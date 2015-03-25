@@ -9,7 +9,7 @@ gulp.task('default', function() {
     .pipe(uglify())
     .pipe(gulp.dest('./js/'));
 
-  gulp.src(['css/leaflet.css', 'css/typeahead.css'])
+  gulp.src(['css/leaflet.css', 'css/common.css', 'css/typeahead.css'])
     .pipe(concat('styles.min.css'))
     .pipe(minifyCSS())
     .pipe(gulp.dest('./css/'))
