@@ -1,0 +1,28 @@
+{
+  "name": "sift",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.html",
+  "dependencies": {
+    "gulp": "^3.8.11"
+  },
+  "devDependencies": {
+    "gulp": "^3.8.11",
+    "gulp-concat": "^2.5.2",
+    "gulp-minify-css": "^1.0.0",
+    "gulp-uglify": "^1.1.0"
+  },
+  "scripts": {
+    "build": "gulp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/UW-Macrostrat/sift.git"
+  },
+  "author": "John J Czaplewski <jczaplew@gmail.com>",
+  "license": "CC0",
+  "bugs": {
+    "url": "https://github.com/UW-Macrostrat/sift/issues"
+  },
+  "homepage": "https://github.com/UW-Macrostrat/sift"
+}
