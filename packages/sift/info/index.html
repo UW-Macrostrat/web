@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>GMNA</title>
+  <title>Macrostrat Sift - info</title>
   <meta charset="utf-8" />
   <meta http-equiv="Content-Language" content="en">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +9,93 @@
   <link rel="stylesheet" href="../css/styles.min.css" />
   <!--<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">-->
   <!--<link href="//fonts.googleapis.com/css?family=Maven+Pro&text=macrostrat" rel="stylesheet" type="text/css">-->
+  <style>
+  /* 
+    transform: matrix(scaleX, skewX, skewY, scaleY, translateX, translateY);
+  */
+    #map {
+      width: 60%;
+      height: 400px;
+    }
+    #not-map {
+      padding: 20px;
+      width: 55%;
+    }
+    .strat_name {
+      border: 1px solid #eee;
+      display: inline-table;
+      vertical-align: middle;
+     /* text-align: center;
+      vertical-align: middle;
+      line-height: 50px;*/
+    }
+    #primary_strat_name > .strat_name_content > a {
+      color: #456C84;
+      font-weight: bold;
+    }
+    .strat_name_content {
+      height: 100%;
+      width: 100%;
+      display: table;
+      text-align: center;
+      line-height: 12px;
+    }
+    .strat_name_content > a {
+      display: table-cell;
+      vertical-align: middle;
+      text-decoration: none;
+      color: #777;
+    }
+    .strat_table {
+      width: 100%;
+      text-align: center;
+      font-size: 11px;
+      margin: 0 auto;
+      table-layout: fixed;
 
+      line-height: 0;
+    }
+
+    @media(max-width: 700px) {
+      #map {
+        width: 100%;
+      }
+
+      #not-map {
+        width: 97%;
+      }
+    }
+    td {
+      border: 1px solid #eee;
+      padding: 5px;
+    }
+    td > a {
+      text-decoration: none;
+      color: #777;
+    }
+    .chart {
+  display: block;
+  margin: auto;
+  margin-top: 60px;
+  font-size: 11px;
+}
+
+rect {
+  stroke: #eee;
+  fill: #aaa;
+  fill-opacity: .8;
+}
+
+rect.parent {
+  cursor: pointer;
+  fill: steelblue;
+}
+
+text {
+  pointer-events: none;
+}
+
+  </style>
 </head>
 <body>
   <div id="header">
@@ -26,13 +112,17 @@
   <div class="container">
     <div id="map"></div>
     <div id="not-map">
-
+      <div id="graph"></div>
+      <div id="stats"></div>
     </div>
   </div>
   
   <script id="column-template" type="x-tmpl-mustache">
-    <h3><a href="/info?col_id={{col_od}}">{{col_name}} <small>({{col_id}})</small></a></h3>
-    <strong>Group: </strong> <a href="/info?col_group={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a><br>
+    {{#col_name}}
+    <h3><a href="/info?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a></h3>
+    {{/col_name}}
+
+    <strong>Group: </strong> <a href="/info?group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a><br>
     <strong>Area: </strong> {{area}} <small>km<sup>2</sup></small><br>
     <strong>Age: </strong> {{b_age}} - {{t_age}} <small>Ma</small> <br>
     <strong>Sections: </strong> {{sections.length}} <br>
@@ -44,26 +134,217 @@
     <strong>Lith. thickness: </strong> {{lith_max_thick}} - {{lith_min_thick}}
   </script>
 
+  <script id="column-popup-template" type="x-tmpl-mustache">
+    <strong><a href="/info?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a></strong><br>
+    <strong>Group: </strong> <a href="/info?group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a><br>
+    <strong>Units: </strong> {{units.length}} <br>
+    <strong>Thickness: </strong> {{max_thick}} - {{min_thick}} <br>
+    <strong>PBDB collections: </strong> {{pbdb_collections}} <br>
+    <strong>PBDB occurrences: </strong> {{pbdb_occs}} <br>
+  </script>
+
 
   <script src="../js/libs.js"></script>
-  <script async src="js/common.js"></script>
+  <script src="../js/d3.min.js"></script>
+  <script async src="../js/common.js"></script>
 
   <script>
-    var map = L.map('map', {
-      minZoom: 2,
-      maxZoom: 10
-    });
 
-    // Add our basemap
-    var stamen = L.tileLayer('http://{s}.tile.stamen.com/toner-lite/{z}/{x}/{y}.png').addTo(map);
-    stamen.setZIndex(1);
+    /*
+      1. Parse URL
+      2a. If valid, get data and draw map
+      2b. If invalid, say so
+    */
+    function buildStratNameHierarchy(id) {
+      $.getJSON("http://localhost:5000/api/v1/defs/strat_names?id=" + id, function(data) {
+        if (data.success.data.length < 1) {
+          throw "No strat names found";
+        } 
 
-    var queryParams = ["strat_name_like", "strat_name", "strat_id", "col_id", "group_id", "group", "interval", "interval_id", "lith", "lith_type", "lith_class", "age", "unit_id"];
+        var highestRank = [];
+        if (data.success.data[0].sgp_id > 0) {
+          highestRank = ["SGp", data.success.data[0].sgp_id];
+        } else if (data.success.data[0].gp_id > 0) {
+          highestRank = ["Gp", data.success.data[0].gp_id];
+        } else if (data.success.data[0].fm_id > 0) {
+          highestRank = ["Fm", data.success.data[0].fm_id];
+        } else if (data.success.data[0].mbr_id > 0) {
+          highestRank = ["Mbr", data.success.data[0].mbr_id];
+        } else if (data.success.data[0].bed_id > 0) {
+          highestRank = ["Bed", data.success.data[0].bed_id];
+        } else {
+          console.log("No strat name IDs found");
+        }
 
-    var type = window.location.search.replace("/", "").replace("?", "").split("=");
+        $.getJSON("http://localhost:5000/api/v1/defs/strat_names?id=" + highestRank[1], function(data) {
+          if (data.success.data.length < 1) {
+            throw "No strat names found with the given id " + highestRank[1];
+          }
 
-    if (queryParams.indexOf(type[0]) > -1) {
-      console.log("valid query");
+          var rankMap = {"SGp": null, "Gp": "sgp", "Fm": "gp", "Mbr": "fm", "Bed": "fm"}
+
+          data.success.data.forEach(function(d) {
+            d.children = [];
+            d.totalChildren = data.success.data.filter(function(j) {
+              if (j[d.rank.toLowerCase() + "_id"] == d.id) {
+                return j
+              }
+            }).length - 1;
+          });
+
+          data.success.data.forEach(function(d) {
+            var belongsTo = d[rankMap[d.rank] + "_id"];
+            // Find the one it belongs to and add it
+            data.success.data.forEach(function(j) {
+              if (j.id === belongsTo) {
+                j.children.push(d);
+              }
+            })
+          });
+
+          var columns = 0;
+          data.success.data.forEach(function(d) {
+            if (d.children.length === 0) {
+              columns++;
+            }
+          });
+
+          console.log("Columns - ", columns)
+          // Find the top of the hierarchy and return it
+          var hierarchy = data.success.data.filter(function(d) {
+            if (d.rank === highestRank[0]) {
+              return d;
+            }
+          });
+
+          var uniqueRanks = d3.set(data.success.data.map(function(d) {
+            return d.rank;
+          })).values();
+
+          console.log(uniqueRanks);
+          console.log(hierarchy);
+          drawStratHierarchy(uniqueRanks, hierarchy, columns, id);
+        });
+      });
+    }
+
+    function drawStratHierarchy(uniqueRanks, hierarchy, columns, requested) {
+      d3.select("#graph").append("h4")
+        .text("Hierarchy of Stratigraphic Nomenclature");
+
+      var graph = d3.select("#graph")
+        .append("div")
+          .attr("class", "strat_table");
+
+      var width = 100,
+          rowHeight = 50,
+          colWidth = width/columns;
+
+      function appendStratName(d) {
+        graph.append("div")
+          .attr("class", "strat_name")
+          .attr("id", function() {
+            if (d.id == requested) {
+              return "primary_strat_name";
+            }
+          })
+          .style("width", ((d.children.length * colWidth) > 0) ? (Math.floor((d.children.length * colWidth) * 10) / 10) - 0.4 + "%" : (Math.floor(colWidth * 10) / 10) - 0.4 + "%")
+          .style("height", rowHeight + "px")
+          .attr("title", d.name + " " + d.rank)
+          .append("div")
+            .attr("class", "strat_name_content")
+            .append("a")
+              .attr("href", "/info?strat_id=" + d.id)
+              .text(d.name + " " + d.rank);
+      }
+
+      hierarchy.forEach(function(d) {
+        appendStratName(d);
+        if (d.children.length > 0) {
+          d.children.forEach(function(a) {
+            appendStratName(a);
+            if (a.children.length > 0) {
+              a.children.forEach(function(b) {
+                appendStratName(b);
+
+                if (b.children.length > 0) {
+                  b.children.forEach(function(c) {
+                    appendStratName(c);
+
+                    if (c.children.length > 0) {
+                      c.children.forEach(function(f) {
+                        appendStratName(f);
+                      });
+                    }
+                  });
+                }
+              });
+            }
+          });
+        }
+      });
+/*
+      var graph = d3.select("#graph")
+        .append("table")
+          .attr("class", "strat_table")
+
+      var rows = {}
+      uniqueRanks.forEach(function(d) {
+        rows[d] = graph.append("tr");
+      });
+
+      function appendStratNames(d) {
+        rows[d.rank].append("td")
+          .attr("colspan", d.totalChildren)
+          .attr("title", d.name + " " + d.rank)
+          .append("a")
+            .attr("href", "/info?strat_id=" + d.id)
+            .text(d.name + " " + d.rank);
+      }
+
+      hierarchy.forEach(function(d) {
+        //d.totalChildren = d.totalChildren - d.children.length
+        appendStratNames(d);
+
+        if (d.children.length > 0) {
+          d.children.forEach(function(a) {
+            appendStratNames(a);
+            if (a.children.length > 0) {
+              a.children.forEach(function(b) {
+                appendStratNames(b);
+
+                if (b.children.length > 0) {
+                  b.children.forEach(function(c) {
+                    appendStratNames(c);
+
+                    if (c.children.length > 0) {
+                      c.children.forEach(function(f) {
+                        appendStratNames(f);
+                      });
+                    }
+                  });
+                }
+              });
+            }
+          });
+        }
+      })
+*/
+
+    }
+
+    function getData() {
+
+      if (type[0] === "strat_name_like" || type[0] === "strat_name" || type[0] === "strat_id") {
+        // Get strat_name hierarchy
+        buildStratNameHierarchy(type[1]);
+      
+      } else if (type[0] === "unit_id") {
+        // Find unit strat name then get hierarchy
+      } else if (type[0] === "col_id") {
+        // Draw strat column
+      }
+
       $.getJSON("http://localhost:5000/api/v1/columns?adjacents=true&response=long&format=topojson_bare&" + type.join("="), function(data) {
         columns = L.geoJson(topojson.feature(data, data.objects.output), {
           style: function(feature) {
@@ -86,22 +367,96 @@
           },
         // Bind some actions to each polygon
           onEachFeature: function (feature, layer) {
+            if (type[0] === "col_id" && feature.properties.col_id == type[1]) {
+              var rendered = Mustache.render(template, feature.properties);
+              $("#stats").html(rendered);
+            }
+
             layer.on("click", function(d) { 
-              var rendered = Mustache.render(columnTemplate, d.target.feature.properties);
-              setUnitInfoContent(rendered, d.latlng);
+             // var rendered = Mustache.render(columnTemplate, d.target.feature.properties);
+             // setUnitInfoContent(rendered, d.latlng);
               console.log(d.target.feature.properties);
             })
-            //layer.bindPopup("<strong>Unit link:</strong> " + feature.properties.unit_link + "<br><strong>Age:</strong> " + feature.properties.min_age + " - " + feature.properties.max_age + "<br><strong>Rock type:</strong> " + rocktypes.substr(0, rocktypes.length - 2, -2) + "<br><strong>Lithologies:</strong> " + liths.substr(0, liths.length - 2, -2));
+            var popup = Mustache.render(popupTemplate, feature.properties);
+            layer.bindPopup(popup);
           }
         }).addTo(map);
 
         map.fitBounds(columns.getBounds());
 
       });
+    }
+
+    function drawMap() {
+      map = L.map('map', {
+        minZoom: 4,
+        maxZoom: 10,
+        scrollWheelZoom: false
+       // dragging: false
+      });
+
+      // Add our basemap
+      L.tileLayer('http://{s}.tile.stamen.com/toner-lite/{z}/{x}/{y}.png').addTo(map);
+    }
       
+
+    var template = $('#column-template').html();
+    Mustache.parse(template);
+
+    var popupTemplate = $('#column-popup-template').html();
+    Mustache.parse(popupTemplate);
+
+    var queryParams = ["strat_name_like", "strat_name", "strat_id", "col_id", "group_id", "group", "interval", "interval_id", "lith", "lith_type", "lith_class", "age", "unit_id"];
+
+    var type = window.location.search.replace("/", "").replace("?", "").split("=");
+
+    if (queryParams.indexOf(type[0]) > -1) {
+      console.log("valid query");
+      getData();
+      drawMap();
     } else {
       console.log("invalid query");
     }
+
+
+    /*
+  var width = 960,
+    height = 500;
+
+var color = d3.scale.category20();
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+var partition = d3.layout.partition()
+    .size([width, height])
+    .value(function(d) { return d.totalChildren; });
+
+
+var nodes = partition.nodes(root);
+
+console.log(nodes);
+
+svg.selectAll(".node")
+  .data(nodes)
+.enter().append("rect")
+  .attr("class", "node")
+  .attr("x", function(d) { return d.x; })
+  .attr("y", function(d) { return d.y; })
+  .attr("width", function(d) { return d.dx; })
+  .attr("height", function(d) { return d.dy; })
+  .style("fill", function(d) { return color((d.children ? d : d.parent).name); });
+
+svg.selectAll(".label")
+  .data(nodes.filter(function(d) { return d.dx > 6; }))
+.enter().append("text")
+  .attr("class", "label")
+  .attr("dy", ".35em")
+  .attr("transform", function(d) { return "translate(" + (d.x + d.dx / 2) + "," + (d.y + d.dy / 2) + ")rotate(90)"; })
+  .text(function(d) { return d.name; });
+
+    */
 
   </script>
 </body>
