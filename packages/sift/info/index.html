@@ -23,8 +23,9 @@
     }
     .strat_name {
       border: 1px solid #eee;
-      display: inline-table;
+      display: inline-block;
       vertical-align: middle;
+      padding: 0 2px;
      /* text-align: center;
       vertical-align: middle;
       line-height: 50px;*/
@@ -49,7 +50,7 @@
     .strat_table {
       width: 100%;
       text-align: center;
-      font-size: 11px;
+      font-size: 1vw;
       margin: 0 auto;
       table-layout: fixed;
 
@@ -63,6 +64,9 @@
 
       #not-map {
         width: 97%;
+      }
+      .strat_table {
+        font-size: 1.6vw;
       }
     }
     td {
@@ -122,7 +126,7 @@ text {
     <h3><a href="/info?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a></h3>
     {{/col_name}}
 
-    <strong>Group: </strong> <a href="/info?group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a><br>
+    <strong>Group: </strong> <a href="/info?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a><br>
     <strong>Area: </strong> {{area}} <small>km<sup>2</sup></small><br>
     <strong>Age: </strong> {{b_age}} - {{t_age}} <small>Ma</small> <br>
     <strong>Sections: </strong> {{sections.length}} <br>
@@ -136,7 +140,7 @@ text {
 
   <script id="column-popup-template" type="x-tmpl-mustache">
     <strong><a href="/info?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a></strong><br>
-    <strong>Group: </strong> <a href="/info?group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a><br>
+    <strong>Group: </strong> <a href="/info?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a><br>
     <strong>Units: </strong> {{units.length}} <br>
     <strong>Thickness: </strong> {{max_thick}} - {{min_thick}} <br>
     <strong>PBDB collections: </strong> {{pbdb_collections}} <br>
@@ -190,6 +194,7 @@ text {
                 return j
               }
             }).length - 1;
+            d.total = d.totalChildren;
           });
 
           data.success.data.forEach(function(d) {
@@ -223,6 +228,7 @@ text {
 
           console.log(uniqueRanks);
           console.log(hierarchy);
+          temp1 = hierarchy;
           drawStratHierarchy(uniqueRanks, hierarchy, columns, id);
         });
       });
@@ -232,23 +238,220 @@ text {
       d3.select("#graph").append("h4")
         .text("Hierarchy of Stratigraphic Nomenclature");
 
-      var graph = d3.select("#graph")
+      d3.select("#graph")
         .append("div")
           .attr("class", "strat_table");
 
+
+      var width = 960,
+          height = 250;
+
+      var x = d3.scale.linear()
+          .range([0, width]);
+
+      var y = d3.scale.linear()
+          .range([0, height]);
+
+      var partition = d3.layout.partition()
+          .value(function(d) { return 1; });
+
+      var svg = d3.select(".strat_table").append("svg")
+          .attr("width", width)
+          .attr("height", height)
+
+      var g = svg.append("g")
+          .attr("id", "strat_table_group");
+
+      var rect = g.selectAll("rect")
+        .data(partition.nodes(hierarchy[0]))
+      .enter().append("rect")
+        .attr("class", "strat_name")
+        .attr("id", function(d) { return "n" + d.id; })
+        .attr("x", function(d) { return x(d.x); })
+        .attr("y", function(d) { return y(d.y); })
+        .attr("width", function(d) { return x(d.dx); })
+        .attr("height", function(d) { return y(d.dy); })
+        .attr("fill", function(d) { return "#000" })
+        //.on("click", clicked);
+        .on("click", function(d) {
+          goTo(d);
+        });
+        
+
+      var labelsG = svg.append("g")
+          .attr("id", "strat_table_labels");
+
+      var labels = labelsG.selectAll("labels")
+          .data(partition.nodes(hierarchy[0]))
+        .enter().append("text")
+          .text(function(d) { return d.name + " " + d.rank })
+          .attr("x", 1)
+          .attr("y", function(d) { return y(d.y) + (height * 0.127) })
+          .attr("width", function() { return this.getComputedTextLength() })
+          .attr("height", function(d) { return y(d.dy) })
+          .attr("class", "strat_name_label")
+          .attr("id", function(d) { return "l" + d.id })
+          .attr("x", function(d) { return labelX(d) })
+
+      function labelX(d) {
+        var rectWidth = parseFloat(d3.select("rect#n" + d.id).attr("width")),
+            rectX = parseFloat(d3.select("rect#n" + d.id).attr("x"));
+
+        var labelWidth;
+        try {
+          labelWidth = d3.select("#l" + d.id).node().getComputedTextLength();
+        } catch(err) {
+          console.log(err);
+          labelWidth = 25;
+        }
+
+        console.log(d.name, rectWidth, labelWidth)
+        if (rectWidth - 8 < labelWidth) {
+           d3.select("#l" + d.id).style("display", "none");
+        }
+        
+        return rectX + (rectWidth - labelWidth) / 2;
+      }
+
+      function labelY(d) {
+        var rectHeight = parseFloat(d3.select("rect#n" + d.id).attr("height")), 
+            rectY = parseFloat(d3.select("rect#n" + d.id).attr("y")),
+            labelHeight = d3.select("#l" + d.id).node().getBBox().height,
+            scale = parseInt(d3.select(".strat_table").style("width"))/961;
+
+        return (rectY * 0.8) + ((rectHeight - labelHeight) / 2) + 8;
+      }
+
+      function labelLevels(d) {
+        // Center whichever interval was clicked
+        d3.select("#l" + d.id).attr("x", 430);
+
+        // Position all the parent labels in the middle of the scale
+        if (typeof d.parent !== 'undefined') {
+          var depth = d.depth,
+              loc = "d.parent";
+          for (var i = 0; i < depth; i++) {
+            var parent = eval(loc).name;
+            d3.selectAll('.strat_name_label').filter(function(d) {
+              return d.name === parent;
+            }).attr("x", 430);
+            loc += ".parent";
+          }
+
+          d3.selectAll(".strat_name_label").style("fill", "#333");
+
+          d3.selectAll('.strat_name_label').filter(function(d) {
+            return d.name === parent;
+          }).attr("x", 430);
+
+        }
+      }
+
+      // Zooms the graph to a given time interval
+      function goTo(d, first) {
+        if (typeof d === "string") {
+          var d = d3.selectAll('rect').filter(function(e) {
+            return e.name === d;
+          });
+          d = d[0][0].__data__;
+        } else if (d.children) {
+          if (d.children.length < 1) {
+            var d = d.parent;
+          }
+        } else {
+          var d = d;
+        }
+
+        // var n keeps track of the transition
+        var n = 0,
+            x = d3.scale.linear().range([5, 955]);
+
+        x.domain([d.x, d.x + d.dx]);
+
+        // "Hide" the labels during the transition
+        // Cannot calculate the correct position if display:none is used
+        d3.selectAll(".strat_name_label")
+          .style("fill", "rgba(0,0,0,0)")
+          .style("display", "block");
+
+        // When complete, calls labelTrans() 
+        d3.selectAll("rect").transition()
+          .duration(750)
+          .each(function(){ ++n; })
+          .attr("x", function(d) { return x(d.x); })
+          .attr("width", function(d) { return x(d.x + d.dx) - x(d.x); })
+          .each("end", function() { if (!--n) { labelTrans(d); }});
+      }
+
+      function labelTrans(d) {
+        // var n keeps track of the transition
+        var n = 0,
+            x = d3.scale.linear().range([0, 955]),
+            y = d3.scale.linear().range([0, 120]);
+
+        x.domain([d.x, d.x + d.dx]);
+
+        // Move the full names
+        d3.selectAll(".strat_name_label").transition()
+          .duration(10)
+          .each(function(){ ++n; })
+          .attr("x", function(d) { return labelX(d); })
+          .attr("height", function(d) { return y(d.y + d.dy) - y(d.y); })
+          .each("end", function() { if (!--n) { labelLevels(d); }});
+
+        //resize();
+      }
+
+      function clicked(d) {
+        x.domain([d.x, d.x + d.dx]);
+        y.domain([d.y, 1]).range([d.y ? 20 : 0, height]);
+
+        rect.transition()
+            .duration(750)
+            .attr("x", function(d) { return x(d.x); })
+            .attr("y", function(d) { return y(d.y); })
+            .attr("width", function(d) { return x(d.x + d.dx) - x(d.x); })
+            .attr("height", function(d) { return y(d.y + d.dy) - y(d.y); });
+      }
+      /*
+
+      var graphWidth = d3.select("#graph").style("width").replace("px", "");
+
       var width = 100,
           rowHeight = 50,
+          padding = 6,
           colWidth = width/columns;
 
-      function appendStratName(d) {
+      function appendStratName(d, top) {
         graph.append("div")
+          .datum(d)
           .attr("class", "strat_name")
           .attr("id", function() {
             if (d.id == requested) {
               return "primary_strat_name";
             }
           })
-          .style("width", ((d.children.length * colWidth) > 0) ? (Math.floor((d.children.length * colWidth) * 10) / 10) - 0.4 + "%" : (Math.floor(colWidth * 10) / 10) - 0.4 + "%")
+          .style("width", function() {
+            if (top) {
+              return graphWidth + "px";
+            }
+            // Calculate width
+            if (d.children.length > 0) {
+
+              var percentage = d.children.length * colWidth;
+
+            // If no children, use min width
+            } else {
+              var percentage = colWidth;
+            }
+
+            var px = (graphWidth*(percentage/100)) - padding;
+
+            return px + "px";
+
+          })
+
+         // .style("width", ((d.children.length * colWidth) > 0) ? (Math.floor((d.children.length * colWidth) * 10) / 10) - 0.6 + "%" : (Math.floor(colWidth * 10) / 10) - 0.6 + "%")
           .style("height", rowHeight + "px")
           .attr("title", d.name + " " + d.rank)
           .append("div")
@@ -259,7 +462,7 @@ text {
       }
 
       hierarchy.forEach(function(d) {
-        appendStratName(d);
+        appendStratName(d, true);
         if (d.children.length > 0) {
           d.children.forEach(function(a) {
             appendStratName(a);
@@ -283,53 +486,32 @@ text {
           });
         }
       });
-/*
-      var graph = d3.select("#graph")
-        .append("table")
-          .attr("class", "strat_table")
-
-      var rows = {}
-      uniqueRanks.forEach(function(d) {
-        rows[d] = graph.append("tr");
-      });
-
-      function appendStratNames(d) {
-        rows[d.rank].append("td")
-          .attr("colspan", d.totalChildren)
-          .attr("title", d.name + " " + d.rank)
-          .append("a")
-            .attr("href", "/info?strat_id=" + d.id)
-            .text(d.name + " " + d.rank);
-      }
-
-      hierarchy.forEach(function(d) {
-        //d.totalChildren = d.totalChildren - d.children.length
-        appendStratNames(d);
-
-        if (d.children.length > 0) {
-          d.children.forEach(function(a) {
-            appendStratNames(a);
-            if (a.children.length > 0) {
-              a.children.forEach(function(b) {
-                appendStratNames(b);
-
-                if (b.children.length > 0) {
-                  b.children.forEach(function(c) {
-                    appendStratNames(c);
-
-                    if (c.children.length > 0) {
-                      c.children.forEach(function(f) {
-                        appendStratNames(f);
-                      });
-                    }
-                  });
-                }
-              });
-            }
-          });
-        }
-      })
 */
+      $(window).on("resize", function() {
+      /*  var graphWidth = d3.select("#graph").style("width").replace("px", "");
+
+        d3.selectAll(".strat_name")
+          .style("width", function(d, i) {
+            if (i === 0) {
+              return graphWidth + "px";
+            }
+             // Calculate width
+            if (d.children.length > 0) {
+
+              var percentage = d.children.length * colWidth;
+
+            // If no children, use min width
+            } else {
+              var percentage = colWidth;
+            }
+
+            var px = (graphWidth*(percentage/100)) - padding;
+
+            return px + "px";
+
+          });
+*/
+      })
 
     }
 
@@ -406,7 +588,7 @@ text {
     var popupTemplate = $('#column-popup-template').html();
     Mustache.parse(popupTemplate);
 
-    var queryParams = ["strat_name_like", "strat_name", "strat_id", "col_id", "group_id", "group", "interval", "interval_id", "lith", "lith_type", "lith_class", "age", "unit_id"];
+    var queryParams = ["strat_name_like", "strat_name", "strat_id", "col_id", "col_group_id", "col_group", "interval", "interval_id", "lith", "lith_type", "lith_class", "age", "unit_id"];
 
     var type = window.location.search.replace("/", "").replace("?", "").split("=");
 
@@ -417,46 +599,6 @@ text {
     } else {
       console.log("invalid query");
     }
-
-
-    /*
-  var width = 960,
-    height = 500;
-
-var color = d3.scale.category20();
-
-var svg = d3.select("body").append("svg")
-    .attr("width", width)
-    .attr("height", height);
-
-var partition = d3.layout.partition()
-    .size([width, height])
-    .value(function(d) { return d.totalChildren; });
-
-
-var nodes = partition.nodes(root);
-
-console.log(nodes);
-
-svg.selectAll(".node")
-  .data(nodes)
-.enter().append("rect")
-  .attr("class", "node")
-  .attr("x", function(d) { return d.x; })
-  .attr("y", function(d) { return d.y; })
-  .attr("width", function(d) { return d.dx; })
-  .attr("height", function(d) { return d.dy; })
-  .style("fill", function(d) { return color((d.children ? d : d.parent).name); });
-
-svg.selectAll(".label")
-  .data(nodes.filter(function(d) { return d.dx > 6; }))
-.enter().append("text")
-  .attr("class", "label")
-  .attr("dy", ".35em")
-  .attr("transform", function(d) { return "translate(" + (d.x + d.dx / 2) + "," + (d.y + d.dy / 2) + ")rotate(90)"; })
-  .text(function(d) { return d.name; });
-
-    */
 
   </script>
 </body>
