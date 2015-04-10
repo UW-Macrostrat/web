@@ -153,7 +153,49 @@ text {
   <script async src="../js/common.js"></script>
 
   <script>
+    /* Via Mike Bostock - http://bl.ocks.org/mbostock/7555321 */
+    function wrap(text, width) {
+      text.each(function() {
+        var text = d3.select(this),
+            words = text.text().split(/\s+/).reverse(),
+            word,
+            line = [],
+            lineNumber = 0,
+            lineHeight = 11, // px
+            y = text.attr("y"),
+            dy = (text.attr("dy")) ? parseFloat(text.attr("dy")) : 0,
+            tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y);
 
+        while (word = words.pop()) {
+          line.push(word);
+          tspan.text(line.join(" "));
+          if (tspan.node().getComputedTextLength() > width) {
+            line.pop();
+            tspan.text(line.join(" "));
+            line = [word];
+            tspan = text.append("tspan").attr("x", 0).attr("y", ++lineNumber * lineHeight + dy).text(word);
+          }
+        }
+      });
+    }
+
+    function unwrap(text) {
+      var tspans = text.selectAll("tspan");
+      
+      var contents = tspans[0].map(function(d) {
+          return d.innerHTML
+        })
+        .join(" ")
+        .trim();
+
+      tspans.remove();
+
+      text.text(contents);
+    }
+
+    function getTextSize(text) {
+      return text.selectAll("tspan")[0][0].getBoundingClientRect()
+    }
     /*
       1. Parse URL
       2a. If valid, get data and draw map
@@ -244,7 +286,8 @@ text {
 
 
       var width = 960,
-          height = 250;
+          height = 250,
+          padding = 10;
 
       var x = d3.scale.linear()
           .range([0, width]);
@@ -283,31 +326,41 @@ text {
 
       var labels = labelsG.selectAll("labels")
           .data(partition.nodes(hierarchy[0]))
-        .enter().append("text")
-          .text(function(d) { return d.name + " " + d.rank })
-          .attr("x", 1)
-          .attr("y", function(d) { return y(d.y) + (height * 0.127) })
-          .attr("width", function() { return this.getComputedTextLength() })
-          .attr("height", function(d) { return y(d.dy) })
+        .enter().append("g")
           .attr("class", "strat_name_label")
           .attr("id", function(d) { return "l" + d.id })
-          .attr("x", function(d) { return labelX(d) })
+        .append("text")
+          .text(function(d) { return d.name + " " + d.rank });
+
+      d3.selectAll(".strat_name_label")
+        .attr("transform", function(d) {
+            return "translate(" + labelX(d) + ", " +  labelY(d) + ")"
+          })
 
       function labelX(d) {
-        var rectWidth = parseFloat(d3.select("rect#n" + d.id).attr("width")),
-            rectX = parseFloat(d3.select("rect#n" + d.id).attr("x"));
-
-        var labelWidth;
-        try {
-          labelWidth = d3.select("#l" + d.id).node().getComputedTextLength();
-        } catch(err) {
-          console.log(err);
-          labelWidth = 25;
+        // Check if split
+        if (d3.select("#l" + d.id).select("text").selectAll("tspan")[0].length > 0) { 
+          // If so, unsplit
+          d3.select("#l" + d.id).select("text").call(unwrap)
         }
+        
 
-        console.log(d.name, rectWidth, labelWidth)
+        var rectWidth = parseFloat(d3.select("rect#n" + d.id).attr("width")),
+            rectX = parseFloat(d3.select("rect#n" + d.id).attr("x")),
+            labelWidth = d3.select("#l" + d.id).select("text").node().getComputedTextLength();
+
+        
+
         if (rectWidth - 8 < labelWidth) {
-           d3.select("#l" + d.id).style("display", "none");
+          // If it's too wide try splitting it
+          d3.select("#l" + d.id).select("text").call(wrap, rectWidth - padding); 
+          labelWidth = getTextSize(d3.select("#l" + d.id).select("text")).width;
+
+          // If it's still too wide, hide it
+          if (rectWidth < labelWidth) {
+            d3.select("#l" + d.id).style("display", "none");
+          }
+            
         }
         
         return rectX + (rectWidth - labelWidth) / 2;
@@ -316,15 +369,23 @@ text {
       function labelY(d) {
         var rectHeight = parseFloat(d3.select("rect#n" + d.id).attr("height")), 
             rectY = parseFloat(d3.select("rect#n" + d.id).attr("y")),
-            labelHeight = d3.select("#l" + d.id).node().getBBox().height,
             scale = parseInt(d3.select(".strat_table").style("width"))/961;
 
-        return (rectY * 0.8) + ((rectHeight - labelHeight) / 2) + 8;
+        // Check if split
+        if (d3.select("#l" + d.id).select("text").selectAll("tspan")[0].length > 0) { 
+          var labelHeight = getTextSize(d3.select("#l" + d.id).select("text")).height;
+        } else {
+          var labelHeight = d3.select("#l" + d.id).select("text")[0][0].getBoundingClientRect().height
+        }
+       // rectY + (rectHeight/2)
+       // labelHeight/2
+        return (rectY) + ((rectHeight - labelHeight) / 2);
       }
 
       function labelLevels(d) {
         // Center whichever interval was clicked
-        d3.select("#l" + d.id).attr("x", 430);
+        console.log(d3.transform(d3.select("#l" + d.id).attr("transform"))[1])
+        d3.select("#l" + d.id).attr("transform", "translate(430, " + d3.transform(d3.select("#l" + d.id).attr("transform")).translate[1] + ")");
 
         // Position all the parent labels in the middle of the scale
         if (typeof d.parent !== 'undefined') {
@@ -334,15 +395,19 @@ text {
             var parent = eval(loc).name;
             d3.selectAll('.strat_name_label').filter(function(d) {
               return d.name === parent;
-            }).attr("x", 430);
+            }).attr("transform", function(d) { 
+              return "translate(" + labelX(d) + ", " + labelY(d) + ")"
+            });
             loc += ".parent";
           }
 
-          d3.selectAll(".strat_name_label").style("fill", "#333");
+          d3.selectAll(".strat_name_label").select("text").style("fill", "#333");
 
           d3.selectAll('.strat_name_label').filter(function(d) {
             return d.name === parent;
-          }).attr("x", 430);
+          }).attr("transform", function(d) { 
+            return "translate(" + labelX(d) + ", " + labelY(d) + ")"
+          })
 
         }
       }
@@ -370,7 +435,7 @@ text {
 
         // "Hide" the labels during the transition
         // Cannot calculate the correct position if display:none is used
-        d3.selectAll(".strat_name_label")
+        d3.selectAll(".strat_name_label").select("text")
           .style("fill", "rgba(0,0,0,0)")
           .style("display", "block");
 
@@ -395,7 +460,9 @@ text {
         d3.selectAll(".strat_name_label").transition()
           .duration(10)
           .each(function(){ ++n; })
-          .attr("x", function(d) { return labelX(d); })
+          .attr("transform", function(d) { 
+            return "translate(" + labelX(d) + ", " + labelY(d) + ")"
+          })
           .attr("height", function(d) { return y(d.y + d.dy) - y(d.y); })
           .each("end", function() { if (!--n) { labelLevels(d); }});
 
