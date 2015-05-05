@@ -6,8 +6,6 @@
   <meta http-equiv="Content-Language" content="en">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="stylesheet" href="../css/normalize.css">
-  <link rel="stylesheet" href="../css/skeleton.css">
   <link rel="stylesheet" href="../css/styles.min.css" />
   <!--<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">-->
   <!--<link href="//fonts.googleapis.com/css?family=Maven+Pro&text=macrostrat" rel="stylesheet" type="text/css">-->
@@ -25,7 +23,7 @@
 
     .page-title {
       color: #aaa;
-      font-size: 1.2em;
+      font-size: 1.7em;
       letter-spacing: 2px;
       font-weight: 200;
       text-align: center;
@@ -78,7 +76,8 @@
 
     .name-hierarchy {
       width: 92%;
-      margin: 0 auto;
+      margin-top: 35px;
+      /*margin: 0 auto;*/
     }
 
     .hierarchy-container {
@@ -96,8 +95,8 @@
       color: #000;
     }
     .active-strat-name {
-      background-color: rgba(0, 139, 139, 0.3);
-      border: 2px solid rgba(0, 139, 139, 0.3);
+      background-color: rgba(153, 0, 0, 0.3);
+      border: 2px solid rgba(153, 0, 0, 0.3);
     }
     .not-active-strat-name {
       background-color: #ffffff;
@@ -124,7 +123,7 @@
 
     .column-summary-row > .columns {
       min-height: 100px;
-      padding: 20px;
+      padding: 25px;
     }
 
     .desc {
@@ -185,6 +184,7 @@
   </div>
 
   <script id="name-hierarchy-template" type="x-tmpl-mustache">
+  <h3>Stratigraphic name hierarchy</h3>
   {{#hierarchy}}
   <a href="/info?strat_id={{id}}" class="hierarchy-link">
     <div class="hierarchy-container hierarchy-1 {{active}}">
@@ -492,7 +492,8 @@
       });
 
       // Add our basemap
-      L.tileLayer('http://{s}.tile.stamen.com/toner-lite/{z}/{x}/{y}.png').addTo(map);
+      L.tileLayer('https://{s}.tiles.mapbox.com/v3/jczaplewski.j751k57j/{z}/{x}/{y}.png').addTo(map);
+      //L.tileLayer('http://{s}.tile.stamen.com/toner-lite/{z}/{x}/{y}.png').addTo(map);
     }
 
     function getStratNameId(unit_id) {
