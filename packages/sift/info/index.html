@@ -13,6 +13,13 @@
   /* 
     transform: matrix(scaleX, skewX, skewY, scaleY, translateX, translateY);
   */
+    html, body {
+      overflow: visible;
+    }
+    .container {
+      height: auto;
+      position: relative;
+    }
     #map {
       width: 60%;
       height: 400px;
@@ -58,6 +65,41 @@
       line-height: 0;
     }
 
+    .hierarchy-container {
+      border: 1px solid #eee;
+      cursor: pointer;
+    }
+
+    .hierarchy-name {
+      font-weight: bold;
+      padding: 7px;
+    }
+
+    .hierarchy-link {
+      text-decoration: none;
+      color: #000;
+    }
+    .active-strat-name {
+      background-color: rgba(0, 139, 139, 0.3);
+      border: 2px solid rgba(0, 139, 139, 0.3);
+    }
+    .not-active-strat-name {
+      background-color: #ffffff;
+    }
+
+    .hierarchy-2 {
+      margin-left: 20px;
+    }
+    .hierarchy-3 {
+      margin-left: 40px;
+    }
+    .hierarchy-4 {
+      margin-left: 60px;
+    }
+    .hierarchy-5 {
+      margin-left: 80px;
+    }
+
     @media(max-width: 700px) {
       #map {
         width: 100%;
@@ -98,10 +140,48 @@
 
     <div id="map"></div>
     <div id="not-map">
-      <div id="graph"></div>
       <div id="stats"></div>
+      <div class="name-hierarchy"></div>
     </div>
   </div>
+
+  <script id="name-hierarchy-template" type="x-tmpl-mustache">
+  {{#hierarchy}}
+  <a href="/info?strat_id={{id}}" class="hierarchy-link">
+    <div class="hierarchy-container hierarchy-1 {{active}}">
+      <div class="hierarchy-name">{{name}} {{rank}}</div>
+      {{#children}}
+      <a href="/info?strat_id={{id}}" class="hierarchy-link">
+        <div class="hierarchy-container hierarchy-2 {{active}}">
+          <div class="hierarchy-name">{{name}} {{rank}}</div>
+          {{#children}}
+          <a href="/info?strat_id={{id}}" class="hierarchy-link">
+            <div class="hierarchy-container hierarchy-3 {{active}}">
+              <div class="hierarchy-name">{{name}} {{rank}}</div>
+              {{#children}}
+              <a href="/info?strat_id={{id}}" class="hierarchy-link">
+                <div class="hierarchy-container hierarchy-4 {{active}}">
+                  <div class="hierarchy-name">{{name}} {{rank}}</div>
+                  {{#children}}
+                  <a href="/info?strat_id={{id}}" class="hierarchy-link">
+                    <div class="hierarchy-container hierarchy-5 {{active}}">
+                      <div class="hierarchy-name">{{name}} {{rank}}</div>
+                    </div>
+                  </a>
+                  {{/children}}
+                </div>
+              </a>
+              {{/children}}
+            </div>
+          </a>
+          {{/children}}
+        </div>
+      </a>
+      {{/children}}
+    </div>
+  </a>
+  {{/hierarchy}}
+  </script>
   
   <script id="column-template" type="x-tmpl-mustache">
     {{#col_name}}
@@ -137,53 +217,8 @@
   <script>
 
     var stratHierarchy = (function() {
-      /* Via Mike Bostock - http://bl.ocks.org/mbostock/7555321 */
-      function wrap(text, width) {
-
-        text.each(function() {
-          var text = d3.select(this),
-              words = text.text().split(/\s+/).reverse(),
-              word,
-              line = [],
-              lineNumber = 0,
-              lineHeight = 15, // px
-              y = text.attr("y"),
-              dy = (text.attr("dy")) ? parseFloat(text.attr("dy")) : 0,
-              tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y);
-
-          while (word = words.pop()) {
-            line.push(word);
-            tspan.text(line.join(" "));
-            if (tspan.node().getComputedTextLength() > width) {
-              line.pop();
-              tspan.text(line.join(" "));
-              line = [word];
-              tspan = text.append("tspan").attr("x", 0).attr("y", ++lineNumber * lineHeight + dy).text(word);
-            }
-          }
-        });
-      }
-
-
-      function unwrap(text) {
-        var tspans = text.selectAll("tspan");
-        
-        var contents = tspans[0].map(function(d) {
-            return d.innerHTML
-          })
-          .join(" ")
-          .trim();
-
-        tspans.remove();
-
-        text.text(contents);
-      }
-
-
-      function getTextSize(text) {
-        return text.selectAll("tspan")[0][0].getBoundingClientRect()
-      }
-
+      var nameTemplate = $('#name-hierarchy-template').html();
+      Mustache.parse(nameTemplate);
 
       function build(id) {
         $.getJSON("http://localhost:5000/api/v1/defs/strat_names?id=" + id, function(data) {
@@ -214,6 +249,12 @@
             var rankMap = {"SGp": null, "Gp": "sgp", "Fm": "gp", "Mbr": "fm", "Bed": "fm"}
 
             data.success.data.forEach(function(d) {
+              if (d.id == id) {
+                d.active = "active-strat-name";
+              } else {
+                d.active = "not-active-strat-name";
+              }
+
               d.children = [];
               d.totalChildren = data.success.data.filter(function(j) {
                 if (j[d.rank.toLowerCase() + "_id"] == d.id) {
@@ -233,14 +274,6 @@
               })
             });
 
-            var columns = 0;
-            data.success.data.forEach(function(d) {
-              if (d.children.length === 0) {
-                columns++;
-              }
-            });
-
-            //console.log("Columns - ", columns)
             // Find the top of the hierarchy and return it
             var hierarchy = data.success.data.filter(function(d) {
               if (d.rank === highestRank[0]) {
@@ -248,288 +281,25 @@
               }
             });
 
-            var uniqueRanks = d3.set(data.success.data.map(function(d) {
-              return d.rank;
-            })).values();
-
-            //console.log(uniqueRanks);
             //console.log(hierarchy);
 
-            drawStratHierarchy(uniqueRanks, hierarchy, columns, id);
+            var rendered = Mustache.render(nameTemplate, {"hierarchy": hierarchy});
+            $(".name-hierarchy").html(rendered);
+
           });
         });
       }
-
-
-
-
-      function drawStratHierarchy(uniqueRanks, hierarchy, columns, requested) {
-        d3.select("#graph").append("h4")
-          .text("Hierarchy of Stratigraphic Nomenclature");
-
-        d3.select("#graph")
-          .append("div")
-            .attr("class", "strat_table");
-
-
-        var width = 960,
-            height = 250,
-            padding = 10;
-
-        var x = d3.scale.linear()
-            .range([0, width]);
-
-        var y = d3.scale.linear()
-            .range([0, height]);
-
-        var partition = d3.layout.partition()
-            .value(function(d) { return 1; });
-
-        var svg = d3.select(".strat_table").append("svg")
-            .attr("width", width)
-            .attr("height", height)
-
-        var g = svg.append("g")
-            .attr("id", "strat_table_group");
-
-        var rect = g.selectAll("rect")
-          .data(partition.nodes(hierarchy[0]))
-        .enter().append("rect")
-          .attr("class", "strat_name")
-          .attr("id", function(d) { return "n" + d.id; })
-          .attr("x", function(d) { return x(d.x); })
-          .attr("y", function(d) { return y(d.y); })
-          .attr("width", function(d) { return x(d.dx); })
-          .attr("height", function(d) { return y(d.dy); })
-          .style("fill", function(d) { 
-            if (d.id === parseInt(requested)) {
-              return "#008B8B"
-            } else {
-              return "#aaaaaa"
-            }
-          })
-          .attr("title", function(d) { return d.name + " " + d.rank })
-          .on("click", function(d) {
-            goTo(d);
-          });
-          
-
-        var labelsG = svg.append("g")
-            .attr("id", "strat_table_labels");
-
-        var labels = labelsG.selectAll("labels")
-            .data(partition.nodes(hierarchy[0]))
-          .enter().append("g")
-            .attr("class", "strat_name_label")
-            .attr("id", function(d) { return "l" + d.id })
-          .append("text")
-            .text(function(d) { return d.name + " " + d.rank });
-
-        resize();
-        fixText();
-
-        function fixText() {
-          d3.selectAll(".strat_name_label")
-            .attr("transform", function(d) {
-                return "translate(" + labelX(d) + ", " +  labelY(d) + ")"
-              })
-
-
-          d3.selectAll("text").selectAll("tspan").forEach(function(d) {
-            var removed = false,
-                y = 0;
-            d.forEach(function(tspan) {
-              var content = d3.select(tspan).text()
-              if (content.length < 1) {
-                d3.select(tspan).remove()
-                removed = true
-              } else if (removed) {
-                d3.select(tspan).attr("y", y);
-                y += 15
-              }
-            })
-          })
-        }
-
-
-        function labelX(d) {
-
-          // Show the label at first
-          d3.select("#l" + d.id).select("text").style("fill", "rgba(51,51,51,1)")
-
-          // Check if split
-          if (d3.select("#l" + d.id).select("text").selectAll("tspan")[0].length > 0) { 
-            // If so, unsplit
-            d3.select("#l" + d.id).select("text").call(unwrap)
-          }
-          
-
-          var rectWidth = (parseFloat(d3.select("rect#n" + d.id).attr("width")) - 8) * scale(),
-              rectX = parseFloat(d3.select("rect#n" + d.id).attr("x")),
-              labelWidth = (d3.select("#l" + d.id).select("text").node().getComputedTextLength()) * scale();
-
-          if (rectWidth < labelWidth) {
-            // If it's too wide try splitting it
-            d3.select("#l" + d.id).select("text").call(wrap, rectWidth - padding); 
-            labelWidth = getTextSize(d3.select("#l" + d.id).select("text")).width;
-
-            // If it's still too wide, hide it
-            if (rectWidth < labelWidth) {
-              d3.select("#l" + d.id).select("text").style("fill", "rgba(0,0,0,0)")
-            }
-          }
-          
-          return rectX + (((rectWidth/scale())/2) - ((labelWidth/scale())/2));
-        }
-
-
-
-        function labelY(d) {
-          var rectHeight = parseFloat(d3.select("rect#n" + d.id).attr("height")), 
-              rectY = parseFloat(d3.select("rect#n" + d.id).attr("y")),
-              scale = parseInt(d3.select(".strat_table").style("width"))/parseInt(d3.select("#map").style("width").replace("px", ""));
-
-          // Check if split
-          if (d3.select("#l" + d.id).select("text").selectAll("tspan")[0].length > 0) { 
-            var labelHeight = getTextSize(d3.select("#l" + d.id).select("text")).height;
-            return (rectY) + ((rectHeight - (labelHeight/2)) / 2);
-
-          } else {
-            var labelHeight = d3.select("#l" + d.id).select("text")[0][0].getBoundingClientRect().height
-            return (rectY) + ((rectHeight + (labelHeight/2)) / 2);
-          }
-
-          
-        }
-
-        function labelLevels(d) {
-          // Center whichever interval was clicked
-   
-         // d3.select("#l" + d.id).attr("transform", "translate(430, " + d3.transform(d3.select("#l" + d.id).attr("transform")).translate[1] + ")");
-
-          // Position all the parent labels in the middle of the scale
-          if (typeof d.parent !== 'undefined') {
-            var depth = d.depth,
-                loc = "d.parent";
-            for (var i = 0; i < depth; i++) {
-              var parent = eval(loc).name;
-              d3.selectAll('.strat_name_label').filter(function(d) {
-                return d.name === parent;
-              }).attr("transform", function(d) { 
-                return "translate(" + labelX(d) + ", " + labelY(d) + ")"
-              });
-              loc += ".parent";
-            }
-
-            //d3.selectAll(".strat_name_label").select("text").style("fill", "#333");
-
-            d3.selectAll('.strat_name_label').filter(function(d) {
-              return d.name === parent;
-            }).attr("transform", function(d) { 
-              return "translate(" + labelX(d) + ", " + labelY(d) + ")"
-            })
-
-          }
-
-          fixText()
-        }
-
-        // Zooms the graph to a given time interval
-        function goTo(d, first) {
-          if (typeof d === "string") {
-            var d = d3.selectAll('rect').filter(function(e) {
-              return e.name === d;
-            });
-            d = d[0][0].__data__;
-          } else if (d.children) {
-            if (d.children.length < 1) {
-              var d = d.parent;
-            }
-          } else {
-            var d = d;
-          }
-
-          // var n keeps track of the transition
-          var n = 0,
-              x = d3.scale.linear().range([0, 960]);
-
-          x.domain([d.x, d.x + d.dx]);
-
-          // "Hide" the labels during the transition
-          // Cannot calculate the correct position if display:none is used
-          d3.selectAll(".strat_name_label").select("text")
-            .style("fill", "rgba(0,0,0,0)")
-
-
-          // When complete, calls labelTrans() 
-          d3.selectAll("rect").transition()
-            .duration(750)
-            .each(function(){ ++n; })
-            .attr("x", function(d) { return x(d.x); })
-            .attr("width", function(d) { return x(d.x + d.dx) - x(d.x); })
-            .each("end", function(d) { if (!--n) { labelTrans(); }});
-        }
-
-
-        function labelTrans() {
-          // var n keeps track of the transition
-          var n = 0,
-              y = d3.scale.linear().range([0, 250]);
-
-          // Move the full names
-          d3.selectAll(".strat_name_label").transition()
-            .duration(0)
-            .each(function(){ ++n; })
-            .attr("transform", function(d) { 
-              return "translate(" + labelX(d) + ", " + labelY(d) + ")"
-            })
-            .attr("height", function(d) { return y(d.y + d.dy) - y(d.y); })
-            .each("end", function(d) { if (!--n) { labelLevels(d); }});
-
-          resize();
-        }
-
-      
-        $(window).on("resize", resize)
-
-      }
-
-
-      function scale() {
-        return d3.select("#map").style("width").replace("px", "")/960;
-      }
-
-
-      function resize() {
-        // Resize SVG
-        d3.select(".strat_table").select("svg").attr("width", d3.select("#map").style("width").replace("px", ""))
-
-        // Resize rectangles
-        d3.select("#strat_table_group").attr("transform", function(d) {
-          return "scale(" + scale() + ")"
-        });
-
-        // Resize labels
-        d3.select("#strat_table_labels").attr("transform", function(d) {
-          return "scale(" + scale() + ")"
-        });
-      }
-
-
 
 
       return {
-        build: build,
-        resize: resize
+        build: build
       }
 
 
     })();
       
 
-      
 
-    
     /*
       1. Parse URL
       2a. If valid, get data and draw map
@@ -545,6 +315,7 @@
       } else if (type[0] === "unit_id") {
         // Find unit strat name then get hierarchy
         getStratNameId(type[1]);
+        
       } else if (type[0] === "col_id") {
         // Draw strat column
       }
