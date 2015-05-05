@@ -20,23 +20,31 @@
       height: auto;
       position: relative;
     }
+
+    .page-title {
+      color: #aaa;
+      font-size: 1.2em;
+      letter-spacing: 2px;
+      font-weight: 200;
+      text-align: center;
+      text-decoration: none;
+      padding: 15px;
+    }
     #map {
-      width: 60%;
+      width: 100%;
       height: 400px;
     }
     #not-map {
       padding: 20px;
-      width: 55%;
+      width: 100%;
     }
     .strat_name {
       border: 1px solid #eee;
       display: inline-block;
       vertical-align: middle;
       padding: 0 2px;
-     /* text-align: center;
-      vertical-align: middle;
-      line-height: 50px;*/
     }
+
     #primary_strat_name > .strat_name_content > a {
       color: #456C84;
       font-weight: bold;
@@ -63,6 +71,12 @@
       table-layout: fixed;
 
       line-height: 0;
+    }
+
+
+    .name-hierarchy {
+      width: 92%;
+      margin: 0 auto;
     }
 
     .hierarchy-container {
@@ -113,15 +127,6 @@
       }
     }
 
-    rect {
-      stroke: #eee;
-      fill-opacity: .8;
-    }
-
-    text {
-      pointer-events: none;
-    }
-
   </style>
 </head>
 <body>
@@ -137,7 +142,7 @@
   </div>
 
   <div class="container">
-
+    <div class="page-title"></div>
     <div id="map"></div>
     <div id="not-map">
       <div id="stats"></div>
@@ -184,11 +189,22 @@
   </script>
   
   <script id="column-template" type="x-tmpl-mustache">
-    {{#col_name}}
-    <h3><a href="/info?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a></h3>
-    {{/col_name}}
-
     <strong>Group: </strong> <a href="/info?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a><br>
+    {{#columns}}<strong>Total columns:</strong> {{columns}} <br>{{/columns}}
+    <strong>Area: </strong> {{area}} <small>km<sup>2</sup></small><br>
+    <strong>Age: </strong> {{b_age}} - {{t_age}} <small>Ma</small> <br>
+    <strong>Sections: </strong> {{sections.length}} <br>
+    <strong>Units: </strong> {{units.length}} <br>
+    <strong>Thickness: </strong> {{max_thick}} - {{min_thick}} <br>
+    <strong>PBDB collections: </strong> {{pbdb_collections}} <br>
+    <strong>PBDB occurrences: </strong> {{pbdb_occs}} <br>
+    <strong>Lithology: </strong> {{#lith_types}}{{.}}, {{/lith_types}} <br>
+    <strong>Lith. thickness: </strong> {{lith_max_thick}} - {{lith_min_thick}}
+  </script>
+
+  <script id="column-summary-template" type="x-tmpl-mustache">
+    <strong>Group: </strong> {{#groups}}<a href="/info?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> {{/groups}}<br>
+    <strong>Total columns:</strong> {{columns}} <br>
     <strong>Area: </strong> {{area}} <small>km<sup>2</sup></small><br>
     <strong>Age: </strong> {{b_age}} - {{t_age}} <small>Ma</small> <br>
     <strong>Sections: </strong> {{sections.length}} <br>
@@ -211,7 +227,7 @@
 
 
   <script src="../js/libs.js"></script>
-  <script src="../js/d3.min.js"></script>
+  <script src="../js/underscore.min.js"></script>
   <script async src="../js/common.js"></script>
 
   <script>
@@ -250,6 +266,7 @@
 
             data.success.data.forEach(function(d) {
               if (d.id == id) {
+                $(".page-title").html(d.name + " " + d.rank);
                 d.active = "active-strat-name";
               } else {
                 d.active = "not-active-strat-name";
@@ -305,22 +322,72 @@
       2a. If valid, get data and draw map
       2b. If invalid, say so
     */
-      
-    function getData() {
 
-      if (type[0] === "strat_name_like" || type[0] === "strat_name" || type[0] === "strat_id") {
-        // Get strat_name hierarchy
-        stratHierarchy.build(type[1]);
-      
-      } else if (type[0] === "unit_id") {
-        // Find unit strat name then get hierarchy
-        getStratNameId(type[1]);
-        
-      } else if (type[0] === "col_id") {
-        // Draw strat column
+    var columns = (function() {
+
+      function summarize(columns) {
+
+        return {
+          "groups" : _.uniq(columns.map(function(d) {
+            return {
+              col_group: d.col_group,
+              col_group_id: d.col_group_id
+            }
+          }), function(item, key, a) {
+            return item.col_group
+          }),
+          "columns": columns.length,
+          "area" : _.reduce(columns.map(function(d) { return d.area; }), function(memo, num) { return memo + num; }, 0).toFixed(0),
+          "b_age" : _.max(columns, function(d) { return d.b_age; }).b_age,
+          "t_age" : _.min(columns, function(d) { return d.t_age; }).t_age,
+          "min_thick" : _.min(columns, function(d) { return d.min_thick; }).min_thick,
+          "max_thick" : _.max(columns, function(d) { return d.max_thick; }).max_thick,
+          "pbdb_occs" : _.reduce(columns.map(function(d) { return d.pbdb_occs; }), function(memo, num) { return memo + num; }, 0),
+          "pbdb_collections" : _.reduce(columns.map(function(d) { return d.pbdb_collections; }), function(memo, num) { return memo + num; }, 0),
+          "sections" : _.uniq(_.flatten(columns.map(function(d) { return d.sections; }))),
+          "units" : _.uniq(_.flatten(columns.map(function(d) { return d.units; }))),
+          "lith_types" : _.uniq(_.flatten(columns.map(function(d) { return d.lith_types; }))),
+          "lith_min_thick" : _.min(columns, function(d) { return d.lith_min_thick; }).lith_min_thick,
+          "lith_max_thick" :  _.max(columns, function(d) { return d.lith_max_thick; }).lith_max_thick
+
+        }
       }
+      return {
+        // fetch: fetch,
+         summarize: summarize
+      }
+    })();
 
+    function getColumns(type) {
       $.getJSON("http://localhost:5000/api/v1/columns?adjacents=true&response=long&format=topojson_bare&" + type.join("="), function(data) {
+
+        if (type[0] === "col_group_id" || type[0] === "strat_id") {
+          var summary = columns.summarize(
+            data.objects.output.geometries.map(function(d) {
+              return d.properties;
+            })
+          );
+          
+          $("#stats").html(Mustache.render(columnSummaryTemplate, summary));
+
+          if (type[0] !== "strat_id") {
+            $(".page-title").html(data.objects.output.geometries[0].properties.col_group + "(" + data.objects.output.geometries[0].properties.col_group_id + ")");
+          }
+          
+
+        } else {
+          var target = data.objects.output.geometries.filter(function(d) {
+            if (d.properties.col_id == type[1]) {
+              return d
+            }
+          })[0].properties;
+
+          $("#stats").html(Mustache.render(template, target));
+
+          $(".page-title").html(target.col_name + "(" + target.col_id + ")");
+        }
+
+
         columns = L.geoJson(topojson.feature(data, data.objects.output), {
           style: function(feature) {
             if (type[0] === "col_id" && feature.properties.col_id == type[1]) {
@@ -342,11 +409,6 @@
           },
         // Bind some actions to each polygon
           onEachFeature: function (feature, layer) {
-            if (type[0] === "col_id" && feature.properties.col_id == type[1]) {
-              var rendered = Mustache.render(template, feature.properties);
-              $("#stats").html(rendered);
-            }
-
             layer.on("click", function(d) { 
              // var rendered = Mustache.render(columnTemplate, d.target.feature.properties);
              // setUnitInfoContent(rendered, d.latlng);
@@ -360,6 +422,25 @@
         map.fitBounds(columns.getBounds());
 
       });
+    }
+      
+    function getData() {
+
+      if (type[0] === "strat_name_like" || type[0] === "strat_name" || type[0] === "strat_id") {
+        // Get strat_name hierarchy
+        stratHierarchy.build(type[1]);
+        getColumns(type);
+      
+      } else if (type[0] === "unit_id") {
+        // Find unit strat name then get hierarchy
+        getStratNameId(type[1]);
+        
+      } else if (type[0] === "col_id" || type[0] === "col_group_id") {
+        // Draw strat column
+        getColumns(type);
+      }
+
+      
     }
 
     function drawMap() {
@@ -385,6 +466,9 @@
 
     var template = $('#column-template').html();
     Mustache.parse(template);
+
+    var columnSummaryTemplate = $('#column-summary-template').html();
+    Mustache.parse(columnSummaryTemplate);
 
     var popupTemplate = $('#column-popup-template').html();
     Mustache.parse(popupTemplate);
