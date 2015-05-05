@@ -6,6 +6,8 @@
   <meta http-equiv="Content-Language" content="en">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <link rel="stylesheet" href="../css/normalize.css">
+  <link rel="stylesheet" href="../css/skeleton.css">
   <link rel="stylesheet" href="../css/styles.min.css" />
   <!--<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">-->
   <!--<link href="//fonts.googleapis.com/css?family=Maven+Pro&text=macrostrat" rel="stylesheet" type="text/css">-->
@@ -114,6 +116,30 @@
       margin-left: 80px;
     }
 
+    .column-summary-row {
+      text-align: center;
+      font-size: 20px;
+      border-bottom: 1px solid #eeeeee;
+    }
+
+    .column-summary-row > .columns {
+      min-height: 100px;
+      padding: 20px;
+    }
+
+    .desc {
+      font-size: 14px;
+      color: #aaa;
+      display: block;
+    }
+
+    .lithologies {
+      font-size: 12px;
+    }
+    #stats {
+      width: 95%;
+    }
+
     @media(max-width: 700px) {
       #map {
         width: 100%;
@@ -126,6 +152,14 @@
         font-size: 14px;
       }
     }
+
+    @media(max-width: 550px) {
+      .column-summary-row > .columns {
+        min-height: 70px;
+        padding: 15px;
+      }
+    }
+    
 
   </style>
 </head>
@@ -203,17 +237,23 @@
   </script>
 
   <script id="column-summary-template" type="x-tmpl-mustache">
-    <strong>Group: </strong> {{#groups}}<a href="/info?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> {{/groups}}<br>
-    <strong>Total columns:</strong> {{columns}} <br>
-    <strong>Area: </strong> {{area}} <small>km<sup>2</sup></small><br>
-    <strong>Age: </strong> {{b_age}} - {{t_age}} <small>Ma</small> <br>
-    <strong>Sections: </strong> {{sections.length}} <br>
-    <strong>Units: </strong> {{units.length}} <br>
-    <strong>Thickness: </strong> {{max_thick}} - {{min_thick}} <br>
-    <strong>PBDB collections: </strong> {{pbdb_collections}} <br>
-    <strong>PBDB occurrences: </strong> {{pbdb_occs}} <br>
-    <strong>Lithology: </strong> {{#lith_types}}{{.}}, {{/lith_types}} <br>
-    <strong>Lith. thickness: </strong> {{lith_max_thick}} - {{lith_min_thick}}
+    <div class="row column-summary-row">
+      <div class="three columns">{{#groups}}<a href="/info?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> {{/groups}}</div>
+      <div class="three columns">{{columns}} <span class="desc">columns</span></div>
+      <div class="three columns">{{area}} <span class="desc"><small>km<sup>2</sup></small></span></div>
+      <div class="three columns">{{b_age}} - {{t_age}} <span class="desc"><small>Ma</small></span></div>
+    </div>
+    <div class="row column-summary-row">
+      <div class="three columns">{{sections.length}} <span class="desc">sections</span></div>
+      <div class="three columns">{{units.length}} <span class="desc">units</span></div>
+      <div class="three columns">{{pbdb_collections}} <span class="desc">PBDB collections</span></div>
+      <div class="three columns">{{pbdb_occs}} <span class="desc">PBDB occurrences</span></div>
+    </div>
+    <div class="row column-summary-row">
+      <div class="four columns">{{max_thick}} - {{min_thick}} <span class="desc">thick</span></div>
+      <div class="four columns lithologies">{{#lith_types}}{{.}}, {{/lith_types}}</div>
+      <div class="four columns">{{lith_max_thick}} - {{lith_min_thick}} <span class="desc">Lithology thickness</span></div>
+    </div>
   </script>
 
   <script id="column-popup-template" type="x-tmpl-mustache">
