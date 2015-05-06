@@ -18,9 +18,7 @@ gulp.task('minifyCSS', function() {
     .pipe(gulp.dest('./css/'));
 })
 
-gulp.task('default', 'uglifyJS', 'minifyCSS'], function() {
-
-});
+gulp.task('default', ['uglifyJS', 'minifyCSS']);
 
 // Rerun the task when a file changes
 gulp.task('watch', function() {
