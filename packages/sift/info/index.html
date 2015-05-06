@@ -10,9 +10,6 @@
   <!--<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">-->
   <!--<link href="//fonts.googleapis.com/css?family=Maven+Pro&text=macrostrat" rel="stylesheet" type="text/css">-->
   <style>
-  /* 
-    transform: matrix(scaleX, skewX, skewY, scaleY, translateX, translateY);
-  */
     html, body {
       overflow: visible;
     }
@@ -62,17 +59,6 @@
       text-decoration: none;
       color: #777;
     }
-    .strat_table {
-      width: 100%;
-      text-align: center;
-      font-size: 15px;
-      font-weight: bold;
-      margin: 0 auto;
-      table-layout: fixed;
-
-      line-height: 0;
-    }
-
 
     .name-hierarchy {
       width: 92%;
@@ -94,6 +80,9 @@
     .hierarchy-link {
       text-decoration: none;
       color: #000;
+    }
+    .hierarchy-link:hover {
+      color: #990000;
     }
     .active-strat-name {
       background-color: rgba(153, 0, 0, 0.3);
@@ -163,19 +152,6 @@
 
     .period-names {
       text-align: center;
-    }
-
-    @media(max-width: 700px) {
-      #map {
-        width: 100%;
-      }
-
-      #not-map {
-        width: 97%;
-      }
-      .strat_table {
-        font-size: 14px;
-      }
     }
 
     @media(max-width: 550px) {
@@ -255,8 +231,8 @@
     <div class="row column-summary-row">
       <div class="four columns column-name"><a href="/sift/info/?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a> <span class="desc">column</span></div>
       <div class="two columns"><a href="/sift/info/?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> <span class="desc">group</span></div>
-      <div class="three columns">{{col_area}} <span class="desc"><small>km<sup>2</sup></small></span></div>
-      <div class="three columns">{{b_age}} - {{t_age}} <span class="desc"><small>Ma</small></span></div>
+      <div class="three columns">{{col_area}}<small>km<sup>2</sup></small><span class="desc">area</span></div>
+      <div class="three columns">{{b_age}} - {{t_age}}<small>Ma</small> <span class="desc">age</span></div>
     </div>
     <div class="row column-summary-row">
       <div class="three columns">{{environ_class}} {{environ_type}} <span class="desc">environment</span></div>
@@ -264,7 +240,6 @@
       <div class="three columns">{{pbdb}} <span class="desc">PBDB collections</span></div>
       <div class="three columns">{{max_thick}} - {{min_thick}} <span class="desc">thick</span></div>
     </div>
-
   </script>
 
   
@@ -272,8 +247,8 @@
     <div class="row column-summary-row">
       <div class="four columns column-name"><a href="/sift/info/?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a><span class="desc">column</span></div>
       <div class="two columns"><a href="/sift/info/?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> <span class="desc">group</span></div>
-      <div class="three columns">{{area}} <span class="desc"><small>km<sup>2</sup></small></span></div>
-      <div class="three columns">{{b_age}} - {{t_age}} <span class="desc"><small>Ma</small></span></div>
+      <div class="three columns">{{area}}<small>km<sup>2</sup></small><span class="desc">area</span></div>
+      <div class="three columns">{{b_age}} - {{t_age}}<small>Ma</small> <span class="desc">age</span></div>
     </div>
     <div class="row column-summary-row">
       <div class="three columns">{{sections.length}} <span class="desc">sections</span></div>
@@ -286,15 +261,14 @@
       <div class="six columns lithologies">{{#lith_types}}{{.}}, {{/lith_types}} <span class="desc">lithologies</span></div>
       <div class="three columns">{{lith_max_thick}} - {{lith_min_thick}} <span class="desc">lith. thickness</span></div>
     </div>
-
   </script>
 
   <script id="column-summary-template" type="x-tmpl-mustache">
     <div class="row column-summary-row">
       <div class="three columns">{{#groups}}<a href="/sift/info/?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> <br>{{/groups}}<span class="desc">group(s)</span></div>
       <div class="three columns">{{columns}} <span class="desc">columns</span></div>
-      <div class="three columns">{{area}} <span class="desc"><small>km<sup>2</sup></small></span></div>
-      <div class="three columns">{{b_age}} - {{t_age}} <span class="desc"><small>Ma</small></span></div>
+      <div class="three columns">{{area}}<small>km<sup>2</sup></small><span class="desc">area</span></div>
+      <div class="three columns">{{b_age}} - {{t_age}}<small>Ma</small> <span class="desc">age</span></div>
     </div>
     <div class="row column-summary-row">
       <div class="three columns">{{sections.length}} <span class="desc">sections</span></div>
@@ -310,7 +284,6 @@
   </script>
 
   <script id="column-popup-template" type="x-tmpl-mustache">
-
     <strong><a href="/sift/info/?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a></strong><br>
     <strong>Group: </strong> <a href="/sift/info/?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a><br>
     <strong>Units: </strong> {{units.length}} <br>
@@ -344,7 +317,6 @@
 
 
   <script src="../js/libs.js"></script>
-  <script src="../js/underscore.min.js"></script>
   <script async src="../js/common.js"></script>
 
   <script>
@@ -619,10 +591,10 @@
           layer.on("click", function(d) { 
            // var rendered = Mustache.render(columnTemplate, d.target.feature.properties);
            // setUnitInfoContent(rendered, d.latlng);
-            console.log(d.target.feature.properties);
+            window.location = "/sift/info/?col_id=" + d.target.feature.properties.col_id; 
           })
-          var popup = Mustache.render(templates.popup, feature.properties);
-          layer.bindPopup(popup);
+          //var popup = Mustache.render(templates.popup, feature.properties);
+          //layer.bindPopup(popup);
         }
       }).addTo(map);
 
