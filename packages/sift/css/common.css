@@ -15,6 +15,9 @@ html, body {
 #header {
   width: 100%;
   display: table;
+  border-bottom: 1px solid rgba(153,0,0,0.2);
+  padding-bottom: 3px;
+  height: 50px;
 }
 .container {
   overflow: hidden;
@@ -22,14 +25,20 @@ html, body {
   width: 100%;
   position: fixed;
 }
-h3, h3>a {
-  color: #aaa;
+h3, h3 > a {
+  
+}
+.header-title {
+  color: #990000;
   font-size: 1.2em;
   letter-spacing: 2px;
   font-weight: 200;
   text-align: center;
   text-decoration: none;
+  margin-left: 7px;
+  display: inline;
 }
+
 #header > h3 {
   text-align: left;
   padding-left: 15px;
@@ -38,17 +47,32 @@ h3, h3>a {
   display: table-cell;
   vertical-align: middle;
 }
+.headerItem > a {
+  text-decoration: none;
+}
+.headerItem.left {
+  padding-left: 20px;
+  padding-top: 10px;
+}
+.header-logo {
+  height: 20px;
+  display: inline;
+}
 .searchBox {
   margin-top: 10px;
-  margin-right: 10px;
+  margin-right: 15px;
+  padding-top: 6px;
 }
 .headerItem.right {
   float: right;
+  padding-right: 20px;
+  padding-bottom: 7px;
 }
 .searcher {
   border-radius: 4px;
-  padding: 10px;
-  border: 1px solid #aaa;
+  margin-bottom: -10px !important;
+  top: -6px;
+  border: 1px solid rgba(153,0,0,0.2) !important;
   width: 300px;
   font-size: 14px;
 }
@@ -60,7 +84,7 @@ h3, h3>a {
   position: fixed;
 }
 h3, h3>a {
-  color: #aaa;
+  color: #990000;
   font-size: 1.2em;
   letter-spacing: 2px;
   font-weight: 200;
