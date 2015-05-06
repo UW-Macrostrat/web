@@ -215,23 +215,23 @@
   <script id="name-hierarchy-template" type="x-tmpl-mustache">
   <h3>Stratigraphic name hierarchy</h3>
   {{#hierarchy}}
-  <a href="/info?strat_id={{id}}" class="hierarchy-link">
+  <a href="info?strat_id={{id}}" class="hierarchy-link">
     <div class="hierarchy-container hierarchy-1 {{active}}">
       <div class="hierarchy-name">{{name}} {{rank}}</div>
       {{#children}}
-      <a href="/info?strat_id={{id}}" class="hierarchy-link">
+      <a href="info?strat_id={{id}}" class="hierarchy-link">
         <div class="hierarchy-container hierarchy-2 {{active}}">
           <div class="hierarchy-name">{{name}} {{rank}}</div>
           {{#children}}
-          <a href="/info?strat_id={{id}}" class="hierarchy-link">
+          <a href="info?strat_id={{id}}" class="hierarchy-link">
             <div class="hierarchy-container hierarchy-3 {{active}}">
               <div class="hierarchy-name">{{name}} {{rank}}</div>
               {{#children}}
-              <a href="/info?strat_id={{id}}" class="hierarchy-link">
+              <a href="info?strat_id={{id}}" class="hierarchy-link">
                 <div class="hierarchy-container hierarchy-4 {{active}}">
                   <div class="hierarchy-name">{{name}} {{rank}}</div>
                   {{#children}}
-                  <a href="/info?strat_id={{id}}" class="hierarchy-link">
+                  <a href="info?strat_id={{id}}" class="hierarchy-link">
                     <div class="hierarchy-container hierarchy-5 {{active}}">
                       <div class="hierarchy-name">{{name}} {{rank}}</div>
                     </div>
@@ -253,8 +253,8 @@
 
   <script id="unit-template" type="x-tmpl-mustache">
     <div class="row column-summary-row">
-      <div class="four columns column-name"><a href="/info?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a> <span class="desc">column</span></div>
-      <div class="two columns"><a href="/info?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> <span class="desc">group</span></div>
+      <div class="four columns column-name"><a href="info?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a> <span class="desc">column</span></div>
+      <div class="two columns"><a href="info?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> <span class="desc">group</span></div>
       <div class="three columns">{{col_area}} <span class="desc"><small>km<sup>2</sup></small></span></div>
       <div class="three columns">{{b_age}} - {{t_age}} <span class="desc"><small>Ma</small></span></div>
     </div>
@@ -270,8 +270,8 @@
   
   <script id="column-template" type="x-tmpl-mustache">
     <div class="row column-summary-row">
-      <div class="four columns column-name"><a href="/info?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a><span class="desc">column</span></div>
-      <div class="two columns"><a href="/info?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> <span class="desc">group</span></div>
+      <div class="four columns column-name"><a href="info?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a><span class="desc">column</span></div>
+      <div class="two columns"><a href="info?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> <span class="desc">group</span></div>
       <div class="three columns">{{area}} <span class="desc"><small>km<sup>2</sup></small></span></div>
       <div class="three columns">{{b_age}} - {{t_age}} <span class="desc"><small>Ma</small></span></div>
     </div>
@@ -291,7 +291,7 @@
 
   <script id="column-summary-template" type="x-tmpl-mustache">
     <div class="row column-summary-row">
-      <div class="three columns">{{#groups}}<a href="/info?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> <br>{{/groups}}<span class="desc">group(s)</span></div>
+      <div class="three columns">{{#groups}}<a href="info?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> <br>{{/groups}}<span class="desc">group(s)</span></div>
       <div class="three columns">{{columns}} <span class="desc">columns</span></div>
       <div class="three columns">{{area}} <span class="desc"><small>km<sup>2</sup></small></span></div>
       <div class="three columns">{{b_age}} - {{t_age}} <span class="desc"><small>Ma</small></span></div>
@@ -311,8 +311,8 @@
 
   <script id="column-popup-template" type="x-tmpl-mustache">
 
-    <strong><a href="/info?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a></strong><br>
-    <strong>Group: </strong> <a href="/info?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a><br>
+    <strong><a href="info?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a></strong><br>
+    <strong>Group: </strong> <a href="info?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a><br>
     <strong>Units: </strong> {{units.length}} <br>
     <strong>Thickness: </strong> {{max_thick}} - {{min_thick}} <br>
     <strong>PBDB collections: </strong> {{pbdb_collections}} <br>
