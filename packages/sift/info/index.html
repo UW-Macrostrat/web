@@ -76,8 +76,9 @@
 
     .name-hierarchy {
       width: 92%;
-      margin-top: 35px;
-      /*margin: 0 auto;*/
+      padding-top: 35px;
+      max-width: 700px;
+      margin: 0 auto;
     }
 
     .hierarchy-container {
@@ -135,8 +136,33 @@
     .lithologies {
       font-size: 12px;
     }
+
+    .columns > a {
+      color: #000;
+      text-decoration: none;
+    }
     #stats {
       width: 95%;
+    }
+
+    .section-box {
+      margin-bottom: 20px;
+    }
+    .section-box > a {
+      text-decoration: none;
+    }
+
+    .unit-box {
+      text-align: center;
+    }
+
+    .ten.columns {
+      margin-left: 0;
+      min-height: 24px
+    }
+
+    .period-names {
+      text-align: center;
     }
 
     @media(max-width: 700px) {
@@ -221,24 +247,48 @@
   </a>
   {{/hierarchy}}
   </script>
+
+  <script id="unit-template" type="x-tmpl-mustache">
+    <div class="row column-summary-row">
+      <div class="four columns column-name"><a href="/info?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a> <span class="desc">column</span></div>
+      <div class="two columns"><a href="/info?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> <span class="desc">group</span></div>
+      <div class="three columns">{{col_area}} <span class="desc"><small>km<sup>2</sup></small></span></div>
+      <div class="three columns">{{b_age}} - {{t_age}} <span class="desc"><small>Ma</small></span></div>
+    </div>
+    <div class="row column-summary-row">
+      <div class="three columns">{{environ_class}} {{environ_type}} <span class="desc">environment</span></div>
+      <div class="three columns">{{lith_class}} {{lith_type}}<span class="desc">lithology</span></div>
+      <div class="three columns">{{pbdb}} <span class="desc">PBDB collections</span></div>
+      <div class="three columns">{{max_thick}} - {{min_thick}} <span class="desc">thick</span></div>
+    </div>
+
+  </script>
+
   
   <script id="column-template" type="x-tmpl-mustache">
-    <strong>Group: </strong> <a href="/info?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a><br>
-    {{#columns}}<strong>Total columns:</strong> {{columns}} <br>{{/columns}}
-    <strong>Area: </strong> {{area}} <small>km<sup>2</sup></small><br>
-    <strong>Age: </strong> {{b_age}} - {{t_age}} <small>Ma</small> <br>
-    <strong>Sections: </strong> {{sections.length}} <br>
-    <strong>Units: </strong> {{units.length}} <br>
-    <strong>Thickness: </strong> {{max_thick}} - {{min_thick}} <br>
-    <strong>PBDB collections: </strong> {{pbdb_collections}} <br>
-    <strong>PBDB occurrences: </strong> {{pbdb_occs}} <br>
-    <strong>Lithology: </strong> {{#lith_types}}{{.}}, {{/lith_types}} <br>
-    <strong>Lith. thickness: </strong> {{lith_max_thick}} - {{lith_min_thick}}
+    <div class="row column-summary-row">
+      <div class="four columns column-name"><a href="/info?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a><span class="desc">column</span></div>
+      <div class="two columns"><a href="/info?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> <span class="desc">group</span></div>
+      <div class="three columns">{{area}} <span class="desc"><small>km<sup>2</sup></small></span></div>
+      <div class="three columns">{{b_age}} - {{t_age}} <span class="desc"><small>Ma</small></span></div>
+    </div>
+    <div class="row column-summary-row">
+      <div class="three columns">{{sections.length}} <span class="desc">sections</span></div>
+      <div class="three columns">{{units.length}} <span class="desc">units</span></div>
+      <div class="three columns">{{pbdb_collections}} <span class="desc">PBDB collections</span></div>
+      <div class="three columns">{{pbdb_occs}} <span class="desc">PBDB occurrences</span></div>
+    </div>
+    <div class="row column-summary-row">
+      <div class="three columns">{{max_thick}} - {{min_thick}} <span class="desc">thick</span></div>
+      <div class="six columns lithologies">{{#lith_types}}{{.}}, {{/lith_types}} <span class="desc">lithologies</span></div>
+      <div class="three columns">{{lith_max_thick}} - {{lith_min_thick}} <span class="desc">lith. thickness</span></div>
+    </div>
+
   </script>
 
   <script id="column-summary-template" type="x-tmpl-mustache">
     <div class="row column-summary-row">
-      <div class="three columns">{{#groups}}<a href="/info?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> {{/groups}}</div>
+      <div class="three columns">{{#groups}}<a href="/info?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> <br>{{/groups}}<span class="desc">group(s)</span></div>
       <div class="three columns">{{columns}} <span class="desc">columns</span></div>
       <div class="three columns">{{area}} <span class="desc"><small>km<sup>2</sup></small></span></div>
       <div class="three columns">{{b_age}} - {{t_age}} <span class="desc"><small>Ma</small></span></div>
@@ -250,13 +300,14 @@
       <div class="three columns">{{pbdb_occs}} <span class="desc">PBDB occurrences</span></div>
     </div>
     <div class="row column-summary-row">
-      <div class="four columns">{{max_thick}} - {{min_thick}} <span class="desc">thick</span></div>
-      <div class="four columns lithologies">{{#lith_types}}{{.}}, {{/lith_types}}</div>
-      <div class="four columns">{{lith_max_thick}} - {{lith_min_thick}} <span class="desc">Lithology thickness</span></div>
+      <div class="three columns">{{max_thick}} - {{min_thick}} <span class="desc">thick</span></div>
+      <div class="six columns lithologies">{{lith_types}}<span class="desc">lithologies</span></div>
+      <div class="three columns">{{lith_max_thick}} - {{lith_min_thick}} <span class="desc">lith. thickness</span></div>
     </div>
   </script>
 
   <script id="column-popup-template" type="x-tmpl-mustache">
+
     <strong><a href="/info?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a></strong><br>
     <strong>Group: </strong> <a href="/info?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a><br>
     <strong>Units: </strong> {{units.length}} <br>
@@ -265,12 +316,43 @@
     <strong>PBDB occurrences: </strong> {{pbdb_occs}} <br>
   </script>
 
+  <script id="column-layout-template" type="x-tmpl-mustache">
+    
+    {{#periods}}
+      <div class="row">
+        <div class="two columns period-names" style="background-color: {{color}};">
+          <div class="period-name">{{abbrev}}</div>
+        </div>
+        <div class="ten columns">
+          {{#sections}}
+            <div class="section-box">
+              {{#units}}
+                <a href="/info?unit_id={{id}}">
+                  <div class="unit-box" style="background-color: {{color}}; color: {{text_color}};">{{strat_name}}</div>
+                </a>
+              {{/units}}
+            </div>
+          {{/sections}}
+        </div>
+      </div>
+    {{/periods}}
+    
+  </script>
+
 
   <script src="../js/libs.js"></script>
   <script src="../js/underscore.min.js"></script>
   <script async src="../js/common.js"></script>
 
   <script>
+    /* via http://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript */
+    function addCommas(x) {
+      x = parseInt(x);
+      var parts = x.toString().split(".");
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      return parts.join(".");
+    }
+
 
     var stratHierarchy = (function() {
       var nameTemplate = $('#name-hierarchy-template').html();
@@ -377,7 +459,7 @@
             return item.col_group
           }),
           "columns": columns.length,
-          "area" : _.reduce(columns.map(function(d) { return d.area; }), function(memo, num) { return memo + num; }, 0).toFixed(0),
+          "area" : _.reduce(columns.map(function(d) { return d.area; }), function(memo, num) { return memo + num; }, 0),
           "b_age" : _.max(columns, function(d) { return d.b_age; }).b_age,
           "t_age" : _.min(columns, function(d) { return d.t_age; }).t_age,
           "min_thick" : _.min(columns, function(d) { return d.min_thick; }).min_thick,
@@ -386,20 +468,76 @@
           "pbdb_collections" : _.reduce(columns.map(function(d) { return d.pbdb_collections; }), function(memo, num) { return memo + num; }, 0),
           "sections" : _.uniq(_.flatten(columns.map(function(d) { return d.sections; }))),
           "units" : _.uniq(_.flatten(columns.map(function(d) { return d.units; }))),
-          "lith_types" : _.uniq(_.flatten(columns.map(function(d) { return d.lith_types; }))),
+          "lith_types" : _.uniq(_.flatten(columns.map(function(d) { return d.lith_types; }))).join(", "),
           "lith_min_thick" : _.min(columns, function(d) { return d.lith_min_thick; }).lith_min_thick,
           "lith_max_thick" :  _.max(columns, function(d) { return d.lith_max_thick; }).lith_max_thick
 
         }
       }
+
+      function fetchUnits(col_id) {
+        $.getJSON("http://localhost:5000/api/v1/units?response=long&col_id=" + col_id, function(data) {
+          data = data.success.data;
+          var column = {"Quaternary":{"name":"Quaternary","abbrev":"Q","color":"#F9F97F","sections":{}},"Neogene":{"name":"Neogene","abbrev":"Ng","color":"#FFE619","sections":{}},"Paleogene":{"name":"Paleogene","abbrev":"Pg","color":"#FD9A52","sections":{}},"Cretaceous":{"name":"Cretaceous","abbrev":"K","color":"#7FC64E","sections":{}},"Jurassic":{"name":"Jurassic","abbrev":"J","color":"#34B2C9","sections":{}},"Triassic":{"name":"Triassic","abbrev":"Tr","color":"#812b92","sections":{}},"Permian":{"name":"Permian","abbrev":"P","color":"#F04028","sections":{}},"Carboniferous":{"name":"Carboniferous","abbrev":"C","color":"#67A599","sections":{}},"Devonian":{"name":"Devonian","abbrev":"D","color":"#CB8C37","sections":{}},"Silurian":{"name":"Silurian","abbrev":"S","color":"#B3E1B6","sections":{}},"Ordovician":{"name":"Ordovician","abbrev":"O","color":"#009270","sections":{}},"Cambrian":{"name":"Cambrian","abbrev":"Cm","color":"#7FA056","sections":{}},"PreCambrian":{"name":"PreCambrian","abbrev":"PCm","color":"#F04370","sections":{}}};
+
+          for (var i = 0; i < data.length; i++) {
+            if (!column[data[i].period]) {
+              if (column["PreCambrian"].sections[data[i].section_id]) {
+                column["PreCambrian"].sections[data[i].section_id].units.push(data[i]);
+              } else {
+                column["PreCambrian"].sections[data[i].section_id] = {
+                  "id": data[i].section_id,
+                  "units": [data[i]]
+                }
+              }
+            } else if (column[data[i].period].sections[data[i].section_id]) {
+              column[data[i].period].sections[data[i].section_id].units.push(data[i]);
+            } else {
+              column[data[i].period].sections[data[i].section_id] = {
+                "id": data[i].section_id,
+                "units": [data[i]]
+              }
+            }
+          }
+
+          var newColumn = Object.keys(column).map(function(d) { 
+            return column[d]; 
+          });
+
+          newColumn.forEach(function(d) {
+            d.sections = Object.keys(d.sections).map(function(j) {
+              return d.sections[j];
+            });
+          });
+          
+          // Draw the column
+          $(".name-hierarchy").html(Mustache.render(columnLayoutTemplate, {"periods": newColumn }));
+
+          // Adjust, adjust
+          $(".period-names").css("height", function() {
+            return $(this).next().height();
+          });
+          $(".period-names").css("line-height", function() {
+            return $(this).next().height() + "px";
+          });
+          //console.log(newColumn);
+        });
+      }
+
       return {
         // fetch: fetch,
-         summarize: summarize
+         summarize: summarize,
+         fetchUnits: fetchUnits
       }
     })();
 
-    function getColumns(type) {
-      $.getJSON("http://localhost:5000/api/v1/columns?adjacents=true&response=long&format=topojson_bare&" + type.join("="), function(data) {
+    function getColumns(type, add, callback) {
+      var adjacents = "";
+      if (!callback) {
+        adjacents = "adjacents=true&"
+      }
+
+      $.getJSON("http://localhost:5000/api/v1/columns?" + adjacents + "&response=long&format=topojson_bare&" + type.join("="), function(data) {
 
         if (type[0] === "col_group_id" || type[0] === "strat_id") {
           var summary = columns.summarize(
@@ -407,6 +545,12 @@
               return d.properties;
             })
           );
+
+          Object.keys(summary).forEach(function(j) {
+            if (typeof(summary[j]) === "number") {
+              summary[j] = addCommas(summary[j]);
+            }
+          });
           
           $("#stats").html(Mustache.render(columnSummaryTemplate, summary));
 
@@ -415,53 +559,72 @@
           }
           
 
-        } else {
+        } else if (type[0] === "col_id") {
+          if (!callback) {
+            columns.fetchUnits(type[1]);
+          }
+
           var target = data.objects.output.geometries.filter(function(d) {
             if (d.properties.col_id == type[1]) {
               return d
             }
           })[0].properties;
 
+          Object.keys(target).forEach(function(j) {
+            if (typeof(target[j]) === "number") {
+              target[j] = addCommas(target[j]);
+            }
+          });
+
           $("#stats").html(Mustache.render(template, target));
 
           $(".page-title").html(target.col_name + "(" + target.col_id + ")");
         }
 
+        if (add) {
+          addToMap(data);
+        } 
 
-        columns = L.geoJson(topojson.feature(data, data.objects.output), {
-          style: function(feature) {
-            if (type[0] === "col_id" && feature.properties.col_id == type[1]) {
-              return {
-                color: 'red',
-                fillOpacity: 0.6,
-                opacity: 0.8,
-                weight: 1
-              };
-            } else {
-              return {
-                color: '#777',
-                fillOpacity: 0.4,
-                opacity: 0.8,
-                weight: 1
-              };
-            }
-              
-          },
-        // Bind some actions to each polygon
-          onEachFeature: function (feature, layer) {
-            layer.on("click", function(d) { 
-             // var rendered = Mustache.render(columnTemplate, d.target.feature.properties);
-             // setUnitInfoContent(rendered, d.latlng);
-              console.log(d.target.feature.properties);
-            })
-            var popup = Mustache.render(popupTemplate, feature.properties);
-            layer.bindPopup(popup);
-          }
-        }).addTo(map);
-
-        map.fitBounds(columns.getBounds());
+        if (callback) {
+          callback(data);
+        }
 
       });
+    }
+
+    function addToMap(data) {
+      columns = L.geoJson(topojson.feature(data, data.objects.output), {
+        style: function(feature) {
+          if (type[0] === "col_id" && feature.properties.col_id == type[1]) {
+            return {
+              color: 'red',
+              fillOpacity: 0.6,
+              opacity: 0.8,
+              weight: 1
+            };
+          } else {
+            return {
+              color: '#777',
+              fillOpacity: 0.4,
+              opacity: 0.8,
+              weight: 1
+            };
+          }
+            
+        },
+      // Bind some actions to each polygon
+        onEachFeature: function (feature, layer) {
+          layer.on("click", function(d) { 
+           // var rendered = Mustache.render(columnTemplate, d.target.feature.properties);
+           // setUnitInfoContent(rendered, d.latlng);
+            console.log(d.target.feature.properties);
+          })
+          var popup = Mustache.render(popupTemplate, feature.properties);
+          layer.bindPopup(popup);
+        }
+      }).addTo(map);
+
+      map.fitBounds(columns.getBounds());
     }
       
     function getData() {
@@ -469,7 +632,7 @@
       if (type[0] === "strat_name_like" || type[0] === "strat_name" || type[0] === "strat_id") {
         // Get strat_name hierarchy
         stratHierarchy.build(type[1]);
-        getColumns(type);
+        getColumns(type, true);
       
       } else if (type[0] === "unit_id") {
         // Find unit strat name then get hierarchy
@@ -477,7 +640,7 @@
         
       } else if (type[0] === "col_id" || type[0] === "col_group_id") {
         // Draw strat column
-        getColumns(type);
+        getColumns(type, true);
       }
 
       
@@ -497,11 +660,30 @@
     }
 
     function getStratNameId(unit_id) {
-      $.getJSON("http://localhost:5000/api/v1/units?id=" + unit_id, function(data) {
+      $.getJSON("http://localhost:5000/api/v1/units?response=long&id=" + unit_id, function(data) {
         if (data.success.data.length > 0) {
-          stratHierarchy.build(data.success.data[0].strat_name_id)
+          var unit = data.success.data[0];
+          stratHierarchy.build(unit.strat_name_id);
+
+          var column = getColumns(["col_id", unit.col_id], true, function(data) {
+            unit.col_group = data.objects.output.geometries[0].properties.col_group;
+            unit.col_group_id = data.objects.output.geometries[0].properties.col_group_id;
+            unit.col_name = data.objects.output.geometries[0].properties.col_name;
+
+            Object.keys(unit).forEach(function(j) {
+              if (typeof(unit[j]) === "number" && j != "id") {
+                unit[j] = addCommas(unit[j]);
+              }
+            });
+
+            $("#stats").html(Mustache.render(unitTemplate, unit));
+
+            $(".page-title").html(unit.strat_name + "(" + unit.id + ")");
+          });
+
+            
         }
-      })
+      });
     }
       
 
@@ -510,6 +692,13 @@
 
     var columnSummaryTemplate = $('#column-summary-template').html();
     Mustache.parse(columnSummaryTemplate);
+
+    var unitTemplate = $('#unit-template').html();
+    Mustache.parse(unitTemplate);
+
+    var columnLayoutTemplate = $('#column-layout-template').html();
+    Mustache.parse(columnLayoutTemplate);
+
 
     var popupTemplate = $('#column-popup-template').html();
     Mustache.parse(popupTemplate);
