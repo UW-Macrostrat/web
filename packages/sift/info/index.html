@@ -191,7 +191,10 @@
 <body>
   <div id="header">
     <div class="headerItem left">
-      <h3><i>sift</i></h3>
+      <a href="/"><img src="img/logo_red.png" class="header-logo"></a>
+      <a href="/sift">
+        <h3 class="header-title"><i>sift</i></h3>
+      </a>
     </div>
     <div class="headerItem right">
       <div class="searchBox typeahead">
@@ -327,7 +330,7 @@
           {{#sections}}
             <div class="section-box">
               {{#units}}
-                <a href="/info?unit_id={{id}}">
+                <a href="info?unit_id={{id}}">
                   <div class="unit-box" style="background-color: {{color}}; color: {{text_color}};">{{strat_name}}</div>
                 </a>
               {{/units}}
