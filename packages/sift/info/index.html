@@ -6,7 +6,7 @@
   <meta http-equiv="Content-Language" content="en">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="stylesheet" href="../css/styles.min.css" />
+  <link rel="stylesheet" href="./css/styles.min.css" />
   <!--<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">-->
   <!--<link href="//fonts.googleapis.com/css?family=Maven+Pro&text=macrostrat" rel="stylesheet" type="text/css">-->
   <style>
@@ -191,7 +191,7 @@
 <body>
   <div id="header">
     <div class="headerItem left">
-      <a href="/"><img src="../img/logo_red.png" class="header-logo"></a>
+      <a href="/"><img src="./img/logo_red.png" class="header-logo"></a>
       <a href="/sift">
         <h3 class="header-title"><i>sift</i></h3>
       </a>
@@ -330,7 +330,7 @@
           {{#sections}}
             <div class="section-box">
               {{#units}}
-                <a href="info?unit_id={{id}}">
+                <a href="/sift/info?unit_id={{id}}">
                   <div class="unit-box" style="background-color: {{color}}; color: {{text_color}};">{{strat_name}}</div>
                 </a>
               {{/units}}
@@ -343,9 +343,9 @@
   </script>
 
 
-  <script src="../js/libs.js"></script>
-  <script src="../js/underscore.min.js"></script>
-  <script async src="../js/common.js"></script>
+  <script src="./js/libs.js"></script>
+  <script src="./js/underscore.min.js"></script>
+  <script async src="./js/common.js"></script>
 
   <script>
     /* via http://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript */
