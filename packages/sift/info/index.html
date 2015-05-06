@@ -324,11 +324,22 @@
     var apiUrl = (window.location.hostname === "localhost") ? "http://localhost:5000" : window.location.origin;
 
     /* via http://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript */
-    function addCommas(x) {
-      x = parseInt(x);
-      var parts = x.toString().split(".");
-      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-      return parts.join(".");
+    function addCommas(obj) {
+      function commaize(x) {
+        x = parseInt(x);
+        var parts = x.toString().split(".");
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        return parts.join(".");
+      }
+
+      Object.keys(obj).forEach(function(j) {
+        if (typeof(obj[j]) === "number" && j != "id") {
+          obj[j] = commaize(obj[j])
+        }
+      });
+
+      return obj
+      
     }
 
 
@@ -433,11 +444,7 @@
               })
             );
 
-            Object.keys(summary).forEach(function(j) {
-              if (typeof(summary[j]) === "number") {
-                summary[j] = addCommas(summary[j]);
-              }
-            });
+            summary = addCommas(summary);
             
             $("#stats").html(Mustache.render(templates.columnSummary, summary));
 
@@ -457,11 +464,7 @@
               }
             })[0].properties;
 
-            Object.keys(target).forEach(function(j) {
-              if (typeof(target[j]) === "number") {
-                target[j] = addCommas(target[j]);
-              }
-            });
+            target = addCommas(target);
 
             $("#stats").html(Mustache.render(templates.column, target));
 
@@ -623,11 +626,7 @@
             unit.col_group_id = data.objects.output.geometries[0].properties.col_group_id;
             unit.col_name = data.objects.output.geometries[0].properties.col_name;
 
-            Object.keys(unit).forEach(function(j) {
-              if (typeof(unit[j]) === "number" && j != "id") {
-                unit[j] = addCommas(unit[j]);
-              }
-            });
+            unit = addCommas(unit);
 
             $("#stats").html(Mustache.render(templates.unit, unit));
 
