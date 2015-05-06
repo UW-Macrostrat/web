@@ -1,4 +1,7 @@
  (function() {
+
+  var apiUrl = (window.location.hostname === "localhost") ? "http://localhost:5000" : window.location.origin;
+
   function prefetch(type, callback) {
     $.ajax({
       url: type,
@@ -8,7 +11,7 @@
 
   var lastSuggestion, lastDataset;
 
-  prefetch('http://localhost:5000/api/v1/defs/columns?all', function(data) {
+  prefetch(apiUrl + "/api/v1/defs/columns?all", function(data) {
     data.success.data.forEach(function(d) {
       d.id = d.col_id;
     });
@@ -24,7 +27,7 @@
 
     columnEngine.initialize();
 
-    prefetch('http://localhost:5000/api/v1/defs/strat_names?all', function(data) {
+    prefetch(apiUrl + "/api/v1/defs/strat_names?all", function(data) {
       var stratEngine = new Bloodhound({
         datumTokenizer: function(d) {
           return Bloodhound.tokenizers.whitespace(d.name);
@@ -35,7 +38,7 @@
       });
       stratEngine.initialize();
 
-      prefetch("http://localhost:5000/api/v1/defs/groups?all", function(data) {
+      prefetch(apiUrl + "/api/v1/defs/groups?all", function(data) {
         data.success.data.forEach(function(d) {
           d.id = d.col_group_id;
         });
@@ -87,7 +90,7 @@
         );
 
         $(".searcher").on("typeahead:selected", function(event, suggestion, dataset) {
-          window.location = "/info?" + dataset + "=" + suggestion.id;
+          window.location = window.location.pathname + "info/?" + dataset + "=" + suggestion.id;
         });
         $(".searcher").on("typeahead:autocompleted", function(event, suggestion, dataset) {
           lastSuggestion = suggestion;
@@ -97,7 +100,7 @@
         $(".searcher").on("keypress", function(e) {
           if (e.which == 13) {
             if (typeof(lastSuggestion) !== "undefined") {
-              window.location = "/info?" + lastDataset + "=" + lastSuggestion.id;
+              window.location = window.location.pathname + "info/?" + lastDataset + "=" + lastSuggestion.id;
             }
           }
         });

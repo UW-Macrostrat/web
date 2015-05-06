@@ -215,23 +215,23 @@
   <script id="name-hierarchy-template" type="x-tmpl-mustache">
   <h3>Stratigraphic name hierarchy</h3>
   {{#hierarchy}}
-  <a href="/sift/info?strat_id={{id}}" class="hierarchy-link">
+  <a href="/sift/info/?strat_id={{id}}" class="hierarchy-link">
     <div class="hierarchy-container hierarchy-1 {{active}}">
       <div class="hierarchy-name">{{name}} {{rank}}</div>
       {{#children}}
-      <a href="/sift/info?strat_id={{id}}" class="hierarchy-link">
+      <a href="/sift/info/?strat_id={{id}}" class="hierarchy-link">
         <div class="hierarchy-container hierarchy-2 {{active}}">
           <div class="hierarchy-name">{{name}} {{rank}}</div>
           {{#children}}
-          <a href="/sift/info?strat_id={{id}}" class="hierarchy-link">
+          <a href="/sift/info/?strat_id={{id}}" class="hierarchy-link">
             <div class="hierarchy-container hierarchy-3 {{active}}">
               <div class="hierarchy-name">{{name}} {{rank}}</div>
               {{#children}}
-              <a href="/sift/info?strat_id={{id}}" class="hierarchy-link">
+              <a href="/sift/info/?strat_id={{id}}" class="hierarchy-link">
                 <div class="hierarchy-container hierarchy-4 {{active}}">
                   <div class="hierarchy-name">{{name}} {{rank}}</div>
                   {{#children}}
-                  <a href="/sift/info?strat_id={{id}}" class="hierarchy-link">
+                  <a href="/sift/info/?strat_id={{id}}" class="hierarchy-link">
                     <div class="hierarchy-container hierarchy-5 {{active}}">
                       <div class="hierarchy-name">{{name}} {{rank}}</div>
                     </div>
@@ -253,8 +253,8 @@
 
   <script id="unit-template" type="x-tmpl-mustache">
     <div class="row column-summary-row">
-      <div class="four columns column-name"><a href="/sift/info?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a> <span class="desc">column</span></div>
-      <div class="two columns"><a href="/sift/info?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> <span class="desc">group</span></div>
+      <div class="four columns column-name"><a href="/sift/info/?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a> <span class="desc">column</span></div>
+      <div class="two columns"><a href="/sift/info/?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> <span class="desc">group</span></div>
       <div class="three columns">{{col_area}} <span class="desc"><small>km<sup>2</sup></small></span></div>
       <div class="three columns">{{b_age}} - {{t_age}} <span class="desc"><small>Ma</small></span></div>
     </div>
@@ -270,8 +270,8 @@
   
   <script id="column-template" type="x-tmpl-mustache">
     <div class="row column-summary-row">
-      <div class="four columns column-name"><a href="/sift/info?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a><span class="desc">column</span></div>
-      <div class="two columns"><a href="/sift/info?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> <span class="desc">group</span></div>
+      <div class="four columns column-name"><a href="/sift/info/?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a><span class="desc">column</span></div>
+      <div class="two columns"><a href="/sift/info/?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> <span class="desc">group</span></div>
       <div class="three columns">{{area}} <span class="desc"><small>km<sup>2</sup></small></span></div>
       <div class="three columns">{{b_age}} - {{t_age}} <span class="desc"><small>Ma</small></span></div>
     </div>
@@ -291,7 +291,7 @@
 
   <script id="column-summary-template" type="x-tmpl-mustache">
     <div class="row column-summary-row">
-      <div class="three columns">{{#groups}}<a href="/sift/info?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> <br>{{/groups}}<span class="desc">group(s)</span></div>
+      <div class="three columns">{{#groups}}<a href="/sift/info/?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> <br>{{/groups}}<span class="desc">group(s)</span></div>
       <div class="three columns">{{columns}} <span class="desc">columns</span></div>
       <div class="three columns">{{area}} <span class="desc"><small>km<sup>2</sup></small></span></div>
       <div class="three columns">{{b_age}} - {{t_age}} <span class="desc"><small>Ma</small></span></div>
@@ -311,8 +311,8 @@
 
   <script id="column-popup-template" type="x-tmpl-mustache">
 
-    <strong><a href="/sift/info?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a></strong><br>
-    <strong>Group: </strong> <a href="/sift/info?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a><br>
+    <strong><a href="/sift/info/?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a></strong><br>
+    <strong>Group: </strong> <a href="/sift/info/?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a><br>
     <strong>Units: </strong> {{units.length}} <br>
     <strong>Thickness: </strong> {{max_thick}} - {{min_thick}} <br>
     <strong>PBDB collections: </strong> {{pbdb_collections}} <br>
@@ -330,7 +330,7 @@
           {{#sections}}
             <div class="section-box">
               {{#units}}
-                <a href="/sift/info?unit_id={{id}}">
+                <a href="/sift/info/?unit_id={{id}}">
                   <div class="unit-box" style="background-color: {{color}}; color: {{text_color}};">{{strat_name}}</div>
                 </a>
               {{/units}}
@@ -348,6 +348,8 @@
   <script async src="../js/common.js"></script>
 
   <script>
+    var apiUrl = (window.location.hostname === "localhost") ? "http://localhost:5000" : window.location.origin;
+
     /* via http://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript */
     function addCommas(x) {
       x = parseInt(x);
@@ -362,7 +364,7 @@
       Mustache.parse(nameTemplate);
 
       function build(id) {
-        $.getJSON("http://localhost:5000/api/v1/defs/strat_names?id=" + id, function(data) {
+        $.getJSON(apiUrl + "/api/v1/defs/strat_names?id=" + id, function(data) {
           if (data.success.data.length < 1) {
             throw "No strat names found";
           } 
@@ -382,7 +384,7 @@
             console.log("No strat name IDs found");
           }
 
-          $.getJSON("http://localhost:5000/api/v1/defs/strat_names?id=" + highestRank[1], function(data) {
+          $.getJSON(apiUrl + "/api/v1/defs/strat_names?id=" + highestRank[1], function(data) {
             if (data.success.data.length < 1) {
               throw "No strat names found with the given id " + highestRank[1];
             }
@@ -479,7 +481,7 @@
       }
 
       function fetchUnits(col_id) {
-        $.getJSON("http://localhost:5000/api/v1/units?response=long&col_id=" + col_id, function(data) {
+        $.getJSON(apiUrl + "/api/v1/units?response=long&col_id=" + col_id, function(data) {
           data = data.success.data;
           var column = {"Quaternary":{"name":"Quaternary","abbrev":"Q","color":"#F9F97F","sections":{}},"Neogene":{"name":"Neogene","abbrev":"Ng","color":"#FFE619","sections":{}},"Paleogene":{"name":"Paleogene","abbrev":"Pg","color":"#FD9A52","sections":{}},"Cretaceous":{"name":"Cretaceous","abbrev":"K","color":"#7FC64E","sections":{}},"Jurassic":{"name":"Jurassic","abbrev":"J","color":"#34B2C9","sections":{}},"Triassic":{"name":"Triassic","abbrev":"Tr","color":"#812b92","sections":{}},"Permian":{"name":"Permian","abbrev":"P","color":"#F04028","sections":{}},"Carboniferous":{"name":"Carboniferous","abbrev":"C","color":"#67A599","sections":{}},"Devonian":{"name":"Devonian","abbrev":"D","color":"#CB8C37","sections":{}},"Silurian":{"name":"Silurian","abbrev":"S","color":"#B3E1B6","sections":{}},"Ordovician":{"name":"Ordovician","abbrev":"O","color":"#009270","sections":{}},"Cambrian":{"name":"Cambrian","abbrev":"Cm","color":"#7FA056","sections":{}},"PreCambrian":{"name":"PreCambrian","abbrev":"PCm","color":"#F04370","sections":{}}};
 
@@ -540,7 +542,7 @@
         adjacents = "adjacents=true&"
       }
 
-      $.getJSON("http://localhost:5000/api/v1/columns?" + adjacents + "&response=long&format=topojson_bare&" + type.join("="), function(data) {
+      $.getJSON(apiUrl + "/api/v1/columns?" + adjacents + "&response=long&format=topojson_bare&" + type.join("="), function(data) {
 
         if (type[0] === "col_group_id" || type[0] === "strat_id") {
           var summary = columns.summarize(
@@ -650,7 +652,7 @@
     }
 
     function drawMap() {
-      map = L.map('map', {
+      map = L.map("map", {
         minZoom: 4,
         maxZoom: 10,
         scrollWheelZoom: false
@@ -658,12 +660,12 @@
       });
 
       // Add our basemap
-      L.tileLayer('https://{s}.tiles.mapbox.com/v3/jczaplewski.j751k57j/{z}/{x}/{y}.png').addTo(map);
+      L.tileLayer("https://{s}.tiles.mapbox.com/v3/jczaplewski.j751k57j/{z}/{x}/{y}.png").addTo(map);
       //L.tileLayer('http://{s}.tile.stamen.com/toner-lite/{z}/{x}/{y}.png').addTo(map);
     }
 
     function getStratNameId(unit_id) {
-      $.getJSON("http://localhost:5000/api/v1/units?response=long&id=" + unit_id, function(data) {
+      $.getJSON(apiUrl + "/api/v1/units?response=long&id=" + unit_id, function(data) {
         if (data.success.data.length > 0) {
           var unit = data.success.data[0];
           stratHierarchy.build(unit.strat_name_id);
