@@ -3,7 +3,7 @@
   // Make things nice. We like nice things.
   $("#map").css("height", window.innerHeight - 62);
 
-  var map = L.map('map', {
+  var map = L.map("map", {
     minZoom: 2,
     maxZoom: 10
   });
@@ -20,26 +20,26 @@
   var hash = new L.Hash(map);
 
   // Add our basemap
-  var mapbox = L.tileLayer('https://{s}.tiles.mapbox.com/v3/jczaplewski.j751k57j/{z}/{x}/{y}.png').addTo(map);;
-  mapbox.setZIndex(1);
-
-  // Add the geologic basemap
-  var geology = L.tileLayer('http://macrostrat.org/tiles/geologic_v2/{z}/{x}/{y}.png', {
-    maxZoom: 12,
-    opacity: 0.8
+  L.tileLayer("https://{s}.tiles.mapbox.com/v3/jczaplewski.j751k57j/{z}/{x}/{y}.png", {
+    zIndex: 1
   }).addTo(map);
 
-  geology.setZIndex(100);
+  // Add the geologic basemap
+  L.tileLayer("http://macrostrat.org/tiles/geologic_v2/{z}/{x}/{y}.png", {
+    maxZoom: 12,
+    opacity: 0.8,
+    zIndex: 100
+  }).addTo(map);
 
-  var columnTemplate = $('#column-template').html();
+  var columnTemplate = $("#column-template").html();
   Mustache.parse(columnTemplate);
 
   //$.get("http://macrostrat.org/api/v1/columns?all&format=topojson_bare", function(data) {
   $.getJSON("js/columns.topojson", function(data) { 
-    columns = L.geoJson(topojson.feature(data, data.objects.output), {
+    L.geoJson(topojson.feature(data, data.objects.output), {
       style: function(feature) {
         return {
-          color: '#777',
+          color: "#777777",
           fillOpacity: 0.4,
           opacity: 0.8,
           weight: 1
@@ -50,8 +50,7 @@
         layer.on("click", function(d) { 
           var rendered = Mustache.render(columnTemplate, d.target.feature.properties);
           setUnitInfoContent(rendered, d.latlng);
-          console.log(d.target.feature.properties);
-        })
+        });
       }
     }).addTo(map);
   });
@@ -60,18 +59,6 @@
   map.on("zoomstart, movestart", hideInfoAndMarker);
   $(window).on("resize", hideInfoAndMarker);
   $(".close").click(hideInfoAndMarker);
-
-  // Show attribution
-  $("#info-link").click(function(d) {
-    d.preventDefault();
-    $(".attr-container").css("visibility", "visible");
-  });
-
-  // Show menu
-  $("#menu-link").click(function(d) {
-    d.preventDefault();
-    toggleMenuBar();
-  });
 
   // Make things fast
   var attachFastClick = Origami.fastclick;
@@ -120,7 +107,6 @@
     }
   }
   function openRightBar() {
-    
     $("#unit_info_right").addClass("moveRight");
   }
 
@@ -136,20 +122,10 @@
     }
   }
   function openBottomBar() {
-    
     $("#unit_info_bottom").addClass("moveDown");
   }
   function closeBottomBar() {
     $("#unit_info_bottom").removeClass("moveDown");
-  }
-
-
-  function toggleMenuBar() {
-    if ($("#unit_info_left").hasClass("moveLeft")) {
-      
-    } else {
-      openMenuBar();
-    }
   }
 
   /* Via https://gist.github.com/missinglink/7620340 */
