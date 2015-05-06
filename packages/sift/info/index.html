@@ -348,6 +348,7 @@
   <script async src="../js/common.js"></script>
 
   <script>
+  (function() {
     var apiUrl = (window.location.hostname === "localhost") ? "http://localhost:5000" : window.location.origin;
 
     /* via http://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript */
@@ -443,14 +444,69 @@
     })();
       
 
-
-    /*
-      1. Parse URL
-      2a. If valid, get data and draw map
-      2b. If invalid, say so
-    */
-
     var columns = (function() {
+
+      function fetch(type, add, callback) {
+        var adjacents = "";
+        if (!callback) {
+          adjacents = "adjacents=true&"
+        }
+
+        $.getJSON(apiUrl + "/api/v1/columns?" + adjacents + "&response=long&format=topojson_bare&" + type.join("="), function(data) {
+
+          if (type[0] === "col_group_id" || type[0] === "strat_id") {
+            var summary = columns.summarize(
+              data.objects.output.geometries.map(function(d) {
+                return d.properties;
+              })
+            );
+
+            Object.keys(summary).forEach(function(j) {
+              if (typeof(summary[j]) === "number") {
+                summary[j] = addCommas(summary[j]);
+              }
+            });
+            
+            $("#stats").html(Mustache.render(templates.columnSummary, summary));
+
+            if (type[0] !== "strat_id") {
+              $(".page-title").html(data.objects.output.geometries[0].properties.col_group + "(" + data.objects.output.geometries[0].properties.col_group_id + ")");
+            }
+            
+
+          } else if (type[0] === "col_id") {
+            if (!callback) {
+              columns.fetchUnits(type[1]);
+            }
+
+            var target = data.objects.output.geometries.filter(function(d) {
+              if (d.properties.col_id == type[1]) {
+                return d
+              }
+            })[0].properties;
+
+            Object.keys(target).forEach(function(j) {
+              if (typeof(target[j]) === "number") {
+                target[j] = addCommas(target[j]);
+              }
+            });
+
+            $("#stats").html(Mustache.render(templates.column, target));
+
+            $(".page-title").html(target.col_name + "(" + target.col_id + ")");
+          }
+
+          if (add) {
+            addToMap(data);
+          } 
+
+          if (callback) {
+            callback(data);
+          }
+
+        });
+      }
+
 
       function summarize(columns) {
 
@@ -516,7 +572,7 @@
           });
           
           // Draw the column
-          $(".name-hierarchy").html(Mustache.render(columnLayoutTemplate, {"periods": newColumn }));
+          $(".name-hierarchy").html(Mustache.render(templates.columnLayout, {"periods": newColumn }));
 
           // Adjust, adjust
           $(".period-names").css("height", function() {
@@ -530,75 +586,16 @@
       }
 
       return {
-        // fetch: fetch,
+         fetch: fetch,
          summarize: summarize,
          fetchUnits: fetchUnits
       }
     })();
 
-    function getColumns(type, add, callback) {
-      var adjacents = "";
-      if (!callback) {
-        adjacents = "adjacents=true&"
-      }
-
-      $.getJSON(apiUrl + "/api/v1/columns?" + adjacents + "&response=long&format=topojson_bare&" + type.join("="), function(data) {
-
-        if (type[0] === "col_group_id" || type[0] === "strat_id") {
-          var summary = columns.summarize(
-            data.objects.output.geometries.map(function(d) {
-              return d.properties;
-            })
-          );
-
-          Object.keys(summary).forEach(function(j) {
-            if (typeof(summary[j]) === "number") {
-              summary[j] = addCommas(summary[j]);
-            }
-          });
-          
-          $("#stats").html(Mustache.render(columnSummaryTemplate, summary));
-
-          if (type[0] !== "strat_id") {
-            $(".page-title").html(data.objects.output.geometries[0].properties.col_group + "(" + data.objects.output.geometries[0].properties.col_group_id + ")");
-          }
-          
-
-        } else if (type[0] === "col_id") {
-          if (!callback) {
-            columns.fetchUnits(type[1]);
-          }
-
-          var target = data.objects.output.geometries.filter(function(d) {
-            if (d.properties.col_id == type[1]) {
-              return d
-            }
-          })[0].properties;
-
-          Object.keys(target).forEach(function(j) {
-            if (typeof(target[j]) === "number") {
-              target[j] = addCommas(target[j]);
-            }
-          });
-
-          $("#stats").html(Mustache.render(template, target));
-
-          $(".page-title").html(target.col_name + "(" + target.col_id + ")");
-        }
-
-        if (add) {
-          addToMap(data);
-        } 
-
-        if (callback) {
-          callback(data);
-        }
-
-      });
-    }
+      
 
     function addToMap(data) {
-      columns = L.geoJson(topojson.feature(data, data.objects.output), {
+      var columnLayer = L.geoJson(topojson.feature(data, data.objects.output), {
         style: function(feature) {
           if (type[0] === "col_id" && feature.properties.col_id == type[1]) {
             return {
@@ -624,44 +621,24 @@
            // setUnitInfoContent(rendered, d.latlng);
             console.log(d.target.feature.properties);
           })
-          var popup = Mustache.render(popupTemplate, feature.properties);
+          var popup = Mustache.render(templates.popup, feature.properties);
           layer.bindPopup(popup);
         }
       }).addTo(map);
 
-      map.fitBounds(columns.getBounds());
+      map.fitBounds(columnLayer.getBounds());
     }
       
-    function getData() {
-
-      if (type[0] === "strat_name_like" || type[0] === "strat_name" || type[0] === "strat_id") {
-        // Get strat_name hierarchy
-        stratHierarchy.build(type[1]);
-        getColumns(type, true);
-      
-      } else if (type[0] === "unit_id") {
-        // Find unit strat name then get hierarchy
-        getStratNameId(type[1]);
-        
-      } else if (type[0] === "col_id" || type[0] === "col_group_id") {
-        // Draw strat column
-        getColumns(type, true);
-      }
-
-      
-    }
 
     function drawMap() {
       map = L.map("map", {
         minZoom: 4,
         maxZoom: 10,
         scrollWheelZoom: false
-       // dragging: false
       });
 
       // Add our basemap
       L.tileLayer("https://{s}.tiles.mapbox.com/v3/jczaplewski.j751k57j/{z}/{x}/{y}.png").addTo(map);
-      //L.tileLayer('http://{s}.tile.stamen.com/toner-lite/{z}/{x}/{y}.png').addTo(map);
     }
 
     function getStratNameId(unit_id) {
@@ -670,7 +647,7 @@
           var unit = data.success.data[0];
           stratHierarchy.build(unit.strat_name_id);
 
-          var column = getColumns(["col_id", unit.col_id], true, function(data) {
+          var column = columns.fetch(["col_id", unit.col_id], true, function(data) {
             unit.col_group = data.objects.output.geometries[0].properties.col_group;
             unit.col_group_id = data.objects.output.geometries[0].properties.col_group_id;
             unit.col_name = data.objects.output.geometries[0].properties.col_name;
@@ -681,7 +658,7 @@
               }
             });
 
-            $("#stats").html(Mustache.render(unitTemplate, unit));
+            $("#stats").html(Mustache.render(templates.unit, unit));
 
             $(".page-title").html(unit.strat_name + "(" + unit.id + ")");
           });
@@ -690,23 +667,39 @@
         }
       });
     }
+
+    function getData() {
+
+      if (type[0] === "strat_name_like" || type[0] === "strat_name" || type[0] === "strat_id") {
+        // Get strat_name hierarchy
+        stratHierarchy.build(type[1]);
+        columns.fetch(type, true);
       
+      } else if (type[0] === "unit_id") {
+        // Find unit strat name then get hierarchy
+        getStratNameId(type[1]);
+        
+      } else if (type[0] === "col_id" || type[0] === "col_group_id") {
+        // Draw strat column
+        columns.fetch(type, true);
+      }
 
-    var template = $('#column-template').html();
-    Mustache.parse(template);
+      
+    }
+    
+    var templates = {
+      column: $('#column-template').html(),
+      columnSummary: $('#column-summary-template').html(),
+      columnLayout: $('#column-layout-template').html(),
+      unit: $('#unit-template').html(),
+      popup: $('#column-popup-template').html()
+    }
 
-    var columnSummaryTemplate = $('#column-summary-template').html();
-    Mustache.parse(columnSummaryTemplate);
+    // Get the templates ready to use
+    Object.keys(templates).forEach(function(d) {
+      Mustache.parse(templates[d]);
+    });
 
-    var unitTemplate = $('#unit-template').html();
-    Mustache.parse(unitTemplate);
-
-    var columnLayoutTemplate = $('#column-layout-template').html();
-    Mustache.parse(columnLayoutTemplate);
-
-
-    var popupTemplate = $('#column-popup-template').html();
-    Mustache.parse(popupTemplate);
 
     var queryParams = ["strat_name_like", "strat_name", "strat_id", "col_id", "col_group_id", "col_group", "interval", "interval_id", "lith", "lith_type", "lith_class", "age", "unit_id"];
 
@@ -719,6 +712,7 @@
     } else {
       console.log("invalid query");
     }
+  })()
 
   </script>
 </body>

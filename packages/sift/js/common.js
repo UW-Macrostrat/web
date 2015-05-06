@@ -90,7 +90,7 @@
         );
 
         $(".searcher").on("typeahead:selected", function(event, suggestion, dataset) {
-          window.location = window.location.pathname + "info/?" + dataset + "=" + suggestion.id;
+          window.location = "/sift/info/?" + dataset + "=" + suggestion.id;
         });
         $(".searcher").on("typeahead:autocompleted", function(event, suggestion, dataset) {
           lastSuggestion = suggestion;
@@ -100,7 +100,7 @@
         $(".searcher").on("keypress", function(e) {
           if (e.which == 13) {
             if (typeof(lastSuggestion) !== "undefined") {
-              window.location = window.location.pathname + "info/?" + lastDataset + "=" + lastSuggestion.id;
+              window.location = "/sift/info/?" + lastDataset + "=" + lastSuggestion.id;
             }
           }
         });
