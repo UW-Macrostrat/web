@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link rel="stylesheet" href="../css/styles.min.css" />
+  <link rel="stylesheet" href="../css/lib/bootstrap.min.css" />
   <!--<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">-->
   <!--<link href="//fonts.googleapis.com/css?family=Maven+Pro&text=macrostrat" rel="stylesheet" type="text/css">-->
   <style>
@@ -154,6 +155,14 @@
       min-height: 24px
     }
 
+    .section-container {
+      margin-left: 0;
+      min-height: 24px;
+    }
+    .column-div {
+      padding: 0 !important;
+    }
+
     .period-names {
       text-align: center;
     }
@@ -234,15 +243,17 @@
   <script id="unit-template" type="x-tmpl-mustache">
     <div class="row column-summary-row">
       <div class="four columns column-name"><a href="/sift/info/?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a> <span class="desc">column</span></div>
-      <div class="two columns"><a href="/sift/info/?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> <span class="desc">group</span></div>
-      <div class="three columns">{{col_area}} <small>km<sup>2</sup></small><span class="desc">area</span></div>
-      <div class="three columns">{{b_age}} - {{t_age}} <small>Ma</small> <span class="desc">age</span></div>
+      <div class="four columns"><a href="/sift/info/?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> <span class="desc">group</span></div>
+      <div class="four columns">{{col_area}} <small>km<sup>2</sup></small><span class="desc">area</span></div>
     </div>
     <div class="row column-summary-row">
-      <div class="three columns">{{environ_class}} {{environ_type}} <span class="desc">environment</span></div>
-      <div class="three columns">{{lith_class}} {{lith_type}}<span class="desc">lithology</span></div>
-      <div class="three columns">{{pbdb}} <span class="desc">PBDB collections</span></div>
-      <div class="three columns">{{max_thick}} - {{min_thick}} <span class="desc">thick</span></div>
+      <div class="four columns">{{b_age}} - {{t_age}} <small>Ma</small> <span class="desc">age</span></div>
+      <div class="four columns">{{pbdb}} <span class="desc">PBDB collections</span></div>
+      <div class="four columns">{{max_thick}} - {{min_thick}}<small>m</small> <span class="desc">thick</span></div>
+    </div>
+    <div class="row column-summary-row">
+      <div class="six columns"><div class="environChart"></div><span class="desc">environments</span></div>
+      <div class="six columns"><div class="lithologyChart"></div><span class="desc">lithologies</span></div>
     </div>
   </script>
 
@@ -277,7 +288,7 @@
     <div class="row column-summary-row">
       <div class="three columns">{{sections.length}} <span class="desc">sections</span></div>
       <div class="three columns">{{units.length}} <span class="desc">units</span></div>
-      <div class="three columns">{{max_thick}} - {{min_thick}} <span class="desc">thick</span></div>
+      <div class="three columns">{{max_thick}} - {{min_thick}}<small>m</small> <span class="desc">thick</span></div>
       <div class="three columns">{{pbdb_occs}} <span class="desc">PBDB occurrences</span></div>
     </div>
     <div class="row column-summary-row">
@@ -296,18 +307,18 @@
   </script>
 
   <script id="column-layout-template" type="x-tmpl-mustache">
-    
     {{#periods}}
       <div class="row">
-        <div class="two columns period-names" style="background-color: {{color}};">
+        <div class="col-xs-1 period-names column-div" style="background-color: {{color}};">
           <div class="period-name">{{abbrev}}</div>
         </div>
-        <div class="ten columns">
+
+        <div class="col-xs-11 column-div section-container">
           {{#sections}}
             <div class="section-box">
               {{#units}}
                 <a href="/sift/info/?unit_id={{id}}">
-                  <div class="unit-box" style="background-color: {{color}}; color: {{text_color}};">{{strat_name}}</div>
+                  <div class="unit-box" style="background-color: rgba({{rgba.r}}, {{rgba.g}}, {{rgba.b}}, {{rgba.alpha}}); color: {{text_color}};">{{strat_name}}</div>
                 </a>
               {{/units}}
             </div>
@@ -315,7 +326,7 @@
         </div>
       </div>
     {{/periods}}
-    
+
   </script>
 
 
@@ -337,7 +348,7 @@
       }
 
       Object.keys(obj).forEach(function(j) {
-        if (typeof(obj[j]) === "number" && j != "id") {
+        if (typeof(obj[j]) === "number" && j != "id" && j != "col_id") {
           obj[j] = commaize(obj[j])
         }
       });
@@ -350,6 +361,43 @@
     function findNumberInString(obj){
       var matches = obj.replace(/,/g, '').match(/(\+|-)?((\d+(\.\d+)?)|(\.\d+))/);
       return matches && matches[0] || null;
+    }
+
+
+    /* via https://github.com/amussey/hex-to-rgb.js/blob/master/hex-to-rgb.js */
+    function hexToRgb(hex, alpha) {
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        var toString = function () {
+            if (this.alpha == undefined) {
+                return "rgb(" + this.r + ", " + this.g + ", " + this.b + ")";
+            }
+            if (this.alpha > 1) {
+                this.alpha = 1;
+            } else if (this.alpha < 0) {
+                this.alpha = 0;
+            }
+            return "rgba(" + this.r + ", " + this.g + ", " + this.b + ", " + this.alpha + ")";
+        } 
+        if (alpha == undefined) {
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16),
+                toString: toString
+            } : null;
+        }
+        if (alpha > 1) {
+            alpha = 1;
+        } else if (alpha < 0) {
+            alpha = 0;
+        }
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16),
+            alpha: alpha,
+            toString: toString
+        } : null;
     }
 
 
@@ -387,6 +435,11 @@
 
             data.success.data.forEach(function(d) {
               if (d.id == id) {
+
+                $("#map").click(function() {
+                  swapMapView(d.name)
+                });
+
                 $(".page-title").html(d.name + " " + d.rank);
                 d.active = "active-strat-name";
               } else {
@@ -554,7 +607,7 @@
       }
 
       function drawLithologyChart(data) {
-
+        console.log(data)
         $('.lithologyChart').highcharts({
             chart: {
                 plotBackgroundColor: null,
@@ -637,6 +690,8 @@
         var column = {"Quaternary":{"name":"Quaternary","abbrev":"Q","color":"#F9F97F","sections":{}},"Neogene":{"name":"Neogene","abbrev":"Ng","color":"#FFE619","sections":{}},"Paleogene":{"name":"Paleogene","abbrev":"Pg","color":"#FD9A52","sections":{}},"Cretaceous":{"name":"Cretaceous","abbrev":"K","color":"#7FC64E","sections":{}},"Jurassic":{"name":"Jurassic","abbrev":"J","color":"#34B2C9","sections":{}},"Triassic":{"name":"Triassic","abbrev":"Tr","color":"#812b92","sections":{}},"Permian":{"name":"Permian","abbrev":"P","color":"#F04028","sections":{}},"Carboniferous":{"name":"Carboniferous","abbrev":"C","color":"#67A599","sections":{}},"Devonian":{"name":"Devonian","abbrev":"D","color":"#CB8C37","sections":{}},"Silurian":{"name":"Silurian","abbrev":"S","color":"#B3E1B6","sections":{}},"Ordovician":{"name":"Ordovician","abbrev":"O","color":"#009270","sections":{}},"Cambrian":{"name":"Cambrian","abbrev":"Cm","color":"#7FA056","sections":{}},"PreCambrian":{"name":"PreCambrian","abbrev":"PCm","color":"#F04370","sections":{}}};
 
         for (var i = 0; i < data.length; i++) {
+          data[i].rgba = hexToRgb(data[i].color.replace("#", ""), 0.7)
+
           if (!column[data[i].period]) {
             if (column["PreCambrian"].sections[data[i].section_id]) {
               column["PreCambrian"].sections[data[i].section_id].units.push(data[i]);
@@ -679,63 +734,65 @@
 
       }
 
+      function getEnvirons(data) {
+        var key = (data[0].environ_type) ? "environ_type" : "environ_class";
+
+        var environ_types = _.groupBy(
+          _.flatten(
+            data.map(function(d) {
+              return d[key].split("|").filter(function(d) {
+                if (d.length > 0) {
+                  return d.trim();
+                }
+                
+              });
+            })
+          )
+        );
+
+        var environs = [],
+            totalEnvirons = 0;
+        
+        Object.keys(environ_types).forEach(function(d) {
+          totalEnvirons += environ_types[d].length;
+        });
+
+        Object.keys(environ_types).forEach(function(d) {
+          environs.push([d, (environ_types[d].length / totalEnvirons) * 100]);
+        });
+
+        return environs;
+      }
+
+      function getLiths(data) {
+        var lith_types = _.groupBy(
+          _.flatten(
+            data.map(function(d) {
+              return d.lith_type.split("|").map(function(d) {
+                return d.replace(findNumberInString(d), "").trim();
+              });
+            })
+          )
+        );
+
+        var liths = [],
+            totalLiths = 0;
+        
+        Object.keys(lith_types).forEach(function(d) {
+          totalLiths += lith_types[d].length;
+        });
+
+        Object.keys(lith_types).forEach(function(d) {
+          liths.push([d, (lith_types[d].length / totalLiths) * 100]);
+        });
+
+        return liths;
+      }
+
+
+
 
       function fetchUnits(type, ids, drawStratColumn) {
-
-        function getEnvirons(data) {
-          var key = (data[0].environ_type) ? "environ_type" : "environ_class";
-
-          var environ_types = _.groupBy(
-            _.flatten(
-              data.map(function(d) {
-                return d[key].split("|").filter(function(d) {
-                  if (d.length > 0) {
-                    return d.trim();
-                  }
-                  
-                });
-              })
-            )
-          );
-
-          var environs = [],
-              totalEnvirons = 0;
-          
-          Object.keys(environ_types).forEach(function(d) {
-            totalEnvirons += environ_types[d].length;
-          });
-
-          Object.keys(environ_types).forEach(function(d) {
-            environs.push([d, (environ_types[d].length / totalEnvirons) * 100]);
-          });
-
-          return environs;
-        }
-
-        function getLiths(data) {
-          var lith_types = _.groupBy(
-            _.flatten(
-              data.map(function(d) {
-                return d.lith_type.split("|").map(function(d) {
-                  return d.replace(findNumberInString(d), "").trim();
-                });
-              })
-            )
-          );
-
-          var liths = [],
-              totalLiths = 0;
-          
-          Object.keys(lith_types).forEach(function(d) {
-            totalLiths += lith_types[d].length;
-          });
-
-          Object.keys(lith_types).forEach(function(d) {
-            liths.push([d, (lith_types[d].length / totalLiths) * 100]);
-          });
-
-          return liths;
-        }
 
         $.getJSON(apiUrl + "/api/v1/units?response=long&" + type + "=" + ids, function(data) {
           data = data.success.data;
@@ -756,14 +813,18 @@
       return {
          fetch: fetch,
          summarize: summarize,
-         fetchUnits: fetchUnits
+         fetchUnits: fetchUnits,
+         getEnvirons: getEnvirons,
+         getLiths: getLiths,
+         drawLithologyChart: drawLithologyChart,
+         drawEnvironChart: drawEnvironChart
       }
     })();
 
       
 
     function addToMap(data) {
-      var columnLayer = L.geoJson(topojson.feature(data, data.objects.output), {
+      columnLayer = L.geoJson(topojson.feature(data, data.objects.output), {
         style: function(feature) {
           if (type[0] === "col_id" && feature.properties.col_id == type[1]) {
             return {
@@ -811,13 +872,89 @@
       });
 
       // Add our basemap
-      L.tileLayer("https://{s}.tiles.mapbox.com/v3/jczaplewski.j751k57j/{z}/{x}/{y}.png").addTo(map);
+      
+      dark = L.tileLayer("https://{s}.tiles.mapbox.com/v3/jczaplewski.m62j11i2/{z}/{x}/{y}.png");
+
+      tiles = L.tileLayer("https://{s}.tiles.mapbox.com/v3/jczaplewski.j751k57j/{z}/{x}/{y}.png").addTo(map);
+    }
+
+    function swapMapView(strat_name) {
+      if (typeof(gmusGeology) == "undefined" ) {
+        $.getJSON(apiUrl + "/api/v1/geologic_units?type=gmus&format=topojson_bare&unit_name=" + strat_name, function(data) {
+          gmusGeology = L.geoJson(topojson.feature(data, data.objects.output), {
+            style: function(feature) {
+              return {
+                color: feature.properties.interval_color,
+                fillOpacity: 0.8,
+                opacity: 0.8,
+                weight: 1
+              };
+            }
+          });
+
+          swap();
+        });
+      } else {
+        swap();
+      }
+
+      function swap() {
+        console.log(map.hasLayer(gmusGeology))
+        if (map.hasLayer(tiles)) {
+          map.removeLayer(tiles);
+          map.addLayer(dark);
+          map.removeLayer(columnLayer);
+          map.addLayer(gmusGeology);
+        } else {
+          map.removeLayer(dark);
+          map.addLayer(tiles);
+          map.addLayer(columnLayer);
+          map.removeLayer(gmusGeology);
+        }
+      }
+        
     }
 
     function getStratNameId(unit_id) {
+      console.log("here")
       $.getJSON(apiUrl + "/api/v1/units?response=long&id=" + unit_id, function(data) {
         if (data.success.data.length > 0) {
           var unit = data.success.data[0];
+
+          if (unit.lith_type.length > 0) {
+            var type = "lith_type";
+          } else {
+            var type = "lith_class";
+          }
+
+          var liths = [];
+          var parsed = unit[type].split("|");
+
+          parsed.forEach(function(d) {
+            var amount = findNumberInString(d),
+                type = d.replace(amount, "").trim();
+
+            liths.push([type, parseFloat(amount) * 100]);
+          });
+
+          if (unit.environ_type.length > 0) {
+            var eType = "environ_type";
+          } else {
+            var eType = "environ_class";
+          }
+
+          var environs = [];
+          var eParsed = unit[eType].split("|").filter(function(d) {
+            if (d.length > 1) {
+              return d;
+            }
+          });
+
+          eParsed.forEach(function(d) {
+            environs.push([d, 100/eParsed.length]);
+          });
+
+  
           stratHierarchy.build(unit.strat_name_id);
 
           var column = columns.fetch(["col_id", unit.col_id], true, function(data) {
@@ -830,6 +967,9 @@
             $("#stats").html(Mustache.render(templates.unit, unit));
 
             $(".page-title").html(unit.strat_name + "(" + unit.id + ")");
+
+            columns.drawLithologyChart(liths);
+            columns.drawEnvironChart(environs);
           });
 
             
