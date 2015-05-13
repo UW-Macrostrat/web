@@ -126,6 +126,10 @@
       font-size: 12px;
     }
 
+    .lithologyChart, .environChart {
+      min-height: 300px !important;
+    }
+
     .columns > a {
       color: #000;
       text-decoration: none;
@@ -231,8 +235,8 @@
     <div class="row column-summary-row">
       <div class="four columns column-name"><a href="/sift/info/?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a> <span class="desc">column</span></div>
       <div class="two columns"><a href="/sift/info/?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> <span class="desc">group</span></div>
-      <div class="three columns">{{col_area}}<small>km<sup>2</sup></small><span class="desc">area</span></div>
-      <div class="three columns">{{b_age}} - {{t_age}}<small>Ma</small> <span class="desc">age</span></div>
+      <div class="three columns">{{col_area}} <small>km<sup>2</sup></small><span class="desc">area</span></div>
+      <div class="three columns">{{b_age}} - {{t_age}} <small>Ma</small> <span class="desc">age</span></div>
     </div>
     <div class="row column-summary-row">
       <div class="three columns">{{environ_class}} {{environ_type}} <span class="desc">environment</span></div>
@@ -247,19 +251,19 @@
     <div class="row column-summary-row">
       <div class="four columns column-name"><a href="/sift/info/?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a><span class="desc">column</span></div>
       <div class="two columns"><a href="/sift/info/?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> <span class="desc">group</span></div>
-      <div class="three columns">{{area}}<small>km<sup>2</sup></small><span class="desc">area</span></div>
-      <div class="three columns">{{b_age}} - {{t_age}}<small>Ma</small> <span class="desc">age</span></div>
+      <div class="three columns">{{area}} <small>km<sup>2</sup></small><span class="desc">area</span></div>
+      <div class="three columns">{{b_age}} - {{t_age}} <small>Ma</small> <span class="desc">age</span></div>
     </div>
     <div class="row column-summary-row">
       <div class="three columns">{{sections.length}} <span class="desc">sections</span></div>
       <div class="three columns">{{units.length}} <span class="desc">units</span></div>
-      <div class="three columns">{{pbdb_collections}} <span class="desc">PBDB collections</span></div>
+      <!--<div class="three columns">{{pbdb_collections}} <span class="desc">PBDB collections</span></div>-->
+      <div class="three columns">{{max_thick}} - {{min_thick}}<small>m</small><span class="desc">thick</span></div>
       <div class="three columns">{{pbdb_occs}} <span class="desc">PBDB occurrences</span></div>
     </div>
     <div class="row column-summary-row">
-      <div class="three columns">{{max_thick}} - {{min_thick}} <span class="desc">thick</span></div>
-      <div class="six columns lithologies">{{#lith_types}}{{.}}, {{/lith_types}} <span class="desc">lithologies</span></div>
-      <div class="three columns">{{lith_max_thick}} - {{lith_min_thick}} <span class="desc">lith. thickness</span></div>
+      <div class="six columns"><div class="environChart"></div><span class="desc">environments</span></div>
+      <div class="six columns"><div class="lithologyChart"></div><span class="desc">lithologies</span></div>
     </div>
   </script>
 
@@ -267,19 +271,18 @@
     <div class="row column-summary-row">
       <div class="three columns">{{#groups}}<a href="/sift/info/?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> <br>{{/groups}}<span class="desc">group(s)</span></div>
       <div class="three columns">{{columns}} <span class="desc">columns</span></div>
-      <div class="three columns">{{area}}<small>km<sup>2</sup></small><span class="desc">area</span></div>
-      <div class="three columns">{{b_age}} - {{t_age}}<small>Ma</small> <span class="desc">age</span></div>
+      <div class="three columns">{{area}} <small>km<sup>2</sup></small><span class="desc">area</span></div>
+      <div class="three columns">{{b_age}} - {{t_age}} <small>Ma</small> <span class="desc">age</span></div>
     </div>
     <div class="row column-summary-row">
       <div class="three columns">{{sections.length}} <span class="desc">sections</span></div>
       <div class="three columns">{{units.length}} <span class="desc">units</span></div>
-      <div class="three columns">{{pbdb_collections}} <span class="desc">PBDB collections</span></div>
+      <div class="three columns">{{max_thick}} - {{min_thick}} <span class="desc">thick</span></div>
       <div class="three columns">{{pbdb_occs}} <span class="desc">PBDB occurrences</span></div>
     </div>
     <div class="row column-summary-row">
-      <div class="three columns">{{max_thick}} - {{min_thick}} <span class="desc">thick</span></div>
-      <div class="six columns lithologies">{{lith_types}}<span class="desc">lithologies</span></div>
-      <div class="three columns">{{lith_max_thick}} - {{lith_min_thick}} <span class="desc">lith. thickness</span></div>
+      <div class="six columns"><div class="lithologyChart"></div><span class="desc">lithologies</span></div>
+      <div class="six columns"><div class="environChart"></div><span class="desc">environments</span></div>
     </div>
   </script>
 
@@ -317,6 +320,7 @@
 
 
   <script src="../js/libs.js"></script>
+  <script src="https://code.highcharts.com/highcharts.js"></script>
   <script async src="../js/common.js"></script>
 
   <script>
@@ -340,6 +344,12 @@
 
       return obj
       
+    }
+
+    /* via http://stackoverflow.com/questions/17885850/how-to-parse-a-string-containing-text-for-a-number-float-in-javascript */
+    function findNumberInString(obj){
+      var matches = obj.replace(/,/g, '').match(/(\+|-)?((\d+(\.\d+)?)|(\.\d+))/);
+      return matches && matches[0] || null;
     }
 
 
@@ -438,6 +448,7 @@
         $.getJSON(apiUrl + "/api/v1/columns?" + adjacents + "&response=long&format=topojson_bare&" + type.join("="), function(data) {
 
           if (type[0] === "col_group_id" || type[0] === "strat_id") {
+
             var summary = columns.summarize(
               data.objects.output.geometries.map(function(d) {
                 return d.properties;
@@ -452,10 +463,41 @@
               $(".page-title").html(data.objects.output.geometries[0].properties.col_group + "(" + data.objects.output.geometries[0].properties.col_group_id + ")");
             }
             
+            if (type[0] === "col_group_id") {
+              var lith_types = _.groupBy(
+                _.flatten(
+                  data.objects.output.geometries.map(function(d) {
+                    return d.properties.lith_types
+                  })
+                )
+              );
+
+              var liths = [],
+                  totalLiths = 0;
+              
+              Object.keys(lith_types).forEach(function(d) {
+                totalLiths += lith_types[d].length;
+              });
+
+              Object.keys(lith_types).forEach(function(d) {
+                liths.push([d, (lith_types[d].length / totalLiths) * 100]);
+              });
+
+              console.log(liths)
+              drawLithologyChart(liths)
+            } else {
+              // Get all units
+
+              var units = _.uniq(_.flatten(data.objects.output.geometries.map(function(d) { return d.properties.units; })));
+              console.log(units)
+              fetchUnits("id", units.join(","));
+            }
+              
+
 
           } else if (type[0] === "col_id") {
             if (!callback) {
-              columns.fetchUnits(type[1]);
+              columns.fetchUnits(type[0], type[1], true);
             }
 
             var target = data.objects.output.geometries.filter(function(d) {
@@ -511,54 +553,205 @@
         }
       }
 
-      function fetchUnits(col_id) {
-        $.getJSON(apiUrl + "/api/v1/units?response=long&col_id=" + col_id, function(data) {
-          data = data.success.data;
-          var column = {"Quaternary":{"name":"Quaternary","abbrev":"Q","color":"#F9F97F","sections":{}},"Neogene":{"name":"Neogene","abbrev":"Ng","color":"#FFE619","sections":{}},"Paleogene":{"name":"Paleogene","abbrev":"Pg","color":"#FD9A52","sections":{}},"Cretaceous":{"name":"Cretaceous","abbrev":"K","color":"#7FC64E","sections":{}},"Jurassic":{"name":"Jurassic","abbrev":"J","color":"#34B2C9","sections":{}},"Triassic":{"name":"Triassic","abbrev":"Tr","color":"#812b92","sections":{}},"Permian":{"name":"Permian","abbrev":"P","color":"#F04028","sections":{}},"Carboniferous":{"name":"Carboniferous","abbrev":"C","color":"#67A599","sections":{}},"Devonian":{"name":"Devonian","abbrev":"D","color":"#CB8C37","sections":{}},"Silurian":{"name":"Silurian","abbrev":"S","color":"#B3E1B6","sections":{}},"Ordovician":{"name":"Ordovician","abbrev":"O","color":"#009270","sections":{}},"Cambrian":{"name":"Cambrian","abbrev":"Cm","color":"#7FA056","sections":{}},"PreCambrian":{"name":"PreCambrian","abbrev":"PCm","color":"#F04370","sections":{}}};
+      function drawLithologyChart(data) {
 
-          for (var i = 0; i < data.length; i++) {
-            if (!column[data[i].period]) {
-              if (column["PreCambrian"].sections[data[i].section_id]) {
-                column["PreCambrian"].sections[data[i].section_id].units.push(data[i]);
-              } else {
-                column["PreCambrian"].sections[data[i].section_id] = {
-                  "id": data[i].section_id,
-                  "units": [data[i]]
+        $('.lithologyChart').highcharts({
+            chart: {
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false
+            },
+            credits : {
+              enabled: false
+            },
+            title : {
+              text : ''
+            },
+            tooltip: {
+              enabled: false
+              //pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
+            plotOptions: {
+                pie: {
+                   // allowPointSelect: true,
+                   // cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                        style: {
+                            color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                        }
+                    }
                 }
-              }
-            } else if (column[data[i].period].sections[data[i].section_id]) {
-              column[data[i].period].sections[data[i].section_id].units.push(data[i]);
+            },
+            series: [{
+                type: 'pie',
+                name: 'Lithology',
+                data: data
+            }]
+        });
+      }
+
+
+      function drawEnvironChart(data) {
+
+          $('.environChart').highcharts({
+              chart: {
+                  plotBackgroundColor: null,
+                  plotBorderWidth: null,
+                  plotShadow: false
+              },
+              credits : {
+                enabled: false
+              },
+              title : {
+                text : ''
+              },
+              tooltip: {
+                enabled: false
+                //pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+              },
+              plotOptions: {
+                  pie: {
+                     // allowPointSelect: true,
+                     // cursor: 'pointer',
+                      dataLabels: {
+                          enabled: true,
+                          format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                          style: {
+                              color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                          }
+                      }
+                  }
+              },
+              series: [{
+                  type: 'pie',
+                  name: 'Lithology',
+                  data: data
+              }]
+          });
+      }
+
+
+      function drawColumn(data) {
+        var column = {"Quaternary":{"name":"Quaternary","abbrev":"Q","color":"#F9F97F","sections":{}},"Neogene":{"name":"Neogene","abbrev":"Ng","color":"#FFE619","sections":{}},"Paleogene":{"name":"Paleogene","abbrev":"Pg","color":"#FD9A52","sections":{}},"Cretaceous":{"name":"Cretaceous","abbrev":"K","color":"#7FC64E","sections":{}},"Jurassic":{"name":"Jurassic","abbrev":"J","color":"#34B2C9","sections":{}},"Triassic":{"name":"Triassic","abbrev":"Tr","color":"#812b92","sections":{}},"Permian":{"name":"Permian","abbrev":"P","color":"#F04028","sections":{}},"Carboniferous":{"name":"Carboniferous","abbrev":"C","color":"#67A599","sections":{}},"Devonian":{"name":"Devonian","abbrev":"D","color":"#CB8C37","sections":{}},"Silurian":{"name":"Silurian","abbrev":"S","color":"#B3E1B6","sections":{}},"Ordovician":{"name":"Ordovician","abbrev":"O","color":"#009270","sections":{}},"Cambrian":{"name":"Cambrian","abbrev":"Cm","color":"#7FA056","sections":{}},"PreCambrian":{"name":"PreCambrian","abbrev":"PCm","color":"#F04370","sections":{}}};
+
+        for (var i = 0; i < data.length; i++) {
+          if (!column[data[i].period]) {
+            if (column["PreCambrian"].sections[data[i].section_id]) {
+              column["PreCambrian"].sections[data[i].section_id].units.push(data[i]);
             } else {
-              column[data[i].period].sections[data[i].section_id] = {
+              column["PreCambrian"].sections[data[i].section_id] = {
                 "id": data[i].section_id,
                 "units": [data[i]]
               }
             }
+          } else if (column[data[i].period].sections[data[i].section_id]) {
+            column[data[i].period].sections[data[i].section_id].units.push(data[i]);
+          } else {
+            column[data[i].period].sections[data[i].section_id] = {
+              "id": data[i].section_id,
+              "units": [data[i]]
+            }
           }
+        }
 
-          var newColumn = Object.keys(column).map(function(d) { 
-            return column[d]; 
-          });
+        var newColumn = Object.keys(column).map(function(d) { 
+          return column[d]; 
+        });
 
-          newColumn.forEach(function(d) {
-            d.sections = Object.keys(d.sections).map(function(j) {
-              return d.sections[j];
-            });
+        newColumn.forEach(function(d) {
+          d.sections = Object.keys(d.sections).map(function(j) {
+            return d.sections[j];
           });
+        });
+        
+        // Draw the column
+        $(".name-hierarchy").html(Mustache.render(templates.columnLayout, {"periods": newColumn }));
+
+        // Adjust, adjust
+        $(".period-names").css("height", function() {
+          return $(this).next().height();
+        });
+        $(".period-names").css("line-height", function() {
+          return $(this).next().height() + "px";
+        });
+
+      }
+
+
+      function fetchUnits(type, ids, drawStratColumn) {
+
+        function getEnvirons(data) {
+          var key = (data[0].environ_type) ? "environ_type" : "environ_class";
+
+          var environ_types = _.groupBy(
+            _.flatten(
+              data.map(function(d) {
+                return d[key].split("|").filter(function(d) {
+                  if (d.length > 0) {
+                    return d.trim();
+                  }
+                  
+                });
+              })
+            )
+          );
+
+          var environs = [],
+              totalEnvirons = 0;
           
-          // Draw the column
-          $(".name-hierarchy").html(Mustache.render(templates.columnLayout, {"periods": newColumn }));
+          Object.keys(environ_types).forEach(function(d) {
+            totalEnvirons += environ_types[d].length;
+          });
 
-          // Adjust, adjust
-          $(".period-names").css("height", function() {
-            return $(this).next().height();
+          Object.keys(environ_types).forEach(function(d) {
+            environs.push([d, (environ_types[d].length / totalEnvirons) * 100]);
           });
-          $(".period-names").css("line-height", function() {
-            return $(this).next().height() + "px";
+
+          return environs;
+        }
+
+        function getLiths(data) {
+          var lith_types = _.groupBy(
+            _.flatten(
+              data.map(function(d) {
+                return d.lith_type.split("|").map(function(d) {
+                  return d.replace(findNumberInString(d), "").trim();
+                });
+              })
+            )
+          );
+
+          var liths = [],
+              totalLiths = 0;
+          
+          Object.keys(lith_types).forEach(function(d) {
+            totalLiths += lith_types[d].length;
           });
-          //console.log(newColumn);
+
+          Object.keys(lith_types).forEach(function(d) {
+            liths.push([d, (lith_types[d].length / totalLiths) * 100]);
+          });
+
+          return liths;
+        }
+
+        $.getJSON(apiUrl + "/api/v1/units?response=long&" + type + "=" + ids, function(data) {
+          data = data.success.data;
+        
+          if (type === "col_id") {
+            drawEnvironChart(getEnvirons(data))
+            drawLithologyChart(getLiths(data));
+            drawColumn(data);
+          } else if (type === "id") {
+            drawEnvironChart(getEnvirons(data))
+            drawLithologyChart(getLiths(data));
+          }
+          
         });
       }
+
 
       return {
          fetch: fetch,
@@ -608,7 +801,13 @@
       map = L.map("map", {
         minZoom: 4,
         maxZoom: 10,
-        scrollWheelZoom: false
+        zoomControl: false,
+        scrollWheelZoom: false,
+        keyboard: false,
+        dragging: false,
+        touchZoom: false,
+        doubleClickZoom: false,
+        boxZoom: false
       });
 
       // Add our basemap

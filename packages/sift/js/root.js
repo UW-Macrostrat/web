@@ -25,7 +25,7 @@
   }).addTo(map);
 
   // Add the geologic basemap
-  L.tileLayer("http://macrostrat.org/tiles/geologic_v2/{z}/{x}/{y}.png", {
+  L.tileLayer("https://dev.macrostrat.org/tiles/geologic_v2/{z}/{x}/{y}.png", {
     maxZoom: 12,
     opacity: 0.8,
     zIndex: 100
