@@ -43,30 +43,29 @@ h3, h3 > a {
   text-align: left;
   padding-left: 15px;
 }
-.headerItem {
-  display: table-cell;
-  vertical-align: middle;
-}
+
 .headerItem > a {
   text-decoration: none;
 }
 .headerItem.left {
+  margin-top: 5px;
   padding-left: 20px;
   padding-top: 10px;
+  float: left;
 }
 .header-logo {
   height: 20px;
   display: inline;
 }
 .searchBox {
-  margin-top: 10px;
-  margin-right: 15px;
-  padding-top: 6px;
+  padding-top: 8px;
 }
 .headerItem.right {
-  float: right;
+  display: table-cell;
+  vertical-align: middle;
   padding-right: 20px;
   padding-bottom: 7px;
+  width: 50px;
 }
 .searcher {
   border-radius: 4px;

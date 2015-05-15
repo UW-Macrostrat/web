@@ -14,7 +14,8 @@
     html, body {
       overflow: visible;
     }
-    .container {
+
+    .mycontainer {
       height: auto;
       position: relative;
     }
@@ -27,6 +28,12 @@
       text-align: center;
       text-decoration: none;
       padding: 15px;
+    }
+    .page-title > a {
+      color: #aaaaaa;
+    }
+    .page-title > a:hover {
+      text-decoration: none;
     }
     #map {
       width: 100%;
@@ -116,7 +123,10 @@
       min-height: 100px;
       padding: 25px;
     }
-
+    .column-summary-row > div {
+      min-height: 100px;
+      padding: 25px;
+    }
     .desc {
       font-size: 14px;
       color: #aaa;
@@ -135,12 +145,17 @@
       color: #000;
       text-decoration: none;
     }
+    .column-summary-row > div > a {
+      color: #000;
+      text-decoration: none;
+    }
     #stats {
       width: 95%;
     }
 
     .section-box {
-      margin-bottom: 20px;
+     /* margin-bottom: 20px;*/
+
     }
     .section-box > a {
       text-decoration: none;
@@ -148,6 +163,7 @@
 
     .unit-box {
       text-align: center;
+      min-height: 24px;
     }
 
     .ten.columns {
@@ -167,6 +183,61 @@
       text-align: center;
     }
 
+    .group-link {
+      color: #aaaaaa;
+    }
+    .group-link:hover {
+      text-decoration: none;
+    }
+
+
+    .onoffswitch {
+        position: relative; width: 106px;
+        -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
+    }
+    .onoffswitch-checkbox {
+        display: none !important;
+    }
+    .onoffswitch-label {
+        display: block; overflow: hidden; cursor: pointer;
+        border: 2px solid #E6DFDF; border-radius: 12px;
+    }
+    .onoffswitch-inner {
+        display: block; width: 200%; margin-left: -100%;
+        -moz-transition: margin 0.3s ease-in 0s; -webkit-transition: margin 0.3s ease-in 0s;
+        -o-transition: margin 0.3s ease-in 0s; transition: margin 0.3s ease-in 0s;
+    }
+    .onoffswitch-inner:before, .onoffswitch-inner:after {
+        display: block; float: left; width: 50%; height: 30px; padding: 0; line-height: 30px;
+        font-size: 13px; color: white; font-family: Trebuchet, Arial, sans-serif; font-weight: bold;
+        -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
+    }
+    .onoffswitch-inner:before {
+        content: "Columns";
+        padding-left: 12px;
+        background-color: #AAAAAA; color: #FFFFFF;
+    }
+    .onoffswitch-inner:after {
+        content: "Rocks";
+        padding-right: 12px;
+        background-color: #34A7C1; color: #FFFFFF;
+        text-align: right;
+    }
+    .onoffswitch-switch {
+        display: block; width: 18px; margin: 6px;
+        background: #FFFFFF;
+        border: 2px solid #E6DFDF; border-radius: 12px;
+        position: absolute; top: 0; bottom: 0; right: 72px;
+        -moz-transition: all 0.3s ease-in 0s; -webkit-transition: all 0.3s ease-in 0s;
+        -o-transition: all 0.3s ease-in 0s; transition: all 0.3s ease-in 0s; 
+    }
+    .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+        margin-left: 0;
+    }
+    .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+        right: 0px; 
+    }
+
     @media(max-width: 550px) {
       .column-summary-row > .columns {
         min-height: 70px;
@@ -178,6 +249,7 @@
   </style>
 </head>
 <body>
+
   <div id="header">
     <div class="headerItem left">
       <a href="/"><img src="../img/logo_red.png" class="header-logo"></a>
@@ -192,7 +264,7 @@
     </div>  
   </div>
 
-  <div class="container">
+  <div class="mycontainer">
     <div class="page-title"></div>
     <div id="map"></div>
     <div id="not-map">
@@ -242,12 +314,13 @@
 
   <script id="unit-template" type="x-tmpl-mustache">
     <div class="row column-summary-row">
-      <div class="four columns column-name"><a href="/sift/info/?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a> <span class="desc">column</span></div>
-      <div class="four columns"><a href="/sift/info/?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> <span class="desc">group</span></div>
+      <div class="four columns column-name">
+        <a href="/sift/info/?col_id={{col_id}}">{{col_name}}</a> <small>(<a class="group-link" href="/sift/info/?col_group_id={{col_group_id}}">{{col_group}}</a>)</small> <span class="desc">column</span>
+      </div>
+      <div class="four columns">{{b_age}} - {{t_age}} <small>Ma</small> <span class="desc">age</span></div>
       <div class="four columns">{{col_area}} <small>km<sup>2</sup></small><span class="desc">area</span></div>
     </div>
     <div class="row column-summary-row">
-      <div class="four columns">{{b_age}} - {{t_age}} <small>Ma</small> <span class="desc">age</span></div>
       <div class="four columns">{{pbdb}} <span class="desc">PBDB collections</span></div>
       <div class="four columns">{{max_thick}} - {{min_thick}}<small>m</small> <span class="desc">thick</span></div>
     </div>
@@ -260,41 +333,60 @@
   
   <script id="column-template" type="x-tmpl-mustache">
     <div class="row column-summary-row">
-      <div class="four columns column-name"><a href="/sift/info/?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a><span class="desc">column</span></div>
-      <div class="two columns"><a href="/sift/info/?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> <span class="desc">group</span></div>
-      <div class="three columns">{{area}} <small>km<sup>2</sup></small><span class="desc">area</span></div>
-      <div class="three columns">{{b_age}} - {{t_age}} <small>Ma</small> <span class="desc">age</span></div>
+      <div class="col-sm-6"><div class="environChart"></div><span class="desc">environments</span></div>
+      <div class="col-sm-6"><div class="lithologyChart"></div><span class="desc">lithologies</span></div>
     </div>
     <div class="row column-summary-row">
-      <div class="three columns">{{sections.length}} <span class="desc">sections</span></div>
-      <div class="three columns">{{units.length}} <span class="desc">units</span></div>
-      <!--<div class="three columns">{{pbdb_collections}} <span class="desc">PBDB collections</span></div>-->
-      <div class="three columns">{{max_thick}} - {{min_thick}}<small>m</small><span class="desc">thick</span></div>
-      <div class="three columns">{{pbdb_occs}} <span class="desc">PBDB occurrences</span></div>
+      <div class="col-sm-4">{{sections.length}} <span class="desc">sections</span></div>
+      <div class="col-sm-4">{{units.length}} <span class="desc">units</span></div>
+      <!--<div class="col-sm-4">{{pbdb_collections}} <span class="desc">PBDB collections</span></div>-->
+      <div class="col-sm-4">{{max_thick}} - {{min_thick}}<small>m</small><span class="desc">thick</span></div>
+      
     </div>
     <div class="row column-summary-row">
-      <div class="six columns"><div class="environChart"></div><span class="desc">environments</span></div>
-      <div class="six columns"><div class="lithologyChart"></div><span class="desc">lithologies</span></div>
+      <div class="col-sm-4">{{area}} <small>km<sup>2</sup></small><span class="desc">area</span></div>
+      <div class="col-sm-4">{{b_age}} - {{t_age}} <small>Ma</small> <span class="desc">age</span></div>
+      <div class="col-sm-4">{{pbdb_occs}} <span class="desc">PBDB occurrences</span></div>
     </div>
   </script>
 
   <script id="column-summary-template" type="x-tmpl-mustache">
     <div class="row column-summary-row">
-      <div class="three columns">{{#groups}}<a href="/sift/info/?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a> <br>{{/groups}}<span class="desc">group(s)</span></div>
-      <div class="three columns">{{columns}} <span class="desc">columns</span></div>
-      <div class="three columns">{{area}} <small>km<sup>2</sup></small><span class="desc">area</span></div>
-      <div class="three columns">{{b_age}} - {{t_age}} <small>Ma</small> <span class="desc">age</span></div>
+      <div class="col-sm-3">{{#groups}}<a href="/sift/info/?col_group_id={{col_group_id}}">{{col_group}}</a> <br>{{/groups}}<span class="desc">group(s)</span></div>
+      <div class="col-sm-3">{{columns}} <span class="desc">columns</span></div>
+      <div class="col-sm-3">{{sections.length}} <span class="desc">sections</span></div>
+      <div class="col-sm-3">{{units.length}} <span class="desc">units</span></div>
     </div>
     <div class="row column-summary-row">
-      <div class="three columns">{{sections.length}} <span class="desc">sections</span></div>
-      <div class="three columns">{{units.length}} <span class="desc">units</span></div>
-      <div class="three columns">{{max_thick}} - {{min_thick}}<small>m</small> <span class="desc">thick</span></div>
-      <div class="three columns">{{pbdb_occs}} <span class="desc">PBDB occurrences</span></div>
+      <div class="col-sm-6"><div class="lithologyChart"></div><span class="desc">lithologies</span></div>
+      <div class="col-sm-6"><div class="environChart"></div><span class="desc">environments</span></div>
     </div>
     <div class="row column-summary-row">
-      <div class="six columns"><div class="lithologyChart"></div><span class="desc">lithologies</span></div>
-      <div class="six columns"><div class="environChart"></div><span class="desc">environments</span></div>
+      <div class="col-sm-3">{{area}} <small>km<sup>2</sup></small><span class="desc">area</span></div>
+      <div class="col-sm-3">{{b_age}} - {{t_age}} <small>Ma</small> <span class="desc">age</span></div>
+      <div class="col-sm-3">{{max_thick}} - {{min_thick}}<small>m</small> <span class="desc">thick</span></div>
+      <div class="col-sm-3">{{pbdb_occs}} <span class="desc">PBDB occurrences</span></div>
     </div>
+  </script>
+
+
+
+  <script id="group-template" type="x-tmpl-mustache">
+    <div class="row column-summary-row">
+      <div class="col-sm-4">{{columns}} <span class="desc">columns</span></div>
+      <div class="col-sm-4">{{sections.length}} <span class="desc">sections</span></div>
+      <div class="col-sm-4">{{units.length}} <span class="desc">units</span></div>
+    </div>
+    <div class="row column-summary-row">
+      <div class="col-sm-6 col-sm-offset-3"><div class="lithologyChart"></div><span class="desc">lithologies</span></div>
+    </div>
+    <div class="row column-summary-row">
+      <div class="col-sm-3">{{area}} <small>km<sup>2</sup></small><span class="desc">area</span></div>
+      <div class="col-sm-3">{{b_age}} - {{t_age}} <small>Ma</small> <span class="desc">age</span></div>
+      <div class="col-sm-3">{{max_thick}} - {{min_thick}}<small>m</small> <span class="desc">thick</span></div>
+      <div class="col-sm-3">{{pbdb_occs}} <span class="desc">PBDB occurrences</span></div>
+    </div>
+    
   </script>
 
   <script id="column-popup-template" type="x-tmpl-mustache">
@@ -309,11 +401,11 @@
   <script id="column-layout-template" type="x-tmpl-mustache">
     {{#periods}}
       <div class="row">
-        <div class="col-xs-1 period-names column-div" style="background-color: {{color}};">
+        <div class="col-xs-1 col-xs-offset-2 period-names column-div" style="background-color: {{color}};">
           <div class="period-name">{{abbrev}}</div>
         </div>
 
-        <div class="col-xs-11 column-div section-container">
+        <div class="col-xs-7 column-div section-container">
           {{#sections}}
             <div class="section-box">
               {{#units}}
@@ -336,6 +428,33 @@
 
   <script>
   (function() {
+    // http://color.hailpixel.com/#366EA6,F9D862,DD98BC,111111,C96566,3D9970,D06CAD,6D3B22,D76433,BD3239,AB6836,
+    var lithPallette = {
+      carbonate: "#366EA6",
+      siliciclastic: "#F9D862",
+      evaporite: "#DD98BC",
+      organic: "#111111",
+      chemical: "#c96566",
+      volcanic: "#3D9970",
+      plutonic: "#D06CAD",
+      metamorphic: "#6D3B22",
+      sedimentary: "#D76433",
+      igneous: "#BD3239",
+      metasedimentary: "#AB6836"
+    }
+    // http://color.hailpixel.com/#366EA6,F9D862,33A373,31909B,635A21,BFECF3,B8794C,366EA6,635A21,
+    var environPallette = {
+      carbonate: "#366EA6",
+      siliciclastic: "#F9D862",
+      fluvial: "#33A373",
+      lacustrine: "#31909B",
+      landscape: "#635A21",
+      glacial: "#BFECF3",
+      eolian: "#B8794C",
+      marine: "#366EA6",
+      "non-marine": "#635A21"
+    }
+
     var apiUrl = (window.location.hostname === "localhost") ? "http://localhost:5000" : window.location.origin;
 
     /* via http://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript */
@@ -436,8 +555,8 @@
             data.success.data.forEach(function(d) {
               if (d.id == id) {
 
-                $("#map").click(function() {
-                  swapMapView(d.name)
+                $("#myonoffswitch").change(function() {
+                  swapMapView(d.name);
                 });
 
                 $(".page-title").html(d.name + " " + d.rank);
@@ -507,13 +626,16 @@
                 return d.properties;
               })
             );
-
+            console.log(summary.pbdb_collections)
             summary = addCommas(summary);
             
-            $("#stats").html(Mustache.render(templates.columnSummary, summary));
+            
 
             if (type[0] !== "strat_id") {
-              $(".page-title").html(data.objects.output.geometries[0].properties.col_group + "(" + data.objects.output.geometries[0].properties.col_group_id + ")");
+              $(".page-title").html('<a href="/sift/info/?col_group_id=' + data.objects.output.geometries[0].properties.col_group_id + '">' + data.objects.output.geometries[0].properties.col_group + '</a>');
+              $("#stats").html(Mustache.render(templates.group, summary));
+            } else {
+              $("#stats").html(Mustache.render(templates.columnSummary, summary));
             }
             
             if (type[0] === "col_group_id") {
@@ -533,7 +655,8 @@
               });
 
               Object.keys(lith_types).forEach(function(d) {
-                liths.push([d, (lith_types[d].length / totalLiths) * 100]);
+
+                liths.push({name: d, y: (lith_types[d].length / totalLiths) * 100, color: lithPallette[d]});
               });
 
               console.log(liths)
@@ -563,7 +686,7 @@
 
             $("#stats").html(Mustache.render(templates.column, target));
 
-            $(".page-title").html(target.col_name + "(" + target.col_id + ")");
+            $(".page-title").html('<a href="/sift/info/?col_id=' + target.col_id + '">' + target.col_name + '</a> <small>(<a class="group-link" href="/sift/info/?col_group_id=' + target.col_group_id + '">' + target.col_group + '</a>)</small>');
           }
 
           if (add) {
@@ -610,9 +733,9 @@
         console.log(data)
         $('.lithologyChart').highcharts({
             chart: {
-                plotBackgroundColor: null,
-                plotBorderWidth: null,
-                plotShadow: false
+              plotBackgroundColor: null,
+              plotBorderWidth: null,
+              plotShadow: false
             },
             credits : {
               enabled: false
@@ -625,22 +748,23 @@
               //pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
             },
             plotOptions: {
-                pie: {
-                   // allowPointSelect: true,
-                   // cursor: 'pointer',
-                    dataLabels: {
-                        enabled: true,
-                        format: '<b>{point.name}</b>: {point.percentage:.1f} %',
-                        style: {
-                            color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
-                        }
-                    }
+              pie: {
+                 // allowPointSelect: true,
+                 // cursor: 'pointer',
+                minSize: 160,
+                dataLabels: {
+                  enabled: true,
+                  format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                  style: {
+                      color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                  }
                 }
+              }
             },
             series: [{
-                type: 'pie',
-                name: 'Lithology',
-                data: data
+              type: 'pie',
+              name: 'Lithology',
+              data: data
             }]
         });
       }
@@ -650,9 +774,9 @@
 
           $('.environChart').highcharts({
               chart: {
-                  plotBackgroundColor: null,
-                  plotBorderWidth: null,
-                  plotShadow: false
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false
               },
               credits : {
                 enabled: false
@@ -665,22 +789,23 @@
                 //pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
               },
               plotOptions: {
-                  pie: {
-                     // allowPointSelect: true,
-                     // cursor: 'pointer',
-                      dataLabels: {
-                          enabled: true,
-                          format: '<b>{point.name}</b>: {point.percentage:.1f} %',
-                          style: {
-                              color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
-                          }
-                      }
+                pie: {
+                   // allowPointSelect: true,
+                   // cursor: 'pointer',
+                  minSize: 160,
+                  dataLabels: {
+                    enabled: true,
+                    format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                    style: {
+                        color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                    }
                   }
+                }
               },
               series: [{
-                  type: 'pie',
-                  name: 'Lithology',
-                  data: data
+                type: 'pie',
+                name: 'Lithology',
+                data: data
               }]
           });
       }
@@ -689,21 +814,30 @@
       function drawColumn(data) {
         var column = {"Quaternary":{"name":"Quaternary","abbrev":"Q","color":"#F9F97F","sections":{}},"Neogene":{"name":"Neogene","abbrev":"Ng","color":"#FFE619","sections":{}},"Paleogene":{"name":"Paleogene","abbrev":"Pg","color":"#FD9A52","sections":{}},"Cretaceous":{"name":"Cretaceous","abbrev":"K","color":"#7FC64E","sections":{}},"Jurassic":{"name":"Jurassic","abbrev":"J","color":"#34B2C9","sections":{}},"Triassic":{"name":"Triassic","abbrev":"Tr","color":"#812b92","sections":{}},"Permian":{"name":"Permian","abbrev":"P","color":"#F04028","sections":{}},"Carboniferous":{"name":"Carboniferous","abbrev":"C","color":"#67A599","sections":{}},"Devonian":{"name":"Devonian","abbrev":"D","color":"#CB8C37","sections":{}},"Silurian":{"name":"Silurian","abbrev":"S","color":"#B3E1B6","sections":{}},"Ordovician":{"name":"Ordovician","abbrev":"O","color":"#009270","sections":{}},"Cambrian":{"name":"Cambrian","abbrev":"Cm","color":"#7FA056","sections":{}},"PreCambrian":{"name":"PreCambrian","abbrev":"PCm","color":"#F04370","sections":{}}};
 
+        console.log(data)
         for (var i = 0; i < data.length; i++) {
           data[i].rgba = hexToRgb(data[i].color.replace("#", ""), 0.7)
 
+          // If there is no period or it's an unknown one, add it to PreCambrian
           if (!column[data[i].period]) {
+            // If this time interval already has this section_id
             if (column["PreCambrian"].sections[data[i].section_id]) {
               column["PreCambrian"].sections[data[i].section_id].units.push(data[i]);
-            } else {
+            } 
+            // If this time interval doesn't have this section_id, add it
+            else {
               column["PreCambrian"].sections[data[i].section_id] = {
                 "id": data[i].section_id,
                 "units": [data[i]]
               }
             }
-          } else if (column[data[i].period].sections[data[i].section_id]) {
+          } 
+          // If both this time interval exist and the time interval has this seciton, add the unit
+          else if (column[data[i].period].sections[data[i].section_id]) {
             column[data[i].period].sections[data[i].section_id].units.push(data[i]);
-          } else {
+          } 
+          // Otherwise, add it as a new section in the time interval
+          else {
             column[data[i].period].sections[data[i].section_id] = {
               "id": data[i].section_id,
               "units": [data[i]]
@@ -719,6 +853,12 @@
           d.sections = Object.keys(d.sections).map(function(j) {
             return d.sections[j];
           });
+        });
+
+        newColumn = newColumn.filter(function(d) {
+          if (d.sections.length > 0) {
+            return d;
+          }
         });
         
         // Draw the column
@@ -758,7 +898,7 @@
         });
 
         Object.keys(environ_types).forEach(function(d) {
-          environs.push([d, (environ_types[d].length / totalEnvirons) * 100]);
+          environs.push({name: d, y: (environ_types[d].length / totalEnvirons) * 100, color: environPallette[d]});
         });
 
         return environs;
@@ -783,7 +923,7 @@
         });
 
         Object.keys(lith_types).forEach(function(d) {
-          liths.push([d, (lith_types[d].length / totalLiths) * 100]);
+          liths.push({name: d, y: (lith_types[d].length / totalLiths) * 100, color: lithPallette[d]});
         });
 
         return liths;
@@ -858,7 +998,7 @@
     }
       
 
-    function drawMap() {
+    function drawMap(type) {
       map = L.map("map", {
         minZoom: 4,
         maxZoom: 10,
@@ -873,9 +1013,31 @@
 
       // Add our basemap
       
-      dark = L.tileLayer("https://{s}.tiles.mapbox.com/v3/jczaplewski.m62j11i2/{z}/{x}/{y}.png");
+      dark = L.tileLayer("https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png", {
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>'
+      });
 
-      tiles = L.tileLayer("https://{s}.tiles.mapbox.com/v3/jczaplewski.j751k57j/{z}/{x}/{y}.png").addTo(map);
+      tiles = L.tileLayer("https://{s}.tiles.mapbox.com/v3/jczaplewski.j751k57j/{z}/{x}/{y}.png", {
+        attribution: "<a href='https://www.mapbox.com/about/maps/' target='_blank'>&copy; Mapbox &copy; OpenStreetMap</a>"
+      }).addTo(map);
+
+
+      if (type === "strat_id") {
+        var toggle = L.Control.extend({
+          options: {
+            position: 'bottomleft'
+          },
+          onAdd: function (map) {
+              var container = L.DomUtil.create('div', 'map-toggle');
+
+              container.innerHTML = '<div class="onoffswitch"><input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" checked><label class="onoffswitch-label" for="myonoffswitch"><span class="onoffswitch-inner"></span><span class="onoffswitch-switch"></span></label></div>'
+              return container;
+          }
+        });
+
+        map.addControl(new toggle());
+      }
+
     }
 
     function swapMapView(strat_name) {
@@ -899,7 +1061,6 @@
       }
 
       function swap() {
-        console.log(map.hasLayer(gmusGeology))
         if (map.hasLayer(tiles)) {
           map.removeLayer(tiles);
           map.addLayer(dark);
@@ -916,7 +1077,6 @@
     }
 
     function getStratNameId(unit_id) {
-      console.log("here")
       $.getJSON(apiUrl + "/api/v1/units?response=long&id=" + unit_id, function(data) {
         if (data.success.data.length > 0) {
           var unit = data.success.data[0];
@@ -934,7 +1094,7 @@
             var amount = findNumberInString(d),
                 type = d.replace(amount, "").trim();
 
-            liths.push([type, parseFloat(amount) * 100]);
+            liths.push({name: type, y: parseFloat(amount) * 100, color: lithPallette[type]});
           });
 
           if (unit.environ_type.length > 0) {
@@ -951,7 +1111,7 @@
           });
 
           eParsed.forEach(function(d) {
-            environs.push([d, 100/eParsed.length]);
+            environs.push({name: d, y: 100/eParsed.length, color: environPallette[d]});
           });
 
   
@@ -966,7 +1126,7 @@
 
             $("#stats").html(Mustache.render(templates.unit, unit));
 
-            $(".page-title").html(unit.strat_name + "(" + unit.id + ")");
+            $(".page-title").html(unit.strat_name + " <small>(" + unit.id + ")</small>");
 
             columns.drawLithologyChart(liths);
             columns.drawEnvironChart(environs);
@@ -1000,6 +1160,7 @@
       columnSummary: $('#column-summary-template').html(),
       columnLayout: $('#column-layout-template').html(),
       unit: $('#unit-template').html(),
+      group: $('#group-template').html(),
       popup: $('#column-popup-template').html()
     }
 
@@ -1016,7 +1177,7 @@
     if (queryParams.indexOf(type[0]) > -1) {
       console.log("valid query");
       getData();
-      drawMap();
+      drawMap(type[0]);
     } else {
       console.log("invalid query");
     }
