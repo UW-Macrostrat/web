@@ -218,7 +218,7 @@
         background-color: #AAAAAA; color: #FFFFFF;
     }
     .onoffswitch-inner:after {
-        content: "Rocks";
+        content: "Outcrop";
         padding-right: 12px;
         background-color: #34A7C1; color: #FFFFFF;
         text-align: right;
@@ -550,7 +550,8 @@
               throw "No strat names found with the given id " + highestRank[1];
             }
 
-            var rankMap = {"SGp": null, "Gp": "sgp", "Fm": "gp", "Mbr": "fm", "Bed": "fm"}
+            var rankMap = {"SGp": null, "Gp": "sgp", "Fm": "gp", "Mbr": "fm", "Bed": "fm", 1: null, 2: "sgp", 3: "gp", 4: "fm", 5: "fm"};
+            var rankMapOrder = {"SGp": 1, "Gp": 2, "Fm": 3, "Mbr": 4, "Bed": 5}
 
             data.success.data.forEach(function(d) {
               if (d.id == id) {
@@ -576,6 +577,15 @@
 
             data.success.data.forEach(function(d) {
               var belongsTo = d[rankMap[d.rank] + "_id"];
+
+              // Need to make sure belongsTo doesn't = 0 when it shouldn't (ex: strat_id=9574)
+              var previousRank = 1;
+              while (belongsTo === 0) {
+                belongsTo = d[rankMap[rankMapOrder[d.rank] - previousRank] + "_id"];
+                previousRank--;
+              }
+
+
               // Find the one it belongs to and add it
               data.success.data.forEach(function(j) {
                 if (j.id === belongsTo) {
@@ -591,7 +601,7 @@
               }
             });
 
-            //console.log(hierarchy);
+            console.log(hierarchy);
 
             var rendered = Mustache.render(nameTemplate, {"hierarchy": hierarchy});
             $(".name-hierarchy").html(rendered);
@@ -816,7 +826,14 @@
 
         console.log(data)
         for (var i = 0; i < data.length; i++) {
-          data[i].rgba = hexToRgb(data[i].color.replace("#", ""), 0.7)
+          // Get the rgb value of the hex color
+          data[i].rgba = hexToRgb(data[i].color.replace("#", ""), 0.7);
+
+          // Remove plutonic and metamorphic for now
+          if (data[i].lith_type.indexOf("plutonic") > -1 || data[i].lith_type.indexOf("metamorphic") > -1) {
+            continue;
+          }
+
 
           // If there is no period or it's an unknown one, add it to PreCambrian
           if (!column[data[i].period]) {
