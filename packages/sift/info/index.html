@@ -580,7 +580,7 @@
 
               // Need to make sure belongsTo doesn't = 0 when it shouldn't (ex: strat_id=9574)
               var previousRank = 1;
-              while (belongsTo === 0) {
+              while (belongsTo === 0 && d.id != highestRank[1]) {
                 belongsTo = d[rankMap[rankMapOrder[d.rank] - previousRank] + "_id"];
                 previousRank--;
               }
