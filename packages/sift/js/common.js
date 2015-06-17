@@ -1,6 +1,7 @@
  (function() {
 
   var apiUrl = (window.location.hostname === "localhost") ? "http://localhost:5000" : window.location.origin;
+  var rankMap = {"SGp": null, "Gp": "sgp", "Fm": "gp", "Mbr": "fm", "Bed": "fm", 1: null, 2: "sgp", 3: "gp", 4: "fm", 5: "fm"};
 
   function prefetch(type, callback) {
     $.ajax({
@@ -11,7 +12,7 @@
 
   var lastSuggestion, lastDataset;
 
-  prefetch(apiUrl + "/api/v1/defs/columns?all", function(data) {
+  prefetch(apiUrl + "/api/v2/defs/columns?all", function(data) {
     data.success.data.forEach(function(d) {
       d.id = d.col_id;
     });
@@ -27,10 +28,19 @@
 
     columnEngine.initialize();
 
-    prefetch(apiUrl + "/api/v1/defs/strat_names?all", function(data) {
+    prefetch(apiUrl + "/api/v2/defs/strat_names?all", function(data) {
+      data.success.data.forEach(function(d) {
+        d.id = d.strat_name_id;
+        if (d[rankMap[d.rank]]) {
+          d.name = d.strat_name + " " + d.rank + " (" + d[rankMap[d.rank]] + " " + rankMap[d.rank] + ")"
+        } else {
+          d.name = d.strat_name + " " + d.rank;
+        }
+      });
+
       var stratEngine = new Bloodhound({
         datumTokenizer: function(d) {
-          return Bloodhound.tokenizers.whitespace(d.name);
+          return Bloodhound.tokenizers.whitespace(d.strat_name);
         },
         queryTokenizer: Bloodhound.tokenizers.whitespace,
         local: data.success.data,
@@ -38,7 +48,7 @@
       });
       stratEngine.initialize();
 
-      prefetch(apiUrl + "/api/v1/defs/groups?all", function(data) {
+      prefetch(apiUrl + "/api/v2/defs/groups?all", function(data) {
         data.success.data.forEach(function(d) {
           d.id = d.col_group_id;
         });
@@ -55,14 +65,14 @@
 
         $(".searchBox>input").typeahead(null, 
           {
-            name: "strat_id",
+            name: "strat_name_id",
             displayKey: function(d) {
-              return d.name + " " + d.rank
+              return d.name;
             },
             minLengh: 1,
             source: stratEngine.ttAdapter(),
             templates: {
-              header: "<h5 class='autocompleteCategory'>Strat names</h5>"
+              header: "<h5 class='autocompleteCategory'>Lithostratigraphic names</h5>"
             }
           },
           {
@@ -107,7 +117,5 @@
       });
     });
   });
-
-    
  })(); 
   

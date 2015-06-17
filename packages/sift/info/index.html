@@ -18,6 +18,7 @@
     .mycontainer {
       height: auto;
       position: relative;
+      padding-bottom: 50px;
     }
 
     .page-title {
@@ -35,6 +36,11 @@
     .page-title > a:hover {
       text-decoration: none;
     }
+
+    .headerItem.left > a:hover {
+      text-decoration: none;
+    }
+
     #map {
       width: 100%;
       height: 400px;
@@ -276,25 +282,25 @@
   <script id="name-hierarchy-template" type="x-tmpl-mustache">
   <h3>Stratigraphic name hierarchy</h3>
   {{#hierarchy}}
-  <a href="/sift/info/?strat_id={{id}}" class="hierarchy-link">
+  <a href="/sift/info/?strat_name_id={{strat_name_id}}" class="hierarchy-link">
     <div class="hierarchy-container hierarchy-1 {{active}}">
-      <div class="hierarchy-name">{{name}} {{rank}}</div>
+      <div class="hierarchy-name">{{strat_name}} {{rank}}</div>
       {{#children}}
-      <a href="/sift/info/?strat_id={{id}}" class="hierarchy-link">
+      <a href="/sift/info/?strat_name_id={{strat_name_id}}" class="hierarchy-link">
         <div class="hierarchy-container hierarchy-2 {{active}}">
-          <div class="hierarchy-name">{{name}} {{rank}}</div>
+          <div class="hierarchy-name">{{strat_name}} {{rank}}</div>
           {{#children}}
-          <a href="/sift/info/?strat_id={{id}}" class="hierarchy-link">
+          <a href="/sift/info/?strat_name_id={{strat_name_id}}" class="hierarchy-link">
             <div class="hierarchy-container hierarchy-3 {{active}}">
-              <div class="hierarchy-name">{{name}} {{rank}}</div>
+              <div class="hierarchy-name">{{strat_name}} {{rank}}</div>
               {{#children}}
-              <a href="/sift/info/?strat_id={{id}}" class="hierarchy-link">
+              <a href="/sift/info/?strat_name_id={{strat_name_id}}" class="hierarchy-link">
                 <div class="hierarchy-container hierarchy-4 {{active}}">
-                  <div class="hierarchy-name">{{name}} {{rank}}</div>
+                  <div class="hierarchy-name">{{strat_name}} {{rank}}</div>
                   {{#children}}
-                  <a href="/sift/info/?strat_id={{id}}" class="hierarchy-link">
+                  <a href="/sift/info/?strat_name_id={{strat_name_id}}" class="hierarchy-link">
                     <div class="hierarchy-container hierarchy-5 {{active}}">
-                      <div class="hierarchy-name">{{name}} {{rank}}</div>
+                      <div class="hierarchy-name">{{strat_name}} {{rank}}</div>
                     </div>
                   </a>
                   {{/children}}
@@ -321,8 +327,8 @@
       <div class="four columns">{{col_area}} <small>km<sup>2</sup></small><span class="desc">area</span></div>
     </div>
     <div class="row column-summary-row">
-      <div class="four columns">{{pbdb}} <span class="desc">PBDB collections</span></div>
-      <div class="four columns">{{max_thick}} - {{min_thick}}<small>m</small> <span class="desc">thick</span></div>
+      <div class="four columns">{{pbdb_collections}} <span class="desc">PBDB collections</span></div>
+      <div class="four columns">{{max_thick}} - {{min_thick}} <small>m</small> <span class="desc">thick</span></div>
     </div>
     <div class="row column-summary-row">
       <div class="six columns"><div class="environChart"></div><span class="desc">environments</span></div>
@@ -337,16 +343,16 @@
       <div class="col-sm-6"><div class="lithologyChart"></div><span class="desc">lithologies</span></div>
     </div>
     <div class="row column-summary-row">
-      <div class="col-sm-4">{{sections.length}} <span class="desc">sections</span></div>
-      <div class="col-sm-4">{{units.length}} <span class="desc">units</span></div>
+      <div class="col-sm-4">{{t_sections}} <span class="desc">sections</span></div>
+      <div class="col-sm-4">{{t_units}} <span class="desc">units</span></div>
       <!--<div class="col-sm-4">{{pbdb_collections}} <span class="desc">PBDB collections</span></div>-->
-      <div class="col-sm-4">{{max_thick}} - {{min_thick}}<small>m</small><span class="desc">thick</span></div>
+      <div class="col-sm-4">{{max_thick}} - {{min_thick}} <small>m</small><span class="desc">thick</span></div>
       
     </div>
     <div class="row column-summary-row">
-      <div class="col-sm-4">{{area}} <small>km<sup>2</sup></small><span class="desc">area</span></div>
+      <div class="col-sm-4">{{col_area}} <small>km<sup>2</sup></small><span class="desc">area</span></div>
       <div class="col-sm-4">{{b_age}} - {{t_age}} <small>Ma</small> <span class="desc">age</span></div>
-      <div class="col-sm-4">{{pbdb_occs}} <span class="desc">PBDB occurrences</span></div>
+      <div class="col-sm-4">{{pbdb_collections}} <span class="desc">PBDB collections</span></div>
     </div>
   </script>
 
@@ -354,8 +360,8 @@
     <div class="row column-summary-row">
       <div class="col-sm-3">{{#groups}}<a href="/sift/info/?col_group_id={{col_group_id}}">{{col_group}}</a> <br>{{/groups}}<span class="desc">group(s)</span></div>
       <div class="col-sm-3">{{columns}} <span class="desc">columns</span></div>
-      <div class="col-sm-3">{{sections.length}} <span class="desc">sections</span></div>
-      <div class="col-sm-3">{{units.length}} <span class="desc">units</span></div>
+      <div class="col-sm-3">{{sections}} <span class="desc">sections</span></div>
+      <div class="col-sm-3">{{units}} <span class="desc">units</span></div>
     </div>
     <div class="row column-summary-row">
       <div class="col-sm-6"><div class="lithologyChart"></div><span class="desc">lithologies</span></div>
@@ -364,8 +370,8 @@
     <div class="row column-summary-row">
       <div class="col-sm-3">{{area}} <small>km<sup>2</sup></small><span class="desc">area</span></div>
       <div class="col-sm-3">{{b_age}} - {{t_age}} <small>Ma</small> <span class="desc">age</span></div>
-      <div class="col-sm-3">{{max_thick}} - {{min_thick}}<small>m</small> <span class="desc">thick</span></div>
-      <div class="col-sm-3">{{pbdb_occs}} <span class="desc">PBDB occurrences</span></div>
+      <div class="col-sm-3">{{max_thick}} - {{min_thick}} <small>m</small> <span class="desc">thick</span></div>
+      <div class="col-sm-3">{{pbdb_collections}} <span class="desc">PBDB collections</span></div>
     </div>
   </script>
 
@@ -383,19 +389,10 @@
     <div class="row column-summary-row">
       <div class="col-sm-3">{{area}} <small>km<sup>2</sup></small><span class="desc">area</span></div>
       <div class="col-sm-3">{{b_age}} - {{t_age}} <small>Ma</small> <span class="desc">age</span></div>
-      <div class="col-sm-3">{{max_thick}} - {{min_thick}}<small>m</small> <span class="desc">thick</span></div>
-      <div class="col-sm-3">{{pbdb_occs}} <span class="desc">PBDB occurrences</span></div>
+      <div class="col-sm-3">{{max_thick}} - {{min_thick}} <small>m</small> <span class="desc">thick</span></div>
+      <div class="col-sm-3">{{pbdb_collections}} <span class="desc">PBDB collections</span></div>
     </div>
     
-  </script>
-
-  <script id="column-popup-template" type="x-tmpl-mustache">
-    <strong><a href="/sift/info/?col_id={{col_id}}">{{col_name}} <small>({{col_id}})</small></a></strong><br>
-    <strong>Group: </strong> <a href="/sift/info/?col_group_id={{col_group_id}}">{{col_group}} <small>({{col_group_id}})</small></a><br>
-    <strong>Units: </strong> {{units.length}} <br>
-    <strong>Thickness: </strong> {{max_thick}} - {{min_thick}} <br>
-    <strong>PBDB collections: </strong> {{pbdb_collections}} <br>
-    <strong>PBDB occurrences: </strong> {{pbdb_occs}} <br>
   </script>
 
   <script id="column-layout-template" type="x-tmpl-mustache">
@@ -409,7 +406,7 @@
           {{#sections}}
             <div class="section-box">
               {{#units}}
-                <a href="/sift/info/?unit_id={{id}}">
+                <a href="/sift/info/?unit_id={{unit_id}}">
                   <div class="unit-box" style="background-color: rgba({{rgba.r}}, {{rgba.g}}, {{rgba.b}}, {{rgba.alpha}}); color: {{text_color}};">{{strat_name}}</div>
                 </a>
               {{/units}}
@@ -428,6 +425,38 @@
 
   <script>
   (function() {
+
+    var pallette = {
+
+      "lith_type": {
+        carbonate: "#366EA6",
+        siliciclastic: "#F9D862",
+        evaporite: "#DD98BC",
+        organic: "#111111",
+        chemical: "#c96566",
+        volcanic: "#3D9970",
+        plutonic: "#D06CAD",
+        metamorphic: "#6D3B22",
+        sedimentary: "#D76433",
+        igneous: "#BD3239",
+        metasedimentary: "#AB6836"
+      },
+
+      "environ_type": {
+        carbonate: "#366EA6",
+        siliciclastic: "#F9D862",
+        fluvial: "#33A373",
+        lacustrine: "#31909B",
+        landscape: "#635A21",
+        glacial: "#BFECF3",
+        eolian: "#B8794C",
+        marine: "#366EA6",
+        "non-marine": "#635A21",
+        "": "#777777"
+      }
+    }
+
+
     // http://color.hailpixel.com/#366EA6,F9D862,DD98BC,111111,C96566,3D9970,D06CAD,6D3B22,D76433,BD3239,AB6836,
     var lithPallette = {
       carbonate: "#366EA6",
@@ -452,7 +481,8 @@
       glacial: "#BFECF3",
       eolian: "#B8794C",
       marine: "#366EA6",
-      "non-marine": "#635A21"
+      "non-marine": "#635A21",
+      "": "#777777"
     }
 
     var apiUrl = (window.location.hostname === "localhost") ? "http://localhost:5000" : window.location.origin;
@@ -467,7 +497,7 @@
       }
 
       Object.keys(obj).forEach(function(j) {
-        if (typeof(obj[j]) === "number" && j != "id" && j != "col_id") {
+        if (typeof(obj[j]) === "number" && j != "id" && j != "col_id" && j != "unit_id" && j != "strat_name_id") {
           obj[j] = commaize(obj[j])
         }
       });
@@ -524,89 +554,65 @@
       var nameTemplate = $('#name-hierarchy-template').html();
       Mustache.parse(nameTemplate);
 
-      function build(id) {
-        $.getJSON(apiUrl + "/api/v1/defs/strat_names?id=" + id, function(data) {
+      function build(strat_name_id) {
+        // Get the entire hierarchy associated with a strat_name_id
+        $.getJSON(apiUrl + "/api/v2/defs/strat_names?rule=all&strat_name_id=" + strat_name_id, function(data) {
           if (data.success.data.length < 1) {
             throw "No strat names found";
           } 
 
-          var highestRank = [];
-          if (data.success.data[0].sgp_id > 0) {
-            highestRank = ["SGp", data.success.data[0].sgp_id];
-          } else if (data.success.data[0].gp_id > 0) {
-            highestRank = ["Gp", data.success.data[0].gp_id];
-          } else if (data.success.data[0].fm_id > 0) {
-            highestRank = ["Fm", data.success.data[0].fm_id];
-          } else if (data.success.data[0].mbr_id > 0) {
-            highestRank = ["Mbr", data.success.data[0].mbr_id];
-          } else if (data.success.data[0].bed_id > 0) {
-            highestRank = ["Bed", data.success.data[0].bed_id];
-          } else {
-            console.log("No strat name IDs found");
-          }
+          var rankMap = {"SGp": null, "Gp": "sgp", "Fm": "gp", "Mbr": "fm", "Bed": "fm", 1: null, 2: "sgp", 3: "gp", 4: "fm", 5: "fm"};
+          var rankMapOrder = {"SGp": 1, "Gp": 2, "Fm": 3, "Mbr": 4, "Bed": 5}
 
-          $.getJSON(apiUrl + "/api/v1/defs/strat_names?id=" + highestRank[1], function(data) {
-            if (data.success.data.length < 1) {
-              throw "No strat names found with the given id " + highestRank[1];
+          data.success.data.forEach(function(d) {
+            if (d.strat_name_id == strat_name_id) {
+
+              $("#myonoffswitch").change(function() {
+                swapMapView(d.strat_name_id);
+              });
+
+              $(".page-title").html(d.strat_name + " " + d.rank);
+              d.active = "active-strat-name";
+            } else {
+              d.active = "not-active-strat-name";
             }
 
-            var rankMap = {"SGp": null, "Gp": "sgp", "Fm": "gp", "Mbr": "fm", "Bed": "fm", 1: null, 2: "sgp", 3: "gp", 4: "fm", 5: "fm"};
-            var rankMapOrder = {"SGp": 1, "Gp": 2, "Fm": 3, "Mbr": 4, "Bed": 5}
-
-            data.success.data.forEach(function(d) {
-              if (d.id == id) {
-
-                $("#myonoffswitch").change(function() {
-                  swapMapView(d.name);
-                });
-
-                $(".page-title").html(d.name + " " + d.rank);
-                d.active = "active-strat-name";
-              } else {
-                d.active = "not-active-strat-name";
+            d.children = [];
+            d.totalChildren = data.success.data.filter(function(j) {
+              if (j[d.rank.toLowerCase() + "_id"] == d.strat_name_id) {
+                return j
               }
-
-              d.children = [];
-              d.totalChildren = data.success.data.filter(function(j) {
-                if (j[d.rank.toLowerCase() + "_id"] == d.id) {
-                  return j
-                }
-              }).length - 1;
-              d.total = d.totalChildren;
-            });
-
-            data.success.data.forEach(function(d) {
-              var belongsTo = d[rankMap[d.rank] + "_id"];
-
-              // Need to make sure belongsTo doesn't = 0 when it shouldn't (ex: strat_id=9574)
-              var previousRank = 1;
-              while (belongsTo === 0 && d.id != highestRank[1]) {
-                belongsTo = d[rankMap[rankMapOrder[d.rank] - previousRank] + "_id"];
-                previousRank--;
-              }
-
-
-              // Find the one it belongs to and add it
-              data.success.data.forEach(function(j) {
-                if (j.id === belongsTo) {
-                  j.children.push(d);
-                }
-              })
-            });
-
-            // Find the top of the hierarchy and return it
-            var hierarchy = data.success.data.filter(function(d) {
-              if (d.rank === highestRank[0]) {
-                return d;
-              }
-            });
-
-            console.log(hierarchy);
-
-            var rendered = Mustache.render(nameTemplate, {"hierarchy": hierarchy});
-            $(".name-hierarchy").html(rendered);
-
+            }).length - 1;
+            d.total = d.totalChildren;
           });
+
+          data.success.data.forEach(function(d) {
+            var belongsTo = d[rankMap[d.rank] + "_id"];
+
+            // Need to make sure belongsTo doesn't = 0 when it shouldn't (ex: strat_name_id=9574)
+            var previousRank = 1;
+            while (belongsTo === 0 && d.strat_name_id != highestRank[1]) {
+              belongsTo = d[rankMap[rankMapOrder[d.rank] - previousRank] + "_id"];
+              previousRank--;
+            }
+
+            // Find the one it belongs to and add it
+            data.success.data.forEach(function(j) {
+              if (j.strat_name_id === belongsTo) {
+                j.children.push(d);
+              }
+            })
+          });
+
+          // Find the top of the hierarchy and return it
+          var hierarchy = _.max(data.success.data, function(d) { return d.totalChildren });
+
+          console.log(hierarchy);
+
+          var rendered = Mustache.render(nameTemplate, {"hierarchy": hierarchy});
+          $(".name-hierarchy").html(rendered);
+
+
         });
       }
 
@@ -624,79 +630,47 @@
       function fetch(type, add, callback) {
         var adjacents = "";
         if (!callback) {
-          adjacents = "adjacents=true&"
+          adjacents = "adjacents=true"
         }
 
-        $.getJSON(apiUrl + "/api/v1/columns?" + adjacents + "&response=long&format=topojson_bare&" + type.join("="), function(data) {
+        $.getJSON(apiUrl + "/api/v2/columns?" + adjacents + "&response=long&format=topojson_bare&" + type.join("="), function(data) {
+          var colProps = data.objects.output.geometries.map(function(d) { return d.properties }); 
 
-          if (type[0] === "col_group_id" || type[0] === "strat_id") {
+          if (type[0] === "col_group_id" || type[0] === "strat_name_id") {
 
-            var summary = columns.summarize(
-              data.objects.output.geometries.map(function(d) {
-                return d.properties;
-              })
-            );
-            console.log(summary.pbdb_collections)
-            summary = addCommas(summary);
-            
-            
+            var summary = addCommas(
+                            columns.summarize(colProps)
+                          );
 
-            if (type[0] !== "strat_id") {
+            if (type[0] !== "strat_name_id") {
               $(".page-title").html('<a href="/sift/info/?col_group_id=' + data.objects.output.geometries[0].properties.col_group_id + '">' + data.objects.output.geometries[0].properties.col_group + '</a>');
               $("#stats").html(Mustache.render(templates.group, summary));
             } else {
               $("#stats").html(Mustache.render(templates.columnSummary, summary));
             }
             
-            if (type[0] === "col_group_id") {
-              var lith_types = _.groupBy(
-                _.flatten(
-                  data.objects.output.geometries.map(function(d) {
-                    return d.properties.lith_types
-                  })
-                )
-              );
-
-              var liths = [],
-                  totalLiths = 0;
-              
-              Object.keys(lith_types).forEach(function(d) {
-                totalLiths += lith_types[d].length;
-              });
-
-              Object.keys(lith_types).forEach(function(d) {
-
-                liths.push({name: d, y: (lith_types[d].length / totalLiths) * 100, color: lithPallette[d]});
-              });
-
-              console.log(liths)
-              drawLithologyChart(liths)
-            } else {
-              // Get all units
-
-              var units = _.uniq(_.flatten(data.objects.output.geometries.map(function(d) { return d.properties.units; })));
-              console.log(units)
-              fetchUnits("id", units.join(","));
-            }
-              
-
+            // Draw charts
+            drawEnvironChart(summarizeAttr(colProps, "environ_type"))
+            drawLithologyChart(summarizeAttr(colProps, "lith_type"));
 
           } else if (type[0] === "col_id") {
-            if (!callback) {
-              columns.fetchUnits(type[0], type[1], true);
-            }
-
-            var target = data.objects.output.geometries.filter(function(d) {
-              if (d.properties.col_id == type[1]) {
-                return d
-              }
-            })[0].properties;
-
-            target = addCommas(target);
+            var target = addCommas(
+              data.objects.output.geometries.filter(function(d) {
+                if (d.properties.col_id == type[1]) {
+                  return d
+                }
+              })[0].properties
+            );
 
             $("#stats").html(Mustache.render(templates.column, target));
 
-            $(".page-title").html('<a href="/sift/info/?col_id=' + target.col_id + '">' + target.col_name + '</a> <small>(<a class="group-link" href="/sift/info/?col_group_id=' + target.col_group_id + '">' + target.col_group + '</a>)</small>');
+            if (!callback) {
+              drawEnvironChart(summarizeAttr(colProps, "environ_type"))
+              drawLithologyChart(summarizeAttr(colProps, "lith_type"));
+              columns.fetchUnits(type[0], type[1], true);
+            }
+
+            $(".page-title").html('<a href="/sift/info/?col_id=' + target.col_id + '">' + target.col_name + '</a> <small>(<a class="group-link" href="/sift/info/?col_group_id=' + target.col_group_id + '">' + target.col_group + '</a> ' + target.group_col_id + ')</small>');
           }
 
           if (add) {
@@ -723,15 +697,15 @@
             return item.col_group
           }),
           "columns": columns.length,
-          "area" : _.reduce(columns.map(function(d) { return d.area; }), function(memo, num) { return memo + num; }, 0),
+          "area": columns.map(function(d) { return d.col_area; }).reduce(function(a, b) { return a + b }, 0),
           "b_age" : _.max(columns, function(d) { return d.b_age; }).b_age,
           "t_age" : _.min(columns, function(d) { return d.t_age; }).t_age,
           "min_thick" : _.min(columns, function(d) { return d.min_thick; }).min_thick,
           "max_thick" : _.max(columns, function(d) { return d.max_thick; }).max_thick,
           "pbdb_occs" : _.reduce(columns.map(function(d) { return d.pbdb_occs; }), function(memo, num) { return memo + num; }, 0),
           "pbdb_collections" : _.reduce(columns.map(function(d) { return d.pbdb_collections; }), function(memo, num) { return memo + num; }, 0),
-          "sections" : _.uniq(_.flatten(columns.map(function(d) { return d.sections; }))),
-          "units" : _.uniq(_.flatten(columns.map(function(d) { return d.units; }))),
+          "sections" : columns.map(function(d) { return d.t_sections; }).reduce(function(a, b) { return a + b }, 0),
+          "units" : columns.map(function(d) { return d.t_units; }).reduce(function(a, b) { return a + b }, 0),
           "lith_types" : _.uniq(_.flatten(columns.map(function(d) { return d.lith_types; }))).join(", "),
           "lith_min_thick" : _.min(columns, function(d) { return d.lith_min_thick; }).lith_min_thick,
           "lith_max_thick" :  _.max(columns, function(d) { return d.lith_max_thick; }).lith_max_thick
@@ -740,7 +714,7 @@
       }
 
       function drawLithologyChart(data) {
-        console.log(data)
+        console.log("lithChart", data)
         $('.lithologyChart').highcharts({
             chart: {
               plotBackgroundColor: null,
@@ -781,43 +755,43 @@
 
 
       function drawEnvironChart(data) {
-
-          $('.environChart').highcharts({
-              chart: {
-                plotBackgroundColor: null,
-                plotBorderWidth: null,
-                plotShadow: false
-              },
-              credits : {
-                enabled: false
-              },
-              title : {
-                text : ''
-              },
-              tooltip: {
-                enabled: false
-                //pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
-              },
-              plotOptions: {
-                pie: {
-                   // allowPointSelect: true,
-                   // cursor: 'pointer',
-                  minSize: 160,
-                  dataLabels: {
-                    enabled: true,
-                    format: '<b>{point.name}</b>: {point.percentage:.1f} %',
-                    style: {
-                        color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
-                    }
+        console.log("environChart", data)
+        $('.environChart').highcharts({
+            chart: {
+              plotBackgroundColor: null,
+              plotBorderWidth: null,
+              plotShadow: false
+            },
+            credits : {
+              enabled: false
+            },
+            title : {
+              text : ''
+            },
+            tooltip: {
+              enabled: false
+              //pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
+            plotOptions: {
+              pie: {
+                 // allowPointSelect: true,
+                 // cursor: 'pointer',
+                minSize: 160,
+                dataLabels: {
+                  enabled: true,
+                  format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                  style: {
+                      color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
                   }
                 }
-              },
-              series: [{
-                type: 'pie',
-                name: 'Lithology',
-                data: data
-              }]
-          });
+              }
+            },
+            series: [{
+              type: 'pie',
+              name: 'Lithology',
+              data: data
+            }]
+        });
       }
 
 
@@ -891,78 +865,33 @@
 
       }
 
-      function getEnvirons(data) {
-        var key = (data[0].environ_type) ? "environ_type" : "environ_class";
+      function summarizeAttr(data, attr) {
+        var types = _.groupBy(_.flatten(data.map(function(d) { return d[attr] })), "type"),
+            all = [];
 
-        var environ_types = _.groupBy(
-          _.flatten(
-            data.map(function(d) {
-              return d[key].split("|").filter(function(d) {
-                if (d.length > 0) {
-                  return d.trim();
-                }
-                
-              });
-            })
-          )
-        );
+        Object.keys(types).forEach(function(d) {
+          var prop = types[d].map(function(d) { return d.prop }).reduce(function(a, b) { return a + b }, 0);
+          all.push({
+            name: d, 
+            y: prop/data.length, 
+            color: pallette[attr][d] 
+          });
+        });
 
-        var environs = [],
-            totalEnvirons = 0;
+        return all;
         
-        Object.keys(environ_types).forEach(function(d) {
-          totalEnvirons += environ_types[d].length;
-        });
-
-        Object.keys(environ_types).forEach(function(d) {
-          environs.push({name: d, y: (environ_types[d].length / totalEnvirons) * 100, color: environPallette[d]});
-        });
-
-        return environs;
       }
-
-      function getLiths(data) {
-        var lith_types = _.groupBy(
-          _.flatten(
-            data.map(function(d) {
-              return d.lith_type.split("|").map(function(d) {
-                return d.replace(findNumberInString(d), "").trim();
-              });
-            })
-          )
-        );
-
-        var liths = [],
-            totalLiths = 0;
-        
-        Object.keys(lith_types).forEach(function(d) {
-          totalLiths += lith_types[d].length;
-        });
-
-        Object.keys(lith_types).forEach(function(d) {
-          liths.push({name: d, y: (lith_types[d].length / totalLiths) * 100, color: lithPallette[d]});
-        });
-
-        return liths;
-      }
-
-
 
 
       function fetchUnits(type, ids, drawStratColumn) {
 
-        $.getJSON(apiUrl + "/api/v1/units?response=long&" + type + "=" + ids, function(data) {
+        $.getJSON(apiUrl + "/api/v2/units?response=long&" + type + "=" + ids, function(data) {
           data = data.success.data;
         
           if (type === "col_id") {
-            drawEnvironChart(getEnvirons(data))
-            drawLithologyChart(getLiths(data));
             drawColumn(data);
-          } else if (type === "id") {
-            drawEnvironChart(getEnvirons(data))
-            drawLithologyChart(getLiths(data));
           }
-          
+
         });
       }
 
@@ -971,8 +900,7 @@
          fetch: fetch,
          summarize: summarize,
          fetchUnits: fetchUnits,
-         getEnvirons: getEnvirons,
-         getLiths: getLiths,
+         summarizeAttr: summarizeAttr,
          drawLithologyChart: drawLithologyChart,
          drawEnvironChart: drawEnvironChart
       }
@@ -1039,7 +967,7 @@
       }).addTo(map);
 
 
-      if (type === "strat_id") {
+      if (type === "strat_name_id") {
         var toggle = L.Control.extend({
           options: {
             position: 'bottomleft'
@@ -1057,9 +985,9 @@
 
     }
 
-    function swapMapView(strat_name) {
+    function swapMapView(strat_name_id) {
       if (typeof(gmusGeology) == "undefined" ) {
-        $.getJSON(apiUrl + "/api/v1/geologic_units?type=gmus&format=topojson_bare&unit_name=" + strat_name, function(data) {
+        $.getJSON(apiUrl + "/api/v2/geologic_units/gmus?format=topojson_bare&strat_name_id=" + strat_name_id, function(data) {
           gmusGeology = L.geoJson(topojson.feature(data, data.objects.output), {
             style: function(feature) {
               return {
@@ -1094,44 +1022,18 @@
     }
 
     function getStratNameId(unit_id) {
-      $.getJSON(apiUrl + "/api/v1/units?response=long&id=" + unit_id, function(data) {
+      $.getJSON(apiUrl + "/api/v2/units?response=long&unit_id=" + unit_id, function(data) {
         if (data.success.data.length > 0) {
-          var unit = data.success.data[0];
 
-          if (unit.lith_type.length > 0) {
-            var type = "lith_type";
-          } else {
-            var type = "lith_class";
-          }
-
-          var liths = [];
-          var parsed = unit[type].split("|");
-
-          parsed.forEach(function(d) {
-            var amount = findNumberInString(d),
-                type = d.replace(amount, "").trim();
-
-            liths.push({name: type, y: parseFloat(amount) * 100, color: lithPallette[type]});
+          var unit = data.success.data[0],
+              liths = columns.summarizeAttr(data.success.data, "lith_type"),
+              environs = [],
+              eType = (unit.environ_type.length > 0) ? "environ_type" : "environ_class";
+              
+          unit[eType].forEach(function(d) {
+            environs.push({name: d, y: 100/unit[eType].length, color: environPallette[d]});
           });
 
-          if (unit.environ_type.length > 0) {
-            var eType = "environ_type";
-          } else {
-            var eType = "environ_class";
-          }
-
-          var environs = [];
-          var eParsed = unit[eType].split("|").filter(function(d) {
-            if (d.length > 1) {
-              return d;
-            }
-          });
-
-          eParsed.forEach(function(d) {
-            environs.push({name: d, y: 100/eParsed.length, color: environPallette[d]});
-          });
-
-  
           stratHierarchy.build(unit.strat_name_id);
 
           var column = columns.fetch(["col_id", unit.col_id], true, function(data) {
@@ -1143,20 +1045,18 @@
 
             $("#stats").html(Mustache.render(templates.unit, unit));
 
-            $(".page-title").html(unit.strat_name + " <small>(" + unit.id + ")</small>");
+            $(".page-title").html("<a href='/sift/info/?unit_id=" + unit.unit_id + "'>" + unit.strat_name + " <small>(" + unit.unit_id + ")</small></a>");
 
             columns.drawLithologyChart(liths);
             columns.drawEnvironChart(environs);
           });
-
-            
         }
       });
     }
 
     function getData() {
 
-      if (type[0] === "strat_name_like" || type[0] === "strat_name" || type[0] === "strat_id") {
+      if (type[0] === "strat_name_like" || type[0] === "strat_name" || type[0] === "strat_name_id") {
         // Get strat_name hierarchy
         stratHierarchy.build(type[1]);
         columns.fetch(type, true);
@@ -1177,8 +1077,7 @@
       columnSummary: $('#column-summary-template').html(),
       columnLayout: $('#column-layout-template').html(),
       unit: $('#unit-template').html(),
-      group: $('#group-template').html(),
-      popup: $('#column-popup-template').html()
+      group: $('#group-template').html()
     }
 
     // Get the templates ready to use
@@ -1187,7 +1086,7 @@
     });
 
 
-    var queryParams = ["strat_name_like", "strat_name", "strat_id", "col_id", "col_group_id", "col_group", "interval", "interval_id", "lith", "lith_type", "lith_class", "age", "unit_id"];
+    var queryParams = ["strat_name_like", "strat_name", "strat_name_id", "col_id", "col_group_id", "col_group", "interval", "interval_id", "lith", "lith_type", "lith_class", "age", "unit_id"];
 
     var type = window.location.search.replace("/", "").replace("?", "").split("=");
 
