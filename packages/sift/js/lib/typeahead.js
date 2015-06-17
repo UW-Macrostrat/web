@@ -761,7 +761,7 @@
                 position: "absolute",
                 top: "100%",
                 left: "0",
-                zIndex: "100",
+                zIndex: "10000",
                 display: "none"
             },
             suggestions: {
