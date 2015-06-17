@@ -58,7 +58,7 @@ h3, h3 > a {
   display: inline;
 }
 .searchBox {
-  padding-top: 8px;
+  padding-top: 1px;
 }
 .headerItem.right {
   display: table-cell;
@@ -67,10 +67,12 @@ h3, h3 > a {
   padding-bottom: 7px;
   width: 50px;
 }
+input[type=text] {
+  border: none;
+}
 .searcher {
   border-radius: 4px;
   margin-bottom: -10px !important;
-  top: -6px;
   border: 1px solid rgba(153,0,0,0.2) !important;
   width: 300px;
   font-size: 14px;

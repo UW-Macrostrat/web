@@ -24,11 +24,11 @@
 .tt-hint {
   color: #999;
   width:100%;
-  top: -6px !important;
 }
 
 .tt-dropdown-menu {
   width: 300px;
+  margin-top: 5px;
   padding: 8px 0;
   background-color: #fff;
   border: 1px solid #ccc;
