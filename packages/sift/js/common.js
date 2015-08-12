@@ -63,7 +63,7 @@
 
         groupEngine.initialize();
 
-        $(".searchBox>input").typeahead(null, 
+        $(".searchBox>input").typeahead(null,
           {
             name: "strat_name_id",
             displayKey: function(d) {
@@ -117,5 +117,4 @@
       });
     });
   });
- })(); 
-  
+ })();

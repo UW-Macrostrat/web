@@ -252,13 +252,13 @@
         border: 2px solid #E6DFDF; border-radius: 12px;
         position: absolute; top: 0; bottom: 0; right: 72px;
         -moz-transition: all 0.3s ease-in 0s; -webkit-transition: all 0.3s ease-in 0s;
-        -o-transition: all 0.3s ease-in 0s; transition: all 0.3s ease-in 0s; 
+        -o-transition: all 0.3s ease-in 0s; transition: all 0.3s ease-in 0s;
     }
     .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
         margin-left: 0;
     }
     .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
-        right: 0px; 
+        right: 0px;
     }
 
     @media(max-width: 550px) {
@@ -267,7 +267,7 @@
         padding: 15px;
       }
     }
-    
+
 
   </style>
 </head>
@@ -284,7 +284,7 @@
       <div class="searchBox typeahead">
         <input class="searcher" type="text" placeholder="Search" data-provide="typeahead">
       </div>
-    </div>  
+    </div>
   </div>
 
   <div class="mycontainer">
@@ -358,7 +358,7 @@
     </div>
   </script>
 
-  
+
   <script id="column-template" type="x-tmpl-mustache">
     <div class="row column-summary-row">
       <div class="col-sm-6"><div class="environChart"></div><span class="desc">environments</span></div>
@@ -369,7 +369,7 @@
       <div class="col-sm-4">{{t_units}} <span class="desc">units</span></div>
       <!--<div class="col-sm-4">{{pbdb_collections}} <span class="desc">PBDB collections</span></div>-->
       <div class="col-sm-4">{{max_thick}} - {{min_thick}} <small>m</small><span class="desc">thick</span></div>
-      
+
     </div>
     <div class="row column-summary-row">
       <div class="col-sm-4">{{col_area}} <small>km<sup>2</sup></small><span class="desc">area</span></div>
@@ -414,7 +414,7 @@
       <div class="col-sm-3">{{max_thick}} - {{min_thick}} <small>m</small> <span class="desc">thick</span></div>
       <div class="col-sm-3">{{pbdb_collections}} <span class="desc">PBDB collections</span></div>
     </div>
-    
+
   </script>
 
   <script id="column-layout-template" type="x-tmpl-mustache">
@@ -429,7 +429,7 @@
             <div class="section-box">
               {{#units}}
                 <a href="/sift/info/?unit_id={{unit_id}}">
-                  <div class="unit-box" style="background-color: rgba({{rgba.r}}, {{rgba.g}}, {{rgba.b}}, {{rgba.alpha}}); color: {{text_color}};">{{strat_name}}</div>
+                  <div class="unit-box" style="background-color: rgba({{rgba.r}}, {{rgba.g}}, {{rgba.b}}, {{rgba.alpha}}); color: {{text_color}};">{{unit_name}}</div>
                 </a>
               {{/units}}
             </div>
@@ -450,7 +450,7 @@
 
     var pallette = {
 
-      "lith_type": {
+      "lith": {
         carbonate: "#366EA6",
         siliciclastic: "#F9D862",
         evaporite: "#DD98BC",
@@ -464,7 +464,7 @@
         metasedimentary: "#AB6836"
       },
 
-      "environ_type": {
+      "environ": {
         carbonate: "#366EA6",
         siliciclastic: "#F9D862",
         fluvial: "#33A373",
@@ -525,7 +525,7 @@
       });
 
       return obj
-      
+
     }
 
     /* via http://stackoverflow.com/questions/17885850/how-to-parse-a-string-containing-text-for-a-number-float-in-javascript */
@@ -548,7 +548,7 @@
                 this.alpha = 0;
             }
             return "rgba(" + this.r + ", " + this.g + ", " + this.b + ", " + this.alpha + ")";
-        } 
+        }
         if (alpha == undefined) {
             return result ? {
                 r: parseInt(result[1], 16),
@@ -581,7 +581,7 @@
         $.getJSON(apiUrl + "/api/v2/defs/strat_names?rule=all&strat_name_id=" + strat_name_id, function(data) {
           if (data.success.data.length < 1) {
             throw "No strat names found";
-          } 
+          }
 
           var rankMap = {"SGp": null, "Gp": "sgp", "Fm": "gp", "Mbr": "fm", "Bed": "fm", 1: null, 2: "sgp", 3: "gp", 4: "fm", 5: "fm"};
           var rankMapOrder = {"SGp": 1, "Gp": 2, "Fm": 3, "Mbr": 4, "Bed": 5}
@@ -629,8 +629,6 @@
           // Find the top of the hierarchy and return it
           var hierarchy = _.max(data.success.data, function(d) { return d.totalChildren });
 
-          console.log(hierarchy);
-
           var rendered = Mustache.render(nameTemplate, {"hierarchy": hierarchy});
           $(".name-hierarchy").html(rendered);
 
@@ -643,9 +641,8 @@
         build: build
       }
 
-
     })();
-      
+
 
     var columns = (function() {
 
@@ -656,7 +653,7 @@
         }
 
         $.getJSON(apiUrl + "/api/v2/columns?" + adjacents + "&response=long&format=topojson_bare&" + type.join("="), function(data) {
-          var colProps = data.objects.output.geometries.map(function(d) { return d.properties }); 
+          var colProps = data.objects.output.geometries.map(function(d) { return d.properties });
 
           if (type[0] === "col_group_id" || type[0] === "strat_name_id") {
 
@@ -670,10 +667,10 @@
             } else {
               $("#stats").html(Mustache.render(templates.columnSummary, summary));
             }
-            
+
             // Draw charts
-            drawEnvironChart(summarizeAttr(colProps, "environ_type"))
-            drawLithologyChart(summarizeAttr(colProps, "lith_type"));
+            drawEnvironChart(summarizeAttr(colProps, "environ"))
+            drawLithologyChart(summarizeAttr(colProps, "lith"));
 
           } else if (type[0] === "col_id") {
             var target = addCommas(
@@ -687,8 +684,8 @@
             $("#stats").html(Mustache.render(templates.column, target));
 
             if (!callback) {
-              drawEnvironChart(summarizeAttr(colProps, "environ_type"))
-              drawLithologyChart(summarizeAttr(colProps, "lith_type"));
+              drawEnvironChart(summarizeAttr(colProps, "environ"))
+              drawLithologyChart(summarizeAttr(colProps, "lith"));
               columns.fetchUnits(type[0], type[1], true);
             }
 
@@ -697,7 +694,7 @@
 
           if (add) {
             addToMap(data);
-          } 
+          }
 
           if (callback) {
             callback(data);
@@ -736,7 +733,7 @@
       }
 
       function drawLithologyChart(data) {
-        console.log("lithChart", data)
+      //  console.log("lithChart", data)
         if (!data.length) {
           data = [{name: 'None', y: 1, color: '#EEEEEE'}];
         }
@@ -780,7 +777,7 @@
 
 
       function drawEnvironChart(data) {
-        console.log("environChart", data)
+    //    console.log("environChart", data)
         if (!data.length) {
           data = [{name: 'None', y: 1, color: '#EEEEEE'}];
         }
@@ -825,48 +822,122 @@
 
 
       function drawColumn(data) {
-        var column = {"Quaternary":{"name":"Quaternary","abbrev":"Q","color":"#F9F97F","sections":{}},"Neogene":{"name":"Neogene","abbrev":"Ng","color":"#FFE619","sections":{}},"Paleogene":{"name":"Paleogene","abbrev":"Pg","color":"#FD9A52","sections":{}},"Cretaceous":{"name":"Cretaceous","abbrev":"K","color":"#7FC64E","sections":{}},"Jurassic":{"name":"Jurassic","abbrev":"J","color":"#34B2C9","sections":{}},"Triassic":{"name":"Triassic","abbrev":"Tr","color":"#812b92","sections":{}},"Permian":{"name":"Permian","abbrev":"P","color":"#F04028","sections":{}},"Carboniferous":{"name":"Carboniferous","abbrev":"C","color":"#67A599","sections":{}},"Devonian":{"name":"Devonian","abbrev":"D","color":"#CB8C37","sections":{}},"Silurian":{"name":"Silurian","abbrev":"S","color":"#B3E1B6","sections":{}},"Ordovician":{"name":"Ordovician","abbrev":"O","color":"#009270","sections":{}},"Cambrian":{"name":"Cambrian","abbrev":"Cm","color":"#7FA056","sections":{}},"PreCambrian":{"name":"PreCambrian","abbrev":"PCm","color":"#F04370","sections":{}}};
+        var column = [{
+            "name": "Quaternary",
+            "abbrev": "Q",
+            "color": "#F9F97F",
+            "t_age": 0,
+            "b_age": 2.588,
+            "sections": {}
+        },{
+            "name": "Neogene",
+            "abbrev": "Ng",
+            "color": "#FFE619",
+            "t_age": 2.588,
+            "b_age": 23.03,
+            "sections": {}
+        },{
+            "name": "Paleogene",
+            "abbrev": "Pg",
+            "color": "#FD9A52",
+            "t_age": 23.03,
+            "b_age": 66,
+            "sections": {}
+        },{
+            "name": "Cretaceous",
+            "abbrev": "K",
+            "color": "#7FC64E",
+            "t_age": 66,
+            "b_age": 145,
+            "sections": {}
+        },{
+            "name": "Jurassic",
+            "abbrev": "J",
+            "color": "#34B2C9",
+            "t_age": 145,
+            "b_age": 201.3,
+            "sections": {}
+        },{
+            "name": "Triassic",
+            "abbrev": "Tr",
+            "color": "#812b92",
+            "t_age": 201.3,
+            "b_age": 252.17,
+            "sections": {}
+        },{
+            "name": "Permian",
+            "abbrev": "P",
+            "color": "#F04028",
+            "t_age": 252.17,
+            "b_age": 298.9,
+            "sections": {}
+        },{
+            "name": "Carboniferous",
+            "abbrev": "C",
+            "color": "#67A599",
+            "t_age": 298.9,
+            "b_age": 358.9,
+            "sections": {}
+        },{
+            "name": "Devonian",
+            "abbrev": "D",
+            "color": "#CB8C37",
+            "t_age": 358.9,
+            "b_age": 419.2,
+            "sections": {}
+        },{
+            "name": "Silurian",
+            "abbrev": "S",
+            "color": "#B3E1B6",
+            "t_age": 419.2,
+            "b_age": 443.8,
+            "sections": {}
+        },{
+            "name": "Ordovician",
+            "abbrev": "O",
+            "color": "#009270",
+            "t_age": 443.8,
+            "b_age": 485.4,
+            "sections": {}
+        },{
+            "name": "Cambrian",
+            "abbrev": "Cm",
+            "color": "#7FA056",
+            "t_age": 485.4,
+            "b_age": 451,
+            "sections": {}
+        },{
+            "name": "PreCambrian",
+            "abbrev": "PCm",
+            "color": "#F04370",
+            "t_age": 451,
+            "b_age": 4000,
+            "sections": {}
+        }];
 
-        console.log(data)
         for (var i = 0; i < data.length; i++) {
           // Get the rgb value of the hex color
           data[i].rgba = hexToRgb(data[i].color.replace("#", ""), 0.7);
 
-          // Remove plutonic and metamorphic for now
-          if (data[i].lith_type.indexOf("plutonic") > -1 || data[i].lith_type.indexOf("metamorphic") > -1) {
-            continue;
-          }
-
-
-          // If there is no period or it's an unknown one, add it to PreCambrian
-          if (!column[data[i].period]) {
-            // If this time interval already has this section_id
-            if (column["PreCambrian"].sections[data[i].section_id]) {
-              column["PreCambrian"].sections[data[i].section_id].units.push(data[i]);
-            } 
-            // If this time interval doesn't have this section_id, add it
-            else {
-              column["PreCambrian"].sections[data[i].section_id] = {
-                "id": data[i].section_id,
-                "units": [data[i]]
+          // Find the right time bin
+          for (var j = 0; j < column.length; j++) {
+            // Check if the unit's age is contained in the time interval
+            if (data[i].t_age >= column[j].t_age && data[i].b_age <= column[j].b_age) {
+              if (column[j].sections[data[i].section_id]) {
+                column[j].sections[data[i].section_id].units.push(data[i]);
+              } else {
+                column[j].sections[data[i].section_id] = {
+                  "id": data[i].section_id,
+                  "units": [data[i]]
+                }
               }
-            }
-          } 
-          // If both this time interval exist and the time interval has this seciton, add the unit
-          else if (column[data[i].period].sections[data[i].section_id]) {
-            column[data[i].period].sections[data[i].section_id].units.push(data[i]);
-          } 
-          // Otherwise, add it as a new section in the time interval
-          else {
-            column[data[i].period].sections[data[i].section_id] = {
-              "id": data[i].section_id,
-              "units": [data[i]]
+              break;
             }
           }
         }
 
-        var newColumn = Object.keys(column).map(function(d) { 
-          return column[d]; 
+        var newColumn = Object.keys(column).map(function(d) {
+          return column[d];
         });
 
         newColumn.forEach(function(d) {
@@ -880,7 +951,7 @@
             return d;
           }
         });
-        
+
         // Draw the column
         $(".name-hierarchy").html(Mustache.render(templates.columnLayout, {"periods": newColumn }));
 
@@ -901,14 +972,14 @@
         Object.keys(types).forEach(function(d) {
           var prop = types[d].map(function(d) { return d.prop }).reduce(function(a, b) { return a + b }, 0);
           all.push({
-            name: d, 
-            y: prop/data.length, 
-            color: pallette[attr][d] 
+            name: d,
+            y: prop/data.length,
+            color: pallette[attr][d]
           });
         });
 
         return all;
-        
+
       }
 
 
@@ -916,7 +987,7 @@
 
         $.getJSON(apiUrl + "/api/v2/units?response=long&" + type + "=" + ids, function(data) {
           data = data.success.data;
-        
+
           if (type === "col_id") {
             drawColumn(data);
           }
@@ -935,7 +1006,7 @@
       }
     })();
 
-      
+
 
     function addToMap(data) {
       columnLayer = L.geoJson(topojson.feature(data, data.objects.output), {
@@ -955,18 +1026,18 @@
               weight: 1
             };
           }
-            
+
         },
         onEachFeature: function (feature, layer) {
-          layer.on("click", function(d) { 
-            window.location = "/sift/info/?col_id=" + d.target.feature.properties.col_id; 
+          layer.on("click", function(d) {
+            window.location = "/sift/info/?col_id=" + d.target.feature.properties.col_id;
           });
         }
       }).addTo(map);
 
       map.fitBounds(columnLayer.getBounds());
     }
-      
+
 
     function drawMap(type) {
       map = L.map("map", {
@@ -982,7 +1053,7 @@
       });
 
       // Add our basemap
-      
+
       dark = L.tileLayer("https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png", {
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>'
       });
@@ -1045,21 +1116,16 @@
         }
         $("#waiting").css("visibility", "hidden");
       }
-        
+
     }
 
     function getStratNameId(unit_id) {
       $.getJSON(apiUrl + "/api/v2/units?response=long&unit_id=" + unit_id, function(data) {
-        if (data.success.data.length > 0) {
+        if (data.success.data.length) {
 
           var unit = data.success.data[0],
-              liths = columns.summarizeAttr(data.success.data, "lith_type"),
-              environs = [],
-              eType = (unit.environ_type.length > 0) ? "environ_type" : "environ_class";
-              
-          unit[eType].forEach(function(d) {
-            environs.push({name: d, y: 100/unit[eType].length, color: environPallette[d]});
-          });
+              liths = columns.summarizeAttr(data.success.data, "lith"),
+              environs = columns.summarizeAttr(data.success.data, "environ");
 
           stratHierarchy.build(unit.strat_name_id);
 
@@ -1087,18 +1153,18 @@
         // Get strat_name hierarchy
         stratHierarchy.build(type[1]);
         columns.fetch(type, true);
-      
+
       } else if (type[0] === "unit_id") {
         // Find unit strat name then get hierarchy
         getStratNameId(type[1]);
-        
+
       } else if (type[0] === "col_id" || type[0] === "col_group_id") {
         // Draw strat column
         columns.fetch(type, true);
       }
 
     }
-    
+
     var templates = {
       column: $('#column-template').html(),
       columnSummary: $('#column-summary-template').html(),
@@ -1118,7 +1184,6 @@
     var type = window.location.search.replace("/", "").replace("?", "").split("=");
 
     if (queryParams.indexOf(type[0]) > -1) {
-      console.log("valid query");
       getData();
       drawMap(type[0]);
     } else {
