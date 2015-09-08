@@ -21,6 +21,7 @@ class Map extends React.Component {
     this.addLayer = this.addLayer.bind(this);
     this.state = {
       data: {features: [], _id: -1},
+      fossils: {features: [], _id: -1},
       target: '',
       outcrop: {features: [], _id: -1},
       showOutcrop: false
@@ -39,9 +40,13 @@ class Map extends React.Component {
       keyboard: false,
     //  dragging: false,
       touchZoom: false,
-    //  doubleClickZoom: false,
+      doubleClickZoom: false,
       boxZoom: false
     }).setView([40, -97], 6);
+
+    var control = L.control.zoom({
+      position: 'topright'
+    }).addTo(map);
 
     this.tiles = L.tileLayer("https://{s}.tiles.mapbox.com/v3/jczaplewski.j751k57j/{z}/{x}/{y}.png", {
       attribution: "<a href='https://www.mapbox.com/about/maps/' target='_blank'>&copy; Mapbox &copy; OpenStreetMap</a>"
@@ -62,6 +67,19 @@ class Map extends React.Component {
         }
       }
     });
+
+    this.fossilLayer = L.geoJson(null, {
+      pointToLayer: (feature, latlng) => {
+        return L.circleMarker(latlng, {
+          color: '#ffffff',
+          fillOpacity: 0.8,
+          opacity: 0.8,
+          weight: 1,
+          outline: 0,
+          radius: 1
+        })
+      }
+    }).addTo(map);
   }
 
   toggleOutcrop() {
@@ -157,6 +175,18 @@ class Map extends React.Component {
 
   }
 
+  addFossils(geojson) {
+    if (this.fossilLayer) {
+      this.fossilLayer.clearLayers();
+    }
+
+    if (!(geojson.features.length)) {
+      return;
+    }
+
+    this.fossilLayer.addData(geojson);
+  }
+
   componentWillReceiveProps(nextProps) {
     console.log("update map", nextProps.data._id, this.props.data._id)
     if (nextProps.hasOwnProperty('showOutcrop') && nextProps.showOutcrop != this.props.showOutcrop) {
@@ -167,10 +197,15 @@ class Map extends React.Component {
       console.log("update outcrop", nextProps.outcrop);
       this.addOutcropLayer(nextProps.outcrop);
     }
+    if (nextProps.hasOwnProperty('fossils') && nextProps.fossils._id != this.props.fossils._id) {
+      console.log("update fossils", nextProps.fossils);
+      this.addFossils(nextProps.fossils);
+    }
     if (nextProps.data._id != this.props.data._id) {
       console.log("update columns")
       this.addLayer(nextProps.data, nextProps.target, nextProps);
     }
+
   }
 
   render() {

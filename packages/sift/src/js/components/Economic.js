@@ -4,32 +4,27 @@ import Chart from './Chart';
 import Map from './Map';
 import SummaryStats from './SummaryStats';
 import ChartLegend from './ChartLegend';
-import StratNameHierarchy from './StratNameHierarchy';
 import NoData from './NoData';
-import PrevalentTaxa from './PrevalentTaxa';
+import Loading from './Loading';
 
-class Unit extends React.Component {
+class Economic extends React.Component {
   constructor(props) {
     super(props);
-    this.state = this._resetState()
+    this.state = this._resetState();
   }
 
   _resetState() {
     return {
+      loading: false,
       mapData: {features: [], _id: -1},
-      fossils: {features: [], _id: -1},
-      prevalentTaxa: [{oid: null, nam: '', img: null, noc: null}],
-      strat_name_ids: [],
       liths: [],
       econs: [],
       environs: [],
-      properties: {
-        col_group: '',
-        col_group_id: '',
-        group_col_id: '',
-        unit_id: '',
-        unit_name: '',
-        strat_name_id: '',
+      target: {
+        name: '',
+        lith_id: ''
+      },
+      summary: {
         col_area: '',
         max_thick: '',
         min_thick: '',
@@ -47,52 +42,25 @@ class Unit extends React.Component {
   }
 
   _update(id) {
-    Utilities.fetchMapData(`columns?unit_id=${id}&response=long`, (error, data) => {
-      Utilities.fetchData(`units?unit_id=${id}&response=long`, (unitError, unitData) => {
-        if (error || unitError || unitData.success.data.length < 1) {
+    this.setState({
+      loading: true
+    });
+    Utilities.fetchMapData(`columns?econ_id=${id}&response=long`, (error, data) => {
+      Utilities.fetchData(`defs/econs?econ_id=${id}`, (econError, econData) => {
+        if (error || econError || !data.features.length) {
           return this.setState(this._resetState());
         }
-        Utilities.fetchMapData(`fossils?unit_id=${id}`, (fossilError, fossilData) => {
-          if (fossilError) {
-            return console.log("Error fetching fossils ", error);
-          }
-          this.setState({
-            fossils: fossilData
-          });
 
-          var collections = fossilData.features.map(d => { return d.properties.cltn_id });
-
-          if (collections.length) {
-            Utilities.fetchPrevalentTaxa(collections.join(','), (prevalentError, prevalentData) => {
-              if (prevalentError) {
-                return;
-              }
-              // Normalize the names a bit
-              prevalentData.records.forEach(d => {
-                var splitName = d.nam.split(' ');
-                d.nam = splitName[0] + ( (splitName.length > 1) ? '*' : '');
-              });
-
-              this.setState({
-                prevalentTaxa: prevalentData.records
-              });
-            });
-          } else {
-            this.setState({
-              prevalentTaxa: [{oid: null, nam: '', img: null, noc: null}]
-            });
-          }
-
-        });
-        var attributes = unitData.success.data[0] || {};
         this.setState({
-          liths: Utilities.parseAttributes('lith', attributes.lith),
-          environs: Utilities.parseAttributes('environ', attributes.environ),
-          econs: Utilities.parseAttributes('econ', attributes.econ),
-          strat_name_ids: unitData.success.data.map(d => { return d.strat_name_id }).filter(d => { if (d) { return d } }),
-          properties: attributes,
-          mapData: data
-        })
+          liths: Utilities.parseAttributes('lith', Utilities.summarizeAttributes('lith', data.features)),
+          environs: Utilities.parseAttributes('environ', Utilities.summarizeAttributes('environ', data.features)),
+          econs: Utilities.parseAttributes('econ', Utilities.summarizeAttributes('econ', data.features)),
+          summary: Utilities.summarize(data.features),
+          properties: data.features[0].properties,
+          mapData: data,
+          target: econData.success.data[0],
+          loading: false
+        });
       });
     });
   }
@@ -153,31 +121,32 @@ class Unit extends React.Component {
       <div id='column-environ-chart-legend'></div>
       </div>
     }
-
-
     return (
       <div>
         <div className='page-title'>
-          {this.state.properties.unit_id ? <a href={'#/unit/' + this.state.properties.unit_id}>Unit {this.state.properties.unit_id} &mdash; {this.state.properties.unit_name}</a> : ''}
+          <a href={'#/lithology/' + this.state.target.lith_id}>{this.state.target.name}</a>
         </div>
 
+        <Loading
+          loading={this.state.loading}
+        />
         <NoData
           features={this.state.mapData.features}
-          type={'unit'}
+          type={'lithology'}
+          loading={this.state.loading}
         />
 
         <div className={this.state.mapData.features.length ? '' : 'hidden'}>
           <div className='random-column'>
             <div className='random-column-stats'>
               <SummaryStats
-                data={this.state.properties}
+                data={this.state.summary}
               />
             </div>
             <Map
               className='table-cell'
               data={this.state.mapData}
               target={false}
-              fossils={this.state.fossils}
             />
           </div>
 
@@ -192,19 +161,11 @@ class Unit extends React.Component {
               {econChart}
             </div>
           </div>
-
-          <PrevalentTaxa data={this.state.prevalentTaxa} />
-          
-          <StratNameHierarchy
-            stratNameID={this.state.properties.strat_name_id}
-          />
         </div>
       </div>
-
     );
 
   }
 }
 
-
-export default Unit;
+export default Economic;

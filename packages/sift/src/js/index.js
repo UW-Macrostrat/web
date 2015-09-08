@@ -10,6 +10,8 @@ import StratName from './components/StratName';
 import Lithology from './components/Lithology';
 import Interval from './components/Interval';
 import Environment from './components/Environment';
+import Economic from './components/Economic';
+
 import NotFound from './components/NotFound';
 
 var { Route, DefaultRoute, RouteHandler, NotFoundRoute, Link } = Router;
@@ -27,6 +29,7 @@ var SiftRouter = Router.create({
        <Route name='lithology' path='lithology/:id' handler={Lithology}/>
        <Route name='interval' path='interval/:id' handler={Interval}/>
        <Route name='environment' path='environment/:id' handler={Environment}/>
+       <Route name='economic' path='economic/:id' handler={Economic}/>
 
        <NotFoundRoute handler={NotFound} />
      </Route>

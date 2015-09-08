@@ -1,6 +1,9 @@
 import _ from 'underscore';
 import xhr from 'xhr';
 import topojson from 'topojson';
+import Explode from 'turf-explode';
+import Convex from 'turf-convex';
+import Wellknown from 'wellknown';
 import Config from './Config';
 
 var typeLookup = {
@@ -10,6 +13,13 @@ var typeLookup = {
 }
 
 var Utilities = {
+  wktHull(data) {
+    return Wellknown.stringify(
+      Convex(
+        Explode(data)
+      )
+    );
+  },
 
   fetchMapData(uri, callback) {
     xhr({
@@ -32,6 +42,39 @@ var Utilities = {
     });
   },
 
+  fetchPrevalentTaxa(coll_ids, callback) {
+    xhr({
+      uri: `${Config.pbdbURL}/occs/prevalence.json?limit=5&coll_id=${coll_ids}`
+    }, (error, response, body) => {
+      callback(error, JSON.parse(body));
+    });
+  },
+
+  fetchPBDBCollections(space, callback) {
+    // Get a convex hull of the desired extent as WKT
+    var hull = this.wktHull(space);
+    xhr({
+      uri: `${Config.pbdbURL}/colls/list.json?loc='${hull}'`
+    }, (error, response, body) => {
+      var data = JSON.parse(body);
+      callback(error, {
+        "type": "FeatureCollection",
+        "features": data.records.map(d => {
+          return {
+            "type": "Feature",
+            "properties": {},
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                d.lng,
+                d.lat
+              ]
+            }
+          };
+        })
+      });
+    });
+  },
 
   /* via http://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript */
   addCommas(obj) {
@@ -95,9 +138,11 @@ var Utilities = {
     var summary = {
       col_area: 0,
       max_thick: 0,
-      min_thick: 99999,
+      min_min_thick: 99999,
       b_age: 0,
       t_age: 99999,
+      b_int_name: '',
+      t_int_name: '',
       pbdb_collections: 0,
       t_units: 0,
       t_sections: 0
@@ -112,14 +157,16 @@ var Utilities = {
       if (data[i].properties.max_thick > summary.max_thick) {
         summary.max_thick = data[i].properties.max_thick
       }
-      if (data[i].properties.min_thick < summary.min_thick) {
-        summary.min_thick = data[i].properties.min_thick;
+      if (data[i].properties.min_min_thick < summary.min_min_thick) {
+        summary.min_min_thick = data[i].properties.min_min_thick;
       }
       if (data[i].properties.b_age > summary.b_age) {
         summary.b_age = data[i].properties.b_age;
+        summary.b_int_name = data[i].properties.b_int_name;
       }
       if (data[i].properties.t_age < summary.t_age) {
         summary.t_age = data[i].properties.t_age;
+        summary.t_int_name = data[i].properties.t_int_name;
       }
     }
 

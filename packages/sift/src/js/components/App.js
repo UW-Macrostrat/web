@@ -21,7 +21,7 @@ class App extends React.Component {
             </a>
           </div>
           <div className='headerItem right'>
-            <div className={(window.location.hash.length < 3) ? 'hide' : 'autocomplete-wrapper'}>
+            <div className='autocomplete-wrapper'>
               <Autocomplete minLength='2'/>
             </div>
           </div>

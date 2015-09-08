@@ -7,6 +7,7 @@ import ChartLegend from './ChartLegend';
 import StratNameHierarchy from './StratNameHierarchy';
 import NoData from './NoData';
 import Loading from './Loading';
+import PrevalentTaxa from './PrevalentTaxa';
 
 class StratName extends React.Component {
   constructor(props) {
@@ -26,11 +27,22 @@ class StratName extends React.Component {
       type: '',
       id: '',
       mapData: {features: [], _id: -1},
+      fossils: {features: [], _id: -1},
       outcropData: {features: [], _id: -1},
+      prevalentTaxa: [{oid: null, nam: '', img: null, noc: null}],
       showOutcrop: false,
       liths: [],
       econs: [],
       strat_names: [],
+      concept: {
+        concept_id: null,
+        name: '',
+        geologic_age: '',
+        int_id: null,
+        usage_notes: '',
+        other: '',
+        province: ''
+      },
       name: {
         name: '',
         id: '',
@@ -74,67 +86,115 @@ class StratName extends React.Component {
     this.setState({
       loading: true
     });
-    if (type === 'strat_name_concept_id') {
-      Utilities.fetchMapData(`columns?${type}=${id}&response=long`, (mapError, data) => {
-        Utilities.fetchData(`defs/strat_names?${type}=${id}`, (stratNameError, stratNameData) => {
-          Utilities.fetchData(`defs/strat_name_concepts?concept_id=${id}`, (conceptError, conceptData) => {
-              if (mapError || stratNameError || conceptError || !data.features.length) {
-                return this.setState(this._resetState());
-              }
-              this.setState({
-                name: {
-                  id: conceptData.success.data[0].concept_id,
-                  name: conceptData.success.data[0].name,
-                  url: '#/strat_name_concept/' + conceptData.success.data[0].concept_id
-                },
-                strat_names: stratNameData.success.data.sort((a,b) => {
-                  if (a.t_units > b.t_units) {
-                    return -1;
-                  }
-                  return 1;
-                }),
-                liths: Utilities.parseAttributes('lith', Utilities.summarizeAttributes('lith', data.features)),
-                environs: Utilities.parseAttributes('environ', Utilities.summarizeAttributes('environ', data.features)),
-                econs: Utilities.parseAttributes('econ', Utilities.summarizeAttributes('econ', data.features)),
-                mapData: data,
-                outcropData: {features: [], _id: -1},
-                showOutcrop: false,
-                summary: Utilities.summarize(data.features),
-                type: type,
-                id: id,
-                loading: false
-              });
-          });
+    /*
+      1. Get columns -- strat_name_id = ? || concept_id = ?
+      (async)
+        2. Get fossils
+        2.5. Get prevalent taxa
+      3. Get strat_name_concept -- strat_name_id = ? || concept_id = ?
+      4. Get strat_names for concept returned above
+      5. if type === strat_name, get strat_names for strat_name_id
+    */
+
+    Utilities.fetchMapData(`columns?${type}=${id}&response=long`, (mapError, data) => {
+      if (mapError || !data.features.length) {
+        return this.setState(this._resetState());
+      }
+
+      Utilities.fetchMapData(`fossils?${type}=${id}`, (fossilError, fossilData) => {
+        if (fossilError) {
+          return console.log("Error fetching fossils ", error);
+        }
+        this.setState({
+          fossils: fossilData
         });
+
+        var collections = fossilData.features.map(d => { return d.properties.cltn_id });
+
+        if (collections.length) {
+          Utilities.fetchPrevalentTaxa(collections.join(','), (prevalentError, prevalentData) => {
+            if (prevalentError) {
+              return;
+            }
+            // Normalize the names a bit
+            prevalentData.records.forEach(d => {
+              var splitName = d.nam.split(' ');
+              d.nam = splitName[0] + ( (splitName.length > 1) ? '*' : '');
+            });
+
+            this.setState({
+              prevalentTaxa: prevalentData.records
+            });
+          });
+        } else {
+          this.setState({
+            prevalentTaxa: [{oid: null, nam: '', img: null, noc: null}]
+          });
+        }
       });
 
-    } else {
-      Utilities.fetchMapData(`columns?${type}=${id}&response=long`, (mapError, data) => {
-        Utilities.fetchData(`defs/strat_names?${type}=${id}`, (error, stratNameData) => {
-            if (mapError || error || !data.features.length) {
-              return this.setState(this._resetState());
-            }
-            this.setState({
-              name: {
-                id: stratNameData.success.data[0].strat_name_id,
-                name: stratNameData.success.data[0].strat_name + ' ' + stratNameData.success.data[0].rank,
-                url: '#/strat_name/' + stratNameData.success.data[0].strat_name_id
-              },
-              strat_names: [],
-              liths: Utilities.parseAttributes('lith', Utilities.summarizeAttributes('lith', data.features)),
-              environs: Utilities.parseAttributes('environ', Utilities.summarizeAttributes('environ', data.features)),
-              econs: Utilities.parseAttributes('econ', Utilities.summarizeAttributes('econ', data.features)),
-              mapData: data,
-              outcropData: {features: [], _id: -1},
-              showOutcrop: false,
-              summary: Utilities.summarize(data.features),
-              type: type,
-              id: id,
-              loading: false
+
+      Utilities.fetchData(`defs/strat_name_concepts?${type}=${id}`, (conceptError, conceptData) => {
+        if (conceptError || !conceptData.success || !conceptData.success.data.length) {
+          return this.setState(this._resetState());
+        }
+
+        var concept_id = conceptData.success.data[0].concept_id
+        Utilities.fetchData(`defs/strat_names?strat_name_concept_id=${concept_id}`, (stratNameConceptError, stratNameConceptData) => {
+          if (stratNameConceptError || !stratNameConceptData.success || !stratNameConceptData.success.data.length) {
+            return this.setState(this._resetState());
+          }
+
+          var name;
+
+          if (type === 'strat_name_id') {
+            var target = stratNameConceptData.success.data.filter(d => {
+              if (d.strat_name_id == id) {
+                return d;
+              }
             });
+
+            if (target.length) {
+              name = {
+                id: target[0].strat_name_id,
+                name: target[0].strat_name + ' ' + target[0].rank,
+                url: '#/strat_name/' + target[0].strat_name_id,
+              }
+            }
+          } else {
+            name = {
+              id: conceptData.success.data[0].concept_id,
+              name: conceptData.success.data[0].name,
+              url: '#/strat_name_concept/' + conceptData.success.data[0].concept_id
+            }
+          }
+
+          this.setState({
+            name: name,
+            concept: conceptData.success.data[0],
+            strat_names: stratNameConceptData.success.data.sort((a,b) => {
+              if (a.t_units > b.t_units) {
+                return -1;
+              }
+              return 1;
+            }),
+            liths: Utilities.parseAttributes('lith', Utilities.summarizeAttributes('lith', data.features)),
+            environs: Utilities.parseAttributes('environ', Utilities.summarizeAttributes('environ', data.features)),
+            econs: Utilities.parseAttributes('econ', Utilities.summarizeAttributes('econ', data.features)),
+            mapData: data,
+            outcropData: {features: [], _id: -1},
+            showOutcrop: false,
+            summary: Utilities.summarize(data.features),
+            type: type,
+            id: id,
+            loading: false
+          });
+
         });
       });
-    }
+    });
+
+
   }
 
   toggleOutcrop() {
@@ -244,12 +304,6 @@ class StratName extends React.Component {
       <div>
         <div className='page-title'>
           <a href={this.state.name.url}>{this.state.name.name}</a>
-          <div className='list-group concept-names'>
-            {this.state.strat_names.map((d,i) => {
-              var parent = (d[rankMap[d.rank]]) ? ' of ' + d[rankMap[d.rank]] + ' ' + rankMap[d.rank] : '';
-              return <a key={i} href={'#/strat_name/' + d.strat_name_id} className='list-group-item'>{d.strat_name} {d.rank} {parent} <span className='badge'>{d.t_units}</span></a>
-            })}
-          </div>
         </div>
 
         <Loading
@@ -284,10 +338,11 @@ class StratName extends React.Component {
               target={false}
               showOutcrop={this.state.showOutcrop}
               outcrop={this.state.outcropData}
+              fossils={this.state.fossils}
             />
           </div>
 
-          <div className='row'>
+          <div className='row chart-row'>
             <div className={'col-sm-' + (12/totalCharts)}>
               {lithChart}
             </div>
@@ -297,6 +352,15 @@ class StratName extends React.Component {
             <div className={'col-sm-' + (12/totalCharts)}>
               {econChart}
             </div>
+          </div>
+
+          <PrevalentTaxa data={this.state.prevalentTaxa} />
+
+          <div className='list-group concept-names'>
+            {this.state.strat_names.map((d,i) => {
+              var parent = (d[rankMap[d.rank]]) ? ' of ' + d[rankMap[d.rank]] + ' ' + rankMap[d.rank] : '';
+              return <a key={i} href={'#/strat_name/' + d.strat_name_id} className='list-group-item'>{d.strat_name} {d.rank} {parent} <span className='badge'>{d.t_units}</span></a>
+            })}
           </div>
 
           {stratHierarchy}

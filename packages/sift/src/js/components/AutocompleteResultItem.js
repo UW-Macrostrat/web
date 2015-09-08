@@ -22,7 +22,8 @@ class AutocompleteResultItem extends React.Component {
         onMouseOver={this.handleMouse}
         onMouseOut={this.handleMouse}
         onClick={this.handleClick}
-      >{this.props.title} {(this.props.id > 0) ? '(' + this.props.id + ')' : ''}</li>
+      >{this.props.title} {(this.props.id > 0) ?
+        (<span className='result-item-id'>{this.props.id}</span>) : ''}</li>
     );
   }
 }

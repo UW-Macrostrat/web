@@ -16,7 +16,10 @@
     "react": "^0.13.3",
     "react-router": "^0.13.3",
     "topojson": "^1.6.19",
+    "turf-convex": "^1.0.1",
+    "turf-explode": "^1.0.1",
     "underscore": "^1.8.3",
+    "wellknown": "^0.3.2",
     "xhr": "^2.0.3"
   },
   "devDependencies": {

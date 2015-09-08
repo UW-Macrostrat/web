@@ -7,7 +7,7 @@ class ColumnStats extends React.Component {
       <table className='random-column-stats-table table-cell'>
         <tr>
           <td>
-            <span className='big-number'>{this.props.data.t_sections}</span> sections
+            <span className='big-number'>{this.props.data.t_sections}</span> packages
           </td>
         </tr>
         <tr>

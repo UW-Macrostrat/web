@@ -250,7 +250,9 @@ Autocomplete.defaultProps = {
     'strat_name_orphans': 'Other names',
     'lithologies': 'Lithologies',
     'environments': 'Environments',
-    'burwell': 'Burwell'
+    'econs': 'Economic',
+    'burwell': 'Burwell',
+    'groups': 'Groups'
   },
   categoryRoutes: {
     'columns': 'column',
@@ -258,7 +260,9 @@ Autocomplete.defaultProps = {
     'strat_name_concepts': 'strat_name_concept',
     'lithologies': 'lithology',
     'environments': 'environment',
-    'burwell': 'burwell'
+    'burwell': 'burwell',
+    'groups': 'group',
+    'econs': 'economic'
   }
 }
 

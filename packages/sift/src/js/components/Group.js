@@ -17,6 +17,7 @@ class Group extends React.Component {
     return {
       loading: false,
       mapData: {features: [], _id: -1},
+      fossils: {features: [], _id: -1},
       liths: [],
       econs: [],
       environs: [],
@@ -50,7 +51,14 @@ class Group extends React.Component {
       if (error || !data.features.length) {
         return this.setState(this._resetState());
       }
-
+      Utilities.fetchMapData(`fossils?col_group_id=${id}`, (fossilError, fossilData) => {
+        if (error) {
+          return console.log("Error fetching fossils ", error);
+        }
+        this.setState({
+          fossils: fossilData
+        });
+      });
       this.setState({
         liths: Utilities.parseAttributes('lith', Utilities.summarizeAttributes('lith', data.features)),
         environs: Utilities.parseAttributes('environ', Utilities.summarizeAttributes('environ', data.features)),
@@ -146,6 +154,7 @@ class Group extends React.Component {
               className='table-cell'
               data={this.state.mapData}
               target={false}
+              fossils={this.state.fossils}
             />
           </div>
 
