@@ -79,7 +79,7 @@ class Map extends React.Component {
           radius: 1
         })
       }
-    }).addTo(map);
+    }).addTo(map).bringToFront();
   }
 
   toggleOutcrop() {
@@ -154,6 +154,7 @@ class Map extends React.Component {
     // Add columns if we are not showing outcrops and not showing columns
     if (!(this.map.hasLayer(this.layer)) && (props.showOutcrop == false)) {
       this.map.addLayer(this.layer);
+      this.layer.bringToBack();
     }
 
     if (target) {

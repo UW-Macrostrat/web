@@ -11,10 +11,17 @@ class Lithology extends React.Component {
   constructor(props) {
     super(props);
     this.state = this._resetState();
+    this.stateLookup = {
+      'lithology': 'lith_id',
+      'lithology_type': 'lith_type',
+      'lithology_class': 'lith_class'
+    }
   }
 
   _resetState() {
     return {
+      type: '',
+      id: '',
       loading: false,
       mapData: {features: [], _id: -1},
       liths: [],
@@ -41,24 +48,26 @@ class Lithology extends React.Component {
     document.getElementById(which + '-legend').innerHTML = html
   }
 
-  _update(id) {
+  _update(type, id) {
     this.setState({
       loading: true
     });
-    Utilities.fetchMapData(`columns?lith_id=${id}&response=long`, (error, data) => {
-      Utilities.fetchData(`defs/lithologies?lith_id=${id}`, (lithError, lithData) => {
+    Utilities.fetchMapData(`columns?${type}=${id}&response=long`, (error, data) => {
+      Utilities.fetchData(`defs/lithologies?${type}=${id}`, (lithError, lithData) => {
         if (error || lithError || !data.features.length) {
           return this.setState(this._resetState());
         }
 
         this.setState({
+          type: type,
+          id: id,
           liths: Utilities.parseAttributes('lith', Utilities.summarizeAttributes('lith', data.features)),
           environs: Utilities.parseAttributes('environ', Utilities.summarizeAttributes('environ', data.features)),
           econs: Utilities.parseAttributes('econ', Utilities.summarizeAttributes('econ', data.features)),
           summary: Utilities.summarize(data.features),
           properties: data.features[0].properties,
           mapData: data,
-          target: lithData.success.data[0],
+          target: (typeof(id) == 'string' ? {'name': id} :  lithData.success.data[0]),
           loading: false
         });
       });
@@ -66,12 +75,18 @@ class Lithology extends React.Component {
   }
 
   componentDidMount() {
-    this._update(this.props.params.id);
+    var currentRoutes = this.context.router.getCurrentRoutes();
+    var activeRoute = currentRoutes[currentRoutes.length - 1].name;
+
+    this._update(this.stateLookup[activeRoute], this.props.params.id);
   }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.params.id !== this.props.params.id) {
-      this._update(nextProps.params.id);
+      var currentRoutes = this.context.router.getCurrentRoutes();
+      var activeRoute = currentRoutes[currentRoutes.length - 1].name;
+
+      this._update(this.stateLookup[activeRoute], nextProps.params.id);
     }
   }
 
@@ -124,7 +139,7 @@ class Lithology extends React.Component {
     return (
       <div>
         <div className='page-title'>
-          <a href={'#/lithology/' + this.state.target.lith_id}>{this.state.target.name}</a>
+          <a href={'#/' + this.state.type + '/' + this.state.id}>{this.state.target.name}</a>
         </div>
 
         <Loading
@@ -164,8 +179,11 @@ class Lithology extends React.Component {
         </div>
       </div>
     );
-
   }
+}
+
+Lithology.contextTypes = {
+  router: React.PropTypes.func.isRequired
 }
 
 export default Lithology;

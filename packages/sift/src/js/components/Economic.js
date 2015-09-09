@@ -11,10 +11,17 @@ class Economic extends React.Component {
   constructor(props) {
     super(props);
     this.state = this._resetState();
+    this.stateLookup = {
+      'economic': 'econ_id',
+      'economic_type': 'econ_type',
+      'economic_class': 'econ_class'
+    }
   }
 
   _resetState() {
     return {
+      type: '',
+      id: '',
       loading: false,
       mapData: {features: [], _id: -1},
       liths: [],
@@ -41,24 +48,26 @@ class Economic extends React.Component {
     document.getElementById(which + '-legend').innerHTML = html
   }
 
-  _update(id) {
+  _update(type, id) {
     this.setState({
       loading: true
     });
-    Utilities.fetchMapData(`columns?econ_id=${id}&response=long`, (error, data) => {
-      Utilities.fetchData(`defs/econs?econ_id=${id}`, (econError, econData) => {
+    Utilities.fetchMapData(`columns?${type}=${id}&response=long`, (error, data) => {
+      Utilities.fetchData(`defs/econs?${type}=${id}`, (econError, econData) => {
         if (error || econError || !data.features.length) {
           return this.setState(this._resetState());
         }
 
         this.setState({
+          type: type,
+          id: id,
           liths: Utilities.parseAttributes('lith', Utilities.summarizeAttributes('lith', data.features)),
           environs: Utilities.parseAttributes('environ', Utilities.summarizeAttributes('environ', data.features)),
           econs: Utilities.parseAttributes('econ', Utilities.summarizeAttributes('econ', data.features)),
           summary: Utilities.summarize(data.features),
           properties: data.features[0].properties,
           mapData: data,
-          target: econData.success.data[0],
+          target: (typeof(id) == 'string' ? {'name': id} :  econData.success.data[0]),
           loading: false
         });
       });
@@ -66,12 +75,18 @@ class Economic extends React.Component {
   }
 
   componentDidMount() {
-    this._update(this.props.params.id);
+    var currentRoutes = this.context.router.getCurrentRoutes();
+    var activeRoute = currentRoutes[currentRoutes.length - 1].name;
+
+    this._update(this.stateLookup[activeRoute], this.props.params.id);
   }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.params.id !== this.props.params.id) {
-      this._update(nextProps.params.id);
+      var currentRoutes = this.context.router.getCurrentRoutes();
+      var activeRoute = currentRoutes[currentRoutes.length - 1].name;
+
+      this._update(this.stateLookup[activeRoute], nextProps.params.id);
     }
   }
 
@@ -166,6 +181,10 @@ class Economic extends React.Component {
     );
 
   }
+}
+
+Economic.contextTypes = {
+  router: React.PropTypes.func.isRequired
 }
 
 export default Economic;

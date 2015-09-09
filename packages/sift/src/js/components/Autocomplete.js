@@ -39,7 +39,7 @@ class Autocomplete extends React.Component {
   }
 
   updateResults(data) {
-    data.burwell = [{"id": 0, "name": this.state.searchTerm}]
+  //  data.burwell = [{"id": 0, "name": this.state.searchTerm}]
     // Set the data
     this.setState({results: data});
 
@@ -163,11 +163,19 @@ class Autocomplete extends React.Component {
     }
     this.setState({selectedItem: item.props});
     this.setState({searchTerm: item.props.title});
-    if (this.props.categoryRoutes[item.props.dataset] != 'burwell') {
+
+    if (item.props.id != 0) {
+      window.location.hash = '#/' + this.props.categoryRoutes[item.props.dataset] + '/' + item.props.id;
+    } else {
+      console.log(item.props)
+      window.location.hash = '#/' + this.props.categoryRoutes[item.props.dataset] + '/' + item.props.title;
+    }
+
+  /*  if (this.props.categoryRoutes[item.props.dataset] != 'burwell') {
       window.location.hash = "#/" + this.props.categoryRoutes[item.props.dataset] + "/" + item.props.id;
     } else {
       window.location.hash = "#/burwell/" + item.props.title.toLowerCase();
-    }
+    }*/
 
     this.setState({
      showSuggestions: false,
@@ -246,11 +254,17 @@ Autocomplete.defaultProps = {
   categoryLookup: {
     'columns': 'Columns',
     'intervals': 'Intervals',
-    'strat_name_concepts': 'Stragrigraphic Names',
+    'strat_name_concepts': 'Stratigraphic Names',
     'strat_name_orphans': 'Other names',
     'lithologies': 'Lithologies',
+    'lithology_types': 'Lithology Types',
+    'lithology_classes': 'Lithology Classes',
     'environments': 'Environments',
+    'environment_types': 'Environment Types',
+    'enviornment_classes': 'Environment Classes',
     'econs': 'Economic',
+    'econ_types': 'Economic Types',
+    'econ_classes': 'Economic Classes',
     'burwell': 'Burwell',
     'groups': 'Groups'
   },
@@ -258,11 +272,18 @@ Autocomplete.defaultProps = {
     'columns': 'column',
     'intervals': 'interval',
     'strat_name_concepts': 'strat_name_concept',
+    'strat_name_orphans': 'strat_name',
     'lithologies': 'lithology',
+    'lithology_types': 'lithology_type',
+    'lithology_classes': 'lithology_class',
     'environments': 'environment',
+    'environment_types': 'environment_type',
+    'environment_classes': 'environment_class',
     'burwell': 'burwell',
     'groups': 'group',
-    'econs': 'economic'
+    'econs': 'economic',
+    'econ_types': 'economic_type',
+    'econ_classes': 'economic_class'
   }
 }
 

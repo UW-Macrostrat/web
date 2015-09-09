@@ -318,7 +318,7 @@ class StratName extends React.Component {
         />
 
         <NoData
-          features={this.state.mapData.features}
+          features={this.state.strat_names}
           type={'name'}
           loading={this.state.loading}
         />
