@@ -96,11 +96,14 @@ class StratName extends React.Component {
       5. if type === strat_name, get strat_names for strat_name_id
     */
 
+    // Get column geometry for map and summary attributes
     Utilities.fetchMapData(`columns?${type}=${id}&response=long`, (mapError, data) => {
       if (mapError || !data.features.length) {
-        return this.setState(this._resetState());
+        console.log('reset')
+        this.setState(this._resetState());
       }
 
+      // Get fossil data (async)
       Utilities.fetchMapData(`fossils?${type}=${id}`, (fossilError, fossilData) => {
         if (fossilError) {
           return console.log("Error fetching fossils ", error);
@@ -111,6 +114,7 @@ class StratName extends React.Component {
 
         var collections = fossilData.features.map(d => { return d.properties.cltn_id });
 
+        // If there are any fossil collections, get prevalent taxa from PBDB
         if (collections.length) {
           Utilities.fetchPrevalentTaxa(collections.join(','), (prevalentError, prevalentData) => {
             if (prevalentError) {
@@ -133,18 +137,27 @@ class StratName extends React.Component {
         }
       });
 
-
+      // Get the concept of whatever name or concept we are looking at
       Utilities.fetchData(`defs/strat_name_concepts?${type}=${id}`, (conceptError, conceptData) => {
-        if (conceptError || !conceptData.success || !conceptData.success.data.length) {
+        if (conceptError || !conceptData.success) {
           return this.setState(this._resetState());
         }
 
-        var concept_id = conceptData.success.data[0].concept_id
-        Utilities.fetchData(`defs/strat_names?strat_name_concept_id=${concept_id}`, (stratNameConceptError, stratNameConceptData) => {
-          if (stratNameConceptError || !stratNameConceptData.success || !stratNameConceptData.success.data.length) {
+        var params;
+        if (!conceptData.success.data.length) {
+          params = `strat_name_id=${id}`;
+        } else {
+          var concept_id = conceptData.success.data[0].concept_id
+          params = `strat_name_concept_id=${concept_id}`;
+        }
+        // Get all strat names associated with that concept for the concept component
+
+        Utilities.fetchData('defs/strat_names?' + params, (stratNameConceptError, stratNameConceptData) => {
+          if (stratNameConceptError || !stratNameConceptData.success) {
             return this.setState(this._resetState());
           }
 
+          // Determine the main info for the page
           var name;
 
           if (type === 'strat_name_id') {
@@ -169,9 +182,18 @@ class StratName extends React.Component {
             }
           }
 
+          // Set the state
           this.setState({
             name: name,
-            concept: conceptData.success.data[0],
+            concept: conceptData.success.data[0] || {
+              concept_id: null,
+              name: '',
+              geologic_age: '',
+              int_id: null,
+              usage_notes: '',
+              other: '',
+              province: ''
+            },
             strat_names: stratNameConceptData.success.data.sort((a,b) => {
               if (a.t_units > b.t_units) {
                 return -1;
@@ -189,12 +211,9 @@ class StratName extends React.Component {
             id: id,
             loading: false
           });
-
         });
       });
     });
-
-
   }
 
   toggleOutcrop() {
@@ -292,20 +311,8 @@ class StratName extends React.Component {
       />
     }
 
-  /*  if (this.state.mapData.features.length < 1) {
-      return (
-        <div className='no-results'>
-          <h1>No data matched to this unit</h1>
-        </div>
-      )
-    }*/
-
     return (
       <div>
-        <div className='page-title'>
-          <a href={this.state.name.url}>{this.state.name.name}</a>
-        </div>
-
         <Loading
           loading={this.state.loading}
         />
@@ -317,6 +324,9 @@ class StratName extends React.Component {
         />
 
         <div className={this.state.mapData.features.length ? '' : 'hidden'}>
+          <div className='page-title'>
+            <a href={this.state.name.url}>{this.state.name.name}</a>
+          </div>
 
           <div className='random-column'>
             <div className='random-column-stats'>
@@ -356,15 +366,34 @@ class StratName extends React.Component {
 
           <PrevalentTaxa data={this.state.prevalentTaxa} />
 
-          <div className='list-group concept-names'>
-            {this.state.strat_names.map((d,i) => {
-              var parent = (d[rankMap[d.rank]]) ? ' of ' + d[rankMap[d.rank]] + ' ' + rankMap[d.rank] : '';
-              return <a key={i} href={'#/strat_name/' + d.strat_name_id} className='list-group-item'>{d.strat_name} {d.rank} {parent} <span className='badge'>{d.t_units}</span></a>
-            })}
-          </div>
-
-          {stratHierarchy}
         </div>
+
+        <div className={this.state.concept.concept_id ? 'row concept-info' : 'hidden'}>
+          <div className='col-sm-12'>
+            <div className='concept-group-title'>
+              <h3>{this.state.concept.name}</h3><span className='concept-ref'>via <a href={'http://ngmdb.usgs.gov/Geolex/Units/' + this.state.concept.name.replace(' ', '') + '_' + this.state.concept.concept_id + '.html'} target='_blank' className='normalize-link'>USGS</a></span>
+            </div>
+          </div>
+          <div className='col-sm-4'>
+            <div className='concept-group-attributes'>
+              {this.state.concept.province ? <p><strong>Province: </strong>{this.state.concept.province}</p> : ''}
+              {this.state.concept.geologic_age ? <p><strong>Age: </strong>{this.state.concept.geologic_age}</p> : ''}
+              {this.state.concept.other ? <p><strong>Notes: </strong>{this.state.concept.other}</p> : ''}
+              {this.state.concept.usage_notes ? <p><strong>Usage: </strong>{this.state.concept.usage_notes}</p> : ''}
+            </div>
+          </div>
+          <div className='col-sm-8'>
+            <div className='list-group concept-names'>
+              {this.state.strat_names.map((d,i) => {
+                var parent = (d[rankMap[d.rank]]) ? ' of ' + d[rankMap[d.rank]] + ' ' + rankMap[d.rank] : '';
+                return <a key={i} href={'#/strat_name/' + d.strat_name_id} className='list-group-item'>{d.strat_name} {d.rank} {parent} <span className='badge'>{d.t_units}</span></a>
+              })}
+            </div>
+          </div>
+        </div>
+
+        {stratHierarchy}
+
       </div>
     );
 

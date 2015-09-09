@@ -176,7 +176,7 @@ class StratColumn extends React.Component {
     render() {
       if (this.state.periods.length) {
         return (
-          <div>
+          <div className='strat-column'>
           {this.state.periods.map((period, period_idx) => {
             return (
               <div className='row' key={period_idx}>

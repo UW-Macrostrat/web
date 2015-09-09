@@ -262,6 +262,7 @@ class Column extends React.Component {
             <PrevalentTaxa data={this.state.prevalentTaxa} />
 
             <StratColumn data={this.state.units}/>
+            <a href={'https://dev.macrostrat.org/unit-renderer/#/column=' + this.state.properties.col_id} target='_blank' className='normalize-link alternate-column'>Alternate column view</a>
           </div>
         </div>
       );

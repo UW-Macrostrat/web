@@ -59,12 +59,12 @@ class StratNameHierarchy extends React.Component {
 
         // Find the one it belongs to and add it
         data.forEach(j => {
-          if (j.strat_name_id == belongsTo) {
+          if (j.strat_name_id == belongsTo && j.strat_name_id != d.strat_name_id) {
             j.children.push(d);
           }
         })
       });
-    //  console.log( data.sort((a, b) => { return b.totalChildren - a.totalChildren })[0]);
+      console.log( data.sort((a, b) => { return b.totalChildren - a.totalChildren })[0]);
       // Find the top of the hierarchy and return it
       this.setState({hierarchy: data.sort((a, b) => { return b.totalChildren - a.totalChildren })[0]});
     });

@@ -59,39 +59,40 @@ class RandomColumn extends React.Component {
 
   render() {
     return (
-      <div className='random-column'>
-        <div className='random-column-title'>
-          <h3 className='title'>{this.state.properties.col_name}</h3>
-        </div>
-        <div className='random-column-stats'>
-          <SummaryStats
-            data={this.state.properties}
-          />
-          <div className='random-column-chart table-cell'>
-            <div className='chart-container'>
-              <div className='chart-position-adjustment'>
-                <Chart
-                  title='Lithology'
-                  id={'random-lith-chart'}
-                  data={this.state.liths}
-                />
-              </div>
+      <div>
 
-              <div className='chart-legend'>
-                <ChartLegend
-                  data={this.state.liths}
-                />
+        <h3 className='title'>{this.state.properties.col_name}</h3>
+        <div className='random-column'>
+          <div className='random-column-stats'>
+            <SummaryStats
+              data={this.state.properties}
+            />
+            <div className='random-column-chart table-cell'>
+              <div className='chart-container'>
+                <div className='chart-position-adjustment'>
+                  <Chart
+                    title='Lithology'
+                    id={'random-lith-chart'}
+                    data={this.state.liths}
+                  />
+                </div>
+
+                <div className='chart-legend'>
+                  <ChartLegend
+                    data={this.state.liths}
+                  />
+                </div>
               </div>
             </div>
           </div>
+          <Map
+            className='table-cell'
+            data={this.state.column}
+            target={true}
+          />
         </div>
-        <Map
-          className='table-cell'
-          data={this.state.column}
-          target={true}
-        />
-
       </div>
+
     );
   }
 }

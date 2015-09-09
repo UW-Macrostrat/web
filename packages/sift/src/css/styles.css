@@ -17,6 +17,7 @@ body {
   height: 100%;
   width: 100%;
   padding: 0;
+  margin-bottom: 200px;
   /*position: fixed;*/
 }
 .page-content {
@@ -124,11 +125,28 @@ body {
 }
 
 .main-search {
+  display: table;
   text-align: center;
   padding: 60px;
+  height: 500px;
+  width: 100%;
+  background: url(../img/jumbotron_bw.jpg) no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
 }
-.main-search > h3 {
-  font-weight: 200;
+
+.main-title {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.main-title > h3 {
+  font-size: 50px;
+  font-weight: 100;
+  letter-spacing: 8px;
+  color: #900;
 }
 
 .main-autocomplete-container {
@@ -411,11 +429,52 @@ small, .small {
 .concept-names {
   text-align: left;
   font-size: 15px;
+  margin: 0 5px;;
+}
+
+.concept-group-title > h3 {
+  font-size: 30px;
+  color: #aaa;
+  font-weight: 100;
+  letter-spacing: 3px;
+  line-height: 50px;
+  display: inline;
+}
+
+.concept-group-title {
+  border-bottom: 1px solid #eeeeee;
+  margin-bottom: 15px;
+}
+
+.concept-ref {
+  margin-left: 10px;
+  font-size: 11px;
+  color: #777
+}
+
+
+.concept-group-attributes > p > strong {
+  font-size: 14px;
+}
+.concept-group-attributes > p {
+  font-size: 13px;
+}
+
+.concept-info {
+  padding: 20px;
+  margin: 55px 0;
 }
 
 .badge {
   background-color: #aaaaaa;
   font-weight: 200;
+}
+
+.strat-column {
+  margin-top: 50px;
+}
+.alternate-column {
+  margin-left: 45%;
 }
 
 .toggleOutcrop {
@@ -450,7 +509,6 @@ small, .small {
   background-color: #999999;
   padding: 15px;
   margin-top: 20px;
-  margin-bottom: 20px;
   height: 90px;
 }
 
