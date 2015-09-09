@@ -67,7 +67,7 @@ class Lithology extends React.Component {
           summary: Utilities.summarize(data.features),
           properties: data.features[0].properties,
           mapData: data,
-          target: (typeof(id) == 'string' ? {'name': id} :  lithData.success.data[0]),
+          target: (isNaN(id) ? {'name': id} : lithData.success.data[0]),
           loading: false
         });
       });
