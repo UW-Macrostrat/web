@@ -1,7 +1,7 @@
 import React from 'react';
 import Router from 'react-router';
 import Main from './Main';
-import Autocomplete from './AutocompleteES6';
+import Autocomplete from './Autocomplete';
 
 
 var { Route, DefaultRoute, RouteHandler, Link } = Router;
@@ -11,7 +11,6 @@ class App extends React.Component {
 
   render() {
     return (
-
       <div className='container'>
         <div id='header'>
           <div className='headerItem left'>

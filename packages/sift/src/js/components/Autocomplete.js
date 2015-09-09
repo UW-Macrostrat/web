@@ -1,61 +1,62 @@
 import React from 'react';
 import AutocompleteResultItem from './AutocompleteResultItem';
 import xhr from 'xhr';
+import Config from './Config';
 
-var Autocomplete = React.createClass({
-  cache: {},
+class Autocomplete extends React.Component {
+  constructor(props) {
+    super(props);
 
-  getInitialState: function() {
-      return {
-        searchTerm: '',
-        results: this.resetResults(),
-        selectedIndex: 0,
-        selectedItem: {},
-        tResults: 0,
-        showSuggestions: false
-      }
-  },
-
-  getDefaultProps: function() {
-    return {
-      limit: 5,
-      minLength: 2,
-      categoryLookup: {
-        'cols': 'Columns',
-        'intervals': 'Intervals',
-        'strat_names': 'Stragrigraphic Names',
-        'liths': 'Lithologies'
-      }
+    this.state = {
+      searchTerm: '',
+      results: this.resetResults(),
+      selectedIndex: 0,
+      selectedItem: {},
+      tResults: 0,
+      showSuggestions: false
     }
-  },
 
-  resetResults: function() {
+    this.cache = {}
+
+    this.updateResults = this.updateResults.bind(this);
+    this.fetch = this.fetch.bind(this);
+    this.fulfillRequest = this.fulfillRequest.bind(this);
+    this.update = this.update.bind(this);
+    this.navigateResults = this.navigateResults.bind(this);
+    this.setSelected = this.setSelected.bind(this);
+    this.doit = this.doit.bind(this);
+    this.showSuggestions = this.showSuggestions.bind(this);
+
+  }
+
+  resetResults() {
     return {
       strat_names: [],
       cols: [],
       intervals: [],
       liths: []
     }
-  },
+  }
 
-  updateResults: function(data) {
+  updateResults(data) {
+    data.burwell = [{"id": 0, "name": this.state.searchTerm}]
     // Set the data
     this.setState({results: data});
 
     // Record the total number of search results returned
-    this.setState({tResults: Object.keys(data).map(function(category) {
+    this.setState({tResults: Object.keys(data).map(category => {
       return data[category];
-    }).map(function(d) {
+    }).map(d => {
       return d.length;
-    }).reduce(function(a, b) {
+    }).reduce((a, b) => {
       return a + b;
     }, 0)});
-  },
+  }
 
-  fetch: function(query) {
+  fetch(query) {
     xhr({
-      uri: `http://localhost:5000/api/v2/defs/autocomplete?query=${query}`
-    }, function(error, response, body) {
+      uri: `${Config.apiURL}/defs/autocomplete?query=${query}&exclude=lithology_attributes`
+    }, (error, response, body) => {
       var response = JSON.parse(body);
 
       var keys = Object.keys(response.success.data);
@@ -65,23 +66,14 @@ var Autocomplete = React.createClass({
         response.success.data[keys[i]] = response.success.data[keys[i]].slice(0, (this.props.limit + 1));
       }
 
-      /*
-      if (response.data.success.data['strat_names']) {
-        var suggestion = response.data.success.data['strat_names'][0].name;
-        this.setState({searchTerm: suggestion})
-        React.findDOMNode(this.refs.corbin)
-          .setSelectionRange(query.length, suggestion.length);
-      }
-      */
-
       // Cache the results so we don't have to make an HTTP request
       // next time we see the same query
       this.cache[query] = response.success.data;
 
       // Update the current result list
       this.updateResults(response.success.data);
-    }.bind(this));
-  },
+    });
+  }
 
   fulfillRequest(query) {
     // Check if the query is long enough to fulfill
@@ -96,9 +88,9 @@ var Autocomplete = React.createClass({
     } else {
       this.updateResults(this.resetResults());
     }
-  },
+  }
 
-  update: function(event) {
+  update(event) {
     this.setState({searchTerm: event.target.value});
     this.fulfillRequest(event.target.value);
     this.setState({selectedIndex: 0});
@@ -106,9 +98,9 @@ var Autocomplete = React.createClass({
     if (event.target.value !== this.state.selectedItem.title) {
       this.setState({showSuggestions: true});
     }
-  },
+  }
 
-  navigateResults: function(event) {
+  navigateResults(event) {
     switch(event.which) {
       // Down arrow
       case 40:
@@ -146,30 +138,51 @@ var Autocomplete = React.createClass({
     if ([9, 13, 38, 39, 40].indexOf(event.which) > -1) {
       event.preventDefault();
     }
-  },
+  }
 
-  setSelected: function(idx) {
+  setSelected(idx) {
     this.setState({selectedIndex: idx});
-  },
+  }
 
-  doit: function() {
+  doit() {
     var target;
+    var item;
     if (this.state.selectedIndex === 0) {
       target = 1;
     } else {
       target = this.state.selectedIndex
     }
-     this.setState({selectedItem: this.refs[target].props});
-     this.setState({searchTerm: this.refs[target].props.title})
-     console.log(this.refs[target].props)
-     this.setState({showSuggestions: false});
-  },
+    if (this.refs[target]) {
+      item = this.refs[target];
+    } else {
+      item = {props: {
+        id: this.state.searchTerm,
+        title: this.state.searchTerm,
+        dataset: 'burwell'
+      }}
+    }
+    this.setState({selectedItem: item.props});
+    this.setState({searchTerm: item.props.title});
+    if (this.props.categoryRoutes[item.props.dataset] != 'burwell') {
+      window.location.hash = "#/" + this.props.categoryRoutes[item.props.dataset] + "/" + item.props.id;
+    } else {
+      window.location.hash = "#/burwell/" + item.props.title.toLowerCase();
+    }
 
-  showSuggestions: function() {
+    this.setState({
+     showSuggestions: false,
+     searchTerm: '',
+     results: this.resetResults()
+    });
+
+    document.getElementsByClassName('autocomplete-input')[0].blur();
+  }
+
+  showSuggestions() {
     this.setState({showSuggestions: true});
-  },
+  }
 
-  render: function() {
+  render() {
     // This is used to ensure that each suggestion has a unique ref/id
     var resultCounter = 1;
     var keys = Object.keys(this.state.results);
@@ -177,7 +190,7 @@ var Autocomplete = React.createClass({
     for (var key = 0; key < keys.length; key++) {
       var itemList = [];
 
-      this.state.results[keys[key]].forEach(function(d) {
+      this.state.results[keys[key]].forEach(d => {
         itemList.push(<AutocompleteResultItem
                         title={d.name}
                         id={d.id}
@@ -190,30 +203,28 @@ var Autocomplete = React.createClass({
                         select={this.doit}
                       />);
         resultCounter += 1;
-      }.bind(this));
+      });
 
       // Save this list as a property of the dataset
       this.state.results[keys[key]].toRender = itemList;
-
     }
 
     return (
       <div className='autocomplete-container'>
         <input
-          ref='corbin'
-          className='corbin'
+          className='autocomplete-input'
           type='text'
           autoComplete='off'
           spellCheck='false'
-          placeholder='Enter some text...'
+          placeholder='Search...'
           value={this.state.searchTerm}
           onKeyDown={this.navigateResults}
           onChange={this.update}
           onFocus={this.showSuggestions}
         />
 
-        <div className={this.state.showSuggestions ? 'autocomplete-results' : 'hidden'}>
-          {Object.keys(this.state.results).map(function(type, idx) {
+      <div className={(this.state.showSuggestions && this.state.searchTerm.length > 1 && this.state.tResults > 0) ? 'autocomplete-results' : 'hidden'}>
+          {Object.keys(this.state.results).map((type, idx) => {
             return (
               <div className={this.state.results[type].length ? 'autocomplete-result-category' : 'hidden' } key={idx}>
                 <p className='autocomplete-result-category-title'>{this.props.categoryLookup[type]}</p>
@@ -222,12 +233,37 @@ var Autocomplete = React.createClass({
                 </ul>
               </div>
             );
-          }.bind(this))}
+          })}
         </div>
       </div>
     );
   }
-});
+}
 
+Autocomplete.defaultProps = {
+  limit: 5,
+  minLength: 2,
+  categoryLookup: {
+    'columns': 'Columns',
+    'intervals': 'Intervals',
+    'strat_name_concepts': 'Stragrigraphic Names',
+    'strat_name_orphans': 'Other names',
+    'lithologies': 'Lithologies',
+    'environments': 'Environments',
+    'econs': 'Economic',
+    'burwell': 'Burwell',
+    'groups': 'Groups'
+  },
+  categoryRoutes: {
+    'columns': 'column',
+    'intervals': 'interval',
+    'strat_name_concepts': 'strat_name_concept',
+    'lithologies': 'lithology',
+    'environments': 'environment',
+    'burwell': 'burwell',
+    'groups': 'group',
+    'econs': 'economic'
+  }
+}
 
 export default Autocomplete;

@@ -1,5 +1,4 @@
 import React from 'react';
-import Autocomplete from './AutocompleteES6';
 import Stats from './Stats';
 import RandomColumn from './RandomColumn';
 
