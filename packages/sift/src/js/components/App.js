@@ -15,7 +15,7 @@ class App extends React.Component {
         <div id='header'>
           <div className='headerItem left'>
             <a href='/'><img src='dist/img/logo_red.png' className='header-logo'/></a>
-            <a href="/sift">
+            <a href="#">
               <h3 className='header-title'><i>sift</i></h3>
             </a>
           </div>
