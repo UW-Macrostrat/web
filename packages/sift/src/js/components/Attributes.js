@@ -7,14 +7,52 @@ import ChartLegend from './ChartLegend';
 import NoData from './NoData';
 import Loading from './Loading';
 
-class Economic extends React.Component {
+class Attributes extends React.Component {
   constructor(props) {
     super(props);
+    this._update = this._update.bind(this);
     this.state = this._resetState();
     this.stateLookup = {
-      'economic': 'econ_id',
-      'economic_type': 'econ_type',
-      'economic_class': 'econ_class'
+      'interval': {
+        classifier: 'int_id',
+        def: 'intervals'
+      },
+      'lithology': {
+        classifier: 'lith_id',
+        def: 'lithologies'
+      },
+      'lithology_type': {
+        classifier: 'lith_type',
+        def: 'lithologies'
+      },
+      'lithology_class': {
+        classifier: 'lith_class',
+        def: 'lithologies'
+      },
+      'environment': {
+        classifier: 'environ_id',
+        def: 'environments'
+      },
+      'environment_type': {
+        classifier: 'environ_type',
+        def: 'environments'
+      },
+      'environment': {
+        classifier: 'environ_class',
+        def: 'environments'
+      },
+      'economic': {
+        classifier: 'econ_id',
+        def: 'econs'
+      },
+      'economic_type': {
+        classifier: 'econ_type',
+        def: 'econs'
+      },
+      'economic_class': {
+        classifier: 'econ_class',
+        def: 'econs'
+      }
     }
   }
 
@@ -27,9 +65,10 @@ class Economic extends React.Component {
       liths: [],
       econs: [],
       environs: [],
-      target: {
+      name: {
         name: '',
-        lith_id: ''
+        id: '',
+        url: ''
       },
       summary: {
         col_area: '',
@@ -52,22 +91,39 @@ class Economic extends React.Component {
     this.setState({
       loading: true
     });
-    Utilities.fetchMapData(`columns?${type}=${id}&response=long`, (error, data) => {
-      Utilities.fetchData(`defs/econs?${type}=${id}`, (econError, econData) => {
-        if (error || econError || !data.features.length) {
+
+    Utilities.fetchMapData(`columns?${this.stateLookup[type].classifier}=${id}&response=long`, (error, data) => {
+      Utilities.fetchData(`defs/${this.stateLookup[type].def}?${this.stateLookup[type].classifier}=${id}`, (defError, defData) => {
+        if (error || defError || !data.features.length) {
           return this.setState(this._resetState());
         }
 
+        var name;
+        // Title is treated differently if it's a *_type or _class because it's a string instead of an integer
+        if (isNaN(id)) {
+          name = {
+            name: id,
+            id: id,
+            url: '#/' + type + '/' + id
+          }
+        } else {
+          name = {
+            name: defData.success.data[0].name,
+            id: defData.success.data[0][this.stateLookup[type].classifier],
+            url: '#/' + type + '/' + defData.success.data[0][this.stateLookup[type].classifier]
+          }
+        }
+
         this.setState({
-          type: type,
-          id: id,
+          name,
+          type,
+          id,
           liths: Utilities.parseAttributes('lith', Utilities.summarizeAttributes('lith', data.features)),
           environs: Utilities.parseAttributes('environ', Utilities.summarizeAttributes('environ', data.features)),
           econs: Utilities.parseAttributes('econ', Utilities.summarizeAttributes('econ', data.features)),
           summary: Utilities.summarize(data.features),
           properties: data.features[0].properties,
           mapData: data,
-          target: (isNaN(id) ? {'name': id} :  econData.success.data[0]),
           loading: false
         });
       });
@@ -78,15 +134,15 @@ class Economic extends React.Component {
     var currentRoutes = this.context.router.getCurrentRoutes();
     var activeRoute = currentRoutes[currentRoutes.length - 1].name;
 
-    this._update(this.stateLookup[activeRoute], this.props.params.id);
+    this._update(activeRoute, this.props.params.id);
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.params.id !== this.props.params.id) {
-      var currentRoutes = this.context.router.getCurrentRoutes();
-      var activeRoute = currentRoutes[currentRoutes.length - 1].name;
-
-      this._update(this.stateLookup[activeRoute], nextProps.params.id);
+    var currentRoutes = this.context.router.getCurrentRoutes();
+    var activeRoute = currentRoutes[currentRoutes.length - 1].name;
+    // Only update if the URI actually changed
+    if (nextProps.params.id !== this.props.params.id || activeRoute !== this.state.type) {
+      this._update(activeRoute, nextProps.params.id);
     }
   }
 
@@ -138,10 +194,6 @@ class Economic extends React.Component {
     }
     return (
       <div>
-        <div className='page-title'>
-          <a href={'#/lithology/' + this.state.target.lith_id}>{this.state.target.name}</a>
-        </div>
-
         <Loading
           loading={this.state.loading}
         />
@@ -152,6 +204,9 @@ class Economic extends React.Component {
         />
 
         <div className={this.state.mapData.features.length ? '' : 'hidden'}>
+          <div className='page-title'>
+            <a href={this.state.name.url}>{this.state.name.name}</a>
+          </div>
           <div className='random-column'>
             <div className='random-column-stats'>
               <SummaryStats
@@ -183,8 +238,8 @@ class Economic extends React.Component {
   }
 }
 
-Economic.contextTypes = {
+Attributes.contextTypes = {
   router: React.PropTypes.func.isRequired
 }
 
-export default Economic;
+export default Attributes;
