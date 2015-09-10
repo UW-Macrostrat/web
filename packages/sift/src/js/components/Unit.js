@@ -154,12 +154,9 @@ class Unit extends React.Component {
       </div>
     }
 
-
+    console.log(this.state.properties['unit_name']);
     return (
       <div>
-        <div className='page-title'>
-          {this.state.properties.unit_id ? <a href={'#/unit/' + this.state.properties.unit_id}>Unit {this.state.properties.unit_id} &mdash; {this.state.properties.unit_name}</a> : ''}
-        </div>
 
         <NoData
           features={this.state.mapData.features}
@@ -167,6 +164,10 @@ class Unit extends React.Component {
         />
 
         <div className={this.state.mapData.features.length ? '' : 'hidden'}>
+          <div className='page-title'>
+            <a href={'#/unit/' + this.state.properties.unit_id}>Unit {this.state.properties.unit_id} &mdash; {this.state.properties.unit_name}</a>
+          </div>
+
           <div className='random-column'>
             <div className='random-column-stats'>
               <SummaryStats
@@ -194,7 +195,7 @@ class Unit extends React.Component {
           </div>
 
           <PrevalentTaxa data={this.state.prevalentTaxa} />
-          
+
           <StratNameHierarchy
             stratNameID={this.state.properties.strat_name_id}
           />

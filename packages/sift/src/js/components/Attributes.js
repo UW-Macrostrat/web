@@ -37,7 +37,7 @@ class Attributes extends React.Component {
         classifier: 'environ_type',
         def: 'environments'
       },
-      'environment': {
+      'environment_class': {
         classifier: 'environ_class',
         def: 'environments'
       },
