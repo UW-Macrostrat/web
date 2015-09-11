@@ -26,7 +26,7 @@ class Autocomplete extends React.Component {
     this.setSelected = this.setSelected.bind(this);
     this.doit = this.doit.bind(this);
     this.showSuggestions = this.showSuggestions.bind(this);
-
+    this.hideSuggestions = this.hideSuggestions.bind(this);
   }
 
   resetResults() {
@@ -131,11 +131,15 @@ class Autocomplete extends React.Component {
           this.setSelected(1);
         }
         break;
+      case 27:
+        this.hideSuggestions();
+        event.target.blur()
+        break;
       default:
         break;
     }
 
-    if ([9, 13, 38, 39, 40].indexOf(event.which) > -1) {
+    if ([9, 13, 38, 39, 40, 27].indexOf(event.which) > -1) {
       event.preventDefault();
     }
   }
@@ -190,6 +194,10 @@ class Autocomplete extends React.Component {
     this.setState({showSuggestions: true});
   }
 
+  hideSuggestions() {
+    this.setState({showSuggestions: false});
+  }
+
   render() {
     // This is used to ensure that each suggestion has a unique ref/id
     var resultCounter = 1;
@@ -229,6 +237,7 @@ class Autocomplete extends React.Component {
           onKeyDown={this.navigateResults}
           onChange={this.update}
           onFocus={this.showSuggestions}
+          onBlur={this.hideSuggestions}
         />
 
       <div className={(this.state.showSuggestions && this.state.searchTerm.length > 1 && this.state.tResults > 0) ? 'autocomplete-results' : 'hidden'}>
