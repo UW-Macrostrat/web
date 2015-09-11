@@ -13,7 +13,8 @@ class Autocomplete extends React.Component {
       selectedIndex: 0,
       selectedItem: {},
       tResults: 0,
-      showSuggestions: false
+      showSuggestions: false,
+      canClose: true,
     }
 
     this.cache = {}
@@ -27,6 +28,8 @@ class Autocomplete extends React.Component {
     this.doit = this.doit.bind(this);
     this.showSuggestions = this.showSuggestions.bind(this);
     this.hideSuggestions = this.hideSuggestions.bind(this);
+    this.disableClose = this.disableClose.bind(this);
+    this.enableClose = this.enableClose.bind(this);
   }
 
   resetResults() {
@@ -148,6 +151,14 @@ class Autocomplete extends React.Component {
     this.setState({selectedIndex: idx});
   }
 
+  disableClose() {
+    this.setState({canClose: false});
+  }
+
+  enableClose() {
+    this.setState({canClose: true});
+  }
+
   doit() {
     var target;
     var item;
@@ -194,8 +205,10 @@ class Autocomplete extends React.Component {
     this.setState({showSuggestions: true});
   }
 
-  hideSuggestions() {
-    this.setState({showSuggestions: false});
+  hideSuggestions(event) {
+    if (this.state.canClose) {
+      this.setState({showSuggestions: false});
+    }
   }
 
   render() {
@@ -255,7 +268,10 @@ class Autocomplete extends React.Component {
         </div>
       </div>
 
-      <div className={(this.state.showSuggestions && this.state.searchTerm.length > 1 && this.state.tResults > 0) ? 'autocomplete-results' : 'hidden'}>
+      <div className={(this.state.showSuggestions && this.state.searchTerm.length > 1 && this.state.tResults > 0) ? 'autocomplete-results' : 'hidden'}
+        onMouseOver={this.disableClose}
+        onMouseOut={this.enableClose}
+        >
           {Object.keys(this.state.results).map((type, idx) => {
             return (
               <div className={this.state.results[type].length ? 'autocomplete-result-category' : 'hidden' } key={idx}>
@@ -273,7 +289,7 @@ class Autocomplete extends React.Component {
 }
 
 Autocomplete.defaultProps = {
-  limit: 5,
+  limit: 4,
   minLength: 2,
   categoryLookup: {
     'columns': 'Columns',
