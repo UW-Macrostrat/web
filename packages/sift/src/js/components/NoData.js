@@ -10,4 +10,8 @@ class NoData extends React.Component {
   }
 }
 
+NoData.defaultProps = {
+  features: [],
+  type: 'route'
+}
 export default NoData;

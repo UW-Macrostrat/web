@@ -8,7 +8,7 @@ import Column from './components/Column';
 import StratName from './components/StratName';
 import Attributes from './components/Attributes';
 
-import NotFound from './components/NotFound';
+import NoData from './components/NoData';
 
 var { Route, DefaultRoute, RouteHandler, NotFoundRoute, Link } = Router;
 
@@ -37,7 +37,7 @@ var SiftRouter = Router.create({
        <Route name='economic_type' path='economic_type/:id' handler={Attributes}/>
        <Route name='economic_class' path='economic_class/:id' handler={Attributes}/>
 
-       <NotFoundRoute handler={NotFound} />
+       <NotFoundRoute handler={NoData} />
      </Route>
    )
 });
