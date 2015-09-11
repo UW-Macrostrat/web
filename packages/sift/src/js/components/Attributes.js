@@ -13,6 +13,10 @@ class Attributes extends React.Component {
     this._update = this._update.bind(this);
     this.state = this._resetState();
     this.stateLookup = {
+      'group': {
+        classifier: 'col_group_id',
+        def: 'groups'
+      },
       'interval': {
         classifier: 'int_id',
         def: 'intervals'
