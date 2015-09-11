@@ -240,6 +240,21 @@ class Autocomplete extends React.Component {
           onBlur={this.hideSuggestions}
         />
 
+      <div className={(this.state.showSuggestions && this.state.searchTerm.length == 0) ? 'autocomplete-results' : 'hidden'}>
+        <div className='autocomplete-hint'>
+          <p>Available categories</p>
+          <ul>
+            <li>Time intervals</li>
+            <li>Stratigraphic names</li>
+            <li>Columns</li>
+            <li>Column groups</li>
+            <li>Lithologies</li>
+            <li>Environments</li>
+            <li>Economics</li>
+          </ul>
+        </div>
+      </div>
+
       <div className={(this.state.showSuggestions && this.state.searchTerm.length > 1 && this.state.tResults > 0) ? 'autocomplete-results' : 'hidden'}>
           {Object.keys(this.state.results).map((type, idx) => {
             return (
