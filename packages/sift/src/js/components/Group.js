@@ -48,25 +48,27 @@ class Group extends React.Component {
       loading: true
     });
     Utilities.fetchMapData(`columns?col_group_id=${id}&response=long`, (error, data) => {
-      if (error || !data.features.length) {
-        return this.setState(this._resetState());
-      }
-      Utilities.fetchMapData(`fossils?col_group_id=${id}`, (fossilError, fossilData) => {
-        if (error) {
-          return console.log("Error fetching fossils ", error);
+      Utilities.fetchData(`defs/groups?col_group_id=${id}`, (defError, defData) => {
+        if (error || defError || !data.features.length) {
+          return this.setState(this._resetState());
         }
-        this.setState({
-          fossils: fossilData
+        Utilities.fetchMapData(`fossils?col_group_id=${id}`, (fossilError, fossilData) => {
+          if (error) {
+            return console.log("Error fetching fossils ", error);
+          }
+          this.setState({
+            fossils: fossilData
+          });
         });
-      });
-      this.setState({
-        liths: Utilities.parseAttributes('lith', Utilities.summarizeAttributes('lith', data.features)),
-        environs: Utilities.parseAttributes('environ', Utilities.summarizeAttributes('environ', data.features)),
-        econs: Utilities.parseAttributes('econ', Utilities.summarizeAttributes('econ', data.features)),
-        summary: Utilities.summarize(data.features),
-        properties: data.features[0].properties,
-        mapData: data,
-        loading: false
+        this.setState({
+          liths: Utilities.parseAttributes('lith', Utilities.summarizeAttributes('lith', data.features)),
+          environs: Utilities.parseAttributes('environ', Utilities.summarizeAttributes('environ', data.features)),
+          econs: Utilities.parseAttributes('econ', Utilities.summarizeAttributes('econ', data.features)),
+          summary: Utilities.summarize(data.features),
+          properties: defData.success.data[0],
+          mapData: data,
+          loading: false
+        });
       });
     });
   }
@@ -130,7 +132,7 @@ class Group extends React.Component {
     return (
       <div>
         <div className='page-title'>
-          {this.state.properties.col_group ? <a href={'#/group/' + this.state.properties.col_group_id}>{this.state.properties.col_group} ({this.state.properties.group_col_id})</a> : ''}
+          <a href={'#/group/' + this.state.properties.col_group_id}>{this.state.properties.col_group_name}</a>
         </div>
 
         <Loading
