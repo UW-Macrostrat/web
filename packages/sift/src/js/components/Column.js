@@ -206,7 +206,7 @@ class Column extends React.Component {
         <div>
           <div className='page-title'>
             {this.state.properties.col_id ? <p><a href={'#/column/' + this.state.properties.col_id}>{this.state.properties.col_name} </a>
-          <small><a href={'#/group/' + this.state.properties.col_group_id}>({this.state.properties.col_group} {this.state.properties.col_group_id})</a></small></p>: ''}
+          <small><a href={'#/group/' + this.state.properties.col_group_id}>({this.state.properties.col_group} {this.state.properties.col_id})</a></small></p>: ''}
 
           </div>
 
