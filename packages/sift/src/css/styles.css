@@ -151,25 +151,42 @@ body {
   display: table;
   text-align: center;
   padding: 60px;
-  height: 500px;
+  height: 400px;
   width: 100%;
-  background: url(../img/jumbotron_bw.jpg) no-repeat center center fixed;
+
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .main-title {
   display: table-cell;
   vertical-align: middle;
+  text-align: left;
+  color: #ffffff;
 }
 
-.main-title > h3 {
-  font-size: 50px;
+.main-title-container > h3 {
+  font-size: 60px;
   font-weight: 100;
   letter-spacing: 8px;
+  margin-bottom: 0;
+}
+
+.winnow {
   color: #900;
+  letter-spacing: 5px;
+  margin: 0;
+}
+
+.macrostrat {
+  font-size: 25px;
+  letter-spacing: 5px;
+  font-weight: 100;
+  margin: 0;
 }
 
 .main-autocomplete-container {
