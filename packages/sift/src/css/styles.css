@@ -151,7 +151,7 @@ body {
   display: table;
   text-align: center;
   padding: 60px;
-  height: 400px;
+  height: 475px;
   width: 100%;
 
   -webkit-background-size: cover;
@@ -202,7 +202,7 @@ body {
   width: 25%;
   text-align: center;
   font-weight: 200;
-  padding: 40px;
+  padding: 35px;
   border: 1px solid #eee;
 }
 
@@ -284,10 +284,11 @@ body {
   color: #777;
 }
 
-.title {
+.title, .title > a {
   font-weight: 200;
   font-size: 20px;
-  margin-left: 25px;
+  margin-left: 15px;
+  color: inherit;
 }
 .chart-label-master {
   min-width: 75px;

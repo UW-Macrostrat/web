@@ -20,7 +20,7 @@ class Main extends React.Component {
           </div>
         </div>
         <Stats/>
-        <RandomColumn/>
+        <RandomColumn colID={randomColID}/>
       </div>
     );
   }

@@ -9,7 +9,7 @@ import ChartLegend from './ChartLegend';
 class RandomColumn extends React.Component {
   constructor(props) {
     super(props);
-    this.getRandom = this.getRandom.bind(this);
+    this.getData = this.getData.bind(this);
     this.state = {
       column: {},
       liths: [],
@@ -35,10 +35,8 @@ class RandomColumn extends React.Component {
     }
   }
 
-  getRandom(callback) {
-    var RandomColumnID = Math.floor(Math.random() * (Config.totalColumns - 2) + 2) + 2;
-
-    Utilities.fetchMapData(`columns?col_id=${RandomColumnID}&response=long&adjacents=true`, (error, data) => {
+  getData(col_id, callback) {
+    Utilities.fetchMapData(`columns?col_id=${col_id}&response=long&adjacents=true`, (error, data) => {
       if (error || data.features.length < 1) {
         return this.getRandom(callback);
       } else {
@@ -48,7 +46,7 @@ class RandomColumn extends React.Component {
   }
 
   componentDidMount() {
-    this.getRandom(data => {
+    this.getData(this.props.colID, data => {
       this.setState({
         liths: Utilities.parseAttributes('lith',  data.features[0].properties.lith),
         column: data,
@@ -61,7 +59,7 @@ class RandomColumn extends React.Component {
     return (
       <div>
 
-        <h3 className='title'>{this.state.properties.col_name}</h3>
+        <h3 className='title'><a href={'#/column' + this.props.colID}>{this.state.properties.col_name}</a></h3>
         <div className='random-column'>
           <div className='random-column-stats'>
             <SummaryStats
