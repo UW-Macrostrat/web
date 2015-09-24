@@ -123,9 +123,14 @@ class StratColumn extends React.Component {
         // Get the rgb value of the hex color
         data[i].rgba = Utilities.hexToRgb(data[i].color.replace("#", ""), 0.7);
         // Find the right time bin
+        if (data[i].unit_id === 5160) {
+          console.log(data[i])
+        }
+        var found = false;
         for (var j = 0; j < column.length; j++) {
           // Check if the unit's age is contained in the time interval
           if (data[i].t_age >= column[j].t_age && data[i].b_age <= column[j].b_age) {
+            found = true
             if (column[j].sections[data[i].section_id]) {
               column[j].sections[data[i].section_id].units.push(data[i]);
             } else {
@@ -136,6 +141,9 @@ class StratColumn extends React.Component {
             }
             break;
           }
+        }
+        if (!found) {
+          console.log("not found for ", data[i].unit_id)
         }
       }
       var newColumn = Object.keys(column).map(d => {
@@ -151,7 +159,7 @@ class StratColumn extends React.Component {
           return d;
         }
       });
-
+      console.log(newColumn)
       this.setState({periods: newColumn});
 
     }

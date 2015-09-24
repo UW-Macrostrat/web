@@ -125,6 +125,9 @@ body {
 .autocomplete-hint > ul > li {
   padding: 5px;
 }
+.autocomplete-hint > ul > li > a {
+  color: inherit;
+}
 .hidden {
   display: none;
 }
@@ -574,6 +577,41 @@ small, .small {
   color: inherit;
 }
 
+.def-page {
+  padding: 25px;
+}
+
+.def-page-title, .def-page-title > a {
+  font-size: 30px;
+  color: #aaa;
+  font-weight: 100;
+  letter-spacing: 3px;
+  line-height: 50px;
+  display: inline;
+}
+.def-page-title > a:hover {
+  text-decoration: none;
+}
+.def-page-title small {
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+.filter-input {
+  float: right;
+  margin-top: 13px;
+  padding: 4px;
+  background-color: #fff;
+  border: none;
+  outline: 0;
+  border-bottom: 1px solid #eee;
+  margin-left: 25px;
+  font-size: 14px;
+  font-weight: 200;
+}
+
+.def-table tr {
+  cursor: pointer;
+}
 
 .loading-container {
   z-index: 9999999;

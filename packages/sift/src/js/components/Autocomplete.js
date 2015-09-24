@@ -30,6 +30,7 @@ class Autocomplete extends React.Component {
     this.hideSuggestions = this.hideSuggestions.bind(this);
     this.disableClose = this.disableClose.bind(this);
     this.enableClose = this.enableClose.bind(this);
+    this.enableAndHide = this.enableAndHide.bind(this);
   }
 
   resetResults() {
@@ -211,6 +212,15 @@ class Autocomplete extends React.Component {
     }
   }
 
+  enableAndHide() {
+    this.setState({
+      canClose: true
+    });
+    this.setState({
+      showSuggestions: false
+    });
+  }
+
   render() {
     // This is used to ensure that each suggestion has a unique ref/id
     var resultCounter = 1;
@@ -253,17 +263,20 @@ class Autocomplete extends React.Component {
           onBlur={this.hideSuggestions}
         />
 
-      <div className={(this.state.showSuggestions && this.state.searchTerm.length == 0) ? 'autocomplete-results' : 'hidden'}>
+      <div className={(this.state.showSuggestions && this.state.searchTerm.length == 0) ? 'autocomplete-results' : 'hidden'}
+        onMouseOver={this.disableClose}
+        onMouseOut={this.enableClose}
+        >
         <div className='autocomplete-hint'>
           <p>Available categories</p>
           <ul>
-            <li>Time intervals</li>
-            <li>Stratigraphic names</li>
-            <li>Columns</li>
-            <li>Column groups</li>
-            <li>Lithologies</li>
-            <li>Environments</li>
-            <li>Economics</li>
+            <li><a onClick={this.enableAndHide} href='#/definitions/intervals'>Time intervals</a></li>
+            <li><a onClick={this.enableAndHide} href='#/definitions/strat_names'>Stratigraphic names</a></li>
+            <li><a onClick={this.enableAndHide} href='#/definitions/columns'>Columns</a></li>
+            <li><a onClick={this.enableAndHide} href='#/definitions/groups'>Column groups</a></li>
+            <li><a onClick={this.enableAndHide} href='#/definitions/lithologies'>Lithologies</a></li>
+            <li><a onClick={this.enableAndHide} href='#/definitions/environments'>Environments</a></li>
+            <li><a onClick={this.enableAndHide} href='#/definitions/economics'>Economics</a></li>
           </ul>
         </div>
       </div>
