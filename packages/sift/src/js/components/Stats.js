@@ -18,7 +18,8 @@ class Stats extends React.Component {
         columns: 0,
         packages: 0,
         units: 0,
-        collections: 0
+        collections: 0,
+        measurements: 0
       }
       data.success.data.forEach(d => {
         if (d.status === 'active') {
@@ -26,6 +27,7 @@ class Stats extends React.Component {
           summary.packages += d.packages;
           summary.units += d.units;
           summary.collections += d.pbdb_collections;
+          summary.measurements += d.measurements;
         }
       });
 
@@ -41,7 +43,7 @@ class Stats extends React.Component {
             <td className='main-stats-stat'>{Utilities.addCommas(this.state.stats.columns)} columns</td>
             <td className='main-stats-stat'>{Utilities.addCommas(this.state.stats.packages)} packages</td>
             <td className='main-stats-stat'>{Utilities.addCommas(this.state.stats.units)} units</td>
-            <td className='main-stats-stat'>{Utilities.addCommas(this.state.stats.collections)} PBDB collections</td>
+            <td className='main-stats-stat'>{Utilities.addCommas(this.state.stats.measurements)} measurements</td>
           </tr>
         </table>
       </div>

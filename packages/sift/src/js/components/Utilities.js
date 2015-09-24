@@ -110,7 +110,7 @@ var Utilities = {
             id: d[type + '_id'],
             type: typeLookup[type],
             value: d.prop,
-            label: d.type || d.class,
+            label: (type === 'environ') ? d.class + ': ' + (d.type || d.class) : d.type || d.class,
             color: Config[type + 'Colors'][d.type || d.class]
           }
         }
@@ -125,7 +125,7 @@ var Utilities = {
           id: d[type + '_id'],
           type: typeLookup[type],
           value: d.prop || 1/data.length,
-          label: d.name,
+          label: (type === 'environ') ? d.class + ': ' + d.name : d.name,
           color: Config[type + 'Colors'][d[type + '_id']]
         });
       });
