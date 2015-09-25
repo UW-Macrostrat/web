@@ -172,7 +172,7 @@ class Map extends React.Component {
       }, 1)
     }
 
-    this.map.invalidateSize()
+    this.map.invalidateSize();
 
   }
 

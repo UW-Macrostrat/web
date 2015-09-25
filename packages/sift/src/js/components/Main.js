@@ -5,8 +5,8 @@ import RandomColumn from './RandomColumn';
 class Main extends React.Component {
 
   render() {
-    var options = [78, 137, 144, 434, 468, 474, 486, 488, 521, 1472, 1643];
-    var randomColID = options[Math.floor(Math.random() * (10 - 1) + 1) + 1]
+    var options = [78, 137, 144, 434, 468, 474, 486, 488, 521, 1472, 1643, 431, 301];
+    var randomColID = options[Math.floor(Math.random() * (12 - 1) + 1) + 1]
 
     return (
       <div className='main'>
