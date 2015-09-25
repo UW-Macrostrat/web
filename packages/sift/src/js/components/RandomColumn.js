@@ -59,7 +59,7 @@ class RandomColumn extends React.Component {
     return (
       <div>
 
-        <h3 className='title'><a href={'#/column' + this.props.colID}>{this.state.properties.col_name}</a></h3>
+        <h3 className='title'><a href={'#/column/' + this.props.colID}>{this.state.properties.col_name}</a></h3>
         <div className='random-column'>
           <div className='random-column-stats'>
             <SummaryStats
