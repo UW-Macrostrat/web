@@ -92,30 +92,30 @@ class StratNameHierarchy extends React.Component {
   render() {
     return (
       <div className={'hierarchy-container hierarchy-1 '  + this.state.hierarchy.active} onClick={this.handleClick.bind(null, this.state.hierarchy.strat_name_id)}>
-        <div className='hierarchy-name'>{this.state.hierarchy.strat_name} {this.state.hierarchy.rank} <span className='badge'>{this.state.hierarchy.t_units}</span></div>
+        <div className='hierarchy-name'>{this.state.hierarchy.strat_name_long} <span className='badge'>{this.state.hierarchy.t_units}</span></div>
 
         {this.state.hierarchy.children.map((b, bi) => {
           return (
 
             <div key={bi} className={'hierarchy-container hierarchy-2 '  + b.active} onClick={this.handleClick.bind(null, b.strat_name_id)}>
-              <div className='hierarchy-name'>{b.strat_name} {b.rank} <span className='badge'>{b.t_units}</span></div>
+              <div className='hierarchy-name'>{b.strat_name_long} <span className='badge'>{b.t_units}</span></div>
 
               {b.children.map((c, ci) => {
                 return (
 
                   <div key={ci} className={'hierarchy-container hierarchy-3 '  + c.active} onClick={this.handleClick.bind(null, c.strat_name_id)}>
-                    <div className='hierarchy-name'>{c.strat_name} {c.rank} <span className='badge'>{c.t_units}</span></div>
+                    <div className='hierarchy-name'>{c.strat_name_long} <span className='badge'>{c.t_units}</span></div>
 
                     {c.children.map((d, di) => {
                       return (
 
                         <div key={di} className={'hierarchy-container hierarchy-4 '  + d.active} onClick={this.handleClick.bind(null, d.strat_name_id)}>
-                          <div className='hierarchy-name'>{d.strat_name} {d.rank}  <span className='badge'>{d.t_units}</span></div>
+                          <div className='hierarchy-name'>{d.strat_name_long} <span className='badge'>{d.t_units}</span></div>
 
                           {d.children.map((e, ei) => {
                             return (
                               <div key={ei} className={'hierarchy-container hierarchy-5 '  + e.active} onClick={this.handleClick.bind(null, e.strat_name_id)}>
-                                <div className='hierarchy-name'>{e.strat_name} {e.rank} <span className='badge'>{e.t_units}</span></div>
+                                <div className='hierarchy-name'>{e.strat_name_long} <span className='badge'>{e.t_units}</span></div>
                               </div>
                             )
                           })}

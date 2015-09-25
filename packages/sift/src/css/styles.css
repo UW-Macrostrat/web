@@ -76,7 +76,6 @@ body {
   position: absolute;
   z-index: 9999999;
   background-color: #FFFFFF;
-  right: 25px;
 }
 .autocomplete-input {
   padding: 10px;
@@ -706,5 +705,46 @@ small, .small {
 @keyframes animation-rotate {
   100% {
     transform: rotate(360deg);
+  }
+}
+
+@media(max-width: 768px) {
+  .headerItem.right {
+    width: 200px;
+  }
+  .page-title {
+    font-size: 1.5em;
+  }
+  .main-stats-stat {
+    padding: 10px;
+  }
+  .random-column-stats {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .random-column-stats-table {
+    max-width: none;
+    display: inherit;
+    border: 0;
+  }
+  .chart-row {
+    margin-top: 500px;
+  }
+  .title {
+    margin-bottom: 50px;
+  }
+  .chart-legend {
+    position: inherit;
+  }
+  .prevalent-taxa-row {
+    height: auto;
+  }
+  .prevalent-taxa-container {
+    display: inherit;
+  }
+  .prevalent-taxa {
+    display: inherit;
   }
 }

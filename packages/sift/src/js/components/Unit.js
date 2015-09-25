@@ -182,7 +182,7 @@ class Unit extends React.Component {
             />
           </div>
 
-          <div className='row'>
+          <div className='row chart-row'>
             <div className={'col-sm-' + (12/totalCharts)}>
               {lithChart}
             </div>
