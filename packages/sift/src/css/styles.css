@@ -734,6 +734,7 @@ small, .small {
   }
   .title {
     margin-bottom: 50px;
+    width: auto;
   }
   .chart-legend {
     position: inherit;

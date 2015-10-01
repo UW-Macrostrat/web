@@ -22,13 +22,11 @@ class Stats extends React.Component {
         measurements: 0
       }
       data.success.data.forEach(d => {
-        if (d.status === 'active') {
-          summary.columns += d.columns;
-          summary.packages += d.packages;
-          summary.units += d.units;
-          summary.collections += d.pbdb_collections;
-          summary.measurements += d.measurements;
-        }
+        summary.columns += d.columns;
+        summary.packages += d.packages;
+        summary.units += d.units;
+        summary.collections += d.pbdb_collections;
+        summary.measurements += d.measurements;
       });
 
       this.setState({stats: summary});
