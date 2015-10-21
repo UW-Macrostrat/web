@@ -1,27 +1,52 @@
 var gulp = require('gulp'),
+    htmlhint = require('gulp-htmlhint'),
     concat = require('gulp-concat'),
     uglify = require('gulp-uglify'),
+    jshint = require('gulp-jshint'),
     minifyCSS = require('gulp-minify-css'),
-    watch = require('gulp-watch');
+    browserify = require('browserify'),
+    babelify = require('babelify'),
+    buffer = require('vinyl-buffer'),
+    source = require('vinyl-source-stream');
 
-gulp.task('uglifyJS', function() {
-  gulp.src(['js/lib/jquery-2.1.3.min.js', 'js/lib/fastclick.min.js', 'js/lib/leaflet.js', 'js/lib/leaflet-hash.js', 'js/lib/mustache.min.js', 'js/lib/typeahead.bundle.min.js', 'js/lib/topojson.min.js', 'js/lib/underscore.min.js'])
-    .pipe(concat('libs.js'))
+gulp.task('build', function() {
+  gulp.src('./index.html')
+    .pipe(htmlhint())
+    .pipe(htmlhint.reporter());
+
+  gulp.src(['node_modules/leaflet/dist/leaflet.js'])
+    .pipe(concat('leaflet.min.js'))
     .pipe(uglify())
-    .pipe(gulp.dest('./js/'));
+    .pipe(gulp.dest('./dist/js/'));
 });
 
-gulp.task('minifyCSS', function() {
-  gulp.src(['css/lib/normalize.css', 'css/lib/skeleton.css', 'css/lib/leaflet.css', 'css/common.css', 'css/lib/typeahead.css'])
+gulp.task('css-min', function() {
+  gulp.src(['node_modules/leaflet/dist/leaflet.css', 'src/css/styles.css'])
     .pipe(concat('styles.min.css'))
     .pipe(minifyCSS())
-    .pipe(gulp.dest('./css/'));
+    .pipe(gulp.dest('./dist/css/'));
 })
 
-gulp.task('default', ['uglifyJS', 'minifyCSS']);
-
-// Rerun the task when a file changes
 gulp.task('watch', function() {
-  gulp.watch('css/*', ['minifyCSS']);
-  gulp.watch('js/*', ['uglifyJS']);
+    gulp.watch('src/js/components/*.jsx', ['browserify-babel']);
+    gulp.watch('src/js/**/*.jsx', ['browserify-babel']);
+    gulp.watch('src/css/*.css', ['css-min']);
+    gulp.watch('index.html', ['build']);
 });
+
+gulp.task('browserify-babel', function() {
+  browserify({
+    entries: 'src/js/index.js',
+    extensions: ['.jsx', '.js'],
+    debug: true
+  })
+  .transform(babelify)
+  .bundle()
+  .pipe(source('bundle.min.js'))
+  .pipe(buffer())
+  .pipe(uglify())
+  .pipe(gulp.dest('./dist/js'))
+
+});
+
+gulp.task('default', ['build', 'css-min', 'browserify-babel']);
