@@ -204,7 +204,7 @@ class Definitions extends React.Component {
             onChange={this.filter}
           />
 
-          <table className='table table-hover def-table'>
+        <table className='table table-hover table-stripped def-table'>
             <thead>
               <tr>
                 {this.stateLookup[this.state.type].fields.map((d, idx) => {
