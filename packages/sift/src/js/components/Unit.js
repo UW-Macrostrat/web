@@ -7,6 +7,7 @@ import ChartLegend from './ChartLegend';
 import StratNameHierarchy from './StratNameHierarchy';
 import NoData from './NoData';
 import PrevalentTaxa from './PrevalentTaxa';
+import Loading from './Loading';
 
 class Unit extends React.Component {
   constructor(props) {
@@ -16,6 +17,7 @@ class Unit extends React.Component {
 
   _resetState() {
     return {
+      loading: false,
       mapData: {features: [], _id: -1},
       fossils: {features: [], _id: -1},
       prevalentTaxa: [{oid: null, nam: '', img: null, noc: null}],
@@ -47,6 +49,9 @@ class Unit extends React.Component {
   }
 
   _update(id) {
+    this.setState({
+      loading: true
+    });
     Utilities.fetchMapData(`columns?unit_id=${id}&response=long`, (error, data) => {
       Utilities.fetchData(`units?unit_id=${id}&response=long`, (unitError, unitData) => {
         if (error || unitError || unitData.success.data.length < 1) {
@@ -86,6 +91,7 @@ class Unit extends React.Component {
         });
         var attributes = unitData.success.data[0] || {};
         this.setState({
+          loading: false,
           liths: Utilities.parseAttributes('lith', attributes.lith),
           environs: Utilities.parseAttributes('environ', attributes.environ),
           econs: Utilities.parseAttributes('econ', attributes.econ),
@@ -158,9 +164,14 @@ class Unit extends React.Component {
     return (
       <div>
 
+        <Loading
+          loading={this.state.loading}
+        />
+
         <NoData
           features={this.state.mapData.features}
           type={'unit'}
+          loading={this.state.loading}
         />
 
         <div className={this.state.mapData.features.length ? '' : 'hidden'}>
