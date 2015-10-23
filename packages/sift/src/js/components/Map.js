@@ -73,7 +73,6 @@ class Map extends React.Component {
       Utilities.fetchData(`/geologic_units/burwell?scale=medium&lat=${event.latlng.lat}&lng=${event.latlng.lng}`, (error, data) => {
         if (data.success && data.success.data.length) {
           var burwellData = data.success.data[0];
-          console.log('burwellData - ', burwellData)
           L.popup()
             .setLatLng(event.latlng)
             .setContent(`

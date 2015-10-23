@@ -2,6 +2,10 @@ body {
   font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
   margin: 0;
 }
+html, body, .react {
+  height: 100%;
+
+}
 .hide {
   display: none;
 }
@@ -19,15 +23,23 @@ body {
   height: 100%;
   width: 100%;
   padding: 0;
-  margin-bottom: 200px;
-  /*position: fixed;*/
+/*  margin-bottom: 200px;
+  position: fixed;*/
 }
 .page-content {
 /*  padding: 0 30px; */
   margin-bottom: 150px;
   max-width: 1200px;
   margin: 0 auto;
+  min-height: 100%;
   overflow: hidden;
+}
+.page-content:after {
+  content: "";
+  display: block;
+}
+.footer, .page-content:after {
+  height: 150px;
 }
 .header-title {
   color: #990000;
@@ -637,6 +649,30 @@ small, .small {
   color: #bbb;
 }
 
+
+
+.footer {
+  background-color: #eeeeee;
+  padding: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;;
+}
+
+.footer-left {
+  text-align: center
+}
+.footer-brand {
+  font-family: "Maven Pro", sans-serif;
+  font-size: 30px;
+}
+.footer-logo {
+  height: 30px;
+}
+
+.footer-license {
+  height: 40px;
+}
 
 .loading-container {
   z-index: 9999999;
