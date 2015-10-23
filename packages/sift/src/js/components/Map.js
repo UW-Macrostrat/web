@@ -3,6 +3,7 @@ import L from 'leaflet';
 import xhr from 'xhr';
 import Centroid from 'turf-centroid';
 import topojson from 'topojson';
+import Utilities from './Utilities';
 
 
 /* Via https://gist.github.com/missinglink/7620340 */
@@ -39,7 +40,7 @@ class Map extends React.Component {
       scrollWheelZoom: false,
       keyboard: false,
     //  dragging: false,
-      touchZoom: false,
+      touchZoom: true,
       doubleClickZoom: false,
       boxZoom: false
     }).setView([40, -97], 6);
@@ -66,6 +67,43 @@ class Map extends React.Component {
           outline: 0
         }
       }
+    });
+
+    this.outcropLayer.on('click', (event) => {
+      Utilities.fetchData(`/geologic_units/burwell?scale=medium&lat=${event.latlng.lat}&lng=${event.latlng.lng}`, (error, data) => {
+        if (data.success && data.success.data.length) {
+          var burwellData = data.success.data[0];
+          console.log('burwellData - ', burwellData)
+          L.popup()
+            .setLatLng(event.latlng)
+            .setContent(`
+              <div class='burwell-popup'>
+                <h4>${burwellData.strat_name} (${burwellData.map_id})</h4>
+                <table class="table table-stripped">
+                  <tbody>
+                    <tr>
+                      <td class='burwell-popup-head'>Age</td>
+                      <td>${burwellData.b_int_name} - ${burwellData.t_int_name}</td>
+                    </tr>
+                    <tr>
+                      <td class='burwell-popup-head'>Age (MA)</td>
+                      <td>${burwellData.b_int_age} - ${burwellData.t_int_age}</td>
+                    </tr>
+                    <tr>
+                      <td class='burwell-popup-head'>Description</td>
+                      <td>${burwellData.descrip}</td>
+                    </tr>
+                    <tr>
+                      <td class='burwell-popup-head'>Comments</td>
+                      <td>${burwellData.comments}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            `)
+            .openOn(this.map);
+        }
+      });
     });
 
     this.fossilLayer = L.geoJson(null, {

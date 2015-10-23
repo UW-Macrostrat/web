@@ -632,6 +632,12 @@ small, .small {
   cursor: pointer;
 }
 
+.burwell-popup-head {
+  font-weight: bold;
+  color: #bbb;
+}
+
+
 .loading-container {
   z-index: 9999999;
   height: 100%;
