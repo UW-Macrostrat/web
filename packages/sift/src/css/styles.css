@@ -405,6 +405,12 @@ small, .small {
   text-align: center;
   min-height: 24px;
 }
+.hasFossils {
+  height: 23px;
+  -webkit-filter: invert(1);
+  filter: invert(1);
+  margin-left: 5px;
+}
 .period-names {
   text-align: center;
 }
