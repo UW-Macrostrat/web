@@ -19,8 +19,8 @@ html, body, .react {
   margin: 0 auto;
 }
 .container {
-  overflow: scroll;
-  height: 100%;
+  /*overflow: scroll;
+  height: 100%;*/
   width: 100%;
   padding: 0;
 /*  margin-bottom: 200px;
@@ -39,7 +39,7 @@ html, body, .react {
   display: block;
 }
 .footer, .page-content:after {
-  height: 150px;
+  height: auto;
 }
 .header-title {
   color: #990000;
@@ -657,10 +657,16 @@ small, .small {
   display: flex;
   align-items: center;
   justify-content: flex-start;;
+  position: absolute;
+  width: 100%;
+  margin-top: 120px;
 }
 
 .footer-left {
-  text-align: center
+  text-align: center;
+  border-right: 1px solid #aaa;
+  height: 100%;
+  padding-right: 15px;
 }
 .footer-brand {
   font-family: "Maven Pro", sans-serif;
@@ -668,6 +674,12 @@ small, .small {
 }
 .footer-logo {
   height: 30px;
+}
+.footer-right {
+  padding: 0 30px;
+}
+.footer-source-title {
+  font-weight: 200;
 }
 
 .footer-license {

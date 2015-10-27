@@ -12,6 +12,12 @@ class Footer extends React.Component {
 
       </div>
       <div className='footer-right'>
+        <h4 className='footer-source-title'>Original sources</h4>
+        <ul>
+          {this.props.data.map(d => {
+            return <li>{d}</li>
+          })}
+        </ul>
 
       </div>
     </div>

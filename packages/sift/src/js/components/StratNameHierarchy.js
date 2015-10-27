@@ -64,7 +64,7 @@ class StratNameHierarchy extends React.Component {
           }
         })
       });
-      console.log( data.sort((a, b) => { return b.totalChildren - a.totalChildren })[0]);
+
       // Find the top of the hierarchy and return it
       this.setState({hierarchy: data.sort((a, b) => { return b.totalChildren - a.totalChildren })[0]});
     });

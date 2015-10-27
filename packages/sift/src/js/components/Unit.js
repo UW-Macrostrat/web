@@ -8,6 +8,7 @@ import StratNameHierarchy from './StratNameHierarchy';
 import NoData from './NoData';
 import PrevalentTaxa from './PrevalentTaxa';
 import Loading from './Loading';
+import Footer from './Footer';
 
 class Unit extends React.Component {
   constructor(props) {
@@ -25,6 +26,7 @@ class Unit extends React.Component {
       liths: [],
       econs: [],
       environs: [],
+      refs: [],
       properties: {
         col_group: '',
         col_group_id: '',
@@ -52,12 +54,12 @@ class Unit extends React.Component {
     this.setState({
       loading: true
     });
-    Utilities.fetchMapData(`columns?unit_id=${id}&response=long`, (error, data) => {
+    Utilities.fetchMapData(`columns?unit_id=${id}&response=long`, (error, data, refs) => {
       Utilities.fetchData(`units?unit_id=${id}&response=long`, (unitError, unitData) => {
         if (error || unitError || unitData.success.data.length < 1) {
           return this.setState(this._resetState());
         }
-        Utilities.fetchMapData(`fossils?unit_id=${id}`, (fossilError, fossilData) => {
+        Utilities.fetchMapData(`fossils?unit_id=${id}`, (fossilError, fossilData, fossilRefs) => {
           if (fossilError) {
             return console.log("Error fetching fossils ", error);
           }
@@ -79,12 +81,14 @@ class Unit extends React.Component {
               });
 
               this.setState({
-                prevalentTaxa: prevalentData.records
+                prevalentTaxa: prevalentData.records,
+                refs: this.state.refs.concat(Object.keys(fossilRefs).map(d => { return fossilRefs[d] }))
               });
             });
           } else {
             this.setState({
-              prevalentTaxa: [{oid: null, nam: '', img: null, noc: null}]
+              prevalentTaxa: [{oid: null, nam: '', img: null, noc: null}],
+              refs: this.state.refs.concat(Object.keys(fossilRefs).map(d => { return fossilRefs[d] }))
             });
           }
 
@@ -97,7 +101,8 @@ class Unit extends React.Component {
           econs: Utilities.parseAttributes('econ', attributes.econ),
           strat_name_ids: unitData.success.data.map(d => { return d.strat_name_id }).filter(d => { if (d) { return d } }),
           properties: attributes,
-          mapData: data
+          mapData: data,
+          refs: Object.keys(refs).map(d => { return refs[d] })
         })
       });
     });
@@ -160,7 +165,6 @@ class Unit extends React.Component {
       </div>
     }
 
-    console.log(this.state.properties['unit_name']);
     return (
       <div>
 
@@ -211,6 +215,7 @@ class Unit extends React.Component {
             stratNameID={this.state.properties.strat_name_id}
           />
         </div>
+        <Footer data={this.state.refs}/>
       </div>
 
     );

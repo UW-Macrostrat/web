@@ -72,6 +72,8 @@ class Map extends React.Component {
     this.outcropLayer.on('click', (event) => {
       Utilities.fetchData(`/geologic_units/burwell?scale=medium&lat=${event.latlng.lat}&lng=${event.latlng.lng}`, (error, data) => {
         if (data.success && data.success.data.length) {
+          this.props.updateRefs(newRefs);
+          this.props.updateRefs(Objec)
           var burwellData = data.success.data[0];
           L.popup()
             .setLatLng(event.latlng)
@@ -122,7 +124,6 @@ class Map extends React.Component {
   toggleOutcrop() {
     // If we are in column view
     if (this.map.hasLayer(this.tiles)) {
-      console.log("Go to outcrop")
       this.map.removeLayer(this.tiles);
       this.map.removeLayer(this.layer);
       this.map.addLayer(this.darkTiles);
@@ -130,7 +131,6 @@ class Map extends React.Component {
     }
     // Otherwise if we are in outcrop view
     else {
-      console.log("Go to column")
       this.map.removeLayer(this.darkTiles);
       this.map.removeLayer(this.outcropLayer);
       this.map.addLayer(this.tiles);
@@ -228,19 +228,15 @@ class Map extends React.Component {
   componentWillReceiveProps(nextProps) {
     console.log("update map", nextProps.data._id, this.props.data._id)
     if (nextProps.hasOwnProperty('showOutcrop') && nextProps.showOutcrop != this.props.showOutcrop) {
-      console.log("toggleOutcrop", nextProps);
       this.toggleOutcrop();
     }
     if (nextProps.hasOwnProperty('outcrop') && nextProps.outcrop._id != this.props.outcrop._id) {
-      console.log("update outcrop", nextProps.outcrop);
       this.addOutcropLayer(nextProps.outcrop);
     }
     if (nextProps.hasOwnProperty('fossils') && nextProps.fossils._id != this.props.fossils._id) {
-      console.log("update fossils", nextProps.fossils);
       this.addFossils(nextProps.fossils);
     }
     if (nextProps.data._id != this.props.data._id) {
-      console.log("update columns")
       this.addLayer(nextProps.data, nextProps.target, nextProps);
     }
 

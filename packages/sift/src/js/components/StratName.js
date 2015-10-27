@@ -8,6 +8,8 @@ import StratNameHierarchy from './StratNameHierarchy';
 import NoData from './NoData';
 import Loading from './Loading';
 import PrevalentTaxa from './PrevalentTaxa';
+import Footer from './Footer';
+
 
 class StratName extends React.Component {
   constructor(props) {
@@ -34,6 +36,7 @@ class StratName extends React.Component {
       liths: [],
       econs: [],
       strat_names: [],
+      refs: [],
       concept: {
         concept_id: null,
         name: '',
@@ -97,11 +100,13 @@ class StratName extends React.Component {
     */
 
     // Get column geometry for map and summary attributes
-    Utilities.fetchMapData(`columns?${type}=${id}&response=long`, (mapError, data) => {
+    Utilities.fetchMapData(`columns?${type}=${id}&response=long`, (mapError, data, refs) => {
       if (mapError || !data.features.length) {
         console.log('reset')
         this.setState(this._resetState());
       }
+
+      var parsedRefs = Object.keys(refs).map(d => { return refs[d] });
 
       // Get fossil data (async)
       Utilities.fetchMapData(`fossils?${type}=${id}`, (fossilError, fossilData) => {
@@ -142,6 +147,8 @@ class StratName extends React.Component {
         if (conceptError || !conceptData.success) {
           return this.setState(this._resetState());
         }
+
+        parsedRefs = parsedRefs.concat(Object.keys(conceptData.success.refs).map(d => { return conceptData.success.refs[d] }));
 
         var params;
         if (!conceptData.success.data.length) {
@@ -209,6 +216,7 @@ class StratName extends React.Component {
             summary: Utilities.summarize(data.features),
             type: type,
             id: id,
+            refs: parsedRefs,
             loading: false
           });
         });
@@ -224,10 +232,11 @@ class StratName extends React.Component {
       this.setState({
         outcropLoading: true
       });
-      Utilities.fetchMapData(`geologic_units/burwell?scale=medium&strat_name_id=${ids}&map=true`, (error, data) => {
+      Utilities.fetchMapData(`geologic_units/burwell?scale=medium&strat_name_id=${ids}&map=true`, (error, data, refs) => {
         this.setState({
           outcropData: data,
           showOutcrop: !this.state.showOutcrop,
+          refs: this.state.refs.concat(Object.keys(refs).map(d => { return refs[d] })),
           outcropLoading: false
         });
       });
@@ -394,6 +403,7 @@ class StratName extends React.Component {
 
         {stratHierarchy}
 
+        <Footer data={this.state.refs}/>
       </div>
     );
 

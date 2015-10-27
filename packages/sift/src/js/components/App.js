@@ -2,7 +2,6 @@ import React from 'react';
 import Router from 'react-router';
 import Main from './Main';
 import Autocomplete from './Autocomplete';
-import Footer from './Footer';
 
 var { Route, DefaultRoute, RouteHandler, Link } = Router;
 
@@ -29,7 +28,7 @@ class App extends React.Component {
         <div className='page-content'>
           <RouteHandler/>
         </div>
-        <Footer/>
+
       </div>
     );
   }

@@ -23,14 +23,16 @@ var Utilities = {
 
   fetchMapData(uri, callback) {
     xhr({
-      uri: `${Config.apiURL}/${uri}&format=topojson_bare`
+      uri: `${Config.apiURL}/${uri}&format=topojson`
     }, (error, response, body) => {
-      var data = JSON.parse(body);
+      var apiResponse = JSON.parse(body);
+      var data = apiResponse.success.data;
+      var refs = (apiResponse.success.refs) ? apiResponse.success.refs : {}
       var geojson = topojson.feature(data, data.objects.output);
 
       // Assign a random identifier for this layer for more efficient component updating
       geojson._id = Math.random().toString(36).substring(7);
-      callback(error, geojson);
+      callback(error, geojson, refs);
     });
   },
 
