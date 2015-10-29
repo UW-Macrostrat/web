@@ -414,7 +414,7 @@ small, .small {
   min-height: 24px;
 }
 .hasFossils {
-  height: 23px;
+  height: 10px;
   -webkit-filter: invert(1);
   filter: invert(1);
   margin-left: 5px;
@@ -567,19 +567,13 @@ small, .small {
   background-position: center;
   margin: 0 auto;
 }
-.outcrop {
-  background-image: url(../img/noun_528.png);
-}
 
-.toggleOutcrop.active {
-  background-color: rgba(100,100,100,0.88);
-}
-.outcrop.active {
-  background-image: url(../img/noun_528_white.png) center/35px no-repeat;
+.outcrop {
+  background-image: url(../img/noun_528_small.png);
 }
 
 .fossils {
-  background-image: url(../img/noun_158842.png);
+  background-image: url(../img/noun_3167.png);
 }
 
 .satellite {
