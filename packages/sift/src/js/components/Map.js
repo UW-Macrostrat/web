@@ -33,6 +33,7 @@ class Map extends React.Component {
     if (this.map) {
       this.map.remove();
     }
+    
     var map = this.map = L.map(document.getElementById('map'), {
       minZoom: 1,
       maxZoom: 10,
