@@ -9,6 +9,7 @@ import StratColumn from './StratColumn';
 import NoData from './NoData';
 import Loading from './Loading';
 import PrevalentTaxa from './PrevalentTaxa';
+import MapControls from './MapControls';
 import Footer from './Footer';
 
 class Column extends React.Component {
@@ -16,6 +17,8 @@ class Column extends React.Component {
     super(props);
     this.state = this._resetState();
     this.toggleOutcrop = this.toggleOutcrop.bind(this);
+    this.toggleFossils = this.toggleFossils.bind(this);
+    this.toggleSatellite = this.toggleSatellite.bind(this);
   }
 
   _resetState() {
@@ -26,6 +29,8 @@ class Column extends React.Component {
       fossils: {features: [], _id: -1},
       outcropData: {features: [], _id: -1},
       showOutcrop: false,
+      showFossils: false,
+      showSatellite: false,
       prevalentTaxa: [{oid: null, nam: '', img: null, noc: null}],
       units: [],
       column: {},
@@ -82,9 +87,25 @@ class Column extends React.Component {
     }
   }
 
+  toggleFossils() {
+    this.setState({
+      showFossils: !this.state.showFossils
+    });
+  }
+
+  toggleSatellite() {
+    console.log(this.state)
+    this.setState({
+      showSatellite: !this.state.showSatellite
+    });
+  }
+
   _update(id) {
     this.setState({
-      loading: true
+      loading: true,
+      showFossils: false,
+      showOutcrop: false,
+      showSatellite: false
     });
     Utilities.fetchMapData(`columns?col_id=${id}&response=long&adjacents=true`, (error, data, refs) => {
       Utilities.fetchData(`units?col_id=${id}&response=long`, (unitError, unitData) => {
@@ -148,7 +169,6 @@ class Column extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    console.log('column update')
     if (nextProps.params.id !== this.props.params.id) {
       this._update(nextProps.params.id);
     }
@@ -231,10 +251,15 @@ class Column extends React.Component {
                 />
               </div>
 
-              <div className={'random-column-stats toggleOutcrop ' + ((this.state.showOutcrop) ? 'active' : '')} onClick={this.toggleOutcrop}>
-                <div className={'outcrop ' + ((this.state.showOutcrop) ? 'active' : '')}></div>
-              </div>
+              <MapControls
+                toggleOutcrop={this.toggleOutcrop}
+                toggleFossils={this.toggleFossils}
+                toggleSatellite={this.toggleSatellite}
 
+                showOutcrop={this.state.showOutcrop}
+                showFossils={this.state.showFossils}
+                showSatellite={this.state.showSatellite}
+              />
 
               <Loading
                 loading={this.state.outcropLoading}
@@ -244,10 +269,13 @@ class Column extends React.Component {
                 className='table-cell'
                 data={this.state.mapData}
                 fossils={this.state.fossils}
-                showOutcrop={this.state.showOutcrop}
                 outcrop={this.state.outcropData}
                 target={true}
                 updateRefs={this.updateRefs}
+
+                showOutcrop={this.state.showOutcrop}
+                showFossils={this.state.showFossils}
+                showSatellite={this.state.showSatellite}
               />
             </div>
 
