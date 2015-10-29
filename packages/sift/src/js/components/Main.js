@@ -1,6 +1,7 @@
 import React from 'react';
 import Stats from './Stats';
 import RandomColumn from './RandomColumn';
+import Footer from './Footer';
 
 class Main extends React.Component {
 
@@ -21,6 +22,7 @@ class Main extends React.Component {
         </div>
         <Stats/>
         <RandomColumn colID={randomColID}/>
+        <Footer data={[]}/>
       </div>
     );
   }

@@ -43,7 +43,6 @@ class Autocomplete extends React.Component {
   }
 
   updateResults(data) {
-  //  data.burwell = [{"id": 0, "name": this.state.searchTerm}]
     // Set the data
     this.setState({results: data});
 
@@ -187,12 +186,6 @@ class Autocomplete extends React.Component {
       window.location.hash = '#/' + this.props.categoryRoutes[item.props.dataset] + '/' + item.props.title;
     }
 
-  /*  if (this.props.categoryRoutes[item.props.dataset] != 'burwell') {
-      window.location.hash = "#/" + this.props.categoryRoutes[item.props.dataset] + "/" + item.props.id;
-    } else {
-      window.location.hash = "#/burwell/" + item.props.title.toLowerCase();
-    }*/
-
     this.setState({
      showSuggestions: false,
      searchTerm: '',
@@ -204,19 +197,19 @@ class Autocomplete extends React.Component {
 
   showSuggestions() {
     this.setState({showSuggestions: true});
+    this.props.reportState();
   }
 
   hideSuggestions(event) {
     if (this.state.canClose) {
       this.setState({showSuggestions: false});
+      this.props.reportState();
     }
   }
 
   enableAndHide() {
     this.setState({
-      canClose: true
-    });
-    this.setState({
+      canClose: true,
       showSuggestions: false
     });
   }
