@@ -7,7 +7,8 @@ var gulp = require('gulp'),
     browserify = require('browserify'),
     babelify = require('babelify'),
     buffer = require('vinyl-buffer'),
-    source = require('vinyl-source-stream');
+    source = require('vinyl-source-stream'),
+    sourcemaps = require('gulp-sourcemaps');
 
 gulp.task('build', function() {
   gulp.src('./index.html')
@@ -34,6 +35,7 @@ gulp.task('watch', function() {
 });
 
 gulp.task('browserify-babel', function() {
+
   browserify({
     entries: 'src/js/index.js',
     extensions: ['.jsx', '.js'],
@@ -43,6 +45,8 @@ gulp.task('browserify-babel', function() {
   .bundle()
   .pipe(source('bundle.min.js'))
   .pipe(buffer())
+  .pipe(sourcemaps.init({ loadMaps: true }))
+  .pipe(sourcemaps.write('./'))
 //  .pipe(uglify())
   .pipe(gulp.dest('./dist/js'))
 

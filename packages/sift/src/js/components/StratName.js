@@ -8,6 +8,7 @@ import StratNameHierarchy from './StratNameHierarchy';
 import NoData from './NoData';
 import Loading from './Loading';
 import PrevalentTaxa from './PrevalentTaxa';
+import MapControls from './MapControls';
 import Footer from './Footer';
 
 
@@ -15,6 +16,8 @@ class StratName extends React.Component {
   constructor(props) {
     super(props);
     this.toggleOutcrop = this.toggleOutcrop.bind(this);
+    this.toggleFossils = this.toggleFossils.bind(this);
+    this.toggleSatellite = this.toggleSatellite.bind(this);
     this.stateLookup = {
       'strat_name_concept': 'strat_name_concept_id',
       'strat_name': 'strat_name_id'
@@ -33,6 +36,8 @@ class StratName extends React.Component {
       outcropData: {features: [], _id: -1},
       prevalentTaxa: [{oid: null, nam: '', img: null, noc: null}],
       showOutcrop: false,
+      showFossils: false,
+      showSatellite: false,
       liths: [],
       econs: [],
       strat_names: [],
@@ -248,6 +253,19 @@ class StratName extends React.Component {
     }
   }
 
+  toggleFossils() {
+    this.setState({
+      showFossils: !this.state.showFossils
+    });
+  }
+
+  toggleSatellite() {
+    this.setState({
+      showSatellite: !this.state.showSatellite
+    });
+  }
+
+
   componentDidMount() {
     var currentRoutes = this.context.router.getCurrentRoutes();
     var activeRoute = currentRoutes[currentRoutes.length - 1].name;
@@ -343,9 +361,16 @@ class StratName extends React.Component {
                 data={this.state.summary}
               />
             </div>
-            <div className={'random-column-stats toggleOutcrop ' + ((this.state.showOutcrop) ? 'active' : '')} onClick={this.toggleOutcrop}>
-              <div className={'outcrop ' + ((this.state.showOutcrop) ? 'active' : '')}></div>
-            </div>
+
+            <MapControls
+              toggleOutcrop={this.toggleOutcrop}
+              toggleFossils={this.toggleFossils}
+              toggleSatellite={this.toggleSatellite}
+
+              showOutcrop={this.state.showOutcrop}
+              showFossils={this.state.showFossils}
+              showSatellite={this.state.showSatellite}
+            />
 
             <Loading
               loading={this.state.outcropLoading}
@@ -355,9 +380,12 @@ class StratName extends React.Component {
               className='table-cell'
               data={this.state.mapData}
               target={false}
-              showOutcrop={this.state.showOutcrop}
               outcrop={this.state.outcropData}
               fossils={this.state.fossils}
+
+              showOutcrop={this.state.showOutcrop}
+              showFossils={this.state.showFossils}
+              showSatellite={this.state.showSatellite}
             />
           </div>
 

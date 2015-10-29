@@ -94,7 +94,6 @@ class Column extends React.Component {
   }
 
   toggleSatellite() {
-    console.log(this.state)
     this.setState({
       showSatellite: !this.state.showSatellite
     });
