@@ -780,7 +780,6 @@ small, .small {
   display: flex;
   align-items: center;
   justify-content: flex-start;;
-  position: absolute;
   width: 100%;
   margin-top: 120px;
 }
