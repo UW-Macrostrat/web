@@ -266,8 +266,7 @@ html, body, .react {
   position: absolute;
   z-index: 10000;
   background-color: rgba(255,255,255,0.95);
-  height: 100%;
-  display: table;
+  height: inherit;
 }
 .table-cell {
   display: table-cell;
@@ -277,7 +276,7 @@ html, body, .react {
 .random-column {
   position: relative;
   margin-bottom: 50px;
-  height: auto;
+  height: 100%;
 /*  box-shadow: 0px 6px 10px -6px #aaa, 0px -6px 10px -6px #aaa;
   -webkit-box-shadow: 0px 6px 10px -6px #aaa, 0px -6px 10px -6px #aaa;
   -mox-box-shadow: 0px 6px 10px -6px #aaa, 0px -6px 10px -6px #aaa;*/
