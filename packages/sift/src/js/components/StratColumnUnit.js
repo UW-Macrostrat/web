@@ -7,7 +7,7 @@ class StratColumnUnit extends React.Component {
         <div className='unit-box' style={{
           backgroundColor: 'rgba(' + this.props.data.rgba.r + ',' + this.props.data.rgba.g + ',' + this.props.data.rgba.b + ',' + this.props.data.rgba.alpha + ')',
           color: this.props.data.text_color
-        }}>{this.props.data.unit_name} {this.props.data.pbdb_collections > 0 ? <img className='hasFossils' src='dist/img/noun_158842.png'/> : ''}</div>
+        }}>{this.props.data.unit_name} {this.props.data.pbdb_collections > 0 ? <img className={this.props.data.text_color === '#000000' ? 'hasFossils black' : 'hasFossils'} src='dist/img/noun_158842.png'/> : ''}</div>
       </a>
     )
   }

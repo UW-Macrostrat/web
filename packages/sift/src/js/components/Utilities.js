@@ -1,9 +1,6 @@
 import _ from 'underscore';
 import xhr from 'xhr';
 import topojson from 'topojson';
-import Explode from 'turf-explode';
-import Convex from 'turf-convex';
-import Wellknown from 'wellknown';
 import Config from './Config';
 
 var typeLookup = {
@@ -13,13 +10,6 @@ var typeLookup = {
 }
 
 var Utilities = {
-  wktHull(data) {
-    return Wellknown.stringify(
-      Convex(
-        Explode(data)
-      )
-    );
-  },
 
   fetchMapData(uri, callback) {
     xhr({
@@ -49,32 +39,6 @@ var Utilities = {
       uri: `${Config.pbdbURL}/occs/prevalence.json?limit=5&coll_id=${coll_ids}`
     }, (error, response, body) => {
       callback(error, JSON.parse(body));
-    });
-  },
-
-  fetchPBDBCollections(space, callback) {
-    // Get a convex hull of the desired extent as WKT
-    var hull = this.wktHull(space);
-    xhr({
-      uri: `${Config.pbdbURL}/colls/list.json?loc='${hull}'`
-    }, (error, response, body) => {
-      var data = JSON.parse(body);
-      callback(error, {
-        "type": "FeatureCollection",
-        "features": data.records.map(d => {
-          return {
-            "type": "Feature",
-            "properties": {},
-            "geometry": {
-              "type": "Point",
-              "coordinates": [
-                d.lng,
-                d.lat
-              ]
-            }
-          };
-        })
-      });
     });
   },
 

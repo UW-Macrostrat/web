@@ -174,7 +174,6 @@ class Column extends React.Component {
   }
 
   render() {
-    //console.log('column render');
     if (!this.state.properties) {
       return <h3>Loading...</h3>
     } else {

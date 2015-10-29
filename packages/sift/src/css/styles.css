@@ -411,6 +411,10 @@ small, .small {
   filter: invert(1);
   margin-left: 5px;
 }
+.hasFossils.black {
+  -webkit-filter: invert(0);
+  filter: invert(0);
+}
 .period-names {
   text-align: center;
 }
@@ -792,6 +796,10 @@ small, .small {
 .footer-brand {
   font-family: "Maven Pro", sans-serif;
   font-size: 30px;
+}
+.footer-brand > a, .footer-brand > a:hover {
+  color: #000000;
+  text-decoration: none;
 }
 .footer-logo {
   height: 30px;

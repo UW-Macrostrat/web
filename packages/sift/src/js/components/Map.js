@@ -1,8 +1,6 @@
 import React from 'react';
 import L from 'leaflet';
-import xhr from 'xhr';
 import Centroid from 'turf-centroid';
-import topojson from 'topojson';
 import Utilities from './Utilities';
 
 
@@ -33,7 +31,7 @@ class Map extends React.Component {
     if (this.map) {
       this.map.remove();
     }
-    
+
     var map = this.map = L.map(document.getElementById('map'), {
       minZoom: 1,
       maxZoom: 10,
@@ -111,6 +109,7 @@ class Map extends React.Component {
       });
     });
 
+    // Set up fossil layer
     this.fossilLayer = L.geoJson(null, {
       pointToLayer: (feature, latlng) => {
         return L.circleMarker(latlng, this.props.defaultFossilStyle)
@@ -192,7 +191,6 @@ class Map extends React.Component {
   addLayer(geojson, target, props) {
     if (this.layer) {
       this.layer.clearLayers();
-    //  this.map.removeLayer(this.layer);
     }
     if (!(geojson.features.length)) {
       return;
@@ -226,7 +224,6 @@ class Map extends React.Component {
       }
     });
 
-    this.layer.setZIndex(1);
     // Add columns if we are not showing outcrops and not showing columns
     if (!(this.map.hasLayer(this.layer)) && (props.showOutcrop == false)) {
       this.map.addLayer(this.layer);
@@ -265,7 +262,6 @@ class Map extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    console.log("update map", nextProps.data._id, this.props.data._id)
     if (nextProps.hasOwnProperty('showOutcrop') && nextProps.showOutcrop != this.props.showOutcrop) {
       this.toggleOutcrop();
     }

@@ -47,7 +47,7 @@ function buildBundle(watch) {
     bundler = watchify(bundler);
     bundler.on('update', function() {
       bundleShare(bundler);
-    })
+    });
   }
 
   bundleShare(bundler);
@@ -59,7 +59,7 @@ function bundleShare(b) {
     .bundle()
     .pipe(source('bundle.min.js'))
     .pipe(buffer())
-    .pipe(uglify())
+  //  .pipe(uglify())
     .pipe(gulp.dest('./dist/js'));
 }
 
