@@ -6,6 +6,7 @@ import SummaryStats from './SummaryStats';
 import ChartLegend from './ChartLegend';
 import NoData from './NoData';
 import Loading from './Loading';
+import Footer from './Footer';
 
 class Attributes extends React.Component {
   constructor(props) {
@@ -69,6 +70,7 @@ class Attributes extends React.Component {
       liths: [],
       econs: [],
       environs: [],
+      refs: [],
       name: {
         name: '',
         id: '',
@@ -96,7 +98,7 @@ class Attributes extends React.Component {
       loading: true
     });
 
-    Utilities.fetchMapData(`columns?${this.stateLookup[type].classifier}=${id}&response=long`, (error, data) => {
+    Utilities.fetchMapData(`columns?${this.stateLookup[type].classifier}=${id}&response=long`, (error, data, refs) => {
       Utilities.fetchData(`defs/${this.stateLookup[type].def}?${this.stateLookup[type].classifier}=${id}`, (defError, defData) => {
         if (error || defError || !data.features.length) {
           return this.setState(this._resetState());
@@ -128,6 +130,7 @@ class Attributes extends React.Component {
           summary: Utilities.summarize(data.features),
           properties: data.features[0].properties,
           mapData: data,
+          refs: this.state.refs.concat(Object.keys(refs).map(d => { return refs[d] })),
           loading: false
         });
       });
@@ -236,6 +239,7 @@ class Attributes extends React.Component {
             </div>
           </div>
         </div>
+        <Footer data={this.state.refs}/>
       </div>
     );
 

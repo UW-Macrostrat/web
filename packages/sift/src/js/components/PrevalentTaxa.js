@@ -19,7 +19,6 @@ class PrevalentTaxa extends React.Component {
   }
 
   render() {
-    console.log('update prevalent-taxa');
     return (
       <div className={this.state.data[0].oid ? 'row prevalent-taxa-row' : 'hidden'}>
         <div className='col-sm-2 prevalent-taxa-container'>

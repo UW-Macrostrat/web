@@ -3,6 +3,7 @@ import L from 'leaflet';
 import xhr from 'xhr';
 import Centroid from 'turf-centroid';
 import topojson from 'topojson';
+import Utilities from './Utilities';
 
 
 /* Via https://gist.github.com/missinglink/7620340 */
@@ -37,11 +38,11 @@ class Map extends React.Component {
       maxZoom: 10,
       zoomControl: false,
       scrollWheelZoom: false,
-      keyboard: false,
+    //  keyboard: false,
     //  dragging: false,
-      touchZoom: false,
-      doubleClickZoom: false,
-      boxZoom: false
+      touchZoom: true,
+    //  doubleClickZoom: false,
+    //  boxZoom: false
     }).setView([40, -97], 6);
 
     var control = L.control.zoom({
@@ -56,6 +57,11 @@ class Map extends React.Component {
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>'
     });
 
+    this.satellite = L.tileLayer('https://{s}.tiles.mapbox.com/v3/jczaplewski.ld2ndl61/{z}/{x}/{y}.png', {
+      zIndex: 10,
+      attribution: "<a href='https://www.mapbox.com/about/maps/' target='_blank'>&copy; Mapbox &copy; OpenStreetMap</a>"
+    });
+
     this.outcropLayer = L.geoJson(null, {
       style: (feature) => {
         return {
@@ -68,37 +74,105 @@ class Map extends React.Component {
       }
     });
 
+    this.outcropLayer.on('click', (event) => {
+      Utilities.fetchData(`/geologic_units/burwell?scale=medium&lat=${event.latlng.lat}&lng=${event.latlng.lng}`, (error, data) => {
+        if (data.success && data.success.data.length) {
+          var burwellData = data.success.data[0];
+          L.popup()
+            .setLatLng(event.latlng)
+            .setContent(`
+              <div class='burwell-popup'>
+                <h4>${burwellData.strat_name} (${burwellData.map_id})</h4>
+                <table class="table table-stripped">
+                  <tbody>
+                    <tr>
+                      <td class='burwell-popup-head'>Age</td>
+                      <td>${burwellData.b_int_name} - ${burwellData.t_int_name}</td>
+                    </tr>
+                    <tr>
+                      <td class='burwell-popup-head'>Age (MA)</td>
+                      <td>${burwellData.b_int_age} - ${burwellData.t_int_age}</td>
+                    </tr>
+                    <tr>
+                      <td class='burwell-popup-head'>Description</td>
+                      <td>${burwellData.descrip}</td>
+                    </tr>
+                    <tr>
+                      <td class='burwell-popup-head'>Comments</td>
+                      <td>${burwellData.comments}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            `)
+            .openOn(this.map);
+        }
+      });
+    });
+
     this.fossilLayer = L.geoJson(null, {
       pointToLayer: (feature, latlng) => {
-        return L.circleMarker(latlng, {
-          color: '#ffffff',
-          fillOpacity: 0.8,
-          opacity: 0.8,
-          weight: 1,
-          outline: 0,
-          radius: 1
-        })
+        return L.circleMarker(latlng, this.props.defaultFossilStyle)
+      },
+      onEachFeature: (feature, layer) => {
+        layer.bindPopup(`
+          <div class='pbdb-popup'>
+            <a class='pbdb-popup-link'
+              href='https://paleobiodb.org/cgi-bin/bridge.pl?a=basicCollectionSearch&collection_no=${feature.properties.cltn_id}'
+              target='_blank'>
+              ${feature.properties.cltn_name}
+            </a>
+            <br>
+            ${feature.properties.pbdb_occs} occurrences
+          </div>
+          `)
       }
-    }).addTo(map).bringToFront();
+    }).addTo(map);
+  }
+
+  toggleSatellite() {
+    if (this.map.hasLayer(this.satellite)) {
+      this.map.removeLayer(this.satellite);
+    } else {
+      this.map.addLayer(this.satellite);
+    }
   }
 
   toggleOutcrop() {
     // If we are in column view
     if (this.map.hasLayer(this.tiles)) {
-      console.log("Go to outcrop")
       this.map.removeLayer(this.tiles);
-      this.map.removeLayer(this.layer);
       this.map.addLayer(this.darkTiles);
+      this.map.removeLayer(this.layer);
       this.map.addLayer(this.outcropLayer);
+      // WTF...why is a timeout necessary for this to work?
+      setTimeout(() => {
+        this.fossilLayer.bringToFront();
+      }, 10);
     }
     // Otherwise if we are in outcrop view
     else {
-      console.log("Go to column")
       this.map.removeLayer(this.darkTiles);
-      this.map.removeLayer(this.outcropLayer);
       this.map.addLayer(this.tiles);
+      this.map.removeLayer(this.outcropLayer);
       this.map.addLayer(this.layer);
+      this.fossilLayer.bringToFront();
     }
+  }
+
+  toggleFossils() {
+    if (!this.props.showFossils) {
+      this.fossilLayer.setStyle((feature, layer) => {
+        return this.props.highlightedFossilStyle
+      });
+    } else {
+      this.fossilLayer.setStyle((feature, layer) => {
+        return this.props.defaultFossilStyle
+      });
+    }
+
+    this.fossilLayer.bringToFront();
+
   }
 
   addOutcropLayer(geojson) {
@@ -151,6 +225,7 @@ class Map extends React.Component {
       }
     });
 
+    this.layer.setZIndex(1);
     // Add columns if we are not showing outcrops and not showing columns
     if (!(this.map.hasLayer(this.layer)) && (props.showOutcrop == false)) {
       this.map.addLayer(this.layer);
@@ -191,19 +266,21 @@ class Map extends React.Component {
   componentWillReceiveProps(nextProps) {
     console.log("update map", nextProps.data._id, this.props.data._id)
     if (nextProps.hasOwnProperty('showOutcrop') && nextProps.showOutcrop != this.props.showOutcrop) {
-      console.log("toggleOutcrop", nextProps);
       this.toggleOutcrop();
     }
+    if (nextProps.hasOwnProperty('showFossils') && nextProps.showFossils != this.props.showFossils) {
+      this.toggleFossils();
+    }
+    if (nextProps.hasOwnProperty('showSatellite') && nextProps.showSatellite != this.props.showSatellite) {
+      this.toggleSatellite();
+    }
     if (nextProps.hasOwnProperty('outcrop') && nextProps.outcrop._id != this.props.outcrop._id) {
-      console.log("update outcrop", nextProps.outcrop);
       this.addOutcropLayer(nextProps.outcrop);
     }
     if (nextProps.hasOwnProperty('fossils') && nextProps.fossils._id != this.props.fossils._id) {
-      console.log("update fossils", nextProps.fossils);
       this.addFossils(nextProps.fossils);
     }
     if (nextProps.data._id != this.props.data._id) {
-      console.log("update columns")
       this.addLayer(nextProps.data, nextProps.target, nextProps);
     }
 
@@ -218,7 +295,25 @@ class Map extends React.Component {
 }
 
 Map.defaultProps = {
-  showOutcrop: false
+  showOutcrop: false,
+  defaultFossilStyle: {
+    color: '#ffffff',
+    fillColor: '#ffffff',
+    fillOpacity: 0.8,
+    opacity: 0.8,
+    weight: 1,
+    outline: 0,
+    radius: 1
+  },
+  highlightedFossilStyle: {
+    color: '#ffffff',
+    fillColor: '#000000',
+    fillOpacity: 0.8,
+    opacity: 0.8,
+    weight: 1,
+    outline: 1.5,
+    radius: 7
+  }
 }
 
 export default Map;

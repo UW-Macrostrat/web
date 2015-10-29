@@ -3,7 +3,6 @@ import Router from 'react-router';
 import Main from './Main';
 import Autocomplete from './Autocomplete';
 
-
 var { Route, DefaultRoute, RouteHandler, Link } = Router;
 
 
@@ -29,6 +28,7 @@ class App extends React.Component {
         <div className='page-content'>
           <RouteHandler/>
         </div>
+
       </div>
     );
   }

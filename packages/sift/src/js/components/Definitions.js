@@ -2,6 +2,7 @@ import React from 'react';
 import Utilities from './Utilities';
 import NoData from './NoData';
 import Loading from './Loading';
+import _ from 'underscore';
 
 if (!String.prototype.startsWith) {
   String.prototype.startsWith = function(searchString, position) {
@@ -39,7 +40,8 @@ class Definitions extends React.Component {
         name: 'name',
         def: 'intervals',
         route: 'interval',
-        fields: [{'field': 'int_id', 'desc': 'int_id'}, {'field': 'name', 'desc': 'name'}, {'field': 'abbrev', 'desc': 'abbreviation'}, {'field': 't_age', 'desc': 'top age'}, {'field': 'b_age', 'desc': 'bottom age'}]
+        fields: [{'field': 'int_id', 'desc': 'int_id'}, {'field': 'name', 'desc': 'name'}, {'field': 'int_type', 'desc': 'type'}, {'field': 'abbrev', 'desc': 'abbreviation'}, {'field': 't_age', 'desc': 'top age'}, {'field': 'b_age', 'desc': 'bottom age'}],
+        sort: ['name', 'int_type']
       },
       'lithologies': {
         title: 'Lithologies',
@@ -47,7 +49,8 @@ class Definitions extends React.Component {
         name: 'name',
         def: 'lithologies',
         route: 'lithology',
-        fields: [{'field': 'lith_id', 'desc': 'lith_id'}, {'field': 'name', 'desc': 'name'}, {'field': 'type', 'desc': 'type'}, {'field': 'class', 'desc': 'class'}, {'field': 'color', 'desc': 'color'}]
+        fields: [{'field': 'lith_id', 'desc': 'lith_id'}, {'field': 'name', 'desc': 'name'}, {'field': 'type', 'desc': 'type'}, {'field': 'class', 'desc': 'class'}, {'field': 'color', 'desc': 'color'}],
+        sort: ['name', 'type', 'class']
       },
       'environments': {
         title: 'Environments',
@@ -55,7 +58,8 @@ class Definitions extends React.Component {
         name: 'name',
         def: 'environments',
         route: 'environment',
-        fields: [{'field': 'environ_id', 'desc': 'lith_id'}, {'field': 'name', 'desc': 'name'}, {'field': 'type', 'desc': 'type'}, {'field': 'class', 'desc': 'class'}, {'field': 'color', 'desc': 'color'}]
+        fields: [{'field': 'environ_id', 'desc': 'lith_id'}, {'field': 'name', 'desc': 'name'}, {'field': 'type', 'desc': 'type'}, {'field': 'class', 'desc': 'class'}, {'field': 'color', 'desc': 'color'}],
+        sort: ['name', 'type', 'class']
       },
       'economics': {
         title: 'Economics',
@@ -63,7 +67,8 @@ class Definitions extends React.Component {
         name: 'name',
         def: 'econs',
         route: 'economic',
-        fields: [{'field': 'econ_id', 'desc': 'lith_id'}, {'field': 'name', 'desc': 'name'}, {'field': 'type', 'desc': 'type'}, {'field': 'class', 'desc': 'class'}, {'field': 'color', 'desc': 'color'}]
+        fields: [{'field': 'econ_id', 'desc': 'lith_id'}, {'field': 'name', 'desc': 'name'}, {'field': 'type', 'desc': 'type'}, {'field': 'class', 'desc': 'class'}, {'field': 'color', 'desc': 'color'}],
+        sort: ['name', 'type', 'class']
       },
       'columns': {
         title: 'Columns',
@@ -79,7 +84,7 @@ class Definitions extends React.Component {
         name: 'strat_name',
         def: 'strat_names',
         route: 'strat_name',
-        fields: [{'field': 'strat_name_id', 'desc': 'strat_name_id'}, {'field': 'strat_name', 'desc': 'name'}, {'field': 'rank', 'desc': 'rank'}, {'field': 't_units', 'desc': 'total units'}]
+        fields: [{'field': 'strat_name_id', 'desc': 'strat_name_id'}, {'field': 'strat_name_long', 'desc': 'name'}, {'field': 'rank', 'desc': 'rank'}, {'field': 't_units', 'desc': 'total units'}]
       },
       'strat_name_concepts': {
         title: 'Stratigraphic Name Concepts',
@@ -107,10 +112,17 @@ class Definitions extends React.Component {
     this.setState({
       loading: true
     });
-    console.log("incoming type - ", type)
+
     Utilities.fetchData(`defs/${this.stateLookup[type].def}?all`, (error, data) => {
       if (error || !data.success || data.error) {
         return this.setState(this._resetState());
+      }
+
+      // Sort, if applicable
+      if (this.stateLookup[type].sort) {
+        this.stateLookup[type].sort.forEach(function(d) {
+          data.success.data = _.sortBy(data.success.data, d);
+        });
       }
 
       this.setState({

@@ -9,12 +9,16 @@ import StratColumn from './StratColumn';
 import NoData from './NoData';
 import Loading from './Loading';
 import PrevalentTaxa from './PrevalentTaxa';
+import MapControls from './MapControls';
+import Footer from './Footer';
 
 class Column extends React.Component {
   constructor(props) {
     super(props);
     this.state = this._resetState();
     this.toggleOutcrop = this.toggleOutcrop.bind(this);
+    this.toggleFossils = this.toggleFossils.bind(this);
+    this.toggleSatellite = this.toggleSatellite.bind(this);
   }
 
   _resetState() {
@@ -25,6 +29,8 @@ class Column extends React.Component {
       fossils: {features: [], _id: -1},
       outcropData: {features: [], _id: -1},
       showOutcrop: false,
+      showFossils: false,
+      showSatellite: false,
       prevalentTaxa: [{oid: null, nam: '', img: null, noc: null}],
       units: [],
       column: {},
@@ -33,6 +39,7 @@ class Column extends React.Component {
       environs: [],
       strat_name_ids: [],
       cltn_ids: [],
+      refs: [],
       properties: {
         col_id: '',
         col_name: '',
@@ -62,36 +69,49 @@ class Column extends React.Component {
   toggleOutcrop() {
     if (!(this.state.outcropData.features.length)) {
       var ids = this.state.strat_name_ids.join(',');
-      console.log(ids);
-      console.log("need to fetch burwell polys");
       this.setState({
         outcropLoading: true
       });
-      Utilities.fetchMapData(`geologic_units/burwell?scale=medium&strat_name_id=${ids}&map=true`, (error, data) => {
+      Utilities.fetchMapData(`geologic_units/burwell?scale=medium&strat_name_id=${ids}&map=true`, (error, data, refs) => {
         this.setState({
           outcropData: data,
           showOutcrop: !this.state.showOutcrop,
-          outcropLoading: false
+          outcropLoading: false,
+          refs: this.state.refs.concat(Object.keys(refs).map(d => { return refs[d] }))
         });
       });
     } else {
-      console.log("simply toggle")
       this.setState({
         showOutcrop: !this.state.showOutcrop
       });
     }
   }
 
+  toggleFossils() {
+    this.setState({
+      showFossils: !this.state.showFossils
+    });
+  }
+
+  toggleSatellite() {
+    this.setState({
+      showSatellite: !this.state.showSatellite
+    });
+  }
+
   _update(id) {
     this.setState({
-      loading: true
+      loading: true,
+      showFossils: false,
+      showOutcrop: false,
+      showSatellite: false
     });
-    Utilities.fetchMapData(`columns?col_id=${id}&response=long&adjacents=true`, (error, data) => {
+    Utilities.fetchMapData(`columns?col_id=${id}&response=long&adjacents=true`, (error, data, refs) => {
       Utilities.fetchData(`units?col_id=${id}&response=long`, (unitError, unitData) => {
         if (error || unitError || !data.features.length) {
           return this.setState(this._resetState());
         }
-        Utilities.fetchMapData(`fossils?col_id=${id}`, (fossilError, fossilData) => {
+        Utilities.fetchMapData(`fossils?col_id=${id}`, (fossilError, fossilData, fossilRefs) => {
           if (fossilError) {
             return console.log("Error fetching fossils ", error);
           }
@@ -114,12 +134,14 @@ class Column extends React.Component {
               });
 
               this.setState({
-                prevalentTaxa: prevalentData.records
+                prevalentTaxa: prevalentData.records,
+                refs: this.state.refs.concat(Object.keys(fossilRefs).map(d => { return fossilRefs[d] }))
               });
             });
           } else {
             this.setState({
-              prevalentTaxa: [{oid: null, nam: '', img: null, noc: null}]
+              prevalentTaxa: [{oid: null, nam: '', img: null, noc: null}],
+              refs: this.state.refs.concat(Object.keys(fossilRefs).map(d => { return fossilRefs[d] }))
             });
           }
 
@@ -134,7 +156,8 @@ class Column extends React.Component {
           mapData: data,
           outcropData: {features: [], _id: -1},
           properties: data.features[0].properties,
-          loading: false
+          loading: false,
+          refs: Object.keys(refs).map(d => { return refs[d] })
         });
       });
     });
@@ -145,7 +168,6 @@ class Column extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    console.log('column update')
     if (nextProps.params.id !== this.props.params.id) {
       this._update(nextProps.params.id);
     }
@@ -228,10 +250,15 @@ class Column extends React.Component {
                 />
               </div>
 
-              <div className={'random-column-stats toggleOutcrop ' + ((this.state.showOutcrop) ? 'active' : '')} onClick={this.toggleOutcrop}>
-                <div className={'outcrop ' + ((this.state.showOutcrop) ? 'active' : '')}></div>
-              </div>
+              <MapControls
+                toggleOutcrop={this.toggleOutcrop}
+                toggleFossils={this.toggleFossils}
+                toggleSatellite={this.toggleSatellite}
 
+                showOutcrop={this.state.showOutcrop}
+                showFossils={this.state.showFossils}
+                showSatellite={this.state.showSatellite}
+              />
 
               <Loading
                 loading={this.state.outcropLoading}
@@ -241,9 +268,13 @@ class Column extends React.Component {
                 className='table-cell'
                 data={this.state.mapData}
                 fossils={this.state.fossils}
-                showOutcrop={this.state.showOutcrop}
                 outcrop={this.state.outcropData}
                 target={true}
+                updateRefs={this.updateRefs}
+
+                showOutcrop={this.state.showOutcrop}
+                showFossils={this.state.showFossils}
+                showSatellite={this.state.showSatellite}
               />
             </div>
 
@@ -264,6 +295,8 @@ class Column extends React.Component {
             <StratColumn data={this.state.units}/>
             <a href={'https://dev.macrostrat.org/unit-renderer/#/column=' + this.state.properties.col_id} target='_blank' className='normalize-link alternate-column'>Alternate column view</a>
           </div>
+
+          <Footer data={this.state.refs}/>
         </div>
       );
     }

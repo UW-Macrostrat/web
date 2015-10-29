@@ -1,5 +1,6 @@
 var Config = {
   apiURL:  (window.location.hostname === 'localhost' ? 'http://localhost:5000/api/v2' : (window.location.origin + '/api/v2')),
+  //apiURL: 'https://macrostrat.org/api/v2',
   pbdbURL: 'https://paleobiodb.org/data1.2',
 
   totalColumns: 1681,

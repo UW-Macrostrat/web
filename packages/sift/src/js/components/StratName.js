@@ -8,11 +8,16 @@ import StratNameHierarchy from './StratNameHierarchy';
 import NoData from './NoData';
 import Loading from './Loading';
 import PrevalentTaxa from './PrevalentTaxa';
+import MapControls from './MapControls';
+import Footer from './Footer';
+
 
 class StratName extends React.Component {
   constructor(props) {
     super(props);
     this.toggleOutcrop = this.toggleOutcrop.bind(this);
+    this.toggleFossils = this.toggleFossils.bind(this);
+    this.toggleSatellite = this.toggleSatellite.bind(this);
     this.stateLookup = {
       'strat_name_concept': 'strat_name_concept_id',
       'strat_name': 'strat_name_id'
@@ -31,9 +36,12 @@ class StratName extends React.Component {
       outcropData: {features: [], _id: -1},
       prevalentTaxa: [{oid: null, nam: '', img: null, noc: null}],
       showOutcrop: false,
+      showFossils: false,
+      showSatellite: false,
       liths: [],
       econs: [],
       strat_names: [],
+      refs: [],
       concept: {
         concept_id: null,
         name: '',
@@ -97,11 +105,13 @@ class StratName extends React.Component {
     */
 
     // Get column geometry for map and summary attributes
-    Utilities.fetchMapData(`columns?${type}=${id}&response=long`, (mapError, data) => {
+    Utilities.fetchMapData(`columns?${type}=${id}&response=long`, (mapError, data, refs) => {
       if (mapError || !data.features.length) {
         console.log('reset')
         this.setState(this._resetState());
       }
+
+      var parsedRefs = Object.keys(refs).map(d => { return refs[d] });
 
       // Get fossil data (async)
       Utilities.fetchMapData(`fossils?${type}=${id}`, (fossilError, fossilData) => {
@@ -142,6 +152,8 @@ class StratName extends React.Component {
         if (conceptError || !conceptData.success) {
           return this.setState(this._resetState());
         }
+
+        parsedRefs = parsedRefs.concat(Object.keys(conceptData.success.refs).map(d => { return conceptData.success.refs[d] }));
 
         var params;
         if (!conceptData.success.data.length) {
@@ -209,6 +221,7 @@ class StratName extends React.Component {
             summary: Utilities.summarize(data.features),
             type: type,
             id: id,
+            refs: parsedRefs,
             loading: false
           });
         });
@@ -224,10 +237,11 @@ class StratName extends React.Component {
       this.setState({
         outcropLoading: true
       });
-      Utilities.fetchMapData(`geologic_units/burwell?scale=medium&strat_name_id=${ids}&map=true`, (error, data) => {
+      Utilities.fetchMapData(`geologic_units/burwell?scale=medium&strat_name_id=${ids}&map=true`, (error, data, refs) => {
         this.setState({
           outcropData: data,
           showOutcrop: !this.state.showOutcrop,
+          refs: this.state.refs.concat(Object.keys(refs).map(d => { return refs[d] })),
           outcropLoading: false
         });
       });
@@ -238,6 +252,19 @@ class StratName extends React.Component {
       });
     }
   }
+
+  toggleFossils() {
+    this.setState({
+      showFossils: !this.state.showFossils
+    });
+  }
+
+  toggleSatellite() {
+    this.setState({
+      showSatellite: !this.state.showSatellite
+    });
+  }
+
 
   componentDidMount() {
     var currentRoutes = this.context.router.getCurrentRoutes();
@@ -334,9 +361,16 @@ class StratName extends React.Component {
                 data={this.state.summary}
               />
             </div>
-            <div className={'random-column-stats toggleOutcrop ' + ((this.state.showOutcrop) ? 'active' : '')} onClick={this.toggleOutcrop}>
-              <div className={'outcrop ' + ((this.state.showOutcrop) ? 'active' : '')}></div>
-            </div>
+
+            <MapControls
+              toggleOutcrop={this.toggleOutcrop}
+              toggleFossils={this.toggleFossils}
+              toggleSatellite={this.toggleSatellite}
+
+              showOutcrop={this.state.showOutcrop}
+              showFossils={this.state.showFossils}
+              showSatellite={this.state.showSatellite}
+            />
 
             <Loading
               loading={this.state.outcropLoading}
@@ -346,9 +380,12 @@ class StratName extends React.Component {
               className='table-cell'
               data={this.state.mapData}
               target={false}
-              showOutcrop={this.state.showOutcrop}
               outcrop={this.state.outcropData}
               fossils={this.state.fossils}
+
+              showOutcrop={this.state.showOutcrop}
+              showFossils={this.state.showFossils}
+              showSatellite={this.state.showSatellite}
             />
           </div>
 
@@ -394,6 +431,7 @@ class StratName extends React.Component {
 
         {stratHierarchy}
 
+        <Footer data={this.state.refs}/>
       </div>
     );
 

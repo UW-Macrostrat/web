@@ -11,11 +11,11 @@
   "dependencies": {
     "chart.js": "^1.0.2",
     "fastclick": "^1.0.6",
-    "gulp": "^3.9.0",
-    "leaflet": "^1.0.0-beta.1",
+    "leaflet": "^1.0.0-beta.2",
     "react": "^0.13.3",
     "react-router": "^0.13.3",
     "topojson": "^1.6.19",
+    "turf-centroid": "^1.1.2",
     "turf-convex": "^1.0.1",
     "turf-explode": "^1.0.1",
     "underscore": "^1.8.3",
@@ -30,8 +30,10 @@
     "gulp-htmlhint": "^0.3.0",
     "gulp-jshint": "^1.11.2",
     "gulp-minify-css": "^1.2.0",
+    "gulp-sourcemaps": "^1.6.0",
     "gulp-uglify": "^1.2.0",
     "vinyl-buffer": "^1.0.0",
-    "vinyl-source-stream": "^1.1.0"
+    "vinyl-source-stream": "^1.1.0",
+    "watchify": "^3.5.0"
   }
 }
