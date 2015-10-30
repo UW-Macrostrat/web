@@ -338,7 +338,7 @@ html, body, .react {
 
 .chart-position-adjustment {
   margin-left: -45px;
-  padding-top: 50%;
+  margin-bottom: 45px;
 }
 .big-number {
   font-size: 22px;
@@ -352,6 +352,13 @@ html, body, .react {
 #map {
   height: 400px;
   width: 100%;
+}
+#indexMap {
+  height: 800px;
+  width: 100%;
+}
+.index-map-group-link {
+  color: #aaaaaa !important;
 }
 .chart-canvas-container {
 /*  padding-top: 48%; */
@@ -903,6 +910,9 @@ small, .small {
 }
 
 @media(max-width: 768px) {
+  .random-column-chart {
+    display: none;
+  }
   .leaflet-control-zoom {
     display: none;
   }
