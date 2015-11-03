@@ -197,13 +197,13 @@ class Autocomplete extends React.Component {
 
   showSuggestions() {
     this.setState({showSuggestions: true});
-    this.props.reportState();
+    //this.props.reportState();
   }
 
   hideSuggestions(event) {
     if (this.state.canClose) {
       this.setState({showSuggestions: false});
-      this.props.reportState();
+    //  this.props.reportState();
     }
   }
 
