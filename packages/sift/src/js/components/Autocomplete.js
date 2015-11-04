@@ -176,8 +176,13 @@ class Autocomplete extends React.Component {
         dataset: 'burwell'
       }}
     }
-    this.setState({selectedItem: item.props});
-    this.setState({searchTerm: item.props.title});
+    this.setState({
+      selectedItem: item.props,
+      searchTerm: item.props.title
+    });
+
+    // Hide the veil
+    this.props.reportState();
 
     if (item.props.id != 0) {
       window.location.hash = '#/' + this.props.categoryRoutes[item.props.dataset] + '/' + item.props.id;
@@ -197,13 +202,15 @@ class Autocomplete extends React.Component {
 
   showSuggestions() {
     this.setState({showSuggestions: true});
-    //this.props.reportState();
+    // Hide the veil
+    this.props.reportState();
   }
 
   hideSuggestions(event) {
     if (this.state.canClose) {
       this.setState({showSuggestions: false});
-    //  this.props.reportState();
+      // Hide the veil
+      this.props.reportState();
     }
   }
 
