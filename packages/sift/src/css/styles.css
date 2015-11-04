@@ -818,6 +818,9 @@ small, .small {
 .footer-source-title {
   font-weight: 200;
 }
+.reference {
+  padding-bottom: 5px;
+}
 
 .footer-license {
   height: 40px;

@@ -303,8 +303,8 @@ Map.defaultProps = {
     radius: 1
   },
   highlightedFossilStyle: {
-    color: '#ffffff',
-    fillColor: '#000000',
+    color: '#eeeeee',
+    fillColor: '#2E3837',
     fillOpacity: 0.8,
     opacity: 0.8,
     weight: 1,

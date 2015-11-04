@@ -13,14 +13,15 @@ class IndexMap extends React.Component {
     }
 
     var map = this.map = L.map(document.getElementById('indexMap'), {
-      minZoom: 1,
+      minZoom: 2,
       maxZoom: 10,
       scrollWheelZoom: false,
       touchZoom: true,
-    }).setView([40, -97], 3);
+      worldCopyJump: true
+    }).setView([28, 0], 2);
 
 
-    L.tileLayer("https://{s}.tiles.mapbox.com/v3/jczaplewski.j751k57j/{z}/{x}/{y}.png", {
+    L.tileLayer('https://{s}.tiles.mapbox.com/v3/jczaplewski.j751k57j/{z}/{x}/{y}.png', {
       attribution: "<a href='https://www.mapbox.com/about/maps/' target='_blank'>&copy; Mapbox &copy; OpenStreetMap</a>"
     }).addTo(map);
 
@@ -31,7 +32,7 @@ class IndexMap extends React.Component {
       if (!(geojson.features.length)) {
         return;
       }
-      
+
       this.props.updateRefs(Object.keys(refs).map(function(d) { return refs[d] }));
 
       this.layer = L.geoJson(geojson, {

@@ -55,7 +55,7 @@ function buildBundle(watch) {
 
 function bundleShare(b) {
   console.log('bundling')
-  b.transform(babelify)
+  return b.transform(babelify)
     .bundle()
     .pipe(source('bundle.min.js'))
     .pipe(buffer())

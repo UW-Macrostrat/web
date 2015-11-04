@@ -19,7 +19,7 @@ class Footer extends React.Component {
         {this.props.data.length ? <h4 className='footer-source-title'>Original sources</h4> : ''}
         <ul>
           {this.props.data.map((d, i) => {
-            return <li key={i}>{d}</li>
+            return <li className='reference' key={i}>{d}</li>
           })}
         </ul>
 
