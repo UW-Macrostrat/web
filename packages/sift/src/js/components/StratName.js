@@ -153,7 +153,10 @@ class StratName extends React.Component {
           return this.setState(this._resetState());
         }
 
-        parsedRefs = parsedRefs.concat(Object.keys(conceptData.success.refs).map(d => { return conceptData.success.refs[d] }));
+        if (conceptData.success && conceptData.success.refs) {
+          parsedRefs = parsedRefs.concat(Object.keys(conceptData.success.refs).map(d => { return conceptData.success.refs[d] }));
+
+        }
 
         var params;
         if (!conceptData.success.data.length) {
