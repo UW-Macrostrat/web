@@ -16,14 +16,14 @@ class App extends React.Component {
   }
 
   toggleAutocomplete() {
-    this.setState({
-      autocompleteIsOpen: !this.state.autocompleteIsOpen
-    });
+  //  this.setState({
+//      autocompleteIsOpen: !this.state.autocompleteIsOpen
+  //  });
   }
 
   render() {
     return (
-      <div className='container'>
+      <div className='container-fluid'>
         <div className={this.state.autocompleteIsOpen ? 'autocomplete-mask' : 'hidden'}></div>
         <div id='header'>
           <div className='headerItem left'>
