@@ -206,12 +206,12 @@ class Autocomplete extends React.Component {
   }
 
   hideSuggestions(event) {
-    //if (this.state.canClose) {
+    if (this.state.canClose) {
       this.setState({showSuggestions: false});
       // Hide the veil
       this.props.reportState();
       event.target.blur();
-  //  }
+    }
   }
 
   enableAndHide() {
