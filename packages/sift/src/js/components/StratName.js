@@ -207,7 +207,9 @@ class StratName extends React.Component {
               int_id: null,
               usage_notes: '',
               other: '',
-              province: ''
+              province: '',
+              url: '',
+              author: ''
             },
             strat_names: stratNameConceptData.success.data.sort((a,b) => {
               if (a.t_units > b.t_units) {
@@ -411,7 +413,7 @@ class StratName extends React.Component {
         <div className={this.state.concept.concept_id ? 'row concept-info' : 'hidden'}>
           <div className='col-sm-12'>
             <div className='concept-group-title'>
-              <h3>{this.state.concept.name}</h3><span className='concept-ref'>via <a href={'http://ngmdb.usgs.gov/Geolex/Units/' + this.state.concept.name.replace(' ', '') + '_' + this.state.concept.concept_id + '.html'} target='_blank' className='normalize-link'>USGS</a></span>
+              <h3>{this.state.concept.name}</h3><span className='concept-ref'>via <a href={this.state.concept.url} target='_blank' className='normalize-link'>{ this.state.concept.author }</a></span>
             </div>
           </div>
           <div className='col-sm-4'>
