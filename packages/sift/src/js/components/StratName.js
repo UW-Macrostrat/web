@@ -289,6 +289,7 @@ class StratName extends React.Component {
 
   render() {
     var rankMap = {'SGp': null, 'Gp': 'sgp', 'Fm': 'gp', 'Mbr': 'fm', 'Bed': 'mbr', 1: null, 2: 'sgp', 3: 'gp', 4: 'fm', 5: 'fm'};
+    var rankFormat = {'SGp': null, 'Gp': 'SGp', 'Fm': 'Gp', 'Mbr': 'Fm', 'Bed': 'Mbr'}
 
     var lithChart;
     var environChart;
@@ -427,7 +428,7 @@ class StratName extends React.Component {
           <div className='col-sm-8'>
             <div className='list-group concept-names'>
               {this.state.strat_names.map((d,i) => {
-                var parent = (d[rankMap[d.rank]]) ? ' of ' + d[rankMap[d.rank]] + ' ' + rankMap[d.rank] : '';
+                var parent = (d[rankMap[d.rank]]) ? ' of ' + d[rankMap[d.rank]] + ' ' + rankFormat[d.rank] : '';
                 return <a key={i} href={'#/strat_name/' + d.strat_name_id} className='list-group-item'>{d.strat_name} {d.rank} {parent} <span className='badge'>{d.t_units}</span></a>
               })}
             </div>
