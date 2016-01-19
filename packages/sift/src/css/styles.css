@@ -363,9 +363,11 @@ html, body, .react {
 .chart-canvas-container {
 /*  padding-top: 48%; */
   min-width: 300px;
+
 /*  margin-left: -40px;*/
   position: relative;
 }
+
 .chart-legend {
   position: absolute;
   bottom: 0;

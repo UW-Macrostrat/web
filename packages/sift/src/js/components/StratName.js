@@ -338,6 +338,8 @@ class StratName extends React.Component {
       </div>
     }
 
+    var chartClass = (totalCharts > 1 ? 'col-sm-' + (12/totalCharts) : 'col-sm-6 col-sm-offset-3');
+
     if (this.state.type === 'strat_name_id') {
       stratHierarchy = <StratNameHierarchy
         stratNameID={this.state.id}
@@ -396,13 +398,13 @@ class StratName extends React.Component {
           </div>
 
           <div className='row chart-row'>
-            <div className={'col-sm-' + (12/totalCharts)}>
+            <div className={chartClass}>
               {lithChart}
             </div>
-            <div className={'col-sm-' + (12/totalCharts)}>
+            <div className={chartClass}>
               {environChart}
             </div>
-            <div className={'col-sm-' + (12/totalCharts)}>
+            <div className={chartClass}>
               {econChart}
             </div>
           </div>
