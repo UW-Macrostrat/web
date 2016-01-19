@@ -52,7 +52,7 @@ class StratNameHierarchy extends React.Component {
 
         // Need to make sure belongsTo doesn't = 0 when it shouldn't (ex: strat_name_id=9574)
         var previousRank = 1;
-        while (belongsTo === 0 && d.strat_name_id != id) {
+        while (belongsTo === 0) {
           belongsTo = d[rankMap[rankMapOrder[d.rank] - previousRank] + '_id'];
           previousRank--;
         }
