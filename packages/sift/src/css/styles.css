@@ -152,6 +152,12 @@ html, body, .react {
 .hidden {
   display: none;
 }
+.noDisplay {
+  display: none;
+}
+.show-more {
+  cursor: pointer;
+}
 .result-item {
   padding: 7px 7px;
   text-overflow: ellipsis;

@@ -9,6 +9,7 @@ import NoData from './NoData';
 import Loading from './Loading';
 import PrevalentTaxa from './PrevalentTaxa';
 import MapControls from './MapControls';
+import LongText from './LongText';
 import Footer from './Footer';
 
 
@@ -421,10 +422,10 @@ class StratName extends React.Component {
           </div>
           <div className='col-sm-4'>
             <div className='concept-group-attributes'>
-              {this.state.concept.province ? <p><strong>Province: </strong>{this.state.concept.province}</p> : ''}
-              {this.state.concept.geologic_age ? <p><strong>Age: </strong>{this.state.concept.geologic_age}</p> : ''}
-              {this.state.concept.other ? <p><strong>Notes: </strong>{this.state.concept.other}</p> : ''}
-              {this.state.concept.usage_notes ? <p><strong>Usage: </strong>{this.state.concept.usage_notes}</p> : ''}
+              {this.state.concept.province ? <LongText title='Province' text={this.state.concept.province}/> : ''}
+              {this.state.concept.geologic_age ? <LongText title='Age' text={this.state.concept.geologic_age}/> : ''}
+              {this.state.concept.other ? <LongText title='Notes' text={this.state.concept.other}/> : ''}
+              {this.state.concept.usage_notes ? <LongText title='Usage' text={this.state.concept.usage_notes}/> : ''}
             </div>
           </div>
           <div className='col-sm-8'>
