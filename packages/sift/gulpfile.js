@@ -30,7 +30,7 @@ gulp.task('css-min', function() {
 })
 
 gulp.task('watch', ['browserify-watch'], function() {
-  //  gulp.watch('src/js/components/*.js', ['browserify-babel']);
+    gulp.watch('src/js/components/*.js', ['browserify-babel']);
     gulp.watch('src/css/*.css', ['css-min']);
     gulp.watch('index.html', ['build']);
 
