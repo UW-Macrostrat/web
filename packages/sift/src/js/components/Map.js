@@ -299,7 +299,6 @@ class Map extends React.Component {
   }
 
   componentWillUpdate(nextProps, nextState) {
-    console.log('New state', nextState.showSatellite, this.state.showSatellite);
     if (nextState.showOutcrop != this.state.showOutcrop) {
       this.toggleOutcrop();
     }

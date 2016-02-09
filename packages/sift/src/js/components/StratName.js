@@ -16,9 +16,6 @@ import Footer from './Footer';
 class StratName extends React.Component {
   constructor(props) {
     super(props);
-    this.toggleOutcrop = this.toggleOutcrop.bind(this);
-    this.toggleFossils = this.toggleFossils.bind(this);
-    this.toggleSatellite = this.toggleSatellite.bind(this);
     this.stateLookup = {
       'strat_name_concept': 'strat_name_concept_id',
       'strat_name': 'strat_name_id'
@@ -36,12 +33,10 @@ class StratName extends React.Component {
       fossils: {features: [], _id: -1},
       outcropData: {features: [], _id: -1},
       prevalentTaxa: [{oid: null, nam: '', img: null, noc: null}],
-      showOutcrop: false,
-      showFossils: false,
-      showSatellite: false,
       liths: [],
       econs: [],
       strat_names: [],
+      strat_name_ids: [],
       refs: [],
       concept: {
         concept_id: null,
@@ -221,6 +216,7 @@ class StratName extends React.Component {
             liths: Utilities.parseAttributes('lith', Utilities.summarizeAttributes('lith', data.features)),
             environs: Utilities.parseAttributes('environ', Utilities.summarizeAttributes('environ', data.features)),
             econs: Utilities.parseAttributes('econ', Utilities.summarizeAttributes('econ', data.features)),
+            strat_name_ids: stratNameConceptData.success.data.map(d => { return d.strat_name_id }).filter(d => { if (d) { return d } }),
             mapData: data,
             outcropData: {features: [], _id: -1},
             showOutcrop: false,
@@ -232,42 +228,6 @@ class StratName extends React.Component {
           });
         });
       });
-    });
-  }
-
-  toggleOutcrop() {
-    if (!(this.state.outcropData.features.length)) {
-      var ids = (this.state.type === 'strat_name_id') ? this.state.id : this.state.strat_names.map(d => { return d.strat_name_id}).join(',');
-
-      console.log("need to fetch burwell polys");
-      this.setState({
-        outcropLoading: true
-      });
-      Utilities.fetchMapData(`geologic_units/burwell?scale=medium&strat_name_id=${ids}&map=true`, (error, data, refs) => {
-        this.setState({
-          outcropData: data,
-          showOutcrop: !this.state.showOutcrop,
-          refs: this.state.refs.concat(Object.keys(refs).map(d => { return refs[d] })),
-          outcropLoading: false
-        });
-      });
-    } else {
-      console.log("simply toggle")
-      this.setState({
-        showOutcrop: !this.state.showOutcrop
-      });
-    }
-  }
-
-  toggleFossils() {
-    this.setState({
-      showFossils: !this.state.showFossils
-    });
-  }
-
-  toggleSatellite() {
-    this.setState({
-      showSatellite: !this.state.showSatellite
     });
   }
 
@@ -371,30 +331,12 @@ class StratName extends React.Component {
               />
             </div>
 
-            <MapControls
-              toggleOutcrop={this.toggleOutcrop}
-              toggleFossils={this.toggleFossils}
-              toggleSatellite={this.toggleSatellite}
-
-              showOutcrop={this.state.showOutcrop}
-              showFossils={this.state.showFossils}
-              showSatellite={this.state.showSatellite}
-            />
-
-            <Loading
-              loading={this.state.outcropLoading}
-            />
-
             <Map
               className='table-cell'
               data={this.state.mapData}
               target={false}
-              outcrop={this.state.outcropData}
+              stratNameIDs={this.state.strat_name_ids}
               fossils={this.state.fossils}
-
-              showOutcrop={this.state.showOutcrop}
-              showFossils={this.state.showFossils}
-              showSatellite={this.state.showSatellite}
             />
           </div>
 
