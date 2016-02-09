@@ -575,7 +575,7 @@ small, .small {
 
 .mapMenuButton {
   background-repeat: no-repeat;
-  background-size: 30px;
+  background-size: 25px;
   height: 30px;
   width: 30px;
   background-position: center;
@@ -624,8 +624,8 @@ small, .small {
 
 }
 .expand-toggle {
-  height: 50px;
-  width: 50px;
+  height: 40px;
+  width: 40px;
   border-radius: 25px;
   background-color: #FFFFFF;
   position: absolute;
@@ -659,15 +659,15 @@ small, .small {
 }
 
 .expand-menu {
-    margin-bottom: 55px;
+    margin-bottom: 45px;
     z-index: 1;
     -webkit-animation-duration: 0.65s;
     -moz-animation-duration: 0.65s;
     animation-duration: 0.65s;
 }
 .expand-menu-button {
-    height: 50px;
-    width: 50px;
+    height: 40px;
+    width: 40px;
     border-radius: 35px;
     background-color: #FFFFFF;
     color: #000000;
@@ -850,6 +850,13 @@ small, .small {
   position: absolute;
   background-color: rgba(255,255,255,0.8);
 }
+.loading-box {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 /* loading css via http://codepen.io/mikeambrosi/pen/JdEMVX */
 .loading,
 .loading::before,
@@ -865,7 +872,7 @@ small, .small {
 }
 
 .loading {
-  margin: -25px 0 0 -25px;
+  margin: -100px 0 0 -50px;
   height: 100px;
   width: 100px;
   -webkit-animation: animation-rotate 1000ms linear infinite;

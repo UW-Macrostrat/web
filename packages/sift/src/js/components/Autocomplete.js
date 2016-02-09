@@ -186,7 +186,6 @@ class Autocomplete extends React.Component {
     if (item.props.id != 0) {
       window.location.hash = '#/' + this.props.categoryRoutes[item.props.dataset] + '/' + item.props.id;
     } else {
-      console.log(item.props)
       window.location.hash = '#/' + this.props.categoryRoutes[item.props.dataset] + '/' + item.props.title;
     }
 

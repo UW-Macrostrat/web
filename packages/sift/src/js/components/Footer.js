@@ -3,7 +3,7 @@ import React from 'react';
 class Footer extends React.Component {
   render() {
     return (
-    <div className='footer'>
+    <div className={this.props.loading ? 'hidden' : 'footer'}>
       <div className='footer-left'>
         <div className='footer-brand'>
           <a href='/'>
