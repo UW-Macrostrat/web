@@ -48,5 +48,5 @@ var SiftRouter = Router.create({
 SiftRouter.run(function (Handler) {
   React.render(<Handler/>, document.getElementsByClassName('react')[0]);
 
-  //ga('send', 'pageview', document.location.href);
+  ga('send', 'pageview', document.location.href);
 });

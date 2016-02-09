@@ -16,21 +16,13 @@ class Column extends React.Component {
   constructor(props) {
     super(props);
     this.state = this._resetState();
-    this.toggleOutcrop = this.toggleOutcrop.bind(this);
-    this.toggleFossils = this.toggleFossils.bind(this);
-    this.toggleSatellite = this.toggleSatellite.bind(this);
   }
 
   _resetState() {
     return {
       loading: false,
-      outcropLoading: false,
       mapData: {features: [], _id: -1},
       fossils: {features: [], _id: -1},
-      outcropData: {features: [], _id: -1},
-      showOutcrop: false,
-      showFossils: false,
-      showSatellite: false,
       prevalentTaxa: [{oid: null, nam: '', img: null, noc: null}],
       units: [],
       column: {},
@@ -66,45 +58,10 @@ class Column extends React.Component {
     document.getElementById(which + '-legend').innerHTML = html
   }
 
-  toggleOutcrop() {
-    if (!(this.state.outcropData.features.length)) {
-      var ids = this.state.strat_name_ids.join(',');
-      this.setState({
-        outcropLoading: true
-      });
-      Utilities.fetchMapData(`geologic_units/burwell?scale=medium&strat_name_id=${ids}&map=true`, (error, data, refs) => {
-        this.setState({
-          outcropData: data,
-          showOutcrop: !this.state.showOutcrop,
-          outcropLoading: false,
-          refs: this.state.refs.concat(Object.keys(refs).map(d => { return refs[d] }))
-        });
-      });
-    } else {
-      this.setState({
-        showOutcrop: !this.state.showOutcrop
-      });
-    }
-  }
-
-  toggleFossils() {
-    this.setState({
-      showFossils: !this.state.showFossils
-    });
-  }
-
-  toggleSatellite() {
-    this.setState({
-      showSatellite: !this.state.showSatellite
-    });
-  }
 
   _update(id) {
     this.setState({
-      loading: true,
-      showFossils: false,
-      showOutcrop: false,
-      showSatellite: false
+      loading: true
     });
     Utilities.fetchMapData(`columns?col_id=${id}&response=long&adjacents=true`, (error, data, refs) => {
       Utilities.fetchData(`units?col_id=${id}&response=long`, (unitError, unitData) => {
@@ -174,131 +131,110 @@ class Column extends React.Component {
   }
 
   render() {
-    if (!this.state.properties) {
-      return <h3>Loading...</h3>
-    } else {
-      var lithChart;
-      var environChart;
-      var econChart;
-      var totalCharts = 0;
-      if (this.state.econs.length) {
-        totalCharts += 1;
-        econChart = <div>
-          <Chart
-          title='Economic'
-          id={'column-econ-chart'}
-          data={this.state.econs}
+    var lithChart;
+    var environChart;
+    var econChart;
+    var totalCharts = 0;
+    if (this.state.econs.length) {
+      totalCharts += 1;
+      econChart = <div>
+        <Chart
+        title='Economic'
+        id={'column-econ-chart'}
+        data={this.state.econs}
+        shareLegend={this.setLegend}
+        returnLegend={true}
+      />
+      <div id='column-econ-chart-legend'></div>
+      </div>
+    }
+
+    if (this.state.liths.length) {
+      totalCharts += 1;
+      lithChart = <div>
+        <Chart
+          title='Lithology'
+          id={'column-lith-chart'}
+          data={this.state.liths}
           shareLegend={this.setLegend}
           returnLegend={true}
         />
-        <div id='column-econ-chart-legend'></div>
-        </div>
-      }
-
-      if (this.state.liths.length) {
-        totalCharts += 1;
-        lithChart = <div>
-          <Chart
-            title='Lithology'
-            id={'column-lith-chart'}
-            data={this.state.liths}
-            shareLegend={this.setLegend}
-            returnLegend={true}
-          />
-          <div id='column-lith-chart-legend'></div>
-        </div>
-      }
-
-      if (this.state.environs.length) {
-        totalCharts += 1;
-        environChart = <div>
-          <Chart
-            title='Environment'
-            id={'column-environ-chart'}
-            data={this.state.environs}
-            shareLegend={this.setLegend}
-            returnLegend={true}
-          />
-        <div id='column-environ-chart-legend'></div>
-        </div>
-      }
-
-      return (
-        <div>
-          <div className='page-title'>
-            {this.state.properties.col_id ? <p><a href={'#/column/' + this.state.properties.col_id}>{this.state.properties.col_name} </a>
-          <small><a href={'#/group/' + this.state.properties.col_group_id}>({this.state.properties.col_group} {this.state.properties.group_col_id})</a></small></p>: ''}
-
-          </div>
-
-          <Loading
-            loading={this.state.loading}
-          />
-
-          <NoData
-            features={this.state.mapData.features}
-            type={'column'}
-            loading={this.state.loading}
-          />
-
-          <div className={this.state.mapData.features.length ? '' : 'hidden'}>
-            <div className='random-column'>
-              <div className='random-column-stats'>
-                <SummaryStats
-                  data={this.state.properties}
-                />
-              </div>
-
-              <MapControls
-                toggleOutcrop={this.toggleOutcrop}
-                toggleFossils={this.toggleFossils}
-                toggleSatellite={this.toggleSatellite}
-
-                showOutcrop={this.state.showOutcrop}
-                showFossils={this.state.showFossils}
-                showSatellite={this.state.showSatellite}
-              />
-
-              <Loading
-                loading={this.state.outcropLoading}
-              />
-
-              <Map
-                className='table-cell'
-                data={this.state.mapData}
-                fossils={this.state.fossils}
-                outcrop={this.state.outcropData}
-                target={true}
-                updateRefs={this.updateRefs}
-
-                showOutcrop={this.state.showOutcrop}
-                showFossils={this.state.showFossils}
-                showSatellite={this.state.showSatellite}
-              />
-            </div>
-
-            <div className='row chart-row'>
-              <div className={'col-sm-' + (12/totalCharts)}>
-                {lithChart}
-              </div>
-              <div className={'col-sm-' + (12/totalCharts)}>
-                {environChart}
-              </div>
-              <div className={'col-sm-' + (12/totalCharts)}>
-                {econChart}
-              </div>
-            </div>
-
-            <PrevalentTaxa data={this.state.prevalentTaxa} />
-
-            <StratColumn data={this.state.units}/>
-            <a href={'https://dev.macrostrat.org/unit-renderer/#/column=' + this.state.properties.col_id} target='_blank' className='normalize-link alternate-column'>Alternate column view</a>
-          </div>
-
-          <Footer data={this.state.refs}/>
-        </div>
-      );
+        <div id='column-lith-chart-legend'></div>
+      </div>
     }
+
+    if (this.state.environs.length) {
+      totalCharts += 1;
+      environChart = <div>
+        <Chart
+          title='Environment'
+          id={'column-environ-chart'}
+          data={this.state.environs}
+          shareLegend={this.setLegend}
+          returnLegend={true}
+        />
+      <div id='column-environ-chart-legend'></div>
+      </div>
+    }
+
+    return (
+      <div>
+        <div className='page-title'>
+          {this.state.properties.col_id ? <p><a href={'#/column/' + this.state.properties.col_id}>{this.state.properties.col_name} </a>
+        <small><a href={'#/group/' + this.state.properties.col_group_id}>({this.state.properties.col_group} {this.state.properties.group_col_id})</a></small></p>: ''}
+
+        </div>
+
+        <Loading
+          loading={this.state.loading}
+        />
+
+        <NoData
+          features={this.state.mapData.features}
+          type={'column'}
+          loading={this.state.loading}
+        />
+
+        <div className={this.state.mapData.features.length ? '' : 'hidden'}>
+          <div className='random-column'>
+            <div className='random-column-stats'>
+              <SummaryStats
+                data={this.state.properties}
+              />
+            </div>
+
+            <Map
+              className='table-cell'
+              data={this.state.mapData}
+              fossils={this.state.fossils}
+              stratNameIDs={this.state.strat_name_ids}
+              target={true}
+              updateRefs={this.updateRefs}
+            />
+          </div>
+
+          <div className='row chart-row'>
+            <div className={'col-sm-' + (12/totalCharts)}>
+              {lithChart}
+            </div>
+            <div className={'col-sm-' + (12/totalCharts)}>
+              {environChart}
+            </div>
+            <div className={'col-sm-' + (12/totalCharts)}>
+              {econChart}
+            </div>
+          </div>
+
+          <PrevalentTaxa data={this.state.prevalentTaxa} />
+
+          <StratColumn data={this.state.units}/>
+          <a href={'https://dev.macrostrat.org/unit-renderer/#/column=' + this.state.properties.col_id} target='_blank' className='normalize-link alternate-column'>Alternate column view</a>
+        </div>
+
+        <Footer data={this.state.refs}/>
+      </div>
+    );
+
 
   }
 }

@@ -2,6 +2,8 @@ import React from 'react';
 import L from 'leaflet';
 import Centroid from 'turf-centroid';
 import Utilities from './Utilities';
+import Loading from './Loading';
+import MapControls from './MapControls';
 
 
 /* Via https://gist.github.com/missinglink/7620340 */
@@ -18,12 +20,25 @@ class Map extends React.Component {
   constructor(props) {
     super(props);
     this.addLayer = this.addLayer.bind(this);
-    this.state = {
+    this.addFossils = this.addFossils.bind(this);
+    this.toggleSatellite = this.toggleSatellite.bind(this);
+    this.changeSatelliteState = this.changeSatelliteState.bind(this);
+    this.toggleOutcrop = this.toggleOutcrop.bind(this);
+    this.changeOutcropState = this.changeOutcropState.bind(this);
+    this.toggleFossils = this.toggleFossils.bind(this);
+    this.state = this._resetState();
+  }
+
+  _resetState() {
+    return {
       data: {features: [], _id: -1},
       fossils: {features: [], _id: -1},
       target: '',
       outcrop: {features: [], _id: -1},
-      showOutcrop: false
+      outcropLoading: false,
+      showOutcrop: false,
+      showFossils: false,
+      showSatellite: false
     }
   }
 
@@ -130,12 +145,19 @@ class Map extends React.Component {
     }).addTo(map);
   }
 
+  changeSatelliteState() {
+    this.setState({
+      showSatellite: !this.state.showSatellite
+    });
+  }
+
   toggleSatellite() {
     if (this.map.hasLayer(this.satellite)) {
       this.map.removeLayer(this.satellite);
     } else {
       this.map.addLayer(this.satellite);
     }
+    console.log('Done toggling')
   }
 
   toggleOutcrop() {
@@ -160,8 +182,32 @@ class Map extends React.Component {
     }
   }
 
+
+  changeOutcropState() {
+    if (!(this.state.outcrop.features.length)) {
+      var ids = this.props.stratNameIDs.join(',');
+      this.setState({
+        outcropLoading: true
+      });
+      Utilities.fetchMapData(`geologic_units/burwell?scale=medium&strat_name_id=${ids}&map=true`, (error, data, refs) => {
+        this.setState({
+          outcrop: data,
+          showOutcrop: !this.state.showOutcrop,
+          outcropLoading: false//,
+          //refs: this.state.refs.concat(Object.keys(refs).map(d => { return refs[d] }))
+        });
+        this.outcropLayer.addData(data);
+      });
+    } else {
+      this.setState({
+        showOutcrop: !this.state.showOutcrop
+      });
+    }
+  }
+
+
   toggleFossils() {
-    if (!this.props.showFossils) {
+    if (!this.state.showFossils) {
       this.fossilLayer.setStyle((feature, layer) => {
         return this.props.highlightedFossilStyle
       });
@@ -171,20 +217,11 @@ class Map extends React.Component {
       });
     }
 
+    this.setState({
+      showFossils: !this.state.showFossils
+    });
+
     this.fossilLayer.bringToFront();
-
-  }
-
-  addOutcropLayer(geojson) {
-    if (this.outcropLayer) {
-      this.outcropLayer.clearLayers();
-    }
-
-    if (!(geojson.features.length)) {
-      return;
-    }
-
-    this.outcropLayer.addData(geojson);
 
   }
 
@@ -261,23 +298,25 @@ class Map extends React.Component {
     this.fossilLayer.addData(geojson);
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.hasOwnProperty('showOutcrop') && nextProps.showOutcrop != this.props.showOutcrop) {
+  componentWillUpdate(nextProps, nextState) {
+    console.log('New state', nextState.showSatellite, this.state.showSatellite);
+    if (nextState.showOutcrop != this.state.showOutcrop) {
       this.toggleOutcrop();
     }
-    if (nextProps.hasOwnProperty('showFossils') && nextProps.showFossils != this.props.showFossils) {
+    if (nextState.showFossils != this.state.showFossils) {
       this.toggleFossils();
     }
-    if (nextProps.hasOwnProperty('showSatellite') && nextProps.showSatellite != this.props.showSatellite) {
+    if (nextState.showSatellite != this.state.showSatellite) {
       this.toggleSatellite();
     }
-    if (nextProps.hasOwnProperty('outcrop') && nextProps.outcrop._id != this.props.outcrop._id) {
-      this.addOutcropLayer(nextProps.outcrop);
-    }
+  }
+
+  componentWillReceiveProps(nextProps) {
     if (nextProps.hasOwnProperty('fossils') && nextProps.fossils._id != this.props.fossils._id) {
       this.addFossils(nextProps.fossils);
     }
     if (nextProps.data._id != this.props.data._id) {
+      this.setState(this._resetState());
       this.addLayer(nextProps.data, nextProps.target, nextProps);
     }
 
@@ -285,7 +324,23 @@ class Map extends React.Component {
 
   render() {
     return (
-      <div id='map'></div>
+      <div className='map-container'>
+        <MapControls
+          toggleOutcrop={this.changeOutcropState}
+          toggleFossils={this.toggleFossils}
+          toggleSatellite={this.changeSatelliteState}
+
+          showOutcrop={this.state.showOutcrop}
+          showFossils={this.state.showFossils}
+          showSatellite={this.state.showSatellite}
+        />
+
+        <Loading
+          loading={this.state.outcropLoading}
+        />
+        <div id='map'></div>
+      </div>
+
     );
   }
 

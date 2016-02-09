@@ -194,6 +194,7 @@ class Unit extends React.Component {
               data={this.state.mapData}
               target={false}
               fossils={this.state.fossils}
+              stratNameIDs={this.state.strat_name_ids}
             />
           </div>
 
