@@ -24,8 +24,6 @@ class Explore extends React.Component {
       this.map.remove();
     }
 
-    this.checkFilters();
-
     var map = this.map = L.map(document.getElementById('exploreMap'), {
       minZoom: 2,
       maxZoom: 10,
@@ -83,6 +81,8 @@ class Explore extends React.Component {
           `)
         }
       }).addTo(this.map);
+
+      this.checkFilters();
     });
   }
 
