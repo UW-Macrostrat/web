@@ -161,7 +161,7 @@ class Definitions extends React.Component {
   showMore() {
 
     var more = this.state.showing + 100;
-    console.log("show more!", more)
+
     this.setState({
       showing: more,
       visible: this.state.filtered.slice(0, more)
@@ -188,10 +188,9 @@ class Definitions extends React.Component {
   }
 
   render() {
-    console.log("Rendering ", this.state.showing);
-    console.log(this.state.type)
+
     return (
-      <div>
+      <div className='page-content'>
         <Loading
           loading={this.state.loading}
         />

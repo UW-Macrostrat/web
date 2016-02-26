@@ -363,6 +363,7 @@ html, body, .react {
   height: 800px;
   width: 100%;
 }
+
 .index-map-group-link {
   color: #aaaaaa !important;
 }
@@ -575,7 +576,7 @@ small, .small {
 
 .mapMenuButton {
   background-repeat: no-repeat;
-  background-size: 30px;
+  background-size: 25px;
   height: 30px;
   width: 30px;
   background-position: center;
@@ -624,8 +625,8 @@ small, .small {
 
 }
 .expand-toggle {
-  height: 50px;
-  width: 50px;
+  height: 40px;
+  width: 40px;
   border-radius: 25px;
   background-color: #FFFFFF;
   position: absolute;
@@ -659,15 +660,15 @@ small, .small {
 }
 
 .expand-menu {
-    margin-bottom: 55px;
+    margin-bottom: 45px;
     z-index: 1;
     -webkit-animation-duration: 0.65s;
     -moz-animation-duration: 0.65s;
     animation-duration: 0.65s;
 }
 .expand-menu-button {
-    height: 50px;
-    width: 50px;
+    height: 40px;
+    width: 40px;
     border-radius: 35px;
     background-color: #FFFFFF;
     color: #000000;
@@ -850,6 +851,13 @@ small, .small {
   position: absolute;
   background-color: rgba(255,255,255,0.8);
 }
+.loading-box {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 /* loading css via http://codepen.io/mikeambrosi/pen/JdEMVX */
 .loading,
 .loading::before,
@@ -865,7 +873,7 @@ small, .small {
 }
 
 .loading {
-  margin: -25px 0 0 -25px;
+  margin: -100px 0 0 -50px;
   height: 100px;
   width: 100px;
   -webkit-animation: animation-rotate 1000ms linear infinite;
@@ -920,7 +928,114 @@ small, .small {
   }
 }
 
+#exploreMap {
+  /*height: -moz-calc(100% - 50px);
+  height: -webkit-calc(100% - 50px);
+  height: calc(100% - 50px);*/
+
+  height: 100%;
+  top: 0;
+  z-index: 9999999;
+  width: 100%;
+  position: absolute;
+  margin-left: -15px;
+}
+
+.filterMenu {
+  position: absolute;
+  z-index: 99999999;
+  background-color: rgba(255,255,255,0.93);
+  color: #333;
+  line-height: 23px;
+  -webkit-transition: all 0.6s ease;
+  -moz-transition: all 0.6s ease;
+  -o-transition: all 0.6s ease;
+  -ms-transition: all 0.6s ease;
+  transition: all 0.6s ease;
+  transform: translate3d(0,0,0);
+  -webkit-transform: translate3d(0,0,0);
+  -webkit-perspective: 1000;
+  -webkit-backface-visibility: hidden;
+
+/*  width: -moz-calc(30% - 15px);
+  width: -webkit-calc(30% - 15px);
+  width: calc(30% - 15px);*/
+  width: 250px;
+  /*height: calc(100% - 49px);
+  top: 49px;*/
+  height: 100%;
+  top: 0;
+  left: -250px;
+  max-width: 300px;
+}
+
+.filterMenu-tab {
+  height: 65px;
+  width: 20px;
+  background-color: rgba(255,255,255,0.93);
+  position: absolute;
+  top: 43%;
+  left: 100%;
+  border-top-right-radius: 2px;
+  border-bottom-right-radius: 2px;
+  border-left: 1px solid #eee;
+  cursor: pointer;
+}
+
+.filterMenu-tab-text {
+  font-size: 12px;
+  color: #777;
+  -webkit-transform: rotate(90deg);
+  -moz-transform: rotate(90deg);
+  -ms-transform: rotate(90deg);
+  -o-transform: rotate(90deg);
+  letter-spacing: 1px;
+  margin-top: 10px;
+}
+
+.filterMenu.open {
+  left: 0;
+}
+
+.filterMenu-content {
+  padding: 15px;
+  margin-top: 70px;
+}
+.filterMenu-filter {
+  font-size: 15px;
+  letter-spacing: 1px;
+  font-weight: 200;
+  padding-bottom: 20px;
+}
+.filterMenu-filter-close {
+  cursor: pointer;
+  display: inline-block;
+  height: 20px;
+  vertical-align: middle;
+  width: 20px;
+  border: 1px solid;
+  text-align: center;
+  border-radius: 50%;
+  margin-left: 10px;
+  line-height: 16px;
+  color: #777;
+}
+
+.autocomplete-wrapper-explore > .autocomplete-container {
+  width: 300px;
+  z-index: 999999999;
+  border-radius: 5px;
+  top: 10px;
+  right: 50px;
+}
+
 @media(max-width: 768px) {
+  #exploreMap {
+    margin-left: 0;
+  }
+  .container-fluid {
+    padding: 0;
+  }
   .random-column-chart {
     display: none;
   }

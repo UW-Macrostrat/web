@@ -181,14 +181,10 @@ class Autocomplete extends React.Component {
     });
 
     // Hide the veil
-    this.props.reportState();
+//    this.props.reportState();
 
-    if (item.props.id != 0) {
-      window.location.hash = '#/' + this.props.categoryRoutes[item.props.dataset] + '/' + item.props.id;
-    } else {
-      console.log(item.props)
-      window.location.hash = '#/' + this.props.categoryRoutes[item.props.dataset] + '/' + item.props.title;
-    }
+    // Return selected item
+    this.props.onComplete(item.props);
 
     this.setState({
      showSuggestions: false,
@@ -202,14 +198,14 @@ class Autocomplete extends React.Component {
   showSuggestions() {
     this.setState({showSuggestions: true});
     // Hide the veil
-    this.props.reportState();
+    //this.props.reportState();
   }
 
   hideSuggestions(event) {
     if (this.state.canClose) {
       this.setState({showSuggestions: false});
       // Hide the veil
-      this.props.reportState();
+    //  this.props.reportState();
       event.target.blur();
     }
   }

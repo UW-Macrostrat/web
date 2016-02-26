@@ -8,6 +8,7 @@ import Column from './components/Column';
 import StratName from './components/StratName';
 import Attributes from './components/Attributes';
 import Definitions from './components/Definitions';
+import Explore from './components/Explore';
 
 import NoData from './components/NoData';
 
@@ -18,8 +19,8 @@ var SiftRouter = Router.create({
    routes:  (
      <Route handler={App}>
        <DefaultRoute path='' handler={Main}/>
-       <Route name='unit' path='unit/:id' handler={Unit}/>
-       <Route name='column' path='column/:id' handler={Column} addHandlerKey={true}/>
+       <Route name='unit' path='unit/:id' handler={Attributes}/>
+       <Route name='column' path='column/:id' handler={Attributes} addHandlerKey={true}/>
        <Route name='group' path='group/:id' handler={Attributes} addHandlerKey={true}/>
        <Route name='interval' path='interval/:id' handler={Attributes}/>
 
@@ -39,6 +40,9 @@ var SiftRouter = Router.create({
        <Route name='economic_class' path='economic_class/:id' handler={Attributes}/>
 
        <Route name='definitions' path='definitions/:type' handler={Definitions}/>
+
+       <Route name='explore_bare' path='explore' handler={Explore}/>
+       <Route name='explore' path='explore/:x?' handler={Explore}/>
 
        <NotFoundRoute handler={NoData} />
      </Route>

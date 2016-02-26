@@ -1,5 +1,4 @@
 import React from 'react';
-import L from 'leaflet';
 import Utilities from './Utilities';
 
 class IndexMap extends React.Component {

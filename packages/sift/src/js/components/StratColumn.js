@@ -196,7 +196,7 @@ class StratColumn extends React.Component {
     }
 
     render() {
-      if (this.state.periods.length) {
+      if (this.state.periods.length > 1) {
         return (
           <div className='strat-column'>
           {this.state.periods.map((period, period_idx) => {

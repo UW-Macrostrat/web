@@ -16,7 +16,7 @@ gulp.task('build', function() {
     .pipe(htmlhint())
     .pipe(htmlhint.reporter());
 
-  gulp.src(['node_modules/leaflet/dist/leaflet.js'])
+  gulp.src(['node_modules/leaflet/dist/leaflet.js', 'src/js/leaflet-pan-to-offset.js', 'node_modules/leaflet-hash/leaflet-hash.js'])
     .pipe(concat('leaflet.min.js'))
     .pipe(uglify())
     .pipe(gulp.dest('./dist/js/'));
