@@ -13,12 +13,22 @@ class App extends React.Component {
       autocompleteIsOpen: false
     }
     this.toggleAutocomplete = this.toggleAutocomplete.bind(this);
+    this.finishAutocomplete = this.finishAutocomplete.bind(this);
   }
 
   toggleAutocomplete() {
   //  this.setState({
 //      autocompleteIsOpen: !this.state.autocompleteIsOpen
   //  });
+  }
+
+  finishAutocomplete(item) {
+    console.log(item);
+    if (item.id != 0) {
+      window.location.hash = '#/' + this.props.categoryRoutes[item.dataset] + '/' + item.id;
+    } else {
+      window.location.hash = '#/' + this.props.categoryRoutes[item.dataset] + '/' + item.title;
+    }
   }
 
   render() {
@@ -37,17 +47,55 @@ class App extends React.Component {
               <Autocomplete
                 minLength='2'
                 reportState={this.toggleAutocomplete}
+                onComplete={this.finishAutocomplete}
               />
             </div>
           </div>
         </div>
 
-        <div className='page-content'>
+        <div>
           <RouteHandler/>
         </div>
 
       </div>
     );
+  }
+}
+
+App.defaultProps = {
+  categoryLookup: {
+    'columns': 'Columns',
+    'intervals': 'Intervals',
+    'strat_name_concepts': 'Stratigraphic Names',
+    'strat_name_orphans': 'Other names',
+    'lithologies': 'Lithologies',
+    'lithology_types': 'Lithology Types',
+    'lithology_classes': 'Lithology Classes',
+    'environments': 'Environments',
+    'environment_types': 'Environment Types',
+    'enviornment_classes': 'Environment Classes',
+    'econs': 'Economic',
+    'econ_types': 'Economic Types',
+    'econ_classes': 'Economic Classes',
+    'burwell': 'Burwell',
+    'groups': 'Groups'
+  },
+  categoryRoutes: {
+    'columns': 'Columns',
+    'intervals': 'Intervals',
+    'strat_name_concepts': 'Stratigraphic Names',
+    'strat_name_orphans': 'Other names',
+    'lithologies': 'Lithologies',
+    'lithology_types': 'Lithology Types',
+    'lithology_classes': 'Lithology Classes',
+    'environments': 'Environments',
+    'environment_types': 'Environment Types',
+    'enviornment_classes': 'Environment Classes',
+    'econs': 'Economic',
+    'econ_types': 'Economic Types',
+    'econ_classes': 'Economic Classes',
+    'burwell': 'Burwell',
+    'groups': 'Groups'
   }
 }
 

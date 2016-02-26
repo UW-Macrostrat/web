@@ -190,7 +190,7 @@ class Definitions extends React.Component {
   render() {
 
     return (
-      <div>
+      <div className='page-content'>
         <Loading
           loading={this.state.loading}
         />

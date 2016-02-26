@@ -308,7 +308,7 @@ class StratName extends React.Component {
     }
 
     return (
-      <div>
+      <div className='page-content'>
         <Loading
           loading={this.state.loading}
         />

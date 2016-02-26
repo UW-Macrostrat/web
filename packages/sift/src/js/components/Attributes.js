@@ -16,6 +16,7 @@ class Attributes extends React.Component {
     super(props);
     this._update = this._update.bind(this);
     this.state = this._resetState();
+
     this.stateLookup = {
       'column': {
         classifier: 'col_id',
@@ -28,6 +29,14 @@ class Attributes extends React.Component {
       'group': {
         classifier: 'col_group_id',
         def: 'groups'
+      },
+      'strat_name': {
+        classifier: 'strat_name_id',
+        def: ''
+      },
+      'strat_name_concept': {
+        classifier: 'concept_id',
+        def: ''
       },
       'interval': {
         classifier: 'int_id',
@@ -100,12 +109,6 @@ class Attributes extends React.Component {
         pbdb_collections: '',
         t_units: '',
         t_sections: ''
-      },
-      unit: {
-
-      },
-      column: {
-
       }
     }
   }
@@ -322,7 +325,7 @@ class Attributes extends React.Component {
 
 
     return (
-      <div>
+      <div className='page-content'>
         <Loading
           loading={this.state.loading}
         />

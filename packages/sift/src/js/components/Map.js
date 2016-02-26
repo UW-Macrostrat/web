@@ -1,20 +1,10 @@
 import React from 'react';
-import L from 'leaflet';
 import Centroid from 'turf-centroid';
 import Utilities from './Utilities';
 import Loading from './Loading';
 import MapControls from './MapControls';
 
 
-/* Via https://gist.github.com/missinglink/7620340 */
-L.Map.prototype.panToOffset = function (latlng, offset, options) {
-  var x = this.latLngToContainerPoint(latlng).x - offset[0],
-      y = this.latLngToContainerPoint(latlng).y - offset[1],
-      point = this.containerPointToLatLng([x, y]),
-      opts = (options) ? options : {'animate': true, 'duration': 0.6, 'noMoveStart': true};
-
-  return this.setView(point, this._zoom, { pan: opts });
-};
 
 class Map extends React.Component {
   constructor(props) {
