@@ -25,9 +25,9 @@ class App extends React.Component {
   finishAutocomplete(item) {
     console.log(item);
     if (item.id != 0) {
-      window.location.hash = '#/' + this.props.categoryRoutes[item.dataset] + '/' + item.id;
+      window.location.hash = '#/' + this.props.categoryRouteLookup[item.dataset] + '/' + item.id;
     } else {
-      window.location.hash = '#/' + this.props.categoryRoutes[item.dataset] + '/' + item.title;
+      window.location.hash = '#/' + this.props.categoryRouteLookup[item.dataset] + '/' + item.title;
     }
   }
 
@@ -96,6 +96,21 @@ App.defaultProps = {
     'econ_classes': 'Economic Classes',
     'burwell': 'Burwell',
     'groups': 'Groups'
+  },
+  categoryRouteLookup: {
+    'columns': 'column',
+    'intervals': 'interval',
+    'strat_name_concepts': 'strat_name_concept',
+    'strat_name_orphans': 'strat_name',
+    'lithologies': 'lithology',
+    'lithology_types': 'lithology_type',
+    'lithology_classes': 'lithology_class',
+    'environments': 'environment',
+    'environment_types': 'environment_type',
+    'enviornment_classes': 'environment_class',
+    'econs': 'economic',
+    'econ_types': 'economic_type',
+    'econ_classes': 'economic_class'
   }
 }
 

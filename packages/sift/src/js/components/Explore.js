@@ -44,7 +44,7 @@ class Explore extends React.Component {
       attribution: "<a href='https://www.mapbox.com/about/maps/' target='_blank'>&copy; Mapbox &copy; OpenStreetMap</a>"
     }).addTo(map);
 
-    Utilities.fetchMapData(`columns?all`, (error, geojson, refs) => {
+    Utilities.fetchMapData(`columns?all&response=long`, (error, geojson, refs) => {
       if (this.layer) {
         this.layer.clearLayers();
       }
@@ -130,12 +130,20 @@ class Explore extends React.Component {
               });
             });
           });
-
+          this.flashFilterTab();
           this.filters = newFilters;
           this.refreshMap();
         }
       });
     }
+  }
+
+  flashFilterTab() {
+    // Highlight filter tab
+    document.querySelector('.filterMenu-tab').classList.add('background-pulse');
+    setTimeout(function() {
+      document.querySelector('.filterMenu-tab').classList.remove('background-pulse');
+    }, 1200);
   }
 
   toggleFilters(event) {
@@ -191,6 +199,9 @@ class Explore extends React.Component {
     this.updateHash();
 
     this.refreshMap();
+
+    // Highlight filter tab
+    this.flashFilterTab();
   }
 
   removeFilter(item, event) {
@@ -202,6 +213,10 @@ class Explore extends React.Component {
         return d;
       }
     });
+
+    if (this.filters.length < 1) {
+      this.toggleFilters(event);
+    }
 
     this.updateHash();
 

@@ -928,6 +928,22 @@ small, .small {
   }
 }
 
+@keyframes pulse {
+  0% {
+    outline: 1px solid #000;
+  }
+  50% {
+    outline: 5px solid #000;
+  }
+  100% {
+    outline: 1px solid #000;
+  }
+}
+
+.background-pulse {
+  animation: pulse 0.5s 1;
+}
+
 #exploreMap {
   /*height: -moz-calc(100% - 50px);
   height: -webkit-calc(100% - 50px);
