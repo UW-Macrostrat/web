@@ -23,7 +23,6 @@ class App extends React.Component {
   }
 
   finishAutocomplete(item) {
-    console.log(item);
     if (item.id != 0) {
       window.location.hash = '#/' + this.props.categoryRouteLookup[item.dataset] + '/' + item.id;
     } else {

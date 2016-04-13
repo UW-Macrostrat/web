@@ -20,7 +20,7 @@ var SiftRouter = Router.create({
      <Route handler={App}>
        <DefaultRoute path='' handler={Main}/>
        <Route name='unit' path='unit/:id' handler={Attributes}/>
-       <Route name='column' path='column/:id' handler={Attributes} addHandlerKey={true}/>
+       <Route name='column' path='column/:id' handler={Column} addHandlerKey={true}/>
        <Route name='group' path='group/:id' handler={Attributes} addHandlerKey={true}/>
        <Route name='interval' path='interval/:id' handler={Attributes}/>
 

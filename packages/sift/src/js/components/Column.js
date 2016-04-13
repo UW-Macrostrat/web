@@ -178,7 +178,7 @@ class Column extends React.Component {
     }
 
     return (
-      <div>
+      <div className='page-content'>
         <div className='page-title'>
           {this.state.properties.col_id ? <p><a href={'#/column/' + this.state.properties.col_id}>{this.state.properties.col_name} </a>
         <small><a href={'#/group/' + this.state.properties.col_group_id}>({this.state.properties.col_group} {this.state.properties.group_col_id})</a></small></p>: ''}
