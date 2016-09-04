@@ -36,7 +36,7 @@ var Utilities = {
 
   fetchPrevalentTaxa(coll_ids, callback) {
     xhr({
-      uri: `${Config.pbdbURL}/occs/prevalence.json?limit=5&coll_re=${coll_ids}`
+      uri: `${Config.pbdbURL}/occs/prevalence.json?limit=5&coll_id=${coll_ids}`
     }, (error, response, body) => {
       callback(error, JSON.parse(body));
     });
