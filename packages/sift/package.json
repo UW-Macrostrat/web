@@ -16,7 +16,7 @@
     "leaflet-hash": "^0.2.1",
     "react": "^0.13.3",
     "react-router": "^0.13.3",
-    "topojson": "^1.6.19",
+    "topojson": "1.6.19",
     "turf-centroid": "^1.1.2",
     "turf-convex": "^1.0.1",
     "turf-explode": "^1.0.1",
