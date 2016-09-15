@@ -445,6 +445,9 @@ small, .small {
   margin-left: 0;
   min-height: 24px;
 }
+.section-box {
+  border-bottom: 2px dashed #000;
+}
 .section-box > a:hover {
   text-decoration: none;
 }
