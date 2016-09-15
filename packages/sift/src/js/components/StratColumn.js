@@ -163,7 +163,7 @@ class StratColumn extends React.Component {
         if (!found) {
           for (var j = 0; j < column.length; j++) {
             // Check if the unit's age is contained in the time interval
-            if (mappedSections[i].t_age >= column[j].t_age && mappedSections[i].t_age <= column[j].b_age) {
+            if (mappedSections[i].b_age >= column[j].t_age && mappedSections[i].b_age <= column[j].b_age) {
               found = true
               column[j].sections.push(mappedSections[i])
               break;
@@ -226,6 +226,9 @@ class StratColumn extends React.Component {
       if (this.state.periods.length > 1) {
         return (
           <div className='strat-column'>
+            <div className='strat-column-warning'>
+              <p><i>Note: some columns have complex unit relationships that are not expressed below</i></p>
+            </div>
           {this.state.periods.map((period, period_idx) => {
             return (
               <div className='row' key={period_idx}>
@@ -233,7 +236,7 @@ class StratColumn extends React.Component {
                   <div className='period-name'>{period.abbrev}</div>
                 </div>
 
-                <div className='col-xs-7 column-div section-container'>
+                <div className='col-xs-8 col-xs-offset-2 column-div section-container'>
                   {period.sections.map((section, section_idx) => {
                     return (
                       <div className='section-box' key={section_idx}>

@@ -424,6 +424,10 @@ small, .small {
 .column-div {
   padding: 0 !important;
 }
+/*TEMP!!!*/
+.column-div.period-names {
+  display: none;
+}
 .unit-box {
   text-align: center;
   min-height: 24px;
@@ -442,7 +446,7 @@ small, .small {
   text-align: center;
 }
 .section-container {
-  margin-left: 0;
+  /*margin-left: 0;*/
   min-height: 24px;
 }
 .section-box {
@@ -563,6 +567,9 @@ small, .small {
 
 .strat-column {
   margin-top: 50px;
+}
+.strat-column-warning {
+  text-align: center;
 }
 .alternate-column {
   margin-left: 45%;
