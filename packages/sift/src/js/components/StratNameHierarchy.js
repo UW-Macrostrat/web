@@ -26,8 +26,8 @@ class StratNameHierarchy extends React.Component {
         return this.setState(this._resetState());
       }
 
-      var rankMap = {'SGp': null, 'Gp': 'sgp', 'Fm': 'gp', 'Mbr': 'fm', 'Bed': 'mbr', 1: null, 2: 'sgp', 3: 'gp', 4: 'fm', 5: 'fm'};
-      var rankMapOrder = {'SGp': 1, 'Gp': 2, 'Fm': 3, 'Mbr': 4, 'Bed': 5};
+      var rankMap = {'SGp': null, 'Gp': 'sgp', 'SubGp': 'gp', 'Fm': 'subgp', 'Mbr': 'fm', 'Bed': 'mbr', 1: null, 2: 'sgp', 3: 'gp', 4: 'subgp', 5: 'fm', 6: 'mbr'};
+      var rankMapOrder = {'SGp': 1, 'Gp': 2, 'SubGp': 3, 'Fm': 4, 'Mbr': 5, 'Bed': 6};
 
       data = data.success.data;
 
