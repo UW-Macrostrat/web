@@ -261,7 +261,7 @@ class Map extends React.Component {
       var center = Centroid(geojson.features[0]).geometry.coordinates;
       setTimeout(() => {
         this.map.panToOffset([center[1], center[0]], [100, 0]);
-      }, 1)
+      }, 10)
 
     } else {
       // No f'ing clue why I need a timeout to make this work...
@@ -269,7 +269,7 @@ class Map extends React.Component {
         this.map.fitBounds(this.layer.getBounds(), {
           animate: false
         });
-      }, 1)
+      }, 10)
     }
 
     this.map.invalidateSize();
