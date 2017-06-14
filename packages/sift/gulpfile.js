@@ -59,7 +59,7 @@ function bundleShare(b) {
     .bundle()
     .pipe(source('bundle.min.js'))
     .pipe(buffer())
-  //  .pipe(uglify())
+    .pipe(uglify())
     .pipe(gulp.dest('./dist/js'));
 }
 
