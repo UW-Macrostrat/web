@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import { toggleMenu } from '../actions'
+import { toggleFilters } from '../actions'
 import Filters from '../components/Filters'
 
 const mapStateToProps = (state) => {
