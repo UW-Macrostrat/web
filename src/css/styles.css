@@ -1,4 +1,33 @@
-/* Styles go here */
 body {
   color: #333;
+  margin:0;
+  padding:0;
+}
+#map {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+}
+.searchbar-holder {
+  margin: 20px;
+}
+.column-icon {
+  fill:none;stroke:#231f20;stroke-miterlimit:10;stroke-width:3px;
+}
+.custom-svg-icon {
+  flex-shrink: 0;
+  margin-right: 16px;
+}
+.search-input {
+  border: none;
+  font-size: 16px;
+  width: 100%;
+  margin-left: 10px;
+}
+.search-input:focus {
+  outline: none;
+}
+.menu-options {
+  padding: 25px;
 }

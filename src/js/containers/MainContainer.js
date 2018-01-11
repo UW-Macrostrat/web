@@ -4,8 +4,8 @@ import ExampleComponent from '../components/ExampleComponent'
 
 const mapStateToProps = (state) => {
   return {
-    msg: state.handleInteraction.msg,
-    clicks: state.handleInteraction.clicks
+    msg: state.update.msg,
+    clicks: state.update.clicks
   }
 }
 

@@ -6,12 +6,20 @@ export const PAGE_CLICK = 'PAGE_CLICK'
 export const RECIEVE_DATA = 'RECIEVE_DATA'
 export const REQUEST_DATA = 'REQUEST_DATA'
 
+export const TOGGLE_MENU = 'TOGGLE_MENU'
+
 // Define action functions
 export const pageClick = () => {
   return {
     type: PAGE_CLICK,
     msg: 'You clicked on the page',
     clicks: 0
+  }
+}
+
+export const toggleMenu = () => {
+  return {
+    type: TOGGLE_MENU
   }
 }
 

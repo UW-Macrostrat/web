@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux'
-import { PAGE_CLICK, REQUEST_DATA, RECIEVE_DATA } from '../actions'
+import { PAGE_CLICK, REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU } from '../actions'
 
 // import all reducers here
 // const stats = (state = [], action) => {
@@ -15,7 +15,8 @@ import { PAGE_CLICK, REQUEST_DATA, RECIEVE_DATA } from '../actions'
 // }
 //
 
-const handleInteraction = (state = {
+const update = (state = {
+  menuOpen: false,
   isFetching: false,
   data: [],
   msg: '',
@@ -23,6 +24,10 @@ const handleInteraction = (state = {
 }, action) => {
 
   switch (action.type) {
+    case TOGGLE_MENU:
+      return Object.assign({}, state, {
+        menuOpen: !state.menuOpen
+      })
     case PAGE_CLICK:
       return Object.assign({}, state, {
         msg: action.msg,
@@ -47,7 +52,7 @@ const handleInteraction = (state = {
 const reducers = combineReducers({
   // list reducers here
 //  stats,
-  handleInteraction
+  update
 })
 
 export default reducers
