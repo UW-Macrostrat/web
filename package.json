@@ -1,0 +1,36 @@
+{
+  "name": "web-v3",
+  "version": "3.0.0",
+  "description": "Macrostrat map interface",
+  "main": "index.html",
+  "scripts": {
+    "postinstall": "gulp deploy",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "John J Czaplewski <jczaplewski@wisc.edu>",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-react": "^6.24.1",
+    "babelify": "^8.0.0",
+    "browserify": "^15.1.0",
+    "gulp": "^3.9.1",
+    "gulp-buffer": "0.0.2",
+    "gulp-clean-css": "^3.9.2",
+    "gulp-concat": "^2.6.1",
+    "gulp-htmlhint": "^1.0.0",
+    "gulp-uglify": "^3.0.0",
+    "vinyl-source-stream": "^2.0.0"
+  },
+  "dependencies": {
+    "babel-polyfill": "^6.26.0",
+    "isomorphic-fetch": "^2.2.1",
+    "prop-types": "^15.6.0",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "react-redux": "^5.0.6",
+    "redux": "^3.7.2",
+    "redux-thunk": "^2.2.0"
+  }
+}
