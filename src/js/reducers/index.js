@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux'
-import { PAGE_CLICK, REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER } from '../actions'
+import { PAGE_CLICK, REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS } from '../actions'
 
 // import all reducers here
 // const stats = (state = [], action) => {
@@ -20,7 +20,9 @@ const update = (state = {
   infoDrawerOpen: false,
   infoDrawerExpanded: false,
   isFetching: false,
+  filtersOpen: false,
   data: [],
+  filters: [],
   msg: '',
   clicks: 0
 }, action) => {
@@ -35,10 +37,14 @@ const update = (state = {
         infoDrawerOpen: !state.infoDrawerOpen
       })
     case EXPAND_INFODRAWER:
-      console.log('expand')
       return Object.assign({}, state, {
         infoDrawerExpanded: !state.infoDrawerExpanded
       })
+    case TOGGLE_FILTERS:
+      return Object.assign({}, state, {
+        filtersOpen: !state.filtersOpen
+      })
+
     case PAGE_CLICK:
       return Object.assign({}, state, {
         msg: action.msg,

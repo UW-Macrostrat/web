@@ -9,6 +9,7 @@ export const REQUEST_DATA = 'REQUEST_DATA'
 export const TOGGLE_MENU = 'TOGGLE_MENU'
 export const TOGGLE_INFODRAWER = 'TOGGLE_INFODRAWER'
 export const EXPAND_INFODRAWER = 'EXPAND_INFODRAWER'
+export const TOGGLE_FILTERS = 'TOGGLE_FILTERS'
 
 // Define action functions
 export const pageClick = () => {
@@ -30,9 +31,13 @@ export const toggleInfoDrawer = () => {
   }
 }
 export const expandInfoDrawer = () => {
-  console.log('expand action')
   return {
     type: EXPAND_INFODRAWER
+  }
+}
+export const toggleFilters = () => {
+  return {
+    type: TOGGLE_FILTERS
   }
 }
 

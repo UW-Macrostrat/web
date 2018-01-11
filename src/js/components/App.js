@@ -4,6 +4,7 @@ import Map from './Map'
 import SearchbarContainer from '../containers/SearchbarContainer'
 import MenuContainer from '../containers/MenuContainer'
 import InfoDrawerContainer from '../containers/InfoDrawerContainer'
+import FiltersContainer from '../containers/FiltersContainer'
 // Import other components
 
 class App extends Component {
@@ -17,6 +18,7 @@ class App extends Component {
         <MenuContainer/>
         <SearchbarContainer/>
         <InfoDrawerContainer/>
+        <FiltersContainer/>
         <MainContainer/>
       </div>
     )

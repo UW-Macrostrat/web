@@ -14,7 +14,7 @@ class Searchbar extends Component {
   }
 
   render() {
-    const { toggleMenu } = this.props
+    const { toggleMenu, toggleFilters } = this.props
 
     return (
       <div className="searchbar-holder">
@@ -27,7 +27,7 @@ class Searchbar extends Component {
                 </IconButton>
                 <input className="search-input" type="text" placeholder="Search Macrostrat"/>
 
-              <IconButton color="default" aria-label="filter" disabled={true}>
+              <IconButton color="default" aria-label="filter" onClick={toggleFilters}>
                   <WarningIcon />
                 </IconButton>
               </Toolbar>
