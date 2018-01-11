@@ -3,6 +3,7 @@ import MainContainer from '../containers/MainContainer'
 import Map from './Map'
 import SearchbarContainer from '../containers/SearchbarContainer'
 import MenuContainer from '../containers/MenuContainer'
+import InfoDrawerContainer from '../containers/InfoDrawerContainer'
 // Import other components
 
 class App extends Component {
@@ -15,7 +16,7 @@ class App extends Component {
       <div>
         <MenuContainer/>
         <SearchbarContainer/>
-
+        <InfoDrawerContainer/>
         <MainContainer/>
       </div>
     )

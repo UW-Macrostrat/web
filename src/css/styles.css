@@ -31,3 +31,12 @@ body {
 .menu-options {
   padding: 25px;
 }
+.infodrawer-content {
+  min-height: 0;
+  -webkit-transition: 0.8s;
+	-moz-transition: 0.8s;
+	transition: 0.8s;
+}
+.hidden {
+  display:none;
+}

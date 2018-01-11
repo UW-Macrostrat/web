@@ -7,6 +7,8 @@ export const RECIEVE_DATA = 'RECIEVE_DATA'
 export const REQUEST_DATA = 'REQUEST_DATA'
 
 export const TOGGLE_MENU = 'TOGGLE_MENU'
+export const TOGGLE_INFODRAWER = 'TOGGLE_INFODRAWER'
+export const EXPAND_INFODRAWER = 'EXPAND_INFODRAWER'
 
 // Define action functions
 export const pageClick = () => {
@@ -20,6 +22,17 @@ export const pageClick = () => {
 export const toggleMenu = () => {
   return {
     type: TOGGLE_MENU
+  }
+}
+export const toggleInfoDrawer = () => {
+  return {
+    type: TOGGLE_INFODRAWER
+  }
+}
+export const expandInfoDrawer = () => {
+  console.log('expand action')
+  return {
+    type: EXPAND_INFODRAWER
   }
 }
 
