@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 import MainContainer from '../containers/MainContainer'
-import Map from './Map'
+import MapContainer from '../containers/MapContainer'
 import SearchbarContainer from '../containers/SearchbarContainer'
 import MenuContainer from '../containers/MenuContainer'
 import InfoDrawerContainer from '../containers/InfoDrawerContainer'
@@ -15,11 +15,13 @@ class App extends Component {
   render() {
     return (
       <div>
-        <MenuContainer/>
-        <SearchbarContainer/>
-        <InfoDrawerContainer/>
-        <FiltersContainer/>
-        <MainContainer/>
+        <div className="ui">
+          <MenuContainer/>
+          <SearchbarContainer/>
+          <InfoDrawerContainer/>
+          <FiltersContainer/>
+        </div>
+        <MapContainer/>
       </div>
     )
   }

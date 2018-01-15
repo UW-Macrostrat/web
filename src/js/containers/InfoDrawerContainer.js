@@ -5,7 +5,9 @@ import InfoDrawer from '../components/InfoDrawer'
 const mapStateToProps = (state) => {
   return {
     infoDrawerOpen: state.update.infoDrawerOpen,
-    infoDrawerExpanded: state.update.infoDrawerExpanded
+    infoDrawerExpanded: state.update.infoDrawerExpanded,
+    mapInfo: state.update.mapInfo,
+    fetchingMapInfo: state.fetchingMapInfo
   }
 }
 

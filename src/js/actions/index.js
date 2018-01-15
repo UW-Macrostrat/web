@@ -11,6 +11,11 @@ export const TOGGLE_INFODRAWER = 'TOGGLE_INFODRAWER'
 export const EXPAND_INFODRAWER = 'EXPAND_INFODRAWER'
 export const TOGGLE_FILTERS = 'TOGGLE_FILTERS'
 
+export const START_MAP_QUERY = 'START_MAP_QUERY'
+export const RECEIVED_MAP_QUERY = 'RECEIVED_MAP_QUERY'
+
+export const TOGGLE_BEDROCK = 'TOGGLE_BEDROCK'
+
 // Define action functions
 export const pageClick = () => {
   return {
@@ -41,6 +46,12 @@ export const toggleFilters = () => {
   }
 }
 
+export const toggleBedrock = () => {
+  return {
+    type: TOGGLE_BEDROCK
+  }
+}
+
 export function requestData() {
   return {
     type: REQUEST_DATA
@@ -60,15 +71,53 @@ function formatResponse(data) {
   })
 }
 
-export const fetchData = () => {
-  return function (dispatch) {
-
-    // Update state to know what is being fetched
-    dispatch(requestData())
-
-    return fetch('')
-      .then(response => response.json())
-      .then(formatted => formatResponse(formatted.success.data))
-      .then(json => dispatch(recieveDictionaries(json)))
+export function startMapQuery() {
+  return {
+    type: START_MAP_QUERY
   }
 }
+
+export function receivedMapQuery(data) {
+  return {
+    type: RECEIVED_MAP_QUERY,
+    data: data
+  }
+}
+
+function addMapIdToRef(data) {
+  data.success.data.mapData = data.success.data.mapData.map(source => {
+    source.ref.map_id = source.map_id
+    return source
+  })
+  return data
+}
+
+export const queryMap = (lng, lat, z) => {
+  return (dispatch) => {
+    dispatch(startMapQuery())
+
+    return fetch(`https://dev.macrostrat.org/api/v2/mobile/map_query_v2?lng=${lng}&lat=${lat}&z=${z}`)
+      .then(response => response.json())
+      .then(json => addMapIdToRef(json))
+      .then(json => dispatch(receivedMapQuery(json.success.data)))
+  }
+}
+
+// export const fetchData = () => {
+//   return function (dispatch) {
+//
+//     // Update state to know what is being fetched
+//     dispatch(requestData())
+//
+//     return fetch('')
+//       .then(response => response.json())
+//       .then(data => function(data) {
+//         data.success.data.mapData = data.success.data.mapData.map(source => {
+//           source.ref.map_id = source.map_id
+//           return source
+//         })
+//         return data
+//       })
+//       .then(json => dispatch(recieveDictionaries(json)))
+//   }
+// }

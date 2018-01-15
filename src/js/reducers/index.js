@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux'
-import { PAGE_CLICK, REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS } from '../actions'
+import { PAGE_CLICK, REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK } from '../actions'
 
 // import all reducers here
 // const stats = (state = [], action) => {
@@ -21,6 +21,10 @@ const update = (state = {
   infoDrawerExpanded: false,
   isFetching: false,
   filtersOpen: false,
+  mapInfo: [],
+  fetchingMapInfo: false,
+  mapHasBedrock: true,
+
   data: [],
   filters: [],
   msg: '',
@@ -34,7 +38,8 @@ const update = (state = {
       })
     case TOGGLE_INFODRAWER:
       return Object.assign({}, state, {
-        infoDrawerOpen: !state.infoDrawerOpen
+        infoDrawerOpen: !state.infoDrawerOpen,
+        infoDrawerExpanded: false
       })
     case EXPAND_INFODRAWER:
       return Object.assign({}, state, {
@@ -43,6 +48,20 @@ const update = (state = {
     case TOGGLE_FILTERS:
       return Object.assign({}, state, {
         filtersOpen: !state.filtersOpen
+      })
+    case START_MAP_QUERY:
+      return Object.assign({}, state, {
+        fetchingMapInfo: true
+      })
+    case RECEIVED_MAP_QUERY:
+      return Object.assign({}, state, {
+        fetchingMapInfo: false,
+        mapInfo: action.data,
+        infoDrawerOpen: true
+      })
+    case TOGGLE_BEDROCK:
+      return Object.assign({}, state, {
+        mapHasBedrock: !state.mapHasBedrock
       })
 
     case PAGE_CLICK:

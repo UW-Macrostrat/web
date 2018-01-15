@@ -20,7 +20,7 @@ class Menu extends Component {
   }
 
   render() {
-    const { menuOpen, toggleMenu } = this.props
+    const { menuOpen, toggleMenu, toggleBedrock, mapHasBedrock } = this.props
     let exitTransition = {
       exit: 1000
     }
@@ -45,7 +45,7 @@ class Menu extends Component {
             </ListItem>
             <Divider light/>
             <div className="menu-options">
-              <ListItem button>
+              <ListItem button onClick={toggleBedrock} style={{ backgroundColor: (mapHasBedrock ? '#eee' : 'transparent') }}>
                 <ListItemIcon>
                   <DraftsIcon />
                 </ListItemIcon>

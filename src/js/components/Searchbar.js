@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import TextField from 'material-ui/TextField'
-import Grid from 'material-ui/Grid';
+import Grid from 'material-ui/Grid'
 import Toolbar from 'material-ui/Toolbar'
 import IconButton from 'material-ui/IconButton'
 import MenuIcon from 'material-ui-icons/Menu'
@@ -26,11 +26,10 @@ class Searchbar extends Component {
                   <MenuIcon />
                 </IconButton>
                 <input className="search-input" type="text" placeholder="Search Macrostrat"/>
-
-              <IconButton color="default" aria-label="filter" onClick={toggleFilters}>
+                <IconButton color="default" aria-label="filter" onClick={toggleFilters}>
                   <WarningIcon />
                 </IconButton>
-              </Toolbar>
+            </Toolbar>
             </Paper>
           </Grid>
         </Grid>
