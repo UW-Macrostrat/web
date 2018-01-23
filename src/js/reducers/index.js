@@ -1,19 +1,20 @@
 import { combineReducers } from 'redux'
 import { PAGE_CLICK, REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK } from '../actions'
 
-// import all reducers here
-// const stats = (state = [], action) => {
-//   switch (action.type, state) {
-//     case TOGGLE_DICTIONARY:
-//       return Object.assign({}, state, {
-//         showDetails: action.dict_id
-//       })
-//
-//     default:
-//       return state
-//   }
-// }
-//
+const classColors = {
+  'sedimentary': '#FF8C00',
+  'metamorphic': '#8B4513',
+  'igneous': '#9F1D0F',
+
+  'marine': '#047BFF',
+  'non-marine': '#A67A45',
+
+  'precious commodity': '#FDFDFC',
+  'material': '#777777',
+  'water': '#00CCFF',
+  'energy': '#333333'
+}
+
 
 const update = (state = {
   menuOpen: false,
@@ -21,6 +22,8 @@ const update = (state = {
   infoDrawerExpanded: false,
   isFetching: false,
   filtersOpen: false,
+  infoMarkerLng: -999,
+  infoMarkerLat: -999,
   mapInfo: [],
   fetchingMapInfo: false,
   mapHasBedrock: true,
@@ -51,9 +54,54 @@ const update = (state = {
       })
     case START_MAP_QUERY:
       return Object.assign({}, state, {
+        infoMarkerLng: action.lng.toFixed(4),
+        infoMarkerLat: action.lat.toFixed(4),
         fetchingMapInfo: true
       })
     case RECEIVED_MAP_QUERY:
+      if (action.data && action.data.mapData) {
+        action.data.mapData = action.data.mapData.map(source => {
+          if (source.macrostrat) {
+            if (source.macrostrat.liths) {
+              source.macrostrat.lith_classes = [ ... new Set(source.macrostrat.liths.map(lith => {
+                return lith.lith_class
+              })) ]
+                .map(lith_class => {
+                  return {
+                    name: lith_class,
+                    color: classColors[lith_class]
+                  }
+                })
+            }
+            if (source.macrostrat.environs) {
+              source.macrostrat.environ_classes = [ ... new Set(source.macrostrat.environs.map(environ => {
+                return environ.environ_class
+              })) ]
+                .map(environ_class => {
+                  return {
+                    name: environ_class,
+                    color: classColors[environ_class]
+                  }
+                })
+            }
+            if (source.macrostrat.econs) {
+              source.macrostrat.econ_classes = [ ... new Set(source.macrostrat.econs.map(econ => {
+                return econ.econ_class
+              })) ]
+                .map(econ_class => {
+                  return {
+                    name: econ_class,
+                    color: classColors[econ_class]
+                  }
+                })
+            }
+
+          }
+
+          return source
+        })
+      }
+
       return Object.assign({}, state, {
         fetchingMapInfo: false,
         mapInfo: action.data,

@@ -3,7 +3,7 @@ import React, { Component } from 'react'
 /*
   Takes: b_int and t_int
 */
-class AgeChip extends Component {
+class MacrostratAgeChip extends Component {
   constructor(props) {
     super(props)
   }
@@ -34,25 +34,17 @@ class AgeChip extends Component {
 
     return (
       <div className="age-chip-container">
-        <div className="age-chip" style={{ backgroundColor: this.hexToRgb(this.props.b_int.color) }}>
-          {this.props.b_int.int_name || 'Unknown'}
-          {this.props.b_int.b_age
-            ? <div className="age-chip-age">
-                {this.props.b_int.b_age}<span className='age-chip-ma'>Ma</span> - {this.props.b_int.t_age}<span className='age-chip-ma'>Ma</span>
-              </div>
-            : ''
-          }
+        <div className="age-chip" style={{ backgroundColor: this.hexToRgb(this.props.color) }}>
+          {this.props.b_int.int_name || 'Unknown'} - {this.props.t_int.int_name || 'Unknown'}
 
+          <div className="age-chip-age">
+            {this.props.b_age}<span className='age-chip-ma'>Ma</span> - {this.props.t_age}<span className='age-chip-ma'>Ma</span>
+          </div>
         </div>
-        {
-          this.props.b_int.int_id != this.props.t_int.int_id
-          ? tIntChip
-          : ''
-        }
       </div>
     )
 
   }
 }
 
-export default AgeChip
+export default MacrostratAgeChip

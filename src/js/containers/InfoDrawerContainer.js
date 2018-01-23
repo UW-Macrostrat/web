@@ -7,7 +7,9 @@ const mapStateToProps = (state) => {
     infoDrawerOpen: state.update.infoDrawerOpen,
     infoDrawerExpanded: state.update.infoDrawerExpanded,
     mapInfo: state.update.mapInfo,
-    fetchingMapInfo: state.fetchingMapInfo
+    fetchingMapInfo: state.update.fetchingMapInfo,
+    infoMarkerLng: state.update.infoMarkerLng,
+    infoMarkerLat: state.update.infoMarkerLat
   }
 }
 

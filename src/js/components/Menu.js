@@ -8,6 +8,7 @@ import CloseIcon from 'material-ui-icons/Close'
 import IconButton from 'material-ui/IconButton'
 import InfoOutlineIcon from 'material-ui-icons/InfoOutline'
 import LocationOnIcon from 'material-ui-icons/LocationOn'
+import SatelliteIcon from 'material-ui-icons/Satellite'
 import Typography from 'material-ui/Typography'
 
 import ColumnIcon from './ColumnIcon'
@@ -62,6 +63,12 @@ class Menu extends Component {
                   <IndexMapIcon size={25} />
                 </ListItemIcon>
                 <ListItemText primary="Index"/>
+              </ListItem>
+              <ListItem button>
+                <ListItemIcon>
+                  <SatelliteIcon />
+                </ListItemIcon>
+                <ListItemText primary="Satellite"/>
               </ListItem>
               <Divider light/>
               <ListItem button>

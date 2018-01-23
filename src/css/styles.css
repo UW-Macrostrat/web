@@ -4,6 +4,10 @@ body {
   padding:0;
   font-family: 'Source Sans Pro', sans-serif;
 }
+::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  display: none;
+}
 .ui {
   z-index: 1;
 }
@@ -39,7 +43,10 @@ body {
 .active-layer {
   font-weight: bold;
 }
-
+.infodrawer-grid {
+  width: 100% !important;
+  overflow-y: scroll !important;
+}
 .infodrawer-content {
   min-height: 0;
   max-height: 100% !important;
@@ -48,18 +55,29 @@ body {
 	transition: 0.8s;
   background-color: #ffffff;
   padding: 25px;
-  overflow-y: scroll;
+
 }
 .infoDrawer {
   /* background-color: rgba(0,0,0,0) !important;
   box-shadow: none !important; */
   overflow-y: hidden;
 }
-.infoDrawer-close {
-  position: absolute;
-  top: 0;
-  right: 0;
-  margin: 10px
+.infodrawer-header-grid {
+  padding-bottom: 0 !important;
+  margin-bottom: -20px !important;
+}
+.infodrawer-header {
+  float: right;
+}
+.infodrawer-header-item {
+  display: inline-block;
+  font-size: 15px;
+}
+.lnglat-container {
+  margin-right: 15px;
+}
+.lnglat {
+  margin-right: 15px;
 }
 .infoDrawer-title {
   font-family: 'Montserrat', sans-serif;
@@ -76,7 +94,6 @@ body {
   font-size: 10px;
 }
 .age-chip-container {
-  margin-top: -10px;
   font-family: 'Montserrat', sans-serif;
   font-weight: 700;
   display: inline-block;
@@ -106,8 +123,10 @@ body {
   border-radius: 5px;
   display: inline-block;
   margin-left: 5px;
-  margin-top: 5px;
   font-size: 12px;
+}
+.lith-chip:last-child {
+  padding-right: 7px !important;
 }
 
 .map-source {
@@ -118,9 +137,23 @@ body {
   padding-top: 10px;
   line-height: 24px;
 }
+.map-source-attr:last-child {
+  margin-bottom: 25px;
+}
 .attr {
   font-family: 'Montserrat', sans-serif;
   font-weight: 700;
+}
+.line-attr {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 85%;
+  display: block;
+  margin-left: 15px;
+}
+
+.reference {
+  font-size: 12px;
+  line-height: 15px;
 }
 .ref-link {
   color: #000;
@@ -129,4 +162,26 @@ body {
 }
 .map_id {
   display: inline-block;
+}
+.long-text-button {
+  margin-top: -20px !important;
+  padding-top: 20px !important;
+}
+
+.macrostrat-inferred {
+
+}
+.expansion-panel {
+  align-items: center;
+}
+.expansion-panel-root {
+  padding-left: 15px !important;
+}
+.expansion-summary-title {
+  font-family: Montserrat,sans-serif !important;
+  font-weight: 700 !important;
+  margin-right: 10px !important;
+}
+.expansion-panel-detail {
+  display: block !important;
 }

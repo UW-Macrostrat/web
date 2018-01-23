@@ -14,7 +14,7 @@ class Reference extends Component {
       <div className="reference map-source-attr">
         <span className="attr">Source: </span>
         {this.props.reference.authors},
-        {this.props.reference.ref_year.length ? this.props.reference.ref_year + ', ' : ''}
+        {this.props.reference.ref_year.length ? ' ' + this.props.reference.ref_year + ', ' : ''}
         <a className="ref-link" href={this.props.reference.url} target='_blank'>{this.props.reference.ref_title}</a>
         {this.props.reference.ref_source.length ? ': ' + this.props.reference.ref_source : ''}
         {this.props.reference.isbn_doi.length ? ', ' + this.props.reference.isbn_doi : ''}

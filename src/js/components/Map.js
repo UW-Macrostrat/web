@@ -9,6 +9,13 @@ let config = {
             "type": "vector",
               "tiles": ["https://devtiles.macrostrat.org/carto/{z}/{x}/{y}.mvt"],
               "tileSize": 512
+        },
+        "info_marker": {
+          type: "geojson",
+          data: {
+            type: "FeatureCollection",
+            features: []
+          }
         }
     },
     "layers": [
@@ -444,176 +451,186 @@ let config = {
             "line-opacity": 1
           }
         },
-        // // {
-        // //   "id": "lines",
-        // //   "type": "line",
-        // //   "source": "burwell",
-        // //   "source-layer": "lines",
-        // //   "filter": ["!in", "type", "moraine", "lineament"],
-        // //   "minzoom": 0,
-        // //   "maxzoom": 16,
-        // //   "layout": {
-        // //     "line-join": {
-        // //       "property": "type",
-        // //       "type": "categorical",
-        // //       "stops": [
-        // //         ["dike", "miter"],
-        // //         ["fold", "miter"],
-        // //         ["anticline", "miter"],
-        // //         ["syncline", "miter"],
-        // //         ["monocline", "miter"],
-        // //         ["moraine", "round"],
-        // //         ["flow", "miter"],
-        // //         ["sill", "miter"],
-        // //         ["vein", "round"],
-        // //         ["marker bed", "miter"],
-        // //         ["", "miter"],
-        // //       ]
-        // //     },
-        // //     // "line-cap": {
-        // //     //   "property": "type",
-        // //     //   "type": "categorical",
-        // //     //   "stops": [
-        // //     //     ["dike", "butt"],
-        // //     //     ["fold", "butt"],
-        // //     //     ["anticline", "butt"],
-        // //     //     ["syncline", "butt"],
-        // //     //     ["monocline", "butt"],
-        // //     //     ["moraine", "round"],
-        // //     //     ["flow", "butt"],
-        // //     //     ["sill", "butt"],
-        // //     //     ["vein", "round"],
-        // //     //     ["marker bed", "butt"],
-        // //     //     ["", "butt"],
-        // //     //   ]
-        // //     // },
-        // //   },
-        // //   "paint": {
-        // //   //  "line-color": "#000000",
-        // //     "line-color": {
-        // //       "property": "type",
-        // //       "type": "categorical",
-        // //       "stops": [
-        // //         ["dike", "#FF4136"],
-        // //         ["fold", "#F012BE"],
-        // //         ["anticline", "#F012BE"],
-        // //         ["syncline", "#F012BE"],
-        // //         ["monocline", "#F012BE"],
-        // //         ["moraine", "#3498DB"],
-        // //         ["flow", "#FF4136"],
-        // //         ["sill", "#FF4136"],
-        // //         ["vein", "#FF4136"],
-        // //         ["marker bed", "#333333"],
-        // //         ["", "#000000"]
-        // //       ]
-        // //     },
-        // //     "line-width": {
-        // //       "property": "type",
-        // //       "type": "categorical",
-        // //       "stops": [
-        // //         [{ "zoom": 0, "value": "" }, 0.3],
-        // //
-        // //         [{ "zoom": 1, "value": "" }, 0.3],
-        // //
-        // //         [{ "zoom": 2, "value": "" }, 0.3],
-        // //         [{ "zoom": 2, "value": "dike" }, 0.25],
-        // //         [{ "zoom": 2, "value": "sill" }, 0.25],
-        // //
-        // //         [{ "zoom": 3, "value": "" }, 0.6],
-        // //         [{ "zoom": 3, "value": "dike" }, 0.35],
-        // //         [{ "zoom": 3, "value": "sill" }, 0.35],
-        // //
-        // //         [{ "zoom": 4, "value": "" }, 0.55],
-        // //         [{ "zoom": 4, "value": "dike" }, 0.3],
-        // //         [{ "zoom": 4, "value": "sill" }, 0.3],
-        // //
-        // //         [{ "zoom": 5, "value": "" }, 0.6],
-        // //         [{ "zoom": 5, "value": "dike" }, 0.35],
-        // //         [{ "zoom": 5, "value": "sill" }, 0.35],
-        // //
-        // //         [{ "zoom": 6, "value": "" }, 0.45],
-        // //         [{ "zoom": 6, "value": "dike" }, 0.2],
-        // //         [{ "zoom": 6, "value": "sill" }, 0.2],
-        // //
-        // //         [{ "zoom": 7, "value": "" }, 0.4],
-        // //         [{ "zoom": 7, "value": "dike" }, 0.25],
-        // //         [{ "zoom": 7, "value": "sill" }, 0.25],
-        // //         [{ "zoom": 7, "value": "fold" }, 0.5],
-        // //         [{ "zoom": 7, "value": "anticline" }, 0.5],
-        // //         [{ "zoom": 7, "value": "syncline" }, 0.5],
-        // //         [{ "zoom": 7, "value": "monocline" }, 15],
-        // //
-        // //         [{ "zoom": 8, "value": "" }, 0.7],
-        // //         [{ "zoom": 8, "value": "dike" }, 0.45],
-        // //         [{ "zoom": 8, "value": "sill" }, 0.45],
-        // //         [{ "zoom": 8, "value": "fold" }, 0.8],
-        // //         [{ "zoom": 8, "value": "anticline" }, 0.8],
-        // //         [{ "zoom": 8, "value": "syncline" }, 0.8],
-        // //         [{ "zoom": 8, "value": "monocline" }, 0.8],
-        // //
-        // //         [{ "zoom": 9, "value": "" }, 0.8],
-        // //         [{ "zoom": 9, "value": "dike" }, 0.65],
-        // //         [{ "zoom": 9, "value": "sill" }, 0.65],
-        // //         [{ "zoom": 9, "value": "fold" }, 0.9],
-        // //         [{ "zoom": 9, "value": "anticline" }, 0.9],
-        // //         [{ "zoom": 9, "value": "syncline" }, 0.9],
-        // //         [{ "zoom": 9, "value": "monocline" }, 0.9],
-        // //
-        // //         [{ "zoom": 10, "value": "" }, 0.8],
-        // //         [{ "zoom": 10, "value": "dike" }, 0.55],
-        // //         [{ "zoom": 10, "value": "sill" }, 0.55],
-        // //         [{ "zoom": 10, "value": "moraine" }, 0.5],
-        // //         [{ "zoom": 10, "value": "vein" }, 0.5],
-        // //         [{ "zoom": 10, "value": "fold" }, 0.9],
-        // //         [{ "zoom": 10, "value": "anticline" }, 0.9],
-        // //         [{ "zoom": 10, "value": "syncline" }, 0.9],
-        // //         [{ "zoom": 10, "value": "monocline" }, 0.9],
-        // //
-        // //         [{ "zoom": 11, "value": "" }, 1.1],
-        // //         [{ "zoom": 11, "value": "dike" }, 0.85],
-        // //         [{ "zoom": 11, "value": "sill" }, 0.85],
-        // //         [{ "zoom": 11, "value": "moraine" }, 0.8],
-        // //         [{ "zoom": 11, "value": "vein" }, 0.8],
-        // //         [{ "zoom": 11, "value": "fold" }, 1.2],
-        // //         [{ "zoom": 11, "value": "anticline" }, 1.2],
-        // //         [{ "zoom": 11, "value": "syncline" }, 1.2],
-        // //         [{ "zoom": 11, "value": "monocline" }, 1.2],
-        // //
-        // //         [{ "zoom": 12, "value": "" }, 1.3],
-        // //         [{ "zoom": 12, "value": "dike" }, 0.9],
-        // //         [{ "zoom": 12, "value": "sill" }, 0.9],
-        // //         [{ "zoom": 12, "value": "moraine" }, 0.8],
-        // //         [{ "zoom": 12, "value": "vein" }, 0.8],
-        // //         [{ "zoom": 12, "value": "flow" }, 1.3],
-        // //         [{ "zoom": 12, "value": "fold" }, 1.4],
-        // //         [{ "zoom": 12, "value": "anticline" }, 1.4],
-        // //         [{ "zoom": 12, "value": "syncline" }, 1.4],
-        // //         [{ "zoom": 12, "value": "monocline" }, 1.4]
-        // //       ]
-        // //     },
-        // //     "line-width": {
-        // //       "stops": [
-        // //         [0, 0.4],
-        // //         [1, 0.4],
-        // //         [2, 0.4],
-        // //         [3, 0.4],
-        // //         [4, 0.35],
-        // //         [5, 0.5],
-        // //         [6, 0.25],
-        // //         [7, 0.5],
-        // //         [8, 1],
-        // //         [9, 0.5],
-        // //         [10, 1],
-        // //         [11, 1.75],
-        // //         [12, 2.5],
-        // //         [13, 3],
-        // //         [14, 4],
-        // //         [15, 5],
-        // //         [16, 6]
-        // //       ]
-        // //     },
-        // //   }
-        // }
+        {
+          "id": "lines",
+          "type": "line",
+          "source": "burwell",
+          "source-layer": "lines",
+          "filter": ["!in", "type", "moraine", "lineament"],
+          "minzoom": 0,
+          "maxzoom": 16,
+          "layout": {
+            "line-join": {
+              "property": "type",
+              "type": "categorical",
+              "stops": [
+                ["dike", "miter"],
+                ["fold", "miter"],
+                ["anticline", "miter"],
+                ["syncline", "miter"],
+                ["monocline", "miter"],
+                ["moraine", "round"],
+                ["flow", "miter"],
+                ["sill", "miter"],
+                ["vein", "round"],
+                ["marker bed", "miter"],
+                ["", "miter"],
+              ]
+            },
+            // "line-cap": {
+            //   "property": "type",
+            //   "type": "categorical",
+            //   "stops": [
+            //     ["dike", "butt"],
+            //     ["fold", "butt"],
+            //     ["anticline", "butt"],
+            //     ["syncline", "butt"],
+            //     ["monocline", "butt"],
+            //     ["moraine", "round"],
+            //     ["flow", "butt"],
+            //     ["sill", "butt"],
+            //     ["vein", "round"],
+            //     ["marker bed", "butt"],
+            //     ["", "butt"],
+            //   ]
+            // },
+          },
+          "paint": {
+          //  "line-color": "#000000",
+            "line-color": {
+              "property": "type",
+              "type": "categorical",
+              "stops": [
+                ["dike", "#FF4136"],
+                ["fold", "#F012BE"],
+                ["anticline", "#F012BE"],
+                ["syncline", "#F012BE"],
+                ["monocline", "#F012BE"],
+                ["moraine", "#3498DB"],
+                ["flow", "#FF4136"],
+                ["sill", "#FF4136"],
+                ["vein", "#FF4136"],
+                ["marker bed", "#333333"],
+                ["", "#000000"]
+              ]
+            },
+            "line-width": {
+              "property": "type",
+              "type": "categorical",
+              "stops": [
+                [{ "zoom": 0, "value": "" }, 0.3],
+
+                [{ "zoom": 1, "value": "" }, 0.3],
+
+                [{ "zoom": 2, "value": "" }, 0.3],
+                [{ "zoom": 2, "value": "dike" }, 0.25],
+                [{ "zoom": 2, "value": "sill" }, 0.25],
+
+                [{ "zoom": 3, "value": "" }, 0.6],
+                [{ "zoom": 3, "value": "dike" }, 0.35],
+                [{ "zoom": 3, "value": "sill" }, 0.35],
+
+                [{ "zoom": 4, "value": "" }, 0.55],
+                [{ "zoom": 4, "value": "dike" }, 0.3],
+                [{ "zoom": 4, "value": "sill" }, 0.3],
+
+                [{ "zoom": 5, "value": "" }, 0.6],
+                [{ "zoom": 5, "value": "dike" }, 0.35],
+                [{ "zoom": 5, "value": "sill" }, 0.35],
+
+                [{ "zoom": 6, "value": "" }, 0.45],
+                [{ "zoom": 6, "value": "dike" }, 0.2],
+                [{ "zoom": 6, "value": "sill" }, 0.2],
+
+                [{ "zoom": 7, "value": "" }, 0.4],
+                [{ "zoom": 7, "value": "dike" }, 0.25],
+                [{ "zoom": 7, "value": "sill" }, 0.25],
+                [{ "zoom": 7, "value": "fold" }, 0.5],
+                [{ "zoom": 7, "value": "anticline" }, 0.5],
+                [{ "zoom": 7, "value": "syncline" }, 0.5],
+                [{ "zoom": 7, "value": "monocline" }, 15],
+
+                [{ "zoom": 8, "value": "" }, 0.7],
+                [{ "zoom": 8, "value": "dike" }, 0.45],
+                [{ "zoom": 8, "value": "sill" }, 0.45],
+                [{ "zoom": 8, "value": "fold" }, 0.8],
+                [{ "zoom": 8, "value": "anticline" }, 0.8],
+                [{ "zoom": 8, "value": "syncline" }, 0.8],
+                [{ "zoom": 8, "value": "monocline" }, 0.8],
+
+                [{ "zoom": 9, "value": "" }, 0.8],
+                [{ "zoom": 9, "value": "dike" }, 0.65],
+                [{ "zoom": 9, "value": "sill" }, 0.65],
+                [{ "zoom": 9, "value": "fold" }, 0.9],
+                [{ "zoom": 9, "value": "anticline" }, 0.9],
+                [{ "zoom": 9, "value": "syncline" }, 0.9],
+                [{ "zoom": 9, "value": "monocline" }, 0.9],
+
+                [{ "zoom": 10, "value": "" }, 0.8],
+                [{ "zoom": 10, "value": "dike" }, 0.55],
+                [{ "zoom": 10, "value": "sill" }, 0.55],
+                [{ "zoom": 10, "value": "moraine" }, 0.5],
+                [{ "zoom": 10, "value": "vein" }, 0.5],
+                [{ "zoom": 10, "value": "fold" }, 0.9],
+                [{ "zoom": 10, "value": "anticline" }, 0.9],
+                [{ "zoom": 10, "value": "syncline" }, 0.9],
+                [{ "zoom": 10, "value": "monocline" }, 0.9],
+
+                [{ "zoom": 11, "value": "" }, 1.1],
+                [{ "zoom": 11, "value": "dike" }, 0.85],
+                [{ "zoom": 11, "value": "sill" }, 0.85],
+                [{ "zoom": 11, "value": "moraine" }, 0.8],
+                [{ "zoom": 11, "value": "vein" }, 0.8],
+                [{ "zoom": 11, "value": "fold" }, 1.2],
+                [{ "zoom": 11, "value": "anticline" }, 1.2],
+                [{ "zoom": 11, "value": "syncline" }, 1.2],
+                [{ "zoom": 11, "value": "monocline" }, 1.2],
+
+                [{ "zoom": 12, "value": "" }, 1.3],
+                [{ "zoom": 12, "value": "dike" }, 0.9],
+                [{ "zoom": 12, "value": "sill" }, 0.9],
+                [{ "zoom": 12, "value": "moraine" }, 0.8],
+                [{ "zoom": 12, "value": "vein" }, 0.8],
+                [{ "zoom": 12, "value": "flow" }, 1.3],
+                [{ "zoom": 12, "value": "fold" }, 1.4],
+                [{ "zoom": 12, "value": "anticline" }, 1.4],
+                [{ "zoom": 12, "value": "syncline" }, 1.4],
+                [{ "zoom": 12, "value": "monocline" }, 1.4]
+              ]
+            },
+            "line-width": {
+              "stops": [
+                [0, 0.4],
+                [1, 0.4],
+                [2, 0.4],
+                [3, 0.4],
+                [4, 0.35],
+                [5, 0.5],
+                [6, 0.25],
+                [7, 0.5],
+                [8, 1],
+                [9, 0.5],
+                [10, 1],
+                [11, 1.75],
+                [12, 2.5],
+                [13, 3],
+                [14, 4],
+                [15, 5],
+                [16, 6]
+              ]
+            },
+          }
+        },
+        {
+          "id": "infoMarker",
+          "type": "symbol",
+          "source": "info_marker",
+          "layout": {
+            "icon-size": 0.65,
+            "icon-image": "pin",
+            "icon-offset": [0, -28]
+          }
+        },
     ]
 }
 
@@ -628,7 +645,12 @@ class Map extends Component {
         container: 'map',
         style: 'mapbox://styles/jczaplewski/cj7qmi00vd4id2rp9d5cnbeqj?optimize=true',
         center: [-89, 43],
-        zoom: 7 // starting zoom
+        zoom: 7,
+        maxZoom: 15,
+        hash: true,
+        failIfMajorPerformanceCaveat: true,
+        dragRotate: false,
+        touchZoomRotate: false
     })
 
     this.map.on('load', () => {
@@ -637,12 +659,30 @@ class Map extends Component {
       })
 
       config.layers.forEach(layer => {
-        this.map.addLayer(layer, "airport-label")
+        this.map.addLayer(layer, 'airport-label')
       })
+    })
+
+    this.map.on('movestart', () => {
+      this.map.setLayoutProperty('infoMarker', 'visibility', 'none')
     })
 
     this.map.on('click', (event) => {
       this.props.queryMap(event.lngLat.lng, event.lngLat.lat, this.map.getZoom())
+
+      // Update the location of the marker
+      this.map.getSource('info_marker').setData({
+          type: 'FeatureCollection',
+          features: [{
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: [event.lngLat.lng, event.lngLat.lat]
+            }
+          }]
+        })
+
+        this.map.setLayoutProperty('infoMarker', 'visibility', 'visible')
     })
   }
 

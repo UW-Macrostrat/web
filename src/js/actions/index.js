@@ -71,9 +71,11 @@ function formatResponse(data) {
   })
 }
 
-export function startMapQuery() {
+export function startMapQuery(data) {
   return {
-    type: START_MAP_QUERY
+    type: START_MAP_QUERY,
+    lng: data.lng,
+    lat: data.lat
   }
 }
 
@@ -94,9 +96,9 @@ function addMapIdToRef(data) {
 
 export const queryMap = (lng, lat, z) => {
   return (dispatch) => {
-    dispatch(startMapQuery())
+    dispatch(startMapQuery({lng: lng, lat: lat}))
 
-    return fetch(`https://dev.macrostrat.org/api/v2/mobile/map_query_v2?lng=${lng}&lat=${lat}&z=${z}`)
+    return fetch(`https://dev.macrostrat.org/api/v2/mobile/map_query_v2?lng=${lng.toFixed(5)}&lat=${lat.toFixed(5)}&z=${z.toFixed(0)}`)
       .then(response => response.json())
       .then(json => addMapIdToRef(json))
       .then(json => dispatch(receivedMapQuery(json.success.data)))

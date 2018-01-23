@@ -59,6 +59,13 @@ class MapSource extends Component {
             : ''
           }
           {
+            this.props.source.age && this.props.source.age.length
+            ? <div className="map-source-attr">
+                <span className="attr">Age: </span> {this.props.source.age}
+              </div>
+            : ''
+          }
+          {
             this.props.source.strat_name && this.props.source.strat_name.length
             ? <div className="map-source-attr">
                 <span className="attr">Stratigraphic name(s): </span> {this.props.source.strat_name}
@@ -128,6 +135,39 @@ class MapSource extends Component {
                 }
 
             </div>
+            : ''
+          }
+          {
+            this.props.source.lines && this.props.source.lines.length
+            ?
+              <div className="map-source-attr">
+                <span className="attr">Lines: </span>
+                {this.props.source.lines.map((line, idx) => {
+                  return <div className="map-source-line" key={idx}>
+                    {
+                      line.name
+                      ? <span className="line-attr"><span className="attr">Name: </span> {line.name}</span>
+                      : ''
+                    }
+                    {
+                      line.type
+                      ? <span className="line-attr"><span className="attr">Type: </span> {line.type}</span>
+                      : ''
+                    }
+                    {
+                      line.direction
+                      ? <span className="line-attr"><span className="attr">Direction: </span> {line.direction}</span>
+                      : ''
+                    }
+                    {
+                      line.descrip
+                      ? <span className="line-attr"><span className="attr">Description: </span> {line.descrip}</span>
+                      : ''
+                    }
+                  </div>
+                })}
+              </div>
+
             : ''
           }
 
