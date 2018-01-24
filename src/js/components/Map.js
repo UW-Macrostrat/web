@@ -665,10 +665,20 @@ class Map extends Component {
 
     this.map.on('movestart', () => {
       this.map.setLayoutProperty('infoMarker', 'visibility', 'none')
+      this.props.closeInfoDrawer()
     })
 
     this.map.on('click', (event) => {
       this.props.queryMap(event.lngLat.lng, event.lngLat.lat, this.map.getZoom())
+
+      let xOffset = (window.innerWidth > 850) ? -((window.innerWidth*0.3333)/2) : 0
+      this.map.panTo(event.lngLat, {
+        offset: [ xOffset, 0 ],
+        easing: function easing(t) {
+          return t * (2 - t)
+        },
+        duration: 500
+      })
 
       // Update the location of the marker
       this.map.getSource('info_marker').setData({

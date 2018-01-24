@@ -9,6 +9,7 @@ export const REQUEST_DATA = 'REQUEST_DATA'
 export const TOGGLE_MENU = 'TOGGLE_MENU'
 export const TOGGLE_INFODRAWER = 'TOGGLE_INFODRAWER'
 export const EXPAND_INFODRAWER = 'EXPAND_INFODRAWER'
+export const CLOSE_INFODRAWER = 'CLOSE_INFODRAWER'
 export const TOGGLE_FILTERS = 'TOGGLE_FILTERS'
 
 export const START_MAP_QUERY = 'START_MAP_QUERY'
@@ -33,6 +34,11 @@ export const toggleMenu = () => {
 export const toggleInfoDrawer = () => {
   return {
     type: TOGGLE_INFODRAWER
+  }
+}
+export const closeInfoDrawer = () => {
+  return {
+    type: CLOSE_INFODRAWER
   }
 }
 export const expandInfoDrawer = () => {

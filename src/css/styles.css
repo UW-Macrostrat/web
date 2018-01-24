@@ -44,7 +44,7 @@ body {
   font-weight: bold;
 }
 .infodrawer-grid {
-  width: 100% !important;
+  /* width: 100% !important; */
   overflow-y: scroll !important;
 }
 .infodrawer-content {
@@ -57,10 +57,15 @@ body {
   padding: 25px;
 
 }
+.infoDrawer-root {
+  z-index: 0 !important;
+  position: relative !important;
+}
 .infoDrawer {
   /* background-color: rgba(0,0,0,0) !important;
   box-shadow: none !important; */
   overflow-y: hidden;
+  max-width: 33%;
 }
 .infodrawer-header-grid {
   padding-bottom: 0 !important;
@@ -82,9 +87,13 @@ body {
 .infoDrawer-title {
   font-family: 'Montserrat', sans-serif;
   font-weight: 400;
+  font-size: 1.5em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.infoDrawer-title-main {
+  margin-bottom: 0;
 }
 .hidden {
   display:none;
@@ -119,14 +128,17 @@ body {
   font-family: 'Montserrat', sans-serif;
   font-weight: 700;
   text-align: center;
-  padding: 10px;
-  border-radius: 5px;
   display: inline-block;
-  margin-left: 5px;
+  margin-top: 5px;
+  margin-right: 5px;
   font-size: 12px;
+  background-repeat: repeat;
+  background-size: cover;
 }
-.lith-chip:last-child {
-  padding-right: 7px !important;
+.lith-chip-inner {
+  padding: 10px;
+  background-color: rgba(255,255,255,0.5);
+  border-radius: 5px;
 }
 
 .map-source {
@@ -181,7 +193,23 @@ body {
   font-family: Montserrat,sans-serif !important;
   font-weight: 700 !important;
   margin-right: 10px !important;
+  padding-right: 0 !important;
 }
 .expansion-panel-detail {
   display: block !important;
+}
+.expansion-panel-detail-header {
+  margin-top: -10px;
+  font-size: 80%;
+}
+.externalLink {
+  color: #333;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+@media(max-width: 850px) {
+  .infoDrawer {
+    max-width: 100%;
+  }
 }

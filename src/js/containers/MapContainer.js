@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import { queryMap } from '../actions'
+import { queryMap, closeInfoDrawer } from '../actions'
 import Map from '../components/Map'
 
 const mapStateToProps = (state) => {
@@ -18,6 +18,9 @@ const mapDispatchToProps = (dispatch) => {
   return {
     queryMap: (lng, lat, z) => {
       dispatch(queryMap(lng, lat, z))
+    },
+    closeInfoDrawer: () => {
+      dispatch(closeInfoDrawer())
     }
   }
 }
