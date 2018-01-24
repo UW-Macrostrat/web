@@ -96,7 +96,7 @@ body {
   margin-bottom: 0;
 }
 .hidden {
-  display:none;
+  display: none !important;
 }
 .inline-button-label {
   display: inline;
@@ -208,6 +208,10 @@ body {
   text-decoration: none;
 }
 
+.filter-title {
+  padding-bottom: 0 !important;
+  margin-bottom: -12px;
+}
 @media(max-width: 850px) {
   .infoDrawer {
     max-width: 100%;

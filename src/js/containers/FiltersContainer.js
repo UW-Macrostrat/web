@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import { toggleFilters } from '../actions'
+import { toggleFilters, removeFilter } from '../actions'
 import Filters from '../components/Filters'
 
 const mapStateToProps = (state) => {
@@ -13,6 +13,9 @@ const mapDispatchToProps = (dispatch) => {
   return {
     toggleFilters: () => {
       dispatch(toggleFilters())
+    },
+    removeFilter: (f) => {
+      dispatch(removeFilter(f))
     }
   }
 }

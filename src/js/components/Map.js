@@ -698,7 +698,6 @@ class Map extends Component {
 
   componentWillUpdate(nextProps) {
     // Watch the state of the application and adjust the map accordingly
-
     // Bedrock
     if (nextProps.mapHasBedrock && !this.props.mapHasBedrock) {
       config.layers.forEach(layer => {
@@ -712,6 +711,23 @@ class Map extends Component {
           this.map.setLayoutProperty(layer.id, 'visibility', 'none')
         }
       })
+    } else if (nextProps.filters.length != this.props.filters.length) {
+      let newFilter = ['any']
+      nextProps.filters.forEach(f => {
+        newFilter.push([
+          'all',
+          ['>', 'best_age_bottom', f.t_age],
+          ['<', 'best_age_top', f.b_age]
+        ])
+      })
+      this.map.setFilter('burwell_fill', newFilter)
+      this.map.setFilter('burwell_stroke', newFilter)
+
+      if (nextProps.filters.length === 0) {
+        this.map.setFilter('burwell_fill', null)
+        this.map.setFilter('burwell_stroke', null)
+      }
+
     }
 
   }

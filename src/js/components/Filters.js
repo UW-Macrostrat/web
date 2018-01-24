@@ -27,14 +27,19 @@ class Filters extends Component {
         </DialogTitle>
         <div>
           <List>
-            <ListItem>
-              <ListItemText primary="Test filter"/>
-              <ListItemSecondaryAction>
-                <IconButton color="default" aria-label="remove" >
-                  <RemoveCircleOutlineIcon/>
-                </IconButton>
-              </ListItemSecondaryAction>
+            <ListItem className={this.props.filters.length > 0 ? 'hidden' : ''}>
+              <ListItemText primary='No filters applied'/>
             </ListItem>
+            {this.props.filters.map((d,i) => {
+              return <ListItem key={i}>
+                <ListItemText primary={d.name}/>
+                <ListItemSecondaryAction onClick={() => { this.props.removeFilter(d) }}>
+                  <IconButton color="accent" aria-label="remove" >
+                    <RemoveCircleOutlineIcon/>
+                  </IconButton>
+                </ListItemSecondaryAction>
+              </ListItem>
+            })}
           </List>
         </div>
       </Dialog>
