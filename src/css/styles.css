@@ -208,7 +208,7 @@ body {
   text-decoration: none;
 }
 
-.filter-title {
+#filter-title {
   padding-bottom: 0 !important;
   margin-bottom: -12px;
 }

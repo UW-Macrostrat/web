@@ -25,6 +25,7 @@ const update = (state = {
   infoMarkerLat: -999,
   mapInfo: [],
   fetchingMapInfo: false,
+  mapInfoCancelToken: null,
   mapHasBedrock: true,
 
   isSearching: false,
@@ -84,10 +85,14 @@ const update = (state = {
       })
 
     case START_MAP_QUERY:
+      if (state.mapInfoCancelToken) {
+        state.mapInfoCancelToken.cancel()
+      }
       return Object.assign({}, state, {
         infoMarkerLng: action.lng.toFixed(4),
         infoMarkerLat: action.lat.toFixed(4),
-        fetchingMapInfo: true
+        fetchingMapInfo: true,
+        mapInfoCancelToken: action.cancelToken
       })
     case RECEIVED_MAP_QUERY:
       if (action.data && action.data.mapData) {

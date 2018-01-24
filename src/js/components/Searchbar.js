@@ -31,6 +31,7 @@ class Searchbar extends Component {
     })
   }
   loseInputFocus() {
+    // A slight timeout is required so that click actions can occur
     setTimeout(() => {
       this.setState({
         inputFocused: false
