@@ -54,6 +54,28 @@ class Searchbar extends Component {
 
   render() {
     const { toggleMenu, toggleFilters } = this.props
+    let resultCategories = new Set(this.props.searchResults.map(d => { return d.category }))
+    resultCategories = [...resultCategories]
+
+    let categoryResults = resultCategories.map((cat) => {
+      let thisCat = this.props.searchResults.filter(f => {
+        if (f.category === cat) return f
+      })
+      return thisCat.map((item, h) => {
+        return <ListItem key={h} button onClick={() => { this.addFilter(item) }}>
+          <ListItemText primary={item.name}/>
+        </ListItem>
+      })
+    })
+
+    let searchResults = resultCategories.map((cat, i) => {
+      return <div>
+          <ListItem key={i}>
+            <ListItemText primary={cat}/>
+          </ListItem>
+          {categoryResults[i]}
+        </div>
+    })
 
     return (
       <div className="searchbar-holder">
@@ -91,12 +113,10 @@ class Searchbar extends Component {
                     </ListItem>
                   </List>
                   <List className={this.state.searchTerm.length < 3 ? 'hidden' : ''}>
-                    {this.props.searchResults && this.props.searchResults.intervals ? this.props.searchResults.intervals.map((item, i) => {
-                      return <ListItem key={i} button onClick={() => { this.addFilter(item) }}>
-                        <ListItemText primary={item.name}/>
-                      </ListItem>
-                    })
-                  : ''}
+                    {this.props.searchResults && this.props.searchResults.length ?
+                      searchResults
+                      : ''
+                    }
                   </List>
                 </div>
               </Collapse>

@@ -2,12 +2,19 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 // import mapboxgl from 'mapbox-gl'
 
+const LITH_CLASSES = 3
+const LITH_TYPES = 14
+
+const noFilter = [
+  "all",
+  ["!=", "color", ""]
+]
 let config = {
     "version": 8,
     "sources": {
         "burwell": {
             "type": "vector",
-              "tiles": ["https://devtiles.macrostrat.org/carto/{z}/{x}/{y}.mvt"],
+              "tiles": ["https://devtiles.macrostrat.org/carto-slim/{z}/{x}/{y}.mvt"],
               "tileSize": 512
         },
         "info_marker": {
@@ -661,6 +668,20 @@ class Map extends Component {
       config.layers.forEach(layer => {
         this.map.addLayer(layer, 'airport-label')
       })
+
+      this.map.setFilter('burwell_fill', noFilter)
+      this.map.setFilter('burwell_stroke', noFilter)
+      // let newFilter = ['any']
+      // for (let i = 1; i < 14; i++) {
+      //   newFilter.push([ '==', `lith_type${i}`, 'sedimentary' ])
+      // }
+      //
+      // this.map.setFilter('burwell_fill', newFilter)
+      // this.map.setFilter('burwell_stroke', newFilter)
+      // this.map.setFilter('burwell_fill', [
+      //   'all',
+      //   ['in', 'map_id', 2985493, 2960118]
+      // ])
     })
 
     this.map.on('movestart', () => {
@@ -670,6 +691,9 @@ class Map extends Component {
 
     this.map.on('click', (event) => {
       this.props.queryMap(event.lngLat.lng, event.lngLat.lat, this.map.getZoom())
+
+      let features = this.map.queryRenderedFeatures(event.point, { layers: ['burwell_fill']})
+      console.log(features)
 
       let xOffset = (window.innerWidth > 850) ? -((window.innerWidth*0.3333)/2) : 0
       this.map.panTo(event.lngLat, {
@@ -696,6 +720,7 @@ class Map extends Component {
     })
   }
 
+
   componentWillUpdate(nextProps) {
     // Watch the state of the application and adjust the map accordingly
     // Bedrock
@@ -712,21 +737,92 @@ class Map extends Component {
         }
       })
     } else if (nextProps.filters.length != this.props.filters.length) {
-      let newFilter = ['any']
-      nextProps.filters.forEach(f => {
-        newFilter.push([
-          'all',
-          ['>', 'best_age_bottom', f.t_age],
-          ['<', 'best_age_top', f.b_age]
-        ])
-      })
-      this.map.setFilter('burwell_fill', newFilter)
-      this.map.setFilter('burwell_stroke', newFilter)
-
       if (nextProps.filters.length === 0) {
-        this.map.setFilter('burwell_fill', null)
-        this.map.setFilter('burwell_stroke', null)
+        this.map.setFilter('burwell_fill', noFilter)
+        this.map.setFilter('burwell_stroke', noFilter)
+
+        config.layers.forEach(layer => {
+          if (layer.source === 'burwell' && layer.type === 'line' && layer.id != 'burwell_stroke') {
+            this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
+          }
+        })
+        return
       }
+      let existingFilters = new Set(this.props.filters.map(f => { return `${f.category}|${f.type}|${f.name}` }))
+      let newFilters = new Set(nextProps.filters.map(f => { return `${f.category}|${f.type}|${f.name}` }))
+
+      let incoming = [...new Set([...newFilters].filter(f => !existingFilters.has(f)))]
+      let outgoing = [...new Set([...existingFilters].filter(f => !newFilters.has(f)))]
+
+      if (incoming.length === 0) {
+        console.log('no new filters to apply')
+
+      }
+      // If a filter was removed...
+      if (outgoing.length) {
+        // Find its index in the existing filters
+        let presentPosition = this.props.filters.map(f => { return `${f.category}|${f.type}|${f.name}` }).indexOf(outgoing[0])
+        console.log('a filter was removed!', presentPosition)
+        let appliedFilters = this.map.getFilter('burwell_fill')
+        appliedFilters.splice((presentPosition + 2), 1)
+
+        this.map.setFilter('burwell_fill', appliedFilters)
+        this.map.setFilter('burwell_stroke', appliedFilters)
+        return
+      }
+
+
+      let newFilterString = incoming[0].split('|')
+      let filterToApply = nextProps.filters.filter(f => {
+        if (f.category === newFilterString[0] && f.type === newFilterString[1] && f.name === newFilterString[2]) {
+          return f
+        }
+      })
+      if (filterToApply.length === 0) {
+        console.log('no new filters to apply2')
+        return
+      }
+      filterToApply = filterToApply[0]
+
+      let newFilter = []
+      switch(filterToApply.type) {
+        case 'intervals':
+          newFilter.push('any')
+          nextProps.filters.forEach(f => {
+            newFilter.push([
+              'all',
+              ['>', 'best_age_bottom', filterToApply.t_age],
+              ['<', 'best_age_top', filterToApply.b_age]
+            ])
+          })
+          break
+
+        case 'lithology_classes':
+          newFilter.push('any')
+          for (let i = 1; i < 14; i++) {
+            newFilter.push([ '==', `lith_class${i}`, filterToApply.name ])
+          }
+          break
+        case 'lithology_types':
+          newFilter.push('any')
+          for (let i = 1; i < 14; i++) {
+            newFilter.push([ '==', `lith_type${i}`, filterToApply.name ])
+          }
+          break
+      }
+
+      let appliedFilters = this.map.getFilter('burwell_fill')
+      appliedFilters.push(newFilter)
+
+      this.map.setFilter('burwell_fill', appliedFilters)
+      this.map.setFilter('burwell_stroke', appliedFilters)
+
+      // Hide all line features when a filter is applied
+      config.layers.forEach(layer => {
+        if (layer.source === 'burwell' && layer.type === 'line' && layer.id != 'burwell_stroke') {
+          this.map.setLayoutProperty(layer.id, 'visibility', 'none')
+        }
+      })
 
     }
 

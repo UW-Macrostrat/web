@@ -139,7 +139,7 @@ export const doSearch = (term) => {
 
     dispatch(startSearchQuery(term, source))
 
-    return axios.get(`https://dev.macrostrat.org/api/v2/defs/autocomplete?include=intervals&query=${term}`, {
+    return axios.get(`https://dev.macrostrat.org/api/v2/mobile/autocomplete?include=interval,lithology&query=${term}`, {
       cancelToken: source.token,
       responseType: 'json'
     })
@@ -155,20 +155,39 @@ export function receivedSearchQuery(data) {
 }
 
 export function addFilter(theFilter) {
-  console.log('addFilter', theFilter)
-  return (dispatch) =>{
-      axios.get(`https://dev.macrostrat.org/api/v2/defs/intervals?int_id=${theFilter.id}`, {
-        responseType: 'json'
-      })
-      .then(json => {
-        let f = json.data.success.data[0]
-        f.name = theFilter.name
+  switch(theFilter.type) {
+    case 'intervals':
+      return (dispatch) => {
+          axios.get(`https://dev.macrostrat.org/api/v2/defs/intervals?int_id=${theFilter.id}`, {
+            responseType: 'json'
+          })
+          .then(json => {
+            let f = json.data.success.data[0]
+            f.name = theFilter.name
+            f.type = theFilter.type
+            f.category = theFilter.category
+            dispatch({
+              type: ADD_FILTER,
+              filter: f
+            })
+          })
+      }
+      break
+    case 'lithology_classes':
+    case 'lithology_types':
+    case 'lithologies':
+      return (dispatch) => {
         dispatch({
           type: ADD_FILTER,
-          filter: f
+          filter: theFilter
         })
-      })
+      }
+      break
+
+    default:
+      console.log('i do not support that filter type', theFilter.type)
   }
+
 }
 
 export function removeFilter(theFilter) {
@@ -177,22 +196,3 @@ export function removeFilter(theFilter) {
     filter: theFilter
   }
 }
-
-// export const fetchData = () => {
-//   return function (dispatch) {
-//
-//     // Update state to know what is being fetched
-//     dispatch(requestData())
-//
-//     return fetch('')
-//       .then(response => response.json())
-//       .then(data => function(data) {
-//         data.success.data.mapData = data.success.data.mapData.map(source => {
-//           source.ref.map_id = source.map_id
-//           return source
-//         })
-//         return data
-//       })
-//       .then(json => dispatch(recieveDictionaries(json)))
-//   }
-// }

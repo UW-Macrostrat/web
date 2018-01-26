@@ -92,6 +92,7 @@ const update = (state = {
         infoMarkerLng: action.lng.toFixed(4),
         infoMarkerLat: action.lat.toFixed(4),
         fetchingMapInfo: true,
+        infoDrawerOpen: true,
         mapInfoCancelToken: action.cancelToken
       })
     case RECEIVED_MAP_QUERY:

@@ -10,6 +10,7 @@ import ExpansionPanel, {
   ExpansionPanelDetails,
   ExpansionPanelSummary,
 } from 'material-ui/ExpansionPanel'
+import { CircularProgress } from 'material-ui/Progress'
 
 import CloseIcon from 'material-ui-icons/Close'
 import Button from 'material-ui/Button'
@@ -100,7 +101,11 @@ class InfoDrawer extends Component {
           }
         }}
       >
-      <div className="d">
+
+      <div className={this.props.fetchingMapInfo ? "infoDrawer-loading" : "hidden"}>
+        <CircularProgress size={50} />
+      </div>
+      <div className={this.props.fetchingMapInfo ? "hidden" : "d"}>
       <Grid container alignItems="center" alignContent="center" justify="center" classes={{ 'spacing-xs-16': 'infodrawer-grid' }}>
         <Grid item xs={12} classes={{ 'grid-xs-12': 'infodrawer-header-grid'}}>
           <div className="infodrawer-header">

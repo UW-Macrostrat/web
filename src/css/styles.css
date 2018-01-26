@@ -43,6 +43,12 @@ body {
 .active-layer {
   font-weight: bold;
 }
+.infoDrawer-loading {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .infodrawer-grid {
   /* width: 100% !important; */
   overflow-y: scroll !important;
