@@ -12,6 +12,11 @@ import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List'
 
 import Collapse from 'material-ui/transitions/Collapse'
 
+const categoryTitles = {
+  'lithology': 'Lithologies',
+  'interval': 'Time Intervals',
+  'place': 'Places (via Mapbox)'
+}
 class Searchbar extends Component {
   constructor(props) {
     super(props)
@@ -69,10 +74,8 @@ class Searchbar extends Component {
     })
 
     let searchResults = resultCategories.map((cat, i) => {
-      return <div>
-          <ListItem key={i}>
-            <ListItemText primary={cat}/>
-          </ListItem>
+      return <div key={`subheader-${i}`}>
+          <ListSubheader>{categoryTitles[cat]}</ListSubheader>
           {categoryResults[i]}
         </div>
     })
@@ -103,10 +106,13 @@ class Searchbar extends Component {
                 <div className="search-results">
                   <List className={this.state.searchTerm.length != 0 ? 'hidden' : ''} dense={true}>
                     <ListItem>
-                      <ListItemText primary="Available categories" />
+                      <ListItemText primary="Available categories:" />
                     </ListItem>
                     <ListItem>
                       <ListItemText inset primary="Time intervals" />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText inset primary="Lithologies" />
                     </ListItem>
                     <ListItem>
                       <ListItemText inset primary="Places" />

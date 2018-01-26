@@ -270,9 +270,9 @@ class InfoDrawer extends Component {
                     <Divider/>
                     {source.macrostrat.strat_names.map((name, i) => {
                       if (i != source.macrostrat.strat_names.length - 1) {
-                        return <span><a className="externalLink" href={"https://macrostrat.org/sift/#/strat_name/" + name.strat_name_id} key={i}>{ name.rank_name }</a>, </span>
+                        return <span key={i}><a className="externalLink" href={"https://macrostrat.org/sift/#/strat_name/" + name.strat_name_id} key={i}>{ name.rank_name }</a>, </span>
                       } else {
-                        return <span><a className="externalLink" href={"https://macrostrat.org/sift/#/strat_name/" + name.strat_name_id} key={i}>{ name.rank_name }</a></span>
+                        return <span key={i}><a className="externalLink" href={"https://macrostrat.org/sift/#/strat_name/" + name.strat_name_id} key={i}>{ name.rank_name }</a></span>
                       }
 
                     })}

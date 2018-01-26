@@ -121,6 +121,9 @@ export const queryMap = (lng, lat, z) => {
     })
     .then(json => addMapIdToRef(json.data))
     .then(json => dispatch(receivedMapQuery(json.success.data)))
+    .catch(error => {
+      // don't care 💁
+    })
   }
 }
 
@@ -144,6 +147,9 @@ export const doSearch = (term) => {
       responseType: 'json'
     })
       .then(json => dispatch(receivedSearchQuery(json.data.success.data)))
+      .catch(error => {
+        // don't care 💁
+      })
   }
 }
 
@@ -171,16 +177,33 @@ export function addFilter(theFilter) {
               filter: f
             })
           })
+          .catch(error => {
+            // don't care 💁
+          })
       }
       break
     case 'lithology_classes':
     case 'lithology_types':
-    case 'lithologies':
       return (dispatch) => {
         dispatch({
           type: ADD_FILTER,
           filter: theFilter
         })
+      }
+      break
+
+    case 'lithologies':
+      return (dispatch) => {
+          axios.get(`https://dev.macrostrat.org/api/v2/mobile/map_filter?lith_id=${theFilter.id}`, {
+            responseType: 'json'
+          })
+          .then(json => {
+            theFilter.map_ids = json.data
+            dispatch({
+              type: ADD_FILTER,
+              filter: theFilter
+            })
+          })
       }
       break
 

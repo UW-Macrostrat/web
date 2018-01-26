@@ -809,6 +809,12 @@ class Map extends Component {
             newFilter.push([ '==', `lith_type${i}`, filterToApply.name ])
           }
           break
+
+        case 'lithologies':
+          newFilter.push('any')
+          newFilter.push([ 'in', 'map_id', ...filterToApply.map_ids ])
+          break
+
       }
 
       let appliedFilters = this.map.getFilter('burwell_fill')

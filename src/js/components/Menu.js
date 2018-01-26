@@ -23,7 +23,7 @@ class Menu extends Component {
   render() {
     const { menuOpen, toggleMenu, toggleBedrock, mapHasBedrock } = this.props
     let exitTransition = {
-      exit: 1000
+      exit: 300
     }
     return (
       <Drawer
