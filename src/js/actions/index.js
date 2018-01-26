@@ -20,6 +20,7 @@ export const START_MAP_QUERY = 'START_MAP_QUERY'
 export const RECEIVED_MAP_QUERY = 'RECEIVED_MAP_QUERY'
 
 export const TOGGLE_BEDROCK = 'TOGGLE_BEDROCK'
+export const TOGGLE_SATELLITE = 'TOGGLE_SATELLITE'
 
 export const START_SEARCH_QUERY = 'START_SEARCH_QUERY'
 export const RECEIVED_SEARCH_QUERY = 'RECEIVED_SEARCH_QUERY'
@@ -62,6 +63,12 @@ export const toggleFilters = () => {
 export const toggleBedrock = () => {
   return {
     type: TOGGLE_BEDROCK
+  }
+}
+
+export const toggleSatellite = () => {
+  return {
+    type: TOGGLE_SATELLITE
   }
 }
 
@@ -218,4 +225,24 @@ export function removeFilter(theFilter) {
     type: REMOVE_FILTER,
     filter: theFilter
   }
+}
+
+export function startGeolocation() {
+
+}
+
+export function askForGeolocationPermissions() {
+
+}
+
+export function receivedGeolocationPermissions() {
+
+}
+
+export function goToUserLocation() {
+
+}
+
+export function wentToUserLocation() {
+
 }

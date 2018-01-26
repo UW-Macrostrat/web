@@ -21,7 +21,7 @@ class Menu extends Component {
   }
 
   render() {
-    const { menuOpen, toggleMenu, toggleBedrock, mapHasBedrock } = this.props
+    const { menuOpen, toggleMenu, toggleBedrock, mapHasBedrock, toggleSatellite, mapHasSatellite } = this.props
     let exitTransition = {
       exit: 300
     }
@@ -64,7 +64,7 @@ class Menu extends Component {
                 </ListItemIcon>
                 <ListItemText primary="Index"/>
               </ListItem>
-              <ListItem button>
+              <ListItem button onClick={toggleSatellite} style={{ backgroundColor: (mapHasSatellite ? '#eee' : 'transparent') }}>
                 <ListItemIcon>
                   <SatelliteIcon />
                 </ListItemIcon>

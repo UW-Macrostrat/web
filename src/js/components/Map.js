@@ -644,6 +644,8 @@ let config = {
 class Map extends Component {
   constructor(props) {
     super(props)
+    this.swapBasemap = this.swapBasemap.bind(this)
+    this.currentSources = []
   }
 
   componentDidMount() {
@@ -671,17 +673,6 @@ class Map extends Component {
 
       this.map.setFilter('burwell_fill', noFilter)
       this.map.setFilter('burwell_stroke', noFilter)
-      // let newFilter = ['any']
-      // for (let i = 1; i < 14; i++) {
-      //   newFilter.push([ '==', `lith_type${i}`, 'sedimentary' ])
-      // }
-      //
-      // this.map.setFilter('burwell_fill', newFilter)
-      // this.map.setFilter('burwell_stroke', newFilter)
-      // this.map.setFilter('burwell_fill', [
-      //   'all',
-      //   ['in', 'map_id', 2985493, 2960118]
-      // ])
     })
 
     this.map.on('movestart', () => {
@@ -718,6 +709,58 @@ class Map extends Component {
 
         this.map.setLayoutProperty('infoMarker', 'visibility', 'visible')
     })
+
+    // Fired after 'swapBasemap'
+    this.map.on('style.load', () => {
+      if (!this.currentSources.length) {
+        return
+      }
+
+      this.currentSources.forEach(source => {
+        this.map.addSource(source.id, source.config)
+        if (source.data) {
+          this.map.getSource(source.id).setData(source.data)
+        }
+      })
+
+      this.currentLayers.forEach(layer => {
+        this.map.addLayer(layer.layer)
+        if (layer.filters) {
+          this.map.setFilter(layer.layer.id, layer.filters)
+        }
+        if (layer.layer.source === 'burwell' && layer.layer.type === 'line' && layer.layer.id != 'burwell_stroke' && this.props.filters.length != 0) {
+          this.map.setLayoutProperty(layer.layer.id, 'visibility', 'none')
+        }
+      })
+    })
+  }
+
+  swapBasemap(toAdd) {
+    this.currentSources = []
+    this.currentLayers = []
+
+    Object.keys(config.sources).forEach(source => {
+      let isPresent = this.map.getSource(source)
+      if (isPresent) {
+        this.currentSources.push({
+          id: source,
+          config: config.sources[source],
+          data: isPresent._data || null
+        })
+      }
+    })
+
+    config.layers.forEach(layer => {
+      let isPresent = this.map.getLayer(layer.id)
+      if (isPresent) {
+        this.currentLayers.push({
+          layer: layer,
+          filters: this.map.getFilter(layer.id)
+        })
+      }
+    })
+
+    this.map.setStyle(toAdd)
   }
 
 
@@ -736,6 +779,12 @@ class Map extends Component {
           this.map.setLayoutProperty(layer.id, 'visibility', 'none')
         }
       })
+    } else if (nextProps.mapHasSatellite != this.props.mapHasSatellite) {
+      if (nextProps.mapHasSatellite) {
+        this.swapBasemap('mapbox://styles/jczaplewski/cj3bpe4xk00002rqndidf9dw4?optimize=true')
+      } else {
+        this.swapBasemap('mapbox://styles/jczaplewski/cj7qmi00vd4id2rp9d5cnbeqj?optimize=true')
+      }
     } else if (nextProps.filters.length != this.props.filters.length) {
       if (nextProps.filters.length === 0) {
         this.map.setFilter('burwell_fill', noFilter)

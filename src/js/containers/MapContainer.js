@@ -11,7 +11,8 @@ const mapStateToProps = (state) => {
     filters: state.update.filters,
     mapInfo: state.update.mapInfo,
     fetchingMapInfo: state.update.fetchingMapInfo,
-    mapHasBedrock: state.update.mapHasBedrock
+    mapHasBedrock: state.update.mapHasBedrock,
+    mapHasSatellite: state.update.mapHasSatellite,
   }
 }
 

@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux'
-import { PAGE_CLICK, REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK, CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER, REMOVE_FILTER } from '../actions'
+import { PAGE_CLICK, REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK, TOGGLE_SATELLITE, CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER, REMOVE_FILTER } from '../actions'
 
 const classColors = {
   'sedimentary': '#FF8C00',
@@ -27,6 +27,7 @@ const update = (state = {
   fetchingMapInfo: false,
   mapInfoCancelToken: null,
   mapHasBedrock: true,
+  mapHasSatellite: false,
 
   isSearching: false,
   searchCancelToken: null,
@@ -147,6 +148,10 @@ const update = (state = {
     case TOGGLE_BEDROCK:
       return Object.assign({}, state, {
         mapHasBedrock: !state.mapHasBedrock
+      })
+    case TOGGLE_SATELLITE:
+      return Object.assign({}, state, {
+        mapHasSatellite: !state.mapHasSatellite
       })
 
     // Handle searching
