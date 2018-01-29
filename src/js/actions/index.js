@@ -24,6 +24,7 @@ export const TOGGLE_SATELLITE = 'TOGGLE_SATELLITE'
 
 export const START_SEARCH_QUERY = 'START_SEARCH_QUERY'
 export const RECEIVED_SEARCH_QUERY = 'RECEIVED_SEARCH_QUERY'
+export const GO_TO_PLACE = 'GO_TO_PLACE'
 
 // Define action functions
 export const pageClick = () => {
@@ -169,6 +170,15 @@ export function receivedSearchQuery(data) {
 
 export function addFilter(theFilter) {
   switch(theFilter.type) {
+    case 'place':
+      return (dispatch) => {
+        dispatch({
+          type: GO_TO_PLACE,
+          place: theFilter
+        })
+      }
+      break
+
     case 'intervals':
       return (dispatch) => {
           axios.get(`https://dev.macrostrat.org/api/v2/defs/intervals?int_id=${theFilter.id}`, {

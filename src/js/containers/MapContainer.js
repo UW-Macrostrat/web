@@ -13,6 +13,7 @@ const mapStateToProps = (state) => {
     fetchingMapInfo: state.update.fetchingMapInfo,
     mapHasBedrock: state.update.mapHasBedrock,
     mapHasSatellite: state.update.mapHasSatellite,
+    mapCenter: state.update.mapCenter
   }
 }
 

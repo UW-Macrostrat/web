@@ -724,7 +724,7 @@ class Map extends Component {
       })
 
       this.currentLayers.forEach(layer => {
-        this.map.addLayer(layer.layer)
+        this.map.addLayer(layer.layer, 'airport-label')
         if (layer.filters) {
           this.map.setFilter(layer.layer.id, layer.filters)
         }
@@ -767,7 +767,23 @@ class Map extends Component {
   componentWillUpdate(nextProps) {
     // Watch the state of the application and adjust the map accordingly
     // Bedrock
-    if (nextProps.mapHasBedrock && !this.props.mapHasBedrock) {
+    if (JSON.stringify(nextProps.mapCenter) != JSON.stringify(this.props.mapCenter)) {
+      console.log('zoom to place', nextProps.mapCenter)
+      if (nextProps.mapCenter.type === 'place') {
+        let bounds = [
+          [ nextProps.mapCenter.place.bbox[0], nextProps.mapCenter.place.bbox[1] ],
+          [ nextProps.mapCenter.place.bbox[2], nextProps.mapCenter.place.bbox[3] ]
+        ]
+        this.map.fitBounds(bounds, {
+          easing: function easing(t) {
+            return t * (2 - t)
+          },
+          maxZoom: 16
+        })
+      } else {
+        // zoom to user location
+      }
+    } else if (nextProps.mapHasBedrock && !this.props.mapHasBedrock) {
       config.layers.forEach(layer => {
         if (layer.source === 'burwell') {
           this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
