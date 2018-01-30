@@ -21,7 +21,7 @@ class Menu extends Component {
   }
 
   render() {
-    const { menuOpen, toggleMenu, toggleBedrock, mapHasBedrock, toggleSatellite, mapHasSatellite } = this.props
+    const { menuOpen, toggleMenu, toggleBedrock, mapHasBedrock, toggleSatellite, mapHasSatellite, toggleAbout } = this.props
     let exitTransition = {
       exit: 300
     }
@@ -84,7 +84,7 @@ class Menu extends Component {
                 <ListItemText primary="My location"/>
               </ListItem>
               <Divider light/>
-              <ListItem button>
+              <ListItem button onClick={toggleAbout}>
                 <ListItemIcon>
                   <InfoOutlineIcon />
                 </ListItemIcon>
@@ -93,7 +93,6 @@ class Menu extends Component {
             </div>
           </List>
         </div>
-
     </Drawer>
     )
   }

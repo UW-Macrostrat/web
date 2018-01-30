@@ -8,6 +8,7 @@ export const RECIEVE_DATA = 'RECIEVE_DATA'
 export const REQUEST_DATA = 'REQUEST_DATA'
 
 export const TOGGLE_MENU = 'TOGGLE_MENU'
+export const TOGGLE_ABOUT = 'TOGGLE_ABOUT'
 export const TOGGLE_INFODRAWER = 'TOGGLE_INFODRAWER'
 export const EXPAND_INFODRAWER = 'EXPAND_INFODRAWER'
 export const CLOSE_INFODRAWER = 'CLOSE_INFODRAWER'
@@ -38,6 +39,11 @@ export const pageClick = () => {
 export const toggleMenu = () => {
   return {
     type: TOGGLE_MENU
+  }
+}
+export const toggleAbout = () => {
+  return {
+    type: TOGGLE_ABOUT
   }
 }
 export const toggleInfoDrawer = () => {
@@ -123,7 +129,7 @@ export const queryMap = (lng, lat, z) => {
 
     dispatch(startMapQuery({lng: lng, lat: lat}, source))
 
-    return axios.get(`https://dev.macrostrat.org/api/v2/mobile/map_query_v2?lng=${lng.toFixed(5)}&lat=${lat.toFixed(5)}&z=${z.toFixed(0)}`, {
+    return axios.get(`https://dev.macrostrat.org/api/v2/mobile/map_query_v2?lng=${lng.toFixed(5)}&lat=${lat.toFixed(5)}&z=${parseInt(z)}`, {
       cancelToken: source.token,
       responseType: 'json'
     })
@@ -150,7 +156,7 @@ export const doSearch = (term) => {
 
     dispatch(startSearchQuery(term, source))
 
-    return axios.get(`https://dev.macrostrat.org/api/v2/mobile/autocomplete?include=interval,lithology&query=${term}`, {
+    return axios.get(`https://dev.macrostrat.org/api/v2/mobile/autocomplete?include=interval,lithology,strat_name&query=${term}`, {
       cancelToken: source.token,
       responseType: 'json'
     })
@@ -176,6 +182,35 @@ export function addFilter(theFilter) {
           type: GO_TO_PLACE,
           place: theFilter
         })
+      }
+      break
+
+    case 'strat_name_concepts':
+      return (dispatch) => {
+          axios.get(`https://dev.macrostrat.org/api/v2/mobile/map_filter?concept_id=${theFilter.id}`, {
+            responseType: 'json'
+          })
+          .then(json => {
+            theFilter.legend_ids = json.data
+            dispatch({
+              type: ADD_FILTER,
+              filter: theFilter
+            })
+          })
+      }
+      break
+    case 'strat_name_orphans':
+      return (dispatch) => {
+          axios.get(`https://dev.macrostrat.org/api/v2/mobile/map_filter?strat_name_id=${theFilter.id}`, {
+            responseType: 'json'
+          })
+          .then(json => {
+            theFilter.legend_id = json.data
+            dispatch({
+              type: ADD_FILTER,
+              filter: theFilter
+            })
+          })
       }
       break
 
@@ -215,7 +250,7 @@ export function addFilter(theFilter) {
             responseType: 'json'
           })
           .then(json => {
-            theFilter.map_ids = json.data
+            theFilter.legend_ids = json.data
             dispatch({
               type: ADD_FILTER,
               filter: theFilter

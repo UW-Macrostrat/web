@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux'
-import { PAGE_CLICK, REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK, TOGGLE_SATELLITE, CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER, REMOVE_FILTER, GO_TO_PLACE } from '../actions'
+import { PAGE_CLICK, REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK, TOGGLE_SATELLITE, CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER, REMOVE_FILTER, GO_TO_PLACE, TOGGLE_ABOUT } from '../actions'
 
 const classColors = {
   'sedimentary': '#FF8C00',
@@ -18,6 +18,7 @@ const classColors = {
 
 const update = (state = {
   menuOpen: false,
+  aboutOpen: false,
   infoDrawerOpen: false,
   infoDrawerExpanded: false,
   isFetching: false,
@@ -46,6 +47,10 @@ const update = (state = {
     case TOGGLE_MENU:
       return Object.assign({}, state, {
         menuOpen: !state.menuOpen
+      })
+    case TOGGLE_ABOUT:
+      return Object.assign({}, state, {
+        aboutOpen: !state.aboutOpen
       })
     case CLOSE_INFODRAWER:
       return Object.assign({}, state, {

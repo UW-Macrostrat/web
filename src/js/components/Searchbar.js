@@ -15,7 +15,8 @@ import Collapse from 'material-ui/transitions/Collapse'
 const categoryTitles = {
   'lithology': 'Lithologies',
   'interval': 'Time Intervals',
-  'place': 'Places (via Mapbox)'
+  'place': 'Places (via Mapbox)',
+  'strat_name': 'Stratigraphic Names',
 }
 class Searchbar extends Component {
   constructor(props) {
@@ -113,6 +114,9 @@ class Searchbar extends Component {
                     </ListItem>
                     <ListItem>
                       <ListItemText inset primary="Lithologies" />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemText inset primary="Stratigraphic Names" />
                     </ListItem>
                     <ListItem>
                       <ListItemText inset primary="Places" />

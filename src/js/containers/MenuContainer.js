@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import { toggleMenu, toggleBedrock, toggleSatellite } from '../actions'
+import { toggleMenu, toggleBedrock, toggleSatellite, toggleAbout } from '../actions'
 import Menu from '../components/Menu'
 
 const mapStateToProps = (state) => {
@@ -20,6 +20,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     toggleSatellite: () => {
       dispatch(toggleSatellite())
+    },
+    toggleAbout: () => {
+      dispatch(toggleAbout())
     }
   }
 }

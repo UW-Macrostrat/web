@@ -14,8 +14,8 @@ let config = {
     "sources": {
         "burwell": {
             "type": "vector",
-              "tiles": ["https://devtiles.macrostrat.org/carto-slim/{z}/{x}/{y}.mvt"],
-              "tileSize": 512
+            "tiles": ["https://devtiles.macrostrat.org/carto-slim/{z}/{x}/{y}.mvt"],
+            "tileSize": 512
         },
         "info_marker": {
           type: "geojson",
@@ -23,6 +23,32 @@ let config = {
             type: "FeatureCollection",
             features: []
           }
+        },
+        "dem": {
+          "type": "raster-dem",
+          "attribution": "<a href=\"https://www.mapbox.com/about/maps/\" target=\"_blank\">&copy; Mapbox</a>",
+          "autoscale": true,
+          "bounds": [-180,-85,180,85],
+          "cacheControl": "max-age=43200,s-maxage=604800",
+          "center": [0,0,3],
+          "created": 1402603200000,
+          "description": "pngraw file extension must be used. height = -10000 + ((R * 256 * 256 + G * 256 + B) * 0.1)",
+          "filesize": 0,
+          "fillzoom": 14,
+          "id": "mapbox.terrain-rgb",
+          "mapbox_logo": true,
+          "maxzoom": 15,
+          "minzoom": 0,
+          "modified": 1446150592060,
+          "name": "Terrain (RGB-encoded dem)",
+          "private": false,
+          "scheme": "xyz",
+          "tilejson": "2.2.0",
+          "tiles": [
+            "https://a.tiles.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiamN6YXBsZXdza2kiLCJhIjoiWnQxSC01USJ9.oleZzfREJUKAK1TMeCD0bg",
+            "https://b.tiles.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiamN6YXBsZXdza2kiLCJhIjoiWnQxSC01USJ9.oleZzfREJUKAK1TMeCD0bg"
+          ],
+          "webpage": "https://a.tiles.mapbox.com/v4/mapbox.terrain-rgb/page.html?access_token=pk.eyJ1IjoiamN6YXBsZXdza2kiLCJhIjoiWnQxSC01USJ9.oleZzfREJUKAK1TMeCD0bg"
         }
     },
     "layers": [
@@ -673,6 +699,7 @@ class Map extends Component {
 
       this.map.setFilter('burwell_fill', noFilter)
       this.map.setFilter('burwell_stroke', noFilter)
+
     })
 
     this.map.on('movestart', () => {
@@ -768,7 +795,6 @@ class Map extends Component {
     // Watch the state of the application and adjust the map accordingly
     // Bedrock
     if (JSON.stringify(nextProps.mapCenter) != JSON.stringify(this.props.mapCenter)) {
-      console.log('zoom to place', nextProps.mapCenter)
       if (nextProps.mapCenter.type === 'place') {
         let bounds = [
           [ nextProps.mapCenter.place.bbox[0], nextProps.mapCenter.place.bbox[1] ],
@@ -876,8 +902,10 @@ class Map extends Component {
           break
 
         case 'lithologies':
+        case 'strat_name_orphans':
+        case 'strat_name_concepts':
           newFilter.push('any')
-          newFilter.push([ 'in', 'map_id', ...filterToApply.map_ids ])
+          newFilter.push([ 'in', 'legend_id', ...filterToApply.legend_ids ])
           break
 
       }
