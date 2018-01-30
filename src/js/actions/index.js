@@ -1,6 +1,7 @@
 import fetch from 'isomorphic-fetch'
 import axios from 'axios'
 import { addCommas } from '../utils'
+import { SETTINGS } from '../Settings'
 
 // Define constants to be passed with actions
 export const PAGE_CLICK = 'PAGE_CLICK'
@@ -129,7 +130,7 @@ export const queryMap = (lng, lat, z) => {
 
     dispatch(startMapQuery({lng: lng, lat: lat}, source))
 
-    return axios.get(`https://dev.macrostrat.org/api/v2/mobile/map_query_v2?lng=${lng.toFixed(5)}&lat=${lat.toFixed(5)}&z=${parseInt(z)}`, {
+    return axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/map_query_v2?lng=${lng.toFixed(5)}&lat=${lat.toFixed(5)}&z=${parseInt(z)}`, {
       cancelToken: source.token,
       responseType: 'json'
     })
@@ -156,7 +157,7 @@ export const doSearch = (term) => {
 
     dispatch(startSearchQuery(term, source))
 
-    return axios.get(`https://dev.macrostrat.org/api/v2/mobile/autocomplete?include=interval,lithology,strat_name&query=${term}`, {
+    return axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/autocomplete?include=interval,lithology,strat_name&query=${term}`, {
       cancelToken: source.token,
       responseType: 'json'
     })
@@ -187,7 +188,7 @@ export function addFilter(theFilter) {
 
     case 'strat_name_concepts':
       return (dispatch) => {
-          axios.get(`https://dev.macrostrat.org/api/v2/mobile/map_filter?concept_id=${theFilter.id}`, {
+          axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/map_filter?concept_id=${theFilter.id}`, {
             responseType: 'json'
           })
           .then(json => {
@@ -201,7 +202,7 @@ export function addFilter(theFilter) {
       break
     case 'strat_name_orphans':
       return (dispatch) => {
-          axios.get(`https://dev.macrostrat.org/api/v2/mobile/map_filter?strat_name_id=${theFilter.id}`, {
+          axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/map_filter?strat_name_id=${theFilter.id}`, {
             responseType: 'json'
           })
           .then(json => {
@@ -216,7 +217,7 @@ export function addFilter(theFilter) {
 
     case 'intervals':
       return (dispatch) => {
-          axios.get(`https://dev.macrostrat.org/api/v2/defs/intervals?int_id=${theFilter.id}`, {
+          axios.get(`${SETTINGS.apiDomain}/api/v2/defs/intervals?int_id=${theFilter.id}`, {
             responseType: 'json'
           })
           .then(json => {
@@ -246,7 +247,7 @@ export function addFilter(theFilter) {
 
     case 'lithologies':
       return (dispatch) => {
-          axios.get(`https://dev.macrostrat.org/api/v2/mobile/map_filter?lith_id=${theFilter.id}`, {
+          axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/map_filter?lith_id=${theFilter.id}`, {
             responseType: 'json'
           })
           .then(json => {
