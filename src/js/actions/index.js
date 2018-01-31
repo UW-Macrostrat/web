@@ -17,12 +17,15 @@ export const CLOSE_INFODRAWER = 'CLOSE_INFODRAWER'
 export const TOGGLE_FILTERS = 'TOGGLE_FILTERS'
 export const ADD_FILTER = 'ADD_FILTER'
 export const REMOVE_FILTER = 'REMOVE_FILTER'
+export const UPDATE_COLUMN_FILTERS = 'UPDATE_COLUMN_FILTERS'
 
 export const START_MAP_QUERY = 'START_MAP_QUERY'
 export const RECEIVED_MAP_QUERY = 'RECEIVED_MAP_QUERY'
 
 export const TOGGLE_BEDROCK = 'TOGGLE_BEDROCK'
 export const TOGGLE_SATELLITE = 'TOGGLE_SATELLITE'
+export const TOGGLE_COLUMNS = 'TOGGLE_COLUMNS'
+export const TOGGLE_INDEXMAP = 'TOGGLE_INDEXMAP'
 
 export const START_SEARCH_QUERY = 'START_SEARCH_QUERY'
 export const RECEIVED_SEARCH_QUERY = 'RECEIVED_SEARCH_QUERY'
@@ -77,6 +80,16 @@ export const toggleBedrock = () => {
 export const toggleSatellite = () => {
   return {
     type: TOGGLE_SATELLITE
+  }
+}
+export const toggleColumns = () => {
+  return {
+    type: TOGGLE_COLUMNS
+  }
+}
+export const toggleIndexMap = () => {
+  return {
+    type: TOGGLE_INDEXMAP
   }
 }
 
@@ -176,77 +189,73 @@ export function receivedSearchQuery(data) {
 }
 
 export function addFilter(theFilter) {
-  switch(theFilter.type) {
-    case 'place':
-      return (dispatch) => {
-        dispatch({
-          type: GO_TO_PLACE,
-          place: theFilter
-        })
-      }
-      break
+  return (dispatch, getState) => {
+      let { mapHasColumns, filters } = getState().update
 
-    case 'strat_name_concepts':
-      return (dispatch) => {
-          axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/map_filter?concept_id=${theFilter.id}`, {
-            responseType: 'json'
-          })
-          .then(json => {
-            theFilter.legend_ids = json.data
+      switch(theFilter.type) {
+        case 'place':
             dispatch({
-              type: ADD_FILTER,
-              filter: theFilter
+              type: GO_TO_PLACE,
+              place: theFilter
             })
-          })
-      }
-      break
-    case 'strat_name_orphans':
-      return (dispatch) => {
-          axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/map_filter?strat_name_id=${theFilter.id}`, {
-            responseType: 'json'
-          })
-          .then(json => {
-            theFilter.legend_id = json.data
-            dispatch({
-              type: ADD_FILTER,
-              filter: theFilter
-            })
-          })
-      }
-      break
+            break
 
-    case 'intervals':
-      return (dispatch) => {
-          axios.get(`${SETTINGS.apiDomain}/api/v2/defs/intervals?int_id=${theFilter.id}`, {
-            responseType: 'json'
-          })
-          .then(json => {
-            let f = json.data.success.data[0]
-            f.name = theFilter.name
-            f.type = theFilter.type
-            f.category = theFilter.category
-            dispatch({
-              type: ADD_FILTER,
-              filter: f
+        case 'strat_name_concepts':
+            axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/map_filter?concept_id=${theFilter.id}`, {
+              responseType: 'json'
             })
-          })
-          .catch(error => {
-            // don't care 💁
-          })
-      }
-      break
-    case 'lithology_classes':
-    case 'lithology_types':
-      return (dispatch) => {
-        dispatch({
-          type: ADD_FILTER,
-          filter: theFilter
-        })
-      }
-      break
+            .then(json => {
+              theFilter.legend_ids = json.data
+              dispatch({
+                type: ADD_FILTER,
+                filter: theFilter
+              })
+            })
+          break
 
-    case 'lithologies':
-      return (dispatch) => {
+        case 'strat_name_orphans':
+            axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/map_filter?strat_name_id=${theFilter.id}`, {
+              responseType: 'json'
+            })
+            .then(json => {
+              theFilter.legend_id = json.data
+              dispatch({
+                type: ADD_FILTER,
+                filter: theFilter
+              })
+            })
+          break
+
+        case 'intervals':
+            axios.get(`${SETTINGS.apiDomain}/api/v2/defs/intervals?int_id=${theFilter.id}`, {
+              responseType: 'json'
+            })
+            .then(json => {
+              let f = json.data.success.data[0]
+              f.name = theFilter.name
+              f.type = theFilter.type
+              f.category = theFilter.category
+              f.id = theFilter.id
+
+              dispatch({
+                type: ADD_FILTER,
+                filter: f
+              })
+            })
+            .catch(error => {
+              // don't care 💁
+            })
+            break
+
+        case 'lithology_classes':
+        case 'lithology_types':
+          dispatch({
+            type: ADD_FILTER,
+            filter: theFilter
+          })
+          break
+
+        case 'lithologies':
           axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/map_filter?lith_id=${theFilter.id}`, {
             responseType: 'json'
           })
@@ -257,13 +266,82 @@ export function addFilter(theFilter) {
               filter: theFilter
             })
           })
+          break
+
+        default:
+          console.log('i do not support that filter type', theFilter.type)
       }
-      break
 
-    default:
-      console.log('i do not support that filter type', theFilter.type)
+    if (mapHasColumns) {
+      dispatch(getFilteredColumns(filters.concat([theFilter])))
+    }
   }
+}
 
+export function getFilteredColumns(providedFilters) {
+  return (dispatch, getState) => {
+    let { mapHasColumns, filters } = getState().update
+
+    if (!providedFilters) {
+      providedFilters = filters
+    }
+
+    let query = {}
+    providedFilters.forEach(f => {
+      if (f.type === 'intervals') {
+        if (query['int_id']) {
+          query['int_id'].push(f.id)
+        } else {
+          query['int_id'] = [f.id]
+        }
+      } else if (f.type === 'strat_name_concepts') {
+        if (query['strat_name_concept_id']) {
+          query['strat_name_concept_id'].push(f.id)
+        } else {
+          query['strat_name_concept_id'] = [f.id]
+        }
+      } else if (f.type === 'strat_name_orphans') {
+        if (query['strat_name_id']) {
+          query['strat_name_id'].push(f.id)
+        } else {
+          query['strat_name_id'] = [f.id]
+        }
+      } else if (f.type === 'lithology_classes') {
+        if (query['lith_class']) {
+          query['lith_class'].push(f.name)
+        } else {
+          query['lith_class'] = [f.name]
+        }
+      } else if (f.type === 'lithology_types') {
+        if (query['lith_type']) {
+          query['lith_type'].push(f.name)
+        } else {
+          query['lith_type'] = [f.name]
+        }
+      } else if (f.type === 'lithologies') {
+        if (query['lith_id']) {
+          query['lith_id'].push(f.id)
+        } else {
+          query['lith_id'] = [f.id]
+        }
+      }
+    })
+
+    let queryString = Object.keys(query).map(k => {
+      return `${k}=${query[k].join(',')}`
+    }).join('&')
+
+    axios.get(`${SETTINGS.apiDomain}/api/v2/columns?format=geojson_bare&${queryString}`, {
+      responseType: 'json'
+    })
+    .then(json => {
+
+      dispatch({
+        type: UPDATE_COLUMN_FILTERS,
+        columns: json.data
+      })
+    })
+  }
 }
 
 export function removeFilter(theFilter) {
@@ -272,6 +350,7 @@ export function removeFilter(theFilter) {
     filter: theFilter
   }
 }
+
 
 export function startGeolocation() {
 

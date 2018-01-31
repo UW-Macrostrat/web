@@ -21,7 +21,7 @@ class Menu extends Component {
   }
 
   render() {
-    const { menuOpen, toggleMenu, toggleBedrock, mapHasBedrock, toggleSatellite, mapHasSatellite, toggleAbout } = this.props
+    const { menuOpen, toggleMenu, toggleBedrock, mapHasBedrock, toggleSatellite, mapHasSatellite, toggleColumns, mapHasColumns, toggleIndexMap, mapHasIndexMap, toggleAbout } = this.props
     let exitTransition = {
       exit: 300
     }
@@ -52,13 +52,13 @@ class Menu extends Component {
                 </ListItemIcon>
                 <ListItemText primary="Bedrock"/>
               </ListItem>
-              <ListItem button>
+              <ListItem button onClick={toggleColumns} style={{ backgroundColor: (mapHasColumns ? '#eee' : 'transparent') }}>
                 <ListItemIcon>
                   <ColumnIcon size={25} />
                 </ListItemIcon>
                 <ListItemText primary="Columns"/>
               </ListItem>
-              <ListItem button>
+              <ListItem button onClick={toggleIndexMap} style={{ backgroundColor: (mapHasIndexMap ? '#eee' : 'transparent') }}>
                 <ListItemIcon>
                   <IndexMapIcon size={25} />
                 </ListItemIcon>

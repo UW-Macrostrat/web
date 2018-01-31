@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux'
-import { PAGE_CLICK, REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK, TOGGLE_SATELLITE, CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER, REMOVE_FILTER, GO_TO_PLACE, TOGGLE_ABOUT } from '../actions'
+import { PAGE_CLICK, REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK, TOGGLE_SATELLITE, TOGGLE_COLUMNS, TOGGLE_INDEXMAP, CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER, REMOVE_FILTER, GO_TO_PLACE, TOGGLE_ABOUT, UPDATE_COLUMN_FILTERS } from '../actions'
 
 const classColors = {
   'sedimentary': '#FF8C00',
@@ -29,6 +29,8 @@ const update = (state = {
   mapInfoCancelToken: null,
   mapHasBedrock: true,
   mapHasSatellite: false,
+  mapHasColumns: false,
+  mapHasIndexMap: false,
   mapCenter: {
     type: null
   },
@@ -38,6 +40,7 @@ const update = (state = {
 
   filtersOpen: false,
   filters: [],
+  filteredColumns: {},
 
   data: [],
   msg: '',
@@ -160,6 +163,14 @@ const update = (state = {
       return Object.assign({}, state, {
         mapHasSatellite: !state.mapHasSatellite
       })
+    case TOGGLE_COLUMNS:
+      return Object.assign({}, state, {
+        mapHasColumns: !state.mapHasColumns
+      })
+    case TOGGLE_INDEXMAP:
+      return Object.assign({}, state, {
+        mapHasIndexMap: !state.mapHasIndexMap
+      })
 
     // Handle searching
     case START_SEARCH_QUERY:
@@ -184,6 +195,11 @@ const update = (state = {
           type: 'place',
           place: action.place
         }
+      })
+
+    case UPDATE_COLUMN_FILTERS:
+      return Object.assign({}, state, {
+        filteredColumns: action.columns
       })
 
     case PAGE_CLICK:

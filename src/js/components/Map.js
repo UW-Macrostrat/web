@@ -41,7 +41,11 @@ class Map extends Component {
       })
 
       mapStyle.layers.forEach(layer => {
-        this.map.addLayer(layer, 'airport-label')
+        if (layer.source === 'indexMap' || layer.source === 'columns') {
+          this.map.addLayer(layer)
+        } else {
+          this.map.addLayer(layer, 'airport-label')
+        }
       })
 
       this.map.setFilter('burwell_fill', noFilter)
@@ -57,7 +61,7 @@ class Map extends Component {
     this.map.on('click', (event) => {
       this.props.queryMap(event.lngLat.lng, event.lngLat.lat, this.map.getZoom())
 
-      let features = this.map.queryRenderedFeatures(event.point, { layers: ['burwell_fill']})
+      let features = this.map.queryRenderedFeatures(event.point, { layers: ['burwell_fill', 'column_fill', 'indexMap_fill']})
       console.log(features)
 
       let xOffset = (window.innerWidth > 850) ? -((window.innerWidth*0.3333)/2) : 0
@@ -174,6 +178,60 @@ class Map extends Component {
       } else {
         this.swapBasemap(SETTINGS.baseMapURL)
       }
+    } else if (nextProps.mapHasColumns != this.props.mapHasColumns) {
+      if (nextProps.mapHasColumns) {
+        if (this.props.filters.length) {
+          this.props.getFilteredColumns()
+          mapStyle.layers.forEach(layer => {
+            if (layer.source === 'filteredColumns') {
+              this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
+            }
+          })
+
+        } else {
+          mapStyle.layers.forEach(layer => {
+            if (layer.source === 'columns') {
+              this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
+            }
+          })
+        }
+      } else {
+        mapStyle.layers.forEach(layer => {
+          if (layer.source === 'columns' || layer.source === 'filteredColumns') {
+            this.map.setLayoutProperty(layer.id, 'visibility', 'none')
+          }
+        })
+      }
+    } else if (JSON.stringify(nextProps.filteredColumns) != JSON.stringify(this.props.filteredColumns)) {
+      this.map.getSource('filteredColumns').setData(nextProps.filteredColumns)
+
+      if (this.map.getSource('columns')) {
+        mapStyle.layers.forEach(layer => {
+          if (layer.source === 'columns') {
+            this.map.setLayoutProperty(layer.id, 'visibility', 'none')
+          }
+        })
+        mapStyle.layers.forEach(layer => {
+          if (layer.source === 'filteredColumns') {
+            this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
+          }
+        })
+      }
+
+    } else if (nextProps.mapHasIndexMap != this.props.mapHasIndexMap) {
+      if (nextProps.mapHasIndexMap) {
+        mapStyle.layers.forEach(layer => {
+          if (layer.source === 'indexMap') {
+            this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
+          }
+        })
+      } else {
+        mapStyle.layers.forEach(layer => {
+          if (layer.source === 'indexMap') {
+            this.map.setLayoutProperty(layer.id, 'visibility', 'none')
+          }
+        })
+      }
     } else if (nextProps.filters.length != this.props.filters.length) {
       if (nextProps.filters.length === 0) {
         this.map.setFilter('burwell_fill', noFilter)
@@ -184,6 +242,20 @@ class Map extends Component {
             this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
           }
         })
+
+        // Remove filtered columns and add unfiltered columns
+        if (this.props.mapHasColumns) {
+          mapStyle.layers.forEach(layer => {
+            if (layer.source === 'columns') {
+              this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
+            }
+          })
+          mapStyle.layers.forEach(layer => {
+            if (layer.source === 'filteredColumns') {
+              this.map.setLayoutProperty(layer.id, 'visibility', 'none')
+            }
+          })
+        }
         return
       }
       let existingFilters = new Set(this.props.filters.map(f => { return `${f.category}|${f.type}|${f.name}` }))
@@ -192,10 +264,6 @@ class Map extends Component {
       let incoming = [...new Set([...newFilters].filter(f => !existingFilters.has(f)))]
       let outgoing = [...new Set([...existingFilters].filter(f => !newFilters.has(f)))]
 
-      if (incoming.length === 0) {
-        console.log('no new filters to apply')
-
-      }
       // If a filter was removed...
       if (outgoing.length) {
         // Find its index in the existing filters
