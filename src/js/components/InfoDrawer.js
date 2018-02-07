@@ -12,6 +12,7 @@ import ExpansionPanel, {
 } from 'material-ui/ExpansionPanel'
 import { CircularProgress } from 'material-ui/Progress'
 import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Table'
+import Card, { CardContent } from 'material-ui/Card'
 
 import CloseIcon from 'material-ui-icons/Close'
 import Button from 'material-ui/Button'
@@ -47,6 +48,11 @@ class InfoDrawer extends Component {
         this.props.getColumn()
       }
     }
+    this.openGdd = (event, expanded) => {
+      if (this.props.gddInfo.length === 0) {
+        this.props.getGdd()
+      }
+    }
   }
 
   normalizeLng(lng) {
@@ -56,7 +62,7 @@ class InfoDrawer extends Component {
 
   render() {
     const { infoDrawerOpen, toggleInfoDrawer, expandInfoDrawer, infoDrawerExpanded } = this.props
-    let { mapInfo } = this.props
+    let { mapInfo, gddInfo } = this.props
     const { expanded } = this.state
     let expansionPanelClasses = {
       'content': 'expansion-panel',
@@ -488,6 +494,42 @@ class InfoDrawer extends Component {
                 </ExpansionPanel>
                 : ''
               }
+
+              <Divider/>
+              <ExpansionPanel classes={{ 'root': 'regional-panel'}} onChange={this.openGdd}>
+                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} classes={expansionPanelClasses}>
+                  <Typography className="expansion-summary-title">Primary Literature <span className='via-gdd'>via GeoDeepDive</span> </Typography>
+                </ExpansionPanelSummary>
+                <ExpansionPanelDetails classes={expansionPanelDetailClasses}>
+                  {gddInfo.length ?
+                    gddInfo.map((article, ai) => {
+                      return (
+                        <div className='article'>
+                          <h3 className='article-title'>
+                            <a href={article.url} target="_blank">
+                              {article.title}. 
+                              <span className="sub-title">
+                                {article.authors.map(d => { return d.name}).join(', ')}. {article.coverdate}. {article.journal}. {article.publisher}.
+                              </span>
+                            </a>
+                          </h3>
+                          <div className="quotes">
+                            {article.snippets.map((snippet, si) => {
+                               let text = snippet.replace(/<em class="hl">/g, "@@@")
+                                  .replace(/<\/em>/g, "***")
+                                  .replace(/(?:\r\n|\r|\n|\<|\>)/g, ' ')
+                                  .trim()
+                                  .replace(/@@@/g, '<em class="hl">')
+                                  .replace(/\*\*\*/g, '</em>');
+                              return <p className='gdd-snippet' key={si} dangerouslySetInnerHTML={{__html: '...' + text + '...'}}></p>
+                            })}
+                          </div>
+                        </div>
+                      )
+                    })
+                  : ''}
+                </ExpansionPanelDetails>
+              </ExpansionPanel>
 
 
             </div>

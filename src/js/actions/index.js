@@ -25,6 +25,9 @@ export const RECEIVED_MAP_QUERY = 'RECEIVED_MAP_QUERY'
 export const START_COLUMN_QUERY = 'START_COLUMN_QUERY'
 export const RECEIVED_COLUMN_QUERY = 'RECEIVED_COLUMN_QUERY'
 
+export const START_GDD_QUERY = 'START_GDD_QUERY'
+export const RECEIVED_GDD_QUERY = 'RECEIVED_GDD_QUERY'
+
 export const TOGGLE_BEDROCK = 'TOGGLE_BEDROCK'
 export const TOGGLE_SATELLITE = 'TOGGLE_SATELLITE'
 export const TOGGLE_COLUMNS = 'TOGGLE_COLUMNS'
@@ -364,7 +367,7 @@ export function startColumnQuery(cancelToken) {
 export const getColumn = () => {
   return (dispatch, getState) => {
     let { infoMarkerLng, infoMarkerLat } = getState().update
-    
+
     let CancelToken = axios.CancelToken
     let source = CancelToken.source()
 
@@ -387,6 +390,47 @@ export function receivedColumnQuery(data) {
     data: data
   }
 }
+
+
+export function startGddQuery(cancelToken) {
+  return {
+    type: START_GDD_QUERY,
+    cancelToken: cancelToken
+  }
+}
+export const getGdd = () => {
+  return (dispatch, getState) => {
+    let { mapInfo } = getState().update
+    // Cancel if there is nothing to search for
+    if (!mapInfo || !mapInfo.mapData.length || Object.keys(mapInfo.mapData[0].macrostrat).length === 0) {
+      return dispatch(receivedGddQuery([]))
+    }
+    let stratNames = mapInfo.mapData[0].macrostrat.strat_names.map(d => { return d.rank_name }).join(',')
+
+    let CancelToken = axios.CancelToken
+    let source = CancelToken.source()
+
+    dispatch(startGddQuery(source))
+
+    return axios.get(`${SETTINGS.gddDomain}/api/v1/excerpts?term=${stratNames}`, {
+      cancelToken: source.token,
+      responseType: 'json'
+    })
+      .then(json => dispatch(receivedGddQuery(json.data.success.data)))
+      .catch(error => {
+        // don't care 💁
+        dispatch(receivedGddQuery([]))
+      })
+  }
+}
+
+export function receivedGddQuery(data) {
+  return {
+    type: RECEIVED_GDD_QUERY,
+    data: data
+  }
+}
+
 
 
 export function startGeolocation() {

@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import { toggleInfoDrawer, expandInfoDrawer, getColumn } from '../actions'
+import { toggleInfoDrawer, expandInfoDrawer, getColumn, getGdd } from '../actions'
 import InfoDrawer from '../components/InfoDrawer'
 
 const mapStateToProps = (state) => {
@@ -9,9 +9,11 @@ const mapStateToProps = (state) => {
     mapInfo: state.update.mapInfo,
     fetchingMapInfo: state.update.fetchingMapInfo,
     fetchingColumnInfo: state.update.fectchingColumnInfo,
+    fetchingGdd: state.update.fetchingGdd,
     columnInfo: state.update.columnInfo,
     infoMarkerLng: state.update.infoMarkerLng,
-    infoMarkerLat: state.update.infoMarkerLat
+    infoMarkerLat: state.update.infoMarkerLat,
+    gddInfo: state.update.gddInfo
   }
 }
 
@@ -25,6 +27,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     getColumn: (lng, lat) => {
       dispatch(getColumn(lng, lat))
+    },
+    getGdd: () => {
+      dispatch(getGdd())
     }
   }
 }

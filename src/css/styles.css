@@ -213,7 +213,40 @@ body {
   font-weight: 700;
   text-decoration: none;
 }
-
+.via-gdd {
+  font-size: 85%;
+  font-weight: 400;
+}
+.article {
+  padding-bottom: 15px;
+}
+.article-title, .article-title > a {
+  font-size: 1em;
+  font-weight: 700;
+  color: #000000;
+  text-decoration: none;
+}
+.sub-title {
+  font-size: 80%;
+}
+.quotes {
+  margin-top: -10px;
+}
+.gdd-snippet {
+  font-size: 90%;
+}
+.hl {
+  font-style: normal;
+  background-color: #24DDB4;
+  font-weight: bold;
+  padding: 2px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-radius: 3px;
+}
+.quotes {
+  font-size: 90%;
+}
 #filter-title {
   padding-bottom: 0 !important;
   margin-bottom: -12px;
@@ -235,6 +268,16 @@ body {
 .region-description {
   margin-top: -5px;
   margin-bottom: 10px;
+}
+.column-container {
+  width: 150px;
+  height: 80vh;
+  display: flex;
+  flex-flow: column wrap;
+}
+.column-unit {
+  width: 25vh;
+  float: left;
 }
 @media(max-width: 850px) {
   .infoDrawer {

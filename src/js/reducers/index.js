@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux'
-import { PAGE_CLICK, REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK, TOGGLE_SATELLITE, TOGGLE_COLUMNS, TOGGLE_INDEXMAP, CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER, REMOVE_FILTER, GO_TO_PLACE, TOGGLE_ABOUT, UPDATE_COLUMN_FILTERS, START_COLUMN_QUERY, RECEIVED_COLUMN_QUERY } from '../actions'
+import { PAGE_CLICK, REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK, TOGGLE_SATELLITE, TOGGLE_COLUMNS, TOGGLE_INDEXMAP, CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER, REMOVE_FILTER, GO_TO_PLACE, TOGGLE_ABOUT, UPDATE_COLUMN_FILTERS, START_COLUMN_QUERY, RECEIVED_COLUMN_QUERY, START_GDD_QUERY, RECEIVED_GDD_QUERY } from '../actions'
 import { sum, timescale } from '../utils'
 
 const classColors = {
@@ -23,16 +23,23 @@ const update = (state = {
   infoDrawerOpen: false,
   infoDrawerExpanded: false,
 
+  // Events and tokens for xhr
   isFetching: false,
   fetchingMapInfo: false,
   mapInfoCancelToken: null,
   fetchingColumnInfo: false,
   columnInfoCancelToken: null,
+  fetchingGdd: false,
+  gddCancelToken: null,
+  isSearching: false,
+  searchCancelToken: null,
 
   infoMarkerLng: -999,
   infoMarkerLat: -999,
   mapInfo: [],
   columnInfo: {},
+  gddInfo: [],
+  searchResults: [],
 
   mapHasBedrock: true,
   mapHasSatellite: false,
@@ -41,9 +48,6 @@ const update = (state = {
   mapCenter: {
     type: null
   },
-  isSearching: false,
-  searchCancelToken: null,
-  searchResults: [],
 
   filtersOpen: false,
   filters: [],
@@ -278,6 +282,44 @@ const update = (state = {
         isSearching: false,
         searchResults: action.data,
         searchCancelToken: null
+      })
+
+    // Handle GDD
+    case START_GDD_QUERY:
+      // When a search is requested, cancel any pending requests first
+      if (state.gddCancelToken) {
+        state.gddCancelToken.cancel()
+      }
+      return Object.assign({}, state, {
+        fetchingGdd: true,
+        gddCancelToken: action.cancelToken
+      })
+    case RECEIVED_GDD_QUERY:
+      // let parsed = {
+      //   journals: []
+      // }
+      //
+      // for (let i = 0; i < action.data.length; i++) {
+      //   let found = false
+      //   for (let j = 0; j < parsed.journals.length; j++) {
+      //     if (parsed.journals[j].name === action.data[i].journal) {
+      //       parsed.journals[j].articles.push(action.data[i])
+      //       found = true
+      //     }
+      //   }
+      //
+      //   if (!found) {
+      //     parsed.journals.push({
+      //       name: action.data[i].journal,
+      //       source: action.data[i].publisher,
+      //       articles: [action.data[i]]
+      //     })
+      //   }
+      // }
+      return Object.assign({}, state, {
+        fetchingGdd: false,
+        gddInfo: action.data,
+        gddCancelToken: null
       })
 
     case GO_TO_PLACE:
