@@ -14,6 +14,7 @@ import Typography from 'material-ui/Typography'
 import ColumnIcon from './ColumnIcon'
 import IndexMapIcon from './IndexMapIcon'
 import ElevationIcon from './ElevationIcon'
+import FossilIcon from './FossilIcon'
 
 class Menu extends Component {
   constructor(props) {
@@ -63,6 +64,12 @@ class Menu extends Component {
                   <IndexMapIcon size={25} />
                 </ListItemIcon>
                 <ListItemText primary="Index"/>
+              </ListItem>
+              <ListItem button onClick={toggleIndexMap} style={{ backgroundColor: (mapHasIndexMap ? '#eee' : 'transparent') }}>
+                <ListItemIcon>
+                  <FossilIcon size={25} />
+                </ListItemIcon>
+                <ListItemText primary="Fossils"/>
               </ListItem>
               <ListItem button onClick={toggleSatellite} style={{ backgroundColor: (mapHasSatellite ? '#eee' : 'transparent') }}>
                 <ListItemIcon>

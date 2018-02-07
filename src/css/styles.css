@@ -219,9 +219,22 @@ body {
   margin-bottom: -12px;
 }
 
+.regional-panel {
+  margin-top: 25px !important;
+}
+
 .about-section {
   display: block;
   padding-bottom: 15px;
+}
+.region-group {
+  margin-top: -16px;
+  font-size: 85%;
+  color: #333;
+}
+.region-description {
+  margin-top: -5px;
+  margin-bottom: 10px;
 }
 @media(max-width: 850px) {
   .infoDrawer {

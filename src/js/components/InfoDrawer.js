@@ -11,6 +11,7 @@ import ExpansionPanel, {
   ExpansionPanelSummary,
 } from 'material-ui/ExpansionPanel'
 import { CircularProgress } from 'material-ui/Progress'
+import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Table'
 
 import CloseIcon from 'material-ui-icons/Close'
 import Button from 'material-ui/Button'
@@ -39,7 +40,12 @@ class InfoDrawer extends Component {
     this.handleChange = panel => (event, expanded) => {
       this.setState({
         expanded: expanded ? panel : false,
-      });
+      })
+    }
+    this.openColumnInfo = (event, expanded) => {
+      if (Object.keys(this.props.columnInfo).length === 0) {
+        this.props.getColumn()
+      }
     }
   }
 
@@ -52,7 +58,6 @@ class InfoDrawer extends Component {
     const { infoDrawerOpen, toggleInfoDrawer, expandInfoDrawer, infoDrawerExpanded } = this.props
     let { mapInfo } = this.props
     const { expanded } = this.state
-
     let expansionPanelClasses = {
       'content': 'expansion-panel',
       'root': 'expansion-panel-root'
@@ -82,6 +87,21 @@ class InfoDrawer extends Component {
       b_int: {},
       t_int: {},
       ref: {}
+    }
+
+    // if (Object.keys(this.props.columnInfo).length != 0) {
+    //   this.props.columnInfo.column.map(d => {
+    //     let unitHTML = d.units.map(j => {
+    //       return <tr>
+    //         <td width={100} colspan=>
+    //
+    //         </td>
+    //       </tr>
+    //     })
+    //   })
+    // }
+    if (Object.keys(this.props.columnInfo).length != 0) {
+      console.log(this.props.columnInfo.timescale)
     }
 
     return (
@@ -378,6 +398,97 @@ class InfoDrawer extends Component {
                 </ExpansionPanel>
                 : ''
               }
+
+              <Divider/>
+              <ExpansionPanel classes={{ 'root': 'regional-panel'}} onChange={this.openColumnInfo}>
+                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} classes={expansionPanelClasses}>
+                  <Typography className="expansion-summary-title">Regional stratigraphy </Typography>
+                </ExpansionPanelSummary>
+                <ExpansionPanelDetails classes={expansionPanelDetailClasses}>
+                  { Object.keys(this.props.columnInfo).length != 0 ?
+                    <Table>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell>
+                            <Typography className="expansion-summary-title">Thickness:</Typography>
+                          </TableCell>
+                          <TableCell>
+                            { this.props.columnInfo.min_thick } - { this.props.columnInfo.max_thick } <span className='age-chip-ma'>m</span>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>
+                            <Typography className="expansion-summary-title">Age:</Typography>
+                          </TableCell>
+                          <TableCell>
+                            { this.props.columnInfo.b_age } - { this.props.columnInfo.t_age } <span className='age-chip-ma'>Ma</span>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>
+                            <Typography className="expansion-summary-title">Area:</Typography>
+                          </TableCell>
+                          <TableCell>
+                            { this.props.columnInfo.area } <span className='age-chip-ma'>km2</span>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>
+                            <Typography className="expansion-summary-title">Fossil collections:</Typography>
+                          </TableCell>
+                          <TableCell>
+                            { this.props.columnInfo.pbdb_collections }
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>
+                            <Typography className="expansion-summary-title">Fossil occurrences:</Typography>
+                          </TableCell>
+                          <TableCell>
+                            { this.props.columnInfo.pbdb_occs }
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>
+                            <table>
+                              <tbody>
+                                <tr>
+                                  <td>Period</td>
+                                  <td>Unit</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+
+                    : ''
+                  }
+                </ExpansionPanelDetails>
+              </ExpansionPanel>
+
+              {
+                mapInfo.regions && mapInfo.regions.length ?
+                <ExpansionPanel classes={{ 'root': 'regional-panel'}}>
+                  <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} classes={expansionPanelClasses}>
+                    <Typography className="expansion-summary-title">Physiography </Typography>
+                  </ExpansionPanelSummary>
+                  <ExpansionPanelDetails classes={expansionPanelDetailClasses}>
+                    {mapInfo.regions.map((region, i) => {
+                      return (
+                        <div className='region' key={i}>
+                          <h3>{region.name}</h3>
+                          <p className='region-group'>{region.boundary_group}</p>
+                          <p className='region-description'>{region.descrip}</p>
+                        </div>
+                      )
+                    })}
+                  </ExpansionPanelDetails>
+                </ExpansionPanel>
+                : ''
+              }
+
 
             </div>
 

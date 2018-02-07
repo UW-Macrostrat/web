@@ -22,6 +22,9 @@ export const UPDATE_COLUMN_FILTERS = 'UPDATE_COLUMN_FILTERS'
 export const START_MAP_QUERY = 'START_MAP_QUERY'
 export const RECEIVED_MAP_QUERY = 'RECEIVED_MAP_QUERY'
 
+export const START_COLUMN_QUERY = 'START_COLUMN_QUERY'
+export const RECEIVED_COLUMN_QUERY = 'RECEIVED_COLUMN_QUERY'
+
 export const TOGGLE_BEDROCK = 'TOGGLE_BEDROCK'
 export const TOGGLE_SATELLITE = 'TOGGLE_SATELLITE'
 export const TOGGLE_COLUMNS = 'TOGGLE_COLUMNS'
@@ -348,6 +351,40 @@ export function removeFilter(theFilter) {
   return {
     type: REMOVE_FILTER,
     filter: theFilter
+  }
+}
+
+
+export function startColumnQuery(cancelToken) {
+  return {
+    type: START_COLUMN_QUERY,
+    cancelToken: cancelToken
+  }
+}
+export const getColumn = () => {
+  return (dispatch, getState) => {
+    let { infoMarkerLng, infoMarkerLat } = getState().update
+    
+    let CancelToken = axios.CancelToken
+    let source = CancelToken.source()
+
+    dispatch(startColumnQuery(source))
+
+    return axios.get(`${SETTINGS.apiDomain}/api/v2/units?response=long&lng=${infoMarkerLng}&lat=${infoMarkerLat}`, {
+      cancelToken: source.token,
+      responseType: 'json'
+    })
+      .then(json => dispatch(receivedColumnQuery(json.data.success.data)))
+      .catch(error => {
+        // don't care 💁
+      })
+  }
+}
+
+export function receivedColumnQuery(data) {
+  return {
+    type: RECEIVED_COLUMN_QUERY,
+    data: data
   }
 }
 

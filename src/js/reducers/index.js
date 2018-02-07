@@ -1,5 +1,6 @@
 import { combineReducers } from 'redux'
-import { PAGE_CLICK, REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK, TOGGLE_SATELLITE, TOGGLE_COLUMNS, TOGGLE_INDEXMAP, CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER, REMOVE_FILTER, GO_TO_PLACE, TOGGLE_ABOUT, UPDATE_COLUMN_FILTERS } from '../actions'
+import { PAGE_CLICK, REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK, TOGGLE_SATELLITE, TOGGLE_COLUMNS, TOGGLE_INDEXMAP, CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER, REMOVE_FILTER, GO_TO_PLACE, TOGGLE_ABOUT, UPDATE_COLUMN_FILTERS, START_COLUMN_QUERY, RECEIVED_COLUMN_QUERY } from '../actions'
+import { sum, timescale } from '../utils'
 
 const classColors = {
   'sedimentary': '#FF8C00',
@@ -21,12 +22,18 @@ const update = (state = {
   aboutOpen: false,
   infoDrawerOpen: false,
   infoDrawerExpanded: false,
+
   isFetching: false,
+  fetchingMapInfo: false,
+  mapInfoCancelToken: null,
+  fetchingColumnInfo: false,
+  columnInfoCancelToken: null,
+
   infoMarkerLng: -999,
   infoMarkerLat: -999,
   mapInfo: [],
-  fetchingMapInfo: false,
-  mapInfoCancelToken: null,
+  columnInfo: {},
+
   mapHasBedrock: true,
   mapHasSatellite: false,
   mapHasColumns: false,
@@ -57,12 +64,14 @@ const update = (state = {
       })
     case CLOSE_INFODRAWER:
       return Object.assign({}, state, {
-        infoDrawerOpen: false
+        infoDrawerOpen: false,
+        columnInfo: {}
       })
     case TOGGLE_INFODRAWER:
       return Object.assign({}, state, {
         infoDrawerOpen: !state.infoDrawerOpen,
-        infoDrawerExpanded: false
+        infoDrawerExpanded: false,
+        columnInfo: {}
       })
 
     case EXPAND_INFODRAWER:
@@ -155,6 +164,88 @@ const update = (state = {
         mapInfo: action.data,
         infoDrawerOpen: true
       })
+
+    case START_COLUMN_QUERY:
+      if (state.columnInfoCancelToken) {
+        state.columnInfoCancelToken.cancel()
+      }
+      return Object.assign({}, state, {
+        fetchingColumnInfo: true,
+        columnInfoCancelToken: action.cancelToken
+      })
+
+    case RECEIVED_COLUMN_QUERY:
+      // summarize units
+      let columnTimescale = timescale.slice().map(d => {
+        d.intersectingUnits = 0
+        d.intersectingUnitIds = []
+        return d
+      })
+      let columnSummary = {
+        max_thick: sum(action.data, 'max_thick'),
+        min_thick: sum(action.data, 'min_thick'),
+        pbdb_collections: sum(action.data, 'pbdb_collections'),
+        pbdb_occs: sum(action.data, 'pbdb_occurrences'),
+        b_age: Math.max(...action.data.map(d => { return d.b_age })),
+        t_age: Math.min(...action.data.map(d => { return d.t_age })),
+        area: (action.data.length) ? parseInt(action.data[0].col_area) : 0,
+      }
+      for (let i = 0; i < action.data.length; i++) {
+        action.data[i].intersectingUnits = 0
+        for (let j = 0; j < action.data.length; j++) {
+          if ((
+            // unit *contains* unit
+            (action.data[i].t_age < action.data[j].b_age && action.data[j].t_age < action.data[i].b_age) ||
+            // units share t and b age
+            (action.data[i].t_age === action.data[j].t_age && action.data[i].b_age === action.data[j].b_age) ||
+            // units share t_age, but not b_age
+            (action.data[i].t_age === action.data[j].t_age && action.data[i].b_age <= action.data[j].b_age) ||
+            // units share b_age, but not t_age
+            (action.data[i].b_age === action.data[j].b_age && action.data[i].t_age >= action.data[j].t_age)
+          ) && action.data[i].unit_id != action.data[j].unit_id) {
+            action.data[i].intersectingUnits += 1
+            action.data[i].intersectingUnitIds.push(action.data[j].unit_id)
+          }
+        }
+
+        for (let j = 0; j < columnTimescale.length; j++) {
+          // Need to explicitly overlap, not
+          if (
+             // interval *contains* unit
+             (action.data[i].t_age < columnTimescale[j].b_age && columnTimescale[j].t_age < action.data[i].b_age) ||
+             // interval and unit share t and b age
+             (action.data[i].t_age === columnTimescale[j].t_age && action.data[i].b_age === columnTimescale[j].b_age) ||
+             // interval and unit share t_age, but not b_age
+             (action.data[i].t_age === columnTimescale[j].t_age && action.data[i].b_age <= columnTimescale[j].b_age) ||
+             // interval and unit share b_age, but not t_age
+             (action.data[i].b_age === columnTimescale[j].b_age && action.data[i].t_age >= columnTimescale[j].t_age))
+          {
+            columnTimescale[j].intersectingUnitIds.push(action.data[j].unit_id)
+          }
+        }
+      }
+
+      let unitIdx = {}
+      action.data.forEach( unit => {
+        unitIdx[unit['unit_id']] = unit
+        unitIdx[unit['unit_id']]['drawn'] = false
+      })
+
+      columnTimescale = columnTimescale.filter(d => {
+        if (d.intersectingUnits > 0) {
+          return d
+        }
+      })
+      columnSummary['timescale'] = columnTimescale
+      columnSummary['units'] = action.data
+      columnSummary['unitIdx'] = unitIdx
+
+      console.log(columnTimescale, action.data)
+      return Object.assign({}, state, {
+        fetchingColumnInfo: false,
+        columnInfo: columnSummary
+      })
+
     case TOGGLE_BEDROCK:
       return Object.assign({}, state, {
         mapHasBedrock: !state.mapHasBedrock
