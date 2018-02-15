@@ -436,74 +436,80 @@ class InfoDrawer extends Component {
                 : ''
               }
 
-              <Divider/>
-              <ExpansionPanel classes={{ 'root': 'regional-panel'}} onChange={this.openColumnInfo}>
-                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} classes={expansionPanelClasses}>
-                  <Typography className="expansion-summary-title">Regional stratigraphy </Typography>
-                </ExpansionPanelSummary>
-                <ExpansionPanelDetails classes={expansionPanelDetailClasses}>
-                  { Object.keys(this.props.columnInfo).length != 0 ?
-                    <Table>
-                      <TableBody>
-                        <TableRow>
-                          <TableCell>
-                            <Typography className="expansion-summary-title">Thickness:</Typography>
-                          </TableCell>
-                          <TableCell>
-                            { addCommas(parseInt(this.props.columnInfo.min_thick)) } - { addCommas(parseInt(this.props.columnInfo.max_thick)) } <span className='age-chip-ma'>m</span>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>
-                            <Typography className="expansion-summary-title">Age:</Typography>
-                          </TableCell>
-                          <TableCell>
-                            { this.props.columnInfo.b_age } - { this.props.columnInfo.t_age } <span className='age-chip-ma'>Ma</span>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>
-                            <Typography className="expansion-summary-title">Area:</Typography>
-                          </TableCell>
-                          <TableCell>
-                            { addCommas(this.props.columnInfo.area) } <span className='age-chip-ma'>km2</span>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>
-                            <Typography className="expansion-summary-title">Fossil collections:</Typography>
-                          </TableCell>
-                          <TableCell>
-                            { addCommas(this.props.columnInfo.pbdb_collections) }
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>
-                            <Typography className="expansion-summary-title">Fossil occurrences:</Typography>
-                          </TableCell>
-                          <TableCell>
-                            { addCommas(this.props.columnInfo.pbdb_occs) }
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>
-                            <table>
-                              <tbody>
-                                <tr>
-                                  <td>Period</td>
-                                  <td>Unit</td>
-                                </tr>
-                              </tbody>
-                            </table>
-                          </TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
+              {
+                mapInfo && mapInfo.mapData && mapInfo.mapData.length && Object.keys(mapInfo.mapData[0].macrostrat).length ?
+                <span>
+                  <Divider/>
+                  <ExpansionPanel classes={{ 'root': 'regional-panel'}} onChange={this.openColumnInfo}>
+                    <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} classes={expansionPanelClasses}>
+                      <Typography className="expansion-summary-title">Regional stratigraphy </Typography>
+                    </ExpansionPanelSummary>
+                    <ExpansionPanelDetails classes={expansionPanelDetailClasses}>
+                      { Object.keys(this.props.columnInfo).length != 0 ?
+                        <Table>
+                          <TableBody>
+                            <TableRow>
+                              <TableCell>
+                                <Typography className="expansion-summary-title">Thickness:</Typography>
+                              </TableCell>
+                              <TableCell>
+                                { addCommas(parseInt(this.props.columnInfo.min_thick)) } - { addCommas(parseInt(this.props.columnInfo.max_thick)) } <span className='age-chip-ma'>m</span>
+                              </TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell>
+                                <Typography className="expansion-summary-title">Age:</Typography>
+                              </TableCell>
+                              <TableCell>
+                                { this.props.columnInfo.b_age } - { this.props.columnInfo.t_age } <span className='age-chip-ma'>Ma</span>
+                              </TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell>
+                                <Typography className="expansion-summary-title">Area:</Typography>
+                              </TableCell>
+                              <TableCell>
+                                { addCommas(this.props.columnInfo.area) } <span className='age-chip-ma'>km2</span>
+                              </TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell>
+                                <Typography className="expansion-summary-title">Fossil collections:</Typography>
+                              </TableCell>
+                              <TableCell>
+                                { addCommas(this.props.columnInfo.pbdb_collections) }
+                              </TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell>
+                                <Typography className="expansion-summary-title">Fossil occurrences:</Typography>
+                              </TableCell>
+                              <TableCell>
+                                { addCommas(this.props.columnInfo.pbdb_occs) }
+                              </TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell>
+                                <table>
+                                  <tbody>
+                                    <tr>
+                                      <td>Period</td>
+                                      <td>Unit</td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </TableCell>
+                            </TableRow>
+                          </TableBody>
+                        </Table>
 
-                    : ''
-                  }
-                </ExpansionPanelDetails>
-              </ExpansionPanel>
+                        : ''
+                      }
+                    </ExpansionPanelDetails>
+                  </ExpansionPanel>
+                </span>
+                : ''
+              }
 
               {
                 mapInfo.regions && mapInfo.regions.length ?
@@ -526,45 +532,48 @@ class InfoDrawer extends Component {
                 : ''
               }
 
-              <Divider/>
-              <ExpansionPanel classes={{ 'root': 'regional-panel'}} onChange={this.openGdd}>
-                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} classes={expansionPanelClasses}>
-                  <Typography className="expansion-summary-title">Primary Literature <span className='via-gdd'>via GeoDeepDive</span> </Typography>
-                </ExpansionPanelSummary>
-                <ExpansionPanelDetails classes={expansionPanelDetailClasses}>
-                  {gddInfo.length ?
-                    gddInfo.map((article, ai) => {
-                      return (
-                        <div className='article' key={ai}>
-                          <h3 className='article-title'>
-                            <a href={article.url} target="_blank">
-                              {article.title}.
-                              <span className="sub-title">
-                                {article.authors.map(d => { return d.name}).join(', ')}. {article.coverdate}. {article.journal}. {article.publisher}.
-                              </span>
-                            </a>
-                          </h3>
-                          <div className="quotes">
-                            {article.snippets.map((snippet, si) => {
-                               let text = snippet.replace(/<em class="hl">/g, "@@@")
-                                  .replace(/<\/em>/g, "***")
-                                  .replace(/(?:\r\n|\r|\n|\<|\>)/g, ' ')
-                                  .trim()
-                                  .replace(/@@@/g, '<em class="hl">')
-                                  .replace(/\*\*\*/g, '</em>');
-                              return <p className='gdd-snippet' key={si} dangerouslySetInnerHTML={{__html: '...' + text + '...'}}></p>
-                            })}
-                          </div>
-                        </div>
-                      )
-                    })
-                  : ''}
-                </ExpansionPanelDetails>
-              </ExpansionPanel>
-
-
+              {
+                mapInfo && mapInfo.mapData && mapInfo.mapData.length && mapInfo.mapData[0].strat_name.length  ?
+                <span>
+                  <Divider/>
+                  <ExpansionPanel classes={{ 'root': 'regional-panel'}} onChange={this.openGdd}>
+                    <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} classes={expansionPanelClasses}>
+                      <Typography className="expansion-summary-title">Primary Literature <span className='via-gdd'>via GeoDeepDive</span> </Typography>
+                    </ExpansionPanelSummary>
+                    <ExpansionPanelDetails classes={expansionPanelDetailClasses}>
+                      {gddInfo.length ?
+                        gddInfo.map((article, ai) => {
+                          return (
+                            <div className='article' key={ai}>
+                              <h3 className='article-title'>
+                                <a href={article.url} target="_blank">
+                                  {article.title}.
+                                  <span className="sub-title">
+                                    {article.authors.map(d => { return d.name}).join(', ')}. {article.coverdate}. {article.journal}. {article.publisher}.
+                                  </span>
+                                </a>
+                              </h3>
+                              <div className="quotes">
+                                {article.snippets.map((snippet, si) => {
+                                   let text = snippet.replace(/<em class="hl">/g, "@@@")
+                                      .replace(/<\/em>/g, "***")
+                                      .replace(/(?:\r\n|\r|\n|\<|\>)/g, ' ')
+                                      .trim()
+                                      .replace(/@@@/g, '<em class="hl">')
+                                      .replace(/\*\*\*/g, '</em>');
+                                  return <p className='gdd-snippet' key={si} dangerouslySetInnerHTML={{__html: '...' + text + '...'}}></p>
+                                })}
+                              </div>
+                            </div>
+                          )
+                        })
+                      : ''}
+                    </ExpansionPanelDetails>
+                  </ExpansionPanel>
+                </span>
+                : ''
+              }
             </div>
-
           </div>
         </Grid>
       </Grid>
