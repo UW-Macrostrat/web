@@ -32,6 +32,8 @@ import Reference from './Reference'
 import MapSource from './MapSource'
 import LongText from './LongText'
 
+import { addCommas } from '../utils'
+
 class InfoDrawer extends Component {
   constructor(props) {
     super(props)
@@ -44,6 +46,7 @@ class InfoDrawer extends Component {
       })
     }
     this.openColumnInfo = (event, expanded) => {
+      console.log(this.props.columnInfo)
       if (Object.keys(this.props.columnInfo).length === 0) {
         this.props.getColumn()
       }
@@ -62,7 +65,8 @@ class InfoDrawer extends Component {
 
   render() {
     const { infoDrawerOpen, toggleInfoDrawer, expandInfoDrawer, infoDrawerExpanded } = this.props
-    let { mapInfo, gddInfo } = this.props
+    let { mapInfo, gddInfo, activeIndexMap } = this.props
+
     const { expanded } = this.state
     let expansionPanelClasses = {
       'content': 'expansion-panel',
@@ -153,6 +157,33 @@ class InfoDrawer extends Component {
         </Grid>
         <Grid item xs={12}>
           <div className="infodrawer-content">
+            {
+              activeIndexMap && Object.keys(activeIndexMap).length > 0 ?
+              <div>
+                <h1 className="infoDrawer-title-no-ellipsis infoDrawer-title-main">{activeIndexMap.ref_title}</h1>
+                <p>
+                  {activeIndexMap.authors},
+                  {
+                    activeIndexMap.ref_year.length ?
+                    ` ${activeIndexMap.ref_year}, ` :
+                    ''
+                  }
+                  {
+                    activeIndexMap.ref_source.length ?
+                    ` ${activeIndexMap.ref_source}, ` :
+                    ''
+                  }
+                  {
+                    activeIndexMap.isbn_doi.length ?
+                    ` ${activeIndexMap.isbn_doi}, ` :
+                    ''
+                  }
+                  <a className="ref-link" href={activeIndexMap.url} target='_blank'>{activeIndexMap.url}</a>
+                </p>
+                <Divider/>
+              </div>
+              : ''
+            }
             <Grid container alignItems="center" alignContent="center">
               <Grid item xs={12}>
                 <div>
@@ -419,7 +450,7 @@ class InfoDrawer extends Component {
                             <Typography className="expansion-summary-title">Thickness:</Typography>
                           </TableCell>
                           <TableCell>
-                            { this.props.columnInfo.min_thick } - { this.props.columnInfo.max_thick } <span className='age-chip-ma'>m</span>
+                            { addCommas(parseInt(this.props.columnInfo.min_thick)) } - { addCommas(parseInt(this.props.columnInfo.max_thick)) } <span className='age-chip-ma'>m</span>
                           </TableCell>
                         </TableRow>
                         <TableRow>
@@ -435,7 +466,7 @@ class InfoDrawer extends Component {
                             <Typography className="expansion-summary-title">Area:</Typography>
                           </TableCell>
                           <TableCell>
-                            { this.props.columnInfo.area } <span className='age-chip-ma'>km2</span>
+                            { addCommas(this.props.columnInfo.area) } <span className='age-chip-ma'>km2</span>
                           </TableCell>
                         </TableRow>
                         <TableRow>
@@ -443,7 +474,7 @@ class InfoDrawer extends Component {
                             <Typography className="expansion-summary-title">Fossil collections:</Typography>
                           </TableCell>
                           <TableCell>
-                            { this.props.columnInfo.pbdb_collections }
+                            { addCommas(this.props.columnInfo.pbdb_collections) }
                           </TableCell>
                         </TableRow>
                         <TableRow>
@@ -451,7 +482,7 @@ class InfoDrawer extends Component {
                             <Typography className="expansion-summary-title">Fossil occurrences:</Typography>
                           </TableCell>
                           <TableCell>
-                            { this.props.columnInfo.pbdb_occs }
+                            { addCommas(this.props.columnInfo.pbdb_occs) }
                           </TableCell>
                         </TableRow>
                         <TableRow>
@@ -504,10 +535,10 @@ class InfoDrawer extends Component {
                   {gddInfo.length ?
                     gddInfo.map((article, ai) => {
                       return (
-                        <div className='article'>
+                        <div className='article' key={ai}>
                           <h3 className='article-title'>
                             <a href={article.url} target="_blank">
-                              {article.title}. 
+                              {article.title}.
                               <span className="sub-title">
                                 {article.authors.map(d => { return d.name}).join(', ')}. {article.coverdate}. {article.journal}. {article.publisher}.
                               </span>

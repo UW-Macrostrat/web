@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux'
-import { PAGE_CLICK, REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK, TOGGLE_SATELLITE, TOGGLE_COLUMNS, TOGGLE_INDEXMAP, CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER, REMOVE_FILTER, GO_TO_PLACE, TOGGLE_ABOUT, UPDATE_COLUMN_FILTERS, START_COLUMN_QUERY, RECEIVED_COLUMN_QUERY, START_GDD_QUERY, RECEIVED_GDD_QUERY } from '../actions'
+import { PAGE_CLICK, REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK, TOGGLE_SATELLITE, TOGGLE_COLUMNS, TOGGLE_INDEXMAP, CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER, REMOVE_FILTER, GO_TO_PLACE, TOGGLE_ABOUT, UPDATE_COLUMN_FILTERS, START_COLUMN_QUERY, RECEIVED_COLUMN_QUERY, START_GDD_QUERY, RECEIVED_GDD_QUERY, SET_ACTIVE_INDEX_MAP } from '../actions'
 import { sum, timescale } from '../utils'
 
 const classColors = {
@@ -38,6 +38,7 @@ const update = (state = {
   infoMarkerLat: -999,
   mapInfo: [],
   columnInfo: {},
+  activeIndexMap: {},
   gddInfo: [],
   searchResults: [],
 
@@ -117,6 +118,7 @@ const update = (state = {
         infoMarkerLat: action.lat.toFixed(4),
         fetchingMapInfo: true,
         infoDrawerOpen: true,
+        activeIndexMap: {},
         mapInfoCancelToken: action.cancelToken
       })
     case RECEIVED_MAP_QUERY:
@@ -185,6 +187,7 @@ const update = (state = {
         d.intersectingUnitIds = []
         return d
       })
+
       let columnSummary = {
         max_thick: sum(action.data, 'max_thick'),
         min_thick: sum(action.data, 'min_thick'),
@@ -194,8 +197,10 @@ const update = (state = {
         t_age: Math.min(...action.data.map(d => { return d.t_age })),
         area: (action.data.length) ? parseInt(action.data[0].col_area) : 0,
       }
+
       for (let i = 0; i < action.data.length; i++) {
         action.data[i].intersectingUnits = 0
+        action.data[i].intersectingUnitIds = []
         for (let j = 0; j < action.data.length; j++) {
           if ((
             // unit *contains* unit
@@ -224,10 +229,11 @@ const update = (state = {
              // interval and unit share b_age, but not t_age
              (action.data[i].b_age === columnTimescale[j].b_age && action.data[i].t_age >= columnTimescale[j].t_age))
           {
-            columnTimescale[j].intersectingUnitIds.push(action.data[j].unit_id)
+            columnTimescale[j].intersectingUnitIds.push(action.data[i].unit_id)
           }
         }
       }
+
 
       let unitIdx = {}
       action.data.forEach( unit => {
@@ -236,7 +242,7 @@ const update = (state = {
       })
 
       columnTimescale = columnTimescale.filter(d => {
-        if (d.intersectingUnits > 0) {
+        if (d.intersectingUnits.length > 0) {
           return d
         }
       })
@@ -244,7 +250,6 @@ const update = (state = {
       columnSummary['units'] = action.data
       columnSummary['unitIdx'] = unitIdx
 
-      console.log(columnTimescale, action.data)
       return Object.assign({}, state, {
         fetchingColumnInfo: false,
         columnInfo: columnSummary
@@ -349,6 +354,11 @@ const update = (state = {
       return Object.assign({}, state, {
         isFetching: false,
         data: action.data
+      })
+
+    case SET_ACTIVE_INDEX_MAP:
+      return Object.assign({}, state, {
+        activeIndexMap: action.data
       })
     default:
       return state

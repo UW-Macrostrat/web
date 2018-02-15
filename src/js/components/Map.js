@@ -18,6 +18,7 @@ class Map extends Component {
     super(props)
     this.swapBasemap = this.swapBasemap.bind(this)
     this.currentSources = []
+    this.isPanning = false
   }
 
   componentDidMount() {
@@ -54,17 +55,43 @@ class Map extends Component {
     })
 
     this.map.on('movestart', () => {
+      if (this.panning) {
+        return
+      }
       this.map.setLayoutProperty('infoMarker', 'visibility', 'none')
       this.props.closeInfoDrawer()
+      this.map.setFilter('indexMap_highlight', [ '==', 'source_id', '' ])
     })
 
     this.map.on('click', (event) => {
       this.props.queryMap(event.lngLat.lng, event.lngLat.lat, this.map.getZoom())
 
       let features = this.map.queryRenderedFeatures(event.point, { layers: ['burwell_fill', 'column_fill', 'indexMap_fill']})
+
+      let indexMapFeatures = features.filter(f => {
+        if (f.layer.id === 'indexMap_fill') return f
+      }).sort((a, b) => {
+        return a.properties.area - b.properties.area
+      })
+
+      if (indexMapFeatures.length) {
+        this.map.setFilter('indexMap_highlight', [ '==', 'source_id', indexMapFeatures[0].properties.source_id ])
+        this.props.setActiveIndexMap(indexMapFeatures[0].properties)
+      }
+
       console.log(features)
 
       let xOffset = (window.innerWidth > 850) ? -((window.innerWidth*0.3333)/2) : 0
+
+      /*
+      Ok. I know this looks jank, and it is, but bear with me.
+      When we pan the map to center the marker relative to the side panel
+      a `movestart` event is fired on the map. That same `movestart` is the
+      listener we use to listen for user input and remove the marker. By
+      toggling this boolean we are able to ignore the `movestart` even when it
+      is fired by this particular action.
+      */
+      this.panning = true
       this.map.panTo(event.lngLat, {
         offset: [ xOffset, 0 ],
         easing: function easing(t) {
@@ -72,6 +99,9 @@ class Map extends Component {
         },
         duration: 500
       })
+      setTimeout(() => {
+        this.panning = false
+      }, 600)
 
       // Update the location of the marker
       this.map.getSource('info_marker').setData({

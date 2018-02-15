@@ -70,8 +70,9 @@ body {
 .infoDrawer {
   /* background-color: rgba(0,0,0,0) !important;
   box-shadow: none !important; */
-  overflow-y: hidden;
+  overflow-x: hidden !important;
   max-width: 33%;
+  top: 0 !important;
 }
 .infodrawer-header-grid {
   padding-bottom: 0 !important;
@@ -97,6 +98,12 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.infoDrawer-title-no-ellipsis {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
+  font-size: 1.3em;
+  overflow: hidden;
 }
 .infoDrawer-title-main {
   margin-bottom: 0;
@@ -281,6 +288,6 @@ body {
 }
 @media(max-width: 850px) {
   .infoDrawer {
-    max-width: 100%;
+    max-width: 100% !important;
   }
 }

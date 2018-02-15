@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import { queryMap, closeInfoDrawer, getFilteredColumns } from '../actions'
+import { queryMap, closeInfoDrawer, getFilteredColumns, setActiveIndexMap } from '../actions'
 import Map from '../components/Map'
 
 const mapStateToProps = (state) => {
@@ -30,6 +30,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     getFilteredColumns: () => {
       dispatch(getFilteredColumns())
+    },
+    setActiveIndexMap: (data) => {
+      dispatch(setActiveIndexMap(data))
     }
   }
 }

@@ -130,6 +130,23 @@ export const mapStyle = {
           }
         },
         {
+          "id": "indexMap_highlight",
+          "type": "line",
+          "source": "indexMap",
+          "paint": {
+            "line-color": "#045275",
+            "line-width": {
+              "stops": [
+                [0, 6],
+                [4, 6],
+                [16, 18]
+              ]
+            },
+            "line-opacity": 1
+          },
+          "filter": ["==", "source_id", ""]
+        },
+        {
           "id": "burwell_fill",
           "type": "fill",
           "source": "burwell",

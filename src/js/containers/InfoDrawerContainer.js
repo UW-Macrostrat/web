@@ -13,7 +13,8 @@ const mapStateToProps = (state) => {
     columnInfo: state.update.columnInfo,
     infoMarkerLng: state.update.infoMarkerLng,
     infoMarkerLat: state.update.infoMarkerLat,
-    gddInfo: state.update.gddInfo
+    gddInfo: state.update.gddInfo,
+    activeIndexMap: state.update.activeIndexMap
   }
 }
 

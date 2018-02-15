@@ -37,6 +37,8 @@ export const START_SEARCH_QUERY = 'START_SEARCH_QUERY'
 export const RECEIVED_SEARCH_QUERY = 'RECEIVED_SEARCH_QUERY'
 export const GO_TO_PLACE = 'GO_TO_PLACE'
 
+export const SET_ACTIVE_INDEX_MAP = 'SET_ACTIVE_INDEX_MAP'
+
 // Define action functions
 export const pageClick = () => {
   return {
@@ -427,6 +429,14 @@ export const getGdd = () => {
 export function receivedGddQuery(data) {
   return {
     type: RECEIVED_GDD_QUERY,
+    data: data
+  }
+}
+
+
+export function setActiveIndexMap(data) {
+  return {
+    type: SET_ACTIVE_INDEX_MAP,
     data: data
   }
 }
