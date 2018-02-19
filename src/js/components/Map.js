@@ -32,8 +32,8 @@ class Map extends Component {
         maxZoom: 15,
         hash: true,
         failIfMajorPerformanceCaveat: true,
-        dragRotate: false,
-        touchZoomRotate: false
+        // dragRotate: false,
+        // touchZoomRotate: false
     })
 
     this.map.on('load', () => {

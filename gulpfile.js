@@ -28,7 +28,7 @@ gulp.task('deploy', function (){
 })
 
 gulp.task('watch', function () {
-	gulp.watch(['./src/js/*/*.js'], ['scripts'])
+	gulp.watch(['./src/js/*/*.js','./src/js/*.js'], ['scripts'])
 	gulp.watch(['./src/css/*.css'], ['css'])
 })
 
