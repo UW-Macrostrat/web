@@ -6,6 +6,7 @@ import MenuContainer from '../containers/MenuContainer'
 import InfoDrawerContainer from '../containers/InfoDrawerContainer'
 import FiltersContainer from '../containers/FiltersContainer'
 import AboutContainer from '../containers/AboutContainer'
+import ElevationChartContainer from '../containers/ElevationChartContainer'
 // Import other components
 
 class App extends Component {
@@ -22,6 +23,7 @@ class App extends Component {
           <InfoDrawerContainer/>
           <FiltersContainer/>
           <AboutContainer/>
+          <ElevationChartContainer/>
         </div>
         <MapContainer/>
       </div>

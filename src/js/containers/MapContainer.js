@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import { queryMap, closeInfoDrawer, getFilteredColumns, setActiveIndexMap } from '../actions'
+import { queryMap, closeInfoDrawer, getFilteredColumns, setActiveIndexMap, getElevation } from '../actions'
 import Map from '../components/Map'
 
 const mapStateToProps = (state) => {
@@ -17,13 +17,16 @@ const mapStateToProps = (state) => {
     mapHasColumns: state.update.mapHasColumns,
     mapHasIndexMap: state.update.mapHasIndexMap,
     mapCenter: state.update.mapCenter,
+    elevationChartOpen: state.update.elevationChartOpen,
+    elevationData: state.update.elevationData,
+    fetchingElevation: state.update.fetchingElevation
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    queryMap: (lng, lat, z) => {
-      dispatch(queryMap(lng, lat, z))
+    queryMap: (lng, lat, z, map_id) => {
+      dispatch(queryMap(lng, lat, z, map_id))
     },
     closeInfoDrawer: () => {
       dispatch(closeInfoDrawer())
@@ -33,6 +36,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     setActiveIndexMap: (data) => {
       dispatch(setActiveIndexMap(data))
+    },
+    getElevation: (line) => {
+      dispatch(getElevation(line))
     }
   }
 }

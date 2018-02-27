@@ -137,54 +137,57 @@ class InfoDrawer extends Component {
       </div>
       <div className={this.props.fetchingMapInfo ? "hidden" : "d"}>
       <Grid container alignItems="center" alignContent="center" justify="center" classes={{ 'spacing-xs-16': 'infodrawer-grid' }}>
-        <Grid item xs={12} classes={{ 'grid-xs-12': 'infodrawer-header-grid'}}>
-          <div className="infodrawer-header">
-            <div className="infodrawer-header-item lnglat-container">
-              <span className="lnglat">
-                {this.normalizeLng(this.props.infoMarkerLng)}  {this.props.infoMarkerLat}
-              </span>
-              <span className="z">
-                {mapInfo.elevation}<span className='age-chip-ma'>m</span> | {(mapInfo.elevation * 3.28084).toFixed(0)}<span className='age-chip-ma'>ft</span>
-              </span>
-            </div>
-            <div className="infodrawer-header-item">
-              <IconButton color="default" aria-label="InfoDrawer" onClick={toggleInfoDrawer}>
-                <CloseIcon/>
-              </IconButton>
-            </div>
-          </div>
 
-        </Grid>
         <Grid item xs={12}>
           <div className="infodrawer-content">
-            {
-              activeIndexMap && Object.keys(activeIndexMap).length > 0 ?
-              <div>
-                <h1 className="infoDrawer-title-no-ellipsis infoDrawer-title-main">{activeIndexMap.ref_title}</h1>
-                <p>
-                  {activeIndexMap.authors},
-                  {
-                    activeIndexMap.ref_year.length ?
-                    ` ${activeIndexMap.ref_year}, ` :
-                    ''
-                  }
-                  {
-                    activeIndexMap.ref_source.length ?
-                    ` ${activeIndexMap.ref_source}, ` :
-                    ''
-                  }
-                  {
-                    activeIndexMap.isbn_doi.length ?
-                    ` ${activeIndexMap.isbn_doi}, ` :
-                    ''
-                  }
-                  <a className="ref-link" href={activeIndexMap.url} target='_blank'>{activeIndexMap.url}</a>
-                </p>
-                <Divider/>
-              </div>
-              : ''
-            }
+
             <Grid container alignItems="center" alignContent="center">
+              <Grid item xs={12} classes={{ 'grid-xs-12': 'infodrawer-header-grid'}}>
+                <div className="infodrawer-header">
+                  <div className="infodrawer-header-item lnglat-container">
+                    <span className="lnglat">
+                      {this.normalizeLng(this.props.infoMarkerLng)}  {this.props.infoMarkerLat}
+                    </span>
+                    <span className="z">
+                      {mapInfo.elevation}<span className='age-chip-ma'>m</span> | {(mapInfo.elevation * 3.28084).toFixed(0)}<span className='age-chip-ma'>ft</span>
+                    </span>
+                  </div>
+                  <div className="infodrawer-header-item">  
+                    <IconButton color="default" aria-label="InfoDrawer" onClick={toggleInfoDrawer}>
+                      <CloseIcon/>
+                    </IconButton>
+                  </div>
+                </div>
+
+                {
+                  activeIndexMap && Object.keys(activeIndexMap).length > 0 ?
+                  <div>
+                    <h1 className="infoDrawer-title-no-ellipsis infoDrawer-title-main">{activeIndexMap.ref_title}</h1>
+                    <p>
+                      {activeIndexMap.authors},
+                      {
+                        activeIndexMap.ref_year.length ?
+                        ` ${activeIndexMap.ref_year}, ` :
+                        ''
+                      }
+                      {
+                        activeIndexMap.ref_source.length ?
+                        ` ${activeIndexMap.ref_source}, ` :
+                        ''
+                      }
+                      {
+                        activeIndexMap.isbn_doi.length ?
+                        ` ${activeIndexMap.isbn_doi}, ` :
+                        ''
+                      }
+                      <a className="ref-link" href={activeIndexMap.url} target='_blank'>{activeIndexMap.url}</a>
+                    </p>
+                    <Divider/>
+                  </div>
+                  : ''
+                }
+
+              </Grid>
               <Grid item xs={12}>
                 <div>
                   <Grid container alignItems="center">
@@ -193,7 +196,9 @@ class InfoDrawer extends Component {
                         {
                           mapInfo && mapInfo.mapData && mapInfo.mapData.length
                           ? ( mapInfo.mapData[0].name && mapInfo.mapData[0].name.length ? mapInfo.mapData[0].name : mapInfo.mapData[0].descrip )
-                          : 'No data found'}
+                          : ( (mapInfo && (mapInfo.hasColumns || (mapInfo.regions && mapInfo.regions.length))) ? '' :  'No data found')
+
+                        }
                       </h1>
                     </Grid>
                   </Grid>
@@ -437,7 +442,7 @@ class InfoDrawer extends Component {
               }
 
               {
-                mapInfo && mapInfo.mapData && mapInfo.mapData.length && Object.keys(mapInfo.mapData[0].macrostrat).length ?
+                mapInfo && mapInfo.mapData && mapInfo.hasColumns ?
                 <span>
                   <Divider/>
                   <ExpansionPanel classes={{ 'root': 'regional-panel'}} onChange={this.openColumnInfo}>

@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import { toggleMenu, toggleBedrock, toggleSatellite, toggleColumns, toggleIndexMap, toggleAbout } from '../actions'
+import { toggleMenu, toggleBedrock, toggleSatellite, toggleColumns, toggleIndexMap, toggleAbout, toggleElevationChart } from '../actions'
 import Menu from '../components/Menu'
 
 const mapStateToProps = (state) => {
@@ -32,6 +32,9 @@ const mapDispatchToProps = (dispatch) => {
     toggleAbout: () => {
       dispatch(toggleAbout())
     },
+    toggleElevationChart: () => {
+      dispatch(toggleElevationChart())
+    }
   }
 }
 

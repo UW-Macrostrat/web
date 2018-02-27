@@ -19,10 +19,14 @@ import FossilIcon from './FossilIcon'
 class Menu extends Component {
   constructor(props) {
     super(props)
+    this.toggleElevationChart = () => {
+      this.props.toggleMenu()
+      this.props.toggleElevationChart()
+    }
   }
 
   render() {
-    const { menuOpen, toggleMenu, toggleBedrock, mapHasBedrock, toggleSatellite, mapHasSatellite, toggleColumns, mapHasColumns, toggleIndexMap, mapHasIndexMap, toggleAbout } = this.props
+    const { menuOpen, toggleMenu, toggleBedrock, mapHasBedrock, toggleSatellite, mapHasSatellite, toggleColumns, mapHasColumns, toggleIndexMap, mapHasIndexMap, toggleAbout, toggleElevationChart } = this.props
     let exitTransition = {
       exit: 300
     }
@@ -65,7 +69,7 @@ class Menu extends Component {
                 </ListItemIcon>
                 <ListItemText primary="Index"/>
               </ListItem>
-              <ListItem button onClick={toggleIndexMap} style={{ backgroundColor: (mapHasIndexMap ? '#eee' : 'transparent') }}>
+              <ListItem button disabled>
                 <ListItemIcon>
                   <FossilIcon size={25} />
                 </ListItemIcon>
@@ -78,13 +82,13 @@ class Menu extends Component {
                 <ListItemText primary="Satellite"/>
               </ListItem>
               <Divider light/>
-              <ListItem button>
+              <ListItem button onClick={this.toggleElevationChart}>
                 <ListItemIcon>
                   <ElevationIcon size={25} />
                 </ListItemIcon>
-                <ListItemText primary="Elevation"/>
+                <ListItemText primary="Elevation Profile"/>
               </ListItem>
-              <ListItem button>
+              <ListItem button disabled>
                 <ListItemIcon>
                   <LocationOnIcon />
                 </ListItemIcon>

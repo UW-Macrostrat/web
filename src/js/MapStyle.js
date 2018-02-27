@@ -37,7 +37,21 @@ export const mapStyle = {
         "indexMap": {
           "type": "geojson",
           "data": `${SETTINGS.apiDomain}/api/v2/defs/sources?all&format=geojson_bare`
-        }
+        },
+        "elevationPoints": {
+          "type": "geojson",
+          "data": {
+            "type": "FeatureCollection",
+            "features": []
+          }
+        },
+        "elevationLine": {
+          "type": "geojson",
+          "data": {
+            "type": "FeatureCollection",
+            "features": []
+          }
+        },
     },
     "layers": [
         {
@@ -159,7 +173,12 @@ export const mapStyle = {
               "property": "color",
               "type": "identity"
             },
-            "fill-opacity": 0.5
+            "fill-opacity": {
+              "stops": [
+                [0, 0.5],
+                [12, 0.3]
+              ]
+            }
           }
         },
         {
@@ -172,29 +191,28 @@ export const mapStyle = {
           "maxzoom": 16,
           "paint": {
             "line-color": "#777777",
-            "line-width": {
-              "stops": [
-                [0, 0.15],
-                [1, 0.15],
-                [2, 0.15],
-                [3, 0.15],
-                [4, 0.2],
-                [5, 0.4],
-                [6, 0.05],
-                [7, 0.1],
-                [8, 0.4],
-                [9, 0.5],
-                [10, 0.35],
-                [11, 0.4],
-                [12, 1],
-                [13, 1.25],
-                [14, 1.5],
-                [15, 1.75],
-                [16, 2],
-                [17, 2.25],
-                [18, 2.5]
-              ]
-            },
+            "line-width": 0,
+            // "line-width": {
+            //   "stops": [
+            //     [0, 0.15],
+            //     [1, 0.15],
+            //     [2, 0.15],
+            //     [3, 0.15],
+            //     [4, 0.2],
+            //     [5, 0.4],
+            //     [6, 0.05],
+            //     [7, 0.1],
+            //     [8, 0.4],
+            //     [9, 0.5],
+            //     [10, 0.35],
+            //     [11, 0.4],
+            //     [12, 1],
+            //     [13, 1.25],
+            //     [14, 1.5],
+            //     [15, 1.75],
+            //     [16, 2]
+            //   ]
+            // },
             "line-opacity": {
               "stops": [
                 [0, 0],
@@ -786,7 +804,12 @@ export const mapStyle = {
                 [16, 2.2]
               ]
             },
-            "line-opacity": 1
+            "line-opacity": {
+              "stops": [
+                [ 6, 0.2 ],
+                [ 10, 1 ]
+              ]
+            }
           }
         },
         {
@@ -850,8 +873,33 @@ export const mapStyle = {
             "icon-size": 0.65,
             "icon-image": "pin",
             "icon-offset": [0, -28],
-            "visibility": "none"
+            "visibility": "none",
+            "icon-allow-overlap": true
           }
         },
+        {
+          "id": "elevationPoint",
+          "type": "symbol",
+          "source": "elevationPoints",
+          "layout": {
+            "icon-size": 1,
+            "icon-image": "circle-stroked-15",
+            "icon-allow-overlap": true
+          },
+          "paint": {
+            "icon-color": "#ffffff"
+          }
+        },
+        {
+          "id": "elevationLine",
+          "type": "line",
+          "source": "elevationLine",
+          "paint": {
+            "line-dasharray": [4, 2],
+            "line-width": 5,
+            "line-color": "#ffffff",
+            "line-opacity": 1
+          }
+        }
     ]
 }

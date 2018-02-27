@@ -13,6 +13,7 @@ export const TOGGLE_ABOUT = 'TOGGLE_ABOUT'
 export const TOGGLE_INFODRAWER = 'TOGGLE_INFODRAWER'
 export const EXPAND_INFODRAWER = 'EXPAND_INFODRAWER'
 export const CLOSE_INFODRAWER = 'CLOSE_INFODRAWER'
+export const TOGGLE_ELEVATION_CHART = 'TOGGLE_ELEVATION_CHART'
 
 export const TOGGLE_FILTERS = 'TOGGLE_FILTERS'
 export const ADD_FILTER = 'ADD_FILTER'
@@ -36,6 +37,9 @@ export const TOGGLE_INDEXMAP = 'TOGGLE_INDEXMAP'
 export const START_SEARCH_QUERY = 'START_SEARCH_QUERY'
 export const RECEIVED_SEARCH_QUERY = 'RECEIVED_SEARCH_QUERY'
 export const GO_TO_PLACE = 'GO_TO_PLACE'
+
+export const START_ELEVATION_QUERY = 'START_ELEVATION_QUERY'
+export const RECEIVED_ELEVATION_QUERY = 'RECEIVED_ELEVATION_QUERY'
 
 export const SET_ACTIVE_INDEX_MAP = 'SET_ACTIVE_INDEX_MAP'
 
@@ -82,6 +86,12 @@ export const toggleFilters = () => {
 export const toggleBedrock = () => {
   return {
     type: TOGGLE_BEDROCK
+  }
+}
+
+export const toggleElevationChart = () => {
+  return {
+    type: TOGGLE_ELEVATION_CHART
   }
 }
 
@@ -144,14 +154,17 @@ function addMapIdToRef(data) {
   return data
 }
 
-export const queryMap = (lng, lat, z) => {
+export const queryMap = (lng, lat, z, map_id) => {
   return (dispatch) => {
     let CancelToken = axios.CancelToken
     let source = CancelToken.source()
 
     dispatch(startMapQuery({lng: lng, lat: lat}, source))
-
-    return axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/map_query_v2?lng=${lng.toFixed(5)}&lat=${lat.toFixed(5)}&z=${parseInt(z)}`, {
+    let url = `${SETTINGS.apiDomain}/api/v2/mobile/map_query_v2?lng=${lng.toFixed(5)}&lat=${lat.toFixed(5)}&z=${parseInt(z)}`
+    if (map_id) {
+      url += `&map_id=${map_id}`
+    }
+    return axios.get(url, {
       cancelToken: source.token,
       responseType: 'json'
     })
@@ -437,6 +450,38 @@ export function receivedGddQuery(data) {
 export function setActiveIndexMap(data) {
   return {
     type: SET_ACTIVE_INDEX_MAP,
+    data: data
+  }
+}
+
+export function startElevationQuery(cancelToken) {
+  return {
+    type: START_ELEVATION_QUERY,
+    cancelToken: cancelToken
+  }
+}
+export const getElevation = (line) => {
+  return (dispatch) => {
+    let CancelToken = axios.CancelToken
+    let source = CancelToken.source()
+
+    dispatch(startElevationQuery(source))
+
+    return axios.get(`${SETTINGS.apiDomain}/api/v2/elevation?start_lng=${line[0][0]}&start_lat=${line[0][1]}&end_lng=${line[1][0]}&end_lat=${line[1][1]}`, {
+      cancelToken: source.token,
+      responseType: 'json'
+    })
+      .then(json => dispatch(receivedElevationQuery(json.data.success.data)))
+      .catch(error => {
+        // don't care 💁
+        dispatch(receivedElevationQuery([]))
+      })
+  }
+}
+
+export function receivedElevationQuery(data) {
+  return {
+    type: RECEIVED_ELEVATION_QUERY,
     data: data
   }
 }

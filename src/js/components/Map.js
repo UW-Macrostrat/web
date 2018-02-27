@@ -19,22 +19,28 @@ class Map extends Component {
     this.swapBasemap = this.swapBasemap.bind(this)
     this.currentSources = []
     this.isPanning = false
+    this.elevationPoints = []
   }
 
   componentDidMount() {
     mapboxgl.accessToken = 'pk.eyJ1IjoiamN6YXBsZXdza2kiLCJhIjoiWnQxSC01USJ9.oleZzfREJUKAK1TMeCD0bg';
     this.map = new mapboxgl.Map({
         container: 'map',
-      //  style: 'mapbox://styles/jczaplewski/cj7qmi00vd4id2rp9d5cnbeqj?optimize=true',
-        style: SETTINGS.baseMapURL,
+        style: 'mapbox://styles/jczaplewski/cje04mr9l3mo82spihpralr4i?optimize=true',
+      //  style: SETTINGS.baseMapURL,
         center: [-89, 43],
         zoom: 7,
-        maxZoom: 15,
+        maxZoom: 16,
         hash: true,
         failIfMajorPerformanceCaveat: true,
         // dragRotate: false,
         // touchZoomRotate: false
     })
+    // disable map rotation using right click + drag
+    this.map.dragRotate.disable()
+
+    // disable map rotation using touch rotation gesture
+    this.map.touchZoomRotate.disableRotation()
 
     this.map.on('load', () => {
       Object.keys(mapStyle.sources).forEach(source => {
@@ -64,9 +70,47 @@ class Map extends Component {
     })
 
     this.map.on('click', (event) => {
-      this.props.queryMap(event.lngLat.lng, event.lngLat.lat, this.map.getZoom())
-
+      if (this.props.elevationChartOpen && this.props.elevationData && this.props.elevationData.length === 0) {
+        this.elevationPoints.push([event.lngLat.lng, event.lngLat.lat])
+        this.map.getSource('elevationPoints').setData({
+          type: 'FeatureCollection',
+          features: this.elevationPoints.map(p => {
+            return {
+              type: 'Feature',
+              geometry: {
+                type: 'Point',
+                coordinates: p
+              }
+            }
+          })
+        })
+        if (this.elevationPoints.length === 2) {
+          this.props.getElevation(this.elevationPoints)
+          this.map.getSource('elevationLine').setData({
+            type: 'FeatureCollection',
+            features: [{
+              type: 'Feature',
+              geometry: {
+                type: 'LineString',
+                coordinates: this.elevationPoints
+              }
+            }]
+          })
+        }
+        return
+      }
       let features = this.map.queryRenderedFeatures(event.point, { layers: ['burwell_fill', 'column_fill', 'indexMap_fill']})
+
+      let burwellFeatures = features.filter(f => {
+        if (f.layer.id === 'burwell_fill') return f
+      }).map(f => {
+        return f.properties
+      })
+      if (burwellFeatures.length) {
+        this.props.queryMap(event.lngLat.lng, event.lngLat.lat, this.map.getZoom(), burwellFeatures[0].map_id)
+      } else {
+        this.props.queryMap(event.lngLat.lng, event.lngLat.lat, this.map.getZoom())
+      }
 
       let indexMapFeatures = features.filter(f => {
         if (f.layer.id === 'indexMap_fill') return f
@@ -97,11 +141,11 @@ class Map extends Component {
         easing: function easing(t) {
           return t * (2 - t)
         },
-        duration: 500
+        duration: 300
       })
       setTimeout(() => {
         this.panning = false
-      }, 600)
+      }, 1000)
 
       // Update the location of the marker
       this.map.getSource('info_marker').setData({
@@ -174,6 +218,17 @@ class Map extends Component {
 
   componentWillUpdate(nextProps) {
     // Watch the state of the application and adjust the map accordingly
+    if (!nextProps.elevationChartOpen && this.props.elevationChartOpen && this.map) {
+      this.elevationPoints = []
+      this.map.getSource('elevationPoints').setData({
+        "type": "FeatureCollection",
+        "features": []
+      })
+      this.map.getSource('elevationLine').setData({
+        "type": "FeatureCollection",
+        "features": []
+      })
+    }
     // Bedrock
     if (JSON.stringify(nextProps.mapCenter) != JSON.stringify(this.props.mapCenter)) {
       if (nextProps.mapCenter.type === 'place') {

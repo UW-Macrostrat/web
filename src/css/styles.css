@@ -21,6 +21,7 @@ body {
 }
 .searchbar-holder {
   margin: 20px;
+  transition: margin 300ms;
 }
 .column-icon {
   fill:none;stroke:#231f20;stroke-miterlimit:10;stroke-width:3px;
@@ -38,12 +39,78 @@ body {
 .search-input:focus {
   outline: none;
 }
+.searchresult-header {
+  font-size: 1.1em !important;
+  font-weight: bold !important;
+  lettering-spacing: 2px !important;
+  color: #333 !important;
+}
+.searchresult-item {
+  font-size: 0.95em !important;
+}
 .menu-options {
   padding: 25px;
 }
 .active-layer {
   font-weight: bold;
 }
+.elevationChart-root {
+  z-index: 0 !important;
+  position: relative !important;
+}
+.elevationChart-content {
+  /* padding: 25px; */
+  -webkit-transition: 0.8s;
+	-moz-transition: 0.8s;
+	transition: 0.8s;
+  background-color: #ffffff;
+  /* margin-top: -25px;
+  margin-right: -25px; */
+}
+.elevationInstructions {
+  padding: 20px;
+  text-align: center;
+}
+.elevationGridItem {
+  padding-right: 0 !important;
+}
+.elevationChartWrapper {
+  padding-bottom: 20px;
+}
+text {
+  fill: #777;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  opacity: 0.2;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.line {
+  fill: none;
+  stroke: rgba(75,192,192,1);
+  stroke-width: 1.5px;
+}
+
+.overlay {
+  fill: none;
+  pointer-events: all;
+}
+
+.tick line {
+  opacity: 0.13;
+}
+.tick text {
+  font-size: 10px;
+}
+
 .infoDrawer-loading {
   height: 100%;
   display: flex;
@@ -62,7 +129,7 @@ body {
 	transition: 0.8s;
   background-color: #ffffff;
   padding: 25px;
-
+  height: 100vh;
 }
 .infoDrawer-root {
   z-index: 0 !important;
@@ -81,6 +148,7 @@ body {
 }
 .infodrawer-header {
   float: right;
+  background-color: #ffffff;
 }
 .infodrawer-header-item {
   display: inline-block;

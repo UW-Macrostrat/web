@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux'
-import { PAGE_CLICK, REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK, TOGGLE_SATELLITE, TOGGLE_COLUMNS, TOGGLE_INDEXMAP, CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER, REMOVE_FILTER, GO_TO_PLACE, TOGGLE_ABOUT, UPDATE_COLUMN_FILTERS, START_COLUMN_QUERY, RECEIVED_COLUMN_QUERY, START_GDD_QUERY, RECEIVED_GDD_QUERY, SET_ACTIVE_INDEX_MAP } from '../actions'
+import { PAGE_CLICK, REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK, TOGGLE_SATELLITE, TOGGLE_COLUMNS, TOGGLE_INDEXMAP, CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER, REMOVE_FILTER, GO_TO_PLACE, TOGGLE_ABOUT, UPDATE_COLUMN_FILTERS, START_COLUMN_QUERY, RECEIVED_COLUMN_QUERY, START_GDD_QUERY, RECEIVED_GDD_QUERY, SET_ACTIVE_INDEX_MAP, TOGGLE_ELEVATION_CHART, START_ELEVATION_QUERY, RECEIVED_ELEVATION_QUERY } from '../actions'
 import { sum, timescale } from '../utils'
 
 const classColors = {
@@ -22,6 +22,8 @@ const update = (state = {
   aboutOpen: false,
   infoDrawerOpen: false,
   infoDrawerExpanded: false,
+  elevationChartOpen: false,
+
 
   // Events and tokens for xhr
   isFetching: false,
@@ -33,6 +35,8 @@ const update = (state = {
   gddCancelToken: null,
   isSearching: false,
   searchCancelToken: null,
+  fetchingElevation: false,
+  elevationCancelToken: null,
 
   infoMarkerLng: -999,
   infoMarkerLat: -999,
@@ -41,6 +45,7 @@ const update = (state = {
   activeIndexMap: {},
   gddInfo: [],
   searchResults: [],
+  elevationData: [],
 
   mapHasBedrock: true,
   mapHasSatellite: false,
@@ -271,6 +276,11 @@ const update = (state = {
       return Object.assign({}, state, {
         mapHasIndexMap: !state.mapHasIndexMap
       })
+    case TOGGLE_ELEVATION_CHART:
+      return Object.assign({}, state, {
+        elevationChartOpen: !state.elevationChartOpen,
+        elevationData: []
+      })
 
     // Handle searching
     case START_SEARCH_QUERY:
@@ -325,6 +335,23 @@ const update = (state = {
         fetchingGdd: false,
         gddInfo: action.data,
         gddCancelToken: null
+      })
+
+    // Handle elevation
+    case START_ELEVATION_QUERY:
+      // When a search is requested, cancel any pending requests first
+      if (state.elevationCancelToken) {
+        state.elevationCancelToken.cancel()
+      }
+      return Object.assign({}, state, {
+        fetchingElevation: true,
+        elevationCancelToken: action.cancelToken
+      })
+    case RECEIVED_ELEVATION_QUERY:
+      return Object.assign({}, state, {
+        fetchingElevation: false,
+        elevationData: action.data,
+        elevationCancelToken: null
       })
 
     case GO_TO_PLACE:

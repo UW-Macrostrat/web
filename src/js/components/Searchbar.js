@@ -69,20 +69,24 @@ class Searchbar extends Component {
       })
       return thisCat.map((item, h) => {
         return <ListItem key={h} button onClick={() => { this.addFilter(item) }}>
-          <ListItemText primary={item.name}/>
+          <ListItemText classes={{ 'root': 'searchresult-item' }} primary={item.name} disableTypography={true}/>
         </ListItem>
       })
     })
 
     let searchResults = resultCategories.map((cat, i) => {
       return <div key={`subheader-${i}`}>
-          <ListSubheader>{categoryTitles[cat]}</ListSubheader>
+          <ListSubheader classes={{ 'root': 'searchresult-header'}}>{categoryTitles[cat]}</ListSubheader>
           {categoryResults[i]}
         </div>
     })
 
+    let holderStyle = {
+      margin: ((window.innerWidth < 850) && this.state.inputFocused) ? 0 : '20px'
+    }
+
     return (
-      <div className="searchbar-holder">
+      <div className="searchbar-holder" style={holderStyle}>
         <Grid container>
           <Grid item xs={12} sm={7} md={6} lg={4} xl={3}>
             <Paper>
