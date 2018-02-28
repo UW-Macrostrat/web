@@ -33,6 +33,7 @@ export const TOGGLE_BEDROCK = 'TOGGLE_BEDROCK'
 export const TOGGLE_SATELLITE = 'TOGGLE_SATELLITE'
 export const TOGGLE_COLUMNS = 'TOGGLE_COLUMNS'
 export const TOGGLE_INDEXMAP = 'TOGGLE_INDEXMAP'
+export const TOGGLE_FOSSILS = 'TOGGLE_FOSSILS'
 
 export const START_SEARCH_QUERY = 'START_SEARCH_QUERY'
 export const RECEIVED_SEARCH_QUERY = 'RECEIVED_SEARCH_QUERY'
@@ -108,6 +109,12 @@ export const toggleColumns = () => {
 export const toggleIndexMap = () => {
   return {
     type: TOGGLE_INDEXMAP
+  }
+}
+
+export const toggleFossils = () => {
+  return {
+    type: TOGGLE_FOSSILS
   }
 }
 

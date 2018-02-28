@@ -20,6 +20,13 @@ class Map extends Component {
     this.currentSources = []
     this.isPanning = false
     this.elevationPoints = []
+    this.noFilter = [
+      "all",
+      ["!=", "color", ""]
+    ]
+    this.filters = [
+      "any",
+    ]
   }
 
   componentDidMount() {
@@ -317,6 +324,20 @@ class Map extends Component {
           }
         })
       }
+    } else if (nextProps.mapHasFossils != this.props.mapHasFossils) {
+      if (nextProps.mapHasFossils) {
+        mapStyle.layers.forEach(layer => {
+          if (layer.source === 'pbdb') {
+            this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
+          }
+        })
+      } else {
+        mapStyle.layers.forEach(layer => {
+          if (layer.source === 'pbdb') {
+            this.map.setLayoutProperty(layer.id, 'visibility', 'none')
+          }
+        })
+      }
     } else if (nextProps.filters.length != this.props.filters.length) {
       if (nextProps.filters.length === 0) {
         this.map.setFilter('burwell_fill', noFilter)
@@ -354,7 +375,7 @@ class Map extends Component {
         // Find its index in the existing filters
         let presentPosition = this.props.filters.map(f => { return `${f.category}|${f.type}|${f.name}` }).indexOf(outgoing[0])
         let appliedFilters = this.map.getFilter('burwell_fill')
-        appliedFilters.splice((presentPosition + 2), 1)
+        appliedFilters[2].splice((presentPosition + 1), 1)
 
         this.map.setFilter('burwell_fill', appliedFilters)
         this.map.setFilter('burwell_stroke', appliedFilters)
@@ -369,7 +390,7 @@ class Map extends Component {
         }
       })
       if (filterToApply.length === 0) {
-        console.log('no new filters to apply2')
+        console.log('no new filters to apply')
         return
       }
       filterToApply = filterToApply[0]
@@ -410,7 +431,19 @@ class Map extends Component {
       }
 
       let appliedFilters = this.map.getFilter('burwell_fill')
-      appliedFilters.push(newFilter)
+      if (appliedFilters.length === 2) {
+        appliedFilters.push([
+          "any",
+          newFilter
+        ])
+      } else {
+        appliedFilters[2].push(newFilter)
+      }
+      // appliedFilters.push(newFilter)
+
+      // this.filters.push(newFilter)
+      // let appliedFilters = this.noFilter
+      // appliedFilters.push(this.filters)
 
       this.map.setFilter('burwell_fill', appliedFilters)
       this.map.setFilter('burwell_stroke', appliedFilters)

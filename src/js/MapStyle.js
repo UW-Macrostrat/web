@@ -10,6 +10,13 @@ export const mapStyle = {
             ],
             "tileSize": 512
         },
+        "pbdb": {
+            "type": "vector",
+            "tiles": [
+              `${SETTINGS.burwellTileDomain}/pbdb-collections/{z}/{x}/{y}.mvt`
+            ],
+            "tileSize": 512
+        },
         "info_marker": {
           "type": "geojson",
           "data": {
@@ -900,6 +907,31 @@ export const mapStyle = {
             "line-color": "#ffffff",
             "line-opacity": 1
           }
-        }
+        },
+        {
+          "id": "pbdbCollections",
+          "type": "circle",
+          "source": "pbdb",
+          "source-layer": "pbdb-collections",
+          "layout": {
+            "visibility": "none"
+          },
+          "paint": {
+            "circle-radius": {
+              "property": "n_collections",
+              "default": 10,
+              "stops": [
+                [{zoom: 0, value: 1}, 5],
+                [{zoom: 0, value: 5000}, 30],
+                [{zoom: 10, value: 1}, 10],
+                [{zoom: 10, value: 50}, 30],
+              ]
+            },
+            "circle-color": "#ffffff",
+            "circle-opacity": 0.8,
+            "circle-stroke-width": 1,
+            "circle-stroke-color": "#aaaaaa"
+          }
+        },
     ]
 }

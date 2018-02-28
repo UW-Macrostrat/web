@@ -26,7 +26,7 @@ class Menu extends Component {
   }
 
   render() {
-    const { menuOpen, toggleMenu, toggleBedrock, mapHasBedrock, toggleSatellite, mapHasSatellite, toggleColumns, mapHasColumns, toggleIndexMap, mapHasIndexMap, toggleAbout, toggleElevationChart } = this.props
+    const { menuOpen, toggleMenu, toggleBedrock, mapHasBedrock, toggleSatellite, mapHasSatellite, toggleColumns, mapHasColumns, toggleIndexMap, mapHasIndexMap, toggleAbout, toggleElevationChart, toggleFossils, mapHasFossils } = this.props
     let exitTransition = {
       exit: 300
     }
@@ -69,7 +69,7 @@ class Menu extends Component {
                 </ListItemIcon>
                 <ListItemText primary="Index"/>
               </ListItem>
-              <ListItem button disabled>
+              <ListItem button onClick={toggleFossils} style={{ backgroundColor: (mapHasFossils ? '#eee' : 'transparent') }}>
                 <ListItemIcon>
                   <FossilIcon size={25} />
                 </ListItemIcon>

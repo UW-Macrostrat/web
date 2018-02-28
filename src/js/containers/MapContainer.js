@@ -16,6 +16,7 @@ const mapStateToProps = (state) => {
     mapHasSatellite: state.update.mapHasSatellite,
     mapHasColumns: state.update.mapHasColumns,
     mapHasIndexMap: state.update.mapHasIndexMap,
+    mapHasFossils: state.update.mapHasFossils,
     mapCenter: state.update.mapCenter,
     elevationChartOpen: state.update.elevationChartOpen,
     elevationData: state.update.elevationData,
