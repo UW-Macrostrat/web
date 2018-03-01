@@ -77,6 +77,7 @@ class Map extends Component {
     })
 
     this.map.on('click', (event) => {
+
       if (this.props.elevationChartOpen && this.props.elevationData && this.props.elevationData.length === 0) {
         this.elevationPoints.push([event.lngLat.lng, event.lngLat.lat])
         this.map.getSource('elevationPoints').setData({
@@ -106,6 +107,17 @@ class Map extends Component {
         }
         return
       }
+      if (this.props.mapHasFossils) {
+        let collections = this.map.queryRenderedFeatures(event.point, { layers: ['pbdbCollections']})
+        if (collections.length && collections[0].properties.cid) {
+          this.map.zoomTo(this.map.getZoom() + 1, { center: event.lngLat })
+          return
+        } else if (collections.length && collections[0].properties.collection_no) {
+          this.props.getPBDB(collections.map(col => { return col.properties.collection_no }))
+          return
+        }
+      }
+
       let features = this.map.queryRenderedFeatures(event.point, { layers: ['burwell_fill', 'column_fill', 'indexMap_fill']})
 
       let burwellFeatures = features.filter(f => {
@@ -430,10 +442,15 @@ class Map extends Component {
 
       }
 
+      // Basically if we are filtering by environments or anything else we can't filter the map with
+      if (!newFilter.length) {
+        return
+      }
+
       let appliedFilters = this.map.getFilter('burwell_fill')
       if (appliedFilters.length === 2) {
         appliedFilters.push([
-          "any",
+          'any',
           newFilter
         ])
       } else {

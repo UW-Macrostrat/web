@@ -933,5 +933,19 @@ export const mapStyle = {
             "circle-stroke-color": "#aaaaaa"
           }
         },
+        {
+          "id": "pbdbCollections_highlight",
+          "type": "circle",
+          "source": "pbdb",
+          "source-layer": "pbdb-collections",
+          "paint": {
+            "circle-radius": 10,
+            "circle-color": "#ffffff",
+            "circle-opacity": 1,
+            "circle-stroke-width": 2,
+            "circle-stroke-color": "#045275"
+          },
+          "filter": ["==", "collection_no", ""]
+        },
     ]
 }

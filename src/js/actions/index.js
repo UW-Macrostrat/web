@@ -29,6 +29,10 @@ export const RECEIVED_COLUMN_QUERY = 'RECEIVED_COLUMN_QUERY'
 export const START_GDD_QUERY = 'START_GDD_QUERY'
 export const RECEIVED_GDD_QUERY = 'RECEIVED_GDD_QUERY'
 
+export const START_PBDB_QUERY = 'START_PBDB_QUERY'
+export const UPDATE_PBDB_QUERY = 'UPDATE_PBDB_QUERY'
+export const RECEIVED_PBDB_QUERY = 'RECEIVED_PBDB_QUERY'
+
 export const TOGGLE_BEDROCK = 'TOGGLE_BEDROCK'
 export const TOGGLE_SATELLITE = 'TOGGLE_SATELLITE'
 export const TOGGLE_COLUMNS = 'TOGGLE_COLUMNS'
@@ -198,7 +202,7 @@ export const doSearch = (term) => {
 
     dispatch(startSearchQuery(term, source))
 
-    return axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/autocomplete?include=interval,lithology,strat_name&query=${term}`, {
+    return axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/autocomplete?include=interval,lithology,environ,strat_name&query=${term}`, {
       cancelToken: source.token,
       responseType: 'json'
     })
@@ -296,6 +300,15 @@ export function addFilter(theFilter) {
           })
           break
 
+        case 'environments':
+        case 'environment_types':
+        case 'environment_classes':
+          dispatch({
+            type: ADD_FILTER,
+            filter: theFilter
+          })
+          break
+
         default:
           console.log('i do not support that filter type', theFilter.type)
       }
@@ -351,6 +364,24 @@ export function getFilteredColumns(providedFilters) {
           query['lith_id'].push(f.id)
         } else {
           query['lith_id'] = [f.id]
+        }
+      } else if (f.type === 'environment') {
+        if (query['environ_id']) {
+          query['environ_id'].push(f.id)
+        } else {
+          query['environ_id'] = [ f.id ]
+        }
+      } else if (f.type === 'environment_types') {
+        if (query['environ_type']) {
+          query['environ_type'].push(f.name)
+        } else {
+          query['environ_type'] = [ f.name ]
+        }
+      } else if (f.type === 'environment_classes') {
+        if (query['environ_class']) {
+          query['environ_class'].push(f.name)
+        } else {
+          query['environ_class'] = [ f.name ]
         }
       }
     })
@@ -489,6 +520,72 @@ export const getElevation = (line) => {
 export function receivedElevationQuery(data) {
   return {
     type: RECEIVED_ELEVATION_QUERY,
+    data: data
+  }
+}
+
+
+
+export function startPbdbQuery(cancelToken) {
+  return {
+    type: START_PBDB_QUERY,
+    cancelToken: cancelToken
+  }
+}
+
+export function updatePbdbQuery(cancelToken) {
+  return {
+    type: UPDATE_PBDB_QUERY,
+    cancelToken: cancelToken
+  }
+}
+
+export const getPBDB = (collection_nos) => {
+  return (dispatch) => {
+    let CancelToken = axios.CancelToken
+    let source = CancelToken.source()
+
+    dispatch(startPbdbQuery(source))
+
+    return axios.get(`${SETTINGS.pbdbDomain}/data1.2/colls/list.json?id=${collection_nos.join(',')}&show=ref,time,strat,geo,lith,entname,prot&markrefs`, {
+      cancelToken: source.token,
+      responseType: 'json'
+    })
+      .then(collectionResponse => {
+        let CancelToken2 = axios.CancelToken
+        let source2 = CancelToken.source()
+
+        dispatch(updatePbdbQuery(source2))
+
+        axios.get(`${SETTINGS.pbdbDomain}/data1.2/occs/list.json?coll_id=${collection_nos.join(',')}&show=phylo,ident`)
+          .then(occurrenceResponse => {
+            let occurrences = occurrenceResponse.data.records
+
+            let collections = collectionResponse.data.records.map(col => {
+              col.occurrences = []
+
+              occurrences.forEach(occ => {
+                if (occ.cid === col.oid) {
+                  col.occurrences.push(occ)
+                }
+              })
+              return col
+            })
+
+            dispatch(receivedPbdbQuery(collections))
+
+          })
+      })
+      .catch(error => {
+        // don't care 💁
+        dispatch(receivedPbdbQuery([]))
+      })
+  }
+}
+
+export function receivedPbdbQuery(data) {
+  return {
+    type: RECEIVED_PBDB_QUERY,
     data: data
   }
 }

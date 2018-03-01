@@ -17,6 +17,7 @@ const categoryTitles = {
   'interval': 'Time Intervals',
   'place': 'Places (via Mapbox)',
   'strat_name': 'Stratigraphic Names',
+  'environ': 'Environments (columns only)',
 }
 class Searchbar extends Component {
   constructor(props) {
@@ -123,6 +124,9 @@ class Searchbar extends Component {
                       <ListItemText inset primary="Stratigraphic Names" />
                     </ListItem>
                     <ListItem>
+                      <ListItemText inset primary="Environments (columns only)" />
+                    </ListItem>
+                    <ListItem>
                       <ListItemText inset primary="Places" />
                     </ListItem>
                   </List>
@@ -142,11 +146,5 @@ class Searchbar extends Component {
     )
   }
 }
-
-// Searchbar.propTypes = {
-//   onClick: PropTypes.func.isRequired,
-//   msg: PropTypes.string.isRequired,
-//   clicks: PropTypes.number.isRequired
-// }
 
 export default Searchbar

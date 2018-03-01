@@ -65,7 +65,7 @@ class InfoDrawer extends Component {
 
   render() {
     const { infoDrawerOpen, toggleInfoDrawer, expandInfoDrawer, infoDrawerExpanded } = this.props
-    let { mapInfo, gddInfo, activeIndexMap } = this.props
+    let { mapInfo, gddInfo, activeIndexMap, pbdbData } = this.props
 
     const { expanded } = this.state
     let expansionPanelClasses = {
@@ -144,21 +144,37 @@ class InfoDrawer extends Component {
             <Grid container alignItems="center" alignContent="center">
               <Grid item xs={12} classes={{ 'grid-xs-12': 'infodrawer-header-grid'}}>
                 <div className="infodrawer-header">
-                  <div className="infodrawer-header-item lnglat-container">
-                    <span className="lnglat">
-                      {this.normalizeLng(this.props.infoMarkerLng)}  {this.props.infoMarkerLat}
-                    </span>
-                    <span className="z">
-                      {mapInfo.elevation}<span className='age-chip-ma'>m</span> | {(mapInfo.elevation * 3.28084).toFixed(0)}<span className='age-chip-ma'>ft</span>
-                    </span>
-                  </div>
-                  <div className="infodrawer-header-item">  
+                  {mapInfo.elevation ?
+                    <div className="infodrawer-header-item lnglat-container">
+                      <span className="lnglat">
+                        {this.normalizeLng(this.props.infoMarkerLng)}  {this.props.infoMarkerLat}
+                      </span>
+                      <span className="z">
+                        {mapInfo.elevation}<span className='age-chip-ma'>m</span> | {(mapInfo.elevation * 3.28084).toFixed(0)}<span className='age-chip-ma'>ft</span>
+                      </span>
+                    </div>
+                  : ''}
+
+                  <div className="infodrawer-header-item">
                     <IconButton color="default" aria-label="InfoDrawer" onClick={toggleInfoDrawer}>
                       <CloseIcon/>
                     </IconButton>
                   </div>
                 </div>
+                {
+                  pbdbData && pbdbData.length > 0 ?
+                  <div>
+                    <h1 className="infoDrawer-title-no-ellipsis infoDrawer-title-main">Fossil Collections</h1>
+                    <p>Via the Paleobiology Database</p>
+                    {pbdbData.map((col, idx) => {
+                      return
+                      <h1>{col.nam}</h1>
 
+
+                    })}
+                  </div>
+                  : ''
+                }
                 {
                   activeIndexMap && Object.keys(activeIndexMap).length > 0 ?
                   <div>
@@ -196,7 +212,7 @@ class InfoDrawer extends Component {
                         {
                           mapInfo && mapInfo.mapData && mapInfo.mapData.length
                           ? ( mapInfo.mapData[0].name && mapInfo.mapData[0].name.length ? mapInfo.mapData[0].name : mapInfo.mapData[0].descrip )
-                          : ( (mapInfo && (mapInfo.hasColumns || (mapInfo.regions && mapInfo.regions.length))) ? '' :  'No data found')
+                          : ( (mapInfo && (mapInfo.hasColumns || (mapInfo.regions && mapInfo.regions.length) || (pbdbData && pbdbData.length))) ? '' :  'No data found')
 
                         }
                       </h1>
@@ -291,6 +307,12 @@ class InfoDrawer extends Component {
                 <span>
                   <Divider/>
                   <h1 className="infoDrawer-title">Macrostrat.org</h1>
+                  <ExpansionPanel classes={{ 'root': 'regional-panel'}} onChange={this.openColumnInfo}>
+                    <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} classes={expansionPanelClasses}>
+                      <Typography className="expansion-summary-title">Regional stratigraphy </Typography>
+                    </ExpansionPanelSummary>
+
+                  </ExpansionPanel>
                 </span>
 
                 : ''

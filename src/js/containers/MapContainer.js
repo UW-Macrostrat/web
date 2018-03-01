@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import { queryMap, closeInfoDrawer, getFilteredColumns, setActiveIndexMap, getElevation } from '../actions'
+import { queryMap, closeInfoDrawer, getFilteredColumns, setActiveIndexMap, getElevation, getPBDB } from '../actions'
 import Map from '../components/Map'
 
 const mapStateToProps = (state) => {
@@ -40,6 +40,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     getElevation: (line) => {
       dispatch(getElevation(line))
+    },
+    getPBDB: (collection_nos) => {
+      dispatch(getPBDB(collection_nos))
     }
   }
 }

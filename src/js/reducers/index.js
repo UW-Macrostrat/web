@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux'
-import { PAGE_CLICK, REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK, TOGGLE_SATELLITE, TOGGLE_COLUMNS, TOGGLE_INDEXMAP, CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER, REMOVE_FILTER, GO_TO_PLACE, TOGGLE_ABOUT, TOGGLE_FOSSILS, UPDATE_COLUMN_FILTERS, START_COLUMN_QUERY, RECEIVED_COLUMN_QUERY, START_GDD_QUERY, RECEIVED_GDD_QUERY, SET_ACTIVE_INDEX_MAP, TOGGLE_ELEVATION_CHART, START_ELEVATION_QUERY, RECEIVED_ELEVATION_QUERY } from '../actions'
+import { PAGE_CLICK, REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK, TOGGLE_SATELLITE, TOGGLE_COLUMNS, TOGGLE_INDEXMAP, CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER, REMOVE_FILTER, GO_TO_PLACE, TOGGLE_ABOUT, TOGGLE_FOSSILS, UPDATE_COLUMN_FILTERS, START_COLUMN_QUERY, RECEIVED_COLUMN_QUERY, START_GDD_QUERY, RECEIVED_GDD_QUERY, SET_ACTIVE_INDEX_MAP, TOGGLE_ELEVATION_CHART, START_ELEVATION_QUERY, RECEIVED_ELEVATION_QUERY, START_PBDB_QUERY, UPDATE_PBDB_QUERY, RECEIVED_PBDB_QUERY } from '../actions'
 import { sum, timescale } from '../utils'
 
 const classColors = {
@@ -37,6 +37,8 @@ const update = (state = {
   searchCancelToken: null,
   fetchingElevation: false,
   elevationCancelToken: null,
+  fetchingPbdb: false,
+  pbdbCancelToken: null,
 
   infoMarkerLng: -999,
   infoMarkerLat: -999,
@@ -46,6 +48,7 @@ const update = (state = {
   gddInfo: [],
   searchResults: [],
   elevationData: [],
+  pbdbInfo: [],
 
   mapHasBedrock: true,
   mapHasSatellite: false,
@@ -76,7 +79,8 @@ const update = (state = {
     case CLOSE_INFODRAWER:
       return Object.assign({}, state, {
         infoDrawerOpen: false,
-        columnInfo: {}
+        columnInfo: {},
+        pbdbData: []
       })
     case TOGGLE_INFODRAWER:
       return Object.assign({}, state, {
@@ -357,6 +361,32 @@ const update = (state = {
         fetchingElevation: false,
         elevationData: action.data,
         elevationCancelToken: null
+      })
+
+    // Handle PBDB
+    case START_PBDB_QUERY:
+      if (state.pbdbCancelToken) {
+        state.pbdbCancelToken.cancel()
+      }
+      return Object.assign({}, state, {
+        fetchingPbdb: true,
+        pbdbCancelToken: action.cancelToken
+      })
+
+    case UPDATE_PBDB_QUERY:
+      if (state.pbdbCancelToken) {
+        state.pbdbCancelToken.cancel()
+      }
+      return Object.assign({}, state, {
+        pbdbCancelToken: action.cancelToken
+      })
+
+    case RECEIVED_PBDB_QUERY:
+      return Object.assign({}, state, {
+        fetchingPbdb: false,
+        pbdbData: action.data,
+        pbdbCancelToken: null,
+        infoDrawerOpen: true
       })
 
     case GO_TO_PLACE:

@@ -14,7 +14,9 @@ const mapStateToProps = (state) => {
     infoMarkerLng: state.update.infoMarkerLng,
     infoMarkerLat: state.update.infoMarkerLat,
     gddInfo: state.update.gddInfo,
-    activeIndexMap: state.update.activeIndexMap
+    activeIndexMap: state.update.activeIndexMap,
+    fetchingPbdb: state.update.fetchingPbdb,
+    pbdbData: state.update.pbdbData
   }
 }
 
