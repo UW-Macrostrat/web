@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import { toggleInfoDrawer, expandInfoDrawer, getColumn, getGdd } from '../actions'
+import { closeInfoDrawer, expandInfoDrawer, getColumn, getGdd } from '../actions'
 import InfoDrawer from '../components/InfoDrawer'
 
 const mapStateToProps = (state) => {
@@ -22,8 +22,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    toggleInfoDrawer: () => {
-      dispatch(toggleInfoDrawer())
+    closeInfoDrawer: () => {
+      dispatch(closeInfoDrawer())
     },
     expandInfoDrawer: () => {
       dispatch(expandInfoDrawer())

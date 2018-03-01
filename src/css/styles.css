@@ -355,6 +355,29 @@ text {
   width: 25vh;
   float: left;
 }
+.pbdb-collection-paper {
+  margin-bottom: 25px !important;
+}
+.pbdb-collection-content {
+  padding: 10px;
+}
+.taxon-list {
+  list-style: none;
+  padding-left: 20px;
+}
+.phyla {
+  margin-bottom: 20px;
+  font-size: 1.6em;
+}
+.classes {
+  font-size: 0.8em;
+}
+.families {
+  font-size: 0.8em;
+}
+.genera {
+  font-size: 0.8em;
+}
 @media(max-width: 850px) {
   .infoDrawer {
     max-width: 100% !important;

@@ -80,6 +80,7 @@ const update = (state = {
       return Object.assign({}, state, {
         infoDrawerOpen: false,
         columnInfo: {},
+        mapInfo: [],
         pbdbData: []
       })
     case TOGGLE_INFODRAWER:

@@ -14,6 +14,7 @@ import { CircularProgress } from 'material-ui/Progress'
 import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Table'
 import Card, { CardContent } from 'material-ui/Card'
 
+
 import CloseIcon from 'material-ui-icons/Close'
 import Button from 'material-ui/Button'
 import IconButton from 'material-ui/IconButton'
@@ -31,6 +32,7 @@ import AttrChip from './AttrChip'
 import Reference from './Reference'
 import MapSource from './MapSource'
 import LongText from './LongText'
+import PBDBCollections from './PBDBCollections'
 
 import { addCommas } from '../utils'
 
@@ -64,7 +66,7 @@ class InfoDrawer extends Component {
   }
 
   render() {
-    const { infoDrawerOpen, toggleInfoDrawer, expandInfoDrawer, infoDrawerExpanded } = this.props
+    const { infoDrawerOpen, closeInfoDrawer, expandInfoDrawer, infoDrawerExpanded } = this.props
     let { mapInfo, gddInfo, activeIndexMap, pbdbData } = this.props
 
     const { expanded } = this.state
@@ -118,7 +120,7 @@ class InfoDrawer extends Component {
       <Drawer
         anchor={window.innerWidth > 850 ? "right" : "bottom"}
         open={infoDrawerOpen}
-        onBackdropClick={toggleInfoDrawer}
+        onBackdropClick={closeInfoDrawer}
         transitionDuration={300}
         hideBackdrop={true}
         disableAutoFocus={true}
@@ -156,23 +158,14 @@ class InfoDrawer extends Component {
                   : ''}
 
                   <div className="infodrawer-header-item">
-                    <IconButton color="default" aria-label="InfoDrawer" onClick={toggleInfoDrawer}>
+                    <IconButton color="default" aria-label="InfoDrawer" onClick={closeInfoDrawer}>
                       <CloseIcon/>
                     </IconButton>
                   </div>
                 </div>
                 {
                   pbdbData && pbdbData.length > 0 ?
-                  <div>
-                    <h1 className="infoDrawer-title-no-ellipsis infoDrawer-title-main">Fossil Collections</h1>
-                    <p>Via the Paleobiology Database</p>
-                    {pbdbData.map((col, idx) => {
-                      return
-                      <h1>{col.nam}</h1>
-
-
-                    })}
-                  </div>
+                  <PBDBCollections data={pbdbData}/>
                   : ''
                 }
                 {
