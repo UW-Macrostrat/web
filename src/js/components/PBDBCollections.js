@@ -35,7 +35,7 @@ class PBDBCollections extends Component {
               fullWidth
               >
               <Tab label="Info"/>
-              <Tab label="Occurrences"/>
+              <Tab label={`Occurrences (${col.occurrences.length})`} disabled={col.occurrences.length ? false : true}/>
             </Tabs>
 
           <div className='pbdb-collection-content'>
@@ -56,11 +56,6 @@ class PBDBCollections extends Component {
                 { col.oei &&
                   <div className="map-source-attr">
                     <span className="attr">Age: </span> { col.oei } ({ col.lag } - {col.lag}<span className="age-chip-ma">Ma</span>)
-                  </div>
-                }
-                { col.noc &&
-                  <div className="map-source-attr">
-                    <span className="attr">Occurrences: </span> { col.noc }
                   </div>
                 }
                 { col.sgr &&
@@ -97,7 +92,7 @@ class PBDBCollections extends Component {
             {
               this.state['col' + idx] === 1 &&
               <div>
-                <ul className='taxon-list'>
+                <ul className='taxon-list phylum-list'>
                   {occurrenceTree.phyla.map((phylum, pidx) => {
                     return (
                       <div key={pidx} className='phyla'>

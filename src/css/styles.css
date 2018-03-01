@@ -365,9 +365,12 @@ text {
   list-style: none;
   padding-left: 20px;
 }
+.phylum-list {
+  padding-left: 0 !important;
+}
 .phyla {
   margin-bottom: 20px;
-  font-size: 1.6em;
+  font-size: 1.5em;
 }
 .classes {
   font-size: 0.8em;
