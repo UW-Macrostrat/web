@@ -19,6 +19,9 @@ body {
   z-index: -1;
   touch-action: none;
 }
+.other-attributes {
+  margin-bottom: 50px;
+}
 .searchbar-holder {
   margin: 20px;
   transition: margin 300ms;
@@ -174,9 +177,7 @@ text {
   font-size: 1.3em;
   overflow: hidden;
 }
-.infoDrawer-title-main {
-  margin-bottom: 0;
-}
+
 .hidden {
   display: none !important;
 }
@@ -225,6 +226,9 @@ text {
 
 .map-source {
   margin-top: 30px;
+}
+.map-source-attrs {
+  padding: 5px 10px 5px 10px;
 }
 .map-source-attr {
   display: block;

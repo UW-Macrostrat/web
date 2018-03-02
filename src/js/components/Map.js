@@ -55,7 +55,7 @@ class Map extends Component {
       })
 
       mapStyle.layers.forEach(layer => {
-        if (layer.source === 'indexMap' || layer.source === 'columns') {
+        if (layer.source === 'indexMap' || layer.source === 'columns' || layer.source === 'info_marker') {
           this.map.addLayer(layer)
         } else {
           this.map.addLayer(layer, 'airport-label')
@@ -77,7 +77,7 @@ class Map extends Component {
     })
 
     this.map.on('click', (event) => {
-
+      // If the elevation drawer is open and we are awaiting to points, add them
       if (this.props.elevationChartOpen && this.props.elevationData && this.props.elevationData.length === 0) {
         this.elevationPoints.push([event.lngLat.lng, event.lngLat.lat])
         this.map.getSource('elevationPoints').setData({
@@ -107,12 +107,14 @@ class Map extends Component {
         }
         return
       }
+
       if (this.props.mapHasFossils) {
         let collections = this.map.queryRenderedFeatures(event.point, { layers: ['pbdbCollections']})
-        if (collections.length && collections[0].properties.cid) {
+        console.log('collections - ', collections)
+        if (collections.length && collections[0].properties.hasOwnProperty('n_collections')) {
           this.map.zoomTo(this.map.getZoom() + 1, { center: event.lngLat })
           return
-        } else if (collections.length && collections[0].properties.collection_no) {
+        } else if (collections.length && collections[0].properties.hasOwnProperty('collection_no')) {
           this.props.getPBDB(collections.map(col => { return col.properties.collection_no }))
           return
         }
@@ -195,7 +197,12 @@ class Map extends Component {
       })
 
       this.currentLayers.forEach(layer => {
-        this.map.addLayer(layer.layer, 'airport-label')
+        if (layer.layer.id != 'infoMarker') {
+          this.map.addLayer(layer.layer, 'airport-label')
+        } else {
+          this.map.addLayer(layer.layer)
+        }
+
         if (layer.filters) {
           this.map.setFilter(layer.layer.id, layer.filters)
         }

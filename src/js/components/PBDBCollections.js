@@ -70,7 +70,7 @@ class PBDBCollections extends Component {
                 }
                 { col.lt1 &&
                   <div className="map-source-attr">
-                    <span className="attr">Lithology: </span> { col.la1 ? col.la1 : '' } { col.lf1 ? col.lf1 : ''} { col.lt1 } { col.lt2 ? ', ' : '' }
+                    <span className="attr">Lithology: </span> { col.la1 ? col.la1 : '' } { col.lf1 ? col.lf1 : ''} { col.lt1.replace('"', '') } { col.lt2 ? ', ' : '' }
                       { col.la2 ? col.la2 : '' } { col.lf2 ? col.lf2 : ''} { col.lt2 }
                   </div>
                 }

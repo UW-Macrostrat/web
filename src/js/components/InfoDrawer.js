@@ -13,6 +13,7 @@ import ExpansionPanel, {
 import { CircularProgress } from 'material-ui/Progress'
 import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Table'
 import Card, { CardContent } from 'material-ui/Card'
+import Paper from 'material-ui/Paper'
 
 
 import CloseIcon from 'material-ui-icons/Close'
@@ -204,25 +205,22 @@ class InfoDrawer extends Component {
                       <h1 className="infoDrawer-title infoDrawer-title-main">
                         {
                           mapInfo && mapInfo.mapData && mapInfo.mapData.length
-                          ? ( mapInfo.mapData[0].name && mapInfo.mapData[0].name.length ? mapInfo.mapData[0].name : mapInfo.mapData[0].descrip )
+                          ? 'Original map'
                           : ( (mapInfo && (mapInfo.hasColumns || (mapInfo.regions && mapInfo.regions.length) || (pbdbData && pbdbData.length))) ? '' :  'No data found')
 
                         }
                       </h1>
                     </Grid>
                   </Grid>
-                  {
-                    mapInfo && mapInfo.mapData && mapInfo.mapData.length && (!source.macrostrat || Object.keys(source.macrostrat).length === 0)
-                    ? <AgeChip b_int={mapInfo.mapData[0].b_int} t_int={mapInfo.mapData[0].t_int}></AgeChip>
-                    : ''
-                  }
+
                 </div>
 
 
               </Grid>
             </Grid>
 
-            <div>
+            <div className={mapInfo && mapInfo.mapData && mapInfo.mapData.length ? "other-attributes" : "hidden"}>
+              <Paper>
               <div className="map-source-attrs">
                 {
                   source.name && source.name.length
@@ -293,21 +291,21 @@ class InfoDrawer extends Component {
                 }
                 <Reference reference={source.ref} />
               </div>
+            </Paper>
 
 
               {
-                source.macrostrat && Object.keys(source.macrostrat).length > 0 ?
+                (source.macrostrat && Object.keys(source.macrostrat).length > 0) || (mapInfo && mapInfo.mapData && mapInfo.mapData.length) ?
                 <span>
                   <Divider/>
                   <h1 className="infoDrawer-title">Macrostrat.org</h1>
-                  <ExpansionPanel classes={{ 'root': 'regional-panel'}} onChange={this.openColumnInfo}>
-                    <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} classes={expansionPanelClasses}>
-                      <Typography className="expansion-summary-title">Regional stratigraphy </Typography>
-                    </ExpansionPanelSummary>
-
-                  </ExpansionPanel>
                 </span>
+                : ''
+              }
 
+              {
+                mapInfo && mapInfo.mapData && mapInfo.mapData.length && (!source.macrostrat || Object.keys(source.macrostrat).length === 0)
+                ? <AgeChip b_int={mapInfo.mapData[0].b_int} t_int={mapInfo.mapData[0].t_int}></AgeChip>
                 : ''
               }
 

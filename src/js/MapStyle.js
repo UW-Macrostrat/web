@@ -62,112 +62,6 @@ export const mapStyle = {
     },
     "layers": [
         {
-          "id": "column_fill",
-          "type": "fill",
-          "source": "columns",
-          "paint": {
-            "fill-color": "#777777",
-            "fill-opacity": 0.2
-          },
-          "layout": {
-            "visibility": "none"
-          }
-        },
-        {
-          "id": "column_stroke",
-          "type": "line",
-          "source": "columns",
-          "paint": {
-            "line-color": "#777777",
-            "line-width": {
-              "stops": [
-                [0, 0.2],
-                [10, 1]
-              ]
-            }
-          },
-          "layout": {
-            "visibility": "none"
-          }
-        },
-        {
-          "id": "filtered_column_fill",
-          "type": "fill",
-          "source": "filteredColumns",
-          "paint": {
-            "fill-color": "#777777",
-            "fill-opacity": 0.2
-          },
-          "layout": {
-            "visibility": "none"
-          }
-        },
-        {
-          "id": "filtered_column_stroke",
-          "type": "line",
-          "source": "filteredColumns",
-          "paint": {
-            "line-color": "#777777",
-            "line-width": {
-              "stops": [
-                [0, 0.2],
-                [10, 1]
-              ]
-            }
-          },
-          "layout": {
-            "visibility": "none"
-          }
-        },
-        {
-          "id": "indexMap_fill",
-          "type": "fill",
-          "source": "indexMap",
-          "paint": {
-            "fill-color": "#000000",
-            "fill-opacity": 0
-          },
-          "layout": {
-            "visibility": "none"
-          }
-        },
-        {
-          "id": "indexMap_stroke",
-          "type": "line",
-          "source": "indexMap",
-          "paint": {
-            "line-color": "#000000",
-            "line-width": {
-              "stops": [
-                [0, 2],
-                [4, 2],
-                [16, 12]
-              ]
-            },
-            "line-opacity": 1
-          },
-          "layout": {
-            "visibility": "none"
-          }
-        },
-        {
-          "id": "indexMap_highlight",
-          "type": "line",
-          "source": "indexMap",
-          "paint": {
-            "line-color": "#045275",
-            "line-width": {
-              "stops": [
-                [0, 6],
-                [4, 6],
-                [16, 18]
-              ]
-            },
-            "line-opacity": 1
-          },
-          "filter": ["==", "source_id", ""]
-        },
-        {
           "id": "burwell_fill",
           "type": "fill",
           "source": "burwell",
@@ -871,6 +765,112 @@ export const mapStyle = {
             },
             "line-opacity": 1
           }
+        },
+        {
+          "id": "column_fill",
+          "type": "fill",
+          "source": "columns",
+          "paint": {
+            "fill-color": "#777777",
+            "fill-opacity": 0.2
+          },
+          "layout": {
+            "visibility": "none"
+          }
+        },
+        {
+          "id": "column_stroke",
+          "type": "line",
+          "source": "columns",
+          "paint": {
+            "line-color": "#777777",
+            "line-width": {
+              "stops": [
+                [0, 0.2],
+                [10, 1]
+              ]
+            }
+          },
+          "layout": {
+            "visibility": "none"
+          }
+        },
+        {
+          "id": "filtered_column_fill",
+          "type": "fill",
+          "source": "filteredColumns",
+          "paint": {
+            "fill-color": "#777777",
+            "fill-opacity": 0.2
+          },
+          "layout": {
+            "visibility": "none"
+          }
+        },
+        {
+          "id": "filtered_column_stroke",
+          "type": "line",
+          "source": "filteredColumns",
+          "paint": {
+            "line-color": "#777777",
+            "line-width": {
+              "stops": [
+                [0, 0.2],
+                [10, 1]
+              ]
+            }
+          },
+          "layout": {
+            "visibility": "none"
+          }
+        },
+        {
+          "id": "indexMap_fill",
+          "type": "fill",
+          "source": "indexMap",
+          "paint": {
+            "fill-color": "#000000",
+            "fill-opacity": 0
+          },
+          "layout": {
+            "visibility": "none"
+          }
+        },
+        {
+          "id": "indexMap_stroke",
+          "type": "line",
+          "source": "indexMap",
+          "paint": {
+            "line-color": "#000000",
+            "line-width": {
+              "stops": [
+                [0, 2],
+                [4, 2],
+                [16, 12]
+              ]
+            },
+            "line-opacity": 1
+          },
+          "layout": {
+            "visibility": "none"
+          }
+        },
+        {
+          "id": "indexMap_highlight",
+          "type": "line",
+          "source": "indexMap",
+          "paint": {
+            "line-color": "#045275",
+            "line-width": {
+              "stops": [
+                [0, 6],
+                [4, 6],
+                [16, 18]
+              ]
+            },
+            "line-opacity": 1
+          },
+          "filter": ["==", "source_id", ""]
         },
         {
           "id": "infoMarker",
