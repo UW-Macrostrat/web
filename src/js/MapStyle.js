@@ -323,7 +323,7 @@ export const mapStyle = {
           "type": "line",
           "source": "burwell",
           "source-layer": "lines",
-          "filter": ["in", "type", "fault", "normal fault", "strike-slip fault", "reverse fault", "growth fault", "fault zone", "zone"],
+          "filter": ["in", "type", "fault", "normal fault", "thrust fault", "strike-slip fault", "reverse fault", "growth fault", "fault zone", "zone"],
           "minzoom": 0,
           "maxzoom": 16,
           "paint": {
@@ -938,6 +938,9 @@ export const mapStyle = {
           "type": "circle",
           "source": "pbdb",
           "source-layer": "pbdb-collections",
+          "layout": {
+            "visibility": "none"
+          },
           "paint": {
             "circle-radius": 10,
             "circle-color": "#ffffff",

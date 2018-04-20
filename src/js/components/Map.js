@@ -39,7 +39,7 @@ class Map extends Component {
         zoom: 7,
         maxZoom: 16,
         hash: true,
-        failIfMajorPerformanceCaveat: true,
+        // failIfMajorPerformanceCaveat: true,
         // dragRotate: false,
         // touchZoomRotate: false
     })
@@ -64,6 +64,11 @@ class Map extends Component {
 
       this.map.setFilter('burwell_fill', noFilter)
       this.map.setFilter('burwell_stroke', noFilter)
+
+      setTimeout(() => {
+        console.log(this.map.getStyle())
+        console.log(this.map.getSource('composite'))
+      }, 5000)
 
     })
 
@@ -144,7 +149,7 @@ class Map extends Component {
         this.props.setActiveIndexMap(indexMapFeatures[0].properties)
       }
 
-      console.log(features)
+      //console.log(features)
 
       let xOffset = (window.innerWidth > 850) ? -((window.innerWidth*0.3333)/2) : 0
 
@@ -263,9 +268,7 @@ class Map extends Component {
           [ nextProps.mapCenter.place.bbox[2], nextProps.mapCenter.place.bbox[3] ]
         ]
         this.map.fitBounds(bounds, {
-          easing: function easing(t) {
-            return t * (2 - t)
-          },
+          duration: 0,
           maxZoom: 16
         })
       } else {

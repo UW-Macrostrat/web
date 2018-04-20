@@ -131,8 +131,8 @@ text {
 	-moz-transition: 0.8s;
 	transition: 0.8s;
   background-color: #ffffff;
-  padding: 25px;
-  height: 100vh;
+  padding: 20px;
+  /* height: 100vh; */
 }
 .infoDrawer-root {
   z-index: 0 !important;
