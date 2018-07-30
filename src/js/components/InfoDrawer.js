@@ -171,7 +171,7 @@ class InfoDrawer extends Component {
                 }
                 {
                   activeIndexMap && Object.keys(activeIndexMap).length > 0 ?
-                  <div>
+                  <div className='infoDrawer-map-ref'>
                     <h1 className="infoDrawer-title-no-ellipsis infoDrawer-title-main">{activeIndexMap.ref_title}</h1>
                     <p>
                       {activeIndexMap.authors},

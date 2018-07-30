@@ -17,6 +17,7 @@ html, body, .main-container, #react, #app-holder {
 }
 .map-holder {
   z-index: 1;
+  height: auto;
 }
 #map {
   position: absolute;
@@ -396,6 +397,9 @@ text {
 }
 .searchbar-background {
   background-color: #ffffff;
+}
+.infoDrawer-map-ref {
+  float: left;
 }
 @media(max-width: 850px) {
   .infoDrawer {
