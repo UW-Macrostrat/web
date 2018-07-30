@@ -4,11 +4,18 @@ body {
   padding:0;
   font-family: 'Source Sans Pro', sans-serif;
 }
+html, body, .main-container, #react, #app-holder {
+  height: 100%;
+  width: 100%;
+}
 ::-webkit-scrollbar,
 *::-webkit-scrollbar {
   display: none;
 }
 .ui {
+  z-index: 100;
+}
+.map-holder {
   z-index: 1;
 }
 #map {
@@ -16,7 +23,6 @@ body {
   top: 0;
   bottom: 0;
   width: 100%;
-  z-index: -1;
   touch-action: none;
 }
 .other-attributes {
@@ -32,6 +38,9 @@ body {
 .custom-svg-icon {
   flex-shrink: 0;
   margin-right: 16px;
+}
+.search-results {
+  background-color: #ffffff !important;
 }
 .search-input {
   border: none;
@@ -384,6 +393,9 @@ text {
 }
 .genera {
   font-size: 0.8em;
+}
+.searchbar-background {
+  background-color: #ffffff;
 }
 @media(max-width: 850px) {
   .infoDrawer {

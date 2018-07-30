@@ -487,7 +487,7 @@ class Map extends Component {
   }
   render() {
     return (
-      <div>
+      <div className='map-holder'>
         <div id='map'></div>
       </div>
     )

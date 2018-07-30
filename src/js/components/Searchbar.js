@@ -91,7 +91,7 @@ class Searchbar extends Component {
         <Grid container>
           <Grid item xs={12} sm={7} md={6} lg={4} xl={3}>
             <Paper>
-              <Toolbar>
+              <Toolbar className="searchbar-background">
                   <IconButton color="default" aria-label="Menu" onClick={toggleMenu}>
                     <MenuIcon />
                   </IconButton>
@@ -108,9 +108,9 @@ class Searchbar extends Component {
                     <WarningIcon />
                   </IconButton>
               </Toolbar>
-              <Collapse in={this.state.inputFocused} timeout="auto" unmountOnExit>
-                <div className="search-results">
-                  <List className={this.state.searchTerm.length != 0 ? 'hidden' : ''} dense={true}>
+              <Collapse in={this.state.inputFocused} timeout="auto" unmountOnExit className="search-results">
+                <div>
+                  <List className={this.state.searchTerm.length != 0 ? 'hidden' : 'search-results'} dense={true}>
                     <ListItem>
                       <ListItemText primary="Available categories:" />
                     </ListItem>
@@ -130,7 +130,7 @@ class Searchbar extends Component {
                       <ListItemText inset primary="Places" />
                     </ListItem>
                   </List>
-                  <List className={this.state.searchTerm.length < 3 ? 'hidden' : ''}>
+                  <List className={this.state.searchTerm.length < 3 ? 'hidden' : 'search-results'}>
                     {this.props.searchResults && this.props.searchResults.length ?
                       searchResults
                       : ''

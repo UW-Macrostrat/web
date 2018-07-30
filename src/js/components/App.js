@@ -16,7 +16,8 @@ class App extends Component {
 
   render() {
     return (
-      <div>
+      <div id="app-holder">
+        <MapContainer/>
         <div className="ui">
           <MenuContainer/>
           <SearchbarContainer/>
@@ -25,7 +26,6 @@ class App extends Component {
           <AboutContainer/>
           <ElevationChartContainer/>
         </div>
-        <MapContainer/>
       </div>
     )
   }
