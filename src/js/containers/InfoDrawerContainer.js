@@ -16,7 +16,12 @@ const mapStateToProps = (state) => {
     gddInfo: state.update.gddInfo,
     activeIndexMap: state.update.activeIndexMap,
     fetchingPbdb: state.update.fetchingPbdb,
-    pbdbData: state.update.pbdbData
+    pbdbData: state.update.pbdbData,
+    mapHasBedrock: state.update.mapHasBedrock,
+    mapHasSatellite: state.update.mapHasSatellite,
+    mapHasColumns: state.update.mapHasColumns,
+    mapHasIndexMap: state.update.mapHasIndexMap,
+    mapHasFossils: state.update.mapHasFossils,
   }
 }
 
