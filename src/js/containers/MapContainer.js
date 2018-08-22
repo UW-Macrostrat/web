@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import { queryMap, closeInfoDrawer, getFilteredColumns, setActiveIndexMap, getElevation, getPBDB } from '../actions'
+import { queryMap, closeInfoDrawer, getFilteredColumns, getElevation, getPBDB } from '../actions'
 import Map from '../components/Map'
 
 const mapStateToProps = (state) => {
@@ -15,7 +15,6 @@ const mapStateToProps = (state) => {
     mapHasBedrock: state.update.mapHasBedrock,
     mapHasSatellite: state.update.mapHasSatellite,
     mapHasColumns: state.update.mapHasColumns,
-    mapHasIndexMap: state.update.mapHasIndexMap,
     mapHasFossils: state.update.mapHasFossils,
     mapCenter: state.update.mapCenter,
     elevationChartOpen: state.update.elevationChartOpen,
@@ -34,9 +33,6 @@ const mapDispatchToProps = (dispatch) => {
     },
     getFilteredColumns: () => {
       dispatch(getFilteredColumns())
-    },
-    setActiveIndexMap: (data) => {
-      dispatch(setActiveIndexMap(data))
     },
     getElevation: (line) => {
       dispatch(getElevation(line))

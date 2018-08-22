@@ -45,8 +45,7 @@ class InfoDrawer extends Component {
       expanded: null,
       bedrockExpanded: this.props.mapHasBedrock,
       bedrockMatchExpanded: this.props.mapHasBedrock,
-      stratigraphyExpanded: this.props.mapHasColumns,
-      indexMapExpanded: this.props.mapHasIndexMap
+      stratigraphyExpanded: this.props.mapHasColumns
     }
 
     // this.bedrockExpanded = this.props.mapHasBedrock
@@ -71,22 +70,18 @@ class InfoDrawer extends Component {
         this.setState({
           stratigraphyExpanded: !this.state.stratigraphyExpanded
         })
-        if (!this.state.stratigraphyExpanded) {
-          console.log('get column!')
-          this.props.getColumn()
-        }
-      } else if (panel === 'indexMap') {
-        this.setState({
-          indexMapExpanded: !this.state.indexMapExpanded
-        })
+        // if (!this.state.stratigraphyExpanded) {
+        //   console.log('get column!')
+        //   this.props.getColumn()
+        // }
       }
 
     }
-    this.openColumnInfo = (event, expanded) => {
-      if (Object.keys(this.props.columnInfo).length === 0) {
-        this.props.getColumn()
-      }
-    }
+    // this.openColumnInfo = (event, expanded) => {
+    //   if (Object.keys(this.props.columnInfo).length === 0) {
+    //     this.props.getColumn()
+    //   }
+    // }
     this.openGdd = (event, expanded) => {
       if (this.props.gddInfo.length === 0) {
         this.props.getGdd()
@@ -110,13 +105,7 @@ class InfoDrawer extends Component {
       this.setState({
         stratigraphyExpanded: nextProps.mapHasColumns
       })
-      this.props.getColumn()
-    }
-
-    if (nextProps.mapHasIndexMap != this.props.mapHasIndexMap) {
-      this.setState({
-        indexMapExpanded: nextProps.mapHasIndexMap
-      })
+    //  this.props.getColumn()
     }
 
     // Reset the state when the drawer is closed
@@ -125,7 +114,6 @@ class InfoDrawer extends Component {
         bedrockExpanded: nextProps.mapHasBedrock,
         bedrockMatchExpanded: nextProps.mapHasBedrock,
         stratigraphyExpanded: nextProps.mapHasColumns,
-        indexMapExpanded: nextProps.mapHasIndexMap
       })
     }
 
@@ -137,9 +125,9 @@ class InfoDrawer extends Component {
 
   render() {
     const { infoDrawerOpen, closeInfoDrawer, expandInfoDrawer, infoDrawerExpanded } = this.props
-    let { mapInfo, gddInfo, activeIndexMap, pbdbData } = this.props
+    let { mapInfo, gddInfo, pbdbData } = this.props
 
-    const { expanded, bedrockExpanded, bedrockMatchExpanded, stratigraphyExpanded, indexMapExpanded } = this.state
+    const { expanded, bedrockExpanded, bedrockMatchExpanded, stratigraphyExpanded } = this.state
 
     let expansionPanelClasses = {
       'content': 'expansion-panel',
@@ -183,9 +171,9 @@ class InfoDrawer extends Component {
     //     })
     //   })
     // }
-    if (Object.keys(this.props.columnInfo).length != 0) {
-      console.log(this.props.columnInfo.timescale)
-    }
+    // if (Object.keys(this.props.columnInfo).length != 0) {
+    //   console.log(this.props.columnInfo.timescale)
+    // }
 
     return (
       <Drawer
@@ -243,39 +231,6 @@ class InfoDrawer extends Component {
               </Grid>
               </Grid>
 
-              {
-                activeIndexMap && Object.keys(activeIndexMap).length > 0 ?
-                <span>
-                  <ExpansionPanel classes={{ 'root': 'regional-panel'}} onChange={this.collapse('indexMap')} expanded={indexMapExpanded}>
-                    <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} classes={expansionPanelClasses}>
-                      <Typography className="expansion-summary-title">Map Source</Typography>
-                    </ExpansionPanelSummary>
-                    <ExpansionPanelDetails classes={expansionPanelDetailClasses}>
-                      <h1 className="infoDrawer-title-no-ellipsis infoDrawer-title-main">{activeIndexMap.ref_title}</h1>
-                      <p>
-                        {activeIndexMap.authors},
-                        {
-                          activeIndexMap.ref_year.length ?
-                          ` ${activeIndexMap.ref_year}, ` :
-                          ''
-                        }
-                        {
-                          activeIndexMap.ref_source.length ?
-                          ` ${activeIndexMap.ref_source}, ` :
-                          ''
-                        }
-                        {
-                          activeIndexMap.isbn_doi.length ?
-                          ` ${activeIndexMap.isbn_doi}, ` :
-                          ''
-                        }
-                        <a className="ref-link" href={activeIndexMap.url} target='_blank'>{activeIndexMap.url}</a>
-                      </p>
-                    </ExpansionPanelDetails>
-                  </ExpansionPanel>
-                </span>
-                : ''
-              }
 
               {
                 mapInfo && mapInfo.mapData && mapInfo.mapData.length ?

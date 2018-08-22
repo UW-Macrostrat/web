@@ -55,7 +55,7 @@ class Map extends Component {
       })
 
       mapStyle.layers.forEach(layer => {
-        if (layer.source === 'indexMap' || layer.source === 'columns' || layer.source === 'info_marker') {
+        if (layer.source === 'columns' || layer.source === 'info_marker') {
           this.map.addLayer(layer)
         } else {
           this.map.addLayer(layer, 'airport-label')
@@ -65,10 +65,10 @@ class Map extends Component {
       this.map.setFilter('burwell_fill', noFilter)
       this.map.setFilter('burwell_stroke', noFilter)
 
-      setTimeout(() => {
-        console.log(this.map.getStyle())
-        console.log(this.map.getSource('composite'))
-      }, 5000)
+      // setTimeout(() => {
+      //   console.log(this.map.getStyle())
+      //   console.log(this.map.getSource('composite'))
+      // }, 5000)
 
     })
 
@@ -78,7 +78,6 @@ class Map extends Component {
       }
       this.map.setLayoutProperty('infoMarker', 'visibility', 'none')
       this.props.closeInfoDrawer()
-      this.map.setFilter('indexMap_highlight', [ '==', 'source_id', '' ])
     })
 
     this.map.on('click', (event) => {
@@ -113,6 +112,7 @@ class Map extends Component {
         return
       }
 
+      // If we are viewing fossils, prioritize clicks on those
       if (this.props.mapHasFossils) {
         let collections = this.map.queryRenderedFeatures(event.point, { layers: ['pbdbCollections']})
         console.log('collections - ', collections)
@@ -125,7 +125,8 @@ class Map extends Component {
         }
       }
 
-      let features = this.map.queryRenderedFeatures(event.point, { layers: ['burwell_fill', 'column_fill', 'indexMap_fill']})
+      // Otherwise try to query the geologic map
+      let features = this.map.queryRenderedFeatures(event.point, { layers: ['burwell_fill', 'column_fill']})
 
       let burwellFeatures = features.filter(f => {
         if (f.layer.id === 'burwell_fill') return f
@@ -137,19 +138,6 @@ class Map extends Component {
       } else {
         this.props.queryMap(event.lngLat.lng, event.lngLat.lat, this.map.getZoom())
       }
-
-      let indexMapFeatures = features.filter(f => {
-        if (f.layer.id === 'indexMap_fill') return f
-      }).sort((a, b) => {
-        return a.properties.area - b.properties.area
-      })
-
-      if (indexMapFeatures.length) {
-        this.map.setFilter('indexMap_highlight', [ '==', 'source_id', indexMapFeatures[0].properties.source_id ])
-        this.props.setActiveIndexMap(indexMapFeatures[0].properties)
-      }
-
-      //console.log(features)
 
       let xOffset = (window.innerWidth > 850) ? -((window.innerWidth*0.3333)/2) : 0
 
@@ -332,20 +320,6 @@ class Map extends Component {
         })
       }
 
-    } else if (nextProps.mapHasIndexMap != this.props.mapHasIndexMap) {
-      if (nextProps.mapHasIndexMap) {
-        mapStyle.layers.forEach(layer => {
-          if (layer.source === 'indexMap') {
-            this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
-          }
-        })
-      } else {
-        mapStyle.layers.forEach(layer => {
-          if (layer.source === 'indexMap') {
-            this.map.setLayoutProperty(layer.id, 'visibility', 'none')
-          }
-        })
-      }
     } else if (nextProps.mapHasFossils != this.props.mapHasFossils) {
       if (nextProps.mapHasFossils) {
         mapStyle.layers.forEach(layer => {

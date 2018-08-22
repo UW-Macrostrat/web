@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux'
-import { PAGE_CLICK, REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK, TOGGLE_SATELLITE, TOGGLE_COLUMNS, TOGGLE_INDEXMAP, CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER, REMOVE_FILTER, GO_TO_PLACE, TOGGLE_ABOUT, TOGGLE_FOSSILS, UPDATE_COLUMN_FILTERS, START_COLUMN_QUERY, RECEIVED_COLUMN_QUERY, START_GDD_QUERY, RECEIVED_GDD_QUERY, SET_ACTIVE_INDEX_MAP, TOGGLE_ELEVATION_CHART, START_ELEVATION_QUERY, RECEIVED_ELEVATION_QUERY, START_PBDB_QUERY, UPDATE_PBDB_QUERY, RECEIVED_PBDB_QUERY } from '../actions'
+import { PAGE_CLICK, REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK, TOGGLE_SATELLITE, TOGGLE_COLUMNS, CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER, REMOVE_FILTER, GO_TO_PLACE, TOGGLE_ABOUT, TOGGLE_FOSSILS, UPDATE_COLUMN_FILTERS, START_COLUMN_QUERY, RECEIVED_COLUMN_QUERY, START_GDD_QUERY, RECEIVED_GDD_QUERY, SET_ACTIVE_INDEX_MAP, TOGGLE_ELEVATION_CHART, START_ELEVATION_QUERY, RECEIVED_ELEVATION_QUERY, START_PBDB_QUERY, UPDATE_PBDB_QUERY, RECEIVED_PBDB_QUERY } from '../actions'
 import { sum, timescale } from '../utils'
 
 const classColors = {
@@ -44,7 +44,6 @@ const update = (state = {
   infoMarkerLat: -999,
   mapInfo: [],
   columnInfo: {},
-  activeIndexMap: {},
   gddInfo: [],
   searchResults: [],
   elevationData: [],
@@ -53,7 +52,6 @@ const update = (state = {
   mapHasBedrock: true,
   mapHasSatellite: false,
   mapHasColumns: false,
-  mapHasIndexMap: false,
   mapHasFossils: false,
   mapCenter: {
     type: null
@@ -129,7 +127,6 @@ const update = (state = {
         infoMarkerLat: action.lat.toFixed(4),
         fetchingMapInfo: true,
         infoDrawerOpen: true,
-        activeIndexMap: {},
         mapInfoCancelToken: action.cancelToken
       })
     case RECEIVED_MAP_QUERY:
@@ -278,10 +275,6 @@ const update = (state = {
       return Object.assign({}, state, {
         mapHasColumns: !state.mapHasColumns
       })
-    case TOGGLE_INDEXMAP:
-      return Object.assign({}, state, {
-        mapHasIndexMap: !state.mapHasIndexMap
-      })
     case TOGGLE_FOSSILS:
       return Object.assign({}, state, {
         mapHasFossils: !state.mapHasFossils
@@ -417,11 +410,6 @@ const update = (state = {
       return Object.assign({}, state, {
         isFetching: false,
         data: action.data
-      })
-
-    case SET_ACTIVE_INDEX_MAP:
-      return Object.assign({}, state, {
-        activeIndexMap: action.data
       })
     default:
       return state

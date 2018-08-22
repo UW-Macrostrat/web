@@ -12,7 +12,6 @@ import SatelliteIcon from 'material-ui-icons/Satellite'
 import Typography from 'material-ui/Typography'
 
 import ColumnIcon from './ColumnIcon'
-import IndexMapIcon from './IndexMapIcon'
 import ElevationIcon from './ElevationIcon'
 import FossilIcon from './FossilIcon'
 
@@ -26,7 +25,7 @@ class Menu extends Component {
   }
 
   render() {
-    const { menuOpen, toggleMenu, toggleBedrock, mapHasBedrock, toggleSatellite, mapHasSatellite, toggleColumns, mapHasColumns, toggleIndexMap, mapHasIndexMap, toggleAbout, toggleElevationChart, toggleFossils, mapHasFossils } = this.props
+    const { menuOpen, toggleMenu, toggleBedrock, mapHasBedrock, toggleSatellite, mapHasSatellite, toggleColumns, mapHasColumns, toggleAbout, toggleElevationChart, toggleFossils, mapHasFossils } = this.props
     let exitTransition = {
       exit: 300
     }
@@ -62,12 +61,6 @@ class Menu extends Component {
                   <ColumnIcon size={25} />
                 </ListItemIcon>
                 <ListItemText primary="Columns"/>
-              </ListItem>
-              <ListItem button onClick={toggleIndexMap} style={{ backgroundColor: (mapHasIndexMap ? '#eee' : 'transparent') }}>
-                <ListItemIcon>
-                  <IndexMapIcon size={25} />
-                </ListItemIcon>
-                <ListItemText primary="Index"/>
               </ListItem>
               <ListItem button onClick={toggleFossils} style={{ backgroundColor: (mapHasFossils ? '#eee' : 'transparent') }}>
                 <ListItemIcon>

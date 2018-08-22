@@ -36,7 +36,6 @@ export const RECEIVED_PBDB_QUERY = 'RECEIVED_PBDB_QUERY'
 export const TOGGLE_BEDROCK = 'TOGGLE_BEDROCK'
 export const TOGGLE_SATELLITE = 'TOGGLE_SATELLITE'
 export const TOGGLE_COLUMNS = 'TOGGLE_COLUMNS'
-export const TOGGLE_INDEXMAP = 'TOGGLE_INDEXMAP'
 export const TOGGLE_FOSSILS = 'TOGGLE_FOSSILS'
 
 export const START_SEARCH_QUERY = 'START_SEARCH_QUERY'
@@ -110,11 +109,6 @@ export const toggleColumns = () => {
     type: TOGGLE_COLUMNS
   }
 }
-export const toggleIndexMap = () => {
-  return {
-    type: TOGGLE_INDEXMAP
-  }
-}
 
 export const toggleFossils = () => {
   return {
@@ -180,11 +174,27 @@ export const queryMap = (lng, lat, z, map_id) => {
       responseType: 'json'
     })
     .then(json => addMapIdToRef(json.data))
+    .then(json => {
+      if (json.success.data && json.success.data.hasColumns) {
+        dispatch(getColumn())
+      }
+      return json
+    })
+    // .then(json => shouldFetchColumn(json))
     .then(json => dispatch(receivedMapQuery(json.success.data)))
+
     .catch(error => {
       // don't care 💁
     })
   }
+}
+
+export function shouldFetchColumn(data) {
+  console.log('shouldFetchColumn?')
+  if (data.success.data && data.success.data.hasColumns) {
+    getColumn()
+  }
+  return data
 }
 
 export function startSearchQuery(term, cancelToken) {
@@ -417,6 +427,7 @@ export function startColumnQuery(cancelToken) {
     cancelToken: cancelToken
   }
 }
+
 export const getColumn = () => {
   return (dispatch, getState) => {
     let { infoMarkerLng, infoMarkerLat } = getState().update
@@ -484,13 +495,6 @@ export function receivedGddQuery(data) {
   }
 }
 
-
-export function setActiveIndexMap(data) {
-  return {
-    type: SET_ACTIVE_INDEX_MAP,
-    data: data
-  }
-}
 
 export function startElevationQuery(cancelToken) {
   return {
