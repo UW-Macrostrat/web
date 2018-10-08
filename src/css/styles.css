@@ -26,6 +26,9 @@ html, body, .main-container, #react, #app-holder {
   width: 100%;
   touch-action: none;
 }
+.mapboxgl-ctrl-bottom-right {
+  z-index: 0;
+}
 .other-attributes {
   margin-bottom: 50px;
 }

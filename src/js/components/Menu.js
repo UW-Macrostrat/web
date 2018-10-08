@@ -3,17 +3,16 @@ import PropTypes from 'prop-types'
 import Drawer from 'material-ui/Drawer'
 import List, { ListItem, ListItemText, ListItemIcon, ListItemSecondaryAction } from 'material-ui/List'
 import Divider from 'material-ui/Divider'
-import DraftsIcon from 'material-ui-icons/Drafts'
 import CloseIcon from 'material-ui-icons/Close'
 import IconButton from 'material-ui/IconButton'
 import InfoOutlineIcon from 'material-ui-icons/InfoOutline'
 import LocationOnIcon from 'material-ui-icons/LocationOn'
 import SatelliteIcon from 'material-ui-icons/Satellite'
 import Typography from 'material-ui/Typography'
-
-import ColumnIcon from './ColumnIcon'
-import ElevationIcon from './ElevationIcon'
-import FossilIcon from './FossilIcon'
+import ColumnIcon from './icons/ColumnIcon'
+import ElevationIcon from './icons/ElevationIcon'
+import FossilIcon from './icons/FossilIcon'
+import BedrockIcon from './icons/BedrockIcon'
 
 class Menu extends Component {
   constructor(props) {
@@ -52,7 +51,7 @@ class Menu extends Component {
             <div className="menu-options">
               <ListItem button onClick={toggleBedrock} style={{ backgroundColor: (mapHasBedrock ? '#eee' : 'transparent') }}>
                 <ListItemIcon>
-                  <DraftsIcon />
+                  <BedrockIcon size={25} />
                 </ListItemIcon>
                 <ListItemText primary="Bedrock"/>
               </ListItem>
@@ -101,11 +100,5 @@ class Menu extends Component {
     )
   }
 }
-
-// Menu.propTypes = {
-//   onClick: PropTypes.func.isRequired,
-//   msg: PropTypes.string.isRequired,
-//   clicks: PropTypes.number.isRequired
-// }
 
 export default Menu

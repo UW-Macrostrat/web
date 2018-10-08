@@ -77,7 +77,7 @@ class Map extends Component {
         return
       }
       this.map.setLayoutProperty('infoMarker', 'visibility', 'none')
-      this.props.closeInfoDrawer()
+      //this.props.closeInfoDrawer()
     })
 
     this.map.on('click', (event) => {
@@ -460,6 +460,7 @@ class Map extends Component {
 
   }
   render() {
+    console.log('render map')
     return (
       <div className='map-holder'>
         <div id='map'></div>
@@ -468,10 +469,5 @@ class Map extends Component {
   }
 }
 
-// Map.propTypes = {
-//   onClick: PropTypes.func.isRequired,
-//   msg: PropTypes.string.isRequired,
-//   clicks: PropTypes.number.isRequired
-// }
 
 export default Map

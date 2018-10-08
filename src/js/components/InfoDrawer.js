@@ -25,7 +25,6 @@ import ExpandMoreIcon from 'material-ui-icons/ExpandMore'
 import ExpandLessIcon from 'material-ui-icons/ExpandLess'
 import Typography from 'material-ui/Typography'
 
-import ElevationIcon from './ElevationIcon'
 import AgeChip from './AgeChip'
 import MacrostratAgeChip from './MacrostratAgeChip'
 import LithChip from './LithChip'
@@ -124,6 +123,7 @@ class InfoDrawer extends Component {
   }
 
   render() {
+    console.log('render infoDrawer')
     const { infoDrawerOpen, closeInfoDrawer, expandInfoDrawer, infoDrawerExpanded } = this.props
     let { mapInfo, gddInfo, pbdbData } = this.props
 
@@ -193,7 +193,7 @@ class InfoDrawer extends Component {
         }}
       >
 
-      <div className={this.props.fetchingMapInfo ? "infoDrawer-loading" : "hidden"}>
+      <div className={this.props.fetchingMapInfo ? "infoDrawer-loading" : "hidden"}  container alignItems="center" alignContent="center" justify="center">
         <CircularProgress size={50} />
       </div>
       <div className={this.props.fetchingMapInfo ? "hidden" : "d"}>
