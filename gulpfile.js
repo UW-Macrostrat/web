@@ -7,6 +7,8 @@ const buffer = require('gulp-buffer')
 const uglify = require('gulp-uglify')
 const minifyCSS = require('gulp-minify-css')
 const concat = require('gulp-concat')
+const browserSync = require('browser-sync').create()
+const historyApiFallback = require('connect-history-api-fallback')
 
 // External dependencies you do not want to rebundle while developing,
 // but include in your application deployment
@@ -39,10 +41,23 @@ gulp.task('css', function() {
     .pipe(gulp.dest('./dist/css/'));
 })
 
+// Because of `react-router` and its use of the client-side browser
+// history API, we need to use a local webserver with some redirects
+// to get routing to work. This design decision could be rendered
+// unnecessary by using a "hash" router (all ther routes behind a hash)
+// but this would remove the flexibility of potentially moving some
+// of these routes to the server if we wanted to.
+gulp.task('browser-sync', function() {
+  browserSync.init({
+    server: {baseDir: "./"},
+    middleware: [ historyApiFallback() ]
+  });
+})
+
 // When running 'gulp' on the terminal this task will fire.
 // It will start watching for changes in every .js file.
 // If there's a change, the task 'scripts' defined above will fire.
-gulp.task('default', ['scripts', 'css', 'watch'])
+gulp.task('default', ['scripts', 'css', 'watch', 'browser-sync'])
 
 // Private Functions
 // ----------------------------------------------------------------------------
