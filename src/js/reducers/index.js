@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux'
-import { PAGE_CLICK, REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK, TOGGLE_SATELLITE, TOGGLE_COLUMNS, CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER, REMOVE_FILTER, GO_TO_PLACE, TOGGLE_ABOUT, TOGGLE_FOSSILS, UPDATE_COLUMN_FILTERS, START_COLUMN_QUERY, RECEIVED_COLUMN_QUERY, START_GDD_QUERY, RECEIVED_GDD_QUERY, SET_ACTIVE_INDEX_MAP, TOGGLE_ELEVATION_CHART, START_ELEVATION_QUERY, RECEIVED_ELEVATION_QUERY, START_PBDB_QUERY, UPDATE_PBDB_QUERY, RECEIVED_PBDB_QUERY } from '../actions'
+import { REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK, TOGGLE_SATELLITE, TOGGLE_COLUMNS, CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER, REMOVE_FILTER, GO_TO_PLACE, TOGGLE_ABOUT, TOGGLE_FOSSILS, UPDATE_COLUMN_FILTERS, START_COLUMN_QUERY, RECEIVED_COLUMN_QUERY, START_GDD_QUERY, RECEIVED_GDD_QUERY, SET_ACTIVE_INDEX_MAP, TOGGLE_ELEVATION_CHART, START_ELEVATION_QUERY, RECEIVED_ELEVATION_QUERY, START_PBDB_QUERY, UPDATE_PBDB_QUERY, RECEIVED_PBDB_QUERY, MAP_MOVED, GET_INITIAL_MAP_STATE, GOT_INITIAL_MAP_STATE } from '../actions'
 import { sum, timescale } from '../utils'
 
 const classColors = {
@@ -62,8 +62,11 @@ const update = (state = {
   filteredColumns: {},
 
   data: [],
-  msg: '',
-  clicks: 0
+  mapXYZ: {
+    z: 1.5,
+    x: 16,
+    y: 23,
+  }
 }, action) => {
   switch (action.type) {
     case TOGGLE_MENU:
@@ -264,18 +267,30 @@ const update = (state = {
       })
 
     case TOGGLE_BEDROCK:
+      updateURI(Object.assign({}, state, {
+        mapHasBedrock: !state.mapHasBedrock
+      }))
       return Object.assign({}, state, {
         mapHasBedrock: !state.mapHasBedrock
       })
     case TOGGLE_SATELLITE:
+      updateURI(Object.assign({}, state, {
+        mapHasSatellite: !state.mapHasSatellite
+      }))
       return Object.assign({}, state, {
         mapHasSatellite: !state.mapHasSatellite
       })
     case TOGGLE_COLUMNS:
+      updateURI(Object.assign({}, state, {
+        mapHasColumns: !state.mapHasColumns
+      }))
       return Object.assign({}, state, {
         mapHasColumns: !state.mapHasColumns
       })
     case TOGGLE_FOSSILS:
+      updateURI(Object.assign({}, state, {
+        mapHasFossils: !state.mapHasFossils
+      }))
       return Object.assign({}, state, {
         mapHasFossils: !state.mapHasFossils
       })
@@ -396,12 +411,7 @@ const update = (state = {
         filteredColumns: action.columns
       })
 
-    case PAGE_CLICK:
-      return Object.assign({}, state, {
-        msg: action.msg,
-        clicks: state.clicks + 1,
-        infoDrawerOpen: !state.infoDrawerOpen
-      })
+
     case REQUEST_DATA:
       return Object.assign({}, state, {
         isFetching: true
@@ -411,12 +421,72 @@ const update = (state = {
         isFetching: false,
         data: action.data
       })
+
+    case GET_INITIAL_MAP_STATE:
+      return Object.assign({}, state, {
+        mapXYZ: {
+          z: action.data.z,
+          x: action.data.x,
+          y: action.data.y
+        }
+      })
+
+    case MAP_MOVED:
+      updateURI(Object.assign({}, state, {
+        mapXYZ: {
+          z: action.data.z,
+          x: action.data.x,
+          y: action.data.y
+        }
+      }))
+      return Object.assign({}, state, {
+        mapXYZ: {
+          z: action.data.z,
+          x: action.data.x,
+          y: action.data.y
+        }
+      })
+
+    case GOT_INITIAL_MAP_STATE:
+      updateURI(Object.assign({}, state, {
+        mapHasSatellite: action.data.satellite || false,
+        mapHasBedrock: action.data.bedrock || false,
+        mapHasColumns: action.data.columns || false,
+        mapHasFossils: action.data.fossils || false,
+        mapXYZ: {
+          z: action.data.z,
+          x: action.data.x,
+          y: action.data.y
+        }
+      }))
+      return Object.assign({}, state, {
+        mapHasSatellite: action.data.satellite || false,
+        mapHasBedrock: action.data.bedrock || false,
+        mapHasColumns: action.data.columns || false,
+        mapHasFossils: action.data.fossils || false,
+        mapXYZ: {
+          z: action.data.z,
+          x: action.data.x,
+          y: action.data.y
+        }
+      })
+
     default:
       return state
   }
 }
 
+function updateURI(state) {
+  let layers = [
+    {'layer': 'bedrock', 'haz': state.mapHasBedrock},
+    {'layer': 'satellite', 'haz': state.mapHasSatellite},
+    {'layer': 'fossils', 'haz': state.mapHasFossils},
+    {'layer': 'columns', 'haz': state.mapHasColumns}]
 
+  let layerString = layers.filter(l => { if (l.haz) return l }).map(l => { return l.layer }).join('/')
+  // Update the hash in the URI
+  window.history.replaceState(undefined, undefined, `#/z=${state.mapXYZ.z}/x=${state.mapXYZ.x}/y=${state.mapXYZ.y}/${layerString}`)
+}
 
 const reducers = combineReducers({
   // list reducers here

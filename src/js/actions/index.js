@@ -47,15 +47,11 @@ export const RECEIVED_ELEVATION_QUERY = 'RECEIVED_ELEVATION_QUERY'
 
 export const SET_ACTIVE_INDEX_MAP = 'SET_ACTIVE_INDEX_MAP'
 
-// Define action functions
-export const pageClick = () => {
-  return {
-    type: PAGE_CLICK,
-    msg: 'You clicked on the page',
-    clicks: 0
-  }
-}
+export const MAP_MOVED = 'MAP_MOVED'
+export const GET_INITIAL_MAP_STATE = 'GET_INITIAL_MAP_STATE'
+export const GOT_INITIAL_MAP_STATE = 'GOT_INITIAL_MAP_STATE'
 
+// Define action functions
 export const toggleMenu = () => {
   return {
     type: TOGGLE_MENU
@@ -594,6 +590,66 @@ export function receivedPbdbQuery(data) {
   }
 }
 
+
+export function mapMoved(data) {
+  return {
+    type: MAP_MOVED,
+    data: data
+  }
+}
+
+export function gotInitialMapState(mapState) {
+  return {
+    type: GOT_INITIAL_MAP_STATE,
+    data: mapState
+  }
+}
+
+export function getInitialMapState() {
+  return (dispatch, getState) => {
+    // Get the default map state
+    let { mapXYZ, mapHasBedrock, mapHasSatellite, mapHasColumns, mapHasFossils } = getState().update
+    let defaultState = {
+      z: mapXYZ.z,
+      x: mapXYZ.x,
+      y: mapXYZ.y,
+      satellite: mapHasSatellite,
+      bedrock: mapHasBedrock,
+      columns: mapHasColumns,
+      fossils: mapHasFossils
+    }
+    let hash = window.location.hash
+    let mapState = {}
+    try {
+      hash = hash.split('/').forEach(d => {
+        let parts = d.split('=')
+        mapState[parts[0]] = parts[1] || true
+      })
+
+      if (
+        mapState.x &&
+        mapState.y &&
+        mapState.z &&
+        (mapState.x >= -180 && mapState.x <= 180) &&
+        (mapState.y >= -85 && mapState.y <= 85) &&
+        (mapState.z >= 0 && mapState.z <= 16)
+      ) {
+        // Sweet, it is legit
+        mapState = mapState
+      } else {
+        // Someone was naughty
+        mapState = defaultState
+      }
+    } catch(e) {
+      // Who knows. Doesn't matter. Nothing does.
+      mapState = defaultState
+    }
+
+    dispatch(gotInitialMapState(mapState))
+
+  }
+
+}
 
 
 export function startGeolocation() {

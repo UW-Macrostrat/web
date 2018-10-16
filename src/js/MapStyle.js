@@ -13,7 +13,7 @@ export const mapStyle = {
         "pbdb": {
             "type": "vector",
             "tiles": [
-              `${SETTINGS.burwellTileDomain}/pbdb-collections/{z}/{x}/{y}.mvt`
+              `${SETTINGS.burwellTileDomain}/hexgrid/{z}/{x}/{y}.mvt`
             ],
             "tileSize": 512
         },
@@ -910,27 +910,32 @@ export const mapStyle = {
         },
         {
           "id": "pbdbCollections",
-          "type": "circle",
+          "type": "fill",
           "source": "pbdb",
-          "source-layer": "pbdb-collections",
+          "source-layer": "hexgrid",
           "layout": {
             "visibility": "none"
           },
           "paint": {
-            "circle-radius": {
-              "property": "n_collections",
-              "default": 10,
-              "stops": [
-                [{zoom: 0, value: 1}, 5],
-                [{zoom: 0, value: 5000}, 30],
-                [{zoom: 10, value: 1}, 10],
-                [{zoom: 10, value: 50}, 30],
-              ]
-            },
-            "circle-color": "#ffffff",
-            "circle-opacity": 0.8,
-            "circle-stroke-width": 1,
-            "circle-stroke-color": "#aaaaaa"
+            "fill-color": ['feature-state', 'color'],
+            "fill-color": [
+              'case',
+              ['==', ['feature-state', 'color'], null],
+              'rgb(255,255,255)',
+              ['feature-state', 'color']
+            ],
+            "fill-opacity": [
+              'case',
+              ['==', ['feature-state', 'color'], null],
+              0,
+              0.5
+            ],
+            "fill-outline-color": [
+              'case',
+              ['==', ['feature-state', 'color'], null],
+              'rgb(255,255,255)',
+              ['feature-state', 'color']
+            ],
           }
         },
         {

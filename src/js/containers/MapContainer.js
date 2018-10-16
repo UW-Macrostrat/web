@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import { queryMap, closeInfoDrawer, getFilteredColumns, getElevation, getPBDB } from '../actions'
+import { queryMap, closeInfoDrawer, getFilteredColumns, getElevation, getPBDB, mapMoved } from '../actions'
 import Map from '../components/Map'
 
 const mapStateToProps = (state) => {
@@ -19,7 +19,8 @@ const mapStateToProps = (state) => {
     mapCenter: state.update.mapCenter,
     elevationChartOpen: state.update.elevationChartOpen,
     elevationData: state.update.elevationData,
-    fetchingElevation: state.update.fetchingElevation
+    fetchingElevation: state.update.fetchingElevation,
+    mapXYZ: state.update.mapXYZ,
   }
 }
 
@@ -39,7 +40,10 @@ const mapDispatchToProps = (dispatch) => {
     },
     getPBDB: (collection_nos) => {
       dispatch(getPBDB(collection_nos))
-    }
+    },
+    mapMoved: (data) => {
+      dispatch(mapMoved(data))
+    },
   }
 }
 

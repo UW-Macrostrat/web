@@ -27,18 +27,35 @@ class Map extends Component {
     this.filters = [
       "any",
     ]
+
+    this.maxValue = 500
+    this.previousZoom = 0
+
+    this.resMax = {
+      0: 143,
+      1: 143,
+      2: 143,
+      3: 76,
+      4: 44,
+      5: 44,
+      6: 29,
+      7: 20,
+      8: 16,
+      9: 16,
+      10: 16,
+    }
   }
 
   componentDidMount() {
     mapboxgl.accessToken = 'pk.eyJ1IjoiamN6YXBsZXdza2kiLCJhIjoiWnQxSC01USJ9.oleZzfREJUKAK1TMeCD0bg';
     this.map = new mapboxgl.Map({
         container: 'map',
-        style: 'mapbox://styles/jczaplewski/cje04mr9l3mo82spihpralr4i?optimize=true',
-      //  style: SETTINGS.baseMapURL,
-        center: [-89, 43],
-        zoom: 7,
+        style: this.props.mapHasSatellite ? SETTINGS.satelliteMapURL : SETTINGS.baseMapURL,
+        center: [this.props.mapXYZ.x, this.props.mapXYZ.y],
+        zoom: this.props.mapXYZ.z,
         maxZoom: 16,
-        hash: true,
+        maxTileCacheSize: 0,
+    //    hash: true,
         // failIfMajorPerformanceCaveat: true,
         // dragRotate: false,
         // touchZoomRotate: false
@@ -49,16 +66,42 @@ class Map extends Component {
     // disable map rotation using touch rotation gesture
     this.map.touchZoomRotate.disableRotation()
 
+    // Update the URI when the map moves
+    this.map.on('moveend', () => {
+      let center = this.map.getCenter()
+      this.props.mapMoved({
+        z: this.map.getZoom().toFixed(1),
+        x: center.lng.toFixed(4),
+        y: center.lat.toFixed(4),
+      })
+      if (this.props.mapHasFossils) {
+        this.updateGrid()
+      }
+    })
+
     this.map.on('load', () => {
       Object.keys(mapStyle.sources).forEach(source => {
         this.map.addSource(source, mapStyle.sources[source])
       })
 
+      // The initial draw of the layers
       mapStyle.layers.forEach(layer => {
         if (layer.source === 'columns' || layer.source === 'info_marker') {
           this.map.addLayer(layer)
         } else {
           this.map.addLayer(layer, 'airport-label')
+        }
+
+        // Accomodate any URI parameters
+        if (layer.source === 'burwell' && this.props.mapHasBedrock === false) {
+          this.map.setLayoutProperty(layer.id, 'visibility', 'none')
+        }
+        if (layer.source === 'pbdb' && this.props.mapHasFossils === true) {
+          this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
+          this.updateGrid()
+        }
+        if (layer.source === 'columns' && this.props.mapHasColumns === true) {
+          this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
         }
       })
 
@@ -236,6 +279,7 @@ class Map extends Component {
 
 
   componentWillUpdate(nextProps) {
+    console.log('filters', nextProps.filters)
     // Watch the state of the application and adjust the map accordingly
     if (!nextProps.elevationChartOpen && this.props.elevationChartOpen && this.map) {
       this.elevationPoints = []
@@ -282,6 +326,7 @@ class Map extends Component {
       }
     } else if (nextProps.mapHasColumns != this.props.mapHasColumns) {
       if (nextProps.mapHasColumns) {
+        // If filters are applied
         if (this.props.filters.length) {
           this.props.getFilteredColumns()
           mapStyle.layers.forEach(layer => {
@@ -289,7 +334,7 @@ class Map extends Component {
               this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
             }
           })
-
+        // No filters applied
         } else {
           mapStyle.layers.forEach(layer => {
             if (layer.source === 'columns') {
@@ -297,6 +342,7 @@ class Map extends Component {
             }
           })
         }
+      // Remove columns
       } else {
         mapStyle.layers.forEach(layer => {
           if (layer.source === 'columns' || layer.source === 'filteredColumns') {
@@ -320,12 +366,14 @@ class Map extends Component {
         })
       }
 
+    // Fossils
     } else if (nextProps.mapHasFossils != this.props.mapHasFossils) {
       if (nextProps.mapHasFossils) {
         mapStyle.layers.forEach(layer => {
           if (layer.source === 'pbdb') {
             this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
           }
+          this.updateGrid()
         })
       } else {
         mapStyle.layers.forEach(layer => {
@@ -459,8 +507,57 @@ class Map extends Component {
     }
 
   }
+
+  updateGrid() {
+    let bounds = this.map.getBounds()
+    let zoom = this.map.getZoom()
+    fetch(`https://dev.macrostrat.org/api/v2/hex-summary?min_lng=${bounds._sw.lng}&min_lat=${bounds._sw.lat}&max_lng=${bounds._ne.lng}&max_lat=${bounds._ne.lat}&zoom=${zoom}`)
+      .then(response => {
+        return response.json()
+      })
+      .then(json => {
+        let currentZoom = parseInt(this.map.getZoom())
+        let mappings = json.success.data
+        if (currentZoom != this.previousZoom) {
+          this.previousZoom = currentZoom
+
+          this.maxValue = this.resMax[parseInt(this.map.getZoom())]
+
+          this.updateColors(mappings)
+
+        } else {
+          this.updateColors(mappings)
+        }
+
+
+      })
+  }
+
+  updateColors(data) {
+    for (let i = 0; i < data.length; i++) {
+      this.map.setFeatureState({
+        source: 'pbdb',
+        sourceLayer: 'hexgrid',
+        id: data[i].hex_id
+      }, {
+        color: this.colorScale(parseInt(data[i].count))
+      })
+    }
+  }
+
+  colorScale(val) {
+    let mid = this.maxValue / 2
+
+    if (Math.abs(val - this.maxValue) <= Math.abs(val - mid)) {
+      return '#5c8b66'
+    } else if (Math.abs(val - mid) <= Math.abs(val - 1)) {
+      return '#adc5b2'
+    } else {
+      return '#eef3ef'
+    }
+  }
+
   render() {
-    console.log('render map')
     return (
       <div className='map-holder'>
         <div id='map'></div>

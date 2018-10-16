@@ -6,6 +6,7 @@ import { Provider } from 'react-redux'
 import thunkMiddleware from 'redux-thunk'
 import { createStore, applyMiddleware } from 'redux'
 import reducers from './reducers'
+import { getInitialMapState } from './actions'
 import App from './components/App'
 
 // Create the data store
@@ -14,6 +15,9 @@ let store = createStore(
   applyMiddleware(thunkMiddleware)
 )
 
+// Parse the URI on load
+store.dispatch(getInitialMapState())
+
 // Render the application
 render(
   <Provider store={store}>
@@ -21,6 +25,3 @@ render(
   </Provider>,
   document.getElementById('react')
 )
-
-// Fetch the data on load
-//store.dispatch()
