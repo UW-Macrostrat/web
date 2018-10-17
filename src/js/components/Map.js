@@ -105,7 +105,10 @@ class Map extends Component {
         }
 
         // Accomodate any URI parameters
-        if (layer.source === 'burwell' && this.props.mapHasBedrock === false) {
+        if (layer.source === 'burwell' && layer['source-layer'] === 'units' && this.props.mapHasBedrock === false) {
+          this.map.setLayoutProperty(layer.id, 'visibility', 'none')
+        }
+        if (layer.source === 'burwell' && layer['source-layer'] === 'lines' && this.props.mapHasLines === false) {
           this.map.setLayoutProperty(layer.id, 'visibility', 'none')
         }
         if (layer.source === 'pbdb' && this.props.mapHasFossils === true) {
@@ -117,8 +120,8 @@ class Map extends Component {
         }
       })
 
-      this.map.setFilter('burwell_fill', noFilter)
-      this.map.setFilter('burwell_stroke', noFilter)
+      // this.map.setFilter('burwell_fill', noFilter)
+      // this.map.setFilter('burwell_stroke', noFilter)
 
       setTimeout(() => {
         this.mapLoaded = true
@@ -252,9 +255,9 @@ class Map extends Component {
         if (layer.filters) {
           this.map.setFilter(layer.layer.id, layer.filters)
         }
-        if (layer.layer.source === 'burwell' && layer.layer.type === 'line' && layer.layer.id != 'burwell_stroke' && this.props.filters.length != 0) {
-          this.map.setLayoutProperty(layer.layer.id, 'visibility', 'none')
-        }
+        // if (layer.layer.source === 'burwell' && layer.layer.type === 'line' && layer.layer.id != 'burwell_stroke' && this.props.filters.length != 0) {
+        //   this.map.setLayoutProperty(layer.layer.id, 'visibility', 'none')
+        // }
       })
     })
   }
@@ -561,11 +564,6 @@ class Map extends Component {
     this.map.setFilter('burwell_fill', toApply)
     this.map.setFilter('burwell_stroke', toApply)
 
-    mapStyle.layers.forEach(layer => {
-      if (layer.source === 'burwell' && layer.type === 'line' && layer.id != 'burwell_stroke') {
-        this.map.setLayoutProperty(layer.id, 'visibility', 'none')
-      }
-    })
   }
 
   updateGrid() {

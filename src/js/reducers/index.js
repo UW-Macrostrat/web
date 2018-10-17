@@ -478,7 +478,6 @@ const update = (state = {
           x: action.data.x,
           y: action.data.y
         },
-        //filters: action.data.filters || []
       }))
 
       return Object.assign({}, state, {
@@ -492,7 +491,6 @@ const update = (state = {
           x: action.data.x,
           y: action.data.y
         },
-      //  filters: action.data.filters || []
       })
 
     default:
