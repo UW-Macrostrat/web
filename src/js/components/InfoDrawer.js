@@ -123,7 +123,6 @@ class InfoDrawer extends Component {
   }
 
   render() {
-    console.log('render infoDrawer')
     const { infoDrawerOpen, closeInfoDrawer, expandInfoDrawer, infoDrawerExpanded } = this.props
     let { mapInfo, gddInfo, pbdbData } = this.props
 
@@ -193,11 +192,11 @@ class InfoDrawer extends Component {
         }}
       >
 
-      <div className={this.props.fetchingMapInfo ? "infoDrawer-loading" : "hidden"}  container alignItems="center" alignContent="center" justify="center">
+      <div className={this.props.fetchingMapInfo ? "infoDrawer-loading" : "hidden"}>
         <CircularProgress size={50} />
       </div>
       <div className={this.props.fetchingMapInfo ? "hidden" : "d"}>
-      <Grid container alignItems="center" alignContent="center" justify="center" classes={{ 'spacing-xs-16': 'infodrawer-grid' }}>
+      <Grid classes={{ 'spacing-xs-16': 'infodrawer-grid' }}>
 
         <Grid item xs={12}>
           <div className="infodrawer-content">

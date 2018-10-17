@@ -136,6 +136,9 @@ text {
 .infodrawer-grid {
   /* width: 100% !important; */
   overflow-y: scroll !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .infodrawer-content {
   min-height: 0;

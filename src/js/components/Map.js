@@ -24,10 +24,20 @@ class Map extends Component {
       "all",
       ["!=", "color", ""]
     ]
-    this.filters = [
-      "any",
-    ]
+    this.timeFilters = []
+    // Keep track of name: index values of time filters for easier removing
+    this.timeFiltersIndex = {}
 
+    this.filters = []
+    this.filtersIndex = {}
+    /*
+    [
+      "all",
+      ["!=", "color", ""],
+      ["any", this.timeFilters],
+      ["any", this.filters]
+    ]
+    */
     this.maxValue = 500
     this.previousZoom = 0
 
@@ -279,7 +289,6 @@ class Map extends Component {
 
 
   componentWillUpdate(nextProps) {
-    console.log('filters', nextProps.filters)
     // Watch the state of the application and adjust the map accordingly
     if (!nextProps.elevationChartOpen && this.props.elevationChartOpen && this.map) {
       this.elevationPoints = []
@@ -384,8 +393,13 @@ class Map extends Component {
       }
     } else if (nextProps.filters.length != this.props.filters.length) {
       if (nextProps.filters.length === 0) {
-        this.map.setFilter('burwell_fill', noFilter)
-        this.map.setFilter('burwell_stroke', noFilter)
+        this.filters = []
+        this.filtersIndex = {}
+        this.timeFilters = []
+        this.timeFiltersIndex = {}
+        this.applyFilters()
+        // this.map.setFilter('burwell_fill', noFilter)
+        // this.map.setFilter('burwell_stroke', noFilter)
 
         mapStyle.layers.forEach(layer => {
           if (layer.source === 'burwell' && layer.type === 'line' && layer.id != 'burwell_stroke') {
@@ -417,12 +431,21 @@ class Map extends Component {
       // If a filter was removed...
       if (outgoing.length) {
         // Find its index in the existing filters
-        let presentPosition = this.props.filters.map(f => { return `${f.category}|${f.type}|${f.name}` }).indexOf(outgoing[0])
-        let appliedFilters = this.map.getFilter('burwell_fill')
-        appliedFilters[2].splice((presentPosition + 1), 1)
+        // If it is a time interval
+        if (outgoing[0].split('|')[0] === 'interval') {
+          let idx = this.timeFiltersIndex[outgoing[0]]
+          this.timeFilters.splice(idx, 1)
+          delete this.timeFiltersIndex[outgoing[0]]
 
-        this.map.setFilter('burwell_fill', appliedFilters)
-        this.map.setFilter('burwell_stroke', appliedFilters)
+        // If it is anything else
+        } else {
+          this.filtersIndex[outgoing[0]].forEach(idx => {
+            this.filters.splice(idx, 1)
+          })
+          delete this.filtersIndex[outgoing[0]]
+        }
+
+        this.applyFilters()
         return
       }
 
@@ -440,62 +463,59 @@ class Map extends Component {
       filterToApply = filterToApply[0]
 
       let newFilter = []
+
       switch(filterToApply.type) {
         case 'intervals':
-          newFilter.push('any')
-          nextProps.filters.forEach(f => {
-            newFilter.push([
-              'all',
-              ['>', 'best_age_bottom', filterToApply.t_age],
-              ['<', 'best_age_top', filterToApply.b_age]
-            ])
-          })
+          this.timeFilters.push([
+            'all',
+            ['>', 'best_age_bottom', filterToApply.t_age],
+            ['<', 'best_age_top', filterToApply.b_age]
+          ])
+          this.timeFiltersIndex[`${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`] = this.timeFilters.length - 1
           break
 
         case 'lithology_classes':
-          newFilter.push('any')
+          //newFilter.push('any')
           for (let i = 1; i < 14; i++) {
-            newFilter.push([ '==', `lith_class${i}`, filterToApply.name ])
+            this.filters.push([ '==', `lith_class${i}`, filterToApply.name ])
+
+            if (this.filtersIndex[`${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`]) {
+              this.filtersIndex[`${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`].push(this.filters.length - 1)
+            } else {
+              this.filtersIndex[`${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`] = [ this.filters.length - 1]
+            }
           }
           break
         case 'lithology_types':
-          newFilter.push('any')
+          //newFilter.push('any')
           for (let i = 1; i < 14; i++) {
-            newFilter.push([ '==', `lith_type${i}`, filterToApply.name ])
+            this.filters.push([ '==', `lith_type${i}`, filterToApply.name ])
+
+            if (this.filtersIndex[`${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`]) {
+              this.filtersIndex[`${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`].push(this.filters.length - 1)
+            } else {
+              this.filtersIndex[`${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`] = [ this.filters.length - 1]
+            }
           }
           break
 
         case 'lithologies':
         case 'strat_name_orphans':
         case 'strat_name_concepts':
-          newFilter.push('any')
-          newFilter.push([ 'in', 'legend_id', ...filterToApply.legend_ids ])
+          //newFilter.push('any')
+          this.filters.push([ 'in', 'legend_id', ...filterToApply.legend_ids ])
+          this.filtersIndex[`${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`] = [ this.filters.length - 1]
           break
 
       }
 
       // Basically if we are filtering by environments or anything else we can't filter the map with
-      if (!newFilter.length) {
-        return
-      }
+      // if (!newFilter.length) {
+      //   return
+      // }
 
-      let appliedFilters = this.map.getFilter('burwell_fill')
-      if (appliedFilters.length === 2) {
-        appliedFilters.push([
-          'any',
-          newFilter
-        ])
-      } else {
-        appliedFilters[2].push(newFilter)
-      }
-      // appliedFilters.push(newFilter)
-
-      // this.filters.push(newFilter)
-      // let appliedFilters = this.noFilter
-      // appliedFilters.push(this.filters)
-
-      this.map.setFilter('burwell_fill', appliedFilters)
-      this.map.setFilter('burwell_stroke', appliedFilters)
+      // Update the map styles
+      this.applyFilters()
 
       // Hide all line features when a filter is applied
       mapStyle.layers.forEach(layer => {
@@ -506,6 +526,22 @@ class Map extends Component {
 
     }
 
+  }
+
+  applyFilters() {
+    let toApply = [
+      "all",
+      ["!=", "color", ""],
+    ]
+    if (this.timeFilters.length) {
+      toApply.push(["any", ...this.timeFilters])
+    }
+    if (this.filters.length) {
+      toApply.push(["any", ...this.filters])
+    }
+
+    this.map.setFilter('burwell_fill', toApply)
+    this.map.setFilter('burwell_stroke', toApply)
   }
 
   updateGrid() {
