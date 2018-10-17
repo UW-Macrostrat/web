@@ -458,7 +458,7 @@ class Map extends Component {
 
         // If it is anything else
         } else {
-          this.filtersIndex[outgoing[0]].forEach(idx => {
+          this.filtersIndex[outgoing[0]].reverse().forEach(idx => {
             this.filters.splice(idx, 1)
           })
           delete this.filtersIndex[outgoing[0]]
@@ -560,7 +560,7 @@ class Map extends Component {
     if (this.filters.length) {
       toApply.push(["any", ...this.filters])
     }
-  //  console.log('toApply', toApply)
+    console.log('toApply', toApply)
     this.map.setFilter('burwell_fill', toApply)
     this.map.setFilter('burwell_stroke', toApply)
 
