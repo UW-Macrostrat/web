@@ -17,6 +17,7 @@ class Map extends Component {
   constructor(props) {
     super(props)
     this.swapBasemap = this.swapBasemap.bind(this)
+    this.mapLoaded = false
     this.currentSources = []
     this.isPanning = false
     this.elevationPoints = []
@@ -123,6 +124,7 @@ class Map extends Component {
 
       if (this.shouldUpdateFeatureState) {
         setTimeout(() => {
+          this.mapLoaded = true
           this.applyFilters()
           this.shouldUpdateFeatureState = false
         }, 1)
@@ -527,13 +529,14 @@ class Map extends Component {
   }
 
   applyFilters() {
+    console.log('applyFilters')
     // don't try and update featureState if the map is loading
     let burwellLoaded = false
     try {
-      burwellLoaded = this.map.isSourceLoaded('burwell') || false
+      burwellLoaded = this.map.getSource('burwell') && this.map.isSourceLoaded('burwell') ? true : false
     } catch(e) { }
 
-    if (!burwellLoaded && !this.shouldUpdateFeatureState) {
+    if ((!burwellLoaded && !this.shouldUpdateFeatureState) || !this.mapLoaded) {
       this.shouldUpdateFeatureState = true
       return
     }
@@ -547,7 +550,7 @@ class Map extends Component {
     if (this.filters.length) {
       toApply.push(["any", ...this.filters])
     }
-
+  //  console.log('toApply', toApply)
     this.map.setFilter('burwell_fill', toApply)
     this.map.setFilter('burwell_stroke', toApply)
 

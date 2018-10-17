@@ -674,21 +674,21 @@ export function getInitialMapState() {
     }
     let filterTypes = ['strat_name_concepts','strat_name_orphans','intervals','lithology_classes','lithology_types','lithologies','environments','environment_types','environment_classes',]
     let hash = window.location.hash
-    let mapState = {}
+    let mapState = {
+      incomingFilters: []
+    }
     try {
       hash = hash.split('/').forEach(d => {
         let parts = d.split('=')
+
         if (filterTypes.indexOf(parts[0]) > -1) {
-          if (mapState['incomingFilters']) {
-            mapState.filters.push({ type: parts[0], id: parts[1] })
-          } else {
-            mapState.incomingFilters = [{ type: parts[0], id: parts[1] }]
-          }
+          mapState.incomingFilters.push({ type: parts[0], id: parts[1] })
         } else {
           mapState[parts[0]] = parts[1] || true
         }
 
       })
+
       if (
         mapState.x &&
         mapState.y &&

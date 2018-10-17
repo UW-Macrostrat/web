@@ -322,7 +322,7 @@ class InfoDrawer extends Component {
                   <Divider/>
                   <ExpansionPanel classes={{ 'root': 'regional-panel'}} onChange={this.collapse('bedrockMatch')} expanded={bedrockMatchExpanded}>
                     <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} classes={expansionPanelClasses}>
-                      <Typography className="expansion-summary-title">Geologic Map (inferred) <span className='via-gdd'>via Macrostrat</span> </Typography>
+                      <Typography className="expansion-summary-title">Macrostrat-linked data <span className='via-gdd'>via Macrostrat</span> </Typography>
                     </ExpansionPanelSummary>
                     <ExpansionPanelDetails classes={expansionPanelDetailClasses}>
                       {
