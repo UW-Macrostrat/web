@@ -34,6 +34,7 @@ export const UPDATE_PBDB_QUERY = 'UPDATE_PBDB_QUERY'
 export const RECEIVED_PBDB_QUERY = 'RECEIVED_PBDB_QUERY'
 
 export const TOGGLE_BEDROCK = 'TOGGLE_BEDROCK'
+export const TOGGLE_LINES = 'TOGGLE_LINES'
 export const TOGGLE_SATELLITE = 'TOGGLE_SATELLITE'
 export const TOGGLE_COLUMNS = 'TOGGLE_COLUMNS'
 export const TOGGLE_FOSSILS = 'TOGGLE_FOSSILS'
@@ -86,6 +87,12 @@ export const toggleFilters = () => {
 export const toggleBedrock = () => {
   return {
     type: TOGGLE_BEDROCK
+  }
+}
+
+export const toggleLines = () => {
+  return {
+    type: TOGGLE_LINES
   }
 }
 
@@ -662,13 +669,14 @@ export function gotInitialMapState(mapState) {
 export function getInitialMapState() {
   return (dispatch, getState) => {
     // Get the default map state
-    let { mapXYZ, mapHasBedrock, mapHasSatellite, mapHasColumns, mapHasFossils } = getState().update
+    let { mapXYZ, mapHasBedrock, mapHasLines, mapHasSatellite, mapHasColumns, mapHasFossils } = getState().update
     let defaultState = {
       z: mapXYZ.z,
       x: mapXYZ.x,
       y: mapXYZ.y,
       satellite: mapHasSatellite,
       bedrock: mapHasBedrock,
+      lines: mapHasLines,
       columns: mapHasColumns,
       fossils: mapHasFossils
     }

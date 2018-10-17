@@ -32,8 +32,6 @@ class Map extends Component {
     this.filters = []
     this.filtersIndex = {}
 
-    // A trigger that can handle updates to featureState while map is still loading
-    this.shouldUpdateFeatureState = false
     /*
     [
       "all",
@@ -122,14 +120,10 @@ class Map extends Component {
       this.map.setFilter('burwell_fill', noFilter)
       this.map.setFilter('burwell_stroke', noFilter)
 
-      if (this.shouldUpdateFeatureState) {
-        setTimeout(() => {
-          this.mapLoaded = true
-          this.applyFilters()
-          this.shouldUpdateFeatureState = false
-        }, 1)
-
-      }
+      setTimeout(() => {
+        this.mapLoaded = true
+        this.applyFilters()
+      }, 1)
     })
 
     this.map.on('movestart', () => {
@@ -321,15 +315,32 @@ class Map extends Component {
       } else {
         // zoom to user location
       }
+    // Add bedrock
     } else if (nextProps.mapHasBedrock && !this.props.mapHasBedrock) {
       mapStyle.layers.forEach(layer => {
-        if (layer.source === 'burwell') {
+        if (layer.source === 'burwell' && layer['source-layer'] === 'units') {
           this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
         }
       })
+    // Remove bedrock
     } else if (!nextProps.mapHasBedrock && this.props.mapHasBedrock) {
       mapStyle.layers.forEach(layer => {
-        if (layer.source === 'burwell') {
+        if (layer.source === 'burwell' && layer['source-layer'] === 'units') {
+          this.map.setLayoutProperty(layer.id, 'visibility', 'none')
+        }
+      })
+
+    // Add lines
+    } else if (nextProps.mapHasLines && !this.props.mapHasLines) {
+      mapStyle.layers.forEach(layer => {
+        if (layer.source === 'burwell' && layer['source-layer'] === 'lines') {
+          this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
+        }
+      })
+    // Remove lines
+    } else if (!nextProps.mapHasLines && this.props.mapHasLines) {
+      mapStyle.layers.forEach(layer => {
+        if (layer.source === 'burwell' && layer['source-layer'] === 'lines') {
           this.map.setLayoutProperty(layer.id, 'visibility', 'none')
         }
       })
@@ -531,12 +542,8 @@ class Map extends Component {
   applyFilters() {
     console.log('applyFilters')
     // don't try and update featureState if the map is loading
-    let burwellLoaded = false
-    try {
-      burwellLoaded = this.map.getSource('burwell') && this.map.isSourceLoaded('burwell') ? true : false
-    } catch(e) { }
-
-    if ((!burwellLoaded && !this.shouldUpdateFeatureState) || !this.mapLoaded) {
+    if (!this.mapLoaded) {
+      console.log('No!')
       this.shouldUpdateFeatureState = true
       return
     }

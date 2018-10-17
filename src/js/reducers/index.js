@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux'
-import { REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK, TOGGLE_SATELLITE, TOGGLE_COLUMNS, CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER, REMOVE_FILTER, GO_TO_PLACE, TOGGLE_ABOUT, TOGGLE_FOSSILS, UPDATE_COLUMN_FILTERS, START_COLUMN_QUERY, RECEIVED_COLUMN_QUERY, START_GDD_QUERY, RECEIVED_GDD_QUERY, SET_ACTIVE_INDEX_MAP, TOGGLE_ELEVATION_CHART, START_ELEVATION_QUERY, RECEIVED_ELEVATION_QUERY, START_PBDB_QUERY, UPDATE_PBDB_QUERY, RECEIVED_PBDB_QUERY, MAP_MOVED, GET_INITIAL_MAP_STATE, GOT_INITIAL_MAP_STATE } from '../actions'
+import { REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK, TOGGLE_LINES, TOGGLE_SATELLITE, TOGGLE_COLUMNS, CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER, REMOVE_FILTER, GO_TO_PLACE, TOGGLE_ABOUT, TOGGLE_FOSSILS, UPDATE_COLUMN_FILTERS, START_COLUMN_QUERY, RECEIVED_COLUMN_QUERY, START_GDD_QUERY, RECEIVED_GDD_QUERY, SET_ACTIVE_INDEX_MAP, TOGGLE_ELEVATION_CHART, START_ELEVATION_QUERY, RECEIVED_ELEVATION_QUERY, START_PBDB_QUERY, UPDATE_PBDB_QUERY, RECEIVED_PBDB_QUERY, MAP_MOVED, GET_INITIAL_MAP_STATE, GOT_INITIAL_MAP_STATE } from '../actions'
 import { sum, timescale } from '../utils'
 
 const classColors = {
@@ -50,6 +50,7 @@ const update = (state = {
   pbdbInfo: [],
 
   mapHasBedrock: true,
+  mapHasLines: true,
   mapHasSatellite: false,
   mapHasColumns: false,
   mapHasFossils: false,
@@ -282,6 +283,15 @@ const update = (state = {
       return Object.assign({}, state, {
         mapHasBedrock: !state.mapHasBedrock
       })
+
+    case TOGGLE_LINES:
+      updateURI(Object.assign({}, state, {
+        mapHasLines: !state.mapHasLines
+      }))
+      return Object.assign({}, state, {
+        mapHasLines: !state.mapHasLines
+      })
+
     case TOGGLE_SATELLITE:
       updateURI(Object.assign({}, state, {
         mapHasSatellite: !state.mapHasSatellite
@@ -460,6 +470,7 @@ const update = (state = {
       updateURI(Object.assign({}, state, {
         mapHasSatellite: action.data.satellite || false,
         mapHasBedrock: action.data.bedrock || false,
+        mapHasLines: action.data.lines || false,
         mapHasColumns: action.data.columns || false,
         mapHasFossils: action.data.fossils || false,
         mapXYZ: {
@@ -473,6 +484,7 @@ const update = (state = {
       return Object.assign({}, state, {
         mapHasSatellite: action.data.satellite || false,
         mapHasBedrock: action.data.bedrock || false,
+        mapHasLines: action.data.lines || false,
         mapHasColumns: action.data.columns || false,
         mapHasFossils: action.data.fossils || false,
         mapXYZ: {
@@ -491,6 +503,7 @@ const update = (state = {
 function updateURI(state) {
   let layers = [
     {'layer': 'bedrock', 'haz': state.mapHasBedrock},
+    {'layer': 'lines', 'haz': state.mapHasLines},
     {'layer': 'satellite', 'haz': state.mapHasSatellite},
     {'layer': 'fossils', 'haz': state.mapHasFossils},
     {'layer': 'columns', 'haz': state.mapHasColumns}]
