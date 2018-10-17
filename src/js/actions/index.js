@@ -239,29 +239,57 @@ export function addFilter(theFilter) {
             break
 
         case 'strat_name_concepts':
-            axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/map_filter?concept_id=${theFilter.id}`, {
+            axios.get(`${SETTINGS.apiDomain}/api/v2/defs/strat_name_concepts?concept_id=${theFilter.id}`, {
               responseType: 'json'
             })
-            .then(json => {
-              theFilter.legend_ids = json.data
-              dispatch({
-                type: ADD_FILTER,
-                filter: theFilter
+            .then(j => {
+              let f = j.data.success.data[0]
+
+              axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/map_filter?concept_id=${theFilter.id}`, {
+                responseType: 'json'
               })
+              .then(json => {
+                dispatch({
+                  type: ADD_FILTER,
+                  filter: {
+                    category: 'strat_name',
+                    id: theFilter.id,
+                    type: 'strat_name_concepts',
+                    name: f.name,
+                    legend_ids: json.data
+                  }
+                })
+              })
+
             })
+
+
           break
 
         case 'strat_name_orphans':
-            axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/map_filter?strat_name_id=${theFilter.id}`, {
+            axios.get(`${SETTINGS.apiDomain}/api/v2/defs/strat_names?strat_name_id=${theFilter.id}`, {
               responseType: 'json'
             })
-            .then(json => {
-              theFilter.legend_id = json.data
-              dispatch({
-                type: ADD_FILTER,
-                filter: theFilter
+            .then(j => {
+              let f = j.data.success.data[0]
+              axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/map_filter?strat_name_id=${theFilter.id}`, {
+                responseType: 'json'
               })
+              .then(json => {
+                dispatch({
+                  type: ADD_FILTER,
+                  filter: {
+                    category: 'strat_name',
+                    id: theFilter.id,
+                    type: 'strat_name_orphans',
+                    name: f.strat_name_long,
+                    legend_ids: json.data
+                  }
+                })
+              })
+
             })
+
           break
 
         case 'intervals':
@@ -270,9 +298,9 @@ export function addFilter(theFilter) {
             })
             .then(json => {
               let f = json.data.success.data[0]
-              f.name = theFilter.name
-              f.type = theFilter.type
-              f.category = theFilter.category
+              f.name = f.name
+              f.type = 'intervals'
+              f.category = 'interval'
               f.id = theFilter.id
 
               dispatch({
@@ -287,23 +315,49 @@ export function addFilter(theFilter) {
 
         case 'lithology_classes':
         case 'lithology_types':
-          dispatch({
-            type: ADD_FILTER,
-            filter: theFilter
-          })
+          // for some reason when loading from the uri this tiny timeout is required
+          setTimeout(() => {
+            dispatch({
+              type: ADD_FILTER,
+              filter: {
+                category: 'lithology',
+                id: 0,
+                name: theFilter.name,
+                type: theFilter.type,
+              }
+            })
+          }, 1)
+
           break
 
         case 'lithologies':
-          axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/map_filter?lith_id=${theFilter.id}`, {
+          // Need to fetch the definition in the event of filter passed via the uri
+          axios.get(`${SETTINGS.apiDomain}/api/v2/defs/lithologies?lith_id=${theFilter.id}`, {
             responseType: 'json'
           })
           .then(json => {
-            theFilter.legend_ids = json.data
-            dispatch({
-              type: ADD_FILTER,
-              filter: theFilter
+            let f = json.data.success.data[0]
+
+            axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/map_filter?lith_id=${theFilter.id}`, {
+              responseType: 'json'
+            })
+            .then(json => {
+              dispatch({
+                type: ADD_FILTER,
+                filter: {
+                  category: 'lithology',
+                  id: theFilter.id,
+                  type: 'lithologies',
+                  name: f.name,
+                  legend_ids: json.data
+                }
+              })
             })
           })
+          .catch(error => {
+            // don't care 💁
+          })
+
           break
 
         case 'environments':
@@ -618,14 +672,23 @@ export function getInitialMapState() {
       columns: mapHasColumns,
       fossils: mapHasFossils
     }
+    let filterTypes = ['strat_name_concepts','strat_name_orphans','intervals','lithology_classes','lithology_types','lithologies','environments','environment_types','environment_classes',]
     let hash = window.location.hash
     let mapState = {}
     try {
       hash = hash.split('/').forEach(d => {
         let parts = d.split('=')
-        mapState[parts[0]] = parts[1] || true
-      })
+        if (filterTypes.indexOf(parts[0]) > -1) {
+          if (mapState['incomingFilters']) {
+            mapState.filters.push({ type: parts[0], id: parts[1] })
+          } else {
+            mapState.incomingFilters = [{ type: parts[0], id: parts[1] }]
+          }
+        } else {
+          mapState[parts[0]] = parts[1] || true
+        }
 
+      })
       if (
         mapState.x &&
         mapState.y &&
@@ -647,6 +710,19 @@ export function getInitialMapState() {
 
     dispatch(gotInitialMapState(mapState))
 
+    if (mapState.incomingFilters && mapState.incomingFilters.length) {
+      mapState.incomingFilters.forEach(f => {
+        // lith classes and types don't have unique IDs in macrostrat so we use the string
+        if (f.type === 'lithology_classes' || f.type === 'lithology_types') {
+          dispatch(addFilter({
+            type: f.type,
+            name: f.id
+          }))
+        } else {
+          dispatch(addFilter(f))
+        }
+      })
+    }
   }
 
 }

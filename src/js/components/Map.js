@@ -30,6 +30,9 @@ class Map extends Component {
 
     this.filters = []
     this.filtersIndex = {}
+
+    // A trigger that can handle updates to featureState while map is still loading
+    this.shouldUpdateFeatureState = false
     /*
     [
       "all",
@@ -118,11 +121,13 @@ class Map extends Component {
       this.map.setFilter('burwell_fill', noFilter)
       this.map.setFilter('burwell_stroke', noFilter)
 
-      // setTimeout(() => {
-      //   console.log(this.map.getStyle())
-      //   console.log(this.map.getSource('composite'))
-      // }, 5000)
+      if (this.shouldUpdateFeatureState) {
+        setTimeout(() => {
+          this.applyFilters()
+          this.shouldUpdateFeatureState = false
+        }, 1)
 
+      }
     })
 
     this.map.on('movestart', () => {
@@ -130,7 +135,6 @@ class Map extends Component {
         return
       }
       this.map.setLayoutProperty('infoMarker', 'visibility', 'none')
-      //this.props.closeInfoDrawer()
     })
 
     this.map.on('click', (event) => {
@@ -392,14 +396,13 @@ class Map extends Component {
         })
       }
     } else if (nextProps.filters.length != this.props.filters.length) {
+      // If all filters have been removed simply reset the filter states
       if (nextProps.filters.length === 0) {
         this.filters = []
         this.filtersIndex = {}
         this.timeFilters = []
         this.timeFiltersIndex = {}
         this.applyFilters()
-        // this.map.setFilter('burwell_fill', noFilter)
-        // this.map.setFilter('burwell_stroke', noFilter)
 
         mapStyle.layers.forEach(layer => {
           if (layer.source === 'burwell' && layer.type === 'line' && layer.id != 'burwell_stroke') {
@@ -457,7 +460,7 @@ class Map extends Component {
         }
       })
       if (filterToApply.length === 0) {
-        console.log('no new filters to apply')
+        console.log('no new filters to apply', nextProps.filters)
         return
       }
       filterToApply = filterToApply[0]
@@ -475,7 +478,6 @@ class Map extends Component {
           break
 
         case 'lithology_classes':
-          //newFilter.push('any')
           for (let i = 1; i < 14; i++) {
             this.filters.push([ '==', `lith_class${i}`, filterToApply.name ])
 
@@ -518,17 +520,23 @@ class Map extends Component {
       this.applyFilters()
 
       // Hide all line features when a filter is applied
-      mapStyle.layers.forEach(layer => {
-        if (layer.source === 'burwell' && layer.type === 'line' && layer.id != 'burwell_stroke') {
-          this.map.setLayoutProperty(layer.id, 'visibility', 'none')
-        }
-      })
+
 
     }
 
   }
 
   applyFilters() {
+    // don't try and update featureState if the map is loading
+    let burwellLoaded = false
+    try {
+      burwellLoaded = this.map.isSourceLoaded('burwell') || false
+    } catch(e) { }
+
+    if (!burwellLoaded && !this.shouldUpdateFeatureState) {
+      this.shouldUpdateFeatureState = true
+      return
+    }
     let toApply = [
       "all",
       ["!=", "color", ""],
@@ -542,6 +550,12 @@ class Map extends Component {
 
     this.map.setFilter('burwell_fill', toApply)
     this.map.setFilter('burwell_stroke', toApply)
+
+    mapStyle.layers.forEach(layer => {
+      if (layer.source === 'burwell' && layer.type === 'line' && layer.id != 'burwell_stroke') {
+        this.map.setLayoutProperty(layer.id, 'visibility', 'none')
+      }
+    })
   }
 
   updateGrid() {

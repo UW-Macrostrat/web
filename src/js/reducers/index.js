@@ -111,10 +111,19 @@ const update = (state = {
       if (!alreadyHasFiter) {
         fs = fs.concat([action.filter])
       }
+      // action.filter.type and action.filter.id go to the URI
+      updateURI(Object.assign({}, state, {
+        filters: fs
+      }))
       return Object.assign({}, state, {
         filters: fs
       })
     case REMOVE_FILTER:
+      updateURI(Object.assign({}, state, {
+        filters: state.filters.filter(d => {
+          if (d.name != action.filter.name) return d
+        })
+      }))
       return Object.assign({}, state, {
         filters: state.filters.filter(d => {
           if (d.name != action.filter.name) return d
@@ -457,8 +466,10 @@ const update = (state = {
           z: action.data.z,
           x: action.data.x,
           y: action.data.y
-        }
+        },
+        //filters: action.data.filters || []
       }))
+
       return Object.assign({}, state, {
         mapHasSatellite: action.data.satellite || false,
         mapHasBedrock: action.data.bedrock || false,
@@ -468,7 +479,8 @@ const update = (state = {
           z: action.data.z,
           x: action.data.x,
           y: action.data.y
-        }
+        },
+      //  filters: action.data.filters || []
       })
 
     default:
@@ -484,8 +496,10 @@ function updateURI(state) {
     {'layer': 'columns', 'haz': state.mapHasColumns}]
 
   let layerString = layers.filter(l => { if (l.haz) return l }).map(l => { return l.layer }).join('/')
+  let filtersString = state.filters.map(f => { return `${f.type}=${f.id || f.name}` }).join('/')
+
   // Update the hash in the URI
-  window.history.replaceState(undefined, undefined, `#/z=${state.mapXYZ.z}/x=${state.mapXYZ.x}/y=${state.mapXYZ.y}/${layerString}`)
+  window.history.replaceState(undefined, undefined, `#/z=${state.mapXYZ.z}/x=${state.mapXYZ.x}/y=${state.mapXYZ.y}/${layerString}/${filtersString}`)
 }
 
 const reducers = combineReducers({
