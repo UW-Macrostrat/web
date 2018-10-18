@@ -19,6 +19,14 @@ const categoryTitles = {
   'strat_name': 'Stratigraphic Names',
   'environ': 'Environments (columns only)',
 }
+
+const sortOrder = {
+  'interval': 1,
+  'lithology': 2,
+  'strat_name': 3,
+  'environ': 4,
+  'place': 5
+}
 class Searchbar extends Component {
   constructor(props) {
     super(props)
@@ -33,11 +41,13 @@ class Searchbar extends Component {
   }
 
   gainInputFocus() {
+    console.log('focus')
     this.setState({
       inputFocused: true
     })
   }
   loseInputFocus() {
+    console.log('lose focus')
     // A slight timeout is required so that click actions can occur
     setTimeout(() => {
       this.setState({
@@ -62,24 +72,27 @@ class Searchbar extends Component {
   render() {
     const { toggleMenu, toggleFilters } = this.props
     let resultCategories = new Set(this.props.searchResults.map(d => { return d.category }))
-    resultCategories = [...resultCategories]
+    // Force the results into a particular order
+    resultCategories = [...resultCategories].sort((a, b) => {
+      return sortOrder[a] - sortOrder[b]
+    })
 
     let categoryResults = resultCategories.map((cat) => {
       let thisCat = this.props.searchResults.filter(f => {
         if (f.category === cat) return f
       })
       return thisCat.map((item, h) => {
-        return <ListItem key={h} button onClick={() => { this.addFilter(item) }}>
+        return (<ListItem key={h} button onClick={() => { this.addFilter(item) }}>
           <ListItemText classes={{ 'root': 'searchresult-item' }} primary={item.name} disableTypography={true}/>
-        </ListItem>
+        </ListItem>)
       })
     })
 
     let searchResults = resultCategories.map((cat, i) => {
-      return <div key={`subheader-${i}`}>
+      return (<div key={`subheader-${i}`}>
           <ListSubheader classes={{ 'root': 'searchresult-header'}}>{categoryTitles[cat]}</ListSubheader>
           {categoryResults[i]}
-        </div>
+        </div>)
     })
 
     let holderStyle = {

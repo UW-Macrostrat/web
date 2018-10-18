@@ -291,17 +291,20 @@ class Map extends Component {
 
   componentWillUpdate(nextProps) {
     if (!nextProps.elevationMarkerLocation.length || nextProps.elevationMarkerLocation[0] != this.props.elevationMarkerLocation[0] && nextProps.elevationMarkerLocation[1] != this.props.elevationMarkerLocation[1]) {
-      this.map.getSource('elevationMarker').setData({
-        "type": "FeatureCollection",
-        "features": [{
-          "type": "Feature",
-          "properties": {},
-          "geometry": {
-            "type": "Point",
-            "coordinates": nextProps.elevationMarkerLocation
-          }
-        }]
-      })
+      if (this.map && this.map.loaded()) {
+        this.map.getSource('elevationMarker').setData({
+          "type": "FeatureCollection",
+          "features": [{
+            "type": "Feature",
+            "properties": {},
+            "geometry": {
+              "type": "Point",
+              "coordinates": nextProps.elevationMarkerLocation
+            }
+          }]
+        })
+      }
+
     }
     // Watch the state of the application and adjust the map accordingly
     if (!nextProps.elevationChartOpen && this.props.elevationChartOpen && this.map) {

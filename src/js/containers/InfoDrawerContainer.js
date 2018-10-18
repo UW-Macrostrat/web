@@ -17,7 +17,6 @@ const mapStateToProps = (state) => {
     fetchingPbdb: state.update.fetchingPbdb,
     pbdbData: state.update.pbdbData,
     mapHasBedrock: state.update.mapHasBedrock,
-    mapHasLines: state.update.mapHasLines,
     mapHasSatellite: state.update.mapHasSatellite,
     mapHasColumns: state.update.mapHasColumns,
     mapHasFossils: state.update.mapHasFossils,

@@ -159,26 +159,11 @@ class InfoDrawer extends Component {
       ref: {}
     }
 
-    // if (Object.keys(this.props.columnInfo).length != 0) {
-    //   this.props.columnInfo.column.map(d => {
-    //     let unitHTML = d.units.map(j => {
-    //       return <tr>
-    //         <td width={100} colspan=>
-    //
-    //         </td>
-    //       </tr>
-    //     })
-    //   })
-    // }
-    // if (Object.keys(this.props.columnInfo).length != 0) {
-    //   console.log(this.props.columnInfo.timescale)
-    // }
-
     return (
       <Drawer
         anchor={window.innerWidth > 850 ? "right" : "bottom"}
         open={infoDrawerOpen}
-        onBackdropClick={closeInfoDrawer}
+      
         transitionDuration={300}
         hideBackdrop={true}
         disableAutoFocus={true}
