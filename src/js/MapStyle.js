@@ -949,7 +949,7 @@ export const mapStyle = {
               'case',
               ['==', ['feature-state', 'color'], null],
               0,
-              0.5
+              0.7
             ],
             "fill-outline-color": [
               'case',

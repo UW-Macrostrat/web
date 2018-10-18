@@ -617,12 +617,15 @@ class Map extends Component {
   colorScale(val) {
     let mid = this.maxValue / 2
 
+    // Max
     if (Math.abs(val - this.maxValue) <= Math.abs(val - mid)) {
-      return '#5c8b66'
+      return '#2171b5'
+    // Mid
     } else if (Math.abs(val - mid) <= Math.abs(val - 1)) {
-      return '#adc5b2'
+      return '#6baed6'
+    // Min
     } else {
-      return '#eef3ef'
+      return '#bdd7e7'
     }
   }
 
