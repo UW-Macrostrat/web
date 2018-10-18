@@ -1,8 +1,6 @@
 import React, { Component } from 'react'
-import PropTypes from 'prop-types'
 import { SETTINGS } from '../Settings'
 import { mapStyle } from '../MapStyle'
-// import mapboxgl from 'mapbox-gl'
 
 const LITH_CLASSES = 3
 const LITH_TYPES = 14
@@ -292,6 +290,19 @@ class Map extends Component {
 
 
   componentWillUpdate(nextProps) {
+    if (!nextProps.elevationMarkerLocation.length || nextProps.elevationMarkerLocation[0] != this.props.elevationMarkerLocation[0] && nextProps.elevationMarkerLocation[1] != this.props.elevationMarkerLocation[1]) {
+      this.map.getSource('elevationMarker').setData({
+        "type": "FeatureCollection",
+        "features": [{
+          "type": "Feature",
+          "properties": {},
+          "geometry": {
+            "type": "Point",
+            "coordinates": nextProps.elevationMarkerLocation
+          }
+        }]
+      })
+    }
     // Watch the state of the application and adjust the map accordingly
     if (!nextProps.elevationChartOpen && this.props.elevationChartOpen && this.map) {
       this.elevationPoints = []

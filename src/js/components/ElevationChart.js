@@ -181,6 +181,7 @@ class ElevationChart extends Component {
       .style('fill', '#333333')
       .attr('dy', '-1.2em')
 
+    const updateElevationMarker = this.props.updateElevationMarker
     this.chart.append('rect')
         .attr('class', 'overlay')
         .attr('width', width)
@@ -197,7 +198,7 @@ class ElevationChart extends Component {
           focus.select('text')
             .text(`${d.elevation} m / ${(parseInt(d.elevation) * 3.28084).toFixed(0)} ft`)
 
-         // shareState('activeElevationPoint', [d.lat, d.lng])
+          updateElevationMarker(d.lng, d.lat)
         })
   }
 }

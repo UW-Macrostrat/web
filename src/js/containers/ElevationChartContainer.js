@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import { toggleElevationChart } from '../actions'
+import { toggleElevationChart, updateElevationMarker } from '../actions'
 import ElevationChart from '../components/ElevationChart'
 
 const mapStateToProps = (state) => {
@@ -14,6 +14,9 @@ const mapDispatchToProps = (dispatch) => {
   return {
     toggleElevationChart: () => {
       dispatch(toggleElevationChart())
+    },
+    updateElevationMarker: (lng, lat) => {
+      dispatch(updateElevationMarker(lng, lat))
     }
   }
 }

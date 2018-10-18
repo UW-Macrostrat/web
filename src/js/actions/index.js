@@ -45,6 +45,7 @@ export const GO_TO_PLACE = 'GO_TO_PLACE'
 
 export const START_ELEVATION_QUERY = 'START_ELEVATION_QUERY'
 export const RECEIVED_ELEVATION_QUERY = 'RECEIVED_ELEVATION_QUERY'
+export const UPDATE_ELEVATION_MARKER = 'UPDATE_ELEVATION_MARKER'
 
 export const SET_ACTIVE_INDEX_MAP = 'SET_ACTIVE_INDEX_MAP'
 
@@ -585,7 +586,13 @@ export function receivedElevationQuery(data) {
   }
 }
 
-
+export function updateElevationMarker(lng, lat) {
+  return {
+    type: UPDATE_ELEVATION_MARKER,
+    lng: lng,
+    lat: lat,
+  }
+}
 
 export function startPbdbQuery(cancelToken) {
   return {
@@ -734,6 +741,8 @@ export function getInitialMapState() {
   }
 
 }
+
+
 
 
 export function startGeolocation() {

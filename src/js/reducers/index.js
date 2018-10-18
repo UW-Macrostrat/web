@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux'
-import { REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK, TOGGLE_LINES, TOGGLE_SATELLITE, TOGGLE_COLUMNS, CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER, REMOVE_FILTER, GO_TO_PLACE, TOGGLE_ABOUT, TOGGLE_FOSSILS, UPDATE_COLUMN_FILTERS, START_COLUMN_QUERY, RECEIVED_COLUMN_QUERY, START_GDD_QUERY, RECEIVED_GDD_QUERY, SET_ACTIVE_INDEX_MAP, TOGGLE_ELEVATION_CHART, START_ELEVATION_QUERY, RECEIVED_ELEVATION_QUERY, START_PBDB_QUERY, UPDATE_PBDB_QUERY, RECEIVED_PBDB_QUERY, MAP_MOVED, GET_INITIAL_MAP_STATE, GOT_INITIAL_MAP_STATE } from '../actions'
+import { REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK, TOGGLE_LINES, TOGGLE_SATELLITE, TOGGLE_COLUMNS, CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER, REMOVE_FILTER, GO_TO_PLACE, TOGGLE_ABOUT, TOGGLE_FOSSILS, UPDATE_COLUMN_FILTERS, START_COLUMN_QUERY, RECEIVED_COLUMN_QUERY, START_GDD_QUERY, RECEIVED_GDD_QUERY, SET_ACTIVE_INDEX_MAP, TOGGLE_ELEVATION_CHART, START_ELEVATION_QUERY, UPDATE_ELEVATION_MARKER, RECEIVED_ELEVATION_QUERY, START_PBDB_QUERY, UPDATE_PBDB_QUERY, RECEIVED_PBDB_QUERY, MAP_MOVED, GET_INITIAL_MAP_STATE, GOT_INITIAL_MAP_STATE } from '../actions'
 import { sum, timescale } from '../utils'
 
 const classColors = {
@@ -47,6 +47,7 @@ const update = (state = {
   gddInfo: [],
   searchResults: [],
   elevationData: [],
+  elevationMarkerLocation: [],
   pbdbInfo: [],
 
   mapHasBedrock: true,
@@ -316,7 +317,8 @@ const update = (state = {
     case TOGGLE_ELEVATION_CHART:
       return Object.assign({}, state, {
         elevationChartOpen: !state.elevationChartOpen,
-        elevationData: []
+        elevationData: [],
+        elevationMarkerLocation: []
       })
 
     // Handle searching
@@ -389,6 +391,10 @@ const update = (state = {
         fetchingElevation: false,
         elevationData: action.data,
         elevationCancelToken: null
+      })
+    case UPDATE_ELEVATION_MARKER:
+      return Object.assign({}, state, {
+        elevationMarkerLocation: [action.lng, action.lat]
       })
 
     // Handle PBDB

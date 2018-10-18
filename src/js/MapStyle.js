@@ -59,6 +59,13 @@ export const mapStyle = {
             "features": []
           }
         },
+        "elevationMarker": {
+          "type": "geojson",
+          "data": {
+            "type": "FeatureCollection",
+            "features": []
+          }
+        },
     },
     "layers": [
         {
@@ -885,27 +892,41 @@ export const mapStyle = {
           }
         },
         {
-          "id": "elevationPoint",
-          "type": "symbol",
-          "source": "elevationPoints",
-          "layout": {
-            "icon-size": 1,
-            "icon-image": "circle-stroked-15",
-            "icon-allow-overlap": true
-          },
-          "paint": {
-            "icon-color": "#ffffff"
-          }
-        },
-        {
           "id": "elevationLine",
           "type": "line",
           "source": "elevationLine",
           "paint": {
             "line-dasharray": [4, 2],
-            "line-width": 5,
+            "line-width": {
+              "stops": [
+                [0, 3],
+                [12, 5]
+              ]
+            },
             "line-color": "#ffffff",
             "line-opacity": 1
+          }
+        },
+        {
+          "id": "elevationPoint",
+          "type": "circle",
+          "source": "elevationPoints",
+          "paint": {
+            "circle-radius": 6,
+            "circle-color": "#ffffff",
+            "circle-stroke-width": 1,
+            "circle-stroke-color": "#333333",
+          }
+        },
+        {
+          "id": "elevationMarker",
+          "type": "circle",
+          "source": "elevationMarker",
+          "paint": {
+            "circle-radius": 8,
+            "circle-color": "#4bc0c0",
+            "circle-stroke-width": 2,
+            "circle-stroke-color": "#dcdcdc",
           }
         },
         {
