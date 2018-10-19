@@ -77,8 +77,8 @@ class ElevationChart extends Component {
 
   drawChart() {
     // Alias these variables because d3 returns `this` in mouseover
+    const updateElevationMarker = this.props.updateElevationMarker
     let data = this.props.elevationData
-  //  let shareState = this.props.shareState
 
     let margin = {top: 20, right: 50, bottom: 30, left: 70}
     let width = window.innerWidth - margin.left - margin.right
@@ -181,7 +181,7 @@ class ElevationChart extends Component {
       .style('fill', '#333333')
       .attr('dy', '-1.2em')
 
-    const updateElevationMarker = this.props.updateElevationMarker
+
     this.chart.append('rect')
         .attr('class', 'overlay')
         .attr('width', width)

@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import PropTypes from 'prop-types'
 import AnimateHeight from 'react-animate-height'
 import Drawer from 'material-ui/Drawer'
 import List, { ListItem, ListItemText, ListItemIcon, ListItemSecondaryAction } from 'material-ui/List'
@@ -15,7 +14,7 @@ import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Ta
 import Card, { CardContent } from 'material-ui/Card'
 import Paper from 'material-ui/Paper'
 
-
+// Icons
 import CloseIcon from 'material-ui-icons/Close'
 import Button from 'material-ui/Button'
 import IconButton from 'material-ui/IconButton'
@@ -25,6 +24,7 @@ import ExpandMoreIcon from 'material-ui-icons/ExpandMore'
 import ExpandLessIcon from 'material-ui-icons/ExpandLess'
 import Typography from 'material-ui/Typography'
 
+// Our components
 import AgeChip from './AgeChip'
 import MacrostratAgeChip from './MacrostratAgeChip'
 import LithChip from './LithChip'
@@ -34,7 +34,7 @@ import MapSource from './MapSource'
 import LongText from './LongText'
 import PBDBCollections from './PBDBCollections'
 
-import { addCommas } from '../utils'
+import { addCommas, normalizeLng } from '../utils'
 
 class InfoDrawer extends Component {
   constructor(props) {
@@ -46,10 +46,6 @@ class InfoDrawer extends Component {
       bedrockMatchExpanded: this.props.mapHasBedrock,
       stratigraphyExpanded: this.props.mapHasColumns
     }
-
-    // this.bedrockExpanded = this.props.mapHasBedrock
-    // this.bedrockMatchExpanded = this.props.mapHasBedrock
-    // this.stratigraphyExpanded = this.props.mapHasColumns
 
     this.handleChange = panel => (event, expanded) => {
       this.setState({
@@ -88,11 +84,6 @@ class InfoDrawer extends Component {
     }
   }
 
-  normalizeLng(lng) {
-    // via https://github.com/Leaflet/Leaflet/blob/32c9156cb1d1c9bd53130639ec4d8575fbeef5a6/src/core/Util.js#L87
-    return (((lng - 180) % 360 + 360) % 360 - 180).toFixed(4);
-  }
-
   componentWillReceiveProps(nextProps) {
 
     this.setState({
@@ -115,11 +106,6 @@ class InfoDrawer extends Component {
         stratigraphyExpanded: nextProps.mapHasColumns,
       })
     }
-
-    // if (nextProps.mapHasColumns) {
-    //   console.log('next prop has columns! go get it')
-    //   this.props.getColumn()
-    // }
   }
 
   render() {
@@ -163,7 +149,7 @@ class InfoDrawer extends Component {
       <Drawer
         anchor={window.innerWidth > 850 ? "right" : "bottom"}
         open={infoDrawerOpen}
-      
+
         transitionDuration={300}
         hideBackdrop={true}
         disableAutoFocus={true}
@@ -192,7 +178,7 @@ class InfoDrawer extends Component {
                   {mapInfo.elevation ?
                     <div className="infodrawer-header-item lnglat-container">
                       <span className="lnglat">
-                        {this.normalizeLng(this.props.infoMarkerLng)}  {this.props.infoMarkerLat}
+                        {normalizeLng(this.props.infoMarkerLng)}  {this.props.infoMarkerLat}
                       </span>
                       <span className="z">
                         {mapInfo.elevation}<span className='age-chip-ma'>m</span> | {(mapInfo.elevation * 3.28084).toFixed(0)}<span className='age-chip-ma'>ft</span>

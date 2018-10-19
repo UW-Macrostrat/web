@@ -2,15 +2,6 @@ import React, { Component } from 'react'
 import { SETTINGS } from '../Settings'
 import { mapStyle } from '../MapStyle'
 
-const LITH_CLASSES = 3
-const LITH_TYPES = 14
-
-const noFilter = [
-  "all",
-  ["!=", "color", ""]
-]
-
-
 class Map extends Component {
   constructor(props) {
     super(props)
@@ -19,10 +10,9 @@ class Map extends Component {
     this.currentSources = []
     this.isPanning = false
     this.elevationPoints = []
-    this.noFilter = [
-      "all",
-      ["!=", "color", ""]
-    ]
+
+    // Separate time filters and other filters for different rules
+    // i.e. time filters are <interval> OR <interval> and all others are AND
     this.timeFilters = []
     // Keep track of name: index values of time filters for easier removing
     this.timeFiltersIndex = {}
@@ -30,14 +20,6 @@ class Map extends Component {
     this.filters = []
     this.filtersIndex = {}
 
-    /*
-    [
-      "all",
-      ["!=", "color", ""],
-      ["any", this.timeFilters],
-      ["any", this.filters]
-    ]
-    */
     this.maxValue = 500
     this.previousZoom = 0
 
@@ -57,7 +39,7 @@ class Map extends Component {
   }
 
   componentDidMount() {
-    mapboxgl.accessToken = 'pk.eyJ1IjoiamN6YXBsZXdza2kiLCJhIjoiWnQxSC01USJ9.oleZzfREJUKAK1TMeCD0bg';
+    mapboxgl.accessToken = Settings.mapboxAccessToken;
     this.map = new mapboxgl.Map({
         container: 'map',
         style: this.props.mapHasSatellite ? SETTINGS.satelliteMapURL : SETTINGS.baseMapURL,
@@ -65,10 +47,6 @@ class Map extends Component {
         zoom: this.props.mapXYZ.z,
         maxZoom: 16,
         maxTileCacheSize: 0,
-    //    hash: true,
-        // failIfMajorPerformanceCaveat: true,
-        // dragRotate: false,
-        // touchZoomRotate: false
     })
     // disable map rotation using right click + drag
     this.map.dragRotate.disable()
@@ -85,11 +63,12 @@ class Map extends Component {
         y: center.lat.toFixed(4),
       })
       if (this.props.mapHasFossils) {
-        this.updateGrid()
+        this.refreshPBDB()
       }
     })
 
     this.map.on('load', () => {
+      // Add the sources to the map
       Object.keys(mapStyle.sources).forEach(source => {
         this.map.addSource(source, mapStyle.sources[source])
       })
@@ -111,27 +90,30 @@ class Map extends Component {
         }
         if ((layer.source === 'pbdb'  || layer.source === 'pbdb-points') && this.props.mapHasFossils === true) {
           this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
-          this.updateGrid()
+          this.refreshPBDB()
         }
         if (layer.source === 'columns' && this.props.mapHasColumns === true) {
           this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
         }
       })
 
-      // this.map.setFilter('burwell_fill', noFilter)
-      // this.map.setFilter('burwell_stroke', noFilter)
-
+      // NO idea why timeout is needed
       setTimeout(() => {
         this.mapLoaded = true
         this.applyFilters()
       }, 1)
     })
 
+    // Hide the infoMarker when the map moves
     this.map.on('movestart', () => {
       if (this.panning) {
         return
       }
-      this.map.setLayoutProperty('infoMarker', 'visibility', 'none')
+      // Make sure this doesn't fire before infoMarker is added to map
+      // Can happen on a slow connection
+      if (this.map.getLayer('infoMarker')) {
+        this.map.setLayoutProperty('infoMarker', 'visibility', 'none')
+      }
     })
 
     this.map.on('click', (event) => {
@@ -168,7 +150,7 @@ class Map extends Component {
 
       // If we are viewing fossils, prioritize clicks on those
       if (this.props.mapHasFossils) {
-        let collections = this.map.queryRenderedFeatures(event.point, { layers: ['pbdbCollections']})
+        let collections = this.map.queryRenderedFeatures(event.point, { layers: ['pbdbCollections', 'pbdb-points']})
         console.log('collections - ', collections)
         if (collections.length && collections[0].properties.hasOwnProperty('n_collections')) {
           this.map.zoomTo(this.map.getZoom() + 1, { center: event.lngLat })
@@ -243,6 +225,7 @@ class Map extends Component {
         }
       })
 
+      // Readd all the previous layers to the map
       this.currentLayers.forEach(layer => {
         if (layer.layer.id != 'infoMarker') {
           this.map.addLayer(layer.layer, 'airport-label')
@@ -253,17 +236,16 @@ class Map extends Component {
         if (layer.filters) {
           this.map.setFilter(layer.layer.id, layer.filters)
         }
-        // if (layer.layer.source === 'burwell' && layer.layer.type === 'line' && layer.layer.id != 'burwell_stroke' && this.props.filters.length != 0) {
-        //   this.map.setLayoutProperty(layer.layer.id, 'visibility', 'none')
-        // }
       })
     })
   }
 
+  // Swap between standard and satellite base layers
   swapBasemap(toAdd) {
     this.currentSources = []
     this.currentLayers = []
 
+    // First record which layers are currently on the map
     Object.keys(mapStyle.sources).forEach(source => {
       let isPresent = this.map.getSource(source)
       if (isPresent) {
@@ -285,10 +267,11 @@ class Map extends Component {
       }
     })
 
+    // Set the style. `style.load` will be fired after to readd other layers
     this.map.setStyle(toAdd)
   }
 
-
+  // Handle updates to the state of the map
   componentWillUpdate(nextProps) {
     if (!nextProps.elevationMarkerLocation.length || nextProps.elevationMarkerLocation[0] != this.props.elevationMarkerLocation[0] && nextProps.elevationMarkerLocation[1] != this.props.elevationMarkerLocation[1]) {
       if (this.map && this.map.loaded()) {
@@ -361,12 +344,15 @@ class Map extends Component {
           this.map.setLayoutProperty(layer.id, 'visibility', 'none')
         }
       })
+
+    // Swap satellite/normal
     } else if (nextProps.mapHasSatellite != this.props.mapHasSatellite) {
       if (nextProps.mapHasSatellite) {
         this.swapBasemap(SETTINGS.satelliteMapURL)
       } else {
         this.swapBasemap(SETTINGS.baseMapURL)
       }
+    // Add columns
     } else if (nextProps.mapHasColumns != this.props.mapHasColumns) {
       if (nextProps.mapHasColumns) {
         // If filters are applied
@@ -416,7 +402,7 @@ class Map extends Component {
           if (layer.source === 'pbdb' || layer.source === 'pbdb-points') {
             this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
           }
-          this.updateGrid()
+          this.refreshPBDB()
         })
       } else {
         mapStyle.layers.forEach(layer => {
@@ -425,6 +411,8 @@ class Map extends Component {
           }
         })
       }
+
+    // Handle changes to map filters
     } else if (nextProps.filters.length != this.props.filters.length) {
       // If all filters have been removed simply reset the filter states
       if (nextProps.filters.length === 0) {
@@ -455,6 +443,8 @@ class Map extends Component {
         }
         return
       }
+
+      // Check which filters were added or removed
       let existingFilters = new Set(this.props.filters.map(f => { return `${f.category}|${f.type}|${f.name}` }))
       let newFilters = new Set(nextProps.filters.map(f => { return `${f.category}|${f.type}|${f.name}` }))
 
@@ -490,13 +480,14 @@ class Map extends Component {
         }
       })
       if (filterToApply.length === 0) {
-        console.log('no new filters to apply', nextProps.filters)
+        //console.log('no new filters to apply', nextProps.filters)
         return
       }
-      filterToApply = filterToApply[0]
 
+      filterToApply = filterToApply[0]
       let newFilter = []
 
+      // Check which kind of filter it is
       switch(filterToApply.type) {
         case 'intervals':
           this.timeFilters.push([
@@ -518,8 +509,8 @@ class Map extends Component {
             }
           }
           break
+
         case 'lithology_types':
-          //newFilter.push('any')
           for (let i = 1; i < 14; i++) {
             this.filters.push([ '==', `lith_type${i}`, filterToApply.name ])
 
@@ -534,7 +525,6 @@ class Map extends Component {
         case 'lithologies':
         case 'strat_name_orphans':
         case 'strat_name_concepts':
-          //newFilter.push('any')
           this.filters.push([ 'in', 'legend_id', ...filterToApply.legend_ids ])
           this.filtersIndex[`${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`] = [ this.filters.length - 1]
           break
@@ -548,10 +538,6 @@ class Map extends Component {
 
       // Update the map styles
       this.applyFilters()
-
-      // Hide all line features when a filter is applied
-
-
     }
 
   }
@@ -577,14 +563,18 @@ class Map extends Component {
     console.log('toApply', toApply)
     this.map.setFilter('burwell_fill', toApply)
     this.map.setFilter('burwell_stroke', toApply)
-
   }
 
-  updateGrid() {
+  // PBDB hexgrids and points are refreshed on every map move
+  refreshPBDB() {
     let bounds = this.map.getBounds()
     let zoom = this.map.getZoom()
     if (zoom < 8) {
+      // Make sure the layer is visible
       this.map.setLayoutProperty('pbdbCollections', 'visibility', 'visible')
+      // Dirty way of hiding points when zooming out
+      this.map.getSource('pbdb-points').setData({"type": "FeatureCollection","features": []})
+      // Fetch the summary
       fetch(`https://dev.macrostrat.org/api/v2/hex-summary?min_lng=${bounds._sw.lng}&min_lat=${bounds._sw.lat}&max_lng=${bounds._ne.lng}&max_lat=${bounds._ne.lat}&zoom=${zoom}`)
         .then(response => {
           return response.json()
@@ -602,15 +592,17 @@ class Map extends Component {
           } else {
             this.updateColors(mappings)
           }
-          this.map.getSource('pbdb-points').setData({"type": "FeatureCollection","features": []})
         })
     } else {
+      // Hide the hexgrids
       this.map.setLayoutProperty('pbdbCollections', 'visibility', 'none')
-      fetch(`https://paleobiodb.org/data1.2/colls/list.json?lngmin=${bounds._sw.lng}&lngmax=${bounds._ne.lng}&latmin=${bounds._sw.lat}&latmax=${bounds._ne.lat}&show=ref,time,strat,geo,lith,entname,prot&markrefs`)
+      // Hit the PBDB API
+      fetch(`${Settings.pbdbDomain}/data1.2/colls/list.json?lngmin=${bounds._sw.lng}&lngmax=${bounds._ne.lng}&latmin=${bounds._sw.lat}&latmax=${bounds._ne.lat}&show=ref,time,strat,geo,lith,entname,prot&markrefs`)
         .then(response => {
           return response.json()
         })
         .then(json => {
+          // Transform it into a GeoJSON and update the underlying data
           this.map.getSource('pbdb-points').setData({
             "type": "FeatureCollection",
             "features": json.records.map(f => {
@@ -624,12 +616,11 @@ class Map extends Component {
               }
             })
           })
-
         })
     }
-
   }
 
+  // Update the colors of the hexgrids
   updateColors(data) {
     for (let i = 0; i < data.length; i++) {
       this.map.setFeatureState({

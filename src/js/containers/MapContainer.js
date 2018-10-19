@@ -4,14 +4,8 @@ import Map from '../components/Map'
 
 const mapStateToProps = (state) => {
   return {
-    menuOpen: state.update.menuOpen,
-    infoDrawerOpen: state.update.infoDrawerOpen,
-    infoDrawerExpanded: state.update.infoDrawerExpanded,
-    filtersOpen: state.update.filtersOpen,
     filters: state.update.filters,
     filteredColumns: state.update.filteredColumns,
-    mapInfo: state.update.mapInfo,
-    fetchingMapInfo: state.update.fetchingMapInfo,
     mapHasBedrock: state.update.mapHasBedrock,
     mapHasLines: state.update.mapHasLines,
     mapHasSatellite: state.update.mapHasSatellite,
@@ -21,7 +15,6 @@ const mapStateToProps = (state) => {
     elevationChartOpen: state.update.elevationChartOpen,
     elevationData: state.update.elevationData,
     elevationMarkerLocation: state.update.elevationMarkerLocation,
-    fetchingElevation: state.update.fetchingElevation,
     mapXYZ: state.update.mapXYZ,
   }
 }
@@ -30,9 +23,6 @@ const mapDispatchToProps = (dispatch) => {
   return {
     queryMap: (lng, lat, z, map_id) => {
       dispatch(queryMap(lng, lat, z, map_id))
-    },
-    closeInfoDrawer: () => {
-      dispatch(closeInfoDrawer())
     },
     getFilteredColumns: () => {
       dispatch(getFilteredColumns())
