@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import { queryMap, closeInfoDrawer, getFilteredColumns, getElevation, getPBDB, mapMoved } from '../actions'
+import { queryMap, closeInfoDrawer, getFilteredColumns, getElevation, getPBDB, mapMoved, resetPbdb } from '../actions'
 import Map from '../components/Map'
 
 const mapStateToProps = (state) => {
@@ -32,6 +32,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     getPBDB: (collection_nos) => {
       dispatch(getPBDB(collection_nos))
+    },
+    resetPbdb: () => {
+      dispatch(resetPbdb())
     },
     mapMoved: (data) => {
       dispatch(mapMoved(data))

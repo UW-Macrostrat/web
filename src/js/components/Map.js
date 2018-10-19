@@ -36,10 +36,13 @@ class Map extends Component {
       9: 16,
       10: 16,
     }
+
+    // We need to store these for cluster querying...
+    this.pbdbPoints = {}
   }
 
   componentDidMount() {
-    mapboxgl.accessToken = Settings.mapboxAccessToken;
+    mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
     this.map = new mapboxgl.Map({
         container: 'map',
         style: this.props.mapHasSatellite ? SETTINGS.satelliteMapURL : SETTINGS.baseMapURL,
@@ -150,14 +153,35 @@ class Map extends Component {
 
       // If we are viewing fossils, prioritize clicks on those
       if (this.props.mapHasFossils) {
-        let collections = this.map.queryRenderedFeatures(event.point, { layers: ['pbdbCollections', 'pbdb-points']})
-        console.log('collections - ', collections)
-        if (collections.length && collections[0].properties.hasOwnProperty('n_collections')) {
+        let collections = this.map.queryRenderedFeatures(event.point, { layers: ['pbdbCollections','pbdb-points-clustered', 'pbdb-points']})
+
+        // Clicked on a hex grid
+        if (collections.length && collections[0].properties.hasOwnProperty('hex_id')) {
           this.map.zoomTo(this.map.getZoom() + 1, { center: event.lngLat })
           return
-        } else if (collections.length && collections[0].properties.hasOwnProperty('collection_no')) {
-          this.props.getPBDB(collections.map(col => { return col.properties.collection_no }))
+
+        // Clicked on a cluster
+        } else if (collections.length && collections[0].properties.hasOwnProperty('cluster')) {
+          // via https://jsfiddle.net/aznkw784/
+          let pointsInCluster = this.pbdbPoints.features.filter(f => {
+            let pointPixels = this.map.project(f.geometry.coordinates)
+            let pixelDistance = Math.sqrt(
+              Math.pow(event.point.x - pointPixels.x, 2) +
+              Math.pow(event.point.y - pointPixels.y, 2)
+            )
+            return Math.abs(pixelDistance) <= 50
+          }).map(f => {
+            return f.properties.oid.replace('col:', '')
+          })
+          this.props.getPBDB(pointsInCluster)
+
+        // Clicked on an unclustered point
+        } else if (collections.length && collections[0].properties.hasOwnProperty('oid')) {
+          this.props.getPBDB(collections.map(col => { return col.properties.oid.replace('col:', '') }))
           return
+        } else {
+          // Otherwise make sure that old fossil collections aren't visible
+          this.props.resetPbdb()
         }
       }
 
@@ -597,13 +621,13 @@ class Map extends Component {
       // Hide the hexgrids
       this.map.setLayoutProperty('pbdbCollections', 'visibility', 'none')
       // Hit the PBDB API
-      fetch(`${Settings.pbdbDomain}/data1.2/colls/list.json?lngmin=${bounds._sw.lng}&lngmax=${bounds._ne.lng}&latmin=${bounds._sw.lat}&latmax=${bounds._ne.lat}&show=ref,time,strat,geo,lith,entname,prot&markrefs`)
+      fetch(`${SETTINGS.pbdbDomain}/data1.2/colls/list.json?lngmin=${bounds._sw.lng}&lngmax=${bounds._ne.lng}&latmin=${bounds._sw.lat}&latmax=${bounds._ne.lat}`)
         .then(response => {
           return response.json()
         })
         .then(json => {
           // Transform it into a GeoJSON and update the underlying data
-          this.map.getSource('pbdb-points').setData({
+          this.pbdbPoints = {
             "type": "FeatureCollection",
             "features": json.records.map(f => {
               return {
@@ -615,7 +639,8 @@ class Map extends Component {
                 }
               }
             })
-          })
+          }
+          this.map.getSource('pbdb-points').setData(this.pbdbPoints)
         })
     }
   }

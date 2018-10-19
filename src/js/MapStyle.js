@@ -21,7 +21,6 @@ export const mapStyle = {
         "pbdb-points": {
           "type": "geojson",
           "cluster": true,
-          "clusterMaxZoom": 13,
           "clusterRadius": 50,
           "data": {
             "type": "FeatureCollection",

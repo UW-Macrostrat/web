@@ -32,6 +32,7 @@ export const RECEIVED_GDD_QUERY = 'RECEIVED_GDD_QUERY'
 export const START_PBDB_QUERY = 'START_PBDB_QUERY'
 export const UPDATE_PBDB_QUERY = 'UPDATE_PBDB_QUERY'
 export const RECEIVED_PBDB_QUERY = 'RECEIVED_PBDB_QUERY'
+export const RESET_PBDB = 'RESET_PBDB'
 
 export const TOGGLE_BEDROCK = 'TOGGLE_BEDROCK'
 export const TOGGLE_LINES = 'TOGGLE_LINES'
@@ -605,6 +606,12 @@ export function updatePbdbQuery(cancelToken) {
   return {
     type: UPDATE_PBDB_QUERY,
     cancelToken: cancelToken
+  }
+}
+
+export const resetPbdb = () => {
+  return {
+    type: RESET_PBDB
   }
 }
 
