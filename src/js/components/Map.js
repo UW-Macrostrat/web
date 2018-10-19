@@ -109,7 +109,7 @@ class Map extends Component {
         if (layer.source === 'burwell' && layer['source-layer'] === 'lines' && this.props.mapHasLines === false) {
           this.map.setLayoutProperty(layer.id, 'visibility', 'none')
         }
-        if (layer.source === 'pbdb' && this.props.mapHasFossils === true) {
+        if ((layer.source === 'pbdb'  || layer.source === 'pbdb-points') && this.props.mapHasFossils === true) {
           this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
           this.updateGrid()
         }
@@ -413,14 +413,14 @@ class Map extends Component {
     } else if (nextProps.mapHasFossils != this.props.mapHasFossils) {
       if (nextProps.mapHasFossils) {
         mapStyle.layers.forEach(layer => {
-          if (layer.source === 'pbdb') {
+          if (layer.source === 'pbdb' || layer.source === 'pbdb-points') {
             this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
           }
           this.updateGrid()
         })
       } else {
         mapStyle.layers.forEach(layer => {
-          if (layer.source === 'pbdb') {
+          if (layer.source === 'pbdb' || layer.source === 'pbdb-points') {
             this.map.setLayoutProperty(layer.id, 'visibility', 'none')
           }
         })
@@ -583,26 +583,51 @@ class Map extends Component {
   updateGrid() {
     let bounds = this.map.getBounds()
     let zoom = this.map.getZoom()
-    fetch(`https://dev.macrostrat.org/api/v2/hex-summary?min_lng=${bounds._sw.lng}&min_lat=${bounds._sw.lat}&max_lng=${bounds._ne.lng}&max_lat=${bounds._ne.lat}&zoom=${zoom}`)
-      .then(response => {
-        return response.json()
-      })
-      .then(json => {
-        let currentZoom = parseInt(this.map.getZoom())
-        let mappings = json.success.data
-        if (currentZoom != this.previousZoom) {
-          this.previousZoom = currentZoom
+    if (zoom < 8) {
+      this.map.setLayoutProperty('pbdbCollections', 'visibility', 'visible')
+      fetch(`https://dev.macrostrat.org/api/v2/hex-summary?min_lng=${bounds._sw.lng}&min_lat=${bounds._sw.lat}&max_lng=${bounds._ne.lng}&max_lat=${bounds._ne.lat}&zoom=${zoom}`)
+        .then(response => {
+          return response.json()
+        })
+        .then(json => {
+          let currentZoom = parseInt(this.map.getZoom())
+          let mappings = json.success.data
+          if (currentZoom != this.previousZoom) {
+            this.previousZoom = currentZoom
 
-          this.maxValue = this.resMax[parseInt(this.map.getZoom())]
+            this.maxValue = this.resMax[parseInt(this.map.getZoom())]
 
-          this.updateColors(mappings)
+            this.updateColors(mappings)
 
-        } else {
-          this.updateColors(mappings)
-        }
+          } else {
+            this.updateColors(mappings)
+          }
+          this.map.getSource('pbdb-points').setData({"type": "FeatureCollection","features": []})
+        })
+    } else {
+      this.map.setLayoutProperty('pbdbCollections', 'visibility', 'none')
+      fetch(`https://paleobiodb.org/data1.2/colls/list.json?lngmin=${bounds._sw.lng}&lngmax=${bounds._ne.lng}&latmin=${bounds._sw.lat}&latmax=${bounds._ne.lat}&show=ref,time,strat,geo,lith,entname,prot&markrefs`)
+        .then(response => {
+          return response.json()
+        })
+        .then(json => {
+          this.map.getSource('pbdb-points').setData({
+            "type": "FeatureCollection",
+            "features": json.records.map(f => {
+              return {
+                "type": "Feature",
+                "properties": f,
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [f.lng, f.lat]
+                }
+              }
+            })
+          })
 
+        })
+    }
 
-      })
   }
 
   updateColors(data) {

@@ -15,7 +15,18 @@ export const mapStyle = {
             "tiles": [
               `${SETTINGS.burwellTileDomain}/hexgrid/{z}/{x}/{y}.mvt`
             ],
-            "tileSize": 512
+            "tileSize": 512,
+            "maxzoom": 7,
+        },
+        "pbdb-points": {
+          "type": "geojson",
+          "cluster": true,
+          "clusterMaxZoom": 13,
+          "clusterRadius": 50,
+          "data": {
+            "type": "FeatureCollection",
+            "features": []
+          }
         },
         "info_marker": {
           "type": "geojson",
@@ -40,10 +51,6 @@ export const mapStyle = {
             "type": "FeatureCollection",
             "features": []
           }
-        },
-        "indexMap": {
-          "type": "geojson",
-          "data": `${SETTINGS.apiDomain}/api/v2/defs/sources?all&format=geojson_bare`
         },
         "elevationPoints": {
           "type": "geojson",
@@ -832,54 +839,6 @@ export const mapStyle = {
           }
         },
         {
-          "id": "indexMap_fill",
-          "type": "fill",
-          "source": "indexMap",
-          "paint": {
-            "fill-color": "#000000",
-            "fill-opacity": 0
-          },
-          "layout": {
-            "visibility": "none"
-          }
-        },
-        {
-          "id": "indexMap_stroke",
-          "type": "line",
-          "source": "indexMap",
-          "paint": {
-            "line-color": "#000000",
-            "line-width": {
-              "stops": [
-                [0, 2],
-                [4, 2],
-                [16, 12]
-              ]
-            },
-            "line-opacity": 1
-          },
-          "layout": {
-            "visibility": "none"
-          }
-        },
-        {
-          "id": "indexMap_highlight",
-          "type": "line",
-          "source": "indexMap",
-          "paint": {
-            "line-color": "#045275",
-            "line-width": {
-              "stops": [
-                [0, 6],
-                [4, 6],
-                [16, 18]
-              ]
-            },
-            "line-opacity": 1
-          },
-          "filter": ["==", "source_id", ""]
-        },
-        {
           "id": "infoMarker",
           "type": "symbol",
           "source": "info_marker",
@@ -960,21 +919,54 @@ export const mapStyle = {
           }
         },
         {
-          "id": "pbdbCollections_highlight",
+          "id": "pbdb-points-clustered",
           "type": "circle",
-          "source": "pbdb",
-          "source-layer": "pbdb-collections",
-          "layout": {
-            "visibility": "none"
-          },
+          "source": "pbdb-points",
+          "filter": ["has", "point_count"],
           "paint": {
-            "circle-radius": 10,
-            "circle-color": "#ffffff",
-            "circle-opacity": 1,
-            "circle-stroke-width": 2,
-            "circle-stroke-color": "#045275"
-          },
-          "filter": ["==", "collection_no", ""]
+            "circle-color": [
+              "step",
+              ["get", "point_count"],
+              "#bdd7e7",
+              20,
+              "#6baed6",
+              50,
+              "#2171b5"
+            ],
+            "circle-radius": [
+              "step",
+              ["get", "point_count"],
+              20,
+              20,
+              30,
+              50,
+              40
+            ]
+          }
         },
+        {
+          "id": "pbdb-point-cluster-count",
+          "type": "symbol",
+          "source": "pbdb-points",
+          "filter": ["has", "point_count"],
+          "layout": {
+            "text-field": "{point_count_abbreviated}",
+            "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+            "text-size": 12
+          }
+        },
+        {
+          "id": "pbdb-points",
+          "type": "circle",
+          "source": "pbdb-points",
+          "filter": ["!", ["has", "point_count"]],
+          "paint": {
+            "circle-color": "#2171b5",
+            "circle-radius": 8,
+            "circle-stroke-width": 1,
+            "circle-stroke-color": "#fff"
+          }
+        }
+
     ]
 }
