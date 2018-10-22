@@ -412,6 +412,32 @@ text {
 .infoDrawer-map-ref {
   float: left;
 }
+
+.journal-title-text {
+  font-size: 20px;
+  font-weight: bold;
+}
+.journal-source {
+  font-size: 14px;
+  font-weight: 200;
+  padding-left: 3px;
+  color: #999;
+}
+.article-title {
+  font-size: 13px;
+}
+.article-author {
+  display: inline;
+  font-weight: normal;
+}
+.title-link {
+  text-decoration: none;
+}
+.expand-button {
+  cursor: pointer;
+  font-size: 20px !important;
+  margin-left: 5px;
+}
 @media(max-width: 850px) {
   .infoDrawer {
     max-width: 100% !important;

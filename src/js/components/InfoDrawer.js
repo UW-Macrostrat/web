@@ -39,6 +39,7 @@ import Reference from './Reference'
 import MapSource from './MapSource'
 import LongText from './LongText'
 import PBDBCollections from './PBDBCollections'
+import Journal from './gdd/Journal'
 
 import { addCommas, normalizeLng } from '../utils'
 
@@ -568,30 +569,8 @@ class InfoDrawer extends Component {
                     </ExpansionPanelSummary>
                     <ExpansionPanelDetails classes={expansionPanelDetailSubClasses}>
                       {gddInfo.length ?
-                        gddInfo.map((article, ai) => {
-                          return (
-                            <div className='article' key={ai}>
-                              <h3 className='article-title'>
-                                <a href={article.url} target="_blank">
-                                  {article.title}.
-                                  <span className="sub-title">
-                                    {article.authors.map(d => { return d.name}).join(', ')}. {article.coverdate}. {article.journal}. {article.publisher}.
-                                  </span>
-                                </a>
-                              </h3>
-                              <div className="quotes">
-                                {article.snippets.map((snippet, si) => {
-                                   let text = snippet.replace(/<em class="hl">/g, "@@@")
-                                      .replace(/<\/em>/g, "***")
-                                      .replace(/(?:\r\n|\r|\n|\<|\>)/g, ' ')
-                                      .trim()
-                                      .replace(/@@@/g, '<em class="hl">')
-                                      .replace(/\*\*\*/g, '</em>');
-                                  return <p className='gdd-snippet' key={si} dangerouslySetInnerHTML={{__html: '...' + text + '...'}}></p>
-                                })}
-                              </div>
-                            </div>
-                          )
+                        gddInfo.map(journal => {
+                          return <Journal data={journal} key={journal.name}/>
                         })
                       : ''}
                     </ExpansionPanelDetails>

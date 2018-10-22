@@ -17,6 +17,16 @@ export const normalizeLng = (lng) => {
   return (((lng - 180) % 360 + 360) % 360 - 180).toFixed(4)
 }
 
+export const hexToRgb = (hex) => {
+  if (!hex) { return 'rgba(0,0,0,0.3)'}
+  hex = hex.replace('#', '')
+  let bigint = parseInt(hex, 16)
+  let r = (bigint >> 16) & 255
+  let g = (bigint >> 8) & 255
+  let b = bigint & 255
+  return `rgba(${r},${g},${b},0.8)`
+}
+
 export const timescale = [ { name: 'Quaternary',
     abbrev: 'Q',
     t_age: 0,

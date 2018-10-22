@@ -349,30 +349,37 @@ const update = (state = {
         gddCancelToken: action.cancelToken
       })
     case RECEIVED_GDD_QUERY:
-      // let parsed = {
-      //   journals: []
-      // }
-      //
-      // for (let i = 0; i < action.data.length; i++) {
-      //   let found = false
-      //   for (let j = 0; j < parsed.journals.length; j++) {
-      //     if (parsed.journals[j].name === action.data[i].journal) {
-      //       parsed.journals[j].articles.push(action.data[i])
-      //       found = true
-      //     }
-      //   }
-      //
-      //   if (!found) {
-      //     parsed.journals.push({
-      //       name: action.data[i].journal,
-      //       source: action.data[i].publisher,
-      //       articles: [action.data[i]]
-      //     })
-      //   }
-      // }
+      let parsed = {
+        journals: []
+      }
+      let articles = {}
+
+      for (let i = 0; i < action.data.length; i++) {
+        let found = false
+        if (articles[action.data[i].docid]) {
+          continue
+        } else {
+          articles[action.data[i].docid] = true
+        }
+        for (let j = 0; j < parsed.journals.length; j++) {
+          if (parsed.journals[j].name === action.data[i].journal) {
+            parsed.journals[j].articles.push(action.data[i])
+            found = true
+          }
+        }
+
+        if (!found) {
+          parsed.journals.push({
+            name: action.data[i].journal,
+            source: action.data[i].publisher,
+            articles: [action.data[i]]
+          })
+        }
+      }
+
       return Object.assign({}, state, {
         fetchingGdd: false,
-        gddInfo: action.data,
+        gddInfo: parsed.journals,
         gddCancelToken: null
       })
 
