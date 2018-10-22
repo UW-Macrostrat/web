@@ -302,6 +302,9 @@ text {
   display: block !important;
   padding: 0 !important;
 }
+.expansion-panel-detail-sub {
+  display: block !important;
+}
 .expansion-panel-detail-header {
   margin-top: -10px;
   font-size: 80%;

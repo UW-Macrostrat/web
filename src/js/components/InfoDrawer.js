@@ -127,6 +127,9 @@ class InfoDrawer extends Component {
     let expansionPanelDetailClasses = {
       'root': 'expansion-panel-detail'
     }
+    const expansionPanelDetailSubClasses = {
+      'root': 'expansion-panel-detail-sub'
+    }
 
     let exitTransition = {
       exit: 1000
@@ -336,7 +339,7 @@ class InfoDrawer extends Component {
                               : ''
                             }
                           </ExpansionPanelSummary>
-                          <ExpansionPanelDetails classes={expansionPanelDetailClasses}>
+                          <ExpansionPanelDetails classes={expansionPanelDetailSubClasses}>
                             <p className="expansion-panel-detail-header">
                               All matched names:
                             </p>
@@ -395,7 +398,7 @@ class InfoDrawer extends Component {
                               return <AttrChip key={i} name={lithClass.name} color={lithClass.color} />
                             }) : ''}
                           </ExpansionPanelSummary>
-                          <ExpansionPanelDetails classes={expansionPanelDetailClasses}>
+                          <ExpansionPanelDetails classes={expansionPanelDetailSubClasses}>
                             <p className="expansion-panel-detail-header">
                               Matched lithologies:
                             </p>
@@ -417,7 +420,7 @@ class InfoDrawer extends Component {
                               return <AttrChip key={i} name={environClass.name} color={environClass.color} />
                             }) : ''}
                           </ExpansionPanelSummary>
-                          <ExpansionPanelDetails classes={expansionPanelDetailClasses}>
+                          <ExpansionPanelDetails classes={expansionPanelDetailSubClasses}>
                             <p className="expansion-panel-detail-header">
                               Matched environments:
                             </p>
@@ -439,7 +442,7 @@ class InfoDrawer extends Component {
                               return <AttrChip key={i} name={econClass.name} color={econClass.color} />
                             }) : ''}
                           </ExpansionPanelSummary>
-                          <ExpansionPanelDetails classes={expansionPanelDetailClasses}>
+                          <ExpansionPanelDetails classes={expansionPanelDetailSubClasses}>
                             <p className="expansion-panel-detail-header">
                               Matched economic attributes:
                             </p>
@@ -540,7 +543,7 @@ class InfoDrawer extends Component {
                   <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} classes={expansionPanelClasses}>
                     <Typography className="expansion-summary-title">Physiography </Typography>
                   </ExpansionPanelSummary>
-                  <ExpansionPanelDetails classes={expansionPanelDetailClasses}>
+                  <ExpansionPanelDetails classes={expansionPanelDetailSubClasses}>
                     {mapInfo.regions.map((region, i) => {
                       return (
                         <div className='region' key={i}>
@@ -563,7 +566,7 @@ class InfoDrawer extends Component {
                     <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} classes={expansionPanelClasses}>
                       <Typography className="expansion-summary-title">Primary Literature <span className='via-gdd'>via GeoDeepDive</span> </Typography>
                     </ExpansionPanelSummary>
-                    <ExpansionPanelDetails classes={expansionPanelDetailClasses}>
+                    <ExpansionPanelDetails classes={expansionPanelDetailSubClasses}>
                       {gddInfo.length ?
                         gddInfo.map((article, ai) => {
                           return (
