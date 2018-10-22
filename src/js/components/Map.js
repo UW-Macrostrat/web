@@ -618,6 +618,7 @@ class Map extends Component {
           }
         })
     } else {
+      console.log(this.timeFilters)
       // Hide the hexgrids
       this.map.setLayoutProperty('pbdbCollections', 'visibility', 'none')
       // Hit the PBDB API
