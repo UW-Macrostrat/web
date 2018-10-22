@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
-import Drawer from 'material-ui/Drawer'
-import IconButton from 'material-ui/IconButton'
-import CloseIcon from 'material-ui-icons/Close'
-import Grid from 'material-ui/Grid'
+import Drawer from '@material-ui/core/Drawer'
+import IconButton from '@material-ui/core/IconButton'
+import CloseIcon from '@material-ui/icons/Close'
+import Grid from '@material-ui/core/Grid'
 
 import { select, mouse } from 'd3-selection'
 import { scaleLinear } from 'd3-scale'

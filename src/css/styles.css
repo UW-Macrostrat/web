@@ -287,6 +287,7 @@ text {
 }
 .expansion-panel {
   align-items: center;
+  flex-wrap: wrap;
 }
 .expansion-panel-root {
   padding-left: 15px !important;
@@ -299,6 +300,7 @@ text {
 }
 .expansion-panel-detail {
   display: block !important;
+  padding: 0 !important;
 }
 .expansion-panel-detail-header {
   margin-top: -10px;

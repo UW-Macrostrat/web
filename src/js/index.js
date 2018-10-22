@@ -1,5 +1,8 @@
 import 'babel-polyfill'
 
+//https://material-ui.com/style/typography/#migration-to-typography-v2
+window.__MUI_USE_NEXT_TYPOGRAPHY_VARIANTS__ = true
+
 import React from 'react'
 import { render } from 'react-dom'
 import { Provider } from 'react-redux'

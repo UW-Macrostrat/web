@@ -2,11 +2,11 @@ import React, { Component } from 'react'
 import AgeChip from './AgeChip'
 import LithChip from './LithChip'
 import Reference from './Reference'
-import Divider from 'material-ui/Divider'
-import IconButton from 'material-ui/IconButton'
-import Collapse from 'material-ui/transitions/Collapse'
-import ExpandMoreIcon from 'material-ui-icons/ExpandMore'
-import ExpandLessIcon from 'material-ui-icons/ExpandLess'
+import Divider from '@material-ui/core/Divider'
+import IconButton from '@material-ui/core/IconButton'
+import Collapse from '@material-ui/core/Collapse'
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
+import ExpandLessIcon from '@material-ui/icons/ExpandLess'
 
 class MapSource extends Component {
   constructor(props) {

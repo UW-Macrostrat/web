@@ -1,9 +1,14 @@
 import React, { Component } from 'react'
-import Dialog, { DialogTitle } from 'material-ui/Dialog'
-import IconButton from 'material-ui/IconButton'
-import List, { ListItem, ListItemText, ListItemIcon, ListItemSecondaryAction } from 'material-ui/List'
-import RemoveCircleOutlineIcon from 'material-ui-icons/RemoveCircleOutline'
-import CloseIcon from 'material-ui-icons/Close'
+import Dialog from '@material-ui/core/Dialog'
+import DialogTitle from '@material-ui/core/DialogTitle'
+import IconButton from '@material-ui/core/IconButton'
+import List from '@material-ui/core/List'
+import ListItem from '@material-ui/core/ListItem'
+import ListItemText from '@material-ui/core/ListItemText'
+import ListItemIcon from '@material-ui/core/ListItemIcon'
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction'
+import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline'
+import CloseIcon from '@material-ui/icons/Close'
 
 class Filters extends Component {
   constructor(props) {

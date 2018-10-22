@@ -1,14 +1,17 @@
 import React, { Component } from 'react'
-import PropTypes from 'prop-types'
-import Drawer from 'material-ui/Drawer'
-import List, { ListItem, ListItemText, ListItemIcon, ListItemSecondaryAction } from 'material-ui/List'
-import Divider from 'material-ui/Divider'
-import CloseIcon from 'material-ui-icons/Close'
-import IconButton from 'material-ui/IconButton'
-import InfoOutlineIcon from 'material-ui-icons/InfoOutline'
-import LocationOnIcon from 'material-ui-icons/LocationOn'
-import SatelliteIcon from 'material-ui-icons/Satellite'
-import Typography from 'material-ui/Typography'
+import Drawer from '@material-ui/core/Drawer'
+import List from '@material-ui/core/List'
+import ListItem from '@material-ui/core/ListItem'
+import ListItemText from '@material-ui/core/ListItemText'
+import ListItemIcon from '@material-ui/core/ListItemIcon'
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction'
+import Divider from '@material-ui/core/Divider'
+import CloseIcon from '@material-ui/icons/Close'
+import IconButton from '@material-ui/core/IconButton'
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined'
+import LocationOnIcon from '@material-ui/icons/LocationOn'
+import SatelliteIcon from '@material-ui/icons/Satellite'
+import Typography from '@material-ui/core/Typography'
 import ColumnIcon from './icons/ColumnIcon'
 import LineIcon from './icons/LineIcon'
 import ElevationIcon from './icons/ElevationIcon'
@@ -96,7 +99,7 @@ class Menu extends Component {
               <Divider light/>
               <ListItem button onClick={toggleAbout}>
                 <ListItemIcon>
-                  <InfoOutlineIcon />
+                  <InfoOutlinedIcon />
                 </ListItemIcon>
                 <ListItemText primary="About"/>
               </ListItem>
