@@ -244,6 +244,7 @@ text {
 }
 .map-source-attrs {
   padding: 5px 10px 5px 10px;
+  margin-top: -15px;
 }
 .map-source-attr {
   display: block;

@@ -39,7 +39,7 @@ class Filters extends Component {
               return <ListItem key={i}>
                 <ListItemText primary={d.name}/>
                 <ListItemSecondaryAction onClick={() => { this.props.removeFilter(d) }}>
-                  <IconButton color="accent" aria-label="remove" >
+                  <IconButton color="secondary" aria-label="remove" >
                     <RemoveCircleOutlineIcon/>
                   </IconButton>
                 </ListItemSecondaryAction>

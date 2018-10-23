@@ -119,7 +119,7 @@ class Searchbar extends Component {
                     onChange={this.handleSearchInput}
                     value={this.state.searchTerm}
                   />
-                <IconButton color={this.props.filters.length != 0 ? "accent" : "default"} aria-label="filter" onClick={toggleFilters}>
+                <IconButton color={this.props.filters.length != 0 ? "secondary" : "default"} aria-label="filter" onClick={toggleFilters}>
                     <WarningIcon />
                   </IconButton>
               </Toolbar>
