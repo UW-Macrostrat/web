@@ -14,11 +14,17 @@ class ColumnIndexMap extends Component
   constructor: (props)->
     super props
     width = window.innerWidth
-    height = 300
-    @state = { width, height }
+    @state = { width }
+
+  getSize: ->
+    {width} = @state
+    height = width/6
+    if height < 200
+      height = 200
+    return {width,height}
 
   render: ->
-    {width, height} = @state
+    {width,height} = @getSize()
     h 'div', [
       h 'svg#column-index-map', {
         xmlns: "http://www.w3.org/2000/svg"
@@ -40,18 +46,24 @@ class ColumnIndexMap extends Component
       .appendMany('path.column', columns.features)
       .attr 'd', @path
 
+  componentWillUpdate: (nextProps, nextState)->
+
   componentDidMount: ->
     window.addEventListener 'resize', @setWidth
+    {width,height} = @getSize()
+    center = [-75, 33]
 
-    {width, height} = @state
-    center = [-60, 40]
+    # This makes sure we never zoom out past the globe's extent,
+    # at least using an orthographic projection
+    hypot = Math.sqrt(Math.pow(width,2)+Math.pow(height,2))
+    minScale = hypot/2
 
     @projection = geoOrthographic()
       .rotate([-center[0],-center[1]])
       .precision(0.2)
       .clipAngle(90)
       .translate([width / 2, height / 2])
-      .scale width
+      .scale minScale
       .clipExtent([[0,0],[width,height]])
 
     # https://unpkg.com/world-atlas@1/world/110m.json
@@ -113,14 +125,11 @@ class ColumnIndexMap extends Component
 
     extent = [.24*minSize*ratio, 3*minSize*ratio]
 
-    # This makes sure we never zoom out past the globe's extent,
-    # at least using an orthographic projection
-    hypot = Math.sqrt(Math.pow(width,2)+Math.pow(height,2))
     zoomed = =>
       {deltaY} = event.sourceEvent
       currScale = @projection.scale()
       newScale = currScale - 2*deltaY
-      if newScale < hypot*0.5
+      if newScale < minScale
         return
       return if newScale == currScale
       @projection.scale newScale
