@@ -12,6 +12,10 @@ class ColumnPage extends React.Component
       </div>
       <ColumnIndexMap />
     </div>
+  componentDidMount: ->
+    # This is a hack to prevent long hash strings from moving
+    # over from the geologic map side of the app
+    window.location.hash = ""
 
 export default ColumnPage
 

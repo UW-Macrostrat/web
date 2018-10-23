@@ -45,7 +45,11 @@ class ColumnIndexMap extends Component
 
     # `await` does promises serially for now
     {data} = await get("https://unpkg.com/world-atlas@1/world/50m.json")
-    land = feature(data, data.objects.land)
+    land50 = feature(data, data.objects.land)
+
+    {data} = await get("https://unpkg.com/world-atlas@1/world/110m.json")
+    land110 = feature(data, data.objects.land)
+
 
     path = d3.geoPath()
       .projection(@projection)
@@ -58,8 +62,33 @@ class ColumnIndexMap extends Component
       .attr('d',path)
 
     land = bkg.selectAppend('path.land')
-      .datum(land)
+      .datum(land50)
       .attr('d',path)
+
+    redraw = ->
+      bkg.selectAll 'path'
+        .attr 'd', path
+
+    updateData = (val)-> ->
+      land.datum(val)
+        .attr 'd', path
+
+    sens = 0.08
+    dragging = d3.drag()
+      .subject (d)=>
+        r = @projection.rotate()
+        return {
+          x: r[0]/sens
+          y: -r[1]/sens
+        }
+      .on "drag", =>
+        rotate = @projection.rotate()
+        @projection.rotate [d3.event.x * sens, -d3.event.y * sens, rotate[2]]
+        redraw()
+      .on 'start', updateData(land110)
+      .on 'end', updateData(land50)
+
+    map.call dragging
 
     console.log land
 
