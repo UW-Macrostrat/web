@@ -4,6 +4,8 @@ import h from 'react-hyperscript'
 import {geoOrthographic} from 'd3'
 import * as d3 from 'd3'
 import 'd3-jetpack'
+import {get} from 'axios'
+import {feature} from 'topojson'
 
 class ColumnIndexMap extends Component
   constructor: (props)->
@@ -30,9 +32,36 @@ class ColumnIndexMap extends Component
       h 'g.map-backdrop'
     ]
 
+  setWidth: =>
+    @setState {width: window.innerWidth}
+
   componentDidMount: ->
+    window.addEventListener 'resize', @setWidth
     # https://unpkg.com/world-atlas@1/world/110m.json
     el = findDOMNode(@)
-    d3.select(el)
+    map = d3.select(el)
+
+    bkg = map.select("g.map-backdrop")
+
+    # `await` does promises serially for now
+    {data} = await get("https://unpkg.com/world-atlas@1/world/50m.json")
+    land = feature(data, data.objects.land)
+
+    path = d3.geoPath()
+      .projection(@projection)
+
+    graticule = d3.geoGraticule()
+      .step([10,10])
+
+    grat = bkg.selectAppend('path.graticule')
+      .datum(graticule())
+      .attr('d',path)
+
+    land = bkg.selectAppend('path.land')
+      .datum(land)
+      .attr('d',path)
+
+    console.log land
+
 
 export default ColumnIndexMap
