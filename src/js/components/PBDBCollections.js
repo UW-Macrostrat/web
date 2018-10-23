@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
-import Paper from 'material-ui/Paper'
-import AppBar from 'material-ui/AppBar'
-import Tabs, { Tab, TabContainer } from 'material-ui/Tabs'
-import Typography from 'material-ui/Typography'
+import Paper from '@material-ui/core/Paper'
+import AppBar from '@material-ui/core/AppBar'
+import Tabs from '@material-ui/core/Tabs'
+import Tab from '@material-ui/core/Tab'
+import Typography from '@material-ui/core/Typography'
 import { makeOccurrenceTree } from '../utils'
 
 class PBDBCollections extends Component {

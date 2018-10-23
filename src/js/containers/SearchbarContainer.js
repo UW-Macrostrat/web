@@ -4,7 +4,6 @@ import Searchbar from '../components/Searchbar'
 
 const mapStateToProps = (state) => {
   return {
-    menuOpen: state.update.menuOpen,
     isSearching: state.update.isSearching,
     searchResults: state.update.searchResults,
     filters: state.update.filters,

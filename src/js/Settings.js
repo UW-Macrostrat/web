@@ -1,10 +1,9 @@
 export const SETTINGS = {
-  baseMapURL: 'dist/style.json',
+  baseMapURL: 'mapbox://styles/jczaplewski/cje04mr9l3mo82spihpralr4i?optimize=true',
   satelliteMapURL: 'mapbox://styles/jczaplewski/cj3bpe4xk00002rqndidf9dw4?optimize=true',
-  burwellTileDomain: 'https://tiles.macrostrat.org',
-  //burwellTileDomain: 'http://localhost:5555',
-  apiDomain: 'https://macrostrat.org',
-//  apiDomain: 'http://localhost:5000',
+  burwellTileDomain: 'https://devtiles.macrostrat.org',
+  apiDomain: 'https://dev.macrostrat.org',
   gddDomain: 'https://geodeepdive.org',
-  pbdbDomain: 'https://paleobiodb.org'
+  pbdbDomain: 'https://paleobiodb.org',
+  mapboxAccessToken: 'pk.eyJ1IjoiamN6YXBsZXdza2kiLCJhIjoiWnQxSC01USJ9.oleZzfREJUKAK1TMeCD0bg',
 }

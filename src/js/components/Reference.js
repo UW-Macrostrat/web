@@ -6,7 +6,6 @@ class Reference extends Component {
   }
 
   render() {
-
     if (!this.props.reference || Object.keys(this.props.reference).length === 0) {
       return null
     }
@@ -21,7 +20,6 @@ class Reference extends Component {
         . {this.props.reference.source_id} / {this.props.reference.map_id}
       </div>
     )
-
   }
 }
 

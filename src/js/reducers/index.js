@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux'
-import { PAGE_CLICK, REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK, TOGGLE_SATELLITE, TOGGLE_COLUMNS, CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER, REMOVE_FILTER, GO_TO_PLACE, TOGGLE_ABOUT, TOGGLE_FOSSILS, UPDATE_COLUMN_FILTERS, START_COLUMN_QUERY, RECEIVED_COLUMN_QUERY, START_GDD_QUERY, RECEIVED_GDD_QUERY, SET_ACTIVE_INDEX_MAP, TOGGLE_ELEVATION_CHART, START_ELEVATION_QUERY, RECEIVED_ELEVATION_QUERY, START_PBDB_QUERY, UPDATE_PBDB_QUERY, RECEIVED_PBDB_QUERY } from '../actions'
+import { REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK, TOGGLE_LINES, TOGGLE_SATELLITE, TOGGLE_COLUMNS, CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER, REMOVE_FILTER, GO_TO_PLACE, TOGGLE_ABOUT, TOGGLE_FOSSILS, UPDATE_COLUMN_FILTERS, START_COLUMN_QUERY, RECEIVED_COLUMN_QUERY, START_GDD_QUERY, RECEIVED_GDD_QUERY, SET_ACTIVE_INDEX_MAP, TOGGLE_ELEVATION_CHART, START_ELEVATION_QUERY, UPDATE_ELEVATION_MARKER, RECEIVED_ELEVATION_QUERY, START_PBDB_QUERY, UPDATE_PBDB_QUERY, RECEIVED_PBDB_QUERY, MAP_MOVED, GET_INITIAL_MAP_STATE, GOT_INITIAL_MAP_STATE, RESET_PBDB } from '../actions'
 import { sum, timescale } from '../utils'
 
 const classColors = {
@@ -47,9 +47,11 @@ const update = (state = {
   gddInfo: [],
   searchResults: [],
   elevationData: [],
-  pbdbInfo: [],
+  elevationMarkerLocation: [],
+  pbdbData: [],
 
   mapHasBedrock: true,
+  mapHasLines: true,
   mapHasSatellite: false,
   mapHasColumns: false,
   mapHasFossils: false,
@@ -62,8 +64,11 @@ const update = (state = {
   filteredColumns: {},
 
   data: [],
-  msg: '',
-  clicks: 0
+  mapXYZ: {
+    z: 1.5,
+    x: 16,
+    y: 23,
+  }
 }, action) => {
   switch (action.type) {
     case TOGGLE_MENU:
@@ -108,10 +113,19 @@ const update = (state = {
       if (!alreadyHasFiter) {
         fs = fs.concat([action.filter])
       }
+      // action.filter.type and action.filter.id go to the URI
+      updateURI(Object.assign({}, state, {
+        filters: fs
+      }))
       return Object.assign({}, state, {
         filters: fs
       })
     case REMOVE_FILTER:
+      updateURI(Object.assign({}, state, {
+        filters: state.filters.filter(d => {
+          if (d.name != action.filter.name) return d
+        })
+      }))
       return Object.assign({}, state, {
         filters: state.filters.filter(d => {
           if (d.name != action.filter.name) return d
@@ -264,25 +278,47 @@ const update = (state = {
       })
 
     case TOGGLE_BEDROCK:
+      updateURI(Object.assign({}, state, {
+        mapHasBedrock: !state.mapHasBedrock
+      }))
       return Object.assign({}, state, {
         mapHasBedrock: !state.mapHasBedrock
       })
+
+    case TOGGLE_LINES:
+      updateURI(Object.assign({}, state, {
+        mapHasLines: !state.mapHasLines
+      }))
+      return Object.assign({}, state, {
+        mapHasLines: !state.mapHasLines
+      })
+
     case TOGGLE_SATELLITE:
+      updateURI(Object.assign({}, state, {
+        mapHasSatellite: !state.mapHasSatellite
+      }))
       return Object.assign({}, state, {
         mapHasSatellite: !state.mapHasSatellite
       })
     case TOGGLE_COLUMNS:
+      updateURI(Object.assign({}, state, {
+        mapHasColumns: !state.mapHasColumns
+      }))
       return Object.assign({}, state, {
         mapHasColumns: !state.mapHasColumns
       })
     case TOGGLE_FOSSILS:
+      updateURI(Object.assign({}, state, {
+        mapHasFossils: !state.mapHasFossils
+      }))
       return Object.assign({}, state, {
         mapHasFossils: !state.mapHasFossils
       })
     case TOGGLE_ELEVATION_CHART:
       return Object.assign({}, state, {
         elevationChartOpen: !state.elevationChartOpen,
-        elevationData: []
+        elevationData: [],
+        elevationMarkerLocation: []
       })
 
     // Handle searching
@@ -313,30 +349,37 @@ const update = (state = {
         gddCancelToken: action.cancelToken
       })
     case RECEIVED_GDD_QUERY:
-      // let parsed = {
-      //   journals: []
-      // }
-      //
-      // for (let i = 0; i < action.data.length; i++) {
-      //   let found = false
-      //   for (let j = 0; j < parsed.journals.length; j++) {
-      //     if (parsed.journals[j].name === action.data[i].journal) {
-      //       parsed.journals[j].articles.push(action.data[i])
-      //       found = true
-      //     }
-      //   }
-      //
-      //   if (!found) {
-      //     parsed.journals.push({
-      //       name: action.data[i].journal,
-      //       source: action.data[i].publisher,
-      //       articles: [action.data[i]]
-      //     })
-      //   }
-      // }
+      let parsed = {
+        journals: []
+      }
+      let articles = {}
+
+      for (let i = 0; i < action.data.length; i++) {
+        let found = false
+        if (articles[action.data[i].docid]) {
+          continue
+        } else {
+          articles[action.data[i].docid] = true
+        }
+        for (let j = 0; j < parsed.journals.length; j++) {
+          if (parsed.journals[j].name === action.data[i].journal) {
+            parsed.journals[j].articles.push(action.data[i])
+            found = true
+          }
+        }
+
+        if (!found) {
+          parsed.journals.push({
+            name: action.data[i].journal,
+            source: action.data[i].publisher,
+            articles: [action.data[i]]
+          })
+        }
+      }
+
       return Object.assign({}, state, {
         fetchingGdd: false,
-        gddInfo: action.data,
+        gddInfo: parsed.journals,
         gddCancelToken: null
       })
 
@@ -355,6 +398,10 @@ const update = (state = {
         fetchingElevation: false,
         elevationData: action.data,
         elevationCancelToken: null
+      })
+    case UPDATE_ELEVATION_MARKER:
+      return Object.assign({}, state, {
+        elevationMarkerLocation: [action.lng, action.lat]
       })
 
     // Handle PBDB
@@ -383,6 +430,11 @@ const update = (state = {
         infoDrawerOpen: true
       })
 
+    case RESET_PBDB:
+      return Object.assign({}, state, {
+        pbdbData: []
+      })
+
     case GO_TO_PLACE:
       return Object.assign({}, state, {
         mapCenter: {
@@ -396,12 +448,7 @@ const update = (state = {
         filteredColumns: action.columns
       })
 
-    case PAGE_CLICK:
-      return Object.assign({}, state, {
-        msg: action.msg,
-        clicks: state.clicks + 1,
-        infoDrawerOpen: !state.infoDrawerOpen
-      })
+
     case REQUEST_DATA:
       return Object.assign({}, state, {
         isFetching: true
@@ -411,16 +458,81 @@ const update = (state = {
         isFetching: false,
         data: action.data
       })
+
+    case GET_INITIAL_MAP_STATE:
+      return Object.assign({}, state, {
+        mapXYZ: {
+          z: action.data.z,
+          x: action.data.x,
+          y: action.data.y
+        }
+      })
+
+    case MAP_MOVED:
+      updateURI(Object.assign({}, state, {
+        mapXYZ: {
+          z: action.data.z,
+          x: action.data.x,
+          y: action.data.y
+        }
+      }))
+      return Object.assign({}, state, {
+        mapXYZ: {
+          z: action.data.z,
+          x: action.data.x,
+          y: action.data.y
+        }
+      })
+
+    case GOT_INITIAL_MAP_STATE:
+      updateURI(Object.assign({}, state, {
+        mapHasSatellite: action.data.satellite || false,
+        mapHasBedrock: action.data.bedrock || false,
+        mapHasLines: action.data.lines || false,
+        mapHasColumns: action.data.columns || false,
+        mapHasFossils: action.data.fossils || false,
+        mapXYZ: {
+          z: action.data.z,
+          x: action.data.x,
+          y: action.data.y
+        },
+      }))
+
+      return Object.assign({}, state, {
+        mapHasSatellite: action.data.satellite || false,
+        mapHasBedrock: action.data.bedrock || false,
+        mapHasLines: action.data.lines || false,
+        mapHasColumns: action.data.columns || false,
+        mapHasFossils: action.data.fossils || false,
+        mapXYZ: {
+          z: action.data.z,
+          x: action.data.x,
+          y: action.data.y
+        },
+      })
+
     default:
       return state
   }
 }
 
+function updateURI(state) {
+  let layers = [
+    {'layer': 'bedrock', 'haz': state.mapHasBedrock},
+    {'layer': 'lines', 'haz': state.mapHasLines},
+    {'layer': 'satellite', 'haz': state.mapHasSatellite},
+    {'layer': 'fossils', 'haz': state.mapHasFossils},
+    {'layer': 'columns', 'haz': state.mapHasColumns}]
 
+  let layerString = layers.filter(l => { if (l.haz) return l }).map(l => { return l.layer }).join('/')
+  let filtersString = state.filters.map(f => { return `${f.type}=${f.id || f.name}` }).join('/')
+
+  // Update the hash in the URI
+  window.history.replaceState(undefined, undefined, `#/z=${state.mapXYZ.z}/x=${state.mapXYZ.x}/y=${state.mapXYZ.y}/${layerString}/${filtersString}`)
+}
 
 const reducers = combineReducers({
   // list reducers here
-//  stats,
   update
 })
 

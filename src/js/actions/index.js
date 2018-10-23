@@ -32,8 +32,10 @@ export const RECEIVED_GDD_QUERY = 'RECEIVED_GDD_QUERY'
 export const START_PBDB_QUERY = 'START_PBDB_QUERY'
 export const UPDATE_PBDB_QUERY = 'UPDATE_PBDB_QUERY'
 export const RECEIVED_PBDB_QUERY = 'RECEIVED_PBDB_QUERY'
+export const RESET_PBDB = 'RESET_PBDB'
 
 export const TOGGLE_BEDROCK = 'TOGGLE_BEDROCK'
+export const TOGGLE_LINES = 'TOGGLE_LINES'
 export const TOGGLE_SATELLITE = 'TOGGLE_SATELLITE'
 export const TOGGLE_COLUMNS = 'TOGGLE_COLUMNS'
 export const TOGGLE_FOSSILS = 'TOGGLE_FOSSILS'
@@ -44,18 +46,15 @@ export const GO_TO_PLACE = 'GO_TO_PLACE'
 
 export const START_ELEVATION_QUERY = 'START_ELEVATION_QUERY'
 export const RECEIVED_ELEVATION_QUERY = 'RECEIVED_ELEVATION_QUERY'
+export const UPDATE_ELEVATION_MARKER = 'UPDATE_ELEVATION_MARKER'
 
 export const SET_ACTIVE_INDEX_MAP = 'SET_ACTIVE_INDEX_MAP'
 
-// Define action functions
-export const pageClick = () => {
-  return {
-    type: PAGE_CLICK,
-    msg: 'You clicked on the page',
-    clicks: 0
-  }
-}
+export const MAP_MOVED = 'MAP_MOVED'
+export const GET_INITIAL_MAP_STATE = 'GET_INITIAL_MAP_STATE'
+export const GOT_INITIAL_MAP_STATE = 'GOT_INITIAL_MAP_STATE'
 
+// Define action functions
 export const toggleMenu = () => {
   return {
     type: TOGGLE_MENU
@@ -90,6 +89,12 @@ export const toggleFilters = () => {
 export const toggleBedrock = () => {
   return {
     type: TOGGLE_BEDROCK
+  }
+}
+
+export const toggleLines = () => {
+  return {
+    type: TOGGLE_LINES
   }
 }
 
@@ -243,29 +248,57 @@ export function addFilter(theFilter) {
             break
 
         case 'strat_name_concepts':
-            axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/map_filter?concept_id=${theFilter.id}`, {
+            axios.get(`${SETTINGS.apiDomain}/api/v2/defs/strat_name_concepts?concept_id=${theFilter.id}`, {
               responseType: 'json'
             })
-            .then(json => {
-              theFilter.legend_ids = json.data
-              dispatch({
-                type: ADD_FILTER,
-                filter: theFilter
+            .then(j => {
+              let f = j.data.success.data[0]
+
+              axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/map_filter?concept_id=${theFilter.id}`, {
+                responseType: 'json'
               })
+              .then(json => {
+                dispatch({
+                  type: ADD_FILTER,
+                  filter: {
+                    category: 'strat_name',
+                    id: theFilter.id,
+                    type: 'strat_name_concepts',
+                    name: f.name,
+                    legend_ids: json.data
+                  }
+                })
+              })
+
             })
+
+
           break
 
         case 'strat_name_orphans':
-            axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/map_filter?strat_name_id=${theFilter.id}`, {
+            axios.get(`${SETTINGS.apiDomain}/api/v2/defs/strat_names?strat_name_id=${theFilter.id}`, {
               responseType: 'json'
             })
-            .then(json => {
-              theFilter.legend_id = json.data
-              dispatch({
-                type: ADD_FILTER,
-                filter: theFilter
+            .then(j => {
+              let f = j.data.success.data[0]
+              axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/map_filter?strat_name_id=${theFilter.id}`, {
+                responseType: 'json'
               })
+              .then(json => {
+                dispatch({
+                  type: ADD_FILTER,
+                  filter: {
+                    category: 'strat_name',
+                    id: theFilter.id,
+                    type: 'strat_name_orphans',
+                    name: f.strat_name_long,
+                    legend_ids: json.data
+                  }
+                })
+              })
+
             })
+
           break
 
         case 'intervals':
@@ -274,9 +307,9 @@ export function addFilter(theFilter) {
             })
             .then(json => {
               let f = json.data.success.data[0]
-              f.name = theFilter.name
-              f.type = theFilter.type
-              f.category = theFilter.category
+              f.name = f.name
+              f.type = 'intervals'
+              f.category = 'interval'
               f.id = theFilter.id
 
               dispatch({
@@ -291,23 +324,49 @@ export function addFilter(theFilter) {
 
         case 'lithology_classes':
         case 'lithology_types':
-          dispatch({
-            type: ADD_FILTER,
-            filter: theFilter
-          })
+          // for some reason when loading from the uri this tiny timeout is required
+          setTimeout(() => {
+            dispatch({
+              type: ADD_FILTER,
+              filter: {
+                category: 'lithology',
+                id: 0,
+                name: theFilter.name,
+                type: theFilter.type,
+              }
+            })
+          }, 1)
+
           break
 
         case 'lithologies':
-          axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/map_filter?lith_id=${theFilter.id}`, {
+          // Need to fetch the definition in the event of filter passed via the uri
+          axios.get(`${SETTINGS.apiDomain}/api/v2/defs/lithologies?lith_id=${theFilter.id}`, {
             responseType: 'json'
           })
           .then(json => {
-            theFilter.legend_ids = json.data
-            dispatch({
-              type: ADD_FILTER,
-              filter: theFilter
+            let f = json.data.success.data[0]
+
+            axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/map_filter?lith_id=${theFilter.id}`, {
+              responseType: 'json'
+            })
+            .then(json => {
+              dispatch({
+                type: ADD_FILTER,
+                filter: {
+                  category: 'lithology',
+                  id: theFilter.id,
+                  type: 'lithologies',
+                  name: f.name,
+                  legend_ids: json.data
+                }
+              })
             })
           })
+          .catch(error => {
+            // don't care 💁
+          })
+
           break
 
         case 'environments':
@@ -528,7 +587,13 @@ export function receivedElevationQuery(data) {
   }
 }
 
-
+export function updateElevationMarker(lng, lat) {
+  return {
+    type: UPDATE_ELEVATION_MARKER,
+    lng: lng,
+    lat: lat,
+  }
+}
 
 export function startPbdbQuery(cancelToken) {
   return {
@@ -541,6 +606,12 @@ export function updatePbdbQuery(cancelToken) {
   return {
     type: UPDATE_PBDB_QUERY,
     cancelToken: cancelToken
+  }
+}
+
+export const resetPbdb = () => {
+  return {
+    type: RESET_PBDB
   }
 }
 
@@ -593,6 +664,91 @@ export function receivedPbdbQuery(data) {
     data: data
   }
 }
+
+
+export function mapMoved(data) {
+  return {
+    type: MAP_MOVED,
+    data: data
+  }
+}
+
+export function gotInitialMapState(mapState) {
+  return {
+    type: GOT_INITIAL_MAP_STATE,
+    data: mapState
+  }
+}
+
+export function getInitialMapState() {
+  return (dispatch, getState) => {
+    // Get the default map state
+    let { mapXYZ, mapHasBedrock, mapHasLines, mapHasSatellite, mapHasColumns, mapHasFossils } = getState().update
+    let defaultState = {
+      z: mapXYZ.z,
+      x: mapXYZ.x,
+      y: mapXYZ.y,
+      satellite: mapHasSatellite,
+      bedrock: mapHasBedrock,
+      lines: mapHasLines,
+      columns: mapHasColumns,
+      fossils: mapHasFossils
+    }
+    let filterTypes = ['strat_name_concepts','strat_name_orphans','intervals','lithology_classes','lithology_types','lithologies','environments','environment_types','environment_classes',]
+    let hash = window.location.hash
+    let mapState = {
+      incomingFilters: []
+    }
+    try {
+      hash = hash.split('/').forEach(d => {
+        let parts = d.split('=')
+
+        if (filterTypes.indexOf(parts[0]) > -1) {
+          mapState.incomingFilters.push({ type: parts[0], id: parts[1] })
+        } else {
+          mapState[parts[0]] = parts[1] || true
+        }
+
+      })
+
+      if (
+        mapState.x &&
+        mapState.y &&
+        mapState.z &&
+        (mapState.x >= -180 && mapState.x <= 180) &&
+        (mapState.y >= -85 && mapState.y <= 85) &&
+        (mapState.z >= 0 && mapState.z <= 16)
+      ) {
+        // Sweet, it is legit
+        mapState = mapState
+      } else {
+        // Someone was naughty
+        mapState = defaultState
+      }
+    } catch(e) {
+      // Who knows. Doesn't matter. Nothing does.
+      mapState = defaultState
+    }
+
+    dispatch(gotInitialMapState(mapState))
+
+    if (mapState.incomingFilters && mapState.incomingFilters.length) {
+      mapState.incomingFilters.forEach(f => {
+        // lith classes and types don't have unique IDs in macrostrat so we use the string
+        if (f.type === 'lithology_classes' || f.type === 'lithology_types') {
+          dispatch(addFilter({
+            type: f.type,
+            name: f.id
+          }))
+        } else {
+          dispatch(addFilter(f))
+        }
+      })
+    }
+  }
+
+}
+
 
 
 

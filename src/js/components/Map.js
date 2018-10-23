@@ -1,47 +1,55 @@
 import React, { Component } from 'react'
-import PropTypes from 'prop-types'
 import { SETTINGS } from '../Settings'
 import { mapStyle } from '../MapStyle'
-// import mapboxgl from 'mapbox-gl'
-
-const LITH_CLASSES = 3
-const LITH_TYPES = 14
-
-const noFilter = [
-  "all",
-  ["!=", "color", ""]
-]
-
 
 class Map extends Component {
   constructor(props) {
     super(props)
     this.swapBasemap = this.swapBasemap.bind(this)
+    this.mapLoaded = false
     this.currentSources = []
     this.isPanning = false
     this.elevationPoints = []
-    this.noFilter = [
-      "all",
-      ["!=", "color", ""]
-    ]
-    this.filters = [
-      "any",
-    ]
+
+    // Separate time filters and other filters for different rules
+    // i.e. time filters are <interval> OR <interval> and all others are AND
+    this.timeFilters = []
+    // Keep track of name: index values of time filters for easier removing
+    this.timeFiltersIndex = {}
+
+    this.filters = []
+    this.filtersIndex = {}
+
+    this.maxValue = 500
+    this.previousZoom = 0
+
+    this.resMax = {
+      0: 143,
+      1: 143,
+      2: 143,
+      3: 76,
+      4: 44,
+      5: 44,
+      6: 29,
+      7: 20,
+      8: 16,
+      9: 16,
+      10: 16,
+    }
+
+    // We need to store these for cluster querying...
+    this.pbdbPoints = {}
   }
 
   componentDidMount() {
-    mapboxgl.accessToken = 'pk.eyJ1IjoiamN6YXBsZXdza2kiLCJhIjoiWnQxSC01USJ9.oleZzfREJUKAK1TMeCD0bg';
+    mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
     this.map = new mapboxgl.Map({
         container: 'map',
-        style: 'mapbox://styles/jczaplewski/cje04mr9l3mo82spihpralr4i?optimize=true',
-      //  style: SETTINGS.baseMapURL,
-        center: [-89, 43],
-        zoom: 7,
+        style: this.props.mapHasSatellite ? SETTINGS.satelliteMapURL : SETTINGS.baseMapURL,
+        center: [this.props.mapXYZ.x, this.props.mapXYZ.y],
+        zoom: this.props.mapXYZ.z,
         maxZoom: 16,
-        hash: true,
-        // failIfMajorPerformanceCaveat: true,
-        // dragRotate: false,
-        // touchZoomRotate: false
+        maxTileCacheSize: 0,
     })
     // disable map rotation using right click + drag
     this.map.dragRotate.disable()
@@ -49,35 +57,66 @@ class Map extends Component {
     // disable map rotation using touch rotation gesture
     this.map.touchZoomRotate.disableRotation()
 
+    // Update the URI when the map moves
+    this.map.on('moveend', () => {
+      let center = this.map.getCenter()
+      this.props.mapMoved({
+        z: this.map.getZoom().toFixed(1),
+        x: center.lng.toFixed(4),
+        y: center.lat.toFixed(4),
+      })
+      if (this.props.mapHasFossils) {
+        this.refreshPBDB()
+      }
+    })
+
     this.map.on('load', () => {
+      // Add the sources to the map
       Object.keys(mapStyle.sources).forEach(source => {
         this.map.addSource(source, mapStyle.sources[source])
       })
 
+      // The initial draw of the layers
       mapStyle.layers.forEach(layer => {
         if (layer.source === 'columns' || layer.source === 'info_marker') {
           this.map.addLayer(layer)
         } else {
           this.map.addLayer(layer, 'airport-label')
         }
+
+        // Accomodate any URI parameters
+        if (layer.source === 'burwell' && layer['source-layer'] === 'units' && this.props.mapHasBedrock === false) {
+          this.map.setLayoutProperty(layer.id, 'visibility', 'none')
+        }
+        if (layer.source === 'burwell' && layer['source-layer'] === 'lines' && this.props.mapHasLines === false) {
+          this.map.setLayoutProperty(layer.id, 'visibility', 'none')
+        }
+        if ((layer.source === 'pbdb'  || layer.source === 'pbdb-points') && this.props.mapHasFossils === true) {
+          this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
+          this.refreshPBDB()
+        }
+        if (layer.source === 'columns' && this.props.mapHasColumns === true) {
+          this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
+        }
       })
 
-      this.map.setFilter('burwell_fill', noFilter)
-      this.map.setFilter('burwell_stroke', noFilter)
-
-      // setTimeout(() => {
-      //   console.log(this.map.getStyle())
-      //   console.log(this.map.getSource('composite'))
-      // }, 5000)
-
+      // NO idea why timeout is needed
+      setTimeout(() => {
+        this.mapLoaded = true
+        this.applyFilters()
+      }, 1)
     })
 
+    // Hide the infoMarker when the map moves
     this.map.on('movestart', () => {
       if (this.panning) {
         return
       }
-      this.map.setLayoutProperty('infoMarker', 'visibility', 'none')
-      //this.props.closeInfoDrawer()
+      // Make sure this doesn't fire before infoMarker is added to map
+      // Can happen on a slow connection
+      if (this.map.getLayer('infoMarker')) {
+        this.map.setLayoutProperty('infoMarker', 'visibility', 'none')
+      }
     })
 
     this.map.on('click', (event) => {
@@ -114,14 +153,35 @@ class Map extends Component {
 
       // If we are viewing fossils, prioritize clicks on those
       if (this.props.mapHasFossils) {
-        let collections = this.map.queryRenderedFeatures(event.point, { layers: ['pbdbCollections']})
-        console.log('collections - ', collections)
-        if (collections.length && collections[0].properties.hasOwnProperty('n_collections')) {
+        let collections = this.map.queryRenderedFeatures(event.point, { layers: ['pbdbCollections','pbdb-points-clustered', 'pbdb-points']})
+
+        // Clicked on a hex grid
+        if (collections.length && collections[0].properties.hasOwnProperty('hex_id')) {
           this.map.zoomTo(this.map.getZoom() + 1, { center: event.lngLat })
           return
-        } else if (collections.length && collections[0].properties.hasOwnProperty('collection_no')) {
-          this.props.getPBDB(collections.map(col => { return col.properties.collection_no }))
+
+        // Clicked on a cluster
+        } else if (collections.length && collections[0].properties.hasOwnProperty('cluster')) {
+          // via https://jsfiddle.net/aznkw784/
+          let pointsInCluster = this.pbdbPoints.features.filter(f => {
+            let pointPixels = this.map.project(f.geometry.coordinates)
+            let pixelDistance = Math.sqrt(
+              Math.pow(event.point.x - pointPixels.x, 2) +
+              Math.pow(event.point.y - pointPixels.y, 2)
+            )
+            return Math.abs(pixelDistance) <= 50
+          }).map(f => {
+            return f.properties.oid.replace('col:', '')
+          })
+          this.props.getPBDB(pointsInCluster)
+
+        // Clicked on an unclustered point
+        } else if (collections.length && collections[0].properties.hasOwnProperty('oid')) {
+          this.props.getPBDB(collections.map(col => { return col.properties.oid.replace('col:', '') }))
           return
+        } else {
+          // Otherwise make sure that old fossil collections aren't visible
+          this.props.resetPbdb()
         }
       }
 
@@ -189,6 +249,7 @@ class Map extends Component {
         }
       })
 
+      // Readd all the previous layers to the map
       this.currentLayers.forEach(layer => {
         if (layer.layer.id != 'infoMarker') {
           this.map.addLayer(layer.layer, 'airport-label')
@@ -199,17 +260,16 @@ class Map extends Component {
         if (layer.filters) {
           this.map.setFilter(layer.layer.id, layer.filters)
         }
-        if (layer.layer.source === 'burwell' && layer.layer.type === 'line' && layer.layer.id != 'burwell_stroke' && this.props.filters.length != 0) {
-          this.map.setLayoutProperty(layer.layer.id, 'visibility', 'none')
-        }
       })
     })
   }
 
+  // Swap between standard and satellite base layers
   swapBasemap(toAdd) {
     this.currentSources = []
     this.currentLayers = []
 
+    // First record which layers are currently on the map
     Object.keys(mapStyle.sources).forEach(source => {
       let isPresent = this.map.getSource(source)
       if (isPresent) {
@@ -231,11 +291,28 @@ class Map extends Component {
       }
     })
 
+    // Set the style. `style.load` will be fired after to readd other layers
     this.map.setStyle(toAdd)
   }
 
-
+  // Handle updates to the state of the map
   componentWillUpdate(nextProps) {
+    if (!nextProps.elevationMarkerLocation.length || nextProps.elevationMarkerLocation[0] != this.props.elevationMarkerLocation[0] && nextProps.elevationMarkerLocation[1] != this.props.elevationMarkerLocation[1]) {
+      if (this.map && this.map.loaded()) {
+        this.map.getSource('elevationMarker').setData({
+          "type": "FeatureCollection",
+          "features": [{
+            "type": "Feature",
+            "properties": {},
+            "geometry": {
+              "type": "Point",
+              "coordinates": nextProps.elevationMarkerLocation
+            }
+          }]
+        })
+      }
+
+    }
     // Watch the state of the application and adjust the map accordingly
     if (!nextProps.elevationChartOpen && this.props.elevationChartOpen && this.map) {
       this.elevationPoints = []
@@ -262,26 +339,47 @@ class Map extends Component {
       } else {
         // zoom to user location
       }
+    // Add bedrock
     } else if (nextProps.mapHasBedrock && !this.props.mapHasBedrock) {
       mapStyle.layers.forEach(layer => {
-        if (layer.source === 'burwell') {
+        if (layer.source === 'burwell' && layer['source-layer'] === 'units') {
           this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
         }
       })
+    // Remove bedrock
     } else if (!nextProps.mapHasBedrock && this.props.mapHasBedrock) {
       mapStyle.layers.forEach(layer => {
-        if (layer.source === 'burwell') {
+        if (layer.source === 'burwell' && layer['source-layer'] === 'units') {
           this.map.setLayoutProperty(layer.id, 'visibility', 'none')
         }
       })
+
+    // Add lines
+    } else if (nextProps.mapHasLines && !this.props.mapHasLines) {
+      mapStyle.layers.forEach(layer => {
+        if (layer.source === 'burwell' && layer['source-layer'] === 'lines') {
+          this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
+        }
+      })
+    // Remove lines
+    } else if (!nextProps.mapHasLines && this.props.mapHasLines) {
+      mapStyle.layers.forEach(layer => {
+        if (layer.source === 'burwell' && layer['source-layer'] === 'lines') {
+          this.map.setLayoutProperty(layer.id, 'visibility', 'none')
+        }
+      })
+
+    // Swap satellite/normal
     } else if (nextProps.mapHasSatellite != this.props.mapHasSatellite) {
       if (nextProps.mapHasSatellite) {
         this.swapBasemap(SETTINGS.satelliteMapURL)
       } else {
         this.swapBasemap(SETTINGS.baseMapURL)
       }
+    // Add columns
     } else if (nextProps.mapHasColumns != this.props.mapHasColumns) {
       if (nextProps.mapHasColumns) {
+        // If filters are applied
         if (this.props.filters.length) {
           this.props.getFilteredColumns()
           mapStyle.layers.forEach(layer => {
@@ -289,7 +387,7 @@ class Map extends Component {
               this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
             }
           })
-
+        // No filters applied
         } else {
           mapStyle.layers.forEach(layer => {
             if (layer.source === 'columns') {
@@ -297,6 +395,7 @@ class Map extends Component {
             }
           })
         }
+      // Remove columns
       } else {
         mapStyle.layers.forEach(layer => {
           if (layer.source === 'columns' || layer.source === 'filteredColumns') {
@@ -320,24 +419,32 @@ class Map extends Component {
         })
       }
 
+    // Fossils
     } else if (nextProps.mapHasFossils != this.props.mapHasFossils) {
       if (nextProps.mapHasFossils) {
         mapStyle.layers.forEach(layer => {
-          if (layer.source === 'pbdb') {
+          if (layer.source === 'pbdb' || layer.source === 'pbdb-points') {
             this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
           }
+          this.refreshPBDB()
         })
       } else {
         mapStyle.layers.forEach(layer => {
-          if (layer.source === 'pbdb') {
+          if (layer.source === 'pbdb' || layer.source === 'pbdb-points') {
             this.map.setLayoutProperty(layer.id, 'visibility', 'none')
           }
         })
       }
+
+    // Handle changes to map filters
     } else if (nextProps.filters.length != this.props.filters.length) {
+      // If all filters have been removed simply reset the filter states
       if (nextProps.filters.length === 0) {
-        this.map.setFilter('burwell_fill', noFilter)
-        this.map.setFilter('burwell_stroke', noFilter)
+        this.filters = []
+        this.filtersIndex = {}
+        this.timeFilters = []
+        this.timeFiltersIndex = {}
+        this.applyFilters()
 
         mapStyle.layers.forEach(layer => {
           if (layer.source === 'burwell' && layer.type === 'line' && layer.id != 'burwell_stroke') {
@@ -360,6 +467,8 @@ class Map extends Component {
         }
         return
       }
+
+      // Check which filters were added or removed
       let existingFilters = new Set(this.props.filters.map(f => { return `${f.category}|${f.type}|${f.name}` }))
       let newFilters = new Set(nextProps.filters.map(f => { return `${f.category}|${f.type}|${f.name}` }))
 
@@ -369,12 +478,21 @@ class Map extends Component {
       // If a filter was removed...
       if (outgoing.length) {
         // Find its index in the existing filters
-        let presentPosition = this.props.filters.map(f => { return `${f.category}|${f.type}|${f.name}` }).indexOf(outgoing[0])
-        let appliedFilters = this.map.getFilter('burwell_fill')
-        appliedFilters[2].splice((presentPosition + 1), 1)
+        // If it is a time interval
+        if (outgoing[0].split('|')[0] === 'interval') {
+          let idx = this.timeFiltersIndex[outgoing[0]]
+          this.timeFilters.splice(idx, 1)
+          delete this.timeFiltersIndex[outgoing[0]]
 
-        this.map.setFilter('burwell_fill', appliedFilters)
-        this.map.setFilter('burwell_stroke', appliedFilters)
+        // If it is anything else
+        } else {
+          this.filtersIndex[outgoing[0]].reverse().forEach(idx => {
+            this.filters.splice(idx, 1)
+          })
+          delete this.filtersIndex[outgoing[0]]
+        }
+
+        this.applyFilters()
         return
       }
 
@@ -386,81 +504,177 @@ class Map extends Component {
         }
       })
       if (filterToApply.length === 0) {
-        console.log('no new filters to apply')
+        //console.log('no new filters to apply', nextProps.filters)
         return
       }
-      filterToApply = filterToApply[0]
 
+      filterToApply = filterToApply[0]
       let newFilter = []
+
+      // Check which kind of filter it is
       switch(filterToApply.type) {
         case 'intervals':
-          newFilter.push('any')
-          nextProps.filters.forEach(f => {
-            newFilter.push([
-              'all',
-              ['>', 'best_age_bottom', filterToApply.t_age],
-              ['<', 'best_age_top', filterToApply.b_age]
-            ])
-          })
+          this.timeFilters.push([
+            'all',
+            ['>', 'best_age_bottom', filterToApply.t_age],
+            ['<', 'best_age_top', filterToApply.b_age]
+          ])
+          this.timeFiltersIndex[`${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`] = this.timeFilters.length - 1
           break
 
         case 'lithology_classes':
-          newFilter.push('any')
           for (let i = 1; i < 14; i++) {
-            newFilter.push([ '==', `lith_class${i}`, filterToApply.name ])
+            this.filters.push([ '==', `lith_class${i}`, filterToApply.name ])
+
+            if (this.filtersIndex[`${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`]) {
+              this.filtersIndex[`${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`].push(this.filters.length - 1)
+            } else {
+              this.filtersIndex[`${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`] = [ this.filters.length - 1]
+            }
           }
           break
+
         case 'lithology_types':
-          newFilter.push('any')
           for (let i = 1; i < 14; i++) {
-            newFilter.push([ '==', `lith_type${i}`, filterToApply.name ])
+            this.filters.push([ '==', `lith_type${i}`, filterToApply.name ])
+
+            if (this.filtersIndex[`${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`]) {
+              this.filtersIndex[`${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`].push(this.filters.length - 1)
+            } else {
+              this.filtersIndex[`${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`] = [ this.filters.length - 1]
+            }
           }
           break
 
         case 'lithologies':
         case 'strat_name_orphans':
         case 'strat_name_concepts':
-          newFilter.push('any')
-          newFilter.push([ 'in', 'legend_id', ...filterToApply.legend_ids ])
+          this.filters.push([ 'in', 'legend_id', ...filterToApply.legend_ids ])
+          this.filtersIndex[`${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`] = [ this.filters.length - 1]
           break
 
       }
 
       // Basically if we are filtering by environments or anything else we can't filter the map with
-      if (!newFilter.length) {
-        return
-      }
+      // if (!newFilter.length) {
+      //   return
+      // }
 
-      let appliedFilters = this.map.getFilter('burwell_fill')
-      if (appliedFilters.length === 2) {
-        appliedFilters.push([
-          'any',
-          newFilter
-        ])
-      } else {
-        appliedFilters[2].push(newFilter)
-      }
-      // appliedFilters.push(newFilter)
-
-      // this.filters.push(newFilter)
-      // let appliedFilters = this.noFilter
-      // appliedFilters.push(this.filters)
-
-      this.map.setFilter('burwell_fill', appliedFilters)
-      this.map.setFilter('burwell_stroke', appliedFilters)
-
-      // Hide all line features when a filter is applied
-      mapStyle.layers.forEach(layer => {
-        if (layer.source === 'burwell' && layer.type === 'line' && layer.id != 'burwell_stroke') {
-          this.map.setLayoutProperty(layer.id, 'visibility', 'none')
-        }
-      })
-
+      // Update the map styles
+      this.applyFilters()
     }
 
   }
+
+  applyFilters() {
+    console.log('applyFilters')
+    // don't try and update featureState if the map is loading
+    if (!this.mapLoaded) {
+      console.log('No!')
+      this.shouldUpdateFeatureState = true
+      return
+    }
+    let toApply = [
+      "all",
+      ["!=", "color", ""],
+    ]
+    if (this.timeFilters.length) {
+      toApply.push(["any", ...this.timeFilters])
+    }
+    if (this.filters.length) {
+      toApply.push(["any", ...this.filters])
+    }
+    console.log('toApply', toApply)
+    this.map.setFilter('burwell_fill', toApply)
+    this.map.setFilter('burwell_stroke', toApply)
+  }
+
+  // PBDB hexgrids and points are refreshed on every map move
+  refreshPBDB() {
+    let bounds = this.map.getBounds()
+    let zoom = this.map.getZoom()
+    if (zoom < 8) {
+      // Make sure the layer is visible
+      this.map.setLayoutProperty('pbdbCollections', 'visibility', 'visible')
+      // Dirty way of hiding points when zooming out
+      this.map.getSource('pbdb-points').setData({"type": "FeatureCollection","features": []})
+      // Fetch the summary
+      fetch(`https://dev.macrostrat.org/api/v2/hex-summary?min_lng=${bounds._sw.lng}&min_lat=${bounds._sw.lat}&max_lng=${bounds._ne.lng}&max_lat=${bounds._ne.lat}&zoom=${zoom}`)
+        .then(response => {
+          return response.json()
+        })
+        .then(json => {
+          let currentZoom = parseInt(this.map.getZoom())
+          let mappings = json.success.data
+          if (currentZoom != this.previousZoom) {
+            this.previousZoom = currentZoom
+
+            this.maxValue = this.resMax[parseInt(this.map.getZoom())]
+
+            this.updateColors(mappings)
+
+          } else {
+            this.updateColors(mappings)
+          }
+        })
+    } else {
+      console.log(this.timeFilters)
+      // Hide the hexgrids
+      this.map.setLayoutProperty('pbdbCollections', 'visibility', 'none')
+      // Hit the PBDB API
+      fetch(`${SETTINGS.pbdbDomain}/data1.2/colls/list.json?lngmin=${bounds._sw.lng}&lngmax=${bounds._ne.lng}&latmin=${bounds._sw.lat}&latmax=${bounds._ne.lat}`)
+        .then(response => {
+          return response.json()
+        })
+        .then(json => {
+          // Transform it into a GeoJSON and update the underlying data
+          this.pbdbPoints = {
+            "type": "FeatureCollection",
+            "features": json.records.map(f => {
+              return {
+                "type": "Feature",
+                "properties": f,
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [f.lng, f.lat]
+                }
+              }
+            })
+          }
+          this.map.getSource('pbdb-points').setData(this.pbdbPoints)
+        })
+    }
+  }
+
+  // Update the colors of the hexgrids
+  updateColors(data) {
+    for (let i = 0; i < data.length; i++) {
+      this.map.setFeatureState({
+        source: 'pbdb',
+        sourceLayer: 'hexgrid',
+        id: data[i].hex_id
+      }, {
+        color: this.colorScale(parseInt(data[i].count))
+      })
+    }
+  }
+
+  colorScale(val) {
+    let mid = this.maxValue / 2
+
+    // Max
+    if (Math.abs(val - this.maxValue) <= Math.abs(val - mid)) {
+      return '#2171b5'
+    // Mid
+    } else if (Math.abs(val - mid) <= Math.abs(val - 1)) {
+      return '#6baed6'
+    // Min
+    } else {
+      return '#bdd7e7'
+    }
+  }
+
   render() {
-    console.log('render map')
     return (
       <div className='map-holder'>
         <div id='map'></div>

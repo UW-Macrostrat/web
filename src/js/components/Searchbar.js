@@ -1,16 +1,18 @@
 import React, { Component } from 'react'
-import PropTypes from 'prop-types'
-import TextField from 'material-ui/TextField'
-import Grid from 'material-ui/Grid'
-import Toolbar from 'material-ui/Toolbar'
-import IconButton from 'material-ui/IconButton'
-import MenuIcon from 'material-ui-icons/Menu'
-import WarningIcon from 'material-ui-icons/Warning'
-import Paper from 'material-ui/Paper'
-import ListSubheader from 'material-ui/List/ListSubheader'
-import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List'
+import TextField from '@material-ui/core/TextField'
+import Grid from '@material-ui/core/Grid'
+import Toolbar from '@material-ui/core/Toolbar'
+import IconButton from '@material-ui/core/IconButton'
+import MenuIcon from '@material-ui/icons/Menu'
+import WarningIcon from '@material-ui/icons/Warning'
+import Paper from '@material-ui/core/Paper'
+import List from '@material-ui/core/List'
+import ListSubheader from '@material-ui/core/ListSubheader'
+import ListItem from '@material-ui/core/ListItem'
+import ListItemText from '@material-ui/core/ListItemText'
+import ListItemIcon from '@material-ui/core/ListItemIcon'
 
-import Collapse from 'material-ui/transitions/Collapse'
+import Collapse from '@material-ui/core/Collapse'
 
 const categoryTitles = {
   'lithology': 'Lithologies',
@@ -18,6 +20,14 @@ const categoryTitles = {
   'place': 'Places (via Mapbox)',
   'strat_name': 'Stratigraphic Names',
   'environ': 'Environments (columns only)',
+}
+
+const sortOrder = {
+  'interval': 1,
+  'lithology': 2,
+  'strat_name': 3,
+  'environ': 4,
+  'place': 5
 }
 class Searchbar extends Component {
   constructor(props) {
@@ -33,11 +43,13 @@ class Searchbar extends Component {
   }
 
   gainInputFocus() {
+    console.log('focus')
     this.setState({
       inputFocused: true
     })
   }
   loseInputFocus() {
+    console.log('lose focus')
     // A slight timeout is required so that click actions can occur
     setTimeout(() => {
       this.setState({
@@ -62,24 +74,27 @@ class Searchbar extends Component {
   render() {
     const { toggleMenu, toggleFilters } = this.props
     let resultCategories = new Set(this.props.searchResults.map(d => { return d.category }))
-    resultCategories = [...resultCategories]
+    // Force the results into a particular order
+    resultCategories = [...resultCategories].sort((a, b) => {
+      return sortOrder[a] - sortOrder[b]
+    })
 
     let categoryResults = resultCategories.map((cat) => {
       let thisCat = this.props.searchResults.filter(f => {
         if (f.category === cat) return f
       })
       return thisCat.map((item, h) => {
-        return <ListItem key={h} button onClick={() => { this.addFilter(item) }}>
+        return (<ListItem key={h} button onClick={() => { this.addFilter(item) }}>
           <ListItemText classes={{ 'root': 'searchresult-item' }} primary={item.name} disableTypography={true}/>
-        </ListItem>
+        </ListItem>)
       })
     })
 
     let searchResults = resultCategories.map((cat, i) => {
-      return <div key={`subheader-${i}`}>
+      return (<div key={`subheader-${i}`}>
           <ListSubheader classes={{ 'root': 'searchresult-header'}}>{categoryTitles[cat]}</ListSubheader>
           {categoryResults[i]}
-        </div>
+        </div>)
     })
 
     let holderStyle = {

@@ -13,9 +13,19 @@ export const mapStyle = {
         "pbdb": {
             "type": "vector",
             "tiles": [
-              `${SETTINGS.burwellTileDomain}/pbdb-collections/{z}/{x}/{y}.mvt`
+              `${SETTINGS.burwellTileDomain}/hexgrid/{z}/{x}/{y}.mvt`
             ],
-            "tileSize": 512
+            "tileSize": 512,
+            "maxzoom": 7,
+        },
+        "pbdb-points": {
+          "type": "geojson",
+          "cluster": true,
+          "clusterRadius": 50,
+          "data": {
+            "type": "FeatureCollection",
+            "features": []
+          }
         },
         "info_marker": {
           "type": "geojson",
@@ -41,10 +51,6 @@ export const mapStyle = {
             "features": []
           }
         },
-        "indexMap": {
-          "type": "geojson",
-          "data": `${SETTINGS.apiDomain}/api/v2/defs/sources?all&format=geojson_bare`
-        },
         "elevationPoints": {
           "type": "geojson",
           "data": {
@@ -53,6 +59,13 @@ export const mapStyle = {
           }
         },
         "elevationLine": {
+          "type": "geojson",
+          "data": {
+            "type": "FeatureCollection",
+            "features": []
+          }
+        },
+        "elevationMarker": {
           "type": "geojson",
           "data": {
             "type": "FeatureCollection",
@@ -91,33 +104,37 @@ export const mapStyle = {
           "minzoom": 0,
           "maxzoom": 16,
           "paint": {
-            "line-color": "#777777",
-            "line-width": 0,
-            // "line-width": {
-            //   "stops": [
-            //     [0, 0.15],
-            //     [1, 0.15],
-            //     [2, 0.15],
-            //     [3, 0.15],
-            //     [4, 0.2],
-            //     [5, 0.4],
-            //     [6, 0.05],
-            //     [7, 0.1],
-            //     [8, 0.4],
-            //     [9, 0.5],
-            //     [10, 0.35],
-            //     [11, 0.4],
-            //     [12, 1],
-            //     [13, 1.25],
-            //     [14, 1.5],
-            //     [15, 1.75],
-            //     [16, 2]
-            //   ]
-            // },
+          //  "line-color": "#777777",
+            // "line-width": 0,
+            "line-color": {
+              "property": "color",
+              "type": "identity"
+            },
+            "line-width": {
+              "stops": [
+                [0, 0.15],
+                [1, 0.15],
+                [2, 0.15],
+                [3, 0.15],
+                [4, 0.2],
+                [5, 0.4],
+                [6, 0.05],
+                [7, 0.1],
+                [8, 0.4],
+                [9, 0.5],
+                [10, 0.35],
+                [11, 0.4],
+                [12, 1],
+                [13, 1.25],
+                [14, 1.5],
+                [15, 1.75],
+                [16, 2]
+              ]
+            },
             "line-opacity": {
               "stops": [
                 [0, 0],
-                [4, 0.5]
+                [4, 1]
               ]
             }
           }
@@ -328,29 +345,32 @@ export const mapStyle = {
           "maxzoom": 16,
           "paint": {
             "line-color": "#000000",
-            "line-width": {
-              "stops": [
-                [0, 0.3],
-                [1, 0.3],
-                [2, 0.3],
-                [3, 0.3],
-                [4, 0.5],
-                [5, 0.6],
-                [6, 0.45],
-                [7, 0.4],
-                [8, 0.7],
-                [9, 0.8],
-                [10, 0.7],
-                [11, 1.1],
-                [12, 1.3],
-                [13, 1.5],
-                [14, 1.6],
-                [15, 1.75],
-                [16, 2.2]
-              ]
-            },
+            "line-width": [
+              "interpolate", ["linear"], ["zoom"],
+              0, ["case", ["!=", ["get", "name"], ""], 0.6, 0.3],
+              1, ["case", ["!=", ["get", "name"], ""], 0.6, 0.3],
+              2, ["case", ["!=", ["get", "name"], ""], 0.6, 0.3],
+              3, ["case", ["!=", ["get", "name"], ""], 0.6, 0.3],
+              4, ["case", ["!=", ["get", "name"], ""], 1, 0.5],
+              5, ["case", ["!=", ["get", "name"], ""], 1.2, 0.6],
+              6, ["case", ["!=", ["get", "name"], ""], 0.9, 0.45],
+              7, ["case", ["!=", ["get", "name"], ""], 0.8, 0.4],
+              8, ["case", ["!=", ["get", "name"], ""], 1.4, 0.7],
+              9, ["case", ["!=", ["get", "name"], ""], 1.6, 0.8],
+              10, ["case", ["!=", ["get", "name"], ""], 1.4, 0.7],
+              11, ["case", ["!=", ["get", "name"], ""], 2.2, 1.1],
+              12, ["case", ["!=", ["get", "name"], ""], 2.6, 1.3],
+              13, ["case", ["!=", ["get", "name"], ""], 3, 1.5],
+              14, ["case", ["!=", ["get", "name"], ""], 3.2, 1.6],
+              15, ["case", ["!=", ["get", "name"], ""], 3.5, 1.75],
+              16, ["case", ["!=", ["get", "name"], ""], 4.4, 2.2],
+            ],
             "line-opacity": 1
-          }
+          },
+          "layout": {
+            "line-join": "round",
+            "line-cap": "round"
+          },
         },
         {
           "id": "moraines",
@@ -825,54 +845,6 @@ export const mapStyle = {
           }
         },
         {
-          "id": "indexMap_fill",
-          "type": "fill",
-          "source": "indexMap",
-          "paint": {
-            "fill-color": "#000000",
-            "fill-opacity": 0
-          },
-          "layout": {
-            "visibility": "none"
-          }
-        },
-        {
-          "id": "indexMap_stroke",
-          "type": "line",
-          "source": "indexMap",
-          "paint": {
-            "line-color": "#000000",
-            "line-width": {
-              "stops": [
-                [0, 2],
-                [4, 2],
-                [16, 12]
-              ]
-            },
-            "line-opacity": 1
-          },
-          "layout": {
-            "visibility": "none"
-          }
-        },
-        {
-          "id": "indexMap_highlight",
-          "type": "line",
-          "source": "indexMap",
-          "paint": {
-            "line-color": "#045275",
-            "line-width": {
-              "stops": [
-                [0, 6],
-                [4, 6],
-                [16, 18]
-              ]
-            },
-            "line-opacity": 1
-          },
-          "filter": ["==", "source_id", ""]
-        },
-        {
           "id": "infoMarker",
           "type": "symbol",
           "source": "info_marker",
@@ -885,70 +857,122 @@ export const mapStyle = {
           }
         },
         {
-          "id": "elevationPoint",
-          "type": "symbol",
-          "source": "elevationPoints",
-          "layout": {
-            "icon-size": 1,
-            "icon-image": "circle-stroked-15",
-            "icon-allow-overlap": true
-          },
-          "paint": {
-            "icon-color": "#ffffff"
-          }
-        },
-        {
           "id": "elevationLine",
           "type": "line",
           "source": "elevationLine",
           "paint": {
             "line-dasharray": [4, 2],
-            "line-width": 5,
+            "line-width": {
+              "stops": [
+                [0, 3],
+                [12, 5]
+              ]
+            },
             "line-color": "#ffffff",
             "line-opacity": 1
           }
         },
         {
-          "id": "pbdbCollections",
+          "id": "elevationPoint",
           "type": "circle",
-          "source": "pbdb",
-          "source-layer": "pbdb-collections",
-          "layout": {
-            "visibility": "none"
-          },
+          "source": "elevationPoints",
           "paint": {
-            "circle-radius": {
-              "property": "n_collections",
-              "default": 10,
-              "stops": [
-                [{zoom: 0, value: 1}, 5],
-                [{zoom: 0, value: 5000}, 30],
-                [{zoom: 10, value: 1}, 10],
-                [{zoom: 10, value: 50}, 30],
-              ]
-            },
+            "circle-radius": 6,
             "circle-color": "#ffffff",
-            "circle-opacity": 0.8,
             "circle-stroke-width": 1,
-            "circle-stroke-color": "#aaaaaa"
+            "circle-stroke-color": "#333333",
           }
         },
         {
-          "id": "pbdbCollections_highlight",
+          "id": "elevationMarker",
           "type": "circle",
+          "source": "elevationMarker",
+          "paint": {
+            "circle-radius": 8,
+            "circle-color": "#4bc0c0",
+            "circle-stroke-width": 2,
+            "circle-stroke-color": "#dcdcdc",
+          }
+        },
+        {
+          "id": "pbdbCollections",
+          "type": "fill",
           "source": "pbdb",
-          "source-layer": "pbdb-collections",
+          "source-layer": "hexgrid",
           "layout": {
             "visibility": "none"
           },
           "paint": {
-            "circle-radius": 10,
-            "circle-color": "#ffffff",
-            "circle-opacity": 1,
-            "circle-stroke-width": 2,
-            "circle-stroke-color": "#045275"
-          },
-          "filter": ["==", "collection_no", ""]
+            "fill-color": ['feature-state', 'color'],
+            "fill-color": [
+              'case',
+              ['==', ['feature-state', 'color'], null],
+              'rgb(255,255,255)',
+              ['feature-state', 'color']
+            ],
+            "fill-opacity": [
+              'case',
+              ['==', ['feature-state', 'color'], null],
+              0,
+              0.7
+            ],
+            "fill-outline-color": [
+              'case',
+              ['==', ['feature-state', 'color'], null],
+              'rgb(255,255,255)',
+              ['feature-state', 'color']
+            ],
+          }
         },
+        {
+          "id": "pbdb-points-clustered",
+          "type": "circle",
+          "source": "pbdb-points",
+          "filter": ["has", "point_count"],
+          "paint": {
+            "circle-color": [
+              "step",
+              ["get", "point_count"],
+              "#bdd7e7",
+              20,
+              "#6baed6",
+              50,
+              "#2171b5"
+            ],
+            "circle-radius": [
+              "step",
+              ["get", "point_count"],
+              20,
+              20,
+              30,
+              50,
+              40
+            ]
+          }
+        },
+        {
+          "id": "pbdb-point-cluster-count",
+          "type": "symbol",
+          "source": "pbdb-points",
+          "filter": ["has", "point_count"],
+          "layout": {
+            "text-field": "{point_count_abbreviated}",
+            "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+            "text-size": 12
+          }
+        },
+        {
+          "id": "pbdb-points",
+          "type": "circle",
+          "source": "pbdb-points",
+          "filter": ["!", ["has", "point_count"]],
+          "paint": {
+            "circle-color": "#2171b5",
+            "circle-radius": 8,
+            "circle-stroke-width": 1,
+            "circle-stroke-color": "#fff"
+          }
+        }
+
     ]
 }

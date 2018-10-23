@@ -1,6 +1,6 @@
-# website-starter
+# web-v3
 
-A boilerplate for websites with React/Redux
+Macrostrat's map
 
 ## Getting started
 

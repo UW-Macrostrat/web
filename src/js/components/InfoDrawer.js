@@ -1,30 +1,36 @@
 import React, { Component } from 'react'
-import PropTypes from 'prop-types'
 import AnimateHeight from 'react-animate-height'
-import Drawer from 'material-ui/Drawer'
-import List, { ListItem, ListItemText, ListItemIcon, ListItemSecondaryAction } from 'material-ui/List'
-import Divider from 'material-ui/Divider'
-import Collapse from 'material-ui/transitions/Collapse'
-import Grid from 'material-ui/Grid'
-import ExpansionPanel, {
-  ExpansionPanelDetails,
-  ExpansionPanelSummary,
-} from 'material-ui/ExpansionPanel'
-import { CircularProgress } from 'material-ui/Progress'
-import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Table'
-import Card, { CardContent } from 'material-ui/Card'
-import Paper from 'material-ui/Paper'
+import Drawer from '@material-ui/core/Drawer'
+import List from '@material-ui/core/List'
+import ListItem from '@material-ui/core/ListItem'
+import ListItemText from '@material-ui/core/ListItemText'
+import ListItemIcon from '@material-ui/core/ListItemIcon'
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction'
+import Divider from '@material-ui/core/Divider'
+import Collapse from '@material-ui/core/Collapse'
+import Grid from '@material-ui/core/Grid'
+import ExpansionPanel from '@material-ui/core/ExpansionPanel'
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails'
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary'
 
+import CircularProgress from '@material-ui/core/CircularProgress'
+import Table from '@material-ui/core/Table'
+import TableBody from '@material-ui/core/TableBody'
+import TableCell from '@material-ui/core/TableCell'
+import TableHead from '@material-ui/core/TableHead'
+import TableRow from '@material-ui/core/TableRow'
+import Card, { CardContent } from '@material-ui/core/Card'
+import Paper from '@material-ui/core/Paper'
 
-import CloseIcon from 'material-ui-icons/Close'
-import Button from 'material-ui/Button'
-import IconButton from 'material-ui/IconButton'
-import InfoOutlineIcon from 'material-ui-icons/InfoOutline'
-import LocationOnIcon from 'material-ui-icons/LocationOn'
-import ExpandMoreIcon from 'material-ui-icons/ExpandMore'
-import ExpandLessIcon from 'material-ui-icons/ExpandLess'
-import Typography from 'material-ui/Typography'
+// Icons
+import CloseIcon from '@material-ui/icons/Close'
+import Button from '@material-ui/core/Button'
+import IconButton from '@material-ui/core/IconButton'
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
+import ExpandLessIcon from '@material-ui/icons/ExpandLess'
+import Typography from '@material-ui/core/Typography'
 
+// Our components
 import AgeChip from './AgeChip'
 import MacrostratAgeChip from './MacrostratAgeChip'
 import LithChip from './LithChip'
@@ -33,8 +39,9 @@ import Reference from './Reference'
 import MapSource from './MapSource'
 import LongText from './LongText'
 import PBDBCollections from './PBDBCollections'
+import Journal from './gdd/Journal'
 
-import { addCommas } from '../utils'
+import { addCommas, normalizeLng } from '../utils'
 
 class InfoDrawer extends Component {
   constructor(props) {
@@ -46,10 +53,6 @@ class InfoDrawer extends Component {
       bedrockMatchExpanded: this.props.mapHasBedrock,
       stratigraphyExpanded: this.props.mapHasColumns
     }
-
-    // this.bedrockExpanded = this.props.mapHasBedrock
-    // this.bedrockMatchExpanded = this.props.mapHasBedrock
-    // this.stratigraphyExpanded = this.props.mapHasColumns
 
     this.handleChange = panel => (event, expanded) => {
       this.setState({
@@ -88,11 +91,6 @@ class InfoDrawer extends Component {
     }
   }
 
-  normalizeLng(lng) {
-    // via https://github.com/Leaflet/Leaflet/blob/32c9156cb1d1c9bd53130639ec4d8575fbeef5a6/src/core/Util.js#L87
-    return (((lng - 180) % 360 + 360) % 360 - 180).toFixed(4);
-  }
-
   componentWillReceiveProps(nextProps) {
 
     this.setState({
@@ -115,15 +113,9 @@ class InfoDrawer extends Component {
         stratigraphyExpanded: nextProps.mapHasColumns,
       })
     }
-
-    // if (nextProps.mapHasColumns) {
-    //   console.log('next prop has columns! go get it')
-    //   this.props.getColumn()
-    // }
   }
 
   render() {
-    console.log('render infoDrawer')
     const { infoDrawerOpen, closeInfoDrawer, expandInfoDrawer, infoDrawerExpanded } = this.props
     let { mapInfo, gddInfo, pbdbData } = this.props
 
@@ -135,6 +127,9 @@ class InfoDrawer extends Component {
     }
     let expansionPanelDetailClasses = {
       'root': 'expansion-panel-detail'
+    }
+    const expansionPanelDetailSubClasses = {
+      'root': 'expansion-panel-detail-sub'
     }
 
     let exitTransition = {
@@ -160,26 +155,11 @@ class InfoDrawer extends Component {
       ref: {}
     }
 
-    // if (Object.keys(this.props.columnInfo).length != 0) {
-    //   this.props.columnInfo.column.map(d => {
-    //     let unitHTML = d.units.map(j => {
-    //       return <tr>
-    //         <td width={100} colspan=>
-    //
-    //         </td>
-    //       </tr>
-    //     })
-    //   })
-    // }
-    // if (Object.keys(this.props.columnInfo).length != 0) {
-    //   console.log(this.props.columnInfo.timescale)
-    // }
-
     return (
       <Drawer
         anchor={window.innerWidth > 850 ? "right" : "bottom"}
         open={infoDrawerOpen}
-        onBackdropClick={closeInfoDrawer}
+
         transitionDuration={300}
         hideBackdrop={true}
         disableAutoFocus={true}
@@ -193,11 +173,11 @@ class InfoDrawer extends Component {
         }}
       >
 
-      <div className={this.props.fetchingMapInfo ? "infoDrawer-loading" : "hidden"}  container alignItems="center" alignContent="center" justify="center">
+      <div className={this.props.fetchingMapInfo ? "infoDrawer-loading" : "hidden"}>
         <CircularProgress size={50} />
       </div>
       <div className={this.props.fetchingMapInfo ? "hidden" : "d"}>
-      <Grid container alignItems="center" alignContent="center" justify="center" classes={{ 'spacing-xs-16': 'infodrawer-grid' }}>
+      <Grid classes={{ 'spacing-xs-16': 'infodrawer-grid' }}>
 
         <Grid item xs={12}>
           <div className="infodrawer-content">
@@ -208,7 +188,7 @@ class InfoDrawer extends Component {
                   {mapInfo.elevation ?
                     <div className="infodrawer-header-item lnglat-container">
                       <span className="lnglat">
-                        {this.normalizeLng(this.props.infoMarkerLng)}  {this.props.infoMarkerLat}
+                        {normalizeLng(this.props.infoMarkerLng)}  {this.props.infoMarkerLat}
                       </span>
                       <span className="z">
                         {mapInfo.elevation}<span className='age-chip-ma'>m</span> | {(mapInfo.elevation * 3.28084).toFixed(0)}<span className='age-chip-ma'>ft</span>
@@ -323,7 +303,7 @@ class InfoDrawer extends Component {
                   <Divider/>
                   <ExpansionPanel classes={{ 'root': 'regional-panel'}} onChange={this.collapse('bedrockMatch')} expanded={bedrockMatchExpanded}>
                     <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} classes={expansionPanelClasses}>
-                      <Typography className="expansion-summary-title">Geologic Map (inferred) <span className='via-gdd'>via Macrostrat</span> </Typography>
+                      <Typography className="expansion-summary-title">Macrostrat-linked data <span className='via-gdd'>via Macrostrat</span> </Typography>
                     </ExpansionPanelSummary>
                     <ExpansionPanelDetails classes={expansionPanelDetailClasses}>
                       {
@@ -360,7 +340,7 @@ class InfoDrawer extends Component {
                               : ''
                             }
                           </ExpansionPanelSummary>
-                          <ExpansionPanelDetails classes={expansionPanelDetailClasses}>
+                          <ExpansionPanelDetails classes={expansionPanelDetailSubClasses}>
                             <p className="expansion-panel-detail-header">
                               All matched names:
                             </p>
@@ -419,7 +399,7 @@ class InfoDrawer extends Component {
                               return <AttrChip key={i} name={lithClass.name} color={lithClass.color} />
                             }) : ''}
                           </ExpansionPanelSummary>
-                          <ExpansionPanelDetails classes={expansionPanelDetailClasses}>
+                          <ExpansionPanelDetails classes={expansionPanelDetailSubClasses}>
                             <p className="expansion-panel-detail-header">
                               Matched lithologies:
                             </p>
@@ -441,7 +421,7 @@ class InfoDrawer extends Component {
                               return <AttrChip key={i} name={environClass.name} color={environClass.color} />
                             }) : ''}
                           </ExpansionPanelSummary>
-                          <ExpansionPanelDetails classes={expansionPanelDetailClasses}>
+                          <ExpansionPanelDetails classes={expansionPanelDetailSubClasses}>
                             <p className="expansion-panel-detail-header">
                               Matched environments:
                             </p>
@@ -463,7 +443,7 @@ class InfoDrawer extends Component {
                               return <AttrChip key={i} name={econClass.name} color={econClass.color} />
                             }) : ''}
                           </ExpansionPanelSummary>
-                          <ExpansionPanelDetails classes={expansionPanelDetailClasses}>
+                          <ExpansionPanelDetails classes={expansionPanelDetailSubClasses}>
                             <p className="expansion-panel-detail-header">
                               Matched economic attributes:
                             </p>
@@ -564,7 +544,7 @@ class InfoDrawer extends Component {
                   <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} classes={expansionPanelClasses}>
                     <Typography className="expansion-summary-title">Physiography </Typography>
                   </ExpansionPanelSummary>
-                  <ExpansionPanelDetails classes={expansionPanelDetailClasses}>
+                  <ExpansionPanelDetails classes={expansionPanelDetailSubClasses}>
                     {mapInfo.regions.map((region, i) => {
                       return (
                         <div className='region' key={i}>
@@ -587,32 +567,10 @@ class InfoDrawer extends Component {
                     <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} classes={expansionPanelClasses}>
                       <Typography className="expansion-summary-title">Primary Literature <span className='via-gdd'>via GeoDeepDive</span> </Typography>
                     </ExpansionPanelSummary>
-                    <ExpansionPanelDetails classes={expansionPanelDetailClasses}>
+                    <ExpansionPanelDetails classes={expansionPanelDetailSubClasses}>
                       {gddInfo.length ?
-                        gddInfo.map((article, ai) => {
-                          return (
-                            <div className='article' key={ai}>
-                              <h3 className='article-title'>
-                                <a href={article.url} target="_blank">
-                                  {article.title}.
-                                  <span className="sub-title">
-                                    {article.authors.map(d => { return d.name}).join(', ')}. {article.coverdate}. {article.journal}. {article.publisher}.
-                                  </span>
-                                </a>
-                              </h3>
-                              <div className="quotes">
-                                {article.snippets.map((snippet, si) => {
-                                   let text = snippet.replace(/<em class="hl">/g, "@@@")
-                                      .replace(/<\/em>/g, "***")
-                                      .replace(/(?:\r\n|\r|\n|\<|\>)/g, ' ')
-                                      .trim()
-                                      .replace(/@@@/g, '<em class="hl">')
-                                      .replace(/\*\*\*/g, '</em>');
-                                  return <p className='gdd-snippet' key={si} dangerouslySetInnerHTML={{__html: '...' + text + '...'}}></p>
-                                })}
-                              </div>
-                            </div>
-                          )
+                        gddInfo.map(journal => {
+                          return <Journal data={journal} key={journal.name}/>
                         })
                       : ''}
                     </ExpansionPanelDetails>

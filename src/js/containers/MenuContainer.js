@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import { toggleMenu, toggleBedrock, toggleSatellite, toggleColumns, toggleFossils, toggleAbout, toggleElevationChart } from '../actions'
+import { toggleMenu, toggleBedrock, toggleLines, toggleSatellite, toggleColumns, toggleFossils, toggleAbout, toggleElevationChart } from '../actions'
 import Menu from '../components/Menu'
 
 const mapStateToProps = (state) => {
@@ -8,7 +8,8 @@ const mapStateToProps = (state) => {
     mapHasBedrock: state.update.mapHasBedrock,
     mapHasSatellite: state.update.mapHasSatellite,
     mapHasColumns: state.update.mapHasColumns,
-    mapHasFossils: state.update.mapHasFossils
+    mapHasFossils: state.update.mapHasFossils,
+    mapHasLines: state.update.mapHasLines,
   }
 }
 
@@ -19,6 +20,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     toggleBedrock: () => {
       dispatch(toggleBedrock())
+    },
+    toggleLines: () => {
+      dispatch(toggleLines())
     },
     toggleSatellite: () => {
       dispatch(toggleSatellite())

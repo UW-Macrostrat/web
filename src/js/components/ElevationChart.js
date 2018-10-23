@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
-import Drawer from 'material-ui/Drawer'
-import IconButton from 'material-ui/IconButton'
-import CloseIcon from 'material-ui-icons/Close'
-import Grid from 'material-ui/Grid'
+import Drawer from '@material-ui/core/Drawer'
+import IconButton from '@material-ui/core/IconButton'
+import CloseIcon from '@material-ui/icons/Close'
+import Grid from '@material-ui/core/Grid'
 
 import { select, mouse } from 'd3-selection'
 import { scaleLinear } from 'd3-scale'
@@ -77,8 +77,8 @@ class ElevationChart extends Component {
 
   drawChart() {
     // Alias these variables because d3 returns `this` in mouseover
+    const updateElevationMarker = this.props.updateElevationMarker
     let data = this.props.elevationData
-  //  let shareState = this.props.shareState
 
     let margin = {top: 20, right: 50, bottom: 30, left: 70}
     let width = window.innerWidth - margin.left - margin.right
@@ -181,6 +181,7 @@ class ElevationChart extends Component {
       .style('fill', '#333333')
       .attr('dy', '-1.2em')
 
+
     this.chart.append('rect')
         .attr('class', 'overlay')
         .attr('width', width)
@@ -197,7 +198,7 @@ class ElevationChart extends Component {
           focus.select('text')
             .text(`${d.elevation} m / ${(parseInt(d.elevation) * 3.28084).toFixed(0)} ft`)
 
-         // shareState('activeElevationPoint', [d.lat, d.lng])
+          updateElevationMarker(d.lng, d.lat)
         })
   }
 }
