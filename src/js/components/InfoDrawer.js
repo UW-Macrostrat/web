@@ -568,6 +568,9 @@ class InfoDrawer extends Component {
                       <Typography className="expansion-summary-title">Primary Literature <span className='via-gdd'>via GeoDeepDive</span> </Typography>
                     </ExpansionPanelSummary>
                     <ExpansionPanelDetails classes={expansionPanelDetailSubClasses}>
+                      <div className={this.props.fetchingGdd ? "infoDrawer-loading" : "hidden"}>
+                        <CircularProgress size={50} />
+                      </div>
                       {gddInfo.length ?
                         gddInfo.map(journal => {
                           return <Journal data={journal} key={journal.name}/>

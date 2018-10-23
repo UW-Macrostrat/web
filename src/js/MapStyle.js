@@ -16,7 +16,7 @@ export const mapStyle = {
               `${SETTINGS.burwellTileDomain}/hexgrid/{z}/{x}/{y}.mvt`
             ],
             "tileSize": 512,
-            "maxzoom": 7,
+            "maxzoom": 6,
         },
         "pbdb-points": {
           "type": "geojson",

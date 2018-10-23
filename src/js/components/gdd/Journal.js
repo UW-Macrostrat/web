@@ -8,12 +8,15 @@ class Journal extends Component {
   }
 
   render() {
+    const dividerClasses = {
+      'root': 'gdd-journal-article-divider'
+    }
     return (
       <div className='journal'>
         <div className='journal-title'>
           <h2 className='journal-title-text'>{this.props.data.name} <small className='journal-source'>{this.props.data.source}</small></h2>
         </div>
-        <Divider/>
+        <Divider classes={dividerClasses}/>
         {this.props.data.articles.map(
           article => <Article key={article.docid} data={article}/>
         )}

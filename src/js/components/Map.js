@@ -50,6 +50,7 @@ class Map extends Component {
         zoom: this.props.mapXYZ.z,
         maxZoom: 16,
         maxTileCacheSize: 0,
+        logoPosition: 'bottom-right',
     })
     // disable map rotation using right click + drag
     this.map.dragRotate.disable()
@@ -116,6 +117,7 @@ class Map extends Component {
       // Can happen on a slow connection
       if (this.map.getLayer('infoMarker')) {
         this.map.setLayoutProperty('infoMarker', 'visibility', 'none')
+        this.props.closeInfoDrawer()
       }
     })
 
@@ -593,7 +595,7 @@ class Map extends Component {
   refreshPBDB() {
     let bounds = this.map.getBounds()
     let zoom = this.map.getZoom()
-    if (zoom < 8) {
+    if (zoom < 7) {
       // Make sure the layer is visible
       this.map.setLayoutProperty('pbdbCollections', 'visibility', 'visible')
       // Dirty way of hiding points when zooming out

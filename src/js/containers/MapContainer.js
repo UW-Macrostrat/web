@@ -39,6 +39,9 @@ const mapDispatchToProps = (dispatch) => {
     mapMoved: (data) => {
       dispatch(mapMoved(data))
     },
+    closeInfoDrawer: () => {
+      dispatch(closeInfoDrawer())
+    }
   }
 }
 

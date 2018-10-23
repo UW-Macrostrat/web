@@ -4,7 +4,7 @@ body {
   padding:0;
   font-family: 'Source Sans Pro', sans-serif;
 }
-html, body, .main-container, #react, #app-holder {
+body, .main-container, #react, #app-holder {
   height: 100%;
   width: 100%;
 }
@@ -126,7 +126,6 @@ text {
 .tick text {
   font-size: 10px;
 }
-
 .infoDrawer-loading {
   height: 100%;
   display: flex;
@@ -151,7 +150,7 @@ text {
   /* height: 100vh; */
 }
 .infoDrawer-root {
-  z-index: 0 !important;
+  z-index: 999999 !important;
   position: relative !important;
 }
 .infoDrawer {
@@ -437,6 +436,19 @@ text {
   cursor: pointer;
   font-size: 20px !important;
   margin-left: 5px;
+}
+.gdd-journal-article-divider {
+  margin-bottom: 15px !important;
+}
+.satellite-icon {
+  margin-right: 33px !important;
+}
+.about-title {
+  display: block;
+  font-size: 20px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  margin-top: 15px;
 }
 @media(max-width: 850px) {
   .infoDrawer {
