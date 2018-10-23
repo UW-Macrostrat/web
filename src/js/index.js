@@ -1,5 +1,5 @@
 import 'babel-polyfill'
-
+import '@blueprintjs/core/lib/css/blueprint.css'
 //https://material-ui.com/style/typography/#migration-to-typography-v2
 window.__MUI_USE_NEXT_TYPOGRAPHY_VARIANTS__ = true
 
