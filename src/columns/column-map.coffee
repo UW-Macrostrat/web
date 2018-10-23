@@ -12,18 +12,9 @@ import {feature} from 'topojson'
 class ColumnIndexMap extends Component
   constructor: (props)->
     super props
-    center = [-60, 40]
     width = window.innerWidth
     height = 300
     @state = { width, height }
-
-    @projection = geoOrthographic()
-      .rotate([-center[0],-center[1]])
-      .precision(0.2)
-      .clipAngle(90)
-      .translate([width / 2, height / 2])
-      .scale width
-      .clipExtent([[0,0],[width,height]])
 
   render: ->
     {width, height} = @state
@@ -40,6 +31,18 @@ class ColumnIndexMap extends Component
 
   componentDidMount: ->
     window.addEventListener 'resize', @setWidth
+
+    {width, height} = @state
+    center = [-60, 40]
+
+    @projection = geoOrthographic()
+      .rotate([-center[0],-center[1]])
+      .precision(0.2)
+      .clipAngle(90)
+      .translate([width / 2, height / 2])
+      .scale width
+      .clipExtent([[0,0],[width,height]])
+
     # https://unpkg.com/world-atlas@1/world/110m.json
     el = findDOMNode(@)
     map = select(el)
@@ -100,6 +103,9 @@ class ColumnIndexMap extends Component
 
     extent = [.24*minSize*ratio, 3*minSize*ratio]
 
+    # This makes sure we never zoom out past the globe's extent,
+    # at least using an orthographic projection
+    hypot = Math.sqrt(Math.pow(width,2)+Math.pow(height,2))
     zoomed = =>
       {deltaY} = event.sourceEvent
       currScale = @projection.scale()
@@ -108,6 +114,9 @@ class ColumnIndexMap extends Component
         newScale = extent[0]
       if newScale > extent[1]
         newScale = extent[1]
+      console.log newScale, extent, width
+      if newScale < hypot*0.5
+        return
       return if newScale == currScale
       @projection.scale newScale
       redraw()
