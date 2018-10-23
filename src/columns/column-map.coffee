@@ -1,9 +1,11 @@
 import {Component} from 'react'
 import {findDOMNode} from 'react-dom'
 import h from 'react-hyperscript'
-import {geoOrthographic} from 'd3'
-import * as d3 from 'd3'
+import {geoOrthographic, geoGraticule, geoPath} from 'd3-geo'
 import 'd3-jetpack'
+import {select, event} from 'd3-selection'
+import {drag} from 'd3-drag'
+import {zoom} from 'd3-zoom'
 import {get} from 'axios'
 import {feature} from 'topojson'
 
@@ -21,6 +23,7 @@ class ColumnIndexMap extends Component
       .clipAngle(90)
       .translate([width / 2, height / 2])
       .scale width
+      .clipExtent([[0,0],[width,height]])
 
   render: ->
     {width, height} = @state
@@ -39,7 +42,7 @@ class ColumnIndexMap extends Component
     window.addEventListener 'resize', @setWidth
     # https://unpkg.com/world-atlas@1/world/110m.json
     el = findDOMNode(@)
-    map = d3.select(el)
+    map = select(el)
 
     bkg = map.select("g.map-backdrop")
 
@@ -51,10 +54,10 @@ class ColumnIndexMap extends Component
     land110 = feature(data, data.objects.land)
 
 
-    path = d3.geoPath()
+    path = geoPath()
       .projection(@projection)
 
-    graticule = d3.geoGraticule()
+    graticule = geoGraticule()
       .step([10,10])
 
     grat = bkg.selectAppend('path.graticule')
@@ -74,7 +77,7 @@ class ColumnIndexMap extends Component
         .attr 'd', path
 
     sens = 0.08
-    dragging = d3.drag()
+    dragging = drag()
       .subject (d)=>
         r = @projection.rotate()
         return {
@@ -83,14 +86,39 @@ class ColumnIndexMap extends Component
         }
       .on "drag", =>
         rotate = @projection.rotate()
-        @projection.rotate [d3.event.x * sens, -d3.event.y * sens, rotate[2]]
+        @projection.rotate [event.x * sens, -event.y * sens, rotate[2]]
         redraw()
       .on 'start', updateData(land110)
       .on 'end', updateData(land50)
 
+
+    x = window.innerWidth
+    y = window.innerHeight
+
+    minSize = Math.min(x,y)
+    ratio = window.devicePixelRatio or 1
+
+    extent = [.24*minSize*ratio, 3*minSize*ratio]
+
+    zoomed = =>
+      {deltaY} = event.sourceEvent
+      currScale = @projection.scale()
+      newScale = currScale - 2*deltaY
+      if newScale < extent[0]
+        newScale = extent[0]
+      if newScale > extent[1]
+        newScale = extent[1]
+      return if newScale == currScale
+      @projection.scale newScale
+      redraw()
+
+    zoomBehavior = zoom()
+      .scaleExtent extent
+      .on 'zoom', zoomed
+      .on "start", updateData(land110)
+      .on "end", updateData(land50)
+
     map.call dragging
-
-    console.log land
-
+    map.call zoomBehavior
 
 export default ColumnIndexMap
