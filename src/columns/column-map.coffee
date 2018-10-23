@@ -1,6 +1,7 @@
 import {Component} from 'react'
 import {findDOMNode} from 'react-dom'
 import h from 'react-hyperscript'
+import {ResizeSensor} from '@blueprintjs/core'
 import {geoOrthographic, geoGraticule, geoPath} from 'd3-geo'
 import 'd3-jetpack'
 import {select, event} from 'd3-selection'
@@ -18,16 +19,26 @@ class ColumnIndexMap extends Component
 
   render: ->
     {width, height} = @state
-    h 'svg#column-index-map', {
-      xmlns: "http://www.w3.org/2000/svg"
-      width
-      height
-    }, [
-      h 'g.map-backdrop'
+    h 'div', [
+      h 'svg#column-index-map', {
+        xmlns: "http://www.w3.org/2000/svg"
+        width
+        height
+      }, [
+        h 'g.map-backdrop'
+      ]
     ]
 
   setWidth: =>
     @setState {width: window.innerWidth}
+
+  getColumns: =>
+    {data: {success: {data}}} = await get "https://dev.macrostrat.org/api/v2/columns?format=topojson&all"
+    columns = feature(data, data.objects.output)
+    console.log columns
+    sel = @columnContainer
+      .appendMany('path.column', columns.features)
+      .attr 'd', @path
 
   componentDidMount: ->
     window.addEventListener 'resize', @setWidth
@@ -56,8 +67,7 @@ class ColumnIndexMap extends Component
     {data} = await get("https://unpkg.com/world-atlas@1/world/110m.json")
     land110 = feature(data, data.objects.land)
 
-
-    path = geoPath()
+    @path = geoPath()
       .projection(@projection)
 
     graticule = geoGraticule()
@@ -65,19 +75,19 @@ class ColumnIndexMap extends Component
 
     grat = bkg.selectAppend('path.graticule')
       .datum(graticule())
-      .attr('d',path)
+      .attr('d',@path)
 
     land = bkg.selectAppend('path.land')
       .datum(land50)
-      .attr('d',path)
+      .attr('d',@path)
 
-    redraw = ->
+    redraw = =>
       bkg.selectAll 'path'
-        .attr 'd', path
+        .attr 'd', @path
 
-    updateData = (val)-> ->
+    updateData = (val)=> =>
       land.datum(val)
-        .attr 'd', path
+        .attr 'd', @path
 
     sens = 0.08
     dragging = drag()
@@ -110,11 +120,6 @@ class ColumnIndexMap extends Component
       {deltaY} = event.sourceEvent
       currScale = @projection.scale()
       newScale = currScale - 2*deltaY
-      if newScale < extent[0]
-        newScale = extent[0]
-      if newScale > extent[1]
-        newScale = extent[1]
-      console.log newScale, extent, width
       if newScale < hypot*0.5
         return
       return if newScale == currScale
@@ -129,5 +134,9 @@ class ColumnIndexMap extends Component
 
     map.call dragging
     map.call zoomBehavior
+
+    @columnContainer = bkg.selectAppend 'g.columns'
+    @getColumns()
+
 
 export default ColumnIndexMap
