@@ -12,8 +12,6 @@ let browserSync = new BrowserSyncPlugin({
 
 //uglify = new UglifyJsPlugin()
 
-let plugins = [browserSync]//, uglify]
-
 let babelLoader = {
   loader: 'babel-loader',
   options: {

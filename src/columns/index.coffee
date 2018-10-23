@@ -1,9 +1,10 @@
 
-import {Component} from 'React'
+import React from 'React'
+import h from 'react-hyperscript'
 
-class SectionPage extends Component
+class SectionPage extends React.Component
   render: ->
-    h 'p', null, "Hello, world!"
+    <div>Hello, world!</div>
 
 export default SectionPage
 
