@@ -67,7 +67,8 @@ function bundleApp(isProduction) {
 	// us use modules in the front end.
 	let appBundler = browserify({
   	entries: './src/js/index.js',
-  	debug: true
+    debug: true,
+    extensions: ['.coffee']
 	})
 
 	// If it's not for production, a separate vendors.js file will be created
@@ -77,7 +78,8 @@ function bundleApp(isProduction) {
 		// create vendors.js for dev environment.
 		browserify({
 			require: dependencies,
-			debug: true
+      debug: true,
+      extensions: ['.coffee']
 		})
 		.bundle()
 		.on('error', gutil.log)
@@ -95,9 +97,10 @@ function bundleApp(isProduction) {
 
 	if (isProduction) {
 		process.env.NODE_ENV = 'production'
-		appBundler
+    appBundler
+      .transform('coffeeify', {})
 			// transform ES6 and JSX to ES5 with babelify
-	  	.transform('babelify', {presets: ['babel-preset-es2015', 'react']})
+		.transform('babelify', {presets: ['babel-preset-es2015', 'react']})
 	    .bundle()
 	    .on('error',gutil.log)
 	    .pipe(source('bundle.js'))
@@ -118,7 +121,7 @@ function bundleApp(isProduction) {
 	} else {
 		appBundler
 			// transform ES6 and JSX to ES5 with babelify
-	  	.transform('babelify', {presets: ['es2015', 'react']})
+		.transform('babelify', {presets: ['es2015', 'react']})
 	    .bundle()
 	    .on('error',gutil.log)
 	    .pipe(source('bundle.js'))

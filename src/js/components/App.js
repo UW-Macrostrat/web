@@ -6,6 +6,7 @@ import {
 } from 'react-router-dom'
 
 import MapPage from './MapPage'
+import SectionPage from '../columns.coffee'
 
 class App extends Component {
   constructor(props) {
@@ -17,6 +18,7 @@ class App extends Component {
       <Router>
         <div id="app-holder">
           <Route path="/map" component={MapPage} />
+          <Route path="/columns" component={SectionPage} />
           <Redirect from="/" exact to="/map" />
         </div>
       </Router>
