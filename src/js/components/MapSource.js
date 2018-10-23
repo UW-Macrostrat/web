@@ -24,16 +24,6 @@ class MapSource extends Component {
     this.setState({'commentsExpanded': !this.state.commentsExpanded})
   }
 
-  hexToRgb(hex) {
-    if (!hex) { return 'rgba(0,0,0,0.3)'}
-    hex = hex.replace('#', '')
-    let bigint = parseInt(hex, 16)
-    let r = (bigint >> 16) & 255
-    let g = (bigint >> 8) & 255
-    let b = bigint & 255
-    return `rgba(${r},${g},${b},0.8)`
-  }
-
   render() {
     return (
       <div className="map-source">

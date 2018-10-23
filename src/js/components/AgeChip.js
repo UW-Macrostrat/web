@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-
+import { hexToRgb } from '../utils'
 /*
   Takes: b_int and t_int
 */
@@ -8,19 +8,9 @@ class AgeChip extends Component {
     super(props)
   }
 
-  hexToRgb(hex) {
-    if (!hex) { return 'rgba(0,0,0,0.3)'}
-    hex = hex.replace('#', '')
-    let bigint = parseInt(hex, 16)
-    let r = (bigint >> 16) & 255
-    let g = (bigint >> 8) & 255
-    let b = bigint & 255
-    return `rgba(${r},${g},${b},0.8)`
-  }
-
   render() {
     let tIntChip = (
-      <div className="age-chip age-chip-t-int" style={{ backgroundColor: this.hexToRgb(this.props.t_int.color) }}>
+      <div className="age-chip age-chip-t-int" style={{ backgroundColor: hexToRgb(this.props.t_int.color, 0.8) }}>
         {this.props.t_int.int_name}
         {this.props.t_int.t_age
           ? <div className="age-chip-age">
@@ -34,7 +24,7 @@ class AgeChip extends Component {
 
     return (
       <div className="age-chip-container">
-        <div className="age-chip" style={{ backgroundColor: this.hexToRgb(this.props.b_int.color) }}>
+        <div className="age-chip" style={{ backgroundColor: hexToRgb(this.props.b_int.color, 0.8) }}>
           {this.props.b_int.int_name || 'Unknown'}
           {this.props.b_int.b_age
             ? <div className="age-chip-age">
