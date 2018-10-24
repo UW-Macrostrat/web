@@ -12,23 +12,31 @@ import {feature} from 'topojson'
 import classNames from 'classnames'
 import {ColumnDataConsumer} from './column-data.coffee'
 
-class ColumnPath extends Component
+class ColumnPath__ extends Component
   render: ->
-    {column} = @props
-    h ColumnDataConsumer, null, ({actions, hoveredColumn, helpers})->
-      hovered = helpers.isSame(column, hoveredColumn)
-      selected = helpers.isSelected(column)
-      className = classNames("column", {hovered, selected})
-      h 'path', {
-        className
-        onMouseEnter: ->actions.setHovered(column)
-        onMouseLeave: ->actions.setHovered()
-        onClick: ->
-          actions.toggleSelected(column)
-      }
+    {actions, hoveredColumn, helpers, column} = @props
+    hovered = helpers.isSame(column, hoveredColumn)
+    selected = helpers.isSelected(column)
+    className = classNames("column", {hovered, selected})
+    h 'path', {
+      className
+      onMouseEnter: ->actions.setHovered(column)
+      onMouseLeave: ->actions.setHovered()
+    }
   componentDidMount: ->
-    {column} = @props
-    select(findDOMNode(@)).datum(column)
+    {column, actions} = @props
+    select(findDOMNode(@))
+      .datum(column)
+      .on 'click', ->
+        # This handler can't be in React because
+        # stopPropagation can't be called before zoom handlers
+        actions.toggleSelected(column)
+        # Right now stopPropagation is not called properly
+        event.stopPropagation()
+
+ColumnPath = (props)=>
+  h ColumnDataConsumer, null, ({actions, hoveredColumn, helpers})->
+    h ColumnPath__, {props...,actions,hoveredColumn,helpers}
 
 class ColumnIndexMap__ extends Component
   @defaultProps: {
