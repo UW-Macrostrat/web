@@ -9,14 +9,23 @@ import {drag} from 'd3-drag'
 import {zoom} from 'd3-zoom'
 import {get} from 'axios'
 import {feature} from 'topojson'
-
+import classNames from 'classnames'
 import {ColumnDataConsumer} from './column-data.coffee'
 
 class ColumnPath extends Component
   render: ->
-    h 'path.column'
+    {column} = @props
+    h ColumnDataConsumer, null, ({actions, hoveredColumn, helpers})->
+      hovered = helpers.isSame(column, hoveredColumn)
+      className = classNames("column", {hovered})
+      h 'path', {
+        className
+        onMouseEnter: ->actions.setHovered(column)
+        onMouseLeave: ->actions.setHovered()
+      }
   componentDidMount: ->
-    select(findDOMNode(@)).datum(@props)
+    {column} = @props
+    select(findDOMNode(@)).datum(column)
 
 class ColumnIndexMap__ extends Component
   @defaultProps: {
@@ -53,8 +62,8 @@ class ColumnIndexMap__ extends Component
       height
     }, [
       h 'g.map-backdrop'
-      h 'g.columns', columns.map (d)->
-        h ColumnPath, d
+      h 'g.columns', columns.map (column)->
+        h ColumnPath, {column}
     ]
 
   setWidth: =>

@@ -16,10 +16,30 @@ class ColumnDataManager extends Component
     @setState {columns}
   render: ->
     {children} = @props
-    value = {@state...}
+    value = {
+      @state...,
+      # Could generalize into a `dispatch` function
+      # https://dev.to/washingtonsteven/reacts-new-context-api-and-actions-446o
+      actions: {
+        setHovered: @setHoveredColumn
+        setSelected: @setSelectedColumn
+      }
+      helpers: @helpers
+    }
     h ColumnDataContext.Provider, {value, children}
   componentDidMount: ->
     @getColumnData()
+  setHoveredColumn: (col)=>
+    @setState {hoveredColumn: col}
+
+  setSelectedColumn: (col)=>
+
+  helpers: {
+    isSame: (col1, col2)->
+      return false unless col1?
+      return false unless col2?
+      col1.properties.col_id == col2.properties.col_id
+  }
 
 ColumnDataConsumer = ColumnDataContext.Consumer
 export {ColumnDataConsumer, ColumnDataManager}
