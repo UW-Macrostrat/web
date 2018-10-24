@@ -10,7 +10,16 @@ import {zoom} from 'd3-zoom'
 import {get} from 'axios'
 import {feature} from 'topojson'
 
+class ColumnPath extends Component
+  render: ->
+    h 'path.column'
+  componentDidMount: ->
+    select(findDOMNode(@)).datum(@props)
+
 class ColumnIndexMap extends Component
+  @defaultProps: {
+    columns: []
+  }
   constructor: (props)->
     super props
     width = window.innerWidth
@@ -34,6 +43,7 @@ class ColumnIndexMap extends Component
     super state
 
   render: ->
+    {columns} = @props
     {width,height} = @state
     h 'svg#column-index-map', {
       xmlns: "http://www.w3.org/2000/svg"
@@ -41,6 +51,8 @@ class ColumnIndexMap extends Component
       height
     }, [
       h 'g.map-backdrop'
+      h 'g.columns', columns.map (d)->
+        h ColumnPath, d
     ]
 
   setWidth: =>
@@ -73,6 +85,8 @@ class ColumnIndexMap extends Component
 
   componentDidUpdate: (prevProps, prevState)->
     @updateProjection(prevProps, prevState)
+    if prevProps.columns != @props.columns
+      @redrawPaths(@map.selectAll('path.column'))
 
   componentDidMount: ->
     window.addEventListener 'resize', @setWidth
@@ -149,9 +163,5 @@ class ColumnIndexMap extends Component
 
     @map.call dragging
     @map.call zoomBehavior
-
-    @columnContainer = @map.selectAppend 'g.columns'
-    @getColumns()
-
 
 export default ColumnIndexMap
