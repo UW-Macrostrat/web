@@ -17,11 +17,14 @@ class ColumnPath extends Component
     {column} = @props
     h ColumnDataConsumer, null, ({actions, hoveredColumn, helpers})->
       hovered = helpers.isSame(column, hoveredColumn)
-      className = classNames("column", {hovered})
+      selected = helpers.isSelected(column)
+      className = classNames("column", {hovered, selected})
       h 'path', {
         className
         onMouseEnter: ->actions.setHovered(column)
         onMouseLeave: ->actions.setHovered()
+        onClick: ->
+          actions.toggleSelected(column)
       }
   componentDidMount: ->
     {column} = @props
