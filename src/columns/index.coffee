@@ -4,6 +4,7 @@ import React, {Component} from 'react'
 import {ColumnDataManager} from './column-data'
 import ColumnIndexMap from './column-map'
 import {HoveredColumnLegend} from './legend'
+import {SelectionPanel} from './selection-panel'
 import './main.styl'
 
 class ColumnPage extends Component
@@ -15,6 +16,7 @@ class ColumnPage extends Component
         <div className="header">
           <h1>Macrostrat <span className="subtitle">Column Explorer</span></h1>
         </div>
+        <SelectionPanel />
       </div>
     </ColumnDataManager>
   componentDidMount: ->

@@ -2,25 +2,51 @@ import {Component, createContext} from 'react'
 import {feature} from 'topojson'
 import h from 'react-hyperscript'
 import {get} from 'axios'
+import update from 'immutability-helper'
 
 ColumnDataContext = createContext({})
 
+class APIManager
+  constructor: (@baseURL)->
+  get: (route)=>
+    # Should handle unsuccessful queries
+    URI = @baseURL+route
+    {data: {success: {data}}} = await get URI
+    return data
+
+getID = (col)->
+  col.properties.col_id
+
 class ColumnDataManager extends Component
+  API: new APIManager("https://dev.macrostrat.org/api/v2")
   state: {
     hoveredColumn: null,
     columns: []
     selection: new Set([])
+    columnUnitIndex: {}
   }
   constructor: (props)->
     super props
   getColumnData: ->
-    __ = "https://dev.macrostrat.org/api/v2/columns?format=topojson&all"
-    {data: {success: {data}}} = await get __
+    data = await @API.get "/columns?format=topojson&all"
     {features: columns} = feature(data, data.objects.output)
     @setState {columns}
+
+  cacheUnitsForColumn: (column)->
+    id = getID(column)
+    {columnUnitIndex} = @state
+    return if columnUnitIndex[id]?
+    data = await @API.get "/units?col_id=#{id}&response=long"
+    console.log data
+    c = {}
+    c[id] = {$set: data}
+    changeset = {columnUnitIndex: c}
+    state = update(@state, changeset)
+    @setState state
+
   render: ->
     {children} = @props
-    {toggleSelected} = @
+    {toggleSelected, getUnits} = @
     value = {
       @state...,
       # Could generalize into a `dispatch` function
@@ -33,6 +59,8 @@ class ColumnDataManager extends Component
       helpers: {
         @helpers...
         isSelected: @isSelected
+        getUnits
+        getID
       }
     }
     h ColumnDataContext.Provider, {value, children}
@@ -41,14 +69,15 @@ class ColumnDataManager extends Component
   setHoveredColumn: (col)=>
     @setState {hoveredColumn: col}
 
-  setSelectedColumn: (col)=>
-
   toggleSelected: (col)=>
-    {selection} = @state
-    hadItem = selection.delete(col)
-    if not hadItem
-      selection = selection.add(col)
-    @setState {selection}
+    if @isSelected(col)
+      selection = {$remove: [col]}
+    else
+      selection = {$add: [col]}
+      @cacheUnitsForColumn(col)
+    changeset = {selection}
+    newState = update(@state, changeset)
+    @setState newState
 
   isSelected: (col)=>@state.selection.has(col)
 
@@ -57,8 +86,13 @@ class ColumnDataManager extends Component
       # Checks if two columns are the same
       return false unless col1?
       return false unless col2?
-      col1.properties.col_id == col2.properties.col_id
+      getID(col1) == getID(col2)
   }
+
+  getUnits: (col)=>
+    id = getID(col)
+    {columnUnitIndex} = @state
+    columnUnitIndex[id] or null
 
 ColumnDataConsumer = ColumnDataContext.Consumer
 export {ColumnDataConsumer, ColumnDataManager}

@@ -3,12 +3,21 @@ h1
     color #aaa
 
 #column-page
-  .header
-    margin 1em 2em 0.5em
+  margin 0 2em
+
+body
+  height 100%
+  width 100%
+
+h4.hovered-column-legend
+  margin-top 0
+  color #888
+  &.empty
+    font-weight 400
 
 svg#column-index-map
   background-color: lighten(dodgerblue,70%)
-  width: 100%
+  margin 0 -2em
   path.graticule
     stroke #aaa
     stroke-width 1px
@@ -30,3 +39,10 @@ svg#column-index-map
       fill alpha(column_color, 50%)
     &.selected
       fill alpha(column_color, 80%)
+
+div.selected-columns
+  display flex
+  max-width 100%
+  flex-direction row
+  div.column-data
+    flex 1
