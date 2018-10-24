@@ -2,7 +2,7 @@ import {Component} from 'react'
 import {findDOMNode} from 'react-dom'
 import h from 'react-hyperscript'
 import {ResizeSensor} from '@blueprintjs/core'
-import {geoOrthographic, geoGraticule, geoPath} from 'd3-geo'
+import {geoOrthographic, geoGraticule10, geoPath} from 'd3-geo'
 import 'd3-jetpack'
 import {select, event} from 'd3-selection'
 import {drag} from 'd3-drag'
@@ -14,25 +14,33 @@ class ColumnIndexMap extends Component
   constructor: (props)->
     super props
     width = window.innerWidth
-    @state = { width }
+    @state = @computeDerivedState({ width })
 
-  getSize: ->
-    {width} = @state
-    height = width/6
-    if height < 200
-      height = 200
-    return {width,height}
+  computeDerivedState: (newState)->
+    # Right now we derive the height of the component
+    # from its width
+    {width} = newState
+    if width?
+      height = width/6
+      if height < 200
+        height = 200
+      hypot = Math.sqrt(Math.pow(width,2)+Math.pow(height,2))
+      minScale = hypot/1.9
+      newState = {height, minScale, newState...}
+    return newState
+
+  setState: (newState)->
+    super @computeDerivedState(newState)
+
 
   render: ->
-    {width,height} = @getSize()
-    h 'div', [
-      h 'svg#column-index-map', {
-        xmlns: "http://www.w3.org/2000/svg"
-        width
-        height
-      }, [
-        h 'g.map-backdrop'
-      ]
+    {width,height} = @state
+    h 'svg#column-index-map', {
+      xmlns: "http://www.w3.org/2000/svg"
+      width
+      height
+    }, [
+      h 'g.map-backdrop'
     ]
 
   setWidth: =>
@@ -44,19 +52,27 @@ class ColumnIndexMap extends Component
     console.log columns
     sel = @columnContainer
       .appendMany('path.column', columns.features)
-      .attr 'd', @path
+      .call @redrawPaths
 
-  componentWillUpdate: (nextProps, nextState)->
+  updateProjection: ->
+    {width,height, minScale} = @state
+    @projection
+      .translate([width / 2, height / 2])
+      .scale minScale
+      .clipExtent([[0,0],[width,height]])
+    @redrawPaths()
+
+  redrawPaths:(sel)=>
+    sel ?= @map.selectAll('path')
+    sel.attr 'd', @path
+
+  componentDidUpdate: (prevProps, prevState)->
+    @updateProjection() if @state.width != prevState.width
 
   componentDidMount: ->
     window.addEventListener 'resize', @setWidth
-    {width,height} = @getSize()
+    {width,height, minScale} = @state
     center = [-75, 33]
-
-    # This makes sure we never zoom out past the globe's extent,
-    # at least using an orthographic projection
-    hypot = Math.sqrt(Math.pow(width,2)+Math.pow(height,2))
-    minScale = hypot/2
 
     @projection = geoOrthographic()
       .rotate([-center[0],-center[1]])
@@ -68,9 +84,9 @@ class ColumnIndexMap extends Component
 
     # https://unpkg.com/world-atlas@1/world/110m.json
     el = findDOMNode(@)
-    map = select(el)
+    @map = select(el)
 
-    bkg = map.select("g.map-backdrop")
+    bkg = @map.select("g.map-backdrop")
 
     # `await` does promises serially for now
     {data} = await get("https://unpkg.com/world-atlas@1/world/50m.json")
@@ -82,24 +98,19 @@ class ColumnIndexMap extends Component
     @path = geoPath()
       .projection(@projection)
 
-    graticule = geoGraticule()
-      .step([10,10])
+    graticule = geoGraticule10()
 
     grat = bkg.selectAppend('path.graticule')
-      .datum(graticule())
-      .attr('d',@path)
+      .datum(graticule)
+      .call @redrawPaths
 
     land = bkg.selectAppend('path.land')
       .datum(land50)
-      .attr('d',@path)
-
-    redraw = =>
-      bkg.selectAll 'path'
-        .attr 'd', @path
+      .call @redrawPaths
 
     updateData = (val)=> =>
       land.datum(val)
-        .attr 'd', @path
+        .call @redrawPaths
 
     sens = 0.08
     dragging = drag()
@@ -112,7 +123,7 @@ class ColumnIndexMap extends Component
       .on "drag", =>
         rotate = @projection.rotate()
         @projection.rotate [event.x * sens, -event.y * sens, rotate[2]]
-        redraw()
+        @redrawPaths()
       .on 'start', updateData(land110)
       .on 'end', updateData(land50)
 
@@ -133,7 +144,7 @@ class ColumnIndexMap extends Component
         return
       return if newScale == currScale
       @projection.scale newScale
-      redraw()
+      @redrawPaths()
 
     zoomBehavior = zoom()
       .scaleExtent extent
@@ -141,10 +152,10 @@ class ColumnIndexMap extends Component
       .on "start", updateData(land110)
       .on "end", updateData(land50)
 
-    map.call dragging
-    map.call zoomBehavior
+    @map.call dragging
+    @map.call zoomBehavior
 
-    @columnContainer = bkg.selectAppend 'g.columns'
+    @columnContainer = @map.selectAppend 'g.columns'
     @getColumns()
 
 
