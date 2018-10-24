@@ -10,13 +10,15 @@ import {zoom} from 'd3-zoom'
 import {get} from 'axios'
 import {feature} from 'topojson'
 
+import {ColumnDataConsumer} from './column-data.coffee'
+
 class ColumnPath extends Component
   render: ->
     h 'path.column'
   componentDidMount: ->
     select(findDOMNode(@)).datum(@props)
 
-class ColumnIndexMap extends Component
+class ColumnIndexMap__ extends Component
   @defaultProps: {
     columns: []
   }
@@ -163,5 +165,9 @@ class ColumnIndexMap extends Component
 
     @map.call dragging
     @map.call zoomBehavior
+
+ColumnIndexMap = =>
+  h ColumnDataConsumer, null, ({columns})->
+    h ColumnIndexMap__, {columns}
 
 export default ColumnIndexMap
