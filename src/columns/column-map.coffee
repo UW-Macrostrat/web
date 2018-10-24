@@ -30,7 +30,8 @@ class ColumnIndexMap extends Component
     return newState
 
   setState: (newState)->
-    super @computeDerivedState(newState)
+    state = @computeDerivedState(newState)
+    super state
 
   render: ->
     {width,height} = @state
@@ -53,9 +54,11 @@ class ColumnIndexMap extends Component
       .appendMany('path.column', columns.features)
       .call @redrawPaths
 
+
   updateProjection: (prevProps, prevState)->
-    {width: prevWidth} = prevState
-    return if @state.width != prevWidth
+    if prevState?
+      {width: prevWidth} = prevState
+      return if @state.width == prevWidth
     {width,height, minScale} = @state
     @projection
       .translate([width / 2, height / 2])
@@ -80,9 +83,7 @@ class ColumnIndexMap extends Component
       .rotate([-center[0],-center[1]])
       .precision(0.2)
       .clipAngle(90)
-      .translate([width / 2, height / 2])
-      .scale minScale
-      .clipExtent([[0,0],[width,height]])
+    @updateProjection()
 
     # https://unpkg.com/world-atlas@1/world/110m.json
     el = findDOMNode(@)
@@ -129,27 +130,19 @@ class ColumnIndexMap extends Component
       .on 'start', updateData(land110)
       .on 'end', updateData(land50)
 
-
-    x = window.innerWidth
-    y = window.innerHeight
-
-    minSize = Math.min(x,y)
-    ratio = window.devicePixelRatio or 1
-
-    extent = [.24*minSize*ratio, 3*minSize*ratio]
-
     zoomed = =>
       {deltaY} = event.sourceEvent
       currScale = @projection.scale()
       newScale = currScale - 2*deltaY
       if newScale < minScale
         return
+      if newScale > minScale * 10
+        return
       return if newScale == currScale
       @projection.scale newScale
       @redrawPaths()
 
     zoomBehavior = zoom()
-      .scaleExtent extent
       .on 'zoom', zoomed
       .on "start", updateData(land110)
       .on "end", updateData(land50)
