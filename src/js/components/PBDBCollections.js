@@ -1,9 +1,7 @@
 import React, { Component } from 'react'
 import Paper from '@material-ui/core/Paper'
-import AppBar from '@material-ui/core/AppBar'
 import Tabs from '@material-ui/core/Tabs'
 import Tab from '@material-ui/core/Tab'
-import Typography from '@material-ui/core/Typography'
 import { makeOccurrenceTree } from '../utils'
 
 class PBDBCollections extends Component {
@@ -27,18 +25,16 @@ class PBDBCollections extends Component {
 
       return (
         <Paper key={idx} classes={{ 'root': 'pbdb-collection-paper' }}>
-
-            <Tabs
-              value={this.state['col' + idx]}
-              onChange={(event, tab) => this.handleChange(event, tab, 'col' + idx)}
-              indicatorColor="primary"
-              textColor="primary"
-              fullWidth
-              >
-              <Tab label="Info"/>
-              <Tab label={`Occurrences (${col.occurrences.length})`} disabled={col.occurrences.length ? false : true}/>
-            </Tabs>
-
+          <Tabs
+            value={this.state['col' + idx]}
+            onChange={(event, tab) => this.handleChange(event, tab, 'col' + idx)}
+            indicatorColor="primary"
+            textColor="primary"
+            fullWidth
+            >
+            <Tab label="Info"/>
+            <Tab label={`Occurrences (${col.occurrences.length})`} disabled={col.occurrences.length ? false : true}/>
+          </Tabs>
           <div className='pbdb-collection-content'>
             {
               this.state['col' + idx] === 0 &&
@@ -147,8 +143,6 @@ class PBDBCollections extends Component {
 
     return (
         <div>
-          <h1 className="infoDrawer-title-no-ellipsis infoDrawer-title-main">Fossil Collections</h1>
-          <p>Via the Paleobiology Database</p>
           { this.props.data && collections }
         </div>
     )
