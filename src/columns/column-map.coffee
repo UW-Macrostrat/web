@@ -32,7 +32,6 @@ class ColumnIndexMap extends Component
   setState: (newState)->
     super @computeDerivedState(newState)
 
-
   render: ->
     {width,height} = @state
     h 'svg#column-index-map', {
@@ -54,7 +53,9 @@ class ColumnIndexMap extends Component
       .appendMany('path.column', columns.features)
       .call @redrawPaths
 
-  updateProjection: ->
+  updateProjection: (prevProps, prevState)->
+    {width: prevWidth} = prevState
+    return if @state.width != prevWidth
     {width,height, minScale} = @state
     @projection
       .translate([width / 2, height / 2])
@@ -63,11 +64,12 @@ class ColumnIndexMap extends Component
     @redrawPaths()
 
   redrawPaths:(sel)=>
+    return unless @map?
     sel ?= @map.selectAll('path')
     sel.attr 'd', @path
 
   componentDidUpdate: (prevProps, prevState)->
-    @updateProjection() if @state.width != prevState.width
+    @updateProjection(prevProps, prevState)
 
   componentDidMount: ->
     window.addEventListener 'resize', @setWidth
