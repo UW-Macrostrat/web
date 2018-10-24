@@ -1,6 +1,6 @@
 import {Component} from 'react'
 import h from 'react-hyperscript'
-import {ColumnDataConsumer} from './column-data'
+import {MacrostratColumnConsumer} from './column-data'
 
 class SelectionPanel extends Component
   render: ->
@@ -19,7 +19,7 @@ class SelectionPanel extends Component
       ]
 
 __ = (props)->
-  h ColumnDataConsumer, null, ({selection, helpers, columnUnitIndex})->
+  h MacrostratColumnConsumer, null, ({selection, helpers, columnUnitIndex})->
     h SelectionPanel, {selection, helpers, columnUnitIndex, props...}
 
 export {__ as SelectionPanel}

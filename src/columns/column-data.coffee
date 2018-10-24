@@ -4,7 +4,7 @@ import h from 'react-hyperscript'
 import {get} from 'axios'
 import update from 'immutability-helper'
 
-ColumnDataContext = createContext({})
+MacrostratColumnContext = createContext({})
 
 class APIManager
   constructor: (@baseURL)->
@@ -17,7 +17,7 @@ class APIManager
 getID = (col)->
   col.properties.col_id
 
-class ColumnDataManager extends Component
+class MacrostratColumnManager extends Component
   API: new APIManager("https://dev.macrostrat.org/api/v2")
   state: {
     hoveredColumn: null,
@@ -63,7 +63,7 @@ class ColumnDataManager extends Component
         getID
       }
     }
-    h ColumnDataContext.Provider, {value, children}
+    h MacrostratColumnContext.Provider, {value, children}
   componentDidMount: ->
     @getColumnData()
   setHoveredColumn: (col)=>
@@ -94,5 +94,5 @@ class ColumnDataManager extends Component
     {columnUnitIndex} = @state
     columnUnitIndex[id] or null
 
-ColumnDataConsumer = ColumnDataContext.Consumer
-export {ColumnDataConsumer, ColumnDataManager}
+MacrostratColumnConsumer = MacrostratColumnContext.Consumer
+export {MacrostratColumnConsumer, MacrostratColumnManager}

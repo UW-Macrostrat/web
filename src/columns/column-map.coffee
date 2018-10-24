@@ -10,7 +10,7 @@ import {zoom} from 'd3-zoom'
 import {get} from 'axios'
 import {feature} from 'topojson'
 import classNames from 'classnames'
-import {ColumnDataConsumer} from './column-data.coffee'
+import {MacrostratColumnConsumer} from './column-data.coffee'
 
 class ColumnPath__ extends Component
   render: ->
@@ -35,7 +35,7 @@ class ColumnPath__ extends Component
         event.stopPropagation()
 
 ColumnPath = (props)=>
-  h ColumnDataConsumer, null, ({actions, hoveredColumn, helpers})->
+  h MacrostratColumnConsumer, null, ({actions, hoveredColumn, helpers})->
     h ColumnPath__, {props...,actions,hoveredColumn,helpers}
 
 class ColumnIndexMap__ extends Component
@@ -187,7 +187,7 @@ class ColumnIndexMap__ extends Component
     @map.call zoomBehavior
 
 ColumnIndexMap = =>
-  h ColumnDataConsumer, null, ({columns})->
+  h MacrostratColumnConsumer, null, ({columns})->
     h ColumnIndexMap__, {columns}
 
 export default ColumnIndexMap
