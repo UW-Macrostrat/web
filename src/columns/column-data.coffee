@@ -17,6 +17,11 @@ class APIManager
     return data
 
 getID = (col)->
+  # This maps column objects to IDs
+  # and transparently passes IDs forward
+  if typeof col =='number'
+    # We were passed the ID
+    return col
   col.properties.col_id
 
 class MacrostratColumnManager extends Component
@@ -29,17 +34,23 @@ class MacrostratColumnManager extends Component
     columns: []
     columnUnitIndex: {}
   }
+
   constructor: (props)->
     super props
     {cookies} = @props
-    __ = cookies.get('selected-columns') or []
-    @state.selection = new Set(__)
+
+    # Create `selection` as a set of IDs, which will
+    # be mapped out to objects when provided
+    selectedIDs = cookies.get('selected-columns') or []
+    @state.selection = new Set(selectedIDs)
+    selectedIDs.map @cacheUnitsForColumn
+
   getColumnData: ->
     data = await @API.get "/columns?format=topojson&all"
     {features: columns} = feature(data, data.objects.output)
     @setState {columns}
 
-  cacheUnitsForColumn: (column)->
+  cacheUnitsForColumn: (column)=>
     id = getID(column)
     {columnUnitIndex} = @state
     return if columnUnitIndex[id]?
@@ -53,8 +64,15 @@ class MacrostratColumnManager extends Component
   render: ->
     {children} = @props
     {toggleSelected, getUnits} = @
+    # We store selected IDs but we provide objects
+    {selection, rest...} = @state
+    selection = @state.columns.filter (col)=>
+      id = getID(col)
+      @state.selection.has(id)
+
     value = {
-      @state...,
+      rest...,
+      selection
       # Could generalize into a `dispatch` function
       # https://dev.to/washingtonsteven/reacts-new-context-api-and-actions-446o
       actions: {
@@ -85,16 +103,19 @@ class MacrostratColumnManager extends Component
     @setState {hoveredColumn: col}
 
   toggleSelected: (col)=>
-    if @isSelected(col)
-      selection = {$remove: [col]}
+    id = getID(col)
+    if @isSelected(id)
+      selection = {$remove: [id]}
     else
-      selection = {$add: [col]}
-      @cacheUnitsForColumn(col)
+      selection = {$add: [id]}
+      @cacheUnitsForColumn(id)
     changeset = {selection}
     newState = update(@state, changeset)
     @setState newState
 
-  isSelected: (col)=>@state.selection.has(col)
+  isSelected: (col)=>
+    id = getID(col)
+    @state.selection.has(id)
 
   helpers: {
     isSame: (col1, col2)->
