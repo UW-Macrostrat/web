@@ -1,7 +1,7 @@
 import {Component} from 'react'
 import {findDOMNode} from 'react-dom'
 import h from 'react-hyperscript'
-import {ResizeSensor} from '@blueprintjs/core'
+import {ResizeSensor, Button} from '@blueprintjs/core'
 import {geoOrthographic, geoGraticule10, geoPath} from 'd3-geo'
 import 'd3-jetpack'
 import {select, event} from 'd3-selection'
@@ -66,16 +66,29 @@ class ColumnIndexMap__ extends Component
     super state
 
   render: ->
-    {columns} = @props
+    {columns, actions, selection} = @props
     {width,height} = @state
-    h SVGComponent, {
-      id: 'column-index-map'
-      width
-      height
-    }, [
-      h 'g.map-backdrop'
-      h 'g.columns', columns.map (column)->
-        h ColumnPath, {column}
+
+    clearSelectionButton = null
+    if selection.length > 0
+      clearSelectionButton = h Button, {
+        className: 'clear-selection'
+        icon: 'graph-remove',
+        onClick: ->actions.clearSelection()
+      }, "Clear selection"
+
+
+    h 'div#column-index-container', [
+      clearSelectionButton
+      h SVGComponent, {
+        id: 'column-index-map'
+        width
+        height
+      }, [
+        h 'g.map-backdrop'
+        h 'g.columns', columns.map (column)->
+          h ColumnPath, {column}
+      ]
     ]
 
   setWidth: =>
@@ -115,7 +128,7 @@ class ColumnIndexMap__ extends Component
 
     # https://unpkg.com/world-atlas@1/world/110m.json
     el = findDOMNode(@)
-    @map = select(el)
+    @map = select(el).select("svg#column-index-map")
 
     bkg = @map.select("g.map-backdrop")
 
@@ -179,7 +192,7 @@ class ColumnIndexMap__ extends Component
     @map.call zoomBehavior
 
 ColumnIndexMap = =>
-  h MacrostratColumnConsumer, null, ({columns})->
-    h ColumnIndexMap__, {columns}
+  h MacrostratColumnConsumer, null, ({columns, actions, selection})->
+    h ColumnIndexMap__, {columns, actions, selection}
 
 export default ColumnIndexMap

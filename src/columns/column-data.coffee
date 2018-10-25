@@ -63,7 +63,7 @@ class MacrostratColumnManager extends Component
 
   render: ->
     {children} = @props
-    {toggleSelected, getUnits} = @
+    {toggleSelected, clearSelection, getUnits} = @
     # We store selected IDs but we provide objects
     {selection, rest...} = @state
     selection = @state.columns.filter (col)=>
@@ -78,6 +78,7 @@ class MacrostratColumnManager extends Component
       actions: {
         setHovered: @setHoveredColumn
         setSelected: @setSelectedColumn
+        clearSelection
         toggleSelected
       }
       helpers: {
@@ -110,6 +111,11 @@ class MacrostratColumnManager extends Component
       selection = {$add: [id]}
       @cacheUnitsForColumn(id)
     changeset = {selection}
+    newState = update(@state, changeset)
+    @setState newState
+
+  clearSelection: =>
+    changeset = {selection: {$set: new Set([])}}
     newState = update(@state, changeset)
     @setState newState
 
