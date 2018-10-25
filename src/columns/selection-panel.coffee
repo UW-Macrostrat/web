@@ -5,21 +5,24 @@ import {sum} from 'd3-array'
 import {ColumnComponent} from 'stratiform'
 import {MacrostratColumnConsumer} from './column-data'
 
-UndefinedThickness = "undefined_thickness"
-
 class ColumnContainer extends Component
-  sectionSurfaces: (section)->
+  @defaultProps: {
+    minUnitHeight: 20
+    maxUnitHeight: 100
+  }
+  sectionSurfaces: (section)=>
     ###
     # Computes surface heights for a gap-bound package
     ###
+    {maxUnitHeight, minUnitHeight} = @props
     units = section.units.map (unit)->
       {min_thick, max_thick} = unit
       thickness = max_thick
-      flags = []
-      if thickness == 0
-        thickness = 10
-        flags.push UndefinedThickness
-      {unit..., flags, thickness}
+      if thickness < minUnitHeight
+        thickness = minUnitHeight
+      if thickness > maxUnitHeight
+        thickness = maxUnitHeight
+      {unit..., thickness}
 
     totalThickness = sum units, (d)->d.thickness
 
