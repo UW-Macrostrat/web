@@ -51,7 +51,8 @@ class InfoDrawer extends Component {
       expanded: null,
       bedrockExpanded: this.props.mapHasBedrock,
       bedrockMatchExpanded: this.props.mapHasBedrock,
-      stratigraphyExpanded: this.props.mapHasColumns
+      stratigraphyExpanded: this.props.mapHasColumns,
+      pbdbExpanded: this.props.mapHasFossils,
     }
 
     this.handleChange = panel => (event, expanded) => {
@@ -76,6 +77,10 @@ class InfoDrawer extends Component {
         //   console.log('get column!')
         //   this.props.getColumn()
         // }
+      } else if (panel === 'pbdb') {
+        this.setState({
+          pbdbExpanded: !this.state.pbdbExpanded
+        })
       }
 
     }
@@ -111,6 +116,7 @@ class InfoDrawer extends Component {
         bedrockExpanded: nextProps.mapHasBedrock,
         bedrockMatchExpanded: nextProps.mapHasBedrock,
         stratigraphyExpanded: nextProps.mapHasColumns,
+        pbdbExpanded: nextProps.mapHasFossils
       })
     }
   }
@@ -119,20 +125,20 @@ class InfoDrawer extends Component {
     const { infoDrawerOpen, closeInfoDrawer, expandInfoDrawer, infoDrawerExpanded } = this.props
     let { mapInfo, gddInfo, pbdbData } = this.props
 
-    const { expanded, bedrockExpanded, bedrockMatchExpanded, stratigraphyExpanded } = this.state
+    const { expanded, bedrockExpanded, bedrockMatchExpanded, stratigraphyExpanded, pbdbExpanded } = this.state
 
-    let expansionPanelClasses = {
+    const expansionPanelClasses = {
       'content': 'expansion-panel',
       'root': 'expansion-panel-root'
     }
-    let expansionPanelDetailClasses = {
+    const expansionPanelDetailClasses = {
       'root': 'expansion-panel-detail'
     }
     const expansionPanelDetailSubClasses = {
       'root': 'expansion-panel-detail-sub'
     }
 
-    let exitTransition = {
+    const exitTransition = {
       exit: 1000
     }
 
@@ -202,14 +208,23 @@ class InfoDrawer extends Component {
                     </IconButton>
                   </div>
                 </div>
-                {
-                  pbdbData && pbdbData.length > 0 ?
-                  <PBDBCollections data={pbdbData}/>
-                  : ''
-                }
+              </Grid>
+            </Grid>
 
-              </Grid>
-              </Grid>
+            {
+              pbdbData && pbdbData.length > 0 ?
+              <span>
+                <ExpansionPanel classes={{ 'root': 'regional-panel'}} onChange={this.collapse('pbdb')} expanded={pbdbExpanded}>
+                  <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} classes={expansionPanelClasses}>
+                    <Typography className="expansion-summary-title">Fossil Collections <span className='via-gdd'>via PBDB</span> </Typography>
+                  </ExpansionPanelSummary>
+                  <ExpansionPanelDetails classes={expansionPanelDetailClasses}>
+                    <PBDBCollections data={pbdbData}/>
+                  </ExpansionPanelDetails>
+                </ExpansionPanel>
+              </span>
+              : ''
+            }
 
 
               {
@@ -568,6 +583,9 @@ class InfoDrawer extends Component {
                       <Typography className="expansion-summary-title">Primary Literature <span className='via-gdd'>via GeoDeepDive</span> </Typography>
                     </ExpansionPanelSummary>
                     <ExpansionPanelDetails classes={expansionPanelDetailSubClasses}>
+                      <div className={this.props.fetchingGdd ? "infoDrawer-loading" : "hidden"}>
+                        <CircularProgress size={50} />
+                      </div>
                       {gddInfo.length ?
                         gddInfo.map(journal => {
                           return <Journal data={journal} key={journal.name}/>

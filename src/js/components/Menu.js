@@ -32,6 +32,9 @@ class Menu extends Component {
     let exitTransition = {
       exit: 300
     }
+    const satelliteButtonClasses = {
+      'root': 'satellite-icon'
+    }
     return (
       <Drawer
         anchor="left"
@@ -42,7 +45,7 @@ class Menu extends Component {
         <div className="menu-content">
           <List>
             <ListItem>
-              <Typography type="headline">
+              <Typography variant="h5">
                 Macrostrat
               </Typography>
               <ListItemSecondaryAction>
@@ -78,7 +81,7 @@ class Menu extends Component {
                 <ListItemText primary="Fossils"/>
               </ListItem>
               <ListItem button onClick={toggleSatellite} style={{ backgroundColor: (mapHasSatellite ? '#eee' : 'transparent') }}>
-                <ListItemIcon>
+                <ListItemIcon classes={satelliteButtonClasses}>
                   <SatelliteIcon />
                 </ListItemIcon>
                 <ListItemText primary="Satellite"/>

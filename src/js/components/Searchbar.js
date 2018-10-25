@@ -43,13 +43,13 @@ class Searchbar extends Component {
   }
 
   gainInputFocus() {
-    console.log('focus')
+  //  console.log('focus')
     this.setState({
       inputFocused: true
     })
   }
   loseInputFocus() {
-    console.log('lose focus')
+  //  console.log('lose focus')
     // A slight timeout is required so that click actions can occur
     setTimeout(() => {
       this.setState({
@@ -119,7 +119,7 @@ class Searchbar extends Component {
                     onChange={this.handleSearchInput}
                     value={this.state.searchTerm}
                   />
-                <IconButton color={this.props.filters.length != 0 ? "accent" : "default"} aria-label="filter" onClick={toggleFilters}>
+                <IconButton color={this.props.filters.length != 0 ? "secondary" : "default"} aria-label="filter" onClick={toggleFilters}>
                     <WarningIcon />
                   </IconButton>
               </Toolbar>

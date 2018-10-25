@@ -21,10 +21,10 @@ class About extends Component {
           <DialogTitle id="responsive-dialog-title">{"Macrostrat Geologic Map"}</DialogTitle>
           <DialogContent>
             <DialogContentText>
-              <h3>About</h3>
-              Macrostrat's geologic map is a seamless integration of over 190 geologic maps from around the world and at numerous scales that have been homogenized into a single database. As you zoom in and out of the map, scale-appropriate geologic maps are shown, and clicking on the map reveals primary data about each unit.
+              <span className="about-title">About</span>
+              Macrostrat's geologic map is a seamless integration of over 200 geologic maps from around the world and at numerous scales that have been homogenized into a single database. As you zoom in and out of the map, scale-appropriate geologic maps are shown, and clicking on the map reveals primary data about each unit.
 
-              <h3>Credits</h3>
+              <span className="about-title">Credits</span>
               <span className="about-section">
                 Basemap <a className="ref-link" href="https://www.mapbox.com/about/maps/" target="_blank">© Mapbox</a> <a className="ref-link" href="http://www.openstreetmap.org/about/" target="_blank">© OpenStreetMap</a>
               </span>
@@ -64,5 +64,5 @@ class About extends Component {
     )
   }
 }
-//export default withMobileDialog()(About)
+
 export default About
