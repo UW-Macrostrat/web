@@ -11,6 +11,7 @@ import {get} from 'axios'
 import {feature} from 'topojson'
 import classNames from 'classnames'
 import {MacrostratColumnConsumer} from './column-data.coffee'
+import {SVGComponent} from 'stratiform'
 
 class ColumnPath__ extends Component
   render: ->
@@ -67,8 +68,8 @@ class ColumnIndexMap__ extends Component
   render: ->
     {columns} = @props
     {width,height} = @state
-    h 'svg#column-index-map', {
-      xmlns: "http://www.w3.org/2000/svg"
+    h SVGComponent, {
+      id: 'column-index-map'
       width
       height
     }, [
@@ -79,15 +80,6 @@ class ColumnIndexMap__ extends Component
 
   setWidth: =>
     @setState {width: window.innerWidth}
-
-  getColumns: =>
-    {data: {success: {data}}} = await get "https://dev.macrostrat.org/api/v2/columns?format=topojson&all"
-    columns = feature(data, data.objects.output)
-    console.log columns
-    sel = @columnContainer
-      .appendMany('path.column', columns.features)
-      .call @redrawPaths
-
 
   updateProjection: (prevProps, prevState)->
     if prevState?

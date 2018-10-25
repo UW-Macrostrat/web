@@ -12,6 +12,8 @@ class HoveredColumnLegend extends Component
     if not empty
       text = hoveredColumn.properties.col_name
     h 'h4', {className}, text
+
+# Wrap in context
 HC = (props)->
   h MacrostratColumnConsumer, null, ({hoveredColumn})->
     h HoveredColumnLegend, {hoveredColumn, props...}

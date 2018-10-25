@@ -37,7 +37,6 @@ class MacrostratColumnManager extends Component
     {columnUnitIndex} = @state
     return if columnUnitIndex[id]?
     data = await @API.get "/units?col_id=#{id}&response=long"
-    console.log data
     c = {}
     c[id] = {$set: data}
     changeset = {columnUnitIndex: c}
