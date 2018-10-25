@@ -1,11 +1,17 @@
-import {get} from 'axios'
 import React, {Component} from 'react'
 
+import {Route} from 'react-router'
 import {MacrostratColumnManager} from './column-data'
 import ColumnIndexMap from './column-map'
 import {HoveredColumnLegend} from './legend'
 import {SelectionPanel} from './selection-panel'
 import './main.styl'
+
+###
+# TODO:
+# - Cookies for settings
+# - Routing for selected sections
+###
 
 class ColumnPage extends Component
   render: ->
