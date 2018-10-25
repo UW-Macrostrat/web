@@ -1,7 +1,9 @@
 import {Component, createContext} from 'react'
 import {feature} from 'topojson'
 import h from 'react-hyperscript'
+import {withCookies, Cookies} from 'react-cookie'
 import {get} from 'axios'
+import {instanceOf} from 'prop-types'
 import update from 'immutability-helper'
 
 MacrostratColumnContext = createContext({})
@@ -19,14 +21,19 @@ getID = (col)->
 
 class MacrostratColumnManager extends Component
   API: new APIManager("https://dev.macrostrat.org/api/v2")
+  @propTypes: {
+    cookies: instanceOf(Cookies).isRequired
+  }
   state: {
     hoveredColumn: null,
     columns: []
-    selection: new Set([])
     columnUnitIndex: {}
   }
   constructor: (props)->
     super props
+    {cookies} = @props
+    __ = cookies.get('selected-columns') or []
+    @state.selection = new Set(__)
   getColumnData: ->
     data = await @API.get "/columns?format=topojson&all"
     {features: columns} = feature(data, data.objects.output)
@@ -65,6 +72,15 @@ class MacrostratColumnManager extends Component
     h MacrostratColumnContext.Provider, {value, children}
   componentDidMount: ->
     @getColumnData()
+
+  componentDidUpdate: (prevProps, prevState)->
+    # Update cookie for selection
+    {cookies} = @props
+    {selection} = @state
+    {selection: oldSelection} = prevState
+    if selection != oldSelection
+      cookies.set('selected-columns',selection)
+
   setHoveredColumn: (col)=>
     @setState {hoveredColumn: col}
 
@@ -92,6 +108,9 @@ class MacrostratColumnManager extends Component
     id = getID(col)
     {columnUnitIndex} = @state
     columnUnitIndex[id] or null
+
+# Wrap column manager for cookie access
+MacrostratColumnManager = withCookies(MacrostratColumnManager)
 
 MacrostratColumnConsumer = MacrostratColumnContext.Consumer
 export {MacrostratColumnConsumer, MacrostratColumnManager}
