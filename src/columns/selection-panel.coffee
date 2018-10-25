@@ -2,6 +2,7 @@ import {Component} from 'react'
 import h from 'react-hyperscript'
 import {nest} from 'd3-collection'
 import {sum} from 'd3-array'
+import {NonIdealState} from '@blueprintjs/core'
 import {ColumnComponent} from 'stratiform'
 import {MacrostratColumnConsumer} from './column-data'
 
@@ -61,6 +62,15 @@ class ColumnContainer extends Component
 
         h 'div.unit', {style, onMouseOver}, unit_name
 
+class EmptyColumnPanel extends Component
+  render: ->
+    h NonIdealState, {
+      title: "No columns selected"
+      icon: 'square'
+      className: 'selected-columns-empty'
+      description: "Select some columns on the map to get started"
+    }
+
 class SelectionPanel extends Component
   renderColumn: (col)=>
     {helpers, columnUnitIndex} = @props
@@ -77,6 +87,9 @@ class SelectionPanel extends Component
   render: ->
     {selection} = @props
     sel = [selection...] # Sets cannot be mapped over
+    if sel.length == 0
+      return h EmptyColumnPanel
+
     h 'div.selected-columns', null, sel.map @renderColumn
 
 __ = (props)->
