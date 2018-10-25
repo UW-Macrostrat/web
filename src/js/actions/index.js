@@ -667,7 +667,6 @@ export function receivedPbdbQuery(data) {
 
 
 export function mapMoved(data) {
-//  dispatch(closeInfoDrawer())
   return {
     type: MAP_MOVED,
     data: data

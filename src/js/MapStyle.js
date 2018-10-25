@@ -27,6 +27,13 @@ export const mapStyle = {
             "features": []
           }
         },
+        "pbdb-clusters": {
+          "type": "geojson",
+          "data": {
+            "type": "FeatureCollection",
+            "features": []
+          }
+        },
         "info_marker": {
           "type": "geojson",
           "data": {
@@ -930,6 +937,11 @@ export const mapStyle = {
           "source": "pbdb-points",
           "filter": ["has", "point_count"],
           "paint": {
+            "circle-opacity": [
+              "interpolate", ["linear"], ["zoom"],
+              5, 0.8,
+              10, 1,
+            ],
             "circle-color": [
               "step",
               ["get", "point_count"],
@@ -958,7 +970,8 @@ export const mapStyle = {
           "layout": {
             "text-field": "{point_count_abbreviated}",
             "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
-            "text-size": 12
+            "text-size": 12,
+            "icon-allow-overlap": true,
           }
         },
         {
@@ -972,7 +985,34 @@ export const mapStyle = {
             "circle-stroke-width": 1,
             "circle-stroke-color": "#fff"
           }
-        }
+        },
+        {
+          "id": "pbdb-clusters",
+          "type": "circle",
+          "source": "pbdb-clusters",
+          "paint": {
+            "circle-opacity": [
+              "interpolate", ["linear"], ["zoom"],
+              0, 0.6,
+              6, 1,
+            ],
+            "circle-color": [
+              "step",
+              ["get", "nco"],
+              "#bdd7e7",
+              100,
+              "#6baed6",
+              1000,
+              "#2171b5"
+            ],
+            "circle-radius": [
+              "interpolate", ["linear"], ["zoom"],
+              0, ["interpolate", ["linear"], ["get", "nco"], 0, 0, 1, 2, 1200, 12],
+              3, ["interpolate", ["linear"], ["get", "nco"], 0, 0, 1, 3, 400, 15],
+              6, ["interpolate", ["linear"], ["get", "nco"], 0, 0, 1, 8, 400, 40],
+            ]
+          }
+        },
 
     ]
 }
