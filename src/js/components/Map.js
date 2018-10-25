@@ -3,8 +3,12 @@ import { SETTINGS } from '../Settings'
 import { mapStyle } from '../MapStyle'
 import { normalizeLng } from '../utils'
 
-const maxClusterZoom = 5
-
+const maxClusterZoom = 6
+const highlightLayers = [
+  {'layer': 'pbdb-points', 'source': 'pbdb-points'},
+  {'layer': 'pbdb-points-clustered', 'source': 'pbdb-points'},
+  {'layer': 'pbdb-clusters', 'source': 'pbdb-clusters'},
+]
 class Map extends Component {
   constructor(props) {
     super(props)
@@ -51,6 +55,14 @@ class Map extends Component {
 
     // We need to store these for cluster querying...
     this.pbdbPoints = {}
+
+    // Keep track of unique ids for interaction states
+    this.hoverStates = {
+
+    }
+    this.selectedStates = {
+
+    }
   }
 
   componentDidMount() {
@@ -60,7 +72,7 @@ class Map extends Component {
         style: this.props.mapHasSatellite ? SETTINGS.satelliteMapURL : SETTINGS.baseMapURL,
         center: [this.props.mapXYZ.x, this.props.mapXYZ.y],
         zoom: this.props.mapXYZ.z,
-        maxZoom: 16,
+        maxZoom: 14,
         maxTileCacheSize: 0,
         logoPosition: 'bottom-right',
     })
@@ -92,6 +104,10 @@ class Map extends Component {
 
       // The initial draw of the layers
       mapStyle.layers.forEach(layer => {
+        // Populate the objects that track interaction states
+        this.hoverStates[layer.id] = null
+        this.selectedStates[layer.id] = null
+
         if (layer.source === 'columns' || layer.source === 'info_marker') {
           this.map.addLayer(layer)
         } else {
@@ -124,6 +140,25 @@ class Map extends Component {
       }, 1)
     })
 
+    highlightLayers.forEach(layer => {
+      this.map.on('mousemove', layer.layer, (evt) => {
+        if (evt.features) {
+          if (this.hoverStates[layer.layer]) {
+            this.map.setFeatureState({source: layer.source, id: this.hoverStates[layer.layer]}, { hover: false})
+          }
+          this.hoverStates[layer.layer] = evt.features[0].id
+          this.map.setFeatureState({source: layer.source, id: evt.features[0].id}, { hover: true})
+        }
+      })
+
+      this.map.on('mouseleave', layer.layer, (evt) => {
+        if (this.hoverStates[layer.layer]) {
+          this.map.setFeatureState({source: layer.source, id: this.hoverStates[layer.layer]}, { hover: false})
+        }
+        this.hoverStates[layer.layer] =  null
+      })
+    })
+
     // Hide the infoMarker when the map moves
     this.map.on('movestart', () => {
       if (this.panning) {
@@ -137,6 +172,7 @@ class Map extends Component {
         this.props.closeInfoDrawer()
       }
     })
+
 
     this.map.on('click', (event) => {
       // If the elevation drawer is open and we are awaiting to points, add them
@@ -172,14 +208,17 @@ class Map extends Component {
 
       // If we are viewing fossils, prioritize clicks on those
       if (this.props.mapHasFossils) {
-        let collections = this.map.queryRenderedFeatures(event.point, { layers: ['pbdbCollections','pbdb-points-clustered', 'pbdb-points']})
-
+        let collections = this.map.queryRenderedFeatures(event.point, { layers: ['pbdb-points-clustered', 'pbdb-points', 'pbdb-clusters']})
         // Clicked on a hex grid
         if (collections.length && collections[0].properties.hasOwnProperty('hex_id')) {
           this.map.zoomTo(this.map.getZoom() + 1, { center: event.lngLat })
           return
 
-        // Clicked on a cluster
+        // Clicked on a summary cluster
+      } else if (collections.length && collections[0].properties.hasOwnProperty('oid') && collections[0].properties.oid.split(':')[0] === 'clu') {
+          this.map.zoomTo(this.map.getZoom() + 2, { center: event.lngLat })
+          return
+        // Clicked on a real cluster of collections
         } else if (collections.length && collections[0].properties.hasOwnProperty('cluster')) {
           // via https://jsfiddle.net/aznkw784/
           let pointsInCluster = this.pbdbPoints.features.filter(f => {
@@ -197,7 +236,7 @@ class Map extends Component {
         // Clicked on an unclustered point
         } else if (collections.length && collections[0].properties.hasOwnProperty('oid')) {
           this.props.getPBDB(collections.map(col => { return col.properties.oid.replace('col:', '') }))
-          return
+      //    return
         } else {
           // Otherwise make sure that old fossil collections aren't visible
           this.props.resetPbdb()
@@ -333,7 +372,6 @@ class Map extends Component {
           }]
         })
       }
-
     }
     // Watch the state of the application and adjust the map accordingly
     if (!nextProps.elevationChartOpen && this.props.elevationChartOpen && this.map) {
@@ -443,6 +481,7 @@ class Map extends Component {
 
     // Fossils
     } else if (nextProps.mapHasFossils != this.props.mapHasFossils) {
+      // Add fossils
       if (nextProps.mapHasFossils && !this.props.mapHasFossils) {
         mapStyle.layers.forEach(layer => {
           if (layer.source === 'pbdb' || layer.source === 'pbdb-points' || layer.source === 'pbdb-clusters') {
@@ -451,6 +490,7 @@ class Map extends Component {
         })
         // Force a hit to the API to refresh
         this.refreshPBDB()
+      // Remove fossils
       } else {
         mapStyle.layers.forEach(layer => {
           if (layer.source === 'pbdb' || layer.source === 'pbdb-points' || layer.source === 'pbdb-clusters') {
@@ -737,10 +777,11 @@ class Map extends Component {
 
         this.pbdbPoints = {
           "type": "FeatureCollection",
-          "features": data.map(f => {
+          "features": data.map((f, i) => {
             return {
               "type": "Feature",
               "properties": f,
+              "id": i,
               "geometry": {
                 "type": "Point",
                 "coordinates": [f.lng, f.lat]
@@ -748,11 +789,12 @@ class Map extends Component {
             }
           })
         }
+        // Show or hide the proper PBDB layers
         if (zoom < maxClusterZoom) {
           this.map.getSource('pbdb-clusters').setData(this.pbdbPoints)
           this.map.setLayoutProperty('pbdb-clusters', 'visibility', 'visible')
           this.map.setLayoutProperty('pbdb-points-clustered', 'visibility', 'none')
-          this.map.setLayoutProperty('pbdb-point-cluster-count', 'visibility', 'none')
+        //  this.map.setLayoutProperty('pbdb-point-cluster-count', 'visibility', 'none')
           this.map.setLayoutProperty('pbdb-points', 'visibility', 'none')
         } else {
           this.map.getSource('pbdb-points').setData(this.pbdbPoints)
@@ -760,8 +802,10 @@ class Map extends Component {
           this.map.getSource('pbdb-clusters').setData(this.pbdbPoints)
           this.map.setLayoutProperty('pbdb-clusters', 'visibility', 'none')
           this.map.setLayoutProperty('pbdb-points-clustered', 'visibility', 'visible')
-          this.map.setLayoutProperty('pbdb-point-cluster-count', 'visibility', 'visible')
+      //    this.map.setLayoutProperty('pbdb-point-cluster-count', 'visibility', 'visible')
           this.map.setLayoutProperty('pbdb-points', 'visibility', 'visible')
+
+
         }
 
       })

@@ -10,14 +10,14 @@ export const mapStyle = {
             ],
             "tileSize": 512
         },
-        "pbdb": {
-            "type": "vector",
-            "tiles": [
-              `${SETTINGS.burwellTileDomain}/hexgrid/{z}/{x}/{y}.mvt`
-            ],
-            "tileSize": 512,
-            "maxzoom": 6,
-        },
+        // "pbdb": {
+        //     "type": "vector",
+        //     "tiles": [
+        //       `${SETTINGS.burwellTileDomain}/hexgrid/{z}/{x}/{y}.mvt`
+        //     ],
+        //     "tileSize": 512,
+        //     "maxzoom": 6,
+        // },
         "pbdb-points": {
           "type": "geojson",
           "cluster": true,
@@ -29,6 +29,7 @@ export const mapStyle = {
         },
         "pbdb-clusters": {
           "type": "geojson",
+          "generateId": true,
           "data": {
             "type": "FeatureCollection",
             "features": []
@@ -49,10 +50,12 @@ export const mapStyle = {
         },
         "columns": {
           "type": "geojson",
+          "generateId": true,
           "data": `${SETTINGS.apiDomain}/api/v2/columns?all&format=geojson_bare`
         },
         "filteredColumns": {
           "type": "geojson",
+          "generateId": true,
           "data": {
             "type": "FeatureCollection",
             "features": []
@@ -901,36 +904,36 @@ export const mapStyle = {
             "circle-stroke-color": "#dcdcdc",
           }
         },
-        {
-          "id": "pbdbCollections",
-          "type": "fill",
-          "source": "pbdb",
-          "source-layer": "hexgrid",
-          "layout": {
-            "visibility": "none"
-          },
-          "paint": {
-            "fill-color": ['feature-state', 'color'],
-            "fill-color": [
-              'case',
-              ['==', ['feature-state', 'color'], null],
-              'rgb(255,255,255)',
-              ['feature-state', 'color']
-            ],
-            "fill-opacity": [
-              'case',
-              ['==', ['feature-state', 'color'], null],
-              0,
-              0.7
-            ],
-            "fill-outline-color": [
-              'case',
-              ['==', ['feature-state', 'color'], null],
-              'rgb(255,255,255)',
-              ['feature-state', 'color']
-            ],
-          }
-        },
+        // {
+        //   "id": "pbdbCollections",
+        //   "type": "fill",
+        //   "source": "pbdb",
+        //   "source-layer": "hexgrid",
+        //   "layout": {
+        //     "visibility": "none"
+        //   },
+        //   "paint": {
+        //     "fill-color": ['feature-state', 'color'],
+        //     "fill-color": [
+        //       'case',
+        //       ['==', ['feature-state', 'color'], null],
+        //       'rgb(255,255,255)',
+        //       ['feature-state', 'color']
+        //     ],
+        //     "fill-opacity": [
+        //       'case',
+        //       ['==', ['feature-state', 'color'], null],
+        //       0,
+        //       0.7
+        //     ],
+        //     "fill-outline-color": [
+        //       'case',
+        //       ['==', ['feature-state', 'color'], null],
+        //       'rgb(255,255,255)',
+        //       ['feature-state', 'color']
+        //     ],
+        //   }
+        // },
         {
           "id": "pbdb-points-clustered",
           "type": "circle",
@@ -943,13 +946,18 @@ export const mapStyle = {
               10, 1,
             ],
             "circle-color": [
-              "step",
-              ["get", "point_count"],
-              "#bdd7e7",
-              20,
-              "#6baed6",
-              50,
-              "#2171b5"
+              "case",
+              ["boolean", ["feature-state", "hover"], false],
+              "#154974",
+              [
+                "step",
+                ["get", "point_count"],
+                "#bdd7e7",
+                20,
+                "#6baed6",
+                50,
+                "#2171b5"
+              ]
             ],
             "circle-radius": [
               "step",
@@ -959,31 +967,52 @@ export const mapStyle = {
               30,
               50,
               40
-            ]
+            ],
+            "circle-stroke-width": [
+              "case",
+              ["boolean", ["feature-state", "hover"], false],
+              2,
+              0,
+            ],
+            "circle-stroke-color": "#fff",
           }
         },
-        {
-          "id": "pbdb-point-cluster-count",
-          "type": "symbol",
-          "source": "pbdb-points",
-          "filter": ["has", "point_count"],
-          "layout": {
-            "text-field": "{point_count_abbreviated}",
-            "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
-            "text-size": 12,
-            "icon-allow-overlap": true,
-          }
-        },
+        // {
+        //   "id": "pbdb-point-cluster-count",
+        //   "type": "symbol",
+        //   "source": "pbdb-points",
+        //   "filter": ["has", "point_count"],
+        //   "layout": {
+        //     "text-field": "{point_count_abbreviated}",
+        //     "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+        //     "text-size": 12,
+        //     "icon-allow-overlap": true,
+        //   }
+        // },
         {
           "id": "pbdb-points",
           "type": "circle",
           "source": "pbdb-points",
           "filter": ["!", ["has", "point_count"]],
           "paint": {
-            "circle-color": "#2171b5",
-            "circle-radius": 8,
-            "circle-stroke-width": 1,
-            "circle-stroke-color": "#fff"
+            "circle-color": [
+              "case",
+              ["boolean", ["feature-state", "hover"], false],
+              "#154974",
+              "#2171b5"
+            ],
+            "circle-radius": [
+              "interpolate", ["linear"], ["zoom"],
+              7, 8,
+              16, 20,
+            ],
+            "circle-stroke-width": [
+              "case",
+              ["boolean", ["feature-state", "hover"], false],
+              2,
+              1,
+            ],
+            "circle-stroke-color": "#ffffff",
           }
         },
         {
@@ -997,20 +1026,31 @@ export const mapStyle = {
               6, 1,
             ],
             "circle-color": [
-              "step",
-              ["get", "nco"],
-              "#bdd7e7",
-              100,
-              "#6baed6",
-              1000,
-              "#2171b5"
+              "case",
+              ["boolean", ["feature-state", "hover"], false],
+              "#154974",
+              ["step",
+                ["get", "noc"],
+                "#bdd7e7",
+                100,
+                "#6baed6",
+                1000,
+                "#2171b5"
+              ]
             ],
             "circle-radius": [
               "interpolate", ["linear"], ["zoom"],
               0, ["interpolate", ["linear"], ["get", "nco"], 0, 0, 1, 2, 1200, 12],
-              3, ["interpolate", ["linear"], ["get", "nco"], 0, 0, 1, 3, 400, 15],
-              6, ["interpolate", ["linear"], ["get", "nco"], 0, 0, 1, 8, 400, 40],
-            ]
+              3, ["interpolate", ["linear"], ["get", "nco"], 0, 0, 1, 4, 400, 18],
+              6, ["interpolate", ["linear"], ["get", "nco"], 0, 0, 1, 10, 400, 50],
+            ],
+            "circle-stroke-width": [
+              "case",
+              ["boolean", ["feature-state", "hover"], false],
+              2,
+              0,
+            ],
+            "circle-stroke-color": "#fff",
           }
         },
 
