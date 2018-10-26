@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import {Icon, IconNames, Card as UICard,
+import {Icon, IconNames, Card,
         Alignment, Navbar,
         Button, Overlay, Dialog, Classes} from '@blueprintjs/core'
 
@@ -9,7 +9,6 @@ import TableBody from '@material-ui/core/TableBody'
 import TableCell from '@material-ui/core/TableCell'
 import TableHead from '@material-ui/core/TableHead'
 import TableRow from '@material-ui/core/TableRow'
-import Card, { CardContent } from '@material-ui/core/Card'
 
 // Icons
 import CloseIcon from '@material-ui/icons/Close'
@@ -174,7 +173,7 @@ class InfoDrawer extends Component {
 
     return (
       <div className="infodrawer-container">
-        <UICard className="infodrawer">
+        <Card className="infodrawer">
           <header>
             <div>
               <Icon icon="map-marker" />
@@ -576,7 +575,7 @@ class InfoDrawer extends Component {
             }
           </div>
         </div>
-      </UICard>
+      </Card>
     </div>
     )
   }

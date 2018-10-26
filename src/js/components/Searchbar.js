@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import {Collapse, Navbar, Alignment,
-        Button, Intent, InputGroup} from '@blueprintjs/core'
+        Button, Intent, InputGroup, Card} from '@blueprintjs/core'
 import h from 'react-hyperscript'
 import classNames from 'classnames'
 
@@ -55,7 +55,7 @@ class Searchbar extends Component {
     }
     this.props.doSearch(event.target.value)
   }
-  addFilter(f) {d
+  addFilter(f) {
     this.setState({
       searchTerm: ''
     })
@@ -114,7 +114,7 @@ class Searchbar extends Component {
           </Navbar.Group>
           <Navbar.Group align={Alignment.RIGHT}>
              <InputGroup
-                large
+                large={true}
                 leftIcon="search"
                 onChange={this.handleSearchInput}
                 onFocus={this.gainInputFocus}
@@ -124,8 +124,8 @@ class Searchbar extends Component {
                 value={this.state.searchTerm} />
           </Navbar.Group>
         </Navbar>
-        <Collapse isOpen={this.state.inputFocused}>
-          <div className={classNames({hidden: this.state.searchTerm.length != 0}, 'search-results')}>
+        <Collapse isOpen={this.state.inputFocused} className="search-results-container">
+          <Card className={classNames({hidden: this.state.searchTerm.length != 0}, 'search-guidance')}>
             <h5>Available categories:</h5>
             <ul>
               <li>Time intervals</li>
@@ -134,12 +134,12 @@ class Searchbar extends Component {
               <li>Environments (columns only)</li>
               <li>Places</li>
             </ul>
-          </div>
-          <div className={searchResultClasses}>
+          </Card>
+          <Card className={searchResultClasses}>
             {this.props.searchResults && this.props.searchResults.length ?
               searchResults
               : '' }
-          </div>
+          </Card>
         </Collapse>
       </div>
     )

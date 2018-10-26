@@ -1,6 +1,38 @@
 .searchbar-holder
   max-width 30em
   transition margin 300ms
+  max-height 90vh
+  display flex
+  flex-direction column
   .searchbar
     background-color #fff
     border-radius 3px
+    margin-bottom 0.5em
+  .search-results-container
+    flex-shrink 1
+    .bp3-card
+      overflow-y scroll
+    ul
+      padding-left 0
+      list-style-type none
+  .search-guidance
+    ul
+      li
+        position relative
+        padding-left 1.2em
+        &:before
+          content: '–'
+          position: absolute
+          left: 0
+
+  .search-results
+    li
+      padding: 0.2em 20px
+      cursor pointer
+      &:first-child
+        border-top 1px solid #ddd
+      border-bottom 1px solid #ddd
+      &:hover
+        background-color: #eee
+    ul
+      margin: 0 -20px
