@@ -544,7 +544,7 @@ class InfoDrawer extends Component {
                 <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} classes={expansionPanelClasses}>
                   <Typography className="expansion-summary-title">Physiography </Typography>
                 </ExpansionPanelSummary>
-                <ExpansionPanelDetails classes={expansionPanelDetailSubClasses}>
+                <ExpansionPanelDetails>
                   {mapInfo.regions.map((region, i) => {
                     return (
                       <div className='region' key={i}>

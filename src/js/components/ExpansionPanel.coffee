@@ -17,9 +17,15 @@ class ExpansionPanelDetails extends Component
 class ExpansionPanel extends Component
   constructor: (props)->
     super props
+    if not onChange?
+      managed = false
+      @state = {expanded: props.expanded or false}
 
   render: ->
     {onChange, title, children, expanded} = @props
+    if not onChange?
+      expanded = @state.expanded
+      onChange = => @setState {expanded: not expanded}
 
     newChildren = []
     for c in children
