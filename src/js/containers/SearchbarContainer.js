@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import { toggleMenu, toggleFilters, doSearch, addFilter } from '../actions'
+import { toggleMenu, toggleFilters, doSearch, addFilter, removeFilter } from '../actions'
 import Searchbar from '../components/Searchbar'
 
 const mapStateToProps = (state) => {
@@ -23,7 +23,10 @@ const mapDispatchToProps = (dispatch) => {
     },
     addFilter: (f) => {
       dispatch(addFilter(f))
-    }
+    },
+    removeFilter: (f) => {
+      dispatch(removeFilter(f))
+    },
   }
 }
 

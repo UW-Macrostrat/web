@@ -5,12 +5,18 @@ import Toolbar from '@material-ui/core/Toolbar'
 import IconButton from '@material-ui/core/IconButton'
 import MenuIcon from '@material-ui/icons/Menu'
 import WarningIcon from '@material-ui/icons/Warning'
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import Paper from '@material-ui/core/Paper'
 import List from '@material-ui/core/List'
 import ListSubheader from '@material-ui/core/ListSubheader'
 import ListItem from '@material-ui/core/ListItem'
 import ListItemText from '@material-ui/core/ListItemText'
 import ListItemIcon from '@material-ui/core/ListItemIcon'
+import ExpansionPanel from '@material-ui/core/ExpansionPanel'
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails'
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary'
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction'
+import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline'
 
 import Collapse from '@material-ui/core/Collapse'
 
@@ -101,6 +107,48 @@ class Searchbar extends Component {
       margin: ((window.innerWidth < 850) && this.state.inputFocused) ? 0 : '20px'
     }
 
+    let timeFilters = this.props.filters.filter(f => {
+      if (f.category === 'interval') return f
+    }).map(f => f.name)
+
+    const otherFilters = this.props.filters.filter(f => {
+      if (f.category !== 'interval') return f
+    })
+    const filters = (this.props.filters.length) ? (
+      <Paper>
+        <ExpansionPanel>
+          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} classes={{ 'root': 'searchbar-filter-container'}}>
+            <span className="searchbar-filter-title">Filtering by:</span>
+            <div className="filters">
+              {otherFilters.length && timeFilters.length > 1 ? '(' : ''}
+              {timeFilters.length ? timeFilters.join(' OR ') : ''}
+              {otherFilters.length && timeFilters.length > 1 ? ')' : ''}
+
+              {otherFilters.length && timeFilters.length ? ' AND ' : ''}
+
+              {otherFilters.map(f => f.name).join(' AND ')}
+            </div>
+          </ExpansionPanelSummary>
+          <ExpansionPanelDetails>
+            <List classes={{ 'root': 'filter-list'}}>
+              <ListSubheader classes={{ 'root': 'searchresult-header'}}>Modify filters:</ListSubheader>
+              {this.props.filters.map((d,i) => {
+                return (<ListItem key={i}>
+                  <ListItemText primary={d.name}/>
+                  <ListItemSecondaryAction onClick={() => { this.props.removeFilter(d) }}>
+                    <IconButton color="secondary" aria-label="remove" >
+                      <RemoveCircleOutlineIcon/>
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                </ListItem>)
+              })}
+            </List>
+          </ExpansionPanelDetails>
+        </ExpansionPanel>
+
+      </Paper>
+    ) : ''
+
     return (
       <div className="searchbar-holder" style={holderStyle}>
         <Grid container>
@@ -119,9 +167,6 @@ class Searchbar extends Component {
                     onChange={this.handleSearchInput}
                     value={this.state.searchTerm}
                   />
-                <IconButton color={this.props.filters.length != 0 ? "secondary" : "default"} aria-label="filter" onClick={toggleFilters}>
-                    <WarningIcon />
-                  </IconButton>
               </Toolbar>
               <Collapse in={this.state.inputFocused} timeout="auto" unmountOnExit className="search-results">
                 <div>
@@ -154,6 +199,7 @@ class Searchbar extends Component {
                 </div>
               </Collapse>
             </Paper>
+            { filters }
           </Grid>
         </Grid>
 
