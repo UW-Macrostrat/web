@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import AnimateHeight from 'react-animate-height'
-import Drawer from '@material-ui/core/Drawer'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
 import ListItemText from '@material-ui/core/ListItemText'
@@ -9,9 +8,6 @@ import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction'
 import Divider from '@material-ui/core/Divider'
 import Collapse from '@material-ui/core/Collapse'
 import Grid from '@material-ui/core/Grid'
-import ExpansionPanel from '@material-ui/core/ExpansionPanel'
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails'
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary'
 import {Icon, IconNames, Card as UICard,
         Alignment, Navbar,
         Button, Overlay, Dialog, Classes} from '@blueprintjs/core'
@@ -43,6 +39,7 @@ import LongText from './LongText'
 import PBDBCollections from './PBDBCollections'
 import Journal from './gdd/Journal'
 
+import {ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails} from './ExpansionPanel'
 import { addCommas, normalizeLng } from '../utils'
 
 class InfoDrawer extends Component {
@@ -192,15 +189,12 @@ class InfoDrawer extends Component {
             </div>
             <Button minimal icon="cross" onClick={closeInfoDrawer} />
           </header>
-        <div>
+          <div>
+
           <div className={this.props.fetchingMapInfo ? "infoDrawer-loading" : "hidden"}>
             <CircularProgress size={50} />
           </div>
           <div className={this.props.fetchingMapInfo ? "hidden" : "d"}>
-          <Grid container alignItems="center" alignContent="center">
-            <Grid item xs={12} classes={{ 'grid-xs-12': 'infodrawer-header-grid'}}>
-            </Grid>
-          </Grid>
 
           {
             pbdbData && pbdbData.length > 0 ?
