@@ -5,6 +5,7 @@ import {
   Redirect
 } from 'react-router-dom'
 
+import '../../styles/index.styl'
 import MapPage from './MapPage'
 import ColumnPage from '../../columns'
 

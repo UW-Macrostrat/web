@@ -111,40 +111,38 @@ class Searchbar extends Component {
 
     return (
       <div className="searchbar-holder" style={holderStyle}>
-        <div className="searchbar">
-          <Navbar className="searchbar-background">
-            <Navbar.Group align={Alignment.LEFT}>
-              <Button icon="layers"
-                      aria-label="Layers" onClick={toggleMenu} />
-              <InputGroup
-                  large
-                  leftIcon="search"
-                  onChange={this.handleSearchInput}
-                  onFocus={this.gainInputFocus}
-                  onBlur={this.loseInputFocus}
-                  placeholder="Search Macrostrat"
-                  rightElement={filterButton}
-                  value={this.state.searchTerm} />
-            </Navbar.Group>
-          </Navbar>
-          <Collapse isOpen={this.state.inputFocused}>
-            <div className={classNames({hidden: this.state.searchTerm.length != 0}, 'search-results')}>
-              <h5>Available categories:</h5>
-              <ul>
-                <li>Time intervals</li>
-                <li>Lithologies</li>
-                <li>Stratigraphic Names</li>
-                <li>Environments (columns only)</li>
-                <li>Places</li>
-              </ul>
-            </div>
-            <div className={searchResultClasses}>
-              {this.props.searchResults && this.props.searchResults.length ?
-                searchResults
-                : '' }
-            </div>
-          </Collapse>
-        </div>
+        <Navbar className="searchbar">
+          <Navbar.Group align={Alignment.LEFT}>
+            <Button icon="layers"
+                    aria-label="Layers" onClick={toggleMenu} />
+            <InputGroup
+                large
+                leftIcon="search"
+                onChange={this.handleSearchInput}
+                onFocus={this.gainInputFocus}
+                onBlur={this.loseInputFocus}
+                placeholder="Search Macrostrat"
+                rightElement={filterButton}
+                value={this.state.searchTerm} />
+          </Navbar.Group>
+        </Navbar>
+        <Collapse isOpen={this.state.inputFocused}>
+          <div className={classNames({hidden: this.state.searchTerm.length != 0}, 'search-results')}>
+            <h5>Available categories:</h5>
+            <ul>
+              <li>Time intervals</li>
+              <li>Lithologies</li>
+              <li>Stratigraphic Names</li>
+              <li>Environments (columns only)</li>
+              <li>Places</li>
+            </ul>
+          </div>
+          <div className={searchResultClasses}>
+            {this.props.searchResults && this.props.searchResults.length ?
+              searchResults
+              : '' }
+          </div>
+        </Collapse>
       </div>
     )
   }

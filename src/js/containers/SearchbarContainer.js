@@ -1,6 +1,6 @@
 import { connect } from 'react-redux'
 import { toggleMenu, toggleFilters, doSearch, addFilter } from '../actions'
-import Searchbar from '../components/Searchbar'
+import Searchbar from '../components/Searchbar.js'
 
 const mapStateToProps = (state) => {
   return {
