@@ -1,18 +1,17 @@
 .infodrawer-container
   width 30em
-  height 0
   position absolute
-  top 0
   right 0
-  .bp3-dialog
+  top 0
+  bottom 0
+  height 90vh
+  /* This doesn't quite work when
+     the page is too tall */
+  .infodrawer
     max-height 100%
-    width 100%
-    margin 0
-    max-height 90vh
-    padding-bottom 0
-    .bp3-dialog-body
-      overflow-y scroll
-      margin 0 10px
-      padding 10px 0
-    .bp3-dialog-header
-      z-index 500
+    header
+      align-items center
+      display flex
+      flex-direction row
+      div
+        flex-grow 1

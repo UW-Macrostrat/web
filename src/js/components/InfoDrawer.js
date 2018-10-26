@@ -12,7 +12,9 @@ import Grid from '@material-ui/core/Grid'
 import ExpansionPanel from '@material-ui/core/ExpansionPanel'
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails'
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary'
-import {Overlay, Dialog, Classes} from '@blueprintjs/core'
+import {Icon, IconNames, Card as UICard,
+        Alignment, Navbar,
+        Button, Overlay, Dialog, Classes} from '@blueprintjs/core'
 
 import CircularProgress from '@material-ui/core/CircularProgress'
 import Table from '@material-ui/core/Table'
@@ -25,7 +27,6 @@ import Paper from '@material-ui/core/Paper'
 
 // Icons
 import CloseIcon from '@material-ui/icons/Close'
-import Button from '@material-ui/core/Button'
 import IconButton from '@material-ui/core/IconButton'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import ExpandLessIcon from '@material-ui/icons/ExpandLess'
@@ -177,19 +178,21 @@ class InfoDrawer extends Component {
       </div>
     )
 
+    if (!infoDrawerOpen) {
+      return null
+    }
+
     return (
       <div className="infodrawer-container">
-        <Dialog
-          isOpen={infoDrawerOpen}
-          transitionDuration={300}
-          canOutsideClickClose={false}
-          usePortal={false}
-          autoFocus={false}
-          enforceFocus={false}
-          onClose={closeInfoDrawer}
-          title={infoDrawerHeader}
-          icon="map-marker" >
-        <div className={Classes.DIALOG_BODY}>
+        <UICard className="infodrawer">
+          <header>
+            <div>
+              <Icon icon="map-marker" />
+              {infoDrawerHeader}
+            </div>
+            <Button minimal icon="cross" onClick={closeInfoDrawer} />
+          </header>
+        <div>
           <div className={this.props.fetchingMapInfo ? "infoDrawer-loading" : "hidden"}>
             <CircularProgress size={50} />
           </div>
@@ -586,7 +589,7 @@ class InfoDrawer extends Component {
             }
           </div>
         </div>
-      </Dialog>
+      </UICard>
     </div>
     )
   }
