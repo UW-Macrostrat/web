@@ -88,11 +88,6 @@ class Searchbar extends Component {
       )
     })
 
-    // This is what media queries in CSS are for, we should do that instead...
-    let holderStyle = {
-      margin: ((window.innerWidth < 850) && this.state.inputFocused) ? 0 : '20px'
-    }
-
     let searchResultClasses = classNames(
       {hidden: this.state.searchTerm.length < 3},
       'search-results'
@@ -110,7 +105,7 @@ class Searchbar extends Component {
     )
 
     return (
-      <div className="searchbar-holder" style={holderStyle}>
+      <div className="searchbar-holder">
         <Navbar className="searchbar">
           <Navbar.Group align={Alignment.LEFT}>
             <Navbar.Heading>Macrostrat</Navbar.Heading>
