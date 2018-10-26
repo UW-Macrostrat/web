@@ -5,11 +5,14 @@
   top 0
   bottom 0
   height 90vh
+  pointer-events none
   /* This doesn't quite work when
      the page is too tall */
   .infodrawer
+    pointer-events all
     overflow-y scroll
     max-height 100%
+    padding 10px
     header
       align-items center
       display flex
@@ -19,3 +22,9 @@
   .expansion-panel
     margin-top 1em
     margin-bottom 0.5em
+    .expansion-panel-header
+      background-color #eee
+      margin-bottom 0.2em
+      margin 0.2em -10px 0.2em -10px
+      border-bottom: 1px solid #ccc
+      border-top: 1px solid #ccc

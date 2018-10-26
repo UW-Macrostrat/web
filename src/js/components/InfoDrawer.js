@@ -5,7 +5,6 @@ import ListItem from '@material-ui/core/ListItem'
 import ListItemText from '@material-ui/core/ListItemText'
 import ListItemIcon from '@material-ui/core/ListItemIcon'
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction'
-import Divider from '@material-ui/core/Divider'
 import Collapse from '@material-ui/core/Collapse'
 import Grid from '@material-ui/core/Grid'
 import {Icon, IconNames, Card as UICard,
@@ -41,6 +40,9 @@ import Journal from './gdd/Journal'
 
 import {ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails} from './ExpansionPanel'
 import { addCommas, normalizeLng } from '../utils'
+
+let Divider = (props) =>
+  <div className="whitespace-divider" />
 
 class InfoDrawer extends Component {
   constructor(props) {
@@ -541,7 +543,7 @@ class InfoDrawer extends Component {
             {
               mapInfo.regions && mapInfo.regions.length ?
               <ExpansionPanel classes={{ 'root': 'regional-panel'}}>
-                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} classes={expansionPanelClasses}>
+                <ExpansionPanelSummary>
                   <Typography className="expansion-summary-title">Physiography </Typography>
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails>

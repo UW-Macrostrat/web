@@ -2,6 +2,7 @@ import React, {Component} from 'react'
 import {Collapse, Button, Icon} from '@blueprintjs/core'
 
 class ExpansionPanelSummary extends Component
+  # Shim to do things the Material UI way
   render: ->
     {expanded, children, onChange} = @props
     showExpand = if expanded then 'chevron-up' else 'chevron-down'
@@ -45,7 +46,7 @@ class ExpansionPanel extends Component
       )
 
     return (
-      <div className="expansion-panel bp3-card">
+      <div className="expansion-panel">
         {title}
         <Collapse isOpen={expanded}>{newChildren}</Collapse>
       </div>
