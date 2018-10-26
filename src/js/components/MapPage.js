@@ -18,11 +18,13 @@ class MapPage extends Component {
       <div id="map-page">
         <MapContainer/>
         <div className="ui">
-          <MenuContainer/>
-          <SearchbarContainer/>
+          <div className="left-stack">
+            <SearchbarContainer/>
+            <MenuContainer/>
+            <FiltersContainer/>
+            <AboutContainer/>
+          </div>
           <InfoDrawerContainer/>
-          <FiltersContainer/>
-          <AboutContainer/>
           <ElevationChartContainer/>
         </div>
       </div>
