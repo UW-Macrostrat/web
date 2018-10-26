@@ -1,18 +1,8 @@
 import React, { Component } from 'react'
-import TextField from '@material-ui/core/TextField'
-import Grid from '@material-ui/core/Grid'
-import Toolbar from '@material-ui/core/Toolbar'
-import IconButton from '@material-ui/core/IconButton'
-import MenuIcon from '@material-ui/icons/Menu'
-import WarningIcon from '@material-ui/icons/Warning'
-import Paper from '@material-ui/core/Paper'
-import List from '@material-ui/core/List'
-import ListSubheader from '@material-ui/core/ListSubheader'
-import ListItem from '@material-ui/core/ListItem'
-import ListItemText from '@material-ui/core/ListItemText'
-import ListItemIcon from '@material-ui/core/ListItemIcon'
-
-import Collapse from '@material-ui/core/Collapse'
+import {Collapse, Navbar, Alignment,
+        Button, Intent, InputGroup} from '@blueprintjs/core'
+import h from 'react-hyperscript'
+import classNames from 'classnames'
 
 const categoryTitles = {
   'lithology': 'Lithologies',
@@ -29,6 +19,7 @@ const sortOrder = {
   'environ': 4,
   'place': 5
 }
+
 class Searchbar extends Component {
   constructor(props) {
     super(props)
@@ -64,7 +55,7 @@ class Searchbar extends Component {
     }
     this.props.doSearch(event.target.value)
   }
-  addFilter(f) {
+  addFilter(f) {d
     this.setState({
       searchTerm: ''
     })
@@ -84,79 +75,76 @@ class Searchbar extends Component {
         if (f.category === cat) return f
       })
       return thisCat.map((item, h) => {
-        return (<ListItem key={h} button onClick={() => { this.addFilter(item) }}>
-          <ListItemText classes={{ 'root': 'searchresult-item' }} primary={item.name} disableTypography={true}/>
-        </ListItem>)
+        return (<li key={h} onClick={() => { this.addFilter(item) }}>{item.name}</li>)
       })
     })
 
     let searchResults = resultCategories.map((cat, i) => {
-      return (<div key={`subheader-${i}`}>
-          <ListSubheader classes={{ 'root': 'searchresult-header'}}>{categoryTitles[cat]}</ListSubheader>
-          {categoryResults[i]}
-        </div>)
+      return (
+        <div key={`subheader-${i}`}>
+          <h3 className='searchresult-header'>{categoryTitles[cat]}</h3>
+          <ul>{categoryResults[i]}</ul>
+        </div>
+      )
     })
 
+    // This is what media queries in CSS are for, we should do that instead...
     let holderStyle = {
       margin: ((window.innerWidth < 850) && this.state.inputFocused) ? 0 : '20px'
     }
 
+    let searchResultClasses = classNames(
+      {hidden: this.state.searchTerm.length < 3},
+      'search-results'
+    )
+
+    let filterButton = (
+        <Button
+          disabled={this.props.filters.length == 0}
+          icon="filter"
+          minimal
+          aria-label="Filter"
+          intent={Intent.PRIMARY}
+          onClick={this.toggleFilters}
+        />
+    )
+
     return (
       <div className="searchbar-holder" style={holderStyle}>
-        <Grid container>
-          <Grid item xs={12} sm={7} md={6} lg={4} xl={3}>
-            <Paper>
-              <Toolbar className="searchbar-background">
-                  <IconButton color="default" aria-label="Menu" onClick={toggleMenu}>
-                    <MenuIcon />
-                  </IconButton>
-                  <input
-                    className="search-input"
-                    type="text"
-                    placeholder="Search Macrostrat"
-                    onFocus={this.gainInputFocus}
-                    onBlur={this.loseInputFocus}
-                    onChange={this.handleSearchInput}
-                    value={this.state.searchTerm}
-                  />
-                <IconButton color={this.props.filters.length != 0 ? "secondary" : "default"} aria-label="filter" onClick={toggleFilters}>
-                    <WarningIcon />
-                  </IconButton>
-              </Toolbar>
-              <Collapse in={this.state.inputFocused} timeout="auto" unmountOnExit className="search-results">
-                <div>
-                  <List className={this.state.searchTerm.length != 0 ? 'hidden' : 'search-results'} dense={true}>
-                    <ListItem>
-                      <ListItemText primary="Available categories:" />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemText inset primary="Time intervals" />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemText inset primary="Lithologies" />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemText inset primary="Stratigraphic Names" />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemText inset primary="Environments (columns only)" />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemText inset primary="Places" />
-                    </ListItem>
-                  </List>
-                  <List className={this.state.searchTerm.length < 3 ? 'hidden' : 'search-results'}>
-                    {this.props.searchResults && this.props.searchResults.length ?
-                      searchResults
-                      : ''
-                    }
-                  </List>
-                </div>
-              </Collapse>
-            </Paper>
-          </Grid>
-        </Grid>
-
+        <div className="searchbar">
+          <Navbar className="searchbar-background">
+            <Navbar.Group align={Alignment.LEFT}>
+              <Button className="bp3-minimal" icon="layers"
+                      aria-label="Layers" onClick={toggleMenu} />
+              <InputGroup
+                  large
+                  leftIcon="search"
+                  onChange={this.handleSearchInput}
+                  onFocus={this.gainInputFocus}
+                  onBlur={this.loseInputFocus}
+                  placeholder="Search Macrostrat"
+                  rightElement={filterButton}
+                  value={this.state.searchTerm} />
+            </Navbar.Group>
+          </Navbar>
+          <Collapse isOpen={this.state.inputFocused}>
+            <div className={classNames({hidden: this.state.searchTerm.length != 0}, 'search-results')}>
+              <h5>Available categories:</h5>
+              <ul>
+                <li>Time intervals</li>
+                <li>Lithologies</li>
+                <li>Stratigraphic Names</li>
+                <li>Environments (columns only)</li>
+                <li>Places</li>
+              </ul>
+            </div>
+            <div className={searchResultClasses}>
+              {this.props.searchResults && this.props.searchResults.length ?
+                searchResults
+                : '' }
+            </div>
+          </Collapse>
+        </div>
       </div>
     )
   }
