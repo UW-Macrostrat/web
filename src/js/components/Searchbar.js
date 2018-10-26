@@ -113,15 +113,18 @@ class Searchbar extends Component {
       <div className="searchbar-holder" style={holderStyle}>
         <Navbar className="searchbar">
           <Navbar.Group align={Alignment.LEFT}>
+            <Navbar.Heading>Macrostrat</Navbar.Heading>
             <Button icon="layers"
-                    aria-label="Layers" onClick={toggleMenu} />
-            <InputGroup
+              aria-label="Layers" onClick={toggleMenu} minimal />
+          </Navbar.Group>
+          <Navbar.Group align={Alignment.RIGHT}>
+             <InputGroup
                 large
                 leftIcon="search"
                 onChange={this.handleSearchInput}
                 onFocus={this.gainInputFocus}
                 onBlur={this.loseInputFocus}
-                placeholder="Search Macrostrat"
+                placeholder="Search and filter..."
                 rightElement={filterButton}
                 value={this.state.searchTerm} />
           </Navbar.Group>

@@ -32,9 +32,7 @@ body, .main-container, #react, #app-holder {
 .other-attributes {
   margin-bottom: 50px;
 }
-.searchbar-holder {
-  transition: margin 300ms;
-}
+
 .column-icon {
   fill:none;stroke:#231f20;stroke-miterlimit:10;stroke-width:3px;
 }
