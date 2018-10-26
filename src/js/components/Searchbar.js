@@ -95,12 +95,12 @@ class Searchbar extends Component {
 
     let filterButton = (
         <Button
-          disabled={this.props.filters.length == 0}
+          disabled={false}
           icon="filter"
           minimal
           aria-label="Filter"
           intent={Intent.PRIMARY}
-          onClick={this.toggleFilters}
+          onClick={toggleFilters}
         />
     )
 

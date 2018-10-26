@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import Drawer from '@material-ui/core/Drawer'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
 import ListItemText from '@material-ui/core/ListItemText'
@@ -17,6 +16,7 @@ import LineIcon from './icons/LineIcon'
 import ElevationIcon from './icons/ElevationIcon'
 import FossilIcon from './icons/FossilIcon'
 import BedrockIcon from './icons/BedrockIcon'
+import {CloseableCard} from './CloseableCard'
 
 class Menu extends Component {
   constructor(props) {
@@ -36,25 +36,14 @@ class Menu extends Component {
       'root': 'satellite-icon'
     }
     return (
-      <Drawer
-        anchor="left"
-        open={menuOpen}
-        onBackdropClick={toggleMenu}
+      <CloseableCard
+        isOpen={menuOpen}
+        onClose={toggleMenu}
+        title="Layers"
         transitionDuration={exitTransition}
       >
         <div className="menu-content">
           <List>
-            <ListItem>
-              <Typography variant="h5">
-                Macrostrat
-              </Typography>
-              <ListItemSecondaryAction>
-                <IconButton color="default" aria-label="Menu" onClick={toggleMenu}>
-                  <CloseIcon/>
-                </IconButton>
-              </ListItemSecondaryAction>
-            </ListItem>
-            <Divider light/>
             <div className="menu-options">
               <ListItem button onClick={toggleBedrock} style={{ backgroundColor: (mapHasBedrock ? '#eee' : 'transparent') }}>
                 <ListItemIcon>
@@ -109,7 +98,7 @@ class Menu extends Component {
             </div>
           </List>
         </div>
-    </Drawer>
+    </CloseableCard>
     )
   }
 }
