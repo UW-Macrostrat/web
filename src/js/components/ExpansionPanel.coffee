@@ -16,15 +16,24 @@ class ExpansionPanelDetails extends Component
     <div>{@props.children}</div>
 
 class ExpansionPanel extends Component
+  ###
+  # A basic expansion panel component built to mimic the API
+  # of the corresponding Material UI component
+  ###
   constructor: (props)->
     super props
-    if not onChange?
-      managed = false
-      @state = {expanded: props.expanded or false}
+    # If we don't provide an onChange method,
+    # the component is set up to be an un-managed one
+    # (i.e. keeps track of its own open/closed state)
+    @state = {managed: not onChange?}
+    @state.expanded = props.expanded or false
 
   render: ->
+
     {onChange, title, children, expanded} = @props
-    if not onChange?
+
+    # Basic methods for an unmanaged component
+    if not @state.managed
       expanded = @state.expanded
       onChange = => @setState {expanded: not expanded}
 

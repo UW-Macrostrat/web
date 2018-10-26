@@ -1,12 +1,4 @@
 import React, { Component } from 'react'
-import AnimateHeight from 'react-animate-height'
-import List from '@material-ui/core/List'
-import ListItem from '@material-ui/core/ListItem'
-import ListItemText from '@material-ui/core/ListItemText'
-import ListItemIcon from '@material-ui/core/ListItemIcon'
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction'
-import Collapse from '@material-ui/core/Collapse'
-import Grid from '@material-ui/core/Grid'
 import {Icon, IconNames, Card as UICard,
         Alignment, Navbar,
         Button, Overlay, Dialog, Classes} from '@blueprintjs/core'
@@ -18,7 +10,6 @@ import TableCell from '@material-ui/core/TableCell'
 import TableHead from '@material-ui/core/TableHead'
 import TableRow from '@material-ui/core/TableRow'
 import Card, { CardContent } from '@material-ui/core/Card'
-import Paper from '@material-ui/core/Paper'
 
 // Icons
 import CloseIcon from '@material-ui/icons/Close'
