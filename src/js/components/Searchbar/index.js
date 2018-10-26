@@ -114,7 +114,7 @@ class Searchbar extends Component {
         <div className="searchbar">
           <Navbar className="searchbar-background">
             <Navbar.Group align={Alignment.LEFT}>
-              <Button className="bp3-minimal" icon="layers"
+              <Button icon="layers"
                       aria-label="Layers" onClick={toggleMenu} />
               <InputGroup
                   large
