@@ -1,7 +1,7 @@
 import React, {Component} from 'react'
 
 import {FocusStyleManager} from '@blueprintjs/core'
-import {Route} from 'react-router'
+import {Link} from 'react-router-dom'
 import {MacrostratColumnManager} from './column-data'
 import ColumnIndexMap from './column-map'
 import {HoveredColumnLegend} from './legend'
@@ -24,7 +24,7 @@ class ColumnPage extends Component
         <ColumnIndexMap />
         <HoveredColumnLegend />
         <div className="header">
-          <h1>Macrostrat <span className="subtitle">Column Explorer</span></h1>
+          <h1><Link to='/'>Macrostrat</Link> <span className="subtitle">Column Explorer</span></h1>
         </div>
         <SelectionPanel />
       </div>
