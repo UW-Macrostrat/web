@@ -29,6 +29,7 @@ class ColumnPage extends Component
         <SelectionPanel />
       </div>
     </MacrostratColumnManager>
+
   componentDidMount: ->
     # This is a hack to prevent long hash strings from moving
     # over from the geologic map side of the app

@@ -89,6 +89,7 @@ class MacrostratColumnManager extends Component
       }
     }
     h MacrostratColumnContext.Provider, {value, children}
+
   componentDidMount: ->
     @getColumnData()
 
