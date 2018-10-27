@@ -114,15 +114,15 @@ class Searchbar extends Component {
               aria-label="Layers" onClick={toggleMenu} minimal />
           </Navbar.Group>
           <Navbar.Group align={Alignment.RIGHT}>
-             <InputGroup
-                large={true}
-                leftIcon="search"
-                onChange={this.handleSearchInput}
-                onFocus={this.gainInputFocus}
-                onBlur={this.loseInputFocus}
-                placeholder="Search and filter..."
-                rightElement={filterButton}
-                value={this.state.searchTerm} />
+           <InputGroup
+              large={true}
+              leftIcon="search"
+              onChange={this.handleSearchInput}
+              onFocus={this.gainInputFocus}
+              onBlur={this.loseInputFocus}
+              placeholder="Search and filter..."
+              rightElement={filterButton}
+              value={this.state.searchTerm} />
           </Navbar.Group>
         </Navbar>
         <Collapse isOpen={this.state.inputFocused} className="search-results-container">
