@@ -2,7 +2,7 @@ import {Component} from 'react'
 import h from 'react-hyperscript'
 import {nest} from 'd3-collection'
 import {sum} from 'd3-array'
-import {NonIdealState} from '@blueprintjs/core'
+import {NonIdealState, Popover} from '@blueprintjs/core'
 import {ColumnComponent} from 'stratiform'
 import {MacrostratColumnConsumer} from './column-data'
 
@@ -57,10 +57,13 @@ class ColumnContainer extends Component
           height: thickness
           backgroundColor: color
         }
-        onMouseOver = ->
-          console.log unit
 
-        h 'div.unit', {style, onMouseOver}, unit_name
+        h Popover, [
+          h 'div.unit', {style}, unit_name
+          h 'div.unit-details', null, [
+            h 'pre', JSON.stringify(unit,null, 2)
+          ]
+        ]
 
 class EmptyColumnPanel extends Component
   render: ->
