@@ -64,6 +64,7 @@ class Searchbar extends Component {
 
   render() {
     const { toggleMenu, toggleFilters } = this.props
+    const { addFilter } = this
     let resultCategories = new Set(this.props.searchResults.map(d => { return d.category }))
     // Force the results into a particular order
     resultCategories = [...resultCategories].sort((a, b) => {
@@ -75,7 +76,7 @@ class Searchbar extends Component {
         if (f.category === cat) return f
       })
       return thisCat.map((item, h) => {
-        return (<li key={h} onClick={() => { this.addFilter(item) }}>{item.name}</li>)
+        return (<li key={h} onClick={() => { addFilter(item) }}>{item.name}</li>)
       })
     })
 
