@@ -90,7 +90,8 @@ const update = (state = {
       return Object.assign({}, state, {
         infoDrawerOpen: !state.infoDrawerOpen,
         infoDrawerExpanded: false,
-        columnInfo: {}
+        columnInfo: {},
+        gddInfo: [],
       })
 
     case EXPAND_INFODRAWER:

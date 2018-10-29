@@ -5,7 +5,6 @@ import MapContainer from '../containers/MapContainer'
 import SearchbarContainer from '../containers/SearchbarContainer'
 import MenuContainer from '../containers/MenuContainer'
 import InfoDrawerContainer from '../containers/InfoDrawerContainer'
-import FiltersContainer from '../containers/FiltersContainer'
 import AboutContainer from '../containers/AboutContainer'
 import ElevationChartContainer from '../containers/ElevationChartContainer'
 
@@ -22,7 +21,6 @@ class App extends Component {
           <MenuContainer/>
           <SearchbarContainer/>
           <InfoDrawerContainer/>
-          <FiltersContainer/>
           <AboutContainer/>
           <ElevationChartContainer/>
         </div>

@@ -53,6 +53,7 @@ class InfoDrawer extends Component {
       bedrockMatchExpanded: this.props.mapHasBedrock,
       stratigraphyExpanded: this.props.mapHasColumns,
       pbdbExpanded: this.props.mapHasFossils,
+      gddExpanded: false,
     }
 
     this.handleChange = panel => (event, expanded) => {
@@ -81,6 +82,15 @@ class InfoDrawer extends Component {
         this.setState({
           pbdbExpanded: !this.state.pbdbExpanded
         })
+      } else if (panel === 'gdd') {
+        if (!this.state.gddExpanded) {
+          this.openGdd()
+        }
+        this.setState({
+          gddExpanded: !this.state.gddExpanded
+        })
+
+
       }
 
     }
@@ -89,11 +99,14 @@ class InfoDrawer extends Component {
     //     this.props.getColumn()
     //   }
     // }
-    this.openGdd = (event, expanded) => {
-      if (this.props.gddInfo.length === 0) {
-        this.props.getGdd()
-      }
-    }
+  }
+
+  openGdd() {
+    console.log('openGdd', this.props.gddInfo)
+    this.props.getGdd()
+    // if (this.props.gddInfo.length === 0) {
+    //   this.props.getGdd()
+    // }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -116,7 +129,8 @@ class InfoDrawer extends Component {
         bedrockExpanded: nextProps.mapHasBedrock,
         bedrockMatchExpanded: nextProps.mapHasBedrock,
         stratigraphyExpanded: nextProps.mapHasColumns,
-        pbdbExpanded: nextProps.mapHasFossils
+        pbdbExpanded: nextProps.mapHasFossils,
+        gddExpanded: false,
       })
     }
   }
@@ -125,7 +139,7 @@ class InfoDrawer extends Component {
     const { infoDrawerOpen, closeInfoDrawer, expandInfoDrawer, infoDrawerExpanded } = this.props
     let { mapInfo, gddInfo, pbdbData } = this.props
 
-    const { expanded, bedrockExpanded, bedrockMatchExpanded, stratigraphyExpanded, pbdbExpanded } = this.state
+    const { expanded, bedrockExpanded, bedrockMatchExpanded, stratigraphyExpanded, pbdbExpanded, gddExpanded } = this.state
 
     const expansionPanelClasses = {
       'content': 'expansion-panel',
@@ -578,7 +592,7 @@ class InfoDrawer extends Component {
                 mapInfo && mapInfo.mapData && mapInfo.mapData.length && mapInfo.mapData[0].strat_name.length  ?
                 <span>
                   <Divider/>
-                  <ExpansionPanel classes={{ 'root': 'regional-panel'}} onChange={this.openGdd}>
+                  <ExpansionPanel classes={{ 'root': 'regional-panel'}} onChange={this.collapse('gdd')} expanded={gddExpanded} >
                     <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} classes={expansionPanelClasses}>
                       <Typography className="expansion-summary-title">Primary Literature <span className='via-gdd'>via GeoDeepDive</span> </Typography>
                     </ExpansionPanelSummary>
