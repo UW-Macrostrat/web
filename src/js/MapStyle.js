@@ -942,22 +942,23 @@ export const mapStyle = {
           "paint": {
             "circle-opacity": [
               "interpolate", ["linear"], ["zoom"],
-              5, 0.8,
+              6, 0.7,
               10, 1,
             ],
             "circle-color": [
               "case",
               ["boolean", ["feature-state", "hover"], false],
               "#154974",
-              [
-                "step",
-                ["get", "point_count"],
-                "#bdd7e7",
-                20,
-                "#6baed6",
-                50,
-                "#2171b5"
-              ]
+              "#2171b5",
+              // [
+              //   "step",
+              //   ["get", "point_count"],
+              //   "#bdd7e7",
+              //   20,
+              //   "#6baed6",
+              //   50,
+              //   "#2171b5"
+              // ]
             ],
             "circle-radius": [
               "step",
@@ -1022,21 +1023,22 @@ export const mapStyle = {
           "paint": {
             "circle-opacity": [
               "interpolate", ["linear"], ["zoom"],
-              0, 0.6,
-              6, 1,
+              0, 0.3,
+              6, 0.8,
             ],
             "circle-color": [
               "case",
               ["boolean", ["feature-state", "hover"], false],
               "#154974",
-              ["step",
-                ["get", "noc"],
-                "#bdd7e7",
-                100,
-                "#6baed6",
-                1000,
-                "#2171b5"
-              ]
+              "#2171b5"
+              // ["step",
+              //   ["get", "noc"],
+              //   "#bdd7e7",
+              //   100,
+              //   "#6baed6",
+              //   1000,
+              //   "#2171b5"
+              // ]
             ],
             "circle-radius": [
               "interpolate", ["linear"], ["zoom"],

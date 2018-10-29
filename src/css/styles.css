@@ -452,6 +452,9 @@ text {
   letter-spacing: 1px;
   margin-top: 15px;
 }
+.filter-paper {
+  border-radius: 0;
+}
 .searchbar-filter-container {
   padding: 0 !important;
   background-color: rgba(245, 0, 87, 0.08) !important;

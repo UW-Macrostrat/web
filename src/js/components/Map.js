@@ -778,6 +778,9 @@ class Map extends Component {
         this.pbdbPoints = {
           "type": "FeatureCollection",
           "features": data.map((f, i) => {
+            // Make sure there aren't nulls for values used for styling
+            f.noc = f.noc || 0
+            f.nco = f.nco || 0
             return {
               "type": "Feature",
               "properties": f,
@@ -804,7 +807,6 @@ class Map extends Component {
           this.map.setLayoutProperty('pbdb-points-clustered', 'visibility', 'visible')
       //    this.map.setLayoutProperty('pbdb-point-cluster-count', 'visibility', 'visible')
           this.map.setLayoutProperty('pbdb-points', 'visibility', 'visible')
-
 
         }
 
