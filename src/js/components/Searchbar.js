@@ -115,7 +115,7 @@ class Searchbar extends Component {
       if (f.category !== 'interval') return f
     })
     const filters = (this.props.filters.length) ? (
-      <Paper>
+      <Paper classes={{'root': 'filter-paper'}}>
         <ExpansionPanel>
           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} classes={{ 'root': 'searchbar-filter-container'}}>
             <span className="searchbar-filter-title">Filtering by:</span>
@@ -126,7 +126,10 @@ class Searchbar extends Component {
 
               {otherFilters.length && timeFilters.length ? ' AND ' : ''}
 
-              {otherFilters.map(f => f.name).join(' AND ')}
+              {otherFilters.length > 1 && timeFilters.length ? '(' : ''}
+              {otherFilters.map(f => f.name).join(' OR ')}
+              {otherFilters.length > 1 && timeFilters.length ? ')' : ''}
+
             </div>
           </ExpansionPanelSummary>
           <ExpansionPanelDetails>
