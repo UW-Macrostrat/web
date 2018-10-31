@@ -144,16 +144,16 @@ class Map extends Component {
       this.map.on('mousemove', layer.layer, (evt) => {
         if (evt.features) {
           if (this.hoverStates[layer.layer]) {
-            this.map.setFeatureState({source: layer.source, id: this.hoverStates[layer.layer]}, { hover: false})
+            this.map.setFeatureState({source: layer.source, sourceLayer: layer.sourceLayer || '', id: this.hoverStates[layer.layer]}, { hover: false})
           }
           this.hoverStates[layer.layer] = evt.features[0].id
-          this.map.setFeatureState({source: layer.source, id: evt.features[0].id}, { hover: true})
+          this.map.setFeatureState({source: layer.source, sourceLayer: layer.sourceLayer || '', id: evt.features[0].id}, { hover: true})
         }
       })
 
       this.map.on('mouseleave', layer.layer, (evt) => {
         if (this.hoverStates[layer.layer]) {
-          this.map.setFeatureState({source: layer.source, id: this.hoverStates[layer.layer]}, { hover: false})
+          this.map.setFeatureState({source: layer.source, sourceLayer: layer.sourceLayer || '', id: this.hoverStates[layer.layer]}, { hover: false})
         }
         this.hoverStates[layer.layer] =  null
       })

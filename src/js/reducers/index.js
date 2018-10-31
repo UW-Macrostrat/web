@@ -149,37 +149,45 @@ const update = (state = {
         action.data.mapData = action.data.mapData.map(source => {
           if (source.macrostrat) {
             if (source.macrostrat.liths) {
-              source.macrostrat.lith_classes = [ ... new Set(source.macrostrat.liths.map(lith => {
-                return lith.lith_class
-              })) ]
-                .map(lith_class => {
-                  return {
-                    name: lith_class,
-                    color: classColors[lith_class]
+              let types = {}
+
+              source.macrostrat.liths.forEach(lith => {
+                if (!types[lith.lith_type]) {
+                  types[lith.lith_type] = {
+                    name: lith.lith_type,
+                    color: classColors[lith.lith_class]
                   }
-                })
+                }
+              })
+              source.macrostrat.lith_types = Object.keys(types).map(l => types[l])
+
             }
             if (source.macrostrat.environs) {
-              source.macrostrat.environ_classes = [ ... new Set(source.macrostrat.environs.map(environ => {
-                return environ.environ_class
-              })) ]
-                .map(environ_class => {
-                  return {
-                    name: environ_class,
-                    color: classColors[environ_class]
+              let types = {}
+
+              source.macrostrat.environs.forEach(environ => {
+                if (!types[environ.environ_type]) {
+                  types[environ.environ_type] = {
+                    name: environ.environ_type,
+                    color: classColors[environ.environ_class]
                   }
-                })
+                }
+              })
+              source.macrostrat.environ_types = Object.keys(types).map(l => types[l])
             }
             if (source.macrostrat.econs) {
-              source.macrostrat.econ_classes = [ ... new Set(source.macrostrat.econs.map(econ => {
-                return econ.econ_class
-              })) ]
-                .map(econ_class => {
-                  return {
-                    name: econ_class,
-                    color: classColors[econ_class]
+              let types = {}
+
+              source.macrostrat.econs.forEach(econ => {
+                if (!types[econ.econ_type]) {
+                  types[econ.econ_type] = {
+                    name: econ.econ_type,
+                    color: classColors[econ.econ_class]
                   }
-                })
+                }
+              })
+              source.macrostrat.econ_types = Object.keys(types).map(l => types[l])
+  
             }
 
           }

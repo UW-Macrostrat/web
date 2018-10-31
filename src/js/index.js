@@ -1,4 +1,4 @@
-import 'babel-polyfill'
+//import 'babel-polyfill'
 
 //https://material-ui.com/style/typography/#migration-to-typography-v2
 window.__MUI_USE_NEXT_TYPOGRAPHY_VARIANTS__ = true
@@ -28,3 +28,5 @@ render(
   </Provider>,
   document.getElementById('react')
 )
+
+module.hot.accept()

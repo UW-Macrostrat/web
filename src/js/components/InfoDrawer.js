@@ -102,11 +102,7 @@ class InfoDrawer extends Component {
   }
 
   openGdd() {
-    console.log('openGdd', this.props.gddInfo)
     this.props.getGdd()
-    // if (this.props.gddInfo.length === 0) {
-    //   this.props.getGdd()
-    // }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -424,8 +420,8 @@ class InfoDrawer extends Component {
                         <ExpansionPanel expanded={expanded === 'lithology'} onChange={this.handleChange('lithology')}>
                           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} classes={expansionPanelClasses}>
                             <Typography className="expansion-summary-title">Lithology: </Typography>
-                            {source.macrostrat && source.macrostrat.lith_classes ? source.macrostrat.lith_classes.map( (lithClass, i) => {
-                              return <AttrChip key={i} name={lithClass.name} color={lithClass.color} />
+                            {source.macrostrat && source.macrostrat.lith_types ? source.macrostrat.lith_types.map( (lithType, i) => {
+                              return <AttrChip key={lithType.name + lithType.color} name={lithType.name || 'other'} color={lithType.color} />
                             }) : ''}
                           </ExpansionPanelSummary>
                           <ExpansionPanelDetails classes={expansionPanelDetailSubClasses}>
@@ -446,8 +442,8 @@ class InfoDrawer extends Component {
                         <ExpansionPanel expanded={expanded === 'environment'} onChange={this.handleChange('environment')}>
                           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} classes={expansionPanelClasses}>
                             <Typography className="expansion-summary-title">Environment: </Typography>
-                            {source.macrostrat && source.macrostrat.environ_classes ? source.macrostrat.environ_classes.map( (environClass, i) => {
-                              return <AttrChip key={i} name={environClass.name} color={environClass.color} />
+                            {source.macrostrat && source.macrostrat.environ_types ? source.macrostrat.environ_types.map( (environType, i) => {
+                              return <AttrChip key={environType.name + environType.color} name={environType.name || 'other'} color={environType.color} />
                             }) : ''}
                           </ExpansionPanelSummary>
                           <ExpansionPanelDetails classes={expansionPanelDetailSubClasses}>
@@ -468,8 +464,8 @@ class InfoDrawer extends Component {
                         <ExpansionPanel expanded={expanded === 'economy'} onChange={this.handleChange('economy')}>
                           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} classes={expansionPanelClasses}>
                             <Typography className="expansion-summary-title">Economy: </Typography>
-                            {source.macrostrat && source.macrostrat.econ_classes ? source.macrostrat.econ_classes.map( (econClass, i) => {
-                              return <AttrChip key={i} name={econClass.name} color={econClass.color} />
+                            {source.macrostrat && source.macrostrat.econ_types ? source.macrostrat.econ_types.map( (econType, i) => {
+                              return <AttrChip key={econType.name + econType.color} name={econType.name || 'other'} color={econType.color} />
                             }) : ''}
                           </ExpansionPanelSummary>
                           <ExpansionPanelDetails classes={expansionPanelDetailSubClasses}>
