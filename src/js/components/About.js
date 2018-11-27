@@ -22,7 +22,10 @@ class About extends Component {
           <DialogContent>
             <DialogContentText>
               <span className="about-title">About</span>
-              Macrostrat's geologic map is a seamless integration of over 200 geologic maps from around the world and at numerous scales that have been homogenized into a single database. As you zoom in and out of the map, scale-appropriate geologic maps are shown, and clicking on the map reveals primary data about each unit.
+              Macrostrat's geologic map is a seamless integration of over <a className="ref-link" href="/map/sources">200 geologic maps</a> from around the world and at numerous scales that have been homogenized into a single database. As you zoom in and out of the map, scale-appropriate geologic maps are shown, and clicking on the map reveals primary data about each unit.
+              <br/><br/>
+              Looking for the old version? You can find it at <a className="ref-link" href="/map-raster" target="_blank">https://macrostrat.org/map-raster</a>
+
 
               <span className="about-title">Credits</span>
               <span className="about-section">
@@ -38,7 +41,7 @@ class About extends Component {
               </span>
 
               <span className="about-section">
-                Place search results © 2017 Mapbox and its suppliers. All rights reserved.
+                Place search results <a className="ref-link" href="https://www.mapbox.com/about/maps/" target="_blank">© Mapbox</a> and its suppliers. All rights reserved.
               </span>
 
               <span className="about-section">
