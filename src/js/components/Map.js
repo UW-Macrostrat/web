@@ -129,6 +129,8 @@ class Map extends Component {
         }
       })
 
+      this.resizeMarker()
+
       if (this.props.mapHasFossils) {
         this.refreshPBDB()
       }
@@ -307,6 +309,7 @@ class Map extends Component {
         }
       })
 
+
       // Readd all the previous layers to the map
       this.currentLayers.forEach(layer => {
         if (layer.layer.id != 'infoMarker') {
@@ -319,7 +322,20 @@ class Map extends Component {
           this.map.setFilter(layer.layer.id, layer.filters)
         }
       })
+
+      this.resizeMarker()
     })
+  }
+
+  resizeMarker() {
+    const currentStyle = this.map.getStyle().name
+    if (currentStyle === 'Satellite Streets') {
+      this.map.setLayoutProperty('infoMarker', 'icon-size', 0.07)
+      this.map.setLayoutProperty('infoMarker', 'icon-offset', [0, -256])
+    } else {
+      this.map.setLayoutProperty('infoMarker', 'icon-size', 0.65)
+      this.map.setLayoutProperty('infoMarker', 'icon-offset', [0, -28])
+    }
   }
 
   // Swap between standard and satellite base layers
