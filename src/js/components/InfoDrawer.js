@@ -185,7 +185,8 @@ class InfoDrawer extends Component {
         ModalProps={{
           classes: {
             'root': 'infoDrawer-root'
-          }
+          },
+          disableEnforceFocus: true,
         }}
       >
 

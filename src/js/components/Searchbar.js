@@ -49,13 +49,11 @@ class Searchbar extends Component {
   }
 
   gainInputFocus() {
-  //  console.log('focus')
     this.setState({
       inputFocused: true
     })
   }
   loseInputFocus() {
-  //  console.log('lose focus')
     // A slight timeout is required so that click actions can occur
     setTimeout(() => {
       this.setState({
