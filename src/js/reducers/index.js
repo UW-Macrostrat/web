@@ -105,6 +105,7 @@ const update = (state = {
       })
     case ADD_FILTER:
       let alreadyHasFiter = false
+      console.log('reduce ADD_FILTER', state.filters, action.filter)
       state.filters.forEach(filter => {
         if (filter.name === action.filter.name && filter.type === action.filter.type) {
           alreadyHasFiter = true
@@ -124,14 +125,16 @@ const update = (state = {
           }
         })
       }
-      // if incoming is NOT 'all', remove 'all' version
+      // if incoming is NOT 'all', remove the 'all' version
       else {
         fs = fs.filter(f => {
           if (
-            f.type !== `all_${action.filter.type}` &&
-            f.id !== action.filter.id &&
-            f.name !== action.filter.name
+            f.type === `all_${action.filter.type}` &&
+            f.id === action.filter.id &&
+            f.name === action.filter.name
           ) {
+            // do nothing
+          } else {
             return f
           }
         })
