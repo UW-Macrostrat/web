@@ -17,7 +17,14 @@ import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails'
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary'
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction'
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline'
-
+import FormControl from '@material-ui/core/FormControl'
+import InputLabel from '@material-ui/core/InputLabel'
+import Select from '@material-ui/core/Select'
+import MenuItem from '@material-ui/core/MenuItem'
+import FormHelperText from '@material-ui/core/FormHelperText'
+import Switch from '@material-ui/core/Switch'
+import FormControlLabel from '@material-ui/core/FormControlLabel'
+import Tooltip from '@material-ui/core/Tooltip'
 import Collapse from '@material-ui/core/Collapse'
 
 const categoryTitles = {
@@ -135,6 +142,21 @@ class Searchbar extends Component {
               <ListSubheader classes={{ 'root': 'searchresult-header'}}>Modify filters:</ListSubheader>
               {this.props.filters.map((d,i) => {
                 return (<ListItem key={i}>
+                  <Tooltip title="By default only 'best' lithology matches are shown. Toggle to show all matches or best.">
+                    <FormControl className={d.category != 'lithology' ? 'hidden': ''}>
+                    <FormControlLabel
+                        control={
+                          <Switch
+                            checked={d.type.substr(0,4) === 'all_' ? true : false}
+                            onChange={() => { this.props.swapLithType(d) }}
+                          />
+                        }
+                        label={d.type.substr(0,4) === 'all_' ? 'All matches' : 'Best matches'}
+                      />
+                      
+                    </FormControl>
+                  </Tooltip>
+                  
                   <ListItemText primary={d.name}/>
                   <ListItemSecondaryAction onClick={() => { this.props.removeFilter(d) }}>
                     <IconButton color="secondary" aria-label="remove" >

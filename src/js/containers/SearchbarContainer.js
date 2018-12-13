@@ -27,6 +27,19 @@ const mapDispatchToProps = (dispatch) => {
     removeFilter: (f) => {
       dispatch(removeFilter(f))
     },
+    swapLithType: (f) => {
+      // Copy the filter, otherwise all hell breaks loose
+      let newFilter = JSON.parse(JSON.stringify(f))
+
+      // Swap the style of filter
+      if (newFilter.type.substr(0,4) === 'all_') {
+        newFilter.type = newFilter.type.replace('all_', '')
+      } else {
+        newFilter.type = `all_${newFilter.type}`
+      }
+
+      dispatch(addFilter(newFilter))
+    }
   }
 }
 

@@ -195,7 +195,6 @@ export const queryMap = (lng, lat, z, map_id) => {
 }
 
 export function shouldFetchColumn(data) {
-  console.log('shouldFetchColumn?')
   if (data.success.data && data.success.data.hasColumns) {
     getColumn()
   }
@@ -369,6 +368,55 @@ export function addFilter(theFilter) {
 
           break
 
+        case 'all_lithologies':
+          // Need to fetch the definition in the event of filter passed via the uri
+          axios.get(`${SETTINGS.apiDomain}/api/v2/defs/lithologies?lith_id=${theFilter.id}`, {
+            responseType: 'json'
+          })
+          .then(json => {
+            let f = json.data.success.data[0]
+
+            axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/map_filter?all_lith_id=${theFilter.id}`, {
+              responseType: 'json'
+            })
+            .then(json => {
+              dispatch({
+                type: ADD_FILTER,
+                filter: {
+                  category: 'lithology',
+                  id: theFilter.id,
+                  type: 'all_lithologies',
+                  name: f.name,
+                  legend_ids: json.data
+                }
+              })
+            })
+          })
+          .catch(error => {
+            // don't care 💁
+          })
+
+          break
+        case 'all_lithology_classes':
+        case 'all_lithology_types':
+          let param = (theFilter.type === 'all_lithology_classes') ? 'all_lith_class' : 'all_lithology_type'
+          axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/map_filter?${param}=${theFilter.id}`, {
+            responseType: 'json'
+          })
+          .then(json => {
+            dispatch({
+              type: ADD_FILTER,
+              filter: {
+                category: 'lithology',
+                id: 0,
+                name: theFilter.name,
+                type: theFilter.type,
+                legend_ids: json.data
+              }
+            })
+        })
+          break
+
         case 'environments':
         case 'environment_types':
         case 'environment_classes':
@@ -478,7 +526,6 @@ export function removeFilter(theFilter) {
     filter: theFilter
   }
 }
-
 
 export function startColumnQuery(cancelToken) {
   return {
@@ -694,7 +741,7 @@ export function getInitialMapState() {
       columns: mapHasColumns,
       fossils: mapHasFossils
     }
-    let filterTypes = ['strat_name_concepts','strat_name_orphans','intervals','lithology_classes','lithology_types','lithologies','environments','environment_types','environment_classes',]
+    let filterTypes = ['strat_name_concepts','strat_name_orphans','intervals','lithology_classes','lithology_types','lithologies','all_lithologies', 'all_lithology_types', 'all_lithology_classes','environments','environment_types','environment_classes',]
     let hash = window.location.hash
     let mapState = {
       incomingFilters: []

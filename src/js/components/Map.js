@@ -516,7 +516,7 @@ class Map extends Component {
       }
 
     // Handle changes to map filters
-    } else if (nextProps.filters.length != this.props.filters.length) {
+  } else if (JSON.stringify(nextProps.filters) != JSON.stringify(this.props.filters)) {
       // If all filters have been removed simply reset the filter states
       // if (nextProps.filters.length === 0) {
       //   this.filters = []
@@ -591,8 +591,11 @@ class Map extends Component {
           this.refreshPBDB()
         }
 
-        this.applyFilters()
-        return false
+        if (!incoming.length) {
+          this.applyFilters()
+          return false
+        }
+
       }
 
       // Otherwise, a filter was added
@@ -602,6 +605,7 @@ class Map extends Component {
           return f
         }
       })
+
       if (filterToApply.length === 0) {
         return false
       }
@@ -649,6 +653,9 @@ class Map extends Component {
           break
 
         case 'lithologies':
+        case 'all_lithologies':
+        case 'all_lithology_types':
+        case 'all_lithology_classes':
           this.lithFilters.push(filterToApply.name)
           this.lithFiltersIndex[`${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`] = this.lithFilters.length - 1
           this.filters.push([ 'in', 'legend_id', ...filterToApply.legend_ids ])
@@ -683,7 +690,6 @@ class Map extends Component {
   }
 
   applyFilters() {
-    //console.log('applyFilters')
     // don't try and update featureState if the map is loading
     if (!this.mapLoaded) {
       this.shouldUpdateFeatureState = true
@@ -699,14 +705,13 @@ class Map extends Component {
     if (this.filters.length) {
       toApply.push(["any", ...this.filters])
     }
-  //  console.log('toApply', toApply)
+
     this.map.setFilter('burwell_fill', toApply)
     this.map.setFilter('burwell_stroke', toApply)
   }
 
   // PBDB hexgrids and points are refreshed on every map move
   refreshPBDB() {
-    //console.log('refresh pbdb')
     let bounds = this.map.getBounds()
     let zoom = this.map.getZoom()
     // if (zoom < 7) {

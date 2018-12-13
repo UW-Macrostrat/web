@@ -106,11 +106,36 @@ const update = (state = {
     case ADD_FILTER:
       let alreadyHasFiter = false
       state.filters.forEach(filter => {
-        if (filter.name === action.filter.name) {
+        if (filter.name === action.filter.name && filter.type === action.filter.type) {
           alreadyHasFiter = true
         }
       })
+
       let fs = state.filters
+      // if incoming is 'all', remove non-'all' version
+      if (action.filter.type.substr(0,4) === 'all_') {
+        fs = fs.filter(f => {
+          if (
+            f.type !== action.filter.type.replace('all_', '') &&
+            f.id !== action.filter.id &&
+            f.name !== action.filter.name
+          ) {
+            return f
+          }
+        })
+      }
+      // if incoming is NOT 'all', remove 'all' version
+      else {
+        fs = fs.filter(f => {
+          if (
+            f.type !== `all_${action.filter.type}` &&
+            f.id !== action.filter.id &&
+            f.name !== action.filter.name
+          ) {
+            return f
+          }
+        })
+      }
       if (!alreadyHasFiter) {
         fs = fs.concat([action.filter])
       }
@@ -121,6 +146,8 @@ const update = (state = {
       return Object.assign({}, state, {
         filters: fs
       })
+      break
+
     case REMOVE_FILTER:
       updateURI(Object.assign({}, state, {
         filters: state.filters.filter(d => {
@@ -132,6 +159,8 @@ const update = (state = {
           if (d.name != action.filter.name) return d
         })
       })
+      break
+
 
     case START_MAP_QUERY:
       if (state.mapInfoCancelToken) {
@@ -187,7 +216,7 @@ const update = (state = {
                 }
               })
               source.macrostrat.econ_types = Object.keys(types).map(l => types[l])
-  
+
             }
 
           }
