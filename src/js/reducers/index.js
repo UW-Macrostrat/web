@@ -117,10 +117,13 @@ const update = (state = {
       if (action.filter.type.substr(0,4) === 'all_') {
         fs = fs.filter(f => {
           if (
-            f.type !== action.filter.type.replace('all_', '') &&
-            f.id !== action.filter.id &&
-            f.name !== action.filter.name
+            f.type === action.filter.type.replace('all_', '') &&
+            f.id === action.filter.id &&
+            f.name === action.filter.name
           ) {
+            // do nothing
+            console.log('remove', f.id, f.name, action.filter.id, action.filter.name)
+          } else {
             return f
           }
         })
@@ -134,6 +137,7 @@ const update = (state = {
             f.name === action.filter.name
           ) {
             // do nothing
+            console.log('remove', f.id, f.name, action.filter.id, action.filter.name)
           } else {
             return f
           }
