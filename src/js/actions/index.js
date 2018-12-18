@@ -164,10 +164,14 @@ function addMapIdToRef(data) {
   return data
 }
 
-export const queryMap = (lng, lat, z, map_id) => {
+export const queryMap = (lng, lat, z, map_id, column) => {
   return (dispatch) => {
     let CancelToken = axios.CancelToken
     let source = CancelToken.source()
+
+    if (column) {
+      dispatch(getColumn(column))
+    }
 
     dispatch(startMapQuery({lng: lng, lat: lat}, source))
     let url = `${SETTINGS.apiDomain}/api/v2/mobile/map_query_v2?lng=${lng.toFixed(5)}&lat=${lat.toFixed(5)}&z=${parseInt(z)}`
@@ -179,15 +183,7 @@ export const queryMap = (lng, lat, z, map_id) => {
       responseType: 'json'
     })
     .then(json => addMapIdToRef(json.data))
-    .then(json => {
-      if (json.success.data && json.success.data.hasColumns) {
-        dispatch(getColumn())
-      }
-      return json
-    })
-    // .then(json => shouldFetchColumn(json))
     .then(json => dispatch(receivedMapQuery(json.success.data)))
-
     .catch(error => {
       // don't care 💁
     })
@@ -399,8 +395,8 @@ export function addFilter(theFilter) {
           break
         case 'all_lithology_classes':
         case 'all_lithology_types':
-          let param = (theFilter.type === 'all_lithology_classes') ? 'all_lith_class' : 'all_lithology_type'
-          axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/map_filter?${param}=${theFilter.id}`, {
+          let param = (theFilter.type === 'all_lithology_classes') ? 'all_lith_class' : 'all_lith_type'
+          axios.get(`${SETTINGS.apiDomain}/api/v2/mobile/map_filter?${param}=${theFilter.id || theFilter.name}`, {
             responseType: 'json'
           })
           .then(json => {
@@ -534,30 +530,29 @@ export function startColumnQuery(cancelToken) {
   }
 }
 
-export const getColumn = () => {
+export const getColumn = (column) => {
   return (dispatch, getState) => {
-    let { infoMarkerLng, infoMarkerLat } = getState().update
-
     let CancelToken = axios.CancelToken
     let source = CancelToken.source()
 
     dispatch(startColumnQuery(source))
 
-    return axios.get(`${SETTINGS.apiDomain}/api/v2/units?response=long&lng=${infoMarkerLng}&lat=${infoMarkerLat}`, {
+    return axios.get(`${SETTINGS.apiDomain}/api/v2/units?response=long&col_id=${column.col_id}`, {
       cancelToken: source.token,
       responseType: 'json'
     })
-      .then(json => dispatch(receivedColumnQuery(json.data.success.data)))
+      .then(json => dispatch(receivedColumnQuery(json.data.success.data, column)))
       .catch(error => {
         // don't care 💁
       })
   }
 }
 
-export function receivedColumnQuery(data) {
+export function receivedColumnQuery(data, column) {
   return {
     type: RECEIVED_COLUMN_QUERY,
-    data: data
+    data: data,
+    column: column
   }
 }
 

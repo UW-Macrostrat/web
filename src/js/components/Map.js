@@ -246,18 +246,16 @@ class Map extends Component {
       }
 
       // Otherwise try to query the geologic map
-      let features = this.map.queryRenderedFeatures(event.point, { layers: ['burwell_fill', 'column_fill']})
+      let burwellFeatures = this.map.queryRenderedFeatures(event.point, { layers: ['burwell_fill']}).map(f => f.properties)
 
-      let burwellFeatures = features.filter(f => {
-        if (f.layer.id === 'burwell_fill') return f
-      }).map(f => {
-        return f.properties
-      })
-      if (burwellFeatures.length) {
-        this.props.queryMap(event.lngLat.lng, event.lngLat.lat, this.map.getZoom(), burwellFeatures[0].map_id)
-      } else {
-        this.props.queryMap(event.lngLat.lng, event.lngLat.lat, this.map.getZoom())
-      }
+      let columns = this.map.queryRenderedFeatures(event.point, { layers: ['column_fill']}).map(f => f.properties)
+
+
+      let map_id = (burwellFeatures.length) ? burwellFeatures[0].map_id : null
+      let column = (columns.length) ? columns[0] : null
+
+      // Trigger the action to fetch data
+      this.props.queryMap(event.lngLat.lng, event.lngLat.lat, this.map.getZoom(), map_id, column)
 
       let xOffset = (window.innerWidth > 850) ? -((window.innerWidth*0.3333)/2) : 0
 

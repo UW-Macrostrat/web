@@ -122,7 +122,6 @@ const update = (state = {
             f.name === action.filter.name
           ) {
             // do nothing
-            console.log('remove', f.id, f.name, action.filter.id, action.filter.name)
           } else {
             return f
           }
@@ -137,7 +136,6 @@ const update = (state = {
             f.name === action.filter.name
           ) {
             // do nothing
-            console.log('remove', f.id, f.name, action.filter.id, action.filter.name)
           } else {
             return f
           }
@@ -256,6 +254,7 @@ const update = (state = {
       })
 
       let columnSummary = {
+        ...action.column,
         max_thick: sum(action.data, 'max_thick'),
         min_thick: sum(action.data, 'min_thick'),
         pbdb_collections: sum(action.data, 'pbdb_collections'),

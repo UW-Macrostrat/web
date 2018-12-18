@@ -94,11 +94,6 @@ class InfoDrawer extends Component {
       }
 
     }
-    // this.openColumnInfo = (event, expanded) => {
-    //   if (Object.keys(this.props.columnInfo).length === 0) {
-    //     this.props.getColumn()
-    //   }
-    // }
   }
 
   openGdd() {
@@ -503,6 +498,38 @@ class InfoDrawer extends Component {
                           <TableBody>
                             <TableRow>
                               <TableCell>
+                                <Typography className="expansion-summary-title">Name:</Typography>
+                              </TableCell>
+                              <TableCell>
+                                { this.props.columnInfo.col_name }
+                              </TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell>
+                                <Typography className="expansion-summary-title">Column ID:</Typography>
+                              </TableCell>
+                              <TableCell>
+                                { this.props.columnInfo.col_id }
+                              </TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell>
+                                <Typography className="expansion-summary-title">Group:</Typography>
+                              </TableCell>
+                              <TableCell>
+                                { this.props.columnInfo.col_group }
+                              </TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell>
+                                <Typography className="expansion-summary-title">Group ID:</Typography>
+                              </TableCell>
+                              <TableCell>
+                                { this.props.columnInfo.col_group_id }
+                              </TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell>
                                 <Typography className="expansion-summary-title">Thickness:</Typography>
                               </TableCell>
                               <TableCell>
@@ -539,18 +566,6 @@ class InfoDrawer extends Component {
                               </TableCell>
                               <TableCell>
                                 { addCommas(this.props.columnInfo.pbdb_occs) }
-                              </TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell>
-                                <table>
-                                  <tbody>
-                                    <tr>
-                                      <td>Period</td>
-                                      <td>Unit</td>
-                                    </tr>
-                                  </tbody>
-                                </table>
                               </TableCell>
                             </TableRow>
                           </TableBody>

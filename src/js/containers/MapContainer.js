@@ -21,8 +21,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    queryMap: (lng, lat, z, map_id) => {
-      dispatch(queryMap(lng, lat, z, map_id))
+    queryMap: (lng, lat, z, map_id, column) => {
+      dispatch(queryMap(lng, lat, z, map_id, column))
     },
     getFilteredColumns: () => {
       dispatch(getFilteredColumns())
