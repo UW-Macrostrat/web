@@ -5,7 +5,7 @@
   "main": "index.html",
   "scripts": {
     "bundle": "webpack",
-    "dev": "webpack",
+    "dev": "webpack --watch",
     "postinstall": "linklocal --link -r && linklocal --list -r | bulk -c 'npm install --production'"
   },
   "author": "John J Czaplewski <jczaplewski@wisc.edu>",
