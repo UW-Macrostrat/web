@@ -17,12 +17,10 @@ groupUnits = (sectionUnits)->
   for unit in sectionUnits
     # We have a group defined
     {Gp, Fm, Mbr, unit_name} = unit
-    
-    if unit.Gp?
-      if unit.Gp
+    #if unit.Gp?
 
-    if lastUnit?
-      if unit.Gp == lastUnit.Gp
+    #if lastUnit?
+    #  #if unit.Gp == lastUnit.Gp
     __.push unit
   return __
 
