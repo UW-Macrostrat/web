@@ -12,7 +12,17 @@ groupUnits = (sectionUnits)->
   # unit groups
   ###
   __ = []
+  lastUnit = null
+  group = {}
   for unit in sectionUnits
+    # We have a group defined
+    {Gp, Fm, Mbr, unit_name} = unit
+    
+    if unit.Gp?
+      if unit.Gp
+
+    if lastUnit?
+      if unit.Gp == lastUnit.Gp
     __.push unit
   return __
 
@@ -38,7 +48,10 @@ class ColumnContainer extends Component
     totalThickness = sum units, (d)->d.thickness
 
     bottom = totalThickness
-    units.map (unit)->
+
+    # Add tops and bottoms to units, then group
+    # formations and members
+    groupUnits units.map (unit)->
       top = bottom
       bottom = top-unit.thickness
       {top, bottom, unit...}

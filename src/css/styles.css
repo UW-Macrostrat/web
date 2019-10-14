@@ -61,9 +61,7 @@ body, .main-container, #react, #app-holder {
 .searchresult-item {
   font-size: 0.95em !important;
 }
-.menu-options {
-  padding: 25px;
-}
+
 .active-layer {
   font-weight: bold;
 }

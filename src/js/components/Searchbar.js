@@ -110,8 +110,8 @@ class Searchbar extends Component {
         <Navbar className="searchbar">
           <Navbar.Group align={Alignment.LEFT}>
             <Navbar.Heading>Macrostrat</Navbar.Heading>
-            <Button icon="layers"
-              aria-label="Layers" onClick={toggleMenu} minimal />
+            <Button icon="menu"
+              aria-label="Menu" onClick={toggleMenu} minimal />
           </Navbar.Group>
           <Navbar.Group align={Alignment.RIGHT}>
            <InputGroup

@@ -16,6 +16,7 @@ import LineIcon from './icons/LineIcon'
 import ElevationIcon from './icons/ElevationIcon'
 import FossilIcon from './icons/FossilIcon'
 import BedrockIcon from './icons/BedrockIcon'
+import {Button, ButtonGroup} from '@blueprintjs/core'
 import {CloseableCard} from './CloseableCard'
 
 class Menu extends Component {
@@ -42,6 +43,13 @@ class Menu extends Component {
         title="Layers"
         transitionDuration={exitTransition}
       >
+        <CloseableCard.Header>
+          <ButtonGroup>
+            <Button minimal icon="layers" text="Layers" />
+            <Button minimal icon="settings" text="Settings" />
+            <Button minimal icon="info-sign" text="About" />
+          </ButtonGroup>
+        </CloseableCard.Header>
         <div className="menu-content">
           <List>
             <div className="menu-options">
