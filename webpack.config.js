@@ -1,7 +1,9 @@
 const path = require('path')
+const {DefinePlugin} = require("webpack")
 const BrowserSyncPlugin = require('browser-sync-webpack-plugin')
 //UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const historyApiFallback = require('connect-history-api-fallback')
+const CopyPlugin = require('copy-webpack-plugin')
 
 let mode = 'development'
 
@@ -9,6 +11,9 @@ let browserSync = new BrowserSyncPlugin({
   server: { baseDir: './' },
   middleware: [ historyApiFallback() ]
 })
+
+const cesiumSource = 'node_modules/cesium/Source';
+const cesiumWorkers = '../Build/Cesium/Workers';
 
 //uglify = new UglifyJsPlugin()
 
@@ -65,9 +70,22 @@ module.exports = {
   entry: {
     'js/bundle': "./src/js/index.js"
   },
+  node: {
+    fs: 'empty'
+  },
   output: {
     path: path.join(__dirname,'/dist/'),
-    filename: "[name].js"
+    filename: "[name].js",
+    sourcePrefix: ''
   },
-  plugins: [browserSync]
+  plugins: [
+    browserSync,
+    new CopyPlugin([ { from: path.join(cesiumSource, cesiumWorkers), to: 'Workers' } ]),
+    new CopyPlugin([ { from: path.join(cesiumSource, 'Assets'), to: 'Assets' } ]),
+    new CopyPlugin([ { from: path.join(cesiumSource, 'Widgets'), to: 'Widgets' } ]),
+    new DefinePlugin({
+        // Define relative base path in cesium for loading assets
+        CESIUM_BASE_URL: JSON.stringify('/3d')
+    })
+  ]
 }
