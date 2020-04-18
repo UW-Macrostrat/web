@@ -34,7 +34,7 @@ class CesiumTestMapPage extends Component {
       //baseLayerPicker : false,
       vrButton: true,
       geocoder: false,
-      skyAtmosphere: false,
+      //skyAtmosphere: true,
       animation: false,
       timeline: false,
       // Makes cesium not render high fps all the time
