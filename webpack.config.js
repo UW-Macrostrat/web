@@ -35,6 +35,7 @@ let coffeeLoader = {
 module.exports = {
   mode: mode,
   module: {
+    unknownContextCritical: false,
     rules: [
       {test: /\.coffee$/, use: [babelLoader, coffeeLoader], exclude},
       {test: /\.(js|jsx)$/, use: [babelLoader], exclude},
@@ -65,7 +66,11 @@ module.exports = {
     ]
   },
   resolve: {
-    extensions: [".coffee", ".js"]
+    extensions: [".coffee", ".js"],
+    alias: {
+        // CesiumJS module name
+        cesium: path.resolve(__dirname, cesiumSource)
+    }
   },
   entry: {
     'js/bundle': "./src/js/index.js"
@@ -78,6 +83,10 @@ module.exports = {
     filename: "[name].js",
     sourcePrefix: ''
   },
+  amd: {
+      // Enable webpack-friendly use of require in Cesium
+      toUrlUndefined: true
+  },
   plugins: [
     browserSync,
     new CopyPlugin([ { from: path.join(cesiumSource, cesiumWorkers), to: 'Workers' } ]),
@@ -85,7 +94,7 @@ module.exports = {
     new CopyPlugin([ { from: path.join(cesiumSource, 'Widgets'), to: 'Widgets' } ]),
     new DefinePlugin({
         // Define relative base path in cesium for loading assets
-        CESIUM_BASE_URL: JSON.stringify('/3d')
+        CESIUM_BASE_URL: JSON.stringify("/dist/")
     })
   ]
 }
