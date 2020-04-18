@@ -8,6 +8,7 @@ import {
 import '../../styles/index.styl'
 import MapPage from './MapPage'
 import ColumnPage from '../../columns'
+import CesiumTestMapPage from './Cesium-Page'
 
 class App extends Component {
   constructor(props) {
@@ -19,6 +20,7 @@ class App extends Component {
       <Router>
         <div id="app-holder">
           <Route path="/map" component={MapPage} />
+          <Route path="/3d" component={CesiumTestMapPage} />
           <Route path="/columns" component={ColumnPage} />
           <Route exact path="/" render={() => <Redirect to="/map" />} />
         </div>
