@@ -29,17 +29,27 @@ class CesiumTestMapPage extends Component {
     var opts = {
       terrainProvider: Cesium.createWorldTerrain(),
       imageryProvider : Cesium.createWorldImagery({
-          style : Cesium.IonWorldImageryStyle.AERIAL_WITH_LABELS
+          style : Cesium.IonWorldImageryStyle.AERIAL
       }),
-      baseLayerPicker : false,
+      //baseLayerPicker : false,
+      vrButton: true,
+      geocoder: false,
+      skyAtmosphere: false,
       animation: false,
       timeline: false,
       // Makes cesium not render high fps all the time
-      requestRenderMode : true
+      requestRenderMode : true,
+      // Use full scene buffer (respecting pixel ratio) if this is false
+      useBrowserRecommendedResolution: false
     }
+
 
     Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIzODk2OGM4ZS1mMzlkLTRlNjAtYWQxZS1mODU3YWJjMWFhNzQiLCJpZCI6MjYwODYsInNjb3BlcyI6WyJhc3IiLCJnYyJdLCJpYXQiOjE1ODcxOTU1MTh9._ILy51LI2aF7Nxvas9RQDkhqOP4Tp92uTYAtvewVvNE';
     var viewer = new Cesium.Viewer('cesiumContainer', opts)
+    //viewer.resolutionScale = 2
+    //viewer.scene.globe.enableLighting = true
+    //viewer.canvas.style.imageRendering = false
+
     var geoLayer = viewer.imageryLayers.addImageryProvider(geology);
     geoLayer.alpha = 0.5;
 
