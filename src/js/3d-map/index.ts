@@ -6,7 +6,7 @@ import "./main.styl"
 
 class CesiumTestMapPage extends Component {
   render() {
-    return h("div.cesiumContainer#cesiumContainer")
+    return h("div.cesium-container#cesiumContainer")
   }
 
   componentDidMount() {
