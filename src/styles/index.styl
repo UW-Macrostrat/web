@@ -1,15 +1,15 @@
-@require "./global.styl"
-@require "./searchbar.styl"
-@require "./infodrawer.styl"
-@require "./ui-components.styl"
+:global
+  @require "./global.styl"
+  @require "./searchbar.styl"
+  @require "./infodrawer.styl"
+  @require "./ui-components.styl"
 
-div.ui
-  position relative
-  margin 20px
-  margin-bottom 0
-  // Make sure we can still click
-  // on map in background
-  pointer-events none
-  &>div
-    pointer-events all
-
+  div.ui
+    position relative
+    margin 20px
+    margin-bottom 0
+    // Make sure we can still click
+    // on map in background
+    pointer-events none
+    &>div
+      pointer-events all
