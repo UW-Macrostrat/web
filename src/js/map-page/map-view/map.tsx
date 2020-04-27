@@ -1,7 +1,7 @@
-import React, { Component } from 'react'
-import { SETTINGS } from '../Settings'
-import { mapStyle } from '../MapStyle'
-import { normalizeLng } from '../utils'
+import { Component } from 'react'
+import { SETTINGS } from '../../Settings'
+import { mapStyle } from '../../MapStyle'
+import h from '@macrostrat/hyper'
 
 const maxClusterZoom = 6
 const highlightLayers = [
@@ -841,11 +841,7 @@ class Map extends Component {
   }
 
   render() {
-    return (
-      <div className='map-holder'>
-        <div id='map'></div>
-      </div>
-    )
+    return h("div.map-holder", null, h("div#map"))
   }
 }
 

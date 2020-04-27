@@ -1,6 +1,14 @@
 import { connect } from 'react-redux'
-import { queryMap, closeInfoDrawer, getFilteredColumns, getElevation, getPBDB, mapMoved, resetPbdb } from '../actions'
-import Map from '../components/Map'
+import {
+  queryMap,
+  closeInfoDrawer,
+  getFilteredColumns,
+  getElevation,
+  getPBDB,
+  mapMoved,
+  resetPbdb
+} from '../../actions'
+import Map from './map'
 
 const mapStateToProps = (state) => {
   return {
