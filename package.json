@@ -8,7 +8,10 @@
     "dev": "webpack --watch",
     "preinstall": "linklocal && linklocal --list | bulk -c 'npm install --suppress-warnings'"
   },
-  "author": "Daven Quinn <daven.quinn@wisc.edu>",
+  "authors": [
+    "John Czaplewski <jczaplewski@wisc.edu>",
+    "Daven Quinn <daven.quinn@wisc.edu>"
+  ],
   "license": "MIT",
   "devDependencies": {
     "@babel/core": "^7.9.0",
@@ -41,6 +44,7 @@
     "@material-ui/core": "^3.1.0",
     "@material-ui/icons": "^3.0.1",
     "@types/react-redux": "^7.1.7",
+    "@znemz/cesium-navigation": "^4.0.0",
     "axios": "^0.17.1",
     "classnames": "^2.2.6",
     "d3": "^4.13.0",
