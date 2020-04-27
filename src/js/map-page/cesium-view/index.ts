@@ -76,6 +76,18 @@ const CesiumView = (props)=>{
         }
     });
 
+    var clickedPoint = viewer.scene.primitives.add(new Cesium.PointPrimitiveCollection());
+
+    const addPoint = (x: number, y: number)=>{
+      clickedPoint.removeAll()
+      clickedPoint.add({
+          position : new Cesium.Cartesian3.fromDegrees(x, y),
+          color : Cesium.Color.DODGERBLUE,
+          outlineColor : Cesium.Color.WHITE,
+          outlineWidth : 2
+      });
+    }
+
     var handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
   	handler.setInputAction(function(movement) {
   		var cartesian = viewer.camera.pickEllipsoid(movement.position, viewer.scene.globe.ellipsoid);
@@ -85,7 +97,7 @@ const CesiumView = (props)=>{
   			const latitude = Cesium.Math.toDegrees(cartographic.latitude);
         console.log(longitude, latitude);
         dispatchAction(queryMap(longitude, latitude, 7, null))
-
+        addPoint(longitude, latitude)
   		}
   	}, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
