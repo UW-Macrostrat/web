@@ -1,6 +1,6 @@
 {
-  "name": "web-v3",
-  "version": "3.0.0",
+  "name": "web-frontend",
+  "version": "4.0.0",
   "description": "Macrostrat map interface",
   "main": "index.html",
   "scripts": {
@@ -8,7 +8,7 @@
     "dev": "webpack --watch",
     "postinstall": "linklocal --link -r && linklocal --list -r | bulk -c 'npm install --production'"
   },
-  "author": "John J Czaplewski <jczaplewski@wisc.edu>",
+  "author": "Daven Quinn <daven.quinn@wisc.edu>",
   "license": "MIT",
   "devDependencies": {
     "@babel/core": "^7.1.2",
