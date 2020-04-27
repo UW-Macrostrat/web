@@ -1,10 +1,12 @@
 import { useEffect } from 'react'
-import "cesium/Widgets/widgets.css"
-import * as Cesium from "cesium/Cesium"
+import "cesiumSource/Widgets/widgets.css"
+import * as Cesium from "cesiumSource/Cesium"
 import {hyperStyled} from '@macrostrat/hyper'
 import styles from "./main.styl"
 const h = hyperStyled(styles)
 import {useSelector} from 'react-redux'
+import NavigationMixin from "@znemz/cesium-navigation"
+import "@znemz/cesium-navigation/dist/index.css"
 
 const CesiumView = (props)=>{
   const mapOpts = useSelector(s => s.update)
@@ -27,8 +29,14 @@ const CesiumView = (props)=>{
       imageryProvider : Cesium.createWorldImagery({
         style : Cesium.IonWorldImageryStyle.AERIAL
       }),
-      //baseLayerPicker : false,
-      vrButton: true,
+      baseLayerPicker : false,
+      fullscreenButton: false,
+      homeButton: false,
+      infoBox: false,
+      navigationInstructionsInitiallyVisible: false,
+      navigationHelpButton: false,
+      scene3DOnly: true,
+      vrButton: false,
       geocoder: false,
       //skyAtmosphere: true,
       animation: false,
@@ -45,6 +53,8 @@ const CesiumView = (props)=>{
     //viewer.resolutionScale = 2
     //viewer.scene.globe.enableLighting = true
     //viewer.canvas.style.imageRendering = false
+
+    viewer.extend(NavigationMixin, {})
 
     var geoLayer = viewer.imageryLayers.addImageryProvider(geology);
     geoLayer.alpha = 0.5;
