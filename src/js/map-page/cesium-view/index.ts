@@ -4,13 +4,18 @@ import * as Cesium from "cesiumSource/Cesium"
 import {hyperStyled} from '@macrostrat/hyper'
 import styles from "./main.styl"
 const h = hyperStyled(styles)
-import {useSelector} from 'react-redux'
+import {useSelector, useDispatch } from 'react-redux'
 import NavigationMixin from "@znemz/cesium-navigation"
 import "@znemz/cesium-navigation/dist/index.css"
+import {
+  queryMap
+} from '../../actions'
 
 const CesiumView = (props)=>{
   const mapOpts = useSelector(s => s.update)
   const {mapXYZ} = mapOpts
+
+  const dispatchAction = useDispatch()
 
   useEffect(()=>{
     var geology = new Cesium.WebMapTileServiceImageryProvider({
@@ -70,6 +75,20 @@ const CesiumView = (props)=>{
             roll : 0.0                             // default value
         }
     });
+
+    var handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+  	handler.setInputAction(function(movement) {
+  		var cartesian = viewer.camera.pickEllipsoid(movement.position, viewer.scene.globe.ellipsoid);
+  		if (cartesian) {
+  			var cartographic = Cesium.Cartographic.fromCartesian(cartesian);
+  			const longitude = Cesium.Math.toDegrees(cartographic.longitude);
+  			const latitude = Cesium.Math.toDegrees(cartographic.latitude);
+        console.log(longitude, latitude);
+        dispatchAction(queryMap(longitude, latitude, 7, null))
+
+  		}
+  	}, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
 
 
   })
