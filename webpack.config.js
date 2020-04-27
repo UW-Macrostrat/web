@@ -15,7 +15,6 @@ let browserSync = new BrowserSyncPlugin({
 let babelLoader = {
   loader: 'babel-loader',
   options: {
-    presets: ['@babel/preset-env','@babel/preset-react'],
     sourceMap: mode == 'development'
   }
 }
@@ -31,8 +30,7 @@ module.exports = {
   mode: mode,
   module: {
     rules: [
-      {test: /\.coffee$/, use: [babelLoader, coffeeLoader], exclude},
-      {test: /\.(js|jsx)$/, use: [babelLoader], exclude},
+      {test: /\.(js|jsx|ts|tsx)$/, use: [babelLoader], exclude},
       {test: /\.styl$/, use: ["style-loader","css-loader", "stylus-loader"]},
       {test: /\.css$/, use: ["style-loader", "css-loader"]},
       {
@@ -60,10 +58,10 @@ module.exports = {
     ]
   },
   resolve: {
-    extensions: [".coffee", ".js"]
+    extensions: [".ts", ".tsx", ".js", ".jsx"]
   },
   entry: {
-    'js/bundle': "./src/js/index.js"
+    'js/bundle': "./src/js/index.tsx"
   },
   output: {
     path: path.join(__dirname,'/dist/'),
