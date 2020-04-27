@@ -6,7 +6,7 @@
   "scripts": {
     "bundle": "webpack",
     "dev": "webpack --watch",
-    "postinstall": "linklocal --link -r && linklocal --list -r | bulk -c 'npm install --production'"
+    "preinstall": "linklocal && linklocal --list | bulk -c 'npm install --suppress-warnings'"
   },
   "author": "Daven Quinn <daven.quinn@wisc.edu>",
   "license": "MIT",
@@ -20,6 +20,7 @@
     "@babel/preset-typescript": "^7.9.0",
     "babel-loader": "^8.0.4",
     "babel-polyfill": "^6.26.0",
+    "browser-sync": "^2.26.7",
     "browser-sync-webpack-plugin": "^2.2.2",
     "bulk": "^2.0.1",
     "connect-history-api-fallback": "^1.5.0",

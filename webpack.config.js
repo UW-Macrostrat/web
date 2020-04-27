@@ -61,7 +61,7 @@ module.exports = {
     extensions: [".ts", ".tsx", ".js", ".jsx"]
   },
   entry: {
-    'js/bundle': "./src/js/index.js"
+    'js/bundle': "./src/js/index.tsx"
   },
   output: {
     path: path.join(__dirname,'/dist/'),
