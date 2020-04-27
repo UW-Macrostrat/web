@@ -5,7 +5,7 @@ import {hyperStyled} from '@macrostrat/hyper'
 import styles from "./main.styl"
 const h = hyperStyled(styles)
 
-class CesiumTestMapPage extends Component {
+class CesiumView extends Component {
   render() {
     return h("div.cesium-container#cesiumContainer")
   }
@@ -52,4 +52,4 @@ class CesiumTestMapPage extends Component {
   }
 }
 
-export default CesiumTestMapPage
+export default CesiumView;

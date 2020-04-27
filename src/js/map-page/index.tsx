@@ -9,6 +9,7 @@ import FiltersContainer from '../containers/FiltersContainer'
 import AboutContainer from '../containers/AboutContainer'
 import ElevationChartContainer from '../containers/ElevationChartContainer'
 import {ButtonGroup, Button} from '@blueprintjs/core'
+import CesiumView from './cesium-view'
 
 enum MapBackend { MAPBOX, CESIUM }
 
@@ -17,7 +18,7 @@ const MapView = (props: {backend: MapBackend}) =>{
   case MapBackend.MAPBOX:
     return h(MapContainer)
   case MapBackend.CESIUM:
-    return h("div")
+    return h(CesiumView)
   }
 }
 

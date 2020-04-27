@@ -14,7 +14,6 @@ const App = ()=>{
   return h(Router, [
     h('div#app-holder', [
       h(Route, {path: "/map", component: MapPage}),
-      h(Route, {path: "/3d", component: CesiumTestMapPage}),
       h(Route, {exact: true, path: "/", render: () => h(Redirect, {to: "/map"})})
     ])
   ])
