@@ -29,7 +29,7 @@ type TypeSelectorProps = {
 
 const MapTypeSelector = (props: TypeSelectorProps)=>{
   const {backend, setBackend} = props
-  return h(ButtonGroup, [
+  return h(ButtonGroup, {className: 'map-type-selector'}, [
     h(Button, {
       active: backend==MapBackend.MAPBOX,
       onClick() { setBackend(MapBackend.MAPBOX)}
@@ -54,7 +54,6 @@ const MapPage = ()=> {
           <MenuContainer/>
           <FiltersContainer/>
           <AboutContainer/>
-          <div className="spacer" />
           <MapTypeSelector backend={backend} setBackend={setBackend} />
         </div>
         <InfoDrawerContainer/>

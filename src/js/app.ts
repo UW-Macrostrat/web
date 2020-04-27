@@ -7,7 +7,6 @@ import h from '@macrostrat/hyper'
 
 import '../styles/index.styl'
 import MapPage from './map-page'
-import CesiumTestMapPage from './3d-map'
 //import ColumnPage from '../../columns'
 
 const App = ()=>{

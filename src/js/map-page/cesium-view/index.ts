@@ -1,16 +1,15 @@
-import { Component } from 'react'
+import { useEffect } from 'react'
 import "cesium/Widgets/widgets.css"
 import * as Cesium from "cesium/Cesium"
 import {hyperStyled} from '@macrostrat/hyper'
 import styles from "./main.styl"
 const h = hyperStyled(styles)
+import {useSelector} from 'react-redux'
 
-class CesiumView extends Component {
-  render() {
-    return h("div.cesium-container#cesiumContainer")
-  }
+const CesiumView = (props)=>{
+  const mapOpts = useSelector(s => s.update)
 
-  componentDidMount() {
+  useEffect(()=>{
     var geology = new Cesium.WebMapTileServiceImageryProvider({
   		url : 'https://macrostrat.org/api/v2/maps/burwell/emphasized/{TileMatrix}/{TileCol}/{TileRow}/tile.png',
   		style : 'default',
@@ -49,7 +48,8 @@ class CesiumView extends Component {
     var geoLayer = viewer.imageryLayers.addImageryProvider(geology);
     geoLayer.alpha = 0.5;
 
-  }
+  })
+  return h("div.cesium-container#cesiumContainer")
 }
 
 export default CesiumView;
