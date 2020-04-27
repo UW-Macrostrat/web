@@ -54,6 +54,7 @@ const MapPage = ()=> {
           <MenuContainer/>
           <FiltersContainer/>
           <AboutContainer/>
+          <div className="spacer" />
           <MapTypeSelector backend={backend} setBackend={setBackend} />
         </div>
         <InfoDrawerContainer/>

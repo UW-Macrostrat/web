@@ -8,6 +8,7 @@ import {useSelector} from 'react-redux'
 
 const CesiumView = (props)=>{
   const mapOpts = useSelector(s => s.update)
+  const {mapXYZ} = mapOpts
 
   useEffect(()=>{
     var geology = new Cesium.WebMapTileServiceImageryProvider({
@@ -47,6 +48,19 @@ const CesiumView = (props)=>{
 
     var geoLayer = viewer.imageryLayers.addImageryProvider(geology);
     geoLayer.alpha = 0.5;
+
+    const clon = parseFloat(mapXYZ.x)
+    const clat = parseFloat(mapXYZ.y)
+    var extent = Cesium.Cartesian3.fromDegrees(clon, clat, 800000)
+    viewer.camera.setView({
+        destination : extent,
+        orientation: {
+            heading : Cesium.Math.toRadians(0), // east, default value is 0.0 (north)
+            pitch : Cesium.Math.toRadians(-90),    // default value (looking down)
+            roll : 0.0                             // default value
+        }
+    });
+
 
   })
   return h("div.cesium-container#cesiumContainer")
