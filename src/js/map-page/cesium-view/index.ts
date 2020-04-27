@@ -29,8 +29,14 @@ const CesiumView = (props)=>{
       imageryProvider : Cesium.createWorldImagery({
         style : Cesium.IonWorldImageryStyle.AERIAL
       }),
-      //baseLayerPicker : false,
-      vrButton: true,
+      baseLayerPicker : false,
+      fullscreenButton: false,
+      homeButton: false,
+      infoBox: false,
+      navigationInstructionsInitiallyVisible: false,
+      navigationHelpButton: false,
+      scene3DOnly: true,
+      vrButton: false,
       geocoder: false,
       //skyAtmosphere: true,
       animation: false,
