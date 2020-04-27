@@ -1,17 +1,12 @@
-import React, { Component } from 'react'
-import "./cesium-page.styl"
+import { Component } from 'react'
 import "cesium/Widgets/widgets.css"
+import h from '@macrostrat/hyper'
 import * as Cesium from "cesium/Cesium"
+import "./main.styl"
 
 class CesiumTestMapPage extends Component {
-  constructor(props) {
-    super(props)
-  }
-
   render() {
-    return (
-      <div className="cesium-container" id="cesiumContainer"></div>
-    )
+    return h("div.cesiumContainer#cesiumContainer")
   }
 
   componentDidMount() {
@@ -29,7 +24,7 @@ class CesiumTestMapPage extends Component {
     var opts = {
       terrainProvider: Cesium.createWorldTerrain(),
       imageryProvider : Cesium.createWorldImagery({
-          style : Cesium.IonWorldImageryStyle.AERIAL
+        style : Cesium.IonWorldImageryStyle.AERIAL
       }),
       //baseLayerPicker : false,
       vrButton: true,

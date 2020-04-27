@@ -10,7 +10,7 @@ import thunkMiddleware from 'redux-thunk'
 import { createStore, applyMiddleware } from 'redux'
 import reducers from './reducers'
 import { getInitialMapState } from './actions'
-import App from './components/App'
+import App from './app'
 
 // Create the data store
 let store = createStore(
