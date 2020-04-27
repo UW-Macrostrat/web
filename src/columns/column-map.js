@@ -18,7 +18,7 @@ import {zoom} from 'd3-zoom';
 import {get} from 'axios';
 import {feature} from 'topojson';
 import classNames from 'classnames';
-import {MacrostratColumnConsumer} from './column-data.coffee';
+import {MacrostratColumnConsumer} from './column-data';
 import {SVGComponent} from 'stratiform';
 
 class ColumnPath__ extends Component {
