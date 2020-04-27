@@ -24,7 +24,7 @@
     "browser-sync-webpack-plugin": "^2.2.2",
     "bulk": "^2.0.1",
     "connect-history-api-fallback": "^1.5.0",
-    "css-loader": "^1.0.0",
+    "css-loader": "^3.5.3",
     "linklocal": "^2.8.2",
     "style-loader": "^0.23.1",
     "stylus": "^0.54.5",
