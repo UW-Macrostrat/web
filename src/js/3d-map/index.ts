@@ -1,8 +1,9 @@
 import { Component } from 'react'
 import "cesium/Widgets/widgets.css"
-import h from '@macrostrat/hyper'
 import * as Cesium from "cesium/Cesium"
-import "./main.styl"
+import {hyperStyled} from '@macrostrat/hyper'
+import styles from "./main.styl"
+const h = hyperStyled(styles)
 
 class CesiumTestMapPage extends Component {
   render() {

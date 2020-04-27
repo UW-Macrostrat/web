@@ -24,12 +24,17 @@ let babelLoader = {
   }
 }
 
-let exclude = /node_modules/
-
-let coffeeLoader = {
-  loader: 'coffee-loader',
-  options: {sourceMap: mode == 'development'}
+const cssModuleLoader = {
+  loader: 'css-loader',
+  options: {
+    modules: {
+      mode: 'local',
+      localIdentName: '[path][name]__[local]--[hash:base64:5]',
+    }
+  }
 }
+
+let exclude = /node_modules/
 
 module.exports = {
   mode: mode,
@@ -37,8 +42,9 @@ module.exports = {
     unknownContextCritical: false,
     rules: [
       {test: /\.(js|jsx|ts|tsx)$/, use: [babelLoader], exclude},
-      {test: /\.styl$/, use: ["style-loader","css-loader", "stylus-loader"]},
-      {test: /\.css$/, use: ["style-loader", "css-loader"]},
+      {test: /\.styl$/, use: ["style-loader", cssModuleLoader, "stylus-loader"], exclude},
+      {test: /\.css$/, use: ["style-loader", cssModuleLoader], exclude},
+      {test: /\.css$/, use: ["style-loader", 'css-loader']},
       {
         test: /\.(eot|svg|ttf|woff|woff2)$/,
         use: [
