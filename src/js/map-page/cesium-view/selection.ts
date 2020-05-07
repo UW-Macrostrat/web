@@ -19,7 +19,9 @@ const MapClickHandler = ()=>{
   const {viewer} = useCesium()
 
   const clickPoint = (movement)=>{
-    var cartesian = viewer.camera.pickEllipsoid(movement.position, viewer.scene.globe.ellipsoid);
+    const ray = viewer.camera.getPickRay(movement.position)
+    var cartesian = viewer.scene.globe.pick(ray, viewer.scene)
+    //var cartesian = viewer.scene.pickPosition(movement.position);
 
     var cartographic = Cesium.Cartographic.fromCartesian(cartesian);
     const longitude = Cesium.Math.toDegrees(cartographic.longitude);
@@ -50,6 +52,7 @@ const SelectedPoint = (props)=>{
     // TODO: Numbers should be guaranteed in typescript
     parseFloat(infoMarkerLng),
     parseFloat(infoMarkerLat)
+    // need to also get height
   )
   let pointGraphics  = {
     color : Cesium.Color.DODGERBLUE,

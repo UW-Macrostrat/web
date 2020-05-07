@@ -6,7 +6,8 @@ const h = hyperStyled(styles)
 import {GlobeViewer} from './viewer'
 import {GeologyLayer} from './geology-layer'
 import {MapClickHandler, SelectedPoint} from './selection'
-import {CameraFlyTo, Camera} from 'resium'
+import {CameraFlyTo} from 'resium'
+import {useState} from 'react'
 import {useSelector} from 'react-redux'
 
 Cesium.Ion.defaultAccessToken = process.env.CESIUM_ACCESS_TOKEN;
@@ -18,7 +19,9 @@ const FlyToInitialPosition = (props)=>{
   const mpos = mapOpts?.mapXYZ
   if (mpos == null) return null
 
-  console.log(mpos)
+  // Make sure we deactivate this once initial position is reached
+  //const currentPos = useState(null)
+
 
   const rangeAtZoom18 = 200
   const zoom = parseFloat(mpos.z)
@@ -29,7 +32,7 @@ const FlyToInitialPosition = (props)=>{
     parseFloat(mpos.x), parseFloat(mpos.y), mscale
   )
 
-  return h(CameraFlyTo, {destination, duration: 0})
+  return h(CameraFlyTo, {destination, duration: 0, once: true})
 }
 
 
