@@ -6,10 +6,32 @@ const h = hyperStyled(styles)
 import {GlobeViewer} from './viewer'
 import {GeologyLayer} from './geology-layer'
 import {MapClickHandler, SelectedPoint} from './selection'
+import {CameraFlyTo, Camera} from 'resium'
+import {useSelector} from 'react-redux'
 
 Cesium.Ion.defaultAccessToken = process.env.CESIUM_ACCESS_TOKEN;
 
 const terrainProvider = Cesium.createWorldTerrain();
+
+const FlyToInitialPosition = (props)=>{
+  const mapOpts = useSelector(s => s.update)
+  const mpos = mapOpts?.mapXYZ
+  if (mpos == null) return null
+
+  console.log(mpos)
+
+  const rangeAtZoom18 = 200
+  const zoom = parseFloat(mpos.z)
+  const zfac = 18-zoom
+  const mscale = rangeAtZoom18*Math.pow(2,zfac)
+
+  const destination = new Cesium.Cartesian3.fromDegrees(
+    parseFloat(mpos.x), parseFloat(mpos.y), mscale
+  )
+
+  return h(CameraFlyTo, {destination, duration: 0})
+}
+
 
 const CesiumView = (props)=>{
   return h(GlobeViewer, {
@@ -18,8 +40,8 @@ const CesiumView = (props)=>{
   }, [
     h(GeologyLayer, {alpha: 0.5}),
     h(MapClickHandler),
-    h(SelectedPoint)
-    //h(Entity, {position, point: pointGraphics})
+    h(SelectedPoint),
+    h(FlyToInitialPosition)
   ])
 }
 
