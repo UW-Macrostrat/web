@@ -8,7 +8,6 @@ import styles from "./main.styl"
 const h = hyperStyled(styles)
 import {useSelector, useDispatch } from 'react-redux'
 import {GlobeViewer} from './viewer'
-
 import {
   ImageryLayer,
   ScreenSpaceEventHandler,
@@ -19,6 +18,8 @@ import {
 import {
   queryMap
 } from '../../actions'
+
+Cesium.Ion.defaultAccessToken = process.env.CESIUM_ACCESS_TOKEN;
 
 const terrainProvider = Cesium.createWorldTerrain();
 
