@@ -22,7 +22,6 @@ class MapPage extends Component {
             <SearchbarContainer/>
             <MenuContainer/>
             <FiltersContainer/>
-            <AboutContainer/>
           </div>
           <InfoDrawerContainer/>
           <ElevationChartContainer/>
