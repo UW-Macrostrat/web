@@ -1,114 +1,129 @@
-import React, { Component } from 'react'
-import List from '@material-ui/core/List'
-import ListItem from '@material-ui/core/ListItem'
-import ListItemText from '@material-ui/core/ListItemText'
-import ListItemIcon from '@material-ui/core/ListItemIcon'
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction'
-import Divider from '@material-ui/core/Divider'
-import CloseIcon from '@material-ui/icons/Close'
-import IconButton from '@material-ui/core/IconButton'
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined'
-import LocationOnIcon from '@material-ui/icons/LocationOn'
-import SatelliteIcon from '@material-ui/icons/Satellite'
-import Typography from '@material-ui/core/Typography'
+import h from '@macrostrat/hyper'
 import ColumnIcon from './icons/ColumnIcon'
 import LineIcon from './icons/LineIcon'
 import ElevationIcon from './icons/ElevationIcon'
 import FossilIcon from './icons/FossilIcon'
 import BedrockIcon from './icons/BedrockIcon'
-import {Button, ButtonGroup} from '@blueprintjs/core'
+import {Button, ButtonGroup, Alignment, IButtonProps} from '@blueprintjs/core'
 import {CloseableCard} from './CloseableCard'
+import {useSelector, useDispatch} from 'react-redux'
+import {MenuPanel} from '../reducers/menu'
+import AboutText from './About'
+import {SettingsPanel} from './settings-panel'
 
-class Menu extends Component {
-  constructor(props) {
-    super(props)
-    this.toggleElevationChart = () => {
-      this.props.toggleMenu()
-      this.props.toggleElevationChart()
-    }
+type ListButtonProps = IButtonProps & {icon: React.ComponentType | Pick<IButtonProps,"icon">}
+const ListButton = (props: ListButtonProps)=>{
+  let {icon, ...rest} = props
+  if (typeof props.icon != 'string') {
+    icon = h(props.icon, {size: 20})
+  }
+  return h(Button, {...rest, icon})
+}
+
+const MinimalButton = (props)=>h(Button, {...props, minimal: true})
+
+const TabButton = (props: IButtonProps & {tab: MenuPanel})=>{
+  const {tab, ...rest} = props
+  const dispatch = useDispatch()
+  const onClick = ()=>dispatch({type: 'set-panel', panel: tab})
+  const active = useSelector(state => state.menu.activePanel == tab)
+  return h(MinimalButton, {active, onClick, ...rest})
+}
+
+const LayerButton = (props: ListButtonProps & {layer: string} )=>{
+  const {layer, ...rest} = props
+  const active = useSelector(state => state.update["mapHas"+layer])
+  const dispatch = useDispatch()
+  const onClick = ()=>dispatch({type: "TOGGLE_"+layer.toUpperCase()})
+  return h(ListButton, {
+    active,
+    onClick,
+    text: layer,
+    ...rest
+  })
+}
+
+const MenuGroup = (props)=> h(ButtonGroup, {
+  className: "menu-options",
+  vertical: true,
+  minimal: true,
+  alignText: Alignment.LEFT,
+  large: true,
+  ...props
+})
+
+const LayerList = (props)=>{
+  const dispatch = useDispatch()
+
+  const toggleElevationChart = ()=>{
+    dispatch({type: "TOGGLE_MENU"})
+    dispatch({type: "TOGGLE_ELEVATION_CHART"})
   }
 
-  render() {
-    const { menuOpen, toggleMenu, toggleBedrock, mapHasBedrock, toggleLines, mapHasLines, toggleSatellite, mapHasSatellite, toggleColumns, mapHasColumns, toggleAbout, toggleElevationChart, toggleFossils, mapHasFossils } = this.props
-    let exitTransition = {
-      exit: 300
-    }
-    const satelliteButtonClasses = {
-      'root': 'satellite-icon'
-    }
-    return (
-      <CloseableCard
-        isOpen={menuOpen}
-        onClose={toggleMenu}
-        title="Layers"
-        transitionDuration={exitTransition}
-      >
-        <CloseableCard.Header>
-          <ButtonGroup>
-            <Button minimal icon="layers" text="Layers" />
-            <Button minimal icon="settings" text="Settings" />
-            <Button minimal icon="info-sign" text="About" />
-          </ButtonGroup>
-        </CloseableCard.Header>
-        <div className="menu-content">
-          <List>
-            <div className="menu-options">
-              <ListItem button onClick={toggleBedrock} style={{ backgroundColor: (mapHasBedrock ? '#eee' : 'transparent') }}>
-                <ListItemIcon>
-                  <BedrockIcon size={25} />
-                </ListItemIcon>
-                <ListItemText primary="Bedrock"/>
-              </ListItem>
-              <ListItem button onClick={toggleLines} style={{ backgroundColor: (mapHasLines ? '#eee' : 'transparent') }}>
-                <ListItemIcon>
-                  <LineIcon size={25} />
-                </ListItemIcon>
-                <ListItemText primary="Lines"/>
-              </ListItem>
-              <ListItem button onClick={toggleColumns} style={{ backgroundColor: (mapHasColumns ? '#eee' : 'transparent') }}>
-                <ListItemIcon>
-                  <ColumnIcon size={25} />
-                </ListItemIcon>
-                <ListItemText primary="Columns"/>
-              </ListItem>
-              <ListItem button onClick={toggleFossils} style={{ backgroundColor: (mapHasFossils ? '#eee' : 'transparent') }}>
-                <ListItemIcon>
-                  <FossilIcon size={25} />
-                </ListItemIcon>
-                <ListItemText primary="Fossils"/>
-              </ListItem>
-              <ListItem button onClick={toggleSatellite} style={{ backgroundColor: (mapHasSatellite ? '#eee' : 'transparent') }}>
-                <ListItemIcon classes={satelliteButtonClasses}>
-                  <SatelliteIcon />
-                </ListItemIcon>
-                <ListItemText primary="Satellite"/>
-              </ListItem>
-              <Divider light/>
-              <ListItem button onClick={this.toggleElevationChart}>
-                <ListItemIcon>
-                  <ElevationIcon size={25} />
-                </ListItemIcon>
-                <ListItemText primary="Elevation Profile"/>
-              </ListItem>
-              <ListItem button disabled>
-                <ListItemIcon>
-                  <LocationOnIcon />
-                </ListItemIcon>
-                <ListItemText primary="My location"/>
-              </ListItem>
-              <Divider light/>
-              <ListItem button onClick={toggleAbout}>
-                <ListItemIcon>
-                  <InfoOutlinedIcon />
-                </ListItemIcon>
-                <ListItemText primary="About"/>
-              </ListItem>
-            </div>
-          </List>
-        </div>
-    </CloseableCard>
-    )
+  return h("div.menu-content", [
+    h(MenuGroup, [
+      h(LayerButton, {
+        layer: "Bedrock",
+        icon: BedrockIcon
+      }),
+      h(LayerButton, {
+        layer: "Lines",
+        icon: LineIcon
+      }),
+      h(LayerButton, {
+        layer: "Columns",
+        icon: ColumnIcon
+      }),
+      h(LayerButton, {
+        layer: "Fossils",
+        icon: FossilIcon
+      }),
+      h(LayerButton, {
+        layer: "Satellite",
+        icon: 'satellite'
+      }),
+    ]),
+    h(MenuGroup, [
+      h(ListButton, {disabled: true, icon: 'map-marker'}, "Your location"),
+      h(ListButton, {onClick: toggleElevationChart, icon: ElevationIcon}, "Elevation profile")
+    ])
+  ])
+}
+
+const PanelContent = (props: {activePanel: MenuPanel})=>{
+  const activePanel = useSelector(state => state.menu.activePanel)
+  switch (activePanel) {
+  case MenuPanel.LAYERS:
+    return h(LayerList)
+  case MenuPanel.SETTINGS:
+    return h(SettingsPanel)
+  case MenuPanel.ABOUT:
+    return h(AboutText)
   }
+  return null
+}
+
+const Menu = (props)=>{
+
+  const {menuOpen, toggleMenu} = props
+
+  let exitTransition = {exit: 300}
+
+  return h(CloseableCard, {
+    isOpen: menuOpen,
+    onClose: toggleMenu,
+    title: "Layers",
+    transitionDuration: exitTransition
+  }, [
+    h(CloseableCard.Header, [
+      h("div.buttons", [
+        h(TabButton, {icon: "layers", text: "Layers", tab: MenuPanel.LAYERS}),
+        h(TabButton, {icon: "settings", text: "Settings", tab: MenuPanel.SETTINGS}),
+        h(TabButton, {icon: "info-sign", text: "About" , tab: MenuPanel.ABOUT})
+      ])
+    ]),
+    h(PanelContent)
+  ])
 }
 
 export default Menu

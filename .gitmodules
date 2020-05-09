@@ -1,3 +1,6 @@
 [submodule "bundledDeps/stratiform"]
 	path = bundledDeps/stratiform
 	url = git://github.com/davenquinn/stratiform.git
+[submodule "bundledDeps/ui-components"]
+	path = bundledDeps/ui-components
+	url = git://github.com/UW-Macrostrat/ui-components.git

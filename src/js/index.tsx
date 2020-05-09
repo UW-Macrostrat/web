@@ -7,15 +7,17 @@ import React from 'react'
 import { render } from 'react-dom'
 import { Provider } from 'react-redux'
 import thunkMiddleware from 'redux-thunk'
-import { createStore, applyMiddleware } from 'redux'
+import { createStore, applyMiddleware, compose} from 'redux'
 import reducers from './reducers'
 import { getInitialMapState } from './actions'
 import App from './app'
 
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
+
 // Create the data store
 let store = createStore(
   reducers,
-  applyMiddleware(thunkMiddleware)
+  composeEnhancers(applyMiddleware(thunkMiddleware))
 )
 
 // Parse the URI on load

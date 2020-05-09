@@ -6,7 +6,6 @@ import SearchbarContainer from '../containers/SearchbarContainer'
 import MenuContainer from '../containers/MenuContainer'
 import InfoDrawerContainer from '../containers/InfoDrawerContainer'
 import FiltersContainer from '../containers/FiltersContainer'
-import AboutContainer from '../containers/AboutContainer'
 import ElevationChartContainer from '../containers/ElevationChartContainer'
 import {ButtonGroup, Button} from '@blueprintjs/core'
 import CesiumView from './cesium-view'
@@ -53,7 +52,6 @@ const MapPage = ()=> {
           <SearchbarContainer/>
           <MenuContainer/>
           <FiltersContainer/>
-          <AboutContainer/>
           <div className="spacer" />
           <MapTypeSelector backend={backend} setBackend={setBackend} />
         </div>
