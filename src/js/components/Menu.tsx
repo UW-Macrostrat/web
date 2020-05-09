@@ -29,12 +29,11 @@ const MinimalButton = (props)=>h(Button, {...props, minimal: true})
 
 const LayerButton = (props: ListButtonProps & {layer: string} )=>{
   const {layer, ...rest} = props
-  const active = useSelector(state => state["mapHas"+layer])
+  const active = useSelector(state => state.update["mapHas"+layer])
   const dispatch = useDispatch()
   const onClick = ()=>dispatch({type: "TOGGLE_"+layer.toUpperCase()})
   return h(ListButton, {
     active,
-    disabled: active,
     onClick,
     text: layer,
     ...rest

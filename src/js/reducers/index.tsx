@@ -16,8 +16,7 @@ const classColors = {
   'energy': '#333333'
 }
 
-
-const update = (state = {
+const preloadedState = {
   menuOpen: false,
   aboutOpen: false,
   infoDrawerOpen: false,
@@ -69,7 +68,9 @@ const update = (state = {
     x: 16,
     y: 23,
   }
-}, action) => {
+}
+
+const update = (state = preloadedState, action) => {
   switch (action.type) {
     case TOGGLE_MENU:
       return Object.assign({}, state, {
