@@ -4,8 +4,12 @@
   "description": "Macrostrat map interface",
   "main": "index.html",
   "scripts": {
-    "bundle": "webpack",
-    "dev": "webpack --watch",
+    "bundle:ui": "cd bundledDeps/ui-components && npm run build",
+    "bundle:main": "webpack",
+    "bundle": "npm run-script bundle:ui && npm run-script bundle:main",
+    "dev:ui": "cd bundledDeps/ui-components && npm run dev",
+    "dev:main": "webpack --watch",
+    "dev": "npm-run-all -p --aggregate-output dev:*",
     "preinstall": "linklocal && linklocal --list | bulk -c 'npm install --suppress-warnings'"
   },
   "author": "Daven Quinn <daven.quinn@wisc.edu>",
@@ -26,6 +30,7 @@
     "connect-history-api-fallback": "^1.5.0",
     "css-loader": "^3.5.3",
     "linklocal": "^2.8.2",
+    "npm-run-all": "^4.1.5",
     "style-loader": "^0.23.1",
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.2",
@@ -34,6 +39,7 @@
   },
   "dependencies": {
     "@blueprintjs/core": "^3.7.0",
+    "@macrostrat/ui-components": "file:./bundledDeps/ui-components",
     "@material-ui/core": "^3.1.0",
     "@material-ui/icons": "^3.0.1",
     "axios": "^0.17.1",
