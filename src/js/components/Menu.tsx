@@ -1,12 +1,4 @@
-import React, { Component } from 'react'
 import h from '@macrostrat/hyper'
-import ListItem from '@material-ui/core/ListItem'
-import ListItemText from '@material-ui/core/ListItemText'
-import ListItemIcon from '@material-ui/core/ListItemIcon'
-import Divider from '@material-ui/core/Divider'
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined'
-import LocationOnIcon from '@material-ui/icons/LocationOn'
-import SatelliteIcon from '@material-ui/icons/Satellite'
 import ColumnIcon from './icons/ColumnIcon'
 import LineIcon from './icons/LineIcon'
 import ElevationIcon from './icons/ElevationIcon'
@@ -16,13 +8,13 @@ import {Button, ButtonGroup, Alignment, IButtonProps} from '@blueprintjs/core'
 import {CloseableCard} from './CloseableCard'
 import {useSelector, useDispatch} from 'react-redux'
 
-type ListButtonProps = IButtonProps & {icon: React.ComponentType}
+type ListButtonProps = IButtonProps & {icon: React.ComponentType | Pick<IButtonProps,"icon">}
 const ListButton = (props: ListButtonProps)=>{
-  let {icon: iconComponent, ...rest} = props
-  return h(Button, {
-    ...rest,
-    icon: h(iconComponent, {size: 25})
-  })
+  let {icon, ...rest} = props
+  if (typeof props.icon != 'string') {
+    icon = h(props.icon, {size: 25})
+  }
+  return h(Button, {...rest, icon})
 }
 
 const MinimalButton = (props)=>h(Button, {...props, minimal: true})
@@ -43,6 +35,7 @@ const LayerButton = (props: ListButtonProps & {layer: string} )=>{
 const MenuGroup = (props)=> h(ButtonGroup, {
   className: "menu-options",
   vertical: true,
+  minimal: true,
   alignText: Alignment.LEFT,
   large: true,
   ...props
@@ -55,17 +48,9 @@ const Menu = (props)=>{
     props.toggleElevationChart()
   }
 
-  const {
-    menuOpen, toggleMenu, toggleBedrock,
-    mapHasBedrock, toggleLines, mapHasLines,
-    toggleSatellite, mapHasSatellite,
-    toggleColumns, mapHasColumns, toggleAbout,
-    toggleFossils, mapHasFossils
-  } = props
+  const {menuOpen, toggleMenu, toggleAbout} = props
 
   let exitTransition = {exit: 300}
-
-  const satelliteButtonClasses = {root: 'satellite-icon'}
 
   return h(CloseableCard, {
     isOpen: menuOpen,
@@ -91,16 +76,21 @@ const Menu = (props)=>{
           icon: LineIcon
         }),
         h(LayerButton, {
+          layer: "Columns",
+          icon: ColumnIcon
+        }),
+        h(LayerButton, {
           layer: "Fossils",
           icon: FossilIcon
         }),
         h(LayerButton, {
           layer: "Satellite",
-          icon: SatelliteIcon
+          icon: 'satellite'
         }),
       ]),
       h(MenuGroup, [
-        h(ListButton, {onClick: toggleElevationChart, icon: ElevationIcon}, "Elevation Profile")
+        h(ListButton, {disabled: true, icon: 'map-marker'}, "Your location"),
+        h(ListButton, {onClick: toggleElevationChart, icon: ElevationIcon}, "Elevation profile")
       ])
     ])
   ])
