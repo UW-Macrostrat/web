@@ -30,6 +30,7 @@ const CloseableCard = (props)=>{
       header,
       h(Button, {
         icon: 'small-cross',
+        className: 'card-close-button',
         minimal: true,
         'aria-label': 'Close',
         onClick: onClose

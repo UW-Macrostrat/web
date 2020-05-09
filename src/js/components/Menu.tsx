@@ -9,12 +9,13 @@ import {CloseableCard} from './CloseableCard'
 import {useSelector, useDispatch} from 'react-redux'
 import {MenuPanel} from '../reducers/menu'
 import AboutText from './About'
+import {SettingsPanel} from './settings-panel'
 
 type ListButtonProps = IButtonProps & {icon: React.ComponentType | Pick<IButtonProps,"icon">}
 const ListButton = (props: ListButtonProps)=>{
   let {icon, ...rest} = props
   if (typeof props.icon != 'string') {
-    icon = h(props.icon, {size: 25})
+    icon = h(props.icon, {size: 20})
   }
   return h(Button, {...rest, icon})
 }
@@ -95,7 +96,7 @@ const PanelContent = (props: {activePanel: MenuPanel})=>{
   case MenuPanel.LAYERS:
     return h(LayerList)
   case MenuPanel.SETTINGS:
-    return h("div")
+    return h(SettingsPanel)
   case MenuPanel.ABOUT:
     return h(AboutText)
   }
