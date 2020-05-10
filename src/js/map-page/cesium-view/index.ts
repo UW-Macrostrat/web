@@ -6,13 +6,12 @@ const h = hyperStyled(styles)
 import {GlobeViewer} from './viewer'
 import {GeologyLayer} from './geology-layer'
 import {MapClickHandler, SelectedPoint} from './selection'
-import {CameraFlyTo} from 'resium'
-import {useState} from 'react'
+import {CameraFlyTo, Fog, Globe, Scene} from 'resium'
 import {useSelector} from 'react-redux'
 
 Cesium.Ion.defaultAccessToken = process.env.CESIUM_ACCESS_TOKEN;
 
-const terrainProvider = Cesium.createWorldTerrain();
+const terrainProvider = Cesium.createWorldTerrain({requestVertexNormals: true});
 
 const FlyToInitialPosition = (props)=>{
   const mapOpts = useSelector(s => s.update)
@@ -37,14 +36,32 @@ const FlyToInitialPosition = (props)=>{
 
 
 const CesiumView = (props)=>{
+
+  const direction = Cesium.Cartesian3.fromDegrees(
+    0,
+    -100,
+    80000
+  )
+
+  //const light = Cesium.DirectionalLight({direction, intensity: 1})
+
   return h(GlobeViewer, {
     terrainProvider,
-    highResolution: true
+    highResolution: true,
+    //terrainShadows: Cesium.ShadowMode.ENABLED
   }, [
+    h(Globe, {
+      baseColor: Cesium.Color.LIGHTGRAY,
+      enableLighting: true,
+      dynamicAtmosphereLighting: false,
+      //shadowMode: Cesium.ShadowMode.ENABLED
+    }),
+    h(Scene),
     h(GeologyLayer, {alpha: 0.5}),
     h(MapClickHandler),
     h(SelectedPoint),
-    h(FlyToInitialPosition)
+    h(FlyToInitialPosition),
+    h(Fog, {density: 1.5e-4})
   ])
 }
 

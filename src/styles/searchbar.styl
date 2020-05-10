@@ -3,8 +3,12 @@
   height 100vh
   display: flex
   flex-direction: column
+  &>div
+    pointer-events: all
   .spacer
     flex-grow 1
+    width 1px
+    pointer-events: none
   &>.closeable-card
     flex-shrink 1
     display flex
