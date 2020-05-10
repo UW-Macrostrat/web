@@ -52,7 +52,7 @@ const CesiumView = (props)=>{
   }, [
     h(Globe, {
       baseColor: Cesium.Color.LIGHTGRAY,
-      enableLighting: true,
+      enableLighting: false,
       dynamicAtmosphereLighting: false,
       //shadowMode: Cesium.ShadowMode.ENABLED
     }),

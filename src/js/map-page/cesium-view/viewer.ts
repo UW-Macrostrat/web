@@ -12,15 +12,10 @@ const GlobeViewer = (props: GlobeViewerProps) => {
   const ref = useRef<CesiumComponentRef<Cesium.Viewer>>(null);
   const {highResolution, ...rest} = props
 
-  useEffect(() => {
-    const {cesiumElement} = ref.current ?? {}
-    if (cesiumElement == null) return
-    let ratio = 1
-    if (highResolution) {
-      ratio = Math.min(window.devicePixelRatio ?? 1, 2)
-    }
-    ref.current.cesiumElement.resolutionScale = ratio
-  }, [highResolution]);
+  let resolutionScale = 1
+  if (highResolution) {
+    resolutionScale = Math.min(window.devicePixelRatio ?? 1, 2)
+  }
 
   useEffect(() => {
     const {cesiumElement} = ref.current ?? {}
@@ -40,6 +35,7 @@ const GlobeViewer = (props: GlobeViewerProps) => {
     scene3DOnly: true,
     vrButton: false,
     geocoder: false,
+    resolutionScale,
     //skyAtmosphere: true,
     animation: false,
     timeline: false,
