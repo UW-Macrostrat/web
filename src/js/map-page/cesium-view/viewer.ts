@@ -39,7 +39,7 @@ const GlobeViewer = (props: GlobeViewerProps) => {
     //skyAtmosphere: true,
     animation: false,
     timeline: false,
-    //imageryProvider: false,
+    imageryProvider: false,
     //shadows: true,
     ...rest
   })

@@ -4,7 +4,7 @@ import {hyperStyled} from '@macrostrat/hyper'
 import styles from "./main.styl"
 const h = hyperStyled(styles)
 import {GlobeViewer} from './viewer'
-import {GeologyLayer} from './geology-layer'
+import {GeologyLayer, SatelliteLayer} from './layers'
 import {MapClickHandler, SelectedPoint} from './selection'
 import {CameraFlyTo, Fog, Globe, Scene} from 'resium'
 import {useSelector} from 'react-redux'
@@ -34,7 +34,6 @@ const FlyToInitialPosition = (props)=>{
   return h(CameraFlyTo, {destination, duration: 0, once: true})
 }
 
-
 const CesiumView = (props)=>{
 
   const direction = Cesium.Cartesian3.fromDegrees(
@@ -57,6 +56,7 @@ const CesiumView = (props)=>{
       //shadowMode: Cesium.ShadowMode.ENABLED
     }),
     h(Scene),
+    h(SatelliteLayer),
     h(GeologyLayer, {alpha: 0.5}),
     h(MapClickHandler),
     h(SelectedPoint),
