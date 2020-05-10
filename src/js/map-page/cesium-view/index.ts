@@ -8,10 +8,20 @@ import {GeologyLayer, SatelliteLayer} from './layers'
 import {MapClickHandler, SelectedPoint} from './selection'
 import {CameraFlyTo, Fog, Globe, Scene} from 'resium'
 import {useSelector} from 'react-redux'
+import MapboxTerrainProvider from '@macrostrat/cesium-martini'
 
 Cesium.Ion.defaultAccessToken = process.env.CESIUM_ACCESS_TOKEN;
 
-const terrainProvider = Cesium.createWorldTerrain({requestVertexNormals: true});
+//const terrainProvider = Cesium.createWorldTerrain({requestVertexNormals: true});
+const terrainProvider = new MapboxTerrainProvider({
+    // @ts-ignore
+    url: Cesium.IonResource.fromAssetId("1"),
+    accessToken: process.env.MAPBOX_API_TOKEN,
+    requestVertexNormals: false,
+    requestWaterMask: false
+});
+
+
 
 const FlyToInitialPosition = (props)=>{
   const mapOpts = useSelector(s => s.update)
@@ -47,6 +57,7 @@ const CesiumView = (props)=>{
   return h(GlobeViewer, {
     terrainProvider,
     highResolution: true,
+    skyBox: false
     //terrainShadows: Cesium.ShadowMode.ENABLED
   }, [
     h(Globe, {
