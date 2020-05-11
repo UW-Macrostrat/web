@@ -15,10 +15,9 @@ Cesium.Ion.defaultAccessToken = process.env.CESIUM_ACCESS_TOKEN;
 //const terrainProvider = Cesium.createWorldTerrain({requestVertexNormals: true});
 const terrainProvider = new MapboxTerrainProvider({
     // @ts-ignore
-    url: Cesium.IonResource.fromAssetId("1"),
     accessToken: process.env.MAPBOX_API_TOKEN,
-    requestVertexNormals: false,
-    requestWaterMask: false
+    format: 'webp',
+    highResolution: false
 });
 
 
@@ -32,7 +31,7 @@ const FlyToInitialPosition = (props)=>{
   //const currentPos = useState(null)
 
 
-  const rangeAtZoom18 = 200
+  const rangeAtZoom18 = 250
   const zoom = parseFloat(mpos.z)
   const zfac = 18-zoom
   const mscale = rangeAtZoom18*Math.pow(2,zfac)
@@ -46,16 +45,10 @@ const FlyToInitialPosition = (props)=>{
 
 const CesiumView = (props)=>{
 
-  const direction = Cesium.Cartesian3.fromDegrees(
-    0,
-    -100,
-    80000
-  )
-
-  //const light = Cesium.DirectionalLight({direction, intensity: 1})
-
   return h(GlobeViewer, {
     terrainProvider,
+    // not sure why we have to do this...
+    terrainExaggeration: 1.00001,
     highResolution: true,
     skyBox: false
     //terrainShadows: Cesium.ShadowMode.ENABLED
@@ -64,6 +57,7 @@ const CesiumView = (props)=>{
       baseColor: Cesium.Color.LIGHTGRAY,
       enableLighting: false,
       dynamicAtmosphereLighting: false,
+      maximumScreenSpaceError: 1.5 //defaults to 2
       //shadowMode: Cesium.ShadowMode.ENABLED
     }),
     h(Scene),
