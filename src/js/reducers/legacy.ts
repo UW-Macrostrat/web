@@ -8,8 +8,9 @@ SET_ACTIVE_INDEX_MAP, TOGGLE_ELEVATION_CHART, START_ELEVATION_QUERY,
 UPDATE_ELEVATION_MARKER, RECEIVED_ELEVATION_QUERY, START_PBDB_QUERY,
 UPDATE_PBDB_QUERY, RECEIVED_PBDB_QUERY, MAP_MOVED, GET_INITIAL_MAP_STATE,
 GOT_INITIAL_MAP_STATE, RESET_PBDB } from '../actions'
+import { updateURI } from '../actions/map-state'
 import { sum, timescale } from '../utils'
-import {format} from 'd3-format'
+import {MapBackend} from '../map-page'
 
 const classColors = {
   'sedimentary': '#FF8C00',
@@ -31,8 +32,7 @@ const preloadedState = {
   infoDrawerOpen: false,
   infoDrawerExpanded: false,
   elevationChartOpen: false,
-
-
+  mapBackend: MapBackend.MAPBOX,
   // Events and tokens for xhr
   isFetching: false,
   fetchingMapInfo: false,
@@ -81,6 +81,11 @@ const preloadedState = {
 
 const update = (state = preloadedState, action) => {
   switch (action.type) {
+    case 'set-map-backend': {
+      const newState = Object.assign({}, state, {mapBackend: action.backend})
+      updateURI(newState)
+      return newState
+    }
     case TOGGLE_MENU:
       return Object.assign({}, state, {
         menuOpen: !state.menuOpen
@@ -495,20 +500,8 @@ const update = (state = preloadedState, action) => {
       })
 
     case GOT_INITIAL_MAP_STATE:
-      updateURI(Object.assign({}, state, {
-        mapHasSatellite: action.data.satellite || false,
-        mapHasBedrock: action.data.bedrock || false,
-        mapHasLines: action.data.lines || false,
-        mapHasColumns: action.data.columns || false,
-        mapHasFossils: action.data.fossils || false,
-        mapXYZ: {
-          z: action.data.z,
-          x: action.data.x,
-          y: action.data.y
-        },
-      }))
-
-      return Object.assign({}, state, {
+      const newState = Object.assign({}, state, {
+        mapBackend: action.data.mapBackend ?? MapBackend.MAPBOX,
         mapHasSatellite: action.data.satellite || false,
         mapHasBedrock: action.data.bedrock || false,
         mapHasLines: action.data.lines || false,
@@ -520,31 +513,12 @@ const update = (state = preloadedState, action) => {
           y: action.data.y
         },
       })
+      updateURI(newState)
+      return newState
 
     default:
       return state
   }
-}
-
-const fmt = format(".4f")
-
-function updateURI(state) {
-  let layers = [
-    {'layer': 'bedrock', 'haz': state.mapHasBedrock},
-    {'layer': 'lines', 'haz': state.mapHasLines},
-    {'layer': 'satellite', 'haz': state.mapHasSatellite},
-    {'layer': 'fossils', 'haz': state.mapHasFossils},
-    {'layer': 'columns', 'haz': state.mapHasColumns}]
-
-  let layerString = layers.filter(l => { if (l.haz) return l }).map(l => { return l.layer }).join('/')
-  let filtersString = state.filters.map(f => { return `${f.type}=${f.id || f.name}` }).join('/')
-
-  // Update the hash in the URI
-  let z = fmt(state.mapXYZ.z)
-  let x = fmt(state.mapXYZ.x)
-  let y = fmt(state.mapXYZ.y)
-
-  window.history.replaceState(undefined, undefined, `#/z=${z}/x=${x}/y=${y}/${layerString}/${filtersString}`)
 }
 
 export default update

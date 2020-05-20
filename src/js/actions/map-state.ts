@@ -2,7 +2,31 @@ import {
   addFilter,
   gotInitialMapState
 } from './main'
+import {format} from 'd3-format'
+import {MapBackend} from '../map-page'
 
+const fmt = format(".4f")
+
+function updateURI(state) {
+  let mode3D = state.mapBackend == MapBackend.CESIUM ? "/3d" : ""
+
+  let layers = [
+    {'layer': 'bedrock', 'haz': state.mapHasBedrock},
+    {'layer': 'lines', 'haz': state.mapHasLines},
+    {'layer': 'satellite', 'haz': state.mapHasSatellite},
+    {'layer': 'fossils', 'haz': state.mapHasFossils},
+    {'layer': 'columns', 'haz': state.mapHasColumns}]
+
+  let layerString = layers.filter(l => { if (l.haz) return l }).map(l => { return l.layer }).join('/')
+  let filtersString = state.filters.map(f => { return `${f.type}=${f.id || f.name}` }).join('/')
+
+  // Update the hash in the URI
+  let z = fmt(state.mapXYZ.z)
+  let x = fmt(state.mapXYZ.x)
+  let y = fmt(state.mapXYZ.y)
+
+  window.history.replaceState(undefined, undefined, `#${mode3D}/z=${z}/x=${x}/y=${y}/${layerString}/${filtersString}`)
+}
 
 function getInitialMapState() {
   return (dispatch, getState) => {
@@ -16,7 +40,8 @@ function getInitialMapState() {
       bedrock: mapHasBedrock,
       lines: mapHasLines,
       columns: mapHasColumns,
-      fossils: mapHasFossils
+      fossils: mapHasFossils,
+      mapBackend: MapBackend.MAPBOX
     }
     let filterTypes = [
       'strat_name_concepts',
@@ -31,10 +56,17 @@ function getInitialMapState() {
     ]
     let hash = window.location.hash
     let mapState = {
-      incomingFilters: []
+      incomingFilters: [],
+      mapBackend: MapBackend.MAPBOX
     }
     try {
       hash = hash.split('/').forEach(d => {
+        console.log(d)
+        if (d == "3d") {
+          mapState.mapBackend = MapBackend.CESIUM
+          return
+        }
+
         let parts = d.split('=')
 
         if (filterTypes.indexOf(parts[0]) > -1) {
@@ -82,4 +114,4 @@ function getInitialMapState() {
   }
 }
 
-export {getInitialMapState}
+export {getInitialMapState, updateURI}
