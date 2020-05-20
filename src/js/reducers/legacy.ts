@@ -1,4 +1,4 @@
-import { REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER,
+import {REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER,
 EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY,
 TOGGLE_BEDROCK, TOGGLE_LINES, TOGGLE_SATELLITE, TOGGLE_COLUMNS,
 CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER,
@@ -538,6 +538,7 @@ function updateURI(state) {
   let filtersString = state.filters.map(f => { return `${f.type}=${f.id || f.name}` }).join('/')
 
   // Update the hash in the URI
+
   window.history.replaceState(undefined, undefined, `#/z=${state.mapXYZ.z}/x=${state.mapXYZ.x}/y=${state.mapXYZ.y}/${layerString}/${filtersString}`)
 }
 
