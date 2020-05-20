@@ -10,9 +10,6 @@ import {CameraFlyTo, Fog, Globe, Scene} from 'resium'
 import {useSelector} from 'react-redux'
 import MapboxTerrainProvider from '@macrostrat/cesium-martini'
 
-Cesium.Ion.defaultAccessToken = process.env.CESIUM_ACCESS_TOKEN;
-
-//const terrainProvider = Cesium.createWorldTerrain({requestVertexNormals: true});
 const terrainProvider = new MapboxTerrainProvider({
     // @ts-ignore
     accessToken: process.env.MAPBOX_API_TOKEN,
@@ -45,10 +42,12 @@ const FlyToInitialPosition = (props)=>{
 
 const CesiumView = (props)=>{
 
+  const exaggeration = useSelector(state => state.globe.verticalExaggeration) ?? 1
+
   return h(GlobeViewer, {
     terrainProvider,
     // not sure why we have to do this...
-    terrainExaggeration: 1.00001,
+    terrainExaggeration: exaggeration + .00001,
     highResolution: true,
     skyBox: false
     //terrainShadows: Cesium.ShadowMode.ENABLED
@@ -56,17 +55,17 @@ const CesiumView = (props)=>{
     h(Globe, {
       baseColor: Cesium.Color.LIGHTGRAY,
       enableLighting: false,
-      dynamicAtmosphereLighting: false,
+      showGroundAtmosphere: true,
       maximumScreenSpaceError: 1.5 //defaults to 2
       //shadowMode: Cesium.ShadowMode.ENABLED
-    }),
+    }, null),
     h(Scene),
     h(SatelliteLayer),
     h(GeologyLayer, {alpha: 0.5}),
     h(MapClickHandler),
     h(SelectedPoint),
     h(FlyToInitialPosition),
-    h(Fog, {density: 1.5e-4})
+    h(Fog, {density: 1e-4})
   ])
 }
 
