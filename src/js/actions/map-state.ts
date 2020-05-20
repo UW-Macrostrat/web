@@ -18,7 +18,17 @@ function getInitialMapState() {
       columns: mapHasColumns,
       fossils: mapHasFossils
     }
-    let filterTypes = ['strat_name_concepts','strat_name_orphans','intervals','lithology_classes','lithology_types','lithologies','environments','environment_types','environment_classes',]
+    let filterTypes = [
+      'strat_name_concepts',
+      'strat_name_orphans',
+      'intervals',
+      'lithology_classes',
+      'lithology_types',
+      'lithologies',
+      'environments',
+      'environment_types',
+      'environment_classes'
+    ]
     let hash = window.location.hash
     let mapState = {
       incomingFilters: []

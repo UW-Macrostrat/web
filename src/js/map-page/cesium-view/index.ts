@@ -5,8 +5,8 @@ import styles from "./main.styl"
 const h = hyperStyled(styles)
 import {GlobeViewer} from './viewer'
 import {GeologyLayer, SatelliteLayer} from './layers'
-import {MapClickHandler, SelectedPoint} from './selection'
-import {CameraFlyTo, Fog, Globe, Scene} from 'resium'
+import {MapClickHandler, SelectedPoint, MapChangeTracker, FlyToInitialPosition} from './position'
+import {Fog, Globe, Scene} from 'resium'
 import {useSelector} from 'react-redux'
 import MapboxTerrainProvider from '@macrostrat/cesium-martini'
 
@@ -17,32 +17,10 @@ const terrainProvider = new MapboxTerrainProvider({
     highResolution: false
 });
 
-
-
-const FlyToInitialPosition = (props)=>{
-  const mapOpts = useSelector(s => s.update)
-  const mpos = mapOpts?.mapXYZ
-  if (mpos == null) return null
-
-  // Make sure we deactivate this once initial position is reached
-  //const currentPos = useState(null)
-
-
-  const rangeAtZoom18 = 250
-  const zoom = parseFloat(mpos.z)
-  const zfac = 18-zoom
-  const mscale = rangeAtZoom18*Math.pow(2,zfac)
-
-  const destination = new Cesium.Cartesian3.fromDegrees(
-    parseFloat(mpos.x), parseFloat(mpos.y), mscale
-  )
-
-  return h(CameraFlyTo, {destination, duration: 0, once: true})
-}
-
 const CesiumView = (props)=>{
 
   const exaggeration = useSelector(state => state.globe.verticalExaggeration) ?? 1
+
 
   return h(GlobeViewer, {
     terrainProvider,
@@ -60,6 +38,7 @@ const CesiumView = (props)=>{
       //shadowMode: Cesium.ShadowMode.ENABLED
     }, null),
     h(Scene),
+    h(MapChangeTracker),
     h(SatelliteLayer),
     h(GeologyLayer, {alpha: 0.5}),
     h(MapClickHandler),

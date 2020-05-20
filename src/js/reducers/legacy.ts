@@ -8,8 +8,8 @@ SET_ACTIVE_INDEX_MAP, TOGGLE_ELEVATION_CHART, START_ELEVATION_QUERY,
 UPDATE_ELEVATION_MARKER, RECEIVED_ELEVATION_QUERY, START_PBDB_QUERY,
 UPDATE_PBDB_QUERY, RECEIVED_PBDB_QUERY, MAP_MOVED, GET_INITIAL_MAP_STATE,
 GOT_INITIAL_MAP_STATE, RESET_PBDB } from '../actions'
-import { sum, timescale }
-from '../utils'
+import { sum, timescale } from '../utils'
+import {format} from 'd3-format'
 
 const classColors = {
   'sedimentary': '#FF8C00',
@@ -526,6 +526,8 @@ const update = (state = preloadedState, action) => {
   }
 }
 
+const fmt = format(".4f")
+
 function updateURI(state) {
   let layers = [
     {'layer': 'bedrock', 'haz': state.mapHasBedrock},
@@ -538,8 +540,11 @@ function updateURI(state) {
   let filtersString = state.filters.map(f => { return `${f.type}=${f.id || f.name}` }).join('/')
 
   // Update the hash in the URI
+  let z = fmt(state.mapXYZ.z)
+  let x = fmt(state.mapXYZ.x)
+  let y = fmt(state.mapXYZ.y)
 
-  window.history.replaceState(undefined, undefined, `#/z=${state.mapXYZ.z}/x=${state.mapXYZ.x}/y=${state.mapXYZ.y}/${layerString}/${filtersString}`)
+  window.history.replaceState(undefined, undefined, `#/z=${z}/x=${x}/y=${y}/${layerString}/${filtersString}`)
 }
 
 export default update

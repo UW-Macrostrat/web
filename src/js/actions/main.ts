@@ -1,6 +1,4 @@
-import fetch from 'isomorphic-fetch'
 import axios from 'axios'
-import { addCommas } from '../utils'
 import { SETTINGS } from '../Settings'
 
 // Define constants to be passed with actions
@@ -135,9 +133,7 @@ export function recieveData(json) {
 }
 
 function formatResponse(data) {
-  return data.map(d => {
-    return d
-  })
+  return data.map(d => d)
 }
 
 export function startMapQuery(data, cancelToken) {
