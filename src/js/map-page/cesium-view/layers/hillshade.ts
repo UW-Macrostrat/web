@@ -5,11 +5,15 @@ import {
 import h from '@macrostrat/hyper'
 import {ImageryLayer} from "resium"
 import {useSelector} from 'react-redux'
+import {get} from 'axios'
 
 class HillshadeImageryProvider extends MapboxImageryProvider {
+  processImage(img: HTMLImageElement|HTMLCanvasElement) {
+    return img
+  }
   requestImage(x,y,z,request) {
-    console.log(x,y,z)
-    return super.requestImage(x,y,z,request)
+    const res = super.requestImage(x,y,z,request)
+    return res?.then(this.processImage)
   }
 }
 
