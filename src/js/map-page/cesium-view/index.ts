@@ -21,7 +21,6 @@ const CesiumView = (props)=>{
 
   const exaggeration = useSelector(state => state.globe.verticalExaggeration) ?? 1
 
-
   return h(GlobeViewer, {
     terrainProvider,
     // not sure why we have to do this...

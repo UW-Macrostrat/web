@@ -78,6 +78,7 @@
     "react-router-dom": "^5.1.2",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
+    "regl": "^1.5.0",
     "resium": "^1.11.0",
     "stratiform": "file:./bundledDeps/stratiform",
     "topojson": "^3.0.2"
