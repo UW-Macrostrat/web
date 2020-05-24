@@ -29,6 +29,12 @@ class HillshadeImageryProvider extends MapboxImageryProvider {
     // rough meters per pixel (could get directly from zoom level)
     const pixelScale = 6371000*angle/image.width
 
+    const fboElevation = regl.framebuffer({
+      width: image.width,
+      height: image.height,
+      colorType: "float"
+    });
+
     const cmdProcessElevation = regl({
       vert: `
         precision highp float;
@@ -61,20 +67,21 @@ class HillshadeImageryProvider extends MapboxImageryProvider {
       },
       uniforms: {
         tElevation: tElevation,
-        elevationScale: 0.0005,
+        elevationScale: 1.0,
         resolution: [image.width, image.height]
       },
       viewport: { x: 0, y: 0, width: image.width, height: image.height },
-      count: 6
+      count: 6,
+      framebuffer: fboElevation,
     });
 
-    const fboElevation = regl.framebuffer({
+    cmdProcessElevation()
+
+    const fboNormal = regl.framebuffer({
       width: image.width,
       height: image.height,
       colorType: "float"
     });
-
-    cmdProcessElevation()
 
     const cmdNormal = regl({
       vert: `
@@ -100,7 +107,7 @@ class HillshadeImageryProvider extends MapboxImageryProvider {
           vec3 dx = vec3(pixelScale, 0.0, px - p0);
           vec3 dy = vec3(0.0, pixelScale, py - p0);
           vec3 n = normalize(cross(dx, dy));
-          gl_FragColor = vec4(0.5 * n + 0.5, 1.0);
+          gl_FragColor = vec4(n, 1.0);
         }
       `,
       attributes: {
@@ -112,13 +119,8 @@ class HillshadeImageryProvider extends MapboxImageryProvider {
         resolution: [image.width, image.height]
       },
       viewport: { x: 0, y: 0, width: image.width, height: image.height },
-      count: 6
-    });
-
-    const fboNormal = regl.framebuffer({
-      width: image.width,
-      height: image.height,
-      colorType: "float"
+      count: 6,
+      framebuffer: fboNormal
     });
 
     cmdNormal();
