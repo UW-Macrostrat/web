@@ -4,7 +4,7 @@ import {hyperStyled} from '@macrostrat/hyper'
 import styles from "./main.styl"
 const h = hyperStyled(styles)
 import {GlobeViewer} from './viewer'
-import {GeologyLayer, SatelliteLayer} from './layers'
+import {GeologyLayer, SatelliteLayer, HillshadeLayer} from './layers'
 import {MapClickHandler, SelectedPoint, MapChangeTracker, FlyToInitialPosition} from './position'
 import {Fog, Globe, Scene} from 'resium'
 import {useSelector} from 'react-redux'
@@ -39,6 +39,7 @@ const CesiumView = (props)=>{
     h(Scene),
     h(MapChangeTracker),
     h(SatelliteLayer),
+    h(HillshadeLayer),
     h(GeologyLayer, {alpha: 0.5}),
     h(MapClickHandler),
     h(SelectedPoint),
