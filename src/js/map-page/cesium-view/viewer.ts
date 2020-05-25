@@ -21,6 +21,9 @@ const GlobeViewer = (props: GlobeViewerProps) => {
     if (cesiumElement == null) return
 
     ref.current.cesiumElement.resolutionScale = resolutionScale
+
+    // Enable anti-aliasing
+    ref.current.cesiumElement.scene.postProcessStages.fxaa.enabled = true
   }, [resolutionScale]);
 
   useEffect(() => {

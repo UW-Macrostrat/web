@@ -5,6 +5,7 @@ import styles from "./main.styl"
 const h = hyperStyled(styles)
 import {GlobeViewer} from './viewer'
 import {GeologyLayer, SatelliteLayer, HillshadeLayer} from './layers'
+import {DisplayQuality} from './actions'
 import {MapClickHandler, SelectedPoint, MapChangeTracker, FlyToInitialPosition} from './position'
 import {Fog, Globe, Scene} from 'resium'
 import {useSelector} from 'react-redux'
@@ -19,13 +20,14 @@ const terrainProvider = new MapboxTerrainProvider({
 
 const CesiumView = (props)=>{
 
-  const exaggeration = useSelector(state => state.globe.verticalExaggeration) ?? 1
+  const exaggeration = useSelector(state => state.globe.verticalExaggeration) ?? 1.0
+  const displayQuality = useSelector(state => state.globe.displayQuality)
 
   return h(GlobeViewer, {
     terrainProvider,
     // not sure why we have to do this...
-    terrainExaggeration: exaggeration + .00001,
-    highResolution: true,
+    terrainExaggeration: exaggeration,
+    highResolution: displayQuality,
     skyBox: false
     //terrainShadows: Cesium.ShadowMode.ENABLED
   }, [
@@ -33,10 +35,10 @@ const CesiumView = (props)=>{
       baseColor: Cesium.Color.LIGHTGRAY,
       enableLighting: false,
       showGroundAtmosphere: true,
-      maximumScreenSpaceError: 1.5 //defaults to 2
+      maximumScreenSpaceError: displayQuality == DisplayQuality.High ? 1.5 : 2
       //shadowMode: Cesium.ShadowMode.ENABLED
     }, null),
-    h(Scene),
+    h(Scene, {requestRenderMode: true}),
     h(MapChangeTracker),
     h(SatelliteLayer),
     h(HillshadeLayer),
