@@ -49,3 +49,4 @@ const SatelliteLayer = (props)=>{
 }
 
 export {GeologyLayer, SatelliteLayer}
+export * from './hillshade'

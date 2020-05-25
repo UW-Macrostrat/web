@@ -9,11 +9,14 @@ import FiltersContainer from '../containers/FiltersContainer'
 import ElevationChartContainer from '../containers/ElevationChartContainer'
 import {ButtonGroup, Button} from '@blueprintjs/core'
 import CesiumView from './cesium-view'
+import {useSelector, useDispatch } from 'react-redux'
 
 enum MapBackend { MAPBOX, CESIUM }
 
+
 const MapView = (props: {backend: MapBackend}) =>{
-  switch (props.backend) {
+  const mapBackend = useSelector(d => d.update.mapBackend)
+  switch (mapBackend) {
   case MapBackend.MAPBOX:
     return h(MapContainer)
   case MapBackend.CESIUM:
@@ -42,7 +45,12 @@ const MapTypeSelector = (props: TypeSelectorProps)=>{
 
 const MapPage = ()=> {
 
-  const [backend, setBackend] = useState(MapBackend.MAPBOX)
+  const backend = useSelector(d => d.update.mapBackend)
+  const dispatch = useDispatch()
+
+  const setBackend = (backend)=>{
+    dispatch({type: 'set-map-backend', backend})
+  }
 
   return (
     <div id="map-page">
@@ -62,4 +70,5 @@ const MapPage = ()=> {
   )
 }
 
+export { MapBackend }
 export default MapPage
