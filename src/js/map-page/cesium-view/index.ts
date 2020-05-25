@@ -9,14 +9,7 @@ import {DisplayQuality} from './actions'
 import {MapClickHandler, SelectedPoint, MapChangeTracker, FlyToInitialPosition} from './position'
 import {Fog, Globe, Scene} from 'resium'
 import {useSelector} from 'react-redux'
-import MapboxTerrainProvider from '@macrostrat/cesium-martini'
-
-const terrainProvider = new MapboxTerrainProvider({
-    // @ts-ignore
-    accessToken: process.env.MAPBOX_API_TOKEN,
-    format: 'webp',
-    highResolution: false
-});
+import {terrainProvider} from './layers'
 
 const CesiumView = (props)=>{
 
