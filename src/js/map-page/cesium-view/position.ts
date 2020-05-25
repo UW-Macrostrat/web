@@ -69,7 +69,8 @@ const SelectedPoint = (props)=>{
     color : Cesium.Color.DODGERBLUE,
     outlineColor : Cesium.Color.WHITE,
     outlineWidth : 2,
-    pixelSize: 10
+    pixelSize: 10,
+    heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
   }
 
   return h(Entity, {position, point: pointGraphics})
