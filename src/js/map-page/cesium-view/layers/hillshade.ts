@@ -101,9 +101,12 @@ class HillshadeImageryProvider extends MapboxImageryProvider {
 
         void main() {
           vec2 dr = 1.0/resolution;
+          vec2 cx = gl_FragCoord.xy + vec2(1.0, 0.0);
+          vec2 cy = gl_FragCoord.xy + vec2(0.0, 1.0);
           float p0 = texture2D(tElevation, dr * (gl_FragCoord.xy + vec2(0.0, 0.0))).r;
-          float px = texture2D(tElevation, dr * (gl_FragCoord.xy + vec2(1.0, 0.0))).r;
-          float py = texture2D(tElevation, dr * (gl_FragCoord.xy + vec2(0.0, 1.0))).r;
+          float px = texture2D(tElevation, dr * cx).r;
+          float py = texture2D(tElevation, dr * cy).r;
+
           vec3 dx = vec3(pixelScale, 0.0, px - p0);
           vec3 dy = vec3(0.0, pixelScale, py - p0);
           vec3 n = normalize(cross(dx, dy));
