@@ -13,7 +13,12 @@ type SetDisplayQuality = {
   value: DisplayQuality;
 };
 
-type GlobeAction = SetExaggeration | SetDisplayQuality;
+type SetShowInspector = {
+  type: "set-show-inspector";
+  value: boolean;
+};
+
+type GlobeAction = SetExaggeration | SetDisplayQuality | SetShowInspector;
 
 interface GlobeState {
   verticalExaggeration: number;
@@ -31,6 +36,8 @@ const reducer = (state: GlobeState = initialState, action: GlobeAction) => {
       return { ...state, verticalExaggeration: action.value };
     case "set-display-quality":
       return { ...state, displayQuality: action.value };
+    case "set-show-inspector":
+      return { ...state, showInspector: action.value };
     default:
       return state;
   }

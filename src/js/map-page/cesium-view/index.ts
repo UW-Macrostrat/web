@@ -21,6 +21,8 @@ const CesiumView = (props) => {
     useSelector((state) => state.globe.verticalExaggeration) ?? 1.0;
   const displayQuality = useSelector((state) => state.globe.displayQuality);
 
+  const showInspector = useSelector((state) => state.globe.showInspector);
+
   return h(
     GlobeViewer,
     {
@@ -29,6 +31,7 @@ const CesiumView = (props) => {
       terrainExaggeration: exaggeration,
       highResolution: displayQuality == DisplayQuality.High,
       skyBox: false,
+      showInspector,
       //terrainShadows: Cesium.ShadowMode.ENABLED
     },
     [
