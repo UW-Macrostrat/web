@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {Suspense} from 'react'
 // Import other components
 import MapContainer from './map-view'
 import h from '@macrostrat/hyper'
@@ -7,9 +7,17 @@ import MenuContainer from '../containers/MenuContainer'
 import InfoDrawerContainer from '../containers/InfoDrawerContainer'
 import FiltersContainer from '../containers/FiltersContainer'
 import ElevationChartContainer from '../containers/ElevationChartContainer'
-import {ButtonGroup, Button} from '@blueprintjs/core'
-import CesiumView from './cesium-view'
+import {ButtonGroup, Button, Spinner} from '@blueprintjs/core'
 import {useSelector, useDispatch } from 'react-redux'
+import loadable from '@loadable/component'
+
+const CesiumView = loadable(() => import('./cesium-view'))
+
+function CesiumMap() {
+  return <Suspense fallback={<Spinner />}>
+    <CesiumView />
+  </Suspense>
+}
 
 enum MapBackend { MAPBOX, CESIUM }
 
@@ -20,7 +28,7 @@ const MapView = (props: {backend: MapBackend}) =>{
   case MapBackend.MAPBOX:
     return h(MapContainer)
   case MapBackend.CESIUM:
-    return h(CesiumView)
+    return h(CesiumMap)
   }
 }
 
@@ -39,7 +47,7 @@ const MapTypeSelector = (props: TypeSelectorProps)=>{
     h(Button, {
       active: backend==MapBackend.CESIUM,
       onClick() { setBackend(MapBackend.CESIUM)}
-    }, "3D")
+    }, "Globe (alpha)")
   ])
 }
 
