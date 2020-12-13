@@ -190,6 +190,7 @@ const HillshadeLayer = (props) => {
       mapId: "mapbox.terrain-rgb",
       maximumLevel: 14,
       accessToken: process.env.MAPBOX_API_TOKEN,
+      format: "@2x.webp",
     })
   );
 
