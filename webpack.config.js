@@ -10,7 +10,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 let mode = "development";
 
 let browserSync = new BrowserSyncPlugin({
-  server: { baseDir: "./" },
+  server: { baseDir: "./dist" },
   middleware: [historyApiFallback()],
 });
 
@@ -82,18 +82,20 @@ module.exports = {
       cesiumSource: path.resolve(__dirname, cesiumSource),
       "~": path.resolve(__dirname, "src"),
     },
+    fallback: { path: require.resolve("path-browserify") },
   },
   entry: {
     "js/bundle": "./src/js/index.tsx",
   },
-  node: {
-    fs: "empty",
-  },
   output: {
     path: path.join(__dirname, "/dist/"),
-    publicPath: "dist/",
     filename: "[name].js",
     sourcePrefix: "",
+  },
+  optimization: {
+    splitChunks: {
+      chunks: "all",
+    },
   },
   amd: {
     // Enable webpack-friendly use of require in Cesium
@@ -101,18 +103,24 @@ module.exports = {
   },
   plugins: [
     browserSync,
-    new HtmlWebpackPlugin({ title: "Macrostrat Web – Experimental" }),
+    new HtmlWebpackPlugin({
+      title: "Macrostrat Web – Experimental",
+      template: "./index.html",
+    }),
     new DotenvPlugin(),
     new CopyPlugin([
       { from: path.join(cesiumSource, cesiumWorkers), to: "Workers" },
     ]),
     new CopyPlugin([{ from: path.join(cesiumSource, "Assets"), to: "Assets" }]),
     new CopyPlugin([
+      { from: path.join(cesiumSource, "../Build"), to: "Build" },
+    ]),
+    new CopyPlugin([
       { from: path.join(cesiumSource, "Widgets"), to: "Widgets" },
     ]),
     new DefinePlugin({
       // Define relative base path in cesium for loading assets
-      CESIUM_BASE_URL: JSON.stringify("/dist/"),
+      CESIUM_BASE_URL: JSON.stringify("/"),
     }),
   ],
 };
