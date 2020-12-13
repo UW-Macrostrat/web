@@ -8,7 +8,6 @@ import h from '@macrostrat/hyper'
 import {ImageryLayer} from "resium"
 import {useSelector} from 'react-redux'
 
-
 type GeoLayerProps = Omit<ComponentProps<typeof ImageryLayer>,"imageryProvider">
 
 const GeologyLayer = (props: GeoLayerProps)=>{
@@ -49,4 +48,4 @@ const SatelliteLayer = (props)=>{
 }
 
 export {GeologyLayer, SatelliteLayer}
-export * from './hillshade'
+export * from './terrain'
