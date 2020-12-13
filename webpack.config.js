@@ -10,7 +10,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 let mode = "development";
 
 let browserSync = new BrowserSyncPlugin({
-  server: { baseDir: "./" },
+  server: { baseDir: "./dist" },
   middleware: [historyApiFallback()],
 });
 
@@ -91,7 +91,7 @@ module.exports = {
   },
   output: {
     path: path.join(__dirname, "/dist/"),
-    publicPath: "dist/",
+    publicPath: "/",
     filename: "[name].js",
     sourcePrefix: "",
   },
@@ -99,9 +99,15 @@ module.exports = {
     // Enable webpack-friendly use of require in Cesium
     toUrlUndefined: true,
   },
+  optimization: {
+    splitChunks: { chunks: "all" },
+  },
   plugins: [
     browserSync,
-    new HtmlWebpackPlugin({ title: "Macrostrat Web – Experimental" }),
+    new HtmlWebpackPlugin({
+      title: "Macrostrat Web – Experimental",
+      template: "./template.html",
+    }),
     new DotenvPlugin(),
     new CopyPlugin([
       { from: path.join(cesiumSource, cesiumWorkers), to: "Workers" },
@@ -112,7 +118,7 @@ module.exports = {
     ]),
     new DefinePlugin({
       // Define relative base path in cesium for loading assets
-      CESIUM_BASE_URL: JSON.stringify("/dist/"),
+      CESIUM_BASE_URL: JSON.stringify("/"),
     }),
   ],
 };
