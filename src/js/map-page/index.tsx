@@ -19,16 +19,17 @@ function CesiumMap() {
   </Suspense>
 }
 
-enum MapBackend { MAPBOX, CESIUM }
+enum MapBackend { MAPBOX, CESIUM, MAPBOX3 }
 
 
 const MapView = (props: {backend: MapBackend}) =>{
   const mapBackend = useSelector(d => d.update.mapBackend)
   switch (mapBackend) {
-  case MapBackend.MAPBOX:
-    return h(MapContainer)
   case MapBackend.CESIUM:
     return h(CesiumMap)
+  default:
+    const use3D = mapBackend == MapBackend.MAPBOX3
+    return h(MapContainer, {use3D})
   }
 }
 
@@ -44,6 +45,10 @@ const MapTypeSelector = (props: TypeSelectorProps)=>{
       active: backend==MapBackend.MAPBOX,
       onClick() { setBackend(MapBackend.MAPBOX)}
     }, "2D"),
+    h(Button, {
+      active: backend==MapBackend.MAPBOX3,
+      onClick() { setBackend(MapBackend.MAPBOX3) }
+    }, "3D"),
     h(Button, {
       active: backend==MapBackend.CESIUM,
       onClick() { setBackend(MapBackend.CESIUM)}
