@@ -1,13 +1,14 @@
 {
   "name": "sift",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "preinstall": "npm install npm-force-resolutions && npm-force-resolutions",
     "dev": "gulp watch",
-    "build": "gulp build"
+    "build": "gulp build",
+    "deploy": "scripts/deploy"
   },
   "author": "John J Czaplewski <jczaplew@gmail.com>",
   "license": "CC0-1.0",

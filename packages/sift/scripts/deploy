@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+outdir="/data/projects/macrostrat/sift-new"
+
+scp ./index.html steno:"$outdir/"
+rsync -azv --delete ./dist steno:"$outdir/dist/"
