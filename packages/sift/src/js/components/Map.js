@@ -4,14 +4,6 @@ import Utilities from './Utilities';
 import Loading from './Loading';
 import MapControls from './MapControls';
 
-// Add a global helper that we somehow lost...
-L.Map.prototype.panToOffset = function (latlng, offset, options) {
-  var x = this.latLngToContainerPoint(latlng).x - offset[0]
-  var y = this.latLngToContainerPoint(latlng).y - offset[1]
-  var point = this.containerPointToLatLng([x, y])
-  return this.setView(point, this._zoom, { pan: options })
-}
-
 class Map extends React.Component {
   constructor(props) {
     super(props);
@@ -324,6 +316,16 @@ class Map extends React.Component {
       this.addLayer(nextProps.data, nextProps.target, nextProps);
     }
 
+  }
+
+  componentDidMount() {
+    // Add a global helper that we somehow lost...
+    L.Map.prototype.panToOffset = function (latlng, offset, options) {
+      var x = this.latLngToContainerPoint(latlng).x - offset[0]
+      var y = this.latLngToContainerPoint(latlng).y - offset[1]
+      var point = this.containerPointToLatLng([x, y])
+      return this.setView(point, this._zoom, { pan: options })
+    }
   }
 
   render() {
