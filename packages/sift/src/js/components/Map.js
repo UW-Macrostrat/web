@@ -267,7 +267,17 @@ class Map extends React.Component {
     if (target) {
       var center = Centroid(geojson.features[0]).geometry.coordinates;
       setTimeout(() => {
-        this.map.panToOffset([center[1], center[0]], [100, 0]);
+
+        var latlng = [center[1], center[0]]
+        var offset = [100, 0]
+
+        // Replicated internal logic of panToOffset
+        // https://gis.stackexchange.com/questions/218102/how-do-i-zoom-pan-to-a-leaflet-map-such-that-the-given-point-is-off-center
+        var x = this.map.latLngToContainerPoint(latlng).x - offset[0]
+        var y = this.map.latLngToContainerPoint(latlng).y - offset[1]
+        var point = this.map.containerPointToLatLng([x, y])
+        this.map.setView(point, this._zoom, { pan: options })
+
       }, 10)
 
     } else {
@@ -316,16 +326,6 @@ class Map extends React.Component {
       this.addLayer(nextProps.data, nextProps.target, nextProps);
     }
 
-  }
-
-  componentDidMount() {
-    // Add a global helper that we somehow lost...
-    L.Map.prototype.panToOffset = function (latlng, offset, options) {
-      var x = this.latLngToContainerPoint(latlng).x - offset[0]
-      var y = this.latLngToContainerPoint(latlng).y - offset[1]
-      var point = this.containerPointToLatLng([x, y])
-      return this.setView(point, this._zoom, { pan: options })
-    }
   }
 
   render() {

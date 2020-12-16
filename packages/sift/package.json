@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "preinstall": "npm install npm-force-resolutions && npm-force-resolutions",
     "dev": "gulp watch",
-    "build": "gulp build",
+    "build": "gulp",
     "deploy": "scripts/deploy"
   },
   "author": "John J Czaplewski <jczaplew@gmail.com>",
