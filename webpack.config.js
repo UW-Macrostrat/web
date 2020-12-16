@@ -9,6 +9,8 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 let mode = "development";
 
+let publicURL = process.env.PUBLIC_URL || "/";
+
 let browserSync = new BrowserSyncPlugin({
   server: { baseDir: "./dist" },
   middleware: [historyApiFallback()],
@@ -91,7 +93,7 @@ module.exports = {
   },
   output: {
     path: path.join(__dirname, "/dist/"),
-    publicPath: "/",
+    publicPath: publicURL,
     filename: "[name].js",
     sourcePrefix: "",
   },
@@ -118,7 +120,7 @@ module.exports = {
     ]),
     new DefinePlugin({
       // Define relative base path in cesium for loading assets
-      CESIUM_BASE_URL: JSON.stringify("/"),
+      CESIUM_BASE_URL: JSON.stringify(publicURL),
     }),
   ],
 };
