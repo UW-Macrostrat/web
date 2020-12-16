@@ -276,7 +276,7 @@ class Map extends React.Component {
         var x = this.map.latLngToContainerPoint(latlng).x - offset[0]
         var y = this.map.latLngToContainerPoint(latlng).y - offset[1]
         var point = this.map.containerPointToLatLng([x, y])
-        this.map.setView(point, this._zoom, { pan: options })
+        this.map.setView(point, this._zoom, { pan: {animate: true} })
 
       }, 10)
 
