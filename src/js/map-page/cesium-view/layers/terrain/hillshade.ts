@@ -5,6 +5,7 @@ import { ImageryLayer } from "resium";
 import { useSelector } from "react-redux";
 import REGL from "regl";
 import { vec3 } from "gl-matrix";
+import { terrainProvider } from "./provider";
 // https://wwwtyro.net/2019/03/21/advanced-map-shading.html
 
 type Img = HTMLImageElement | HTMLCanvasElement;
@@ -13,6 +14,8 @@ class HillshadeImageryProvider extends MapboxImageryProvider {
   // Fib about tile size in order to download fewer elevation tiles
   tileWidth = 512;
   tileHeight = 512;
+  terrainProvider = terrainProvider;
+
   processImage(image: Img, rect: Cesium.Rectangle): Img {
     const canvas = document.createElement("canvas");
     canvas.width = image.width;
@@ -176,9 +179,10 @@ class HillshadeImageryProvider extends MapboxImageryProvider {
     return canvas;
   }
   requestImage(x, y, z, request) {
-    const res = super.requestImage(x, y, z, request);
+    const res = this.terrainProvider.backend.requestImage(x, y, z, request);
+    if (res == null) return undefined;
     const rect = this.tilingScheme.tileXYToRectangle(x, y, z);
-    return res?.then((d) => this.processImage(d, rect));
+    return res.then((d) => this.processImage(d, rect));
   }
 }
 
