@@ -1,6 +1,7 @@
 {
-  "name": "web-frontend",
-  "version": "4.0.0a1",
+  "name": "@macrostrat/map-interface",
+  "private": true,
+  "version": "4.0.0-a1",
   "description": "Macrostrat map interface",
   "main": "index.html",
   "scripts": {
