@@ -1,77 +1,126 @@
-const path = require('path')
-const BrowserSyncPlugin = require('browser-sync-webpack-plugin')
+const path = require("path");
+const { DefinePlugin } = require("webpack");
+const BrowserSyncPlugin = require("browser-sync-webpack-plugin");
 //UglifyJsPlugin = require('uglifyjs-webpack-plugin')
-const historyApiFallback = require('connect-history-api-fallback')
+const historyApiFallback = require("connect-history-api-fallback");
+const CopyPlugin = require("copy-webpack-plugin");
+const DotenvPlugin = require("dotenv-webpack");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
-let mode = 'development'
+let mode = "development";
+
+let publicURL = process.env.PUBLIC_URL || "/";
 
 let browserSync = new BrowserSyncPlugin({
-  server: { baseDir: './' },
-  middleware: [ historyApiFallback() ]
-})
+  server: { baseDir: "./dist" },
+  middleware: [historyApiFallback()],
+});
+
+const cesiumSource = "node_modules/cesium/Source";
+const cesiumWorkers = "../Build/Cesium/Workers";
 
 //uglify = new UglifyJsPlugin()
 
 let babelLoader = {
-  loader: 'babel-loader',
+  loader: "babel-loader",
   options: {
-    sourceMap: mode == 'development'
-  }
-}
+    sourceMap: mode == "development",
+  },
+};
 
 const cssModuleLoader = {
-  loader: 'css-loader',
+  loader: "css-loader",
   options: {
     modules: {
-      mode: 'local',
-      localIdentName: '[path][name]__[local]--[hash:base64:5]',
-    }
-  }
-}
+      mode: "local",
+      localIdentName: "[path][name]__[local]--[hash:base64:5]",
+    },
+  },
+};
 
-let exclude = /node_modules/
+let exclude = /node_modules/;
 
 module.exports = {
   mode: mode,
   module: {
+    unknownContextCritical: false,
     rules: [
-      {test: /\.(js|jsx|ts|tsx)$/, use: [babelLoader], exclude},
-      {test: /\.styl$/, use: ["style-loader", cssModuleLoader, "stylus-loader"], exclude},
-      {test: /\.css$/, use: ["style-loader", cssModuleLoader], exclude},
-      {test: /\.css$/, use: ["style-loader", 'css-loader']},
+      { test: /\.(js|jsx|ts|tsx)$/, use: [babelLoader], exclude },
+      {
+        test: /\.styl$/,
+        use: ["style-loader", cssModuleLoader, "stylus-loader"],
+        exclude,
+      },
+      { test: /\.css$/, use: ["style-loader", cssModuleLoader], exclude },
+      { test: /\.css$/, use: ["style-loader", "css-loader"] },
       {
         test: /\.(eot|svg|ttf|woff|woff2)$/,
         use: [
           {
-            loader: 'file-loader',
-            options: {}
-          }
-        ]
+            loader: "file-loader",
+            options: {},
+          },
+        ],
       },
       {
         test: /\.(png|svg)$/,
         use: [
           {
-            loader: 'file-loader',
+            loader: "file-loader",
             options: {
               useRelativePath: true,
-              outputPath: 'sections/assets/',
-              name: '[name].[ext]'
-            }
-          }
-        ]
+              outputPath: "sections/assets/",
+              name: "[name].[ext]",
+            },
+          },
+        ],
       },
-    ]
+    ],
   },
   resolve: {
-    extensions: [".ts", ".tsx", ".js", ".jsx"]
+    extensions: [".ts", ".tsx", ".js", ".jsx"],
+    alias: {
+      // CesiumJS module name
+      cesiumSource: path.resolve(__dirname, cesiumSource),
+      "~": path.resolve(__dirname, "src"),
+    },
   },
   entry: {
-    'js/bundle': "./src/js/index.tsx"
+    "js/bundle": "./src/js/index.tsx",
+  },
+  node: {
+    fs: "empty",
   },
   output: {
-    path: path.join(__dirname,'/dist/'),
-    filename: "[name].js"
+    path: path.join(__dirname, "/dist/"),
+    publicPath: publicURL,
+    filename: "[name].js",
+    sourcePrefix: "",
   },
-  plugins: [browserSync]
-}
+  amd: {
+    // Enable webpack-friendly use of require in Cesium
+    toUrlUndefined: true,
+  },
+  optimization: {
+    splitChunks: { chunks: "all" },
+  },
+  plugins: [
+    browserSync,
+    new HtmlWebpackPlugin({
+      title: "Macrostrat Web – Experimental",
+      template: "./template.html",
+    }),
+    new DotenvPlugin(),
+    new CopyPlugin([
+      { from: path.join(cesiumSource, cesiumWorkers), to: "Workers" },
+    ]),
+    new CopyPlugin([{ from: path.join(cesiumSource, "Assets"), to: "Assets" }]),
+    new CopyPlugin([
+      { from: path.join(cesiumSource, "Widgets"), to: "Widgets" },
+    ]),
+    new DefinePlugin({
+      // Define relative base path in cesium for loading assets
+      CESIUM_BASE_URL: JSON.stringify(publicURL),
+    }),
+  ],
+};

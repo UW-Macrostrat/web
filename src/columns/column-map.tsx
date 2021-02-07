@@ -16,7 +16,7 @@ import {select, event} from 'd3-selection';
 import {drag} from 'd3-drag';
 import {zoom} from 'd3-zoom';
 import {get} from 'axios';
-import {feature} from 'topojson';
+import {feature} from 'topojson-client';
 import classNames from 'classnames';
 import {MacrostratColumnConsumer} from './column-data';
 import {SVGComponent} from 'stratiform';

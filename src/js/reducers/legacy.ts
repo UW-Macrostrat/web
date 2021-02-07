@@ -1,7 +1,16 @@
-import { combineReducers } from 'redux'
-import { REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER, EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY, TOGGLE_BEDROCK, TOGGLE_LINES, TOGGLE_SATELLITE, TOGGLE_COLUMNS, CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER, REMOVE_FILTER, GO_TO_PLACE, TOGGLE_ABOUT, TOGGLE_FOSSILS, UPDATE_COLUMN_FILTERS, START_COLUMN_QUERY, RECEIVED_COLUMN_QUERY, START_GDD_QUERY, RECEIVED_GDD_QUERY, SET_ACTIVE_INDEX_MAP, TOGGLE_ELEVATION_CHART, START_ELEVATION_QUERY, UPDATE_ELEVATION_MARKER, RECEIVED_ELEVATION_QUERY, START_PBDB_QUERY, UPDATE_PBDB_QUERY, RECEIVED_PBDB_QUERY, MAP_MOVED, GET_INITIAL_MAP_STATE, GOT_INITIAL_MAP_STATE, RESET_PBDB } from '../actions'
+import {REQUEST_DATA, RECIEVE_DATA, TOGGLE_MENU, TOGGLE_INFODRAWER,
+EXPAND_INFODRAWER, TOGGLE_FILTERS, START_MAP_QUERY, RECEIVED_MAP_QUERY,
+TOGGLE_BEDROCK, TOGGLE_LINES, TOGGLE_SATELLITE, TOGGLE_COLUMNS,
+CLOSE_INFODRAWER, START_SEARCH_QUERY, RECEIVED_SEARCH_QUERY, ADD_FILTER,
+REMOVE_FILTER, GO_TO_PLACE, TOGGLE_ABOUT, TOGGLE_FOSSILS, UPDATE_COLUMN_FILTERS,
+START_COLUMN_QUERY, RECEIVED_COLUMN_QUERY, START_GDD_QUERY, RECEIVED_GDD_QUERY,
+SET_ACTIVE_INDEX_MAP, TOGGLE_ELEVATION_CHART, START_ELEVATION_QUERY,
+UPDATE_ELEVATION_MARKER, RECEIVED_ELEVATION_QUERY, START_PBDB_QUERY,
+UPDATE_PBDB_QUERY, RECEIVED_PBDB_QUERY, MAP_MOVED, GET_INITIAL_MAP_STATE,
+GOT_INITIAL_MAP_STATE, RESET_PBDB } from '../actions'
+import { updateURI } from '../actions/map-state'
 import { sum, timescale } from '../utils'
-import {menuReducer} from './menu'
+import {MapBackend} from '../map-page'
 
 const classColors = {
   'sedimentary': '#FF8C00',
@@ -23,8 +32,7 @@ const preloadedState = {
   infoDrawerOpen: false,
   infoDrawerExpanded: false,
   elevationChartOpen: false,
-
-
+  mapBackend: MapBackend.MAPBOX,
   // Events and tokens for xhr
   isFetching: false,
   fetchingMapInfo: false,
@@ -73,6 +81,11 @@ const preloadedState = {
 
 const update = (state = preloadedState, action) => {
   switch (action.type) {
+    case 'set-map-backend': {
+      const newState = Object.assign({}, state, {mapBackend: action.backend})
+      updateURI(newState)
+      return newState
+    }
     case TOGGLE_MENU:
       return Object.assign({}, state, {
         menuOpen: !state.menuOpen
@@ -487,20 +500,8 @@ const update = (state = preloadedState, action) => {
       })
 
     case GOT_INITIAL_MAP_STATE:
-      updateURI(Object.assign({}, state, {
-        mapHasSatellite: action.data.satellite || false,
-        mapHasBedrock: action.data.bedrock || false,
-        mapHasLines: action.data.lines || false,
-        mapHasColumns: action.data.columns || false,
-        mapHasFossils: action.data.fossils || false,
-        mapXYZ: {
-          z: action.data.z,
-          x: action.data.x,
-          y: action.data.y
-        },
-      }))
-
-      return Object.assign({}, state, {
+      const newState = Object.assign({}, state, {
+        mapBackend: action.data.mapBackend ?? MapBackend.MAPBOX,
         mapHasSatellite: action.data.satellite || false,
         mapHasBedrock: action.data.bedrock || false,
         mapHasLines: action.data.lines || false,
@@ -512,31 +513,12 @@ const update = (state = preloadedState, action) => {
           y: action.data.y
         },
       })
+      updateURI(newState)
+      return newState
 
     default:
       return state
   }
 }
 
-function updateURI(state) {
-  let layers = [
-    {'layer': 'bedrock', 'haz': state.mapHasBedrock},
-    {'layer': 'lines', 'haz': state.mapHasLines},
-    {'layer': 'satellite', 'haz': state.mapHasSatellite},
-    {'layer': 'fossils', 'haz': state.mapHasFossils},
-    {'layer': 'columns', 'haz': state.mapHasColumns}]
-
-  let layerString = layers.filter(l => { if (l.haz) return l }).map(l => { return l.layer }).join('/')
-  let filtersString = state.filters.map(f => { return `${f.type}=${f.id || f.name}` }).join('/')
-
-  // Update the hash in the URI
-  window.history.replaceState(undefined, undefined, `#/z=${state.mapXYZ.z}/x=${state.mapXYZ.x}/y=${state.mapXYZ.y}/${layerString}/${filtersString}`)
-}
-
-const reducers = combineReducers({
-  // list reducers here
-  menu: menuReducer,
-  update
-})
-
-export default reducers
+export default update

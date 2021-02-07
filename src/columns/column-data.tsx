@@ -7,7 +7,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import {Component, createContext} from 'react';
-import {feature} from 'topojson';
+import {feature} from 'topojson-client';
 import h from 'react-hyperscript';
 import {withCookies, Cookies} from 'react-cookie';
 import {get} from 'axios';

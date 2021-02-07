@@ -10,7 +10,7 @@ import thunkMiddleware from 'redux-thunk'
 import { createStore, applyMiddleware, compose} from 'redux'
 import reducers from './reducers'
 import { getInitialMapState } from './actions'
-import App from './components/App'
+import App from './app'
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
 
