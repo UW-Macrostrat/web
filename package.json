@@ -52,6 +52,7 @@
   },
   "dependencies": {
     "@blueprintjs/core": "^3.7.0",
+    "@loadable/component": "^5.14.1",
     "@macrostrat/cesium-martini": "file:./bundledDeps/cesium-martini",
     "@macrostrat/hyper": "^1.2.6",
     "@macrostrat/ui-components": "file:./bundledDeps/ui-components",
@@ -73,6 +74,7 @@
     "immutability-helper": "^2.8.1",
     "isomorphic-fetch": "^2.2.1",
     "mapbox-gl": "^2.0.0",
+    "multi-regl": "^1.1.1",
     "pbf": "^3.2.1",
     "prop-types": "^15.6.0",
     "react": "^16.13.1",

@@ -27,7 +27,7 @@ interface GlobeState {
 
 const initialState = {
   verticalExaggeration: 1,
-  displayQuality: DisplayQuality.High,
+  displayQuality: DisplayQuality.Low,
 };
 
 const reducer = (state: GlobeState = initialState, action: GlobeAction) => {
