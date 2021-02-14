@@ -6,6 +6,8 @@ const historyApiFallback = require("connect-history-api-fallback");
 const CopyPlugin = require("copy-webpack-plugin");
 const DotenvPlugin = require("dotenv-webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const GitRevisionPlugin = require('git-revision-webpack-plugin');
+const {version} = require("./package.json")
 
 let mode = "development";
 
@@ -16,6 +18,7 @@ let browserSync = new BrowserSyncPlugin({
   middleware: [historyApiFallback()],
 });
 
+const gitRevisionPlugin = new GitRevisionPlugin()
 const cesiumSource = "node_modules/cesium/Source";
 const cesiumWorkers = "../Build/Cesium/Workers";
 
@@ -121,6 +124,10 @@ module.exports = {
     new DefinePlugin({
       // Define relative base path in cesium for loading assets
       CESIUM_BASE_URL: JSON.stringify(publicURL),
+      VERSION: JSON.stringify(version),
+      GIT_VERSION: JSON.stringify(gitRevisionPlugin.version()),
+      GIT_COMMIT_HASH: JSON.stringify(gitRevisionPlugin.commithash()),
+      GIT_BRANCH: JSON.stringify(gitRevisionPlugin.branch()),
     }),
   ],
 };
