@@ -1,6 +1,6 @@
 import CesiumView from "@macrostrat/cesium-viewer/src";
 import h from "@macrostrat/hyper";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { queryMap, mapMoved } from "../actions";
 import {
   MapChangeTracker,
@@ -9,19 +9,23 @@ import {
 
 function MacrostratCesiumView(props) {
   const dispatch = useDispatch();
+  const terrainExaggeration =
+    useSelector((state) => state.globe.verticalExaggeration) ?? 1.0;
+  const displayQuality = useSelector((state) => state.globe.displayQuality);
 
-  return h(CesiumView, [
-    h(MapClickHandler, {
-      onClick({ latitude, longitude, zoom }) {
-        dispatch(queryMap(longitude, latitude, 7, null));
-      },
-    }),
-    h(MapChangeTracker, {
-      onChange(cpos) {
-        dispatch(mapMoved(cpos));
-      },
-    }),
-  ]);
+  const showInspector = useSelector((state) => state.globe.showInspector);
+
+  return h(CesiumView, {
+    onViewChange(cpos) {
+      dispatch(mapMoved(cpos));
+    },
+    onClick({ latitude, longitude, zoom }) {
+      dispatch(queryMap(longitude, latitude, zoom, null));
+    },
+    terrainExaggeration,
+    displayQuality,
+    showInspector,
+  });
 }
 
 export default MacrostratCesiumView;
