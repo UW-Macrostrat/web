@@ -11,7 +11,7 @@ import {ButtonGroup, Button, Spinner} from '@blueprintjs/core'
 import {useSelector, useDispatch } from 'react-redux'
 import loadable from '@loadable/component'
 
-const CesiumView = loadable(() => import('@macrostrat/cesium-viewer/src/index'))
+const CesiumView = loadable(() => import('./cesium-view'))
 
 function CesiumMap() {
   return <Suspense fallback={<Spinner />}>
