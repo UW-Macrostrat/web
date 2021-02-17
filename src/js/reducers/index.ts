@@ -1,13 +1,13 @@
-import { combineReducers } from 'redux'
-import {menuReducer} from './menu'
-import {globeReducer} from '../map-page/cesium-view/actions'
-import update from './legacy'
+import { combineReducers } from "redux";
+import { menuReducer } from "./menu";
+import { globeReducer } from "@macrostrat/cesium-viewer/src/actions";
+import update from "./legacy";
 
 const reducers = combineReducers({
   // list reducers here
   menu: menuReducer,
   globe: globeReducer,
-  update
-})
+  update,
+});
 
-export default reducers
+export default reducers;
