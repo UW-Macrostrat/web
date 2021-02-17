@@ -18,6 +18,9 @@
     "dev": "npm-run-all -p --aggregate-output dev:*",
     "preinstall": "linklocal && linklocal --list | bulk -c 'npm install --suppress-warnings'"
   },
+  "workspaces": [
+    "packages/*"
+  ],
   "authors": [
     "John Czaplewski <jczaplewski@wisc.edu>",
     "Daven Quinn <daven.quinn@wisc.edu>"
@@ -55,6 +58,7 @@
     "@blueprintjs/core": "^3.7.0",
     "@loadable/component": "^5.14.1",
     "@macrostrat/cesium-martini": "file:./bundledDeps/cesium-martini",
+    "@macrostrat/cesium-viewer": "^1.0.0",
     "@macrostrat/hyper": "^1.2.6",
     "@macrostrat/ui-components": "file:./bundledDeps/ui-components",
     "@mapbox/point-geometry": "^0.1.0",

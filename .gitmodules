@@ -7,3 +7,6 @@
 [submodule "bundledDeps/cesium-martini"]
 	path = bundledDeps/cesium-martini
 	url = git://github.com/davenquinn/cesium-martini.git
+[submodule "packages/cesium-viewer"]
+	path = packages/cesium-viewer
+	url = git://github.com/UW-Macrostrat/cesium-viewer.git
