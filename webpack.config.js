@@ -38,20 +38,23 @@ const cssModuleLoader = {
   },
 };
 
-let exclude = /node_modules/;
+let include = [
+  path.resolve(__dirname, 'src'),
+  path.resolve(__dirname, 'packages', 'cesium-viewer', 'src'),
+];
 
 module.exports = {
   mode: mode,
   module: {
     unknownContextCritical: false,
     rules: [
-      { test: /\.(js|jsx|ts|tsx)$/, use: [babelLoader], exclude },
+      { test: /\.(js|jsx|ts|tsx)$/, use: [babelLoader], include },
       {
         test: /\.styl$/,
         use: ["style-loader", cssModuleLoader, "stylus-loader"],
-        exclude,
+        include,
       },
-      { test: /\.css$/, use: ["style-loader", cssModuleLoader], exclude },
+      { test: /\.css$/, use: ["style-loader", cssModuleLoader], include },
       { test: /\.css$/, use: ["style-loader", "css-loader"] },
       {
         test: /\.(eot|svg|ttf|woff|woff2)$/,
@@ -80,7 +83,7 @@ module.exports = {
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".jsx"],
     alias: {
-      // CesiumJS module name
+      // CesiumJS module name,
       cesiumSource: path.resolve(__dirname, cesiumSource),
       "~": path.resolve(__dirname, "src"),
     },
