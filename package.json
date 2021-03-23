@@ -7,14 +7,14 @@
   "scripts": {
     "bundle:ui": "cd bundledDeps/ui-components && npm run build",
     "bundle:main": "webpack",
-    "bundle:terrain": "cd bundledDeps/cesium-martini && npm run build",
+    "bundle:terrain": "npm --prefix packages/cesium-martini run build",
     "bundle": "npm run-script bundle:ui && npm run-script bundle:terrain && npm run-script bundle:main",
     "bundle:dist": "npm run clean && PUBLIC_URL=/next/web/ npm run bundle:main",
     "clean": "rm -rf dist/*",
     "deploy:steno": "npm run bundle:dist && rsync -azv --delete dist/ steno:/data/projects/macrostrat/next/web/",
-    "dev:ui": "cd bundledDeps/ui-components && npm run dev",
+    "dev:ui": "npm --prefix bundledDeps/ui-components run dev",
     "dev:main": "webpack --watch",
-    "dev:terrain": "cd bundledDeps/cesium-martini && npm run watch",
+    "dev:terrain": "npm --prefix packages/cesium-martini run watch",
     "dev": "npm-run-all -p --aggregate-output dev:*",
     "preinstall": "linklocal && linklocal --list | bulk -c 'npm install --suppress-warnings'"
   },
@@ -58,7 +58,7 @@
   "dependencies": {
     "@blueprintjs/core": "^3.7.0",
     "@loadable/component": "^5.14.1",
-    "@macrostrat/cesium-martini": "file:./bundledDeps/cesium-martini",
+    "@macrostrat/cesium-martini": "file:./packages/cesium-martini",
     "@macrostrat/cesium-viewer": "^1.0.0",
     "@macrostrat/hyper": "^1.2.6",
     "@macrostrat/ui-components": "file:./bundledDeps/ui-components",

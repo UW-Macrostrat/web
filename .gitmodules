@@ -5,7 +5,7 @@
 	path = bundledDeps/ui-components
 	url = git://github.com/UW-Macrostrat/ui-components.git
 [submodule "bundledDeps/cesium-martini"]
-	path = bundledDeps/cesium-martini
+	path = packages/cesium-martini
 	url = git://github.com/davenquinn/cesium-martini.git
 [submodule "packages/cesium-viewer"]
 	path = packages/cesium-viewer
