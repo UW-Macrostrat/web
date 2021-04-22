@@ -73,10 +73,48 @@ export function Map() {
 
     map.addControl(nav);
 
-    const MultipleVerticiesClick = MapboxDraw.modes.simple_select;
+    const MultVertSimpleSelect = MapboxDraw.modes.simple_select;
+    const MultVertDirectSelect = MapboxDraw.modes.direct_select;
+
+    MultVertDirectSelect.onDrag = function(state, e) {
+      if (state.canDragMove !== true) return;
+      state.dragMoving = true;
+      e.originalEvent.stopPropagation();
+
+      console.log(e);
+
+      const delta = {
+        lng: e.lngLat.lng - state.dragMoveLocation.lng,
+        lat: e.lngLat.lat - state.dragMoveLocation.lat,
+      };
+      if (state.selectedCoordPaths.length > 0) this.dragVertex(state, e, delta);
+      else this.dragFeature(state, e, delta);
+
+      state.dragMoveLocation = e.lngLat;
+
+      if (movedCoordPath) {
+        let newCoord = [e.lngLat.lng, e.lngLat.lat];
+
+        if (sameFeature) {
+          //logic for if multiple verticies, same point, same feature
+          let coordsToChange = [...toMoveFeature.coordinates];
+          toMoveCoordPath.map((coordPath) => {
+            coordsToChange.splice(coordPath, 1, newCoord);
+          });
+          toMoveFeature.setCoordinates(coordsToChange);
+        } else {
+          // different features, works for more than 2 shared vertices
+          toMoveFeature.map((feature, index) => {
+            let coordsToChange = [...feature.coordinates];
+            coordsToChange.splice(toMoveCoordPath[index], 1, newCoord);
+            feature.setCoordinates(coordsToChange);
+          });
+        }
+      }
+    };
 
     // need to just pass off it there aren't other verticies at point
-    MultipleVerticiesClick.clickOnVertex = function(state, e) {
+    MultVertSimpleSelect.clickOnVertex = function(state, e) {
       console.log("mult_vert clicked vertix");
       //console.log(e);
       //console.log(this._ctx);
@@ -132,7 +170,7 @@ export function Map() {
       }
 
       // this is what the normal simple_select does, we want to keep that the same
-      this.changeMode("direct_select", {
+      this.changeMode("mult_vert_direct", {
         featureId: e.featureTarget.properties.parent,
         coordPath: e.featureTarget.properties.coord_path,
         startPos: e.lngLat,
@@ -145,7 +183,8 @@ export function Map() {
       defaultMode: "mult_vert",
       modes: Object.assign(
         {
-          mult_vert: MultipleVerticiesClick,
+          mult_vert_direct: MultVertDirectSelect,
+          mult_vert: MultVertSimpleSelect,
         },
         MapboxDraw.modes
       ),
@@ -170,7 +209,7 @@ export function Map() {
     // use the splice to replace coords
     // This needs to account for deleteing nodes. That falls under change_coordinates
     map.on("draw.update", function(e) {
-      console.log(e);
+      console.log(Draw.getMode());
 
       if (movedCoordPath) {
         let newCoord = e.features[0].geometry.coordinates[movedCoordPath];
