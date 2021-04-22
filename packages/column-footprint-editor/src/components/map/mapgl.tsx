@@ -10,15 +10,13 @@ import { TopoJSONToLineString, coordinatesAreEqual } from "./utils";
 import "./map.css";
 
 /**
- * TODO: Instead of snap to after finish drag, drag with...
- *        Might be possible with customizing a direct_select mode and modifying the drag events
  * Edge cases to fix:
- *  Handling vertix clicks where they aren't shared, new node
- *    There seems to be an event that happens sometimes that messes up the proccess
- *    Happens after I add a new node, then try to move a shared vertix.
- *    I think it has to do with the draw modes. It needs to get set back to multi-vert
  *
  *  Deleting node that has 2 shared verticies in same feature.
+ *
+ * TODO: The utility function to tell if point are the same vertex needs to become more sophisticated.
+ *        To ensure some reliability, it checks to the tenths decimal point on longitude and latitude.
+ *        This might be acceptable, unless someone wants to create a column with incredible granularity.
  */
 
 // Topojson
@@ -199,13 +197,6 @@ export function Map() {
       setZoom(map.getZoom().toFixed(2));
     });
 
-    map.on("draw.onDrag", function(state, e) {
-      console.log("DRAG");
-      console.log(e);
-    });
-
-    // maybe a custom editing that checks if there is another vertix at same point, and also select
-    // that one.
     // use the splice to replace coords
     // This needs to account for deleteing nodes. That falls under change_coordinates
     map.on("draw.update", function(e) {

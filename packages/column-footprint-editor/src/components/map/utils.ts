@@ -37,8 +37,8 @@ function TopoJSONToLineString(json) {
 function coordinatesAreEqual(props) {
   const { coord1, coord2 } = props;
   if (
-    coord1[0].toFixed(2) == coord2[0].toFixed(2) &&
-    coord1[1].toFixed(2) == coord2[1].toFixed(2)
+    coord1[0].toFixed(1) == coord2[0].toFixed(1) &&
+    coord1[1].toFixed(1) == coord2[1].toFixed(1)
   ) {
     return true;
   } else {
