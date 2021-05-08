@@ -6,13 +6,25 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
 import mapboxgl from "mapbox-gl";
 
+import { SnapLineClosed } from "./modes";
+
+import { SnapLineMode, SnapModeDrawStyles } from "mapbox-gl-draw-snap-mode";
 import { TopoJSONToLineString, coordinatesAreEqual } from "./utils";
 import "./map.css";
 
 /**
+ * Next Steps:
+ *
+ *  Use the snap-to add on to create a custom mode for new polygons
+ *  Starting from scratch
+ *
+ *
  * Edge cases to fix:
  *
+ *  Multi-junction where it has a point in same line AND a point from another line
  *  Deleting node that has 2 shared verticies in same feature.
+ *  Deleting lines
+ *  Dragging Whole lines
  *
  * TODO: The utility function to tell if point are the same vertex needs to become more sophisticated.
  *        To ensure some reliability, it checks to the tenths decimal point on longitude and latitude.
@@ -30,7 +42,11 @@ interface tomove {
 }
 
 const url =
-  "https://macrostrat.org/api/v2/columns?project_id=1&format=topojson_bare";
+  "https://macrostrat.org/api/v2/columns?project_id=10&format=topojson_bare&status_code=in%20process";
+// const url =
+//   "https://macrostrat.org/api/v2/columns?project_id=1&format=topojson_bare";
+
+const local_url = "http://0.0.0.0:8000/lines";
 
 mapboxgl.accessToken =
   "pk.eyJ1IjoidGhlZmFsbGluZ2R1Y2siLCJhIjoiY2tsOHAzeDZ6MWtsaTJ2cXhpMDAxc3k5biJ9.FUMK57K0UP7PSrTUi3DiFQ";
@@ -45,9 +61,9 @@ export function Map() {
 
   useEffect(() => {
     if (!topo) {
-      fetch(url)
+      fetch(local_url)
         .then((res) => res.json())
-        .then((json) => setTopo(TopoJSONToLineString(json)));
+        .then((json) => setTopo(json));
     }
   }, [topo]);
 
@@ -79,14 +95,14 @@ export function Map() {
       state.dragMoving = true;
       e.originalEvent.stopPropagation();
 
-      console.log(e);
+      //console.log(e);
 
       const delta = {
         lng: e.lngLat.lng - state.dragMoveLocation.lng,
         lat: e.lngLat.lat - state.dragMoveLocation.lat,
       };
       if (state.selectedCoordPaths.length > 0) this.dragVertex(state, e, delta);
-      else this.dragFeature(state, e, delta);
+      //else this.dragFeature(state, e, delta);
 
       state.dragMoveLocation = e.lngLat;
 
@@ -114,7 +130,7 @@ export function Map() {
     // need to just pass off it there aren't other verticies at point
     MultVertSimpleSelect.clickOnVertex = function(state, e) {
       console.log("mult_vert clicked vertix");
-      //console.log(e);
+      console.log(e.lngLat);
       //console.log(this._ctx);
 
       // this block gets features other than the clicked one at point
@@ -129,7 +145,7 @@ export function Map() {
       features = features.filter((f) => f != null && f.id != currentId); // this will return the other vertix
 
       if (features.length > 0) {
-        console.log("Theres a Shared vertix!!");
+        console.log("You've clicked multiple vertices");
         movedCoordPath = e.featureTarget.properties.coord_path;
 
         const coords = [...targetCoords];
@@ -159,7 +175,7 @@ export function Map() {
         if (truthy.length > 1) {
           //there will always be at least 1 point the same
           // need to set to moveId to an array of the pathcoords that are the same
-          console.log("More than one!!");
+          console.log("Vertices in same feature");
           toMoveCoordPath = coordPaths;
           toMoveFeature = currentFeature;
           movedCoordPath = e.featureTarget.properties.coord_path;
@@ -168,7 +184,7 @@ export function Map() {
       }
 
       // this is what the normal simple_select does, we want to keep that the same
-      this.changeMode("mult_vert_direct", {
+      this.changeMode("direct_select", {
         featureId: e.featureTarget.properties.parent,
         coordPath: e.featureTarget.properties.coord_path,
         startPos: e.lngLat,
@@ -178,15 +194,22 @@ export function Map() {
     /// draw.create, draw.delete, draw.update, draw.selectionchange
     /// draw.modechange, draw.actionable, draw.combine, draw.uncombine
     var Draw = new MapboxDraw({
-      defaultMode: "mult_vert",
+      //defaultMode: "mult_vert",
       modes: Object.assign(
         {
-          mult_vert_direct: MultVertDirectSelect,
-          mult_vert: MultVertSimpleSelect,
+          direct_select: MultVertDirectSelect,
+          simple_select: MultVertSimpleSelect,
         },
-        MapboxDraw.modes
+        MapboxDraw.modes,
+        { draw_line_string: SnapLineClosed }
       ),
+      styles: SnapModeDrawStyles,
+      snap: true,
+      snapOptions: {
+        snapPx: 25,
+      },
     });
+
     map.addControl(Draw, "top-left");
 
     var featureIds = Draw.add(topo);
@@ -196,12 +219,17 @@ export function Map() {
       setLat(map.getCenter().lat.toFixed(4));
       setZoom(map.getZoom().toFixed(2));
     });
+    map.on("click", function() {
+      console.log(Draw.getMode());
+    });
+
+    map.on("draw.create", function(e) {
+      console.log(Draw.getMode());
+    });
 
     // use the splice to replace coords
     // This needs to account for deleteing nodes. That falls under change_coordinates
     map.on("draw.update", function(e) {
-      console.log(Draw.getMode());
-
       if (movedCoordPath) {
         let newCoord = e.features[0].geometry.coordinates[movedCoordPath];
 
@@ -221,7 +249,7 @@ export function Map() {
           });
         }
       }
-      Draw.changeMode("mult_vert", [e.features[0].id]);
+      Draw.changeMode("simple_select", [e.features[0].id]);
       // reset the state to undefined
       toMoveCoordPath = undefined;
       toMoveFeature = undefined;

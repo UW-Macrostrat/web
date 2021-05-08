@@ -22,6 +22,7 @@ function TopoJSONToLineString(json) {
     type: "FeatureCollection",
     features: features,
   };
+  console.log(featureCollection);
   return featureCollection;
 }
 
@@ -46,4 +47,16 @@ function coordinatesAreEqual(props) {
   }
 }
 
-export { TopoJSONToLineString, coordinatesAreEqual };
+function isOnOtherVertix(currentVertix, vertices) {
+  let match = [];
+  vertices.map((vertex) => {
+    if (Array.isArray(vertex)) {
+      if (coordinatesAreEqual({ coord1: currentVertix, coord2: vertex })) {
+        match.push(1);
+      }
+    }
+  });
+  return match.length > 0;
+}
+
+export { TopoJSONToLineString, coordinatesAreEqual, isOnOtherVertix };
