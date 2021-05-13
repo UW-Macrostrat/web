@@ -13,6 +13,7 @@
     "@vx/gradient": "^0.0.199",
     "@vx/group": "^0.0.199",
     "@vx/voronoi": "^0.0.199",
+    "axios": "^0.21.1",
     "d3-delaunay": "^5.3.0",
     "mapbox-gl": "^2.2.0",
     "mapbox-gl-draw-snap-mode": "^0.1.6",

@@ -5,6 +5,7 @@ import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
 import mapboxgl from "mapbox-gl";
+import axios from "axios";
 
 import { SnapLineClosed } from "./modes";
 
@@ -47,6 +48,7 @@ const url =
 //   "https://macrostrat.org/api/v2/columns?project_id=1&format=topojson_bare";
 
 const local_url = "http://0.0.0.0:8000/lines";
+const put_url = "http://0.0.0.0:8000/updates";
 
 mapboxgl.accessToken =
   "pk.eyJ1IjoidGhlZmFsbGluZ2R1Y2siLCJhIjoiY2tsOHAzeDZ6MWtsaTJ2cXhpMDAxc3k5biJ9.FUMK57K0UP7PSrTUi3DiFQ";
@@ -59,6 +61,28 @@ export function Map() {
   const [lat, setLat] = useState(43);
   const [zoom, setZoom] = useState(5);
 
+  const [changeSet, setChangeSet] = useState([]);
+
+  const onSave = async (e) => {
+    // can do cleaning on changeSet by the internal id string.
+    // Combine like edits so I'm not running a million
+    // transactions on the db.
+    console.log(changeSet);
+    const res = await axios.put(
+      put_url,
+      { change_set: changeSet },
+      { headers: { "Access-Control-Allow-Origin": "*" } }
+    );
+    console.log(res.data);
+    setChangeSet([]);
+    window.location.reload();
+  };
+
+  const onCancel = () => {
+    setChangeSet([]);
+    window.location.reload();
+  };
+
   useEffect(() => {
     if (!topo) {
       fetch(local_url)
@@ -70,11 +94,17 @@ export function Map() {
   useEffect(() => {
     if (!topo) return;
     var map = new mapboxgl.Map({
-      container: mapContainerRef.current, // container id (the div I create above)
+      container: mapContainerRef.current,
       style: "mapbox://styles/mapbox/streets-v11", // style URL
       center: [lng, lat], // starting position [lng, lat]
       zoom: zoom, // starting zoom
     });
+
+    const addToChangeSet = (obj) => {
+      setChangeSet((prevState) => {
+        return [...prevState, ...new Array(obj)];
+      });
+    };
 
     let toMoveCoordPath;
     let toMoveFeature;
@@ -224,12 +254,40 @@ export function Map() {
     });
 
     map.on("draw.create", function(e) {
-      console.log(Draw.getMode());
+      console.log(e);
+      console.log("created new feature!");
+      const { type: action, features } = e;
+
+      features.map((feature) => {
+        const obj = { action, feature };
+        addToChangeSet(obj);
+      });
+    });
+
+    map.on("draw.delete", function(e) {
+      console.log(e);
+      const { type: action, features } = e;
+
+      features.map((feature) => {
+        const obj = { action, feature };
+        addToChangeSet(obj);
+      });
     });
 
     // use the splice to replace coords
     // This needs to account for deleteing nodes. That falls under change_coordinates
     map.on("draw.update", function(e) {
+      console.log(e);
+      const { action, features } = e;
+
+      features.map((feature) => {
+        const obj = { action, feature };
+
+        addToChangeSet(obj);
+      });
+
+      console.log("updated a feature!");
+
       if (movedCoordPath) {
         let newCoord = e.features[0].geometry.coordinates[movedCoordPath];
 
@@ -246,6 +304,20 @@ export function Map() {
             let coordsToChange = [...feature.coordinates];
             coordsToChange.splice(toMoveCoordPath[index], 1, newCoord);
             feature.setCoordinates(coordsToChange);
+            console.log(feature);
+            const geometry = {
+              coordinates: feature.coordinates,
+              type: feature.type,
+            };
+            const obj = {
+              action,
+              feature: {
+                geometry,
+                properties: feature.properties,
+                type: "Feature",
+              },
+            };
+            addToChangeSet(obj);
           });
         }
       }
@@ -260,8 +332,23 @@ export function Map() {
   }, [topo]);
 
   return (
-    <div>
-      <div className="map-container" ref={mapContainerRef} />
+    <div style={{ display: "flex" }}>
+      <button
+        style={{ background: "lightgreen", marginRight: "10px" }}
+        onClick={onSave}
+      >
+        SAVE!!!
+      </button>
+      <button
+        style={{ background: "orangered", marginLeft: "10px" }}
+        onClick={onCancel}
+      >
+        CANCEL!!!
+      </button>
+
+      <div>
+        <div className="map-container" ref={mapContainerRef} />
+      </div>
     </div>
   );
 }
