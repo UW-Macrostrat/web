@@ -54,6 +54,7 @@
     "@loadable/component": "^5.14.1",
     "@macrostrat/cesium-martini": "*",
     "@macrostrat/cesium-viewer": "*",
+    "@macrostrat/column-components": "*",
     "@macrostrat/hyper": "^1.2.6",
     "@macrostrat/ui-components": "*",
     "@mapbox/point-geometry": "^0.1.0",

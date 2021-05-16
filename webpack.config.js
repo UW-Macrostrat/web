@@ -40,11 +40,6 @@ const cssModuleLoader = {
   }
 };
 
-let include = [
-  path.resolve(__dirname, "src")
-  //path.resolve(__dirname, "packages", "cesium-viewer", "src"),
-];
-
 module.exports = {
   mode: mode,
   module: {
@@ -97,6 +92,7 @@ module.exports = {
       cesiumSource: path.resolve(__dirname, cesiumSource),
       "~": path.resolve(__dirname, "src"),
       "@macrostrat/cesium-viewer": packageSrc("cesium-viewer"),
+      "@macrostrat/column-components": packageSrc("column-components"),
       "@macrostrat/ui-components": packageSrc("ui-components")
     }
   },

@@ -19,7 +19,8 @@
       "~/*": ["./src/*"],
       "@macrostrat/cesium-viewer": ["packages/cesium-viewer/src/"],
       "@macrostrat/cesium-martini": ["packages/cesium-martini"],
-      "@macrostrat/ui-components": ["packages/ui-components/src/"]
+      "@macrostrat/ui-components": ["packages/ui-components/src/"],
+      "@macrostrat/column-components": ["packages/column-components/src/"]
     }
   },
   "include": ["src"]

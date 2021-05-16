@@ -3,18 +3,19 @@ import h from "@macrostrat/hyper";
 
 import "../styles/index.styl";
 import MapPage from "./map-page";
-//import ColumnPage from '../../columns'
+import ColumnPage from "../columns";
 
 const App = () => {
   return h(Router, { basename: CESIUM_BASE_URL }, [
     h("div#app-holder", [
       h(Route, { path: "/map", component: MapPage }),
+      h(Route, { path: "/columns", component: ColumnPage }),
       h(Route, {
         exact: true,
         path: "/",
-        render: () => h(Redirect, { to: "/map" }),
-      }),
-    ]),
+        render: () => h(Redirect, { to: "/map" })
+      })
+    ])
   ]);
 };
 
