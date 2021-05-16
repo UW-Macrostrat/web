@@ -10,3 +10,6 @@
 [submodule "packages/column-components"]
 	path = packages/column-components
 	url = git://github.com/UW-Macrostrat/column-components.git
+[submodule "map-components"]
+	path = packages/map-components
+	url = git://github.com/UW-Macrostrat/map-components.git
