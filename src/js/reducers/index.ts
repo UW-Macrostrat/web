@@ -1,6 +1,6 @@
 import { combineReducers } from "redux";
 import { menuReducer } from "./menu";
-import { globeReducer } from "@macrostrat/cesium-viewer/src/actions";
+import { globeReducer } from "@macrostrat/cesium-viewer/actions";
 import update from "./legacy";
 
 const reducers = combineReducers({

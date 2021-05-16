@@ -2,7 +2,7 @@
 	path = bundledDeps/stratiform
 	url = git://github.com/davenquinn/stratiform.git
 [submodule "bundledDeps/ui-components"]
-	path = bundledDeps/ui-components
+	path = packages/ui-components
 	url = git://github.com/UW-Macrostrat/ui-components.git
 [submodule "bundledDeps/cesium-martini"]
 	path = packages/cesium-martini

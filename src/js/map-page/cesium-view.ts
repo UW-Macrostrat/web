@@ -1,11 +1,11 @@
-import CesiumView from "@macrostrat/cesium-viewer/src";
+import CesiumView from "@macrostrat/cesium-viewer";
 import h from "@macrostrat/hyper";
 import { useDispatch, useSelector } from "react-redux";
 import { queryMap, mapMoved } from "../actions";
 import {
   MapChangeTracker,
   MapClickHandler,
-} from "@macrostrat/cesium-viewer/src/position";
+} from "@macrostrat/cesium-viewer/position";
 
 function MacrostratCesiumView(props) {
   const dispatch = useDispatch();
