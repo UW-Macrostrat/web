@@ -37,6 +37,7 @@
     "connect-history-api-fallback": "^1.5.0",
     "copy-webpack-plugin": "^5.1.1",
     "css-loader": "^3.5.3",
+    "dedent": "^0.7.0",
     "dotenv-webpack": "^1.7.0",
     "file-loader": "^6.0.0",
     "lerna": "^3.22.1",
