@@ -27,6 +27,7 @@ function TopoJSONToLineString(json) {
 }
 
 /**
+ * Would be better if I could do it based on pixel distance
  * Function tells whether too coordinates are the same or not
  * @param props
  * coord1:  [lng, lat]
@@ -47,6 +48,20 @@ function coordinatesAreEqual(props) {
   }
 }
 
+function distance_between_points(props) {
+  const { point1, point2 } = props;
+  let x1 = point1.x;
+  let x2 = point2.x;
+
+  let y1 = point1.y;
+  let y2 = point2.y;
+
+  let a = Math.pow(x2 - x1, 2);
+  let b = Math.pow(y2 - y1, 2);
+
+  return Math.sqrt(a + b);
+}
+
 function isOnOtherVertix(currentVertix, vertices) {
   let match = [];
   vertices.map((vertex) => {
@@ -59,4 +74,9 @@ function isOnOtherVertix(currentVertix, vertices) {
   return match.length > 0;
 }
 
-export { TopoJSONToLineString, coordinatesAreEqual, isOnOtherVertix };
+export {
+  TopoJSONToLineString,
+  coordinatesAreEqual,
+  isOnOtherVertix,
+  distance_between_points,
+};
