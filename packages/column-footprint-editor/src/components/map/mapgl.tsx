@@ -4,10 +4,17 @@ import * as topojson from "topojson-client";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
+import doubleClickZoom from "@mapbox/mapbox-gl-draw/src/lib/double_click_zoom";
+import * as Constants from "@mapbox/mapbox-gl-draw/src/constants";
+
 import mapboxgl from "mapbox-gl";
 import axios from "axios";
 
-import { SnapLineClosed } from "./modes";
+import {
+  SnapLineClosed,
+  MultVertDirectSelect,
+  MultVertSimpleSelect,
+} from "./modes";
 
 import { SnapLineMode, SnapModeDrawStyles } from "mapbox-gl-draw-snap-mode";
 import {
@@ -30,6 +37,8 @@ import "./map.css";
  *  Deleting node that has 2 shared verticies in same feature.
  *  Deleting lines
  *  Dragging Whole lines
+ *
+ * For delete point, feature.removeCoordinate()
  *
  * TODO: The utility function to tell if point are the same vertex needs to become more sophisticated.
  *        To ensure some reliability, it checks to the tenths decimal point on longitude and latitude.
@@ -72,14 +81,14 @@ export function Map() {
     // Combine like edits so I'm not running a million
     // transactions on the db.
     console.log(changeSet);
-    const res = await axios.put(
-      put_url,
-      { change_set: changeSet },
-      { headers: { "Access-Control-Allow-Origin": "*" } }
-    );
-    console.log(res.data);
-    setChangeSet([]);
-    window.location.reload();
+    // const res = await axios.put(
+    //   put_url,
+    //   { change_set: changeSet },
+    //   { headers: { "Access-Control-Allow-Origin": "*" } }
+    // );
+    // console.log(res.data);
+    // setChangeSet([]);
+    // window.location.reload();
   };
 
   const onCancel = () => {
@@ -110,95 +119,11 @@ export function Map() {
       });
     };
 
-    let toMoveCoordPath;
-    let toMoveFeature;
-    let movedCoordPath;
-
     var nav = new mapboxgl.NavigationControl();
 
     map.addControl(nav);
 
-    const MultVertSimpleSelect = MapboxDraw.modes.simple_select;
-    const MultVertDirectSelect = MapboxDraw.modes.direct_select;
-
-    MultVertDirectSelect.onDrag = function(state, e) {
-      if (state.canDragMove !== true) return;
-      state.dragMoving = true;
-      e.originalEvent.stopPropagation();
-
-      //console.log(e);
-
-      const delta = {
-        lng: e.lngLat.lng - state.dragMoveLocation.lng,
-        lat: e.lngLat.lat - state.dragMoveLocation.lat,
-      };
-      if (state.selectedCoordPaths.length > 0) this.dragVertex(state, e, delta);
-      //else this.dragFeature(state, e, delta);
-
-      state.dragMoveLocation = e.lngLat;
-
-      let newCoord = [e.lngLat.lng, e.lngLat.lat];
-
-      // different features, works for more than 2 shared vertices
-      toMoveFeature.map((feature, index) => {
-        let coordsToChange = [...feature.coordinates];
-        coordsToChange.splice(toMoveCoordPath[index], 1, newCoord);
-        feature.setCoordinates(coordsToChange);
-      });
-    };
-
-    // need to just pass off it there aren't other verticies at point
-    MultVertSimpleSelect.clickOnVertex = function(state, e) {
-      console.log("mult_vert clicked vertix");
-      console.log(e.lngLat);
-      //console.log(this._ctx);
-
-      // this block gets features other than the clicked one at point
-      var point = map.project(e.lngLat);
-      const idsAtPoint = this._ctx.api.getFeatureIdsAt(point);
-      let features = idsAtPoint.map((id) => this.getFeature(id));
-
-      const targetCoords = e.featureTarget.geometry.coordinates;
-      console.log(targetCoords);
-
-      features = features.filter((f) => f != null); // this will return the other vertix
-
-      console.log("Number of Features", features.length);
-      if (features.length > 0) {
-        console.log("You've clicked multiple vertices");
-        movedCoordPath = e.featureTarget.properties.coord_path;
-
-        const coords = [...targetCoords];
-
-        let match = [];
-        let movingFeatures = [];
-        features.map((f) => {
-          if (f) {
-            let coord_path = f.coordinates.map((coord, index) => {
-              let point1 = map.project(coord);
-              console.log(
-                distance_between_points({ point1: point, point2: point1 })
-              );
-              if (
-                distance_between_points({ point1: point, point2: point1 }) < 10
-              ) {
-                match.push(index);
-                movingFeatures.push(f);
-              }
-            });
-          }
-        });
-        toMoveCoordPath = match; // will have same index as toMoveFeature
-        toMoveFeature = movingFeatures;
-      }
-
-      // this is what the normal simple_select does, we want to keep that the same
-      this.changeMode("direct_select", {
-        featureId: e.featureTarget.properties.parent,
-        coordPath: e.featureTarget.properties.coord_path,
-        startPos: e.lngLat,
-      });
-    };
+    map.addToChangeSet = addToChangeSet;
 
     /// draw.create, draw.delete, draw.update, draw.selectionchange
     /// draw.modechange, draw.actionable, draw.combine, draw.uncombine
@@ -256,46 +181,7 @@ export function Map() {
     // use the splice to replace coords
     // This needs to account for deleteing nodes. That falls under change_coordinates
     map.on("draw.update", function(e) {
-      console.log(e);
-      const { action, features } = e;
-
-      features.map((feature) => {
-        const obj = { action, feature };
-
-        addToChangeSet(obj);
-      });
-
-      console.log("updated a feature!");
-
-      if (movedCoordPath) {
-        let newCoord = e.features[0].geometry.coordinates[movedCoordPath];
-
-        // different features, works for more than 2 shared vertices
-        toMoveFeature.map((feature, index) => {
-          let coordsToChange = [...feature.coordinates];
-          coordsToChange.splice(toMoveCoordPath[index], 1, newCoord);
-          feature.setCoordinates(coordsToChange);
-          console.log(feature);
-          const geometry = {
-            coordinates: feature.coordinates,
-            type: feature.type,
-          };
-          const obj = {
-            action,
-            feature: {
-              geometry,
-              properties: feature.properties,
-              type: "Feature",
-            },
-          };
-          addToChangeSet(obj);
-        });
-      }
       Draw.changeMode("simple_select", [e.features[0].id]);
-      // reset the state to undefined
-      toMoveCoordPath = undefined;
-      toMoveFeature = undefined;
-      movedCoordPath = undefined;
     });
     return () => map.remove();
   }, [topo]);
