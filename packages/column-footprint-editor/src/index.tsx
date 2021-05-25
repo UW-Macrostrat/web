@@ -1,6 +1,6 @@
 import React from "react";
 import { render } from "react-dom";
-import { Map, v, VoroniExample } from "./components";
+import { Map } from "./components";
 
 function App() {
   return (
