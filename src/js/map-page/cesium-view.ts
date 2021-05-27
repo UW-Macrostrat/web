@@ -70,7 +70,7 @@ function MacrostratCesiumView(props) {
         dispatch(queryMap(longitude, latitude, zoom, null));
       },
       terrainExaggeration,
-      displayQuality: DisplayQuality.High,
+      displayQuality,
       showInspector,
       terrainProvider,
       flyTo: globe.flyToProps
