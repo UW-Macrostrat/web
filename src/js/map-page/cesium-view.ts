@@ -13,9 +13,17 @@ import {
   terrainProvider,
 } from "@macrostrat/cesium-viewer/layers";
 import { ImageryLayer } from "resium";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import MVTImageryProvider from "mvt-imagery-provider";
 import { mapStyle } from "./vector-style";
+import {
+  getHashString,
+  setHashString,
+} from "@macrostrat/ui-components/util/query-string";
+import {
+  buildPositionHash,
+  getInitialPosition,
+} from "@macrostrat/cesium-viewer/query-string";
 
 const GeologyLayer = ({ visibleMaps = null, ...rest }) => {
   const provider = useMemo(() => {
@@ -89,10 +97,22 @@ function MacrostratCesiumView(props) {
   );
 }
 
+const initialPosition = getInitialPosition(getHashString());
+
 export function GlobeDevPage() {
+  console.log(initialPosition);
   return h(
     CesiumView,
-    { terrainProvider, showInspector: true },
+    {
+      terrainProvider,
+      showInspector: true,
+      flyTo: null,
+      initialPosition,
+      onViewChange(cpos) {
+        console.log(cpos);
+        setHashString(buildPositionHash(cpos.camera));
+      },
+    },
     h(SatelliteLayer)
   );
 }

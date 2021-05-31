@@ -12,19 +12,19 @@ function updateURI(state) {
     { layer: "lines", haz: state.mapHasLines },
     { layer: "satellite", haz: state.mapHasSatellite },
     { layer: "fossils", haz: state.mapHasFossils },
-    { layer: "columns", haz: state.mapHasColumns }
+    { layer: "columns", haz: state.mapHasColumns },
   ];
 
   let layerString = layers
-    .filter(l => {
+    .filter((l) => {
       if (l.haz) return l;
     })
-    .map(l => {
+    .map((l) => {
       return l.layer;
     })
     .join("/");
   let filtersString = state.filters
-    .map(f => {
+    .map((f) => {
       return `${f.type}=${f.id || f.name}`;
     })
     .join("/");
@@ -34,11 +34,13 @@ function updateURI(state) {
   let x = fmt(state.mapXYZ.x);
   let y = fmt(state.mapXYZ.y);
 
-  window.history.replaceState(
-    undefined,
-    undefined,
-    `#${mode3D}/z=${z}/x=${x}/y=${y}/${layerString}/${filtersString}`
-  );
+  // TODO: fix this to be nicer
+
+  // window.history.replaceState(
+  //   undefined,
+  //   undefined,
+  //   `#${mode3D}/z=${z}/x=${x}/y=${y}/${layerString}/${filtersString}`
+  // );
 }
 
 function getInitialMapState() {
@@ -50,7 +52,7 @@ function getInitialMapState() {
       mapHasLines,
       mapHasSatellite,
       mapHasColumns,
-      mapHasFossils
+      mapHasFossils,
     } = getState().update;
     let defaultState = {
       z: mapXYZ.z,
@@ -61,7 +63,7 @@ function getInitialMapState() {
       lines: mapHasLines,
       columns: mapHasColumns,
       fossils: mapHasFossils,
-      mapBackend: MapBackend.MAPBOX
+      mapBackend: MapBackend.MAPBOX,
     };
     let filterTypes = [
       "strat_name_concepts",
@@ -72,15 +74,15 @@ function getInitialMapState() {
       "lithologies",
       "environments",
       "environment_types",
-      "environment_classes"
+      "environment_classes",
     ];
     let hash = window.location.hash;
     let mapState = {
       incomingFilters: [],
-      mapBackend: MapBackend.MAPBOX
+      mapBackend: MapBackend.MAPBOX,
     };
     try {
-      hash = hash.split("/").forEach(d => {
+      hash = hash.split("/").forEach((d) => {
         console.log(d);
         if (d == "globe") {
           mapState.mapBackend = MapBackend.CESIUM;
@@ -121,13 +123,13 @@ function getInitialMapState() {
     dispatch(gotInitialMapState(mapState));
 
     if (mapState.incomingFilters && mapState.incomingFilters.length) {
-      mapState.incomingFilters.forEach(f => {
+      mapState.incomingFilters.forEach((f) => {
         // lith classes and types don't have unique IDs in macrostrat so we use the string
         if (f.type === "lithology_classes" || f.type === "lithology_types") {
           dispatch(
             addFilter({
               type: f.type,
-              name: f.id
+              name: f.id,
             })
           );
         } else {
