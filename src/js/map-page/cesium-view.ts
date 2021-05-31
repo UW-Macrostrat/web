@@ -4,13 +4,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { queryMap, mapMoved } from "../actions";
 import {
   MapChangeTracker,
-  MapClickHandler
+  MapClickHandler,
 } from "@macrostrat/cesium-viewer/position";
 import {
   HillshadeLayer,
   //GeologyLayer,
   SatelliteLayer,
-  terrainProvider
+  terrainProvider,
 } from "@macrostrat/cesium-viewer/layers";
 import { ImageryLayer } from "resium";
 import { useMemo } from "react";
@@ -22,7 +22,7 @@ const GeologyLayer = ({ visibleMaps = null, ...rest }) => {
     let prov = new MVTImageryProvider({
       style: mapStyle,
       maximumZoom: 13,
-      tileSize: 512
+      tileSize: 512,
     });
     // let filter: any = ["boolean", true];
     // if (visibleMaps != null) {
@@ -41,21 +41,27 @@ const GeologyLayer = ({ visibleMaps = null, ...rest }) => {
     return prov;
   }, [visibleMaps]);
 
-  const hasGeology = useSelector(state => state.update.mapHasBedrock);
+  const hasGeology = useSelector((state) => state.update.mapHasBedrock);
 
   if (!hasGeology) return null;
 
   return h(ImageryLayer, { imageryProvider: provider, ...rest });
 };
 
+function MacrostratSatelliteLayer() {
+  const hasSatellite = useSelector((state) => state.update.mapHasSatellite);
+  if (!hasSatellite) return null;
+  return h(SatelliteLayer);
+}
+
 function MacrostratCesiumView(props) {
   const dispatch = useDispatch();
   const terrainExaggeration =
-    useSelector(state => state.globe.verticalExaggeration) ?? 1.0;
-  const displayQuality = useSelector(state => state.globe.displayQuality);
-  const globe = useSelector(state => state.globe);
+    useSelector((state) => state.globe.verticalExaggeration) ?? 1.0;
+  const displayQuality = useSelector((state) => state.globe.displayQuality);
+  const globe = useSelector((state) => state.globe);
 
-  const showInspector = useSelector(state => state.globe.showInspector);
+  const showInspector = useSelector((state) => state.globe.showInspector);
 
   return h(
     CesiumView,
@@ -73,9 +79,21 @@ function MacrostratCesiumView(props) {
       displayQuality,
       showInspector,
       terrainProvider,
-      flyTo: globe.flyToProps
+      flyTo: globe.flyToProps,
     },
-    [h(HillshadeLayer), h(SatelliteLayer), h(GeologyLayer, { alpha: 0.5 })]
+    [
+      h(HillshadeLayer),
+      h(MacrostratSatelliteLayer),
+      h(GeologyLayer, { alpha: 0.5 }),
+    ]
+  );
+}
+
+export function GlobeDevPage() {
+  return h(
+    CesiumView,
+    { terrainProvider, showInspector: true },
+    h(SatelliteLayer)
   );
 }
 
