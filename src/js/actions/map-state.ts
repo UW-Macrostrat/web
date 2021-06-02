@@ -1,10 +1,11 @@
 import { addFilter, gotInitialMapState } from "./main";
 import { format } from "d3-format";
 import { MapBackend } from "../map-page";
+import { buildQueryString, setHashString } from "@macrostrat/ui-components";
 
 const fmt = format(".4f");
 
-function updateURI(state) {
+function updateURI(state: any) {
   let layers = [
     { layer: "bedrock", haz: state.mapHasBedrock },
     { layer: "lines", haz: state.mapHasLines },
@@ -13,24 +14,26 @@ function updateURI(state) {
     { layer: "columns", haz: state.mapHasColumns },
   ];
 
-  let layerString = layers
+  let args: any = {};
+
+  args.layers = layers
     .filter((l) => {
       if (l.haz) return l;
     })
     .map((l) => {
       return l.layer;
-    })
-    .join("/");
-  let filtersString = state.filters
-    .map((f) => {
-      return `${f.type}=${f.id || f.name}`;
-    })
-    .join("/");
+    });
+
+  for (const filter of state.filters) {
+    args[filter.type] = filter.id || filter.name;
+  }
 
   // Update the hash in the URI
   let z = fmt(state.mapXYZ.z);
   let x = fmt(state.mapXYZ.x);
   let y = fmt(state.mapXYZ.y);
+
+  setHashString({ ...args, x, y, z }, { arrayFormat: "comma" });
 
   // TODO: fix this to be nicer
 
