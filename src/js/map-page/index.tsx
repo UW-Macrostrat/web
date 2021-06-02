@@ -24,23 +24,24 @@ enum MapBackend {
 }
 
 const MapView = (props: { backend: MapBackend }) => {
-  const mapBackend = useSelector((d) => d.update.mapBackend);
-  switch (mapBackend) {
+  const { backend = MapBackend.MAPBOX3 } = props;
+  switch (backend) {
     case MapBackend.CESIUM:
       return h(CesiumView);
     default:
-      const use3D = mapBackend == MapBackend.MAPBOX3;
+      const use3D = backend == MapBackend.MAPBOX3;
       return h(MapContainer, { use3D });
   }
 };
 
-type TypeSelectorProps = {
-  backend: MapBackend;
-  setBackend(b: MapBackend): void;
-};
+const MapTypeSelector = () => {
+  const backend = useSelector((d) => d.update.mapBackend);
+  const dispatch = useDispatch();
 
-const MapTypeSelector = (props: TypeSelectorProps) => {
-  const { backend, setBackend } = props;
+  const setBackend = (backend) => {
+    dispatch({ type: "set-map-backend", backend });
+  };
+
   return h(ButtonGroup, { className: "map-type-selector" }, [
     h(
       Button,
@@ -75,14 +76,7 @@ const MapTypeSelector = (props: TypeSelectorProps) => {
   ]);
 };
 
-const MapPage = () => {
-  const backend = useSelector((d) => d.update.mapBackend);
-  const dispatch = useDispatch();
-
-  const setBackend = (backend) => {
-    dispatch({ type: "set-map-backend", backend });
-  };
-
+const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   return (
     <div id="map-page">
       <MapView backend={backend} />
@@ -92,7 +86,6 @@ const MapPage = () => {
           <MenuContainer />
           <FiltersContainer />
           <div className="spacer" />
-          <MapTypeSelector backend={backend} setBackend={setBackend} />
         </div>
         <InfoDrawerContainer />
         <ElevationChartContainer />
