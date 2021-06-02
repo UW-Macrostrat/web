@@ -5,8 +5,6 @@ import { MapBackend } from "../map-page";
 const fmt = format(".4f");
 
 function updateURI(state) {
-  let mode3D = state.mapBackend == MapBackend.CESIUM ? "/globe" : "";
-
   let layers = [
     { layer: "bedrock", haz: state.mapHasBedrock },
     { layer: "lines", haz: state.mapHasLines },
