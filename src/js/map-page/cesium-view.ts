@@ -108,6 +108,7 @@ export function GlobeDevPage() {
       showInspector: true,
       flyTo: null,
       initialPosition,
+      highResolution: true,
       onViewChange(cpos) {
         console.log(cpos);
         setHashString(buildPositionHash(cpos.camera));

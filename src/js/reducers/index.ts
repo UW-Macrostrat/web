@@ -10,7 +10,7 @@ const reducers = combineReducers({
   // list reducers here
   menu: menuReducer,
   globe: globeReducer,
-  update
+  update,
 });
 
 function overallReducer(state, action) {
@@ -27,8 +27,8 @@ function overallReducer(state, action) {
       ...state,
       globe: {
         ...state.globe,
-        flyToProps: { destination, duration: 0, once: true }
-      }
+        flyToProps: { destination, duration: 0, once: true },
+      },
     };
     console.log(newState);
     return newState;
