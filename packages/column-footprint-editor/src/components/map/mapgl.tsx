@@ -16,6 +16,8 @@ import {
   MultVertSimpleSelect,
 } from "./modes";
 
+import { PropertyDialog, MapNavBar } from "../blueprint";
+
 import { SnapLineMode, SnapModeDrawStyles } from "mapbox-gl-draw-snap-mode";
 import {
   TopoJSONToLineString,
@@ -25,24 +27,12 @@ import {
 import "./map.css";
 
 /**
- * Next Steps:
- *
- *  Use the snap-to add on to create a custom mode for new polygons
- *  Starting from scratch
- *
- *
- * Edge cases to fix:
- *
- *  Multi-junction where it has a point in same line AND a point from another line
- *  Deleting node that has 2 shared verticies in same feature.
- *  Deleting lines
- *  Dragging Whole lines
  *
  * For delete point, feature.removeCoordinate()
  *
- * TODO: The utility function to tell if point are the same vertex needs to become more sophisticated.
- *        To ensure some reliability, it checks to the tenths decimal point on longitude and latitude.
- *        This might be acceptable, unless someone wants to create a column with incredible granularity.
+ *
+ * For the "preview" mode. Add layer, fill will be based on property. Hover would be nice touch. Then popup
+ *
  */
 
 // Topojson
@@ -62,6 +52,7 @@ const url =
 
 const local_url = "http://0.0.0.0:8000/lines";
 const put_url = "http://0.0.0.0:8000/updates";
+const columns_url = "http://0.0.0.0:8000/columns";
 
 mapboxgl.accessToken =
   "pk.eyJ1IjoidGhlZmFsbGluZ2R1Y2siLCJhIjoiY2tsOHAzeDZ6MWtsaTJ2cXhpMDAxc3k5biJ9.FUMK57K0UP7PSrTUi3DiFQ";
@@ -70,9 +61,20 @@ export function Map() {
   const mapContainerRef = useRef(null);
 
   const [topo, setTopo] = useState(null);
+  const [columns, setColumns] = useState(null);
+
   const [lng, setLng] = useState(-89);
   const [lat, setLat] = useState(43);
   const [zoom, setZoom] = useState(5);
+
+  const [edit, setEdit] = useState(false);
+
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState(null);
+
+  const closeOpen = () => {
+    setOpen(false);
+  };
 
   const [changeSet, setChangeSet] = useState([]);
 
@@ -80,15 +82,16 @@ export function Map() {
     // can do cleaning on changeSet by the internal id string.
     // Combine like edits so I'm not running a million
     // transactions on the db.
-    console.log(changeSet);
-    // const res = await axios.put(
-    //   put_url,
-    //   { change_set: changeSet },
-    //   { headers: { "Access-Control-Allow-Origin": "*" } }
-    // );
-    // console.log(res.data);
-    // setChangeSet([]);
-    // window.location.reload();
+    if (changeSet.length != 0) {
+      console.log(changeSet);
+      const res = await axios.put(
+        put_url,
+        { change_set: changeSet },
+        { headers: { "Access-Control-Allow-Origin": "*" } }
+      );
+      setChangeSet([]);
+    }
+    //window.location.reload();
   };
 
   const onCancel = () => {
@@ -105,7 +108,15 @@ export function Map() {
   }, [topo]);
 
   useEffect(() => {
-    if (!topo) return;
+    if (!columns) {
+      fetch(columns_url)
+        .then((res) => res.json())
+        .then((json) => setColumns(json));
+    }
+  }, [columns]);
+
+  useEffect(() => {
+    if (!topo || !columns) return;
     var map = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: "mapbox://styles/mapbox/streets-v11", // style URL
@@ -125,85 +136,124 @@ export function Map() {
 
     map.addToChangeSet = addToChangeSet;
 
-    /// draw.create, draw.delete, draw.update, draw.selectionchange
-    /// draw.modechange, draw.actionable, draw.combine, draw.uncombine
-    var Draw = new MapboxDraw({
-      //defaultMode: "mult_vert",
-      modes: Object.assign(
-        {
-          direct_select: MultVertDirectSelect,
-          simple_select: MultVertSimpleSelect,
-        },
-        MapboxDraw.modes,
-        { draw_line_string: SnapLineClosed }
-      ),
-      styles: SnapModeDrawStyles,
-      snap: true,
-      snapOptions: {
-        snapPx: 25,
-      },
-    });
-
-    map.addControl(Draw, "top-left");
-
-    var featureIds = Draw.add(topo);
-
     map.on("move", () => {
       setLng(map.getCenter().lng.toFixed(4));
       setLat(map.getCenter().lat.toFixed(4));
       setZoom(map.getZoom().toFixed(2));
     });
-    map.on("click", function() {
-      console.log(Draw.getMode());
-    });
 
-    map.on("draw.create", function(e) {
-      console.log(e);
-      console.log("created new feature!");
-      const { type: action, features } = e;
-
-      features.map((feature) => {
-        const obj = { action, feature };
-        addToChangeSet(obj);
+    if (edit) {
+      /// draw.create, draw.delete, draw.update, draw.selectionchange
+      /// draw.modechange, draw.actionable, draw.combine, draw.uncombine
+      var Draw = new MapboxDraw({
+        controls: { point: false, polygon: false },
+        modes: Object.assign(
+          {
+            direct_select: MultVertDirectSelect,
+            simple_select: MultVertSimpleSelect,
+          },
+          MapboxDraw.modes,
+          { draw_line_string: SnapLineClosed }
+        ),
+        styles: SnapModeDrawStyles,
+        snap: true,
+        snapOptions: {
+          snapPx: 25,
+        },
       });
-    });
 
-    map.on("draw.delete", function(e) {
-      console.log(e);
-      const { type: action, features } = e;
+      map.addControl(Draw, "top-left");
 
-      features.map((feature) => {
-        const obj = { action, feature };
-        addToChangeSet(obj);
+      var featureIds = Draw.add(topo);
+
+      map.on("click", function() {
+        console.log(Draw.getMode());
       });
-    });
 
-    // use the splice to replace coords
-    // This needs to account for deleteing nodes. That falls under change_coordinates
-    map.on("draw.update", function(e) {
-      Draw.changeMode("simple_select", [e.features[0].id]);
-    });
+      map.on("draw.create", function(e) {
+        console.log(e);
+        console.log("created new feature!");
+        const { type: action, features } = e;
+
+        features.map((feature) => {
+          const obj = { action, feature };
+          addToChangeSet(obj);
+        });
+      });
+
+      map.on("draw.delete", function(e) {
+        console.log(e);
+        const { type: action, features } = e;
+
+        features.map((feature) => {
+          const obj = { action, feature };
+          addToChangeSet(obj);
+        });
+      });
+
+      // use the splice to replace coords
+      // This needs to account for deleteing nodes. That falls under change_coordinates
+      map.on("draw.update", function(e) {
+        Draw.changeMode("simple_select", [e.features[0].id]);
+      });
+    } else {
+      map.on("load", function() {
+        map.addSource("columns", {
+          type: "geojson",
+          data: columns,
+        });
+        map.addLayer({
+          id: "column-fill",
+          type: "fill",
+          source: "columns", // reference the data source
+          paint: {
+            "fill-color": [
+              "case",
+              ["==", ["get", "col_id"], "nan"],
+              "#F95E5E",
+              "#0BDCB9",
+            ], // blue color fill
+            "fill-opacity": 0.5,
+          },
+        });
+        map.addLayer({
+          id: "outline",
+          type: "line",
+          source: "columns",
+          layout: {},
+          paint: {
+            "line-color": "#000",
+            "line-width": 1,
+          },
+        });
+      });
+      map.on("click", "column-fill", function(e) {
+        console.log(e.features[0]);
+        setName(e.features[0].properties.col_name);
+        setOpen(true);
+      });
+    }
     return () => map.remove();
-  }, [topo]);
+  }, [topo, edit, columns]);
 
   return (
-    <div style={{ display: "flex" }}>
-      <button
-        style={{ background: "lightgreen", marginRight: "10px" }}
-        onClick={onSave}
-      >
-        SAVE!!!
-      </button>
-      <button
-        style={{ background: "orangered", marginLeft: "10px" }}
-        onClick={onCancel}
-      >
-        CANCEL!!!
-      </button>
+    <div
+      style={{ display: "flex", justifyContent: "center", marginTop: "30px" }}
+    >
+      <div>
+        <MapNavBar
+          onSave={onSave}
+          onCancel={onCancel}
+          enterEditMode={() => setEdit(true)}
+          enterPropertyMode={() => setEdit(false)}
+          editMode={edit}
+        />
+      </div>
 
       <div>
         <div className="map-container" ref={mapContainerRef} />
       </div>
+      <PropertyDialog open={open} name={name} closeOpen={closeOpen} />
     </div>
   );
 }

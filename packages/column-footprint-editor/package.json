@@ -5,6 +5,7 @@
     "build": "parcel build ./src/index.html"
   },
   "dependencies": {
+    "@blueprintjs/core": "^3.45.0",
     "@macrostrat/ui-components": "^0.5.1",
     "@mapbox/mapbox-gl-draw": "^1.2.2",
     "@vx/clip-path": "^0.0.199",
@@ -22,6 +23,7 @@
     "topojson-client": "^3.1.0"
   },
   "devDependencies": {
+    "@parcel/transformer-stylus": "^2.0.0-beta.2",
     "parcel": "next"
   }
 }
