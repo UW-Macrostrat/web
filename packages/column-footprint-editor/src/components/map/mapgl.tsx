@@ -16,7 +16,8 @@ import {
   MultVertSimpleSelect,
 } from "./modes";
 
-import { PropertyDialog, MapNavBar } from "../blueprint";
+import { MapNavBar } from "../blueprint";
+import { PropertyDialog } from "../editor";
 
 import { SnapLineMode, SnapModeDrawStyles } from "mapbox-gl-draw-snap-mode";
 import {
@@ -70,7 +71,7 @@ export function Map() {
   const [edit, setEdit] = useState(false);
 
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState(null);
+  const [features, setFeatures] = useState([]);
 
   const closeOpen = () => {
     setOpen(false);
@@ -228,8 +229,7 @@ export function Map() {
         });
       });
       map.on("click", "column-fill", function(e) {
-        console.log(e.features[0]);
-        setName(e.features[0].properties.col_name);
+        setFeatures(e.features);
         setOpen(true);
       });
     }
@@ -253,7 +253,7 @@ export function Map() {
       <div>
         <div className="map-container" ref={mapContainerRef} />
       </div>
-      <PropertyDialog open={open} name={name} closeOpen={closeOpen} />
+      <PropertyDialog open={open} features={features} closeOpen={closeOpen} />
     </div>
   );
 }
