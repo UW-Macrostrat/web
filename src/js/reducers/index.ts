@@ -3,7 +3,7 @@ import reduceReducers from "reduce-reducers";
 import { menuReducer } from "./menu";
 import { reducer as globeReducer } from "@macrostrat/cesium-viewer/actions";
 import { nadirCameraPosition } from "@macrostrat/cesium-viewer/position";
-import { GOT_INITIAL_MAP_STATE } from "../actions";
+import { GOT_INITIAL_MAP_STATE, MAP_MOVED } from "../actions";
 import update from "./legacy";
 
 const reducers = combineReducers({
@@ -14,7 +14,7 @@ const reducers = combineReducers({
 });
 
 function overallReducer(state, action) {
-  if (action.type === GOT_INITIAL_MAP_STATE) {
+  if (action.type === GOT_INITIAL_MAP_STATE || action.type == MAP_MOVED) {
     // You can access both app and inventory states here
     const { x, y, z } = action.data;
     const destination = nadirCameraPosition(

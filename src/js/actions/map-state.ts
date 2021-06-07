@@ -34,14 +34,6 @@ function updateURI(state: any) {
   let y = fmt(state.mapXYZ.y);
 
   setHashString({ ...args, x, y, z }, { arrayFormat: "comma" });
-
-  // TODO: fix this to be nicer
-
-  // window.history.replaceState(
-  //   undefined,
-  //   undefined,
-  //   `#${mode3D}/z=${z}/x=${x}/y=${y}/${layerString}/${filtersString}`
-  // );
 }
 
 function getInitialMapState() {

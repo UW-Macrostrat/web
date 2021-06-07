@@ -78,6 +78,7 @@ function MacrostratCesiumView(props) {
         console.log(cpos);
         const { viewCenter } = cpos;
         if (viewCenter == null) return;
+        console.log(viewCenter);
         dispatch(mapMoved(viewCenter));
       },
       onClick({ latitude, longitude, zoom }) {
@@ -92,7 +93,7 @@ function MacrostratCesiumView(props) {
     [
       h(HillshadeLayer),
       h(MacrostratSatelliteLayer),
-      h(GeologyLayer, { alpha: 0.5 }),
+      h(GeologyLayer, { alpha: 0.8 }),
     ]
   );
 }
