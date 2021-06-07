@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "moduleResolution": "node",
     "target": "es5",
     "module": "es2020",
@@ -13,7 +14,15 @@
     "emitDecoratorMetadata": true,
     "declarationDir": "dist/types",
     "outDir": "dist/lib",
-    "typeRoots": ["node_modules/@types"]
+    "typeRoots": ["node_modules/@types"],
+    "paths": {
+      "~/*": ["./src/*"],
+      "@macrostrat/cesium-viewer": ["packages/cesium-viewer/src/"],
+      "@macrostrat/cesium-martini": ["packages/cesium-martini"],
+      "@macrostrat/ui-components": ["packages/ui-components/src/"],
+      "@macrostrat/column-components": ["packages/column-components/src/"],
+      "@macrostrat/map-components": ["packages/map-components/src/"]
+    }
   },
-  "include": ["src", "packages/cesium-viewer/src"]
+  "include": ["src"]
 }
