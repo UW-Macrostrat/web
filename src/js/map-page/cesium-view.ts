@@ -67,6 +67,7 @@ function MacrostratCesiumView(props) {
   const terrainExaggeration =
     useSelector((state) => state.globe.verticalExaggeration) ?? 1.0;
   const displayQuality = useSelector((state) => state.globe.displayQuality);
+  console.log(displayQuality);
   const globe = useSelector((state) => state.globe);
 
   const showInspector = useSelector((state) => state.globe.showInspector);
