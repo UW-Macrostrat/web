@@ -36,16 +36,6 @@ import "./map.css";
  *
  */
 
-// Topojson
-// topojson.feautre(topology, object) returns geojson
-// topojson.mesh(topology, object, filter) returns merged arcs as linestrings
-// topojson.neighbors(objects) list of adjacent objects
-
-interface tomove {
-  id: string;
-  index: number;
-}
-
 const url =
   "https://macrostrat.org/api/v2/columns?project_id=10&format=topojson_bare&status_code=in%20process";
 // const url =
@@ -247,6 +237,7 @@ export function Map() {
           enterEditMode={() => setEdit(true)}
           enterPropertyMode={() => setEdit(false)}
           editMode={edit}
+          columns={columns}
         />
       </div>
 

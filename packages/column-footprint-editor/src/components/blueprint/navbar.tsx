@@ -1,4 +1,5 @@
 import React from "react";
+import { DownloadButton } from ".";
 import { Button, Navbar } from "@blueprintjs/core";
 
 function MapNavBar(props) {
@@ -8,6 +9,7 @@ function MapNavBar(props) {
     enterEditMode,
     enterPropertyMode,
     editMode,
+    columns,
   } = props;
 
   return (
@@ -17,6 +19,7 @@ function MapNavBar(props) {
           <b>Project 10</b>
         </Navbar.Heading>
         <Navbar.Divider />
+        <DownloadButton columns={columns} />
         <Button minimal={true} intent="success" onClick={onSave}>
           Save
         </Button>

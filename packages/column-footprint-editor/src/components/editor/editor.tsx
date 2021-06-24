@@ -48,6 +48,7 @@ function ColumnName() {
     return (
       <div>
         <h4>
+          {/* @ts-ignore */}
           <EditableMultilineText field="column_name" className="column_name" />
         </h4>
       </div>
@@ -67,6 +68,7 @@ function ColumnGroup() {
   if (isEditing) {
     return (
       <h4>
+        {/* @ts-ignore */}
         <EditableMultilineText field="group" className="column_name" />
       </h4>
     );
@@ -98,13 +100,13 @@ function PropertyDialog(props) {
 
   const featuress = [features[0], features[0]];
 
-  if (featuress.length > 1) {
-    return (
-      <OverlayBox open={open} closeOpen={closeOpen}>
-        <TwoIdentities features={featuress} />
-      </OverlayBox>
-    );
-  }
+  //   if (featuress.length > 1) {
+  //     return (
+  //       <OverlayBox open={open} closeOpen={closeOpen}>
+  //         <TwoIdentities features={featuress} />
+  //       </OverlayBox>
+  //     );
+  //   }
   if (feature["properties"]["col_id"] == null) {
     let state = {
       group: null,
