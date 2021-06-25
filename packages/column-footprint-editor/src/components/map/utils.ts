@@ -74,9 +74,31 @@ function isOnOtherVertix(currentVertix, vertices) {
   return match.length > 0;
 }
 
+//#8/-17.66/-149.66
+function locationFromHash(hash) {
+  if (hash == null) {
+    ({ hash } = window.location);
+  }
+  const s = hash.slice(1);
+  const v = s.split("/");
+  if (v.length !== 3) {
+    return { zoom: 2, latitude: 43, longitude: -89 };
+  }
+  const [zoom, latitude, longitude] = v.map((d) => parseFloat(d));
+
+  return { zoom, latitude, longitude };
+}
+
+function setWindowHash({ zoom, latitude, longitude }) {
+  const hashString = `${zoom}/${latitude}/${longitude}`;
+  window.location.hash = hashString;
+}
+
 export {
   TopoJSONToLineString,
   coordinatesAreEqual,
   isOnOtherVertix,
   distance_between_points,
+  locationFromHash,
+  setWindowHash,
 };

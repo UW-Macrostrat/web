@@ -18,13 +18,10 @@ import {
 
 import { MapNavBar } from "../blueprint";
 import { PropertyDialog } from "../editor";
+import { ImportDialog } from "../importer";
 
 import { SnapLineMode, SnapModeDrawStyles } from "mapbox-gl-draw-snap-mode";
-import {
-  TopoJSONToLineString,
-  coordinatesAreEqual,
-  distance_between_points,
-} from "./utils";
+import { setWindowHash, locationFromHash } from "./utils";
 import "./map.css";
 
 /**
@@ -54,13 +51,14 @@ export function Map() {
   const [topo, setTopo] = useState(null);
   const [columns, setColumns] = useState(null);
 
-  const [lng, setLng] = useState(-89);
-  const [lat, setLat] = useState(43);
-  const [zoom, setZoom] = useState(5);
+  const [viewport, setViewport] = useState(
+    locationFromHash(window.location.hash)
+  );
 
   const [edit, setEdit] = useState(false);
 
   const [open, setOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [features, setFeatures] = useState([]);
 
   const closeOpen = () => {
@@ -82,7 +80,7 @@ export function Map() {
       );
       setChangeSet([]);
     }
-    //window.location.reload();
+    window.location.reload();
   };
 
   const onCancel = () => {
@@ -102,7 +100,12 @@ export function Map() {
     if (!columns) {
       fetch(columns_url)
         .then((res) => res.json())
-        .then((json) => setColumns(json));
+        .then((json) => {
+          if (json["features"].length == 0) {
+            setImportOpen(true);
+          }
+          setColumns(json);
+        });
     }
   }, [columns]);
 
@@ -111,8 +114,8 @@ export function Map() {
     var map = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: "mapbox://styles/mapbox/streets-v11", // style URL
-      center: [lng, lat], // starting position [lng, lat]
-      zoom: zoom, // starting zoom
+      center: [viewport.longitude, viewport.latitude], // starting position [lng, lat]
+      zoom: viewport.zoom, // starting zoom
     });
 
     const addToChangeSet = (obj) => {
@@ -128,9 +131,13 @@ export function Map() {
     map.addToChangeSet = addToChangeSet;
 
     map.on("move", () => {
-      setLng(map.getCenter().lng.toFixed(4));
-      setLat(map.getCenter().lat.toFixed(4));
-      setZoom(map.getZoom().toFixed(2));
+      const [zoom, latitude, longitude] = [
+        map.getZoom().toFixed(2),
+        map.getCenter().lat.toFixed(4),
+        map.getCenter().lng.toFixed(4),
+      ];
+      setViewport({ longitude, latitude, zoom });
+      setWindowHash({ zoom, latitude, longitude });
     });
 
     if (edit) {
@@ -230,6 +237,7 @@ export function Map() {
     <div
       style={{ display: "flex", justifyContent: "center", marginTop: "30px" }}
     >
+      <ImportDialog open={importOpen} />
       <div>
         <MapNavBar
           onSave={onSave}
