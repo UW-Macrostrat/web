@@ -10,11 +10,9 @@ function ImportDialog(props) {
   const [project_id, setProject_id] = useState(null);
 
   const onClickImport = () => {
-    console.log(project_id);
     const url =
       "https://macrostrat.org/api/v2/columns?project_id=10&format=geojson_bare&status_code=in%20process";
 
-    console.log({ url, project_id });
     axios.post(import_url, { url, project_id: 10 });
   };
   return (

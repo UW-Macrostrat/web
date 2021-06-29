@@ -4,8 +4,6 @@ import * as topojson from "topojson-client";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
-import doubleClickZoom from "@mapbox/mapbox-gl-draw/src/lib/double_click_zoom";
-import * as Constants from "@mapbox/mapbox-gl-draw/src/constants";
 
 import mapboxgl from "mapbox-gl";
 import axios from "axios";
@@ -14,6 +12,7 @@ import {
   SnapLineClosed,
   MultVertDirectSelect,
   MultVertSimpleSelect,
+  DrawPolygon,
 } from "./modes";
 
 import { MapNavBar } from "../blueprint";
@@ -144,11 +143,12 @@ export function Map() {
       /// draw.create, draw.delete, draw.update, draw.selectionchange
       /// draw.modechange, draw.actionable, draw.combine, draw.uncombine
       var Draw = new MapboxDraw({
-        controls: { point: false, polygon: false },
+        controls: { point: false },
         modes: Object.assign(
           {
             direct_select: MultVertDirectSelect,
             simple_select: MultVertSimpleSelect,
+            draw_polygon: DrawPolygon,
           },
           MapboxDraw.modes,
           { draw_line_string: SnapLineClosed }
@@ -164,7 +164,7 @@ export function Map() {
 
       var featureIds = Draw.add(topo);
 
-      map.on("click", function() {
+      map.on("click", function(e) {
         console.log(Draw.getMode());
       });
 

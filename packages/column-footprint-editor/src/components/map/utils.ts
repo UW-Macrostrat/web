@@ -1,4 +1,5 @@
 import * as topojson from "topojson-client";
+import mapboxgl from "mapbox-gl";
 
 function TopoJSONToLineString(json) {
   const multiLineString = topojson.mesh(json);
@@ -48,6 +49,12 @@ function coordinatesAreEqual(props) {
   }
 }
 
+/**
+ * Function to find distance between two points, using pixel distance
+ * and basic geometry
+ * @param props
+ * @returns
+ */
 function distance_between_points(props) {
   const { point1, point2 } = props;
   let x1 = point1.x;

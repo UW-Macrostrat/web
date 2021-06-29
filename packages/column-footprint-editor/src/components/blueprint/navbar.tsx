@@ -1,6 +1,9 @@
 import React from "react";
 import { DownloadButton } from ".";
 import { Button, Navbar } from "@blueprintjs/core";
+import axios from "axios";
+
+const import_url = "http://0.0.0.0:8000/import";
 
 function MapNavBar(props) {
   const {
@@ -12,11 +15,20 @@ function MapNavBar(props) {
     columns,
   } = props;
 
+  const onClickImport = () => {
+    const url =
+      "https://macrostrat.org/api/v2/columns?project_id=10&format=geojson_bare&status_code=in%20process";
+
+    axios.post(import_url, { url, project_id: 10 });
+  };
+
   return (
     <Navbar>
       <Navbar.Group>
         <Navbar.Heading>
-          <b>Project 10</b>
+          <Button minimal={true} onClick={onClickImport}>
+            <b>Project 10</b>
+          </Button>
         </Navbar.Heading>
         <Navbar.Divider />
         <DownloadButton columns={columns} />
