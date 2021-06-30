@@ -1,12 +1,13 @@
 import "regenerator-runtime/runtime";
-import React, { useRef, useEffect, useState } from "react";
-import * as topojson from "topojson-client";
+import React, { useRef, useEffect, useState, useContext } from "react";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
 
 import mapboxgl from "mapbox-gl";
 import axios from "axios";
+
+import { AppContext } from "../../context";
 
 import {
   SnapLineClosed,
@@ -19,9 +20,10 @@ import { MapNavBar } from "../blueprint";
 import { PropertyDialog } from "../editor";
 import { ImportDialog } from "../importer";
 
-import { SnapLineMode, SnapModeDrawStyles } from "mapbox-gl-draw-snap-mode";
+import { SnapModeDrawStyles } from "mapbox-gl-draw-snap-mode";
 import { setWindowHash, locationFromHash } from "./utils";
 import "./map.css";
+import { initializeMap, propertyViewMap, editModeMap } from "./map-pieces";
 
 /**
  *
@@ -32,23 +34,26 @@ import "./map.css";
  *
  */
 
-const url =
-  "https://macrostrat.org/api/v2/columns?project_id=10&format=topojson_bare&status_code=in%20process";
-// const url =
-//   "https://macrostrat.org/api/v2/columns?project_id=1&format=topojson_bare";
-
-const local_url = "http://0.0.0.0:8000/lines";
-const put_url = "http://0.0.0.0:8000/updates";
-const columns_url = "http://0.0.0.0:8000/columns";
+const local_url = "http://0.0.0.0:8000/lines/10";
+const put_url = "http://0.0.0.0:8000/updates/10";
+const columns_url = "http://0.0.0.0:8000/columns/10";
 
 mapboxgl.accessToken =
   "pk.eyJ1IjoidGhlZmFsbGluZ2R1Y2siLCJhIjoiY2tsOHAzeDZ6MWtsaTJ2cXhpMDAxc3k5biJ9.FUMK57K0UP7PSrTUi3DiFQ";
 
 export function Map() {
   const mapContainerRef = useRef(null);
+  const mapRef = useRef();
 
-  const [topo, setTopo] = useState(null);
-  const [columns, setColumns] = useState(null);
+  const {
+    state,
+    dispatch,
+    state_reducer,
+    fetchLines,
+    fetchColumns,
+  } = useContext(AppContext);
+
+  console.log(state.project_id == null);
 
   const [viewport, setViewport] = useState(
     locationFromHash(window.location.hash)
@@ -57,8 +62,12 @@ export function Map() {
   const [edit, setEdit] = useState(false);
 
   const [open, setOpen] = useState(false);
-  const [importOpen, setImportOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(state.project_id == null);
   const [features, setFeatures] = useState([]);
+
+  useEffect(() => {
+    setImportOpen(state.project_id == null);
+  }, [state.project_id]);
 
   const closeOpen = () => {
     setOpen(false);
@@ -72,76 +81,37 @@ export function Map() {
     // transactions on the db.
     if (changeSet.length != 0) {
       console.log(changeSet);
-      const res = await axios.put(
-        put_url,
-        { change_set: changeSet },
-        { headers: { "Access-Control-Allow-Origin": "*" } }
-      );
+      const res = await axios.put(put_url, { change_set: changeSet });
       setChangeSet([]);
     }
-    window.location.reload();
+    fetchColumns(state.project_id, dispatch);
+    fetchLines(state.project_id, dispatch);
   };
 
   const onCancel = () => {
     setChangeSet([]);
-    window.location.reload();
+    fetchColumns(state.project_id, dispatch);
+    fetchLines(state.project_id, dispatch);
   };
 
   useEffect(() => {
-    if (!topo) {
-      fetch(local_url)
-        .then((res) => res.json())
-        .then((json) => setTopo(json));
-    }
-  }, [topo]);
+    if (mapContainerRef.current == null) return;
+    initializeMap(
+      mapContainerRef.current,
+      viewport,
+      setChangeSet,
+      setViewport
+    ).then((mapObj) => {
+      mapRef.current = mapObj;
+    });
+    return () => mapRef.current.remove();
+  }, [mapContainerRef, state.project_id]);
 
   useEffect(() => {
-    if (!columns) {
-      fetch(columns_url)
-        .then((res) => res.json())
-        .then((json) => {
-          if (json["features"].length == 0) {
-            setImportOpen(true);
-          }
-          setColumns(json);
-        });
-    }
-  }, [columns]);
-
-  useEffect(() => {
-    if (!topo || !columns) return;
-    var map = new mapboxgl.Map({
-      container: mapContainerRef.current,
-      style: "mapbox://styles/mapbox/streets-v11", // style URL
-      center: [viewport.longitude, viewport.latitude], // starting position [lng, lat]
-      zoom: viewport.zoom, // starting zoom
-    });
-
-    const addToChangeSet = (obj) => {
-      setChangeSet((prevState) => {
-        return [...prevState, ...new Array(obj)];
-      });
-    };
-
-    var nav = new mapboxgl.NavigationControl();
-
-    map.addControl(nav);
-
-    map.addToChangeSet = addToChangeSet;
-
-    map.on("move", () => {
-      const [zoom, latitude, longitude] = [
-        map.getZoom().toFixed(2),
-        map.getCenter().lat.toFixed(4),
-        map.getCenter().lng.toFixed(4),
-      ];
-      setViewport({ longitude, latitude, zoom });
-      setWindowHash({ zoom, latitude, longitude });
-    });
-
+    if (mapRef.current == null) return;
     if (edit) {
-      /// draw.create, draw.delete, draw.update, draw.selectionchange
-      /// draw.modechange, draw.actionable, draw.combine, draw.uncombine
+      const map = mapRef.current;
+
       var Draw = new MapboxDraw({
         controls: { point: false },
         modes: Object.assign(
@@ -162,76 +132,56 @@ export function Map() {
 
       map.addControl(Draw, "top-left");
 
-      var featureIds = Draw.add(topo);
+      var featureIds = Draw.add(state.lines);
 
-      map.on("click", function(e) {
+      map.on("click", async function(e) {
         console.log(Draw.getMode());
       });
 
-      map.on("draw.create", function(e) {
+      map.on("draw.create", async function(e) {
         console.log(e);
         console.log("created new feature!");
         const { type: action, features } = e;
 
         features.map((feature) => {
           const obj = { action, feature };
-          addToChangeSet(obj);
+          map.addToChangeSet(obj);
         });
       });
 
-      map.on("draw.delete", function(e) {
+      map.on("draw.delete", async function(e) {
         console.log(e);
         const { type: action, features } = e;
 
         features.map((feature) => {
           const obj = { action, feature };
-          addToChangeSet(obj);
+          map.addToChangeSet(obj);
         });
       });
 
       // use the splice to replace coords
       // This needs to account for deleteing nodes. That falls under change_coordinates
-      map.on("draw.update", function(e) {
+      map.on("draw.update", async function(e) {
         Draw.changeMode("simple_select", [e.features[0].id]);
       });
-    } else {
-      map.on("load", function() {
-        map.addSource("columns", {
-          type: "geojson",
-          data: columns,
-        });
-        map.addLayer({
-          id: "column-fill",
-          type: "fill",
-          source: "columns", // reference the data source
-          paint: {
-            "fill-color": [
-              "case",
-              ["==", ["get", "col_id"], "nan"],
-              "#F95E5E",
-              "#0BDCB9",
-            ], // blue color fill
-            "fill-opacity": 0.5,
-          },
-        });
-        map.addLayer({
-          id: "outline",
-          type: "line",
-          source: "columns",
-          layout: {},
-          paint: {
-            "line-color": "#000",
-            "line-width": 1,
-          },
-        });
-      });
-      map.on("click", "column-fill", function(e) {
-        setFeatures(e.features);
-        setOpen(true);
-      });
+      return () => map.removeControl(Draw);
     }
-    return () => map.remove();
-  }, [topo, edit, columns]);
+  }, [state.lines, edit, mapRef]);
+
+  useEffect(() => {
+    if (mapRef.current == null) return;
+    if (!edit) {
+      propertyViewMap(mapRef.current, state, setFeatures, setOpen);
+      return () => {
+        var mapLayer = mapRef.current.getLayer("column-fill");
+        if (typeof mapLayer !== "undefined") {
+          mapRef.current.removeLayer("column-fill");
+          mapRef.current.removeLayer("outline");
+          mapRef.current.removeSource("columns");
+        }
+      };
+    }
+  }, [state.columns, edit, mapRef]);
 
   return (
     <div
@@ -245,7 +195,7 @@ export function Map() {
           enterEditMode={() => setEdit(true)}
           enterPropertyMode={() => setEdit(false)}
           editMode={edit}
-          columns={columns}
+          columns={state.columns}
         />
       </div>
 

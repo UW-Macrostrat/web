@@ -16,10 +16,9 @@ function MapNavBar(props) {
   } = props;
 
   const onClickImport = () => {
-    const url =
-      "https://macrostrat.org/api/v2/columns?project_id=10&format=geojson_bare&status_code=in%20process";
-
-    axios.post(import_url, { url, project_id: 10 });
+    // const url =
+    //   "https://macrostrat.org/api/v2/columns?project_id=10&format=geojson_bare&status_code=in%20process";
+    // axios.post(import_url, { url, project_id: 10 });
   };
 
   return (

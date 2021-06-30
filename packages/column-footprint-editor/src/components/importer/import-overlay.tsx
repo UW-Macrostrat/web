@@ -1,13 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Dialog, InputGroup, FormGroup, Card, Button } from "@blueprintjs/core";
 import axios from "axios";
+
+import { AppContext } from "../../context";
 
 const import_url = "http://0.0.0.0:8000/import";
 
 function ImportDialog(props) {
   const { open } = props;
 
-  const [project_id, setProject_id] = useState(null);
+  const { state, dispatch, state_reducer } = useContext(AppContext);
+
+  const { project_id } = state;
+
+  const changeProjectId = (id) => {
+    dispatch({ type: state_reducer.PROJECT_ID, payload: { project_id: id } });
+  };
 
   const onClickImport = () => {
     const url =
@@ -16,13 +24,21 @@ function ImportDialog(props) {
     axios.post(import_url, { url, project_id: 10 });
   };
   return (
-    <Dialog isOpen={open} title="Import a Project">
+    <Dialog isOpen={open} title="Choose a Project">
       <Card>
-        Hello! It looks like there is no project in the database! Please enter a
-        Project ID to import the project of your choice
+        Hello! Please choose a project to edit, or import a new project!
       </Card>
+      <Button onClick={() => changeProjectId(1)}>Project 1</Button>
+      <Button onClick={() => changeProjectId(10)}>Project 10</Button>
       <FormGroup label="Project ID">
-        <InputGroup onChange={(e) => setProject_id(e.target.value)} />
+        <InputGroup
+        // onChange={(e) =>
+        //   dispatch({
+        //     type: state_reducer.PROJECT_ID,
+        //     payload: { project_id: e.target.value },
+        //   })
+        // }
+        />
       </FormGroup>
       <Button onClick={onClickImport}>Import!</Button>
     </Dialog>
