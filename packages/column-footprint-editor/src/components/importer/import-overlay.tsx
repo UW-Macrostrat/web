@@ -9,12 +9,12 @@ const import_url = "http://0.0.0.0:8000/import";
 function ImportDialog(props) {
   const { open } = props;
 
-  const { state, dispatch, state_reducer } = useContext(AppContext);
+  const { state, runAction, state_reducer } = useContext(AppContext);
 
   const { project_id } = state;
 
   const changeProjectId = (id) => {
-    dispatch({ type: state_reducer.PROJECT_ID, payload: { project_id: id } });
+    runAction({ type: state_reducer.PROJECT_ID, payload: { project_id: id } });
   };
 
   const onClickImport = () => {
@@ -31,14 +31,7 @@ function ImportDialog(props) {
       <Button onClick={() => changeProjectId(1)}>Project 1</Button>
       <Button onClick={() => changeProjectId(10)}>Project 10</Button>
       <FormGroup label="Project ID">
-        <InputGroup
-        // onChange={(e) =>
-        //   dispatch({
-        //     type: state_reducer.PROJECT_ID,
-        //     payload: { project_id: e.target.value },
-        //   })
-        // }
-        />
+        <InputGroup />
       </FormGroup>
       <Button onClick={onClickImport}>Import!</Button>
     </Dialog>

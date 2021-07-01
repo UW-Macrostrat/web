@@ -18,6 +18,7 @@ const reducer = (state, action) => {
         lines: action.payload.lines,
       };
     default:
+      console.log(action);
       throw new Error("What does this mean?");
   }
 };

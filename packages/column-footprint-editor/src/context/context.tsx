@@ -4,7 +4,7 @@ import { reducer, state_reducer, initialState } from ".";
 const AppContext = createContext({});
 
 function fetchLines(project_id, dispatch) {
-  let url = `http://0.0.0.0:8000/lines/${project_id}`;
+  let url = `http://0.0.0.0:8000/${project_id}/lines`;
 
   fetch(url)
     .then((res) => res.json())
@@ -14,7 +14,7 @@ function fetchLines(project_id, dispatch) {
 }
 
 function fetchColumns(project_id, dispatch) {
-  let url = `http://0.0.0.0:8000/columns/${project_id}`;
+  let url = `http://0.0.0.0:8000/${project_id}/columns`;
   fetch(url)
     .then((res) => res.json())
     .then((json) => {
@@ -25,8 +25,50 @@ function fetchColumns(project_id, dispatch) {
     });
 }
 
+function useAppContextActions(dispatch) {
+  return async (action) => {
+    switch (action.type) {
+      case "fetch-lines": {
+        let project_id = action.payload.project_id;
+        let url = `http://0.0.0.0:8000/${project_id}/columns`;
+        console.log("made it this far");
+        fetch(url)
+          .then((res) => res.json())
+          .then((json) => {
+            console.log(json);
+            dispatch({
+              type: state_reducer.FETCH_COLUMNS,
+              payload: { columns: json },
+            });
+          });
+      }
+      case "fetch-columns": {
+        let project_id = action.payload.project_id;
+        let url = `http://0.0.0.0:8000/${project_id}/lines`;
+        fetch(url)
+          .then((res) => res.json())
+          .then((json) =>
+            dispatch({
+              type: state_reducer.FETCH_LINES,
+              payload: { lines: json },
+            })
+          );
+      }
+      default:
+        return dispatch(action);
+    }
+  };
+}
+
 function AppContextProvider(props) {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const runAction = useAppContextActions(dispatch);
+
+  function updateLinesAndColumns() {
+    const project_id = state.project_id;
+    runAction({ type: "fetch-lines", payload: { project_id } });
+    runAction({ type: "fetch-columns", payload: { project_id } });
+  }
 
   useEffect(() => {
     if (state.project_id) {
@@ -38,7 +80,14 @@ function AppContextProvider(props) {
 
   return (
     <AppContext.Provider
-      value={{ state, dispatch, state_reducer, fetchColumns, fetchLines }}
+      value={{
+        state,
+        state_reducer,
+        dispatch,
+        runAction,
+        fetchColumns,
+        fetchLines,
+      }}
     >
       {props.children}
     </AppContext.Provider>
