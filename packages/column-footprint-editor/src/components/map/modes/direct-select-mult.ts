@@ -93,6 +93,7 @@ MultVertDirectSelect.onStop = function(state, addToChangeSet) {
       const obj = {
         action,
         feature: {
+          id: feature.id,
           geometry,
           properties: feature.properties,
           type: "Feature",

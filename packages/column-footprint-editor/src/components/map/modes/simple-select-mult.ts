@@ -2,6 +2,7 @@ import "regenerator-runtime/runtime";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
+import * as Constants from "@mapbox/mapbox-gl-draw/src/constants";
 
 import { distance_between_points } from "../utils";
 
@@ -37,6 +38,22 @@ MultVertSimpleSelect.onSetup = function(opts) {
   });
 
   return state;
+};
+
+MultVertSimpleSelect.fireUpdate = function() {
+  console.log("MOVING");
+  this.getSelected().map((f) => {
+    const action = Constants.updateActions.CHANGE_COORDINATES;
+    const obj = {
+      action,
+      feature: f.toGeoJSON(),
+    };
+    this.map.addToChangeSet(obj);
+  });
+  this.map.fire(Constants.events.UPDATE, {
+    action: Constants.updateActions.MOVE,
+    features: this.getSelected().map((f) => f.toGeoJSON()),
+  });
 };
 
 // need to just pass off it there aren't other verticies at point

@@ -26,7 +26,8 @@ function fetchColumns(project_id, dispatch) {
 }
 
 function useAppContextActions(dispatch) {
-  return async (action) => {
+  // maybe state and action??
+  return async (state, action) => {
     switch (action.type) {
       case "fetch-lines": {
         let project_id = action.payload.project_id;
@@ -62,12 +63,12 @@ function useAppContextActions(dispatch) {
 
 function AppContextProvider(props) {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const runAction = useAppContextActions(dispatch);
+  const runAction = useAppContextActions(state, dispatch);
 
   function updateLinesAndColumns() {
     const project_id = state.project_id;
-    runAction({ type: "fetch-lines", payload: { project_id } });
-    runAction({ type: "fetch-columns", payload: { project_id } });
+    runAction(state, { type: "fetch-lines", payload: { project_id } });
+    runAction(state, { type: "fetch-columns", payload: { project_id } });
   }
 
   useEffect(() => {

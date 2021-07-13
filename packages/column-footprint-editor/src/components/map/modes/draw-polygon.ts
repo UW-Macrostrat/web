@@ -19,7 +19,6 @@ DrawPolygon.clickAnywhere = function(state, e) {
     [x4, y4],
     [x1, y1],
   ];
-  console.log(bbox);
 
   var line = this.newFeature({
     type: Constants.geojsonTypes.FEATURE,
@@ -29,9 +28,12 @@ DrawPolygon.clickAnywhere = function(state, e) {
       coordinates: bbox,
     },
   });
-  this.map.fire(Constants.events.CREATE, {
-    features: [line.toGeoJSON()],
-  });
+
+  const obj = {
+    action: "draw.create",
+    feature: line.toGeoJSON(),
+  };
+  this.map.addToChangeSet(obj);
 
   this.addFeature(line);
 

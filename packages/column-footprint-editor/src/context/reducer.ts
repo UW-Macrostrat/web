@@ -17,6 +17,16 @@ const reducer = (state, action) => {
         ...state,
         lines: action.payload.lines,
       };
+    case "import-overlay":
+      return {
+        ...state,
+        importOverlay: action.payload.open,
+      };
+    case "saving":
+      return {
+        ...state,
+        isSaving: action.payload.saving,
+      };
     default:
       console.log(action);
       throw new Error("What does this mean?");

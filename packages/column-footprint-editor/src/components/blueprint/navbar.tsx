@@ -1,9 +1,54 @@
-import React from "react";
+import React, { useContext } from "react";
 import { DownloadButton } from ".";
-import { Button, Navbar } from "@blueprintjs/core";
+import { Button, Navbar, Popover, Divider } from "@blueprintjs/core";
+import { AppContext } from "../../context";
 import axios from "axios";
 
 const import_url = "http://0.0.0.0:8000/import";
+
+function ProjectDropDown(props) {
+  const { state, runAction, dispatch, state_reducer } = useContext(AppContext);
+
+  const changeProjectId = (id) => {
+    dispatch({ type: state_reducer.PROJECT_ID, payload: { project_id: id } });
+  };
+
+  const openImportOverlay = () => {
+    dispatch({ type: "import-overlay", payload: { open: true } });
+  };
+
+  const project_ids = [1, 10];
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        padding: "5px",
+        justifyContent: "flex-start",
+      }}
+    >
+      {project_ids.map((id) => {
+        let iconName = id == state.project_id ? "tick" : null;
+        return (
+          <Button
+            key={id}
+            minimal={true}
+            onClick={() => changeProjectId(id)}
+            intent="primary"
+            rightIcon={iconName}
+          >
+            Project {id}
+          </Button>
+        );
+      })}
+      <Divider />
+      <Button minimal={true} onClick={openImportOverlay}>
+        More...
+      </Button>
+    </div>
+  );
+}
 
 function MapNavBar(props) {
   const {
@@ -14,6 +59,7 @@ function MapNavBar(props) {
     editMode,
     columns,
   } = props;
+  const { state, runAction, dispatch, state_reducer } = useContext(AppContext);
 
   const onClickImport = () => {
     // const url =
@@ -25,9 +71,15 @@ function MapNavBar(props) {
     <Navbar>
       <Navbar.Group>
         <Navbar.Heading>
-          <Button minimal={true} onClick={onClickImport}>
-            <b>Project 10</b>
-          </Button>
+          <Popover
+            content={<ProjectDropDown />}
+            position="bottom"
+            minimal={true}
+          >
+            <Button minimal={true} onClick={onClickImport}>
+              <b>Project {state.project_id}</b>
+            </Button>
+          </Popover>
         </Navbar.Heading>
         <Navbar.Divider />
         <DownloadButton columns={columns} />

@@ -5,7 +5,7 @@
     "build": "parcel build ./src/index.html"
   },
   "dependencies": {
-    "@blueprintjs/core": "^3.45.0",
+    "@blueprintjs/core": "^3.46.0",
     "@macrostrat/ui-components": "^0.5.2",
     "@mapbox/mapbox-gl-draw": "^1.2.2",
     "@vx/clip-path": "^0.0.199",
@@ -20,6 +20,7 @@
     "mapbox-gl-draw-snap-mode": "^0.1.6",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
+    "react-loading-overlay": "^1.0.1",
     "topojson-client": "^3.1.0"
   },
   "devDependencies": {
