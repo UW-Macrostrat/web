@@ -26,7 +26,12 @@ function NewProject() {
     setProject({ name: state.name, description: e });
   };
 
-  const onSubmit = () => {};
+  const onSubmit = async () => {
+    const data = { data: project };
+    let url = "http://0.0.0.0:8000/new-project";
+    const res = await axios.post(url, data);
+    console.log(res);
+  };
 
   return (
     <Card>

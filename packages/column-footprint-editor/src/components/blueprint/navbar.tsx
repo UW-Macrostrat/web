@@ -7,14 +7,14 @@ import axios from "axios";
 const import_url = "http://0.0.0.0:8000/import";
 
 function ProjectDropDown(props) {
-  const { state, runAction, dispatch, state_reducer } = useContext(AppContext);
+  const { state, runAction } = useContext(AppContext);
 
   const changeProjectId = (id) => {
-    dispatch({ type: state_reducer.PROJECT_ID, payload: { project_id: id } });
+    runAction({ type: "change-project-id", payload: { project_id: id } });
   };
 
   const openImportOverlay = () => {
-    dispatch({ type: "import-overlay", payload: { open: true } });
+    runAction({ type: "import-overlay", payload: { open: true } });
   };
 
   const project_ids = [1, 10];
@@ -59,7 +59,7 @@ function MapNavBar(props) {
     editMode,
     columns,
   } = props;
-  const { state, runAction, dispatch, state_reducer } = useContext(AppContext);
+  const { state, runAction } = useContext(AppContext);
 
   const onClickImport = () => {
     // const url =

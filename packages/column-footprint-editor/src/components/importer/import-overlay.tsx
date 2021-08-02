@@ -111,7 +111,7 @@ function ImportableProjects(props) {
 }
 
 function EditableProjects() {
-  const { state, runAction, dispatch, state_reducer } = useContext(AppContext);
+  const { state, runAction } = useContext(AppContext);
   const [id, setId] = useState(null);
 
   let projectsUrl = "http://0.0.0.0:8000/projects";
@@ -139,7 +139,7 @@ function EditableProjects() {
   };
 
   const changeProjectId = (id) => {
-    dispatch({ type: state_reducer.PROJECT_ID, payload: { project_id: id } });
+    runAction({ type: "change-project-id", payload: { project_id: id } });
   };
 
   return (
@@ -162,16 +162,21 @@ function EditableProjects() {
 }
 
 function ImportDialog(props) {
-  const { state, runAction, dispatch, state_reducer } = useContext(AppContext);
+  const { state, runAction } = useContext(AppContext);
 
-  const { project_id } = state;
+  let isCloseButtonShown = state.project_id != null;
 
-  const changeProjectId = (id) => {
-    dispatch({ type: state_reducer.PROJECT_ID, payload: { project_id: id } });
+  const onClose = () => {
+    runAction({ type: "import-overlay", payload: { open: false } });
   };
 
   return (
-    <Dialog isOpen={state.importOverlay} title="Choose a Project">
+    <Dialog
+      isOpen={state.importOverlayOpen}
+      title="Choose a Project"
+      isCloseButtonShown={isCloseButtonShown}
+      onClose={onClose}
+    >
       <EditableProjects />
       <ImportableProjects />
       <NewProject />

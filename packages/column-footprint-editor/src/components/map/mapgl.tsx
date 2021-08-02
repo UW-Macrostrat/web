@@ -47,13 +47,8 @@ export function Map() {
   const mapContainerRef = useRef(null);
   const mapRef = useRef();
 
-  const {
-    state,
-    state_reducer,
-    dispatch,
-    fetchColumns,
-    fetchLines,
-  } = useContext(AppContext);
+  const { state, runAction, updateLinesAndColumns } = useContext(AppContext);
+  console.log(state);
 
   const [viewport, setViewport] = useState(
     locationFromHash(window.location.hash)
@@ -64,23 +59,17 @@ export function Map() {
   const [open, setOpen] = useState(false);
   const [features, setFeatures] = useState([]);
 
-  useEffect(() => {
-    let open = state.project_id == null;
-    dispatch({ type: "import-overlay", payload: { open } });
-  }, [state.project_id]);
-
   const closeOpen = () => {
     setOpen(false);
   };
 
   const [changeSet, setChangeSet] = useState([]);
 
-  console.log("Changeset", changeSet);
   const onSave = async (e) => {
     // can do cleaning on changeSet by the internal id string.
     // Combine like edits so I'm not running a million
     // transactions on the db.
-    dispatch({ type: "saving", payload: { saving: true } });
+    runAction({ type: "is-saving", payload: { isSaving: true } });
 
     AppToaster.show({
       message: <SavingToast />,
@@ -95,18 +84,16 @@ export function Map() {
           intent: "success",
           timeout: 3000,
         });
-        fetchColumns(state.project_id, dispatch);
-        fetchLines(state.project_id, dispatch);
-        dispatch({ type: "saving", payload: { saving: false } });
+        updateLinesAndColumns(state.project_id);
+        runAction({ type: "is-saving", payload: { isSaving: false } });
       } catch (error) {
         AppToaster.show({
           message: <BadSaving />,
           intent: "danger",
           timeout: 5000,
         });
-        fetchColumns(state.project_id, dispatch);
-        fetchLines(state.project_id, dispatch);
-        dispatch({ type: "saving", payload: { saving: false } });
+        updateLinesAndColumns(state.project_id);
+        runAction({ type: "is-saving", payload: { isSaving: false } });
       }
       setChangeSet([]);
     }
@@ -119,8 +106,7 @@ export function Map() {
       timeout: 1000,
     });
     setChangeSet([]);
-    fetchColumns(state.project_id, dispatch);
-    fetchLines(state.project_id, dispatch);
+    updateLinesAndColumns(state.project_id);
   };
 
   useEffect(() => {

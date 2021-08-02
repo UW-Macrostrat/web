@@ -1,59 +1,47 @@
 import React, { createContext, useReducer, useEffect } from "react";
-import { reducer, state_reducer, initialState } from ".";
+import { fetchColumns, fetchLines } from "./fetch";
 
-const AppContext = createContext({});
+//////////////////////// Data Types ///////////////////////
 
-function fetchLines(project_id, dispatch) {
-  let url = `http://0.0.0.0:8000/${project_id}/lines`;
+type ProjectId = { project_id: number };
+type Columns = { columns: object };
+type Lines = { lines: object };
 
-  fetch(url)
-    .then((res) => res.json())
-    .then((json) =>
-      dispatch({ type: state_reducer.FETCH_LINES, payload: { lines: json } })
-    );
-}
+/////////////////////// Async Actions ///////////////////////
 
-function fetchColumns(project_id, dispatch) {
-  let url = `http://0.0.0.0:8000/${project_id}/columns`;
-  fetch(url)
-    .then((res) => res.json())
-    .then((json) => {
-      dispatch({
-        type: state_reducer.FETCH_COLUMNS,
-        payload: { columns: json },
-      });
-    });
-}
+type FetchColumns = { type: "fetch-columns"; payload: ProjectId };
+type FetchLines = { type: "fetch-lines"; payload: ProjectId };
+
+////////////////////// Sync Actions ///////////////////////////
+
+type ChangeProjectId = { type: "change-project-id"; payload: ProjectId };
+type ImportOverlay = { type: "import-overlay"; payload: { open: boolean } };
+type IsSaving = { type: "is-saving"; payload: { isSaving: boolean } };
+type SetColumns = { type: "set-columns"; payload: Columns };
+type SetLines = { type: "set-lines"; payload: Lines };
+
+////////////////////// Union Action Types //////////////////////
+type SyncAppActions =
+  | ChangeProjectId
+  | ImportOverlay
+  | IsSaving
+  | SetColumns
+  | SetLines;
+type AsyncAppActions = FetchColumns | FetchLines;
 
 function useAppContextActions(dispatch) {
   // maybe state and action??
-  return async (state, action) => {
+  return async (action: SyncAppActions | AsyncAppActions) => {
     switch (action.type) {
       case "fetch-lines": {
-        let project_id = action.payload.project_id;
-        let url = `http://0.0.0.0:8000/${project_id}/columns`;
-        console.log("made it this far");
-        fetch(url)
-          .then((res) => res.json())
-          .then((json) => {
-            console.log(json);
-            dispatch({
-              type: state_reducer.FETCH_COLUMNS,
-              payload: { columns: json },
-            });
-          });
+        const project_id = action.payload.project_id;
+        const lines = await fetchLines(project_id);
+        return dispatch({ type: "set-lines", payload: { lines } });
       }
       case "fetch-columns": {
-        let project_id = action.payload.project_id;
-        let url = `http://0.0.0.0:8000/${project_id}/lines`;
-        fetch(url)
-          .then((res) => res.json())
-          .then((json) =>
-            dispatch({
-              type: state_reducer.FETCH_LINES,
-              payload: { lines: json },
-            })
-          );
+        const project_id = action.payload.project_id;
+        const columns = await fetchColumns(project_id);
+        return dispatch({ type: "set-columns", payload: { columns } });
       }
       default:
         return dispatch(action);
@@ -61,20 +49,80 @@ function useAppContextActions(dispatch) {
   };
 }
 
-function AppContextProvider(props) {
-  const [state, dispatch] = useReducer(reducer, initialState);
-  const runAction = useAppContextActions(state, dispatch);
+const appReducer = (state = initialState, action: SyncAppActions) => {
+  switch (action.type) {
+    case "change-project-id":
+      return {
+        ...state,
+        project_id: action.payload.project_id,
+      };
+    case "set-columns":
+      return {
+        ...state,
+        columns: action.payload.columns,
+      };
+    case "set-lines":
+      return {
+        ...state,
+        lines: action.payload.lines,
+      };
+    case "import-overlay":
+      return {
+        ...state,
+        importOverlayOpen: action.payload.open,
+      };
+    case "is-saving":
+      return {
+        ...state,
+        isSaving: action.payload.isSaving,
+      };
+    default:
+      console.log(action);
+      throw new Error("What does this mean?");
+  }
+};
 
-  function updateLinesAndColumns() {
-    const project_id = state.project_id;
-    runAction(state, { type: "fetch-lines", payload: { project_id } });
-    runAction(state, { type: "fetch-columns", payload: { project_id } });
+interface AppState {
+  project_id: number;
+  lines: object;
+  columns: object;
+  importOverlayOpen: boolean;
+  isSaving: boolean;
+}
+
+let initialState: AppState = {
+  project_id: null,
+  lines: null,
+  columns: null,
+  importOverlayOpen: true,
+  isSaving: false,
+};
+
+interface AppCtx {
+  state: AppState;
+  runAction(action: SyncAppActions | AsyncAppActions): Promise<void>;
+  updateLinesAndColumns: (e) => void;
+}
+const AppContext = createContext<AppCtx>({
+  state: initialState,
+  async runAction() {},
+  updateLinesAndColumns() {},
+});
+
+function AppContextProvider(props) {
+  const [state, dispatch] = useReducer(appReducer, initialState);
+  const runAction = useAppContextActions(dispatch);
+
+  function updateLinesAndColumns(project_id) {
+    runAction({ type: "fetch-lines", payload: { project_id } });
+    runAction({ type: "fetch-columns", payload: { project_id } });
   }
 
   useEffect(() => {
     if (state.project_id) {
-      fetchLines(state.project_id, dispatch);
-      fetchColumns(state.project_id, dispatch);
+      updateLinesAndColumns(state.project_id);
+      let open = state.project_id == null;
+      runAction({ type: "import-overlay", payload: { open } });
     }
     return () => {};
   }, [state.project_id]);
@@ -83,11 +131,8 @@ function AppContextProvider(props) {
     <AppContext.Provider
       value={{
         state,
-        state_reducer,
-        dispatch,
         runAction,
-        fetchColumns,
-        fetchLines,
+        updateLinesAndColumns,
       }}
     >
       {props.children}
