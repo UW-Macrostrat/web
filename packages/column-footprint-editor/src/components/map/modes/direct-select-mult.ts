@@ -53,8 +53,6 @@ MultVertDirectSelect.onDrag = function(state, e) {
   state.dragMoving = true;
   e.originalEvent.stopPropagation();
 
-  //console.log(e);
-
   const delta = {
     lng: e.lngLat.lng - state.dragMoveLocation.lng,
     lat: e.lngLat.lat - state.dragMoveLocation.lat,
@@ -75,9 +73,29 @@ MultVertDirectSelect.onDrag = function(state, e) {
   }
 };
 
-MultVertDirectSelect.onStop = function(state, addToChangeSet) {
-  console.log("Stopped Dragging", state);
+/**
+ * Helper function to add a feature coordinate change to changeset
+ * @param feature valid mapbox feature
+ */
+MultVertDirectSelect.onDragChangeSetAdder = function(feature) {
+  const action = Constants.updateActions.CHANGE_COORDINATES;
+  const geometry = {
+    coordinates: feature.coordinates,
+    type: feature.type,
+  };
+  const obj = {
+    action,
+    feature: {
+      id: feature.id,
+      geometry,
+      properties: feature.properties,
+      type: "Feature",
+    },
+  };
+  this.map.addToChangeSet(obj);
+};
 
+MultVertDirectSelect.onStop = function(state) {
   if (state.movedCoordPath) {
     let newCoord = state.feature.coordinates[state.movedCoordPath];
     // different features, works for more than 2 shared vertices
@@ -85,25 +103,41 @@ MultVertDirectSelect.onStop = function(state, addToChangeSet) {
       let coordsToChange = [...feature.coordinates];
       coordsToChange.splice(state.toMoveCoordPaths[index], 1, newCoord);
       feature.setCoordinates(coordsToChange);
-      const action = Constants.updateActions.CHANGE_COORDINATES;
-      const geometry = {
-        coordinates: feature.coordinates,
-        type: feature.type,
-      };
-      const obj = {
-        action,
-        feature: {
-          id: feature.id,
-          geometry,
-          properties: feature.properties,
-          type: "Feature",
-        },
-      };
-      this.map.addToChangeSet(obj);
+      this.onDragChangeSetAdder(feature);
     });
+  } else {
+    this.onDragChangeSetAdder(state.feature);
   }
   doubleClickZoom.enable(this);
   this.clearSelectedCoordinates();
+};
+
+MultVertDirectSelect.onTrash = function(state) {
+  // Uses number-aware sorting to make sure '9' < '10'. Comparison is reversed because we want them
+  // in reverse order so that we can remove by index safely.
+  console.log("Trashing", state.feature);
+  console.log("TRASHING", state.selectedCoordPaths);
+  console.log("TRASHING", state);
+  if (!state.toMoveCoordPaths) {
+    //no shared vertices
+    state.selectedCoordPaths
+      .sort((a, b) => b.localeCompare(a, "en", { numeric: true }))
+      .forEach((id) => {
+        state.feature.removeCoordinate(id);
+      });
+    this.fireUpdate();
+    state.selectedCoordPaths = [];
+    this.clearSelectedCoordinates();
+    this.fireActionable(state);
+    if (state.feature.isValid() === false) {
+      this.deleteFeature([state.featureId]);
+      this.changeMode(Constants.modes.SIMPLE_SELECT, {});
+    }
+  } else {
+    /// we only want to delete the one point..
+    const pointId = parseInt(state.selectedCoordPaths[0]);
+    state.feature.removeCoordinate(pointId);
+  }
 };
 
 export { MultVertDirectSelect };

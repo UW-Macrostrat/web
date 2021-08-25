@@ -22,7 +22,7 @@ function ProjectButtonCollapse(props) {
   return (
     <div style={{ margin: "5px" }} key={project.project_id}>
       <Button key={project.project_id} onClick={onClick}>
-        Project {project.project_id}
+        {project.name}
       </Button>
       <Collapse isOpen={project.project_id == id}>
         <div

@@ -2,11 +2,25 @@ import React, { useContext } from "react";
 import { DownloadButton } from ".";
 import { Button, Navbar, Popover, Divider } from "@blueprintjs/core";
 import { AppContext } from "../../context";
+import { useAPIResult } from "@macrostrat/ui-components";
 import axios from "axios";
 
 const import_url = "http://0.0.0.0:8000/import";
+const projects_url = "http://0.0.0.0:8000/projects";
+
+function unwrapProjectIds(res) {
+  if (res.data) {
+    const { data } = res;
+    console.log(data);
+    let ids = data.map((project) => project.project_id);
+    return ids;
+  } else {
+    return [];
+  }
+}
 
 function ProjectDropDown(props) {
+  const { project_ids } = props;
   const { state, runAction } = useContext(AppContext);
 
   const changeProjectId = (id) => {
@@ -16,8 +30,6 @@ function ProjectDropDown(props) {
   const openImportOverlay = () => {
     runAction({ type: "import-overlay", payload: { open: true } });
   };
-
-  const project_ids = [1, 10];
 
   return (
     <div
@@ -67,12 +79,18 @@ function MapNavBar(props) {
     // axios.post(import_url, { url, project_id: 10 });
   };
 
+  let ids = useAPIResult(
+    projects_url,
+    {},
+    { unwrapResponse: unwrapProjectIds }
+  );
+
   return (
     <Navbar>
       <Navbar.Group>
         <Navbar.Heading>
           <Popover
-            content={<ProjectDropDown />}
+            content={<ProjectDropDown project_ids={ids} />}
             position="bottom"
             minimal={true}
           >

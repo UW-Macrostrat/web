@@ -48,7 +48,6 @@ export function Map() {
   const mapRef = useRef();
 
   const { state, runAction, updateLinesAndColumns } = useContext(AppContext);
-  console.log(state);
 
   const [viewport, setViewport] = useState(
     locationFromHash(window.location.hash)
@@ -70,7 +69,7 @@ export function Map() {
     // Combine like edits so I'm not running a million
     // transactions on the db.
     runAction({ type: "is-saving", payload: { isSaving: true } });
-
+    console.log(changeSet);
     AppToaster.show({
       message: <SavingToast />,
       intent: "primary",
@@ -157,12 +156,12 @@ export function Map() {
 
       map.on("draw.create", async function(e) {
         console.log("created new feature!");
-        const { type: action, features } = e;
+        // const { type: action, features } = e;
 
-        features.map((feature) => {
-          const obj = { action, feature };
-          map.addToChangeSet(obj);
-        });
+        // features.map((feature) => {
+        //   const obj = { action, feature };
+        //   map.addToChangeSet(obj);
+        // });
       });
 
       map.on("draw.delete", async function(e) {
@@ -176,8 +175,6 @@ export function Map() {
         });
       });
 
-      // use the splice to replace coords
-      // This needs to account for deleteing nodes. That falls under change_coordinates
       map.on("draw.update", async function(e) {
         console.log(e);
         Draw.changeMode("simple_select");
