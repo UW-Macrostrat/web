@@ -35,6 +35,8 @@ async function propertyViewMap(map, state, setFeatures, setOpen) {
   });
 
   map.on("click", "column-fill", async function(e) {
+    var features = map.queryRenderedFeatures(e.point);
+    //console.log("feautresss", features);
     setFeatures(e.features);
     setOpen(true);
   });

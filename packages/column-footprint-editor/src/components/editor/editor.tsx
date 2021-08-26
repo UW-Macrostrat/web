@@ -2,16 +2,25 @@ import React, { createContext, useContext, useReducer, useEffect } from "react";
 import { Overlay, Button, Card, Navbar, FormGroup } from "@blueprintjs/core";
 import { OverlayBox, SaveButton } from "../blueprint";
 import {
-  APIHelpers,
   ModelEditor,
   useModelEditor,
   ModelEditButton,
   EditableMultilineText,
 } from "@macrostrat/ui-components";
 import axios from "axios";
+import { AppContext } from "../../context";
+
+import {
+  AppToaster,
+  SavingToast,
+  SuccessfullySaved,
+  BadSaving,
+} from "../blueprint";
+
 import "./main.css";
 
 import { TwoIdentities } from "./two-identities";
+import { ColumnGroup } from "./column-groups";
 
 function ColumnNavBar() {
   const { model, isEditing, hasChanges, actions } = useModelEditor();
@@ -22,7 +31,7 @@ function ColumnNavBar() {
   return (
     <Navbar>
       <Navbar.Group>
-        Column ID: {model.column_id}
+        Column ID: {model.col_id}
         <Navbar.Divider />
         Project ID: {model.project_id}
         <Navbar.Divider />
@@ -42,40 +51,21 @@ function ColumnNavBar() {
 function ColumnName() {
   const { model, isEditing, actions } = useModelEditor();
 
-  const { column_name } = model;
+  const { col_name } = model;
 
   if (isEditing) {
     return (
       <div>
         <h4>
           {/* @ts-ignore */}
-          <EditableMultilineText field="column_name" className="column_name" />
+          <EditableMultilineText field="col_name" className="column_name" />
         </h4>
       </div>
     );
   }
   return (
     <div>
-      <h4>Column Name: {column_name}</h4>
-    </div>
-  );
-}
-function ColumnGroup() {
-  const { model, isEditing, actions } = useModelEditor();
-
-  const { group } = model;
-
-  if (isEditing) {
-    return (
-      <h4>
-        {/* @ts-ignore */}
-        <EditableMultilineText field="group" className="column_name" />
-      </h4>
-    );
-  }
-  return (
-    <div>
-      <h4>Column Group: {group}</h4>
+      <h4>Column Name: {col_name}</h4>
     </div>
   );
 }
@@ -94,61 +84,64 @@ function FeatureOverlay({ feature }) {
 
 function PropertyDialog(props) {
   const { features, open, closeOpen } = props;
-
+  const { state: appState, runAction, updateLinesAndColumns } = useContext(
+    AppContext
+  );
   const feature = features[0];
   if (!feature) return null;
 
-  const featuress = [features[0], features[0]];
-
-  //   if (featuress.length > 1) {
-  //     return (
-  //       <OverlayBox open={open} closeOpen={closeOpen}>
-  //         <TwoIdentities features={featuress} />
-  //       </OverlayBox>
-  //     );
-  //   }
-  if (feature["properties"]["col_id"] == null) {
-    let state = {
-      group: null,
-      project_id: null,
-      column_id: null,
-      column_name: null,
-      identity_id: null,
-    };
-    return (
-      <OverlayBox open={open} closeOpen={closeOpen}>
-        <FeatureOverlay feature={state} />
-      </OverlayBox>
-    );
-  }
-
   const {
-    col_group: group,
-    project_id,
-    col_id: column_id,
-    col_name: column_name,
+    col_group,
+    col_group_name,
+    col_group_id,
+    col_id,
+    col_name,
     id: identity_id,
-  } = features[0]["properties"];
+  } = feature["properties"];
 
   let state = {
-    group,
-    project_id: parseInt(project_id),
-    column_id: parseInt(column_id),
-    column_name,
-    identity_id: parseInt(identity_id),
+    col_group,
+    col_group_name,
+    col_group_id,
+    project_id: appState.project_id,
+    location: feature.geometry,
+    col_id,
+    col_name,
+    identity_id,
   };
 
-  const put_url = "http://0.0.0.0:8000/property_updates";
+  const put_url = `http://0.0.0.0:8000/${state.project_id}/property_updates`;
 
   const persistChanges = async (updatedModel, changeset) => {
     console.log("changeset", changeset);
     console.log("updatedModel", updatedModel);
-    const res = await axios.put(
-      put_url,
-      { updatedModel },
-      { headers: { "Access-Control-Allow-Origin": "*" } }
-    );
-    console.log(res);
+    runAction({ type: "is-saving", payload: { isSaving: true } });
+    AppToaster.show({
+      message: <SavingToast />,
+      intent: "primary",
+    });
+    try {
+      const res = await axios.put(
+        put_url,
+        { updatedModel },
+        { headers: { "Access-Control-Allow-Origin": "*" } }
+      );
+      AppToaster.show({
+        message: <SuccessfullySaved />,
+        intent: "success",
+        timeout: 3000,
+      });
+      updateLinesAndColumns(state.project_id);
+      runAction({ type: "is-saving", payload: { isSaving: false } });
+    } catch {
+      AppToaster.show({
+        message: <BadSaving />,
+        intent: "danger",
+        timeout: 5000,
+      });
+      updateLinesAndColumns(state.project_id);
+      runAction({ type: "is-saving", payload: { isSaving: false } });
+    }
   };
 
   return (

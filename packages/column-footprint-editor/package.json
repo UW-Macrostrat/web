@@ -6,6 +6,7 @@
   },
   "dependencies": {
     "@blueprintjs/core": "^3.46.0",
+    "@blueprintjs/select": "^3.17.0",
     "@macrostrat/ui-components": "^0.5.2",
     "@mapbox/mapbox-gl-draw": "^1.2.2",
     "@vx/clip-path": "^0.0.199",
