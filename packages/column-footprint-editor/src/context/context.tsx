@@ -1,5 +1,5 @@
 import React, { createContext, useReducer, useEffect } from "react";
-import { fetchColumns, fetchLines } from "./fetch";
+import { fetchColumns, fetchLines, fetchProjColGroups } from "./fetch";
 
 //////////////////////// Data Types ///////////////////////
 
@@ -77,7 +77,6 @@ const appReducer = (state = initialState, action: SyncAppActions) => {
         isSaving: action.payload.isSaving,
       };
     default:
-      console.log(action);
       throw new Error("What does this mean?");
   }
 };
@@ -88,6 +87,7 @@ interface AppState {
   columns: object;
   importOverlayOpen: boolean;
   isSaving: boolean;
+  projectColumnGroups: object[];
 }
 
 let initialState: AppState = {
@@ -96,6 +96,7 @@ let initialState: AppState = {
   columns: null,
   importOverlayOpen: true,
   isSaving: false,
+  projectColumnGroups: null,
 };
 
 interface AppCtx {

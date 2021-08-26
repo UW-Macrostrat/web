@@ -1,4 +1,5 @@
 import React from "react";
+export * from "./properties";
 import mapboxgl from "mapbox-gl";
 import { setWindowHash, locationFromHash } from "../utils";
 import {
@@ -105,40 +106,4 @@ function editModeMap(map, state) {
   return Draw;
 }
 
-async function propertyViewMap(map, state, setFeatures, setOpen) {
-  map.addSource("columns", {
-    type: "geojson",
-    data: state.columns,
-  });
-  map.addLayer({
-    id: "column-fill",
-    type: "fill",
-    source: "columns", // reference the data source
-    paint: {
-      "fill-color": [
-        "case",
-        ["==", ["get", "col_id"], "nan"],
-        "#F95E5E",
-        "#0BDCB9",
-      ], // blue color fill
-      "fill-opacity": 0.5,
-    },
-  });
-  map.addLayer({
-    id: "outline",
-    type: "line",
-    source: "columns",
-    layout: {},
-    paint: {
-      "line-color": "#000",
-      "line-width": 1,
-    },
-  });
-
-  map.on("click", "column-fill", async function(e) {
-    setFeatures(e.features);
-    setOpen(true);
-  });
-}
-
-export { propertyViewMap, initializeMap, editModeMap };
+export { initializeMap, editModeMap };

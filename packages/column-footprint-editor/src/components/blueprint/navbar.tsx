@@ -11,7 +11,6 @@ const projects_url = "http://0.0.0.0:8000/projects";
 function unwrapProjectIds(res) {
   if (res.data) {
     const { data } = res;
-    console.log(data);
     let ids = data.map((project) => project.project_id);
     return ids;
   } else {

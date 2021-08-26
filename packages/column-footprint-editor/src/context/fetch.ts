@@ -14,4 +14,10 @@ async function fetchLines(project_id) {
   return res.data;
 }
 
-export { fetchColumns, fetchLines };
+async function fetchProjColGroups(project_id) {
+  let url = "http://0.0.0.0:8000/col-groups";
+  const res = await axios.get(url, { params: { project_id } });
+  return res.data.data;
+}
+
+export { fetchColumns, fetchLines, fetchProjColGroups };
