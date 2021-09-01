@@ -4,8 +4,11 @@ import { fetchColumns, fetchLines, fetchProjColGroups } from "./fetch";
 //////////////////////// Data Types ///////////////////////
 
 type ProjectId = { project_id: number };
+type ProjectName = { name: string };
+type ProjectDescription = { description: string };
 type Columns = { columns: object };
 type Lines = { lines: object };
+type Project = ProjectId & ProjectName & ProjectDescription;
 
 /////////////////////// Async Actions ///////////////////////
 
@@ -14,7 +17,7 @@ type FetchLines = { type: "fetch-lines"; payload: ProjectId };
 
 ////////////////////// Sync Actions ///////////////////////////
 
-type ChangeProjectId = { type: "change-project-id"; payload: ProjectId };
+type ChangeProject = { type: "change-project"; payload: Project };
 type ImportOverlay = { type: "import-overlay"; payload: { open: boolean } };
 type IsSaving = { type: "is-saving"; payload: { isSaving: boolean } };
 type SetColumns = { type: "set-columns"; payload: Columns };
@@ -22,7 +25,7 @@ type SetLines = { type: "set-lines"; payload: Lines };
 
 ////////////////////// Union Action Types //////////////////////
 type SyncAppActions =
-  | ChangeProjectId
+  | ChangeProject
   | ImportOverlay
   | IsSaving
   | SetColumns
@@ -51,10 +54,10 @@ function useAppContextActions(dispatch) {
 
 const appReducer = (state = initialState, action: SyncAppActions) => {
   switch (action.type) {
-    case "change-project-id":
+    case "change-project":
       return {
         ...state,
-        project_id: action.payload.project_id,
+        project: action.payload,
       };
     case "set-columns":
       return {
@@ -80,9 +83,13 @@ const appReducer = (state = initialState, action: SyncAppActions) => {
       throw new Error("What does this mean?");
   }
 };
-
-interface AppState {
+interface ProjectInterface {
   project_id: number;
+  name: string;
+  description: string;
+}
+interface AppState {
+  project: ProjectInterface;
   lines: object;
   columns: object;
   importOverlayOpen: boolean;
@@ -91,7 +98,7 @@ interface AppState {
 }
 
 let initialState: AppState = {
-  project_id: null,
+  project: { project_id: null, name: null, description: null },
   lines: null,
   columns: null,
   importOverlayOpen: true,
@@ -120,13 +127,13 @@ function AppContextProvider(props) {
   }
 
   useEffect(() => {
-    if (state.project_id) {
-      updateLinesAndColumns(state.project_id);
-      let open = state.project_id == null;
+    if (state.project.project_id) {
+      updateLinesAndColumns(state.project.project_id);
+      let open = state.project.project_id == null;
       runAction({ type: "import-overlay", payload: { open } });
     }
     return () => {};
-  }, [state.project_id]);
+  }, [state.project.project_id]);
 
   return (
     <AppContext.Provider

@@ -1,7 +1,25 @@
+@import "~/node_modules/normalize.css";
+@import "~/node_modules/@blueprintjs/core/lib/css/blueprint.css";
+@import "~/node_modules/@blueprintjs/icons/lib/css/blueprint-icons.css";
+@import "~/node_modules/@blueprintjs/popover2/lib/css/blueprint-popover2.css";
+
 .map-container {
   position: absolute;
   top: 0;
   bottom: 0;
   left: 0;
   right: 0;
+}
+
+.map-legend-container {
+  padding: 10px;
+}
+
+.add-geo-popover {
+  padding: 10px;
+  height: 250px;
+  width: 250px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }

@@ -8,15 +8,13 @@ export function ColumnSuggest(props) {
     onChange,
     onFilter = () => {},
     initialItem,
-    createNew = true,
+    createNew = false,
     ...rest
   } = props;
   const [selectedItem, setSelectedItem] = useState({});
   const [query, setQuery] = useState("");
-  console.log(query);
 
   let itemz = [...items];
-  console.log(itemz);
 
   let initialQuery = initialItem.col_group_name;
   useEffect(() => {

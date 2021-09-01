@@ -3,7 +3,14 @@ import { Overlay, Button, Card } from "@blueprintjs/core";
 import "./main.css";
 
 function OverlayBox(props) {
-  const { open, children, closeOpen } = props;
+  const {
+    open,
+    children,
+    closeOpen,
+    className = "overlay",
+    closeButton = true,
+    cardStyles = {},
+  } = props;
 
   const overlayProperties = {
     autoFocus: true,
@@ -17,12 +24,14 @@ function OverlayBox(props) {
 
   return (
     <Overlay isOpen={open} {...overlayProperties}>
-      <div className="overlay">
-        <Card>
+      <div className={className}>
+        <Card style={cardStyles}>
           {children}
-          <Button intent="danger" onClick={closeOpen}>
-            Close
-          </Button>
+          {closeButton ? (
+            <Button intent="danger" onClick={closeOpen}>
+              Close
+            </Button>
+          ) : null}
         </Card>
       </div>
     </Overlay>

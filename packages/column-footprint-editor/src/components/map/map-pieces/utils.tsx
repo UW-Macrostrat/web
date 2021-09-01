@@ -26,3 +26,10 @@ export function createMapboxPaintConditional(colGroups) {
     "#0BDCB9",
   ];
 }
+
+export function addIdsToGeoJSON(columns) {
+  let features = columns.features.map((feature, i) => {
+    return { id: i, ...feature };
+  });
+  return { type: "FeatureCollection", features };
+}

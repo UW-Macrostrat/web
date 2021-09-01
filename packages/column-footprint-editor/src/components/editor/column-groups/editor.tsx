@@ -55,20 +55,31 @@ function ColumnGroup() {
   if (isEditing) {
     return (
       <div>
-        <ColumnSuggest
-          items={data}
-          onChange={onChangeGroup}
-          initialItem={model}
-        />
-        <Button
-          onClick={() => {
-            setOpen(!open);
-          }}
+        <div className="edit-with-label">
+          <h4 className="h4-0">Column Group: </h4>
+          <ColumnSuggest
+            items={data}
+            onChange={onChangeGroup}
+            initialItem={model}
+          />
+        </div>
+        <div
+          className="edit-with-label"
+          style={{ margin: "10px", marginLeft: "0px" }}
         >
-          New Col Group
-        </Button>
+          <Button
+            onClick={() => {
+              setOpen(!open);
+            }}
+            intent="success"
+          >
+            New Column Group
+          </Button>
+        </div>
         <Collapse isOpen={open}>
-          <NewColGroups onCreate={onCreateColGroup} />
+          <div className="new-column-collapse">
+            <NewColGroups onCreate={onCreateColGroup} />
+          </div>
         </Collapse>
       </div>
     );

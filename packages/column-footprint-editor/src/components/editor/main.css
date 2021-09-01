@@ -1,12 +1,60 @@
 @import "~/node_modules/normalize.css";
 @import "~/node_modules/@blueprintjs/core/lib/css/blueprint.css";
 @import "~/node_modules/@blueprintjs/icons/lib/css/blueprint-icons.css";
+@import "~/node_modules/@blueprintjs/popover2/lib/css/blueprint-popover2.css";
 
 .column_name {
-  background-color: #ced9e0;
   margin-top: 0px;
 }
 
 .clicked-entity {
   background-color: #ced9e0;
+}
+
+.edit-with-label {
+  display: flex;
+  align-items: baseline;
+  margin: 10px;
+  margin-left: 0px;
+}
+
+.new-column-collapse {
+  border-style: solid;
+  border-color: black;
+  border-radius: 5px;
+  border-width: 1px;
+  margin-bottom: 5px;
+  padding: 10px;
+}
+
+.h4-0 {
+  margin: 0px;
+  margin-right: 5px;
+}
+
+.map-legend-overlay {
+  top: 85px;
+  right: 30px;
+  max-width: 500px;
+  min-width: 300px;
+}
+
+.map-legend-row {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: "5px";
+  overflow-y: auto;
+  justify-content: space-between;
+}
+
+.col-group-legend {
+  color: rgb(170, 170, 170);
+}
+
+.import-feedback-dialog {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 250px;
 }

@@ -3,27 +3,35 @@ import { DownloadButton } from ".";
 import { Button, Navbar, Popover, Divider } from "@blueprintjs/core";
 import { AppContext } from "../../context";
 import { useAPIResult } from "@macrostrat/ui-components";
+import { MapColLegend, AddKnownGeom } from "../map/map-pieces";
+import * as Constants from "@mapbox/mapbox-gl-draw/src/constants";
 import axios from "axios";
 
 const import_url = "http://0.0.0.0:8000/import";
 const projects_url = "http://0.0.0.0:8000/projects";
 
-function unwrapProjectIds(res) {
+function unwrapProjects(res) {
   if (res.data) {
     const { data } = res;
-    let ids = data.map((project) => project.project_id);
-    return ids;
+    let projects = data.map((project) => {
+      return {
+        project_id: project.project_id,
+        name: project.name,
+        description: project.description,
+      };
+    });
+    return projects;
   } else {
     return [];
   }
 }
 
 function ProjectDropDown(props) {
-  const { project_ids } = props;
+  const { projects } = props;
   const { state, runAction } = useContext(AppContext);
 
-  const changeProjectId = (id) => {
-    runAction({ type: "change-project-id", payload: { project_id: id } });
+  const changeProjectId = (project) => {
+    runAction({ type: "change-project", payload: project });
   };
 
   const openImportOverlay = () => {
@@ -31,92 +39,132 @@ function ProjectDropDown(props) {
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        padding: "5px",
-        justifyContent: "flex-start",
-      }}
-    >
-      {project_ids.map((id) => {
-        let iconName = id == state.project_id ? "tick" : null;
-        return (
-          <Button
-            key={id}
-            minimal={true}
-            onClick={() => changeProjectId(id)}
-            intent="primary"
-            rightIcon={iconName}
-          >
-            Project {id}
-          </Button>
-        );
-      })}
-      <Divider />
-      <Button minimal={true} onClick={openImportOverlay}>
-        More...
-      </Button>
+    <div>
+      <div className="projects-drop-down">
+        {projects.map((project) => {
+          const { project_id: id, name } = project;
+          let iconName = id == state.project.project_id ? "tick" : null;
+          return (
+            <Button
+              key={id}
+              minimal={true}
+              onClick={() => changeProjectId(project)}
+              intent="primary"
+              rightIcon={iconName}
+            >
+              {name}
+            </Button>
+          );
+        })}
+      </div>
+      <div className="projects-drop-more">
+        <Divider />
+        <Button minimal={true} onClick={openImportOverlay}>
+          More...
+        </Button>
+      </div>
     </div>
+  );
+}
+
+function MapToolBar(props) {
+  const { columns, editMode, draw, addToChangeSet } = props;
+  console.log(draw);
+
+  const addGeomToDraw = (geom) => {
+    let feature = draw.add(geom);
+    console.log(feature);
+    // var line = draw.newFeature({
+    //   type: Constants.geojsonTypes.FEATURE,
+    //   properties: {},
+    //   geometry: geom,
+    // });
+    const obj = {
+      action: "draw.create",
+      feature: { id: feature[0], geometry: geom },
+    };
+
+    addToChangeSet(obj);
+    // draw.addFeature(geom);
+    // draw.changeMode("simple_select");
+  };
+
+  return (
+    <Navbar className="toolbar">
+      <Navbar.Group>
+        <Navbar.Heading>Tool Bar</Navbar.Heading>
+        {editMode ? (
+          <AddKnownGeom addGeom={addGeomToDraw} />
+        ) : (
+          <MapColLegend columns={columns} />
+        )}
+      </Navbar.Group>
+    </Navbar>
   );
 }
 
 function MapNavBar(props) {
   const {
     onSave,
+    addToChangeSet,
     onCancel,
     enterEditMode,
     enterPropertyMode,
     editMode,
     columns,
+    legendColumns,
+    draw,
   } = props;
   const { state, runAction } = useContext(AppContext);
 
-  const onClickImport = () => {
-    // const url =
-    //   "https://macrostrat.org/api/v2/columns?project_id=10&format=geojson_bare&status_code=in%20process";
-    // axios.post(import_url, { url, project_id: 10 });
-  };
-
-  let ids = useAPIResult(
+  let projects = useAPIResult(
     projects_url,
     {},
-    { unwrapResponse: unwrapProjectIds }
+    { unwrapResponse: unwrapProjects }
   );
+  if (!projects) return <div></div>;
 
   return (
-    <Navbar>
-      <Navbar.Group>
-        <Navbar.Heading>
-          <Popover
-            content={<ProjectDropDown project_ids={ids} />}
-            position="bottom"
-            minimal={true}
-          >
-            <Button minimal={true} onClick={onClickImport}>
-              <b>Project {state.project_id}</b>
-            </Button>
-          </Popover>
-        </Navbar.Heading>
-        <Navbar.Divider />
-        <DownloadButton columns={columns} />
-        <Button minimal={true} intent="success" onClick={onSave}>
-          Save
-        </Button>
-        <Button minimal={true} intent="danger" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Navbar.Divider />
-        <Button minimal={true} active={editMode} onClick={enterEditMode}>
-          Topology Edit Mode
-        </Button>
-        <Button minimal={true} active={!editMode} onClick={enterPropertyMode}>
-          Property View Mode
-        </Button>
-        <Navbar.Divider />
-        Total Area: 5000 sq miles?
-      </Navbar.Group>
-    </Navbar>
+    <div className="navbar-layout">
+      <Navbar>
+        <Navbar.Group>
+          <Navbar.Heading>
+            <Popover
+              content={<ProjectDropDown projects={projects} />}
+              position="bottom"
+              minimal={true}
+            >
+              <Button minimal={true}>
+                <b>{state.project.name}</b>
+              </Button>
+            </Popover>
+          </Navbar.Heading>
+          <Navbar.Divider />
+          <DownloadButton columns={columns} />
+          <Button minimal={true} intent="success" onClick={onSave}>
+            Save
+          </Button>
+          <Button minimal={true} intent="danger" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Navbar.Divider />
+          <Button minimal={true} active={editMode} onClick={enterEditMode}>
+            Topology Edit Mode
+          </Button>
+          <Button minimal={true} active={!editMode} onClick={enterPropertyMode}>
+            Property View Mode
+          </Button>
+          <Navbar.Divider />
+          Total Area: 5000 sq miles?
+        </Navbar.Group>
+      </Navbar>
+      <MapToolBar
+        columns={legendColumns}
+        editMode={editMode}
+        addToChangeSet={addToChangeSet}
+        draw={draw}
+      />
+    </div>
   );
 }
 

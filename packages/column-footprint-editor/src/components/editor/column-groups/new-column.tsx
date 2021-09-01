@@ -12,17 +12,23 @@ function EditComponents() {
   const { actions } = useModelEditor();
   return (
     <div>
-      <h4>
-        Column-Group:
-        {/* @ts-ignore */}
-        <EditableMultilineText field="col_group" className="col_group" />
-        Column-Group-Name:
-        {/* @ts-ignore */}
-        <EditableMultilineText
-          field="col_group_name"
-          className="col_group_name"
-        />
-      </h4>
+      <div className="edit-with-label">
+        <h4 className="h4-0">Column-Group: </h4>
+        <h4 className="h4-0">
+          {/* @ts-ignore */}
+          <EditableMultilineText field="col_group" className="col_group" />
+        </h4>
+      </div>
+      <div className="edit-with-label">
+        <h4 className="h4-0">Column-Group-Name:</h4>
+        <h4 className="h4-0">
+          {/* @ts-ignore */}
+          <EditableMultilineText
+            field="col_group_name"
+            className="col_group_name"
+          />
+        </h4>
+      </div>
       <SaveButton onClick={() => actions.persistChanges()} />
     </div>
   );

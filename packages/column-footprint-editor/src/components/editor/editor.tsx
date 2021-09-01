@@ -38,7 +38,10 @@ function ColumnNavBar() {
         <SaveButton
           minimal={true}
           disabled={!isEditing && !hasChanges()}
-          onClick={() => actions.persistChanges()}
+          onClick={() => {
+            actions.toggleEditing();
+            actions.persistChanges();
+          }}
         ></SaveButton>
         <ModelEditButton intent={buttonIntent} minimal={true}>
           {buttonText}
@@ -55,9 +58,9 @@ function ColumnName() {
 
   if (isEditing) {
     return (
-      <div>
+      <div className="edit-with-label">
+        <h4 className="h4-0">col_name: </h4>{" "}
         <h4>
-          {/* @ts-ignore */}
           <EditableMultilineText field="col_name" className="column_name" />
         </h4>
       </div>
@@ -70,8 +73,8 @@ function ColumnName() {
   );
 }
 
-function FeatureOverlay({ feature }) {
-  const { model, isEditing } = useModelEditor();
+function FeatureOverlay({ feature, open }) {
+  const { model, isEditing, actions } = useModelEditor();
 
   return (
     <div>
@@ -103,7 +106,7 @@ function PropertyDialog(props) {
     col_group,
     col_group_name,
     col_group_id,
-    project_id: appState.project_id,
+    project_id: appState.project.project_id,
     location: feature.geometry,
     col_id,
     col_name,
@@ -115,32 +118,34 @@ function PropertyDialog(props) {
   const persistChanges = async (updatedModel, changeset) => {
     console.log("changeset", changeset);
     console.log("updatedModel", updatedModel);
-    runAction({ type: "is-saving", payload: { isSaving: true } });
-    AppToaster.show({
-      message: <SavingToast />,
-      intent: "primary",
-    });
-    try {
-      const res = await axios.put(
-        put_url,
-        { updatedModel },
-        { headers: { "Access-Control-Allow-Origin": "*" } }
-      );
+    if (Object.keys(changeset).length > 0) {
+      runAction({ type: "is-saving", payload: { isSaving: true } });
       AppToaster.show({
-        message: <SuccessfullySaved />,
-        intent: "success",
-        timeout: 3000,
+        message: <SavingToast />,
+        intent: "primary",
       });
-      updateLinesAndColumns(state.project_id);
-      runAction({ type: "is-saving", payload: { isSaving: false } });
-    } catch {
-      AppToaster.show({
-        message: <BadSaving />,
-        intent: "danger",
-        timeout: 5000,
-      });
-      updateLinesAndColumns(state.project_id);
-      runAction({ type: "is-saving", payload: { isSaving: false } });
+      try {
+        const res = await axios.put(
+          put_url,
+          { updatedModel },
+          { headers: { "Access-Control-Allow-Origin": "*" } }
+        );
+        AppToaster.show({
+          message: <SuccessfullySaved />,
+          intent: "success",
+          timeout: 3000,
+        });
+        updateLinesAndColumns(state.project_id);
+        runAction({ type: "is-saving", payload: { isSaving: false } });
+      } catch {
+        AppToaster.show({
+          message: <BadSaving />,
+          intent: "danger",
+          timeout: 5000,
+        });
+        updateLinesAndColumns(state.project_id);
+        runAction({ type: "is-saving", payload: { isSaving: false } });
+      }
     }
   };
 
@@ -152,7 +157,7 @@ function PropertyDialog(props) {
       persistChanges={persistChanges}
     >
       <OverlayBox open={open} closeOpen={closeOpen}>
-        <FeatureOverlay feature={state} />
+        <FeatureOverlay feature={state} open={open} />
       </OverlayBox>
     </ModelEditor>
   );

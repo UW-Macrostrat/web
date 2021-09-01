@@ -12,3 +12,29 @@
   overflow: scroll;
   max-height: 200px;
 }
+
+.projects-drop-down {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  padding: 5px;
+  justify-content: flex-end;
+}
+
+.projects-drop-more {
+  display: flex;
+  flex-direction: column;
+  padding: 5px;
+  justify-content: flex-end;
+}
+
+.navbar-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.toolbar {
+  max-width: 300px;
+  margin-top: 5px;
+}

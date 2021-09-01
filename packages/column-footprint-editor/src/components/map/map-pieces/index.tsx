@@ -1,5 +1,7 @@
 import React from "react";
 export * from "./properties";
+export * from "./map-legend";
+export * from "./add-geom";
 import mapboxgl from "mapbox-gl";
 import { setWindowHash, locationFromHash } from "../utils";
 import {
@@ -51,7 +53,7 @@ async function initializeMap(
 function editModeMap(map, state) {
   /// draw.create, draw.delete, draw.update, draw.selectionchange
   /// draw.modechange, draw.actionable, draw.combine, draw.uncombine
-  var Draw = new MapboxDraw({
+  const Draw = new MapboxDraw({
     controls: { point: false },
     modes: Object.assign(
       {
@@ -74,34 +76,27 @@ function editModeMap(map, state) {
   var featureIds = Draw.add(state.lines);
 
   map.on("click", async function(e) {
-    console.log(Draw.getMode());
+    console.log("Mode", Draw.getMode());
   });
 
   map.on("draw.create", async function(e) {
-    console.log(e);
     console.log("created new feature!");
-    const { type: action, features } = e;
-
-    features.map((feature) => {
-      const obj = { action, feature };
-      map.addToChangeSet(obj);
-    });
   });
 
   map.on("draw.delete", async function(e) {
-    console.log(e);
+    console.log("Deleted a Feature");
     const { type: action, features } = e;
 
     features.map((feature) => {
+      console.log("Deleteing", feature);
       const obj = { action, feature };
       map.addToChangeSet(obj);
     });
   });
 
-  // use the splice to replace coords
-  // This needs to account for deleteing nodes. That falls under change_coordinates
   map.on("draw.update", async function(e) {
-    Draw.changeMode("simple_select", [e.features[0].id]);
+    console.log(e);
+    Draw.changeMode("simple_select");
   });
   return Draw;
 }

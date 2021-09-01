@@ -81,7 +81,6 @@ function isOnOtherVertix(currentVertix, vertices) {
   return match.length > 0;
 }
 
-//#8/-17.66/-149.66
 function locationFromHash(hash) {
   if (hash == null) {
     ({ hash } = window.location);

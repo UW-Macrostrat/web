@@ -29,7 +29,12 @@ import { ImportDialog } from "../importer";
 import { SnapModeDrawStyles } from "mapbox-gl-draw-snap-mode";
 import { setWindowHash, locationFromHash } from "./utils";
 import "./map.css";
-import { initializeMap, propertyViewMap, editModeMap } from "./map-pieces";
+import {
+  initializeMap,
+  propertyViewMap,
+  editModeMap,
+  MapColLegend,
+} from "./map-pieces";
 
 /**
  *
@@ -46,6 +51,7 @@ mapboxgl.accessToken =
 export function Map() {
   const mapContainerRef = useRef(null);
   const mapRef = useRef();
+  const drawRef = useRef();
 
   const { state, runAction, updateLinesAndColumns } = useContext(AppContext);
 
@@ -54,6 +60,7 @@ export function Map() {
   );
 
   const [edit, setEdit] = useState(false);
+  const [legendColumns, setLegendColumns] = useState([]);
 
   const [open, setOpen] = useState(false);
   const [features, setFeatures] = useState([]);
@@ -63,6 +70,12 @@ export function Map() {
   };
 
   const [changeSet, setChangeSet] = useState([]);
+
+  const addToChangeSet = (geom) => {
+    let currentSet = [...changeSet];
+    let newSet = [...currentSet, geom];
+    setChangeSet(newSet);
+  };
 
   const onSave = async (e) => {
     // can do cleaning on changeSet by the internal id string.
@@ -76,14 +89,14 @@ export function Map() {
     });
     if (changeSet.length != 0) {
       try {
-        let url = `http://0.0.0.0:8000/${state.project_id}/updates`;
+        let url = `http://0.0.0.0:8000/${state.project.project_id}/updates`;
         const res = await axios.put(url, { change_set: changeSet });
         AppToaster.show({
           message: <SuccessfullySaved />,
           intent: "success",
           timeout: 3000,
         });
-        updateLinesAndColumns(state.project_id);
+        updateLinesAndColumns(state.project.project_id);
         runAction({ type: "is-saving", payload: { isSaving: false } });
       } catch (error) {
         AppToaster.show({
@@ -91,7 +104,7 @@ export function Map() {
           intent: "danger",
           timeout: 5000,
         });
-        updateLinesAndColumns(state.project_id);
+        updateLinesAndColumns(state.project.project_id);
         runAction({ type: "is-saving", payload: { isSaving: false } });
       }
       setChangeSet([]);
@@ -105,7 +118,7 @@ export function Map() {
       timeout: 1000,
     });
     setChangeSet([]);
-    updateLinesAndColumns(state.project_id);
+    updateLinesAndColumns(state.project.project_id);
   };
 
   useEffect(() => {
@@ -128,59 +141,11 @@ export function Map() {
     if (edit) {
       const map = mapRef.current;
 
-      var Draw = new MapboxDraw({
-        controls: { point: false },
-        modes: Object.assign(
-          {
-            direct_select: MultVertDirectSelect,
-            simple_select: MultVertSimpleSelect,
-            draw_polygon: DrawPolygon,
-          },
-          MapboxDraw.modes,
-          { draw_line_string: SnapLineClosed }
-        ),
-        styles: SnapModeDrawStyles,
-        snap: true,
-        snapOptions: {
-          snapPx: 25,
-        },
-      });
-
-      map.addControl(Draw, "top-left");
-
-      var featureIds = Draw.add(state.lines);
-
-      map.on("click", async function(e) {
-        console.log("Mode", Draw.getMode());
-      });
-
-      map.on("draw.create", async function(e) {
-        console.log("created new feature!");
-        // const { type: action, features } = e;
-
-        // features.map((feature) => {
-        //   const obj = { action, feature };
-        //   map.addToChangeSet(obj);
-        // });
-      });
-
-      map.on("draw.delete", async function(e) {
-        console.log("Deleted a Feature");
-        const { type: action, features } = e;
-
-        features.map((feature) => {
-          console.log("Deleteing", feature);
-          const obj = { action, feature };
-          map.addToChangeSet(obj);
-        });
-      });
-
-      map.on("draw.update", async function(e) {
-        console.log(e);
-        Draw.changeMode("simple_select");
-      });
+      let draw = editModeMap(map, state);
+      drawRef.current = draw;
       return () => {
         let map = mapRef.current;
+        let Draw = drawRef.current;
         if (!map || !Draw || !edit) return;
         try {
           Draw.onRemove();
@@ -194,7 +159,13 @@ export function Map() {
   useEffect(() => {
     if (mapRef.current == null) return;
     if (!edit) {
-      propertyViewMap(mapRef.current, state, setFeatures, setOpen);
+      propertyViewMap(
+        mapRef.current,
+        state,
+        setFeatures,
+        setOpen,
+        setLegendColumns
+      );
       return () => {
         var mapLayer = mapRef.current.getLayer("column-fill");
         if (typeof mapLayer !== "undefined") {
@@ -213,19 +184,30 @@ export function Map() {
       <ImportDialog />
       <div>
         <MapNavBar
+          draw={drawRef.current}
+          addToChangeSet={addToChangeSet}
           onSave={onSave}
           onCancel={onCancel}
           enterEditMode={() => setEdit(true)}
           enterPropertyMode={() => setEdit(false)}
           editMode={edit}
           columns={state.columns}
+          legendColumns={legendColumns}
         />
       </div>
 
       <div>
         <div className="map-container" ref={mapContainerRef} />
       </div>
-      <PropertyDialog open={open} features={features} closeOpen={closeOpen} />
+      {edit ? null : (
+        <div>
+          <PropertyDialog
+            open={open}
+            features={features}
+            closeOpen={closeOpen}
+          />
+        </div>
+      )}
     </div>
   );
 }
