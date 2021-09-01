@@ -71,10 +71,10 @@ export function Map() {
 
   const [changeSet, setChangeSet] = useState([]);
 
-  const addToChangeSet = (geom) => {
-    let currentSet = [...changeSet];
-    let newSet = [...currentSet, geom];
-    setChangeSet(newSet);
+  const addToChangeSet = (obj) => {
+    setChangeSet((prevState) => {
+      return [...prevState, ...new Array(obj)];
+    });
   };
 
   const onSave = async (e) => {
@@ -126,7 +126,7 @@ export function Map() {
     initializeMap(
       mapContainerRef.current,
       viewport,
-      setChangeSet,
+      addToChangeSet,
       setViewport
     ).then((mapObj) => {
       mapRef.current = mapObj;

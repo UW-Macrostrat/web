@@ -16,7 +16,7 @@ import { SnapModeDrawStyles } from "mapbox-gl-draw-snap-mode";
 async function initializeMap(
   mapContainerRef,
   viewport,
-  setChangeSet,
+  addToChangeSet,
   setViewport
 ) {
   var map = new mapboxgl.Map({
@@ -25,12 +25,6 @@ async function initializeMap(
     center: [viewport.longitude, viewport.latitude], // starting position [lng, lat]
     zoom: viewport.zoom, // starting zoom
   });
-
-  const addToChangeSet = (obj) => {
-    setChangeSet((prevState) => {
-      return [...prevState, ...new Array(obj)];
-    });
-  };
 
   var nav = new mapboxgl.NavigationControl();
 

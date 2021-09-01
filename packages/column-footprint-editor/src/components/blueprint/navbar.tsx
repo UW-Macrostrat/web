@@ -69,24 +69,16 @@ function ProjectDropDown(props) {
 
 function MapToolBar(props) {
   const { columns, editMode, draw, addToChangeSet } = props;
-  console.log(draw);
 
   const addGeomToDraw = (geom) => {
     let feature = draw.add(geom);
-    console.log(feature);
-    // var line = draw.newFeature({
-    //   type: Constants.geojsonTypes.FEATURE,
-    //   properties: {},
-    //   geometry: geom,
-    // });
+
     const obj = {
       action: "draw.create",
       feature: { id: feature[0], geometry: geom },
     };
 
     addToChangeSet(obj);
-    // draw.addFeature(geom);
-    // draw.changeMode("simple_select");
   };
 
   return (
