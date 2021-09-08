@@ -1,11 +1,16 @@
 import { addFilter, gotInitialMapState } from "./main";
 import { format } from "d3-format";
 import { MapBackend } from "../map-page";
-import { buildQueryString, setHashString } from "@macrostrat/ui-components";
+import {
+  buildQueryString,
+  setHashString,
+  getHashString,
+} from "@macrostrat/ui-components";
 
 const fmt = format(".4f");
 
 function updateURI(state: any) {
+  console.log(state);
   let layers = [
     { layer: "bedrock", haz: state.mapHasBedrock },
     { layer: "lines", haz: state.mapHasLines },
@@ -33,6 +38,8 @@ function updateURI(state: any) {
   let x = fmt(state.mapXYZ.x);
   let y = fmt(state.mapXYZ.y);
 
+  console.log("Updating URI", state.mapXYZ);
+
   setHashString({ ...args, x, y, z }, { arrayFormat: "comma" });
 }
 
@@ -56,7 +63,6 @@ function getInitialMapState() {
       lines: mapHasLines,
       columns: mapHasColumns,
       fossils: mapHasFossils,
-      mapBackend: MapBackend.MAPBOX,
     };
     let filterTypes = [
       "strat_name_concepts",
@@ -75,21 +81,12 @@ function getInitialMapState() {
       mapBackend: MapBackend.MAPBOX,
     };
     try {
-      hash = hash.split("/").forEach((d) => {
-        console.log(d);
-        if (d == "globe") {
-          mapState.mapBackend = MapBackend.CESIUM;
-          return;
-        }
+      const hashData = getHashString(window.location.hash);
+      console.log(window.location.hash);
+      console.log(hashData);
+      const { layers, x = 16, y = 23, z = 1.5 } = hashData;
 
-        let parts = d.split("=");
-
-        if (filterTypes.indexOf(parts[0]) > -1) {
-          mapState.incomingFilters.push({ type: parts[0], id: parts[1] });
-        } else {
-          mapState[parts[0]] = parts[1] || true;
-        }
-      });
+      let mapState = { x, y, z };
 
       if (
         mapState.x &&
@@ -104,6 +101,7 @@ function getInitialMapState() {
       ) {
         // Sweet, it is legit
         mapState = mapState;
+        console.log("Map state is legit");
       } else {
         // Someone was naughty
         mapState = defaultState;
