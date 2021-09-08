@@ -44,7 +44,7 @@ function NewColGroups(props) {
   const persistChanges = async (updatedModel, changeset) => {
     console.log("changeset", changeset);
     console.log("updatedModel", updatedModel);
-    let route = `http://0.0.0.0:8000/col-groups/post`;
+    let route = `http://0.0.0.0:8000/col-groups`;
     let res = await axios.post(route, { updatedModel });
     const {
       data: { col_group_id },

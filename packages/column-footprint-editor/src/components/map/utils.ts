@@ -1,5 +1,4 @@
 import * as topojson from "topojson-client";
-import mapboxgl from "mapbox-gl";
 
 function TopoJSONToLineString(json) {
   const multiLineString = topojson.mesh(json);

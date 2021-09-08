@@ -35,7 +35,7 @@ function NewProject() {
 
   const onSubmit = async () => {
     const data = { data: project };
-    let url = "http://0.0.0.0:8000/new-project";
+    let url = "http://0.0.0.0:8000/projects";
     setAlert(true);
     setImporting(true);
     const res = await axios.post(url, data);

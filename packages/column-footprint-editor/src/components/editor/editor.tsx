@@ -113,7 +113,7 @@ function PropertyDialog(props) {
     identity_id,
   };
 
-  const put_url = `http://0.0.0.0:8000/${state.project_id}/property_updates`;
+  const put_url = `http://0.0.0.0:8000/projects`;
 
   const persistChanges = async (updatedModel, changeset) => {
     console.log("changeset", changeset);
@@ -125,11 +125,10 @@ function PropertyDialog(props) {
         intent: "primary",
       });
       try {
-        const res = await axios.put(
-          put_url,
-          { updatedModel },
-          { headers: { "Access-Control-Allow-Origin": "*" } }
-        );
+        const res = await axios.put(put_url, {
+          updatedModel,
+          project_id: state.project_id,
+        });
         AppToaster.show({
           message: <SuccessfullySaved />,
           intent: "success",

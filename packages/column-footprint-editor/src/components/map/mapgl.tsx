@@ -1,6 +1,5 @@
 import "regenerator-runtime/runtime";
 import React, { useRef, useEffect, useState, useContext } from "react";
-import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
 
@@ -8,13 +7,6 @@ import mapboxgl from "mapbox-gl";
 import axios from "axios";
 
 import { AppContext } from "../../context";
-
-import {
-  SnapLineClosed,
-  MultVertDirectSelect,
-  MultVertSimpleSelect,
-  DrawPolygon,
-} from "./modes";
 
 import {
   MapNavBar,
@@ -26,15 +18,9 @@ import {
 import { PropertyDialog } from "../editor";
 import { ImportDialog } from "../importer";
 
-import { SnapModeDrawStyles } from "mapbox-gl-draw-snap-mode";
-import { setWindowHash, locationFromHash } from "./utils";
+import { locationFromHash } from "./utils";
 import "./map.css";
-import {
-  initializeMap,
-  propertyViewMap,
-  editModeMap,
-  MapColLegend,
-} from "./map-pieces";
+import { initializeMap, propertyViewMap, editModeMap } from "./map-pieces";
 
 /**
  *
@@ -89,8 +75,11 @@ export function Map() {
     });
     if (changeSet.length != 0) {
       try {
-        let url = `http://0.0.0.0:8000/${state.project.project_id}/updates`;
-        const res = await axios.put(url, { change_set: changeSet });
+        let url = `http://0.0.0.0:8000/${state.project.project_id}/lines`;
+        const res = await axios.put(url, {
+          change_set: changeSet,
+          project_id: state.project.project_id,
+        });
         AppToaster.show({
           message: <SuccessfullySaved />,
           intent: "success",
