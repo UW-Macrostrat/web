@@ -180,7 +180,7 @@ export function Map() {
           enterEditMode={() => setEdit(true)}
           enterPropertyMode={() => setEdit(false)}
           editMode={edit}
-          columns={state.columns}
+          project_id={state.project.project_id}
           legendColumns={legendColumns}
         />
       </div>

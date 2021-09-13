@@ -103,7 +103,7 @@ function MapNavBar(props) {
     enterEditMode,
     enterPropertyMode,
     editMode,
-    columns,
+    project_id,
     legendColumns,
     draw,
   } = props;
@@ -132,7 +132,7 @@ function MapNavBar(props) {
             </Popover>
           </Navbar.Heading>
           <Navbar.Divider />
-          <DownloadButton columns={columns} />
+          <DownloadButton project_id={project_id} />
           <Button minimal={true} intent="success" onClick={onSave}>
             Save
           </Button>

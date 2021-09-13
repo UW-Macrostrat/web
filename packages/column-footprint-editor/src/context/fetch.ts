@@ -15,8 +15,8 @@ async function fetchLines(project_id) {
 }
 
 async function fetchProjColGroups(project_id) {
-  let url = "http://0.0.0.0:8000/col-groups";
-  const res = await axios.get(url, { params: { project_id } });
+  let url = `http://0.0.0.0:8000/${project_id}/col-groups`;
+  const res = await axios.get(url);
   return res.data.data;
 }
 

@@ -11,6 +11,7 @@ import { OverlayBox, SaveButton } from "../../blueprint";
 import { useAPIResult, useModelEditor } from "@macrostrat/ui-components";
 import { ColumnSuggest } from "./column-suggest";
 import { NewColGroups } from "./new-column";
+import { AppContext } from "../../../context";
 
 function unwrapColumnGroups(res) {
   const { data } = res;
@@ -19,10 +20,14 @@ function unwrapColumnGroups(res) {
 
 function ColumnGroup() {
   const { model, isEditing, actions } = useModelEditor();
+  const { state } = useContext(AppContext);
   const [open, setOpen] = useState(false);
 
+  const { project } = state;
+  const { project_id } = project;
+
   const data = useAPIResult(
-    "http://0.0.0.0:8000/col-groups?all",
+    `http://0.0.0.0:8000/${project_id}/col-groups`,
     {},
     { unwrapResponse: unwrapColumnGroups }
   );

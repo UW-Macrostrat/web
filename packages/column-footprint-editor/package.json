@@ -10,12 +10,6 @@
     "@blueprintjs/select": "^3.17.0",
     "@macrostrat/ui-components": "^0.5.2",
     "@mapbox/mapbox-gl-draw": "^1.2.2",
-    "@vx/clip-path": "^0.0.199",
-    "@vx/drag": "^0.0.199",
-    "@vx/event": "^0.0.199",
-    "@vx/gradient": "^0.0.199",
-    "@vx/group": "^0.0.199",
-    "@vx/voronoi": "^0.0.199",
     "axios": "^0.21.1",
     "d3-delaunay": "^5.3.0",
     "mapbox-gl": "^2.2.0",
@@ -23,6 +17,7 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-loading-overlay": "^1.0.1",
+    "react-router-dom": "^5.3.0",
     "topojson-client": "^3.1.0"
   },
   "devDependencies": {

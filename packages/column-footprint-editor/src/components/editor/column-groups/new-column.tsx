@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   ModelEditor,
   useModelEditor,
@@ -7,6 +7,8 @@ import {
 } from "@macrostrat/ui-components";
 import { SaveButton } from "../../blueprint";
 import axios from "axios";
+
+import { AppContext } from "../../../context";
 
 function EditComponents() {
   const { actions } = useModelEditor();
@@ -41,10 +43,13 @@ function NewColGroups(props) {
     col_group_name: "",
   };
 
+  const { state: appState } = useContext(AppContext);
+  const project_id = appState.project.project_id;
+
   const persistChanges = async (updatedModel, changeset) => {
     console.log("changeset", changeset);
     console.log("updatedModel", updatedModel);
-    let route = `http://0.0.0.0:8000/col-groups`;
+    let route = `http://0.0.0.0:8000/${project_id}/col-groups`;
     let res = await axios.post(route, { updatedModel });
     const {
       data: { col_group_id },
