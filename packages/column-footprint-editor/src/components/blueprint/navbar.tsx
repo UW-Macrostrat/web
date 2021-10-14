@@ -4,8 +4,6 @@ import { Button, Navbar, Popover, Divider } from "@blueprintjs/core";
 import { AppContext } from "../../context";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { MapColLegend, AddKnownGeom } from "../map/map-pieces";
-import * as Constants from "@mapbox/mapbox-gl-draw/src/constants";
-import axios from "axios";
 
 const import_url = "http://0.0.0.0:8000/import";
 const projects_url = "http://0.0.0.0:8000/projects";
@@ -82,16 +80,13 @@ function MapToolBar(props) {
   };
 
   return (
-    <Navbar className="toolbar">
-      <Navbar.Group>
-        <Navbar.Heading>Tool Bar</Navbar.Heading>
-        {editMode ? (
-          <AddKnownGeom addGeom={addGeomToDraw} />
-        ) : (
-          <MapColLegend columns={columns} />
-        )}
-      </Navbar.Group>
-    </Navbar>
+    <div>
+      {editMode ? (
+        <AddKnownGeom addGeom={addGeomToDraw} />
+      ) : (
+        <MapColLegend columns={columns} />
+      )}
+    </div>
   );
 }
 
@@ -147,15 +142,14 @@ function MapNavBar(props) {
             Property View Mode
           </Button>
           <Navbar.Divider />
-          Total Area: 5000 sq miles?
+          <MapToolBar
+            columns={legendColumns}
+            editMode={editMode}
+            addToChangeSet={addToChangeSet}
+            draw={draw}
+          />
         </Navbar.Group>
       </Navbar>
-      <MapToolBar
-        columns={legendColumns}
-        editMode={editMode}
-        addToChangeSet={addToChangeSet}
-        draw={draw}
-      />
     </div>
   );
 }
