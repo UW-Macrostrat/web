@@ -568,7 +568,6 @@ const update = (state = preloadedState, action) => {
       });
 
     case GOT_INITIAL_MAP_STATE:
-      console.log("GOT_INITIAL_MAP_STATE", action.data);
       const newState = Object.assign({}, state, {
         mapBackend: action.data.mapBackend ?? MapBackend.MAPBOX,
         mapHasSatellite: action.data.satellite || false,
@@ -576,14 +575,14 @@ const update = (state = preloadedState, action) => {
         mapHasLines: action.data.lines || false,
         mapHasColumns: action.data.columns || false,
         mapHasFossils: action.data.fossils || false,
-        // mapXYZ: {
-        //   z: action.data.z,
-        //   x: action.data.x,
-        //   y: action.data.y,
-        // },
+        mapXYZ: {
+          z: action.data.z,
+          x: action.data.x,
+          y: action.data.y,
+        },
       });
       // This causes some hilarious problems...
-      //updateURI(newState)
+      updateURI(newState);
       return newState;
 
     default:

@@ -42,7 +42,7 @@ function overallReducer(state, action) {
       //   flyToProps: { destination, duration: 0, once: true },
       // },
     };
-    console.log(newState);
+    //console.log(newState);
     return newState;
   }
   return state;
