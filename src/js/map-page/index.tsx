@@ -11,7 +11,8 @@ import { ButtonGroup, Button, Spinner } from "@blueprintjs/core";
 import { useSelector, useDispatch } from "react-redux";
 import loadable from "@loadable/component";
 
-const CesiumViewMod = loadable(() => import("./cesium-view"));
+//const CesiumViewMod = loadable(() => import("./cesium-view"));
+const CesiumViewMod = () => h("div", "Globe is currently disabled");
 
 export function CesiumView(props) {
   return h(Suspense, { fallback: h(Spinner) }, h(CesiumViewMod, props));

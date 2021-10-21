@@ -2,9 +2,9 @@
 
 import h from "@macrostrat/hyper";
 import { LinkButton } from "@macrostrat/ui-components";
-import { GlobeSettings } from "@macrostrat/cesium-viewer/settings";
+//import { GlobeSettings } from "@macrostrat/cesium-viewer/settings";
 import { useLocation } from "react-router";
-import { DisplayQuality } from "@macrostrat/cesium-viewer";
+//import { DisplayQuality } from "@macrostrat/cesium-viewer";
 import { useDispatch } from "react-redux";
 
 function MapTypeButton(props) {
@@ -21,7 +21,7 @@ const SettingsPanel = (props) => {
   const globeActive = pathname?.startsWith("/globe");
   return h("div.settings", [
     h(MapTypeButton),
-    h.if(globeActive)(GlobeSettings),
+    //h.if(globeActive)(GlobeSettings),
   ]);
 };
 
