@@ -93,9 +93,9 @@ class Map extends Component<MapProps, {}> {
     this.map.on("moveend", () => {
       let center = this.map.getCenter();
       this.props.mapMoved({
-        z: this.map.getZoom().toFixed(1),
-        x: center.lng.toFixed(4),
-        y: center.lat.toFixed(4),
+        z: this.map.getZoom(),
+        x: center.lng,
+        y: center.lat,
       });
       // Force a hit to the API to refresh
       if (this.props.mapHasFossils) {

@@ -6,11 +6,18 @@ import {
   setHashString,
   getHashString,
 } from "@macrostrat/ui-components";
+import { stat } from "fs";
 
 const fmt = format(".4f");
 
+function formatVal(val: any): string | undefined {
+  if (isNaN(val)) {
+    return undefined;
+  }
+  return fmt(val);
+}
+
 function updateURI(state: any) {
-  return;
   console.log(state);
   let layers = [
     { layer: "bedrock", haz: state.mapHasBedrock },
@@ -39,7 +46,7 @@ function updateURI(state: any) {
   let x = fmt(state.mapXYZ.x);
   let y = fmt(state.mapXYZ.y);
 
-  console.log("Updating URI", state.mapXYZ);
+  console.log("Updating URI", { x, y, z });
 
   setHashString({ ...args, x, y, z }, { arrayFormat: "comma" });
 }
@@ -82,7 +89,7 @@ function getInitialMapState() {
       mapBackend: MapBackend.MAPBOX,
     };
     try {
-      const hashData = getHashString(window.location.hash);
+      const hashData = getHashString(window.location.hash) ?? {};
       console.log(window.location.hash);
       console.log(hashData);
       const { layers, x = 16, y = 23, z = 1.5 } = hashData;
@@ -103,32 +110,30 @@ function getInitialMapState() {
         // Sweet, it is legit
         mapState = mapState;
         console.log("Map state is legit");
-      } else {
-        // Someone was naughty
-        mapState = defaultState;
+        // Augh, got to simplify this multiple dispatch situation. This should be one atomic action.
+        dispatch(gotInitialMapState(mapState));
       }
     } catch (e) {
+      console.error("Invalid map state:", e);
       // Who knows. Doesn't matter. Nothing does.
       mapState = defaultState;
     }
 
-    dispatch(gotInitialMapState(mapState));
-
-    if (mapState.incomingFilters && mapState.incomingFilters.length) {
-      mapState.incomingFilters.forEach((f) => {
-        // lith classes and types don't have unique IDs in macrostrat so we use the string
-        if (f.type === "lithology_classes" || f.type === "lithology_types") {
-          dispatch(
-            addFilter({
-              type: f.type,
-              name: f.id,
-            })
-          );
-        } else {
-          dispatch(addFilter(f));
-        }
-      });
-    }
+    // if (mapState.incomingFilters && mapState.incomingFilters.length) {
+    //   mapState.incomingFilters.forEach((f) => {
+    //     // lith classes and types don't have unique IDs in macrostrat so we use the string
+    //     if (f.type === "lithology_classes" || f.type === "lithology_types") {
+    //       dispatch(
+    //         addFilter({
+    //           type: f.type,
+    //           name: f.id,
+    //         })
+    //       );
+    //     } else {
+    //       dispatch(addFilter(f));
+    //     }
+    //   });
+    // }
   };
 }
 

@@ -24,22 +24,23 @@ function getFloat(x: any, _default = 0): number {
 
 function overallReducer(state, action) {
   if (action.type === GOT_INITIAL_MAP_STATE || action.type == MAP_MOVED) {
+    console.log(action.type, action);
     // You can access both app and inventory states here
     const x = getFloat(action.data.x, 16);
     const y = getFloat(action.data.y, 23);
     const z = getFloat(action.data.z, 1.5);
-    const destination = nadirCameraPosition(x, y, z);
-    console.log("Set globe position", destination);
+    //const destination = nadirCameraPosition(x, y, z);
+    //console.log("Set globe position", destination);
     const newState = {
       ...state,
       update: {
         ...state.update,
         mapXYZ: { x, y, z },
       },
-      globe: {
-        ...state.globe,
-        flyToProps: { destination, duration: 0, once: true },
-      },
+      // globe: {
+      //   ...state.globe,
+      //   flyToProps: { destination, duration: 0, once: true },
+      // },
     };
     console.log(newState);
     return newState;
@@ -47,6 +48,6 @@ function overallReducer(state, action) {
   return state;
 }
 
-const newReducer = reduceReducers(reducers, overallReducer);
+const newReducer = reduceReducers(overallReducer, reducers);
 
 export default newReducer;
