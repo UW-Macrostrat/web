@@ -10,6 +10,7 @@ import {
 const fmt = format(".4f");
 
 function updateURI(state: any) {
+  return;
   console.log(state);
   let layers = [
     { layer: "bedrock", haz: state.mapHasBedrock },
