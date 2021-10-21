@@ -568,13 +568,20 @@ const update = (state = preloadedState, action) => {
       });
 
     case GOT_INITIAL_MAP_STATE:
+      const { layers = [] } = action.data;
+      const mapHasSatellite = layers.includes("satellite");
+      const mapHasLines = layers.includes("lines");
+      const mapHasColumns = layers.includes("columns");
+      const mapHasFossils = layers.includes("fossils");
+      const mapHasBedrock = layers.includes("bedrock");
+
       const newState = Object.assign({}, state, {
         mapBackend: action.data.mapBackend ?? MapBackend.MAPBOX,
-        mapHasSatellite: action.data.satellite || false,
-        mapHasBedrock: action.data.bedrock || false,
-        mapHasLines: action.data.lines || false,
-        mapHasColumns: action.data.columns || false,
-        mapHasFossils: action.data.fossils || false,
+        mapHasSatellite,
+        mapHasBedrock,
+        mapHasLines,
+        mapHasColumns,
+        mapHasFossils,
         mapXYZ: {
           z: action.data.z,
           x: action.data.x,

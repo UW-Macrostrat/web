@@ -94,7 +94,7 @@ function getInitialMapState() {
       console.log(hashData);
       const { layers, x = 16, y = 23, z = 1.5 } = hashData;
 
-      let mapState = { x, y, z };
+      let mapState = { x, y, z, layers };
 
       if (
         mapState.x &&
