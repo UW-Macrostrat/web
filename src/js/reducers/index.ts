@@ -1,15 +1,16 @@
 import { combineReducers } from "redux";
 import reduceReducers from "reduce-reducers";
 import { menuReducer } from "./menu";
-//import { reducer as globeReducer } from "@macrostrat/cesium-viewer/actions";
-//import { nadirCameraPosition } from "@macrostrat/cesium-viewer/position";
+import { reducer as globeReducer } from "@macrostrat/cesium-viewer/actions";
+import { nadirCameraPosition } from "@macrostrat/cesium-viewer/position";
 import { GOT_INITIAL_MAP_STATE, MAP_MOVED } from "../actions";
 import update from "./legacy";
+import { parse } from "path";
 
 const reducers = combineReducers({
   // list reducers here
   menu: menuReducer,
-  //globe: globeReducer,
+  globe: globeReducer,
   update,
 });
 
@@ -27,7 +28,7 @@ function overallReducer(state, action) {
     const x = getFloat(action.data.x, 16);
     const y = getFloat(action.data.y, 23);
     const z = getFloat(action.data.z, 1.5);
-    //const destination = nadirCameraPosition(x, y, z);
+    const destination = nadirCameraPosition(x, y, z);
     //console.log("Set globe position", destination);
     const newState = {
       ...state,
@@ -35,12 +36,10 @@ function overallReducer(state, action) {
         ...state.update,
         mapXYZ: { x, y, z },
       },
-      /*
       globe: {
         ...state.globe,
         flyToProps: { destination, duration: 0, once: true },
       },
-      */
     };
     //console.log(newState);
     return newState;

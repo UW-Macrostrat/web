@@ -10,7 +10,6 @@ import { Spinner } from "@blueprintjs/core";
 const _ColumnPage = loadable(import("../columns"));
 const ColumnPage = () => h(Suspense, { fallback: h(Spinner) }, h(_ColumnPage));
 
-/*
 const _GlobeDevPage = loadable(() =>
   import("./map-page/cesium-view").then((d) => d.GlobeDevPage)
 );
@@ -21,18 +20,17 @@ const GlobeDevPage = () =>
 function GlobePage() {
   return h(MapPage, { backend: MapBackend.CESIUM });
 }
-*/
 
 const App = () => {
-  return h(Router, { basename: MACROSTRAT_BASE_URL }, [
+  return h(Router, { basename: CESIUM_BASE_URL }, [
     h("div#app-holder", [
       h(Route, { path: "/map", component: MapPage }),
-      // h(Route, {
-      //   path: "/globe",
-      //   component: GlobePage,
-      // }),
+      h(Route, {
+        path: "/globe",
+        component: GlobePage,
+      }),
       h(Route, { path: "/columns", component: ColumnPage }),
-      //h(Route, { path: "/dev/globe", component: GlobeDevPage }),
+      h(Route, { path: "/dev/globe", component: GlobeDevPage }),
       h(Route, {
         exact: true,
         path: "/",

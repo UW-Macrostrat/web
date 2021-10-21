@@ -11,23 +11,23 @@ let mode = "development";
 
 let publicURL = process.env.PUBLIC_URL || "/";
 
-const packageSrc = (name) => path.resolve(__dirname, "packages", name, "src");
+const packageSrc = name => path.resolve(__dirname, "packages", name, "src");
 
 let browserSync = new BrowserSyncPlugin({
   server: { baseDir: "./dist" },
-  middleware: [historyApiFallback()],
+  middleware: [historyApiFallback()]
 });
 
-//const cesiumSource = "node_modules/cesium/Source";
-//const cesiumWorkers = "../Build/Cesium/Workers";
+const cesiumSource = "node_modules/cesium/Source";
+const cesiumWorkers = "../Build/Cesium/Workers";
 
 //uglify = new UglifyJsPlugin()
 
 let babelLoader = {
   loader: "babel-loader",
   options: {
-    sourceMap: mode == "development",
-  },
+    sourceMap: mode == "development"
+  }
 };
 
 const cssModuleLoader = {
@@ -35,9 +35,9 @@ const cssModuleLoader = {
   options: {
     modules: {
       mode: "local",
-      localIdentName: "[path][name]__[local]--[hash:base64:5]",
-    },
-  },
+      localIdentName: "[path][name]__[local]--[hash:base64:5]"
+    }
+  }
 };
 
 module.exports = {
@@ -48,17 +48,17 @@ module.exports = {
       {
         test: /\.(js|jsx|ts|tsx)$/,
         use: [babelLoader],
-        exclude: /node_modules/,
+        exclude: /node_modules/
       },
       {
         test: /\.styl$/,
         use: ["style-loader", cssModuleLoader, "stylus-loader"],
-        exclude: /node_modules/,
+        exclude: /node_modules/
       },
       {
         test: /\.css$/,
         use: ["style-loader", cssModuleLoader],
-        exclude: /node_modules/,
+        exclude: /node_modules/
       },
       { test: /\.css$/, use: ["style-loader", "css-loader"] },
       {
@@ -66,9 +66,9 @@ module.exports = {
         use: [
           {
             loader: "file-loader",
-            options: {},
-          },
-        ],
+            options: {}
+          }
+        ]
       },
       {
         test: /\.(png|svg)$/,
@@ -78,51 +78,50 @@ module.exports = {
             options: {
               useRelativePath: true,
               outputPath: "sections/assets/",
-              name: "[name].[ext]",
-            },
-          },
-        ],
-      },
-    ],
+              name: "[name].[ext]"
+            }
+          }
+        ]
+      }
+    ]
   },
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".jsx"],
     alias: {
       // CesiumJS module name,
-      //cesiumSource: path.resolve(__dirname, cesiumSource),
+      cesiumSource: path.resolve(__dirname, cesiumSource),
       "~": path.resolve(__dirname, "src"),
-      //"@macrostrat/cesium-viewer": packageSrc("cesium-viewer"),
+      "@macrostrat/cesium-viewer": packageSrc("cesium-viewer"),
       "@macrostrat/column-components": packageSrc("column-components"),
-      "@macrostrat/ui-components": packageSrc("ui-components"),
-    },
+      "@macrostrat/ui-components": packageSrc("ui-components")
+    }
   },
   entry: {
-    "js/bundle": "./src/js/index.tsx",
+    "js/bundle": "./src/js/index.tsx"
   },
   node: {
-    fs: "empty",
+    fs: "empty"
   },
   output: {
     path: path.join(__dirname, "/dist/"),
     publicPath: publicURL,
     filename: "[name].js",
-    sourcePrefix: "",
+    sourcePrefix: ""
   },
   amd: {
     // Enable webpack-friendly use of require in Cesium
-    toUrlUndefined: true,
+    toUrlUndefined: true
   },
   optimization: {
-    splitChunks: { chunks: "all" },
+    splitChunks: { chunks: "all" }
   },
   plugins: [
     browserSync,
     new HtmlWebpackPlugin({
       title: "Macrostrat Web – Experimental",
-      template: "./template.html",
+      template: "./template.html"
     }),
     new DotenvPlugin(),
-    /*
     new CopyPlugin([
       { from: path.join(cesiumSource, cesiumWorkers), to: "Workers" }
     ]),
@@ -130,11 +129,9 @@ module.exports = {
     new CopyPlugin([
       { from: path.join(cesiumSource, "Widgets"), to: "Widgets" }
     ]),
-    */
     new DefinePlugin({
-      MACROSTRAT_BASE_URL: JSON.stringify(publicURL),
       // Define relative base path in cesium for loading assets
-      CESIUM_BASE_URL: JSON.stringify(publicURL),
-    }),
-  ],
+      CESIUM_BASE_URL: JSON.stringify(publicURL)
+    })
+  ]
 };
