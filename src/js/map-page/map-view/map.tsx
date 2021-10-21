@@ -69,6 +69,7 @@ class Map extends Component<MapProps, {}> {
   }
 
   componentDidMount() {
+    console.log(this.props);
     mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
     this.map = new mapboxgl.Map({
       container: "map",
@@ -92,9 +93,9 @@ class Map extends Component<MapProps, {}> {
     this.map.on("moveend", () => {
       let center = this.map.getCenter();
       this.props.mapMoved({
-        z: this.map.getZoom().toFixed(1),
-        x: center.lng.toFixed(4),
-        y: center.lat.toFixed(4),
+        z: this.map.getZoom(),
+        x: center.lng,
+        y: center.lat,
       });
       // Force a hit to the API to refresh
       if (this.props.mapHasFossils) {
@@ -105,7 +106,9 @@ class Map extends Component<MapProps, {}> {
     this.map.on("load", () => {
       // Add the sources to the map
       Object.keys(mapStyle.sources).forEach((source) => {
-        this.map.addSource(source, mapStyle.sources[source]);
+        if (this.map.getSource(source) == null) {
+          this.map.addSource(source, mapStyle.sources[source]);
+        }
       });
 
       this.enable3DTerrain.bind(this)();
@@ -371,7 +374,9 @@ class Map extends Component<MapProps, {}> {
       }
 
       this.currentSources.forEach((source) => {
-        this.map.addSource(source.id, source.config);
+        if (this.map.getSource(source.id) == null) {
+          this.map.addSource(source.id, source.config);
+        }
         if (source.data) {
           this.map.getSource(source.id).setData(source.data);
         }
@@ -393,25 +398,30 @@ class Map extends Component<MapProps, {}> {
   }
 
   enable3DTerrain() {
-    this.map.addSource("mapbox-dem", {
-      type: "raster-dem",
-      url: "mapbox://mapbox.mapbox-terrain-dem-v1",
-      tileSize: 512,
-      maxzoom: 14,
-    });
-    // add the DEM source as a terrain layer with exaggerated height
-    this.map.setTerrain({ source: "mapbox-dem", exaggeration: 1 });
+    if (this.map.getSource("mapbox-dem") == null) {
+      this.map.addSource("mapbox-dem", {
+        type: "raster-dem",
+        url: "mapbox://mapbox.mapbox-terrain-dem-v1",
+        tileSize: 512,
+        maxzoom: 14,
+      });
+
+      // add the DEM source as a terrain layer with exaggerated height
+      this.map.setTerrain({ source: "mapbox-dem", exaggeration: 1 });
+    }
 
     // add a sky layer that will show when the map is highly pitched
-    this.map.addLayer({
-      id: "sky",
-      type: "sky",
-      paint: {
-        "sky-type": "atmosphere",
-        "sky-atmosphere-sun": [0.0, 0.0],
-        "sky-atmosphere-sun-intensity": 15,
-      },
-    });
+    if (this.map.getLayer("sky") == null) {
+      this.map.addLayer({
+        id: "sky",
+        type: "sky",
+        paint: {
+          "sky-type": "atmosphere",
+          "sky-atmosphere-sun": [0.0, 0.0],
+          "sky-atmosphere-sun-intensity": 15,
+        },
+      });
+    }
   }
 
   // Swap between standard and satellite base layers
@@ -441,7 +451,7 @@ class Map extends Component<MapProps, {}> {
       }
     });
 
-    this.enable3DTerrain().bind(this)();
+    this.enable3DTerrain.bind(this)();
 
     // Set the style. `style.load` will be fired after to readd other layers
     this.map.setStyle(toAdd);
@@ -547,9 +557,9 @@ class Map extends Component<MapProps, {}> {
       // Swap satellite/normal
     } else if (nextProps.mapHasSatellite != this.props.mapHasSatellite) {
       if (nextProps.mapHasSatellite) {
-        this.swapBasemap(SETTINGS.satelliteMapURL);
+        this.swapBasemap.bind(this)(SETTINGS.satelliteMapURL);
       } else {
-        this.swapBasemap(SETTINGS.baseMapURL);
+        this.swapBasemap.bind(this)(SETTINGS.baseMapURL);
       }
       // Add columns
     } else if (nextProps.mapHasColumns != this.props.mapHasColumns) {

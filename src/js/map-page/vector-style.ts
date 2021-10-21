@@ -2,35 +2,37 @@ import { SETTINGS } from "../Settings";
 
 // https://devtiles.macrostrat.org/carto-slim/4/0/5.mvt
 
+const lineScale = 0.5;
+
 export const mapStyle = {
   version: 8,
   sources: {
     burwell: {
       type: "vector",
       tiles: [`${SETTINGS.burwellTileDomain}/carto-slim/{z}/{x}/{y}.mvt`],
-      tileSize: 512
+      tileSize: 512,
     },
     elevationPoints: {
       type: "geojson",
       data: {
         type: "FeatureCollection",
-        features: []
-      }
+        features: [],
+      },
     },
     elevationLine: {
       type: "geojson",
       data: {
         type: "FeatureCollection",
-        features: []
-      }
+        features: [],
+      },
     },
     elevationMarker: {
       type: "geojson",
       data: {
         type: "FeatureCollection",
-        features: []
-      }
-    }
+        features: [],
+      },
+    },
   },
   layers: [
     {
@@ -44,15 +46,15 @@ export const mapStyle = {
       paint: {
         "fill-color": {
           property: "color",
-          type: "identity"
+          type: "identity",
         },
         "fill-opacity": {
           stops: [
             [0, 0.8],
-            [12, 0.5]
-          ]
-        }
-      }
+            [12, 0.5],
+          ],
+        },
+      },
     },
     {
       id: "burwell_stroke",
@@ -67,36 +69,36 @@ export const mapStyle = {
         // "line-width": 0,
         "line-color": {
           property: "color",
-          type: "identity"
+          type: "identity",
         },
         "line-width": {
           stops: [
-            [0, 0.15],
-            [1, 0.15],
-            [2, 0.15],
-            [3, 0.15],
-            [4, 0.2],
-            [5, 0.4],
-            [6, 0.05],
-            [7, 0.1],
-            [8, 0.4],
-            [9, 0.5],
-            [10, 0.35],
-            [11, 0.4],
-            [12, 0.5],
-            [13, 0.55],
-            [14, 0.6],
-            [15, 0.7],
-            [16, 0.8]
-          ]
+            [0, 0.15 * lineScale],
+            [1, 0.15 * lineScale],
+            [2, 0.15 * lineScale],
+            [3, 0.15 * lineScale],
+            [4, 0.2 * lineScale],
+            [5, 0.4 * lineScale],
+            [6, 0.05 * lineScale],
+            [7, 0.1 * lineScale],
+            [8, 0.4 * lineScale],
+            [9, 0.5 * lineScale],
+            [10, 0.35 * lineScale],
+            [11, 0.4 * lineScale],
+            [12, 0.5 * lineScale],
+            [13, 0.55 * lineScale],
+            [14, 0.6 * lineScale],
+            [15, 0.7 * lineScale],
+            [16, 0.8 * lineScale],
+          ],
         },
         "line-opacity": {
           stops: [
             [0, 0],
-            [4, 1]
-          ]
-        }
-      }
+            [4, 1],
+          ],
+        },
+      },
     },
     // Hide water
     {
@@ -108,8 +110,8 @@ export const mapStyle = {
       minzoom: 0,
       maxzoom: 16,
       paint: {
-        "fill-opacity": 0
-      }
+        "fill-opacity": 0,
+      },
     },
     {
       id: "burwell_water_line",
@@ -121,8 +123,8 @@ export const mapStyle = {
       maxzoom: 16,
       paint: {
         "line-opacity": 0,
-        "line-width": 1
-      }
+        "line-width": 1,
+      },
     },
     {
       id: "faults",
@@ -139,7 +141,7 @@ export const mapStyle = {
         "reverse fault",
         "growth fault",
         "fault zone",
-        "zone"
+        "zone",
       ],
       minzoom: 0,
       maxzoom: 16,
@@ -150,46 +152,121 @@ export const mapStyle = {
           ["linear"],
           ["zoom"],
           0,
-          ["case", ["!=", ["get", "name"], ""], 0.6, 0.3],
+          [
+            "case",
+            ["!=", ["get", "name"], ""],
+            0.6 * lineScale,
+            0.3 * lineScale,
+          ],
           1,
-          ["case", ["!=", ["get", "name"], ""], 0.6, 0.3],
+          [
+            "case",
+            ["!=", ["get", "name"], ""],
+            0.6 * lineScale,
+            0.3 * lineScale,
+          ],
           2,
-          ["case", ["!=", ["get", "name"], ""], 0.6, 0.3],
+          [
+            "case",
+            ["!=", ["get", "name"], ""],
+            0.6 * lineScale,
+            0.3 * lineScale,
+          ],
           3,
-          ["case", ["!=", ["get", "name"], ""], 0.6, 0.3],
+          [
+            "case",
+            ["!=", ["get", "name"], ""],
+            0.6 * lineScale,
+            0.3 * lineScale,
+          ],
           4,
-          ["case", ["!=", ["get", "name"], ""], 1, 0.5],
+          ["case", ["!=", ["get", "name"], ""], 1 * lineScale, 0.5 * lineScale],
           5,
-          ["case", ["!=", ["get", "name"], ""], 1.2, 0.6],
+          [
+            "case",
+            ["!=", ["get", "name"], ""],
+            1.2 * lineScale,
+            0.6 * lineScale,
+          ],
           6,
-          ["case", ["!=", ["get", "name"], ""], 0.9, 0.45],
+          [
+            "case",
+            ["!=", ["get", "name"], ""],
+            0.9 * lineScale,
+            0.45 * lineScale,
+          ],
           7,
-          ["case", ["!=", ["get", "name"], ""], 0.8, 0.4],
+          [
+            "case",
+            ["!=", ["get", "name"], ""],
+            0.8 * lineScale,
+            0.4 * lineScale,
+          ],
           8,
-          ["case", ["!=", ["get", "name"], ""], 1.4, 0.7],
+          [
+            "case",
+            ["!=", ["get", "name"], ""],
+            1.4 * lineScale,
+            0.7 * lineScale,
+          ],
           9,
-          ["case", ["!=", ["get", "name"], ""], 1.6, 0.8],
+          [
+            "case",
+            ["!=", ["get", "name"], ""],
+            1.6 * lineScale,
+            0.8 * lineScale,
+          ],
           10,
-          ["case", ["!=", ["get", "name"], ""], 1.4, 0.7],
+          [
+            "case",
+            ["!=", ["get", "name"], ""],
+            1.4 * lineScale,
+            0.7 * lineScale,
+          ],
           11,
-          ["case", ["!=", ["get", "name"], ""], 2.2, 1.1],
+          [
+            "case",
+            ["!=", ["get", "name"], ""],
+            2.2 * lineScale,
+            1.1 * lineScale,
+          ],
           12,
-          ["case", ["!=", ["get", "name"], ""], 2.6, 1.3],
+          [
+            "case",
+            ["!=", ["get", "name"], ""],
+            2.6 * lineScale,
+            1.3 * lineScale,
+          ],
           13,
-          ["case", ["!=", ["get", "name"], ""], 3, 1.5],
+          ["case", ["!=", ["get", "name"], ""], 3 * lineScale, 1.5 * lineScale],
           14,
-          ["case", ["!=", ["get", "name"], ""], 3.2, 1.6],
+          [
+            "case",
+            ["!=", ["get", "name"], ""],
+            3.2 * lineScale,
+            1.6 * lineScale,
+          ],
           15,
-          ["case", ["!=", ["get", "name"], ""], 3.5, 1.75],
+          [
+            "case",
+            ["!=", ["get", "name"], ""],
+            3.5 * lineScale,
+            1.75 * lineScale,
+          ],
           16,
-          ["case", ["!=", ["get", "name"], ""], 4.4, 2.2]
+          [
+            "case",
+            ["!=", ["get", "name"], ""],
+            4.4 * lineScale,
+            2.2 * lineScale,
+          ],
         ],
-        "line-opacity": 1
+        "line-opacity": 1,
       },
       layout: {
         "line-join": "round",
-        "line-cap": "round"
-      }
+        "line-cap": "round",
+      },
     },
     {
       id: "moraines",
@@ -201,7 +278,7 @@ export const mapStyle = {
       maxzoom: 16,
       layout: {
         "line-join": "round",
-        "line-cap": "round"
+        "line-cap": "round",
       },
       paint: {
         "line-color": "#3498DB",
@@ -213,16 +290,16 @@ export const mapStyle = {
             [12, 2],
             [13, 2.5],
             [14, 3],
-            [15, 3]
-          ]
+            [15, 3],
+          ],
         },
         "line-opacity": {
           stops: [
             [10, 0.2],
-            [13, 1]
-          ]
-        }
-      }
+            [13, 1],
+          ],
+        },
+      },
     },
     {
       id: "eskers",
@@ -234,7 +311,7 @@ export const mapStyle = {
       maxzoom: 16,
       layout: {
         "line-join": "round",
-        "line-cap": "round"
+        "line-cap": "round",
       },
       paint: {
         "line-color": "#00FFFF",
@@ -246,16 +323,16 @@ export const mapStyle = {
             [12, 2],
             [13, 2.5],
             [14, 3],
-            [15, 3]
-          ]
+            [15, 3],
+          ],
         },
         "line-opacity": {
           stops: [
             [10, 0.2],
-            [13, 1]
-          ]
-        }
-      }
+            [13, 1],
+          ],
+        },
+      },
     },
     {
       id: "lineaments",
@@ -267,7 +344,7 @@ export const mapStyle = {
       maxzoom: 16,
       layout: {
         "line-join": "round",
-        "line-cap": "round"
+        "line-cap": "round",
       },
       paint: {
         "line-color": "#000000",
@@ -280,11 +357,11 @@ export const mapStyle = {
             [12, 2],
             [13, 2.5],
             [14, 3],
-            [15, 3]
-          ]
+            [15, 3],
+          ],
         },
-        "line-opacity": 1
-      }
+        "line-opacity": 1,
+      },
     },
     {
       id: "synclines",
@@ -296,7 +373,7 @@ export const mapStyle = {
       maxzoom: 16,
       layout: {
         "line-join": "round",
-        "line-cap": "round"
+        "line-cap": "round",
       },
       paint: {
         "line-color": "#F012BE",
@@ -312,11 +389,11 @@ export const mapStyle = {
             [13, 0.9],
             [14, 1.4],
             [15, 1.75],
-            [16, 2.2]
-          ]
+            [16, 2.2],
+          ],
         },
-        "line-opacity": 1
-      }
+        "line-opacity": 1,
+      },
     },
     {
       id: "monoclines",
@@ -328,7 +405,7 @@ export const mapStyle = {
       maxzoom: 16,
       layout: {
         "line-join": "round",
-        "line-cap": "round"
+        "line-cap": "round",
       },
       paint: {
         "line-color": "#F012BE",
@@ -344,11 +421,11 @@ export const mapStyle = {
             [13, 0.9],
             [14, 1.4],
             [15, 1.75],
-            [16, 2.2]
-          ]
+            [16, 2.2],
+          ],
         },
-        "line-opacity": 1
-      }
+        "line-opacity": 1,
+      },
     },
     {
       id: "folds",
@@ -360,7 +437,7 @@ export const mapStyle = {
       maxzoom: 16,
       layout: {
         "line-join": "round",
-        "line-cap": "round"
+        "line-cap": "round",
       },
       paint: {
         "line-color": "#F012BE",
@@ -376,11 +453,11 @@ export const mapStyle = {
             [13, 0.9],
             [14, 1.4],
             [15, 1.75],
-            [16, 2.2]
-          ]
+            [16, 2.2],
+          ],
         },
-        "line-opacity": 1
-      }
+        "line-opacity": 1,
+      },
     },
     {
       id: "dikes",
@@ -392,7 +469,7 @@ export const mapStyle = {
       maxzoom: 16,
       layout: {
         "line-join": "round",
-        "line-cap": "round"
+        "line-cap": "round",
       },
       paint: {
         "line-color": "#FF4136",
@@ -408,16 +485,16 @@ export const mapStyle = {
             [13, 0.9],
             [14, 1.4],
             [15, 1.75],
-            [16, 2.2]
-          ]
+            [16, 2.2],
+          ],
         },
         "line-opacity": {
           stops: [
             [6, 0.2],
-            [10, 1]
-          ]
-        }
-      }
+            [10, 1],
+          ],
+        },
+      },
     },
     {
       id: "anticlines",
@@ -429,7 +506,7 @@ export const mapStyle = {
       maxzoom: 16,
       layout: {
         "line-join": "round",
-        "line-cap": "round"
+        "line-cap": "round",
       },
       paint: {
         "line-color": "#F012BE",
@@ -445,11 +522,11 @@ export const mapStyle = {
             [13, 0.9],
             [14, 1.4],
             [15, 1.75],
-            [16, 2.2]
-          ]
+            [16, 2.2],
+          ],
         },
-        "line-opacity": 1
-      }
+        "line-opacity": 1,
+      },
     },
     {
       id: "flows",
@@ -461,7 +538,7 @@ export const mapStyle = {
       maxzoom: 16,
       layout: {
         "line-join": "round",
-        "line-cap": "round"
+        "line-cap": "round",
       },
       paint: {
         "line-color": "#FF4136",
@@ -477,11 +554,11 @@ export const mapStyle = {
             [13, 0.9],
             [14, 1.4],
             [15, 1.75],
-            [16, 2.2]
-          ]
+            [16, 2.2],
+          ],
         },
-        "line-opacity": 1
-      }
+        "line-opacity": 1,
+      },
     },
     {
       id: "sills",
@@ -493,7 +570,7 @@ export const mapStyle = {
       maxzoom: 16,
       layout: {
         "line-join": "round",
-        "line-cap": "round"
+        "line-cap": "round",
       },
       paint: {
         "line-color": "#FF4136",
@@ -509,11 +586,11 @@ export const mapStyle = {
             [13, 0.9],
             [14, 1.4],
             [15, 1.75],
-            [16, 2.2]
-          ]
+            [16, 2.2],
+          ],
         },
-        "line-opacity": 1
-      }
+        "line-opacity": 1,
+      },
     },
     {
       id: "veins",
@@ -525,7 +602,7 @@ export const mapStyle = {
       maxzoom: 16,
       layout: {
         "line-join": "round",
-        "line-cap": "round"
+        "line-cap": "round",
       },
       paint: {
         "line-color": "#FF4136",
@@ -541,16 +618,16 @@ export const mapStyle = {
             [13, 0.9],
             [14, 1.4],
             [15, 1.75],
-            [16, 2.2]
-          ]
+            [16, 2.2],
+          ],
         },
         "line-opacity": {
           stops: [
             [6, 0.2],
-            [10, 1]
-          ]
-        }
-      }
+            [10, 1],
+          ],
+        },
+      },
     },
     {
       id: "marker_beds",
@@ -562,7 +639,7 @@ export const mapStyle = {
       maxzoom: 16,
       layout: {
         "line-join": "round",
-        "line-cap": "round"
+        "line-cap": "round",
       },
       paint: {
         "line-color": "#333333",
@@ -574,11 +651,11 @@ export const mapStyle = {
             [13, 0.9],
             [14, 1.4],
             [15, 1.75],
-            [16, 2.2]
-          ]
+            [16, 2.2],
+          ],
         },
-        "line-opacity": 1
-      }
+        "line-opacity": 1,
+      },
     },
     {
       id: "craters",
@@ -599,11 +676,11 @@ export const mapStyle = {
             [13, 0.72],
             [14, 1],
             [15, 1.3],
-            [16, 1.8]
-          ]
+            [16, 1.8],
+          ],
         },
-        "line-opacity": 1
-      }
-    }
-  ]
+        "line-opacity": 1,
+      },
+    },
+  ],
 };

@@ -25,7 +25,7 @@ import {
   getInitialPosition,
 } from "@macrostrat/cesium-viewer/query-string";
 
-const GeologyLayer = ({ visibleMaps = null, ...rest }) => {
+const BaseGeologyLayer = ({ enabled = true, ...rest }) => {
   const provider = useMemo(() => {
     let prov = new MVTImageryProvider({
       style: mapStyle,
@@ -47,13 +47,16 @@ const GeologyLayer = ({ visibleMaps = null, ...rest }) => {
     // const res = prov.mapboxRenderer.setFilter("unit-edge", filter, false);
     // res();
     return prov;
-  }, [visibleMaps]);
+  }, [enabled]);
 
-  const hasGeology = useSelector((state) => state.update.mapHasBedrock);
-
-  if (!hasGeology) return null;
+  if (!enabled) return null;
 
   return h(ImageryLayer, { imageryProvider: provider, ...rest });
+};
+
+const GeologyLayer = ({ visibleMaps = null, ...rest }) => {
+  const hasGeology = useSelector((state) => state.update.mapHasBedrock);
+  return h(BaseGeologyLayer, { enabled: hasGeology, ...rest });
 };
 
 function MacrostratSatelliteLayer() {
@@ -62,11 +65,17 @@ function MacrostratSatelliteLayer() {
   return h(SatelliteLayer);
 }
 
+function MacrostratHillshadeLayer() {
+  const hasSatellite = useSelector((state) => state.update.mapHasSatellite);
+  return h(HillshadeLayer, { enabled: !hasSatellite });
+}
+
 function MacrostratCesiumView(props) {
   const dispatch = useDispatch();
   const terrainExaggeration =
-    useSelector((state) => state.globe.verticalExaggeration) ?? 1.0;
+    useSelector((state) => state.globe.verticalExaggeration) ?? 1.00001;
   const displayQuality = useSelector((state) => state.globe.displayQuality);
+  console.log(displayQuality);
   const globe = useSelector((state) => state.globe);
 
   const showInspector = useSelector((state) => state.globe.showInspector);
@@ -91,9 +100,9 @@ function MacrostratCesiumView(props) {
       flyTo: globe.flyToProps,
     },
     [
-      h(HillshadeLayer),
+      h(MacrostratHillshadeLayer),
       h(MacrostratSatelliteLayer),
-      h(GeologyLayer, { alpha: 0.8 }),
+      h(GeologyLayer, { alpha: 0.5 }),
     ]
   );
 }
@@ -109,13 +118,13 @@ export function GlobeDevPage() {
       showInspector: true,
       flyTo: null,
       initialPosition,
-      highResolution: true,
+      displayQuality: DisplayQuality.High,
       onViewChange(cpos) {
         console.log(cpos);
         setHashString(buildPositionHash(cpos.camera));
       },
     },
-    h(SatelliteLayer)
+    [h(HillshadeLayer), h(BaseGeologyLayer)]
   );
 }
 
