@@ -1,9 +1,18 @@
 [submodule "bundledDeps/ui-components"]
 	path = packages/ui-components
 	url = git://github.com/UW-Macrostrat/ui-components.git
+[submodule "bundledDeps/cesium-martini"]
+	path = packages/cesium-martini
+	url = git://github.com/davenquinn/cesium-martini.git
+[submodule "packages/cesium-viewer"]
+	path = packages/cesium-viewer
+	url = git://github.com/UW-Macrostrat/cesium-viewer.git
 [submodule "packages/column-components"]
 	path = packages/column-components
 	url = git://github.com/UW-Macrostrat/column-components.git
 [submodule "map-components"]
 	path = packages/map-components
 	url = git://github.com/UW-Macrostrat/map-components.git
+[submodule "packages/MVTImageryProvider"]
+	path = packages/MVTImageryProvider
+	url = git://github.com/davenquinn/MVTImageryProvider.git
