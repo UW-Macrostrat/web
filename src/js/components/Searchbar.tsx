@@ -26,7 +26,6 @@ const sortOrder = {
   environ: 4,
   place: 5,
 };
-
 class Searchbar extends Component {
   constructor(props) {
     super(props);

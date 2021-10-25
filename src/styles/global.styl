@@ -17,6 +17,7 @@ body, .main-container, #react, #app-holder {
 }
 .ui {
   z-index: 100;
+  position: relative;
 }
 .map-holder {
   z-index: 1;
@@ -452,6 +453,21 @@ text {
   font-weight: bold;
   letter-spacing: 1px;
   margin-top: 15px;
+}
+.filter-paper {
+  border-radius: 0;
+}
+.searchbar-filter-container {
+  padding: 0 !important;
+  background-color: rgba(245, 0, 87, 0.08) !important;
+}
+.searchbar-filter-title {
+  font-weight: bold;
+  padding-right: 10px !important;
+  padding-left: 10px !important;
+}
+.filter-list {
+  width: 100%;
 }
 @media(max-width: 850px) {
   .infoDrawer {

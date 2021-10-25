@@ -55,6 +55,7 @@ class InfoDrawer extends Component {
       bedrockMatchExpanded: this.props.mapHasBedrock,
       stratigraphyExpanded: this.props.mapHasColumns,
       pbdbExpanded: this.props.mapHasFossils,
+      gddExpanded: false,
     };
 
     this.handleChange = (panel) => (event, expanded) => {
@@ -83,18 +84,19 @@ class InfoDrawer extends Component {
         this.setState({
           pbdbExpanded: !this.state.pbdbExpanded,
         });
+      } else if (panel === "gdd") {
+        if (!this.state.gddExpanded) {
+          this.openGdd();
+        }
+        this.setState({
+          gddExpanded: !this.state.gddExpanded,
+        });
       }
     };
-    // this.openColumnInfo = (event, expanded) => {
-    //   if (Object.keys(this.props.columnInfo).length === 0) {
-    //     this.props.getColumn()
-    //   }
-    // }
-    this.openGdd = (event, expanded) => {
-      if (this.props.gddInfo.length === 0) {
-        this.props.getGdd();
-      }
-    };
+  }
+
+  openGdd() {
+    this.props.getGdd();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -120,6 +122,7 @@ class InfoDrawer extends Component {
         bedrockMatchExpanded: nextProps.mapHasBedrock,
         stratigraphyExpanded: nextProps.mapHasColumns,
         pbdbExpanded: nextProps.mapHasFossils,
+        gddExpanded: false,
       });
     }
   }
@@ -139,6 +142,7 @@ class InfoDrawer extends Component {
       bedrockMatchExpanded,
       stratigraphyExpanded,
       pbdbExpanded,
+      gddExpanded,
     } = this.state;
 
     const expansionPanelClasses = {
@@ -843,6 +847,8 @@ class InfoDrawer extends Component {
                   <ExpansionPanel
                     classes={{ root: "regional-panel" }}
                     onChange={this.openGdd}
+                    onChange={this.collapse("gdd")}
+                    expanded={gddExpanded}
                   >
                     <ExpansionPanelSummary
                       expandIcon={<ExpandMoreIcon />}
