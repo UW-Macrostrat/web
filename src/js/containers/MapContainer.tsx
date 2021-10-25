@@ -1,6 +1,14 @@
-import { connect } from 'react-redux'
-import { queryMap, closeInfoDrawer, getFilteredColumns, getElevation, getPBDB, mapMoved, resetPbdb } from '../actions'
-import Map from '../components/Map'
+import { connect } from "react-redux";
+import {
+  queryMap,
+  closeInfoDrawer,
+  getFilteredColumns,
+  getElevation,
+  getPBDB,
+  mapMoved,
+  resetPbdb,
+} from "../actions";
+import Map from "../components/Map";
 
 const mapStateToProps = (state) => {
   return {
@@ -16,38 +24,35 @@ const mapStateToProps = (state) => {
     elevationData: state.update.elevationData,
     elevationMarkerLocation: state.update.elevationMarkerLocation,
     mapXYZ: state.update.mapXYZ,
-  }
-}
+  };
+};
 
 const mapDispatchToProps = (dispatch) => {
   return {
     queryMap: (lng, lat, z, map_id, column) => {
-      dispatch(queryMap(lng, lat, z, map_id, column))
+      dispatch(queryMap(lng, lat, z, map_id, column));
     },
     getFilteredColumns: () => {
-      dispatch(getFilteredColumns())
+      dispatch(getFilteredColumns());
     },
     getElevation: (line) => {
-      dispatch(getElevation(line))
+      dispatch(getElevation(line));
     },
     getPBDB: (collection_nos) => {
-      dispatch(getPBDB(collection_nos))
+      dispatch(getPBDB(collection_nos));
     },
     resetPbdb: () => {
-      dispatch(resetPbdb())
+      dispatch(resetPbdb());
     },
     mapMoved: (data) => {
-      dispatch(mapMoved(data))
+      dispatch(mapMoved(data));
     },
     closeInfoDrawer: () => {
-      dispatch(closeInfoDrawer())
-    }
-  }
-}
+      dispatch(closeInfoDrawer());
+    },
+  };
+};
 
-const MapContainer = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Map)
+const MapContainer = connect(mapStateToProps, mapDispatchToProps)(Map);
 
-export default MapContainer
+export default MapContainer;
