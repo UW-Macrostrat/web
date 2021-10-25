@@ -14,8 +14,8 @@ import {
 } from "@macrostrat/cesium-viewer/layers";
 import { ImageryLayer } from "resium";
 import { useEffect, useMemo } from "react";
-import MVTImageryProvider from "mvt-imagery-provider";
-import { coreStyle } from "./map-styles/core";
+import MVTImageryProvider from "cesium-vector-provider/src";
+import { mapStyle } from "./vector-style";
 import {
   getHashString,
   setHashString,

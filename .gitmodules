@@ -22,3 +22,6 @@
 [submodule "packages/maplibre-gl-js"]
 	path = packages/maplibre-gl-js
 	url = git://github.com/maplibre/maplibre-gl-js.git
+[submodule "packages/maplibre-basic-renderer"]
+	path = packages/maplibre-basic-renderer
+	url = github.com:davenquinn/maplibre-basic-renderer.git
