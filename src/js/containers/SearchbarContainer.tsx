@@ -1,11 +1,5 @@
 import { connect } from "react-redux";
-import {
-  toggleMenu,
-  toggleFilters,
-  doSearch,
-  addFilter,
-  removeFilter,
-} from "../actions";
+import { toggleMenu, toggleFilters, doSearch, addFilter } from "../actions";
 import Searchbar from "../components/Searchbar";
 
 const mapStateToProps = (state) => {
@@ -29,22 +23,6 @@ const mapDispatchToProps = (dispatch) => {
     },
     addFilter: (f) => {
       dispatch(addFilter(f));
-    },
-    removeFilter: (f) => {
-      dispatch(removeFilter(f));
-    },
-    swapLithType: (f) => {
-      // Copy the filter, otherwise all hell breaks loose
-      let newFilter = JSON.parse(JSON.stringify(f));
-
-      // Swap the style of filter
-      if (newFilter.type.substr(0, 4) === "all_") {
-        newFilter.type = newFilter.type.replace("all_", "");
-      } else {
-        newFilter.type = `all_${newFilter.type}`;
-      }
-
-      dispatch(addFilter(newFilter));
     },
   };
 };

@@ -1,3 +1,6 @@
+*
+  box-sizing border-box
+
 body {
   color: #333;
   margin:0;
@@ -18,14 +21,18 @@ body, .main-container, #react, #app-holder {
 }
 .map-holder {
   z-index: 1;
-  height: auto;
+  position: fixed;
+  top 0
+  left 0
+  bottom 0
+  right 0
+  height 100vh
 }
 #map {
-  position: absolute;
+  position: fixed;
   top: 0;
   bottom: 0;
   width: 100%;
-  touch-action: none;
 }
 .mapboxgl-ctrl-bottom-right {
   z-index: 0;
@@ -33,10 +40,7 @@ body, .main-container, #react, #app-holder {
 .other-attributes {
   margin-bottom: 50px;
 }
-.searchbar-holder {
-  margin: 20px;
-  transition: margin 300ms;
-}
+
 .column-icon {
   fill:none;stroke:#231f20;stroke-miterlimit:10;stroke-width:3px;
 }
@@ -65,9 +69,7 @@ body, .main-container, #react, #app-holder {
 .searchresult-item {
   font-size: 0.95em !important;
 }
-.menu-options {
-  padding: 25px;
-}
+
 .active-layer {
   font-weight: bold;
 }

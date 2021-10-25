@@ -1,21 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Macrostrat</title>
+  <title><%= htmlWebpackPlugin.options.title %></title>
   <meta charset="utf-8" />
   <meta http-equiv="Content-Language" content="en">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <link rel="stylesheet" type="text/css" href="src/css/styles.css"/>
-  <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.css' rel='stylesheet' />
   <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700|Source+Sans+Pro" rel="stylesheet">
 </head>
 <body>
   <div class="wrapper container-fluid main-container">
     <div id="react"></div>
   </div>
-
-  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.js'></script>
-  <script src="dist/js/bundle.js"></script>
   
   <script>
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

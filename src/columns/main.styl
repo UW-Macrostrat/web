@@ -1,0 +1,76 @@
+:global
+  h1
+    span.subtitle
+      color #aaa
+
+  #column-page
+    margin 0 2em
+
+  body
+    height 100%
+    width 100%
+
+  h4.hovered-column-legend
+    margin-top 0
+    color #888
+    &.empty
+      font-weight 400
+
+  div#column-index-container
+    position relative
+    margin 0 -2em
+    button.clear-selection
+      position absolute
+      bottom 1em
+      right 1em
+
+  svg#column-index-map
+    background-color: lighten(dodgerblue,70%)
+    path.graticule
+      stroke #aaa
+      stroke-width 1px
+      stroke-dasharray 1,1
+      fill none
+
+    path.land
+      fill #eee
+      stroke #aaa
+      stroke-width 1px
+      stroke-linecap round
+
+    column_color=lighten(black,10%)
+    path.column
+      fill alpha(column_color, 10%)
+      stroke column_color
+      stroke-width 1.5px
+      &.hovered
+        fill alpha(column_color, 50%)
+      &.selected
+        fill alpha(column_color, 80%)
+
+  div.selected-columns-empty
+    min-height 400px
+
+  div.selected-columns
+    display flex
+    max-width 100%
+    flex-direction row
+    margin 0 -0.5em
+    div.column-data
+      flex 1
+      margin 0 0.5em
+      div.section
+        margin-bottom 0.5em
+        border-top 2px solid #888
+        max-width 200px
+        div.unit
+          border 2px solid #888
+          border-top none
+        .bp3-popover-target
+          display block
+
+  // Popover to display unit details
+  div.unit-details
+    padding 0.5em
+    max-height 200px
+    overflow-y scroll

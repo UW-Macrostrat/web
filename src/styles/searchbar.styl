@@ -1,0 +1,73 @@
+.left-stack
+  max-width 34em
+  height 100vh
+  display: flex
+  flex-direction: column
+  &>div
+    pointer-events: all
+  .spacer
+    flex-grow 1
+    width 1px
+    pointer-events: none
+  &>.closeable-card
+    flex-shrink 1
+    display flex
+    flex-direction: column
+
+.searchbar-holder
+  transition margin 300ms
+  display flex
+  flex-direction column
+  margin 0
+  .searchbar
+    background-color #fff
+    border-radius 3px
+    margin-bottom 0.5em
+    padding-right 5px
+  .search-results-container
+    flex-shrink 1
+    .bp3-card
+      overflow-y scroll
+    ul
+      padding-left 0
+      list-style-type none
+  .search-guidance
+    ul
+      li
+        position relative
+        padding-left 1.2em
+        &:before
+          content: '–'
+          position: absolute
+          left: 0
+
+  .search-results
+    li
+      padding: 0.2em 20px
+      cursor pointer
+      &:first-child
+        border-top 1px solid #ddd
+      border-bottom 1px solid #ddd
+      &:hover
+        background-color: #eee
+    ul
+      margin: 0 -20px
+
+.menu-content
+  display flex
+  flex-direction column
+  margin 0 -10px
+  .bp3-button-group
+    margin-bottom 1em
+    button
+      margin-bottom 2px
+  margin-bottom -1em
+
+// Should be maybe moved to a card-specific location
+.card-header-left button
+  margin-right 5px
+
+.card-content
+  h2:first-child
+    margin-top 0
+  overflow-y scroll

@@ -5,3 +5,4 @@ dist
 ai
 geologic-patterns
 package-lock.json
+.env
