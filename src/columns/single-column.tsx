@@ -4,7 +4,7 @@ import { nest } from "d3-collection";
 import { sum } from "d3-array";
 import { Popover } from "@blueprintjs/core";
 
-const groupUnits = function(sectionUnits) {
+const groupUnits = function (sectionUnits) {
   /*
    * Split units in gap-bound packages into nested
    * unit groups
@@ -33,7 +33,7 @@ class ColumnContainer extends Component {
   static initClass() {
     this.defaultProps = {
       minUnitHeight: 20,
-      maxUnitHeight: 100
+      maxUnitHeight: 100,
     };
   }
   sectionSurfaces(section) {
@@ -41,7 +41,7 @@ class ColumnContainer extends Component {
      * Computes surface heights for a gap-bound package
      */
     const { maxUnitHeight, minUnitHeight } = this.props;
-    const units = section.units.map(function(unit) {
+    const units = section.units.map(function (unit) {
       const { min_thick, max_thick } = unit;
       let thickness = max_thick;
       if (thickness < minUnitHeight) {
@@ -53,14 +53,14 @@ class ColumnContainer extends Component {
       return { ...unit, thickness };
     });
 
-    const totalThickness = sum(units, d => d.thickness);
+    const totalThickness = sum(units, (d) => d.thickness);
 
     let bottom = totalThickness;
 
     // Add tops and bottoms to units, then group
     // formations and members
     return groupUnits(
-      units.map(function(unit) {
+      units.map(function (unit) {
         const top = bottom;
         bottom = top - unit.thickness;
         return { top, bottom, ...unit };
@@ -74,9 +74,9 @@ class ColumnContainer extends Component {
     // Separate column into gap-bound sections
     // which should be treated mostly separately
     const sections = nest()
-      .key(d => d.section_id)
+      .key((d) => d.section_id)
       .entries(units)
-      .map(function(d) {
+      .map(function (d) {
         // Rename entries semantically
         let section_id;
         ({ key: section_id, values: units } = d);
@@ -88,17 +88,17 @@ class ColumnContainer extends Component {
 
     return h(
       "div.column",
-      surfaces.map(section =>
+      surfaces.map((section) =>
         h(
           "div.section",
-          section.map(function(unit) {
+          section.map(function (unit) {
             let { thickness, color, unit_name, Mbr, Fm, Gp } = unit;
             if (color == null) {
               color = "#eee";
             }
             const style = {
               minHeight: thickness,
-              backgroundColor: color
+              backgroundColor: color,
             };
 
             return h(Popover, [
@@ -106,11 +106,11 @@ class ColumnContainer extends Component {
                 h("p", unit_name),
                 h("p", `Mbr: ${Mbr}`),
                 h("p", `Fm: ${Fm}`),
-                h("p", `Gp: ${Gp}`)
+                h("p", `Gp: ${Gp}`),
               ]),
               h("div.unit-details", null, [
-                h("pre", JSON.stringify(unit, null, 2))
-              ])
+                h("pre", JSON.stringify(unit, null, 2)),
+              ]),
             ]);
           })
         )

@@ -34,14 +34,14 @@ class ColumnPath__ extends Component {
       },
       onMouseLeave() {
         return actions.setHovered();
-      }
+      },
     });
   }
   componentDidMount() {
     const { column, actions } = this.props;
     return select(findDOMNode(this))
       .datum(column)
-      .on("click", function() {
+      .on("click", function () {
         // This handler can't be in React because
         // stopPropagation can't be called before zoom handlers
         actions.toggleSelected(column);
@@ -51,7 +51,7 @@ class ColumnPath__ extends Component {
   }
 }
 
-const ColumnPath = props => {
+const ColumnPath = (props) => {
   return h(
     MacrostratColumnConsumer,
     null,
@@ -63,7 +63,7 @@ const ColumnPath = props => {
 class ColumnIndexMap__ extends Component {
   static initClass() {
     this.defaultProps = {
-      columns: []
+      columns: [],
     };
   }
   constructor(props) {
@@ -108,7 +108,7 @@ class ColumnIndexMap__ extends Component {
           icon: "graph-remove",
           onClick() {
             return actions.clearSelection();
-          }
+          },
         },
         "Clear selection"
       );
@@ -121,16 +121,16 @@ class ColumnIndexMap__ extends Component {
         {
           id: "column-index-map",
           width,
-          height
+          height,
         },
         [
           h("g.map-backdrop"),
           h(
             "g.columns",
-            columns.map(column => h(ColumnPath, { column }))
-          )
+            columns.map((column) => h(ColumnPath, { column }))
+          ),
         ]
-      )
+      ),
     ]);
   }
 
@@ -151,7 +151,7 @@ class ColumnIndexMap__ extends Component {
       .scale(minScale)
       .clipExtent([
         [0, 0],
-        [width, height]
+        [width, height],
       ]);
     return this.redrawPaths();
   }
@@ -211,17 +211,17 @@ class ColumnIndexMap__ extends Component {
       .datum(land50)
       .call(this.redrawPaths);
 
-    const updateData = val => () => {
+    const updateData = (val) => () => {
       return land.datum(val).call(this.redrawPaths);
     };
 
     const sens = 0.08;
     const dragging = drag()
-      .subject(d => {
+      .subject((d) => {
         const r = this.projection.rotate();
         return {
           x: r[0] / sens,
-          y: -r[1] / sens
+          y: -r[1] / sens,
         };
       })
       .on("drag", () => {

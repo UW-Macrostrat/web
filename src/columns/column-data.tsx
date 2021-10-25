@@ -6,32 +6,36 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-import {Component, createContext} from 'react';
-import {feature} from 'topojson-client';
-import h from 'react-hyperscript';
-import {withCookies, Cookies} from 'react-cookie';
-import {get} from 'axios';
-import {instanceOf} from 'prop-types';
-import update from 'immutability-helper';
+import { Component, createContext } from "react";
+import { feature } from "topojson-client";
+import h from "react-hyperscript";
+import { withCookies, Cookies } from "react-cookie";
+import { get } from "axios";
+import { instanceOf } from "prop-types";
+import update from "immutability-helper";
 
 const MacrostratColumnContext = createContext({});
 
 class APIManager {
-  constructor(baseURL){
+  constructor(baseURL) {
     this.baseURL = baseURL;
   }
-  get = async route=> {
+  get = async (route) => {
     // Should handle unsuccessful queries
-    const URI = this.baseURL+route;
-    const {data: {success: {data}}} = await get(URI);
+    const URI = this.baseURL + route;
+    const {
+      data: {
+        success: { data },
+      },
+    } = await get(URI);
     return data;
   };
 }
 
-const getID = function(col){
+const getID = function (col) {
   // This maps column objects to IDs
   // and transparently passes IDs forward
-  if (typeof col ==='number') {
+  if (typeof col === "number") {
     // We were passed the ID
     return col;
   }
@@ -42,64 +46,70 @@ class MacrostratColumnManager extends Component {
   static initClass() {
     this.prototype.API = new APIManager("https://dev.macrostrat.org/api/v2");
     this.propTypes = {
-      cookies: instanceOf(Cookies).isRequired
+      cookies: instanceOf(Cookies).isRequired,
     };
     this.prototype.state = {
       hoveredColumn: null,
       columns: [],
-      columnUnitIndex: {}
+      columnUnitIndex: {},
     };
 
     this.prototype.helpers = {
-      isSame(col1, col2){
+      isSame(col1, col2) {
         // Checks if two columns are the same
-        if (col1 == null) { return false; }
-        if (col2 == null) { return false; }
+        if (col1 == null) {
+          return false;
+        }
+        if (col2 == null) {
+          return false;
+        }
         return getID(col1) === getID(col2);
-      }
+      },
     };
   }
 
-  constructor(props){
+  constructor(props) {
     super(props);
     this.setHoveredColumn = this.setHoveredColumn.bind(this);
     this.toggleSelected = this.toggleSelected.bind(this);
     this.clearSelection = this.clearSelection.bind(this);
     this.isSelected = this.isSelected.bind(this);
     this.getUnits = this.getUnits.bind(this);
-    const {cookies} = this.props;
+    const { cookies } = this.props;
 
     // Create `selection` as a set of IDs, which will
     // be mapped out to objects when provided
-    const selectedIDs = cookies.get('selected-columns') || [];
+    const selectedIDs = cookies.get("selected-columns") || [];
     this.state.selection = new Set(selectedIDs);
     selectedIDs.map(this.cacheUnitsForColumn);
   }
 
   async getColumnData() {
     const data = await this.API.get("/columns?format=topojson&all");
-    const {features: columns} = feature(data, data.objects.output);
-    return this.setState({columns});
+    const { features: columns } = feature(data, data.objects.output);
+    return this.setState({ columns });
   }
 
-  cacheUnitsForColumn = async column=> {
+  cacheUnitsForColumn = async (column) => {
     const id = getID(column);
-    const {columnUnitIndex} = this.state;
-    if (columnUnitIndex[id] != null) { return; }
+    const { columnUnitIndex } = this.state;
+    if (columnUnitIndex[id] != null) {
+      return;
+    }
     const data = await this.API.get(`/units?col_id=${id}&response=long`);
     const c = {};
-    c[id] = {$set: data};
-    const changeset = {columnUnitIndex: c};
+    c[id] = { $set: data };
+    const changeset = { columnUnitIndex: c };
     const state = update(this.state, changeset);
     return this.setState(state);
   };
 
   render() {
-    const {children} = this.props;
-    const {toggleSelected, clearSelection, getUnits} = this;
+    const { children } = this.props;
+    const { toggleSelected, clearSelection, getUnits } = this;
     // We store selected IDs but we provide objects
-    let {selection, ...rest} = this.state;
-    selection = this.state.columns.filter(col=> {
+    let { selection, ...rest } = this.state;
+    selection = this.state.columns.filter((col) => {
       const id = getID(col);
       return this.state.selection.has(id);
     });
@@ -113,64 +123,64 @@ class MacrostratColumnManager extends Component {
         setHovered: this.setHoveredColumn,
         setSelected: this.setSelectedColumn,
         clearSelection,
-        toggleSelected
+        toggleSelected,
       },
       helpers: {
         ...this.helpers,
         isSelected: this.isSelected,
         getUnits,
-        getID
-      }
+        getID,
+      },
     };
-    return h(MacrostratColumnContext.Provider, {value, children});
+    return h(MacrostratColumnContext.Provider, { value, children });
   }
 
   componentDidMount() {
     return this.getColumnData();
   }
 
-  componentDidUpdate(prevProps, prevState){
+  componentDidUpdate(prevProps, prevState) {
     // Update cookie for selection
-    const {cookies} = this.props;
-    const {selection} = this.state;
-    const {selection: oldSelection} = prevState;
+    const { cookies } = this.props;
+    const { selection } = this.state;
+    const { selection: oldSelection } = prevState;
     if (selection !== oldSelection) {
-      return cookies.set('selected-columns',selection);
+      return cookies.set("selected-columns", selection);
     }
   }
 
-  setHoveredColumn(col){
-    return this.setState({hoveredColumn: col});
+  setHoveredColumn(col) {
+    return this.setState({ hoveredColumn: col });
   }
 
-  toggleSelected(col){
+  toggleSelected(col) {
     let selection;
     const id = getID(col);
     if (this.isSelected(id)) {
-      selection = {$remove: [id]};
+      selection = { $remove: [id] };
     } else {
-      selection = {$add: [id]};
+      selection = { $add: [id] };
       this.cacheUnitsForColumn(id);
     }
-    const changeset = {selection};
+    const changeset = { selection };
     const newState = update(this.state, changeset);
     return this.setState(newState);
   }
 
   clearSelection() {
-    const changeset = {selection: {$set: new Set([])}};
+    const changeset = { selection: { $set: new Set([]) } };
     const newState = update(this.state, changeset);
     return this.setState(newState);
   }
 
-  isSelected(col){
+  isSelected(col) {
     const id = getID(col);
     return this.state.selection.has(id);
   }
 
-  getUnits(col){
+  getUnits(col) {
     const id = getID(col);
-    const {columnUnitIndex} = this.state;
+    const { columnUnitIndex } = this.state;
     return columnUnitIndex[id] || null;
   }
 }
@@ -180,4 +190,4 @@ MacrostratColumnManager.initClass();
 MacrostratColumnManager = withCookies(MacrostratColumnManager);
 
 const MacrostratColumnConsumer = MacrostratColumnContext.Consumer;
-export {MacrostratColumnConsumer, MacrostratColumnManager};
+export { MacrostratColumnConsumer, MacrostratColumnManager };

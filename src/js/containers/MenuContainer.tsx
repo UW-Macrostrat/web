@@ -1,6 +1,15 @@
-import { connect } from 'react-redux'
-import { toggleMenu, toggleBedrock, toggleLines, toggleSatellite, toggleColumns, toggleFossils, toggleAbout, toggleElevationChart } from '../actions'
-import Menu from '../components/Menu'
+import { connect } from "react-redux";
+import {
+  toggleMenu,
+  toggleBedrock,
+  toggleLines,
+  toggleSatellite,
+  toggleColumns,
+  toggleFossils,
+  toggleAbout,
+  toggleElevationChart,
+} from "../actions";
+import Menu from "../components/Menu";
 
 const mapStateToProps = (state) => {
   return {
@@ -10,41 +19,38 @@ const mapStateToProps = (state) => {
     mapHasColumns: state.update.mapHasColumns,
     mapHasFossils: state.update.mapHasFossils,
     mapHasLines: state.update.mapHasLines,
-  }
-}
+  };
+};
 
 const mapDispatchToProps = (dispatch) => {
   return {
     toggleMenu: () => {
-      dispatch(toggleMenu())
+      dispatch(toggleMenu());
     },
     toggleBedrock: () => {
-      dispatch(toggleBedrock())
+      dispatch(toggleBedrock());
     },
     toggleLines: () => {
-      dispatch(toggleLines())
+      dispatch(toggleLines());
     },
     toggleSatellite: () => {
-      dispatch(toggleSatellite())
+      dispatch(toggleSatellite());
     },
     toggleColumns: () => {
-      dispatch(toggleColumns())
+      dispatch(toggleColumns());
     },
     toggleFossils: () => {
-      dispatch(toggleFossils())
+      dispatch(toggleFossils());
     },
     toggleAbout: () => {
-      dispatch(toggleAbout())
+      dispatch(toggleAbout());
     },
     toggleElevationChart: () => {
-      dispatch(toggleElevationChart())
-    }
-  }
-}
+      dispatch(toggleElevationChart());
+    },
+  };
+};
 
-const MenuContainer = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Menu)
+const MenuContainer = connect(mapStateToProps, mapDispatchToProps)(Menu);
 
-export default MenuContainer
+export default MenuContainer;

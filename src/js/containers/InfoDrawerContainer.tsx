@@ -1,6 +1,11 @@
-import { connect } from 'react-redux'
-import { closeInfoDrawer, expandInfoDrawer, getColumn, getGdd } from '../actions'
-import InfoDrawer from '../components/InfoDrawer'
+import { connect } from "react-redux";
+import {
+  closeInfoDrawer,
+  expandInfoDrawer,
+  getColumn,
+  getGdd,
+} from "../actions";
+import InfoDrawer from "../components/InfoDrawer";
 
 const mapStateToProps = (state) => {
   return {
@@ -20,29 +25,29 @@ const mapStateToProps = (state) => {
     mapHasSatellite: state.update.mapHasSatellite,
     mapHasColumns: state.update.mapHasColumns,
     mapHasFossils: state.update.mapHasFossils,
-  }
-}
+  };
+};
 
 const mapDispatchToProps = (dispatch) => {
   return {
     closeInfoDrawer: () => {
-      dispatch(closeInfoDrawer())
+      dispatch(closeInfoDrawer());
     },
     expandInfoDrawer: () => {
-      dispatch(expandInfoDrawer())
+      dispatch(expandInfoDrawer());
     },
     getColumn: (lng, lat) => {
-      dispatch(getColumn(lng, lat))
+      dispatch(getColumn(lng, lat));
     },
     getGdd: () => {
-      dispatch(getGdd())
-    }
-  }
-}
+      dispatch(getGdd());
+    },
+  };
+};
 
 const InfoDrawerContainer = connect(
   mapStateToProps,
   mapDispatchToProps
-)(InfoDrawer)
+)(InfoDrawer);
 
-export default InfoDrawerContainer
+export default InfoDrawerContainer;

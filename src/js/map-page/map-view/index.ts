@@ -10,6 +10,9 @@ import {
 } from "../../actions";
 import Map from "./map";
 
+// Convert to use hooks:
+// https://betterprogramming.pub/convert-redux-to-hooks-d74d79b04f
+
 const mapStateToProps = (state) => {
   return {
     filters: state.update.filters,

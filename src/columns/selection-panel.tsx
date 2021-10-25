@@ -10,7 +10,7 @@ class EmptyColumnPanel extends Component {
       title: "No columns selected",
       icon: "square",
       className: "selected-columns-empty",
-      description: "Select some columns on the map to get started"
+      description: "Select some columns on the map to get started",
     });
   }
 }
@@ -46,7 +46,7 @@ class SelectionPanel extends Component {
   }
 }
 
-const __ = props =>
+const __ = (props) =>
   h(MacrostratColumnConsumer, null, ({ selection, helpers, columnUnitIndex }) =>
     h(SelectionPanel, { selection, helpers, columnUnitIndex, ...props })
   );

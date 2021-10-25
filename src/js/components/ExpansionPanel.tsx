@@ -5,18 +5,20 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-import React, {Component} from 'react';
-import {Collapse, Button, Icon} from '@blueprintjs/core';
+import React, { Component } from "react";
+import { Collapse, Button, Icon } from "@blueprintjs/core";
 
 class ExpansionPanelSummary extends Component {
   // Shim to do things the Material UI way
   render() {
-    const {expanded, children, onChange} = this.props;
-    const showExpand = expanded ? 'chevron-up' : 'chevron-down';
-    return <div className="expansion-panel-header" onClick={onChange}>
-      <div className="title">{children}</div>
-      <Icon icon={showExpand} />
-    </div>;
+    const { expanded, children, onChange } = this.props;
+    const showExpand = expanded ? "chevron-up" : "chevron-down";
+    return (
+      <div className="expansion-panel-header" onClick={onChange}>
+        <div className="title">{children}</div>
+        <Icon icon={showExpand} />
+      </div>
+    );
   }
 }
 
@@ -31,38 +33,37 @@ class ExpansionPanel extends Component {
    * A basic expansion panel component built to mimic the API
    * of the corresponding Material UI component
    */
-  constructor(props){
+  constructor(props) {
     super(props);
     // If we don't provide an onChange method,
     // the component is set up to be an un-managed one
     // (i.e. keeps track of its own open/closed state)
-    this.state = {managed: (typeof onChange === 'undefined' || onChange === null)};
+    this.state = {
+      managed: typeof onChange === "undefined" || onChange === null,
+    };
     this.state.expanded = props.expanded || false;
   }
 
   render() {
-
-    let {onChange, title, children, expanded} = this.props;
+    let { onChange, title, children, expanded } = this.props;
 
     // Basic methods for an unmanaged component
     if (!this.state.managed) {
-      ({
-        expanded
-      } = this.state);
-      onChange = () => this.setState({expanded: !expanded});
+      ({ expanded } = this.state);
+      onChange = () => this.setState({ expanded: !expanded });
     }
 
     const newChildren = [];
     for (let c of Array.from(children)) {
       if (c.type === ExpansionPanelSummary) {
-        title = React.cloneElement(c, {expanded, onChange});
+        title = React.cloneElement(c, { expanded, onChange });
         continue;
       }
       newChildren.push(c);
     }
 
     // Title must be set on element
-    if ((title == null)) {
+    if (title == null) {
       if (!React.isValidElement(title)) {
         title = <h4>{title}</h4>;
       }
@@ -82,5 +83,4 @@ class ExpansionPanel extends Component {
   }
 }
 
-export {ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails};
-
+export { ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails };
