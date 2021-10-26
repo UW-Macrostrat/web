@@ -126,20 +126,11 @@ class Searchbar extends Component {
 
     return (
       <div className="searchbar-holder">
-        <Navbar className="searchbar">
-          <Navbar.Group align={Alignment.LEFT}>
-            <Navbar.Heading>Macrostrat</Navbar.Heading>
-            <Button
-              icon="menu"
-              aria-label="Menu"
-              onClick={toggleMenu}
-              minimal
-            />
-          </Navbar.Group>
-          <Navbar.Group align={Alignment.RIGHT}>
+        <div className="navbar-holder">
+          <Navbar className="searchbar panel">
             <InputGroup
               large={true}
-              leftIcon="search"
+              //leftIcon="search"
               onChange={this.handleSearchInput}
               onFocus={this.gainInputFocus}
               onBlur={this.loseInputFocus}
@@ -147,11 +138,18 @@ class Searchbar extends Component {
               rightElement={filterButton}
               value={this.state.searchTerm}
             />
-          </Navbar.Group>
-        </Navbar>
+            <Button
+              icon="menu"
+              aria-label="Menu"
+              large
+              onClick={toggleMenu}
+              minimal
+            />
+          </Navbar>
+        </div>
         <Collapse
           isOpen={this.state.inputFocused}
-          className="search-results-container"
+          className="search-results-container panel"
         >
           <Card
             className={classNames(
