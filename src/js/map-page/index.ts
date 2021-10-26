@@ -78,21 +78,19 @@ const MapTypeSelector = () => {
 };
 
 const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
-  return (
-    <div id="map-page">
-      <MapView backend={backend} />
-      <div className="ui">
-        <div className="left-stack">
-          <SearchbarContainer />
-          <MenuContainer />
-          <FiltersContainer />
-          <div className="spacer" />
-        </div>
-        <InfoDrawerContainer />
-        <ElevationChartContainer />
-      </div>
-    </div>
-  );
+  return h("div#map-page", [
+    h(MapView, { backend }),
+    h("div.ui", [
+      h("div.left-stack", [
+        h(SearchbarContainer, null),
+        h(MenuContainer, null),
+        h(FiltersContainer, null),
+        h("div.spacer"),
+      ]),
+      h(InfoDrawerContainer, null),
+      h(ElevationChartContainer, null),
+    ]),
+  ]);
 };
 
 export { MapBackend };
