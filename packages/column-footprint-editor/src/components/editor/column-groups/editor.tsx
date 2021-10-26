@@ -12,6 +12,7 @@ import { useAPIResult, useModelEditor } from "@macrostrat/ui-components";
 import { ColumnSuggest } from "./column-suggest";
 import { NewColGroups } from "./new-column";
 import { AppContext } from "../../../context";
+import { base } from "../../../context/env";
 
 function unwrapColumnGroups(res) {
   const { data } = res;
@@ -27,7 +28,7 @@ function ColumnGroup() {
   const { project_id } = project;
 
   const data = useAPIResult(
-    `http://0.0.0.0:8000/${project_id}/col-groups`,
+    base + `${project_id}/col-groups`,
     {},
     { unwrapResponse: unwrapColumnGroups }
   );

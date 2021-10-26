@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "@blueprintjs/core";
 import { useAPIResult } from "@macrostrat/ui-components";
+import { base } from "../../context/env";
 
 function SaveButton(props) {
   const { onClick, minimal, disabled } = props;
@@ -31,7 +32,7 @@ function DownloadButton(props) {
   const { project_id } = props;
   let data = [];
   if (project_id) {
-    data = useAPIResult(`http://0.0.0.0:8000/${project_id}/csv`);
+    data = useAPIResult(base + `${project_id}/csv`);
   }
 
   const onClick = () => {

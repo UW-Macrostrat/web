@@ -7,6 +7,7 @@ import mapboxgl from "mapbox-gl";
 import axios from "axios";
 
 import { AppContext } from "../../context";
+import { base } from "../../context/env";
 
 import {
   MapNavBar,
@@ -75,7 +76,7 @@ export function Map() {
     });
     if (changeSet.length != 0) {
       try {
-        let url = `http://0.0.0.0:8000/${state.project.project_id}/lines`;
+        let url = base + `${state.project.project_id}/lines`;
         const res = await axios.put(url, {
           change_set: changeSet,
           project_id: state.project.project_id,

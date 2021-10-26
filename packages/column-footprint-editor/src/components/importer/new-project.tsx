@@ -12,6 +12,7 @@ import {
 } from "@blueprintjs/core";
 import axios from "axios";
 import { AppContext } from "../../context";
+import { base } from "../../context/env";
 
 function NewProject() {
   const { state, runAction } = useContext(AppContext);
@@ -35,7 +36,7 @@ function NewProject() {
 
   const onSubmit = async () => {
     const data = { data: project };
-    let url = "http://0.0.0.0:8000/projects";
+    let url = base + "projects";
     setAlert(true);
     setImporting(true);
     const res = await axios.post(url, data);

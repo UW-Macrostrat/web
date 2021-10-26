@@ -3,6 +3,7 @@ import { AppContext } from "../../../context";
 import { Button, TextArea } from "@blueprintjs/core";
 import { Popover2 } from "@blueprintjs/popover2";
 import axios from "axios";
+import {base} from "../../../context/env"
 
 function PopoverContent({ addGeom }) {
   const { state, runAction } = useContext(AppContext);
@@ -11,7 +12,7 @@ function PopoverContent({ addGeom }) {
 
   const onClick = async () => {
     console.log(geom);
-    let url = "http://0.0.0.0:8000/get-line";
+    let url = base+"get-line";
     let res = await axios.post(url, { location: geom });
     let data = res.data;
     let line = data["location"];

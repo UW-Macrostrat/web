@@ -4,9 +4,10 @@ import { Button, Navbar, Popover, Divider } from "@blueprintjs/core";
 import { AppContext } from "../../context";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { MapColLegend, AddKnownGeom } from "../map/map-pieces";
+import { base } from "../../context/env";
 
-const import_url = "http://0.0.0.0:8000/import";
-const projects_url = "http://0.0.0.0:8000/projects";
+const import_url = base + "import";
+const projects_url = base + "projects";
 
 function unwrapProjects(res) {
   if (res.data) {

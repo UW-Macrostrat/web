@@ -12,8 +12,9 @@ import axios from "axios";
 
 import { AppContext } from "../../context";
 import { NewProject } from "./new-project";
+import { base } from "../../context/env";
 
-const import_url = "http://0.0.0.0:8000/import";
+const import_url = base + "import";
 
 // https://macrostrat.org/api/v2/defs/projects?all lists projects in macrostrat
 
@@ -143,7 +144,7 @@ function EditableProjects() {
   const { state, runAction } = useContext(AppContext);
   const [id, setId] = useState(null);
 
-  let projectsUrl = "http://0.0.0.0:8000/projects";
+  let projectsUrl = base + "projects";
   const unwrapProjects = (res) => {
     const data = res.data.map((project) => {
       const { project_id, name, description } = project;

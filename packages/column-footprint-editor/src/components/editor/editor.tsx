@@ -21,6 +21,7 @@ import "./main.css";
 
 import { TwoIdentities } from "./two-identities";
 import { ColumnGroup } from "./column-groups";
+import { base } from "../../context/env";
 
 function ColumnNavBar() {
   const { model, isEditing, hasChanges, actions } = useModelEditor();
@@ -113,7 +114,7 @@ function PropertyDialog(props) {
     identity_id,
   };
 
-  const put_url = `http://0.0.0.0:8000/projects`;
+  const put_url = base + `projects`;
 
   const persistChanges = async (updatedModel, changeset) => {
     console.log("changeset", changeset);

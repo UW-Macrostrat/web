@@ -9,6 +9,7 @@ import { SaveButton } from "../../blueprint";
 import axios from "axios";
 
 import { AppContext } from "../../../context";
+import { base } from "../../../context/env";
 
 function EditComponents() {
   const { actions } = useModelEditor();
@@ -49,7 +50,7 @@ function NewColGroups(props) {
   const persistChanges = async (updatedModel, changeset) => {
     console.log("changeset", changeset);
     console.log("updatedModel", updatedModel);
-    let route = `http://0.0.0.0:8000/${project_id}/col-groups`;
+    let route = base + `${project_id}/col-groups`;
     let res = await axios.post(route, { updatedModel });
     const {
       data: { col_group_id },
