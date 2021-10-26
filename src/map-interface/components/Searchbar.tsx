@@ -9,7 +9,7 @@ import {
 } from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
 import classNames from "classnames";
-import { useDispatch, useStore } from "react-redux";
+import { useDispatch, useSelector, useStore } from "react-redux";
 import { toggleMenu, toggleFilters, doSearch, addFilter } from "../actions";
 
 const categoryTitles = {
@@ -196,7 +196,10 @@ function SearchGuidance() {
 }
 
 function SearchbarContainer(props) {
-  const state = useStore().getState();
+  /** A replacement for the connect component */
+  const { isSearching, searchResults, filters } = useSelector(
+    (state) => state.update
+  );
   const dispatch = useDispatch();
 
   const rest = {
@@ -212,9 +215,9 @@ function SearchbarContainer(props) {
     addFilter: (f) => {
       dispatch(addFilter(f));
     },
-    isSearching: state.update.isSearching,
-    searchResults: state.update.searchResults,
-    filters: state.update.filters,
+    isSearching,
+    searchResults,
+    filters,
   };
 
   return h(Searchbar, { ...props, ...rest });
