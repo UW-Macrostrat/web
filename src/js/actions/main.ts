@@ -1,4 +1,6 @@
+import fetch from "isomorphic-fetch";
 import axios from "axios";
+import { addCommas } from "../utils";
 import { SETTINGS } from "../Settings";
 
 // Define constants to be passed with actions
@@ -133,7 +135,9 @@ export function recieveData(json) {
 }
 
 function formatResponse(data) {
-  return data.map((d) => d);
+  return data.map((d) => {
+    return d;
+  });
 }
 
 export function startMapQuery(data, cancelToken) {
@@ -160,10 +164,14 @@ function addMapIdToRef(data) {
   return data;
 }
 
-export const queryMap = (lng, lat, z, map_id) => {
+export const queryMap = (lng, lat, z, map_id, column) => {
   return (dispatch) => {
     let CancelToken = axios.CancelToken;
     let source = CancelToken.source();
+
+    if (column) {
+      dispatch(getColumn(column));
+    }
 
     dispatch(startMapQuery({ lng: lng, lat: lat }, source));
     let url = `${
@@ -174,31 +182,20 @@ export const queryMap = (lng, lat, z, map_id) => {
     if (map_id) {
       url += `&map_id=${map_id}`;
     }
-    return (
-      axios
-        .get(url, {
-          cancelToken: source.token,
-          responseType: "json",
-        })
-        .then((json) => addMapIdToRef(json.data))
-        .then((json) => {
-          if (json.success.data && json.success.data.hasColumns) {
-            dispatch(getColumn());
-          }
-          return json;
-        })
-        // .then(json => shouldFetchColumn(json))
-        .then((json) => dispatch(receivedMapQuery(json.success.data)))
-
-        .catch((error) => {
-          // don't care 💁
-        })
-    );
+    return axios
+      .get(url, {
+        cancelToken: source.token,
+        responseType: "json",
+      })
+      .then((json) => addMapIdToRef(json.data))
+      .then((json) => dispatch(receivedMapQuery(json.success.data)))
+      .catch((error) => {
+        // don't care 💁
+      });
   };
 };
 
 export function shouldFetchColumn(data) {
-  console.log("shouldFetchColumn?");
   if (data.success.data && data.success.data.hasColumns) {
     getColumn();
   }
@@ -401,6 +398,72 @@ export function addFilter(theFilter) {
 
         break;
 
+      case "all_lithologies":
+        // Need to fetch the definition in the event of filter passed via the uri
+        axios
+          .get(
+            `${SETTINGS.apiDomain}/api/v2/defs/lithologies?lith_id=${theFilter.id}`,
+            {
+              responseType: "json",
+            }
+          )
+          .then((json) => {
+            let f = json.data.success.data[0];
+
+            axios
+              .get(
+                `${SETTINGS.apiDomain}/api/v2/mobile/map_filter?all_lith_id=${theFilter.id}`,
+                {
+                  responseType: "json",
+                }
+              )
+              .then((json) => {
+                dispatch({
+                  type: ADD_FILTER,
+                  filter: {
+                    category: "lithology",
+                    id: theFilter.id,
+                    type: "all_lithologies",
+                    name: f.name,
+                    legend_ids: json.data,
+                  },
+                });
+              });
+          })
+          .catch((error) => {
+            // don't care 💁
+          });
+
+        break;
+      case "all_lithology_classes":
+      case "all_lithology_types":
+        let param =
+          theFilter.type === "all_lithology_classes"
+            ? "all_lith_class"
+            : "all_lith_type";
+        axios
+          .get(
+            `${SETTINGS.apiDomain}/api/v2/mobile/map_filter?${param}=${
+              theFilter.id || theFilter.name
+            }`,
+            {
+              responseType: "json",
+            }
+          )
+          .then((json) => {
+            dispatch({
+              type: ADD_FILTER,
+              filter: {
+                category: "lithology",
+                id: 0,
+                name: theFilter.name,
+                type: theFilter.type,
+                legend_ids: json.data,
+              },
+            });
+          });
+        break;
+
       case "environments":
       case "environment_types":
       case "environment_classes":
@@ -523,10 +586,8 @@ export function startColumnQuery(cancelToken) {
   };
 }
 
-export const getColumn = () => {
+export const getColumn = (column) => {
   return (dispatch, getState) => {
-    let { infoMarkerLng, infoMarkerLat } = getState().update;
-
     let CancelToken = axios.CancelToken;
     let source = CancelToken.source();
 
@@ -534,23 +595,26 @@ export const getColumn = () => {
 
     return axios
       .get(
-        `${SETTINGS.apiDomain}/api/v2/units?response=long&lng=${infoMarkerLng}&lat=${infoMarkerLat}`,
+        `${SETTINGS.apiDomain}/api/v2/units?response=long&col_id=${column.col_id}`,
         {
           cancelToken: source.token,
           responseType: "json",
         }
       )
-      .then((json) => dispatch(receivedColumnQuery(json.data.success.data)))
+      .then((json) =>
+        dispatch(receivedColumnQuery(json.data.success.data, column))
+      )
       .catch((error) => {
         // don't care 💁
       });
   };
 };
 
-export function receivedColumnQuery(data) {
+export function receivedColumnQuery(data, column) {
   return {
     type: RECEIVED_COLUMN_QUERY,
     data: data,
+    column: column,
   };
 }
 
