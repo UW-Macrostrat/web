@@ -1,4 +1,3 @@
-import { combineReducers } from "redux";
 import {
   REQUEST_DATA,
   RECIEVE_DATA,
@@ -38,7 +37,9 @@ import {
   GOT_INITIAL_MAP_STATE,
   RESET_PBDB,
 } from "../actions";
+import { updateURI } from "../actions/map-state";
 import { sum, timescale } from "../utils";
+import { MapBackend } from "../map-page";
 
 const classColors = {
   sedimentary: "#FF8C00",
@@ -60,7 +61,7 @@ const preloadedState = {
   infoDrawerOpen: false,
   infoDrawerExpanded: false,
   elevationChartOpen: false,
-
+  mapBackend: MapBackend.MAPBOX,
   // Events and tokens for xhr
   isFetching: false,
   fetchingMapInfo: false,
@@ -109,6 +110,11 @@ const preloadedState = {
 
 const update = (state = preloadedState, action) => {
   switch (action.type) {
+    case "set-map-backend": {
+      const newState = Object.assign({}, state, { mapBackend: action.backend });
+      updateURI(newState);
+      return newState;
+    }
     case TOGGLE_MENU:
       return Object.assign({}, state, {
         menuOpen: !state.menuOpen,
@@ -143,7 +149,6 @@ const update = (state = preloadedState, action) => {
       });
     case ADD_FILTER:
       let alreadyHasFiter = false;
-      console.log("reduce ADD_FILTER", state.filters, action.filter);
       state.filters.forEach((filter) => {
         if (
           filter.name === action.filter.name &&
@@ -152,7 +157,6 @@ const update = (state = preloadedState, action) => {
           alreadyHasFiter = true;
         }
       });
-
       let fs = state.filters;
       // if incoming is 'all', remove non-'all' version
       if (action.filter.type.substr(0, 4) === "all_") {
@@ -207,7 +211,6 @@ const update = (state = preloadedState, action) => {
           if (d.name != action.filter.name) return d;
         }),
       });
-      break;
 
     case START_MAP_QUERY:
       if (state.mapInfoCancelToken) {
@@ -621,6 +624,9 @@ const update = (state = preloadedState, action) => {
           y: action.data.y,
         },
       });
+      // This causes some hilarious problems...
+      updateURI(newState);
+      return newState;
 
     default:
       return state;
