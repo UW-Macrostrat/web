@@ -97,7 +97,7 @@ module.exports = {
     },
   },
   entry: {
-    "js/bundle": "./src/js/index.tsx",
+    "js/bundle": "./src/index.ts",
   },
   node: {
     fs: "empty",

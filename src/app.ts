@@ -1,13 +1,13 @@
 import { BrowserRouter as Router, Route, Redirect } from "react-router-dom";
 import h from "@macrostrat/hyper";
 
-import "../styles/index.styl";
-import MapPage, { MapBackend } from "./map-page";
+import MapPage, { MapBackend } from "./map-interface/map-page";
 import { Suspense } from "react";
 import loadable from "@loadable/component";
 import { Spinner } from "@blueprintjs/core";
+import "./styles/index.styl";
 
-const _ColumnPage = loadable(import("../columns"));
+const _ColumnPage = loadable(import("./columns"));
 const ColumnPage = () => h(Suspense, { fallback: h(Spinner) }, h(_ColumnPage));
 
 /*

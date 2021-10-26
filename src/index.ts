@@ -3,6 +3,7 @@ import "@blueprintjs/core/lib/css/blueprint.css";
 //https://material-ui.com/style/typography/#migration-to-typography-v2
 window.__MUI_USE_NEXT_TYPOGRAPHY_VARIANTS__ = true;
 import { FocusStyleManager } from "@blueprintjs/core";
+import h from "@macrostrat/hyper";
 
 FocusStyleManager.onlyShowFocusOnTabs();
 
@@ -11,8 +12,8 @@ import { render } from "react-dom";
 import { Provider } from "react-redux";
 import thunkMiddleware from "redux-thunk";
 import { createStore, applyMiddleware, compose } from "redux";
-import reducers from "./reducers";
-import { getInitialMapState } from "./actions";
+import reducers from "./map-interface/reducers";
+import { getInitialMapState } from "./map-interface/actions";
 import App from "./app";
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
@@ -27,9 +28,4 @@ let store = createStore(
 store.dispatch(getInitialMapState());
 
 // Render the application
-render(
-  <Provider store={store}>
-    <App />
-  </Provider>,
-  document.getElementById("react")
-);
+render(h(Provider, { store }, h(App)), document.getElementById("react"));
