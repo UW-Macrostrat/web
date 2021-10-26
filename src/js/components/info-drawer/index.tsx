@@ -17,6 +17,13 @@ import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
+import { connect } from "react-redux";
+import {
+  closeInfoDrawer,
+  expandInfoDrawer,
+  getColumn,
+  getGdd,
+} from "../../actions";
 
 // Icons
 import CloseIcon from "@material-ui/icons/Close";
@@ -26,22 +33,22 @@ import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import Typography from "@material-ui/core/Typography";
 
 // Our components
-import AgeChip from "./AgeChip";
-import MacrostratAgeChip from "./MacrostratAgeChip";
-import LithChip from "./LithChip";
-import AttrChip from "./AttrChip";
-import Reference from "./Reference";
-import MapSource from "./MapSource";
-import LongText from "./LongText";
-import PBDBCollections from "./PBDBCollections";
-import Journal from "./gdd/Journal";
+import AgeChip from "../AgeChip";
+import MacrostratAgeChip from "../MacrostratAgeChip";
+import LithChip from "../LithChip";
+import AttrChip from "../AttrChip";
+import Reference from "../Reference";
+import MapSource from "../MapSource";
+import LongText from "../LongText";
+import PBDBCollections from "../PBDBCollections";
+import Journal from "../gdd/Journal";
 
 import {
   ExpansionPanel,
   ExpansionPanelSummary,
   ExpansionPanelDetails,
-} from "./ExpansionPanel";
-import { addCommas, normalizeLng } from "../utils";
+} from "../ExpansionPanel";
+import { addCommas, normalizeLng } from "../../utils";
 
 let Divider = (props) => <div className="whitespace-divider" />;
 
@@ -892,4 +899,47 @@ class InfoDrawer extends Component {
   }
 }
 
-export default InfoDrawer;
+const mapStateToProps = (state) => {
+  return {
+    infoDrawerOpen: state.update.infoDrawerOpen,
+    infoDrawerExpanded: state.update.infoDrawerExpanded,
+    mapInfo: state.update.mapInfo,
+    fetchingMapInfo: state.update.fetchingMapInfo,
+    fetchingColumnInfo: state.update.fectchingColumnInfo,
+    fetchingGdd: state.update.fetchingGdd,
+    columnInfo: state.update.columnInfo,
+    infoMarkerLng: state.update.infoMarkerLng,
+    infoMarkerLat: state.update.infoMarkerLat,
+    gddInfo: state.update.gddInfo,
+    fetchingPbdb: state.update.fetchingPbdb,
+    pbdbData: state.update.pbdbData,
+    mapHasBedrock: state.update.mapHasBedrock,
+    mapHasSatellite: state.update.mapHasSatellite,
+    mapHasColumns: state.update.mapHasColumns,
+    mapHasFossils: state.update.mapHasFossils,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    closeInfoDrawer: () => {
+      dispatch(closeInfoDrawer());
+    },
+    expandInfoDrawer: () => {
+      dispatch(expandInfoDrawer());
+    },
+    getColumn: (lng, lat) => {
+      dispatch(getColumn(lng, lat));
+    },
+    getGdd: () => {
+      dispatch(getGdd());
+    },
+  };
+};
+
+const InfoDrawerContainer = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(InfoDrawer);
+
+export default InfoDrawerContainer;

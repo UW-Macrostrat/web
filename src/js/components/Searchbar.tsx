@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import {
   Collapse,
   Navbar,
-  Alignment,
   Button,
   Intent,
   InputGroup,
@@ -10,7 +9,7 @@ import {
 } from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
 import classNames from "classnames";
-import { useDispatch, useSelector, useStore } from "react-redux";
+import { useDispatch, useStore } from "react-redux";
 import { toggleMenu, toggleFilters, doSearch, addFilter } from "../actions";
 
 const categoryTitles = {

@@ -8,28 +8,40 @@ import {
   Button,
   ButtonGroup,
   Alignment,
-  IButtonProps,
+  ButtonProps,
+  IconName,
 } from "@blueprintjs/core";
 import { CloseableCard } from "./CloseableCard";
 import { useSelector, useDispatch } from "react-redux";
 import { MenuPanel } from "../reducers/menu";
 import AboutText from "./About";
 import { SettingsPanel } from "./settings-panel";
+import { connect } from "react-redux";
+import {
+  toggleMenu,
+  toggleBedrock,
+  toggleLines,
+  toggleSatellite,
+  toggleColumns,
+  toggleFossils,
+  toggleAbout,
+  toggleElevationChart,
+} from "../actions";
 
-type ListButtonProps = IButtonProps & {
-  icon: React.ComponentType | Pick<IButtonProps, "icon">;
+type ListButtonProps = ButtonProps & {
+  icon: React.ComponentType | IconName;
 };
 const ListButton = (props: ListButtonProps) => {
   let { icon, ...rest } = props;
   if (typeof props.icon != "string") {
     icon = h(props.icon, { size: 20 });
   }
-  return h(Button, { ...rest, icon });
+  return h(Button, { ...props, icon });
 };
 
 const MinimalButton = (props) => h(Button, { ...props, minimal: true });
 
-const TabButton = (props: IButtonProps & { tab: MenuPanel }) => {
+const TabButton = (props: ButtonProps & { tab: MenuPanel }) => {
   const { tab, ...rest } = props;
   const dispatch = useDispatch();
   const onClick = () => dispatch({ type: "set-panel", panel: tab });
@@ -150,4 +162,46 @@ const Menu = (props) => {
   );
 };
 
-export default Menu;
+const mapStateToProps = (state) => {
+  return {
+    menuOpen: state.update.menuOpen,
+    mapHasBedrock: state.update.mapHasBedrock,
+    mapHasSatellite: state.update.mapHasSatellite,
+    mapHasColumns: state.update.mapHasColumns,
+    mapHasFossils: state.update.mapHasFossils,
+    mapHasLines: state.update.mapHasLines,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    toggleMenu: () => {
+      dispatch(toggleMenu());
+    },
+    toggleBedrock: () => {
+      dispatch(toggleBedrock());
+    },
+    toggleLines: () => {
+      dispatch(toggleLines());
+    },
+    toggleSatellite: () => {
+      dispatch(toggleSatellite());
+    },
+    toggleColumns: () => {
+      dispatch(toggleColumns());
+    },
+    toggleFossils: () => {
+      dispatch(toggleFossils());
+    },
+    toggleAbout: () => {
+      dispatch(toggleAbout());
+    },
+    toggleElevationChart: () => {
+      dispatch(toggleElevationChart());
+    },
+  };
+};
+
+const MenuContainer = connect(mapStateToProps, mapDispatchToProps)(Menu);
+
+export default MenuContainer;
