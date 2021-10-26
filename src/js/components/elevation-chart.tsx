@@ -3,6 +3,8 @@ import Drawer from "@material-ui/core/Drawer";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
 import Grid from "@material-ui/core/Grid";
+import { connect } from "react-redux";
+import { toggleElevationChart, updateElevationMarker } from "../actions";
 
 import { select, mouse } from "d3-selection";
 import { scaleLinear } from "d3-scale";
@@ -264,4 +266,28 @@ class ElevationChart extends Component {
   }
 }
 
-export default ElevationChart;
+const mapStateToProps = (state) => {
+  return {
+    fetchingElevation: state.update.fetchingElevation,
+    elevationData: state.update.elevationData,
+    elevationChartOpen: state.update.elevationChartOpen,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    toggleElevationChart: () => {
+      dispatch(toggleElevationChart());
+    },
+    updateElevationMarker: (lng, lat) => {
+      dispatch(updateElevationMarker(lng, lat));
+    },
+  };
+};
+
+const ElevationChartContainer = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ElevationChart);
+
+export default ElevationChartContainer;

@@ -2,11 +2,11 @@ import React, { Suspense } from "react";
 // Import other components
 import MapContainer from "./map-view";
 import h from "@macrostrat/hyper";
-import SearchbarContainer from "../containers/SearchbarContainer";
-import MenuContainer from "../containers/MenuContainer";
-import InfoDrawerContainer from "../containers/InfoDrawerContainer";
-import FiltersContainer from "../containers/FiltersContainer";
-import ElevationChartContainer from "../containers/ElevationChartContainer";
+import Searchbar from "../components/searchbar";
+import MenuContainer from "../components/menu";
+import InfoDrawer from "../components/info-drawer";
+import FiltersContainer from "../components/filters";
+import ElevationChart from "../components/elevation-chart";
 import { ButtonGroup, Button, Spinner } from "@blueprintjs/core";
 import { useSelector, useDispatch } from "react-redux";
 import loadable from "@loadable/component";
@@ -83,14 +83,14 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
     h("div.ui", [
       h("div.left-stack", [
         h("div.panel-container", [
-          h(SearchbarContainer, null),
+          h(Searchbar, null),
           h(MenuContainer, null),
           h(FiltersContainer, null),
         ]),
         h("div.spacer"),
       ]),
-      h(InfoDrawerContainer, null),
-      h(ElevationChartContainer, null),
+      h(InfoDrawer, null),
+      h(ElevationChart, null),
     ]),
   ]);
 };

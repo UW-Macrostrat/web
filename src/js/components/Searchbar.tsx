@@ -2,14 +2,15 @@ import React, { Component } from "react";
 import {
   Collapse,
   Navbar,
-  Alignment,
   Button,
   Intent,
   InputGroup,
   Card,
 } from "@blueprintjs/core";
-import h from "react-hyperscript";
+import h from "@macrostrat/hyper";
 import classNames from "classnames";
+import { useDispatch, useStore } from "react-redux";
+import { toggleMenu, toggleFilters, doSearch, addFilter } from "../actions";
 
 const categoryTitles = {
   lithology: "Lithologies",
@@ -177,4 +178,29 @@ class Searchbar extends Component {
   }
 }
 
-export default Searchbar;
+function SearchbarContainer(props) {
+  const state = useStore().getState();
+  const dispatch = useDispatch();
+
+  const rest = {
+    toggleMenu: () => {
+      dispatch(toggleMenu());
+    },
+    toggleFilters: () => {
+      dispatch(toggleFilters());
+    },
+    doSearch: (term) => {
+      dispatch(doSearch(term));
+    },
+    addFilter: (f) => {
+      dispatch(addFilter(f));
+    },
+    isSearching: state.update.isSearching,
+    searchResults: state.update.searchResults,
+    filters: state.update.filters,
+  };
+
+  return h(Searchbar, { ...props, ...rest });
+}
+
+export default SearchbarContainer;

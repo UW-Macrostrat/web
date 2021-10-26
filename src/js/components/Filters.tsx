@@ -7,6 +7,8 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import RemoveCircleOutlineIcon from "@material-ui/icons/RemoveCircleOutline";
 import { CloseableCard } from "./CloseableCard";
+import { connect } from "react-redux";
+import { toggleFilters, removeFilter } from "../actions";
 
 class Filters extends Component {
   constructor(props) {
@@ -47,4 +49,24 @@ class Filters extends Component {
   }
 }
 
-export default Filters;
+const mapStateToProps = (state) => {
+  return {
+    filtersOpen: state.update.filtersOpen,
+    filters: state.update.filters,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    toggleFilters: () => {
+      dispatch(toggleFilters());
+    },
+    removeFilter: (f) => {
+      dispatch(removeFilter(f));
+    },
+  };
+};
+
+const FiltersContainer = connect(mapStateToProps, mapDispatchToProps)(Filters);
+
+export default FiltersContainer;
