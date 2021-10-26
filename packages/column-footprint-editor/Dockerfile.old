@@ -10,7 +10,5 @@ RUN npm install
 
 COPY . .
 
-RUN npm run build
-WORKDIR /app/dist
-
-ENTRYPOINT ["npx", "serve"]
+EXPOSE 1234
+CMD ["npm", "start"]
