@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 // Import other components
 import MapContainer from "./map-view";
 import h from "@macrostrat/hyper";
-import SearchbarContainer from "../containers/SearchbarContainer";
+import SearchbarContainer from "../components/searchbar";
 import MenuContainer from "../containers/MenuContainer";
 import InfoDrawerContainer from "../containers/InfoDrawerContainer";
 import FiltersContainer from "../containers/FiltersContainer";
