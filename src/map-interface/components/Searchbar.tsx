@@ -27,6 +27,47 @@ const sortOrder = {
   environ: 4,
   place: 5,
 };
+
+function SearchResults({ searchResults, onSelectResult }) {
+  console.log(searchResults);
+  if (searchResults == null) return null;
+  if (searchResults.length == 0) return h("p", "No results found");
+
+  const resultCategories = new Set(searchResults.map((d) => d.category));
+  // Force the results into a particular order
+  let resultCategoriesArr = Array.from(resultCategories);
+  resultCategoriesArr.sort((a: string, b: string) => {
+    return sortOrder[a] - sortOrder[b];
+  });
+
+  let categoryResults = resultCategoriesArr.map((cat) => {
+    let thisCat = searchResults.filter((f) => f.category === cat);
+    return thisCat.map((item, key) => {
+      return h(
+        "li",
+        {
+          key,
+          onClick() {
+            onSelectResult(item);
+          },
+        },
+        item.name
+      );
+    });
+  });
+
+  return h(
+    resultCategoriesArr.map((cat, i) => {
+      return (
+        <div key={`subheader-${i}`}>
+          <h3 className="searchresult-header">{categoryTitles[cat]}</h3>
+          <ul>{categoryResults[i]}</ul>
+        </div>
+      );
+    })
+  );
+}
+
 class Searchbar extends Component {
   constructor(props) {
     super(props);
@@ -72,42 +113,8 @@ class Searchbar extends Component {
   render() {
     const { toggleMenu, toggleFilters } = this.props;
     const { addFilter } = this;
-    let resultCategories = new Set(
-      this.props.searchResults.map((d) => {
-        return d.category;
-      })
-    );
-    // Force the results into a particular order
-    resultCategories = [...resultCategories].sort((a, b) => {
-      return sortOrder[a] - sortOrder[b];
-    });
 
-    let categoryResults = resultCategories.map((cat) => {
-      let thisCat = this.props.searchResults.filter((f) => {
-        if (f.category === cat) return f;
-      });
-      return thisCat.map((item, h) => {
-        return (
-          <li
-            key={h}
-            onClick={() => {
-              addFilter(item);
-            }}
-          >
-            {item.name}
-          </li>
-        );
-      });
-    });
-
-    let searchResults = resultCategories.map((cat, i) => {
-      return (
-        <div key={`subheader-${i}`}>
-          <h3 className="searchresult-header">{categoryTitles[cat]}</h3>
-          <ul>{categoryResults[i]}</ul>
-        </div>
-      );
-    });
+    const { searchResults } = this.props;
 
     let searchResultClasses = classNames(
       { hidden: this.state.searchTerm.length < 3 },
@@ -158,24 +165,34 @@ class Searchbar extends Component {
               "search-guidance"
             )}
           >
-            <h5>Available categories:</h5>
-            <ul>
-              <li>Time intervals</li>
-              <li>Lithologies</li>
-              <li>Stratigraphic Names</li>
-              <li>Environments (columns only)</li>
-              <li>Places</li>
-            </ul>
+            {h(SearchGuidance)}
           </Card>
           <Card className={searchResultClasses}>
-            {this.props.searchResults && this.props.searchResults.length
-              ? searchResults
-              : ""}
+            {h(SearchResults, {
+              searchResults,
+              onSelectResult: addFilter,
+            })}
           </Card>
         </Collapse>
       </div>
     );
   }
+}
+
+function SearchGuidance() {
+  return h(
+    "div.search-guidance",
+    <>
+      <h5>Available categories:</h5>
+      <ul>
+        <li>Time intervals</li>
+        <li>Lithologies</li>
+        <li>Stratigraphic Names</li>
+        <li>Environments (columns only)</li>
+        <li>Places</li>
+      </ul>
+    </>
+  );
 }
 
 function SearchbarContainer(props) {
