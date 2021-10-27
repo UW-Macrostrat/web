@@ -24,4 +24,4 @@
 	url = git://github.com/davenquinn/maplibre-gl-js.git
 [submodule "packages/maplibre-basic-renderer"]
 	path = packages/maplibre-basic-renderer
-	url = github.com:davenquinn/maplibre-basic-renderer.git
+	url = git://github.com/davenquinn/maplibre-basic-renderer.git
