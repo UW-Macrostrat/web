@@ -11,7 +11,7 @@ const _ColumnPage = loadable(import("./columns"));
 const ColumnPage = () => h(Suspense, { fallback: h(Spinner) }, h(_ColumnPage));
 
 const _GlobeDevPage = loadable(() =>
-  import("./map-page/cesium-view").then((d) => d.GlobeDevPage)
+  import("./map-interface/map-page/cesium-view").then((d) => d.GlobeDevPage)
 );
 
 const GlobeDevPage = () =>
