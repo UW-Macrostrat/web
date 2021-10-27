@@ -10,7 +10,8 @@
     "clean": "rm -rf dist/*",
     "deploy:steno": "npm run bundle:dist && rsync -azv --delete dist/ steno:/data/projects/macrostrat/next/web/",
     "dev": "webpack --watch",
-    "bootstrap": "npm install --workspaces"
+    "bootstrap": "npm install --workspaces",
+    "postinstall": "lerna bootstrap --hoist"
   },
   "workspaces": [
     "packages/*"
@@ -59,6 +60,7 @@
     "@macrostrat/cesium-viewer": "*",
     "@macrostrat/column-components": "*",
     "@macrostrat/hyper": "^1.4.2",
+    "@macrostrat/router-components": "^1.0.2",
     "@macrostrat/ui-components": "^1",
     "@mapbox/point-geometry": "^0.1.0",
     "@mapbox/vector-tile": "^1.3.1",
@@ -68,8 +70,8 @@
     "@types/react-redux": "^7.1.7",
     "@znemz/cesium-navigation": "^4.0.0",
     "axios": "^0.17.1",
+    "cesium": "1.81.0",
     "classnames": "^2.2.6",
-    "cesium": "1.80.0",
     "d3": "^4.13.0",
     "d3-array": "^3.1.1",
     "d3-format": "^1.4.4",

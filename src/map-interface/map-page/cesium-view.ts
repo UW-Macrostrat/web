@@ -15,7 +15,7 @@ import {
 import { ImageryLayer } from "resium";
 import { useEffect, useMemo } from "react";
 import MVTImageryProvider from "mvt-imagery-provider";
-import { mapStyle } from "./vector-style";
+import { coreStyle } from "./map-styles/core";
 import {
   getHashString,
   setHashString,
@@ -28,7 +28,7 @@ import {
 const BaseGeologyLayer = ({ enabled = true, ...rest }) => {
   const provider = useMemo(() => {
     let prov = new MVTImageryProvider({
-      style: mapStyle,
+      style: coreStyle,
       maximumZoom: 13,
       tileSize: 512,
     });
