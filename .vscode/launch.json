@@ -11,8 +11,13 @@
       "name": "Debug in Chrome",
       "sourceMaps": true,
       "disableNetworkCache": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
       "url": "http://localhost:3000",
-      "webRoot": "${workspaceFolder}"
+      "webRoot": "${workspaceFolder}",
+      "sourceMapPathOverrides": {
+        // if you override this, you MUST provide all defaults again
+        "webpack:///*": "*" // a default, catch everything else
+      }
     }
   ]
 }
