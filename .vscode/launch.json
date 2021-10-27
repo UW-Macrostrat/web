@@ -5,10 +5,25 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "trace": true,
       "type": "chrome",
       "request": "launch",
       "name": "Debug in Chrome",
+      "reAttach": true,
+      "sourceMaps": true,
+      "disableNetworkCache": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}",
+      "sourceMapPathOverrides": {
+        // if you override this, you MUST provide all defaults again
+        "webpack:///*": "*" // a default, catch everything else
+      }
+    },
+    {
+      "name": "Debug in Firefox",
+      "type": "firefox",
+      "request": "launch",
+      "reAttach": true,
       "sourceMaps": true,
       "disableNetworkCache": true,
       "outFiles": ["${workspaceFolder}/dist/**/*.js"],
