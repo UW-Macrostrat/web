@@ -2,11 +2,11 @@ import React, { Suspense } from "react";
 // Import other components
 import MapContainer from "./map-view";
 import h from "@macrostrat/hyper";
-import SearchbarContainer from "../containers/SearchbarContainer";
-import MenuContainer from "../containers/MenuContainer";
-import InfoDrawerContainer from "../containers/InfoDrawerContainer";
-import FiltersContainer from "../containers/FiltersContainer";
-import ElevationChartContainer from "../containers/ElevationChartContainer";
+import Searchbar from "../components/searchbar";
+import MenuContainer from "../components/menu";
+import InfoDrawer from "../components/info-drawer";
+import FiltersContainer from "../components/filters";
+import ElevationChart from "../components/elevation-chart";
 import { ButtonGroup, Button, Spinner } from "@blueprintjs/core";
 import { useSelector, useDispatch } from "react-redux";
 import loadable from "@loadable/component";
@@ -78,21 +78,21 @@ const MapTypeSelector = () => {
 };
 
 const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
-  return (
-    <div id="map-page">
-      <MapView backend={backend} />
-      <div className="ui">
-        <div className="left-stack">
-          <SearchbarContainer />
-          <MenuContainer />
-          <FiltersContainer />
-          <div className="spacer" />
-        </div>
-        <InfoDrawerContainer />
-        <ElevationChartContainer />
-      </div>
-    </div>
-  );
+  return h("div#map-page", [
+    h(MapView, { backend }),
+    h("div.ui", [
+      h("div.left-stack", [
+        h("div.panel-container", [
+          h(Searchbar, null),
+          h(MenuContainer, null),
+          h(FiltersContainer, null),
+        ]),
+        h("div.spacer"),
+      ]),
+      h(InfoDrawer, null),
+      h(ElevationChart, null),
+    ]),
+  ]);
 };
 
 export { MapBackend };

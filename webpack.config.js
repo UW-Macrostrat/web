@@ -97,7 +97,7 @@ module.exports = {
     },
   },
   entry: {
-    "js/bundle": "./src/js/index.tsx",
+    "js/bundle": "./src/index.ts",
   },
   node: {
     fs: "empty",
@@ -106,8 +106,9 @@ module.exports = {
     path: path.join(__dirname, "/dist/"),
     publicPath: publicURL,
     filename: "[name].js",
-    sourcePrefix: "",
+    devtoolModuleFilenameTemplate: "file:///[absolute-resource-path]",
   },
+  devtool: mode == "development" ? "source-map" : false,
   amd: {
     // Enable webpack-friendly use of require in Cesium
     toUrlUndefined: true,

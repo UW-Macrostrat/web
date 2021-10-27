@@ -1,8 +1,9 @@
 .left-stack
   max-width 34em
+  min-width 14em
   height 100vh
   display: flex
-  flex-direction: column
+  flex-direction: row
   &>div
     pointer-events: all
   .spacer
@@ -13,17 +14,35 @@
     flex-shrink 1
     display flex
     flex-direction: column
+  .panel-container > .panel
+    transition width 300ms
 
 .searchbar-holder
+  .navbar-holder
+    display: flex
+    flex-direction: row
+    .spacer
+      flex-grow 1
   transition margin 300ms
   display flex
   flex-direction column
   margin 0
   .searchbar
+    width: 100%
     background-color #fff
     border-radius 3px
     margin-bottom 0.5em
-    padding-right 5px
+    padding 0 5px
+    display flex
+    flex-direction: row
+    align-items center
+    .bp3-input-group
+      flex-grow 1
+    &>*
+      margin-right 5px
+      &:last-child
+        margin-right 0
+    
   .search-results-container
     flex-shrink 1
     .bp3-card

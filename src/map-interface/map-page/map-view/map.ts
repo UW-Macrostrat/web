@@ -1,6 +1,6 @@
 import { Component } from "react";
 import { SETTINGS } from "../../Settings";
-import { mapStyle } from "../../MapStyle";
+import { mapStyle } from "../vector-style";
 import h from "@macrostrat/hyper";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";

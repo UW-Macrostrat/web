@@ -135,6 +135,7 @@ const update = (state = preloadedState, action) => {
         infoDrawerOpen: !state.infoDrawerOpen,
         infoDrawerExpanded: false,
         columnInfo: {},
+        gddInfo: [],
       });
 
     case EXPAND_INFODRAWER:
@@ -149,11 +150,42 @@ const update = (state = preloadedState, action) => {
     case ADD_FILTER:
       let alreadyHasFiter = false;
       state.filters.forEach((filter) => {
-        if (filter.name === action.filter.name) {
+        if (
+          filter.name === action.filter.name &&
+          filter.type === action.filter.type
+        ) {
           alreadyHasFiter = true;
         }
       });
       let fs = state.filters;
+      // if incoming is 'all', remove non-'all' version
+      if (action.filter.type.substr(0, 4) === "all_") {
+        fs = fs.filter((f) => {
+          if (
+            f.type === action.filter.type.replace("all_", "") &&
+            f.id === action.filter.id &&
+            f.name === action.filter.name
+          ) {
+            // do nothing
+          } else {
+            return f;
+          }
+        });
+      }
+      // if incoming is NOT 'all', remove the 'all' version
+      else {
+        fs = fs.filter((f) => {
+          if (
+            f.type === `all_${action.filter.type}` &&
+            f.id === action.filter.id &&
+            f.name === action.filter.name
+          ) {
+            // do nothing
+          } else {
+            return f;
+          }
+        });
+      }
       if (!alreadyHasFiter) {
         fs = fs.concat([action.filter]);
       }
@@ -196,46 +228,49 @@ const update = (state = preloadedState, action) => {
         action.data.mapData = action.data.mapData.map((source) => {
           if (source.macrostrat) {
             if (source.macrostrat.liths) {
-              source.macrostrat.lith_classes = [
-                ...new Set(
-                  source.macrostrat.liths.map((lith) => {
-                    return lith.lith_class;
-                  })
-                ),
-              ].map((lith_class) => {
-                return {
-                  name: lith_class,
-                  color: classColors[lith_class],
-                };
+              let types = {};
+
+              source.macrostrat.liths.forEach((lith) => {
+                if (!types[lith.lith_type]) {
+                  types[lith.lith_type] = {
+                    name: lith.lith_type,
+                    color: classColors[lith.lith_class],
+                  };
+                }
               });
+              source.macrostrat.lith_types = Object.keys(types).map(
+                (l) => types[l]
+              );
             }
             if (source.macrostrat.environs) {
-              source.macrostrat.environ_classes = [
-                ...new Set(
-                  source.macrostrat.environs.map((environ) => {
-                    return environ.environ_class;
-                  })
-                ),
-              ].map((environ_class) => {
-                return {
-                  name: environ_class,
-                  color: classColors[environ_class],
-                };
+              let types = {};
+
+              source.macrostrat.environs.forEach((environ) => {
+                if (!types[environ.environ_type]) {
+                  types[environ.environ_type] = {
+                    name: environ.environ_type,
+                    color: classColors[environ.environ_class],
+                  };
+                }
               });
+              source.macrostrat.environ_types = Object.keys(types).map(
+                (l) => types[l]
+              );
             }
             if (source.macrostrat.econs) {
-              source.macrostrat.econ_classes = [
-                ...new Set(
-                  source.macrostrat.econs.map((econ) => {
-                    return econ.econ_class;
-                  })
-                ),
-              ].map((econ_class) => {
-                return {
-                  name: econ_class,
-                  color: classColors[econ_class],
-                };
+              let types = {};
+
+              source.macrostrat.econs.forEach((econ) => {
+                if (!types[econ.econ_type]) {
+                  types[econ.econ_type] = {
+                    name: econ.econ_type,
+                    color: classColors[econ.econ_class],
+                  };
+                }
               });
+              source.macrostrat.econ_types = Object.keys(types).map(
+                (l) => types[l]
+              );
             }
           }
 
@@ -267,6 +302,7 @@ const update = (state = preloadedState, action) => {
       });
 
       let columnSummary = {
+        ...action.column,
         max_thick: sum(action.data, "max_thick"),
         min_thick: sum(action.data, "min_thick"),
         pbdb_collections: sum(action.data, "pbdb_collections"),
