@@ -4,5 +4,4 @@ node_modules
 dist
 ai
 geologic-patterns
-package-lock.json
 .env
