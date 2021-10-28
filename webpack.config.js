@@ -43,7 +43,6 @@ const cssModuleLoader = {
 module.exports = {
   mode: mode,
   module: {
-    unknownContextCritical: false,
     rules: [
       {
         test: /\.(js|jsx|ts|tsx)$/,
