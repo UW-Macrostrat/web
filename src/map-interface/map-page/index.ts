@@ -10,9 +10,9 @@ import ElevationChart from "../components/elevation-chart";
 import { ButtonGroup, Button, Spinner } from "@blueprintjs/core";
 import { useSelector, useDispatch } from "react-redux";
 import loadable from "@loadable/component";
+//import CesiumView from "./cesium-view";
 
 const CesiumViewMod = loadable(() => import("./cesium-view"));
-
 export function CesiumView(props) {
   return h(Suspense, { fallback: h(Spinner) }, h(CesiumViewMod, props));
 }
