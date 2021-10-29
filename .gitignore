@@ -6,3 +6,5 @@ ai
 geologic-patterns
 package-lock.json
 .env
+Dockerfile
+docker-compose.yaml
