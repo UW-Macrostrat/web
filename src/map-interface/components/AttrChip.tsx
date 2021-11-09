@@ -1,29 +1,19 @@
-import React, { Component } from "react";
+import h from "@macrostrat/hyper";
 import { hexToRgb } from "../utils";
 
-class AttrChip extends Component {
-  constructor(props) {
-    super(props);
+function AttrChip(props) {
+  const { fill = null, color, name } = props;
+  let styles = {};
+  if (fill) {
+    styles["backgroundImage"] = `url('dist/img/geologic-patterns/${fill}.png')`;
   }
-
-  render() {
-    let styles = {};
-    if (this.props.fill) {
-      styles[
-        "backgroundImage"
-      ] = `url('dist/img/geologic-patterns/${this.props.fill}.png')`;
-    }
-    return (
-      <div className="lith-chip" style={styles}>
-        <div
-          className="lith-chip-inner"
-          style={{ backgroundColor: hexToRgb(this.props.color, 0.6) }}
-        >
-          {this.props.name}
-        </div>
-      </div>
-    );
-  }
+  return h("div.lith-chip", { style: { ...styles } }, [
+    h(
+      "div.lith-chip-inner",
+      { style: { backgroundColor: hexToRgb(color, 0.6) } },
+      [name]
+    ),
+  ]);
 }
 
 export default AttrChip;

@@ -1,19 +1,15 @@
-import React, { Component } from "react";
+import h from "@macrostrat/hyper";
 import { hexToRgb } from "../utils";
-class LithChip extends Component {
-  constructor(props) {
-    super(props);
-  }
-  render() {
-    return (
-      <div
-        className="lith-chip"
-        style={{ backgroundColor: hexToRgb(this.props.lith.color) }}
-      >
-        {this.props.lith.lith}
-      </div>
-    );
-  }
+
+function LithChip(props) {
+  const { lith: lith_ } = props;
+  const { color, lith } = lith_;
+
+  return h(
+    "div.lith-chip",
+    { style: { backgrounColor: hexToRgb(color, 0.6) } },
+    [lith]
+  );
 }
 
 export default LithChip;

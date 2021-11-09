@@ -15,7 +15,6 @@ function MacrostratLinkedData(props) {
   }
 
   return h("span", [
-    h(Divider),
     h(
       ExpansionPanel,
       {
@@ -61,7 +60,7 @@ function MacrostratAgeChipRenderer(props) {
   return h.if(source.macrostrat && source.macrostrat.b_age)(
     ExpansionPanel,
     {
-      title: "Age:",
+      title: "Age",
     },
     [
       h(MacrostratAgeChip, {
