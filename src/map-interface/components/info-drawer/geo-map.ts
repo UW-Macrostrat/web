@@ -40,7 +40,7 @@ function GeologicMapInfo(props) {
   const { mapInfo, bedrockExpanded, source } = props;
 
   if (!mapInfo || !mapInfo.mapData || !mapInfo.mapData.length) {
-    return "";
+    return h("div");
   }
 
   return h("span", [

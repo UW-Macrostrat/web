@@ -1,7 +1,5 @@
-import React, { Component } from "react";
-import { Icon, Card, Button } from "@blueprintjs/core";
-
-import CircularProgress from "@material-ui/core/CircularProgress";
+import { Card, Spinner } from "@blueprintjs/core";
+import h from "@macrostrat/hyper";
 import { connect } from "react-redux";
 import {
   closeInfoDrawer,
@@ -10,10 +8,6 @@ import {
   getGdd,
 } from "../../actions";
 
-import Journal from "../gdd/Journal";
-
-import { ExpansionPanel, ExpansionPanelSummary } from "./ExpansionPanel";
-import { addCommas, normalizeLng } from "../../utils";
 import { InfoDrawerHeader } from "./header";
 import { FossilCollections } from "./fossil-collections";
 import { GeologicMapInfo } from "./geo-map";
@@ -22,154 +16,86 @@ import { RegionalStratigraphy } from "./reg-strat";
 import { Physiography } from "./physiography";
 import { GddExpansion } from "./gdd";
 
-let Divider = (props) => <div className="whitespace-divider" />;
+function InfoDrawer(props) {
+  const {
+    mapHasBedrock,
+    mapHasColumns,
+    mapHasFossils,
+    getGdd,
+    infoDrawerOpen,
+    closeInfoDrawer,
+    columnInfo,
+    ...rest
+  } = props;
+  let { mapInfo, gddInfo, pbdbData } = rest;
 
-class InfoDrawer extends Component {
-  constructor(props) {
-    super(props);
-    // Need to run this when drawer is opened
-    this.state = {
-      expanded: null,
-      bedrockExpanded: this.props.mapHasBedrock,
-      bedrockMatchExpanded: this.props.mapHasBedrock,
-      stratigraphyExpanded: this.props.mapHasColumns,
-      pbdbExpanded: this.props.mapHasFossils,
-      gddExpanded: false,
-    };
+  const openGdd = () => {
+    getGdd();
+  };
 
-    this.handleChange = (panel) => (event, expanded) => {
-      this.setState({
-        expanded: expanded ? panel : false,
-      });
-    };
-    this.collapse = (panel) => (event) => {
-      if (panel === "gdd") {
-        if (!this.state.gddExpanded) {
-          this.openGdd();
-        }
-      }
+  if (!mapInfo || !mapInfo.mapData) {
+    mapInfo = {
+      mapData: [],
     };
   }
 
-  openGdd() {
-    this.props.getGdd();
+  let source =
+    mapInfo && mapInfo.mapData && mapInfo.mapData.length
+      ? mapInfo.mapData[0]
+      : {
+          name: null,
+          descrip: null,
+          comments: null,
+          liths: [],
+          b_int: {},
+          t_int: {},
+          ref: {},
+        };
+
+  console.log("map data", mapInfo);
+
+  if (!infoDrawerOpen) {
+    return null;
   }
 
-  componentWillReceiveProps(nextProps) {
-    this.setState({
-      bedrockExpanded: nextProps.mapHasBedrock,
-      bedrockMatchExpanded: nextProps.mapHasBedrock,
-    });
-
-    if (nextProps.mapHasColumns != this.props.mapHasColumns) {
-      this.setState({
-        stratigraphyExpanded: nextProps.mapHasColumns,
-      });
-      //  this.props.getColumn()
-    }
-
-    // Reset the state when the drawer is closed
-    if (
-      nextProps.infoDrawerOpen === false &&
-      this.props.infoDrawerOpen === true
-    ) {
-      this.setState({
-        bedrockExpanded: nextProps.mapHasBedrock,
-        bedrockMatchExpanded: nextProps.mapHasBedrock,
-        stratigraphyExpanded: nextProps.mapHasColumns,
-        pbdbExpanded: nextProps.mapHasFossils,
-        gddExpanded: false,
-      });
-    }
-  }
-
-  render() {
-    const {
-      infoDrawerOpen,
-      closeInfoDrawer,
-      expandInfoDrawer,
-      infoDrawerExpanded,
-    } = this.props;
-    let { mapInfo, gddInfo, pbdbData } = this.props;
-
-    const {
-      expanded,
-      bedrockExpanded,
-      bedrockMatchExpanded,
-      stratigraphyExpanded,
-      pbdbExpanded,
-      gddExpanded,
-    } = this.state;
-
-    if (!mapInfo || !mapInfo.mapData) {
-      mapInfo = {
-        mapData: [],
-      };
-    }
-
-    let source =
-      mapInfo && mapInfo.mapData && mapInfo.mapData.length
-        ? mapInfo.mapData[0]
-        : {
-            name: null,
-            descrip: null,
-            comments: null,
-            liths: [],
-            b_int: {},
-            t_int: {},
-            ref: {},
-          };
-
-    if (!infoDrawerOpen) {
-      return null;
-    }
-
-    return (
-      <div className="infodrawer-container">
-        <Card className="infodrawer">
-          <InfoDrawerHeader
-            mapInfo={mapInfo}
-            infoMarkerLng={this.props.infoMarkerLng}
-            infoMarkerLat={this.props.infoMarkerLat}
-            onCloseClick={closeInfoDrawer}
-          />
-          <div>
-            <div
-              className={
-                this.props.fetchingMapInfo ? "infoDrawer-loading" : "hidden"
-              }
-            >
-              <CircularProgress size={50} />
-            </div>
-            <div className={this.props.fetchingMapInfo ? "hidden" : "d"}>
-              <FossilCollections data={pbdbData} expanded={pbdbExpanded} />
-              <GeologicMapInfo
-                mapInfo={mapInfo}
-                bedrockExpanded={bedrockExpanded}
-                source={source}
-              />
-              <MacrostratLinkedData
-                mapInfo={mapInfo}
-                bedrockMatchExpanded={bedrockMatchExpanded}
-                source={source}
-              />
-              <RegionalStratigraphy
-                mapInfo={mapInfo}
-                columnInfo={this.props.columnInfo}
-              />
-              <Physiography mapInfo={mapInfo} />
-              <GddExpansion
-                mapInfo={mapInfo}
-                gddInfo={gddInfo}
-                openGdd={this.openGdd}
-                fetchingGdd={this.props.fetchingGdd}
-              />
-            </div>
-          </div>
-        </Card>
-      </div>
-    );
-  }
+  return h("div.infodrawer-container", [
+    h(Card, { className: "infodrawer" }, [
+      h(InfoDrawerHeader, {
+        mapInfo,
+        infoMarkerLng: rest.infoMarkerLng,
+        infoMarkerLat: rest.infoMarkerLat,
+        onCloseClick: closeInfoDrawer,
+      }),
+      h("div.overflow-container", [
+        h(
+          "div",
+          { className: rest.fetchingMapInfo ? "infoDrawer-loading" : "hidden" },
+          [h(Spinner)]
+        ),
+        h("div", { className: rest.fetchingMapInfo ? "hidden" : "d" }, [
+          h(FossilCollections, { data: pbdbData, expanded: mapHasFossils }),
+          h(GeologicMapInfo, {
+            mapInfo,
+            bedrockExpanded: mapHasBedrock,
+            source,
+          }),
+          h(MacrostratLinkedData, {
+            mapInfo,
+            bedrockMatchExpanded: false,
+            source,
+          }),
+          h(RegionalStratigraphy, { mapInfo, columnInfo }),
+          h(Physiography, { mapInfo }),
+          h(GddExpansion, {
+            mapInfo,
+            gddInfo,
+            openGdd,
+            fetchingGdd: rest.fetchingGdd,
+          }),
+        ]),
+      ]),
+    ]),
+  ]);
 }
 
 const mapStateToProps = (state) => {
@@ -202,7 +128,7 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(expandInfoDrawer());
     },
     getColumn: (lng, lat) => {
-      dispatch(getColumn(lng, lat));
+      dispatch(getColumn(lng, lat)); // not correct
     },
     getGdd: () => {
       dispatch(getGdd());

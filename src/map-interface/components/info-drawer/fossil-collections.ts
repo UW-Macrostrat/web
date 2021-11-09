@@ -6,7 +6,7 @@ export function FossilCollections(props) {
   const { data, expanded } = props;
 
   if (!data || data.length <= 0) {
-    return "";
+    return h("div");
   }
   return h("span", [
     h(

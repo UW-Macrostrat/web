@@ -10,18 +10,17 @@ const metersToFeet = (meters, decimals = 0) => {
 export function InfoDrawerHeader(props) {
   const { mapInfo, infoMarkerLat, infoMarkerLng, onCloseClick } = props;
   const { elevation } = mapInfo;
-  if (!elevation) return "";
   return h("header", [
     h("div", [
       h(Icon, { icon: "map-marker" }),
       h("div.infodrawer-header", [
         h("div.infodrawer-header-item lnglat-container", [
           h("span.lnglat", [normalizeLng(infoMarkerLng), ", ", infoMarkerLat]),
-          h("span.z", [elevation]),
-          h("span.age-chip-ma", ["m"]),
+          h.if(elevation)("span.z", [elevation]),
+          h.if(elevation)("span.age-chip-ma", ["m"]),
           " | ",
           metersToFeet(elevation),
-          h("span.age-chip-ma", ["ft"]),
+          h.if(elevation)("span.age-chip-ma", ["ft"]),
         ]),
       ]),
     ]),

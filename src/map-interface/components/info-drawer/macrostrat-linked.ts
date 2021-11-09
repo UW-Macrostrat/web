@@ -87,7 +87,6 @@ function MatchBasis(props) {
       helpText: source.macrostrat.strat_names[0].rank_name,
     },
     [
-      h.if(source.macrostrat.strat_names.length > 1)(["..."]),
       h(Divider),
       h(Divider),
       h("p.expansion-panel-detail-header", ["All matched names:"]),
@@ -138,7 +137,7 @@ function MinorFossilCollections(props) {
   return h.if(macrostrat && macrostrat.pbdb_collections)(
     ExpansionPanel,
     {
-      title: "Fossil collections:",
+      title: "Fossil collections",
     },
     [h("div", [macrostrat.pbdb_collections])]
   );
@@ -153,7 +152,7 @@ function FossilOccs(props) {
   return h.if(macrostrat && macrostrat.pbdb_occs)(
     ExpansionPanel,
     {
-      title: "Fossil Occurences: ",
+      title: "Fossil Occurences ",
     },
     [
       h(Typography, { className: "expansion-summary-detail" }, [
@@ -166,13 +165,13 @@ function FossilOccs(props) {
 function LithsAndClasses(props) {
   const { source } = props;
   const { macrostrat } = source;
-  const { liths, lith_types } = macrostrat;
+  const { liths = null, lith_types = null } = macrostrat;
 
   if (!liths) return h("div");
 
   return h.if(liths && liths.length > 0)(
     ExpansionPanel,
-    { title: "Lithology:" },
+    { title: "Lithology" },
     [
       h(Divider),
       h("p.expansion-panel-detail-header", ["Matched lithologies: "]),
@@ -202,14 +201,14 @@ function LithsAndClasses(props) {
 function Environments(props) {
   const { source } = props;
   const { macrostrat } = source;
-  const { environs, environ_types } = macrostrat;
+  const { environs = null, environ_types = null } = macrostrat;
 
   if (!environs) return h("div");
 
   return h.if(environs && environs.length > 0)(
     ExpansionPanel,
     {
-      title: "Environment: ",
+      title: "Environment ",
     },
     [
       h(Divider),
@@ -239,13 +238,13 @@ function Environments(props) {
 function Economy(props) {
   const { source } = props;
   const { macrostrat } = source;
-  const { econs, econ_types } = macrostrat;
+  const { econs = null, econ_types = null } = macrostrat;
   if (!econs) return h("div");
 
   return h.if(econs && econs.length > 0)(
     ExpansionPanel,
     {
-      title: "Economy: ",
+      title: "Economy ",
     },
     [
       h(Divider),

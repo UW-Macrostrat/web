@@ -20,7 +20,10 @@ function RegionalStratigraphy(props) {
   const { mapInfo, columnInfo } = props;
   const { mapData, hasColumns } = mapInfo;
 
-  if (!mapData || !hasColumns) return h("div");
+  console.log("Map has columns", hasColumns);
+
+  if (!mapData || !hasColumns || Object.keys(columnInfo).length == 0)
+    return h("div");
 
   return h("span", [
     h(ExpansionPanel, {
