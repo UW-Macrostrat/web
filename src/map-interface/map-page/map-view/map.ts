@@ -199,8 +199,8 @@ class Map extends Component<MapProps, {}> {
       // Can happen on a slow connection
       if (this.map.getLayer("infoMarker")) {
         // Hide the info marker and close the info drawer
-        this.map.setLayoutProperty("infoMarker", "visibility", "none");
-        this.props.closeInfoDrawer();
+        //this.map.setLayoutProperty("infoMarker", "visibility", "none");
+        //this.props.closeInfoDrawer();
       }
     });
 
