@@ -4,132 +4,172 @@ import { addCommas } from "../utils";
 import { SETTINGS } from "../Settings";
 
 // Define constants to be passed with actions
-export const PAGE_CLICK = "PAGE_CLICK";
-export const RECIEVE_DATA = "RECIEVE_DATA";
-export const REQUEST_DATA = "REQUEST_DATA";
+type PAGE_CLICK = { type: "page-click" };
+type RECIEVE_DATA = { type: "recieve-data" };
+type REQUEST_DATA = { type: "request-data" };
 
-export const TOGGLE_MENU = "TOGGLE_MENU";
-export const TOGGLE_ABOUT = "TOGGLE_ABOUT";
-export const TOGGLE_INFODRAWER = "TOGGLE_INFODRAWER";
-export const EXPAND_INFODRAWER = "EXPAND_INFODRAWER";
-export const CLOSE_INFODRAWER = "CLOSE_INFODRAWER";
-export const TOGGLE_ELEVATION_CHART = "TOGGLE_ELEVATION_CHART";
+type TOGGLE_MENU = { type: "toggle-menu" };
+type TOGGLE_ABOUT = { type: "toggle-about" };
+type TOGGLE_INFODRAWER = { type: "toggle-infodrawer" };
+type EXPAND_INFODRAWER = { type: "expand-infodrawer" };
+type CLOSE_INFODRAWER = { type: "close-infodrawer" };
+type TOGGLE_ELEVATION_CHART = { type: "toggle-elevation-chart" };
 
-export const TOGGLE_FILTERS = "TOGGLE_FILTERS";
-export const ADD_FILTER = "ADD_FILTER";
-export const REMOVE_FILTER = "REMOVE_FILTER";
-export const UPDATE_COLUMN_FILTERS = "UPDATE_COLUMN_FILTERS";
+type TOGGLE_FILTERS = { type: "toggle-filters" };
+type ADD_FILTER = { type: "add-filter" };
+type REMOVE_FILTER = { type: "remove-filter" };
+type UPDATE_COLUMN_FILTERS = { type: "update-column-filters" };
 
-export const START_MAP_QUERY = "START_MAP_QUERY";
-export const RECEIVED_MAP_QUERY = "RECEIVED_MAP_QUERY";
+type START_MAP_QUERY = { type: "start-map-query" };
+type RECEIVED_MAP_QUERY = { type: "received-map-query" };
 
-export const START_COLUMN_QUERY = "START_COLUMN_QUERY";
-export const RECEIVED_COLUMN_QUERY = "RECEIVED_COLUMN_QUERY";
+type START_COLUMN_QUERY = { type: "start-column-query" };
+type RECEIVED_COLUMN_QUERY = { type: "received-column-query" };
 
-export const START_GDD_QUERY = "START_GDD_QUERY";
-export const RECEIVED_GDD_QUERY = "RECEIVED_GDD_QUERY";
+type START_GDD_QUERY = { type: "start-gdd-query" };
+type RECEIVED_GDD_QUERY = { type: "received-gdd-query" };
 
-export const START_PBDB_QUERY = "START_PBDB_QUERY";
-export const UPDATE_PBDB_QUERY = "UPDATE_PBDB_QUERY";
-export const RECEIVED_PBDB_QUERY = "RECEIVED_PBDB_QUERY";
-export const RESET_PBDB = "RESET_PBDB";
+type START_PBDB_QUERY = { type: "start-pbdb-query" };
+type UPDATE_PBDB_QUERY = { type: "update-pbdb-query" };
+type RECEIVED_PBDB_QUERY = { type: "received-pbdb-query" };
+type RESET_PBDB = { type: "reset-pbdb" };
 
-export const TOGGLE_BEDROCK = "TOGGLE_BEDROCK";
-export const TOGGLE_LINES = "TOGGLE_LINES";
-export const TOGGLE_SATELLITE = "TOGGLE_SATELLITE";
-export const TOGGLE_COLUMNS = "TOGGLE_COLUMNS";
-export const TOGGLE_FOSSILS = "TOGGLE_FOSSILS";
+type TOGGLE_BEDROCK = { type: "toggle-bedrock" };
+type TOGGLE_LINES = { type: "toggle-lines" };
+type TOGGLE_SATELLITE = { type: "toggle-satellite" };
+type TOGGLE_COLUMNS = { type: "toggle-columns" };
+type TOGGLE_FOSSILS = { type: "toggle-fossils" };
 
-export const START_SEARCH_QUERY = "START_SEARCH_QUERY";
-export const RECEIVED_SEARCH_QUERY = "RECEIVED_SEARCH_QUERY";
-export const GO_TO_PLACE = "GO_TO_PLACE";
+type START_SEARCH_QUERY = { type: "start-search-query" };
+type RECEIVED_SEARCH_QUERY = { type: "received-search-query" };
+type GO_TO_PLACE = { type: "go-to-place" };
 
-export const START_ELEVATION_QUERY = "START_ELEVATION_QUERY";
-export const RECEIVED_ELEVATION_QUERY = "RECEIVED_ELEVATION_QUERY";
-export const UPDATE_ELEVATION_MARKER = "UPDATE_ELEVATION_MARKER";
+type START_ELEVATION_QUERY = { type: "start-elevation-query" };
+type RECEIVED_ELEVATION_QUERY = { type: "received-elevation-query" };
+type UPDATE_ELEVATION_MARKER = { type: "update-elevation-marker" };
 
-export const SET_ACTIVE_INDEX_MAP = "SET_ACTIVE_INDEX_MAP";
+type SET_ACTIVE_INDEX_MAP = { type: "set-active-index-map" };
 
-export const MAP_MOVED = "MAP_MOVED";
-export const GET_INITIAL_MAP_STATE = "GET_INITIAL_MAP_STATE";
-export const GOT_INITIAL_MAP_STATE = "GOT_INITIAL_MAP_STATE";
+type MAP_MOVED = { type: "map-moved" };
+type GET_INITIAL_MAP_STATE = { type: "get-initial-map-state" };
+type GOT_INITIAL_MAP_STATE = { type: "got-initial-map-state" };
+
+export type Action =
+  | PAGE_CLICK
+  | RECIEVE_DATA
+  | REQUEST_DATA
+  | TOGGLE_MENU
+  | TOGGLE_ABOUT
+  | TOGGLE_INFODRAWER
+  | EXPAND_INFODRAWER
+  | CLOSE_INFODRAWER
+  | TOGGLE_ELEVATION_CHART
+  | TOGGLE_FILTERS
+  | ADD_FILTER
+  | REMOVE_FILTER
+  | UPDATE_COLUMN_FILTERS
+  | START_MAP_QUERY
+  | RECEIVED_MAP_QUERY
+  | START_COLUMN_QUERY
+  | RECEIVED_COLUMN_QUERY
+  | START_GDD_QUERY
+  | RECEIVED_GDD_QUERY
+  | START_PBDB_QUERY
+  | UPDATE_PBDB_QUERY
+  | RECEIVED_PBDB_QUERY
+  | RESET_PBDB
+  | TOGGLE_BEDROCK
+  | TOGGLE_LINES
+  | TOGGLE_SATELLITE
+  | TOGGLE_COLUMNS
+  | TOGGLE_FOSSILS
+  | START_SEARCH_QUERY
+  | RECEIVED_SEARCH_QUERY
+  | GO_TO_PLACE
+  | START_ELEVATION_QUERY
+  | RECEIVED_ELEVATION_QUERY
+  | UPDATE_ELEVATION_MARKER
+  | SET_ACTIVE_INDEX_MAP
+  | MAP_MOVED
+  | GET_INITIAL_MAP_STATE
+  | GOT_INITIAL_MAP_STATE;
 
 // Define action functions
 export const toggleMenu = () => {
   return {
-    type: TOGGLE_MENU,
+    type: "toggle-menu",
   };
 };
 export const toggleAbout = () => {
   return {
-    type: TOGGLE_ABOUT,
+    type: "toggle-about",
   };
 };
 export const toggleInfoDrawer = () => {
   return {
-    type: TOGGLE_INFODRAWER,
+    type: "toggle-infodrawer",
   };
 };
 export const closeInfoDrawer = () => {
   return {
-    type: CLOSE_INFODRAWER,
+    type: "close-infodrawer",
   };
 };
 export const expandInfoDrawer = () => {
   return {
-    type: EXPAND_INFODRAWER,
+    type: "expand-infodrawer",
   };
 };
 export const toggleFilters = () => {
   return {
-    type: TOGGLE_FILTERS,
+    type: "toggle-filters",
   };
 };
 
 export const toggleBedrock = () => {
   return {
-    type: TOGGLE_BEDROCK,
+    type: "toggle-bedrock",
   };
 };
 
 export const toggleLines = () => {
   return {
-    type: TOGGLE_LINES,
+    type: "toggle-lines",
   };
 };
 
 export const toggleElevationChart = () => {
   return {
-    type: TOGGLE_ELEVATION_CHART,
+    type: "toggle-elevation-chart",
   };
 };
 
 export const toggleSatellite = () => {
   return {
-    type: TOGGLE_SATELLITE,
+    type: "toggle-satellite",
   };
 };
 export const toggleColumns = () => {
   return {
-    type: TOGGLE_COLUMNS,
+    type: "toggle-columns",
   };
 };
 
 export const toggleFossils = () => {
   return {
-    type: TOGGLE_FOSSILS,
+    type: "toggle-fossils",
   };
 };
 
 export function requestData() {
   return {
-    type: REQUEST_DATA,
+    type: "request-data",
   };
 }
 
 export function recieveData(json) {
   return {
-    type: RECIEVE_DATA,
+    type: "recieve-data",
     data: json,
   };
 }
@@ -142,7 +182,7 @@ function formatResponse(data) {
 
 export function startMapQuery(data, cancelToken) {
   return {
-    type: START_MAP_QUERY,
+    type: "start-map-query",
     lng: data.lng,
     lat: data.lat,
     cancelToken: cancelToken,
@@ -151,7 +191,7 @@ export function startMapQuery(data, cancelToken) {
 
 export function receivedMapQuery(data) {
   return {
-    type: RECEIVED_MAP_QUERY,
+    type: "received-map-query",
     data: data,
   };
 }
@@ -204,7 +244,7 @@ export function shouldFetchColumn(data) {
 
 export function startSearchQuery(term, cancelToken) {
   return {
-    type: START_SEARCH_QUERY,
+    type: "start-search-query",
     term: term,
     cancelToken: cancelToken,
   };
@@ -234,7 +274,7 @@ export const doSearch = (term) => {
 
 export function receivedSearchQuery(data) {
   return {
-    type: RECEIVED_SEARCH_QUERY,
+    type: "received-search-query",
     data: data,
   };
 }
@@ -246,7 +286,7 @@ export function addFilter(theFilter) {
     switch (theFilter.type) {
       case "place":
         dispatch({
-          type: GO_TO_PLACE,
+          type: "go-to-place",
           place: theFilter,
         });
         break;
@@ -271,7 +311,7 @@ export function addFilter(theFilter) {
               )
               .then((json) => {
                 dispatch({
-                  type: ADD_FILTER,
+                  type: "add-filter",
                   filter: {
                     category: "strat_name",
                     id: theFilter.id,
@@ -304,7 +344,7 @@ export function addFilter(theFilter) {
               )
               .then((json) => {
                 dispatch({
-                  type: ADD_FILTER,
+                  type: "add-filter",
                   filter: {
                     category: "strat_name",
                     id: theFilter.id,
@@ -334,7 +374,7 @@ export function addFilter(theFilter) {
             f.id = theFilter.id;
 
             dispatch({
-              type: ADD_FILTER,
+              type: "add-filter",
               filter: f,
             });
           })
@@ -348,7 +388,7 @@ export function addFilter(theFilter) {
         // for some reason when loading from the uri this tiny timeout is required
         setTimeout(() => {
           dispatch({
-            type: ADD_FILTER,
+            type: "add-filter",
             filter: {
               category: "lithology",
               id: 0,
@@ -381,7 +421,7 @@ export function addFilter(theFilter) {
               )
               .then((json) => {
                 dispatch({
-                  type: ADD_FILTER,
+                  type: "add-filter",
                   filter: {
                     category: "lithology",
                     id: theFilter.id,
@@ -419,7 +459,7 @@ export function addFilter(theFilter) {
               )
               .then((json) => {
                 dispatch({
-                  type: ADD_FILTER,
+                  type: "add-filter",
                   filter: {
                     category: "lithology",
                     id: theFilter.id,
@@ -452,7 +492,7 @@ export function addFilter(theFilter) {
           )
           .then((json) => {
             dispatch({
-              type: ADD_FILTER,
+              type: "add-filter",
               filter: {
                 category: "lithology",
                 id: 0,
@@ -468,7 +508,7 @@ export function addFilter(theFilter) {
       case "environment_types":
       case "environment_classes":
         dispatch({
-          type: ADD_FILTER,
+          type: "add-filter",
           filter: theFilter,
         });
         break;
@@ -565,7 +605,7 @@ export function getFilteredColumns(providedFilters) {
       )
       .then((json) => {
         dispatch({
-          type: UPDATE_COLUMN_FILTERS,
+          type: "update-column-filters",
           columns: json.data,
         });
       });
@@ -574,14 +614,14 @@ export function getFilteredColumns(providedFilters) {
 
 export function removeFilter(theFilter) {
   return {
-    type: REMOVE_FILTER,
+    type: "remove-filter",
     filter: theFilter,
   };
 }
 
 export function startColumnQuery(cancelToken) {
   return {
-    type: START_COLUMN_QUERY,
+    type: "start-column-query",
     cancelToken: cancelToken,
   };
 }
@@ -612,7 +652,7 @@ export const getColumn = (column) => {
 
 export function receivedColumnQuery(data, column) {
   return {
-    type: RECEIVED_COLUMN_QUERY,
+    type: "received-column-query",
     data: data,
     column: column,
   };
@@ -620,7 +660,7 @@ export function receivedColumnQuery(data, column) {
 
 export function startGddQuery(cancelToken) {
   return {
-    type: START_GDD_QUERY,
+    type: "start-gdd-query",
     cancelToken: cancelToken,
   };
 }
@@ -661,14 +701,14 @@ export const getGdd = () => {
 
 export function receivedGddQuery(data) {
   return {
-    type: RECEIVED_GDD_QUERY,
+    type: "received-gdd-query",
     data: data,
   };
 }
 
 export function startElevationQuery(cancelToken) {
   return {
-    type: START_ELEVATION_QUERY,
+    type: "start-elevation-query",
     cancelToken: cancelToken,
   };
 }
@@ -697,14 +737,14 @@ export const getElevation = (line) => {
 
 export function receivedElevationQuery(data) {
   return {
-    type: RECEIVED_ELEVATION_QUERY,
+    type: "received-elevation-query",
     data: data,
   };
 }
 
 export function updateElevationMarker(lng, lat) {
   return {
-    type: UPDATE_ELEVATION_MARKER,
+    type: "update-elevation-marker",
     lng: lng,
     lat: lat,
   };
@@ -712,21 +752,21 @@ export function updateElevationMarker(lng, lat) {
 
 export function startPbdbQuery(cancelToken) {
   return {
-    type: START_PBDB_QUERY,
+    type: "start-pbdb-query",
     cancelToken: cancelToken,
   };
 }
 
 export function updatePbdbQuery(cancelToken) {
   return {
-    type: UPDATE_PBDB_QUERY,
+    type: "update-pbdb-query",
     cancelToken: cancelToken,
   };
 }
 
 export const resetPbdb = () => {
   return {
-    type: RESET_PBDB,
+    type: "reset-pbdb",
   };
 };
 
@@ -789,21 +829,21 @@ export const getPBDB = (collection_nos) => {
 
 export function receivedPbdbQuery(data) {
   return {
-    type: RECEIVED_PBDB_QUERY,
+    type: "received-pbdb-query",
     data: data,
   };
 }
 
 export function mapMoved(data) {
   return {
-    type: MAP_MOVED,
+    type: "map-moved",
     data: data,
   };
 }
 
 export function gotInitialMapState(mapState) {
   return {
-    type: GOT_INITIAL_MAP_STATE,
+    type: "got-initial-map-state",
     data: mapState,
   };
 }
