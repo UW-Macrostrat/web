@@ -10,7 +10,13 @@ import {
 import h from "@macrostrat/hyper";
 import classNames from "classnames";
 import { useDispatch, useSelector, useStore } from "react-redux";
-import { toggleMenu, toggleFilters, doSearch, addFilter } from "../actions";
+import {
+  toggleMenu,
+  toggleFilters,
+  doSearch,
+  addFilter,
+  useActionDispatch,
+} from "../actions";
 
 const categoryTitles = {
   lithology: "Lithologies",
@@ -200,14 +206,14 @@ function SearchbarContainer(props) {
   const { isSearching, searchResults, filters } = useSelector(
     (state) => state.update
   );
-  const dispatch = useDispatch();
+  const dispatch = useActionDispatch();
 
   const rest = {
     toggleMenu: () => {
-      dispatch(toggleMenu());
+      dispatch({ type: "toggle-menu" });
     },
     toggleFilters: () => {
-      dispatch(toggleFilters());
+      dispatch({ type: "toggle-filters" });
     },
     doSearch: (term) => {
       dispatch(doSearch(term));

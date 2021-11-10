@@ -2,6 +2,7 @@ import fetch from "isomorphic-fetch";
 import axios from "axios";
 import { addCommas } from "../utils";
 import { SETTINGS } from "../Settings";
+import { useDispatch } from "react-redux";
 
 // Define constants to be passed with actions
 type PAGE_CLICK = { type: "page-click" };
@@ -40,7 +41,11 @@ type TOGGLE_SATELLITE = { type: "toggle-satellite" };
 type TOGGLE_COLUMNS = { type: "toggle-columns" };
 type TOGGLE_FOSSILS = { type: "toggle-fossils" };
 
-type START_SEARCH_QUERY = { type: "start-search-query" };
+type START_SEARCH_QUERY = {
+  type: "start-search-query";
+  term: string;
+  cancelToken: any;
+};
 type RECEIVED_SEARCH_QUERY = { type: "received-search-query" };
 type GO_TO_PLACE = { type: "go-to-place" };
 
@@ -242,20 +247,17 @@ export function shouldFetchColumn(data) {
   return data;
 }
 
-export function startSearchQuery(term, cancelToken) {
-  return {
-    type: "start-search-query",
-    term: term,
-    cancelToken: cancelToken,
-  };
-}
-
 export const doSearch = (term) => {
+  // This function is dumb
   return (dispatch) => {
     let CancelToken = axios.CancelToken;
     let source = CancelToken.source();
 
-    dispatch(startSearchQuery(term, source));
+    dispatch({
+      type: "start-search-query",
+      term: term,
+      cancelToken: source,
+    });
 
     return axios
       .get(
@@ -857,3 +859,7 @@ export function receivedGeolocationPermissions() {}
 export function goToUserLocation() {}
 
 export function wentToUserLocation() {}
+
+export function useActionDispatch(): React.Dispatch<Action> {
+  return useDispatch<React.Dispatch<Action>>();
+}
