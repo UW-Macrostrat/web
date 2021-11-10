@@ -1,53 +1,45 @@
-import React, { Component } from "react";
+import h from "@macrostrat/hyper";
 import { hexToRgb } from "../utils";
-/*
-  Takes: b_int and t_int
-*/
-class AgeChip extends Component {
-  constructor(props) {
-    super(props);
-  }
 
-  render() {
-    let tIntChip = (
-      <div
-        className="age-chip age-chip-t-int"
-        style={{ backgroundColor: hexToRgb(this.props.t_int.color, 0.8) }}
-      >
-        {this.props.t_int.int_name}
-        {this.props.t_int.t_age ? (
-          <div className="age-chip-age">
-            {this.props.t_int.b_age}
-            <span className="age-chip-ma">Ma</span>- {this.props.t_int.t_age}
-            <span className="age-chip-ma">Ma</span>
-          </div>
-        ) : (
-          ""
-        )}
-      </div>
-    );
+function IntChip(props) {
+  const { t_int } = props;
+  return h(
+    "div.age-chip age-chip-t-int",
+    {
+      style: { backgroundColor: hexToRgb(t_int.color, 0.8) },
+    },
+    [
+      t_int.int_name,
+      h.if(t_int.t_age)("span.age-chip-ma", ["Ma"]),
+      " - ",
+      t_int.t_age,
+      h("span.age-chip-ma", ["Ma"]),
+    ]
+  );
+}
 
-    return (
-      <div className="age-chip-container">
-        <div
-          className="age-chip"
-          style={{ backgroundColor: hexToRgb(this.props.b_int.color, 0.8) }}
-        >
-          {this.props.b_int.int_name || "Unknown"}
-          {this.props.b_int.b_age ? (
-            <div className="age-chip-age">
-              {this.props.b_int.b_age}
-              <span className="age-chip-ma">Ma</span> - {this.props.b_int.t_age}
-              <span className="age-chip-ma">Ma</span>
-            </div>
-          ) : (
-            ""
-          )}
-        </div>
-        {this.props.b_int.int_id != this.props.t_int.int_id ? tIntChip : ""}
-      </div>
-    );
-  }
+function AgeChip(props) {
+  const { t_int, b_int } = props;
+  return h("div.age-chip-container", [
+    h(
+      "div.age-chip",
+      {
+        style: { backgroundColor: hexToRgb(props.b_int.color, 0.8) },
+      },
+      [
+        b_int.int_name || "Unknown",
+        h.if(b_int.b_age)("div.age-chip-age", [
+          b_int.b_age,
+          h("span.age-chip-ma", ["Ma"]),
+          " -  ",
+          b_int.t_age,
+          h("span.age-chip-ma", ["Ma"]),
+        ]),
+      ]
+    ),
+
+    h.if(b_int.int_id != props.t_int.int_id)(IntChip, { t_int }),
+  ]);
 }
 
 export default AgeChip;

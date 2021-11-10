@@ -1,63 +1,31 @@
-import React, { Component } from "react";
-import IconButton from "@material-ui/core/IconButton";
-import Collapse from "@material-ui/core/Collapse";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-/*
-  Takes: b_int and t_int
-*/
-class LongText extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      expanded: false,
-    };
-    this.toggleExpand = this.toggleExpand.bind(this);
-  }
+import { useState } from "react";
+import { Button } from "@blueprintjs/core";
+import h from "@macrostrat/hyper";
 
-  toggleExpand() {
-    this.setState({ expanded: !this.state.expanded });
-  }
+function LongText(props) {
+  const [expanded, setExpanded] = useState(false);
 
-  render() {
-    const { name, text } = this.props;
-    return (
-      <div className="map-source-attr">
-        <span className="attr">{name}: </span>
-        {text.substr(0, 250)}
-        {text.length > 250 ? (
-          <span>
-            <span className={this.state.expanded ? "hidden" : ""}>...</span>
-            <span className={this.state.expanded ? "hidden" : ""}>
-              <IconButton
-                color="default"
-                aria-label="Show more"
-                onClick={this.toggleExpand}
-                classes={{ root: "long-text-button" }}
-              >
-                <ExpandMoreIcon />
-              </IconButton>
-            </span>
-            <Collapse in={this.state.expanded} timeout="auto" unmountOnExit>
-              {text.substr(250, text.length)}
-              <span className={this.state.expanded ? "" : "hidden"}>
-                <IconButton
-                  color="default"
-                  aria-label="Show more"
-                  onClick={this.toggleExpand}
-                  classes={{ root: "long-text-button" }}
-                >
-                  <ExpandLessIcon />
-                </IconButton>
-              </span>
-            </Collapse>
-          </span>
-        ) : (
-          ""
-        )}
-      </div>
-    );
-  }
+  const toggleExpand = () => {
+    setExpanded(!expanded);
+  };
+
+  let iconName: any = expanded ? "chevron-up" : "chevron-down";
+  let classname = expanded ? "hidden" : "";
+
+  const { name, text } = props;
+
+  return h("div.map-source-attr", [
+    h.if(text.length <= 250)([h("span.attr", [name, ":"]), text]),
+    h.if(text.length > 250)([
+      expanded ? text : text.substr(0, 250),
+      h("span", [
+        h(`span.${classname}`, ["..."]),
+        h(`span`, [
+          h(Button, { icon: iconName, onClick: toggleExpand, minimal: true }),
+        ]),
+      ]),
+    ]),
+  ]);
 }
 
 export default LongText;

@@ -1,35 +1,25 @@
-import React, { Component } from "react";
+import h from "@macrostrat/hyper";
 import { hexToRgb } from "../utils";
-/*
-  Takes: b_int and t_int
-*/
-class MacrostratAgeChip extends Component {
-  constructor(props) {
-    super(props);
-  }
 
-  render() {
-    let age = this.props.b_int.int_name || "Unknown";
-    if (this.props.t_int.int_name != age) {
-      age += ` - ${this.props.t_int.int_name || "Unknown"}`;
-    }
-    return (
-      <div className="age-chip-container">
-        <div
-          className="age-chip"
-          style={{ backgroundColor: hexToRgb(this.props.color, 0.8) }}
-        >
-          {age}
-
-          <div className="age-chip-age">
-            {this.props.b_age}
-            <span className="age-chip-ma">Ma</span> - {this.props.t_age}
-            <span className="age-chip-ma">Ma</span>
-          </div>
-        </div>
-      </div>
-    );
+function MacrostratAgeChip(props) {
+  const { b_int, t_int, color, b_age, t_age } = props;
+  let age = b_int.int_name || "Unknown";
+  if (t_int.int_name != age) {
+    age += ` - ${t_int.int_name || "Unknown"}`;
   }
+  return h("div.age-chip-container", [
+    h("div.age-chip", { style: { backgroundColor: hexToRgb(color, 0.8) } }, [
+      age,
+      h("div.age-chip-age", [
+        b_age,
+        ,
+        h("span.age-chip-ma", ["Ma"]),
+        " - ",
+        t_age,
+        h("span.age-chip-ma", ["Ma"]),
+      ]),
+    ]),
+  ]);
 }
 
 export default MacrostratAgeChip;
