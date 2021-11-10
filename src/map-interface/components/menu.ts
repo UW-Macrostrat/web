@@ -53,7 +53,7 @@ const LayerButton = (props: ListButtonProps & { layer: string }) => {
   const { layer, ...rest } = props;
   const active = useSelector((state) => state.update["mapHas" + layer]);
   const dispatch = useDispatch();
-  const onClick = () => dispatch({ type: "TOGGLE_" + layer.toUpperCase() });
+  const onClick = () => dispatch({ type: "toggle-" + layer.toLowerCase() });
   return h(ListButton, {
     active,
     onClick,
@@ -76,8 +76,8 @@ const LayerList = (props) => {
   const dispatch = useDispatch();
 
   const toggleElevationChart = () => {
-    dispatch({ type: "TOGGLE_MENU" });
-    dispatch({ type: "TOGGLE_ELEVATION_CHART" });
+    dispatch({ type: "toggle-menu" });
+    dispatch({ type: "toggle-elevation-chart" });
   };
 
   return h("div.menu-content", [
