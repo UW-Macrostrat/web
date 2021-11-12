@@ -564,7 +564,9 @@ const update = (state = preloadedState, action: Action) => {
           y: action.data.y,
         },
       });
-
+    case "update-state":
+      return Object.assign({}, action.state);
+      
     case "got-initial-map-state":
       const { layers = [] } = action.data;
       const mapHasSatellite = layers.includes("satellite");
@@ -596,3 +598,4 @@ const update = (state = preloadedState, action: Action) => {
 };
 
 export default update;
+export { preloadedState };

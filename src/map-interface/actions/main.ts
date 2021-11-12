@@ -1,9 +1,11 @@
-import fetch from "isomorphic-fetch";
 import axios from "axios";
-import { addCommas } from "../utils";
 import { SETTINGS } from "../Settings";
 import { useDispatch } from "react-redux";
 
+//////////// Async Actions ///////////////
+type FETCH_SEARCH_QUERY = { type: "fetch-search-query"; term: string };
+type ASYNC_ADD_FILTER = { type: "async-add-filter"; filter: any };
+type GET_FILTERED_COLUMNS = { type: "get-filtered-columns"; filter: any };
 // Define constants to be passed with actions
 type PAGE_CLICK = { type: "page-click" };
 type RECIEVE_DATA = { type: "recieve-data" };
@@ -17,20 +19,25 @@ type CLOSE_INFODRAWER = { type: "close-infodrawer" };
 type TOGGLE_ELEVATION_CHART = { type: "toggle-elevation-chart" };
 
 type TOGGLE_FILTERS = { type: "toggle-filters" };
-type ADD_FILTER = { type: "add-filter" };
+type ADD_FILTER = { type: "add-filter"; filter: any };
 type REMOVE_FILTER = { type: "remove-filter" };
-type UPDATE_COLUMN_FILTERS = { type: "update-column-filters" };
+type UPDATE_COLUMN_FILTERS = { type: "update-column-filters"; columns: any };
 
-type START_MAP_QUERY = { type: "start-map-query" };
+type START_MAP_QUERY = {
+  type: "start-map-query";
+  lng: number;
+  lat: number;
+  cancelToken: any;
+};
 type RECEIVED_MAP_QUERY = { type: "received-map-query" };
 
-type START_COLUMN_QUERY = { type: "start-column-query" };
+type START_COLUMN_QUERY = { type: "start-column-query"; cancelToken: any };
 type RECEIVED_COLUMN_QUERY = { type: "received-column-query" };
 
-type START_GDD_QUERY = { type: "start-gdd-query" };
+type START_GDD_QUERY = { type: "start-gdd-query"; cancelToken: any };
 type RECEIVED_GDD_QUERY = { type: "received-gdd-query" };
 
-type START_PBDB_QUERY = { type: "start-pbdb-query" };
+type START_PBDB_QUERY = { type: "start-pbdb-query"; cancelToken: any };
 type UPDATE_PBDB_QUERY = { type: "update-pbdb-query" };
 type RECEIVED_PBDB_QUERY = { type: "received-pbdb-query" };
 type RESET_PBDB = { type: "reset-pbdb" };
@@ -46,10 +53,13 @@ type START_SEARCH_QUERY = {
   term: string;
   cancelToken: any;
 };
-type RECEIVED_SEARCH_QUERY = { type: "received-search-query" };
-type GO_TO_PLACE = { type: "go-to-place" };
+type RECEIVED_SEARCH_QUERY = { type: "received-search-query"; data: any };
+type GO_TO_PLACE = { type: "go-to-place"; place: any };
 
-type START_ELEVATION_QUERY = { type: "start-elevation-query" };
+type START_ELEVATION_QUERY = {
+  type: "start-elevation-query";
+  cancelToken: any;
+};
 type RECEIVED_ELEVATION_QUERY = { type: "received-elevation-query" };
 type UPDATE_ELEVATION_MARKER = { type: "update-elevation-marker" };
 
@@ -58,8 +68,16 @@ type SET_ACTIVE_INDEX_MAP = { type: "set-active-index-map" };
 type MAP_MOVED = { type: "map-moved" };
 type GET_INITIAL_MAP_STATE = { type: "get-initial-map-state" };
 type GOT_INITIAL_MAP_STATE = { type: "got-initial-map-state" };
+type SET_MAP_BACKEND = { type: "set-map-backend"; backend: any };
+
+type UPDATE_STATE = { type: "update-state"; state: any };
 
 export type Action =
+  | UPDATE_STATE
+  | GET_FILTERED_COLUMNS
+  | ASYNC_ADD_FILTER
+  | SET_MAP_BACKEND
+  | FETCH_SEARCH_QUERY
   | PAGE_CLICK
   | RECIEVE_DATA
   | REQUEST_DATA
@@ -179,12 +197,6 @@ export function recieveData(json) {
   };
 }
 
-function formatResponse(data) {
-  return data.map((d) => {
-    return d;
-  });
-}
-
 export function startMapQuery(data, cancelToken) {
   return {
     type: "start-map-query",
@@ -245,284 +257,6 @@ export function shouldFetchColumn(data) {
     getColumn();
   }
   return data;
-}
-
-export const doSearch = (term) => {
-  // This function is dumb
-  return (dispatch) => {
-    let CancelToken = axios.CancelToken;
-    let source = CancelToken.source();
-
-    dispatch({
-      type: "start-search-query",
-      term: term,
-      cancelToken: source,
-    });
-
-    return axios
-      .get(
-        `${SETTINGS.apiDomain}/api/v2/mobile/autocomplete?include=interval,lithology,environ,strat_name&query=${term}`,
-        {
-          cancelToken: source.token,
-          responseType: "json",
-        }
-      )
-      .then((json) => dispatch(receivedSearchQuery(json.data.success.data)))
-      .catch((error) => {
-        // don't care 💁
-      });
-  };
-};
-
-export function receivedSearchQuery(data) {
-  return {
-    type: "received-search-query",
-    data: data,
-  };
-}
-
-export function addFilter(theFilter) {
-  return (dispatch, getState) => {
-    let { mapHasColumns, filters } = getState().update;
-
-    switch (theFilter.type) {
-      case "place":
-        dispatch({
-          type: "go-to-place",
-          place: theFilter,
-        });
-        break;
-
-      case "strat_name_concepts":
-        axios
-          .get(
-            `${SETTINGS.apiDomain}/api/v2/defs/strat_name_concepts?concept_id=${theFilter.id}`,
-            {
-              responseType: "json",
-            }
-          )
-          .then((j) => {
-            let f = j.data.success.data[0];
-
-            axios
-              .get(
-                `${SETTINGS.apiDomain}/api/v2/mobile/map_filter?concept_id=${theFilter.id}`,
-                {
-                  responseType: "json",
-                }
-              )
-              .then((json) => {
-                dispatch({
-                  type: "add-filter",
-                  filter: {
-                    category: "strat_name",
-                    id: theFilter.id,
-                    type: "strat_name_concepts",
-                    name: f.name,
-                    legend_ids: json.data,
-                  },
-                });
-              });
-          });
-
-        break;
-
-      case "strat_name_orphans":
-        axios
-          .get(
-            `${SETTINGS.apiDomain}/api/v2/defs/strat_names?strat_name_id=${theFilter.id}`,
-            {
-              responseType: "json",
-            }
-          )
-          .then((j) => {
-            let f = j.data.success.data[0];
-            axios
-              .get(
-                `${SETTINGS.apiDomain}/api/v2/mobile/map_filter?strat_name_id=${theFilter.id}`,
-                {
-                  responseType: "json",
-                }
-              )
-              .then((json) => {
-                dispatch({
-                  type: "add-filter",
-                  filter: {
-                    category: "strat_name",
-                    id: theFilter.id,
-                    type: "strat_name_orphans",
-                    name: f.strat_name_long,
-                    legend_ids: json.data,
-                  },
-                });
-              });
-          });
-
-        break;
-
-      case "intervals":
-        axios
-          .get(
-            `${SETTINGS.apiDomain}/api/v2/defs/intervals?int_id=${theFilter.id}`,
-            {
-              responseType: "json",
-            }
-          )
-          .then((json) => {
-            let f = json.data.success.data[0];
-            f.name = f.name;
-            f.type = "intervals";
-            f.category = "interval";
-            f.id = theFilter.id;
-
-            dispatch({
-              type: "add-filter",
-              filter: f,
-            });
-          })
-          .catch((error) => {
-            // don't care 💁
-          });
-        break;
-
-      case "lithology_classes":
-      case "lithology_types":
-        // for some reason when loading from the uri this tiny timeout is required
-        setTimeout(() => {
-          dispatch({
-            type: "add-filter",
-            filter: {
-              category: "lithology",
-              id: 0,
-              name: theFilter.name,
-              type: theFilter.type,
-            },
-          });
-        }, 1);
-
-        break;
-
-      case "lithologies":
-        // Need to fetch the definition in the event of filter passed via the uri
-        axios
-          .get(
-            `${SETTINGS.apiDomain}/api/v2/defs/lithologies?lith_id=${theFilter.id}`,
-            {
-              responseType: "json",
-            }
-          )
-          .then((json) => {
-            let f = json.data.success.data[0];
-
-            axios
-              .get(
-                `${SETTINGS.apiDomain}/api/v2/mobile/map_filter?lith_id=${theFilter.id}`,
-                {
-                  responseType: "json",
-                }
-              )
-              .then((json) => {
-                dispatch({
-                  type: "add-filter",
-                  filter: {
-                    category: "lithology",
-                    id: theFilter.id,
-                    type: "lithologies",
-                    name: f.name,
-                    legend_ids: json.data,
-                  },
-                });
-              });
-          })
-          .catch((error) => {
-            // don't care 💁
-          });
-
-        break;
-
-      case "all_lithologies":
-        // Need to fetch the definition in the event of filter passed via the uri
-        axios
-          .get(
-            `${SETTINGS.apiDomain}/api/v2/defs/lithologies?lith_id=${theFilter.id}`,
-            {
-              responseType: "json",
-            }
-          )
-          .then((json) => {
-            let f = json.data.success.data[0];
-
-            axios
-              .get(
-                `${SETTINGS.apiDomain}/api/v2/mobile/map_filter?all_lith_id=${theFilter.id}`,
-                {
-                  responseType: "json",
-                }
-              )
-              .then((json) => {
-                dispatch({
-                  type: "add-filter",
-                  filter: {
-                    category: "lithology",
-                    id: theFilter.id,
-                    type: "all_lithologies",
-                    name: f.name,
-                    legend_ids: json.data,
-                  },
-                });
-              });
-          })
-          .catch((error) => {
-            // don't care 💁
-          });
-
-        break;
-      case "all_lithology_classes":
-      case "all_lithology_types":
-        let param =
-          theFilter.type === "all_lithology_classes"
-            ? "all_lith_class"
-            : "all_lith_type";
-        axios
-          .get(
-            `${SETTINGS.apiDomain}/api/v2/mobile/map_filter?${param}=${
-              theFilter.id || theFilter.name
-            }`,
-            {
-              responseType: "json",
-            }
-          )
-          .then((json) => {
-            dispatch({
-              type: "add-filter",
-              filter: {
-                category: "lithology",
-                id: 0,
-                name: theFilter.name,
-                type: theFilter.type,
-                legend_ids: json.data,
-              },
-            });
-          });
-        break;
-
-      case "environments":
-      case "environment_types":
-      case "environment_classes":
-        dispatch({
-          type: "add-filter",
-          filter: theFilter,
-        });
-        break;
-
-      default:
-        console.log("i do not support that filter type", theFilter.type);
-    }
-
-    if (mapHasColumns) {
-      dispatch(getFilteredColumns(filters.concat([theFilter])));
-    }
-  };
 }
 
 export function getFilteredColumns(providedFilters) {

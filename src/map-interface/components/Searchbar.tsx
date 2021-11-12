@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState } from "react";
 import {
   Collapse,
   Navbar,
@@ -9,14 +9,7 @@ import {
 } from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
 import classNames from "classnames";
-import { useDispatch, useSelector, useStore } from "react-redux";
-import {
-  toggleMenu,
-  toggleFilters,
-  doSearch,
-  addFilter,
-  useActionDispatch,
-} from "../actions";
+import { useAppActions, useSearchState } from "../reducers";
 
 const categoryTitles = {
   lithology: "Lithologies",
@@ -35,7 +28,6 @@ const sortOrder = {
 };
 
 function SearchResults({ searchResults, onSelectResult }) {
-  console.log(searchResults);
   if (searchResults == null) return null;
   if (searchResults.length == 0) return h("p", "No results found");
 
@@ -74,115 +66,121 @@ function SearchResults({ searchResults, onSelectResult }) {
   );
 }
 
-class Searchbar extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      inputFocused: false,
-      searchTerm: "",
-    };
-    this.gainInputFocus = this.gainInputFocus.bind(this);
-    this.loseInputFocus = this.loseInputFocus.bind(this);
-    this.handleSearchInput = this.handleSearchInput.bind(this);
-    this.addFilter = this.addFilter.bind(this);
-  }
+function Searchbar(props) {
+  const runAction = useAppActions();
+  const { searchResults } = useSearchState();
 
-  gainInputFocus() {
-    //  console.log('focus')
-    this.setState({
-      inputFocused: true,
+  const [barState, setbarState] = useState({
+    inputFocused: false,
+    searchTerm: "",
+  });
+
+  const gainInputFocus = () => {
+    setbarState((prevState) => {
+      return {
+        ...prevState,
+        inputFocused: true,
+      };
     });
-  }
-  loseInputFocus() {
+  };
+  const loseInputFocus = () => {
     //  console.log('lose focus')
     // A slight timeout is required so that click actions can occur
     setTimeout(() => {
-      this.setState({
-        inputFocused: false,
+      setbarState((prevState) => {
+        return {
+          ...prevState,
+          inputFocused: false,
+        };
       });
     }, 100);
-  }
-  handleSearchInput(event) {
-    this.setState({ searchTerm: event.target.value });
+  };
+  const handleSearchInput = (event) => {
+    setbarState((prevState) => {
+      return { ...prevState, searchTerm: event.target.value };
+    });
     if (event.target.value.length <= 2) {
       return;
     }
-    this.props.doSearch(event.target.value);
-  }
-  addFilter(f) {
-    this.setState({
-      searchTerm: "",
+    runAction({ type: "fetch-search-query", term: barState.searchTerm });
+  };
+
+  const addFilter = (f) => {
+    setbarState((prevState) => {
+      return { ...prevState, searchTerm: "" };
     });
-    this.props.addFilter(f);
-  }
+    console.log("Filter", f);
+    runAction({ type: "async-add-filter", filter: f });
+  };
 
-  render() {
-    const { toggleMenu, toggleFilters } = this.props;
-    const { addFilter } = this;
+  const toggleMenu = () => {
+    runAction({ type: "toggle-menu" });
+  };
 
-    const { searchResults } = this.props;
+  const toggleFilters = () => {
+    runAction({ type: "toggle-filters" });
+  };
 
-    let searchResultClasses = classNames(
-      { hidden: this.state.searchTerm.length < 3 },
-      "search-results"
-    );
+  let searchResultClasses = classNames(
+    { hidden: barState.searchTerm.length < 3 },
+    "search-results"
+  );
 
-    let filterButton = (
-      <Button
-        disabled={false}
-        icon="filter"
-        minimal
-        aria-label="Filter"
-        intent={Intent.PRIMARY}
-        onClick={toggleFilters}
-      />
-    );
+  let filterButton = (
+    <Button
+      disabled={false}
+      icon="filter"
+      minimal
+      aria-label="Filter"
+      intent={Intent.PRIMARY}
+      onClick={toggleFilters}
+    />
+  );
 
-    return (
-      <div className="searchbar-holder">
-        <div className="navbar-holder">
-          <Navbar className="searchbar panel">
-            <InputGroup
-              large={true}
-              //leftIcon="search"
-              onChange={this.handleSearchInput}
-              onFocus={this.gainInputFocus}
-              onBlur={this.loseInputFocus}
-              placeholder="Search Macrostrat..."
-              rightElement={filterButton}
-              value={this.state.searchTerm}
-            />
-            <Button
-              icon="menu"
-              aria-label="Menu"
-              large
-              onClick={toggleMenu}
-              minimal
-            />
-          </Navbar>
-        </div>
-        <Collapse
-          isOpen={this.state.inputFocused}
-          className="search-results-container panel"
-        >
-          <Card
-            className={classNames(
-              { hidden: this.state.searchTerm.length != 0 },
-              "search-guidance"
-            )}
-          >
-            {h(SearchGuidance)}
-          </Card>
-          <Card className={searchResultClasses}>
-            {h(SearchResults, {
-              searchResults,
-              onSelectResult: addFilter,
-            })}
-          </Card>
-        </Collapse>
+  return (
+    <div className="searchbar-holder">
+      <div className="navbar-holder">
+        <Navbar className="searchbar panel">
+          <InputGroup
+            large={true}
+            //leftIcon="search"
+            onChange={handleSearchInput}
+            onFocus={gainInputFocus}
+            onBlur={loseInputFocus}
+            placeholder="Search Macrostrat..."
+            rightElement={filterButton}
+            value={barState.searchTerm}
+          />
+          <Button
+            icon="menu"
+            aria-label="Menu"
+            large
+            onClick={toggleMenu}
+            minimal
+          />
+        </Navbar>
       </div>
-    );
-  }
+      <Collapse
+        isOpen={barState.inputFocused}
+        className="search-results-container panel"
+      >
+        <Card
+          className={classNames(
+            { hidden: barState.searchTerm.length != 0 },
+            "search-guidance"
+          )}
+        >
+          {h(SearchGuidance)}
+        </Card>
+        <Card className={searchResultClasses}>
+          {h(SearchResults, {
+            searchResults,
+            onSelectResult: addFilter,
+          })}
+        </Card>
+      </Collapse>
+    </div>
+  );
 }
 
 function SearchGuidance() {
@@ -203,30 +201,8 @@ function SearchGuidance() {
 
 function SearchbarContainer(props) {
   /** A replacement for the connect component */
-  const { isSearching, searchResults, filters } = useSelector(
-    (state) => state.update
-  );
-  const dispatch = useActionDispatch();
 
-  const rest = {
-    toggleMenu: () => {
-      dispatch({ type: "toggle-menu" });
-    },
-    toggleFilters: () => {
-      dispatch({ type: "toggle-filters" });
-    },
-    doSearch: (term) => {
-      dispatch(doSearch(term));
-    },
-    addFilter: (f) => {
-      dispatch(addFilter(f));
-    },
-    isSearching,
-    searchResults,
-    filters,
-  };
-
-  return h(Searchbar, { ...props, ...rest });
+  return h(Searchbar, { ...props });
 }
 
 export default SearchbarContainer;

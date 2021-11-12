@@ -1,4 +1,4 @@
-import { addFilter, gotInitialMapState } from "./main";
+import { gotInitialMapState } from "./main";
 import { format } from "d3-format";
 import { MapBackend } from "../map-page";
 import {
@@ -121,22 +121,6 @@ function getInitialMapState() {
       // Who knows. Doesn't matter. Nothing does.
       mapState = defaultState;
     }
-
-    // if (mapState.incomingFilters && mapState.incomingFilters.length) {
-    //   mapState.incomingFilters.forEach((f) => {
-    //     // lith classes and types don't have unique IDs in macrostrat so we use the string
-    //     if (f.type === "lithology_classes" || f.type === "lithology_types") {
-    //       dispatch(
-    //         addFilter({
-    //           type: f.type,
-    //           name: f.id,
-    //         })
-    //       );
-    //     } else {
-    //       dispatch(addFilter(f));
-    //     }
-    //   });
-    // }
   };
 }
 
