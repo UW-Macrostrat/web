@@ -115,9 +115,6 @@ MultVertDirectSelect.onStop = function(state) {
 MultVertDirectSelect.onTrash = function(state) {
   // Uses number-aware sorting to make sure '9' < '10'. Comparison is reversed because we want them
   // in reverse order so that we can remove by index safely.
-  console.log("Trashing", state.feature);
-  console.log("TRASHING", state.selectedCoordPaths);
-  console.log("TRASHING", state);
   if (!state.toMoveCoordPaths) {
     //no shared vertices
     state.selectedCoordPaths

@@ -1,5 +1,5 @@
 import React, { createContext, useReducer, useEffect } from "react";
-import { fetchColumns, fetchLines, fetchProjColGroups } from "./fetch";
+import { fetchColumns, fetchLines } from "./fetch";
 
 //////////////////////// Data Types ///////////////////////
 

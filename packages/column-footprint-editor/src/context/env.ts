@@ -1,4 +1,3 @@
-
-let base = process.env.API_BASE
+let base = process.env.API_BASE;
 
 export { base };

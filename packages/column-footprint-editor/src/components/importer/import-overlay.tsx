@@ -157,7 +157,6 @@ function EditableProjects() {
     {},
     { unwrapResponse: unwrapProjects }
   );
-  console.log(data);
   if (!data) return <div></div>;
 
   const onClick = (i) => {

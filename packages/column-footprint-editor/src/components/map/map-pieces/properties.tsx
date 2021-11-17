@@ -12,9 +12,6 @@ async function propertyViewMap(
   setOpen,
   setLegendColumns
 ) {
-  console.log("MAP", map);
-  console.log("State", state);
-
   let colGroups = await fetchProjColGroups(state.project.project_id);
 
   colGroups = colorAttribute(colGroups);

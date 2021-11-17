@@ -64,12 +64,9 @@ MultVertSimpleSelect.clickOnVertex = function(state, e) {
   var point = this.map.project(e.lngLat);
   const idsAtPoint = this._ctx.api.getFeatureIdsAt(point);
   let features = idsAtPoint.map((id) => this.getFeature(id));
-
   features = features.filter((f) => f != null); // this will return the other vertix
 
-  console.log("Number of Features", features.length);
-  if (features.length > 1) {
-    console.log("You've clicked multiple vertices");
+  if (features.length > 0) {
     state.movedCoordPath = e.featureTarget.properties.coord_path;
 
     let match = [];
