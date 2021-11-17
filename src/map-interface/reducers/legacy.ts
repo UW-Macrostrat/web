@@ -418,7 +418,6 @@ const update = (state = preloadedState, action: Action) => {
         searchCancelToken: null,
       });
 
-    // Handle GDD
     case "start-gdd-query":
       // When a search is requested, cancel any pending requests first
       if (state.gddCancelToken) {
@@ -527,7 +526,6 @@ const update = (state = preloadedState, action: Action) => {
       return Object.assign({}, state, {
         filteredColumns: action.columns,
       });
-
     case "request-data":
       return Object.assign({}, state, {
         isFetching: true,
@@ -566,7 +564,7 @@ const update = (state = preloadedState, action: Action) => {
       });
     case "update-state":
       return Object.assign({}, action.state);
-      
+
     case "got-initial-map-state":
       const { layers = [] } = action.data;
       const mapHasSatellite = layers.includes("satellite");

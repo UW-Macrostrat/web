@@ -566,7 +566,8 @@ class Map extends Component<MapProps, {}> {
       if (nextProps.mapHasColumns) {
         // If filters are applied
         if (this.props.filters.length) {
-          this.props.getFilteredColumns();
+          console.log("GET FILTERED COLUMNS");
+          this.props.runAction({ type: "get-filtered-columns" });
           mapStyle.layers.forEach((layer) => {
             if (layer.source === "filteredColumns") {
               this.map.setLayoutProperty(layer.id, "visibility", "visible");

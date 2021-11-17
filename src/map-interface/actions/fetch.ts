@@ -2,6 +2,7 @@ import axios from "axios";
 import { SETTINGS } from "../Settings";
 
 let base = `${SETTINGS.apiDomain}/api/v2`;
+let basev1 = `${SETTINGS.gddDomain}/api/v1`;
 
 export const doSearchAsync = async (term, cancelToken) => {
   let url = `${base}/mobile/autocomplete?include=interval,lithology,environ,strat_name&query=${term}`;
@@ -166,4 +167,32 @@ export async function fetchFilteredColumns(providedFilters) {
   let url = `${base}/columns?format=geojson_bare&${queryString}`;
   let res = await axios.get(url, { responseType: "json" });
   return res.data;
+}
+
+export async function getAsyncGdd(mapInfo, cancelToken) {
+  if (
+    !mapInfo ||
+    !mapInfo.mapData.length ||
+    Object.keys(mapInfo.mapData[0].macrostrat).length === 0
+  ) {
+    return [];
+  }
+  let stratNames = mapInfo.mapData[0].macrostrat.strat_names
+    .map((d) => {
+      return d.rank_name;
+    })
+    .join(",");
+
+  let url = `${basev1}/excerpts?term=${stratNames}`;
+
+  const res = await axios.get(url, {
+    cancelToken: cancelToken,
+    responseType: "json",
+  });
+  try {
+    let data = res.data.success.data;
+    return data;
+  } catch (error) {
+    return [];
+  }
 }

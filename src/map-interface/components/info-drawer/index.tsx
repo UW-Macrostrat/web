@@ -1,12 +1,8 @@
 import { Card, Spinner } from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
 import { connect } from "react-redux";
-import {
-  closeInfoDrawer,
-  expandInfoDrawer,
-  getColumn,
-  getGdd,
-} from "../../actions";
+import { closeInfoDrawer, expandInfoDrawer, getColumn } from "../../actions";
+import { useAppActions } from "~/map-interface/reducers";
 
 import { InfoDrawerHeader } from "./header";
 import { FossilCollections } from "./fossil-collections";
@@ -21,16 +17,16 @@ function InfoDrawer(props) {
     mapHasBedrock,
     mapHasColumns,
     mapHasFossils,
-    getGdd,
     infoDrawerOpen,
     closeInfoDrawer,
     columnInfo,
     ...rest
   } = props;
   let { mapInfo, gddInfo, pbdbData } = rest;
+  const runAction = useAppActions();
 
   const openGdd = () => {
-    getGdd();
+    runAction({ type: "fetch-gdd" });
   };
 
   if (!mapInfo || !mapInfo.mapData) {
@@ -51,8 +47,6 @@ function InfoDrawer(props) {
           t_int: {},
           ref: {},
         };
-
-  console.log("map data", mapInfo);
 
   if (!infoDrawerOpen) {
     return null;
@@ -129,9 +123,6 @@ const mapDispatchToProps = (dispatch) => {
     },
     getColumn: (lng, lat) => {
       dispatch(getColumn(lng, lat)); // not correct
-    },
-    getGdd: () => {
-      dispatch(getGdd());
     },
   };
 };

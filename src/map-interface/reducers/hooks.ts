@@ -1,18 +1,14 @@
 import {
   Action,
   doSearchAsync,
-  fetchAllLithsFilter,
-  fetchAllLithTypes,
   fetchFilteredColumns,
-  fetchIntervalFilter,
-  fetchLithFilter,
-  stratNameConcepts,
-  stratNameOrphans,
   useActionDispatch,
+  getAsyncGdd,
 } from "../actions";
 import update from "./legacy";
 import { useSelector } from "react-redux";
 import axios from "axios";
+import { asyncFilterHandler } from "./filters";
 
 async function runAction(state, action: Action, dispatch = null) {
   switch (action.type) {
@@ -27,66 +23,24 @@ async function runAction(state, action: Action, dispatch = null) {
       });
       const data = await doSearchAsync(term, source.token);
       return runAction(state, { type: "received-search-query", data });
-    case "async-add-filter": //this is mess
+    case "fetch-gdd":
+      const { mapInfo } = state;
+      let CancelToken1 = axios.CancelToken;
+      let source1 = CancelToken1.source();
+      dispatch({
+        type: "start-gdd-query",
+        cancelToken: source1,
+      });
+      const gdd_data = await getAsyncGdd(mapInfo, source1.token);
+      return runAction(state, { type: "received-gdd-query", data: gdd_data });
+    case "async-add-filter":
       let filter = action.filter;
-      switch (filter.type) {
-        case "place":
-          return runAction(state, { type: "go-to-place", place: filter });
-        case "strat_name_concepts":
-          let f = await stratNameConcepts(filter);
-          return runAction(state, { type: "add-filter", filter: f });
-        case "strat_name_orphans":
-          let sNOFilter = await stratNameOrphans(filter);
-          return runAction(state, { type: "add-filter", filter: sNOFilter });
-        case "intervals":
-          let intervalFilter = await fetchIntervalFilter(filter);
-          return runAction(state, {
-            type: "add-filter",
-            filter: intervalFilter,
-          });
-        case "lithology_classes":
-        case "lithology_types":
-          // for some reason when loading from the uri this tiny timeout is required
-          setTimeout(() => {
-            return runAction(state, {
-              type: "add-filter",
-              filter: {
-                category: "lithology",
-                id: 0,
-                name: filter.name,
-                type: filter.type,
-              },
-            });
-          }, 1);
-          break;
-        case "lithologies":
-          let lithfilter = await fetchLithFilter(filter);
-          return runAction(state, { type: "add-filter", filter: lithfilter });
-        case "all_lithologies":
-          let allLithsFilter = await fetchAllLithsFilter(filter);
-          return runAction(state, {
-            type: "add-filter",
-            filter: allLithsFilter,
-          });
-        case "all_lithology_classes":
-        case "all_lithology_types":
-          let allLithsTypesFilter = await fetchAllLithTypes(filter);
-          return runAction(state, {
-            type: "add-filter",
-            filter: allLithsTypesFilter,
-          });
-        case "environments":
-        case "environment_types":
-        case "environment_classes":
-          return runAction(state, {
-            type: "add-filter",
-            filter: filter,
-          });
-      }
-      if (state.mapHasColumns) {
-        return runAction(state, { type: "get-filtered-columns", filter });
-      }
+      const filterAction = await asyncFilterHandler(filter);
+      return runAction(state, filterAction);
     case "get-filtered-columns":
+      if (!state.mapHasColumns) {
+        break;
+      }
       let filters_ = state.filters;
       if (!action.filter) {
         filters_ = [...filters_, action.filter];
@@ -97,7 +51,6 @@ async function runAction(state, action: Action, dispatch = null) {
         columns: filteredColumns,
       });
     default:
-      console.log(state, action);
       return update(state, action);
   }
 }

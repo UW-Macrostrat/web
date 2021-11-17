@@ -109,7 +109,6 @@ function Searchbar(props) {
     setbarState((prevState) => {
       return { ...prevState, searchTerm: "" };
     });
-    console.log("Filter", f);
     runAction({ type: "async-add-filter", filter: f });
   };
 

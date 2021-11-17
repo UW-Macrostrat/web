@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux";
 type FETCH_SEARCH_QUERY = { type: "fetch-search-query"; term: string };
 type ASYNC_ADD_FILTER = { type: "async-add-filter"; filter: any };
 type GET_FILTERED_COLUMNS = { type: "get-filtered-columns"; filter: any };
+type FETCH_GDD = { type: "fetch-gdd" };
 // Define constants to be passed with actions
 type PAGE_CLICK = { type: "page-click" };
 type RECIEVE_DATA = { type: "recieve-data" };
@@ -35,7 +36,7 @@ type START_COLUMN_QUERY = { type: "start-column-query"; cancelToken: any };
 type RECEIVED_COLUMN_QUERY = { type: "received-column-query" };
 
 type START_GDD_QUERY = { type: "start-gdd-query"; cancelToken: any };
-type RECEIVED_GDD_QUERY = { type: "received-gdd-query" };
+type RECEIVED_GDD_QUERY = { type: "received-gdd-query"; data: any };
 
 type START_PBDB_QUERY = { type: "start-pbdb-query"; cancelToken: any };
 type UPDATE_PBDB_QUERY = { type: "update-pbdb-query" };
@@ -73,6 +74,7 @@ type SET_MAP_BACKEND = { type: "set-map-backend"; backend: any };
 type UPDATE_STATE = { type: "update-state"; state: any };
 
 export type Action =
+  | FETCH_GDD
   | UPDATE_STATE
   | GET_FILTERED_COLUMNS
   | ASYNC_ADD_FILTER
@@ -259,95 +261,6 @@ export function shouldFetchColumn(data) {
   return data;
 }
 
-export function getFilteredColumns(providedFilters) {
-  return (dispatch, getState) => {
-    let { mapHasColumns, filters } = getState().update;
-
-    if (!providedFilters) {
-      providedFilters = filters;
-    }
-
-    let query = {};
-    providedFilters.forEach((f) => {
-      if (f.type === "intervals") {
-        if (query["int_id"]) {
-          query["int_id"].push(f.id);
-        } else {
-          query["int_id"] = [f.id];
-        }
-      } else if (f.type === "strat_name_concepts") {
-        if (query["strat_name_concept_id"]) {
-          query["strat_name_concept_id"].push(f.id);
-        } else {
-          query["strat_name_concept_id"] = [f.id];
-        }
-      } else if (f.type === "strat_name_orphans") {
-        if (query["strat_name_id"]) {
-          query["strat_name_id"].push(f.id);
-        } else {
-          query["strat_name_id"] = [f.id];
-        }
-      } else if (f.type === "lithology_classes") {
-        if (query["lith_class"]) {
-          query["lith_class"].push(f.name);
-        } else {
-          query["lith_class"] = [f.name];
-        }
-      } else if (f.type === "lithology_types") {
-        if (query["lith_type"]) {
-          query["lith_type"].push(f.name);
-        } else {
-          query["lith_type"] = [f.name];
-        }
-      } else if (f.type === "lithologies") {
-        if (query["lith_id"]) {
-          query["lith_id"].push(f.id);
-        } else {
-          query["lith_id"] = [f.id];
-        }
-      } else if (f.type === "environment") {
-        if (query["environ_id"]) {
-          query["environ_id"].push(f.id);
-        } else {
-          query["environ_id"] = [f.id];
-        }
-      } else if (f.type === "environment_types") {
-        if (query["environ_type"]) {
-          query["environ_type"].push(f.name);
-        } else {
-          query["environ_type"] = [f.name];
-        }
-      } else if (f.type === "environment_classes") {
-        if (query["environ_class"]) {
-          query["environ_class"].push(f.name);
-        } else {
-          query["environ_class"] = [f.name];
-        }
-      }
-    });
-
-    let queryString = Object.keys(query)
-      .map((k) => {
-        return `${k}=${query[k].join(",")}`;
-      })
-      .join("&");
-
-    axios
-      .get(
-        `${SETTINGS.apiDomain}/api/v2/columns?format=geojson_bare&${queryString}`,
-        {
-          responseType: "json",
-        }
-      )
-      .then((json) => {
-        dispatch({
-          type: "update-column-filters",
-          columns: json.data,
-        });
-      });
-  };
-}
-
 export function removeFilter(theFilter) {
   return {
     type: "remove-filter",
@@ -391,54 +304,6 @@ export function receivedColumnQuery(data, column) {
     type: "received-column-query",
     data: data,
     column: column,
-  };
-}
-
-export function startGddQuery(cancelToken) {
-  return {
-    type: "start-gdd-query",
-    cancelToken: cancelToken,
-  };
-}
-export const getGdd = () => {
-  return (dispatch, getState) => {
-    let { mapInfo } = getState().update;
-    // Cancel if there is nothing to search for
-    if (
-      !mapInfo ||
-      !mapInfo.mapData.length ||
-      Object.keys(mapInfo.mapData[0].macrostrat).length === 0
-    ) {
-      return dispatch(receivedGddQuery([]));
-    }
-    let stratNames = mapInfo.mapData[0].macrostrat.strat_names
-      .map((d) => {
-        return d.rank_name;
-      })
-      .join(",");
-
-    let CancelToken = axios.CancelToken;
-    let source = CancelToken.source();
-
-    dispatch(startGddQuery(source));
-
-    return axios
-      .get(`${SETTINGS.gddDomain}/api/v1/excerpts?term=${stratNames}`, {
-        cancelToken: source.token,
-        responseType: "json",
-      })
-      .then((json) => dispatch(receivedGddQuery(json.data.success.data)))
-      .catch((error) => {
-        // don't care 💁
-        dispatch(receivedGddQuery([]));
-      });
-  };
-};
-
-export function receivedGddQuery(data) {
-  return {
-    type: "received-gdd-query",
-    data: data,
   };
 }
 
