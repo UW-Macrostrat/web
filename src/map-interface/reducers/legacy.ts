@@ -178,6 +178,7 @@ const update = (state = preloadedState, action: Action) => {
       if (state.mapInfoCancelToken) {
         state.mapInfoCancelToken.cancel();
       }
+      console.log("MAP BEING QUERIED", action);
       return Object.assign({}, state, {
         infoMarkerLng: action.lng.toFixed(4),
         infoMarkerLat: action.lat.toFixed(4),
@@ -523,6 +524,7 @@ const update = (state = preloadedState, action: Action) => {
       });
 
     case "update-column-filters":
+      console.log("Filtered Columns", action.columns);
       return Object.assign({}, state, {
         filteredColumns: action.columns,
       });

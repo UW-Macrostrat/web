@@ -4,11 +4,23 @@ import {
   fetchFilteredColumns,
   useActionDispatch,
   getAsyncGdd,
+  asyncGetColumn,
+  asyncQueryMap,
+  asyncGetElevation,
+  asyncGetPBDBCollection,
+  asyncGetPBDBOccurences,
+  mergePBDBResponses,
 } from "../actions";
 import update from "./legacy";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import { asyncFilterHandler } from "./filters";
+
+function getCancelToken() {
+  let CancelToken = axios.CancelToken;
+  let source = CancelToken.source();
+  return source;
+}
 
 async function runAction(state, action: Action, dispatch = null) {
   switch (action.type) {
@@ -38,17 +50,94 @@ async function runAction(state, action: Action, dispatch = null) {
       const filterAction = await asyncFilterHandler(filter);
       return runAction(state, filterAction);
     case "get-filtered-columns":
-      if (!state.mapHasColumns) {
-        break;
-      }
       let filters_ = state.filters;
-      if (!action.filter) {
+      if (action.filter) {
         filters_ = [...filters_, action.filter];
       }
       let filteredColumns = await fetchFilteredColumns(filters_);
       return runAction(state, {
         type: "update-column-filters",
         columns: filteredColumns,
+      });
+    case "map-query":
+      const { lng, lat, z, map_id, column } = action;
+      console.log("MAP QUERY", lng, lat, z, map_id, column);
+      let CancelTokenMapQuery = axios.CancelToken;
+      let sourceMapQuery = CancelTokenMapQuery.source();
+      dispatch({
+        type: "start-map-query",
+        lng,
+        lat,
+        cancelToken: sourceMapQuery,
+      });
+      // if (column) {
+      //   runAction(state, { type: "get-column" });
+      // }
+      let mapData = await asyncQueryMap(
+        lng,
+        lat,
+        z,
+        map_id,
+        sourceMapQuery.token
+      );
+      console.log("MAP DATA", mapData);
+      // the infoMarker coords gets set during the above start-map-query
+      // but then gets overriden by the recieved-map-query, because that state being returned
+      // with the runAction doesn't have the coords yet.
+      // need a better way to handle these cancelTokens
+      state.infoMarkerLng = lng.toFixed(4);
+      state.infoMarkerLat = lat.toFixed(4);
+      return runAction(state, {
+        type: "received-map-query",
+        data: mapData,
+      });
+    case "get-column":
+      let CancelTokenGetColumn = axios.CancelToken;
+      let sourceGetColumn = CancelTokenGetColumn.source();
+      dispatch({ type: "start-column-query", cancelToken: sourceMapQuery });
+
+      let columnData = await asyncGetColumn(
+        action.column,
+        sourceGetColumn.token
+      );
+      return runAction(state, {
+        type: "received-column-query",
+        data: columnData,
+        column: action.column,
+      });
+    case "get-elevation":
+      let CancelTokenElevation = axios.CancelToken;
+      let sourceElevation = CancelTokenElevation.source();
+      dispatch({
+        type: "start-elevation-query",
+        cancelToken: sourceElevation.token,
+      });
+      const elevationData = await asyncGetElevation(
+        action.line,
+        sourceElevation
+      );
+      return runAction(state, {
+        type: "received-elevation-query",
+        data: elevationData,
+      });
+    case "get-pbdb":
+      let collection_nos = action.collection_nos;
+      const sourceCollection = getCancelToken();
+      const sourceOccur = getCancelToken();
+      dispatch({ type: "start-pdbd-query", cancelToken: sourceCollection });
+      const collection = await asyncGetPBDBCollection(
+        collection_nos,
+        sourceCollection.token
+      );
+      dispatch({ type: "update-pbdb-query", cancelToken: sourceOccur });
+      const occurences = await asyncGetPBDBOccurences(
+        collection_nos,
+        sourceOccur.token
+      );
+      const collections = mergePBDBResponses(occurences, collection);
+      return runAction(state, {
+        type: "received-pbdb-query",
+        data: collections,
       });
     default:
       return update(state, action);

@@ -1,7 +1,6 @@
 import { Card, Spinner } from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
 import { connect } from "react-redux";
-import { closeInfoDrawer, expandInfoDrawer, getColumn } from "../../actions";
 import { useAppActions } from "~/map-interface/reducers";
 
 import { InfoDrawerHeader } from "./header";
@@ -18,7 +17,6 @@ function InfoDrawer(props) {
     mapHasColumns,
     mapHasFossils,
     infoDrawerOpen,
-    closeInfoDrawer,
     columnInfo,
     ...rest
   } = props;
@@ -51,14 +49,13 @@ function InfoDrawer(props) {
   if (!infoDrawerOpen) {
     return null;
   }
-
   return h("div.infodrawer-container", [
     h(Card, { className: "infodrawer" }, [
       h(InfoDrawerHeader, {
         mapInfo,
         infoMarkerLng: rest.infoMarkerLng,
         infoMarkerLat: rest.infoMarkerLat,
-        onCloseClick: closeInfoDrawer,
+        onCloseClick: () => runAction({ type: "close-infodrawer" }),
       }),
       h("div.overflow-container", [
         h(
@@ -113,23 +110,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mapDispatchToProps = (dispatch) => {
-  return {
-    closeInfoDrawer: () => {
-      dispatch(closeInfoDrawer());
-    },
-    expandInfoDrawer: () => {
-      dispatch(expandInfoDrawer());
-    },
-    getColumn: (lng, lat) => {
-      dispatch(getColumn(lng, lat)); // not correct
-    },
-  };
-};
-
-const InfoDrawerContainer = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(InfoDrawer);
+const InfoDrawerContainer = connect(mapStateToProps)(InfoDrawer);
 
 export default InfoDrawerContainer;

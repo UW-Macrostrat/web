@@ -8,12 +8,11 @@ import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import RemoveCircleOutlineIcon from "@material-ui/icons/RemoveCircleOutline";
 import { CloseableCard } from "./CloseableCard";
 import { useDispatch } from "react-redux";
-import { removeFilter } from "../actions";
 import { useAppActions, useFilterState } from "../reducers";
 
 function Filter({ filter }) {
   const dispatch = useDispatch();
-  const remove = () => dispatch(removeFilter(filter));
+  const remove = () => dispatch({ type: "remove-filter", filter });
   return (
     <ListItem>
       <ListItemText primary={filter.name} />

@@ -200,7 +200,7 @@ class Map extends Component<MapProps, {}> {
       if (this.map.getLayer("infoMarker")) {
         // Hide the info marker and close the info drawer
         //this.map.setLayoutProperty("infoMarker", "visibility", "none");
-        //this.props.closeInfoDrawer();
+        //this.props.runAction({type:"close-infodrawer"});
       }
     });
 
@@ -225,7 +225,10 @@ class Map extends Component<MapProps, {}> {
           }),
         });
         if (this.elevationPoints.length === 2) {
-          this.props.getElevation(this.elevationPoints);
+          this.props.runAction({
+            type: "get-elevation",
+            line: this.elevationPoints,
+          });
           this.map.getSource("elevationLine").setData({
             type: "FeatureCollection",
             features: [
@@ -281,18 +284,20 @@ class Map extends Component<MapProps, {}> {
             .map((f) => {
               return f.properties.oid.replace("col:", "");
             });
-          this.props.getPBDB(pointsInCluster);
+          this.props.runAction({
+            type: "get-pbdb",
+            collection_nos: pointsInCluster,
+          });
 
           // Clicked on an unclustered point
         } else if (
           collections.length &&
           collections[0].properties.hasOwnProperty("oid")
         ) {
-          this.props.getPBDB(
-            collections.map((col) => {
-              return col.properties.oid.replace("col:", "");
-            })
-          );
+          let collection_nos = collections.map((col) => {
+            return col.properties.oid.replace("col:", "");
+          });
+          this.props.runAction({ type: "get-pbdb", collection_nos });
           //    return
         } else {
           // Otherwise make sure that old fossil collections aren't visible
@@ -313,18 +318,20 @@ class Map extends Component<MapProps, {}> {
           return f.properties;
         });
       if (burwellFeatures.length) {
-        this.props.queryMap(
-          event.lngLat.lng,
-          event.lngLat.lat,
-          this.map.getZoom(),
-          burwellFeatures[0].map_id
-        );
+        this.props.runAction({
+          type: "map-query",
+          lng: event.lngLat.lng,
+          lat: event.lngLat.lat,
+          z: this.map.getZoom(),
+          column: burwellFeatures[0].map_id,
+        });
       } else {
-        this.props.queryMap(
-          event.lngLat.lng,
-          event.lngLat.lat,
-          this.map.getZoom()
-        );
+        this.props.runAction({
+          type: "map-query",
+          lng: event.lngLat.lng,
+          lat: event.lngLat.lat,
+          z: this.map.getZoom(),
+        });
       }
 
       let xOffset =
@@ -462,6 +469,7 @@ class Map extends Component<MapProps, {}> {
   // and always return `false` to prevent DOM updates
   // We basically intercept the changes, handle them, and tell React to ignore them
   shouldComponentUpdate(nextProps) {
+    console.log("NEXT PROPS", nextProps);
     if (
       !nextProps.elevationMarkerLocation.length ||
       (nextProps.elevationMarkerLocation[0] !=

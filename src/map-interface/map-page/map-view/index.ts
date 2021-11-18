@@ -1,13 +1,5 @@
 import { connect } from "react-redux";
-import {
-  queryMap,
-  closeInfoDrawer,
-  getFilteredColumns,
-  getElevation,
-  getPBDB,
-  mapMoved,
-  resetPbdb,
-} from "../../actions";
+import { mapMoved, resetPbdb } from "../../actions";
 import { useAppActions } from "~/map-interface/reducers";
 import Map from "./map";
 import h from "@macrostrat/hyper";
@@ -34,26 +26,11 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    queryMap: (lng, lat, z, map_id, column) => {
-      dispatch(queryMap(lng, lat, z, map_id, column));
-    },
-    getFilteredColumns: () => {
-      dispatch(getFilteredColumns());
-    },
-    getElevation: (line) => {
-      dispatch(getElevation(line));
-    },
-    getPBDB: (collection_nos) => {
-      dispatch(getPBDB(collection_nos));
-    },
     resetPbdb: () => {
       dispatch(resetPbdb());
     },
     mapMoved: (data) => {
       dispatch(mapMoved(data));
-    },
-    closeInfoDrawer: () => {
-      dispatch(closeInfoDrawer());
     },
   };
 };

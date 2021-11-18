@@ -1,8 +1,9 @@
 import axios from "axios";
 import { SETTINGS } from "../Settings";
 
-let base = `${SETTINGS.apiDomain}/api/v2`;
-let basev1 = `${SETTINGS.gddDomain}/api/v1`;
+const base = `${SETTINGS.apiDomain}/api/v2`;
+const basev1 = `${SETTINGS.gddDomain}/api/v1`;
+const pddbURL = `${SETTINGS.pbdbDomain}/data1.2/colls/list.json`;
 
 export const doSearchAsync = async (term, cancelToken) => {
   let url = `${base}/mobile/autocomplete?include=interval,lithology,environ,strat_name&query=${term}`;
@@ -128,30 +129,27 @@ export const fetchAllLithTypes = async (filter) => {
 
 function formColumnQueryString(filters) {
   console.log("FILTERS", filters);
-  let possibleFields = [
-    { key: "intervals", value: "int_id", attr: "id" },
-    { key: "strat_name_concepts", value: "strat_name_concept_id", attr: "id" },
-    { key: "strat_name_orphans", value: "strat_name_id", attr: "id" },
-    { key: "lithology_classes", value: "lith_class", attr: "name" },
-    { key: "lithology_types", value: "lith_type", attr: "name" },
-    { key: "lithologies", value: "lith_id", attr: "id" },
-    { key: "environment", value: "environ_id", attr: "id" },
-    { key: "environment_types", value: "environ_type", attr: "name" },
-    { key: "environment_classes", value: "environ_class", attr: "name" },
-  ];
+  let possibleFields = {
+    intervals: ["int_id", "id"], // [value, attr]
+    strat_name_concepts: ["strat_name_concept_id", "id"],
+    strat_name_orphans: ["strat_name_id", "id"],
+    lithology_classes: ["lith_class", "name"],
+    lithology_types: ["lith_type", "name"],
+    lithologies: ["lith_id", "id"],
+    environment: ["environ_id", "id"],
+    environment_types: ["environ_type", "name"],
+    environment_classes: ["environ_class", "name"],
+  };
+
   let query = {};
   filters.forEach((f) => {
-    possibleFields.map((field) => {
-      if (f.type === field.key) {
-        if (query[field.value]) {
-          query[field.value].push(f[field.attr]);
-        } else {
-          query[field.value] = [f[field.attr]];
-        }
-      }
-    });
+    let [value, attr] = possibleFields[f.type];
+    if (query[value]) {
+      query[value].push(f[attr]);
+    } else {
+      query[value] = [f[attr]];
+    }
   });
-  console.log("FILTERED COLUMN QUERY", query);
   let queryString = Object.keys(query)
     .map((k) => {
       console.log("QUERY KEY", k, typeof k);
@@ -192,6 +190,107 @@ export async function getAsyncGdd(mapInfo, cancelToken) {
   try {
     let data = res.data.success.data;
     return data;
+  } catch (error) {
+    return [];
+  }
+}
+
+function addMapIdToRef(data) {
+  data.success.data.mapData = data.success.data.mapData.map((source) => {
+    source.ref.map_id = source.map_id;
+    return source;
+  });
+  return data;
+}
+
+export const asyncQueryMap = async (lng, lat, z, map_id, cancelToken) => {
+  let url = `${base}/mobile/map_query_v2?lng=${lng.toFixed(
+    5
+  )}&lat=${lat.toFixed(5)}&z=${parseInt(z)}`;
+  if (map_id) {
+    url += `map_id=${map_id}`;
+  }
+
+  let res = await axios.get(url, { cancelToken, responseType: "json" });
+  const data = addMapIdToRef(res.data).success.data;
+  return data;
+};
+
+export const asyncGetColumn = async (column, cancelToken) => {
+  let url = `${base}/units?response=long&col_id=${column.col_id}`;
+  const res = await axios.get(url, { cancelToken, responseType: "json" });
+  try {
+    return [res.data.success.data, column];
+  } catch (error) {
+    return [];
+  }
+};
+
+export const asyncGetElevation = async (line, cancelToken) => {
+  const [start_lng, start_lat] = line[0];
+  const [end_lng, end_lat] = line[1];
+
+  let params = { start_lng, start_lat, end_lng, end_lat };
+
+  let url = `${base}/elevation`;
+
+  const res = axios.get(url, {
+    cancelToken,
+    responseType: "json",
+    params: params,
+  });
+  try {
+    return (await res).data.success.data;
+  } catch (error) {
+    return [];
+  }
+};
+
+// I broke these into 3 functions so we could call the dispatch as a side effect during
+// the runAction
+export const asyncGetPBDBCollection = async (collection_nos, cancelToken) => {
+  let params = {
+    id: collection_nos.join(","),
+    show: "ref,time,strat,geo,lith,entname,prot",
+    markrefs: true,
+  };
+  const collectionResponse = await axios.get(pddbURL, {
+    cancelToken,
+    responseType: "json",
+    params,
+  });
+
+  return collectionResponse;
+};
+
+export const asyncGetPBDBOccurences = async (collection_nos, cancelToken) => {
+  let params = {
+    coll_id: collection_nos.join(","),
+    show: "phylo,ident",
+  };
+  const occurrenceResponse = await axios.get(pddbURL, {
+    cancelToken,
+    responseType: "json",
+    params,
+  });
+  return occurrenceResponse;
+};
+
+export function mergePBDBResponses(occurrenceResponse, collectionResponse) {
+  try {
+    let occurrences = occurrenceResponse.data.records;
+
+    let collections = collectionResponse.data.records.map((col) => {
+      col.occurrences = [];
+
+      occurrences.forEach((occ) => {
+        if (occ.cid === col.oid) {
+          col.occurrences.push(occ);
+        }
+      });
+      return col;
+    });
+    return collections;
   } catch (error) {
     return [];
   }

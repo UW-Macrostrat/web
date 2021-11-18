@@ -18,7 +18,6 @@ function formatVal(val: any): string | undefined {
 }
 
 function updateURI(state: any) {
-  console.log(state);
   let layers = [
     { layer: "bedrock", haz: state.mapHasBedrock },
     { layer: "lines", haz: state.mapHasLines },
@@ -45,8 +44,6 @@ function updateURI(state: any) {
   let z = fmt(state.mapXYZ.z);
   let x = fmt(state.mapXYZ.x);
   let y = fmt(state.mapXYZ.y);
-
-  console.log("Updating URI", { x, y, z });
 
   setHashString({ ...args, x, y, z }, { arrayFormat: "comma" });
 }
@@ -93,8 +90,7 @@ function getInitialMapState() {
     };
     try {
       const hashData = getHashString(window.location.hash) ?? {};
-      console.log(window.location.hash);
-      console.log(hashData);
+
       const { layers, x = 16, y = 23, z = 1.5 } = hashData;
 
       let mapState = { x, y, z, layers };
@@ -112,7 +108,6 @@ function getInitialMapState() {
       ) {
         // Sweet, it is legit
         mapState = mapState;
-        console.log("Map state is legit");
         // Augh, got to simplify this multiple dispatch situation. This should be one atomic action.
         dispatch(gotInitialMapState(mapState));
       }
