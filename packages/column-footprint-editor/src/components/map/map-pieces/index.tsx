@@ -5,7 +5,7 @@ export * from "./add-geom";
 import mapboxgl from "mapbox-gl";
 import { setWindowHash, locationFromHash } from "../utils";
 import {
-  SnapLineClosed,
+  SnapLineMode,
   MultVertDirectSelect,
   MultVertSimpleSelect,
   DrawPolygon,
@@ -56,7 +56,7 @@ function editModeMap(map, state) {
         draw_polygon: DrawPolygon,
       },
       MapboxDraw.modes,
-      { draw_line_string: SnapLineClosed }
+      { draw_line_string: SnapLineMode }
     ),
     styles: SnapModeDrawStyles,
     snap: true,

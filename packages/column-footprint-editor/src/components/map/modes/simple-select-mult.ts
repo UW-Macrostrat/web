@@ -41,7 +41,6 @@ MultVertSimpleSelect.onSetup = function(opts) {
 };
 
 MultVertSimpleSelect.fireUpdate = function() {
-  console.log("MOVING");
   this.getSelected().map((f) => {
     const action = Constants.updateActions.CHANGE_COORDINATES;
     const obj = {
@@ -58,29 +57,32 @@ MultVertSimpleSelect.fireUpdate = function() {
 
 // need to just pass off it there aren't other verticies at point
 MultVertSimpleSelect.clickOnVertex = function(state, e) {
-  console.log("mult_vert clicked vertix");
-
   // this block gets features other than the clicked one at point
   var point = this.map.project(e.lngLat);
   const idsAtPoint = this._ctx.api.getFeatureIdsAt(point);
   let features = idsAtPoint.map((id) => this.getFeature(id));
   features = features.filter((f) => f != null); // this will return the other vertix
-
+  console.log("CLICKED FEATURES", features);
   if (features.length > 0) {
-    state.movedCoordPath = e.featureTarget.properties.coord_path;
-
+    state.movedCoordPath = e.featureTarget.properties.coord_path; // "0.5" might mean first feature 4th point
     let match = [];
     let movingFeatures = [];
-    features.map((f) => {
-      if (f) {
-        let coord_path = f.coordinates.map((coord, index) => {
-          let point1 = this.map.project(coord);
-          if (distance_between_points({ point1: point, point2: point1 }) < 10) {
-            match.push(index);
-            movingFeatures.push(f);
-          }
-        });
-      }
+    features.map((fs) => {
+      // multiline string
+      fs.features.map((f, lineIndex) => {
+        // f is a linestring, line_index is which line in the multilinestring!
+        if (f) {
+          f.coordinates.map((coord, pointIndex) => {
+            let point1 = this.map.project(coord);
+            if (
+              distance_between_points({ point1: point, point2: point1 }) < 10
+            ) {
+              match.push(`${lineIndex}.${pointIndex}`);
+              movingFeatures.push(fs);
+            }
+          });
+        }
+      });
     });
     state.toMoveCoordPaths = match;
     state.toMoveFeatures = movingFeatures;
