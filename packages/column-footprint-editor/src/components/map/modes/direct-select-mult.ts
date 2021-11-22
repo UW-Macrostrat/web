@@ -67,11 +67,13 @@ MultVertDirectSelect.onDrag = function(state, e) {
   state.newCoord = newCoord;
   // different features, works for more than 2 shared vertices
   // now lists of line strings
-  state.toMoveFeatures.map((feature, index) => {
-    const path = state.toMoveCoordPaths[index];
-    let [lng, lat] = newCoord;
-    feature.updateCoordinate(path, lng, lat);
-  });
+  if (state.toMoveFeatures) {
+    state.toMoveFeatures.map((feature, index) => {
+      const path = state.toMoveCoordPaths[index];
+      let [lng, lat] = newCoord;
+      feature.updateCoordinate(path, lng, lat);
+    });
+  }
 };
 
 /**
@@ -88,7 +90,7 @@ MultVertDirectSelect.onDragChangeSetAdder = function(feature) {
 };
 
 MultVertDirectSelect.onStop = function(state) {
-  if (state.movedCoordPath) {
+  if (state.movedCoordPath && state.newCoord) {
     // different features, works for more than 2 shared vertices
     state.toMoveFeatures.map((feature, index) => {
       let path = state.toMoveCoordPaths[index];
@@ -123,7 +125,7 @@ MultVertDirectSelect.onTrash = function(state) {
     }
   } else {
     /// we only want to delete the one point..
-    const pointId = parseInt(state.selectedCoordPaths[0]);
+    const pointId = state.selectedCoordPaths[0];
     state.feature.removeCoordinate(pointId);
   }
 };

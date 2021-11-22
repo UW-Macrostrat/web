@@ -2,7 +2,8 @@
 
 import {
   geojsonTypes,
-  modes,
+  activeStates,
+  meta,
   cursors,
 } from "@mapbox/mapbox-gl-draw/src/constants";
 import doubleClickZoom from "@mapbox/mapbox-gl-draw/src/lib/double_click_zoom";
@@ -10,15 +11,18 @@ import DrawLine from "@mapbox/mapbox-gl-draw/src/modes/draw_line_string";
 import {
   addPointTovertices,
   createSnapList,
-  getGuideFeature,
-  IDS,
-  shouldHideGuide,
-  snap,
 } from "mapbox-gl-draw-snap-mode/src/utils";
+import createVertex from "@mapbox/mapbox-gl-draw/src/lib/create_vertex";
+import {
+  createPointOnLine,
+  incrementMultiPath,
+  parseMultiPath,
+  snapToCoord,
+} from "./utils";
 
 const SnapLineMode = { ...DrawLine };
 
-SnapLineMode.onSetup = function(options) {
+SnapLineMode.onSetup = function(opts) {
   const line = this.newFeature({
     type: geojsonTypes.FEATURE,
     properties: {},
@@ -28,14 +32,7 @@ SnapLineMode.onSetup = function(options) {
     },
   });
 
-  const verticalGuide = this.newFeature(getGuideFeature(IDS.VERTICAL_GUIDE));
-  const horizontalGuide = this.newFeature(
-    getGuideFeature(IDS.HORIZONTAL_GUIDE)
-  );
-
   this.addFeature(line);
-  this.addFeature(verticalGuide);
-  this.addFeature(horizontalGuide);
 
   const selectedFeatures = this.getSelected();
   this.clearSelectedFeatures();
@@ -46,12 +43,10 @@ SnapLineMode.onSetup = function(options) {
   const state = {
     map: this.map,
     line,
-    currentVertexPosition: 0,
+    currentVertexPosition: "0.0",
     vertices,
     snapList,
     selectedFeatures,
-    verticalGuide,
-    horizontalGuide,
     direction: "forward", // expected by DrawLineString
   };
 
@@ -77,40 +72,26 @@ SnapLineMode.onSetup = function(options) {
   return state;
 };
 
-SnapLineMode.onClick = function(state) {
-  // We save some processing by rounding on click, not mousemove
-  console.log("SNAP STATE", state);
+SnapLineMode.clickAnywhere = function(state, e) {
   const lng = state.snappedLng;
   const lat = state.snappedLat;
 
-  // End the drawing if this click is on the previous position
-  // Note: not bothering with 'direction'
-  if (state.currentVertexPosition > 0) {
-    const lastVertex = state.line.coordinates[state.currentVertexPosition - 1];
+  addPointTovertices(state.map, state.vertices, [lng, lat]);
 
-    state.lastVertex = lastVertex;
-
-    if (lastVertex[0] === lng && lastVertex[1] === lat) {
-      return this.changeMode(modes.SIMPLE_SELECT, {
-        featureIds: [state.line.id],
-      });
-    }
-  }
-
-  // const point = state.map.project({ lng: lng, lat: lat });
-
-  addPointTovertices(state.map, state.vertices, { lng, lat });
+  var point = this.map.project({ lng, lat });
+  const idsAtPoint = this._ctx.api.getFeatureIdsAt(point);
+  const filteredIds = idsAtPoint.filter((id) => id != state.line.id);
+  createPointOnLine(filteredIds, [lng, lat], this);
 
   state.line.updateCoordinate(state.currentVertexPosition, lng, lat);
 
-  state.currentVertexPosition++;
+  state.currentVertexPosition = incrementMultiPath(state.currentVertexPosition);
 
   state.line.updateCoordinate(state.currentVertexPosition, lng, lat);
 };
 
 SnapLineMode.onMouseMove = function(state, e) {
-  const { lng, lat } = snap(state, e);
-  console.log("LONG AND LAT", lng, lat);
+  const [lng, lat] = snapToCoord(state, e);
 
   state.line.updateCoordinate(state.currentVertexPosition, lng, lat);
   state.snappedLng = lng;
@@ -122,13 +103,6 @@ SnapLineMode.onMouseMove = function(state, e) {
     state.lastVertex[1] === lat
   ) {
     this.updateUIClasses({ mouse: cursors.POINTER });
-
-    // cursor options:
-    // ADD: "add"
-    // DRAG: "drag"
-    // MOVE: "move"
-    // NONE: "none"
-    // POINTER: "pointer"
   } else {
     this.updateUIClasses({ mouse: cursors.ADD });
   }
@@ -136,22 +110,50 @@ SnapLineMode.onMouseMove = function(state, e) {
 
 // This is 'extending' DrawLine.toDisplayFeatures
 SnapLineMode.toDisplayFeatures = function(state, geojson, display) {
-  if (shouldHideGuide(state, geojson)) return;
+  const isActiveLine = geojson.properties.id === state.line.id;
+  geojson.properties.active = isActiveLine
+    ? activeStates.ACTIVE
+    : activeStates.INACTIVE;
+  if (!isActiveLine) return display(geojson);
 
-  // This relies on the the state of SnapLineMode being similar to DrawLine
-  DrawLine.toDisplayFeatures(state, geojson, display);
+  const [line, path] = parseMultiPath(state.currentVertexPosition);
+
+  // Only render the line if it has at least one real coordinate
+  if (geojson.geometry.coordinates[line].length < 2) return;
+  geojson.properties.meta = meta.FEATURE;
+
+  display(
+    createVertex(
+      //parentId, coordinates, path, selected
+      state.line.id,
+      geojson.geometry.coordinates[line][
+        state.direction === "forward"
+          ? geojson.geometry.coordinates[line].length - 2
+          : 1
+      ],
+      `${line}.${
+        state.direction === "forward"
+          ? geojson.geometry.coordinates[line].length - 2
+          : 1
+      }`,
+      false
+    )
+  );
+
+  display(geojson);
 };
 
 // This is 'extending' DrawLine.onStop
 SnapLineMode.onStop = function(state) {
-  this.deleteFeature(IDS.VERTICAL_GUIDE, { silent: true });
-  this.deleteFeature(IDS.HORIZONTAL_GUIDE, { silent: true });
-
   // remove moveemd callback
   this.map.off("moveend", state.moveendCallback);
 
-  // This relies on the the state of SnapLineMode being similar to DrawLine
   DrawLine.onStop.call(this, state);
+  const obj = {
+    action: "draw.create",
+    feature: state.line.toGeoJSON(),
+  };
+  this.map.addToChangeSet(obj);
 };
 
 export { SnapLineMode };
