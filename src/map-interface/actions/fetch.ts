@@ -234,13 +234,14 @@ export const asyncGetElevation = async (line, cancelToken) => {
 
   let url = `${base}/elevation`;
 
-  const res = axios.get(url, {
-    cancelToken,
+  const res = await axios.get(url, {
+    //cancelToken,
     responseType: "json",
     params: params,
   });
+  const data = res.data;
   try {
-    return (await res).data.success.data;
+    return data.success.data;
   } catch (error) {
     return [];
   }

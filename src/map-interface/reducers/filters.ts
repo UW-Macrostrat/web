@@ -11,7 +11,8 @@ import { Action } from "../actions";
 // handler to reduce noise on case & switch
 // want this function to return an action object {type: "type", place/filter: fitler}
 // this is still a mess
-const asyncFilterHandler = async (filter): Action => {
+const asyncFilterHandler = async (filter): Promise<Action> => {
+  console.log(filter);
   switch (filter.type) {
     case "place":
       return { type: "go-to-place", place: filter };

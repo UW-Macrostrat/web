@@ -69,7 +69,6 @@ class Map extends Component<MapProps, {}> {
   }
 
   componentDidMount() {
-    console.log(this.props);
     mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
     this.map = new mapboxgl.Map({
       container: "map",
@@ -106,6 +105,7 @@ class Map extends Component<MapProps, {}> {
     this.map.on("load", () => {
       // Add the sources to the map
       Object.keys(mapStyle.sources).forEach((source) => {
+        console.log("MAP SOURCES", source, mapStyle.sources[source]);
         if (this.map.getSource(source) == null) {
           this.map.addSource(source, mapStyle.sources[source]);
         }
@@ -470,6 +470,7 @@ class Map extends Component<MapProps, {}> {
   // We basically intercept the changes, handle them, and tell React to ignore them
   shouldComponentUpdate(nextProps) {
     console.log("NEXT PROPS", nextProps);
+    console.log("PROPS", this.props);
     if (
       !nextProps.elevationMarkerLocation.length ||
       (nextProps.elevationMarkerLocation[0] !=
@@ -573,7 +574,8 @@ class Map extends Component<MapProps, {}> {
     } else if (nextProps.mapHasColumns != this.props.mapHasColumns) {
       if (nextProps.mapHasColumns) {
         // If filters are applied
-        if (this.props.filters.length) {
+        console.log("FILTERS", this.props.filters);
+        if (nextProps.filters.length) {
           console.log("GET FILTERED COLUMNS");
           this.props.runAction({ type: "get-filtered-columns" });
           mapStyle.layers.forEach((layer) => {
@@ -604,6 +606,7 @@ class Map extends Component<MapProps, {}> {
       JSON.stringify(nextProps.filteredColumns) !=
       JSON.stringify(this.props.filteredColumns)
     ) {
+      console.log("DIFFERENCE IN FILTERED COLUMNS");
       this.map.getSource("filteredColumns").setData(nextProps.filteredColumns);
 
       if (this.map.getSource("columns")) {
