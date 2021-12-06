@@ -169,7 +169,7 @@ export function Map() {
 
   return (
     <div
-      style={{ display: "flex", justifyContent: "center", marginTop: "30px" }}
+      // style={{ display: "flex", justifyContent: "center", marginTop: "30px" }}
     >
       <ImportDialog />
       <div>

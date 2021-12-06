@@ -28,10 +28,11 @@
   justify-content: flex-end;
 }
 
-.navbar-layout {
+.nav-contents {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  justify-content: space-evenly;
+  align-items: center;
+  padding-top: 10px;
 }
 
 .toolbar {

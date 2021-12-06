@@ -115,7 +115,7 @@ function MapNavBar(props) {
   return (
     <div className="navbar-layout">
       <Navbar>
-        <Navbar.Group>
+        <div className="nav-contents">
           <Navbar.Heading>
             <Popover
               content={<ProjectDropDown projects={projects} />}
@@ -137,10 +137,10 @@ function MapNavBar(props) {
           </Button>
           <Navbar.Divider />
           <Button minimal={true} active={editMode} onClick={enterEditMode}>
-            Topology Edit Mode
+            Edit Topology
           </Button>
           <Button minimal={true} active={!editMode} onClick={enterPropertyMode}>
-            Property View Mode
+            View / Edit Properties
           </Button>
           <Navbar.Divider />
           <MapToolBar
@@ -149,7 +149,7 @@ function MapNavBar(props) {
             addToChangeSet={addToChangeSet}
             draw={draw}
           />
-        </Navbar.Group>
+        </div>
       </Navbar>
     </div>
   );
