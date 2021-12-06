@@ -3,8 +3,6 @@
 @import "~/node_modules/@blueprintjs/icons/lib/css/blueprint-icons.css";
 
 .overlay {
-  top: 100px;
-  left: 20px;
   max-width: 500px;
 }
 
