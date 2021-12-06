@@ -47,7 +47,7 @@ module.exports = {
       {
         test: /\.(js|jsx|ts|tsx)$/,
         use: [babelLoader],
-        exclude: /node_modules/,
+        exclude: [/node_modules/, /\/packages\/maplibre-gl-js\/dist/],
       },
       {
         test: /\.styl$/,
