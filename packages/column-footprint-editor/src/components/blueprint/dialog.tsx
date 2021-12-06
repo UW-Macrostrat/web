@@ -31,8 +31,8 @@ function OverlayBox(props) {
     if (e.button !== 0) return;
     setDragging(true);
     setOffset(getOffest(e));
-    e.stopPropagation();
-    e.preventDefault();
+    // e.stopPropagation();
+    // e.preventDefault();
   };
 
   const onMouseUp = (e) => {
