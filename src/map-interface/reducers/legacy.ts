@@ -178,6 +178,7 @@ const update = (state = preloadedState, action: Action) => {
       if (state.mapInfoCancelToken) {
         state.mapInfoCancelToken.cancel();
       }
+      console.log("MAP BEING QUERIED", action);
       return Object.assign({}, state, {
         infoMarkerLng: action.lng.toFixed(4),
         infoMarkerLat: action.lat.toFixed(4),
@@ -418,7 +419,6 @@ const update = (state = preloadedState, action: Action) => {
         searchCancelToken: null,
       });
 
-    // Handle GDD
     case "start-gdd-query":
       // When a search is requested, cancel any pending requests first
       if (state.gddCancelToken) {
@@ -524,10 +524,10 @@ const update = (state = preloadedState, action: Action) => {
       });
 
     case "update-column-filters":
+      console.log("Filtered Columns", action.columns);
       return Object.assign({}, state, {
         filteredColumns: action.columns,
       });
-
     case "request-data":
       return Object.assign({}, state, {
         isFetching: true,
@@ -564,6 +564,8 @@ const update = (state = preloadedState, action: Action) => {
           y: action.data.y,
         },
       });
+    case "update-state":
+      return Object.assign({}, action.state);
 
     case "got-initial-map-state":
       const { layers = [] } = action.data;
@@ -596,3 +598,4 @@ const update = (state = preloadedState, action: Action) => {
 };
 
 export default update;
+export { preloadedState };

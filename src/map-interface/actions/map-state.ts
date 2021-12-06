@@ -1,4 +1,4 @@
-import { addFilter, gotInitialMapState } from "./main";
+import { gotInitialMapState } from "./main";
 import { format } from "d3-format";
 import { MapBackend } from "../map-page";
 import {
@@ -18,7 +18,6 @@ function formatVal(val: any): string | undefined {
 }
 
 function updateURI(state: any) {
-  console.log(state);
   let layers = [
     { layer: "bedrock", haz: state.mapHasBedrock },
     { layer: "lines", haz: state.mapHasLines },
@@ -45,8 +44,6 @@ function updateURI(state: any) {
   let z = fmt(state.mapXYZ.z);
   let x = fmt(state.mapXYZ.x);
   let y = fmt(state.mapXYZ.y);
-
-  console.log("Updating URI", { x, y, z });
 
   setHashString({ ...args, x, y, z }, { arrayFormat: "comma" });
 }
@@ -93,8 +90,7 @@ function getInitialMapState() {
     };
     try {
       const hashData = getHashString(window.location.hash) ?? {};
-      console.log(window.location.hash);
-      console.log(hashData);
+
       const { layers, x = 16, y = 23, z = 1.5 } = hashData;
 
       let mapState = { x, y, z, layers };
@@ -112,7 +108,6 @@ function getInitialMapState() {
       ) {
         // Sweet, it is legit
         mapState = mapState;
-        console.log("Map state is legit");
         // Augh, got to simplify this multiple dispatch situation. This should be one atomic action.
         dispatch(gotInitialMapState(mapState));
       }
@@ -121,22 +116,6 @@ function getInitialMapState() {
       // Who knows. Doesn't matter. Nothing does.
       mapState = defaultState;
     }
-
-    // if (mapState.incomingFilters && mapState.incomingFilters.length) {
-    //   mapState.incomingFilters.forEach((f) => {
-    //     // lith classes and types don't have unique IDs in macrostrat so we use the string
-    //     if (f.type === "lithology_classes" || f.type === "lithology_types") {
-    //       dispatch(
-    //         addFilter({
-    //           type: f.type,
-    //           name: f.id,
-    //         })
-    //       );
-    //     } else {
-    //       dispatch(addFilter(f));
-    //     }
-    //   });
-    // }
   };
 }
 

@@ -4,7 +4,8 @@ import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
 import Grid from "@material-ui/core/Grid";
 import { connect } from "react-redux";
-import { toggleElevationChart, updateElevationMarker } from "../actions";
+import { toggleElevationChart, updateElevationMarker } from "../../actions";
+import { BottomOverlay } from "./overlay";
 
 import { select, mouse } from "d3-selection";
 import { scaleLinear } from "d3-scale";
@@ -25,24 +26,23 @@ class ElevationChart extends Component {
 
   render() {
     let ctx = select("#elevationChart");
-
     if (ctx && this.props.elevationData.length && !this.chart) {
       this.drawChart();
     }
 
     return (
-      <Drawer
-        anchor={"bottom"}
+      <BottomOverlay
+        // anchor={"bottom"}
         open={this.props.elevationChartOpen}
-        onBackdropClick={this.props.toggleElevationChart}
-        transitionDuration={300}
-        hideBackdrop={true}
-        disableAutoFocus={true}
-        ModalProps={{
-          classes: {
-            root: "elevationChart-root",
-          },
-        }}
+        // onBackdropClick={this.props.toggleElevationChart}
+        // transitionDuration={300}
+        // hideBackdrop={true}
+        // disableAutoFocus={true}
+        // ModalProps={{
+        //   classes: {
+        //     root: "elevationChart-root",
+        //   },
+        // }}
       >
         <div className="elevationChart-content">
           <Grid
@@ -97,7 +97,7 @@ class ElevationChart extends Component {
             </Grid>
           </Grid>
         </div>
-      </Drawer>
+      </BottomOverlay>
     );
   }
 

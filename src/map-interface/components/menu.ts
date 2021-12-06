@@ -16,17 +16,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { MenuPanel } from "../reducers/menu";
 import AboutText from "./About";
 import { SettingsPanel } from "./settings-panel";
-import { connect } from "react-redux";
-import {
-  toggleMenu,
-  toggleBedrock,
-  toggleLines,
-  toggleSatellite,
-  toggleColumns,
-  toggleFossils,
-  toggleAbout,
-  toggleElevationChart,
-} from "../actions";
+import { useAppActions, useMenuState } from "../reducers";
 
 type ListButtonProps = ButtonProps & {
   icon: React.ComponentType | IconName;
@@ -52,8 +42,8 @@ const TabButton = (props: ButtonProps & { tab: MenuPanel }) => {
 const LayerButton = (props: ListButtonProps & { layer: string }) => {
   const { layer, ...rest } = props;
   const active = useSelector((state) => state.update["mapHas" + layer]);
-  const dispatch = useDispatch();
-  const onClick = () => dispatch({ type: "toggle-" + layer.toLowerCase() });
+  const runAction = useAppActions();
+  const onClick = () => runAction({ type: "toggle-" + layer.toLowerCase() });
   return h(ListButton, {
     active,
     onClick,
@@ -73,11 +63,11 @@ const MenuGroup = (props) =>
   });
 
 const LayerList = (props) => {
-  const dispatch = useDispatch();
+  const runAction = useAppActions();
 
   const toggleElevationChart = () => {
-    dispatch({ type: "toggle-menu" });
-    dispatch({ type: "toggle-elevation-chart" });
+    runAction({ type: "toggle-menu" });
+    runAction({ type: "toggle-elevation-chart" });
   };
 
   return h("div.menu-content", [
@@ -128,7 +118,12 @@ const PanelContent = (props: { activePanel: MenuPanel }) => {
 };
 
 const Menu = (props) => {
-  const { menuOpen, toggleMenu } = props;
+  const runAction = useAppActions();
+  const { menuOpen } = useMenuState();
+
+  const toggleMenu = () => {
+    runAction({ type: "toggle-menu" });
+  };
 
   let exitTransition = { exit: 300 };
 
@@ -162,46 +157,4 @@ const Menu = (props) => {
   );
 };
 
-const mapStateToProps = (state) => {
-  return {
-    menuOpen: state.update.menuOpen,
-    mapHasBedrock: state.update.mapHasBedrock,
-    mapHasSatellite: state.update.mapHasSatellite,
-    mapHasColumns: state.update.mapHasColumns,
-    mapHasFossils: state.update.mapHasFossils,
-    mapHasLines: state.update.mapHasLines,
-  };
-};
-
-const mapDispatchToProps = (dispatch) => {
-  return {
-    toggleMenu: () => {
-      dispatch(toggleMenu());
-    },
-    toggleBedrock: () => {
-      dispatch(toggleBedrock());
-    },
-    toggleLines: () => {
-      dispatch(toggleLines());
-    },
-    toggleSatellite: () => {
-      dispatch(toggleSatellite());
-    },
-    toggleColumns: () => {
-      dispatch(toggleColumns());
-    },
-    toggleFossils: () => {
-      dispatch(toggleFossils());
-    },
-    toggleAbout: () => {
-      dispatch(toggleAbout());
-    },
-    toggleElevationChart: () => {
-      dispatch(toggleElevationChart());
-    },
-  };
-};
-
-const MenuContainer = connect(mapStateToProps, mapDispatchToProps)(Menu);
-
-export default MenuContainer;
+export default Menu;

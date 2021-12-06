@@ -6,7 +6,7 @@ import Searchbar from "../components/searchbar";
 import MenuContainer from "../components/menu";
 import InfoDrawer from "../components/info-drawer";
 import FiltersContainer from "../components/filters";
-import ElevationChart from "../components/elevation-chart";
+import ElevationChart from "../components/elevation-chart/elevation-chart";
 import { ButtonGroup, Button, Spinner } from "@blueprintjs/core";
 import { useSelector, useDispatch } from "react-redux";
 import loadable from "@loadable/component";

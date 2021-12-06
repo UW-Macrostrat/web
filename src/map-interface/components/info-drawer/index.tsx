@@ -1,12 +1,7 @@
 import { Card, Spinner } from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
 import { connect } from "react-redux";
-import {
-  closeInfoDrawer,
-  expandInfoDrawer,
-  getColumn,
-  getGdd,
-} from "../../actions";
+import { useAppActions } from "~/map-interface/reducers";
 
 import { InfoDrawerHeader } from "./header";
 import { FossilCollections } from "./fossil-collections";
@@ -21,16 +16,15 @@ function InfoDrawer(props) {
     mapHasBedrock,
     mapHasColumns,
     mapHasFossils,
-    getGdd,
     infoDrawerOpen,
-    closeInfoDrawer,
     columnInfo,
     ...rest
   } = props;
   let { mapInfo, gddInfo, pbdbData } = rest;
+  const runAction = useAppActions();
 
   const openGdd = () => {
-    getGdd();
+    runAction({ type: "fetch-gdd" });
   };
 
   if (!mapInfo || !mapInfo.mapData) {
@@ -52,19 +46,16 @@ function InfoDrawer(props) {
           ref: {},
         };
 
-  console.log("map data", mapInfo);
-
   if (!infoDrawerOpen) {
     return null;
   }
-
   return h("div.infodrawer-container", [
     h(Card, { className: "infodrawer" }, [
       h(InfoDrawerHeader, {
         mapInfo,
         infoMarkerLng: rest.infoMarkerLng,
         infoMarkerLat: rest.infoMarkerLat,
-        onCloseClick: closeInfoDrawer,
+        onCloseClick: () => runAction({ type: "close-infodrawer" }),
       }),
       h("div.overflow-container", [
         h(
@@ -119,26 +110,6 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mapDispatchToProps = (dispatch) => {
-  return {
-    closeInfoDrawer: () => {
-      dispatch(closeInfoDrawer());
-    },
-    expandInfoDrawer: () => {
-      dispatch(expandInfoDrawer());
-    },
-    getColumn: (lng, lat) => {
-      dispatch(getColumn(lng, lat)); // not correct
-    },
-    getGdd: () => {
-      dispatch(getGdd());
-    },
-  };
-};
-
-const InfoDrawerContainer = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(InfoDrawer);
+const InfoDrawerContainer = connect(mapStateToProps)(InfoDrawer);
 
 export default InfoDrawerContainer;

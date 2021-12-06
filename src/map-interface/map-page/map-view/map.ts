@@ -69,7 +69,6 @@ class Map extends Component<MapProps, {}> {
   }
 
   componentDidMount() {
-    console.log(this.props);
     mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
     this.map = new mapboxgl.Map({
       container: "map",
@@ -106,6 +105,7 @@ class Map extends Component<MapProps, {}> {
     this.map.on("load", () => {
       // Add the sources to the map
       Object.keys(mapStyle.sources).forEach((source) => {
+        console.log("MAP SOURCES", source, mapStyle.sources[source]);
         if (this.map.getSource(source) == null) {
           this.map.addSource(source, mapStyle.sources[source]);
         }
@@ -200,7 +200,7 @@ class Map extends Component<MapProps, {}> {
       if (this.map.getLayer("infoMarker")) {
         // Hide the info marker and close the info drawer
         //this.map.setLayoutProperty("infoMarker", "visibility", "none");
-        //this.props.closeInfoDrawer();
+        //this.props.runAction({type:"close-infodrawer"});
       }
     });
 
@@ -225,7 +225,10 @@ class Map extends Component<MapProps, {}> {
           }),
         });
         if (this.elevationPoints.length === 2) {
-          this.props.getElevation(this.elevationPoints);
+          this.props.runAction({
+            type: "get-elevation",
+            line: this.elevationPoints,
+          });
           this.map.getSource("elevationLine").setData({
             type: "FeatureCollection",
             features: [
@@ -281,18 +284,20 @@ class Map extends Component<MapProps, {}> {
             .map((f) => {
               return f.properties.oid.replace("col:", "");
             });
-          this.props.getPBDB(pointsInCluster);
+          this.props.runAction({
+            type: "get-pbdb",
+            collection_nos: pointsInCluster,
+          });
 
           // Clicked on an unclustered point
         } else if (
           collections.length &&
           collections[0].properties.hasOwnProperty("oid")
         ) {
-          this.props.getPBDB(
-            collections.map((col) => {
-              return col.properties.oid.replace("col:", "");
-            })
-          );
+          let collection_nos = collections.map((col) => {
+            return col.properties.oid.replace("col:", "");
+          });
+          this.props.runAction({ type: "get-pbdb", collection_nos });
           //    return
         } else {
           // Otherwise make sure that old fossil collections aren't visible
@@ -313,18 +318,20 @@ class Map extends Component<MapProps, {}> {
           return f.properties;
         });
       if (burwellFeatures.length) {
-        this.props.queryMap(
-          event.lngLat.lng,
-          event.lngLat.lat,
-          this.map.getZoom(),
-          burwellFeatures[0].map_id
-        );
+        this.props.runAction({
+          type: "map-query",
+          lng: event.lngLat.lng,
+          lat: event.lngLat.lat,
+          z: this.map.getZoom(),
+          column: burwellFeatures[0].map_id,
+        });
       } else {
-        this.props.queryMap(
-          event.lngLat.lng,
-          event.lngLat.lat,
-          this.map.getZoom()
-        );
+        this.props.runAction({
+          type: "map-query",
+          lng: event.lngLat.lng,
+          lat: event.lngLat.lat,
+          z: this.map.getZoom(),
+        });
       }
 
       let xOffset =
@@ -462,6 +469,8 @@ class Map extends Component<MapProps, {}> {
   // and always return `false` to prevent DOM updates
   // We basically intercept the changes, handle them, and tell React to ignore them
   shouldComponentUpdate(nextProps) {
+    console.log("NEXT PROPS", nextProps);
+    console.log("PROPS", this.props);
     if (
       !nextProps.elevationMarkerLocation.length ||
       (nextProps.elevationMarkerLocation[0] !=
@@ -565,8 +574,10 @@ class Map extends Component<MapProps, {}> {
     } else if (nextProps.mapHasColumns != this.props.mapHasColumns) {
       if (nextProps.mapHasColumns) {
         // If filters are applied
-        if (this.props.filters.length) {
-          this.props.getFilteredColumns();
+        console.log("FILTERS", this.props.filters);
+        if (nextProps.filters.length) {
+          console.log("GET FILTERED COLUMNS");
+          this.props.runAction({ type: "get-filtered-columns" });
           mapStyle.layers.forEach((layer) => {
             if (layer.source === "filteredColumns") {
               this.map.setLayoutProperty(layer.id, "visibility", "visible");
@@ -595,6 +606,7 @@ class Map extends Component<MapProps, {}> {
       JSON.stringify(nextProps.filteredColumns) !=
       JSON.stringify(this.props.filteredColumns)
     ) {
+      console.log("DIFFERENCE IN FILTERED COLUMNS");
       this.map.getSource("filteredColumns").setData(nextProps.filteredColumns);
 
       if (this.map.getSource("columns")) {
@@ -641,32 +653,40 @@ class Map extends Component<MapProps, {}> {
       // Handle changes to map filters
     } else if (nextProps.filters.length != this.props.filters.length) {
       // If all filters have been removed simply reset the filter states
-      // if (nextProps.filters.length === 0) {
-      //   this.filters = []
-      //   this.filtersIndex = {}
-      //   this.timeFilters = []
-      //   this.timeFiltersIndex = {}
-      //   this.applyFilters()
-      //
-      //   // Remove filtered columns and add unfiltered columns
-      //   if (this.props.mapHasColumns) {
-      //     mapStyle.layers.forEach(layer => {
-      //       if (layer.source === 'columns') {
-      //         this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
-      //       }
-      //     })
-      //     mapStyle.layers.forEach(layer => {
-      //       if (layer.source === 'filteredColumns') {
-      //         this.map.setLayoutProperty(layer.id, 'visibility', 'none')
-      //       }
-      //     })
-      //   }
-      //
-      //   if (this.props.mapHasFossils === true) {
-      //     this.refreshPBDB()
-      //   }
-      //   return false
-      // }
+      if (nextProps.filters.length === 0) {
+        this.filters = [];
+        this.filtersIndex = {};
+        this.timeFilters = [];
+        this.timeFiltersIndex = {};
+        this.applyFilters();
+
+        // Remove filtered columns and add unfiltered columns
+        if (this.props.mapHasColumns) {
+          mapStyle.layers.forEach((layer) => {
+            if (layer.source === "columns") {
+              this.map.setLayoutProperty(layer.id, "visibility", "visible");
+            }
+          });
+          mapStyle.layers.forEach((layer) => {
+            if (layer.source === "filteredColumns") {
+              this.map.setLayoutProperty(layer.id, "visibility", "none");
+            }
+          });
+        }
+
+        if (this.props.mapHasFossils === true) {
+          this.refreshPBDB();
+        }
+        return false;
+      }
+      if (nextProps.mapHasColumns) {
+        if (nextProps.filters.length) {
+          this.props.runAction({
+            type: "get-filtered-columns",
+            filter: nextProps.filters[0],
+          });
+        }
+      }
 
       // Check which filters were added or removed
       let existingFilters = new Set(
@@ -843,7 +863,6 @@ class Map extends Component<MapProps, {}> {
 
       // Update the map styles
       this.applyFilters();
-
       return false;
     }
     return false;
