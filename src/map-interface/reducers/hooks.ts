@@ -55,7 +55,17 @@ async function runAction(state, action: Action, dispatch = null) {
         filters_ = [...filters_, action.filter];
       }
       let filteredColumns = await fetchFilteredColumns(filters_);
-      return runAction(state, {
+      let updatedState = state;
+      if (!state.mapHasColumns) {
+        updatedState = await runAction(state, { type: "toggle-columns" });
+      }
+      if (action.filter) {
+        updatedState = await runAction(updatedState, {
+          type: "add-filter",
+          filter: action.filter,
+        });
+      }
+      return runAction(updatedState, {
         type: "update-column-filters",
         columns: filteredColumns,
       });
@@ -147,7 +157,7 @@ function useAppActions() {
   const dispatch = useActionDispatch();
   const state = useLegacyState();
   return async (action) => {
-    let newState = await runAction(state, action, dispatch);
+    const newState = await runAction(state, action, dispatch);
     dispatch({ type: "update-state", state: newState });
   };
 }

@@ -653,32 +653,40 @@ class Map extends Component<MapProps, {}> {
       // Handle changes to map filters
     } else if (nextProps.filters.length != this.props.filters.length) {
       // If all filters have been removed simply reset the filter states
-      // if (nextProps.filters.length === 0) {
-      //   this.filters = []
-      //   this.filtersIndex = {}
-      //   this.timeFilters = []
-      //   this.timeFiltersIndex = {}
-      //   this.applyFilters()
-      //
-      //   // Remove filtered columns and add unfiltered columns
-      //   if (this.props.mapHasColumns) {
-      //     mapStyle.layers.forEach(layer => {
-      //       if (layer.source === 'columns') {
-      //         this.map.setLayoutProperty(layer.id, 'visibility', 'visible')
-      //       }
-      //     })
-      //     mapStyle.layers.forEach(layer => {
-      //       if (layer.source === 'filteredColumns') {
-      //         this.map.setLayoutProperty(layer.id, 'visibility', 'none')
-      //       }
-      //     })
-      //   }
-      //
-      //   if (this.props.mapHasFossils === true) {
-      //     this.refreshPBDB()
-      //   }
-      //   return false
-      // }
+      if (nextProps.filters.length === 0) {
+        this.filters = [];
+        this.filtersIndex = {};
+        this.timeFilters = [];
+        this.timeFiltersIndex = {};
+        this.applyFilters();
+
+        // Remove filtered columns and add unfiltered columns
+        if (this.props.mapHasColumns) {
+          mapStyle.layers.forEach((layer) => {
+            if (layer.source === "columns") {
+              this.map.setLayoutProperty(layer.id, "visibility", "visible");
+            }
+          });
+          mapStyle.layers.forEach((layer) => {
+            if (layer.source === "filteredColumns") {
+              this.map.setLayoutProperty(layer.id, "visibility", "none");
+            }
+          });
+        }
+
+        if (this.props.mapHasFossils === true) {
+          this.refreshPBDB();
+        }
+        return false;
+      }
+      if (nextProps.mapHasColumns) {
+        if (nextProps.filters.length) {
+          this.props.runAction({
+            type: "get-filtered-columns",
+            filter: nextProps.filters[0],
+          });
+        }
+      }
 
       // Check which filters were added or removed
       let existingFilters = new Set(
@@ -855,7 +863,6 @@ class Map extends Component<MapProps, {}> {
 
       // Update the map styles
       this.applyFilters();
-
       return false;
     }
     return false;
