@@ -46,6 +46,7 @@ function ProjectDropDown(props) {
           return (
             <Button
               key={id}
+              fill={true}
               minimal={true}
               onClick={() => changeProjectId(project)}
               intent="primary"

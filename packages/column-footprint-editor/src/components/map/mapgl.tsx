@@ -168,9 +168,7 @@ export function Map() {
   }, [state.columns, edit, mapRef]);
 
   return (
-    <div
-      // style={{ display: "flex", justifyContent: "center", marginTop: "30px" }}
-    >
+    <div>
       <ImportDialog />
       <div>
         <MapNavBar
