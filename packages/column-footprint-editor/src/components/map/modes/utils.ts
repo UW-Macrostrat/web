@@ -1,18 +1,23 @@
 import * as Constants from "@mapbox/mapbox-gl-draw/src/constants";
 import nearestPointOnLine from "@turf/nearest-point-on-line";
-import distance from "@turf/distance";
+import { distance_between_points } from "../utils";
 
-function getClosestLine(lines, point) {
+function getClosestLine(lines, point, map) {
   let closest;
-
+  const pixelPoint = map.project(point);
   let minDis = null;
   lines.map((line) => {
     const newPoint = nearestPointOnLine(line, point);
-    const dist = distance(point, newPoint);
-    if (!minDis && dist <= 150) {
+    const newPixelPoint = map.project(newPoint.geometry.coordinates);
+
+    const dist = distance_between_points({
+      point1: pixelPoint,
+      point2: newPixelPoint,
+    });
+    if (!minDis && dist <= 40) {
       minDis = dist;
       closest = newPoint;
-    } else if (dist < minDis && dist <= 150) {
+    } else if (dist < minDis && dist <= 40) {
       minDis = dist;
       closest = newPoint;
     }
@@ -25,11 +30,11 @@ function getClosestLine(lines, point) {
   }
 }
 
-function snapToCoord(state, e) {
+function snapToCoord(state, e, map) {
   let lng = e.lngLat.lng;
   let lat = e.lngLat.lat;
 
-  const closestPoint = getClosestLine(state.snapList, [lng, lat]).geometry
+  const closestPoint = getClosestLine(state.snapList, [lng, lat], map).geometry
     .coordinates;
   const [lng_, lat_] = closestPoint;
 

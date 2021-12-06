@@ -91,7 +91,7 @@ SnapLineMode.clickAnywhere = function(state, e) {
 };
 
 SnapLineMode.onMouseMove = function(state, e) {
-  const [lng, lat] = snapToCoord(state, e);
+  const [lng, lat] = snapToCoord(state, e, this.map);
 
   state.line.updateCoordinate(state.currentVertexPosition, lng, lat);
   state.snappedLng = lng;

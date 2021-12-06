@@ -10,7 +10,6 @@
     "@blueprintjs/select": "^3.17.0",
     "@macrostrat/ui-components": "^0.5.2",
     "@mapbox/mapbox-gl-draw": "^1.2.2",
-    "@turf/distance": "^5.1.5",
     "@turf/nearest-point-on-line": "^5.1.5",
     "axios": "^0.21.1",
     "d3-delaunay": "^5.3.0",
