@@ -22,7 +22,11 @@ function getCancelToken() {
   return source;
 }
 
-async function runAction(state, action: Action, dispatch = null) {
+async function runAction(
+  state,
+  action: Action,
+  dispatch = null
+): Promise<Action> {
   switch (action.type) {
     case "fetch-search-query":
       let term = action.term;
@@ -34,7 +38,7 @@ async function runAction(state, action: Action, dispatch = null) {
         cancelToken: source,
       });
       const data = await doSearchAsync(term, source.token);
-      return runAction(state, { type: "received-search-query", data });
+      return { type: "received-search-query", data };
     case "fetch-gdd":
       const { mapInfo } = state;
       let CancelToken1 = axios.CancelToken;
@@ -44,11 +48,11 @@ async function runAction(state, action: Action, dispatch = null) {
         cancelToken: source1,
       });
       const gdd_data = await getAsyncGdd(mapInfo, source1.token);
-      return runAction(state, { type: "received-gdd-query", data: gdd_data });
+      return { type: "received-gdd-query", data: gdd_data };
     case "async-add-filter":
       let filter = action.filter;
       const filterAction = await asyncFilterHandler(filter);
-      return runAction(state, filterAction);
+      return filterAction;
     case "get-filtered-columns":
       console.log(state);
       // WHY IS STATE.FILTERS EMPTY?
@@ -58,14 +62,10 @@ async function runAction(state, action: Action, dispatch = null) {
       // }
       console.log("filters", filters_);
       let filteredColumns = await fetchFilteredColumns(filters_);
-      let updatedState = state;
-      if (!state.mapHasColumns) {
-        updatedState = await runAction(state, { type: "toggle-columns" });
-      }
-      return runAction(updatedState, {
+      return {
         type: "update-column-filters",
         columns: filteredColumns,
-      });
+      };
     case "map-query":
       const { lng, lat, z, map_id, column } = action;
       console.log("MAP QUERY", lng, lat, z, map_id, column);
@@ -89,10 +89,10 @@ async function runAction(state, action: Action, dispatch = null) {
       );
       state.infoMarkerLng = lng.toFixed(4);
       state.infoMarkerLat = lat.toFixed(4);
-      return runAction(state, {
+      return {
         type: "received-map-query",
         data: mapData,
-      });
+      };
     case "get-column":
       let CancelTokenGetColumn = axios.CancelToken;
       let sourceGetColumn = CancelTokenGetColumn.source();
@@ -102,11 +102,11 @@ async function runAction(state, action: Action, dispatch = null) {
         action.column,
         sourceGetColumn.token
       );
-      return runAction(state, {
+      return {
         type: "received-column-query",
         data: columnData,
         column: action.column,
-      });
+      };
     case "get-elevation":
       let CancelTokenElevation = axios.CancelToken;
       let sourceElevation = CancelTokenElevation.source();
@@ -118,10 +118,10 @@ async function runAction(state, action: Action, dispatch = null) {
         action.line,
         sourceElevation
       );
-      return runAction(state, {
+      return {
         type: "received-elevation-query",
         data: elevationData,
-      });
+      };
     case "get-pbdb":
       let collection_nos = action.collection_nos;
       const sourceCollection = getCancelToken();
@@ -137,20 +137,20 @@ async function runAction(state, action: Action, dispatch = null) {
         sourceOccur.token
       );
       const collections = mergePBDBResponses(occurences, collection);
-      return runAction(state, {
+      return {
         type: "received-pbdb-query",
         data: collections,
-      });
+      };
     default:
-      return update(state, action);
+      return action;
   }
 }
 function useAppActions() {
   const dispatch = useActionDispatch();
   const state = useLegacyState();
   return async (action) => {
-    const newState = await runAction(state, action, dispatch);
-    dispatch({ type: "update-state", state: newState });
+    const newAction: Action = await runAction(state, action, dispatch);
+    dispatch(newAction);
   };
 }
 
