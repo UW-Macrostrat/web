@@ -597,31 +597,10 @@ class Map extends Component<MapProps, {}> {
       // Fossils
     } else if (nextProps.mapHasFossils != this.props.mapHasFossils) {
       // Add fossils
-      if (nextProps.mapHasFossils && !this.props.mapHasFossils) {
-        mapStyle.layers.forEach((layer) => {
-          if (
-            layer.source === "pbdb" ||
-            layer.source === "pbdb-points" ||
-            layer.source === "pbdb-clusters"
-          ) {
-            this.map.setLayoutProperty(layer.id, "visibility", "visible");
-          }
-        });
+      if (nextProps.mapHasFossils) {
         // Force a hit to the API to refresh
         this.refreshPBDB();
-        // Remove fossils
-      } else {
-        mapStyle.layers.forEach((layer) => {
-          if (
-            layer.source === "pbdb" ||
-            layer.source === "pbdb-points" ||
-            layer.source === "pbdb-clusters"
-          ) {
-            this.map.setLayoutProperty(layer.id, "visibility", "none");
-          }
-        });
       }
-
       // Handle changes to map filters
     } else if (nextProps.filters.length != this.props.filters.length) {
       // If all filters have been removed simply reset the filter states

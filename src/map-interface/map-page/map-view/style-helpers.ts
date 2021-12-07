@@ -15,6 +15,15 @@ function setMapStyle(map, mapStyle, props) {
       if (visibility !== showLines) {
         map.setLayoutProperty(layer.id, "visibility", showLines);
       }
+    } else if (
+      layer.source === "pbdb" ||
+      layer.source === "pbdb-points" ||
+      layer.source === "pbdb-clusters"
+    ) {
+      const showFossils = props.mapHasFossils ? "visible" : "none";
+      if (visibility !== showFossils) {
+        map.setLayoutProperty(layer.id, "visibility", showFossils);
+      }
     }
   });
 }
