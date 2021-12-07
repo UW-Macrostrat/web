@@ -9,6 +9,7 @@ import {
 import h from "@macrostrat/hyper";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
+import { setMapStyle } from "./style-helpers";
 
 const maxClusterZoom = 6;
 const highlightLayers = [
@@ -536,35 +537,6 @@ class Map extends Component<MapProps, {}> {
       } else {
         // zoom to user location
       }
-      // Add bedrock
-    } else if (nextProps.mapHasBedrock && !this.props.mapHasBedrock) {
-      mapStyle.layers.forEach((layer) => {
-        if (layer.source === "burwell" && layer["source-layer"] === "units") {
-          this.map.setLayoutProperty(layer.id, "visibility", "visible");
-        }
-      });
-      // Remove bedrock
-    } else if (!nextProps.mapHasBedrock && this.props.mapHasBedrock) {
-      mapStyle.layers.forEach((layer) => {
-        if (layer.source === "burwell" && layer["source-layer"] === "units") {
-          this.map.setLayoutProperty(layer.id, "visibility", "none");
-        }
-      });
-
-      // Add lines
-    } else if (nextProps.mapHasLines && !this.props.mapHasLines) {
-      mapStyle.layers.forEach((layer) => {
-        if (layer.source === "burwell" && layer["source-layer"] === "lines") {
-          this.map.setLayoutProperty(layer.id, "visibility", "visible");
-        }
-      });
-      // Remove lines
-    } else if (!nextProps.mapHasLines && this.props.mapHasLines) {
-      mapStyle.layers.forEach((layer) => {
-        if (layer.source === "burwell" && layer["source-layer"] === "lines") {
-          this.map.setLayoutProperty(layer.id, "visibility", "none");
-        }
-      });
 
       // Swap satellite/normal
     } else if (nextProps.mapHasSatellite != this.props.mapHasSatellite) {
@@ -702,6 +674,8 @@ class Map extends Component<MapProps, {}> {
       // Update the map styles
       this.applyFilters();
       return false;
+    } else {
+      setMapStyle(this.map, mapStyle, nextProps);
     }
     return false;
   }
