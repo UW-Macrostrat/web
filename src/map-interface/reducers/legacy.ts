@@ -33,6 +33,7 @@ const preloadedState = {
   fetchingGdd: false,
   gddCancelToken: null,
   isSearching: false,
+  term: "",
   searchCancelToken: null,
   fetchingElevation: false,
   elevationCancelToken: null,
@@ -401,7 +402,10 @@ const update = (state = preloadedState, action: Action) => {
         elevationData: [],
         elevationMarkerLocation: [],
       });
-
+    case "set-input-focus":
+      return Object.assign({}, state, { inputFocus: action.inputFocus });
+    case "set-search-term":
+      return Object.assign({}, state, { term: action.term });
     // Handle searching
     case "start-search-query":
       // When a search is requested, cancel any pending requests first

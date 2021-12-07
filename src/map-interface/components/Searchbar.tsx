@@ -27,10 +27,17 @@ const sortOrder = {
   place: 5,
 };
 
-function SearchResults({ searchResults, onSelectResult }) {
-  if (searchResults == null) return null;
-  if (searchResults.length == 0) return h("p", "No results found");
+function SearchResults() {
+  const { searchResults } = useSearchState();
+  const runAction = useAppActions();
+  if (searchResults == null || searchResults.length == 0)
+    return h("div.search-guidence", [h(SearchGuidance)]);
 
+  const onSelectResult = (f) => {
+    runAction({ type: "set-search-term", term: "" });
+    runAction({ type: "async-add-filter", filter: f });
+    runAction({ type: "received-search-query", data: [] });
+  };
   const resultCategories = new Set(searchResults.map((d) => d.category));
   // Force the results into a particular order
   let resultCategoriesArr = Array.from(resultCategories);
@@ -54,7 +61,7 @@ function SearchResults({ searchResults, onSelectResult }) {
     });
   });
 
-  return h(
+  return h("div.search-results", [
     resultCategoriesArr.map((cat, i) => {
       return (
         <div key={`subheader-${i}`}>
@@ -62,54 +69,32 @@ function SearchResults({ searchResults, onSelectResult }) {
           <ul>{categoryResults[i]}</ul>
         </div>
       );
-    })
-  );
+    }),
+  ]);
 }
 
 function Searchbar(props) {
   const runAction = useAppActions();
-  const { searchResults } = useSearchState();
-
-  const [barState, setbarState] = useState({
-    inputFocused: false,
-    searchTerm: "",
-  });
+  const { term, inputFocus } = useSearchState();
+  // const [barState, setbarState] = useState({
+  //   inputFocus: false,
+  // });
 
   const gainInputFocus = () => {
-    setbarState((prevState) => {
-      return {
-        ...prevState,
-        inputFocused: true,
-      };
-    });
+    runAction({ type: "set-input-focus", inputFocus: true });
   };
   const loseInputFocus = () => {
-    //  console.log('lose focus')
     // A slight timeout is required so that click actions can occur
     setTimeout(() => {
-      setbarState((prevState) => {
-        return {
-          ...prevState,
-          inputFocused: false,
-        };
-      });
+      runAction({ type: "set-input-focus", inputFocus: false });
     }, 100);
   };
   const handleSearchInput = (event) => {
-    setbarState((prevState) => {
-      return { ...prevState, searchTerm: event.target.value };
-    });
+    runAction({ type: "set-search-term", term: event.target.value });
     if (event.target.value.length <= 2) {
       return;
     }
-    runAction({ type: "fetch-search-query", term: barState.searchTerm });
-  };
-
-  const addFilter = (f) => {
-    setbarState((prevState) => {
-      return { ...prevState, searchTerm: "" };
-    });
-    runAction({ type: "async-add-filter", filter: f });
+    runAction({ type: "fetch-search-query", term: term });
   };
 
   const toggleMenu = () => {
@@ -119,11 +104,6 @@ function Searchbar(props) {
   const toggleFilters = () => {
     runAction({ type: "toggle-filters" });
   };
-
-  let searchResultClasses = classNames(
-    { hidden: barState.searchTerm.length < 3 },
-    "search-results"
-  );
 
   let filterButton = (
     <Button
@@ -148,7 +128,7 @@ function Searchbar(props) {
             onBlur={loseInputFocus}
             placeholder="Search Macrostrat..."
             rightElement={filterButton}
-            value={barState.searchTerm}
+            value={term}
           />
           <Button
             icon="menu"
@@ -159,25 +139,17 @@ function Searchbar(props) {
           />
         </Navbar>
       </div>
-      <Collapse
-        isOpen={barState.inputFocused}
-        className="search-results-container panel"
-      >
-        <Card
+      {/* <Collapse isOpen={inputFocus} className="search-results-container panel"> */}
+      {/* <Card
           className={classNames(
             { hidden: barState.searchTerm.length != 0 },
             "search-guidance"
           )}
         >
           {h(SearchGuidance)}
-        </Card>
-        <Card className={searchResultClasses}>
-          {h(SearchResults, {
-            searchResults,
-            onSelectResult: addFilter,
-          })}
-        </Card>
-      </Collapse>
+        </Card> */}
+      {/* <Card className={searchResultClasses}>{h(SearchResults)}</Card> */}
+      {/* </Collapse> */}
     </div>
   );
 }
@@ -205,3 +177,4 @@ function SearchbarContainer(props) {
 }
 
 export default SearchbarContainer;
+export { SearchResults };

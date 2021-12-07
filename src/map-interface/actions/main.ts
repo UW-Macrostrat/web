@@ -62,6 +62,14 @@ type TOGGLE_SATELLITE = { type: "toggle-satellite" };
 type TOGGLE_COLUMNS = { type: "toggle-columns" };
 type TOGGLE_FOSSILS = { type: "toggle-fossils" };
 
+type SET_INPUT_FOCUS = {
+  type: "set-input-focus";
+  inputFocus: boolean;
+};
+type SET_SEARCH_TERM = {
+  type: "set-search-term";
+  term: string;
+};
 type START_SEARCH_QUERY = {
   type: "start-search-query";
   term: string;
@@ -87,6 +95,8 @@ type SET_MAP_BACKEND = { type: "set-map-backend"; backend: any };
 type UPDATE_STATE = { type: "update-state"; state: any };
 
 export type Action =
+  | SET_INPUT_FOCUS
+  | SET_SEARCH_TERM
   | GET_PBDB
   | GET_ELEVATION
   | GET_COLUMN

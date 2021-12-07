@@ -84,8 +84,8 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
       h("div.left-stack", [
         h("div.panel-container", [
           h(Searchbar, null),
-          h(MenuContainer, null),
           h(FiltersContainer, null),
+          h(MenuContainer, null),
         ]),
         h("div.spacer"),
       ]),

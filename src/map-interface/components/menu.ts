@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import h from "@macrostrat/hyper";
 import ColumnIcon from "./icons/ColumnIcon";
 import LineIcon from "./icons/LineIcon";
@@ -16,7 +17,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { MenuPanel } from "../reducers/menu";
 import AboutText from "./About";
 import { SettingsPanel } from "./settings-panel";
-import { useAppActions, useMenuState } from "../reducers";
+import { useAppActions, useMenuState, useSearchState } from "../reducers";
+import { SearchResults } from "./searchbar";
 
 type ListButtonProps = ButtonProps & {
   icon: React.ComponentType | IconName;
@@ -113,17 +115,29 @@ const PanelContent = (props: { activePanel: MenuPanel }) => {
       return h(SettingsPanel);
     case MenuPanel.ABOUT:
       return h(AboutText);
+    case MenuPanel.FILTERS:
+      return h(SearchResults);
   }
   return null;
 };
 
 const Menu = (props) => {
   const runAction = useAppActions();
+  const { isSearching, inputFocus } = useSearchState();
   const { menuOpen } = useMenuState();
 
   const toggleMenu = () => {
     runAction({ type: "toggle-menu" });
   };
+
+  useEffect(() => {
+    if (inputFocus) {
+      if (!menuOpen) {
+        runAction({ type: "toggle-menu" });
+      }
+      runAction({ type: "set-panel", panel: MenuPanel.FILTERS });
+    }
+  }, [inputFocus]);
 
   let exitTransition = { exit: 300 };
 
@@ -149,6 +163,11 @@ const Menu = (props) => {
             icon: "info-sign",
             text: "About",
             tab: MenuPanel.ABOUT,
+          }),
+          h(TabButton, {
+            icon: "filter",
+            text: "Filters",
+            tab: MenuPanel.FILTERS,
           }),
         ]),
       ]),

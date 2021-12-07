@@ -160,8 +160,10 @@ function useFilterState() {
 }
 
 function useSearchState() {
-  const { searchResults, isSearching } = useSelector((state) => state.update);
-  return { searchResults, isSearching };
+  const { searchResults, isSearching, term, inputFocus } = useSelector(
+    (state) => state.update
+  );
+  return { searchResults, isSearching, term, inputFocus };
 }
 
 function useMenuState() {
