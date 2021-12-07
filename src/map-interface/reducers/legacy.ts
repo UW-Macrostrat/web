@@ -565,7 +565,7 @@ const update = (state = preloadedState, action: Action) => {
         },
       });
     case "update-state":
-      return Object.assign({}, action.state);
+      return action.state;
 
     case "got-initial-map-state":
       const { layers = [] } = action.data;

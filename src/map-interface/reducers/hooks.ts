@@ -50,20 +50,17 @@ async function runAction(state, action: Action, dispatch = null) {
       const filterAction = await asyncFilterHandler(filter);
       return runAction(state, filterAction);
     case "get-filtered-columns":
+      console.log(state);
+      // WHY IS STATE.FILTERS EMPTY?
       let filters_ = state.filters;
-      if (action.filter) {
-        filters_ = [...filters_, action.filter];
-      }
+      // if (action.filter) {
+      //   filters_ = [...filters_, ...action.filter];
+      // }
+      console.log("filters", filters_);
       let filteredColumns = await fetchFilteredColumns(filters_);
       let updatedState = state;
       if (!state.mapHasColumns) {
         updatedState = await runAction(state, { type: "toggle-columns" });
-      }
-      if (action.filter) {
-        updatedState = await runAction(updatedState, {
-          type: "add-filter",
-          filter: action.filter,
-        });
       }
       return runAction(updatedState, {
         type: "update-column-filters",
@@ -90,11 +87,6 @@ async function runAction(state, action: Action, dispatch = null) {
         map_id,
         sourceMapQuery.token
       );
-      console.log("MAP DATA", mapData);
-      // the infoMarker coords gets set during the above start-map-query
-      // but then gets overriden by the recieved-map-query, because that state being returned
-      // with the runAction doesn't have the coords yet.
-      // need a better way to handle these cancelTokens
       state.infoMarkerLng = lng.toFixed(4);
       state.infoMarkerLat = lat.toFixed(4);
       return runAction(state, {
