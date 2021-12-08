@@ -19,6 +19,7 @@ import AboutText from "./About";
 import { SettingsPanel } from "./settings-panel";
 import { useAppActions, useMenuState, useSearchState } from "../reducers";
 import { SearchResults } from "./searchbar";
+import Filters from "./Filters";
 
 type ListButtonProps = ButtonProps & {
   icon: React.ComponentType | IconName;
@@ -160,14 +161,14 @@ const Menu = (props) => {
           // Settings are mostly for globe, which is currently disabled
           //h(TabButton, {icon: "settings", text: "Settings", tab: MenuPanel.SETTINGS}),
           h(TabButton, {
-            icon: "info-sign",
-            text: "About",
-            tab: MenuPanel.ABOUT,
-          }),
-          h(TabButton, {
             icon: "filter",
             text: "Filters",
             tab: MenuPanel.FILTERS,
+          }),
+          h(TabButton, {
+            icon: "info-sign",
+            text: "About",
+            tab: MenuPanel.ABOUT,
           }),
         ]),
       ]),

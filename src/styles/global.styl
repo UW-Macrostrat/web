@@ -60,11 +60,22 @@ body, .main-container, #react, #app-holder {
 .search-input:focus {
   outline: none;
 }
+
 .searchresult-header {
   font-size: 1.1em !important;
-  font-weight: bold !important;
-  lettering-spacing: 2px !important;
-  color: #333 !important;
+    font-weight: bold !important;
+    lettering-spacing: 2px !important;
+    color: #333 !important;
+    position: sticky;
+    top: 0px;
+    /* height: 37px; */
+    background: #fff;
+    margin:0;
+    width: 25vw;
+    margin-left: -20px;
+    padding-left: 20px;
+    padding-top: 10px
+    padding-bottom: 10px;
 }
 .searchresult-item {
   font-size: 0.95em !important;
@@ -457,9 +468,15 @@ text {
 .filter-paper {
   border-radius: 0;
 }
-.searchbar-filter-container {
-  padding: 0 !important;
-  background-color: rgba(245, 0, 87, 0.08) !important;
+.filter-container {
+  display: flex;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 1px;
+  margin-bottom: 5px;
+}
+.filter-tag {
+  margin-right: 3px;
 }
 .searchbar-filter-title {
   font-weight: bold;

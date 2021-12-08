@@ -45,7 +45,7 @@ const preloadedState = {
   mapInfo: [],
   columnInfo: {},
   gddInfo: [],
-  searchResults: [],
+  searchResults: null,
   elevationData: [],
   elevationMarkerLocation: [],
   pbdbData: [],

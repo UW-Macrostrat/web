@@ -10,6 +10,7 @@ import {
 import h from "@macrostrat/hyper";
 import classNames from "classnames";
 import { useAppActions, useSearchState } from "../reducers";
+import Filters from "./Filters";
 
 const categoryTitles = {
   lithology: "Lithologies",
@@ -30,13 +31,14 @@ const sortOrder = {
 function SearchResults() {
   const { searchResults } = useSearchState();
   const runAction = useAppActions();
-  if (searchResults == null || searchResults.length == 0)
-    return h("div.search-guidence", [h(SearchGuidance)]);
 
+  if (searchResults == null) {
+    return h("div", [h(Filters), h(SearchGuidance)]);
+  }
   const onSelectResult = (f) => {
     runAction({ type: "set-search-term", term: "" });
     runAction({ type: "async-add-filter", filter: f });
-    runAction({ type: "received-search-query", data: [] });
+    runAction({ type: "received-search-query", data: null });
   };
   const resultCategories = new Set(searchResults.map((d) => d.category));
   // Force the results into a particular order
@@ -61,15 +63,19 @@ function SearchResults() {
     });
   });
 
-  return h("div.search-results", [
-    resultCategoriesArr.map((cat, i) => {
-      return (
-        <div key={`subheader-${i}`}>
-          <h3 className="searchresult-header">{categoryTitles[cat]}</h3>
-          <ul>{categoryResults[i]}</ul>
-        </div>
-      );
-    }),
+  return h("div", [
+    h(Filters),
+    h.if(searchResults.length == 0)("p.search-guidence", [
+      "No results, try again.",
+    ]),
+    h.if(searchResults.length > 0)("div.search-results", [
+      resultCategoriesArr.map((cat, i) => {
+        return h("div", { key: `subheader-${i}` }, [
+          h("h3.searchresult-header", [categoryTitles[cat]]),
+          h("ul", [categoryResults[i]]),
+        ]);
+      }),
+    ]),
   ]);
 }
 
@@ -112,7 +118,7 @@ function Searchbar(props) {
       minimal
       aria-label="Filter"
       intent={Intent.PRIMARY}
-      onClick={toggleFilters}
+      onClick={gainInputFocus}
     />
   );
 
