@@ -57,7 +57,7 @@
   "dependencies": {
     "@blueprintjs/core": "^3.7.0",
     "@loadable/component": "^5.14.1",
-    "@macrostrat/cesium-martini": "*",
+    "@macrostrat/cesium-martini": "^1.2.2",
     "@macrostrat/cesium-viewer": "*",
     "@macrostrat/column-components": "*",
     "@macrostrat/hyper": "^1.4.2",

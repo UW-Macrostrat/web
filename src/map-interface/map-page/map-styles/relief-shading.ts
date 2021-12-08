@@ -25,7 +25,7 @@ export default {
     "mapbox://mapbox.terrain-rgb": {
       url: "mapbox://mapbox.terrain-rgb",
       type: "raster-dem",
-      tileSize: 256,
+      tileSize: 512,
     },
     composite: {
       url: "mapbox://mapbox.mapbox-terrain-v2,mapbox.mapbox-streets-v7",

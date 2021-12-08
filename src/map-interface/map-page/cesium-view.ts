@@ -16,6 +16,7 @@ import { ImageryLayer } from "resium";
 import { useEffect, useMemo } from "react";
 import MVTImageryProvider from "cesium-vector-provider/src";
 import { coreStyle } from "./map-styles";
+import reliefShading from "./map-styles/relief-shading";
 import {
   getHashString,
   setHashString,
@@ -24,14 +25,20 @@ import {
   buildPositionHash,
   getInitialPosition,
 } from "@macrostrat/cesium-viewer/query-string";
+import maplibre from "maplibre-gl/dist/maplibre-gl-dev";
+
+maplibre.accessToken =
+  "pk.eyJ1IjoiamN6YXBsZXdza2kiLCJhIjoiY2szNXA5OWcxMDN2bzNtcnI1cWd1ZXJpYiJ9.Dd5GKlrPhg969y1ayY32cg";
 
 const BaseGeologyLayer = ({ enabled = true, ...rest }) => {
   const provider = useMemo(() => {
     let prov = new MVTImageryProvider({
-      style: coreStyle,
+      style: "mapbox://styles/jczaplewski/cjftzyqhh8o5l2rqu4k68soub", //reliefShading, //"mapbox://styles/jczaplewski/cjftzyqhh8o5l2rqu4k68soub",
+      //"mapbox://styles/jczaplewski/cjftzyqhh8o5l2rqu4k68soub", //coreStyle,
       maximumZoom: 13,
       tileSize: 512,
     });
+    //"mapbox://styles/v1/jczaplewski/ckowdcq8h0gym17p2fh1vwdkd";
     // let filter: any = ["boolean", true];
     // if (visibleMaps != null) {
     //   filter = [
@@ -100,7 +107,7 @@ function MacrostratCesiumView(props) {
       flyTo: globe.flyToProps,
     },
     [
-      h(MacrostratHillshadeLayer),
+      //h(MacrostratHillshadeLayer),
       h(MacrostratSatelliteLayer),
       h(GeologyLayer, { alpha: 0.5 }),
     ]
