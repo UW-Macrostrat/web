@@ -52,3 +52,4 @@ const newReducer = reduceReducers(overallReducer, reducers);
 
 export default newReducer;
 export * from "./hooks";
+export * from "./menu";

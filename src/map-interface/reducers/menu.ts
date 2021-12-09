@@ -2,7 +2,6 @@ enum MenuPanel {
   LAYERS,
   SETTINGS,
   ABOUT,
-  FILTERS,
 }
 
 type MenuAction = {

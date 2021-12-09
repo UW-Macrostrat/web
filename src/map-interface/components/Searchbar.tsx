@@ -1,16 +1,18 @@
-import React, { useState } from "react";
+import React from "react";
 import {
-  Collapse,
   Navbar,
   Button,
-  Intent,
   InputGroup,
   Card,
 } from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
 import classNames from "classnames";
-import { useAppActions, useSearchState } from "../reducers";
-import Filters from "./Filters";
+import {
+  useAppActions,
+  useSearchState,
+} from "../reducers";
+import { useEffect } from "react";
+import { SubtleFilterText } from "./Filters";
 
 const categoryTitles = {
   lithology: "Lithologies",
@@ -33,7 +35,7 @@ function SearchResults() {
   const runAction = useAppActions();
 
   if (searchResults == null) {
-    return h("div", [h(Filters), h(SearchGuidance)]);
+    return h(Card, [h(SearchGuidance)]);
   }
   const onSelectResult = (f) => {
     runAction({ type: "set-search-term", term: "" });
@@ -64,11 +66,8 @@ function SearchResults() {
   });
 
   return h("div", [
-    h(Filters),
-    h.if(searchResults.length == 0)("p.search-guidence", [
-      "No results, try again.",
-    ]),
-    h.if(searchResults.length > 0)("div.search-results", [
+    h.if(searchResults.length == 0)(Card, ["No results, try again."]),
+    h.if(searchResults.length > 0)(Card, { className: "search-results" }, [
       resultCategoriesArr.map((cat, i) => {
         return h("div", { key: `subheader-${i}` }, [
           h("h3.searchresult-header", [categoryTitles[cat]]),
@@ -81,10 +80,7 @@ function SearchResults() {
 
 function Searchbar(props) {
   const runAction = useAppActions();
-  const { term, inputFocus } = useSearchState();
-  // const [barState, setbarState] = useState({
-  //   inputFocus: false,
-  // });
+  const { term, searchResults } = useSearchState();
 
   const gainInputFocus = () => {
     runAction({ type: "set-input-focus", inputFocus: true });
@@ -107,19 +103,14 @@ function Searchbar(props) {
     runAction({ type: "toggle-menu" });
   };
 
-  const toggleFilters = () => {
-    runAction({ type: "toggle-filters" });
-  };
+  useEffect(() => {
+    if (term == "" && searchResults != null) {
+      runAction({ type: "received-search-query", data: null });
+    }
+  }, [term]);
 
-  let filterButton = (
-    <Button
-      disabled={false}
-      icon="filter"
-      minimal
-      aria-label="Filter"
-      intent={Intent.PRIMARY}
-      onClick={gainInputFocus}
-    />
+  const MenuButton = (
+    <Button icon="menu" aria-label="Menu" large onClick={toggleMenu} minimal />
   );
 
   return (
@@ -128,34 +119,16 @@ function Searchbar(props) {
         <Navbar className="searchbar panel">
           <InputGroup
             large={true}
-            //leftIcon="search"
             onChange={handleSearchInput}
             onFocus={gainInputFocus}
             onBlur={loseInputFocus}
+            rightElement={MenuButton}
             placeholder="Search Macrostrat..."
-            rightElement={filterButton}
             value={term}
-          />
-          <Button
-            icon="menu"
-            aria-label="Menu"
-            large
-            onClick={toggleMenu}
-            minimal
           />
         </Navbar>
       </div>
-      {/* <Collapse isOpen={inputFocus} className="search-results-container panel"> */}
-      {/* <Card
-          className={classNames(
-            { hidden: barState.searchTerm.length != 0 },
-            "search-guidance"
-          )}
-        >
-          {h(SearchGuidance)}
-        </Card> */}
-      {/* <Card className={searchResultClasses}>{h(SearchResults)}</Card> */}
-      {/* </Collapse> */}
+      <SubtleFilterText />
     </div>
   );
 }

@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 // Import other components
 import MapContainer from "./map-view";
 import h from "@macrostrat/hyper";
-import Searchbar from "../components/searchbar";
+import Searchbar, { SearchResults } from "../components/searchbar";
 import MenuContainer from "../components/menu";
 import InfoDrawer from "../components/info-drawer";
 import FiltersContainer from "../components/filters";
@@ -10,6 +10,7 @@ import ElevationChart from "../components/elevation-chart/elevation-chart";
 import { ButtonGroup, Button, Spinner } from "@blueprintjs/core";
 import { useSelector, useDispatch } from "react-redux";
 import loadable from "@loadable/component";
+import { useSearchState } from "../reducers";
 
 //const CesiumViewMod = loadable(() => import("./cesium-view"));
 const CesiumViewMod = () => h("div", "Globe is currently disabled");
@@ -78,11 +79,17 @@ const MapTypeSelector = () => {
 };
 
 const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
+  const { inputFocus } = useSearchState();
+
   return h("div#map-page", [
     h(MapView, { backend }),
     h("div.ui", [
       h("div.left-stack", [
-        h("div.panel-container", [h(Searchbar, null), h(MenuContainer, null)]),
+        h("div.panel-container", [
+          h(Searchbar, null),
+          h.if(inputFocus)(SearchResults),
+          h.if(!inputFocus)(MenuContainer, null),
+        ]),
         h("div.spacer"),
       ]),
       h(InfoDrawer, null),

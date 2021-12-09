@@ -62,13 +62,15 @@
 
 .search-results
   max-height 70vh
-  width 20vw
+  width 23vw
   overflow auto
+  padding: 0px 15px 0px 15px;
   li
     padding: 0.2em 0 0.2em 20px
     cursor pointer
     &:first-child
       border-top 1px solid #ddd
+      border-bottom 1px solid #ddd
     border-bottom 1px solid #ddd
     &:hover
       background-color: #eee
@@ -96,3 +98,13 @@
   h2:first-child
     margin-top 0
   overflow-y scroll
+
+.filter-names {
+  margin-top: 6px;
+}
+
+.filter-name-container{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

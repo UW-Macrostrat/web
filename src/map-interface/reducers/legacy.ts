@@ -107,6 +107,7 @@ const update = (state = preloadedState, action: Action) => {
       });
 
     case "toggle-filters":
+      // rework this to open menu panel
       return Object.assign({}, state, {
         filtersOpen: !state.filtersOpen,
       });
