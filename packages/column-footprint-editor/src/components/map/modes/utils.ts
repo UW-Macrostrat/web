@@ -8,12 +8,16 @@ function getClosestLine(lines, point, map) {
   let minDis = null;
   lines.map((line) => {
     const newPoint = nearestPointOnLine(line, point);
+    if (newPoint.properties.dist == Infinity) {
+      return point;
+    }
     const newPixelPoint = map.project(newPoint.geometry.coordinates);
 
     const dist = distance_between_points({
       point1: pixelPoint,
       point2: newPixelPoint,
     });
+
     if (!minDis && dist <= 40) {
       minDis = dist;
       closest = newPoint;
