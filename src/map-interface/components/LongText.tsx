@@ -15,7 +15,7 @@ function LongText(props) {
   const { name, text } = props;
 
   return h("div.map-source-attr", [
-    h.if(text.length <= 250)([h("span.attr", [name, ":"]), text]),
+    h.if(text.length <= 250)([h("span.attr", [name, ": "]), text]),
     h.if(text.length > 250)([
       expanded ? text : text.substr(0, 250),
       h("span", [

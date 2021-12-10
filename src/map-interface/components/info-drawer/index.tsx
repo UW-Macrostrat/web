@@ -58,12 +58,8 @@ function InfoDrawer(props) {
         onCloseClick: () => runAction({ type: "close-infodrawer" }),
       }),
       h("div.overflow-container", [
-        h(
-          "div",
-          { className: rest.fetchingMapInfo ? "infoDrawer-loading" : "hidden" },
-          [h(Spinner)]
-        ),
-        h("div", { className: rest.fetchingMapInfo ? "hidden" : "d" }, [
+        h.if(rest.fetchingMapInfo)("div", [h(Spinner)]),
+        h.if(!rest.fetchingMapInfo)("div", [
           h(FossilCollections, { data: pbdbData, expanded: mapHasFossils }),
           h(GeologicMapInfo, {
             mapInfo,

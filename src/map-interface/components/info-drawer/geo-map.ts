@@ -17,7 +17,7 @@ function GeoMapLines(props) {
   const { lines } = source;
 
   return h("div.map-source-attr", [
-    h("span.attr", ["Lines: "]),
+    h("span.attr", ["Lines "]),
     lines.map((line, i) => {
       const { name, type, direction, descrip } = line;
       return h("div.map-source-line", { key: i }, [
@@ -69,8 +69,9 @@ function GeologicMapInfo(props) {
               h.if(source.age && source.age.length)("div.map-source-attr", [
                 h("span.attr", ["Age: "]),
                 source.age,
-                `(${source.b_int.b_age} - ${source.t_int.t_age})`,
-                h("span.age-chip-ma", ["Ma"]),
+                ` (${source.b_int.b_age} - ${source.t_int.t_age}`,
+                h("span.age-ma", [" Ma"]),
+                ")",
               ]),
               h(LongTextRenderer, {
                 name: "Stratigraphic name(s)",

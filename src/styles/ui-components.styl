@@ -1,13 +1,23 @@
 .expansion-panel
   border-radius 3px
   padding 0
+  .sub-panel-header
+    cursor pointer
+    &:hover
+      background-color #F5F8FA
+    display flex
+    padding 0.1em 0.5em
+    flex-direction row
+    align-items center
+    .title
+      flex-grow 1
   .expansion-panel-header
     z-index: 1;
     position sticky
     top 0px
     cursor pointer
     &:hover
-      background-color #E1E8ED
+      background-color #D8E1E8
     display flex
     padding 0.1em 0.5em
     flex-direction row
