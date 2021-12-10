@@ -1,21 +1,41 @@
 import { useState } from "react";
 import h from "@macrostrat/hyper";
-import { Tag, Card, Button, Collapse } from "@blueprintjs/core";
-import {
-  useFilterState,
-  useAppActions,
-  useMenuState,
-  MenuPanel,
-} from "../reducers";
+import { Tag, Card, Button, Collapse, Switch } from "@blueprintjs/core";
+import { useFilterState, useAppActions } from "../reducers";
 
 function Filter({ filter }) {
   const runAction = useAppActions();
   const remove = () => runAction({ type: "remove-filter", filter });
-  const { name } = filter;
+
+  const swapFilterType = () => {
+    // Copy the filter, otherwise all hell breaks loose
+    let newFilter = JSON.parse(JSON.stringify(filter));
+
+    // Swap the style of filter
+    if (newFilter.type.substr(0, 4) === "all_") {
+      newFilter.type = newFilter.type.replace("all_", "");
+    } else {
+      newFilter.type = `all_${newFilter.type}`;
+    }
+    console.log(newFilter);
+    runAction({ type: "async-add-filter", filter: newFilter });
+  };
+
+  const { name, category, type } = filter;
+
+  const isTypeAll: boolean = type.substr(0, 4) === "all_";
+  const label: string = isTypeAll ? "All matches" : "Best matches";
+
   return h("div.filter-tag", [
     h(Tag, { round: true, onRemove: remove, large: true, interactive: true }, [
       name,
     ]),
+    h.if(category == "lithology")(Switch, {
+      style: { marginLeft: "5px" },
+      checked: isTypeAll,
+      onChange: swapFilterType,
+      label,
+    }),
   ]);
 }
 
@@ -75,7 +95,7 @@ function SubtleFilterText() {
   const iconName = !open ? "chevron-right" : "chevron-down";
 
   const style = {
-    backgroundColor: "#ffc8dcf0",
+    backgroundColor: "rgb(222 241 255 / 95%)",
     padding: "5px",
     paddingBottom: "2px",
     margin: "5px",
