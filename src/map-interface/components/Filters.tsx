@@ -32,6 +32,32 @@ function Filters() {
   ]);
 }
 
+function makeFilterString(filters) {
+  const timeFilters = filters
+    .filter((f) => f.category === "interval")
+    .map((f) => f.name);
+
+  const otherFilters = filters
+    .filter((f) => f.category !== "interval")
+    .map((f) => f.name);
+
+  let otherFiltersString = otherFilters.join(" OR ");
+  let timeFiltersString = timeFilters.join(" OR ");
+
+  if (otherFilters.length > 1 && timeFilters.length > 0) {
+    otherFiltersString = "(" + otherFiltersString + ")";
+  }
+  if (timeFilters.length > 1 && otherFilters.length > 0) {
+    timeFiltersString = "(" + timeFiltersString + ")";
+  }
+
+  const finalString = [timeFiltersString, otherFiltersString]
+    .filter((s) => s.length > 0)
+    .join(" AND ");
+
+  return finalString;
+}
+
 function SubtleFilterText() {
   const [open, setOpen] = useState(false);
   const { filters } = useFilterState();
@@ -40,7 +66,7 @@ function SubtleFilterText() {
     return h("div");
   }
 
-  const filterNames = filters.map((f) => f.name).join(", ");
+  const filterString = makeFilterString(filters);
 
   const onClick = () => {
     setOpen(!open);
@@ -58,7 +84,7 @@ function SubtleFilterText() {
   };
   return h(Card, { style }, [
     h("div.filter-name-container", [
-      h("p.filter-names", [h("b", "Filtering by: "), filterNames]),
+      h("p.filter-names", [h("b", "Filtering by: "), filterString]),
       h(Button, { minimal: true, icon: iconName, onClick }),
     ]),
     h(Collapse, { isOpen: open }, [h(Filters)]),
