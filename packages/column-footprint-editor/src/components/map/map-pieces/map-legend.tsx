@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Tooltip2, Popover2 } from "@blueprintjs/popover2";
 import { Button, Divider } from "@blueprintjs/core";
+import { AddKnownGeom } from "./add-geom";
 
 function MapLegendRow(props) {
   const { col_group, col_group_name, color } = props;
@@ -45,8 +46,6 @@ function MapColLegend(props) {
 
   const [open, setOpen] = useState(true);
 
-  let iconName = open ? "minimize" : "maximize";
-
   if (columns.length == 0) {
     return <div></div>;
   }
@@ -64,17 +63,38 @@ function MapColLegend(props) {
           minimal={true}
           placement="bottom-end"
         >
-          <Button
-            minimal={true}
-            rightIcon={iconName}
-            onClick={() => setOpen(!open)}
-          >
-            <h5 className="h4-0">Column Group Legend</h5>
-          </Button>
+          <Tooltip2 content="Column Legend">
+            <Button rightIcon="map" onClick={() => setOpen(!open)} />
+          </Tooltip2>
         </Popover2>
       </div>
     </div>
   );
 }
 
-export { MapColLegend };
+function MapToolsControl(props) {
+  const { columns = [], editMode, draw, addToChangeSet } = props;
+
+  const addGeomToDraw = (geom) => {
+    let feature = draw.add(geom);
+
+    const obj = {
+      action: "draw.create",
+      feature: { id: feature[0], geometry: geom },
+    };
+
+    addToChangeSet(obj);
+  };
+
+  return (
+    <div>
+      {editMode ? (
+        <AddKnownGeom addGeom={addGeomToDraw} />
+      ) : (
+        <MapColLegend columns={columns} />
+      )}
+    </div>
+  );
+}
+
+export { MapColLegend, MapToolsControl };

@@ -1,4 +1,3 @@
-import React from "react";
 export * from "./properties";
 export * from "./map-legend";
 export * from "./add-geom";

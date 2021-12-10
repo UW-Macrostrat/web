@@ -3,10 +3,8 @@ import { DownloadButton } from ".";
 import { Button, Navbar, Popover, Divider } from "@blueprintjs/core";
 import { AppContext } from "../../context";
 import { useAPIResult } from "@macrostrat/ui-components";
-import { MapColLegend, AddKnownGeom } from "../map/map-pieces";
 import { base } from "../../context/env";
 
-const import_url = base + "import";
 const projects_url = base + "projects";
 
 function unwrapProjects(res) {
@@ -67,44 +65,20 @@ function ProjectDropDown(props) {
   );
 }
 
-function MapToolBar(props) {
-  const { columns, editMode, draw, addToChangeSet } = props;
-
-  const addGeomToDraw = (geom) => {
-    let feature = draw.add(geom);
-
-    const obj = {
-      action: "draw.create",
-      feature: { id: feature[0], geometry: geom },
-    };
-
-    addToChangeSet(obj);
-  };
-
-  return (
-    <div>
-      {editMode ? (
-        <AddKnownGeom addGeom={addGeomToDraw} />
-      ) : (
-        <MapColLegend columns={columns} />
-      )}
-    </div>
-  );
-}
-
 function MapNavBar(props) {
   const {
     onSave,
-    addToChangeSet,
     onCancel,
     enterEditMode,
     enterPropertyMode,
     editMode,
     project_id,
-    legendColumns,
-    draw,
   } = props;
   const { state, runAction } = useContext(AppContext);
+
+  const openImportOverlay = () => {
+    runAction({ type: "import-overlay", payload: { open: true } });
+  };
 
   let projects = useAPIResult(
     projects_url,
@@ -117,39 +91,47 @@ function MapNavBar(props) {
     <div className="navbar-layout">
       <Navbar>
         <div className="nav-contents">
-          <Navbar.Heading>
-            <Popover
-              content={<ProjectDropDown projects={projects} />}
-              position="bottom"
-              minimal={true}
-            >
-              <Button minimal={true}>
-                <b>{state.project.name}</b>
+          <div className="nav-left">
+            <Navbar.Heading>
+              <Button minimal={true} onClick={openImportOverlay}>
+                <h2 style={{ margin: 0 }}>BirdsEye</h2>
               </Button>
-            </Popover>
-          </Navbar.Heading>
-          <Navbar.Divider />
-          <DownloadButton project_id={project_id} />
-          <Button minimal={true} intent="success" onClick={onSave}>
-            Save
-          </Button>
-          <Button minimal={true} intent="danger" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Navbar.Divider />
-          <Button minimal={true} active={editMode} onClick={enterEditMode}>
-            Edit Topology
-          </Button>
-          <Button minimal={true} active={!editMode} onClick={enterPropertyMode}>
-            View / Edit Properties
-          </Button>
-          <Navbar.Divider />
-          <MapToolBar
-            columns={legendColumns}
-            editMode={editMode}
-            addToChangeSet={addToChangeSet}
-            draw={draw}
-          />
+            </Navbar.Heading>
+            <Navbar.Divider />
+            <Navbar.Heading>
+              <Popover
+                content={<ProjectDropDown projects={projects} />}
+                position="bottom"
+                minimal={true}
+              >
+                <Button minimal={true}>
+                  <h3 style={{ margin: 0 }}>Project: {state.project.name}</h3>
+                </Button>
+              </Popover>
+            </Navbar.Heading>
+          </div>
+          <div className="nav-right">
+            <Button minimal={true} active={editMode} onClick={enterEditMode}>
+              Edit Topology
+            </Button>
+            <Button
+              minimal={true}
+              active={!editMode}
+              onClick={enterPropertyMode}
+            >
+              View / Edit Properties
+            </Button>
+            <Navbar.Divider />
+            <div className="nav-btn">
+              <Button minimal={true} intent="success" onClick={onSave}>
+                Save
+              </Button>
+              <Button minimal={true} intent="danger" onClick={onCancel}>
+                Cancel
+              </Button>
+              <DownloadButton project_id={project_id} />
+            </div>
+          </div>
         </div>
       </Navbar>
     </div>

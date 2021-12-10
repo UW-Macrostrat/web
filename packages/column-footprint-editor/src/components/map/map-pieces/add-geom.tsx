@@ -1,9 +1,9 @@
 import React, { useContext, useState } from "react";
 import { AppContext } from "../../../context";
 import { Button, TextArea } from "@blueprintjs/core";
-import { Popover2 } from "@blueprintjs/popover2";
+import { Popover2, Tooltip2 } from "@blueprintjs/popover2";
 import axios from "axios";
-import {base} from "../../../context/env"
+import { base } from "../../../context/env";
 
 function PopoverContent({ addGeom }) {
   const { state, runAction } = useContext(AppContext);
@@ -12,7 +12,7 @@ function PopoverContent({ addGeom }) {
 
   const onClick = async () => {
     console.log(geom);
-    let url = base+"get-line";
+    let url = base + "get-line";
     let res = await axios.post(url, { location: geom });
     let data = res.data;
     let line = data["location"];
@@ -34,13 +34,6 @@ function PopoverContent({ addGeom }) {
 }
 
 export function AddKnownGeom({ addGeom }) {
-  const { state, runAction } = useContext(AppContext);
-
-  // this should probably just be done via postgres and an api route that returns a linestring or set of linestrings
-  //need a function to make sure it's a valid WKT or geojson polygon/multipolygon
-  // need a function to turn it into LineStrings
-  // add to the state.lines
-
   return (
     <div>
       <Popover2
@@ -48,9 +41,9 @@ export function AddKnownGeom({ addGeom }) {
         minimal={true}
         placement="bottom-end"
       >
-        <Button minimal={true}>
-          <h5 className="h4-0">Add Existing Geometry</h5>
-        </Button>
+        <Tooltip2 content="Add Existing Geometry">
+          <Button rightIcon="shapes" />
+        </Tooltip2>
       </Popover2>
     </div>
   );

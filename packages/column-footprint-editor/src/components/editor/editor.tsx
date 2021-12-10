@@ -30,25 +30,30 @@ function ColumnNavBar() {
   const buttonIntent = isEditing ? "danger" : "success";
 
   return (
-    <Navbar>
-      <Navbar.Group>
-        Column ID: {model.col_id}
-        <Navbar.Divider />
-        Project ID: {model.project_id}
-        <Navbar.Divider />
-        <SaveButton
-          minimal={true}
-          disabled={!isEditing && !hasChanges()}
-          onClick={() => {
-            actions.toggleEditing();
-            actions.persistChanges();
-          }}
-        ></SaveButton>
-        <ModelEditButton intent={buttonIntent} minimal={true}>
-          {buttonText}
-        </ModelEditButton>
-      </Navbar.Group>
-    </Navbar>
+    <div className="column-nav-bar">
+      <Navbar>
+        <div className="column-nav-container">
+          <div style={{ display: "flex", alignItems: "center" }}>
+            Column ID: {model.col_id}
+            <Navbar.Divider />
+            Project ID: {model.project_id}
+          </div>
+          <div>
+            <SaveButton
+              minimal={true}
+              disabled={!isEditing && !hasChanges()}
+              onClick={() => {
+                actions.toggleEditing();
+                actions.persistChanges();
+              }}
+            ></SaveButton>
+            <ModelEditButton intent={buttonIntent} minimal={true}>
+              {buttonText}
+            </ModelEditButton>
+          </div>
+        </div>
+      </Navbar>
+    </div>
   );
 }
 

@@ -28,12 +28,17 @@
 
 .nav-contents {
   display: flex;
-  justify-content: space-evenly;
   align-items: center;
+  justify-content: space-between;
   padding-top: 10px;
 }
 
 .toolbar {
   max-width: 300px;
   margin-top: 5px;
+}
+.nav-right,
+.nav-left {
+  display: flex;
+  align-items: center;
 }

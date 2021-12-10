@@ -194,7 +194,7 @@ function EditableProjects() {
 function ImportDialog(props) {
   const { state, runAction } = useContext(AppContext);
 
-  let isCloseButtonShown = state.project != null;
+  const isCloseButtonShown = state.project.project_id != null;
 
   const onClose = () => {
     runAction({ type: "import-overlay", payload: { open: false } });
@@ -205,6 +205,8 @@ function ImportDialog(props) {
       isOpen={state.importOverlayOpen}
       title="Choose a Project"
       isCloseButtonShown={isCloseButtonShown}
+      canOutsideClickClose={isCloseButtonShown}
+      canEscapeKeyClose={isCloseButtonShown}
       onClose={onClose}
     >
       <EditableProjects />

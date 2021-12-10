@@ -23,3 +23,9 @@
   flex-direction: column;
   justify-content: space-between;
 }
+
+.map-tools-control {
+  position: absolute;
+  top: 160px;
+  right: 9px;
+}
