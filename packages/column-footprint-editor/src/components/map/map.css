@@ -24,8 +24,13 @@
   justify-content: space-between;
 }
 
-.map-tools-control {
+.map-tools-control-right {
   position: absolute;
   top: 160px;
   right: 9px;
+}
+.map-tools-control-left {
+  position: absolute;
+  top: 210px;
+  left: 9px;
 }

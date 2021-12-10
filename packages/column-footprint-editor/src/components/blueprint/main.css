@@ -42,3 +42,16 @@
   display: flex;
   align-items: center;
 }
+
+.panel-stack {
+  min-height: 500px;
+}
+.main-dialog-header {
+  margin-top: 5px;
+  margin-left: 5px;
+}
+.btn-holder {
+  float: right;
+  margin-top: -23px;
+  margin-right: -20px;
+}

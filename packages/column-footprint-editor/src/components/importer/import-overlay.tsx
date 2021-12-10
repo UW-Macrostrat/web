@@ -6,6 +6,7 @@ import {
   Collapse,
   Spinner,
   Icon,
+  Divider,
 } from "@blueprintjs/core";
 import { useAPIResult } from "@macrostrat/ui-components";
 import axios from "axios";
@@ -13,35 +14,25 @@ import axios from "axios";
 import { AppContext } from "../../context";
 import { NewProject } from "./new-project";
 import { base } from "../../context/env";
+import { AboutPanel } from "./about-panel";
+import { PanelStack } from "./panel-stack";
 
 const import_url = base + "import";
 
 // https://macrostrat.org/api/v2/defs/projects?all lists projects in macrostrat
 
-function ProjectButtonCollapse(props) {
-  const { project, onClick, onClickImport, text, id } = props;
+function Project(props) {
+  const { project, onClickImport, text } = props;
   return (
     <div style={{ margin: "5px" }} key={project.project_id}>
-      <Button key={project.project_id} onClick={onClick}>
-        {project.name}
-      </Button>
-      <Collapse isOpen={project.project_id == id}>
-        <div
-          style={{
-            borderStyle: "solid",
-            borderRadius: "5px",
-            borderWidth: "1px",
-            padding: "5px",
-          }}
-        >
-          <h5>Project ID: {project.project_id}</h5>
-          <h5>Project Name: {project.name}</h5>
-          <p>Project Description: {project.description}</p>
-          <Button onClick={() => onClickImport(project)} intent="primary">
-            {text}
-          </Button>
-        </div>
-      </Collapse>
+      <div>
+        <h5>Project ID: {project.project_id}</h5>
+        <h5>Project Name: {project.name}</h5>
+        <p>Project Description: {project.description}</p>
+        <Button onClick={() => onClickImport(project)} intent="primary">
+          {text}
+        </Button>
+      </div>
     </div>
   );
 }
@@ -65,24 +56,12 @@ const getMacrostratProjects = () => {
   return data;
 };
 
-function ImportableProjects(props) {
-  const { state, runAction } = useContext(AppContext);
-
-  const [id, setId] = useState(null);
+function ImportableProjectPanel(props) {
+  const { runAction } = useContext(AppContext);
   const [alert, setAlert] = useState(false);
   const [importing, setImporting] = useState(false);
-  const projectData = getMacrostratProjects();
 
-  if (!projectData) return <div></div>;
-
-  const onClick = (i) => {
-    let id_ = projectData[i]["project_id"];
-    if (id_ == id) {
-      setId(null);
-    } else {
-      setId(projectData[i]["project_id"]);
-    }
-  };
+  const { project } = props;
 
   const onClickImport = async (project) => {
     let data = {
@@ -115,34 +94,50 @@ function ImportableProjects(props) {
     : "Wait to be redirected";
 
   return (
-    <Card>
-      <h3>Projects Available for Import</h3>
-      <div style={{ display: "flex", flexWrap: "wrap" }}>
-        {projectData.map((project, i) => {
-          return (
-            <ProjectButtonCollapse
-              key={i}
-              project={project}
-              onClick={() => onClick(i)}
-              onClickImport={onClickImport}
-              text="Import"
-              id={id}
-            />
-          );
-        })}
-      </div>
+    <div>
+      <Project project={project} onClickImport={onClickImport} text="import" />
       <Dialog isOpen={alert} className="import-feedback-dialog">
         <h4>{mainText}</h4>
         {visualComponent}
         <h5>{lowerText}</h5>{" "}
       </Dialog>
-    </Card>
+    </div>
   );
 }
 
-function EditableProjects() {
+function ImportableProjects(props) {
+  const projectData = getMacrostratProjects();
+
+  if (!projectData) return <div></div>;
+
+  const openNewPanel = (project) => {
+    props.openPanel({
+      props: {
+        project,
+      },
+      renderPanel: ImportableProjectPanel,
+      title: "Import " + project.name,
+    });
+  };
+
+  return (
+    <div>
+      <h3>Projects Available for Import</h3>
+      <div style={{ display: "flex", flexWrap: "wrap" }}>
+        {projectData.map((project, i) => {
+          return (
+            <Button key={i} onClick={() => openNewPanel(project)}>
+              {project.name}
+            </Button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function EditableProjects(props) {
   const { state, runAction } = useContext(AppContext);
-  const [id, setId] = useState(null);
 
   let projectsUrl = base + "projects";
   const unwrapProjects = (res) => {
@@ -159,13 +154,16 @@ function EditableProjects() {
   );
   if (!data) return <div></div>;
 
-  const onClick = (i) => {
-    let id_ = data[i]["project_id"];
-    if (id_ == id) {
-      setId(null);
-    } else {
-      setId(data[i]["project_id"]);
-    }
+  const openNewPanel = (project) => {
+    props.openPanel({
+      props: {
+        project,
+        onClickImport: () => changeProjectId(project),
+        text: "Edit",
+      },
+      renderPanel: Project,
+      title: "Edit " + project.name,
+    });
   };
 
   const changeProjectId = (project) => {
@@ -173,21 +171,89 @@ function EditableProjects() {
   };
 
   return (
-    <Card>
+    <div>
       <h3>Projects Available for Editing in Databse</h3>
       {data.map((project, i) => {
         return (
-          <ProjectButtonCollapse
-            key={i}
-            project={project}
-            onClick={() => onClick(i)}
-            onClickImport={() => changeProjectId(project)}
-            text="Edit"
-            id={id}
-          />
+          <Button key={i} onClick={() => openNewPanel(project)}>
+            {project.name}
+          </Button>
         );
       })}
-    </Card>
+    </div>
+  );
+}
+
+enum MenuPanel {
+  PROJECT,
+  ABOUT,
+}
+
+function ImportPanels() {
+  const [panel, setPanel] = useState<MenuPanel>(MenuPanel.PROJECT);
+
+  const setProjects = () => {
+    setPanel(MenuPanel.PROJECT);
+  };
+  const setAbout = () => {
+    setPanel(MenuPanel.ABOUT);
+  };
+  return (
+    <div>
+      <div className="main-dialog-header">
+        <Button
+          rightIcon="send-to-graph"
+          onClick={setProjects}
+          minimal
+          active={panel == MenuPanel.PROJECT}
+        >
+          Projects
+        </Button>
+        <Button
+          rightIcon="info-sign"
+          onClick={setAbout}
+          minimal
+          active={panel == MenuPanel.ABOUT}
+        >
+          About
+        </Button>
+      </div>
+      <Divider />
+      <PanelRender panel={panel} />
+    </div>
+  );
+}
+
+function PanelRender({ panel }) {
+  const initialPanel = {
+    props: {
+      panelNumber: 1,
+    },
+    renderPanel: ProjectPanel,
+    title: "Project Actions",
+  };
+  return (
+    <div>
+      {panel == MenuPanel.ABOUT ? (
+        <AboutPanel />
+      ) : (
+        <PanelStack
+          initialPanel={initialPanel}
+          renderActivePanelOnly={false}
+          className="panel-stack"
+        />
+      )}
+    </div>
+  );
+}
+
+function ProjectPanel(props) {
+  return (
+    <div>
+      <EditableProjects {...props} />
+      <ImportableProjects {...props} />
+      <NewProject {...props} />
+    </div>
   );
 }
 
@@ -203,15 +269,23 @@ function ImportDialog(props) {
   return (
     <Dialog
       isOpen={state.importOverlayOpen}
-      title="Choose a Project"
       isCloseButtonShown={isCloseButtonShown}
       canOutsideClickClose={isCloseButtonShown}
       canEscapeKeyClose={isCloseButtonShown}
       onClose={onClose}
     >
-      <EditableProjects />
-      <ImportableProjects />
-      <NewProject />
+      <Card>
+        <div className="btn-holder">
+          <Button
+            rightIcon="cross"
+            minimal={true}
+            intent="danger"
+            onClick={onClose}
+            disabled={!isCloseButtonShown}
+          />
+        </div>
+        <ImportPanels />
+      </Card>
     </Dialog>
   );
 }

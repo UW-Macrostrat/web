@@ -172,6 +172,10 @@ export function Map() {
     }
   }, [state.columns, edit, mapRef]);
 
+  const mapToolsClassName = edit
+    ? "map-tools-control-left"
+    : "map-tools-control-right";
+
   return (
     <div>
       <ImportDialog />
@@ -189,7 +193,7 @@ export function Map() {
       <div>
         <div className="map-container" ref={mapContainerRef} />
       </div>
-      <div className="map-tools-control">
+      <div className={mapToolsClassName}>
         <MapToolsControl
           draw={drawRef.current}
           addToChangeSet={addToChangeSet}

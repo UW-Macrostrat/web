@@ -7,18 +7,33 @@ import {
   Spinner,
   Icon,
   Dialog,
-  Card,
   Collapse,
 } from "@blueprintjs/core";
 import axios from "axios";
 import { AppContext } from "../../context";
 import { base } from "../../context/env";
 
-function NewProject() {
+function NewProject(props) {
+  const openNewPanel = () => {
+    props.openPanel({
+      renderPanel: NewProjectFormPanel,
+      title: "Create New Project",
+    });
+  };
+  return (
+    <div>
+      <h3>Create a New Project</h3>
+      <Button onClick={openNewPanel} intent="primary">
+        Create
+      </Button>
+    </div>
+  );
+}
+
+function NewProjectFormPanel(props) {
   const { state, runAction } = useContext(AppContext);
   const [alert, setAlert] = useState(false);
   const [importing, setImporting] = useState(false);
-  const [open, setOpen] = useState(false);
   const [project, setProject] = useState({
     name: "",
     description: "",
@@ -64,42 +79,33 @@ function NewProject() {
   let lowerText = importing
     ? "This may take a minute.."
     : "Wait to be redirected";
-
   return (
-    <Card>
-      <h3>Create a New Project</h3>
-      {!open ? (
-        <Button onClick={() => setOpen(true)} intent="primary">
-          Create
+    <div style={{ marginTop: "15px", padding: "5px" }}>
+      <FormGroup label="Project Name">
+        <InputGroup value={project.name} onChange={setName} />
+      </FormGroup>
+      <FormGroup label="Project Description">
+        <EditableText
+          multiline={true}
+          placeholder="Add a project description"
+          value={project.description}
+          onChange={setDescription}
+        />
+      </FormGroup>
+      <div>
+        <Button onClick={() => props.closePanel()} intent="danger">
+          Cancel
         </Button>
-      ) : null}
-      <Collapse isOpen={open}>
-        <FormGroup label="Project Name">
-          <InputGroup value={project.name} onChange={setName} />
-        </FormGroup>
-        <FormGroup label="Project Description">
-          <EditableText
-            multiline={true}
-            placeholder="Add a project description"
-            value={project.description}
-            onChange={setDescription}
-          />
-        </FormGroup>
-        <div>
-          <Button onClick={() => setOpen(false)} intent="danger">
-            Cancel
-          </Button>
-          <Button onClick={onSubmit} intent="success">
-            Create Project
-          </Button>
-        </div>
-      </Collapse>
+        <Button onClick={onSubmit} intent="success">
+          Create Project
+        </Button>
+      </div>
       <Dialog isOpen={alert} className="import-feedback-dialog">
         <h4>{mainText}</h4>
         {visualComponent}
         <h5>{lowerText}</h5>{" "}
       </Dialog>
-    </Card>
+    </div>
   );
 }
 
