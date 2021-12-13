@@ -123,15 +123,17 @@ function ImportableProjects(props) {
   return (
     <div>
       <h3>Projects Available for Import</h3>
-      <div style={{ display: "flex", flexWrap: "wrap" }}>
-        {projectData.map((project, i) => {
-          return (
-            <Button key={i} onClick={() => openNewPanel(project)}>
-              {project.name}
-            </Button>
-          );
-        })}
-      </div>
+      {projectData.map((project, i) => {
+        return (
+          <Button
+            key={i}
+            className="project-btns"
+            onClick={() => openNewPanel(project)}
+          >
+            {project.name}
+          </Button>
+        );
+      })}
     </div>
   );
 }
@@ -175,7 +177,11 @@ function EditableProjects(props) {
       <h3>Projects Available for Editing in Databse</h3>
       {data.map((project, i) => {
         return (
-          <Button key={i} onClick={() => openNewPanel(project)}>
+          <Button
+            key={i}
+            className="project-btns"
+            onClick={() => openNewPanel(project)}
+          >
             {project.name}
           </Button>
         );
