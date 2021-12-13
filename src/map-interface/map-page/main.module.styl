@@ -1,0 +1,21 @@
+.map-page
+  height 100vh
+  width 100vw
+  display flex
+  flex-direction column
+  position relative
+
+.main-ui
+  flex-grow 1
+  position: relative
+
+.panels-overlay
+  position relative
+  margin 0 20px
+  margin-bottom 0
+  z-index 100
+  // Make sure we can still click
+  // on map in background
+  pointer-events none
+  &>div
+    padding 20px 0

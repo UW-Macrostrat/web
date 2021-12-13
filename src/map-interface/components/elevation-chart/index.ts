@@ -194,11 +194,11 @@ function ElevationChartPanel(props) {
   const { elevationData = [], updateElevationMarker } = props;
   const hasElevationData = elevationData.length > 0;
 
+  if (!props.elevationChartOpen) return null;
+
   return h(
-    BottomOverlay,
-    {
-      open: props.elevationChartOpen,
-    },
+    "div.elevation-chart-panel",
+    null,
     h("div.elevation-chart", [
       h(Button, {
         icon: "cross",
@@ -215,8 +215,7 @@ function ElevationChartPanel(props) {
         ),
         h(
           "div.elevation-chart-wrapper",
-
-          { style: { display: hasElevationData ? "block" : "none" } },
+          null,
           h.if(hasElevationData)(ElevationChart, {
             elevationData,
             updateElevationMarker,

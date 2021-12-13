@@ -10,7 +10,7 @@ function BottomOverlay(props) {
     canOutsideClickClose: true,
     enforceFocus: false,
     hasBackdrop: false,
-    usePortal: true,
+    usePortal: false,
     useTallContent: false,
     isOpen: open,
     transitionDuration: 0,
