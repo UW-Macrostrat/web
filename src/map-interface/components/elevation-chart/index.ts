@@ -1,7 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import { connect } from "react-redux";
 import { toggleElevationChart, updateElevationMarker } from "../../actions";
-import { BottomOverlay } from "./overlay";
 import hyper from "@macrostrat/hyper";
 import { Button } from "@blueprintjs/core";
 
