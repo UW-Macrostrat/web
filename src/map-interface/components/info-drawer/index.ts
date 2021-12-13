@@ -60,7 +60,7 @@ function InfoDrawer(props) {
         infoMarkerLat: rest.infoMarkerLat,
         onCloseClick: () => runAction({ type: "close-infodrawer" }),
       }),
-      h("div.overflow-container", [
+      h("div.infodrawer-body", [
         h.if(rest.fetchingMapInfo)("div", [h(Spinner)]),
         h.if(!rest.fetchingMapInfo)("div", [
           h(FossilCollections, { data: pbdbData, expanded: mapHasFossils }),
@@ -85,6 +85,7 @@ function InfoDrawer(props) {
         ]),
       ]),
     ]),
+    h("div.spacer"),
   ]);
 }
 

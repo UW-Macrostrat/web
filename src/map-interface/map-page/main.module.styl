@@ -10,12 +10,31 @@
   position: relative
 
 .panels-overlay
-  position relative
-  margin 0 20px
-  margin-bottom 0
+  position absolute
+  top 20px
+  left 20px
+  right 20px
+  bottom 30px
   z-index 100
   // Make sure we can still click
   // on map in background
   pointer-events none
+
+.left-stack
+  max-width 34em
+  min-width 14em
+  // height 100vh
+  display: flex
+  flex-direction: row
   &>div
-    padding 20px 0
+    pointer-events: all
+  .spacer
+    flex-grow 1
+    width 1px
+    pointer-events: none
+  &>:global(.closeable-card)
+    flex-shrink 1
+    display flex
+    flex-direction: column
+  .panel-container > *
+    transition width 300ms
