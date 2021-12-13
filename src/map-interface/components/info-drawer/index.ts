@@ -1,5 +1,5 @@
 import { Card, Spinner } from "@blueprintjs/core";
-import h from "@macrostrat/hyper";
+import hyper from "@macrostrat/hyper";
 import { connect } from "react-redux";
 import { useAppActions } from "~/map-interface/reducers";
 
@@ -10,6 +10,9 @@ import { MacrostratLinkedData } from "./macrostrat-linked";
 import { RegionalStratigraphy } from "./reg-strat";
 import { Physiography } from "./physiography";
 import { GddExpansion } from "./gdd";
+import styles from "./main.module.styl";
+
+const h = hyper.styled(styles);
 
 function InfoDrawer(props) {
   const {
