@@ -1,0 +1,43 @@
+.elevationChart-root
+  z-index: 0 !important;
+  position: relative !important;
+
+
+.elevation-chart
+  -webkit-transition: 0.8s;
+  -moz-transition: 0.8s;
+  transition: 0.8s;
+  background-color: #ffffff;
+  .close-button
+    float: right
+    margin: 0.25em
+
+.elevation-instructions
+  padding: 20px;
+  text-align: center;
+
+.elevation-chart-wrapper
+  padding-bottom: 20px;
+  :global
+    text
+      fill: #777;
+
+    .axis path, .axis line
+      fill: none;
+      stroke: #000;
+      opacity: 0.2;
+      shape-rendering: crispEdges;
+
+    .x.axis path
+      display: none
+
+    .line
+      fill: none;
+      stroke: rgba(75,192,192,1);
+      stroke-width: 1.5px;
+
+    .tick line
+      opacity: 0.13;
+
+    .tick text
+      font-size: 10px;

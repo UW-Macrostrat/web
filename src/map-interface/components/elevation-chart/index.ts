@@ -1,11 +1,9 @@
-import React, { Component } from "react";
-import Drawer from "@material-ui/core/Drawer";
-import IconButton from "@material-ui/core/IconButton";
-import CloseIcon from "@material-ui/icons/Close";
-import Grid from "@material-ui/core/Grid";
+import { Component } from "react";
 import { connect } from "react-redux";
 import { toggleElevationChart, updateElevationMarker } from "../../actions";
 import { BottomOverlay } from "./overlay";
+import hyper from "@macrostrat/hyper";
+import { Button } from "@blueprintjs/core";
 
 import { select, mouse } from "d3-selection";
 import { scaleLinear } from "d3-scale";
@@ -13,11 +11,15 @@ import { axisBottom, axisLeft } from "d3-axis";
 import { line, area } from "d3-shape";
 import { min, max, extent, bisector } from "d3-array";
 
+import styles from "./main.module.styl";
+const h = hyper.styled(styles);
+
 class ElevationChart extends Component {
   constructor(props) {
     super(props);
     this.chart = null;
     this.close = () => {
+      console.log("Closing elevation chart");
       select("#elevationChart").select("g").remove();
       delete this.chart;
       this.props.toggleElevationChart();
@@ -30,74 +32,32 @@ class ElevationChart extends Component {
       this.drawChart();
     }
 
-    return (
-      <BottomOverlay
-        // anchor={"bottom"}
-        open={this.props.elevationChartOpen}
-        // onBackdropClick={this.props.toggleElevationChart}
-        // transitionDuration={300}
-        // hideBackdrop={true}
-        // disableAutoFocus={true}
-        // ModalProps={{
-        //   classes: {
-        //     root: "elevationChart-root",
-        //   },
-        // }}
-      >
-        <div className="elevationChart-content">
-          <Grid
-            container
-            alignItems="center"
-            alignContent="center"
-            justify="center"
-            classes={{ "spacing-xs-16": "infodrawer-grid" }}
-          >
-            <Grid
-              item
-              xs={12}
-              classes={{
-                "grid-xs-12": "infodrawer-header-grid elevationGridItem",
-              }}
-            >
-              <div className="infodrawer-header">
-                <div className="infodrawer-header-item">
-                  <IconButton
-                    color="default"
-                    aria-label="ElevationChart"
-                    onClick={this.close}
-                  >
-                    <CloseIcon />
-                  </IconButton>
-                </div>
-              </div>
-            </Grid>
+    const hasElevationData = (this.props.elevationData?.length ?? 0) > 0;
 
-            <Grid item xs={12} classes={{ "grid-xs-12": "elevationGridItem" }}>
-              <div>
-                {this.props.elevationData &&
-                this.props.elevationData.length === 0 ? (
-                  <div className="elevationInstructions">
-                    Click two points on the map to draw an elevation profile
-                  </div>
-                ) : (
-                  ""
-                )}
-
-                <div
-                  className={
-                    this.props.elevationData &&
-                    this.props.elevationData.length === 0
-                      ? "hidden"
-                      : "elevationChartWrapper"
-                  }
-                >
-                  <svg id="elevationChart"></svg>
-                </div>
-              </div>
-            </Grid>
-          </Grid>
-        </div>
-      </BottomOverlay>
+    return h(
+      BottomOverlay,
+      {
+        open: this.props.elevationChartOpen,
+      },
+      h("div.elevation-chart", [
+        h(Button, {
+          icon: "cross",
+          minimal: true,
+          className: "close-button",
+          onClick: this.close,
+        }),
+        h("div", [
+          h.if(!hasElevationData)(
+            "div.elevation-instructions",
+            "Click two points on the map to draw an elevation profile"
+          ),
+          h(
+            "div.elevation-chart-wrapper",
+            { style: { display: hasElevationData ? "block" : "none" } },
+            h("svg#elevationChart")
+          ),
+        ]),
+      ])
     );
   }
 
@@ -115,7 +75,6 @@ class ElevationChart extends Component {
     }).left;
 
     let x = scaleLinear().range([0, width]);
-
     let y = scaleLinear().range([height, 0]);
 
     let xAxis = axisBottom().scale(x);
