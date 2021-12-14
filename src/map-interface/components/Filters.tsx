@@ -37,6 +37,7 @@ function Filter({ filter }) {
       [name]
     ),
     h.if(category == "lithology")(Switch, {
+      style: { margin: 0 },
       alignIndicator: "right",
       label,
       checked: isTypeAll,
