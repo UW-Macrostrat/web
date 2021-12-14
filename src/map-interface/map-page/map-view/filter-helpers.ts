@@ -191,9 +191,6 @@ function PBDBHelper(map, bounds, zoom, maxClusterZoom = 6): void {
       timeQuery.push(`max_ma=${f[2][2]}`, `min_ma=${f[1][2]}`);
     });
   }
-  if (map.lithFilters.length) {
-    queryString.push(`lithology=${map.lithFilters.join(",")}`);
-  }
   if (map.stratNameFilters.length) {
     queryString.push(`strat=${map.stratNameFilters.join(",")}`);
   }
