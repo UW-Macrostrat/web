@@ -1,8 +1,5 @@
 import React, { useState } from "react";
-import Collapse from "@material-ui/core/Collapse";
-
-import AddBoxIcon from "@material-ui/icons/AddBoxOutlined";
-import RemoveCircleOutlinedIcon from "@material-ui/icons/RemoveCircleOutlined";
+import { Collapse, Button } from "@blueprintjs/core";
 
 function Article(props) {
   const [expanded, setExpanded] = useState(false);
@@ -31,6 +28,8 @@ function Article(props) {
         .join(", ")
     : "";
 
+  const iconName = expanded ? "chevron-up" : "chevron-down";
+
   return (
     <div className="article">
       <div className="article-title">
@@ -39,23 +38,14 @@ function Article(props) {
           {year.length ? " " + year + ". " : ""}
         </p>
         <a href={props.data.url} target="_blank" className="title-link">
-          <strong>{props.data.title}.</strong>
+          <strong style={{ lineHeight: "24px" }}>{props.data.title}.</strong>
         </a>
 
         <span>
-          <AddBoxIcon
-            onClick={toggleExpand}
-            classes={buttonClasses}
-            className={expanded ? "hidden" : ""}
-          />
-          <RemoveCircleOutlinedIcon
-            onClick={toggleExpand}
-            classes={buttonClasses}
-            className={expanded ? "" : "hidden"}
-          />
+          <Button onClick={toggleExpand} minimal={true} icon={iconName} />
         </span>
       </div>
-      <Collapse in={expanded} timeout="auto" unmountOnExit>
+      <Collapse isOpen={expanded}>
         <span className={expanded ? "" : "hidden"}>
           <div className="quotes">
             {props.data.snippets.map((snippet, si) => {
