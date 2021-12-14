@@ -59,7 +59,7 @@ function InfoDrawer(props) {
         onCloseClick: () => runAction({ type: "close-infodrawer" }),
       }),
       h("div.infodrawer-body", [
-        h.if(rest.fetchingMapInfo)("div", [h(Spinner)]),
+        h.if(rest.fetchingMapInfo)("div.spinner", [h(Spinner)]),
         h.if(!rest.fetchingMapInfo)("div", [
           h(FossilCollections, { data: pbdbData, expanded: mapHasFossils }),
           h(GeologicMapInfo, {
