@@ -1,8 +1,42 @@
-:global
-  .expansion-panel
-    align-items: center;
-    flex-wrap: wrap;
 
+.expansion-panel
+  padding 0
+  border-bottom 1px solid #e0e0e0
+  align-items: center;
+  flex-wrap: wrap;
+  :global
+    .sub-panel-header
+      background-color #EBF1F5
+      padding 5px
+      border-radius 5px 0 0 5px
+      cursor pointer
+      &:hover
+        background-color #F5F8FA
+      display flex
+      padding 0.1em 0.5em
+      flex-direction row
+      align-items center
+      .title
+        flex-grow 1
+    .expansion-panel-header
+      background-color #CED9E0
+      padding 10px
+      z-index: 1;
+      position sticky
+      top 0px
+      cursor pointer
+      &:hover
+        background-color #D8E1E8
+      display flex
+      flex-direction row
+      align-items center
+      .title
+        flex-grow 1
+
+.expansion-children
+  margin 5px 10px 10px
+
+:global
   .expansion-panel-root
     padding-left: 15px !important;
 
@@ -29,34 +63,3 @@
     margin-top: 5px;
     font-size: 80%;
 
-  .expansion-panel
-    padding 0
-    border-bottom 1px solid #e0e0e0
-    .sub-panel-header
-      background-color #EBF1F5
-      padding 5px
-      border-radius 5px 0 0 5px
-      cursor pointer
-      &:hover
-        background-color #F5F8FA
-      display flex
-      padding 0.1em 0.5em
-      flex-direction row
-      align-items center
-      .title
-        flex-grow 1
-    .expansion-panel-header
-      background-color #CED9E0
-      padding 10px
-      z-index: 1;
-      position sticky
-      top 0px
-      cursor pointer
-      margin-bottom 0.5em
-      &:hover
-        background-color #D8E1E8
-      display flex
-      flex-direction row
-      align-items center
-      .title
-        flex-grow 1

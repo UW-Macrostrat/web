@@ -10,13 +10,13 @@
   display flex
   flex-direction column
   :global
-    .expansion-children
-      margin-left 10px
-
     .macrostrat-detail
       margin: 15px 0px;
       display: flex;
       align-items: center;
+
+.expansion-children
+  margin-left 10px
 
 .infodrawer
   pointer-events all
@@ -26,13 +26,21 @@
   padding 0
   overflow hidden
   header
-    padding 15px
-    padding-bottom 0
-    align-items center
+    padding 5px
     display flex
     flex-direction row
-    div
+    align-items: center
+    .spacer
       flex-grow 1
+    .left-icon
+      padding 7px
+
+  .infodrawer-header
+    display flex
+    flex-direction row
+    align-items baseline
+    margin-right 1em
+
 
 .infodrawer-body
   overflow-y scroll

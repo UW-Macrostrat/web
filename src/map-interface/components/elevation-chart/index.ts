@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import { toggleElevationChart, updateElevationMarker } from "../../actions";
 import hyper from "@macrostrat/hyper";
 import { Button } from "@blueprintjs/core";
-
 import { select, mouse } from "d3-selection";
 import { scaleLinear } from "d3-scale";
 import { axisBottom, axisLeft } from "d3-axis";

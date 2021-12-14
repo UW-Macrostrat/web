@@ -1,16 +1,7 @@
 import React from "react";
-import {
-  Navbar,
-  Button,
-  InputGroup,
-  Card,
-} from "@blueprintjs/core";
+import { Navbar, Button, InputGroup, Card } from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
-import classNames from "classnames";
-import {
-  useAppActions,
-  useSearchState,
-} from "../reducers";
+import { useAppActions, useSearchState } from "../reducers";
 import { useEffect } from "react";
 import { SubtleFilterText } from "./Filters";
 
@@ -149,11 +140,5 @@ function SearchGuidance() {
   );
 }
 
-function SearchbarContainer(props) {
-  /** A replacement for the connect component */
-
-  return h(Searchbar, { ...props });
-}
-
-export default SearchbarContainer;
+export default Searchbar;
 export { SearchResults };
