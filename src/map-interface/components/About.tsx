@@ -86,6 +86,16 @@ const AboutText = (props) => {
         <li>
           <a
             className="ref-link"
+            href="https://idzikowski-casey.github.io/personal-site/"
+            target="_blank"
+          >
+            Casey Idzikowski
+          </a>
+          , research specialist and <em>v4</em> developer
+        </li>
+        <li>
+          <a
+            className="ref-link"
             href="http://strata.geology.wisc.edu"
             target="_blank"
           >
