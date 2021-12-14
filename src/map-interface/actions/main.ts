@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 //////////// Async Actions ///////////////
 type FETCH_SEARCH_QUERY = { type: "fetch-search-query"; term: string };
 type ASYNC_ADD_FILTER = { type: "async-add-filter"; filter: any };
-type GET_FILTERED_COLUMNS = { type: "get-filtered-columns"; filter: any };
+type GET_FILTERED_COLUMNS = { type: "get-filtered-columns" };
 type FETCH_GDD = { type: "fetch-gdd" };
 type MAP_QUERY = {
   type: "map-query";

@@ -11,7 +11,6 @@ import {
   asyncGetPBDBOccurences,
   mergePBDBResponses,
 } from "../actions";
-import update from "./legacy";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import { asyncFilterHandler } from "./filters";
@@ -54,14 +53,7 @@ async function runAction(
       const filterAction = await asyncFilterHandler(filter);
       return filterAction;
     case "get-filtered-columns":
-      console.log(state);
-      // WHY IS STATE.FILTERS EMPTY?
-      let filters_ = state.filters;
-      // if (action.filter) {
-      //   filters_ = [...filters_, ...action.filter];
-      // }
-      console.log("filters", filters_);
-      let filteredColumns = await fetchFilteredColumns(filters_);
+      let filteredColumns = await fetchFilteredColumns(state.filters);
       return {
         type: "update-column-filters",
         columns: filteredColumns,
