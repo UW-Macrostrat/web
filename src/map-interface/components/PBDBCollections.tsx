@@ -1,5 +1,5 @@
 import React from "react";
-import { Divider, Tabs, Tab } from "@blueprintjs/core";
+import { Tabs, Tab, Card } from "@blueprintjs/core";
 import { makeOccurrenceTree } from "../utils";
 import h from "@macrostrat/hyper";
 
@@ -125,11 +125,10 @@ function OccurancesPanel(props) {
 
 function PBDBCollections(props) {
   let collections = props.data.map((col, idx) => {
-    const isLast = idx == props.data.length - 1;
     let occurrenceTree = makeOccurrenceTree(col.occurrences);
 
     return (
-      <div key={idx} style={{ marginBottom: "10px" }}>
+      <Card key={idx} style={{ marginBottom: "10px" }}>
         <Tabs animate={true} id={idx}>
           <Tab
             title="Info"
@@ -145,8 +144,7 @@ function PBDBCollections(props) {
             panel={<OccurancesPanel occurrenceTree={occurrenceTree} />}
           />
         </Tabs>
-        {h.if(!isLast)(Divider)}
-      </div>
+      </Card>
     );
   });
 

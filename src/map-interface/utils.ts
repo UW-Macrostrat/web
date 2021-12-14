@@ -186,6 +186,7 @@ export const makeOccurrenceTree = (data) => {
   }
 
   data.forEach((d) => {
+    console.log("DD",d);
     // Some preprocessing
     d.rank = d.rnk ? rankMap[d.rnk] : d.idr ? rankMap[d.idr] : "Unknown";
     d.italics = d.rnk < 6 ? "italics" : "";

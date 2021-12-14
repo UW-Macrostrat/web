@@ -4,6 +4,7 @@ import { SETTINGS } from "../Settings";
 const base = `${SETTINGS.apiDomain}/api/v2`;
 const basev1 = `${SETTINGS.gddDomain}/api/v1`;
 const pbdbURL = `${SETTINGS.pbdbDomain}/data1.2/colls/list.json`;
+const pbdbURLOccs = `${SETTINGS.pbdbDomain}/data1.2/occs/list.json`;
 
 export const doSearchAsync = async (term, cancelToken) => {
   let url = `${base}/mobile/autocomplete?include=interval,lithology,environ,strat_name&query=${term}`;
@@ -269,7 +270,7 @@ export const asyncGetPBDBOccurences = async (collection_nos, cancelToken) => {
     coll_id: collection_nos.join(","),
     show: "phylo,ident",
   };
-  const occurrenceResponse = await axios.get(pbdbURL, {
+  const occurrenceResponse = await axios.get(pbdbURLOccs, {
     cancelToken,
     responseType: "json",
     params,
@@ -283,7 +284,6 @@ export function mergePBDBResponses(occurrenceResponse, collectionResponse) {
 
     let collections = collectionResponse.data.records.map((col) => {
       col.occurrences = [];
-
       occurrences.forEach((occ) => {
         if (occ.cid === col.oid) {
           col.occurrences.push(occ);
