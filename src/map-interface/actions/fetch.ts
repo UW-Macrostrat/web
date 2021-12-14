@@ -3,7 +3,7 @@ import { SETTINGS } from "../Settings";
 
 const base = `${SETTINGS.apiDomain}/api/v2`;
 const basev1 = `${SETTINGS.gddDomain}/api/v1`;
-const pddbURL = `${SETTINGS.pbdbDomain}/data1.2/colls/list.json`;
+const pbdbURL = `${SETTINGS.pbdbDomain}/data1.2/colls/list.json`;
 
 export const doSearchAsync = async (term, cancelToken) => {
   let url = `${base}/mobile/autocomplete?include=interval,lithology,environ,strat_name&query=${term}`;
@@ -255,7 +255,7 @@ export const asyncGetPBDBCollection = async (collection_nos, cancelToken) => {
     show: "ref,time,strat,geo,lith,entname,prot",
     markrefs: true,
   };
-  const collectionResponse = await axios.get(pddbURL, {
+  const collectionResponse = await axios.get(pbdbURL, {
     cancelToken,
     responseType: "json",
     params,
@@ -269,7 +269,7 @@ export const asyncGetPBDBOccurences = async (collection_nos, cancelToken) => {
     coll_id: collection_nos.join(","),
     show: "phylo,ident",
   };
-  const occurrenceResponse = await axios.get(pddbURL, {
+  const occurrenceResponse = await axios.get(pbdbURL, {
     cancelToken,
     responseType: "json",
     params,
