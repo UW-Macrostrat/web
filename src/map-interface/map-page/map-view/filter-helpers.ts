@@ -17,9 +17,6 @@ function getRemovedOrNewFilters(nextProps, map) {
     })
   );
 
-  console.log("EXISTING FILTERS", existingFilters);
-  console.log("NEW FILTERS", newFilters);
-
   let incoming = [
     ...new Set([...newFilters].filter((f) => !existingFilters.has(f))),
   ];

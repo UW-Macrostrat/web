@@ -1,7 +1,9 @@
-function setMapStyle(map, mapStyle, props) {
+function setMapStyle(class_, map, mapStyle, props) {
   mapStyle.layers.forEach((layer) => {
-    let visibility = map.getLayoutProperty(layer.id, "visibility");
-
+    const visibility = map.getLayoutProperty(layer.id, "visibility");
+    if (!map.getSource(layer.source) || !map.getLayer(layer.id)) {
+      return;
+    }
     if (layer.source === "burwell" && layer["source-layer"] === "units") {
       const showBedRock = props.mapHasBedrock ? "visible" : "none";
       if (visibility !== showBedRock) {
@@ -22,7 +24,28 @@ function setMapStyle(map, mapStyle, props) {
     ) {
       const showFossils = props.mapHasFossils ? "visible" : "none";
       if (visibility !== showFossils) {
+        if (showFossils == "visible") {
+          class_.refreshPBDB();
+        }
         map.setLayoutProperty(layer.id, "visibility", showFossils);
+      }
+    } else if (layer.source === "columns") {
+      const showColumns =
+        props.mapHasColumns && !props.filters.length ? "visible" : "none";
+      if (visibility !== showColumns) {
+        map.setLayoutProperty(layer.id, "visibility", showColumns);
+      }
+    } else if (layer.source === "filteredColumns") {
+      const showFilteredColumns =
+        props.mapHasColumns && props.filters.length ? "visible" : "none";
+      if (
+        JSON.stringify(props.filteredColumns) !=
+        JSON.stringify(class_.props.filteredColumns)
+      ) {
+        map.getSource("filteredColumns").setData(props.filteredColumns);
+      }
+      if (visibility != showFilteredColumns) {
+        map.setLayoutProperty(layer.id, "visibility", showFilteredColumns);
       }
     }
   });

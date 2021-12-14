@@ -33,6 +33,7 @@ function SearchResults() {
     runAction({ type: "async-add-filter", filter: f });
     runAction({ type: "received-search-query", data: null });
   };
+
   const resultCategories = new Set(searchResults.map((d) => d.category));
   // Force the results into a particular order
   let resultCategoriesArr = Array.from(resultCategories);

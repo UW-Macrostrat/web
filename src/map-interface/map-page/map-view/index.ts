@@ -3,6 +3,7 @@ import { mapMoved, resetPbdb } from "../../actions";
 import { useAppActions } from "~/map-interface/reducers";
 import Map from "./map";
 import h from "@macrostrat/hyper";
+import { useEffect } from "react";
 
 // Convert to use hooks:
 // https://betterprogramming.pub/convert-redux-to-hooks-d74d79b04f
@@ -37,6 +38,13 @@ const mapDispatchToProps = (dispatch) => {
 
 function MapPropsContainer(props) {
   const runAction = useAppActions();
+
+  useEffect(() => {
+    if (props.mapHasColumns) {
+      runAction({ type: "get-filtered-columns" });
+    }
+  }, [props.filters]);
+
   let mapProps = { ...props, runAction };
   return h(Map, { ...mapProps });
 }

@@ -407,6 +407,7 @@ class Map extends Component<MapProps, {}> {
           this.map.setFilter(layer.layer.id, layer.filters);
         }
       });
+      setMapStyle(this, this.map, mapStyle, this.props);
     });
   }
 
@@ -446,6 +447,7 @@ class Map extends Component<MapProps, {}> {
     Object.keys(mapStyle.sources).forEach((source) => {
       let isPresent = this.map.getSource(source);
       if (isPresent) {
+        console.log("map source", isPresent);
         this.currentSources.push({
           id: source,
           config: mapStyle.sources[source],
@@ -457,6 +459,7 @@ class Map extends Component<MapProps, {}> {
     mapStyle.layers.forEach((layer) => {
       let isPresent = this.map.getLayer(layer.id);
       if (isPresent) {
+        console.log("map layer", isPresent);
         this.currentLayers.push({
           layer: layer,
           filters: this.map.getFilter(layer.id),
@@ -475,7 +478,6 @@ class Map extends Component<MapProps, {}> {
   // and always return `false` to prevent DOM updates
   // We basically intercept the changes, handle them, and tell React to ignore them
   shouldComponentUpdate(nextProps) {
-    console.log("PROPS UPDATED", nextProps);
     setMapStyle(this, this.map, mapStyle, nextProps);
 
     if (
@@ -548,57 +550,9 @@ class Map extends Component<MapProps, {}> {
       } else {
         this.swapBasemap.bind(this)(SETTINGS.baseMapURL);
       }
-      // Add columns
-    } else if (nextProps.mapHasColumns != this.props.mapHasColumns) {
-      if (nextProps.mapHasColumns) {
-        // If filters are applied
-        if (nextProps.filters.length) {
-          this.props.runAction({ type: "get-filtered-columns" });
-          mapStyle.layers.forEach((layer) => {
-            if (layer.source === "filteredColumns") {
-              this.map.setLayoutProperty(layer.id, "visibility", "visible");
-            }
-          });
-          // No filters applied
-        } else {
-          mapStyle.layers.forEach((layer) => {
-            if (layer.source === "columns") {
-              this.map.setLayoutProperty(layer.id, "visibility", "visible");
-            }
-          });
-        }
-        // Remove columns
-      } else {
-        mapStyle.layers.forEach((layer) => {
-          if (
-            layer.source === "columns" ||
-            layer.source === "filteredColumns"
-          ) {
-            this.map.setLayoutProperty(layer.id, "visibility", "none");
-          }
-        });
-      }
-    } else if (
-      JSON.stringify(nextProps.filteredColumns) !=
-      JSON.stringify(this.props.filteredColumns)
-    ) {
-      this.map.getSource("filteredColumns").setData(nextProps.filteredColumns);
-
-      if (this.map.getSource("columns")) {
-        mapStyle.layers.forEach((layer) => {
-          if (layer.source === "columns") {
-            this.map.setLayoutProperty(layer.id, "visibility", "none");
-          }
-        });
-        mapStyle.layers.forEach((layer) => {
-          if (layer.source === "filteredColumns") {
-            this.map.setLayoutProperty(layer.id, "visibility", "visible");
-          }
-        });
-      }
-
-      // Handle changes to map filters
-    } else if (nextProps.filters.length != this.props.filters.length) {
+    }
+    // Handle changes to map filters
+    else if (nextProps.filters.length != this.props.filters.length) {
       // If all filters have been removed simply reset the filter states
       if (nextProps.filters.length === 0) {
         this.filters = [];
