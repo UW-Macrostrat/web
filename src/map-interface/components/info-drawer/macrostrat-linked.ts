@@ -1,18 +1,11 @@
 import h from "@macrostrat/hyper";
-import { Typography } from "@material-ui/core";
 import AgeChip from "../AgeChip";
 import AttrChip from "../AttrChip";
 import MacrostratAgeChip from "../MacrostratAgeChip";
 import { ExpansionPanel } from "../expansion-panel";
 
-let Divider = () => h("div.whitespace-divider");
-
 function MacrostratLinkedData(props) {
   const { mapInfo, bedrockMatchExpanded, source } = props;
-
-  if (!mapInfo || !mapInfo.mapData || !mapInfo.mapData.length) {
-    return h("div");
-  }
 
   return h("span", [
     h(

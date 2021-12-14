@@ -37,11 +37,7 @@ function GeoMapLines(props) {
 }
 
 function GeologicMapInfo(props) {
-  const { mapInfo, bedrockExpanded, source } = props;
-
-  if (!mapInfo || !mapInfo.mapData || !mapInfo.mapData.length) {
-    return h("div");
-  }
+  const { bedrockExpanded, source } = props;
 
   return h("span", [
     h(

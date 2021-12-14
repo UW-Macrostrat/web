@@ -31,9 +31,7 @@ function InfoDrawer(props) {
   };
 
   if (!mapInfo || !mapInfo.mapData) {
-    mapInfo = {
-      mapData: [],
-    };
+    return h("div");
   }
 
   let source =
