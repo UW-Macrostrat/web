@@ -27,14 +27,26 @@ function Filter({ filter }) {
   const label: string = isTypeAll ? "All matches" : "Best matches";
 
   return h("div.filter-tag", [
-    h(Tag, { round: true, onRemove: remove, large: true, interactive: true }, [
-      name,
+    h("div.flex", [
+      h(
+        Tag,
+        {
+          onRemove: remove,
+          large: true,
+          interactive: true,
+          style: { backgroundColor: "#D9822B" },
+        },
+        [name]
+      ),
+      h.if(category == "lithology")("p", { style: { marginLeft: "5px" } }, [
+        label,
+      ]),
     ]),
     h.if(category == "lithology")(Switch, {
       style: { marginLeft: "5px" },
+      alignIndicator: "right",
       checked: isTypeAll,
       onChange: swapFilterType,
-      label,
     }),
   ]);
 }
@@ -94,15 +106,7 @@ function SubtleFilterText() {
 
   const iconName = !open ? "chevron-right" : "chevron-down";
 
-  const style = {
-    backgroundColor: "rgb(222 241 255 / 95%)",
-    padding: "5px",
-    paddingBottom: "2px",
-    margin: "5px",
-    marginBottom: "7px",
-    marginTop: "-9px",
-  };
-  return h(Card, { style }, [
+  return h(Card, { className: "filter-tongue" }, [
     h("div.filter-name-container", [
       h("p.filter-names", [h("b", "Filtering by: "), filterString]),
       h(Button, { minimal: true, icon: iconName, onClick }),
