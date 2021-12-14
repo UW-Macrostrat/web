@@ -27,24 +27,18 @@ function Filter({ filter }) {
   const label: string = isTypeAll ? "All matches" : "Best matches";
 
   return h("div.filter-tag", [
-    h("div.flex", [
-      h(
-        Tag,
-        {
-          onRemove: remove,
-          large: true,
-          interactive: true,
-          style: { backgroundColor: "#D9822B" },
-        },
-        [name]
-      ),
-      h.if(category == "lithology")("p", { style: { marginLeft: "5px" } }, [
-        label,
-      ]),
-    ]),
+    h(
+      Tag,
+      {
+        onRemove: remove,
+        interactive: true,
+        style: { backgroundColor: "#D9822B" },
+      },
+      [name]
+    ),
     h.if(category == "lithology")(Switch, {
-      style: { marginLeft: "5px" },
       alignIndicator: "right",
+      label,
       checked: isTypeAll,
       onChange: swapFilterType,
     }),
