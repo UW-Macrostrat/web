@@ -475,6 +475,9 @@ class Map extends Component<MapProps, {}> {
   // and always return `false` to prevent DOM updates
   // We basically intercept the changes, handle them, and tell React to ignore them
   shouldComponentUpdate(nextProps) {
+    console.log("PROPS UPDATED", nextProps);
+    setMapStyle(this, this.map, mapStyle, nextProps);
+
     if (
       !nextProps.elevationMarkerLocation.length ||
       (nextProps.elevationMarkerLocation[0] !=
@@ -594,13 +597,6 @@ class Map extends Component<MapProps, {}> {
         });
       }
 
-      // Fossils
-    } else if (nextProps.mapHasFossils != this.props.mapHasFossils) {
-      // Add fossils
-      if (nextProps.mapHasFossils) {
-        // Force a hit to the API to refresh
-        this.refreshPBDB();
-      }
       // Handle changes to map filters
     } else if (nextProps.filters.length != this.props.filters.length) {
       // If all filters have been removed simply reset the filter states
@@ -625,23 +621,16 @@ class Map extends Component<MapProps, {}> {
           });
         }
 
-        if (this.props.mapHasFossils === true) {
+        if (nextProps.mapHasFossils === true) {
           this.refreshPBDB();
         }
+
         return false;
       }
 
       this.handleFilterChanges(nextProps);
 
-      // if (nextProps.mapHasColumns) {
-      //   if (nextProps.filters.length) {
-      //     this.props.runAction({
-      //       type: "get-filtered-columns",
-      //     });
-      //   }
-      // }
-
-      if (this.props.mapHasFossils === true) {
+      if (nextProps.mapHasFossils === true) {
         this.refreshPBDB();
       }
 
@@ -653,8 +642,6 @@ class Map extends Component<MapProps, {}> {
       // Update the map styles
       this.applyFilters();
       return false;
-    } else {
-      setMapStyle(this.map, mapStyle, nextProps);
     }
     return false;
   }

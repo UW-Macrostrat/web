@@ -6,9 +6,6 @@ import { SETTINGS } from "../../Settings";
  * @returns void
  */
 function getRemovedOrNewFilters(nextProps, map) {
-  console.log("PROPS FILTERS", map.props.filters);
-  console.log("NEXT FILTERS", nextProps.filters);
-
   let existingFilters = new Set(
     map.props.filters.map((f) => {
       return `${f.category}|${f.type}|${f.name}`;
@@ -29,9 +26,6 @@ function getRemovedOrNewFilters(nextProps, map) {
   let outgoing = [
     ...new Set([...existingFilters].filter((f) => !newFilters.has(f))),
   ];
-
-  console.log("INCOMING", incoming);
-  console.log("OUTGOING", outgoing);
 
   // if a filter was removed
   if (outgoing.length) {
