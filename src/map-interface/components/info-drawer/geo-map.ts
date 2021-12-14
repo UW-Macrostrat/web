@@ -1,5 +1,5 @@
 import h from "@macrostrat/hyper";
-import { ExpansionPanel } from "./ExpansionPanel";
+import { ExpansionPanel } from "../expansion-panel";
 import Reference from "../Reference";
 import LongText from "../LongText";
 

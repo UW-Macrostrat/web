@@ -1,5 +1,5 @@
 import h from "@macrostrat/hyper";
-import { ExpansionPanel } from "./ExpansionPanel";
+import { ExpansionPanel } from "../expansion-panel";
 
 function Physiography(props) {
   const { mapInfo } = props;

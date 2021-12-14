@@ -1,7 +1,7 @@
 import { Spinner } from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
 import Journal from "../gdd/Journal";
-import { ExpansionPanel } from "./ExpansionPanel";
+import { ExpansionPanel } from "../expansion-panel";
 
 function GddExpansion(props) {
   const { mapInfo, gddInfo, openGdd, fetchingGdd } = props;

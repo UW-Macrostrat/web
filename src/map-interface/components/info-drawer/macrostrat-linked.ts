@@ -3,7 +3,7 @@ import { Typography } from "@material-ui/core";
 import AgeChip from "../AgeChip";
 import AttrChip from "../AttrChip";
 import MacrostratAgeChip from "../MacrostratAgeChip";
-import { ExpansionPanel } from "./ExpansionPanel";
+import { ExpansionPanel } from "../expansion-panel";
 
 let Divider = () => h("div.whitespace-divider");
 
