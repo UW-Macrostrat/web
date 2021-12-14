@@ -175,7 +175,15 @@ const update = (state = preloadedState, action: Action) => {
           if (d.name != action.filter.name) return d;
         }),
       });
-
+    case "clear-filters":
+      updateURI(
+        Object.assign({}, state, {
+          filters: [],
+        })
+      );
+      return Object.assign({}, state, {
+        filters: [],
+      });
     case "start-map-query":
       if (state.mapInfoCancelToken) {
         state.mapInfoCancelToken.cancel();

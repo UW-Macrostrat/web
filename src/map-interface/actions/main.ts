@@ -32,6 +32,7 @@ type TOGGLE_FILTERS = { type: "toggle-filters" };
 type ADD_FILTER = { type: "add-filter"; filter: any };
 type REMOVE_FILTER = { type: "remove-filter"; filter: any };
 type UPDATE_COLUMN_FILTERS = { type: "update-column-filters"; columns: any };
+type CLEAR_FILTERS = { type: "clear-filters" };
 
 type START_MAP_QUERY = {
   type: "start-map-query";
@@ -95,6 +96,7 @@ type SET_MAP_BACKEND = { type: "set-map-backend"; backend: any };
 type UPDATE_STATE = { type: "update-state"; state: any };
 
 export type Action =
+  | CLEAR_FILTERS
   | SET_INPUT_FOCUS
   | SET_SEARCH_TERM
   | GET_PBDB

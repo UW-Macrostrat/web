@@ -1,6 +1,6 @@
 import { useState } from "react";
 import h from "@macrostrat/hyper";
-import { Tag, Card, Button, Collapse, Switch } from "@blueprintjs/core";
+import { Tag, Card, Button, Collapse, Switch, Icon } from "@blueprintjs/core";
 import { useFilterState, useAppActions } from "../reducers";
 
 function Filter({ filter }) {
@@ -87,6 +87,7 @@ function makeFilterString(filters) {
 function SubtleFilterText() {
   const [open, setOpen] = useState(false);
   const { filters } = useFilterState();
+  const runAction = useAppActions();
 
   if (filters.length == 0) {
     return h("div");
@@ -97,6 +98,9 @@ function SubtleFilterText() {
   const onClick = () => {
     setOpen(!open);
   };
+  const onRemoveAll = () => {
+    runAction({ type: "clear-filters" });
+  };
 
   const iconName = !open ? "chevron-right" : "chevron-down";
 
@@ -105,6 +109,7 @@ function SubtleFilterText() {
       h("p.filter-names", [h("b", "Filtering by: "), filterString]),
       h(Button, { minimal: true, icon: iconName, onClick }),
     ]),
+    h.if(!open)("div.remove", { onClick: onRemoveAll }, ["remove all"]),
     h(Collapse, { isOpen: open }, [h(Filters)]),
   ]);
 }
