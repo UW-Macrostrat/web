@@ -5,8 +5,9 @@ import { ExpansionPanel } from "../expansion-panel";
 
 function GddExpansion(props) {
   const { mapInfo, gddInfo, openGdd, fetchingGdd } = props;
+  const { mapData } = mapInfo;
 
-  if (!mapInfo.mapData[0].strat_name.length) return h("div");
+  if (!mapData[0] || !mapData[0].strat_name.length) return h("div");
 
   return h("span", [
     h(

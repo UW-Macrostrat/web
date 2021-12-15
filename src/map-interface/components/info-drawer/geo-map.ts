@@ -39,6 +39,8 @@ function GeoMapLines(props) {
 function GeologicMapInfo(props) {
   const { bedrockExpanded, source } = props;
 
+  if (!source.name) return h("div");
+
   return h("span", [
     h(
       ExpansionPanel,

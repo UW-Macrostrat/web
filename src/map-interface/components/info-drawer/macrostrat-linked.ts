@@ -7,6 +7,8 @@ import { ExpansionPanel } from "../expansion-panel";
 function MacrostratLinkedData(props) {
   const { mapInfo, bedrockMatchExpanded, source } = props;
 
+  if (!mapInfo.mapData[0]) return h("div");
+
   return h("span", [
     h(
       ExpansionPanel,
