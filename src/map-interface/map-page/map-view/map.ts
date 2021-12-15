@@ -377,6 +377,9 @@ class Map extends Component<MapProps, {}> {
         ],
       });
 
+      const iconSize = this.props.mapHasSatellite ? 0.1 : 0.8;
+
+      this.map.setLayoutProperty("infoMarker", "icon-size", iconSize);
       this.map.setLayoutProperty("infoMarker", "visibility", "visible");
     });
 
@@ -447,7 +450,6 @@ class Map extends Component<MapProps, {}> {
     Object.keys(mapStyle.sources).forEach((source) => {
       let isPresent = this.map.getSource(source);
       if (isPresent) {
-        console.log("map source", isPresent);
         this.currentSources.push({
           id: source,
           config: mapStyle.sources[source],
@@ -459,7 +461,6 @@ class Map extends Component<MapProps, {}> {
     mapStyle.layers.forEach((layer) => {
       let isPresent = this.map.getLayer(layer.id);
       if (isPresent) {
-        console.log("map layer", isPresent);
         this.currentLayers.push({
           layer: layer,
           filters: this.map.getFilter(layer.id),
