@@ -1,5 +1,4 @@
 
-
 .infodrawer-container
   width 30em
   position absolute
@@ -21,6 +20,7 @@
 .infodrawer
   pointer-events all
   max-height 100%
+  max-width 100%
   display flex
   flex-direction column
   padding 0
@@ -51,4 +51,13 @@
 
 .spinner{
   margin: 10px;
+}
+
+@media screen and (max-width: 768px) {
+  .infodrawer-container{
+    width: 100vw;
+    height: 100vh;
+    z-index: 200;
+    pointer-events: all;
+  }
 }

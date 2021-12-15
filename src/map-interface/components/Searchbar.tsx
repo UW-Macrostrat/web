@@ -52,7 +52,7 @@ function SearchResults() {
             onSelectResult(item);
           },
         },
-        item.name
+        h("div.text", [item.name])
       );
     });
   });
@@ -62,7 +62,7 @@ function SearchResults() {
     h.if(searchResults.length > 0)(Card, { className: "search-results" }, [
       resultCategoriesArr.map((cat, i) => {
         return h("div", { key: `subheader-${i}` }, [
-          h("h3.searchresult-header", [categoryTitles[cat]]),
+          h("div.searchresult-header", [h("div.text", [categoryTitles[cat]])]),
           h("ul", [categoryResults[i]]),
         ]);
       }),

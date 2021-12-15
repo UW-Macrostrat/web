@@ -46,12 +46,13 @@
   max-height 70vh
   max-width 310px
   overflow auto
-  padding: 0px 15px 0px 15px;
+  padding: 0;
   li
+    .text
+      padding-left 15px
     padding: 0.2em 0 0.2em 20px
     cursor pointer
     &:first-child
-      border-top 1px solid #ddd
       border-bottom 1px solid #ddd
     border-bottom 1px solid #ddd
     &:hover
@@ -91,6 +92,7 @@
   justify-content: space-between;
   align-items: center;
 }
+
 .filter-tongue{
   background-color: #def1fff2;
   padding: 5px;
@@ -99,4 +101,22 @@
   max-width: 300px;
   margin-bottom: 7px;
   margin-top: -9px;
+}
+
+
+@media only screen and (max-width: 768px) {
+  /* For mobile phones: */
+  .navbar-holder{
+    width: 100vw;
+    left:0;
+  }
+  .searchbar{
+    margin-bottom: 0;
+  }
+  .search-results{
+    max-height: 93vh;
+    width: 100vw;
+    max-width:100vw;
+  }
+
 }
