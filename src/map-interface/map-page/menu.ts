@@ -1,9 +1,9 @@
 import h from "@macrostrat/hyper";
-import ColumnIcon from "./icons/ColumnIcon";
-import LineIcon from "./icons/LineIcon";
-import ElevationIcon from "./icons/ElevationIcon";
-import FossilIcon from "./icons/FossilIcon";
-import BedrockIcon from "./icons/BedrockIcon";
+import ColumnIcon from "../components/icons/ColumnIcon";
+import LineIcon from "../components/icons/LineIcon";
+import ElevationIcon from "../components/icons/ElevationIcon";
+import FossilIcon from "../components/icons/FossilIcon";
+import BedrockIcon from "../components/icons/BedrockIcon";
 import {
   Button,
   ButtonGroup,
@@ -11,11 +11,11 @@ import {
   ButtonProps,
   IconName,
 } from "@blueprintjs/core";
-import { CloseableCard } from "./CloseableCard";
+import { CloseableCard } from "../components/CloseableCard";
 import { useSelector, useDispatch } from "react-redux";
 import { MenuPanel } from "../reducers/menu";
-import AboutText from "./About";
-import { SettingsPanel } from "./settings-panel";
+import AboutText from "../components/About";
+import { SettingsPanel } from "../components/settings-panel";
 import { useAppActions, useMenuState } from "../reducers";
 
 type ListButtonProps = ButtonProps & {

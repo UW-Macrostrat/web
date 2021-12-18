@@ -20,10 +20,18 @@
   // on map in background
   pointer-events none
 
+:global(.bp3-panel-stack-view)
+  position: relative;
+  overflow: unset
+
+
 .left-stack
   max-width 34em
   min-width 14em
   // height 100vh
+  position absolute
+  top 0
+  bottom 0
   display: flex
   flex-direction: row
   &>div
@@ -32,12 +40,16 @@
     flex-grow 1
     width 1px
     pointer-events: none
-  &>:global(.closeable-card)
+  :global(.closeable-card)
     flex-shrink 1
     display flex
     flex-direction: column
   .panel-container > *
     transition width 300ms
+
+.panel-container
+  display flex
+  flex-direction: column
 
 
 @media only screen and (max-width: 768px) {

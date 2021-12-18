@@ -86,6 +86,11 @@ module.exports = {
           },
         ],
       },
+      {
+        test: /\.mdx?$/,
+        use: [babelLoader, "@mdx-js/loader"],
+        exclude: /node_modules/,
+      },
     ],
   },
   resolve: {
