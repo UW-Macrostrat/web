@@ -1,0 +1,31 @@
+.card-header-left button
+  margin-right 5px
+
+.card-content
+  h2:first-child
+    margin-top 0
+  overflow-y scroll
+  padding 15px
+  padding-top 10px
+  min-height 0
+
+
+.closeable-card
+  padding 0
+  min-height 40px
+  flex-shrink 1
+  display flex
+  flex-direction: column
+  .card-header, .card-header-left
+    display: flex
+    align-items: center
+    .spacer
+      flex-grow 1
+  .card-header-left
+    flex-grow 1
+    justify-content: flex-start
+  .card-header
+    justify-content space-between
+    padding 5px
+    border-bottom 1px solid #ddd
+    height 40px

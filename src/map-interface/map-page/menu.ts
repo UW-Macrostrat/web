@@ -1,4 +1,4 @@
-import h from "@macrostrat/hyper";
+import hyper from "@macrostrat/hyper";
 import ColumnIcon from "../components/icons/ColumnIcon";
 import LineIcon from "../components/icons/LineIcon";
 import ElevationIcon from "../components/icons/ElevationIcon";
@@ -11,13 +11,17 @@ import {
   ButtonProps,
   IconName,
   PanelStack2,
+  Panel,
 } from "@blueprintjs/core";
-import { CloseableCard } from "../components/CloseableCard";
+import { CloseableCard } from "../components/closeable-card";
 import { useSelector, useDispatch } from "react-redux";
 import { MenuPanel } from "../reducers/menu";
 import AboutText from "../components/About";
 import { SettingsPanel } from "../components/settings-panel";
 import { useAppActions, useMenuState } from "../reducers";
+import styles from "./main.module.styl";
+
+const h = hyper.styled(styles);
 
 type ListButtonProps = ButtonProps & {
   icon: React.ComponentType | IconName;
@@ -105,28 +109,39 @@ const LayerList = (props) => {
   ]);
 };
 
-const PanelContent = (props: { activePanel: MenuPanel }) => {
+function useMainPanel(): Panel<{}> {
   const activePanel = useSelector((state) => state.menu.activePanel);
   switch (activePanel) {
     case MenuPanel.LAYERS:
-      return h(LayerList);
+      return {
+        title: "Layers",
+        renderPanel: LayerList,
+      };
     case MenuPanel.SETTINGS:
-      return h(SettingsPanel);
+      return {
+        title: "Settings",
+        renderPanel: SettingsPanel,
+      };
     case MenuPanel.ABOUT:
-      return h(AboutText);
+      return {
+        title: "About",
+        renderPanel: AboutText,
+      };
   }
   return null;
-};
+}
 
 const Menu = (props) => {
   const runAction = useAppActions();
-  const { menuOpen } = useMenuState();
+  const { menuOpen, panelStack = [] } = useMenuState();
 
   const toggleMenu = () => {
     runAction({ type: "toggle-menu" });
   };
 
   let exitTransition = { exit: 300 };
+
+  const stack = [useMainPanel(), ...panelStack];
 
   return h(
     CloseableCard,
@@ -138,7 +153,7 @@ const Menu = (props) => {
     },
     [
       h(CloseableCard.Header, [
-        h("div.buttons", [
+        h.if(stack.length == 1)("div.buttons", [
           h(TabButton, {
             icon: "layers",
             text: "Layers",
@@ -152,16 +167,23 @@ const Menu = (props) => {
             tab: MenuPanel.ABOUT,
           }),
         ]),
+        h.if(stack.length > 1)([
+          h(
+            Button,
+            {
+              icon: "chevron-left",
+              minimal: true,
+              onClick: () => runAction({ type: "close-panel" }),
+            },
+            stack[stack.length - 2]?.title ?? "Back"
+          ),
+          h("h2.panel-title", stack[stack.length - 1]?.title),
+        ]),
       ]),
       h(PanelStack2, {
         showPanelHeader: false,
-        stack: [
-          {
-            renderPanel() {
-              return h(PanelContent);
-            },
-          },
-        ],
+        renderActivePanelOnly: true,
+        stack,
       }),
     ]
   );

@@ -34,23 +34,21 @@
   bottom 0
   display: flex
   flex-direction: row
-  &>div
-    pointer-events: all
   .spacer
     flex-grow 1
     width 1px
     pointer-events: none
-  :global(.closeable-card)
-    flex-shrink 1
-    display flex
-    flex-direction: column
   .panel-container > *
     transition width 300ms
 
 .panel-container
   display flex
   flex-direction: column
+  &>div
+    pointer-events all
 
+.panel-title
+  font-size 16px
 
 @media only screen and (max-width: 768px) {
   /* For mobile phones: */
