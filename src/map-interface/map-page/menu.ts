@@ -10,6 +10,7 @@ import {
   Alignment,
   ButtonProps,
   IconName,
+  PanelStack2,
 } from "@blueprintjs/core";
 import { CloseableCard } from "../components/CloseableCard";
 import { useSelector, useDispatch } from "react-redux";
@@ -152,7 +153,16 @@ const Menu = (props) => {
           }),
         ]),
       ]),
-      h(PanelContent),
+      h(PanelStack2, {
+        showPanelHeader: false,
+        stack: [
+          {
+            renderPanel() {
+              return h(PanelContent);
+            },
+          },
+        ],
+      }),
     ]
   );
 };
