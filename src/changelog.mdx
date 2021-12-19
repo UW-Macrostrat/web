@@ -1,0 +1,28 @@
+## `[4.0.0]`: Unreleased
+
+The 4.0 series represents the first major update to the Macrostrat frontend in
+three years. It is the first major version of the Macrostrat web interface that
+is an incremental update, i.e., it is an evolution of the v3 codebase rather
+than a complete rewrite. The 4.0 milestone does not add much user-facing
+functionality, but it simplifies, modularizes, and modernizes the codebase to
+better enable collaborative and iterative development.
+
+Based on this initial release, we will be able to shift to a higher cadence of
+releases. Future iterations in the 4.0 series will add functionality such as
+stratigraphic columns, paleogeography, a digital globe, geochemical data
+holdings, and more.
+
+### User-facing changes
+
+- Removed [Material UI](https://material-ui.com/) in favor of [Blueprint](https://blueprintjs.com/)
+- Make panels simpler and more information-dense
+- Add an oblique map view with 3D terrain
+- Numerous bug fixes for filtering map data
+
+### Internal changes
+
+- Convert codebase to Typescript
+- Start converting JSX to hyperscript
+- Update React code to use functional components and hooks
+- Improve handling of query strings
+- Much better state management system and more consistent action handling

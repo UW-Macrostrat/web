@@ -1,11 +1,10 @@
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 // Import other components
 import MapContainer from "./map-view";
 import hyper from "@macrostrat/hyper";
 import Searchbar, { SearchResults } from "../components/searchbar";
-import MenuContainer from "../components/menu";
+import MenuContainer from "./menu";
 import InfoDrawer from "../components/info-drawer";
-import FiltersContainer from "../components/filters";
 import ElevationChart from "../components/elevation-chart";
 import { ButtonGroup, Button, Spinner } from "@blueprintjs/core";
 import { useSelector, useDispatch } from "react-redux";

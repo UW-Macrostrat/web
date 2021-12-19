@@ -159,10 +159,9 @@ function useSearchState() {
 }
 
 function useMenuState() {
-  const { update, menu } = useSelector((state) => state);
-  const { menuOpen } = update;
-  const { activePanel } = menu;
-  return { menuOpen, activePanel };
+  const menuOpen = useSelector((state) => state.update.menuOpen);
+  const menu = useSelector((state) => state.menu);
+  return { menuOpen, ...menu };
 }
 
 function useMapHasBools() {

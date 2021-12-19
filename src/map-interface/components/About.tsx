@@ -1,6 +1,14 @@
 import React from "react";
+import h from "react-hyperscript";
+import Changelog from "../../changelog.mdx";
+import { useAppActions } from "../reducers";
+
+function ChangelogPanel() {
+  return h("div.bp3-text", [h(Changelog)]);
+}
 
 const AboutText = (props) => {
+  const runAction = useAppActions();
   return (
     <div className="about">
       <h2>Macrostrat Geologic Map</h2>
@@ -11,6 +19,20 @@ const AboutText = (props) => {
         scale-appropriate geologic maps are shown, and clicking on the map
         reveals primary data about each unit.
       </p>
+
+      <a
+        onClick={() => {
+          runAction({
+            type: "push-panel",
+            panel: {
+              renderPanel: ChangelogPanel,
+              title: "Changelog",
+            },
+          });
+        }}
+      >
+        Show the changelog
+      </a>
 
       <h3>Credits</h3>
       <ul>
