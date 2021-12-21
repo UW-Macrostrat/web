@@ -3,7 +3,7 @@ import { Navbar, Button, InputGroup, Card } from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
 import { useAppActions, useSearchState } from "../reducers";
 import { useEffect } from "react";
-import { SubtleFilterText } from "./Filters";
+import { SubtleFilterText } from "./filters-panel";
 
 const categoryTitles = {
   lithology: "Lithologies",
@@ -127,7 +127,7 @@ function Searchbar(props) {
 
 function SearchGuidance() {
   return h(
-    "div.search-guidance",
+    "div.search-guidance.bp3-text",
     <>
       <h5>Available categories:</h5>
       <ul>

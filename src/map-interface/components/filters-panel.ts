@@ -103,7 +103,7 @@ function SubtleFilterText() {
     runAction({ type: "clear-filters" });
   };
 
-  const iconName = !open ? "chevron-right" : "chevron-down";
+  const iconName = open ? "chevron-up" : "chevron-down";
 
   return h(Card, { className: "filter-tongue" }, [
     h("div.filter-name-container", [
