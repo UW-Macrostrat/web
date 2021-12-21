@@ -1,5 +1,14 @@
+@require "../../packages/ui-components/src/shared/colors"
+
 *
   box-sizing border-box
+
+:root
+  --accent-color: $light-gray3
+  --accent-hover-color: $light-gray1
+  --accent-border-color: $gray5
+  --accent-secondary-color: #EBF1F5
+  --accent-secondary-hover-color: #F5F8FA
 
 body {
   color: #333;
@@ -15,21 +24,19 @@ body, .main-container, #react, #app-holder {
 *::-webkit-scrollbar {
   display: none;
 }
-.ui {
-  z-index: 100;
-  position: relative;
-}
+
 .map-holder {
   z-index: 1;
-  position: fixed;
+  position: absolute;
   top 0
   left 0
   bottom 0
   right 0
-  height 100vh
+  height 100%
 }
+
 #map {
-  position: fixed;
+  position: absolute;
   top: 0;
   bottom: 0;
   width: 100%;
@@ -60,12 +67,24 @@ body, .main-container, #react, #app-holder {
 .search-input:focus {
   outline: none;
 }
-.searchresult-header {
+
+.searchresult-header 
   font-size: 1.1em !important;
   font-weight: bold !important;
   lettering-spacing: 2px !important;
   color: #333 !important;
-}
+  position: sticky;
+  top: 0px;
+  background: #fff;
+  border-bottom: 2px solid #ddd;
+  margin:0;
+  width: 100%;
+  padding-top: 10px
+  padding-bottom: 10px;
+  .text
+    padding-left: 15px;
+
+
 .searchresult-item {
   font-size: 0.95em !important;
 }
@@ -73,62 +92,13 @@ body, .main-container, #react, #app-holder {
 .active-layer {
   font-weight: bold;
 }
-.elevationChart-root {
-  z-index: 0 !important;
-  position: relative !important;
-}
-.elevationChart-content {
-  /* padding: 25px; */
-  -webkit-transition: 0.8s;
-	-moz-transition: 0.8s;
-	transition: 0.8s;
-  background-color: #ffffff;
-  /* margin-top: -25px;
-  margin-right: -25px; */
-}
-.elevationInstructions {
-  padding: 20px;
-  text-align: center;
-}
-.elevationGridItem {
-  padding-right: 0 !important;
-}
-.elevationChartWrapper {
-  padding-bottom: 20px;
-}
-text {
-  fill: #777;
-}
-
-.axis path,
-.axis line {
-  fill: none;
-  stroke: #000;
-  opacity: 0.2;
-  shape-rendering: crispEdges;
-}
-
-.x.axis path {
-  display: none;
-}
-
-.line {
-  fill: none;
-  stroke: rgba(75,192,192,1);
-  stroke-width: 1.5px;
-}
 
 .overlay {
   fill: none;
   pointer-events: all;
 }
 
-.tick line {
-  opacity: 0.13;
-}
-.tick text {
-  font-size: 10px;
-}
+
 .infoDrawer-loading {
   height: 100%;
   display: flex;
@@ -225,6 +195,10 @@ text {
   margin-left: 10px;
 }
 
+.age-ma {
+  font-style italic
+}
+
 .lith-chip {
   font-family: 'Montserrat', sans-serif;
   font-weight: 700;
@@ -255,15 +229,13 @@ text {
   line-height: 24px;
 }
 .map-source-attr:last-child {
-  margin-bottom: 25px;
+  //margin-bottom: 25px;
 }
 .attr {
   font-family: 'Montserrat', sans-serif;
   font-weight: 700;
 }
 .line-attr {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 85%;
   display: block;
   margin-left: 15px;
 }
@@ -273,7 +245,6 @@ text {
   line-height: 15px;
 }
 .ref-link {
-  color: #000;
   font-weight: bold;
   text-decoration: none;
 }
@@ -288,30 +259,7 @@ text {
 .macrostrat-inferred {
 
 }
-.expansion-panel {
-  align-items: center;
-  flex-wrap: wrap;
-}
-.expansion-panel-root {
-  padding-left: 15px !important;
-}
-.expansion-summary-title {
-  font-family: Montserrat,sans-serif !important;
-  font-weight: 700 !important;
-  margin-right: 10px !important;
-  padding-right: 0 !important;
-}
-.expansion-panel-detail {
-  display: block !important;
-  padding: 0 !important;
-}
-.expansion-panel-detail-sub {
-  display: block !important;
-}
-.expansion-panel-detail-header {
-  margin-top: -10px;
-  font-size: 80%;
-}
+
 .externalLink {
   color: #333;
   font-weight: 700;
@@ -327,14 +275,13 @@ text {
 .article-title, .article-title > a {
   font-size: 1em;
   font-weight: 700;
-  color: #000000;
   text-decoration: none;
 }
 .sub-title {
   font-size: 80%;
 }
 .quotes {
-  margin-top: -10px;
+  margin-top: 0px;
 }
 .gdd-snippet {
   font-size: 90%;
@@ -419,6 +366,7 @@ text {
 .journal-title-text {
   font-size: 20px;
   font-weight: bold;
+  margin-bottom: 0;
 }
 .journal-source {
   font-size: 14px;
@@ -457,10 +405,17 @@ text {
 .filter-paper {
   border-radius: 0;
 }
-.searchbar-filter-container {
-  padding: 0 !important;
-  background-color: rgba(245, 0, 87, 0.08) !important;
+.filter-container {
+ 
+  margin-bottom: 5px;
 }
+.filter-tag {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 5px;
+}
+
 .searchbar-filter-title {
   font-weight: bold;
   padding-right: 10px !important;
@@ -468,6 +423,12 @@ text {
 }
 .filter-list {
   width: 100%;
+}
+.remove{
+  font-size: 10px;
+  color: orangered;
+  text-decoration: underline;
+  cursor: pointer;
 }
 @media(max-width: 850px) {
   .infoDrawer {

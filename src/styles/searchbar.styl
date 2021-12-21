@@ -1,21 +1,3 @@
-.left-stack
-  max-width 34em
-  min-width 14em
-  height 100vh
-  display: flex
-  flex-direction: row
-  &>div
-    pointer-events: all
-  .spacer
-    flex-grow 1
-    width 1px
-    pointer-events: none
-  &>.closeable-card
-    flex-shrink 1
-    display flex
-    flex-direction: column
-  .panel-container > .panel
-    transition width 300ms
 
 .searchbar-holder
   .navbar-holder
@@ -60,17 +42,26 @@
           position: absolute
           left: 0
 
-  .search-results
-    li
-      padding: 0.2em 20px
-      cursor pointer
-      &:first-child
-        border-top 1px solid #ddd
+.search-results
+  max-height 70vh
+  max-width 310px
+  overflow auto
+  padding: 0;
+  li
+    .text
+      padding-left 15px
+    padding: 0.2em 0 0.2em 20px
+    cursor pointer
+    &:first-child
       border-bottom 1px solid #ddd
-      &:hover
-        background-color: #eee
-    ul
-      margin: 0 -20px
+    border-bottom 1px solid #ddd
+    &:hover
+      background-color: #eee
+  ul
+    list-style none
+    margin: 0 
+    margin-left: -60px
+    margin-right: -40px
 
 .menu-content
   display flex
@@ -83,10 +74,50 @@
   margin-bottom -1em
 
 // Should be maybe moved to a card-specific location
-.card-header-left button
-  margin-right 5px
 
-.card-content
-  h2:first-child
-    margin-top 0
-  overflow-y scroll
+.filter-names {
+  margin-top: 6px;
+  margin-bottom: 2px;
+}
+
+.filter-name-container{
+  display: flex;
+  justify-content: space-between;
+}
+
+.filter-tongue{
+  background-color: #def1ff;
+  padding: 5px;
+  padding-bottom: 7px;
+  margin: 5px;
+  max-width: 300px;
+  margin-bottom: 7px;
+  margin-top: -9px;
+}
+
+.filter-tongue-actions{
+  display: flex;
+  align-items: center;
+  margin-left: 15px;
+  white-space: nowrap;
+
+}
+
+@media only screen and (max-width: 768px) {
+  /* For mobile phones: */
+  .navbar-holder{
+    width: 100vw;
+    left:0;
+  }
+  .searchbar{
+    margin-bottom: 0;
+  }
+  .search-results{
+    max-height: 93vh;
+    width: 100vw;
+    max-width:100vw;
+  }
+  .filter-tongue{
+    max-width: 100vw;
+  }
+}

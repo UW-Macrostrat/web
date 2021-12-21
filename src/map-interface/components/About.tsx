@@ -1,9 +1,68 @@
 import React from "react";
+import hyper from "@macrostrat/hyper";
+import { NavLink } from "react-router-dom";
+import Changelog from "../../changelog.mdx";
+import { useAppActions } from "../reducers";
+import { useLocation } from "react-router";
+import styles from "./about.module.styl";
+
+const h = hyper.styled(styles);
+
+function ChangelogPanel() {
+  return h("div.bp3-text", [h(Changelog)]);
+}
+
+function MapLink({ to = "", children }) {
+  const loc = useLocation();
+  return h(NavLink, { to: "/map" + to + loc.hash }, children);
+}
+
+const SoftwareInfo = (props) => {
+  const runAction = useAppActions();
+  return h("div.software-info", [
+    h("p.version", [
+      `Version ${JSON.parse(process.env.NPM_VERSION)} `,
+      h("span.revision", [
+        "(revision ",
+        h(
+          "a",
+          { href: JSON.parse(process.env.GITHUB_REV_LINK) },
+          JSON.parse(process.env.GIT_COMMIT_HASH)
+        ),
+        ")  — ",
+        JSON.parse(process.env.COMPILE_DATE),
+      ]),
+    ]),
+    h("p.changes", [
+      h(
+        "a",
+        {
+          onClick() {
+            runAction({
+              type: "push-panel",
+              panel: {
+                renderPanel: ChangelogPanel,
+                title: "Changelog",
+              },
+            });
+          },
+        },
+        "Changelog"
+      ),
+    ]),
+  ]);
+};
 
 const AboutText = (props) => {
+  const runAction = useAppActions();
+
   return (
     <div className="about">
-      <h2>Macrostrat Geologic Map</h2>
+      <div className={styles["title-block"]}>
+        <h2>Macrostrat Geologic Map</h2>
+        <SoftwareInfo />
+      </div>
+
       <p>
         Macrostrat's geologic map is a seamless integration of over 200 geologic
         maps from around the world and at numerous scales that have been
@@ -11,7 +70,6 @@ const AboutText = (props) => {
         scale-appropriate geologic maps are shown, and clicking on the map
         reveals primary data about each unit.
       </p>
-
       <h3>Credits</h3>
       <ul>
         <li>
@@ -82,6 +140,16 @@ const AboutText = (props) => {
             Daven P Quinn
           </a>
           , research scientist and <em>v4</em> lead developer
+        </li>
+        <li>
+          <a
+            className="ref-link"
+            href="https://idzikowski-casey.github.io/personal-site/"
+            target="_blank"
+          >
+            Casey Idzikowski
+          </a>
+          , research specialist and <em>v4</em> developer
         </li>
         <li>
           <a

@@ -1,11 +1,13 @@
 const path = require("path");
-const { DefinePlugin } = require("webpack");
+const { DefinePlugin, EnvironmentPlugin } = require("webpack");
 const BrowserSyncPlugin = require("browser-sync-webpack-plugin");
 //UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const historyApiFallback = require("connect-history-api-fallback");
 const CopyPlugin = require("copy-webpack-plugin");
 const DotenvPlugin = require("dotenv-webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const revisionInfo = require("@macrostrat/revision-info-webpack");
+const pkg = require("./package.json");
 
 let mode = "development";
 
@@ -22,6 +24,8 @@ let browserSync = new BrowserSyncPlugin({
 //const cesiumWorkers = "../Build/Cesium/Workers";
 
 //uglify = new UglifyJsPlugin()
+
+const gitEnv = revisionInfo(pkg, "https://github.com/UW-Macrostrat/web");
 
 let babelLoader = {
   loader: "babel-loader",
@@ -43,7 +47,6 @@ const cssModuleLoader = {
 module.exports = {
   mode: mode,
   module: {
-    unknownContextCritical: false,
     rules: [
       {
         test: /\.(js|jsx|ts|tsx)$/,
@@ -82,6 +85,11 @@ module.exports = {
             },
           },
         ],
+      },
+      {
+        test: /\.mdx?$/,
+        use: [babelLoader, "@mdx-js/loader"],
+        exclude: /node_modules/,
       },
     ],
   },
@@ -136,6 +144,10 @@ module.exports = {
       MACROSTRAT_BASE_URL: JSON.stringify(publicURL),
       // Define relative base path in cesium for loading assets
       CESIUM_BASE_URL: JSON.stringify(publicURL),
+      // Git revision information
+    }),
+    new EnvironmentPlugin({
+      ...gitEnv,
     }),
   ],
 };

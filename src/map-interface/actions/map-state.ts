@@ -1,4 +1,4 @@
-import { addFilter, gotInitialMapState } from "./main";
+import { gotInitialMapState } from "./main";
 import { format } from "d3-format";
 import { MapBackend } from "../map-page";
 import {
@@ -18,7 +18,6 @@ function formatVal(val: any): string | undefined {
 }
 
 function updateURI(state: any) {
-  console.log(state);
   let layers = [
     { layer: "bedrock", haz: state.mapHasBedrock },
     { layer: "lines", haz: state.mapHasLines },
@@ -37,6 +36,10 @@ function updateURI(state: any) {
       return l.layer;
     });
 
+  if (args.layers.length == 0) {
+    args.layers.push("None");
+  }
+
   for (const filter of state.filters) {
     args[filter.type] = filter.id || filter.name;
   }
@@ -45,8 +48,6 @@ function updateURI(state: any) {
   let z = fmt(state.mapXYZ.z);
   let x = fmt(state.mapXYZ.x);
   let y = fmt(state.mapXYZ.y);
-
-  console.log("Updating URI", { x, y, z });
 
   setHashString({ ...args, x, y, z }, { arrayFormat: "comma" });
 }
@@ -93,9 +94,17 @@ function getInitialMapState() {
     };
     try {
       const hashData = getHashString(window.location.hash) ?? {};
-      console.log(window.location.hash);
-      console.log(hashData);
-      const { layers, x = 16, y = 23, z = 1.5 } = hashData;
+
+      const { layers = [], x = 16, y = 23, z = 1.5 } = hashData;
+
+      if (layers.length == 0) {
+        if (defaultState.bedrock) {
+          layers.push("bedrock");
+        }
+        if (defaultState.lines) {
+          layers.push("lines");
+        }
+      }
 
       let mapState = { x, y, z, layers };
 
@@ -112,7 +121,7 @@ function getInitialMapState() {
       ) {
         // Sweet, it is legit
         mapState = mapState;
-        console.log("Map state is legit");
+        updateURI(getState().update);
         // Augh, got to simplify this multiple dispatch situation. This should be one atomic action.
         dispatch(gotInitialMapState(mapState));
       }
@@ -120,23 +129,8 @@ function getInitialMapState() {
       console.error("Invalid map state:", e);
       // Who knows. Doesn't matter. Nothing does.
       mapState = defaultState;
+      updateURI(getState().update);
     }
-
-    // if (mapState.incomingFilters && mapState.incomingFilters.length) {
-    //   mapState.incomingFilters.forEach((f) => {
-    //     // lith classes and types don't have unique IDs in macrostrat so we use the string
-    //     if (f.type === "lithology_classes" || f.type === "lithology_types") {
-    //       dispatch(
-    //         addFilter({
-    //           type: f.type,
-    //           name: f.id,
-    //         })
-    //       );
-    //     } else {
-    //       dispatch(addFilter(f));
-    //     }
-    //   });
-    // }
   };
 }
 
