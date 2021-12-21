@@ -42,4 +42,40 @@ function AgeChip(props) {
   ]);
 }
 
-export default AgeChip;
+function AttrChip(props) {
+  const { fill = null, color, name } = props;
+  let styles = {};
+  if (fill) {
+    styles["backgroundImage"] = `url('dist/img/geologic-patterns/${fill}.png')`;
+  }
+  return h("div.lith-chip", { style: { ...styles } }, [
+    h(
+      "div.lith-chip-inner",
+      { style: { backgroundColor: hexToRgb(color, 0.6) } },
+      [name]
+    ),
+  ]);
+}
+
+function MacrostratAgeChip(props) {
+  const { b_int, t_int, color, b_age, t_age } = props;
+  let age = b_int.int_name || "Unknown";
+  if (t_int.int_name != age) {
+    age += ` - ${t_int.int_name || "Unknown"}`;
+  }
+  return h("div.age-chip-container", [
+    h("div.age-chip", { style: { backgroundColor: hexToRgb(color, 0.8) } }, [
+      age,
+      h("div.age-chip-age", [
+        b_age,
+        ,
+        h("span.age-chip-ma", ["Ma"]),
+        " - ",
+        t_age,
+        h("span.age-chip-ma", ["Ma"]),
+      ]),
+    ]),
+  ]);
+}
+
+export { AgeChip, AttrChip, MacrostratAgeChip };

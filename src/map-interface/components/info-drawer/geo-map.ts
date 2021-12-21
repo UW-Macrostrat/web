@@ -1,7 +1,7 @@
 import h from "@macrostrat/hyper";
 import { ExpansionPanel } from "../expansion-panel";
 import Reference from "../Reference";
-import LongText from "../LongText";
+import LongText from "../long-text";
 
 function LongTextRenderer(props) {
   const { name, text } = props;

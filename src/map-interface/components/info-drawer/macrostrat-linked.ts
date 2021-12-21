@@ -1,7 +1,5 @@
 import h from "@macrostrat/hyper";
-import AgeChip from "../AgeChip";
-import AttrChip from "../AttrChip";
-import MacrostratAgeChip from "../MacrostratAgeChip";
+import { AgeChip, AttrChip, MacrostratAgeChip } from "../info-blocks";
 import { ExpansionPanel } from "../expansion-panel";
 
 function MacrostratLinkedData(props) {

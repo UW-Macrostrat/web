@@ -17,7 +17,7 @@ import { CloseableCard } from "../components/closeable-card";
 import { useSelector, useDispatch } from "react-redux";
 import { MenuPanel } from "../reducers/menu";
 import AboutText from "../components/About";
-import { SettingsPanel } from "../components/settings-panel";
+import { SettingsPanel } from "./settings-panel";
 import { useAppActions, useMenuState } from "../reducers";
 import styles from "./main.module.styl";
 
@@ -115,17 +115,17 @@ function useMainPanel(): Panel<{}> {
     case MenuPanel.LAYERS:
       return {
         title: "Layers",
-        renderPanel: LayerList,
+        renderPanel: () => h(LayerList),
       };
     case MenuPanel.SETTINGS:
       return {
         title: "Settings",
-        renderPanel: SettingsPanel,
+        renderPanel: () => h(SettingsPanel),
       };
     case MenuPanel.ABOUT:
       return {
         title: "About",
-        renderPanel: AboutText,
+        renderPanel: () => h(AboutText),
       };
   }
   return null;

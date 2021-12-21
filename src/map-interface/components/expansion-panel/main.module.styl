@@ -1,17 +1,19 @@
 
 .expansion-panel
   padding 0
-  border-bottom 1px solid #e0e0e0
   align-items: center;
   flex-wrap: wrap;
+  &:first-child
+    :global(.expansion-panel-header)
+      border-top: 1px solid var(--accent-hover-color);
   :global
     .sub-panel-header
-      background-color #EBF1F5
+      background-color var(--accent-secondary-color)
       padding 5px
       border-radius 5px 0 0 5px
       cursor pointer
       &:hover
-        background-color #F5F8FA
+        background-color var(--accent-secondary-hover-color)
       display flex
       padding 0.1em 0.5em
       flex-direction row
@@ -19,14 +21,15 @@
       .title
         flex-grow 1
     .expansion-panel-header
-      background-color #CED9E0
+      border-bottom 1px solid var(--accent-border-color)
+      background-color var(--accent-color)
       padding 10px
       z-index: 1;
       position sticky
       top 0px
       cursor pointer
       &:hover
-        background-color #D8E1E8
+        background-color var(--accent-hover-color)
       display flex
       flex-direction row
       align-items center
