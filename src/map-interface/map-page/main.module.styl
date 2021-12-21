@@ -1,0 +1,61 @@
+.map-page
+  height 100vh
+  width 100vw
+  display flex
+  flex-direction column
+  position relative
+
+.main-ui
+  flex-grow 1
+  position: relative
+
+.panels-overlay
+  position absolute
+  top 20px
+  left 20px
+  right 20px
+  bottom 30px
+  z-index 100
+  // Make sure we can still click
+  // on map in background
+  pointer-events none
+
+:global(.bp3-panel-stack-view)
+  position: relative;
+  overflow: unset
+
+
+.left-stack
+  max-width 34em
+  min-width 14em
+  // height 100vh
+  position absolute
+  top 0
+  bottom 0
+  display: flex
+  flex-direction: row
+  .spacer
+    flex-grow 1
+    width 1px
+    pointer-events: none
+  .panel-container > *
+    transition width 300ms
+
+.panel-container
+  display flex
+  flex-direction: column
+  &>div
+    pointer-events all
+
+.panel-title
+  font-size 16px
+
+@media only screen and (max-width: 768px) {
+  /* For mobile phones: */
+  .panels-overlay{
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+  }
+}

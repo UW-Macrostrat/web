@@ -1,45 +1,7 @@
-import {
-  REQUEST_DATA,
-  RECIEVE_DATA,
-  TOGGLE_MENU,
-  TOGGLE_INFODRAWER,
-  EXPAND_INFODRAWER,
-  TOGGLE_FILTERS,
-  START_MAP_QUERY,
-  RECEIVED_MAP_QUERY,
-  TOGGLE_BEDROCK,
-  TOGGLE_LINES,
-  TOGGLE_SATELLITE,
-  TOGGLE_COLUMNS,
-  CLOSE_INFODRAWER,
-  START_SEARCH_QUERY,
-  RECEIVED_SEARCH_QUERY,
-  ADD_FILTER,
-  REMOVE_FILTER,
-  GO_TO_PLACE,
-  TOGGLE_ABOUT,
-  TOGGLE_FOSSILS,
-  UPDATE_COLUMN_FILTERS,
-  START_COLUMN_QUERY,
-  RECEIVED_COLUMN_QUERY,
-  START_GDD_QUERY,
-  RECEIVED_GDD_QUERY,
-  SET_ACTIVE_INDEX_MAP,
-  TOGGLE_ELEVATION_CHART,
-  START_ELEVATION_QUERY,
-  UPDATE_ELEVATION_MARKER,
-  RECEIVED_ELEVATION_QUERY,
-  START_PBDB_QUERY,
-  UPDATE_PBDB_QUERY,
-  RECEIVED_PBDB_QUERY,
-  MAP_MOVED,
-  GET_INITIAL_MAP_STATE,
-  GOT_INITIAL_MAP_STATE,
-  RESET_PBDB,
-} from "../actions";
 import { updateURI } from "../actions/map-state";
 import { sum, timescale } from "../utils";
 import { MapBackend } from "../map-page";
+import { Action } from "../actions";
 
 const classColors = {
   sedimentary: "#FF8C00",
@@ -71,6 +33,7 @@ const preloadedState = {
   fetchingGdd: false,
   gddCancelToken: null,
   isSearching: false,
+  term: "",
   searchCancelToken: null,
   fetchingElevation: false,
   elevationCancelToken: null,
@@ -82,7 +45,7 @@ const preloadedState = {
   mapInfo: [],
   columnInfo: {},
   gddInfo: [],
-  searchResults: [],
+  searchResults: null,
   elevationData: [],
   elevationMarkerLocation: [],
   pbdbData: [],
@@ -108,29 +71,29 @@ const preloadedState = {
   },
 };
 
-const update = (state = preloadedState, action) => {
+const update = (state = preloadedState, action: Action) => {
   switch (action.type) {
     case "set-map-backend": {
       const newState = Object.assign({}, state, { mapBackend: action.backend });
       updateURI(newState);
       return newState;
     }
-    case TOGGLE_MENU:
+    case "toggle-menu":
       return Object.assign({}, state, {
         menuOpen: !state.menuOpen,
       });
-    case TOGGLE_ABOUT:
+    case "toggle-about":
       return Object.assign({}, state, {
         aboutOpen: !state.aboutOpen,
       });
-    case CLOSE_INFODRAWER:
+    case "close-infodrawer":
       return Object.assign({}, state, {
         infoDrawerOpen: false,
         columnInfo: {},
         mapInfo: [],
         pbdbData: [],
       });
-    case TOGGLE_INFODRAWER:
+    case "toggle-infodrawer":
       return Object.assign({}, state, {
         infoDrawerOpen: !state.infoDrawerOpen,
         infoDrawerExpanded: false,
@@ -138,16 +101,17 @@ const update = (state = preloadedState, action) => {
         gddInfo: [],
       });
 
-    case EXPAND_INFODRAWER:
+    case "expand-infodrawer":
       return Object.assign({}, state, {
         infoDrawerExpanded: !state.infoDrawerExpanded,
       });
 
-    case TOGGLE_FILTERS:
+    case "toggle-filters":
+      // rework this to open menu panel
       return Object.assign({}, state, {
         filtersOpen: !state.filtersOpen,
       });
-    case ADD_FILTER:
+    case "add-filter":
       let alreadyHasFiter = false;
       state.filters.forEach((filter) => {
         if (
@@ -198,7 +162,7 @@ const update = (state = preloadedState, action) => {
       return Object.assign({}, state, {
         filters: fs,
       });
-    case REMOVE_FILTER:
+    case "remove-filter":
       updateURI(
         Object.assign({}, state, {
           filters: state.filters.filter((d) => {
@@ -211,11 +175,20 @@ const update = (state = preloadedState, action) => {
           if (d.name != action.filter.name) return d;
         }),
       });
-
-    case START_MAP_QUERY:
+    case "clear-filters":
+      updateURI(
+        Object.assign({}, state, {
+          filters: [],
+        })
+      );
+      return Object.assign({}, state, {
+        filters: [],
+      });
+    case "start-map-query":
       if (state.mapInfoCancelToken) {
         state.mapInfoCancelToken.cancel();
       }
+      console.log("MAP BEING QUERIED", action);
       return Object.assign({}, state, {
         infoMarkerLng: action.lng.toFixed(4),
         infoMarkerLat: action.lat.toFixed(4),
@@ -223,7 +196,7 @@ const update = (state = preloadedState, action) => {
         infoDrawerOpen: true,
         mapInfoCancelToken: action.cancelToken,
       });
-    case RECEIVED_MAP_QUERY:
+    case "received-map-query":
       if (action.data && action.data.mapData) {
         action.data.mapData = action.data.mapData.map((source) => {
           if (source.macrostrat) {
@@ -284,7 +257,7 @@ const update = (state = preloadedState, action) => {
         infoDrawerOpen: true,
       });
 
-    case START_COLUMN_QUERY:
+    case "start-column-query":
       if (state.columnInfoCancelToken) {
         state.columnInfoCancelToken.cancel();
       }
@@ -293,7 +266,7 @@ const update = (state = preloadedState, action) => {
         columnInfoCancelToken: action.cancelToken,
       });
 
-    case RECEIVED_COLUMN_QUERY:
+    case "received-column-query":
       // summarize units
       let columnTimescale = timescale.slice().map((d) => {
         d.intersectingUnits = 0;
@@ -385,7 +358,7 @@ const update = (state = preloadedState, action) => {
         columnInfo: columnSummary,
       });
 
-    case TOGGLE_BEDROCK:
+    case "toggle-bedrock":
       updateURI(
         Object.assign({}, state, {
           mapHasBedrock: !state.mapHasBedrock,
@@ -395,7 +368,7 @@ const update = (state = preloadedState, action) => {
         mapHasBedrock: !state.mapHasBedrock,
       });
 
-    case TOGGLE_LINES:
+    case "toggle-lines":
       updateURI(
         Object.assign({}, state, {
           mapHasLines: !state.mapHasLines,
@@ -405,7 +378,7 @@ const update = (state = preloadedState, action) => {
         mapHasLines: !state.mapHasLines,
       });
 
-    case TOGGLE_SATELLITE:
+    case "toggle-satellite":
       updateURI(
         Object.assign({}, state, {
           mapHasSatellite: !state.mapHasSatellite,
@@ -414,7 +387,7 @@ const update = (state = preloadedState, action) => {
       return Object.assign({}, state, {
         mapHasSatellite: !state.mapHasSatellite,
       });
-    case TOGGLE_COLUMNS:
+    case "toggle-columns":
       updateURI(
         Object.assign({}, state, {
           mapHasColumns: !state.mapHasColumns,
@@ -423,7 +396,7 @@ const update = (state = preloadedState, action) => {
       return Object.assign({}, state, {
         mapHasColumns: !state.mapHasColumns,
       });
-    case TOGGLE_FOSSILS:
+    case "toggle-fossils":
       updateURI(
         Object.assign({}, state, {
           mapHasFossils: !state.mapHasFossils,
@@ -432,15 +405,18 @@ const update = (state = preloadedState, action) => {
       return Object.assign({}, state, {
         mapHasFossils: !state.mapHasFossils,
       });
-    case TOGGLE_ELEVATION_CHART:
+    case "toggle-elevation-chart":
       return Object.assign({}, state, {
         elevationChartOpen: !state.elevationChartOpen,
         elevationData: [],
         elevationMarkerLocation: [],
       });
-
+    case "set-input-focus":
+      return Object.assign({}, state, { inputFocus: action.inputFocus });
+    case "set-search-term":
+      return Object.assign({}, state, { term: action.term });
     // Handle searching
-    case START_SEARCH_QUERY:
+    case "start-search-query":
       // When a search is requested, cancel any pending requests first
       if (state.searchCancelToken) {
         state.searchCancelToken.cancel();
@@ -449,15 +425,14 @@ const update = (state = preloadedState, action) => {
         isSearching: true,
         searchCancelToken: action.cancelToken,
       });
-    case RECEIVED_SEARCH_QUERY:
+    case "received-search-query":
       return Object.assign({}, state, {
         isSearching: false,
         searchResults: action.data,
         searchCancelToken: null,
       });
 
-    // Handle GDD
-    case START_GDD_QUERY:
+    case "start-gdd-query":
       // When a search is requested, cancel any pending requests first
       if (state.gddCancelToken) {
         state.gddCancelToken.cancel();
@@ -466,7 +441,7 @@ const update = (state = preloadedState, action) => {
         fetchingGdd: true,
         gddCancelToken: action.cancelToken,
       });
-    case RECEIVED_GDD_QUERY:
+    case "received-gdd-query":
       let parsed = {
         journals: [],
       };
@@ -502,7 +477,7 @@ const update = (state = preloadedState, action) => {
       });
 
     // Handle elevation
-    case START_ELEVATION_QUERY:
+    case "start-elevation-query":
       // When a search is requested, cancel any pending requests first
       if (state.elevationCancelToken) {
         state.elevationCancelToken.cancel();
@@ -511,19 +486,19 @@ const update = (state = preloadedState, action) => {
         fetchingElevation: true,
         elevationCancelToken: action.cancelToken,
       });
-    case RECEIVED_ELEVATION_QUERY:
+    case "received-elevation-query":
       return Object.assign({}, state, {
         fetchingElevation: false,
         elevationData: action.data,
         elevationCancelToken: null,
       });
-    case UPDATE_ELEVATION_MARKER:
+    case "update-elevation-marker":
       return Object.assign({}, state, {
         elevationMarkerLocation: [action.lng, action.lat],
       });
 
     // Handle PBDB
-    case START_PBDB_QUERY:
+    case "start-pbdb-query":
       if (state.pbdbCancelToken) {
         state.pbdbCancelToken.cancel();
       }
@@ -532,7 +507,7 @@ const update = (state = preloadedState, action) => {
         pbdbCancelToken: action.cancelToken,
       });
 
-    case UPDATE_PBDB_QUERY:
+    case "update-pbdb-query":
       if (state.pbdbCancelToken) {
         state.pbdbCancelToken.cancel();
       }
@@ -540,7 +515,7 @@ const update = (state = preloadedState, action) => {
         pbdbCancelToken: action.cancelToken,
       });
 
-    case RECEIVED_PBDB_QUERY:
+    case "received-pbdb-query":
       return Object.assign({}, state, {
         fetchingPbdb: false,
         pbdbData: action.data,
@@ -548,12 +523,12 @@ const update = (state = preloadedState, action) => {
         infoDrawerOpen: true,
       });
 
-    case RESET_PBDB:
+    case "reset-pbdb":
       return Object.assign({}, state, {
         pbdbData: [],
       });
 
-    case GO_TO_PLACE:
+    case "go-to-place":
       return Object.assign({}, state, {
         mapCenter: {
           type: "place",
@@ -561,22 +536,22 @@ const update = (state = preloadedState, action) => {
         },
       });
 
-    case UPDATE_COLUMN_FILTERS:
+    case "update-column-filters":
+      console.log("Filtered Columns", action.columns);
       return Object.assign({}, state, {
         filteredColumns: action.columns,
       });
-
-    case REQUEST_DATA:
+    case "request-data":
       return Object.assign({}, state, {
         isFetching: true,
       });
-    case RECIEVE_DATA:
+    case "recieve-data":
       return Object.assign({}, state, {
         isFetching: false,
         data: action.data,
       });
 
-    case GET_INITIAL_MAP_STATE:
+    case "get-initial-map-state":
       return Object.assign({}, state, {
         mapXYZ: {
           z: action.data.z,
@@ -585,7 +560,7 @@ const update = (state = preloadedState, action) => {
         },
       });
 
-    case MAP_MOVED:
+    case "map-moved":
       updateURI(
         Object.assign({}, state, {
           mapXYZ: {
@@ -602,8 +577,10 @@ const update = (state = preloadedState, action) => {
           y: action.data.y,
         },
       });
+    case "update-state":
+      return action.state;
 
-    case GOT_INITIAL_MAP_STATE:
+    case "got-initial-map-state":
       const { layers = [] } = action.data;
       const mapHasSatellite = layers.includes("satellite");
       const mapHasLines = layers.includes("lines");
@@ -634,3 +611,4 @@ const update = (state = preloadedState, action) => {
 };
 
 export default update;
+export { preloadedState };

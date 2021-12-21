@@ -1,32 +1,27 @@
-import h from "@macrostrat/hyper";
-import ColumnIcon from "./icons/ColumnIcon";
-import LineIcon from "./icons/LineIcon";
-import ElevationIcon from "./icons/ElevationIcon";
-import FossilIcon from "./icons/FossilIcon";
-import BedrockIcon from "./icons/BedrockIcon";
+import hyper from "@macrostrat/hyper";
+import ColumnIcon from "../components/icons/ColumnIcon";
+import LineIcon from "../components/icons/LineIcon";
+import ElevationIcon from "../components/icons/ElevationIcon";
+import FossilIcon from "../components/icons/FossilIcon";
+import BedrockIcon from "../components/icons/BedrockIcon";
 import {
   Button,
   ButtonGroup,
   Alignment,
   ButtonProps,
   IconName,
+  PanelStack2,
+  Panel,
 } from "@blueprintjs/core";
-import { CloseableCard } from "./CloseableCard";
+import { CloseableCard } from "../components/closeable-card";
 import { useSelector, useDispatch } from "react-redux";
 import { MenuPanel } from "../reducers/menu";
-import AboutText from "./About";
-import { SettingsPanel } from "./settings-panel";
-import { connect } from "react-redux";
-import {
-  toggleMenu,
-  toggleBedrock,
-  toggleLines,
-  toggleSatellite,
-  toggleColumns,
-  toggleFossils,
-  toggleAbout,
-  toggleElevationChart,
-} from "../actions";
+import AboutText from "../components/About";
+import { SettingsPanel } from "../components/settings-panel";
+import { useAppActions, useMenuState } from "../reducers";
+import styles from "./main.module.styl";
+
+const h = hyper.styled(styles);
 
 type ListButtonProps = ButtonProps & {
   icon: React.ComponentType | IconName;
@@ -52,8 +47,8 @@ const TabButton = (props: ButtonProps & { tab: MenuPanel }) => {
 const LayerButton = (props: ListButtonProps & { layer: string }) => {
   const { layer, ...rest } = props;
   const active = useSelector((state) => state.update["mapHas" + layer]);
-  const dispatch = useDispatch();
-  const onClick = () => dispatch({ type: "TOGGLE_" + layer.toUpperCase() });
+  const runAction = useAppActions();
+  const onClick = () => runAction({ type: "toggle-" + layer.toLowerCase() });
   return h(ListButton, {
     active,
     onClick,
@@ -73,11 +68,11 @@ const MenuGroup = (props) =>
   });
 
 const LayerList = (props) => {
-  const dispatch = useDispatch();
+  const runAction = useAppActions();
 
   const toggleElevationChart = () => {
-    dispatch({ type: "TOGGLE_MENU" });
-    dispatch({ type: "TOGGLE_ELEVATION_CHART" });
+    runAction({ type: "toggle-menu" });
+    runAction({ type: "toggle-elevation-chart" });
   };
 
   return h("div.menu-content", [
@@ -114,23 +109,39 @@ const LayerList = (props) => {
   ]);
 };
 
-const PanelContent = (props: { activePanel: MenuPanel }) => {
+function useMainPanel(): Panel<{}> {
   const activePanel = useSelector((state) => state.menu.activePanel);
   switch (activePanel) {
     case MenuPanel.LAYERS:
-      return h(LayerList);
+      return {
+        title: "Layers",
+        renderPanel: LayerList,
+      };
     case MenuPanel.SETTINGS:
-      return h(SettingsPanel);
+      return {
+        title: "Settings",
+        renderPanel: SettingsPanel,
+      };
     case MenuPanel.ABOUT:
-      return h(AboutText);
+      return {
+        title: "About",
+        renderPanel: AboutText,
+      };
   }
   return null;
-};
+}
 
 const Menu = (props) => {
-  const { menuOpen, toggleMenu } = props;
+  const runAction = useAppActions();
+  const { menuOpen, panelStack = [] } = useMenuState();
+
+  const toggleMenu = () => {
+    runAction({ type: "toggle-menu" });
+  };
 
   let exitTransition = { exit: 300 };
+
+  const stack = [useMainPanel(), ...panelStack];
 
   return h(
     CloseableCard,
@@ -142,7 +153,7 @@ const Menu = (props) => {
     },
     [
       h(CloseableCard.Header, [
-        h("div.buttons", [
+        h.if(stack.length == 1)("div.buttons", [
           h(TabButton, {
             icon: "layers",
             text: "Layers",
@@ -159,52 +170,26 @@ const Menu = (props) => {
             tab: MenuPanel.ABOUT,
           }),
         ]),
+        h.if(stack.length > 1)([
+          h(
+            Button,
+            {
+              icon: "chevron-left",
+              minimal: true,
+              onClick: () => runAction({ type: "close-panel" }),
+            },
+            stack[stack.length - 2]?.title ?? "Back"
+          ),
+          h("h2.panel-title", stack[stack.length - 1]?.title),
+        ]),
       ]),
-      h(PanelContent),
+      h(PanelStack2, {
+        showPanelHeader: false,
+        renderActivePanelOnly: true,
+        stack,
+      }),
     ]
   );
 };
 
-const mapStateToProps = (state) => {
-  return {
-    menuOpen: state.update.menuOpen,
-    mapHasBedrock: state.update.mapHasBedrock,
-    mapHasSatellite: state.update.mapHasSatellite,
-    mapHasColumns: state.update.mapHasColumns,
-    mapHasFossils: state.update.mapHasFossils,
-    mapHasLines: state.update.mapHasLines,
-  };
-};
-
-const mapDispatchToProps = (dispatch) => {
-  return {
-    toggleMenu: () => {
-      dispatch(toggleMenu());
-    },
-    toggleBedrock: () => {
-      dispatch(toggleBedrock());
-    },
-    toggleLines: () => {
-      dispatch(toggleLines());
-    },
-    toggleSatellite: () => {
-      dispatch(toggleSatellite());
-    },
-    toggleColumns: () => {
-      dispatch(toggleColumns());
-    },
-    toggleFossils: () => {
-      dispatch(toggleFossils());
-    },
-    toggleAbout: () => {
-      dispatch(toggleAbout());
-    },
-    toggleElevationChart: () => {
-      dispatch(toggleElevationChart());
-    },
-  };
-};
-
-const MenuContainer = connect(mapStateToProps, mapDispatchToProps)(Menu);
-
-export default MenuContainer;
+export default Menu;

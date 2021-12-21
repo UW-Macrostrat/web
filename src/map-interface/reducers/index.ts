@@ -3,7 +3,7 @@ import reduceReducers from "reduce-reducers";
 import { menuReducer } from "./menu";
 import { reducer as globeReducer } from "@macrostrat/cesium-viewer/actions";
 import { nadirCameraPosition } from "@macrostrat/cesium-viewer/position";
-import { GOT_INITIAL_MAP_STATE, MAP_MOVED } from "../actions";
+import { Action } from "../actions";
 import update from "./legacy";
 import { parse } from "path";
 
@@ -22,8 +22,8 @@ function getFloat(x: any, _default = 0): number {
   return v ?? _default;
 }
 
-function overallReducer(state, action) {
-  if (action.type === GOT_INITIAL_MAP_STATE || action.type == MAP_MOVED) {
+function overallReducer(state, action: Action) {
+  if (action.type === "got-initial-map-state" || action.type == "map-moved") {
     // You can access both app and inventory states here
     const x = getFloat(action.data.x, 16);
     const y = getFloat(action.data.y, 23);
@@ -50,3 +50,5 @@ function overallReducer(state, action) {
 const newReducer = reduceReducers(overallReducer, reducers);
 
 export default newReducer;
+export * from "./hooks";
+export * from "./menu";

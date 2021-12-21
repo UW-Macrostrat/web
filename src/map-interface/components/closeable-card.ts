@@ -1,11 +1,22 @@
 import { Children } from "react";
 import { Card, Button } from "@blueprintjs/core";
-import h from "react-hyperscript";
+import hyper from "@macrostrat/hyper";
+import styles from "./card.module.styl";
+
+const h = hyper.styled(styles);
 
 const CloseableCardHeader = (props) => h("div.card-header-left", props);
 
 const CloseableCard = (props) => {
-  let { isOpen, onClose, title, transitionDuration, children, ...rest } = props;
+  let {
+    isOpen,
+    onClose,
+    title,
+    transitionDuration,
+    showHeader = true,
+    children,
+    ...rest
+  } = props;
   if (!isOpen) {
     return null;
   }
@@ -26,12 +37,13 @@ const CloseableCard = (props) => {
     if (title != null) {
       title = h("h4", title);
     }
-    header = h(CloseableCardHeader, [title]);
+    header = h([title]);
   }
 
   return h(Card, rest, [
-    h("div.card-header", [
+    h.if(showHeader)("div.card-header", [
       header,
+      h("div.spacer"),
       h(Button, {
         icon: "small-cross",
         className: "card-close-button",

@@ -1,14 +1,9 @@
 import { connect } from "react-redux";
-import {
-  queryMap,
-  closeInfoDrawer,
-  getFilteredColumns,
-  getElevation,
-  getPBDB,
-  mapMoved,
-  resetPbdb,
-} from "../../actions";
+import { mapMoved, resetPbdb } from "../../actions";
+import { useAppActions } from "~/map-interface/reducers";
 import Map from "./map";
+import h from "@macrostrat/hyper";
+import { useEffect } from "react";
 
 // Convert to use hooks:
 // https://betterprogramming.pub/convert-redux-to-hooks-d74d79b04f
@@ -32,30 +27,31 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    queryMap: (lng, lat, z, map_id, column) => {
-      dispatch(queryMap(lng, lat, z, map_id, column));
-    },
-    getFilteredColumns: () => {
-      dispatch(getFilteredColumns());
-    },
-    getElevation: (line) => {
-      dispatch(getElevation(line));
-    },
-    getPBDB: (collection_nos) => {
-      dispatch(getPBDB(collection_nos));
-    },
     resetPbdb: () => {
       dispatch(resetPbdb());
     },
     mapMoved: (data) => {
       dispatch(mapMoved(data));
     },
-    closeInfoDrawer: () => {
-      dispatch(closeInfoDrawer());
-    },
   };
 };
 
-const MapContainer = connect(mapStateToProps, mapDispatchToProps)(Map);
+function MapPropsContainer(props) {
+  const runAction = useAppActions();
+
+  useEffect(() => {
+    if (props.mapHasColumns) {
+      runAction({ type: "get-filtered-columns" });
+    }
+  }, [props.filters]);
+
+  let mapProps = { ...props, runAction };
+  return h(Map, { ...mapProps });
+}
+
+const MapContainer = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(MapPropsContainer);
 
 export default MapContainer;

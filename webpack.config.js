@@ -1,11 +1,13 @@
 const path = require("path");
-const { DefinePlugin } = require("webpack");
+const { DefinePlugin, EnvironmentPlugin } = require("webpack");
 const BrowserSyncPlugin = require("browser-sync-webpack-plugin");
 //UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const historyApiFallback = require("connect-history-api-fallback");
 const CopyPlugin = require("copy-webpack-plugin");
 const DotenvPlugin = require("dotenv-webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const revisionInfo = require("@macrostrat/revision-info-webpack");
+const pkg = require("./package.json");
 
 let mode = "development";
 
@@ -22,6 +24,8 @@ const cesiumSource = "node_modules/cesium/Source";
 const cesiumWorkers = "../Build/Cesium/Workers";
 
 //uglify = new UglifyJsPlugin()
+
+const gitEnv = revisionInfo(pkg, "https://github.com/UW-Macrostrat/web");
 
 let babelLoader = {
   loader: "babel-loader",
@@ -88,6 +92,11 @@ module.exports = {
         include: path.resolve(__dirname, "node_modules/cesium/Source"),
         use: { loader: require.resolve("@open-wc/webpack-import-meta-loader") },
       },
+      {
+        test: /\.mdx?$/,
+        use: [babelLoader, "@mdx-js/loader"],
+        exclude: /node_modules/,
+      },
     ],
   },
   resolve: {
@@ -139,6 +148,10 @@ module.exports = {
     new DefinePlugin({
       // Define relative base path in cesium for loading assets
       CESIUM_BASE_URL: JSON.stringify(publicURL),
+      // Git revision information
+    }),
+    new EnvironmentPlugin({
+      ...gitEnv,
     }),
   ],
 };

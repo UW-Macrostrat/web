@@ -5,3 +5,5 @@ dist
 ai
 geologic-patterns
 .env
+Dockerfile
+docker-compose.yaml
