@@ -1,16 +1,39 @@
 import { combineReducers } from "redux";
 import reduceReducers from "reduce-reducers";
 import { menuReducer } from "./menu";
-import { reducer as globeReducer } from "@macrostrat/cesium-viewer/actions";
+import {
+  reducer as globeReducer,
+  GlobeAction,
+  createInitialState,
+  DisplayQuality,
+} from "@macrostrat/cesium-viewer/actions";
+import { LocalStorage } from "@macrostrat/ui-components";
 import { nadirCameraPosition } from "@macrostrat/cesium-viewer/position";
 import { Action } from "../actions";
 import update from "./legacy";
-import { parse } from "path";
+
+const globeStorage = new LocalStorage("macrostrat-globe");
+
+function getInitialGlobeState() {
+  const { displayQuality = DisplayQuality.Low } = globeStorage.get() ?? {};
+  return createInitialState({ displayQuality });
+}
+
+function storageGlobeReducer(
+  state = getInitialGlobeState(),
+  action: GlobeAction
+) {
+  console.log("Globe state", state);
+  if (action.type === "set-display-quality") {
+    globeStorage.set({ displayQuality: action.value });
+  }
+  return globeReducer(state, action);
+}
 
 const reducers = combineReducers({
   // list reducers here
   menu: menuReducer,
-  globe: globeReducer,
+  globe: storageGlobeReducer,
   update,
 });
 
