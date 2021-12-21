@@ -17,9 +17,9 @@ import { CloseableCard } from "../components/closeable-card";
 import { useSelector, useDispatch } from "react-redux";
 import { MenuPanel } from "../reducers/menu";
 import AboutText from "../components/About";
+import { SettingsPanel } from "./settings-panel";
 import { useAppActions, useMenuState } from "../reducers";
 import styles from "./main.module.styl";
-import { SettingsPanel } from "./settings-panel";
 
 const h = hyper.styled(styles);
 
