@@ -32,28 +32,11 @@ maplibre.accessToken =
 
 const BaseGeologyLayer = ({ enabled = true, ...rest }) => {
   const provider = useMemo(() => {
-    let prov = new MVTImageryProvider({
-      style: "mapbox://styles/jczaplewski/cjftzyqhh8o5l2rqu4k68soub", //reliefShading, //"mapbox://styles/jczaplewski/cjftzyqhh8o5l2rqu4k68soub",
-      //"mapbox://styles/jczaplewski/cjftzyqhh8o5l2rqu4k68soub", //coreStyle,
+    return new MVTImageryProvider({
+      style: coreStyle,
       maximumZoom: 13,
       tileSize: 512,
     });
-    //"mapbox://styles/v1/jczaplewski/ckowdcq8h0gym17p2fh1vwdkd";
-    // let filter: any = ["boolean", true];
-    // if (visibleMaps != null) {
-    //   filter = [
-    //     "match",
-    //     ["get", "map_id"],
-    //     Array.from(visibleMaps),
-    //     true,
-    //     false
-    //   ];
-    // }
-    // console.log(filter);
-    // prov.mapboxRenderer.setFilter("map-units", filter, false);
-    // const res = prov.mapboxRenderer.setFilter("unit-edge", filter, false);
-    // res();
-    return prov;
   }, [enabled]);
 
   if (!enabled) return null;
@@ -72,9 +55,19 @@ function MacrostratSatelliteLayer() {
   return h(SatelliteLayer);
 }
 
-function MacrostratHillshadeLayer() {
-  const hasSatellite = useSelector((state) => state.update.mapHasSatellite);
-  return h(HillshadeLayer, { enabled: !hasSatellite });
+function BaseLayer({ enabled, ...rest }) {
+  const provider = useMemo(() => {
+    return new MVTImageryProvider({
+      style: "mapbox://styles/jczaplewski/ckxcu9zmu4aln14mfg4monlv3/draft",
+      // "mapbox://styles/jczaplewski/ckxeiii3a1jv415o8rxvgqlpd", //
+      maximumZoom: 13,
+      tileSize: 256,
+    });
+  }, [enabled]);
+
+  if (!enabled) return null;
+
+  return h(ImageryLayer, { imageryProvider: provider, ...rest });
 }
 
 function MacrostratCesiumView(props) {
@@ -86,6 +79,7 @@ function MacrostratCesiumView(props) {
   const globe = useSelector((state) => state.globe);
 
   const showInspector = useSelector((state) => state.globe.showInspector);
+  const hasSatellite = useSelector((state) => state.update.mapHasSatellite);
 
   return h(
     CesiumView,
@@ -107,9 +101,10 @@ function MacrostratCesiumView(props) {
       flyTo: globe.flyToProps,
     },
     [
+      h(BaseLayer, { enabled: !hasSatellite }),
       //h(MacrostratHillshadeLayer),
       h(MacrostratSatelliteLayer),
-      h(GeologyLayer, { alpha: 0.5 }),
+      h(GeologyLayer, { alpha: 0.4 }),
     ]
   );
 }
@@ -131,7 +126,7 @@ export function GlobeDevPage() {
         setHashString(buildPositionHash(cpos.camera));
       },
     },
-    [h(HillshadeLayer), h(BaseGeologyLayer)]
+    [h(BaseGeologyLayer)]
   );
 }
 

@@ -25,7 +25,7 @@ export default {
     "mapbox://mapbox.terrain-rgb": {
       url: "mapbox://mapbox.terrain-rgb",
       type: "raster-dem",
-      tileSize: 512,
+      tileSize: 256,
     },
     composite: {
       url: "mapbox://mapbox.mapbox-terrain-v2,mapbox.mapbox-streets-v7",
@@ -188,7 +188,7 @@ export default {
         "hillshade-illumination-anchor": "map",
         "hillshade-exaggeration": 1,
         "hillshade-highlight-color": "hsla(141, 63%, 49%, 0.75)",
-        "hillshade-shadow-color": "hsla(130, 23%, 3%, 0.9)",
+        "hillshade-shadow-color": "#000000",
         "hillshade-accent-color": "hsl(57, 77%, 76%)",
         "hillshade-illumination-direction": 0,
       },
