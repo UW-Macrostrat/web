@@ -1,9 +1,12 @@
 import React from "react";
-import h from "@macrostrat/hyper";
+import hyper from "@macrostrat/hyper";
 import { NavLink } from "react-router-dom";
 import Changelog from "../../changelog.mdx";
 import { useAppActions } from "../reducers";
 import { useLocation } from "react-router";
+import styles from "./about.module.styl";
+
+const h = hyper.styled(styles);
 
 function ChangelogPanel() {
   return h("div.bp3-text", [h(Changelog)]);
@@ -29,23 +32,23 @@ const SoftwareInfo = (props) => {
         ")  — ",
         JSON.parse(process.env.COMPILE_DATE),
       ]),
-      h("p.changes", [
-        h(
-          "a",
-          {
-            onClick() {
-              runAction({
-                type: "push-panel",
-                panel: {
-                  renderPanel: ChangelogPanel,
-                  title: "Changelog",
-                },
-              });
-            },
+    ]),
+    h("p.changes", [
+      h(
+        "a",
+        {
+          onClick() {
+            runAction({
+              type: "push-panel",
+              panel: {
+                renderPanel: ChangelogPanel,
+                title: "Changelog",
+              },
+            });
           },
-          "Changelog"
-        ),
-      ]),
+        },
+        "Changelog"
+      ),
     ]),
   ]);
 };
@@ -55,8 +58,11 @@ const AboutText = (props) => {
 
   return (
     <div className="about">
-      <h2>Macrostrat Geologic Map</h2>
-      <SoftwareInfo />
+      <div className={styles["title-block"]}>
+        <h2>Macrostrat Geologic Map</h2>
+        <SoftwareInfo />
+      </div>
+
       <p>
         Macrostrat's geologic map is a seamless integration of over 200 geologic
         maps from around the world and at numerous scales that have been
