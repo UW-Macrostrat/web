@@ -17,7 +17,7 @@ function MapTypeButton(props) {
   return h(LinkButton, { to: { pathname: "/globe", hash } }, "Switch to globe");
 }
 
-const SettingsPanel = (props) => {
+const SettingsPanel = () => {
   const { pathname } = useLocation();
   const globeActive = pathname?.startsWith("/globe");
   return h("div.settings", [

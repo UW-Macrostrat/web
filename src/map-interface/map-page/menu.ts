@@ -17,9 +17,9 @@ import { CloseableCard } from "../components/closeable-card";
 import { useSelector, useDispatch } from "react-redux";
 import { MenuPanel } from "../reducers/menu";
 import AboutText from "../components/About";
-import { SettingsPanel } from "../components/settings-panel";
 import { useAppActions, useMenuState } from "../reducers";
 import styles from "./main.module.styl";
+import { SettingsPanel } from "./settings-panel";
 
 const h = hyper.styled(styles);
 
@@ -115,25 +115,25 @@ function useMainPanel(): Panel<{}> {
     case MenuPanel.LAYERS:
       return {
         title: "Layers",
-        renderPanel: LayerList,
+        renderPanel: () => h(LayerList),
       };
     case MenuPanel.SETTINGS:
       return {
         title: "Settings",
-        renderPanel: SettingsPanel,
+        renderPanel: () => h(SettingsPanel),
       };
     case MenuPanel.ABOUT:
       return {
         title: "About",
-        renderPanel: AboutText,
+        renderPanel: () => h(AboutText),
       };
   }
-  return null;
 }
 
 const Menu = (props) => {
   const runAction = useAppActions();
   const { menuOpen, panelStack = [] } = useMenuState();
+  const mainPanel = useMainPanel();
 
   const toggleMenu = () => {
     runAction({ type: "toggle-menu" });
@@ -141,7 +141,7 @@ const Menu = (props) => {
 
   let exitTransition = { exit: 300 };
 
-  const stack = [useMainPanel(), ...panelStack];
+  const stack = [mainPanel, ...panelStack];
 
   return h(
     CloseableCard,
@@ -153,21 +153,21 @@ const Menu = (props) => {
     },
     [
       h(CloseableCard.Header, [
-        h.if(stack.length == 1)("div.buttons", [
+        h.if(stack.length <= 1)("div.buttons", [
           h(TabButton, {
             icon: "layers",
             text: "Layers",
             tab: MenuPanel.LAYERS,
           }),
           h(TabButton, {
-            icon: "settings",
-            text: "Settings",
-            tab: MenuPanel.SETTINGS,
-          }),
-          h(TabButton, {
             icon: "info-sign",
             text: "About",
             tab: MenuPanel.ABOUT,
+          }),
+          h(TabButton, {
+            icon: "settings",
+            text: "Settings",
+            tab: MenuPanel.SETTINGS,
           }),
         ]),
         h.if(stack.length > 1)([
