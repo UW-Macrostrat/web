@@ -43,12 +43,11 @@ const cssModuleLoader = {
 module.exports = {
   mode: mode,
   module: {
-    unknownContextCritical: false,
     rules: [
       {
         test: /\.(js|jsx|ts|tsx)$/,
         use: [babelLoader],
-        exclude: /node_modules/,
+        exclude: [/node_modules/, /\/packages\/maplibre-gl-js\/dist/],
       },
       {
         test: /\.styl$/,
@@ -83,12 +82,19 @@ module.exports = {
           },
         ],
       },
+      // https://github.com/CesiumGS/cesium/issues/9790#issuecomment-943773870
+      {
+        test: /.js$/,
+        include: path.resolve(__dirname, "node_modules/cesium/Source"),
+        use: { loader: require.resolve("@open-wc/webpack-import-meta-loader") },
+      },
     ],
   },
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".jsx"],
     alias: {
       // CesiumJS module name,
+      cesium: path.resolve(__dirname, "node_modules/cesium"),
       cesiumSource: path.resolve(__dirname, cesiumSource),
       "~": path.resolve(__dirname, "src"),
       "@macrostrat/cesium-viewer": packageSrc("cesium-viewer"),
@@ -106,8 +112,9 @@ module.exports = {
     path: path.join(__dirname, "/dist/"),
     publicPath: publicURL,
     filename: "[name].js",
-    sourcePrefix: "",
+    devtoolModuleFilenameTemplate: "file:///[absolute-resource-path]",
   },
+  devtool: mode == "development" ? "source-map" : false,
   amd: {
     // Enable webpack-friendly use of require in Cesium
     toUrlUndefined: true,

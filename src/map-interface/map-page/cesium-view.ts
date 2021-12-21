@@ -14,8 +14,9 @@ import {
 } from "@macrostrat/cesium-viewer/layers";
 import { ImageryLayer } from "resium";
 import { useEffect, useMemo } from "react";
-import MVTImageryProvider from "mvt-imagery-provider";
-import { coreStyle } from "./map-styles/core";
+import MVTImageryProvider from "cesium-vector-provider/src";
+import { coreStyle } from "./map-styles";
+import reliefShading from "./map-styles/relief-shading";
 import {
   getHashString,
   setHashString,
@@ -24,29 +25,18 @@ import {
   buildPositionHash,
   getInitialPosition,
 } from "@macrostrat/cesium-viewer/query-string";
+import maplibre from "maplibre-gl/dist/maplibre-gl-dev";
+
+maplibre.accessToken =
+  "pk.eyJ1IjoiamN6YXBsZXdza2kiLCJhIjoiY2szNXA5OWcxMDN2bzNtcnI1cWd1ZXJpYiJ9.Dd5GKlrPhg969y1ayY32cg";
 
 const BaseGeologyLayer = ({ enabled = true, ...rest }) => {
   const provider = useMemo(() => {
-    let prov = new MVTImageryProvider({
+    return new MVTImageryProvider({
       style: coreStyle,
       maximumZoom: 13,
       tileSize: 512,
     });
-    // let filter: any = ["boolean", true];
-    // if (visibleMaps != null) {
-    //   filter = [
-    //     "match",
-    //     ["get", "map_id"],
-    //     Array.from(visibleMaps),
-    //     true,
-    //     false
-    //   ];
-    // }
-    // console.log(filter);
-    // prov.mapboxRenderer.setFilter("map-units", filter, false);
-    // const res = prov.mapboxRenderer.setFilter("unit-edge", filter, false);
-    // res();
-    return prov;
   }, [enabled]);
 
   if (!enabled) return null;
@@ -65,9 +55,19 @@ function MacrostratSatelliteLayer() {
   return h(SatelliteLayer);
 }
 
-function MacrostratHillshadeLayer() {
-  const hasSatellite = useSelector((state) => state.update.mapHasSatellite);
-  return h(HillshadeLayer, { enabled: !hasSatellite });
+function BaseLayer({ enabled, ...rest }) {
+  const provider = useMemo(() => {
+    return new MVTImageryProvider({
+      style: "mapbox://styles/jczaplewski/ckxcu9zmu4aln14mfg4monlv3/draft",
+      // "mapbox://styles/jczaplewski/ckxeiii3a1jv415o8rxvgqlpd", //
+      maximumZoom: 13,
+      tileSize: 256,
+    });
+  }, [enabled]);
+
+  if (!enabled) return null;
+
+  return h(ImageryLayer, { imageryProvider: provider, ...rest });
 }
 
 function MacrostratCesiumView(props) {
@@ -79,6 +79,7 @@ function MacrostratCesiumView(props) {
   const globe = useSelector((state) => state.globe);
 
   const showInspector = useSelector((state) => state.globe.showInspector);
+  const hasSatellite = useSelector((state) => state.update.mapHasSatellite);
 
   return h(
     CesiumView,
@@ -100,9 +101,10 @@ function MacrostratCesiumView(props) {
       flyTo: globe.flyToProps,
     },
     [
-      h(MacrostratHillshadeLayer),
+      h(BaseLayer, { enabled: !hasSatellite }),
+      //h(MacrostratHillshadeLayer),
       h(MacrostratSatelliteLayer),
-      h(GeologyLayer, { alpha: 0.5 }),
+      h(GeologyLayer, { alpha: 0.4 }),
     ]
   );
 }
@@ -124,7 +126,7 @@ export function GlobeDevPage() {
         setHashString(buildPositionHash(cpos.camera));
       },
     },
-    [h(HillshadeLayer), h(BaseGeologyLayer)]
+    [h(BaseGeologyLayer)]
   );
 }
 

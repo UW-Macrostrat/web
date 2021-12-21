@@ -17,6 +17,10 @@
     "typeRoots": ["node_modules/@types"],
     "paths": {
       "~/*": ["./src/*"],
+      "@macrostrat/cesium-vector-provider": [
+        "./packages/cesium-vector-provider/src/"
+      ],
+      "maplibre-basic-renderer": ["packages/maplibre-basic-renderer/src/"],
       "@macrostrat/cesium-viewer": ["packages/cesium-viewer/src/"],
       "@macrostrat/cesium-martini": ["packages/cesium-martini"],
       "@macrostrat/ui-components": ["packages/ui-components/src/"],

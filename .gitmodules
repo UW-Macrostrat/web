@@ -16,3 +16,12 @@
 [submodule "packages/MVTImageryProvider"]
 	path = packages/MVTImageryProvider
 	url = git://github.com/davenquinn/MVTImageryProvider.git
+[submodule "packages/cesium-vector-provider"]
+	path = packages/cesium-vector-provider
+	url = git://github.com/davenquinn/cesium-vector-provider.git
+[submodule "packages/maplibre-gl-js"]
+	path = packages/maplibre-gl-js
+	url = git://github.com/davenquinn/maplibre-gl-js.git
+[submodule "packages/maplibre-basic-renderer"]
+	path = packages/maplibre-basic-renderer
+	url = git://github.com/davenquinn/maplibre-basic-renderer.git
