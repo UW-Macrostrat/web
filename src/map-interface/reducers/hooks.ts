@@ -68,9 +68,11 @@ async function runAction(
         lat,
         cancelToken: sourceMapQuery,
       });
-      // if (column) {
-      //   runAction(state, { type: "get-column" });
-      // }
+      if (column) {
+        dispatch(
+          await runAction(state, { type: "get-column", column }, dispatch)
+        );
+      }
       let mapData = await asyncQueryMap(
         lng,
         lat,

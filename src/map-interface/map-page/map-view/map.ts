@@ -322,13 +322,22 @@ class Map extends Component<MapProps, {}> {
         .map((f) => {
           return f.properties;
         });
-      if (burwellFeatures.length) {
+
+      const columns = features
+        .filter((f) => {
+          if (f.layer.id === "column_fill") return f;
+        })
+        .map((f) => {
+          return f.properties;
+        });
+
+      if (columns.length) {
         this.props.runAction({
           type: "map-query",
           lng: event.lngLat.lng,
           lat: event.lngLat.lat,
           z: this.map.getZoom(),
-          column: burwellFeatures[0].map_id,
+          column: columns[0],
         });
       } else {
         this.props.runAction({
