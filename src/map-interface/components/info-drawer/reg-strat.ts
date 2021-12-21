@@ -23,7 +23,7 @@ function RegionalStratigraphy(props) {
       {
         classes: { root: "regional-panel" },
         title: "Regional stratigraphy",
-        expanded: hasColumns,
+        expanded: true,
       },
       [
         h.if(Object.keys(columnInfo).length != 0)("div", [
