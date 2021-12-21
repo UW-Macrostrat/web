@@ -13,9 +13,6 @@
 [submodule "map-components"]
 	path = packages/map-components
 	url = git://github.com/UW-Macrostrat/map-components.git
-[submodule "packages/MVTImageryProvider"]
-	path = packages/MVTImageryProvider
-	url = git://github.com/davenquinn/MVTImageryProvider.git
 [submodule "packages/cesium-vector-provider"]
 	path = packages/cesium-vector-provider
 	url = git://github.com/davenquinn/cesium-vector-provider.git
