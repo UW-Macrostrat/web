@@ -22,6 +22,7 @@ const mapStateToProps = (state) => {
     elevationData: state.update.elevationData,
     elevationMarkerLocation: state.update.elevationMarkerLocation,
     mapXYZ: state.update.mapXYZ,
+    infoDrawerOpen: state.update.infoDrawerOpen,
   };
 };
 

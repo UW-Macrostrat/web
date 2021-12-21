@@ -206,7 +206,6 @@ class Map extends Component<MapProps, {}> {
       if (this.map.getLayer("infoMarker")) {
         // Hide the info marker and close the info drawer
         //this.map.setLayoutProperty("infoMarker", "visibility", "none");
-        //this.props.runAction({type:"close-infodrawer"});
       }
     });
 
@@ -353,11 +352,11 @@ class Map extends Component<MapProps, {}> {
       */
       this.panning = true;
       this.map.panTo(event.lngLat, {
-        offset: [xOffset, 0],
+        //offset: [xOffset, 0],
         easing: function easing(t) {
           return t * (2 - t);
         },
-        duration: 300,
+        duration: 500,
       });
       setTimeout(() => {
         this.panning = false;

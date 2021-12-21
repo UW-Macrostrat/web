@@ -46,6 +46,10 @@ function setMapStyle(class_, map, mapStyle, props) {
         if (visibility != showFilteredColumns) {
           map.setLayoutProperty(layer.id, "visibility", showFilteredColumns);
         }
+      } else if (layer.source == "info_marker") {
+        if (!props.infoDrawerOpen) {
+          map.setLayoutProperty(layer.id, "visibility", "none");
+        }
       }
     }
   });

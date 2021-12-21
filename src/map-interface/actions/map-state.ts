@@ -36,6 +36,10 @@ function updateURI(state: any) {
       return l.layer;
     });
 
+  if (args.layers.length == 0) {
+    args.layers.push("None");
+  }
+
   for (const filter of state.filters) {
     args[filter.type] = filter.id || filter.name;
   }
@@ -91,7 +95,16 @@ function getInitialMapState() {
     try {
       const hashData = getHashString(window.location.hash) ?? {};
 
-      const { layers, x = 16, y = 23, z = 1.5 } = hashData;
+      const { layers = [], x = 16, y = 23, z = 1.5 } = hashData;
+
+      if (layers.length == 0) {
+        if (defaultState.bedrock) {
+          layers.push("bedrock");
+        }
+        if (defaultState.lines) {
+          layers.push("lines");
+        }
+      }
 
       let mapState = { x, y, z, layers };
 
@@ -108,6 +121,7 @@ function getInitialMapState() {
       ) {
         // Sweet, it is legit
         mapState = mapState;
+        updateURI(getState().update);
         // Augh, got to simplify this multiple dispatch situation. This should be one atomic action.
         dispatch(gotInitialMapState(mapState));
       }
@@ -115,6 +129,7 @@ function getInitialMapState() {
       console.error("Invalid map state:", e);
       // Who knows. Doesn't matter. Nothing does.
       mapState = defaultState;
+      updateURI(getState().update);
     }
   };
 }

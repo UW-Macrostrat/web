@@ -60,7 +60,6 @@ async function runAction(
       };
     case "map-query":
       const { lng, lat, z, map_id, column } = action;
-      console.log("MAP QUERY", lng, lat, z, map_id, column);
       let CancelTokenMapQuery = axios.CancelToken;
       let sourceMapQuery = CancelTokenMapQuery.source();
       dispatch({
