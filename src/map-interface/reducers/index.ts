@@ -23,7 +23,6 @@ function storageGlobeReducer(
   state = getInitialGlobeState(),
   action: GlobeAction
 ) {
-  console.log("Globe state", state);
   if (action.type === "set-display-quality") {
     globeStorage.set({ displayQuality: action.value });
   }
