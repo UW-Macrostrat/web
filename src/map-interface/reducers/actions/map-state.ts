@@ -31,7 +31,8 @@ function updateURI(state: any) {
     });
 
   if (args.layers.length == 0) {
-    args.layers.push("None");
+    // Special case for no layers
+    args.layers.push("none");
   }
 
   for (const filter of state.filters) {
@@ -89,15 +90,15 @@ function getInitialMapState() {
     try {
       const hashData = getHashString(window.location.hash) ?? {};
 
-      const { layers = [], x = 16, y = 23, z = 1.5 } = hashData;
+      let { layers = ["bedrock", "lines"] } = hashData;
+      const { x = 16, y = 23, z = 1.5 } = hashData;
 
-      if (layers.length == 0) {
-        if (defaultState.bedrock) {
-          layers.push("bedrock");
-        }
-        if (defaultState.lines) {
-          layers.push("lines");
-        }
+      if (!Array.isArray(layers)) {
+        layers = [layers];
+      }
+
+      if (layers == ["none"]) {
+        layers = [];
       }
 
       let mapState = { x, y, z, layers };
