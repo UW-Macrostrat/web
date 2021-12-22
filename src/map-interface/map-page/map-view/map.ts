@@ -9,7 +9,7 @@ import {
 import h from "@macrostrat/hyper";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { setMapStyle } from "./style-helpers";
+import { setMapStyle, markerOffset } from "./style-helpers";
 
 const maxClusterZoom = 6;
 const highlightLayers = [
@@ -361,7 +361,7 @@ class Map extends Component<MapProps, {}> {
       */
       this.panning = true;
       this.map.panTo(event.lngLat, {
-        //offset: [xOffset, 0],
+        offset: [0, markerOffset()],
         easing: function easing(t) {
           return t * (2 - t);
         },
