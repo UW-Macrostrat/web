@@ -1,4 +1,3 @@
-import { gotInitialMapState } from "./main";
 import { format } from "d3-format";
 import { MapBackend } from "../../map-page";
 import { setHashString, getHashString } from "@macrostrat/ui-components";
@@ -126,6 +125,13 @@ function getInitialMapState() {
       mapState = defaultState;
       updateURI(getState().update);
     }
+  };
+}
+
+export function gotInitialMapState(mapState) {
+  return {
+    type: "got-initial-map-state",
+    data: mapState,
   };
 }
 

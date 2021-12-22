@@ -158,13 +158,6 @@ export type Action =
   | GET_INITIAL_MAP_STATE
   | GOT_INITIAL_MAP_STATE;
 
-export function gotInitialMapState(mapState) {
-  return {
-    type: "got-initial-map-state",
-    data: mapState,
-  };
-}
-
 export function useActionDispatch(): React.Dispatch<Action> {
   return useDispatch<React.Dispatch<Action>>();
 }
