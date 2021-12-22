@@ -1,8 +1,8 @@
 import React, { useRef, useEffect } from "react";
-import { connect } from "react-redux";
-import { toggleElevationChart, updateElevationMarker } from "../../actions";
+import { useSelector } from "react-redux";
+import { useAppActions } from "~/map-interface/reducers";
 import hyper from "@macrostrat/hyper";
-import { Button } from "@blueprintjs/core";
+import { Button, Spinner } from "@blueprintjs/core";
 import { select, mouse } from "d3-selection";
 import { scaleLinear } from "d3-scale";
 import { axisBottom, axisLeft } from "d3-axis";
@@ -175,24 +175,40 @@ function drawElevationChart(
     });
 }
 
-function ElevationChart({ elevationData, updateElevationMarker }) {
+function ElevationChart({ elevationData = [], fetchingElevation }) {
   const chartRef = useRef(null);
+  const runAction = useAppActions();
 
   useEffect(() => {
+    if (elevationData.length == 0) return;
     drawElevationChart(chartRef, { elevationData, updateElevationMarker });
     return () => {
       chartRef.current?.select("g").remove();
     };
-  }, []);
+  }, [elevationData]);
 
+  const updateElevationMarker = (lng: number, lat: number) =>
+    runAction({
+      type: "update-elevation-marker",
+      lng,
+      lat,
+    });
+
+  if (fetchingElevation) return h(Spinner);
+  if (elevationData.length == 0) return null;
   return h("svg#elevationChart");
 }
 
-function ElevationChartPanel(props) {
-  const { elevationData = [], updateElevationMarker } = props;
+function ElevationChartContainer() {
+  const {
+    elevationData = [],
+    elevationChartOpen,
+    fetchingElevation,
+  } = useSelector((state) => state.update);
   const hasElevationData = elevationData.length > 0;
+  const runAction = useAppActions();
 
-  if (!props.elevationChartOpen) return null;
+  if (!elevationChartOpen) return null;
 
   return h(
     "div.elevation-chart-panel",
@@ -203,7 +219,7 @@ function ElevationChartPanel(props) {
         minimal: true,
         className: "close-button",
         onClick() {
-          props.toggleElevationChart();
+          runAction({ type: "toggle-elevation-chart" });
         },
       }),
       h("div", [
@@ -214,38 +230,14 @@ function ElevationChartPanel(props) {
         h(
           "div.elevation-chart-wrapper",
           null,
-          h.if(hasElevationData)(ElevationChart, {
+          h(ElevationChart, {
             elevationData,
-            updateElevationMarker,
+            fetchingElevation,
           })
         ),
       ]),
     ])
   );
 }
-
-const mapStateToProps = (state) => {
-  return {
-    fetchingElevation: state.update.fetchingElevation,
-    elevationData: state.update.elevationData,
-    elevationChartOpen: state.update.elevationChartOpen,
-  };
-};
-
-const mapDispatchToProps = (dispatch) => {
-  return {
-    toggleElevationChart: () => {
-      dispatch(toggleElevationChart());
-    },
-    updateElevationMarker: (lng, lat) => {
-      dispatch(updateElevationMarker(lng, lat));
-    },
-  };
-};
-
-const ElevationChartContainer = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ElevationChartPanel);
 
 export default ElevationChartContainer;

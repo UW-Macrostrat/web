@@ -1,5 +1,5 @@
 import axios from "axios";
-import { SETTINGS } from "../Settings";
+import { SETTINGS } from "../../Settings";
 
 const base = `${SETTINGS.apiDomain}/api/v2`;
 const basev1 = `${SETTINGS.gddDomain}/api/v1`;
