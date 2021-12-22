@@ -133,7 +133,7 @@ function useMainPanel(): Panel<{}> {
 
 const Menu = (props) => {
   const runAction = useAppActions();
-  const { menuOpen, panelStack = [] } = useMenuState();
+  const { menuOpen, infoDrawerOpen, panelStack = [] } = useMenuState();
 
   const toggleMenu = () => {
     runAction({ type: "toggle-menu" });
@@ -142,6 +142,10 @@ const Menu = (props) => {
   let exitTransition = { exit: 300 };
 
   const stack = [useMainPanel(), ...panelStack];
+
+  if (window.innerWidth <= 768 && infoDrawerOpen) {
+    return h("div");
+  }
 
   return h(
     CloseableCard,
