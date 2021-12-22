@@ -93,7 +93,6 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
             h.if(inputFocus)(SearchResults),
             h.if(!inputFocus)(MenuContainer, null),
           ]),
-          h("div.spacer"),
         ]),
         h(InfoDrawer, null),
       ]),

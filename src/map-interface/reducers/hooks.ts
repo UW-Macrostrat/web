@@ -153,10 +153,9 @@ function useFilterState() {
 }
 
 function useSearchState() {
-  const { searchResults, isSearching, term, inputFocus } = useSelector(
-    (state) => state.update
-  );
-  return { searchResults, isSearching, term, inputFocus };
+  const { searchResults, isSearching, term, inputFocus, infoDrawerOpen } =
+    useSelector((state) => state.update);
+  return { searchResults, isSearching, term, inputFocus, infoDrawerOpen };
 }
 
 function useMenuState() {

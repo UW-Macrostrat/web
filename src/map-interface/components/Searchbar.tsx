@@ -26,7 +26,7 @@ function SearchResults() {
   const runAction = useAppActions();
 
   if (searchResults == null) {
-    return h(Card, [h(SearchGuidance)]);
+    return h(Card, { className: "no-results" }, [h(SearchGuidance)]);
   }
   const onSelectResult = (f) => {
     runAction({ type: "set-search-term", term: "" });
@@ -58,7 +58,9 @@ function SearchResults() {
   });
 
   return h("div", [
-    h.if(searchResults.length == 0)(Card, ["No results, try again."]),
+    h.if(searchResults.length == 0)(Card, { className: "no-results" }, [
+      "No results, try again.",
+    ]),
     h.if(searchResults.length > 0)(Card, { className: "search-results" }, [
       resultCategoriesArr.map((cat, i) => {
         return h("div", { key: `subheader-${i}` }, [
@@ -72,7 +74,7 @@ function SearchResults() {
 
 function Searchbar(props) {
   const runAction = useAppActions();
-  const { term, searchResults } = useSearchState();
+  const { term, searchResults, infoDrawerOpen } = useSearchState();
 
   const gainInputFocus = () => {
     runAction({ type: "set-input-focus", inputFocus: true });
@@ -104,6 +106,10 @@ function Searchbar(props) {
   const MenuButton = (
     <Button icon="menu" aria-label="Menu" large onClick={toggleMenu} minimal />
   );
+
+  if (window.innerWidth <= 768 && infoDrawerOpen) {
+    return h("div");
+  }
 
   return (
     <div className="searchbar-holder">
