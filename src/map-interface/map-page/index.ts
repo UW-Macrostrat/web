@@ -75,13 +75,6 @@ const MapTypeSelector = () => {
   ]);
 };
 
-function LoadingSpinner() {
-  const mapIsLoading = useSelector((d) => d.update.mapIsLoading);
-  if (!mapIsLoading) return null;
-
-  return h("div.loading-indicator", null, h(Spinner, { size: 10 }));
-}
-
 const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   const { inputFocus } = useSearchState();
 
@@ -94,7 +87,6 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
             h(Searchbar, null),
             h.if(inputFocus)(SearchResults),
             h.if(!inputFocus)(MenuContainer, null),
-            h(LoadingSpinner),
           ]),
         ]),
         h(InfoDrawer, null),
