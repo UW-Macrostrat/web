@@ -84,11 +84,21 @@ type START_ELEVATION_QUERY = {
   cancelToken: any;
 };
 type RECEIVED_ELEVATION_QUERY = { type: "received-elevation-query"; data: any };
-type UPDATE_ELEVATION_MARKER = { type: "update-elevation-marker" };
+type UPDATE_ELEVATION_MARKER = {
+  type: "update-elevation-marker";
+  lng: number;
+  lat: number;
+};
 
 type SET_ACTIVE_INDEX_MAP = { type: "set-active-index-map" };
 
-type MAP_MOVED = { type: "map-moved" };
+type MapPosition = {
+  x: number;
+  y: number;
+  z: number;
+};
+
+type MAP_MOVED = { type: "map-moved"; data: MapPosition };
 type GET_INITIAL_MAP_STATE = { type: "get-initial-map-state" };
 type GOT_INITIAL_MAP_STATE = { type: "got-initial-map-state" };
 type SET_MAP_BACKEND = { type: "set-map-backend"; backend: any };
@@ -147,20 +157,6 @@ export type Action =
   | MAP_MOVED
   | GET_INITIAL_MAP_STATE
   | GOT_INITIAL_MAP_STATE;
-
-export const toggleElevationChart = () => {
-  return {
-    type: "toggle-elevation-chart",
-  };
-};
-
-export function updateElevationMarker(lng, lat) {
-  return {
-    type: "update-elevation-marker",
-    lng: lng,
-    lat: lat,
-  };
-}
 
 export function gotInitialMapState(mapState) {
   return {
