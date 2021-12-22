@@ -91,6 +91,8 @@ class Map extends Component<MapProps, {}> {
       optimizeForTerrain: true,
     });
 
+    this.props.mapRef.current = this.map;
+
     // disable map rotation using right click + drag
     //this.map.dragRotate.disable();
 
