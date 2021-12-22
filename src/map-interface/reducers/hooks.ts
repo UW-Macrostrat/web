@@ -14,6 +14,7 @@ import {
 import { useSelector } from "react-redux";
 import axios from "axios";
 import { asyncFilterHandler } from "./filters";
+import { updateStateFromURI } from "./helpers";
 
 function getCancelToken() {
   let CancelToken = axios.CancelToken;
@@ -25,8 +26,10 @@ async function runAction(
   state,
   action: Action,
   dispatch = null
-): Promise<Action> {
+): Promise<Action | void> {
   switch (action.type) {
+    case "get-initial-map-state":
+      return updateStateFromURI(state);
     case "fetch-search-query":
       let term = action.term;
       let CancelToken = axios.CancelToken;
@@ -143,6 +146,7 @@ function useAppActions() {
   const state = useLegacyState();
   return async (action) => {
     const newAction: Action = await runAction(state, action, dispatch);
+    if (newAction == null) return;
     dispatch(newAction);
   };
 }

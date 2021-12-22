@@ -15,13 +15,8 @@ const classColors = {
   energy: "#333333",
 };
 
-type MapPosition = {
-  x: number;
-  y: number;
-  z: number;
-};
-
 const preloadedState = {
+  initialLoadComplete: false,
   menuOpen: false,
   aboutOpen: false,
   infoDrawerOpen: false,
@@ -593,6 +588,7 @@ const update = (state = preloadedState, action: Action) => {
       const mapHasBedrock = layers.includes("bedrock");
 
       const newState = Object.assign({}, state, {
+        initialLoadComplete: true,
         mapBackend: action.data.mapBackend ?? MapBackend.MAPBOX,
         mapHasSatellite,
         mapHasBedrock,
@@ -612,29 +608,6 @@ const update = (state = preloadedState, action: Action) => {
     default:
       return state;
   }
-};
-
-enum MapLayer {
-  SATELLITE = "satellite",
-  LINES = "lines",
-  COLUMNS = "columns",
-  FOSSILS = "fossils",
-  BEDROCK = "bedrock",
-}
-
-type MapState = {
-  mapXYZ: MapPosition;
-  mapHasBedrock: boolean;
-  mapHasLines: boolean;
-  mapHasSatellite: boolean;
-  mapHasColumns: boolean;
-  mapHasFossils: boolean;
-  mapBackend: MapBackend;
-};
-
-type MapActionData = MapPosition & {
-  layers: MapLayer[];
-  mapBackend: MapBackend;
 };
 
 export default update;

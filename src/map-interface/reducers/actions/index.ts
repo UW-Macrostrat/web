@@ -1,4 +1,5 @@
 import { useDispatch } from "react-redux";
+import { MapAction } from "./map-state";
 
 //////////// Async Actions ///////////////
 type FETCH_SEARCH_QUERY = { type: "fetch-search-query"; term: string };
@@ -92,17 +93,6 @@ type UPDATE_ELEVATION_MARKER = {
 
 type SET_ACTIVE_INDEX_MAP = { type: "set-active-index-map" };
 
-type MapPosition = {
-  x: number;
-  y: number;
-  z: number;
-};
-
-type MAP_MOVED = { type: "map-moved"; data: MapPosition };
-type GET_INITIAL_MAP_STATE = { type: "get-initial-map-state" };
-type GOT_INITIAL_MAP_STATE = { type: "got-initial-map-state" };
-type SET_MAP_BACKEND = { type: "set-map-backend"; backend: any };
-
 type UPDATE_STATE = { type: "update-state"; state: any };
 
 export type Action =
@@ -117,7 +107,6 @@ export type Action =
   | UPDATE_STATE
   | GET_FILTERED_COLUMNS
   | ASYNC_ADD_FILTER
-  | SET_MAP_BACKEND
   | FETCH_SEARCH_QUERY
   | PAGE_CLICK
   | RECIEVE_DATA
@@ -154,9 +143,7 @@ export type Action =
   | RECEIVED_ELEVATION_QUERY
   | UPDATE_ELEVATION_MARKER
   | SET_ACTIVE_INDEX_MAP
-  | MAP_MOVED
-  | GET_INITIAL_MAP_STATE
-  | GOT_INITIAL_MAP_STATE;
+  | MapAction;
 
 export function useActionDispatch(): React.Dispatch<Action> {
   return useDispatch<React.Dispatch<Action>>();

@@ -1,6 +1,6 @@
 import { format } from "d3-format";
-import { MapBackend } from "../../map-page";
 import { setHashString, getHashString } from "@macrostrat/ui-components";
+import { MapBackend, GotInitialMapState } from "../actions";
 
 const fmt = format(".4f");
 
@@ -46,86 +46,84 @@ function updateURI(state: any) {
   setHashString({ ...args, x, y, z }, { arrayFormat: "comma" });
 }
 
-function getInitialMapState() {
-  return (dispatch, getState) => {
-    // Get the default map state
-    let {
-      mapXYZ,
-      mapHasBedrock,
-      mapHasLines,
-      mapHasSatellite,
-      mapHasColumns,
-      mapHasFossils,
-    } = getState().update;
-    let defaultState = {
-      z: mapXYZ.z,
-      x: mapXYZ.x,
-      y: mapXYZ.y,
-      satellite: mapHasSatellite,
-      bedrock: mapHasBedrock,
-      lines: mapHasLines,
-      columns: mapHasColumns,
-      fossils: mapHasFossils,
-    };
-    let filterTypes = [
-      "strat_name_concepts",
-      "strat_name_orphans",
-      "intervals",
-      "lithology_classes",
-      "lithology_types",
-      "lithologies",
-      "all_lithologies",
-      "all_lithology_types",
-      "all_lithology_classes",
-      "environments",
-      "environment_types",
-      "environment_classes",
-    ];
-    let hash = window.location.hash;
-    let mapState = {
-      incomingFilters: [],
-      mapBackend: MapBackend.MAPBOX,
-    };
-    try {
-      const hashData = getHashString(window.location.hash) ?? {};
-
-      let { layers = ["bedrock", "lines"] } = hashData;
-      const { x = 16, y = 23, z = 1.5 } = hashData;
-
-      if (!Array.isArray(layers)) {
-        layers = [layers];
-      }
-
-      if (layers == ["none"]) {
-        layers = [];
-      }
-
-      let mapState = { x, y, z, layers };
-
-      if (
-        mapState.x &&
-        mapState.y &&
-        mapState.z &&
-        mapState.x >= -180 &&
-        mapState.x <= 180 &&
-        mapState.y >= -85 &&
-        mapState.y <= 85 &&
-        mapState.z >= 0 &&
-        mapState.z <= 16
-      ) {
-        // Sweet, it is legit
-        mapState = mapState;
-        updateURI(getState().update);
-        // Augh, got to simplify this multiple dispatch situation. This should be one atomic action.
-        dispatch(gotInitialMapState(mapState));
-      }
-    } catch (e) {
-      console.error("Invalid map state:", e);
-      // Who knows. Doesn't matter. Nothing does.
-      mapState = defaultState;
-      updateURI(getState().update);
-    }
+function updateStateFromURI(state): GotInitialMapState | void {
+  // Get the default map state
+  let {
+    mapXYZ,
+    mapHasBedrock,
+    mapHasLines,
+    mapHasSatellite,
+    mapHasColumns,
+    mapHasFossils,
+  } = state;
+  let defaultState = {
+    z: mapXYZ.z,
+    x: mapXYZ.x,
+    y: mapXYZ.y,
+    satellite: mapHasSatellite,
+    bedrock: mapHasBedrock,
+    lines: mapHasLines,
+    columns: mapHasColumns,
+    fossils: mapHasFossils,
   };
+  let filterTypes = [
+    "strat_name_concepts",
+    "strat_name_orphans",
+    "intervals",
+    "lithology_classes",
+    "lithology_types",
+    "lithologies",
+    "all_lithologies",
+    "all_lithology_types",
+    "all_lithology_classes",
+    "environments",
+    "environment_types",
+    "environment_classes",
+  ];
+  let hash = window.location.hash;
+  let mapState = {
+    incomingFilters: [],
+    mapBackend: MapBackend.MAPBOX,
+  };
+  try {
+    const hashData = getHashString(window.location.hash) ?? {};
+
+    let { layers = ["bedrock", "lines"] } = hashData;
+    const { x = 16, y = 23, z = 1.5 } = hashData;
+
+    if (!Array.isArray(layers)) {
+      layers = [layers];
+    }
+
+    if (layers == ["none"]) {
+      layers = [];
+    }
+
+    let mapState = { x, y, z, layers };
+
+    if (
+      mapState.x &&
+      mapState.y &&
+      mapState.z &&
+      mapState.x >= -180 &&
+      mapState.x <= 180 &&
+      mapState.y >= -85 &&
+      mapState.y <= 85 &&
+      mapState.z >= 0 &&
+      mapState.z <= 16
+    ) {
+      // Sweet, it is legit
+      mapState = mapState;
+      updateURI(state);
+      // Augh, got to simplify this multiple dispatch situation. This should be one atomic action.
+      return { type: "got-initial-map-state", data: mapState };
+    }
+  } catch (e) {
+    console.error("Invalid map state:", e);
+    // // Who knows. Doesn't matter. Nothing does.
+    // mapState = defaultState;
+    // updateURI(mainState);
+  }
 }
 
 export function gotInitialMapState(mapState) {
@@ -135,4 +133,4 @@ export function gotInitialMapState(mapState) {
   };
 }
 
-export { getInitialMapState, updateURI };
+export { updateStateFromURI, updateURI };

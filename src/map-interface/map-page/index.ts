@@ -10,6 +10,7 @@ import { ButtonGroup, Button, Spinner } from "@blueprintjs/core";
 import { useSelector, useDispatch } from "react-redux";
 import loadable from "@loadable/component";
 import { useSearchState } from "../reducers";
+import { MapBackend } from "../reducers/actions";
 import styles from "./main.module.styl";
 
 const h = hyper.styled(styles);
@@ -19,12 +20,6 @@ const CesiumViewMod = () => h("div", "Globe is currently disabled");
 
 export function CesiumView(props) {
   return h(Suspense, { fallback: h(Spinner) }, h(CesiumViewMod, props));
-}
-
-enum MapBackend {
-  MAPBOX,
-  CESIUM,
-  MAPBOX3,
 }
 
 const MapView = (props: { backend: MapBackend }) => {
