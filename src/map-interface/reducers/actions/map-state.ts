@@ -26,6 +26,7 @@ export type MapState = {
   mapHasColumns: boolean;
   mapHasFossils: boolean;
   mapBackend: MapBackend;
+  mapIsLoading: boolean;
 };
 
 type MapHashData = MapPosition & {
@@ -36,6 +37,8 @@ type MapHashData = MapPosition & {
 type MapMoved = { type: "map-moved"; data: MapPosition };
 type SetMapBackend = { type: "set-map-backend"; backend: any };
 type GetInitialMapState = { type: "get-initial-map-state" };
+type MapLoading = { type: "map-loading" };
+type MapIdle = { type: "map-idle" };
 export type GotInitialMapState = {
   type: "got-initial-map-state";
   data: MapHashData;
@@ -45,4 +48,6 @@ export type MapAction =
   | MapMoved
   | GetInitialMapState
   | GotInitialMapState
-  | SetMapBackend;
+  | SetMapBackend
+  | MapLoading
+  | MapIdle;

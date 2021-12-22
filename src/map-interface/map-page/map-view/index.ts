@@ -19,6 +19,7 @@ function MapContainer(props) {
     elevationMarkerLocation,
     mapXYZ,
     infoDrawerOpen,
+    mapIsLoading,
   } = useSelector((state) => state.update);
 
   const runAction = useAppActions();
@@ -44,6 +45,7 @@ function MapContainer(props) {
     mapXYZ,
     infoDrawerOpen,
     runAction,
+    mapIsLoading,
     ...props,
   });
 }

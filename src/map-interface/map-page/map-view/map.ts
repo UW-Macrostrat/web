@@ -87,6 +87,8 @@ class Map extends Component<MapProps, {}> {
       maxZoom: 14,
       maxTileCacheSize: 0,
       logoPosition: "bottom-right",
+      antialias: true,
+      optimizeForTerrain: true,
     });
 
     // disable map rotation using right click + drag
@@ -94,6 +96,16 @@ class Map extends Component<MapProps, {}> {
 
     // disable map rotation using touch rotation gesture
     this.map.touchZoomRotate.disableRotation();
+
+    this.map.on("sourcedataloading", () => {
+      if (this.props.mapIsLoading) return;
+      this.props.runAction({ type: "map-loading" });
+    });
+
+    this.map.on("idle", () => {
+      if (!this.props.mapIsLoading) return;
+      this.props.runAction({ type: "map-idle" });
+    });
 
     // Update the URI when the map moves
     this.map.on("moveend", () => {
