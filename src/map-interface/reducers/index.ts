@@ -1,7 +1,7 @@
 import { combineReducers } from "redux";
 import reduceReducers from "reduce-reducers";
 import { menuReducer } from "./menu";
-import { Action } from "../actions";
+import { Action } from "./actions";
 //import { reducer as globeReducer } from "@macrostrat/cesium-viewer/actions";
 //import { nadirCameraPosition } from "@macrostrat/cesium-viewer/position";
 import update from "./legacy";

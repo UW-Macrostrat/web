@@ -1,7 +1,7 @@
-import { updateURI } from "../actions/map-state";
+import { updateURI } from "./actions/map-state";
 import { sum, timescale } from "../utils";
 import { MapBackend } from "../map-page";
-import { Action } from "../actions";
+import { Action } from "./actions";
 
 const classColors = {
   sedimentary: "#FF8C00",
@@ -15,6 +15,12 @@ const classColors = {
   material: "#777777",
   water: "#00CCFF",
   energy: "#333333",
+};
+
+type MapPosition = {
+  x: number;
+  y: number;
+  z: number;
 };
 
 const preloadedState = {
@@ -608,6 +614,29 @@ const update = (state = preloadedState, action: Action) => {
     default:
       return state;
   }
+};
+
+enum MapLayer {
+  SATELLITE = "satellite",
+  LINES = "lines",
+  COLUMNS = "columns",
+  FOSSILS = "fossils",
+  BEDROCK = "bedrock",
+}
+
+type MapState = {
+  mapXYZ: MapPosition;
+  mapHasBedrock: boolean;
+  mapHasLines: boolean;
+  mapHasSatellite: boolean;
+  mapHasColumns: boolean;
+  mapHasFossils: boolean;
+  mapBackend: MapBackend;
+};
+
+type MapActionData = MapPosition & {
+  layers: MapLayer[];
+  mapBackend: MapBackend;
 };
 
 export default update;

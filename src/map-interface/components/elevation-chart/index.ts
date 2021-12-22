@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useActionDispatch } from "../../actions";
+import { useAppActions } from "~/map-interface/reducers";
 import hyper from "@macrostrat/hyper";
 import { Button, Spinner } from "@blueprintjs/core";
 import { select, mouse } from "d3-selection";
@@ -177,7 +177,7 @@ function drawElevationChart(
 
 function ElevationChart({ elevationData = [], fetchingElevation }) {
   const chartRef = useRef(null);
-  const runAction = useActionDispatch();
+  const runAction = useAppActions();
 
   useEffect(() => {
     if (elevationData.length == 0) return;
@@ -206,7 +206,7 @@ function ElevationChartContainer() {
     fetchingElevation,
   } = useSelector((state) => state.update);
   const hasElevationData = elevationData.length > 0;
-  const runAction = useActionDispatch();
+  const runAction = useAppActions();
 
   if (!elevationChartOpen) return null;
 

@@ -1,12 +1,7 @@
 import { gotInitialMapState } from "./main";
 import { format } from "d3-format";
-import { MapBackend } from "../map-page";
-import {
-  buildQueryString,
-  setHashString,
-  getHashString,
-} from "@macrostrat/ui-components";
-import { stat } from "fs";
+import { MapBackend } from "../../map-page";
+import { setHashString, getHashString } from "@macrostrat/ui-components";
 
 const fmt = format(".4f");
 

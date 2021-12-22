@@ -10,7 +10,7 @@ import {
   asyncGetPBDBCollection,
   asyncGetPBDBOccurences,
   mergePBDBResponses,
-} from "../actions";
+} from "./actions";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import { asyncFilterHandler } from "./filters";
