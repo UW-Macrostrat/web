@@ -98,10 +98,13 @@ class Map extends Component<MapProps, {}> {
     // Update the URI when the map moves
     this.map.on("moveend", () => {
       let center = this.map.getCenter();
-      this.props.mapMoved({
-        z: this.map.getZoom(),
-        x: center.lng,
-        y: center.lat,
+      this.props.runAction({
+        type: "map-moved",
+        data: {
+          z: this.map.getZoom(),
+          x: center.lng,
+          y: center.lat,
+        },
       });
       // Force a hit to the API to refresh
       if (this.props.mapHasFossils) {
@@ -306,7 +309,7 @@ class Map extends Component<MapProps, {}> {
           //    return
         } else {
           // Otherwise make sure that old fossil collections aren't visible
-          this.props.resetPbdb();
+          this.props.runAction({ type: "reset-pbdb" });
         }
       }
 

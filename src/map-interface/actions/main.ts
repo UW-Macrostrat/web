@@ -162,19 +162,6 @@ export function updateElevationMarker(lng, lat) {
   };
 }
 
-export const resetPbdb = () => {
-  return {
-    type: "reset-pbdb",
-  };
-};
-
-export function mapMoved(data) {
-  return {
-    type: "map-moved",
-    data: data,
-  };
-}
-
 export function gotInitialMapState(mapState) {
   return {
     type: "got-initial-map-state",

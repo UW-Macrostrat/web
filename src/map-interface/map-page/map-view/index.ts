@@ -1,5 +1,4 @@
 import { useSelector } from "react-redux";
-import { mapMoved, resetPbdb } from "../../actions";
 import { useAppActions } from "~/map-interface/reducers";
 import Map from "./map";
 import h from "@macrostrat/hyper";
@@ -45,12 +44,6 @@ function MapContainer(props) {
     mapXYZ,
     infoDrawerOpen,
     runAction,
-    resetPbdb: () => {
-      runAction(resetPbdb());
-    },
-    mapMoved: (data) => {
-      runAction(mapMoved(data));
-    },
     ...props,
   });
 }
