@@ -49,6 +49,7 @@ const preloadedState = {
   elevationMarkerLocation: [],
   pbdbData: [],
 
+  mapIsLoading: false,
   mapHasBedrock: true,
   mapHasLines: true,
   mapHasSatellite: false,
@@ -77,6 +78,10 @@ const update = (state = preloadedState, action: Action) => {
       updateURI(newState);
       return newState;
     }
+    case "map-loading":
+      return { ...state, mapIsLoading: true };
+    case "map-idle":
+      return { ...state, mapIsLoading: false };
     case "toggle-menu":
       return Object.assign({}, state, {
         menuOpen: !state.menuOpen,
