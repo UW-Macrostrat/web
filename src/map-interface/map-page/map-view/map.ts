@@ -97,13 +97,14 @@ class Map extends Component<MapProps, {}> {
     // disable map rotation using touch rotation gesture
     this.map.touchZoomRotate.disableRotation();
 
-    this.map.on("data", () => {
+    this.map.on("sourcedataloading", () => {
+      if (this.props.mapIsLoading) return;
       this.props.runAction({ type: "map-loading" });
-      if (!this.props.mapIsLoading) {
-        this.map.once("idle", () => {
-          this.props.runAction({ type: "map-idle" });
-        });
-      }
+    });
+
+    this.map.on("idle", () => {
+      if (!this.props.mapIsLoading) return;
+      this.props.runAction({ type: "map-idle" });
     });
 
     // Update the URI when the map moves
