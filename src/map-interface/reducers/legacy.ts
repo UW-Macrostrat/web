@@ -1,4 +1,4 @@
-import { updateURI } from "./actions/map-state";
+import { updateURI } from "./helpers";
 import { sum, timescale } from "../utils";
 import { MapBackend } from "../map-page";
 import { Action } from "./actions";
@@ -7,10 +7,8 @@ const classColors = {
   sedimentary: "#FF8C00",
   metamorphic: "#8B4513",
   igneous: "#9F1D0F",
-
   marine: "#047BFF",
   "non-marine": "#A67A45",
-
   "precious commodity": "#FDFDFC",
   material: "#777777",
   water: "#00CCFF",

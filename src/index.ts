@@ -13,7 +13,7 @@ import { Provider } from "react-redux";
 import thunkMiddleware from "redux-thunk";
 import { createStore, applyMiddleware, compose } from "redux";
 import reducers from "./map-interface/reducers";
-import { getInitialMapState } from "./map-interface/reducers/actions";
+import { getInitialMapState } from "./map-interface/reducers/helpers";
 import App from "./app";
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
