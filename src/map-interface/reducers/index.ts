@@ -24,16 +24,14 @@ function getFloat(x: any, _default = 0): number {
 function overallReducer(state, action: Action) {
   if (action.type === "got-initial-map-state" || action.type == "map-moved") {
     // You can access both app and inventory states here
-    const x = getFloat(action.data.x, 16);
-    const y = getFloat(action.data.y, 23);
-    const z = getFloat(action.data.z, 1.5);
+
     //const destination = nadirCameraPosition(x, y, z);
     //console.log("Set globe position", destination);
     const newState = {
       ...state,
       update: {
         ...state.update,
-        mapXYZ: { x, y, z },
+        mapPosition: action.data,
       },
       /*
       globe: {

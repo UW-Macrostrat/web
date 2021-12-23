@@ -9,6 +9,7 @@ import {
 import h from "@macrostrat/hyper";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
+import { MercatorCoordinate, FreeCameraOptions } from "mapbox-gl";
 import { setMapStyle, markerOffset } from "./style-helpers";
 
 const maxClusterZoom = 6;
@@ -77,19 +78,40 @@ class Map extends Component<MapProps, {}> {
 
   componentDidMount() {
     mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
+
     this.map = new mapboxgl.Map({
       container: "map",
       style: this.props.mapHasSatellite
         ? SETTINGS.satelliteMapURL
         : SETTINGS.baseMapURL,
-      center: [this.props.mapXYZ.x, this.props.mapXYZ.y],
-      zoom: this.props.mapXYZ.z,
       maxZoom: 14,
       maxTileCacheSize: 0,
       logoPosition: "bottom-right",
       antialias: true,
       optimizeForTerrain: true,
     });
+
+    const pos = this.props.mapPosition;
+    const { pitch = 0, bearing = 0, altitude } = pos.camera;
+    const zoom = pos.target?.zoom;
+    if (zoom != null && altitude == null) {
+      const { lng, lat } = pos.target;
+      this.map.setCenter([lng, lat]);
+      this.map.setZoom(zoom);
+    } else {
+      const { altitude, lng, lat } = pos.camera;
+      const cameraOptions = new FreeCameraOptions(
+        MercatorCoordinate.fromLngLat({ lng, lat }, altitude),
+        [0, 0, 0, 1]
+      );
+      cameraOptions.setPitchBearing(pitch, bearing);
+
+      console.log(cameraOptions);
+
+      this.map.setFreeCameraOptions(cameraOptions);
+    }
+
+    this.props.mapRef.current = this.map;
 
     // disable map rotation using right click + drag
     //this.map.dragRotate.disable();
@@ -107,17 +129,7 @@ class Map extends Component<MapProps, {}> {
       this.props.runAction({ type: "map-idle" });
     });
 
-    // Update the URI when the map moves
     this.map.on("moveend", () => {
-      let center = this.map.getCenter();
-      this.props.runAction({
-        type: "map-moved",
-        data: {
-          z: this.map.getZoom(),
-          x: center.lng,
-          y: center.lat,
-        },
-      });
       // Force a hit to the API to refresh
       if (this.props.mapHasFossils) {
         this.refreshPBDB();

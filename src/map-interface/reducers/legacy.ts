@@ -1,7 +1,7 @@
 import { updateURI } from "./helpers";
 import { sum, timescale } from "../utils";
 import { MapBackend } from "../map-page";
-import { Action } from "./actions";
+import { Action, MapState } from "./actions";
 
 const classColors = {
   sedimentary: "#FF8C00",
@@ -15,7 +15,16 @@ const classColors = {
   energy: "#333333",
 };
 
-const preloadedState = {
+interface AppState extends MapState {
+  initialLoadComplete: boolean;
+  menuOpen: boolean;
+  aboutOpen: boolean;
+  infoDrawerOpen: boolean;
+  infoDrawerExpanded: boolean;
+  isFetching: boolean;
+}
+
+const preloadedState: AppState = {
   initialLoadComplete: false,
   menuOpen: false,
   aboutOpen: false,
@@ -64,10 +73,12 @@ const preloadedState = {
   filteredColumns: {},
 
   data: [],
-  mapXYZ: {
-    z: 1.5,
-    x: 16,
-    y: 23,
+  mapPosition: {
+    camera: {
+      lng: 23,
+      lat: 16,
+      altitude: 300000,
+    },
   },
 };
 
@@ -554,38 +565,13 @@ const update = (state = preloadedState, action: Action) => {
         isFetching: false,
         data: action.data,
       });
-
-    case "get-initial-map-state":
-      return Object.assign({}, state, {
-        mapXYZ: {
-          z: action.data.z,
-          x: action.data.x,
-          y: action.data.y,
-        },
-      });
-
     case "map-moved":
-      updateURI(
-        Object.assign({}, state, {
-          mapXYZ: {
-            z: action.data.z,
-            x: action.data.x,
-            y: action.data.y,
-          },
-        })
-      );
-      return Object.assign({}, state, {
-        mapXYZ: {
-          z: action.data.z,
-          x: action.data.x,
-          y: action.data.y,
-        },
-      });
+      return updateURI({ ...state, mapPosition: action.data });
     case "update-state":
       return action.state;
 
     case "got-initial-map-state":
-      const { layers = [] } = action.data;
+      const { layers = [], position, backend } = action.data;
       const mapHasSatellite = layers.includes("satellite");
       const mapHasLines = layers.includes("lines");
       const mapHasColumns = layers.includes("columns");
@@ -594,17 +580,13 @@ const update = (state = preloadedState, action: Action) => {
 
       const newState = Object.assign({}, state, {
         initialLoadComplete: true,
-        mapBackend: action.data.mapBackend ?? MapBackend.MAPBOX,
+        mapBackend: backend ?? MapBackend.MAPBOX,
         mapHasSatellite,
         mapHasBedrock,
         mapHasLines,
         mapHasColumns,
         mapHasFossils,
-        mapXYZ: {
-          z: action.data.z,
-          x: action.data.x,
-          y: action.data.y,
-        },
+        mapPosition: position,
       });
       // This causes some hilarious problems...
       updateURI(newState);
