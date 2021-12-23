@@ -85,10 +85,10 @@ function MapContainer(props) {
   }, [mapRef]);
 
   useEffect(() => {
-    if (props.mapHasColumns) {
+    if (mapHasColumns) {
       runAction({ type: "get-filtered-columns" });
     }
-  }, [props.filters]);
+  }, [filters]);
 
   return h(_Map, {
     filters,
