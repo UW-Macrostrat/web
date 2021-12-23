@@ -9,6 +9,7 @@ import {
 import h from "@macrostrat/hyper";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
+import { MercatorCoordinate, FreeCameraOptions } from "mapbox-gl";
 import { setMapStyle, markerOffset } from "./style-helpers";
 
 const maxClusterZoom = 6;
@@ -82,14 +83,27 @@ class Map extends Component<MapProps, {}> {
       style: this.props.mapHasSatellite
         ? SETTINGS.satelliteMapURL
         : SETTINGS.baseMapURL,
-      center: [this.props.mapXYZ.x, this.props.mapXYZ.y],
-      zoom: this.props.mapXYZ.z,
       maxZoom: 14,
       maxTileCacheSize: 0,
       logoPosition: "bottom-right",
       antialias: true,
       optimizeForTerrain: true,
     });
+
+    const {
+      altitude,
+      pitch = 0,
+      bearing = 0,
+      lng,
+      lat,
+    } = this.props.mapPosition.camera;
+    const cameraOptions = new FreeCameraOptions(
+      MercatorCoordinate.fromLngLat({ lng, lat }, altitude),
+      [0, 0, 0, 1]
+    );
+    cameraOptions.setPitchBearing(pitch, bearing);
+
+    this.map.setFreeCameraOptions(cameraOptions);
 
     this.props.mapRef.current = this.map;
 
@@ -109,17 +123,7 @@ class Map extends Component<MapProps, {}> {
       this.props.runAction({ type: "map-idle" });
     });
 
-    // Update the URI when the map moves
     this.map.on("moveend", () => {
-      let center = this.map.getCenter();
-      this.props.runAction({
-        type: "map-moved",
-        data: {
-          z: this.map.getZoom(),
-          x: center.lng,
-          y: center.lat,
-        },
-      });
       // Force a hit to the API to refresh
       if (this.props.mapHasFossils) {
         this.refreshPBDB();

@@ -15,6 +15,7 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import { asyncFilterHandler } from "./filters";
 import { updateStateFromURI } from "./helpers";
+import React from "packages/ui-components/node_modules/@types/react";
 
 function getCancelToken() {
   let CancelToken = axios.CancelToken;
@@ -141,13 +142,14 @@ async function runAction(
       return action;
   }
 }
-function useAppActions() {
+
+function useAppActions(): (action: Action) => Promise<void> {
   const dispatch = useActionDispatch();
   const state = useLegacyState();
   return async (action) => {
-    const newAction: Action = await runAction(state, action, dispatch);
-    if (newAction == null) return;
-    dispatch(newAction);
+    const newAction = await runAction(state, action, dispatch);
+    if (newAction === undefined) return;
+    dispatch(newAction as Action);
   };
 }
 

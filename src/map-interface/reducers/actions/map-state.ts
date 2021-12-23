@@ -1,7 +1,21 @@
+type LatLng = {
+  lng: number;
+  lat: number;
+};
+
+type TargetPosition = LatLng & {
+  zoom: number;
+};
+
+type CameraPosition = LatLng & {
+  bearing?: number;
+  pitch?: number;
+  altitude: number;
+};
+
 export type MapPosition = {
-  x: number;
-  y: number;
-  z: number;
+  camera: CameraPosition;
+  target?: TargetPosition;
 };
 
 export enum MapBackend {
@@ -19,7 +33,7 @@ export enum MapLayer {
 }
 
 export type MapState = {
-  mapXYZ: MapPosition;
+  mapPosition: MapPosition;
   mapHasBedrock: boolean;
   mapHasLines: boolean;
   mapHasSatellite: boolean;
@@ -29,9 +43,10 @@ export type MapState = {
   mapIsLoading: boolean;
 };
 
-type MapHashData = MapPosition & {
+type MapHashData = {
   layers: MapLayer[];
-  mapBackend: MapBackend;
+  position: MapPosition;
+  backend: MapBackend;
 };
 
 type MapMoved = { type: "map-moved"; data: MapPosition };
