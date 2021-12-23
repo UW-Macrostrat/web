@@ -10,10 +10,12 @@ import {
   asyncGetPBDBCollection,
   asyncGetPBDBOccurences,
   mergePBDBResponses,
-} from "../actions";
+} from "./actions";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import { asyncFilterHandler } from "./filters";
+import { updateStateFromURI } from "./helpers";
+import React from "packages/ui-components/node_modules/@types/react";
 
 function getCancelToken() {
   let CancelToken = axios.CancelToken;
@@ -25,8 +27,10 @@ async function runAction(
   state,
   action: Action,
   dispatch = null
-): Promise<Action> {
+): Promise<Action | void> {
   switch (action.type) {
+    case "get-initial-map-state":
+      return updateStateFromURI(state);
     case "fetch-search-query":
       let term = action.term;
       let CancelToken = axios.CancelToken;
@@ -60,7 +64,6 @@ async function runAction(
       };
     case "map-query":
       const { lng, lat, z, map_id, column } = action;
-      console.log("MAP QUERY", lng, lat, z, map_id, column);
       let CancelTokenMapQuery = axios.CancelToken;
       let sourceMapQuery = CancelTokenMapQuery.source();
       dispatch({
@@ -69,9 +72,11 @@ async function runAction(
         lat,
         cancelToken: sourceMapQuery,
       });
-      // if (column) {
-      //   runAction(state, { type: "get-column" });
-      // }
+      if (column) {
+        dispatch(
+          await runAction(state, { type: "get-column", column }, dispatch)
+        );
+      }
       let mapData = await asyncQueryMap(
         lng,
         lat,
@@ -137,12 +142,14 @@ async function runAction(
       return action;
   }
 }
-function useAppActions() {
+
+function useAppActions(): (action: Action) => Promise<void> {
   const dispatch = useActionDispatch();
   const state = useLegacyState();
   return async (action) => {
-    const newAction: Action = await runAction(state, action, dispatch);
-    dispatch(newAction);
+    const newAction = await runAction(state, action, dispatch);
+    if (newAction === undefined) return;
+    dispatch(newAction as Action);
   };
 }
 
@@ -152,16 +159,15 @@ function useFilterState() {
 }
 
 function useSearchState() {
-  const { searchResults, isSearching, term, inputFocus } = useSelector(
-    (state) => state.update
-  );
-  return { searchResults, isSearching, term, inputFocus };
+  const { searchResults, isSearching, term, inputFocus, infoDrawerOpen } =
+    useSelector((state) => state.update);
+  return { searchResults, isSearching, term, inputFocus, infoDrawerOpen };
 }
 
 function useMenuState() {
-  const menuOpen = useSelector((state) => state.update.menuOpen);
+  const { menuOpen, infoDrawerOpen } = useSelector((state) => state.update);
   const menu = useSelector((state) => state.menu);
-  return { menuOpen, ...menu };
+  return { menuOpen, infoDrawerOpen, ...menu };
 }
 
 function useMapHasBools() {

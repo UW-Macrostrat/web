@@ -61,18 +61,18 @@ function InfoDrawer(props) {
       h("div.infodrawer-body", [
         h.if(rest.fetchingMapInfo)("div.spinner", [h(Spinner)]),
         h.if(!rest.fetchingMapInfo)("div", [
-          h(FossilCollections, { data: pbdbData, expanded: mapHasFossils }),
+          h(FossilCollections, { data: pbdbData, expanded: true }),
+          h(RegionalStratigraphy, { mapInfo, columnInfo }),
           h(GeologicMapInfo, {
             mapInfo,
-            bedrockExpanded: mapHasBedrock,
+            bedrockExpanded: true,
             source,
           }),
           h(MacrostratLinkedData, {
             mapInfo,
-            bedrockMatchExpanded: false,
+            bedrockMatchExpanded: true,
             source,
           }),
-          h(RegionalStratigraphy, { mapInfo, columnInfo }),
           h(Physiography, { mapInfo }),
           h(GddExpansion, {
             mapInfo,

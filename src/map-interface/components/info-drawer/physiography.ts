@@ -12,6 +12,7 @@ function Physiography(props) {
     {
       classes: { root: "regional-panel" },
       title: "Physiography",
+      expanded: true,
     },
     [
       regions.map((region, i) => {

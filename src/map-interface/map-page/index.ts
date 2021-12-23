@@ -10,6 +10,7 @@ import { ButtonGroup, Button, Spinner } from "@blueprintjs/core";
 import { useSelector, useDispatch } from "react-redux";
 import loadable from "@loadable/component";
 import { useSearchState } from "../reducers";
+import { MapBackend } from "../reducers/actions";
 import styles from "./main.module.styl";
 
 const h = hyper.styled(styles);
@@ -17,12 +18,6 @@ const h = hyper.styled(styles);
 const CesiumViewMod = loadable(() => import("./cesium-view"));
 export function CesiumView(props) {
   return h(Suspense, { fallback: h(Spinner) }, h(CesiumViewMod, props));
-}
-
-enum MapBackend {
-  MAPBOX,
-  CESIUM,
-  MAPBOX3,
 }
 
 const MapView = (props: { backend: MapBackend }) => {
@@ -91,7 +86,6 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
             h.if(inputFocus)(SearchResults),
             h.if(!inputFocus)(MenuContainer, null),
           ]),
-          h("div.spacer"),
         ]),
         h(InfoDrawer, null),
       ]),

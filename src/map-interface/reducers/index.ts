@@ -8,8 +8,11 @@ import {
   DisplayQuality,
 } from "@macrostrat/cesium-viewer/actions";
 import { LocalStorage } from "@macrostrat/ui-components";
-import { nadirCameraPosition } from "@macrostrat/cesium-viewer/position";
-import { Action } from "../actions";
+import {
+  nadirCameraPosition,
+  CameraParams,
+} from "@macrostrat/cesium-viewer/position";
+import { Action, MapPosition } from "./actions";
 import update from "./legacy";
 
 const globeStorage = new LocalStorage("macrostrat-globe");
@@ -36,27 +39,35 @@ const reducers = combineReducers({
   update,
 });
 
-function getFloat(x: any, _default = 0): number {
-  const v = parseFloat(x ?? _default);
-  if (isNaN(v)) {
-    return _default;
+function translateCameraPosition(pos: MapPosition): CameraParams {
+  const { bearing = 0, pitch, altitude } = pos.camera;
+  const { zoom } = pos.target ?? {};
+  if (bearing == 0 && pitch == 0 && zoom != null) {
+    const { lng, lat } = pos.target;
+    return nadirCameraPosition(lng, lat, zoom);
+  } else {
+    return {
+      longitude: pos.camera.lng,
+      latitude: pos.camera.lat,
+      height: altitude,
+      heading: bearing,
+      pitch,
+      roll: 0,
+    };
   }
-  return v ?? _default;
 }
 
 function overallReducer(state, action: Action) {
   if (action.type === "got-initial-map-state" || action.type == "map-moved") {
     // You can access both app and inventory states here
-    const x = getFloat(action.data.x, 16);
-    const y = getFloat(action.data.y, 23);
-    const z = getFloat(action.data.z, 1.5);
-    const destination = nadirCameraPosition(x, y, z);
+
+    const destination = translateCameraPosition(state.update.mapPosition);
     //console.log("Set globe position", destination);
     const newState = {
       ...state,
       update: {
         ...state.update,
-        mapXYZ: { x, y, z },
+        mapPosition: action.data,
       },
       globe: {
         ...state.globe,

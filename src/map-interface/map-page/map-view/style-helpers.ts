@@ -1,3 +1,17 @@
+/* 
+
+Returns an [xoffset, yoffset] for the map.panTo 
+*/
+function markerOffset() {
+  const width = window.innerWidth;
+  let yOffset = 0;
+  if (width <= 768) {
+    // mobile
+    yOffset = -200;
+  }
+  return yOffset;
+}
+
 function setMapStyle(class_, map, mapStyle, props) {
   mapStyle.layers.forEach((layer) => {
     if (map.getSource(layer.source) && map.getLayer(layer.id)) {
@@ -46,9 +60,13 @@ function setMapStyle(class_, map, mapStyle, props) {
         if (visibility != showFilteredColumns) {
           map.setLayoutProperty(layer.id, "visibility", showFilteredColumns);
         }
+      } else if (layer.source == "info_marker") {
+        if (!props.infoDrawerOpen) {
+          map.setLayoutProperty(layer.id, "visibility", "none");
+        }
       }
     }
   });
 }
 
-export { setMapStyle };
+export { setMapStyle, markerOffset };

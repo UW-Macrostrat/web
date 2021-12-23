@@ -1,7 +1,7 @@
 import { useState } from "react";
 import h from "@macrostrat/hyper";
 import { Tag, Card, Button, Collapse, Switch, Icon } from "@blueprintjs/core";
-import { useFilterState, useAppActions } from "../reducers";
+import { useFilterState, useAppActions } from "~/map-interface/reducers";
 
 function Filter({ filter }) {
   const runAction = useAppActions();
@@ -108,9 +108,11 @@ function SubtleFilterText() {
   return h(Card, { className: "filter-tongue" }, [
     h("div.filter-name-container", [
       h("p.filter-names", [h("b", "Filtering by: "), filterString]),
-      h(Button, { minimal: true, icon: iconName, onClick }),
+      h("div.filter-tongue-actions", [
+        h("div.remove", { onClick: onRemoveAll }, ["remove all"]),
+        h(Button, { minimal: true, icon: iconName, onClick }),
+      ]),
     ]),
-    h.if(!open)("div.remove", { onClick: onRemoveAll }, ["remove all"]),
     h(Collapse, { isOpen: open }, [h(Filters)]),
   ]);
 }

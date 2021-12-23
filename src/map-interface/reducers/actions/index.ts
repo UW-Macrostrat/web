@@ -1,4 +1,5 @@
 import { useDispatch } from "react-redux";
+import { MapAction } from "./map-state";
 
 //////////// Async Actions ///////////////
 type FETCH_SEARCH_QUERY = { type: "fetch-search-query"; term: string };
@@ -84,14 +85,13 @@ type START_ELEVATION_QUERY = {
   cancelToken: any;
 };
 type RECEIVED_ELEVATION_QUERY = { type: "received-elevation-query"; data: any };
-type UPDATE_ELEVATION_MARKER = { type: "update-elevation-marker" };
+type UPDATE_ELEVATION_MARKER = {
+  type: "update-elevation-marker";
+  lng: number;
+  lat: number;
+};
 
 type SET_ACTIVE_INDEX_MAP = { type: "set-active-index-map" };
-
-type MAP_MOVED = { type: "map-moved" };
-type GET_INITIAL_MAP_STATE = { type: "get-initial-map-state" };
-type GOT_INITIAL_MAP_STATE = { type: "got-initial-map-state" };
-type SET_MAP_BACKEND = { type: "set-map-backend"; backend: any };
 
 type UPDATE_STATE = { type: "update-state"; state: any };
 
@@ -107,7 +107,6 @@ export type Action =
   | UPDATE_STATE
   | GET_FILTERED_COLUMNS
   | ASYNC_ADD_FILTER
-  | SET_MAP_BACKEND
   | FETCH_SEARCH_QUERY
   | PAGE_CLICK
   | RECIEVE_DATA
@@ -144,44 +143,11 @@ export type Action =
   | RECEIVED_ELEVATION_QUERY
   | UPDATE_ELEVATION_MARKER
   | SET_ACTIVE_INDEX_MAP
-  | MAP_MOVED
-  | GET_INITIAL_MAP_STATE
-  | GOT_INITIAL_MAP_STATE;
-
-export const toggleElevationChart = () => {
-  return {
-    type: "toggle-elevation-chart",
-  };
-};
-
-export function updateElevationMarker(lng, lat) {
-  return {
-    type: "update-elevation-marker",
-    lng: lng,
-    lat: lat,
-  };
-}
-
-export const resetPbdb = () => {
-  return {
-    type: "reset-pbdb",
-  };
-};
-
-export function mapMoved(data) {
-  return {
-    type: "map-moved",
-    data: data,
-  };
-}
-
-export function gotInitialMapState(mapState) {
-  return {
-    type: "got-initial-map-state",
-    data: mapState,
-  };
-}
+  | MapAction;
 
 export function useActionDispatch(): React.Dispatch<Action> {
   return useDispatch<React.Dispatch<Action>>();
 }
+
+export * from "./map-state";
+export * from "./fetch";

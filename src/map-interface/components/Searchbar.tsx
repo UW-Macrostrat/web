@@ -1,7 +1,8 @@
 import React from "react";
-import { Navbar, Button, InputGroup, Card } from "@blueprintjs/core";
+import { Navbar, Button, InputGroup, Card, Spinner } from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
 import { useAppActions, useSearchState } from "../reducers";
+import { useSelector } from "react-redux";
 import { useEffect } from "react";
 import { SubtleFilterText } from "./filters-panel";
 
@@ -26,7 +27,7 @@ function SearchResults() {
   const runAction = useAppActions();
 
   if (searchResults == null) {
-    return h(Card, [h(SearchGuidance)]);
+    return h(Card, { className: "no-results" }, [h(SearchGuidance)]);
   }
   const onSelectResult = (f) => {
     runAction({ type: "set-search-term", term: "" });
@@ -58,7 +59,9 @@ function SearchResults() {
   });
 
   return h("div", [
-    h.if(searchResults.length == 0)(Card, ["No results, try again."]),
+    h.if(searchResults.length == 0)(Card, { className: "no-results" }, [
+      "No results, try again.",
+    ]),
     h.if(searchResults.length > 0)(Card, { className: "search-results" }, [
       resultCategoriesArr.map((cat, i) => {
         return h("div", { key: `subheader-${i}` }, [
@@ -70,9 +73,24 @@ function SearchResults() {
   ]);
 }
 
+function MenuButton() {
+  const runAction = useAppActions();
+  const mapIsLoading = useSelector((d) => d.update.mapIsLoading);
+
+  return h(Button, {
+    icon: mapIsLoading ? h(Spinner, { size: 16 }) : "menu",
+    "aria-label": "Menu",
+    large: true,
+    minimal: true,
+    onClick() {
+      runAction({ type: "toggle-menu" });
+    },
+  });
+}
+
 function Searchbar(props) {
   const runAction = useAppActions();
-  const { term, searchResults } = useSearchState();
+  const { term, searchResults, infoDrawerOpen } = useSearchState();
 
   const gainInputFocus = () => {
     runAction({ type: "set-input-focus", inputFocus: true });
@@ -91,19 +109,15 @@ function Searchbar(props) {
     runAction({ type: "fetch-search-query", term: term });
   };
 
-  const toggleMenu = () => {
-    runAction({ type: "toggle-menu" });
-  };
-
   useEffect(() => {
     if (term == "" && searchResults != null) {
       runAction({ type: "received-search-query", data: null });
     }
   }, [term]);
 
-  const MenuButton = (
-    <Button icon="menu" aria-label="Menu" large onClick={toggleMenu} minimal />
-  );
+  if (window.innerWidth <= 768 && infoDrawerOpen) {
+    return h("div");
+  }
 
   return (
     <div className="searchbar-holder">
@@ -114,7 +128,7 @@ function Searchbar(props) {
             onChange={handleSearchInput}
             onFocus={gainInputFocus}
             onBlur={loseInputFocus}
-            rightElement={MenuButton}
+            rightElement={h(MenuButton)}
             placeholder="Search Macrostrat..."
             value={term}
           />

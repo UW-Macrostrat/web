@@ -5,8 +5,8 @@ import {
   fetchLithFilter,
   stratNameConcepts,
   stratNameOrphans,
-} from "../actions";
-import { Action } from "../actions";
+  Action,
+} from "./actions";
 
 // handler to reduce noise on case & switch
 // want this function to return an action object {type: "type", place/filter: fitler}

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { SETTINGS } from "../Settings";
+import { SETTINGS } from "../../Settings";
 
 const base = `${SETTINGS.apiDomain}/api/v2`;
 const basev1 = `${SETTINGS.gddDomain}/api/v1`;
@@ -129,7 +129,6 @@ export const fetchAllLithTypes = async (filter) => {
 };
 
 function formColumnQueryString(filters) {
-  console.log("FILTERS", filters);
   let possibleFields = {
     intervals: ["int_id", "id"], // [value, attr]
     strat_name_concepts: ["strat_name_concept_id", "id"],
@@ -153,7 +152,6 @@ function formColumnQueryString(filters) {
   });
   let queryString = Object.keys(query)
     .map((k) => {
-      console.log("QUERY KEY", k, typeof k);
       return `${k}=${query[k].join(",")}`;
     })
     .join("&");
@@ -221,7 +219,7 @@ export const asyncGetColumn = async (column, cancelToken) => {
   let url = `${base}/units?response=long&col_id=${column.col_id}`;
   const res = await axios.get(url, { cancelToken, responseType: "json" });
   try {
-    return [res.data.success.data, column];
+    return res.data.success.data;
   } catch (error) {
     return [];
   }

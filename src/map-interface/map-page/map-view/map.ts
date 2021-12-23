@@ -9,7 +9,8 @@ import {
 import h from "@macrostrat/hyper";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { setMapStyle } from "./style-helpers";
+import { MercatorCoordinate, FreeCameraOptions } from "mapbox-gl";
+import { setMapStyle, markerOffset } from "./style-helpers";
 
 const maxClusterZoom = 6;
 const highlightLayers = [
@@ -77,17 +78,40 @@ class Map extends Component<MapProps, {}> {
 
   componentDidMount() {
     mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
+
     this.map = new mapboxgl.Map({
       container: "map",
       style: this.props.mapHasSatellite
         ? SETTINGS.satelliteMapURL
         : SETTINGS.baseMapURL,
-      center: [this.props.mapXYZ.x, this.props.mapXYZ.y],
-      zoom: this.props.mapXYZ.z,
       maxZoom: 14,
       maxTileCacheSize: 0,
       logoPosition: "bottom-right",
+      antialias: true,
+      optimizeForTerrain: true,
     });
+
+    const pos = this.props.mapPosition;
+    const { pitch = 0, bearing = 0, altitude } = pos.camera;
+    const zoom = pos.target?.zoom;
+    if (zoom != null && altitude == null) {
+      const { lng, lat } = pos.target;
+      this.map.setCenter([lng, lat]);
+      this.map.setZoom(zoom);
+    } else {
+      const { altitude, lng, lat } = pos.camera;
+      const cameraOptions = new FreeCameraOptions(
+        MercatorCoordinate.fromLngLat({ lng, lat }, altitude),
+        [0, 0, 0, 1]
+      );
+      cameraOptions.setPitchBearing(pitch, bearing);
+
+      console.log(cameraOptions);
+
+      this.map.setFreeCameraOptions(cameraOptions);
+    }
+
+    this.props.mapRef.current = this.map;
 
     // disable map rotation using right click + drag
     //this.map.dragRotate.disable();
@@ -95,14 +119,17 @@ class Map extends Component<MapProps, {}> {
     // disable map rotation using touch rotation gesture
     this.map.touchZoomRotate.disableRotation();
 
-    // Update the URI when the map moves
+    this.map.on("sourcedataloading", () => {
+      if (this.props.mapIsLoading) return;
+      this.props.runAction({ type: "map-loading" });
+    });
+
+    this.map.on("idle", () => {
+      if (!this.props.mapIsLoading) return;
+      this.props.runAction({ type: "map-idle" });
+    });
+
     this.map.on("moveend", () => {
-      let center = this.map.getCenter();
-      this.props.mapMoved({
-        z: this.map.getZoom(),
-        x: center.lng,
-        y: center.lat,
-      });
       // Force a hit to the API to refresh
       if (this.props.mapHasFossils) {
         this.refreshPBDB();
@@ -206,7 +233,6 @@ class Map extends Component<MapProps, {}> {
       if (this.map.getLayer("infoMarker")) {
         // Hide the info marker and close the info drawer
         //this.map.setLayoutProperty("infoMarker", "visibility", "none");
-        //this.props.runAction({type:"close-infodrawer"});
       }
     });
 
@@ -307,7 +333,7 @@ class Map extends Component<MapProps, {}> {
           //    return
         } else {
           // Otherwise make sure that old fossil collections aren't visible
-          this.props.resetPbdb();
+          this.props.runAction({ type: "reset-pbdb" });
         }
       }
 
@@ -323,13 +349,22 @@ class Map extends Component<MapProps, {}> {
         .map((f) => {
           return f.properties;
         });
-      if (burwellFeatures.length) {
+
+      const columns = features
+        .filter((f) => {
+          if (f.layer.id === "column_fill") return f;
+        })
+        .map((f) => {
+          return f.properties;
+        });
+
+      if (columns.length) {
         this.props.runAction({
           type: "map-query",
           lng: event.lngLat.lng,
           lat: event.lngLat.lat,
           z: this.map.getZoom(),
-          column: burwellFeatures[0].map_id,
+          column: columns[0],
         });
       } else {
         this.props.runAction({
@@ -353,11 +388,11 @@ class Map extends Component<MapProps, {}> {
       */
       this.panning = true;
       this.map.panTo(event.lngLat, {
-        offset: [xOffset, 0],
+        offset: [0, markerOffset()],
         easing: function easing(t) {
           return t * (2 - t);
         },
-        duration: 300,
+        duration: 500,
       });
       setTimeout(() => {
         this.panning = false;
