@@ -27,6 +27,24 @@ function buildMapPosition(map: mapboxgl.Map): MapPosition {
   };
 }
 
+function setMapPosition(map: mapboxgl.Map, pos: MapPosition) {
+  const { pitch = 0, bearing = 0, altitude } = pos.camera;
+  const zoom = pos.target?.zoom;
+  if (zoom != null && altitude == null && pitch == 0 && bearing == 0) {
+    const { lng, lat } = pos.target;
+    map.setCenter([lng, lat]);
+    map.setZoom(zoom);
+  } else {
+    const { altitude, lng, lat } = pos.camera;
+    const cameraOptions = new mapboxgl.FreeCameraOptions(
+      mapboxgl.MercatorCoordinate.fromLngLat({ lng, lat }, altitude),
+      [0, 0, 0, 1]
+    );
+    cameraOptions.setPitchBearing(pitch, bearing);
+    map.setFreeCameraOptions(cameraOptions);
+  }
+}
+
 function MapContainer(props) {
   const {
     filters,
@@ -55,6 +73,8 @@ function MapContainer(props) {
     console.log("Map was set up:", mapRef.current);
     const map = mapRef.current;
     if (map == null) return;
+
+    setMapPosition(map, mapPosition);
     // Update the URI when the map moves
     map.on("moveend", () => {
       runAction({
@@ -69,8 +89,6 @@ function MapContainer(props) {
       runAction({ type: "get-filtered-columns" });
     }
   }, [props.filters]);
-
-  console.log(mapPosition);
 
   return h(_Map, {
     filters,

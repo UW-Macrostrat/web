@@ -7,7 +7,8 @@ import {
   MapLayer,
 } from "../actions";
 
-const fmt = format(".4f");
+const fmt = format(".3~f");
+const fmt2 = format(".2~f");
 const fmtInt = format(".0f");
 
 function updateURI(state: any) {
@@ -40,19 +41,28 @@ function updateURI(state: any) {
 
   // Update the hash in the URI
   const pos = state.mapPosition.camera ?? {};
+  const zoom = state.mapPosition.target?.zoom;
   const { bearing = 0, pitch = 0 } = pos;
 
-  args.z = fmtInt(pos.altitude ?? 300000);
   args.x = fmt(pos.lng);
   args.y = fmt(pos.lat);
+  if (bearing == 0 && pitch == 0 && zoom != null) {
+    args.z = fmt2(zoom);
+  } else if (pos.altitude > 5000) {
+    args.z = fmt2(pos.altitude / 1000) + "km";
+  } else {
+    args.z = fmtInt(pos.altitude) + "m";
+  }
   if (bearing != 0) {
-    args.a = fmtInt(pos.bearing);
+    let az = pos.bearing;
+    if (az < 0) az += 360;
+    args.a = fmtInt(az);
   }
   if (pitch != 0) {
     args.e = fmtInt(pos.pitch);
   }
-
-  setHashString(args, { arrayFormat: "comma" });
+  console.log(args);
+  setHashString(args, { arrayFormat: "comma", sort: false });
   return state;
 }
 
@@ -110,8 +120,7 @@ function updateStateFromURI(state): GotInitialMapState | void {
     const hashData = getHashString(window.location.hash) ?? {};
 
     let { layers = ["bedrock", "lines"] } = hashData;
-    console.log(hashData);
-    const { x = 16, y = 23, z = 80000, a = 0, e = 0 } = hashData;
+    const { x = 16, y = 23, z = 1.5, a = 0, e = 0 } = hashData;
 
     if (!Array.isArray(layers)) {
       layers = [layers];
@@ -121,17 +130,41 @@ function updateStateFromURI(state): GotInitialMapState | void {
       layers = [];
     }
 
+    const lng = _fmt(x);
+    const lat = _fmt(y);
+
+    let altitude = null;
+    let zoom = null;
+    const _z = z.toString();
+    if (_z.endsWith("km")) {
+      altitude = _fmt(_z.substring(0, _z.length - 2)) * 1000;
+    } else if (_z.endsWith("m")) {
+      altitude = _fmt(_z.substring(0, _z.length - 1));
+    } else {
+      zoom = _fmt(z);
+    }
+    const bearing = _fmt(a);
+    const pitch = _fmt(e);
+
+    let target = undefined;
+    if (bearing == 0 && pitch == 0 && zoom != null) {
+      target = {
+        lat,
+        lng,
+        zoom,
+      };
+    }
+
     const position: MapPosition = {
       camera: {
         lng: _fmt(x),
         lat: _fmt(y),
-        altitude: _fmt(z),
+        altitude,
         bearing: _fmt(a),
         pitch: _fmt(e),
       },
+      target,
     };
-
-    console.log(position);
 
     const mapState = {
       position,

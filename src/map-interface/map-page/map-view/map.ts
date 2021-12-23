@@ -78,6 +78,7 @@ class Map extends Component<MapProps, {}> {
 
   componentDidMount() {
     mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
+
     this.map = new mapboxgl.Map({
       container: "map",
       style: this.props.mapHasSatellite
@@ -90,20 +91,25 @@ class Map extends Component<MapProps, {}> {
       optimizeForTerrain: true,
     });
 
-    const {
-      altitude,
-      pitch = 0,
-      bearing = 0,
-      lng,
-      lat,
-    } = this.props.mapPosition.camera;
-    const cameraOptions = new FreeCameraOptions(
-      MercatorCoordinate.fromLngLat({ lng, lat }, altitude),
-      [0, 0, 0, 1]
-    );
-    cameraOptions.setPitchBearing(pitch, bearing);
+    const pos = this.props.mapPosition;
+    const { pitch = 0, bearing = 0, altitude } = pos.camera;
+    const zoom = pos.target?.zoom;
+    if (zoom != null && altitude == null) {
+      const { lng, lat } = pos.target;
+      this.map.setCenter([lng, lat]);
+      this.map.setZoom(zoom);
+    } else {
+      const { altitude, lng, lat } = pos.camera;
+      const cameraOptions = new FreeCameraOptions(
+        MercatorCoordinate.fromLngLat({ lng, lat }, altitude),
+        [0, 0, 0, 1]
+      );
+      cameraOptions.setPitchBearing(pitch, bearing);
 
-    this.map.setFreeCameraOptions(cameraOptions);
+      console.log(cameraOptions);
+
+      this.map.setFreeCameraOptions(cameraOptions);
+    }
 
     this.props.mapRef.current = this.map;
 
