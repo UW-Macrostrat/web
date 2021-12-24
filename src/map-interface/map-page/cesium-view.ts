@@ -1,7 +1,6 @@
 import CesiumView, { DisplayQuality } from "@macrostrat/cesium-viewer";
 import h from "@macrostrat/hyper";
 import { useDispatch, useSelector } from "react-redux";
-import { queryMap, mapMoved } from "../actions";
 import {
   MapChangeTracker,
   MapClickHandler,
@@ -89,10 +88,10 @@ function MacrostratCesiumView(props) {
         const { viewCenter } = cpos;
         if (viewCenter == null) return;
         console.log(viewCenter);
-        dispatch(mapMoved(viewCenter));
+        //dispatch({mapMoved(viewCente)});
       },
       onClick({ latitude, longitude, zoom }) {
-        dispatch(queryMap(longitude, latitude, zoom, null));
+        //dispatch(queryMap(longitude, latitude, zoom, null));
       },
       terrainExaggeration,
       displayQuality,

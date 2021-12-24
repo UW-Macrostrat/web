@@ -9,8 +9,9 @@ import {
 } from "@macrostrat/cesium-viewer/actions";
 import { LocalStorage } from "@macrostrat/ui-components";
 import {
-  nadirCameraPosition,
+  nadirCameraParams,
   CameraParams,
+  flyToParams,
 } from "@macrostrat/cesium-viewer/position";
 import { Action, MapPosition } from "./actions";
 import update from "./legacy";
@@ -29,6 +30,8 @@ function storageGlobeReducer(
   if (action.type === "set-display-quality") {
     globeStorage.set({ displayQuality: action.value });
   }
+
+  console.log(state);
   return globeReducer(state, action);
 }
 
@@ -44,26 +47,32 @@ function translateCameraPosition(pos: MapPosition): CameraParams {
   const { zoom } = pos.target ?? {};
   if (bearing == 0 && pitch == 0 && zoom != null) {
     const { lng, lat } = pos.target;
-    return nadirCameraPosition(lng, lat, zoom);
+    return nadirCameraParams(lng, lat, zoom);
   } else {
     return {
       longitude: pos.camera.lng,
       latitude: pos.camera.lat,
       height: altitude,
       heading: bearing,
-      pitch,
+      pitch: -90 + pitch,
       roll: 0,
     };
   }
 }
 
 function overallReducer(state, action: Action) {
-  if (action.type === "got-initial-map-state" || action.type == "map-moved") {
-    // You can access both app and inventory states here
+  let pos: MapPosition;
+  if (action.type === "got-initial-map-state") {
+    pos = action.data.position;
+  } else if (action.type == "map-moved") {
+    pos = action.data;
+  }
 
-    const destination = translateCameraPosition(state.update.mapPosition);
+  if (pos) {
+    // You can access both app and inventory states here
+    const params = flyToParams(translateCameraPosition(pos));
     //console.log("Set globe position", destination);
-    const newState = {
+    return {
       ...state,
       update: {
         ...state.update,
@@ -71,11 +80,9 @@ function overallReducer(state, action: Action) {
       },
       globe: {
         ...state.globe,
-        flyToProps: { destination, duration: 0, once: true },
+        flyToProps: { ...params, duration: 0, once: true },
       },
     };
-    //console.log(newState);
-    return newState;
   }
   return state;
 }

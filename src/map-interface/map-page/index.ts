@@ -7,6 +7,7 @@ import MenuContainer from "./menu";
 import InfoDrawer from "../components/info-drawer";
 import ElevationChart from "../components/elevation-chart";
 import { ButtonGroup, Button, Spinner } from "@blueprintjs/core";
+import { ErrorBoundary } from "@macrostrat/ui-components";
 import { useSelector, useDispatch } from "react-redux";
 import loadable from "@loadable/component";
 import { useSearchState } from "../reducers";
@@ -78,7 +79,7 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
 
   return h("div.map-page", [
     h("div.main-ui", [
-      h(MapView, { backend }),
+      h(ErrorBoundary, [h(MapView, { backend })]),
       h("div.panels-overlay", [
         h("div.left-stack", [
           h("div.panel-container", [
