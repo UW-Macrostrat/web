@@ -21,7 +21,12 @@ function LongText(props) {
       h("span", [
         h(`span.${classname}`, ["..."]),
         h(`span`, [
-          h(Button, { icon: iconName, onClick: toggleExpand, minimal: true }),
+          h(Button, {
+            icon: iconName,
+            onClick: toggleExpand,
+            minimal: true,
+            className: "flat-btn",
+          }),
         ]),
       ]),
     ]),
