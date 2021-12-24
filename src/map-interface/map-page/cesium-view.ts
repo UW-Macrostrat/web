@@ -25,6 +25,8 @@ import {
   getInitialPosition,
 } from "@macrostrat/cesium-viewer/query-string";
 import maplibre from "maplibre-gl/dist/maplibre-gl-dev";
+import { useAppActions } from "../reducers";
+import { positionClass } from "@blueprintjs/core/lib/esm/common/classes";
 
 maplibre.accessToken =
   "pk.eyJ1IjoiamN6YXBsZXdza2kiLCJhIjoiY2szNXA5OWcxMDN2bzNtcnI1cWd1ZXJpYiJ9.Dd5GKlrPhg969y1ayY32cg";
@@ -59,8 +61,8 @@ function BaseLayer({ enabled, ...rest }) {
     return new MVTImageryProvider({
       style: "mapbox://styles/jczaplewski/ckxcu9zmu4aln14mfg4monlv3/draft",
       // "mapbox://styles/jczaplewski/ckxeiii3a1jv415o8rxvgqlpd", //
-      maximumZoom: 13,
-      tileSize: 256,
+      maximumZoom: 15,
+      tileSize: 512,
     });
   }, [enabled]);
 
@@ -70,7 +72,7 @@ function BaseLayer({ enabled, ...rest }) {
 }
 
 function MacrostratCesiumView(props) {
-  const dispatch = useDispatch();
+  const runAction = useAppActions();
   const terrainExaggeration =
     useSelector((state) => state.globe.verticalExaggeration) ?? 1.00001;
   const displayQuality = useSelector((state) => state.globe.displayQuality);
@@ -84,11 +86,21 @@ function MacrostratCesiumView(props) {
     CesiumView,
     {
       onViewChange(cpos) {
-        console.log(cpos);
-        const { viewCenter } = cpos;
-        if (viewCenter == null) return;
-        console.log(viewCenter);
-        //dispatch({mapMoved(viewCente)});
+        const { camera } = cpos;
+        // Tamp down memory usage by clearing log statements
+        console.clear();
+        runAction({
+          type: "map-moved",
+          data: {
+            camera: {
+              lng: camera.longitude,
+              lat: camera.latitude,
+              altitude: camera.height,
+              pitch: 90 + camera.pitch,
+              bearing: camera.heading,
+            },
+          },
+        });
       },
       onClick({ latitude, longitude, zoom }) {
         //dispatch(queryMap(longitude, latitude, zoom, null));

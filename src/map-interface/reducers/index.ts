@@ -76,7 +76,7 @@ function overallReducer(state, action: Action) {
       ...state,
       update: {
         ...state.update,
-        mapPosition: action.data,
+        mapPosition: pos,
       },
       globe: {
         ...state.globe,
