@@ -7,12 +7,12 @@ type RequestData = {
   duration: number;
 };
 
-type ResourceCounts = {
+export type ResourceCounts = {
   totalSize: number;
   requests: RequestData[];
 };
 
-type MapPerformanceStep = ResourceCounts & {
+export type MapPerformanceStep = ResourceCounts & {
   startTime: number;
   endTime: number | null;
   name?: string;
@@ -111,7 +111,7 @@ export function MapPerformanceObserver({
     }
     const observer = new PerformanceObserver(callback);
     observer.observe({ entryTypes: ["resource"] });
-    return observer.disconnect;
+    return () => observer.disconnect();
   }, []);
   return null;
 }
