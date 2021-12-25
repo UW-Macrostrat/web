@@ -14,7 +14,7 @@ import { useAppActions, useSearchState } from "../reducers";
 import { MapBackend } from "../reducers/actions";
 import styles from "./main.module.styl";
 import { useLocation } from "react-router-dom";
-import { MapPerformanceObserver } from "./performance";
+import { PerformanceWatcher } from "../performance";
 
 const h = hyper.styled(styles);
 
@@ -44,7 +44,7 @@ const MapView = (props: { backend: MapBackend }) => {
   return h([
     h.if(shouldRender(MapBackend.CESIUM))(CesiumView),
     h.if(shouldRender(MapBackend.MAPBOX3))(MapContainer, { use3D }),
-    h(MapPerformanceObserver, { dispatch: runAction }),
+    h(PerformanceWatcher, { dispatch: runAction }),
   ]);
 };
 

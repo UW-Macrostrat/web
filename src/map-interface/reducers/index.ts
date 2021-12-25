@@ -15,7 +15,7 @@ import {
 } from "@macrostrat/cesium-viewer/position";
 import { Action, MapPosition } from "./actions";
 import updateReducer from "./legacy";
-import { performanceReducer, PerformanceState } from "../map-page/performance";
+import { performanceReducer, PerformanceState } from "../performance/core";
 import update from "immutability-helper";
 
 const globeStorage = new LocalStorage("macrostrat-globe");

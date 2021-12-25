@@ -97,7 +97,7 @@ function buildPerformanceData(data: PerformanceResourceTiming): RequestData {
   };
 }
 
-export function MapPerformanceObserver({
+export function PerformanceWatcher({
   dispatch,
 }: {
   dispatch: Dispatch<PerformanceAction>;

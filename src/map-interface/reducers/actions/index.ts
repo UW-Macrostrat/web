@@ -1,6 +1,6 @@
 import { useDispatch } from "react-redux";
 import { MapAction } from "./map-state";
-import { PerformanceAction } from "../../map-page/performance";
+import { PerformanceAction } from "../../performance";
 
 //////////// Async Actions ///////////////
 type FETCH_SEARCH_QUERY = { type: "fetch-search-query"; term: string };
