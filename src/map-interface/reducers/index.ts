@@ -14,8 +14,9 @@ import {
   flyToParams,
 } from "@macrostrat/cesium-viewer/position";
 import { Action, MapPosition } from "./actions";
-import update from "./legacy";
-import { performanceReducer } from "../map-page/performance";
+import updateReducer from "./legacy";
+import { performanceReducer, PerformanceState } from "../map-page/performance";
+import update from "immutability-helper";
 
 const globeStorage = new LocalStorage("macrostrat-globe");
 
@@ -40,7 +41,7 @@ const reducers = combineReducers({
   performance: performanceReducer,
   menu: menuReducer,
   globe: storageGlobeReducer,
-  update,
+  update: updateReducer,
 });
 
 function translateCameraPosition(pos: MapPosition): CameraParams {
@@ -61,7 +62,14 @@ function translateCameraPosition(pos: MapPosition): CameraParams {
   }
 }
 
-function overallReducer(state, action: Action) {
+type MapAppState = {
+  update: UpdateState;
+  globe: GlobeState;
+  performance: PerformanceState;
+  menu: MenuState;
+};
+
+function entryReducer(state: MapAppState, action: Action) {
   let pos: MapPosition;
   if (action.type === "got-initial-map-state") {
     pos = action.data.position;
@@ -85,11 +93,22 @@ function overallReducer(state, action: Action) {
       },
     };
   }
+
+  if (action.type == "map-loading" && !state.update.mapIsLoading) {
+    return overallReducer(state, {
+      type: "reset-performance-counter",
+      name: "map-loading",
+    });
+  }
+  if (action.type == "map-idle" && state.update.mapIsLoading) {
+    return overallReducer(state, { type: "reset-performance-counter" });
+  }
+
   return state;
 }
 
-const newReducer = reduceReducers(overallReducer, reducers);
+const overallReducer = reduceReducers(entryReducer, reducers);
 
-export default newReducer;
+export default overallReducer;
 export * from "./hooks";
 export * from "./menu";
