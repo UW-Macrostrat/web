@@ -81,6 +81,7 @@ function MacrostratCesiumView(props) {
 
   const showInspector = useSelector((state) => state.globe.showInspector);
   const hasSatellite = useSelector((state) => state.update.mapHasSatellite);
+  const mapIsLoading = useSelector((state) => state.update.mapIsLoading);
 
   return h(
     CesiumView,
@@ -104,6 +105,19 @@ function MacrostratCesiumView(props) {
       },
       onClick({ latitude, longitude, zoom }) {
         //dispatch(queryMap(longitude, latitude, zoom, null));
+      },
+      onTileLoadEvent(count) {
+        console.log("Remaining resources: ", count);
+        if (count > 0 && !mapIsLoading) {
+          runAction({
+            type: "map-loading",
+          });
+        }
+        if (count === 0) {
+          runAction({
+            type: "map-idle",
+          });
+        }
       },
       terrainExaggeration,
       displayQuality,

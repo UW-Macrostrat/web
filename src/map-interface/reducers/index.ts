@@ -31,7 +31,6 @@ function storageGlobeReducer(
     globeStorage.set({ displayQuality: action.value });
   }
 
-  console.log(state);
   return globeReducer(state, action);
 }
 
