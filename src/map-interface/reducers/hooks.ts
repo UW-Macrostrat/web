@@ -11,7 +11,8 @@ import {
   asyncGetPBDBOccurences,
   mergePBDBResponses,
 } from "./actions";
-import { useSelector } from "react-redux";
+import { useCallback } from "react";
+import { useSelector, useStore } from "react-redux";
 import axios from "axios";
 import { asyncFilterHandler } from "./filters";
 import { updateStateFromURI } from "./helpers";
@@ -145,12 +146,17 @@ async function runAction(
 
 function useAppActions(): (action: Action) => Promise<void> {
   const dispatch = useActionDispatch();
-  const state = useLegacyState();
-  return async (action) => {
-    const newAction = await runAction(state, action, dispatch);
-    if (newAction === undefined) return;
-    dispatch(newAction as Action);
-  };
+  const store = useStore();
+  const callback = useCallback(
+    async (action) => {
+      const updateState = store.getState().update;
+      const newAction = await runAction(updateState, action, dispatch);
+      if (newAction === undefined) return;
+      dispatch(newAction as Action);
+    },
+    [dispatch, store]
+  );
+  return callback;
 }
 
 function useFilterState() {

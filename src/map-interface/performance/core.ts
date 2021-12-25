@@ -1,9 +1,10 @@
-import { useEffect, Dispatch } from "react";
+import { useEffect, useRef, Dispatch, useCallback } from "react";
 import update, { Spec } from "immutability-helper";
 
 type RequestData = {
   url: string;
   size: number;
+  decodedSize: number;
   duration: number;
 };
 
@@ -93,6 +94,7 @@ function buildPerformanceData(data: PerformanceResourceTiming): RequestData {
   return {
     url: data.name,
     size: data.transferSize,
+    decodedSize: data.decodedBodySize,
     duration: data.duration,
   };
 }
@@ -102,16 +104,23 @@ export function PerformanceWatcher({
 }: {
   dispatch: Dispatch<PerformanceAction>;
 }) {
-  useEffect(() => {
-    function callback(data: PerformanceObserverEntryList) {
+  const observerRef = useRef<PerformanceObserver>();
+  const callback = useCallback(
+    (data: PerformanceObserverEntryList) => {
       dispatch({
         type: "add-performance-data",
         data: data.getEntries().map(buildPerformanceData),
       });
-    }
+    },
+    [dispatch]
+  );
+
+  useEffect(() => {
+    console.log("Creating performance observer");
     const observer = new PerformanceObserver(callback);
     observer.observe({ entryTypes: ["resource"] });
-    return () => observer.disconnect();
-  }, []);
+    observerRef.current = observer;
+    return () => observerRef.current.disconnect();
+  }, [callback]);
   return null;
 }

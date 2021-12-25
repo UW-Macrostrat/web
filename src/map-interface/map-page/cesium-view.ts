@@ -26,6 +26,7 @@ import {
 } from "@macrostrat/cesium-viewer/query-string";
 import maplibre from "maplibre-gl/dist/maplibre-gl-dev";
 import { useAppActions } from "../reducers";
+import { useCallback } from "react";
 import { positionClass } from "@blueprintjs/core/lib/esm/common/classes";
 
 maplibre.accessToken =
@@ -82,6 +83,22 @@ function MacrostratCesiumView(props) {
   const hasSatellite = useSelector((state) => state.update.mapHasSatellite);
   const mapIsLoading = useSelector((state) => state.update.mapIsLoading);
 
+  const onTileLoadEvent = useCallback(
+    (count) => {
+      if (count > 0 && !mapIsLoading) {
+        runAction({
+          type: "map-loading",
+        });
+      }
+      if (count === 0) {
+        runAction({
+          type: "map-idle",
+        });
+      }
+    },
+    [mapIsLoading]
+  );
+
   return h(
     CesiumView,
     {
@@ -105,19 +122,7 @@ function MacrostratCesiumView(props) {
       onClick({ latitude, longitude, zoom }) {
         //dispatch(queryMap(longitude, latitude, zoom, null));
       },
-      onTileLoadEvent(count) {
-        console.log("Remaining resources: ", count);
-        if (count > 0 && !mapIsLoading) {
-          runAction({
-            type: "map-loading",
-          });
-        }
-        if (count === 0) {
-          runAction({
-            type: "map-idle",
-          });
-        }
-      },
+      onTileLoadEvent,
       terrainExaggeration,
       displayQuality,
       showInspector,
