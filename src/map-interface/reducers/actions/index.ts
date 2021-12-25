@@ -1,5 +1,6 @@
 import { useDispatch } from "react-redux";
 import { MapAction } from "./map-state";
+import { PerformanceAction } from "../../map-page/performance";
 
 //////////// Async Actions ///////////////
 type FETCH_SEARCH_QUERY = { type: "fetch-search-query"; term: string };
@@ -143,7 +144,8 @@ export type Action =
   | RECEIVED_ELEVATION_QUERY
   | UPDATE_ELEVATION_MARKER
   | SET_ACTIVE_INDEX_MAP
-  | MapAction;
+  | MapAction
+  | PerformanceAction;
 
 export function useActionDispatch(): React.Dispatch<Action> {
   return useDispatch<React.Dispatch<Action>>();

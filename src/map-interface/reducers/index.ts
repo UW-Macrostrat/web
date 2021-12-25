@@ -15,6 +15,7 @@ import {
 } from "@macrostrat/cesium-viewer/position";
 import { Action, MapPosition } from "./actions";
 import update from "./legacy";
+import { performanceReducer } from "../map-page/performance";
 
 const globeStorage = new LocalStorage("macrostrat-globe");
 
@@ -36,6 +37,7 @@ function storageGlobeReducer(
 
 const reducers = combineReducers({
   // list reducers here
+  performance: performanceReducer,
   menu: menuReducer,
   globe: storageGlobeReducer,
   update,
@@ -68,7 +70,7 @@ function overallReducer(state, action: Action) {
   }
 
   if (pos) {
-    // You can access both app and inventory states here
+    // You can access both app and globe states here
     const params = flyToParams(translateCameraPosition(pos));
     //console.log("Set globe position", destination);
     return {
