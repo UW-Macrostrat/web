@@ -4,22 +4,25 @@ import h from "@macrostrat/hyper";
 import { LinkButton } from "@macrostrat/router-components";
 import { GlobeSettings } from "@macrostrat/cesium-viewer/settings";
 import { useLocation } from "react-router";
-import { DisplayQuality } from "@macrostrat/cesium-viewer";
-import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { MapBackend } from "../reducers/actions";
+
+function useMapBackend() {
+  return useSelector((d) => d.update.mapBackend.current);
+}
 
 function MapTypeButton(props) {
-  const { pathname, hash } = useLocation();
-  console.log(pathname);
-  const globeActive = pathname?.startsWith("/globe");
-  if (globeActive) {
-    return h(LinkButton, { to: { pathname: "/map", hash } }, "Switch to map");
-  }
-  return h(LinkButton, { to: { pathname: "/globe", hash } }, "Switch to globe");
+  const { hash } = useLocation();
+
+  const globeActive = useMapBackend() == MapBackend.CESIUM;
+  const pathname = globeActive ? "/map" : "/globe";
+  const name = globeActive ? "map" : "globe";
+
+  return h(LinkButton, { to: { pathname, hash } }, `Switch to ${name}`);
 }
 
 const SettingsPanel = () => {
-  const { pathname } = useLocation();
-  const globeActive = pathname?.startsWith("/globe");
+  const globeActive = useMapBackend() == MapBackend.CESIUM;
   return h("div.settings", [
     h(MapTypeButton),
     h.if(globeActive)(GlobeSettings),

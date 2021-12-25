@@ -31,7 +31,10 @@ const preloadedState: AppState = {
   infoDrawerOpen: false,
   infoDrawerExpanded: false,
   elevationChartOpen: false,
-  mapBackend: MapBackend.MAPBOX,
+  mapBackend: {
+    current: MapBackend.MAPBOX3,
+    previous: null,
+  },
   // Events and tokens for xhr
   isFetching: false,
   fetchingMapInfo: false,
@@ -85,12 +88,21 @@ const preloadedState: AppState = {
 const update = (state = preloadedState, action: Action) => {
   switch (action.type) {
     case "set-map-backend": {
-      const newState = Object.assign({}, state, { mapBackend: action.backend });
+      const newState = Object.assign({}, state, {
+        mapBackend: {
+          current: action.backend,
+          prevous: state.mapBackend.current,
+        },
+      });
       updateURI(newState);
       return newState;
     }
     case "map-loading":
-      return { ...state, mapIsLoading: true };
+      return {
+        ...state,
+        mapIsLoading: true,
+        mapBackend: { ...state.mapBackend }, //, previous: null },
+      };
     case "map-idle":
       return { ...state, mapIsLoading: false };
     case "toggle-menu":

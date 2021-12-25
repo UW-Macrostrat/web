@@ -19,10 +19,6 @@ const _GlobeDevPage = loadable(() =>
 const GlobeDevPage = () =>
   h(Suspense, { fallback: h(Spinner) }, h(_GlobeDevPage));
 
-function GlobePage() {
-  return h(MapPage, { backend: MapBackend.CESIUM });
-}
-
 const App = () => {
   const runAction = useAppActions();
   const loaded = useSelector((state) => state.update.initialLoadComplete);
@@ -34,11 +30,7 @@ const App = () => {
 
   return h(Router, { basename: MACROSTRAT_BASE_URL }, [
     h("div#app-holder", [
-      h(Route, { path: "/map", component: MapPage }),
-      h(Route, {
-        path: "/globe",
-        component: GlobePage,
-      }),
+      h(Route, { path: ["/map", "/globe"], component: MapPage }),
       h(Route, { path: "/columns", component: ColumnPage }),
       h(Route, { path: "/dev/globe", component: GlobeDevPage }),
       h(Route, {

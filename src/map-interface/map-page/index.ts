@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 // Import other components
 import MapContainer from "./map-view";
 import hyper from "@macrostrat/hyper";
@@ -10,9 +10,10 @@ import { ButtonGroup, Button, Spinner } from "@blueprintjs/core";
 import { ErrorBoundary } from "@macrostrat/ui-components";
 import { useSelector, useDispatch } from "react-redux";
 import loadable from "@loadable/component";
-import { useSearchState } from "../reducers";
+import { useAppActions, useSearchState } from "../reducers";
 import { MapBackend } from "../reducers/actions";
 import styles from "./main.module.styl";
+import { useLocation } from "react-router-dom";
 
 const h = hyper.styled(styles);
 
@@ -22,18 +23,31 @@ export function CesiumView(props) {
 }
 
 const MapView = (props: { backend: MapBackend }) => {
-  const { backend = MapBackend.MAPBOX3 } = props;
-  switch (backend) {
-    case MapBackend.CESIUM:
-      return h(CesiumView);
-    default:
-      const use3D = backend == MapBackend.MAPBOX3;
-      return h(MapContainer, { use3D });
+  const location = useLocation();
+  const runAction = useAppActions();
+  const mapBackend = useSelector((d) => d.update.mapBackend);
+
+  let backend = MapBackend.MAPBOX3;
+  if (location.pathname.includes("/globe")) {
+    backend = MapBackend.CESIUM;
   }
+
+  useEffect(() => {
+    runAction({ type: "set-map-backend", backend });
+  }, [backend]);
+
+  const shouldRender = (bkg: MapBackend) =>
+    bkg == mapBackend.current || bkg == mapBackend.previous;
+
+  const use3D = backend == MapBackend.MAPBOX3;
+  return h([
+    h.if(shouldRender(MapBackend.CESIUM))(CesiumView),
+    h.if(shouldRender(MapBackend.MAPBOX3))(MapContainer, { use3D }),
+  ]);
 };
 
 const MapTypeSelector = () => {
-  const backend = useSelector((d) => d.update.mapBackend);
+  const backend = useSelector((d) => d.update.mapBackend.current);
   const dispatch = useDispatch();
 
   const setBackend = (backend) => {

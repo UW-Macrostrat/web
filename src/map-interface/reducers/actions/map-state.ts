@@ -39,7 +39,10 @@ export type MapState = {
   mapHasSatellite: boolean;
   mapHasColumns: boolean;
   mapHasFossils: boolean;
-  mapBackend: MapBackend;
+  mapBackend: {
+    previous: MapBackend | null;
+    current: MapBackend;
+  };
   mapIsLoading: boolean;
 };
 
