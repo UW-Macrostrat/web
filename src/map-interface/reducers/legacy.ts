@@ -85,47 +85,39 @@ const preloadedState: AppState = {
 const update = (state = preloadedState, action: Action) => {
   switch (action.type) {
     case "set-map-backend": {
-      const newState = Object.assign({}, state, { mapBackend: action.backend });
-      updateURI(newState);
-      return newState;
+      return updateURI({ ...state, mapBackend: action.backend });
     }
     case "map-loading":
       return { ...state, mapIsLoading: true };
     case "map-idle":
       return { ...state, mapIsLoading: false };
     case "toggle-menu":
-      return Object.assign({}, state, {
-        menuOpen: !state.menuOpen,
-      });
+      return { ...state, menuOpen: !state.menuOpen };
     case "toggle-about":
-      return Object.assign({}, state, {
-        aboutOpen: !state.aboutOpen,
-      });
+      return { ...state, aboutOpen: !state.aboutOpen };
     case "close-infodrawer":
-      return Object.assign({}, state, {
+      return {
+        ...state,
         infoDrawerOpen: false,
         columnInfo: {},
         mapInfo: [],
         pbdbData: [],
-      });
+      };
     case "toggle-infodrawer":
-      return Object.assign({}, state, {
+      return {
+        ...state,
         infoDrawerOpen: !state.infoDrawerOpen,
         infoDrawerExpanded: false,
         columnInfo: {},
         gddInfo: [],
-      });
+      };
 
     case "expand-infodrawer":
-      return Object.assign({}, state, {
-        infoDrawerExpanded: !state.infoDrawerExpanded,
-      });
+      return { ...state, infoDrawerExpanded: !state.infoDrawerExpanded };
 
     case "toggle-filters":
       // rework this to open menu panel
-      return Object.assign({}, state, {
-        filtersOpen: !state.filtersOpen,
-      });
+      return { ...state, filtersOpen: !state.filtersOpen };
     case "add-filter":
       let alreadyHasFiter = false;
       state.filters.forEach((filter) => {
@@ -169,48 +161,29 @@ const update = (state = preloadedState, action: Action) => {
         fs = fs.concat([action.filter]);
       }
       // action.filter.type and action.filter.id go to the URI
-      updateURI(
-        Object.assign({}, state, {
-          filters: fs,
-        })
-      );
-      return Object.assign({}, state, {
-        filters: fs,
-      });
+      return updateURI({ ...state, filters: fs });
     case "remove-filter":
-      updateURI(
-        Object.assign({}, state, {
-          filters: state.filters.filter((d) => {
-            if (d.name != action.filter.name) return d;
-          }),
-        })
-      );
-      return Object.assign({}, state, {
+      return updateURI({
+        ...state,
         filters: state.filters.filter((d) => {
           if (d.name != action.filter.name) return d;
         }),
       });
     case "clear-filters":
-      updateURI(
-        Object.assign({}, state, {
-          filters: [],
-        })
-      );
-      return Object.assign({}, state, {
-        filters: [],
-      });
+      return updateURI({ ...state, filters: [] });
     case "start-map-query":
       if (state.mapInfoCancelToken) {
         state.mapInfoCancelToken.cancel();
       }
       console.log("MAP BEING QUERIED", action);
-      return Object.assign({}, state, {
+      return {
+        ...state,
         infoMarkerLng: action.lng.toFixed(4),
         infoMarkerLat: action.lat.toFixed(4),
         fetchingMapInfo: true,
         infoDrawerOpen: true,
         mapInfoCancelToken: action.cancelToken,
-      });
+      };
     case "received-map-query":
       if (action.data && action.data.mapData) {
         action.data.mapData = action.data.mapData.map((source) => {
@@ -266,20 +239,22 @@ const update = (state = preloadedState, action: Action) => {
         });
       }
 
-      return Object.assign({}, state, {
+      return {
+        ...state,
         fetchingMapInfo: false,
         mapInfo: action.data,
         infoDrawerOpen: true,
-      });
+      };
 
     case "start-column-query":
       if (state.columnInfoCancelToken) {
         state.columnInfoCancelToken.cancel();
       }
-      return Object.assign({}, state, {
+      return {
+        ...state,
         fetchingColumnInfo: true,
         columnInfoCancelToken: action.cancelToken,
-      });
+      };
 
     case "received-column-query":
       // summarize units
@@ -368,94 +343,57 @@ const update = (state = preloadedState, action: Action) => {
       columnSummary["units"] = action.data;
       columnSummary["unitIdx"] = unitIdx;
 
-      return Object.assign({}, state, {
-        fetchingColumnInfo: false,
-        columnInfo: columnSummary,
-      });
-
+      return { ...state, fetchingColumnInfo: false, columnInfo: columnSummary };
     case "toggle-bedrock":
-      updateURI(
-        Object.assign({}, state, {
-          mapHasBedrock: !state.mapHasBedrock,
-        })
-      );
-      return Object.assign({}, state, {
-        mapHasBedrock: !state.mapHasBedrock,
-      });
-
+      return updateURI({ ...state, mapHasBedrock: !state.mapHasBedrock });
     case "toggle-lines":
-      updateURI(
-        Object.assign({}, state, {
-          mapHasLines: !state.mapHasLines,
-        })
-      );
-      return Object.assign({}, state, {
-        mapHasLines: !state.mapHasLines,
-      });
-
+      return updateURI({ ...state, mapHasLines: !state.mapHasLines });
     case "toggle-satellite":
-      updateURI(
-        Object.assign({}, state, {
-          mapHasSatellite: !state.mapHasSatellite,
-        })
-      );
-      return Object.assign({}, state, {
-        mapHasSatellite: !state.mapHasSatellite,
-      });
+      return updateURI({ ...state, mapHasSatellite: !state.mapHasSatellite });
     case "toggle-columns":
-      updateURI(
-        Object.assign({}, state, {
-          mapHasColumns: !state.mapHasColumns,
-        })
-      );
-      return Object.assign({}, state, {
-        mapHasColumns: !state.mapHasColumns,
-      });
+      return updateURI({ ...state, mapHasColumns: !state.mapHasColumns });
     case "toggle-fossils":
-      updateURI(
-        Object.assign({}, state, {
-          mapHasFossils: !state.mapHasFossils,
-        })
-      );
-      return Object.assign({}, state, {
-        mapHasFossils: !state.mapHasFossils,
-      });
+      return updateURI({ ...state, mapHasFossils: !state.mapHasFossils });
     case "toggle-elevation-chart":
-      return Object.assign({}, state, {
+      return {
+        ...state,
         elevationChartOpen: !state.elevationChartOpen,
         elevationData: [],
         elevationMarkerLocation: [],
-      });
+      };
     case "set-input-focus":
-      return Object.assign({}, state, { inputFocus: action.inputFocus });
+      return { ...state, inputFocus: action.inputFocus };
     case "set-search-term":
-      return Object.assign({}, state, { term: action.term });
+      return { ...state, term: action.term };
     // Handle searching
     case "start-search-query":
       // When a search is requested, cancel any pending requests first
       if (state.searchCancelToken) {
         state.searchCancelToken.cancel();
       }
-      return Object.assign({}, state, {
+      return {
+        ...state,
         isSearching: true,
         searchCancelToken: action.cancelToken,
-      });
+      };
     case "received-search-query":
-      return Object.assign({}, state, {
+      return {
+        ...state,
         isSearching: false,
         searchResults: action.data,
         searchCancelToken: null,
-      });
+      };
 
     case "start-gdd-query":
       // When a search is requested, cancel any pending requests first
       if (state.gddCancelToken) {
         state.gddCancelToken.cancel();
       }
-      return Object.assign({}, state, {
+      return {
+        ...state,
         fetchingGdd: true,
         gddCancelToken: action.cancelToken,
-      });
+      };
     case "received-gdd-query":
       let parsed = {
         journals: [],
@@ -485,11 +423,12 @@ const update = (state = preloadedState, action: Action) => {
         }
       }
 
-      return Object.assign({}, state, {
+      return {
+        ...state,
         fetchingGdd: false,
         gddInfo: parsed.journals,
         gddCancelToken: null,
-      });
+      };
 
     // Handle elevation
     case "start-elevation-query":
@@ -497,74 +436,67 @@ const update = (state = preloadedState, action: Action) => {
       if (state.elevationCancelToken) {
         state.elevationCancelToken.cancel();
       }
-      return Object.assign({}, state, {
+      return {
+        ...state,
         fetchingElevation: true,
         elevationCancelToken: action.cancelToken,
-      });
+      };
     case "received-elevation-query":
-      return Object.assign({}, state, {
+      return {
+        ...state,
         fetchingElevation: false,
         elevationData: action.data,
         elevationCancelToken: null,
-      });
+      };
     case "update-elevation-marker":
-      return Object.assign({}, state, {
-        elevationMarkerLocation: [action.lng, action.lat],
-      });
+      return { ...state, elevationMarkerLocation: [action.lng, action.lat] };
 
     // Handle PBDB
     case "start-pbdb-query":
       if (state.pbdbCancelToken) {
         state.pbdbCancelToken.cancel();
       }
-      return Object.assign({}, state, {
+      return {
+        ...state,
         fetchingPbdb: true,
         pbdbCancelToken: action.cancelToken,
-      });
+      };
 
     case "update-pbdb-query":
       if (state.pbdbCancelToken) {
         state.pbdbCancelToken.cancel();
       }
-      return Object.assign({}, state, {
-        pbdbCancelToken: action.cancelToken,
-      });
+      return { ...state, pbdbCancelToken: action.cancelToken };
 
     case "received-pbdb-query":
-      return Object.assign({}, state, {
+      return {
+        ...state,
         fetchingPbdb: false,
         pbdbData: action.data,
         pbdbCancelToken: null,
         infoDrawerOpen: true,
-      });
+      };
 
     case "reset-pbdb":
-      return Object.assign({}, state, {
-        pbdbData: [],
-      });
-
+      return { ...state, pbdbData: [] };
     case "go-to-place":
-      return Object.assign({}, state, {
+      return {
+        ...state,
         mapCenter: {
           type: "place",
           place: action.place,
         },
-      });
-
+      };
     case "update-column-filters":
       console.log("Filtered Columns", action.columns);
-      return Object.assign({}, state, {
+      return {
+        ...state,
         filteredColumns: action.columns,
-      });
+      };
     case "request-data":
-      return Object.assign({}, state, {
-        isFetching: true,
-      });
+      return { ...state, isFetching: true };
     case "recieve-data":
-      return Object.assign({}, state, {
-        isFetching: false,
-        data: action.data,
-      });
+      return { ...state, isFetching: false, data: action.data };
     case "map-moved":
       return updateURI({ ...state, mapPosition: action.data });
     case "update-state":
@@ -578,7 +510,8 @@ const update = (state = preloadedState, action: Action) => {
       const mapHasFossils = layers.includes("fossils");
       const mapHasBedrock = layers.includes("bedrock");
 
-      const newState = Object.assign({}, state, {
+      const newState = {
+        ...state,
         initialLoadComplete: true,
         mapBackend: backend ?? MapBackend.MAPBOX,
         mapHasSatellite,
@@ -587,11 +520,9 @@ const update = (state = preloadedState, action: Action) => {
         mapHasColumns,
         mapHasFossils,
         mapPosition: position,
-      });
+      };
       // This causes some hilarious problems...
-      updateURI(newState);
-      return newState;
-
+      return updateURI(newState);
     default:
       return state;
   }
