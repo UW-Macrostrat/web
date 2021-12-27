@@ -204,7 +204,7 @@ function ElevationChartContainer() {
     elevationData = [],
     elevationChartOpen,
     fetchingElevation,
-  } = useSelector((state) => state.update);
+  } = useSelector((state) => state.core);
   const hasElevationData = elevationData.length > 0;
   const runAction = useAppActions();
 

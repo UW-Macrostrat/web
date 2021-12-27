@@ -27,7 +27,7 @@ function GlobePage() {
 
 const App = () => {
   const runAction = useAppActions();
-  const loaded = useSelector((state) => state.update.initialLoadComplete);
+  const loaded = useSelector((state) => state.core.initialLoadComplete);
   useEffect(() => {
     runAction({ type: "get-initial-map-state" });
   }, []);

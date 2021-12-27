@@ -35,7 +35,7 @@ interface AsyncRequestState {
   elevationCancelToken: CancelToken | null;
   pbdbCancelToken: CancelToken | null;
 }
-interface CoreState extends MapState, AsyncRequestState {
+export interface CoreState extends MapState, AsyncRequestState {
   initialLoadComplete: boolean;
   menuOpen: boolean;
   aboutOpen: boolean;
@@ -120,7 +120,7 @@ const defaultState: CoreState = {
 export function coreReducer(
   state: CoreState = defaultState,
   action: Action
-): AppState {
+): CoreState {
   switch (action.type) {
     case "set-map-backend": {
       return updateURI({ ...state, mapBackend: action.backend });

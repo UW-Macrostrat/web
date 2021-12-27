@@ -45,7 +45,7 @@ const TabButton = (props: ButtonProps & { tab: MenuPanel }) => {
 
 const LayerButton = (props: ListButtonProps & { layer: string }) => {
   const { layer, ...rest } = props;
-  const active = useSelector((state) => state.update["mapHas" + layer]);
+  const active = useSelector((state) => state.core["mapHas" + layer]);
   const runAction = useAppActions();
   const onClick = () => runAction({ type: "toggle-" + layer.toLowerCase() });
   return h(ListButton, {

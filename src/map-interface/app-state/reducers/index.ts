@@ -1,39 +1,28 @@
 import { combineReducers } from "redux";
 import reduceReducers from "reduce-reducers";
-import { menuReducer } from "./menu";
+import { menuReducer, MenuState } from "./menu";
 import { Action } from "../actions";
-//import { reducer as globeReducer } from "@macrostrat/cesium-viewer/actions";
-//import { nadirCameraPosition } from "@macrostrat/cesium-viewer/position";
-import { coreReducer } from "./core";
+import { coreReducer, CoreState } from "./core";
+
+export type AppState = {
+  core: CoreState;
+  menu: MenuState;
+};
 
 const reducers = combineReducers({
-  // list reducers here
   menu: menuReducer,
-  //globe: globeReducer,
-  update: coreReducer,
+  core: coreReducer,
 });
 
-function overallReducer(state, action: Action) {
+function overallReducer(state: AppState, action: Action): AppState {
   if (action.type === "got-initial-map-state" || action.type == "map-moved") {
-    // You can access both app and inventory states here
-
-    //const destination = nadirCameraPosition(x, y, z);
-    //console.log("Set globe position", destination);
-    const newState = {
+    return {
       ...state,
-      update: {
-        ...state.update,
+      core: {
+        ...state.core,
         mapPosition: action.data,
       },
-      /*
-      globe: {
-        ...state.globe,
-        flyToProps: { destination, duration: 0, once: true },
-      },
-      */
     };
-    //console.log(newState);
-    return newState;
   }
   return state;
 }

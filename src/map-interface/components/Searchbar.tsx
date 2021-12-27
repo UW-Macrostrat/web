@@ -75,7 +75,7 @@ function SearchResults() {
 
 function MenuButton() {
   const runAction = useAppActions();
-  const mapIsLoading = useSelector((d) => d.update.mapIsLoading);
+  const mapIsLoading = useSelector((state) => state.core.mapIsLoading);
 
   return h(Button, {
     icon: mapIsLoading ? h(Spinner, { size: 16 }) : "menu",

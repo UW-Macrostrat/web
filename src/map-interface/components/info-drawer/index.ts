@@ -89,22 +89,22 @@ function InfoDrawer(props) {
 
 const mapStateToProps = (state) => {
   return {
-    infoDrawerOpen: state.update.infoDrawerOpen,
-    infoDrawerExpanded: state.update.infoDrawerExpanded,
-    mapInfo: state.update.mapInfo,
-    fetchingMapInfo: state.update.fetchingMapInfo,
-    fetchingColumnInfo: state.update.fectchingColumnInfo,
-    fetchingGdd: state.update.fetchingGdd,
-    columnInfo: state.update.columnInfo,
-    infoMarkerLng: state.update.infoMarkerLng,
-    infoMarkerLat: state.update.infoMarkerLat,
-    gddInfo: state.update.gddInfo,
-    fetchingPbdb: state.update.fetchingPbdb,
-    pbdbData: state.update.pbdbData,
-    mapHasBedrock: state.update.mapHasBedrock,
-    mapHasSatellite: state.update.mapHasSatellite,
-    mapHasColumns: state.update.mapHasColumns,
-    mapHasFossils: state.update.mapHasFossils,
+    infoDrawerOpen: state.core.infoDrawerOpen,
+    infoDrawerExpanded: state.core.infoDrawerExpanded,
+    mapInfo: state.core.mapInfo,
+    fetchingMapInfo: state.core.fetchingMapInfo,
+    fetchingColumnInfo: state.core.fectchingColumnInfo,
+    fetchingGdd: state.core.fetchingGdd,
+    columnInfo: state.core.columnInfo,
+    infoMarkerLng: state.core.infoMarkerLng,
+    infoMarkerLat: state.core.infoMarkerLat,
+    gddInfo: state.core.gddInfo,
+    fetchingPbdb: state.core.fetchingPbdb,
+    pbdbData: state.core.pbdbData,
+    mapHasBedrock: state.core.mapHasBedrock,
+    mapHasSatellite: state.core.mapHasSatellite,
+    mapHasColumns: state.core.mapHasColumns,
+    mapHasFossils: state.core.mapHasFossils,
   };
 };
 

@@ -60,7 +60,7 @@ function MapContainer(props) {
     mapPosition,
     infoDrawerOpen,
     mapIsLoading,
-  } = useSelector((state) => state.update);
+  } = useSelector((state) => state.core);
 
   const runAction = useAppActions();
 
