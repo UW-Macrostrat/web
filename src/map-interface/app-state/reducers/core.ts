@@ -77,8 +77,10 @@ export function coreReducer(
       return updateURI({ ...state, mapBackend: action.backend });
     }
     case "map-loading":
+      if (state.mapIsLoading) return state;
       return { ...state, mapIsLoading: true };
     case "map-idle":
+      if (!state.mapIsLoading) return state;
       return { ...state, mapIsLoading: false };
     case "toggle-menu":
       return { ...state, menuOpen: !state.menuOpen };

@@ -1,7 +1,7 @@
-import { useSelector } from "react-redux";
 import { forwardRef, useRef } from "react";
 import {
   useAppActions,
+  useAppState,
   MapPosition,
   MapLayer,
 } from "~/map-interface/app-state";
@@ -60,7 +60,7 @@ function MapContainer(props) {
     mapPosition,
     infoDrawerOpen,
     mapIsLoading,
-  } = useSelector((state) => state.core);
+  } = useAppState((state) => state.core);
 
   const runAction = useAppActions();
 
