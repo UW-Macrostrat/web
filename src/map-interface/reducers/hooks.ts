@@ -11,11 +11,10 @@ import {
   asyncGetPBDBOccurences,
   mergePBDBResponses,
 } from "./actions";
-import { useSelector } from "react-redux";
+import { useStore, useSelector } from "react-redux";
 import axios from "axios";
 import { asyncFilterHandler } from "./filters";
 import { updateStateFromURI } from "./helpers";
-import React from "packages/ui-components/node_modules/@types/react";
 
 function getCancelToken() {
   let CancelToken = axios.CancelToken;
@@ -23,7 +22,7 @@ function getCancelToken() {
   return source;
 }
 
-async function runAction(
+async function actionRunner(
   state,
   action: Action,
   dispatch = null
@@ -74,7 +73,7 @@ async function runAction(
       });
       if (column) {
         dispatch(
-          await runAction(state, { type: "get-column", column }, dispatch)
+          await actionRunner(state, { type: "get-column", column }, dispatch)
         );
       }
       let mapData = await asyncQueryMap(
@@ -145,9 +144,10 @@ async function runAction(
 
 function useAppActions(): (action: Action) => Promise<void> {
   const dispatch = useActionDispatch();
-  const state = useLegacyState();
+  const store = useStore();
   return async (action) => {
-    const newAction = await runAction(state, action, dispatch);
+    const coreState = store.getState().update;
+    const newAction = await actionRunner(coreState, action, dispatch);
     if (newAction === undefined) return;
     dispatch(newAction as Action);
   };
