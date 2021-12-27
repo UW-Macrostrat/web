@@ -1,6 +1,6 @@
-import { updateURI } from "./helpers";
-import { sum, timescale } from "../utils";
-import { Action, MapState, MapBackend } from "./actions";
+import { updateURI } from "../helpers";
+import { sum, timescale } from "../../utils";
+import { Action, MapState, MapBackend } from "../actions";
 
 const classColors = {
   sedimentary: "#FF8C00",
@@ -23,7 +23,7 @@ interface AppState extends MapState {
   isFetching: boolean;
 }
 
-const preloadedState: AppState = {
+const defaultState: AppState = {
   initialLoadComplete: false,
   menuOpen: false,
   aboutOpen: false,
@@ -81,7 +81,10 @@ const preloadedState: AppState = {
   },
 };
 
-const update = (state = preloadedState, action: Action) => {
+export function coreReducer(
+  state: AppState = defaultState,
+  action: Action
+): AppState {
   switch (action.type) {
     case "set-map-backend": {
       return updateURI({ ...state, mapBackend: action.backend });
@@ -525,7 +528,4 @@ const update = (state = preloadedState, action: Action) => {
     default:
       return state;
   }
-};
-
-export default update;
-export { preloadedState };
+}
