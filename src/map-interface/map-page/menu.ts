@@ -15,10 +15,9 @@ import {
 } from "@blueprintjs/core";
 import { CloseableCard } from "../components/closeable-card";
 import { useSelector, useDispatch } from "react-redux";
-import { MenuPanel } from "../reducers/menu";
 import AboutText from "../components/About";
 import { SettingsPanel } from "./settings-panel";
-import { useAppActions, useMenuState } from "../reducers";
+import { useAppActions, useMenuState, MenuPanel } from "../app-state";
 import styles from "./main.module.styl";
 
 const h = hyper.styled(styles);

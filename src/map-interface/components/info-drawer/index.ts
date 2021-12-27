@@ -1,7 +1,7 @@
 import { Card, Spinner } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import { connect } from "react-redux";
-import { useAppActions } from "~/map-interface/reducers";
+import { useAppActions } from "~/map-interface/app-state";
 
 import { InfoDrawerHeader } from "./header";
 import { FossilCollections } from "./fossil-collections";

@@ -1,7 +1,6 @@
 import { useSelector } from "react-redux";
 import { forwardRef, useRef } from "react";
-import { useAppActions } from "~/map-interface/reducers";
-import { MapPosition } from "~/map-interface/reducers/actions";
+import { useAppActions, MapPosition } from "~/map-interface/app-state";
 import Map from "./map";
 import h from "@macrostrat/hyper";
 import { useEffect } from "react";

@@ -1,7 +1,6 @@
 import { updateURI } from "./helpers";
 import { sum, timescale } from "../utils";
-import { MapBackend } from "../map-page";
-import { Action, MapState } from "./actions";
+import { Action, MapState, MapBackend } from "./actions";
 
 const classColors = {
   sedimentary: "#FF8C00",

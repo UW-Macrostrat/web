@@ -1,7 +1,7 @@
 import { useState } from "react";
 import h from "@macrostrat/hyper";
 import { Tag, Card, Button, Collapse, Switch, Icon } from "@blueprintjs/core";
-import { useFilterState, useAppActions } from "~/map-interface/reducers";
+import { useFilterState, useAppActions } from "~/map-interface/app-state";
 
 function Filter({ filter }) {
   const runAction = useAppActions();
