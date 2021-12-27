@@ -9,7 +9,7 @@ import {
   asyncGetPBDBOccurences,
   mergePBDBResponses,
 } from "./fetch";
-import { Action, CoreState } from "../sections/core";
+import { Action, CoreState } from "../sections";
 import axios from "axios";
 import { asyncFilterHandler } from "./filters";
 import { updateStateFromURI } from "../helpers";
