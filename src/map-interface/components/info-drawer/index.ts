@@ -1,6 +1,5 @@
 import { Card, Spinner } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
-import { connect } from "react-redux";
 import { useAppActions } from "~/map-interface/app-state";
 
 import { InfoDrawerHeader } from "./header";
@@ -10,20 +9,34 @@ import { MacrostratLinkedData } from "./macrostrat-linked";
 import { RegionalStratigraphy } from "./reg-strat";
 import { Physiography } from "./physiography";
 import { GddExpansion } from "./gdd";
+import { useAppState } from "~/map-interface/app-state";
 import styles from "./main.module.styl";
 
 const h = hyper.styled(styles);
 
-function InfoDrawer(props) {
+function InfoDrawer() {
   const {
-    mapHasBedrock,
-    mapHasColumns,
-    mapHasFossils,
     infoDrawerOpen,
+    infoDrawerExpanded,
+    mapInfo,
+    fetchingMapInfo,
+    fetchingColumnInfo,
+    fetchingGdd,
     columnInfo,
-    ...rest
-  } = props;
-  let { mapInfo, gddInfo, pbdbData } = rest;
+    infoMarkerLng,
+    infoMarkerLat,
+    gddInfo,
+    fetchingPbdb,
+    pbdbData,
+    // We used to enable panels when certain layers were on,
+    // but now we just show all panels always
+    //mapLayers
+    // mapHasBedrock,
+    // mapHasSatellite,
+    // mapHasColumns,
+    // mapHasFossils,
+  } = useAppState((state) => state.core);
+
   const runAction = useAppActions();
 
   const openGdd = () => {
@@ -54,13 +67,13 @@ function InfoDrawer(props) {
     h(Card, { className: "infodrawer" }, [
       h(InfoDrawerHeader, {
         mapInfo,
-        infoMarkerLng: rest.infoMarkerLng,
-        infoMarkerLat: rest.infoMarkerLat,
+        infoMarkerLng,
+        infoMarkerLat,
         onCloseClick: () => runAction({ type: "close-infodrawer" }),
       }),
       h("div.infodrawer-body", [
-        h.if(rest.fetchingMapInfo)("div.spinner", [h(Spinner)]),
-        h.if(!rest.fetchingMapInfo)("div", [
+        h.if(fetchingMapInfo)("div.spinner", [h(Spinner)]),
+        h.if(!fetchingMapInfo)("div", [
           h(FossilCollections, { data: pbdbData, expanded: true }),
           h(RegionalStratigraphy, { mapInfo, columnInfo }),
           h(GeologicMapInfo, {
@@ -78,7 +91,7 @@ function InfoDrawer(props) {
             mapInfo,
             gddInfo,
             openGdd,
-            fetchingGdd: rest.fetchingGdd,
+            fetchingGdd,
           }),
         ]),
       ]),
@@ -87,27 +100,4 @@ function InfoDrawer(props) {
   ]);
 }
 
-const mapStateToProps = (state) => {
-  return {
-    infoDrawerOpen: state.core.infoDrawerOpen,
-    infoDrawerExpanded: state.core.infoDrawerExpanded,
-    mapInfo: state.core.mapInfo,
-    fetchingMapInfo: state.core.fetchingMapInfo,
-    fetchingColumnInfo: state.core.fectchingColumnInfo,
-    fetchingGdd: state.core.fetchingGdd,
-    columnInfo: state.core.columnInfo,
-    infoMarkerLng: state.core.infoMarkerLng,
-    infoMarkerLat: state.core.infoMarkerLat,
-    gddInfo: state.core.gddInfo,
-    fetchingPbdb: state.core.fetchingPbdb,
-    pbdbData: state.core.pbdbData,
-    mapHasBedrock: state.core.mapHasBedrock,
-    mapHasSatellite: state.core.mapHasSatellite,
-    mapHasColumns: state.core.mapHasColumns,
-    mapHasFossils: state.core.mapHasFossils,
-  };
-};
-
-const InfoDrawerContainer = connect(mapStateToProps)(InfoDrawer);
-
-export default InfoDrawerContainer;
+export default InfoDrawer;
