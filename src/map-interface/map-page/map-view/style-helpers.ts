@@ -30,17 +30,21 @@ function setMapStyle(class_, map, mapStyle, props) {
           map.setLayoutProperty(layer.id, "visibility", showLines);
         }
       } else if (
-        layer.source === "pbdb" ||
         layer.source === "pbdb-points" ||
         layer.source === "pbdb-clusters"
       ) {
+        // points and clusters are visible at different zooms
+        // currently this difference is handled by refreshPBDB()
+        // it's annoying but doesn't cause an infinite loop
         const showFossils = props.mapHasFossils ? "visible" : "none";
+        if (
+          class_.props.mapHasFossils != props.mapHasFossils &&
+          props.mapHasFossils
+        ) {
+          class_.refreshPBDB();
+        }
         if (visibility !== showFossils) {
-          if (showFossils == "visible") {
-            class_.refreshPBDB();
-          } else {
-            map.setLayoutProperty(layer.id, "visibility", showFossils);
-          }
+          map.setLayoutProperty(layer.id, "visibility", showFossils);
         }
       } else if (layer.source === "columns") {
         const showColumns =
