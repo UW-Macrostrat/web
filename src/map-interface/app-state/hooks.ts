@@ -34,33 +34,4 @@ function useMenuState() {
   return { menuOpen, infoDrawerOpen, ...menu };
 }
 
-function useMapHasBools() {
-  const {
-    mapHasBedrock,
-    mapHasSatellite,
-    mapHasColumns,
-    mapHasFossils,
-    mapHasLines,
-  } = useSelector((state) => state.update);
-  return {
-    mapHasBedrock,
-    mapHasSatellite,
-    mapHasColumns,
-    mapHasFossils,
-    mapHasLines,
-  };
-}
-
-function useLegacyState() {
-  const legacyState = useSelector((state) => state.update);
-  return legacyState;
-}
-
-export {
-  useAppActions,
-  useFilterState,
-  useLegacyState,
-  useSearchState,
-  useMenuState,
-  useMapHasBools,
-};
+export { useAppActions, useFilterState, useSearchState, useMenuState };
