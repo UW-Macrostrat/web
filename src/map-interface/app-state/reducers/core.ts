@@ -1,6 +1,7 @@
 import { updateURI } from "../helpers";
 import { sum, timescale } from "../../utils";
 import { Action, MapState, MapBackend } from "../actions";
+import { CancelToken } from "axios";
 
 const classColors = {
   sedimentary: "#FF8C00",
@@ -14,16 +15,51 @@ const classColors = {
   energy: "#333333",
 };
 
-interface AppState extends MapState {
+interface MapCenterInfo {
+  type: string;
+  [key: string]: any;
+}
+interface AsyncRequestState {
+  // Events and tokens for xhr
+  fetchingMapInfo: boolean;
+  fetchingColumnInfo: boolean;
+  fetchingGdd: boolean;
+  isSearching: boolean;
+  term: string;
+  fetchingElevation: boolean;
+  fetchingPbdb: boolean;
+  mapInfoCancelToken: CancelToken | null;
+  columnInfoCancelToken: CancelToken | null;
+  gddCancelToken: CancelToken | null;
+  searchCancelToken: CancelToken | null;
+  elevationCancelToken: CancelToken | null;
+  pbdbCancelToken: CancelToken | null;
+}
+interface CoreState extends MapState, AsyncRequestState {
   initialLoadComplete: boolean;
   menuOpen: boolean;
   aboutOpen: boolean;
   infoDrawerOpen: boolean;
   infoDrawerExpanded: boolean;
   isFetching: boolean;
+  elevationChartOpen: false;
+  infoMarkerLng: number;
+  infoMarkerLat: number;
+  mapInfo: any[];
+  columnInfo: object;
+  gddInfo: any[];
+  searchResults: any;
+  elevationData: any;
+  elevationMarkerLocation: any;
+  pbdbData: any[];
+  mapCenter: MapCenterInfo;
+  filtersOpen: boolean;
+  filters: any[];
+  filteredColumns: object;
+  data: [];
 }
 
-const defaultState: AppState = {
+const defaultState: CoreState = {
   initialLoadComplete: false,
   menuOpen: false,
   aboutOpen: false,
@@ -82,7 +118,7 @@ const defaultState: AppState = {
 };
 
 export function coreReducer(
-  state: AppState = defaultState,
+  state: CoreState = defaultState,
   action: Action
 ): AppState {
   switch (action.type) {
