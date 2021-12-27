@@ -1,8 +1,6 @@
 import {
-  Action,
   doSearchAsync,
   fetchFilteredColumns,
-  useActionDispatch,
   getAsyncGdd,
   asyncGetColumn,
   asyncQueryMap,
@@ -10,12 +8,11 @@ import {
   asyncGetPBDBCollection,
   asyncGetPBDBOccurences,
   mergePBDBResponses,
-} from "./actions";
-import { useSelector } from "react-redux";
+} from "./fetch";
+import { Action, CoreState } from "../sections";
 import axios from "axios";
 import { asyncFilterHandler } from "./filters";
-import { updateStateFromURI } from "./helpers";
-import React from "packages/ui-components/node_modules/@types/react";
+import { updateStateFromURI } from "../helpers";
 
 function getCancelToken() {
   let CancelToken = axios.CancelToken;
@@ -23,8 +20,8 @@ function getCancelToken() {
   return source;
 }
 
-async function runAction(
-  state,
+async function actionRunner(
+  state: CoreState,
   action: Action,
   dispatch = null
 ): Promise<Action | void> {
@@ -74,7 +71,7 @@ async function runAction(
       });
       if (column) {
         dispatch(
-          await runAction(state, { type: "get-column", column }, dispatch)
+          await actionRunner(state, { type: "get-column", column }, dispatch)
         );
       }
       let mapData = await asyncQueryMap(
@@ -143,60 +140,4 @@ async function runAction(
   }
 }
 
-function useAppActions(): (action: Action) => Promise<void> {
-  const dispatch = useActionDispatch();
-  const state = useLegacyState();
-  return async (action) => {
-    const newAction = await runAction(state, action, dispatch);
-    if (newAction === undefined) return;
-    dispatch(newAction as Action);
-  };
-}
-
-function useFilterState() {
-  const { filters, filtersOpen } = useSelector((state) => state.update);
-  return { filters, filtersOpen };
-}
-
-function useSearchState() {
-  const { searchResults, isSearching, term, inputFocus, infoDrawerOpen } =
-    useSelector((state) => state.update);
-  return { searchResults, isSearching, term, inputFocus, infoDrawerOpen };
-}
-
-function useMenuState() {
-  const { menuOpen, infoDrawerOpen } = useSelector((state) => state.update);
-  const menu = useSelector((state) => state.menu);
-  return { menuOpen, infoDrawerOpen, ...menu };
-}
-
-function useMapHasBools() {
-  const {
-    mapHasBedrock,
-    mapHasSatellite,
-    mapHasColumns,
-    mapHasFossils,
-    mapHasLines,
-  } = useSelector((state) => state.update);
-  return {
-    mapHasBedrock,
-    mapHasSatellite,
-    mapHasColumns,
-    mapHasFossils,
-    mapHasLines,
-  };
-}
-
-function useLegacyState() {
-  const legacyState = useSelector((state) => state.update);
-  return legacyState;
-}
-
-export {
-  useAppActions,
-  useFilterState,
-  useLegacyState,
-  useSearchState,
-  useMenuState,
-  useMapHasBools,
-};
+export default actionRunner;

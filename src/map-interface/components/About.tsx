@@ -2,7 +2,7 @@ import React from "react";
 import hyper from "@macrostrat/hyper";
 import { NavLink } from "react-router-dom";
 import Changelog from "../../changelog.mdx";
-import { useAppActions } from "../reducers";
+import { useAppActions } from "../app-state";
 import { useLocation } from "react-router";
 import styles from "./about.module.styl";
 

@@ -1,7 +1,7 @@
 import React from "react";
 import { Navbar, Button, InputGroup, Card, Spinner } from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
-import { useAppActions, useSearchState } from "../reducers";
+import { useAppActions, useSearchState } from "../app-state";
 import { useSelector } from "react-redux";
 import { useEffect } from "react";
 import { SubtleFilterText } from "./filters-panel";
@@ -75,7 +75,7 @@ function SearchResults() {
 
 function MenuButton() {
   const runAction = useAppActions();
-  const mapIsLoading = useSelector((d) => d.update.mapIsLoading);
+  const mapIsLoading = useSelector((state) => state.core.mapIsLoading);
 
   return h(Button, {
     icon: mapIsLoading ? h(Spinner, { size: 16 }) : "menu",
