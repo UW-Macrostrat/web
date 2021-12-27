@@ -4,13 +4,13 @@ import { menuReducer } from "./menu";
 import { Action } from "./actions";
 //import { reducer as globeReducer } from "@macrostrat/cesium-viewer/actions";
 //import { nadirCameraPosition } from "@macrostrat/cesium-viewer/position";
-import update from "./legacy";
+import coreReducer from "./core";
 
 const reducers = combineReducers({
   // list reducers here
   menu: menuReducer,
   //globe: globeReducer,
-  update,
+  update: coreReducer,
 });
 
 function getFloat(x: any, _default = 0): number {

@@ -1,4 +1,3 @@
-import { useDispatch } from "react-redux";
 import { MapAction } from "./map-state";
 
 //////////// Async Actions ///////////////
@@ -145,9 +144,4 @@ export type Action =
   | SET_ACTIVE_INDEX_MAP
   | MapAction;
 
-export function useActionDispatch(): React.Dispatch<Action> {
-  return useDispatch<React.Dispatch<Action>>();
-}
-
 export * from "./map-state";
-export * from "./fetch";
