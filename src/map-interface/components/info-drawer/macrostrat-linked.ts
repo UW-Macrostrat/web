@@ -67,7 +67,6 @@ function MacrostratAgeChipRenderer(props) {
 
 function MatchBasis(props) {
   const { source } = props;
-  console.log(source);
   if (!source.macrostrat.strat_names) return h("div");
 
   return h.if(source.macrostrat && source.macrostrat.strat_names)(

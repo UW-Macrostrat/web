@@ -17,7 +17,6 @@ function Filter({ filter }) {
     } else {
       newFilter.type = `all_${newFilter.type}`;
     }
-    console.log(newFilter);
     runAction({ type: "async-add-filter", filter: newFilter });
   };
 

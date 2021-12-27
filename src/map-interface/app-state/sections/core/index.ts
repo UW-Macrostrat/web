@@ -476,7 +476,6 @@ export function coreReducer(
         },
       };
     case "update-column-filters":
-      console.log("Filtered Columns", action.columns);
       return {
         ...state,
         filteredColumns: action.columns,
