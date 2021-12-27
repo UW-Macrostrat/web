@@ -6,7 +6,7 @@ import {
   stratNameConcepts,
   stratNameOrphans,
 } from "./fetch";
-import { Action } from "../actions";
+import { Action } from "../sections/core/types";
 
 // handler to reduce noise on case & switch
 // want this function to return an action object {type: "type", place/filter: fitler}

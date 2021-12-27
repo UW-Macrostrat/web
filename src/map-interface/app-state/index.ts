@@ -1,5 +1,4 @@
-import appReducer from "./reducers";
+import appReducer from "./sections";
 export default appReducer;
-export * from "./actions";
 export * from "./hooks";
-export * from "./reducers";
+export * from "./sections";

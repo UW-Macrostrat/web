@@ -1,5 +1,6 @@
-import { MapAction, MapState } from "./map-state";
+import { MapAction, MapState } from "../map";
 import { CancelToken } from "axios";
+export * from "../map";
 
 //////////// Async Actions ///////////////
 type FETCH_SEARCH_QUERY = { type: "fetch-search-query"; term: string };
@@ -89,7 +90,7 @@ type SET_ACTIVE_INDEX_MAP = { type: "set-active-index-map" };
 
 type UPDATE_STATE = { type: "update-state"; state: any };
 
-export type Action =
+export type CoreAction =
   | CLEAR_FILTERS
   | SET_INPUT_FOCUS
   | SET_SEARCH_TERM
@@ -179,5 +180,3 @@ export interface CoreState extends MapState, AsyncRequestState {
   filteredColumns: object;
   data: [];
 }
-
-export * from "./map-state";

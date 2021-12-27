@@ -1,7 +1,9 @@
-import { updateURI } from "../helpers";
-import { sum, timescale } from "../../utils";
-import { Action, MapState, MapBackend, MapLayer, CoreState } from "../actions";
+import { updateURI } from "../../helpers";
+import { sum, timescale } from "../../../utils";
+import { MapBackend, MapLayer } from "../map";
+import { CoreState, CoreAction } from "./types";
 import update, { Spec } from "immutability-helper";
+export * from "./types";
 
 const classColors = {
   sedimentary: "#FF8C00",
@@ -70,7 +72,7 @@ const defaultState: CoreState = {
 
 export function coreReducer(
   state: CoreState = defaultState,
-  action: Action
+  action: CoreAction
 ): CoreState {
   switch (action.type) {
     case "set-map-backend": {

@@ -1,8 +1,9 @@
 import { combineReducers } from "redux";
 import reduceReducers from "reduce-reducers";
-import { menuReducer, MenuState } from "./menu";
-import { Action } from "../actions";
+import { menuReducer, MenuState, MenuAction } from "./menu";
+import { CoreAction } from "./core/types";
 import { coreReducer, CoreState } from "./core";
+import { MapAction } from "./map";
 
 export type AppState = {
   core: CoreState;
@@ -29,5 +30,9 @@ function overallReducer(state: AppState, action: Action): AppState {
 
 const appReducer = reduceReducers(overallReducer, reducers);
 
-export * from "./menu";
+export type Action = CoreAction | MenuAction | MapAction;
+
 export default appReducer;
+export * from "./core";
+export * from "./menu";
+export * from "./map";

@@ -6,7 +6,7 @@ import {
   MapPosition,
   MapLayer,
   CoreState,
-} from "../actions";
+} from "../sections/core/types";
 
 const fmt = format(".3~f");
 const fmt2 = format(".2~f");

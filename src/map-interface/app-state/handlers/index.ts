@@ -9,7 +9,7 @@ import {
   asyncGetPBDBOccurences,
   mergePBDBResponses,
 } from "./fetch";
-import { Action } from "../actions";
+import { Action, CoreState } from "../sections/core";
 import axios from "axios";
 import { asyncFilterHandler } from "./filters";
 import { updateStateFromURI } from "../helpers";
@@ -21,7 +21,7 @@ function getCancelToken() {
 }
 
 async function actionRunner(
-  state,
+  state: CoreState,
   action: Action,
   dispatch = null
 ): Promise<Action | void> {

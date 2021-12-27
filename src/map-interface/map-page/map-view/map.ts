@@ -611,9 +611,9 @@ class Map extends Component<MapProps, {}> {
           });
         }
 
-        // if (nextProps.mapHasFossils === true) {
-        //   this.refreshPBDB();
-        // }
+        if (nextProps.mapHasFossils === true) {
+          this.refreshPBDB();
+        }
 
         return false;
       }
