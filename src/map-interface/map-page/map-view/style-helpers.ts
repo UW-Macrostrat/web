@@ -42,8 +42,7 @@ function setMapStyle(class_, map, mapStyle, props) {
           props.mapHasFossils
         ) {
           class_.refreshPBDB();
-        }
-        if (visibility !== showFossils) {
+        } else {
           map.setLayoutProperty(layer.id, "visibility", showFossils);
         }
       } else if (layer.source === "columns") {
