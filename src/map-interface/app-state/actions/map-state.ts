@@ -32,21 +32,14 @@ export enum MapLayer {
   BEDROCK = "bedrock",
 }
 
-export type MapState = {
+type MapInitialState = {
   mapPosition: MapPosition;
-  mapHasBedrock: boolean;
-  mapHasLines: boolean;
-  mapHasSatellite: boolean;
-  mapHasColumns: boolean;
-  mapHasFossils: boolean;
   mapBackend: MapBackend;
-  mapIsLoading: boolean;
+  mapLayers: Set<MapLayer>;
 };
 
-type MapHashData = {
-  layers: MapLayer[];
-  position: MapPosition;
-  backend: MapBackend;
+export type MapState = MapInitialState & {
+  mapIsLoading: boolean;
 };
 
 type MapMoved = { type: "map-moved"; data: MapPosition };
@@ -54,9 +47,11 @@ type SetMapBackend = { type: "set-map-backend"; backend: any };
 type GetInitialMapState = { type: "get-initial-map-state" };
 type MapLoading = { type: "map-loading" };
 type MapIdle = { type: "map-idle" };
+type ToggleLayer = { type: "toggle-map-layer"; layer: MapLayer };
+
 export type GotInitialMapState = {
   type: "got-initial-map-state";
-  data: MapHashData;
+  data: MapInitialState;
 };
 
 export type MapAction =
@@ -65,4 +60,5 @@ export type MapAction =
   | GotInitialMapState
   | SetMapBackend
   | MapLoading
-  | MapIdle;
+  | MapIdle
+  | ToggleLayer;

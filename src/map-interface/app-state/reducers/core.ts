@@ -1,7 +1,7 @@
 import { updateURI } from "../helpers";
 import { sum, timescale } from "../../utils";
-import { Action, MapState, MapBackend } from "../actions";
-import { CancelToken } from "axios";
+import { Action, MapState, MapBackend, MapLayer, CoreState } from "../actions";
+import update, { Spec } from "immutability-helper";
 
 const classColors = {
   sedimentary: "#FF8C00",
@@ -15,50 +15,6 @@ const classColors = {
   energy: "#333333",
 };
 
-interface MapCenterInfo {
-  type: string;
-  [key: string]: any;
-}
-interface AsyncRequestState {
-  // Events and tokens for xhr
-  fetchingMapInfo: boolean;
-  fetchingColumnInfo: boolean;
-  fetchingGdd: boolean;
-  isSearching: boolean;
-  term: string;
-  fetchingElevation: boolean;
-  fetchingPbdb: boolean;
-  mapInfoCancelToken: CancelToken | null;
-  columnInfoCancelToken: CancelToken | null;
-  gddCancelToken: CancelToken | null;
-  searchCancelToken: CancelToken | null;
-  elevationCancelToken: CancelToken | null;
-  pbdbCancelToken: CancelToken | null;
-}
-export interface CoreState extends MapState, AsyncRequestState {
-  initialLoadComplete: boolean;
-  menuOpen: boolean;
-  aboutOpen: boolean;
-  infoDrawerOpen: boolean;
-  infoDrawerExpanded: boolean;
-  isFetching: boolean;
-  elevationChartOpen: false;
-  infoMarkerLng: number;
-  infoMarkerLat: number;
-  mapInfo: any[];
-  columnInfo: object;
-  gddInfo: any[];
-  searchResults: any;
-  elevationData: any;
-  elevationMarkerLocation: any;
-  pbdbData: any[];
-  mapCenter: MapCenterInfo;
-  filtersOpen: boolean;
-  filters: any[];
-  filteredColumns: object;
-  data: [];
-}
-
 const defaultState: CoreState = {
   initialLoadComplete: false,
   menuOpen: false,
@@ -67,6 +23,7 @@ const defaultState: CoreState = {
   infoDrawerExpanded: false,
   elevationChartOpen: false,
   mapBackend: MapBackend.MAPBOX,
+  mapLayers: new Set([MapLayer.BEDROCK, MapLayer.LINES]),
   // Events and tokens for xhr
   isFetching: false,
   fetchingMapInfo: false,
@@ -92,13 +49,7 @@ const defaultState: CoreState = {
   elevationData: [],
   elevationMarkerLocation: [],
   pbdbData: [],
-
   mapIsLoading: false,
-  mapHasBedrock: true,
-  mapHasLines: true,
-  mapHasSatellite: false,
-  mapHasColumns: false,
-  mapHasFossils: false,
   mapCenter: {
     type: null,
   },
@@ -213,7 +164,6 @@ export function coreReducer(
       if (state.mapInfoCancelToken) {
         state.mapInfoCancelToken.cancel();
       }
-      console.log("MAP BEING QUERIED", action);
       return {
         ...state,
         infoMarkerLng: action.lng.toFixed(4),
@@ -382,16 +332,12 @@ export function coreReducer(
       columnSummary["unitIdx"] = unitIdx;
 
       return { ...state, fetchingColumnInfo: false, columnInfo: columnSummary };
-    case "toggle-bedrock":
-      return updateURI({ ...state, mapHasBedrock: !state.mapHasBedrock });
-    case "toggle-lines":
-      return updateURI({ ...state, mapHasLines: !state.mapHasLines });
-    case "toggle-satellite":
-      return updateURI({ ...state, mapHasSatellite: !state.mapHasSatellite });
-    case "toggle-columns":
-      return updateURI({ ...state, mapHasColumns: !state.mapHasColumns });
-    case "toggle-fossils":
-      return updateURI({ ...state, mapHasFossils: !state.mapHasFossils });
+    case "toggle-map-layer":
+      const op = state.mapLayers.has(action.layer) ? "$remove" : "$add";
+      const mapLayers: Spec<Set<MapLayer>, any> = {
+        [op]: [action.layer],
+      };
+      return updateURI(update(state, { mapLayers }));
     case "toggle-elevation-chart":
       return {
         ...state,
@@ -539,25 +485,11 @@ export function coreReducer(
       return updateURI({ ...state, mapPosition: action.data });
     case "update-state":
       return action.state;
-
     case "got-initial-map-state":
-      const { layers = [], position, backend } = action.data;
-      const mapHasSatellite = layers.includes("satellite");
-      const mapHasLines = layers.includes("lines");
-      const mapHasColumns = layers.includes("columns");
-      const mapHasFossils = layers.includes("fossils");
-      const mapHasBedrock = layers.includes("bedrock");
-
       const newState = {
         ...state,
+        ...action.data,
         initialLoadComplete: true,
-        mapBackend: backend ?? MapBackend.MAPBOX,
-        mapHasSatellite,
-        mapHasBedrock,
-        mapHasLines,
-        mapHasColumns,
-        mapHasFossils,
-        mapPosition: position,
       };
       // This causes some hilarious problems...
       return updateURI(newState);

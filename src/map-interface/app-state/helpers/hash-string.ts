@@ -5,30 +5,17 @@ import {
   GotInitialMapState,
   MapPosition,
   MapLayer,
+  CoreState,
 } from "../actions";
 
 const fmt = format(".3~f");
 const fmt2 = format(".2~f");
 const fmtInt = format(".0f");
 
-function updateURI(state: any) {
-  let layers = [
-    { layer: "bedrock", haz: state.mapHasBedrock },
-    { layer: "lines", haz: state.mapHasLines },
-    { layer: "satellite", haz: state.mapHasSatellite },
-    { layer: "fossils", haz: state.mapHasFossils },
-    { layer: "columns", haz: state.mapHasColumns },
-  ];
-
-  let args: any = {};
-
-  args.layers = layers
-    .filter((l) => {
-      if (l.haz) return l;
-    })
-    .map((l) => {
-      return l.layer;
-    });
+function updateURI(state: CoreState) {
+  let args: object = {
+    layers: Array.from(state.mapLayers),
+  };
 
   if (args.layers.length == 0) {
     // Special case for no layers
@@ -61,7 +48,6 @@ function updateURI(state: any) {
   if (pitch != 0) {
     args.e = fmtInt(pos.pitch);
   }
-  console.log(args);
   setHashString(args, { arrayFormat: "comma", sort: false });
   return state;
 }
@@ -114,6 +100,15 @@ function _fmt(x: string | number | string[]) {
   return parseFloat(x.toString());
 }
 
+function isValidLayer(test: string): test is MapLayer {
+  const vals: string[] = Object.values(MapLayer);
+  return vals.includes(test);
+}
+
+function validateLayers(layers: string[]): Set<MapLayer> {
+  return new Set(layers.filter(isValidLayer));
+}
+
 function updateStateFromURI(state): GotInitialMapState | void {
   // Get the default map state
   try {
@@ -129,6 +124,8 @@ function updateStateFromURI(state): GotInitialMapState | void {
     if (layers == ["none"]) {
       layers = [];
     }
+
+    const mapLayers = validateLayers(layers);
 
     const lng = _fmt(x);
     const lat = _fmt(y);
@@ -166,13 +163,14 @@ function updateStateFromURI(state): GotInitialMapState | void {
       target,
     };
 
-    const mapState = {
-      position,
-      layers: layers as MapLayer[],
-      backend: MapBackend.MAPBOX3,
+    return {
+      type: "got-initial-map-state",
+      data: {
+        mapPosition: position,
+        mapLayers,
+        mapBackend: MapBackend.MAPBOX3,
+      },
     };
-
-    return { type: "got-initial-map-state", data: mapState };
   } catch (e) {
     console.error("Invalid map state:", e);
   }

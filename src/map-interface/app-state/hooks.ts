@@ -1,6 +1,7 @@
 import { Action } from "./actions";
 import actionRunner from "./handlers";
 import { useStore, useSelector, useDispatch } from "react-redux";
+import { AppState } from ".";
 
 function useActionDispatch() {
   return useDispatch<React.Dispatch<Action>>();
@@ -34,4 +35,14 @@ function useMenuState() {
   return { menuOpen, infoDrawerOpen, ...menu };
 }
 
-export { useAppActions, useFilterState, useSearchState, useMenuState };
+function useAppState<T>(selectorFn: (state: AppState) => T): T {
+  return useSelector<AppState>(selectorFn) as T;
+}
+
+export {
+  useAppActions,
+  useFilterState,
+  useSearchState,
+  useMenuState,
+  useAppState,
+};

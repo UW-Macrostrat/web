@@ -1,7 +1,6 @@
 import { Card, Spinner } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import { useAppActions } from "~/map-interface/app-state";
-
 import { InfoDrawerHeader } from "./header";
 import { FossilCollections } from "./fossil-collections";
 import { GeologicMapInfo } from "./geo-map";

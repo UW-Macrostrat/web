@@ -1,4 +1,5 @@
-import { MapAction } from "./map-state";
+import { MapAction, MapState } from "./map-state";
+import { CancelToken } from "axios";
 
 //////////// Async Actions ///////////////
 type FETCH_SEARCH_QUERY = { type: "fetch-search-query"; term: string };
@@ -56,12 +57,6 @@ type START_PBDB_QUERY = { type: "start-pbdb-query"; cancelToken: any };
 type UPDATE_PBDB_QUERY = { type: "update-pbdb-query"; cancelToken: any };
 type RECEIVED_PBDB_QUERY = { type: "received-pbdb-query"; data: any };
 type RESET_PBDB = { type: "reset-pbdb" };
-
-type TOGGLE_BEDROCK = { type: "toggle-bedrock" };
-type TOGGLE_LINES = { type: "toggle-lines" };
-type TOGGLE_SATELLITE = { type: "toggle-satellite" };
-type TOGGLE_COLUMNS = { type: "toggle-columns" };
-type TOGGLE_FOSSILS = { type: "toggle-fossils" };
 
 type SET_INPUT_FOCUS = {
   type: "set-input-focus";
@@ -130,11 +125,6 @@ export type Action =
   | UPDATE_PBDB_QUERY
   | RECEIVED_PBDB_QUERY
   | RESET_PBDB
-  | TOGGLE_BEDROCK
-  | TOGGLE_LINES
-  | TOGGLE_SATELLITE
-  | TOGGLE_COLUMNS
-  | TOGGLE_FOSSILS
   | START_SEARCH_QUERY
   | RECEIVED_SEARCH_QUERY
   | GO_TO_PLACE
@@ -143,5 +133,51 @@ export type Action =
   | UPDATE_ELEVATION_MARKER
   | SET_ACTIVE_INDEX_MAP
   | MapAction;
+
+interface AsyncRequestState {
+  // Events and tokens for xhr
+  // NOTE: we should really improve some of this token infrastructure
+  fetchingMapInfo: boolean;
+  fetchingColumnInfo: boolean;
+  fetchingGdd: boolean;
+  isSearching: boolean;
+  term: string;
+  fetchingElevation: boolean;
+  fetchingPbdb: boolean;
+  mapInfoCancelToken: CancelToken | null;
+  columnInfoCancelToken: CancelToken | null;
+  gddCancelToken: CancelToken | null;
+  searchCancelToken: CancelToken | null;
+  elevationCancelToken: CancelToken | null;
+  pbdbCancelToken: CancelToken | null;
+}
+
+interface MapCenterInfo {
+  type: string;
+  [key: string]: any;
+}
+export interface CoreState extends MapState, AsyncRequestState {
+  initialLoadComplete: boolean;
+  menuOpen: boolean;
+  aboutOpen: boolean;
+  infoDrawerOpen: boolean;
+  infoDrawerExpanded: boolean;
+  isFetching: boolean;
+  elevationChartOpen: false;
+  infoMarkerLng: number;
+  infoMarkerLat: number;
+  mapInfo: any[];
+  columnInfo: object;
+  gddInfo: any[];
+  searchResults: any;
+  elevationData: any;
+  elevationMarkerLocation: any;
+  pbdbData: any[];
+  mapCenter: MapCenterInfo;
+  filtersOpen: boolean;
+  filters: any[];
+  filteredColumns: object;
+  data: [];
+}
 
 export * from "./map-state";

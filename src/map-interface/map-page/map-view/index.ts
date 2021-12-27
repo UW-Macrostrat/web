@@ -1,6 +1,10 @@
 import { useSelector } from "react-redux";
 import { forwardRef, useRef } from "react";
-import { useAppActions, MapPosition } from "~/map-interface/app-state";
+import {
+  useAppActions,
+  MapPosition,
+  MapLayer,
+} from "~/map-interface/app-state";
 import Map from "./map";
 import h from "@macrostrat/hyper";
 import { useEffect } from "react";
@@ -48,11 +52,7 @@ function MapContainer(props) {
   const {
     filters,
     filteredColumns,
-    mapHasBedrock,
-    mapHasLines,
-    mapHasSatellite,
-    mapHasColumns,
-    mapHasFossils,
+    mapLayers,
     mapCenter,
     elevationChartOpen,
     elevationData,
@@ -84,7 +84,7 @@ function MapContainer(props) {
   }, [mapRef]);
 
   useEffect(() => {
-    if (mapHasColumns) {
+    if (mapLayers.has(MapLayer.COLUMNS)) {
       runAction({ type: "get-filtered-columns" });
     }
   }, [filters]);
@@ -92,11 +92,11 @@ function MapContainer(props) {
   return h(_Map, {
     filters,
     filteredColumns,
-    mapHasBedrock,
-    mapHasLines,
-    mapHasSatellite,
-    mapHasColumns,
-    mapHasFossils,
+    mapHasBedrock: mapLayers.has(MapLayer.BEDROCK),
+    mapHasLines: mapLayers.has(MapLayer.LINES),
+    mapHasSatellite: mapLayers.has(MapLayer.SATELLITE),
+    mapHasColumns: mapLayers.has(MapLayer.COLUMNS),
+    mapHasFossils: mapLayers.has(MapLayer.FOSSILS),
     mapCenter,
     elevationChartOpen,
     elevationData,
