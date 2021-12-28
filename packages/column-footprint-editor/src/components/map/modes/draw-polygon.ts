@@ -1,45 +1,122 @@
+import * as CommonSelectors from "@mapbox/mapbox-gl-draw/src/lib/common_selectors";
+import {
+  geojsonTypes,
+  meta,
+  activeStates,
+} from "@mapbox/mapbox-gl-draw/src/constants";
+import doubleClickZoom from "@mapbox/mapbox-gl-draw/src/lib/double_click_zoom";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
 import * as Constants from "@mapbox/mapbox-gl-draw/src/constants";
+import { distance_between_points } from "../utils";
 
-let DrawPolygon = MapboxDraw.modes.draw_polygon;
+let DrawPolyMult = MapboxDraw.modes.draw_polygon;
 
-DrawPolygon.clickAnywhere = function(state, e) {
-  const { x, y } = e.point;
-
-  let { lng: x1, lat: y1 } = this.map.unproject([x, y]);
-  let { lng: x2, lat: y2 } = this.map.unproject([x, y - 100]);
-  let { lng: x3, lat: y3 } = this.map.unproject([x - 100, y - 100]);
-  let { lng: x4, lat: y4 } = this.map.unproject([x - 100, y]);
-  const bbox = [
-    [
-      [x1, y1],
-      [x2, y2],
-      [x3, y3],
-      [x4, y4],
-      [x1, y1],
-    ],
-  ];
-
-  var line = this.newFeature({
-    type: Constants.geojsonTypes.FEATURE,
+DrawPolyMult.onSetup = function(opts) {
+  const line = this.newFeature({
+    type: geojsonTypes.FEATURE,
     properties: {},
     geometry: {
-      type: Constants.geojsonTypes.MULTI_LINE_STRING,
-      coordinates: bbox,
+      type: geojsonTypes.MULTI_LINE_STRING,
+      coordinates: [[]],
     },
   });
 
-  const obj = {
-    action: "draw.create",
-    feature: line.toGeoJSON(),
-  };
-  this.map.addToChangeSet(obj);
-
   this.addFeature(line);
 
-  this.changeMode("simple_select");
+  this.clearSelectedFeatures();
+  doubleClickZoom.disable(this);
+
+  return { line, canDraw: false, n: 6 };
 };
 
-export { DrawPolygon };
+DrawPolyMult.createNPolygon = function(x, y, n, r) {
+  // n is number of sides
+  // x is the xoffset
+  // y is the yoffset
+  // r is radius
+
+  const polygon = [];
+
+  for (let i = 0; i <= n; i++) {
+    const pointX = r * Math.cos(i * ((2 * Math.PI) / n)) + x;
+    const pointY = r * Math.sin(i * ((2 * Math.PI) / n)) + y;
+    const { lng, lat } = this.map.unproject([pointX, pointY]);
+    polygon.push([lng, lat]);
+  }
+  return [polygon];
+};
+
+DrawPolyMult.onMouseMove = function(state, e) {
+  if (!state.canDraw) return;
+
+  console.log("Drag State", state);
+  console.log("Drag Event", e);
+
+  const { n } = state;
+  const { x, y } = state.centerPoint;
+
+  const buffer =
+    distance_between_points({ point1: e.point, point2: state.centerPoint }) +
+    10;
+
+  const bbox = this.createNPolygon(x, y, n, buffer);
+
+  state.line.setCoordinates(bbox);
+};
+
+DrawPolyMult.clickAnywhere = function(state, e) {
+  state.canDraw = true;
+  state.centerPoint = e.point;
+};
+
+DrawPolyMult.onKeyUp = function(state, e) {
+  if (CommonSelectors.isEscapeKey(e)) {
+    this.deleteFeature([state.line.id], { silent: true });
+    this.changeMode(Constants.modes.SIMPLE_SELECT);
+  } else if (CommonSelectors.isEnterKey(e)) {
+    this.changeMode(Constants.modes.SIMPLE_SELECT);
+  } else {
+    if (e.key == "a") {
+      state.n += 1;
+    } else if (e.key == "s" && state.n > 3) {
+      state.n -= 1;
+    }
+  }
+};
+
+DrawPolyMult.onStop = function(state) {
+  this.updateUIClasses({ mouse: Constants.cursors.NONE });
+  doubleClickZoom.enable(this);
+  this.activateUIButton();
+
+  // check to see if we've deleted this feature
+  if (this.getFeature(state.line.id) === undefined) return;
+
+  //remove last added coordinate
+  if (state.line.isValid()) {
+    this.map.fire(Constants.events.CREATE, {
+      features: [state.line.toGeoJSON()],
+    });
+    const obj = {
+      action: "draw.create",
+      feature: state.line.toGeoJSON(),
+    };
+    this.map.addToChangeSet(obj);
+  } else {
+    this.deleteFeature([state.line.id], { silent: true });
+    this.changeMode(Constants.modes.SIMPLE_SELECT, {}, { silent: true });
+  }
+};
+
+DrawPolyMult.toDisplayFeatures = function(state, geojson, display) {
+  const isActiveLine = geojson.properties.id === state.line.id;
+  geojson.properties.active = isActiveLine
+    ? activeStates.ACTIVE
+    : activeStates.INACTIVE;
+  geojson.properties.meta = meta.FEATURE;
+  display(geojson);
+};
+
+export { DrawPolyMult };
