@@ -14,7 +14,6 @@ import {
 import { ImageryLayer } from "resium";
 import { useEffect, useMemo } from "react";
 import MVTImageryProvider from "cesium-vector-provider/src";
-import { coreStyle } from "./map-styles";
 import reliefShading from "./map-styles/relief-shading";
 import {
   getHashString,
@@ -28,6 +27,7 @@ import maplibre from "maplibre-gl/dist/maplibre-gl-dev";
 import { useAppActions } from "../reducers";
 import { useCallback } from "react";
 import { positionClass } from "@blueprintjs/core/lib/esm/common/classes";
+import { mapStyle, coreStyle } from "./map-styles";
 
 maplibre.accessToken =
   "pk.eyJ1IjoiamN6YXBsZXdza2kiLCJhIjoiY2szNXA5OWcxMDN2bzNtcnI1cWd1ZXJpYiJ9.Dd5GKlrPhg969y1ayY32cg";
@@ -35,7 +35,7 @@ maplibre.accessToken =
 const BaseGeologyLayer = ({ enabled = true, ...rest }) => {
   const provider = useMemo(() => {
     return new MVTImageryProvider({
-      style: coreStyle,
+      style: reliefShading,
       maximumZoom: 13,
       tileSize: 512,
     });
@@ -130,10 +130,10 @@ function MacrostratCesiumView(props) {
       flyTo: globe.flyToProps,
     },
     [
-      h(BaseLayer, { enabled: !hasSatellite }),
+      //h(BaseLayer, { enabled: !hasSatellite }),
       //h(MacrostratHillshadeLayer),
       h(MacrostratSatelliteLayer),
-      h(GeologyLayer, { alpha: 0.4 }),
+      h(GeologyLayer, { alpha: 1 }),
     ]
   );
 }

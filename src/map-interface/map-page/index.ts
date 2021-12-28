@@ -14,7 +14,7 @@ import { useAppActions, useSearchState } from "../reducers";
 import { MapBackend } from "../reducers/actions";
 import styles from "./main.module.styl";
 import { useLocation } from "react-router-dom";
-import { PerformanceWatcher } from "../performance";
+import { usePerformanceWatcher } from "../performance";
 
 const h = hyper.styled(styles);
 
@@ -27,6 +27,12 @@ const MapView = (props: { backend: MapBackend }) => {
   const location = useLocation();
   const runAction = useAppActions();
   const mapBackend = useSelector((d) => d.update.mapBackend);
+  const performanceResetToken = useSelector((d) => d.performance.resetToken);
+  // Reset token allows observer to be regenerated periodically
+  const performanceWatch = usePerformanceWatcher(
+    runAction,
+    performanceResetToken
+  );
 
   let backend = MapBackend.MAPBOX3;
   if (location.pathname.includes("/globe")) {
@@ -44,7 +50,6 @@ const MapView = (props: { backend: MapBackend }) => {
   return h([
     h.if(shouldRender(MapBackend.CESIUM))(CesiumView),
     h.if(shouldRender(MapBackend.MAPBOX3))(MapContainer, { use3D }),
-    h(PerformanceWatcher, { dispatch: runAction }),
   ]);
 };
 

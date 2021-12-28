@@ -29,6 +29,7 @@ export type PerformanceAction = ResetPerformanceCounter | AddPerformanceData;
 
 export type PerformanceState = ResourceCounts & {
   steps: MapPerformanceStep[];
+  resetToken: number;
 };
 
 const emptyStep = (name?: string): MapPerformanceStep => {
@@ -44,6 +45,7 @@ const emptyStep = (name?: string): MapPerformanceStep => {
 const initialState: PerformanceState = {
   totalSize: 0,
   requests: [],
+  resetToken: 0,
   steps: [emptyStep()],
 };
 
@@ -61,7 +63,10 @@ export function performanceReducer(
       if (state.steps[currentStepIx].requests.length == 0) {
         steps = { [currentStepIx]: { $set: emptyStep(action.name) } };
       }
-      return update(state, { steps });
+      return update(state, {
+        steps,
+        resetToken: { $set: state.resetToken + 1 },
+      });
     case "add-performance-data":
       const { data } = action;
       let totalSize = 0;
@@ -99,20 +104,21 @@ function buildPerformanceData(data: PerformanceResourceTiming): RequestData {
   };
 }
 
-export function PerformanceWatcher({
-  dispatch,
-}: {
-  dispatch: Dispatch<PerformanceAction>;
-}) {
+export function usePerformanceWatcher(
+  dispatch: Dispatch<PerformanceAction>,
+  resetToken: 0
+) {
   const observerRef = useRef<PerformanceObserver>();
   const callback = useCallback(
     (data: PerformanceObserverEntryList) => {
+      console.log("Adding performance data");
       dispatch({
         type: "add-performance-data",
         data: data.getEntries().map(buildPerformanceData),
       });
+      performance.clearResourceTimings();
     },
-    [dispatch]
+    [dispatch, resetToken]
   );
 
   useEffect(() => {
@@ -121,6 +127,7 @@ export function PerformanceWatcher({
     observer.observe({ entryTypes: ["resource"] });
     observerRef.current = observer;
     return () => observerRef.current.disconnect();
-  }, [callback]);
-  return null;
+  }, [callback, resetToken]);
+
+  return [observerRef];
 }
