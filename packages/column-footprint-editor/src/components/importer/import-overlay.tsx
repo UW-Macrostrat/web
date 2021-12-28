@@ -274,7 +274,6 @@ function ImportDialog(props) {
   return (
     <Dialog
       isOpen={state.importOverlayOpen}
-      isCloseButtonShown={isCloseButtonShown}
       canOutsideClickClose={isCloseButtonShown}
       canEscapeKeyClose={isCloseButtonShown}
       onClose={onClose}
