@@ -57,6 +57,18 @@ MultVertSimpleSelect.fireUpdate = function() {
 
 // need to just pass off it there aren't other verticies at point
 MultVertSimpleSelect.clickOnVertex = function(state, e) {
+  if (e.originalEvent.shiftKey) {
+    this.changeMode("direct_select", {
+      featureId: e.featureTarget.properties.parent,
+      coordPath: e.featureTarget.properties.coord_path,
+      startPos: e.lngLat,
+      toMoveFeatures: state.toMoveFeatures,
+      toMoveCoordPaths: state.toMoveCoordPaths,
+      movedCoordPath: state.movedCoordPath,
+    });
+    return;
+  }
+
   // this block gets features other than the clicked one at point
   var point = this.map.project(e.lngLat);
   const idsAtPoint = this._ctx.api.getFeatureIdsAt(point);
