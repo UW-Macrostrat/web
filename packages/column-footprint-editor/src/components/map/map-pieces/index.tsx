@@ -2,12 +2,12 @@ export * from "./properties";
 export * from "./map-legend";
 export * from "./add-geom";
 import mapboxgl from "mapbox-gl";
-import { setWindowHash, locationFromHash } from "../utils";
+import { setWindowHash } from "../utils";
 import {
   SnapLineMode,
   MultVertDirectSelect,
   MultVertSimpleSelect,
-  DrawPolygon,
+  DrawPolyMult,
 } from "../modes";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import { SnapModeDrawStyles } from "mapbox-gl-draw-snap-mode";
@@ -52,13 +52,14 @@ function editModeMap(map, state) {
       {
         direct_select: MultVertDirectSelect,
         simple_select: MultVertSimpleSelect,
-        draw_polygon: DrawPolygon,
+        draw_polygon: DrawPolyMult,
       },
       MapboxDraw.modes,
       { draw_line_string: SnapLineMode }
     ),
     styles: SnapModeDrawStyles,
     snap: true,
+    clickBuffer: 10,
     snapOptions: {
       snapPx: 25,
     },
@@ -66,7 +67,7 @@ function editModeMap(map, state) {
 
   map.addControl(Draw, "top-left");
 
-  var featureIds = Draw.add(state.lines);
+  Draw.add(state.lines);
 
   map.on("click", async function(e) {
     console.log("Mode", Draw.getMode());
