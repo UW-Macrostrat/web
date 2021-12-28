@@ -24,7 +24,7 @@ import {
   getInitialPosition,
 } from "@macrostrat/cesium-viewer/query-string";
 import maplibre from "maplibre-gl/dist/maplibre-gl-dev";
-import { useAppActions } from "../reducers";
+import { useAppActions, MapLayer, useAppState } from "../app-state";
 import { useCallback } from "react";
 import { positionClass } from "@blueprintjs/core/lib/esm/common/classes";
 import { mapStyle, coreStyle } from "./map-styles";
@@ -47,12 +47,16 @@ const BaseGeologyLayer = ({ enabled = true, ...rest }) => {
 };
 
 const GeologyLayer = ({ visibleMaps = null, ...rest }) => {
-  const hasGeology = useSelector((state) => state.update.mapHasBedrock);
+  const hasGeology = useAppState((state) =>
+    state.core.mapLayers.has(MapLayer.BEDROCK)
+  );
   return h(BaseGeologyLayer, { enabled: hasGeology, ...rest });
 };
 
 function MacrostratSatelliteLayer() {
-  const hasSatellite = useSelector((state) => state.update.mapHasSatellite);
+  const hasSatellite = useAppState((state) =>
+    state.core.mapLayers.has(MapLayer.SATELLITE)
+  );
   if (!hasSatellite) return null;
   return h(SatelliteLayer);
 }
@@ -79,9 +83,11 @@ function MacrostratCesiumView(props) {
   const displayQuality = useSelector((state) => state.globe.displayQuality);
   const globe = useSelector((state) => state.globe);
 
-  const showInspector = useSelector((state) => state.globe.showInspector);
-  const hasSatellite = useSelector((state) => state.update.mapHasSatellite);
-  const mapIsLoading = useSelector((state) => state.update.mapIsLoading);
+  const showInspector = useAppState((state) => state.globe.showInspector);
+  const hasSatellite = useAppState((state) =>
+    state.core.mapLayers.has(MapLayer.SATELLITE)
+  );
+  const mapIsLoading = useAppState((state) => state.core.mapIsLoading);
 
   const onTileLoadEvent = useCallback(
     (count) => {

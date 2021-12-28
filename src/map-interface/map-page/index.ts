@@ -10,8 +10,7 @@ import { ButtonGroup, Button, Spinner } from "@blueprintjs/core";
 import { ErrorBoundary } from "@macrostrat/ui-components";
 import { useSelector, useDispatch } from "react-redux";
 import loadable from "@loadable/component";
-import { useAppActions, useSearchState } from "../reducers";
-import { MapBackend } from "../reducers/actions";
+import { useAppActions, useSearchState, MapBackend } from "../app-state";
 import styles from "./main.module.styl";
 import { useLocation } from "react-router-dom";
 import { usePerformanceWatcher } from "../performance";
@@ -26,7 +25,7 @@ export function CesiumView(props) {
 const MapView = (props: { backend: MapBackend }) => {
   const location = useLocation();
   const runAction = useAppActions();
-  const mapBackend = useSelector((d) => d.update.mapBackend);
+  const mapBackend = useSelector((d) => d.core.mapBackend);
   const performanceResetToken = useSelector((d) => d.performance.resetToken);
   // Reset token allows observer to be regenerated periodically
   const performanceWatch = usePerformanceWatcher(

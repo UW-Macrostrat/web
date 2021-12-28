@@ -119,7 +119,7 @@ class Map extends Component<MapProps, {}> {
     // disable map rotation using touch rotation gesture
     this.map.touchZoomRotate.disableRotation();
 
-    this.map.on("sourcedataloading", () => {
+    this.map.on("sourcedataloading", (evt) => {
       if (this.props.mapIsLoading) return;
       this.props.runAction({ type: "map-loading" });
     });

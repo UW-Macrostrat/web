@@ -5,7 +5,7 @@ import { LinkButton } from "@macrostrat/router-components";
 import { GlobeSettings } from "@macrostrat/cesium-viewer/settings";
 import { useLocation } from "react-router";
 import { useSelector } from "react-redux";
-import { MapBackend } from "../reducers/actions";
+import { MapBackend } from "~/map-interface/app-state";
 import { PerformanceDisplay } from "../performance";
 
 function useMapBackend() {

@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 import loadable from "@loadable/component";
 import { Spinner } from "@blueprintjs/core";
 import "./styles/index.styl";
-import { useAppActions } from "./map-interface/reducers";
+import { useAppActions } from "~/map-interface/app-state";
 
 const _ColumnPage = loadable(import("./columns"));
 const ColumnPage = () => h(Suspense, { fallback: h(Spinner) }, h(_ColumnPage));
@@ -21,7 +21,7 @@ const GlobeDevPage = () =>
 
 const App = () => {
   const runAction = useAppActions();
-  const loaded = useSelector((state) => state.update.initialLoadComplete);
+  const loaded = useSelector((state) => state.core.initialLoadComplete);
   useEffect(() => {
     runAction({ type: "get-initial-map-state" });
   }, []);

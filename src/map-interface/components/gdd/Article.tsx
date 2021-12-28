@@ -38,11 +38,16 @@ function Article(props) {
           {year.length ? " " + year + ". " : ""}
         </p>
         <a href={props.data.url} target="_blank" className="title-link">
-          <strong style={{ lineHeight: "24px" }}>{props.data.title}.</strong>
+          <strong>{props.data.title}.</strong>
         </a>
 
         <span>
-          <Button onClick={toggleExpand} minimal={true} icon={iconName} />
+          <Button
+            onClick={toggleExpand}
+            minimal={true}
+            icon={iconName}
+            className="flat-btn"
+          />
         </span>
       </div>
       <Collapse isOpen={expanded}>
