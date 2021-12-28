@@ -101,7 +101,13 @@ module.exports = {
       "~": path.resolve(__dirname, "src"),
       //"@macrostrat/cesium-viewer": packageSrc("cesium-viewer"),
       "@macrostrat/column-components": packageSrc("column-components"),
-      "@macrostrat/ui-components": packageSrc("ui-components"),
+      "@macrostrat/ui-components": path.join(
+        __dirname,
+        "ui-components",
+        "packages",
+        "ui-components",
+        "src"
+      ),
     },
   },
   entry: {

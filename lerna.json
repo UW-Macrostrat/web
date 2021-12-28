@@ -1,4 +1,4 @@
 {
-  "packages": ["packages/*"],
+  "packages": ["packages/*", "ui-components/packages/*"],
   "version": "independent"
 }

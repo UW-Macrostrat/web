@@ -1,5 +1,5 @@
 [submodule "bundledDeps/ui-components"]
-	path = packages/ui-components
+	path = ui-components
 	url = git://github.com/UW-Macrostrat/ui-components.git
 [submodule "packages/column-components"]
 	path = packages/column-components
