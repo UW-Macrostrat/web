@@ -72,7 +72,7 @@ type AppState = {
 function overallReducer(state: AppState, action: Action) {
   let pos: MapPosition;
   if (action.type === "got-initial-map-state") {
-    pos = action.data.position;
+    pos = action.data.mapPosition;
   } else if (action.type == "map-moved") {
     pos = action.data;
   }

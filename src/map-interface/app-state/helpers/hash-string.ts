@@ -12,8 +12,17 @@ const fmt = format(".3~f");
 const fmt2 = format(".2~f");
 const fmtInt = format(".0f");
 
+interface HashParams {
+  x?: string;
+  y?: string;
+  z?: string;
+  e?: string;
+  a?: string;
+  layers?: string[];
+}
+
 function updateURI(state: CoreState) {
-  let args: object = {
+  let args: HashParams = {
     layers: Array.from(state.mapLayers),
   };
 
@@ -112,7 +121,7 @@ function validateLayers(layers: string[]): Set<MapLayer> {
 function updateStateFromURI(state): GotInitialMapState | void {
   // Get the default map state
   try {
-    const hashData = getHashString(window.location.hash) ?? {};
+    const hashData: HashParams = getHashString(window.location.hash) ?? {};
 
     let { layers = ["bedrock", "lines"] } = hashData;
     const { x = 16, y = 23, z = 1.5, a = 0, e = 0 } = hashData;

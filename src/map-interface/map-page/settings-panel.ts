@@ -8,7 +8,7 @@ import { MapBackend, useAppState } from "~/map-interface/app-state";
 import { PerformanceDisplay } from "../performance";
 
 function useMapBackend() {
-  return useAppState((d) => d.core.mapBackend.current);
+  return useAppState((d) => d.core.mapBackend);
 }
 
 function MapTypeButton(props) {
