@@ -4,12 +4,11 @@ import h from "@macrostrat/hyper";
 import { LinkButton } from "@macrostrat/router-components";
 import { GlobeSettings } from "@macrostrat/cesium-viewer/settings";
 import { useLocation } from "react-router";
-import { useSelector } from "react-redux";
-import { MapBackend } from "~/map-interface/app-state";
+import { MapBackend, useAppState } from "~/map-interface/app-state";
 import { PerformanceDisplay } from "../performance";
 
 function useMapBackend() {
-  return useSelector((d) => d.update.mapBackend.current);
+  return useAppState((d) => d.core.mapBackend.current);
 }
 
 function MapTypeButton(props) {
@@ -24,7 +23,7 @@ function MapTypeButton(props) {
 
 const SettingsPanel = () => {
   const globeActive = useMapBackend() == MapBackend.CESIUM;
-  const data = useSelector((d) => d.performance);
+  const data = useAppState((d) => d.performance);
   return h("div.settings", [
     h(MapTypeButton),
     h.if(globeActive)(GlobeSettings),

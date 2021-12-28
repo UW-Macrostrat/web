@@ -63,7 +63,7 @@ function translateCameraPosition(pos: MapPosition): CameraParams {
 }
 
 type AppState = {
-  update: CoreState;
+  core: CoreState;
   globe: GlobeState;
   performance: PerformanceState;
   menu: MenuState;
@@ -83,8 +83,8 @@ function overallReducer(state: AppState, action: Action) {
     //console.log("Set globe position", destination);
     return {
       ...state,
-      update: {
-        ...state.update,
+      core: {
+        ...state.core,
         mapPosition: pos,
       },
       globe: {
@@ -94,13 +94,13 @@ function overallReducer(state: AppState, action: Action) {
     };
   }
 
-  if (action.type == "map-loading" && !state.update.mapIsLoading) {
+  if (action.type == "map-loading" && !state.core.mapIsLoading) {
     return appReducer(state, {
       type: "reset-performance-counter",
       name: "map-loading",
     });
   }
-  if (action.type == "map-idle" && state.update.mapIsLoading) {
+  if (action.type == "map-idle" && state.core.mapIsLoading) {
     return appReducer(state, { type: "reset-performance-counter" });
   }
 

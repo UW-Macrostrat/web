@@ -8,9 +8,14 @@ import InfoDrawer from "../components/info-drawer";
 import ElevationChart from "../components/elevation-chart";
 import { ButtonGroup, Button, Spinner } from "@blueprintjs/core";
 import { ErrorBoundary } from "@macrostrat/ui-components";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import loadable from "@loadable/component";
-import { useAppActions, useSearchState, MapBackend } from "../app-state";
+import {
+  useAppActions,
+  useSearchState,
+  MapBackend,
+  useAppState,
+} from "../app-state";
 import styles from "./main.module.styl";
 import { useLocation } from "react-router-dom";
 import { usePerformanceWatcher } from "../performance";
@@ -25,8 +30,8 @@ export function CesiumView(props) {
 const MapView = (props: { backend: MapBackend }) => {
   const location = useLocation();
   const runAction = useAppActions();
-  const mapBackend = useSelector((d) => d.core.mapBackend);
-  const performanceResetToken = useSelector((d) => d.performance.resetToken);
+  const mapBackend = useAppState((d) => d.core.mapBackend);
+  const performanceResetToken = useAppState((d) => d.performance.resetToken);
   // Reset token allows observer to be regenerated periodically
   const performanceWatch = usePerformanceWatcher(
     runAction,
@@ -42,8 +47,7 @@ const MapView = (props: { backend: MapBackend }) => {
     runAction({ type: "set-map-backend", backend });
   }, [backend]);
 
-  const shouldRender = (bkg: MapBackend) =>
-    bkg == mapBackend.current || bkg == mapBackend.previous;
+  const shouldRender = (bkg: MapBackend) => bkg == mapBackend;
 
   const use3D = backend == MapBackend.MAPBOX3;
   return h([
@@ -53,7 +57,7 @@ const MapView = (props: { backend: MapBackend }) => {
 };
 
 const MapTypeSelector = () => {
-  const backend = useSelector((d) => d.update.mapBackend.current);
+  const backend = useAppState((d) => d.core.mapBackend);
   const dispatch = useDispatch();
 
   const setBackend = (backend) => {
