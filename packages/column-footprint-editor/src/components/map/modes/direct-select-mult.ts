@@ -35,7 +35,6 @@ MultVertDirectSelect.onSetup = function(opts) {
     toMoveFeatures,
     newCoord: undefined,
   };
-  console.log("DIRECT SELECT", state);
 
   this.setSelectedCoordinates(
     this.pathsToCoordinates(featureId, state.selectedCoordPaths)
