@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useReducer, useEffect } from "react";
-import { Overlay, Button, Card, Navbar, FormGroup } from "@blueprintjs/core";
+import React, { useContext } from "react";
+import { Navbar, Popover } from "@blueprintjs/core";
 import { OverlayBox, SaveButton } from "../blueprint";
 import {
   ModelEditor,
@@ -23,7 +23,13 @@ import { TwoIdentities } from "./two-identities";
 import { ColumnGroup } from "./column-groups";
 import { base } from "../../context/env";
 
-function ColumnNavBar() {
+const canSave = (model): boolean => {
+  const { col_name = null, description = null, col_group_name = null } = model;
+  if (col_name && description && col_group_name) return true;
+  return false;
+};
+
+function ColumnNavBar({ onMouseDown }) {
   const { state: appState, runAction, updateLinesAndColumns } = useContext(
     AppContext
   );
@@ -34,9 +40,7 @@ function ColumnNavBar() {
 
   const put_url = base + `projects`;
 
-  const persistChanges = async (updatedModel = model) => {
-    //console.log("changeset", changeset);
-    console.log("updatedModel", updatedModel);
+  const persist = async (updatedModel = model) => {
     if (Object.keys(updatedModel).length > 0) {
       runAction({ type: "is-saving", payload: { isSaving: true } });
       AppToaster.show({
@@ -55,7 +59,7 @@ function ColumnNavBar() {
         });
         updateLinesAndColumns(model.project_id);
         runAction({ type: "is-saving", payload: { isSaving: false } });
-        actions.updateState({ model: { $set: res.data.project } });
+        return res.data.project;
       } catch {
         AppToaster.show({
           message: <BadSaving />,
@@ -69,7 +73,7 @@ function ColumnNavBar() {
   };
 
   return (
-    <div className="column-nav-bar">
+    <div className="column-nav-bar" onMouseDown={onMouseDown}>
       <Navbar>
         <div className="column-nav-container">
           <div style={{ display: "flex", alignItems: "center" }}>
@@ -80,10 +84,11 @@ function ColumnNavBar() {
           <div>
             <SaveButton
               minimal={true}
-              disabled={!isEditing && !hasChanges()}
+              disabled={!isEditing || !canSave(model)}
               onClick={async () => {
+                const project = await persist();
+                actions.updateState({ model: { $set: project } });
                 actions.toggleEditing();
-                await persistChanges();
               }}
             ></SaveButton>
             <ModelEditButton intent={buttonIntent} minimal={true}>
@@ -104,7 +109,7 @@ function ColumnName() {
     return (
       <div className="edit-with-label">
         <h4 className="h4-0">col_name: </h4>{" "}
-        <h4>
+        <h4 className="h4-0">
           <EditableMultilineText field="col_name" className="column_name" />
         </h4>
       </div>
@@ -117,13 +122,35 @@ function ColumnName() {
   );
 }
 
-function FeatureOverlay({ feature, open }) {
+function ColumnDescription() {
   const { model, isEditing, actions } = useModelEditor();
+  let { description = "No description" } = model;
 
+  if (isEditing) {
+    return (
+      <div className="edit-with-label">
+        <h4 className="h4-0">Description: </h4>{" "}
+        <h4 className="h4-0">
+          <EditableMultilineText
+            field="description"
+            className="column_description"
+          />
+        </h4>
+      </div>
+    );
+  }
   return (
     <div>
-      <ColumnNavBar />
+      <h4>Description: {description}</h4>
+    </div>
+  );
+}
+
+function FeatureOverlay({ feature, open }) {
+  return (
+    <div>
       <ColumnName />
+      <ColumnDescription />
       <ColumnGroup />
     </div>
   );
@@ -134,13 +161,15 @@ function PropertyDialog(props) {
   const { state: appState } = useContext(AppContext);
   const feature = features[0];
   if (!feature) return null;
-
+  console.log(feature);
   const {
     col_group,
     col_group_name,
     col_group_id,
     col_id,
     col_name,
+    description,
+    color,
     id: identity_id,
   } = feature["properties"];
 
@@ -152,8 +181,12 @@ function PropertyDialog(props) {
     location: feature.geometry,
     col_id,
     col_name,
+    color,
+    description,
     identity_id,
   };
+
+  console.log(feature);
 
   return (
     <ModelEditor
@@ -162,7 +195,11 @@ function PropertyDialog(props) {
       isEditing={false}
       persistChanges={() => {}}
     >
-      <OverlayBox open={open} closeOpen={closeOpen}>
+      <OverlayBox
+        open={open}
+        closeOpen={closeOpen}
+        HeaderComponent={ColumnNavBar}
+      >
         <FeatureOverlay feature={state} open={open} />
       </OverlayBox>
     </ModelEditor>

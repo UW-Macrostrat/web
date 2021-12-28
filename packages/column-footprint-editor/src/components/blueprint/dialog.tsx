@@ -7,6 +7,7 @@ function OverlayBox(props) {
     open,
     children,
     closeOpen,
+    HeaderComponent,
     className = "overlay",
     closeButton = true,
     cardStyles = {},
@@ -70,8 +71,9 @@ function OverlayBox(props) {
 
   return (
     <Overlay isOpen={open} {...overlayProperties}>
-      <div className={className} style={style} onMouseDown={onMouseDown}>
+      <div className={className} style={style}>
         <Card style={cardStyles}>
+          <HeaderComponent onMouseDown={onMouseDown} />
           {children}
           {closeButton ? (
             <Button intent="danger" onClick={closeOpen}>

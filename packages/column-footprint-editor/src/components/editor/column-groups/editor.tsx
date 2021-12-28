@@ -13,6 +13,7 @@ import { ColumnSuggest } from "./column-suggest";
 import { NewColGroups } from "./new-column";
 import { AppContext } from "../../../context";
 import { base } from "../../../context/env";
+import { EditColGroup } from ".";
 
 function unwrapColumnGroups(res) {
   const { data } = res;
@@ -23,6 +24,7 @@ function ColumnGroup() {
   const { model, isEditing, actions } = useModelEditor();
   const { state } = useContext(AppContext);
   const [open, setOpen] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
 
   const { project } = state;
   const { project_id } = project;
@@ -69,22 +71,35 @@ function ColumnGroup() {
             initialItem={model}
           />
         </div>
-        <div
-          className="edit-with-label"
-          style={{ margin: "10px", marginLeft: "0px" }}
-        >
-          <Button
-            onClick={() => {
-              setOpen(!open);
-            }}
-            intent="success"
-          >
-            New Column Group
-          </Button>
+        <div style={{ margin: "10px", marginLeft: "0px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <Button
+              onClick={() => {
+                setOpen(!open);
+              }}
+              intent="success"
+            >
+              New Column Group
+            </Button>
+            <Button
+              onClick={() => {
+                setOpenEdit(!openEdit);
+              }}
+              disabled={model.col_group_id == undefined ? true : false}
+              intent="success"
+            >
+              Edit Column Group
+            </Button>
+          </div>
         </div>
         <Collapse isOpen={open}>
           <div className="new-column-collapse">
             <NewColGroups onCreate={onCreateColGroup} />
+          </div>
+        </Collapse>
+        <Collapse isOpen={openEdit}>
+          <div className="new-column-collapse">
+            <EditColGroup onCreate={onCreateColGroup} state={model} />
           </div>
         </Collapse>
       </div>

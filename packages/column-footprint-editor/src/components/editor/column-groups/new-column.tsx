@@ -1,15 +1,40 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   ModelEditor,
   useModelEditor,
   ModelEditButton,
   EditableMultilineText,
 } from "@macrostrat/ui-components";
+import { Popover2 } from "@blueprintjs/popover2";
 import { SaveButton } from "../../blueprint";
 import axios from "axios";
+import { ChromePicker } from "react-color";
 
 import { AppContext } from "../../../context";
 import { base } from "../../../context/env";
+
+function ColorPicker() {
+  const { model, isEditing, actions } = useModelEditor();
+  const { color } = model;
+
+  const onChangeColor = (color) => {
+    const { hex } = color;
+    actions.updateState({ model: { color: { $set: hex } } });
+  };
+
+  if (!isEditing) return <div />;
+  return (
+    <div>
+      <Popover2
+        content={
+          <ChromePicker onChangeComplete={onChangeColor} color={color} />
+        }
+      >
+        <div className="color-block" style={{ backgroundColor: color }}></div>
+      </Popover2>
+    </div>
+  );
+}
 
 function EditComponents() {
   const { actions } = useModelEditor();
@@ -32,6 +57,7 @@ function EditComponents() {
           />
         </h4>
       </div>
+      <ColorPicker />
       <SaveButton onClick={() => actions.persistChanges()} />
     </div>
   );
@@ -42,6 +68,7 @@ function NewColGroups(props) {
   let state = {
     col_group: "",
     col_group_name: "",
+    color: "",
   };
 
   const { state: appState } = useContext(AppContext);
@@ -59,6 +86,33 @@ function NewColGroups(props) {
     onCreate(col_group_id, col_group, col_group_name);
   };
 
+  return <BaseColGroupEditor state={state} persistChanges={persistChanges} />;
+}
+
+function EditColGroup(props) {
+  const { onCreate, state } = props;
+
+  const { state: appState } = useContext(AppContext);
+  const project_id = appState.project.project_id;
+
+  const persistChanges = async (updatedModel, changeset) => {
+    console.log("changeset", changeset);
+    console.log("updatedModel", updatedModel);
+    let route = base + `${project_id}/col-groups`;
+    let res = await axios.put(route, { updatedModel });
+    const {
+      data: { col_group_id },
+    } = res;
+    const { col_group, col_group_name } = updatedModel;
+    onCreate(col_group_id, col_group, col_group_name);
+  };
+
+  return <BaseColGroupEditor state={state} persistChanges={persistChanges} />;
+}
+
+function BaseColGroupEditor(props) {
+  const { state, persistChanges } = props;
+
   return (
     <ModelEditor
       model={state}
@@ -71,4 +125,4 @@ function NewColGroups(props) {
   );
 }
 
-export { NewColGroups };
+export { NewColGroups, EditColGroup };

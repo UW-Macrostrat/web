@@ -10,7 +10,12 @@
 .clicked-entity {
   background-color: #ced9e0;
 }
-
+.color-block {
+  height: 25px;
+  width: 25px;
+  border-radius: 5px;
+  box-shadow: 0px 2px 3px 0px;
+}
 .edit-with-label {
   display: flex;
   align-items: baseline;
@@ -63,6 +68,7 @@
   margin-top: -20px;
   margin-left: -20px;
   margin-right: -20px;
+  cursor: grab;
 }
 .column-nav-container {
   display: flex;

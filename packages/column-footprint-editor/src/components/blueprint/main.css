@@ -10,7 +10,11 @@
   overflow: scroll;
   max-height: 200px;
 }
-
+.drag-bar-top {
+  height: 50px;
+  width: 100%;
+  z-index: 22;
+}
 .projects-drop-down {
   display: flex;
   align-items: flex-start;

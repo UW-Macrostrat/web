@@ -4,8 +4,11 @@ export function randomColor() {
 
 export function colorAttribute(colGroups) {
   let newColGroups = colGroups.map((col) => {
-    let color = randomColor();
-    return { ...col, color };
+    if (!col.color) {
+      let color = randomColor();
+      return { ...col, color };
+    }
+    return col;
   });
   return newColGroups;
 }
