@@ -8,6 +8,7 @@ import {
 async function propertyViewMap(
   map,
   state,
+  features,
   setFeatures,
   setOpen,
   setLegendColumns
@@ -55,6 +56,15 @@ async function propertyViewMap(
   });
 
   let highlightedFeature = null;
+  
+  if (features.length) {
+    highlightedFeature = features[0].id;
+    map.setFeatureState(
+      { source: "columns", id: highlightedFeature },
+      { clicked: true }
+    );
+  }
+
   map.on("click", "column-fill", async function(e) {
     if (e.features.length > 0) {
       if (highlightedFeature !== null) {

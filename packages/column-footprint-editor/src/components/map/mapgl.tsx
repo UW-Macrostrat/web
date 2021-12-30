@@ -58,6 +58,7 @@ export function Map() {
   const [features, setFeatures] = useState([]);
 
   const closeOpen = () => {
+    setFeatures([]);
     setOpen(false);
   };
 
@@ -156,6 +157,7 @@ export function Map() {
       propertyViewMap(
         mapRef.current,
         state,
+        features,
         setFeatures,
         setOpen,
         setLegendColumns

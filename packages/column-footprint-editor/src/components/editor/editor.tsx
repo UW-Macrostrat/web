@@ -138,11 +138,12 @@ function PropertyDialog(props) {
   } = feature["properties"];
 
   let state = {
+    id: feature.id,
     col_group,
     col_group_name,
     col_group_id,
     project_id: appState.project.project_id,
-    location: feature.geometry,
+    location: feature.geometry || feature.properties.location,
     col_id,
     col_name,
     color,
@@ -150,10 +151,9 @@ function PropertyDialog(props) {
     identity_id,
   };
   const put_url = base + `projects`;
+  console.log(state.id);
 
   const persistChanges = async (updatedModel, changeSet) => {
-    console.log("updated", updatedModel);
-    console.log("change", changeSet);
     if (Object.keys(updatedModel).length > 0) {
       runAction({ type: "is-saving", payload: { isSaving: true } });
       AppToaster.show({
@@ -182,7 +182,7 @@ function PropertyDialog(props) {
         runAction({ type: "is-saving", payload: { isSaving: false } });
       }
     }
-    const newFeature = { properties: updatedModel };
+    const newFeature = { properties: updatedModel, id: updatedModel.id };
     newFeature.properties.id = newFeature.properties.identity_id;
     setFeatures([newFeature]);
   };
