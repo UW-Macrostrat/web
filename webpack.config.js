@@ -121,6 +121,7 @@ module.exports = {
   },
   optimization: {
     splitChunks: { chunks: "all" },
+    usedExports: true,
   },
   plugins: [
     new HtmlWebpackPlugin({
