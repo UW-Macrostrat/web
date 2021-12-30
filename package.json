@@ -8,7 +8,7 @@
     "bundle": "webpack",
     "bundle:dist": "npm run clean && PUBLIC_URL=/next/web/ npm run bundle",
     "clean": "rm -rf dist/*",
-    "deploy:steno": "npm run bundle:dist && rsync -azv --delete dist/ steno:/data/projects/macrostrat/next/web/",
+    "deploy:steno": "scripts/deploy-steno",
     "dev": "webpack --watch",
     "bootstrap": "npm install --workspaces"
   },
