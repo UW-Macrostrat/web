@@ -13,7 +13,6 @@ async function propertyViewMap(
   setLegendColumns
 ) {
   let colGroups = await fetchProjColGroups(state.project.project_id);
-
   colGroups = colorAttribute(colGroups);
   setLegendColumns(colGroups);
   let paintConditionals = createMapboxPaintConditional(colGroups);

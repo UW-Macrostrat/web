@@ -74,7 +74,6 @@ export function Map() {
     // Combine like edits so I'm not running a million
     // transactions on the db.
     runAction({ type: "is-saving", payload: { isSaving: true } });
-    console.log(changeSet);
     AppToaster.show({
       message: <SavingToast />,
       intent: "primary",
@@ -176,6 +175,7 @@ export function Map() {
     ? "map-tools-control-left"
     : "map-tools-control-right";
 
+  console.log("features", features);
   return (
     <div>
       <ImportDialog />
@@ -206,6 +206,7 @@ export function Map() {
           <PropertyDialog
             open={open}
             features={features}
+            setFeatures={setFeatures}
             closeOpen={closeOpen}
           />
         </div>
