@@ -76,3 +76,8 @@
   align-items: center;
   padding-top: 10px;
 }
+
+.about-container {
+  height: 80vh;
+  overflow: auto;
+}
