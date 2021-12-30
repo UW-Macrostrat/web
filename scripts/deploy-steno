@@ -4,6 +4,7 @@ deploy_dir=/data/projects/macrostrat/map
 
 npm run clean
 export PUBLIC_URL=/map/
+export NODE_ENV=production
 npm run bundle
 
 rsync -azv --delete dist/ steno:$deploy_dir/

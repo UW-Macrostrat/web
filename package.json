@@ -5,8 +5,7 @@
   "description": "Macrostrat map interface",
   "main": "index.html",
   "scripts": {
-    "bundle": "webpack",
-    "bundle:dist": "npm run clean && PUBLIC_URL=/next/web/ npm run bundle",
+    "bundle": "NODE_ENV=production webpack",
     "clean": "rm -rf dist/*",
     "deploy:steno": "scripts/deploy-steno",
     "dev": "webpack --watch",

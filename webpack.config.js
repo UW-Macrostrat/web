@@ -9,7 +9,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const revisionInfo = require("@macrostrat/revision-info-webpack");
 const pkg = require("./package.json");
 
-let mode = "development";
+const mode = process.env.NODE_ENV || "development";
 
 let publicURL = process.env.PUBLIC_URL || "/";
 
