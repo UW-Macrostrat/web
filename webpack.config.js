@@ -1,8 +1,7 @@
 const path = require("path");
 const { DefinePlugin, EnvironmentPlugin } = require("webpack");
-const BrowserSyncPlugin = require("browser-sync-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 //UglifyJsPlugin = require('uglifyjs-webpack-plugin')
-const historyApiFallback = require("connect-history-api-fallback");
 const CopyPlugin = require("copy-webpack-plugin");
 const DotenvPlugin = require("dotenv-webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
@@ -14,11 +13,6 @@ const mode = process.env.NODE_ENV || "development";
 let publicURL = process.env.PUBLIC_URL || "/";
 
 const packageSrc = (name) => path.resolve(__dirname, "packages", name, "src");
-
-let browserSync = new BrowserSyncPlugin({
-  server: { baseDir: "./dist" },
-  middleware: [historyApiFallback()],
-});
 
 //const cesiumSource = "node_modules/cesium/Source";
 //const cesiumWorkers = "../Build/Cesium/Workers";
@@ -46,6 +40,13 @@ const cssModuleLoader = {
 
 module.exports = {
   mode: mode,
+  devServer: {
+    compress: true,
+    port: 3000,
+    hot: true,
+    open: true,
+    historyApiFallback: true,
+  },
   module: {
     rules: [
       {
@@ -55,15 +56,15 @@ module.exports = {
       },
       {
         test: /\.styl$/,
-        use: ["style-loader", cssModuleLoader, "stylus-loader"],
+        use: [MiniCssExtractPlugin.loader, cssModuleLoader, "stylus-loader"],
         exclude: /node_modules/,
       },
       {
         test: /\.css$/,
-        use: ["style-loader", cssModuleLoader],
+        use: [MiniCssExtractPlugin.loader, cssModuleLoader],
         exclude: /node_modules/,
       },
-      { test: /\.css$/, use: ["style-loader", "css-loader"] },
+      { test: /\.css$/, use: [MiniCssExtractPlugin.loader, "css-loader"] },
       {
         test: /\.(eot|svg|ttf|woff|woff2)$/,
         use: [
@@ -105,10 +106,7 @@ module.exports = {
     },
   },
   entry: {
-    "js/bundle": "./src/index.ts",
-  },
-  node: {
-    fs: "empty",
+    main: "./src/index.ts",
   },
   output: {
     path: path.join(__dirname, "/dist/"),
@@ -125,11 +123,11 @@ module.exports = {
     splitChunks: { chunks: "all" },
   },
   plugins: [
-    browserSync,
     new HtmlWebpackPlugin({
-      title: "Macrostrat Web – Experimental",
+      title: "Macrostrat",
       template: "./template.html",
     }),
+    new MiniCssExtractPlugin(),
     new DotenvPlugin(),
     /*
     new CopyPlugin([
