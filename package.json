@@ -17,7 +17,8 @@
   ],
   "authors": [
     "John Czaplewski <jczaplewski@wisc.edu>",
-    "Daven Quinn <daven.quinn@wisc.edu>"
+    "Daven Quinn <daven.quinn@wisc.edu>",
+    "Casey Idzikowski <cidzikowski@wisc.edu>"
   ],
   "license": "MIT",
   "devDependencies": {
@@ -75,7 +76,6 @@
     "immutability-helper": "^2.8.1",
     "isomorphic-fetch": "^2.2.1",
     "mapbox-gl": "^2.2.0",
-    "material-ui": "^0.18.6",
     "new-github-issue-url": "^1.0.0",
     "pbf": "^3.2.1",
     "prop-types": "^15.6.0",
