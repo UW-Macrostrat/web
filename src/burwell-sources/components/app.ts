@@ -7,10 +7,6 @@ import h from "@macrostrat/hyper";
 // // http://stackoverflow.com/a/34015469/988941
 // injectTapEventPlugin()
 
-import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
-
-// Import other components
-
 function App() {
   const runAction = useBurwellActions();
   useEffect(() => {
@@ -18,7 +14,7 @@ function App() {
     runAction({ type: "request-data" });
     runAction({ type: "fetch-data" });
   }, []);
-  return h(MuiThemeProvider, [h(Content)]);
+  return h(Content);
 }
 
 export default App;

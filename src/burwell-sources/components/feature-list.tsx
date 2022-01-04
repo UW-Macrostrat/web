@@ -3,7 +3,7 @@ import { useBurwellState, getVisibleScale } from "~/burwell-sources/app-state";
 import SourceMap from "./source-map";
 
 const FeatureList = () => {
-  const { view, selectedScale, maps } = useBurwellState((state) => state);
+  const { selectedScale, maps } = useBurwellState((state) => state);
   const data = getVisibleScale(maps, selectedScale);
   return (
     <div className="container index-map-container feature-list-container">

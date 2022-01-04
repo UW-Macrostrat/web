@@ -1,3 +1,5 @@
+import h from "@macrostrat/hyper";
+import mapboxgl from "mapbox-gl";
 import React, { Component } from "react";
 import { zoomMap } from "../app-state/utils";
 
@@ -70,4 +72,10 @@ class SourceMap extends Component {
   }
 }
 
-export default SourceMap;
+function StaticSourceMap({ feature }) {
+  // probably have a better way to render static maps.
+
+  return h("div.static-map");
+}
+
+export default StaticSourceMap;
