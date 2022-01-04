@@ -6,12 +6,7 @@ type SELECT_SCALE = { type: "select-scale"; selectedScale: any };
 type SELECT_FEATURES = { type: "select-features"; selectedFeatures: any };
 type ACTIVATE_FEATURE = { type: "activate-feature"; activeFeature: any };
 type TOGGLE_MENU = { type: "toggle-menu"; menuOpen: boolean };
-type OPEN_OPTIONS = {
-  type: "open-options";
-  optionsAnchorElement: any;
-  optionsOpen: boolean;
-};
-type CLOSE_OPTIONS = { type: "close-options"; optionsOpen: boolean };
+
 type CHANGE_VIEW = { type: "change-view"; view: string };
 
 export type BurwellSourceActions =
@@ -22,8 +17,6 @@ export type BurwellSourceActions =
   | SELECT_FEATURES
   | ACTIVATE_FEATURE
   | TOGGLE_MENU
-  | OPEN_OPTIONS
-  | CLOSE_OPTIONS
   | CHANGE_VIEW;
 
 export interface BurwellState {
@@ -35,7 +28,5 @@ export interface BurwellState {
   selectedFeatures: [];
   activeFeature: {};
   menuOpen: boolean;
-  optionsOpen: boolean;
-  optionsAnchorElement: {};
   view: string;
 }

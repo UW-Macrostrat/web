@@ -9,8 +9,6 @@ const burwellDefaultState: BurwellState = {
   selectedFeatures: [],
   activeFeature: {},
   menuOpen: false,
-  optionsOpen: false,
-  optionsAnchorElement: {},
   view: "map",
 };
 
@@ -43,15 +41,6 @@ const reducer = (
     case "toggle-menu":
       return Object.assign({}, state, {
         menuOpen: action.menuOpen,
-      });
-    case "open-options":
-      return Object.assign({}, state, {
-        optionsOpen: true,
-        optionsAnchorElement: action.optionsAnchorElement,
-      });
-    case "close-options":
-      return Object.assign({}, state, {
-        optionsOpen: false,
       });
     case "change-view":
       return Object.assign({}, state, {
