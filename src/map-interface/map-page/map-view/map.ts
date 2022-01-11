@@ -339,7 +339,7 @@ class Map extends Component<MapProps, {}> {
 
       // Otherwise try to query the geologic map
       let features = this.map.queryRenderedFeatures(event.point, {
-        layers: ["burwell_fill", "column_fill"],
+        layers: ["burwell_fill", "column_fill", "filtered_column_fill"],
       });
 
       let burwellFeatures = features
@@ -352,7 +352,11 @@ class Map extends Component<MapProps, {}> {
 
       const columns = features
         .filter((f) => {
-          if (f.layer.id === "column_fill") return f;
+          if (
+            f.layer.id === "column_fill" ||
+            f.layer.id === "filtered_column_fill"
+          )
+            return f;
         })
         .map((f) => {
           return f.properties;
