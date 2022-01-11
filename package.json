@@ -16,7 +16,8 @@
   ],
   "authors": [
     "John Czaplewski <jczaplewski@wisc.edu>",
-    "Daven Quinn <daven.quinn@wisc.edu>"
+    "Daven Quinn <daven.quinn@wisc.edu>",
+    "Casey Idzikowski <cidzikowski@wisc.edu>"
   ],
   "license": "MIT",
   "devDependencies": {
