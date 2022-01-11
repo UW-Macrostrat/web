@@ -22,9 +22,13 @@ const reducer = (
         isFetching: true,
       });
     case "recieve-data":
+      const maps = action.maps.map((d, i) => {
+        d.id = i;
+        return d;
+      });
       return Object.assign({}, state, {
         isFetching: false,
-        maps: action.maps,
+        maps: maps,
       });
     case "select-scale":
       return Object.assign({}, state, {

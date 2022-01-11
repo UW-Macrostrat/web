@@ -30,6 +30,7 @@ function IndexMapContainer() {
 
   useEffect(() => {
     if (mapContainerRef.current == null) return;
+    console.log("Map Container rerendered");
     initializeMap({
       mapContainer: mapContainerRef.current,
       viewport,
@@ -44,6 +45,7 @@ function IndexMapContainer() {
 
   useEffect(() => {
     if (mapRef.current == null) return;
+    console.log("map rerendered");
     mapSources(
       mapRef.current,
       maps,
@@ -52,7 +54,7 @@ function IndexMapContainer() {
       activeFeature,
       selectedScale
     );
-  }, [mapRef, maps, activeFeature, selectedScale, view]);
+  }, [mapRef, maps, activeFeature, selectedScale]);
 
   return h("div.index-map-container", { ref: mapContainerRef });
 }

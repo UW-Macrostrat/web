@@ -7,12 +7,9 @@ function setStyle(props) {
     map.scale = selectedScale;
     const filteredMaps = {
       type: "FeatureCollection",
-      features: getVisibleScale(maps, selectedScale)
-        .map((feature, i) => {
-          feature.id = i;
-          return feature;
-        })
-        .filter((f) => f.properties.source_id != 154),
+      features: getVisibleScale(maps, selectedScale).filter(
+        (f) => f.properties.source_id != 154
+      ),
     };
     map.addSource("burwell-sources", {
       type: "geojson",
@@ -54,17 +51,15 @@ function setStyle(props) {
       map.scale = selectedScale;
       const filteredMaps = {
         type: "FeatureCollection",
-        features: getVisibleScale(maps, selectedScale)
-          .map((feature, i) => {
-            feature.id = i;
-            return feature;
-          })
-          .filter((f) => f.properties.source_id != 154),
+        features: getVisibleScale(maps, selectedScale).filter(
+          (f) => f.properties.source_id != 154
+        ),
       };
       map.getSource("burwell-sources").setData(filteredMaps);
     }
 
     if (activeFeature.id !== undefined) {
+      console.log("Adding active state");
       map.setFeatureState(
         { source: "burwell-sources", id: activeFeature.id },
         { active: true }
@@ -108,6 +103,7 @@ async function mapSources(
     let features = map.queryRenderedFeatures({
       layers: ["sources-fill"],
     });
+    console.log("feature clicked");
     features.map((f) => {
       map.setFeatureState(
         { source: "burwell-sources", id: f.id },
@@ -131,7 +127,6 @@ async function mapSources(
     });
     if (e.features.length) {
       onSelectFeatures(features_);
-      openMenu();
     }
   });
 }
