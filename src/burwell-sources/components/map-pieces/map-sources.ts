@@ -9,9 +9,7 @@ function setStyle(props) {
       map.scale = selectedScale;
       const filteredMaps = {
         type: "FeatureCollection",
-        features: getVisibleScale(maps, selectedScale).filter(
-          (f) => f.properties.source_id != 154
-        ),
+        features: getVisibleScale(maps, selectedScale),
       };
       map.getSource("burwell-sources").setData(filteredMaps);
     }
