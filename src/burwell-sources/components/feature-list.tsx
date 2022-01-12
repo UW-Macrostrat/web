@@ -63,8 +63,9 @@ function ViewMap({ feature }) {
 function FeatureContent({ d, activateFeature }) {
   return (
     <div
+      style={{ pointerEvents: "all" }}
       onMouseEnter={() => activateFeature(d)}
-      onMouseOut={() => activateFeature({})}
+      onMouseLeave={() => activateFeature({})}
     >
       <p>
         <span className="map-source-title">{d.properties.ref_title}</span>

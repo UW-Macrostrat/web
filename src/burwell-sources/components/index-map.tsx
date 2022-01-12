@@ -27,7 +27,6 @@ function IndexMapContainer() {
 
   useEffect(() => {
     if (mapContainerRef.current == null) return;
-    console.log("Map Container rerendered");
     initializeMap({
       mapContainer: mapContainerRef.current,
       viewport,

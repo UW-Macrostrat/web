@@ -59,20 +59,18 @@ function setStyle(props) {
     }
 
     if (activeFeature.id !== undefined) {
+      map.activeFeatureId = activeFeature.id;
       map.setFeatureState(
         { source: "burwell-sources", id: activeFeature.id },
         { active: true }
       );
     } else {
-      let features = map.queryRenderedFeatures({
-        layers: ["sources-fill"],
-      });
-      features.map((f) => {
+      if (map.activeFeatureId) {
         map.setFeatureState(
-          { source: "burwell-sources", id: f.id },
+          { source: "burwell-sources", id: map.activeFeatureId },
           { active: false }
         );
-      });
+      }
     }
   }
 }
@@ -87,16 +85,14 @@ async function mapSources(
   setStyle({ map, maps, selectedScale, activeFeature });
 
   map.sourcesFillListener = (e) => {
-    const map = e.target;
-    let features = map.queryRenderedFeatures({
-      layers: ["sources-fill"],
-    });
-    features.map((f) => {
-      map.setFeatureState(
-        { source: "burwell-sources", id: f.id },
-        { clicked: false }
-      );
-    });
+    if (map.clickedFeatures) {
+      map.clickedFeatures.map((f) => {
+        map.setFeatureState(
+          { source: "burwell-sources", id: f.id },
+          { clicked: false }
+        );
+      });
+    }
     let features_ = [];
     e.features.map((f) => {
       if (f.state.clicked) {
@@ -113,20 +109,20 @@ async function mapSources(
       }
     });
     if (e.features.length) {
+      map.clickedFeatures = features_;
       onSelectFeatures(features_);
     }
   };
 
   map.clickMap = (e) => {
-    let features = map.queryRenderedFeatures({
-      layers: ["sources-fill"],
-    });
-    features.map((f) => {
-      map.setFeatureState(
-        { source: "burwell-sources", id: f.id },
-        { clicked: false }
-      );
-    });
+    if (map.clickedFeatures) {
+      map.clickedFeatures.map((f) => {
+        map.setFeatureState(
+          { source: "burwell-sources", id: f.id },
+          { clicked: false }
+        );
+      });
+    }
   };
 
   map.on("click", map.clickMap);
