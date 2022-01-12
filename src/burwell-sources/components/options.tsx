@@ -17,7 +17,7 @@ const capitalizeWord = (word) => {
   return word.charAt(0).toUpperCase() + word.slice(1);
 };
 
-function ScaleMenu() {
+function OptionsMenu() {
   const { selectedScale, flyTo } = useBurwellState((state) => state);
   const runAction = useBurwellActions();
 
@@ -56,7 +56,7 @@ function ScaleMenu() {
 }
 
 function Options() {
-  return h(Popover, { content: h(ScaleMenu), minimal: true }, [
+  return h(Popover, { content: h(OptionsMenu), minimal: true }, [
     h(Button, { minimal: true }, [
       h("h5", { style: { margin: "0" } }, ["Options"]),
     ]),

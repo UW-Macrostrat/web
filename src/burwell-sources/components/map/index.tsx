@@ -4,7 +4,8 @@ import {
   useBurwellState,
   flyToData,
 } from "~/burwell-sources/app-state";
-import { initializeMap, mapSources } from "./map-pieces";
+import { initializeMap } from "./initialize-map";
+import { mapSources } from "./map-sources";
 import h from "@macrostrat/hyper";
 import "mapbox-gl/dist/mapbox-gl.css";
 

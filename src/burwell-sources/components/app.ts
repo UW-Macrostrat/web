@@ -1,7 +1,8 @@
 import { useEffect } from "react";
-import Content from "./content";
 import { useBurwellActions } from "~/burwell-sources/app-state";
 import h from "@macrostrat/hyper";
+import IndexMapContainer from "./map";
+import { InfoDrawer } from "./info-drawer";
 // // Needed for onTouchTap
 // import injectTapEventPlugin from 'react-tap-event-plugin'
 // // http://stackoverflow.com/a/34015469/988941
@@ -14,7 +15,7 @@ function App() {
     runAction({ type: "request-data" });
     runAction({ type: "fetch-data" });
   }, []);
-  return h(Content);
+  return h("div.full-height", [h(IndexMapContainer), h(InfoDrawer)]);
 }
 
 export default App;
