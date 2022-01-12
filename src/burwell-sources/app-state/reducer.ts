@@ -22,6 +22,7 @@ const reducer = (
         isFetching: true,
       });
     case "recieve-data":
+      // map ids to features to use mapbox effects appwide
       const maps = action.maps.map((d, i) => {
         d.id = i;
         return d;

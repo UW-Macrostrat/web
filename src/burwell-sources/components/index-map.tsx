@@ -45,7 +45,6 @@ function IndexMapContainer() {
 
   useEffect(() => {
     if (mapRef.current == null) return;
-    console.log("map rerendered");
     mapSources(
       mapRef.current,
       maps,
@@ -54,6 +53,15 @@ function IndexMapContainer() {
       activeFeature,
       selectedScale
     );
+    return () => {
+      // remove current click events to prevent stack overflow
+      mapRef.current.off(
+        "click",
+        "sources-fill",
+        mapRef.current.sourcesFillListener
+      );
+      mapRef.current.off("click", mapRef.current.clickMap);
+    };
   }, [mapRef, maps, activeFeature, selectedScale]);
 
   return h("div.index-map-container", { ref: mapContainerRef });

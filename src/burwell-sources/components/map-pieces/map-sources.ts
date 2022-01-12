@@ -59,7 +59,6 @@ function setStyle(props) {
     }
 
     if (activeFeature.id !== undefined) {
-      console.log("Adding active state");
       map.setFeatureState(
         { source: "burwell-sources", id: activeFeature.id },
         { active: true }
@@ -88,22 +87,11 @@ async function mapSources(
 ) {
   setStyle({ map, maps, selectedScale, activeFeature });
 
-  map.on("click", (e) => {
+  map.sourcesFillListener = (e) => {
+    const map = e.target;
     let features = map.queryRenderedFeatures({
       layers: ["sources-fill"],
     });
-    features.map((f) => {
-      map.setFeatureState(
-        { source: "burwell-sources", id: f.id },
-        { clicked: false }
-      );
-    });
-  });
-  map.on("click", "sources-fill", (e) => {
-    let features = map.queryRenderedFeatures({
-      layers: ["sources-fill"],
-    });
-    console.log("feature clicked");
     features.map((f) => {
       map.setFeatureState(
         { source: "burwell-sources", id: f.id },
@@ -128,7 +116,22 @@ async function mapSources(
     if (e.features.length) {
       onSelectFeatures(features_);
     }
-  });
+  };
+
+  map.clickMap = (e) => {
+    let features = map.queryRenderedFeatures({
+      layers: ["sources-fill"],
+    });
+    features.map((f) => {
+      map.setFeatureState(
+        { source: "burwell-sources", id: f.id },
+        { clicked: false }
+      );
+    });
+  };
+
+  map.on("click", map.clickMap);
+  map.on("click", "sources-fill", map.sourcesFillListener);
 }
 
 export { mapSources };
