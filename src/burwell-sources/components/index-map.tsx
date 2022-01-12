@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   useBurwellActions,
   useBurwellState,
+  flyToData,
 } from "~/burwell-sources/app-state";
 import { initializeMap, mapSources } from "./map-pieces";
 import h from "@macrostrat/hyper";
@@ -13,11 +14,10 @@ function IndexMapContainer() {
     latitude: 40,
     zoom: 1,
   });
-
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
 
-  const { maps, selectedScale, activeFeature } = useBurwellState(
+  const { maps, selectedScale, activeFeature, flyTo } = useBurwellState(
     (state) => state
   );
   const runAction = useBurwellActions();
@@ -58,6 +58,12 @@ function IndexMapContainer() {
       mapRef.current.off("click", mapRef.current.clickMap);
     };
   }, [mapRef, maps, activeFeature, selectedScale]);
+
+  useEffect(() => {
+    if (mapRef.current == null || !activeFeature.id || !flyTo) return;
+    const map = mapRef.current;
+    map.flyTo(flyToData(activeFeature));
+  }, [activeFeature]);
 
   return h("div.index-map-container", { ref: mapContainerRef });
 }

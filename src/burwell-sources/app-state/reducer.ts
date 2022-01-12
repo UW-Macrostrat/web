@@ -9,6 +9,7 @@ const burwellDefaultState: BurwellState = {
   selectedFeatures: [],
   activeFeature: {},
   menuOpen: false,
+  flyTo: true,
 };
 
 const reducer = (
@@ -45,6 +46,10 @@ const reducer = (
     case "toggle-menu":
       return Object.assign({}, state, {
         menuOpen: action.menuOpen,
+      });
+    case "toggle-fly-option":
+      return Object.assign({}, state, {
+        flyTo: action.flyTo,
       });
     default:
       return state;

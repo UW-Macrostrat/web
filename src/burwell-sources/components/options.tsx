@@ -1,4 +1,12 @@
-import { Menu, MenuItem, Popover, Button, Icon } from "@blueprintjs/core";
+import {
+  Menu,
+  MenuItem,
+  Popover,
+  Button,
+  Icon,
+  Switch,
+  MenuDivider,
+} from "@blueprintjs/core";
 import {
   useBurwellActions,
   useBurwellState,
@@ -10,11 +18,26 @@ const capitalizeWord = (word) => {
 };
 
 function ScaleMenu() {
-  const { selectedScale } = useBurwellState((state) => state);
+  const { selectedScale, flyTo } = useBurwellState((state) => state);
   const runAction = useBurwellActions();
 
+  const onChange = () => {
+    runAction({ type: "toggle-fly-option", flyTo: !flyTo });
+  };
+
   const sizes = ["all", "large", "medium", "small", "tiny"];
+
   return h(Menu, [
+    h(Switch, {
+      style: { margin: "3px" },
+      checked: flyTo,
+      alignIndicator: "right",
+      innerLabel: "off",
+      innerLabelChecked: "on",
+      label: "Fly To Source",
+      onChange,
+    }),
+    h(MenuDivider, { title: "Scale" }),
     sizes.map((size, i) => {
       const onClick = (e) => {
         runAction({ type: "select-scale", selectedScale: size });
@@ -35,7 +58,7 @@ function ScaleMenu() {
 function Options() {
   return h(Popover, { content: h(ScaleMenu), minimal: true }, [
     h(Button, { minimal: true }, [
-      h("h5", { style: { margin: "0" } }, ["Scale"]),
+      h("h5", { style: { margin: "0" } }, ["Options"]),
     ]),
   ]);
 }

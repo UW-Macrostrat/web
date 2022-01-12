@@ -2,8 +2,45 @@ import { getVisibleScale } from "../../app-state";
 
 function setStyle(props) {
   const { map, maps, selectedScale, activeFeature } = props;
-  if (!map.getSource("burwell-sources")) {
-    // setting up the beginning
+  if (map.getSource("burwell-sources")) {
+    if (selectedScale != map.scale) {
+      // if the scale has been changed
+      // reset the data on the burwell-sources source
+      map.scale = selectedScale;
+      const filteredMaps = {
+        type: "FeatureCollection",
+        features: getVisibleScale(maps, selectedScale).filter(
+          (f) => f.properties.source_id != 154
+        ),
+      };
+      map.getSource("burwell-sources").setData(filteredMaps);
+    }
+
+    if (activeFeature.id !== undefined) {
+      map.activeFeatureId = activeFeature.id;
+      map.setFeatureState(
+        { source: "burwell-sources", id: activeFeature.id },
+        { active: true }
+      );
+    } else {
+      if (map.activeFeatureId) {
+        map.setFeatureState(
+          { source: "burwell-sources", id: map.activeFeatureId },
+          { active: false }
+        );
+      }
+    }
+  }
+}
+
+async function mapSources(
+  map,
+  maps,
+  onSelectFeatures,
+  activeFeature,
+  selectedScale
+) {
+  map.on("load", () => {
     map.scale = selectedScale;
     const filteredMaps = {
       type: "FeatureCollection",
@@ -44,44 +81,8 @@ function setStyle(props) {
         "line-width": 2,
       },
     });
-  } else {
-    if (selectedScale != map.scale) {
-      // if the scale has been changed
-      // reset the data on the burwell-sources source
-      map.scale = selectedScale;
-      const filteredMaps = {
-        type: "FeatureCollection",
-        features: getVisibleScale(maps, selectedScale).filter(
-          (f) => f.properties.source_id != 154
-        ),
-      };
-      map.getSource("burwell-sources").setData(filteredMaps);
-    }
+  });
 
-    if (activeFeature.id !== undefined) {
-      map.activeFeatureId = activeFeature.id;
-      map.setFeatureState(
-        { source: "burwell-sources", id: activeFeature.id },
-        { active: true }
-      );
-    } else {
-      if (map.activeFeatureId) {
-        map.setFeatureState(
-          { source: "burwell-sources", id: map.activeFeatureId },
-          { active: false }
-        );
-      }
-    }
-  }
-}
-
-async function mapSources(
-  map,
-  maps,
-  onSelectFeatures,
-  activeFeature,
-  selectedScale
-) {
   setStyle({ map, maps, selectedScale, activeFeature });
 
   map.sourcesFillListener = (e) => {
