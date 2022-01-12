@@ -17,15 +17,12 @@ function IndexMapContainer() {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
 
-  const { maps, selectedScale, activeFeature, view } = useBurwellState(
+  const { maps, selectedScale, activeFeature } = useBurwellState(
     (state) => state
   );
   const runAction = useBurwellActions();
   const onSelectFeatures = (features) => {
     runAction({ type: "select-features", selectedFeatures: features });
-  };
-  const openMenu = () => {
-    runAction({ type: "toggle-menu", menuOpen: true });
   };
 
   useEffect(() => {
@@ -49,7 +46,6 @@ function IndexMapContainer() {
       mapRef.current,
       maps,
       onSelectFeatures,
-      openMenu,
       activeFeature,
       selectedScale
     );

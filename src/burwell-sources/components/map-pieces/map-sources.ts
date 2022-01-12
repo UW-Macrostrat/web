@@ -81,7 +81,6 @@ async function mapSources(
   map,
   maps,
   onSelectFeatures,
-  openMenu,
   activeFeature,
   selectedScale
 ) {
