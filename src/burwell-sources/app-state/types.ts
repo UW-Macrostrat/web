@@ -1,13 +1,11 @@
 //////////////// Action Types //////////////////
 type FETCH_DATA = { type: "fetch-data" };
-type RECIEVE_DATA = { type: "recieve-data"; maps: object };
+type RECIEVE_DATA = { type: "recieve-data"; maps: object[] };
 type REQUEST_DATA = { type: "request-data" };
 type SELECT_SCALE = { type: "select-scale"; selectedScale: any };
 type SELECT_FEATURES = { type: "select-features"; selectedFeatures: any };
 type ACTIVATE_FEATURE = { type: "activate-feature"; activeFeature: any };
 type TOGGLE_MENU = { type: "toggle-menu"; menuOpen: boolean };
-
-type CHANGE_VIEW = { type: "change-view"; view: string };
 
 export type BurwellSourceActions =
   | FETCH_DATA
@@ -16,8 +14,7 @@ export type BurwellSourceActions =
   | SELECT_SCALE
   | SELECT_FEATURES
   | ACTIVATE_FEATURE
-  | TOGGLE_MENU
-  | CHANGE_VIEW;
+  | TOGGLE_MENU;
 
 export interface BurwellState {
   isFetching: boolean;
@@ -28,5 +25,4 @@ export interface BurwellState {
   selectedFeatures: [];
   activeFeature: {};
   menuOpen: boolean;
-  view: string;
 }
