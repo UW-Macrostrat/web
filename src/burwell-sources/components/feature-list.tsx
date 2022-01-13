@@ -83,14 +83,17 @@ function FeatureContent({ d, activateFeature }) {
   );
 }
 
-const FeatureList = ({ features }) => {
+const FeatureList = ({ features, open = true }) => {
   const runAction = useBurwellActions();
   const activateFeature = (feature) => {
     runAction({ type: "activate-feature", activeFeature: feature });
   };
 
   return (
-    <div className="feature-list-container">
+    <div
+      className="feature-list-container"
+      style={{ display: open ? "initial" : "none" }}
+    >
       {features.map((d, i) => {
         return h(
           ExpansionPanel,

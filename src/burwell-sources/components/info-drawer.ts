@@ -1,5 +1,6 @@
+import { useState } from "react";
 import h from "@macrostrat/hyper";
-import { Card, Navbar, Button } from "@blueprintjs/core";
+import { Card, Navbar, Button, Collapse } from "@blueprintjs/core";
 import {
   useBurwellState,
   getVisibleScale,
@@ -8,6 +9,8 @@ import {
 import Options from "./options";
 
 import FeatureList from "./feature-list";
+import { ExpansionPanel } from "~/map-interface/components/expansion-panel";
+import { useEffect } from "react";
 
 function BackButton() {
   const runAction = useBurwellActions();
@@ -25,7 +28,7 @@ function BackButton() {
   );
 }
 
-function Header({ len }) {
+function Header({ len, btn }) {
   return h(Navbar, [
     h.if(len == 0)(Navbar.Group, [
       h(Navbar.Heading, [
@@ -34,11 +37,11 @@ function Header({ len }) {
     ]),
     h.if(len > 0)(Navbar.Group, [
       h(BackButton),
-      h(Navbar.Heading, [
+      h(Navbar.Heading, { style: { marginLeft: "20px" } }, [
         h("div.expansion-summary-title", ["Selected Sources"]),
       ]),
     ]),
-    h(Navbar.Group, { align: "right" }, [h(Options)]),
+    h(Navbar.Group, { align: "right" }, [h(Options), btn]),
   ]);
 }
 
@@ -46,15 +49,31 @@ function InfoDrawer() {
   const { selectedFeatures, maps, selectedScale } = useBurwellState(
     (state) => state
   );
+
+  const [open, setOpen] = useState(true);
+
   const data = getVisibleScale(maps, selectedScale);
 
   const len = selectedFeatures.length;
 
+  useEffect(() => {
+    if (len > 0 && !open) {
+      setOpen(true);
+    }
+  }, [len]);
+
+  function CloseBtn() {
+    return h(Button, {
+      minimal: true,
+      onClick: () => setOpen(!open),
+      icon: open ? "chevron-up" : "chevron-down",
+    });
+  }
   return h("div.infodrawer-container", { style: { margin: "20px" } }, [
     h(Card, { className: "infodrawer" }, [
-      h(Header, { len }),
-      h.if(len == 0)(FeatureList, { features: data }),
-      h.if(len > 0)(FeatureList, { features: selectedFeatures }),
+      h(Header, { len, btn: h(CloseBtn) }),
+      h.if(len == 0)(FeatureList, { features: data, open }),
+      h.if(len > 0)(FeatureList, { features: selectedFeatures, open }),
     ]),
   ]);
 }
