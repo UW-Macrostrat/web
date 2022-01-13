@@ -91,8 +91,11 @@ const FeatureList = ({ features, open = true }) => {
 
   return (
     <div
-      className="feature-list-container"
-      style={{ display: open ? "initial" : "none" }}
+      className={`feature-list-container`}
+      style={{
+        visibility: open ? "visible" : "hidden",
+        maxHeight: open ? "100%" : 0,
+      }}
     >
       {features.map((d, i) => {
         return h(

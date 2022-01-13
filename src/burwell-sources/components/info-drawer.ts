@@ -64,6 +64,7 @@ function InfoDrawer() {
 
   function CloseBtn() {
     return h(Button, {
+      style: { marginRight: "-12px" },
       minimal: true,
       onClick: () => setOpen(!open),
       icon: open ? "chevron-up" : "chevron-down",
