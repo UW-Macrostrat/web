@@ -8,6 +8,7 @@ import { useSelector } from "react-redux";
 import { Spinner } from "@blueprintjs/core";
 import "./styles/index.styl";
 import { useAppActions } from "~/map-interface/app-state";
+import BurwellSources from "~/burwell-sources";
 
 //const _ColumnPage = loadable(import("./columns"));
 //const ColumnPage = () => h(Suspense, { fallback: h(Spinner) }, h(_ColumnPage));
@@ -36,7 +37,8 @@ const App = () => {
 
   return h(Router, { basename: MACROSTRAT_BASE_URL }, [
     h("div#app-holder", [
-      h(Route, { path: "/", component: MapPage }),
+      h(Route, { path: "/", component: MapPage, exact: true }),
+      h(Route, { path: "/sources", component: BurwellSources }),
       // h(Route, {
       //   path: "/globe",
       //   component: GlobePage,

@@ -121,13 +121,9 @@ const AboutText = (props) => {
         </li>
         <li>
           Geologic map data adapted from{" "}
-          <a
-            className="ref-link"
-            href="https://macrostrat.org/api/v2/defs/sources?all"
-            target="_blank"
-          >
+          <NavLink className="ref-link" to="/sources">
             various providers
-          </a>{" "}
+          </NavLink>{" "}
           as noted.
         </li>
       </ul>
