@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+deploy_dir=/data/projects/macrostrat/map
+
+npm run clean
+export PUBLIC_URL=/map/
+export NODE_ENV=production
+npm run bundle
+
+rsync -azv --delete dist/ steno:$deploy_dir/
+
+ssh steno "cd $deploy_dir && ln -s /data/projects/burwell-sources/ sources"
+ssh steno "cd $deploy_dir && ls -la"
+
+##/data/projects/burwell-sources/

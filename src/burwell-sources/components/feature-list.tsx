@@ -1,4 +1,5 @@
 import React from "react";
+import { NavLink } from "react-router-dom";
 import { useBurwellActions } from "~/burwell-sources/app-state";
 import { ExpansionPanel } from "~/map-interface/components/expansion-panel";
 import h from "@macrostrat/hyper";
@@ -38,26 +39,16 @@ function FeatureTable(props) {
 }
 
 function ViewMap({ feature }) {
-  return (
-    <a
-      href={
-        settings.uri +
-        "/burwell#" +
-        zoomMap[feature.properties.scale] +
-        "/" +
-        (feature.geometry.coordinates[0][0][1] +
-          feature.geometry.coordinates[0][2][1]) /
-          2 +
-        "/" +
-        (feature.geometry.coordinates[0][0][0] +
-          feature.geometry.coordinates[0][2][0]) /
-          2
-      }
-      target="_blank"
-    >
-      View map
-    </a>
-  );
+  const { geometry, properties } = feature;
+  const { coordinates } = geometry;
+  //                       lon      lat     zoom
+  // #layers=bedrock,lines&x=5.012&y=29.031&z=1.45
+  const zoom = zoomMap[properties.scale];
+  const lat = (coordinates[0][0][1] + coordinates[0][2][1]) / 2;
+  const long = (coordinates[0][0][0] + coordinates[0][2][0]) / 2;
+  const to = `/#layers=bedrock,lines&x=${long}&y=${lat}&z=${zoom}`;
+
+  return <NavLink to={to}>View map</NavLink>;
 }
 
 function FeatureContent({ d, activateFeature }) {
