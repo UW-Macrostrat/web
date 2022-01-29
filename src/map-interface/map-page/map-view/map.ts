@@ -85,10 +85,10 @@ class Map extends Component<MapProps, {}> {
         ? SETTINGS.satelliteMapURL
         : SETTINGS.baseMapURL,
       maxZoom: 14,
-      maxTileCacheSize: 0,
+      //maxTileCacheSize: 0,
       logoPosition: "bottom-right",
-      antialias: true,
-      optimizeForTerrain: true,
+      //antialias: true,
+      //optimizeForTerrain: true,
     });
 
     const pos = this.props.mapPosition;
@@ -117,7 +117,7 @@ class Map extends Component<MapProps, {}> {
     //this.map.dragRotate.disable();
 
     // disable map rotation using touch rotation gesture
-    this.map.touchZoomRotate.disableRotation();
+    //this.map.touchZoomRotate.disableRotation();
 
     this.map.on("sourcedataloading", (evt) => {
       if (this.props.mapIsLoading) return;
@@ -144,7 +144,7 @@ class Map extends Component<MapProps, {}> {
         }
       });
 
-      this.enable3DTerrain.bind(this)();
+      //this.enable3DTerrain.bind(this)();
 
       // The initial draw of the layers
       mapStyle.layers.forEach((layer) => {
