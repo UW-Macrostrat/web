@@ -12,7 +12,7 @@ function MacrostratLinkedData(props) {
   return h(
     ExpansionPanel,
     {
-      classes: { root: "regional-panel" },
+      className: "regional-panel",
       title: "Macrostrat-linked data",
       helpText: "via Macrostrat",
       expanded: bedrockMatchExpanded,
@@ -48,21 +48,19 @@ function AgeChipRenderer(props) {
 }
 
 function MacrostratAgeChipRenderer(props) {
-  const { source } = props;
+  const { macrostrat = {}, color } = props?.source;
+  const { b_age, t_age, b_int, t_int } = macrostrat;
 
-  return h.if(source.macrostrat && source.macrostrat.b_age)(
-    "div.macrostrat-detail",
-    [
-      h("div.expansion-summary-title", "Age: "),
-      h(MacrostratAgeChip, {
-        b_int: source.macrostrat.b_int,
-        t_int: source.macrostrat.t_int,
-        b_age: source.macrostrat.b_age,
-        t_age: source.macrostrat.t_age,
-        color: source.color,
-      }),
-    ]
-  );
+  return h.if(b_age)("div.macrostrat-detail", [
+    h("div.expansion-summary-title", "Age: "),
+    h(MacrostratAgeChip, {
+      b_int,
+      t_int,
+      b_age,
+      t_age,
+      color,
+    }),
+  ]);
 }
 
 function MatchBasis(props) {
