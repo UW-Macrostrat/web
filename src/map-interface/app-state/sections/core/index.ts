@@ -40,8 +40,6 @@ const defaultState: CoreState = {
   fetchingElevation: false,
   elevationCancelToken: null,
   fetchingPbdb: false,
-  pbdbCancelToken: null,
-
   infoMarkerLng: -999,
   infoMarkerLat: -999,
   mapInfo: [],
@@ -441,27 +439,16 @@ export function coreReducer(
 
     // Handle PBDB
     case "start-pbdb-query":
-      if (state.pbdbCancelToken) {
-        state.pbdbCancelToken.cancel();
-      }
       return {
         ...state,
         fetchingPbdb: true,
-        pbdbCancelToken: action.cancelToken,
       };
-
-    case "update-pbdb-query":
-      if (state.pbdbCancelToken) {
-        state.pbdbCancelToken.cancel();
-      }
-      return { ...state, pbdbCancelToken: action.cancelToken };
 
     case "received-pbdb-query":
       return {
         ...state,
         fetchingPbdb: false,
         pbdbData: action.data,
-        pbdbCancelToken: null,
         infoDrawerOpen: true,
       };
 
