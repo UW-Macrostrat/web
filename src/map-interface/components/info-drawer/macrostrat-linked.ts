@@ -1,36 +1,34 @@
 import h from "@macrostrat/hyper";
 import { AgeChip, AttrChip, MacrostratAgeChip } from "../info-blocks";
-import { ExpansionPanel } from "../expansion-panel";
+import { ExpansionPanel, SubExpansionPanel } from "../expansion-panel";
 
 function MacrostratLinkedData(props) {
   const { mapInfo, bedrockMatchExpanded, source } = props;
 
   if (!mapInfo.mapData[0]) return h("div");
 
-  return h("span", [
-    h(
-      ExpansionPanel,
-      {
-        classes: { root: "regional-panel" },
-        title: "Macrostrat-linked data",
-        helpText: "via Macrostrat",
-        expanded: bedrockMatchExpanded,
-      },
-      [
-        h("div", { classes: expansionPanelDetailClasses }, [
-          h(AgeChipRenderer, { mapInfo, source }),
-          h(MacrostratAgeChipRenderer, { source }),
-          h(Thickness, { source }),
-          h(MinorFossilCollections, { source }),
-          h(FossilOccs, { source }),
-          h(MatchBasis, { source }),
-          h(LithsAndClasses, { source }),
-          h(Environments, { source }),
-          h(Economy, { source }),
-        ]),
-      ]
-    ),
-  ]);
+  return h(
+    ExpansionPanel,
+    {
+      classes: { root: "regional-panel" },
+      title: "Macrostrat-linked data",
+      helpText: "via Macrostrat",
+      expanded: bedrockMatchExpanded,
+    },
+    [
+      h("div", { classes: expansionPanelDetailClasses }, [
+        h(AgeChipRenderer, { mapInfo, source }),
+        h(MacrostratAgeChipRenderer, { source }),
+        h(Thickness, { source }),
+        h(MinorFossilCollections, { source }),
+        h(FossilOccs, { source }),
+        h(MatchBasis, { source }),
+        h(LithsAndClasses, { source }),
+        h(Environments, { source }),
+        h(Economy, { source }),
+      ]),
+    ]
+  );
 }
 
 const expansionPanelDetailClasses = {
@@ -70,11 +68,10 @@ function MatchBasis(props) {
   if (!source.macrostrat.strat_names) return h("div");
 
   return h.if(source.macrostrat && source.macrostrat.strat_names)(
-    ExpansionPanel,
+    SubExpansionPanel,
     {
       title: "Match basis",
       helpText: source.macrostrat.strat_names[0].rank_name,
-      subheader: true,
     },
     [
       h("p.expansion-panel-detail-header", ["All matched names:"]),
@@ -165,11 +162,10 @@ function LithsAndClasses(props) {
   if (!liths) return h("div");
 
   return h.if(liths && liths.length > 0)(
-    ExpansionPanel,
+    SubExpansionPanel,
     {
       title: "Lithology",
       sideComponent: h(LithTypes, { lith_types }),
-      subheader: true,
     },
     [
       h("p.expansion-panel-detail-header", ["Matched lithologies: "]),
@@ -247,10 +243,9 @@ function Economy(props) {
   if (!econs) return h("div");
 
   return h.if(econs && econs.length > 0)(
-    ExpansionPanel,
+    SubExpansionPanel,
     {
       title: "Economy ",
-      subheader: true,
       sideComponent: h(EconType, { econ_types }),
     },
     [

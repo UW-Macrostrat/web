@@ -1,43 +1,51 @@
 
 .expansion-panel
   padding 0
-  align-items: center;
   flex-wrap: wrap;
-  &:first-child
-    :global(.expansion-panel-header)
-      border-top: 1px solid var(--accent-hover-color);
-  :global
-    .sub-panel-header
+  margin-top -1px;
+  &.collapsed
+    .expansion-panel-header
+      border-bottom-width: 0;
+
+
+  &.sub-expansion-panel
+    margin 0 calc(var(--panel-padding-h) * -1)
+    .expansion-panel-header
       background-color var(--accent-secondary-color)
       padding 5px
-      border-radius 5px 0 0 5px
       cursor pointer
+      border-top 1px solid var(--accent-color)
+      border-bottom 1px solid var(--accent-color)
       &:hover
         background-color var(--accent-secondary-hover-color)
       display flex
       padding 0.1em 0.5em
       flex-direction row
       align-items center
-      .title
-        flex-grow 1
-    .expansion-panel-header
-      border-bottom 1px solid var(--accent-border-color)
-      background-color var(--accent-color)
-      padding 10px
-      z-index: 1;
-      position sticky
-      top 0px
-      cursor pointer
-      &:hover
-        background-color var(--accent-hover-color)
-      display flex
-      flex-direction row
-      align-items center
-      .title
-        flex-grow 1
+
+.expansion-panel-header
+  border-top: 1px solid var(--accent-hover-color);
+  border-bottom 1px solid var(--accent-border-color)
+  background-color var(--accent-color)
+  padding 10px
+  z-index: 1;
+  position sticky
+  top 0px
+  cursor pointer
+  &:hover
+    background-color var(--accent-hover-color)
+  display flex
+  flex-direction row
+  align-items center
+  .title
+    flex-grow 1
 
 .expansion-children
-  margin 5px 10px 10px
+  padding 5px 10px 10px
+
+.expansion-panel-subtext
+  font-size: 85%;
+  font-weight: 400;
 
 :global
   .expansion-panel-root
@@ -65,4 +73,3 @@
     margin: 0;
     margin-top: 5px;
     font-size: 80%;
-
