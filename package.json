@@ -40,6 +40,8 @@
     "lerna": "^3.22.1",
     "mini-css-extract-plugin": "^2.4.5",
     "react-hot-loader": "^4.13.0",
+    "sass": "^1.49.0",
+    "sass-loader": "^12.4.0",
     "style-loader": "^3.2.1",
     "stylus": "^0.55.0",
     "stylus-loader": "^6.2.0",

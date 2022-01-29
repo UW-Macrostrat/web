@@ -78,6 +78,8 @@ if (!devMode) {
   finalStyleLoader = MiniCssExtractPlugin.loader;
 }
 
+const styleLoaders = [finalStyleLoader, cssModuleLoader];
+
 module.exports = {
   mode,
   devServer: {
@@ -96,12 +98,16 @@ module.exports = {
       },
       {
         test: /\.styl$/,
-        use: [finalStyleLoader, cssModuleLoader, "stylus-loader"],
+        use: [...styleLoaders, "stylus-loader"],
         exclude: /node_modules/,
       },
       {
+        test: /\.(sass|scss)$/,
+        use: [...styleLoaders, "sass-loader"],
+      },
+      {
         test: /\.css$/,
-        use: [finalStyleLoader, cssModuleLoader],
+        use: styleLoaders,
         exclude: /node_modules/,
       },
       { test: /\.css$/, use: [finalStyleLoader, "css-loader"] },
