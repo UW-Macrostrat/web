@@ -1,7 +1,9 @@
 import React from "react";
 import { Tabs, Tab } from "@blueprintjs/core";
 import { makeOccurrenceTree } from "../../../utils";
-import h from "@macrostrat/hyper";
+import hyper from "@macrostrat/hyper";
+import styles from "./main.module.sass";
+const h = hyper.styled(styles);
 
 export default function PBDBCollections({ data }) {
   if (data == null) return null;
@@ -13,8 +15,9 @@ export default function PBDBCollections({ data }) {
 
 function FossilCollection({ col }) {
   let occurrenceTree = makeOccurrenceTree(col.occurrences);
-  return (
-    <div className="fossil-collection">
+  return h(
+    "div.fossil-collection",
+    <>
       <Header col={col} />
       <Tabs>
         <Tab title="Info" panel={<InfoPanel col={col} />} id="info" />
@@ -22,10 +25,10 @@ function FossilCollection({ col }) {
           id="occ"
           title={`Occurrences (${col.occurrences.length})`}
           disabled={col.occurrences.length == 0}
-          panel={<OccurancesPanel occurrenceTree={occurrenceTree} />}
+          panel={<OccurencesPanel occurrenceTree={occurrenceTree} />}
         />
       </Tabs>
-    </div>
+    </>
   );
 }
 
@@ -96,7 +99,7 @@ function InfoPanel(props) {
   );
 }
 
-function OccurancesPanel(props) {
+function OccurencesPanel(props) {
   const { occurrenceTree } = props;
 
   return (

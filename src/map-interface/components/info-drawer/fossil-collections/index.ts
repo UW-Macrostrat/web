@@ -11,7 +11,7 @@ export function FossilCollections(props) {
   return h(
     ExpansionPanel,
     {
-      classes: { root: "regional-panel" },
+      className: "regional-panel",
       title: "Fossil collections",
       helpText: "via PBDB",
       expanded,
