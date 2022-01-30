@@ -24,6 +24,7 @@ interface MapProps {
 }
 
 class Map extends Component<MapProps, {}> {
+  map: mapboxgl.Map;
   constructor(props) {
     super(props);
     this.swapBasemap = this.swapBasemap.bind(this);

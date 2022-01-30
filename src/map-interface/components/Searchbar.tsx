@@ -1,5 +1,12 @@
-import React from "react";
-import { Navbar, Button, InputGroup, Card, Spinner } from "@blueprintjs/core";
+import React, { useMemo } from "react";
+import {
+  Navbar,
+  Button,
+  InputGroup,
+  Card,
+  Spinner,
+  useHotkeys,
+} from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
 import { useAppActions, useSearchState } from "../app-state";
 import { useSelector } from "react-redux";
@@ -120,7 +127,12 @@ function Searchbar(props) {
   }
 
   return (
-    <div className="searchbar-holder">
+    <div
+      tabIndex={0}
+      className="searchbar-holder"
+      onKeyDown={handleKeyDown}
+      onKeyUp={handleKeyUp}
+    >
       <div className="navbar-holder">
         <Navbar className="searchbar panel">
           <InputGroup

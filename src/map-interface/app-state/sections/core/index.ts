@@ -35,6 +35,7 @@ const defaultState: CoreState = {
   fetchingGdd: false,
   gddCancelToken: null,
   isSearching: false,
+  inputFocus: false,
   term: "",
   searchCancelToken: null,
   fetchingElevation: false,
@@ -163,6 +164,9 @@ export function coreReducer(
     case "clear-filters":
       return updateURI({ ...state, filters: [] });
     case "start-map-query":
+      if (state.inputFocus) {
+        return { ...state, inputFocus: false };
+      }
       if (state.mapInfoCancelToken) {
         state.mapInfoCancelToken.cancel();
       }

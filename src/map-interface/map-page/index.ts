@@ -1,12 +1,18 @@
 import { Suspense } from "react";
 // Import other components
 import MapContainer from "./map-view";
-import hyper from "@macrostrat/hyper";
+import hyper, { compose } from "@macrostrat/hyper";
 import Searchbar, { SearchResults } from "../components/searchbar";
 import MenuContainer from "./menu";
 import InfoDrawer from "../components/info-drawer";
 import ElevationChart from "../components/elevation-chart";
-import { ButtonGroup, Button, Spinner } from "@blueprintjs/core";
+import {
+  ButtonGroup,
+  Button,
+  Spinner,
+  Collapse,
+  HotkeysProvider,
+} from "@blueprintjs/core";
 import { useSelector, useDispatch } from "react-redux";
 import loadable from "@loadable/component";
 import { useSearchState, MapBackend } from "../app-state";
@@ -77,14 +83,19 @@ const MapTypeSelector = () => {
 const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   const { inputFocus } = useSearchState();
 
+  /* We apply a custom style to the panel container when we are interacting
+    with the search bar, so that we can block map interactions until search
+    bar focus is lost */
+  const className = inputFocus ? "searching" : null;
+
   return h("div.map-page", [
     h("div.main-ui", [
       h(MapView, { backend }),
-      h("div.panels-overlay", [
+      h("div.panels-overlay", { className }, [
         h("div.left-stack", [
           h("div.panel-container", [
             h(Searchbar, null),
-            h.if(inputFocus)(SearchResults),
+            h(Collapse, { isOpen: inputFocus }, [h(SearchResults)]),
             h.if(!inputFocus)(MenuContainer, null),
           ]),
         ]),
@@ -95,5 +106,7 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   ]);
 };
 
+const _MapPage = compose(HotkeysProvider, MapPage);
+
 export { MapBackend };
-export default MapPage;
+export default _MapPage;

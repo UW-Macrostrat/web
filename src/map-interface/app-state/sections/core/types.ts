@@ -169,6 +169,7 @@ export interface CoreState extends MapState, AsyncRequestState {
   gddInfo: any[];
   searchResults: any;
   elevationData: any;
+  inputFocus: boolean;
   elevationMarkerLocation: any;
   pbdbData: any[];
   mapCenter: MapCenterInfo;
