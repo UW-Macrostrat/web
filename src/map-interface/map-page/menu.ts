@@ -152,8 +152,6 @@ const Menu = (props) => {
     runAction({ type: "toggle-menu" });
   };
 
-  let exitTransition = { exit: 300 };
-
   const stack = [useMainPanel(), ...panelStack];
 
   if (window.innerWidth <= 768 && infoDrawerOpen) {
@@ -165,38 +163,37 @@ const Menu = (props) => {
     {
       isOpen: menuOpen,
       onClose: toggleMenu,
-      title: "Layers",
-      transitionDuration: exitTransition,
+      renderHeader: () =>
+        h(CloseableCard.Header, [
+          h.if(stack.length == 1)("div.buttons", [
+            h(TabButton, {
+              icon: "layers",
+              text: "Layers",
+              tab: MenuPanel.LAYERS,
+            }),
+            // Settings are mostly for globe, which is currently disabled
+            //h(TabButton, {icon: "settings", text: "Settings", tab: MenuPanel.SETTINGS}),
+            h(TabButton, {
+              icon: "info-sign",
+              text: "About",
+              tab: MenuPanel.ABOUT,
+            }),
+          ]),
+          h.if(stack.length > 1)([
+            h(
+              Button,
+              {
+                icon: "chevron-left",
+                minimal: true,
+                onClick: () => runAction({ type: "close-panel" }),
+              },
+              stack[stack.length - 2]?.title ?? "Back"
+            ),
+            h("h2.panel-title", stack[stack.length - 1]?.title),
+          ]),
+        ]),
     },
     [
-      h(CloseableCard.Header, [
-        h.if(stack.length == 1)("div.buttons", [
-          h(TabButton, {
-            icon: "layers",
-            text: "Layers",
-            tab: MenuPanel.LAYERS,
-          }),
-          // Settings are mostly for globe, which is currently disabled
-          //h(TabButton, {icon: "settings", text: "Settings", tab: MenuPanel.SETTINGS}),
-          h(TabButton, {
-            icon: "info-sign",
-            text: "About",
-            tab: MenuPanel.ABOUT,
-          }),
-        ]),
-        h.if(stack.length > 1)([
-          h(
-            Button,
-            {
-              icon: "chevron-left",
-              minimal: true,
-              onClick: () => runAction({ type: "close-panel" }),
-            },
-            stack[stack.length - 2]?.title ?? "Back"
-          ),
-          h("h2.panel-title", stack[stack.length - 1]?.title),
-        ]),
-      ]),
       h(PanelStack2, {
         showPanelHeader: false,
         renderActivePanelOnly: true,

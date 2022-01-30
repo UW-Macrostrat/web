@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import {
   Navbar,
   Button,
@@ -6,9 +6,10 @@ import {
   Card,
   Spinner,
   useHotkeys,
+  NonIdealState,
 } from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
-import { useAppActions, useSearchState } from "../app-state";
+import { useAppActions, useMenuState, useSearchState } from "../app-state";
 import { useSelector } from "react-redux";
 import { useEffect } from "react";
 import { SubtleFilterText } from "./filters-panel";
@@ -33,14 +34,19 @@ function SearchResults() {
   const { searchResults } = useSearchState();
   const runAction = useAppActions();
 
+  // This is crazy
+  const onSelectResult = useCallback(
+    (f) => {
+      runAction({ type: "set-search-term", term: "" });
+      runAction({ type: "async-add-filter", filter: f });
+      runAction({ type: "received-search-query", data: null });
+    },
+    [runAction]
+  );
+
   if (searchResults == null) {
-    return h(Card, { className: "no-results" }, [h(SearchGuidance)]);
+    return h(SearchGuidance);
   }
-  const onSelectResult = (f) => {
-    runAction({ type: "set-search-term", term: "" });
-    runAction({ type: "async-add-filter", filter: f });
-    runAction({ type: "received-search-query", data: null });
-  };
 
   const resultCategories = new Set(searchResults.map((d) => d.category));
   // Force the results into a particular order
@@ -65,33 +71,38 @@ function SearchResults() {
     });
   });
 
-  return h("div", [
-    h.if(searchResults.length == 0)(Card, { className: "no-results" }, [
-      "No results, try again.",
-    ]),
-    h.if(searchResults.length > 0)(Card, { className: "search-results" }, [
-      resultCategoriesArr.map((cat, i) => {
-        return h("div", { key: `subheader-${i}` }, [
-          h("div.searchresult-header", [h("div.text", [categoryTitles[cat]])]),
-          h("ul", [categoryResults[i]]),
-        ]);
-      }),
-    ]),
+  if (searchResults.length === 0) {
+    return h("div.no-results", "No results found");
+  }
+
+  return h("div.search-results", [
+    resultCategoriesArr.map((cat, i) => {
+      return h("div", { key: `subheader-${i}` }, [
+        h("div.searchresult-header", [h("div.text", [categoryTitles[cat]])]),
+        h("ul", [categoryResults[i]]),
+      ]);
+    }),
   ]);
 }
 
 function MenuButton() {
   const runAction = useAppActions();
   const mapIsLoading = useSelector((state) => state.core.mapIsLoading);
+  const { menuOpen } = useMenuState();
 
-  return h(Button, {
+  let buttonProps = {
     icon: mapIsLoading ? h(Spinner, { size: 16 }) : "menu",
-    "aria-label": "Menu",
     large: true,
     minimal: true,
     onClick() {
       runAction({ type: "toggle-menu" });
     },
+  };
+
+  return h(Button, {
+    ...buttonProps,
+    "aria-label": "Menu",
+    active: menuOpen && !mapIsLoading,
   });
 }
 
@@ -127,12 +138,7 @@ function Searchbar(props) {
   }
 
   return (
-    <div
-      tabIndex={0}
-      className="searchbar-holder"
-      onKeyDown={handleKeyDown}
-      onKeyUp={handleKeyUp}
-    >
+    <div className="searchbar-holder">
       <div className="navbar-holder">
         <Navbar className="searchbar panel">
           <InputGroup

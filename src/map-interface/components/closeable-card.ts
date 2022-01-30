@@ -14,6 +14,7 @@ const CloseableCard = (props) => {
     title,
     transitionDuration,
     showHeader = true,
+    renderHeader,
     children,
     ...rest
   } = props;
@@ -25,15 +26,11 @@ const CloseableCard = (props) => {
   // Set header from "CloseableCardHeader" unless  not set,
   // otherwise use "title"
   let header = null;
-  const newChildren = Children.map(children, function (c) {
-    if (c.type === CloseableCardHeader) {
-      header = c;
-      return null;
-    }
-    return c;
-  });
+  if (renderHeader != null) {
+    header = renderHeader();
+  }
 
-  if (header == null) {
+  if (header == null && title != null) {
     if (title != null) {
       title = h("h4", title);
     }
@@ -52,7 +49,7 @@ const CloseableCard = (props) => {
         onClick: onClose,
       }),
     ]),
-    h("div.card-content", null, newChildren),
+    h("div.card-content", null, children),
   ]);
 };
 

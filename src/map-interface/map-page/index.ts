@@ -12,11 +12,13 @@ import {
   Spinner,
   Collapse,
   HotkeysProvider,
+  Card,
 } from "@blueprintjs/core";
 import { useSelector, useDispatch } from "react-redux";
 import loadable from "@loadable/component";
-import { useSearchState, MapBackend } from "../app-state";
+import { useSearchState, MapBackend, useMenuState } from "../app-state";
 import styles from "./main.module.styl";
+import { CloseableCard } from "../components/closeable-card";
 
 const h = hyper.styled(styles);
 
@@ -80,8 +82,17 @@ const MapTypeSelector = () => {
   ]);
 };
 
+function MenuPanel() {
+  const { inputFocus } = useSearchState();
+  const { menuOpen } = useMenuState();
+  return h(Collapse, { isOpen: inputFocus || menuOpen }, [
+    //h(CloseableCard, { className: "menu-card", isOpen: true }, []),
+  ]);
+}
+
 const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   const { inputFocus } = useSearchState();
+  const { menuOpen } = useMenuState();
 
   /* We apply a custom style to the panel container when we are interacting
     with the search bar, so that we can block map interactions until search
@@ -95,8 +106,8 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
         h("div.left-stack", [
           h("div.panel-container", [
             h(Searchbar, null),
-            h(Collapse, { isOpen: inputFocus }, [h(SearchResults)]),
-            h.if(!inputFocus)(MenuContainer, null),
+            h.if(!inputFocus && menuOpen)(MenuContainer),
+            h.if(inputFocus)(Card, null, h(SearchResults)),
           ]),
         ]),
         h(InfoDrawer, null),
