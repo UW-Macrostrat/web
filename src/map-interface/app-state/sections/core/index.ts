@@ -55,7 +55,7 @@ const defaultState: CoreState = {
   mapCenter: {
     type: null,
   },
-
+  mapUse3D: false,
   filtersOpen: false,
   filters: [],
   filteredColumns: {},
@@ -342,6 +342,8 @@ export function coreReducer(
         [op]: [action.layer],
       };
       return updateURI(update(state, { mapLayers }));
+    case "toggle-map-3d":
+      return { ...state, mapUse3D: !state.mapUse3D };
     case "toggle-elevation-chart":
       return {
         ...state,

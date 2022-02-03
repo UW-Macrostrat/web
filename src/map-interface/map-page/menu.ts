@@ -12,6 +12,7 @@ import {
   IconName,
   PanelStack2,
   Panel,
+  Switch,
 } from "@blueprintjs/core";
 import { CloseableCard } from "../components/closeable-card";
 import { useSelector, useDispatch } from "react-redux";

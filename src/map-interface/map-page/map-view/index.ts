@@ -89,6 +89,11 @@ function MapContainer(props) {
     }
   }, [filters]);
 
+  // Switch to 3D mode at high zoom levels or with a rotated map
+  const pitch = mapPosition.camera.pitch ?? 0;
+  const alt = mapPosition.camera.altitude;
+  const mapUse3D = (pitch > 0 && alt < 200000) || alt < 80000;
+
   return h(_Map, {
     filters,
     filteredColumns,
@@ -107,6 +112,7 @@ function MapContainer(props) {
     mapIsLoading,
     mapRef,
     ...props,
+    use3D: mapUse3D,
   });
 }
 

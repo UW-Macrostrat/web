@@ -48,6 +48,7 @@ type GetInitialMapState = { type: "get-initial-map-state" };
 type MapLoading = { type: "map-loading" };
 type MapIdle = { type: "map-idle" };
 type ToggleLayer = { type: "toggle-map-layer"; layer: MapLayer };
+type ToggleMap3D = { type: "toggle-map-3d" };
 
 export type GotInitialMapState = {
   type: "got-initial-map-state";
@@ -61,4 +62,5 @@ export type MapAction =
   | SetMapBackend
   | MapLoading
   | MapIdle
-  | ToggleLayer;
+  | ToggleLayer
+  | ToggleMap3D;
