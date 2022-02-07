@@ -10,8 +10,16 @@ import { Physiography } from "./physiography";
 import { GddExpansion } from "./gdd";
 import { useAppState } from "~/map-interface/app-state";
 import styles from "./main.module.styl";
+import { ReactChild } from "react";
 
 const h = hyper.styled(styles);
+
+function InfoDrawerContainer({ children }: { children: ReactChild }) {
+  return h("div.infodrawer-container", [
+    h(Card, { className: "infodrawer" }, [children]),
+    h("div.spacer"),
+  ]);
+}
 
 function InfoDrawer() {
   const {
@@ -62,41 +70,39 @@ function InfoDrawer() {
   if (!infoDrawerOpen) {
     return null;
   }
-  return h("div.infodrawer-container", [
-    h(Card, { className: "infodrawer" }, [
-      h(InfoDrawerHeader, {
-        mapInfo,
-        infoMarkerLng,
-        infoMarkerLat,
-        onCloseClick: () => runAction({ type: "close-infodrawer" }),
-      }),
-      h("div.infodrawer-body", [
-        h.if(fetchingMapInfo)("div.spinner", [h(Spinner)]),
-        h.if(!fetchingMapInfo)("div", [
-          h(FossilCollections, { data: pbdbData, expanded: true }),
-          h(RegionalStratigraphy, { mapInfo, columnInfo }),
-          h(GeologicMapInfo, {
-            mapInfo,
-            bedrockExpanded: true,
-            source,
-          }),
-          h(MacrostratLinkedData, {
-            mapInfo,
-            bedrockMatchExpanded: true,
-            source,
-          }),
-          h(Physiography, { mapInfo }),
-          h(GddExpansion, {
-            mapInfo,
-            gddInfo,
-            openGdd,
-            fetchingGdd,
-          }),
-        ]),
+  return h(InfoDrawerContainer, [
+    h(InfoDrawerHeader, {
+      mapInfo,
+      infoMarkerLng,
+      infoMarkerLat,
+      onCloseClick: () => runAction({ type: "close-infodrawer" }),
+    }),
+    h("div.infodrawer-body", [
+      h.if(fetchingMapInfo)("div.spinner", [h(Spinner)]),
+      h.if(!fetchingMapInfo)("div", [
+        h(FossilCollections, { data: pbdbData, expanded: true }),
+        h(RegionalStratigraphy, { mapInfo, columnInfo }),
+        h(GeologicMapInfo, {
+          mapInfo,
+          bedrockExpanded: true,
+          source,
+        }),
+        h(MacrostratLinkedData, {
+          mapInfo,
+          bedrockMatchExpanded: true,
+          source,
+        }),
+        h(Physiography, { mapInfo }),
+        h(GddExpansion, {
+          mapInfo,
+          gddInfo,
+          openGdd,
+          fetchingGdd,
+        }),
       ]),
     ]),
-    h("div.spacer"),
   ]);
 }
 
 export default InfoDrawer;
+export { InfoDrawerContainer };
