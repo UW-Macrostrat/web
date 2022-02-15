@@ -1,5 +1,7 @@
 .map-page
   height 100vh
+  /* mobile viewport bug fix */
+  height: -webkit-fill-available;
   width 100vw
   display flex
   flex-direction column
@@ -9,6 +11,7 @@
       display flex
       order 1
       flex-direction: column-reverse
+
 
 .main-ui
   flex-grow 1
