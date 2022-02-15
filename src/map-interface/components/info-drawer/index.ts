@@ -14,11 +14,8 @@ import { ReactChild } from "react";
 
 const h = hyper.styled(styles);
 
-function InfoDrawerContainer({ children }: { children: ReactChild }) {
-  return h("div.infodrawer-container", [
-    h(Card, { className: "infodrawer" }, [children]),
-    h("div.spacer"),
-  ]);
+function InfoDrawerContainer(props) {
+  h(Card, { className: "infodrawer", ...props });
 }
 
 function InfoDrawer() {
@@ -70,7 +67,7 @@ function InfoDrawer() {
   if (!infoDrawerOpen) {
     return null;
   }
-  return h(InfoDrawerContainer, [
+  return h(Card, { className: "infodrawer" }, [
     h(InfoDrawerHeader, {
       mapInfo,
       infoMarkerLng,

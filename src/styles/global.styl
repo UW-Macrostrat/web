@@ -25,22 +25,7 @@ body, .main-container, #react, #app-holder {
   display: none;
 }
 
-.map-holder {
-  z-index: 1;
-  position: absolute;
-  top 0
-  left 0
-  bottom 0
-  right 0
-  height 100%
-}
 
-#map {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 100%;
-}
 
 .mapboxgl-ctrl-bottom-right {
   z-index: 0;
@@ -431,11 +416,6 @@ body, .main-container, #react, #app-holder {
   text-decoration: underline;
   cursor: pointer;
 }
-@media(max-width: 850px) {
-  .infoDrawer {
-    max-width: 100% !important;
-  }
-}
 
 
 /////////////////// SOURCES STYLES ////////
@@ -542,17 +522,12 @@ td {
   margin: 10px;
 }
 
-@media screen and (max-width: 768px) {
-  .infodrawer{
-    max-height: 60%;
-    width: 100%;
-    border-radius: 0px;
-    position: absolute;
-    bottom: 0px;
-  }
-  .infodrawer-container{
-    width: 100vw;
-    height: 100vh;
-    z-index: 200;
-  }
-}
+// @media screen and (max-width: 768px) {
+//   .infodrawer{
+//     max-height: 60%;
+//     width: 100%;
+//     border-radius: 0px;
+//     position: absolute;
+//     bottom: 0px;
+//   }
+// }

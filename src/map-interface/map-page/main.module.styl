@@ -8,6 +8,8 @@
 .main-ui
   flex-grow 1
   position: relative
+  display flex
+  flex-direction: column
 
 .panels-overlay
   position absolute
@@ -27,6 +29,7 @@
   overflow: unset
 
 
+// Rename left-stack to context-stack
 .left-stack
   max-width 34em
   min-width 14em
@@ -37,9 +40,7 @@
   display: flex
   flex-direction: row
   .spacer
-    flex-grow 1
     width 1px
-    pointer-events: none
   .panel-container > *
     transition width 300ms
 
@@ -52,6 +53,26 @@
 .panel-title
   font-size 16px
 
+
+
+.spacer
+  flex-grow 1
+  pointer-events: none
+
+.map-view-container
+  flex-grow 1
+  position: relative
+
+:global
+  #map {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+  }
+
+
+// Mobile-first styling
 @media only screen and (max-width: 768px) {
   /* For mobile phones: */
   .panels-overlay{
@@ -61,3 +82,24 @@
     right: 0;
   }
 }
+
+@media screen and (min-width: 768px)
+  .infodrawer-container
+    width 30em
+    position absolute
+    right 0px
+    top 0px
+    bottom: 0px
+    pointer-events none
+    display flex
+    flex-direction column
+
+  // .map-holder
+  //   z-index: 1;
+  //   position: absolute;
+  //   top 0
+  //   left 0
+  //   bottom 0
+  //   right 0
+  //   height 100%
+

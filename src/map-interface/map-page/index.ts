@@ -100,17 +100,18 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   const className = inputFocus ? "searching" : null;
 
   return h("div.map-page", [
-    h("div.main-ui", [
-      h(MapView, { backend }),
-      h("div.panels-overlay", { className }, [
-        h("div.left-stack", [
-          h("div.panel-container", [
-            h(Searchbar, null),
-            h.if(!inputFocus && menuOpen)(MenuContainer),
-            h.if(inputFocus)(Card, null, h(SearchResults)),
-          ]),
+    h("div.main-ui", { className }, [
+      h("div.context-stack", [
+        h("div.panel-container", [
+          h(Searchbar, null),
+          h.if(!inputFocus && menuOpen)(MenuContainer),
+          h.if(inputFocus)(Card, null, h(SearchResults)),
         ]),
+      ]),
+      h("div.map-view-container.main-view", [h(MapView, { backend })]),
+      h("div.detail-stack.infodrawer-container", [
         h(InfoDrawer, null),
+        h("div.spacer"),
       ]),
     ]),
     h("div.bottom", null, h(ElevationChart, null)),

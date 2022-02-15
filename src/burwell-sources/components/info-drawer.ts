@@ -70,11 +70,15 @@ function InfoDrawer() {
       icon: open ? "chevron-up" : "chevron-down",
     });
   }
-  return h(InfoDrawerContainer, [
-    h(Header, { len, btn: h(CloseBtn) }),
-    h.if(len == 0)(FeatureList, { features: data, open }),
-    h.if(len > 0)(FeatureList, { features: selectedFeatures, open }),
-  ]);
+  return h(
+    "div.infodrawer-container",
+    null,
+    h(InfoDrawerContainer, [
+      h(Header, { len, btn: h(CloseBtn) }),
+      h.if(len == 0)(FeatureList, { features: data, open }),
+      h.if(len > 0)(FeatureList, { features: selectedFeatures, open }),
+    ])
+  );
 }
 
 export { InfoDrawer };
