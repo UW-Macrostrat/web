@@ -90,6 +90,7 @@ class Map extends Component<MapProps, {}> {
       logoPosition: "bottom-right",
       antialias: true,
       optimizeForTerrain: true,
+      trackResize: true,
     });
 
     const pos = this.props.mapPosition;

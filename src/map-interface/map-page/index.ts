@@ -99,14 +99,12 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
     bar focus is lost */
   const className = inputFocus ? "searching" : null;
 
-  return h("div.map-page", [
+  return h("div.map-page.mobile-bottom-search", [
     h("div.main-ui", { className }, [
       h("div.context-stack", [
-        h("div.panel-container", [
-          h(Searchbar, null),
-          h.if(!inputFocus && menuOpen)(MenuContainer),
-          h.if(inputFocus)(Card, null, h(SearchResults)),
-        ]),
+        h(Searchbar, null),
+        h.if(!inputFocus && menuOpen)(MenuContainer),
+        h.if(inputFocus)(Card, null, h(SearchResults)),
       ]),
       h("div.map-view-container.main-view", [h(MapView, { backend })]),
       h("div.detail-stack.infodrawer-container", [
