@@ -38,7 +38,7 @@ const App = () => {
   return h(Router, { basename: MACROSTRAT_BASE_URL }, [
     h("div#app-holder", [
       h(Route, { path: "/sources", component: BurwellSources }),
-      h(Route, { path: "/", component: MapPage }),
+      h(Route, { path: "/", component: MapPage, exact: true }),
 
       // h(Route, {
       //   path: "/globe",
