@@ -137,40 +137,38 @@ function Searchbar(props) {
     return h("div");
   }
 
-  return (
-    <div className="searchbar-holder">
-      <div className="navbar-holder">
-        <Navbar className="searchbar panel">
-          <InputGroup
-            large={true}
-            onChange={handleSearchInput}
-            onFocus={gainInputFocus}
-            onBlur={loseInputFocus}
-            rightElement={h(MenuButton)}
-            placeholder="Search Macrostrat..."
-            value={term}
-          />
-        </Navbar>
-      </div>
-      <SubtleFilterText />
-    </div>
-  );
+  return h("div.searchbar-holder", [
+    h("div.navbar-holder", [
+      h(Navbar, { className: "searchbar panel" }, [
+        h(InputGroup, {
+          large: true,
+          onChange: handleSearchInput,
+          onFocus: gainInputFocus,
+          onBlur: loseInputFocus,
+          rightElement: h(MenuButton),
+          placeholder: "Search Macrostrat...",
+          value: term,
+        }),
+      ]),
+    ]),
+
+    h(SubtleFilterText),
+  ]);
 }
 
 function SearchGuidance() {
-  return h(
-    "div.search-guidance.bp3-text",
-    <>
-      <h5>Available categories:</h5>
-      <ul>
-        <li>Time intervals</li>
-        <li>Lithologies</li>
-        <li>Stratigraphic Names</li>
-        <li>Environments (columns only)</li>
-        <li>Places</li>
-      </ul>
-    </>
-  );
+  return h("div.search-guidance.bp3-text", [
+    h("h5", [
+      "Available categories:",
+      h("ul", [
+        h("li", ["Time intervals"]),
+        h("li", ["Lithologies"]),
+        h("li", ["Stratigraphic Names"]),
+        h("li", ["Environments (columns only)"]),
+        h("li", ["Places"]),
+      ]),
+    ]),
+  ]);
 }
 
 export default Searchbar;
