@@ -86,11 +86,10 @@ class Map extends Component<MapProps, {}> {
         ? SETTINGS.satelliteMapURL
         : SETTINGS.baseMapURL,
       maxZoom: 14,
-      maxTileCacheSize: 0,
+      //maxTileCacheSize: 0,
       logoPosition: "bottom-right",
-      antialias: true,
-      optimizeForTerrain: true,
-      trackResize: true,
+      //antialias: true,
+      //optimizeForTerrain: true,
     });
 
     const pos = this.props.mapPosition;
@@ -108,8 +107,6 @@ class Map extends Component<MapProps, {}> {
       );
       cameraOptions.setPitchBearing(pitch, bearing);
 
-      console.log(cameraOptions);
-
       this.map.setFreeCameraOptions(cameraOptions);
     }
 
@@ -119,7 +116,7 @@ class Map extends Component<MapProps, {}> {
     //this.map.dragRotate.disable();
 
     // disable map rotation using touch rotation gesture
-    this.map.touchZoomRotate.disableRotation();
+    //this.map.touchZoomRotate.disableRotation();
 
     this.map.on("sourcedataloading", (evt) => {
       if (this.props.mapIsLoading) return;
@@ -146,7 +143,7 @@ class Map extends Component<MapProps, {}> {
         }
       });
 
-      this.enable3DTerrain.bind(this)();
+      //this.enable3DTerrain.bind(this)();
 
       // The initial draw of the layers
       mapStyle.layers.forEach((layer) => {
@@ -455,7 +452,7 @@ class Map extends Component<MapProps, {}> {
     });
   }
 
-  enable3DTerrain() {
+  enable3DTerrain(shouldEnable: boolean) {
     if (this.map.getSource("mapbox-dem") == null) {
       this.map.addSource("mapbox-dem", {
         type: "raster-dem",
@@ -463,9 +460,17 @@ class Map extends Component<MapProps, {}> {
         tileSize: 512,
         maxzoom: 14,
       });
-
-      // add the DEM source as a terrain layer with exaggerated height
-      this.map.setTerrain({ source: "mapbox-dem", exaggeration: 1 });
+    }
+    // Enable or disable terrain depending on our current desires...
+    const currentTerrain = this.map.getTerrain();
+    if (shouldEnable) {
+      if (currentTerrain == null) {
+        this.map.setTerrain({ source: "mapbox-dem", exaggeration: 1 });
+      }
+    } else {
+      if (currentTerrain != null) {
+        this.map.setTerrain(null);
+      }
     }
 
     // add a sky layer that will show when the map is highly pitched
@@ -480,6 +485,7 @@ class Map extends Component<MapProps, {}> {
         },
       });
     }
+    console.log("Enabling 3d terrain");
   }
 
   // Swap between standard and satellite base layers
@@ -509,7 +515,7 @@ class Map extends Component<MapProps, {}> {
       }
     });
 
-    this.enable3DTerrain.bind(this)();
+    this.enable3DTerrain(this.props.use3D);
 
     // Set the style. `style.load` will be fired after to readd other layers
     this.map.setStyle(toAdd);
@@ -521,6 +527,11 @@ class Map extends Component<MapProps, {}> {
   // We basically intercept the changes, handle them, and tell React to ignore them
   shouldComponentUpdate(nextProps) {
     setMapStyle(this, this.map, mapStyle, nextProps);
+
+    // Check for 3D changes
+    if (nextProps.use3D != this.props.use3D) {
+      this.enable3DTerrain(nextProps.use3D);
+    }
 
     if (
       !nextProps.elevationMarkerLocation.length ||
@@ -593,6 +604,7 @@ class Map extends Component<MapProps, {}> {
         this.swapBasemap.bind(this)(SETTINGS.baseMapURL);
       }
     }
+
     // Handle changes to map filters
     else if (nextProps.filters.length != this.props.filters.length) {
       // If all filters have been removed simply reset the filter states

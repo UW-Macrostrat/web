@@ -35,8 +35,8 @@ const MapView = (props: { backend: MapBackend }) => {
     case MapBackend.CESIUM:
       return h(CesiumView);
     default:
-      const use3D = backend == MapBackend.MAPBOX3;
-      return h(MapContainer, { use3D });
+      //const use3D = backend == MapBackend.MAPBOX3;
+      return h(MapContainer);
   }
 };
 
