@@ -10,7 +10,6 @@ import { Physiography } from "./physiography";
 import { GddExpansion } from "./gdd";
 import { useAppState } from "~/map-interface/app-state";
 import styles from "./main.module.styl";
-import { ReactChild } from "react";
 
 const h = hyper.styled(styles);
 
@@ -18,9 +17,8 @@ function InfoDrawerContainer(props) {
   h(Card, { className: "infodrawer", ...props });
 }
 
-function InfoDrawer() {
+function InfoDrawer(props) {
   const {
-    infoDrawerOpen,
     infoDrawerExpanded,
     mapInfo,
     fetchingMapInfo,
@@ -64,9 +62,6 @@ function InfoDrawer() {
           ref: {},
         };
 
-  if (!infoDrawerOpen) {
-    return null;
-  }
   return h(Card, { className: "infodrawer" }, [
     h(InfoDrawerHeader, {
       mapInfo,

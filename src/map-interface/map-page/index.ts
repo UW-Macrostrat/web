@@ -16,8 +16,14 @@ import {
 } from "@blueprintjs/core";
 import { useSelector, useDispatch } from "react-redux";
 import loadable from "@loadable/component";
-import { useSearchState, MapBackend, useMenuState } from "../app-state";
+import {
+  useSearchState,
+  MapBackend,
+  useMenuState,
+  useAppState,
+} from "../app-state";
 import styles from "./main.module.styl";
+import classNames from "classnames";
 import { CloseableCard } from "../components/closeable-card";
 
 const h = hyper.styled(styles);
@@ -93,22 +99,29 @@ function MenuPanel() {
 const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   const { inputFocus } = useSearchState();
   const { menuOpen } = useMenuState();
+  const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
 
   /* We apply a custom style to the panel container when we are interacting
     with the search bar, so that we can block map interactions until search
-    bar focus is lost */
-  const className = inputFocus ? "searching" : null;
+    bar focus is lost.
+    We also apply a custom style when the infodrawer is open so we can hide
+    the search bar on mobile platforms
+  */
+  const className = classNames({
+    searching: inputFocus,
+    "detail-panel-open": infoDrawerOpen,
+  });
 
-  return h("div.map-page.mobile-bottom-search", [
+  return h("div.map-page", [
     h("div.main-ui", { className }, [
       h("div.context-stack", [
-        h(Searchbar, null),
+        h(Searchbar, { className: "searchbar" }),
         h.if(!inputFocus && menuOpen)(MenuContainer),
         h.if(inputFocus)(Card, null, h(SearchResults)),
       ]),
       h("div.map-view-container.main-view", [h(MapView, { backend })]),
       h("div.detail-stack.infodrawer-container", [
-        h(InfoDrawer, null),
+        h.if(infoDrawerOpen)(InfoDrawer),
         h("div.spacer"),
       ]),
     ]),

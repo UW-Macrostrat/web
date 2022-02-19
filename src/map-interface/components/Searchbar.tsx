@@ -13,6 +13,7 @@ import { useAppActions, useMenuState, useSearchState } from "../app-state";
 import { useSelector } from "react-redux";
 import { useEffect } from "react";
 import { SubtleFilterText } from "./filters-panel";
+import classNames from "classnames";
 
 const categoryTitles = {
   lithology: "Lithologies",
@@ -108,6 +109,7 @@ function MenuButton() {
 
 function Searchbar(props) {
   const runAction = useAppActions();
+  const { className } = props;
   const { term, searchResults, infoDrawerOpen } = useSearchState();
 
   const gainInputFocus = () => {
@@ -133,12 +135,8 @@ function Searchbar(props) {
     }
   }, [term]);
 
-  if (window.innerWidth <= 768 && infoDrawerOpen) {
-    return h("div");
-  }
-
   return (
-    <div className="searchbar-holder">
+    <div className={classNames("searchbar-holder", className)}>
       <div className="navbar-holder">
         <Navbar className="searchbar panel">
           <InputGroup

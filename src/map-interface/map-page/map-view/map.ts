@@ -87,7 +87,8 @@ class Map extends Component<MapProps, {}> {
         : SETTINGS.baseMapURL,
       maxZoom: 14,
       //maxTileCacheSize: 0,
-      logoPosition: "bottom-right",
+      logoPosition: "bottom-left",
+      trackResize: true,
       //antialias: true,
       //optimizeForTerrain: true,
     });
@@ -736,7 +737,7 @@ class Map extends Component<MapProps, {}> {
   }
 
   render() {
-    return h("div.map-holder", null, h("div#map"));
+    return h("div.mapbox-map#map");
   }
 }
 
