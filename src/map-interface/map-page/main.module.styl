@@ -26,7 +26,7 @@ This stylesheet the overall application page layout.
   display: flex
   flex-direction: column
   &>div
-    flex 1
+    flex-shrink 1
   &>.searchbar
     flex 0
 
@@ -52,8 +52,6 @@ This stylesheet the overall application page layout.
   flex-grow 1
   position: relative
 
-.infodrawer-container
-  max-height: 60%
 
 .searchbar-holder
   margin-bottom 0.5em
@@ -110,6 +108,7 @@ This stylesheet the overall application page layout.
     z-index: 100
     &>div
       pointer-events: all
+      margin-bottom: 0.5em
 
   /* Make map fill page rather than containing div,
     by unsetting map position */
