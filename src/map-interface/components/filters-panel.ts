@@ -90,7 +90,7 @@ function SubtleFilterText() {
   const runAction = useAppActions();
 
   if (filters.length == 0) {
-    return h("div");
+    return null;
   }
 
   const filterString = makeFilterString(filters);

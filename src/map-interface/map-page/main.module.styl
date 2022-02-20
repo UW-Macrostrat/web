@@ -1,3 +1,7 @@
+/*
+This stylesheet the overall application page layout.
+*/
+
 .map-page
   height 100vh
   /* mobile viewport bug fix */
@@ -7,27 +11,12 @@
   flex-direction column
   position relative
 
-
-
 .main-ui
   flex 1
   position: relative
   display flex
   flex-direction: column
   max-height 100%
-
-.panels-overlay
-  position absolute
-  top 20px
-  left 20px
-  right 20px
-  bottom 30px
-  z-index 100
-  // Make sure we can still click
-  // on map in background
-  pointer-events none
-  &.searching
-    pointer-events: all
 
 :global(.bp3-panel-stack-view)
   position: relative;
@@ -42,19 +31,7 @@
     flex 0
 
 // Rename left-stack to context-stack
-.left-stack
-  max-width 34em
-  min-width 14em
-  // height 100vh
-  position absolute
-  top 0
-  bottom 0
-  display: flex
-  flex-direction: row
-  .spacer
-    width 1px
-  .panel-container > *
-    transition width 300ms
+
 
 .panel-container
   display flex
@@ -86,13 +63,15 @@
     position: absolute;
     top: 0;
     bottom: 0;
+    left: 0;
+    right: 0;
     width: 100%;
   }
 
 
-// Mobile-first styling
+/* For mobile phones, we want to make the most of screen space,
+ which in some cases means adding complications to the basic page. */
 @media only screen and (max-width: 768px)
-  /* For mobile phones, we want to make the most of screen space... */
 
   // Move the search bar and context panel to the bottom of the screen
   .context-stack
@@ -104,16 +83,38 @@
   .main-ui.detail-panel-open .searchbar
     display none
 
+/* Desktop styling is necessarily much more complicated than mobile
+  to handle a two-column layout. */
 @media screen and (min-width: 768px)
-  .infodrawer-container
+
+  .main-ui
+    flex-direction row
+    padding 1em 1em 2em
+
+  .context-stack
+    max-width 34em
+    min-width 14em
+
+  .detail-stack
     width 30em
-    position absolute
-    right 0px
-    top 0px
-    bottom: 0px
+    // position absolute
+    // right 0px
+    // top 0px
+    // bottom: 0px
     pointer-events none
     display flex
     flex-direction column
+
+  .context-stack,.detail-stack
+    pointer-events: none
+    z-index: 100
+    &>div
+      pointer-events: all
+
+  /* Make map fill page rather than containing div,
+    by unsetting map position */
+  .map-view-container
+    position: unset
 
   // .map-holder
   //   z-index: 1;
