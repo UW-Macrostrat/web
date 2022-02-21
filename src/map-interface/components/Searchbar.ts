@@ -1,13 +1,5 @@
 import React, { useCallback, useRef, useEffect } from "react";
-import {
-  Navbar,
-  Button,
-  InputGroup,
-  Card,
-  Spinner,
-  useHotkeys,
-  NonIdealState,
-} from "@blueprintjs/core";
+import { Navbar, Button, InputGroup, Spinner } from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
 import {
   useAppActions,
@@ -49,9 +41,7 @@ function SearchResults() {
   // This is crazy
   const onSelectResult = useCallback(
     (f) => {
-      runAction({ type: "set-search-term", term: "" });
       runAction({ type: "async-add-filter", filter: f });
-      runAction({ type: "received-search-query", data: null });
     },
     [runAction]
   );
@@ -84,11 +74,10 @@ function SearchResults() {
     h.if(searchResults == null)(SearchGuidance),
     h.if(searchResults != null && searchResults.length === 0)(
       "div.no-results",
-      { ref: resultsRef },
       ["No results found"]
     ),
     h("div.search-results", [
-      resultCategoriesArr.map((cat, i) => {
+      resultCategoriesArr.map((cat: string, i: number) => {
         return h("div", { key: `subheader-${i}` }, [
           h("div.searchresult-header", [h("div.text", [categoryTitles[cat]])]),
           h("ul", [categoryResults[i]]),
@@ -167,8 +156,8 @@ function Searchbar(props) {
   ]);
 }
 
-function SearchGuidance({ ref }: { ref: React.RefObject<any> }) {
-  return h("div.search-guidance.bp3-text", { ref: ref }, [
+function SearchGuidance() {
+  return h("div.search-guidance.bp3-text", [
     h("h5", [
       "Available categories:",
       h("ul", [
