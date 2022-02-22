@@ -87,7 +87,7 @@ function MapContainer(props) {
     if (mapLayers.has(MapLayer.COLUMNS)) {
       runAction({ type: "get-filtered-columns" });
     }
-  }, [filters]);
+  }, [filters, mapLayers]);
 
   return h(_Map, {
     filters,
