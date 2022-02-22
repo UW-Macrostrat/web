@@ -1,5 +1,7 @@
 import "babel-polyfill";
 import "@blueprintjs/core/lib/css/blueprint.css";
+import "./styles/padding.css";
+
 import { FocusStyleManager } from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
 

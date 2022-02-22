@@ -105,11 +105,11 @@ module.exports = {
         test: /\.(sass|scss)$/,
         use: [...styleLoaders, "sass-loader"],
       },
-      {
-        test: /\.css$/,
-        use: styleLoaders,
-        exclude: /node_modules/,
-      },
+      // {
+      //   test: /\.css$/,
+      //   use: styleLoaders,
+      //   exclude: /node_modules/,
+      // },
       { test: /\.css$/, use: [finalStyleLoader, "css-loader"] },
       {
         test: /\.(eot|svg|ttf|woff|woff2)$/,

@@ -10,6 +10,10 @@
   --accent-secondary-color: #EBF1F5
   --accent-secondary-hover-color: #F5F8FA
 
+html, body
+  height 100vh
+  height -webkit-fill-available
+
 body {
   color: #333;
   margin:0;
@@ -19,6 +23,7 @@ body {
 body, .main-container, #react, #app-holder {
   height: 100%;
   width: 100%;
+  min-height: -webkit-fill-available;
 }
 ::-webkit-scrollbar,
 *::-webkit-scrollbar {

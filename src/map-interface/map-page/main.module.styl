@@ -88,6 +88,10 @@ This stylesheet the overall application page layout.
   .main-ui
     flex-direction row
     padding 1em 1em 2em
+    &>*
+      margin-right 0.5em
+      &:last-child
+        margin-right 0
 
   .context-stack
     max-width 34em
@@ -123,4 +127,6 @@ This stylesheet the overall application page layout.
   //   bottom 0
   //   right 0
   //   height 100%
+
+// padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 

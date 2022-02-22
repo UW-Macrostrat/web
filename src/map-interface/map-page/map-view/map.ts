@@ -93,6 +93,12 @@ class Map extends Component<MapProps, {}> {
       //optimizeForTerrain: true,
     });
 
+    const nav = new mapboxgl.NavigationControl({
+      showZoom: false,
+      visualizePitch: false,
+    });
+    this.map.addControl(nav, "bottom-right");
+
     const pos = this.props.mapPosition;
     const { pitch = 0, bearing = 0, altitude } = pos.camera;
     const zoom = pos.target?.zoom;
