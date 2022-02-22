@@ -182,7 +182,7 @@ function getToApply(map): (string | string[])[] {
   return toApply;
 }
 
-function PBDBHelper(map, bounds, zoom, maxClusterZoom = 6): void {
+function PBDBHelper(map, bounds, zoom, maxClusterZoom = 7): void {
   // One for time, one for everything else because
   // time filters require a separate request for each filter
   let timeQuery = [];
@@ -273,7 +273,7 @@ function PBDBHelper(map, bounds, zoom, maxClusterZoom = 6): void {
     } else {
       map.map.getSource("pbdb-points").setData(map.pbdbPoints);
 
-      map.map.getSource("pbdb-clusters").setData(map.pbdbPoints);
+      //map.map.getSource("pbdb-clusters").setData(map.pbdbPoints);
       map.map.setLayoutProperty("pbdb-clusters", "visibility", "none");
       map.map.setLayoutProperty(
         "pbdb-points-clustered",
@@ -281,7 +281,7 @@ function PBDBHelper(map, bounds, zoom, maxClusterZoom = 6): void {
         "visible"
       );
       //    map.map.setLayoutProperty('pbdb-point-cluster-count', 'visibility', 'visible')
-      map.map.setLayoutProperty("pbdb-points", "visibility", "visible");
+      // map.map.setLayoutProperty("pbdb-points", "visibility", "visible");
     }
   });
 }
