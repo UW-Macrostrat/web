@@ -344,7 +344,9 @@ class Map extends React.Component {
         <Loading
           loading={this.state.outcropLoading}
         />
-        <div id='map'></div>
+        <div id='map' className="mapbox-map">
+          <a href="http://mapbox.com/about/maps" className='mapbox-logo' target="_blank">Mapbox</a>
+        </div>
       </div>
 
     );

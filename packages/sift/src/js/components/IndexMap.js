@@ -70,7 +70,9 @@ class IndexMap extends React.Component {
 
   render() {
     return (
-      <div id='indexMap'></div>
+      <div id='indexMap' className="mapbox-map">
+        <a href="http://mapbox.com/about/maps" className='mapbox-logo' target="_blank">Mapbox</a>
+      </div>
     );
   }
 
