@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-outdir="/data/projects/macrostrat/sift-new"
+outdir="/data/projects/macrostrat/sift"
 
 npm run build
 scp ./index.html steno:"$outdir/"
