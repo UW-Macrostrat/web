@@ -2,6 +2,8 @@ import { Action } from "./sections";
 import actionRunner from "./handlers";
 import { useStore, useSelector, useDispatch } from "react-redux";
 import { AppState } from ".";
+import React from "react";
+import { useEffect } from "react";
 
 function useActionDispatch() {
   return useDispatch<React.Dispatch<Action>>();
@@ -39,10 +41,32 @@ function useAppState<T>(selectorFn: (state: AppState) => T): T {
   return useSelector<AppState>(selectorFn) as T;
 }
 
+interface OutsideClickI {
+  ref: React.RefObject<any>;
+  fn: () => void;
+}
+
+function useOutsideClick(props: OutsideClickI) {
+  const { ref, fn } = props;
+
+  useEffect(() => {
+    function handleOutsideClick(event) {
+      if (ref.current && !ref.current.contains(event.target)) {
+        fn();
+      }
+    }
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, [ref]);
+}
+
 export {
   useAppActions,
   useFilterState,
   useSearchState,
   useMenuState,
   useAppState,
+  useOutsideClick,
 };

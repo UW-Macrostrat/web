@@ -613,7 +613,9 @@ class Map extends Component<MapProps, {}> {
     }
 
     // Handle changes to map filters
-    else if (nextProps.filters.length != this.props.filters.length) {
+    else if (
+      JSON.stringify(nextProps.filters) !== JSON.stringify(this.props.filters)
+    ) {
       // If all filters have been removed simply reset the filter states
       if (nextProps.filters.length === 0) {
         this.filters = [];

@@ -87,7 +87,7 @@ function MapContainer(props) {
     if (mapLayers.has(MapLayer.COLUMNS)) {
       runAction({ type: "get-filtered-columns" });
     }
-  }, [filters]);
+  }, [filters, mapLayers]);
 
   // Switch to 3D mode at high zoom levels or with a rotated map
   const pitch = mapPosition.camera.pitch ?? 0;

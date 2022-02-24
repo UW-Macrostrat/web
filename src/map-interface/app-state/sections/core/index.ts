@@ -153,7 +153,16 @@ export function coreReducer(
         fs = fs.concat([action.filter]);
       }
       // action.filter.type and action.filter.id go to the URI
-      return updateURI({ ...state, filters: fs });
+      // handle search resetting
+      return updateURI({
+        ...state,
+        filters: fs,
+        term: "",
+        isSearching: false,
+        searchResults: null,
+        searchCancelToken: null,
+        inputFocus: false,
+      });
     case "remove-filter":
       return updateURI({
         ...state,
