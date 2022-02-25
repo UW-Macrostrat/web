@@ -1,5 +1,5 @@
 import { useCallback, useRef, useEffect } from "react";
-import { Navbar, Button, InputGroup, Spinner } from "@blueprintjs/core";
+import { Navbar, Button, InputGroup, Spinner, Card } from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
 import {
   useAppActions,
@@ -26,19 +26,8 @@ const sortOrder = {
   place: 5,
 };
 
-function SearchResults() {
-  const { searchResults } = useSearchState();
+function ResultList({ searchResults }) {
   const runAction = useAppActions();
-  const resultsRef = useRef(null);
-
-  useOutsideClick({
-    ref: resultsRef,
-    fn: () => {
-      runAction({ type: "set-input-focus", inputFocus: false });
-    },
-  });
-
-  // This is crazy
   const onSelectResult = useCallback(
     (f) => {
       runAction({ type: "async-add-filter", filter: f });
@@ -46,8 +35,11 @@ function SearchResults() {
     [runAction]
   );
 
-  const resultCategories =
-    searchResults == null ? [] : new Set(searchResults.map((d) => d.category));
+  if (searchResults == null) return h(SearchGuidance);
+  if (searchResults.length === 0) {
+    return h("div.no-results", "No results found");
+  }
+  const resultCategories = new Set(searchResults.map((d) => d.category));
   // Force the results into a particular order
   let resultCategoriesArr = Array.from(resultCategories);
   resultCategoriesArr.sort((a: string, b: string) => {
@@ -70,21 +62,29 @@ function SearchResults() {
     });
   });
 
-  return h("div", { ref: resultsRef }, [
-    h.if(searchResults == null)(SearchGuidance),
-    h.if(searchResults != null && searchResults.length === 0)(
-      "div.no-results",
-      ["No results found"]
-    ),
-    h("div.search-results", [
-      resultCategoriesArr.map((cat: string, i: number) => {
-        return h("div", { key: `subheader-${i}` }, [
-          h("div.searchresult-header", [h("div.text", [categoryTitles[cat]])]),
-          h("ul", [categoryResults[i]]),
-        ]);
-      }),
-    ]),
+  return h("div.search-results", [
+    resultCategoriesArr.map((cat: string, i: number) => {
+      return h("div", { key: `subheader-${i}` }, [
+        h("div.searchresult-header", [h("div.text", [categoryTitles[cat]])]),
+        h("ul", [categoryResults[i]]),
+      ]);
+    }),
   ]);
+}
+
+function SearchResults() {
+  const { searchResults } = useSearchState();
+  const runAction = useAppActions();
+  const resultsRef = useRef(null);
+
+  useOutsideClick({
+    ref: resultsRef,
+    fn: () => {
+      runAction({ type: "set-input-focus", inputFocus: false });
+    },
+  });
+
+  return h(Card, { ref: resultsRef }, h(ResultList, { searchResults }));
 }
 
 function MenuButton() {

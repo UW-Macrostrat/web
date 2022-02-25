@@ -38,7 +38,7 @@ const ListButton = (props: ListButtonProps) => {
   if (typeof props.icon != "string") {
     icon = h(props.icon, { size: 20 });
   }
-  return h(Button, { ...props, icon });
+  return h(Button, { ...props, className: "list-button", icon });
 };
 
 const MinimalButton = (props) => h(Button, { ...props, minimal: true });
@@ -164,6 +164,7 @@ const Menu = (props) => {
     {
       isOpen: menuOpen,
       onClose: toggleMenu,
+      insetContent: false,
       renderHeader: () =>
         h(CloseableCard.Header, [
           h.if(stack.length == 1)("div.buttons", [

@@ -12,7 +12,6 @@ import {
   Spinner,
   Collapse,
   HotkeysProvider,
-  Card,
 } from "@blueprintjs/core";
 import { useSelector, useDispatch } from "react-redux";
 import loadable from "@loadable/component";
@@ -117,7 +116,7 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
       h("div.context-stack", [
         h(Searchbar, { className: "searchbar" }),
         h.if(!inputFocus && menuOpen)(MenuContainer),
-        h.if(inputFocus)(Card, null, h(SearchResults)),
+        h.if(inputFocus)(SearchResults),
       ]),
       h("div.map-view-container.main-view", [h(MapView, { backend })]),
       h("div.detail-stack.infodrawer-container", [
