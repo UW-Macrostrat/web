@@ -32,6 +32,9 @@ This stylesheet the overall application page layout.
 
 // Rename left-stack to context-stack
 
+.context-stack, .detail-stack
+  z-index: 100
+
 
 .panel-container
   display flex
@@ -56,18 +59,58 @@ This stylesheet the overall application page layout.
 .searchbar-holder
   margin-bottom 0.5em
 
+map-control()
+  min-width: 22px
+  min-height: 22px 
+  margin-right: 10px
+  margin-bottom 8px
+  border-radius: 4px
+  margin-top 0px
+  box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.1), 0 0 0 rgba(16, 22, 26, 0), 0 1px 1px rgba(16, 22, 26, 0.2)
+  //box-shadow: 0 0 0 2px rgba(0,0,0,.1)
+  button
+    width: 22px
+    height: 22px
+    background-position: center center
+    padding 0
+
+
 :global
-  #map {
+  :focus:not(:focus-visible)
+    outline: none
+
+  #map
     position: absolute;
     top: 0;
     bottom: 0;
     left: 0;
     right: 0;
-  }
+
+    .mapbox-compass
+      display: none
+
+    &.is-rotated .mapbox-compass
+      display: block
 
   .mapboxgl-canvas-container
     width: 100%
     height: 100%
+
+  .mapboxgl-ctrl-bottom-right .mapbox-compass
+    margin-bottom: 0.6em
+    map-control()
+  
+  .mapboxgl-ctrl-attrib.mapboxgl-compact
+    map-control()
+    margin-bottom: 0.8em
+    padding: 0
+
+  .mapboxgl-ctrl
+    .mapbox-ctrl-attrib-inner
+      padding 0 10px
+  // .mapboxgl-ctrl-attrib-button
+  //   map-control()
+
 
 
 /* For mobile phones, we want to make the most of screen space,
@@ -83,6 +126,9 @@ This stylesheet the overall application page layout.
 
   .main-ui.detail-panel-open .searchbar
     display none
+
+  .detail-stack
+    max-height: 70%
 
 /* Desktop styling is necessarily much more complicated than mobile
   to handle a two-column layout. */
@@ -109,6 +155,7 @@ This stylesheet the overall application page layout.
     pointer-events none
     display flex
     flex-direction column
+    margin-bottom 1.2em
 
   .context-stack,.detail-stack
     pointer-events: none
@@ -122,6 +169,10 @@ This stylesheet the overall application page layout.
   .map-view-container
     position: unset
 
+
+  :global
+    .mapboxgl-ctrl-bottom-right .mapbox-compass
+        margin-right: 15px
   // .map-holder
   //   z-index: 1;
   //   position: absolute;

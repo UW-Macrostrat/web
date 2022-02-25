@@ -91,7 +91,10 @@ function MapContainer(props) {
 
   // Switch to 3D mode at high zoom levels or with a rotated map
   const pitch = mapPosition.camera.pitch ?? 0;
+  const bearing = mapPosition.camera.bearing ?? 0;
   const alt = mapPosition.camera.altitude;
+  console.log(pitch, bearing, alt);
+  const mapIsRotated = pitch != 0 || bearing != 0;
   const mapUse3D = (pitch > 0 && alt < 200000) || alt < 80000;
 
   return h(_Map, {
@@ -110,6 +113,7 @@ function MapContainer(props) {
     infoDrawerOpen,
     runAction,
     mapIsLoading,
+    mapIsRotated,
     mapRef,
     ...props,
     use3D: mapUse3D,

@@ -11,6 +11,8 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MercatorCoordinate, FreeCameraOptions } from "mapbox-gl";
 import { setMapStyle, markerOffset } from "./style-helpers";
+import { CompassControl } from "mapbox-gl-controls";
+import classNames from "classnames";
 
 const maxClusterZoom = 6;
 const highlightLayers = [
@@ -21,6 +23,7 @@ const highlightLayers = [
 
 interface MapProps {
   use3D: boolean;
+  mapIsRotated: boolean;
 }
 
 class Map extends Component<MapProps, {}> {
@@ -93,11 +96,7 @@ class Map extends Component<MapProps, {}> {
       //optimizeForTerrain: true,
     });
 
-    const nav = new mapboxgl.NavigationControl({
-      showZoom: false,
-      visualizePitch: false,
-    });
-    this.map.addControl(nav, "bottom-right");
+    this.map.addControl(new CompassControl(), "bottom-right");
 
     const pos = this.props.mapPosition;
     const { pitch = 0, bearing = 0, altitude } = pos.camera;
@@ -492,7 +491,6 @@ class Map extends Component<MapProps, {}> {
         },
       });
     }
-    console.log("Enabling 3d terrain");
   }
 
   // Swap between standard and satellite base layers
@@ -538,6 +536,10 @@ class Map extends Component<MapProps, {}> {
     // Check for 3D changes
     if (nextProps.use3D != this.props.use3D) {
       this.enable3DTerrain(nextProps.use3D);
+    }
+
+    if (nextProps.mapIsRotated !== this.props.mapIsRotated) {
+      return true;
     }
 
     if (
@@ -745,7 +747,10 @@ class Map extends Component<MapProps, {}> {
   }
 
   render() {
-    return h("div.mapbox-map#map");
+    const className = classNames({
+      "is-rotated": this.props.mapIsRotated ?? false,
+    });
+    return h("div.mapbox-map#map", { className });
   }
 }
 
