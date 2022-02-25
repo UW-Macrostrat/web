@@ -109,7 +109,7 @@ function SubtleFilterText() {
       h("p.filter-names", [h("b", "Filtering by: "), filterString]),
       h("div.filter-tongue-actions", [
         h("div.remove", { onClick: onRemoveAll }, ["remove all"]),
-        h(Button, { minimal: true, icon: iconName, onClick }),
+        h(Button, { minimal: true, small: true, icon: iconName, onClick }),
       ]),
     ]),
     h(Collapse, { isOpen: open }, [h(Filters)]),

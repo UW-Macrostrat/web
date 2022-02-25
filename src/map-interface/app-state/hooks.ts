@@ -55,9 +55,9 @@ function useOutsideClick(props: OutsideClickI) {
         fn();
       }
     }
-    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("click", handleOutsideClick);
     return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("click", handleOutsideClick);
     };
   }, [ref]);
 }
