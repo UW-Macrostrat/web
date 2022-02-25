@@ -165,6 +165,7 @@ const Menu = (props) => {
       isOpen: menuOpen,
       onClose: toggleMenu,
       insetContent: false,
+      className: "menu-card",
       renderHeader: () =>
         h(CloseableCard.Header, [
           h.if(stack.length == 1)("div.buttons", [

@@ -18,10 +18,6 @@ This stylesheet the overall application page layout.
   flex-direction: column
   max-height 100%
 
-:global(.bp3-panel-stack-view)
-  position: relative;
-  overflow: unset
-
 .context-stack
   display: flex
   flex-direction: column
@@ -64,6 +60,23 @@ This stylesheet the overall application page layout.
   padding 0
   margin-bottom 4px
 
+.menu-card
+  :global(.bp3-panel-stack2)
+    overflow: unset
+  :global(.bp3-panel-stack-view)
+    border-right: 0
+    position: relative;
+    overflow: unset
+
+.menu-content
+  display flex
+  flex-direction column
+  .bp3-button-group
+    margin-bottom 4px
+  margin: -4px
+  margin-bottom -12px
+
+// Map controls
 map-control()
   min-width: 22px
   min-height: 22px 
@@ -81,8 +94,6 @@ map-control()
 
 
 :global
-  :focus:not(:focus-visible)
-    outline: none
 
   #map
     position: absolute;
@@ -110,8 +121,8 @@ map-control()
     margin-bottom: 0.8em
     padding: 0
 
-  .mapboxgl-ctrl .mapbox-ctrl-attrib-inner
-      padding 0 10px
+  .mapboxgl-ctrl-attrib .mapboxgl-ctrl-attrib-inner
+      padding 0 24px 0 10px
   // .mapboxgl-ctrl-attrib-button
   //   map-control()
 

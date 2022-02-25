@@ -84,7 +84,12 @@ export function coreReducer(
       if (!state.mapIsLoading) return state;
       return { ...state, mapIsLoading: false };
     case "toggle-menu":
-      return { ...state, menuOpen: !state.menuOpen };
+      return {
+        ...state,
+        menuOpen: !state.menuOpen,
+        isSearching: false,
+        inputFocus: false,
+      };
     case "toggle-about":
       return { ...state, aboutOpen: !state.aboutOpen };
     case "close-infodrawer":
