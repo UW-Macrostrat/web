@@ -3,16 +3,22 @@ import { Collapse, Icon } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.styl";
 import classNames from "classnames";
+import { PanelSubhead } from "./headers";
 
 const h = hyper.styled(styles);
 
 function ExpansionPanelSummary(props) {
-  const { expanded, children, onChange, className } = props;
+  const { expanded, children, onChange, className, title } = props;
   const showExpand = expanded ? "chevron-up" : "chevron-down";
-  return h("div.expansion-panel-header", { className, onClick: onChange }, [
-    h("div.title", children),
-    h(Icon, { icon: showExpand }),
-  ]);
+  return h(
+    PanelSubhead,
+    {
+      className: classNames("expansion-panel-header", className),
+      onClick: onChange,
+      title,
+    },
+    [children, h(Icon, { icon: showExpand })]
+  );
 }
 
 function ExpansionHeader(props) {
@@ -22,19 +28,15 @@ function ExpansionHeader(props) {
   return h(
     ExpansionPanelSummary,
     {
-      //classes: expansionPanelClasses,
-      //
-      className: "expansion-panel-header",
       onChange: onClick,
+      className,
       expanded,
-    },
-    h("div.expansion-summary-title", [
       title,
-      h("div.expansion-summary-title-help", [
-        h("span.expansion-panel-subtext", helpText),
-        " ",
-        sideComponent,
-      ]),
+    },
+    h("div.expansion-summary-title-help", [
+      h("span.expansion-panel-subtext", helpText),
+      " ",
+      sideComponent,
     ])
   );
 }

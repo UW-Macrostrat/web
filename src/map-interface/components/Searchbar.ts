@@ -1,6 +1,6 @@
 import { useCallback, useRef, useEffect } from "react";
 import { Navbar, Button, InputGroup, Spinner, Card } from "@blueprintjs/core";
-import h from "@macrostrat/hyper";
+import hyper from "@macrostrat/hyper";
 import {
   useAppActions,
   useMenuState,
@@ -9,6 +9,10 @@ import {
 } from "../app-state";
 import { useSelector } from "react-redux";
 import { SubtleFilterText } from "./filters-panel";
+import styles from "./searchbar.styl";
+import { PanelSubhead } from "./expansion-panel/headers";
+
+const h = hyper.styled(styles);
 
 const categoryTitles = {
   lithology: "Lithologies",
@@ -46,27 +50,31 @@ function ResultList({ searchResults }) {
     return sortOrder[a] - sortOrder[b];
   });
 
-  let categoryResults = resultCategoriesArr.map((cat) => {
-    let thisCat = searchResults?.filter((f) => f.category === cat);
-    return thisCat.map((item, key) => {
-      return h(
-        "li",
-        {
-          key,
-          onClick() {
-            onSelectResult(item);
-          },
-        },
-        h("div.text", [item.name])
-      );
-    });
-  });
-
   return h("div.search-results", [
     resultCategoriesArr.map((cat: string, i: number) => {
-      return h("div", { key: `subheader-${i}` }, [
-        h("div.searchresult-header", [h("div.text", [categoryTitles[cat]])]),
-        h("ul", [categoryResults[i]]),
+      return h("div.search-result-category", { key: `subheader-${i}` }, [
+        h(PanelSubhead, {
+          className: "search-result-header",
+          title: categoryTitles[cat],
+        }),
+        h(
+          "ul",
+          null,
+          searchResults
+            .filter((f) => f.category === cat)
+            .map((item, key) => {
+              return h(
+                "li.search-result-row",
+                {
+                  key,
+                  onClick() {
+                    onSelectResult(item);
+                  },
+                },
+                item.name
+              );
+            })
+        ),
       ]);
     }),
   ]);
@@ -84,7 +92,11 @@ function SearchResults() {
     },
   });
 
-  return h(Card, { ref: resultsRef }, h(ResultList, { searchResults }));
+  return h(
+    Card,
+    { ref: resultsRef, className: "search-results-card" },
+    h(ResultList, { searchResults })
+  );
 }
 
 function MenuButton() {
