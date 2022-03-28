@@ -1,4 +1,4 @@
-import { Component } from "react";
+import { Component, forwardRef } from "react";
 import { SETTINGS } from "../../Settings";
 import { mapStyle } from "../vector-style";
 import {
@@ -749,8 +749,10 @@ class Map extends Component<MapProps, {}> {
     const className = classNames({
       "is-rotated": this.props.mapIsRotated ?? false,
     });
-    return h("div.mapbox-map#map", { className });
+    return h("div.mapbox-map#map", { ref: this.props.elementRef, className });
   }
 }
 
-export default Map;
+export default forwardRef((props, ref) =>
+  h(Map, { ...props, elementRef: ref })
+);

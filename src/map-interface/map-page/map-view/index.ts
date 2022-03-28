@@ -9,6 +9,7 @@ import Map from "./map";
 import h from "@macrostrat/hyper";
 import { useEffect } from "react";
 import mapboxgl from "mapbox-gl";
+import useResizeObserver from "use-resize-observer";
 
 const _Map = forwardRef((props, ref) => h(Map, { ...props, ref }));
 
@@ -66,6 +67,8 @@ function MapContainer(props) {
 
   const mapRef = useRef<mapboxgl.Map>();
 
+  const { ref, width, height } = useResizeObserver();
+
   useEffect(() => {
     // Get the current value of the map. Useful for gradually moving away
     // from class component
@@ -88,6 +91,11 @@ function MapContainer(props) {
       runAction({ type: "get-filtered-columns" });
     }
   }, [filters, mapLayers]);
+
+  useEffect(() => {
+    console.log("Resizing map", width, height);
+    mapRef.current?.resize();
+  }, [mapRef, width, height]);
 
   // Switch to 3D mode at high zoom levels or with a rotated map
   const pitch = mapPosition.camera.pitch ?? 0;
@@ -117,6 +125,7 @@ function MapContainer(props) {
     mapRef,
     ...props,
     use3D: mapUse3D,
+    ref,
   });
 }
 
