@@ -97,6 +97,8 @@ class Map extends Component<MapProps, {}> {
 
     this.map.addControl(new CompassControl(), "bottom-right");
 
+    this.map.scrollZoom.enable();
+
     const pos = this.props.mapPosition;
     const { pitch = 0, bearing = 0, altitude } = pos.camera;
     const zoom = pos.target?.zoom;
