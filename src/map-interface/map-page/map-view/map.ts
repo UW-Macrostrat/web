@@ -34,7 +34,6 @@ class Map extends Component<MapProps, {}> {
     this.handleFilterChanges = this.handleFilterChanges.bind(this);
     this.mapLoaded = false;
     this.currentSources = [];
-    this.isPanning = false;
     this.elevationPoints = [];
 
     // Separate time filters and other filters for different rules
@@ -395,17 +394,15 @@ class Map extends Component<MapProps, {}> {
       toggling this boolean we are able to ignore the `movestart` even when it
       is fired by this particular action.
       */
-      this.panning = true;
+      //this.panning = true;
       this.map.panTo(event.lngLat, {
         offset: [0, markerOffset()],
-        easing: function easing(t) {
-          return t * (2 - t);
-        },
+        easing: (t) => t * (2 - t),
         duration: 500,
       });
-      setTimeout(() => {
-        this.panning = false;
-      }, 1000);
+      // setTimeout(() => {
+      //   this.panning = false;
+      // }, 1000);
 
       // Update the location of the marker
       this.map.getSource("info_marker").setData({

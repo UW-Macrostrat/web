@@ -166,15 +166,13 @@ function Searchbar(props) {
 
 function SearchGuidance() {
   return h("div.search-guidance.bp3-text", [
-    h("h5", [
-      "Available categories:",
-      h("ul", [
-        h("li", ["Time intervals"]),
-        h("li", ["Lithologies"]),
-        h("li", ["Stratigraphic Names"]),
-        h("li", ["Environments (columns only)"]),
-        h("li", ["Places"]),
-      ]),
+    h("h3", ["Available categories"]),
+    h("ul", [
+      h("li", ["Time intervals"]),
+      h("li", ["Lithologies"]),
+      h("li", ["Stratigraphic Names"]),
+      h("li", ["Environments (columns only)"]),
+      h("li", ["Places"]),
     ]),
   ]);
 }
