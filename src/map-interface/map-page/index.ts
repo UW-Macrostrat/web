@@ -23,6 +23,7 @@ import {
 } from "../app-state";
 import styles from "./main.module.styl";
 import classNames from "classnames";
+import useResizeObserver from "use-resize-observer";
 import { CloseableCard } from "../components/closeable-card";
 
 const h = hyper.styled(styles);
@@ -99,6 +100,7 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   const { inputFocus } = useSearchState();
   const { menuOpen } = useMenuState();
   const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
+  const { ref, width, height } = useResizeObserver();
 
   /* We apply a custom style to the panel container when we are interacting
     with the search bar, so that we can block map interactions until search
@@ -118,7 +120,9 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
         h.if(!inputFocus && menuOpen)(MenuContainer),
         h.if(inputFocus)(SearchResults),
       ]),
-      h("div.map-view-container.main-view", [h(MapView, { backend })]),
+
+      h(MapView, { backend }),
+
       h("div.detail-stack.infodrawer-container", [
         h.if(infoDrawerOpen)(InfoDrawer),
         h("div.spacer"),

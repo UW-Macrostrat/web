@@ -24,6 +24,7 @@ const highlightLayers = [
 interface MapProps {
   use3D: boolean;
   mapIsRotated: boolean;
+  markerLoadOffset: [number, number];
 }
 
 class Map extends Component<MapProps, {}> {
@@ -98,6 +99,7 @@ class Map extends Component<MapProps, {}> {
     this.map.addControl(new CompassControl(), "bottom-right");
 
     this.map.scrollZoom.enable();
+    this.map.touchZoomRotate.enable();
 
     const pos = this.props.mapPosition;
     const { pitch = 0, bearing = 0, altitude } = pos.camera;
@@ -385,8 +387,7 @@ class Map extends Component<MapProps, {}> {
         });
       }
 
-      let xOffset =
-        window.innerWidth > 850 ? -((window.innerWidth * 0.3333) / 2) : 0;
+      let markerOffset = this.props.markerLoadOffset ?? [0, 0];
 
       /*
       Ok. I know this looks jank, and it is, but bear with me.
@@ -398,13 +399,10 @@ class Map extends Component<MapProps, {}> {
       */
       //this.panning = true;
       this.map.panTo(event.lngLat, {
-        offset: [0, markerOffset()],
+        offset: markerOffset,
         easing: (t) => t * (2 - t),
         duration: 500,
       });
-      // setTimeout(() => {
-      //   this.panning = false;
-      // }, 1000);
 
       // Update the location of the marker
       this.map.getSource("info_marker").setData({
@@ -458,37 +456,38 @@ class Map extends Component<MapProps, {}> {
   }
 
   enable3DTerrain(shouldEnable: boolean) {
-    if (this.map.getSource("mapbox-dem") == null) {
-      this.map.addSource("mapbox-dem", {
-        type: "raster-dem",
-        url: "mapbox://mapbox.mapbox-terrain-dem-v1",
-        tileSize: 512,
-        maxzoom: 14,
-      });
+    if (!this.map.style._loaded) {
+      return;
+    }
+    if (shouldEnable) {
+      if (this.map.getSource("mapbox-dem") == null) {
+        this.map.addSource("mapbox-dem", {
+          type: "raster-dem",
+          url: "mapbox://mapbox.mapbox-terrain-dem-v1",
+          tileSize: 512,
+          maxzoom: 14,
+        });
+      }
+
+      // add a sky layer that will show when the map is highly pitched
+      if (this.map.getLayer("sky") == null) {
+        this.map.addLayer({
+          id: "sky",
+          type: "sky",
+          paint: {
+            "sky-type": "atmosphere",
+            "sky-atmosphere-sun": [0.0, 0.0],
+            "sky-atmosphere-sun-intensity": 15,
+          },
+        });
+      }
     }
     // Enable or disable terrain depending on our current desires...
     const currentTerrain = this.map.getTerrain();
-    if (shouldEnable) {
-      if (currentTerrain == null) {
-        this.map.setTerrain({ source: "mapbox-dem", exaggeration: 1 });
-      }
-    } else {
-      if (currentTerrain != null) {
-        this.map.setTerrain(null);
-      }
-    }
-
-    // add a sky layer that will show when the map is highly pitched
-    if (this.map.getLayer("sky") == null) {
-      this.map.addLayer({
-        id: "sky",
-        type: "sky",
-        paint: {
-          "sky-type": "atmosphere",
-          "sky-atmosphere-sun": [0.0, 0.0],
-          "sky-atmosphere-sun-intensity": 15,
-        },
-      });
+    if (shouldEnable && currentTerrain == null) {
+      this.map.setTerrain({ source: "mapbox-dem", exaggeration: 1 });
+    } else if (!shouldEnable && currentTerrain != null) {
+      this.map.setTerrain(null);
     }
   }
 
@@ -533,9 +532,7 @@ class Map extends Component<MapProps, {}> {
     setMapStyle(this, this.map, mapStyle, nextProps);
 
     // Check for 3D changes
-    if (nextProps.use3D != this.props.use3D) {
-      this.enable3DTerrain(nextProps.use3D);
-    }
+    this.enable3DTerrain(nextProps.use3D);
 
     if (nextProps.mapIsRotated !== this.props.mapIsRotated) {
       return true;
