@@ -102,19 +102,34 @@ map-control()
     left: 0;
     right: 0;
 
-    .mapbox-compass
+    .mapbox-compass, .mapbox-3d
       display: none
 
-    &.is-rotated .mapbox-compass
+    &.is-rotated
+      .mapbox-compass
+        display: block
+    
+    &.is-rotated.is-3d-available .mapbox-3d
+      display: none
+
+    &.is-3d-available .mapbox-3d
       display: block
+
+  .mapboxgl-ctrl.mapbox-3d.mapbox-control
+    width: unset
+    button
+      width: unset
+      padding-inline 4px
 
   .mapboxgl-canvas-container
     width: 100%
     height: 100%
 
-  .mapboxgl-ctrl-bottom-right .mapbox-compass
-    margin-bottom: 0.6em
-    map-control()
+  .mapboxgl-ctrl-bottom-right
+    .mapbox-control
+      margin-bottom: 0.3em
+      float: right
+      map-control()
   
   .mapboxgl-ctrl-attrib.mapboxgl-compact
     map-control()
@@ -126,6 +141,12 @@ map-control()
   // .mapboxgl-ctrl-attrib-button
   //   map-control()
 
+.main-ui.detail-panel-open
+  :global(.mapbox-control.mapbox-zoom)
+    display: none
+
+:global(.mapbox-control.mapbox-zoom)
+  background: rgba(255,255,255,0.2)
 
 /* For mobile phones, we want to make the most of screen space,
  which in some cases means adding complications to the basic page. */
@@ -145,6 +166,10 @@ map-control()
   // Make sure that our detail panel doesn't take up the entirety of the page
   .detail-stack
     max-height: 70%
+
+  // Completely hide zoom control
+  :global(.mapbox-control.mapbox-zoom)
+    display: none
 
 /* Desktop styling is necessarily much more complicated than mobile
   to handle a two-column layout. */
@@ -191,7 +216,7 @@ map-control()
 
 
   :global
-    .mapboxgl-ctrl-bottom-right .mapbox-compass
+    .mapboxgl-ctrl-bottom-right .mapbox-control
         margin-right: 15px
   // .map-holder
   //   z-index: 1;

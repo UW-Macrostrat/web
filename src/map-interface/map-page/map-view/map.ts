@@ -11,7 +11,8 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MercatorCoordinate, FreeCameraOptions } from "mapbox-gl";
 import { setMapStyle, markerOffset } from "./style-helpers";
-import { CompassControl } from "mapbox-gl-controls";
+import { CompassControl, ZoomControl } from "mapbox-gl-controls";
+import { ThreeDControl } from "./controls";
 import classNames from "classnames";
 
 const maxClusterZoom = 6;
@@ -96,10 +97,9 @@ class Map extends Component<MapProps, {}> {
       //optimizeForTerrain: true,
     });
 
+    this.map.addControl(new ZoomControl(), "top-right");
+    this.map.addControl(new ThreeDControl(), "bottom-right");
     this.map.addControl(new CompassControl(), "bottom-right");
-
-    this.map.scrollZoom.enable();
-    this.map.touchZoomRotate.enable();
 
     const pos = this.props.mapPosition;
     const { pitch = 0, bearing = 0, altitude } = pos.camera;
@@ -118,6 +118,8 @@ class Map extends Component<MapProps, {}> {
 
       this.map.setFreeCameraOptions(cameraOptions);
     }
+
+    this.enable3DTerrain(this.props.use3D);
 
     this.props.mapRef.current = this.map;
 
@@ -151,8 +153,6 @@ class Map extends Component<MapProps, {}> {
           this.map.addSource(source, mapStyle.sources[source]);
         }
       });
-
-      //this.enable3DTerrain.bind(this)();
 
       // The initial draw of the layers
       mapStyle.layers.forEach((layer) => {
@@ -195,6 +195,8 @@ class Map extends Component<MapProps, {}> {
       if (this.props.mapHasFossils) {
         this.refreshPBDB();
       }
+
+      this.enable3DTerrain(this.props.use3D);
 
       // NO idea why timeout is needed
       setTimeout(() => {
@@ -430,6 +432,8 @@ class Map extends Component<MapProps, {}> {
         return;
       }
 
+      this.enable3DTerrain(this.props.use3D);
+
       this.currentSources.forEach((source) => {
         if (this.map.getSource(source.id) == null) {
           this.map.addSource(source.id, source.config);
@@ -530,9 +534,9 @@ class Map extends Component<MapProps, {}> {
   // We basically intercept the changes, handle them, and tell React to ignore them
   shouldComponentUpdate(nextProps) {
     setMapStyle(this, this.map, mapStyle, nextProps);
-
-    // Check for 3D changes
-    this.enable3DTerrain(nextProps.use3D);
+    if (this.props.use3D !== nextProps.use3D) {
+      return true;
+    }
 
     if (nextProps.mapIsRotated !== this.props.mapIsRotated) {
       return true;
@@ -707,6 +711,10 @@ class Map extends Component<MapProps, {}> {
     PBDBHelper(this, bounds, zoom);
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    this.enable3DTerrain(this.props.use3D);
+  }
+
   // Update the colors of the hexgrids
   updateColors(data) {
     for (let i = 0; i < data.length; i++) {
@@ -745,6 +753,7 @@ class Map extends Component<MapProps, {}> {
   render() {
     const className = classNames({
       "is-rotated": this.props.mapIsRotated ?? false,
+      "is-3d-available": this.props.use3D ?? false,
     });
     return h("div.mapbox-map#map", { ref: this.props.elementRef, className });
   }
