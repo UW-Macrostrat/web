@@ -9,25 +9,23 @@ function GddExpansion(props) {
 
   if (!mapData[0] || !mapData[0].strat_name.length) return h("div");
 
-  return h("span", [
-    h(
-      ExpansionPanel,
-      {
-        classes: { root: "regional-panel" },
-        onChange: openGdd,
-        title: "Primary Literature",
-        helpText: "via GeoDeepDive",
-      },
-      [
-        h.if(fetchingGdd)(Spinner),
-        h.if(gddInfo.length > 0)([
-          gddInfo.map((journal) => {
-            return h(Journal, { data: journal, key: journal.name });
-          }),
-        ]),
-      ]
-    ),
-  ]);
+  return h(
+    ExpansionPanel,
+    {
+      className: "regional-panel",
+      onChange: openGdd,
+      title: "Primary Literature",
+      helpText: "via GeoDeepDive",
+    },
+    [
+      h.if(fetchingGdd)(Spinner),
+      h.if(gddInfo.length > 0)([
+        gddInfo.map((journal) => {
+          return h(Journal, { data: journal, key: journal.name });
+        }),
+      ]),
+    ]
+  );
 }
 
 export { GddExpansion };

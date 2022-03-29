@@ -1,7 +1,7 @@
 import Article from "./Article";
 import { Divider } from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
-import { ExpansionPanel } from "../expansion-panel";
+import { SubExpansionPanel } from "../expansion-panel";
 
 function Journal(props) {
   return h("div.journal", [
@@ -22,9 +22,8 @@ function Journal(props) {
 function Journal_(props) {
   return h("div", { style: { marginTop: "5px" } }, [
     h(
-      ExpansionPanel,
+      SubExpansionPanel,
       {
-        subheader: true,
         title: props.data.name,
         helpText: props.data.source,
         expanded: true,

@@ -9,6 +9,12 @@
   --accent-border-color: $gray5
   --accent-secondary-color: #EBF1F5
   --accent-secondary-hover-color: #F5F8FA
+  --box-horizontal-padding: 0.8em
+
+html, body
+  height 100vh
+  height -webkit-fill-available
+  overflow hidden
 
 body {
   color: #333;
@@ -19,32 +25,13 @@ body {
 body, .main-container, #react, #app-holder {
   height: 100%;
   width: 100%;
+  //min-height: -webkit-fill-available;
 }
 ::-webkit-scrollbar,
 *::-webkit-scrollbar {
   display: none;
 }
 
-.map-holder {
-  z-index: 1;
-  position: absolute;
-  top 0
-  left 0
-  bottom 0
-  right 0
-  height 100%
-}
-
-#map {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 100%;
-}
-
-.mapboxgl-ctrl-bottom-right {
-  z-index: 0;
-}
 .other-attributes {
   margin-bottom: 50px;
 }
@@ -270,10 +257,7 @@ body, .main-container, #react, #app-holder {
   font-weight: 700;
   text-decoration: none;
 }
-.via-gdd {
-  font-size: 85%;
-  font-weight: 400;
-}
+
 .article {
   padding-bottom: 15px;
 }
@@ -309,10 +293,6 @@ body, .main-container, #react, #app-holder {
 #filter-title {
   padding-bottom: 0 !important;
   margin-bottom: -12px;
-}
-
-.regional-panel {
-  margin-top: 25px !important;
 }
 
 .about-section {
@@ -438,11 +418,6 @@ body, .main-container, #react, #app-holder {
   text-decoration: underline;
   cursor: pointer;
 }
-@media(max-width: 850px) {
-  .infoDrawer {
-    max-width: 100% !important;
-  }
-}
 
 
 /////////////////// SOURCES STYLES ////////
@@ -542,53 +517,6 @@ td {
   text-align: center;
 }
 
-.infodrawer-container
-  width 30em
-  position absolute
-  right 0px
-  top 0px
-  bottom: 0px
-  pointer-events none
-  display flex
-  flex-direction column
-  :global
-    .macrostrat-detail
-      margin: 15px 0px;
-      display: flex;
-      align-items: center;
-
-.expansion-children
-  margin-left 10px
-
-.infodrawer
-  pointer-events all
-  max-height 100%
-  max-width 100%
-  display flex
-  flex-direction column
-  padding 0
-  overflow hidden
-  header
-    padding 5px
-    display flex
-    flex-direction row
-    align-items: center
-    .spacer
-      flex-grow 1
-    .left-icon
-      padding 7px
-
-  .infodrawer-header
-    display flex
-    flex-direction row
-    align-items baseline
-    margin-right 1em
-
-
-.infodrawer-body
-  overflow-y scroll
-  flex-shrink 1
-
 .spacer
   flex-grow 1
 
@@ -596,17 +524,12 @@ td {
   margin: 10px;
 }
 
-@media screen and (max-width: 768px) {
-  .infodrawer{
-    max-height: 60%;
-    width: 100%;
-    border-radius: 0px;
-    position: absolute;
-    bottom: 0px;
-  }
-  .infodrawer-container{
-    width: 100vw;
-    height: 100vh;
-    z-index: 200;
-  }
-}
+// @media screen and (max-width: 768px) {
+//   .infodrawer{
+//     max-height: 60%;
+//     width: 100%;
+//     border-radius: 0px;
+//     position: absolute;
+//     bottom: 0px;
+//   }
+// }

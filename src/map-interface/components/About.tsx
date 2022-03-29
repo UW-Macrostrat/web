@@ -140,7 +140,7 @@ const AboutText = (props) => {
         <li>
           <a
             className="ref-link"
-            href="https://idzikowski-casey.github.io/personal-site/"
+            href="https://idzikowski-casey.github.io/Idzikowski-Casey/"
             target="_blank"
           >
             Casey Idzikowski

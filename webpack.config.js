@@ -1,5 +1,9 @@
 const path = require("path");
-const { DefinePlugin, EnvironmentPlugin } = require("webpack");
+const {
+  DefinePlugin,
+  EnvironmentPlugin,
+  HotModuleReplacementPlugin,
+} = require("webpack");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 //UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const CopyPlugin = require("copy-webpack-plugin");
@@ -33,13 +37,51 @@ const cssModuleLoader = {
   options: {
     modules: {
       mode: "local",
-      localIdentName: "[path][name]__[local]--[hash:base64:5]",
+      localIdentName: "[local]-[hash:base64:6]",
     },
   },
 };
 
+const plugins = [
+  new HtmlWebpackPlugin({
+    title: "Macrostrat",
+    template: "./template.html",
+  }),
+  new DotenvPlugin(),
+  /*
+  new CopyPlugin([
+    { from: path.join(cesiumSource, cesiumWorkers), to: "Workers" }
+  ]),
+  new CopyPlugin([{ from: path.join(cesiumSource, "Assets"), to: "Assets" }]),
+  new CopyPlugin([
+    { from: path.join(cesiumSource, "Widgets"), to: "Widgets" }
+  ]),
+  */
+  new DefinePlugin({
+    MACROSTRAT_BASE_URL: JSON.stringify(publicURL),
+    // Define relative base path in cesium for loading assets
+    CESIUM_BASE_URL: JSON.stringify(publicURL),
+    // Git revision information
+  }),
+  new EnvironmentPlugin({
+    ...gitEnv,
+  }),
+];
+
+const devMode = mode == "development";
+
+/* Use style-loader in development so we can get hot-reloading,
+  but use MiniCssExtractPlugin in production for small bundle sizes */
+let finalStyleLoader = "style-loader";
+if (!devMode) {
+  plugins.push(new MiniCssExtractPlugin());
+  finalStyleLoader = MiniCssExtractPlugin.loader;
+}
+
+const styleLoaders = [finalStyleLoader, cssModuleLoader];
+
 module.exports = {
-  mode: mode,
+  mode,
   devServer: {
     compress: true,
     port: 3000,
@@ -56,15 +98,19 @@ module.exports = {
       },
       {
         test: /\.styl$/,
-        use: [MiniCssExtractPlugin.loader, cssModuleLoader, "stylus-loader"],
+        use: [...styleLoaders, "stylus-loader"],
         exclude: /node_modules/,
       },
       {
-        test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, cssModuleLoader],
-        exclude: /node_modules/,
+        test: /\.(sass|scss)$/,
+        use: [...styleLoaders, "sass-loader"],
       },
-      { test: /\.css$/, use: [MiniCssExtractPlugin.loader, "css-loader"] },
+      // {
+      //   test: /\.css$/,
+      //   use: styleLoaders,
+      //   exclude: /node_modules/,
+      // },
+      { test: /\.css$/, use: [finalStyleLoader, "css-loader"] },
       {
         test: /\.(eot|svg|ttf|woff|woff2)$/,
         use: [
@@ -114,7 +160,7 @@ module.exports = {
     filename: "[name].js",
     devtoolModuleFilenameTemplate: "file:///[absolute-resource-path]",
   },
-  devtool: mode == "development" ? "source-map" : false,
+  devtool: "source-map",
   amd: {
     // Enable webpack-friendly use of require in Cesium
     toUrlUndefined: true,
@@ -123,30 +169,5 @@ module.exports = {
     splitChunks: { chunks: "all" },
     usedExports: true,
   },
-  plugins: [
-    new HtmlWebpackPlugin({
-      title: "Macrostrat",
-      template: "./template.html",
-    }),
-    new MiniCssExtractPlugin(),
-    new DotenvPlugin(),
-    /*
-    new CopyPlugin([
-      { from: path.join(cesiumSource, cesiumWorkers), to: "Workers" }
-    ]),
-    new CopyPlugin([{ from: path.join(cesiumSource, "Assets"), to: "Assets" }]),
-    new CopyPlugin([
-      { from: path.join(cesiumSource, "Widgets"), to: "Widgets" }
-    ]),
-    */
-    new DefinePlugin({
-      MACROSTRAT_BASE_URL: JSON.stringify(publicURL),
-      // Define relative base path in cesium for loading assets
-      CESIUM_BASE_URL: JSON.stringify(publicURL),
-      // Git revision information
-    }),
-    new EnvironmentPlugin({
-      ...gitEnv,
-    }),
-  ],
+  plugins,
 };

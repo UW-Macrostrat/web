@@ -1,45 +1,37 @@
+/*
+This stylesheet the overall application page layout.
+*/
+
 .map-page
   height 100vh
+  /* mobile viewport bug fix */
+  max-height: -webkit-fill-available;
   width 100vw
   display flex
   flex-direction column
   position relative
 
 .main-ui
-  flex-grow 1
+  flex 1
   position: relative
+  display flex
+  flex-direction: column
+  max-height 100%
+  height: 100%
 
-.panels-overlay
-  position absolute
-  top 20px
-  left 20px
-  right 20px
-  bottom 30px
-  z-index 100
-  // Make sure we can still click
-  // on map in background
-  pointer-events none
-
-:global(.bp3-panel-stack-view)
-  position: relative;
-  overflow: unset
-
-
-.left-stack
-  max-width 34em
-  min-width 14em
-  // height 100vh
-  position absolute
-  top 0
-  bottom 0
+.context-stack
   display: flex
-  flex-direction: row
-  .spacer
-    flex-grow 1
-    width 1px
-    pointer-events: none
-  .panel-container > *
-    transition width 300ms
+  flex-direction: column
+  max-height: 100%
+  &>div
+    flex-shrink 1
+  &>.searchbar
+    flex 0
+
+// Rename left-stack to context-stack
+
+.context-stack, .detail-stack
+  z-index: 100
 
 .panel-container
   display flex
@@ -50,12 +42,165 @@
 .panel-title
   font-size 16px
 
-@media only screen and (max-width: 768px) {
-  /* For mobile phones: */
-  .panels-overlay{
+
+
+.spacer
+  flex-grow 1
+  pointer-events: none
+
+.map-view-container
+  flex-grow 1
+  position: relative
+
+
+.searchbar-holder
+  margin-bottom 0.5em
+
+.list-button
+  border-radius: 4px
+  padding 0
+  margin-bottom 4px
+
+.menu-card
+  :global(.bp3-panel-stack2)
+    overflow: unset
+  :global(.bp3-panel-stack-view)
+    border-right: 0
+    position: relative;
+    overflow: unset
+
+.menu-content
+  display flex
+  flex-direction column
+  .bp3-button-group
+    margin-bottom 4px
+  margin: -4px
+  margin-bottom -8px
+
+// Map controls
+map-control()
+  min-width: 22px
+  min-height: 22px 
+  margin-right: 10px
+  margin-bottom 8px
+  border-radius: 4px
+  margin-top 0px
+  box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.1), 0 0 0 rgba(16, 22, 26, 0), 0 1px 1px rgba(16, 22, 26, 0.2)
+  //box-shadow: 0 0 0 2px rgba(0,0,0,.1)
+  button
+    width: 22px
+    height: 22px
+    background-position: center center
+    padding 0
+
+:global
+
+  #map
+    position: absolute;
     top: 0;
-    left: 0;
     bottom: 0;
+    left: 0;
     right: 0;
-  }
-}
+
+    .mapbox-compass
+      display: none
+
+    &.is-rotated .mapbox-compass
+      display: block
+
+  .mapboxgl-canvas-container
+    width: 100%
+    height: 100%
+
+  .mapboxgl-ctrl-bottom-right .mapbox-compass
+    margin-bottom: 0.6em
+    map-control()
+  
+  .mapboxgl-ctrl-attrib.mapboxgl-compact
+    map-control()
+    margin-bottom: 0.8em
+    padding: 0
+
+  .mapboxgl-ctrl-attrib .mapboxgl-ctrl-attrib-inner
+      padding 0 24px 0 10px
+  // .mapboxgl-ctrl-attrib-button
+  //   map-control()
+
+
+/* For mobile phones, we want to make the most of screen space,
+ which in some cases means adding complications to the basic page. */
+@media only screen and (max-width: 768px)
+
+  // Move the search bar and context panel to the bottom of the screen
+  // .context-stack
+  //   display flex
+  //   order 1
+  //   flex-direction: column-reverse
+  //   max-height: 80%
+
+  // Hide searchbar when infodrawer is open
+  .main-ui.detail-panel-open .searchbar
+    display none
+
+  // Make sure that our detail panel doesn't take up the entirety of the page
+  .detail-stack
+    max-height: 70%
+
+/* Desktop styling is necessarily much more complicated than mobile
+  to handle a two-column layout. */
+@media screen and (min-width: 768px)
+
+  .main-ui
+    flex-direction row
+    padding 1em 1em 2em
+    min-height: 80px
+    &>*
+      margin-right 0.5em
+      &:last-child
+        margin-right 0
+
+  .context-stack
+    max-width 34em
+    min-width 14em
+    transition: width 1s ease
+
+  .detail-stack
+    width 30em
+    // position absolute
+    // right 0px
+    // top 0px
+    // bottom: 0px
+    pointer-events none
+    display flex
+    flex-direction column
+    margin-bottom 1.2em
+
+  .context-stack,.detail-stack
+    pointer-events: none
+    z-index: 100
+    &>div
+      pointer-events: all
+      margin-bottom: 0.5em
+    &>div.spacer
+      pointer-events: none
+
+  /* Make map fill page rather than containing div,
+    by unsetting map position */
+  .map-view-container
+    position: unset
+
+
+  :global
+    .mapboxgl-ctrl-bottom-right .mapbox-compass
+        margin-right: 15px
+  // .map-holder
+  //   z-index: 1;
+  //   position: absolute;
+  //   top 0
+  //   left 0
+  //   bottom 0
+  //   right 0
+  //   height 100%
+
+// padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+

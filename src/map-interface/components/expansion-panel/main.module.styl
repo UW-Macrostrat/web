@@ -1,58 +1,70 @@
 
+.panel-subhead
+  background-color: var(--accent-color)
+  padding 0.2em var(--box-horizontal-padding)
+  border-top 1px solid var(--accent-border-color)
+  border-bottom 1px solid var(--accent-border-color)
+  display flex
+  flex-direction row
+  position sticky
+  align-items: baseline;
+  z-index 1
+  top 0px
+  &>*
+    margin-right var(--box-horizontal-padding)
+    &:last-child
+      margin-right: 0
+  h1, h2, h3
+    font-family: Montserrat,sans-serif !important;
+    font-weight: 700;
+    margin 0.2em 0;
+  .title
+    flex-grow 1
+
 .expansion-panel
   padding 0
-  align-items: center;
   flex-wrap: wrap;
-  &:first-child
-    :global(.expansion-panel-header)
-      border-top: 1px solid var(--accent-hover-color);
-  :global
-    .sub-panel-header
+  margin-top -1px;
+  &.collapsed
+    .expansion-panel-header
+      border-bottom-width: 0;
+
+
+  &.sub-expansion-panel
+    margin 0 calc(var(--panel-padding-h) * -1)
+    .expansion-panel-header
       background-color var(--accent-secondary-color)
-      padding 5px
-      border-radius 5px 0 0 5px
       cursor pointer
       &:hover
         background-color var(--accent-secondary-hover-color)
-      display flex
       padding 0.1em 0.5em
-      flex-direction row
       align-items center
-      .title
-        flex-grow 1
-    .expansion-panel-header
-      border-bottom 1px solid var(--accent-border-color)
-      background-color var(--accent-color)
-      padding 10px
-      z-index: 1;
-      position sticky
-      top 0px
-      cursor pointer
-      &:hover
-        background-color var(--accent-hover-color)
-      display flex
-      flex-direction row
-      align-items center
-      .title
-        flex-grow 1
+
+.expansion-summary-title-help
+  margin-left 5px;
+  :global(.bp3-icon)
+    margin-left 5px;
+
+.expansion-panel-header
+  cursor pointer
+  &:hover
+    background-color var(--accent-hover-color)
+  :global(.bp3-icon)
+    transform: translate(0,3px);
 
 .expansion-children
-  margin 5px 10px 10px
+  padding 5px 10px
+  .expansion-panel
+    margin-left -10px
+    margin-right -10px
+
+.expansion-panel-subtext
+  font-size: 85%;
+  font-weight: 400;
 
 :global
   .expansion-panel-root
     padding-left: 15px !important;
-
-  .expansion-summary-title
-    font-family: Montserrat,sans-serif !important;
-    font-weight: 700 !important;
-    margin-right: 10px !important;
-    padding-right: 0 !important;
-    display: flex;
-    align-items: baseline;
-
-  .expansion-summary-title-help
-    margin-left 5px;
 
   .expansion-panel-detail
     display: block !important;
@@ -65,4 +77,3 @@
     margin: 0;
     margin-top: 5px;
     font-size: 80%;
-

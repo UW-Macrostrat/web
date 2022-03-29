@@ -54,8 +54,7 @@ type RECEIVED_COLUMN_QUERY = {
 type START_GDD_QUERY = { type: "start-gdd-query"; cancelToken: any };
 type RECEIVED_GDD_QUERY = { type: "received-gdd-query"; data: any };
 
-type START_PBDB_QUERY = { type: "start-pbdb-query"; cancelToken: any };
-type UPDATE_PBDB_QUERY = { type: "update-pbdb-query"; cancelToken: any };
+type START_PBDB_QUERY = { type: "start-pbdb-query" };
 type RECEIVED_PBDB_QUERY = { type: "received-pbdb-query"; data: any };
 type RESET_PBDB = { type: "reset-pbdb" };
 
@@ -123,7 +122,6 @@ export type CoreAction =
   | START_GDD_QUERY
   | RECEIVED_GDD_QUERY
   | START_PBDB_QUERY
-  | UPDATE_PBDB_QUERY
   | RECEIVED_PBDB_QUERY
   | RESET_PBDB
   | START_SEARCH_QUERY
@@ -150,7 +148,6 @@ interface AsyncRequestState {
   gddCancelToken: CancelToken | null;
   searchCancelToken: CancelToken | null;
   elevationCancelToken: CancelToken | null;
-  pbdbCancelToken: CancelToken | null;
 }
 
 interface MapCenterInfo {
@@ -172,6 +169,7 @@ export interface CoreState extends MapState, AsyncRequestState {
   gddInfo: any[];
   searchResults: any;
   elevationData: any;
+  inputFocus: boolean;
   elevationMarkerLocation: any;
   pbdbData: any[];
   mapCenter: MapCenterInfo;

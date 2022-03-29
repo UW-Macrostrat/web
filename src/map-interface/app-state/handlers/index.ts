@@ -5,9 +5,7 @@ import {
   asyncGetColumn,
   asyncQueryMap,
   asyncGetElevation,
-  asyncGetPBDBCollection,
-  asyncGetPBDBOccurences,
-  mergePBDBResponses,
+  getPBDBData,
 } from "./fetch";
 import { Action, CoreState } from "../sections";
 import axios from "axios";
@@ -60,7 +58,11 @@ async function actionRunner(
         columns: filteredColumns,
       };
     case "map-query":
+      console.log("map query");
       const { lng, lat, z, map_id, column } = action;
+      if (state.inputFocus) {
+        return { type: "set-input-focus", inputFocus: false };
+      }
       let CancelTokenMapQuery = axios.CancelToken;
       let sourceMapQuery = CancelTokenMapQuery.source();
       dispatch({
@@ -118,22 +120,10 @@ async function actionRunner(
       };
     case "get-pbdb":
       let collection_nos = action.collection_nos;
-      const sourceCollection = getCancelToken();
-      const sourceOccur = getCancelToken();
-      dispatch({ type: "start-pdbd-query", cancelToken: sourceCollection });
-      const collection = await asyncGetPBDBCollection(
-        collection_nos,
-        sourceCollection.token
-      );
-      dispatch({ type: "update-pbdb-query", cancelToken: sourceOccur });
-      const occurences = await asyncGetPBDBOccurences(
-        collection_nos,
-        sourceOccur.token
-      );
-      const collections = mergePBDBResponses(occurences, collection);
+      dispatch({ type: "start-pdbd-query" });
       return {
         type: "received-pbdb-query",
-        data: collections,
+        data: await getPBDBData(collection_nos),
       };
     default:
       return action;

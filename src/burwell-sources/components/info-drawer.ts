@@ -9,7 +9,7 @@ import {
 import Options from "./options";
 
 import FeatureList from "./feature-list";
-import { ExpansionPanel } from "~/map-interface/components/expansion-panel";
+import { InfoDrawerContainer } from "~/map-interface/components/info-drawer";
 import { useEffect } from "react";
 
 function BackButton() {
@@ -70,13 +70,15 @@ function InfoDrawer() {
       icon: open ? "chevron-up" : "chevron-down",
     });
   }
-  return h("div.infodrawer-container", { style: { margin: "20px" } }, [
-    h(Card, { className: "infodrawer" }, [
+  return h(
+    "div.infodrawer-container",
+    null,
+    h(InfoDrawerContainer, [
       h(Header, { len, btn: h(CloseBtn) }),
       h.if(len == 0)(FeatureList, { features: data, open }),
       h.if(len > 0)(FeatureList, { features: selectedFeatures, open }),
-    ]),
-  ]);
+    ])
+  );
 }
 
 export { InfoDrawer };

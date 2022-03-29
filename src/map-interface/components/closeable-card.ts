@@ -1,6 +1,6 @@
-import { Children } from "react";
 import { Card, Button } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
+import classNames from "classnames";
 import styles from "./card.module.styl";
 
 const h = hyper.styled(styles);
@@ -14,26 +14,25 @@ const CloseableCard = (props) => {
     title,
     transitionDuration,
     showHeader = true,
+    insetContent = true,
+    renderHeader,
     children,
+    className,
     ...rest
   } = props;
   if (!isOpen) {
     return null;
   }
-  rest.className = "closeable-card";
+  rest.className = classNames("closeable-card", className);
 
   // Set header from "CloseableCardHeader" unless  not set,
   // otherwise use "title"
   let header = null;
-  const newChildren = Children.map(children, function (c) {
-    if (c.type === CloseableCardHeader) {
-      header = c;
-      return null;
-    }
-    return c;
-  });
+  if (renderHeader != null) {
+    header = renderHeader();
+  }
 
-  if (header == null) {
+  if (header == null && title != null) {
     if (title != null) {
       title = h("h4", title);
     }
@@ -52,7 +51,11 @@ const CloseableCard = (props) => {
         onClick: onClose,
       }),
     ]),
-    h("div.card-content", null, newChildren),
+    h(
+      "div.card-content",
+      { className: classNames({ inset: insetContent }) },
+      children
+    ),
   ]);
 };
 

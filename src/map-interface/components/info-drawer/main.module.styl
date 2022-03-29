@@ -1,21 +1,11 @@
+@require "../../../styles/_common"
 
-.infodrawer-container
-  width 30em
-  position absolute
-  right 0px
-  top 0px
-  bottom: 0px
-  pointer-events none
-  display flex
-  flex-direction column
-  :global
-    .macrostrat-detail
-      margin: 15px 0px;
-      display: flex;
-      align-items: center;
+.macrostrat-detail
+  margin: 0.25em 0px 0.5em;
+  display: flex;
+  align-items: center;
 
-.expansion-children
-  margin-left 10px
+
 
 .infodrawer
   pointer-events all
@@ -48,22 +38,12 @@
 
 .spacer
   flex-grow 1
+  pointer-events none
 
 .spinner{
   margin: 10px;
 }
 
-@media screen and (max-width: 768px) {
-  .infodrawer{
-    max-height: 60%;
-    width: 100%;
+@media screen and (max-width: 768px)
+  .infodrawer
     border-radius: 0px;
-    position: absolute;
-    bottom: 0px;
-  }
-  .infodrawer-container{
-    width: 100vw;
-    height: 100vh;
-    z-index: 200;
-  }
-}

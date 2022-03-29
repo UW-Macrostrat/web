@@ -58,7 +58,7 @@ function getRemovedOrNewFilters(nextProps, map) {
     }
   }
   // Otherwise, a filter was added
-  else if (incoming.length) {
+  if (incoming.length > 0) {
     let newFilterString = incoming[0].split("|");
     let filterToApply = nextProps.filters.filter((f) => {
       if (
@@ -72,7 +72,6 @@ function getRemovedOrNewFilters(nextProps, map) {
     if (filterToApply.length === 0) {
       return false;
     }
-
     filterToApply = filterToApply[0];
 
     // Check which kind of filter it is
@@ -138,6 +137,9 @@ function getRemovedOrNewFilters(nextProps, map) {
         break;
 
       case "lithologies":
+      case "all_lithologies":
+      case "all_lithology_types":
+      case "all_lithology_classes":
         map.lithFilters.push(filterToApply.name);
         map.lithFiltersIndex[
           `${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`
@@ -180,7 +182,7 @@ function getToApply(map): (string | string[])[] {
   return toApply;
 }
 
-function PBDBHelper(map, bounds, zoom, maxClusterZoom = 6): void {
+function PBDBHelper(map, bounds, zoom, maxClusterZoom = 7): void {
   // One for time, one for everything else because
   // time filters require a separate request for each filter
   let timeQuery = [];
@@ -271,7 +273,7 @@ function PBDBHelper(map, bounds, zoom, maxClusterZoom = 6): void {
     } else {
       map.map.getSource("pbdb-points").setData(map.pbdbPoints);
 
-      map.map.getSource("pbdb-clusters").setData(map.pbdbPoints);
+      //map.map.getSource("pbdb-clusters").setData(map.pbdbPoints);
       map.map.setLayoutProperty("pbdb-clusters", "visibility", "none");
       map.map.setLayoutProperty(
         "pbdb-points-clustered",
@@ -279,7 +281,7 @@ function PBDBHelper(map, bounds, zoom, maxClusterZoom = 6): void {
         "visible"
       );
       //    map.map.setLayoutProperty('pbdb-point-cluster-count', 'visibility', 'visible')
-      map.map.setLayoutProperty("pbdb-points", "visibility", "visible");
+      // map.map.setLayoutProperty("pbdb-points", "visibility", "visible");
     }
   });
 }

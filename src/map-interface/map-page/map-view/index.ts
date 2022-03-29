@@ -6,9 +6,13 @@ import {
   MapLayer,
 } from "~/map-interface/app-state";
 import Map from "./map";
-import h from "@macrostrat/hyper";
+import hyper from "@macrostrat/hyper";
 import { useEffect } from "react";
 import mapboxgl from "mapbox-gl";
+import useResizeObserver from "use-resize-observer";
+import styles from "../main.module.styl";
+
+const h = hyper.styled(styles);
 
 const _Map = forwardRef((props, ref) => h(Map, { ...props, ref }));
 
@@ -48,6 +52,20 @@ function setMapPosition(map: mapboxgl.Map, pos: MapPosition) {
   }
 }
 
+function calcMarkerLoadOffset({ ref, parentRef }) {
+  const rect = parentRef.current?.getBoundingClientRect();
+  const childRect = ref.current?.getBoundingClientRect();
+  const desiredCenterX = rect.left + rect.width / 2;
+  const desiredCenterY = rect.top + rect.height / 2;
+  const centerX = childRect.left + childRect.width / 2;
+  const centerY = childRect.top + childRect.height / 2;
+  if (rect && childRect) {
+    // Build in some space for the marker itself
+    return [desiredCenterX - centerX, desiredCenterY - centerY + 20];
+  }
+  return [0, 0];
+}
+
 function MapContainer(props) {
   const {
     filters,
@@ -63,8 +81,13 @@ function MapContainer(props) {
   } = useAppState((state) => state.core);
 
   const runAction = useAppActions();
+  const offset = useRef([0, 0]);
 
   const mapRef = useRef<mapboxgl.Map>();
+
+  const ref = useRef<HTMLDivElement>();
+  const parentRef = useRef<HTMLDivElement>();
+  const { width, height } = useResizeObserver({ ref });
 
   useEffect(() => {
     // Get the current value of the map. Useful for gradually moving away
@@ -87,33 +110,46 @@ function MapContainer(props) {
     if (mapLayers.has(MapLayer.COLUMNS)) {
       runAction({ type: "get-filtered-columns" });
     }
-  }, [filters]);
+  }, [filters, mapLayers]);
+
+  useEffect(() => {
+    offset.current = calcMarkerLoadOffset({ ref, parentRef });
+    mapRef.current?.resize();
+  }, [mapRef, width, height]);
 
   // Switch to 3D mode at high zoom levels or with a rotated map
   const pitch = mapPosition.camera.pitch ?? 0;
+  const bearing = mapPosition.camera.bearing ?? 0;
   const alt = mapPosition.camera.altitude;
+  console.log(pitch, bearing, alt);
+  const mapIsRotated = pitch != 0 || bearing != 0;
   const mapUse3D = (pitch > 0 && alt < 200000) || alt < 80000;
 
-  return h(_Map, {
-    filters,
-    filteredColumns,
-    mapHasBedrock: mapLayers.has(MapLayer.BEDROCK),
-    mapHasLines: mapLayers.has(MapLayer.LINES),
-    mapHasSatellite: mapLayers.has(MapLayer.SATELLITE),
-    mapHasColumns: mapLayers.has(MapLayer.COLUMNS),
-    mapHasFossils: mapLayers.has(MapLayer.FOSSILS),
-    mapCenter,
-    elevationChartOpen,
-    elevationData,
-    elevationMarkerLocation,
-    mapPosition,
-    infoDrawerOpen,
-    runAction,
-    mapIsLoading,
-    mapRef,
-    ...props,
-    use3D: mapUse3D,
-  });
+  return h("div.map-view-container.main-view", { ref: parentRef }, [
+    h(_Map, {
+      filters,
+      filteredColumns,
+      mapHasBedrock: mapLayers.has(MapLayer.BEDROCK),
+      mapHasLines: mapLayers.has(MapLayer.LINES),
+      mapHasSatellite: mapLayers.has(MapLayer.SATELLITE),
+      mapHasColumns: mapLayers.has(MapLayer.COLUMNS),
+      mapHasFossils: mapLayers.has(MapLayer.FOSSILS),
+      mapCenter,
+      elevationChartOpen,
+      elevationData,
+      elevationMarkerLocation,
+      mapPosition,
+      infoDrawerOpen,
+      runAction,
+      mapIsLoading,
+      mapIsRotated,
+      mapRef,
+      markerLoadOffset: offset.current,
+      ...props,
+      use3D: mapUse3D,
+      ref,
+    }),
+  ]);
 }
 
 export default MapContainer;

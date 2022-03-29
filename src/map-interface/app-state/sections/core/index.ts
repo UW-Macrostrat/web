@@ -35,13 +35,12 @@ const defaultState: CoreState = {
   fetchingGdd: false,
   gddCancelToken: null,
   isSearching: false,
+  inputFocus: false,
   term: "",
   searchCancelToken: null,
   fetchingElevation: false,
   elevationCancelToken: null,
   fetchingPbdb: false,
-  pbdbCancelToken: null,
-
   infoMarkerLng: -999,
   infoMarkerLat: -999,
   mapInfo: [],
@@ -85,7 +84,12 @@ export function coreReducer(
       if (!state.mapIsLoading) return state;
       return { ...state, mapIsLoading: false };
     case "toggle-menu":
-      return { ...state, menuOpen: !state.menuOpen };
+      return {
+        ...state,
+        menuOpen: !state.menuOpen,
+        isSearching: false,
+        inputFocus: false,
+      };
     case "toggle-about":
       return { ...state, aboutOpen: !state.aboutOpen };
     case "close-infodrawer":
@@ -154,7 +158,16 @@ export function coreReducer(
         fs = fs.concat([action.filter]);
       }
       // action.filter.type and action.filter.id go to the URI
-      return updateURI({ ...state, filters: fs });
+      // handle search resetting
+      return updateURI({
+        ...state,
+        filters: fs,
+        term: "",
+        isSearching: false,
+        searchResults: null,
+        searchCancelToken: null,
+        inputFocus: false,
+      });
     case "remove-filter":
       return updateURI({
         ...state,
@@ -165,6 +178,9 @@ export function coreReducer(
     case "clear-filters":
       return updateURI({ ...state, filters: [] });
     case "start-map-query":
+      if (state.inputFocus) {
+        return { ...state, inputFocus: false };
+      }
       if (state.mapInfoCancelToken) {
         state.mapInfoCancelToken.cancel();
       }
@@ -443,27 +459,16 @@ export function coreReducer(
 
     // Handle PBDB
     case "start-pbdb-query":
-      if (state.pbdbCancelToken) {
-        state.pbdbCancelToken.cancel();
-      }
       return {
         ...state,
         fetchingPbdb: true,
-        pbdbCancelToken: action.cancelToken,
       };
-
-    case "update-pbdb-query":
-      if (state.pbdbCancelToken) {
-        state.pbdbCancelToken.cancel();
-      }
-      return { ...state, pbdbCancelToken: action.cancelToken };
 
     case "received-pbdb-query":
       return {
         ...state,
         fetchingPbdb: false,
         pbdbData: action.data,
-        pbdbCancelToken: null,
         infoDrawerOpen: true,
       };
 
