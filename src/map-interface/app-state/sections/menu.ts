@@ -1,9 +1,9 @@
 import { Panel } from "@blueprintjs/core";
 
 enum MenuPanel {
-  LAYERS,
-  SETTINGS,
-  ABOUT,
+  LAYERS = "layers",
+  SETTINGS = "settings",
+  ABOUT = "about",
 }
 
 type SetPanel = {

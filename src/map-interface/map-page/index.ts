@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import MapContainer from "./map-view";
 import hyper, { compose } from "@macrostrat/hyper";
 import Searchbar, { SearchResults } from "../components/searchbar";
-import MenuContainer from "./menu";
+import MenuContainer, { useContextClass } from "./menu";
 import InfoDrawer from "../components/info-drawer";
 import ElevationChart from "../components/elevation-chart";
 import {
@@ -113,9 +113,11 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
     "detail-panel-open": infoDrawerOpen,
   });
 
+  const contextClass = useContextClass();
+
   return h("div.map-page", [
     h("div.main-ui", { className }, [
-      h("div.context-stack", [
+      h("div.context-stack", { className: contextClass }, [
         h(Searchbar, { className: "searchbar" }),
         h.if(!inputFocus && menuOpen)(MenuContainer),
         h.if(inputFocus)(SearchResults),

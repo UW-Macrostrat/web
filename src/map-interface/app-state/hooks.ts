@@ -42,7 +42,7 @@ function useAppState<T>(selectorFn: (state: AppState) => T): T {
 }
 
 interface OutsideClickI {
-  ref: React.RefObject<any>;
+  ref: React.RefObject<HTMLElement>;
   fn: () => void;
 }
 
@@ -51,7 +51,7 @@ function useOutsideClick(props: OutsideClickI) {
 
   useEffect(() => {
     function handleOutsideClick(event) {
-      if (ref.current && !ref.current.contains(event.target)) {
+      if (ref.current && !ref.current?.contains(event.target)) {
         fn();
       }
     }

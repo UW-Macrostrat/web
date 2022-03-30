@@ -25,6 +25,7 @@ import {
   MenuPanel,
   MapLayer,
 } from "../app-state";
+import classNames from "classnames";
 import styles from "./main.module.styl";
 
 const h = hyper.styled(styles);
@@ -145,19 +146,36 @@ function useMainPanel(): Panel<{}> {
   return null;
 }
 
+function usePanelStack() {
+  const { panelStack = [] } = useMenuState();
+  return [useMainPanel(), ...panelStack];
+}
+
+export function useContextClass() {
+  const menuOpen = useSelector((state) => state.core.menuOpen);
+  const stack = usePanelStack();
+  if (!menuOpen) return null;
+  return classNames("panel-open", stack[stack.length - 1].title.toLowerCase());
+}
+
 const Menu = (props) => {
   const runAction = useAppActions();
-  const { menuOpen, infoDrawerOpen, panelStack = [] } = useMenuState();
+  const { menuOpen, infoDrawerOpen } = useMenuState();
 
   const toggleMenu = () => {
     runAction({ type: "toggle-menu" });
   };
 
-  const stack = [useMainPanel(), ...panelStack];
+  const stack = usePanelStack();
 
   if (window.innerWidth <= 768 && infoDrawerOpen) {
-    return h("div");
+    return null;
   }
+
+  const className = classNames(
+    "menu-card",
+    stack[stack.length - 1].title.toLowerCase()
+  );
 
   return h(
     CloseableCard,
@@ -165,7 +183,7 @@ const Menu = (props) => {
       isOpen: menuOpen,
       onClose: toggleMenu,
       insetContent: false,
-      className: "menu-card",
+      className,
       renderHeader: () =>
         h(CloseableCard.Header, [
           h.if(stack.length == 1)("div.buttons", [

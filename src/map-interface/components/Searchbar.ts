@@ -83,7 +83,7 @@ function ResultList({ searchResults }) {
 function SearchResults() {
   const { searchResults } = useSearchState();
   const runAction = useAppActions();
-  const resultsRef = useRef(null);
+  const resultsRef = useRef<HTMLElement>(null);
 
   useOutsideClick({
     ref: resultsRef,

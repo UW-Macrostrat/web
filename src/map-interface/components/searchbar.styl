@@ -32,7 +32,11 @@
     margin 1em 0 0.2em
   ul
     padding-left 1.2em
-    li:before
-      content: '–'
-      position: absolute
-      left: 0
+    margin 0.5em 0 1em
+    li
+      list-style-type: none
+      position relative
+      &:before
+        content: '–'
+        position: absolute
+        left: -1em

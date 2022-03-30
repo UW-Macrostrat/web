@@ -42,8 +42,6 @@ This stylesheet the overall application page layout.
 .panel-title
   font-size 16px
 
-
-
 .spacer
   flex-grow 1
   pointer-events: none
@@ -183,11 +181,19 @@ map-control()
       margin-right 0.5em
       &:last-child
         margin-right 0
+    &.searching .context-stack
+      width: 24em
+
 
   .context-stack
     max-width 34em
     min-width 14em
-    transition: width 1s ease
+    width: 16em
+    &.panel-open
+      width: 34em
+    &.layers
+      width: 16em
+    transition width 300ms ease
 
   .detail-stack
     width 30em

@@ -122,9 +122,11 @@ function MapContainer(props) {
   const bearing = mapPosition.camera.bearing ?? 0;
   const alt = mapPosition.camera.altitude;
   const mapIsRotated = pitch != 0 || bearing != 0;
-  const mapUse3D = (pitch > 0 && alt < 200000) || alt < 80000;
 
-  console.log(pitch, bearing, alt);
+  let mapUse3D = false;
+  if (alt != null) {
+    mapUse3D = (pitch > 0 && alt < 200000) || alt < 80000;
+  }
 
   return h("div.map-view-container.main-view", { ref: parentRef }, [
     h(_Map, {
