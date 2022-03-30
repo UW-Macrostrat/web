@@ -22,9 +22,11 @@ import {
   useAppActions,
   useMenuState,
   useAppState,
+  useSearchState,
   MenuPanel,
   MapLayer,
 } from "../app-state";
+import { SearchResults } from "../components/searchbar";
 import classNames from "classnames";
 import styles from "./main.module.styl";
 
@@ -152,15 +154,17 @@ function usePanelStack() {
 }
 
 export function useContextClass() {
-  const menuOpen = useSelector((state) => state.core.menuOpen);
+  const panelOpen = useSelector((state) => state.core.contextPanelOpen);
   const stack = usePanelStack();
-  if (!menuOpen) return null;
+  if (!panelOpen) return null;
   return classNames("panel-open", stack[stack.length - 1].title.toLowerCase());
 }
 
 const Menu = (props) => {
+  let { className } = props;
   const runAction = useAppActions();
-  const { menuOpen, infoDrawerOpen } = useMenuState();
+  const { infoDrawerOpen } = useMenuState();
+  const { inputFocus } = useSearchState();
 
   const toggleMenu = () => {
     runAction({ type: "toggle-menu" });
@@ -168,11 +172,16 @@ const Menu = (props) => {
 
   const stack = usePanelStack();
 
+  if (inputFocus) {
+    return h(SearchResults, { className });
+  }
+
   if (window.innerWidth <= 768 && infoDrawerOpen) {
     return null;
   }
 
-  const className = classNames(
+  className = classNames(
+    className,
     "menu-card",
     stack[stack.length - 1].title.toLowerCase()
   );
@@ -180,7 +189,6 @@ const Menu = (props) => {
   return h(
     CloseableCard,
     {
-      isOpen: menuOpen,
       onClose: toggleMenu,
       insetContent: false,
       className,

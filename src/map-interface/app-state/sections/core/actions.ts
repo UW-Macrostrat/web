@@ -19,13 +19,11 @@ type GET_COLUMN = { type: "get-column"; column: any };
 type GET_ELEVATION = { type: "get-elevation"; line: any };
 type GET_PBDB = { type: "get-pbdb"; collection_nos: any };
 // Define constants to be passed with actions
-type PAGE_CLICK = { type: "page-click" };
 type RECIEVE_DATA = { type: "recieve-data" };
 type REQUEST_DATA = { type: "request-data" };
 
 type TOGGLE_MENU = { type: "toggle-menu" };
 type TOGGLE_ABOUT = { type: "toggle-about" };
-type TOGGLE_INFODRAWER = { type: "toggle-infodrawer" };
 type EXPAND_INFODRAWER = { type: "expand-infodrawer" };
 type CLOSE_INFODRAWER = { type: "close-infodrawer" };
 type TOGGLE_ELEVATION_CHART = { type: "toggle-elevation-chart" };
@@ -62,6 +60,11 @@ type SET_INPUT_FOCUS = {
   type: "set-input-focus";
   inputFocus: boolean;
 };
+
+type CONTEXT_OUTSIDE_CLICK = {
+  type: "context-outside-click";
+};
+
 type SET_SEARCH_TERM = {
   type: "set-search-term";
   term: string;
@@ -102,12 +105,11 @@ export type CoreAction =
   | GET_FILTERED_COLUMNS
   | ASYNC_ADD_FILTER
   | FETCH_SEARCH_QUERY
-  | PAGE_CLICK
+  | CONTEXT_OUTSIDE_CLICK
   | RECIEVE_DATA
   | REQUEST_DATA
   | TOGGLE_MENU
   | TOGGLE_ABOUT
-  | TOGGLE_INFODRAWER
   | EXPAND_INFODRAWER
   | CLOSE_INFODRAWER
   | TOGGLE_ELEVATION_CHART
@@ -156,6 +158,7 @@ interface MapCenterInfo {
 }
 export interface CoreState extends MapState, AsyncRequestState {
   initialLoadComplete: boolean;
+  contextPanelOpen: boolean;
   menuOpen: boolean;
   aboutOpen: boolean;
   infoDrawerOpen: boolean;

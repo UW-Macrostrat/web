@@ -143,6 +143,10 @@ map-control()
   :global(.mapbox-control.mapbox-zoom)
     display: none
 
+.main-ui.searching
+  .map-view-container
+    pointer-events: none
+
 :global(.mapbox-control.mapbox-zoom)
   background: rgba(255,255,255,0.2)
 
@@ -192,7 +196,7 @@ map-control()
     &.panel-open
       width: 34em
     &.layers
-      width: 16em
+      width: 18em
     transition width 300ms ease
 
   .detail-stack
@@ -235,3 +239,17 @@ map-control()
 
 // padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 
+// Transitions
+
+@keyframes fadeIn
+  from
+    opacity: 0
+  to
+    opacity: 1;
+
+.transition-item
+  animation fadeIn 1s
+  opacity: 1
+  &.exiting
+    opacity: 0
+    transition: opacity 0.5s

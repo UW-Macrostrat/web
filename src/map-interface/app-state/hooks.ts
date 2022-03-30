@@ -4,6 +4,7 @@ import { useStore, useSelector, useDispatch } from "react-redux";
 import { AppState } from ".";
 import React from "react";
 import { useEffect } from "react";
+import { eventNames } from "process";
 
 function useActionDispatch() {
   return useDispatch<React.Dispatch<Action>>();
@@ -43,7 +44,7 @@ function useAppState<T>(selectorFn: (state: AppState) => T): T {
 
 interface OutsideClickI {
   ref: React.RefObject<HTMLElement>;
-  fn: () => void;
+  fn: (event: Event) => void;
 }
 
 function useOutsideClick(props: OutsideClickI) {
@@ -51,8 +52,9 @@ function useOutsideClick(props: OutsideClickI) {
 
   useEffect(() => {
     function handleOutsideClick(event) {
+      console.log(ref.current);
       if (ref.current && !ref.current?.contains(event.target)) {
-        fn();
+        return fn(event);
       }
     }
     document.addEventListener("mousedown", handleOutsideClick);
