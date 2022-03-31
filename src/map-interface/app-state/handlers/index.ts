@@ -61,6 +61,10 @@ async function actionRunner(
       const { lng, lat, z, map_id, column } = action;
       let CancelTokenMapQuery = axios.CancelToken;
       let sourceMapQuery = CancelTokenMapQuery.source();
+      if (state.inputFocus && state.contextPanelOpen) {
+        return { type: "context-outside-click" };
+      }
+
       dispatch({
         type: "start-map-query",
         lng,

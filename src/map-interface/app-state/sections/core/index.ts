@@ -183,9 +183,9 @@ export function coreReducer(
     case "clear-filters":
       return updateURI({ ...state, filters: [] });
     case "start-map-query":
-      if (state.inputFocus) {
-        return { ...state, inputFocus: false };
-      }
+      // if (state.inputFocus) {
+      //   return { ...state, inputFocus: false };
+      // }
       if (state.mapInfoCancelToken) {
         state.mapInfoCancelToken.cancel();
       }

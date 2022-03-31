@@ -89,6 +89,14 @@ const MapTypeSelector = () => {
   ]);
 };
 
+function MenuPanel() {
+  const { inputFocus } = useSearchState();
+  const { menuOpen } = useMenuState();
+  return h(Collapse, { isOpen: inputFocus || menuOpen }, [
+    //h(CloseableCard, { className: "menu-card", isOpen: true }, []),
+  ]);
+}
+
 function hTrans(isOpen, { animate = true, duration = 500 } = {}) {
   const [isShown, setIsShown] = useState(isOpen);
   const isAnimating = isShown !== isOpen;
@@ -147,7 +155,8 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
 
   const contextClass = useContextClass();
 
-  const onClick = (event) => {
+  const onMouseDown = (event) => {
+    if (!(inputFocus || contextPanelOpen)) return;
     if (ref.current?.contains(event.target)) return;
     runAction({ type: "context-outside-click" });
     event.stopPropagation();
@@ -158,7 +167,7 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
       "div.main-ui",
       {
         className,
-        onClick,
+        onMouseDown,
       },
       [
         h("div.context-stack", { className: contextClass, ref }, [
@@ -168,7 +177,6 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
 
         h(MapView, {
           backend,
-          allowInteraction: !(inputFocus && contextPanelOpen),
         }),
 
         h("div.detail-stack.infodrawer-container", [
