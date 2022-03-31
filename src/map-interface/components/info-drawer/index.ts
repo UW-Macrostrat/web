@@ -9,6 +9,8 @@ import { RegionalStratigraphy } from "./reg-strat";
 import { Physiography } from "./physiography";
 import { GddExpansion } from "./gdd";
 import { useAppState } from "~/map-interface/app-state";
+import classNames from "classnames";
+import { useState } from "react";
 import styles from "./main.module.styl";
 
 const h = hyper.styled(styles);
@@ -18,6 +20,7 @@ function InfoDrawerContainer(props) {
 }
 
 function InfoDrawer(props) {
+  let { className } = props;
   const {
     infoDrawerExpanded,
     mapInfo,
@@ -46,7 +49,7 @@ function InfoDrawer(props) {
   };
 
   if (!mapInfo || !mapInfo.mapData) {
-    return h("div");
+    return null;
   }
 
   let source =
@@ -62,7 +65,11 @@ function InfoDrawer(props) {
           ref: {},
         };
 
-  return h(Card, { className: "infodrawer" }, [
+  className = classNames("infodrawer", className, {
+    loading: fetchingMapInfo,
+  });
+
+  return h(Card, { className }, [
     h(InfoDrawerHeader, {
       mapInfo,
       infoMarkerLng,

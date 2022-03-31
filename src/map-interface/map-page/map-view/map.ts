@@ -587,20 +587,30 @@ class Map extends Component<MapProps, {}> {
       JSON.stringify(this.props.mapCenter)
     ) {
       if (nextProps.mapCenter.type === "place") {
-        let bounds = [
-          [
-            nextProps.mapCenter.place.bbox[0],
-            nextProps.mapCenter.place.bbox[1],
-          ],
-          [
-            nextProps.mapCenter.place.bbox[2],
-            nextProps.mapCenter.place.bbox[3],
-          ],
-        ];
-        this.map.fitBounds(bounds, {
-          duration: 0,
-          maxZoom: 16,
-        });
+        const { bbox, center } = nextProps.mapCenter.place;
+        if (bbox?.length == 4) {
+          let bounds = [
+            [
+              nextProps.mapCenter.place.bbox[0],
+              nextProps.mapCenter.place.bbox[1],
+            ],
+            [
+              nextProps.mapCenter.place.bbox[2],
+              nextProps.mapCenter.place.bbox[3],
+            ],
+          ];
+          console.log(nextProps.mapCenter, bounds);
+          this.map.fitBounds(bounds, {
+            duration: 0,
+            maxZoom: 16,
+          });
+        } else {
+          this.map.flyTo({
+            center,
+            duration: 0,
+            zoom: Math.max(nextProps.zoom, 14),
+          });
+        }
       } else {
         // zoom to user location
       }

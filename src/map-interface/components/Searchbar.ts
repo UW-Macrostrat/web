@@ -11,6 +11,7 @@ import { useSelector } from "react-redux";
 import { SubtleFilterText } from "./filters-panel";
 import styles from "./searchbar.styl";
 import { PanelSubhead } from "./expansion-panel/headers";
+import classNames from "classnames";
 
 const h = hyper.styled(styles);
 
@@ -80,23 +81,11 @@ function ResultList({ searchResults }) {
   ]);
 }
 
-function SearchResults() {
+function SearchResults({ className }) {
   const { searchResults } = useSearchState();
-  const runAction = useAppActions();
-  const resultsRef = useRef<HTMLElement>(null);
+  className = classNames(className, "search-results-card");
 
-  useOutsideClick({
-    ref: resultsRef,
-    fn: () => {
-      runAction({ type: "set-input-focus", inputFocus: false });
-    },
-  });
-
-  return h(
-    Card,
-    { ref: resultsRef, className: "search-results-card" },
-    h(ResultList, { searchResults })
-  );
+  return h(Card, { className }, h(ResultList, { searchResults }));
 }
 
 function MenuButton() {
@@ -127,10 +116,9 @@ function Searchbar(props) {
   const { term, searchResults, inputFocus } = useSearchState();
 
   const gainInputFocus = (e) => {
+    console.log("Gained input focus");
     e.stopPropagation();
-    if (!inputFocus) {
-      runAction({ type: "set-input-focus", inputFocus: true });
-    }
+    runAction({ type: "set-input-focus", inputFocus: true });
   };
 
   const handleSearchInput = (event) => {

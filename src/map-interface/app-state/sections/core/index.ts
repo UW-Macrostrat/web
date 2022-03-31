@@ -1,9 +1,9 @@
 import { updateURI } from "../../helpers";
 import { sum, timescale } from "../../../utils";
 import { MapBackend, MapLayer } from "../map";
-import { CoreState, CoreAction } from "./types";
+import { CoreState, CoreAction } from "./actions";
 import update, { Spec } from "immutability-helper";
-export * from "./types";
+export * from "./actions";
 
 const classColors = {
   sedimentary: "#FF8C00",
@@ -19,6 +19,7 @@ const classColors = {
 
 const defaultState: CoreState = {
   initialLoadComplete: false,
+  contextPanelOpen: false,
   menuOpen: false,
   aboutOpen: false,
   infoDrawerOpen: false,
@@ -84,29 +85,33 @@ export function coreReducer(
       if (!state.mapIsLoading) return state;
       return { ...state, mapIsLoading: false };
     case "toggle-menu":
+      const shouldOpen = state.inputFocus || !state.menuOpen;
+
       return {
         ...state,
-        menuOpen: !state.menuOpen,
+        contextPanelOpen: shouldOpen,
+        menuOpen: shouldOpen,
         isSearching: false,
         inputFocus: false,
       };
+    case "context-outside-click":
+      if (state.inputFocus) {
+        return {
+          ...state,
+          contextPanelOpen: false,
+          menuOpen: false,
+        };
+      }
+      return state;
     case "toggle-about":
       return { ...state, aboutOpen: !state.aboutOpen };
     case "close-infodrawer":
       return {
         ...state,
         infoDrawerOpen: false,
-        columnInfo: {},
-        mapInfo: [],
-        pbdbData: [],
-      };
-    case "toggle-infodrawer":
-      return {
-        ...state,
-        infoDrawerOpen: !state.infoDrawerOpen,
-        infoDrawerExpanded: false,
-        columnInfo: {},
-        gddInfo: [],
+        //columnInfo: {},
+        //mapInfo: [],
+        //pbdbData: [],
       };
 
     case "expand-infodrawer":
@@ -178,9 +183,9 @@ export function coreReducer(
     case "clear-filters":
       return updateURI({ ...state, filters: [] });
     case "start-map-query":
-      if (state.inputFocus) {
-        return { ...state, inputFocus: false };
-      }
+      // if (state.inputFocus) {
+      //   return { ...state, inputFocus: false };
+      // }
       if (state.mapInfoCancelToken) {
         state.mapInfoCancelToken.cancel();
       }
@@ -368,7 +373,11 @@ export function coreReducer(
         elevationMarkerLocation: [],
       };
     case "set-input-focus":
-      return { ...state, inputFocus: action.inputFocus };
+      return {
+        ...state,
+        inputFocus: action.inputFocus,
+        contextPanelOpen: action.inputFocus || state.menuOpen,
+      };
     case "set-search-term":
       return { ...state, term: action.term };
     // Handle searching

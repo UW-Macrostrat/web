@@ -1,7 +1,7 @@
 import { combineReducers } from "redux";
 import reduceReducers from "reduce-reducers";
 import { menuReducer, MenuState, MenuAction } from "./menu";
-import { CoreAction } from "./core/types";
+import { CoreAction } from "./core/actions";
 import { coreReducer, CoreState } from "./core";
 import { MapAction } from "./map";
 

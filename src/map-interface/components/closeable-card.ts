@@ -7,9 +7,10 @@ const h = hyper.styled(styles);
 
 const CloseableCardHeader = (props) => h("div.card-header-left", props);
 
+
 const CloseableCard = (props) => {
   let {
-    isOpen,
+    isOpen = true,
     onClose,
     title,
     transitionDuration,

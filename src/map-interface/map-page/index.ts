@@ -1,8 +1,8 @@
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 // Import other components
 import MapContainer from "./map-view";
 import hyper, { compose } from "@macrostrat/hyper";
-import Searchbar, { SearchResults } from "../components/searchbar";
+import Searchbar from "../components/searchbar";
 import MenuContainer, { useContextClass } from "./menu";
 import InfoDrawer from "../components/info-drawer";
 import ElevationChart from "../components/elevation-chart";
@@ -17,14 +17,15 @@ import { useSelector, useDispatch } from "react-redux";
 import loadable from "@loadable/component";
 import {
   useSearchState,
+  useOutsideClick,
   MapBackend,
   useMenuState,
   useAppState,
+  useAppActions,
 } from "../app-state";
 import styles from "./main.module.styl";
 import classNames from "classnames";
-import useResizeObserver from "use-resize-observer";
-import { CloseableCard } from "../components/closeable-card";
+import { useState, useRef } from "react";
 
 const h = hyper.styled(styles);
 
@@ -96,11 +97,50 @@ function MenuPanel() {
   ]);
 }
 
+function hTrans(isOpen, { animate = true, duration = 500 } = {}) {
+  const [isShown, setIsShown] = useState(isOpen);
+  const isAnimating = isShown !== isOpen;
+  useEffect(() => {
+    if (isOpen == isShown) return;
+    if (animate) {
+      setTimeout(() => setIsShown(isOpen), duration);
+    } else {
+      setIsShown(isOpen);
+    }
+  }, [isOpen, animate]);
+
+  return (tag, props = {}, children = null) => {
+    const { className = "", ...rest } = props;
+    const classes = classNames(className, "transition-item", {
+      animating: isAnimating,
+      entering: isAnimating && isOpen,
+      exiting: isAnimating && !isOpen,
+    });
+    return h.if(isShown || isOpen)(
+      tag,
+      { className: classes, ...rest },
+      children
+    );
+  };
+}
+
 const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   const { inputFocus } = useSearchState();
   const { menuOpen } = useMenuState();
+  const runAction = useAppActions();
   const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
-  const { ref, width, height } = useResizeObserver();
+  const contextPanelOpen = useAppState((s) => s.core.contextPanelOpen);
+  const ref = useRef<HTMLElement>(null);
+
+  // useOutsideClick({
+  //   ref,
+  //   fn: (event) => {
+  //     if (!inputFocus) return;
+  //     runAction({ type: "context-outside-click" });
+  //     event.stopPropagation();
+  //     return false;
+  //   },
+  // });
 
   /* We apply a custom style to the panel container when we are interacting
     with the search bar, so that we can block map interactions until search
@@ -109,27 +149,42 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
     the search bar on mobile platforms
   */
   const className = classNames({
-    searching: inputFocus,
+    searching: inputFocus && contextPanelOpen,
     "detail-panel-open": infoDrawerOpen,
   });
 
   const contextClass = useContextClass();
 
+  const onMouseDown = (event) => {
+    if (!(inputFocus || contextPanelOpen)) return;
+    if (ref.current?.contains(event.target)) return;
+    runAction({ type: "context-outside-click" });
+    event.stopPropagation();
+  };
+
   return h("div.map-page", [
-    h("div.main-ui", { className }, [
-      h("div.context-stack", { className: contextClass }, [
-        h(Searchbar, { className: "searchbar" }),
-        h.if(!inputFocus && menuOpen)(MenuContainer),
-        h.if(inputFocus)(SearchResults),
-      ]),
+    h(
+      "div.main-ui",
+      {
+        className,
+        onMouseDown,
+      },
+      [
+        h("div.context-stack", { className: contextClass, ref }, [
+          h(Searchbar, { className: "searchbar" }),
+          hTrans(contextPanelOpen)(MenuContainer),
+        ]),
 
-      h(MapView, { backend }),
+        h(MapView, {
+          backend,
+        }),
 
-      h("div.detail-stack.infodrawer-container", [
-        h.if(infoDrawerOpen)(InfoDrawer),
-        h("div.spacer"),
-      ]),
-    ]),
+        h("div.detail-stack.infodrawer-container", [
+          hTrans(infoDrawerOpen)(InfoDrawer),
+          h("div.spacer"),
+        ]),
+      ]
+    ),
     h("div.bottom", null, h(ElevationChart, null)),
   ]);
 };
