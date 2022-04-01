@@ -1,12 +1,7 @@
 import { useCallback, useRef, useEffect } from "react";
 import { Navbar, Button, InputGroup, Spinner, Card } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
-import {
-  useAppActions,
-  useMenuState,
-  useOutsideClick,
-  useSearchState,
-} from "../app-state";
+import { useAppActions, useMenuState, useSearchState } from "../app-state";
 import { useSelector } from "react-redux";
 import { SubtleFilterText } from "./filters-panel";
 import styles from "./searchbar.styl";
@@ -113,11 +108,10 @@ function MenuButton() {
 function Searchbar(props) {
   const runAction = useAppActions();
   const { className } = props;
-  const { term, searchResults, inputFocus } = useSearchState();
+  const { term, searchResults } = useSearchState();
 
   const gainInputFocus = (e) => {
     console.log("Gained input focus");
-    e.stopPropagation();
     runAction({ type: "set-input-focus", inputFocus: true });
   };
 

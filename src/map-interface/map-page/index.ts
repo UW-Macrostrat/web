@@ -17,7 +17,6 @@ import { useSelector, useDispatch } from "react-redux";
 import loadable from "@loadable/component";
 import {
   useSearchState,
-  useOutsideClick,
   MapBackend,
   useMenuState,
   useAppState,
@@ -131,16 +130,6 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
   const contextPanelOpen = useAppState((s) => s.core.contextPanelOpen);
   const ref = useRef<HTMLElement>(null);
-
-  // useOutsideClick({
-  //   ref,
-  //   fn: (event) => {
-  //     if (!inputFocus) return;
-  //     runAction({ type: "context-outside-click" });
-  //     event.stopPropagation();
-  //     return false;
-  //   },
-  // });
 
   /* We apply a custom style to the panel container when we are interacting
     with the search bar, so that we can block map interactions until search
