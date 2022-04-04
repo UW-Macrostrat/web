@@ -608,7 +608,10 @@ class Map extends Component<MapProps, {}> {
           this.map.flyTo({
             center,
             duration: 0,
-            zoom: Math.max(nextProps.zoom, 14),
+            zoom: Math.max(
+              nextProps.mapPosition?.camera?.target?.zoom ?? 10,
+              14
+            ),
           });
         }
       } else {

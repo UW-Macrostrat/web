@@ -1,7 +1,7 @@
 import { Suspense, useEffect } from "react";
 // Import other components
 import MapContainer from "./map-view";
-import hyper, { compose } from "@macrostrat/hyper";
+import hyper, { compose, classed } from "@macrostrat/hyper";
 import Searchbar from "../components/searchbar";
 import MenuContainer, { useContextClass } from "./menu";
 import InfoDrawer from "../components/info-drawer";
@@ -24,7 +24,8 @@ import {
 } from "../app-state";
 import styles from "./main.module.styl";
 import classNames from "classnames";
-import { useState, useRef } from "react";
+import { useRef } from "react";
+import { Conditional } from "../components/transitions";
 
 const h = hyper.styled(styles);
 
@@ -96,33 +97,6 @@ function MenuPanel() {
   ]);
 }
 
-function hTrans(isOpen, { animate = true, duration = 500 } = {}) {
-  const [isShown, setIsShown] = useState(isOpen);
-  const isAnimating = isShown !== isOpen;
-  useEffect(() => {
-    if (isOpen == isShown) return;
-    if (animate) {
-      setTimeout(() => setIsShown(isOpen), duration);
-    } else {
-      setIsShown(isOpen);
-    }
-  }, [isOpen, animate]);
-
-  return (tag, props = {}, children = null) => {
-    const { className = "", ...rest } = props;
-    const classes = classNames(className, "transition-item", {
-      animating: isAnimating,
-      entering: isAnimating && isOpen,
-      exiting: isAnimating && !isOpen,
-    });
-    return h.if(isShown || isOpen)(
-      tag,
-      { className: classes, ...rest },
-      children
-    );
-  };
-}
-
 const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   const { inputFocus } = useSearchState();
   const { menuOpen } = useMenuState();
@@ -161,7 +135,7 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
       [
         h("div.context-stack", { className: contextClass, ref }, [
           h(Searchbar, { className: "searchbar" }),
-          hTrans(contextPanelOpen)(MenuContainer),
+          h(Conditional, { shown: contextPanelOpen, component: MenuContainer }),
         ]),
 
         h(MapView, {
@@ -169,7 +143,11 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
         }),
 
         h("div.detail-stack.infodrawer-container", [
-          hTrans(infoDrawerOpen)(InfoDrawer),
+          h(Conditional, {
+            shown: infoDrawerOpen,
+            component: InfoDrawer,
+            className: "quick",
+          }),
           h("div.spacer"),
         ]),
       ]

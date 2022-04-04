@@ -490,6 +490,7 @@ export function coreReducer(
           type: "place",
           place: action.place,
         },
+        isSearching: false,
       };
     case "update-column-filters":
       return {

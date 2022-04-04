@@ -241,15 +241,22 @@ map-control()
 
 // Transitions
 
-@keyframes fadeIn
-  from
-    opacity: 0
-  to
-    opacity: 1;
+// @keyframes fadeIn
+//   from
+//     opacity: 0
+//   to
+//     opacity: 1
 
-.transition-item
-  animation fadeIn 1s
-  opacity: 1
-  &.exiting
-    opacity: 0
-    transition: opacity 0.5s
+:global
+  .transition-item
+    //animation fadeIn 500ms ease-in-out
+    &.enter
+      opacity: 0
+    &.enter-active
+      opacity: 1
+      transition: opacity 0.5s ease-in-out !important
+    &.exit
+      opacity: 1
+    &.exit-active
+      opacity: 0
+      transition: opacity 0.5s ease-in-out !important

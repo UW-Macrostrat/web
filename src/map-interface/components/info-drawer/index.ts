@@ -10,8 +10,9 @@ import { Physiography } from "./physiography";
 import { GddExpansion } from "./gdd";
 import { useAppState } from "~/map-interface/app-state";
 import classNames from "classnames";
-import { useState } from "react";
+import { hTrans } from "~/map-interface/utils";
 import styles from "./main.module.styl";
+import { Conditional } from "../transitions";
 
 const h = hyper.styled(styles);
 
@@ -77,28 +78,36 @@ function InfoDrawer(props) {
       onCloseClick: () => runAction({ type: "close-infodrawer" }),
     }),
     h("div.infodrawer-body", [
-      h.if(fetchingMapInfo)("div.spinner", [h(Spinner)]),
-      h.if(!fetchingMapInfo)("div", [
-        h(FossilCollections, { data: pbdbData, expanded: true }),
-        h(RegionalStratigraphy, { mapInfo, columnInfo }),
-        h(GeologicMapInfo, {
-          mapInfo,
-          bedrockExpanded: true,
-          source,
-        }),
-        h(MacrostratLinkedData, {
-          mapInfo,
-          bedrockMatchExpanded: true,
-          source,
-        }),
-        h(Physiography, { mapInfo }),
-        h(GddExpansion, {
-          mapInfo,
-          gddInfo,
-          openGdd,
-          fetchingGdd,
-        }),
-      ]),
+      h(Conditional, {
+        shown: fetchingMapInfo,
+        className: "spinner",
+        component: Spinner,
+      }),
+      h(
+        Conditional,
+        { shown: !fetchingMapInfo },
+        h("div", [
+          h(FossilCollections, { data: pbdbData, expanded: true }),
+          h(RegionalStratigraphy, { mapInfo, columnInfo }),
+          h(GeologicMapInfo, {
+            mapInfo,
+            bedrockExpanded: true,
+            source,
+          }),
+          h(MacrostratLinkedData, {
+            mapInfo,
+            bedrockMatchExpanded: true,
+            source,
+          }),
+          h(Physiography, { mapInfo }),
+          h(GddExpansion, {
+            mapInfo,
+            gddInfo,
+            openGdd,
+            fetchingGdd,
+          }),
+        ])
+      ),
     ]),
   ]);
 }

@@ -44,8 +44,15 @@
   pointer-events none
 
 .spinner
-  margin: 10px
-
+  .bp3-spinner
+    padding: 10px
+  height: 100px
+  &:global(.enter)
+    height: 100px
+    transition: height 0.5s ease
+  &:global(.exit-active)
+    height 0
+    transition: height 0.5s ease
 
 
 @media screen and (max-width: 768px)
