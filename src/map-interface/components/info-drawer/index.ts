@@ -10,9 +10,8 @@ import { Physiography } from "./physiography";
 import { GddExpansion } from "./gdd";
 import { useAppState } from "~/map-interface/app-state";
 import classNames from "classnames";
-import { hTrans } from "~/map-interface/utils";
 import styles from "./main.module.styl";
-import { Conditional } from "../transitions";
+import { LoadingArea } from "../transitions";
 
 const h = hyper.styled(styles);
 
@@ -78,14 +77,9 @@ function InfoDrawer(props) {
       onCloseClick: () => runAction({ type: "close-infodrawer" }),
     }),
     h("div.infodrawer-body", [
-      h(Conditional, {
-        shown: fetchingMapInfo,
-        className: "spinner",
-        component: Spinner,
-      }),
       h(
-        Conditional,
-        { shown: !fetchingMapInfo },
+        LoadingArea,
+        { loaded: !fetchingMapInfo },
         h("div", [
           h(FossilCollections, { data: pbdbData, expanded: true }),
           h(RegionalStratigraphy, { mapInfo, columnInfo }),

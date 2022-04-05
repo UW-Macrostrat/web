@@ -30,6 +30,11 @@
     align-items baseline
     margin-right 1em
 
+  &.loading
+    .infodrawer-body
+      overflow-y: hidden
+      min-height: 70px
+
   // &.loading
   //   max-height: 200px
   // max-height: calc(100vh - 60px)
@@ -38,21 +43,14 @@
 .infodrawer-body
   overflow-y scroll
   flex-shrink 1
+  position relative
+  min-height: 0
+  transition min-height 0.2s ease
 
 .spacer
   flex-grow 1
   pointer-events none
 
-.spinner
-  .bp3-spinner
-    padding: 10px
-  height: 100px
-  &:global(.enter)
-    height: 100px
-    transition: height 0.5s ease
-  &:global(.exit-active)
-    height 0
-    transition: height 0.5s ease
 
 
 @media screen and (max-width: 768px)
