@@ -25,7 +25,6 @@ import {
 import styles from "./main.module.styl";
 import classNames from "classnames";
 import { useRef } from "react";
-import { Conditional } from "../components/transitions";
 import { useTransition } from "transition-hook";
 
 const h = hyper.styled(styles);
