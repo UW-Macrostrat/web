@@ -3,7 +3,7 @@ import { Suspense, useEffect } from "react";
 import MapContainer from "./map-view";
 import hyper, { compose, classed } from "@macrostrat/hyper";
 import Searchbar from "../components/searchbar";
-import MenuContainer, { useContextClass } from "./menu";
+import Menu, { useContextClass } from "./menu";
 import InfoDrawer from "../components/info-drawer";
 import ElevationChart from "../components/elevation-chart";
 import {
@@ -143,7 +143,9 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
       [
         h("div.context-stack", { className: contextClass, ref }, [
           h(Searchbar, { className: "searchbar" }),
-          h.if(contextPanelTrans.shouldMount)(MenuContainer),
+          h.if(contextPanelTrans.shouldMount)(Menu, {
+            className: "context-panel",
+          }),
         ]),
 
         h(MapView, {
@@ -151,7 +153,9 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
         }),
 
         h("div.detail-stack.infodrawer-container", [
-          h.if(detailPanelTrans.shouldMount)(InfoDrawer),
+          h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
+            className: "detail-panel",
+          }),
           h("div.spacer"),
         ]),
       ]

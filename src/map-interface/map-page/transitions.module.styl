@@ -1,12 +1,13 @@
-.detail-panel
-  &:global(.enter)
-    opacity: 0
-  &:global(.enter-active)
-    opacity: 1
-    transition: opacity 0.5s ease-in-out, height 0.5s ease-in-out, max-height 0.5s ease-in-out
-  &:global(.exit)
-    opacity: 1
-  &:global(.exit-active)
-    opacity: 0
-    transition: opacity 0.5s ease-in-out, height 0.5s ease-in-out, max-height 0.5s ease-in-out
-  transition: height 0.5s ease-in-out, max-height 0.5s ease-in-out
+$transition(container_class, child_class)
+  {container_class}
+    {child_class}
+      transition: opacity 0.5s ease-in-out, height 0.5s ease-in-out, max-height 0.5s ease-in-out
+    &{child_class}-from {child_class}
+      opacity: 0
+    &{child_class}-enter {child_class}
+      opacity: 1
+    &{child_class}-leave {child_class}
+      opacity: 0
+
+$transition('.main-ui', '.detail-panel')
+$transition('.main-ui', '.context-panel')
