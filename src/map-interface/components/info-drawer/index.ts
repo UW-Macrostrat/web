@@ -22,16 +22,13 @@ function InfoDrawerContainer(props) {
 function InfoDrawer(props) {
   let { className } = props;
   const {
-    infoDrawerExpanded,
     mapInfo,
     fetchingMapInfo,
-    fetchingColumnInfo,
     fetchingGdd,
     columnInfo,
     infoMarkerLng,
     infoMarkerLat,
     gddInfo,
-    fetchingPbdb,
     pbdbData,
     // We used to enable panels when certain layers were on,
     // but now we just show all panels always

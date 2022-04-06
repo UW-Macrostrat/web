@@ -145,6 +145,7 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
         h("div.detail-stack.infodrawer-container", [
           h(Conditional, {
             shown: infoDrawerOpen,
+            className: "infodrawer-stack",
             component: InfoDrawer,
           }),
           h("div.spacer"),

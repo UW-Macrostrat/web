@@ -167,11 +167,17 @@ map-control()
 
   // Make sure that our detail panel doesn't take up the entirety of the page
   .detail-stack
-    max-height: 70%
+    height: fit-content
+    position: inherit
 
   // Completely hide zoom control
   :global(.mapbox-control.mapbox-zoom)
     display: none
+
+  .infodrawer-stack
+    max-height: 70%
+    &:global(.exit-active)
+      max-height: 0   
 
 /* Desktop styling is necessarily much more complicated than mobile
   to handle a two-column layout. */
@@ -210,7 +216,7 @@ map-control()
     flex-direction column
     margin-bottom 1.2em
 
-  .context-stack,.detail-stack
+  .context-stack, .detail-stack
     pointer-events: none
     z-index: 100
     &>div
@@ -247,16 +253,3 @@ map-control()
 //   to
 //     opacity: 1
 
-:global
-  .transition-item
-    //animation fadeIn 500ms ease-in-out
-    &.enter
-      opacity: 0
-    &.enter-active
-      opacity: 1
-      transition: opacity 0.5s ease-in-out !important
-    &.exit
-      opacity: 1
-    &.exit-active
-      opacity: 0
-      transition: opacity 0.5s ease-in-out !important
