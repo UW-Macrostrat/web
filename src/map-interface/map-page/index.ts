@@ -26,7 +26,6 @@ import styles from "./main.module.styl";
 import classNames from "classnames";
 import { useRef } from "react";
 import { Conditional } from "../components/transitions";
-import { CSSTransition } from "react-transition-group";
 
 const h = hyper.styled(styles);
 
@@ -98,28 +97,6 @@ function MenuPanel() {
   ]);
 }
 
-function MapPageContainer(props) {
-  const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
-  const contextPanelOpen = useAppState((s) => s.core.contextPanelOpen);
-  const { inputFocus } = useSearchState();
-
-  const className = classNames({
-    searching: inputFocus && contextPanelOpen,
-    "detail-panel-open": infoDrawerOpen,
-  });
-
-  return h(
-    CSSTransition,
-    {
-      className,
-      classNames: "context-shown",
-      in: contextPanelOpen,
-      timeout: 300,
-    },
-    h("div.map-page", props)
-  );
-}
-
 const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   const { inputFocus } = useSearchState();
   const { menuOpen } = useMenuState();
@@ -134,6 +111,10 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
     We also apply a custom style when the infodrawer is open so we can hide
     the search bar on mobile platforms
   */
+  const className = classNames({
+    searching: inputFocus && contextPanelOpen,
+    "detail-panel-open": infoDrawerOpen,
+  });
 
   const contextClass = useContextClass();
 
@@ -144,10 +125,11 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
     event.stopPropagation();
   };
 
-  return h(MapPageContainer, [
+  return h("div.map-page", [
     h(
       "div.main-ui",
       {
+        className,
         onMouseDown,
       },
       [
