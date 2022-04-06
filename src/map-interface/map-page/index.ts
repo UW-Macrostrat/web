@@ -1,11 +1,8 @@
-import { Suspense, useEffect } from "react";
+import { Suspense } from "react";
 // Import other components
-import MapContainer from "./map-view";
-import hyper, { compose, classed } from "@macrostrat/hyper";
+import hyper, { compose } from "@macrostrat/hyper";
 import Searchbar from "../components/searchbar";
 import Menu, { useContextClass } from "./menu";
-import InfoDrawer from "../components/info-drawer";
-import ElevationChart from "../components/elevation-chart";
 import {
   ButtonGroup,
   Button,
@@ -27,6 +24,10 @@ import classNames from "classnames";
 import { useRef } from "react";
 import { useTransition } from "transition-hook";
 
+const ElevationChart = loadable(() => import("../components/elevation-chart"));
+const InfoDrawer = loadable(() => import("../components/info-drawer"));
+const MapContainer = loadable(() => import("./map-view"));
+
 const h = hyper.styled(styles);
 
 //const CesiumViewMod = loadable(() => import("./cesium-view"));
@@ -36,6 +37,10 @@ export function CesiumView(props) {
   return h(Suspense, { fallback: h(Spinner) }, h(CesiumViewMod, props));
 }
 
+function MapContainerBase(props) {
+  return h(Suspense, { fallback: h(Spinner) }, h(MapContainer, props));
+}
+
 const MapView = (props: { backend: MapBackend }) => {
   const { backend = MapBackend.MAPBOX3 } = props;
   switch (backend) {
@@ -43,7 +48,7 @@ const MapView = (props: { backend: MapBackend }) => {
       return h(CesiumView);
     default:
       //const use3D = backend == MapBackend.MAPBOX3;
-      return h(MapContainer);
+      return h(MapContainerBase);
   }
 };
 

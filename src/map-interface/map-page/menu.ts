@@ -12,11 +12,9 @@ import {
   IconName,
   PanelStack2,
   Panel,
-  Switch,
 } from "@blueprintjs/core";
 import { CloseableCard } from "../components/closeable-card";
 import { useSelector, useDispatch } from "react-redux";
-import AboutText from "../components/About";
 import { SettingsPanel } from "./settings-panel";
 import {
   useAppActions,
@@ -29,6 +27,9 @@ import {
 import { SearchResults } from "../components/searchbar";
 import classNames from "classnames";
 import styles from "./main.module.styl";
+import loadable from "@loadable/component";
+
+const AboutText = loadable(() => import("../components/About"));
 
 const h = hyper.styled(styles);
 
