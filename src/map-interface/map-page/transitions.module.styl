@@ -1,0 +1,33 @@
+core_transition=opacity 0.8s ease, height 0.8s ease, max-height 0.8s ease
+
+opacity-transition-core(child_class, prefix)
+  {child_class}
+    transition: core_transition
+  &{prefix}from {child_class}
+    opacity: 0
+  &{prefix}enter {child_class}
+    opacity: 1
+  &{prefix}leave {child_class}
+    opacity: 0
+
+opacity-transition(child_class)
+  opacity-transition-core(child_class, child_class + '-')
+
+height-transition(child_class, prefix)
+  {child_class}
+    transition: core_transition
+  &{prefix}from {child_class}
+    max-height: 0
+    height: 0
+  &{prefix}leave {child_class}
+    max-height: 0
+    max-height: 0
+
+.main-ui
+  opacity-transition('.detail-panel')
+  opacity-transition('.context-panel')
+
+@media only screen and (max-width: 768px)
+  .main-ui
+    height-transition('.detail-stack', '.detail-panel-')
+    height-transition('.context-panel', '.context-panel-')

@@ -1,5 +1,5 @@
 import hyper from "@macrostrat/hyper";
-import { AgeChip, AttrChip, MacrostratAgeChip } from "../info-blocks";
+import { AgeChip, AttrChip } from "../info-blocks";
 import { ExpansionPanel, SubExpansionPanel } from "../expansion-panel";
 import styles from "./main.module.styl";
 const h = hyper.styled(styles);
@@ -53,7 +53,7 @@ function MacrostratAgeChipRenderer(props) {
 
   return h.if(b_age)("div.macrostrat-detail", [
     h("div.expansion-summary-title", "Age: "),
-    h(MacrostratAgeChip, {
+    h(AgeChip, {
       b_int,
       t_int,
       b_age,
