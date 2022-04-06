@@ -112,9 +112,14 @@ function MapContainer(props) {
     }
   }, [filters, mapLayers]);
 
+  const timeout = useRef<Timeout>(null);
+
   useEffect(() => {
     offset.current = calcMarkerLoadOffset({ ref, parentRef });
-    mapRef.current?.resize();
+    if (timeout.current != null) {
+      clearTimeout(timeout.current);
+    }
+    timeout.current = setTimeout(() => mapRef.current?.resize(), 100);
   }, [mapRef, width, height]);
 
   // Switch to 3D mode at high zoom levels or with a rotated map

@@ -162,8 +162,10 @@ map-control()
   //   max-height: 80%
 
   // Hide searchbar when infodrawer is open
-  .main-ui.detail-panel-open .searchbar
-    display none
+  .main-ui.detail-panel-enter .context-stack
+    height: 0
+    visibility: hidden
+    transition: height 0.5s ease-in-out
 
   // Make sure that our detail panel doesn't take up the entirety of the page
   .detail-stack
