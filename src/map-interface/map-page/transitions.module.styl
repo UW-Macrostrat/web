@@ -1,0 +1,12 @@
+.detail-panel
+  &:global(.enter)
+    opacity: 0
+  &:global(.enter-active)
+    opacity: 1
+    transition: opacity 0.5s ease-in-out, height 0.5s ease-in-out, max-height 0.5s ease-in-out
+  &:global(.exit)
+    opacity: 1
+  &:global(.exit-active)
+    opacity: 0
+    transition: opacity 0.5s ease-in-out, height 0.5s ease-in-out, max-height 0.5s ease-in-out
+  transition: height 0.5s ease-in-out, max-height 0.5s ease-in-out

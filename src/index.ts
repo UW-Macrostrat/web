@@ -24,4 +24,7 @@ let store = createStore<AppState, Action, any, any>(
 );
 
 // Render the application
-render(h(Provider, { store }, h(App)), document.getElementById("react"));
+render(
+  h(Provider, { store }, h(App)),
+  document.getElementById("app-container")
+);
