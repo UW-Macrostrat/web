@@ -26,6 +26,7 @@ import styles from "./main.module.styl";
 import classNames from "classnames";
 import { useRef } from "react";
 import { Conditional } from "../components/transitions";
+import { useTransition } from "transition-hook";
 
 const h = hyper.styled(styles);
 
@@ -105,16 +106,23 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   const contextPanelOpen = useAppState((s) => s.core.contextPanelOpen);
   const ref = useRef<HTMLElement>(null);
 
+  const contextPanelTrans = useTransition(contextPanelOpen, 500);
+  const detailPanelTrans = useTransition(infoDrawerOpen, 500);
+
   /* We apply a custom style to the panel container when we are interacting
     with the search bar, so that we can block map interactions until search
     bar focus is lost.
     We also apply a custom style when the infodrawer is open so we can hide
     the search bar on mobile platforms
   */
-  const className = classNames({
-    searching: inputFocus && contextPanelOpen,
-    "detail-panel-open": infoDrawerOpen,
-  });
+  const className = classNames(
+    {
+      searching: inputFocus && contextPanelOpen,
+      "detail-panel-open": infoDrawerOpen,
+    },
+    `context-panel-${contextPanelTrans.stage}`,
+    `detail-panel-${detailPanelTrans.stage}`
+  );
 
   const contextClass = useContextClass();
 
@@ -135,7 +143,7 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
       [
         h("div.context-stack", { className: contextClass, ref }, [
           h(Searchbar, { className: "searchbar" }),
-          h(Conditional, { shown: contextPanelOpen, component: MenuContainer }),
+          h.if(contextPanelTrans.shouldMount)(MenuContainer),
         ]),
 
         h(MapView, {
@@ -143,11 +151,7 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
         }),
 
         h("div.detail-stack.infodrawer-container", [
-          h(Conditional, {
-            shown: infoDrawerOpen,
-            className: "infodrawer-stack",
-            component: InfoDrawer,
-          }),
+          h.if(detailPanelTrans.shouldMount)(InfoDrawer),
           h("div.spacer"),
         ]),
       ]
