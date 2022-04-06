@@ -106,8 +106,8 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   const contextPanelOpen = useAppState((s) => s.core.contextPanelOpen);
   const ref = useRef<HTMLElement>(null);
 
-  const contextPanelTrans = useTransition(contextPanelOpen, 500);
-  const detailPanelTrans = useTransition(infoDrawerOpen, 500);
+  const contextPanelTrans = useTransition(contextPanelOpen, 800);
+  const detailPanelTrans = useTransition(infoDrawerOpen, 800);
 
   /* We apply a custom style to the panel container when we are interacting
     with the search bar, so that we can block map interactions until search
