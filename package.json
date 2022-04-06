@@ -88,6 +88,7 @@
     "reduce-reducers": "^1.0.4",
     "redux": "^4.0.5",
     "topojson-client": "^3.0.0",
+    "transition-hook": "^1.5.2",
     "urijs": "^1.19.2",
     "use-resize-observer": "^8.0.0"
   },
