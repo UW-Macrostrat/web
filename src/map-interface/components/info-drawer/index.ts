@@ -16,7 +16,7 @@ import { LoadingArea } from "../transitions";
 const h = hyper.styled(styles);
 
 function InfoDrawerContainer(props) {
-  h(Card, { className: "infodrawer", ...props });
+  return h(Card, { className: "infodrawer", ...props });
 }
 
 function InfoDrawer(props) {

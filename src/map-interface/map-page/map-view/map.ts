@@ -1,6 +1,6 @@
 import { Component, forwardRef } from "react";
 import { SETTINGS } from "../../Settings";
-import { mapStyle } from "../vector-style";
+import { mapStyle, macrostratLineSymbolLayers } from "../vector-style";
 import {
   getRemovedOrNewFilters,
   getToApply,
@@ -14,6 +14,7 @@ import { setMapStyle, markerOffset } from "./style-helpers";
 import { CompassControl, ZoomControl } from "mapbox-gl-controls";
 import { ThreeDControl } from "./controls";
 import classNames from "classnames";
+import { setupLineSymbols } from "@macrostrat/map-styling";
 
 const maxClusterZoom = 6;
 const highlightLayers = [
@@ -26,6 +27,16 @@ interface MapProps {
   use3D: boolean;
   mapIsRotated: boolean;
   markerLoadOffset: [number, number];
+}
+
+async function addLineSymbolLayers(map) {
+  await setupLineSymbols(map);
+  const layers = macrostratLineSymbolLayers();
+  console.log(layers);
+  for (const layer of layers) {
+    if (map.getLayer(layer.id) != null) continue;
+    map.addLayer(layer);
+  }
 }
 
 class Map extends Component<MapProps, {}> {
@@ -146,7 +157,7 @@ class Map extends Component<MapProps, {}> {
       }
     });
 
-    this.map.on("load", () => {
+    this.map.on("load", async () => {
       // Add the sources to the map
       Object.keys(mapStyle.sources).forEach((source) => {
         if (this.map.getSource(source) == null) {
@@ -197,6 +208,8 @@ class Map extends Component<MapProps, {}> {
       }
 
       this.enable3DTerrain(this.props.use3D);
+
+      addLineSymbolLayers(this.map);
 
       // NO idea why timeout is needed
       setTimeout(() => {

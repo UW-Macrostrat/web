@@ -146,6 +146,7 @@ module.exports = {
       //"@macrostrat/cesium-viewer": packageSrc("cesium-viewer"),
       "@macrostrat/column-components": packageSrc("column-components"),
       "@macrostrat/ui-components": packageSrc("ui-components"),
+      "@macrostrat/map-styling": packageSrc("map-styling"),
     },
   },
   entry: {
