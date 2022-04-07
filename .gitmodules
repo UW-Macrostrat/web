@@ -1,6 +1,6 @@
 [submodule "bundledDeps/ui-components"]
-	path = packages/ui-components
-	url = git://github.com/UW-Macrostrat/ui-components.git
+	path = deps/ui-components
+	url = https://github.com/UW-Macrostrat/ui-components.git
 [submodule "packages/column-components"]
 	path = packages/column-components
 	url = git://github.com/UW-Macrostrat/column-components.git
