@@ -1,9 +1,5 @@
 const path = require("path");
-const {
-  DefinePlugin,
-  EnvironmentPlugin,
-  HotModuleReplacementPlugin,
-} = require("webpack");
+const { DefinePlugin, EnvironmentPlugin } = require("webpack");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 //UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const CopyPlugin = require("copy-webpack-plugin");
@@ -16,7 +12,8 @@ const mode = process.env.NODE_ENV || "development";
 
 let publicURL = process.env.PUBLIC_URL || "/";
 
-const packageSrc = (name) => path.resolve(__dirname, "packages", name, "src");
+const packageSrc = (name) =>
+  path.resolve(__dirname, "deps", "ui-components", "packages", name, "src");
 
 //const cesiumSource = "node_modules/cesium/Source";
 //const cesiumWorkers = "../Build/Cesium/Workers";

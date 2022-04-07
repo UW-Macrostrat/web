@@ -9,10 +9,10 @@
     "clean": "rm -rf dist/*",
     "deploy:steno": "scripts/deploy-steno",
     "dev": "webpack serve",
-    "bootstrap": "npm install --workspaces"
+    "bootstrap": "npm install --workspaces && npm install"
   },
   "workspaces": [
-    "packages/*"
+    "deps/ui-components/packages/*"
   ],
   "authors": [
     "John Czaplewski <jczaplewski@wisc.edu>",
