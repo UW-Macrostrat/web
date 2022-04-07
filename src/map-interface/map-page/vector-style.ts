@@ -19,6 +19,10 @@ const symbolIndex = {
 
 const reverseSources = [229];
 
+function sizeExpression(sz) {
+  return ["case", ["!=", ["get", "name"], ""], sz * 1.5, sz];
+}
+
 export function macrostratLineSymbolLayers() {
   let symbolLayers = [];
   for (const [key, lyr] of Object.entries(symbolIndex)) {
@@ -39,7 +43,7 @@ export function macrostratLineSymbolLayers() {
     }
 
     const val = {
-      ...symbolLayerPaintProperties(lyr, { color, rotate }),
+      ...symbolLayerPaintProperties(lyr, { color, rotate, sizeExpression }),
       id: `${lyr}-stroke`,
       source: "burwell",
       "source-layer": "lines",
