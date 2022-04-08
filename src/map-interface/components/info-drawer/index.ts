@@ -1,3 +1,4 @@
+import { ReactChild } from "react";
 import { Card, Spinner } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import { useAppActions } from "~/map-interface/app-state";
@@ -16,7 +17,7 @@ import { LoadingArea } from "../transitions";
 const h = hyper.styled(styles);
 
 function InfoDrawerContainer(props) {
-  h(Card, { className: "infodrawer", ...props });
+  return h(Card, { className: "infodrawer", ...props });
 }
 
 function InfoDrawer(props) {

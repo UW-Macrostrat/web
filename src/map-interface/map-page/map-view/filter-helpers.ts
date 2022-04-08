@@ -193,6 +193,13 @@ function PBDBHelper(map, bounds, zoom, maxClusterZoom = 7): void {
       timeQuery.push(`max_ma=${f[2][2]}`, `min_ma=${f[1][2]}`);
     });
   }
+  // lith filters broken on pbdb (500 error returned)
+  // if (map.lithFilters.length) {
+  //   let filters = map.lithFilters.filter((f) => f != "sedimentary");
+  //   if (filters.length) {
+  //     queryString.push(`lithology=${filters.join(",")}`);
+  //   }
+  // }
   if (map.stratNameFilters.length) {
     queryString.push(`strat=${map.stratNameFilters.join(",")}`);
   }
