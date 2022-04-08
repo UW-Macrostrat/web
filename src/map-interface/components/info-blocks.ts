@@ -26,12 +26,13 @@ function Age({ age }) {
 
 function AgeChip(props) {
   const { t_int, b_int } = props;
-
-  if (b_int.int_id != t_int.int_id) {
-    b_int.int_name += ` - ${t_int.int_name}`;
-  }
-
-  return h("div.age-chip-container", [h(IntervalChip, { interval: b_int })]);
+  return h("div.age-chip-container", [
+    h(IntervalChip, { interval: b_int }),
+    h.if(b_int.int_id != props.t_int.int_id)(IntervalChip, {
+      interval: t_int,
+      className: "age-chip-t-int",
+    }),
+  ]);
 }
 
 function AttrChip(props) {
