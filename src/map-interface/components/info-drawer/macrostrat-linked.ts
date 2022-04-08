@@ -48,17 +48,14 @@ function AgeChipRenderer(props) {
 }
 
 function MacrostratAgeChipRenderer(props) {
-  const { macrostrat = {}, color } = props?.source;
+  const { macrostrat = {} } = props?.source;
   const { b_age, t_age, b_int, t_int } = macrostrat;
 
   return h.if(b_age)("div.macrostrat-detail", [
     h("div.expansion-summary-title", "Age: "),
     h(AgeChip, {
-      b_int,
-      t_int,
-      b_age,
-      t_age,
-      color,
+      b_int: { ...b_int, b_age, t_age },
+      t_int: { ...t_int, b_age, t_age },
     }),
   ]);
 }
