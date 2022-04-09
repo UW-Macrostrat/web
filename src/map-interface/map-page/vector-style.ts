@@ -17,7 +17,7 @@ const symbolIndex = {
   anticline: "anticline-hinge",
 };
 
-const reverseSources = [229];
+const reverseSources = [229, 210, 133, 74, 75, 40, 205];
 
 function sizeExpression(sz) {
   return ["case", ["!=", ["get", "name"], ""], sz * 1.5, sz];
