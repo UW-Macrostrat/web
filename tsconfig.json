@@ -19,9 +19,9 @@
       "~/*": ["./src/*"],
       "@macrostrat/cesium-viewer": ["packages/cesium-viewer/src/"],
       "@macrostrat/cesium-martini": ["packages/cesium-martini"],
-      "@macrostrat/ui-components": ["packages/ui-components/src/"],
-      "@macrostrat/column-components": ["packages/column-components/src/"],
-      "@macrostrat/map-components": ["packages/map-components/src/"]
+      "@macrostrat/ui-components": ["deps/ui-components/packages/ui-components/src/"],
+      "@macrostrat/column-components": ["deps/ui-components/packages/column-components/src/"],
+      "@macrostrat/map-components": ["deps/ui-components/packages/map-components/src/"]
     }
   },
   "include": ["src"]
