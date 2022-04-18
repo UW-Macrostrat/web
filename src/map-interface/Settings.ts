@@ -16,7 +16,7 @@ export const SETTINGS = {
   //     : `https://${window.location.hostname}`,
   burwellTileDomain: "https://devtiles.macrostrat.org",
   apiDomain: "https://dev.macrostrat.org",
-  gddDomain: "https://geodeepdive.org",
+  gddDomain: "https://xdd.wisc.edu",
   pbdbDomain: "https://paleobiodb.org",
   mapboxAccessToken:
     "pk.eyJ1IjoiamN6YXBsZXdza2kiLCJhIjoiWnQxSC01USJ9.oleZzfREJUKAK1TMeCD0bg",
