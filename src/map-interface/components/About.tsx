@@ -64,11 +64,12 @@ const AboutText = (props) => {
       </div>
 
       <p>
-        Macrostrat's geologic map is a seamless integration of over 200 geologic
-        maps from around the world and at numerous scales that have been
-        homogenized into a single database. As you zoom in and out of the map,
-        scale-appropriate geologic maps are shown, and clicking on the map
-        reveals primary data about each unit.
+        Macrostrat's geologic map system integrates over 290 bedrock geologic
+        maps constructed at multiple scales from around the world into a 
+        single database. As you zoom in and out of this map interface,
+        the display shifts between maps in one of four topologic levels. 
+        Clicking on the map reveals primary data about the target map unit and 
+        adjacent geologic lines at the given scale, as well as other regional information.
       </p>
       <h3>Credits</h3>
       <ul>
