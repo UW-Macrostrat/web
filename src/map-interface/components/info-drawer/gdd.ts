@@ -15,7 +15,7 @@ function GddExpansion(props) {
       className: "regional-panel",
       onChange: openGdd,
       title: "Primary Literature",
-      helpText: "via GeoDeepDive",
+      helpText: "via xDD",
     },
     [
       h.if(fetchingGdd)(Spinner),
