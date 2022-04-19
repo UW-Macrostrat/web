@@ -31,9 +31,8 @@ export const persistNewUnitChanges = async (
   col_id: number
 ) => {
   let s_id = section_id;
-  if (s_id == null || s_id === "undefined") {
+  if (s_id == null) {
     // we're making a new section with this unit
-    console.log("Making a new section");
     s_id = await createNewSection(col_id);
   }
   console.log(updatedModel, changeSet);
@@ -54,7 +53,7 @@ export const persistNewUnitChanges = async (
     ...unit,
   });
 
-  unit_id = data? data[0].id || null;
+  unit_id = data ? data[0].id : null;
 
   if (changeSet.envs) {
     const inserts = changeSet.envs.map((e) => {

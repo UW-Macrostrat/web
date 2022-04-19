@@ -46,7 +46,7 @@ function Projects({ projects }: { projects: Project[] }) {
             h("td", [project.timescale_id]),
             h("td", [
               h(EditButton, {
-                href: `/project/edit/${project.id}`,
+                href: `/project/${project.id}/edit`,
               }),
             ]),
           ]);

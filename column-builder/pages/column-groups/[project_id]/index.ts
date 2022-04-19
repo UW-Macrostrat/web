@@ -7,7 +7,7 @@ import pg, {
   Table,
   CreateButton,
   EditButton,
-} from "../../src";
+} from "../../../src";
 
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   const {
@@ -32,9 +32,9 @@ export default function ColumnGroup(props: {
 
   return h(BasePage, { query: { project_id } }, [
     h("h3", [
-      props.projectName,
+      `Column Groups for Project #${props.project_id}: ${props.projectName}`,
       h(CreateButton, {
-        href: `/column-groups/new/${project_id}`,
+        href: `/column-groups/${project_id}/new`,
         text: "Add New Group",
       }),
     ]),
@@ -48,7 +48,7 @@ export default function ColumnGroup(props: {
               h("h3", { style: { margin: 0 } }, colGroup.col_group_long),
               h(EditButton, {
                 small: true,
-                href: `/column-groups/edit/${colGroup.id}`,
+                href: `/column-group/${colGroup.id}/edit`,
               }),
             ]),
             h(Table, { interactive: true }, [
@@ -79,7 +79,7 @@ export default function ColumnGroup(props: {
               ]),
             ]),
             h(CreateButton, {
-              href: `/column/new/${colGroup.id}`,
+              href: `/column-group/${colGroup.id}/new-column`,
               text: "Add New Column",
             }),
           ]

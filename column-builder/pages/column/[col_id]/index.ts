@@ -7,7 +7,7 @@ import pg, {
   Table,
   EditButton,
   CreateButton,
-} from "../../src";
+} from "../../../src";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const {
@@ -90,7 +90,7 @@ export default function ColumnGroup(props: {
     h("h3", [
       `Sections for Column: ${col_name}`,
       h(EditButton, {
-        href: `/column/edit/${col_id}`,
+        href: `/column/${col_id}/edit`,
       }),
     ]),
     h.if(section_data.length == 0)("div", [
@@ -99,7 +99,7 @@ export default function ColumnGroup(props: {
       ]),
       h(CreateButton, {
         minimal: false,
-        href: `/units/new/undefined?col_id=${col_id}`,
+        href: `/column/${col_id}/new/section-unit`,
         text: "Create Unit",
       }),
     ]),
@@ -118,7 +118,7 @@ export default function ColumnGroup(props: {
               Row,
               {
                 key: i,
-                href: `/units/${section.section_id}`,
+                href: `/section/${section.section_id}`,
               },
               [
                 h("td", [section.section_id]),
@@ -132,7 +132,7 @@ export default function ColumnGroup(props: {
       ]),
       h(CreateButton, {
         minimal: false,
-        href: `/units/new/undefined?col_id=${col_id}`,
+        href: `/column/${col_id}/new/section-unit`,
         text: "Create Unit in new Section",
       }),
     ]),

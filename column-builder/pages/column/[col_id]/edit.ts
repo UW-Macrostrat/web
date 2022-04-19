@@ -1,4 +1,4 @@
-import { hyperStyled } from "@macrostrat/hyper";
+import h from "@macrostrat/hyper";
 import {
   tableUpdate,
   BasePage,
@@ -7,9 +7,7 @@ import {
   tableSelect,
   selectFirst,
 } from "../../../src";
-import styles from "../column.module.scss";
 import { GetServerSideProps } from "next";
-const h = hyperStyled(styles);
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const {

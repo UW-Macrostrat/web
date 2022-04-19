@@ -1,4 +1,4 @@
-import { hyperStyled } from "@macrostrat/hyper";
+import h from "@macrostrat/hyper";
 import {
   UnitEditorModel,
   BasePage,
@@ -10,9 +10,7 @@ import {
   selectFirst,
 } from "../../../src";
 import { persistUnitChanges } from "./edit-helpers";
-import styles from "../units.module.scss";
 import { GetServerSidePropsContext } from "next";
-const h = hyperStyled(styles);
 
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   const {

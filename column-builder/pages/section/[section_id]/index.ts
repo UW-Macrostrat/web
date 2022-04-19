@@ -1,7 +1,6 @@
 import h from "@macrostrat/hyper";
-import pg, { usePostgrest, Row, UnitsView, CreateButton } from "../../src";
-import { BasePage, Table } from "../../src";
-import { Spinner } from "@blueprintjs/core";
+import pg, { Row, UnitsView, CreateButton } from "../../../src";
+import { BasePage, Table } from "../../../src";
 import { GetServerSideProps } from "next";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -18,7 +17,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   return { props: { section_id, units: data } };
 };
 
-function Units(props: { section_id: string; units: UnitsView[] }) {
+function Section(props: { section_id: string; units: UnitsView[] }) {
   const { section_id, units } = props;
 
   const headers = [
@@ -30,12 +29,11 @@ function Units(props: { section_id: string; units: UnitsView[] }) {
     "Thickness",
   ];
 
-  if (!units) return h(Spinner);
   return h(BasePage, { query: { section_id: parseInt(section_id) } }, [
     h("h3", [
-      "Units",
+      `Units in Section #${section_id}`,
       h(CreateButton, {
-        href: `/units/new/${section_id}?col_id=${units[0].col_id}`,
+        href: `/section/${section_id}/new-unit`,
         text: "Add new unit",
       }),
     ]),
@@ -53,7 +51,7 @@ function Units(props: { section_id: string; units: UnitsView[] }) {
             Row,
             {
               key: i,
-              href: `/units/edit/${unit.id}`,
+              href: `/unit/${unit.id}/edit`,
             },
             [
               h("td", [unit.id]),
@@ -74,4 +72,4 @@ function Units(props: { section_id: string; units: UnitsView[] }) {
   ]);
 }
 
-export default Units;
+export default Section;

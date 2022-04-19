@@ -5,7 +5,7 @@ import pg, {
   ColumnGroupEditor,
   ColumnGroupI,
 } from "../../../src";
-import styles from "../colgroup.module.scss";
+import styles from "./colgroup.module.scss";
 import { GetServerSidePropsContext } from "next";
 const h = hyperStyled(styles);
 

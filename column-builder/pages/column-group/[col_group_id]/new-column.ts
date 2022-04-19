@@ -1,4 +1,4 @@
-import { hyperStyled } from "@macrostrat/hyper";
+import h from "@macrostrat/hyper";
 import { GetServerSideProps } from "next";
 import pg, {
   BasePage,
@@ -7,8 +7,6 @@ import pg, {
   ColumnForm,
   tableInsert,
 } from "../../../src";
-import styles from "../column.module.scss";
-const h = hyperStyled(styles);
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const {

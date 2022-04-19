@@ -32,6 +32,7 @@ Creates the breadcrumbs at the top of each page based on the router query
 export function BasePage(props: BasePageProps) {
   const router = useRouter();
   const { query } = props;
+  console.log(query);
 
   const filterCrumbs = (obj: CrumbsI) => {
     if (Object.keys(query).length == 0) {
@@ -40,6 +41,7 @@ export function BasePage(props: BasePageProps) {
       }
       return false;
     }
+    /// WOW THIS IS BAD, IF THERE ARE MORE THAN 1 ids passed it will return false
     for (let i = 0; i < Object.keys(query).length; i++) {
       if (!obj.predicate.includes(Object.keys(query)[i])) {
         return false;
@@ -80,7 +82,7 @@ export function BasePage(props: BasePageProps) {
       ],
     },
     {
-      text: "Sections",
+      text: "Column",
       onClick: async () => {
         const { col_id } = await onClick();
         router.push(`/column/${col_id}`);
@@ -88,12 +90,20 @@ export function BasePage(props: BasePageProps) {
       predicate: ["col_id", "section_id", "unit_id"],
     },
     {
-      text: "Units",
+      text: "Section",
       onClick: async () => {
         const { section_id } = await onClick();
-        router.push(`/units/${section_id}`);
+        router.push(`/section/${section_id}`);
       },
       predicate: ["section_id", "unit_id"],
+    },
+    {
+      text: "Unit",
+      onClick: async () => {
+        const { unit_id } = await onClick();
+        router.push(`/unit/${unit_id}/edit`);
+      },
+      predicate: ["unit_id"],
     },
   ].filter(filterCrumbs);
 

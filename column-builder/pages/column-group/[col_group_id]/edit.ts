@@ -1,14 +1,12 @@
-import { hyperStyled } from "@macrostrat/hyper";
-import pg, {
+import h from "@macrostrat/hyper";
+import {
   BasePage,
   ColumnGroupEditor,
   ColumnGroupI,
   tableSelect,
   tableUpdate,
 } from "../../../src";
-import styles from "../colgroup.module.scss";
 import { GetServerSidePropsContext } from "next";
-const h = hyperStyled(styles);
 
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   const {
