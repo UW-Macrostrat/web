@@ -34,12 +34,7 @@ function usePostgrest(
 
   return result;
 }
-
-interface TableHooksI {
-  tableName: string;
-}
-
-interface SelectTableI extends TableHooksI {
+interface SelectTableI {
   match?: number | Record<string, unknown>;
   limit?: number;
   columns?: string | undefined;
@@ -48,47 +43,85 @@ interface SelectTableI extends TableHooksI {
 /*
  * Helper hook to abstract some query building
  */
-function useTableSelect(props: SelectTableI) {
-  let query = pg.from(props.tableName).select(props.columns);
-  if (props.match) {
-    if (typeof props.match !== "number") {
-      query = query.match(props.match);
+function useTableSelect(table: string, opts: SelectTableI) {
+  let query = pg.from(table).select(opts.columns);
+  if (opts.match) {
+    if (typeof opts.match !== "number") {
+      query = query.match(opts.match);
     } else {
-      query = query.match({ id: props.match });
+      query = query.match({ id: opts.match });
     }
   }
-  if (props.limit) {
-    query = query.limit(props.limit);
+  if (opts.limit) {
+    query = query.limit(opts.limit);
   }
   return usePostgrest(query);
 }
 
-interface UpdateTableI extends TableHooksI {
+interface QueryOptsI {
+  columns?: string;
+  match?: number | Record<string, string | number>;
+  limit?: number;
+}
+
+async function tableSelect(table: string, opts: QueryOptsI = {}) {
+  let query = pg.from(table).select(opts.columns);
+  if (opts.match) {
+    if (typeof opts.match !== "number") {
+      query = query.match(opts.match);
+    } else {
+      query = query.match({ id: opts.match });
+    }
+  }
+  if (opts.limit) {
+    query = query.limit(opts.limit);
+  }
+
+  return await query;
+}
+
+async function selectFirst(table: string, opts: QueryOptsI) {
+  const { data, error } = await tableSelect(table, opts);
+
+  const firstData = data ? data[0] : null;
+  return { firstData, error };
+}
+
+interface UpdateTableI {
   id: number | Record<string, unknown>;
   changes: object;
 }
 
-async function tableUpdate(props: UpdateTableI) {
-  let query = pg.from(props.tableName).update(props.changes);
-  if (typeof props.id !== "number") {
-    query = query.match(props.id);
+async function tableUpdate(table: string, opts: UpdateTableI) {
+  let query = pg.from(table).update(opts.changes);
+  if (typeof opts.id !== "number") {
+    query = query.match(opts.id);
   } else {
-    query = query.match({ id: props.id });
+    query = query.match({ id: opts.id });
   }
   return await query;
-}
-
-interface InsertTableI extends TableHooksI {
-  row: object;
 }
 
 /* 
   Hook for easy table inserts
 */
-async function tableInsert(props: InsertTableI) {
-  const query = pg.from(props.tableName).insert([props.row]);
+async function tableInsert(table: string, row: object) {
+  let query = pg.from(table).insert([row]);
+  return await query;
+}
+
+async function tableInsertMany(table: string, rows: object[]) {
+  let query = pg.from(table).insert(rows);
   return await query;
 }
 
 export default pg;
-export { usePostgrest, useTableSelect, tableUpdate, tableInsert };
+export {
+  usePostgrest,
+  useTableSelect,
+  tableUpdate,
+  tableInsert,
+  selectFirst,
+  tableInsertMany,
+  tableSelect,
+};

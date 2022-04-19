@@ -1,28 +1,38 @@
 import { hyperStyled } from "@macrostrat/hyper";
 import {
-  useTableSelect,
   tableUpdate,
   BasePage,
   Project,
   ProjectEditor,
+  selectFirst,
 } from "../../../src";
 import styles from "../project.module.scss";
-import { Spinner } from "@blueprintjs/core";
 import { GetServerSidePropsContext } from "next";
 const h = hyperStyled(styles);
 
-export default function NewProject({ project_id }: { project_id: string }) {
-  const project: Project = useTableSelect({
-    tableName: "projects",
-    match: parseInt(project_id),
-    limit: 1,
-  });
+export async function getServerSideProps({
+  query,
+  ...rest
+}: GetServerSidePropsContext) {
+  const { project_id } = query;
 
-  if (!project) return h(Spinner);
+  const { firstData, error } = await selectFirst("projects", {
+    match: { id: project_id },
+  });
+  console.log(firstData, error);
+  const project = firstData ? firstData : {};
+
+  return { props: { project_id, project } };
+}
+
+export default function NewProject(props: {
+  project_id: string;
+  project: Project;
+}) {
+  const { project, project_id } = props;
 
   const persistChanges = async (e: Project, changes: Partial<Project>) => {
-    const { data, error } = await tableUpdate({
-      tableName: "projects",
+    const { data, error } = await tableUpdate("projects", {
       id: e.id,
       changes,
     });
@@ -37,15 +47,6 @@ export default function NewProject({ project_id }: { project_id: string }) {
   return h(BasePage, { query: {} }, [
     h("h3", ["Create a New Project"]),
     //@ts-ignore
-    h(ProjectEditor, { project: project[0], persistChanges }),
+    h(ProjectEditor, { project: project, persistChanges }),
   ]);
-}
-
-export async function getServerSideProps({
-  query,
-  ...rest
-}: GetServerSidePropsContext) {
-  const { project_id } = query;
-
-  return { props: { project_id } };
 }

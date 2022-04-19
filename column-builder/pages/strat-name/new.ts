@@ -6,27 +6,35 @@ import {
   tableInsert,
   tableUpdate,
 } from "../../src";
-import { useRouter } from "next/router";
+import { GetServerSidePropsContext } from "next";
 import styles from "./stratname.module.scss";
 
 const h = hyperStyled(styles);
 
-export default function NewStratName() {
-  const router = useRouter();
-  const { name, unit_id } = router.query;
+export async function getServerSideProps(ctx: GetServerSidePropsContext) {
+  const {
+    query: { unit_id, name },
+  } = ctx;
 
+  return { props: { unit_id, name } };
+}
+
+export default function NewStratName({
+  name,
+  unit_id,
+}: {
+  name: string;
+  unit_id: number;
+}) {
   const persistChanges = async (e: StratNameI, c: Partial<StratNameI>) => {
-    const { data, error } = await tableInsert({
-      tableName: "strat_names",
-      row: e,
-    });
-    console.log(data);
-    const strat_name_id: number = data[0].id;
-    if (!error) {
-      const { data, error } = await tableUpdate({
-        tableName: "units",
+    const { data, error } = await tableInsert("strat_names", e);
+
+    const strat_name_id: number = data ? data[0].id : null;
+
+    if (!strat_name_id) {
+      const { data, error } = await tableUpdate("units", {
         changes: { strat_name_id: strat_name_id },
-        id: parseInt(unit_id),
+        id: unit_id,
       });
 
       return data[0];
@@ -40,7 +48,7 @@ export default function NewStratName() {
     model.strat_name = name;
   }
 
-  return h(BasePage, { query: router.query }, [
+  return h(BasePage, { query: { unit_id } }, [
     h("h3", ["Make New Stratigraphic Name "]),
     //@ts-ignore
     h(StratNameEditor, {

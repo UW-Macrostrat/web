@@ -1,32 +1,35 @@
 import { hyperStyled } from "@macrostrat/hyper";
 import { GetServerSideProps } from "next";
-import {
+import pg, {
   BasePage,
   ColumnGroupI,
   ColumnEditor,
   ColumnForm,
-  useTableSelect,
   tableInsert,
 } from "../../../src";
 import styles from "../column.module.scss";
-import { Spinner } from "@blueprintjs/core";
 const h = hyperStyled(styles);
 
-const getData = (col_group_id: number) => {
-  // get all col_groups for project, find one matches col_group_id
-  const colGroups: Partial<ColumnGroupI>[] = useTableSelect({
-    tableName: "col_groups",
-    columns: "id, col_group, col_group_long",
-    match: col_group_id,
-  });
-  return colGroups;
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const {
+    query: { col_group_id },
+  } = ctx;
+
+  const { data, error } = await pg
+    .from("col_groups")
+    .select("id, col_group, col_group_long")
+    .match({ id: col_group_id });
+
+  const colGroup = data ? data[0] : {};
+
+  return { props: { col_group_id, colGroup } };
 };
 
-export default function NewColumn({ col_group_id }: { col_group_id: string }) {
-  const colGroups = getData(parseInt(col_group_id));
-
-  if (!colGroups) return h(Spinner);
-  const colGroup = colGroups[0];
+export default function NewColumn(props: {
+  col_group_id: string;
+  colGroup: Partial<ColumnGroupI>;
+}) {
+  const { colGroup, col_group_id } = props;
 
   const persistChanges = async (
     e: ColumnForm,
@@ -44,20 +47,14 @@ export default function NewColumn({ col_group_id }: { col_group_id: string }) {
       col_type: "column",
     };
 
-    const { data, error } = await tableInsert({
-      tableName: "cols",
-      row: newColumn,
-    });
+    const { data, error } = await tableInsert("cols", newColumn);
 
     if (!error) {
       // create new col_refs from new id
       const col_id: number = data[0].id;
       const ref_col = { ref_id: e.ref.id, col_id: col_id };
 
-      const { data: data_, error } = await tableInsert({
-        tableName: "col_refs",
-        row: ref_col,
-      });
+      const { data: data_, error } = await tableInsert("col_refs", ref_col);
 
       if (!error) {
         return e;
@@ -81,11 +78,3 @@ export default function NewColumn({ col_group_id }: { col_group_id: string }) {
     }),
   ]);
 }
-
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const {
-    query: { col_group_id },
-  } = ctx;
-
-  return { props: { col_group_id } };
-};

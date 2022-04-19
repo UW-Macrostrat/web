@@ -1,45 +1,39 @@
 import { hyperStyled } from "@macrostrat/hyper";
-import pg, {
-  usePostgrest,
-  useTableSelect,
+import {
   tableUpdate,
   BasePage,
   ColumnEditor,
   ColumnForm,
+  tableSelect,
+  selectFirst,
 } from "../../../src";
 import styles from "../column.module.scss";
-import { Spinner } from "@blueprintjs/core";
 import { GetServerSideProps } from "next";
 const h = hyperStyled(styles);
 
-const getData = (col_id: any) => {
-  // get all col_groups for project, find one matches col_group_id
-  // const colGroups: Partial<ColumnGroupI>[] = useTableSelect({
-  //   tableName: "col_groups",
-  //   columns: "id, col_group, col_group_long",
-  //   match: { project_id: project_id },
-  // });
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const {
+    query: { col_id },
+  } = ctx;
 
-  const column: ColumnForm[] = useTableSelect({
-    tableName: "col_form",
+  const { data, error } = await tableSelect("col_form", {
     match: { col_id: col_id },
   });
 
-  // fancy join
-  //https://supabase.com/docs/reference/javascript/select#query-foreign-tables
-  const data = usePostgrest(
-    pg.from("cols").select("col_groups!cols_col_group_id_fkey1(*)").limit(1)
-  );
-  console.log(data);
+  const { firstData, error: error_ } = await selectFirst("cols", {
+    columns: "col_groups!cols_col_group_id_fkey1(*)",
+    limit: 1,
+  });
 
-  return { colGroups: data, column };
+  return { props: { col_id, column: data, curColGroup: firstData.col_groups } };
 };
 
-export default function EditColumn({ col_id }: { col_id: string }) {
-  const { colGroups, column } = getData(col_id);
-
-  if (!colGroups || !column) return h(Spinner);
-  const curColGroup = colGroups[0].col_groups;
+export default function EditColumn(props: {
+  col_id: string;
+  curColGroup: any;
+  column: ColumnForm[];
+}) {
+  const { col_id, curColGroup, column } = props;
 
   const persistChanges = async (
     e: ColumnForm,
@@ -57,8 +51,7 @@ export default function EditColumn({ col_id }: { col_id: string }) {
       ref_id = changes.ref.id;
       delete changes.ref;
     }
-    const { data, error } = await tableUpdate({
-      tableName: "cols",
+    const { data, error } = await tableUpdate("cols", {
       changes,
       id: e.col_id,
     });
@@ -66,8 +59,7 @@ export default function EditColumn({ col_id }: { col_id: string }) {
     if (!error) {
       if (ref_id) {
         const ref_col = { ref_id: ref_id };
-        const { data: data_, error } = await tableUpdate({
-          tableName: "col_refs",
+        const { data: data_, error } = await tableUpdate("col_refs", {
           changes: ref_col,
           id: { col_id: e.col_id },
         });
@@ -87,7 +79,7 @@ export default function EditColumn({ col_id }: { col_id: string }) {
 
   return h(BasePage, { query: { col_id: parseInt(col_id) } }, [
     h("h3", [
-      `Edit column ${column[0].col_name}, part of ${curColGroup.col_group_long}(${curColGroup.col_group})`,
+      `Edit column ${column[0].col_name}, part of ${curColGroup.col_group_long}(${curColGroup.col_group}) Column Group`,
     ]),
     //@ts-ignore
     h(ColumnEditor, {
@@ -97,10 +89,3 @@ export default function EditColumn({ col_id }: { col_id: string }) {
     }),
   ]);
 }
-
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const {
-    query: { col_id },
-  } = ctx;
-  return { props: { col_id } };
-};

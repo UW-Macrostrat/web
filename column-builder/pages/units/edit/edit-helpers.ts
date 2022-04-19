@@ -2,6 +2,7 @@ import pg, {
   UnitsView,
   useTableSelect,
   tableInsert,
+  tableInsertMany,
   tableUpdate,
   EnvironUnit,
   LithUnit,
@@ -11,26 +12,6 @@ import {
   conductChangeSet,
   detectDeletionsAndAdditions,
 } from "../../../src/components/helpers";
-
-export function getUnitData(unit_id: number) {
-  const units: UnitsView[] = useTableSelect({
-    tableName: "units_view",
-    match: { id: unit_id },
-    limit: 1,
-  });
-
-  const envs: EnvironUnit[] = useTableSelect({
-    tableName: "environ_unit",
-    match: { unit_id: unit_id },
-  });
-
-  const liths: LithUnit[] = useTableSelect({
-    tableName: "lith_unit",
-    match: { unit_id: unit_id },
-  });
-
-  return { units, envs, liths };
-}
 
 /* 
 handles insertions and deletions for
@@ -52,10 +33,7 @@ async function handleCollections(
     const inserts = additions.map((i) => {
       return { unit_id, environ_id: i };
     });
-    const { data, error } = await tableInsert({
-      tableName: table,
-      row: inserts,
-    });
+    const { data, error } = await tableInsertMany(table, inserts);
   }
   if (deletions.length > 0) {
     const { data, error } = await pg
@@ -81,8 +59,7 @@ export async function persistUnitChanges(
 ) {
   if (changeSet.unit) {
     const changes = conductChangeSet(unit, changeSet.unit);
-    const { data, error } = await tableUpdate({
-      tableName: "units",
+    const { data, error } = await tableUpdate("units", {
       changes,
       id: unit.id,
     });

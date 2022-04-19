@@ -1,41 +1,45 @@
 import h from "@macrostrat/hyper";
 import { GetServerSidePropsContext } from "next";
-import {
-  Project,
+import pg, {
   ColumnGroupI,
   Row,
   BasePage,
   Table,
   CreateButton,
   EditButton,
-  useTableSelect,
 } from "../../src";
 
-export default function ColumnGroup({ project_id }: { project_id: number }) {
-  const projects: Project[] = useTableSelect({
-    tableName: "projects",
-    match: { id: project_id },
-    limit: 1,
-  });
+export async function getServerSideProps(ctx: GetServerSidePropsContext) {
+  const {
+    query: { project_id },
+  } = ctx;
+  const { data, error } = await pg
+    .from("col_group_view")
+    .select("*, project_id(project)")
+    .match({ project_id: project_id });
 
-  const columnGroups: ColumnGroupI[] = useTableSelect({
-    tableName: "col_group_view",
-    match: { project_id: project_id },
-  });
+  const projectName: string = data ? data[0].project_id.project : "";
 
-  if (!columnGroups || !projects) return h("div");
-  const project = projects[0];
+  return { props: { project_id, projectName, columnGroups: data } };
+}
+
+export default function ColumnGroup(props: {
+  projectName: string;
+  project_id: number;
+  columnGroups: ColumnGroupI[];
+}) {
+  const { project_id } = props;
 
   return h(BasePage, { query: { project_id } }, [
     h("h3", [
-      project.project,
+      props.projectName,
       h(CreateButton, {
         href: `/column-groups/new/${project_id}`,
         text: "Add New Group",
       }),
     ]),
     h("div", { style: { display: "flex", flexWrap: "wrap" } }, [
-      columnGroups.map((colGroup, i) => {
+      props.columnGroups.map((colGroup, i) => {
         return h(
           "div",
           { key: i, style: { textAlign: "center", height: "100%" } },
@@ -83,12 +87,4 @@ export default function ColumnGroup({ project_id }: { project_id: number }) {
       }),
     ]),
   ]);
-}
-
-export async function getServerSideProps(ctx: GetServerSidePropsContext) {
-  const {
-    query: { project_id },
-  } = ctx;
-
-  return { props: { project_id } };
 }

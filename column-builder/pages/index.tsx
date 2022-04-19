@@ -1,5 +1,7 @@
 import h from "@macrostrat/hyper";
+import { GetServerSidePropsContext } from "next";
 import pg, {
+  tableSelect,
   Row,
   Project,
   BasePage,
@@ -7,6 +9,13 @@ import pg, {
   EditButton,
   CreateButton,
 } from "../src";
+
+export async function getServerSideProps(ctx: GetServerSidePropsContext) {
+  const { data, error } = await tableSelect("projects");
+  const projects: Project[] = data ? data : [{}];
+
+  return { props: { projects } };
+}
 
 function Projects({ projects }: { projects: Project[] }) {
   const headers = Object.keys(projects[0]);
@@ -45,13 +54,6 @@ function Projects({ projects }: { projects: Project[] }) {
       ]),
     ]),
   ]);
-}
-
-export async function getServerSideProps(ctx) {
-  const { data, error } = await pg.from("projects").select();
-  const projects: Project[] = data;
-
-  return { props: { projects } };
 }
 
 export default Projects;

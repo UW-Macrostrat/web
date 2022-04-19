@@ -1,17 +1,25 @@
 import h from "@macrostrat/hyper";
 import pg, { usePostgrest, Row, UnitsView, CreateButton } from "../../src";
 import { BasePage, Table } from "../../src";
-import { Spinner, Button } from "@blueprintjs/core";
+import { Spinner } from "@blueprintjs/core";
 import { GetServerSideProps } from "next";
 
-function Units({ section_id }: { section_id: string }) {
-  const units: UnitsView[] = usePostgrest(
-    pg
-      .from("units_view")
-      .select()
-      .order("age_top", { ascending: true })
-      .match({ section_id: section_id })
-  );
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const {
+    query: { section_id },
+  } = ctx;
+
+  const { data, error } = await pg
+    .from("units_view")
+    .select()
+    .order("age_top", { ascending: true })
+    .match({ section_id: section_id });
+
+  return { props: { section_id, units: data } };
+};
+
+function Units(props: { section_id: string; units: UnitsView[] }) {
+  const { section_id, units } = props;
 
   const headers = [
     "ID",
@@ -65,9 +73,5 @@ function Units({ section_id }: { section_id: string }) {
     ]),
   ]);
 }
-
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  return { props: { section_id: ctx.query.section_id } };
-};
 
 export default Units;

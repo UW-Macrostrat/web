@@ -19,7 +19,7 @@ async function createNewSection(col_id: number) {
   const { data, error } = await pg
     .from("sections")
     .insert([{ col_id: col_id }]);
-  console.log("section!!", data);
+
   const s_id = data ? data[0].id : null;
   return s_id;
 }
@@ -49,12 +49,12 @@ export const persistNewUnitChanges = async (
     }
   });
   unit.section_id = s_id;
-  const { data, error } = await tableInsert({
-    tableName: "units",
-    row: { col_id: col_id, ...unit },
+  const { data, error } = await tableInsert("units", {
+    col_id: col_id,
+    ...unit,
   });
 
-  unit_id = data[0].id;
+  unit_id = data? data[0].id || null;
 
   if (changeSet.envs) {
     const inserts = changeSet.envs.map((e) => {

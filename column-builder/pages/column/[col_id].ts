@@ -1,7 +1,6 @@
 import h from "@macrostrat/hyper";
 import { GetServerSideProps } from "next";
-import {
-  useTableSelect,
+import pg, {
   IColumnSection,
   Row,
   BasePage,
@@ -10,18 +9,25 @@ import {
   CreateButton,
 } from "../../src";
 
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const {
+    query: { col_id },
+  } = ctx;
+  const { data, error } = await pg
+    .from("col_sections")
+    .select()
+    .match({ col_id });
+
+  const colSections = data ? data : [{}];
+  return { props: { col_id, colSections } };
+};
+
 /* 
 Creates section arrays by finding the lowest posistion_bottom and highest
 position_bottom. Sets a bottom and top strat_name based on this 
 sorting. 
 */
-function dataPreProcess(col_id: any) {
-  const colSections: IColumnSection[] = useTableSelect({
-    tableName: "col_sections",
-    match: { col_id: col_id },
-  });
-
-  if (!colSections) return [];
+function dataPreProcess(colSections: IColumnSection[]) {
   const col_name = colSections[0]["col_name"];
   let data: any = {};
   /* 
@@ -61,22 +67,33 @@ function dataPreProcess(col_id: any) {
   return { data, col_name };
 }
 
-export default function ColumnGroup({ col_id }: { col_id: string }) {
-  const { data, col_name } = dataPreProcess(col_id);
+interface SectionI {
+  top: string;
+  bottom: string;
+  units: number;
+  section_id: number;
+}
 
-  if (!data) return h("div");
+export default function ColumnGroup(props: {
+  col_id: string;
+  colSections: IColumnSection[];
+}) {
+  const { col_id } = props;
+  const { data, col_name }: { data: SectionI[]; col_name: string } =
+    dataPreProcess(props.colSections);
+
   const headers = Object.keys(data[0]);
 
-  let dat = data.filter((d) => d.section_id != null);
+  let section_data = data.filter((d) => d.section_id != null);
 
   return h(BasePage, { query: { col_id: parseInt(col_id) } }, [
     h("h3", [
-      `Sections for ${col_name}`,
+      `Sections for Column: ${col_name}`,
       h(EditButton, {
         href: `/column/edit/${col_id}`,
       }),
     ]),
-    h.if(dat.filter((d) => d.section_id != null).length == 0)("div", [
+    h.if(section_data.length == 0)("div", [
       h("h3", [
         "Looks like there are no sections or units. To begin create a new unit",
       ]),
@@ -86,7 +103,7 @@ export default function ColumnGroup({ col_id }: { col_id: string }) {
         text: "Create Unit",
       }),
     ]),
-    h.if(dat.filter((d) => d.section_id != null).length > 0)("div", [
+    h.if(section_data.length > 0)("div", [
       h(Table, { interactive: true }, [
         h("thead", [
           h("tr", [
@@ -96,18 +113,18 @@ export default function ColumnGroup({ col_id }: { col_id: string }) {
           ]),
         ]),
         h("tbody", [
-          dat.map((col, i) => {
+          section_data.map((section, i) => {
             return h(
               Row,
               {
                 key: i,
-                href: `/units/${col.section_id}`,
+                href: `/units/${section.section_id}`,
               },
               [
-                h("td", [col.section_id]),
-                h("td", [col.top]),
-                h("td", [col.bottom]),
-                h("td", [h("a", `view ${col.units} units`)]),
+                h("td", [section.section_id]),
+                h("td", [section.top]),
+                h("td", [section.bottom]),
+                h("td", [h("a", `view ${section.units} units`)]),
               ]
             );
           }),
@@ -121,11 +138,3 @@ export default function ColumnGroup({ col_id }: { col_id: string }) {
     ]),
   ]);
 }
-
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const {
-    query: { col_id },
-  } = ctx;
-
-  return { props: { col_id } };
-};

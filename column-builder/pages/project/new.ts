@@ -11,11 +11,8 @@ export default function NewProject() {
   };
 
   const persistChanges = async (project: Project, c: Partial<Project>) => {
-    const { data, error } = await tableInsert({
-      row: project,
-      tableName: "projects",
-    });
-    return data[0];
+    const { data, error } = await tableInsert("projects", project);
+    return data ? data[0] : {};
   };
 
   return h(BasePage, { query: {} }, [
