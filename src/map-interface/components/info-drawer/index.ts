@@ -1,3 +1,4 @@
+import { ReactChild } from "react";
 import { Card, Spinner } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import { useAppActions } from "~/map-interface/app-state";

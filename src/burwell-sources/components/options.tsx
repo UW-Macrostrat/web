@@ -56,11 +56,15 @@ function OptionsMenu() {
 }
 
 function Options() {
-  return h(Popover, { content: h(OptionsMenu), minimal: true }, [
-    h(Button, { minimal: true }, [
-      h("h5", { style: { margin: "0" } }, ["Options"]),
-    ]),
-  ]);
+  return h(
+    Popover,
+    { content: h(OptionsMenu), minimal: true, position: "bottom-right" },
+    [
+      h(Button, { minimal: true }, [
+        h("h5", { style: { margin: "0" } }, ["Options"]),
+      ]),
+    ]
+  );
 }
 
 export default Options;
