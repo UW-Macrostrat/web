@@ -1,0 +1,35 @@
+@import "~normalize.css";
+@import "~@blueprintjs/core/lib/css/blueprint.css";
+@import "~@blueprintjs/icons/lib/css/blueprint-icons.css";
+@import "~@blueprintjs/popover2/lib/css/blueprint-popover2.css";
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.table-container {
+  margin: 10px;
+  height: 100%;
+  border-style: solid;
+  border-radius: 3px;
+  border-width: 1px;
+}
+
+.col-group-name {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

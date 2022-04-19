@@ -1,0 +1,47 @@
+.mySuggest {
+  overflow: scroll;
+  max-height: 200px;
+}
+.interval-row {
+  display: flex;
+  justify-content: space-between;
+}
+.row {
+  display: flex;
+  align-items: baseline;
+}
+.color-block {
+  border-style: solid;
+  border-color: black;
+  border-width: 0.5px;
+  height: 30px;
+  width: 30px;
+}
+.page {
+  margin: 10px;
+}
+.bread-crumbs {
+  display: flex;
+}
+.strat-name-con {
+  display: flex;
+  align-items: baseline;
+}
+.strat-name {
+  margin: 0;
+}
+.tag-container,
+.tag-popover {
+  flex-wrap: wrap;
+  display: flex;
+  align-items: baseline;
+}
+.tag-popover {
+  padding: 10px;
+  height: 300px;
+  width: 900px;
+  overflow-y: scroll;
+}
+.tag {
+  margin: 5px;
+}
