@@ -59,7 +59,7 @@ function MySuggest(props: SuggestI) {
 
   return h(MySuggestComponent, {
     inputValueRenderer: (item: DataI) => item.value,
-    items: itemz.slice(0, 200),
+    items: itemz,
     popoverProps: {
       minimal: true,
       popoverClassName: styles.mySuggest,

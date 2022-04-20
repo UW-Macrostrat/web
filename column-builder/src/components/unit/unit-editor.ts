@@ -339,6 +339,7 @@ interface UnitEditorProps {
 }
 
 function UnitEditor(props: UnitEditorProps) {
+  console.log("Unit Model", props.model);
   return h(
     ModelEditor,
     {

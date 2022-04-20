@@ -15,7 +15,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   const { data, error } = await pg
     .from("col_groups")
-    .select("id, col_group, col_group_long")
+    .select()
     .match({ id: col_group_id });
 
   const colGroup = data ? data[0] : {};

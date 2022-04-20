@@ -74,7 +74,8 @@ function IntervalRow(props: IntervalRowProps) {
       }),
     ]),
     h(FeatureCell, { text: ageLabel }, [
-      (props.age_bottom || props.age_top, " ma"),
+      props.age_bottom || props.age_top,
+      " ma",
     ]),
   ]);
 }
