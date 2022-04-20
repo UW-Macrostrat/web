@@ -30,9 +30,6 @@ import {
   StratNameSuggest,
   SubmitButton,
 } from "..";
-import { createLink } from "../helpers";
-import { useRouter } from "next/router";
-
 const h = hyperStyled(styles);
 
 function EnvTags() {
