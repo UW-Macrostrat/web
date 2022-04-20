@@ -14,7 +14,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     query: { col_id },
   } = ctx;
 
-  const { data, error } = await tableSelect("col_form", {
+  const { data, error } = await tableSelect("col_ref_expanded", {
     match: { col_id: col_id },
   });
 

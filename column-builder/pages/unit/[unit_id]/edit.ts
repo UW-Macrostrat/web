@@ -17,7 +17,7 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
     query: { unit_id },
   } = ctx;
 
-  const { firstData: unit, error } = await selectFirst("units_view", {
+  const { firstData: unit, error } = await selectFirst("unit_strat_name_expanded", {
     match: { id: unit_id },
     limit: 1,
   });

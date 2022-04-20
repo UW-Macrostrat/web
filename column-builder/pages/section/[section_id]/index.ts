@@ -9,7 +9,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   } = ctx;
 
   const { data, error } = await pg
-    .from("units_view")
+    .from("unit_strat_name_expanded")
     .select()
     .order("age_top", { ascending: true })
     .match({ section_id: section_id });

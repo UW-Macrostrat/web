@@ -14,7 +14,7 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
     query: { project_id },
   } = ctx;
   const { data, error } = await pg
-    .from("col_group_view")
+    .from("col_group_with_cols")
     .select("*, project_id(project)")
     .match({ project_id: project_id });
 

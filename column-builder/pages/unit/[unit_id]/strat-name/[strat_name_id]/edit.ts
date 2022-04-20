@@ -17,7 +17,7 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   } = ctx;
 
   const { firstData: strat_name, error } = await selectFirst(
-    "strat_names_view",
+    "strat_names_ref",
     {
       match: { id: strat_name_id },
     }
