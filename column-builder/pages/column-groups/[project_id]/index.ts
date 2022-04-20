@@ -18,7 +18,7 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
     .select("*, project_id(project)")
     .match({ project_id: project_id });
 
-  const projectName: string =
+    const projectName: string =
     data && data.length > 0 ? data[0].project_id.project : "";
 
   return { props: { project_id, projectName, columnGroups: data } };

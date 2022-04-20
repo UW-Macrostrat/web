@@ -18,7 +18,7 @@ const getStratNames = async (
 ) => {
   if (query.length > 2) {
     const { data, error } = await pg
-      .from("strat_name_ref")
+      .from("strat_names_ref")
       .select()
       .like("strat_name", `%${query}%`)
       .limit(50);
@@ -27,7 +27,7 @@ const getStratNames = async (
     });
     setNames(d);
   } else {
-    const { data, error } = await pg.from("strat_name_ref").select().limit(50);
+    const { data, error } = await pg.from("strat_names_ref").select().limit(50);
     const d: StratNameDataI[] = data?.map((d: StratNameI) => {
       return { value: d.strat_name, data: d };
     });
