@@ -54,8 +54,6 @@ interface CancelButtonI {
 }
 
 function CancelButton(props: CancelButtonI) {
-  const router = useRouter();
-
   const { href } = props;
   return h(Link, { href }, [
     h(

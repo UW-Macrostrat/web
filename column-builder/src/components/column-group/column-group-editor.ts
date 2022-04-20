@@ -8,7 +8,7 @@ import {
   //@ts-ignore
 } from "@macrostrat/ui-components/lib/esm";
 import styles from "../comp.module.scss";
-import { CancelButton, SubmitButton } from "..";
+import {SubmitButton } from "..";
 
 const h = hyperStyled(styles);
 

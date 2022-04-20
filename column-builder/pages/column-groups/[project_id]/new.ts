@@ -4,6 +4,7 @@ import pg, {
   Project,
   ColumnGroupEditor,
   ColumnGroupI,
+  tableSelect,
 } from "../../../src";
 import styles from "./colgroup.module.scss";
 import { GetServerSidePropsContext } from "next";
@@ -13,10 +14,10 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   const {
     query: { project_id },
   } = ctx;
-  const { data, error } = await pg
-    .from("projects")
-    .select()
-    .match({ id: project_id });
+
+  const { data, error } = await tableSelect("projects", {
+    match: { id: project_id },
+  });
 
   const project = data ? data[0] : {};
 
@@ -35,12 +36,12 @@ export default function NewColumnGroup(props: {
   };
 
   const persistChanges = async (
-    e: Partial<ColumnGroupI>,
+    columnGroup: Partial<ColumnGroupI>,
     c: Partial<ColumnGroupI>
   ) => {
     const { data, error } = await pg
       .from("col_groups")
-      .insert([{ ...e, project_id: project_id }]);
+      .insert([{ ...columnGroup, project_id: project_id }]);
     if (!error) {
       return data[0];
     } else {
