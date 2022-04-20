@@ -20,9 +20,11 @@ var rankMap = {
 };
 var rankMapOrder = { SGp: 1, Gp: 2, SubGp: 3, Fm: 4, Mbr: 5, Bed: 6 };
 
-const fetchStratNames = async (id: number) => {
+const fetchStratNames = async (id: number | undefined) => {
   // function to fetch stratnames and orgnize hierarchy
-
+  if (id === undefined) {
+    return null;
+  }
   const res = await axios.get(url, {
     params: { rule: "all", strat_name_id: id },
   });

@@ -5,15 +5,15 @@ import {
   StratNameEditor,
   tableUpdate,
   selectFirst,
-} from "../../src";
+} from "../../../../../src";
 import { GetServerSidePropsContext } from "next";
-import styles from "./stratname.module.scss";
+import styles from "../stratname.module.scss";
 
 const h = hyperStyled(styles);
 
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   const {
-    query: { strat_name_id },
+    query: { strat_name_id, unit_id },
   } = ctx;
 
   const { firstData: strat_name, error } = await selectFirst(
@@ -23,14 +23,15 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
     }
   );
 
-  return { props: { strat_name_id, strat_name } };
+  return { props: { strat_name_id, strat_name, unit_id } };
 }
 
 export default function EditColumnGroup(props: {
   strat_name_id: number;
   strat_name: StratNameI;
+  unit_id: number;
 }) {
-  const { strat_name_id, strat_name } = props;
+  const { strat_name_id, strat_name, unit_id } = props;
 
   const persistChanges = async (
     e: StratNameI,
@@ -48,7 +49,7 @@ export default function EditColumnGroup(props: {
     }
   };
 
-  return h(BasePage, { query: { strat_name_id } }, [
+  return h(BasePage, { query: { unit_id } }, [
     h("h3", ["Edit Stratigraphic Name ", strat_name.strat_name]),
     //@ts-ignore
     h(StratNameEditor, { model: strat_name, persistChanges }),

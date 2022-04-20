@@ -5,7 +5,7 @@ import {
   StratNameEditor,
   tableInsert,
   tableUpdate,
-} from "../../src";
+} from "../../../../src";
 import { GetServerSidePropsContext } from "next";
 import styles from "./stratname.module.scss";
 
@@ -23,7 +23,7 @@ export default function NewStratName({
   name,
   unit_id,
 }: {
-  name: string;
+  name: string | undefined;
   unit_id: number;
 }) {
   const persistChanges = async (e: StratNameI, c: Partial<StratNameI>) => {
@@ -48,8 +48,13 @@ export default function NewStratName({
     model.strat_name = name;
   }
 
+  const pageTitle =
+    name == undefined
+      ? "Make New Stratigraphic Name "
+      : "This Stratigraphic name doesn't exist in the database. Make New Stratigraphic Name";
+
   return h(BasePage, { query: { unit_id } }, [
-    h("h3", ["Make New Stratigraphic Name "]),
+    h("h3", [pageTitle]),
     //@ts-ignore
     h(StratNameEditor, {
       model,

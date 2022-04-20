@@ -44,8 +44,8 @@ export function StratNameHierarchy({
   strat_name_id: number;
 }) {
   const [state, setState] = useState<Partial<IHierarchy>>({});
+  console.log(strat_name_id);
 
-  console.log(state);
   useEffect(() => {
     async function fetch() {
       const res = await fetchStratNames(strat_name_id);
@@ -53,7 +53,9 @@ export function StratNameHierarchy({
     }
     fetch();
   }, [strat_name_id]);
-
+  if (!state) {
+    return h("h3", "No results");
+  }
   if (!state.name) {
     return h(Spinner);
   }

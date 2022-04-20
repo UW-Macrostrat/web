@@ -116,7 +116,6 @@ function StratNameEdit() {
         ]
       ),
       h(SubmitButton),
-      h(CancelButton, { href: "/units/edit" }),
     ]),
     h(StratNameHierarchy, { strat_name_id: model.id }),
   ]);

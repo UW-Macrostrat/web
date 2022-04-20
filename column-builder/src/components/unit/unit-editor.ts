@@ -148,22 +148,15 @@ is NOT stored in the database with a proper record. This is complicated
 right now, but we can discuss how to move forward.
 */
 function StratName() {
-  const router = useRouter();
   const { model, actions } = useModelEditor();
   const { unit }: UnitEditorModel = model;
+  const baseURl = `/unit/${unit.id}`;
+  // this complexity is born of the confusing strat_name issues in the db
   const href = unit.strat_name
-    ? createLink(`/strat-name/edit`, {
-        ...router.query,
-        strat_name_id: unit.strat_name.id,
-      })
+    ? `${baseURl}/strat-name/${unit.strat_name.id}/edit`
     : unit.unit_strat_name
-    ? createLink(`/strat-name/new`, {
-        ...router.query,
-        name: unit.unit_strat_name,
-      })
-    : createLink(`/strat-name/new`, {
-        ...router.query,
-      });
+    ? `${baseURl}/strat-name/new?name=${unit.unit_strat_name}`
+    : `${baseURl}/strat-name/new`;
 
   const initialSelected: StratNameDataI | undefined = unit?.strat_name
     ? {
