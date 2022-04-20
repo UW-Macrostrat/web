@@ -11,12 +11,11 @@ import {
 import {
   ModelEditor,
   useModelEditor,
-  ModelEditButton,
   //@ts-ignore
 } from "@macrostrat/ui-components/lib/esm";
 import styles from "../comp.module.scss";
 import { RANK, StratNameI } from "../../types";
-import { CancelButton, SubmitButton } from "..";
+import { SubmitButton } from "..";
 import { StratNameDataI } from ".";
 import { StratNameHierarchy } from "./hierarchy";
 
