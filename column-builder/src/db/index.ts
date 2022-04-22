@@ -5,7 +5,20 @@ import {
   PostgrestQueryBuilder,
 } from "@supabase/postgrest-js";
 
-const pg = new PostgrestClient("http://localhost:3001"); // this needs to be env set
+function isServer() {
+  return typeof window === "undefined";
+}
+console.log(
+  process.env.NEXT_PUBLIC_SERVER_URL,
+  process.env.NEXT_PUBLIC_CLIENT_URL
+);
+// The address of the postgrest service is different between the client and the server!
+const pg = new PostgrestClient(
+  //@ts-ignore
+  isServer()
+    ? process.env.NEXT_PUBLIC_SERVER_URL
+    : process.env.NEXT_PUBLIC_CLIENT_URL
+);
 
 /**
  * Fetch data using postgrestclient
