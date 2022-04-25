@@ -1,17 +1,22 @@
 import { Button, Checkbox } from "@blueprintjs/core";
 import h from "react-hyperscript";
 
-function ColumnSectionCheckBox(props: {
+function SectionUnitCheckBox(props: {
   data: any;
   onChange: (e: number) => void;
 }) {
   const onChange = (e) => {
+    e.stopPropagation();
     props.onChange(props.data);
   };
   return h(Checkbox, { onChange });
 }
 
-function MergeSectionsBtn(props: { onClick: () => void; disabled: boolean }) {
+function MergeDivideBtn(props: {
+  onClick: () => void;
+  disabled: boolean;
+  text: string;
+}) {
   return h(
     Button,
     {
@@ -20,8 +25,8 @@ function MergeSectionsBtn(props: { onClick: () => void; disabled: boolean }) {
       onClick: props.onClick,
       intent: "success",
     },
-    ["Merge"]
+    [props.text]
   );
 }
 
-export { ColumnSectionCheckBox, MergeSectionsBtn };
+export { SectionUnitCheckBox, MergeDivideBtn };

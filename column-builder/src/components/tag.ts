@@ -80,17 +80,24 @@ function TagBody(props: tagBody) {
 
 const itemRenderer: ItemRenderer<DataI> = (
   item: DataI,
-  { handleClick, index }
+  { handleClick, index, modifiers }
 ) => {
   const { value, data } = item;
+
+  const style = modifiers.active
+    ? {
+        marginBottom: "2px",
+      }
+    : {
+        backgroundColor: data.color + "40", // add opaquness
+        marginBottom: "2px",
+      };
   return h(MenuItem, {
+    active: modifiers.active,
     key: index,
     onClick: handleClick,
     text: data.name,
-    style: {
-      backgroundColor: data.color + "40", // add opaquness
-      marginBottom: "2px",
-    },
+    style,
   });
 };
 

@@ -3,135 +3,54 @@ import { hyperStyled } from "@macrostrat/hyper";
 import Link from "next/link";
 import {
   UnitsView,
-  LithUnit,
-  EnvironUnit,
   IntervalRow,
   IntervalDataI,
-  TagContainerCell,
   ColorBlock,
   Table,
   FeatureCell,
 } from "../../index";
-import { InputGroup, NumericInput, TextArea } from "@blueprintjs/core";
+import { NumericInput, TextArea } from "@blueprintjs/core";
 import {
   ModelEditor,
   useModelEditor,
   //@ts-ignore
 } from "@macrostrat/ui-components/lib/esm";
 import styles from "../comp.module.scss";
+import { SubmitButton } from "..";
 import {
-  EnvTagsAdd,
-  LithTagsAdd,
-  StratNameDataI,
-  StratNameSuggest,
-  SubmitButton,
-} from "..";
+  UnitEditorModel,
+  UnitEditorProps,
+  EnvTags,
+  LithTags,
+  FormalStratName,
+  InformalUnitName,
+  UnitThickness,
+} from "./common-editing";
 const h = hyperStyled(styles);
 
-function EnvTags() {
-  const {
-    model,
-    isEditing,
-    actions,
-  }: {
-    model: UnitEditorModel;
-    isEditing: boolean;
-    actions: any;
-  } = useModelEditor();
-  const { envs } = model;
-
-  const tagData = envs.map((env) => {
-    return {
-      id: env.id,
-      color: env.environ_color,
-      name: env.environ,
-      description: env.environ_class,
-    };
-  });
-
-  const onClickDelete = (id: number) => {
-    const filteredEnvs = [...envs].filter((l) => l.id != id);
-    actions.updateState({ model: { envs: { $set: filteredEnvs } } });
-  };
-
-  const onClick = (env: Partial<EnvironUnit>) => {
-    actions.updateState({ model: { envs: { $push: [env] } } });
-  };
-
-  return h("div.tag-container", [
-    h(TagContainerCell, { data: tagData, onClickDelete, isEditing }),
-    h(EnvTagsAdd, { onClick }),
-  ]);
-}
-
-function LithTags() {
-  const {
-    model,
-    isEditing,
-    actions,
-  }: {
-    model: UnitEditorModel;
-    isEditing: boolean;
-    actions: any;
-  } = useModelEditor();
-  const { liths } = model;
-
-  const tagData = liths.map((lith) => {
-    return {
-      id: lith.id,
-      color: lith.lith_color,
-      name: lith.lith,
-      description: lith.lith_class,
-    };
-  });
-
-  const onClickDelete = (id: number) => {
-    const filteredLiths = [...liths].filter((l) => l.id != id);
-    actions.updateState({ model: { liths: { $set: filteredLiths } } });
-  };
-
-  const onClick = (lith: Partial<LithUnit>) => {
-    actions.updateState({ model: { liths: { $push: [lith] } } });
-  };
-
-  return h("div.tag-container", [
-    h(TagContainerCell, { data: tagData, onClickDelete, isEditing }),
-    h(LithTagsAdd, { onClick }),
-  ]);
-}
-
-function UnitThickness() {
+function UnitThicknesses() {
   const { model, actions }: { model: UnitEditorModel; actions: any } =
     useModelEditor();
   const { unit } = model;
 
-  const update = (field: string, e: any) => {
-    actions.updateState({ model: { unit: { [field]: { $set: e } } } });
-  };
-
   return h(React.Fragment, [
     h(FeatureCell, { text: "Min-Thick" }, [
-      h(NumericInput, {
-        onValueChange: (e) => update("min_thick", e),
+      h(UnitThickness, {
+        field: "min_thick",
         defaultValue: unit?.min_thick || undefined,
+        placeholder: "Min thick",
       }),
     ]),
     h(FeatureCell, { text: "Max-Thick: " }, [
-      h(NumericInput, {
-        onValueChange: (e) => update("max_thick", e),
+      h(UnitThickness, {
+        field: "max_thick",
         defaultValue: unit?.max_thick || undefined,
+        placeholder: "Max thick",
       }),
     ]),
   ]);
 }
 
-/* 
-The strat_name situation is semi-complex. There are many 
-units that have an assigned strat_name that is stored. But there
-are a lot of units that contain a 'strat_name' but that strat_name 
-is NOT stored in the database with a proper record. This is complicated
-right now, but we can discuss how to move forward.
-*/
 function StratName() {
   const { model, actions } = useModelEditor();
   const { unit }: UnitEditorModel = model;
@@ -141,37 +60,12 @@ function StratName() {
     ? `${baseURl}/strat-name/${unit.strat_name.id}/edit`
     : `${baseURl}/strat-name/new`;
 
-  const initialSelected: StratNameDataI | undefined = unit?.strat_name
-    ? {
-        value: unit.unit_strat_name || unit.strat_name.strat_name,
-        data: unit.strat_name,
-      }
-    : undefined;
-
-  const updateStratName = (e: StratNameDataI) => {
-    actions.updateState({ model: { unit: { strat_name: { $set: e.data } } } });
-  };
-  const updateUnitName = (e: string) => {
-    actions.updateState({
-      model: { unit: { unit_strat_name: { $set: e } } },
-    });
-  };
-
   const linkText = unit.strat_name ? "(modify)" : "(create)";
 
   return h("tr", [
-    h(FeatureCell, { text: "Informal Unit Name" }, [
-      h(InputGroup, {
-        style: { width: "200px" },
-        defaultValue: unit.unit_strat_name || undefined,
-        onChange: (e) => updateUnitName(e.target.value),
-      }),
-    ]),
+    h(FeatureCell, { text: "Informal Unit Name" }, [h(InformalUnitName)]),
     h(FeatureCell, { text: "Formal Stratigraphic Name: " }, [
-      h(StratNameSuggest, {
-        initialSelected,
-        onChange: updateStratName,
-      }),
+      h(FormalStratName),
       h(Link, { href }, [h("a", { style: { fontSize: "10px" } }, [linkText])]),
     ]),
   ]);
@@ -288,7 +182,7 @@ function UnitEdit() {
               color: unit?.color,
             }),
           ]),
-          h(UnitThickness),
+          h(UnitThicknesses),
         ]),
         h("tr", [
           h(FeatureCell, { text: "Notes: ", colSpan: 5 }, [
@@ -308,17 +202,6 @@ function UnitEdit() {
     ]),
     h(SubmitButton),
   ]);
-}
-
-export interface UnitEditorModel {
-  unit: UnitsView;
-  envs: EnvironUnit[];
-  liths: LithUnit[];
-}
-
-interface UnitEditorProps {
-  persistChanges: (e: Partial<UnitsView>, c: Partial<UnitsView>) => UnitsView;
-  model: UnitEditorModel | {};
 }
 
 function UnitEditor(props: UnitEditorProps) {

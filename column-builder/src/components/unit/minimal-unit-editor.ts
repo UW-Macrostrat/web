@@ -1,183 +1,26 @@
-import React from "react";
 import { hyperStyled } from "@macrostrat/hyper";
-import Link from "next/link";
-import {
-  UnitsView,
-  LithUnit,
-  EnvironUnit,
-  IntervalRow,
-  IntervalDataI,
-  TagContainerCell,
-  Table,
-  FeatureCell,
-} from "../../index";
-import {
-  Tooltip2 as Tooltip,
-  Popover2 as Popover,
-} from "@blueprintjs/popover2";
-import { Button, InputGroup, NumericInput, TextArea } from "@blueprintjs/core";
+import { UnitsView, IntervalDataI, Table, IntervalSuggest } from "../../index";
+import { Button, TextArea } from "@blueprintjs/core";
 import {
   ModelEditor,
   useModelEditor,
   //@ts-ignore
 } from "@macrostrat/ui-components/lib/esm";
 import styles from "../comp.module.scss";
+import { SubmitButton } from "..";
 import {
-  EnvTagsAdd,
-  LithTagsAdd,
-  StratNameDataI,
-  StratNameSuggest,
-  SubmitButton,
-} from "..";
+  UnitThickness,
+  UnitEditorProps,
+  InformalUnitName,
+  FormalStratName,
+  EnvTags,
+  LithTags,
+} from "./common-editing";
+import { useState } from "react";
+import { AddButton } from "../buttons";
 const h = hyperStyled(styles);
 
-function EnvTags() {
-  const {
-    model,
-    isEditing,
-    actions,
-  }: {
-    model: UnitEditorModel;
-    isEditing: boolean;
-    actions: any;
-  } = useModelEditor();
-  const { envs } = model;
-
-  const tagData = envs.map((env) => {
-    return {
-      id: env.id,
-      color: env.environ_color,
-      name: env.environ,
-      description: env.environ_class,
-    };
-  });
-
-  const onClickDelete = (id: number) => {
-    const filteredEnvs = [...envs].filter((l) => l.id != id);
-    actions.updateState({ model: { envs: { $set: filteredEnvs } } });
-  };
-
-  const onClick = (env: Partial<EnvironUnit>) => {
-    actions.updateState({ model: { envs: { $push: [env] } } });
-  };
-
-  return h("div.tag-container", [
-    h(TagContainerCell, { data: tagData, onClickDelete, isEditing }),
-    h(EnvTagsAdd, { onClick }),
-  ]);
-}
-
-function LithTags() {
-  const {
-    model,
-    isEditing,
-    actions,
-  }: {
-    model: UnitEditorModel;
-    isEditing: boolean;
-    actions: any;
-  } = useModelEditor();
-  const { liths } = model;
-
-  const tagData = liths.map((lith) => {
-    return {
-      id: lith.id,
-      color: lith.lith_color,
-      name: lith.lith,
-      description: lith.lith_class,
-    };
-  });
-
-  const onClickDelete = (id: number) => {
-    const filteredLiths = [...liths].filter((l) => l.id != id);
-    actions.updateState({ model: { liths: { $set: filteredLiths } } });
-  };
-
-  const onClick = (lith: Partial<LithUnit>) => {
-    actions.updateState({ model: { liths: { $push: [lith] } } });
-  };
-
-  return h("div.tag-container", [
-    h(TagContainerCell, { data: tagData, onClickDelete, isEditing }),
-    h(LithTagsAdd, { onClick }),
-  ]);
-}
-
-function UnitThickness() {
-  const { model, actions }: { model: UnitEditorModel; actions: any } =
-    useModelEditor();
-  const { unit } = model;
-
-  const update = (field: string, e: any) => {
-    actions.updateState({ model: { unit: { [field]: { $set: e } } } });
-  };
-
-  return h(React.Fragment, [
-    h(FeatureCell, { text: "Min-Thick" }, [
-      h(NumericInput, {
-        onValueChange: (e) => update("min_thick", e),
-        defaultValue: unit?.min_thick || undefined,
-      }),
-    ]),
-    h(FeatureCell, { text: "Max-Thick: " }, [
-      h(NumericInput, {
-        onValueChange: (e) => update("max_thick", e),
-        defaultValue: unit?.max_thick || undefined,
-      }),
-    ]),
-  ]);
-}
-
-function StratName() {
-  const { model, actions } = useModelEditor();
-  const { unit }: UnitEditorModel = model;
-  const baseURl = `/unit/${unit.id}`;
-
-  const href = unit.strat_name
-    ? `${baseURl}/strat-name/${unit.strat_name.id}/edit`
-    : `${baseURl}/strat-name/new`;
-
-  const initialSelected: StratNameDataI | undefined = unit?.strat_name
-    ? {
-        value: unit.unit_strat_name || unit.strat_name.strat_name,
-        data: unit.strat_name,
-      }
-    : undefined;
-
-  const updateStratName = (e: StratNameDataI) => {
-    actions.updateState({ model: { unit: { strat_name: { $set: e.data } } } });
-  };
-  const updateUnitName = (e: string) => {
-    actions.updateState({
-      model: { unit: { unit_strat_name: { $set: e } } },
-    });
-  };
-
-  const linkText = unit.strat_name ? "(modify)" : "(create)";
-
-  return h(React.Fragment, [
-    h("td", [
-      h(InputGroup, {
-        placeholder: "Informal Unit Name",
-        style: { width: "200px" },
-        defaultValue: unit.unit_strat_name || undefined,
-        onChange: (e) => updateUnitName(e.target.value),
-      }),
-    ]),
-    h("td", [
-      h(StratNameSuggest, {
-        initialSelected,
-        onChange: updateStratName,
-      }),
-      h(Link, { href }, [h("a", { style: { fontSize: "10px" } }, [linkText])]),
-    ]),
-  ]);
-}
-
-/* 
-Probably the most complicated component, bc there are so many editable things.
-*/
-function UnitEdit() {
+function UnitEdit(props: { onCancel: () => void }) {
   const { model, hasChanges, actions, ...rest } = useModelEditor();
   const { unit }: { unit: UnitsView } = model;
 
@@ -187,13 +30,12 @@ function UnitEdit() {
 
   const onChangeLo = (interval: IntervalDataI) => {
     const { data } = interval;
-    const { id: lo, interval_name: name_lo, age_top } = data;
+    const { id: lo, interval_name: name_lo } = data;
     actions.updateState({
       model: {
         unit: {
           lo: { $set: lo },
           name_lo: { $set: name_lo },
-          age_top: { $set: age_top },
         },
       },
     });
@@ -201,13 +43,12 @@ function UnitEdit() {
 
   const onChangeFo = (interval: IntervalDataI) => {
     const { data } = interval;
-    const { id: fo, interval_name: name_fo, age_bottom } = data;
+    const { id: fo, interval_name: name_fo } = data;
     actions.updateState({
       model: {
         unit: {
           fo: { $set: fo },
           name_fo: { $set: name_fo },
-          age_bottom: { $set: age_bottom },
         },
       },
     });
@@ -216,59 +57,75 @@ function UnitEdit() {
   return h("div", [
     h(Table, { interactive: false }, [
       h("tbody", [
-        h("tr", [h(StratName), h("tr", [h(LithTags)]), h("tr", [h(EnvTags)])]),
         h("tr", [
-          h(IntervalRow, {
-            bottom: false,
-            age_top: unit?.age_top,
-            initialSelected: {
-              value: unit?.name_lo,
-              data: { id: unit?.lo || 0, interval_name: unit?.name_lo },
-            },
-            onChange: onChangeLo,
-          }),
-        ]),
-        h("tr", [
-          h(IntervalRow, {
-            bottom: true,
-            age_bottom: unit?.age_bottom,
-            initialSelected: {
-              value: unit?.name_fo,
-              data: {
-                id: unit?.fo || 0,
-                interval_name: unit?.name_fo,
-              },
-            },
-            onChange: onChangeFo,
-          }),
-        ]),
-        h("tr", [h(UnitThickness)]),
-        h("tr", [
-          h(FeatureCell, { text: "Notes: ", colSpan: 5 }, [
-            h(TextArea, {
-              value: unit.notes,
-              onChange: (e) => updateUnit("notes", e.target.value),
+          h("td", [h(InformalUnitName)]),
+          h("td", [h(EnvTags)]),
+          h("td", [
+            h(UnitThickness, {
+              field: "min_width",
+              placeholder: "min width",
+              defaultValue: unit?.min_thick || undefined,
             }),
+          ]),
+        ]),
+        h("tr", [
+          h("td", [h(FormalStratName)]),
+          h("td", [h(LithTags)]),
+          h("td", [
+            h(UnitThickness, {
+              field: "max_width",
+              placeholder: "max width",
+              defaultValue: unit?.max_thick || undefined,
+            }),
+          ]),
+        ]),
+        h("tr", [
+          h("td", { style: { display: "flex", flexDirection: "column" } }, [
+            h(IntervalSuggest, {
+              placeholder: "Top interval",
+              initialSelected: {
+                value: unit?.name_lo,
+                data: { id: unit?.lo || 0, interval_name: unit?.name_lo },
+              },
+              onChange: onChangeLo,
+            }),
+            h(IntervalSuggest, {
+              placeholder: "Bottom Interval",
+              initialSelected: {
+                value: unit?.name_fo,
+                data: {
+                  id: unit?.fo || 0,
+                  interval_name: unit?.name_fo,
+                },
+              },
+              onChange: onChangeFo,
+            }),
+          ]),
+          h("td", { colSpan: 2 }, [
+            h("div", { style: { display: "flex", flexDirection: "column" } }, [
+              h(TextArea, {
+                value: unit.notes,
+                onChange: (e) => updateUnit("notes", e.target.value),
+              }),
+              h("div", { style: { marginTop: "10px" } }, [
+                h(SubmitButton),
+                h(Button, { intent: "danger", onClick: props.onCancel }, [
+                  "Cancel",
+                ]),
+              ]),
+            ]),
           ]),
         ]),
       ]),
     ]),
-    h(SubmitButton),
   ]);
 }
 
-export interface UnitEditorModel {
-  unit: UnitsView;
-  envs: EnvironUnit[];
-  liths: LithUnit[];
+interface MinUnitEditorProps extends UnitEditorProps {
+  onCancel: () => void;
 }
 
-interface UnitEditorProps {
-  persistChanges: (e: Partial<UnitsView>, c: Partial<UnitsView>) => UnitsView;
-  model: UnitEditorModel | {};
-}
-
-function MinUnitEditor(props: UnitEditorProps) {
+function MinUnitEditor(props: MinUnitEditorProps) {
   return h(
     ModelEditor,
     {
@@ -278,8 +135,25 @@ function MinUnitEditor(props: UnitEditorProps) {
       canEdit: true,
       isEditing: true,
     },
-    [h(UnitEdit)]
+    [h(UnitEdit, { onCancel: props.onCancel })]
   );
 }
 
-export { MinUnitEditor };
+interface ToggleI extends UnitEditorProps {
+  btnText: string;
+}
+
+function MinEditorToggle(props: ToggleI) {
+  const [add, setAdd] = useState(false);
+
+  return h("div", [
+    h.if(add)(MinUnitEditor, {
+      model: { unit: {}, liths: [], envs: [] },
+      persistChanges: props.persistChanges,
+      onCancel: () => setAdd(false),
+    }),
+    h.if(!add)(AddButton, { onClick: () => setAdd(true) }, [props.btnText]),
+  ]);
+}
+
+export { MinUnitEditor, MinEditorToggle };

@@ -22,6 +22,7 @@ interface SuggestI {
   initialSelected?: DataI;
   items: DataI[];
   onQueryChange?: (e: string) => void;
+  placeholder?: string;
 }
 const ItemSuggestComponent = Suggest.ofType<any>();
 
@@ -40,7 +41,10 @@ function ItemSuggest(props: SuggestI) {
 
   const [selected, setSelected] = useState(props.initialSelected);
 
-  const itemRenderer: ItemRenderer<DataI> = (item: DataI, { handleClick }) => {
+  const itemRenderer: ItemRenderer<DataI> = (
+    item: DataI,
+    { handleClick, modifiers }
+  ) => {
     const { value, data } = item;
     const active = selected?.value == value;
     return h(MenuItem, {
@@ -48,7 +52,7 @@ function ItemSuggest(props: SuggestI) {
       labelElement: active ? h(Icon, { icon: "tick" }) : null,
       text: value,
       onClick: handleClick,
-      active: active,
+      active: modifiers.active,
     });
   };
 
@@ -68,6 +72,9 @@ function ItemSuggest(props: SuggestI) {
     items: itemz,
     popoverProps: {
       minimal: true,
+    },
+    inputProps: {
+      placeholder: props.placeholder,
     },
     selectedItem: selected,
     onItemSelect: onItemSelect,
@@ -94,13 +101,14 @@ const ItemSelectComponent = Select.ofType<DataI>();
 
 const itemRenderer: ItemRenderer<DataI> = (
   item: DataI,
-  { handleClick, index }
+  { handleClick, index, modifiers }
 ) => {
   const { value, data } = item;
   return h(MenuItem, {
     key: index,
     text: value,
     onClick: handleClick,
+    active: modifiers.active,
   });
 };
 

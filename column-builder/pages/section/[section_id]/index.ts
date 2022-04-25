@@ -1,7 +1,14 @@
 import h from "@macrostrat/hyper";
-import pg, { Row, UnitsView } from "../../../src";
-import { BasePage, Table, AddButton } from "../../../src";
+import pg, {
+  MergeDivideBtn,
+  SectionUnitCheckBox,
+  Row,
+  UnitsView,
+} from "../../../src";
+import { BasePage, Table } from "../../../src";
 import { GetServerSideProps } from "next";
+import { MinEditorToggle } from "../../../src/components/unit/minimal-unit-editor";
+import { useState } from "react";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const {
@@ -17,10 +24,35 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   return { props: { section_id, units: data } };
 };
 
+const filterOrAddIds = (id: number, mergeIds: number[]): [] | number[] => {
+  if (mergeIds.length == 0) {
+    return [id];
+  } else if (mergeIds.includes(id)) {
+    return mergeIds.filter((i) => i != id);
+  }
+  return [id, ...mergeIds];
+};
+
 function Section(props: { section_id: string; units: UnitsView[] }) {
   const { section_id, units } = props;
 
+  const [divideIds, setDivideIds] = useState<[] | number[]>([]);
+
+  const onChange = (id: number) => {
+    setDivideIds((prevIds: number[]) => {
+      return filterOrAddIds(id, prevIds);
+    });
+  };
+  const divideSection = () => {
+    console.log("Dividing Section", divideIds);
+  };
+
   const headers = [
+    h(MergeDivideBtn, {
+      text: "Divide section",
+      onClick: divideSection,
+      disabled: divideIds.length < 2,
+    }),
     "ID",
     "Strat Name",
     "Bottom Interval",
@@ -31,7 +63,11 @@ function Section(props: { section_id: string; units: UnitsView[] }) {
 
   return h(BasePage, { query: { section_id: parseInt(section_id) } }, [
     h("h3", [`Units in Section #${section_id}`]),
-    h(AddButton, { onClick: () => {} }, ["create new unit above"]),
+    //@ts-ignore
+    h(MinEditorToggle, {
+      persistChanges: (e, c) => console.log(e, c),
+      btnText: "create new unit above",
+    }),
     h(Table, { interactive: true }, [
       h("thead", [
         h("tr", [
@@ -49,6 +85,12 @@ function Section(props: { section_id: string; units: UnitsView[] }) {
               href: `/unit/${unit.id}/edit`,
             },
             [
+              h("td", { onClick: (e) => e.stopPropagation() }, [
+                h(SectionUnitCheckBox, {
+                  data: unit.id,
+                  onChange: onChange,
+                }),
+              ]),
               h("td", [unit.id]),
               h("td", [
                 unit.strat_name
@@ -64,7 +106,11 @@ function Section(props: { section_id: string; units: UnitsView[] }) {
         }),
       ]),
     ]),
-    h(AddButton, { onClick: () => {} }, ["create new unit below"]),
+    //@ts-ignore
+    h(MinEditorToggle, {
+      persistChanges: (e, c) => console.log(e, c),
+      btnText: "create new unit below",
+    }),
   ]);
 }
 

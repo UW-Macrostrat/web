@@ -7,8 +7,8 @@ import pg, {
   EditButton,
   CreateButton,
   TableHeader,
-  ColumnSectionCheckBox,
-  MergeSectionsBtn,
+  SectionUnitCheckBox,
+  MergeDivideBtn,
   AddButton,
 } from "../../../src";
 
@@ -63,9 +63,10 @@ export default function ColumnGroup(props: {
   };
 
   const headers = [
-    h(MergeSectionsBtn, {
+    h(MergeDivideBtn, {
       onClick: mergeSections,
       disabled: mergeIds.length < 2,
+      text: "Merge",
     }),
     "section number",
     "top",
@@ -103,7 +104,7 @@ export default function ColumnGroup(props: {
               },
               [
                 h("td", [
-                  h(ColumnSectionCheckBox, {
+                  h(SectionUnitCheckBox, {
                     data: section.id,
                     onChange: onChange,
                   }),

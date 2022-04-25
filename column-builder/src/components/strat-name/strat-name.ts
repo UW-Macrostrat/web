@@ -38,6 +38,7 @@ const getStratNames = async (
 interface StratCellProps {
   initialSelected?: StratNameDataI | undefined;
   onChange: (item: StratNameDataI) => void;
+  placeholder?: string;
 }
 
 function StratNameSuggest(props: StratCellProps) {
@@ -56,6 +57,7 @@ function StratNameSuggest(props: StratCellProps) {
     onQueryChange: onQueryChange,
     onChange: props.onChange,
     initialSelected: props.initialSelected,
+    placeholder: props.placeholder,
   });
 }
 
