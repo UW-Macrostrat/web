@@ -16,7 +16,7 @@ import {
 } from "@macrostrat/ui-components/lib/esm";
 import styles from "../comp.module.scss";
 import { ColumnForm, ColumnGroupI } from "../../types";
-import { MySuggest } from "../suggest";
+import { ItemSuggest } from "../suggest";
 import { RefI } from "../../types";
 import pg, { usePostgrest } from "../../db";
 import { RefEditor } from "../ref/ref-editor";
@@ -54,7 +54,7 @@ function ColumnRef() {
   };
   // have the ref suggest as well as option to create new ref.
   return h("div", [
-    h(MySuggest, {
+    h(ItemSuggest, {
       items: refs.map((ref) => {
         return { value: `${ref?.author}(${ref?.pub_year})`, data: ref };
       }),

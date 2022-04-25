@@ -3,7 +3,7 @@ import pg from "../../db";
 import { hyperStyled } from "@macrostrat/hyper";
 import styles from "../comp.module.scss";
 import { StratNameI } from "../..";
-import { MySuggest } from "../suggest";
+import { ItemSuggest } from "../suggest";
 
 const h = hyperStyled(styles);
 
@@ -51,7 +51,7 @@ function StratNameSuggest(props: StratCellProps) {
     onQueryChange("");
   }, []);
 
-  return h(MySuggest, {
+  return h(ItemSuggest, {
     items: names,
     onQueryChange: onQueryChange,
     onChange: props.onChange,

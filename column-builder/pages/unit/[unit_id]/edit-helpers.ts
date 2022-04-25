@@ -1,7 +1,5 @@
 import pg, {
   UnitsView,
-  useTableSelect,
-  tableInsert,
   tableInsertMany,
   tableUpdate,
   EnvironUnit,

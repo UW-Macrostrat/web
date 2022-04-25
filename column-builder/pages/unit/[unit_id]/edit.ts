@@ -17,10 +17,13 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
     query: { unit_id },
   } = ctx;
 
-  const { firstData: unit, error } = await selectFirst("unit_strat_name_expanded", {
-    match: { id: unit_id },
-    limit: 1,
-  });
+  const { firstData: unit, error } = await selectFirst(
+    "unit_strat_name_expanded",
+    {
+      match: { id: unit_id },
+      limit: 1,
+    }
+  );
 
   const { data: envs, error: error_ } = await tableSelect("environ_unit", {
     match: { unit_id: unit_id },
@@ -56,11 +59,7 @@ function UnitEdit(props: {
   };
 
   return h(BasePage, { query: { unit_id: parseInt(unit_id) } }, [
-    h("h3", [
-      "Edit Unit: ",
-      unit.unit_strat_name ||
-        `${unit.strat_name?.strat_name} ${unit.strat_name.rank}`,
-    ]),
+    h("h3", [`Edit Unit #${unit.id}: `, unit.unit_strat_name]),
     //@ts-ignore
     h(UnitEditor, { model, persistChanges }),
   ]);

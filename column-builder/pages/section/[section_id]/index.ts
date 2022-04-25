@@ -1,6 +1,6 @@
 import h from "@macrostrat/hyper";
-import pg, { Row, UnitsView, CreateButton } from "../../../src";
-import { BasePage, Table } from "../../../src";
+import pg, { Row, UnitsView } from "../../../src";
+import { BasePage, Table, AddButton } from "../../../src";
 import { GetServerSideProps } from "next";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -11,7 +11,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const { data, error } = await pg
     .from("unit_strat_name_expanded")
     .select()
-    .order("age_top", { ascending: true })
+    .order("position_bottom", { ascending: true })
     .match({ section_id: section_id });
 
   return { props: { section_id, units: data } };
@@ -30,13 +30,8 @@ function Section(props: { section_id: string; units: UnitsView[] }) {
   ];
 
   return h(BasePage, { query: { section_id: parseInt(section_id) } }, [
-    h("h3", [
-      `Units in Section #${section_id}`,
-      h(CreateButton, {
-        href: `/section/${section_id}/new-unit`,
-        text: "Add new unit",
-      }),
-    ]),
+    h("h3", [`Units in Section #${section_id}`]),
+    h(AddButton, { onClick: () => {} }, ["create new unit above"]),
     h(Table, { interactive: true }, [
       h("thead", [
         h("tr", [
@@ -69,6 +64,7 @@ function Section(props: { section_id: string; units: UnitsView[] }) {
         }),
       ]),
     ]),
+    h(AddButton, { onClick: () => {} }, ["create new unit below"]),
   ]);
 }
 

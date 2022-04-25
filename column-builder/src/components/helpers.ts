@@ -11,6 +11,7 @@ the changes in the sub-object of the units.
 const conductChangeSet = (og: UnitsView, changeset: UnitsView) => {
   const changes = {};
   const keys = [
+    "unit_strat_name",
     "strat_name",
     "color",
     "outcrop",
@@ -25,8 +26,13 @@ const conductChangeSet = (og: UnitsView, changeset: UnitsView) => {
     "notes",
   ];
   Object.entries(og).map(([key, val], i) => {
-    if (key == "strat_name") {
+    if (key == "strat_name" && changeset.strat_name) {
       changes.strat_name_id = changeset.strat_name.id;
+    } else if (
+      key == "unit_strat_name" &&
+      changeset.unit_strat_name != undefined
+    ) {
+      changes.strat_name = changeset.unit_strat_name;
     } else if (changeset[key] && changeset[key] != val && keys.includes(key)) {
       changes[key] = changeset[key];
     }

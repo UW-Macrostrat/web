@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import { Button } from "@blueprintjs/core";
 import styles from "../comp.module.scss";
 import { createLink } from "../helpers";
+import { ReactChild } from "react";
 
 const h = hyperStyled(styles);
 
@@ -80,4 +81,18 @@ function SubmitButton() {
   );
 }
 
-export { CreateButton, EditButton, SubmitButton, CancelButton };
+function AddButton(props: {
+  onClick: () => void;
+  minimal?: boolean;
+  children: ReactChild;
+}) {
+  const { onClick, minimal = true, children } = props;
+
+  return h(
+    Button,
+    { minimal: minimal, onClick, fill: true, intent: "success" },
+    ["+ ", children]
+  );
+}
+
+export { CreateButton, EditButton, SubmitButton, CancelButton, AddButton };

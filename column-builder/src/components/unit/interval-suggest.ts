@@ -4,7 +4,7 @@ import { Spinner } from "@blueprintjs/core";
 import { IntervalI } from "../../types";
 import pg from "../../db";
 import styles from "../comp.module.scss";
-import { MySuggest } from "../suggest";
+import { ItemSuggest } from "../suggest";
 import { FeatureCell } from "../table";
 
 const h = hyperStyled(styles);
@@ -66,7 +66,7 @@ function IntervalRow(props: IntervalRowProps) {
   return h(React.Fragment, [
     h(FeatureCell, { text: label }, [
       h.if(intervals == undefined)(Spinner),
-      h.if(intervals != undefined)(MySuggest, {
+      h.if(intervals != undefined)(ItemSuggest, {
         items: intervals,
         onChange: props.onChange,
         onQueryChange: getIntervals,

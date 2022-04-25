@@ -10,7 +10,7 @@ import {
 import styles from "../comp.module.scss";
 import pg, { usePostgrest } from "../..";
 import { CancelButton, SubmitButton } from "..";
-import { MySuggest } from "../suggest";
+import { ItemSuggest } from "../suggest";
 
 const h = hyperStyled(styles);
 
@@ -33,7 +33,7 @@ function TimeScaleSuggest(props: TimeScaleSuggestProps) {
 
   const init = timescales_.filter((t) => t.data.id == props.initialSelected)[0];
 
-  return h(MySuggest, {
+  return h(ItemSuggest, {
     items: timescales_,
     initialSelected: init,
     onChange: props.onChange,

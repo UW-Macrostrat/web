@@ -7,5 +7,6 @@ export * from "./unit/unit-editor";
 export * from "./project/project-editor";
 export * from "./column-group/column-group-editor";
 export * from "./column/column-editor";
+export * from "./column";
 export * from "./strat-name";
 export * from "./buttons";

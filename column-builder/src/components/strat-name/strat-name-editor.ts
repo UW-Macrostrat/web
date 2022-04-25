@@ -18,6 +18,7 @@ import { RANK, StratNameI } from "../../types";
 import { SubmitButton } from "..";
 import { StratNameDataI } from ".";
 import { StratNameHierarchy } from "./hierarchy";
+import { DataI, ItemSelect } from "../suggest";
 
 const h = hyperStyled(styles);
 
@@ -34,33 +35,36 @@ function RankSelect({
 }) {
   const { model, actions, hasChanges }: Model = useModelEditor();
 
-  const possibleRanks = ["SGp", "Gp", "SubGp", "Fm", "Mbr", "Bed"];
+  const possibleRanks = [
+    { value: "SGp", data: "SGp" },
+    { value: "Gp", data: "Gp" },
+    { value: "SubGp", data: "SubGp" },
+    { value: "Fm", data: "Fm" },
+    { value: "Mbr", data: "Mbr" },
+    { value: "Bed", data: "Bed" },
+  ];
 
-  const itemRenderer: ItemRenderer<string> = (
-    item: string,
+  const itemRenderer: ItemRenderer<DataI> = (
+    item: DataI,
     { handleClick, index }
   ) => {
-    const active = model.rank == item;
+    const active = model.rank == item.value;
     return h(MenuItem, {
       key: index,
       labelElement: active ? h(Icon, { icon: "tick" }) : null,
-      text: item,
+      text: item.value,
       onClick: handleClick,
       active: active,
     });
   };
 
   return h(
-    Select,
+    ItemSelect,
     {
-      filterable: false,
       items: possibleRanks,
-      popoverProps: {
-        minimal: true,
-      },
       itemRenderer,
-      selectedItem: model.rank,
-      onItemSelect: (item) => updateStratName("rank", item),
+      // selectedItem: model.rank,
+      onItemSelect: (item) => updateStratName("rank", item.value),
     },
     [h(Button, { rightIcon: "double-caret-vertical" }, [model.rank])]
   );
