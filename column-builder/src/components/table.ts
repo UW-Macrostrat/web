@@ -50,4 +50,14 @@ function Table(props: TableProps) {
   ]);
 }
 
-export { Row, Table, FeatureCell };
+function TableHeader(props: { headers: any[] }) {
+  return h("thead", [
+    h("tr", [
+      props.headers.map((head, i) => {
+        return h("th", { key: i }, [head]);
+      }),
+    ]),
+  ]);
+}
+
+export { Row, Table, FeatureCell, TableHeader };
