@@ -12,11 +12,7 @@ import {
   Table,
   FeatureCell,
 } from "../../index";
-import {
-  Tooltip2 as Tooltip,
-  Popover2 as Popover,
-} from "@blueprintjs/popover2";
-import { Button, NumericInput, TextArea } from "@blueprintjs/core";
+import { InputGroup, NumericInput, TextArea } from "@blueprintjs/core";
 import {
   ModelEditor,
   useModelEditor,
@@ -64,11 +60,7 @@ function EnvTags() {
 
   return h("div.tag-container", [
     h(TagContainerCell, { data: tagData, onClickDelete, isEditing }),
-    h(Popover, { content: h(EnvTagsAdd, { onClick }) }, [
-      h(Tooltip, { content: "Add an environment" }, [
-        h(Button, { icon: "plus", minimal: true, intent: "success" }),
-      ]),
-    ]),
+    h(EnvTagsAdd, { onClick }),
   ]);
 }
 
@@ -104,11 +96,7 @@ function LithTags() {
 
   return h("div.tag-container", [
     h(TagContainerCell, { data: tagData, onClickDelete, isEditing }),
-    h(Popover, { content: h(LithTagsAdd, { onClick }) }, [
-      h(Tooltip, { content: "Add a lithology" }, [
-        h(Button, { icon: "plus", minimal: true, intent: "success" }),
-      ]),
-    ]),
+    h(LithTagsAdd, { onClick }),
   ]);
 }
 
@@ -151,8 +139,6 @@ function StratName() {
   // this complexity is born of the confusing strat_name issues in the db
   const href = unit.strat_name
     ? `${baseURl}/strat-name/${unit.strat_name.id}/edit`
-    : unit.unit_strat_name
-    ? `${baseURl}/strat-name/new?name=${unit.unit_strat_name}`
     : `${baseURl}/strat-name/new`;
 
   const initialSelected: StratNameDataI | undefined = unit?.strat_name
@@ -160,26 +146,33 @@ function StratName() {
         value: unit.unit_strat_name || unit.strat_name.strat_name,
         data: unit.strat_name,
       }
-    : unit?.unit_strat_name
-    ? {
-        value: unit.unit_strat_name,
-        data: { strat_name: unit.unit_strat_name, id: undefined },
-      }
     : undefined;
 
   const updateStratName = (e: StratNameDataI) => {
     actions.updateState({ model: { unit: { strat_name: { $set: e.data } } } });
   };
+  const updateUnitName = (e: string) => {
+    actions.updateState({
+      model: { unit: { unit_strat_name: { $set: e } } },
+    });
+  };
+
+  const linkText = unit.strat_name ? "(modify)" : "(create)";
 
   return h("tr", [
-    h(FeatureCell, { text: "Stratigraphic Name: " }, [
+    h(FeatureCell, { text: "Informal Unit Name" }, [
+      h(InputGroup, {
+        style: { width: "200px" },
+        defaultValue: unit.unit_strat_name || undefined,
+        onChange: (e) => updateUnitName(e.target.value),
+      }),
+    ]),
+    h(FeatureCell, { text: "Formal Stratigraphic Name: " }, [
       h(StratNameSuggest, {
         initialSelected,
         onChange: updateStratName,
       }),
-      h(Link, { href }, [
-        h("a", { style: { fontSize: "10px" } }, ["(modify)"]),
-      ]),
+      h(Link, { href }, [h("a", { style: { fontSize: "10px" } }, [linkText])]),
     ]),
   ]);
 }
@@ -329,7 +322,6 @@ interface UnitEditorProps {
 }
 
 function UnitEditor(props: UnitEditorProps) {
-  console.log("Unit Model", props.model);
   return h(
     ModelEditor,
     {
