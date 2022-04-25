@@ -4,6 +4,7 @@ import pg, {
   SectionUnitCheckBox,
   Row,
   UnitsView,
+  LithUnit,
 } from "../../../src";
 import { BasePage, Table } from "../../../src";
 import { GetServerSideProps } from "next";
@@ -17,13 +18,12 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   const { data, error } = await pg
     .from("unit_strat_name_expanded")
-    .select()
+    .select("*,lith_unit!unit_liths_unit_id_fkey1(lith)")
     .order("position_bottom", { ascending: true })
     .match({ section_id: section_id });
 
   return { props: { section_id, units: data } };
 };
-
 const filterOrAddIds = (id: number, mergeIds: number[]): [] | number[] => {
   if (mergeIds.length == 0) {
     return [id];
@@ -33,9 +33,33 @@ const filterOrAddIds = (id: number, mergeIds: number[]): [] | number[] => {
   return [id, ...mergeIds];
 };
 
+function UnitLithHelperText(props: {
+  lith_unit: Partial<LithUnit>[] | undefined;
+}) {
+  if (props.lith_unit == undefined) return null;
+
+  return h(
+    "div",
+    {
+      style: { display: "flex", fontSize: "10px", whiteSpace: "break-spaces" },
+    },
+    [
+      "(",
+      props.lith_unit.map((l, i) => {
+        let last = i == props.lith_unit.length - 1;
+        if (last) {
+          return h("p", { key: i }, [l.lith]);
+        } else {
+          return h("p", { key: i }, [l.lith, ", "]);
+        }
+      }),
+      ")",
+    ]
+  );
+}
+
 function Section(props: { section_id: string; units: UnitsView[] }) {
   const { section_id, units } = props;
-
   const [divideIds, setDivideIds] = useState<[] | number[]>([]);
 
   const onChange = (id: number) => {
@@ -51,7 +75,7 @@ function Section(props: { section_id: string; units: UnitsView[] }) {
     h(MergeDivideBtn, {
       text: "Divide section",
       onClick: divideSection,
-      disabled: divideIds.length < 2,
+      disabled: divideIds.length < 1,
     }),
     "ID",
     "Strat Name",
@@ -60,7 +84,6 @@ function Section(props: { section_id: string; units: UnitsView[] }) {
     "Color",
     "Thickness",
   ];
-
   return h(BasePage, { query: { section_id: parseInt(section_id) } }, [
     h("h3", [`Units in Section #${section_id}`]),
     //@ts-ignore
@@ -93,9 +116,12 @@ function Section(props: { section_id: string; units: UnitsView[] }) {
               ]),
               h("td", [unit.id]),
               h("td", [
-                unit.strat_name
-                  ? `${unit.strat_name.strat_name} ${unit.strat_name.rank}`
-                  : unit.unit_strat_name || "unnamed",
+                h("div", [
+                  unit.strat_name
+                    ? `${unit.strat_name.strat_name} ${unit.strat_name.rank}`
+                    : unit.unit_strat_name || "unnamed",
+                ]),
+                h(UnitLithHelperText, { lith_unit: unit.lith_unit }),
               ]),
               h("td", [unit.name_fo]),
               h("td", [unit.name_lo]),
