@@ -59,28 +59,29 @@ function UnitEdit(props: { onCancel: () => void }) {
       h("tbody", [
         h("tr", [
           h("td", [h(InformalUnitName)]),
-          h("td", [h(EnvTags)]),
+          h("td", [h(LithTags, { large: false })]),
+
           h("td", [
             h(UnitThickness, {
-              field: "min_width",
-              placeholder: "min width",
+              field: "min_thick",
+              placeholder: "min thickness",
               defaultValue: unit?.min_thick || undefined,
             }),
           ]),
         ]),
         h("tr", [
           h("td", [h(FormalStratName)]),
-          h("td", [h(LithTags)]),
+          h("td", [h(EnvTags, { large: false })]),
           h("td", [
             h(UnitThickness, {
-              field: "max_width",
-              placeholder: "max width",
+              field: "max_thick",
+              placeholder: "max thickness",
               defaultValue: unit?.max_thick || undefined,
             }),
           ]),
         ]),
         h("tr", [
-          h("td", { style: { display: "flex", flexDirection: "column" } }, [
+          h("td.interval-cell-min-editor", [
             h(IntervalSuggest, {
               placeholder: "Top interval",
               initialSelected: {
@@ -149,7 +150,10 @@ function MinEditorToggle(props: ToggleI) {
   return h("div", [
     h.if(add)(MinUnitEditor, {
       model: { unit: {}, liths: [], envs: [] },
-      persistChanges: props.persistChanges,
+      persistChanges: (e, c) => {
+        props.persistChanges(e, c);
+        setAdd(false);
+      },
       onCancel: () => setAdd(false),
     }),
     h.if(!add)(AddButton, { onClick: () => setAdd(true) }, [props.btnText]),

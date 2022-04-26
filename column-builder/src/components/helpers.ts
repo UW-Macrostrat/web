@@ -87,4 +87,18 @@ const createLink = (base: string, query: QueryI) => {
   return base + queryString;
 };
 
-export { conductChangeSet, detectDeletionsAndAdditions, createLink };
+const filterOrAddIds = (id: number, mergeIds: number[]): [] | number[] => {
+  if (mergeIds.length == 0) {
+    return [id];
+  } else if (mergeIds.includes(id)) {
+    return mergeIds.filter((i) => i != id);
+  }
+  return [id, ...mergeIds];
+};
+
+export {
+  conductChangeSet,
+  detectDeletionsAndAdditions,
+  createLink,
+  filterOrAddIds,
+};

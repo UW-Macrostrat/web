@@ -52,5 +52,11 @@
   overflow-y: scroll;
 }
 .tag {
-  margin: 5px;
+  margin: 1px;
+}
+.interval-cell-min-editor {
+  display: flex;
+  flex-direction: column;
+  height: 8em;
+  justify-content: space-between;
 }

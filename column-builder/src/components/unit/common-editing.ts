@@ -21,11 +21,15 @@ export interface UnitEditorModel {
 }
 
 export interface UnitEditorProps {
-  persistChanges: (e: Partial<UnitsView>, c: Partial<UnitsView>) => UnitsView;
+  persistChanges: (
+    e: Partial<UnitEditorModel>,
+    c: Partial<UnitEditorModel>
+  ) => void;
   model: UnitEditorModel | {};
 }
 
-export function EnvTags() {
+export function EnvTags(props: { large: boolean }) {
+  const { large = true } = props;
   const {
     model,
     isEditing,
@@ -57,12 +61,13 @@ export function EnvTags() {
 
   return h("div.tag-container", [
     h.if(tagData.length == 0)("div", ["Add environments"]),
-    h(TagContainerCell, { data: tagData, onClickDelete, isEditing }),
+    h(TagContainerCell, { data: tagData, onClickDelete, isEditing, large }),
     h(EnvTagsAdd, { onClick }),
   ]);
 }
 
-export function LithTags() {
+export function LithTags(props: { large?: boolean }) {
+  const { large = true } = props;
   const {
     model,
     isEditing,
@@ -94,7 +99,7 @@ export function LithTags() {
 
   return h("div.tag-container", [
     h.if(tagData.length == 0)("div", ["Add lithologies"]),
-    h(TagContainerCell, { data: tagData, onClickDelete, isEditing }),
+    h(TagContainerCell, { data: tagData, onClickDelete, isEditing, large }),
     h(LithTagsAdd, { onClick }),
   ]);
 }
@@ -156,4 +161,29 @@ export function FormalStratName() {
     placeholder: "Formal Strat Name",
     onChange: updateStratName,
   });
+}
+
+export function UnitLithHelperText(props: {
+  lith_unit: Partial<LithUnit>[] | undefined;
+}) {
+  if (props.lith_unit == undefined) return null;
+
+  return h(
+    "div",
+    {
+      style: { display: "flex", fontSize: "10px", whiteSpace: "break-spaces" },
+    },
+    [
+      "(",
+      props.lith_unit.map((l, i) => {
+        let last = i == props.lith_unit.length - 1;
+        if (last) {
+          return h("p", { key: i }, [l.lith]);
+        } else {
+          return h("p", { key: i }, [l.lith, ", "]);
+        }
+      }),
+      ")",
+    ]
+  );
 }

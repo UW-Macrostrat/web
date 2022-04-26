@@ -21,6 +21,7 @@ interface tagBody extends tagInfo {
   onClick?: (e: tagInfo) => void | null;
   disabled?: boolean;
   isEditing?: boolean;
+  large?: boolean;
 }
 
 export function isTooDark(hexcolor: string) {
@@ -47,6 +48,7 @@ function TagBody(props: tagBody) {
     isEditing = false,
     id = 10000,
     disabled = false,
+    large = true,
   } = props;
 
   const showName = name.length > 0 ? name : "Tag Preview";
@@ -65,7 +67,7 @@ function TagBody(props: tagBody) {
       Tag,
       {
         key: id,
-        large: true,
+        large,
         round: true,
         className: styles.tag,
         onRemove: isEditing ? onRemove : undefined,
@@ -175,9 +177,11 @@ interface TagCellProps {
   isEditing?: boolean;
   onClick?: (e: tagInfo) => void | null;
   onClickDelete?: (e: number) => void;
+  large?: boolean;
 }
 
 function TagContainerCell(props: TagCellProps) {
+  const { large = true } = props;
   return h("div", [
     props.data.map((tag, i) => {
       const { id, name, color, description } = tag;
@@ -190,6 +194,7 @@ function TagContainerCell(props: TagCellProps) {
         onClickDelete: props.onClickDelete,
         name,
         description,
+        large,
       });
     }),
   ]);
