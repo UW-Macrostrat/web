@@ -10,6 +10,9 @@ import pg, {
   SectionUnitCheckBox,
   MergeDivideBtn,
   AddButton,
+  filterOrAddIds,
+  MinEditorToggle,
+  Row,
 } from "../../../src";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -35,15 +38,6 @@ interface ColSectionI {
   top: string;
   bottom: string;
 }
-
-const filterOrAddIds = (id: number, mergeIds: number[]): [] | number[] => {
-  if (mergeIds.length == 0) {
-    return [id];
-  } else if (mergeIds.includes(id)) {
-    return mergeIds.filter((i) => i != id);
-  }
-  return [id, ...mergeIds];
-};
 
 export default function ColumnGroup(props: {
   col_id: string;
@@ -92,18 +86,23 @@ export default function ColumnGroup(props: {
       }),
     ]),
     h.if(colSections.length > 0)("div", [
-      h(AddButton, { onClick: () => {} }, ["add section above"]),
-      h(Table, { interactive: false }, [
+      //@ts-ignore
+      h(MinEditorToggle, {
+        btnText: "create new section above with new unit",
+        persistChanges: (e, c) => console.log(e, c),
+      }),
+      h(Table, { interactive: true }, [
         h(TableHeader, { headers }),
         h("tbody", [
           colSections.map((section, i) => {
             return h(
-              "tr",
+              Row,
               {
+                href: `/section/${section.id}`,
                 key: i,
               },
               [
-                h("td", [
+                h("td", { onClick: (e) => e.stopPropagation() }, [
                   h(SectionUnitCheckBox, {
                     data: section.id,
                     onChange: onChange,
@@ -124,12 +123,11 @@ export default function ColumnGroup(props: {
           }),
         ]),
       ]),
-      h(AddButton, { onClick: () => {} }, ["add section below"]),
-      // h(CreateButton, {
-      //   minimal: false,
-      //   href: `/column/${col_id}/new/section-unit`,
-      //   text: "Create Unit in new Section",
-      // }),
+      //@ts-ignore
+      h(MinEditorToggle, {
+        persistChanges: (e, c) => console.log(e, c),
+        btnText: "create new section below with new unit",
+      }),
     ]),
   ]);
 }
