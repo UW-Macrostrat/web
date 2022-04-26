@@ -4,12 +4,14 @@ import pg, {
   SectionUnitCheckBox,
   Row,
   UnitsView,
-  LithUnit,
+  UnitLithHelperText,
+  PositionIncrementBtns,
 } from "../../../src";
 import { BasePage, Table } from "../../../src";
 import { GetServerSideProps } from "next";
 import { MinEditorToggle } from "../../../src/components/unit/minimal-unit-editor";
-import { useState } from "react";
+import { useReducer } from "react";
+import { sectionReducer } from "./reducer";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const {
@@ -24,58 +26,43 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   return { props: { section_id, units: data } };
 };
-const filterOrAddIds = (id: number, mergeIds: number[]): [] | number[] => {
-  if (mergeIds.length == 0) {
-    return [id];
-  } else if (mergeIds.includes(id)) {
-    return mergeIds.filter((i) => i != id);
-  }
-  return [id, ...mergeIds];
-};
-
-function UnitLithHelperText(props: {
-  lith_unit: Partial<LithUnit>[] | undefined;
-}) {
-  if (props.lith_unit == undefined) return null;
-
-  return h(
-    "div",
-    {
-      style: { display: "flex", fontSize: "10px", whiteSpace: "break-spaces" },
-    },
-    [
-      "(",
-      props.lith_unit.map((l, i) => {
-        let last = i == props.lith_unit.length - 1;
-        if (last) {
-          return h("p", { key: i }, [l.lith]);
-        } else {
-          return h("p", { key: i }, [l.lith, ", "]);
-        }
-      }),
-      ")",
-    ]
-  );
-}
 
 function Section(props: { section_id: string; units: UnitsView[] }) {
   const { section_id, units } = props;
-  const [divideIds, setDivideIds] = useState<[] | number[]>([]);
+  const [state, dispatch] = useReducer(sectionReducer, {
+    units,
+    divideIds: [],
+  });
 
-  const onChange = (id: number) => {
-    setDivideIds((prevIds: number[]) => {
-      return filterOrAddIds(id, prevIds);
+  const onClickDivideCheckBox = (id: number) => {
+    dispatch({ type: "set-divide-ids", id });
+  };
+
+  const onClickUp = (i: number) => {
+    dispatch({
+      type: "switch-positions",
+      indexOne: i,
+      indexTwo: i - 1,
     });
   };
-  const divideSection = () => {
-    console.log("Dividing Section", divideIds);
+  const onClickDown = (i: number) => {
+    dispatch({
+      type: "switch-positions",
+      indexOne: i,
+      indexTwo: i + 1,
+    });
   };
+
+  const divideSection = () => {
+    console.log("Dividing Section", state.divideIds);
+  };
+  console.log("State", state);
 
   const headers = [
     h(MergeDivideBtn, {
       text: "Divide section",
       onClick: divideSection,
-      disabled: divideIds.length < 1,
+      disabled: state.divideIds.length < 1,
     }),
     "ID",
     "Strat Name",
@@ -83,12 +70,16 @@ function Section(props: { section_id: string; units: UnitsView[] }) {
     "Top Interval",
     "Color",
     "Thickness",
+    "Position (B)",
   ];
   return h(BasePage, { query: { section_id: parseInt(section_id) } }, [
     h("h3", [`Units in Section #${section_id}`]),
     //@ts-ignore
     h(MinEditorToggle, {
-      persistChanges: (e, c) => console.log(e, c),
+      persistChanges: (e, c) => {
+        console.log(e, c);
+        dispatch({ type: "add-unit-top", unit: e });
+      },
       btnText: "create new unit above",
     }),
     h(Table, { interactive: true }, [
@@ -100,7 +91,9 @@ function Section(props: { section_id: string; units: UnitsView[] }) {
         ]),
       ]),
       h("tbody", [
-        units.map((unit, i) => {
+        state.units.map((unit, i) => {
+          let isFirst = i == 0;
+          let isLast = i == state.units.length - 1;
           return h(
             Row,
             {
@@ -108,10 +101,10 @@ function Section(props: { section_id: string; units: UnitsView[] }) {
               href: `/unit/${unit.id}/edit`,
             },
             [
-              h("td", { onClick: (e) => e.stopPropagation() }, [
+              h("td", { onClick: (e: any) => e.stopPropagation() }, [
                 h(SectionUnitCheckBox, {
                   data: unit.id,
-                  onChange: onChange,
+                  onChange: onClickDivideCheckBox,
                 }),
               ]),
               h("td", [unit.id]),
@@ -127,6 +120,15 @@ function Section(props: { section_id: string; units: UnitsView[] }) {
               h("td", [unit.name_lo]),
               h("td", { style: { backgroundColor: unit.color } }, [unit.color]),
               h("td", [`${unit.min_thick} - ${unit.max_thick}`]),
+              h("td", { onClick: (e: any) => e.stopPropagation() }, [
+                h(PositionIncrementBtns, {
+                  position_bottom: unit.position_bottom,
+                  onClickUp: () => onClickUp(i),
+                  onClickDown: () => onClickDown(i),
+                  isFirst,
+                  isLast,
+                }),
+              ]),
             ]
           );
         }),
@@ -134,7 +136,10 @@ function Section(props: { section_id: string; units: UnitsView[] }) {
     ]),
     //@ts-ignore
     h(MinEditorToggle, {
-      persistChanges: (e, c) => console.log(e, c),
+      persistChanges: (e, c) => {
+        console.log(e, c);
+        dispatch({ type: "add-unit-bottom", unit: e });
+      },
       btnText: "create new unit below",
     }),
   ]);
