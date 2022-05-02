@@ -55,7 +55,6 @@ function MacrostratAgeChipRenderer(props) {
 
   let age = b_int.int_name;
   if (b_int.int_id !== t_int.int_id) {
-    console.log("iiiiidffff");
     age += ` - ${t_int.int_name}`;
   }
   return h.if(b_age)("div.macrostrat-detail", [
