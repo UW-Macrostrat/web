@@ -677,34 +677,6 @@ class Map extends Component<MapProps, {}> {
   refreshPBDB() {
     let bounds = this.map.getBounds();
     let zoom = this.map.getZoom();
-    // if (zoom < 7) {
-    //   // Make sure the layer is visible
-    //   this.map.setLayoutProperty('pbdbCollections', 'visibility', 'visible')
-    //   // Dirty way of hiding points when zooming out
-    //   this.map.getSource('pbdb-points').setData({"type": "FeatureCollection","features": []})
-    //   // Fetch the summary
-    //   fetch(`https://dev.macrostrat.org/api/v2/hex-summary?min_lng=${bounds._sw.lng}&min_lat=${bounds._sw.lat}&max_lng=${bounds._ne.lng}&max_lat=${bounds._ne.lat}&zoom=${zoom}`)
-    //     .then(response => {
-    //       return response.json()
-    //     })
-    //     .then(json => {
-    //       let currentZoom = parseInt(this.map.getZoom())
-    //       let mappings = json.success.data
-    //       if (currentZoom != this.previousZoom) {
-    //         this.previousZoom = currentZoom
-    //
-    //         this.maxValue = this.resMax[parseInt(this.map.getZoom())]
-    //
-    //         this.updateColors(mappings)
-    //
-    //       } else {
-    //         this.updateColors(mappings)
-    //       }
-    //     })
-    // } else {
-    // Hide the hexgrids
-    //this.map.setLayoutProperty('pbdbCollections', 'visibility', 'none')
-
     PBDBHelper(this, bounds, zoom);
   }
 

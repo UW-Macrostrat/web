@@ -66,6 +66,30 @@ function calcMarkerLoadOffset({ ref, parentRef }) {
   return [0, 0];
 }
 
+function useElevationMarkerLocation(mapRef, elevationMarkerLocation) {
+  // Handle elevation marker location
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map == null) return;
+    if (elevationMarkerLocation == null) return;
+    const src = map.getSource("elevationMarker");
+    if (src == null) return;
+    src.setData({
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          properties: {},
+          geometry: {
+            type: "Point",
+            coordinates: elevationMarkerLocation,
+          },
+        },
+      ],
+    });
+  }, [mapRef, elevationMarkerLocation]);
+}
+
 function MapContainer(props) {
   const {
     filters,
@@ -112,28 +136,6 @@ function MapContainer(props) {
     }
   }, [filters, mapLayers]);
 
-  // Handle elevation marker location
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null) return;
-    if (elevationMarkerLocation == null) return;
-    const src = map.getSource("elevationMarker");
-    if (src == null) return;
-    src.setData({
-      type: "FeatureCollection",
-      features: [
-        {
-          type: "Feature",
-          properties: {},
-          geometry: {
-            type: "Point",
-            coordinates: elevationMarkerLocation,
-          },
-        },
-      ],
-    });
-  }, [mapRef, elevationMarkerLocation]);
-
   const timeout = useRef<Timeout>(null);
 
   useEffect(() => {
@@ -143,6 +145,8 @@ function MapContainer(props) {
     }
     timeout.current = setTimeout(() => mapRef.current?.resize(), 100);
   }, [mapRef, width, height]);
+
+  useElevationMarkerLocation(mapRef, elevationMarkerLocation);
 
   // Switch to 3D mode at high zoom levels or with a rotated map
   const pitch = mapPosition.camera.pitch ?? 0;
