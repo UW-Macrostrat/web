@@ -112,6 +112,28 @@ function MapContainer(props) {
     }
   }, [filters, mapLayers]);
 
+  // Handle elevation marker location
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map == null) return;
+    if (elevationMarkerLocation == null) return;
+    const src = map.getSource("elevationMarker");
+    if (src == null) return;
+    src.setData({
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          properties: {},
+          geometry: {
+            type: "Point",
+            coordinates: elevationMarkerLocation,
+          },
+        },
+      ],
+    });
+  }, [mapRef, elevationMarkerLocation]);
+
   const timeout = useRef<Timeout>(null);
 
   useEffect(() => {

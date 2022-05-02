@@ -128,9 +128,16 @@ class Map extends Component<MapProps, {}> {
 
     // disable map rotation using touch rotation gesture
     //this.map.touchZoomRotate.disableRotation();
+    const ignoredSources = [
+      "elevationMarker",
+      "elevationPoints",
+      "info_marker",
+    ];
 
     this.map.on("sourcedataloading", (evt) => {
-      if (this.props.mapIsLoading) return;
+      if (ignoredSources.includes(evt.sourceId) || this.props.mapIsLoading) {
+        return;
+      }
       this.props.runAction({ type: "map-loading" });
     });
 
@@ -542,29 +549,6 @@ class Map extends Component<MapProps, {}> {
       return true;
     }
 
-    if (
-      !nextProps.elevationMarkerLocation.length ||
-      (nextProps.elevationMarkerLocation[0] !=
-        this.props.elevationMarkerLocation[0] &&
-        nextProps.elevationMarkerLocation[1] !=
-          this.props.elevationMarkerLocation[1])
-    ) {
-      if (this.map && this.map.loaded()) {
-        this.map.getSource("elevationMarker").setData({
-          type: "FeatureCollection",
-          features: [
-            {
-              type: "Feature",
-              properties: {},
-              geometry: {
-                type: "Point",
-                coordinates: nextProps.elevationMarkerLocation,
-              },
-            },
-          ],
-        });
-      }
-    }
     // Watch the state of the application and adjust the map accordingly
     if (
       !nextProps.elevationChartOpen &&
