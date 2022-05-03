@@ -4,7 +4,7 @@ import pg, {
   SectionUnitCheckBox,
   Row,
   UnitsView,
-  UnitLithHelperText,
+  UnitRowCellGroup,
   PositionIncrementBtns,
 } from "../../../src";
 import { BasePage, Table } from "../../../src";
@@ -56,7 +56,6 @@ function Section(props: { section_id: string; units: UnitsView[] }) {
   const divideSection = () => {
     console.log("Dividing Section", state.divideIds);
   };
-  console.log("State", state);
 
   const headers = [
     h(MergeDivideBtn, {
@@ -107,19 +106,7 @@ function Section(props: { section_id: string; units: UnitsView[] }) {
                   onChange: onClickDivideCheckBox,
                 }),
               ]),
-              h("td", [unit.id]),
-              h("td", [
-                h("div", [
-                  unit.strat_name
-                    ? `${unit.strat_name.strat_name} ${unit.strat_name.rank}`
-                    : unit.unit_strat_name || "unnamed",
-                ]),
-                h(UnitLithHelperText, { lith_unit: unit.lith_unit }),
-              ]),
-              h("td", [unit.name_fo]),
-              h("td", [unit.name_lo]),
-              h("td", { style: { backgroundColor: unit.color } }, [unit.color]),
-              h("td", [`${unit.min_thick} - ${unit.max_thick}`]),
+              h(UnitRowCellGroup, { unit }),
               h("td", { onClick: (e: any) => e.stopPropagation() }, [
                 h(PositionIncrementBtns, {
                   position_bottom: unit.position_bottom,
