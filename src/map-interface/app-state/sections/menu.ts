@@ -4,6 +4,7 @@ enum MenuPanel {
   LAYERS = "layers",
   SETTINGS = "settings",
   ABOUT = "about",
+  HELP = "help",
 }
 
 type SetPanel = {

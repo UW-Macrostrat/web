@@ -52,7 +52,12 @@ const TabButton = (props: ButtonProps & { tab: MenuPanel }) => {
   const dispatch = useDispatch();
   const onClick = () => dispatch({ type: "set-panel", panel: tab });
   const active = useAppState((state) => state.menu.activePanel == tab);
-  return h(MinimalButton, { active, onClick, ...rest });
+  return h(MinimalButton, {
+    active,
+    onClick,
+    ...rest,
+    className: "tab-button",
+  });
 };
 
 type LayerButtonProps = ListButtonProps & { layer: MapLayer; name: string };
@@ -145,6 +150,11 @@ function useMainPanel(): Panel<{}> {
         title: "About",
         renderPanel: () => h(AboutText),
       };
+    case MenuPanel.HELP:
+      return {
+        title: "Help",
+        renderPanel: () => h("div", "Help"),
+      };
   }
   return null;
 }
@@ -207,6 +217,11 @@ const Menu = (props) => {
               icon: "info-sign",
               text: "About",
               tab: MenuPanel.ABOUT,
+            }),
+            h(TabButton, {
+              icon: "help",
+              text: "Help",
+              tab: MenuPanel.HELP,
             }),
           ]),
           h.if(stack.length > 1)([
