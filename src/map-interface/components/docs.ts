@@ -1,4 +1,7 @@
-import h from "@macrostrat/hyper";
+import hyper from "@macrostrat/hyper";
+import styles from "./docs.module.styl";
+
+const h = hyper.styled(styles);
 
 export function DocsVideo({ slug }) {
   return h("video", {
