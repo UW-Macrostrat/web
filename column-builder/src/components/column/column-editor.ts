@@ -21,6 +21,7 @@ import { RefI } from "../../types";
 import pg, { usePostgrest } from "../../db";
 import { RefEditor } from "../ref/ref-editor";
 import { SubmitButton } from "..";
+import { LngLatMap, Point } from "./map";
 
 const h = hyperStyled(styles);
 
@@ -92,6 +93,13 @@ function ColumnEdit({ curColGroup }: { curColGroup: Partial<ColumnGroupI> }) {
     actions.updateState({ model: { [field]: { $set: e } } });
   };
 
+  const setCoords = (p: Point) => {
+    const [long, lat] = p.geometry.coordinates;
+    actions.updateState({
+      model: { longitude: { $set: long }, latitude: { $set: lat } },
+    });
+  };
+
   return h("div", [
     h(Table, { interactive: false }, [
       h("tbody", [
@@ -117,6 +125,19 @@ function ColumnEdit({ curColGroup }: { curColGroup: Partial<ColumnGroupI> }) {
               defaultValue: model.col_number || undefined,
               onValueChange: (e) => updateColumn("col_number", e),
             }),
+          ]),
+        ]),
+        h("tr", [
+          h("td", [
+            h(LngLatMap, {
+              longitude: model.longitude ?? 0,
+              latitude: model.latitude ?? 0,
+              onChange: (p: Point) => setCoords(p),
+            }),
+          ]),
+          h("td", [
+            h("div", ["longitude: ", model.longitude]),
+            h("div", ["latitude: ", model.latitude]),
           ]),
         ]),
         h("tr", [

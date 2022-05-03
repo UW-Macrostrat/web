@@ -28,5 +28,5 @@ function MergeDivideBtn(props: {
     [props.text]
   );
 }
-
+export * from "./map";
 export { SectionUnitCheckBox, MergeDivideBtn };
