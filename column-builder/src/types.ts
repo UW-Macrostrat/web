@@ -131,3 +131,10 @@ export interface StratNameI {
   ref_id: number;
   concept_id?: number;
 }
+
+export interface ColSectionI {
+  id: number;
+  unit_count: number;
+  top: string;
+  bottom: string;
+}
