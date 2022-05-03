@@ -3,17 +3,17 @@ import h from "@macrostrat/hyper";
 import { GetServerSideProps } from "next";
 import pg, {
   BasePage,
-  Table,
   EditButton,
   CreateButton,
-  TableHeader,
-  SectionUnitCheckBox,
   MergeDivideBtn,
-  AddButton,
   filterOrAddIds,
   MinEditorToggle,
-  Row,
+  UnitsView,
+  ColSectionI,
+  ColSectionsTable,
+  ColUnitsTable,
 } from "../../../src";
+import { Button } from "@blueprintjs/core";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const {
@@ -29,22 +29,24 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     .select("col_name")
     .match({ id: col_id });
 
-  return { props: { col_id, colSections: d, column } };
+  const { data: units, error: unit_error } = await pg
+    .from("unit_strat_name_expanded")
+    .select("*,lith_unit!unit_liths_unit_id_fkey1(lith)")
+    .order("position_bottom", { ascending: true })
+    .match({ col_id: col_id });
+
+  return { props: { col_id, colSections: d, column, units } };
 };
 
-interface ColSectionI {
-  id: number;
-  unit_count: number;
-  top: string;
-  bottom: string;
-}
-
-export default function ColumnGroup(props: {
+export default function Columns(props: {
   col_id: string;
   colSections: ColSectionI[];
+  units: UnitsView[];
   column: { col_name: string }[];
 }) {
-  const { col_id, colSections, column } = props;
+  const { col_id, colSections, column, units } = props;
+
+  const [unitView, setUnitView] = useState<boolean>(false);
   const [mergeIds, setMergeIds] = useState<[] | number[]>([]);
 
   const onChange = (id: number) => {
@@ -62,9 +64,9 @@ export default function ColumnGroup(props: {
       disabled: mergeIds.length < 2,
       text: "Merge",
     }),
-    "section number",
-    "top",
-    "bottom",
+    "Section number",
+    "Top interval",
+    "Bottom interval",
     "# of units",
   ];
 
@@ -74,6 +76,9 @@ export default function ColumnGroup(props: {
       h(EditButton, {
         href: `/column/${col_id}/edit`,
       }),
+    ]),
+    h(Button, { onClick: () => setUnitView(!unitView) }, [
+      unitView ? "Section view" : "Unit view",
     ]),
     h.if(colSections.length == 0)("div", [
       h("h3", [
@@ -88,45 +93,15 @@ export default function ColumnGroup(props: {
     h.if(colSections.length > 0)("div", [
       //@ts-ignore
       h(MinEditorToggle, {
-        btnText: "create new section above with new unit",
+        btnText: "create new unit",
         persistChanges: (e, c) => console.log(e, c),
       }),
-      h(Table, { interactive: true }, [
-        h(TableHeader, { headers }),
-        h("tbody", [
-          colSections.map((section, i) => {
-            return h(
-              Row,
-              {
-                href: `/section/${section.id}`,
-                key: i,
-              },
-              [
-                h("td", { onClick: (e) => e.stopPropagation() }, [
-                  h(SectionUnitCheckBox, {
-                    data: section.id,
-                    onChange: onChange,
-                  }),
-                ]),
-                h("td", [section.id]),
-                h("td", [section.top]),
-                h("td", [section.bottom]),
-                h("td", [
-                  h(
-                    "a",
-                    { href: `/section/${section.id}` },
-                    `view ${section.unit_count} units`
-                  ),
-                ]),
-              ]
-            );
-          }),
-        ]),
-      ]),
+      h.if(!unitView)(ColSectionsTable, { colSections, onChange, headers }),
+      h.if(unitView)(ColUnitsTable, { units }),
       //@ts-ignore
       h(MinEditorToggle, {
         persistChanges: (e, c) => console.log(e, c),
-        btnText: "create new section below with new unit",
+        btnText: "create new unit",
       }),
     ]),
   ]);
