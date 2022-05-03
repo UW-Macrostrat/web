@@ -1,6 +1,6 @@
 import { hyperStyled } from "@macrostrat/hyper";
 import { UnitsView, IntervalDataI, Table, IntervalSuggest } from "../../index";
-import { Button, TextArea } from "@blueprintjs/core";
+import { Button, Checkbox, TextArea } from "@blueprintjs/core";
 import {
   ModelEditor,
   useModelEditor,
@@ -15,6 +15,7 @@ import {
   FormalStratName,
   EnvTags,
   LithTags,
+  UnitEditorI,
 } from "./common-editing";
 import { useState } from "react";
 import { AddButton } from "../buttons";
@@ -22,8 +23,8 @@ const h = hyperStyled(styles);
 
 function UnitEdit(props: { onCancel: () => void }) {
   const { model, hasChanges, actions, ...rest } = useModelEditor();
-  const { unit }: { unit: UnitsView } = model;
-
+  const { unit }: { unit: UnitEditorI } = model;
+  console.log(unit);
   const updateUnit = (field: string, e: any) => {
     actions.updateState({ model: { unit: { [field]: { $set: e } } } });
   };
@@ -58,21 +59,23 @@ function UnitEdit(props: { onCancel: () => void }) {
     h(Table, { interactive: false }, [
       h("tbody", [
         h("tr", [
-          h("td", [h(InformalUnitName)]),
-          h("td", [h(LithTags, { large: false })]),
+          h("td", [
+            h("div.margin-bottom-spacing", [h(InformalUnitName)]),
+            h(FormalStratName),
+          ]),
+          h("td", [
+            h("div.margin-bottom-spacing", [h(LithTags, { large: false })]),
+            h(EnvTags, { large: false }),
+          ]),
 
           h("td", [
-            h(UnitThickness, {
-              field: "min_thick",
-              placeholder: "min thickness",
-              defaultValue: unit?.min_thick || undefined,
-            }),
-          ]),
-        ]),
-        h("tr", [
-          h("td", [h(FormalStratName)]),
-          h("td", [h(EnvTags, { large: false })]),
-          h("td", [
+            h("div.margin-bottom-spacing", [
+              h(UnitThickness, {
+                field: "min_thick",
+                placeholder: "min thickness",
+                defaultValue: unit?.min_thick || undefined,
+              }),
+            ]),
             h(UnitThickness, {
               field: "max_thick",
               placeholder: "max thickness",
@@ -109,6 +112,11 @@ function UnitEdit(props: { onCancel: () => void }) {
                 onChange: (e) => updateUnit("notes", e.target.value),
               }),
               h("div", { style: { marginTop: "10px" } }, [
+                h(Checkbox, {
+                  checked: unit.new_section,
+                  onChange: () => updateUnit("new_section", !unit.new_section),
+                  label: "Make new section with this unit",
+                }),
                 h(SubmitButton),
                 h(Button, { intent: "danger", onClick: props.onCancel }, [
                   "Cancel",
@@ -149,7 +157,7 @@ function MinEditorToggle(props: ToggleI) {
 
   return h("div", [
     h.if(add)(MinUnitEditor, {
-      model: { unit: {}, liths: [], envs: [] },
+      model: { unit: { new_section: false }, liths: [], envs: [] },
       persistChanges: (e, c) => {
         props.persistChanges(e, c);
         setAdd(false);
