@@ -14,18 +14,19 @@ import styles from "../comp.module.scss";
 import { EnvTagsAdd, LithTagsAdd, StratNameDataI, StratNameSuggest } from "..";
 const h = hyperStyled(styles);
 
+export interface UnitEditorI extends UnitsView {
+  new_section: boolean;
+}
+
 export interface UnitEditorModel {
-  unit: UnitsView;
+  unit: UnitEditorI;
   envs: EnvironUnit[];
   liths: LithUnit[];
 }
 
 export interface UnitEditorProps {
-  persistChanges: (
-    e: Partial<UnitEditorModel>,
-    c: Partial<UnitEditorModel>
-  ) => void;
-  model: UnitEditorModel | {};
+  persistChanges: (e: Partial<UnitEditorI>, c: Partial<UnitEditorI>) => void;
+  model: UnitEditorI | {};
 }
 
 export function EnvTags(props: { large: boolean }) {
@@ -163,9 +164,7 @@ export function FormalStratName() {
   });
 }
 
-export function UnitLithHelperText(props: {
-  lith_unit: Partial<LithUnit>[] | undefined;
-}) {
+export function UnitLithHelperText(props: { lith_unit: Partial<LithUnit>[] }) {
   if (props.lith_unit == undefined) return null;
 
   return h(
@@ -178,9 +177,9 @@ export function UnitLithHelperText(props: {
       props.lith_unit.map((l, i) => {
         let last = i == props.lith_unit.length - 1;
         if (last) {
-          return h("p", { key: i }, [l.lith]);
+          return h("p.nomargin", { key: i }, [l.lith]);
         } else {
-          return h("p", { key: i }, [l.lith, ", "]);
+          return h("p.nomargin", { key: i }, [l.lith, ", "]);
         }
       }),
       ")",
