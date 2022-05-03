@@ -28,6 +28,7 @@ import { SearchResults } from "../components/searchbar";
 import classNames from "classnames";
 import styles from "./main.module.styl";
 import loadable from "@loadable/component";
+import UsagePanel from "../usage.mdx";
 
 const AboutText = loadable(() => import("../components/About"));
 
@@ -150,10 +151,10 @@ function useMainPanel(): Panel<{}> {
         title: "About",
         renderPanel: () => h(AboutText),
       };
-    case MenuPanel.HELP:
+    case MenuPanel.USAGE:
       return {
-        title: "Help",
-        renderPanel: () => h("div", "Help"),
+        title: "Usage",
+        renderPanel: () => h(UsagePanel),
       };
   }
   return null;
@@ -220,8 +221,8 @@ const Menu = (props) => {
             }),
             h(TabButton, {
               icon: "help",
-              text: "Help",
-              tab: MenuPanel.HELP,
+              text: "Usage",
+              tab: MenuPanel.USAGE,
             }),
           ]),
           h.if(stack.length > 1)([
