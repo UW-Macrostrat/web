@@ -1,3 +1,4 @@
+import { useContext } from "react";
 import { hyperStyled } from "@macrostrat/hyper";
 import { Project, TimeScale } from "../../types";
 import { FormGroup, InputGroup, Spinner, TextArea } from "@blueprintjs/core";
@@ -5,11 +6,11 @@ import {
   ModelEditor,
   useModelEditor,
   ModelEditButton,
-  //@ts-ignore
-} from "@macrostrat/ui-components/lib/esm";
+  ModelEditorContext,
+} from "@macrostrat/ui-components";
 import styles from "../comp.module.scss";
 import pg, { usePostgrest } from "../..";
-import { CancelButton, SubmitButton } from "..";
+import { CancelButton, SubmitButton } from "~/components";
 import { ItemSuggest } from "../suggest";
 
 const h = hyperStyled(styles);

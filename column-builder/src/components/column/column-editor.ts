@@ -9,11 +9,6 @@ import {
   TextArea,
   Spinner,
 } from "@blueprintjs/core";
-import {
-  ModelEditor,
-  useModelEditor,
-  //@ts-ignore
-} from "@macrostrat/ui-components/lib/esm";
 import styles from "../comp.module.scss";
 import { ColumnForm, ColumnGroupI } from "../../types";
 import { ItemSuggest } from "../suggest";
@@ -22,6 +17,7 @@ import pg, { usePostgrest } from "../../db";
 import { RefEditor } from "../ref/ref-editor";
 import { SubmitButton } from "..";
 import { LngLatMap, Point } from "./map";
+import { ModelEditor, useModelEditor } from "@macrostrat/ui-components";
 
 const h = hyperStyled(styles);
 

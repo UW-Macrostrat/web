@@ -13,7 +13,20 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "incremental": true
+    "incremental": true,
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./src/*"],
+      "@macrostrat/ui-components": [
+        "deps/ui-components/packages/ui-components/src/"
+      ],
+      "@macrostrat/form-components": [
+        "deps/ui-components/packages/form-components/src/"
+      ],
+      "@macrostrat/data-components": [
+        "deps/ui-components/packages/data-components/src/"
+      ]
+    }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]

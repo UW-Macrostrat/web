@@ -6,7 +6,7 @@ import {
   useModelEditor,
   ModelEditButton,
   //@ts-ignore
-} from "@macrostrat/ui-components/lib/esm";
+} from "@macrostrat/ui-components";
 import styles from "../comp.module.scss";
 import {SubmitButton } from "..";
 

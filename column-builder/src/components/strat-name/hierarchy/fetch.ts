@@ -80,7 +80,7 @@ const fetchStratNames = async (id: number | undefined) => {
 
 const mapToHier = (data) => {
   const Hier: Partial<IHierarchy> = {};
-  Hier.name = data.strat_name;
+  Hier.name = data.strat_name_long;
   Hier.units = data.t_units;
   Hier.active = data.active;
   Hier.onClick = (e) => {
@@ -88,7 +88,7 @@ const mapToHier = (data) => {
     const url = `https://macrostrat.org/sift/#/strat_name/${data.strat_name_id}`;
     window.open(url, "_blank");
   };
-  Hier.kinder = data.children.map((c) => mapToHier(c));
+  Hier.subhierarchy = data.children.map((c) => mapToHier(c));
   return Hier;
 };
 
