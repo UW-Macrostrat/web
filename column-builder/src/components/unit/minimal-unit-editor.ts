@@ -57,70 +57,68 @@ function UnitEdit(props: { onCancel: () => void }) {
 
   return h("div", [
     h(Table, { interactive: false }, [
-      h("tbody", [
-        h("tr", [
-          h("td", [
-            h("div.margin-bottom-spacing", [h(InformalUnitName)]),
-            h(FormalStratName),
-          ]),
-          h("td", [
-            h("div.margin-bottom-spacing", [h(LithTags, { large: false })]),
-            h(EnvTags, { large: false }),
-          ]),
-
-          h("td", [
-            h("div.margin-bottom-spacing", [
-              h(UnitThickness, {
-                field: "min_thick",
-                placeholder: "min thickness",
-                defaultValue: unit?.min_thick || undefined,
-              }),
-            ]),
-            h(UnitThickness, {
-              field: "max_thick",
-              placeholder: "max thickness",
-              defaultValue: unit?.max_thick || undefined,
-            }),
-          ]),
+      h("tr", [
+        h("td", [
+          h("div.margin-bottom-spacing", [h(InformalUnitName)]),
+          h(FormalStratName),
         ]),
-        h("tr", [
-          h("td.interval-cell-min-editor", [
-            h(IntervalSuggest, {
-              placeholder: "Top interval",
-              initialSelected: {
-                value: unit?.name_lo,
-                data: { id: unit?.lo || 0, interval_name: unit?.name_lo },
-              },
-              onChange: onChangeLo,
-            }),
-            h(IntervalSuggest, {
-              placeholder: "Bottom Interval",
-              initialSelected: {
-                value: unit?.name_fo,
-                data: {
-                  id: unit?.fo || 0,
-                  interval_name: unit?.name_fo,
-                },
-              },
-              onChange: onChangeFo,
+        h("td", [
+          h("div.margin-bottom-spacing", [h(LithTags, { large: false })]),
+          h(EnvTags, { large: false }),
+        ]),
+
+        h("td", [
+          h("div.margin-bottom-spacing", [
+            h(UnitThickness, {
+              field: "min_thick",
+              placeholder: "min thickness",
+              defaultValue: unit?.min_thick || undefined,
             }),
           ]),
-          h("td", { colSpan: 2 }, [
-            h("div", { style: { display: "flex", flexDirection: "column" } }, [
-              h(TextArea, {
-                value: unit.notes,
-                onChange: (e) => updateUnit("notes", e.target.value),
+          h(UnitThickness, {
+            field: "max_thick",
+            placeholder: "max thickness",
+            defaultValue: unit?.max_thick || undefined,
+          }),
+        ]),
+      ]),
+      h("tr", [
+        h("td.interval-cell-min-editor", [
+          h(IntervalSuggest, {
+            placeholder: "Top interval",
+            initialSelected: {
+              value: unit?.name_lo,
+              data: { id: unit?.lo || 0, interval_name: unit?.name_lo },
+            },
+            onChange: onChangeLo,
+          }),
+          h(IntervalSuggest, {
+            placeholder: "Bottom Interval",
+            initialSelected: {
+              value: unit?.name_fo,
+              data: {
+                id: unit?.fo || 0,
+                interval_name: unit?.name_fo,
+              },
+            },
+            onChange: onChangeFo,
+          }),
+        ]),
+        h("td", { colSpan: 2 }, [
+          h("div", { style: { display: "flex", flexDirection: "column" } }, [
+            h(TextArea, {
+              value: unit.notes,
+              onChange: (e) => updateUnit("notes", e.target.value),
+            }),
+            h("div", { style: { marginTop: "10px" } }, [
+              h(Checkbox, {
+                checked: unit.new_section,
+                onChange: () => updateUnit("new_section", !unit.new_section),
+                label: "Make new section with this unit",
               }),
-              h("div", { style: { marginTop: "10px" } }, [
-                h(Checkbox, {
-                  checked: unit.new_section,
-                  onChange: () => updateUnit("new_section", !unit.new_section),
-                  label: "Make new section with this unit",
-                }),
-                h(SubmitButton),
-                h(Button, { intent: "danger", onClick: props.onCancel }, [
-                  "Cancel",
-                ]),
+              h(SubmitButton),
+              h(Button, { intent: "danger", onClick: props.onCancel }, [
+                "Cancel",
               ]),
             ]),
           ]),

@@ -1,5 +1,4 @@
-import React from "react";
-import { filterOrAddIds, UnitEditorModel, UnitsView } from "../../../src";
+import { filterOrAddIds, UnitEditorModel, UnitsView } from "~/index";
 
 ///////////////// helper functions //////////////
 /* 
@@ -29,8 +28,8 @@ type AddUnitTop = { type: "add-unit-top"; unit: UnitEditorModel };
 type AddUnitBottom = { type: "add-unit-bottom"; unit: UnitEditorModel };
 type SwitchPositions = {
   type: "switch-positions";
-  indexOne: number;
-  indexTwo: number;
+  source: number;
+  destination: number;
 };
 
 export type SyncActions =
@@ -43,6 +42,15 @@ export interface SectionStateI {
   units: UnitsView[];
   divideIds: number[];
 }
+
+// a little function to help us with reordering the result
+const reorder = (list: any[], startIndex: number, endIndex: number): any[] => {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+
+  return result;
+};
 
 const sectionReducer = (state: SectionStateI, action: SyncActions) => {
   switch (action.type) {
@@ -80,21 +88,27 @@ const sectionReducer = (state: SectionStateI, action: SyncActions) => {
         units: [...state.units, newBottomUnit],
       };
     case "switch-positions":
-      const currUnits = [...state.units];
-      // swap position_bottom
+      // somewhat non-effcient way to create deep copy
+      let currUnits = JSON.parse(JSON.stringify([...state.units]));
 
-      [
-        currUnits[action.indexOne].position_bottom,
-        currUnits[action.indexTwo].position_bottom,
-      ] = [
-        currUnits[action.indexTwo].position_bottom,
-        currUnits[action.indexOne].position_bottom,
-      ];
-      // swap spot in units
-      [currUnits[action.indexOne], currUnits[action.indexTwo]] = [
-        currUnits[action.indexTwo],
-        currUnits[action.indexOne],
-      ];
+      // assign new p_b to dragged unit
+      currUnits[action.source].position_bottom =
+        currUnits[action.destination].position_bottom;
+
+      currUnits = reorder(currUnits, action.source, action.destination);
+
+      //if we moved a unit up the column source > destination => increment
+      // all p_bs from source+1 -> destination
+      if (action.source > action.destination) {
+        for (let i = action.destination + 1; i <= action.source; i++) {
+          currUnits[i].position_bottom++;
+        }
+      } else if (action.source < action.destination) {
+        for (let i = action.destination - 1; i >= action.source; i--) {
+          currUnits[i].position_bottom--;
+        }
+      }
+
       return {
         ...state,
         units: currUnits,

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useReducer } from "react";
 import h from "@macrostrat/hyper";
 import { GetServerSideProps } from "next";
 import pg, {
@@ -14,6 +14,8 @@ import pg, {
   ColUnitsTable,
 } from "../../../src";
 import { Button } from "@blueprintjs/core";
+import { calculateSecionUnitIndexs, columnReducer } from "../reducer";
+import { DropResult } from "react-beautiful-dnd";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const {
@@ -46,22 +48,30 @@ export default function Columns(props: {
 }) {
   const { col_id, colSections, column, units } = props;
 
+  const unitIndexsBySection = calculateSecionUnitIndexs(units);
+
+  const [state, dispatch] = useReducer(columnReducer, {
+    units,
+    sections: unitIndexsBySection,
+    mergeIds: [],
+  });
   const [unitView, setUnitView] = useState<boolean>(false);
-  const [mergeIds, setMergeIds] = useState<[] | number[]>([]);
 
   const onChange = (id: number) => {
-    setMergeIds((prevMergeIds: number[]) => {
-      return filterOrAddIds(id, prevMergeIds);
-    });
+    dispatch({ type: "set-merge-ids", id });
   };
   const mergeSections = () => {
-    console.log("Merging Sections", mergeIds);
+    dispatch({ type: "merge-ids" });
+  };
+
+  const onDragEnd = (r: DropResult) => {
+    dispatch({ type: "dropped-unit", result: r });
   };
 
   const headers = [
     h(MergeDivideBtn, {
       onClick: mergeSections,
-      disabled: mergeIds.length < 2,
+      disabled: state.mergeIds.length < 2,
       text: "Merge",
     }),
     "Section number",
@@ -97,7 +107,7 @@ export default function Columns(props: {
         persistChanges: (e, c) => console.log(e, c),
       }),
       h.if(!unitView)(ColSectionsTable, { colSections, onChange, headers }),
-      h.if(unitView)(ColUnitsTable, { units }),
+      h.if(unitView)(ColUnitsTable, { state, onDragEnd }),
       //@ts-ignore
       h(MinEditorToggle, {
         persistChanges: (e, c) => console.log(e, c),

@@ -29,17 +29,17 @@ function Projects({ projects }: { projects: Project[] }) {
         text: "Create New Project",
       }),
     ]),
-    h(Table, { interactive: true }, [
-      h("thead", [
-        h("tr", [
-          headers.map((head, i) => {
-            return h("th", { key: i }, [head]);
-          }),
-        ]),
-      ]),
-      h("tbody", [
-        projects.map((project, i) => {
-          return h(Row, { key: i, href: `/column-groups/${project.id}` }, [
+    h(Table, { interactive: true, headers, drag: false }, [
+      projects.map((project, i) => {
+        return h(
+          Row,
+          {
+            key: i,
+            index: i,
+            draggableId: project.project,
+            href: `/column-groups/${project.id}`,
+          },
+          [
             h("td", [project.id]),
             h("td", [project.project]),
             h("td", [project.descrip]),
@@ -49,9 +49,9 @@ function Projects({ projects }: { projects: Project[] }) {
                 href: `/project/${project.id}/edit`,
               }),
             ]),
-          ]);
-        }),
-      ]),
+          ]
+        );
+      }),
     ]),
   ]);
 }

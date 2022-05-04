@@ -164,8 +164,8 @@ export function FormalStratName() {
   });
 }
 
-export function UnitLithHelperText(props: { lith_unit: Partial<LithUnit>[] }) {
-  if (props.lith_unit == undefined) return null;
+export function UnitLithHelperText(props: { lith_unit?: Partial<LithUnit>[] }) {
+  const { lith_unit = [] } = props;
 
   return h(
     "div",
@@ -174,8 +174,8 @@ export function UnitLithHelperText(props: { lith_unit: Partial<LithUnit>[] }) {
     },
     [
       "(",
-      props.lith_unit.map((l, i) => {
-        let last = i == props.lith_unit.length - 1;
+      lith_unit.map((l, i) => {
+        let last = i == lith_unit.length - 1;
         if (last) {
           return h("p.nomargin", { key: i }, [l.lith]);
         } else {

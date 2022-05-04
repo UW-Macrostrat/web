@@ -1,4 +1,3 @@
-import { useContext } from "react";
 import { hyperStyled } from "@macrostrat/hyper";
 import { Project, TimeScale } from "../../types";
 import { FormGroup, InputGroup, Spinner, TextArea } from "@blueprintjs/core";

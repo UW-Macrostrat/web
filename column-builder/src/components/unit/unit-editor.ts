@@ -134,70 +134,68 @@ function UnitEdit() {
 
   return h("div", [
     h(Table, { interactive: false }, [
-      h("tbody", [
-        h(StratName),
-        h("tr", [
-          h(IntervalRow, {
-            bottom: false,
-            age_top: unit?.age_top,
-            initialSelected: {
-              value: unit?.name_lo,
-              data: { id: unit?.lo || 0, interval_name: unit?.name_lo },
+      h(StratName),
+      h("tr", [
+        h(IntervalRow, {
+          bottom: false,
+          age_top: unit?.age_top,
+          initialSelected: {
+            value: unit?.name_lo,
+            data: { id: unit?.lo || 0, interval_name: unit?.name_lo },
+          },
+          onChange: onChangeLo,
+        }),
+        h(UnitPosition, {
+          bottom: false,
+          onPositionChange: (e) => updateUnit("position_top", e),
+          position_top: unit?.position_top || undefined,
+        }),
+      ]),
+      h("tr", [
+        h(IntervalRow, {
+          bottom: true,
+          age_bottom: unit?.age_bottom,
+          initialSelected: {
+            value: unit?.name_fo,
+            data: {
+              id: unit?.fo || 0,
+              interval_name: unit?.name_fo,
             },
-            onChange: onChangeLo,
-          }),
-          h(UnitPosition, {
-            bottom: false,
-            onPositionChange: (e) => updateUnit("position_top", e),
-            position_top: unit?.position_top || undefined,
-          }),
-        ]),
-        h("tr", [
-          h(IntervalRow, {
-            bottom: true,
-            age_bottom: unit?.age_bottom,
-            initialSelected: {
-              value: unit?.name_fo,
-              data: {
-                id: unit?.fo || 0,
-                interval_name: unit?.name_fo,
-              },
+          },
+          onChange: onChangeFo,
+        }),
+        h(UnitPosition, {
+          bottom: true,
+          onPositionChange: (e) => updateUnit("position_bottom", e),
+          position_bottom: unit?.position_bottom || undefined,
+        }),
+      ]),
+      h("tr", [
+        h(FeatureCell, { text: "Color: " }, [
+          h(ColorBlock, {
+            onChange: (color) => {
+              actions.updateState({
+                model: { unit: { color: { $set: color } } },
+              });
             },
-            onChange: onChangeFo,
-          }),
-          h(UnitPosition, {
-            bottom: true,
-            onPositionChange: (e) => updateUnit("position_bottom", e),
-            position_bottom: unit?.position_bottom || undefined,
+            color: unit?.color,
           }),
         ]),
-        h("tr", [
-          h(FeatureCell, { text: "Color: " }, [
-            h(ColorBlock, {
-              onChange: (color) => {
-                actions.updateState({
-                  model: { unit: { color: { $set: color } } },
-                });
-              },
-              color: unit?.color,
-            }),
-          ]),
-          h(UnitThicknesses),
+        h(UnitThicknesses),
+      ]),
+      h("tr", [
+        h(FeatureCell, { text: "Notes: ", colSpan: 5 }, [
+          h(TextArea, {
+            value: unit.notes,
+            onChange: (e) => updateUnit("notes", e.target.value),
+          }),
         ]),
-        h("tr", [
-          h(FeatureCell, { text: "Notes: ", colSpan: 5 }, [
-            h(TextArea, {
-              value: unit.notes,
-              onChange: (e) => updateUnit("notes", e.target.value),
-            }),
-          ]),
-        ]),
-        h("tr", [
-          h(FeatureCell, { text: "Lithologies: ", colSpan: 5 }, [h(LithTags)]),
-        ]),
-        h("tr", [
-          h(FeatureCell, { text: "Environments: ", colSpan: 5 }, [h(EnvTags)]),
-        ]),
+      ]),
+      h("tr", [
+        h(FeatureCell, { text: "Lithologies: ", colSpan: 5 }, [h(LithTags)]),
+      ]),
+      h("tr", [
+        h(FeatureCell, { text: "Environments: ", colSpan: 5 }, [h(EnvTags)]),
       ]),
     ]),
     h(SubmitButton),

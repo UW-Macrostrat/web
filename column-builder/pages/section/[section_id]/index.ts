@@ -5,13 +5,13 @@ import pg, {
   Row,
   UnitsView,
   UnitRowCellGroup,
-  PositionIncrementBtns,
-} from "../../../src";
+} from "~/index";
 import { BasePage, Table } from "../../../src";
 import { GetServerSideProps } from "next";
 import { MinEditorToggle } from "../../../src/components/unit/minimal-unit-editor";
 import { useReducer } from "react";
 import { sectionReducer } from "./reducer";
+import { DropResult } from "react-beautiful-dnd";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const {
@@ -38,18 +38,14 @@ function Section(props: { section_id: string; units: UnitsView[] }) {
     dispatch({ type: "set-divide-ids", id });
   };
 
-  const onClickUp = (i: number) => {
+  const onDragEnd = (result: DropResult) => {
+    const { source, destination } = result;
+    console.log(result);
+    if (!destination) return;
     dispatch({
       type: "switch-positions",
-      indexOne: i,
-      indexTwo: i - 1,
-    });
-  };
-  const onClickDown = (i: number) => {
-    dispatch({
-      type: "switch-positions",
-      indexOne: i,
-      indexTwo: i + 1,
+      source: source.index,
+      destination: destination.index,
     });
   };
 
@@ -69,7 +65,7 @@ function Section(props: { section_id: string; units: UnitsView[] }) {
     "Top Interval",
     "Color",
     "Thickness",
-    "Position (B)",
+    "Pos.(B)",
   ];
   return h(BasePage, { query: { section_id: parseInt(section_id) } }, [
     h("h3", [`Units in Section #${section_id}`]),
@@ -81,22 +77,24 @@ function Section(props: { section_id: string; units: UnitsView[] }) {
       },
       btnText: "create new unit above",
     }),
-    h(Table, { interactive: true }, [
-      h("thead", [
-        h("tr", [
-          headers.map((head, i) => {
-            return h("th", { key: i }, [head]);
-          }),
-        ]),
-      ]),
-      h("tbody", [
+    h(
+      Table,
+      {
+        interactive: true,
+        headers,
+        drag: true,
+        onDragEnd,
+        droppableId: "section_table",
+      },
+      [
         state.units.map((unit, i) => {
-          let isFirst = i == 0;
-          let isLast = i == state.units.length - 1;
           return h(
             Row,
             {
-              key: i,
+              key: unit.id,
+              index: i,
+              drag: true,
+              draggableId: unit.unit_strat_name + unit.id.toString(),
               href: `/unit/${unit.id}/edit`,
             },
             [
@@ -107,20 +105,11 @@ function Section(props: { section_id: string; units: UnitsView[] }) {
                 }),
               ]),
               h(UnitRowCellGroup, { unit }),
-              h("td", { onClick: (e: any) => e.stopPropagation() }, [
-                h(PositionIncrementBtns, {
-                  position_bottom: unit.position_bottom,
-                  onClickUp: () => onClickUp(i),
-                  onClickDown: () => onClickDown(i),
-                  isFirst,
-                  isLast,
-                }),
-              ]),
             ]
           );
         }),
-      ]),
-    ]),
+      ]
+    ),
     //@ts-ignore
     h(MinEditorToggle, {
       persistChanges: (e, c) => {

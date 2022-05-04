@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { hyperStyled } from "@macrostrat/hyper";
-import { Table } from "../../index";
+import { Table } from "~/index";
 import {
   Button,
   NumericInput,
@@ -10,10 +10,10 @@ import {
   Spinner,
 } from "@blueprintjs/core";
 import styles from "../comp.module.scss";
-import { ColumnForm, ColumnGroupI } from "../../types";
+import { ColumnForm, ColumnGroupI } from "~/types";
 import { ItemSuggest } from "../suggest";
-import { RefI } from "../../types";
-import pg, { usePostgrest } from "../../db";
+import { RefI } from "~/types";
+import pg, { usePostgrest } from "~/db";
 import { RefEditor } from "../ref/ref-editor";
 import { SubmitButton } from "..";
 import { LngLatMap, Point } from "./map";
@@ -98,55 +98,53 @@ function ColumnEdit({ curColGroup }: { curColGroup: Partial<ColumnGroupI> }) {
 
   return h("div", [
     h(Table, { interactive: false }, [
-      h("tbody", [
-        h("tr", [
-          h("td", [h("h4", ["Column Group"])]),
-          h("td", [curColGroup.col_group]),
-        ]),
-        h("tr", [
-          h("td", [h("h4", ["Column Name"])]),
-          h("td", [
-            h(InputGroup, {
-              style: { width: "200px" },
-              defaultValue: model.col_name || undefined,
-              onChange: (e) => updateColumn("col_name", e.target.value),
-            }),
-          ]),
-        ]),
-        h("tr", [
-          h("td", [h("h4", ["Column Number"])]),
-          h("td", [
-            h(NumericInput, {
-              style: { width: "200px" },
-              defaultValue: model.col_number || undefined,
-              onValueChange: (e) => updateColumn("col_number", e),
-            }),
-          ]),
-        ]),
-        h("tr", [
-          h("td", [
-            h(LngLatMap, {
-              longitude: model.longitude ?? 0,
-              latitude: model.latitude ?? 0,
-              onChange: (p: Point) => setCoords(p),
-            }),
-          ]),
-          h("td", [
-            h("div", ["longitude: ", model.longitude]),
-            h("div", ["latitude: ", model.latitude]),
-          ]),
-        ]),
-        h("tr", [
-          h("td", [h("h4", ["Notes"])]),
-          h("td", [
-            h(TextArea, {
-              value: model.notes,
-              onChange: (e) => updateColumn("notes", e.target.value),
-            }),
-          ]),
-        ]),
-        h("tr", [h("td", [h("h4", ["Ref"])]), h("td", [h(ColumnRef)])]),
+      h("tr", [
+        h("td", [h("h4", ["Column Group"])]),
+        h("td", [curColGroup.col_group]),
       ]),
+      h("tr", [
+        h("td", [h("h4", ["Column Name"])]),
+        h("td", [
+          h(InputGroup, {
+            style: { width: "200px" },
+            defaultValue: model.col_name || undefined,
+            onChange: (e) => updateColumn("col_name", e.target.value),
+          }),
+        ]),
+      ]),
+      h("tr", [
+        h("td", [h("h4", ["Column Number"])]),
+        h("td", [
+          h(NumericInput, {
+            style: { width: "200px" },
+            defaultValue: model.col_number || undefined,
+            onValueChange: (e) => updateColumn("col_number", e),
+          }),
+        ]),
+      ]),
+      h("tr", [
+        h("td", [
+          h(LngLatMap, {
+            longitude: model.longitude ?? 0,
+            latitude: model.latitude ?? 0,
+            onChange: (p: Point) => setCoords(p),
+          }),
+        ]),
+        h("td", [
+          h("div", ["longitude: ", model.longitude]),
+          h("div", ["latitude: ", model.latitude]),
+        ]),
+      ]),
+      h("tr", [
+        h("td", [h("h4", ["Notes"])]),
+        h("td", [
+          h(TextArea, {
+            value: model.notes,
+            onChange: (e) => updateColumn("notes", e.target.value),
+          }),
+        ]),
+      ]),
+      h("tr", [h("td", [h("h4", ["Ref"])]), h("td", [h(ColumnRef)])]),
     ]),
     h(SubmitButton),
   ]);
