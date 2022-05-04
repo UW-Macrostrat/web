@@ -1,12 +1,23 @@
 /** @type {import('next').NextConfig} */
+const path = require("path");
+
+const packageSrc = (name) =>
+  path.resolve(__dirname, "deps", "ui-components", "packages", name, "src");
+
 const nextConfig = {
   reactStrictMode: true,
-  experimental: { esmExternals: true },
+  webpack: (config, options) => {
+    (config.resolve.alias["~"] = path.resolve(__dirname, "src")),
+      (config.resolve.alias["@macrostrat/form-components"] =
+        packageSrc("form-components"));
+    config.resolve.alias["@macrostrat/data-components"] =
+      packageSrc("data-components");
+    config.resolve.alias["@macrostrat/ui-components"] =
+      packageSrc("ui-components");
+    config.resolve.alias["react"] = path.resolve("./node_modules/react");
+
+    return config;
+  },
 };
 
-const withTM = require("next-transpile-modules")([
-  "@macrostrat/hyper",
-  "@macrostrat/ui-components",
-]); // pass the modules you would like to see transpiled
-
-module.exports = withTM(nextConfig);
+module.exports = nextConfig;

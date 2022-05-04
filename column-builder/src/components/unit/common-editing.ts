@@ -9,7 +9,7 @@ import { InputGroup, NumericInput } from "@blueprintjs/core";
 import {
   useModelEditor,
   //@ts-ignore
-} from "@macrostrat/ui-components/lib/esm";
+} from "@macrostrat/ui-components";
 import styles from "../comp.module.scss";
 import { EnvTagsAdd, LithTagsAdd, StratNameDataI, StratNameSuggest } from "..";
 const h = hyperStyled(styles);

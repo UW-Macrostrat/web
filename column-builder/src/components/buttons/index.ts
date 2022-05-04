@@ -1,6 +1,5 @@
 import { hyperStyled } from "@macrostrat/hyper";
-//@ts-ignore
-import { useModelEditor } from "@macrostrat/ui-components/lib/esm";
+import { useModelEditor } from "@macrostrat/ui-components";
 import Link from "next/link";
 import { Button, ButtonGroup } from "@blueprintjs/core";
 import styles from "./btns.module.scss";

@@ -1,5 +1,6 @@
 import { hyperStyled } from "@macrostrat/hyper";
-import { StratNameSuggest } from "../../index";
+import dynamic from "next/dynamic";
+import { StratNameSuggest } from "~/index";
 import { Select, ItemRenderer } from "@blueprintjs/select";
 import {
   Button,
@@ -8,11 +9,7 @@ import {
   InputGroup,
   Icon,
 } from "@blueprintjs/core";
-import {
-  ModelEditor,
-  useModelEditor,
-  //@ts-ignore
-} from "@macrostrat/ui-components/lib/esm";
+import { ModelEditor, useModelEditor } from "@macrostrat/ui-components";
 import styles from "../comp.module.scss";
 import { RANK, StratNameI } from "../../types";
 import { SubmitButton } from "..";
