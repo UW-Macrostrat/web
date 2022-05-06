@@ -5,13 +5,20 @@ import {
   EnvironUnit,
   TagContainerCell,
 } from "../../index";
-import { InputGroup, NumericInput } from "@blueprintjs/core";
+import {
+  InputGroup,
+  Menu,
+  MenuItem,
+  NumericInput,
+  Button,
+} from "@blueprintjs/core";
 import {
   useModelEditor,
   //@ts-ignore
 } from "@macrostrat/ui-components";
 import styles from "../comp.module.scss";
 import { EnvTagsAdd, LithTagsAdd, StratNameDataI, StratNameSuggest } from "..";
+import { Popover2 } from "@blueprintjs/popover2";
 const h = hyperStyled(styles);
 
 export interface UnitEditorI extends UnitsView {
@@ -186,3 +193,37 @@ export function UnitLithHelperText(props: { lith_unit?: Partial<LithUnit>[] }) {
     ]
   );
 }
+
+enum UNIT_ADD_POISITON {
+  UP = "up",
+  DOWN = "down",
+}
+
+export interface UnitRowContextMenuI {
+  // either we are adding a new unit above, below or editing the current unit
+  triggerEditor: (e: UNIT_ADD_POISITON | number) => void;
+  unit: UnitsView;
+}
+function UnitRowContextMenu(props: UnitRowContextMenuI) {
+  const ContextMenu = () =>
+    h(Menu, [
+      h(MenuItem, {
+        text: "Add Unit Above",
+        onClick: () => props.triggerEditor(UNIT_ADD_POISITON.UP),
+      }),
+      h(MenuItem, {
+        text: "Add Unit Below",
+        onClick: () => props.triggerEditor(UNIT_ADD_POISITON.DOWN),
+      }),
+      h(MenuItem, {
+        text: `Edit current unit, ${props.unit.id}`,
+        onClick: () => props.triggerEditor(props.unit.id),
+      }),
+    ]);
+
+  return h(Popover2, { content: h(ContextMenu), minimal: true }, [
+    h(Button, { minimal: true, icon: "more" }),
+  ]);
+}
+
+export { UnitRowContextMenu, UNIT_ADD_POISITON };

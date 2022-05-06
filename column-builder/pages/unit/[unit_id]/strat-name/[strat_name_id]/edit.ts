@@ -5,7 +5,7 @@ import {
   StratNameEditor,
   tableUpdate,
   selectFirst,
-} from "../../../../../src";
+} from "~/index";
 import { GetServerSidePropsContext } from "next";
 import styles from "../stratname.module.scss";
 

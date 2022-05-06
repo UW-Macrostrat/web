@@ -1,5 +1,4 @@
 import { hyperStyled } from "@macrostrat/hyper";
-import dynamic from "next/dynamic";
 import { StratNameSuggest } from "~/index";
 import { Select, ItemRenderer } from "@blueprintjs/select";
 import {
@@ -16,6 +15,7 @@ import { SubmitButton } from "..";
 import { StratNameDataI } from ".";
 import { StratNameHierarchy } from "./hierarchy";
 import { DataI, ItemSelect } from "../suggest";
+import { PrevalentTaxa } from "@macrostrat/data-components";
 
 const h = hyperStyled(styles);
 
@@ -117,7 +117,10 @@ function StratNameEdit() {
       ),
       h(SubmitButton),
     ]),
-    h(StratNameHierarchy, { strat_name_id: model.id }),
+    h("div", [
+      h(StratNameHierarchy, { strat_name_id: model.id }),
+      h(PrevalentTaxa, { strat_name_id: model.id }),
+    ]),
   ]);
 }
 

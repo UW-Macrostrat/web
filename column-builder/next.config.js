@@ -9,12 +9,15 @@ const nextConfig = {
   webpack: (config, options) => {
     (config.resolve.alias["~"] = path.resolve(__dirname, "src")),
       (config.resolve.alias["@macrostrat/form-components"] =
-        packageSrc("form-components"));
-    config.resolve.alias["@macrostrat/data-components"] =
-      packageSrc("data-components");
-    config.resolve.alias["@macrostrat/ui-components"] =
-      packageSrc("ui-components");
-    config.resolve.alias["react"] = path.resolve("./node_modules/react");
+        packageSrc("form-components")),
+      (config.resolve.alias["@macrostrat/data-components"] =
+        packageSrc("data-components")),
+      (config.resolve.alias["@macrostrat/ui-components"] =
+        packageSrc("ui-components")),
+      (config.resolve.alias["react"] = path.resolve("./node_modules/react")),
+      (config.resolve.alias["@macrostrat/hyper"] = path.resolve(
+        "./node_modules/@macrostrat/hyper"
+      ));
 
     return config;
   },

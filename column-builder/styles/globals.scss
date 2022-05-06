@@ -23,9 +23,8 @@ a {
 .table-container {
   margin: 10px;
   height: 100%;
-  border-style: solid;
+  padding: 0px;
   border-radius: 3px;
-  border-width: 1px;
 }
 
 .col-group-name {
@@ -33,7 +32,7 @@ a {
   justify-content: center;
   align-items: center;
 }
-.bp3-menu {
+.bp4-menu {
   max-height: 200px;
   max-width: 400px;
   overflow: auto;

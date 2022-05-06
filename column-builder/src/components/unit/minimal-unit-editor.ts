@@ -1,11 +1,7 @@
 import { hyperStyled } from "@macrostrat/hyper";
-import { UnitsView, IntervalDataI, Table, IntervalSuggest } from "../../index";
+import { IntervalDataI, Table, IntervalSuggest } from "../../index";
 import { Button, Checkbox, TextArea } from "@blueprintjs/core";
-import {
-  ModelEditor,
-  useModelEditor,
-  //@ts-ignore
-} from "@macrostrat/ui-components";
+import { ModelEditor, useModelEditor } from "@macrostrat/ui-components";
 import styles from "../comp.module.scss";
 import { SubmitButton } from "..";
 import {

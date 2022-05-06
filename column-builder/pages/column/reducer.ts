@@ -56,18 +56,24 @@ type DroppedUnit = {
   type: "dropped-unit";
   result: DropResult;
 };
+type ToggleDrag = { type: "toggle-drag" };
+type ToggleUnitsView = { type: "toggle-units-view" };
 
 export type SyncActions =
   | SetMergeIds
   | AddUnitBottom
   | AddUnitTop
   | DroppedUnit
-  | MergeIds;
+  | MergeIds
+  | ToggleDrag
+  | ToggleUnitsView;
 
 export interface ColumnStateI {
   sections: SectionUnits;
   units: UnitsView[];
   mergeIds: number[];
+  drag: boolean;
+  unitsView: boolean;
 }
 
 const columnReducer = (state: ColumnStateI, action: SyncActions) => {
@@ -79,6 +85,16 @@ const columnReducer = (state: ColumnStateI, action: SyncActions) => {
       return {
         ...state,
         mergeIds: newIds,
+      };
+    case "toggle-drag":
+      return {
+        ...state,
+        drag: !state.drag,
+      };
+    case "toggle-units-view":
+      return {
+        ...state,
+        unitsView: !state.unitsView,
       };
     case "merge-ids":
       console.log("Merging sections ", state.mergeIds);

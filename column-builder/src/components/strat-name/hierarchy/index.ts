@@ -15,7 +15,6 @@ export function StratNameHierarchy({
   strat_name_id: number;
 }) {
   const [state, setState] = useState<Partial<IHierarchy>>({});
-  console.log(strat_name_id);
 
   useEffect(() => {
     async function fetch() {

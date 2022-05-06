@@ -1,11 +1,11 @@
-import { Button, Checkbox } from "@blueprintjs/core";
+import { Button, ButtonGroup, Checkbox } from "@blueprintjs/core";
 import h from "react-hyperscript";
 
 function SectionUnitCheckBox(props: {
   data: any;
   onChange: (e: number) => void;
 }) {
-  const onChange = (e) => {
+  const onChange = (e: any) => {
     e.stopPropagation();
     props.onChange(props.data);
   };
@@ -28,5 +28,26 @@ function MergeDivideBtn(props: {
     [props.text]
   );
 }
+
+export interface ColBtnMenuI {
+  toggleUnitsView: () => void;
+  toggleDrag: () => void;
+  state: { unitsView: boolean; drag: boolean };
+}
+
+function ColumnPageBtnMenu(props: ColBtnMenuI) {
+  const {
+    state: { unitsView, drag },
+  } = props;
+  return h(ButtonGroup, [
+    h(Button, { onClick: props.toggleUnitsView }, [
+      unitsView ? "Section view" : "Unit view",
+    ]),
+    h(Button, { onClick: props.toggleDrag, disabled: !unitsView }, [
+      drag ? "Disable drag" : "Enable drag",
+    ]),
+  ]);
+}
+
 export * from "./map";
-export { SectionUnitCheckBox, MergeDivideBtn };
+export { SectionUnitCheckBox, MergeDivideBtn, ColumnPageBtnMenu };

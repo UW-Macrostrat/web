@@ -1,11 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { hyperStyled } from "@macrostrat/hyper";
 import Link from "next/link";
 import { ReactChild } from "react";
 import styles from "./comp.module.scss";
 import { UnitsView, ColSectionI } from "../types";
 import { SectionUnitCheckBox } from "./column";
-import { UnitLithHelperText } from "./unit";
+import {
+  MinEditorToggle,
+  MinUnitEditor,
+  UnitLithHelperText,
+  UnitRowContextMenu,
+  UNIT_ADD_POISITON,
+} from "./unit";
 import {
   DragDropContext,
   Draggable,
@@ -16,6 +22,8 @@ import {
   DropResult,
 } from "react-beautiful-dnd";
 import { ColumnStateI } from "pages/column/reducer";
+import { convertColorNameToHex } from "./helpers";
+import { Card, Icon } from "@blueprintjs/core";
 
 const h = hyperStyled(styles);
 
@@ -23,7 +31,7 @@ interface RowProps {
   children: ReactChild;
   draggableId?: string;
   index: number;
-  href: string;
+  href?: string;
   drag?: boolean;
 }
 
@@ -31,6 +39,18 @@ const getItemStyle = (isDragging: boolean, draggableStyle: any) => ({
   display: isDragging ? "table" : "",
   ...draggableStyle,
 });
+
+const RowWrapper = (props: {
+  link: string | undefined;
+  children: ReactChild;
+}) => {
+  const { link, children } = props;
+  if (typeof link === "undefined") {
+    return h(React.Fragment, [children]);
+  } else {
+    return h(Link, { href: link }, [children]);
+  }
+};
 
 function Row(props: RowProps) {
   const { draggableId = "", drag = false } = props;
@@ -44,20 +64,24 @@ function Row(props: RowProps) {
     },
     [
       (provided: DraggableProvided, snapshot: DraggableStateSnapshot) => {
-        return h(Link, { href: props.href }, [
+        return h(RowWrapper, { link: props.href }, [
           h(
             "tr",
             {
               onClick: (e: MouseEvent) => e.stopPropagation(),
               ref: provided.innerRef,
               ...provided.draggableProps,
-              ...provided.dragHandleProps,
               style: getItemStyle(
                 snapshot.isDragging,
                 provided.draggableProps.style
               ),
             },
-            [props.children]
+            [
+              h.if(drag)("td", { ...provided.dragHandleProps, width: "2%" }, [
+                h(Icon, { icon: "drag-handle-vertical" }),
+              ]),
+              props.children,
+            ]
           ),
         ]);
       },
@@ -98,12 +122,12 @@ function Table(props: TableProps) {
     externalDragContext = false,
   } = props;
   const baseClass =
-    "bp3-html-table .bp3-html-table-condensed .bp3-html-table-bordered";
+    "bp4-html-table .bp4-html-table-condensed .bp4-html-table-bordered";
   let tableClassName = props.interactive
-    ? `${baseClass} .bp3-interactive`
+    ? `${baseClass} .bp4-interactive`
     : baseClass;
 
-  return h("div.table-container", [
+  return h(Card, { className: "table-container" }, [
     h(
       `table.${tableClassName}`,
       { style: { width: "100%", tableLayout: "auto" } },
@@ -166,9 +190,10 @@ function TableHeader(props: { headers: any[]; title?: string }) {
 function UnitRowCellGroup(props: { unit: UnitsView }) {
   const { unit } = props;
 
+  const backgroundColor = convertColorNameToHex(unit.color) + "80";
   return h(React.Fragment, [
-    h("td", [unit.id]),
-    h("td", [
+    h("td", { width: "5%" }, [unit.id]),
+    h("td", { style: { background: backgroundColor } }, [
       h("div", [
         unit.strat_name
           ? `${unit.strat_name.strat_name} ${unit.strat_name.rank}`
@@ -176,11 +201,17 @@ function UnitRowCellGroup(props: { unit: UnitsView }) {
       ]),
       h(UnitLithHelperText, { lith_unit: unit.lith_unit }),
     ]),
-    h("td", [unit.name_fo]),
-    h("td", [unit.name_lo]),
-    h("td", { style: { backgroundColor: unit.color } }, [unit.color]),
-    h("td", [`${unit.min_thick} - ${unit.max_thick}`]),
-    h("td", [unit.position_bottom]),
+    h("td", [
+      unit.name_fo !== unit.name_lo
+        ? `${unit.name_fo} - ${unit.name_lo}`
+        : unit.name_lo,
+    ]),
+    h("td", [
+      unit.min_thick != unit.max_thick
+        ? `${unit.min_thick} - ${unit.max_thick}`
+        : unit.min_thick,
+    ]),
+    h("td", { width: "0%" }, [unit.position_bottom]),
   ]);
 }
 
@@ -231,9 +262,9 @@ function ColSectionsTable(props: {
 }
 
 /* 
-To enable drag and drop between tables, we will have to add extra state management..
-It shouldn't be too difficult. But, on top of of adjusting position_bottom, we need 
-to also check if it's been dropped into a new section and then handle that change.
+This needs to internally handle context options of... create new unit above, below, edit current, 
+copying unit up or down. The differences just position the unit editor above or below, the model,
+and the persistChanges function --> some dispatch to the reducer.
 
 State will be this object of section_ids as keys and a list of the respective units.
 Or do we only keep track of the indices of the units that below to section, that way
@@ -244,22 +275,15 @@ function ColUnitsTable(props: {
   onDragEnd: (r: DropResult) => void;
 }) {
   const {
-    state: { units, sections },
+    state: { units, sections, drag },
   } = props;
 
   const originalIdOrder: number[] = Array.from(
     new Set<number>(units.map((unit) => unit.section_id))
   );
 
-  const headers = [
-    "ID",
-    "Strat Name",
-    "Bottom Interval",
-    "Top Interval",
-    "Color",
-    "Thickness",
-    "Pos.(b)",
-  ];
+  let headers = ["ID", "Strat Name", "Interval", "Thickness", "Pos.(b)", ""];
+  if (drag) headers = ["", ...headers];
 
   const onDragEnd = (result: DropResult) => {
     console.log(result);
@@ -274,26 +298,76 @@ function ColUnitsTable(props: {
           Table,
           {
             key: i,
-            interactive: true,
+            interactive: false,
             headers,
             title: `Section #${id}`,
-            drag: true,
+            drag: props.state.drag,
             droppableId: id.toString(),
             externalDragContext: true,
           },
           [
             units_.map((unit, i) => {
-              return h(
-                Row,
-                {
-                  key: unit.id,
-                  index: i + sections[id][0],
-                  drag: true,
-                  draggableId: unit.unit_strat_name + unit.id.toString(),
-                  href: `/unit/${unit.id}/edit`,
-                },
-                [h(UnitRowCellGroup, { unit, key: i })]
-              );
+              const [above, setAbove] = useState<boolean>(false);
+
+              const [below, setBelow] = useState<boolean>(false);
+
+              const triggerEditor = (e: UNIT_ADD_POISITON | number) => {
+                console.log(e);
+                if (e == UNIT_ADD_POISITON.UP) {
+                  setAbove(true);
+                } else if (e == UNIT_ADD_POISITON.DOWN) {
+                  setBelow(true);
+                }
+              };
+
+              const closeEditors = () => {
+                setAbove(false);
+                setBelow(false);
+              };
+
+              return h(React.Fragment, [
+                h.if(above)("tr", [
+                  h("td", { colSpan: headers.length }, [
+                    h(MinUnitEditor, {
+                      model: { unit: {}, liths: [], envs: [] },
+                      persistChanges: (e, c) => {
+                        console.log(e, c);
+                        closeEditors();
+                      },
+                      onCancel: () => closeEditors(),
+                    }),
+                  ]),
+                ]),
+                h(
+                  Row,
+                  {
+                    key: unit.id,
+                    index: i + sections[id][0],
+                    drag: props.state.drag,
+                    draggableId: unit.unit_strat_name + unit.id.toString(),
+                    href: undefined,
+                  },
+                  [
+                    h(UnitRowCellGroup, { unit, key: i }),
+                    h("td", { width: "0%" }, [
+                      h(UnitRowContextMenu, { unit, triggerEditor }),
+                    ]),
+                  ]
+                ),
+
+                h.if(below)("tr", [
+                  h("td", { colSpan: headers.length }, [
+                    h(MinUnitEditor, {
+                      model: { unit: {}, liths: [], envs: [] },
+                      persistChanges: (e, c) => {
+                        console.log(e, c);
+                        closeEditors();
+                      },
+                      onCancel: () => closeEditors(),
+                    }),
+                  ]),
+                ]),
+              ]);
             }),
           ]
         );

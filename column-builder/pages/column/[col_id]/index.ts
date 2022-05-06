@@ -1,4 +1,4 @@
-import { useState, useReducer } from "react";
+import { useReducer } from "react";
 import h from "@macrostrat/hyper";
 import { GetServerSideProps } from "next";
 import pg, {
@@ -6,14 +6,13 @@ import pg, {
   EditButton,
   CreateButton,
   MergeDivideBtn,
-  filterOrAddIds,
   MinEditorToggle,
   UnitsView,
   ColSectionI,
   ColSectionsTable,
   ColUnitsTable,
-} from "../../../src";
-import { Button } from "@blueprintjs/core";
+  ColumnPageBtnMenu,
+} from "~/index";
 import { calculateSecionUnitIndexs, columnReducer } from "../reducer";
 import { DropResult } from "react-beautiful-dnd";
 
@@ -54,8 +53,9 @@ export default function Columns(props: {
     units,
     sections: unitIndexsBySection,
     mergeIds: [],
+    drag: false,
+    unitsView: false,
   });
-  const [unitView, setUnitView] = useState<boolean>(false);
 
   const onChange = (id: number) => {
     dispatch({ type: "set-merge-ids", id });
@@ -87,9 +87,13 @@ export default function Columns(props: {
         href: `/column/${col_id}/edit`,
       }),
     ]),
-    h(Button, { onClick: () => setUnitView(!unitView) }, [
-      unitView ? "Section view" : "Unit view",
-    ]),
+    h(ColumnPageBtnMenu, {
+      state: { unitsView: state.unitsView, drag: state.drag },
+      toggleUnitsView: () => dispatch({ type: "toggle-units-view" }),
+      toggleDrag: () => {
+        dispatch({ type: "toggle-drag" });
+      },
+    }),
     h.if(colSections.length == 0)("div", [
       h("h3", [
         "Looks like there are no sections or units. To begin create a new unit",
@@ -106,8 +110,12 @@ export default function Columns(props: {
         btnText: "create new unit",
         persistChanges: (e, c) => console.log(e, c),
       }),
-      h.if(!unitView)(ColSectionsTable, { colSections, onChange, headers }),
-      h.if(unitView)(ColUnitsTable, { state, onDragEnd }),
+      h.if(!state.unitsView)(ColSectionsTable, {
+        colSections,
+        onChange,
+        headers,
+      }),
+      h.if(state.unitsView)(ColUnitsTable, { state, onDragEnd }),
       //@ts-ignore
       h(MinEditorToggle, {
         persistChanges: (e, c) => console.log(e, c),

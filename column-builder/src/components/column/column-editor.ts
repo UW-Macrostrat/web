@@ -16,7 +16,8 @@ import { RefI } from "~/types";
 import pg, { usePostgrest } from "~/db";
 import { RefEditor } from "../ref/ref-editor";
 import { SubmitButton } from "..";
-import { LngLatMap, Point } from "./map";
+import { LngLatMap } from "./map";
+import { Point } from "deps/ui-components/packages/form-components/src";
 import { ModelEditor, useModelEditor } from "@macrostrat/ui-components";
 
 const h = hyperStyled(styles);

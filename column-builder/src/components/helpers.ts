@@ -96,9 +96,38 @@ const filterOrAddIds = (id: number, mergeIds: number[]): [] | number[] => {
   return [id, ...mergeIds];
 };
 
+const colorMap: { [name: string]: string } = {
+  blue: "#0000FF",
+  [`blue dark`]: "#00008B",
+  [`blue green`]: "#008B8B",
+  black: "#000000",
+  yellow: "#FFFF00",
+  orange: "#FFA500",
+  [`brown dark`]: "#A52A2A",
+  [`brown light`]: "#DEB887",
+  tan: "#D2B48C",
+  [`green dark`]: "#006400",
+  [`green light`]: "#90EE90",
+  [`gray dark`]: "#A9A9A9",
+  [`gray light`]: "#D3D3D3",
+  pink: "#FFC0CB",
+  purple: "#800080",
+  red: "#FF0000",
+  gray: "#808080",
+  green: "#008000",
+  brown: "#D2691E",
+  [`steel blue`]: "#B0C4DE",
+  white: "#FFFFFF",
+};
+
+const convertColorNameToHex = (name: string): string => {
+  return colorMap[name] ?? "#ffffff";
+};
+
 export {
   conductChangeSet,
   detectDeletionsAndAdditions,
   createLink,
   filterOrAddIds,
+  convertColorNameToHex,
 };
