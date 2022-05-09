@@ -20,7 +20,9 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   const { data, error } = await pg
     .from("unit_strat_name_expanded")
-    .select("*,lith_unit!unit_liths_unit_id_fkey1(lith)")
+    .select(
+      "*,lith_unit!unit_liths_unit_id_fkey1(*),environ_unit!unit_environs_unit_id_fkey1(*)"
+    )
     .order("position_bottom", { ascending: true })
     .match({ section_id: section_id });
 

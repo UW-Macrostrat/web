@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { hyperStyled } from "@macrostrat/hyper";
 import {
   UnitsView,
@@ -32,7 +33,10 @@ export interface UnitEditorModel {
 }
 
 export interface UnitEditorProps {
-  persistChanges: (e: Partial<UnitEditorI>, c: Partial<UnitEditorI>) => void;
+  persistChanges: (
+    e: Partial<UnitEditorModel>,
+    c: Partial<UnitEditorModel>
+  ) => void;
   model: UnitEditorI | {};
 }
 
@@ -171,53 +175,51 @@ export function FormalStratName() {
   });
 }
 
-export function UnitLithHelperText(props: { lith_unit?: Partial<LithUnit>[] }) {
+export function UnitLithHelperText(props: { lith_unit?: LithUnit[] }) {
   const { lith_unit = [] } = props;
 
-  return h(
-    "div",
-    {
-      style: { display: "flex", fontSize: "10px", whiteSpace: "break-spaces" },
-    },
-    [
-      "(",
-      lith_unit.map((l, i) => {
-        let last = i == lith_unit.length - 1;
-        if (last) {
-          return h("p.nomargin", { key: i }, [l.lith]);
-        } else {
-          return h("p.nomargin", { key: i }, [l.lith, ", "]);
-        }
-      }),
-      ")",
-    ]
-  );
+  const tagData = lith_unit.map((lith) => {
+    return {
+      id: lith.id,
+      color: lith.lith_color,
+      name: lith.lith,
+      description: lith.lith_class,
+    };
+  });
+
+  return h("div.tag-container", [
+    h(TagContainerCell, { data: tagData, large: false }),
+  ]);
 }
 
 enum UNIT_ADD_POISITON {
-  UP = "up",
-  DOWN = "down",
+  ABOVE = "above",
+  BELOW = "below",
+  EDIT = "edit",
 }
 
 export interface UnitRowContextMenuI {
   // either we are adding a new unit above, below or editing the current unit
-  triggerEditor: (e: UNIT_ADD_POISITON | number) => void;
+  triggerEditor: (e: UNIT_ADD_POISITON, i: number) => void;
   unit: UnitsView;
+  index: number;
 }
 function UnitRowContextMenu(props: UnitRowContextMenuI) {
   const ContextMenu = () =>
     h(Menu, [
       h(MenuItem, {
         text: "Add Unit Above",
-        onClick: () => props.triggerEditor(UNIT_ADD_POISITON.UP),
+        onClick: () =>
+          props.triggerEditor(UNIT_ADD_POISITON.ABOVE, props.index),
       }),
       h(MenuItem, {
         text: "Add Unit Below",
-        onClick: () => props.triggerEditor(UNIT_ADD_POISITON.DOWN),
+        onClick: () =>
+          props.triggerEditor(UNIT_ADD_POISITON.BELOW, props.index),
       }),
       h(MenuItem, {
         text: `Edit current unit, ${props.unit.id}`,
-        onClick: () => props.triggerEditor(props.unit.id),
+        onClick: () => props.triggerEditor(UNIT_ADD_POISITON.EDIT, props.index),
       }),
     ]);
 
@@ -225,5 +227,7 @@ function UnitRowContextMenu(props: UnitRowContextMenuI) {
     h(Button, { minimal: true, icon: "more" }),
   ]);
 }
+
+
 
 export { UnitRowContextMenu, UNIT_ADD_POISITON };

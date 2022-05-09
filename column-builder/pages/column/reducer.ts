@@ -10,11 +10,8 @@ import { filterOrAddIds, UnitEditorModel, UnitsView } from "~/index";
 function persistUnit(unit: UnitEditorModel, position_bottom: number) {
   const newUnit = {
     ...unit.unit,
-    lith_unit: [
-      ...unit.liths.map((l) => {
-        return { lith: l.lith };
-      }),
-    ],
+    lith_unit: [...unit.liths],
+    environ_unit: [...unit.envs],
     id: 666,
     position_bottom,
     color: unit.liths[0].lith_color || "#FFFFF",
@@ -42,6 +39,61 @@ const reorder = (list: any[], startIndex: number, endIndex: number): any[] => {
 
   return result;
 };
+
+const getSectionId = (sections: SectionUnits, index: number) => {
+  let id = "0";
+  for (const key in sections) {
+    const [begin, end] = sections[key];
+    if (index >= begin && index <= end) {
+      id = key;
+    }
+  }
+  return parseInt(id);
+};
+
+const addUnitToTop = (
+  unit: UnitEditorModel,
+  units: UnitsView[],
+  sections: SectionUnits
+) => {
+  for (let i = 0; i < units.length; i++) {
+    units[i].position_bottom++;
+  }
+  const newTopUnit = persistUnit(unit, units[0].position_bottom - 1);
+  const newUnits = [
+    {
+      ...newTopUnit,
+      section_id: getSectionId(sections, 0),
+    },
+    ...units,
+  ];
+  return newUnits;
+};
+
+const addUnitToBottom = (
+  unit: UnitEditorModel,
+  units: UnitsView[],
+  sections: SectionUnits
+) => {
+  // add to bottom
+  const newBottomUnit = persistUnit(
+    unit,
+    units[units.length - 1].position_bottom + 1
+  );
+
+  const newUnits_ = [
+    ...units,
+
+    {
+      ...newBottomUnit,
+      section_id: getSectionId(
+        JSON.parse(JSON.stringify(sections)),
+        units.length - 1
+      ),
+    },
+  ];
+  return newUnits_;
+};
 /////////////// Data Types //////////////////
 
 type SectionUnits = { [section_id: number]: [number, number] };
@@ -50,22 +102,24 @@ type SectionUnits = { [section_id: number]: [number, number] };
 
 type SetMergeIds = { type: "set-merge-ids"; id: number };
 type MergeIds = { type: "merge-ids" };
-type AddUnitTop = { type: "add-unit-top"; unit: UnitEditorModel };
-type AddUnitBottom = { type: "add-unit-bottom"; unit: UnitEditorModel };
 type DroppedUnit = {
   type: "dropped-unit";
   result: DropResult;
 };
 type ToggleDrag = { type: "toggle-drag" };
 type ToggleUnitsView = { type: "toggle-units-view" };
+type AddUnitAt = {
+  type: "add-unit-at";
+  index: number;
+  unit: Partial<UnitEditorModel>;
+};
 
 export type SyncActions =
   | SetMergeIds
-  | AddUnitBottom
-  | AddUnitTop
   | DroppedUnit
   | MergeIds
   | ToggleDrag
+  | AddUnitAt
   | ToggleUnitsView;
 
 export interface ColumnStateI {
@@ -99,31 +153,30 @@ const columnReducer = (state: ColumnStateI, action: SyncActions) => {
     case "merge-ids":
       console.log("Merging sections ", state.mergeIds);
       return state;
-    case "add-unit-top":
-      // for each unit in section increment postion_bottom 1
-      const currentUnits = [...state.units];
-      for (let i = 0; i < currentUnits.length; i++) {
-        //@ts-ignore
-        currentUnits[i].position_bottom++;
+    case "add-unit-at":
+      // this will encapsulate the add top and bottom
+      const currentUnits_ = JSON.parse(JSON.stringify(state.units));
+      const currentSections_ = JSON.parse(JSON.stringify(state.sections));
+      let newUnits = currentUnits_;
+      if (action.index <= 0) {
+        ///add to top
+        newUnits = addUnitToTop(action.unit, currentUnits_, currentSections_);
+      } else if (action.index > state.units.length) {
+        newUnits = addUnitToBottom(
+          action.unit,
+          currentUnits_,
+          currentSections_
+        );
       }
-      const newTopUnit = persistUnit(
-        action.unit,
-        currentUnits[0].position_bottom - 1
-      );
+
+      const newSections = calculateSecionUnitIndexs(newUnits);
+
       return {
         ...state,
-        units: [newTopUnit, ...currentUnits],
+        units: newUnits,
+        sections: newSections,
       };
-    case "add-unit-bottom":
-      // just append to end here
-      const newBottomUnit = persistUnit(
-        action.unit,
-        state.units[state.units.length - 1].position_bottom + 1
-      );
-      return {
-        ...state,
-        units: [...state.units, newBottomUnit],
-      };
+
     case "dropped-unit":
       if (typeof action.result.destination === "undefined") return state;
 

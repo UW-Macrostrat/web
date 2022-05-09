@@ -77,7 +77,8 @@ export interface UnitsView {
   position_top: number;
   max_thick: number;
   min_thick: number;
-  lith_unit?: Partial<Lith>[];
+  lith_unit?: LithUnit[];
+  environ_unit?: EnvironUnit[];
 }
 
 export interface Lith {

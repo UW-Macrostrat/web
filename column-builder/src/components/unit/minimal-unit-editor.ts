@@ -1,6 +1,12 @@
 import { hyperStyled } from "@macrostrat/hyper";
-import { IntervalDataI, Table, IntervalSuggest } from "../../index";
-import { Button, Checkbox, TextArea } from "@blueprintjs/core";
+import {
+  IntervalDataI,
+  Table,
+  IntervalSuggest,
+  UnitsView,
+  UnitEditorModel,
+} from "~/index";
+import { Button, Checkbox, Dialog, TextArea } from "@blueprintjs/core";
 import { ModelEditor, useModelEditor } from "@macrostrat/ui-components";
 import styles from "../comp.module.scss";
 import { SubmitButton } from "..";
@@ -13,8 +19,9 @@ import {
   LithTags,
   UnitEditorI,
 } from "./common-editing";
-import { useState } from "react";
+import React, { ReactChild, useEffect, useState } from "react";
 import { AddButton } from "../buttons";
+import { DraggableOverlay } from "~/components/draggable-overlay";
 const h = hyperStyled(styles);
 
 function UnitEdit(props: { onCancel: () => void }) {
@@ -149,17 +156,55 @@ interface ToggleI extends UnitEditorProps {
 function MinEditorToggle(props: ToggleI) {
   const [add, setAdd] = useState(false);
 
+  const model = { unit: { new_section: false }, liths: [], envs: [] };
+
+  const persistChanges = (
+    e: Partial<UnitEditorModel>,
+    c: Partial<UnitEditorModel>
+  ) => {
+    props.persistChanges(e, c);
+    setAdd(false);
+  };
+
+  const onCancel = () => {
+    setAdd(false);
+  };
+
   return h("div", [
-    h.if(add)(MinUnitEditor, {
-      model: { unit: { new_section: false }, liths: [], envs: [] },
-      persistChanges: (e, c) => {
-        props.persistChanges(e, c);
-        setAdd(false);
-      },
-      onCancel: () => setAdd(false),
+    h(MinEditorDialog, {
+      open: add,
+      persistChanges,
+      onCancel,
+      model,
+      title: props.btnText,
     }),
-    h.if(!add)(AddButton, { onClick: () => setAdd(true) }, [props.btnText]),
+    h(AddButton, { onClick: () => setAdd(true) }, [props.btnText]),
   ]);
 }
 
-export { MinUnitEditor, MinEditorToggle };
+function MinEditorDialog(
+  props: UnitEditorProps & {
+    open: boolean;
+    onCancel: () => void;
+    title?: string;
+  }
+) {
+  const { open, persistChanges, model, onCancel, title } = props;
+  console.log("rendered");
+  return h(
+    DraggableOverlay,
+    {
+      open,
+      title,
+    },
+    [
+      h(MinUnitEditor, {
+        model,
+        persistChanges,
+        onCancel,
+      }),
+    ]
+  );
+}
+
+export { MinUnitEditor, MinEditorToggle, MinEditorDialog };

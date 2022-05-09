@@ -12,6 +12,7 @@ import pg, {
   ColSectionsTable,
   ColUnitsTable,
   ColumnPageBtnMenu,
+  UnitEditorModel,
 } from "~/index";
 import { calculateSecionUnitIndexs, columnReducer } from "../reducer";
 import { DropResult } from "react-beautiful-dnd";
@@ -32,7 +33,10 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   const { data: units, error: unit_error } = await pg
     .from("unit_strat_name_expanded")
-    .select("*,lith_unit!unit_liths_unit_id_fkey1(lith)")
+    .select(
+      /// joins the lith_unit and environ_unit table
+      "*,lith_unit!unit_liths_unit_id_fkey1(*),environ_unit!unit_environs_unit_id_fkey1(*)"
+    )
     .order("position_bottom", { ascending: true })
     .match({ col_id: col_id });
 
@@ -66,6 +70,27 @@ export default function Columns(props: {
 
   const onDragEnd = (r: DropResult) => {
     dispatch({ type: "dropped-unit", result: r });
+  };
+
+  const addUnitAt = (
+    unit: Partial<UnitEditorModel>,
+    index: number,
+    newSection: boolean
+  ) => {
+    /// callback for adding a unit in column at index i
+    // should probably have a way to split the section as well..
+    console.log("Adding At", unit, index, newSection);
+    dispatch({ type: "add-unit-at", index, unit });
+  };
+
+  const editUnitAt = (
+    unit: Partial<UnitEditorModel>,
+    index: number,
+    newSection: boolean
+  ) => {
+    /// callback for editing a unit
+    // should probably have a way to split the section as well..
+    console.log("Editing At", unit, index, newSection);
   };
 
   const headers = [
@@ -107,19 +132,31 @@ export default function Columns(props: {
     h.if(colSections.length > 0)("div", [
       //@ts-ignore
       h(MinEditorToggle, {
-        btnText: "create new unit",
-        persistChanges: (e, c) => console.log(e, c),
+        btnText: "create new unit on top",
+        persistChanges: (e, c) =>
+          dispatch({ type: "add-unit-at", index: 0, unit: e }),
       }),
       h.if(!state.unitsView)(ColSectionsTable, {
         colSections,
         onChange,
         headers,
       }),
-      h.if(state.unitsView)(ColUnitsTable, { state, onDragEnd }),
+      h.if(state.unitsView)(ColUnitsTable, {
+        state,
+        onDragEnd,
+        editUnitAt,
+        addUnitAt,
+      }),
       //@ts-ignore
       h(MinEditorToggle, {
-        persistChanges: (e, c) => console.log(e, c),
-        btnText: "create new unit",
+        persistChanges: (e, c) =>
+          dispatch({
+            type: "add-unit-at",
+            index: state.units.length + 1,
+            unit: e,
+          }),
+
+        btnText: "create new unit on bottom",
       }),
     ]),
   ]);

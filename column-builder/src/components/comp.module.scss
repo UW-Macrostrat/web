@@ -70,3 +70,17 @@
   height: 200px;
   width: 100%;
 }
+
+.header {
+  min-height: 15px;
+  padding: 5px;
+  padding-left: 10px;
+  text-transform: capitalize;
+  font-size: 20px;
+  background: rgb(211, 216, 222);
+  font-weight: bold;
+  cursor: grab;
+  &:active {
+    cursor: grabbing;
+  }
+}

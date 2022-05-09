@@ -6,8 +6,8 @@ import styles from "./comp.module.scss";
 import { UnitsView, ColSectionI } from "../types";
 import { SectionUnitCheckBox } from "./column";
 import {
-  MinEditorToggle,
-  MinUnitEditor,
+  MinEditorDialog,
+  UnitEditorModel,
   UnitLithHelperText,
   UnitRowContextMenu,
   UNIT_ADD_POISITON,
@@ -24,6 +24,7 @@ import {
 import { ColumnStateI } from "pages/column/reducer";
 import { convertColorNameToHex } from "./helpers";
 import { Card, Icon } from "@blueprintjs/core";
+import { JSONView } from "deps/ui-components/packages/ui-components/src";
 
 const h = hyperStyled(styles);
 
@@ -187,31 +188,31 @@ function TableHeader(props: { headers: any[]; title?: string }) {
   ]);
 }
 
-function UnitRowCellGroup(props: { unit: UnitsView }) {
-  const { unit } = props;
+function UnitRowCellGroup(props: { unit: UnitsView; cellStyles: object }) {
+  const { unit, cellStyles } = props;
 
   const backgroundColor = convertColorNameToHex(unit.color) + "80";
   return h(React.Fragment, [
-    h("td", { width: "5%" }, [unit.id]),
-    h("td", { style: { background: backgroundColor } }, [
+    h("td", { width: "5%", style: { ...cellStyles } }, [unit.id]),
+    h("td", { style: { background: backgroundColor, ...cellStyles } }, [
       h("div", [
         unit.strat_name
           ? `${unit.strat_name.strat_name} ${unit.strat_name.rank}`
           : unit.unit_strat_name || "unnamed",
       ]),
-      h(UnitLithHelperText, { lith_unit: unit.lith_unit }),
+      h(UnitLithHelperText, { lith_unit: unit?.lith_unit ?? [] }),
     ]),
-    h("td", [
+    h("td", { style: { ...cellStyles } }, [
       unit.name_fo !== unit.name_lo
         ? `${unit.name_fo} - ${unit.name_lo}`
         : unit.name_lo,
     ]),
-    h("td", [
+    h("td", { style: { ...cellStyles } }, [
       unit.min_thick != unit.max_thick
         ? `${unit.min_thick} - ${unit.max_thick}`
         : unit.min_thick,
     ]),
-    h("td", { width: "0%" }, [unit.position_bottom]),
+    h("td", { width: "0%", style: { ...cellStyles } }, [unit.position_bottom]),
   ]);
 }
 
@@ -273,10 +274,17 @@ that state is still holding a list of units.. easier for handling state.
 function ColUnitsTable(props: {
   state: ColumnStateI;
   onDragEnd: (r: DropResult) => void;
+  addUnitAt: (u: Partial<UnitEditorModel>, i: number, s: boolean) => void;
+  editUnitAt: (u: Partial<UnitEditorModel>, i: number, s: boolean) => void;
 }) {
   const {
     state: { units, sections, drag },
   } = props;
+  const [editOpen, setEditOpen] = useState(false);
+  const [index, setIndex] = useState(0);
+  const [editMode, setEditMode] = useState<UNIT_ADD_POISITON>(
+    UNIT_ADD_POISITON.EDIT
+  );
 
   const originalIdOrder: number[] = Array.from(
     new Set<number>(units.map((unit) => unit.section_id))
@@ -290,7 +298,42 @@ function ColUnitsTable(props: {
     props.onDragEnd(result);
   };
 
+  const triggerEditor = (e: UNIT_ADD_POISITON, i: number) => {
+    setIndex(i);
+    setEditMode(e);
+    setEditOpen(true);
+  };
+
+  console.log(editOpen, index, editMode);
+
+  const diaglogTitle =
+    editMode == "edit"
+      ? `Edit unit #${units[index].id}`
+      : `Add unit ${editMode} unit #${units[index].id}`;
+
+  const rowBorderStyles = !editOpen
+    ? {}
+    : editMode == "edit"
+    ? { background: "#0F996040" }
+    : editMode == "above"
+    ? { borderTop: "solid #0F9960 3px" }
+    : { borderBottom: "solid #0F9960 3px" };
+
   return h("div", [
+    h(MinEditorDialog, {
+      title: diaglogTitle,
+      persistChanges: (e, c) => console.log(e),
+      open: editOpen,
+      model:
+        editMode == "edit"
+          ? {
+              unit: units[index],
+              liths: units[index].lith_unit,
+              envs: units[index].environ_unit,
+            }
+          : { unit: {}, liths: [], envs: [] },
+      onCancel: () => setEditOpen(false),
+    }),
     h(DragDropContext, { onDragEnd }, [
       originalIdOrder.map((id, i) => {
         let units_ = units.slice(sections[id][0], sections[id][1] + 1);
@@ -306,68 +349,32 @@ function ColUnitsTable(props: {
             externalDragContext: true,
           },
           [
-            units_.map((unit, i) => {
-              const [above, setAbove] = useState<boolean>(false);
-
-              const [below, setBelow] = useState<boolean>(false);
-
-              const triggerEditor = (e: UNIT_ADD_POISITON | number) => {
-                console.log(e);
-                if (e == UNIT_ADD_POISITON.UP) {
-                  setAbove(true);
-                } else if (e == UNIT_ADD_POISITON.DOWN) {
-                  setBelow(true);
-                }
-              };
-
-              const closeEditors = () => {
-                setAbove(false);
-                setBelow(false);
-              };
-
-              return h(React.Fragment, [
-                h.if(above)("tr", [
-                  h("td", { colSpan: headers.length }, [
-                    h(MinUnitEditor, {
-                      model: { unit: {}, liths: [], envs: [] },
-                      persistChanges: (e, c) => {
-                        console.log(e, c);
-                        closeEditors();
-                      },
-                      onCancel: () => closeEditors(),
+            units_.map((unit, j) => {
+              let styles = index == j + sections[id][0] ? rowBorderStyles : {};
+              return h(
+                Row,
+                {
+                  key: unit.id,
+                  index: j + sections[id][0],
+                  drag: props.state.drag,
+                  draggableId: unit.unit_strat_name + unit.id.toString(),
+                  href: undefined,
+                },
+                [
+                  h(UnitRowCellGroup, {
+                    unit,
+                    key: j,
+                    cellStyles: styles,
+                  }),
+                  h("td", { width: "0%", style: { ...styles } }, [
+                    h(UnitRowContextMenu, {
+                      unit,
+                      index: j + sections[id][0],
+                      triggerEditor: triggerEditor,
                     }),
                   ]),
-                ]),
-                h(
-                  Row,
-                  {
-                    key: unit.id,
-                    index: i + sections[id][0],
-                    drag: props.state.drag,
-                    draggableId: unit.unit_strat_name + unit.id.toString(),
-                    href: undefined,
-                  },
-                  [
-                    h(UnitRowCellGroup, { unit, key: i }),
-                    h("td", { width: "0%" }, [
-                      h(UnitRowContextMenu, { unit, triggerEditor }),
-                    ]),
-                  ]
-                ),
-
-                h.if(below)("tr", [
-                  h("td", { colSpan: headers.length }, [
-                    h(MinUnitEditor, {
-                      model: { unit: {}, liths: [], envs: [] },
-                      persistChanges: (e, c) => {
-                        console.log(e, c);
-                        closeEditors();
-                      },
-                      onCancel: () => closeEditors(),
-                    }),
-                  ]),
-                ]),
-              ]);
+                ]
+              );
             }),
           ]
         );
