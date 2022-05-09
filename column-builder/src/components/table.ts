@@ -274,8 +274,8 @@ that state is still holding a list of units.. easier for handling state.
 function ColUnitsTable(props: {
   state: ColumnStateI;
   onDragEnd: (r: DropResult) => void;
-  addUnitAt: (u: Partial<UnitEditorModel>, i: number, s: boolean) => void;
-  editUnitAt: (u: Partial<UnitEditorModel>, i: number, s: boolean) => void;
+  addUnitAt: (u: Partial<UnitEditorModel>, i: number) => void;
+  editUnitAt: (u: Partial<UnitEditorModel>, i: number) => void;
 }) {
   const {
     state: { units, sections, drag },
@@ -304,8 +304,6 @@ function ColUnitsTable(props: {
     setEditOpen(true);
   };
 
-  console.log(editOpen, index, editMode);
-
   const diaglogTitle =
     editMode == "edit"
       ? `Edit unit #${units[index].id}`
@@ -319,10 +317,25 @@ function ColUnitsTable(props: {
     ? { borderTop: "solid #0F9960 3px" }
     : { borderBottom: "solid #0F9960 3px" };
 
+  const persistChanges = (
+    e: Partial<UnitEditorModel>,
+    c: Partial<UnitEditorModel>
+  ) => {
+    if (editMode == "edit") {
+      props.editUnitAt(e, index);
+    } else {
+      let i = index;
+      if (editMode == "below") {
+        i++;
+      }
+      props.addUnitAt(e, i);
+    }
+  };
+
   return h("div", [
     h(MinEditorDialog, {
       title: diaglogTitle,
-      persistChanges: (e, c) => console.log(e),
+      persistChanges,
       open: editOpen,
       model:
         editMode == "edit"

@@ -72,25 +72,17 @@ export default function Columns(props: {
     dispatch({ type: "dropped-unit", result: r });
   };
 
-  const addUnitAt = (
-    unit: Partial<UnitEditorModel>,
-    index: number,
-    newSection: boolean
-  ) => {
+  const addUnitAt = (unit: Partial<UnitEditorModel>, index: number) => {
     /// callback for adding a unit in column at index i
     // should probably have a way to split the section as well..
-    console.log("Adding At", unit, index, newSection);
-    dispatch({ type: "add-unit-at", index, unit });
+    console.log("Adding At", unit, index);
+    // dispatch({ type: "add-unit-at", index, unit });
   };
 
-  const editUnitAt = (
-    unit: Partial<UnitEditorModel>,
-    index: number,
-    newSection: boolean
-  ) => {
+  const editUnitAt = (unit: Partial<UnitEditorModel>, index: number) => {
     /// callback for editing a unit
     // should probably have a way to split the section as well..
-    console.log("Editing At", unit, index, newSection);
+    console.log("Editing At", unit, index);
   };
 
   const headers = [
