@@ -158,10 +158,7 @@ function MinEditorToggle(props: ToggleI) {
 
   const model = { unit: { new_section: false }, liths: [], envs: [] };
 
-  const persistChanges = (
-    e: Partial<UnitEditorModel>,
-    c: Partial<UnitEditorModel>
-  ) => {
+  const persistChanges = (e: UnitEditorModel, c: Partial<UnitEditorModel>) => {
     props.persistChanges(e, c);
     setAdd(false);
   };

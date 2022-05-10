@@ -22,7 +22,7 @@ function persistUnit(unit: UnitEditorModel, position_bottom: number) {
 }
 
 /////////////// Action Types ///////////////
-
+type ToggleDrag = { type: "toggle-drag" };
 type SetDivideIds = { type: "set-divide-ids"; id: number };
 type AddUnitTop = { type: "add-unit-top"; unit: UnitEditorModel };
 type AddUnitBottom = { type: "add-unit-bottom"; unit: UnitEditorModel };
@@ -36,11 +36,14 @@ export type SyncActions =
   | SetDivideIds
   | AddUnitBottom
   | AddUnitTop
-  | SwitchPositions;
+  | SwitchPositions
+  | ToggleDrag;
 
 export interface SectionStateI {
   units: UnitsView[];
   divideIds: number[];
+  drag: boolean;
+  sections: { [section_id: number]: [number, number] };
 }
 
 // a little function to help us with reordering the result
@@ -54,6 +57,11 @@ const reorder = (list: any[], startIndex: number, endIndex: number): any[] => {
 
 const sectionReducer = (state: SectionStateI, action: SyncActions) => {
   switch (action.type) {
+    case "toggle-drag":
+      return {
+        ...state,
+        drag: !state.drag,
+      };
     case "set-divide-ids":
       const currentIds = [...state.divideIds];
       const id = action.id;

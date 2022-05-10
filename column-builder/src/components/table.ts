@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { hyperStyled } from "@macrostrat/hyper";
 import Link from "next/link";
 import { ReactChild } from "react";
@@ -10,7 +10,7 @@ import {
   UnitEditorModel,
   UnitLithHelperText,
   UnitRowContextMenu,
-  UNIT_ADD_POISITON,
+  useRowUnitEditor,
 } from "./unit";
 import {
   DragDropContext,
@@ -24,7 +24,7 @@ import {
 import { ColumnStateI } from "pages/column/reducer";
 import { convertColorNameToHex } from "./helpers";
 import { Card, Icon } from "@blueprintjs/core";
-import { JSONView } from "deps/ui-components/packages/ui-components/src";
+import { SectionStateI } from "pages/section/[section_id]/reducer";
 
 const h = hyperStyled(styles);
 
@@ -188,21 +188,41 @@ function TableHeader(props: { headers: any[]; title?: string }) {
   ]);
 }
 
-function UnitRowCellGroup(props: { unit: UnitsView; cellStyles: object }) {
+function UnitRowCellGroup(props: {
+  unit: UnitsView;
+  cellStyles: object;
+  onClickDivideCheckBox: (id: number) => void;
+}) {
   const { unit, cellStyles } = props;
 
   const backgroundColor = convertColorNameToHex(unit.color) + "80";
   return h(React.Fragment, [
-    h("td", { width: "5%", style: { ...cellStyles } }, [unit.id]),
-    h("td", { style: { background: backgroundColor, ...cellStyles } }, [
-      h("div", [
-        unit.strat_name
-          ? `${unit.strat_name.strat_name} ${unit.strat_name.rank}`
-          : unit.unit_strat_name || "unnamed",
-      ]),
-      h(UnitLithHelperText, { lith_unit: unit?.lith_unit ?? [] }),
+    h(
+      "td",
+      { onClick: (e: any) => e.stopPropagation(), style: { width: "0%" } },
+      [
+        h(SectionUnitCheckBox, {
+          data: unit.id,
+          onChange: props.onClickDivideCheckBox,
+        }),
+      ]
+    ),
+    h("td", { width: "0%", style: { ...cellStyles } }, [
+      h(Link, { href: `/unit/${unit.id}/edit` }, [h("a", [unit.id])]),
     ]),
-    h("td", { style: { ...cellStyles } }, [
+    h(
+      "td",
+      { width: "50%", style: { background: backgroundColor, ...cellStyles } },
+      [
+        h("div", [
+          unit.strat_name
+            ? `${unit.strat_name.strat_name} ${unit.strat_name.rank}`
+            : unit.unit_strat_name || "unnamed",
+        ]),
+        h(UnitLithHelperText, { lith_unit: unit?.lith_unit ?? [] }),
+      ]
+    ),
+    h("td", { style: { ...cellStyles, width: "50%" } }, [
       unit.name_fo !== unit.name_lo
         ? `${unit.name_fo} - ${unit.name_lo}`
         : unit.name_lo,
@@ -271,26 +291,32 @@ State will be this object of section_ids as keys and a list of the respective un
 Or do we only keep track of the indices of the units that below to section, that way
 that state is still holding a list of units.. easier for handling state.
 */
-function ColUnitsTable(props: {
-  state: ColumnStateI;
+function ColSecUnitsTable(props: {
+  state: ColumnStateI | SectionStateI;
   onDragEnd: (r: DropResult) => void;
+  onClickDivideCheckBox: (id: number) => void;
   addUnitAt: (u: Partial<UnitEditorModel>, i: number) => void;
   editUnitAt: (u: Partial<UnitEditorModel>, i: number) => void;
 }) {
   const {
     state: { units, sections, drag },
   } = props;
-  const [editOpen, setEditOpen] = useState(false);
-  const [index, setIndex] = useState(0);
-  const [editMode, setEditMode] = useState<UNIT_ADD_POISITON>(
-    UNIT_ADD_POISITON.EDIT
-  );
+  const { editOpen, triggerEditor, styles, onCancel, index, editMode } =
+    useRowUnitEditor();
 
   const originalIdOrder: number[] = Array.from(
     new Set<number>(units.map((unit) => unit.section_id))
   );
 
-  let headers = ["ID", "Strat Name", "Interval", "Thickness", "Pos.(b)", ""];
+  let headers = [
+    "",
+    "ID",
+    "Strat Name",
+    "Interval",
+    "Thickness",
+    "Pos.(b)",
+    "",
+  ];
   if (drag) headers = ["", ...headers];
 
   const onDragEnd = (result: DropResult) => {
@@ -298,54 +324,39 @@ function ColUnitsTable(props: {
     props.onDragEnd(result);
   };
 
-  const triggerEditor = (e: UNIT_ADD_POISITON, i: number) => {
-    setIndex(i);
-    setEditMode(e);
-    setEditOpen(true);
-  };
-
   const diaglogTitle =
-    editMode == "edit"
+    editMode.mode == "edit"
       ? `Edit unit #${units[index].id}`
-      : `Add unit ${editMode} unit #${units[index].id}`;
+      : `Add unit ${editMode.mode} unit #${units[index].id}`;
 
-  const rowBorderStyles = !editOpen
-    ? {}
-    : editMode == "edit"
-    ? { background: "#0F996040" }
-    : editMode == "above"
-    ? { borderTop: "solid #0F9960 3px" }
-    : { borderBottom: "solid #0F9960 3px" };
-
-  const persistChanges = (
-    e: Partial<UnitEditorModel>,
-    c: Partial<UnitEditorModel>
-  ) => {
-    if (editMode == "edit") {
+  const persistChanges = (e: UnitEditorModel, c: Partial<UnitEditorModel>) => {
+    if (editMode.mode == "edit") {
       props.editUnitAt(e, index);
     } else {
       let i = index;
-      if (editMode == "below") {
+      if (editMode.mode == "below") {
         i++;
       }
       props.addUnitAt(e, i);
     }
   };
 
+  const editingModel =
+    editMode.mode == "edit" || editMode.copy
+      ? {
+          unit: units[index],
+          liths: units[index].lith_unit,
+          envs: units[index].environ_unit,
+        }
+      : { unit: {}, liths: [], envs: [] };
+
   return h("div", [
     h(MinEditorDialog, {
       title: diaglogTitle,
       persistChanges,
       open: editOpen,
-      model:
-        editMode == "edit"
-          ? {
-              unit: units[index],
-              liths: units[index].lith_unit,
-              envs: units[index].environ_unit,
-            }
-          : { unit: {}, liths: [], envs: [] },
-      onCancel: () => setEditOpen(false),
+      model: editingModel,
+      onCancel,
     }),
     h(DragDropContext, { onDragEnd }, [
       originalIdOrder.map((id, i) => {
@@ -363,7 +374,7 @@ function ColUnitsTable(props: {
           },
           [
             units_.map((unit, j) => {
-              let styles = index == j + sections[id][0] ? rowBorderStyles : {};
+              let cellStyles = index == j + sections[id][0] ? styles : {};
               return h(
                 Row,
                 {
@@ -375,11 +386,12 @@ function ColUnitsTable(props: {
                 },
                 [
                   h(UnitRowCellGroup, {
+                    onClickDivideCheckBox: props.onClickDivideCheckBox,
                     unit,
                     key: j,
-                    cellStyles: styles,
+                    cellStyles,
                   }),
-                  h("td", { width: "0%", style: { ...styles } }, [
+                  h("td", { width: "0%", style: { ...cellStyles } }, [
                     h(UnitRowContextMenu, {
                       unit,
                       index: j + sections[id][0],
@@ -403,5 +415,5 @@ export {
   TableHeader,
   UnitRowCellGroup,
   ColSectionsTable,
-  ColUnitsTable,
+  ColSecUnitsTable,
 };

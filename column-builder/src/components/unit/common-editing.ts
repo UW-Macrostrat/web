@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { hyperStyled } from "@macrostrat/hyper";
 import {
   UnitsView,
@@ -33,10 +33,7 @@ export interface UnitEditorModel {
 }
 
 export interface UnitEditorProps {
-  persistChanges: (
-    e: Partial<UnitEditorModel>,
-    c: Partial<UnitEditorModel>
-  ) => void;
+  persistChanges: (e: UnitEditorModel, c: Partial<UnitEditorModel>) => void;
   model: UnitEditorI | {};
 }
 
@@ -200,26 +197,49 @@ enum UNIT_ADD_POISITON {
 
 export interface UnitRowContextMenuI {
   // either we are adding a new unit above, below or editing the current unit
-  triggerEditor: (e: UNIT_ADD_POISITON, i: number) => void;
+  triggerEditor: (e: UNIT_ADD_POISITON, i: number, copy: boolean) => void;
   unit: UnitsView;
   index: number;
 }
 function UnitRowContextMenu(props: UnitRowContextMenuI) {
+  const SubMenu = ({ pos }: { pos: UNIT_ADD_POISITON }) => {
+    return h(React.Fragment, [
+      h(MenuItem, {
+        text: `Copy unit #${props.unit.id}`,
+        icon: "duplicate",
+        onClick: () => props.triggerEditor(pos, props.index, true),
+      }),
+      h(MenuItem, {
+        text: `With empty unit`,
+        icon: "new-object",
+        onClick: () => props.triggerEditor(pos, props.index, false),
+      }),
+    ]);
+  };
+
   const ContextMenu = () =>
     h(Menu, [
+      h(
+        MenuItem,
+        {
+          text: "Add Unit Above",
+          icon: "circle-arrow-up",
+        },
+        [h(SubMenu, { pos: UNIT_ADD_POISITON.ABOVE })]
+      ),
+      h(
+        MenuItem,
+        {
+          text: "Add Unit Below",
+          icon: "circle-arrow-down",
+        },
+        [h(SubMenu, { pos: UNIT_ADD_POISITON.BELOW })]
+      ),
       h(MenuItem, {
-        text: "Add Unit Above",
+        text: `Edit unit #${props.unit.id}`,
+        icon: "annotation",
         onClick: () =>
-          props.triggerEditor(UNIT_ADD_POISITON.ABOVE, props.index),
-      }),
-      h(MenuItem, {
-        text: "Add Unit Below",
-        onClick: () =>
-          props.triggerEditor(UNIT_ADD_POISITON.BELOW, props.index),
-      }),
-      h(MenuItem, {
-        text: `Edit current unit, ${props.unit.id}`,
-        onClick: () => props.triggerEditor(UNIT_ADD_POISITON.EDIT, props.index),
+          props.triggerEditor(UNIT_ADD_POISITON.EDIT, props.index, true),
       }),
     ]);
 
@@ -228,6 +248,45 @@ function UnitRowContextMenu(props: UnitRowContextMenuI) {
   ]);
 }
 
+interface EditModeI {
+  mode: UNIT_ADD_POISITON;
+  copy: boolean;
+}
 
+const useRowUnitEditor = () => {
+  const [editOpen, setEditOpen] = useState(false);
+  const [index, setIndex] = useState(0);
+  const [editMode, setEditMode] = useState<EditModeI>({
+    mode: UNIT_ADD_POISITON.EDIT,
+    copy: true,
+  });
 
-export { UnitRowContextMenu, UNIT_ADD_POISITON };
+  const triggerEditor = (e: UNIT_ADD_POISITON, i: number, copy: boolean) => {
+    setIndex(i);
+    setEditMode({ mode: e, copy });
+    setEditOpen(true);
+  };
+
+  const onCancel = () => {
+    setEditOpen(false);
+  };
+
+  const rowBorderStyles = !editOpen
+    ? {}
+    : editMode.mode == "edit"
+    ? { background: "#0F996040" }
+    : editMode.mode == "above"
+    ? { borderTop: "solid #0F9960 3px" }
+    : { borderBottom: "solid #0F9960 3px" };
+
+  return {
+    triggerEditor,
+    index,
+    editOpen,
+    styles: rowBorderStyles,
+    editMode,
+    onCancel,
+  };
+};
+
+export { UnitRowContextMenu, UNIT_ADD_POISITON, useRowUnitEditor };

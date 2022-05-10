@@ -1,5 +1,5 @@
 import { Button, ButtonGroup, Checkbox } from "@blueprintjs/core";
-import h from "react-hyperscript";
+import h from "@macrostrat/hyper";
 
 function SectionUnitCheckBox(props: {
   data: any;
@@ -21,31 +21,49 @@ function MergeDivideBtn(props: {
     Button,
     {
       disabled: props.disabled,
-      minimal: true,
       onClick: props.onClick,
-      intent: "success",
     },
     [props.text]
   );
 }
 
 export interface ColBtnMenuI {
-  toggleUnitsView: () => void;
+  toggleUnitsView?: () => void;
   toggleDrag: () => void;
-  state: { unitsView: boolean; drag: boolean };
+  state: {
+    unitsView: boolean;
+    drag: boolean;
+    divideIds: number[];
+    mergeIds: number[];
+  };
+  divideSection: () => void;
+  mergeSections: () => void;
 }
 
 function ColumnPageBtnMenu(props: ColBtnMenuI) {
   const {
-    state: { unitsView, drag },
+    state: { unitsView, drag, divideIds, mergeIds },
   } = props;
+  //@ts-ignore
   return h(ButtonGroup, [
-    h(Button, { onClick: props.toggleUnitsView }, [
-      unitsView ? "Section view" : "Unit view",
-    ]),
+    h.if(typeof props.toggleUnitsView !== "undefined")(
+      Button,
+      { onClick: props.toggleUnitsView },
+      [unitsView ? "Section view" : "Unit view"]
+    ),
     h(Button, { onClick: props.toggleDrag, disabled: !unitsView }, [
       drag ? "Disable drag" : "Enable drag",
     ]),
+    h.if(!unitsView)(MergeDivideBtn, {
+      onClick: props.mergeSections,
+      disabled: mergeIds.length < 2,
+      text: "Merge Sections",
+    }),
+    h.if(unitsView)(MergeDivideBtn, {
+      text: "Divide section",
+      onClick: props.divideSection,
+      disabled: divideIds.length < 1,
+    }),
   ]);
 }
 

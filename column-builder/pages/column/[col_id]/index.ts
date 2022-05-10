@@ -10,7 +10,7 @@ import pg, {
   UnitsView,
   ColSectionI,
   ColSectionsTable,
-  ColUnitsTable,
+  ColSecUnitsTable,
   ColumnPageBtnMenu,
   UnitEditorModel,
 } from "~/index";
@@ -57,6 +57,7 @@ export default function Columns(props: {
     units,
     sections: unitIndexsBySection,
     mergeIds: [],
+    divideIds: [],
     drag: false,
     unitsView: false,
   });
@@ -86,11 +87,7 @@ export default function Columns(props: {
   };
 
   const headers = [
-    h(MergeDivideBtn, {
-      onClick: mergeSections,
-      disabled: state.mergeIds.length < 2,
-      text: "Merge",
-    }),
+    "",
     "Section number",
     "Top interval",
     "Bottom interval",
@@ -105,11 +102,18 @@ export default function Columns(props: {
       }),
     ]),
     h(ColumnPageBtnMenu, {
-      state: { unitsView: state.unitsView, drag: state.drag },
+      state: {
+        unitsView: state.unitsView,
+        drag: state.drag,
+        divideIds: state.divideIds,
+        mergeIds: state.mergeIds,
+      },
       toggleUnitsView: () => dispatch({ type: "toggle-units-view" }),
       toggleDrag: () => {
         dispatch({ type: "toggle-drag" });
       },
+      divideSection: () => {},
+      mergeSections: () => {},
     }),
     h.if(colSections.length == 0)("div", [
       h("h3", [
@@ -133,7 +137,9 @@ export default function Columns(props: {
         onChange,
         headers,
       }),
-      h.if(state.unitsView)(ColUnitsTable, {
+      h.if(state.unitsView)(ColSecUnitsTable, {
+        onClickDivideCheckBox: (id: number) =>
+          dispatch({ type: "set-divide-ids", id }),
         state,
         onDragEnd,
         editUnitAt,

@@ -1,14 +1,8 @@
 import h from "@macrostrat/hyper";
-import pg, {
-  MergeDivideBtn,
-  SectionUnitCheckBox,
-  Row,
-  UnitsView,
-  UnitRowCellGroup,
-} from "~/index";
-import { BasePage, Table } from "../../../src";
+import pg, { UnitsView, ColumnPageBtnMenu } from "~/index";
+import { BasePage, ColSecUnitsTable } from "~/index";
 import { GetServerSideProps } from "next";
-import { MinEditorToggle } from "../../../src/components/unit/minimal-unit-editor";
+import { MinEditorToggle } from "~/components/unit/minimal-unit-editor";
 import { useReducer } from "react";
 import { sectionReducer } from "./reducer";
 import { DropResult } from "react-beautiful-dnd";
@@ -34,6 +28,8 @@ function Section(props: { section_id: string; units: UnitsView[] }) {
   const [state, dispatch] = useReducer(sectionReducer, {
     units,
     divideIds: [],
+    drag: false,
+    sections: { [parseInt(section_id)]: [0, units.length - 1] },
   });
 
   const onClickDivideCheckBox = (id: number) => {
@@ -55,22 +51,21 @@ function Section(props: { section_id: string; units: UnitsView[] }) {
     console.log("Dividing Section", state.divideIds);
   };
 
-  const headers = [
-    h(MergeDivideBtn, {
-      text: "Divide section",
-      onClick: divideSection,
-      disabled: state.divideIds.length < 1,
-    }),
-    "ID",
-    "Strat Name",
-    "Bottom Interval",
-    "Top Interval",
-    "Color",
-    "Thickness",
-    "Pos.(B)",
-  ];
   return h(BasePage, { query: { section_id: parseInt(section_id) } }, [
     h("h3", [`Units in Section #${section_id}`]),
+    h(ColumnPageBtnMenu, {
+      state: {
+        unitsView: true,
+        drag: state.drag,
+        divideIds: state.divideIds,
+        mergeIds: [],
+      },
+      toggleDrag: () => {
+        dispatch({ type: "toggle-drag" });
+      },
+      divideSection: divideSection,
+      mergeSections: () => {},
+    }),
     //@ts-ignore
     h(MinEditorToggle, {
       persistChanges: (e, c) => {
@@ -79,39 +74,13 @@ function Section(props: { section_id: string; units: UnitsView[] }) {
       },
       btnText: "create new unit above",
     }),
-    h(
-      Table,
-      {
-        interactive: true,
-        headers,
-        drag: true,
-        onDragEnd,
-        droppableId: "section_table",
-      },
-      [
-        state.units.map((unit, i) => {
-          return h(
-            Row,
-            {
-              key: unit.id,
-              index: i,
-              drag: true,
-              draggableId: unit.unit_strat_name + unit.id.toString(),
-              href: `/unit/${unit.id}/edit`,
-            },
-            [
-              h("td", { onClick: (e: any) => e.stopPropagation() }, [
-                h(SectionUnitCheckBox, {
-                  data: unit.id,
-                  onChange: onClickDivideCheckBox,
-                }),
-              ]),
-              h(UnitRowCellGroup, { unit }),
-            ]
-          );
-        }),
-      ]
-    ),
+    h(ColSecUnitsTable, {
+      state,
+      onDragEnd,
+      addUnitAt: () => {},
+      onClickDivideCheckBox,
+      editUnitAt: () => {},
+    }),
     //@ts-ignore
     h(MinEditorToggle, {
       persistChanges: (e, c) => {
