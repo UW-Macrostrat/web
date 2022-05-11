@@ -4,7 +4,7 @@ import { BasePage, ColSecUnitsTable } from "~/index";
 import { GetServerSideProps } from "next";
 import { MinEditorToggle } from "~/components/unit/minimal-unit-editor";
 import { useReducer } from "react";
-import { sectionReducer } from "./reducer";
+import { sectionReducer } from "../../../src/components/section/reducer";
 import { DropResult } from "react-beautiful-dnd";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {

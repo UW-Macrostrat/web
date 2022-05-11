@@ -1,6 +1,6 @@
 import h from "@macrostrat/hyper";
 import { BasePage, UnitEditor, UnitEditorModel } from "../../../../src";
-import { persistNewUnitChanges } from "../../../section/[section_id]/new-helpers";
+import { persistNewUnitChanges } from "../../../../src/components/section/new-helpers";
 import { GetServerSideProps } from "next";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {

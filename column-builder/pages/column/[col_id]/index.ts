@@ -14,7 +14,7 @@ import pg, {
   ColumnPageBtnMenu,
   UnitEditorModel,
 } from "~/index";
-import { calculateSecionUnitIndexs, columnReducer } from "../reducer";
+import { calculateSecionUnitIndexs, columnReducer } from "../../../src/components/column/reducer";
 import { DropResult } from "react-beautiful-dnd";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {

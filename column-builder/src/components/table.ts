@@ -21,10 +21,10 @@ import {
   DroppableProvided,
   DropResult,
 } from "react-beautiful-dnd";
-import { ColumnStateI } from "pages/column/reducer";
+import { ColumnStateI } from "~/components/column/reducer";
 import { convertColorNameToHex } from "./helpers";
 import { Card, Icon } from "@blueprintjs/core";
-import { SectionStateI } from "pages/section/[section_id]/reducer";
+import { SectionStateI } from "~/components/section/reducer";
 
 const h = hyperStyled(styles);
 

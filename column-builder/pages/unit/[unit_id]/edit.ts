@@ -9,7 +9,7 @@ import {
   tableSelect,
   selectFirst,
 } from "../../../src";
-import { persistUnitChanges } from "./edit-helpers";
+import { persistUnitChanges } from "../../../src/components/unit/edit-helpers";
 import { GetServerSidePropsContext } from "next";
 
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
