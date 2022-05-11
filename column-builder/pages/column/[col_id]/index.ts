@@ -56,17 +56,6 @@ export default function Columns(props: {
 }) {
   const { col_id, colSections, column, units } = props;
 
-  const d = usePostgrest(
-    pg
-      .from("unit_strat_name_expanded")
-      .select(
-        /// joins the lith_unit and environ_unit table
-        "*,lith_unit!unit_liths_unit_id_fkey1(*),environ_unit!unit_environs_unit_id_fkey1(*)"
-      )
-      .order("position_bottom", { ascending: true })
-      .match({ col_id: col_id })
-  );
-
   console.log("units error", props.unit_error);
 
   const unitIndexsBySection = calculateSecionUnitIndexs(units);
