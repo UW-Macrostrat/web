@@ -37,6 +37,8 @@ export interface ColumnForm {
   col_id: number;
   col_name: string;
   col_number: number;
+  lng: number;
+  lat: number;
   notes?: string;
   ref: RefI;
 }
