@@ -6,7 +6,9 @@ import {
   ColumnForm,
   tableSelect,
   selectFirst,
-} from "../../../src";
+  getIdHierarchy,
+  QueryI,
+} from "~/index";
 import { GetServerSideProps } from "next";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -19,17 +21,22 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   });
 
   const { firstData, error: error_ } = await selectFirst("cols", {
-    columns: "col_groups!cols_col_group_id_fkey1(*)",
+    columns: "col_groups!cols_col_group_id_fkey(*)",
     limit: 1,
   });
 
-  return { props: { col_id, column: data, curColGroup: firstData.col_groups } };
+  const query = await getIdHierarchy({ col_id });
+
+  return {
+    props: { col_id, column: data, curColGroup: firstData.col_groups, query },
+  };
 };
 
 export default function EditColumn(props: {
   col_id: string;
   curColGroup: any;
   column: ColumnForm[];
+  query: QueryI;
 }) {
   const { col_id, curColGroup, column } = props;
 
@@ -75,7 +82,7 @@ export default function EditColumn(props: {
     return e;
   };
 
-  return h(BasePage, { query: { col_id: parseInt(col_id) } }, [
+  return h(BasePage, { query: props.query }, [
     h("h3", [
       `Edit column ${column[0].col_name}, part of ${curColGroup.col_group_long}(${curColGroup.col_group}) Column Group`,
     ]),

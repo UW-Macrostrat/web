@@ -1,5 +1,10 @@
 import h from "@macrostrat/hyper";
-import pg, { UnitsView, ColumnPageBtnMenu } from "~/index";
+import pg, {
+  UnitsView,
+  ColumnPageBtnMenu,
+  getIdHierarchy,
+  QueryI,
+} from "~/index";
 import { BasePage, ColSecUnitsTable } from "~/index";
 import { GetServerSideProps } from "next";
 import { MinEditorToggle } from "~/components/unit/minimal-unit-editor";
@@ -20,10 +25,16 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     .order("position_bottom", { ascending: true })
     .match({ section_id: section_id });
 
-  return { props: { section_id, units: data } };
+  const query: QueryI = await getIdHierarchy({ section_id });
+
+  return { props: { section_id, units: data, query } };
 };
 
-function Section(props: { section_id: string; units: UnitsView[] }) {
+function Section(props: {
+  section_id: string;
+  units: UnitsView[];
+  query: QueryI;
+}) {
   const { section_id, units } = props;
   const [state, dispatch] = useReducer(sectionReducer, {
     units,
@@ -51,7 +62,7 @@ function Section(props: { section_id: string; units: UnitsView[] }) {
     console.log("Dividing Section", state.divideIds);
   };
 
-  return h(BasePage, { query: { section_id: parseInt(section_id) } }, [
+  return h(BasePage, { query: props.query }, [
     h("h3", [`Units in Section #${section_id}`]),
     h(ColumnPageBtnMenu, {
       state: {

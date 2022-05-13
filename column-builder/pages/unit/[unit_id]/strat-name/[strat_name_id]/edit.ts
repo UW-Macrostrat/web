@@ -5,6 +5,8 @@ import {
   StratNameEditor,
   tableUpdate,
   selectFirst,
+  getIdHierarchy,
+  QueryI,
 } from "~/index";
 import { GetServerSidePropsContext } from "next";
 import styles from "../stratname.module.scss";
@@ -15,7 +17,7 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   const {
     query: { strat_name_id, unit_id },
   } = ctx;
-
+  const query = await getIdHierarchy({ unit_id });
   const { firstData: strat_name, error } = await selectFirst(
     "strat_names_ref",
     {
@@ -23,13 +25,14 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
     }
   );
 
-  return { props: { strat_name_id, strat_name, unit_id } };
+  return { props: { strat_name_id, strat_name, unit_id, query } };
 }
 
 export default function EditColumnGroup(props: {
   strat_name_id: number;
   strat_name: StratNameI;
   unit_id: number;
+  query: QueryI;
 }) {
   const { strat_name_id, strat_name, unit_id } = props;
 
@@ -49,7 +52,7 @@ export default function EditColumnGroup(props: {
     }
   };
 
-  return h(BasePage, { query: { unit_id } }, [
+  return h(BasePage, { query: props.query }, [
     h("h3", ["Edit Stratigraphic Name ", strat_name.strat_name]),
     //@ts-ignore
     h(StratNameEditor, { model: strat_name, persistChanges }),

@@ -8,6 +8,8 @@ import {
   LithUnit,
   tableSelect,
   selectFirst,
+  getIdHierarchy,
+  QueryI,
 } from "../../../src";
 import { persistUnitChanges } from "../../../src/components/unit/edit-helpers";
 import { GetServerSidePropsContext } from "next";
@@ -16,7 +18,7 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   const {
     query: { unit_id },
   } = ctx;
-
+  const query: QueryI = await getIdHierarchy({ unit_id });
   const { firstData: unit, error } = await selectFirst(
     "unit_strat_name_expanded",
     {
@@ -32,7 +34,8 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   const { data: liths, error: _error } = await tableSelect("lith_unit", {
     match: { unit_id: unit_id },
   });
-  return { props: { unit_id, unit, envs, liths } };
+
+  return { props: { unit_id, unit, envs, liths, query } };
 }
 
 /* 
@@ -46,6 +49,7 @@ function UnitEdit(props: {
   unit: UnitsView;
   envs: EnvironUnit[];
   liths: LithUnit[];
+  query: QueryI;
 }) {
   const { unit, envs, liths, unit_id } = props;
 
@@ -58,7 +62,7 @@ function UnitEdit(props: {
     return await persistUnitChanges(unit, envs, liths, updatedModel, changeSet);
   };
 
-  return h(BasePage, { query: { unit_id: parseInt(unit_id) } }, [
+  return h(BasePage, { query: props.query }, [
     h("h3", [`Edit Unit #${unit.id}: `, unit.unit_strat_name]),
     //@ts-ignore
     h(UnitEditor, { model, persistChanges }),

@@ -6,7 +6,9 @@ import pg, {
   ColumnEditor,
   ColumnForm,
   tableInsert,
-} from "../../../src";
+  getIdHierarchy,
+  QueryI,
+} from "~/index";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const {
@@ -20,12 +22,15 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   const colGroup = data ? data[0] : {};
 
-  return { props: { col_group_id, colGroup } };
+  const query = await getIdHierarchy({ col_group_id });
+
+  return { props: { col_group_id, colGroup, query } };
 };
 
 export default function NewColumn(props: {
   col_group_id: string;
   colGroup: Partial<ColumnGroupI>;
+  query: QueryI;
 }) {
   const { colGroup, col_group_id } = props;
 
@@ -64,7 +69,7 @@ export default function NewColumn(props: {
     }
   };
 
-  return h(BasePage, { query: { col_group_id: parseInt(col_group_id) } }, [
+  return h(BasePage, { query: props.query }, [
     h("h3", [
       `Add a new column to ${colGroup.col_group_long}(${colGroup.col_group})`,
     ]),

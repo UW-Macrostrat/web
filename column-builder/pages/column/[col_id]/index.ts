@@ -2,11 +2,9 @@ import { useReducer } from "react";
 import h from "@macrostrat/hyper";
 import { GetServerSideProps } from "next";
 import pg, {
-  usePostgrest,
   BasePage,
   EditButton,
   CreateButton,
-  MergeDivideBtn,
   MinEditorToggle,
   UnitsView,
   ColSectionI,
@@ -14,11 +12,13 @@ import pg, {
   ColSecUnitsTable,
   ColumnPageBtnMenu,
   UnitEditorModel,
+  getIdHierarchy,
+  QueryI,
 } from "~/index";
 import {
   calculateSecionUnitIndexs,
   columnReducer,
-} from "../../../src/components/column/reducer";
+} from "~/components/column/reducer";
 import { DropResult } from "react-beautiful-dnd";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -29,6 +29,8 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const { data: d, error: e } = await pg.rpc("get_col_section_data", {
     column_id: col_id,
   });
+
+  const query = await getIdHierarchy({ col_id });
 
   const { data: column, error: col_error } = await pg
     .from("cols")
@@ -44,7 +46,9 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     .order("position_bottom", { ascending: true })
     .match({ col_id: col_id });
 
-  return { props: { col_id, colSections: d, column, units, unit_error } };
+  return {
+    props: { col_id, colSections: d, column, units, unit_error, query },
+  };
 };
 
 export default function Columns(props: {
@@ -53,10 +57,9 @@ export default function Columns(props: {
   units: UnitsView[];
   column: { col_name: string }[];
   unit_error: any;
+  query: QueryI;
 }) {
-  const { col_id, colSections, column, units } = props;
-
-  console.log("units error", props.unit_error);
+  const { col_id, colSections, column, units, query } = props;
 
   const unitIndexsBySection = calculateSecionUnitIndexs(units);
 
@@ -101,7 +104,7 @@ export default function Columns(props: {
     "# of units",
   ];
 
-  return h(BasePage, { query: { col_id: parseInt(col_id) } }, [
+  return h(BasePage, { query }, [
     h("h3", [
       `Sections for Column: ${column[0].col_name}`,
       h(EditButton, {
