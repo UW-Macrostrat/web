@@ -5,7 +5,8 @@
     "dev": "next dev -p 1234",
     "build": "next build",
     "start": "next start -p 1234",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "(npm install deps/ui-components/packages/ui-components/); (npm install deps/ui-components/packages/form-components/); (npm install deps/ui-components/packages/data-components/);"
   },
   "dependencies": {
     "@blueprintjs/core": "^4.3.0",
