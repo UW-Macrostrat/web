@@ -10,9 +10,12 @@
   },
   "dependencies": {
     "@blueprintjs/core": "^4.3.0",
-    "@blueprintjs/popover2": "^0.12.9",
+    "@blueprintjs/popover2": "^1.2.1",
     "@blueprintjs/select": "^4.2.0",
+    "@macrostrat/data-components": "file:deps/ui-components/packages/data-components",
+    "@macrostrat/form-components": "file:deps/ui-components/packages/form-components",
     "@macrostrat/hyper": "^2.0.1",
+    "@macrostrat/ui-components": "file:deps/ui-components/packages/ui-components",
     "@mapbox/mapbox-gl-draw": "^1.3.0",
     "@supabase/postgrest-js": "^0.36.0",
     "@types/mapbox__mapbox-gl-draw": "^1.2.3",
