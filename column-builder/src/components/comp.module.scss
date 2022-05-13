@@ -84,3 +84,14 @@
     cursor: grabbing;
   }
 }
+
+.lng-lat-inputs {
+  margin: 5px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.col-editor-container {
+  display: flex;
+  justify-content: space-between;
+}

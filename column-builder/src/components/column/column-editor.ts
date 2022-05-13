@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { hyperStyled } from "@macrostrat/hyper";
-import { Table } from "~/index";
 import {
   Button,
   NumericInput,
@@ -8,6 +7,9 @@ import {
   InputGroup,
   TextArea,
   Spinner,
+  FormGroup,
+  Card,
+  Drawer,
 } from "@blueprintjs/core";
 import styles from "../comp.module.scss";
 import { ColumnForm, ColumnGroupI } from "~/types";
@@ -17,7 +19,10 @@ import pg, { usePostgrest } from "~/db";
 import { RefEditor } from "../ref/ref-editor";
 import { SubmitButton } from "..";
 import { LngLatMap } from "./map";
-import { Point } from "deps/ui-components/packages/form-components/src";
+import {
+  Point,
+  PublicationFinder,
+} from "deps/ui-components/packages/form-components/src";
 import { ModelEditor, useModelEditor } from "@macrostrat/ui-components";
 
 const h = hyperStyled(styles);
@@ -62,8 +67,39 @@ function ColumnRef() {
       },
       onChange,
     }),
-    h(Button, { onClick }, ["New Ref"]),
-    h(Collapse, { isOpen: open }, [h(NewRef)]),
+    h(Button, { onClick, icon: "plus" }),
+    h(
+      Drawer,
+      {
+        usePortal: true,
+        isOpen: open,
+        onClose: () => setOpen(false),
+        title: "Add a new reference",
+      },
+      [
+        h(
+          "div",
+          {
+            style: {
+              padding: "5px",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              height: "80%",
+            },
+          },
+          [
+            h("div", [
+              h("h3", { style: { marginBottom: 0 } }, [
+                "Search for a Publication",
+              ]),
+              h(PublicationFinder, { onClick: (e: any) => console.log(e) }),
+            ]),
+            h(NewRef),
+          ]
+        ),
+      ]
+    ),
   ]);
 }
 
@@ -93,59 +129,66 @@ function ColumnEdit({ curColGroup }: { curColGroup: Partial<ColumnGroupI> }) {
   const setCoords = (p: Point) => {
     const [long, lat] = p.geometry.coordinates;
     actions.updateState({
-      model: { longitude: { $set: long }, latitude: { $set: lat } },
+      model: { lng: { $set: long }, lat: { $set: lat } },
     });
   };
 
-  return h("div", [
-    h(Table, { interactive: false }, [
-      h("tr", [
-        h("td", [h("h4", ["Column Group"])]),
-        h("td", [curColGroup.col_group]),
-      ]),
-      h("tr", [
-        h("td", [h("h4", ["Column Name"])]),
-        h("td", [
-          h(InputGroup, {
-            style: { width: "200px" },
-            defaultValue: model.col_name || undefined,
-            onChange: (e) => updateColumn("col_name", e.target.value),
-          }),
+  return h(Card, { style: { width: "70vw" } }, [
+    h("div.col-editor-container", [
+      h("div.left", [
+        h("h4", ["Column Group: ", curColGroup.col_group]),
+        h("div", [
+          h(
+            FormGroup,
+            { label: h("h4", { style: { margin: 0 } }, ["Column Name"]) },
+            [
+              h(InputGroup, {
+                style: { width: "200px" },
+                defaultValue: model.col_name || undefined,
+                onChange: (e) => updateColumn("col_name", e.target.value),
+              }),
+            ]
+          ),
+        ]),
+        h("div", [
+          h(
+            FormGroup,
+            { label: h("h4", { style: { margin: 0 } }, ["Column Number"]) },
+            [
+              h(NumericInput, {
+                style: { width: "200px" },
+                defaultValue: model.col_number || undefined,
+                onValueChange: (e) => updateColumn("col_number", e),
+              }),
+            ]
+          ),
+        ]),
+        h("div", [
+          h("td", [
+            h("div", [
+              h("h4", { style: { marginBottom: 0 } }, ["Notes"]),
+              h(TextArea, {
+                style: { width: "400px", height: "150px" },
+                value: model.notes,
+                onChange: (e) => updateColumn("notes", e.target.value),
+              }),
+            ]),
+            h("div", [
+              h("h4", { style: { marginBottom: 0 } }, ["Ref"]),
+              h(ColumnRef),
+            ]),
+          ]),
         ]),
       ]),
-      h("tr", [
-        h("td", [h("h4", ["Column Number"])]),
-        h("td", [
-          h(NumericInput, {
-            style: { width: "200px" },
-            defaultValue: model.col_number || undefined,
-            onValueChange: (e) => updateColumn("col_number", e),
-          }),
-        ]),
-      ]),
-      h("tr", [
-        h("td", [
+      h("div.right", [
+        h(Card, { style: { minWidth: "600px" }, elevation: 1 }, [
           h(LngLatMap, {
-            longitude: model.longitude ?? 0,
-            latitude: model.latitude ?? 0,
+            longitude: model.lng ?? 0,
+            latitude: model.lat ?? 0,
             onChange: (p: Point) => setCoords(p),
           }),
         ]),
-        h("td", [
-          h("div", ["longitude: ", model.longitude]),
-          h("div", ["latitude: ", model.latitude]),
-        ]),
       ]),
-      h("tr", [
-        h("td", [h("h4", ["Notes"])]),
-        h("td", [
-          h(TextArea, {
-            value: model.notes,
-            onChange: (e) => updateColumn("notes", e.target.value),
-          }),
-        ]),
-      ]),
-      h("tr", [h("td", [h("h4", ["Ref"])]), h("td", [h(ColumnRef)])]),
     ]),
     h(SubmitButton),
   ]);

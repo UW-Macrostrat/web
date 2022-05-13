@@ -45,8 +45,9 @@ function LngLatMap(props: {
   }, [point]);
 
   return h("div", [
+    h("h4", { style: { marginTop: 0 } }, ["Set a location"]),
     h(LngLatMap_, { point, setPoint: setPoint_ }),
-    h(LngLatInputs, { point, setPoint: setPoint_ }),
+    h("div.lng-lat-inputs", [h(LngLatInputs, { point, setPoint: setPoint_ })]),
   ]);
 }
 
