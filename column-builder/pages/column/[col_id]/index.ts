@@ -39,7 +39,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     .from("unit_strat_name_expanded")
     .select(
       /// joins the lith_unit and environ_unit table
-      "*,lith_unit!unit_liths_unit_id_fkey1(*),environ_unit!unit_environs_unit_id_fkey1(*)"
+      "*,lith_unit!unit_liths_unit_id_fkey(*),environ_unit!unit_environs_unit_id_fkey(*)"
     )
     .order("position_bottom", { ascending: true })
     .match({ col_id: col_id });
