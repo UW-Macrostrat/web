@@ -2,6 +2,7 @@ import { useReducer } from "react";
 import h from "@macrostrat/hyper";
 import { GetServerSideProps } from "next";
 import pg, {
+  usePostgrest,
   BasePage,
   EditButton,
   CreateButton,
@@ -14,7 +15,10 @@ import pg, {
   ColumnPageBtnMenu,
   UnitEditorModel,
 } from "~/index";
-import { calculateSecionUnitIndexs, columnReducer } from "../reducer";
+import {
+  calculateSecionUnitIndexs,
+  columnReducer,
+} from "../../../src/components/column/reducer";
 import { DropResult } from "react-beautiful-dnd";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -35,12 +39,12 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     .from("unit_strat_name_expanded")
     .select(
       /// joins the lith_unit and environ_unit table
-      "*,lith_unit!unit_liths_unit_id_fkey1(*),environ_unit!unit_environs_unit_id_fkey1(*)"
+      "*,lith_unit!unit_liths_unit_id_fkey(*),environ_unit!unit_environs_unit_id_fkey(*)"
     )
     .order("position_bottom", { ascending: true })
     .match({ col_id: col_id });
 
-  return { props: { col_id, colSections: d, column, units } };
+  return { props: { col_id, colSections: d, column, units, unit_error } };
 };
 
 export default function Columns(props: {
@@ -48,8 +52,11 @@ export default function Columns(props: {
   colSections: ColSectionI[];
   units: UnitsView[];
   column: { col_name: string }[];
+  unit_error: any;
 }) {
   const { col_id, colSections, column, units } = props;
+
+  console.log("units error", props.unit_error);
 
   const unitIndexsBySection = calculateSecionUnitIndexs(units);
 

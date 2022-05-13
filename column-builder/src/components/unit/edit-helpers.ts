@@ -5,11 +5,11 @@ import pg, {
   EnvironUnit,
   LithUnit,
   UnitEditorModel,
-} from "../../../src";
+} from "../..";
 import {
   conductChangeSet,
   detectDeletionsAndAdditions,
-} from "../../../src/components/helpers";
+} from "../helpers";
 
 /* 
 handles insertions and deletions for

@@ -1,4 +1,4 @@
-import pg, { tableInsert, UnitEditorModel, UnitsView } from "../../../src";
+import pg, { tableInsert, UnitEditorModel, UnitsView } from "../..";
 
 const keys = [
   "strat_name",

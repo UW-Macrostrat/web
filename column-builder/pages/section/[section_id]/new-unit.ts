@@ -5,7 +5,7 @@ import {
   UnitEditorModel,
   selectFirst,
 } from "../../../src";
-import { persistNewUnitChanges } from "./new-helpers";
+import { persistNewUnitChanges } from "../../../src/components/section/new-helpers";
 import { GetServerSideProps } from "next";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
