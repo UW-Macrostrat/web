@@ -7,7 +7,7 @@ import pg, {
   Table,
   CreateButton,
   EditButton,
-} from "../../../src";
+} from "~/index";
 
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   const {
@@ -30,6 +30,7 @@ export default function ColumnGroup(props: {
   columnGroups: ColumnGroupI[];
 }) {
   const { project_id } = props;
+  console.log(props.columnGroups);
 
   const headers = ["ID", "Name", "Col #", "Status"];
 
@@ -60,7 +61,7 @@ export default function ColumnGroup(props: {
                   Row,
                   {
                     key: id.col_id,
-                    draggableId: id.col_name + id.col_id.toString(),
+                    draggableId: id.col_name + id.col_id?.toString(),
                     index: i,
                     href: `/column/${id.col_id}`,
                   },
