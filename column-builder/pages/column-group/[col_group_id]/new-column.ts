@@ -48,6 +48,8 @@ export default function NewColumn(props: {
       col_name: e.col_name,
       status_code: "in process",
       col_type: "column",
+      lat: e.lat,
+      lng: e.lng,
     };
 
     const { data, error } = await tableInsert("cols", newColumn);

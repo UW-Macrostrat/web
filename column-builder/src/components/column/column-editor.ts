@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Ref, useState } from "react";
 import { hyperStyled } from "@macrostrat/hyper";
 import {
   Button,
@@ -9,6 +9,7 @@ import {
   FormGroup,
   Card,
   Drawer,
+  Collapse,
 } from "@blueprintjs/core";
 import styles from "../comp.module.scss";
 import { ColumnForm, ColumnGroupI } from "~/types";
@@ -20,6 +21,7 @@ import { SubmitButton } from "..";
 import { LngLatMap } from "./map";
 import {
   Point,
+  Pub,
   PublicationFinder,
 } from "deps/ui-components/packages/form-components/src";
 import { ModelEditor, useModelEditor } from "@macrostrat/ui-components";
@@ -37,10 +39,17 @@ interface RefDataI {
   data: RefI;
 }
 
+function formPubSelectText(ref: RefI) {
+  const title = ref.ref?.length > 50 ? ref.ref.slice(0, 50) + "..." : ref.ref;
+
+  return `${ref?.author}(${ref?.pub_year})-${title}`;
+}
+
 function ColumnRef() {
   const [open, setOpen] = useState(false);
+  const [newRefOpen, setNewRefOpen] = useState(false);
 
-  const { model, actions, hasChanges }: Model = useModelEditor();
+  const { model, actions }: Model = useModelEditor();
   const refs: RefI[] = usePostgrest(
     pg.from("refs").select("id, pub_year, author, ref, doi, url")
   );
@@ -54,14 +63,31 @@ function ColumnRef() {
   const onChange = (item: RefDataI) => {
     actions.updateState({ model: { ref: { $set: item.data } } });
   };
+
+  const onPubFinderClick = async (e: Pub) => {
+    const newRef: RefI = {
+      ref: e.title,
+      pub_year: e.year,
+      author: e.author,
+      doi: e.doi,
+      url: e.link,
+    };
+    const { data, error } = await pg.from("refs").insert([newRef]);
+    if (!error) {
+      actions.updateState({ model: { ref: { $set: data[0] } } });
+    }
+    setOpen(false);
+    setNewRefOpen(false);
+  };
+
   // have the ref suggest as well as option to create new ref.
   return h("div", [
     h(ItemSuggest, {
       items: refs.map((ref) => {
-        return { value: `${ref?.author}(${ref?.pub_year})`, data: ref };
+        return { value: formPubSelectText(ref), data: ref };
       }),
       initialSelected: {
-        value: model.ref ? `${model.ref.author}(${model.ref.pub_year})` : "",
+        value: model.ref ? formPubSelectText(model.ref) : "",
         data: model.ref || {},
       },
       onChange,
@@ -83,8 +109,6 @@ function ColumnRef() {
               padding: "5px",
               display: "flex",
               flexDirection: "column",
-              justifyContent: "space-between",
-              height: "80%",
             },
           },
           [
@@ -92,9 +116,22 @@ function ColumnRef() {
               h("h3", { style: { marginBottom: 0 } }, [
                 "Search for a Publication",
               ]),
-              h(PublicationFinder, { onClick: (e: any) => console.log(e) }),
+              h(PublicationFinder, {
+                onClick: onPubFinderClick,
+              }),
             ]),
-            h(NewRef),
+            h("div", [
+              h(
+                Button,
+                {
+                  minimal: true,
+                  fill: true,
+                  onClick: () => setNewRefOpen(!newRefOpen),
+                },
+                ["+ Can't find the paper, add it's details +"]
+              ),
+              h(Collapse, { isOpen: newRefOpen }, [h(NewRef)]),
+            ]),
           ]
         ),
       ]
@@ -112,10 +149,19 @@ function NewRef() {
     if (!error) {
       actions.updateState({ model: { ref: { $set: data[0] } } });
     }
-    return data[0];
+
+    return e;
   };
   //@ts-ignore
   return h(RefEditor, { model: model.ref || {}, persistChanges });
+}
+
+function isDisabled(model: ColumnForm) {
+  if (typeof model.col_name == "undefined") return true;
+  if (typeof model.lat == "undefined" || typeof model.lng == "undefined")
+    return true;
+  if (typeof model.ref == "undefined") return false;
+  return false;
 }
 
 function ColumnEdit({ curColGroup }: { curColGroup: Partial<ColumnGroupI> }) {
@@ -132,7 +178,7 @@ function ColumnEdit({ curColGroup }: { curColGroup: Partial<ColumnGroupI> }) {
     });
   };
 
-  return h(Card, { style: { width: "70vw" } }, [
+  return h(Card, [
     h("div.col-editor-container", [
       h("div.left", [
         h("h4", ["Column Group: ", curColGroup.col_group]),
@@ -173,7 +219,10 @@ function ColumnEdit({ curColGroup }: { curColGroup: Partial<ColumnGroupI> }) {
               }),
             ]),
             h("div", [
-              h("h4", { style: { marginBottom: 0 } }, ["Ref"]),
+              h("h4", { style: { marginBottom: 0 } }, [
+                "Ref: ",
+                model.ref?.ref ?? "",
+              ]),
               h(ColumnRef),
             ]),
           ]),
@@ -189,7 +238,7 @@ function ColumnEdit({ curColGroup }: { curColGroup: Partial<ColumnGroupI> }) {
         ]),
       ]),
     ]),
-    h(SubmitButton),
+    h(SubmitButton, { disabled: isDisabled(model) }),
   ]);
 }
 

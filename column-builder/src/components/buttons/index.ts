@@ -64,13 +64,13 @@ function CancelButton(props: CancelButtonI) {
   ]);
 }
 
-function SubmitButton() {
+function SubmitButton(props: { disabled?: boolean }) {
   const { hasChanges, actions } = useModelEditor();
 
   return h(
     Button,
     {
-      disabled: !hasChanges(),
+      disabled: props.disabled || !hasChanges(),
       intent: "success",
       onClick: () => actions.persistChanges(),
     },
