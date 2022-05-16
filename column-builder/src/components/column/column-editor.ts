@@ -3,7 +3,6 @@ import { hyperStyled } from "@macrostrat/hyper";
 import {
   Button,
   NumericInput,
-  Collapse,
   InputGroup,
   TextArea,
   Spinner,
