@@ -4,6 +4,7 @@ import pg, {
   ColumnPageBtnMenu,
   getIdHierarchy,
   QueryI,
+  UnitEditorModel,
 } from "~/index";
 import { BasePage, ColSecUnitsTable } from "~/index";
 import { GetServerSideProps } from "next";
@@ -37,6 +38,7 @@ function Section(props: {
 }) {
   const { section_id, units } = props;
   const [state, dispatch] = useReducer(sectionReducer, {
+    section_id: parseInt(section_id),
     units,
     divideIds: [],
     drag: false,
@@ -57,11 +59,16 @@ function Section(props: {
       destination: destination.index,
     });
   };
-
+  const addUnitAt = (unit: UnitEditorModel, index: number) => {
+    dispatch({ type: "add-unit-at", index, unit });
+  };
+  const editUnitAt = (unit: UnitEditorModel, index: number) => {
+    dispatch({ type: "edit-unit-at", index, unit });
+  };
   const divideSection = () => {
     console.log("Dividing Section", state.divideIds);
   };
-
+  console.log(state);
   return h(BasePage, { query: props.query }, [
     h("h3", [`Units in Section #${section_id}`]),
     h(ColumnPageBtnMenu, {
@@ -88,9 +95,9 @@ function Section(props: {
     h(ColSecUnitsTable, {
       state,
       onDragEnd,
-      addUnitAt: () => {},
+      addUnitAt,
       onClickDivideCheckBox,
-      editUnitAt: () => {},
+      editUnitAt,
     }),
     //@ts-ignore
     h(MinEditorToggle, {
