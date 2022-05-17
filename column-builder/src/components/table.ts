@@ -346,7 +346,7 @@ function ColSecUnitsTable(props: {
       ? {
           unit: units[index],
         }
-      : { unit: {} };
+      : { unit: { lith_unit: [], environ_unit: [] } };
 
   return h("div", [
     h(MinEditorDialog, {
