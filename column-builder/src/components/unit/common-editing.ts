@@ -12,6 +12,7 @@ import {
   MenuItem,
   NumericInput,
   Button,
+  MenuDivider,
 } from "@blueprintjs/core";
 import {
   useModelEditor,
@@ -251,11 +252,19 @@ function UnitRowContextMenu(props: UnitRowContextMenuI) {
         onClick: () =>
           props.triggerEditor(UNIT_ADD_POISITON.EDIT, props.index, true),
       }),
+      h(MenuDivider),
+      h(MenuItem, {
+        text: `Delete unit #${props.unit.id}`,
+        icon: "trash",
+        intent: "danger",
+      }),
     ]);
 
-  return h(Popover2, { content: h(ContextMenu), minimal: true }, [
-    h(Button, { minimal: true, icon: "more" }),
-  ]);
+  return h(
+    Popover2,
+    { content: h(ContextMenu), minimal: true, position: "left-top" },
+    [h(Button, { minimal: true, icon: "more" })]
+  );
 }
 
 interface EditModeI {
