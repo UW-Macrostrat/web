@@ -4,7 +4,7 @@ import { Spinner } from "@blueprintjs/core";
 import { IntervalI } from "../../types";
 import pg from "../../db";
 import styles from "../comp.module.scss";
-import { MySuggest } from "../suggest";
+import { ItemSuggest } from "../suggest";
 import { FeatureCell } from "../table";
 
 const h = hyperStyled(styles);
@@ -13,6 +13,7 @@ interface IntervalProps {
   onChange: (e: IntervalDataI) => void;
   initialSelected?: IntervalDataI;
   onQueryChange?: (e: string) => void;
+  placeholder?: string;
 }
 
 export interface IntervalDataI {
@@ -26,7 +27,7 @@ interface IntervalRowProps extends IntervalProps {
   bottom: boolean;
 }
 
-function IntervalRow(props: IntervalRowProps) {
+function IntervalSuggest(props: IntervalProps) {
   const [intervals, setIntervals] = useState<IntervalDataI[] | []>([]);
   const getIntervals = async (query: string) => {
     if (query.length > 2) {
@@ -59,20 +60,25 @@ function IntervalRow(props: IntervalRowProps) {
     getData();
   }, []);
 
+  return h(React.Fragment, [
+    h.if(intervals == undefined)(Spinner),
+    h.if(intervals != undefined)(ItemSuggest, {
+      items: intervals,
+      onChange: props.onChange,
+      onQueryChange: getIntervals,
+      initialSelected: props.initialSelected,
+      placeholder: props.placeholder,
+    }),
+  ]);
+}
+
+function IntervalRow(props: IntervalRowProps) {
   const label: string = !props.bottom ? "Top (LO): " : "Bottom (FO): ";
 
   const ageLabel: string = props.bottom ? "Age Bottom: " : "Age Top: ";
 
   return h(React.Fragment, [
-    h(FeatureCell, { text: label }, [
-      h.if(intervals == undefined)(Spinner),
-      h.if(intervals != undefined)(MySuggest, {
-        items: intervals,
-        onChange: props.onChange,
-        onQueryChange: getIntervals,
-        initialSelected: props.initialSelected,
-      }),
-    ]),
+    h(FeatureCell, { text: label }, [h(IntervalSuggest, { ...props })]),
     h(FeatureCell, { text: ageLabel }, [
       props.age_bottom || props.age_top,
       " ma",
@@ -80,4 +86,4 @@ function IntervalRow(props: IntervalRowProps) {
   ]);
 }
 
-export { IntervalRow };
+export { IntervalRow, IntervalSuggest };

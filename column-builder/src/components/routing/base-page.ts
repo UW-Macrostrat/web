@@ -3,7 +3,6 @@ import styles from "../comp.module.scss";
 import { useRouter } from "next/router";
 import { Breadcrumbs, BreadcrumbProps } from "@blueprintjs/core";
 import { ReactChild } from "react";
-import { getIdHierarchy } from "./routing-helpers";
 
 const h = hyperStyled(styles);
 
@@ -23,7 +22,7 @@ interface BasePageProps {
 }
 
 interface CrumbsI extends BreadcrumbProps {
-  predicate?: any;
+  predicate: string;
 }
 
 /* 
@@ -32,78 +31,52 @@ Creates the breadcrumbs at the top of each page based on the router query
 export function BasePage(props: BasePageProps) {
   const router = useRouter();
   const { query } = props;
-  console.log(query);
+  console.log("basepageQuery", query);
 
   const filterCrumbs = (obj: CrumbsI) => {
-    if (Object.keys(query).length == 0) {
-      if (obj.text == "Projects") {
-        return true;
-      }
-      return false;
+    if (obj.text == "Projects") {
+      return true;
     }
-    /// WOW THIS IS BAD, IF THERE ARE MORE THAN 1 ids passed it will return false
-    for (let i = 0; i < Object.keys(query).length; i++) {
-      if (!obj.predicate.includes(Object.keys(query)[i])) {
-        return false;
-      }
-    }
+
+    if (typeof query[obj.predicate] == "undefined") return false;
     return true;
   };
 
-  const onClick = async () => {
-    return await getIdHierarchy(query);
-  };
   const breadCrumbs: CrumbsI[] = [
     {
       text: "Projects",
       onClick: async () => {
         router.push("/");
       },
-      predicate: [
-        "project_id",
-        "col_group_id",
-        "col_id",
-        "section_id",
-        "unit_id",
-      ],
+      predicate: "",
     },
     {
       text: "Column Groups",
       onClick: async () => {
-        const { project_id } = await onClick();
-        router.push(`/column-groups/${project_id}`);
+        router.push(`/column-groups/${query.project_id}`);
       },
-      predicate: [
-        "project_id",
-        "col_group_id",
-        "col_id",
-        "section_id",
-        "unit_id",
-      ],
+      predicate: "project_id",
     },
     {
       text: "Column",
       onClick: async () => {
-        const { col_id } = await onClick();
-        router.push(`/column/${col_id}`);
+        router.push(`/column/${query.col_id}`);
       },
-      predicate: ["col_id", "section_id", "unit_id"],
+      predicate: "col_id",
     },
     {
       text: "Section",
       onClick: async () => {
-        const { section_id } = await onClick();
-        router.push(`/section/${section_id}`);
+        router.push(`/section/${query.section_id}`);
       },
-      predicate: ["section_id", "unit_id"],
+      predicate: "section_id",
     },
     {
       text: "Unit",
       onClick: async () => {
-        const { unit_id } = await onClick();
-        router.push(`/unit/${unit_id}/edit`);
+        router.push(`/unit/${query.unit_id}/edit`);
       },
-      predicate: ["unit_id"],
+      predicate: "unit_id",
     },
   ].filter(filterCrumbs);
 

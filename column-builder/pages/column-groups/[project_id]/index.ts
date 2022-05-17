@@ -7,7 +7,7 @@ import pg, {
   Table,
   CreateButton,
   EditButton,
-} from "../../../src";
+} from "~/index";
 
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   const {
@@ -18,7 +18,7 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
     .select("*, project_id(project)")
     .match({ project_id: project_id });
 
-    const projectName: string =
+  const projectName: string =
     data && data.length > 0 ? data[0].project_id.project : "";
 
   return { props: { project_id, projectName, columnGroups: data } };
@@ -30,6 +30,9 @@ export default function ColumnGroup(props: {
   columnGroups: ColumnGroupI[];
 }) {
   const { project_id } = props;
+  console.log(props.columnGroups);
+
+  const headers = ["ID", "Name", "Col #", "Status"];
 
   return h(BasePage, { query: { project_id } }, [
     h("h3", [
@@ -52,32 +55,24 @@ export default function ColumnGroup(props: {
                 href: `/column-group/${colGroup.id}/edit`,
               }),
             ]),
-            h(Table, { interactive: true }, [
-              h("thead", [
-                h("tr", [
-                  h("td", "ID"),
-                  h("td", "Name"),
-                  h("td", "Col #"),
-                  h("td", "Status"),
-                ]),
-              ]),
-              h("tbody", [
-                colGroup.cols.map((id, i) => {
-                  return h(
-                    Row,
-                    {
-                      key: i,
-                      href: `/column/${id.col_id}`,
-                    },
-                    [
-                      h("td", [id.col_id]),
-                      h("td", [id.col_name]),
-                      h("td", [id.col_number]),
-                      h("td", [id.status_code]),
-                    ]
-                  );
-                }),
-              ]),
+            h(Table, { interactive: true, headers }, [
+              colGroup.cols.map((id, i) => {
+                return h(
+                  Row,
+                  {
+                    key: id.col_id,
+                    draggableId: id.col_name + id.col_id?.toString(),
+                    index: i,
+                    href: `/column/${id.col_id}`,
+                  },
+                  [
+                    h("td", [id.col_id]),
+                    h("td", [id.col_name]),
+                    h("td", [id.col_number]),
+                    h("td", [id.status_code]),
+                  ]
+                );
+              }),
             ]),
             h(CreateButton, {
               href: `/column-group/${colGroup.id}/new-column`,

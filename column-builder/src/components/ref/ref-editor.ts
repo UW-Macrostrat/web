@@ -5,11 +5,10 @@ import {
   ModelEditor,
   useModelEditor,
   ModelEditButton,
-  //@ts-ignore
-} from "@macrostrat/ui-components/lib/esm";
+} from "@macrostrat/ui-components";
 import styles from "../comp.module.scss";
-import { RefI } from "../../types";
-import {  SubmitButton } from "..";
+import { RefI } from "~/types";
+import { SubmitButton } from "..";
 import { FeatureCell } from "../table";
 
 const h = hyperStyled(styles);
@@ -30,43 +29,41 @@ function RefEdit() {
 
   return h("div", [
     h(Table, { interactive: false }, [
-      h("tbody", [
-        h("tr", [
-          h(FeatureCell, { text: "Author" }, [
-            h(InputGroup, {
-              style: { width: "200px" },
-              defaultValue: model.author || undefined,
-              onChange: (e) => updateRef("author", e.target.value),
-            }),
-          ]),
-          h(FeatureCell, { text: "Pub Year" }, [
-            h(NumericInput, {
-              style: { width: "200px" },
-              defaultValue: model.pub_year || undefined,
-              onValueChange: (e) => updateRef("pub_year", e),
-            }),
-          ]),
+      h("tr", [
+        h(FeatureCell, { text: "Author" }, [
+          h(InputGroup, {
+            style: { width: "200px" },
+            defaultValue: model.author || undefined,
+            onChange: (e) => updateRef("author", e.target.value),
+          }),
         ]),
-        h("tr", [
-          h(FeatureCell, { text: "Ref", colSpan: 3 }, [
-            h(TextArea, { onChange: (e) => updateRef("ref", e.target.value) }),
-          ]),
+        h(FeatureCell, { text: "Pub Year" }, [
+          h(NumericInput, {
+            style: { width: "200px" },
+            defaultValue: model.pub_year || undefined,
+            onValueChange: (e) => updateRef("pub_year", e),
+          }),
         ]),
-        h("tr", [
-          h(FeatureCell, { text: "DOI" }, [
-            h(InputGroup, {
-              style: { width: "200px" },
-              defaultValue: model.doi || undefined,
-              onChange: (e) => updateRef("doi", e.target.value),
-            }),
-          ]),
-          h(FeatureCell, { text: "URL" }, [
-            h(InputGroup, {
-              style: { width: "200px" },
-              defaultValue: model.url || undefined,
-              onChange: (e) => updateRef("url", e.target.value),
-            }),
-          ]),
+      ]),
+      h("tr", [
+        h(FeatureCell, { text: "Ref", colSpan: 3 }, [
+          h(TextArea, { onChange: (e) => updateRef("ref", e.target.value) }),
+        ]),
+      ]),
+      h("tr", [
+        h(FeatureCell, { text: "DOI" }, [
+          h(InputGroup, {
+            style: { width: "200px" },
+            defaultValue: model.doi || undefined,
+            onChange: (e) => updateRef("doi", e.target.value),
+          }),
+        ]),
+        h(FeatureCell, { text: "URL" }, [
+          h(InputGroup, {
+            style: { width: "200px" },
+            defaultValue: model.url || undefined,
+            onChange: (e) => updateRef("url", e.target.value),
+          }),
         ]),
       ]),
     ]),

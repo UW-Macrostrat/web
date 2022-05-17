@@ -5,7 +5,9 @@ import {
   StratNameEditor,
   tableInsert,
   tableUpdate,
-} from "../../../../src";
+  QueryI,
+  getIdHierarchy,
+} from "~/index";
 import { GetServerSidePropsContext } from "next";
 import styles from "./stratname.module.scss";
 
@@ -16,15 +18,19 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
     query: { unit_id, name },
   } = ctx;
 
-  return { props: { unit_id, name } };
+  const query: QueryI = await getIdHierarchy({ unit_id });
+
+  return { props: { unit_id, name, query } };
 }
 
 export default function NewStratName({
   name,
   unit_id,
+  query,
 }: {
   name: string | undefined;
   unit_id: number;
+  query: QueryI;
 }) {
   const persistChanges = async (e: StratNameI, c: Partial<StratNameI>) => {
     const { data, error } = await tableInsert("strat_names", e);
@@ -53,7 +59,7 @@ export default function NewStratName({
       ? "Make New Stratigraphic Name "
       : "This Stratigraphic name doesn't exist in the database. Make New Stratigraphic Name";
 
-  return h(BasePage, { query: { unit_id } }, [
+  return h(BasePage, { query }, [
     h("h3", [pageTitle]),
     //@ts-ignore
     h(StratNameEditor, {

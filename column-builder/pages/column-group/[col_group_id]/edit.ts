@@ -5,7 +5,9 @@ import {
   ColumnGroupI,
   tableSelect,
   tableUpdate,
-} from "../../../src";
+  getIdHierarchy,
+  QueryI,
+} from "~/index";
 import { GetServerSidePropsContext } from "next";
 
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
@@ -18,16 +20,17 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   });
 
   const columnGroup = data ? data[0] : {};
+  const query = await getIdHierarchy({ col_group_id });
 
-  return { props: { col_group_id, columnGroup } };
+  return { props: { col_group_id, columnGroup, query } };
 }
 
 export default function EditColumnGroup({
-  col_group_id,
   columnGroup,
+  query,
 }: {
   columnGroup: Partial<ColumnGroupI>;
-  col_group_id: string;
+  query: QueryI;
 }) {
   const persistChanges = async (
     e: Partial<ColumnGroupI>,
@@ -44,7 +47,7 @@ export default function EditColumnGroup({
     }
   };
 
-  return h(BasePage, { query: { col_group_id: parseInt(col_group_id) } }, [
+  return h(BasePage, { query }, [
     h("h3", ["Edit Column Group: ", columnGroup.col_group_long]),
     //@ts-ignore
     h(ColumnGroupEditor, { model: columnGroup, persistChanges }),

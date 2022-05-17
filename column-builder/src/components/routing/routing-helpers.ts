@@ -32,7 +32,7 @@ async function fetchIdsFromColGroup(col_group_id: number) {
 async function fetchIdsFromUnitId(unit_id: number) {
   const { data, error } = await pg
     .from("units")
-    .select("section_id, cols!units_col_id_fkey1(id, project_id)")
+    .select("section_id, cols!units_col_id_fkey(id, project_id)")
     .match({ id: unit_id });
 
   if (data) {
@@ -46,7 +46,7 @@ async function fetchIdsFromUnitId(unit_id: number) {
 async function fetchIdsFromSectionId(section_id: number) {
   const { data, error } = await pg
     .from("sections")
-    .select("cols!sections_col_id_fkey1(id, project_id)")
+    .select("cols!sections_col_id_fkey(id, project_id)")
     .match({ id: section_id });
 
   if (data) {

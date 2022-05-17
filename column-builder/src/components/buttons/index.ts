@@ -1,11 +1,9 @@
 import { hyperStyled } from "@macrostrat/hyper";
-//@ts-ignore
-import { useModelEditor } from "@macrostrat/ui-components/lib/esm";
+import { useModelEditor } from "@macrostrat/ui-components";
 import Link from "next/link";
-import { useRouter } from "next/router";
-import { Button } from "@blueprintjs/core";
-import styles from "../comp.module.scss";
-import { createLink } from "../helpers";
+import { Button, ButtonGroup } from "@blueprintjs/core";
+import styles from "./btns.module.scss";
+import { ReactChild } from "react";
 
 const h = hyperStyled(styles);
 
@@ -66,13 +64,13 @@ function CancelButton(props: CancelButtonI) {
   ]);
 }
 
-function SubmitButton() {
+function SubmitButton(props: { disabled?: boolean }) {
   const { hasChanges, actions } = useModelEditor();
 
   return h(
     Button,
     {
-      disabled: !hasChanges(),
+      disabled: props.disabled || !hasChanges(),
       intent: "success",
       onClick: () => actions.persistChanges(),
     },
@@ -80,4 +78,51 @@ function SubmitButton() {
   );
 }
 
-export { CreateButton, EditButton, SubmitButton, CancelButton };
+function AddButton(props: {
+  onClick: () => void;
+  minimal?: boolean;
+  children: ReactChild;
+}) {
+  const { onClick, minimal = true, children } = props;
+
+  return h(
+    Button,
+    { minimal: minimal, onClick, fill: true, intent: "success" },
+    ["+ ", children]
+  );
+}
+
+function PositionIncrementBtns(props: {
+  onClickUp: () => void;
+  onClickDown: () => void;
+  position_bottom: number;
+  isFirst?: boolean;
+  isLast?: boolean;
+}) {
+  return h("div.position-increment-container", [
+    props.position_bottom,
+    h(ButtonGroup, { vertical: true, minimal: true }, [
+      h(Button, {
+        icon: "chevron-up",
+        className: styles["flat-btn"],
+        disabled: props.isFirst,
+        onClick: props.onClickUp,
+      }),
+      h(Button, {
+        icon: "chevron-down",
+        className: styles["flat-btn"],
+        disabled: props.isLast,
+        onClick: props.onClickDown,
+      }),
+    ]),
+  ]);
+}
+
+export {
+  CreateButton,
+  EditButton,
+  SubmitButton,
+  CancelButton,
+  AddButton,
+  PositionIncrementBtns,
+};

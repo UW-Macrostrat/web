@@ -2,6 +2,15 @@
   overflow: scroll;
   max-height: 200px;
 }
+.itemSelectPopover {
+  padding: 5px;
+  background-color: white;
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+  ::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+  }
+}
 .interval-row {
   display: flex;
   justify-content: space-between;
@@ -43,5 +52,46 @@
   overflow-y: scroll;
 }
 .tag {
+  margin: 1px;
+}
+.interval-cell-min-editor {
+  display: flex;
+  flex-direction: column;
+  height: 8em;
+  justify-content: space-between;
+}
+.nomargin {
+  margin-bottom: 0px;
+}
+.margin-bottom-spacing {
+  margin-bottom: 20px;
+}
+.map-container {
+  height: 200px;
+  width: 100%;
+}
+
+.header {
+  min-height: 15px;
+  padding: 5px;
+  padding-left: 10px;
+  text-transform: capitalize;
+  font-size: 20px;
+  background: rgb(211, 216, 222);
+  font-weight: bold;
+  cursor: grab;
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.lng-lat-inputs {
   margin: 5px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.col-editor-container {
+  display: flex;
+  justify-content: space-between;
 }

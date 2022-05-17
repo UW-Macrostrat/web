@@ -1,4 +1,4 @@
-import pg, { tableInsert, UnitEditorModel, UnitsView } from "../../../src";
+import pg, { tableInsert, UnitEditorModel, UnitsView } from "../..";
 
 const keys = [
   "strat_name",
@@ -23,6 +23,22 @@ async function createNewSection(col_id: number) {
   const s_id = data ? data[0].id : null;
   return s_id;
 }
+
+export const persistNewUnitAbove = async (
+  updatedModel: UnitEditorModel,
+  changeSet: Partial<UnitEditorModel>,
+  section_id: number,
+  col_id: number
+) => {
+  /* 
+    we need to get the smalled position_bottom in section, that will be the position_bottom for the new unit.
+    Every unit below that in the column needs to have the position_bottom incremented by 1.
+    1. get smallest position bottom in section
+    2. for all units where position_bottom >= this.position_bottom: position_bottom++
+  
+    but maybe ask shanan
+    */
+};
 
 export const persistNewUnitChanges = async (
   updatedModel: UnitEditorModel,

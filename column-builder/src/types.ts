@@ -37,6 +37,8 @@ export interface ColumnForm {
   col_id: number;
   col_name: string;
   col_number: number;
+  lng: number;
+  lat: number;
   notes?: string;
   ref: RefI;
 }
@@ -77,6 +79,8 @@ export interface UnitsView {
   position_top: number;
   max_thick: number;
   min_thick: number;
+  lith_unit?: LithUnit[];
+  environ_unit?: EnvironUnit[];
 }
 
 export interface Lith {
@@ -129,4 +133,11 @@ export interface StratNameI {
   rank: RANK;
   ref_id: number;
   concept_id?: number;
+}
+
+export interface ColSectionI {
+  id: number;
+  unit_count: number;
+  top: string;
+  bottom: string;
 }
