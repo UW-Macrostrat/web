@@ -1,5 +1,5 @@
 import h from "@macrostrat/hyper";
-import {
+import pg, {
   UnitEditorModel,
   BasePage,
   UnitEditor,
@@ -19,23 +19,16 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
     query: { unit_id },
   } = ctx;
   const query: QueryI = await getIdHierarchy({ unit_id });
-  const { firstData: unit, error } = await selectFirst(
-    "unit_strat_name_expanded",
-    {
-      match: { id: unit_id },
-      limit: 1,
-    }
-  );
 
-  const { data: envs, error: error_ } = await tableSelect("environ_unit", {
-    match: { unit_id: unit_id },
-  });
+  const { data: units, error: e } = await pg
+    .from("unit_strat_name_expanded")
+    .select(
+      "*,lith_unit!unit_liths_unit_id_fkey(*),environ_unit!unit_environs_unit_id_fkey(*)"
+    )
+    .match({ id: unit_id })
+    .limit(1);
 
-  const { data: liths, error: _error } = await tableSelect("lith_unit", {
-    match: { unit_id: unit_id },
-  });
-
-  return { props: { unit_id, unit, envs, liths, query } };
+  return { props: { unit_id, unit: units[0], query } };
 }
 
 /* 
@@ -44,22 +37,16 @@ Needs a strat_name displayer, we'll be stricter with editing that
 Need interval suggest component (2), Need A color picker, Contact suggests.
 Tags for liths and environs; adding components for those too.
 */
-function UnitEdit(props: {
-  unit_id: string;
-  unit: UnitsView;
-  envs: EnvironUnit[];
-  liths: LithUnit[];
-  query: QueryI;
-}) {
-  const { unit, envs, liths, unit_id } = props;
+function UnitEdit(props: { unit_id: string; unit: UnitsView; query: QueryI }) {
+  const { unit } = props;
 
-  const model = { unit, envs, liths };
+  const model = { unit };
 
   const persistChanges = async (
     updatedModel: UnitEditorModel,
     changeSet: Partial<UnitEditorModel>
   ) => {
-    return await persistUnitChanges(unit, envs, liths, updatedModel, changeSet);
+    return await persistUnitChanges(unit, updatedModel, changeSet);
   };
 
   return h(BasePage, { query: props.query }, [

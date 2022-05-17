@@ -6,10 +6,7 @@ import pg, {
   LithUnit,
   UnitEditorModel,
 } from "../..";
-import {
-  conductChangeSet,
-  detectDeletionsAndAdditions,
-} from "../helpers";
+import { conductChangeSet, detectDeletionsAndAdditions } from "../helpers";
 
 /* 
 handles insertions and deletions for
@@ -29,7 +26,7 @@ async function handleCollections(
 
   if (additions.length > 0) {
     const inserts = additions.map((i) => {
-      return { unit_id, environ_id: i };
+      return { unit_id, [column]: i };
     });
     const { data, error } = await tableInsertMany(table, inserts);
   }
@@ -50,8 +47,6 @@ or added and then handle those changes
 */
 export async function persistUnitChanges(
   unit: UnitsView,
-  envs: EnvironUnit[],
-  liths: LithUnit[],
   updatedModel: UnitEditorModel,
   changeSet: Partial<UnitEditorModel>
 ) {
@@ -63,22 +58,22 @@ export async function persistUnitChanges(
     });
   }
 
-  if (changeSet.envs) {
+  if (changeSet.unit?.environ_unit) {
     await handleCollections(
       "unit_environs",
       "environ_id",
       unit.id,
-      envs,
-      changeSet.envs
+      unit.environ_unit ?? [],
+      changeSet.unit.environ_unit
     );
   }
-  if (changeSet.liths) {
+  if (changeSet.unit?.lith_unit) {
     await handleCollections(
       "unit_liths",
       "lith_id",
       unit.id,
-      liths,
-      changeSet.liths
+      unit.lith_unit ?? [],
+      changeSet.unit.lith_unit
     );
   }
   return updatedModel;

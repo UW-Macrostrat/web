@@ -28,8 +28,6 @@ export interface UnitEditorI extends UnitsView {
 
 export interface UnitEditorModel {
   unit: UnitEditorI;
-  envs: EnvironUnit[];
-  liths: LithUnit[];
 }
 
 export interface UnitEditorProps {
@@ -48,24 +46,31 @@ export function EnvTags(props: { large: boolean }) {
     isEditing: boolean;
     actions: any;
   } = useModelEditor();
-  const { envs } = model;
+  const {
+    unit: { environ_unit: envs },
+  } = model;
 
-  const tagData = envs.map((env) => {
-    return {
-      id: env.id,
-      color: env.environ_color,
-      name: env.environ,
-      description: env.environ_class,
-    };
-  });
+  const tagData =
+    envs?.map((env) => {
+      return {
+        id: env.id,
+        color: env.environ_color,
+        name: env.environ,
+        description: env.environ_class,
+      };
+    }) ?? [];
 
   const onClickDelete = (id: number) => {
-    const filteredEnvs = [...envs].filter((l) => l.id != id);
-    actions.updateState({ model: { envs: { $set: filteredEnvs } } });
+    const filteredEnvs = [...(envs ?? [])].filter((l) => l.id != id);
+    actions.updateState({
+      model: { unit: { environ_unit: { $set: filteredEnvs } } },
+    });
   };
 
   const onClick = (env: Partial<EnvironUnit>) => {
-    actions.updateState({ model: { envs: { $push: [env] } } });
+    actions.updateState({
+      model: { unit: { environ_unit: { $push: [env] } } },
+    });
   };
 
   return h("div.tag-container", [
@@ -86,24 +91,29 @@ export function LithTags(props: { large?: boolean }) {
     isEditing: boolean;
     actions: any;
   } = useModelEditor();
-  const { liths } = model;
+  const {
+    unit: { lith_unit: liths },
+  } = model;
 
-  const tagData = liths.map((lith) => {
-    return {
-      id: lith.id,
-      color: lith.lith_color,
-      name: lith.lith,
-      description: lith.lith_class,
-    };
-  });
+  const tagData =
+    liths?.map((lith) => {
+      return {
+        id: lith.id,
+        color: lith.lith_color,
+        name: lith.lith,
+        description: lith.lith_class,
+      };
+    }) ?? [];
 
   const onClickDelete = (id: number) => {
-    const filteredLiths = [...liths].filter((l) => l.id != id);
-    actions.updateState({ model: { liths: { $set: filteredLiths } } });
+    const filteredLiths = [...(liths ?? [])].filter((l) => l.id != id);
+    actions.updateState({
+      model: { unit: { lith_unit: { $set: filteredLiths } } },
+    });
   };
 
   const onClick = (lith: Partial<LithUnit>) => {
-    actions.updateState({ model: { liths: { $push: [lith] } } });
+    actions.updateState({ model: { unit: { lith_unit: { $push: [lith] } } } });
   };
 
   return h("div.tag-container", [
@@ -156,7 +166,7 @@ export function FormalStratName() {
 
   const initialSelected: StratNameDataI | undefined = unit?.strat_name
     ? {
-        value: unit.unit_strat_name || unit.strat_name.strat_name,
+        value: unit.strat_name.strat_name,
         data: unit.strat_name,
       }
     : undefined;

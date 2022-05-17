@@ -3,10 +3,9 @@ import {
   IntervalDataI,
   Table,
   IntervalSuggest,
-  UnitsView,
   UnitEditorModel,
 } from "~/index";
-import { Button, Checkbox, Dialog, TextArea } from "@blueprintjs/core";
+import { Button, Checkbox, TextArea } from "@blueprintjs/core";
 import { ModelEditor, useModelEditor } from "@macrostrat/ui-components";
 import styles from "../comp.module.scss";
 import { SubmitButton } from "..";
@@ -156,7 +155,9 @@ interface ToggleI extends UnitEditorProps {
 function MinEditorToggle(props: ToggleI) {
   const [add, setAdd] = useState(false);
 
-  const model = { unit: { new_section: false }, liths: [], envs: [] };
+  const model = {
+    unit: { new_section: false, lith_unit: [], environ_unit: [] },
+  };
 
   const persistChanges = (e: UnitEditorModel, c: Partial<UnitEditorModel>) => {
     props.persistChanges(e, c);
@@ -187,7 +188,6 @@ function MinEditorDialog(
   }
 ) {
   const { open, persistChanges, model, onCancel, title } = props;
-  console.log("rendered");
   return h(
     DraggableOverlay,
     {
