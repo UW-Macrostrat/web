@@ -295,8 +295,8 @@ function ColSecUnitsTable(props: {
   state: ColumnStateI | SectionStateI;
   onDragEnd: (r: DropResult) => void;
   onClickDivideCheckBox: (id: number) => void;
-  addUnitAt: (u: Partial<UnitEditorModel>, i: number) => void;
-  editUnitAt: (u: Partial<UnitEditorModel>, i: number) => void;
+  addUnitAt: (u: UnitEditorModel, index: number) => void;
+  editUnitAt: (u: UnitEditorModel, index: number) => void;
 }) {
   const {
     state: { units, sections, drag },
@@ -345,10 +345,8 @@ function ColSecUnitsTable(props: {
     editMode.mode == "edit" || editMode.copy
       ? {
           unit: units[index],
-          liths: units[index].lith_unit,
-          envs: units[index].environ_unit,
         }
-      : { unit: {}, liths: [], envs: [] };
+      : { unit: {} };
 
   return h("div", [
     h(MinEditorDialog, {
