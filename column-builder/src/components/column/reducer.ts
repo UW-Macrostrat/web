@@ -8,13 +8,19 @@ import { filterOrAddIds, UnitEditorModel, UnitsView } from "~/index";
     would add to units in a Sync Action
 */
 function persistUnit(unit: UnitEditorModel, position_bottom: number) {
+  let color = "#FFFFF";
+  if (
+    typeof unit.unit.lith_unit !== "undefined" &&
+    unit.unit.lith_unit.length > 0
+  ) {
+    color = unit.unit?.lith_unit[0].lith_color;
+  }
   const newUnit = {
     ...unit.unit,
-    lith_unit: [...unit.liths],
-    environ_unit: [...unit.envs],
+
     id: 666,
     position_bottom,
-    color: unit.liths[0].lith_color || "#FFFFF",
+    color,
   };
   return newUnit;
 }
@@ -59,7 +65,11 @@ const addUnitToTop = (
   for (let i = 0; i < units.length; i++) {
     units[i].position_bottom++;
   }
-  const newTopUnit = persistUnit(unit, units[0].position_bottom - 1);
+  const pBottom =
+    typeof units[0]?.position_bottom == "undefined"
+      ? 0
+      : units[0]?.position_bottom - 1;
+  const newTopUnit = persistUnit(unit, pBottom);
   const newUnits = [
     {
       ...newTopUnit,
@@ -70,26 +80,40 @@ const addUnitToTop = (
   return newUnits;
 };
 
+const addUnitAt = (
+  unit: UnitEditorModel,
+  units: UnitsView[],
+  index: number
+) => {
+  const pBottom = units[index]?.position_bottom;
+  const sectionId = units[index]?.section_id;
+  console.log(pBottom, sectionId);
+  for (let i = index; i < units.length; i++) {
+    units[i].position_bottom++;
+  }
+  const newUnit = { ...persistUnit(unit, pBottom), section_id: sectionId };
+  units.splice(index, 0, newUnit);
+  return units;
+};
+
 const addUnitToBottom = (
   unit: UnitEditorModel,
   units: UnitsView[],
   sections: SectionUnits
 ) => {
   // add to bottom
-  const newBottomUnit = persistUnit(
-    unit,
-    units[units.length - 1].position_bottom + 1
-  );
+  const pBottom =
+    typeof units[0]?.position_bottom == "undefined"
+      ? 0
+      : units[0]?.position_bottom + 1;
+  const newBottomUnit = persistUnit(unit, pBottom);
 
   const newUnits_ = [
     ...units,
 
     {
       ...newBottomUnit,
-      section_id: getSectionId(
-        JSON.parse(JSON.stringify(sections)),
-        units.length - 1
-      ),
+      section_id: getSectionId(sections, units.length - 1),
     },
   ];
   return newUnits_;
@@ -112,7 +136,13 @@ type ToggleUnitsView = { type: "toggle-units-view" };
 type AddUnitAt = {
   type: "add-unit-at";
   index: number;
-  unit: Partial<UnitEditorModel>;
+  unit: UnitEditorModel;
+};
+
+type EditUnitAt = {
+  type: "edit-unit-at";
+  index: number;
+  unit: UnitEditorModel;
 };
 
 export type SyncActions =
@@ -122,6 +152,7 @@ export type SyncActions =
   | MergeIds
   | ToggleDrag
   | AddUnitAt
+  | EditUnitAt
   | ToggleUnitsView;
 
 export interface ColumnStateI {
@@ -178,6 +209,10 @@ const columnReducer = (state: ColumnStateI, action: SyncActions) => {
           currentUnits_,
           currentSections_
         );
+      } else {
+        // we are adding somewhere in the middle
+        // first increment up all the position_bottoms below it
+        newUnits = addUnitAt(action.unit, currentUnits_, action.index);
       }
 
       const newSections = calculateSecionUnitIndexs(newUnits);
@@ -187,7 +222,16 @@ const columnReducer = (state: ColumnStateI, action: SyncActions) => {
         units: newUnits,
         sections: newSections,
       };
-
+    case "edit-unit-at":
+      const newUnits__ = JSON.parse(JSON.stringify(state.units));
+      const unitToEdit = {
+        ...action.unit.unit,
+      };
+      newUnits__.splice(action.index, 1, unitToEdit);
+      return {
+        ...state,
+        units: newUnits__,
+      };
     case "dropped-unit":
       if (typeof action.result.destination === "undefined") return state;
 
