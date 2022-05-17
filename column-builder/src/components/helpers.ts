@@ -121,6 +121,7 @@ const colorMap: { [name: string]: string } = {
 };
 
 const convertColorNameToHex = (name: string): string => {
+  if (name[0] === "#") return name;
   return colorMap[name] ?? "#ffffff";
 };
 
