@@ -112,11 +112,11 @@ function UnitEdit(props: { onCancel: () => void }) {
               onChange: (e) => updateUnit("notes", e.target.value),
             }),
             h("div", { style: { marginTop: "10px" } }, [
-              h(Checkbox, {
-                checked: unit.new_section,
-                onChange: () => updateUnit("new_section", !unit.new_section),
-                label: "Make new section with this unit",
-              }),
+              // h(Checkbox, {
+              //   checked: unit.new_section,
+              //   onChange: () => updateUnit("new_section", !unit.new_section),
+              //   label: "Make new section with this unit",
+              // }),
               h(SubmitButton),
               h(Button, { intent: "danger", onClick: props.onCancel }, [
                 "Cancel",
@@ -149,6 +149,7 @@ function MinUnitEditor(props: MinUnitEditorProps) {
 
 interface ToggleI extends UnitEditorProps {
   btnText: string;
+  btnPosition: "top" | "bottom";
 }
 
 function MinEditorToggle(props: ToggleI) {
@@ -168,7 +169,11 @@ function MinEditorToggle(props: ToggleI) {
   };
 
   return h("div", [
-    h(AddButton, { onClick: () => setAdd(true) }, [props.btnText]),
+    h.if(props.btnPosition == "top")(
+      AddButton,
+      { onClick: () => setAdd(!add) },
+      [props.btnText]
+    ),
     h(Collapse, { isOpen: add }, [
       h(MinEditorCard, {
         persistChanges,
@@ -177,6 +182,11 @@ function MinEditorToggle(props: ToggleI) {
         title: props.btnText,
       }),
     ]),
+    h.if(props.btnPosition == "bottom")(
+      AddButton,
+      { onClick: () => setAdd(!add) },
+      [props.btnText]
+    ),
   ]);
 }
 
