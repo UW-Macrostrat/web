@@ -38,6 +38,7 @@ export interface ColBtnMenuI {
   };
   divideSection: () => void;
   mergeSections: () => void;
+  noSectionView: boolean;
 }
 
 function ColumnPageBtnMenu(props: ColBtnMenuI) {
@@ -55,7 +56,7 @@ function ColumnPageBtnMenu(props: ColBtnMenuI) {
       },
       ["Unit view"]
     ),
-    h(
+    h.if(!props.noSectionView)(
       Button,
       {
         onClick: props.toggleUnitsView,
@@ -79,6 +80,6 @@ function ColumnPageBtnMenu(props: ColBtnMenuI) {
     }),
   ]);
 }
-export * from "./reducer";
+export * from "../unit/table/reducer";
 export * from "./map";
 export { SectionUnitCheckBox, MergeDivideBtn, ColumnPageBtnMenu };
