@@ -4,7 +4,7 @@ import { GetServerSideProps } from "next";
 import pg, {
   BasePage,
   EditButton,
-  CreateButton,
+  createUnitBySections,
   MinEditorToggle,
   UnitsView,
   ColSectionI,
@@ -15,10 +15,7 @@ import pg, {
   getIdHierarchy,
   QueryI,
 } from "~/index";
-import {
-  calculateSecionUnitIndexs,
-  columnReducer,
-} from "~/components/column/reducer";
+import { columnReducer } from "~/components/column/reducer";
 import { DropResult } from "react-beautiful-dnd";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -46,30 +43,35 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     .order("position_bottom", { ascending: true })
     .match({ col_id: col_id });
 
+  const sections = createUnitBySections(units);
   return {
-    props: { col_id, colSections: d, column, units, unit_error, query },
+    props: {
+      col_id,
+      colSections: d,
+      column,
+      unit_error,
+      query,
+      sections,
+    },
   };
 };
 
 export default function Columns(props: {
   col_id: string;
   colSections: ColSectionI[];
-  units: UnitsView[];
   column: { col_name: string }[];
   unit_error: any;
   query: QueryI;
+  sections: { [section_id: number | string]: UnitsView[] }[];
 }) {
-  const { col_id, colSections, column, units, query } = props;
-
-  const unitIndexsBySection = calculateSecionUnitIndexs(units);
+  const { col_id, colSections, column, query } = props;
 
   const [state, dispatch] = useReducer(columnReducer, {
-    units,
-    sections: unitIndexsBySection,
+    sections: props.sections,
     mergeIds: [],
     divideIds: [],
     drag: false,
-    unitsView: false,
+    unitsView: true,
   });
 
   const onChange = (id: number) => {
@@ -83,18 +85,36 @@ export default function Columns(props: {
     dispatch({ type: "dropped-unit", result: r });
   };
 
-  const addUnitAt = (unit: UnitEditorModel, index: number) => {
+  const addUnitAt = (
+    unit: UnitEditorModel,
+    section_index: number,
+    unit_index: number
+  ) => {
     /// callback for adding a unit in column at index i
     // should probably have a way to split the section as well..
-    console.log("Adding At", unit, index);
-    dispatch({ type: "add-unit-at", index, unit });
+    console.log("Adding At", unit, section_index, unit, unit_index);
+    dispatch({
+      type: "add-unit-at",
+      section_index,
+      unit,
+      unit_index,
+    });
   };
 
-  const editUnitAt = (unit: UnitEditorModel, index: number) => {
+  const editUnitAt = (
+    unit: UnitEditorModel,
+    section_index: number,
+    unit_index: number
+  ) => {
     /// callback for editing a unit
     // should probably have a way to split the section as well..
-    console.log("Editing At", unit, index);
-    dispatch({ type: "edit-unit-at", index, unit });
+    console.log("Editing At", section_index, unit, unit_index);
+    dispatch({
+      type: "edit-unit-at",
+      section_index,
+      unit,
+      unit_index,
+    });
   };
 
   const headers = [
@@ -104,7 +124,7 @@ export default function Columns(props: {
     "Bottom interval",
     "# of units",
   ];
-  console.log(state);
+
   return h(BasePage, { query }, [
     h("h3", [
       `Sections for Column: ${column[0].col_name}`,
@@ -126,19 +146,24 @@ export default function Columns(props: {
       divideSection: () => {},
       mergeSections: () => {},
     }),
-    h("div", [
+    h.if(colSections.length > 0 && !state.unitsView)(ColSectionsTable, {
+      colSections,
+      onChange,
+      headers,
+    }),
+    h.if(state.sections.length > 0 && state.unitsView)("div", [
       //@ts-ignore
       h(MinEditorToggle, {
         btnText: "create new unit on top",
         persistChanges: (e, c) =>
-          dispatch({ type: "add-unit-at", index: 0, unit: e }),
+          dispatch({
+            type: "add-unit-at",
+            section_index: 0,
+            unit: e,
+            unit_index: 0,
+          }),
       }),
-      h.if(colSections.length > 0 && !state.unitsView)(ColSectionsTable, {
-        colSections,
-        onChange,
-        headers,
-      }),
-      h.if(state.units.length > 0 && state.unitsView)(ColSecUnitsTable, {
+      h(ColSecUnitsTable, {
         onClickDivideCheckBox: (id: number) =>
           dispatch({ type: "set-divide-ids", id }),
         state,
@@ -151,7 +176,11 @@ export default function Columns(props: {
         persistChanges: (e, c) =>
           dispatch({
             type: "add-unit-at",
-            index: state.units.length + 1,
+            section_index: state.sections.length - 1,
+            // an annoying way to get the index of the last unit in last section
+            unit_index: Object.values(
+              state.sections[state.sections.length - 1]
+            )[0].length,
             unit: e,
           }),
 
