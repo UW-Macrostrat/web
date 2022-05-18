@@ -8,16 +8,16 @@ import {
   UnitsView,
   convertColorNameToHex,
   ColSectionsTable,
-  ColumnPageBtnMenu,
   ColSectionI,
   MinEditorToggle,
 } from "~/index";
-import { SectionUnitCheckBox, columnReducer } from "../../column";
-import { UnitLithHelperText, UnitRowContextMenu } from "../common-editing";
-import { MinEditorCard } from "../minimal-unit-editor";
+import { columnReducer } from "../column";
+import { UnitLithHelperText, UnitRowContextMenu } from "../unit/common-editing";
+import { MinEditorCard } from "../unit/minimal-unit-editor";
 import { DragDropContext } from "react-beautiful-dnd";
-import { Table, Row } from "../../table";
+import { Table, Row } from "../table";
 import { DropResult } from "react-beautiful-dnd";
+import { ColumnPageBtnMenu, SectionUnitCheckBox } from "./buttons";
 
 import styles from "~/components/comp.module.scss";
 
