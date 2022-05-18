@@ -46,10 +46,23 @@ function ColumnPageBtnMenu(props: ColBtnMenuI) {
   } = props;
   //@ts-ignore
   return h(ButtonGroup, [
-    h.if(typeof props.toggleUnitsView !== "undefined")(
+    h(
       Button,
-      { onClick: props.toggleUnitsView },
-      [unitsView ? "Section view" : "Unit view"]
+      {
+        onClick: props.toggleUnitsView,
+        intent: unitsView ? "primary" : "none",
+        disabled: unitsView,
+      },
+      ["Unit view"]
+    ),
+    h(
+      Button,
+      {
+        onClick: props.toggleUnitsView,
+        intent: !unitsView ? "primary" : "none",
+        disabled: !unitsView,
+      },
+      ["Section View"]
     ),
     h(Button, { onClick: props.toggleDrag, disabled: !unitsView }, [
       drag ? "Disable drag" : "Enable drag",
@@ -66,6 +79,6 @@ function ColumnPageBtnMenu(props: ColBtnMenuI) {
     }),
   ]);
 }
-
+export * from "./reducer";
 export * from "./map";
 export { SectionUnitCheckBox, MergeDivideBtn, ColumnPageBtnMenu };

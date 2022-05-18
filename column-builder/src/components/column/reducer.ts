@@ -7,7 +7,7 @@ import { filterOrAddIds, UnitEditorModel, UnitsView } from "~/index";
     then would return db representation which we 
     would add to units in a Sync Action
 */
-function persistUnit(unit: UnitEditorModel, position_bottom: number) {
+function persistUnit(unit: UnitEditorModel) {
   let color = "#FFFFF";
   if (
     typeof unit.unit.lith_unit !== "undefined" &&
@@ -17,110 +17,21 @@ function persistUnit(unit: UnitEditorModel, position_bottom: number) {
   }
   const newUnit = {
     ...unit.unit,
-
-    id: 666,
-    position_bottom,
-    color,
+    id: unit.unit.id ?? 666,
+    color: unit.unit.color ?? color,
   };
   return newUnit;
 }
 
-function calculateSecionUnitIndexs(units: UnitsView[]) {
-  const unitIndexsBySection: { [section_id: number]: [number, number] } = {};
-  units.map((unit, i) => {
-    if (unit.section_id in unitIndexsBySection) {
-      unitIndexsBySection[unit.section_id][1] = i;
-    } else {
-      unitIndexsBySection[unit.section_id] = [i, i];
-    }
-  });
-  return unitIndexsBySection;
-}
-
 // a little function to help us with reordering the result
-const reorder = (list: any[], startIndex: number, endIndex: number): any[] => {
-  const result = Array.from(list);
-  const [removed] = result.splice(startIndex, 1);
-  result.splice(endIndex, 0, removed);
-
-  return result;
+const reorder = (list: any[], startIndex: number, endIndex: number): void => {
+  const [removed] = list.splice(startIndex, 1);
+  list.splice(endIndex, 0, removed);
 };
 
-const getSectionId = (sections: SectionUnits, index: number) => {
-  let id = "0";
-  for (const key in sections) {
-    const [begin, end] = sections[key];
-    if (index >= begin && index <= end) {
-      id = key;
-    }
-  }
-  return parseInt(id);
-};
-
-const addUnitToTop = (
-  unit: UnitEditorModel,
-  units: UnitsView[],
-  sections: SectionUnits
-) => {
-  for (let i = 0; i < units.length; i++) {
-    units[i].position_bottom++;
-  }
-  const pBottom =
-    typeof units[0]?.position_bottom == "undefined"
-      ? 0
-      : units[0]?.position_bottom - 1;
-  const newTopUnit = persistUnit(unit, pBottom);
-  const newUnits = [
-    {
-      ...newTopUnit,
-      section_id: getSectionId(sections, 0),
-    },
-    ...units,
-  ];
-  return newUnits;
-};
-
-const addUnitAt = (
-  unit: UnitEditorModel,
-  units: UnitsView[],
-  index: number
-) => {
-  const pBottom = units[index]?.position_bottom;
-  const sectionId = units[index]?.section_id;
-  console.log(pBottom, sectionId);
-  for (let i = index; i < units.length; i++) {
-    units[i].position_bottom++;
-  }
-  const newUnit = { ...persistUnit(unit, pBottom), section_id: sectionId };
-  units.splice(index, 0, newUnit);
-  return units;
-};
-
-const addUnitToBottom = (
-  unit: UnitEditorModel,
-  units: UnitsView[],
-  sections: SectionUnits
-) => {
-  // add to bottom
-  const pBottom =
-    typeof units[0]?.position_bottom == "undefined"
-      ? 0
-      : units[0]?.position_bottom + 1;
-  const newBottomUnit = persistUnit(unit, pBottom);
-
-  const newUnits_ = [
-    ...units,
-
-    {
-      ...newBottomUnit,
-      section_id: getSectionId(sections, units.length - 1),
-    },
-  ];
-  return newUnits_;
-};
 /////////////// Data Types //////////////////
 
-type SectionUnits = { [section_id: number]: [number, number] };
+type SectionUnits = { [section_id: string | number]: UnitsView[] }[];
 
 /////////////// Action Types ///////////////
 
@@ -135,13 +46,15 @@ type ToggleDrag = { type: "toggle-drag" };
 type ToggleUnitsView = { type: "toggle-units-view" };
 type AddUnitAt = {
   type: "add-unit-at";
-  index: number;
+  section_index: number;
+  unit_index: number;
   unit: UnitEditorModel;
 };
 
 type EditUnitAt = {
   type: "edit-unit-at";
-  index: number;
+  section_index: number;
+  unit_index: number;
   unit: UnitEditorModel;
 };
 
@@ -157,7 +70,6 @@ export type SyncActions =
 
 export interface ColumnStateI {
   sections: SectionUnits;
-  units: UnitsView[];
   mergeIds: number[];
   divideIds: number[];
   drag: boolean;
@@ -165,6 +77,7 @@ export interface ColumnStateI {
 }
 
 const columnReducer = (state: ColumnStateI, action: SyncActions) => {
+  const currSections: SectionUnits = JSON.parse(JSON.stringify(state.sections));
   switch (action.type) {
     case "set-merge-ids":
       const currentIds = [...state.mergeIds];
@@ -197,97 +110,69 @@ const columnReducer = (state: ColumnStateI, action: SyncActions) => {
       return state;
     case "add-unit-at":
       // this will encapsulate the add top and bottom
-      const currentUnits_ = JSON.parse(JSON.stringify(state.units));
-      const currentSections_ = JSON.parse(JSON.stringify(state.sections));
-      let newUnits = currentUnits_;
-      if (action.index <= 0) {
-        ///add to top
-        newUnits = addUnitToTop(action.unit, currentUnits_, currentSections_);
-      } else if (action.index > state.units.length) {
-        newUnits = addUnitToBottom(
-          action.unit,
-          currentUnits_,
-          currentSections_
-        );
-      } else {
-        // we are adding somewhere in the middle
-        // first increment up all the position_bottoms below it
-        newUnits = addUnitAt(action.unit, currentUnits_, action.index);
-      }
+      // mutate a the sections list in place
+      const section_id = Object.keys(currSections[action.section_index])[0];
 
-      const newSections = calculateSecionUnitIndexs(newUnits);
-
+      currSections[action.section_index][section_id].splice(
+        action.unit_index,
+        0,
+        persistUnit(action.unit)
+      );
       return {
         ...state,
-        units: newUnits,
-        sections: newSections,
+        sections: currSections,
       };
     case "edit-unit-at":
-      const newUnits__ = JSON.parse(JSON.stringify(state.units));
-      const unitToEdit = {
-        ...action.unit.unit,
-      };
-      newUnits__.splice(action.index, 1, unitToEdit);
+      const section_id_ = Object.keys(currSections[action.section_index])[0];
+
+      currSections[action.section_index][section_id_].splice(
+        action.unit_index,
+        1,
+        persistUnit(action.unit)
+      );
       return {
         ...state,
-        units: newUnits__,
+        sections: currSections,
       };
     case "dropped-unit":
       if (typeof action.result.destination === "undefined") return state;
-
-      // somewhat non-effcient way to create deep copy
-      let currUnits: UnitsView[] = JSON.parse(JSON.stringify([...state.units]));
       let source_index = action.result.source.index;
       let destination_index = action.result.destination.index;
-      /// check droppableIds
-      const sourceDroppableId = action.result.source.droppableId;
-      const destDroppableId = action.result.destination.droppableId;
-      if (
-        source_index < destination_index &&
-        sourceDroppableId !== destDroppableId
-      ) {
-        destination_index--;
-      }
 
-      // assign new p_b to dragged unit
-      currUnits[source_index].position_bottom =
-        currUnits[destination_index].position_bottom;
+      /// our drop result source and destination provide
+      // The index of where to find the section in our list as well
+      //  as the section_id itself.
+      const [sourceSectionIndex, sourceSection] =
+        action.result.source.droppableId.split(" ");
+      const [destSectionIndex, destSection] =
+        action.result.destination.droppableId.split(" ");
 
-      currUnits = reorder(currUnits, source_index, destination_index);
-
-      //if we moved a unit up the column source > destination => increment
-      // all p_bs from source+1 -> destination
-      if (source_index > destination_index) {
-        for (let i = destination_index + 1; i <= source_index; i++) {
-          currUnits[i].position_bottom++;
-        }
-      } else if (source_index < destination_index) {
-        for (let i = destination_index - 1; i >= source_index; i--) {
-          currUnits[i].position_bottom--;
-        }
-      }
-
-      if (sourceDroppableId !== destDroppableId) {
-        // we changed sections!
-        const finalSectionId = parseInt(destDroppableId);
-        const unitToChange: UnitsView = JSON.parse(
-          JSON.stringify(currUnits[destination_index])
+      if (sourceSection === destSection) {
+        // same unit
+        reorder(
+          currSections[parseInt(sourceSectionIndex)][sourceSection],
+          source_index,
+          destination_index
         );
-        unitToChange["section_id"] = finalSectionId;
-        currUnits.splice(destination_index, 1, unitToChange);
-        const newSections = calculateSecionUnitIndexs(currUnits);
-        return {
-          ...state,
-          units: currUnits,
-          sections: newSections,
-        };
+      } else {
+        // we changed sections!
+        const [movedUnit] = currSections[parseInt(sourceSectionIndex)][
+          sourceSection
+        ].splice(source_index, 1);
+        movedUnit["section_id"] = parseInt(destSection);
+
+        currSections[parseInt(destSectionIndex)][destSection].splice(
+          destination_index,
+          0,
+          movedUnit
+        );
       }
 
       return {
         ...state,
-        units: currUnits,
+        sections: currSections,
       };
   }
 };
 
-export { columnReducer, calculateSecionUnitIndexs };
+export { columnReducer };

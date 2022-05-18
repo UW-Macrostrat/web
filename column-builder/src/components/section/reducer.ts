@@ -56,7 +56,7 @@ type EditUnitAt = {
   unit: UnitEditorModel;
 };
 
-export type SyncActions =
+export type SyncSectActions =
   | SetDivideIds
   | AddUnitBottom
   | AddUnitTop
@@ -70,7 +70,7 @@ export interface SectionStateI {
   units: UnitsView[];
   divideIds: number[];
   drag: boolean;
-  sections: { [section_id: number]: [number, number] };
+  sections: { [section_id: string | number]: UnitsView[] }[];
 }
 
 // a little function to help us with reordering the result
@@ -82,7 +82,7 @@ const reorder = (list: any[], startIndex: number, endIndex: number): any[] => {
   return result;
 };
 
-const sectionReducer = (state: SectionStateI, action: SyncActions) => {
+const sectionReducer = (state: SectionStateI, action: SyncSectActions) => {
   switch (action.type) {
     case "toggle-drag":
       return {
@@ -149,7 +149,7 @@ const sectionReducer = (state: SectionStateI, action: SyncActions) => {
       return {
         ...state,
         units: current_units,
-        sections: { [state.section_id]: [0, state.units.length] },
+        sections: { [state.section_id]: [0, state.units.length - 1] },
       };
 
     case "edit-unit-at":
