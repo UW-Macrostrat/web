@@ -5,7 +5,7 @@ import {
   IntervalSuggest,
   UnitEditorModel,
 } from "~/index";
-import { Button, Checkbox, TextArea } from "@blueprintjs/core";
+import { Button, Checkbox, TextArea, Card, Collapse } from "@blueprintjs/core";
 import { ModelEditor, useModelEditor } from "@macrostrat/ui-components";
 import styles from "../comp.module.scss";
 import { SubmitButton } from "..";
@@ -18,9 +18,8 @@ import {
   LithTags,
   UnitEditorI,
 } from "./common-editing";
-import React, { ReactChild, useEffect, useState } from "react";
+import { useState } from "react";
 import { AddButton } from "../buttons";
-import { DraggableOverlay } from "~/components/draggable-overlay";
 const h = hyperStyled(styles);
 
 function UnitEdit(props: { onCancel: () => void }) {
@@ -113,11 +112,11 @@ function UnitEdit(props: { onCancel: () => void }) {
               onChange: (e) => updateUnit("notes", e.target.value),
             }),
             h("div", { style: { marginTop: "10px" } }, [
-              h(Checkbox, {
-                checked: unit.new_section,
-                onChange: () => updateUnit("new_section", !unit.new_section),
-                label: "Make new section with this unit",
-              }),
+              // h(Checkbox, {
+              //   checked: unit.new_section,
+              //   onChange: () => updateUnit("new_section", !unit.new_section),
+              //   label: "Make new section with this unit",
+              // }),
               h(SubmitButton),
               h(Button, { intent: "danger", onClick: props.onCancel }, [
                 "Cancel",
@@ -150,6 +149,7 @@ function MinUnitEditor(props: MinUnitEditorProps) {
 
 interface ToggleI extends UnitEditorProps {
   btnText: string;
+  btnPosition: "top" | "bottom";
 }
 
 function MinEditorToggle(props: ToggleI) {
@@ -169,39 +169,42 @@ function MinEditorToggle(props: ToggleI) {
   };
 
   return h("div", [
-    h(MinEditorDialog, {
-      open: add,
-      persistChanges,
-      onCancel,
-      model,
-      title: props.btnText,
-    }),
-    h(AddButton, { onClick: () => setAdd(true) }, [props.btnText]),
+    h.if(props.btnPosition == "top")(
+      AddButton,
+      { onClick: () => setAdd(!add) },
+      [props.btnText]
+    ),
+    h(Collapse, { isOpen: add }, [
+      h(MinEditorCard, {
+        persistChanges,
+        onCancel,
+        model,
+        title: props.btnText,
+      }),
+    ]),
+    h.if(props.btnPosition == "bottom")(
+      AddButton,
+      { onClick: () => setAdd(!add) },
+      [props.btnText]
+    ),
   ]);
 }
 
-function MinEditorDialog(
+function MinEditorCard(
   props: UnitEditorProps & {
-    open: boolean;
     onCancel: () => void;
     title?: string;
   }
 ) {
-  const { open, persistChanges, model, onCancel, title } = props;
-  return h(
-    DraggableOverlay,
-    {
-      open,
-      title,
-    },
-    [
-      h(MinUnitEditor, {
-        model,
-        persistChanges,
-        onCancel,
-      }),
-    ]
-  );
+  const { persistChanges, model, onCancel, title } = props;
+  return h(Card, { style: { padding: 0, paddingBottom: "5px" } }, [
+    h("div.header", [title]),
+    h(MinUnitEditor, {
+      model,
+      persistChanges,
+      onCancel,
+    }),
+  ]);
 }
 
-export { MinUnitEditor, MinEditorToggle, MinEditorDialog };
+export { MinUnitEditor, MinEditorToggle, MinEditorCard };

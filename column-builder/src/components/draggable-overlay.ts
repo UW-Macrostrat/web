@@ -79,11 +79,10 @@ function DraggableOverlay(props: DraggableOverlayPropsI) {
     useTallContent: false,
   };
 
-
   return h(Overlay, { isOpen: open, ...overlayProperties }, [
     h("div", {}, [
       h(Card, { style: { padding: 0, paddingBottom: "5px" }, elevation: 4 }, [
-        h("div.header", { onMouseDown: onMouseDown }, [props.title]),
+        h("div.header-drag", { onMouseDown: onMouseDown }, [props.title]),
         children,
       ]),
     ]),
