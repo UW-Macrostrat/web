@@ -4,7 +4,6 @@ import { hyperStyled } from "@macrostrat/hyper";
 import {
   ColumnStateI,
   UnitEditorModel,
-  useRowUnitEditor,
   UnitsView,
   convertColorNameToHex,
   ColSectionsTable,
@@ -12,12 +11,19 @@ import {
   MinEditorToggle,
 } from "~/index";
 import { columnReducer } from "../column";
-import { UnitLithHelperText, UnitRowContextMenu } from "../unit/common-editing";
+import { UnitLithHelperText } from "../unit/common-editing";
 import { MinEditorCard } from "../unit/minimal-unit-editor";
 import { DragDropContext } from "react-beautiful-dnd";
-import { Table, Row } from "../table";
+import { Table, DraggableRow } from "../table";
 import { DropResult } from "react-beautiful-dnd";
-import { ColumnPageBtnMenu, SectionUnitCheckBox } from "./buttons";
+import {
+  ColumnPageBtnMenu,
+  SectionUnitCheckBox,
+  UnitRowContextMenu,
+  AddBtnBetweenRows,
+  UNIT_ADD_POISITON,
+  useRowUnitEditor,
+} from "./helpers";
 
 import styles from "~/components/comp.module.scss";
 
@@ -70,15 +76,6 @@ function UnitRowCellGroup(props: {
   ]);
 }
 
-/* 
-This needs to internally handle context options of... create new unit above, below, edit current, 
-copying unit up or down. The differences just position the unit editor above or below, the model,
-and the persistChanges function --> some dispatch to the reducer.
-
-State will be this object of section_ids as keys and a list of the respective units.
-Or do we only keep track of the indices of the units that below to section, that way
-that state is still holding a list of units.. easier for handling state.
-*/
 function ColSecUnitsTable(props: {
   state: ColumnStateI;
   onDragEnd: (r: DropResult) => void;
@@ -183,13 +180,30 @@ function ColSecUnitsTable(props: {
                   ]),
                 ]),
                 h(
-                  Row,
+                  DraggableRow,
                   {
                     key: unit.id,
                     index: j,
                     drag: props.state.drag,
                     draggableId: unit.unit_strat_name + unit.id.toString(),
                     href: undefined,
+                    rowComponent: h("tr", [
+                      h(
+                        "td",
+                        { colSpan: headers.length, style: { padding: 0 } },
+                        [
+                          h(AddBtnBetweenRows, {
+                            onClick: () =>
+                              triggerEditor(
+                                UNIT_ADD_POISITON.BELOW,
+                                j,
+                                i,
+                                false
+                              ),
+                          }),
+                        ]
+                      ),
+                    ]),
                   },
                   [
                     h(UnitRowCellGroup, {
