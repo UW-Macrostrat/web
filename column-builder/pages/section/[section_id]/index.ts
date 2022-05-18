@@ -10,7 +10,7 @@ import { BasePage, ColSecUnitsTable } from "~/index";
 import { GetServerSideProps } from "next";
 import { MinEditorToggle } from "~/components/unit/minimal-unit-editor";
 import { useReducer } from "react";
-import { sectionReducer } from "../../../src/components/section/reducer";
+import { sectionReducer } from "~/components/section/reducer";
 import { DropResult } from "react-beautiful-dnd";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -59,6 +59,7 @@ function Section(props: {
       destination: destination.index,
     });
   };
+
   const addUnitAt = (unit: UnitEditorModel, index: number) => {
     dispatch({ type: "add-unit-at", index, unit });
   };
@@ -68,7 +69,7 @@ function Section(props: {
   const divideSection = () => {
     console.log("Dividing Section", state.divideIds);
   };
-  console.log(state);
+
   return h(BasePage, { query: props.query }, [
     h("h3", [`Units in Section #${section_id}`]),
     h(ColumnPageBtnMenu, {

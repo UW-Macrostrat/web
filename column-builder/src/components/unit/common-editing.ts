@@ -208,9 +208,15 @@ enum UNIT_ADD_POISITON {
 
 export interface UnitRowContextMenuI {
   // either we are adding a new unit above, below or editing the current unit
-  triggerEditor: (e: UNIT_ADD_POISITON, i: number, copy: boolean) => void;
+  triggerEditor: (
+    e: UNIT_ADD_POISITON,
+    unit_index: number,
+    section_index: number,
+    copy: boolean
+  ) => void;
   unit: UnitsView;
-  index: number;
+  unit_index: number;
+  section_index: number;
 }
 function UnitRowContextMenu(props: UnitRowContextMenuI) {
   const SubMenu = ({ pos }: { pos: UNIT_ADD_POISITON }) => {
@@ -218,12 +224,19 @@ function UnitRowContextMenu(props: UnitRowContextMenuI) {
       h(MenuItem, {
         text: `Copy unit #${props.unit.id}`,
         icon: "duplicate",
-        onClick: () => props.triggerEditor(pos, props.index, true),
+        onClick: () =>
+          props.triggerEditor(pos, props.unit_index, props.section_index, true),
       }),
       h(MenuItem, {
         text: `With empty unit`,
         icon: "new-object",
-        onClick: () => props.triggerEditor(pos, props.index, false),
+        onClick: () =>
+          props.triggerEditor(
+            pos,
+            props.unit_index,
+            props.section_index,
+            false
+          ),
       }),
     ]);
   };
@@ -250,7 +263,12 @@ function UnitRowContextMenu(props: UnitRowContextMenuI) {
         text: `Edit unit #${props.unit.id}`,
         icon: "annotation",
         onClick: () =>
-          props.triggerEditor(UNIT_ADD_POISITON.EDIT, props.index, true),
+          props.triggerEditor(
+            UNIT_ADD_POISITON.EDIT,
+            props.unit_index,
+            props.section_index,
+            true
+          ),
       }),
       h(MenuDivider),
       h(MenuItem, {
@@ -274,14 +292,21 @@ interface EditModeI {
 
 const useRowUnitEditor = () => {
   const [editOpen, setEditOpen] = useState(false);
-  const [index, setIndex] = useState(0);
+  const [unit_index, setUnitIndex] = useState(0);
+  const [section_index, setSectionIndex] = useState(0);
   const [editMode, setEditMode] = useState<EditModeI>({
     mode: UNIT_ADD_POISITON.EDIT,
     copy: true,
   });
 
-  const triggerEditor = (e: UNIT_ADD_POISITON, i: number, copy: boolean) => {
-    setIndex(i);
+  const triggerEditor = (
+    e: UNIT_ADD_POISITON,
+    unit_index: number,
+    section_index: number,
+    copy: boolean
+  ) => {
+    setUnitIndex(unit_index);
+    setSectionIndex(section_index);
     setEditMode({ mode: e, copy });
     setEditOpen(true);
   };
@@ -300,7 +325,8 @@ const useRowUnitEditor = () => {
 
   return {
     triggerEditor,
-    index,
+    unit_index,
+    section_index,
     editOpen,
     styles: rowBorderStyles,
     editMode,
