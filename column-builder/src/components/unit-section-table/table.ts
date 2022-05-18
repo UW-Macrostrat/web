@@ -162,7 +162,11 @@ function ColSecUnitsTable(props: {
                 section_index == i &&
                 editMode.mode === "below";
 
-              const openTop = editOpen && !openBottom;
+              const openTop =
+                editOpen &&
+                unit_index == j &&
+                section_index == i &&
+                editMode.mode !== "below";
 
               return h(React.Fragment, [
                 h.if(openTop)("tr", [
