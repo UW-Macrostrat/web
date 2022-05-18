@@ -71,14 +71,18 @@
   width: 100%;
 }
 
-.header {
+.header,
+.header-drag {
   min-height: 15px;
   padding: 5px;
   padding-left: 10px;
   text-transform: capitalize;
-  font-size: 20px;
+  font-size: 15px;
   background: rgb(211, 216, 222);
   font-weight: bold;
+}
+
+.header-drag {
   cursor: grab;
   &:active {
     cursor: grabbing;
