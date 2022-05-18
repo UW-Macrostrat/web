@@ -12,7 +12,7 @@ import {
   DroppableProvided,
   DropResult,
 } from "react-beautiful-dnd";
-import { Card, Icon } from "@blueprintjs/core";
+import { Card, Icon, Button } from "@blueprintjs/core";
 
 const h = hyperStyled(styles);
 
@@ -22,6 +22,7 @@ interface RowProps {
   index: number;
   href?: string;
   drag?: boolean;
+  rowComponent: React.ReactElement;
 }
 
 const getItemStyle = (isDragging: boolean, draggableStyle: any) => ({
@@ -41,7 +42,11 @@ const RowWrapper = (props: {
   }
 };
 
-function Row(props: RowProps) {
+function Row(props: { href: string; children: ReactChild }) {
+  return h(RowWrapper, { link: props.href }, [h("tr", [props.children])]);
+}
+
+function DraggableRow(props: RowProps) {
   const { draggableId = "", drag = false } = props;
   return h(
     Draggable,
@@ -66,12 +71,19 @@ function Row(props: RowProps) {
               ),
             },
             [
-              h.if(drag)("td", { ...provided.dragHandleProps, width: "2%" }, [
-                h(Icon, { icon: "drag-handle-vertical" }),
-              ]),
+              h.if(drag)(
+                "td",
+                {
+                  ...provided.dragHandleProps,
+                  width: "2%",
+                  style: { verticalAlign: "middle" },
+                },
+                [h(Icon, { icon: "drag-handle-vertical" })]
+              ),
               props.children,
             ]
           ),
+          props.rowComponent,
         ]);
       },
     ]
@@ -176,4 +188,4 @@ function TableHeader(props: { headers: any[]; title?: string }) {
   ]);
 }
 
-export { Row, Table, FeatureCell, TableHeader };
+export { Row, Table, FeatureCell, TableHeader, DraggableRow };

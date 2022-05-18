@@ -2,7 +2,7 @@ import { hyperStyled } from "@macrostrat/hyper";
 import styles from "../comp.module.scss";
 import { ColSectionI } from "~/types";
 import { Table, Row } from "../table";
-import { SectionUnitCheckBox } from "../column";
+import { SectionUnitCheckBox } from "../unit-section-table/helpers";
 
 const h = hyperStyled(styles);
 
@@ -19,8 +19,6 @@ function ColSectionsTable(props: {
         {
           href: `/section/${section.id}`,
           key: i,
-          draggableId: section.id.toString() + " " + section.bottom,
-          index: i,
         },
         [
           h(
