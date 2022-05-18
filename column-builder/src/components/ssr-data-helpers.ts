@@ -2,6 +2,12 @@ import { UnitsView } from "~/index";
 
 /* A collection of data processing functions to run server side before page is rendered */
 
+/**
+ * Creates a list of objects where the key is a section_id and the values are the
+ * corresponding units belonging to that section
+ * @param units UnitsView[]
+ * @returns unitsBySection - {[section_id: number]: UnitsView[]}[]
+ */
 function createUnitBySections(units: UnitsView[]) {
   const seen: { [section_id: number | string]: number } = {}; // store section_ids and their index in array
   const unitsBySections: { [section_id: string | number]: UnitsView[] }[] = [];
