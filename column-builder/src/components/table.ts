@@ -22,7 +22,6 @@ interface RowProps {
   index: number;
   href?: string;
   drag?: boolean;
-  rowComponent: React.ReactElement;
 }
 
 const getItemStyle = (isDragging: boolean, draggableStyle: any) => ({
@@ -83,7 +82,6 @@ function DraggableRow(props: RowProps) {
               props.children,
             ]
           ),
-          props.rowComponent,
         ]);
       },
     ]

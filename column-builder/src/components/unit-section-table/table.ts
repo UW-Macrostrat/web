@@ -169,6 +169,14 @@ function ColSecUnitsTable(props: {
                 editMode.mode !== "below";
 
               return h(React.Fragment, [
+                h.if(j == 0)("tr", [
+                  h("td", { colSpan: headers.length, style: { padding: 0 } }, [
+                    h(AddBtnBetweenRows, {
+                      onClick: () =>
+                        triggerEditor(UNIT_ADD_POISITON.ABOVE, j, i, false),
+                    }),
+                  ]),
+                ]),
                 h.if(openTop)("tr", [
                   h("td", { colSpan: headers.length, style: { padding: 0 } }, [
                     h(MinEditorCard, {
@@ -187,23 +195,6 @@ function ColSecUnitsTable(props: {
                     drag: props.state.drag,
                     draggableId: unit.unit_strat_name + unit.id.toString(),
                     href: undefined,
-                    rowComponent: h("tr", [
-                      h(
-                        "td",
-                        { colSpan: headers.length, style: { padding: 0 } },
-                        [
-                          h(AddBtnBetweenRows, {
-                            onClick: () =>
-                              triggerEditor(
-                                UNIT_ADD_POISITON.BELOW,
-                                j,
-                                i,
-                                false
-                              ),
-                          }),
-                        ]
-                      ),
-                    ]),
                   },
                   [
                     h(UnitRowCellGroup, {
@@ -222,6 +213,14 @@ function ColSecUnitsTable(props: {
                     ]),
                   ]
                 ),
+                h("tr", [
+                  h("td", { colSpan: headers.length, style: { padding: 0 } }, [
+                    h(AddBtnBetweenRows, {
+                      onClick: () =>
+                        triggerEditor(UNIT_ADD_POISITON.BELOW, j, i, false),
+                    }),
+                  ]),
+                ]),
                 h.if(openBottom)("tr", [
                   h("td", { colSpan: headers.length, style: { padding: 0 } }, [
                     h(MinEditorCard, {
