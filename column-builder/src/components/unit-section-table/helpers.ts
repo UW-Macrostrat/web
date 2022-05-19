@@ -183,41 +183,45 @@ function UnitRowContextMenu(props: UnitRowContextMenuI) {
   );
 }
 
-function AddBtnBetweenRows(props: { onClick: () => void }) {
+function AddBtnBetweenRows(props: { onClick: () => void; colSpan: number }) {
   const [style, setStyle] = useState({ display: "none" });
-  return h(
-    Tooltip2,
-    {
-      content: "add unit",
-      fill: true,
-      position: "right",
-      intent: "success",
-    },
-    [
+  return h("tr", [
+    h("td", { colSpan: props.colSpan, style: { padding: 0 } }, [
       h(
-        "div.btwn-row-btn",
+        Tooltip2,
         {
-          onMouseEnter: (e: React.MouseEvent<HTMLDivElement>) => {
-            console.log("Enter");
-            setStyle({ display: "flex" });
-          },
-          onMouseLeave: (e: React.MouseEvent<HTMLDivElement>) => {
-            console.log("Leave");
-            setStyle({ display: "none" });
-          },
-          onClick: props.onClick,
+          content: "add unit",
+          fill: true,
+          position: "right",
+          intent: "success",
         },
         [
-          h(Button, {
-            intent: "success",
-            fill: true,
-            onClick: props.onClick,
-            style: { ...style, minHeight: "5px" },
-          }),
+          h(
+            "div.btwn-row-btn",
+            {
+              onMouseEnter: (e: React.MouseEvent<HTMLDivElement>) => {
+                console.log("Enter");
+                setStyle({ display: "flex" });
+              },
+              onMouseLeave: (e: React.MouseEvent<HTMLDivElement>) => {
+                console.log("Leave");
+                setStyle({ display: "none" });
+              },
+              onClick: props.onClick,
+            },
+            [
+              h(Button, {
+                intent: "success",
+                fill: true,
+                onClick: props.onClick,
+                style: { ...style, minHeight: "5px" },
+              }),
+            ]
+          ),
         ]
       ),
-    ]
-  );
+    ]),
+  ]);
 }
 
 interface EditModeI {
