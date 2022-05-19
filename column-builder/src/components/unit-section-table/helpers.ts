@@ -7,9 +7,12 @@ import {
   MenuItem,
   MenuDivider,
 } from "@blueprintjs/core";
-import { Popover2 } from "@blueprintjs/popover2";
+import { Popover2, Tooltip2 } from "@blueprintjs/popover2";
 import { UnitsView } from "~/index";
-import h from "@macrostrat/hyper";
+import styles from "../comp.module.scss";
+import { hyperStyled } from "@macrostrat/hyper";
+
+const h = hyperStyled(styles);
 
 function SectionUnitCheckBox(props: {
   data: any;
@@ -180,32 +183,43 @@ function UnitRowContextMenu(props: UnitRowContextMenuI) {
   );
 }
 
-function AddBtnBetweenRows(props: { onClick: () => void }) {
+function AddBtnBetweenRows(props: { onClick: () => void; colSpan: number }) {
   const [style, setStyle] = useState({ display: "none" });
-  return h(
-    "div",
-    {
-      style: { height: "10px", width: "100%", margin: "-10px 0" },
-      onMouseEnter: (e) => {
-        console.log("Enter");
-        setStyle({ display: "flex" });
-      },
-      onMouseLeave: (e) => {
-        console.log("Leave");
-        setStyle({ display: "none" });
-      },
-    },
-    [
-      h(Button, {
-        minimal: true,
-        intent: "success",
-        icon: "add",
-        fill: true,
-        onClick: props.onClick,
-        style: { ...style, margin: "-15px 0", minHeight: 0 },
-      }),
-    ]
-  );
+  return h("tr", [
+    h("td", { colSpan: props.colSpan, style: { padding: 0 } }, [
+      h(
+        Tooltip2,
+        {
+          content: "add unit",
+          fill: true,
+          position: "right",
+          intent: "success",
+        },
+        [
+          h(
+            "div.btwn-row-btn",
+            {
+              onMouseEnter: (e: React.MouseEvent<HTMLDivElement>) => {
+                setStyle({ display: "flex" });
+              },
+              onMouseLeave: (e: React.MouseEvent<HTMLDivElement>) => {
+                setStyle({ display: "none" });
+              },
+              onClick: props.onClick,
+            },
+            [
+              h(Button, {
+                intent: "success",
+                fill: true,
+                onClick: props.onClick,
+                style: { ...style, minHeight: "5px" },
+              }),
+            ]
+          ),
+        ]
+      ),
+    ]),
+  ]);
 }
 
 interface EditModeI {

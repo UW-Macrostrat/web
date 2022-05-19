@@ -13,9 +13,9 @@ import {
 import { columnReducer } from "../column";
 import { UnitLithHelperText } from "../unit/common-editing";
 import { MinEditorCard } from "../unit/minimal-unit-editor";
-import { DragDropContext } from "react-beautiful-dnd";
-import { Table, DraggableRow } from "../table";
-import { DropResult } from "react-beautiful-dnd";
+import { DragDropContext, Droppable } from "react-beautiful-dnd";
+import { DraggableRow, DnDTable } from "../table";
+import { DropResult, DroppableProvided } from "react-beautiful-dnd";
 import {
   ColumnPageBtnMenu,
   SectionUnitCheckBox,
@@ -137,62 +137,115 @@ function ColSecUnitsTable(props: {
 
   return h("div", [
     h(DragDropContext, { onDragEnd }, [
-      sections.map((section, i) => {
-        const units_: UnitsView[] = Object.values(section)[0];
-        const id = Object.keys(section)[0];
-        return h(
-          Table,
-          {
-            key: i,
-            interactive: false,
-            headers,
-            title: `Section #${id}`,
-            drag: props.state.drag,
-            droppableId: i.toString() + " " + id.toString(),
-            externalDragContext: true,
-          },
-          [
-            units_.map((unit, j) => {
-              const cellStyles =
-                unit_index == j && section_index == i ? styles : {};
+      h(
+        Droppable,
+        {
+          droppableId: "unit-section-tables",
+          type: "SECTIONS",
+          isCombineEnabled: true,
+        },
+        [
+          (provided: DroppableProvided) => {
+            return h(
+              "div",
+              { ...provided.droppableProps, ref: provided.innerRef },
+              [
+                sections.map((section, i) => {
+                  const units_: UnitsView[] = Object.values(section)[0];
+                  const id = Object.keys(section)[0];
+                  return h(
+                    DnDTable,
+                    {
+                      key: i,
+                      index: i,
+                      interactive: false,
+                      headers,
+                      title: `Section #${id}`,
+                      draggableId: `${id} ${i}`,
+                      drag: props.state.drag,
+                      droppableId: i.toString() + " " + id.toString(),
+                    },
+                    [
+                      units_.map((unit, j) => {
+                        const cellStyles =
+                          unit_index == j && section_index == i ? styles : {};
 
-              const openBottom =
-                editOpen &&
-                unit_index == j &&
-                section_index == i &&
-                editMode.mode === "below";
+                        const openBottom =
+                          editOpen &&
+                          unit_index == j &&
+                          section_index == i &&
+                          editMode.mode === "below";
 
-              const openTop =
-                editOpen &&
-                unit_index == j &&
-                section_index == i &&
-                editMode.mode !== "below";
+                        const openTop =
+                          editOpen &&
+                          unit_index == j &&
+                          section_index == i &&
+                          editMode.mode !== "below";
 
-              return h(React.Fragment, [
-                h.if(openTop)("tr", [
-                  h("td", { colSpan: headers.length, style: { padding: 0 } }, [
-                    h(MinEditorCard, {
-                      title: diaglogTitle,
-                      persistChanges,
-                      model: editingModel,
-                      onCancel,
-                    }),
-                  ]),
-                ]),
-                h(
-                  DraggableRow,
-                  {
-                    key: unit.id,
-                    index: j,
-                    drag: props.state.drag,
-                    draggableId: unit.unit_strat_name + unit.id.toString(),
-                    href: undefined,
-                    rowComponent: h("tr", [
-                      h(
-                        "td",
-                        { colSpan: headers.length, style: { padding: 0 } },
-                        [
+                        return h(React.Fragment, [
+                          h.if(j == 0)(AddBtnBetweenRows, {
+                            colSpan: headers.length,
+                            onClick: () =>
+                              triggerEditor(
+                                UNIT_ADD_POISITON.ABOVE,
+                                j,
+                                i,
+                                false
+                              ),
+                          }),
+
+                          h.if(openTop)("tr", [
+                            h(
+                              "td",
+                              {
+                                colSpan: headers.length,
+                                style: { padding: 0 },
+                              },
+                              [
+                                h(MinEditorCard, {
+                                  title: diaglogTitle,
+                                  persistChanges,
+                                  model: editingModel,
+                                  onCancel,
+                                }),
+                              ]
+                            ),
+                          ]),
+                          h(
+                            DraggableRow,
+                            {
+                              key: unit.id,
+                              index: j,
+                              drag: props.state.drag,
+                              draggableId:
+                                unit.unit_strat_name + unit.id.toString(),
+                              href: undefined,
+                            },
+                            [
+                              h(UnitRowCellGroup, {
+                                onClickDivideCheckBox:
+                                  props.onClickDivideCheckBox,
+                                unit,
+                                key: j,
+                                cellStyles,
+                              }),
+                              h(
+                                "td",
+                                { width: "0%", style: { ...cellStyles } },
+                                [
+                                  h(UnitRowContextMenu, {
+                                    unit,
+                                    unit_index: j,
+                                    section_index: i,
+                                    triggerEditor: triggerEditor,
+                                  }),
+                                ]
+                              ),
+                            ]
+                          ),
+
                           h(AddBtnBetweenRows, {
+                            colSpan: headers.length,
                             onClick: () =>
                               triggerEditor(
                                 UNIT_ADD_POISITON.BELOW,
@@ -201,42 +254,35 @@ function ColSecUnitsTable(props: {
                                 false
                               ),
                           }),
-                        ]
-                      ),
-                    ]),
-                  },
-                  [
-                    h(UnitRowCellGroup, {
-                      onClickDivideCheckBox: props.onClickDivideCheckBox,
-                      unit,
-                      key: j,
-                      cellStyles,
-                    }),
-                    h("td", { width: "0%", style: { ...cellStyles } }, [
-                      h(UnitRowContextMenu, {
-                        unit,
-                        unit_index: j,
-                        section_index: i,
-                        triggerEditor: triggerEditor,
+
+                          h.if(openBottom)("tr", [
+                            h(
+                              "td",
+                              {
+                                colSpan: headers.length,
+                                style: { padding: 0 },
+                              },
+                              [
+                                h(MinEditorCard, {
+                                  title: diaglogTitle,
+                                  persistChanges,
+                                  model: editingModel,
+                                  onCancel,
+                                }),
+                              ]
+                            ),
+                          ]),
+                        ]);
                       }),
-                    ]),
-                  ]
-                ),
-                h.if(openBottom)("tr", [
-                  h("td", { colSpan: headers.length, style: { padding: 0 } }, [
-                    h(MinEditorCard, {
-                      title: diaglogTitle,
-                      persistChanges,
-                      model: editingModel,
-                      onCancel,
-                    }),
-                  ]),
-                ]),
-              ]);
-            }),
-          ]
-        );
-      }),
+                    ]
+                  );
+                }),
+                provided.placeholder,
+              ]
+            );
+          },
+        ]
+      ),
     ]),
   ]);
 }
@@ -263,7 +309,11 @@ function UnitSectionTable(props: {
   };
 
   const onDragEnd = (r: DropResult) => {
-    dispatch({ type: "dropped-unit", result: r });
+    if (r.type == "SECTIONS") {
+      dispatch({ type: "dropped-section", result: r });
+    } else {
+      dispatch({ type: "dropped-unit", result: r });
+    }
   };
 
   const addUnitAt = (
@@ -327,46 +377,51 @@ function UnitSectionTable(props: {
       onChange,
       headers,
     }),
-    h.if(state.sections.length > 0 && state.unitsView)("div", [
-      //@ts-ignore
-      h(MinEditorToggle, {
-        btnPosition: "top",
-        btnText: "create new unit on top",
-        //@ts-ignore
-        persistChanges: (e, c) =>
-          dispatch({
-            type: "add-unit-at",
-            section_index: 0,
-            unit: e,
-            unit_index: 0,
+    h.if(state.sections.length > 0 && state.unitsView)(
+      "div.unit-section-container",
+      [
+        h("div.unit-section-tables", [
+          //@ts-ignore
+          h(MinEditorToggle, {
+            btnPosition: "top",
+            btnText: "create new unit on top",
+            //@ts-ignore
+            persistChanges: (e, c) =>
+              dispatch({
+                type: "add-unit-at",
+                section_index: 0,
+                unit: e,
+                unit_index: 0,
+              }),
           }),
-      }),
-      h(ColSecUnitsTable, {
-        onClickDivideCheckBox: (id: number) =>
-          dispatch({ type: "set-divide-ids", id }),
-        state,
-        onDragEnd,
-        editUnitAt,
-        addUnitAt,
-      }),
-      //@ts-ignore
-      h(MinEditorToggle, {
-        //@ts-ignore
-        persistChanges: (e, c) =>
-          dispatch({
-            type: "add-unit-at",
-            section_index: state.sections.length - 1,
-            // an annoying way to get the index of the last unit in last section
-            unit_index: Object.values(
-              state.sections[state.sections.length - 1]
-            )[0].length,
-            unit: e,
+          h(ColSecUnitsTable, {
+            onClickDivideCheckBox: (id: number) =>
+              dispatch({ type: "set-divide-ids", id }),
+            state,
+            onDragEnd,
+            editUnitAt,
+            addUnitAt,
           }),
+          //@ts-ignore
+          h(MinEditorToggle, {
+            //@ts-ignore
+            persistChanges: (e, c) =>
+              dispatch({
+                type: "add-unit-at",
+                section_index: state.sections.length - 1,
+                // an annoying way to get the index of the last unit in last section
+                unit_index: Object.values(
+                  state.sections[state.sections.length - 1]
+                )[0].length,
+                unit: e,
+              }),
 
-        btnText: "create new unit on bottom",
-        btnPosition: "bottom",
-      }),
-    ]),
+            btnText: "create new unit on bottom",
+            btnPosition: "bottom",
+          }),
+        ]),
+      ]
+    ),
   ]);
 }
 

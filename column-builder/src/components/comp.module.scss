@@ -99,3 +99,29 @@
   display: flex;
   justify-content: space-between;
 }
+
+.unit-section-tables {
+  width: 75%;
+}
+.unit-section-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+.btwn-row-btn {
+  height: 10px;
+  width: 100%;
+  margin: -10px 0%;
+  padding-top: 5px;
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.base-table {
+  border: solid 1px;
+  border-color: #c5cbd3;
+  margin: 10px;
+  background-color: white;
+  border-radius: 5px;
+}
