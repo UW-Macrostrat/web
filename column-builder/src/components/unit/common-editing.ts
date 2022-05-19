@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import { hyperStyled } from "@macrostrat/hyper";
 import {
   UnitsView,
@@ -6,21 +5,13 @@ import {
   EnvironUnit,
   TagContainerCell,
 } from "../../index";
-import {
-  InputGroup,
-  Menu,
-  MenuItem,
-  NumericInput,
-  Button,
-  MenuDivider,
-} from "@blueprintjs/core";
+import { InputGroup, NumericInput } from "@blueprintjs/core";
 import {
   useModelEditor,
   //@ts-ignore
 } from "@macrostrat/ui-components";
 import styles from "../comp.module.scss";
 import { EnvTagsAdd, LithTagsAdd, StratNameDataI, StratNameSuggest } from "..";
-import { Popover2 } from "@blueprintjs/popover2";
 const h = hyperStyled(styles);
 
 export interface UnitEditorI extends UnitsView {
@@ -199,6 +190,3 @@ export function UnitLithHelperText(props: { lith_unit?: LithUnit[] }) {
     h(TagContainerCell, { data: tagData, large: false }),
   ]);
 }
-
-
-
