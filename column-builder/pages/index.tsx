@@ -29,14 +29,12 @@ function Projects({ projects }: { projects: Project[] }) {
         text: "Create New Project",
       }),
     ]),
-    h(Table, { interactive: true, headers, drag: false }, [
+    h(Table, { interactive: true, headers }, [
       projects.map((project, i) => {
         return h(
           Row,
           {
             key: i,
-            index: i,
-            draggableId: project.project,
             href: `/column-groups/${project.id}`,
           },
           [

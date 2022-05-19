@@ -104,22 +104,12 @@ function FeatureCell(props: FeatureCellI) {
 interface TableProps {
   interactive: boolean;
   children: ReactChild;
-  drag?: boolean;
-  onDragEnd?: (result: DropResult) => void;
   headers?: any[];
-  droppableId?: string;
   title?: string;
-  externalDragContext?: boolean;
 }
 
 function Table(props: TableProps) {
-  const {
-    drag = false,
-    onDragEnd = (result) => console.log(result),
-    headers = [],
-    droppableId = "table-drop-zone",
-    externalDragContext = false,
-  } = props;
+  const { headers = [] } = props;
   const baseClass =
     "bp4-html-table .bp4-html-table-condensed .bp4-html-table-bordered";
   let tableClassName = props.interactive
@@ -135,15 +125,59 @@ function Table(props: TableProps) {
           headers: headers,
           title: props.title,
         }),
-        h.if(!externalDragContext)(DragDropContext, { onDragEnd: onDragEnd }, [
-          h(TableBody, { drag, droppableId }, [props.children]),
-        ]),
-        h.if(externalDragContext)(TableBody, { drag, droppableId }, [
-          props.children,
-        ]),
+        h("tbody", [props.children]),
       ]
     ),
   ]);
+}
+
+interface DnDTableProps {
+  interactive: boolean;
+  children: ReactChild;
+  drag?: boolean;
+  headers?: any[];
+  droppableId?: string;
+  draggableId?: string;
+  title?: string;
+  index: number;
+}
+
+function DnDTable(props: DnDTableProps) {
+  const { drag = false, headers = [], droppableId = "table-drop-zone" } = props;
+  const baseClass =
+    "bp4-html-table .bp4-html-table-condensed .bp4-html-table-bordered .base-table";
+  let tableClassName = props.interactive
+    ? `${baseClass} .bp4-interactive`
+    : baseClass;
+
+  return h(
+    Draggable,
+    {
+      key: props.index,
+      index: props.index,
+      isDragDisabled: !drag,
+      draggableId: props.draggableId ?? "",
+    },
+    [
+      (provided: DraggableProvided, snapshot: DraggableStateSnapshot) => {
+        return h(
+          `table.${tableClassName}`,
+          {
+            ref: provided.innerRef,
+            ...provided.draggableProps,
+          },
+          [
+            h.if(headers.length > 0)(TableHeader, {
+              dragProps: provided.dragHandleProps,
+              headers: headers,
+              title: props.title,
+            }),
+            h(TableBody, { drag, droppableId }, [props.children]),
+          ]
+        );
+      },
+    ]
+  );
 }
 
 function TableBody(props: {
@@ -152,26 +186,35 @@ function TableBody(props: {
   droppableId?: string;
 }) {
   const { drag = false, droppableId = "table-drop" } = props;
-  return h(Droppable, { droppableId: droppableId, isDropDisabled: !drag }, [
-    (provided: DroppableProvided) => {
-      return h(
-        "tbody",
-        {
-          ...provided.droppableProps,
-          ref: provided.innerRef,
-        },
-        [props.children, provided.placeholder]
-      );
-    },
-  ]);
+  return h(
+    Droppable,
+    { droppableId: droppableId, isDropDisabled: !drag, type: "table-body" },
+    [
+      (provided: DroppableProvided) => {
+        return h(
+          "tbody",
+          {
+            ...provided.droppableProps,
+            ref: provided.innerRef,
+          },
+          [props.children, provided.placeholder]
+        );
+      },
+    ]
+  );
 }
 
-function TableHeader(props: { headers: any[]; title?: string }) {
+function TableHeader(props: {
+  headers: any[];
+  title?: string;
+  dragProps?: any;
+}) {
   return h("thead", [
     h.if(typeof props.title !== "undefined")("tr", [
       h(
         "th",
         {
+          ...props.dragProps,
           colSpan: props.headers.length,
           style: { textAlign: "center", backgroundColor: "#D3D8DE" },
         },
@@ -186,4 +229,4 @@ function TableHeader(props: { headers: any[]; title?: string }) {
   ]);
 }
 
-export { Row, Table, FeatureCell, TableHeader, DraggableRow };
+export { Row, Table, DnDTable, FeatureCell, TableHeader, DraggableRow };

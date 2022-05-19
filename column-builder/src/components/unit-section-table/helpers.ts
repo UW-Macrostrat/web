@@ -200,11 +200,9 @@ function AddBtnBetweenRows(props: { onClick: () => void; colSpan: number }) {
             "div.btwn-row-btn",
             {
               onMouseEnter: (e: React.MouseEvent<HTMLDivElement>) => {
-                console.log("Enter");
                 setStyle({ display: "flex" });
               },
               onMouseLeave: (e: React.MouseEvent<HTMLDivElement>) => {
-                console.log("Leave");
                 setStyle({ display: "none" });
               },
               onClick: props.onClick,

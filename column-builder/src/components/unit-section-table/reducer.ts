@@ -42,6 +42,10 @@ type DroppedUnit = {
   type: "dropped-unit";
   result: DropResult;
 };
+type DroppedSection = {
+  type: "dropped-section";
+  result: DropResult;
+};
 type ToggleDrag = { type: "toggle-drag" };
 type ToggleUnitsView = { type: "toggle-units-view" };
 type AddUnitAt = {
@@ -62,6 +66,7 @@ export type SyncActions =
   | SetMergeIds
   | SetDivideIds
   | DroppedUnit
+  | DroppedSection
   | MergeIds
   | ToggleDrag
   | AddUnitAt
@@ -134,6 +139,30 @@ const columnReducer = (state: ColumnStateI, action: SyncActions) => {
         ...state,
         sections: currSections,
       };
+    case "dropped-section":
+      if (!action.result.combine) return state;
+      /* Merge sections!! What data should you expect? 
+        draggableId : `${section_id} ${index}` of section that was dropped.
+        combine.draggableID: `${section_id} ${index}` of section that was dropped on.
+
+        Get the indexes, whichever is greater, take those units and append to smaller one
+      */
+      const [s_id, s_index] = action.result.draggableId.split(" ");
+      const [d_id, d_index] = action.result.combine.draggableId.split(" ");
+
+      let big = { id: s_id, index: parseInt(s_index) };
+      let small = { id: d_id, index: parseInt(d_index) };
+      if (parseInt(s_index) < parseInt(d_index)) {
+        big = { id: d_id, index: parseInt(d_index) };
+        small = { id: s_id, index: parseInt(s_index) };
+      }
+
+      currSections[small.index][small.id].push(
+        ...currSections[big.index][big.id]
+      );
+      currSections.splice(big.index, 1);
+
+      return { ...state, sections: currSections };
     case "dropped-unit":
       if (typeof action.result.destination === "undefined") return state;
       let source_index = action.result.source.index;
