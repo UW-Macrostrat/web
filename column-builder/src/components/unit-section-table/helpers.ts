@@ -186,11 +186,11 @@ function AddBtnBetweenRows(props: { onClick: () => void }) {
     "div",
     {
       style: { height: "10px", width: "100%", margin: "-10px 0" },
-      onMouseEnter: (e) => {
+      onMouseEnter: (e: React.MouseEvent<HTMLDivElement>) => {
         console.log("Enter");
         setStyle({ display: "flex" });
       },
-      onMouseLeave: (e) => {
+      onMouseLeave: (e: React.MouseEvent<HTMLDivElement>) => {
         console.log("Leave");
         setStyle({ display: "none" });
       },

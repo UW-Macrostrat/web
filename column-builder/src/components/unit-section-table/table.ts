@@ -327,46 +327,51 @@ function UnitSectionTable(props: {
       onChange,
       headers,
     }),
-    h.if(state.sections.length > 0 && state.unitsView)("div", [
-      //@ts-ignore
-      h(MinEditorToggle, {
-        btnPosition: "top",
-        btnText: "create new unit on top",
-        //@ts-ignore
-        persistChanges: (e, c) =>
-          dispatch({
-            type: "add-unit-at",
-            section_index: 0,
-            unit: e,
-            unit_index: 0,
+    h.if(state.sections.length > 0 && state.unitsView)(
+      "div.unit-section-container",
+      [
+        h("div.unit-section-tables", [
+          //@ts-ignore
+          h(MinEditorToggle, {
+            btnPosition: "top",
+            btnText: "create new unit on top",
+            //@ts-ignore
+            persistChanges: (e, c) =>
+              dispatch({
+                type: "add-unit-at",
+                section_index: 0,
+                unit: e,
+                unit_index: 0,
+              }),
           }),
-      }),
-      h(ColSecUnitsTable, {
-        onClickDivideCheckBox: (id: number) =>
-          dispatch({ type: "set-divide-ids", id }),
-        state,
-        onDragEnd,
-        editUnitAt,
-        addUnitAt,
-      }),
-      //@ts-ignore
-      h(MinEditorToggle, {
-        //@ts-ignore
-        persistChanges: (e, c) =>
-          dispatch({
-            type: "add-unit-at",
-            section_index: state.sections.length - 1,
-            // an annoying way to get the index of the last unit in last section
-            unit_index: Object.values(
-              state.sections[state.sections.length - 1]
-            )[0].length,
-            unit: e,
+          h(ColSecUnitsTable, {
+            onClickDivideCheckBox: (id: number) =>
+              dispatch({ type: "set-divide-ids", id }),
+            state,
+            onDragEnd,
+            editUnitAt,
+            addUnitAt,
           }),
+          //@ts-ignore
+          h(MinEditorToggle, {
+            //@ts-ignore
+            persistChanges: (e, c) =>
+              dispatch({
+                type: "add-unit-at",
+                section_index: state.sections.length - 1,
+                // an annoying way to get the index of the last unit in last section
+                unit_index: Object.values(
+                  state.sections[state.sections.length - 1]
+                )[0].length,
+                unit: e,
+              }),
 
-        btnText: "create new unit on bottom",
-        btnPosition: "bottom",
-      }),
-    ]),
+            btnText: "create new unit on bottom",
+            btnPosition: "bottom",
+          }),
+        ]),
+      ]
+    ),
   ]);
 }
 
