@@ -7,7 +7,7 @@ import { PostgrestError } from "@supabase/postgrest-js";
 const h = hyperStyled(styles);
 
 function ErrorDialog(props: { errors: PostgrestError[] }) {
-  return h(Dialog, { isOpen: true }, [
+  return h(Dialog, { isOpen: true, style: { paddingBottom: "0" } }, [
     h(
       Callout,
       { intent: Intent.DANGER, title: "Error has occured", icon: "error" },

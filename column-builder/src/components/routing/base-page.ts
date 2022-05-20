@@ -1,3 +1,4 @@
+import React from "react";
 import { hyperStyled } from "@macrostrat/hyper";
 import styles from "../comp.module.scss";
 import { useRouter } from "next/router";
@@ -83,6 +84,7 @@ export function BasePage(props: BasePageProps) {
 
   return h("div.page", [
     h("div.bread-crumbs", [h(Breadcrumbs, { items: breadCrumbs })]),
-    errors.length > 0 ? h(ErrorDialog, { errors }) : props.children,
+    h.if(errors.length > 0)(ErrorDialog, { errors }),
+    h.if(errors.length == 0)(React.Fragment, [props.children]),
   ]);
 }

@@ -63,9 +63,11 @@ export default function Columns(props: {
 }) {
   const { col_id, colSections, column, query, sections, errors } = props;
 
+  const columnName = column ? column[0].col_name : null;
+
   return h(BasePage, { query, errors }, [
     h("h3", [
-      `Sections for Column: ${column[0].col_name}`,
+      `Sections for Column: ${columnName}`,
       h(EditButton, {
         href: `/column/${col_id}/edit`,
       }),
