@@ -1,4 +1,5 @@
 import h from "@macrostrat/hyper";
+import { PostgrestError } from "@supabase/postgrest-js";
 import { GetServerSidePropsContext } from "next";
 import pg, {
   tableSelect,
@@ -14,13 +15,20 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   const { data, error } = await tableSelect("projects");
   const projects: Project[] = data ? data : [{}];
 
-  return { props: { projects } };
+  const errors = [error].filter((e) => e != null);
+  return { props: { projects, errors } };
 }
 
-function Projects({ projects }: { projects: Project[] }) {
+function Projects({
+  projects,
+  errors,
+}: {
+  projects: Project[];
+  errors: PostgrestError[];
+}) {
   const headers = Object.keys(projects[0]);
 
-  return h(BasePage, { query: {} }, [
+  return h(BasePage, { query: {}, errors }, [
     h("h3,", [
       "Choose a Project",
       h(CreateButton, {

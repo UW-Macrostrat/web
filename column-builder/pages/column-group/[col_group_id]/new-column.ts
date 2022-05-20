@@ -1,4 +1,5 @@
 import h from "@macrostrat/hyper";
+import { PostgrestError } from "@supabase/postgrest-js";
 import { GetServerSideProps } from "next";
 import pg, {
   BasePage,
@@ -23,16 +24,17 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const colGroup = data ? data[0] : {};
 
   const query = await getIdHierarchy({ col_group_id });
-
-  return { props: { col_group_id, colGroup, query } };
+  const errors = error == null ? [] : [error];
+  return { props: { col_group_id, colGroup, query, errors } };
 };
 
 export default function NewColumn(props: {
   col_group_id: string;
   colGroup: Partial<ColumnGroupI>;
   query: QueryI;
+  errors: PostgrestError[];
 }) {
-  const { colGroup, col_group_id } = props;
+  const { colGroup, col_group_id, errors } = props;
 
   const persistChanges = async (
     e: ColumnForm,
@@ -71,7 +73,7 @@ export default function NewColumn(props: {
     }
   };
 
-  return h(BasePage, { query: props.query }, [
+  return h(BasePage, { query: props.query, errors }, [
     h("h3", [
       `Add a new column to ${colGroup.col_group_long}(${colGroup.col_group})`,
     ]),

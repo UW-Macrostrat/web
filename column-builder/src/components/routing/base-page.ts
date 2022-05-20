@@ -3,7 +3,8 @@ import styles from "../comp.module.scss";
 import { useRouter } from "next/router";
 import { Breadcrumbs, BreadcrumbProps } from "@blueprintjs/core";
 import { ReactChild } from "react";
-
+import { ErrorDialog } from "./error-boundary";
+import { PostgrestError } from "@supabase/postgrest-js";
 const h = hyperStyled(styles);
 
 export interface QueryI {
@@ -18,6 +19,7 @@ export interface QueryI {
 
 interface BasePageProps {
   query: QueryI;
+  errors: PostgrestError[];
   children: ReactChild;
 }
 
@@ -30,15 +32,14 @@ Creates the breadcrumbs at the top of each page based on the router query
 */
 export function BasePage(props: BasePageProps) {
   const router = useRouter();
-  const { query } = props;
-  console.log("basepageQuery", query);
+  const { query, errors = [] } = props;
 
   const filterCrumbs = (obj: CrumbsI) => {
     if (obj.text == "Projects") {
       return true;
     }
 
-    if (typeof query[obj.predicate] == "undefined") return false;
+    if (!(obj.predicate in query)) return false;
     return true;
   };
 
@@ -82,6 +83,6 @@ export function BasePage(props: BasePageProps) {
 
   return h("div.page", [
     h("div.bread-crumbs", [h(Breadcrumbs, { items: breadCrumbs })]),
-    props.children,
+    errors.length > 0 ? h(ErrorDialog, { errors }) : props.children,
   ]);
 }

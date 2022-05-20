@@ -15,7 +15,7 @@ export default function NewProject() {
     return data ? data[0] : {};
   };
 
-  return h(BasePage, { query: {} }, [
+  return h(BasePage, { query: {}, errors: [] }, [
     h("h3", ["Create a New Project"]),
     //@ts-ignore
     h(ProjectEditor, { project: newProject, persistChanges }),

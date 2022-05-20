@@ -8,6 +8,7 @@ import pg, {
 } from "../../../src";
 import styles from "./colgroup.module.scss";
 import { GetServerSidePropsContext } from "next";
+import { PostgrestError } from "@supabase/postgrest-js";
 const h = hyperStyled(styles);
 
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
@@ -20,15 +21,16 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   });
 
   const project = data ? data[0] : {};
-
-  return { props: { project_id, project } };
+  const errors = [error].filter((e) => e != null);
+  return { props: { project_id, project, errors } };
 }
 
 export default function NewColumnGroup(props: {
   project_id: number;
   project: Project;
+  errors: PostgrestError[];
 }) {
-  const { project, project_id } = props;
+  const { project, project_id, errors } = props;
 
   const newColumnGroup: Partial<ColumnGroupI> = {
     col_group: "",
@@ -49,7 +51,7 @@ export default function NewColumnGroup(props: {
     }
   };
 
-  return h(BasePage, { query: { project_id } }, [
+  return h(BasePage, { query: { project_id }, errors }, [
     h("h3", ["Create a New Column Group for ", project.project]),
     //@ts-ignore
     h(ColumnGroupEditor, { model: newColumnGroup, persistChanges }),

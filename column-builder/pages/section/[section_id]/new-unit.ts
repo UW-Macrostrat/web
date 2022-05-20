@@ -9,6 +9,7 @@ import {
 } from "~/index";
 import { persistNewUnitChanges } from "~/components/section/new-helpers";
 import { GetServerSideProps } from "next";
+import { PostgrestError } from "@supabase/postgrest-js";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   let {
@@ -20,9 +21,9 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   });
 
   const { col_id } = firstData;
-
+  const errors = error == null ? [] : [error];
   return {
-    props: { section_id: ctx.query.section_id, col_id, query },
+    props: { section_id: ctx.query.section_id, col_id, query, errors },
   };
 };
 
@@ -30,10 +31,12 @@ function NewUnitInSection({
   col_id,
   section_id,
   query,
+  errors,
 }: {
   col_id: number;
   section_id: string;
   query: QueryI;
+  errors: PostgrestError[];
 }) {
   const model = { unit: { col_id: col_id }, liths: [], envs: [] };
 
@@ -49,7 +52,7 @@ function NewUnitInSection({
     );
   };
 
-  return h(BasePage, { query }, [
+  return h(BasePage, { query, errors }, [
     //@ts-ignore
     h(UnitEditor, { model, persistChanges }),
   ]);

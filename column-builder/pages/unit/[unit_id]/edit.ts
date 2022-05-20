@@ -4,15 +4,12 @@ import pg, {
   BasePage,
   UnitEditor,
   UnitsView,
-  EnvironUnit,
-  LithUnit,
-  tableSelect,
-  selectFirst,
   getIdHierarchy,
   QueryI,
 } from "../../../src";
 import { persistUnitChanges } from "../../../src/components/unit/edit-helpers";
 import { GetServerSidePropsContext } from "next";
+import { PostgrestError } from "@supabase/postgrest-js";
 
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   const {
@@ -28,7 +25,8 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
     .match({ id: unit_id })
     .limit(1);
 
-  return { props: { unit_id, unit: units[0], query } };
+  const errors = e == null ? [] : [e];
+  return { props: { unit_id, unit: units[0], query, errors } };
 }
 
 /* 
@@ -37,8 +35,13 @@ Needs a strat_name displayer, we'll be stricter with editing that
 Need interval suggest component (2), Need A color picker, Contact suggests.
 Tags for liths and environs; adding components for those too.
 */
-function UnitEdit(props: { unit_id: string; unit: UnitsView; query: QueryI }) {
-  const { unit } = props;
+function UnitEdit(props: {
+  unit_id: string;
+  unit: UnitsView;
+  query: QueryI;
+  errors: PostgrestError[];
+}) {
+  const { unit, errors } = props;
 
   const model = { unit };
 
@@ -49,7 +52,7 @@ function UnitEdit(props: { unit_id: string; unit: UnitsView; query: QueryI }) {
     return await persistUnitChanges(unit, updatedModel, changeSet);
   };
 
-  return h(BasePage, { query: props.query }, [
+  return h(BasePage, { query: props.query, errors }, [
     h("h3", [`Edit Unit #${unit.id}: `, unit.unit_strat_name]),
     //@ts-ignore
     h(UnitEditor, { model, persistChanges }),

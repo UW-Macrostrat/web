@@ -59,7 +59,7 @@ export default function NewStratName({
       ? "Make New Stratigraphic Name "
       : "This Stratigraphic name doesn't exist in the database. Make New Stratigraphic Name";
 
-  return h(BasePage, { query }, [
+  return h(BasePage, { query, errors: [] }, [
     h("h3", [pageTitle]),
     //@ts-ignore
     h(StratNameEditor, {
