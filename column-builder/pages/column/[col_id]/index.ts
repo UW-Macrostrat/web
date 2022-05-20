@@ -9,6 +9,7 @@ import pg, {
   getIdHierarchy,
   QueryI,
   UnitSectionTable,
+  isServer,
 } from "~/index";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -66,6 +67,8 @@ export default function Columns(props: {
         href: `/column/${col_id}/edit`,
       }),
     ]),
-    h(UnitSectionTable, { sections, colSections }),
+    // there doesn't appear to be a good solution yet, so this is the best we can do. It loses the SSR
+    // for this component unfortunately
+    h.if(!isServer())(UnitSectionTable, { sections, colSections }),
   ]);
 }

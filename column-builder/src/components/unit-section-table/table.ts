@@ -26,6 +26,7 @@ import {
 } from "./helpers";
 
 import styles from "~/components/comp.module.scss";
+import { join } from "path";
 
 const h = hyperStyled(styles);
 
@@ -156,7 +157,7 @@ function ColSecUnitsTable(props: {
                   return h(
                     DnDTable,
                     {
-                      key: i,
+                      key: id.toString(),
                       index: i,
                       interactive: false,
                       headers,
@@ -182,7 +183,7 @@ function ColSecUnitsTable(props: {
                           section_index == i &&
                           editMode.mode !== "below";
 
-                        return h(React.Fragment, [
+                        return h(React.Fragment, { key: unit.id }, [
                           h.if(j == 0)(AddBtnBetweenRows, {
                             colSpan: headers.length,
                             onClick: () =>

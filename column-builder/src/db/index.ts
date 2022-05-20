@@ -137,4 +137,5 @@ export {
   selectFirst,
   tableInsertMany,
   tableSelect,
+  isServer,
 };
