@@ -1,83 +1,25 @@
-import React, { useReducer } from "react";
-import Link from "next/link";
+import { useReducer } from "react";
 import { hyperStyled } from "@macrostrat/hyper";
 import {
   ColumnStateI,
   UnitEditorModel,
   UnitsView,
-  convertColorNameToHex,
   ColSectionsTable,
   ColSectionI,
   MinEditorToggle,
 } from "~/index";
 import { columnReducer } from "../column";
-import { UnitLithHelperText } from "../unit/common-editing";
-import { MinEditorCard } from "../unit/minimal-unit-editor";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
-import { DraggableRow, DnDTable } from "../table";
+
 import { DropResult, DroppableProvided } from "react-beautiful-dnd";
-import {
-  ColumnPageBtnMenu,
-  SectionUnitCheckBox,
-  UnitRowContextMenu,
-  AddBtnBetweenRows,
-  UNIT_ADD_POISITON,
-  useRowUnitEditor,
-} from "./helpers";
+import { ColumnPageBtnMenu, useRowUnitEditor } from "./helpers";
 
 import styles from "~/components/comp.module.scss";
-import { join } from "path";
+import { SectionTable } from "./section";
 
 const h = hyperStyled(styles);
 
-function UnitRowCellGroup(props: {
-  unit: UnitsView;
-  cellStyles: object;
-  onClickDivideCheckBox: (id: number) => void;
-}) {
-  const { unit, cellStyles } = props;
-
-  const backgroundColor = convertColorNameToHex(unit.color) + "80";
-  return h(React.Fragment, [
-    h(
-      "td",
-      { onClick: (e: any) => e.stopPropagation(), style: { width: "0%" } },
-      [
-        h(SectionUnitCheckBox, {
-          data: unit.id,
-          onChange: props.onClickDivideCheckBox,
-        }),
-      ]
-    ),
-    h("td", { width: "0%", style: { ...cellStyles } }, [
-      h(Link, { href: `/unit/${unit.id}/edit` }, [h("a", [unit.id])]),
-    ]),
-    h(
-      "td",
-      { width: "50%", style: { background: backgroundColor, ...cellStyles } },
-      [
-        h("div", [
-          unit.strat_name
-            ? `${unit.strat_name.strat_name} ${unit.strat_name.rank}`
-            : unit.unit_strat_name || "unnamed",
-        ]),
-        h(UnitLithHelperText, { lith_unit: unit?.lith_unit ?? [] }),
-      ]
-    ),
-    h("td", { style: { ...cellStyles, width: "50%" } }, [
-      unit.name_fo !== unit.name_lo
-        ? `${unit.name_fo} - ${unit.name_lo}`
-        : unit.name_lo,
-    ]),
-    h("td", { style: { ...cellStyles } }, [
-      unit.min_thick != unit.max_thick
-        ? `${unit.min_thick} - ${unit.max_thick}`
-        : unit.min_thick,
-    ]),
-  ]);
-}
-
-function ColSecUnitsTable(props: {
+interface SectionUnitTableProps {
   state: ColumnStateI;
   onDragEnd: (r: DropResult) => void;
   onClickDivideCheckBox: (id: number) => void;
@@ -91,30 +33,24 @@ function ColSecUnitsTable(props: {
     section_index: number,
     unit_index: number
   ) => void;
-}) {
+}
+
+function SectionsDropContainer(props: SectionUnitTableProps) {
   const {
-    state: { sections, drag },
+    state: { sections },
+    onDragEnd,
   } = props;
   const {
     editOpen,
     triggerEditor,
-    styles,
     onCancel,
     unit_index,
     section_index,
     editMode,
   } = useRowUnitEditor();
 
-  let headers = ["", "ID", "Strat Name", "Interval", "Thickness", ""];
-  if (drag) headers = ["", ...headers];
-
-  const onDragEnd = (result: DropResult) => {
-    console.log("Drop result!!", result);
-    props.onDragEnd(result);
-  };
-
   const unitForEditor = Object.values(sections[section_index])[0][unit_index];
-  const diaglogTitle =
+  const dialogTitle =
     editMode.mode == "edit"
       ? `Edit unit #${unitForEditor.id}`
       : `Add unit ${editMode.mode} unit #${unitForEditor.id}`;
@@ -152,131 +88,21 @@ function ColSecUnitsTable(props: {
               { ...provided.droppableProps, ref: provided.innerRef },
               [
                 sections.map((section, i) => {
-                  const units_: UnitsView[] = Object.values(section)[0];
-                  const id = Object.keys(section)[0];
-                  return h(
-                    DnDTable,
-                    {
-                      key: id.toString(),
-                      index: i,
-                      interactive: false,
-                      headers,
-                      title: `Section #${id}`,
-                      draggableId: `${id} ${i}`,
-                      drag: props.state.drag,
-                      droppableId: i.toString() + " " + id.toString(),
-                    },
-                    [
-                      units_.map((unit, j) => {
-                        const cellStyles =
-                          unit_index == j && section_index == i ? styles : {};
-
-                        const openBottom =
-                          editOpen &&
-                          unit_index == j &&
-                          section_index == i &&
-                          editMode.mode === "below";
-
-                        const openTop =
-                          editOpen &&
-                          unit_index == j &&
-                          section_index == i &&
-                          editMode.mode !== "below";
-
-                        return h(React.Fragment, { key: unit.id }, [
-                          h.if(j == 0)(AddBtnBetweenRows, {
-                            colSpan: headers.length,
-                            onClick: () =>
-                              triggerEditor(
-                                UNIT_ADD_POISITON.ABOVE,
-                                j,
-                                i,
-                                false
-                              ),
-                          }),
-
-                          h.if(openTop)("tr", [
-                            h(
-                              "td",
-                              {
-                                colSpan: headers.length,
-                                style: { padding: 0 },
-                              },
-                              [
-                                h(MinEditorCard, {
-                                  title: diaglogTitle,
-                                  persistChanges,
-                                  model: editingModel,
-                                  onCancel,
-                                }),
-                              ]
-                            ),
-                          ]),
-                          h(
-                            DraggableRow,
-                            {
-                              key: unit.id,
-                              index: j,
-                              drag: props.state.drag,
-                              draggableId:
-                                unit.unit_strat_name + unit.id.toString(),
-                              href: undefined,
-                            },
-                            [
-                              h(UnitRowCellGroup, {
-                                onClickDivideCheckBox:
-                                  props.onClickDivideCheckBox,
-                                unit,
-                                key: j,
-                                cellStyles,
-                              }),
-                              h(
-                                "td",
-                                { width: "0%", style: { ...cellStyles } },
-                                [
-                                  h(UnitRowContextMenu, {
-                                    unit,
-                                    unit_index: j,
-                                    section_index: i,
-                                    triggerEditor: triggerEditor,
-                                  }),
-                                ]
-                              ),
-                            ]
-                          ),
-
-                          h(AddBtnBetweenRows, {
-                            colSpan: headers.length,
-                            onClick: () =>
-                              triggerEditor(
-                                UNIT_ADD_POISITON.BELOW,
-                                j,
-                                i,
-                                false
-                              ),
-                          }),
-
-                          h.if(openBottom)("tr", [
-                            h(
-                              "td",
-                              {
-                                colSpan: headers.length,
-                                style: { padding: 0 },
-                              },
-                              [
-                                h(MinEditorCard, {
-                                  title: diaglogTitle,
-                                  persistChanges,
-                                  model: editingModel,
-                                  onCancel,
-                                }),
-                              ]
-                            ),
-                          ]),
-                        ]);
-                      }),
-                    ]
-                  );
+                  return h(SectionTable, {
+                    editingModel,
+                    section,
+                    unit_index,
+                    section_index,
+                    editOpen,
+                    editMode,
+                    triggerEditor,
+                    onCancel,
+                    dialogTitle,
+                    persistChanges,
+                    index: i,
+                    onClickCheckBox: props.onClickDivideCheckBox,
+                    drag: props.state.drag,
+                  });
                 }),
                 provided.placeholder,
               ]
@@ -305,9 +131,6 @@ function UnitSectionTable(props: {
   const onChange = (id: number) => {
     dispatch({ type: "set-merge-ids", id });
   };
-  const mergeSections = () => {
-    dispatch({ type: "merge-ids" });
-  };
 
   const onDragEnd = (r: DropResult) => {
     if (r.type == "SECTIONS") {
@@ -322,9 +145,6 @@ function UnitSectionTable(props: {
     section_index: number,
     unit_index: number
   ) => {
-    /// callback for adding a unit in column at index i
-    // should probably have a way to split the section as well..
-    console.log("Adding At", unit, section_index, unit, unit_index);
     dispatch({
       type: "add-unit-at",
       section_index,
@@ -338,9 +158,6 @@ function UnitSectionTable(props: {
     section_index: number,
     unit_index: number
   ) => {
-    /// callback for editing a unit
-    // should probably have a way to split the section as well..
-    console.log("Editing At", section_index, unit, unit_index);
     dispatch({
       type: "edit-unit-at",
       section_index,
@@ -348,14 +165,6 @@ function UnitSectionTable(props: {
       unit_index,
     });
   };
-
-  const headers = [
-    "",
-    "Section number",
-    "Top interval",
-    "Bottom interval",
-    "# of units",
-  ];
 
   return h("div", [
     h(ColumnPageBtnMenu, {
@@ -376,7 +185,6 @@ function UnitSectionTable(props: {
     h.if(colSections.length > 0 && !state.unitsView)(ColSectionsTable, {
       colSections,
       onChange,
-      headers,
     }),
     h.if(state.sections.length > 0 && state.unitsView)(
       "div.unit-section-container",
@@ -395,7 +203,7 @@ function UnitSectionTable(props: {
                 unit_index: 0,
               }),
           }),
-          h(ColSecUnitsTable, {
+          h(SectionsDropContainer, {
             onClickDivideCheckBox: (id: number) =>
               dispatch({ type: "set-divide-ids", id }),
             state,
@@ -426,4 +234,4 @@ function UnitSectionTable(props: {
   ]);
 }
 
-export { ColSecUnitsTable, UnitRowCellGroup, UnitSectionTable };
+export { UnitSectionTable };

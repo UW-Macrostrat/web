@@ -4,15 +4,13 @@ import Link from "next/link";
 import { ReactChild } from "react";
 import styles from "./comp.module.scss";
 import {
-  DragDropContext,
   Draggable,
   DraggableProvided,
   DraggableStateSnapshot,
   Droppable,
   DroppableProvided,
-  DropResult,
 } from "react-beautiful-dnd";
-import { Card, Icon, Button } from "@blueprintjs/core";
+import { Card, Icon } from "@blueprintjs/core";
 
 const h = hyperStyled(styles);
 
