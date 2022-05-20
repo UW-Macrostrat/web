@@ -222,7 +222,7 @@ function AddBtnBetweenRows(props: { onClick: () => void; colSpan: number }) {
   ]);
 }
 
-interface EditModeI {
+export interface EditModeI {
   mode: UNIT_ADD_POISITON;
   copy: boolean;
 }
@@ -252,20 +252,11 @@ const useRowUnitEditor = () => {
     setEditOpen(false);
   };
 
-  const rowBorderStyles = !editOpen
-    ? {}
-    : editMode.mode == "edit"
-    ? { background: "#0F996040" }
-    : editMode.mode == "above"
-    ? { borderTop: "solid #0F9960 3px" }
-    : { borderBottom: "solid #0F9960 3px" };
-
   return {
     triggerEditor,
     unit_index,
     section_index,
     editOpen,
-    styles: rowBorderStyles,
     editMode,
     onCancel,
   };

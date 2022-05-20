@@ -1,4 +1,5 @@
 import h from "@macrostrat/hyper";
+import { PostgrestError } from "@supabase/postgrest-js";
 import { GetServerSideProps } from "next";
 import pg, {
   BasePage,
@@ -9,6 +10,7 @@ import pg, {
   getIdHierarchy,
   QueryI,
   UnitSectionTable,
+  isServer,
 } from "~/index";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -37,12 +39,14 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     .match({ col_id: col_id });
 
   const sections = createUnitBySections(units);
+
+  const errors = [e, col_error, unit_error].filter((e) => e != null);
   return {
     props: {
       col_id,
       colSections: d,
       column,
-      unit_error,
+      errors,
       query,
       sections,
     },
@@ -53,19 +57,23 @@ export default function Columns(props: {
   col_id: string;
   colSections: ColSectionI[];
   column: { col_name: string }[];
-  unit_error: any;
+  errors: PostgrestError[];
   query: QueryI;
   sections: { [section_id: number | string]: UnitsView[] }[];
 }) {
-  const { col_id, colSections, column, query, sections } = props;
+  const { col_id, colSections, column, query, sections, errors } = props;
 
-  return h(BasePage, { query }, [
+  const columnName = column ? column[0].col_name : null;
+
+  return h(BasePage, { query, errors }, [
     h("h3", [
-      `Sections for Column: ${column[0].col_name}`,
+      `Sections for Column: ${columnName}`,
       h(EditButton, {
         href: `/column/${col_id}/edit`,
       }),
     ]),
-    h(UnitSectionTable, { sections, colSections }),
+    // there doesn't appear to be a good solution yet, so this is the best we can do. It loses the SSR
+    // for this component unfortunately
+    h.if(!isServer())(UnitSectionTable, { sections, colSections }),
   ]);
 }

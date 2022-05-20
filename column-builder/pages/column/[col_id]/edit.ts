@@ -10,6 +10,7 @@ import {
   QueryI,
 } from "~/index";
 import { GetServerSideProps } from "next";
+import { PostgrestError } from "@supabase/postgrest-js";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const {
@@ -27,8 +28,16 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   const query = await getIdHierarchy({ col_id });
 
+  const errors = [error, error_].filter((e) => e != null);
+
   return {
-    props: { col_id, column: data, curColGroup: firstData.col_groups, query },
+    props: {
+      col_id,
+      column: data,
+      curColGroup: firstData.col_groups,
+      query,
+      errors,
+    },
   };
 };
 
@@ -37,8 +46,9 @@ export default function EditColumn(props: {
   curColGroup: any;
   column: ColumnForm[];
   query: QueryI;
+  errors: PostgrestError[];
 }) {
-  const { col_id, curColGroup, column } = props;
+  const { col_id, curColGroup, column, errors } = props;
 
   const persistChanges = async (
     e: ColumnForm,
@@ -82,7 +92,7 @@ export default function EditColumn(props: {
     return e;
   };
 
-  return h(BasePage, { query: props.query }, [
+  return h(BasePage, { query: props.query, errors }, [
     h("h3", [
       `Edit column ${column[0].col_name}, part of ${curColGroup.col_group_long}(${curColGroup.col_group}) Column Group`,
     ]),

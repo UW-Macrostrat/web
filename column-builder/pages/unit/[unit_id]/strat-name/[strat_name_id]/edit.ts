@@ -10,6 +10,7 @@ import {
 } from "~/index";
 import { GetServerSidePropsContext } from "next";
 import styles from "../stratname.module.scss";
+import { PostgrestError } from "@supabase/postgrest-js";
 
 const h = hyperStyled(styles);
 
@@ -24,8 +25,8 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
       match: { id: strat_name_id },
     }
   );
-
-  return { props: { strat_name_id, strat_name, unit_id, query } };
+  const errors = error == null ? [] : [error];
+  return { props: { strat_name_id, strat_name, errors, unit_id, query } };
 }
 
 export default function EditColumnGroup(props: {
@@ -33,8 +34,9 @@ export default function EditColumnGroup(props: {
   strat_name: StratNameI;
   unit_id: number;
   query: QueryI;
+  errors: PostgrestError[];
 }) {
-  const { strat_name_id, strat_name, unit_id } = props;
+  const { strat_name, errors } = props;
 
   const persistChanges = async (
     e: StratNameI,
@@ -52,7 +54,7 @@ export default function EditColumnGroup(props: {
     }
   };
 
-  return h(BasePage, { query: props.query }, [
+  return h(BasePage, { query: props.query, errors }, [
     h("h3", ["Edit Stratigraphic Name ", strat_name.strat_name]),
     //@ts-ignore
     h(StratNameEditor, { model: strat_name, persistChanges }),

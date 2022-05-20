@@ -8,6 +8,7 @@ import {
 } from "../../../src";
 import styles from "../project.module.scss";
 import { GetServerSidePropsContext } from "next";
+import { PostgrestError } from "@supabase/postgrest-js";
 const h = hyperStyled(styles);
 
 export async function getServerSideProps({
@@ -19,17 +20,17 @@ export async function getServerSideProps({
   const { firstData, error } = await selectFirst("projects", {
     match: { id: project_id },
   });
-  console.log(firstData, error);
   const project = firstData ? firstData : {};
-
-  return { props: { project_id, project } };
+  const errors = [error].filter((e) => e != null);
+  return { props: { project_id, project, errors } };
 }
 
 export default function NewProject(props: {
   project_id: string;
   project: Project;
+  errors: PostgrestError[];
 }) {
-  const { project, project_id } = props;
+  const { project, project_id, errors } = props;
 
   const persistChanges = async (e: Project, changes: Partial<Project>) => {
     const { data, error } = await tableUpdate("projects", {
@@ -44,7 +45,7 @@ export default function NewProject(props: {
     }
   };
 
-  return h(BasePage, { query: {} }, [
+  return h(BasePage, { query: {}, errors }, [
     h("h3", ["Create a New Project"]),
     //@ts-ignore
     h(ProjectEditor, { project: project, persistChanges }),

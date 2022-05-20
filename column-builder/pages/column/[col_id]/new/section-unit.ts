@@ -37,7 +37,7 @@ function NewUnitInSection({
     return await persistNewUnitChanges(updatedModel, changeSet, null, col_id);
   };
 
-  return h(BasePage, { query }, [
+  return h(BasePage, { query, errors: [] }, [
     //@ts-ignore
     h(UnitEditor, { model, persistChanges }),
   ]);

@@ -7,11 +7,17 @@ import { SectionUnitCheckBox } from "../unit-section-table/helpers";
 const h = hyperStyled(styles);
 
 function ColSectionsTable(props: {
-  headers: any[];
   colSections: ColSectionI[];
   onChange: (id: number) => void;
 }) {
-  const { headers, colSections, onChange } = props;
+  const { colSections, onChange } = props;
+  const headers = [
+    "",
+    "Section number",
+    "Top interval",
+    "Bottom interval",
+    "# of units",
+  ];
   return h(Table, { interactive: true, headers }, [
     colSections.map((section, i) => {
       return h(

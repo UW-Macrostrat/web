@@ -1,4 +1,5 @@
 import h from "@macrostrat/hyper";
+import { PostgrestError } from "@supabase/postgrest-js";
 import { GetServerSidePropsContext } from "next";
 import pg, {
   ColumnGroupI,
@@ -20,21 +21,22 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 
   const projectName: string =
     data && data.length > 0 ? data[0].project_id.project : "";
+  const errors = [error].filter((e) => e != null);
 
-  return { props: { project_id, projectName, columnGroups: data } };
+  return { props: { project_id, projectName, columnGroups: data, errors } };
 }
 
 export default function ColumnGroup(props: {
   projectName: string;
   project_id: number;
   columnGroups: ColumnGroupI[];
+  errors: PostgrestError[];
 }) {
-  const { project_id } = props;
-  console.log(props.columnGroups);
+  const { project_id, errors } = props;
 
   const headers = ["ID", "Name", "Col #", "Status"];
 
-  return h(BasePage, { query: { project_id } }, [
+  return h(BasePage, { query: { project_id }, errors }, [
     h("h3", [
       `Column Groups for Project #${props.project_id}: ${props.projectName}`,
       h(CreateButton, {
@@ -61,8 +63,6 @@ export default function ColumnGroup(props: {
                   Row,
                   {
                     key: id.col_id,
-                    draggableId: id.col_name + id.col_id?.toString(),
-                    index: i,
                     href: `/column/${id.col_id}`,
                   },
                   [

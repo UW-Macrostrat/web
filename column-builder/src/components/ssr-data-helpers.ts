@@ -9,6 +9,7 @@ import { UnitsView } from "~/index";
  * @returns unitsBySection - {[section_id: number]: UnitsView[]}[]
  */
 function createUnitBySections(units: UnitsView[]) {
+  if (!units) return [];
   const seen: { [section_id: number | string]: number } = {}; // store section_ids and their index in array
   const unitsBySections: { [section_id: string | number]: UnitsView[] }[] = [];
 

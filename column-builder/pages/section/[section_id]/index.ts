@@ -8,6 +8,7 @@ import pg, {
 } from "~/index";
 import { BasePage } from "~/index";
 import { GetServerSideProps } from "next";
+import { PostgrestError } from "@supabase/postgrest-js";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const {
@@ -25,18 +26,19 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const sections = createUnitBySections(data);
 
   const query: QueryI = await getIdHierarchy({ section_id });
-
-  return { props: { section_id, query, sections } };
+  const errors = [error].filter((e) => e != null);
+  return { props: { section_id, query, sections, errors } };
 };
 
 function Section(props: {
   section_id: string;
   query: QueryI;
   sections: { [section_id: number | string]: UnitsView[] }[];
+  errors: PostgrestError[];
 }) {
-  const { section_id, sections } = props;
+  const { section_id, sections, errors } = props;
 
-  return h(BasePage, { query: props.query }, [
+  return h(BasePage, { query: props.query, errors }, [
     h("h3", [`Units in Section #${section_id}`]),
     h(UnitSectionTable, { sections, colSections: [] }),
   ]);
