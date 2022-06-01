@@ -46,51 +46,72 @@ export interface ColBtnMenuI {
   state: {
     unitsView: boolean;
     drag: boolean;
-    divideIds: number[];
     mergeIds: number[];
+    moved: { [unit_id: number]: boolean };
   };
-  divideSection: () => void;
   mergeSections: () => void;
   noSectionView: boolean;
 }
 
 function ColumnPageBtnMenu(props: ColBtnMenuI) {
   const {
-    state: { unitsView, drag, divideIds, mergeIds },
+    state: { unitsView, drag, mergeIds, moved },
   } = props;
-  //@ts-ignore
-  return h(ButtonGroup, [
-    h(
-      Button,
-      {
-        onClick: props.toggleUnitsView,
-        intent: unitsView ? "primary" : "none",
-        disabled: unitsView,
-      },
-      ["Unit view"]
-    ),
-    h.if(!props.noSectionView)(
-      Button,
-      {
-        onClick: props.toggleUnitsView,
-        intent: !unitsView ? "primary" : "none",
-        disabled: !unitsView,
-      },
-      ["Section View"]
-    ),
-    h(Button, { onClick: props.toggleDrag, disabled: !unitsView }, [
-      drag ? "Disable drag" : "Enable drag",
+  return h("div", [
+    //@ts-ignore
+    h(ButtonGroup, [
+      h(
+        Button,
+        {
+          onClick: props.toggleUnitsView,
+          intent: unitsView ? "primary" : "none",
+          disabled: unitsView,
+        },
+        ["Unit view"]
+      ),
+      h.if(!props.noSectionView)(
+        Button,
+        {
+          onClick: props.toggleUnitsView,
+          intent: !unitsView ? "primary" : "none",
+          disabled: !unitsView,
+        },
+        ["Section View"]
+      ),
+      h.if(!unitsView)(MergeDivideBtn, {
+        onClick: props.mergeSections,
+        disabled: mergeIds.length < 2,
+        text: "Merge Sections",
+      }),
     ]),
-    h.if(!unitsView)(MergeDivideBtn, {
-      onClick: props.mergeSections,
-      disabled: mergeIds.length < 2,
-      text: "Merge Sections",
+    h.if(unitsView)(ReorderUnitsBtnGrp, {
+      drag,
+      onClick: props.toggleDrag,
+      moved,
     }),
-    h.if(unitsView)(MergeDivideBtn, {
-      text: "Divide section",
-      onClick: props.divideSection,
-      disabled: divideIds.length < 1,
-    }),
+  ]);
+}
+
+function ReorderUnitsBtnGrp(props: {
+  drag: boolean;
+  onClick: () => void;
+  moved: { [unit_id: number]: boolean };
+}) {
+  //@ts-ignore
+  return h(ButtonGroup, { style: { marginLeft: "20px" } }, [
+    h.if(!props.drag)(Button, { onClick: props.onClick }, ["Reorder Units"]),
+    h.if(props.drag)(
+      Button,
+      {
+        intent: "success",
+        onClick: props.onClick,
+        disabled: Object.keys(props.moved).length == 0,
+      },
+      ["Save"]
+    ),
+    h.if(props.drag)(Button, { intent: "danger", onClick: props.onClick }, [
+      "Cancel",
+    ]),
   ]);
 }
 
