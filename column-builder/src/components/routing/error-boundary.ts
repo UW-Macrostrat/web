@@ -6,6 +6,7 @@ import styles from "../comp.module.scss";
 import { PostgrestError } from "@supabase/postgrest-js";
 const h = hyperStyled(styles);
 
+
 function ErrorDialog(props: { errors: PostgrestError[] }) {
   return h(Dialog, { isOpen: true, style: { paddingBottom: "0" } }, [
     h(

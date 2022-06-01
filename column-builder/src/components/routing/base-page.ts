@@ -44,6 +44,7 @@ export function BasePage(props: BasePageProps) {
     return true;
   };
 
+  // This should really be moved out to a hook.
   const breadCrumbs: CrumbsI[] = [
     {
       text: "Projects",

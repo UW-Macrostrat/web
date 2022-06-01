@@ -5,6 +5,10 @@ async function getIdHierarchy(query: QueryI) {
   // could be col_id,section_id, unit_id
   const { project_id, col_id, section_id, unit_id, col_group_id } = query;
 
+  // Can you use simpler null checks?
+  // e.g., if (col_id != null)  could work well.
+  // Also this seems like a weird way to do it... this function
+  // seems like a choke point that just passes things off to other functions.
   if (typeof col_id !== "undefined") {
     return await fetchIdsFromColId(col_id);
   } else if (typeof section_id !== "undefined") {
