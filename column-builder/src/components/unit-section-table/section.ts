@@ -25,7 +25,7 @@ interface SectionTableProps {
   dialogTitle: string;
   editingModel: { unit: any };
   persistChanges: (e: UnitEditorModel, c: Partial<UnitEditorModel>) => void;
-  onClickCheckBox: (id: number) => void;
+  moved: { [unit_id: number]: boolean };
 }
 
 function SectionTable(props: SectionTableProps) {
@@ -72,6 +72,7 @@ function SectionTable(props: SectionTableProps) {
         return h(UnitRow, {
           drag,
           unit,
+          isMoved: unit.id in props.moved,
           unit_index: j,
           section_index: index,
           triggerEditor,

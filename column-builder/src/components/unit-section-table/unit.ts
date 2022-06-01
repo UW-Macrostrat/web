@@ -78,11 +78,11 @@ interface UnitRowProps {
   dialogTitle: string;
   editingModel: { unit: any };
   persistChanges: (e: UnitEditorModel, c: Partial<UnitEditorModel>) => void;
-  onClickCheckBox: (id: number) => void;
   styles: any;
   colSpan: number;
   openBottom: boolean;
   openTop: boolean;
+  isMoved: boolean;
 }
 
 function UnitRow(props: UnitRowProps) {
@@ -114,10 +114,10 @@ function UnitRow(props: UnitRowProps) {
         drag: props.drag,
         draggableId: props.unit.unit_strat_name + props.unit.id.toString(),
         href: undefined,
+        isMoved: props.isMoved,
       },
       [
         h(UnitCellGroup, {
-          onClickDivideCheckBox: props.onClickCheckBox,
           unit: props.unit,
           key: props.unit_index,
           cellStyles: props.styles,

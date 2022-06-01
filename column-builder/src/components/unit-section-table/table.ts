@@ -37,7 +37,7 @@ interface SectionUnitTableProps {
 
 function SectionsDropContainer(props: SectionUnitTableProps) {
   const {
-    state: { sections },
+    state: { sections, moved },
     onDragEnd,
   } = props;
   const {
@@ -100,8 +100,8 @@ function SectionsDropContainer(props: SectionUnitTableProps) {
                     dialogTitle,
                     persistChanges,
                     index: i,
-                    onClickCheckBox: props.onClickDivideCheckBox,
                     drag: props.state.drag,
+                    moved,
                   });
                 }),
                 provided.placeholder,
@@ -122,8 +122,9 @@ function UnitSectionTable(props: {
 
   const [state, dispatch] = useReducer(columnReducer, {
     sections,
+    originalSections: sections,
     mergeIds: [],
-    divideIds: [],
+    moved: {},
     drag: false,
     unitsView: true,
   });
@@ -171,8 +172,8 @@ function UnitSectionTable(props: {
       state: {
         unitsView: state.unitsView,
         drag: state.drag,
-        divideIds: state.divideIds,
         mergeIds: state.mergeIds,
+        moved: state.moved,
       },
       toggleUnitsView: () => dispatch({ type: "toggle-units-view" }),
       toggleDrag: () => {

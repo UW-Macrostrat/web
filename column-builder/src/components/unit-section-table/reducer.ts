@@ -75,8 +75,9 @@ export type SyncActions =
 
 export interface ColumnStateI {
   sections: SectionUnits;
+  originalSections: SectionUnits;
   mergeIds: number[];
-  divideIds: number[];
+  moved: { [unit_id: number]: boolean };
   drag: boolean;
   unitsView: boolean;
 }
@@ -176,8 +177,13 @@ const columnReducer = (state: ColumnStateI, action: SyncActions) => {
       const [destSectionIndex, destSection] =
         action.result.destination.droppableId.split(" ");
 
+      const movedUnitId =
+        currSections[parseInt(sourceSectionIndex)][sourceSection][source_index][
+          "id"
+        ];
+
       if (sourceSection === destSection) {
-        // same unit
+        // same section
         reorder(
           currSections[parseInt(sourceSectionIndex)][sourceSection],
           source_index,
@@ -199,6 +205,7 @@ const columnReducer = (state: ColumnStateI, action: SyncActions) => {
 
       return {
         ...state,
+        moved: { ...state.moved, [movedUnitId]: true },
         sections: currSections,
       };
   }

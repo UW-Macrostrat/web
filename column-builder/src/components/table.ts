@@ -20,6 +20,7 @@ interface RowProps {
   index: number;
   href?: string;
   drag?: boolean;
+  isMoved?: boolean;
 }
 
 const getItemStyle = (isDragging: boolean, draggableStyle: any) => ({
@@ -57,7 +58,7 @@ function DraggableRow(props: RowProps) {
       (provided: DraggableProvided, snapshot: DraggableStateSnapshot) => {
         return h(RowWrapper, { link: props.href }, [
           h(
-            "tr",
+            `tr${props.isMoved ? ".unit-moved" : ""}`,
             {
               onClick: (e: MouseEvent) => e.stopPropagation(),
               ref: provided.innerRef,
