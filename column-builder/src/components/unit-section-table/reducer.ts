@@ -155,7 +155,11 @@ const columnReducer = (state: ColumnStateI, action: SyncActions) => {
 
       return { ...state, sections: currSections };
     case "dropped-unit":
-      if (typeof action.result.destination === "undefined") return state;
+      if (
+        typeof action.result.destination === "undefined" ||
+        action.result.destination == null
+      )
+        return state;
       let source_index = action.result.source.index;
       let destination_index = action.result.destination.index;
 
