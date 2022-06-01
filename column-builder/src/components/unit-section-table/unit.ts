@@ -6,7 +6,6 @@ import { UnitEditorProps, UnitLithHelperText } from "../unit/common-editing";
 import { MinEditorCard } from "../unit/minimal-unit-editor";
 import { DraggableRow } from "../table";
 import {
-  SectionUnitCheckBox,
   UnitRowContextMenu,
   AddBtnBetweenRows,
   UNIT_ADD_POISITON,
@@ -16,25 +15,11 @@ import styles from "~/components/comp.module.scss";
 
 const h = hyperStyled(styles);
 
-function UnitCellGroup(props: {
-  unit: UnitsView;
-  cellStyles: object;
-  onClickDivideCheckBox: (id: number) => void;
-}) {
+function UnitCellGroup(props: { unit: UnitsView; cellStyles: object }) {
   const { unit, cellStyles } = props;
 
   const backgroundColor = convertColorNameToHex(unit.color) + "80";
   return h(React.Fragment, [
-    h(
-      "td",
-      { onClick: (e: any) => e.stopPropagation(), style: { width: "0%" } },
-      [
-        h(SectionUnitCheckBox, {
-          data: unit.id,
-          onChange: props.onClickDivideCheckBox,
-        }),
-      ]
-    ),
     h("td", { width: "0%", style: { ...cellStyles } }, [
       h(Link, { href: `/unit/${unit.id}/edit` }, [h("a", [unit.id])]),
     ]),

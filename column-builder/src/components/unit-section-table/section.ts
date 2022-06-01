@@ -42,7 +42,7 @@ function SectionTable(props: SectionTableProps) {
     dialogTitle,
   } = props;
 
-  let headers = ["", "ID", "Strat Name", "Interval", "Thickness", ""];
+  let headers = ["ID", "Strat Name", "Interval", "Thickness", ""];
   if (drag) headers = ["", ...headers];
 
   const units: UnitsView[] = Object.values(props.section)[0];
@@ -84,7 +84,6 @@ function SectionTable(props: SectionTableProps) {
           styles: cellStyles,
           colSpan: headers.length,
           persistChanges: props.persistChanges,
-          onClickCheckBox: props.onClickCheckBox,
         });
       }),
     ]

@@ -22,7 +22,6 @@ const h = hyperStyled(styles);
 interface SectionUnitTableProps {
   state: ColumnStateI;
   onDragEnd: (r: DropResult) => void;
-  onClickDivideCheckBox: (id: number) => void;
   addUnitAt: (
     u: UnitEditorModel,
     section_index: number,
@@ -205,8 +204,6 @@ function UnitSectionTable(props: {
               }),
           }),
           h(SectionsDropContainer, {
-            onClickDivideCheckBox: (id: number) =>
-              dispatch({ type: "set-divide-ids", id }),
             state,
             onDragEnd,
             editUnitAt,

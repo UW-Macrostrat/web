@@ -36,7 +36,6 @@ type SectionUnits = { [section_id: string | number]: UnitsView[] }[];
 /////////////// Action Types ///////////////
 
 type SetMergeIds = { type: "set-merge-ids"; id: number };
-type SetDivideIds = { type: "set-divide-ids"; id: number };
 type MergeIds = { type: "merge-ids" };
 type DroppedUnit = {
   type: "dropped-unit";
@@ -64,7 +63,6 @@ type EditUnitAt = {
 
 export type SyncActions =
   | SetMergeIds
-  | SetDivideIds
   | DroppedUnit
   | DroppedSection
   | MergeIds
@@ -92,14 +90,6 @@ const columnReducer = (state: ColumnStateI, action: SyncActions) => {
       return {
         ...state,
         mergeIds: newIds,
-      };
-    case "set-divide-ids":
-      const currentDiIds = [...state.divideIds];
-      const id_ = action.id;
-      const newDiIds = filterOrAddIds(id_, currentDiIds);
-      return {
-        ...state,
-        divideIds: newDiIds,
       };
     case "toggle-drag":
       return {
