@@ -263,6 +263,7 @@ const useRowUnitEditor = () => {
     section_index: number,
     copy: boolean
   ) => {
+    if (editOpen) return;
     setUnitIndex(unit_index);
     setSectionIndex(section_index);
     setEditMode({ mode: e, copy });
