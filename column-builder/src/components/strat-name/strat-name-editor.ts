@@ -15,7 +15,7 @@ import { SubmitButton } from "..";
 import { StratNameDataI } from ".";
 import { StratNameHierarchy } from "./hierarchy";
 import { DataI, ItemSelect } from "../suggest";
-import { PrevalentTaxa } from "@macrostrat/data-components";
+import { Checkbox } from "@blueprintjs/core";
 
 const h = hyperStyled(styles);
 
@@ -79,7 +79,8 @@ function StratNameEdit() {
     actions.updateState({ model: { [field]: { $set: e } } });
   };
 
-  return h("div", { style: { display: "flex" } }, [
+  return h("div", [
+    h(StratNameHierarchy, { strat_name_id: model.id }),
     h("div", [
       h("div.row", [
         h(
@@ -99,11 +100,17 @@ function StratNameEdit() {
         ),
         h(FormGroup, { label: "Rank" }, [h(RankSelect, { updateStratName })]),
       ]),
-
+      h("div.row", [
+        h(Checkbox, { label: "Apply globally", style: { margin: "5px" } }),
+        h(Checkbox, {
+          label: "Apply to this unit only",
+          style: { margin: "5px" },
+        }),
+      ]),
       h(
         FormGroup,
         {
-          helperText: "This will assign the parent of Cerro Tipon Fm",
+          helperText: `This will assign the parent of ${model.strat_name} ${model.rank}`,
           label: "(re)-Assign Parent",
           labelFor: "descrip-input",
         },
@@ -116,10 +123,6 @@ function StratNameEdit() {
         ]
       ),
       h(SubmitButton),
-    ]),
-    h("div", [
-      h(StratNameHierarchy, { strat_name_id: model.id }),
-      h(PrevalentTaxa, { strat_name_id: model.id }),
     ]),
   ]);
 }

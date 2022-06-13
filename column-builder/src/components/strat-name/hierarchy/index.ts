@@ -23,14 +23,14 @@ export function StratNameHierarchy({
     }
     fetch();
   }, [strat_name_id]);
+
   if (!state) {
     return h("h3", "No results");
   }
-  if (!state.name) {
-    return h(Spinner);
-  }
 
-  return h("div", { style: { flexGrow: 1, marginLeft: "50px" } }, [
-    h(Hierarchy, { ...state }),
+  return h("div.strat-name-hierarchy", [
+    h("h3", ["Hierarchy Summary"]),
+    h.if(state.name)(Hierarchy, { ...state }),
+    h.if(!state.name)(Spinner),
   ]);
 }

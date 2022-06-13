@@ -29,7 +29,7 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   return { props: { strat_name_id, strat_name, errors, unit_id, query } };
 }
 
-export default function EditColumnGroup(props: {
+export default function EditStratigraphicName(props: {
   strat_name_id: number;
   strat_name: StratNameI;
   unit_id: number;
@@ -55,7 +55,11 @@ export default function EditColumnGroup(props: {
   };
 
   return h(BasePage, { query: props.query, errors }, [
-    h("h3", ["Edit Stratigraphic Name ", strat_name.strat_name]),
+    h("h3", [
+      "Edit Stratigraphic Name and Hierarchy for ",
+      strat_name.strat_name," ",
+      strat_name.rank,
+    ]),
     //@ts-ignore
     h(StratNameEditor, { model: strat_name, persistChanges }),
   ]);
