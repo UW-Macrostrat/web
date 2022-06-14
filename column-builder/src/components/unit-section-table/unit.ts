@@ -29,6 +29,7 @@ import {
   useModelEditor,
 } from "deps/ui-components/packages/ui-components/src";
 import { SubmitButton } from "../buttons";
+import { UnitStratNameModalEditor } from "../strat-name";
 
 const h = hyperStyled(styles);
 
@@ -122,10 +123,29 @@ function UnitRowNotes() {
 
   return h(React.Fragment, [
     h.if(isEditing)(TextArea, {
+      style: { maxWidth: "100px" },
       value: unit.notes,
       onChange: (e) => updateUnit("notes", e.target.value),
     }),
     h.if(!isEditing)("p.ellipse", [unit.notes]),
+  ]);
+}
+
+function UnitRowStratNameEditor() {
+  const {
+    model,
+    actions,
+    isEditing,
+  }: { model: { unit: UnitsView }; actions: any; isEditing: boolean } =
+    useModelEditor();
+
+  const { unit } = model;
+
+  return h("div", [
+    unit.strat_names
+      ? `${unit.strat_names.strat_name} ${unit.strat_names.rank}`
+      : unit.unit_strat_name ?? "unnamed",
+    h.if(isEditing)(UnitStratNameModalEditor),
   ]);
 }
 
@@ -143,11 +163,7 @@ function UnitCellGroup(props: { unit: UnitsView; onCancel: () => void }) {
       h(Link, { href: `/unit/${unit.id}/edit` }, [h("a", [unit.id])]),
     ]),
     h("td", { style: { background: backgroundColor } }, [
-      h("div", [
-        unit.strat_name
-          ? `${unit.strat_name.strat_name} ${unit.strat_name.rank}`
-          : unit.unit_strat_name ?? "unnamed",
-      ]),
+      h(UnitRowStratNameEditor),
     ]),
     h("td", [h(LithTags, { large: false })]),
     h("td", [h(EnvTags, { large: false })]),

@@ -133,3 +133,67 @@
 .full-width {
   width: 100%;
 }
+
+.ellipse {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 80px;
+  white-space: nowrap;
+}
+
+.strat-name-tooltip {
+  h4 {
+    margin: 0;
+  }
+  .underline {
+    text-decoration: underline;
+  }
+  i {
+    color: rgb(166, 170, 174);
+    a {
+      text-decoration: underline;
+      color: rgb(108, 138, 175);
+    }
+  }
+}
+.no-strat-meta {
+  h4::before {
+    color: rgb(243, 170, 33);
+    content: "Warning: ";
+  }
+}
+
+///////////////////////// strat modal ///////////////
+.concept-card {
+  h4 {
+    margin: 0;
+    font-size: 15px;
+  }
+  .geologic-age {
+    font-style: italic;
+    color: #7b7b7b;
+  }
+  p {
+    margin: 0;
+    a {
+      text-decoration: underline;
+    }
+  }
+}
+
+.related-strat-card {
+  h3 {
+    margin: 0;
+  }
+}
+.strat-name-dialog-container {
+  display: flex;
+  padding: 10px;
+  .left,
+  .right {
+    margin: 5px;
+  }
+}
+.strat-dialog-bottom {
+  margin: 10px;
+}

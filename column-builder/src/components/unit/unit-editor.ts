@@ -57,11 +57,11 @@ function StratName() {
   const { unit }: UnitEditorModel = model;
   const baseURl = `/unit/${unit.id}`;
   // this complexity is born of the confusing strat_name issues in the db
-  const href = unit.strat_name
-    ? `${baseURl}/strat-name/${unit.strat_name.id}/edit`
+  const href = unit.strat_names
+    ? `${baseURl}/strat-name/${unit.strat_names.id}/edit`
     : `${baseURl}/strat-name/new`;
 
-  const linkText = unit.strat_name ? "(modify)" : "(create)";
+  const linkText = unit.strat_names ? "(modify)" : "(create)";
 
   return h("tr", [
     h(FeatureCell, { text: "Informal Unit Name" }, [h(InformalUnitName)]),

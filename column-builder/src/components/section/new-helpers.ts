@@ -57,7 +57,7 @@ export const persistNewUnitChanges = async (
   const unit: Partial<UnitsView> = {};
   keys.map((k) => {
     if (k == "strat_name") {
-      unit.strat_name_id = changeSet.unit?.strat_name.id;
+      unit.strat_name_id = changeSet.unit?.strat_names.id;
     } else {
       //@ts-ignore
       unit[k] = changeSet.unit[k];

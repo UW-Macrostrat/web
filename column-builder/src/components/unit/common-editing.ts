@@ -6,7 +6,7 @@ import {
   EnvironUnit,
   TagContainerCell,
 } from "../../index";
-import { InputGroup, NumericInput } from "@blueprintjs/core";
+import { InputGroup, NumericInput, FormGroup } from "@blueprintjs/core";
 import {
   useModelEditor,
   //@ts-ignore
@@ -184,22 +184,24 @@ export function InformalUnitName() {
     });
   };
 
-  return h(InputGroup, {
-    placeholder: "Informal Unit Name",
-    style: { width: "200px" },
-    defaultValue: unit.unit_strat_name || undefined,
-    onChange: (e) => updateUnitName(e.target.value),
-  });
+  return h(FormGroup, { label: "Informal Unit Name" }, [
+    h(InputGroup, {
+      placeholder: "Informal Unit Name",
+      style: { width: "200px" },
+      defaultValue: unit.unit_strat_name || undefined,
+      onChange: (e) => updateUnitName(e.target.value),
+    }),
+  ]);
 }
 
 export function FormalStratName() {
   const { model, actions } = useModelEditor();
   const { unit }: UnitEditorModel = model;
 
-  const initialSelected: StratNameDataI | undefined = unit?.strat_name
+  const initialSelected: StratNameDataI | undefined = unit?.strat_names
     ? {
-        value: unit.strat_name.strat_name,
-        data: unit.strat_name,
+        value: `${unit.strat_names.strat_name} ${unit.strat_names.rank}`,
+        data: unit.strat_names,
       }
     : undefined;
 
@@ -207,9 +209,11 @@ export function FormalStratName() {
     actions.updateState({ model: { unit: { strat_name: { $set: e.data } } } });
   };
 
-  return h(StratNameSuggest, {
-    initialSelected,
-    placeholder: "Formal Strat Name",
-    onChange: updateStratName,
-  });
+  return h(FormGroup, { label: "Formal strat name" }, [
+    h(StratNameSuggest, {
+      initialSelected,
+      placeholder: "Formal Strat Name",
+      onChange: updateStratName,
+    }),
+  ]);
 }
