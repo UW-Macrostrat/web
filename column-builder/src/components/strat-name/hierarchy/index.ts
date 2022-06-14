@@ -29,7 +29,6 @@ export function StratNameHierarchy({
   }
 
   return h("div.strat-name-hierarchy", [
-    h("h3", ["Hierarchy Summary"]),
     h.if(state.name)(Hierarchy, { ...state }),
     h.if(!state.name)(Spinner),
   ]);
