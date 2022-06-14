@@ -21,6 +21,7 @@ interface SuggestI {
   onChange: (e: DataI) => void;
   initialSelected?: DataI;
   items: DataI[];
+  itemRenderer?: ItemRenderer<any>;
   onQueryChange?: (e: string) => void;
   placeholder?: string;
 }
@@ -78,7 +79,7 @@ function ItemSuggest(props: SuggestI) {
     },
     selectedItem: selected,
     onItemSelect: onItemSelect,
-    itemRenderer: itemRenderer,
+    itemRenderer: props.itemRenderer ?? itemRenderer,
     itemPredicate: itemPredicate,
     onQueryChange: props.onQueryChange,
     resetOnQuery: true,
