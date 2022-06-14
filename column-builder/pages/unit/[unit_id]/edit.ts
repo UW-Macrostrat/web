@@ -20,7 +20,7 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   const { data: units, error: e } = await pg
     .from("unit_strat_name_expanded")
     .select(
-      "*,lith_unit!unit_liths_unit_id_fkey(*),environ_unit!unit_environs_unit_id_fkey(*)"
+      "*,strat_names(*, strat_names_meta(*)),lith_unit!unit_liths_unit_id_fkey(*),environ_unit!unit_environs_unit_id_fkey(*)"
     )
     .match({ id: unit_id })
     .limit(1);
@@ -44,7 +44,7 @@ function UnitEdit(props: {
   const { unit, errors } = props;
 
   const model = { unit };
-  console.log(unit);
+  console.log("Unit", unit);
 
   const persistChanges = async (
     updatedModel: UnitEditorModel,
