@@ -90,6 +90,9 @@ export interface Lith {
   lith_type: string;
   lith_class: string;
   lith_color: string;
+  prop: "dom" | "sub";
+  mod_prop: number;
+  comp_prop: number;
 }
 
 export interface LithUnit extends Lith {

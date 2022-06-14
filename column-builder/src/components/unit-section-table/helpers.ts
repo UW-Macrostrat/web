@@ -123,15 +123,19 @@ enum UNIT_ADD_POISITON {
 
 export interface UnitRowContextMenuI {
   // either we are adding a new unit above, below or editing the current unit
+  // or we are editing the unit inRow
   triggerEditor: (
     e: UNIT_ADD_POISITON,
     unit_index: number,
     section_index: number,
-    copy: boolean
+    copy: boolean,
+    inRow?: boolean
   ) => void;
   unit: UnitsView;
   unit_index: number;
   section_index: number;
+  copyUnitUp: () => void;
+  copyUnitDown: () => void;
 }
 function UnitRowContextMenu(props: UnitRowContextMenuI) {
   const SubMenu = ({ pos }: { pos: UNIT_ADD_POISITON }) => {
@@ -156,8 +160,44 @@ function UnitRowContextMenu(props: UnitRowContextMenuI) {
     ]);
   };
 
+  const QuickActionMenu = () => {
+    return h(React.Fragment, [
+      h(MenuItem, {
+        text: `Quick edit unit #${props.unit.id}`,
+        icon: "edit",
+        onClick: () => {
+          props.triggerEditor(
+            UNIT_ADD_POISITON.EDIT,
+            props.unit_index,
+            props.section_index,
+            true,
+            true
+          );
+        },
+      }),
+      h(MenuItem, {
+        text: `Copy unit #${props.unit.id} up`,
+        icon: "circle-arrow-up",
+        onClick: props.copyUnitUp,
+      }),
+      h(MenuItem, {
+        text: `Copy unit #${props.unit.id} down`,
+        icon: "circle-arrow-down",
+        onClick: props.copyUnitDown,
+      }),
+    ]);
+  };
+
   const ContextMenu = () =>
     h(Menu, [
+      h(
+        MenuItem,
+        {
+          text: "Quick Actions",
+          icon: "selection",
+        },
+        [h(QuickActionMenu)]
+      ),
       h(
         MenuItem,
         {
@@ -246,6 +286,7 @@ function AddBtnBetweenRows(props: { onClick: () => void; colSpan: number }) {
 export interface EditModeI {
   mode: UNIT_ADD_POISITON;
   copy: boolean;
+  inRow?: boolean;
 }
 
 const useRowUnitEditor = () => {
@@ -255,18 +296,20 @@ const useRowUnitEditor = () => {
   const [editMode, setEditMode] = useState<EditModeI>({
     mode: UNIT_ADD_POISITON.EDIT,
     copy: true,
+    inRow: false,
   });
 
   const triggerEditor = (
     e: UNIT_ADD_POISITON,
     unit_index: number,
     section_index: number,
-    copy: boolean
+    copy: boolean,
+    inRow?: boolean
   ) => {
     if (editOpen) return;
     setUnitIndex(unit_index);
     setSectionIndex(section_index);
-    setEditMode({ mode: e, copy });
+    setEditMode({ mode: e, copy, inRow: inRow ?? false });
     setEditOpen(true);
   };
 

@@ -1,4 +1,4 @@
-import { useReducer } from "react";
+import React, { useReducer } from "react";
 import { hyperStyled } from "@macrostrat/hyper";
 import {
   ColumnStateI,
@@ -16,12 +16,15 @@ import { ColumnPageBtnMenu, useRowUnitEditor } from "./helpers";
 
 import styles from "~/components/comp.module.scss";
 import { SectionTable } from "./section";
+import { NewSectionBtn } from "../unit/minimal-unit-editor";
+import { UnitRowEditorModal } from "./unit";
 
 const h = hyperStyled(styles);
 
 interface SectionUnitTableProps {
   state: ColumnStateI;
   onDragEnd: (r: DropResult) => void;
+  addSectionAt: (n: number) => void;
   addUnitAt: (
     u: UnitEditorModel,
     section_index: number,
@@ -51,8 +54,8 @@ function SectionsDropContainer(props: SectionUnitTableProps) {
   const unitForEditor = Object.values(sections[section_index])[0][unit_index];
   const dialogTitle =
     editMode.mode == "edit"
-      ? `Edit unit #${unitForEditor.id}`
-      : `Add unit ${editMode.mode} unit #${unitForEditor.id}`;
+      ? `Edit unit #${unitForEditor?.id ?? ""}`
+      : `Add unit ${editMode.mode} unit #${unitForEditor?.id ?? ""}`;
 
   const persistChanges = (e: UnitEditorModel, c: Partial<UnitEditorModel>) => {
     if (editMode.mode == "edit") {
@@ -72,6 +75,13 @@ function SectionsDropContainer(props: SectionUnitTableProps) {
     : { unit: { lith_unit: [], environ_unit: [] } };
 
   return h("div", [
+    h(UnitRowEditorModal, {
+      model: editingModel,
+      persistChanges: persistChanges,
+      onCancel: onCancel,
+      title: dialogTitle,
+      open: editOpen && !editMode.inRow,
+    }),
     h(DragDropContext, { onDragEnd }, [
       h(
         Droppable,
@@ -86,22 +96,36 @@ function SectionsDropContainer(props: SectionUnitTableProps) {
               "div",
               { ...provided.droppableProps, ref: provided.innerRef },
               [
+                h(NewSectionBtn, {
+                  index: 0,
+                  addNewSection: props.addSectionAt,
+                }),
                 sections.map((section, i) => {
-                  return h(SectionTable, {
-                    editingModel,
-                    section,
-                    unit_index,
-                    section_index,
-                    editOpen,
-                    editMode,
-                    triggerEditor,
-                    onCancel,
-                    dialogTitle,
-                    persistChanges,
-                    index: i,
-                    drag: props.state.drag,
-                    moved,
-                  });
+                  const addUnitAt = (e: UnitEditorModel, n: number) => {
+                    props.addUnitAt(e, i, n);
+                  };
+                  return h(React.Fragment, [
+                    h(SectionTable, {
+                      addUnitAt,
+                      editingModel,
+                      section,
+                      unit_index,
+                      section_index,
+                      editOpen,
+                      editMode,
+                      triggerEditor,
+                      onCancel,
+                      dialogTitle,
+                      persistChanges,
+                      index: i,
+                      drag: props.state.drag,
+                      moved,
+                    }),
+                    h(NewSectionBtn, {
+                      index: i + 1,
+                      addNewSection: props.addSectionAt,
+                    }),
+                  ]);
                 }),
                 provided.placeholder,
               ]
@@ -165,7 +189,9 @@ function UnitSectionTable(props: {
       unit_index,
     });
   };
-
+  const addSectionAt = (index: number) => {
+    dispatch({ type: "add-section-at", index });
+  };
   return h("div", [
     h(ColumnPageBtnMenu, {
       state: {
@@ -190,41 +216,12 @@ function UnitSectionTable(props: {
       "div.unit-section-container",
       [
         h("div.unit-section-tables", [
-          //@ts-ignore
-          h(MinEditorToggle, {
-            btnPosition: "top",
-            btnText: "create new unit on top",
-            //@ts-ignore
-            persistChanges: (e, c) =>
-              dispatch({
-                type: "add-unit-at",
-                section_index: 0,
-                unit: e,
-                unit_index: 0,
-              }),
-          }),
           h(SectionsDropContainer, {
             state,
             onDragEnd,
             editUnitAt,
             addUnitAt,
-          }),
-          //@ts-ignore
-          h(MinEditorToggle, {
-            //@ts-ignore
-            persistChanges: (e, c) =>
-              dispatch({
-                type: "add-unit-at",
-                section_index: state.sections.length - 1,
-                // an annoying way to get the index of the last unit in last section
-                unit_index: Object.values(
-                  state.sections[state.sections.length - 1]
-                )[0].length,
-                unit: e,
-              }),
-
-            btnText: "create new unit on bottom",
-            btnPosition: "bottom",
+            addSectionAt,
           }),
         ]),
       ]

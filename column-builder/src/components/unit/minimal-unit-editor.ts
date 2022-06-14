@@ -16,10 +16,10 @@ import {
   FormalStratName,
   EnvTags,
   LithTags,
-  UnitEditorI,
 } from "./common-editing";
 import { useState } from "react";
 import { AddButton } from "../buttons";
+import { UnitsView } from "~/types";
 const h = hyperStyled(styles);
 
 function UnitEditCancelAlert(props: {
@@ -61,7 +61,7 @@ function UnitEditCancelAlert(props: {
 function UnitEdit(props: { onCancel: () => void }) {
   const [open, setOpen] = useState(false);
   const { model, hasChanges, actions, ...rest } = useModelEditor();
-  const { unit }: { unit: UnitEditorI } = model;
+  const { unit }: { unit: UnitsView } = model;
 
   const updateUnit = (field: string, e: any) => {
     actions.updateState({ model: { unit: { [field]: { $set: e } } } });
@@ -162,11 +162,6 @@ function UnitEdit(props: { onCancel: () => void }) {
               onChange: (e) => updateUnit("notes", e.target.value),
             }),
             h("div", { style: { marginTop: "10px" } }, [
-              // h(Checkbox, {
-              //   checked: unit.new_section,
-              //   onChange: () => updateUnit("new_section", !unit.new_section),
-              //   label: "Make new section with this unit",
-              // }),
               h(SubmitButton),
               h(Button, { intent: "danger", onClick: onCancelBtnClick }, [
                 "Cancel",
@@ -240,6 +235,15 @@ function MinEditorToggle(props: ToggleI) {
   ]);
 }
 
+function NewSectionBtn(props: {
+  addNewSection: (i: number) => void;
+  index: number;
+}) {
+  return h(AddButton, { onClick: () => props.addNewSection(props.index) }, [
+    "Add Section",
+  ]);
+}
+
 function MinEditorCard(
   props: UnitEditorProps & {
     onCancel: () => void;
@@ -257,4 +261,4 @@ function MinEditorCard(
   ]);
 }
 
-export { MinUnitEditor, MinEditorToggle, MinEditorCard };
+export { MinUnitEditor, MinEditorToggle, MinEditorCard, NewSectionBtn };

@@ -26,6 +26,7 @@ import {
   InformalUnitName,
   UnitThickness,
 } from "./common-editing";
+import { LithContainer } from "../lith";
 const h = hyperStyled(styles);
 
 function UnitThicknesses() {

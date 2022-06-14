@@ -19,13 +19,14 @@ interface SectionTableProps {
     u: UNIT_ADD_POISITON,
     unit_index: number,
     section_number: number,
-    copy: boolean
+    copy: boolean,
+    inRow?: boolean
   ) => void;
   onCancel: () => void;
   dialogTitle: string;
-  editingModel: { unit: any };
   persistChanges: (e: UnitEditorModel, c: Partial<UnitEditorModel>) => void;
   moved: { [unit_id: number]: boolean };
+  addUnitAt: (unit: UnitEditorModel, unit_index: number) => void;
 }
 
 function SectionTable(props: SectionTableProps) {
@@ -38,15 +39,24 @@ function SectionTable(props: SectionTableProps) {
     editOpen,
     triggerEditor,
     onCancel,
-    editingModel,
     dialogTitle,
   } = props;
 
-  let headers = ["ID", "Strat Name", "Interval", "Thickness", ""];
+  let headers = [
+    "ID",
+    "Strat Name",
+    "Liths",
+    "Envs",
+    "Interval",
+    "Thickness",
+    "notes",
+    "",
+  ];
   if (drag) headers = ["", ...headers];
 
   const units: UnitsView[] = Object.values(props.section)[0];
   const id = Object.keys(props.section)[0];
+
   return h(
     DnDTable,
     {
@@ -61,29 +71,30 @@ function SectionTable(props: SectionTableProps) {
     [
       units.map((unit, j) => {
         const isEditing = unit_index == j && section_index == index && editOpen;
-        const openBottom = isEditing && editMode.mode === "below";
-        const openTop = isEditing && editMode.mode !== "below";
+        const inRowEditing = isEditing && (editMode.inRow ?? false);
 
-        const cellStyles =
-          isEditing && editMode.mode == "edit"
-            ? { background: "#0F996040" }
-            : {};
+        // these ids here are meaningless... this action needs to be persisted
+        const copyUnitDown = () => {
+          props.addUnitAt({ unit: { ...unit, id: 67 } }, j + 1);
+        };
+        const copyUnitUp = () => {
+          props.addUnitAt({ unit: { ...unit, id: 66 } }, j);
+        };
 
         return h(UnitRow, {
-          drag,
           unit,
-          isMoved: unit.id in props.moved,
+          drag,
           unit_index: j,
           section_index: index,
           triggerEditor,
           onCancel,
           dialogTitle,
-          editingModel,
-          openBottom,
-          openTop,
-          styles: cellStyles,
-          colSpan: headers.length,
           persistChanges: props.persistChanges,
+          colSpan: headers.length,
+          isMoved: unit.id in props.moved,
+          inRowEditing,
+          copyUnitDown,
+          copyUnitUp,
         });
       }),
     ]

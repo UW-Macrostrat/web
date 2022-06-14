@@ -44,6 +44,7 @@ function UnitEdit(props: {
   const { unit, errors } = props;
 
   const model = { unit };
+  console.log(unit);
 
   const persistChanges = async (
     updatedModel: UnitEditorModel,

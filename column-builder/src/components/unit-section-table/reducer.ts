@@ -29,6 +29,10 @@ const reorder = (list: any[], startIndex: number, endIndex: number): void => {
   list.splice(endIndex, 0, removed);
 };
 
+const addElementToList = (list: any[], index: number, element: any): void => {
+  list.splice(index, 0, element);
+};
+
 /////////////// Data Types //////////////////
 
 type SectionUnits = { [section_id: string | number]: UnitsView[] }[];
@@ -47,6 +51,10 @@ type DroppedSection = {
 };
 type ToggleDrag = { type: "toggle-drag" };
 type ToggleUnitsView = { type: "toggle-units-view" };
+type AddSectionAt = {
+  type: "add-section-at";
+  index: number;
+};
 type AddUnitAt = {
   type: "add-unit-at";
   section_index: number;
@@ -62,6 +70,7 @@ type EditUnitAt = {
 };
 
 export type SyncActions =
+  | AddSectionAt
   | SetMergeIds
   | DroppedUnit
   | DroppedSection
@@ -104,6 +113,11 @@ const columnReducer = (state: ColumnStateI, action: SyncActions) => {
     case "merge-ids":
       console.log("Merging sections ", state.mergeIds);
       return state;
+    case "add-section-at":
+      const sectionIndex = action.index;
+      const newSection: SectionUnits = { 666: [] };
+      addElementToList(currSections, sectionIndex, newSection);
+      return { ...state, sections: currSections };
     case "add-unit-at":
       // this will encapsulate the add top and bottom
       // mutate a the sections list in place
