@@ -63,7 +63,7 @@ export interface IColumnSection extends ICol {
 export interface UnitsView {
   id: number;
   unit_strat_name: string;
-  strat_name: StratNameI;
+  strat_names: StratNameI;
   color: string;
   outcrop?: string;
   fo?: number;
@@ -130,12 +130,34 @@ export enum RANK {
   "Bed" = "Bed",
 }
 
+interface StratNameConceptBase {
+  concept_id: number;
+  orig_id: number;
+  name: string;
+  geologic_age: string;
+  b_int: number;
+  t_int: number;
+  usage_notes: string;
+  other: string;
+  province: string;
+  url: string;
+}
+export interface StratNameConceptI extends StratNameConceptBase {
+  interval_id: number;
+  ref_id: number;
+}
+
+export interface StratNameConceptLongI extends StratNameConceptBase {
+  intervals: IntervalI;
+  refs: RefI;
+}
+
 export interface StratNameI {
   id: number;
   strat_name: string;
   rank: RANK;
   ref_id: number;
-  concept_id?: number;
+  strat_names_meta: StratNameConceptI | null;
 }
 
 export interface ColSectionI {
