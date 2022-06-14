@@ -172,6 +172,8 @@ export function coreReducer(
         searchResults: null,
         searchCancelToken: null,
         inputFocus: false,
+        // We have to do a lot of extra work to manage this context panel state
+        contextPanelOpen: state.menuOpen,
       });
     case "remove-filter":
       return updateURI({

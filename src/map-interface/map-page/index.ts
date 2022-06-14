@@ -151,11 +151,9 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
             className: "context-panel",
           }),
         ]),
-
         h(MapView, {
           backend,
         }),
-
         h("div.detail-stack.infodrawer-container", [
           h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
             className: "detail-panel",

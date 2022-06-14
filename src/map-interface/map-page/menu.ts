@@ -28,6 +28,7 @@ import { SearchResults } from "../components/searchbar";
 import classNames from "classnames";
 import styles from "./main.module.styl";
 import loadable from "@loadable/component";
+import UsagePanel from "../usage.mdx";
 
 const AboutText = loadable(() => import("../components/About"));
 
@@ -52,7 +53,12 @@ const TabButton = (props: ButtonProps & { tab: MenuPanel }) => {
   const dispatch = useDispatch();
   const onClick = () => dispatch({ type: "set-panel", panel: tab });
   const active = useAppState((state) => state.menu.activePanel == tab);
-  return h(MinimalButton, { active, onClick, ...rest });
+  return h(MinimalButton, {
+    active,
+    onClick,
+    ...rest,
+    className: "tab-button",
+  });
 };
 
 type LayerButtonProps = ListButtonProps & { layer: MapLayer; name: string };
@@ -145,6 +151,11 @@ function useMainPanel(): Panel<{}> {
         title: "About",
         renderPanel: () => h(AboutText),
       };
+    case MenuPanel.USAGE:
+      return {
+        title: "Usage",
+        renderPanel: () => h(UsagePanel),
+      };
   }
   return null;
 }
@@ -207,6 +218,11 @@ const Menu = (props) => {
               icon: "info-sign",
               text: "About",
               tab: MenuPanel.ABOUT,
+            }),
+            h(TabButton, {
+              icon: "help",
+              text: "Usage",
+              tab: MenuPanel.USAGE,
             }),
           ]),
           h.if(stack.length > 1)([
