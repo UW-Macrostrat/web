@@ -12,7 +12,7 @@ export { Hierarchy };
 export function StratNameHierarchy({
   strat_name_id,
 }: {
-  strat_name_id: number;
+  strat_name_id?: number;
 }) {
   const [state, setState] = useState<Partial<IHierarchy>>({});
 
@@ -21,9 +21,13 @@ export function StratNameHierarchy({
       const res = await fetchStratNames(strat_name_id);
       setState(res);
     }
-    fetch();
+    if (typeof strat_name_id !== "undefined") {
+      fetch();
+    }
   }, [strat_name_id]);
 
+  if (typeof strat_name_id === "undefined") return null;
+  
   if (!state) {
     return h("h3", "No results");
   }

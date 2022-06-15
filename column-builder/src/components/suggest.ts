@@ -1,4 +1,4 @@
-import { ReactChild, useState } from "react";
+import { ReactChild, useEffect, useState } from "react";
 import { hyperStyled } from "@macrostrat/hyper";
 import {
   Suggest,
@@ -41,6 +41,10 @@ function ItemSuggest(props: SuggestI) {
   itemz = props.initialSelected ? [props.initialSelected, ...itemz] : itemz;
 
   const [selected, setSelected] = useState(props.initialSelected);
+
+  useEffect(() => {
+    setSelected(props.initialSelected);
+  }, [props.initialSelected]);
 
   const itemRenderer: ItemRenderer<DataI> = (
     item: DataI,

@@ -188,7 +188,7 @@ export function InformalUnitName() {
     h(InputGroup, {
       placeholder: "Informal Unit Name",
       style: { width: "200px" },
-      defaultValue: unit.unit_strat_name || undefined,
+      value: unit.unit_strat_name || undefined,
       onChange: (e) => updateUnitName(e.target.value),
     }),
   ]);
@@ -206,7 +206,15 @@ export function FormalStratName() {
     : undefined;
 
   const updateStratName = (e: StratNameDataI) => {
-    actions.updateState({ model: { unit: { strat_name: { $set: e.data } } } });
+    actions.updateState({
+      model: {
+        unit: {
+          strat_names: { $set: e.data },
+          unit_strat_name: { $set: `${e.data.strat_name} ${e.data.rank}` },
+          strat_name_id: { $set: e.data.id },
+        },
+      },
+    });
   };
 
   return h(FormGroup, { label: "Formal strat name" }, [
@@ -214,6 +222,7 @@ export function FormalStratName() {
       initialSelected,
       placeholder: "Formal Strat Name",
       onChange: updateStratName,
+      col_id: unit.col_id,
     }),
   ]);
 }

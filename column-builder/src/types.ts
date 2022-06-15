@@ -63,7 +63,7 @@ export interface IColumnSection extends ICol {
 export interface UnitsView {
   id: number;
   unit_strat_name: string;
-  strat_names: StratNameI;
+  strat_names: StratNameI | null;
   color: string;
   outcrop?: string;
   fo?: number;
