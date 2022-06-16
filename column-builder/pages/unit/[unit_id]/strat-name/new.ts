@@ -5,8 +5,8 @@ import {
   StratNameEditor,
   tableInsert,
   tableUpdate,
-  QueryI,
-  getIdHierarchy,
+  IdsFromUnit,
+  fetchIdsFromUnitId,
 } from "~/index";
 import { GetServerSidePropsContext } from "next";
 import styles from "./stratname.module.scss";
@@ -14,11 +14,16 @@ import styles from "./stratname.module.scss";
 const h = hyperStyled(styles);
 
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
-  const {
+  let {
     query: { unit_id, name },
   } = ctx;
+  if (Array.isArray(unit_id)) {
+    unit_id = unit_id[0];
+  } else if (typeof unit_id == "undefined") {
+    unit_id = "0";
+  }
 
-  const query: QueryI = await getIdHierarchy({ unit_id });
+  const query: IdsFromUnit = await fetchIdsFromUnitId(parseInt(unit_id));
 
   return { props: { unit_id, name, query } };
 }
@@ -30,7 +35,7 @@ export default function NewStratName({
 }: {
   name: string | undefined;
   unit_id: number;
-  query: QueryI;
+  query: IdsFromUnit;
 }) {
   const persistChanges = async (e: StratNameI, c: Partial<StratNameI>) => {
     const { data, error } = await tableInsert("strat_names", e);

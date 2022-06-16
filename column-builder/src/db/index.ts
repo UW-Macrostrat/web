@@ -3,6 +3,7 @@ import {
   PostgrestClient,
   PostgrestFilterBuilder,
   PostgrestQueryBuilder,
+  PostgrestResponse,
 } from "@supabase/postgrest-js";
 
 function isServer() {
@@ -94,7 +95,10 @@ async function tableSelect(table: string, opts: QueryOptsI = {}) {
 }
 
 async function selectFirst(table: string, opts: QueryOptsI) {
-  const { data, error } = await tableSelect(table, opts);
+  const { data, error }: PostgrestResponse<any> = await tableSelect(
+    table,
+    opts
+  );
 
   const firstData = data ? data[0] : null;
   return { firstData, error };

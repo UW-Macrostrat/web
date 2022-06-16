@@ -5,23 +5,30 @@ import {
   ColumnGroupI,
   tableSelect,
   tableUpdate,
-  getIdHierarchy,
-  QueryI,
+  IdsFromColGroup,
+  fetchIdsFromColGroup,
 } from "~/index";
 import { GetServerSidePropsContext } from "next";
-import { PostgrestError } from "@supabase/postgrest-js";
+import { PostgrestError, PostgrestResponse } from "@supabase/postgrest-js";
 
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
-  const {
+  let {
     query: { col_group_id },
   } = ctx;
+  if (Array.isArray(col_group_id)) {
+    col_group_id = col_group_id[0];
+  }
 
-  const { data, error } = await tableSelect("col_groups", {
-    match: { id: col_group_id },
-  });
+  const query: IdsFromColGroup = await fetchIdsFromColGroup(
+    parseInt(col_group_id ?? "0")
+  );
+
+  const { data, error }: PostgrestResponse<Partial<ColumnGroupI>> =
+    await tableSelect("col_groups", {
+      match: { id: col_group_id ?? "0" },
+    });
 
   const columnGroup = data ? data[0] : {};
-  const query = await getIdHierarchy({ col_group_id });
   const errors = [error].filter((e) => e != null);
   return { props: { col_group_id, columnGroup, query, errors } };
 }
@@ -33,7 +40,7 @@ export default function EditColumnGroup({
 }: {
   errors: PostgrestError[];
   columnGroup: Partial<ColumnGroupI>;
-  query: QueryI;
+  query: IdsFromColGroup;
 }) {
   const persistChanges = async (
     e: Partial<ColumnGroupI>,

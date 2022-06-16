@@ -19,7 +19,14 @@ async function fetchIdsFromColGroup(
   return {};
 }
 
-async function fetchIdsFromUnitId(unit_id: number) {
+export interface IdsFromUnit {
+  unit_id?: number;
+  section_id?: number;
+  col_id?: number;
+  project_id?: number;
+}
+
+async function fetchIdsFromUnitId(unit_id: number): Promise<IdsFromUnit> {
   const { data, error } = await pg
     .from("units")
     .select("section_id, cols!units_col_id_fkey(id, project_id)")
@@ -33,7 +40,15 @@ async function fetchIdsFromUnitId(unit_id: number) {
   return {};
 }
 
-async function fetchIdsFromSectionId(section_id: number) {
+export interface IdsFromSection {
+  col_id?: number;
+  section_id?: number;
+  project_id?: number;
+}
+
+async function fetchIdsFromSectionId(
+  section_id: number
+): Promise<IdsFromSection> {
   const { data, error } = await pg
     .from("sections")
     .select("cols!sections_col_id_fkey(id, project_id)")
@@ -46,7 +61,12 @@ async function fetchIdsFromSectionId(section_id: number) {
   return {};
 }
 
-async function fetchIdsFromColId(col_id: number) {
+export interface IdsFromCol {
+  col_id?: number;
+  project_id?: number;
+}
+
+async function fetchIdsFromColId(col_id: number): Promise<IdsFromCol> {
   const { data, error } = await pg
     .from("cols")
     .select("project_id")
