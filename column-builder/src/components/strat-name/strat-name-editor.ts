@@ -7,6 +7,7 @@ import {
   FormGroup,
   InputGroup,
   Icon,
+  Card,
 } from "@blueprintjs/core";
 import { ModelEditor, useModelEditor } from "@macrostrat/ui-components";
 import styles from "../comp.module.scss";
@@ -15,7 +16,7 @@ import { SubmitButton } from "..";
 import { StratNameDataI } from ".";
 import { StratNameHierarchy } from "./hierarchy";
 import { DataI, ItemSelect } from "../suggest";
-import { PrevalentTaxa } from "@macrostrat/data-components";
+import { Checkbox } from "@blueprintjs/core";
 
 const h = hyperStyled(styles);
 
@@ -79,47 +80,94 @@ function StratNameEdit() {
     actions.updateState({ model: { [field]: { $set: e } } });
   };
 
-  return h("div", { style: { display: "flex" } }, [
+  return h("div", [
+    h(StratNameHierarchy, { strat_name_id: model.id }),
     h("div", [
-      h("div.row", [
+      h(Card, [
+        h("h3", { style: { marginTop: 0 } }, ["Edit strat name string"]),
+        h("div.row", [
+          h(
+            FormGroup,
+            {
+              helperText: "Edit existing Strat name",
+              label: "Stratigraphic Name",
+              labelInfo: "(optional)",
+            },
+            [
+              h(InputGroup, {
+                style: { width: "200px" },
+                defaultValue: model.strat_name,
+                onChange: (e) => updateStratName("strat_name", e.target.value),
+              }),
+            ]
+          ),
+          h(FormGroup, { label: "Rank" }, [h(RankSelect, { updateStratName })]),
+        ]),
+        h("div.row", [
+          h(Checkbox, { label: "Apply globally", style: { margin: "5px" } }),
+          h(Checkbox, {
+            label: "Apply to this unit only (create new strat name)",
+            style: { margin: "5px" },
+          }),
+        ]),
+      ]),
+      h(Card, [
+        h("h3", { style: { marginTop: 0 } }, ["Edit Hierarcy"]),
         h(
           FormGroup,
           {
-            helperText: "Edit existing Strat name",
-            label: "Stratigraphic Name",
-            labelInfo: "(optional)",
+            helperText: `This will assign the parent of ${model.strat_name} ${model.rank}`,
+            label: "(re)-Assign Parent",
+            labelFor: "descrip-input",
           },
           [
-            h(InputGroup, {
-              style: { width: "200px" },
-              defaultValue: model.strat_name,
-              onChange: (e) => updateStratName("strat_name", e.target.value),
+            h(StratNameSuggest, {
+              onChange: (item: StratNameDataI) => {
+                updateStratName("parent", item.data);
+              },
             }),
           ]
         ),
-        h(FormGroup, { label: "Rank" }, [h(RankSelect, { updateStratName })]),
-      ]),
-
-      h(
-        FormGroup,
-        {
-          helperText: "This will assign the parent of Cerro Tipon Fm",
-          label: "(re)-Assign Parent",
-          labelFor: "descrip-input",
-        },
-        [
-          h(StratNameSuggest, {
-            onChange: (item: StratNameDataI) => {
-              updateStratName("parent", item.data);
+        h(
+          FormGroup,
+          {
+            helperText: `This will assign a child to ${model.strat_name} ${model.rank}`,
+            label: `Add Name to ${model.strat_name} ${model.rank}`,
+          },
+          [
+            h(StratNameSuggest, {
+              onChange: (item: StratNameDataI) => {
+                updateStratName("child", item.data);
+              },
+            }),
+          ]
+        ),
+        h("h3", { style: { marginTop: 0 } }, ["Create new strat name"]),
+        h("div.row", [
+          h(
+            FormGroup,
+            {
+              label: "Create new name",
+              labelInfo: "(optional)",
             },
+            [
+              h(InputGroup, {
+                style: { width: "200px" },
+                onChange: (e) => console.log(e.target.value),
+              }),
+            ]
+          ),
+          h(FormGroup, { label: "Rank" }, [h(RankSelect, { updateStratName })]),
+        ]),
+        h("div.row", [
+          h(Checkbox, { label: "Assign as Child", style: { margin: "5px" } }),
+          h(Checkbox, {
+            label: "Assign as Parent",
+            style: { margin: "5px" },
           }),
-        ]
-      ),
+        ]),
+      ]),
       h(SubmitButton),
-    ]),
-    h("div", [
-      h(StratNameHierarchy, { strat_name_id: model.id }),
-      h(PrevalentTaxa, { strat_name_id: model.id }),
     ]),
   ]);
 }

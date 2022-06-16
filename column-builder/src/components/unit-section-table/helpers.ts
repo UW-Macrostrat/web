@@ -46,51 +46,72 @@ export interface ColBtnMenuI {
   state: {
     unitsView: boolean;
     drag: boolean;
-    divideIds: number[];
     mergeIds: number[];
+    moved: { [unit_id: number]: boolean };
   };
-  divideSection: () => void;
   mergeSections: () => void;
   noSectionView: boolean;
 }
 
 function ColumnPageBtnMenu(props: ColBtnMenuI) {
   const {
-    state: { unitsView, drag, divideIds, mergeIds },
+    state: { unitsView, drag, mergeIds, moved },
   } = props;
-  //@ts-ignore
-  return h(ButtonGroup, [
-    h(
-      Button,
-      {
-        onClick: props.toggleUnitsView,
-        intent: unitsView ? "primary" : "none",
-        disabled: unitsView,
-      },
-      ["Unit view"]
-    ),
-    h.if(!props.noSectionView)(
-      Button,
-      {
-        onClick: props.toggleUnitsView,
-        intent: !unitsView ? "primary" : "none",
-        disabled: !unitsView,
-      },
-      ["Section View"]
-    ),
-    h(Button, { onClick: props.toggleDrag, disabled: !unitsView }, [
-      drag ? "Disable drag" : "Enable drag",
+  return h("div", [
+    //@ts-ignore
+    h(ButtonGroup, [
+      h(
+        Button,
+        {
+          onClick: props.toggleUnitsView,
+          intent: unitsView ? "primary" : "none",
+          disabled: unitsView,
+        },
+        ["Unit view"]
+      ),
+      h.if(!props.noSectionView)(
+        Button,
+        {
+          onClick: props.toggleUnitsView,
+          intent: !unitsView ? "primary" : "none",
+          disabled: !unitsView,
+        },
+        ["Section View"]
+      ),
+      h.if(!unitsView)(MergeDivideBtn, {
+        onClick: props.mergeSections,
+        disabled: mergeIds.length < 2,
+        text: "Merge Sections",
+      }),
     ]),
-    h.if(!unitsView)(MergeDivideBtn, {
-      onClick: props.mergeSections,
-      disabled: mergeIds.length < 2,
-      text: "Merge Sections",
+    h.if(unitsView)(ReorderUnitsBtnGrp, {
+      drag,
+      onClick: props.toggleDrag,
+      moved,
     }),
-    h.if(unitsView)(MergeDivideBtn, {
-      text: "Divide section",
-      onClick: props.divideSection,
-      disabled: divideIds.length < 1,
-    }),
+  ]);
+}
+
+function ReorderUnitsBtnGrp(props: {
+  drag: boolean;
+  onClick: () => void;
+  moved: { [unit_id: number]: boolean };
+}) {
+  //@ts-ignore
+  return h(ButtonGroup, { style: { marginLeft: "20px" } }, [
+    h.if(!props.drag)(Button, { onClick: props.onClick }, ["Reorder Units"]),
+    h.if(props.drag)(
+      Button,
+      {
+        intent: "success",
+        onClick: props.onClick,
+        disabled: Object.keys(props.moved).length == 0,
+      },
+      ["Save"]
+    ),
+    h.if(props.drag)(Button, { intent: "danger", onClick: props.onClick }, [
+      "Cancel",
+    ]),
   ]);
 }
 
@@ -102,15 +123,19 @@ enum UNIT_ADD_POISITON {
 
 export interface UnitRowContextMenuI {
   // either we are adding a new unit above, below or editing the current unit
+  // or we are editing the unit inRow
   triggerEditor: (
     e: UNIT_ADD_POISITON,
     unit_index: number,
     section_index: number,
-    copy: boolean
+    copy: boolean,
+    inRow?: boolean
   ) => void;
   unit: UnitsView;
   unit_index: number;
   section_index: number;
+  copyUnitUp: () => void;
+  copyUnitDown: () => void;
 }
 function UnitRowContextMenu(props: UnitRowContextMenuI) {
   const SubMenu = ({ pos }: { pos: UNIT_ADD_POISITON }) => {
@@ -135,8 +160,44 @@ function UnitRowContextMenu(props: UnitRowContextMenuI) {
     ]);
   };
 
+  const QuickActionMenu = () => {
+    return h(React.Fragment, [
+      h(MenuItem, {
+        text: `Quick edit unit #${props.unit.id}`,
+        icon: "edit",
+        onClick: () => {
+          props.triggerEditor(
+            UNIT_ADD_POISITON.EDIT,
+            props.unit_index,
+            props.section_index,
+            true,
+            true
+          );
+        },
+      }),
+      h(MenuItem, {
+        text: `Copy unit #${props.unit.id} up`,
+        icon: "circle-arrow-up",
+        onClick: props.copyUnitUp,
+      }),
+      h(MenuItem, {
+        text: `Copy unit #${props.unit.id} down`,
+        icon: "circle-arrow-down",
+        onClick: props.copyUnitDown,
+      }),
+    ]);
+  };
+
   const ContextMenu = () =>
     h(Menu, [
+      h(
+        MenuItem,
+        {
+          text: "Quick Actions",
+          icon: "selection",
+        },
+        [h(QuickActionMenu)]
+      ),
       h(
         MenuItem,
         {
@@ -225,6 +286,7 @@ function AddBtnBetweenRows(props: { onClick: () => void; colSpan: number }) {
 export interface EditModeI {
   mode: UNIT_ADD_POISITON;
   copy: boolean;
+  inRow?: boolean;
 }
 
 const useRowUnitEditor = () => {
@@ -234,17 +296,20 @@ const useRowUnitEditor = () => {
   const [editMode, setEditMode] = useState<EditModeI>({
     mode: UNIT_ADD_POISITON.EDIT,
     copy: true,
+    inRow: false,
   });
 
   const triggerEditor = (
     e: UNIT_ADD_POISITON,
     unit_index: number,
     section_index: number,
-    copy: boolean
+    copy: boolean,
+    inRow?: boolean
   ) => {
+    if (editOpen) return;
     setUnitIndex(unit_index);
     setSectionIndex(section_index);
-    setEditMode({ mode: e, copy });
+    setEditMode({ mode: e, copy, inRow: inRow ?? false });
     setEditOpen(true);
   };
 

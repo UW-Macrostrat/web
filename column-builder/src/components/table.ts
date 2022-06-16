@@ -20,6 +20,8 @@ interface RowProps {
   index: number;
   href?: string;
   drag?: boolean;
+  isMoved?: boolean;
+  onDoubleClick?: () => void;
 }
 
 const getItemStyle = (isDragging: boolean, draggableStyle: any) => ({
@@ -44,7 +46,11 @@ function Row(props: { href: string; children: ReactChild }) {
 }
 
 function DraggableRow(props: RowProps) {
-  const { draggableId = "", drag = false } = props;
+  const {
+    draggableId = "",
+    drag = false,
+    onDoubleClick = () => console.log("double clicked!"),
+  } = props;
   return h(
     Draggable,
     {
@@ -57,9 +63,14 @@ function DraggableRow(props: RowProps) {
       (provided: DraggableProvided, snapshot: DraggableStateSnapshot) => {
         return h(RowWrapper, { link: props.href }, [
           h(
-            "tr",
+            `tr${props.isMoved ? ".unit-moved" : ""}`,
             {
-              onClick: (e: MouseEvent) => e.stopPropagation(),
+              onClick: (e: MouseEvent) => {
+                e.stopPropagation();
+                if (e.detail == 2) {
+                  onDoubleClick();
+                }
+              },
               ref: provided.innerRef,
               ...provided.draggableProps,
               style: getItemStyle(
@@ -143,7 +154,7 @@ interface DnDTableProps {
 function DnDTable(props: DnDTableProps) {
   const { drag = false, headers = [], droppableId = "table-drop-zone" } = props;
   const baseClass =
-    "bp4-html-table .bp4-html-table-condensed .bp4-html-table-bordered .base-table";
+    "bp4-html-table .bp4-html-table-condensed .bp4-html-table-bordered .base-table .full-width";
   let tableClassName = props.interactive
     ? `${baseClass} .bp4-interactive`
     : baseClass;

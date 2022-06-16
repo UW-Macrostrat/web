@@ -1,4 +1,4 @@
-import { ReactChild, useState } from "react";
+import { ReactChild, useEffect, useState } from "react";
 import { hyperStyled } from "@macrostrat/hyper";
 import {
   Suggest,
@@ -21,6 +21,7 @@ interface SuggestI {
   onChange: (e: DataI) => void;
   initialSelected?: DataI;
   items: DataI[];
+  itemRenderer?: ItemRenderer<any>;
   onQueryChange?: (e: string) => void;
   placeholder?: string;
 }
@@ -40,6 +41,10 @@ function ItemSuggest(props: SuggestI) {
   itemz = props.initialSelected ? [props.initialSelected, ...itemz] : itemz;
 
   const [selected, setSelected] = useState(props.initialSelected);
+
+  useEffect(() => {
+    setSelected(props.initialSelected);
+  }, [props.initialSelected]);
 
   const itemRenderer: ItemRenderer<DataI> = (
     item: DataI,
@@ -78,7 +83,7 @@ function ItemSuggest(props: SuggestI) {
     },
     selectedItem: selected,
     onItemSelect: onItemSelect,
-    itemRenderer: itemRenderer,
+    itemRenderer: props.itemRenderer ?? itemRenderer,
     itemPredicate: itemPredicate,
     onQueryChange: props.onQueryChange,
     resetOnQuery: true,
