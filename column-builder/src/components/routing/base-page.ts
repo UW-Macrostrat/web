@@ -6,6 +6,7 @@ import { Breadcrumbs, BreadcrumbProps } from "@blueprintjs/core";
 import { ReactChild } from "react";
 import { ErrorDialog } from "./error-boundary";
 import { PostgrestError } from "@supabase/postgrest-js";
+import { useBreadCrumbs } from "./routing-helpers";
 const h = hyperStyled(styles);
 
 export interface QueryI {
@@ -18,13 +19,13 @@ export interface QueryI {
   name?: string;
 }
 
-interface BasePageProps {
+export interface BasePageProps {
   query: QueryI;
   errors: PostgrestError[];
   children: ReactChild;
 }
 
-interface CrumbsI extends BreadcrumbProps {
+export interface CrumbsI extends BreadcrumbProps {
   predicate: string;
 }
 
@@ -35,53 +36,8 @@ export function BasePage(props: BasePageProps) {
   const router = useRouter();
   const { query, errors = [] } = props;
 
-  const filterCrumbs = (obj: CrumbsI) => {
-    if (obj.text == "Projects") {
-      return true;
-    }
-
-    if (!(obj.predicate in query)) return false;
-    return true;
-  };
-
   // This should really be moved out to a hook.
-  const breadCrumbs: CrumbsI[] = [
-    {
-      text: "Projects",
-      onClick: async () => {
-        router.push("/");
-      },
-      predicate: "",
-    },
-    {
-      text: "Column Groups",
-      onClick: async () => {
-        router.push(`/column-groups/${query.project_id}`);
-      },
-      predicate: "project_id",
-    },
-    {
-      text: "Column",
-      onClick: async () => {
-        router.push(`/column/${query.col_id}`);
-      },
-      predicate: "col_id",
-    },
-    {
-      text: "Section",
-      onClick: async () => {
-        router.push(`/section/${query.section_id}`);
-      },
-      predicate: "section_id",
-    },
-    {
-      text: "Unit",
-      onClick: async () => {
-        router.push(`/unit/${query.unit_id}/edit`);
-      },
-      predicate: "unit_id",
-    },
-  ].filter(filterCrumbs);
+  const breadCrumbs: CrumbsI[] = useBreadCrumbs({ router, query });
 
   return h("div.page", [
     h("div.bread-crumbs", [h(Breadcrumbs, { items: breadCrumbs })]),
