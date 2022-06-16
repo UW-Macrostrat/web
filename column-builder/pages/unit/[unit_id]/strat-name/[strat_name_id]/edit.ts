@@ -5,8 +5,8 @@ import {
   StratNameEditor,
   tableUpdate,
   selectFirst,
-  getIdHierarchy,
-  QueryI,
+  IdsFromUnit,
+  fetchIdsFromUnitId,
 } from "~/index";
 import { GetServerSidePropsContext } from "next";
 import styles from "../stratname.module.scss";
@@ -15,10 +15,17 @@ import { PostgrestError } from "@supabase/postgrest-js";
 const h = hyperStyled(styles);
 
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
-  const {
+  let {
     query: { strat_name_id, unit_id },
   } = ctx;
-  const query = await getIdHierarchy({ unit_id });
+
+  if (Array.isArray(unit_id)) {
+    unit_id = unit_id[0];
+  } else if (typeof unit_id == "undefined") {
+    unit_id = "0";
+  }
+  const query: IdsFromUnit = await fetchIdsFromUnitId(parseInt(unit_id));
+
   const { firstData: strat_name, error } = await selectFirst(
     "strat_names_ref",
     {
@@ -29,11 +36,11 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   return { props: { strat_name_id, strat_name, errors, unit_id, query } };
 }
 
-export default function EditColumnGroup(props: {
+export default function EditStratigraphicName(props: {
   strat_name_id: number;
   strat_name: StratNameI;
   unit_id: number;
-  query: QueryI;
+  query: IdsFromUnit;
   errors: PostgrestError[];
 }) {
   const { strat_name, errors } = props;
@@ -55,7 +62,12 @@ export default function EditColumnGroup(props: {
   };
 
   return h(BasePage, { query: props.query, errors }, [
-    h("h3", ["Edit Stratigraphic Name ", strat_name.strat_name]),
+    h("h3", [
+      "Edit Stratigraphic Name and Hierarchy for ",
+      strat_name.strat_name,
+      " ",
+      strat_name.rank,
+    ]),
     //@ts-ignore
     h(StratNameEditor, { model: strat_name, persistChanges }),
   ]);

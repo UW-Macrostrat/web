@@ -5,9 +5,15 @@ import { ItemPredicate, ItemRenderer } from "@blueprintjs/select";
 import pg, { usePostgrest } from "../db";
 import styles from "./comp.module.scss";
 import { EnvironUnit, LithUnit } from "..";
-import { DataI, ItemSelect } from "./suggest";
+import { ItemSelect } from "./suggest";
+import React from "react";
 
 const h = hyperStyled(styles);
+
+interface SelectDataI {
+  data: any;
+  value: any;
+}
 
 interface tagInfo {
   name: string;
@@ -80,8 +86,8 @@ function TagBody(props: tagBody) {
   ]);
 }
 
-const itemRenderer: ItemRenderer<DataI> = (
-  item: DataI,
+const lithItemRenderer: ItemRenderer<SelectDataI> = (
+  item: SelectDataI,
   { handleClick, index, modifiers }
 ) => {
   const { value, data } = item;
@@ -94,16 +100,26 @@ const itemRenderer: ItemRenderer<DataI> = (
         backgroundColor: data.color + "40", // add opaquness
         marginBottom: "2px",
       };
-  return h(MenuItem, {
-    active: modifiers.active,
-    key: index,
-    onClick: handleClick,
-    text: data.name,
-    style,
-  });
+  const onClick = (type: string, e: React.MouseEvent<HTMLElement>) => {
+    item.value.type = type;
+    handleClick(e);
+  };
+  return h(
+    MenuItem,
+    {
+      active: modifiers.active,
+      key: index,
+      text: data.name,
+      style,
+    },
+    [
+      h(MenuItem, { text: "Dom", onClick: (e) => onClick("dom", e) }),
+      h(MenuItem, { text: "Sub", onClick: (e) => onClick("sub", e) }),
+    ]
+  );
 };
 
-const itemPredicate: ItemPredicate<DataI> = (query, item, index) => {
+const itemPredicate: ItemPredicate<SelectDataI> = (query, item, index) => {
   const {
     data: { name },
   } = item;
@@ -113,9 +129,9 @@ const itemPredicate: ItemPredicate<DataI> = (query, item, index) => {
 
 function LithTagsAdd(props: { onClick: (e: Partial<LithUnit>) => void }) {
   const liths: Partial<LithUnit>[] = usePostgrest(pg.from("liths"));
-  if (!liths) return h(Spinner);
+  if (!liths) return null;
 
-  const data: DataI[] = liths.map((lith, i) => {
+  const data: { data: any; value: any }[] = liths.map((lith, i) => {
     return {
       data: {
         id: lith.id || 0,
@@ -123,7 +139,7 @@ function LithTagsAdd(props: { onClick: (e: Partial<LithUnit>) => void }) {
         name: lith.lith || "None",
         description: lith.lith_class || "None",
       },
-      value: lith,
+      value: { ...lith, type: "dom" },
     };
   });
 
@@ -132,20 +148,45 @@ function LithTagsAdd(props: { onClick: (e: Partial<LithUnit>) => void }) {
     {
       filterable: true,
       items: data,
-      itemRenderer,
+      itemRenderer: lithItemRenderer,
       itemPredicate,
       position: "bottom-left",
-      onItemSelect: (item: DataI) => props.onClick(item.value),
+      onItemSelect: (item: SelectDataI) => {
+        props.onClick(item.value);
+      },
     },
     [h(Button, { icon: "plus", minimal: true, intent: "success" })]
   );
 }
 
+const envItemRenderer: ItemRenderer<SelectDataI> = (
+  item: SelectDataI,
+  { handleClick, index, modifiers }
+) => {
+  const { value, data } = item;
+
+  const style = modifiers.active
+    ? {
+        marginBottom: "2px",
+      }
+    : {
+        backgroundColor: data.color + "40", // add opaquness
+        marginBottom: "2px",
+      };
+
+  return h(MenuItem, {
+    active: modifiers.active,
+    key: index,
+    text: data.name,
+    onClick: handleClick,
+    style,
+  });
+};
 function EnvTagsAdd(props: { onClick: (e: Partial<EnvironUnit>) => void }) {
   const envs: Partial<EnvironUnit>[] = usePostgrest(pg.from("environs"));
-  if (!envs) return h(Spinner);
+  if (!envs) return null;
 
-  const data: DataI[] = envs.map((env, i) => {
+  const data: SelectDataI[] = envs.map((env, i) => {
     return {
       data: {
         id: env.id || 0,
@@ -162,10 +203,10 @@ function EnvTagsAdd(props: { onClick: (e: Partial<EnvironUnit>) => void }) {
     {
       filterable: true,
       items: data,
-      itemRenderer,
+      itemRenderer: envItemRenderer,
       itemPredicate,
       position: "bottom-left",
-      onItemSelect: (item: DataI) => props.onClick(item.value),
+      onItemSelect: (item: SelectDataI) => props.onClick(item.value),
     },
     [h(Button, { icon: "plus", minimal: true, intent: "success" })]
   );

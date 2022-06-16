@@ -5,7 +5,7 @@ import {
   IntervalSuggest,
   UnitEditorModel,
 } from "~/index";
-import { Button, Checkbox, TextArea, Card, Collapse } from "@blueprintjs/core";
+import { Button, TextArea, Card, Collapse, Dialog } from "@blueprintjs/core";
 import { ModelEditor, useModelEditor } from "@macrostrat/ui-components";
 import styles from "../comp.module.scss";
 import { SubmitButton } from "..";
@@ -16,16 +16,53 @@ import {
   FormalStratName,
   EnvTags,
   LithTags,
-  UnitEditorI,
 } from "./common-editing";
 import { useState } from "react";
 import { AddButton } from "../buttons";
+import { UnitsView } from "~/types";
 const h = hyperStyled(styles);
 
+function UnitEditCancelAlert(props: {
+  onCancel: () => void;
+  onClose: () => void;
+  open: boolean;
+}) {
+  return h(
+    Dialog,
+    {
+      isOpen: props.open,
+      icon: "warning-sign",
+      title: "Unsaved Changes",
+    },
+    [
+      h(
+        "div",
+        {
+          style: { margin: "10px" },
+        },
+        [
+          h("p", [
+            "There are unsaved changes, are you sure you want to leave?",
+          ]),
+          h("div", [
+            h(Button, { intent: "danger", onClick: props.onCancel }, [
+              "Don't Save",
+            ]),
+            h(Button, { intent: "primary", onClick: props.onClose }, [
+              "Back to Editing",
+            ]),
+          ]),
+        ]
+      ),
+    ]
+  );
+}
+
 function UnitEdit(props: { onCancel: () => void }) {
+  const [open, setOpen] = useState(false);
   const { model, hasChanges, actions, ...rest } = useModelEditor();
-  const { unit }: { unit: UnitEditorI } = model;
-  console.log(unit);
+  const { unit }: { unit: UnitsView } = model;
+
   const updateUnit = (field: string, e: any) => {
     actions.updateState({ model: { unit: { [field]: { $set: e } } } });
   };
@@ -56,7 +93,20 @@ function UnitEdit(props: { onCancel: () => void }) {
     });
   };
 
+  const onCancelBtnClick = () => {
+    if (hasChanges()) {
+      setOpen(true);
+    } else {
+      props.onCancel();
+    }
+  };
+
   return h("div", [
+    h(UnitEditCancelAlert, {
+      open,
+      onCancel: props.onCancel,
+      onClose: () => setOpen(false),
+    }),
     h(Table, { interactive: false }, [
       h("tr", [
         h("td", [
@@ -112,13 +162,8 @@ function UnitEdit(props: { onCancel: () => void }) {
               onChange: (e) => updateUnit("notes", e.target.value),
             }),
             h("div", { style: { marginTop: "10px" } }, [
-              // h(Checkbox, {
-              //   checked: unit.new_section,
-              //   onChange: () => updateUnit("new_section", !unit.new_section),
-              //   label: "Make new section with this unit",
-              // }),
               h(SubmitButton),
-              h(Button, { intent: "danger", onClick: props.onCancel }, [
+              h(Button, { intent: "danger", onClick: onCancelBtnClick }, [
                 "Cancel",
               ]),
             ]),
@@ -190,6 +235,15 @@ function MinEditorToggle(props: ToggleI) {
   ]);
 }
 
+function NewSectionBtn(props: {
+  addNewSection: (i: number) => void;
+  index: number;
+}) {
+  return h(AddButton, { onClick: () => props.addNewSection(props.index) }, [
+    "Add Section",
+  ]);
+}
+
 function MinEditorCard(
   props: UnitEditorProps & {
     onCancel: () => void;
@@ -207,4 +261,4 @@ function MinEditorCard(
   ]);
 }
 
-export { MinUnitEditor, MinEditorToggle, MinEditorCard };
+export { MinUnitEditor, MinEditorToggle, MinEditorCard, NewSectionBtn };

@@ -1,5 +1,5 @@
 import h from "@macrostrat/hyper";
-import { PostgrestError } from "@supabase/postgrest-js";
+import { PostgrestError, PostgrestResponse } from "@supabase/postgrest-js";
 import { GetServerSideProps } from "next";
 import pg, {
   BasePage,
@@ -7,44 +7,53 @@ import pg, {
   createUnitBySections,
   UnitsView,
   ColSectionI,
-  getIdHierarchy,
-  QueryI,
+  fetchIdsFromColId,
+  IdsFromCol,
   UnitSectionTable,
   isServer,
 } from "~/index";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const {
+  let {
     query: { col_id },
   } = ctx;
+  if (Array.isArray(col_id)) {
+    col_id = col_id[0];
+  }
 
-  const { data: d, error: e } = await pg.rpc("get_col_section_data", {
-    column_id: col_id,
-  });
+  const query: IdsFromCol = await fetchIdsFromColId(parseInt(col_id ?? "0"));
 
-  const query = await getIdHierarchy({ col_id });
+  const { data: colSections, error: e }: PostgrestResponse<ColSectionI> =
+    await pg.rpc("get_col_section_data", {
+      column_id: col_id,
+    });
 
-  const { data: column, error: col_error } = await pg
+  const {
+    data: column,
+    error: col_error,
+  }: PostgrestResponse<{ col_name: string }> = await pg
     .from("cols")
     .select("col_name")
     .match({ id: col_id });
 
-  const { data: units, error: unit_error } = await pg
-    .from("unit_strat_name_expanded")
-    .select(
-      /// joins the lith_unit and environ_unit table
-      "*,lith_unit!unit_liths_unit_id_fkey(*),environ_unit!unit_environs_unit_id_fkey(*)"
-    )
-    .order("position_bottom", { ascending: true })
-    .match({ col_id: col_id });
+  const { data: units, error: unit_error }: PostgrestResponse<UnitsView> =
+    await pg
+      .from("unit_strat_name_expanded")
+      .select(
+        /// joins the lith_unit and environ_unit table
+        "*,strat_names(*, strat_names_meta(*)),lith_unit!unit_liths_unit_id_fkey(*),environ_unit!unit_environs_unit_id_fkey(*)"
+      )
+      .order("position_bottom", { ascending: true })
+      .match({ col_id: col_id });
 
-  const sections = createUnitBySections(units);
+  const sections: { [section_id: string | number]: UnitsView[] }[] =
+    createUnitBySections(units);
 
   const errors = [e, col_error, unit_error].filter((e) => e != null);
   return {
     props: {
       col_id,
-      colSections: d,
+      colSections,
       column,
       errors,
       query,
@@ -58,7 +67,7 @@ export default function Columns(props: {
   colSections: ColSectionI[];
   column: { col_name: string }[];
   errors: PostgrestError[];
-  query: QueryI;
+  query: IdsFromCol;
   sections: { [section_id: number | string]: UnitsView[] }[];
 }) {
   const { col_id, colSections, column, query, sections, errors } = props;

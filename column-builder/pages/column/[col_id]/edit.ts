@@ -6,27 +6,33 @@ import {
   ColumnForm,
   tableSelect,
   selectFirst,
-  getIdHierarchy,
-  QueryI,
+  fetchIdsFromColId,
+  IdsFromCol,
 } from "~/index";
 import { GetServerSideProps } from "next";
-import { PostgrestError } from "@supabase/postgrest-js";
+import { PostgrestError, PostgrestResponse } from "@supabase/postgrest-js";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const {
+  let {
     query: { col_id },
   } = ctx;
+  if (Array.isArray(col_id)) {
+    col_id = col_id[0];
+  }
 
-  const { data, error } = await tableSelect("col_ref_expanded", {
-    match: { col_id: col_id },
-  });
+  const query: IdsFromCol = await fetchIdsFromColId(parseInt(col_id ?? "0"));
+
+  const { data, error }: PostgrestResponse<ColumnForm> = await tableSelect(
+    "col_ref_expanded",
+    {
+      match: { col_id: parseInt(col_id ?? "0") },
+    }
+  );
 
   const { firstData, error: error_ } = await selectFirst("cols", {
     columns: "col_groups!cols_col_group_id_fkey(*)",
     limit: 1,
   });
-
-  const query = await getIdHierarchy({ col_id });
 
   const errors = [error, error_].filter((e) => e != null);
 
@@ -45,7 +51,7 @@ export default function EditColumn(props: {
   col_id: string;
   curColGroup: any;
   column: ColumnForm[];
-  query: QueryI;
+  query: IdsFromCol;
   errors: PostgrestError[];
 }) {
   const { col_id, curColGroup, column, errors } = props;

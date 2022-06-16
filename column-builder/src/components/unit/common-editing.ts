@@ -1,3 +1,4 @@
+import React from "react";
 import { hyperStyled } from "@macrostrat/hyper";
 import {
   UnitsView,
@@ -5,26 +6,23 @@ import {
   EnvironUnit,
   TagContainerCell,
 } from "../../index";
-import { InputGroup, NumericInput } from "@blueprintjs/core";
+import { InputGroup, NumericInput, FormGroup } from "@blueprintjs/core";
 import {
   useModelEditor,
   //@ts-ignore
 } from "@macrostrat/ui-components";
 import styles from "../comp.module.scss";
 import { EnvTagsAdd, LithTagsAdd, StratNameDataI, StratNameSuggest } from "..";
+import { LithContainer } from "../lith";
 const h = hyperStyled(styles);
 
-export interface UnitEditorI extends UnitsView {
-  new_section: boolean;
-}
-
 export interface UnitEditorModel {
-  unit: UnitEditorI;
+  unit: UnitsView;
 }
 
 export interface UnitEditorProps {
   persistChanges: (e: UnitEditorModel, c: Partial<UnitEditorModel>) => void;
-  model: UnitEditorI | {};
+  model: UnitsView | {};
 }
 
 export function EnvTags(props: { large: boolean }) {
@@ -66,9 +64,9 @@ export function EnvTags(props: { large: boolean }) {
   };
 
   return h("div.tag-container", [
-    h.if(tagData.length == 0)("div", ["Add environments"]),
+    h.if(tagData.length == 0 && isEditing)("div", ["Add environments"]),
     h(TagContainerCell, { data: tagData, onClickDelete, isEditing, large }),
-    h(EnvTagsAdd, { onClick }),
+    h.if(isEditing)(EnvTagsAdd, { onClick }),
   ]);
 }
 
@@ -97,8 +95,8 @@ export function LithTags(props: { large?: boolean }) {
       };
     }) ?? [];
 
-  const onClickDelete = (id: number) => {
-    const filteredLiths = [...(liths ?? [])].filter((l) => l.id != id);
+  const onClickDelete = (lith: LithUnit) => {
+    const filteredLiths = [...(liths ?? [])].filter((l) => l.id != lith.id);
     actions.updateState({
       model: { unit: { lith_unit: { $set: filteredLiths } } },
     });
@@ -109,9 +107,13 @@ export function LithTags(props: { large?: boolean }) {
   };
 
   return h("div.tag-container", [
-    h.if(tagData.length == 0)("div", ["Add lithologies"]),
-    h(TagContainerCell, { data: tagData, onClickDelete, isEditing, large }),
-    h(LithTagsAdd, { onClick }),
+    h.if(tagData.length == 0 && isEditing)("div", ["Add lithologies"]),
+    h(LithContainer, {
+      large,
+      liths,
+      onRemove: isEditing ? onClickDelete : undefined,
+    }),
+    h.if(isEditing)(LithTagsAdd, { onClick }),
   ]);
 }
 
@@ -119,6 +121,7 @@ export function UnitThickness(props: {
   field: string;
   defaultValue: number | undefined;
   placeholder: string;
+  small?: boolean;
 }) {
   const { model, actions }: { model: UnitEditorModel; actions: any } =
     useModelEditor();
@@ -126,12 +129,49 @@ export function UnitThickness(props: {
   const update = (field: string, e: any) => {
     actions.updateState({ model: { unit: { [field]: { $set: e } } } });
   };
+  const width = props.small ?? false ? "60px" : undefined;
 
   return h(NumericInput, {
+    style: { width },
     onValueChange: (e) => update(props.field, e),
     defaultValue: props.defaultValue,
     placeholder: props.placeholder,
+    buttonPosition: props.small ?? false ? "none" : undefined,
   });
+}
+
+export function UnitRowThicknessEditor() {
+  const {
+    model,
+    actions,
+    isEditing,
+  }: { model: UnitEditorModel; actions: any; isEditing: boolean } =
+    useModelEditor();
+
+  const unit = model.unit;
+
+  return h(React.Fragment, [
+    h.if(!isEditing)("div", [
+      unit.min_thick != unit.max_thick
+        ? `${unit.min_thick} - ${unit.max_thick}`
+        : unit.min_thick,
+    ]),
+    h.if(isEditing)("div", { style: { display: "flex" } }, [
+      h(UnitThickness, {
+        field: "min_thick",
+        placeholder: "min thickness",
+        defaultValue: unit?.min_thick,
+        small: true,
+      }),
+      " - ",
+      h(UnitThickness, {
+        field: "max_thick",
+        placeholder: "max thickness",
+        defaultValue: unit?.max_thick,
+        small: true,
+      }),
+    ]),
+  ]);
 }
 
 export function InformalUnitName() {
@@ -144,49 +184,45 @@ export function InformalUnitName() {
     });
   };
 
-  return h(InputGroup, {
-    placeholder: "Informal Unit Name",
-    style: { width: "200px" },
-    defaultValue: unit.unit_strat_name || undefined,
-    onChange: (e) => updateUnitName(e.target.value),
-  });
+  return h(FormGroup, { label: "Informal Unit Name" }, [
+    h(InputGroup, {
+      placeholder: "Informal Unit Name",
+      style: { width: "200px" },
+      value: unit.unit_strat_name || undefined,
+      onChange: (e) => updateUnitName(e.target.value),
+    }),
+  ]);
 }
 
 export function FormalStratName() {
   const { model, actions } = useModelEditor();
   const { unit }: UnitEditorModel = model;
 
-  const initialSelected: StratNameDataI | undefined = unit?.strat_name
+  const initialSelected: StratNameDataI | undefined = unit?.strat_names
     ? {
-        value: unit.strat_name.strat_name,
-        data: unit.strat_name,
+        value: `${unit.strat_names.strat_name} ${unit.strat_names.rank}`,
+        data: unit.strat_names,
       }
     : undefined;
 
   const updateStratName = (e: StratNameDataI) => {
-    actions.updateState({ model: { unit: { strat_name: { $set: e.data } } } });
+    actions.updateState({
+      model: {
+        unit: {
+          strat_names: { $set: e.data },
+          unit_strat_name: { $set: `${e.data.strat_name} ${e.data.rank}` },
+          strat_name_id: { $set: e.data.id },
+        },
+      },
+    });
   };
 
-  return h(StratNameSuggest, {
-    initialSelected,
-    placeholder: "Formal Strat Name",
-    onChange: updateStratName,
-  });
-}
-
-export function UnitLithHelperText(props: { lith_unit?: LithUnit[] }) {
-  const { lith_unit = [] } = props;
-
-  const tagData = lith_unit.map((lith) => {
-    return {
-      id: lith.id,
-      color: lith.lith_color,
-      name: lith.lith,
-      description: lith.lith_class,
-    };
-  });
-
-  return h("div.tag-container", [
-    h(TagContainerCell, { data: tagData, large: false }),
+  return h(FormGroup, { label: "Formal strat name" }, [
+    h(StratNameSuggest, {
+      initialSelected,
+      placeholder: "Formal Strat Name",
+      onChange: updateStratName,
+      col_id: unit.col_id,
+    }),
   ]);
 }

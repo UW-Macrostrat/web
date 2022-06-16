@@ -1,5 +1,5 @@
 import h from "@macrostrat/hyper";
-import { PostgrestError } from "@supabase/postgrest-js";
+import { PostgrestError, PostgrestResponse } from "@supabase/postgrest-js";
 import { GetServerSideProps } from "next";
 import pg, {
   BasePage,
@@ -7,23 +7,30 @@ import pg, {
   ColumnEditor,
   ColumnForm,
   tableInsert,
-  getIdHierarchy,
-  QueryI,
+  IdsFromColGroup,
+  fetchIdsFromColGroup,
 } from "~/index";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const {
+  let {
     query: { col_group_id },
   } = ctx;
 
-  const { data, error } = await pg
+  if (Array.isArray(col_group_id)) {
+    col_group_id = col_group_id[0];
+  }
+
+  const query: IdsFromColGroup = await fetchIdsFromColGroup(
+    parseInt(col_group_id ?? "0")
+  );
+
+  const { data, error }: PostgrestResponse<Partial<ColumnGroupI>> = await pg
     .from("col_groups")
     .select()
     .match({ id: col_group_id });
 
   const colGroup = data ? data[0] : {};
 
-  const query = await getIdHierarchy({ col_group_id });
   const errors = error == null ? [] : [error];
   return { props: { col_group_id, colGroup, query, errors } };
 };
@@ -31,7 +38,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 export default function NewColumn(props: {
   col_group_id: string;
   colGroup: Partial<ColumnGroupI>;
-  query: QueryI;
+  query: IdsFromColGroup;
   errors: PostgrestError[];
 }) {
   const { colGroup, col_group_id, errors } = props;

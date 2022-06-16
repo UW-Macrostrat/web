@@ -1,0 +1,37 @@
+.lith-segment-container {
+  display: flex;
+  width: 100%;
+  min-width: 100px;
+  max-width: 600px;
+}
+
+.segment-tooltip {
+  display: flex;
+  flex-direction: column;
+  b {
+    text-transform: capitalize;
+  }
+  i {
+    color: #d3d8de;
+  }
+}
+
+.lith-segment {
+  margin-right: 1px;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  p {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    margin-bottom: 0;
+    color: black;
+    font-size: 13px;
+  }
+  
+  .small {
+    font-size: 11px !important;
+  }
+}

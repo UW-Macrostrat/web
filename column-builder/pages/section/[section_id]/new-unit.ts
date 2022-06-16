@@ -4,8 +4,8 @@ import {
   UnitEditor,
   UnitEditorModel,
   selectFirst,
-  QueryI,
-  getIdHierarchy,
+  IdsFromSection,
+  fetchIdsFromSectionId,
 } from "~/index";
 import { persistNewUnitChanges } from "~/components/section/new-helpers";
 import { GetServerSideProps } from "next";
@@ -15,7 +15,17 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   let {
     query: { section_id },
   } = ctx;
-  const query: QueryI = await getIdHierarchy({ section_id });
+
+  if (Array.isArray(section_id)) {
+    section_id = section_id[0];
+  } else if (typeof section_id == "undefined") {
+    section_id = "0";
+  }
+
+  const query: IdsFromSection = await fetchIdsFromSectionId(
+    parseInt(section_id)
+  );
+
   const { firstData, error } = await selectFirst("sections", {
     match: { id: section_id },
   });
@@ -35,7 +45,7 @@ function NewUnitInSection({
 }: {
   col_id: number;
   section_id: string;
-  query: QueryI;
+  query: IdsFromSection;
   errors: PostgrestError[];
 }) {
   const model = { unit: { col_id: col_id }, liths: [], envs: [] };
