@@ -48,6 +48,7 @@ type RECEIVED_COLUMN_QUERY = {
   data: any;
   column: any;
 };
+type RESET_COLUMN_INFO = { type: "reset-column-info" };
 
 type START_GDD_QUERY = { type: "start-gdd-query"; cancelToken: any };
 type RECEIVED_GDD_QUERY = { type: "received-gdd-query"; data: any };
@@ -93,6 +94,7 @@ type SET_ACTIVE_INDEX_MAP = { type: "set-active-index-map" };
 type UPDATE_STATE = { type: "update-state"; state: any };
 
 export type CoreAction =
+  | RESET_COLUMN_INFO
   | CLEAR_FILTERS
   | SET_INPUT_FOCUS
   | SET_SEARCH_TERM

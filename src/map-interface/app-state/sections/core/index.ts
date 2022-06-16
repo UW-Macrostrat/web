@@ -109,11 +109,8 @@ export function coreReducer(
       return {
         ...state,
         infoDrawerOpen: false,
-        //columnInfo: {},
-        //mapInfo: [],
-        //pbdbData: [],
+        columnInfo: {},
       };
-
     case "expand-infodrawer":
       return { ...state, infoDrawerExpanded: !state.infoDrawerExpanded };
 
@@ -485,6 +482,8 @@ export function coreReducer(
 
     case "reset-pbdb":
       return { ...state, pbdbData: [] };
+    case "reset-column-info":
+      return { ...state, columnInfo: [] };
     case "go-to-place":
       return {
         ...state,
