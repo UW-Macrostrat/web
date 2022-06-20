@@ -13,6 +13,7 @@ interface LithDialogProps {
   onRemove?: (l: LithUnit) => void;
   onClose: () => void;
   onSwitchChange: (i: number, prop: "dom" | "sub") => void;
+  onAdd: (l: Lith) => void;
   isOpen: boolean;
 }
 function LithDialog(props: LithDialogProps) {
@@ -46,9 +47,7 @@ function LithDialog(props: LithDialogProps) {
           }),
         ]),
         h(Divider),
-        h("div.lith-select", [
-          h(LithSelect, { onItemSelect: (l: Lith) => console.log(l) }),
-        ]),
+        h("div.lith-select", [h(LithSelect, { onItemSelect: props.onAdd })]),
       ]),
     ]
   );
@@ -86,7 +85,7 @@ interface LithContainerProps {
   liths: LithUnit[];
   large: boolean;
   onRemove?: (l: LithUnit) => void;
-  onAdd: (l: LithUnit) => void;
+  onAdd: (l: Lith) => void;
   onSwitchProp: (id: number, prop: "dom" | "sub") => void;
   isEditing: boolean;
 }
@@ -102,8 +101,10 @@ function LithContainer(props: LithContainerProps) {
     h(LithDialog, {
       isOpen,
       onClose: () => setIsOpen(false),
+      onAdd: props.onAdd,
       onSwitchChange: props.onSwitchProp,
       liths: props.liths,
+      onRemove: props.onRemove,
     }),
     h("div.row", [
       h(LithSegmentContainer, {
