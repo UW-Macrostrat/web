@@ -82,7 +82,7 @@ export function LithTags(props: { large?: boolean }) {
     actions: any;
   } = useModelEditor();
   const {
-    unit: { lith_unit: liths },
+    unit: { lith_unit: liths = [] },
   } = model;
 
   const tagData =
@@ -102,8 +102,12 @@ export function LithTags(props: { large?: boolean }) {
     });
   };
 
-  const onClick = (lith: Partial<LithUnit>) => {
+  const onAdd = (lith: Partial<LithUnit>) => {
     actions.updateState({ model: { unit: { lith_unit: { $push: [lith] } } } });
+  };
+
+  const onSwitchProp = (id: number, prop: "dom" | "sub") => {
+    console.log(id, prop);
   };
 
   return h("div.tag-container", [
@@ -111,9 +115,11 @@ export function LithTags(props: { large?: boolean }) {
     h(LithContainer, {
       large,
       liths,
+      onAdd,
+      onSwitchProp,
       onRemove: isEditing ? onClickDelete : undefined,
+      isEditing,
     }),
-    h.if(isEditing)(LithTagsAdd, { onClick }),
   ]);
 }
 

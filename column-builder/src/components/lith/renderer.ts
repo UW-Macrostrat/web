@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { hyperStyled } from "@macrostrat/hyper";
-import { LithUnit } from "~/types";
-import { mergeRefs, Tag } from "@blueprintjs/core";
+import { Lith, LithUnit } from "~/types";
+import { mergeRefs, Tag, Dialog } from "@blueprintjs/core";
 import { Tooltip2, Popover2 } from "@blueprintjs/popover2";
 import styles from "./lith.module.scss";
 
@@ -11,11 +11,13 @@ interface LithContainerProps {
   liths?: LithUnit[];
   onRemove?: (l: LithUnit) => void;
   large: boolean;
+  onClick: () => void;
 }
 
-function LithContainer(props: LithContainerProps) {
+function LithSegmentContainer(props: LithContainerProps) {
   const { liths = [] } = props;
-  return h("div.lith-segment-container", [
+
+  return h("div.lith-segment-container", { onClick: props.onClick }, [
     liths.map((lith) => {
       return h(LithSegment, {
         lith,
@@ -26,7 +28,7 @@ function LithContainer(props: LithContainerProps) {
   ]);
 }
 
-function LithSegmentToolTipContent(props: { lith: LithUnit }) {
+function LithSegmentToolTipContent(props: { lith: LithUnit | Lith }) {
   return h("div.segment-tooltip", [
     h("span", [
       h("b", [props.lith.lith]),
@@ -42,20 +44,15 @@ function LithSegmentToolTipContent(props: { lith: LithUnit }) {
 }
 
 function LithSegment(props: {
-  lith: LithUnit;
+  lith: LithUnit | Lith;
   onRemove?: (l: LithUnit) => void;
   large: boolean;
+  widthInherit?: boolean;
 }) {
-  const [curWidth, setCurWidth] = useState(0);
-  const widthRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (widthRef.current) setCurWidth(widthRef.current.offsetWidth);
-  }, [widthRef.current]);
-
-  const width = `${props.lith.mod_prop * 100}%`;
+  const { widthInherit = true } = props;
+  const width = widthInherit ? `${props.lith.mod_prop * 100}%` : "100%";
   const style = {
-    backgroundColor: props.lith.lith_color,
+    backgroundColor: props.lith.lith_color + "70",
     width,
   };
 
@@ -79,7 +76,7 @@ function LithSegment(props: {
               ? //@ts-ignore
                 () => props.onRemove(props.lith)
               : undefined,
-          elementRef: mergeRefs(ref, widthRef),
+          elementRef: mergeRefs(ref),
           ...tooltipProps,
         },
         [
@@ -91,4 +88,4 @@ function LithSegment(props: {
   });
 }
 
-export { LithContainer };
+export { LithSegmentContainer, LithSegment };
