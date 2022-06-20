@@ -128,8 +128,7 @@ export interface UnitRowContextMenuI {
     e: UNIT_ADD_POISITON,
     unit_index: number,
     section_index: number,
-    copy: boolean,
-    inRow?: boolean
+    copy: boolean
   ) => void;
   unit: UnitsView;
   unit_index: number;
@@ -160,44 +159,8 @@ function UnitRowContextMenu(props: UnitRowContextMenuI) {
     ]);
   };
 
-  const QuickActionMenu = () => {
-    return h(React.Fragment, [
-      h(MenuItem, {
-        text: `Quick edit unit #${props.unit.id}`,
-        icon: "edit",
-        onClick: () => {
-          props.triggerEditor(
-            UNIT_ADD_POISITON.EDIT,
-            props.unit_index,
-            props.section_index,
-            true,
-            true
-          );
-        },
-      }),
-      h(MenuItem, {
-        text: `Copy unit #${props.unit.id} up`,
-        icon: "circle-arrow-up",
-        onClick: props.copyUnitUp,
-      }),
-      h(MenuItem, {
-        text: `Copy unit #${props.unit.id} down`,
-        icon: "circle-arrow-down",
-        onClick: props.copyUnitDown,
-      }),
-    ]);
-  };
-
   const ContextMenu = () =>
     h(Menu, [
-      h(
-        MenuItem,
-        {
-          text: "Quick Actions",
-          icon: "selection",
-        },
-        [h(QuickActionMenu)]
-      ),
       h(
         MenuItem,
         {
@@ -244,7 +207,10 @@ function UnitRowContextMenu(props: UnitRowContextMenuI) {
   );
 }
 
-function AddBtnBetweenRows(props: { onClick: () => void; colSpan: number }) {
+function AddBtnBetweenRows(props: {
+  onClick: (e: any) => void;
+  colSpan: number;
+}) {
   const [style, setStyle] = useState({ display: "none" });
   return h("tr", [
     h("td", { colSpan: props.colSpan, style: { padding: 0 } }, [
@@ -296,20 +262,18 @@ const useRowUnitEditor = () => {
   const [editMode, setEditMode] = useState<EditModeI>({
     mode: UNIT_ADD_POISITON.EDIT,
     copy: true,
-    inRow: false,
   });
 
   const triggerEditor = (
     e: UNIT_ADD_POISITON,
     unit_index: number,
     section_index: number,
-    copy: boolean,
-    inRow?: boolean
+    copy: boolean
   ) => {
     if (editOpen) return;
     setUnitIndex(unit_index);
     setSectionIndex(section_index);
-    setEditMode({ mode: e, copy, inRow: inRow ?? false });
+    setEditMode({ mode: e, copy });
     setEditOpen(true);
   };
 

@@ -3,6 +3,7 @@ import { hyperStyled } from "@macrostrat/hyper";
 import {
   UnitsView,
   LithUnit,
+  Lith,
   EnvironUnit,
   TagContainerCell,
 } from "../../index";
@@ -12,7 +13,7 @@ import {
   //@ts-ignore
 } from "@macrostrat/ui-components";
 import styles from "../comp.module.scss";
-import { EnvTagsAdd, LithTagsAdd, StratNameDataI, StratNameSuggest } from "..";
+import { EnvTagsAdd, StratNameDataI, StratNameSuggest } from "..";
 import { LithContainer } from "../lith";
 const h = hyperStyled(styles);
 
@@ -85,16 +86,6 @@ export function LithTags(props: { large?: boolean }) {
     unit: { lith_unit: liths = [] },
   } = model;
 
-  const tagData =
-    liths?.map((lith) => {
-      return {
-        id: lith.id,
-        color: lith.lith_color,
-        name: lith.lith,
-        description: lith.lith_class,
-      };
-    }) ?? [];
-
   const onClickDelete = (lith: LithUnit) => {
     const filteredLiths = [...(liths ?? [])].filter((l) => l.id != lith.id);
     actions.updateState({
@@ -102,7 +93,7 @@ export function LithTags(props: { large?: boolean }) {
     });
   };
 
-  const onAdd = (lith: Partial<LithUnit>) => {
+  const onAdd = (lith: Lith) => {
     actions.updateState({ model: { unit: { lith_unit: { $push: [lith] } } } });
   };
 
@@ -110,8 +101,8 @@ export function LithTags(props: { large?: boolean }) {
     console.log(id, prop);
   };
 
-  return h("div.tag-container", [
-    h.if(tagData.length == 0 && isEditing)("div", ["Add lithologies"]),
+  return h("div", [
+    h.if(liths.length == 0 && isEditing)("div", ["Add lithologies"]),
     h(LithContainer, {
       large,
       liths,

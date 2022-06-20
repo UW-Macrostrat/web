@@ -6,7 +6,6 @@ import {
   UnitsView,
   ColSectionsTable,
   ColSectionI,
-  MinEditorToggle,
 } from "~/index";
 import { columnReducer } from "../column";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
@@ -17,7 +16,6 @@ import { ColumnPageBtnMenu, useRowUnitEditor } from "./helpers";
 import styles from "~/components/comp.module.scss";
 import { SectionTable } from "./section";
 import { NewSectionBtn } from "../unit/minimal-unit-editor";
-import { UnitRowEditorModal } from "./unit";
 
 const h = hyperStyled(styles);
 
@@ -75,13 +73,6 @@ function SectionsDropContainer(props: SectionUnitTableProps) {
     : { unit: { lith_unit: [], environ_unit: [] } };
 
   return h("div", [
-    h(UnitRowEditorModal, {
-      model: editingModel,
-      persistChanges: persistChanges,
-      onCancel: onCancel,
-      title: dialogTitle,
-      open: editOpen && !editMode.inRow,
-    }),
     h(DragDropContext, { onDragEnd }, [
       h(
         Droppable,
@@ -112,7 +103,6 @@ function SectionsDropContainer(props: SectionUnitTableProps) {
                       unit_index,
                       section_index,
                       editOpen,
-                      editMode,
                       triggerEditor,
                       onCancel,
                       dialogTitle,

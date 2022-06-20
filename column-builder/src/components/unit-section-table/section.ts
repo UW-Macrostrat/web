@@ -1,11 +1,24 @@
 import { hyperStyled } from "@macrostrat/hyper";
 import { UnitEditorModel, UnitsView } from "~/index";
 import { DnDTable } from "../table";
-import { UNIT_ADD_POISITON, EditModeI } from "./helpers";
+import { UNIT_ADD_POISITON } from "./helpers";
 import { UnitRow } from "./unit";
 import styles from "~/components/comp.module.scss";
 
 const h = hyperStyled(styles);
+
+const getEmptyUnit = (col_id: number) => {
+  let emptyUnit: UnitsView = {
+    id: 66,
+    unit_strat_name: "unnamed",
+    strat_names: null,
+    lith_unit: [],
+    environ_unit: [],
+    color: "#fffff",
+    col_id,
+  };
+  return emptyUnit;
+};
 
 interface SectionTableProps {
   index: number;
@@ -13,14 +26,12 @@ interface SectionTableProps {
   drag: boolean;
   unit_index: number;
   section_index: number;
-  editMode: EditModeI;
   editOpen: boolean;
   triggerEditor: (
     u: UNIT_ADD_POISITON,
     unit_index: number,
     section_number: number,
-    copy: boolean,
-    inRow?: boolean
+    copy: boolean
   ) => void;
   onCancel: () => void;
   dialogTitle: string;
@@ -35,7 +46,6 @@ function SectionTable(props: SectionTableProps) {
     drag,
     section_index,
     unit_index,
-    editMode,
     editOpen,
     triggerEditor,
     onCancel,
@@ -71,7 +81,7 @@ function SectionTable(props: SectionTableProps) {
     [
       units.map((unit, j) => {
         const isEditing = unit_index == j && section_index == index && editOpen;
-        const inRowEditing = isEditing && (editMode.inRow ?? false);
+        const inRowEditing = isEditing;
 
         // these ids here are meaningless... this action needs to be persisted
         const copyUnitDown = () => {
@@ -79,6 +89,12 @@ function SectionTable(props: SectionTableProps) {
         };
         const copyUnitUp = () => {
           props.addUnitAt({ unit: { ...unit, id: 66 } }, j);
+        };
+        const addUnitUp = () => {
+          props.addUnitAt({ unit: getEmptyUnit(unit.col_id) }, j);
+        };
+        const addUnitDown = () => {
+          props.addUnitAt({ unit: getEmptyUnit(unit.col_id) }, j + 1);
         };
 
         return h(UnitRow, {
@@ -95,6 +111,8 @@ function SectionTable(props: SectionTableProps) {
           inRowEditing,
           copyUnitDown,
           copyUnitUp,
+          addUnitUp,
+          addUnitDown,
         });
       }),
     ]

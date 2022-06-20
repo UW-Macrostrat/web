@@ -186,8 +186,7 @@ interface UnitRowProps {
     u: UNIT_ADD_POISITON,
     unit_index: number,
     section_number: number,
-    copy: boolean,
-    inRow?: boolean
+    copy: boolean
   ) => void;
   onCancel: () => void;
   dialogTitle: string;
@@ -197,19 +196,25 @@ interface UnitRowProps {
   inRowEditing: boolean;
   copyUnitUp: () => void;
   copyUnitDown: () => void;
+  addUnitUp: () => void;
+  addUnitDown: () => void;
 }
 
 function UnitRow(props: UnitRowProps) {
   return h(React.Fragment, { key: props.unit.id }, [
     h.if(props.unit_index == 0)(AddBtnBetweenRows, {
       colSpan: props.colSpan,
-      onClick: () =>
+      onClick: (e) => {
+        e.stopPropagation();
+        props.addUnitUp();
+        console.log("Clicked");
         props.triggerEditor(
           UNIT_ADD_POISITON.ABOVE,
           props.unit_index,
           props.section_index,
           false
-        ),
+        );
+      },
     }),
     h(
       DraggableRow,
@@ -225,7 +230,6 @@ function UnitRow(props: UnitRowProps) {
             UNIT_ADD_POISITON.EDIT,
             props.unit_index,
             props.section_index,
-            true,
             true
           ),
       },
@@ -261,13 +265,17 @@ function UnitRow(props: UnitRowProps) {
 
     h(AddBtnBetweenRows, {
       colSpan: props.colSpan,
-      onClick: () =>
+      onClick: (e) => {
+        e.stopPropagation();
+        console.log("clicked");
+        props.addUnitDown();
         props.triggerEditor(
           UNIT_ADD_POISITON.BELOW,
-          props.unit_index,
+          props.unit_index + 1,
           props.section_index,
           false
-        ),
+        );
+      },
     }),
   ]);
 }
