@@ -50,7 +50,7 @@ function LithSegment(props: {
   widthInherit?: boolean;
 }) {
   const { widthInherit = true } = props;
-  const width = widthInherit ? `${props.lith.mod_prop * 100}%` : "100%";
+  const width = widthInherit ? `${props.lith.mod_prop * 100 || 100}%` : "100%";
   const style = {
     backgroundColor: props.lith.lith_color + "70",
     width,
