@@ -1,12 +1,16 @@
+import { MouseEventHandler } from "react";
 import { hyperStyled } from "@macrostrat/hyper";
 import { Tooltip2 as Tooltip } from "@blueprintjs/popover2";
 import { Button, MenuItem, Spinner, Tag } from "@blueprintjs/core";
-import { ItemPredicate, ItemRenderer } from "@blueprintjs/select";
+import {
+  IItemModifiers,
+  ItemPredicate,
+  ItemRenderer,
+} from "@blueprintjs/select";
 import pg, { usePostgrest } from "../db";
 import styles from "./comp.module.scss";
 import { EnvironUnit, LithUnit } from "..";
 import { ItemSelect } from "./suggest";
-import React from "react";
 
 const h = hyperStyled(styles);
 
@@ -86,37 +90,40 @@ function TagBody(props: tagBody) {
   ]);
 }
 
+interface LithMenuItemProps {
+  data: { name: string; color: string };
+  modifiers?: IItemModifiers;
+  handleClick: MouseEventHandler<HTMLElement>;
+}
+
+export function LithMenuItem(props: LithMenuItemProps) {
+  const { modifiers, handleClick, data } = props;
+
+  const style =
+    modifiers?.active ?? false
+      ? {
+          marginBottom: "2px",
+        }
+      : {
+          backgroundColor: data.color + "40", // add opaquness
+          marginBottom: "2px",
+        };
+
+  return h(MenuItem, {
+    active: modifiers?.active,
+    text: data.name,
+    onClick: handleClick,
+    style,
+  });
+}
+
 const lithItemRenderer: ItemRenderer<SelectDataI> = (
   item: SelectDataI,
   { handleClick, index, modifiers }
 ) => {
   const { value, data } = item;
 
-  const style = modifiers.active
-    ? {
-        marginBottom: "2px",
-      }
-    : {
-        backgroundColor: data.color + "40", // add opaquness
-        marginBottom: "2px",
-      };
-  const onClick = (type: string, e: React.MouseEvent<HTMLElement>) => {
-    item.value.type = type;
-    handleClick(e);
-  };
-  return h(
-    MenuItem,
-    {
-      active: modifiers.active,
-      key: index,
-      text: data.name,
-      style,
-    },
-    [
-      h(MenuItem, { text: "Dom", onClick: (e) => onClick("dom", e) }),
-      h(MenuItem, { text: "Sub", onClick: (e) => onClick("sub", e) }),
-    ]
-  );
+  return h(LithMenuItem, { key: index, data, modifiers, handleClick });
 };
 
 const itemPredicate: ItemPredicate<SelectDataI> = (query, item, index) => {
