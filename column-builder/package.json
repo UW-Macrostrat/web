@@ -11,7 +11,7 @@
   "dependencies": {
     "@blueprintjs/core": "^4.3.0",
     "@blueprintjs/popover2": "^1.2.1",
-    "@blueprintjs/select": "^4.2.0",
+    "@blueprintjs/select": "^4.4.1",
     "@macrostrat/data-components": "file:deps/ui-components/packages/data-components",
     "@macrostrat/form-components": "file:deps/ui-components/packages/form-components",
     "@macrostrat/hyper": "^2.0.1",
