@@ -1,7 +1,6 @@
 import { hyperStyled } from "@macrostrat/hyper";
 import { Lith } from "~/types";
 import { LithMenuItem } from "../tag";
-import { LithSegment, LithSegmentContainer } from "./renderer";
 import styles from "./lith.module.scss";
 import {
   QueryList,
@@ -44,7 +43,7 @@ const LithQueryListRenderer = (props: IQueryListRendererProps<Lith>) => {
       h(InputGroup, {
         ["aria-autocomplete"]: "list",
         leftIcon: "search",
-        placeholder: "Choose a lithology",
+        placeholder: "Add a lithology...",
         onChange: listProps.handleQueryChange,
         value: listProps.query,
       }),
