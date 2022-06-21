@@ -134,6 +134,7 @@ function MapContainer(props) {
     if (mapLayers.has(MapLayer.COLUMNS)) {
       runAction({ type: "get-filtered-columns" });
     }
+    runAction({ type: "map-layers-changed", mapLayers });
   }, [filters, mapLayers]);
 
   const timeout = useRef<Timeout>(null);

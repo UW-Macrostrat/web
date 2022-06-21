@@ -84,6 +84,16 @@ export function coreReducer(
     case "map-idle":
       if (!state.mapIsLoading) return state;
       return { ...state, mapIsLoading: false };
+    case "map-layers-changed":
+      let columnInfo = state.columnInfo;
+      let pbdbData = state.pbdbData;
+      if (!action.mapLayers.has(MapLayer.COLUMNS)) columnInfo = [];
+      if (!action.mapLayers.has(MapLayer.FOSSILS)) pbdbData = [];
+      return {
+        ...state,
+        columnInfo,
+        pbdbData,
+      };
     case "toggle-menu":
       const shouldOpen = state.inputFocus || !state.menuOpen;
 
@@ -109,11 +119,8 @@ export function coreReducer(
       return {
         ...state,
         infoDrawerOpen: false,
-        //columnInfo: {},
-        //mapInfo: [],
-        //pbdbData: [],
+        columnInfo: {},
       };
-
     case "expand-infodrawer":
       return { ...state, infoDrawerExpanded: !state.infoDrawerExpanded };
 
