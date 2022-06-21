@@ -196,8 +196,7 @@ interface UnitRowProps {
   inRowEditing: boolean;
   copyUnitUp: () => void;
   copyUnitDown: () => void;
-  addUnitUp: () => void;
-  addUnitDown: () => void;
+  addEmptyUnit: (unit_index: number) => void;
 }
 
 function UnitRow(props: UnitRowProps) {
@@ -206,8 +205,7 @@ function UnitRow(props: UnitRowProps) {
       colSpan: props.colSpan,
       onClick: (e) => {
         e.stopPropagation();
-        props.addUnitUp();
-        console.log("Clicked");
+        props.addEmptyUnit(props.unit_index);
         props.triggerEditor(
           UNIT_ADD_POISITON.ABOVE,
           props.unit_index,
@@ -258,6 +256,7 @@ function UnitRow(props: UnitRowProps) {
             triggerEditor: props.triggerEditor,
             copyUnitUp: props.copyUnitUp,
             copyUnitDown: props.copyUnitDown,
+            addEmptyUnit: props.addEmptyUnit,
           }),
         ]),
       ]
@@ -268,7 +267,7 @@ function UnitRow(props: UnitRowProps) {
       onClick: (e) => {
         e.stopPropagation();
         console.log("clicked");
-        props.addUnitDown();
+        props.addEmptyUnit(props.unit_index + 1);
         props.triggerEditor(
           UNIT_ADD_POISITON.BELOW,
           props.unit_index + 1,

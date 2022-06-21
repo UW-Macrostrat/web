@@ -135,6 +135,7 @@ export interface UnitRowContextMenuI {
   section_index: number;
   copyUnitUp: () => void;
   copyUnitDown: () => void;
+  addEmptyUnit: (unit_index: number) => void;
 }
 function UnitRowContextMenu(props: UnitRowContextMenuI) {
   const SubMenu = ({ pos }: { pos: UNIT_ADD_POISITON }) => {
@@ -142,19 +143,27 @@ function UnitRowContextMenu(props: UnitRowContextMenuI) {
       h(MenuItem, {
         text: `Copy unit #${props.unit.id}`,
         icon: "duplicate",
-        onClick: () =>
-          props.triggerEditor(pos, props.unit_index, props.section_index, true),
+        onClick: () => {
+          if (pos == UNIT_ADD_POISITON.ABOVE) {
+            props.copyUnitUp();
+          } else props.copyUnitDown();
+          props.triggerEditor(pos, props.unit_index, props.section_index, true);
+        },
       }),
       h(MenuItem, {
         text: `With empty unit`,
         icon: "new-object",
-        onClick: () =>
+        onClick: () => {
+          if (pos == UNIT_ADD_POISITON.ABOVE) {
+            props.addEmptyUnit(props.unit_index);
+          } else props.addEmptyUnit(props.unit_index + 1);
           props.triggerEditor(
             pos,
             props.unit_index,
             props.section_index,
             false
-          ),
+          );
+        },
       }),
     ]);
   };
@@ -271,7 +280,9 @@ const useRowUnitEditor = () => {
     copy: boolean
   ) => {
     if (editOpen) return;
-    setUnitIndex(unit_index);
+    if (e == UNIT_ADD_POISITON.BELOW) {
+      setUnitIndex(unit_index + 1);
+    } else setUnitIndex(unit_index);
     setSectionIndex(section_index);
     setEditMode({ mode: e, copy });
     setEditOpen(true);

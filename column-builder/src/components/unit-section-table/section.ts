@@ -16,6 +16,10 @@ const getEmptyUnit = (col_id: number) => {
     environ_unit: [],
     color: "#fffff",
     col_id,
+    name_fo: "",
+    age_bottom: 0,
+    name_lo: "",
+    age_top: 0,
   };
   return emptyUnit;
 };
@@ -90,11 +94,8 @@ function SectionTable(props: SectionTableProps) {
         const copyUnitUp = () => {
           props.addUnitAt({ unit: { ...unit, id: 66 } }, j);
         };
-        const addUnitUp = () => {
-          props.addUnitAt({ unit: getEmptyUnit(unit.col_id) }, j);
-        };
-        const addUnitDown = () => {
-          props.addUnitAt({ unit: getEmptyUnit(unit.col_id) }, j + 1);
+        const addEmptyUnit = (unit_index: number) => {
+          props.addUnitAt({ unit: getEmptyUnit(unit.col_id) }, unit_index);
         };
 
         return h(UnitRow, {
@@ -111,8 +112,7 @@ function SectionTable(props: SectionTableProps) {
           inRowEditing,
           copyUnitDown,
           copyUnitUp,
-          addUnitUp,
-          addUnitDown,
+          addEmptyUnit,
         });
       }),
     ]
