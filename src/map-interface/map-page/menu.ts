@@ -23,6 +23,7 @@ import {
   useSearchState,
   MenuPanel,
   MapLayer,
+  MapPosition,
 } from "../app-state";
 import { SearchResults } from "../components/searchbar";
 import classNames from "classnames";
@@ -43,7 +44,46 @@ const ListButton = (props: ListButtonProps) => {
   if (typeof props.icon != "string") {
     icon = h(props.icon, { size: 20 });
   }
-  return h(Button, { ...props, className: "list-button", icon });
+  return h(Button, { ...rest, className: "list-button", icon });
+};
+
+const YourLocationButton = () => {
+  const runAction = useAppActions();
+  const onClick = () => {
+    navigator.geolocation.getCurrentPosition(
+      function (position) {
+        const lngLat = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        const mapPosition: MapPosition = {
+          camera: {
+            altitude: 0,
+            bearing: 0,
+            pitch: 0,
+            ...lngLat,
+          },
+          target: {
+            zoom: 6,
+            ...lngLat,
+          },
+        };
+        runAction({
+          type: "map-moved",
+          data: mapPosition,
+        });
+      },
+      (e) => {
+        console.log(e);
+      },
+      { timeout: 100000 }
+    );
+  };
+  return h(
+    ListButton,
+    { icon: "map-marker", onClick, disabled: true },
+    "Your location"
+  );
 };
 
 const MinimalButton = (props) => h(Button, { ...props, minimal: true });
@@ -123,7 +163,7 @@ const LayerList = (props) => {
       }),
     ]),
     h(MenuGroup, [
-      h(ListButton, { disabled: true, icon: "map-marker" }, "Your location"),
+      h(YourLocationButton),
       h(
         ListButton,
         { onClick: toggleElevationChart, icon: ElevationIcon },
