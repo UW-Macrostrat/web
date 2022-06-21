@@ -14,12 +14,12 @@ import { UnitsView } from "~/types";
 import { FormalStratName, InformalUnitName } from "../unit";
 import pg, { usePostgrest } from "~/db";
 import { StratNameConceptLongI, StratNameI } from "~/types";
-import { StratNameHierarchy } from "./hierarchy";
+import { StratNameStack } from "./panel-stack";
 
 const h = hyperStyled(styles);
 
-function StratNameConceptCard(props: {
-  concept_id: number;
+export function StratNameConceptCard(props: {
+  concept_id?: number;
   strat_name: string;
 }) {
   const data: StratNameConceptLongI[] = usePostgrest(
@@ -63,30 +63,14 @@ function StratNameConceptCard(props: {
   );
 }
 
-/* 
-component that can 'suggest' strat_names that may be 
-related and are linked to concepts
-
-This can have multiple states:
-    1. Where theres no info except col_id: can suggest any strat_name with concept
-    2. informal name given, should try to search text based by that.
-    3. Informal & Formal strat_name given
-        - 1. formal name isn't connected to a concept
-        - 2. formal name IS connected to a concept
-*/
-function RelatedLinkedStratNames() {
+function UnitStratNameModalEditor() {
+  const [open, setOpen] = useState(false);
   const { model, actions } = useModelEditor();
   const { unit }: { unit: UnitsView } = model;
-  const { col_id } = unit;
 
-  const data: StratNameI[] = usePostgrest(
-    pg
-      .rpc("get_strat_names_col_priority", { _col_id: col_id })
-      .select("*,strat_names_meta(*)")
-      .limit(10)
-  );
+  const onSubmitStratName = (e: StratNameI | null) => {
+    if (!e) return;
 
-  const updateStratName = (e: StratNameI) => {
     actions.updateState({
       model: {
         unit: {
@@ -98,29 +82,10 @@ function RelatedLinkedStratNames() {
     });
   };
 
-  return h(Card, { className: "related-strat-card" }, [
-    h("h3", ["Suggested strat names"]),
-    h(Divider),
-    h(Menu, [
-      data
-        ? data.map((strat, i) => {
-            return h(MenuItem, {
-              key: i,
-              text: strat.strat_name,
-              onClick: () => updateStratName(strat),
-            });
-          })
-        : "Fetching strat names...",
-    ]),
-  ]);
-}
-
-function UnitStratNameModalEditor() {
-  const [open, setOpen] = useState(false);
-  const { model, actions } = useModelEditor();
-  const { unit }: { unit: UnitsView } = model;
-
-  const concept_id = unit.strat_names?.strat_names_meta?.concept_id;
+  const onStratNameSelect = (e: StratNameI | null) => {
+    onSubmitStratName(e);
+    setOpen(false);
+  };
 
   return h(React.Fragment, [
     h(
@@ -136,28 +101,11 @@ function UnitStratNameModalEditor() {
         onClose: () => setOpen(false),
       },
       [
-        h("div.strat-name-dialog-container", [
-          h("div.left", [h(InformalUnitName), h(FormalStratName)]),
-          h("div.right", [h(RelatedLinkedStratNames)]),
-        ]),
-        h("div.strat-dialog-bottom", [
-          //@ts-ignore
-          h.if(typeof concept_id !== "undefined")(StratNameConceptCard, {
-            strat_name: unit.strat_names?.strat_name,
-            concept_id,
-          }),
-
-          h("div", [
-            h("h3", [
-              unit.strat_names
-                ? "Hierarchy Summary"
-                : "Choose a strat name to view hierarchy",
-            ]),
-            h(StratNameHierarchy, {
-              strat_name_id: unit.strat_names?.id,
-            }),
-          ]),
-        ]),
+        h(StratNameStack, {
+          col_id: unit.col_id,
+          stratName: unit.strat_names,
+          onStratNameSelect,
+        }),
       ]
     ),
   ]);
