@@ -133,11 +133,8 @@ function MapContainer(props) {
   useEffect(() => {
     if (mapLayers.has(MapLayer.COLUMNS)) {
       runAction({ type: "get-filtered-columns" });
-    } else if (!mapLayers.has(MapLayer.COLUMNS)) {
-      runAction({ type: "reset-column-info" });
-    } else if (!mapLayers.has(MapLayer.FOSSILS)) {
-      runAction({ type: "reset-pbdb" });
     }
+    runAction({ type: "map-layers-changed", mapLayers });
   }, [filters, mapLayers]);
 
   const timeout = useRef<Timeout>(null);
