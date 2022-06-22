@@ -1,3 +1,4 @@
+import { Dispatch } from "react";
 import { DropResult } from "react-beautiful-dnd";
 import { filterOrAddIds, UnitEditorModel, UnitsView } from "~/index";
 
@@ -55,8 +56,16 @@ type AddSectionAt = {
   type: "add-section-at";
   index: number;
 };
+
 type AddUnitAt = {
   type: "add-unit-at";
+  section_index: number;
+  unit_index: number;
+  unit: UnitEditorModel;
+};
+
+type PersistEditsAt = {
+  type: "persist-edits-at";
   section_index: number;
   unit_index: number;
   unit: UnitEditorModel;
@@ -66,19 +75,37 @@ type EditUnitAt = {
   type: "edit-unit-at";
   section_index: number;
   unit_index: number;
-  unit: UnitEditorModel;
+};
+
+type CancelEditing = {
+  type: "cancel-editing";
+};
+
+type RemoveUnit = {
+  type: "remove-unit";
+  section_index: number;
+  unit_index: number;
 };
 
 export type SyncActions =
+  | RemoveUnit
+  | CancelEditing
   | AddSectionAt
+  | EditUnitAt
   | SetMergeIds
   | DroppedUnit
   | DroppedSection
   | MergeIds
   | ToggleDrag
   | AddUnitAt
-  | EditUnitAt
+  | PersistEditsAt
   | ToggleUnitsView;
+
+export interface EditorState {
+  open: boolean;
+  section_index: number;
+  unit_index: number;
+}
 
 export interface ColumnStateI {
   sections: SectionUnits;
@@ -87,11 +114,44 @@ export interface ColumnStateI {
   moved: { [unit_id: number]: boolean };
   drag: boolean;
   unitsView: boolean;
+  edit: EditorState;
 }
+
+export interface UnitSectionTableCtx {
+  state: ColumnStateI;
+  runAction(action: SyncActions): Promise<void>;
+}
+
+/// we can filter async actions through here first
+export const useUnitSectionTableActions = (dispatch: Dispatch<SyncActions>) => {
+  return async (action: SyncActions) => {
+    switch (action.type) {
+      default:
+        return dispatch(action);
+    }
+  };
+};
 
 const columnReducer = (state: ColumnStateI, action: SyncActions) => {
   const currSections: SectionUnits = JSON.parse(JSON.stringify(state.sections));
   switch (action.type) {
+    case "cancel-editing":
+      return {
+        ...state,
+        edit: {
+          ...state.edit,
+          open: false,
+        },
+      };
+    case "edit-unit-at":
+      return {
+        ...state,
+        edit: {
+          open: true,
+          section_index: action.section_index,
+          unit_index: action.unit_index,
+        },
+      };
     case "set-merge-ids":
       const currentIds = [...state.mergeIds];
       const id = action.id;
@@ -115,9 +175,20 @@ const columnReducer = (state: ColumnStateI, action: SyncActions) => {
       return state;
     case "add-section-at":
       const sectionIndex = action.index;
+      //@ts-ignore
       const newSection: SectionUnits = { 666: [] };
       addElementToList(currSections, sectionIndex, newSection);
       return { ...state, sections: currSections };
+    case "remove-unit":
+      const _section_id = Object.keys(currSections[action.section_index])[0];
+      currSections[action.section_index][_section_id].splice(
+        action.unit_index,
+        1
+      );
+      return {
+        ...state,
+        sections: currSections,
+      };
     case "add-unit-at":
       // this will encapsulate the add top and bottom
       // mutate a the sections list in place
@@ -131,8 +202,13 @@ const columnReducer = (state: ColumnStateI, action: SyncActions) => {
       return {
         ...state,
         sections: currSections,
+        edit: {
+          open: true,
+          section_index: action.section_index,
+          unit_index: action.unit_index,
+        },
       };
-    case "edit-unit-at":
+    case "persist-edits-at":
       const section_id_ = Object.keys(currSections[action.section_index])[0];
 
       currSections[action.section_index][section_id_].splice(
@@ -143,6 +219,10 @@ const columnReducer = (state: ColumnStateI, action: SyncActions) => {
       return {
         ...state,
         sections: currSections,
+        edit: {
+          ...state.edit,
+          open: false,
+        },
       };
     case "dropped-section":
       if (!action.result.combine) return state;
