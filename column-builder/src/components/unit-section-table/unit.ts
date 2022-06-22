@@ -16,12 +16,8 @@ import {
 } from "../unit/common-editing";
 import { MinEditorCard } from "../unit/minimal-unit-editor";
 import { DraggableRow } from "../table";
-import {
-  UnitRowContextMenu,
-  AddBtnBetweenRows,
-  UNIT_ADD_POISITON,
-} from "./helpers";
-
+import { UnitRowContextMenu, AddBtnBetweenRows } from "./helpers";
+import { useUnitSectionContext } from "~/index";
 import styles from "~/components/comp.module.scss";
 import { Button, Dialog, TextArea } from "@blueprintjs/core";
 import {
@@ -182,24 +178,31 @@ interface UnitRowProps {
   drag: boolean;
   unit_index: number;
   section_index: number;
-  triggerEditor: (
-    u: UNIT_ADD_POISITON,
-    unit_index: number,
-    section_number: number,
-    copy: boolean
-  ) => void;
-  onCancel: () => void;
-  dialogTitle: string;
-  persistChanges: (e: UnitEditorModel, c: Partial<UnitEditorModel>) => void;
   colSpan: number;
   isMoved: boolean;
   inRowEditing: boolean;
   copyUnitUp: () => void;
   copyUnitDown: () => void;
   addEmptyUnit: (unit_index: number) => void;
+  editUnitAt: (unit_index: number) => void;
 }
 
 function UnitRow(props: UnitRowProps) {
+  const { state, runAction } = useUnitSectionContext();
+
+  const persistChanges = (e: UnitEditorModel, c: Partial<UnitEditorModel>) => {
+    runAction({
+      type: "persist-edits-at",
+      unit: e,
+      unit_index: props.unit_index,
+      section_index: props.section_index,
+    });
+  };
+
+  const onCancel = () => {
+    runAction({ type: "cancel-editing" });
+  };
+
   return h(React.Fragment, { key: props.unit.id }, [
     h.if(props.unit_index == 0)(AddBtnBetweenRows, {
       colSpan: props.colSpan,
@@ -218,7 +221,11 @@ function UnitRow(props: UnitRowProps) {
         href: undefined,
         isMoved: props.isMoved,
         onDoubleClick: () => {
-          //open editor
+          runAction({
+            type: "edit-unit-at",
+            unit_index: props.unit_index,
+            section_index: props.section_index,
+          });
         },
       },
       [
@@ -227,14 +234,14 @@ function UnitRow(props: UnitRowProps) {
           {
             isEditing: props.inRowEditing,
             //@ts-ignore
-            persistChanges: props.persistChanges,
+            persistChanges,
             model: { unit: props.unit },
           },
           [
             h(UnitCellGroup, {
               unit: props.unit,
               key: props.unit_index,
-              onCancel: props.onCancel,
+              onCancel,
             }),
           ]
         ),
@@ -243,10 +250,10 @@ function UnitRow(props: UnitRowProps) {
             unit: props.unit,
             unit_index: props.unit_index,
             section_index: props.section_index,
-            triggerEditor: props.triggerEditor,
             copyUnitUp: props.copyUnitUp,
             copyUnitDown: props.copyUnitDown,
             addEmptyUnit: props.addEmptyUnit,
+            editUnitAt: props.editUnitAt,
           }),
         ]),
       ]
@@ -256,14 +263,7 @@ function UnitRow(props: UnitRowProps) {
       colSpan: props.colSpan,
       onClick: (e) => {
         e.stopPropagation();
-        console.log("clicked");
         props.addEmptyUnit(props.unit_index + 1);
-        props.triggerEditor(
-          UNIT_ADD_POISITON.BELOW,
-          props.unit_index + 1,
-          props.section_index,
-          false
-        );
       },
     }),
   ]);

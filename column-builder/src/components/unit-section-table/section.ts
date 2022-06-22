@@ -3,6 +3,8 @@ import { UnitEditorModel, UnitsView } from "~/index";
 import { DnDTable } from "../table";
 import { UNIT_ADD_POISITON } from "./helpers";
 import { UnitRow } from "./unit";
+import { EditorState } from "./reducer";
+import { useUnitSectionContext } from "./table";
 import styles from "~/components/comp.module.scss";
 
 const h = hyperStyled(styles);
@@ -28,22 +30,15 @@ interface SectionTableProps {
   index: number;
   section: { [section_id: number | string]: UnitsView[] };
   drag: boolean;
-  edit: EditorState;
-  triggerEditor: (
-    u: UNIT_ADD_POISITON,
-    unit_index: number,
-    section_number: number,
-    copy: boolean
-  ) => void;
-  onCancel: () => void;
-  dialogTitle: string;
-  persistChanges: (e: UnitEditorModel, c: Partial<UnitEditorModel>) => void;
   moved: { [unit_id: number]: boolean };
   addUnitAt: (unit: UnitEditorModel, unit_index: number) => void;
+  editUnitAt: (unit_index: number) => void;
 }
 
 function SectionTable(props: SectionTableProps) {
-  const { index, drag, edit, triggerEditor, onCancel, dialogTitle } = props;
+  const { index, drag } = props;
+  const { state, runAction } = useUnitSectionContext();
+  const { edit } = state;
 
   let headers = [
     "ID",
@@ -86,22 +81,21 @@ function SectionTable(props: SectionTableProps) {
         const addEmptyUnit = (unit_index: number) => {
           props.addUnitAt({ unit: getEmptyUnit(unit.col_id) }, unit_index);
         };
-
+        const editUnitAt = (unit_index: number) => {
+          props.editUnitAt(unit_index);
+        };
         return h(UnitRow, {
           unit,
           drag,
           unit_index: j,
           section_index: index,
-          triggerEditor,
-          onCancel,
-          dialogTitle,
-          persistChanges: props.persistChanges,
           colSpan: headers.length,
           isMoved: unit.id in props.moved,
           inRowEditing: isEditing,
           copyUnitDown,
           copyUnitUp,
           addEmptyUnit,
+          editUnitAt,
         });
       }),
     ]
