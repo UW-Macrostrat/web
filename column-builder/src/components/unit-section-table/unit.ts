@@ -206,12 +206,6 @@ function UnitRow(props: UnitRowProps) {
       onClick: (e) => {
         e.stopPropagation();
         props.addEmptyUnit(props.unit_index);
-        props.triggerEditor(
-          UNIT_ADD_POISITON.ABOVE,
-          props.unit_index,
-          props.section_index,
-          false
-        );
       },
     }),
     h(
@@ -223,13 +217,9 @@ function UnitRow(props: UnitRowProps) {
         draggableId: props.unit.unit_strat_name + props.unit.id.toString(),
         href: undefined,
         isMoved: props.isMoved,
-        onDoubleClick: () =>
-          props.triggerEditor(
-            UNIT_ADD_POISITON.EDIT,
-            props.unit_index,
-            props.section_index,
-            true
-          ),
+        onDoubleClick: () => {
+          //open editor
+        },
       },
       [
         h(

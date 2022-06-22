@@ -28,9 +28,7 @@ interface SectionTableProps {
   index: number;
   section: { [section_id: number | string]: UnitsView[] };
   drag: boolean;
-  unit_index: number;
-  section_index: number;
-  editOpen: boolean;
+  edit: EditorState;
   triggerEditor: (
     u: UNIT_ADD_POISITON,
     unit_index: number,
@@ -45,16 +43,7 @@ interface SectionTableProps {
 }
 
 function SectionTable(props: SectionTableProps) {
-  const {
-    index,
-    drag,
-    section_index,
-    unit_index,
-    editOpen,
-    triggerEditor,
-    onCancel,
-    dialogTitle,
-  } = props;
+  const { index, drag, edit, triggerEditor, onCancel, dialogTitle } = props;
 
   let headers = [
     "ID",
@@ -84,8 +73,8 @@ function SectionTable(props: SectionTableProps) {
     },
     [
       units.map((unit, j) => {
-        const isEditing = unit_index == j && section_index == index && editOpen;
-        const inRowEditing = isEditing;
+        const isEditing =
+          edit.unit_index == j && edit.section_index == index && edit.open;
 
         // these ids here are meaningless... this action needs to be persisted
         const copyUnitDown = () => {
@@ -109,7 +98,7 @@ function SectionTable(props: SectionTableProps) {
           persistChanges: props.persistChanges,
           colSpan: headers.length,
           isMoved: unit.id in props.moved,
-          inRowEditing,
+          inRowEditing: isEditing,
           copyUnitDown,
           copyUnitUp,
           addEmptyUnit,

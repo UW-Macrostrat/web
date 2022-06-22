@@ -70,8 +70,15 @@ type PersistEditsAt = {
   unit: UnitEditorModel;
 };
 
+type EditUnitAt = {
+  type: "edit-unit-at";
+  section_index: number;
+  unit_index: number;
+};
+
 export type SyncActions =
   | AddSectionAt
+  | EditUnitAt
   | SetMergeIds
   | DroppedUnit
   | DroppedSection
@@ -100,6 +107,15 @@ export interface ColumnStateI {
 const columnReducer = (state: ColumnStateI, action: SyncActions) => {
   const currSections: SectionUnits = JSON.parse(JSON.stringify(state.sections));
   switch (action.type) {
+    case "edit-unit-at":
+      return {
+        ...state,
+        edit: {
+          open: true,
+          section_index: action.section_index,
+          unit_index: action.unit_index,
+        },
+      };
     case "set-merge-ids":
       const currentIds = [...state.mergeIds];
       const id = action.id;
@@ -139,6 +155,11 @@ const columnReducer = (state: ColumnStateI, action: SyncActions) => {
       return {
         ...state,
         sections: currSections,
+        edit: {
+          open: true,
+          section_index: action.section_index,
+          unit_index: action.unit_index,
+        },
       };
     case "persist-edits-at":
       const section_id_ = Object.keys(currSections[action.section_index])[0];
