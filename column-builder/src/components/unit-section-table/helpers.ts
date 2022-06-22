@@ -11,6 +11,7 @@ import { Popover2, Tooltip2 } from "@blueprintjs/popover2";
 import { UnitsView } from "~/index";
 import styles from "../comp.module.scss";
 import { hyperStyled } from "@macrostrat/hyper";
+import { useUnitSectionContext } from "./index";
 
 const h = hyperStyled(styles);
 
@@ -124,80 +125,41 @@ enum UNIT_ADD_POISITON {
 export interface UnitRowContextMenuI {
   // either we are adding a new unit above, below or editing the current unit
   // or we are editing the unit inRow
-  triggerEditor: (
-    e: UNIT_ADD_POISITON,
-    unit_index: number,
-    section_index: number,
-    copy: boolean,
-    inRow?: boolean
-  ) => void;
   unit: UnitsView;
   unit_index: number;
   section_index: number;
   copyUnitUp: () => void;
   copyUnitDown: () => void;
+  addEmptyUnit: (unit_index: number) => void;
+  editUnitAt: (unit_index: number) => void;
 }
 function UnitRowContextMenu(props: UnitRowContextMenuI) {
+  const { state, runAction } = useUnitSectionContext();
   const SubMenu = ({ pos }: { pos: UNIT_ADD_POISITON }) => {
     return h(React.Fragment, [
       h(MenuItem, {
         text: `Copy unit #${props.unit.id}`,
         icon: "duplicate",
-        onClick: () =>
-          props.triggerEditor(pos, props.unit_index, props.section_index, true),
+        onClick: () => {
+          if (pos == UNIT_ADD_POISITON.ABOVE) {
+            props.copyUnitUp();
+          } else props.copyUnitDown();
+        },
       }),
       h(MenuItem, {
         text: `With empty unit`,
         icon: "new-object",
-        onClick: () =>
-          props.triggerEditor(
-            pos,
-            props.unit_index,
-            props.section_index,
-            false
-          ),
-      }),
-    ]);
-  };
-
-  const QuickActionMenu = () => {
-    return h(React.Fragment, [
-      h(MenuItem, {
-        text: `Quick edit unit #${props.unit.id}`,
-        icon: "edit",
         onClick: () => {
-          props.triggerEditor(
-            UNIT_ADD_POISITON.EDIT,
-            props.unit_index,
-            props.section_index,
-            true,
-            true
-          );
+          if (pos == UNIT_ADD_POISITON.ABOVE) {
+            props.addEmptyUnit(props.unit_index);
+          } else props.addEmptyUnit(props.unit_index + 1);
         },
-      }),
-      h(MenuItem, {
-        text: `Copy unit #${props.unit.id} up`,
-        icon: "circle-arrow-up",
-        onClick: props.copyUnitUp,
-      }),
-      h(MenuItem, {
-        text: `Copy unit #${props.unit.id} down`,
-        icon: "circle-arrow-down",
-        onClick: props.copyUnitDown,
       }),
     ]);
   };
 
   const ContextMenu = () =>
     h(Menu, [
-      h(
-        MenuItem,
-        {
-          text: "Quick Actions",
-          icon: "selection",
-        },
-        [h(QuickActionMenu)]
-      ),
       h(
         MenuItem,
         {
@@ -217,19 +179,19 @@ function UnitRowContextMenu(props: UnitRowContextMenuI) {
       h(MenuItem, {
         text: `Edit unit #${props.unit.id}`,
         icon: "annotation",
-        onClick: () =>
-          props.triggerEditor(
-            UNIT_ADD_POISITON.EDIT,
-            props.unit_index,
-            props.section_index,
-            true
-          ),
+        onClick: () => props.editUnitAt(props.unit_index),
       }),
       h(MenuDivider),
       h(MenuItem, {
         text: `Delete unit #${props.unit.id}`,
         icon: "trash",
         intent: "danger",
+        onClick: () =>
+          runAction({
+            type: "remove-unit",
+            section_index: props.section_index,
+            unit_index: props.unit_index,
+          }),
       }),
     ]);
 
@@ -244,7 +206,10 @@ function UnitRowContextMenu(props: UnitRowContextMenuI) {
   );
 }
 
-function AddBtnBetweenRows(props: { onClick: () => void; colSpan: number }) {
+function AddBtnBetweenRows(props: {
+  onClick: (e: any) => void;
+  colSpan: number;
+}) {
   const [style, setStyle] = useState({ display: "none" });
   return h("tr", [
     h("td", { colSpan: props.colSpan, style: { padding: 0 } }, [
@@ -283,56 +248,11 @@ function AddBtnBetweenRows(props: { onClick: () => void; colSpan: number }) {
   ]);
 }
 
-export interface EditModeI {
-  mode: UNIT_ADD_POISITON;
-  copy: boolean;
-  inRow?: boolean;
-}
-
-const useRowUnitEditor = () => {
-  const [editOpen, setEditOpen] = useState(false);
-  const [unit_index, setUnitIndex] = useState(0);
-  const [section_index, setSectionIndex] = useState(0);
-  const [editMode, setEditMode] = useState<EditModeI>({
-    mode: UNIT_ADD_POISITON.EDIT,
-    copy: true,
-    inRow: false,
-  });
-
-  const triggerEditor = (
-    e: UNIT_ADD_POISITON,
-    unit_index: number,
-    section_index: number,
-    copy: boolean,
-    inRow?: boolean
-  ) => {
-    if (editOpen) return;
-    setUnitIndex(unit_index);
-    setSectionIndex(section_index);
-    setEditMode({ mode: e, copy, inRow: inRow ?? false });
-    setEditOpen(true);
-  };
-
-  const onCancel = () => {
-    setEditOpen(false);
-  };
-
-  return {
-    triggerEditor,
-    unit_index,
-    section_index,
-    editOpen,
-    editMode,
-    onCancel,
-  };
-};
-
 export {
   SectionUnitCheckBox,
   MergeDivideBtn,
   ColumnPageBtnMenu,
   AddBtnBetweenRows,
-  useRowUnitEditor,
   UNIT_ADD_POISITON,
   UnitRowContextMenu,
 };
