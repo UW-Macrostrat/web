@@ -140,6 +140,11 @@ function UnitSectionTable(props: {
     moved: {},
     drag: false,
     unitsView: true,
+    edit: {
+      open: false,
+      section_index: 0,
+      unit_index: 0,
+    },
   });
 
   const onChange = (id: number) => {
@@ -173,7 +178,7 @@ function UnitSectionTable(props: {
     unit_index: number
   ) => {
     dispatch({
-      type: "edit-unit-at",
+      type: "persist-edits-at",
       section_index,
       unit,
       unit_index,

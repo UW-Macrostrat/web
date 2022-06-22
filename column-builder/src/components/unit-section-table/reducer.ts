@@ -55,6 +55,7 @@ type AddSectionAt = {
   type: "add-section-at";
   index: number;
 };
+
 type AddUnitAt = {
   type: "add-unit-at";
   section_index: number;
@@ -62,8 +63,8 @@ type AddUnitAt = {
   unit: UnitEditorModel;
 };
 
-type EditUnitAt = {
-  type: "edit-unit-at";
+type PersistEditsAt = {
+  type: "persist-edits-at";
   section_index: number;
   unit_index: number;
   unit: UnitEditorModel;
@@ -77,8 +78,14 @@ export type SyncActions =
   | MergeIds
   | ToggleDrag
   | AddUnitAt
-  | EditUnitAt
+  | PersistEditsAt
   | ToggleUnitsView;
+
+export interface EditorState {
+  open: boolean;
+  section_index: number;
+  unit_index: number;
+}
 
 export interface ColumnStateI {
   sections: SectionUnits;
@@ -87,6 +94,7 @@ export interface ColumnStateI {
   moved: { [unit_id: number]: boolean };
   drag: boolean;
   unitsView: boolean;
+  edit: EditorState;
 }
 
 const columnReducer = (state: ColumnStateI, action: SyncActions) => {
@@ -132,7 +140,7 @@ const columnReducer = (state: ColumnStateI, action: SyncActions) => {
         ...state,
         sections: currSections,
       };
-    case "edit-unit-at":
+    case "persist-edits-at":
       const section_id_ = Object.keys(currSections[action.section_index])[0];
 
       currSections[action.section_index][section_id_].splice(
