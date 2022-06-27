@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Redirect } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import h from "@macrostrat/hyper";
 
 import MapPage, { MapBackend } from "./map-interface/map-page";
@@ -36,8 +36,10 @@ const App = () => {
   if (!loaded) return h(Spinner);
 
   return h(Router, { basename: MACROSTRAT_BASE_URL }, [
-    h(Route, { path: "/sources", component: BurwellSources }),
-    h(Route, { path: "/", component: MapPage, exact: true }),
+    h(Routes, [
+      h(Route, { path: "/sources", element: h(BurwellSources) }),
+      h(Route, { path: "/", element: h(MapPage), exact: true }),
+    ]),
 
     // h(Route, {
     //   path: "/globe",
