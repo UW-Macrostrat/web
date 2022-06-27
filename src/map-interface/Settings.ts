@@ -14,10 +14,11 @@ export const SETTINGS = {
   //   window.location.hostname === "localhost"
   //     ? "https://dev.macrostrat.org"
   //     : `https://${window.location.hostname}`,
-  burwellTileDomain: "https://devtiles.macrostrat.org",
-  apiDomain: "https://dev.macrostrat.org",
+  // burwellTileDomain: "https://devtiles.macrostrat.org",
+  // apiDomain: "https://dev.macrostrat.org",
+  burwellTileDomain: process.env.MACROSTRAT_TILESERVER_DOMAIN,
+  apiDomain: process.env.MACROSTRAT_API_DOMAIN,
   gddDomain: "https://xdd.wisc.edu",
   pbdbDomain: "https://paleobiodb.org",
-  mapboxAccessToken:
-    "pk.eyJ1IjoiamN6YXBsZXdza2kiLCJhIjoiWnQxSC01USJ9.oleZzfREJUKAK1TMeCD0bg",
+  mapboxAccessToken: process.env.MAPBOX_API_TOKEN,
 };

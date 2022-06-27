@@ -44,7 +44,7 @@ const plugins = [
     title: "Macrostrat",
     template: "./template.html",
   }),
-  new DotenvPlugin(),
+  new DotenvPlugin({ defaults: true }),
   /*
   new CopyPlugin([
     { from: path.join(cesiumSource, cesiumWorkers), to: "Workers" }
