@@ -32,7 +32,7 @@ const App = () => {
   return h(Router, { basename: MACROSTRAT_BASE_URL }, [
     h(Routes, [
       h(Route, { path: "/sources", element: h(Sources) }),
-      h(Route, { path: "/", element: h(MapPage) }),
+      h(Route, { path: "*", element: h(MapPage) }),
     ]),
 
     // h(Route, {

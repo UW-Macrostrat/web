@@ -29,7 +29,13 @@ import { SearchResults } from "../components/searchbar";
 import classNames from "classnames";
 import styles from "./main.module.styl";
 import loadable from "@loadable/component";
-import UsagePanel from "../usage.mdx";
+import UsageText from "../usage.mdx";
+import { Routes, Route, useNavigate } from "react-router-dom";
+import Changelog from "../../changelog.mdx";
+
+function ChangelogPanel() {
+  return h("div.bp3-text.text-panel", [h(Changelog)]);
+}
 
 const AboutText = loadable(() => import("../components/About"));
 
@@ -88,14 +94,15 @@ const YourLocationButton = () => {
 
 const MinimalButton = (props) => h(Button, { ...props, minimal: true });
 
-const TabButton = (props: ButtonProps & { tab: MenuPanel }) => {
-  const { tab, ...rest } = props;
-  const dispatch = useDispatch();
-  const onClick = () => dispatch({ type: "set-panel", panel: tab });
-  const active = useAppState((state) => state.menu.activePanel == tab);
+const TabButton = (props: ButtonProps & { to: string }) => {
+  const { to, ...rest } = props;
+  let navigate = useNavigate();
+
   return h(MinimalButton, {
-    active,
-    onClick,
+    active: false,
+    onClick() {
+      navigate(to, { replace: false });
+    },
     ...rest,
     className: "tab-button",
   });
@@ -194,7 +201,7 @@ function useMainPanel(): Panel<{}> {
     case MenuPanel.USAGE:
       return {
         title: "Usage",
-        renderPanel: () => h("div.text-panel", h(UsagePanel)),
+        renderPanel: () => h("div.text-panel", h(UsageText)),
       };
   }
   return null;
@@ -204,6 +211,8 @@ function usePanelStack() {
   const { panelStack = [] } = useMenuState();
   return [useMainPanel(), ...panelStack];
 }
+
+const UsagePanel = () => h("div.text-panel", h(UsageText));
 
 export function useContextClass() {
   const panelOpen = useSelector((state) => state.core.contextPanelOpen);
@@ -250,19 +259,19 @@ const Menu = (props) => {
             h(TabButton, {
               icon: "layers",
               text: "Layers",
-              tab: MenuPanel.LAYERS,
+              to: "layers",
             }),
             // Settings are mostly for globe, which is currently disabled
             //h(TabButton, {icon: "settings", text: "Settings", tab: MenuPanel.SETTINGS}),
             h(TabButton, {
               icon: "info-sign",
               text: "About",
-              tab: MenuPanel.ABOUT,
+              to: "about",
             }),
             h(TabButton, {
               icon: "help",
               text: "Usage",
-              tab: MenuPanel.USAGE,
+              to: "usage",
             }),
           ]),
           h.if(stack.length > 1)([
@@ -280,11 +289,13 @@ const Menu = (props) => {
         ]),
     },
     [
-      h(PanelStack2, {
-        showPanelHeader: false,
-        renderActivePanelOnly: true,
-        stack,
-      }),
+      h(Routes, [
+        h(Route, { path: "/layers", element: h(LayerList) }),
+        h(Route, { path: "/about", element: h(AboutText) }),
+        h(Route, { path: "/usage", element: h(UsagePanel) }),
+        h(Route, { path: "/changelog", element: h(Changelog) }),
+      ]),
+      //h(Route, { path: "/settings", element: h(SettingsPanel) })
     ]
   );
 };
