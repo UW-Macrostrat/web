@@ -1,14 +1,10 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import h from "@macrostrat/hyper";
 
-import MapPage, { MapBackend } from "./map-interface/map-page";
-import { Suspense, useEffect } from "react";
-import { useSelector } from "react-redux";
-//import loadable from "@loadable/component";
+import { Suspense } from "react";
+import loadable from "@loadable/component";
 import { Spinner } from "@blueprintjs/core";
 import "./styles/index.styl";
-import { useAppActions } from "~/map-interface/app-state";
-import BurwellSources from "~/burwell-sources";
 
 //const _ColumnPage = loadable(import("./columns"));
 //const ColumnPage = () => h(Suspense, { fallback: h(Spinner) }, h(_ColumnPage));
@@ -26,19 +22,17 @@ function GlobePage() {
 }
 */
 
+const _Sources = loadable(() => import("~/burwell-sources"));
+const Sources = () => h(Suspense, { fallback: h(Spinner) }, h(_Sources));
+
+const _MapPage = loadable(() => import("./map-interface/map-page"));
+const MapPage = () => h(Suspense, { fallback: h(Spinner) }, h(_MapPage));
+
 const App = () => {
-  const runAction = useAppActions();
-  const loaded = useSelector((state) => state.core.initialLoadComplete);
-  useEffect(() => {
-    runAction({ type: "get-initial-map-state" });
-  }, []);
-
-  if (!loaded) return h(Spinner);
-
   return h(Router, { basename: MACROSTRAT_BASE_URL }, [
     h(Routes, [
-      h(Route, { path: "/sources", element: h(BurwellSources) }),
-      h(Route, { path: "/", element: h(MapPage), exact: true }),
+      h(Route, { path: "/sources", element: h(Sources) }),
+      h(Route, { path: "/", element: h(MapPage) }),
     ]),
 
     // h(Route, {
