@@ -23,6 +23,9 @@ import styles from "./main.module.styl";
 import classNames from "classnames";
 import { useRef, useEffect } from "react";
 import { useTransition } from "transition-hook";
+import { usePanelOpen } from "./menu";
+import { Routes, Route, useNavigate, Outlet } from "react-router-dom";
+import { useMatch } from "react-router";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));
@@ -107,8 +110,9 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   const { menuOpen } = useMenuState();
   const runAction = useAppActions();
   const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
-  const contextPanelOpen = useAppState((s) => s.core.contextPanelOpen);
   const ref = useRef<HTMLElement>(null);
+
+  const contextPanelOpen = usePanelOpen();
 
   const contextPanelTrans = useTransition(contextPanelOpen, 800);
   const detailPanelTrans = useTransition(infoDrawerOpen, 800);
@@ -131,6 +135,7 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   const contextClass = useContextClass();
 
   const onMouseDown = (event) => {
+    console.log("outside click");
     if (!(inputFocus || contextPanelOpen)) return;
     if (ref.current?.contains(event.target)) return;
     runAction({ type: "context-outside-click" });

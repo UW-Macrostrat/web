@@ -30,8 +30,9 @@ import classNames from "classnames";
 import styles from "./main.module.styl";
 import loadable from "@loadable/component";
 import UsageText from "../usage.mdx";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import Changelog from "../../changelog.mdx";
+import { useMatch, useLocation } from "react-router";
 
 function ChangelogPanel() {
   return h("div.bp3-text.text-panel", [h(Changelog)]);
@@ -92,14 +93,26 @@ const YourLocationButton = () => {
   );
 };
 
+const LinkButton = (props: ButtonProps & { to: string }) => {
+  const { to, ...rest } = props;
+  const navigate = useNavigate();
+  return h(Button, {
+    ...rest,
+    onClick() {
+      navigate(to);
+    },
+  });
+};
+
 const MinimalButton = (props) => h(Button, { ...props, minimal: true });
 
 const TabButton = (props: ButtonProps & { to: string }) => {
   const { to, ...rest } = props;
   let navigate = useNavigate();
+  const active = useMatch(to) != null;
 
   return h(MinimalButton, {
-    active: false,
+    active,
     onClick() {
       navigate(to, { replace: false });
     },
@@ -214,18 +227,31 @@ function usePanelStack() {
 
 const UsagePanel = () => h("div.text-panel", h(UsageText));
 
-export function useContextClass() {
-  const panelOpen = useSelector((state) => state.core.contextPanelOpen);
-  const stack = usePanelStack();
-  if (!panelOpen) return null;
-  return classNames("panel-open", stack[stack.length - 1].title.toLowerCase());
+export function usePanelOpen() {
+  const match = useMatch("/");
+  return match?.pathname != "/";
 }
+
+export function useContextClass() {
+  const panelOpen = usePanelOpen();
+  const pageName = useCurrentPage();
+  if (!panelOpen) return null;
+  return classNames("panel-open", pageName);
+}
+
+const useCurrentPage = () => {
+  const { pathname } = useLocation();
+  return pathname.slice(pathname.lastIndexOf("/") + 1, pathname.length);
+};
 
 const Menu = (props) => {
   let { className } = props;
   const runAction = useAppActions();
   const { infoDrawerOpen } = useMenuState();
   const { inputFocus } = useSearchState();
+  const navigate = useNavigate();
+
+  const pageName = useCurrentPage();
 
   const toggleMenu = () => {
     runAction({ type: "toggle-menu" });
@@ -241,16 +267,15 @@ const Menu = (props) => {
     return null;
   }
 
-  className = classNames(
-    className,
-    "menu-card",
-    stack[stack.length - 1].title.toLowerCase()
-  );
+  className = classNames(className, "menu-card", pageName);
 
   return h(
     CloseableCard,
     {
-      onClose: toggleMenu,
+      onClose() {
+        navigate("/");
+        runAction({ type: "toggle-menu" });
+      },
       insetContent: false,
       className,
       renderHeader: () =>
@@ -276,11 +301,11 @@ const Menu = (props) => {
           ]),
           h.if(stack.length > 1)([
             h(
-              Button,
+              LinkButton,
               {
                 icon: "chevron-left",
                 minimal: true,
-                onClick: () => runAction({ type: "close-panel" }),
+                to: "/",
               },
               stack[stack.length - 2]?.title ?? "Back"
             ),
@@ -290,10 +315,10 @@ const Menu = (props) => {
     },
     [
       h(Routes, [
-        h(Route, { path: "/layers", element: h(LayerList) }),
-        h(Route, { path: "/about", element: h(AboutText) }),
-        h(Route, { path: "/usage", element: h(UsagePanel) }),
-        h(Route, { path: "/changelog", element: h(Changelog) }),
+        h(Route, { path: "layers", element: h(LayerList) }),
+        h(Route, { path: "about", element: h(AboutText) }),
+        h(Route, { path: "usage", element: h(UsagePanel) }),
+        h(Route, { path: "changelog", element: h(Changelog) }),
       ]),
       //h(Route, { path: "/settings", element: h(SettingsPanel) })
     ]

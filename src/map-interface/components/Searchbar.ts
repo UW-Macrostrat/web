@@ -7,6 +7,7 @@ import { SubtleFilterText } from "./filters-panel";
 import styles from "./searchbar.styl";
 import { PanelSubhead } from "./expansion-panel/headers";
 import classNames from "classnames";
+import { useNavigate } from "react-router";
 
 const h = hyper.styled(styles);
 
@@ -87,6 +88,7 @@ function MenuButton() {
   const runAction = useAppActions();
   const mapIsLoading = useSelector((state) => state.core.mapIsLoading);
   const { menuOpen } = useMenuState();
+  const navigate = useNavigate();
 
   let buttonProps = {
     icon: mapIsLoading ? h(Spinner, { size: 16 }) : "menu",
@@ -94,7 +96,8 @@ function MenuButton() {
     minimal: true,
     onClick(e) {
       e.stopPropagation();
-      runAction({ type: "toggle-menu" });
+      navigate("/layers");
+      //runAction({ type: "toggle-menu" });
     },
   };
 
@@ -111,7 +114,6 @@ function Searchbar(props) {
   const { term, searchResults } = useSearchState();
 
   const gainInputFocus = (e) => {
-    console.log("Gained input focus");
     runAction({ type: "set-input-focus", inputFocus: true });
   };
 

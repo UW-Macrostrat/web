@@ -108,6 +108,7 @@ export function coreReducer(
       if (state.inputFocus) {
         return {
           ...state,
+          inputFocus: false,
           contextPanelOpen: false,
           menuOpen: false,
         };
