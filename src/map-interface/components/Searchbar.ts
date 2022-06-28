@@ -8,6 +8,7 @@ import styles from "./searchbar.styl";
 import { PanelSubhead } from "./expansion-panel/headers";
 import classNames from "classnames";
 import { useNavigate } from "react-router";
+import { usePanelOpen } from "../map-page/menu";
 
 const h = hyper.styled(styles);
 
@@ -87,8 +88,8 @@ function SearchResults({ className }) {
 function MenuButton() {
   const runAction = useAppActions();
   const mapIsLoading = useSelector((state) => state.core.mapIsLoading);
-  const { menuOpen } = useMenuState();
   const navigate = useNavigate();
+  const menuOpen = usePanelOpen();
 
   let buttonProps = {
     icon: mapIsLoading ? h(Spinner, { size: 16 }) : "menu",
@@ -96,7 +97,10 @@ function MenuButton() {
     minimal: true,
     onClick(e) {
       e.stopPropagation();
-      navigate("/layers");
+      if (!menuOpen) {
+        navigate("/layers");
+      }
+      runAction({ type: "set-input-focus", inputFocus: false });
       //runAction({ type: "toggle-menu" });
     },
   };

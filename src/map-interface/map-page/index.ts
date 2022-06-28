@@ -112,7 +112,7 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
   const ref = useRef<HTMLElement>(null);
 
-  const contextPanelOpen = usePanelOpen();
+  const contextPanelOpen = usePanelOpen() && inputFocus;
 
   const contextPanelTrans = useTransition(contextPanelOpen, 800);
   const detailPanelTrans = useTransition(infoDrawerOpen, 800);
@@ -135,9 +135,9 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   const contextClass = useContextClass();
 
   const onMouseDown = (event) => {
-    console.log("outside click");
     if (!(inputFocus || contextPanelOpen)) return;
     if (ref.current?.contains(event.target)) return;
+
     runAction({ type: "context-outside-click" });
     event.stopPropagation();
   };
