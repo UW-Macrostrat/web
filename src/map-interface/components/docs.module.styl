@@ -1,9 +1,19 @@
 :global
   video
-    max-width: 70%
-    margin 0.5em auto 1em
+    max-width: 50%
+    float: left
+    margin 0.5em 1em 1em 0
     border-radius: 6px
     box-shadow: 0 0 6px rgba(0, 0, 0, 0.4)
+
+
+  .text-panel
+    margin 1em
+    h2, h3
+      // Make sure headings clear floats (for videos)
+      clear both
+      display: inline-block
+      width: 100%
 
 .new-swatch
   font-size 0.8em

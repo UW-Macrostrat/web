@@ -9,7 +9,7 @@ import styles from "./about.module.styl";
 const h = hyper.styled(styles);
 
 function ChangelogPanel() {
-  return h("div.bp3-text", [h(Changelog)]);
+  return h("div.bp3-text.text-panel", [h(Changelog)]);
 }
 
 function MapLink({ to = "", children }) {
@@ -57,7 +57,7 @@ const AboutText = (props) => {
   const runAction = useAppActions();
 
   return (
-    <div className="about">
+    <div className="about bp3-text text-panel">
       <div className={styles["title-block"]}>
         <h2>Macrostrat Geologic Map</h2>
         <SoftwareInfo />
@@ -65,11 +65,11 @@ const AboutText = (props) => {
 
       <p>
         Macrostrat's geologic map system integrates over 290 bedrock geologic
-        maps constructed at multiple scales from around the world into a 
-        single database. As you zoom in and out of this map interface,
-        the display shifts between maps in one of four topologic levels. 
-        Clicking on the map reveals primary data about the target map unit and 
-        adjacent geologic lines at the given scale, as well as other regional information.
+        maps constructed at multiple scales from around the world into a single
+        database. As you zoom in and out of this map interface, the display
+        shifts between maps in one of four topologic levels. Clicking on the map
+        reveals primary data about the target map unit and adjacent geologic
+        lines at the given scale, as well as other regional information.
       </p>
       <h3>Credits</h3>
       <ul>
