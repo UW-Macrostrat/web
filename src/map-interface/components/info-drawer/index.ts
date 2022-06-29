@@ -91,13 +91,13 @@ function InfoDrawer(props) {
             bedrockMatchExpanded: true,
             source,
           }),
-          h(Physiography, { mapInfo }),
           h(GddExpansion, {
             mapInfo,
             gddInfo,
             openGdd,
             fetchingGdd,
           }),
+          h(Physiography, { mapInfo }),
         ])
       ),
     ]),
