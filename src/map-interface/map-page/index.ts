@@ -116,6 +116,8 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   const { menuOpen } = useMenuState();
   const runAction = useAppActions();
   const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
+  const contextPanelOpen = useAppState((s) => s.core.contextPanelOpen);
+
   const ref = useRef<HTMLElement>(null);
 
   const navigate = useNavigate();

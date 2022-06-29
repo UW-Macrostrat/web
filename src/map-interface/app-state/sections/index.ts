@@ -1,9 +1,13 @@
 import { combineReducers } from "redux";
 import reduceReducers from "reduce-reducers";
+import { createBrowserHistory } from "history";
 import { menuReducer, MenuState, MenuAction } from "./menu";
 import { CoreAction } from "./core/actions";
 import { coreReducer, CoreState } from "./core";
 import { MapAction } from "./map";
+import { createRouterReducer } from "@lagunovsky/redux-react-router";
+
+export const browserHistory = createBrowserHistory();
 
 export type AppState = {
   core: CoreState;
@@ -11,6 +15,7 @@ export type AppState = {
 };
 
 const reducers = combineReducers({
+  router: createRouterReducer(browserHistory),
   menu: menuReducer,
   core: coreReducer,
 });
