@@ -399,7 +399,8 @@ export function coreReducer(
       return {
         ...state,
         inputFocus: action.inputFocus,
-        contextPanelOpen: action.inputFocus || state.menuOpen,
+        menuOpen: action.menuOpen ?? state.menuOpen,
+        contextPanelOpen: action.inputFocus || action.menuOpen,
       };
     case "set-search-term":
       return { ...state, term: action.term };

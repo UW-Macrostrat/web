@@ -65,6 +65,7 @@ type RESET_PBDB = { type: "reset-pbdb" };
 type SET_INPUT_FOCUS = {
   type: "set-input-focus";
   inputFocus: boolean;
+  menuOpen?: boolean;
 };
 
 type CONTEXT_OUTSIDE_CLICK = {

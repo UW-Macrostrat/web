@@ -97,7 +97,11 @@ function MenuButton() {
     minimal: true,
     onClick() {
       if (inputFocus) {
-        runAction({ type: "set-input-focus", inputFocus: false });
+        runAction({
+          type: "set-input-focus",
+          inputFocus: false,
+          menuOpen: true,
+        });
         return;
       }
       if (menuOpen) {
