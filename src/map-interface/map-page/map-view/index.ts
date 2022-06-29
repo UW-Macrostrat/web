@@ -11,6 +11,8 @@ import { useEffect } from "react";
 import mapboxgl from "mapbox-gl";
 import useResizeObserver from "use-resize-observer";
 import styles from "../main.module.styl";
+import { MapProvider } from "./context";
+import { MapControlWrapper, ThreeDControl } from "./controls";
 
 const h = hyper.styled(styles);
 
@@ -161,29 +163,36 @@ function MapContainer(props) {
   }
 
   return h("div.map-view-container.main-view", { ref: parentRef }, [
-    h(_Map, {
-      filters,
-      filteredColumns,
-      mapHasBedrock: mapLayers.has(MapLayer.BEDROCK),
-      mapHasLines: mapLayers.has(MapLayer.LINES),
-      mapHasSatellite: mapLayers.has(MapLayer.SATELLITE),
-      mapHasColumns: mapLayers.has(MapLayer.COLUMNS),
-      mapHasFossils: mapLayers.has(MapLayer.FOSSILS),
-      mapCenter,
-      elevationChartOpen,
-      elevationData,
-      elevationMarkerLocation,
-      mapPosition,
-      infoDrawerOpen,
-      runAction,
-      mapIsLoading,
-      mapIsRotated,
-      mapRef,
-      markerLoadOffset: offset.current,
-      ...props,
-      use3D: mapUse3D,
-      ref,
-    }),
+    h(MapProvider, { mapRef }, [
+      h(_Map, {
+        filters,
+        filteredColumns,
+        mapHasBedrock: mapLayers.has(MapLayer.BEDROCK),
+        mapHasLines: mapLayers.has(MapLayer.LINES),
+        mapHasSatellite: mapLayers.has(MapLayer.SATELLITE),
+        mapHasColumns: mapLayers.has(MapLayer.COLUMNS),
+        mapHasFossils: mapLayers.has(MapLayer.FOSSILS),
+        mapCenter,
+        elevationChartOpen,
+        elevationData,
+        elevationMarkerLocation,
+        mapPosition,
+        infoDrawerOpen,
+        runAction,
+        mapIsLoading,
+        mapIsRotated,
+        mapRef,
+        markerLoadOffset: offset.current,
+        ...props,
+        use3D: mapUse3D,
+        ref,
+      }),
+      [
+        h("div.map-controls", [
+          h(MapControlWrapper, { control: ThreeDControl }),
+        ]),
+      ],
+    ]),
   ]);
 }
 
