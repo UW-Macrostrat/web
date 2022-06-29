@@ -32,7 +32,7 @@ export function MapControlWrapper({ className, control }) {
   const controlRef = useRef<Base>();
 
   useEffect(() => {
-    if (map.current == null) return;
+    if (map?.current == null) return;
     const ctrl = new control();
     controlRef.current = ctrl;
     const controlElement = ctrl.onAdd(map.current);
@@ -41,7 +41,7 @@ export function MapControlWrapper({ className, control }) {
       controlContainer.current?.removeChild(controlRef.current.node);
       controlRef.current?.onRemove();
     };
-  }, [map, controlRef, controlContainer]);
+  }, [map?.current, controlRef, controlContainer]);
 
   return h("div.map-control-wrapper", { className, ref: controlContainer });
 }

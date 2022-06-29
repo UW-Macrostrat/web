@@ -11,7 +11,7 @@ import { useEffect } from "react";
 import mapboxgl from "mapbox-gl";
 import useResizeObserver from "use-resize-observer";
 import styles from "../main.module.styl";
-import { MapProvider } from "./context";
+import { useMapRef } from "./context";
 import { MapControlWrapper, ThreeDControl } from "./controls";
 import { CompassControl, ZoomControl } from "mapbox-gl-controls";
 
@@ -110,7 +110,7 @@ function MapContainer(props) {
   const runAction = useAppActions();
   const offset = useRef([0, 0]);
 
-  const mapRef = useRef<mapboxgl.Map>();
+  const mapRef = useMapRef();
 
   const ref = useRef<HTMLDivElement>();
   const parentRef = useRef<HTMLDivElement>();
@@ -164,39 +164,41 @@ function MapContainer(props) {
   }
 
   return h("div.map-view-container.main-view", { ref: parentRef }, [
-    h(MapProvider, { mapRef }, [
-      h(_Map, {
-        filters,
-        filteredColumns,
-        mapHasBedrock: mapLayers.has(MapLayer.BEDROCK),
-        mapHasLines: mapLayers.has(MapLayer.LINES),
-        mapHasSatellite: mapLayers.has(MapLayer.SATELLITE),
-        mapHasColumns: mapLayers.has(MapLayer.COLUMNS),
-        mapHasFossils: mapLayers.has(MapLayer.FOSSILS),
-        mapCenter,
-        elevationChartOpen,
-        elevationData,
-        elevationMarkerLocation,
-        mapPosition,
-        infoDrawerOpen,
-        runAction,
-        mapIsLoading,
-        mapIsRotated,
-        mapRef,
-        markerLoadOffset: offset.current,
-        ...props,
-        use3D: mapUse3D,
-        ref,
-      }),
-      [
-        h("div.map-controls", [
-          h(MapControlWrapper, { control: ThreeDControl }),
-          h(MapControlWrapper, { control: ZoomControl }),
-          h(MapControlWrapper, { control: CompassControl }),
-        ]),
-      ],
-    ]),
+    h(_Map, {
+      filters,
+      filteredColumns,
+      mapHasBedrock: mapLayers.has(MapLayer.BEDROCK),
+      mapHasLines: mapLayers.has(MapLayer.LINES),
+      mapHasSatellite: mapLayers.has(MapLayer.SATELLITE),
+      mapHasColumns: mapLayers.has(MapLayer.COLUMNS),
+      mapHasFossils: mapLayers.has(MapLayer.FOSSILS),
+      mapCenter,
+      elevationChartOpen,
+      elevationData,
+      elevationMarkerLocation,
+      mapPosition,
+      infoDrawerOpen,
+      runAction,
+      mapIsLoading,
+      mapIsRotated,
+      mapRef,
+      markerLoadOffset: offset.current,
+      ...props,
+      use3D: mapUse3D,
+      ref,
+    }),
   ]);
 }
 
+export const MapZoomControl = () =>
+  h(MapControlWrapper, { control: ZoomControl });
+
+export function MapBottomControls() {
+  return h("div.map-controls", [
+    h(MapControlWrapper, { control: ThreeDControl }),
+    h(MapControlWrapper, { control: CompassControl }),
+  ]);
+}
+
+export * from "./context";
 export default MapContainer;
