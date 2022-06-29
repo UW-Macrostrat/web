@@ -253,10 +253,6 @@ const Menu = (props) => {
 
   const pageName = useCurrentPage();
 
-  const toggleMenu = () => {
-    runAction({ type: "toggle-menu" });
-  };
-
   const stack = usePanelStack();
 
   if (inputFocus) {
@@ -274,7 +270,7 @@ const Menu = (props) => {
     {
       onClose() {
         navigate("/");
-        runAction({ type: "toggle-menu" });
+        //runAction({ type: "close-menu" });
       },
       insetContent: false,
       className,

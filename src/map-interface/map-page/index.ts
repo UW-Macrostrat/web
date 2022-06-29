@@ -112,9 +112,11 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
   const ref = useRef<HTMLElement>(null);
 
-  const contextPanelOpen = usePanelOpen() && inputFocus;
+  const navigate = useNavigate();
 
-  const contextPanelTrans = useTransition(contextPanelOpen, 800);
+  const contextPanelOpen = usePanelOpen();
+
+  const contextPanelTrans = useTransition(contextPanelOpen && inputFocus, 800);
   const detailPanelTrans = useTransition(infoDrawerOpen, 800);
 
   /* We apply a custom style to the panel container when we are interacting
@@ -137,10 +139,17 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   const onMouseDown = (event) => {
     if (!(inputFocus || contextPanelOpen)) return;
     if (ref.current?.contains(event.target)) return;
+    console.log("Clicked outside");
 
     runAction({ type: "context-outside-click" });
     event.stopPropagation();
   };
+
+  const nextRoute = useSelector((s) => s.core.nextRoute);
+  useEffect(() => {
+    if (nextRoute == null) return;
+    navigate(nextRoute);
+  }, [nextRoute]);
 
   const loaded = useSelector((state) => state.core.initialLoadComplete);
   useEffect(() => {

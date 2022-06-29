@@ -23,6 +23,7 @@ type RECIEVE_DATA = { type: "recieve-data" };
 type REQUEST_DATA = { type: "request-data" };
 
 type TOGGLE_MENU = { type: "toggle-menu" };
+type CLOSE_MENU = { type: "close-menu" };
 type TOGGLE_ABOUT = { type: "toggle-about" };
 type EXPAND_INFODRAWER = { type: "expand-infodrawer" };
 type CLOSE_INFODRAWER = { type: "close-infodrawer" };
@@ -139,6 +140,7 @@ export type CoreAction =
   | RECEIVED_ELEVATION_QUERY
   | UPDATE_ELEVATION_MARKER
   | SET_ACTIVE_INDEX_MAP
+  | CLOSE_MENU
   | MapAction;
 
 interface AsyncRequestState {
@@ -187,4 +189,5 @@ export interface CoreState extends MapState, AsyncRequestState {
   filters: any[];
   filteredColumns: object;
   data: [];
+  nextRoute: string | null;
 }

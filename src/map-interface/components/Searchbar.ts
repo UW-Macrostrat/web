@@ -86,38 +86,37 @@ function SearchResults({ className }) {
 }
 
 function MenuButton() {
+  const { inputFocus } = useSearchState();
   const runAction = useAppActions();
   const mapIsLoading = useSelector((state) => state.core.mapIsLoading);
-  const navigate = useNavigate();
   const menuOpen = usePanelOpen();
 
-  let buttonProps = {
+  return h(Button, {
     icon: mapIsLoading ? h(Spinner, { size: 16 }) : "menu",
     large: true,
     minimal: true,
-    onClick(e) {
-      e.stopPropagation();
-      if (!menuOpen) {
-        navigate("/layers");
+    onClick() {
+      if (inputFocus) {
+        runAction({ type: "set-input-focus", inputFocus: false });
+        return;
       }
-      runAction({ type: "set-input-focus", inputFocus: false });
-      //runAction({ type: "toggle-menu" });
+      if (menuOpen) {
+        runAction({ type: "close-menu" });
+        return;
+      }
+      runAction({ type: "toggle-menu" });
     },
-  };
-
-  return h(Button, {
-    ...buttonProps,
-    "aria-label": "Menu",
+    //"aria-label": "Menu",
     active: menuOpen && !mapIsLoading,
   });
 }
 
-function Searchbar(props) {
+function Searchbar({ className }) {
   const runAction = useAppActions();
-  const { className } = props;
   const { term, searchResults } = useSearchState();
 
   const gainInputFocus = (e) => {
+    console.log("Set input focus");
     runAction({ type: "set-input-focus", inputFocus: true });
   };
 
