@@ -21,7 +21,7 @@ import {
 } from "../app-state";
 import styles from "./main.module.styl";
 import classNames from "classnames";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { useTransition } from "transition-hook";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
@@ -136,6 +136,13 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
     runAction({ type: "context-outside-click" });
     event.stopPropagation();
   };
+
+  const loaded = useSelector((state) => state.core.initialLoadComplete);
+  useEffect(() => {
+    runAction({ type: "get-initial-map-state" });
+  }, []);
+
+  if (!loaded) return h(Spinner);
 
   return h("div.map-page", [
     h(

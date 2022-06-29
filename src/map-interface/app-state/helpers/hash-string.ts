@@ -13,6 +13,7 @@ const fmt2 = format(".2~f");
 const fmtInt = format(".0f");
 
 function updateURI(state: CoreState) {
+  console.log("Updating URI", state);
   let args: object = {
     layers: Array.from(state.mapLayers),
   };

@@ -194,7 +194,7 @@ function useMainPanel(): Panel<{}> {
     case MenuPanel.USAGE:
       return {
         title: "Usage",
-        renderPanel: () => h(UsagePanel),
+        renderPanel: () => h("div.text-panel", h(UsagePanel)),
       };
   }
   return null;
