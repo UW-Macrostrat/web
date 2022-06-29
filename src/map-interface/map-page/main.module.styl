@@ -11,6 +11,23 @@ This stylesheet the overall application page layout.
   flex-direction column
   position relative
 
+  // Compass display
+  .compass-control
+    display: none
+  &.map-is-rotated
+    .compass-control
+      display: block
+  
+  .map-3d-control
+    display: none
+  &.map-3d-available .map-3d-control
+    display: block
+  &.map-is-rotated.map-3d-available .map-3d-control
+    display: none
+
+
+
+
 .main-ui
   flex 1
   position: relative
@@ -23,6 +40,7 @@ This stylesheet the overall application page layout.
   display: flex
   flex-direction: column
   max-height: 100%
+  margin-bottom: 0.5em
   &>div
     flex-shrink 1
   &>.searchbar
@@ -100,10 +118,7 @@ This stylesheet the overall application page layout.
 map-control()
   min-width: 22px
   min-height: 22px 
-  margin-right: 10px
-  margin-bottom 8px
   border-radius: 4px
-  margin-top 0px
   box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.1), 0 0 0 rgba(16, 22, 26, 0), 0 1px 1px rgba(16, 22, 26, 0.2)
   //box-shadow: 0 0 0 2px rgba(0,0,0,.1)
   button
@@ -124,16 +139,6 @@ map-control()
     .mapbox-compass, .mapbox-3d
       display: none
 
-    &.is-rotated
-      .mapbox-compass
-        display: block
-    
-    &.is-rotated.is-3d-available .mapbox-3d
-      display: none
-
-    &.is-3d-available .mapbox-3d
-      display: block
-
   .mapboxgl-ctrl.mapbox-3d.mapbox-control
     width: unset
     button
@@ -144,29 +149,51 @@ map-control()
     width: 100%
     height: 100%
 
-  .mapboxgl-ctrl-bottom-right
-    .mapbox-control
-      margin-bottom: 0.3em
-      float: right
-      map-control()
+  // .mapboxgl-ctrl-bottom-right
+  //   .mapbox-control
+  //     margin-bottom: 0.3em
+  //     float: right
+  //     map-control()
   
-  .mapboxgl-ctrl-attrib.mapboxgl-compact
-    map-control()
-    margin-bottom: 0.8em
-    padding: 0
-
-  .mapboxgl-ctrl-attrib .mapboxgl-ctrl-attrib-inner
-      padding 0 24px 0 10px
-  // .mapboxgl-ctrl-attrib-button
+  // .mapboxgl-ctrl-attrib.mapboxgl-compact
   //   map-control()
+  //   margin-bottom: 0.8em
+  //   padding: 0
+
+  // .mapboxgl-ctrl-attrib .mapboxgl-ctrl-attrib-inner
+  //     padding 0 24px 0 10px
+  // // .mapboxgl-ctrl-attrib-button
+  // //   map-control()
+
+.detail-stack
+  position relative
 
 .main-ui.detail-panel-open
-  :global(.mapbox-control.mapbox-zoom)
-    display: none
+  .zoom-control
+    opacity: 0
+    display none
+
+.zoom-control
+  transition opacity 1s ease-in-out
+  width: 30px
+  position absolute
+  top 0
+  right 0
 
 // .main-ui.searching
 //   .map-view-container
 //     pointer-events: none
+
+.map-controls
+  display flex
+  flex-direction row
+  justify-content: right
+  margin-bottom: 0
+  &>*
+    margin-left: 0.5em
+  :global(.mapbox-control)
+    map-control()
+
 
 :global(.mapbox-control.mapbox-zoom)
   background: rgba(255,255,255,0.2)
@@ -238,7 +265,6 @@ map-control()
     pointer-events none
     display flex
     flex-direction column
-    margin-bottom 1.2em
 
   .context-stack, .detail-stack
     pointer-events: none
@@ -246,6 +272,8 @@ map-control()
     &>div
       pointer-events: all
       margin-bottom: 0.5em
+      &:last-child
+        margin-bottom 0
     &>div.spacer
       pointer-events: none
 
@@ -254,10 +282,6 @@ map-control()
   .map-view-container
     position: unset
 
-
-  :global
-    .mapboxgl-ctrl-bottom-right .mapbox-control
-        margin-right: 15px
   // .map-holder
   //   z-index: 1;
   //   position: absolute;

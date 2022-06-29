@@ -23,7 +23,12 @@ import styles from "./main.module.styl";
 import classNames from "classnames";
 import { useRef, useEffect } from "react";
 import { useTransition } from "transition-hook";
-import { MapboxMapProvider, MapBottomControls } from "./map-view";
+import {
+  MapboxMapProvider,
+  MapBottomControls,
+  MapStyledContainer,
+  MapZoomControl,
+} from "./map-view";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));
@@ -146,7 +151,7 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   if (!loaded) return h(Spinner);
 
   return h(MapboxMapProvider, [
-    h("div.map-page", [
+    h(MapStyledContainer, { className: "map-page" }, [
       h(
         "div.main-ui",
         {
@@ -167,6 +172,7 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
             h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
               className: "detail-panel",
             }),
+            h(MapZoomControl),
             h("div.spacer"),
             h(MapBottomControls),
           ]),

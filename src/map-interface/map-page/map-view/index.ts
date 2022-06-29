@@ -11,9 +11,10 @@ import { useEffect } from "react";
 import mapboxgl from "mapbox-gl";
 import useResizeObserver from "use-resize-observer";
 import styles from "../main.module.styl";
-import { useMapRef } from "./context";
+import { useMapRef, viewInfo } from "./context";
 import { MapControlWrapper, ThreeDControl } from "./controls";
 import { CompassControl, ZoomControl } from "mapbox-gl-controls";
+import classNames from "classnames";
 
 const h = hyper.styled(styles);
 
@@ -152,16 +153,7 @@ function MapContainer(props) {
 
   useElevationMarkerLocation(mapRef, elevationMarkerLocation);
 
-  // Switch to 3D mode at high zoom levels or with a rotated map
-  const pitch = mapPosition.camera.pitch ?? 0;
-  const bearing = mapPosition.camera.bearing ?? 0;
-  const alt = mapPosition.camera.altitude;
-  const mapIsRotated = pitch != 0 || bearing != 0;
-
-  let mapUse3D = false;
-  if (alt != null) {
-    mapUse3D = (pitch > 0 && alt < 200000) || alt < 80000;
-  }
+  const { mapUse3D, mapIsRotated } = viewInfo(mapPosition);
 
   return h("div.map-view-container.main-view", { ref: parentRef }, [
     h(_Map, {
@@ -191,13 +183,32 @@ function MapContainer(props) {
 }
 
 export const MapZoomControl = () =>
-  h(MapControlWrapper, { control: ZoomControl });
+  h(MapControlWrapper, { className: "zoom-control", control: ZoomControl });
 
 export function MapBottomControls() {
   return h("div.map-controls", [
-    h(MapControlWrapper, { control: ThreeDControl }),
-    h(MapControlWrapper, { control: CompassControl }),
+    h(MapControlWrapper, {
+      className: "map-3d-control",
+      control: ThreeDControl,
+    }),
+    h(MapControlWrapper, {
+      className: "compass-control",
+      control: CompassControl,
+    }),
   ]);
+}
+
+export function MapStyledContainer({ className, children }) {
+  const { mapIsRotated, mapUse3D, mapIsGlobal } = viewInfo(
+    useAppState((state) => state.core.mapPosition)
+  );
+  className = classNames(className, {
+    "map-is-rotated": mapIsRotated,
+    "map-3d-available": mapUse3D,
+    "map-is-global": mapIsGlobal,
+  });
+
+  return h("div", { className }, children);
 }
 
 export * from "./context";

@@ -27,7 +27,7 @@ export function viewInfo(mapPosition: MapPosition): MapViewInfo {
   const alt = mapPosition.camera.altitude;
   const mapIsRotated = pitch != 0 || bearing != 0;
 
-  const mapIsGlobal = mapPosition.camera.altitude > 500000;
+  const mapIsGlobal = mapPosition.camera.altitude > 1000000;
 
   let mapUse3D = false;
   if (alt != null) {
