@@ -99,9 +99,9 @@ class Map extends Component<MapProps, {}> {
 
     this.map.setProjection("globe");
 
-    this.map.addControl(new ZoomControl(), "top-right");
-    this.map.addControl(new ThreeDControl(), "bottom-right");
-    this.map.addControl(new CompassControl(), "bottom-right");
+    //this.map.addControl(new ZoomControl(), "top-right");
+    //this.map.addControl(new ThreeDControl(), "bottom-right");
+    //this.map.addControl(new CompassControl(), "bottom-right");
 
     const pos = this.props.mapPosition;
     const { pitch = 0, bearing = 0, altitude } = pos.camera;

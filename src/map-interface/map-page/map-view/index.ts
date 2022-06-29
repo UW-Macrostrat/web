@@ -13,6 +13,7 @@ import useResizeObserver from "use-resize-observer";
 import styles from "../main.module.styl";
 import { MapProvider } from "./context";
 import { MapControlWrapper, ThreeDControl } from "./controls";
+import { CompassControl, ZoomControl } from "mapbox-gl-controls";
 
 const h = hyper.styled(styles);
 
@@ -190,6 +191,8 @@ function MapContainer(props) {
       [
         h("div.map-controls", [
           h(MapControlWrapper, { control: ThreeDControl }),
+          h(MapControlWrapper, { control: ZoomControl }),
+          h(MapControlWrapper, { control: CompassControl }),
         ]),
       ],
     ]),
