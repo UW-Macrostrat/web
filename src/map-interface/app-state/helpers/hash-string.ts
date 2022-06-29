@@ -116,7 +116,7 @@ function updateStateFromURI(state): GotInitialMapState | void {
     const hashData = getHashString(window.location.hash) ?? {};
 
     let { layers = ["bedrock", "lines"] } = hashData;
-    const { x = 16, y = 23, z = 1.5, a = 0, e = 0 } = hashData;
+    const { x = 16, y = 23, z = 2, a = 0, e = 0 } = hashData;
 
     if (!Array.isArray(layers)) {
       layers = [layers];
