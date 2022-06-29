@@ -11,10 +11,12 @@ import { useEffect } from "react";
 import mapboxgl from "mapbox-gl";
 import useResizeObserver from "use-resize-observer";
 import styles from "../main.module.styl";
-import { useMapRef, viewInfo } from "./context";
+import { useMapRef, viewInfo, useMapElement } from "./context";
 import { MapControlWrapper, ThreeDControl } from "./controls";
 import { CompassControl, ZoomControl } from "mapbox-gl-controls";
 import classNames from "classnames";
+import { Icon } from "@blueprintjs/core";
+import { map } from "d3-array";
 
 const h = hyper.styled(styles);
 
@@ -182,6 +184,34 @@ function MapContainer(props) {
   ]);
 }
 
+function MapGlobeControl() {
+  const map = useMapElement();
+
+  let mapIsGlobe = false;
+  let proj = map?.getProjection().name;
+  if (proj == "globe") {
+    mapIsGlobe = true;
+  }
+  const nextProj = mapIsGlobe ? "mercator" : "globe";
+  const icon = mapIsGlobe ? "map" : "globe";
+
+  return h(
+    "div.map-control.globe-control.mapboxgl-ctrl-group.mapboxgl-ctrl.mapbox-control",
+    [
+      h(
+        "button.globe-control-button",
+        {
+          onClick() {
+            if (map == null) return;
+            map.setProjection(nextProj);
+          },
+        },
+        h(Icon, { icon })
+      ),
+    ]
+  );
+}
+
 export const MapZoomControl = () =>
   h(MapControlWrapper, { className: "zoom-control", control: ZoomControl });
 
@@ -195,6 +225,7 @@ export function MapBottomControls() {
       className: "compass-control",
       control: CompassControl,
     }),
+    h(MapGlobeControl),
   ]);
 }
 

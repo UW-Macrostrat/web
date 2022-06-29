@@ -9,6 +9,10 @@ export function useMapRef() {
   return useContext(MapContext);
 }
 
+export function useMapElement() {
+  return useMapRef().current;
+}
+
 export function MapboxMapProvider({ children }) {
   const mapRef = useRef<Map>();
   return h(MapContext.Provider, { value: mapRef }, children);
@@ -24,10 +28,10 @@ export function viewInfo(mapPosition: MapPosition): MapViewInfo {
   // Switch to 3D mode at high zoom levels or with a rotated map
   const pitch = mapPosition.camera.pitch ?? 0;
   const bearing = mapPosition.camera.bearing ?? 0;
-  const alt = mapPosition.camera.altitude;
+  const alt = mapPosition.camera.altitude ?? 10000000;
   const mapIsRotated = pitch != 0 || bearing != 0;
 
-  const mapIsGlobal = mapPosition.camera.altitude > 1000000;
+  const mapIsGlobal = alt > 1600000;
 
   let mapUse3D = false;
   if (alt != null) {

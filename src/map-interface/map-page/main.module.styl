@@ -25,7 +25,12 @@ This stylesheet the overall application page layout.
   &.map-is-rotated.map-3d-available .map-3d-control
     display: none
 
-
+  .globe-control
+    svg
+      color: var(--secondary-color)
+    display: none
+  &.map-is-global .globe-control
+    display: block
 
 
 .main-ui
@@ -119,7 +124,7 @@ map-control()
   min-width: 22px
   min-height: 22px 
   border-radius: 4px
-  box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.1), 0 0 0 rgba(16, 22, 26, 0), 0 1px 1px rgba(16, 22, 26, 0.2)
+  box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.1), 0 0 0 rgba(16, 22, 26, 0), 0 1px 1px rgba(16, 22, 26, 0.2) !important
   //box-shadow: 0 0 0 2px rgba(0,0,0,.1)
   button
     width: 22px
@@ -191,7 +196,7 @@ map-control()
   margin-bottom: 0
   &>*
     margin-left: 0.5em
-  :global(.mapbox-control)
+  :global(.mapbox-control), .map-control
     map-control()
 
 
