@@ -97,6 +97,8 @@ class Map extends Component<MapProps, {}> {
       //optimizeForTerrain: true,
     });
 
+    this.map.setProjection("globe");
+
     this.map.addControl(new ZoomControl(), "top-right");
     this.map.addControl(new ThreeDControl(), "bottom-right");
     this.map.addControl(new CompassControl(), "bottom-right");
