@@ -154,6 +154,20 @@ class Map extends Component<MapProps, {}> {
     });
 
     this.map.on("load", () => {
+      this.map.setFog({
+        range: [10, 20],
+        color: "#ffffffff",
+        "space-color": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          4,
+          "hsl(215, 33%, 42%)",
+          7,
+          "hsl(209, 92%, 85%)",
+        ],
+      });
+
       // Add the sources to the map
       Object.keys(mapStyle.sources).forEach((source) => {
         if (this.map.getSource(source) == null) {
