@@ -147,6 +147,13 @@ function MapContainer(props) {
     },
   });
 
+  useResizeObserver({
+    ref,
+    onResize(sz) {
+      mapRef.current?.resize();
+    },
+  });
+
   useElevationMarkerLocation(mapRef, elevationMarkerLocation);
 
   const { mapUse3D, mapIsRotated } = viewInfo(mapPosition);
