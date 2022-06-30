@@ -33,7 +33,19 @@ height-transition(child_class, prefix)
     height-transition('.context-panel', '.context-panel-')
 
 @media only screen and (min-width: 768px)
-  .main-ui.detail-panel-leave
-    .detail-stack
-      margin-left -30em
-      //margin-left: -30em
+
+  .map-page .main-ui.detail-panel-leave .map-view-container
+    margin-right -14em
+
+  .map-page
+    &.map-is-global
+      .main-ui
+        &.detail-panel-leave .map-view-container
+          margin-right -30em
+          //margin-left: -30em
+
+        // Adjust so that the map centers on a further left
+        // region of the screen when the context panel is not open.
+        &.context-panel-leave .map-view-container
+          margin-left: -16em
+  
