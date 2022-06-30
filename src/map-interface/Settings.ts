@@ -1,8 +1,8 @@
 export const SETTINGS = {
   baseMapURL:
-    "mapbox://styles/jczaplewski/cl1b1pf4m000f14p4cqowlto0?optimize=true",
+    "mapbox://styles/jczaplewski/cl3w3bdai001f14ob27ckmpxz?optimize=true",
   satelliteMapURL:
-    "mapbox://styles/jczaplewski/cj3bpe4xk00002rqndidf9dw4?optimize=true",
+    "mapbox://styles/jczaplewski/cl51esfdm000e14mq51erype3?optimize=true",
   // TODO: make these configurable with environment variables
   // burwellTileDomain:
   //   window.location.hostname === "localhost"
