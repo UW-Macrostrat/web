@@ -66,18 +66,6 @@ function calcMapPadding(rect, childRect) {
   };
 }
 
-function calcMarkerLoadOffset(rect, childRect) {
-  // const desiredCenterX = rect.left + rect.width / 2;
-  // const desiredCenterY = rect.top + rect.height / 2;
-  // const centerX = childRect.left + childRect.width / 2;
-  // const centerY = childRect.top + childRect.height / 2;
-  // if (rect && childRect) {
-  //   // Build in some space for the marker itself
-  //   return [desiredCenterX - centerX, desiredCenterY - centerY + 20];
-  // }
-  return [0, 0];
-}
-
 function useElevationMarkerLocation(mapRef, elevationMarkerLocation) {
   // Handle elevation marker location
   useEffect(() => {
@@ -123,7 +111,6 @@ function MapContainer(props) {
 
   const ref = useRef<HTMLDivElement>();
   const parentRef = useRef<HTMLDivElement>();
-  const { width, height } = useResizeObserver({ ref });
 
   useEffect(() => {
     // Get the current value of the map. Useful for gradually moving away
@@ -149,8 +136,6 @@ function MapContainer(props) {
     runAction({ type: "map-layers-changed", mapLayers });
   }, [filters, mapLayers]);
 
-  const timeout = useRef<Timeout>(null);
-
   useResizeObserver({
     ref: parentRef,
     onResize(sz) {
@@ -161,22 +146,6 @@ function MapContainer(props) {
       mapRef.current?.easeTo({ padding }, { duration: 800 });
     },
   });
-
-  // useEffect(() => {
-  //   const rect = parentRef.current?.getBoundingClientRect();
-  //   const childRect = ref.current?.getBoundingClientRect();
-  //   if (rect == null || childRect == null) return;
-
-  //   offset.current = calcMarkerLoadOffset(rect, childRect);
-  //   if (timeout.current != null) {
-  //     clearTimeout(timeout.current);
-  //   }
-
-  //   timeout.current = setTimeout(() => mapRef.current?.resize(), 100);
-
-  //   console.log(calcMapPadding(rect, childRect));
-  //   mapRef.current?.setPadding(calcMapPadding(rect, childRect));
-  // }, [mapRef, width, height, infoDrawerOpen]);
 
   useElevationMarkerLocation(mapRef, elevationMarkerLocation);
 

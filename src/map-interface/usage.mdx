@@ -1,10 +1,21 @@
 import { DocsVideo, NewSwatch } from "./components/docs";
+import { Icon } from "@blueprintjs/core";
 
 ## Using Macrostrat's map interface
 
 Macrostrat's map interface is the primary tool to interact with our geologic map holdings.
 
-### 3D view <NewSwatch>New in version 4!</NewSwatch>
+### Globe projection <NewSwatch>New in version 4.0!</NewSwatch>
+
+<DocsVideo slug="map-globe-demo" />
+
+The map interface is now based on an orthographic (globe) projection at low zoom levels. This display
+is intuitive and accurate, but it cannot show the
+entire globe. To switch to the previous mercator projection,
+click the <Icon icon="map" size={16}></Icon> button in the bottom right
+of the map interface.
+
+### 3D view <NewSwatch>New in version 4.0!</NewSwatch>
 
 <DocsVideo slug="map-3d-demo" />
 

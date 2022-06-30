@@ -10,9 +10,7 @@ import h from "@macrostrat/hyper";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MercatorCoordinate, FreeCameraOptions } from "mapbox-gl";
-import { setMapStyle, markerOffset } from "./style-helpers";
-import { CompassControl, ZoomControl } from "mapbox-gl-controls";
-import { ThreeDControl } from "./controls";
+import { setMapStyle } from "./style-helpers";
 import classNames from "classnames";
 
 const maxClusterZoom = 6;
