@@ -16,7 +16,6 @@ import { MapControlWrapper, ThreeDControl } from "./controls";
 import { CompassControl, ZoomControl } from "mapbox-gl-controls";
 import classNames from "classnames";
 import { Icon } from "@blueprintjs/core";
-import { map } from "d3-array";
 
 const h = hyper.styled(styles);
 
@@ -58,17 +57,24 @@ function setMapPosition(map: mapboxgl.Map, pos: MapPosition) {
   }
 }
 
-function calcMarkerLoadOffset({ ref, parentRef }) {
-  const rect = parentRef.current?.getBoundingClientRect();
-  const childRect = ref.current?.getBoundingClientRect();
-  const desiredCenterX = rect.left + rect.width / 2;
-  const desiredCenterY = rect.top + rect.height / 2;
-  const centerX = childRect.left + childRect.width / 2;
-  const centerY = childRect.top + childRect.height / 2;
-  if (rect && childRect) {
-    // Build in some space for the marker itself
-    return [desiredCenterX - centerX, desiredCenterY - centerY + 20];
-  }
+function calcMapPadding(rect, childRect) {
+  return {
+    left: Math.max(rect.left - childRect.left, 0),
+    top: Math.max(rect.top - childRect.top, 0),
+    right: Math.max(childRect.right - rect.right, 0),
+    bottom: Math.max(childRect.bottom - rect.bottom, 0),
+  };
+}
+
+function calcMarkerLoadOffset(rect, childRect) {
+  // const desiredCenterX = rect.left + rect.width / 2;
+  // const desiredCenterY = rect.top + rect.height / 2;
+  // const centerX = childRect.left + childRect.width / 2;
+  // const centerY = childRect.top + childRect.height / 2;
+  // if (rect && childRect) {
+  //   // Build in some space for the marker itself
+  //   return [desiredCenterX - centerX, desiredCenterY - centerY + 20];
+  // }
   return [0, 0];
 }
 
@@ -145,13 +151,32 @@ function MapContainer(props) {
 
   const timeout = useRef<Timeout>(null);
 
-  useEffect(() => {
-    offset.current = calcMarkerLoadOffset({ ref, parentRef });
-    if (timeout.current != null) {
-      clearTimeout(timeout.current);
-    }
-    timeout.current = setTimeout(() => mapRef.current?.resize(), 100);
-  }, [mapRef, width, height]);
+  useResizeObserver({
+    ref: parentRef,
+    onResize(sz) {
+      const rect = parentRef.current?.getBoundingClientRect();
+      const childRect = ref.current?.getBoundingClientRect();
+      const padding = calcMapPadding(rect, childRect);
+      console.log(padding);
+      mapRef.current?.easeTo({ padding }, { duration: 800 });
+    },
+  });
+
+  // useEffect(() => {
+  //   const rect = parentRef.current?.getBoundingClientRect();
+  //   const childRect = ref.current?.getBoundingClientRect();
+  //   if (rect == null || childRect == null) return;
+
+  //   offset.current = calcMarkerLoadOffset(rect, childRect);
+  //   if (timeout.current != null) {
+  //     clearTimeout(timeout.current);
+  //   }
+
+  //   timeout.current = setTimeout(() => mapRef.current?.resize(), 100);
+
+  //   console.log(calcMapPadding(rect, childRect));
+  //   mapRef.current?.setPadding(calcMapPadding(rect, childRect));
+  // }, [mapRef, width, height, infoDrawerOpen]);
 
   useElevationMarkerLocation(mapRef, elevationMarkerLocation);
 

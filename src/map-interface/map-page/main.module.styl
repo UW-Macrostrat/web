@@ -250,19 +250,30 @@ map-control()
     &.searching .context-stack
       width: 24em
 
+    // Adjust so that the map centers on a further left
+    // region of the screen when the context panel is not open.
+    &.context-panel-leave .map-view-container
+      margin-left: -15em
 
   .context-stack
     max-width 34em
     min-width 14em
     width: 16em
+    //margin-right: -15.5em
     &.panel-open
       width: 34em
+      margin-right 0.5em
     &.layers
       width: 18em
+      margin-right 0.5em
     transition width 300ms ease
 
+  .main-ui.detail-panel-open
+    .detail-stack
+      width: 30em
+
   .detail-stack
-    width 30em
+    max-width 30em
     // position absolute
     // right 0px
     // top 0px
