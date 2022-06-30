@@ -11,6 +11,11 @@ import { useEffect } from "react";
 import mapboxgl from "mapbox-gl";
 import useResizeObserver from "use-resize-observer";
 import styles from "../main.module.styl";
+import { useMapRef, viewInfo, useMapElement } from "./context";
+import { MapControlWrapper, ThreeDControl } from "./controls";
+import { CompassControl, ZoomControl } from "mapbox-gl-controls";
+import classNames from "classnames";
+import { Icon } from "@blueprintjs/core";
 
 const h = hyper.styled(styles);
 
@@ -52,18 +57,13 @@ function setMapPosition(map: mapboxgl.Map, pos: MapPosition) {
   }
 }
 
-function calcMarkerLoadOffset({ ref, parentRef }) {
-  const rect = parentRef.current?.getBoundingClientRect();
-  const childRect = ref.current?.getBoundingClientRect();
-  const desiredCenterX = rect.left + rect.width / 2;
-  const desiredCenterY = rect.top + rect.height / 2;
-  const centerX = childRect.left + childRect.width / 2;
-  const centerY = childRect.top + childRect.height / 2;
-  if (rect && childRect) {
-    // Build in some space for the marker itself
-    return [desiredCenterX - centerX, desiredCenterY - centerY + 20];
-  }
-  return [0, 0];
+function calcMapPadding(rect, childRect) {
+  return {
+    left: Math.max(rect.left - childRect.left, 0),
+    top: Math.max(rect.top - childRect.top, 0),
+    right: Math.max(childRect.right - rect.right, 0),
+    bottom: Math.max(childRect.bottom - rect.bottom, 0),
+  };
 }
 
 function useElevationMarkerLocation(mapRef, elevationMarkerLocation) {
@@ -107,11 +107,10 @@ function MapContainer(props) {
   const runAction = useAppActions();
   const offset = useRef([0, 0]);
 
-  const mapRef = useRef<mapboxgl.Map>();
+  const mapRef = useMapRef();
 
   const ref = useRef<HTMLDivElement>();
   const parentRef = useRef<HTMLDivElement>();
-  const { width, height } = useResizeObserver({ ref });
 
   useEffect(() => {
     // Get the current value of the map. Useful for gradually moving away
@@ -137,28 +136,27 @@ function MapContainer(props) {
     runAction({ type: "map-layers-changed", mapLayers });
   }, [filters, mapLayers]);
 
-  const timeout = useRef<Timeout>(null);
+  useResizeObserver({
+    ref: parentRef,
+    onResize(sz) {
+      const rect = parentRef.current?.getBoundingClientRect();
+      const childRect = ref.current?.getBoundingClientRect();
+      const padding = calcMapPadding(rect, childRect);
+      console.log(padding);
+      mapRef.current?.easeTo({ padding }, { duration: 800 });
+    },
+  });
 
-  useEffect(() => {
-    offset.current = calcMarkerLoadOffset({ ref, parentRef });
-    if (timeout.current != null) {
-      clearTimeout(timeout.current);
-    }
-    timeout.current = setTimeout(() => mapRef.current?.resize(), 100);
-  }, [mapRef, width, height]);
+  useResizeObserver({
+    ref,
+    onResize(sz) {
+      mapRef.current?.resize();
+    },
+  });
 
   useElevationMarkerLocation(mapRef, elevationMarkerLocation);
 
-  // Switch to 3D mode at high zoom levels or with a rotated map
-  const pitch = mapPosition.camera.pitch ?? 0;
-  const bearing = mapPosition.camera.bearing ?? 0;
-  const alt = mapPosition.camera.altitude;
-  const mapIsRotated = pitch != 0 || bearing != 0;
-
-  let mapUse3D = false;
-  if (alt != null) {
-    mapUse3D = (pitch > 0 && alt < 200000) || alt < 80000;
-  }
+  const { mapUse3D, mapIsRotated } = viewInfo(mapPosition);
 
   return h("div.map-view-container.main-view", { ref: parentRef }, [
     h(_Map, {
@@ -187,4 +185,63 @@ function MapContainer(props) {
   ]);
 }
 
+function MapGlobeControl() {
+  const map = useMapElement();
+
+  let mapIsGlobe = false;
+  let proj = map?.getProjection().name;
+  if (proj == "globe") {
+    mapIsGlobe = true;
+  }
+  const nextProj = mapIsGlobe ? "mercator" : "globe";
+  const icon = mapIsGlobe ? "map" : "globe";
+
+  return h(
+    "div.map-control.globe-control.mapboxgl-ctrl-group.mapboxgl-ctrl.mapbox-control",
+    [
+      h(
+        "button.globe-control-button",
+        {
+          onClick() {
+            if (map == null) return;
+            map.setProjection(nextProj);
+          },
+        },
+        h(Icon, { icon })
+      ),
+    ]
+  );
+}
+
+export const MapZoomControl = () =>
+  h(MapControlWrapper, { className: "zoom-control", control: ZoomControl });
+
+export function MapBottomControls() {
+  return h("div.map-controls", [
+    h(MapControlWrapper, {
+      className: "map-3d-control",
+      control: ThreeDControl,
+    }),
+    h(MapControlWrapper, {
+      className: "compass-control",
+      control: CompassControl,
+    }),
+    h(MapGlobeControl),
+  ]);
+}
+
+export function MapStyledContainer({ className, children }) {
+  const { mapIsRotated, mapUse3D, mapIsGlobal } = viewInfo(
+    useAppState((state) => state.core.mapPosition)
+  );
+  className = classNames(className, {
+    "map-is-rotated": mapIsRotated,
+    "map-3d-available": mapUse3D,
+    "map-is-global": mapIsGlobal,
+  });
+
+  return h("div", { className }, children);
+}
+
+export * from "./context";
 export default MapContainer;

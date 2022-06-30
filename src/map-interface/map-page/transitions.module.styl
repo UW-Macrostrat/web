@@ -31,3 +31,9 @@ height-transition(child_class, prefix)
   .main-ui
     height-transition('.detail-stack', '.detail-panel-')
     height-transition('.context-panel', '.context-panel-')
+
+@media only screen and (min-width: 768px)
+  .main-ui.detail-panel-leave
+    .detail-stack
+      margin-left -30em
+      //margin-left: -30em

@@ -10,9 +10,7 @@ import h from "@macrostrat/hyper";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MercatorCoordinate, FreeCameraOptions } from "mapbox-gl";
-import { setMapStyle, markerOffset } from "./style-helpers";
-import { CompassControl, ZoomControl } from "mapbox-gl-controls";
-import { ThreeDControl } from "./controls";
+import { setMapStyle } from "./style-helpers";
 import classNames from "classnames";
 
 const maxClusterZoom = 6;
@@ -99,9 +97,9 @@ class Map extends Component<MapProps, {}> {
 
     this.map.setProjection("globe");
 
-    this.map.addControl(new ZoomControl(), "top-right");
-    this.map.addControl(new ThreeDControl(), "bottom-right");
-    this.map.addControl(new CompassControl(), "bottom-right");
+    //this.map.addControl(new ZoomControl(), "top-right");
+    //this.map.addControl(new ThreeDControl(), "bottom-right");
+    //this.map.addControl(new CompassControl(), "bottom-right");
 
     const pos = this.props.mapPosition;
     const { pitch = 0, bearing = 0, altitude } = pos.camera;
@@ -155,7 +153,7 @@ class Map extends Component<MapProps, {}> {
       }
     });
 
-    this.map.on("load", () => {
+    this.map.on("style.load", () => {
       // Add the sources to the map
       Object.keys(mapStyle.sources).forEach((source) => {
         if (this.map.getSource(source) == null) {
