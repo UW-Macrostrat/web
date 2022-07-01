@@ -10,20 +10,13 @@ import {
   Alignment,
   ButtonProps,
   IconName,
-  PanelStack2,
-  Panel,
   NonIdealState,
-  IconSize,
 } from "@blueprintjs/core";
 import { CloseableCard } from "../components/closeable-card";
-import { useSelector, useDispatch } from "react-redux";
-import { SettingsPanel } from "./settings-panel";
 import {
   useAppActions,
-  useMenuState,
   useAppState,
   useSearchState,
-  MenuPanel,
   MapLayer,
   MapPosition,
 } from "../app-state";
@@ -34,8 +27,9 @@ import loadable from "@loadable/component";
 import UsageText from "../usage.mdx";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import Changelog from "../../changelog.mdx";
-import { useMatch, useLocation, Navigate } from "react-router";
+import { useMatch, useLocation } from "react-router";
 import { useTransition } from "transition-hook";
+import { useCurrentPage } from "./nav-hooks";
 import useBreadcrumbs from "use-react-router-breadcrumbs";
 
 function ChangelogPanel() {
@@ -97,9 +91,16 @@ const YourLocationButton = () => {
   );
 };
 
+function useHashNavigate() {
+  const navigate = useNavigate();
+  return (to: string) => {
+    navigate(to + location.hash);
+  };
+}
+
 const LinkButton = (props: ButtonProps & { to: string }) => {
   const { to, ...rest } = props;
-  const navigate = useNavigate();
+  const navigate = useHashNavigate();
   return h(Button, {
     ...rest,
     onClick() {
@@ -112,13 +113,13 @@ const MinimalButton = (props) => h(Button, { ...props, minimal: true });
 
 const TabButton = (props: ButtonProps & { to: string }) => {
   const { to, ...rest } = props;
-  let navigate = useNavigate();
+  let navigate = useHashNavigate();
   const active = useMatch(to) != null;
 
   return h(MinimalButton, {
     active,
     onClick() {
-      navigate(to, { replace: false });
+      navigate(to);
     },
     ...rest,
     className: "tab-button",
@@ -197,56 +198,7 @@ const LayerList = (props) => {
   ]);
 };
 
-function useMainPanel(): Panel<{}> {
-  const activePanel = useSelector((state) => state.menu.activePanel);
-  switch (activePanel) {
-    case MenuPanel.LAYERS:
-      return {
-        title: "Layers",
-        renderPanel: () => h(LayerList),
-      };
-    case MenuPanel.SETTINGS:
-      return {
-        title: "Settings",
-        renderPanel: () => h(SettingsPanel),
-      };
-    case MenuPanel.ABOUT:
-      return {
-        title: "About",
-        renderPanel: () => h(AboutText),
-      };
-    case MenuPanel.USAGE:
-      return {
-        title: "Usage",
-        renderPanel: () => h("div.text-panel", h(UsageText)),
-      };
-  }
-  return null;
-}
-
-function usePanelStack() {
-  const { panelStack = [] } = useMenuState();
-  return [useMainPanel(), ...panelStack];
-}
-
 const UsagePanel = () => h("div.text-panel", h(UsageText));
-
-export function usePanelOpen() {
-  const match = useMatch("/");
-  return match?.pathname != "/";
-}
-
-export function useContextClass() {
-  const panelOpen = usePanelOpen();
-  const pageName = useCurrentPage();
-  if (!panelOpen) return null;
-  return classNames("panel-open", pageName);
-}
-
-const useCurrentPage = () => {
-  const { pathname } = useLocation();
-  return pathname.slice(pathname.lastIndexOf("/") + 1, pathname.length);
-};
 
 const locationTitleForRoute = {
   "/about": "About",
@@ -314,10 +266,9 @@ function MenuHeaderButtons() {
 
 const Menu = (props) => {
   let { className } = props;
-  const { infoDrawerOpen } = useMenuState();
   const { inputFocus } = useSearchState();
 
-  const navigate = useNavigate();
+  const navigate = useHashNavigate();
 
   const pageName = useCurrentPage();
   const isNarrow = pageName == "layers";
@@ -360,7 +311,7 @@ const Menu = (props) => {
 };
 
 function NotFoundPage() {
-  const navigate = useNavigate();
+  const navigate = useHashNavigate();
   return h(
     "div.text-panel",
     h(NonIdealState, {
