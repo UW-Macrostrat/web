@@ -110,6 +110,7 @@ export function coreReducer(
           inputFocus: false,
           contextPanelOpen: false,
           menuOpen: false,
+          term: "",
         };
       }
       return state;

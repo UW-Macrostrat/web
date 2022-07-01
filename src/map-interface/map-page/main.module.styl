@@ -110,6 +110,10 @@ This stylesheet the overall application page layout.
     border-right: 0
     position: relative;
     overflow: unset
+  :global
+    .bp3-text, .text-panel
+      ul
+        padding-left: 1em
 
 .menu-content
   display flex
@@ -185,9 +189,9 @@ map-control()
   top 0
   right 0
 
-// .main-ui.searching
-//   .map-view-container
-//     pointer-events: none
+.main-ui.searching
+  .map-view-container
+    pointer-events: none
 
 .map-controls
   display flex

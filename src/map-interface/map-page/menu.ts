@@ -34,6 +34,7 @@ import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import Changelog from "../../changelog.mdx";
 import { useMatch, useLocation } from "react-router";
 import { useTransition } from "transition-hook";
+import useBreadcrumbs from "use-react-router-breadcrumbs";
 
 function ChangelogPanel() {
   return h("div.bp3-text.text-panel", [h(Changelog)]);
@@ -250,6 +251,7 @@ const Menu = (props) => {
   const runAction = useAppActions();
   const { infoDrawerOpen } = useMenuState();
   const { inputFocus } = useSearchState();
+
   const navigate = useNavigate();
 
   const pageName = useCurrentPage();
@@ -322,7 +324,7 @@ const Menu = (props) => {
         h(Route, { path: "layers", element: h(LayerList) }),
         h(Route, { path: "about", element: h(AboutText) }),
         h(Route, { path: "usage", element: h(UsagePanel) }),
-        h(Route, { path: "changelog", element: h(Changelog) }),
+        h(Route, { path: "changelog", element: h(ChangelogPanel) }),
       ]),
       //h(Route, { path: "/settings", element: h(SettingsPanel) })
     ]

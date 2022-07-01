@@ -91,6 +91,7 @@
     "topojson-client": "^3.0.0",
     "transition-hook": "^1.5.2",
     "urijs": "^1.19.2",
+    "use-react-router-breadcrumbs": "^3.2.1",
     "use-resize-observer": "^8.0.0"
   },
   "prettier": {}
