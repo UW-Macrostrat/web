@@ -86,7 +86,6 @@ function SearchResults({ className }) {
 }
 
 function MenuButton() {
-  const { inputFocus } = useSearchState();
   const runAction = useAppActions();
   const mapIsLoading = useSelector((state) => state.core.mapIsLoading);
   const menuOpen = usePanelOpen();
@@ -96,18 +95,6 @@ function MenuButton() {
     large: true,
     minimal: true,
     onClick() {
-      if (inputFocus) {
-        runAction({
-          type: "set-input-focus",
-          inputFocus: false,
-          menuOpen: true,
-        });
-        return;
-      }
-      if (menuOpen) {
-        runAction({ type: "close-menu" });
-        return;
-      }
       runAction({ type: "toggle-menu" });
     },
     //"aria-label": "Menu",

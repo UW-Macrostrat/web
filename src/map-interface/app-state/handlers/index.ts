@@ -7,10 +7,11 @@ import {
   asyncGetElevation,
   getPBDBData,
 } from "./fetch";
-import { Action, CoreState } from "../sections";
+import { Action, AppState } from "../sections";
 import axios from "axios";
 import { asyncFilterHandler } from "./filters";
 import { updateStateFromURI } from "../helpers";
+import { push } from "@lagunovsky/redux-react-router";
 
 function getCancelToken() {
   let CancelToken = axios.CancelToken;
@@ -19,13 +20,23 @@ function getCancelToken() {
 }
 
 async function actionRunner(
-  state: CoreState,
+  state: AppState,
   action: Action,
   dispatch = null
 ): Promise<Action | void> {
+  const coreState = state.core;
   switch (action.type) {
     case "get-initial-map-state":
-      return updateStateFromURI(state);
+      return updateStateFromURI(coreState);
+    case "toggle-menu":
+      console.log(state);
+      if (state.core.inputFocus) {
+        return { type: "set-input-focus", inputFocus: false };
+      }
+      if (state.router.location.pathname == "/") {
+        return push("/layers");
+      }
+      return push("/");
     case "fetch-search-query":
       let term = action.term;
       let CancelToken = axios.CancelToken;
@@ -38,7 +49,7 @@ async function actionRunner(
       const data = await doSearchAsync(term, source.token);
       return { type: "received-search-query", data };
     case "fetch-gdd":
-      const { mapInfo } = state;
+      const { mapInfo } = coreState;
       let CancelToken1 = axios.CancelToken;
       let source1 = CancelToken1.source();
       dispatch({
@@ -52,7 +63,7 @@ async function actionRunner(
       const filterAction = await asyncFilterHandler(filter);
       return filterAction;
     case "get-filtered-columns":
-      let filteredColumns = await fetchFilteredColumns(state.filters);
+      let filteredColumns = await fetchFilteredColumns(coreState.filters);
       return {
         type: "update-column-filters",
         columns: filteredColumns,
@@ -61,7 +72,7 @@ async function actionRunner(
       const { lng, lat, z, map_id, column } = action;
       let CancelTokenMapQuery = axios.CancelToken;
       let sourceMapQuery = CancelTokenMapQuery.source();
-      if (state.inputFocus && state.contextPanelOpen) {
+      if (coreState.inputFocus && coreState.contextPanelOpen) {
         return { type: "context-outside-click" };
       }
 
@@ -83,8 +94,8 @@ async function actionRunner(
         map_id,
         sourceMapQuery.token
       );
-      state.infoMarkerLng = lng.toFixed(4);
-      state.infoMarkerLat = lat.toFixed(4);
+      coreState.infoMarkerLng = lng;
+      coreState.infoMarkerLat = lat;
       return {
         type: "received-map-query",
         data: mapData,

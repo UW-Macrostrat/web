@@ -116,6 +116,8 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   const { menuOpen } = useMenuState();
   const runAction = useAppActions();
   const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
+  //const contextPanelOpen = useAppState((s) => s.core.contextPanelOpen);
+
   const ref = useRef<HTMLElement>(null);
 
   const navigate = useNavigate();
@@ -150,12 +152,6 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
     runAction({ type: "context-outside-click" });
     event.stopPropagation();
   };
-
-  const nextRoute = useSelector((s) => s.core.nextRoute);
-  useEffect(() => {
-    if (nextRoute == null) return;
-    navigate(nextRoute);
-  }, [nextRoute]);
 
   const loaded = useSelector((state) => state.core.initialLoadComplete);
   useEffect(() => {

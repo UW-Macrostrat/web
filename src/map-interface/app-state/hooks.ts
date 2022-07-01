@@ -13,9 +13,8 @@ function useAppActions(): (action: Action) => Promise<void> {
   const dispatch = useActionDispatch();
   const store = useStore<AppState, Action>();
   return async (action) => {
-    const coreState = store.getState().core;
-    console.log(location);
-    const newAction = await actionRunner(coreState, action, dispatch);
+    const appState = store.getState();
+    const newAction = await actionRunner(appState, action, dispatch);
     if (newAction === undefined) return;
     dispatch(newAction as Action);
   };

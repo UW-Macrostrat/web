@@ -270,7 +270,6 @@ const Menu = (props) => {
     {
       onClose() {
         navigate("/");
-        //runAction({ type: "close-menu" });
       },
       insetContent: false,
       className,
