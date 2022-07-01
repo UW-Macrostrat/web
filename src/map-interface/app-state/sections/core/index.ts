@@ -398,6 +398,7 @@ export function coreReducer(
     case "set-input-focus":
       return {
         ...state,
+        term: action.inputFocus ? state.term : "",
         inputFocus: action.inputFocus,
         menuOpen: action.menuOpen ?? state.menuOpen,
         contextPanelOpen: action.inputFocus || action.menuOpen,

@@ -7,7 +7,7 @@ import { SubtleFilterText } from "./filters-panel";
 import styles from "./searchbar.styl";
 import { PanelSubhead } from "./expansion-panel/headers";
 import classNames from "classnames";
-import { useNavigate } from "react-router";
+import { Navigate, useNavigate } from "react-router";
 import { usePanelOpen } from "../map-page/menu";
 
 const h = hyper.styled(styles);

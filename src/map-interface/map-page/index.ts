@@ -122,7 +122,7 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
 
   const contextPanelOpen = usePanelOpen();
 
-  const contextPanelTrans = useTransition(contextPanelOpen && inputFocus, 800);
+  const contextPanelTrans = useTransition(contextPanelOpen || inputFocus, 800);
   const detailPanelTrans = useTransition(infoDrawerOpen, 800);
 
   /* We apply a custom style to the panel container when we are interacting
@@ -133,7 +133,7 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   */
   const className = classNames(
     {
-      searching: inputFocus && contextPanelOpen,
+      searching: inputFocus,
       "detail-panel-open": infoDrawerOpen,
     },
     `context-panel-${contextPanelTrans.stage}`,
