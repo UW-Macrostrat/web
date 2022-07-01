@@ -31,6 +31,12 @@ const reducers = combineReducers({
 
 function overallReducer(state: AppState, action: Action): AppState {
   switch (action.type) {
+    case "@@router/ON_LOCATION_CHANGED":
+      const isOpen = action.payload.location.pathname != "/";
+      return {
+        ...state,
+        core: { ...state.core, menuOpen: isOpen, contextPanelOpen: isOpen },
+      };
     case "got-initial-map-state":
     case "map-moved":
       return {

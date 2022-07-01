@@ -24,8 +24,7 @@ import classNames from "classnames";
 import { useRef, useEffect } from "react";
 import { useTransition } from "transition-hook";
 import { usePanelOpen } from "./menu";
-import { Routes, Route, useNavigate, Outlet } from "react-router-dom";
-import { useMatch } from "react-router";
+import { useNavigate } from "react-router-dom";
 import {
   MapboxMapProvider,
   MapBottomControls,

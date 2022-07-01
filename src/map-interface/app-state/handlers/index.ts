@@ -29,8 +29,10 @@ async function actionRunner(
     case "get-initial-map-state":
       return updateStateFromURI(coreState);
     case "toggle-menu":
-      console.log(state);
       if (state.core.inputFocus) {
+        if (state.router.location.pathname == "/") {
+          dispatch(push("/layers"));
+        }
         return { type: "set-input-focus", inputFocus: false };
       }
       if (state.router.location.pathname == "/") {
