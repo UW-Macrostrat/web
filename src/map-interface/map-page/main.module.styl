@@ -4,9 +4,9 @@ This stylesheet the overall application page layout.
 
 .map-page
   height 100vh
+  width 100vw
   /* mobile viewport bug fix */
   max-height: -webkit-fill-available;
-  width 100vw
   display flex
   flex-direction column
   position relative
@@ -45,7 +45,6 @@ This stylesheet the overall application page layout.
   display: flex
   flex-direction: column
   max-height: 100%
-  margin-bottom: 0.5em
   &>div
     flex-shrink 1
   &>.searchbar
@@ -71,8 +70,7 @@ This stylesheet the overall application page layout.
 
 .map-view-container
   flex-grow 1
-  position: relative
-
+  position relative
 
 .searchbar-holder
   margin-bottom 0.5em
@@ -226,14 +224,20 @@ map-control()
     position: inherit
     max-height: 70%
 
+  .infodrawer-stack
+    max-height: 70%
+    &:global(.exit-active)
+      max-height: 0
+
   // Completely hide zoom control
   :global(.mapbox-control.mapbox-zoom)
     display: none
 
-  .infodrawer-stack
-    max-height: 70%
-    &:global(.exit-active)
-      max-height: 0   
+  // Position map controls within the map area
+  .map-controls
+    position absolute
+    top -60px
+    right 10px
 
 /* Desktop styling is necessarily much more complicated than mobile
   to handle a two-column layout. */
@@ -255,6 +259,7 @@ map-control()
     max-width 34em
     min-width 14em
     width: 16em
+    transition width 300ms ease
     //margin-right: -15.5em
     &.panel-open
       width: 34em
@@ -262,11 +267,9 @@ map-control()
     &.layers
       width: 18em
       margin-right 0.5em
-    transition width 300ms ease
 
-  .main-ui.detail-panel-open
-    .detail-stack
-      width: 30em
+  .main-ui.detail-panel-open .detail-stack
+    width: 30em
 
   .detail-stack
     width 30em
