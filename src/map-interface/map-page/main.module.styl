@@ -45,7 +45,6 @@ This stylesheet the overall application page layout.
   display: flex
   flex-direction: column
   max-height: 100%
-  margin-bottom: 0.5em
   &>div
     flex-shrink 1
   &>.searchbar
@@ -226,14 +225,20 @@ map-control()
     position: inherit
     max-height: 70%
 
+  .infodrawer-stack
+    max-height: 70%
+    &:global(.exit-active)
+      max-height: 0
+
   // Completely hide zoom control
   :global(.mapbox-control.mapbox-zoom)
     display: none
 
-  .infodrawer-stack
-    max-height: 70%
-    &:global(.exit-active)
-      max-height: 0   
+  // Position map controls within the map area
+  .map-controls
+    position absolute
+    top -60px
+    right 10px
 
 /* Desktop styling is necessarily much more complicated than mobile
   to handle a two-column layout. */

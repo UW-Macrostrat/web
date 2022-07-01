@@ -16,6 +16,7 @@ import { MapControlWrapper, ThreeDControl } from "./controls";
 import { CompassControl, ZoomControl } from "mapbox-gl-controls";
 import classNames from "classnames";
 import { Icon } from "@blueprintjs/core";
+import { debounce } from "lodash";
 
 const h = hyper.styled(styles);
 
@@ -115,7 +116,6 @@ function MapContainer(props) {
   useEffect(() => {
     // Get the current value of the map. Useful for gradually moving away
     // from class component
-    console.log("Map was set up:", mapRef.current);
     const map = mapRef.current;
     if (map == null) return;
 
@@ -142,16 +142,19 @@ function MapContainer(props) {
       const rect = parentRef.current?.getBoundingClientRect();
       const childRect = ref.current?.getBoundingClientRect();
       const padding = calcMapPadding(rect, childRect);
-      console.log(padding);
       mapRef.current?.easeTo({ padding }, { duration: 800 });
     },
   });
 
+  const debouncedResize = useRef(
+    debounce(() => {
+      mapRef.current?.resize();
+    }, 100)
+  );
+
   useResizeObserver({
     ref,
-    onResize(sz) {
-      mapRef.current?.resize();
-    },
+    onResize: debouncedResize.current,
   });
 
   useElevationMarkerLocation(mapRef, elevationMarkerLocation);
