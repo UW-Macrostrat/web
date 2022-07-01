@@ -96,6 +96,13 @@ This stylesheet the overall application page layout.
     transition all 0.2s
     transition-delay 0.1s
 
+.context-panel-leave .menu-card, .menu-card.narrow-card
+  .tab-button:not(:hover) :global(.bp3-button-text)
+      width 0
+      opacity: 0
+      margin-left: -7px
+
+
 .menu-card
   :global(.bp3-panel-stack2)
     overflow: unset
@@ -103,11 +110,6 @@ This stylesheet the overall application page layout.
     border-right: 0
     position: relative;
     overflow: unset
-  &.layers .tab-button:not(:hover)
-    :global(.bp3-button-text)
-      width 0
-      opacity: 0
-      margin-left: -7px
 
 .menu-content
   display flex

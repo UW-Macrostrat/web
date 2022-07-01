@@ -33,6 +33,7 @@ import UsageText from "../usage.mdx";
 import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import Changelog from "../../changelog.mdx";
 import { useMatch, useLocation } from "react-router";
+import { useTransition } from "transition-hook";
 
 function ChangelogPanel() {
   return h("div.bp3-text.text-panel", [h(Changelog)]);
@@ -252,6 +253,8 @@ const Menu = (props) => {
   const navigate = useNavigate();
 
   const pageName = useCurrentPage();
+  const isNarrow = pageName == "layers";
+  const isNarrowTrans = useTransition(isNarrow, 800);
 
   const stack = usePanelStack();
 
@@ -263,7 +266,13 @@ const Menu = (props) => {
     return null;
   }
 
-  className = classNames(className, "menu-card", pageName);
+  className = classNames(
+    className,
+    "menu-card",
+    pageName,
+    { "narrow-card": isNarrowTrans.shouldMount },
+    `narrow-${isNarrowTrans.stage}`
+  );
 
   return h(
     CloseableCard,
