@@ -327,10 +327,6 @@ const Menu = (props) => {
     return h(SearchResults, { className });
   }
 
-  if (window.innerWidth <= 768 && infoDrawerOpen) {
-    return null;
-  }
-
   className = classNames(
     className,
     "menu-card",
