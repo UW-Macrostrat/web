@@ -96,6 +96,13 @@ This stylesheet the overall application page layout.
     transition all 0.2s
     transition-delay 0.1s
 
+.context-panel-leave .menu-card, .menu-card.narrow-card
+  .tab-button:not(:hover) :global(.bp3-button-text)
+      width 0
+      opacity: 0
+      margin-left: -7px
+
+
 .menu-card
   :global(.bp3-panel-stack2)
     overflow: unset
@@ -103,11 +110,10 @@ This stylesheet the overall application page layout.
     border-right: 0
     position: relative;
     overflow: unset
-  &.layers .tab-button:not(:hover)
-    :global(.bp3-button-text)
-      width 0
-      opacity: 0
-      margin-left: -7px
+  :global
+    .bp3-text, .text-panel
+      ul
+        padding-left: 1em
 
 .menu-content
   display flex
@@ -152,22 +158,6 @@ map-control()
     width: 100%
     height: 100%
 
-  // .mapboxgl-ctrl-bottom-right
-  //   .mapbox-control
-  //     margin-bottom: 0.3em
-  //     float: right
-  //     map-control()
-  
-  // .mapboxgl-ctrl-attrib.mapboxgl-compact
-  //   map-control()
-  //   margin-bottom: 0.8em
-  //   padding: 0
-
-  // .mapboxgl-ctrl-attrib .mapboxgl-ctrl-attrib-inner
-  //     padding 0 24px 0 10px
-  // // .mapboxgl-ctrl-attrib-button
-  // //   map-control()
-
 .detail-stack
   position relative
 
@@ -183,9 +173,9 @@ map-control()
   top 0
   right 0
 
-// .main-ui.searching
-//   .map-view-container
-//     pointer-events: none
+.main-ui.searching
+  .map-view-container
+    pointer-events: none
 
 .map-controls
   display flex
@@ -217,6 +207,7 @@ map-control()
     height: 0
     visibility: hidden
     transition: height 0.5s ease-in-out
+
 
   // Make sure that our detail panel doesn't take up the entirety of the page
   .detail-stack
@@ -267,6 +258,8 @@ map-control()
     &.layers
       width: 18em
       margin-right 0.5em
+    // Leave a little space for Mapbox logo at the bottom
+    padding-bottom: 0.5em
 
   .main-ui.detail-panel-open .detail-stack
     width: 30em

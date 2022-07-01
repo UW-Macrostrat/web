@@ -1,12 +1,13 @@
 import { useCallback, useRef, useEffect } from "react";
 import { Navbar, Button, InputGroup, Spinner, Card } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
-import { useAppActions, useMenuState, useSearchState } from "../app-state";
+import { useAppActions, useSearchState } from "../app-state";
 import { useSelector } from "react-redux";
 import { SubtleFilterText } from "./filters-panel";
 import styles from "./searchbar.styl";
 import { PanelSubhead } from "./expansion-panel/headers";
 import classNames from "classnames";
+import { usePanelOpen } from "../map-page/nav-hooks";
 
 const h = hyper.styled(styles);
 
@@ -86,32 +87,25 @@ function SearchResults({ className }) {
 function MenuButton() {
   const runAction = useAppActions();
   const mapIsLoading = useSelector((state) => state.core.mapIsLoading);
-  const { menuOpen } = useMenuState();
+  const menuOpen = usePanelOpen();
 
-  let buttonProps = {
+  return h(Button, {
     icon: mapIsLoading ? h(Spinner, { size: 16 }) : "menu",
     large: true,
     minimal: true,
-    onClick(e) {
-      e.stopPropagation();
+    onClick() {
       runAction({ type: "toggle-menu" });
     },
-  };
-
-  return h(Button, {
-    ...buttonProps,
-    "aria-label": "Menu",
+    //"aria-label": "Menu",
     active: menuOpen && !mapIsLoading,
   });
 }
 
-function Searchbar(props) {
+function Searchbar({ className }) {
   const runAction = useAppActions();
-  const { className } = props;
   const { term, searchResults } = useSearchState();
 
   const gainInputFocus = (e) => {
-    console.log("Gained input focus");
     runAction({ type: "set-input-focus", inputFocus: true });
   };
 

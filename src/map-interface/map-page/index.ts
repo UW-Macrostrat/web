@@ -1,21 +1,13 @@
 import { Suspense } from "react";
 // Import other components
-import hyper, { compose } from "@macrostrat/hyper";
+import hyper from "@macrostrat/hyper";
 import Searchbar from "../components/searchbar";
-import Menu, { useContextClass } from "./menu";
-import {
-  ButtonGroup,
-  Button,
-  Spinner,
-  Collapse,
-  HotkeysProvider,
-} from "@blueprintjs/core";
+import { ButtonGroup, Button, Spinner } from "@blueprintjs/core";
 import { useSelector, useDispatch } from "react-redux";
 import loadable from "@loadable/component";
 import {
   useSearchState,
   MapBackend,
-  useMenuState,
   useAppState,
   useAppActions,
 } from "../app-state";
@@ -23,6 +15,7 @@ import styles from "./main.module.styl";
 import classNames from "classnames";
 import { useRef, useEffect } from "react";
 import { useTransition } from "transition-hook";
+import { usePanelOpen, useContextClass } from "./nav-hooks";
 import {
   MapboxMapProvider,
   MapBottomControls,
@@ -33,6 +26,7 @@ import {
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));
 const MapContainer = loadable(() => import("./map-view"));
+const Menu = loadable(() => import("./menu"));
 
 const h = hyper.styled(styles);
 
@@ -100,23 +94,16 @@ const MapTypeSelector = () => {
   ]);
 };
 
-function MenuPanel() {
-  const { inputFocus } = useSearchState();
-  const { menuOpen } = useMenuState();
-  return h(Collapse, { isOpen: inputFocus || menuOpen }, [
-    //h(CloseableCard, { className: "menu-card", isOpen: true }, []),
-  ]);
-}
-
 const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   const { inputFocus } = useSearchState();
-  const { menuOpen } = useMenuState();
   const runAction = useAppActions();
   const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
-  const contextPanelOpen = useAppState((s) => s.core.contextPanelOpen);
+
   const ref = useRef<HTMLElement>(null);
 
-  const contextPanelTrans = useTransition(contextPanelOpen, 800);
+  const contextPanelOpen = usePanelOpen();
+
+  const contextPanelTrans = useTransition(contextPanelOpen || inputFocus, 800);
   const detailPanelTrans = useTransition(infoDrawerOpen, 800);
 
   /* We apply a custom style to the panel container when we are interacting
@@ -127,7 +114,7 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   */
   const className = classNames(
     {
-      searching: inputFocus && contextPanelOpen,
+      searching: inputFocus,
       "detail-panel-open": infoDrawerOpen,
     },
     `context-panel-${contextPanelTrans.stage}`,
@@ -139,6 +126,7 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   const onMouseDown = (event) => {
     if (!(inputFocus || contextPanelOpen)) return;
     if (ref.current?.contains(event.target)) return;
+
     runAction({ type: "context-outside-click" });
     event.stopPropagation();
   };
@@ -183,7 +171,7 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   ]);
 };
 
-const _MapPage = compose(HotkeysProvider, MapPage);
+//const _MapPage = compose(HotkeysProvider, MapPage);
 
 export { MapBackend };
-export default _MapPage;
+export default MapPage;

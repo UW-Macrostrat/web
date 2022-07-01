@@ -59,7 +59,6 @@ const defaultState: CoreState = {
   filtersOpen: false,
   filters: [],
   filteredColumns: {},
-
   data: [],
   mapPosition: {
     camera: {
@@ -108,8 +107,10 @@ export function coreReducer(
       if (state.inputFocus) {
         return {
           ...state,
+          inputFocus: false,
           contextPanelOpen: false,
           menuOpen: false,
+          term: "",
         };
       }
       return state;
@@ -384,8 +385,10 @@ export function coreReducer(
     case "set-input-focus":
       return {
         ...state,
+        term: action.inputFocus ? state.term : "",
         inputFocus: action.inputFocus,
-        contextPanelOpen: action.inputFocus || state.menuOpen,
+        menuOpen: action.menuOpen ?? state.menuOpen,
+        contextPanelOpen: action.inputFocus || action.menuOpen,
       };
     case "set-search-term":
       return { ...state, term: action.term };

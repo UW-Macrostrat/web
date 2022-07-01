@@ -1,21 +1,11 @@
 import React from "react";
 import hyper from "@macrostrat/hyper";
 import { NavLink } from "react-router-dom";
-import Changelog from "../../changelog.mdx";
 import { useAppActions } from "../app-state";
-import { useLocation } from "react-router";
+import { Link } from "react-router-dom";
 import styles from "./about.module.styl";
 
 const h = hyper.styled(styles);
-
-function ChangelogPanel() {
-  return h("div.bp3-text.text-panel", [h(Changelog)]);
-}
-
-function MapLink({ to = "", children }) {
-  const loc = useLocation();
-  return h(NavLink, { to: "/map" + to + loc.hash }, children);
-}
 
 const SoftwareInfo = (props) => {
   const runAction = useAppActions();
@@ -35,17 +25,9 @@ const SoftwareInfo = (props) => {
     ]),
     h("p.changes", [
       h(
-        "a",
+        Link,
         {
-          onClick() {
-            runAction({
-              type: "push-panel",
-              panel: {
-                renderPanel: ChangelogPanel,
-                title: "Changelog",
-              },
-            });
-          },
+          to: "/changelog",
         },
         "Changelog"
       ),
