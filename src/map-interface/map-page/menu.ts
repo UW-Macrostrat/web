@@ -12,6 +12,8 @@ import {
   IconName,
   PanelStack2,
   Panel,
+  NonIdealState,
+  IconSize,
 } from "@blueprintjs/core";
 import { CloseableCard } from "../components/closeable-card";
 import { useSelector, useDispatch } from "react-redux";
@@ -30,9 +32,9 @@ import classNames from "classnames";
 import styles from "./main.module.styl";
 import loadable from "@loadable/component";
 import UsageText from "../usage.mdx";
-import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import Changelog from "../../changelog.mdx";
-import { useMatch, useLocation } from "react-router";
+import { useMatch, useLocation, Navigate } from "react-router";
 import { useTransition } from "transition-hook";
 import useBreadcrumbs from "use-react-router-breadcrumbs";
 
@@ -246,11 +248,23 @@ const useCurrentPage = () => {
   return pathname.slice(pathname.lastIndexOf("/") + 1, pathname.length);
 };
 
+const locationTitleForRoute = {
+  "/about": "About",
+  "/usage": "Usage",
+  "/settings": "Settings",
+  "/layers": "Layers",
+};
+
+const menuBacklinkLocationOverrides = {
+  "/changelog": "/about",
+};
+
 const Menu = (props) => {
   let { className } = props;
   const runAction = useAppActions();
   const { infoDrawerOpen } = useMenuState();
   const { inputFocus } = useSearchState();
+  const breadcrumbs = useBreadcrumbs();
 
   const navigate = useNavigate();
 
@@ -325,10 +339,32 @@ const Menu = (props) => {
         h(Route, { path: "about", element: h(AboutText) }),
         h(Route, { path: "usage", element: h(UsagePanel) }),
         h(Route, { path: "changelog", element: h(ChangelogPanel) }),
+        h(Route, { path: "*", element: h(NotFoundPage) }),
       ]),
       //h(Route, { path: "/settings", element: h(SettingsPanel) })
     ]
   );
 };
+
+function NotFoundPage() {
+  const navigate = useNavigate();
+  return h(
+    "div.text-panel",
+    h(NonIdealState, {
+      title: "Unknown page",
+      action: h(
+        Button,
+        {
+          onClick() {
+            navigate("/");
+          },
+          minimal: true,
+          rightIcon: "chevron-right",
+        },
+        "Main page"
+      ),
+    })
+  );
+}
 
 export default Menu;
