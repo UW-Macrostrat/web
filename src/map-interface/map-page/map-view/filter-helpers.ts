@@ -212,15 +212,32 @@ function PBDBHelper(map, bounds, zoom, maxClusterZoom = 7): void {
   const lngMin = bounds._sw.lng < -180 ? -180 : bounds._sw.lng;
   const lngMax = bounds._ne.lng > 180 ? 180 : bounds._ne.lng;
   // If more than one time filter is present, multiple requests are needed
+
+  /* Currently there is a limitation in the globe for the getBounds function that
+  resolves incorrect latitude ranges for low zoom levels.
+  - https://docs.mapbox.com/mapbox-gl-js/guides/globe/#limitations-of-globe
+  - https://github.com/mapbox/mapbox-gl-js/issues/11795
+  -   https://github.com/UW-Macrostrat/web/issues/68
+
+  This is a workaround for that issue.
+  */
+  let latMin = bounds._sw.lat;
+  let latMax = bounds._ne.lat;
+
+  if (zoom < 5) {
+    latMin = Math.max(Math.min(latMin, latMin * 5), -85);
+    latMax = Math.min(Math.max(latMax, latMax * 5), 85);
+  }
+
+  console.log(latMin, latMax);
+
   if (map.timeFilters.length && map.timeFilters.length > 1) {
     urls = map.timeFilters.map((f) => {
       let url = `${SETTINGS.pbdbDomain}/data1.2/colls/${
         zoom < maxClusterZoom ? "summary" : "list"
-      }.json?lngmin=${lngMin}&lngmax=${lngMax}&latmin=${
-        bounds._sw.lat
-      }&latmax=${bounds._ne.lat}&max_ma=${f[2][2]}&min_ma=${f[1][2]}${
-        zoom < maxClusterZoom ? level : ""
-      }`;
+      }.json?lngmin=${lngMin}&lngmax=${lngMax}&latmin=${latMin}&latmax=${latMax}&max_ma=${
+        f[2][2]
+      }&min_ma=${f[1][2]}${zoom < maxClusterZoom ? level : ""}`;
       if (queryString.length) {
         url += `&${queryString.join("&")}`;
       }
@@ -229,9 +246,9 @@ function PBDBHelper(map, bounds, zoom, maxClusterZoom = 7): void {
   } else {
     let url = `${SETTINGS.pbdbDomain}/data1.2/colls/${
       zoom < maxClusterZoom ? "summary" : "list"
-    }.json?lngmin=${lngMin}&lngmax=${lngMax}&latmin=${bounds._sw.lat}&latmax=${
-      bounds._ne.lat
-    }${zoom < maxClusterZoom ? level : ""}`;
+    }.json?lngmin=${lngMin}&lngmax=${lngMax}&latmin=${latMin}&latmax=${latMax}${
+      zoom < maxClusterZoom ? level : ""
+    }`;
     if (timeQuery.length) {
       url += `&${timeQuery.join("&")}`;
     }
