@@ -253,26 +253,75 @@ const locationTitleForRoute = {
   "/usage": "Usage",
   "/settings": "Settings",
   "/layers": "Layers",
+  "/changelog": "Changelog",
 };
 
 const menuBacklinkLocationOverrides = {
   "/changelog": "/about",
 };
 
+function useLastPageLocation(): { title: string; to: string } | null {
+  const breadcrumbs = useBreadcrumbs();
+  if (breadcrumbs.length < 2) return null;
+  const prevPage = breadcrumbs[breadcrumbs.length - 2];
+  const currentPage = breadcrumbs[breadcrumbs.length - 1];
+  const prevRoute =
+    menuBacklinkLocationOverrides[currentPage.match.pathname] ??
+    prevPage.match.pathname;
+  if (prevRoute == "/") return null;
+  return { to: prevRoute, title: locationTitleForRoute[prevRoute] ?? "Back" };
+}
+
+function MenuHeaderButtons() {
+  const backLoc = useLastPageLocation();
+  const { pathname } = useLocation();
+
+  if (backLoc != null) {
+    return h([
+      h(
+        LinkButton,
+        {
+          icon: "chevron-left",
+          minimal: true,
+          to: backLoc.to,
+        },
+        backLoc.title
+      ),
+      h("h2.panel-title", locationTitleForRoute[pathname] ?? ""),
+    ]);
+  }
+
+  return h("div.buttons", [
+    h(TabButton, {
+      icon: "layers",
+      text: "Layers",
+      to: "layers",
+    }),
+    // Settings are mostly for globe, which is currently disabled
+    //h(TabButton, {icon: "settings", text: "Settings", tab: MenuPanel.SETTINGS}),
+    h(TabButton, {
+      icon: "info-sign",
+      text: "About",
+      to: "about",
+    }),
+    h(TabButton, {
+      icon: "help",
+      text: "Usage",
+      to: "usage",
+    }),
+  ]);
+}
+
 const Menu = (props) => {
   let { className } = props;
-  const runAction = useAppActions();
   const { infoDrawerOpen } = useMenuState();
   const { inputFocus } = useSearchState();
-  const breadcrumbs = useBreadcrumbs();
 
   const navigate = useNavigate();
 
   const pageName = useCurrentPage();
   const isNarrow = pageName == "layers";
   const isNarrowTrans = useTransition(isNarrow, 800);
-
-  const stack = usePanelStack();
 
   if (inputFocus) {
     return h(SearchResults, { className });
@@ -298,40 +347,7 @@ const Menu = (props) => {
       },
       insetContent: false,
       className,
-      renderHeader: () =>
-        h(CloseableCard.Header, [
-          h.if(stack.length == 1)("div.buttons", [
-            h(TabButton, {
-              icon: "layers",
-              text: "Layers",
-              to: "layers",
-            }),
-            // Settings are mostly for globe, which is currently disabled
-            //h(TabButton, {icon: "settings", text: "Settings", tab: MenuPanel.SETTINGS}),
-            h(TabButton, {
-              icon: "info-sign",
-              text: "About",
-              to: "about",
-            }),
-            h(TabButton, {
-              icon: "help",
-              text: "Usage",
-              to: "usage",
-            }),
-          ]),
-          h.if(stack.length > 1)([
-            h(
-              LinkButton,
-              {
-                icon: "chevron-left",
-                minimal: true,
-                to: "/",
-              },
-              stack[stack.length - 2]?.title ?? "Back"
-            ),
-            h("h2.panel-title", stack[stack.length - 1]?.title),
-          ]),
-        ]),
+      renderHeader: () => h(CloseableCard.Header, h(MenuHeaderButtons)),
     },
     [
       h(Routes, [
@@ -339,7 +355,8 @@ const Menu = (props) => {
         h(Route, { path: "about", element: h(AboutText) }),
         h(Route, { path: "usage", element: h(UsagePanel) }),
         h(Route, { path: "changelog", element: h(ChangelogPanel) }),
-        h(Route, { path: "*", element: h(NotFoundPage) }),
+        // Need a better page transition before we can do this
+        //h(Route, { path: "*", element: h(NotFoundPage) }),
       ]),
       //h(Route, { path: "/settings", element: h(SettingsPanel) })
     ]

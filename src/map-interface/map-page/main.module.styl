@@ -158,22 +158,6 @@ map-control()
     width: 100%
     height: 100%
 
-  // .mapboxgl-ctrl-bottom-right
-  //   .mapbox-control
-  //     margin-bottom: 0.3em
-  //     float: right
-  //     map-control()
-  
-  // .mapboxgl-ctrl-attrib.mapboxgl-compact
-  //   map-control()
-  //   margin-bottom: 0.8em
-  //   padding: 0
-
-  // .mapboxgl-ctrl-attrib .mapboxgl-ctrl-attrib-inner
-  //     padding 0 24px 0 10px
-  // // .mapboxgl-ctrl-attrib-button
-  // //   map-control()
-
 .detail-stack
   position relative
 
@@ -273,6 +257,8 @@ map-control()
     &.layers
       width: 18em
       margin-right 0.5em
+    // Leave a little space for Mapbox logo at the bottom
+    padding-bottom: 0.5em
 
   .main-ui.detail-panel-open .detail-stack
     width: 30em

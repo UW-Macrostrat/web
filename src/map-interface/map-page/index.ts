@@ -146,7 +146,6 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   const onMouseDown = (event) => {
     if (!(inputFocus || contextPanelOpen)) return;
     if (ref.current?.contains(event.target)) return;
-    console.log("Clicked outside");
 
     runAction({ type: "context-outside-click" });
     event.stopPropagation();
