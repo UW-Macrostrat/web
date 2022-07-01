@@ -41,7 +41,7 @@ const AboutText = (props) => {
   return (
     <div className="about bp3-text text-panel">
       <div className={styles["title-block"]}>
-        <h2>Macrostrat Geologic Map</h2>
+        <h2>Macrostrat geologic map</h2>
         <SoftwareInfo />
       </div>
 

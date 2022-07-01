@@ -1,10 +1,21 @@
 import { DocsVideo, NewSwatch } from "./components/docs";
+import { Icon } from "@blueprintjs/core";
 
 ## Using Macrostrat's map interface
 
-Macrostrat's map interface is the primary tool to interact with our geologic map holdings.
+Macrostrat's map interface is the primary tool to interact with
+our multiscale, harmonized geologic map.
 
-### 3D view <NewSwatch>New in version 4!</NewSwatch>
+### Globe projection <NewSwatch>New in version 4.0!</NewSwatch>
+
+<DocsVideo slug="map-globe-demo" />
+
+The map interface is now based on an orthographic (globe) projection at low zoom levels. This display
+is intuitive and accurate, but it cannot show all continents at once. To switch back to a mercator projection,
+click the <Icon icon="map" size={16}></Icon> button in the bottom right
+of the map interface.
+
+### 3D terrain <NewSwatch>New in version 4.0!</NewSwatch>
 
 <DocsVideo slug="map-3d-demo" />
 
@@ -46,8 +57,9 @@ can be overlaid on the geologic map.
 
 <DocsVideo slug="map-elevation-profile-demo" />
 
-Elevation profiles are a placeholder for in-progress 3D cross-section
-functionality.
+In <em>Elevation profile</em> mode, click two points on the map to create
+an elevation profile between them. This capability is a placeholder
+for in-development 3D cross-section functionality.
 
 ### Fossil collections
 

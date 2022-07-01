@@ -13,7 +13,6 @@ const fmt2 = format(".2~f");
 const fmtInt = format(".0f");
 
 function updateURI(state: CoreState) {
-  console.log("Updating URI", state);
   let args: object = {
     layers: Array.from(state.mapLayers),
   };
@@ -116,7 +115,7 @@ function updateStateFromURI(state): GotInitialMapState | void {
     const hashData = getHashString(window.location.hash) ?? {};
 
     let { layers = ["bedrock", "lines"] } = hashData;
-    const { x = 16, y = 23, z = 1.5, a = 0, e = 0 } = hashData;
+    const { x = 16, y = 23, z = 2, a = 0, e = 0 } = hashData;
 
     if (!Array.isArray(layers)) {
       layers = [layers];

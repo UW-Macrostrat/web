@@ -26,6 +26,12 @@ import { useTransition } from "transition-hook";
 import { usePanelOpen } from "./menu";
 import { Routes, Route, useNavigate, Outlet } from "react-router-dom";
 import { useMatch } from "react-router";
+import {
+  MapboxMapProvider,
+  MapBottomControls,
+  MapStyledContainer,
+  MapZoomControl,
+} from "./map-view";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));
@@ -158,32 +164,36 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
 
   if (!loaded) return h(Spinner);
 
-  return h("div.map-page", [
-    h(
-      "div.main-ui",
-      {
-        className,
-        onMouseDown,
-      },
-      [
-        h("div.context-stack", { className: contextClass, ref }, [
-          h(Searchbar, { className: "searchbar" }),
-          h.if(contextPanelTrans.shouldMount)(Menu, {
-            className: "context-panel",
+  return h(MapboxMapProvider, [
+    h(MapStyledContainer, { className: "map-page" }, [
+      h(
+        "div.main-ui",
+        {
+          className,
+          onMouseDown,
+        },
+        [
+          h("div.context-stack", { className: contextClass, ref }, [
+            h(Searchbar, { className: "searchbar" }),
+            h.if(contextPanelTrans.shouldMount)(Menu, {
+              className: "context-panel",
+            }),
+          ]),
+          h(MapView, {
+            backend,
           }),
-        ]),
-        h(MapView, {
-          backend,
-        }),
-        h("div.detail-stack.infodrawer-container", [
-          h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
-            className: "detail-panel",
-          }),
-          h("div.spacer"),
-        ]),
-      ]
-    ),
-    h("div.bottom", null, h(ElevationChart, null)),
+          h("div.detail-stack.infodrawer-container", [
+            h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
+              className: "detail-panel",
+            }),
+            h(MapZoomControl),
+            h("div.spacer"),
+            h(MapBottomControls),
+          ]),
+        ]
+      ),
+      h("div.bottom", null, h(ElevationChart, null)),
+    ]),
   ]);
 };
 
