@@ -25,12 +25,13 @@ import classNames from "classnames";
 import styles from "./main.module.styl";
 import loadable from "@loadable/component";
 import UsageText from "../usage.mdx";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate, useHref } from "react-router-dom";
 import Changelog from "../../changelog.mdx";
 import { useMatch, useLocation } from "react-router";
 import { useTransition } from "transition-hook";
 import { useCurrentPage } from "./nav-hooks";
 import useBreadcrumbs from "use-react-router-breadcrumbs";
+import { routerBasename } from "../Settings";
 
 function ChangelogPanel() {
   return h("div.bp3-text.text-panel", [h(Changelog)]);
@@ -91,21 +92,26 @@ const YourLocationButton = () => {
   );
 };
 
-function useHashNavigate() {
+function useHashNavigate(to: string) {
+  // This must be a bug that we have to manage this ourselves.
+  const base = routerBasename.replace(/\/$/, "");
   const navigate = useNavigate();
-  return (to: string) => {
-    navigate(to + location.hash);
+  if (to.startsWith("/")) {
+    to = base + to;
+  }
+  const href = useHref(to);
+  return () => {
+    const loc = href + location.hash;
+    navigate(loc);
   };
 }
 
 const LinkButton = (props: ButtonProps & { to: string }) => {
   const { to, ...rest } = props;
-  const navigate = useHashNavigate();
+  const onClick = useHashNavigate(to);
   return h(Button, {
     ...rest,
-    onClick() {
-      navigate(to);
-    },
+    onClick,
   });
 };
 
@@ -113,14 +119,12 @@ const MinimalButton = (props) => h(Button, { ...props, minimal: true });
 
 const TabButton = (props: ButtonProps & { to: string }) => {
   const { to, ...rest } = props;
-  let navigate = useHashNavigate();
+  let onClick = useHashNavigate(to);
   const active = useMatch(to) != null;
 
   return h(MinimalButton, {
     active,
-    onClick() {
-      navigate(to);
-    },
+    onClick,
     ...rest,
     className: "tab-button",
   });
@@ -268,7 +272,7 @@ const Menu = (props) => {
   let { className } = props;
   const { inputFocus } = useSearchState();
 
-  const navigate = useHashNavigate();
+  const navigateHome = useHashNavigate("/");
 
   const pageName = useCurrentPage();
   const isNarrow = pageName == "layers";
@@ -289,9 +293,7 @@ const Menu = (props) => {
   return h(
     CloseableCard,
     {
-      onClose() {
-        navigate("/");
-      },
+      onClose: navigateHome,
       insetContent: false,
       className,
       renderHeader: () => h(CloseableCard.Header, h(MenuHeaderButtons)),
@@ -311,7 +313,7 @@ const Menu = (props) => {
 };
 
 function NotFoundPage() {
-  const navigate = useHashNavigate();
+  const navigate = useHashNavigate("/");
   return h(
     "div.text-panel",
     h(NonIdealState, {
@@ -319,9 +321,7 @@ function NotFoundPage() {
       action: h(
         Button,
         {
-          onClick() {
-            navigate("/");
-          },
+          onClick: navigate,
           minimal: true,
           rightIcon: "chevron-right",
         },

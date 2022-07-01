@@ -22,3 +22,5 @@ export const SETTINGS = {
   pbdbDomain: "https://paleobiodb.org",
   mapboxAccessToken: process.env.MAPBOX_API_TOKEN,
 };
+
+export const routerBasename = process.env.PUBLIC_URL;

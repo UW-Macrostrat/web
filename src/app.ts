@@ -18,6 +18,7 @@ import {
   createRouterMiddleware,
   ReduxRouterState,
 } from "@lagunovsky/redux-react-router";
+import { routerBasename } from "./map-interface/Settings";
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
@@ -56,7 +57,7 @@ const App = () => {
     { store },
     h(
       ReduxRouter,
-      { basename: MACROSTRAT_BASE_URL, store, history: browserHistory },
+      { basename: routerBasename, store, history: browserHistory },
       [
         h(Routes, [
           h(Route, { path: "/sources", element: h(Sources) }),
