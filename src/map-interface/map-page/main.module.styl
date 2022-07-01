@@ -4,9 +4,9 @@ This stylesheet the overall application page layout.
 
 .map-page
   height 100vh
+  width 100vw
   /* mobile viewport bug fix */
   max-height: -webkit-fill-available;
-  width 100vw
   display flex
   flex-direction column
   position relative
@@ -70,8 +70,7 @@ This stylesheet the overall application page layout.
 
 .map-view-container
   flex-grow 1
-  position: relative
-
+  position relative
 
 .searchbar-holder
   margin-bottom 0.5em
@@ -260,6 +259,7 @@ map-control()
     max-width 34em
     min-width 14em
     width: 16em
+    transition width 300ms ease
     //margin-right: -15.5em
     &.panel-open
       width: 34em
@@ -267,11 +267,9 @@ map-control()
     &.layers
       width: 18em
       margin-right 0.5em
-    transition width 300ms ease
 
-  .main-ui.detail-panel-open
-    .detail-stack
-      width: 30em
+  .main-ui.detail-panel-open .detail-stack
+    width: 30em
 
   .detail-stack
     width 30em
