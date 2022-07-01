@@ -676,6 +676,7 @@ class Map extends Component<MapProps, {}> {
   // PBDB hexgrids and points are refreshed on every map move
   refreshPBDB() {
     let bounds = this.map.getBounds();
+    console.log(bounds);
     let zoom = this.map.getZoom();
     PBDBHelper(this, bounds, zoom);
   }
