@@ -12,6 +12,7 @@ import { createStore, compose, applyMiddleware } from "redux";
 import reducerStack, {
   Action,
   browserHistory,
+  AppState,
 } from "./map-interface/app-state";
 import {
   createRouterMiddleware,
@@ -19,8 +20,6 @@ import {
 } from "@lagunovsky/redux-react-router";
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-
-type AppState = { router: ReduxRouterState; globe: any; core: any };
 
 const routerMiddleware = createRouterMiddleware(browserHistory);
 // Create the data store

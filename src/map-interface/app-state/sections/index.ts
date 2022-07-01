@@ -6,12 +6,14 @@ import { CoreAction } from "./core/actions";
 import { coreReducer, CoreState } from "./core";
 import { MapAction } from "./map";
 import { createRouterReducer } from "@lagunovsky/redux-react-router";
+import { ReduxRouterState } from "@lagunovsky/redux-react-router";
 
 export const browserHistory = createBrowserHistory();
 
 export type AppState = {
   core: CoreState;
   menu: MenuState;
+  router: ReduxRouterState;
 };
 
 const reducers = combineReducers({
