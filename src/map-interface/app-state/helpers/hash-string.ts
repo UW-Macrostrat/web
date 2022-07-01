@@ -105,6 +105,19 @@ function getLayerDescriptionFromLayers(layers: Set<MapLayer>): string[] {
     // Special case for no layers
     layerArr.push("none");
   }
+
+  // If all geology layers are present, remove them and replace with "geology"
+  let geoLayers = layerArr.filter((lyr) => geologyLayers.includes(lyr));
+  if (geoLayers.length == geologyLayers.length) {
+    layerArr = layerArr.filter((lyr) => !geologyLayers.includes(lyr));
+    layerArr.push("geology");
+  }
+
+  // If "geology" is the only layer, we remove it as implicit
+  if (layerArr.length == 1 && layerArr[0] == "geology") {
+    layerArr = [];
+  }
+
   return layerArr;
 }
 
@@ -117,12 +130,23 @@ function validateLayers(layers: string[]): Set<MapLayer> {
   return new Set(layers.filter(isValidLayer));
 }
 
+const geologyLayers = ["bedrock", "lines"];
+
 function layerDescriptionToLayers(layers: string | string[]): Set<MapLayer> {
   if (!Array.isArray(layers)) {
     layers = [layers];
   }
 
-  if (layers == ["none"]) {
+  if (layers.length == 0) {
+    layers = ["geology"];
+  }
+
+  if (layers.includes("geology")) {
+    layers = layers.filter((lyr) => lyr != "geology");
+    layers.push(...geologyLayers);
+  }
+
+  if (layers.length == 1 && layers[0] == "none") {
     layers = [];
   }
 
@@ -134,7 +158,7 @@ function updateStateFromURI(state): GotInitialMapState | void {
   try {
     const hashData = getHashString(window.location.hash) ?? {};
 
-    let { show = ["bedrock", "lines"] } = hashData;
+    let { show = [] } = hashData;
     const { x = 16, y = 23, z = 2, a = 0, e = 0 } = hashData;
 
     const mapLayers = layerDescriptionToLayers(show);
