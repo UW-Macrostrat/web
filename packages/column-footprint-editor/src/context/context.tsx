@@ -1,5 +1,5 @@
 import React, { createContext, useReducer, useEffect } from "react";
-import { fetchColumns, fetchLines } from "./fetch";
+import { fetchColumns, fetchLines, fetchPoints } from "./fetch";
 
 //////////////////////// Data Types ///////////////////////
 
@@ -8,12 +8,14 @@ type ProjectName = { name: string };
 type ProjectDescription = { description: string };
 type Columns = { columns: object };
 type Lines = { lines: object };
+type Points = { points: object };
 type Project = ProjectId & ProjectName & ProjectDescription;
 
 /////////////////////// Async Actions ///////////////////////
 
 type FetchColumns = { type: "fetch-columns"; payload: ProjectId };
 type FetchLines = { type: "fetch-lines"; payload: ProjectId };
+type FetchPoints = { type: "fetch-points"; payload: ProjectId };
 
 ////////////////////// Sync Actions ///////////////////////////
 
@@ -22,6 +24,7 @@ type ImportOverlay = { type: "import-overlay"; payload: { open: boolean } };
 type IsSaving = { type: "is-saving"; payload: { isSaving: boolean } };
 type SetColumns = { type: "set-columns"; payload: Columns };
 type SetLines = { type: "set-lines"; payload: Lines };
+type SetPoints = { type: "set-points"; payload: Points };
 
 ////////////////////// Union Action Types //////////////////////
 type SyncAppActions =
@@ -29,8 +32,9 @@ type SyncAppActions =
   | ImportOverlay
   | IsSaving
   | SetColumns
-  | SetLines;
-type AsyncAppActions = FetchColumns | FetchLines;
+  | SetLines
+  | SetPoints;
+type AsyncAppActions = FetchColumns | FetchLines | FetchPoints;
 
 function useAppContextActions(dispatch) {
   // maybe state and action??
@@ -45,6 +49,11 @@ function useAppContextActions(dispatch) {
         const project_id = action.payload.project_id;
         const columns = await fetchColumns(project_id);
         return dispatch({ type: "set-columns", payload: { columns } });
+      }
+      case "fetch-points": {
+        const project_id = action.payload.project_id;
+        const points = await fetchPoints(project_id);
+        return dispatch({ type: "set-points", payload: { points } });
       }
       default:
         return dispatch(action);
@@ -69,6 +78,11 @@ const appReducer = (state = initialState, action: SyncAppActions) => {
         ...state,
         lines: action.payload.lines,
       };
+    case "set-points":
+      return {
+        ...state,
+        points: action.payload.points,
+      };
     case "import-overlay":
       return {
         ...state,
@@ -84,22 +98,24 @@ const appReducer = (state = initialState, action: SyncAppActions) => {
   }
 };
 interface ProjectInterface {
-  project_id: number;
-  name: string;
-  description: string;
+  project_id: number | null;
+  name: string | null;
+  description: string | null;
 }
 interface AppState {
   project: ProjectInterface;
-  lines: object;
-  columns: object;
+  lines: object | null;
+  points: object | null;
+  columns: object | null;
   importOverlayOpen: boolean;
   isSaving: boolean;
-  projectColumnGroups: object[];
+  projectColumnGroups: object[] | null;
 }
 
 let initialState: AppState = {
   project: { project_id: null, name: null, description: null },
   lines: null,
+  points: null,
   columns: null,
   importOverlayOpen: true,
   isSaving: false,
@@ -124,6 +140,7 @@ function AppContextProvider(props) {
   function updateLinesAndColumns(project_id) {
     runAction({ type: "fetch-lines", payload: { project_id } });
     runAction({ type: "fetch-columns", payload: { project_id } });
+    runAction({ type: "fetch-points", payload: { project_id } });
   }
 
   useEffect(() => {

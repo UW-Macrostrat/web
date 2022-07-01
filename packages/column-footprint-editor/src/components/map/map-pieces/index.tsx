@@ -69,15 +69,15 @@ function editModeMap(map, state) {
 
   Draw.add(state.lines);
 
-  map.on("click", async function(e) {
+  map.on("click", async function (e) {
     console.log("Mode", Draw.getMode());
   });
 
-  map.on("draw.create", async function(e) {
+  map.on("draw.create", async function (e) {
     console.log("created new feature!");
   });
 
-  map.on("draw.delete", async function(e) {
+  map.on("draw.delete", async function (e) {
     console.log("Deleted a Feature");
     const { type: action, features } = e;
 
@@ -88,7 +88,7 @@ function editModeMap(map, state) {
     });
   });
 
-  map.on("draw.update", async function(e) {
+  map.on("draw.update", async function (e) {
     console.log(e);
     Draw.changeMode("simple_select");
   });
