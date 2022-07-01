@@ -38,7 +38,6 @@ export function MapControlWrapper({ className, control }) {
     const controlElement = ctrl.onAdd(map.current);
     controlContainer.current.appendChild(controlElement);
     return () => {
-      controlContainer.current?.removeChild(controlRef.current.node);
       controlRef.current?.onRemove();
     };
   }, [map?.current, controlRef, controlContainer]);
