@@ -190,5 +190,4 @@ export interface CoreState extends MapState, AsyncRequestState {
   filters: any[];
   filteredColumns: object;
   data: [];
-  nextRoute: string | null;
 }

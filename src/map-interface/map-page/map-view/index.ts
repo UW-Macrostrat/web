@@ -121,12 +121,14 @@ function MapContainer(props) {
 
     setMapPosition(map, mapPosition);
     // Update the URI when the map moves
-    map.on("moveend", () => {
+
+    const mapMovedCallback = () => {
       runAction({
         type: "map-moved",
         data: buildMapPosition(map),
       });
-    });
+    };
+    map.on("moveend", debounce(mapMovedCallback, 100));
   }, [mapRef]);
 
   useEffect(() => {

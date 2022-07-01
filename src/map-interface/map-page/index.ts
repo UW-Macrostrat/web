@@ -153,12 +153,6 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
     event.stopPropagation();
   };
 
-  const nextRoute = useSelector((s) => s.core.nextRoute);
-  useEffect(() => {
-    if (nextRoute == null) return;
-    navigate(nextRoute);
-  }, [nextRoute]);
-
   const loaded = useSelector((state) => state.core.initialLoadComplete);
   useEffect(() => {
     runAction({ type: "get-initial-map-state" });

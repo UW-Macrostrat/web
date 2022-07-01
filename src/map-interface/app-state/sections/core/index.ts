@@ -98,11 +98,8 @@ export function coreReducer(
     case "toggle-menu":
       const shouldOpen = state.inputFocus || !state.menuOpen;
 
-      let nextRoute = shouldOpen ? "/layers" : "/";
-
       return {
         ...state,
-        nextRoute,
         contextPanelOpen: shouldOpen,
         menuOpen: shouldOpen,
         isSearching: false,

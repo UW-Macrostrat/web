@@ -6,7 +6,10 @@ import { CoreAction } from "./core/actions";
 import { coreReducer, CoreState } from "./core";
 import { MapAction } from "./map";
 import { createRouterReducer } from "@lagunovsky/redux-react-router";
-import { ReduxRouterState } from "@lagunovsky/redux-react-router";
+import {
+  ReduxRouterState,
+  RouterActions,
+} from "@lagunovsky/redux-react-router";
 
 export const browserHistory = createBrowserHistory();
 
@@ -16,8 +19,10 @@ export type AppState = {
   router: ReduxRouterState;
 };
 
+const routerReducer = createRouterReducer(browserHistory);
+
 const reducers = combineReducers({
-  router: createRouterReducer(browserHistory),
+  router: routerReducer,
   menu: menuReducer,
   core: coreReducer,
 });
@@ -37,7 +42,7 @@ function overallReducer(state: AppState, action: Action): AppState {
 
 const appReducer = reduceReducers(overallReducer, reducers);
 
-export type Action = CoreAction | MenuAction | MapAction;
+export type Action = CoreAction | MenuAction | MapAction | RouterActions;
 
 export default appReducer;
 export * from "./core";
