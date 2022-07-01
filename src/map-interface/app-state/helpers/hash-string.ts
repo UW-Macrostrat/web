@@ -13,14 +13,7 @@ const fmt2 = format(".2~f");
 const fmtInt = format(".0f");
 
 function updateURI(state: CoreState) {
-  let args: object = {
-    layers: Array.from(state.mapLayers),
-  };
-
-  if (args.layers.length == 0) {
-    // Special case for no layers
-    args.layers.push("none");
-  }
+  let args: object = {};
 
   for (const filter of state.filters) {
     args[filter.type] = filter.id || filter.name;
@@ -48,6 +41,12 @@ function updateURI(state: CoreState) {
   if (pitch != 0) {
     args.e = fmtInt(pos.pitch);
   }
+
+  const layers = getLayerDescriptionFromLayers(state.mapLayers);
+  if (layers.length != 0) {
+    args.show = layers;
+  }
+
   setHashString(args, { arrayFormat: "comma", sort: false });
   return state;
 }
@@ -100,6 +99,15 @@ function _fmt(x: string | number | string[]) {
   return parseFloat(x.toString());
 }
 
+function getLayerDescriptionFromLayers(layers: Set<MapLayer>): string[] {
+  let layerArr: string[] = Array.from(layers);
+  if (layerArr.length == 0) {
+    // Special case for no layers
+    layerArr.push("none");
+  }
+  return layerArr;
+}
+
 function isValidLayer(test: string): test is MapLayer {
   const vals: string[] = Object.values(MapLayer);
   return vals.includes(test);
@@ -109,23 +117,27 @@ function validateLayers(layers: string[]): Set<MapLayer> {
   return new Set(layers.filter(isValidLayer));
 }
 
+function layerDescriptionToLayers(layers: string | string[]): Set<MapLayer> {
+  if (!Array.isArray(layers)) {
+    layers = [layers];
+  }
+
+  if (layers == ["none"]) {
+    layers = [];
+  }
+
+  return validateLayers(layers);
+}
+
 function updateStateFromURI(state): GotInitialMapState | void {
   // Get the default map state
   try {
     const hashData = getHashString(window.location.hash) ?? {};
 
-    let { layers = ["bedrock", "lines"] } = hashData;
+    let { show = ["bedrock", "lines"] } = hashData;
     const { x = 16, y = 23, z = 2, a = 0, e = 0 } = hashData;
 
-    if (!Array.isArray(layers)) {
-      layers = [layers];
-    }
-
-    if (layers == ["none"]) {
-      layers = [];
-    }
-
-    const mapLayers = validateLayers(layers);
+    const mapLayers = layerDescriptionToLayers(show);
 
     const lng = _fmt(x);
     const lat = _fmt(y);
