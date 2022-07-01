@@ -59,8 +59,6 @@ const defaultState: CoreState = {
   filtersOpen: false,
   filters: [],
   filteredColumns: {},
-  nextRoute: null,
-
   data: [],
   mapPosition: {
     camera: {
@@ -102,15 +100,6 @@ export function coreReducer(
         ...state,
         contextPanelOpen: shouldOpen,
         menuOpen: shouldOpen,
-        isSearching: false,
-        inputFocus: false,
-      };
-    case "close-menu":
-      return {
-        ...state,
-        nextRoute: "/",
-        contextPanelOpen: false,
-        menuOpen: false,
         isSearching: false,
         inputFocus: false,
       };

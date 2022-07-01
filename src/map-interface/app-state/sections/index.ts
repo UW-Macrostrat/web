@@ -6,9 +6,11 @@ import { CoreAction } from "./core/actions";
 import { coreReducer, CoreState } from "./core";
 import { MapAction } from "./map";
 import { createRouterReducer } from "@lagunovsky/redux-react-router";
+import update from "immutability-helper";
 import {
   ReduxRouterState,
   RouterActions,
+  push,
 } from "@lagunovsky/redux-react-router";
 
 export const browserHistory = createBrowserHistory();
@@ -28,16 +30,19 @@ const reducers = combineReducers({
 });
 
 function overallReducer(state: AppState, action: Action): AppState {
-  if (action.type === "got-initial-map-state" || action.type == "map-moved") {
-    return {
-      ...state,
-      core: {
-        ...state.core,
-        mapPosition: action.data,
-      },
-    };
+  switch (action.type) {
+    case "got-initial-map-state":
+    case "map-moved":
+      return {
+        ...state,
+        core: {
+          ...state.core,
+          mapPosition: action.data,
+        },
+      };
+    default:
+      return state;
   }
-  return state;
 }
 
 const appReducer = reduceReducers(overallReducer, reducers);
