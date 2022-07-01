@@ -143,6 +143,7 @@ function MapContainer(props) {
     onResize(sz) {
       const rect = parentRef.current?.getBoundingClientRect();
       const childRect = ref.current?.getBoundingClientRect();
+      if (rect == null || childRect == null) return;
       const padding = calcMapPadding(rect, childRect);
       mapRef.current?.easeTo({ padding }, { duration: 800 });
     },
