@@ -8,7 +8,7 @@ import { Spinner } from "@blueprintjs/core";
 import "./styles/index.styl";
 
 import { Provider } from "react-redux";
-import { createStore, compose } from "redux";
+import { createStore, compose, applyMiddleware } from "redux";
 import reducerStack, {
   Action,
   browserHistory,
@@ -22,10 +22,11 @@ const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 type AppState = { router: ReduxRouterState; globe: any; core: any };
 
+const routerMiddleware = createRouterMiddleware(browserHistory);
 // Create the data store
 let store = createStore<AppState, Action, any, any>(
   reducerStack,
-  composeEnhancers(createRouterMiddleware(browserHistory))
+  composeEnhancers(applyMiddleware(routerMiddleware))
 );
 
 //const _ColumnPage = loadable(import("./columns"));
