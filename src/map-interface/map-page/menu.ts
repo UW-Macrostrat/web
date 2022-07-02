@@ -94,11 +94,7 @@ const YourLocationButton = () => {
 
 function useHashNavigate(to: string) {
   // This must be a bug that we have to manage this ourselves.
-  const base = routerBasename.replace(/\/$/, "");
   const navigate = useNavigate();
-  if (to.startsWith("/")) {
-    to = base + to;
-  }
   //const href = useHref(to);
   return () => {
     const loc = to + location.hash;
