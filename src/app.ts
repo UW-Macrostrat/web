@@ -14,10 +14,7 @@ import reducerStack, {
   browserHistory,
   AppState,
 } from "./map-interface/app-state";
-import {
-  createRouterMiddleware,
-  ReduxRouterState,
-} from "@lagunovsky/redux-react-router";
+import { createRouterMiddleware } from "@lagunovsky/redux-react-router";
 import { routerBasename } from "./map-interface/Settings";
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
@@ -44,6 +41,8 @@ function GlobePage() {
   return h(MapPage, { backend: MapBackend.CESIUM });
 }
 */
+
+console.log(routerBasename);
 
 const _Sources = loadable(() => import("~/burwell-sources"));
 const Sources = () => h(Suspense, { fallback: h(Spinner) }, h(_Sources));

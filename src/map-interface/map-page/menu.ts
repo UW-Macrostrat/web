@@ -99,9 +99,10 @@ function useHashNavigate(to: string) {
   if (to.startsWith("/")) {
     to = base + to;
   }
-  const href = useHref(to);
+  //const href = useHref(to);
   return () => {
-    const loc = href + location.hash;
+    const loc = to + location.hash;
+    console.log("navigating to", loc);
     navigate(loc);
   };
 }
