@@ -12,6 +12,7 @@ import axios from "axios";
 import { asyncFilterHandler } from "./filters";
 import { updateStateFromURI } from "../helpers";
 import { push } from "@lagunovsky/redux-react-router";
+import { routerBasename } from "~/map-interface/Settings";
 
 function getCancelToken() {
   let CancelToken = axios.CancelToken;
@@ -29,16 +30,18 @@ async function actionRunner(
     case "get-initial-map-state":
       return updateStateFromURI(coreState);
     case "toggle-menu":
+      const isRootRoute = state.router.location.pathname == routerBasename;
+      const goToLayersPage = push(routerBasename + "layers" + location.hash);
       if (state.core.inputFocus) {
-        if (state.router.location.pathname == "/") {
-          dispatch(push("/layers"));
+        if (isRootRoute) {
+          dispatch(goToLayersPage);
         }
         return { type: "set-input-focus", inputFocus: false };
       }
-      if (state.router.location.pathname == "/") {
-        return push("/layers");
+      if (isRootRoute) {
+        return goToLayersPage;
       }
-      return push("/");
+      return push(routerBasename + location.hash);
     case "fetch-search-query":
       let term = action.term;
       let CancelToken = axios.CancelToken;

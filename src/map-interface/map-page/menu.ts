@@ -95,7 +95,7 @@ const YourLocationButton = () => {
 function useHashNavigate(to: string) {
   // This must be a bug that we have to manage this ourselves.
   const navigate = useNavigate();
-  //const href = useHref(to);
+
   return () => {
     const loc = to + location.hash;
     console.log("navigating to", loc);
