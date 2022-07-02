@@ -31,7 +31,7 @@ import { useMatch, useLocation } from "react-router";
 import { useTransition } from "transition-hook";
 import { useCurrentPage } from "./nav-hooks";
 import useBreadcrumbs from "use-react-router-breadcrumbs";
-import { routerBasename } from "../Settings";
+import { useState, useEffect } from "react";
 
 function ChangelogPanel() {
   return h("div.bp3-text.text-panel", [h(Changelog)]);
@@ -93,13 +93,9 @@ const YourLocationButton = () => {
 };
 
 function useHashNavigate(to: string) {
-  // This must be a bug that we have to manage this ourselves.
   const navigate = useNavigate();
-
   return () => {
-    const loc = to + location.hash;
-    console.log("navigating to", loc);
-    navigate(loc);
+    navigate(to + location.hash);
   };
 }
 
@@ -265,6 +261,26 @@ function MenuHeaderButtons() {
   ]);
 }
 
+function HeaderWrapper({ children, minimal = false }) {
+  /* A small component that changes whether a "minimal" class is applied, but only if the item isn't hovered */
+  const [isHovered, setIsHovered] = useState(false);
+  const [isMinimal, setIsMinimal] = useState(minimal);
+  const onMouseEnter = () => setIsHovered(true);
+  const onMouseLeave = () => setIsHovered(false);
+  useEffect(() => {
+    if (isHovered) return;
+    setIsMinimal(minimal);
+  }, [minimal, isHovered]);
+
+  const className = classNames("panel-header", { minimal: isMinimal });
+
+  return h(
+    CloseableCard.Header,
+    { onMouseEnter, onMouseLeave, className },
+    children
+  );
+}
+
 const Menu = (props) => {
   let { className } = props;
   const { inputFocus } = useSearchState();
@@ -293,7 +309,8 @@ const Menu = (props) => {
       onClose: navigateHome,
       insetContent: false,
       className,
-      renderHeader: () => h(CloseableCard.Header, h(MenuHeaderButtons)),
+      renderHeader: () =>
+        h(HeaderWrapper, { minimal: isNarrow }, h(MenuHeaderButtons)),
     },
     [
       h(Routes, [

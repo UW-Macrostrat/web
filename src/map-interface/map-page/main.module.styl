@@ -96,20 +96,41 @@ This stylesheet the overall application page layout.
     transition all 0.2s
     transition-delay 0.1s
 
-.context-panel-leave .menu-card, .menu-card.narrow-card
+.menu-card.narrow-card
+  // Transition opacity when leaving context panel
+  .panel-header:not(.minimal)
+    // .tab-button
+    //   &:not(:hover) :global(.bp3-button-text)
+    //     //width 0
+    //     opacity: 1
+        //margin-left: -7px
+    // Fancy CSS to select all buttons _after_ the currently hovered one
+    .tab-button:global(.bp3-active) ~ .tab-button :global(.bp3-button-text)
+        width 0
+        opacity: 0
+        margin-left: -7px
+
+// When panel is closing, fade out the buttons text-first
+.context-panel-leave .menu-card .panel-header
+  .tab-button :global(.bp3-button-text)
+    opacity: 0
+    width: 0
+
+.narrow-card.narrow-enter .panel-header .buttons
+  // When we have not yet transitioned to a "minimal" state, we need extra space
+  // to not crowd buttons that haven't yet transitioned
+  margin-right: -500px
+
+
+
+
+.panel-header.minimal
   .tab-button:not(:hover) :global(.bp3-button-text)
       width 0
       opacity: 0
       margin-left: -7px
 
-
 .menu-card
-  :global(.bp3-panel-stack2)
-    overflow: unset
-  :global(.bp3-panel-stack-view)
-    border-right: 0
-    position: relative;
-    overflow: unset
   :global
     .bp3-text, .text-panel
       ul
