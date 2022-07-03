@@ -1,5 +1,20 @@
 #!/usr/bin/env bash
 
+if [[ $(git diff --stat) != '' ]]; then
+  echo 'Cannot deploy with uncommited changes'
+  exit 1
+fi
+echo 'Working directory is clean.'
+
+version="$(node -p \"require('./package.json').version\")"
+
+echo "Tagging version v$version"
+
+git tag -a "v${version}" -m "Version ${version}"
+
+git push
+
+echo "Deploying to steno"
 deploy_dir=/data/projects/macrostrat/map
 
 npm run clean
