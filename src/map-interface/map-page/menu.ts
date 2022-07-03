@@ -262,7 +262,8 @@ function MenuHeaderButtons() {
 }
 
 function HeaderWrapper({ children, minimal = false }) {
-  /* A small component that changes whether a "minimal" class is applied, but only if the item isn't hovered */
+  /* A small component that changes whether a "minimal" class is applied, but only if the item isn't hovered.
+  This prevents buttons from moving around when the user is hovering over them. */
   const [isHovered, setIsHovered] = useState(false);
   const [isMinimal, setIsMinimal] = useState(minimal);
   const onMouseEnter = () => setIsHovered(true);
