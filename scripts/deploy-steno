@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 
+version=$(node -p "require('./package.json').version")
+
 if [[ $(git diff --stat) != '' ]]; then
-  echo 'Cannot deploy with uncommited changes'
+  echo 'Cannot deploy with uncommitted changes'
   exit 1
 fi
 echo 'Working directory is clean.'
 
-version="$(node -p \"require('./package.json').version\")"
 
 echo "Tagging version v$version"
 
