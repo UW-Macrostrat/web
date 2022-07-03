@@ -2,6 +2,7 @@ import React from "react";
 import hyper from "@macrostrat/hyper";
 import { NavLink } from "react-router-dom";
 import { useAppActions } from "../app-state";
+import { LinkButton } from "./buttons";
 import { Link } from "react-router-dom";
 import styles from "./about.module.styl";
 
@@ -31,6 +32,13 @@ const SoftwareInfo = (props) => {
         },
         "Changelog"
       ),
+      h(LinkButton, {
+        to: "/experiments",
+        icon: "clean",
+        className: "experimental-settings-button",
+        minimal: true,
+        small: true,
+      }),
     ]),
   ]);
 };

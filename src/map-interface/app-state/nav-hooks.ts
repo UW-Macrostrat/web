@@ -1,4 +1,4 @@
-import { useMatch, useLocation } from "react-router";
+import { useMatch, useLocation, useNavigate } from "react-router";
 import classNames from "classnames";
 
 export function usePanelOpen() {
@@ -16,4 +16,11 @@ export function useContextClass() {
 export function useCurrentPage() {
   const { pathname } = useLocation();
   return pathname.slice(pathname.lastIndexOf("/") + 1, pathname.length);
+}
+
+export function useHashNavigate(to: string) {
+  const navigate = useNavigate();
+  return () => {
+    navigate(to + location.hash);
+  };
 }

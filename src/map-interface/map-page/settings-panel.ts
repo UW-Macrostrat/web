@@ -1,11 +1,12 @@
 // Settings panel for the map
 
+import { Switch } from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
 //import { LinkButton } from "@macrostrat/ui-components";
 //import { GlobeSettings } from "@macrostrat/cesium-viewer/settings";
+import { useAppState, useAppActions } from "~/map-interface/app-state";
 import { useLocation } from "react-router";
 //import { DisplayQuality } from "@macrostrat/cesium-viewer";
-import { useDispatch } from "react-redux";
 
 function MapTypeButton(props) {
   const { pathname, hash } = useLocation();
@@ -17,9 +18,22 @@ function MapTypeButton(props) {
 }
 
 const SettingsPanel = (props) => {
-  const { pathname } = useLocation();
-  const globeActive = pathname?.startsWith("/globe");
+  const checked = useAppState((s) => s.core.mapShowLabels);
+  const dispatch = useAppActions();
+  //const { pathname } = useLocation();
+  //const globeActive = pathname?.startsWith("/globe");
   return h("div.settings", [
+    h("h2", "Experimental settings"),
+    h(
+      Switch,
+      {
+        checked,
+        onChange() {
+          dispatch({ type: "toggle-labels" });
+        },
+      },
+      "Show labels"
+    ),
     //h(MapTypeButton),
     //h.if(globeActive)(GlobeSettings),
   ]);

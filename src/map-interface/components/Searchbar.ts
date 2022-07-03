@@ -1,13 +1,12 @@
 import { useCallback, useRef, useEffect } from "react";
 import { Navbar, Button, InputGroup, Spinner, Card } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
-import { useAppActions, useSearchState } from "../app-state";
+import { useAppActions, useSearchState, usePanelOpen } from "../app-state";
 import { useSelector } from "react-redux";
 import { SubtleFilterText } from "./filters-panel";
 import styles from "./searchbar.styl";
 import { PanelSubhead } from "./expansion-panel/headers";
 import classNames from "classnames";
-import { usePanelOpen } from "../map-page/nav-hooks";
 
 const h = hyper.styled(styles);
 

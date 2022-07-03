@@ -56,6 +56,7 @@ const defaultState: CoreState = {
     type: null,
   },
   mapUse3D: false,
+  mapShowLabels: true,
   filtersOpen: false,
   filters: [],
   filteredColumns: {},
@@ -128,6 +129,8 @@ export function coreReducer(
     case "toggle-filters":
       // rework this to open menu panel
       return { ...state, filtersOpen: !state.filtersOpen };
+    case "toggle-labels":
+      return { ...state, mapShowLabels: !state.mapShowLabels };
     case "add-filter":
       let alreadyHasFiter = false;
       state.filters.forEach((filter) => {

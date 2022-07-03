@@ -15,7 +15,7 @@ import styles from "./main.module.styl";
 import classNames from "classnames";
 import { useRef, useEffect } from "react";
 import { useTransition } from "transition-hook";
-import { usePanelOpen, useContextClass } from "./nav-hooks";
+import { usePanelOpen, useContextClass } from "../app-state";
 import {
   MapboxMapProvider,
   MapBottomControls,

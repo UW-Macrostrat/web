@@ -1,4 +1,4 @@
-import { forwardRef, useRef } from "react";
+import { forwardRef, RefObject, useRef } from "react";
 import {
   useAppActions,
   useAppState,
@@ -67,6 +67,37 @@ function calcMapPadding(rect, childRect) {
   };
 }
 
+function toggleMapLabelVisibility(map: mapboxgl.Map, visible: boolean) {
+  // Disable labels on the map
+  console.log("Toggling map visibility");
+  for (let lyr of map.style.stylesheet.layers) {
+    const isLabelLayer = lyr.layout?.["text-field"] != null;
+    if (isLabelLayer) {
+      map.setLayoutProperty(lyr.id, "visibility", visible ? "visible" : "none");
+    }
+  }
+}
+
+function useMapLabelVisibility(
+  mapRef: RefObject<mapboxgl.Map>,
+  mapShowLabels: boolean
+) {
+  // Labek visibility
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map?.style?.stylesheet == null) return;
+    toggleMapLabelVisibility(map, mapShowLabels);
+  }, [mapRef, mapShowLabels]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map == null) return;
+    map.on("style.load", () => {
+      toggleMapLabelVisibility(map, mapShowLabels);
+    });
+  }, [mapRef]);
+}
+
 function useElevationMarkerLocation(mapRef, elevationMarkerLocation) {
   // Handle elevation marker location
   useEffect(() => {
@@ -103,6 +134,7 @@ function MapContainer(props) {
     mapPosition,
     infoDrawerOpen,
     mapIsLoading,
+    mapShowLabels,
   } = useAppState((state) => state.core);
 
   const runAction = useAppActions();
@@ -137,6 +169,8 @@ function MapContainer(props) {
     }
     runAction({ type: "map-layers-changed", mapLayers });
   }, [filters, mapLayers]);
+
+  useMapLabelVisibility(mapRef, mapShowLabels);
 
   useResizeObserver({
     ref: parentRef,
