@@ -91,6 +91,16 @@ function useElevationMarkerLocation(mapRef, elevationMarkerLocation) {
   }, [mapRef, elevationMarkerLocation]);
 }
 
+function toggleMapLabelVisibility(map: mapboxgl.Map, visible: boolean) {
+  // Disable labels on the map
+  for (let lyr of map.style.stylesheet.layers) {
+    const isLabelLayer = lyr.layout?.["text-field"] != null;
+    if (isLabelLayer) {
+      map.setLayoutProperty(lyr.id, "visibility", visible ? "visible" : "none");
+    }
+  }
+}
+
 function MapContainer(props) {
   const {
     filters,
@@ -103,6 +113,7 @@ function MapContainer(props) {
     mapPosition,
     infoDrawerOpen,
     mapIsLoading,
+    mapShowLabels,
   } = useAppState((state) => state.core);
 
   const runAction = useAppActions();
@@ -137,6 +148,12 @@ function MapContainer(props) {
     }
     runAction({ type: "map-layers-changed", mapLayers });
   }, [filters, mapLayers]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map?.style?.stylesheet == null) return;
+    toggleMapLabelVisibility(map, mapShowLabels);
+  }, [mapRef, mapShowLabels]);
 
   useResizeObserver({
     ref: parentRef,

@@ -19,19 +19,22 @@ import {
   useSearchState,
   MapLayer,
   MapPosition,
+  useHashNavigate,
 } from "../app-state";
 import { SearchResults } from "../components/searchbar";
 import classNames from "classnames";
 import styles from "./main.module.styl";
 import loadable from "@loadable/component";
 import UsageText from "../usage.mdx";
-import { Routes, Route, useNavigate, useHref } from "react-router-dom";
-import Changelog from "../../changelog.mdx";
+import { Routes, Route } from "react-router-dom";
+import Changelog from "~/changelog.mdx";
 import { useMatch, useLocation } from "react-router";
 import { useTransition } from "transition-hook";
-import { useCurrentPage } from "./nav-hooks";
+import { useCurrentPage } from "../app-state/nav-hooks";
 import useBreadcrumbs from "use-react-router-breadcrumbs";
+import { SettingsPanel } from "./settings-panel";
 import { useState, useEffect } from "react";
+import { LinkButton } from "../components/buttons";
 
 function ChangelogPanel() {
   return h("div.bp3-text.text-panel", [h(Changelog)]);
@@ -92,32 +95,16 @@ const YourLocationButton = () => {
   );
 };
 
-function useHashNavigate(to: string) {
-  const navigate = useNavigate();
-  return () => {
-    navigate(to + location.hash);
-  };
-}
-
-const LinkButton = (props: ButtonProps & { to: string }) => {
-  const { to, ...rest } = props;
-  const onClick = useHashNavigate(to);
-  return h(Button, {
-    ...rest,
-    onClick,
-  });
-};
-
 const MinimalButton = (props) => h(Button, { ...props, minimal: true });
 
 const TabButton = (props: ButtonProps & { to: string }) => {
   const { to, ...rest } = props;
-  let onClick = useHashNavigate(to);
   const active = useMatch(to) != null;
 
-  return h(MinimalButton, {
+  return h(LinkButton, {
+    minimal: true,
     active,
-    onClick,
+    to,
     ...rest,
     className: "tab-button",
   });
@@ -201,6 +188,7 @@ const locationTitleForRoute = {
   "/about": "About",
   "/usage": "Usage",
   "/settings": "Settings",
+  "/experiments": "Experiments",
   "/layers": "Layers",
   "/changelog": "Changelog",
 };
@@ -319,10 +307,10 @@ const Menu = (props) => {
         h(Route, { path: "about", element: h(AboutText) }),
         h(Route, { path: "usage", element: h(UsagePanel) }),
         h(Route, { path: "changelog", element: h(ChangelogPanel) }),
+        h(Route, { path: "experiments", element: h(SettingsPanel) }),
         // Need a better page transition before we can do this
         //h(Route, { path: "*", element: h(NotFoundPage) }),
       ]),
-      //h(Route, { path: "/settings", element: h(SettingsPanel) })
     ]
   );
 };
