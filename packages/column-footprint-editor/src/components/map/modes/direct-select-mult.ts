@@ -7,7 +7,7 @@ import * as Constants from "@mapbox/mapbox-gl-draw/src/constants";
 
 const MultVertDirectSelect = MapboxDraw.modes.direct_select;
 
-MultVertDirectSelect.onSetup = function(opts) {
+MultVertDirectSelect.onSetup = function (opts) {
   const featureId = opts.featureId;
   const feature = this.getFeature(featureId);
 
@@ -49,7 +49,7 @@ MultVertDirectSelect.onSetup = function(opts) {
   return state;
 };
 
-MultVertDirectSelect.onDrag = function(state, e) {
+MultVertDirectSelect.onDrag = function (state, e) {
   if (state.canDragMove !== true) return;
   state.dragMoving = true;
   e.originalEvent.stopPropagation();
@@ -79,7 +79,7 @@ MultVertDirectSelect.onDrag = function(state, e) {
  * Helper function to add a feature coordinate change to changeset
  * @param feature valid mapbox feature
  */
-MultVertDirectSelect.onDragChangeSetAdder = function(feature) {
+MultVertDirectSelect.onDragChangeSetAdder = function (feature) {
   const action = Constants.updateActions.CHANGE_COORDINATES;
   const obj = {
     action,
@@ -88,7 +88,7 @@ MultVertDirectSelect.onDragChangeSetAdder = function(feature) {
   this.map.addToChangeSet(obj);
 };
 
-MultVertDirectSelect.onStop = function(state) {
+MultVertDirectSelect.onStop = function (state) {
   if (state.movedCoordPath && state.newCoord) {
     // different features, works for more than 2 shared vertices
     state.toMoveFeatures.map((feature, index) => {
@@ -104,7 +104,7 @@ MultVertDirectSelect.onStop = function(state) {
   this.clearSelectedCoordinates();
 };
 
-MultVertDirectSelect.onTrash = function(state) {
+MultVertDirectSelect.onTrash = function (state) {
   // Uses number-aware sorting to make sure '9' < '10'. Comparison is reversed because we want them
   // in reverse order so that we can remove by index safely.
   if (!state.toMoveCoordPaths) {

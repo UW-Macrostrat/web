@@ -4,6 +4,7 @@ import { Button, Navbar, Popover, Divider } from "@blueprintjs/core";
 import { AppContext } from "../../context";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { base } from "../../context/env";
+import { MAP_MODES } from "../map/mapgl";
 
 const projects_url = base + "projects";
 
@@ -65,15 +66,16 @@ function ProjectDropDown(props) {
   );
 }
 
-function MapNavBar(props) {
-  const {
-    onSave,
-    onCancel,
-    enterEditMode,
-    enterPropertyMode,
-    editMode,
-    project_id,
-  } = props;
+interface MapNavBarProps {
+  onSave: () => void;
+  onCancel: () => void;
+  changeMode: (mode: MAP_MODES) => void;
+  mode: MAP_MODES;
+  project_id: number | null;
+}
+
+function MapNavBar(props: MapNavBarProps) {
+  const { onSave, onCancel, mode, changeMode, project_id } = props;
   const { state, runAction } = useContext(AppContext);
 
   const openImportOverlay = () => {
@@ -111,13 +113,24 @@ function MapNavBar(props) {
             </Navbar.Heading>
           </div>
           <div className="nav-right">
-            <Button minimal={true} active={editMode} onClick={enterEditMode}>
+            <Button
+              minimal={true}
+              active={mode == MAP_MODES.voronoi}
+              onClick={() => changeMode(MAP_MODES.voronoi)}
+            >
+              Voronoi
+            </Button>
+            <Button
+              minimal={true}
+              active={mode == MAP_MODES.topology}
+              onClick={() => changeMode(MAP_MODES.topology)}
+            >
               Edit Topology
             </Button>
             <Button
               minimal={true}
-              active={!editMode}
-              onClick={enterPropertyMode}
+              active={mode == MAP_MODES.properties}
+              onClick={() => changeMode(MAP_MODES.properties)}
             >
               View / Edit Properties
             </Button>

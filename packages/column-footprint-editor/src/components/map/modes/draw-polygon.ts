@@ -13,7 +13,7 @@ import { distance_between_points } from "../utils";
 
 let DrawPolyMult = MapboxDraw.modes.draw_polygon;
 
-DrawPolyMult.onSetup = function(opts) {
+DrawPolyMult.onSetup = function (opts) {
   const line = this.newFeature({
     type: geojsonTypes.FEATURE,
     properties: {},
@@ -31,7 +31,7 @@ DrawPolyMult.onSetup = function(opts) {
   return { line, canDraw: false, n: 6 };
 };
 
-DrawPolyMult.createNPolygon = function(x, y, n, r) {
+DrawPolyMult.createNPolygon = function (x, y, n, r) {
   // n is number of sides
   // x is the xoffset
   // y is the yoffset
@@ -48,11 +48,8 @@ DrawPolyMult.createNPolygon = function(x, y, n, r) {
   return [polygon];
 };
 
-DrawPolyMult.onMouseMove = function(state, e) {
+DrawPolyMult.onMouseMove = function (state, e) {
   if (!state.canDraw) return;
-
-  console.log("Drag State", state);
-  console.log("Drag Event", e);
 
   const { n } = state;
   const { x, y } = state.centerPoint;
@@ -66,12 +63,12 @@ DrawPolyMult.onMouseMove = function(state, e) {
   state.line.setCoordinates(bbox);
 };
 
-DrawPolyMult.clickAnywhere = function(state, e) {
+DrawPolyMult.clickAnywhere = function (state, e) {
   state.canDraw = true;
   state.centerPoint = e.point;
 };
 
-DrawPolyMult.onKeyUp = function(state, e) {
+DrawPolyMult.onKeyUp = function (state, e) {
   if (CommonSelectors.isEscapeKey(e)) {
     this.deleteFeature([state.line.id], { silent: true });
     this.changeMode(Constants.modes.SIMPLE_SELECT);
@@ -86,7 +83,7 @@ DrawPolyMult.onKeyUp = function(state, e) {
   }
 };
 
-DrawPolyMult.onStop = function(state) {
+DrawPolyMult.onStop = function (state) {
   this.updateUIClasses({ mouse: Constants.cursors.NONE });
   doubleClickZoom.enable(this);
   this.activateUIButton();
@@ -110,7 +107,7 @@ DrawPolyMult.onStop = function(state) {
   }
 };
 
-DrawPolyMult.toDisplayFeatures = function(state, geojson, display) {
+DrawPolyMult.toDisplayFeatures = function (state, geojson, display) {
   const isActiveLine = geojson.properties.id === state.line.id;
   geojson.properties.active = isActiveLine
     ? activeStates.ACTIVE

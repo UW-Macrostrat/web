@@ -22,7 +22,7 @@ import {
 
 const SnapLineMode = { ...DrawLine };
 
-SnapLineMode.onSetup = function(opts) {
+SnapLineMode.onSetup = function (opts) {
   const line = this.newFeature({
     type: geojsonTypes.FEATURE,
     properties: {},
@@ -72,7 +72,7 @@ SnapLineMode.onSetup = function(opts) {
   return state;
 };
 
-SnapLineMode.clickAnywhere = function(state, e) {
+SnapLineMode.clickAnywhere = function (state, e) {
   const lng = state.snappedLng;
   const lat = state.snappedLat;
 
@@ -90,7 +90,7 @@ SnapLineMode.clickAnywhere = function(state, e) {
   state.line.updateCoordinate(state.currentVertexPosition, lng, lat);
 };
 
-SnapLineMode.onMouseMove = function(state, e) {
+SnapLineMode.onMouseMove = function (state, e) {
   const [lng, lat] = snapToCoord(state, e, this.map);
 
   state.line.updateCoordinate(state.currentVertexPosition, lng, lat);
@@ -109,7 +109,7 @@ SnapLineMode.onMouseMove = function(state, e) {
 };
 
 // This is 'extending' DrawLine.toDisplayFeatures
-SnapLineMode.toDisplayFeatures = function(state, geojson, display) {
+SnapLineMode.toDisplayFeatures = function (state, geojson, display) {
   const isActiveLine = geojson.properties.id === state.line.id;
   geojson.properties.active = isActiveLine
     ? activeStates.ACTIVE
@@ -144,7 +144,7 @@ SnapLineMode.toDisplayFeatures = function(state, geojson, display) {
 };
 
 // This is 'extending' DrawLine.onStop
-SnapLineMode.onStop = function(state) {
+SnapLineMode.onStop = function (state) {
   // remove moveemd callback
   this.map.off("moveend", state.moveendCallback);
 

@@ -8,7 +8,7 @@ import { distance_between_points } from "../utils";
 
 const MultVertSimpleSelect = MapboxDraw.modes.simple_select;
 
-MultVertSimpleSelect.onSetup = function(opts) {
+MultVertSimpleSelect.onSetup = function (opts) {
   // turn the opts into state.
   const state = {
     dragMoveLocation: null,
@@ -40,7 +40,7 @@ MultVertSimpleSelect.onSetup = function(opts) {
   return state;
 };
 
-MultVertSimpleSelect.fireUpdate = function() {
+MultVertSimpleSelect.fireUpdate = function () {
   this.getSelected().map((f) => {
     const action = Constants.updateActions.CHANGE_COORDINATES;
     const obj = {
@@ -56,7 +56,7 @@ MultVertSimpleSelect.fireUpdate = function() {
 };
 
 // need to just pass off it there aren't other verticies at point
-MultVertSimpleSelect.clickOnVertex = function(state, e) {
+MultVertSimpleSelect.clickOnVertex = function (state, e) {
   if (e.originalEvent.shiftKey) {
     this.changeMode("direct_select", {
       featureId: e.featureTarget.properties.parent,

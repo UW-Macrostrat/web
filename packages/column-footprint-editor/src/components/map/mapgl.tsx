@@ -2,23 +2,11 @@ import "regenerator-runtime/runtime";
 import React, { useRef, useEffect, useState, useContext } from "react";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
-
 import mapboxgl from "mapbox-gl";
-import axios from "axios";
-
 import { AppContext } from "../../context";
-import { base } from "../../context/env";
-
-import {
-  MapNavBar,
-  AppToaster,
-  SavingToast,
-  SuccessfullySaved,
-  BadSaving,
-} from "../blueprint";
+import { MapNavBar, AppToaster } from "../blueprint";
 import { PropertyDialog } from "../editor";
 import { ImportDialog } from "../importer";
-
 import { locationFromHash } from "./utils";
 import "./map.css";
 import {
@@ -26,7 +14,15 @@ import {
   propertyViewMap,
   editModeMap,
   MapToolsControl,
+  voronoiModeMap,
 } from "./map-pieces";
+import { onSaveLines } from "./fetch-post";
+
+export enum MAP_MODES {
+  topology,
+  properties,
+  voronoi,
+}
 
 /**
  *
@@ -44,6 +40,7 @@ export function Map() {
   const mapContainerRef = useRef(null);
   const mapRef = useRef();
   const drawRef = useRef();
+  const voronoiRef = useRef();
 
   const { state, runAction, updateLinesAndColumns } = useContext(AppContext);
 
@@ -51,9 +48,9 @@ export function Map() {
     locationFromHash(window.location.hash)
   );
 
-  const [edit, setEdit] = useState(false);
+  const [mode, setMode] = useState<MAP_MODES>(MAP_MODES.properties);
   const [legendColumns, setLegendColumns] = useState([]);
-
+  const [changeSet, setChangeSet] = useState([]);
   const [open, setOpen] = useState(false);
   const [features, setFeatures] = useState([]);
 
@@ -62,7 +59,9 @@ export function Map() {
     setOpen(false);
   };
 
-  const [changeSet, setChangeSet] = useState([]);
+  const changeMode = (mode: MAP_MODES) => {
+    setMode(mode);
+  };
 
   const addToChangeSet = (obj) => {
     setChangeSet((prevState) => {
@@ -70,38 +69,15 @@ export function Map() {
     });
   };
 
-  const onSave = async (e) => {
+  const onSave = async () => {
     // can do cleaning on changeSet by the internal id string.
     // Combine like edits so I'm not running a million
     // transactions on the db.
-    runAction({ type: "is-saving", payload: { isSaving: true } });
-    AppToaster.show({
-      message: <SavingToast />,
-      intent: "primary",
-    });
     if (changeSet.length != 0) {
-      try {
-        let url = base + `${state.project.project_id}/lines`;
-        const res = await axios.put(url, {
-          change_set: changeSet,
-          project_id: state.project.project_id,
-        });
-        AppToaster.show({
-          message: <SuccessfullySaved />,
-          intent: "success",
-          timeout: 3000,
-        });
-        updateLinesAndColumns(state.project.project_id);
-        runAction({ type: "is-saving", payload: { isSaving: false } });
-      } catch (error) {
-        AppToaster.show({
-          message: <BadSaving />,
-          intent: "danger",
-          timeout: 5000,
-        });
-        updateLinesAndColumns(state.project.project_id);
-        runAction({ type: "is-saving", payload: { isSaving: false } });
-      }
+      runAction({ type: "is-saving", payload: { isSaving: true } });
+      await onSaveLines(changeSet, state.project.project_id);
+      updateLinesAndColumns(state.project.project_id);
+      runAction({ type: "is-saving", payload: { isSaving: false } });
       setChangeSet([]);
     }
   };
@@ -133,12 +109,14 @@ export function Map() {
 
   useEffect(() => {
     if (mapRef.current == null) return;
+    const edit = mode == MAP_MODES.topology;
     if (edit) {
       const map = mapRef.current;
 
       let draw = editModeMap(map, state);
       drawRef.current = draw;
       return () => {
+        console.log("Removing Topology Mode");
         let map = mapRef.current;
         let Draw = drawRef.current;
         if (!map || !Draw || !edit) return;
@@ -149,11 +127,31 @@ export function Map() {
         }
       };
     }
-  }, [state.lines, edit, mapRef]);
+  }, [state.lines, mode, mapRef]);
 
   useEffect(() => {
     if (mapRef.current == null) return;
-    if (!edit) {
+    const isVoronoiMode = mode == MAP_MODES.voronoi;
+    if (isVoronoiMode) {
+      const map = mapRef.current;
+      let draw = voronoiModeMap(map, state);
+      voronoiRef.current = draw;
+      return () => {
+        let map = mapRef.current;
+        let Draw = voronoiRef.current;
+        if (!map || !Draw || !isVoronoiMode) return;
+        try {
+          Draw.onRemove();
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }, [mode, mapRef]);
+
+  useEffect(() => {
+    if (mapRef.current == null) return;
+    if (mode == MAP_MODES.properties) {
       propertyViewMap(
         mapRef.current,
         state,
@@ -171,11 +169,12 @@ export function Map() {
         }
       };
     }
-  }, [state.columns, edit, mapRef]);
+  }, [state.columns, mode, mapRef]);
 
-  const mapToolsClassName = edit
-    ? "map-tools-control-left"
-    : "map-tools-control-right";
+  const mapToolsClassName =
+    mode == MAP_MODES.topology
+      ? "map-tools-control-left"
+      : "map-tools-control-right";
 
   console.log("features", features);
   return (
@@ -185,9 +184,8 @@ export function Map() {
         <MapNavBar
           onSave={onSave}
           onCancel={onCancel}
-          enterEditMode={() => setEdit(true)}
-          enterPropertyMode={() => setEdit(false)}
-          editMode={edit}
+          changeMode={changeMode}
+          mode={mode}
           project_id={state.project.project_id}
         />
       </div>
@@ -200,10 +198,10 @@ export function Map() {
           draw={drawRef.current}
           addToChangeSet={addToChangeSet}
           columns={legendColumns}
-          editMode={edit}
+          editMode={mode == MAP_MODES.topology}
         />
       </div>
-      {edit ? null : (
+      {mode == MAP_MODES.topology ? null : (
         <div>
           <PropertyDialog
             open={open}

@@ -3,6 +3,10 @@ import nearestPointOnLine from "@turf/nearest-point-on-line";
 import { distance_between_points } from "../utils";
 
 function getClosestLine(lines, point, map) {
+  lines = lines.filter((geom) => geom.geometry.type != "Point");
+  if (lines.length == 0) {
+    return { geometry: { coordinates: point } };
+  }
   let closest;
   const pixelPoint = map.project(point);
   let minDis = null;
@@ -78,7 +82,7 @@ function pointBetweenPoints(bound1, bound2, point) {
   return false;
 }
 
-const onChangeSetAdder = function(feature, this_) {
+const onChangeSetAdder = function (feature, this_) {
   const action = Constants.updateActions.CHANGE_COORDINATES;
   const obj = {
     action,
