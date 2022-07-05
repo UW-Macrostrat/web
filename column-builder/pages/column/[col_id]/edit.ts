@@ -19,7 +19,6 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   if (Array.isArray(col_id)) {
     col_id = col_id[0];
   }
-
   const query: IdsFromCol = await fetchIdsFromColId(parseInt(col_id ?? "0"));
 
   const { data, error }: PostgrestResponse<ColumnForm> = await tableSelect(
@@ -31,6 +30,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   const { firstData, error: error_ } = await selectFirst("cols", {
     columns: "col_groups!cols_col_group_id_fkey(*)",
+    match: { id: parseInt(col_id ?? "0") },
     limit: 1,
   });
 
