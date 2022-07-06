@@ -15,12 +15,15 @@ git tag -a "v${version}" -m "Version ${version}"
 
 git push
 
-echo "Deploying to steno"
+echo "Deploying to strata"
 deploy_dir=/data/projects/macrostrat/map
 
 npm run clean
 export PUBLIC_URL=/map/
 export NODE_ENV=production
+export MACROSTRAT_TILESERVER_DOMAIN='https://tiles.macrostrat.org'
+export MACROSTRAT_API_DOMAIN='https://macrostrat.org'
+
 npm run bundle
 
-rsync -azv --delete dist/ steno:$deploy_dir/
+rsync -azv --delete dist/ strata:$deploy_dir/

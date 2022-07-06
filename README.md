@@ -1,4 +1,4 @@
-# web-v3
+# Macrostrat's map interface
 
 Macrostrat's map interface is the intersection of stratigraphic, bedrock, paleoenvironment, and paleontology data in the modern world.
 

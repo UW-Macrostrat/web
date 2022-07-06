@@ -4,12 +4,34 @@ This stylesheet the overall application page layout.
 
 .map-page
   height 100vh
+  width 100vw
   /* mobile viewport bug fix */
   max-height: -webkit-fill-available;
-  width 100vw
   display flex
   flex-direction column
   position relative
+
+  // Compass display
+  .compass-control
+    display: none
+  &.map-is-rotated
+    .compass-control
+      display: block
+  
+  .map-3d-control
+    display: none
+  &.map-3d-available .map-3d-control
+    display: block
+  &.map-is-rotated.map-3d-available .map-3d-control
+    display: none
+
+  .globe-control
+    svg
+      color: var(--secondary-color)
+    display: none
+  &.map-is-global .globe-control
+    display: block
+
 
 .main-ui
   flex 1
@@ -48,8 +70,7 @@ This stylesheet the overall application page layout.
 
 .map-view-container
   flex-grow 1
-  position: relative
-
+  position relative
 
 .searchbar-holder
   margin-bottom 0.5em
@@ -59,13 +80,58 @@ This stylesheet the overall application page layout.
   padding 0
   margin-bottom 4px
 
+// Menu
+.buttons
+  display: flex
+  flex-direction: row
+  flex: 1
+  min-width: 0
+
+.tab-button
+  flex-shrink: 1
+  min-width: 40px
+  overflow: hidden
+  text-align: right
+  :global(.bp3-button-text)
+    transition all 0.2s
+    transition-delay 0.1s
+
+.menu-card.narrow-card
+  // Transition opacity when leaving context panel
+  .panel-header:not(.minimal)
+    // .tab-button
+    //   &:not(:hover) :global(.bp3-button-text)
+    //     //width 0
+    //     opacity: 1
+        //margin-left: -7px
+    // Fancy CSS to select all buttons _after_ the currently hovered one
+    .tab-button:global(.bp3-active) ~ .tab-button :global(.bp3-button-text)
+        width 0
+        opacity: 0
+        margin-left: -7px
+
+// When panel is closing, fade out the buttons text-first
+.context-panel-leave .menu-card .panel-header
+  .tab-button :global(.bp3-button-text)
+    opacity: 0
+    width: 0
+
+.narrow-card.narrow-enter .panel-header .buttons
+  // When we have not yet transitioned to a "minimal" state, we need extra space
+  // to not crowd buttons that haven't yet transitioned
+  margin-right: -500px
+
+.panel-header.minimal
+  .tab-button:not(:hover) :global(.bp3-button-text)
+      width 0
+      opacity: 0
+      margin-left: -7px
+
 .menu-card
-  :global(.bp3-panel-stack2)
-    overflow: unset
-  :global(.bp3-panel-stack-view)
-    border-right: 0
-    position: relative;
-    overflow: unset
+  :global
+    .bp3-text, .text-panel
+      ul
+        padding-left: 1em
 
 .menu-content
   display flex
@@ -79,11 +145,8 @@ This stylesheet the overall application page layout.
 map-control()
   min-width: 22px
   min-height: 22px 
-  margin-right: 10px
-  margin-bottom 8px
   border-radius: 4px
-  margin-top 0px
-  box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.1), 0 0 0 rgba(16, 22, 26, 0), 0 1px 1px rgba(16, 22, 26, 0.2)
+  box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.1), 0 0 0 rgba(16, 22, 26, 0), 0 1px 1px rgba(16, 22, 26, 0.2) !important
   //box-shadow: 0 0 0 2px rgba(0,0,0,.1)
   button
     width: 22px
@@ -103,16 +166,6 @@ map-control()
     .mapbox-compass, .mapbox-3d
       display: none
 
-    &.is-rotated
-      .mapbox-compass
-        display: block
-    
-    &.is-rotated.is-3d-available .mapbox-3d
-      display: none
-
-    &.is-3d-available .mapbox-3d
-      display: block
-
   .mapboxgl-ctrl.mapbox-3d.mapbox-control
     width: unset
     button
@@ -123,29 +176,35 @@ map-control()
     width: 100%
     height: 100%
 
-  .mapboxgl-ctrl-bottom-right
-    .mapbox-control
-      margin-bottom: 0.3em
-      float: right
-      map-control()
-  
-  .mapboxgl-ctrl-attrib.mapboxgl-compact
-    map-control()
-    margin-bottom: 0.8em
-    padding: 0
-
-  .mapboxgl-ctrl-attrib .mapboxgl-ctrl-attrib-inner
-      padding 0 24px 0 10px
-  // .mapboxgl-ctrl-attrib-button
-  //   map-control()
+.detail-stack
+  position relative
 
 .main-ui.detail-panel-open
-  :global(.mapbox-control.mapbox-zoom)
-    display: none
+  .zoom-control
+    opacity: 0
+    display none
 
-// .main-ui.searching
-//   .map-view-container
-//     pointer-events: none
+.zoom-control
+  transition opacity 1s ease-in-out
+  width: 30px
+  position absolute
+  top 0
+  right 0
+
+.main-ui.searching
+  .map-view-container
+    pointer-events: none
+
+.map-controls
+  display flex
+  flex-direction row
+  justify-content: right
+  margin-bottom: 0
+  &>*
+    margin-left: 0.5em
+  :global(.mapbox-control), .map-control
+    map-control()
+
 
 :global(.mapbox-control.mapbox-zoom)
   background: rgba(255,255,255,0.2)
@@ -167,20 +226,27 @@ map-control()
     visibility: hidden
     transition: height 0.5s ease-in-out
 
+
   // Make sure that our detail panel doesn't take up the entirety of the page
   .detail-stack
     height: fit-content
     position: inherit
     max-height: 70%
 
+  .infodrawer-stack
+    max-height: 70%
+    &:global(.exit-active)
+      max-height: 0
+
   // Completely hide zoom control
   :global(.mapbox-control.mapbox-zoom)
     display: none
 
-  .infodrawer-stack
-    max-height: 70%
-    &:global(.exit-active)
-      max-height: 0   
+  // Position map controls within the map area
+  .map-controls
+    position absolute
+    top -60px
+    right 10px
 
 /* Desktop styling is necessarily much more complicated than mobile
   to handle a two-column layout. */
@@ -202,11 +268,19 @@ map-control()
     max-width 34em
     min-width 14em
     width: 16em
+    transition width 300ms ease
+    //margin-right: -15.5em
     &.panel-open
       width: 34em
+      margin-right 0.5em
     &.layers
       width: 18em
-    transition width 300ms ease
+      margin-right 0.5em
+    // Leave a little space for Mapbox logo at the bottom
+    padding-bottom: 0.5em
+
+  .main-ui.detail-panel-open .detail-stack
+    width: 30em
 
   .detail-stack
     width 30em
@@ -217,7 +291,6 @@ map-control()
     pointer-events none
     display flex
     flex-direction column
-    margin-bottom 1.2em
 
   .context-stack, .detail-stack
     pointer-events: none
@@ -225,6 +298,8 @@ map-control()
     &>div
       pointer-events: all
       margin-bottom: 0.5em
+      &:last-child
+        margin-bottom 0
     &>div.spacer
       pointer-events: none
 
@@ -233,10 +308,6 @@ map-control()
   .map-view-container
     position: unset
 
-
-  :global
-    .mapboxgl-ctrl-bottom-right .mapbox-control
-        margin-right: 15px
   // .map-holder
   //   z-index: 1;
   //   position: absolute;

@@ -56,10 +56,10 @@ const defaultState: CoreState = {
     type: null,
   },
   mapUse3D: false,
+  mapShowLabels: true,
   filtersOpen: false,
   filters: [],
   filteredColumns: {},
-
   data: [],
   mapPosition: {
     camera: {
@@ -84,6 +84,16 @@ export function coreReducer(
     case "map-idle":
       if (!state.mapIsLoading) return state;
       return { ...state, mapIsLoading: false };
+    case "map-layers-changed":
+      let columnInfo = state.columnInfo;
+      let pbdbData = state.pbdbData;
+      if (!action.mapLayers.has(MapLayer.COLUMNS)) columnInfo = [];
+      if (!action.mapLayers.has(MapLayer.FOSSILS)) pbdbData = [];
+      return {
+        ...state,
+        columnInfo,
+        pbdbData,
+      };
     case "toggle-menu":
       const shouldOpen = state.inputFocus || !state.menuOpen;
 
@@ -98,8 +108,10 @@ export function coreReducer(
       if (state.inputFocus) {
         return {
           ...state,
+          inputFocus: false,
           contextPanelOpen: false,
           menuOpen: false,
+          term: "",
         };
       }
       return state;
@@ -109,17 +121,16 @@ export function coreReducer(
       return {
         ...state,
         infoDrawerOpen: false,
-        //columnInfo: {},
-        //mapInfo: [],
-        //pbdbData: [],
+        columnInfo: {},
       };
-
     case "expand-infodrawer":
       return { ...state, infoDrawerExpanded: !state.infoDrawerExpanded };
 
     case "toggle-filters":
       // rework this to open menu panel
       return { ...state, filtersOpen: !state.filtersOpen };
+    case "toggle-labels":
+      return { ...state, mapShowLabels: !state.mapShowLabels };
     case "add-filter":
       let alreadyHasFiter = false;
       state.filters.forEach((filter) => {
@@ -172,6 +183,8 @@ export function coreReducer(
         searchResults: null,
         searchCancelToken: null,
         inputFocus: false,
+        // We have to do a lot of extra work to manage this context panel state
+        contextPanelOpen: state.menuOpen,
       });
     case "remove-filter":
       return updateURI({
@@ -375,8 +388,10 @@ export function coreReducer(
     case "set-input-focus":
       return {
         ...state,
+        term: action.inputFocus ? state.term : "",
         inputFocus: action.inputFocus,
-        contextPanelOpen: action.inputFocus || state.menuOpen,
+        menuOpen: action.menuOpen ?? state.menuOpen,
+        contextPanelOpen: action.inputFocus || action.menuOpen,
       };
     case "set-search-term":
       return { ...state, term: action.term };

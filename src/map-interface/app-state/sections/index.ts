@@ -1,38 +1,56 @@
 import { combineReducers } from "redux";
 import reduceReducers from "reduce-reducers";
-import { menuReducer, MenuState, MenuAction } from "./menu";
+import { createBrowserHistory } from "history";
 import { CoreAction } from "./core/actions";
 import { coreReducer, CoreState } from "./core";
 import { MapAction } from "./map";
+import { createRouterReducer } from "@lagunovsky/redux-react-router";
+import {
+  ReduxRouterState,
+  RouterActions,
+} from "@lagunovsky/redux-react-router";
+import { routerBasename } from "~/map-interface/Settings";
+
+export const browserHistory = createBrowserHistory();
 
 export type AppState = {
   core: CoreState;
-  menu: MenuState;
+  router: ReduxRouterState;
 };
 
+const routerReducer = createRouterReducer(browserHistory);
+
 const reducers = combineReducers({
-  menu: menuReducer,
+  router: routerReducer,
   core: coreReducer,
 });
 
 function overallReducer(state: AppState, action: Action): AppState {
-  if (action.type === "got-initial-map-state" || action.type == "map-moved") {
-    return {
-      ...state,
-      core: {
-        ...state.core,
-        mapPosition: action.data,
-      },
-    };
+  switch (action.type) {
+    case "@@router/ON_LOCATION_CHANGED":
+      const isOpen = action.payload.location.pathname != "/";
+      return {
+        ...state,
+        core: { ...state.core, menuOpen: isOpen, contextPanelOpen: isOpen },
+      };
+    case "got-initial-map-state":
+    case "map-moved":
+      return {
+        ...state,
+        core: {
+          ...state.core,
+          mapPosition: action.data,
+        },
+      };
+    default:
+      return state;
   }
-  return state;
 }
 
 const appReducer = reduceReducers(overallReducer, reducers);
 
-export type Action = CoreAction | MenuAction | MapAction;
+export type Action = CoreAction | MapAction | RouterActions;
 
 export default appReducer;
 export * from "./core";
-export * from "./menu";
 export * from "./map";

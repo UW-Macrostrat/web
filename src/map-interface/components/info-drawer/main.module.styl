@@ -1,9 +1,30 @@
 @require "../../../styles/_common"
 
 .macrostrat-detail
-  margin: 0.25em 0px 0.5em;
   display: flex;
   align-items: center;
+  margin 0.2em 0 0.4em;
+  .expansion-summary-title
+    margin-right: 0.8em;
+    &:after
+      content: ":";
+
+.described-age, .macrostrat-detail
+  display: flex;
+  align-items: center;
+  .expansion-summary-title
+    margin-right: 0.8em;
+    &:after
+      content: ":";
+
+  .description
+    font-style italic
+    font-size 0.7em
+    max-width: 100px
+    text-align: right
+
+  .age-chips
+    flex-grow 1
 
 .infodrawer
   pointer-events all
@@ -51,7 +72,15 @@
   flex-grow 1
   pointer-events none
 
+.macrostrat-unit
+  h3
+    margin: 0.5em 0 0.5em;
+    flex-grow: 1;
+  .description
+    margin-right: 1em
 
+.description
+  font-style italic
 
 @media screen and (max-width: 768px)
   .infodrawer

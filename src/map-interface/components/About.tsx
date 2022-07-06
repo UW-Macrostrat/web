@@ -1,24 +1,14 @@
 import React from "react";
 import hyper from "@macrostrat/hyper";
-import { NavLink } from "react-router-dom";
-import Changelog from "../../changelog.mdx";
-import { useAppActions } from "../app-state";
-import { useLocation } from "react-router";
+import { NavLink, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import styles from "./about.module.styl";
+import newGithubIssueUrl from "new-github-issue-url";
+import { AnchorButton } from "@blueprintjs/core";
 
 const h = hyper.styled(styles);
 
-function ChangelogPanel() {
-  return h("div.bp3-text", [h(Changelog)]);
-}
-
-function MapLink({ to = "", children }) {
-  const loc = useLocation();
-  return h(NavLink, { to: "/map" + to + loc.hash }, children);
-}
-
 const SoftwareInfo = (props) => {
-  const runAction = useAppActions();
   return h("div.software-info", [
     h("p.version", [
       `Version ${JSON.parse(process.env.NPM_VERSION)} `,
@@ -35,42 +25,58 @@ const SoftwareInfo = (props) => {
     ]),
     h("p.changes", [
       h(
-        "a",
+        Link,
         {
-          onClick() {
-            runAction({
-              type: "push-panel",
-              panel: {
-                renderPanel: ChangelogPanel,
-                title: "Changelog",
-              },
-            });
-          },
+          to: "/changelog",
         },
         "Changelog"
       ),
+      h(LinkButton, {
+        to: "/experiments",
+        icon: "clean",
+        className: "experimental-settings-button",
+        minimal: true,
+        small: true,
+      }),
     ]),
   ]);
 };
 
+const LinkButton = ({to, ...props}) => {
+  const navigate = useNavigate();
+  return h(AnchorButton,  {...props, onClick() {
+    navigate(to)
+  }});
+}
+
 const AboutText = (props) => {
-  const runAction = useAppActions();
+  const issueURL = newGithubIssueUrl({
+    repo: "web",
+    user: "UW-Macrostrat",
+    title: "Found an issue with the Macrostrat web interface",
+    body: "Please describe the issue you've found. Feel free to include screenshots or other information.",
+  })
 
   return (
-    <div className="about">
+    <div className="about bp3-text text-panel">
       <div className={styles["title-block"]}>
-        <h2>Macrostrat Geologic Map</h2>
+        <h2>Macrostrat geologic map</h2>
         <SoftwareInfo />
       </div>
 
       <p>
         Macrostrat's geologic map system integrates over 290 bedrock geologic
-        maps constructed at multiple scales from around the world into a 
-        single database. As you zoom in and out of this map interface,
-        the display shifts between maps in one of four topologic levels. 
-        Clicking on the map reveals primary data about the target map unit and 
-        adjacent geologic lines at the given scale, as well as other regional information.
+        maps from around the world into a single, multiscale
+        database. As you zoom in and out of this map interface, the display
+        shifts between four harmonized levels of detail. Clicking on the map
+        reveals primary data from the map and other regional information.
       </p>
+      <ul className={styles["nav-list"]}>
+        <li><LinkButton to="/sources" icon="map" minimal>Explore map sources</LinkButton></li>
+        <li><LinkButton to="/usage" icon="help" minimal>Tips and tricks</LinkButton></li>
+        <li><AnchorButton href={issueURL} target="_blank" icon="issue" minimal>Report a software bug</AnchorButton></li>
+      </ul>
+
       <h3>Credits</h3>
       <ul>
         <li>

@@ -4,7 +4,6 @@ import { useStore, useSelector, useDispatch } from "react-redux";
 import { AppState } from ".";
 import React from "react";
 import { useEffect } from "react";
-import { eventNames } from "process";
 
 function useActionDispatch() {
   return useDispatch<React.Dispatch<Action>>();
@@ -14,8 +13,8 @@ function useAppActions(): (action: Action) => Promise<void> {
   const dispatch = useActionDispatch();
   const store = useStore<AppState, Action>();
   return async (action) => {
-    const coreState = store.getState().core;
-    const newAction = await actionRunner(coreState, action, dispatch);
+    const appState = store.getState();
+    const newAction = await actionRunner(appState, action, dispatch);
     if (newAction === undefined) return;
     dispatch(newAction as Action);
   };

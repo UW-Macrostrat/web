@@ -13,6 +13,7 @@ import { useAppState } from "~/map-interface/app-state";
 import classNames from "classnames";
 import styles from "./main.module.styl";
 import { LoadingArea } from "../transitions";
+import { ErrorBoundary } from "@macrostrat/ui-components";
 
 const h = hyper.styled(styles);
 
@@ -75,31 +76,33 @@ function InfoDrawer(props) {
       onCloseClick: () => runAction({ type: "close-infodrawer" }),
     }),
     h("div.infodrawer-body", [
-      h(
-        LoadingArea,
-        { loaded: !fetchingMapInfo },
-        h("div", [
-          h(FossilCollections, { data: pbdbData, expanded: true }),
-          h(RegionalStratigraphy, { mapInfo, columnInfo }),
-          h(GeologicMapInfo, {
-            mapInfo,
-            bedrockExpanded: true,
-            source,
-          }),
-          h(MacrostratLinkedData, {
-            mapInfo,
-            bedrockMatchExpanded: true,
-            source,
-          }),
-          h(Physiography, { mapInfo }),
-          h(GddExpansion, {
-            mapInfo,
-            gddInfo,
-            openGdd,
-            fetchingGdd,
-          }),
-        ])
-      ),
+      h(ErrorBoundary, [
+        h(
+          LoadingArea,
+          { loaded: !fetchingMapInfo },
+          h("div", [
+            h(FossilCollections, { data: pbdbData, expanded: true }),
+            h(RegionalStratigraphy, { mapInfo, columnInfo }),
+            h(GeologicMapInfo, {
+              mapInfo,
+              bedrockExpanded: true,
+              source,
+            }),
+            h(MacrostratLinkedData, {
+              mapInfo,
+              bedrockMatchExpanded: true,
+              source,
+            }),
+            h(GddExpansion, {
+              mapInfo,
+              gddInfo,
+              openGdd,
+              fetchingGdd,
+            }),
+            h(Physiography, { mapInfo }),
+          ])
+        ),
+      ]),
     ]),
   ]);
 }

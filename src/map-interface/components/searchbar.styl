@@ -16,8 +16,6 @@
     padding-left 0
 
 
-
-
 .search-result-row
   border-bottom 1px solid #ddd
   padding 0.2em var(--box-horizontal-padding)
@@ -40,3 +38,29 @@
         content: '–'
         position: absolute
         left: -1em
+
+.searchbar-holder
+  .navbar-holder
+    display: flex
+    flex-direction: row
+    .spacer
+      flex-grow 1
+  transition margin 300ms
+  display flex
+  flex-direction column
+  margin 0
+  .searchbar
+    width: 100%
+    background-color #fff
+    border-radius 3px
+    padding 0 5px
+    display flex
+    flex-direction: row
+    align-items center
+    :global(.bp3-input-group)
+      flex-grow 1
+      cursor: text
+    &>*
+      margin-right 5px
+      &:last-child
+        margin-right 0 

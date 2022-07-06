@@ -1,32 +1,32 @@
 import { Suspense } from "react";
 // Import other components
-import hyper, { compose } from "@macrostrat/hyper";
+import hyper from "@macrostrat/hyper";
 import Searchbar from "../components/searchbar";
-import Menu, { useContextClass } from "./menu";
-import {
-  ButtonGroup,
-  Button,
-  Spinner,
-  Collapse,
-  HotkeysProvider,
-} from "@blueprintjs/core";
+import { ButtonGroup, Button, Spinner } from "@blueprintjs/core";
 import { useSelector, useDispatch } from "react-redux";
 import loadable from "@loadable/component";
 import {
   useSearchState,
   MapBackend,
-  useMenuState,
   useAppState,
   useAppActions,
 } from "../app-state";
 import styles from "./main.module.styl";
 import classNames from "classnames";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { useTransition } from "transition-hook";
+import { usePanelOpen, useContextClass } from "../app-state";
+import {
+  MapboxMapProvider,
+  MapBottomControls,
+  MapStyledContainer,
+  MapZoomControl,
+} from "./map-view";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));
 const MapContainer = loadable(() => import("./map-view"));
+const Menu = loadable(() => import("./menu"));
 
 const h = hyper.styled(styles);
 
@@ -94,23 +94,16 @@ const MapTypeSelector = () => {
   ]);
 };
 
-function MenuPanel() {
-  const { inputFocus } = useSearchState();
-  const { menuOpen } = useMenuState();
-  return h(Collapse, { isOpen: inputFocus || menuOpen }, [
-    //h(CloseableCard, { className: "menu-card", isOpen: true }, []),
-  ]);
-}
-
 const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   const { inputFocus } = useSearchState();
-  const { menuOpen } = useMenuState();
   const runAction = useAppActions();
   const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
-  const contextPanelOpen = useAppState((s) => s.core.contextPanelOpen);
+
   const ref = useRef<HTMLElement>(null);
 
-  const contextPanelTrans = useTransition(contextPanelOpen, 800);
+  const contextPanelOpen = usePanelOpen();
+
+  const contextPanelTrans = useTransition(contextPanelOpen || inputFocus, 800);
   const detailPanelTrans = useTransition(infoDrawerOpen, 800);
 
   /* We apply a custom style to the panel container when we are interacting
@@ -121,7 +114,7 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   */
   const className = classNames(
     {
-      searching: inputFocus && contextPanelOpen,
+      searching: inputFocus,
       "detail-panel-open": infoDrawerOpen,
     },
     `context-panel-${contextPanelTrans.stage}`,
@@ -133,42 +126,52 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   const onMouseDown = (event) => {
     if (!(inputFocus || contextPanelOpen)) return;
     if (ref.current?.contains(event.target)) return;
+
     runAction({ type: "context-outside-click" });
     event.stopPropagation();
   };
 
-  return h("div.map-page", [
-    h(
-      "div.main-ui",
-      {
-        className,
-        onMouseDown,
-      },
-      [
-        h("div.context-stack", { className: contextClass, ref }, [
-          h(Searchbar, { className: "searchbar" }),
-          h.if(contextPanelTrans.shouldMount)(Menu, {
-            className: "context-panel",
-          }),
-        ]),
+  const loaded = useSelector((state) => state.core.initialLoadComplete);
+  useEffect(() => {
+    runAction({ type: "get-initial-map-state" });
+  }, []);
 
-        h(MapView, {
-          backend,
-        }),
+  if (!loaded) return h(Spinner);
 
-        h("div.detail-stack.infodrawer-container", [
-          h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
-            className: "detail-panel",
+  return h(MapboxMapProvider, [
+    h(MapStyledContainer, { className: "map-page" }, [
+      h(
+        "div.main-ui",
+        {
+          className,
+          onMouseDown,
+        },
+        [
+          h("div.context-stack", { className: contextClass, ref }, [
+            h(Searchbar, { className: "searchbar" }),
+            h.if(contextPanelTrans.shouldMount)(Menu, {
+              className: "context-panel",
+            }),
+          ]),
+          h(MapView, {
+            backend,
           }),
-          h("div.spacer"),
-        ]),
-      ]
-    ),
-    h("div.bottom", null, h(ElevationChart, null)),
+          h("div.detail-stack.infodrawer-container", [
+            h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
+              className: "detail-panel",
+            }),
+            h(MapZoomControl),
+            h("div.spacer"),
+            h(MapBottomControls),
+          ]),
+        ]
+      ),
+      h("div.bottom", null, h(ElevationChart, null)),
+    ]),
   ]);
 };
 
-const _MapPage = compose(HotkeysProvider, MapPage);
+//const _MapPage = compose(HotkeysProvider, MapPage);
 
 export { MapBackend };
-export default _MapPage;
+export default MapPage;

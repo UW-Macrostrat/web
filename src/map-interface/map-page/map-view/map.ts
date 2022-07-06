@@ -10,9 +10,7 @@ import h from "@macrostrat/hyper";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MercatorCoordinate, FreeCameraOptions } from "mapbox-gl";
-import { setMapStyle, markerOffset } from "./style-helpers";
-import { CompassControl, ZoomControl } from "mapbox-gl-controls";
-import { ThreeDControl } from "./controls";
+import { setMapStyle } from "./style-helpers";
 import classNames from "classnames";
 import { setupLineSymbols } from "@macrostrat/map-styling";
 
@@ -108,9 +106,11 @@ class Map extends Component<MapProps, {}> {
       //optimizeForTerrain: true,
     });
 
-    this.map.addControl(new ZoomControl(), "top-right");
-    this.map.addControl(new ThreeDControl(), "bottom-right");
-    this.map.addControl(new CompassControl(), "bottom-right");
+    this.map.setProjection("globe");
+
+    //this.map.addControl(new ZoomControl(), "top-right");
+    //this.map.addControl(new ThreeDControl(), "bottom-right");
+    //this.map.addControl(new CompassControl(), "bottom-right");
 
     const pos = this.props.mapPosition;
     const { pitch = 0, bearing = 0, altitude } = pos.camera;
@@ -139,9 +139,16 @@ class Map extends Component<MapProps, {}> {
 
     // disable map rotation using touch rotation gesture
     //this.map.touchZoomRotate.disableRotation();
+    const ignoredSources = [
+      "elevationMarker",
+      "elevationPoints",
+      "info_marker",
+    ];
 
     this.map.on("sourcedataloading", (evt) => {
-      if (this.props.mapIsLoading) return;
+      if (ignoredSources.includes(evt.sourceId) || this.props.mapIsLoading) {
+        return;
+      }
       this.props.runAction({ type: "map-loading" });
     });
 
@@ -157,7 +164,7 @@ class Map extends Component<MapProps, {}> {
       }
     });
 
-    this.map.on("load", async () => {
+    this.map.on("style.load", () => {
       // Add the sources to the map
       Object.keys(mapStyle.sources).forEach((source) => {
         if (this.map.getSource(source) == null) {
@@ -555,29 +562,6 @@ class Map extends Component<MapProps, {}> {
       return true;
     }
 
-    if (
-      !nextProps.elevationMarkerLocation.length ||
-      (nextProps.elevationMarkerLocation[0] !=
-        this.props.elevationMarkerLocation[0] &&
-        nextProps.elevationMarkerLocation[1] !=
-          this.props.elevationMarkerLocation[1])
-    ) {
-      if (this.map && this.map.loaded()) {
-        this.map.getSource("elevationMarker").setData({
-          type: "FeatureCollection",
-          features: [
-            {
-              type: "Feature",
-              properties: {},
-              geometry: {
-                type: "Point",
-                coordinates: nextProps.elevationMarkerLocation,
-              },
-            },
-          ],
-        });
-      }
-    }
     // Watch the state of the application and adjust the map accordingly
     if (
       !nextProps.elevationChartOpen &&
@@ -705,35 +689,8 @@ class Map extends Component<MapProps, {}> {
   // PBDB hexgrids and points are refreshed on every map move
   refreshPBDB() {
     let bounds = this.map.getBounds();
+    console.log(bounds);
     let zoom = this.map.getZoom();
-    // if (zoom < 7) {
-    //   // Make sure the layer is visible
-    //   this.map.setLayoutProperty('pbdbCollections', 'visibility', 'visible')
-    //   // Dirty way of hiding points when zooming out
-    //   this.map.getSource('pbdb-points').setData({"type": "FeatureCollection","features": []})
-    //   // Fetch the summary
-    //   fetch(`https://dev.macrostrat.org/api/v2/hex-summary?min_lng=${bounds._sw.lng}&min_lat=${bounds._sw.lat}&max_lng=${bounds._ne.lng}&max_lat=${bounds._ne.lat}&zoom=${zoom}`)
-    //     .then(response => {
-    //       return response.json()
-    //     })
-    //     .then(json => {
-    //       let currentZoom = parseInt(this.map.getZoom())
-    //       let mappings = json.success.data
-    //       if (currentZoom != this.previousZoom) {
-    //         this.previousZoom = currentZoom
-    //
-    //         this.maxValue = this.resMax[parseInt(this.map.getZoom())]
-    //
-    //         this.updateColors(mappings)
-    //
-    //       } else {
-    //         this.updateColors(mappings)
-    //       }
-    //     })
-    // } else {
-    // Hide the hexgrids
-    //this.map.setLayoutProperty('pbdbCollections', 'visibility', 'none')
-
     PBDBHelper(this, bounds, zoom);
   }
 

@@ -39,7 +39,7 @@ function GeoMapLines(props) {
 function GeologicMapInfo(props) {
   const { bedrockExpanded, source } = props;
 
-  if (!source.name) return h("div");
+  if (!source) return h("div");
 
   return h(
     ExpansionPanel,
@@ -50,47 +50,37 @@ function GeologicMapInfo(props) {
       expanded: bedrockExpanded,
     },
     [
-      h(
-        "div",
-        {
-          classes: {
-            root: "expansion-panel-detail",
-          },
-        },
-        [
-          h("div.map-source-attrs", [
-            h.if(source.name && source.name.length)("div.map-source-attr", [
-              h("span.attr", ["Name: "]),
-              source.name,
-            ]),
-            h.if(source.age && source.age.length)("div.map-source-attr", [
-              h("span.attr", ["Age: "]),
-              source.age,
-              ` (${source.b_int.b_age} - ${source.t_int.t_age}`,
-              h("span.age-ma", [" Ma"]),
-              ")",
-            ]),
-            h(LongTextRenderer, {
-              name: "Stratigraphic name(s)",
-              text: source.strat_name,
-            }),
-            h(LongTextRenderer, {
-              name: "Lithology",
-              text: source.lith,
-            }),
-            h(LongTextRenderer, {
-              name: "Description",
-              text: source.descrip,
-            }),
-            h(LongTextRenderer, {
-              name: "Comments",
-              text: source.comments,
-            }),
-            h(GeoMapLines, { source }),
-            h(Reference, { reference: source.ref }),
-          ]),
-        ]
-      ),
+      h("div.map-source-attrs", [
+        h.if(source.name && source.name.length)("div.map-source-attr", [
+          h("span.attr", ["Name: "]),
+          source.name,
+        ]),
+        h.if(source.age && source.age.length)("div.map-source-attr", [
+          h("span.attr", ["Age: "]),
+          source.age,
+          ` (${source.b_int.b_age} - ${source.t_int.t_age}`,
+          h("span.age-ma", [" Ma"]),
+          ")",
+        ]),
+        h(LongTextRenderer, {
+          name: "Stratigraphic name(s)",
+          text: source.strat_name,
+        }),
+        h(LongTextRenderer, {
+          name: "Lithology",
+          text: source.lith,
+        }),
+        h(LongTextRenderer, {
+          name: "Description",
+          text: source.descrip,
+        }),
+        h(LongTextRenderer, {
+          name: "Comments",
+          text: source.comments,
+        }),
+        h(GeoMapLines, { source }),
+        h(Reference, { reference: source.ref }),
+      ]),
     ]
   );
 }

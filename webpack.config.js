@@ -1,12 +1,15 @@
 const path = require("path");
-const { DefinePlugin, EnvironmentPlugin } = require("webpack");
+const { EnvironmentPlugin } = require("webpack");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 //UglifyJsPlugin = require('uglifyjs-webpack-plugin')
-const CopyPlugin = require("copy-webpack-plugin");
-const DotenvPlugin = require("dotenv-webpack");
+//const CopyPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const revisionInfo = require("@macrostrat/revision-info-webpack");
 const pkg = require("./package.json");
+
+// Read dotenv file in directory
+const dotenv = require("dotenv");
+dotenv.config();
 
 const mode = process.env.NODE_ENV || "development";
 
@@ -44,7 +47,6 @@ const plugins = [
     title: "Macrostrat",
     template: "./template.html",
   }),
-  new DotenvPlugin(),
   /*
   new CopyPlugin([
     { from: path.join(cesiumSource, cesiumWorkers), to: "Workers" }
@@ -54,14 +56,17 @@ const plugins = [
     { from: path.join(cesiumSource, "Widgets"), to: "Widgets" }
   ]),
   */
-  new DefinePlugin({
-    MACROSTRAT_BASE_URL: JSON.stringify(publicURL),
-    // Define relative base path in cesium for loading assets
-    CESIUM_BASE_URL: JSON.stringify(publicURL),
-    // Git revision information
-  }),
+  // new DefinePlugin({
+  //   // Define relative base path in cesium for loading assets
+  //   CESIUM_BASE_URL: JSON.stringify(publicURL),
+  //   // Git revision information
+  // }),
   new EnvironmentPlugin({
     ...gitEnv,
+    MAPBOX_API_TOKEN: "<your-mapbox-api-token>",
+    MACROSTRAT_TILESERVER_DOMAIN: "https://tiles.macrostrat.org",
+    MACROSTRAT_API_DOMAIN: "https://macrostrat.org",
+    PUBLIC_URL: "/",
   }),
 ];
 
