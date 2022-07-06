@@ -15,7 +15,7 @@ git tag -a "v${version}" -m "Version ${version}"
 
 git push
 
-echo "Deploying to steno"
+echo "Deploying to strata"
 deploy_dir=/data/projects/macrostrat/map
 
 npm run clean

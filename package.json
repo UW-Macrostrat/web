@@ -8,6 +8,7 @@
     "bundle": "NODE_ENV=production webpack",
     "clean": "rm -rf dist/*",
     "deploy:steno": "scripts/deploy-steno",
+    "deploy:strata": "scripts/deploy-strata",
     "dev": "webpack serve",
     "bootstrap": "npm install --workspaces && npm install"
   },
