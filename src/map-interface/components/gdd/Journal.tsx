@@ -20,21 +20,19 @@ function Journal(props) {
 
 // Still up for review
 function Journal_(props) {
-  return h("div", { style: { marginTop: "5px" } }, [
-    h(
-      SubExpansionPanel,
-      {
-        title: props.data.name,
-        helpText: props.data.source,
-        expanded: true,
-      },
-      [
-        props.data.articles.map((article, i) => {
-          return h(Article, { key: i, data: article });
-        }),
-      ]
-    ),
-  ]);
+  return h(
+    SubExpansionPanel,
+    {
+      title: props.data.name,
+      helpText: props.data.source,
+      expanded: true,
+    },
+    [
+      props.data.articles.map((article, i) => {
+        return h(Article, { key: i, data: article });
+      }),
+    ]
+  );
 }
 
 export default Journal_;

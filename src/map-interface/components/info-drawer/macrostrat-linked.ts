@@ -24,8 +24,7 @@ function MacrostratLinkedData(props) {
     [
       h("div", { classes: expansionPanelDetailClasses }, [
         h(MatchBasis, { source }),
-        h(AgeChipRenderer, { mapInfo, source }),
-        h(MacrostratAgeChipRenderer, { source }),
+        h(AgeInformation, { mapInfo, source }),
         h(Thickness, { source }),
         h(MinorFossilCollections, { source }),
         h(FossilOccs, { source }),
@@ -41,18 +40,40 @@ const expansionPanelDetailClasses = {
   root: "expansion-panel-detail",
 };
 
-function AgeChipRenderer(props) {
+function AgeInformation(props) {
   const { source, mapInfo } = props;
-  return h.if(
-    !source.macrostrat || Object.keys(source.macrostrat).length === 0
-  )(AgeChip, {
-    b_int: mapInfo.mapData[0].b_int,
-    t_int: mapInfo.mapData[0].t_int,
-  });
+  const { macrostrat } = source;
+
+  if (!macrostrat?.b_age) return h(MapAgeRenderer, { mapInfo });
+
+  return h(MacrostratAgeInfo, { macrostrat });
 }
 
-function MacrostratAgeChipRenderer(props) {
-  const { macrostrat = {} } = props?.source;
+function MapAgeRenderer(props) {
+  const { mapInfo, ...rest } = props;
+  return h(
+    DescribedAgeInfo,
+    {
+      ageElement: h(AgeChip, {
+        b_int: mapInfo.mapData[0].b_int,
+        t_int: mapInfo.mapData[0].t_int,
+      }),
+    },
+    "Based on geologic map description."
+  );
+}
+
+function DescribedAgeInfo(props) {
+  const { ageElement, children, className } = props;
+
+  return h("div.described-age.macrostrast-detail", [
+    h("div.expansion-summary-title", "Age"),
+    h("div.age-chips", null, ageElement),
+    h("div.description", children),
+  ]);
+}
+
+function MacrostratAgeInfo({ macrostrat }) {
   const { b_age, t_age, b_int, t_int } = macrostrat;
 
   if (!b_age) return null;
@@ -61,13 +82,16 @@ function MacrostratAgeChipRenderer(props) {
   if (b_int.int_id !== t_int.int_id) {
     age += ` - ${t_int.int_name}`;
   }
-  return h.if(b_age)("div.macrostrat-detail", [
-    h("div.expansion-summary-title", "Age"),
-    h(AgeChip, {
-      b_int: { ...b_int, int_name: age, b_age, t_age },
-      t_int: { ...b_int, int_name: age, b_age, t_age },
-    }),
-  ]);
+  return h(
+    DescribedAgeInfo,
+    {
+      ageElement: h(AgeChip, {
+        b_int: { ...b_int, int_name: age, b_age, t_age },
+        t_int: { ...b_int, int_name: age, b_age, t_age },
+      }),
+    },
+    "Refined using the Macrostrat age model."
+  );
 }
 
 function MatchBasis(props) {

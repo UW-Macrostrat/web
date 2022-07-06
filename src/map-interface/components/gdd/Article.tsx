@@ -45,9 +45,9 @@ function Article(props) {
           <Button
             onClick={toggleExpand}
             minimal={true}
-            icon={iconName}
+            rightIcon={iconName}
             className="flat-btn"
-          />
+          ></Button>
         </span>
       </div>
       <Collapse isOpen={expanded}>

@@ -11,7 +11,7 @@ const h = hyper.styled(styles);
 function ExpansionPanelSummary(props) {
   const { expanded, children, onChange, className, title, titleComponent } =
     props;
-  const showExpand = expanded ? "chevron-up" : "chevron-down";
+  const icon = expanded ? "chevron-up" : "chevron-down";
   return h(
     PanelSubhead,
     {
@@ -20,7 +20,7 @@ function ExpansionPanelSummary(props) {
       title,
       component: titleComponent,
     },
-    [children, h(Icon, { icon: showExpand })]
+    [children, h(Icon, { icon })]
   );
 }
 
@@ -44,13 +44,18 @@ function ExpansionPanelBase(props) {
 
   return h(
     "div.expansion-panel-base",
-    { className: classNames(className, { expanded, collapsed: !expanded }) },
+    {
+      className: classNames(className, {
+        expanded: isOpen,
+        collapsed: !isOpen,
+      }),
+    },
     [
       h(
         ExpansionPanelSummary,
         {
           onChange: onChange_,
-          expanded,
+          expanded: isOpen,
           title,
           titleComponent,
         },
@@ -103,11 +108,6 @@ function ExpandableDetailsPanel(props) {
       h("div.expandable-details-children", null, children)
     ),
   ]);
-  // return h(ExpansionPanelBase, {
-  //   ...props,
-  //   className: "sub-expansion-panel",
-  //   titleComponent: "h4",
-  // });
 }
 
 function ExpansionBody({ title, className, children }) {

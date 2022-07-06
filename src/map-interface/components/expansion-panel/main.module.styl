@@ -26,32 +26,38 @@
   padding 0
   flex-wrap: wrap;
   margin-top -1px;
-  &.collapsed
-    .expansion-panel-header
-      border-bottom-width: 0;
+  // &.collapsed
+  //   .expansion-panel-header
+  //     border-bottom-width: 0;
   .panel-subhead
     background-color: var(--accent-color)
 
 
 
 .sub-expansion-panel
-  margin 0 calc(var(--panel-padding-h) * -0.5)
-  border-radius 4px;
+  margin -1px calc(var(--panel-padding-h) * -0.5) 0;
   overflow: hidden
+  &:first-child
+    .expansion-panel-header
+      border-top-width: 0;
   .panel-subhead
     border-top: none
     border-bottom: none
-  .expansion-children
-    border-radius: 4px;
-    border-top: none;
+
 
   .expansion-panel-header
-    backround-color: var(--tertiary-color);
+    background-color: var(--tertiary-background);
     cursor pointer
     &:hover
       background-color var(--accent-secondary-hover-color)
-    padding 0.1em 0.8em
+    h2, h3, h4
+      font-weight: 500
+    border-bottom 1px solid var(--tertiary-border-color)
+    border-top 1px solid var(--tertiary-border-color)
+    margin-top -1px
+    padding 5px 1em 5px
     align-items center
+
 
 .expansion-summary-title-help
   margin-left 5px;
@@ -66,10 +72,12 @@
     transform: translate(0,3px);
 
 .expansion-children
-  padding 5px 10px
+  padding 5px 1em 10px
   .expansion-panel
-    margin-left -10px
-    margin-right -10px
+    margin-left -1em
+    margin-right -1em
+    &:first-child
+      margin-top: -5px
 
 .expansion-panel-subtext
   font-size: 85%;
