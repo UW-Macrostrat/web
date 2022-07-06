@@ -5,11 +5,14 @@
 
 :root
   --secondary-color: $gray3
+  --tertiary-background: $light-gray5
+  --tertiary-color: $light-gray4
+  --tertiary-border-color: $gray5
   --accent-color: $light-gray3
   --accent-hover-color: $light-gray1
   --accent-border-color: $gray5
-  --accent-secondary-color: #EBF1F5
-  --accent-secondary-hover-color: #F5F8FA
+  --accent-secondary-color: #F5F8FA
+  --accent-secondary-hover-color: #EBF1F5
   --ui-color-accent: rgb(252, 217, 250)
   --ui-color-accent-text: rgb(143, 39, 138)
   --box-horizontal-padding: 0.8em
@@ -164,49 +167,6 @@ body, .main-container {
   display: inline;
   font-size: 10px;
 }
-.age-chip-container {
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 700;
-  display: inline-block;
-}
-.age-chip {
-  text-align: center;
-  padding: 6px;
-  border-radius: 5px;
-  margin: 0px 4px 4px 0;
-  display: inline-block;
-}
-.age-chip-age {
-  font-size: 75%;
-}
-.age-chip-ma {
-  font-size: 70%;
-  font-weight: 400;
-}
-.age-chip-t-int {
-  margin-left: 10px;
-}
-
-.age-ma {
-  font-style italic
-}
-
-.lith-chip {
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 700;
-  text-align: center;
-  display: inline-block;
-  margin-top: 5px;
-  margin-right: 5px;
-  font-size: 12px;
-  background-repeat: repeat;
-  background-size: cover;
-}
-.lith-chip-inner {
-  padding: 10px;
-  background-color: rgba(255,255,255,0.5);
-  border-radius: 5px;
-}
 
 .flat-btn{
   padding: 0px 10px;
@@ -216,10 +176,7 @@ body, .main-container {
 .map-source {
   margin-top: 30px;
 }
-.map-source-attrs {
-  padding: 5px 10px 5px 10px;
-  margin-top: -15px;
-}
+
 .map-source-attr {
   display: block;
   padding-top: 10px;
@@ -263,7 +220,8 @@ body, .main-container {
 }
 
 .article {
-  padding-bottom: 15px;
+  padding: 4px 0 4px;
+  margin: 4px 0 6px;
 }
 .article-title, .article-title > a {
   font-size: 1em;

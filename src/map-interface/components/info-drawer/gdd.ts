@@ -7,14 +7,14 @@ function GddExpansion(props) {
   const { mapInfo, gddInfo, openGdd, fetchingGdd } = props;
   const { mapData } = mapInfo;
 
-  if (!mapData[0] || !mapData[0].strat_name.length) return h("div");
+  if (!mapData[0] || !mapData[0].strat_name.length) return null;
 
   return h(
     ExpansionPanel,
     {
       className: "regional-panel",
       onChange: openGdd,
-      title: "Primary Literature",
+      title: "Primary literature",
       helpText: "via xDD",
     },
     [
