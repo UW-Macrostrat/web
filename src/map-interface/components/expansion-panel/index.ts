@@ -110,9 +110,17 @@ function ExpandableDetailsPanel(props) {
   // });
 }
 
+function ExpansionBody({ title, className, children }) {
+  return h("div.expansion-body", { className }, [
+    h("div.expansion-panel-detail-header", title),
+    h("div.expansion-panel-detail-body", null, children),
+  ]);
+}
+
 export {
   ExpansionPanel,
   ExpansionPanelSummary,
   ExpandableDetailsPanel,
   SubExpansionPanel,
+  ExpansionBody,
 };

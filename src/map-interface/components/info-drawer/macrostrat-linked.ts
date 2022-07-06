@@ -1,6 +1,10 @@
 import hyper from "@macrostrat/hyper";
 import { AgeChip, AttrChip } from "../info-blocks";
-import { ExpansionPanel, ExpandableDetailsPanel } from "../expansion-panel";
+import {
+  ExpansionPanel,
+  ExpandableDetailsPanel,
+  ExpansionBody,
+} from "../expansion-panel";
 import styles from "./main.module.styl";
 const h = hyper.styled(styles);
 
@@ -159,13 +163,6 @@ function LithTypes(props) {
   ]);
 }
 
-function ExpansionBody({ title, className, children }) {
-  return h("div", { className }, [
-    h("div.expansion-panel-detail-header", title),
-    h("div.expansion-panel-detail-body", null, children),
-  ]);
-}
-
 function LithsAndClasses(props) {
   const { source } = props;
   const { macrostrat } = source;
@@ -186,6 +183,7 @@ function LithsAndClasses(props) {
           name: lith.lith,
           color: lith.color,
           fill: lith.lith_fill,
+          emphasized: false,
         });
       }),
     ])
@@ -216,7 +214,7 @@ function Environments(props) {
   return h(
     ExpandableDetailsPanel,
     {
-      title: "Environment ",
+      title: "Environment",
       value: h(EnvironTypes, { environ_types }),
     },
     h(ExpansionBody, { title: "Matched environments" }, [
@@ -225,6 +223,7 @@ function Environments(props) {
           key: i,
           name: env.environ,
           color: env.color,
+          emphasized: false,
         });
       }),
     ])

@@ -86,11 +86,6 @@
   .expansion-panel-detail-sub
     display: block !important;
 
-  .expansion-panel-detail-header
-    margin: 0;
-    margin-top: 5px;
-    font-size: 80%;
-
 
 // New expandable panel for details
 .expandable-details-main
@@ -98,6 +93,7 @@
   flex-direction row
   align-items: center
   justify-content: space-between
+  margin: 3px 0
 
 .expandable-details-header
   display inline-flex
@@ -120,3 +116,26 @@
     margin-right 1em
     &:after
       content: ":";
+
+.expansion-body
+  display: inline-block
+  //flex-direction row
+  align-items: baseline
+  background-color: var(--tertiary-background)
+  padding 2px 6px
+  border-radius: 4px
+  width: 100%
+  box-shadow: 0px 1px 2px 1px rgba(0,0,0,0.2)
+  margin-bottom 6px
+
+.expansion-panel-detail-header
+  font-size: 90%;
+  font-style italic
+  margin-right: 1em
+  display inline
+  color: var(--secondary-color)
+  &:after
+    content: ":";
+
+.expansion-panel-detail-body
+  display inline

@@ -39,15 +39,19 @@ function AgeChip(props) {
 }
 
 function AttrChip(props) {
-  const { fill = null, color, name } = props;
+  const { fill = null, color, name, className, emphasized = true } = props;
+
   let styles = {};
   if (fill) {
     styles["backgroundImage"] = `url('dist/img/geologic-patterns/${fill}.png')`;
   }
-  return h("div.lith-chip", { style: { ...styles } }, [
+  return h("div.lith-chip", { style: { ...styles }, className }, [
     h(
       "div.lith-chip-inner.chip",
-      { style: { backgroundColor: hexToRgb(color, 0.6) } },
+      {
+        style: { backgroundColor: hexToRgb(color, 0.6) },
+        className: emphasized ? "emphasized" : null,
+      },
       [name]
     ),
   ]);
