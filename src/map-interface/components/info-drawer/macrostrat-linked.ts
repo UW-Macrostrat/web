@@ -19,12 +19,12 @@ function MacrostratLinkedData(props) {
     },
     [
       h("div", { classes: expansionPanelDetailClasses }, [
+        h(MatchBasis, { source }),
         h(AgeChipRenderer, { mapInfo, source }),
         h(MacrostratAgeChipRenderer, { source }),
         h(Thickness, { source }),
         h(MinorFossilCollections, { source }),
         h(FossilOccs, { source }),
-        h(MatchBasis, { source }),
         h(LithsAndClasses, { source }),
         h(Environments, { source }),
         h(Economy, { source }),
@@ -58,7 +58,7 @@ function MacrostratAgeChipRenderer(props) {
     age += ` - ${t_int.int_name}`;
   }
   return h.if(b_age)("div.macrostrat-detail", [
-    h("div.expansion-summary-title", "Age: "),
+    h("div.expansion-summary-title", "Age"),
     h(AgeChip, {
       b_int: { ...b_int, int_name: age, b_age, t_age },
       t_int: { ...b_int, int_name: age, b_age, t_age },
@@ -68,13 +68,13 @@ function MacrostratAgeChipRenderer(props) {
 
 function MatchBasis(props) {
   const { source } = props;
-  if (!source.macrostrat.strat_names) return h("div");
+  if (!source.macrostrat?.strat_names) return null;
 
-  return h.if(source.macrostrat && source.macrostrat.strat_names)(
+  return h(
     SubExpansionPanel,
     {
-      title: "Match basis",
-      helpText: source.macrostrat.strat_names[0].rank_name,
+      title: source.macrostrat.strat_names[0].rank_name,
+      helpText: "Matched stratigraphic unit",
     },
     [
       h("p.expansion-panel-detail-header", ["All matched names:"]),
@@ -106,7 +106,7 @@ function Thickness(props) {
   return h.if(source.macrostrat && source.macrostrat.max_thick)(
     "div.macrostrat-detail",
     [
-      h("div.expansion-summary-title", "Thickness: "),
+      h("div.expansion-summary-title", "Thickness"),
       h("div", [
         source.macrostrat.min_min_thick,
         " - ",
@@ -125,7 +125,7 @@ function MinorFossilCollections(props) {
   return h.if(macrostrat && macrostrat.pbdb_collections)(
     "div.macrostrat-detail",
     [
-      h("div.expansion-summary-title", "Fossil collections: "),
+      h("div.expansion-summary-title", "Fossil collections"),
       h("div", [macrostrat.pbdb_collections]),
     ]
   );
@@ -138,7 +138,7 @@ function FossilOccs(props) {
   if (!macrostrat) return h("div");
 
   return h.if(macrostrat && macrostrat.pbdb_occs)("div.macrostrat-detail", [
-    h("div.expansion-summary-title", "Fossil occurences: "),
+    h("div.expansion-summary-title", "Fossil occurrences"),
     h("div", [macrostrat.pbdb_occs]),
   ]);
 }
@@ -162,9 +162,9 @@ function LithsAndClasses(props) {
   const { macrostrat } = source;
   const { liths = null, lith_types = null } = macrostrat;
 
-  if (!liths) return h("div");
+  if (!liths || liths.length == 0) return null;
 
-  return h.if(liths && liths.length > 0)(
+  return h(
     SubExpansionPanel,
     {
       title: "Lithology",
@@ -206,7 +206,7 @@ function Environments(props) {
   if (!environs) return h("div");
 
   return h.if(environs && environs.length > 0)(
-    ExpansionPanel,
+    SubExpansionPanel,
     {
       title: "Environment ",
       sideComponent: h(EnvironTypes, { environ_types }),

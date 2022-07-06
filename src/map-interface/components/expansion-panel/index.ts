@@ -8,7 +8,8 @@ import { PanelSubhead } from "./headers";
 const h = hyper.styled(styles);
 
 function ExpansionPanelSummary(props) {
-  const { expanded, children, onChange, className, title } = props;
+  const { expanded, children, onChange, className, title, titleComponent } =
+    props;
   const showExpand = expanded ? "chevron-up" : "chevron-down";
   return h(
     PanelSubhead,
@@ -16,14 +17,22 @@ function ExpansionPanelSummary(props) {
       className: classNames("expansion-panel-header", className),
       onClick: onChange,
       title,
+      component: titleComponent,
     },
     [children, h(Icon, { icon: showExpand })]
   );
 }
 
 function ExpansionHeader(props) {
-  const { onClick, title, helpText, expanded, sideComponent, className } =
-    props;
+  const {
+    onClick,
+    title,
+    helpText,
+    expanded,
+    sideComponent,
+    className,
+    titleComponent,
+  } = props;
 
   return h(
     ExpansionPanelSummary,
@@ -32,6 +41,7 @@ function ExpansionHeader(props) {
       className,
       expanded,
       title,
+      titleComponent,
     },
     h("div.expansion-summary-title-help", [
       h("span.expansion-panel-subtext", helpText),
@@ -41,9 +51,10 @@ function ExpansionHeader(props) {
   );
 }
 
-function ExpansionPanel(props) {
+function ExpansionPanelBase(props) {
   let {
     title,
+    titleComponent = "h3",
     children,
     expanded,
     helpText,
@@ -59,11 +70,12 @@ function ExpansionPanel(props) {
   };
 
   return h(
-    "div.expansion-panel",
+    "div.expansion-panel-base",
     { className: classNames(className, { expanded, collapsed: !expanded }) },
     [
       h(ExpansionHeader, {
         title: title,
+        titleComponent,
         expanded: isOpen,
         onClick: onChange_,
         helpText,
@@ -74,8 +86,19 @@ function ExpansionPanel(props) {
   );
 }
 
+function ExpansionPanel(props) {
+  return h(ExpansionPanelBase, {
+    ...props,
+    className: "expansion-panel",
+  });
+}
+
 function SubExpansionPanel(props) {
-  return h(ExpansionPanel, { ...props, className: "sub-expansion-panel" });
+  return h(ExpansionPanelBase, {
+    ...props,
+    className: "sub-expansion-panel",
+    titleComponent: "h4",
+  });
 }
 
 export { ExpansionPanel, ExpansionPanelSummary, SubExpansionPanel };
