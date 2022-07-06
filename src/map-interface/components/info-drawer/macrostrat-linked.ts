@@ -1,6 +1,6 @@
 import hyper from "@macrostrat/hyper";
 import { AgeChip, AttrChip } from "../info-blocks";
-import { ExpansionPanel, SubExpansionPanel } from "../expansion-panel";
+import { ExpansionPanel, ExpandableDetailsPanel } from "../expansion-panel";
 import styles from "./main.module.styl";
 const h = hyper.styled(styles);
 
@@ -71,13 +71,15 @@ function MatchBasis(props) {
   if (!source.macrostrat?.strat_names) return null;
 
   return h(
-    SubExpansionPanel,
+    ExpandableDetailsPanel,
     {
-      title: source.macrostrat.strat_names[0].rank_name,
-      helpText: "Matched stratigraphic unit",
+      className: "macrostrat-unit",
+      headerElement: h([
+        h("h3", source.macrostrat.strat_names[0].rank_name),
+        h("div.description", "Matched stratigraphic unit"),
+      ]),
     },
-    [
-      h("p.expansion-panel-detail-header", ["All matched names:"]),
+    h(ExpansionBody, { title: "All matched names" }, [
       source.macrostrat.strat_names.map((name, i) => {
         let lastElement: boolean =
           i == source.macrostrat.strat_names.length - 1;
@@ -95,7 +97,7 @@ function MatchBasis(props) {
           h.if(!lastElement)([", "]),
         ]);
       }),
-    ]
+    ])
   );
 }
 
@@ -135,9 +137,9 @@ function FossilOccs(props) {
   const { source } = props;
   const { macrostrat } = source;
 
-  if (!macrostrat) return h("div");
+  if (!macrostrat?.pbdb_occs) return null;
 
-  return h.if(macrostrat && macrostrat.pbdb_occs)("div.macrostrat-detail", [
+  return h("div.macrostrat-detail", [
     h("div.expansion-summary-title", "Fossil occurrences"),
     h("div", [macrostrat.pbdb_occs]),
   ]);
@@ -157,6 +159,13 @@ function LithTypes(props) {
   ]);
 }
 
+function ExpansionBody({ title, className, children }) {
+  return h("div", { className }, [
+    h("div.expansion-panel-detail-header", title),
+    h("div.expansion-panel-detail-body", null, children),
+  ]);
+}
+
 function LithsAndClasses(props) {
   const { source } = props;
   const { macrostrat } = source;
@@ -165,13 +174,12 @@ function LithsAndClasses(props) {
   if (!liths || liths.length == 0) return null;
 
   return h(
-    SubExpansionPanel,
+    ExpandableDetailsPanel,
     {
       title: "Lithology",
-      sideComponent: h(LithTypes, { lith_types }),
+      value: h(LithTypes, { lith_types }),
     },
-    [
-      h("p.expansion-panel-detail-header", ["Matched lithologies: "]),
+    h(ExpansionBody, { title: "Matched lithologies" }, [
       macrostrat.liths.map((lith, i) => {
         return h(AttrChip, {
           key: i,
@@ -180,7 +188,7 @@ function LithsAndClasses(props) {
           fill: lith.lith_fill,
         });
       }),
-    ]
+    ])
   );
 }
 
@@ -203,17 +211,15 @@ function Environments(props) {
   const { macrostrat } = source;
   const { environs = null, environ_types = null } = macrostrat;
 
-  if (!environs) return h("div");
+  if (!environs || environs.length == 0) return null;
 
-  return h.if(environs && environs.length > 0)(
-    SubExpansionPanel,
+  return h(
+    ExpandableDetailsPanel,
     {
       title: "Environment ",
-      sideComponent: h(EnvironTypes, { environ_types }),
-      subheader: true,
+      value: h(EnvironTypes, { environ_types }),
     },
-    [
-      h("p.expansion-panel-detail-header", ["Matched environments: "]),
+    h(ExpansionBody, { title: "Matched environments" }, [
       macrostrat.environs.map((env, i) => {
         return h(AttrChip, {
           key: i,
@@ -221,7 +227,7 @@ function Environments(props) {
           color: env.color,
         });
       }),
-    ]
+    ])
   );
 }
 
@@ -246,13 +252,12 @@ function Economy(props) {
   if (!econs) return h("div");
 
   return h.if(econs && econs.length > 0)(
-    SubExpansionPanel,
+    ExpandableDetailsPanel,
     {
       title: "Economy ",
-      sideComponent: h(EconType, { econ_types }),
+      value: h(EconType, { econ_types }),
     },
-    [
-      h("p.expansion-panel-detail-header", ["Matched economic attributes: "]),
+    h(ExpansionBody, { title: "Matched economic attributes" }, [
       econs.map((econ, i) => {
         return h(AttrChip, {
           key: i,
@@ -260,7 +265,7 @@ function Economy(props) {
           color: econ.color,
         });
       }),
-    ]
+    ])
   );
 }
 

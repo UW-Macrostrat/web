@@ -1,10 +1,13 @@
-import h from "@macrostrat/hyper";
+import hyper from "@macrostrat/hyper";
 import { hexToRgb } from "../utils";
+import styles from "./info-blocks.module.styl";
+
+const h = hyper.styled(styles);
 
 function IntervalChip(props) {
   const { interval, className } = props;
   return h(
-    "div.age-chip",
+    "div.chip.age-chip",
     {
       className,
       style: { backgroundColor: hexToRgb(interval.color, 0.8) },
@@ -43,7 +46,7 @@ function AttrChip(props) {
   }
   return h("div.lith-chip", { style: { ...styles } }, [
     h(
-      "div.lith-chip-inner",
+      "div.lith-chip-inner.chip",
       { style: { backgroundColor: hexToRgb(color, 0.6) } },
       [name]
     ),

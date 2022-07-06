@@ -3,6 +3,7 @@ import { Collapse, Icon } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.styl";
 import classNames from "classnames";
+import { Button } from "@blueprintjs/core";
 import { PanelSubhead } from "./headers";
 
 const h = hyper.styled(styles);
@@ -20,34 +21,6 @@ function ExpansionPanelSummary(props) {
       component: titleComponent,
     },
     [children, h(Icon, { icon: showExpand })]
-  );
-}
-
-function ExpansionHeader(props) {
-  const {
-    onClick,
-    title,
-    helpText,
-    expanded,
-    sideComponent,
-    className,
-    titleComponent,
-  } = props;
-
-  return h(
-    ExpansionPanelSummary,
-    {
-      onChange: onClick,
-      className,
-      expanded,
-      title,
-      titleComponent,
-    },
-    h("div.expansion-summary-title-help", [
-      h("span.expansion-panel-subtext", helpText),
-      " ",
-      sideComponent,
-    ])
   );
 }
 
@@ -73,14 +46,20 @@ function ExpansionPanelBase(props) {
     "div.expansion-panel-base",
     { className: classNames(className, { expanded, collapsed: !expanded }) },
     [
-      h(ExpansionHeader, {
-        title: title,
-        titleComponent,
-        expanded: isOpen,
-        onClick: onChange_,
-        helpText,
-        sideComponent,
-      }),
+      h(
+        ExpansionPanelSummary,
+        {
+          onChange: onChange_,
+          expanded,
+          title,
+          titleComponent,
+        },
+        h("div.expansion-summary-title-help", [
+          h("span.expansion-panel-subtext", helpText),
+          " ",
+          sideComponent,
+        ])
+      ),
       h(Collapse, { isOpen }, h("div.expansion-children", null, children)),
     ]
   );
@@ -96,9 +75,44 @@ function ExpansionPanel(props) {
 function SubExpansionPanel(props) {
   return h(ExpansionPanelBase, {
     ...props,
-    className: "sub-expansion-panel",
+    className: "expansion-panel sub-expansion-panel",
     titleComponent: "h4",
   });
 }
 
-export { ExpansionPanel, ExpansionPanelSummary, SubExpansionPanel };
+function ExpandableDetailsPanel(props) {
+  let { title, children, value, headerElement, className } = props;
+  const [isOpen, setIsOpen] = useState(false);
+  headerElement ??= h([h("div.title", title), value]);
+  return h("div.expandable-details", { className }, [
+    h("div.expandable-details-main", [
+      h("div.expandable-details-header", headerElement),
+      h("div.expandable-details-toggle", [
+        h(Button, {
+          small: true,
+          minimal: true,
+          active: isOpen,
+          onClick: () => setIsOpen(!isOpen),
+          icon: "more",
+        }),
+      ]),
+    ]),
+    h(
+      Collapse,
+      { isOpen },
+      h("div.expandable-details-children", null, children)
+    ),
+  ]);
+  // return h(ExpansionPanelBase, {
+  //   ...props,
+  //   className: "sub-expansion-panel",
+  //   titleComponent: "h4",
+  // });
+}
+
+export {
+  ExpansionPanel,
+  ExpansionPanelSummary,
+  ExpandableDetailsPanel,
+  SubExpansionPanel,
+};

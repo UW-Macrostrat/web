@@ -42,7 +42,6 @@
     border-top: none
     border-bottom: none
   .expansion-children
-    border: 2px dotted var(--tertiary-border-color);
     border-radius: 4px;
     border-top: none;
 
@@ -91,3 +90,33 @@
     margin: 0;
     margin-top: 5px;
     font-size: 80%;
+
+
+// New expandable panel for details
+.expandable-details-main
+  display flex
+  flex-direction row
+  align-items: center
+  justify-content: space-between
+
+.expandable-details-header
+  display inline-flex
+  flex-direction row
+  align-items: baseline
+  flex-grow 1
+
+.expandable-details-children
+  position relative
+
+.expandable-details-toggle
+  :global(.bp3-button)
+    font-size: 10px
+
+.expandable-details
+  &.macrostrat-unit
+    .title:after
+      content: none;
+  .title
+    margin-right 1em
+    &:after
+      content: ":";
