@@ -180,7 +180,11 @@ function MapContainer(props) {
   }, [filters, mapLayers]);
 
   useMapLabelVisibility(mapRef, mapShowLabels);
-  useMapConditionalStyle(mapRef, mapShowLineSymbols, toggleLineSymbols);
+  useMapConditionalStyle(
+    mapRef,
+    mapShowLineSymbols && mapLayers.has(MapLayer.LINES),
+    toggleLineSymbols
+  );
 
   useResizeObserver({
     ref: parentRef,
