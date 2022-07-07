@@ -56,7 +56,7 @@ function translateCameraPosition(pos: MapPosition): CameraParams {
       latitude: pos.camera.lat,
       height: altitude,
       heading: bearing,
-      pitch: -90 + pitch,
+      pitch: -90 + (pitch ?? 0),
       roll: 0,
     };
   }

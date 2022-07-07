@@ -14,7 +14,7 @@ export const SETTINGS = {
   //   window.location.hostname === "localhost"
   //     ? "https://dev.macrostrat.org"
   //     : `https://${window.location.hostname}`,
-  burwellTileDomain: "https://devtiles.macrostrat.org",
+  burwellTileDomain: "https://tiles.macrostrat.org",
   apiDomain: "https://dev.macrostrat.org",
   gddDomain: "https://geodeepdive.org",
   pbdbDomain: "https://paleobiodb.org",
