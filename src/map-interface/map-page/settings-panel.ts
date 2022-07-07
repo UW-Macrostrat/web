@@ -1,12 +1,16 @@
 // Settings panel for the map
 
 import { Switch } from "@blueprintjs/core";
-import h from "@macrostrat/hyper";
+import hyper from "@macrostrat/hyper";
+import { Tag } from "@blueprintjs/core";
 //import { LinkButton } from "@macrostrat/ui-components";
 //import { GlobeSettings } from "@macrostrat/cesium-viewer/settings";
 import { useAppState, useAppActions } from "~/map-interface/app-state";
 import { useLocation } from "react-router";
 //import { DisplayQuality } from "@macrostrat/cesium-viewer";
+import styles from "./settings-panel.module.styl";
+
+const h = hyper.styled(styles);
 
 function MapTypeButton(props) {
   const { pathname, hash } = useLocation();
@@ -18,7 +22,6 @@ function MapTypeButton(props) {
 }
 
 const SettingsPanel = (props) => {
-  const checked = useAppState((s) => s.core.mapShowLabels);
   const dispatch = useAppActions();
   //const { pathname } = useLocation();
   //const globeActive = pathname?.startsWith("/globe");
@@ -27,12 +30,31 @@ const SettingsPanel = (props) => {
     h(
       Switch,
       {
-        checked,
+        checked: useAppState((s) => s.core.mapShowLabels),
         onChange() {
           dispatch({ type: "toggle-labels" });
         },
       },
       "Show labels"
+    ),
+    h(
+      Switch,
+      {
+        checked: useAppState((s) => s.core.mapShowLineSymbols),
+        onChange() {
+          dispatch({ type: "toggle-line-symbols" });
+        },
+      },
+      [
+        h("span.control-label", [
+          h("span.control-label-text", "Geological line symbols"),
+          h(
+            Tag,
+            { intent: "danger", icon: "issue", minimal: true },
+            "Data issues"
+          ),
+        ]),
+      ]
     ),
     //h(MapTypeButton),
     //h.if(globeActive)(GlobeSettings),

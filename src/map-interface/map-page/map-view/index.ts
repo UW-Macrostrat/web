@@ -17,6 +17,7 @@ import { CompassControl, ZoomControl } from "mapbox-gl-controls";
 import classNames from "classnames";
 import { Icon } from "@blueprintjs/core";
 import { debounce } from "lodash";
+import { toggleLineSymbols } from "../map-style";
 
 const h = hyper.styled(styles);
 
@@ -78,24 +79,31 @@ function toggleMapLabelVisibility(map: mapboxgl.Map, visible: boolean) {
   }
 }
 
-function useMapLabelVisibility(
+function useMapConditionalStyle<T = any>(
   mapRef: RefObject<mapboxgl.Map>,
-  mapShowLabels: boolean
+  state: T,
+  operator: (map: mapboxgl.Map, a: T) => void
 ) {
-  // Labek visibility
   useEffect(() => {
     const map = mapRef.current;
     if (map?.style?.stylesheet == null) return;
-    toggleMapLabelVisibility(map, mapShowLabels);
-  }, [mapRef, mapShowLabels]);
+    operator(map, state);
+  }, [mapRef, state]);
 
   useEffect(() => {
     const map = mapRef.current;
     if (map == null) return;
     map.on("style.load", () => {
-      toggleMapLabelVisibility(map, mapShowLabels);
+      operator(map, state);
     });
   }, [mapRef]);
+}
+
+function useMapLabelVisibility(
+  mapRef: RefObject<mapboxgl.Map>,
+  mapShowLabels: boolean
+) {
+  useMapConditionalStyle(mapRef, mapShowLabels, toggleMapLabelVisibility);
 }
 
 function useElevationMarkerLocation(mapRef, elevationMarkerLocation) {
@@ -135,6 +143,7 @@ function MapContainer(props) {
     infoDrawerOpen,
     mapIsLoading,
     mapShowLabels,
+    mapShowLineSymbols,
   } = useAppState((state) => state.core);
 
   const runAction = useAppActions();
@@ -171,6 +180,7 @@ function MapContainer(props) {
   }, [filters, mapLayers]);
 
   useMapLabelVisibility(mapRef, mapShowLabels);
+  useMapConditionalStyle(mapRef, mapShowLineSymbols, toggleLineSymbols);
 
   useResizeObserver({
     ref: parentRef,
