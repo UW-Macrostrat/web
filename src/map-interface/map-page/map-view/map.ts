@@ -1,6 +1,6 @@
 import { Component, forwardRef } from "react";
 import { SETTINGS } from "../../Settings";
-import { mapStyle } from "../vector-style";
+import { mapStyle } from "../map-style";
 import {
   getRemovedOrNewFilters,
   getToApply,
