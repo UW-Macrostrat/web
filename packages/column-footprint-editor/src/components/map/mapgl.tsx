@@ -16,7 +16,7 @@ import {
   MapToolsControl,
   voronoiModeMap,
 } from "./map-pieces";
-import { onSaveLines } from "./fetch-post";
+import { getVoronoiPolygons, onSaveLines } from "./fetch-post";
 
 export enum MAP_MODES {
   topology,
@@ -73,12 +73,18 @@ export function Map() {
     // can do cleaning on changeSet by the internal id string.
     // Combine like edits so I'm not running a million
     // transactions on the db.
-    if (changeSet.length != 0) {
+    if (changeSet.length != 0 && mode != MAP_MODES.voronoi) {
       runAction({ type: "is-saving", payload: { isSaving: true } });
       await onSaveLines(changeSet, state.project.project_id);
       updateLinesAndColumns(state.project.project_id);
       runAction({ type: "is-saving", payload: { isSaving: false } });
       setChangeSet([]);
+    } else if (mode == MAP_MODES.voronoi) {
+      await getVoronoiPolygons(
+        runAction,
+        state.voronoi.points,
+        state.voronoi.bounding_geom
+      );
     }
   };
 
@@ -129,25 +135,41 @@ export function Map() {
     }
   }, [state.lines, mode, mapRef]);
 
+  const addVoronoiPoint = (point: object) => {
+    runAction({
+      type: "fetch-voronoi-state",
+      points: state.voronoi.points ?? [],
+      point,
+      project_id: state.project.project_id,
+    });
+  };
+
   useEffect(() => {
     if (mapRef.current == null) return;
     const isVoronoiMode = mode == MAP_MODES.voronoi;
     if (isVoronoiMode) {
       const map = mapRef.current;
-      let draw = voronoiModeMap(map, state);
+      let draw = voronoiModeMap(
+        map,
+        state.voronoi.polygons,
+        state.voronoi.points,
+        state.lines,
+        addVoronoiPoint
+      );
       voronoiRef.current = draw;
       return () => {
         let map = mapRef.current;
         let Draw = voronoiRef.current;
         if (!map || !Draw || !isVoronoiMode) return;
         try {
+          map.off("draw.create", map.addVoronoiPoint);
           Draw.onRemove();
         } catch (error) {
           console.log(error);
         }
       };
     }
-  }, [mode, mapRef]);
+  }, [mode, mapRef, state.voronoi.polygons, state.lines]);
 
   useEffect(() => {
     if (mapRef.current == null) return;

@@ -66,6 +66,62 @@ function ProjectDropDown(props) {
   );
 }
 
+function NavBarModeBtns(props: {
+  changeMode: (mode: MAP_MODES) => void;
+  mode: MAP_MODES;
+}) {
+  const { changeMode, mode } = props;
+
+  return (
+    <React.Fragment>
+      <Button
+        minimal={true}
+        active={mode == MAP_MODES.voronoi}
+        onClick={() => changeMode(MAP_MODES.voronoi)}
+      >
+        Tesselate
+      </Button>
+      <Button
+        minimal={true}
+        active={mode == MAP_MODES.topology}
+        onClick={() => changeMode(MAP_MODES.topology)}
+      >
+        Edit Topology
+      </Button>
+      <Button
+        minimal={true}
+        active={mode == MAP_MODES.properties}
+        onClick={() => changeMode(MAP_MODES.properties)}
+      >
+        View / Edit Properties
+      </Button>
+    </React.Fragment>
+  );
+}
+
+interface NavBarSaveBtnsProps {
+  onSave: () => void;
+  onCancel: () => void;
+  mode: MAP_MODES;
+  project_id: number | null;
+}
+
+function NavBarSaveBtns(props: NavBarSaveBtnsProps) {
+  const { onSave, onCancel, project_id, mode } = props;
+
+  return (
+    <div className="nav-btn">
+      <Button minimal={true} intent="success" onClick={onSave}>
+        {mode == MAP_MODES.voronoi ? "Tesselate" : "Save"}
+      </Button>
+      <Button minimal={true} intent="danger" onClick={onCancel}>
+        Cancel
+      </Button>
+      <DownloadButton project_id={project_id} />
+    </div>
+  );
+}
+
 interface MapNavBarProps {
   onSave: () => void;
   onCancel: () => void;
@@ -113,37 +169,14 @@ function MapNavBar(props: MapNavBarProps) {
             </Navbar.Heading>
           </div>
           <div className="nav-right">
-            <Button
-              minimal={true}
-              active={mode == MAP_MODES.voronoi}
-              onClick={() => changeMode(MAP_MODES.voronoi)}
-            >
-              Voronoi
-            </Button>
-            <Button
-              minimal={true}
-              active={mode == MAP_MODES.topology}
-              onClick={() => changeMode(MAP_MODES.topology)}
-            >
-              Edit Topology
-            </Button>
-            <Button
-              minimal={true}
-              active={mode == MAP_MODES.properties}
-              onClick={() => changeMode(MAP_MODES.properties)}
-            >
-              View / Edit Properties
-            </Button>
+            <NavBarModeBtns mode={mode} changeMode={changeMode} />
             <Navbar.Divider />
-            <div className="nav-btn">
-              <Button minimal={true} intent="success" onClick={onSave}>
-                Save
-              </Button>
-              <Button minimal={true} intent="danger" onClick={onCancel}>
-                Cancel
-              </Button>
-              <DownloadButton project_id={project_id} />
-            </div>
+            <NavBarSaveBtns
+              mode={mode}
+              project_id={project_id}
+              onSave={onSave}
+              onCancel={onCancel}
+            />
           </div>
         </div>
       </Navbar>

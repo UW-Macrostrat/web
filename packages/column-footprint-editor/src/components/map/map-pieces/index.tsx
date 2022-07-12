@@ -1,6 +1,7 @@
 export * from "./properties";
 export * from "./map-legend";
 export * from "./add-geom";
+export * from "./voronoi";
 import mapboxgl from "mapbox-gl";
 import { setWindowHash } from "../utils";
 import {
@@ -95,52 +96,5 @@ function editModeMap(map, state) {
   });
   return Draw;
 }
-function voronoiModeMap(map, state) {
-  const Draw = new MapboxDraw({
-    controls: { polygon: false },
-    modes: Object.assign(
-      {
-        lots_of_points: LotsOfPointsMode,
-        direct_select: MultVertDirectSelect,
-        simple_select: MultVertSimpleSelect,
-      },
-      MapboxDraw.modes,
-      { draw_line_string: SnapLineMode }
-    ),
-    styles: SnapModeDrawStyles,
-    snap: true,
-    clickBuffer: 10,
-    snapOptions: {
-      snapPx: 25,
-    },
-  });
 
-  map.addControl(Draw, "top-left");
-
-  map.on("click", async function (e) {
-    console.log("Mode", Draw.getMode());
-  });
-
-  map.on("draw.create", async function (e) {
-    console.log("created new feature!");
-  });
-
-  map.on("draw.delete", async function (e) {
-    console.log("Deleted a Feature");
-    const { type: action, features } = e;
-
-    features.map((feature) => {
-      console.log("Deleteing", feature);
-      const obj = { action, feature };
-      map.addToChangeSet(obj);
-    });
-  });
-
-  map.on("draw.update", async function (e) {
-    console.log(e);
-    //Draw.changeMode("simple_select");
-  });
-  return Draw;
-}
-
-export { initializeMap, editModeMap, voronoiModeMap };
+export { initializeMap, editModeMap };

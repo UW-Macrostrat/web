@@ -33,4 +33,16 @@ const onSaveLines = async (changeSet, project_id) => {
   }
 };
 
-export { onSaveLines };
+const getVoronoiPolygons = async (runAction, points, bounding_geom) => {
+  AppToaster.show({
+    message: "Tesselating Polygons..",
+    intent: "primary",
+  });
+  try {
+    runAction({ type: "fetch-voronoi-polygons", points, bounding_geom });
+  } catch {
+    console.error("Something went wrong");
+  }
+};
+
+export { onSaveLines, getVoronoiPolygons };

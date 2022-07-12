@@ -1,5 +1,10 @@
-import React, { createContext, useReducer, useEffect } from "react";
-import { fetchColumns, fetchLines, fetchPoints } from "./fetch";
+import React, { createContext, useReducer, useEffect, Dispatch } from "react";
+import {
+  fetchColumns,
+  fetchLines,
+  fetchPoints,
+  fetchVoronoiPolygons,
+} from "./fetch";
 
 //////////////////////// Data Types ///////////////////////
 
@@ -10,12 +15,20 @@ type Columns = { columns: object };
 type Lines = { lines: object };
 type Points = { points: object };
 type Project = ProjectId & ProjectName & ProjectDescription;
+type VoronoiPoint = object;
+type VoronoiPoints = VoronoiPoint[];
 
 /////////////////////// Async Actions ///////////////////////
 
 type FetchColumns = { type: "fetch-columns"; payload: ProjectId };
 type FetchLines = { type: "fetch-lines"; payload: ProjectId };
 type FetchPoints = { type: "fetch-points"; payload: ProjectId };
+type FetchVoronoiState = {
+  type: "fetch-voronoi-state";
+  points: VoronoiPoints;
+  point: any;
+  project_id: number;
+};
 
 ////////////////////// Sync Actions ///////////////////////////
 
@@ -25,6 +38,13 @@ type IsSaving = { type: "is-saving"; payload: { isSaving: boolean } };
 type SetColumns = { type: "set-columns"; payload: Columns };
 type SetLines = { type: "set-lines"; payload: Lines };
 type SetPoints = { type: "set-points"; payload: Points };
+type AddVoronoiPoints = { type: "add-voronoi-points"; point: VoronoiPoint };
+type ChangeVoronoiPoint = { type: "change-voronoi-point"; point: VoronoiPoint };
+type SetVoronoiState = {
+  type: "set-voronoi-state";
+  polygons: any;
+  points: any;
+};
 
 ////////////////////// Union Action Types //////////////////////
 type SyncAppActions =
@@ -33,10 +53,18 @@ type SyncAppActions =
   | IsSaving
   | SetColumns
   | SetLines
-  | SetPoints;
-type AsyncAppActions = FetchColumns | FetchLines | FetchPoints;
+  | SetPoints
+  | AddVoronoiPoints
+  | SetVoronoiState
+  | ChangeVoronoiPoint;
 
-function useAppContextActions(dispatch) {
+type AsyncAppActions =
+  | FetchColumns
+  | FetchLines
+  | FetchPoints
+  | FetchVoronoiState;
+
+function useAppContextActions(dispatch: Dispatch<SyncAppActions>) {
   // maybe state and action??
   return async (action: SyncAppActions | AsyncAppActions) => {
     switch (action.type) {
@@ -55,6 +83,27 @@ function useAppContextActions(dispatch) {
         const points = await fetchPoints(project_id);
         return dispatch({ type: "set-points", payload: { points } });
       }
+      case "fetch-voronoi-state":
+        const { project_id, points, point } = action;
+        if (points.length == 0) {
+          return dispatch({
+            type: "set-voronoi-state",
+            polygons: [],
+            points: [point],
+          });
+        }
+        const points_ = JSON.parse(JSON.stringify(points)).map(
+          (point) => point.geometry.coordinates
+        );
+        const data = await fetchVoronoiPolygons(project_id, [
+          ...points_,
+          point.geometry.coordinates,
+        ]);
+        return dispatch({
+          type: "set-voronoi-state",
+          polygons: data,
+          points: [...points, point],
+        });
       default:
         return dispatch(action);
     }
@@ -93,6 +142,51 @@ const appReducer = (state = initialState, action: SyncAppActions) => {
         ...state,
         isSaving: action.payload.isSaving,
       };
+    case "add-voronoi-points":
+      const curVoronoiPoints = state.voronoi.points ?? [];
+      const newVoronoiPoints = [...curVoronoiPoints, action.point];
+      return {
+        ...state,
+        voronoi: {
+          ...state.voronoi,
+          points: newVoronoiPoints,
+        },
+      };
+    case "set-voronoi-state":
+      return {
+        ...state,
+        voronoi: {
+          ...state.voronoi,
+          polygons: action.polygons,
+          points: action.points,
+        },
+      };
+    case "change-voronoi-point":
+      const currentPoints = state.voronoi.points ?? [];
+      if (currentPoints.length > 0) {
+        let idx;
+        currentPoints.map((p, i) => {
+          if (p.id == action.point.id) {
+            idx = i;
+          }
+        });
+        const points = JSON.parse(JSON.stringify(currentPoints));
+        points.splice(idx, 1, action.point);
+        return {
+          ...state,
+          voronoi: {
+            ...state.voronoi,
+            points,
+          },
+        };
+      }
+      return {
+        ...state,
+        voronoi: {
+          ...state.voronoi,
+          points: [action.point],
+        },
+      };
     default:
       throw new Error("What does this mean?");
   }
@@ -102,8 +196,15 @@ interface ProjectInterface {
   name: string | null;
   description: string | null;
 }
+
+interface VoronoiState {
+  points?: VoronoiPoints;
+  polygons?: any;
+}
+
 interface AppState {
   project: ProjectInterface;
+  voronoi: VoronoiState;
   lines: object | null;
   points: object | null;
   columns: object | null;
@@ -114,6 +215,7 @@ interface AppState {
 
 let initialState: AppState = {
   project: { project_id: null, name: null, description: null },
+  voronoi: {},
   lines: null,
   points: null,
   columns: null,
@@ -142,6 +244,7 @@ function AppContextProvider(props) {
     runAction({ type: "fetch-columns", payload: { project_id } });
     runAction({ type: "fetch-points", payload: { project_id } });
   }
+  console.log(state.voronoi);
 
   useEffect(() => {
     if (state.project.project_id) {
