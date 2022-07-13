@@ -143,7 +143,30 @@ export function Map() {
       project_id: state.project.project_id,
     });
   };
+  const moveVoronoiPoint = (point: object) => {
+    let filteredPoints = state.voronoi.points?.filter((p) => p.id != point.id);
 
+    filteredPoints = filteredPoints ?? [];
+    filteredPoints = [...filteredPoints, point];
+    runAction({
+      type: "fetch-voronoi-state",
+      points: filteredPoints,
+      point: null,
+      project_id: state.project.project_id,
+    });
+  };
+
+  const deleteVoronoiPoint = (point: object) => {
+    const filteredPoints =
+      state.voronoi.points?.filter((p) => p.id != point.id) ?? [];
+
+    runAction({
+      type: "fetch-voronoi-state",
+      points: filteredPoints,
+      point: null,
+      project_id: state.project.project_id,
+    });
+  };
   useEffect(() => {
     if (mapRef.current == null) return;
     const isVoronoiMode = mode == MAP_MODES.voronoi;
@@ -154,7 +177,9 @@ export function Map() {
         state.voronoi.polygons,
         state.voronoi.points,
         state.lines,
-        addVoronoiPoint
+        addVoronoiPoint,
+        moveVoronoiPoint,
+        deleteVoronoiPoint
       );
       voronoiRef.current = draw;
       return () => {
@@ -163,6 +188,8 @@ export function Map() {
         if (!map || !Draw || !isVoronoiMode) return;
         try {
           map.off("draw.create", map.addVoronoiPoint);
+          map.off("draw.update", map.moveVoronoiPoint);
+          map.off("draw.delete", map.deleteVoronoiPoint);
           Draw.onRemove();
         } catch (error) {
           console.log(error);

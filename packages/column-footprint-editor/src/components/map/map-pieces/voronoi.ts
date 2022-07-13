@@ -5,8 +5,17 @@ import {
 } from "../modes";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import { SnapModeDrawStyles } from "mapbox-gl-draw-snap-mode";
+import { addIdsToGeoJSON } from "./utils";
 
-function voronoiModeMap(map, polygons, points, lines, addVoronoiPoint) {
+function voronoiModeMap(
+  map,
+  polygons,
+  points,
+  lines,
+  addVoronoiPoint,
+  moveVoronoiPoint,
+  deleteVoronoiPoint
+) {
   const Draw = new MapboxDraw({
     controls: { polygon: false },
     modes: Object.assign(
@@ -27,8 +36,7 @@ function voronoiModeMap(map, polygons, points, lines, addVoronoiPoint) {
 
   map.addControl(Draw, "top-left");
 
-  if (polygons) {
-    console.log("POLYGONS", polygons);
+  if (polygons?.length ?? false) {
     Draw.add({ type: "FeatureCollection", features: polygons });
   }
   if (lines) {
@@ -42,28 +50,33 @@ function voronoiModeMap(map, polygons, points, lines, addVoronoiPoint) {
   });
 
   map.addVoronoiPoint = async function (e) {
-    console.log("created new feature!", e);
     const feature = e.features[0];
     const type = feature.geometry.type;
     if (type == "Point") {
       addVoronoiPoint(feature);
     }
   };
-
-  map.on("draw.create", map.addVoronoiPoint);
-
-  map.on("draw.delete", async function (e) {
-    console.log("Deleted a Feature");
-    const { type: action, features } = e;
-  });
-
-  map.on("draw.update", async function (e) {
-    console.log(e);
+  map.moveVoronoiPoint = async function (e) {
+    console.log("Moving feature");
     const feature = e.features[0];
     const type = feature.geometry.type;
     if (type == "Point") {
+      moveVoronoiPoint(feature);
     }
-  });
+  };
+
+  map.deleteVoronoiPoint = async function (e) {
+    console.log("Deleting feature");
+    const feature = e.features[0];
+    const type = feature.geometry.type;
+    if (type == "Point") {
+      deleteVoronoiPoint(feature);
+    }
+  };
+
+  map.on("draw.create", map.addVoronoiPoint);
+  map.on("draw.delete", map.deleteVoronoiPoint);
+  map.on("draw.update", map.moveVoronoiPoint);
   return Draw;
 }
 
