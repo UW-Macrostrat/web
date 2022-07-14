@@ -5,7 +5,6 @@ import {
 } from "../modes";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import { SnapModeDrawStyles } from "mapbox-gl-draw-snap-mode";
-import { addIdsToGeoJSON } from "./utils";
 
 function voronoiModeMap(
   map,
@@ -45,9 +44,6 @@ function voronoiModeMap(
   if (points) {
     Draw.add({ type: "FeatureCollection", features: points });
   }
-  map.on("click", async function (e) {
-    console.log("Mode", Draw.getMode());
-  });
 
   map.addVoronoiPoint = async function (e) {
     const feature = e.features[0];
