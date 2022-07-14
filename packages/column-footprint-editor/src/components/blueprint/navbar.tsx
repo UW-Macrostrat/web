@@ -104,15 +104,33 @@ interface NavBarSaveBtnsProps {
   onCancel: () => void;
   mode: MAP_MODES;
   project_id: number | null;
+  polygons?: object[];
+  changeSet?: object[];
 }
 
 function NavBarSaveBtns(props: NavBarSaveBtnsProps) {
-  const { onSave, onCancel, project_id, mode } = props;
+  const {
+    onSave,
+    onCancel,
+    project_id,
+    mode,
+    polygons = [],
+    changeSet = [],
+  } = props;
+  console.log(polygons);
 
+  const disabled =
+    (mode == MAP_MODES.voronoi && !polygons.length) ||
+    (mode == MAP_MODES.topology && !changeSet.length);
   return (
     <div className="nav-btn">
-      <Button minimal={true} intent="success" onClick={onSave}>
-        {mode == MAP_MODES.voronoi ? "Tesselate" : "Save"}
+      <Button
+        minimal={true}
+        intent="success"
+        onClick={onSave}
+        disabled={disabled}
+      >
+        {mode == MAP_MODES.voronoi ? "Save Tesselation" : "Save"}
       </Button>
       <Button minimal={true} intent="danger" onClick={onCancel}>
         Cancel
@@ -128,10 +146,12 @@ interface MapNavBarProps {
   changeMode: (mode: MAP_MODES) => void;
   mode: MAP_MODES;
   project_id: number | null;
+  polygons: object[];
+  changeSet: object[];
 }
 
 function MapNavBar(props: MapNavBarProps) {
-  const { onSave, onCancel, mode, changeMode, project_id } = props;
+  const { onSave, onCancel, mode, changeMode, project_id, ...rest } = props;
   const { state, runAction } = useContext(AppContext);
 
   const openImportOverlay = () => {
@@ -176,6 +196,7 @@ function MapNavBar(props: MapNavBarProps) {
               project_id={project_id}
               onSave={onSave}
               onCancel={onCancel}
+              {...rest}
             />
           </div>
         </div>
