@@ -83,7 +83,6 @@ export function Map() {
       await getVoronoiPolygons(
         runAction,
         state.voronoi.points,
-        state.voronoi.bounding_geom
       );
     }
   };
@@ -236,6 +235,8 @@ export function Map() {
           changeMode={changeMode}
           mode={mode}
           project_id={state.project.project_id}
+          polygons={state.voronoi.polygons}
+          changeSet={changeSet}
         />
       </div>
 
