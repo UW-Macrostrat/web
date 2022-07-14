@@ -84,6 +84,7 @@ function useAppContextActions(dispatch: Dispatch<SyncAppActions>) {
         return dispatch({ type: "set-points", payload: { points } });
       }
       case "fetch-voronoi-state":
+        // should just take in points
         const { project_id, points, point } = action;
         if (points.length == 0) {
           if (!point) {
@@ -103,9 +104,8 @@ function useAppContextActions(dispatch: Dispatch<SyncAppActions>) {
         if (point) {
           points_.push(point);
         }
-        const data = await fetchVoronoiPolygons(project_id, [
-          ...points_.map((p) => p.geometry.coordinates),
-        ]);
+        // this function should return polygons and points
+        const data = await fetchVoronoiPolygons(project_id, points_);
         return dispatch({
           type: "set-voronoi-state",
           polygons: data,
