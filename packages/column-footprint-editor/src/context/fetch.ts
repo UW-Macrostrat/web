@@ -28,7 +28,6 @@ async function fetchProjColGroups(project_id) {
 }
 
 async function fetchVoronoiPolygons(project_id, points) {
-  console.log("Fetch", points);
   let url = base + `${project_id}/voronoi`;
   const res = await axios.put(url, { points });
   return res.data.polygons;
