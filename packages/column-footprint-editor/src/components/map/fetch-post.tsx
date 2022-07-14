@@ -33,16 +33,15 @@ const onSaveLines = async (changeSet, project_id) => {
   }
 };
 
-const getVoronoiPolygons = async (runAction, points, bounding_geom) => {
+/* 
+Need to perform a post to the api endpoint; run a reset on voronoi state
+and then updateColumnsandLines, maybe default back to topology
+*/
+const getVoronoiPolygons = async (runAction, points) => {
   AppToaster.show({
     message: "Tesselating Polygons..",
     intent: "primary",
   });
-  try {
-    runAction({ type: "fetch-voronoi-polygons", points, bounding_geom });
-  } catch {
-    console.error("Something went wrong");
-  }
 };
 
 export { onSaveLines, getVoronoiPolygons };
