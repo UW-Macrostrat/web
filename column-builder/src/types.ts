@@ -158,6 +158,7 @@ export interface StratNameI {
   rank: RANK;
   ref_id: number;
   strat_names_meta: StratNameConceptI | null;
+  strat_tree?: { strat_names: StratNameI }[];
 }
 
 export interface ColSectionI {

@@ -29,12 +29,24 @@ const StratNameItemRenderer: ItemRenderer<StratNameI> = (
   item: StratNameI,
   { handleClick, index, modifiers }
 ) => {
-  const { strat_name, strat_names_meta, rank } = item;
+  const { strat_name, strat_names_meta, rank, strat_tree = [] } = item;
 
+  const helperTexts = strat_tree.map(
+    (strat) => `${strat.strat_names.strat_name} ${strat.strat_names.rank}`
+  );
+
+  const helperText = helperTexts.length
+    ? "(" + helperTexts.join(", ") + ")"
+    : "";
+
+  const geologic_age = strat_names_meta?.geologic_age ?? "";
   return h(MenuItem, {
     key: index,
     intent: strat_names_meta ? "primary" : "warning",
-    text: `${strat_name} ${rank}`,
+    text: h("div.flex-between", [
+      `${strat_name} ${rank} ${helperText}`,
+      h("i", [geologic_age]),
+    ]),
     onClick: handleClick,
     active: modifiers.active,
   });
@@ -74,13 +86,17 @@ const getStratNames = async (
   }
   if (query.length > 2) {
     const { data, error } = await baseQuery
-      .select("*,strat_names_meta(*,refs(author,pub_year, ref))")
+      .select(
+        "*,strat_names_meta(*,refs(author,pub_year, ref)),strat_tree!strat_tree_child_fkey(strat_names!strat_tree_parent_fkey(*))"
+      )
       .ilike("strat_name", `%${query}%`)
       .limit(50);
     setNames(data ?? []);
   } else {
     const { data, error } = await baseQuery
-      .select("*,strat_names_meta(*, refs(author,pub_year, ref))")
+      .select(
+        "*,strat_names_meta(*, refs(author,pub_year, ref)),strat_tree!strat_tree_child_fkey(strat_names!strat_tree_parent_fkey(*))"
+      )
       .limit(50);
     setNames(data ?? []);
   }
@@ -93,7 +109,7 @@ interface StratNameSelectProps {
 
 function StratNameSelect(props: StratNameSelectProps) {
   const [names, setNames] = useState<StratNameI[]>([]);
-
+  console.log(names);
   const onQueryChange = (i: string) => {
     getStratNames(i, (e: StratNameI[]) => setNames(e), props.col_id);
   };
