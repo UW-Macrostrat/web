@@ -117,6 +117,7 @@ export interface IntervalI {
   age_top: number;
   interval_name: string;
   interval_abbrev?: string;
+  interval_type?: string;
   interval_color: string;
   rank: number;
 }
