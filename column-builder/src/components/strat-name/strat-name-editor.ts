@@ -73,23 +73,29 @@ Edit the name and rank of strat_name - text input and select
 Assign other strat_name as parent
 Add to a concept
 */
-function StratNameEdit() {
+function StratNameEdit(props: { new_name?: boolean }) {
+  const { new_name = false } = props;
   const { model, actions, hasChanges }: Model = useModelEditor();
 
   const updateStratName = (field: string, e: any) => {
     actions.updateState({ model: { [field]: { $set: e } } });
   };
 
+  const title = new_name ? "Create new strat name" : "Edit strat name";
+  const helperText = new_name
+    ? "Create new strat name"
+    : "Edit existing Strat name";
+
   return h("div", [
     h(StratNameHierarchy, { strat_name_id: model.id }),
     h("div", [
       h(Card, [
-        h("h3", { style: { marginTop: 0 } }, ["Edit strat name string"]),
+        h("h3", { style: { marginTop: 0 } }, [title]),
         h("div.row", [
           h(
             FormGroup,
             {
-              helperText: "Edit existing Strat name",
+              helperText: helperText,
               label: "Stratigraphic Name",
               labelInfo: "(optional)",
             },
@@ -175,9 +181,11 @@ function StratNameEdit() {
 interface StratNameEditorProps {
   model: StratNameI | {};
   persistChanges: (e: StratNameI, c: Partial<StratNameI>) => StratNameI;
+  new_name?: boolean;
 }
 
 export function StratNameEditor(props: StratNameEditorProps) {
+  const { new_name } = props;
   return h(
     ModelEditor,
     {
@@ -186,6 +194,6 @@ export function StratNameEditor(props: StratNameEditorProps) {
       isEditing: true,
       canEdit: true,
     },
-    [h(StratNameEdit)]
+    [h(StratNameEdit, { new_name })]
   );
 }
