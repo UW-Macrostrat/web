@@ -6,7 +6,7 @@ import {
   Panel,
   Button,
   Intent,
-  Divider,
+  Callout,
 } from "@blueprintjs/core";
 import styles from "./strat-name-panel.module.scss";
 import { StratNameI } from "~/types";
@@ -52,7 +52,7 @@ const MetaDataPanel: React.FC<PanelProps<MetaDataPanelProps>> = (props) => {
   };
 
   if (!props.stratName) return h("div");
-  const concept_id = props.stratName.strat_names_meta?.concept_id;
+  const concept_id = props.stratName.concept_id;
 
   return h("div", [
     h("div.action-btns", [
@@ -69,7 +69,7 @@ const MetaDataPanel: React.FC<PanelProps<MetaDataPanelProps>> = (props) => {
       h(Button, {
         minimal: true,
         intent: Intent.SUCCESS,
-        onClick: () => onSubmitStratName(props.stratName),
+        onClick: () => onSubmitStratName(stratName),
         icon: "saved",
       }),
     ]),
@@ -77,10 +77,17 @@ const MetaDataPanel: React.FC<PanelProps<MetaDataPanelProps>> = (props) => {
       h("h3", [
         `Chosen strat name: ${props.stratName?.strat_name} ${props.stratName?.rank}`,
       ]),
-      h.if(typeof concept_id !== "undefined")(StratNameConceptCard, {
+      h.if(concept_id != null)(StratNameConceptCard, {
         strat_name: props.stratName?.strat_name,
         concept_id,
       }),
+      h.if(concept_id == null)(
+        Callout,
+        { intent: "warning", title: "No official lexicon" },
+        [
+          "This stratigraphic name is not linked to an official lexicon reference. You can use this but it may be better to find a strat_name that is linked.",
+        ]
+      ),
       h("h3", ["Hierarchy Summary"]),
       h("div.strat-hierarchy-constainer", [
         h(StratNameHierarchy, {

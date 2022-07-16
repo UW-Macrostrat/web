@@ -3,6 +3,7 @@ import { hyperStyled } from "@macrostrat/hyper";
 import { useModelEditor } from "@macrostrat/ui-components";
 import {
   Button,
+  Callout,
   Card,
   Dialog,
   Divider,
@@ -34,17 +35,17 @@ export function StratNameConceptCard(props: {
   const concept: StratNameConceptLongI = data[0];
 
   return h(
-    Card,
+    Callout,
     {
       className: "concept-card",
+      intent: "success",
+      title: `${props.strat_name} is a part of ${concept.refs.author}`,
+
       style: {
         backgroundColor: concept.intervals.interval_color + "40",
       },
     },
     [
-      h("h4.underline", [
-        `${props.strat_name} is connected to an official lexicon: ${concept.name}`,
-      ]),
       h("p.geologic-age", [concept.province]),
       h("p.geologic-age", [
         concept.geologic_age,
@@ -96,6 +97,7 @@ function UnitStratNameModalEditor() {
     h(
       Dialog,
       {
+        style: { width: "600px" },
         isOpen: open,
         title: `Modify Unit #${unit.id} strat_name`,
         onClose: () => setOpen(false),

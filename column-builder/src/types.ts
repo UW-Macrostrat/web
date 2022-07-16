@@ -153,13 +153,21 @@ export interface StratNameConceptLongI extends StratNameConceptBase {
   refs: RefI;
 }
 
+export enum STRAT_SOURCE {
+  COLUMN = "column",
+  NEARBY = "nearby",
+  LEXICON = "lexicon",
+}
+
 export interface StratNameI {
   id: number;
   strat_name: string;
   rank: RANK;
   ref_id: number;
-  strat_names_meta: StratNameConceptI | null;
-  strat_tree?: { strat_names: StratNameI }[];
+  author: string | null;
+  concept_id: number | null;
+  parent: string | null;
+  source: STRAT_SOURCE;
 }
 
 export interface ColSectionI {

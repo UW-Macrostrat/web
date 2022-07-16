@@ -13,7 +13,7 @@ import {
   PostgrestFilterBuilder,
   PostgrestQueryBuilder,
 } from "@supabase/postgrest-js";
-import { StratNameI } from "~/types";
+import { StratNameI, STRAT_SOURCE } from "~/types";
 
 const h = hyperStyled(styles);
 
@@ -25,28 +25,37 @@ const itemPredicate: ItemPredicate<StratNameI> = (query, item, index) => {
   return strat_name?.toLowerCase().indexOf(query.toLowerCase()) >= 0;
 };
 
+const StratNameListItem = (props: StratNameI) => {
+  const { strat_name, author, rank, parent, source } = props;
+
+  let sourceText: string;
+  if (source == STRAT_SOURCE.COLUMN) {
+    sourceText = "current column";
+  } else if (source == STRAT_SOURCE.NEARBY) {
+    sourceText = "nearby column";
+  } else {
+    sourceText = "lexicon";
+  }
+  if (author) sourceText = sourceText + ` (${author})`;
+
+  const parentText = parent ? `(${parent})` : "";
+
+  return h("div.flex-between", [
+    `${strat_name} ${rank} ${parentText}`,
+    h("i", [sourceText]),
+  ]);
+};
+
 const StratNameItemRenderer: ItemRenderer<StratNameI> = (
   item: StratNameI,
   { handleClick, index, modifiers }
 ) => {
-  const { strat_name, strat_names_meta, rank, strat_tree = [] } = item;
+  const { author } = item;
 
-  const helperTexts = strat_tree.map(
-    (strat) => `${strat.strat_names.strat_name} ${strat.strat_names.rank}`
-  );
-
-  const helperText = helperTexts.length
-    ? "(" + helperTexts.join(", ") + ")"
-    : "";
-
-  const geologic_age = strat_names_meta?.geologic_age ?? "";
   return h(MenuItem, {
     key: index,
-    intent: strat_names_meta ? "primary" : "warning",
-    text: h("div.flex-between", [
-      `${strat_name} ${rank} ${helperText}`,
-      h("i", [geologic_age]),
-    ]),
+    intent: author ? "primary" : "warning",
+    text: h(StratNameListItem, { ...item }),
     onClick: handleClick,
     active: modifiers.active,
   });
@@ -86,18 +95,12 @@ const getStratNames = async (
   }
   if (query.length > 2) {
     const { data, error } = await baseQuery
-      .select(
-        "*,strat_names_meta(*,refs(author,pub_year, ref)),strat_tree!strat_tree_child_fkey(strat_names!strat_tree_parent_fkey(*))"
-      )
+      .select()
       .ilike("strat_name", `%${query}%`)
       .limit(50);
     setNames(data ?? []);
   } else {
-    const { data, error } = await baseQuery
-      .select(
-        "*,strat_names_meta(*, refs(author,pub_year, ref)),strat_tree!strat_tree_child_fkey(strat_names!strat_tree_parent_fkey(*))"
-      )
-      .limit(50);
+    const { data, error } = await baseQuery.select().limit(50);
     setNames(data ?? []);
   }
 };
@@ -125,7 +128,13 @@ function StratNameSelect(props: StratNameSelectProps) {
     items: names,
     renderer: StratNameQueryListRenderer,
     resetOnSelect: true,
-    menuProps: { style: { maxWidth: "100%", margin: "0 10px" } },
+    menuProps: {
+      style: {
+        maxWidth: "100%",
+        margin: "0 10px",
+        maxHeight: "400px !important",
+      },
+    },
     onQueryChange,
   });
 }
