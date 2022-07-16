@@ -66,12 +66,16 @@ const MetaDataPanel: React.FC<PanelProps<MetaDataPanelProps>> = (props) => {
         },
         ["Search for another"]
       ),
-      h(Button, {
-        minimal: true,
-        intent: Intent.SUCCESS,
-        onClick: () => onSubmitStratName(stratName),
-        icon: "saved",
-      }),
+      h(
+        Button,
+        {
+          minimal: true,
+          intent: Intent.SUCCESS,
+          onClick: () => onSubmitStratName(stratName),
+          icon: "saved",
+        },
+        ["Save"]
+      ),
     ]),
     h("div.strat-name-select", [
       h("h3", [

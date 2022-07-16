@@ -7,7 +7,7 @@ import {
   ItemPredicate,
 } from "@blueprintjs/select";
 import pg from "~/db";
-import { InputGroup, MenuItem } from "@blueprintjs/core";
+import { Button, Callout, InputGroup, MenuItem } from "@blueprintjs/core";
 import styles from "./strat-name.module.scss";
 import {
   PostgrestFilterBuilder,
@@ -61,11 +61,17 @@ const StratNameItemRenderer: ItemRenderer<StratNameI> = (
   });
 };
 
+const StratNameNewRenderer = () => {
+  return h(Callout, { intent: "warning", title: "No results" }, [
+    `Don't see what you're looking for? Want to make a new strat_name?`,
+    h(Button, { intent: "success" }, ["Create name"]),
+  ]);
+};
+
 const StratNameQueryListRenderer = (
   props: IQueryListRendererProps<StratNameI>
 ) => {
   const { itemList, handleKeyDown, handleKeyUp, ...listProps } = props;
-
   return h(
     "div.lith-query-list-renderer",
     { onKeyDown: handleKeyDown, onKeyUp: handleKeyUp },
@@ -128,6 +134,7 @@ function StratNameSelect(props: StratNameSelectProps) {
     items: names,
     renderer: StratNameQueryListRenderer,
     resetOnSelect: true,
+    noResults: h(StratNameNewRenderer),
     menuProps: {
       style: {
         maxWidth: "100%",
