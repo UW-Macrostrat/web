@@ -16,7 +16,13 @@ function voronoiModeMap(
   deleteVoronoiPoint
 ) {
   const Draw = new MapboxDraw({
-    controls: { polygon: false },
+    controls: {
+      polygon: false,
+      line_string: false,
+      trash: false,
+      combine_features: false,
+      uncombine_features: false,
+    },
     modes: Object.assign(
       {
         direct_select: MultVertDirectSelect,
@@ -53,7 +59,6 @@ function voronoiModeMap(
     }
   };
   map.moveVoronoiPoint = async function (e) {
-    console.log("Moving feature");
     const feature = e.features[0];
     const type = feature.geometry.type;
     if (type == "Point") {
@@ -62,7 +67,6 @@ function voronoiModeMap(
   };
 
   map.deleteVoronoiPoint = async function (e) {
-    console.log("Deleting feature");
     const feature = e.features[0];
     const type = feature.geometry.type;
     if (type == "Point") {

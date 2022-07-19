@@ -28,6 +28,8 @@ type FetchVoronoiState = {
   points: VoronoiPoints;
   point: any;
   project_id: number;
+  radius: number;
+  quad_segs: number;
 };
 
 ////////////////////// Sync Actions ///////////////////////////
@@ -104,7 +106,12 @@ function useAppContextActions(dispatch: Dispatch<SyncAppActions>) {
           points_.push(point);
         }
         // this function should return polygons and points
-        const data = await fetchVoronoiPolygons(project_id, points_);
+        const data = await fetchVoronoiPolygons(
+          project_id,
+          points_,
+          action.radius,
+          action.quad_segs
+        );
         return dispatch({
           type: "set-voronoi-state",
           polygons: data,
@@ -268,7 +275,6 @@ function AppContextProvider(props) {
     runAction({ type: "fetch-columns", payload: { project_id } });
     runAction({ type: "fetch-points", payload: { project_id } });
   }
-  console.log(state.voronoi);
 
   useEffect(() => {
     if (state.project.project_id) {

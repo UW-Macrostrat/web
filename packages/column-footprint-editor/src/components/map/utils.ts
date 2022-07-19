@@ -22,7 +22,6 @@ function TopoJSONToLineString(json) {
     type: "FeatureCollection",
     features: features,
   };
-  console.log(featureCollection);
   return featureCollection;
 }
 

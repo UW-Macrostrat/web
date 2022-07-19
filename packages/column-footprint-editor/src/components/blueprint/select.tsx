@@ -15,7 +15,6 @@ export function MySuggest(props) {
   const [query, setQuery] = useState("");
 
   let itemz = [...items];
-  console.log("selected item", selectedItem);
 
   useEffect(() => {
     if (initialQuery && initialQuery != "") {

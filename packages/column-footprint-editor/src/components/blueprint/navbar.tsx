@@ -117,7 +117,6 @@ function NavBarSaveBtns(props: NavBarSaveBtnsProps) {
     polygons = [],
     changeSet = [],
   } = props;
-  console.log(polygons);
 
   const disabled =
     (mode == MAP_MODES.voronoi && !polygons.length) ||

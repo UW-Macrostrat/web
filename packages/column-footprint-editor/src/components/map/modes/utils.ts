@@ -113,7 +113,6 @@ function createPointOnLine(ids, point, map) {
               pointIndex = i + 1;
               lineIndex = lineIndex_;
               const path = `${lineIndex}.${pointIndex}`;
-              console.log(path);
               feature.addCoordinate(path, lng, lat);
               onChangeSetAdder(feature, map);
             }

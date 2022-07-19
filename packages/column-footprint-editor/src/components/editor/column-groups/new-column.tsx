@@ -75,8 +75,6 @@ function NewColGroups(props) {
   const project_id = appState.project.project_id;
 
   const persistChanges = async (updatedModel, changeset) => {
-    console.log("changeset", changeset);
-    console.log("updatedModel", updatedModel);
     let route = base + `${project_id}/col-groups`;
     let res = await axios.post(route, { updatedModel });
     const {
@@ -96,8 +94,7 @@ function EditColGroup(props) {
   const project_id = appState.project.project_id;
 
   const persistChanges = async (updatedModel, changeset) => {
-    console.log("changeset", changeset);
-    console.log("updatedModel", updatedModel);
+
     let route = base + `${project_id}/col-groups`;
     let res = await axios.put(route, { updatedModel });
     const {

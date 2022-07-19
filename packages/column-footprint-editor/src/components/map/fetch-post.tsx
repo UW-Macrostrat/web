@@ -37,13 +37,13 @@ const onSaveLines = async (changeSet, project_id) => {
 Need to perform a post to the api endpoint; run a reset on voronoi state
 and then updateColumnsandLines, maybe default back to topology
 */
-const saveVoronoiPolygons = async (project_id, points) => {
+const saveVoronoiPolygons = async (project_id, points, radius, quad_segs) => {
   AppToaster.show({
     message: <SavingToast message="Tessellating polygons..." />,
     intent: "primary",
   });
   let url = base + `${project_id}/voronoi`;
-  const res = await axios.post(url, { points });
+  const res = await axios.post(url, { points, radius, quad_segs });
   if (res.status == 404) {
     AppToaster.show({
       message: <BadSaving />,
