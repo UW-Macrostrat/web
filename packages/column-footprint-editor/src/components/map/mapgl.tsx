@@ -86,7 +86,9 @@ export function Map() {
       // updateLinesAndColumns
       const res = await saveVoronoiPolygons(
         state.project.project_id,
-        state.voronoi.points
+        state.voronoi.points,
+        state.voronoi.radius,
+        state.voronoi.quad_seg
       );
       if (res) {
         runAction({ type: "set-voronoi-state", polygons: [], points: [] });
@@ -136,6 +138,8 @@ export function Map() {
         let Draw = drawRef.current;
         if (!map || !Draw || !edit) return;
         try {
+          map.off("draw.update", map.switchToSimpleSelect);
+          map.off("draw.delete", map.onDrawDelete);
           Draw.onRemove();
         } catch (error) {
           console.log(error);
@@ -150,6 +154,8 @@ export function Map() {
       points: state.voronoi.points ?? [],
       point,
       project_id: state.project.project_id,
+      radius: state.voronoi.radius,
+      quad_segs: state.voronoi.quad_seg,
     });
   };
   const moveVoronoiPoint = (point: object) => {
@@ -162,6 +168,8 @@ export function Map() {
       points: filteredPoints,
       point: null,
       project_id: state.project.project_id,
+      radius: state.voronoi.radius,
+      quad_segs: state.voronoi.quad_seg,
     });
   };
 
@@ -174,6 +182,8 @@ export function Map() {
       points: filteredPoints,
       point: null,
       project_id: state.project.project_id,
+      radius: state.voronoi.radius,
+      quad_segs: state.voronoi.quad_seg,
     });
   };
   useEffect(() => {
@@ -205,7 +215,14 @@ export function Map() {
         }
       };
     }
-  }, [mode, mapRef, state.voronoi.polygons, state.lines]);
+  }, [
+    mode,
+    mapRef,
+    state.voronoi.polygons,
+    state.voronoi.quad_seg,
+    state.voronoi.radius,
+    state.lines,
+  ]);
 
   useEffect(() => {
     if (mapRef.current == null) return;
@@ -234,7 +251,6 @@ export function Map() {
       ? "map-tools-control-left"
       : "map-tools-control-right";
 
-  console.log("features", features);
   return (
     <div>
       <ImportDialog />
@@ -253,7 +269,7 @@ export function Map() {
         runAction={runAction}
         quad_segs={state.voronoi.quad_seg}
         radius={state.voronoi.radius}
-        mode={MAP_MODES.voronoi}
+        mode={mode}
       />
 
       <div>

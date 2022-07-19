@@ -12,7 +12,6 @@ import {
 } from "../modes";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import { SnapModeDrawStyles } from "mapbox-gl-draw-snap-mode";
-import { LotsOfPointsMode } from "../modes/lots-of-points";
 
 async function initializeMap(
   mapContainerRef,
@@ -70,30 +69,22 @@ function editModeMap(map, state) {
   map.addControl(Draw, "top-left");
 
   Draw.add(state.lines);
-
-  map.on("click", async function (e) {
-    console.log("Mode", Draw.getMode());
-  });
-
-  map.on("draw.create", async function (e) {
-    console.log("created new feature!");
-  });
-
-  map.on("draw.delete", async function (e) {
-    console.log("Deleted a Feature");
+  map.onDrawDelete = async function (e) {
     const { type: action, features } = e;
 
     features.map((feature) => {
-      console.log("Deleteing", feature);
       const obj = { action, feature };
       map.addToChangeSet(obj);
     });
-  });
+  };
 
-  map.on("draw.update", async function (e) {
-    console.log(e);
+  map.on("draw.delete", map.onDrawDelete);
+
+  map.switchToSimpleSelect = async function (e) {
     Draw.changeMode("simple_select");
-  });
+  };
+
+  map.on("draw.update", map.switchToSimpleSelect);
   return Draw;
 }
 
