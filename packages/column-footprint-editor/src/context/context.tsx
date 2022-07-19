@@ -94,11 +94,6 @@ function useAppContextActions(dispatch: Dispatch<SyncAppActions>) {
               points: [],
             });
           }
-          return dispatch({
-            type: "set-voronoi-state",
-            polygons: [],
-            points: [point],
-          });
         }
         let points_ = JSON.parse(JSON.stringify(points));
         if (point) {

@@ -6,10 +6,10 @@ const AppToaster = Toaster.create({
   maxToasts: 1,
 });
 
-const SavingToast = () => {
+const SavingToast = ({ message = "Saving..." }) => {
   return (
     <div>
-      <h4 style={{ marginLeft: "10px", margin: "0px" }}>Saving...</h4>
+      <h4 style={{ marginLeft: "10px", margin: "0px" }}>{message}</h4>
       <ProgressBar />
     </div>
   );

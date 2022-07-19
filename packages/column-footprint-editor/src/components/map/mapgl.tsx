@@ -16,7 +16,7 @@ import {
   MapToolsControl,
   voronoiModeMap,
 } from "./map-pieces";
-import { getVoronoiPolygons, onSaveLines } from "./fetch-post";
+import { saveVoronoiPolygons, onSaveLines } from "./fetch-post";
 
 export enum MAP_MODES {
   topology,
@@ -80,10 +80,18 @@ export function Map() {
       runAction({ type: "is-saving", payload: { isSaving: false } });
       setChangeSet([]);
     } else if (mode == MAP_MODES.voronoi) {
-      await getVoronoiPolygons(
-        runAction,
-        state.voronoi.points,
+      /// persist new polygons to db
+      // empty voronoi state, switch to topology mode
+      // updateLinesAndColumns
+      const res = await saveVoronoiPolygons(
+        state.project.project_id,
+        state.voronoi.points
       );
+      if (res) {
+        runAction({ type: "set-voronoi-state", polygons: [], points: [] });
+        setMode(MAP_MODES.topology);
+        updateLinesAndColumns(state.project.project_id);
+      }
     }
   };
 
@@ -94,6 +102,7 @@ export function Map() {
       timeout: 1000,
     });
     setChangeSet([]);
+    runAction({ type: "set-voronoi-state", points: [], polygons: [] });
     updateLinesAndColumns(state.project.project_id);
   };
 
