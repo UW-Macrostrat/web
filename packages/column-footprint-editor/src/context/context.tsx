@@ -45,9 +45,13 @@ type SetVoronoiState = {
   polygons: any;
   points: any;
 };
+type SetQuadSeg = { type: "set-quad-seg"; quad_seg: number };
+type SetRadius = { type: "set-radius"; radius: number };
 
 ////////////////////// Union Action Types //////////////////////
-type SyncAppActions =
+export type SyncAppActions =
+  | SetRadius
+  | SetQuadSeg
   | ChangeProject
   | ImportOverlay
   | IsSaving
@@ -58,7 +62,7 @@ type SyncAppActions =
   | SetVoronoiState
   | ChangeVoronoiPoint;
 
-type AsyncAppActions =
+export type AsyncAppActions =
   | FetchColumns
   | FetchLines
   | FetchPoints
@@ -189,6 +193,22 @@ const appReducer = (state = initialState, action: SyncAppActions) => {
           points: [action.point],
         },
       };
+    case "set-quad-seg":
+      return {
+        ...state,
+        voronoi: {
+          ...state.voronoi,
+          quad_seg: action.quad_seg,
+        },
+      };
+    case "set-radius":
+      return {
+        ...state,
+        voronoi: {
+          ...state.voronoi,
+          radius: action.radius,
+        },
+      };
     default:
       throw new Error("What does this mean?");
   }
@@ -202,6 +222,8 @@ interface ProjectInterface {
 interface VoronoiState {
   points?: VoronoiPoints;
   polygons?: any;
+  quad_seg: number;
+  radius: number;
 }
 
 interface AppState {
@@ -217,7 +239,7 @@ interface AppState {
 
 let initialState: AppState = {
   project: { project_id: null, name: null, description: null },
-  voronoi: {},
+  voronoi: { quad_seg: 2, radius: 1 },
   lines: null,
   points: null,
   columns: null,

@@ -167,7 +167,7 @@ function MapNavBar(props: MapNavBarProps) {
 
   return (
     <div className="navbar-layout">
-      <Navbar>
+      <Navbar style={{ position: "absolute", top: 0, left: 0 }}>
         <div className="nav-contents">
           <div className="nav-left">
             <Navbar.Heading>

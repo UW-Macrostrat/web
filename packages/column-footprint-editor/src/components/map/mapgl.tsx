@@ -17,6 +17,7 @@ import {
   voronoiModeMap,
 } from "./map-pieces";
 import { saveVoronoiPolygons, onSaveLines } from "./fetch-post";
+import { VoronoiToolBar } from "../voronoi/tool-bar";
 
 export enum MAP_MODES {
   topology,
@@ -248,6 +249,12 @@ export function Map() {
           changeSet={changeSet}
         />
       </div>
+      <VoronoiToolBar
+        runAction={runAction}
+        quad_segs={state.voronoi.quad_seg}
+        radius={state.voronoi.radius}
+        mode={MAP_MODES.voronoi}
+      />
 
       <div>
         <div className="map-container" ref={mapContainerRef} />
