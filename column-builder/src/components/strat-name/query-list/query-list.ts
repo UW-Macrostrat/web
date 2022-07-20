@@ -48,7 +48,7 @@ const StratNameListItem = (props: StratNameI) => {
           placement: "top",
           minimal: true,
         },
-        [h("i.source-text", [source])]
+        [h(Tag, { minimal: true }, [h("i.source-text", [source])])]
       ),
     ]),
   ]);
