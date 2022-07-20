@@ -17,29 +17,23 @@ import { EnvTagsAdd, StratNameDataI, StratNameSuggest } from "..";
 import { LithContainer } from "../lith";
 const h = hyperStyled(styles);
 
-export interface UnitEditorModel {
-  unit: UnitsView;
-}
-
 export interface UnitEditorProps {
-  persistChanges: (e: UnitEditorModel, c: Partial<UnitEditorModel>) => void;
+  persistChanges: (e: UnitsView, c: Partial<UnitsView>) => void;
   model: UnitsView | {};
 }
 
 export function EnvTags(props: { large: boolean }) {
   const { large = true } = props;
   const {
-    model,
+    model: unit,
     isEditing,
     actions,
   }: {
-    model: UnitEditorModel;
+    model: UnitsView;
     isEditing: boolean;
     actions: any;
   } = useModelEditor();
-  const {
-    unit: { environ_unit: envs },
-  } = model;
+  const { environ_unit: envs } = unit;
 
   const tagData =
     envs?.map((env) => {
@@ -54,13 +48,13 @@ export function EnvTags(props: { large: boolean }) {
   const onClickDelete = (id: number) => {
     const filteredEnvs = [...(envs ?? [])].filter((l) => l.id != id);
     actions.updateState({
-      model: { unit: { environ_unit: { $set: filteredEnvs } } },
+      model: { environ_unit: { $set: filteredEnvs } },
     });
   };
 
   const onClick = (env: Partial<EnvironUnit>) => {
     actions.updateState({
-      model: { unit: { environ_unit: { $push: [env] } } },
+      model: { environ_unit: { $push: [env] } },
     });
   };
 
@@ -74,27 +68,25 @@ export function EnvTags(props: { large: boolean }) {
 export function LithTags(props: { large?: boolean }) {
   const { large = true } = props;
   const {
-    model,
+    model: unit,
     isEditing,
     actions,
   }: {
-    model: UnitEditorModel;
+    model: UnitsView;
     isEditing: boolean;
     actions: any;
   } = useModelEditor();
-  const {
-    unit: { lith_unit: liths = [] },
-  } = model;
+  const { lith_unit: liths = [] } = unit;
 
   const onClickDelete = (lith: LithUnit) => {
     const filteredLiths = [...(liths ?? [])].filter((l) => l.id != lith.id);
     actions.updateState({
-      model: { unit: { lith_unit: { $set: filteredLiths } } },
+      model: { lith_unit: { $set: filteredLiths } },
     });
   };
 
   const onAdd = (lith: Lith) => {
-    actions.updateState({ model: { unit: { lith_unit: { $push: [lith] } } } });
+    actions.updateState({ model: { lith_unit: { $push: [lith] } } });
   };
 
   const onSwitchProp = (id: number, prop: "dom" | "sub") => {
@@ -120,11 +112,11 @@ export function UnitThickness(props: {
   placeholder: string;
   small?: boolean;
 }) {
-  const { model, actions }: { model: UnitEditorModel; actions: any } =
+  const { model: unit, actions }: { model: UnitsView; actions: any } =
     useModelEditor();
 
   const update = (field: string, e: any) => {
-    actions.updateState({ model: { unit: { [field]: { $set: e } } } });
+    actions.updateState({ model: { [field]: { $set: e } } });
   };
   const width = props.small ?? false ? "60px" : undefined;
 
@@ -139,13 +131,10 @@ export function UnitThickness(props: {
 
 export function UnitRowThicknessEditor() {
   const {
-    model,
+    model: unit,
     actions,
     isEditing,
-  }: { model: UnitEditorModel; actions: any; isEditing: boolean } =
-    useModelEditor();
-
-  const unit = model.unit;
+  }: { model: UnitsView; actions: any; isEditing: boolean } = useModelEditor();
 
   return h(React.Fragment, [
     h.if(!isEditing)("div", [
@@ -172,12 +161,11 @@ export function UnitRowThicknessEditor() {
 }
 
 export function InformalUnitName() {
-  const { model, actions } = useModelEditor();
-  const { unit }: UnitEditorModel = model;
+  const { model: unit, actions } = useModelEditor();
 
   const updateUnitName = (e: string) => {
     actions.updateState({
-      model: { unit: { unit_strat_name: { $set: e } } },
+      model: { unit_strat_name: { $set: e } },
     });
   };
 
@@ -192,8 +180,7 @@ export function InformalUnitName() {
 }
 
 export function FormalStratName() {
-  const { model, actions } = useModelEditor();
-  const { unit }: UnitEditorModel = model;
+  const { model: unit, actions } = useModelEditor();
 
   const initialSelected: StratNameDataI | undefined = unit?.strat_names
     ? {
@@ -205,11 +192,9 @@ export function FormalStratName() {
   const updateStratName = (e: StratNameDataI) => {
     actions.updateState({
       model: {
-        unit: {
-          strat_names: { $set: e.data },
-          unit_strat_name: { $set: `${e.data.strat_name} ${e.data.rank}` },
-          strat_name_id: { $set: e.data.id },
-        },
+        strat_names: { $set: e.data },
+        unit_strat_name: { $set: `${e.data.strat_name} ${e.data.rank}` },
+        strat_name_id: { $set: e.data.id },
       },
     });
   };

@@ -1,6 +1,5 @@
 import h from "@macrostrat/hyper";
 import pg, {
-  UnitEditorModel,
   BasePage,
   UnitEditor,
   UnitsView,
@@ -50,12 +49,12 @@ function UnitEdit(props: {
 }) {
   const { unit, errors } = props;
 
-  const model = { unit };
+  const model = unit;
   console.log("Unit", unit);
 
   const persistChanges = async (
-    updatedModel: UnitEditorModel,
-    changeSet: Partial<UnitEditorModel>
+    updatedModel: UnitsView,
+    changeSet: Partial<UnitsView>
   ) => {
     return await persistUnitChanges(unit, updatedModel, changeSet);
   };

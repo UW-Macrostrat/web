@@ -1,9 +1,7 @@
 import { hyperStyled } from "@macrostrat/hyper";
-import { UnitEditorModel, UnitsView } from "~/index";
+import { UnitsView } from "~/index";
 import { DnDTable } from "../table";
-import { UNIT_ADD_POISITON } from "./helpers";
 import { UnitRow } from "./unit";
-import { EditorState } from "./reducer";
 import { useUnitSectionContext } from "./table";
 import styles from "~/components/comp.module.scss";
 
@@ -31,7 +29,7 @@ interface SectionTableProps {
   section: { [section_id: number | string]: UnitsView[] };
   drag: boolean;
   moved: { [unit_id: number]: boolean };
-  addUnitAt: (unit: UnitEditorModel, unit_index: number) => void;
+  addUnitAt: (unit: UnitsView, unit_index: number) => void;
   editUnitAt: (unit_index: number) => void;
 }
 
@@ -73,13 +71,13 @@ function SectionTable(props: SectionTableProps) {
 
         // these ids here are meaningless... this action needs to be persisted
         const copyUnitDown = () => {
-          props.addUnitAt({ unit: { ...unit, id: 67 } }, j + 1);
+          props.addUnitAt({ ...unit, id: 67 }, j + 1);
         };
         const copyUnitUp = () => {
-          props.addUnitAt({ unit: { ...unit, id: 66 } }, j);
+          props.addUnitAt({ ...unit, id: 66 }, j);
         };
         const addEmptyUnit = (unit_index: number) => {
-          props.addUnitAt({ unit: getEmptyUnit(unit.col_id) }, unit_index);
+          props.addUnitAt(getEmptyUnit(unit.col_id), unit_index);
         };
         const editUnitAt = (unit_index: number) => {
           props.editUnitAt(unit_index);

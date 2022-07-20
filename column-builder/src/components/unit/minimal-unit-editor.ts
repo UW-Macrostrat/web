@@ -3,7 +3,6 @@ import {
   IntervalDataI,
   Table,
   IntervalSuggest,
-  UnitEditorModel,
 } from "~/index";
 import { Button, TextArea, Card, Collapse, Dialog } from "@blueprintjs/core";
 import { ModelEditor, useModelEditor } from "@macrostrat/ui-components";
@@ -204,7 +203,7 @@ function MinEditorToggle(props: ToggleI) {
     unit: { new_section: false, lith_unit: [], environ_unit: [] },
   };
 
-  const persistChanges = (e: UnitEditorModel, c: Partial<UnitEditorModel>) => {
+  const persistChanges = (e: UnitsView, c: Partial<UnitsView>) => {
     props.persistChanges(e, c);
     setAdd(false);
   };

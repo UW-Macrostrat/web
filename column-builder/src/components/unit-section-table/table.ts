@@ -2,7 +2,6 @@ import React, { createContext, useContext, useReducer } from "react";
 import { hyperStyled } from "@macrostrat/hyper";
 import {
   ColumnStateI,
-  UnitEditorModel,
   UnitsView,
   ColSectionsTable,
   ColSectionI,
@@ -52,7 +51,7 @@ function SectionsDropContainer(props: SectionUnitTableProps) {
                     runAction({ type: "add-section-at", index: i }),
                 }),
                 sections.map((section, i) => {
-                  const addUnitAt = (e: UnitEditorModel, n: number) => {
+                  const addUnitAt = (e: UnitsView, n: number) => {
                     runAction({
                       type: "add-unit-at",
                       unit_index: n,

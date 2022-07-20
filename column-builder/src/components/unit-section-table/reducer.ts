@@ -1,6 +1,6 @@
 import { Dispatch } from "react";
 import { DropResult } from "react-beautiful-dnd";
-import { filterOrAddIds, UnitEditorModel, UnitsView } from "~/index";
+import { filterOrAddIds, UnitsView } from "~/index";
 
 ///////////////// helper functions //////////////
 /* 
@@ -8,18 +8,18 @@ import { filterOrAddIds, UnitEditorModel, UnitsView } from "~/index";
     then would return db representation which we 
     would add to units in a Sync Action
 */
-function persistUnit(unit: UnitEditorModel) {
+function persistUnit(unit: UnitsView) {
   let color = "#FFFFF";
   if (
-    typeof unit.unit.lith_unit !== "undefined" &&
-    unit.unit.lith_unit.length > 0
+    typeof unit.lith_unit !== "undefined" &&
+    unit.lith_unit.length > 0
   ) {
-    color = unit.unit?.lith_unit[0].lith_color;
+    color = unit?.lith_unit[0].lith_color;
   }
   const newUnit = {
-    ...unit.unit,
-    id: unit.unit.id ?? 666,
-    color: unit.unit.color ?? color,
+    ...unit,
+    id: unit.id ?? 666,
+    color: unit.color ?? color,
   };
   return newUnit;
 }
@@ -61,14 +61,14 @@ type AddUnitAt = {
   type: "add-unit-at";
   section_index: number;
   unit_index: number;
-  unit: UnitEditorModel;
+  unit: UnitsView;
 };
 
 type PersistEditsAt = {
   type: "persist-edits-at";
   section_index: number;
   unit_index: number;
-  unit: UnitEditorModel;
+  unit: UnitsView;
 };
 
 type EditUnitAt = {

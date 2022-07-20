@@ -4,7 +4,6 @@ import pg, {
   tableUpdate,
   EnvironUnit,
   LithUnit,
-  UnitEditorModel,
 } from "../..";
 import { conductChangeSet, detectDeletionsAndAdditions } from "../helpers";
 
@@ -47,33 +46,33 @@ or added and then handle those changes
 */
 export async function persistUnitChanges(
   unit: UnitsView,
-  updatedModel: UnitEditorModel,
-  changeSet: Partial<UnitEditorModel>
+  updatedModel: UnitsView,
+  changeSet: Partial<UnitsView>
 ) {
-  if (changeSet.unit) {
-    const changes = conductChangeSet(unit, changeSet.unit);
+  if (changeSet) {
+    const changes = conductChangeSet(unit, changeSet);
     const { data, error } = await tableUpdate("units", {
       changes,
       id: unit.id,
     });
   }
 
-  if (changeSet.unit?.environ_unit) {
+  if (changeSet?.environ_unit) {
     await handleCollections(
       "unit_environs",
       "environ_id",
       unit.id,
       unit.environ_unit ?? [],
-      changeSet.unit.environ_unit
+      changeSet.environ_unit
     );
   }
-  if (changeSet.unit?.lith_unit) {
+  if (changeSet?.lith_unit) {
     await handleCollections(
       "unit_liths",
       "lith_id",
       unit.id,
       unit.lith_unit ?? [],
-      changeSet.unit.lith_unit
+      changeSet.lith_unit
     );
   }
   return updatedModel;

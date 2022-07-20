@@ -32,7 +32,6 @@ const intervalItemRenderer: ItemRenderer<IntervalDataI> = (
   item: IntervalDataI,
   { modifiers, handleClick }
 ) => {
-  console.log(item);
   const {
     interval_name,
     age_bottom,

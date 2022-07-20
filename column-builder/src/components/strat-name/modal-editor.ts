@@ -66,19 +66,16 @@ export function StratNameConceptCard(props: {
 
 function UnitStratNameModalEditor() {
   const [open, setOpen] = useState(false);
-  const { model, actions } = useModelEditor();
-  const { unit }: { unit: UnitsView } = model;
+  const { model: unit, actions } = useModelEditor();
 
   const onSubmitStratName = (e: StratNameI | null) => {
     if (!e) return;
 
     actions.updateState({
       model: {
-        unit: {
           unit_strat_name: { $set: `${e.strat_name} ${e.rank}` },
           strat_names: { $set: e },
           strat_name_id: { $set: e.id },
-        },
       },
     });
   };

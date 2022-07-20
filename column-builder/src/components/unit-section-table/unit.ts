@@ -31,13 +31,10 @@ const h = hyperStyled(styles);
 
 function UnitRowIntervalEditor() {
   const {
-    model,
+    model: unit,
     actions,
     isEditing,
-  }: { model: UnitEditorModel; actions: any; isEditing: boolean } =
-    useModelEditor();
-
-  const unit = model.unit;
+  }: { model: UnitsView; actions: any; isEditing: boolean } = useModelEditor();
 
   const changeInterval = (interval: IntervalDataI, lo: boolean) => {
     const { id, interval_name } = interval.data;
@@ -50,10 +47,8 @@ function UnitRowIntervalEditor() {
     }
     actions.updateState({
       model: {
-        unit: {
-          [intervalField]: { $set: id },
-          [intervalName]: { $set: interval_name },
-        },
+        [intervalField]: { $set: id },
+        [intervalName]: { $set: interval_name },
       },
     });
   };
@@ -99,20 +94,15 @@ function UnitRowIntervalEditor() {
 
 function UnitRowNotes() {
   const {
-    model,
+    model: unit,
     actions,
     isEditing,
-  }: { model: { unit: UnitsView }; actions: any; isEditing: boolean } =
-    useModelEditor();
-
-  const unit = model.unit;
+  }: { model: UnitsView; actions: any; isEditing: boolean } = useModelEditor();
 
   const updateUnit = (field: string, value: string) => {
     actions.updateState({
       model: {
-        unit: {
-          [field]: { $set: value },
-        },
+        [field]: { $set: value },
       },
     });
   };
@@ -129,13 +119,10 @@ function UnitRowNotes() {
 
 function UnitRowStratNameEditor() {
   const {
-    model,
+    model: unit,
     actions,
     isEditing,
-  }: { model: { unit: UnitsView }; actions: any; isEditing: boolean } =
-    useModelEditor();
-
-  const { unit } = model;
+  }: { model: UnitsView; actions: any; isEditing: boolean } = useModelEditor();
 
   return h("div", [
     unit.strat_names
@@ -190,7 +177,7 @@ interface UnitRowProps {
 function UnitRow(props: UnitRowProps) {
   const { state, runAction } = useUnitSectionContext();
 
-  const persistChanges = (e: UnitEditorModel, c: Partial<UnitEditorModel>) => {
+  const persistChanges = (e: UnitsView, c: Partial<UnitsView>) => {
     runAction({
       type: "persist-edits-at",
       unit: e,
@@ -235,7 +222,7 @@ function UnitRow(props: UnitRowProps) {
             isEditing: props.inRowEditing,
             //@ts-ignore
             persistChanges,
-            model: { unit: props.unit },
+            model: props.unit,
           },
           [
             h(UnitCellGroup, {
