@@ -1,6 +1,7 @@
 .flex-between {
   display: flex;
   justify-content: space-between;
+  min-height: 2.5rem;
 }
 .source-text {
   overflow: hidden;

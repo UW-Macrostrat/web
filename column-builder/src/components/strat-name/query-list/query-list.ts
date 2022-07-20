@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { hyperStyled } from "@macrostrat/hyper";
 import {
   QueryList,
@@ -69,8 +69,6 @@ const StratNameItemRenderer: ItemRenderer<StratNameI> = (
   item: StratNameI,
   { handleClick, index, modifiers }
 ) => {
-  const { author } = item;
-
   return h(MenuItem, {
     key: index,
     text: h(StratNameListItem, { ...item }),
@@ -136,7 +134,6 @@ interface StratNameSelectProps {
 
 function StratNameSelect(props: StratNameSelectProps) {
   const [names, setNames] = useState<StratNameI[]>([]);
-  console.log(names);
   const onQueryChange = (i: string) => {
     getStratNames(i, (e: StratNameI[]) => setNames(e), props.col_id);
   };
@@ -151,7 +148,7 @@ function StratNameSelect(props: StratNameSelectProps) {
     onItemSelect: props.onItemSelect,
     items: names,
     renderer: StratNameQueryListRenderer,
-    resetOnSelect: true,
+    resetOnSelect: false,
     noResults: h(StratNameNewRenderer),
     menuProps: {
       style: {
