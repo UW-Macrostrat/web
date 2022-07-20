@@ -58,6 +58,10 @@ const SettingsPanel = (props) => {
   return h("div.settings.bp3-text.text-panel", [
     h("h2", "Settings"),
     h(
+      "p",
+      "This page contains useful settings that are not yet fully integrated into the application."
+    ),
+    h(
       Switch,
       {
         large: true,
@@ -66,7 +70,7 @@ const SettingsPanel = (props) => {
           runAction({ type: "toggle-labels" });
         },
       },
-      "Map labels"
+      "Show map labels"
     ),
 
     //h(MapTypeButton),

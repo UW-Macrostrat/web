@@ -235,12 +235,12 @@ function MenuHeaderButtons() {
       text: "Layers",
       to: "layers",
     }),
+    h(TabButton, { icon: "settings", text: "Settings", to: "settings" }),
     h(TabButton, {
       icon: "info-sign",
       text: "About",
       to: "about",
     }),
-    h(TabButton, { icon: "settings", text: "Settings", to: "settings" }),
     h(TabButton, {
       icon: "help",
       text: "Usage",
