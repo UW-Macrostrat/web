@@ -2,7 +2,6 @@ import React from "react";
 import Link from "next/link";
 import { hyperStyled } from "@macrostrat/hyper";
 import {
-  UnitEditorModel,
   UnitsView,
   convertColorNameToHex,
   IntervalDataI,
@@ -13,6 +12,8 @@ import {
   LithTags,
   UnitEditorProps,
   UnitRowThicknessEditor,
+  UnitRowStratNameEditor,
+  InformalUnitName,
 } from "../unit/common-editing";
 import { MinEditorCard } from "../unit/minimal-unit-editor";
 import { DraggableRow } from "../table";
@@ -25,7 +26,6 @@ import {
   useModelEditor,
 } from "deps/ui-components/packages/ui-components/src";
 import { SubmitButton } from "../buttons";
-import { UnitStratNameModalEditor } from "../strat-name";
 
 const h = hyperStyled(styles);
 
@@ -117,21 +117,6 @@ function UnitRowNotes() {
   ]);
 }
 
-function UnitRowStratNameEditor() {
-  const {
-    model: unit,
-    actions,
-    isEditing,
-  }: { model: UnitsView; actions: any; isEditing: boolean } = useModelEditor();
-
-  return h("div", [
-    unit.strat_names
-      ? `${unit.strat_names.strat_name} ${unit.strat_names.rank}`
-      : unit.unit_strat_name ?? "unnamed",
-    h.if(isEditing)(UnitStratNameModalEditor),
-  ]);
-}
-
 function UnitCellGroup(props: { unit: UnitsView; onCancel: () => void }) {
   const { unit } = props;
   const {
@@ -145,6 +130,7 @@ function UnitCellGroup(props: { unit: UnitsView; onCancel: () => void }) {
     h("td", { width: "0%" }, [
       h(Link, { href: `/unit/${unit.id}/edit` }, [h("a", [unit.id])]),
     ]),
+    h("td", { style: { background: backgroundColor } }, [h(InformalUnitName)]),
     h("td", { style: { background: backgroundColor } }, [
       h(UnitRowStratNameEditor),
     ]),

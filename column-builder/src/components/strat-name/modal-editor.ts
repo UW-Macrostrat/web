@@ -12,7 +12,7 @@ import {
 } from "@blueprintjs/core";
 import styles from "../comp.module.scss";
 import { UnitsView } from "~/types";
-import { FormalStratName, InformalUnitName } from "../unit";
+import { InformalUnitName } from "../unit";
 import pg, { usePostgrest } from "~/db";
 import { StratNameConceptLongI, StratNameI } from "~/types";
 import { StratNameStack } from "./panel-stack";
@@ -73,9 +73,8 @@ function UnitStratNameModalEditor() {
 
     actions.updateState({
       model: {
-          unit_strat_name: { $set: `${e.strat_name} ${e.rank}` },
-          strat_names: { $set: e },
-          strat_name_id: { $set: e.id },
+        strat_names: { $set: e },
+        strat_name_id: { $set: e.id },
       },
     });
   };
@@ -86,11 +85,12 @@ function UnitStratNameModalEditor() {
   };
 
   return h(React.Fragment, [
-    h(
-      Button,
-      { minimal: true, onClick: () => setOpen(true), style: { padding: 0 } },
-      ["(modify)"]
-    ),
+    h(Button, {
+      minimal: true,
+      onClick: () => setOpen(true),
+      icon: "edit",
+      style: { padding: 0 },
+    }),
     h(
       Dialog,
       {

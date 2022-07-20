@@ -40,6 +40,7 @@ function SectionTable(props: SectionTableProps) {
 
   let headers = [
     "ID",
+    "Unit Name",
     "Strat Name",
     "Liths",
     "Envs",

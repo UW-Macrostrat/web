@@ -26,30 +26,41 @@ const itemPredicate: ItemPredicate<StratNameI> = (query, item, index) => {
   return strat_name?.toLowerCase().indexOf(query.toLowerCase()) >= 0;
 };
 
+const SourceTag = ({ source }: { source: string | undefined }) => {
+  return h.if(typeof source !== "undefined")(
+    Tooltip2,
+    {
+      content: source ?? "",
+      className: "source-text",
+      placement: "top",
+      minimal: true,
+    },
+    [h(Tag, { minimal: true }, [h("i", [source])])]
+  );
+};
+
+const AuthorTag = ({ author }: { author: string | null }) => {
+  return h("div.author-tag", [
+    h.if(author != null)(Tag, { intent: "success", minimal: true }, [author]),
+    h.if(!author)(Tag, { intent: "warning", minimal: true }, "Unlinked"),
+  ]);
+};
+
 const StratNameListItem = (props: StratNameI) => {
   const { strat_name, author, rank, parent, source } = props;
 
-  const parentText = parent ? ` of the ${parent}` : "";
+  const parentText = parent ? `${parent}` : "";
 
   return h("div", [
     h("div.flex-between", [
-      h("div", [
-        h("div", [h("b", [`${strat_name} ${rank}`]), `${parentText}`]),
-        h.if(author != null)(Tag, { intent: "success", minimal: true }, [
-          author,
-        ]),
-        h.if(!author)(Tag, { intent: "warning", minimal: true }, "Unlinked"),
+      h("div.name-text", [
+        h("b", [`${strat_name} ${rank}`]),
+        h("i.parent-name", [`${parentText}`]),
       ]),
-      h.if(typeof source !== "undefined")(
-        Tooltip2,
-        {
-          content: source ?? "",
-          className: "source-text",
-          placement: "top",
-          minimal: true,
-        },
-        [h(Tag, { minimal: true }, [h("i.source-text", [source])])]
-      ),
+      h("div.author-source-tag", [
+        h(SourceTag, { source }),
+        h(AuthorTag, { author }),
+      ]),
     ]),
   ]);
 };

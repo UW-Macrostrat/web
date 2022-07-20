@@ -5,7 +5,7 @@ import pg, {
   EnvironUnit,
   LithUnit,
 } from "../..";
-import { conductChangeSet, detectDeletionsAndAdditions } from "../helpers";
+import { detectDeletionsAndAdditions } from "../helpers";
 
 /* 
 handles insertions and deletions for
@@ -49,31 +49,31 @@ export async function persistUnitChanges(
   updatedModel: UnitsView,
   changeSet: Partial<UnitsView>
 ) {
-  if (changeSet) {
-    const changes = conductChangeSet(unit, changeSet);
-    const { data, error } = await tableUpdate("units", {
-      changes,
-      id: unit.id,
-    });
-  }
+  console.log(unit, updatedModel, changeSet);
+  // if (changeSet) {
+  //   const { data, error } = await tableUpdate("units", {
+  //     changes,
+  //     id: unit.id,
+  //   });
+  // }
 
-  if (changeSet?.environ_unit) {
-    await handleCollections(
-      "unit_environs",
-      "environ_id",
-      unit.id,
-      unit.environ_unit ?? [],
-      changeSet.environ_unit
-    );
-  }
-  if (changeSet?.lith_unit) {
-    await handleCollections(
-      "unit_liths",
-      "lith_id",
-      unit.id,
-      unit.lith_unit ?? [],
-      changeSet.lith_unit
-    );
-  }
+  // if (changeSet?.environ_unit) {
+  //   await handleCollections(
+  //     "unit_environs",
+  //     "environ_id",
+  //     unit.id,
+  //     unit.environ_unit ?? [],
+  //     changeSet.environ_unit
+  //   );
+  // }
+  // if (changeSet?.lith_unit) {
+  //   await handleCollections(
+  //     "unit_liths",
+  //     "lith_id",
+  //     unit.id,
+  //     unit.lith_unit ?? [],
+  //     changeSet.lith_unit
+  //   );
+  // }
   return updatedModel;
 }

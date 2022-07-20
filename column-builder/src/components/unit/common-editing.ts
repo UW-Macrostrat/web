@@ -13,7 +13,8 @@ import {
   //@ts-ignore
 } from "@macrostrat/ui-components";
 import styles from "../comp.module.scss";
-import { EnvTagsAdd, StratNameDataI, StratNameSuggest } from "..";
+import { EnvTagsAdd } from "..";
+import { UnitStratNameModalEditor } from "..";
 import { LithContainer } from "../lith";
 const h = hyperStyled(styles);
 
@@ -161,7 +162,7 @@ export function UnitRowThicknessEditor() {
 }
 
 export function InformalUnitName() {
-  const { model: unit, actions } = useModelEditor();
+  const { model: unit, actions, isEditing } = useModelEditor();
 
   const updateUnitName = (e: string) => {
     actions.updateState({
@@ -169,8 +170,9 @@ export function InformalUnitName() {
     });
   };
 
-  return h(FormGroup, { label: "Informal Unit Name" }, [
-    h(InputGroup, {
+  return h("div", [
+    h.if(!isEditing)("p", [unit.unit_strat_name]),
+    h.if(isEditing)(InputGroup, {
       placeholder: "Informal Unit Name",
       style: { width: "200px" },
       value: unit.unit_strat_name || undefined,
@@ -179,32 +181,17 @@ export function InformalUnitName() {
   ]);
 }
 
-export function FormalStratName() {
-  const { model: unit, actions } = useModelEditor();
+export function UnitRowStratNameEditor() {
+  const {
+    model: unit,
+    actions,
+    isEditing,
+  }: { model: UnitsView; actions: any; isEditing: boolean } = useModelEditor();
 
-  const initialSelected: StratNameDataI | undefined = unit?.strat_names
-    ? {
-        value: `${unit.strat_names.strat_name} ${unit.strat_names.rank}`,
-        data: unit.strat_names,
-      }
-    : undefined;
-
-  const updateStratName = (e: StratNameDataI) => {
-    actions.updateState({
-      model: {
-        strat_names: { $set: e.data },
-        unit_strat_name: { $set: `${e.data.strat_name} ${e.data.rank}` },
-        strat_name_id: { $set: e.data.id },
-      },
-    });
-  };
-
-  return h(FormGroup, { label: "Formal strat name" }, [
-    h(StratNameSuggest, {
-      initialSelected,
-      placeholder: "Formal Strat Name",
-      onChange: updateStratName,
-      col_id: unit.col_id,
-    }),
+  return h("div", [
+    unit.strat_names
+      ? `${unit.strat_names.strat_name} ${unit.strat_names.rank}`
+      : "unnamed",
+    h.if(isEditing)(UnitStratNameModalEditor),
   ]);
 }

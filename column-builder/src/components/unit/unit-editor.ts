@@ -21,7 +21,7 @@ import {
   UnitEditorProps,
   EnvTags,
   LithTags,
-  FormalStratName,
+  UnitRowStratNameEditor,
   InformalUnitName,
   UnitThickness,
 } from "./common-editing";
@@ -63,7 +63,7 @@ function StratName() {
   return h("tr", [
     h(FeatureCell, { text: "Informal Unit Name" }, [h(InformalUnitName)]),
     h(FeatureCell, { text: "Formal Stratigraphic Name: " }, [
-      h(FormalStratName),
+      h(UnitRowStratNameEditor),
       h(Link, { href }, [h("a", { style: { fontSize: "10px" } }, [linkText])]),
     ]),
   ]);

@@ -5,6 +5,19 @@
 .source-text {
   overflow: hidden;
   text-overflow: ellipsis;
-  width: 150px;
+  max-width: 150px;
   text-align: right;
+}
+.name-text {
+  display: flex;
+  flex-direction: column;
+}
+.author-source-tag {
+  display: flex;
+}
+.author-tag {
+  margin-left: 3px;
+}
+.parent-name {
+  color: #5f6b7c;
 }
