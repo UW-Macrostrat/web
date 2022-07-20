@@ -154,6 +154,7 @@ function StratNameStack(props: StratNameStackProps) {
     stack: currentPanelStack,
     onOpen: addToPanelStack,
     onClose: removeFromPanelStack,
+    renderActivePanelOnly: false,
     showPanelHeader: false,
   });
 }
