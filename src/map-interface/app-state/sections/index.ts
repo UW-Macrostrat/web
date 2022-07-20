@@ -9,7 +9,6 @@ import {
   ReduxRouterState,
   RouterActions,
 } from "@lagunovsky/redux-react-router";
-import { routerBasename } from "~/map-interface/Settings";
 
 export const browserHistory = createBrowserHistory();
 

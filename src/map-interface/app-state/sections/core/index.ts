@@ -57,6 +57,7 @@ const defaultState: CoreState = {
   },
   mapUse3D: false,
   mapShowLabels: true,
+  mapShowLineSymbols: false,
   filtersOpen: false,
   filters: [],
   filteredColumns: {},
@@ -131,6 +132,8 @@ export function coreReducer(
       return { ...state, filtersOpen: !state.filtersOpen };
     case "toggle-labels":
       return { ...state, mapShowLabels: !state.mapShowLabels };
+    case "toggle-line-symbols":
+      return { ...state, mapShowLineSymbols: !state.mapShowLineSymbols };
     case "add-filter":
       let alreadyHasFiter = false;
       state.filters.forEach((filter) => {

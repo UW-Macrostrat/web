@@ -1,4 +1,5 @@
-import { SETTINGS } from "../Settings";
+import { SETTINGS } from "../../Settings";
+export * from "./line-symbols";
 
 const overlaySources = {
   // "pbdb": {
