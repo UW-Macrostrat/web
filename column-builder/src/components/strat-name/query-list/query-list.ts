@@ -7,13 +7,14 @@ import {
   ItemPredicate,
 } from "@blueprintjs/select";
 import pg from "~/db";
-import { Button, Callout, InputGroup, MenuItem } from "@blueprintjs/core";
+import { Button, Callout, InputGroup, MenuItem, Tag } from "@blueprintjs/core";
 import styles from "./strat-name.module.scss";
 import {
   PostgrestFilterBuilder,
   PostgrestQueryBuilder,
 } from "@supabase/postgrest-js";
-import { StratNameI, STRAT_SOURCE } from "~/types";
+import { StratNameI } from "~/types";
+import { Tooltip2 } from "@blueprintjs/popover2";
 
 const h = hyperStyled(styles);
 
@@ -28,21 +29,28 @@ const itemPredicate: ItemPredicate<StratNameI> = (query, item, index) => {
 const StratNameListItem = (props: StratNameI) => {
   const { strat_name, author, rank, parent, source } = props;
 
-  let sourceText: string;
-  if (source == STRAT_SOURCE.COLUMN) {
-    sourceText = "current column";
-  } else if (source == STRAT_SOURCE.NEARBY) {
-    sourceText = "nearby column";
-  } else {
-    sourceText = "lexicon";
-  }
-  if (author) sourceText = sourceText + ` (${author})`;
+  const parentText = parent ? ` of the ${parent}` : "";
 
-  const parentText = parent ? `(${parent})` : "";
-
-  return h("div.flex-between", [
-    `${strat_name} ${rank} ${parentText}`,
-    h("i", [sourceText]),
+  return h("div", [
+    h("div.flex-between", [
+      h("div", [
+        h("div", [h("b", [`${strat_name} ${rank}`]), `${parentText}`]),
+        h.if(author != null)(Tag, { intent: "success", minimal: true }, [
+          author,
+        ]),
+        h.if(!author)(Tag, { intent: "warning", minimal: true }, "Unlinked"),
+      ]),
+      h.if(typeof source !== "undefined")(
+        Tooltip2,
+        {
+          content: source ?? "",
+          className: "source-text",
+          placement: "top",
+          minimal: true,
+        },
+        [h("i.source-text", [source])]
+      ),
+    ]),
   ]);
 };
 
@@ -54,7 +62,6 @@ const StratNameItemRenderer: ItemRenderer<StratNameI> = (
 
   return h(MenuItem, {
     key: index,
-    intent: author ? "primary" : "warning",
     text: h(StratNameListItem, { ...item }),
     onClick: handleClick,
     active: modifiers.active,
@@ -63,8 +70,8 @@ const StratNameItemRenderer: ItemRenderer<StratNameI> = (
 
 const StratNameNewRenderer = () => {
   return h(Callout, { intent: "warning", title: "No results" }, [
-    `Don't see what you're looking for? Want to make a new strat_name?`,
-    h(Button, { intent: "success" }, ["Create name"]),
+    `No matching name in Macrostrat lexicon `,
+    h(Button, { intent: "warning" }, ["Create new"]),
   ]);
 };
 

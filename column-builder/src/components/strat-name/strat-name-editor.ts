@@ -8,6 +8,7 @@ import {
   InputGroup,
   Icon,
   Card,
+  Callout,
 } from "@blueprintjs/core";
 import { ModelEditor, useModelEditor } from "@macrostrat/ui-components";
 import styles from "../comp.module.scss";
@@ -84,7 +85,7 @@ function StratNameEdit(props: { new_name?: boolean }) {
   const title = new_name ? "Create new strat name" : "Edit strat name";
   const helperText = new_name
     ? "Create new strat name"
-    : "Edit existing Strat name";
+    : "Edit existing strat name";
 
   return h("div", [
     h(StratNameHierarchy, { strat_name_id: model.id }),
@@ -97,7 +98,6 @@ function StratNameEdit(props: { new_name?: boolean }) {
             {
               helperText: helperText,
               label: "Stratigraphic Name",
-              labelInfo: "(optional)",
             },
             [
               h(InputGroup, {
@@ -109,13 +109,22 @@ function StratNameEdit(props: { new_name?: boolean }) {
           ),
           h(FormGroup, { label: "Rank" }, [h(RankSelect, { updateStratName })]),
         ]),
-        h("div.row", [
+        h.if(!new_name)("div.row", [
           h(Checkbox, { label: "Apply globally", style: { margin: "5px" } }),
           h(Checkbox, {
             label: "Apply to this unit only (create new strat name)",
             style: { margin: "5px" },
           }),
         ]),
+        h(
+          Callout,
+          {
+            intent: "warning",
+            title: "Unlinked",
+            style: { width: "265px", borderRadius: "5px" },
+          },
+          ["This name will be unlinked to external resources"]
+        ),
       ]),
       h(Card, [
         h("h3", { style: { marginTop: 0 } }, ["Edit Hierarcy"]),

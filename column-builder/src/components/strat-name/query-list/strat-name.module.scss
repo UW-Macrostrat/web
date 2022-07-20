@@ -2,3 +2,9 @@
   display: flex;
   justify-content: space-between;
 }
+.source-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 150px;
+  text-align: right;
+}
