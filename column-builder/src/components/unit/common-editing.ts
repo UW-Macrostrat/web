@@ -87,11 +87,19 @@ export function LithTags(props: { large?: boolean }) {
   };
 
   const onAdd = (lith: Lith) => {
+    lith.prop = "sub";
     actions.updateState({ model: { lith_unit: { $push: [lith] } } });
   };
 
-  const onSwitchProp = (id: number, prop: "dom" | "sub") => {
-    console.log(id, prop);
+  const onSwitchProp = (id: number) => {
+    const index = liths.findIndex((lith: LithUnit) => lith.id == id);
+    const arrayOfDeleted = liths.splice(index, 1);
+    const lith: LithUnit = arrayOfDeleted[0];
+    if (lith.prop == "dom") {
+      lith.prop = "sub";
+    } else lith.prop = "dom";
+    liths.splice(index, 0, lith);
+    actions.updateState({ model: { lith_unit: { $set: liths } } });
   };
 
   return h("div", [
