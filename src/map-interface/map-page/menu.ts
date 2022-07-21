@@ -32,9 +32,10 @@ import { useMatch, useLocation } from "react-router";
 import { useTransition } from "transition-hook";
 import { useCurrentPage } from "../app-state/nav-hooks";
 import useBreadcrumbs from "use-react-router-breadcrumbs";
-import { SettingsPanel } from "./settings-panel";
+import { SettingsPanel, ExperimentsPanel } from "./settings-panel";
 import { useState, useEffect } from "react";
 import { LinkButton } from "../components/buttons";
+import { Switch } from "@blueprintjs/core";
 
 function ChangelogPanel() {
   return h("div.bp3-text.text-panel", [h(Changelog)]);
@@ -234,8 +235,7 @@ function MenuHeaderButtons() {
       text: "Layers",
       to: "layers",
     }),
-    // Settings are mostly for globe, which is currently disabled
-    //h(TabButton, {icon: "settings", text: "Settings", tab: MenuPanel.SETTINGS}),
+    h(TabButton, { icon: "settings", text: "Settings", to: "settings" }),
     h(TabButton, {
       icon: "info-sign",
       text: "About",
@@ -306,9 +306,9 @@ const Menu = (props) => {
         h(Route, { path: "layers", element: h(LayerList) }),
         h(Route, { path: "about", element: h(AboutText) }),
         h(Route, { path: "usage", element: h(UsagePanel) }),
+        h(Route, { path: "settings", element: h(SettingsPanel) }),
         h(Route, { path: "changelog", element: h(ChangelogPanel) }),
-        h(Route, { path: "experiments", element: h(SettingsPanel) }),
-        // Need a better page transition before we can do this
+        h(Route, { path: "experiments", element: h(ExperimentsPanel) }),
         //h(Route, { path: "*", element: h(NotFoundPage) }),
       ]),
     ]

@@ -21,22 +21,12 @@ function MapTypeButton(props) {
   return h(LinkButton, { to: { pathname: "/globe", hash } }, "Switch to globe");
 }
 
-const SettingsPanel = (props) => {
+const ExperimentsPanel = (props) => {
   const dispatch = useAppActions();
   //const { pathname } = useLocation();
   //const globeActive = pathname?.startsWith("/globe");
-  return h("div.settings", [
+  return h("div.settings.experiments.bp3-text.text-panel", [
     h("h2", "Experimental settings"),
-    h(
-      Switch,
-      {
-        checked: useAppState((s) => s.core.mapShowLabels),
-        onChange() {
-          dispatch({ type: "toggle-labels" });
-        },
-      },
-      "Show labels"
-    ),
     h(
       Switch,
       {
@@ -61,4 +51,31 @@ const SettingsPanel = (props) => {
   ]);
 };
 
-export { SettingsPanel };
+const SettingsPanel = (props) => {
+  const runAction = useAppActions();
+  //const { pathname } = useLocation();
+  //const globeActive = pathname?.startsWith("/globe");
+  return h("div.settings.bp3-text.text-panel", [
+    h("h2", "Settings"),
+    h(
+      "p",
+      "This page contains useful settings that are not yet fully integrated into the application."
+    ),
+    h(
+      Switch,
+      {
+        large: true,
+        checked: useAppState((s) => s.core.mapShowLabels),
+        onChange() {
+          runAction({ type: "toggle-labels" });
+        },
+      },
+      "Show map labels"
+    ),
+
+    //h(MapTypeButton),
+    //h.if(globeActive)(GlobeSettings),
+  ]);
+};
+
+export { ExperimentsPanel, SettingsPanel };

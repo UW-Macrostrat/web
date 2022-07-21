@@ -14,7 +14,7 @@ const categoryTitles = {
   lithology: "Lithologies",
   interval: "Time Intervals",
   place: "Places (via Mapbox)",
-  strat_name: "Stratigraphic Names",
+  strat_name: "Stratigraphic names",
   environ: "Environments (columns only)",
 };
 
@@ -145,7 +145,7 @@ function SearchGuidance() {
     h("ul", [
       h("li", ["Time intervals"]),
       h("li", ["Lithologies"]),
-      h("li", ["Stratigraphic Names"]),
+      h("li", ["Stratigraphic names"]),
       h("li", ["Environments (columns only)"]),
       h("li", ["Places"]),
     ]),
