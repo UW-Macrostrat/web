@@ -9,6 +9,7 @@ import { useAppState, useAppActions } from "~/map-interface/app-state";
 import { useLocation } from "react-router";
 //import { DisplayQuality } from "@macrostrat/cesium-viewer";
 import styles from "./settings-panel.module.styl";
+import { DarkModeButton } from "@macrostrat/ui-components";
 
 const h = hyper.styled(styles);
 
@@ -72,6 +73,7 @@ const SettingsPanel = (props) => {
       },
       "Show map labels"
     ),
+    h(DarkModeButton, "Dark mode"),
 
     //h(MapTypeButton),
     //h.if(globeActive)(GlobeSettings),
