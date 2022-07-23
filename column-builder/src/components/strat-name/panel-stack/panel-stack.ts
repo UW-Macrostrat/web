@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import { hyperStyled } from "@macrostrat/hyper";
 import {
   PanelProps,
@@ -7,32 +7,77 @@ import {
   Button,
   Intent,
   Callout,
+  Menu,
+  MenuItem,
 } from "@blueprintjs/core";
 import styles from "./strat-name-panel.module.scss";
 import { StratNameI } from "~/types";
-import { StratNameSelect } from "../query-list";
+import { StratNameListItem, StratNameSelect } from "../query-list";
 import { StratNameHierarchy } from "../hierarchy";
 import { StratNameConceptCard } from "../modal-editor";
+import pg, { usePostgrest } from "~/db";
 
 const h = hyperStyled(styles);
 
 interface SearchPanelProps {
   col_id: number;
   onSubmitStratName: (l: StratNameI) => void;
-  stratName: StratNameI | null;
+  onDelete: (id: number) => void;
+  stratNames: StratNameI[];
+}
+
+interface CurrentStratNamesProps {
+  stratName: StratNameI;
+  onDelete: (id: number) => void;
+  onClick: (stratName: StratNameI, canAdd: boolean) => void;
+}
+
+function CurrentStratName(props: CurrentStratNamesProps) {
+  const { stratName } = props;
+
+  const data: StratNameI[] = usePostgrest(
+    pg.rpc("get_strat_name_info", { strat_name_id: stratName.id })
+  );
+
+  if (!data) return null;
+  return h(MenuItem, {
+    text: h(StratNameListItem, { ...data[0] }),
+    onClick: () => props.onClick(stratName, false),
+    labelElement: h(Button, {
+      intent: "danger",
+      minimal: true,
+      icon: "trash",
+      onClick: (e: any) => {
+        e.stopPropagation();
+        props.onDelete(stratName.id);
+      },
+    }),
+  });
 }
 
 const SearchPanel: React.FC<PanelProps<SearchPanelProps>> = (props) => {
-  const { col_id, onSubmitStratName } = props;
+  const { col_id, onDelete, onStratNameSelect, stratNames } =
+    useContext(StratStackContext);
 
-  const onItemSelect = (stratName: StratNameI) => {
+  const onItemSelect = (stratName: StratNameI, canAdd?: boolean) => {
     props.openPanel({
-      props: { stratName, onSubmitStratName, col_id },
+      props: { stratName, onStratNameSelect, col_id, canAdd },
       renderPanel: MetaDataPanel,
     });
   };
 
   return h("div.strat-name-select", [
+    h.if(stratNames.length > 0)("h3", ["Current Stratigraphic Names"]),
+    h.if(stratNames.length > 0)(Menu, [
+      stratNames.map((stratName) => {
+        return h(CurrentStratName, {
+          key: stratName.id,
+          stratName,
+          onClick: onItemSelect,
+          onDelete,
+        });
+      }),
+    ]),
     h("h3", ["Choose a stratigraphic name"]),
     h(StratNameSelect, { col_id, onItemSelect }),
   ]);
@@ -40,14 +85,23 @@ const SearchPanel: React.FC<PanelProps<SearchPanelProps>> = (props) => {
 
 interface MetaDataPanelProps {
   stratName: StratNameI | null;
-  onSubmitStratName: (l: StratNameI) => void;
+  onStratNameSelect: (l: StratNameI) => void;
   col_id: number;
+  canAdd?: boolean;
 }
 
 const MetaDataPanel: React.FC<PanelProps<MetaDataPanelProps>> = (props) => {
-  const { stratName, onSubmitStratName, col_id } = props;
+  const { canAdd = true, stratName, onStratNameSelect, col_id } = props;
 
   const onBackClick = () => {
+    props.closePanel();
+  };
+
+  const onSaveClick = (stratName: StratNameI | null) => {
+    if (stratName == null) {
+      return;
+    }
+    onStratNameSelect(stratName);
     props.closePanel();
   };
 
@@ -66,15 +120,15 @@ const MetaDataPanel: React.FC<PanelProps<MetaDataPanelProps>> = (props) => {
         },
         ["Search for another"]
       ),
-      h(
+      h.if(canAdd)(
         Button,
         {
           minimal: true,
           intent: Intent.SUCCESS,
-          onClick: () => onSubmitStratName(stratName),
-          icon: "saved",
+          onClick: () => onSaveClick(stratName),
+          icon: "plus",
         },
-        ["Save"]
+        ["add name"]
       ),
     ]),
     h("div.strat-name-select", [
@@ -105,16 +159,25 @@ const MetaDataPanel: React.FC<PanelProps<MetaDataPanelProps>> = (props) => {
 interface StratNameStackProps {
   onStratNameSelect: (i: StratNameI | null) => void;
   col_id: number;
-  stratName: StratNameI | null;
+  stratNames: StratNameI[];
+  onDelete: (id: number) => void;
 }
 
 type StratPanelTypes = SearchPanelProps | MetaDataPanelProps;
 type StratPanels = Panel<StratPanelTypes>;
 
+/* PanelStack has the limitation of NOT re-rendering on props change.
+https://github.com/palantir/blueprint/issues/3173
+So I use a react context to get around the issue. 
+Not perfect but better than nothing.
+*/
+
+const StratStackContext = React.createContext<StratNameStackProps>({});
+
 function StratNameStack(props: StratNameStackProps) {
-  const { col_id, onStratNameSelect, stratName } = props;
+  const { col_id, onStratNameSelect, stratNames } = props;
+  console.log("strat names", stratNames);
   const initialPanel: Panel<SearchPanelProps> = {
-    props: { col_id, onSubmitStratName: onStratNameSelect, stratName },
     renderPanel: SearchPanel,
     title: "Search for a strat name",
   };
@@ -123,40 +186,32 @@ function StratNameStack(props: StratNameStackProps) {
     Array<StratPanels>
   >([initialPanel]);
 
-  useEffect(() => {
-    if (stratName) {
-      addToPanelStack({
-        props: { stratName, col_id, onSubmitStratName: onStratNameSelect },
-        renderPanel: MetaDataPanel,
-      });
-    }
-  }, []);
-
   const addToPanelStack = React.useCallback(
     (newPanel: StratPanels) =>
       setCurrentPanelStack((stack) => [...stack, newPanel]),
-    []
+    [stratNames]
   );
   const removeFromPanelStack = React.useCallback(
     () =>
       setCurrentPanelStack([
         {
-          props: { col_id, onSubmitStratName: onStratNameSelect, stratName },
           renderPanel: SearchPanel,
           title: "Search for a strat name",
         },
       ]),
-    []
+    [stratNames]
   );
 
-  return h(PanelStack2, {
-    className: "strat-name-stack",
-    stack: currentPanelStack,
-    onOpen: addToPanelStack,
-    onClose: removeFromPanelStack,
-    renderActivePanelOnly: false,
-    showPanelHeader: false,
-  });
+  return h(StratStackContext.Provider, { value: props }, [
+    h(PanelStack2, {
+      className: "strat-name-stack",
+      stack: currentPanelStack,
+      onOpen: addToPanelStack,
+      onClose: removeFromPanelStack,
+      renderActivePanelOnly: false,
+      showPanelHeader: false,
+    }),
+  ]);
 }
 
 export { StratNameStack };

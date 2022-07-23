@@ -72,6 +72,8 @@ export default function Columns(props: {
 }) {
   const { col_id, colSections, column, query, sections, errors } = props;
 
+  console.log(sections);
+
   const columnName = column ? column[0].col_name : null;
 
   return h(BasePage, { query, errors }, [

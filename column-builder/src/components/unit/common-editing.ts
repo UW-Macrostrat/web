@@ -196,10 +196,9 @@ export function UnitRowStratNameEditor() {
     isEditing,
   }: { model: UnitsView; actions: any; isEditing: boolean } = useModelEditor();
 
-  return h("div", [
-    unit.strat_names
-      ? `${unit.strat_names.strat_name} ${unit.strat_names.rank}`
-      : "unnamed",
-    h.if(isEditing)(UnitStratNameModalEditor),
-  ]);
+  const nameText = unit.strat_names.length
+    ? unit.strat_names.map((sn) => `${sn.strat_name} ${sn.rank}`).join(", ")
+    : "No stratigraphic name";
+
+  return h("div", [nameText, h.if(isEditing)(UnitStratNameModalEditor)]);
 }

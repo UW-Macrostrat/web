@@ -161,4 +161,4 @@ function StratNameSelect(props: StratNameSelectProps) {
   });
 }
 
-export { StratNameSelect };
+export { StratNameSelect, StratNameListItem };

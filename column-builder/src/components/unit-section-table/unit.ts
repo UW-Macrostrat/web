@@ -110,7 +110,7 @@ function UnitRowNotes() {
   return h(React.Fragment, [
     h.if(isEditing)(TextArea, {
       style: { maxWidth: "100px" },
-      value: unit.notes,
+      value: unit.notes ?? "",
       onChange: (e) => updateUnit("notes", e.target.value),
     }),
     h.if(!isEditing)("p.ellipse", [unit.notes]),

@@ -70,18 +70,24 @@ function UnitStratNameModalEditor() {
 
   const onSubmitStratName = (e: StratNameI | null) => {
     if (!e) return;
-
     actions.updateState({
       model: {
-        strat_names: { $set: e },
-        strat_name_id: { $set: e.id },
+        strat_names: { $push: [e] },
+      },
+    });
+  };
+
+  const onDelete = (id: number) => {
+    const newNames = unit.strat_names.filter((sn) => sn.id != id);
+    actions.updateState({
+      model: {
+        strat_names: { $set: newNames },
       },
     });
   };
 
   const onStratNameSelect = (e: StratNameI | null) => {
     onSubmitStratName(e);
-    setOpen(false);
   };
 
   return h(React.Fragment, [
@@ -102,8 +108,9 @@ function UnitStratNameModalEditor() {
       [
         h(StratNameStack, {
           col_id: unit.col_id,
-          stratName: unit.strat_names,
+          stratNames: unit.strat_names,
           onStratNameSelect,
+          onDelete,
         }),
       ]
     ),
