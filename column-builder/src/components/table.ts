@@ -149,10 +149,16 @@ interface DnDTableProps {
   draggableId?: string;
   title?: string;
   index: number;
+  widths?: number[];
 }
 
 function DnDTable(props: DnDTableProps) {
-  const { drag = false, headers = [], droppableId = "table-drop-zone" } = props;
+  const {
+    drag = false,
+    headers = [],
+    widths,
+    droppableId = "table-drop-zone",
+  } = props;
   const baseClass =
     "bp4-html-table .bp4-html-table-condensed .bp4-html-table-bordered .base-table .full-width";
   let tableClassName = props.interactive
@@ -179,6 +185,7 @@ function DnDTable(props: DnDTableProps) {
             h.if(headers.length > 0)(TableHeader, {
               dragProps: provided.dragHandleProps,
               headers: headers,
+              widths,
               title: props.title,
             }),
             h(TableBody, { drag, droppableId }, [props.children]),
@@ -215,10 +222,11 @@ function TableBody(props: {
 
 function TableHeader(props: {
   headers: any[];
+  widths?: number[];
   title?: string;
   dragProps?: any;
 }) {
-  return h("thead", [
+  return h(React.Fragment, [
     h.if(typeof props.title !== "undefined")("tr", [
       h(
         "th",
@@ -230,9 +238,23 @@ function TableHeader(props: {
         [props.title]
       ),
     ]),
+    h("colgroup", [
+      props.widths?.map((width, i) => {
+        return h("col", {
+          key: i,
+          width: `${typeof width != "undefined" ? width : ""}%`,
+        });
+      }),
+    ]),
     h("tr", [
       props.headers.map((head, i) => {
-        return h("th", { key: i }, [head]);
+        return h(
+          "th",
+          {
+            key: i,
+          },
+          [head]
+        );
       }),
     ]),
   ]);

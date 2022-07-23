@@ -10,8 +10,8 @@ const h = hyperStyled(styles);
 const getEmptyUnit = (col_id: number) => {
   let emptyUnit: UnitsView = {
     id: 66,
-    unit_strat_name: "unnamed",
-    strat_names: null,
+    strat_name: "unnamed",
+    strat_names: [],
     lith_unit: [],
     environ_unit: [],
     color: "#fffff",
@@ -49,7 +49,11 @@ function SectionTable(props: SectionTableProps) {
     "notes",
     "",
   ];
-  if (drag) headers = ["", ...headers];
+  let widths = [7, 15, 15, 15, 15, 10, 8, 10, 5];
+  if (drag) {
+    headers = ["", ...headers];
+    widths = [5, 5, 15, 15, 15, 10, 10, 10, 10, 5];
+  }
 
   const units: UnitsView[] = Object.values(props.section)[0];
   const id = Object.keys(props.section)[0];
@@ -60,6 +64,7 @@ function SectionTable(props: SectionTableProps) {
       index,
       interactive: false,
       headers,
+      widths,
       title: `Section #${id}`,
       draggableId: `${id} ${index}`,
       drag,
