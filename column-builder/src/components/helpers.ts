@@ -1,5 +1,5 @@
 import { QueryI } from ".";
-import { EnvironUnit, LithUnit } from "..";
+import { EnvironUnit, LithUnit, StratNameI } from "..";
 
 /* 
 returns a list of number ids for the envs or liths to be deleted or 
@@ -8,11 +8,11 @@ added from a unit.
 Otherwise it's impossible to detect if a user has removed envs or liths
 */
 const detectDeletionsAndAdditions = (
-  og: EnvironUnit[] | LithUnit[],
-  changes: EnvironUnit[] | LithUnit[]
+  og: EnvironUnit[] | LithUnit[] | StratNameI[],
+  changes: EnvironUnit[] | LithUnit[] | StratNameI[]
 ) => {
-  let deletions: number[] | [] = [];
-  let additions: number[] | [] = [];
+  let deletions = new Set<number>();
+  let additions = new Set<number>();
 
   const present_og: any = {};
 
@@ -25,10 +25,10 @@ const detectDeletionsAndAdditions = (
     if (present_og[key]) {
       delete present_og[key];
     } else {
-      additions = [...additions, c.id];
+      additions.add(c.id);
     }
   });
-  deletions = Object.keys(present_og).map((i) => parseInt(i));
+  Object.keys(present_og).map((i) => deletions.add(parseInt(i)));
   return { deletions, additions };
 };
 

@@ -60,7 +60,7 @@ function UnitEdit(props: {
   };
 
   return h(BasePage, { query: props.query, errors }, [
-    h("h3", [`Edit Unit #${unit.id}: `, unit.unit_strat_name]),
+    h("h3", [`Edit Unit #${unit.id}: `, unit.strat_name]),
     //@ts-ignore
     h(UnitEditor, { model, persistChanges }),
   ]);

@@ -4,15 +4,9 @@ import { useModelEditor } from "@macrostrat/ui-components";
 import {
   Button,
   Callout,
-  Card,
   Dialog,
-  Divider,
-  Menu,
-  MenuItem,
 } from "@blueprintjs/core";
 import styles from "../comp.module.scss";
-import { UnitsView } from "~/types";
-import { InformalUnitName } from "../unit";
 import pg, { usePostgrest } from "~/db";
 import { StratNameConceptLongI, StratNameI } from "~/types";
 import { StratNameStack } from "./panel-stack";
@@ -78,7 +72,7 @@ function UnitStratNameModalEditor() {
   };
 
   const onDelete = (id: number) => {
-    const newNames = unit.strat_names.filter((sn) => sn.id != id);
+    const newNames = [...unit.strat_names].filter((sn) => sn.id != id);
     actions.updateState({
       model: {
         strat_names: { $set: newNames },

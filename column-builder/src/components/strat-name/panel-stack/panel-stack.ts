@@ -43,6 +43,7 @@ function CurrentStratName(props: CurrentStratNamesProps) {
   return h(MenuItem, {
     text: h(StratNameListItem, { ...data[0] }),
     onClick: () => props.onClick(stratName, false),
+    style: { marginBottom: "3px", background: "#EDEFF2" },
     labelElement: h(Button, {
       intent: "danger",
       minimal: true,
@@ -68,7 +69,7 @@ const SearchPanel: React.FC<PanelProps<SearchPanelProps>> = (props) => {
 
   return h("div.strat-name-select", [
     h.if(stratNames.length > 0)("h3", ["Current Stratigraphic Names"]),
-    h.if(stratNames.length > 0)(Menu, [
+    h.if(stratNames.length > 0)(Menu, { style: { maxWidth: "100%" } }, [
       stratNames.map((stratName) => {
         return h(CurrentStratName, {
           key: stratName.id,

@@ -174,16 +174,16 @@ export function InformalUnitName() {
 
   const updateUnitName = (e: string) => {
     actions.updateState({
-      model: { unit_strat_name: { $set: e } },
+      model: { strat_name: { $set: e } },
     });
   };
 
   return h("div", [
-    h.if(!isEditing)("p", [unit.unit_strat_name]),
+    h.if(!isEditing)("p", [unit.strat_name]),
     h.if(isEditing)(InputGroup, {
       placeholder: "Informal Unit Name",
       style: { width: "200px" },
-      value: unit.unit_strat_name || undefined,
+      value: unit.strat_name || undefined,
       onChange: (e) => updateUnitName(e.target.value),
     }),
   ]);
