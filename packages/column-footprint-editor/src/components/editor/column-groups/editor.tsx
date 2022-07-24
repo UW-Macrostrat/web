@@ -43,7 +43,7 @@ function ColumnGroup() {
     actions.updateState({
       model: {
         col_group: { $set: e.col_group },
-        col_group_id: { $set: e.col_group_id },
+        col_group_id: { $set: e.id },
         col_group_name: { $set: e.col_group_name },
       },
     });

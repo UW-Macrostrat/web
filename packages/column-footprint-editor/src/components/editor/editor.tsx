@@ -119,9 +119,11 @@ function FeatureOverlay({ feature, open }) {
 }
 
 function PropertyDialog(props) {
-  const { state: appState, runAction, updateLinesAndColumns } = useContext(
-    AppContext
-  );
+  const {
+    state: appState,
+    runAction,
+    updateLinesAndColumns,
+  } = useContext(AppContext);
   const { features, open, closeOpen, setFeatures } = props;
   const feature = features[0];
   if (!feature) return null;
@@ -151,9 +153,10 @@ function PropertyDialog(props) {
     identity_id,
   };
   const put_url = base + `projects`;
-  console.log(state.id);
+  console.log(state);
 
   const persistChanges = async (updatedModel, changeSet) => {
+    console.log(updatedModel);
     if (Object.keys(updatedModel).length > 0) {
       runAction({ type: "is-saving", payload: { isSaving: true } });
       AppToaster.show({

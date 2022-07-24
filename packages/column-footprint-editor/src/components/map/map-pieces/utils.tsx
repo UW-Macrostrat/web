@@ -17,8 +17,8 @@ export function createMapboxPaintConditional(colGroups) {
   let predicate = [];
   colGroups.map((col) => {
     let color = col.color;
-    let col_group_id = col.col_group_id;
-    let pred = [["==", ["get", "col_group_id"], col_group_id], color];
+    let id = col.id;
+    let pred = [["==", ["get", "col_group_id"], id], color];
     predicate = [...predicate, ...pred];
   });
   return [

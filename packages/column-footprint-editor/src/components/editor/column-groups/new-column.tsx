@@ -73,7 +73,6 @@ function NewColGroups(props) {
 
   const { state: appState } = useContext(AppContext);
   const project_id = appState.project.project_id;
-
   const persistChanges = async (updatedModel, changeset) => {
     let route = base + `${project_id}/col-groups`;
     let res = await axios.post(route, { updatedModel });
@@ -94,14 +93,14 @@ function EditColGroup(props) {
   const project_id = appState.project.project_id;
 
   const persistChanges = async (updatedModel, changeset) => {
-
+    console.log(updatedModel);
     let route = base + `${project_id}/col-groups`;
     let res = await axios.put(route, { updatedModel });
     const {
-      data: { col_group_id },
+      data: { id },
     } = res;
     const { col_group, col_group_name } = updatedModel;
-    onCreate(col_group_id, col_group, col_group_name);
+    onCreate(id, col_group, col_group_name);
   };
 
   return <BaseColGroupEditor state={state} persistChanges={persistChanges} />;
