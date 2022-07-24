@@ -65,7 +65,7 @@ function StratName() {
     h(FeatureCell, { text: "Informal Unit Name" }, [h(InformalUnitName)]),
     h(FeatureCell, { text: "Formal Stratigraphic Name: " }, [
       h(UnitRowStratNameEditor),
-      h(Link, { href }, [h("a", { style: { fontSize: "10px" } }, [linkText])]),
+      // h(Link, { href }, [h("a", { style: { fontSize: "10px" } }, [linkText])]),
     ]),
   ]);
 }
