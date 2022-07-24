@@ -1,4 +1,3 @@
-import { useState, useRef, useEffect } from "react";
 import { hyperStyled } from "@macrostrat/hyper";
 import { Lith, LithUnit } from "~/types";
 import { mergeRefs, Tag, Dialog } from "@blueprintjs/core";
@@ -14,7 +13,7 @@ const getLithProportions = (liths: LithUnit[]) => {
   let sub_count = 0;
 
   liths.map((lith) => {
-    if (lith.prop == "dom") dom_count++;
+    if (lith.dom == "dom") dom_count++;
     else sub_count++;
   });
 
@@ -36,13 +35,13 @@ function LithSegmentContainer(props: LithContainerProps) {
 
   const [dom_prop, sub_prop] = getLithProportions(liths);
   return h("div.lith-segment-container", { onClick: props.onClick }, [
-    liths.map((lith) => {
+    liths.map((lith, i) => {
       return h(LithSegment, {
-        key: lith.id,
+        key: i,
         lith,
         onRemove: props.onRemove,
         large: props.large,
-        width: lith.prop == "dom" ? dom_prop * 100 : sub_prop * 100,
+        width: lith.dom == "dom" ? dom_prop * 100 : sub_prop * 100,
       });
     }),
   ]);
@@ -53,7 +52,7 @@ function LithSegmentToolTipContent(props: { lith: LithUnit | Lith }) {
     h("span", [
       h("b", [props.lith.lith]),
       " ",
-      h("i", ["(", props.lith.prop, ")"]),
+      h("i", ["(", props.lith.dom, ")"]),
     ]),
     h.if(
       typeof props.lith.lith_group !== "undefined" &&

@@ -25,12 +25,12 @@ async function handleLithCollection(
       // this is completely new! Insert!
       const { data, error } = await pg
         .from("unit_liths")
-        .insert([{ unit_id: unit_id, lith_id: change.id, dom: change.prop }]);
+        .insert([{ unit_id: unit_id, lith_id: change.id, dom: change.dom }]);
     } else {
       // already exists! update!
       const { data, error } = await pg
         .from("unit_liths")
-        .update({ dom: change.prop })
+        .update({ dom: change.dom })
         .match({ unit_id: unit_id, lith_id: change.id });
     }
   });
@@ -189,7 +189,7 @@ export async function persistNewUnit(
       const { data, error } = await pg
         .from("unit_liths")
         .insert([
-          { unit_id: updatedModel.id, lith_id: lith.id, dom: lith.prop },
+          { unit_id: updatedModel.id, lith_id: lith.id, dom: lith.dom },
         ]);
     });
   }

@@ -82,7 +82,7 @@ function LithSwitch(props: LithSwitchProps) {
       h(Switch, {
         innerLabel: "Sub",
         innerLabelChecked: "Dom",
-        checked: lith.prop == "dom",
+        checked: lith.dom == "dom",
         onChange: () => props.onChange(lith.id),
       }),
     ]),
