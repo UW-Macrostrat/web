@@ -18,6 +18,7 @@ import classNames from "classnames";
 import { Icon } from "@blueprintjs/core";
 import { debounce } from "lodash";
 import { toggleLineSymbols } from "../map-style";
+import { inDarkMode } from "@macrostrat/ui-components";
 
 const h = hyper.styled(styles);
 
@@ -210,6 +211,8 @@ function MapContainer(props) {
 
   useElevationMarkerLocation(mapRef, elevationMarkerLocation);
 
+  const isDarkMode = inDarkMode();
+
   const { mapUse3D, mapIsRotated } = viewInfo(mapPosition);
 
   return h("div.map-view-container.main-view", { ref: parentRef }, [
@@ -231,6 +234,7 @@ function MapContainer(props) {
       mapIsLoading,
       mapIsRotated,
       mapRef,
+      isDark: isDarkMode,
       markerLoadOffset: offset.current,
       ...props,
       use3D: mapUse3D,

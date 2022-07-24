@@ -22,6 +22,7 @@ const highlightLayers = [
 
 interface MapProps {
   use3D: boolean;
+  isDark: boolean;
   mapIsRotated: boolean;
   markerLoadOffset: [number, number];
 }
@@ -79,14 +80,24 @@ class Map extends Component<MapProps, {}> {
     this.selectedStates = {};
   }
 
+  getBaseMapStyle(props = null) {
+    props ??= this.props;
+
+    if (props.mapHasSatellite) {
+      return SETTINGS.satelliteMapURL;
+    } else if (props.isDark) {
+      return SETTINGS.darkMapURL;
+    } else {
+      return SETTINGS.baseMapURL;
+    }
+  }
+
   componentDidMount() {
     mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
 
     this.map = new mapboxgl.Map({
       container: "map",
-      style: this.props.mapHasSatellite
-        ? SETTINGS.satelliteMapURL
-        : SETTINGS.baseMapURL,
+      style: this.getBaseMapStyle(),
       maxZoom: 14,
       //maxTileCacheSize: 0,
       logoPosition: "bottom-left",
@@ -603,12 +614,12 @@ class Map extends Component<MapProps, {}> {
       }
 
       // Swap satellite/normal
-    } else if (nextProps.mapHasSatellite != this.props.mapHasSatellite) {
-      if (nextProps.mapHasSatellite) {
-        this.swapBasemap.bind(this)(SETTINGS.satelliteMapURL);
-      } else {
-        this.swapBasemap.bind(this)(SETTINGS.baseMapURL);
-      }
+    } else if (
+      nextProps.mapHasSatellite != this.props.mapHasSatellite ||
+      nextProps.isDark != this.props.isDark
+    ) {
+      const nextBasemap = this.getBaseMapStyle(nextProps);
+      this.swapBasemap.bind(this)(nextBasemap);
     }
 
     // Handle changes to map filters
