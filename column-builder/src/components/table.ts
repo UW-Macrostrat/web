@@ -227,16 +227,18 @@ function TableHeader(props: {
   dragProps?: any;
 }) {
   return h(React.Fragment, [
-    h.if(typeof props.title !== "undefined")("tr", [
-      h(
-        "th",
-        {
-          ...props.dragProps,
-          colSpan: props.headers.length,
-          style: { textAlign: "center", backgroundColor: "#D3D8DE" },
-        },
-        [props.title]
-      ),
+    h("thead", [
+      h.if(typeof props.title !== "undefined")("tr", [
+        h(
+          "th",
+          {
+            ...props.dragProps,
+            colSpan: props.headers.length,
+            style: { textAlign: "center", backgroundColor: "#D3D8DE" },
+          },
+          [props.title]
+        ),
+      ]),
     ]),
     h("colgroup", [
       props.widths?.map((width, i) => {
@@ -246,16 +248,18 @@ function TableHeader(props: {
         });
       }),
     ]),
-    h("tr", [
-      props.headers.map((head, i) => {
-        return h(
-          "th",
-          {
-            key: i,
-          },
-          [head]
-        );
-      }),
+    h("thead", [
+      h("tr", [
+        props.headers.map((head, i) => {
+          return h(
+            "th",
+            {
+              key: i,
+            },
+            [head]
+          );
+        }),
+      ]),
     ]),
   ]);
 }

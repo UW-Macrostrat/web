@@ -182,7 +182,7 @@ export function InformalUnitName() {
     h.if(!isEditing)("p", [unit.strat_name]),
     h.if(isEditing)(InputGroup, {
       placeholder: "Informal Unit Name",
-      style: { width: "200px" },
+      style: { width: "120px" },
       value: unit.strat_name || undefined,
       onChange: (e) => updateUnitName(e.target.value),
     }),

@@ -38,6 +38,7 @@ function LithSegmentContainer(props: LithContainerProps) {
   return h("div.lith-segment-container", { onClick: props.onClick }, [
     liths.map((lith) => {
       return h(LithSegment, {
+        key: lith.id,
         lith,
         onRemove: props.onRemove,
         large: props.large,

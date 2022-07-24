@@ -163,15 +163,22 @@ function UnitRow(props: UnitRowProps) {
 
   const persistChanges = (e: UnitsView, c: Partial<UnitsView>) => {
     runAction({
-      type: "persist-edits-at",
+      type: "save-unit-at",
       unit: e,
+      changeSet: c,
+      og_unit: props.unit,
       unit_index: props.unit_index,
       section_index: props.section_index,
+      sections: state.sections,
     });
   };
 
   const onCancel = () => {
-    runAction({ type: "cancel-editing" });
+    runAction({
+      type: "cancel-editing",
+      section_index: props.section_index,
+      unit_index: props.unit_index,
+    });
   };
 
   return h(React.Fragment, { key: props.unit.id }, [
@@ -206,7 +213,7 @@ function UnitRow(props: UnitRowProps) {
             isEditing: props.inRowEditing,
             //@ts-ignore
             persistChanges,
-            model: props.unit,
+            model: { ...props.unit },
           },
           [
             h(UnitCellGroup, {

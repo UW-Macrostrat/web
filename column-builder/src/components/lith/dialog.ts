@@ -45,7 +45,13 @@ function LithDialog(props: LithDialogProps) {
         h(LithSegmentContainer, { liths, onClick: () => {}, large: false }),
         h("div.lith-switches", [
           liths.map((lith, i) => {
-            return h(LithSwitch, { lith, index: i, onChange, onRemove });
+            return h(LithSwitch, {
+              key: lith.id,
+              lith,
+              index: i,
+              onChange,
+              onRemove,
+            });
           }),
         ]),
         h(Divider),

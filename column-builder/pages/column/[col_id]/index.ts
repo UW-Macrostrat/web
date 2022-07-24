@@ -85,6 +85,6 @@ export default function Columns(props: {
     ]),
     // there doesn't appear to be a good solution yet, so this is the best we can do. It loses the SSR
     // for this component unfortunately
-    h.if(!isServer())(UnitSectionTable, { sections, colSections }),
+    h.if(!isServer())(UnitSectionTable, { sections, colSections, col_id }),
   ]);
 }

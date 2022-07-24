@@ -1,3 +1,4 @@
+import { PostgrestResponse } from "@supabase/postgrest-js";
 import pg, {
   UnitsView,
   tableUpdate,
@@ -95,18 +96,15 @@ const persistable_fields = new Set([
   "max_thick",
   "notes",
   "color",
+  "section_id",
+  "col_id",
 ]);
 
-/* 
-Function to handle changes to Units! This is a bit complicated because of the 
-one to many relationship between a unit and environments, lithologies, and strat_names.
-*/
-export async function persistUnitChanges(
+async function updateExistingUnit(
   unit: UnitsView,
   updatedModel: UnitsView,
   changeSet: Partial<UnitsView>
 ) {
-  console.log(unit, updatedModel, changeSet);
   if (changeSet) {
     const updates = Object.keys(changeSet)
       .filter((key) => persistable_fields.has(key))
@@ -118,6 +116,32 @@ export async function persistUnitChanges(
       id: unit.id,
     });
   }
+}
+
+async function insertNewUnit(unit: UnitsView) {
+  const inserts = Object.keys(unit)
+    .filter((key) => persistable_fields.has(key))
+    .reduce((cur, key) => {
+      return Object.assign(cur, { [key]: unit[key] });
+    }, {});
+  const { data, error }: PostgrestResponse<UnitsView> = await pg
+    .from("units")
+    .insert([inserts]);
+  return data[0];
+}
+
+/* 
+Function to handle changes to Units! This is a bit complicated because of the 
+one to many relationship between a unit and environments, lithologies, and strat_names.
+*/
+export async function persistUnitChanges(
+  unit: UnitsView,
+  updatedModel: UnitsView,
+  changeSet: Partial<UnitsView>
+) {
+  console.log(unit, updatedModel, changeSet);
+
+  await updateExistingUnit(unit, updatedModel, changeSet);
 
   if (changeSet?.environ_unit) {
     await handleEnvironCollection(
@@ -139,6 +163,42 @@ export async function persistUnitChanges(
       changeSet.strat_names,
       unit.id
     );
+  }
+  return updatedModel;
+}
+
+export async function persistNewUnit(
+  unit: UnitsView,
+  updatedModel: UnitsView,
+  changeSet: Partial<UnitsView>
+) {
+  const { id } = await insertNewUnit(updatedModel);
+  unit.id = id;
+  updatedModel.id = id;
+  console.log(updatedModel);
+
+  if (updatedModel?.environ_unit) {
+    updatedModel.environ_unit.map(async (env) => {
+      const { data, error } = await pg
+        .from("unit_environs")
+        .insert([{ unit_id: updatedModel.id, environ_id: env.id }]);
+    });
+  }
+  if (updatedModel?.lith_unit) {
+    updatedModel.lith_unit.map(async (lith) => {
+      const { data, error } = await pg
+        .from("unit_liths")
+        .insert([
+          { unit_id: updatedModel.id, lith_id: lith.id, dom: lith.prop },
+        ]);
+    });
+  }
+  if (updatedModel?.strat_names) {
+    updatedModel.strat_names.map(async (strat_name) => {
+      const { data, error } = await pg
+        .from("unit_strat_names")
+        .insert([{ unit_id: updatedModel.id, strat_name_id: strat_name.id }]);
+    });
   }
   return updatedModel;
 }

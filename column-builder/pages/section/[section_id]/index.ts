@@ -49,7 +49,11 @@ function Section(props: {
 
   return h(BasePage, { query: props.query, errors }, [
     h("h3", [`Units in Section #${section_id}`]),
-    h(UnitSectionTable, { sections, colSections: [] }),
+    h(UnitSectionTable, {
+      sections,
+      colSections: [],
+      col_id: props.query.col_id,
+    }),
   ]);
 }
 

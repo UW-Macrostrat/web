@@ -77,10 +77,10 @@ function SectionTable(props: SectionTableProps) {
 
         // these ids here are meaningless... this action needs to be persisted
         const copyUnitDown = () => {
-          props.addUnitAt({ ...unit, id: 67 }, j + 1);
+          props.addUnitAt({ ...unit, id: "new" }, j + 1);
         };
         const copyUnitUp = () => {
-          props.addUnitAt({ ...unit, id: 66 }, j);
+          props.addUnitAt({ ...unit, id: "new" }, j);
         };
         const addEmptyUnit = (unit_index: number) => {
           props.addUnitAt(getEmptyUnit(unit.col_id), unit_index);
@@ -89,6 +89,7 @@ function SectionTable(props: SectionTableProps) {
           props.editUnitAt(unit_index);
         };
         return h(UnitRow, {
+          key: unit.id,
           unit,
           drag,
           unit_index: j,
