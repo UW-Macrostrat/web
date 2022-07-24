@@ -198,3 +198,17 @@
 .strat-dialog-bottom {
   margin: 10px;
 }
+
+/////////////// ref list item //////////////////
+.ref-author {
+  font-style: italic;
+  &::before {
+    content: "-";
+  }
+}
+.doi {
+  &::before {
+    content: "DOI: ";
+  }
+  color: rgb(86, 109, 138);
+}

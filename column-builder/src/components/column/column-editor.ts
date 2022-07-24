@@ -8,12 +8,14 @@ import {
   Spinner,
   FormGroup,
   Card,
+  MenuItem,
   Drawer,
   Collapse,
+  Callout,
 } from "@blueprintjs/core";
 import styles from "../comp.module.scss";
 import { ColumnForm, ColumnGroupI } from "~/types";
-import { ItemSuggest } from "../suggest";
+import { DataI, ItemSuggest } from "../suggest";
 import { RefI } from "~/types";
 import pg, { usePostgrest } from "~/db";
 import { RefEditor } from "../ref/ref-editor";
@@ -25,6 +27,7 @@ import {
   PublicationFinder,
 } from "deps/ui-components/packages/form-components/src";
 import { ModelEditor, useModelEditor } from "@macrostrat/ui-components";
+import { ItemRenderer } from "@blueprintjs/select";
 
 const h = hyperStyled(styles);
 
@@ -45,6 +48,23 @@ function formPubSelectText(ref: RefI) {
   return `${ref?.author}(${ref?.pub_year})-${title}`;
 }
 
+const ColumnRefItemRenderer: ItemRenderer<DataI<RefI>> = (
+  item: DataI<RefI>,
+  { handleClick, modifiers, index }
+) => {
+  const { value, data } = item;
+  return h(MenuItem, {
+    key: index,
+    text: h(Callout, [
+      h("div", [data.ref]),
+      h("div.ref-author", [data.author, "(", data.pub_year, ")"]),
+      h("div.doi", [data.doi]),
+    ]),
+    onClick: handleClick,
+    active: modifiers.active,
+  });
+};
+
 function ColumnRef() {
   const [open, setOpen] = useState(false);
   const [newRefOpen, setNewRefOpen] = useState(false);
@@ -61,7 +81,7 @@ function ColumnRef() {
   };
 
   const onChange = (item: RefDataI) => {
-    actions.updateState({ model: { ref: { $set: item.data } } });
+    actions.updateState({ model: { refs: { $set: [item.data] } } });
   };
 
   const onPubFinderClick = async (e: Pub) => {
@@ -74,7 +94,7 @@ function ColumnRef() {
     };
     const { data, error } = await pg.from("refs").insert([newRef]);
     if (!error) {
-      actions.updateState({ model: { ref: { $set: data[0] } } });
+      actions.updateState({ model: { refs: { $set: [data[0]] } } });
     }
     setOpen(false);
     setNewRefOpen(false);
@@ -86,9 +106,10 @@ function ColumnRef() {
       items: refs.map((ref) => {
         return { value: formPubSelectText(ref), data: ref };
       }),
+      itemRenderer: ColumnRefItemRenderer,
       initialSelected: {
-        value: model.ref ? formPubSelectText(model.ref) : "",
-        data: model.ref || {},
+        value: model.refs[0] ? formPubSelectText(model.refs[0]) : "",
+        data: model.refs[0] || {},
       },
       onChange,
     }),
@@ -147,7 +168,7 @@ function NewRef() {
     // would need to post ref to back as new ref first
     const { data, error } = await pg.from("refs").insert([e]);
     if (!error) {
-      actions.updateState({ model: { ref: { $set: data[0] } } });
+      actions.updateState({ model: { refs: { $set: [data[0]] } } });
     }
 
     return e;
@@ -160,7 +181,7 @@ function isDisabled(model: ColumnForm) {
   if (typeof model.col_name == "undefined") return true;
   if (typeof model.lat == "undefined" || typeof model.lng == "undefined")
     return true;
-  if (typeof model.ref == "undefined") return false;
+  if (typeof model.refs == "undefined") return false;
   return false;
 }
 
@@ -202,8 +223,8 @@ function ColumnEdit({ curColGroup }: { curColGroup: Partial<ColumnGroupI> }) {
             [
               h(NumericInput, {
                 style: { width: "200px" },
-                defaultValue: model.col_number || undefined,
-                onValueChange: (e) => updateColumn("col_number", e),
+                defaultValue: model.col || undefined,
+                onValueChange: (e) => updateColumn("col", e),
               }),
             ]
           ),
@@ -219,11 +240,32 @@ function ColumnEdit({ curColGroup }: { curColGroup: Partial<ColumnGroupI> }) {
               }),
             ]),
             h("div", [
-              h("h4", { style: { marginBottom: 0 } }, [
-                "Ref: ",
-                model.ref?.ref ?? "",
-              ]),
-              h(ColumnRef),
+              h(
+                Callout,
+                {
+                  style: {
+                    width: "400px",
+                    marginTop: "10px",
+                    marginBottom: "10px",
+                  },
+                  title: "Reference",
+                },
+                [
+                  h("div.ref", [model.refs[0]?.ref]),
+                  h("div.ref-author", [
+                    model.refs[0]?.author,
+                    "(",
+                    model.refs[0]?.pub_year,
+                    ")",
+                  ]),
+                  h("div.doi", [
+                    h("a", { href: model.refs[0]?.url, target: "_blank" }, [
+                      model.refs[0]?.doi,
+                    ]),
+                  ]),
+                  h(ColumnRef),
+                ]
+              ),
             ]),
           ]),
         ]),
@@ -231,10 +273,23 @@ function ColumnEdit({ curColGroup }: { curColGroup: Partial<ColumnGroupI> }) {
       h("div.right", [
         h(Card, { style: { minWidth: "600px" }, elevation: 1 }, [
           h(LngLatMap, {
+            disabled: model.poly_geom != null,
             longitude: model.lng ?? 0,
             latitude: model.lat ?? 0,
             onChange: (p: Point) => setCoords(p),
           }),
+          h.if(model.poly_geom != null)(
+            Callout,
+            {
+              intent: "warning",
+              title: "No editing location",
+              style: { width: "600px" },
+            },
+            [
+              "This column has an associated footprint geometry.",
+              " All editing must take place in Column-Topology-Editor.",
+            ]
+          ),
         ]),
       ]),
     ]),

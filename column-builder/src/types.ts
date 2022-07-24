@@ -3,6 +3,8 @@ The different data types used in the application. Usually matching up with a spe
 macrostrat_api schema
 */
 
+import { PointGeom } from "deps/ui-components/packages/form-components/src";
+
 export interface Project {
   descrip: string;
   id?: number;
@@ -34,13 +36,19 @@ export interface RefI {
 }
 
 export interface ColumnForm {
-  col_id: number;
+  id: number;
+  col_area: number;
+  col_type: string;
+  coordinate: PointGeom;
+  poly_geom: { type: "Polygon"; coordinates: [][] } | null;
+  project_id: number;
   col_name: string;
-  col_number: number;
+  col: number;
   lng: number;
   lat: number;
   notes?: string;
-  ref: RefI;
+  wkt: string;
+  refs: RefI[];
 }
 
 // interface for col that shows up in column_group

@@ -12,22 +12,22 @@ import styles from "./comp.module.scss";
 
 const h = hyperStyled(styles);
 
-export interface DataI {
+export interface DataI<T> {
   value: string;
-  data: any;
+  data: T;
 }
 
-interface SuggestI {
-  onChange: (e: DataI) => void;
-  initialSelected?: DataI;
-  items: DataI[];
-  itemRenderer?: ItemRenderer<any>;
+interface SuggestI<T> {
+  onChange: (e: DataI<T>) => void;
+  initialSelected?: DataI<T>;
+  items: DataI<T>[];
+  itemRenderer?: ItemRenderer<DataI<T>>;
   onQueryChange?: (e: string) => void;
   placeholder?: string;
 }
 const ItemSuggestComponent = Suggest.ofType<any>();
 
-function ItemSuggest(props: SuggestI) {
+function ItemSuggest<T>(props: SuggestI<T>) {
   let itemz = [...props.items];
   //sees if initialSelected is in list, and moves to front
   if (
@@ -46,8 +46,8 @@ function ItemSuggest(props: SuggestI) {
     setSelected(props.initialSelected);
   }, [props.initialSelected]);
 
-  const itemRenderer: ItemRenderer<DataI> = (
-    item: DataI,
+  const itemRenderer: ItemRenderer<DataI<T>> = (
+    item: DataI<T>,
     { handleClick, modifiers }
   ) => {
     const { value, data } = item;
@@ -61,19 +61,22 @@ function ItemSuggest(props: SuggestI) {
     });
   };
 
-  const itemPredicate: ItemPredicate<DataI> = (query: string, item: DataI) => {
+  const itemPredicate: ItemPredicate<DataI<T>> = (
+    query: string,
+    item: DataI<T>
+  ) => {
     const { value } = item;
 
     return value?.toLowerCase().indexOf(query.toLowerCase()) >= 0;
   };
 
-  const onItemSelect = (item: DataI) => {
+  const onItemSelect = (item: DataI<T>) => {
     setSelected(item);
     props.onChange(item);
   };
 
   return h(ItemSuggestComponent, {
-    inputValueRenderer: (item: DataI) => item.value,
+    inputValueRenderer: (item: DataI<T>) => item.value,
     items: itemz,
     popoverProps: {
       minimal: true,
@@ -91,21 +94,21 @@ function ItemSuggest(props: SuggestI) {
   });
 }
 
-interface ItemSelectI {
-  items: DataI[];
-  onItemSelect: (e: DataI) => void;
+interface ItemSelectI<T> {
+  items: DataI<T>[];
+  onItemSelect: (e: DataI<T>) => void;
   children: ReactChild;
-  itemRenderer?: ItemRenderer<DataI>;
-  itemPredicate?: ItemPredicate<DataI>;
-  itemListRenderer?: ItemListRenderer<DataI>;
+  itemRenderer?: ItemRenderer<DataI<T>>;
+  itemPredicate?: ItemPredicate<DataI<T>>;
+  itemListRenderer?: ItemListRenderer<DataI<T>>;
   filterable?: boolean;
   position?: PopoverPosition;
 }
 
-const ItemSelectComponent = Select.ofType<DataI>();
+const ItemSelectComponent = Select.ofType<DataI<T>>();
 
-const itemRenderer: ItemRenderer<DataI> = (
-  item: DataI,
+const itemRenderer: ItemRenderer<DataI<T>> = (
+  item: DataI<T>,
   { handleClick, index, modifiers }
 ) => {
   const { value, data } = item;
@@ -117,13 +120,13 @@ const itemRenderer: ItemRenderer<DataI> = (
   });
 };
 
-const itemPredicate: ItemPredicate<DataI> = (query, item, _index) => {
+const itemPredicate: ItemPredicate<DataI<T>> = (query, item, _index) => {
   const { value } = item;
 
   return value?.toLowerCase().indexOf(query.toLowerCase()) >= 0;
 };
 
-function ItemSelect(props: ItemSelectI) {
+function ItemSelect<T>(props: ItemSelectI<T>) {
   return h(
     ItemSelectComponent,
     {

@@ -1,5 +1,5 @@
 import h from "@macrostrat/hyper";
-import {
+import pg, {
   tableUpdate,
   BasePage,
   ColumnEditor,
@@ -21,12 +21,10 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   }
   const query: IdsFromCol = await fetchIdsFromColId(parseInt(col_id ?? "0"));
 
-  const { data, error }: PostgrestResponse<ColumnForm> = await tableSelect(
-    "col_ref_expanded",
-    {
-      match: { col_id: parseInt(col_id ?? "0") },
-    }
-  );
+  const { data, error }: PostgrestResponse<ColumnForm> = await pg
+    .from("cols")
+    .select("*,refs(*)")
+    .match({ id: parseInt(col_id ?? "0") });
 
   const { firstData, error: error_ } = await selectFirst("cols", {
     columns: "col_groups!cols_col_group_id_fkey(*)",
@@ -55,7 +53,7 @@ export default function EditColumn(props: {
   errors: PostgrestError[];
 }) {
   const { col_id, curColGroup, column, errors } = props;
-
+  console.log(column);
   const persistChanges = async (
     e: ColumnForm,
     changes: Partial<ColumnForm>
