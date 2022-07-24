@@ -78,7 +78,7 @@ function StratNameSuggest(props: StratCellProps) {
   useEffect(() => {
     onQueryChange("");
   }, []);
-  console.log(props.initialSelected);
+  
   return h(ItemSuggest, {
     items: names,
     onQueryChange: onQueryChange,

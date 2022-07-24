@@ -77,10 +77,28 @@ const StratNameItemRenderer: ItemRenderer<StratNameI> = (
   });
 };
 
-const StratNameNewRenderer = () => {
+const StratNameNewRenderer = (props: { onClickCreateNew: () => void }) => {
   return h(Callout, { intent: "warning", title: "No results" }, [
-    `No matching name in Macrostrat lexicon `,
-    h(Button, { intent: "warning" }, ["Create new"]),
+    `No matching name in Macrostrat lexicon. `,
+    "This could be for a few reasons:",
+    h("ul", [
+      h("li", [
+        "The search algorithm prioritizes based on location. Ensure this column's location is set correctly.",
+      ]),
+      h("li", [
+        "The name you're searching for may be in as a different spelling,",
+      ]),
+      h("li", ["The name may just not exist in Macrostrat's lexicon."]),
+    ]),
+    h(
+      Button,
+      {
+        intent: "warning",
+        style: { marginTop: "5px" },
+        onClick: props.onClickCreateNew,
+      },
+      ["Create new"]
+    ),
   ]);
 };
 
@@ -129,6 +147,7 @@ const getStratNames = async (
 
 interface StratNameSelectProps {
   onItemSelect: (l: StratNameI) => void;
+  onClickCreateNew: () => void;
   col_id: number;
 }
 
@@ -149,7 +168,9 @@ function StratNameSelect(props: StratNameSelectProps) {
     items: names,
     renderer: StratNameQueryListRenderer,
     resetOnSelect: false,
-    noResults: h(StratNameNewRenderer),
+    noResults: h(StratNameNewRenderer, {
+      onClickCreateNew: props.onClickCreateNew,
+    }),
     menuProps: {
       style: {
         maxWidth: "100%",

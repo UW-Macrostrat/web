@@ -9,12 +9,15 @@ import {
   Callout,
   Menu,
   MenuItem,
+  FormGroup,
+  InputGroup,
 } from "@blueprintjs/core";
 import styles from "./strat-name-panel.module.scss";
 import { StratNameI } from "~/types";
 import { StratNameListItem, StratNameSelect } from "../query-list";
 import { StratNameHierarchy } from "../hierarchy";
 import { StratNameConceptCard } from "../modal-editor";
+import { RankSelect } from "../strat-name-editor";
 import pg, { usePostgrest } from "~/db";
 
 const h = hyperStyled(styles);
@@ -67,6 +70,13 @@ const SearchPanel: React.FC<PanelProps<SearchPanelProps>> = (props) => {
     });
   };
 
+  const onClickCreateNew = () => {
+    props.openPanel({
+      props: { onStratNameSelect },
+      renderPanel: NewStratNamePanel,
+    });
+  };
+
   return h("div.strat-name-select", [
     h.if(stratNames.length > 0)("h3", ["Current Stratigraphic Names"]),
     h.if(stratNames.length > 0)(Menu, { style: { maxWidth: "100%" } }, [
@@ -80,7 +90,95 @@ const SearchPanel: React.FC<PanelProps<SearchPanelProps>> = (props) => {
       }),
     ]),
     h("h3", ["Choose a stratigraphic name"]),
-    h(StratNameSelect, { col_id, onItemSelect }),
+    h(StratNameSelect, { col_id, onItemSelect, onClickCreateNew }),
+  ]);
+};
+
+interface NewStratNamePanelProps {
+  onStratNameSelect: (l: StratNameI) => void;
+}
+
+const NewStratNamePanel: React.FC<PanelProps<NewStratNamePanelProps>> = (
+  props
+) => {
+  const [state, setState] = useState({ strat_name: "", rank: "Fm" });
+
+  const updateStratName = (field: string, value: string) => {
+    setState((prevState) => {
+      return { ...prevState, [field]: value };
+    });
+  };
+
+  const onBackClick = () => {
+    props.closePanel();
+  };
+
+  return h("div", [
+    h("div.action-btns", [
+      h(
+        Button,
+        {
+          intent: Intent.WARNING,
+          onClick: onBackClick,
+          minimal: true,
+          icon: "arrow-left",
+        },
+        ["Return to search"]
+      ),
+    ]),
+    h("div.bottom", [
+      h("div.new-strat-name", [
+        h("div", [
+          h("div.row", [
+            h(
+              FormGroup,
+              {
+                helperText: "Create a stratigraphic name",
+                label: "Stratigraphic Name",
+              },
+              [
+                h(InputGroup, {
+                  style: { width: "200px" },
+                  defaultValue: state.strat_name,
+                  onChange: (e) =>
+                    updateStratName("strat_name", e.target.value),
+                }),
+              ]
+            ),
+            h(FormGroup, { label: "Rank" }, [
+              h(RankSelect, { updateStratName, rank: state.rank }),
+            ]),
+          ]),
+          h(
+            Button,
+            { intent: "success", disabled: state.strat_name.length < 1 },
+            ["Submit"]
+          ),
+        ]),
+        h(
+          Callout,
+          {
+            intent: "warning",
+            title: "Unlinked",
+            style: { width: "265px", borderRadius: "5px" },
+          },
+          ["This name will be unlinked to external resources."]
+        ),
+      ]),
+      h(
+        Callout,
+        {
+          intent: "success",
+          title: "Make a stronger stratigraphic name",
+        },
+        [
+          "To increase the validity of your stratigraphic name consider building a hierarchy, adding a reference",
+          ", or location.",
+          " All these can be done with the expanded stratigraphic name editor. ",
+          h(Button, { intent: "success" }, ["Strengthen my strat name"]),
+        ]
+      ),
+    ]),
   ]);
 };
 

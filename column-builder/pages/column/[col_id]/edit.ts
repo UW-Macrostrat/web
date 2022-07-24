@@ -4,7 +4,6 @@ import pg, {
   BasePage,
   ColumnEditor,
   ColumnForm,
-  tableSelect,
   selectFirst,
   fetchIdsFromColId,
   IdsFromCol,
@@ -61,18 +60,14 @@ export default function EditColumn(props: {
     console.log(e, changes);
     // port names to match db (only col_numer -> col)
     let ref_id: number | undefined = undefined;
-    if (changes.col_number) {
-      changes.col = changes.col_number;
-      delete changes.col_number;
-    }
-    if (changes.ref) {
+    if (changes.refs) {
       // handle the changing of a ref, either one that exists or was created
-      ref_id = changes.ref.id;
-      delete changes.ref;
+      ref_id = changes.refs[0].id;
+      delete changes.refs;
     }
     const { data, error } = await tableUpdate("cols", {
       changes,
-      id: e.col_id,
+      id: e.id,
     });
 
     if (!error) {
@@ -80,7 +75,7 @@ export default function EditColumn(props: {
         const ref_col = { ref_id: ref_id };
         const { data: data_, error } = await tableUpdate("col_refs", {
           changes: ref_col,
-          id: { col_id: e.col_id },
+          id: { col_id: e.id },
         });
       }
       if (error) {

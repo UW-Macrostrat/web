@@ -50,15 +50,16 @@ function UnitThicknesses() {
 }
 
 function StratName() {
-  const { model: unit, actions } = useModelEditor();
+  const { model: unit }: { model: UnitsView } = useModelEditor();
 
   const baseURl = `/unit/${unit.id}`;
   // this complexity is born of the confusing strat_name issues in the db
-  const href = unit.strat_names
-    ? `${baseURl}/strat-name/${unit.strat_names.id}/edit`
-    : `${baseURl}/strat-name/new`;
+  const href =
+    unit.strat_names.length > 0
+      ? `${baseURl}/strat-name/${unit.strat_names[0].id}/edit`
+      : `${baseURl}/strat-name/new`;
 
-  const linkText = unit.strat_names ? "(modify)" : "(create)";
+  const linkText = unit.strat_names.length > 0 ? "(modify)" : "(create)";
 
   return h("tr", [
     h(FeatureCell, { text: "Informal Unit Name" }, [h(InformalUnitName)]),

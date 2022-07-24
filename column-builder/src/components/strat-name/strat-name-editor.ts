@@ -27,13 +27,13 @@ interface Model {
   hasChanges: () => boolean;
 }
 
-function RankSelect({
+export function RankSelect({
   updateStratName,
+  rank,
 }: {
   updateStratName: (field: string, i: any) => void;
+  rank?: string;
 }) {
-  const { model, actions, hasChanges }: Model = useModelEditor();
-
   const possibleRanks = [
     { value: "SGp", data: "SGp" },
     { value: "Gp", data: "Gp" },
@@ -43,11 +43,11 @@ function RankSelect({
     { value: "Bed", data: "Bed" },
   ];
 
-  const itemRenderer: ItemRenderer<DataI> = (
-    item: DataI,
+  const itemRenderer: ItemRenderer<DataI<string>> = (
+    item: DataI<string>,
     { handleClick, index }
   ) => {
-    const active = model.rank == item.value;
+    const active = rank == item.value;
     return h(MenuItem, {
       key: index,
       labelElement: active ? h(Icon, { icon: "tick" }) : null,
@@ -65,7 +65,7 @@ function RankSelect({
       // selectedItem: model.rank,
       onItemSelect: (item) => updateStratName("rank", item.value),
     },
-    [h(Button, { rightIcon: "double-caret-vertical" }, [model.rank])]
+    [h(Button, { rightIcon: "double-caret-vertical" }, [rank ?? "Fm"])]
   );
 }
 
@@ -107,7 +107,9 @@ function StratNameEdit(props: { new_name?: boolean }) {
               }),
             ]
           ),
-          h(FormGroup, { label: "Rank" }, [h(RankSelect, { updateStratName })]),
+          h(FormGroup, { label: "Rank" }, [
+            h(RankSelect, { updateStratName, rank: model.rank }),
+          ]),
         ]),
         h.if(!new_name)("div.row", [
           h(Checkbox, { label: "Apply globally", style: { margin: "5px" } }),
