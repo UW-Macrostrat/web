@@ -275,7 +275,7 @@ const StratStackContext = React.createContext<StratNameStackProps>({});
 
 function StratNameStack(props: StratNameStackProps) {
   const { col_id, onStratNameSelect, stratNames } = props;
-  console.log("strat names", stratNames);
+
   const initialPanel: Panel<SearchPanelProps> = {
     renderPanel: SearchPanel,
     title: "Search for a strat name",

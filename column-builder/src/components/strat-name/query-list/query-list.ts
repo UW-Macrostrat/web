@@ -35,19 +35,34 @@ const SourceTag = ({ source }: { source: string | undefined }) => {
       placement: "top",
       minimal: true,
     },
-    [h(Tag, { minimal: true }, [h("i", [source])])]
+    [
+      h.if(source === "unrelated")(Tag, { minimal: true, intent: "danger" }, [
+        h("b", ["may be unrelated"]),
+      ]),
+      h.if(source !== "unrelated")(Tag, { minimal: true }, [h("i", [source])]),
+    ]
   );
 };
 
-const AuthorTag = ({ author }: { author: string | null }) => {
-  return h("div.author-tag", [
-    h.if(author != null)(Tag, { intent: "success", minimal: true }, [author]),
-    h.if(!author)(Tag, { intent: "warning", minimal: true }, "Unlinked"),
+const AuthorTag = ({
+  author,
+  concept_id,
+}: {
+  author: string | null;
+  concept_id: number | null;
+}) => {
+  return h(React.Fragment, [
+    h("div.author-tag", [
+      h.if(author != null)(Tag, { intent: "success", minimal: true }, [author]),
+    ]),
+    h("div.author-tag", [
+      h.if(!concept_id)(Tag, { intent: "warning", minimal: true }, "Unlinked"),
+    ]),
   ]);
 };
 
 const StratNameListItem = (props: StratNameI) => {
-  const { strat_name, author, rank, parent, source } = props;
+  const { strat_name, author, rank, parent, source, concept_id } = props;
 
   const parentText = parent ? `${parent}` : "";
 
@@ -59,7 +74,7 @@ const StratNameListItem = (props: StratNameI) => {
       ]),
       h("div.author-source-tag", [
         h(SourceTag, { source }),
-        h(AuthorTag, { author }),
+        h(AuthorTag, { author, concept_id }),
       ]),
     ]),
   ]);

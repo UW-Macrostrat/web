@@ -18,6 +18,9 @@
 }
 .author-tag {
   margin-left: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
 }
 .parent-name {
   color: #5f6b7c;
