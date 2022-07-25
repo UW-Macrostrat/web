@@ -254,6 +254,19 @@ class Map extends Component<MapProps, {}> {
     });
 
     this.map.on("click", (event) => {
+      // Get points for burwell source
+      if (true) {
+        const bbox = [
+          [event.point.x - 1, event.point.y - 1],
+          [event.point.x + 1, event.point.y + 1],
+        ];
+
+        const selectedFeatures = this.map.queryRenderedFeatures(bbox, {
+          layers: ["burwell_fill"],
+        });
+        console.log(selectedFeatures);
+      }
+
       // If the elevation drawer is open and we are awaiting to points, add them
       if (
         this.props.elevationChartOpen &&
