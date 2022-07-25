@@ -73,10 +73,20 @@ export default function EditColumn(props: {
     if (!error) {
       if (ref_id) {
         const ref_col = { ref_id: ref_id };
-        const { data: data_, error } = await tableUpdate("col_refs", {
-          changes: ref_col,
-          id: { col_id: e.id },
-        });
+        const { data: count, error: _ } = await pg
+          .from("col_refs")
+          .select()
+          .match({ col_id: e.id });
+        if (count?.length ?? 0 > 1) {
+          const { data: data_, error } = await pg
+            .from("col_refs")
+            .update({ ref_id })
+            .match({ col_id: e.id });
+        } else {
+          const { data: data_, error } = await pg
+            .from("col_refs")
+            .insert([{ ref_id, col_id: e.id }]);
+        }
       }
       if (error) {
         //catch errror
