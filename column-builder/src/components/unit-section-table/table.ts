@@ -194,16 +194,13 @@ function UnitSectionTable(props: {
         colSections,
         onChange,
       }),
-      h.if(state.sections.length > 0 && state.unitsView)(
-        "div.unit-section-container",
-        [
-          h("div.unit-section-tables", [
-            h(SectionsDropContainer, {
-              onDragEnd,
-            }),
-          ]),
-        ]
-      ),
+      h.if(state.unitsView)("div.unit-section-container", [
+        h("div.unit-section-tables", [
+          h(SectionsDropContainer, {
+            onDragEnd,
+          }),
+        ]),
+      ]),
     ]),
   ]);
 }

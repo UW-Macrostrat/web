@@ -3,13 +3,14 @@ import { UnitsView } from "~/index";
 import { DnDTable } from "../table";
 import { UnitRow } from "./unit";
 import { useUnitSectionContext } from "./table";
+import { AddBtnBetweenRows } from "./helpers";
 import styles from "~/components/comp.module.scss";
 
 const h = hyperStyled(styles);
 
 const getEmptyUnit = (col_id: number) => {
   let emptyUnit: UnitsView = {
-    id: 66,
+    id: "new",
     strat_name: "unnamed",
     strat_names: [],
     lith_unit: [],
@@ -70,7 +71,15 @@ function SectionTable(props: SectionTableProps) {
       drag,
       droppableId: index.toString() + " " + id.toString(),
     },
+
     [
+      h.if(units.length == 0)(AddBtnBetweenRows, {
+        colSpan: headers.length,
+        onClick: (e) => {
+          e.stopPropagation();
+          props.addUnitAt(getEmptyUnit(state.col_id), 0);
+        },
+      }),
       units.map((unit, j) => {
         const isEditing =
           edit.unit_index == j && edit.section_index == index && edit.open;
