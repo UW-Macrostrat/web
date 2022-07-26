@@ -428,6 +428,7 @@ class VestigialMap extends Component<MapProps, {}> {
   }
 
   enable3DTerrain(shouldEnable: boolean) {
+    console.log("Trying to enable 3D terrain");
     if (!this.map.style._loaded) {
       return;
     }

@@ -91,6 +91,47 @@ function MapContainer(props) {
   const parentRef = useRef<HTMLDivElement>();
 
   useEffect(() => {
+    // setup the basic map
+    mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
+
+    const map = new mapboxgl.Map({
+      container: "map",
+      style: mapLayers.has(MapLayer.SATELLITE)
+        ? SETTINGS.satelliteMapURL
+        : SETTINGS.baseMapURL,
+      maxZoom: 14,
+      //maxTileCacheSize: 0,
+      logoPosition: "bottom-left",
+      trackResize: true,
+      //antialias: true,
+      //optimizeForTerrain: true,
+    });
+
+    map.setProjection("globe");
+
+    // set initial map position
+    const pos = mapPosition;
+    const { pitch = 0, bearing = 0, altitude } = pos.camera;
+    const zoom = pos.target?.zoom;
+    if (zoom != null && altitude == null) {
+      const { lng, lat } = pos.target;
+      map.setCenter([lng, lat]);
+      map.setZoom(zoom);
+    } else {
+      const { altitude, lng, lat } = pos.camera;
+      const cameraOptions = new FreeCameraOptions(
+        MercatorCoordinate.fromLngLat({ lng, lat }, altitude),
+        [0, 0, 0, 1]
+      );
+      cameraOptions.setPitchBearing(pitch, bearing);
+
+      map.setFreeCameraOptions(cameraOptions);
+    }
+
+    mapRef.current = map;
+  }, []);
+
+  useEffect(() => {
     // Get the current value of the map. Useful for gradually moving away
     // from class component
     const map = mapRef.current;
@@ -151,51 +192,6 @@ function MapContainer(props) {
   useElevationMarkerLocation(mapRef, elevationMarkerLocation);
 
   const { mapUse3D, mapIsRotated } = mapViewInfo(mapPosition);
-
-  useEffect(() => {
-    // setup the basic map
-    mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
-
-    const map = new mapboxgl.Map({
-      container: "map",
-      style: mapLayers.has(MapLayer.SATELLITE)
-        ? SETTINGS.satelliteMapURL
-        : SETTINGS.baseMapURL,
-      maxZoom: 14,
-      //maxTileCacheSize: 0,
-      logoPosition: "bottom-left",
-      trackResize: true,
-      //antialias: true,
-      //optimizeForTerrain: true,
-    });
-
-    map.setProjection("globe");
-
-    // set initial map position
-    const pos = mapPosition;
-    const { pitch = 0, bearing = 0, altitude } = pos.camera;
-    const zoom = pos.target?.zoom;
-    if (zoom != null && altitude == null) {
-      const { lng, lat } = pos.target;
-      map.setCenter([lng, lat]);
-      map.setZoom(zoom);
-    } else {
-      const { altitude, lng, lat } = pos.camera;
-      const cameraOptions = new FreeCameraOptions(
-        MercatorCoordinate.fromLngLat({ lng, lat }, altitude),
-        [0, 0, 0, 1]
-      );
-      cameraOptions.setPitchBearing(pitch, bearing);
-
-      console.log("Setting free camera options");
-
-      map.setFreeCameraOptions(cameraOptions);
-    }
-
-    //enable3DTerrain(this.props.use3D);
-
-    mapRef.current = map;
-  }, []);
 
   const className = classNames({
     "is-rotated": mapIsRotated ?? false,
