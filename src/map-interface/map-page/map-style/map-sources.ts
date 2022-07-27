@@ -88,7 +88,7 @@ export function MapSourcesLayer() {
         0
       );
 
-      f.properties.opacity = Math.pow(lvl, 0.5) / 2;
+      f.properties.opacity = (lvl + 0.5) / 4;
     });
     styles.sources["burwell-sources"].data = featureData;
     if (map.isStyleLoaded()) {
