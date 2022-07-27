@@ -1,5 +1,6 @@
 import { SETTINGS } from "../../Settings";
 export * from "./line-symbols";
+export * from "./map-sources";
 
 const overlaySources = {
   // "pbdb": {

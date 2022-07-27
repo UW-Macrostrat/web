@@ -17,7 +17,7 @@ import { CompassControl, ZoomControl } from "mapbox-gl-controls";
 import classNames from "classnames";
 import { Icon } from "@blueprintjs/core";
 import { debounce } from "lodash";
-import { toggleLineSymbols } from "../map-style";
+import { MapSourcesLayer, toggleLineSymbols } from "../map-style";
 
 const h = hyper.styled(styles);
 
@@ -236,6 +236,7 @@ function MapContainer(props) {
       use3D: mapUse3D,
       ref,
     }),
+    h(MapSourcesLayer),
   ]);
 }
 
