@@ -7,7 +7,14 @@ import {
   ItemPredicate,
 } from "@blueprintjs/select";
 import pg from "~/db";
-import { Button, Callout, InputGroup, MenuItem, Tag } from "@blueprintjs/core";
+import {
+  Button,
+  Callout,
+  InputGroup,
+  MenuItem,
+  NonIdealState,
+  Tag,
+} from "@blueprintjs/core";
 import styles from "./strat-name.module.scss";
 import {
   PostgrestFilterBuilder,
@@ -93,28 +100,22 @@ const StratNameItemRenderer: ItemRenderer<StratNameI> = (
 };
 
 const StratNameNewRenderer = (props: { onClickCreateNew: () => void }) => {
-  return h(Callout, { intent: "warning", title: "No results" }, [
-    `No matching name in Macrostrat lexicon. `,
-    "This could be for a few reasons:",
-    h("ul", [
-      h("li", [
-        "The search algorithm prioritizes based on location. Ensure this column's location is set correctly.",
-      ]),
-      h("li", [
-        "The name you're searching for may be in as a different spelling,",
-      ]),
-      h("li", ["The name may just not exist in Macrostrat's lexicon."]),
+  return h(NonIdealState, {
+    icon: "warning-sign",
+    title: "No results in Macrostrat lexicon",
+    description: h("div", [
+      h("li", ["Ensure column location is correct"]),
+      h("li", ["Try an alternative spelling"]),
     ]),
-    h(
+    action: h(
       Button,
       {
         intent: "warning",
-        style: { marginTop: "5px" },
         onClick: props.onClickCreateNew,
       },
       ["Create new"]
     ),
-  ]);
+  });
 };
 
 const StratNameQueryListRenderer = (
@@ -197,4 +198,4 @@ function StratNameSelect(props: StratNameSelectProps) {
   });
 }
 
-export { StratNameSelect, StratNameListItem };
+export { StratNameSelect, StratNameListItem, AuthorTag };

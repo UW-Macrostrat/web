@@ -1,21 +1,26 @@
 import React, { useState } from "react";
 import { hyperStyled } from "@macrostrat/hyper";
 import { useModelEditor } from "@macrostrat/ui-components";
-import {
-  Button,
-  Callout,
-  Dialog,
-} from "@blueprintjs/core";
+import { Button, Callout, Dialog, Tag } from "@blueprintjs/core";
 import styles from "../comp.module.scss";
 import pg, { usePostgrest } from "~/db";
-import { StratNameConceptLongI, StratNameI } from "~/types";
+import { RANK, StratNameConceptLongI, StratNameI } from "~/types";
 import { StratNameStack } from "./panel-stack";
+import { AuthorTag } from "./query-list";
 
 const h = hyperStyled(styles);
 
+const rankLong: { [RANK]: string } = {
+  [RANK.Fm]: "Formation",
+  [RANK.Gp]: "Group",
+  [RANK.Mbr]: "Member",
+  [RANK.SGp]: "SuperGroup",
+  [RANK.Bed]: "Bed",
+};
+
 export function StratNameConceptCard(props: {
   concept_id?: number;
-  strat_name: string;
+  strat_name: StratNameI;
 }) {
   const data: StratNameConceptLongI[] = usePostgrest(
     pg
@@ -32,23 +37,35 @@ export function StratNameConceptCard(props: {
     Callout,
     {
       className: "concept-card",
-      intent: "success",
-      title: `${props.strat_name} is a part of ${concept.refs.author}`,
-
-      style: {
-        backgroundColor: concept.intervals.interval_color + "40",
-      },
     },
     [
+      h("div.strat-title", [
+        h("h3", [
+          `${props.strat_name.strat_name} ${rankLong[props.strat_name.rank]}`,
+        ]),
+        h(Tag, { intent: "success", minimal: true, icon: "tick" }, [
+          concept.refs.author,
+        ]),
+      ]),
       h("p.geologic-age", [concept.province]),
-      h("p.geologic-age", [
-        concept.geologic_age,
-        " (",
-        concept.intervals.age_bottom,
-        "ma",
-        " - ",
-        concept.intervals.age_top,
-        "ma)",
+      h("div", { style: { display: "flex", alignItems: "center" } }, [
+        h("p.geologic-age", [
+          concept.geologic_age,
+          " (",
+          concept.intervals.age_bottom,
+          "ma",
+          " - ",
+          concept.intervals.age_top,
+          "ma)",
+        ]),
+        h("div.color-block", {
+          style: {
+            background: concept.intervals.interval_color,
+            width: "15px",
+            height: "15px",
+            marginLeft: "3px",
+          },
+        }),
       ]),
       h("p.source", [
         "reference: ",

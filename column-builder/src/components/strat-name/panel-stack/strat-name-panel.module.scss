@@ -14,10 +14,10 @@
   padding: 1px 10px 0 10px;
 }
 .bottom {
+  .row {
+    display: flex;
+  }
   .new-strat-name {
-    .row {
-      display: flex;
-    }
     display: flex;
     justify-content: space-between;
     margin: 10px;
