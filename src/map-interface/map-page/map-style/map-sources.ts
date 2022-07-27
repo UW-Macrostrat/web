@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useMapElement } from "../map-view";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "~/map-interface/Settings";
+import { features } from "process";
 
 const sourceMapStyle = {
   version: 8,
@@ -12,20 +13,20 @@ const sourceMapStyle = {
     },
   },
   layers: [
-    // {
-    //   id: "sources-fill",
-    //   type: "fill",
-    //   source: "burwell-sources", // reference the data source
-    //   paint: {
-    //     "fill-opacity": 0.5,
-    //     "fill-color": [
-    //       "case",
-    //       ["boolean", ["feature-state", "active"], false],
-    //       "#ffae80",
-    //       "#aaaaaa",
-    //     ],
-    //   },
-    // },
+    {
+      id: "sources-fill",
+      type: "fill",
+      source: "burwell-sources", // reference the data source
+      paint: {
+        "fill-opacity": ["get", "opacity"],
+        "fill-color": [
+          "case",
+          ["boolean", ["feature-state", "active"], false],
+          "#ffae80",
+          "#aaaaaa",
+        ],
+      },
+    },
     {
       id: "outline",
       type: "line",
@@ -38,7 +39,7 @@ const sourceMapStyle = {
           "#ffae80",
           "#333",
         ],
-        "line-width": 2,
+        "line-width": 1.5,
       },
     },
   ],
@@ -57,9 +58,22 @@ function mergeStyles(map, style) {
   }
 }
 
+function removeStyle(map, style) {
+  for (const key in style.sources) {
+    if (map.getSource(key)) {
+      map.removeSource(key);
+    }
+  }
+  for (const layer of style.layers) {
+    if (map.getLayer(layer.id)) {
+      map.removeLayer(layer.id);
+    }
+  }
+}
+
 export function MapSourcesLayer() {
   const map = useMapElement();
-  const featureData: any[] = useAPIResult(
+  const featureData: any = useAPIResult(
     SETTINGS.apiDomain + "/api/v2/defs/sources",
     { all: true, format: "geojson_bare" }
   );
@@ -68,6 +82,14 @@ export function MapSourcesLayer() {
     if (!map || !featureData) return;
 
     let styles = { ...sourceMapStyle };
+    featureData.features.forEach((f) => {
+      const lvl = Math.max(
+        ["small", "medium", "large"].indexOf(f.properties.scale),
+        0
+      );
+
+      f.properties.opacity = Math.pow(lvl, 0.5) / 2;
+    });
     styles.sources["burwell-sources"].data = featureData;
     if (map.isStyleLoaded()) {
       mergeStyles(map, styles);
@@ -77,6 +99,9 @@ export function MapSourcesLayer() {
         mergeStyles(map, styles);
       });
     }
+    return () => {
+      removeStyle(map, styles);
+    };
   }, [map, featureData]);
   return null;
 }

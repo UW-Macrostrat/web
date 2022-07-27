@@ -7,6 +7,7 @@ import { Tag } from "@blueprintjs/core";
 //import { GlobeSettings } from "@macrostrat/cesium-viewer/settings";
 import { useAppState, useAppActions } from "~/map-interface/app-state";
 import { useLocation } from "react-router";
+import { MapLayer } from "~/map-interface/app-state";
 //import { DisplayQuality } from "@macrostrat/cesium-viewer";
 import styles from "./settings-panel.module.styl";
 
@@ -36,6 +37,16 @@ const SettingsPanel = (props) => {
         },
       },
       "Show labels"
+    ),
+    h(
+      Switch,
+      {
+        checked: useAppState((s) => s.core.mapLayers.has(MapLayer.SOURCES)),
+        onChange() {
+          dispatch({ type: "toggle-map-layer", layer: MapLayer.SOURCES });
+        },
+      },
+      "Show sources"
     ),
     h(
       Switch,

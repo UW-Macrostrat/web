@@ -212,6 +212,7 @@ function MapContainer(props) {
 
   const { mapUse3D, mapIsRotated } = viewInfo(mapPosition);
 
+  console.log(mapLayers);
   return h("div.map-view-container.main-view", { ref: parentRef }, [
     h(_Map, {
       filters,
@@ -236,7 +237,7 @@ function MapContainer(props) {
       use3D: mapUse3D,
       ref,
     }),
-    h(MapSourcesLayer),
+    h.if(mapLayers.has(MapLayer.SOURCES))(MapSourcesLayer),
   ]);
 }
 
@@ -248,7 +249,7 @@ function MapGlobeControl() {
   if (proj == "globe") {
     mapIsGlobe = true;
   }
-  const nextProj = mapIsGlobe ? "mercator" : "globe";
+  const nextProj = mapIsGlobe ? "naturalEarth" : "globe";
   const icon = mapIsGlobe ? "map" : "globe";
 
   return h(
