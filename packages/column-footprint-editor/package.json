@@ -1,7 +1,7 @@
 {
   "name": "my-project",
   "scripts": {
-    "start": "ENV=development parcel serve ./src/index.html",
+    "start": "ENV=development parcel serve -p 1235 ./src/index.html",
     "build": "ENV=production parcel build ./src/index.html"
   },
   "dependencies": {
