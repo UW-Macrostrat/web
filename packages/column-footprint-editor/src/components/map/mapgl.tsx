@@ -54,8 +54,7 @@ export function Map() {
   const [changeSet, setChangeSet] = useState([]);
   const [open, setOpen] = useState(false);
   const [features, setFeatures] = useState([]);
-  console.log(features);
-  
+
   const closeOpen = () => {
     setFeatures([]);
     setOpen(false);
