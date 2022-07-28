@@ -69,7 +69,6 @@ export function Map() {
       return [...prevState, ...new Array(obj)];
     });
   };
-
   const onSave = async () => {
     // can do cleaning on changeSet by the internal id string.
     // Combine like edits so I'm not running a million
