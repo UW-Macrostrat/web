@@ -236,7 +236,7 @@ const MetaDataPanel: React.FC<PanelProps<MetaDataPanelProps>> = (props) => {
           "This stratigraphic name is not linked to an official lexicon reference. You can use this but it may be better to find a strat_name that is linked.",
         ]
       ),
-      h("h3", ["Hierarchy Summary"]),
+      h("h3", ["Stratigraphic name hierarchy"]),
       h("div.strat-hierarchy-constainer", [
         h(StratNameHierarchy, {
           strat_name_id: props.stratName?.id,
