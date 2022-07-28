@@ -147,6 +147,7 @@ SnapLineMode.toDisplayFeatures = function (state, geojson, display) {
 SnapLineMode.onStop = function (state) {
   // remove moveemd callback
   this.map.off("moveend", state.moveendCallback);
+  this.map.off("draw.snap.options_changed", state.optionsChangedCallBAck);
 
   DrawLine.onStop.call(this, state);
   const obj = {
