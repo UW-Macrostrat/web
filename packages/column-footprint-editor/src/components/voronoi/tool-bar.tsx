@@ -21,6 +21,7 @@ function HelpText() {
   return (
     <Callout intent="none">
       <p>Options only for points picked outside of already existing polygon.</p>
+      <p>*distance measurements are not fully accurate.</p>
     </Callout>
   );
 }
@@ -64,14 +65,14 @@ function VoronoiToolBar(props: VoronoiToolBarProps) {
   return (
     <Card style={style}>
       <Slider
-        min={1}
-        max={100}
-        stepSize={1}
+        min={0}
+        max={500}
+        stepSize={10}
         showTrackFill={false}
         value={props.radius}
         onChange={onChangeRadius}
         labelRenderer={(value) => `${value}km`}
-        labelValues={[1, 100]}
+        labelValues={[1, 100, 200, 300, 400, 500]}
       />
       <Slider
         min={1}
