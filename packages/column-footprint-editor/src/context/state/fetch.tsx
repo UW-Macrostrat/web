@@ -1,14 +1,46 @@
 import React from "react";
-import { base } from "../../context/env";
-import axios from "axios";
 import {
   AppToaster,
   SavingToast,
   SuccessfullySaved,
   BadSaving,
-} from "../blueprint";
+} from "../../components/blueprint";
+import axios from "axios";
+import { base } from "../env";
 
-const onSaveLines = async (changeSet, project_id) => {
+async function fetchColumns(project_id) {
+  let url = base + `${project_id}/columns`;
+  const res = await axios.get(url);
+
+  return res.data;
+}
+
+async function fetchLines(project_id) {
+  let url = base + `${project_id}/lines`;
+  const res = await axios.get(url);
+
+  return res.data;
+}
+
+async function fetchPoints(project_id) {
+  let url = base + `${project_id}/points`;
+  const res = await axios.get(url);
+  return res.data;
+}
+
+async function fetchProjColGroups(project_id) {
+  let url = base + `${project_id}/col-groups`;
+  const res = await axios.get(url);
+  return res.data.data;
+}
+
+async function fetchVoronoiPolygons(project_id, points, radius, quad_segs) {
+  let url = base + `${project_id}/voronoi`;
+  const res = await axios.put(url, { points, radius, quad_segs });
+  return res.data.polygons;
+}
+
+const saveLines = async (changeSet, project_id) => {
   AppToaster.show({
     message: <SavingToast />,
     intent: "primary",
@@ -33,10 +65,6 @@ const onSaveLines = async (changeSet, project_id) => {
   }
 };
 
-/* 
-Need to perform a post to the api endpoint; run a reset on voronoi state
-and then updateColumnsandLines, maybe default back to topology
-*/
 const saveVoronoiPolygons = async (project_id, points, radius, quad_segs) => {
   AppToaster.show({
     message: <SavingToast message="Tessellating polygons..." />,
@@ -50,15 +78,21 @@ const saveVoronoiPolygons = async (project_id, points, radius, quad_segs) => {
       intent: "danger",
       timeout: 5000,
     });
-    return false;
   } else {
     AppToaster.show({
       message: <SuccessfullySaved />,
       intent: "success",
       timeout: 3000,
     });
-    return true;
   }
 };
 
-export { onSaveLines, saveVoronoiPolygons };
+export {
+  fetchColumns,
+  fetchLines,
+  fetchVoronoiPolygons,
+  fetchProjColGroups,
+  fetchPoints,
+  saveLines,
+  saveVoronoiPolygons,
+};

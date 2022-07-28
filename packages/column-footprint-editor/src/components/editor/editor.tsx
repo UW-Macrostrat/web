@@ -19,7 +19,6 @@ import {
 
 import "./main.css";
 
-import { TwoIdentities } from "./two-identities";
 import { ColumnGroup } from "./column-groups";
 import { base } from "../../context/env";
 

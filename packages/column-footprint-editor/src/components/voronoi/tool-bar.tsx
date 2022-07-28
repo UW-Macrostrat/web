@@ -7,8 +7,7 @@ import {
   Icon,
   Button,
 } from "@blueprintjs/core";
-import { SyncAppActions, AsyncAppActions } from "../../context";
-import { MAP_MODES } from "../map/mapgl";
+import { SyncAppActions, AsyncAppActions, MAP_MODES } from "../../context";
 import { Popover2 } from "@blueprintjs/popover2";
 
 // import { ReactComponent as FourSide } from "jsx:../../assets/4-side.svg";

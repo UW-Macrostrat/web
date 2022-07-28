@@ -3,8 +3,7 @@ import { DownloadButton } from ".";
 import { Button, Navbar, Popover, Divider } from "@blueprintjs/core";
 import { AppContext } from "../../context";
 import { useAPIResult } from "@macrostrat/ui-components";
-import { base } from "../../context/env";
-import { MAP_MODES } from "../map/mapgl";
+import { base, MAP_MODES } from "../../context";
 
 const projects_url = base + "projects";
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Dialog } from "@blueprintjs/core";
-import { MAP_MODES } from "../map/mapgl";
+import { MAP_MODES } from "../../context";
 
 interface VoronoiHelpDialogProps {
   mode: MAP_MODES;
