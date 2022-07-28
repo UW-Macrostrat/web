@@ -1,2 +1,3 @@
 let base = process.env.API_BASE;
-export { base };
+let mapboxToken = process.env.MAPBOX_TOKEN;
+export { base, mapboxToken };

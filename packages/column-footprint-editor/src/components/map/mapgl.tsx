@@ -18,6 +18,7 @@ import {
 } from "./map-pieces";
 import { saveVoronoiPolygons, onSaveLines } from "./fetch-post";
 import { VoronoiToolBar } from "../voronoi/tool-bar";
+import { mapboxToken } from "../../context/env";
 
 export enum MAP_MODES {
   topology,
@@ -34,8 +35,7 @@ export enum MAP_MODES {
  *
  */
 
-mapboxgl.accessToken =
-  "pk.eyJ1IjoidGhlZmFsbGluZ2R1Y2siLCJhIjoiY2tsOHAzeDZ6MWtsaTJ2cXhpMDAxc3k5biJ9.FUMK57K0UP7PSrTUi3DiFQ";
+mapboxgl.accessToken = mapboxToken;
 
 export function Map() {
   const mapContainerRef = useRef(null);
