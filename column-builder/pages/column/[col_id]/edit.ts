@@ -65,6 +65,8 @@ export default function EditColumn(props: {
       ref_id = changes.refs[0].id;
       delete changes.refs;
     }
+    // lat,lng only need to be entered to update coordinate and wkt.
+    //  DB triggers, see /api-views/02-functions.sql
     const { data, error } = await tableUpdate("cols", {
       changes,
       id: e.id,
