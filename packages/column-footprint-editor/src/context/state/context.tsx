@@ -4,7 +4,7 @@ import { appReducer, useAppContextActions } from "./reducer";
 
 let initialState: AppState = {
   project: { project_id: null, name: null, description: null },
-  voronoi: { quad_seg: 2, radius: 1 },
+  voronoi: { quad_seg: 2, radius: 100 },
   lines: null,
   points: null,
   columns: null,
