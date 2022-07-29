@@ -1,4 +1,3 @@
-import { Divider } from "@blueprintjs/core";
 import React from "react";
 
 function AboutPanel() {
@@ -12,9 +11,10 @@ function AboutPanel() {
           <i>while</i>
         </b>{" "}
         keeping topology. Users can use the <b>Edit Topology</b> mode to create
-        new column footprint geometries and then use the{" "}
-        <b>View/ Edit Properties</b> mode to add column-group and column-name
-        information. This application is being developed at{" "}
+        new column footprint geometries. The <b>Tessellate</b> mode can be used
+        to create polygons inside a bounding geometry or quickly create polygons
+        from points. The <b>View/ Edit Properties</b> mode to add column-group
+        and column-name information. This application is being developed at{" "}
         <a href="https://macrostrat.org/" target="_blank">
           {" "}
           UW-Macrostrat
@@ -51,11 +51,8 @@ function AboutPanel() {
         <i>
           <b>dragged</b>
         </i>{" "}
-        together. Sometimes this action works very well and sometimes it takes a
-        couple tries to get them sticking together. The best workflow I've found
-        is, dragging a vertix to another one to where they are overlapping. Then
-        unclick the lines such that <b>NO</b> lines are highlighted. Then
-        reclick the line and vertix to be dragged.
+        together. To ungroup vertices, hold <b>shift</b> while you click on a
+        vertix. This will bypass the multiple dragging mode.
       </p>
       <p>
         There is an option to create a new n-sided polygon (n {">="} 3 ) as a
@@ -63,8 +60,10 @@ function AboutPanel() {
         second option from the top will place you in the <b>Polygon Drawing</b>{" "}
         mode. Click anywhere once and move your mouse. By default, a hexgon
         appears and dynamically changes sizes as you move your cursor from the
-        original clicked point on the map. To increase the number of sides the
-        polygon has, press the{" "}
+        original clicked point on the map.
+      </p>
+      <p>
+        To increase the number of sides the polygon has, press the{" "}
         <i>
           <b>a</b>
         </i>{" "}
@@ -73,7 +72,7 @@ function AboutPanel() {
           <b>s</b>
         </i>
         key to subtract from the number of sides the polgyon has. To finish and
-        create the polygon, press
+        create the polygon, press{" "}
         <i>
           <b>enter</b>
         </i>{" "}

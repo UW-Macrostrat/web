@@ -21,7 +21,12 @@ function VoronoiHelpDialog(props: VoronoiHelpDialogProps) {
   return (
     <Dialog isOpen={open} title="Tessellation Mode" onClose={onClose}>
       <h1>Welcome to Tessellation Mode</h1>
-      <p>Help text for Tessellation mode</p>
+      <p>
+        You can add, move, and delete points to view tessellation. If two points
+        must added inside an existing polygon for tessellation to occur. Points
+        added outside of polygons will buffer to points; overlapping buffered
+        points will also tessellate.
+      </p>
     </Dialog>
   );
 }
