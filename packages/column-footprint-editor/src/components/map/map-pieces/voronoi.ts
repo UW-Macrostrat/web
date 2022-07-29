@@ -1,10 +1,5 @@
-import {
-  SnapLineMode,
-  MultVertDirectSelect,
-  MultVertSimpleSelect,
-} from "../modes";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
-import { SnapModeDrawStyles } from "mapbox-gl-draw-snap-mode";
+import { PointsOnly } from "../modes";
 
 function voronoiModeMap(
   map,
@@ -15,6 +10,10 @@ function voronoiModeMap(
   moveVoronoiPoint,
   deleteVoronoiPoint
 ) {
+  const modes = Object.assign(MapboxDraw.modes, {
+    simple_select: PointsOnly,
+  });
+
   const Draw = new MapboxDraw({
     controls: {
       polygon: false,
@@ -23,20 +22,7 @@ function voronoiModeMap(
       combine_features: false,
       uncombine_features: false,
     },
-    modes: Object.assign(
-      {
-        direct_select: MultVertDirectSelect,
-        simple_select: MultVertSimpleSelect,
-      },
-      MapboxDraw.modes,
-      { draw_line_string: SnapLineMode }
-    ),
-    styles: SnapModeDrawStyles,
-    snap: true,
-    clickBuffer: 10,
-    snapOptions: {
-      snapPx: 25,
-    },
+    modes,
   });
 
   map.addControl(Draw, "top-left");

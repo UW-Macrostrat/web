@@ -50,12 +50,12 @@ function editModeMap(map, state) {
   const Draw = new MapboxDraw({
     controls: { point: false },
     modes: Object.assign(
+      MapboxDraw.modes,
       {
         direct_select: MultVertDirectSelect,
         simple_select: MultVertSimpleSelect,
         draw_polygon: DrawPolyMult,
       },
-      MapboxDraw.modes,
       { draw_line_string: SnapLineMode }
     ),
     styles: SnapModeDrawStyles,
