@@ -5,10 +5,6 @@
   max-width: 500px;
 }
 
-.my-suggest {
-  overflow: scroll;
-  max-height: 200px;
-}
 .drag-bar-top {
   height: 50px;
   width: 100%;

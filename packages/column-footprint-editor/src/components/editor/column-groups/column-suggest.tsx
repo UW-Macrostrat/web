@@ -77,7 +77,6 @@ export function ColumnSuggest(props) {
         items={itemz}
         popoverProps={{
           minimal: true,
-          popoverClassName: "my-suggest",
         }}
         inputProps={{ fill: true, style: { minWidth: "350px" } }}
         query={query}
