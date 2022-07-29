@@ -44,6 +44,7 @@ const saveLines = async (changeSet, project_id) => {
   AppToaster.show({
     message: <SavingToast />,
     intent: "primary",
+    timeout: -1,
   });
   try {
     let url = base + `${project_id}/lines`;
@@ -69,6 +70,7 @@ const saveVoronoiPolygons = async (project_id, points, radius, quad_segs) => {
   AppToaster.show({
     message: <SavingToast message="Tessellating polygons..." />,
     intent: "primary",
+    timeout: -1,
   });
   let url = base + `${project_id}/voronoi`;
   const res = await axios.post(url, { points, radius, quad_segs });
