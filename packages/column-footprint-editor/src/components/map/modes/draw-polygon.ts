@@ -5,13 +5,13 @@ import {
   activeStates,
 } from "@mapbox/mapbox-gl-draw/src/constants";
 import doubleClickZoom from "@mapbox/mapbox-gl-draw/src/lib/double_click_zoom";
-import MapboxDraw from "@mapbox/mapbox-gl-draw";
+import DrawPolygon from "@mapbox/mapbox-gl-draw/src/modes/draw_polygon";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
 import * as Constants from "@mapbox/mapbox-gl-draw/src/constants";
 import { distance_between_points } from "../utils";
 
-let DrawPolyMult = MapboxDraw.modes.draw_polygon;
+let DrawPolyMult = { ...DrawPolygon };
 
 DrawPolyMult.onSetup = function (opts) {
   const line = this.newFeature({
@@ -37,12 +37,15 @@ DrawPolyMult.createNPolygon = function (x, y, n, r) {
   // y is the yoffset
   // r is radius
 
-  const polygon = [];
+  const polygon: number[][] = [];
 
   for (let i = 0; i <= n; i++) {
     const pointX = r * Math.cos(i * ((2 * Math.PI) / n)) + x;
     const pointY = r * Math.sin(i * ((2 * Math.PI) / n)) + y;
-    const { lng, lat } = this.map.unproject([pointX, pointY]);
+    const { lng, lat }: { lng: number; lat: number } = this.map.unproject([
+      pointX,
+      pointY,
+    ]);
     polygon.push([lng, lat]);
   }
   return [polygon];

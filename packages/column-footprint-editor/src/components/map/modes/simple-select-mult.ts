@@ -1,12 +1,13 @@
 import "regenerator-runtime/runtime";
-import MapboxDraw from "@mapbox/mapbox-gl-draw";
+import SimpleSelect from "@mapbox/mapbox-gl-draw/src/modes/simple_select";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
 import * as Constants from "@mapbox/mapbox-gl-draw/src/constants";
+import * as CommonSelectors from "@mapbox/mapbox-gl-draw/src/lib/common_selectors";
 
 import { distance_between_points } from "../utils";
 
-const MultVertSimpleSelect = MapboxDraw.modes.simple_select;
+const MultVertSimpleSelect = { ...SimpleSelect };
 
 MultVertSimpleSelect.onSetup = function (opts) {
   // turn the opts into state.
@@ -57,7 +58,8 @@ MultVertSimpleSelect.fireUpdate = function () {
 
 // need to just pass off it there aren't other verticies at point
 MultVertSimpleSelect.clickOnVertex = function (state, e) {
-  if (e.originalEvent.shiftKey) {
+  const isShiftClick = CommonSelectors.isShiftDown(e);
+  if (isShiftClick) {
     this.changeMode("direct_select", {
       featureId: e.featureTarget.properties.parent,
       coordPath: e.featureTarget.properties.coord_path,
@@ -76,8 +78,8 @@ MultVertSimpleSelect.clickOnVertex = function (state, e) {
   features = features.filter((f) => f != null); // this will return the other vertix
   if (features.length > 0) {
     state.movedCoordPath = e.featureTarget.properties.coord_path; // "0.5" might mean first feature 4th point
-    let match = [];
-    let movingFeatures = [];
+    let match: string[] = [];
+    let movingFeatures: any = []; // feature type
     features.map((fs) => {
       // multiline string
       fs.features.map((f, lineIndex) => {

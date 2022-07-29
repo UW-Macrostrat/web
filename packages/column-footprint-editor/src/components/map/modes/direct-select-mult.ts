@@ -1,11 +1,11 @@
 import "regenerator-runtime/runtime";
-import MapboxDraw from "@mapbox/mapbox-gl-draw";
+import DirectSelect from "@mapbox/mapbox-gl-draw/src/modes/direct_select";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
 import doubleClickZoom from "@mapbox/mapbox-gl-draw/src/lib/double_click_zoom";
 import * as Constants from "@mapbox/mapbox-gl-draw/src/constants";
 
-const MultVertDirectSelect = MapboxDraw.modes.direct_select;
+const MultVertDirectSelect = { ...DirectSelect };
 
 MultVertDirectSelect.onSetup = function (opts) {
   const featureId = opts.featureId;
