@@ -151,7 +151,15 @@ function ColumnEdit({ curColGroup }: { curColGroup: Partial<ColumnGroupI> }) {
             },
             [
               "This column has an associated footprint geometry.",
-              " All editing must take place in Column-Topology-Editor.",
+              " All editing must take place in ",
+              h(
+                "a",
+                {
+                  href: process.env.NEXT_PUBLIC_TOPOLOGY_URL,
+                  target: "_blank",
+                },
+                ["Column-Topology-Editor."]
+              ),
             ]
           ),
         ]),
