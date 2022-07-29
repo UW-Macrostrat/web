@@ -18,7 +18,7 @@ function voronoiModeMap(
     controls: {
       polygon: false,
       line_string: false,
-      trash: false,
+      trash: true,
       combine_features: false,
       uncombine_features: false,
     },
