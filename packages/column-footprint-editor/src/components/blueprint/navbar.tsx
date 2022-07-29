@@ -1,6 +1,16 @@
 import React, { useContext } from "react";
 import { DownloadButton } from ".";
-import { Button, Navbar, Popover, Divider } from "@blueprintjs/core";
+import {
+  Button,
+  Navbar,
+  Popover,
+  Divider,
+  MenuItem,
+  Menu,
+  MenuDivider,
+  Icon,
+  IconName,
+} from "@blueprintjs/core";
 import { AppContext } from "../../context";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { base, MAP_MODES } from "../../context";
@@ -26,7 +36,6 @@ function unwrapProjects(res) {
 function ProjectDropDown(props) {
   const { projects } = props;
   const { state, runAction } = useContext(AppContext);
-
   const changeProjectId = (project) => {
     runAction({ type: "change-project", payload: project });
   };
@@ -36,32 +45,25 @@ function ProjectDropDown(props) {
   };
 
   return (
-    <div>
-      <div className="projects-drop-down">
-        {projects.map((project) => {
-          const { project_id: id, name } = project;
-          let iconName = id == state.project.project_id ? "tick" : null;
-          return (
-            <Button
-              key={id}
-              fill={true}
-              minimal={true}
-              onClick={() => changeProjectId(project)}
-              intent="primary"
-              rightIcon={iconName}
-            >
-              {name}
-            </Button>
-          );
-        })}
-      </div>
-      <div className="projects-drop-more">
-        <Divider />
-        <Button minimal={true} onClick={openImportOverlay}>
-          More...
-        </Button>
-      </div>
-    </div>
+    <Menu>
+      {projects.map((project) => {
+        const { project_id: id, name } = project;
+        let iconName: IconName | undefined =
+          id == state.project.project_id ? "tick" : undefined;
+        return (
+          <MenuItem
+            key={id}
+            text={name}
+            onClick={() => changeProjectId(project)}
+            intent="primary"
+            labelElement={<Icon icon={iconName} />}
+          ></MenuItem>
+        );
+      })}
+      <MenuDivider />
+
+      <MenuItem text="More..." onClick={openImportOverlay}></MenuItem>
+    </Menu>
   );
 }
 
@@ -156,7 +158,7 @@ function MapNavBar(props: MapNavBarProps) {
     runAction({ type: "import-overlay", payload: { open: true } });
   };
 
-  let projects = useAPIResult(
+  const projects = useAPIResult(
     projects_url,
     {},
     { unwrapResponse: unwrapProjects }
