@@ -11,7 +11,6 @@ function PopoverContent({ addGeom }) {
   const [geom, setGeom] = useState("");
 
   const onClick = async () => {
-    console.log(geom);
     let url = base + "get-line";
     let res = await axios.post(url, { location: geom });
     let data = res.data;
@@ -21,7 +20,7 @@ function PopoverContent({ addGeom }) {
 
   return (
     <div className="add-geo-popover">
-      <h4 className="h4-0">Enter a WKT or GeoJSON</h4>
+      <h4 className="h4-0">Enter a WKT</h4>
       <TextArea
         onChange={(e) => setGeom(e.target.value)}
         style={{ height: "150px" }}
