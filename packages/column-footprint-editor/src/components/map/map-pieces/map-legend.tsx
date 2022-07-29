@@ -73,18 +73,7 @@ function MapColLegend(props) {
 }
 
 function MapToolsControl(props) {
-  const { columns = [], editMode, draw, addToChangeSet } = props;
-
-  const addGeomToDraw = (geom) => {
-    let feature = draw.add(geom);
-
-    const obj = {
-      action: "draw.create",
-      feature: { id: feature[0], geometry: geom },
-    };
-
-    addToChangeSet(obj);
-  };
+  const { columns = [], editMode, addGeomToDraw } = props;
 
   return (
     <div>

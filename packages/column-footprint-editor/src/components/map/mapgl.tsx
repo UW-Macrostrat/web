@@ -110,7 +110,6 @@ export function Map() {
       let draw = editModeMap(map, state);
       drawRef.current = draw;
       return () => {
-        console.log("Removing Topology Mode");
         let map = mapRef.current;
         let Draw = drawRef.current;
         if (!map || !Draw || !edit) return;
@@ -163,7 +162,7 @@ export function Map() {
       quad_segs: state.voronoi.quad_seg,
     });
   };
-  
+
   useEffect(() => {
     if (mapRef.current == null) return;
     const isVoronoiMode = mode == MAP_MODES.voronoi;
@@ -229,6 +228,19 @@ export function Map() {
       ? "map-tools-control-left"
       : "map-tools-control-right";
 
+  const addGeomToDraw = (geom) => {
+    const draw = drawRef.current;
+    if (typeof draw === "undefined") return;
+    let feature = draw.add(geom);
+
+    const obj = {
+      action: "draw.create",
+      feature: { type: "Feature", id: feature[0], geometry: geom },
+    };
+
+    addToChangeSet(obj);
+  };
+
   return (
     <div>
       <ImportDialog />
@@ -255,8 +267,7 @@ export function Map() {
       </div>
       <div className={mapToolsClassName}>
         <MapToolsControl
-          draw={drawRef.current}
-          addToChangeSet={addToChangeSet}
+          addGeomToDraw={addGeomToDraw}
           columns={legendColumns}
           editMode={mode == MAP_MODES.topology}
         />
