@@ -1,14 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Card,
   Slider,
-  FormGroup,
   Callout,
   Icon,
-  Button,
 } from "@blueprintjs/core";
 import { SyncAppActions, AsyncAppActions, MAP_MODES } from "../../context";
-import { Popover2 } from "@blueprintjs/popover2";
 
 // import { ReactComponent as FourSide } from "jsx:../../assets/4-side.svg";
 // import { ReactComponent as EightSide } from "jsx:../../assets/8-side.svg";
