@@ -79,6 +79,7 @@ export function ColumnSuggest(props) {
           minimal: true,
           popoverClassName: "my-suggest",
         }}
+        inputProps={{ fill: true, style: { minWidth: "350px" } }}
         query={query}
         onItemSelect={onItemSelect}
         onQueryChange={onQueryChange}

@@ -4,7 +4,6 @@ import {
   Button,
   Navbar,
   Popover,
-  Divider,
   MenuItem,
   Menu,
   MenuDivider,

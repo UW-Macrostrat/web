@@ -7,7 +7,6 @@ import {
   FormGroup,
   Collapse,
 } from "@blueprintjs/core";
-import { OverlayBox, SaveButton } from "../../blueprint";
 import { useAPIResult, useModelEditor } from "@macrostrat/ui-components";
 import { ColumnSuggest } from "./column-suggest";
 import { NewColGroups } from "./new-column";
@@ -63,14 +62,13 @@ function ColumnGroup() {
   if (isEditing) {
     return (
       <div>
-        <div className="edit-with-label">
-          <h4 className="h4-0">Column Group: </h4>
+        <FormGroup label="Column group">
           <ColumnSuggest
             items={data}
             onChange={onChangeGroup}
             initialItem={model}
           />
-        </div>
+        </FormGroup>
         <div style={{ margin: "10px", marginLeft: "0px" }}>
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             <Button
@@ -106,9 +104,8 @@ function ColumnGroup() {
     );
   }
   return (
-    <div>
-      <h4>Column Group: {col_group}</h4>
-      <h4>Column Group Name: {col_group_name}</h4>
+    <div className="col-group-text">
+      {col_group_name} <i>({col_group})</i>
     </div>
   );
 }

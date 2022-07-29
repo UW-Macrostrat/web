@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Navbar } from "@blueprintjs/core";
+import { Navbar, InputGroup, FormGroup, TextArea } from "@blueprintjs/core";
 import { OverlayBox, SaveButton } from "../blueprint";
 import {
   ModelEditor,
@@ -66,53 +66,48 @@ function ColumnName() {
   const { model, isEditing, actions } = useModelEditor();
   const { col_name } = model;
 
+  const updateName = (name) => {
+    actions.updateState({
+      model: { col_name: { $set: name.target.value } },
+    });
+  };
+
   if (isEditing) {
     return (
-      <div className="edit-with-label">
-        <h4 className="h4-0">col_name: </h4>{" "}
-        <h4 className="h4-0">
-          <EditableMultilineText field="col_name" className="column_name" />
-        </h4>
-      </div>
+      <FormGroup label="Column name">
+        <InputGroup onChange={updateName} value={col_name} />
+      </FormGroup>
     );
   }
-  return (
-    <div>
-      <h4>Column Name: {col_name}</h4>
-    </div>
-  );
+  return <div className="column-name-text">{col_name}</div>;
 }
 
 function ColumnDescription() {
   const { model, isEditing, actions } = useModelEditor();
   let { description = "No description" } = model;
 
+  const updateDescription = (e) => {
+    actions.updateState({
+      model: { description: { $set: e.target.value } },
+    });
+  };
+
   if (isEditing) {
     return (
-      <div className="edit-with-label">
-        <h4 className="h4-0">Description: </h4>{" "}
-        <h4 className="h4-0">
-          <EditableMultilineText
-            field="description"
-            className="column_description"
-          />
-        </h4>
-      </div>
+      <FormGroup label="Column description">
+        <TextArea onChange={updateDescription} value={description} />
+      </FormGroup>
     );
   }
-  return (
-    <div>
-      <h4>Description: {description}</h4>
-    </div>
-  );
+  return <div className="description-text">{description}</div>;
 }
 
 function FeatureOverlay({ feature, open }) {
   return (
-    <div>
+    <div className="editor-overlay">
       <ColumnName />
-      <ColumnDescription />
       <ColumnGroup />
+      <ColumnDescription />
     </div>
   );
 }
@@ -152,7 +147,6 @@ function PropertyDialog(props) {
     identity_id,
   };
   const put_url = base + `projects`;
-  console.log(state);
 
   const persistChanges = async (updatedModel, changeSet) => {
     console.log(updatedModel);

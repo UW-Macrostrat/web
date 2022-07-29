@@ -12,6 +12,7 @@ import { ChromePicker } from "react-color";
 
 import { AppContext } from "../../../context";
 import { base } from "../../../context/env";
+import { FormGroup, InputGroup } from "@blueprintjs/core";
 
 function ColorPicker() {
   const { model, isEditing, actions } = useModelEditor();
@@ -37,26 +38,28 @@ function ColorPicker() {
 }
 
 function EditComponents() {
-  const { actions } = useModelEditor();
+  const { actions, model } = useModelEditor();
+
+  const update = (field, value) => {
+    actions.updateState({
+      model: { [field]: { $set: value } },
+    });
+  };
   return (
     <div>
-      <div className="edit-with-label">
-        <h4 className="h4-0">Column-Group: </h4>
-        <h4 className="h4-0">
-          {/* @ts-ignore */}
-          <EditableMultilineText field="col_group" className="col_group" />
-        </h4>
-      </div>
-      <div className="edit-with-label">
-        <h4 className="h4-0">Column-Group-Name:</h4>
-        <h4 className="h4-0">
-          {/* @ts-ignore */}
-          <EditableMultilineText
-            field="col_group_name"
-            className="col_group_name"
-          />
-        </h4>
-      </div>
+      <FormGroup label="Column group">
+        <InputGroup
+          onChange={(e) => update("col_group", e.target.value)}
+          value={model["col_group"]}
+        />
+      </FormGroup>
+      <FormGroup label="Column group name">
+        <InputGroup
+          onChange={(e) => update("col_group_name", e.target.value)}
+          value={model["col_group_name"]}
+        />
+      </FormGroup>
+
       <ColorPicker />
       <SaveButton onClick={() => actions.persistChanges()} />
     </div>

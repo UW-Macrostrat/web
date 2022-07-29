@@ -2,8 +2,21 @@
 @import "~/node_modules/@blueprintjs/icons/lib/css/blueprint-icons.css";
 @import "~/node_modules/@blueprintjs/popover2/lib/css/blueprint-popover2.css";
 
-.column_name {
-  margin-top: 0px;
+.column-name-text {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.col-group-text {
+  font-size: 16px;
+  color: #5f6b7c;
+}
+.description-text {
+  margin-top: 5px;
+}
+.editor-overlay {
+  margin-top: 10px;
+  min-height: 100px;
 }
 
 .clicked-entity {
