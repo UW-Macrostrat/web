@@ -207,6 +207,7 @@ const columnReducer = (state: ColumnStateI, action: Actions): ColumnStateI => {
       const _unit_ =
         currSections[action.section_index][_section_id_][action.unit_index];
       if (_unit_.id == "new") {
+        state = { ...state, edit: { ...state.edit, open: false } };
         return columnReducer(state, {
           type: "remove-unit",
           section_index: action.section_index,
