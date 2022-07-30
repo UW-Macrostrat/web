@@ -14,7 +14,7 @@ import { AppContext } from "../../context";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { base, MAP_MODES } from "../../context";
 
-const projects_url = base + "projects";
+const projects_url = process.env.API_BASE + "projects";
 
 function unwrapProjects(res) {
   if (res.data) {
