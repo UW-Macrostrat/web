@@ -28,8 +28,8 @@
       "@macrostrat/map-components": [
         "deps/web-components/packages/map-components/src/"
       ],
-      "@macrostrat/map-styling": [
-        "deps/web-components/packages/map-styling/src/"
+      "@macrostrat/mapbox-styles": [
+        "deps/web-components/packages/mapbox-styles/src"
       ]
     }
   },

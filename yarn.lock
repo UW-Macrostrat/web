@@ -3891,7 +3891,7 @@ __metadata:
     "@loadable/component": ^5.14.1
     "@macrostrat/column-components": "*"
     "@macrostrat/hyper": ^2.2.1
-    "@macrostrat/map-styling": ^1.0.0
+    "@macrostrat/mapbox-styles": ^1.0.0
     "@macrostrat/revision-info-webpack": ^1.0.0
     "@macrostrat/ui-components": ^1
     "@mapbox/point-geometry": ^0.1.0
@@ -3953,14 +3953,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@macrostrat/map-styling@^1.0.0, @macrostrat/map-styling@workspace:deps/web-components/packages/map-styling":
-  version: 0.0.0-use.local
-  resolution: "@macrostrat/map-styling@workspace:deps/web-components/packages/map-styling"
-  dependencies:
-    ts-node: ^10.7.0
-  languageName: unknown
-  linkType: soft
-
 "@macrostrat/mapbox-react@workspace:deps/web-components/packages/mapbox-react":
   version: 0.0.0-use.local
   resolution: "@macrostrat/mapbox-react@workspace:deps/web-components/packages/mapbox-react"
@@ -3973,6 +3965,14 @@ __metadata:
   peerDependencies:
     react: ^16||^17||^18
     react-dom: ^16||^17||^18
+  languageName: unknown
+  linkType: soft
+
+"@macrostrat/mapbox-styles@^1.0.0, @macrostrat/mapbox-styles@workspace:deps/web-components/packages/mapbox-styles":
+  version: 0.0.0-use.local
+  resolution: "@macrostrat/mapbox-styles@workspace:deps/web-components/packages/mapbox-styles"
+  dependencies:
+    ts-node: ^10.7.0
   languageName: unknown
   linkType: soft
 

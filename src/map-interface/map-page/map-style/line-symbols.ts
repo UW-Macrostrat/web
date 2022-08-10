@@ -1,6 +1,6 @@
 /** Experimental line symbol support */
-import { symbolLayerPaintProperties } from "@macrostrat/map-styling";
-import { setupLineSymbols } from "@macrostrat/map-styling";
+import { symbolLayerPaintProperties } from "@macrostrat/mapbox-styles";
+import { setupLineSymbols } from "@macrostrat/mapbox-styles";
 
 import mapboxgl from "mapbox-gl";
 

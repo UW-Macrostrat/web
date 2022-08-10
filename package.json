@@ -57,7 +57,7 @@
     "@loadable/component": "^5.14.1",
     "@macrostrat/column-components": "*",
     "@macrostrat/hyper": "^2.2.1",
-    "@macrostrat/map-styling": "^1.0.0",
+    "@macrostrat/mapbox-styles": "^1.0.0",
     "@macrostrat/ui-components": "^1",
     "@mapbox/point-geometry": "^0.1.0",
     "@mapbox/vector-tile": "^1.3.1",
