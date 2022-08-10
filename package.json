@@ -13,7 +13,7 @@
     "bootstrap": "npm install --workspaces && npm install"
   },
   "workspaces": [
-    "deps/ui-components/packages/*"
+    "deps/web-components/packages/*"
   ],
   "authors": [
     "John Czaplewski <jczaplewski@wisc.edu>",
