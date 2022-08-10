@@ -56,21 +56,17 @@ const SettingsPanel = (props) => {
   //const { pathname } = useLocation();
   //const globeActive = pathname?.startsWith("/globe");
   return h("div.settings.bp3-text.text-panel", [
-    h("h2", "Settings"),
-    h(
-      "p",
-      "This page contains useful settings that are not yet fully integrated into the application."
-    ),
+    h("h2", "Map view settings"),
+    h("p", "Advanced configuration for Macrostrat's map."),
     h(
       Switch,
       {
-        large: true,
         checked: useAppState((s) => s.core.mapShowLabels),
         onChange() {
           runAction({ type: "toggle-labels" });
         },
       },
-      "Show map labels"
+      "Show labels"
     ),
 
     //h(MapTypeButton),
