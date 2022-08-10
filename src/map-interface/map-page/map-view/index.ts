@@ -10,7 +10,7 @@ import { useEffect } from "react";
 import mapboxgl from "mapbox-gl";
 import useResizeObserver from "use-resize-observer";
 import styles from "../main.module.styl";
-import { useMapRef, viewInfo, useMapElement } from "./context";
+import { useMapRef, useMapElement } from "@macrostrat/mapbox-react";
 import { MapControlWrapper, ThreeDControl } from "./controls";
 import { CompassControl, ZoomControl } from "mapbox-gl-controls";
 import classNames from "classnames";
@@ -21,6 +21,7 @@ import {
   mapViewInfo,
   getMapPosition,
   setMapPosition,
+  toggleMapLabelVisibility,
 } from "@macrostrat/mapbox-utils";
 
 const h = hyper.styled(styles);
@@ -34,17 +35,6 @@ function calcMapPadding(rect, childRect) {
     right: Math.max(childRect.right - rect.right, 0),
     bottom: Math.max(childRect.bottom - rect.bottom, 0),
   };
-}
-
-function toggleMapLabelVisibility(map: mapboxgl.Map, visible: boolean) {
-  // Disable labels on the map
-  console.log("Toggling map visibility");
-  for (let lyr of map.style.stylesheet.layers) {
-    const isLabelLayer = lyr.layout?.["text-field"] != null;
-    if (isLabelLayer) {
-      map.setLayoutProperty(lyr.id, "visibility", visible ? "visible" : "none");
-    }
-  }
 }
 
 function useMapConditionalStyle<T = any>(
@@ -178,7 +168,7 @@ function MapContainer(props) {
 
   useElevationMarkerLocation(mapRef, elevationMarkerLocation);
 
-  const { mapUse3D, mapIsRotated } = viewInfo(mapPosition);
+  const { mapUse3D, mapIsRotated } = mapViewInfo(mapPosition);
 
   return h("div.map-view-container.main-view", { ref: parentRef }, [
     h(_Map, {
@@ -265,5 +255,4 @@ export function MapStyledContainer({ className, children }) {
   return h("div", { className }, children);
 }
 
-export * from "./context";
 export default MapContainer;

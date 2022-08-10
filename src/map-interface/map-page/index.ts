@@ -16,8 +16,8 @@ import classNames from "classnames";
 import { useRef, useEffect } from "react";
 import { useTransition } from "transition-hook";
 import { usePanelOpen, useContextClass } from "../app-state";
+import { MapboxMapProvider } from "@macrostrat/mapbox-react";
 import {
-  MapboxMapProvider,
   MapBottomControls,
   MapStyledContainer,
   MapZoomControl,

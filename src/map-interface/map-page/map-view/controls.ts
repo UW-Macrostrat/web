@@ -2,7 +2,7 @@ import h from "@macrostrat/hyper";
 import Base from "mapbox-gl-controls/lib/Base/Base";
 import Button from "mapbox-gl-controls/lib/Button/Button";
 import { useRef, useEffect } from "react";
-import { useMapRef } from "./context";
+import { useMapRef } from "@macrostrat/mapbox-react";
 
 export class ThreeDControl extends Base {
   button: Button;
