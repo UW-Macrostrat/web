@@ -30,6 +30,12 @@
       ],
       "@macrostrat/mapbox-styles": [
         "deps/web-components/packages/mapbox-styles/src"
+      ],
+      "@macrostrat/mapbox-react": [
+        "deps/web-components/packages/mapbox-react/src"
+      ],
+      "@macrostrat/mapbox-utils": [
+        "deps/web-components/packages/mapbox-utils/src"
       ]
     }
   },

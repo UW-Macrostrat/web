@@ -152,6 +152,8 @@ module.exports = {
       "@macrostrat/column-components": packageSrc("column-components"),
       "@macrostrat/ui-components": packageSrc("ui-components"),
       "@macrostrat/mapbox-styles": packageSrc("mapbox-styles"),
+      "@macrostrat/mapbox-utils": packageSrc("mapbox-utils"),
+      "@macrostrat/mapbox-react": packageSrc("mapbox-react"),
     },
   },
   entry: {

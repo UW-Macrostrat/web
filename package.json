@@ -58,6 +58,8 @@
     "@macrostrat/column-components": "*",
     "@macrostrat/hyper": "^2.2.1",
     "@macrostrat/mapbox-styles": "^1.0.0",
+    "@macrostrat/mapbox-react": "*",
+    "@macrostrat/mapbox-utils": "*",
     "@macrostrat/ui-components": "^1",
     "@mapbox/point-geometry": "^0.1.0",
     "@mapbox/vector-tile": "^1.3.1",

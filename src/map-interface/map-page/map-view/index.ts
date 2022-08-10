@@ -2,7 +2,6 @@ import { forwardRef, RefObject, useRef } from "react";
 import {
   useAppActions,
   useAppState,
-  MapPosition,
   MapLayer,
 } from "~/map-interface/app-state";
 import Map from "./map";
@@ -18,46 +17,15 @@ import classNames from "classnames";
 import { Icon } from "@blueprintjs/core";
 import { debounce } from "lodash";
 import { toggleLineSymbols } from "../map-style";
+import {
+  mapViewInfo,
+  getMapPosition,
+  setMapPosition,
+} from "@macrostrat/mapbox-utils";
 
 const h = hyper.styled(styles);
 
 const _Map = forwardRef((props, ref) => h(Map, { ...props, ref }));
-
-function buildMapPosition(map: mapboxgl.Map): MapPosition {
-  const pos = map.getFreeCameraOptions();
-  const cameraPos = pos.position.toLngLat();
-  let center = map.getCenter();
-  return {
-    camera: {
-      ...cameraPos,
-      altitude: pos.position.toAltitude(),
-      bearing: map.getBearing(),
-      pitch: map.getPitch(),
-    },
-    target: {
-      ...center,
-      zoom: map.getZoom(),
-    },
-  };
-}
-
-function setMapPosition(map: mapboxgl.Map, pos: MapPosition) {
-  const { pitch = 0, bearing = 0, altitude } = pos.camera;
-  const zoom = pos.target?.zoom;
-  if (zoom != null && altitude == null && pitch == 0 && bearing == 0) {
-    const { lng, lat } = pos.target;
-    map.setCenter([lng, lat]);
-    map.setZoom(zoom);
-  } else {
-    const { altitude, lng, lat } = pos.camera;
-    const cameraOptions = new mapboxgl.FreeCameraOptions(
-      mapboxgl.MercatorCoordinate.fromLngLat({ lng, lat }, altitude),
-      [0, 0, 0, 1]
-    );
-    cameraOptions.setPitchBearing(pitch, bearing);
-    map.setFreeCameraOptions(cameraOptions);
-  }
-}
 
 function calcMapPadding(rect, childRect) {
   return {
@@ -166,7 +134,7 @@ function MapContainer(props) {
     const mapMovedCallback = () => {
       runAction({
         type: "map-moved",
-        data: buildMapPosition(map),
+        data: getMapPosition(map),
       });
     };
     map.on("moveend", debounce(mapMovedCallback, 100));
@@ -285,7 +253,7 @@ export function MapBottomControls() {
 }
 
 export function MapStyledContainer({ className, children }) {
-  const { mapIsRotated, mapUse3D, mapIsGlobal } = viewInfo(
+  const { mapIsRotated, mapUse3D, mapIsGlobal } = mapViewInfo(
     useAppState((state) => state.core.mapPosition)
   );
   className = classNames(className, {
