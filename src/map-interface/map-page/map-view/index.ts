@@ -1,4 +1,4 @@
-import { forwardRef, RefObject, useRef } from "react";
+import { forwardRef, useRef } from "react";
 import {
   useAppActions,
   useAppState,
@@ -7,12 +7,16 @@ import {
 import Map from "./map";
 import hyper from "@macrostrat/hyper";
 import { useEffect } from "react";
-import mapboxgl from "mapbox-gl";
 import useResizeObserver from "use-resize-observer";
 import styles from "../main.module.styl";
-import { useMapRef, useMapElement } from "@macrostrat/mapbox-react";
-import { MapControlWrapper, ThreeDControl } from "./controls";
-import { CompassControl, ZoomControl } from "mapbox-gl-controls";
+import {
+  useMapRef,
+  CompassControl,
+  GlobeControl,
+  ThreeDControl,
+  useMapConditionalStyle,
+  useMapLabelVisibility,
+} from "@macrostrat/mapbox-react";
 import classNames from "classnames";
 import { Icon } from "@blueprintjs/core";
 import { debounce } from "lodash";
@@ -21,7 +25,6 @@ import {
   mapViewInfo,
   getMapPosition,
   setMapPosition,
-  toggleMapLabelVisibility,
 } from "@macrostrat/mapbox-utils";
 
 const h = hyper.styled(styles);
@@ -35,33 +38,6 @@ function calcMapPadding(rect, childRect) {
     right: Math.max(childRect.right - rect.right, 0),
     bottom: Math.max(childRect.bottom - rect.bottom, 0),
   };
-}
-
-function useMapConditionalStyle<T = any>(
-  mapRef: RefObject<mapboxgl.Map>,
-  state: T,
-  operator: (map: mapboxgl.Map, a: T) => void
-) {
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map?.style?.stylesheet == null) return;
-    operator(map, state);
-  }, [mapRef, state]);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null) return;
-    map.on("style.load", () => {
-      operator(map, state);
-    });
-  }, [mapRef]);
-}
-
-function useMapLabelVisibility(
-  mapRef: RefObject<mapboxgl.Map>,
-  mapShowLabels: boolean
-) {
-  useMapConditionalStyle(mapRef, mapShowLabels, toggleMapLabelVisibility);
 }
 
 function useElevationMarkerLocation(mapRef, elevationMarkerLocation) {
@@ -197,48 +173,11 @@ function MapContainer(props) {
   ]);
 }
 
-function MapGlobeControl() {
-  const map = useMapElement();
-
-  let mapIsGlobe = false;
-  let proj = map?.getProjection().name;
-  if (proj == "globe") {
-    mapIsGlobe = true;
-  }
-  const nextProj = mapIsGlobe ? "mercator" : "globe";
-  const icon = mapIsGlobe ? "map" : "globe";
-
-  return h(
-    "div.map-control.globe-control.mapboxgl-ctrl-group.mapboxgl-ctrl.mapbox-control",
-    [
-      h(
-        "button.globe-control-button",
-        {
-          onClick() {
-            if (map == null) return;
-            map.setProjection(nextProj);
-          },
-        },
-        h(Icon, { icon })
-      ),
-    ]
-  );
-}
-
-export const MapZoomControl = () =>
-  h(MapControlWrapper, { className: "zoom-control", control: ZoomControl });
-
 export function MapBottomControls() {
   return h("div.map-controls", [
-    h(MapControlWrapper, {
-      className: "map-3d-control",
-      control: ThreeDControl,
-    }),
-    h(MapControlWrapper, {
-      className: "compass-control",
-      control: CompassControl,
-    }),
-    h(MapGlobeControl),
+    h(ThreeDControl, { className: "map-3d-control" }),
+    h(CompassControl, { className: "compass-control" }),
+    h(GlobeControl, { className: "globe-control" }),
   ]);
 }
 

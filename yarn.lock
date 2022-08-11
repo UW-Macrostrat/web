@@ -3891,7 +3891,9 @@ __metadata:
     "@loadable/component": ^5.14.1
     "@macrostrat/column-components": "*"
     "@macrostrat/hyper": ^2.2.1
+    "@macrostrat/mapbox-react": "*"
     "@macrostrat/mapbox-styles": ^1.0.0
+    "@macrostrat/mapbox-utils": "*"
     "@macrostrat/revision-info-webpack": ^1.0.0
     "@macrostrat/ui-components": ^1
     "@mapbox/point-geometry": ^0.1.0
@@ -3924,6 +3926,7 @@ __metadata:
     mini-css-extract-plugin: ^2.4.5
     new-github-issue-url: ^1.0.0
     pbf: ^3.2.1
+    prettier: ^2.7.1
     prop-types: ^15.6.0
     react: ^16.13.1
     react-animate-height: ^0.10.9
@@ -3953,7 +3956,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@macrostrat/mapbox-react@workspace:deps/web-components/packages/mapbox-react":
+"@macrostrat/mapbox-react@*, @macrostrat/mapbox-react@workspace:deps/web-components/packages/mapbox-react":
   version: 0.0.0-use.local
   resolution: "@macrostrat/mapbox-react@workspace:deps/web-components/packages/mapbox-react"
   dependencies:
@@ -3976,12 +3979,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@macrostrat/mapbox-utils@workspace:deps/web-components/packages/mapbox-utils":
+"@macrostrat/mapbox-utils@*, @macrostrat/mapbox-utils@workspace:deps/web-components/packages/mapbox-utils":
   version: 0.0.0-use.local
   resolution: "@macrostrat/mapbox-utils@workspace:deps/web-components/packages/mapbox-utils"
   dependencies:
     "@parcel/config-default": ^2.6.2
     axios: ^0.27.2
+    mapbox-gl: ^2.0.0
     parcel: ^2.6.2
   languageName: unknown
   linkType: soft
@@ -21425,7 +21429,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mapbox-gl@npm:^2.8.2, mapbox-gl@npm:^2.9.1":
+"mapbox-gl@npm:^2.0.0, mapbox-gl@npm:^2.8.2, mapbox-gl@npm:^2.9.1":
   version: 2.9.2
   resolution: "mapbox-gl@npm:2.9.2"
   dependencies:
@@ -25369,7 +25373,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^2.0.5":
+"prettier@npm:^2.0.5, prettier@npm:^2.7.1":
   version: 2.7.1
   resolution: "prettier@npm:2.7.1"
   bin:
