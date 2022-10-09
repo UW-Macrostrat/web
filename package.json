@@ -10,7 +10,7 @@
     "deploy:steno": "scripts/deploy-steno",
     "deploy:strata": "scripts/deploy-strata",
     "dev": "webpack serve",
-    "bootstrap": "npm install --workspaces && npm install"
+    "bootstrap": "yarn"
   },
   "workspaces": [
     "deps/web-components/packages/*"
