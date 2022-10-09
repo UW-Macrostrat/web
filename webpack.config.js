@@ -151,7 +151,9 @@ module.exports = {
       //"@macrostrat/cesium-viewer": packageSrc("cesium-viewer"),
       "@macrostrat/column-components": packageSrc("column-components"),
       "@macrostrat/ui-components": packageSrc("ui-components"),
-      "@macrostrat/map-styling": packageSrc("map-styling"),
+      "@macrostrat/mapbox-styles": packageSrc("mapbox-styles"),
+      "@macrostrat/mapbox-utils": packageSrc("mapbox-utils"),
+      "@macrostrat/mapbox-react": packageSrc("mapbox-react"),
     },
   },
   entry: {

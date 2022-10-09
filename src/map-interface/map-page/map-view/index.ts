@@ -1,63 +1,35 @@
-import { forwardRef, RefObject, useRef } from "react";
+import { forwardRef, useRef } from "react";
 import {
   useAppActions,
   useAppState,
-  MapPosition,
   MapLayer,
 } from "~/map-interface/app-state";
 import Map from "./map";
 import hyper from "@macrostrat/hyper";
 import { useEffect } from "react";
-import mapboxgl from "mapbox-gl";
 import useResizeObserver from "use-resize-observer";
 import styles from "../main.module.styl";
-import { useMapRef, viewInfo, useMapElement } from "./context";
-import { MapControlWrapper, ThreeDControl } from "./controls";
-import { CompassControl, ZoomControl } from "mapbox-gl-controls";
+import {
+  useMapRef,
+  CompassControl,
+  GlobeControl,
+  ThreeDControl,
+  useMapConditionalStyle,
+  useMapLabelVisibility,
+} from "@macrostrat/mapbox-react";
 import classNames from "classnames";
 import { Icon } from "@blueprintjs/core";
 import { debounce } from "lodash";
 import { toggleLineSymbols } from "../map-style";
+import {
+  mapViewInfo,
+  getMapPosition,
+  setMapPosition,
+} from "@macrostrat/mapbox-utils";
 
 const h = hyper.styled(styles);
 
 const _Map = forwardRef((props, ref) => h(Map, { ...props, ref }));
-
-function buildMapPosition(map: mapboxgl.Map): MapPosition {
-  const pos = map.getFreeCameraOptions();
-  const cameraPos = pos.position.toLngLat();
-  let center = map.getCenter();
-  return {
-    camera: {
-      ...cameraPos,
-      altitude: pos.position.toAltitude(),
-      bearing: map.getBearing(),
-      pitch: map.getPitch(),
-    },
-    target: {
-      ...center,
-      zoom: map.getZoom(),
-    },
-  };
-}
-
-function setMapPosition(map: mapboxgl.Map, pos: MapPosition) {
-  const { pitch = 0, bearing = 0, altitude } = pos.camera;
-  const zoom = pos.target?.zoom;
-  if (zoom != null && altitude == null && pitch == 0 && bearing == 0) {
-    const { lng, lat } = pos.target;
-    map.setCenter([lng, lat]);
-    map.setZoom(zoom);
-  } else {
-    const { altitude, lng, lat } = pos.camera;
-    const cameraOptions = new mapboxgl.FreeCameraOptions(
-      mapboxgl.MercatorCoordinate.fromLngLat({ lng, lat }, altitude),
-      [0, 0, 0, 1]
-    );
-    cameraOptions.setPitchBearing(pitch, bearing);
-    map.setFreeCameraOptions(cameraOptions);
-  }
-}
 
 function calcMapPadding(rect, childRect) {
   return {
@@ -66,44 +38,6 @@ function calcMapPadding(rect, childRect) {
     right: Math.max(childRect.right - rect.right, 0),
     bottom: Math.max(childRect.bottom - rect.bottom, 0),
   };
-}
-
-function toggleMapLabelVisibility(map: mapboxgl.Map, visible: boolean) {
-  // Disable labels on the map
-  console.log("Toggling map visibility");
-  for (let lyr of map.style.stylesheet.layers) {
-    const isLabelLayer = lyr.layout?.["text-field"] != null;
-    if (isLabelLayer) {
-      map.setLayoutProperty(lyr.id, "visibility", visible ? "visible" : "none");
-    }
-  }
-}
-
-function useMapConditionalStyle<T = any>(
-  mapRef: RefObject<mapboxgl.Map>,
-  state: T,
-  operator: (map: mapboxgl.Map, a: T) => void
-) {
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map?.style?.stylesheet == null) return;
-    operator(map, state);
-  }, [mapRef, state]);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null) return;
-    map.on("style.load", () => {
-      operator(map, state);
-    });
-  }, [mapRef]);
-}
-
-function useMapLabelVisibility(
-  mapRef: RefObject<mapboxgl.Map>,
-  mapShowLabels: boolean
-) {
-  useMapConditionalStyle(mapRef, mapShowLabels, toggleMapLabelVisibility);
 }
 
 function useElevationMarkerLocation(mapRef, elevationMarkerLocation) {
@@ -166,7 +100,7 @@ function MapContainer(props) {
     const mapMovedCallback = () => {
       runAction({
         type: "map-moved",
-        data: buildMapPosition(map),
+        data: getMapPosition(map),
       });
     };
     map.on("moveend", debounce(mapMovedCallback, 100));
@@ -210,7 +144,7 @@ function MapContainer(props) {
 
   useElevationMarkerLocation(mapRef, elevationMarkerLocation);
 
-  const { mapUse3D, mapIsRotated } = viewInfo(mapPosition);
+  const { mapUse3D, mapIsRotated } = mapViewInfo(mapPosition);
 
   return h("div.map-view-container.main-view", { ref: parentRef }, [
     h(_Map, {
@@ -239,53 +173,16 @@ function MapContainer(props) {
   ]);
 }
 
-function MapGlobeControl() {
-  const map = useMapElement();
-
-  let mapIsGlobe = false;
-  let proj = map?.getProjection().name;
-  if (proj == "globe") {
-    mapIsGlobe = true;
-  }
-  const nextProj = mapIsGlobe ? "mercator" : "globe";
-  const icon = mapIsGlobe ? "map" : "globe";
-
-  return h(
-    "div.map-control.globe-control.mapboxgl-ctrl-group.mapboxgl-ctrl.mapbox-control",
-    [
-      h(
-        "button.globe-control-button",
-        {
-          onClick() {
-            if (map == null) return;
-            map.setProjection(nextProj);
-          },
-        },
-        h(Icon, { icon })
-      ),
-    ]
-  );
-}
-
-export const MapZoomControl = () =>
-  h(MapControlWrapper, { className: "zoom-control", control: ZoomControl });
-
 export function MapBottomControls() {
   return h("div.map-controls", [
-    h(MapControlWrapper, {
-      className: "map-3d-control",
-      control: ThreeDControl,
-    }),
-    h(MapControlWrapper, {
-      className: "compass-control",
-      control: CompassControl,
-    }),
-    h(MapGlobeControl),
+    h(ThreeDControl, { className: "map-3d-control" }),
+    h(CompassControl, { className: "compass-control" }),
+    h(GlobeControl, { className: "globe-control" }),
   ]);
 }
 
 export function MapStyledContainer({ className, children }) {
-  const { mapIsRotated, mapUse3D, mapIsGlobal } = viewInfo(
+  const { mapIsRotated, mapUse3D, mapIsGlobal } = mapViewInfo(
     useAppState((state) => state.core.mapPosition)
   );
   className = classNames(className, {
@@ -297,5 +194,4 @@ export function MapStyledContainer({ className, children }) {
   return h("div", { className }, children);
 }
 
-export * from "./context";
 export default MapContainer;

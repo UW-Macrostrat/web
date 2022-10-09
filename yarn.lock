@@ -3891,7 +3891,9 @@ __metadata:
     "@loadable/component": ^5.14.1
     "@macrostrat/column-components": "*"
     "@macrostrat/hyper": ^2.2.1
-    "@macrostrat/map-styling": ^1.0.0
+    "@macrostrat/mapbox-react": "*"
+    "@macrostrat/mapbox-styles": ^1.0.0
+    "@macrostrat/mapbox-utils": "*"
     "@macrostrat/revision-info-webpack": ^1.0.0
     "@macrostrat/ui-components": ^1
     "@mapbox/point-geometry": ^0.1.0
@@ -3924,6 +3926,7 @@ __metadata:
     mini-css-extract-plugin: ^2.4.5
     new-github-issue-url: ^1.0.0
     pbf: ^3.2.1
+    prettier: ^2.7.1
     prop-types: ^15.6.0
     react: ^16.13.1
     react-animate-height: ^0.10.9
@@ -3953,20 +3956,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@macrostrat/map-styling@^1.0.0, @macrostrat/map-styling@workspace:deps/web-components/packages/map-styling":
-  version: 0.0.0-use.local
-  resolution: "@macrostrat/map-styling@workspace:deps/web-components/packages/map-styling"
-  dependencies:
-    ts-node: ^10.7.0
-  languageName: unknown
-  linkType: soft
-
-"@macrostrat/mapbox-react@workspace:deps/web-components/packages/mapbox-react":
+"@macrostrat/mapbox-react@*, @macrostrat/mapbox-react@workspace:deps/web-components/packages/mapbox-react":
   version: 0.0.0-use.local
   resolution: "@macrostrat/mapbox-react@workspace:deps/web-components/packages/mapbox-react"
   dependencies:
     "@macrostrat/hyper": ^2.2.1
     "@parcel/config-default": ^2.6.2
+    "@types/mapbox-gl": ^2.7.5
+    evergreen-ui: ^6.10.3
     mapbox-gl: ^2.9.1
     mapbox-gl-controls: ^2.3.5
     parcel: ^2.6.2
@@ -3976,12 +3973,25 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@macrostrat/mapbox-utils@workspace:deps/web-components/packages/mapbox-utils":
+"@macrostrat/mapbox-styles@^1.0.0, @macrostrat/mapbox-styles@workspace:deps/web-components/packages/mapbox-styles":
+  version: 0.0.0-use.local
+  resolution: "@macrostrat/mapbox-styles@workspace:deps/web-components/packages/mapbox-styles"
+  dependencies:
+    "@parcel/config-default": ^2.6.2
+    mapbox-gl: ^2.0.0
+    parcel: ^2.6.2
+    ts-node: ^10.7.0
+  languageName: unknown
+  linkType: soft
+
+"@macrostrat/mapbox-utils@*, @macrostrat/mapbox-utils@workspace:deps/web-components/packages/mapbox-utils":
   version: 0.0.0-use.local
   resolution: "@macrostrat/mapbox-utils@workspace:deps/web-components/packages/mapbox-utils"
   dependencies:
     "@parcel/config-default": ^2.6.2
+    "@types/mapbox-gl": ^2.7.5
     axios: ^0.27.2
+    mapbox-gl: ^2.0.0
     parcel: ^2.6.2
   languageName: unknown
   linkType: soft
@@ -5763,6 +5773,17 @@ __metadata:
     zen-observable:
       optional: true
   checksum: 8ec6d43370f419975295f306699f87989dd64a099a29cf62ddacbbbe32df634f87451504d340e15321e74b0a3ca8a9b447736472f792102e234faa207395e6c9
+  languageName: node
+  linkType: hard
+
+"@segment/react-tiny-virtual-list@npm:^2.2.1":
+  version: 2.2.1
+  resolution: "@segment/react-tiny-virtual-list@npm:2.2.1"
+  dependencies:
+    prop-types: ^15.5.7
+  peerDependencies:
+    react: ">=16.3"
+  checksum: 998139fe46ea05111444d33a88f0d99eb00bc16c449e62ded37bce08014469bc0dc55c95f752b06ac9c5c3e8fb5beac98fb19efbf9fcc55dd7d6f2b348980465
   languageName: node
   linkType: hard
 
@@ -7672,7 +7693,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/mapbox-gl@npm:*, @types/mapbox-gl@npm:^2.7.0":
+"@types/mapbox-gl@npm:*, @types/mapbox-gl@npm:^2.7.0, @types/mapbox-gl@npm:^2.7.5":
   version: 2.7.5
   resolution: "@types/mapbox-gl@npm:2.7.5"
   dependencies:
@@ -7889,6 +7910,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react-transition-group@npm:^4.4.0":
+  version: 4.4.5
+  resolution: "@types/react-transition-group@npm:4.4.5"
+  dependencies:
+    "@types/react": "*"
+  checksum: 265f1c74061556708ffe8d15559e35c60d6c11478c9950d3735575d2c116ca69f461d85effa06d73a613eb8b73c84fd32682feb57cf7c5f9e4284021dbca25b0
+  languageName: node
+  linkType: hard
+
 "@types/react@npm:*, @types/react@npm:>=15":
   version: 18.0.17
   resolution: "@types/react@npm:18.0.17"
@@ -7900,7 +7930,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:^16":
+"@types/react@npm:^16, @types/react@npm:^16.9.5":
   version: 16.14.30
   resolution: "@types/react@npm:16.14.30"
   dependencies:
@@ -11719,6 +11749,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"compute-scroll-into-view@npm:^1.0.14":
+  version: 1.0.17
+  resolution: "compute-scroll-into-view@npm:1.0.17"
+  checksum: b20c05a10c37813c5a6e4bf053c00f65c88d23afed7a6bd7a2a69e05e2ffc2df3483ecfe407d36bf16b8cec8be21ae1966c9c523093a03117e567156cd79a51e
+  languageName: node
+  linkType: hard
+
 "concat-map@npm:0.0.1":
   version: 0.0.1
   resolution: "concat-map@npm:0.0.1"
@@ -14177,6 +14214,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"downshift@npm:^5.2.0":
+  version: 5.4.7
+  resolution: "downshift@npm:5.4.7"
+  dependencies:
+    "@babel/runtime": ^7.10.2
+    compute-scroll-into-view: ^1.0.14
+    prop-types: ^15.7.2
+    react-is: ^16.13.1
+  peerDependencies:
+    react: ">=16.8.0"
+  checksum: 818e333a039419c2fed3a740c031d3903675b6dede8ef22b7a6d07de3862d3db6da9198cbfdbfaa0b3ef6fd295d39a8f3b9b3983ff3ed71ee2cb81bda08ce391
+  languageName: node
+  linkType: hard
+
 "duplexer2@npm:~0.1.0":
   version: 0.1.4
   resolution: "duplexer2@npm:0.1.4"
@@ -14751,6 +14802,39 @@ __metadata:
   languageName: node
   linkType: hard
 
+"evergreen-ui@npm:^6.10.3":
+  version: 6.10.3
+  resolution: "evergreen-ui@npm:6.10.3"
+  dependencies:
+    "@babel/runtime": ^7.1.2
+    "@segment/react-tiny-virtual-list": ^2.2.1
+    "@types/react": ^16.9.5
+    "@types/react-transition-group": ^4.4.0
+    arrify: ^1.0.1
+    classnames: ^2.3.0
+    downshift: ^5.2.0
+    fuzzaldrin-plus: ^0.6.0
+    glamor: ^2.20.40
+    humanize-plus: ^1.8.2
+    lodash.debounce: ^4.0.8
+    lodash.differencewith: ^4.5.0
+    lodash.isempty: ^4.4.0
+    lodash.merge: ^4.6.2
+    lodash.omit: ^4.5.0
+    lodash.uniqby: ^4.7.0
+    prop-types: ^15.6.2
+    react-fast-compare: ^3.2.0
+    react-transition-group: ^4.4.1
+    tinycolor2: ^1.4.1
+    ui-box: ^5.1.0
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+    react-is: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: 9c5002bd8c3bc3ea8dba719d72c44a867f46b7234ec2bce9b26a88b6fc0f9798c9244611a0659ceac924aa50a14225ea400dc79bb69b2aad290d0b89a1c474d8
+  languageName: node
+  linkType: hard
+
 "evp_bytestokey@npm:^1.0.0, evp_bytestokey@npm:^1.0.3":
   version: 1.0.3
   resolution: "evp_bytestokey@npm:1.0.3"
@@ -15136,7 +15220,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fbjs@npm:^0.8.16":
+"fbjs@npm:^0.8.12, fbjs@npm:^0.8.16":
   version: 0.8.18
   resolution: "fbjs@npm:0.8.18"
   dependencies:
@@ -15825,6 +15909,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fuzzaldrin-plus@npm:^0.6.0":
+  version: 0.6.0
+  resolution: "fuzzaldrin-plus@npm:0.6.0"
+  checksum: f4535e5f87a363a5863d50e0b7d992a8f6214d16ac14cea6190d5bada39c57640478b92c94dc12c43e2fbdfcc3082a8a696147ca0be5644818c888b136841757
+  languageName: node
+  linkType: hard
+
 "g-status@npm:^2.0.2":
   version: 2.0.2
   resolution: "g-status@npm:2.0.2"
@@ -16231,6 +16322,19 @@ __metadata:
     fbjs: ^0.8.16
     inline-style-prefixer: ^3.0.8
   checksum: a46a21e87ee54c0da6c1e45e5eca2efb837367ea3ce8f476c3909538082302cf3c061a2068df620d7bf5a78d3904c466395881f1f6c0d397a7ab431181d09c91
+  languageName: node
+  linkType: hard
+
+"glamor@npm:^2.20.40":
+  version: 2.20.40
+  resolution: "glamor@npm:2.20.40"
+  dependencies:
+    fbjs: ^0.8.12
+    inline-style-prefixer: ^3.0.6
+    object-assign: ^4.1.1
+    prop-types: ^15.5.10
+    through: ^2.3.8
+  checksum: c52f74317053ace8808b9adb156ac756ce03f4d885d3480ff268a56bdc5a0007a5d226edde826b830dc99eb65b509281f187a7ac827009f81225d1ab89f6653d
   languageName: node
   linkType: hard
 
@@ -17392,6 +17496,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"humanize-plus@npm:^1.8.2":
+  version: 1.8.2
+  resolution: "humanize-plus@npm:1.8.2"
+  checksum: 466498a794ecf7c8a246441941241649618da6bebe6627900f919ea993bf5c30c3e7f05cf3a04c2fad9e4ec0f7a15ee2a09ceb216a440b08a830eda66f684131
+  languageName: node
+  linkType: hard
+
 "husky@npm:^4.2.5":
   version: 4.3.8
   resolution: "husky@npm:4.3.8"
@@ -17743,7 +17854,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"inline-style-prefixer@npm:^3.0.8":
+"inline-style-prefixer@npm:^3.0.6, inline-style-prefixer@npm:^3.0.8":
   version: 3.0.8
   resolution: "inline-style-prefixer@npm:3.0.8"
   dependencies:
@@ -20963,6 +21074,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lodash.differencewith@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "lodash.differencewith@npm:4.5.0"
+  checksum: 79b63aa84e9f7ddfd1451b0ce62888baf94474b91a79ca69da301b2073d3fe30bdfb1bcdbb7365592e1b4e63874ce72a271c0c75e43ab49968c1ca953893d258
+  languageName: node
+  linkType: hard
+
 "lodash.escaperegexp@npm:^4.1.2":
   version: 4.1.2
   resolution: "lodash.escaperegexp@npm:4.1.2"
@@ -20974,6 +21092,13 @@ __metadata:
   version: 4.4.2
   resolution: "lodash.get@npm:4.4.2"
   checksum: e403047ddb03181c9d0e92df9556570e2b67e0f0a930fcbbbd779370972368f5568e914f913e93f3b08f6d492abc71e14d4e9b7a18916c31fa04bd2306efe545
+  languageName: node
+  linkType: hard
+
+"lodash.isempty@npm:^4.4.0":
+  version: 4.4.0
+  resolution: "lodash.isempty@npm:4.4.0"
+  checksum: a8118f23f7ed72a1dbd176bf27f297d1e71aa1926288449cb8f7cef99ba1bc7527eab52fe7899ab080fa1dc150aba6e4a6367bf49fa4e0b78da1ecc095f8d8c5
   languageName: node
   linkType: hard
 
@@ -21016,6 +21141,20 @@ __metadata:
   version: 4.1.2
   resolution: "lodash.memoize@npm:4.1.2"
   checksum: 9ff3942feeccffa4f1fafa88d32f0d24fdc62fd15ded5a74a5f950ff5f0c6f61916157246744c620173dddf38d37095a92327d5fd3861e2063e736a5c207d089
+  languageName: node
+  linkType: hard
+
+"lodash.merge@npm:^4.6.2":
+  version: 4.6.2
+  resolution: "lodash.merge@npm:4.6.2"
+  checksum: ad580b4bdbb7ca1f7abf7e1bce63a9a0b98e370cf40194b03380a46b4ed799c9573029599caebc1b14e3f24b111aef72b96674a56cfa105e0f5ac70546cdc005
+  languageName: node
+  linkType: hard
+
+"lodash.omit@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "lodash.omit@npm:4.5.0"
+  checksum: 434645e49fe84ab315719bd5a9a3a585a0f624aa4160bc09157dd041a414bcc287c15840365c1379476a3f3eda41fbe838976c3f7bdecbbf4c5478e86c471a30
   languageName: node
   linkType: hard
 
@@ -21425,7 +21564,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mapbox-gl@npm:^2.8.2, mapbox-gl@npm:^2.9.1":
+"mapbox-gl@npm:^2.0.0, mapbox-gl@npm:^2.8.2, mapbox-gl@npm:^2.9.1":
   version: 2.9.2
   resolution: "mapbox-gl@npm:2.9.2"
   dependencies:
@@ -25369,7 +25508,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^2.0.5":
+"prettier@npm:^2.0.5, prettier@npm:^2.7.1":
   version: 2.7.1
   resolution: "prettier@npm:2.7.1"
   bin:
@@ -25576,7 +25715,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.0.0, prop-types@npm:^15.5.10, prop-types@npm:^15.5.8, prop-types@npm:^15.6.0, prop-types@npm:^15.6.1, prop-types@npm:^15.6.2, prop-types@npm:^15.7.2, prop-types@npm:^15.8.0, prop-types@npm:^15.8.1":
+"prop-types@npm:^15.0.0, prop-types@npm:^15.5.10, prop-types@npm:^15.5.7, prop-types@npm:^15.5.8, prop-types@npm:^15.6.0, prop-types@npm:^15.6.1, prop-types@npm:^15.6.2, prop-types@npm:^15.7.2, prop-types@npm:^15.8.0, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -26174,7 +26313,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-fast-compare@npm:^3.0.1":
+"react-fast-compare@npm:^3.0.1, react-fast-compare@npm:^3.2.0":
   version: 3.2.0
   resolution: "react-fast-compare@npm:3.2.0"
   checksum: 8ef272c825ae329f61633ce4ce7f15aa5b84e5214d88bc0823880236e03e985a13195befa2c7a4eda7db3b017dc7985729152d88445823f652403cf36c2b86aa
@@ -29972,7 +30111,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"through@npm:2, through@npm:>=2.2.7 <3, through@npm:^2.3.4, through@npm:^2.3.6":
+"through@npm:2, through@npm:>=2.2.7 <3, through@npm:^2.3.4, through@npm:^2.3.6, through@npm:^2.3.8":
   version: 2.3.8
   resolution: "through@npm:2.3.8"
   checksum: a38c3e059853c494af95d50c072b83f8b676a9ba2818dcc5b108ef252230735c54e0185437618596c790bbba8fcdaef5b290405981ffa09dce67b1f1bf190cbd
@@ -30738,6 +30877,19 @@ __metadata:
   peerDependencies:
     react: ^16.0.0
   checksum: bdd6e0cbde012a81d1d287db117b50ac535783253f6cb66f16eb4f9f6214b46525ca05735846f3b268143d865acc277e3ec99660d594d84fcb5e46542c00cbd9
+  languageName: node
+  linkType: hard
+
+"ui-box@npm:^5.1.0":
+  version: 5.1.0
+  resolution: "ui-box@npm:5.1.0"
+  dependencies:
+    "@emotion/hash": ^0.7.1
+    inline-style-prefixer: ^5.0.4
+    prop-types: ^15.7.2
+  peerDependencies:
+    react: ^16.0.0 || ^17.0.0 || ^18.0.0
+  checksum: a52b903504becb82b1e31d4fafb097e194a4c34d0014b462c6f43810fd062767040998ec12d7dadfc9e9cc9605a2eb0903b1e2f441bfaedbc10d3edb9547786d
   languageName: node
   linkType: hard
 
