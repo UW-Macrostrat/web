@@ -57,4 +57,4 @@ function AttrChip(props) {
   ]);
 }
 
-export { AgeChip, AttrChip };
+export { AgeChip, AttrChip, IntervalChip };

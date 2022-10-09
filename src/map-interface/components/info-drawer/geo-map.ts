@@ -2,6 +2,7 @@ import h from "@macrostrat/hyper";
 import { ExpansionPanel } from "../expansion-panel";
 import Reference from "../Reference";
 import LongText from "../long-text";
+import { IntervalChip } from "../info-blocks";
 
 function LongTextRenderer(props) {
   const { name, text } = props;
@@ -41,6 +42,13 @@ function GeologicMapInfo(props) {
 
   if (!source) return h("div");
 
+  const interval = {
+    int_name: source.age,
+    b_age: source.b_int.b_age,
+    t_age: source.t_int.t_age,
+    color: "#cccccc",
+  };
+
   return h(
     ExpansionPanel,
     {
@@ -57,10 +65,9 @@ function GeologicMapInfo(props) {
         ]),
         h.if(source.age && source.age.length)("div.map-source-attr", [
           h("span.attr", ["Age: "]),
-          source.age,
-          ` (${source.b_int.b_age} - ${source.t_int.t_age}`,
-          h("span.age-ma", [" Ma"]),
-          ")",
+          h(IntervalChip, {
+            interval,
+          }),
         ]),
         h(LongTextRenderer, {
           name: "Stratigraphic name(s)",
