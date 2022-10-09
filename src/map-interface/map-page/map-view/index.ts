@@ -106,6 +106,10 @@ function MapContainer(props) {
     map.on("moveend", debounce(mapMovedCallback, 100));
   }, [mapRef]);
 
+  // useMapConditionalStyle(mapRef, true, (map, isOn) => {
+  //   map.showTileBoundaries = isOn;
+  // });
+
   useEffect(() => {
     if (mapLayers.has(MapLayer.COLUMNS)) {
       runAction({ type: "get-filtered-columns" });
