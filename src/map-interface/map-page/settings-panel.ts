@@ -7,6 +7,7 @@ import { Tag } from "@blueprintjs/core";
 //import { GlobeSettings } from "@macrostrat/cesium-viewer/settings";
 import { useAppState, useAppActions } from "~/map-interface/app-state";
 import { useLocation } from "react-router";
+import { MapLayer } from "~/map-interface/app-state";
 //import { DisplayQuality } from "@macrostrat/cesium-viewer";
 import styles from "./settings-panel.module.styl";
 
@@ -27,6 +28,26 @@ const ExperimentsPanel = (props) => {
   //const globeActive = pathname?.startsWith("/globe");
   return h("div.settings.experiments.bp3-text.text-panel", [
     h("h2", "Experimental settings"),
+    h(
+      Switch,
+      {
+        checked: useAppState((s) => s.core.mapShowLabels),
+        onChange() {
+          dispatch({ type: "toggle-labels" });
+        },
+      },
+      "Show labels"
+    ),
+    h(
+      Switch,
+      {
+        checked: useAppState((s) => s.core.mapLayers.has(MapLayer.SOURCES)),
+        onChange() {
+          dispatch({ type: "toggle-map-layer", layer: MapLayer.SOURCES });
+        },
+      },
+      "Show sources"
+    ),
     h(
       Switch,
       {

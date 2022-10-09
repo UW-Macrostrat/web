@@ -20,12 +20,12 @@ import {
 import classNames from "classnames";
 import { Icon } from "@blueprintjs/core";
 import { debounce } from "lodash";
-import { toggleLineSymbols } from "../map-style";
 import {
   mapViewInfo,
   getMapPosition,
   setMapPosition,
 } from "@macrostrat/mapbox-utils";
+import { MapSourcesLayer, toggleLineSymbols } from "../map-style";
 
 const h = hyper.styled(styles);
 
@@ -150,6 +150,7 @@ function MapContainer(props) {
 
   const { mapUse3D, mapIsRotated } = mapViewInfo(mapPosition);
 
+  console.log(mapLayers);
   return h("div.map-view-container.main-view", { ref: parentRef }, [
     h(_Map, {
       filters,
@@ -174,6 +175,7 @@ function MapContainer(props) {
       use3D: mapUse3D,
       ref,
     }),
+    h.if(mapLayers.has(MapLayer.SOURCES))(MapSourcesLayer),
   ]);
 }
 

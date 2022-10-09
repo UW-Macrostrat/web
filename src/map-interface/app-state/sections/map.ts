@@ -12,6 +12,7 @@ export enum MapLayer {
   COLUMNS = "columns",
   FOSSILS = "fossils",
   BEDROCK = "bedrock",
+  SOURCES = "sources",
 }
 
 type MapInitialState = {
