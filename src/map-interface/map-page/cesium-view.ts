@@ -13,7 +13,7 @@ import {
 } from "@macrostrat/cesium-viewer/layers";
 import { ImageryLayer } from "resium";
 import { useEffect, useMemo } from "react";
-import MVTImageryProvider from "cesium-vector-provider/src";
+import MVTImageryProvider from "@macrostrat/cesium-vector-provider/src";
 import reliefShading from "./map-styles/relief-shading";
 import {
   getHashString,

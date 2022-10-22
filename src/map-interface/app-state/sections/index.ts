@@ -1,6 +1,6 @@
 import { combineReducers } from "redux";
 import reduceReducers from "reduce-reducers";
-import { menuReducer, MenuState, MenuAction } from "./menu";
+//import { menuReducer, MenuState, MenuAction } from "./menu";
 import { coreReducer, CoreState, MapPosition, CoreAction } from "./core";
 import { MapAction } from "./map";
 import {
@@ -49,7 +49,7 @@ const routerReducer = createRouterReducer(browserHistory);
 const reducers = combineReducers({
   // list reducers here
   performance: performanceReducer,
-  menu: menuReducer,
+  //menu: menuReducer,
   globe: storageGlobeReducer,
   router: routerReducer,
   core: coreReducer,
@@ -78,7 +78,7 @@ export type AppState = {
   router: ReduxRouterState;
   globe: GlobeState;
   performance: PerformanceState;
-  menu: MenuState;
+  //menu: MenuState;
 };
 
 function overallReducer(state: AppState, action: Action): AppState {
@@ -141,7 +141,6 @@ const appReducer = reduceReducers(overallReducer, reducers);
 
 export type Action =
   | CoreAction
-  | MenuAction
   | MapAction
   | GlobeAction
   | RouterActions;

@@ -18,8 +18,11 @@ let publicURL = process.env.PUBLIC_URL || "/";
 const packageSrc = (name) =>
   path.resolve(__dirname, "deps", "web-components", "packages", name, "src");
 
-const cesiumSource = "cesium/Source";
-const cesiumWorkers = "cesium/Build/Cesium/Workers";
+const localPackageSrc = (name) =>
+  path.resolve(__dirname, "packages", name, "src");
+
+const cesiumSource = "node_modules/cesium/Source";
+const cesiumWorkers = "node_modules/cesium/Build/Cesium/Workers";
 
 //uglify = new UglifyJsPlugin()
 
@@ -151,15 +154,25 @@ module.exports = {
     alias: {
       // CesiumJS module name,
       cesium: path.resolve(__dirname, "node_modules/cesium"),
+      resium: path.resolve(__dirname, "node_modules/resium"),
       cesiumSource: path.resolve(__dirname, cesiumSource),
       "~": path.resolve(__dirname, "src"),
-      "@macrostrat/cesium-viewer": packageSrc("cesium-viewer"),
+      "@macrostrat/cesium-viewer": localPackageSrc("cesium-viewer"),
       "@macrostrat/column-components": packageSrc("column-components"),
       "@macrostrat/ui-components": packageSrc("ui-components"),
       "@macrostrat/mapbox-styles": packageSrc("mapbox-styles"),
       "@macrostrat/mapbox-utils": packageSrc("mapbox-utils"),
       "@macrostrat/mapbox-react": packageSrc("mapbox-react"),
     },
+    // We need fallbacks for cesium source files
+    fallback: {
+      http: require.resolve("stream-http"),
+      https: require.resolve("https-browserify"),
+      zlib: require.resolve("browserify-zlib"),
+      stream: require.resolve("stream-browserify"),
+      path: require.resolve("path-browserify"),
+    }
+
   },
   entry: {
     main: "./src/index.ts",

@@ -1,6 +1,7 @@
 // Settings panel for the map
 
-import { LinkButton } from "@macrostrat/router-components";
+// TODO: re-integrate LinkButton to @macrostrat/router-components
+import { LinkButton } from "~/map-interface/components/buttons";
 import { GlobeSettings } from "@macrostrat/cesium-viewer/settings";
 import { useLocation } from "react-router";
 import {

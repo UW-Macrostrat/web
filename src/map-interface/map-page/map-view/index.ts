@@ -25,7 +25,7 @@ import {
   getMapPosition,
   setMapPosition,
 } from "@macrostrat/mapbox-utils";
-import { MapSourcesLayer, toggleLineSymbols } from "../map-style";
+import { MapSourcesLayer, toggleLineSymbols } from "../map-styles";
 
 const h = hyper.styled(styles);
 

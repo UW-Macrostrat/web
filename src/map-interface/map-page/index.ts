@@ -4,7 +4,7 @@ import hyper from "@macrostrat/hyper";
 import Searchbar from "../components/searchbar";
 import { ButtonGroup, Button, Spinner } from "@blueprintjs/core";
 import { ErrorBoundary } from "@macrostrat/ui-components";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import loadable from "@loadable/component";
 import {
   useAppActions,
