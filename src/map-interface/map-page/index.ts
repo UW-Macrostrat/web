@@ -48,9 +48,13 @@ const MapView = (props: { backend: MapBackend }) => {
     performanceResetToken
   );
 
-  //if (location.pathname.includes("/globe")) {
   //  backend = MapBackend.CESIUM;
-  const { backend = MapBackend.MAPBOX3 } = props;
+  let { backend = MapBackend.MAPBOX3 } = props;
+  if (location.pathname.includes("/globe")) {
+    backend = MapBackend.CESIUM;
+  }
+
+
   switch (backend) {
     case MapBackend.CESIUM:
       return h(CesiumView);

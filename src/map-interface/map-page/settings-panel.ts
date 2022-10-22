@@ -32,7 +32,7 @@ function MapTypeButton(props) {
   const pathname = globeActive ? "/map" : "/globe";
   const name = globeActive ? "map" : "globe";
 
-  return h(LinkButton, { to: { pathname, hash } }, `Switch to ${name}`);
+  return h(LinkButton, { to: pathname }, `Switch to ${name}`);
 }
 
 const ExperimentsPanel = (props) => {
@@ -87,9 +87,9 @@ const ExperimentsPanel = (props) => {
 
 const SettingsPanel = (props) => {
   const runAction = useAppActions();
-  //const { pathname } = useLocation();
-  //const globeActive = pathname?.startsWith("/globe");\
-  const globeActive = useMapBackend() == MapBackend.CESIUM;
+  const { pathname } = useLocation();
+  const globeActive = pathname?.startsWith("/globe");
+  //const globeActive = useMapBackend() == MapBackend.CESIUM;
   const data = useAppState((d) => d.performance);
 
   return h("div.settings.bp3-text.text-panel", [
