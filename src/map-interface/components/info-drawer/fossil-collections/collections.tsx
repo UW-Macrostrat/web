@@ -1,32 +1,65 @@
 import React from "react";
-import { Tabs, Tab, Card } from "@blueprintjs/core";
-import { makeOccurrenceTree } from "../utils";
-import h from "@macrostrat/hyper";
+import { Tabs, Tab } from "@blueprintjs/core";
+import { makeOccurrenceTree } from "../../../utils";
+import hyper from "@macrostrat/hyper";
+import styles from "./main.module.sass";
+const h = hyper.styled(styles);
+
+export default function PBDBCollections({ data }) {
+  if (data == null) return null;
+  return h(
+    "div.collections",
+    data.map((col, ix) => h(FossilCollection, { key: ix, col }))
+  );
+}
+
+function FossilCollection({ col }) {
+  let occurrenceTree = makeOccurrenceTree(col.occurrences);
+  return h(
+    "div.fossil-collection",
+    <>
+      <Header col={col} />
+      <Tabs>
+        <Tab title="Info" panel={<InfoPanel col={col} />} id="info" />
+        <Tab
+          id="occ"
+          title={`Occurrences (${col.occurrences.length})`}
+          disabled={col.occurrences.length == 0}
+          panel={<OccurencesPanel occurrenceTree={occurrenceTree} />}
+        />
+      </Tabs>
+    </>
+  );
+}
+
+function CollectionNumber({ col }) {
+  const num = col.oid.replace("col:", "");
+  return h("div.collection-number", [
+    h("span.collection-number-prefix", "#"),
+    h(
+      "a",
+      {
+        href: `https://paleobiodb.org/classic/basicCollectionSearch?collection_no=${num}`,
+        target: "_blank",
+      },
+      num
+    ),
+  ]);
+}
+
+function Header({ col }) {
+  console.log(col);
+  return h("div.pbdb-panel-header", [
+    h.if(col.nam)("h4", {}, col.nam),
+    h.if(col.oid)(CollectionNumber, { col }),
+  ]);
+}
 
 function InfoPanel(props) {
   const { col } = props;
 
   return (
     <div>
-      {col.nam && (
-        <div className="map-source-attr">
-          <span className="attr">Name: </span> {col.nam}
-        </div>
-      )}
-      {col.oid && (
-        <div className="map-source-attr">
-          <span className="attr">Collection no.: </span>{" "}
-          <a
-            href={`https://paleobiodb.org/classic/basicCollectionSearch?collection_no=${col.oid.replace(
-              "col:",
-              ""
-            )}`}
-            target="_blank"
-          >
-            {col.oid.replace("col:", "")}
-          </a>
-        </div>
-      )}
       {col.oei && (
         <div className="map-source-attr">
           <span className="attr">Age: </span> {col.oei} ({col.lag} - {col.lag}
@@ -66,7 +99,7 @@ function InfoPanel(props) {
   );
 }
 
-function OccurancesPanel(props) {
+function OccurencesPanel(props) {
   const { occurrenceTree } = props;
 
   return (
@@ -122,33 +155,3 @@ function OccurancesPanel(props) {
     </div>
   );
 }
-
-function PBDBCollections(props) {
-  let collections = props.data.map((col, idx) => {
-    let occurrenceTree = makeOccurrenceTree(col.occurrences);
-
-    return (
-      <Card key={idx} style={{ marginBottom: "10px" }}>
-        <Tabs animate={true} id={idx}>
-          <Tab
-            title="Info"
-            panel={<InfoPanel col={col} />}
-            id="info"
-            style={{ fontSize: "20px" }}
-          />
-          <Tab
-            style={{ fontSize: "20px" }}
-            id="occ"
-            title={`Occurrences (${col.occurrences.length})`}
-            disabled={col.occurrences.length ? false : true}
-            panel={<OccurancesPanel occurrenceTree={occurrenceTree} />}
-          />
-        </Tabs>
-      </Card>
-    );
-  });
-
-  return <div>{props.data && collections}</div>;
-}
-
-export default PBDBCollections;

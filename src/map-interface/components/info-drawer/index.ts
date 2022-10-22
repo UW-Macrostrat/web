@@ -1,3 +1,4 @@
+import { ReactChild } from "react";
 import { Card, Spinner } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import { useAppActions } from "~/map-interface/app-state";
@@ -9,23 +10,27 @@ import { RegionalStratigraphy } from "./reg-strat";
 import { Physiography } from "./physiography";
 import { GddExpansion } from "./gdd";
 import { useAppState } from "~/map-interface/app-state";
+import classNames from "classnames";
 import styles from "./main.module.styl";
+import { LoadingArea } from "../transitions";
+import { ErrorBoundary } from "@macrostrat/ui-components";
 
 const h = hyper.styled(styles);
 
-function InfoDrawer() {
+function InfoDrawerContainer(props) {
+  return h(Card, { className: "infodrawer", ...props });
+}
+
+function InfoDrawer(props) {
+  let { className } = props;
   const {
-    infoDrawerOpen,
-    infoDrawerExpanded,
     mapInfo,
     fetchingMapInfo,
-    fetchingColumnInfo,
     fetchingGdd,
     columnInfo,
     infoMarkerLng,
     infoMarkerLat,
     gddInfo,
-    fetchingPbdb,
     pbdbData,
     // We used to enable panels when certain layers were on,
     // but now we just show all panels always
@@ -43,7 +48,7 @@ function InfoDrawer() {
   };
 
   if (!mapInfo || !mapInfo.mapData) {
-    return h("div");
+    return null;
   }
 
   let source =
@@ -59,44 +64,48 @@ function InfoDrawer() {
           ref: {},
         };
 
-  if (!infoDrawerOpen) {
-    return null;
-  }
-  return h("div.infodrawer-container", [
-    h(Card, { className: "infodrawer" }, [
-      h(InfoDrawerHeader, {
-        mapInfo,
-        infoMarkerLng,
-        infoMarkerLat,
-        onCloseClick: () => runAction({ type: "close-infodrawer" }),
-      }),
-      h("div.infodrawer-body", [
-        h.if(fetchingMapInfo)("div.spinner", [h(Spinner)]),
-        h.if(!fetchingMapInfo)("div", [
-          h(FossilCollections, { data: pbdbData, expanded: true }),
-          h(RegionalStratigraphy, { mapInfo, columnInfo }),
-          h(GeologicMapInfo, {
-            mapInfo,
-            bedrockExpanded: true,
-            source,
-          }),
-          h(MacrostratLinkedData, {
-            mapInfo,
-            bedrockMatchExpanded: true,
-            source,
-          }),
-          h(Physiography, { mapInfo }),
-          h(GddExpansion, {
-            mapInfo,
-            gddInfo,
-            openGdd,
-            fetchingGdd,
-          }),
-        ]),
+  className = classNames("infodrawer", className, {
+    loading: fetchingMapInfo,
+  });
+
+  return h(Card, { className }, [
+    h(InfoDrawerHeader, {
+      mapInfo,
+      infoMarkerLng,
+      infoMarkerLat,
+      onCloseClick: () => runAction({ type: "close-infodrawer" }),
+    }),
+    h("div.infodrawer-body", [
+      h(ErrorBoundary, [
+        h(
+          LoadingArea,
+          { loaded: !fetchingMapInfo },
+          h("div", [
+            h(FossilCollections, { data: pbdbData, expanded: true }),
+            h(RegionalStratigraphy, { mapInfo, columnInfo }),
+            h(GeologicMapInfo, {
+              mapInfo,
+              bedrockExpanded: true,
+              source,
+            }),
+            h(MacrostratLinkedData, {
+              mapInfo,
+              bedrockMatchExpanded: true,
+              source,
+            }),
+            h(GddExpansion, {
+              mapInfo,
+              gddInfo,
+              openGdd,
+              fetchingGdd,
+            }),
+            h(Physiography, { mapInfo }),
+          ])
+        ),
       ]),
     ]),
-    h("div.spacer"),
   ]);
 }
 
 export default InfoDrawer;
+export { InfoDrawerContainer };

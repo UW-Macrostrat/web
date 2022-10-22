@@ -246,41 +246,46 @@ export const asyncGetElevation = async (line, cancelToken) => {
   }
 };
 
-// I broke these into 3 functions so we could call the dispatch as a side effect during
-// the runAction
-export const asyncGetPBDBCollection = async (collection_nos, cancelToken) => {
-  let params = {
-    id: collection_nos.join(","),
-    show: "ref,time,strat,geo,lith,entname,prot",
-    markrefs: true,
-  };
-  const collectionResponse = await axios.get(pbdbURL, {
-    cancelToken,
+/* PBDB data */
+// use new cancellation API
+
+let abortController = null;
+
+export async function getPBDBData(collections: number[]) {
+  abortController?.abort();
+  abortController = new AbortController();
+  const coll_id = collections.join(",");
+  const opts: any = {
     responseType: "json",
-    params,
-  });
-
-  return collectionResponse;
-};
-
-export const asyncGetPBDBOccurences = async (collection_nos, cancelToken) => {
-  let params = {
-    coll_id: collection_nos.join(","),
-    show: "phylo,ident",
+    signal: abortController.signal,
   };
-  const occurrenceResponse = await axios.get(pbdbURLOccs, {
-    cancelToken,
-    responseType: "json",
-    params,
-  });
-  return occurrenceResponse;
-};
 
-export function mergePBDBResponses(occurrenceResponse, collectionResponse) {
+  return Promise.all([
+    axios.get(pbdbURL, {
+      ...opts,
+      params: {
+        id: coll_id,
+        show: "ref,time,strat,geo,lith,entname,prot",
+        markrefs: true,
+      },
+    }),
+    axios.get(pbdbURLOccs, {
+      ...opts,
+      params: { coll_id, show: "phylo,ident" },
+    }),
+  ])
+    .then(([collections, occurences]) => {
+      return mergePBDBResponses(collections, occurences);
+    })
+    .finally(() => {
+      abortController = null;
+    });
+}
+
+function mergePBDBResponses(collectionResponse, occurrenceResponse) {
   try {
-    let occurrences = occurrenceResponse.data.records;
-
-    let collections = collectionResponse.data.records.map((col) => {
+    const occurrences = occurrenceResponse.data.records;
+    return collectionResponse.data.records.map((col) => {
       col.occurrences = [];
       occurrences.forEach((occ) => {
         if (occ.cid === col.oid) {
@@ -289,8 +294,8 @@ export function mergePBDBResponses(occurrenceResponse, collectionResponse) {
       });
       return col;
     });
-    return collections;
   } catch (error) {
+    console.log(error);
     return [];
   }
 }

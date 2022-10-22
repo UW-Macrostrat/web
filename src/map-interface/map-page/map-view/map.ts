@@ -1,6 +1,6 @@
-import { Component } from "react";
+import { Component, forwardRef } from "react";
 import { SETTINGS } from "../../Settings";
-import { mapStyle } from "../map-styles";
+import { mapStyle } from "../map-style";
 import {
   getRemovedOrNewFilters,
   getToApply,
@@ -10,7 +10,8 @@ import h from "@macrostrat/hyper";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MercatorCoordinate, FreeCameraOptions } from "mapbox-gl";
-import { setMapStyle, markerOffset } from "./style-helpers";
+import { setMapStyle } from "./style-helpers";
+import classNames from "classnames";
 
 const maxClusterZoom = 6;
 const highlightLayers = [
@@ -21,16 +22,18 @@ const highlightLayers = [
 
 interface MapProps {
   use3D: boolean;
+  mapIsRotated: boolean;
+  markerLoadOffset: [number, number];
 }
 
 class Map extends Component<MapProps, {}> {
+  map: mapboxgl.Map;
   constructor(props) {
     super(props);
     this.swapBasemap = this.swapBasemap.bind(this);
     this.handleFilterChanges = this.handleFilterChanges.bind(this);
     this.mapLoaded = false;
     this.currentSources = [];
-    this.isPanning = false;
     this.elevationPoints = [];
 
     // Separate time filters and other filters for different rules
@@ -85,11 +88,18 @@ class Map extends Component<MapProps, {}> {
         ? SETTINGS.satelliteMapURL
         : SETTINGS.baseMapURL,
       maxZoom: 14,
-      maxTileCacheSize: 0,
-      logoPosition: "bottom-right",
-      antialias: true,
-      optimizeForTerrain: true,
+      //maxTileCacheSize: 0,
+      logoPosition: "bottom-left",
+      trackResize: true,
+      //antialias: true,
+      //optimizeForTerrain: true,
     });
+
+    this.map.setProjection("globe");
+
+    //this.map.addControl(new ZoomControl(), "top-right");
+    //this.map.addControl(new ThreeDControl(), "bottom-right");
+    //this.map.addControl(new CompassControl(), "bottom-right");
 
     const pos = this.props.mapPosition;
     const { pitch = 0, bearing = 0, altitude } = pos.camera;
@@ -106,10 +116,10 @@ class Map extends Component<MapProps, {}> {
       );
       cameraOptions.setPitchBearing(pitch, bearing);
 
-      console.log(cameraOptions);
-
       this.map.setFreeCameraOptions(cameraOptions);
     }
+
+    this.enable3DTerrain(this.props.use3D);
 
     this.props.mapRef.current = this.map;
 
@@ -117,10 +127,17 @@ class Map extends Component<MapProps, {}> {
     //this.map.dragRotate.disable();
 
     // disable map rotation using touch rotation gesture
-    this.map.touchZoomRotate.disableRotation();
+    //this.map.touchZoomRotate.disableRotation();
+    const ignoredSources = [
+      "elevationMarker",
+      "elevationPoints",
+      "info_marker",
+    ];
 
     this.map.on("sourcedataloading", (evt) => {
-      if (this.props.mapIsLoading) return;
+      if (ignoredSources.includes(evt.sourceId) || this.props.mapIsLoading) {
+        return;
+      }
       this.props.runAction({ type: "map-loading" });
     });
 
@@ -136,15 +153,13 @@ class Map extends Component<MapProps, {}> {
       }
     });
 
-    this.map.on("load", () => {
+    this.map.on("style.load", () => {
       // Add the sources to the map
       Object.keys(mapStyle.sources).forEach((source) => {
         if (this.map.getSource(source) == null) {
           this.map.addSource(source, mapStyle.sources[source]);
         }
       });
-
-      this.enable3DTerrain.bind(this)();
 
       // The initial draw of the layers
       mapStyle.layers.forEach((layer) => {
@@ -187,6 +202,8 @@ class Map extends Component<MapProps, {}> {
       if (this.props.mapHasFossils) {
         this.refreshPBDB();
       }
+
+      this.enable3DTerrain(this.props.use3D);
 
       // NO idea why timeout is needed
       setTimeout(() => {
@@ -339,7 +356,7 @@ class Map extends Component<MapProps, {}> {
 
       // Otherwise try to query the geologic map
       let features = this.map.queryRenderedFeatures(event.point, {
-        layers: ["burwell_fill", "column_fill"],
+        layers: ["burwell_fill", "column_fill", "filtered_column_fill"],
       });
 
       let burwellFeatures = features
@@ -352,7 +369,11 @@ class Map extends Component<MapProps, {}> {
 
       const columns = features
         .filter((f) => {
-          if (f.layer.id === "column_fill") return f;
+          if (
+            f.layer.id === "column_fill" ||
+            f.layer.id === "filtered_column_fill"
+          )
+            return f;
         })
         .map((f) => {
           return f.properties;
@@ -375,8 +396,7 @@ class Map extends Component<MapProps, {}> {
         });
       }
 
-      let xOffset =
-        window.innerWidth > 850 ? -((window.innerWidth * 0.3333) / 2) : 0;
+      let markerOffset = this.props.markerLoadOffset ?? [0, 0];
 
       /*
       Ok. I know this looks jank, and it is, but bear with me.
@@ -386,17 +406,12 @@ class Map extends Component<MapProps, {}> {
       toggling this boolean we are able to ignore the `movestart` even when it
       is fired by this particular action.
       */
-      this.panning = true;
+      //this.panning = true;
       this.map.panTo(event.lngLat, {
-        offset: [0, markerOffset()],
-        easing: function easing(t) {
-          return t * (2 - t);
-        },
+        offset: markerOffset,
+        easing: (t) => t * (2 - t),
         duration: 500,
       });
-      setTimeout(() => {
-        this.panning = false;
-      }, 1000);
 
       // Update the location of the marker
       this.map.getSource("info_marker").setData({
@@ -424,6 +439,8 @@ class Map extends Component<MapProps, {}> {
         return;
       }
 
+      this.enable3DTerrain(this.props.use3D);
+
       this.currentSources.forEach((source) => {
         if (this.map.getSource(source.id) == null) {
           this.map.addSource(source.id, source.config);
@@ -449,30 +466,39 @@ class Map extends Component<MapProps, {}> {
     });
   }
 
-  enable3DTerrain() {
-    if (this.map.getSource("mapbox-dem") == null) {
-      this.map.addSource("mapbox-dem", {
-        type: "raster-dem",
-        url: "mapbox://mapbox.mapbox-terrain-dem-v1",
-        tileSize: 512,
-        maxzoom: 14,
-      });
-
-      // add the DEM source as a terrain layer with exaggerated height
-      this.map.setTerrain({ source: "mapbox-dem", exaggeration: 1 });
+  enable3DTerrain(shouldEnable: boolean) {
+    if (!this.map.style._loaded) {
+      return;
     }
+    if (shouldEnable) {
+      if (this.map.getSource("mapbox-dem") == null) {
+        this.map.addSource("mapbox-dem", {
+          type: "raster-dem",
+          url: "mapbox://mapbox.mapbox-terrain-dem-v1",
+          tileSize: 512,
+          maxzoom: 14,
+        });
+      }
 
-    // add a sky layer that will show when the map is highly pitched
-    if (this.map.getLayer("sky") == null) {
-      this.map.addLayer({
-        id: "sky",
-        type: "sky",
-        paint: {
-          "sky-type": "atmosphere",
-          "sky-atmosphere-sun": [0.0, 0.0],
-          "sky-atmosphere-sun-intensity": 15,
-        },
-      });
+      // add a sky layer that will show when the map is highly pitched
+      if (this.map.getLayer("sky") == null) {
+        this.map.addLayer({
+          id: "sky",
+          type: "sky",
+          paint: {
+            "sky-type": "atmosphere",
+            "sky-atmosphere-sun": [0.0, 0.0],
+            "sky-atmosphere-sun-intensity": 15,
+          },
+        });
+      }
+    }
+    // Enable or disable terrain depending on our current desires...
+    const currentTerrain = this.map.getTerrain();
+    if (shouldEnable && currentTerrain == null) {
+      this.map.setTerrain({ source: "mapbox-dem", exaggeration: 1 });
+    } else if (!shouldEnable && currentTerrain != null) {
+      this.map.setTerrain(null);
     }
   }
 
@@ -503,7 +529,7 @@ class Map extends Component<MapProps, {}> {
       }
     });
 
-    this.enable3DTerrain.bind(this)();
+    this.enable3DTerrain(this.props.use3D);
 
     // Set the style. `style.load` will be fired after to readd other layers
     this.map.setStyle(toAdd);
@@ -515,30 +541,14 @@ class Map extends Component<MapProps, {}> {
   // We basically intercept the changes, handle them, and tell React to ignore them
   shouldComponentUpdate(nextProps) {
     setMapStyle(this, this.map, mapStyle, nextProps);
-
-    if (
-      !nextProps.elevationMarkerLocation.length ||
-      (nextProps.elevationMarkerLocation[0] !=
-        this.props.elevationMarkerLocation[0] &&
-        nextProps.elevationMarkerLocation[1] !=
-          this.props.elevationMarkerLocation[1])
-    ) {
-      if (this.map && this.map.loaded()) {
-        this.map.getSource("elevationMarker").setData({
-          type: "FeatureCollection",
-          features: [
-            {
-              type: "Feature",
-              properties: {},
-              geometry: {
-                type: "Point",
-                coordinates: nextProps.elevationMarkerLocation,
-              },
-            },
-          ],
-        });
-      }
+    if (this.props.use3D !== nextProps.use3D) {
+      return true;
     }
+
+    if (nextProps.mapIsRotated !== this.props.mapIsRotated) {
+      return true;
+    }
+
     // Watch the state of the application and adjust the map accordingly
     if (
       !nextProps.elevationChartOpen &&
@@ -561,20 +571,33 @@ class Map extends Component<MapProps, {}> {
       JSON.stringify(this.props.mapCenter)
     ) {
       if (nextProps.mapCenter.type === "place") {
-        let bounds = [
-          [
-            nextProps.mapCenter.place.bbox[0],
-            nextProps.mapCenter.place.bbox[1],
-          ],
-          [
-            nextProps.mapCenter.place.bbox[2],
-            nextProps.mapCenter.place.bbox[3],
-          ],
-        ];
-        this.map.fitBounds(bounds, {
-          duration: 0,
-          maxZoom: 16,
-        });
+        const { bbox, center } = nextProps.mapCenter.place;
+        if (bbox?.length == 4) {
+          let bounds = [
+            [
+              nextProps.mapCenter.place.bbox[0],
+              nextProps.mapCenter.place.bbox[1],
+            ],
+            [
+              nextProps.mapCenter.place.bbox[2],
+              nextProps.mapCenter.place.bbox[3],
+            ],
+          ];
+          console.log(nextProps.mapCenter, bounds);
+          this.map.fitBounds(bounds, {
+            duration: 0,
+            maxZoom: 16,
+          });
+        } else {
+          this.map.flyTo({
+            center,
+            duration: 0,
+            zoom: Math.max(
+              nextProps.mapPosition?.camera?.target?.zoom ?? 10,
+              14
+            ),
+          });
+        }
       } else {
         // zoom to user location
       }
@@ -587,8 +610,11 @@ class Map extends Component<MapProps, {}> {
         this.swapBasemap.bind(this)(SETTINGS.baseMapURL);
       }
     }
+
     // Handle changes to map filters
-    else if (nextProps.filters.length != this.props.filters.length) {
+    else if (
+      JSON.stringify(nextProps.filters) !== JSON.stringify(this.props.filters)
+    ) {
       // If all filters have been removed simply reset the filter states
       if (nextProps.filters.length === 0) {
         this.filters = [];
@@ -650,36 +676,13 @@ class Map extends Component<MapProps, {}> {
   // PBDB hexgrids and points are refreshed on every map move
   refreshPBDB() {
     let bounds = this.map.getBounds();
+    console.log(bounds);
     let zoom = this.map.getZoom();
-    // if (zoom < 7) {
-    //   // Make sure the layer is visible
-    //   this.map.setLayoutProperty('pbdbCollections', 'visibility', 'visible')
-    //   // Dirty way of hiding points when zooming out
-    //   this.map.getSource('pbdb-points').setData({"type": "FeatureCollection","features": []})
-    //   // Fetch the summary
-    //   fetch(`https://dev.macrostrat.org/api/v2/hex-summary?min_lng=${bounds._sw.lng}&min_lat=${bounds._sw.lat}&max_lng=${bounds._ne.lng}&max_lat=${bounds._ne.lat}&zoom=${zoom}`)
-    //     .then(response => {
-    //       return response.json()
-    //     })
-    //     .then(json => {
-    //       let currentZoom = parseInt(this.map.getZoom())
-    //       let mappings = json.success.data
-    //       if (currentZoom != this.previousZoom) {
-    //         this.previousZoom = currentZoom
-    //
-    //         this.maxValue = this.resMax[parseInt(this.map.getZoom())]
-    //
-    //         this.updateColors(mappings)
-    //
-    //       } else {
-    //         this.updateColors(mappings)
-    //       }
-    //     })
-    // } else {
-    // Hide the hexgrids
-    //this.map.setLayoutProperty('pbdbCollections', 'visibility', 'none')
-
     PBDBHelper(this, bounds, zoom);
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    this.enable3DTerrain(this.props.use3D);
   }
 
   // Update the colors of the hexgrids
@@ -718,8 +721,14 @@ class Map extends Component<MapProps, {}> {
   }
 
   render() {
-    return h("div.map-holder", null, h("div#map"));
+    const className = classNames({
+      "is-rotated": this.props.mapIsRotated ?? false,
+      "is-3d-available": this.props.use3D ?? false,
+    });
+    return h("div.mapbox-map#map", { ref: this.props.elementRef, className });
   }
 }
 
-export default Map;
+export default forwardRef((props, ref) =>
+  h(Map, { ...props, elementRef: ref })
+);

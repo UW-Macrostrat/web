@@ -1,9 +1,9 @@
 import { updateURI } from "../../helpers";
 import { sum, timescale } from "../../../utils";
 import { MapBackend, MapLayer } from "../map";
-import { CoreState, CoreAction } from "./types";
+import { CoreState, CoreAction } from "./actions";
 import update, { Spec } from "immutability-helper";
-export * from "./types";
+export * from "./actions";
 
 const classColors = {
   sedimentary: "#FF8C00",
@@ -19,6 +19,7 @@ const classColors = {
 
 const defaultState: CoreState = {
   initialLoadComplete: false,
+  contextPanelOpen: false,
   menuOpen: false,
   aboutOpen: false,
   infoDrawerOpen: false,
@@ -35,13 +36,12 @@ const defaultState: CoreState = {
   fetchingGdd: false,
   gddCancelToken: null,
   isSearching: false,
+  inputFocus: false,
   term: "",
   searchCancelToken: null,
   fetchingElevation: false,
   elevationCancelToken: null,
   fetchingPbdb: false,
-  pbdbCancelToken: null,
-
   infoMarkerLng: -999,
   infoMarkerLat: -999,
   mapInfo: [],
@@ -55,11 +55,12 @@ const defaultState: CoreState = {
   mapCenter: {
     type: null,
   },
-
+  mapUse3D: false,
+  mapShowLabels: true,
+  mapShowLineSymbols: false,
   filtersOpen: false,
   filters: [],
   filteredColumns: {},
-
   data: [],
   mapPosition: {
     camera: {
@@ -83,8 +84,37 @@ export function coreReducer(
     case "map-idle":
       if (!state.mapIsLoading) return state;
       return { ...state, mapIsLoading: false };
+    case "map-layers-changed":
+      let columnInfo = state.columnInfo;
+      let pbdbData = state.pbdbData;
+      if (!action.mapLayers.has(MapLayer.COLUMNS)) columnInfo = [];
+      if (!action.mapLayers.has(MapLayer.FOSSILS)) pbdbData = [];
+      return {
+        ...state,
+        columnInfo,
+        pbdbData,
+      };
     case "toggle-menu":
-      return { ...state, menuOpen: !state.menuOpen };
+      const shouldOpen = state.inputFocus || !state.menuOpen;
+
+      return {
+        ...state,
+        contextPanelOpen: shouldOpen,
+        menuOpen: shouldOpen,
+        isSearching: false,
+        inputFocus: false,
+      };
+    case "context-outside-click":
+      if (state.inputFocus) {
+        return {
+          ...state,
+          inputFocus: false,
+          contextPanelOpen: false,
+          menuOpen: false,
+          term: "",
+        };
+      }
+      return state;
     case "toggle-about":
       return { ...state, aboutOpen: !state.aboutOpen };
     case "close-infodrawer":
@@ -92,24 +122,17 @@ export function coreReducer(
         ...state,
         infoDrawerOpen: false,
         columnInfo: {},
-        mapInfo: [],
-        pbdbData: [],
       };
-    case "toggle-infodrawer":
-      return {
-        ...state,
-        infoDrawerOpen: !state.infoDrawerOpen,
-        infoDrawerExpanded: false,
-        columnInfo: {},
-        gddInfo: [],
-      };
-
     case "expand-infodrawer":
       return { ...state, infoDrawerExpanded: !state.infoDrawerExpanded };
 
     case "toggle-filters":
       // rework this to open menu panel
       return { ...state, filtersOpen: !state.filtersOpen };
+    case "toggle-labels":
+      return { ...state, mapShowLabels: !state.mapShowLabels };
+    case "toggle-line-symbols":
+      return { ...state, mapShowLineSymbols: !state.mapShowLineSymbols };
     case "add-filter":
       let alreadyHasFiter = false;
       state.filters.forEach((filter) => {
@@ -153,7 +176,18 @@ export function coreReducer(
         fs = fs.concat([action.filter]);
       }
       // action.filter.type and action.filter.id go to the URI
-      return updateURI({ ...state, filters: fs });
+      // handle search resetting
+      return updateURI({
+        ...state,
+        filters: fs,
+        term: "",
+        isSearching: false,
+        searchResults: null,
+        searchCancelToken: null,
+        inputFocus: false,
+        // We have to do a lot of extra work to manage this context panel state
+        contextPanelOpen: state.menuOpen,
+      });
     case "remove-filter":
       return updateURI({
         ...state,
@@ -164,6 +198,9 @@ export function coreReducer(
     case "clear-filters":
       return updateURI({ ...state, filters: [] });
     case "start-map-query":
+      // if (state.inputFocus) {
+      //   return { ...state, inputFocus: false };
+      // }
       if (state.mapInfoCancelToken) {
         state.mapInfoCancelToken.cancel();
       }
@@ -341,6 +378,8 @@ export function coreReducer(
         [op]: [action.layer],
       };
       return updateURI(update(state, { mapLayers }));
+    case "toggle-map-3d":
+      return { ...state, mapUse3D: !state.mapUse3D };
     case "toggle-elevation-chart":
       return {
         ...state,
@@ -349,7 +388,13 @@ export function coreReducer(
         elevationMarkerLocation: [],
       };
     case "set-input-focus":
-      return { ...state, inputFocus: action.inputFocus };
+      return {
+        ...state,
+        term: action.inputFocus ? state.term : "",
+        inputFocus: action.inputFocus,
+        menuOpen: action.menuOpen ?? state.menuOpen,
+        contextPanelOpen: action.inputFocus || action.menuOpen,
+      };
     case "set-search-term":
       return { ...state, term: action.term };
     // Handle searching
@@ -440,27 +485,16 @@ export function coreReducer(
 
     // Handle PBDB
     case "start-pbdb-query":
-      if (state.pbdbCancelToken) {
-        state.pbdbCancelToken.cancel();
-      }
       return {
         ...state,
         fetchingPbdb: true,
-        pbdbCancelToken: action.cancelToken,
       };
-
-    case "update-pbdb-query":
-      if (state.pbdbCancelToken) {
-        state.pbdbCancelToken.cancel();
-      }
-      return { ...state, pbdbCancelToken: action.cancelToken };
 
     case "received-pbdb-query":
       return {
         ...state,
         fetchingPbdb: false,
         pbdbData: action.data,
-        pbdbCancelToken: null,
         infoDrawerOpen: true,
       };
 
@@ -473,6 +507,7 @@ export function coreReducer(
           type: "place",
           place: action.place,
         },
+        isSearching: false,
       };
     case "update-column-filters":
       return {

@@ -1,81 +1,60 @@
-import h from "@macrostrat/hyper";
+import hyper from "@macrostrat/hyper";
 import { hexToRgb } from "../utils";
+import styles from "./info-blocks.module.styl";
 
-function IntChip(props) {
-  const { t_int } = props;
+const h = hyper.styled(styles);
+
+function IntervalChip(props) {
+  const { interval, className } = props;
   return h(
-    "div.age-chip age-chip-t-int",
+    "div.chip.age-chip",
     {
-      style: { backgroundColor: hexToRgb(t_int.color, 0.8) },
+      className,
+      style: { backgroundColor: hexToRgb(interval.color, 0.8) },
     },
     [
-      t_int.int_name,
-      h.if(t_int.t_age)("span.age-chip-ma", ["Ma"]),
-      " - ",
-      t_int.t_age,
-      h("span.age-chip-ma", ["Ma"]),
+      h("div.age-chip-interval", interval.int_name),
+      h("div.age-chip-age", [
+        h(Age, { age: interval.b_age }),
+        " - ",
+        h(Age, { age: interval.t_age }),
+      ]),
     ]
   );
+}
+
+function Age({ age }) {
+  return h("span.age", [age, h("span.age-chip-ma", ["Ma"])]);
 }
 
 function AgeChip(props) {
   const { t_int, b_int } = props;
   return h("div.age-chip-container", [
-    h(
-      "div.age-chip",
-      {
-        style: { backgroundColor: hexToRgb(props.b_int.color, 0.8) },
-      },
-      [
-        b_int.int_name || "Unknown",
-        h.if(b_int.b_age)("div.age-chip-age", [
-          b_int.b_age,
-          h("span.age-chip-ma", ["Ma"]),
-          " -  ",
-          b_int.t_age,
-          h("span.age-chip-ma", ["Ma"]),
-        ]),
-      ]
-    ),
-
-    h.if(b_int.int_id != props.t_int.int_id)(IntChip, { t_int }),
+    h(IntervalChip, { interval: b_int }),
+    h.if(b_int.int_id != props.t_int.int_id)(IntervalChip, {
+      interval: t_int,
+      className: "age-chip-t-int",
+    }),
   ]);
 }
 
 function AttrChip(props) {
-  const { fill = null, color, name } = props;
+  const { fill = null, color, name, className, emphasized = true } = props;
+
   let styles = {};
   if (fill) {
     styles["backgroundImage"] = `url('dist/img/geologic-patterns/${fill}.png')`;
   }
-  return h("div.lith-chip", { style: { ...styles } }, [
+  return h("div.lith-chip", { style: { ...styles }, className }, [
     h(
-      "div.lith-chip-inner",
-      { style: { backgroundColor: hexToRgb(color, 0.6) } },
+      "div.lith-chip-inner.chip",
+      {
+        style: { backgroundColor: hexToRgb(color, 0.6) },
+        className: emphasized ? "emphasized" : null,
+      },
       [name]
     ),
   ]);
 }
 
-function MacrostratAgeChip(props) {
-  const { b_int, t_int, color, b_age, t_age } = props;
-  let age = b_int.int_name || "Unknown";
-  if (t_int.int_name != age) {
-    age += ` - ${t_int.int_name || "Unknown"}`;
-  }
-  return h("div.age-chip-container", [
-    h("div.age-chip", { style: { backgroundColor: hexToRgb(color, 0.8) } }, [
-      age,
-      h("div.age-chip-age", [
-        b_age,
-        ,
-        h("span.age-chip-ma", ["Ma"]),
-        " - ",
-        t_age,
-        h("span.age-chip-ma", ["Ma"]),
-      ]),
-    ]),
-  ]);
-}
-
-export { AgeChip, AttrChip, MacrostratAgeChip };
+export { AgeChip, AttrChip, IntervalChip };

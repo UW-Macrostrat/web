@@ -13,8 +13,8 @@ function Article(props) {
   // Attempt to pull out only the year and not the whole date
   let year;
   try {
-    year = this.props.data.coverdate
-      ? this.props.data.coverdate.match(/\d{4}/)[0]
+    year = this.props.data.coverDate
+      ? this.props.data.coverDate.match(/\d{4}/)[0]
       : "";
   } catch (e) {
     year = "";
@@ -45,9 +45,9 @@ function Article(props) {
           <Button
             onClick={toggleExpand}
             minimal={true}
-            icon={iconName}
+            rightIcon={iconName}
             className="flat-btn"
-          />
+          ></Button>
         </span>
       </div>
       <Collapse isOpen={expanded}>
