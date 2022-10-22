@@ -1,8 +1,5 @@
 import { SETTINGS } from "../../Settings";
-<<<<<<<< HEAD:src/map-interface/map-page/map-styles/core.ts
 
-export const coreStyle = {
-========
 export * from "./line-symbols";
 export * from "./map-sources";
 
@@ -321,8 +318,7 @@ const overlayLayers = [
   },
 ];
 
-export const mapStyle = {
->>>>>>>> develop:src/map-interface/map-page/map-style/index.ts
+export const coreStyle = {
   version: 8,
   sources: {
     burwell: {

@@ -1,6 +1,5 @@
 // Settings panel for the map
 
-import h from "@macrostrat/hyper";
 import { LinkButton } from "@macrostrat/router-components";
 import { GlobeSettings } from "@macrostrat/cesium-viewer/settings";
 import { useLocation } from "react-router";

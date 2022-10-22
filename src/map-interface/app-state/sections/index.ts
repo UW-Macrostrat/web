@@ -17,6 +17,14 @@ import {
   flyToParams,
 } from "@macrostrat/cesium-viewer/position";
 import { performanceReducer, PerformanceState } from "../../performance/core";
+import { createBrowserHistory } from "history";
+import { createRouterReducer } from "@lagunovsky/redux-react-router";
+import {
+  ReduxRouterState,
+  RouterActions,
+} from "@lagunovsky/redux-react-router";
+
+export const browserHistory = createBrowserHistory();
 
 const globeStorage = new LocalStorage("macrostrat-globe");
 
@@ -35,22 +43,6 @@ function storageGlobeReducer(
 
   return globeReducer(state, action);
 }
-import { createBrowserHistory } from "history";
-import { CoreAction } from "./core/actions";
-import { coreReducer, CoreState } from "./core";
-import { MapAction } from "./map";
-import { createRouterReducer } from "@lagunovsky/redux-react-router";
-import {
-  ReduxRouterState,
-  RouterActions,
-} from "@lagunovsky/redux-react-router";
-
-export const browserHistory = createBrowserHistory();
-
-export type AppState = {
-  core: CoreState;
-  router: ReduxRouterState;
-};
 
 const routerReducer = createRouterReducer(browserHistory);
 
@@ -81,8 +73,9 @@ function translateCameraPosition(pos: MapPosition): CameraParams {
   }
 }
 
-type AppState = {
+export type AppState = {
   core: CoreState;
+  router: ReduxRouterState;
   globe: GlobeState;
   performance: PerformanceState;
   menu: MenuState;
@@ -146,7 +139,12 @@ function overallReducer(state: AppState, action: Action): AppState {
 
 const appReducer = reduceReducers(overallReducer, reducers);
 
-export type Action = CoreAction | MenuAction | MapAction | GlobeAction | RouterActions;
+export type Action =
+  | CoreAction
+  | MenuAction
+  | MapAction
+  | GlobeAction
+  | RouterActions;
 
 export default appReducer;
 export * from "./core";

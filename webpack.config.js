@@ -1,8 +1,8 @@
 const path = require("path");
-const { EnvironmentPlugin } = require("webpack");
+const { EnvironmentPlugin, DefinePlugin } = require("webpack");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 //UglifyJsPlugin = require('uglifyjs-webpack-plugin')
-//const CopyPlugin = require("copy-webpack-plugin");
+const CopyPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const revisionInfo = require("@macrostrat/revision-info-webpack");
 const pkg = require("./package.json");
@@ -18,8 +18,8 @@ let publicURL = process.env.PUBLIC_URL || "/";
 const packageSrc = (name) =>
   path.resolve(__dirname, "deps", "web-components", "packages", name, "src");
 
-const cesiumSource = "node_modules/cesium/Source";
-const cesiumWorkers = "../Build/Cesium/Workers";
+const cesiumSource = "cesium/Source";
+const cesiumWorkers = "cesium/Build/Cesium/Workers";
 
 //uglify = new UglifyJsPlugin()
 
@@ -47,11 +47,13 @@ const plugins = [
     title: "Macrostrat",
     template: "./template.html",
   }),
-  new CopyPlugin([
-    { from: path.join(cesiumSource, cesiumWorkers), to: "Workers" },
-  ]),
-  new CopyPlugin([{ from: path.join(cesiumSource, "Assets"), to: "Assets" }]),
-  new CopyPlugin([{ from: path.join(cesiumSource, "Widgets"), to: "Widgets" }]),
+  new CopyPlugin({
+    patterns: [
+      { from: cesiumWorkers, to: "Workers" },
+      { from: path.join(cesiumSource, "Assets"), to: "Assets" },
+      { from: path.join(cesiumSource, "Widgets"), to: "Widgets" },
+    ],
+  }),
   new DefinePlugin({
     // Define relative base path in cesium for loading assets
     CESIUM_BASE_URL: JSON.stringify(publicURL),

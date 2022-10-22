@@ -1,4 +1,4 @@
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useRef } from "react";
 // Import other components
 import hyper from "@macrostrat/hyper";
 import Searchbar from "../components/searchbar";
@@ -16,7 +16,6 @@ import styles from "./main.module.styl";
 import { useLocation } from "react-router-dom";
 import { usePerformanceWatcher } from "../performance";
 import classNames from "classnames";
-import { useRef, useEffect } from "react";
 import { useTransition } from "transition-hook";
 import { usePanelOpen, useContextClass } from "../app-state";
 import { MapboxMapProvider, ZoomControl } from "@macrostrat/mapbox-react";
