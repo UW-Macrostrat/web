@@ -13,7 +13,8 @@
     "bootstrap": "yarn"
   },
   "workspaces": [
-    "deps/web-components/packages/*"
+    "deps/web-components/packages/*",
+    "packages/*"
   ],
   "authors": [
     "John Czaplewski <jczaplewski@wisc.edu>",
@@ -73,7 +74,7 @@
     "@types/react-redux": "^7.1.7",
     "@znemz/cesium-navigation": "^4.0.0",
     "cesium": "1.81.0",
-    "cesium-vector-provider": "file:./packages/cesium-vector-provider",
+    "@macrostrat/cesium-vector-provider": "workspace:*",
     "@visx/axis": "^2.14.0",
     "@visx/scale": "^2.2.2",
     "axios": "^0.25.0",
@@ -88,7 +89,7 @@
     "history": "^5.3.0",
     "immutability-helper": "^2.8.1",
     "isomorphic-fetch": "^2.2.1",
-    "maplibre-gl": "file:packages/maplibre-gl-js",
+    "maplibre-gl": "workspace:*",
     "mapbox-gl": "^2.9.1",
     "mapbox-gl-controls": "^2.3.5",
     "new-github-issue-url": "^1.0.0",
@@ -105,7 +106,6 @@
     "reduce-reducers": "^1.0.4",
     "redux": "^4.0.5",
     "regl": "^1.5.0",
-    "terriajs": "^7.11.4",
     "topojson-client": "^3.0.0",
     "transition-hook": "^1.5.2",
     "urijs": "^1.19.2",
