@@ -134,8 +134,8 @@ function AgeRefinementPlot({ macrostrat, mapInfo }) {
   console.log(macrostrat, mapInfo);
 
   const mapData = mapInfo.mapData[0];
-  const b_age = mapData.b_int.b_age;
-  const t_age = mapData.t_int.t_age;
+  const b_age = Math.max(mapData.b_int.b_age, macrostrat.b_age);
+  const t_age = Math.min(mapData.t_int.t_age, macrostrat.t_age);
 
   const scale = scaleLinear({
     domain: [1.02 * b_age, t_age * 0.98],
