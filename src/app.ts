@@ -58,6 +58,7 @@ const App = () => {
       [
         h(Routes, [
           h(Route, { path: "/sources", element: h(Sources) }),
+          h(Route, { path: "/dev/globe", element: h(GlobeDevPage) }),
           h(Route, { path: "*", element: h(MapPage) }),
         ]),
 

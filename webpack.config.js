@@ -156,7 +156,7 @@ module.exports = {
       cesium: path.resolve(__dirname, "node_modules/cesium"),
       resium: path.resolve(__dirname, "node_modules/resium"),
       cesiumSource: path.resolve(__dirname, cesiumSource),
-      "maplibre-gl": path.resolve(__dirname, "packages/maplibre-gl-js"),
+      "maplibre-gl": path.resolve(__dirname, "packages/cesium-vector-provider/packages/maplibre-gl"),
       "~": path.resolve(__dirname, "src"),
       "@macrostrat/cesium-viewer": localPackageSrc("cesium-viewer"),
       "@macrostrat/column-components": packageSrc("column-components"),

@@ -150,7 +150,6 @@ function MapContainer(props) {
 
   const { mapUse3D, mapIsRotated } = mapViewInfo(mapPosition);
 
-  console.log(mapLayers);
   return h("div.map-view-container.main-view", { ref: parentRef }, [
     h(_Map, {
       filters,

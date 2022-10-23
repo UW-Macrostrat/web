@@ -1,5 +1,5 @@
 import CesiumView, { DisplayQuality } from "@macrostrat/cesium-viewer";
-import h from "@macrostrat/hyper";
+import hyper from "@macrostrat/hyper";
 import { useDispatch, useSelector } from "react-redux";
 import {
   MapChangeTracker,
@@ -7,7 +7,7 @@ import {
 } from "@macrostrat/cesium-viewer/position";
 import {
   HillshadeLayer,
-  //GeologyLayer,
+  GeologyLayer,
   SatelliteLayer,
   terrainProvider,
 } from "@macrostrat/cesium-viewer/layers";
@@ -28,15 +28,24 @@ import { useAppActions, MapLayer, useAppState } from "../app-state";
 import { useCallback } from "react";
 import { positionClass } from "@blueprintjs/core/lib/esm/common/classes";
 import { mapStyle, coreStyle } from "./map-styles";
+import styles from "./main.module.styl";
+
+import "cesium/Source/Widgets/widgets.css"
+import "@znemz/cesium-navigation/dist/index.css"
+import { mergeStyles } from "@macrostrat/mapbox-utils";
+
+const h = hyper.styled(styles);
 
 maplibre.accessToken =
   "pk.eyJ1IjoiamN6YXBsZXdza2kiLCJhIjoiY2szNXA5OWcxMDN2bzNtcnI1cWd1ZXJpYiJ9.Dd5GKlrPhg969y1ayY32cg";
 
-const BaseGeologyLayer = ({ enabled = true, ...rest }) => {
+
+const VectorGeologyLayer = ({ enabled = true, ...rest }) => {
+
   const provider = useMemo(() => {
     return new MVTImageryProvider({
-      style: reliefShading,
-      maximumZoom: 13,
+      style: coreStyle,
+      maximumZoom: 15,
       tileSize: 512,
       opacity: 0.5,
     });
@@ -47,11 +56,11 @@ const BaseGeologyLayer = ({ enabled = true, ...rest }) => {
   return h(ImageryLayer, { imageryProvider: provider, ...rest });
 };
 
-const GeologyLayer = ({ visibleMaps = null, ...rest }) => {
+const _GeologyLayer = ({ visibleMaps = null, ...rest }) => {
   const hasGeology = useAppState((state) =>
     state.core.mapLayers.has(MapLayer.BEDROCK)
   );
-  return h(BaseGeologyLayer, { enabled: hasGeology, ...rest });
+  return h(GeologyLayer, { enabled: true, ...rest });
 };
 
 function MacrostratSatelliteLayer() {
@@ -65,7 +74,7 @@ function MacrostratSatelliteLayer() {
 function BaseLayer({ enabled = true, style, ...rest }) {
   const provider = useMemo(() => {
     return new MVTImageryProvider({
-      style,
+      style: reliefShading,
       // "mapbox://styles/jczaplewski/ckxeiii3a1jv415o8rxvgqlpd", //
       maximumZoom: 15,
       tileSize: 512,
@@ -115,46 +124,52 @@ function MacrostratCesiumView(props) {
     [mapIsLoading]
   );
 
-  return h(
-    CesiumView,
-    {
-      onViewChange(cpos) {
-        const { camera } = cpos;
-        // Tamp down memory usage by clearing log statements
-        console.clear();
-        runAction({
-          type: "map-moved",
-          data: {
-            camera: {
-              lng: camera.longitude,
-              lat: camera.latitude,
-              altitude: camera.height,
-              pitch: 90 + camera.pitch,
-              bearing: camera.heading,
+  return h("div.map-view-container.main-view", [
+    h("div.cesium-container", [
+    h(
+      CesiumView,
+      {
+        full: true,
+        onViewChange(cpos) {
+          const { camera } = cpos;
+          // Tamp down memory usage by clearing log statements
+          //console.clear();
+          runAction({
+            type: "map-moved",
+            data: {
+              camera: {
+                lng: camera.longitude,
+                lat: camera.latitude,
+                altitude: camera.height,
+                pitch: 90 + camera.pitch,
+                bearing: camera.heading,
+              },
             },
-          },
-        });
+          });
+        },
+        onClick({ latitude, longitude, zoom }) {
+          //dispatch(queryMap(longitude, latitude, zoom, null));
+        },
+        onTileLoadEvent,
+        terrainExaggeration,
+        displayQuality,
+        showInspector,
+        terrainProvider,
+        flyTo: globe.flyToProps,
       },
-      onClick({ latitude, longitude, zoom }) {
-        //dispatch(queryMap(longitude, latitude, zoom, null));
-      },
-      onTileLoadEvent,
-      terrainExaggeration,
-      displayQuality,
-      showInspector,
-      terrainProvider,
-      flyTo: globe.flyToProps,
-    },
-    [
-      //h(BaseLayer, { enabled: !hasSatellite }),
-      //h(MacrostratHillshadeLayer),
-      h.if(hasSatellite)(SatelliteLayer),
-      h.if(style != null)(BaseLayer, {
-        alpha: 1,
-        style, //"mapbox://styles/jczaplewski/ckxcu9zmu4aln14mfg4monlv3/draft",
-      }),
-    ]
-  );
+      [
+        //h(BaseLayer, { enabled: !hasSatellite }),
+        h.if(!hasSatellite)(HillshadeLayer),
+        h.if(hasSatellite)(SatelliteLayer),
+        // h.if(style != null)(BaseLayer, {
+        //   alpha: 1,
+        //   style, //"mapbox://styles/jczaplewski/ckxcu9zmu4aln14mfg4monlv3/draft",
+        // }),
+        h(_GeologyLayer, {alpha: 0.5}),
+      ]
+    ),
+    ])
+  ]);
 }
 
 const initialPosition = getInitialPosition(getHashString());
@@ -169,11 +184,10 @@ export function GlobeDevPage() {
       initialPosition,
       displayQuality: DisplayQuality.High,
       onViewChange(cpos) {
-        console.log(cpos);
         setHashString(buildPositionHash(cpos.camera));
       },
     },
-    [h(BaseGeologyLayer)]
+    [h(SatelliteLayer)]
   );
 }
 

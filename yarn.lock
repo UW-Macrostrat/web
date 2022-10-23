@@ -4732,7 +4732,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mapbox/sphericalmercator@npm:^1.0.5, @mapbox/sphericalmercator@npm:^1.2.0":
+"@mapbox/sphericalmercator@npm:^1.0.5":
   version: 1.2.0
   resolution: "@mapbox/sphericalmercator@npm:1.2.0"
   bin:
@@ -26129,21 +26129,41 @@ __metadata:
   languageName: node
   linkType: hard
 
-"maplibre-basic-renderer@workspace:packages/maplibre-basic-renderer":
-  version: 0.0.0-use.local
-  resolution: "maplibre-basic-renderer@workspace:packages/maplibre-basic-renderer"
+"maplibre-gl@npm:*":
+  version: 2.4.0
+  resolution: "maplibre-gl@npm:2.4.0"
   dependencies:
+    "@mapbox/geojson-rewind": ^0.5.2
+    "@mapbox/jsonlint-lines-primitives": ^2.0.2
+    "@mapbox/mapbox-gl-supported": ^2.0.1
     "@mapbox/point-geometry": ^0.1.0
-    "@mapbox/sphericalmercator": ^1.2.0
-    gl-matrix: ^3.2.1
-    maplibre-gl: ^2.0.0-pre.5
-    typescript: ^4.5.2
-  languageName: unknown
-  linkType: soft
+    "@mapbox/tiny-sdf": ^2.0.5
+    "@mapbox/unitbezier": ^0.0.1
+    "@mapbox/vector-tile": ^1.3.1
+    "@mapbox/whoots-js": ^3.1.0
+    "@types/geojson": ^7946.0.10
+    "@types/mapbox__point-geometry": ^0.1.2
+    "@types/mapbox__vector-tile": ^1.3.0
+    "@types/pbf": ^3.0.2
+    csscolorparser: ~1.0.3
+    earcut: ^2.2.4
+    geojson-vt: ^3.2.1
+    gl-matrix: ^3.4.3
+    global-prefix: ^3.0.0
+    murmurhash-js: ^1.0.0
+    pbf: ^3.2.1
+    potpack: ^1.0.2
+    quickselect: ^2.0.0
+    supercluster: ^7.1.5
+    tinyqueue: ^2.0.3
+    vt-pbf: ^3.1.3
+  checksum: ee3f422332596616861c243ced39b5b58b9d071487f0de75df49e5140fe04c4a9c112a83eb1e5f82bb34a11e78a0d54c39b62f65ef773f371b06b0b319a5a7a2
+  languageName: node
+  linkType: hard
 
-"maplibre-gl@^2.0.0-pre.5, maplibre-gl@workspace:*, maplibre-gl@workspace:packages/maplibre-gl-js":
+"maplibre-gl@workspace:*, maplibre-gl@workspace:packages/cesium-vector-provider/packages/maplibre-gl":
   version: 0.0.0-use.local
-  resolution: "maplibre-gl@workspace:packages/maplibre-gl-js"
+  resolution: "maplibre-gl@workspace:packages/cesium-vector-provider/packages/maplibre-gl"
   dependencies:
     "@babel/core": ^7.16.0
     "@mapbox/gazetteer": ^5.1.0
@@ -26300,38 +26320,6 @@ __metadata:
     vt-pbf: ^3.1.1
   languageName: unknown
   linkType: soft
-
-"maplibre-gl@npm:*":
-  version: 2.4.0
-  resolution: "maplibre-gl@npm:2.4.0"
-  dependencies:
-    "@mapbox/geojson-rewind": ^0.5.2
-    "@mapbox/jsonlint-lines-primitives": ^2.0.2
-    "@mapbox/mapbox-gl-supported": ^2.0.1
-    "@mapbox/point-geometry": ^0.1.0
-    "@mapbox/tiny-sdf": ^2.0.5
-    "@mapbox/unitbezier": ^0.0.1
-    "@mapbox/vector-tile": ^1.3.1
-    "@mapbox/whoots-js": ^3.1.0
-    "@types/geojson": ^7946.0.10
-    "@types/mapbox__point-geometry": ^0.1.2
-    "@types/mapbox__vector-tile": ^1.3.0
-    "@types/pbf": ^3.0.2
-    csscolorparser: ~1.0.3
-    earcut: ^2.2.4
-    geojson-vt: ^3.2.1
-    gl-matrix: ^3.4.3
-    global-prefix: ^3.0.0
-    murmurhash-js: ^1.0.0
-    pbf: ^3.2.1
-    potpack: ^1.0.2
-    quickselect: ^2.0.0
-    supercluster: ^7.1.5
-    tinyqueue: ^2.0.3
-    vt-pbf: ^3.1.3
-  checksum: ee3f422332596616861c243ced39b5b58b9d071487f0de75df49e5140fe04c4a9c112a83eb1e5f82bb34a11e78a0d54c39b62f65ef773f371b06b0b319a5a7a2
-  languageName: node
-  linkType: hard
 
 "markdown-escapes@npm:^1.0.0":
   version: 1.0.4
@@ -38279,7 +38267,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:>=3.0.1, typescript@npm:^4.0.2, typescript@npm:^4.1.3, typescript@npm:^4.2.3, typescript@npm:^4.4.2, typescript@npm:^4.4.4, typescript@npm:^4.5.2, typescript@npm:^4.5.5, typescript@npm:^4.6.4":
+"typescript@npm:>=3.0.1, typescript@npm:^4.0.2, typescript@npm:^4.1.3, typescript@npm:^4.2.3, typescript@npm:^4.4.2, typescript@npm:^4.4.4, typescript@npm:^4.5.5, typescript@npm:^4.6.4":
   version: 4.8.4
   resolution: "typescript@npm:4.8.4"
   bin:
@@ -38309,7 +38297,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@>=3.0.1#~builtin<compat/typescript>, typescript@patch:typescript@^4.0.2#~builtin<compat/typescript>, typescript@patch:typescript@^4.1.3#~builtin<compat/typescript>, typescript@patch:typescript@^4.2.3#~builtin<compat/typescript>, typescript@patch:typescript@^4.4.2#~builtin<compat/typescript>, typescript@patch:typescript@^4.4.4#~builtin<compat/typescript>, typescript@patch:typescript@^4.5.2#~builtin<compat/typescript>, typescript@patch:typescript@^4.5.5#~builtin<compat/typescript>, typescript@patch:typescript@^4.6.4#~builtin<compat/typescript>":
+"typescript@patch:typescript@>=3.0.1#~builtin<compat/typescript>, typescript@patch:typescript@^4.0.2#~builtin<compat/typescript>, typescript@patch:typescript@^4.1.3#~builtin<compat/typescript>, typescript@patch:typescript@^4.2.3#~builtin<compat/typescript>, typescript@patch:typescript@^4.4.2#~builtin<compat/typescript>, typescript@patch:typescript@^4.4.4#~builtin<compat/typescript>, typescript@patch:typescript@^4.5.5#~builtin<compat/typescript>, typescript@patch:typescript@^4.6.4#~builtin<compat/typescript>":
   version: 4.8.4
   resolution: "typescript@patch:typescript@npm%3A4.8.4#~builtin<compat/typescript>::version=4.8.4&hash=f456af"
   bin:

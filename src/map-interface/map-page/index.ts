@@ -54,7 +54,6 @@ const MapView = (props: { backend: MapBackend }) => {
     backend = MapBackend.CESIUM;
   }
 
-
   switch (backend) {
     case MapBackend.CESIUM:
       return h(CesiumView);

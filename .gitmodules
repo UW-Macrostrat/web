@@ -7,12 +7,6 @@
 [submodule "packages/cesium-vector-provider"]
 	path = packages/cesium-vector-provider
 	url = https://github.com/davenquinn/cesium-vector-provider.git
-[submodule "packages/maplibre-gl-js"]
-	path = packages/maplibre-gl-js
-	url = https://github.com/davenquinn/maplibre-gl-js.git
-[submodule "packages/maplibre-basic-renderer"]
-	path = packages/maplibre-basic-renderer
-	url = https://github.com/davenquinn/maplibre-basic-renderer.git
 [submodule "deps/ui-components"]
 	path = deps/web-components
 	url = https://github.com/UW-Macrostrat/web-components.git
