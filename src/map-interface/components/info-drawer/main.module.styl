@@ -1,26 +1,36 @@
+@require "../../../styles/_common"
 
-.infodrawer-container
-  width 30em
-  position absolute
-  right 0px
-  top 0px
-  bottom: 0px
-  pointer-events none
-  display flex
-  flex-direction column
-  :global
-    .macrostrat-detail
-      margin: 15px 0px;
-      display: flex;
-      align-items: center;
+.macrostrat-detail
+  display: flex;
+  align-items: center;
+  margin 0.2em 0 0.4em;
+  .expansion-summary-title
+    margin-right: 0.8em;
+    &:after
+      content: ":";
 
-.expansion-children
-  margin-left 10px
+.described-age, .macrostrat-detail
+  display: flex;
+  align-items: center;
+  .expansion-summary-title
+    margin-right: 0.8em;
+    &:after
+      content: ":";
+
+  .description
+    font-style italic
+    font-size 0.7em
+    max-width: 100px
+    text-align: right
+
+  .age-chips
+    flex-grow 1
 
 .infodrawer
   pointer-events all
   max-height 100%
   max-width 100%
+  height fit-content
   display flex
   flex-direction column
   padding 0
@@ -41,29 +51,43 @@
     align-items baseline
     margin-right 1em
 
+  &.loading
+    .infodrawer-body
+      overflow-y: hidden
+      min-height: 70px
+
+  // &.loading
+  //   max-height: 200px
+  // max-height: calc(100vh - 60px)
+  // transition: max-height 0.5s ease-in-out 0.25s
 
 .infodrawer-body
   overflow-y scroll
   flex-shrink 1
+  position relative
+  min-height: 0
+  transition min-height 0.2s ease
 
 .spacer
   flex-grow 1
+  pointer-events none
 
-.spinner{
-  margin: 10px;
-}
+.macrostrat-unit
+  h3
+    margin: 0.5em 0 0.5em;
+    flex-grow: 1;
+  .description
+    margin-right: 1em
 
-@media screen and (max-width: 768px) {
-  .infodrawer{
-    max-height: 60%;
-    width: 100%;
+.description
+  font-style italic
+
+.age-refinement-plot
+  position relative
+  .age-refinement-bar
+    border-radius: 3px
+    margin-bottom: 1px
+
+@media screen and (max-width: 768px)
+  .infodrawer
     border-radius: 0px;
-    position: absolute;
-    bottom: 0px;
-  }
-  .infodrawer-container{
-    width: 100vw;
-    height: 100vh;
-    z-index: 200;
-  }
-}

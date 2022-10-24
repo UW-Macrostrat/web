@@ -1,7 +1,7 @@
-import React from "react";
 import Article from "./Article";
 import { Divider } from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
+import { SubExpansionPanel } from "../expansion-panel";
 
 function Journal(props) {
   return h("div.journal", [
@@ -18,4 +18,21 @@ function Journal(props) {
   ]);
 }
 
-export default Journal;
+// Still up for review
+function Journal_(props) {
+  return h(
+    SubExpansionPanel,
+    {
+      title: props.data.name,
+      helpText: props.data.source,
+      expanded: true,
+    },
+    [
+      props.data.articles.map((article, i) => {
+        return h(Article, { key: i, data: article });
+      }),
+    ]
+  );
+}
+
+export default Journal_;

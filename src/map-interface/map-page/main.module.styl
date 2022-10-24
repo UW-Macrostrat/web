@@ -1,45 +1,59 @@
+/*
+This stylesheet the overall application page layout.
+*/
+
 .map-page
   height 100vh
   width 100vw
+  /* mobile viewport bug fix */
+  max-height: -webkit-fill-available;
   display flex
   flex-direction column
   position relative
 
+  // Compass display
+  .compass-control
+    display: none
+  &.map-is-rotated
+    .compass-control
+      display: block
+  
+  .map-3d-control
+    display: none
+  &.map-3d-available .map-3d-control
+    display: block
+  &.map-is-rotated.map-3d-available .map-3d-control
+    display: none
+
+  .globe-control
+    svg
+      color: var(--secondary-color)
+    display: none
+  &.map-is-global .globe-control
+    display: block
+
+
 .main-ui
-  flex-grow 1
+  flex 1
   position: relative
+  display flex
+  flex-direction: column
+  max-height 100%
+  height: 100%
 
-.panels-overlay
-  position absolute
-  top 20px
-  left 20px
-  right 20px
-  bottom 30px
-  z-index 100
-  // Make sure we can still click
-  // on map in background
-  pointer-events none
-
-:global(.bp3-panel-stack-view)
-  position: relative;
-  overflow: unset
-
-
-.left-stack
-  max-width 34em
-  min-width 14em
-  // height 100vh
-  position absolute
-  top 0
-  bottom 0
+.context-stack
   display: flex
-  flex-direction: row
-  .spacer
-    flex-grow 1
-    width 1px
-    pointer-events: none
-  .panel-container > *
-    transition width 300ms
+  flex-direction: column
+  max-height: 100%
+  &>div
+    flex-shrink 1
+  &>.searchbar
+    flex 0
+
+// Rename left-stack to context-stack
+
+.context-stack, .detail-stack
+  z-index: 100
 
 .panel-container
   display flex
@@ -50,12 +64,281 @@
 .panel-title
   font-size 16px
 
-@media only screen and (max-width: 768px) {
-  /* For mobile phones: */
-  .panels-overlay{
+.spacer
+  flex-grow 1
+  pointer-events: none
+
+.map-view-container
+  flex-grow 1
+  position relative
+
+.searchbar-holder
+  margin-bottom 0.5em
+
+.list-button
+  border-radius: 4px
+  padding: 0px 10px !important
+  margin-bottom 4px
+
+
+// Menu
+.buttons
+  display: flex
+  flex-direction: row
+  flex: 1
+  min-width: 0
+
+.tab-button
+  flex-shrink: 1
+  min-width: 40px
+  overflow: hidden
+  text-align: right
+  :global(.bp3-button-text)
+    transition all 0.2s
+    transition-delay 0.1s
+
+.menu-card.narrow-card
+  // Transition opacity when leaving context panel
+  .panel-header:not(.minimal)
+    // .tab-button
+    //   &:not(:hover) :global(.bp3-button-text)
+    //     //width 0
+    //     opacity: 1
+        //margin-left: -7px
+    // Fancy CSS to select all buttons _after_ the currently hovered one
+    .tab-button:global(.bp3-active) ~ .tab-button :global(.bp3-button-text)
+        width 0
+        opacity: 0
+        margin-left: -7px
+
+// When panel is closing, fade out the buttons text-first
+.context-panel-leave .menu-card .panel-header
+  .tab-button :global(.bp3-button-text)
+    opacity: 0
+    width: 0
+
+.narrow-card.narrow-enter .panel-header .buttons
+  // When we have not yet transitioned to a "minimal" state, we need extra space
+  // to not crowd buttons that haven't yet transitioned
+  margin-right: -500px
+
+.panel-header.minimal
+  .tab-button:not(:hover)
+    &:not(:global(.bp3-active))
+      padding-left: 0
+      padding-right: 0
+      min-width: 30px
+      width: 30px
+    :global(.bp3-button-text)
+      width 0
+      opacity: 0
+      margin-left: -7px
+
+.menu-card
+  :global
+    .bp3-text, .text-panel
+      ul
+        padding-left: 1em
+
+.menu-content
+  display flex
+  flex-direction column
+  .bp3-button-group
+    margin-bottom 4px
+  margin: -4px
+  margin-bottom -8px
+
+// Map controls
+map-control()
+  min-width: 22px
+  min-height: 22px 
+  border-radius: 4px
+  box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.1), 0 0 0 rgba(16, 22, 26, 0), 0 1px 1px rgba(16, 22, 26, 0.2) !important
+  //box-shadow: 0 0 0 2px rgba(0,0,0,.1)
+  button
+    width: 22px
+    height: 22px
+    background-position: center center
+    padding 0
+
+:global
+
+  #map
+    position: absolute;
     top: 0;
-    left: 0;
     bottom: 0;
+    left: 0;
     right: 0;
-  }
-}
+
+    .mapbox-compass, .mapbox-3d
+      display: none
+
+  .mapboxgl-ctrl.mapbox-3d.mapbox-control
+    width: unset
+    button
+      width: unset
+      padding-inline 4px
+
+  .mapboxgl-canvas-container
+    width: 100%
+    height: 100%
+
+.detail-stack
+  position relative
+
+.main-ui.detail-panel-open
+  .zoom-control
+    opacity: 0
+    display none
+
+.zoom-control
+  transition opacity 1s ease-in-out
+  width: 30px
+  position absolute
+  top 0
+  right 0
+
+.main-ui.searching
+  .map-view-container
+    pointer-events: none
+
+.map-controls
+  display flex
+  flex-direction row
+  justify-content: right
+  margin-bottom: 0
+  &>*
+    margin-left: 0.5em
+  :global(.mapbox-control), .map-control
+    map-control()
+
+
+:global(.mapbox-control.mapbox-zoom)
+  background: rgba(255,255,255,0.2)
+
+/* For mobile phones, we want to make the most of screen space,
+ which in some cases means adding complications to the basic page. */
+@media only screen and (max-width: 768px)
+
+  // Move the search bar and context panel to the bottom of the screen
+  // .context-stack
+  //   display flex
+  //   order 1
+  //   flex-direction: column-reverse
+  //   max-height: 80%
+
+  // Hide searchbar when infodrawer is open
+  .main-ui.detail-panel-enter .context-stack
+    height: 0
+    visibility: hidden
+    transition: height 0.5s ease-in-out
+
+
+  // Make sure that our detail panel doesn't take up the entirety of the page
+  .detail-stack
+    height: fit-content
+    position: inherit
+    max-height: 70%
+
+  .infodrawer-stack
+    max-height: 70%
+    &:global(.exit-active)
+      max-height: 0
+
+  // Completely hide zoom control
+  :global(.mapbox-control.mapbox-zoom)
+    display: none
+
+  // Position map controls within the map area
+  .map-controls
+    position absolute
+    top -60px
+    right 10px
+
+/* Desktop styling is necessarily much more complicated than mobile
+  to handle a two-column layout. */
+@media screen and (min-width: 768px)
+
+  .main-ui
+    flex-direction row
+    padding 1em 1em 2em
+    min-height: 80px
+    &>*
+      margin-right 0.5em
+      &:last-child
+        margin-right 0
+    &.searching .context-stack
+      width: 24em
+
+
+  .context-stack
+    max-width 34em
+    min-width 14em
+    width: 16em
+    transition width 300ms ease
+    //margin-right: -15.5em
+    &.panel-open
+      width: 34em
+      margin-right 0.5em
+    &.layers
+      width: 18em
+      margin-right 0.5em
+    // Leave a little space for Mapbox logo at the bottom
+    padding-bottom: 0.5em
+
+  .main-ui.detail-panel-open .detail-stack
+    width: 30em
+
+  .detail-stack
+    width 30em
+    // position absolute
+    // right 0px
+    // top 0px
+    // bottom: 0px
+    pointer-events none
+    display flex
+    flex-direction column
+
+  .context-stack, .detail-stack
+    pointer-events: none
+    z-index: 100
+    &>div
+      pointer-events: all
+      margin-bottom: 0.5em
+      &:last-child
+        margin-bottom 0
+    &>div.spacer
+      pointer-events: none
+
+  /* Make map fill page rather than containing div,
+    by unsetting map position */
+  .map-view-container
+    position: unset
+
+  // .map-holder
+  //   z-index: 1;
+  //   position: absolute;
+  //   top 0
+  //   left 0
+  //   bottom 0
+  //   right 0
+  //   height 100%
+
+// padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+
+// Transitions
+
+// @keyframes fadeIn
+//   from
+//     opacity: 0
+//   to
+//     opacity: 1
+
+@require "./transitions.module.styl"
+
+.cesium-container
+  position: absolute
+  top: 0
+  left: 0
+  right: 0
+  bottom: 0

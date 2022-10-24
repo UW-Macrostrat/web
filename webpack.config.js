@@ -1,27 +1,35 @@
 const path = require("path");
-const { DefinePlugin, EnvironmentPlugin } = require("webpack");
-const BrowserSyncPlugin = require("browser-sync-webpack-plugin");
+const { EnvironmentPlugin, DefinePlugin } = require("webpack");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 //UglifyJsPlugin = require('uglifyjs-webpack-plugin')
-const historyApiFallback = require("connect-history-api-fallback");
 const CopyPlugin = require("copy-webpack-plugin");
-const DotenvPlugin = require("dotenv-webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const revisionInfo = require("@macrostrat/revision-info-webpack");
 const pkg = require("./package.json");
 
-let mode = "development";
+// Read dotenv file in directory
+const dotenv = require("dotenv");
+dotenv.config();
+
+const mode = process.env.NODE_ENV || "development";
+const devMode = mode == "development";
 
 let publicURL = process.env.PUBLIC_URL || "/";
 
-const packageSrc = (name) => path.resolve(__dirname, "packages", name, "src");
+const packageSrc = (name) =>
+  path.resolve(__dirname, "deps", "web-components", "packages", name, "src");
 
-let browserSync = new BrowserSyncPlugin({
-  server: { baseDir: "./dist" },
-  middleware: [historyApiFallback()],
-});
+const localPackageSrc = (name) =>
+  path.resolve(__dirname, "packages", name, "src");
 
-const cesiumSource = "node_modules/cesium/Source";
-const cesiumWorkers = "../Build/Cesium/Workers";
+const cesiumSource = path.join(
+  path.dirname(require.resolve("cesium")),
+  "Source"
+);
+const cesiumWorkers = path.join(
+  path.dirname(require.resolve("cesium")),
+  "Build/Cesium/Workers"
+);
 
 //uglify = new UglifyJsPlugin()
 
@@ -39,13 +47,65 @@ const cssModuleLoader = {
   options: {
     modules: {
       mode: "local",
-      localIdentName: "[path][name]__[local]--[hash:base64:5]",
+      localIdentName: "[local]-[hash:base64:6]",
     },
   },
 };
 
+const plugins = [
+  new HtmlWebpackPlugin({
+    title: "Macrostrat",
+    template: "./template.html",
+  }),
+  new CopyPlugin({
+    patterns: [
+      { from: cesiumWorkers, to: "cesium/Workers" },
+      { from: path.join(cesiumSource, "Assets"), to: "cesium/Assets" },
+      { from: path.join(cesiumSource, "Widgets"), to: "cesium/Widgets" },
+      {
+        from: path.resolve(
+          cesiumSource,
+          `../Build/Cesium${devMode ? "Unminified" : ""}`
+        ),
+        to: "cesium",
+      },
+    ],
+  }),
+  new DefinePlugin({
+    // Define relative base path in cesium for loading assets
+    CESIUM_BASE_URL: JSON.stringify(publicURL + "cesium"),
+    // Git revision information
+  }),
+  new EnvironmentPlugin({
+    ...gitEnv,
+    MAPBOX_API_TOKEN: "<your-mapbox-api-token>",
+    MACROSTRAT_TILESERVER_DOMAIN: "https://tiles.macrostrat.org",
+    MACROSTRAT_API_DOMAIN: "https://macrostrat.org",
+    PUBLIC_URL: "/",
+  }),
+];
+
+/* Use style-loader in development so we can get hot-reloading,
+  but use MiniCssExtractPlugin in production for small bundle sizes */
+let finalStyleLoader = "style-loader";
+if (!devMode) {
+  plugins.push(new MiniCssExtractPlugin());
+  finalStyleLoader = MiniCssExtractPlugin.loader;
+}
+
+const styleLoaders = [finalStyleLoader, cssModuleLoader];
+
+console.log(cesiumSource);
+
 module.exports = {
-  mode: mode,
+  mode,
+  devServer: {
+    compress: true,
+    port: 3000,
+    hot: true,
+    open: true,
+    historyApiFallback: true,
+  },
   module: {
     rules: [
       {
@@ -55,15 +115,19 @@ module.exports = {
       },
       {
         test: /\.styl$/,
-        use: ["style-loader", cssModuleLoader, "stylus-loader"],
+        use: [...styleLoaders, "stylus-loader"],
         exclude: /node_modules/,
       },
       {
-        test: /\.css$/,
-        use: ["style-loader", cssModuleLoader],
-        exclude: /node_modules/,
+        test: /\.(sass|scss)$/,
+        use: [...styleLoaders, "sass-loader"],
       },
-      { test: /\.css$/, use: ["style-loader", "css-loader"] },
+      // {
+      //   test: /\.css$/,
+      //   use: styleLoaders,
+      //   exclude: /node_modules/,
+      // },
+      { test: /\.css$/, use: [finalStyleLoader, "css-loader"] },
       {
         test: /\.(eot|svg|ttf|woff|woff2)$/,
         use: [
@@ -87,11 +151,11 @@ module.exports = {
         ],
       },
       // https://github.com/CesiumGS/cesium/issues/9790#issuecomment-943773870
-      {
-        test: /.js$/,
-        include: path.resolve(__dirname, "node_modules/cesium/Source"),
-        use: { loader: require.resolve("@open-wc/webpack-import-meta-loader") },
-      },
+      // {
+      //   test: /.js$/,
+      //   include: "node_modules/cesium/Source",
+      //   use: { loader: require.resolve("@open-wc/webpack-import-meta-loader") },
+      // },
       {
         test: /\.mdx?$/,
         use: [babelLoader, "@mdx-js/loader"],
@@ -103,19 +167,31 @@ module.exports = {
     extensions: [".ts", ".tsx", ".js", ".jsx"],
     alias: {
       // CesiumJS module name,
-      cesium: path.resolve(__dirname, "node_modules/cesium"),
-      cesiumSource: path.resolve(__dirname, cesiumSource),
+      cesiumSource,
+      cesium: "cesium/Source/Cesium",
+      "maplibre-gl": path.resolve(
+        __dirname,
+        "packages/cesium-vector-provider/packages/maplibre-gl"
+      ),
       "~": path.resolve(__dirname, "src"),
-      "@macrostrat/cesium-viewer": packageSrc("cesium-viewer"),
+      "@macrostrat/cesium-viewer": localPackageSrc("cesium-viewer"),
       "@macrostrat/column-components": packageSrc("column-components"),
       "@macrostrat/ui-components": packageSrc("ui-components"),
+      "@macrostrat/mapbox-styles": packageSrc("mapbox-styles"),
+      "@macrostrat/mapbox-utils": packageSrc("mapbox-utils"),
+      "@macrostrat/mapbox-react": packageSrc("mapbox-react"),
+    },
+    // We need fallbacks for cesium source files
+    fallback: {
+      https: false,
+      zlib: false,
+      http: false,
+      url: false,
+      path: require.resolve("path-browserify"),
     },
   },
   entry: {
-    "js/bundle": "./src/index.ts",
-  },
-  node: {
-    fs: "empty",
+    main: "./src/index.ts",
   },
   output: {
     path: path.join(__dirname, "/dist/"),
@@ -123,36 +199,14 @@ module.exports = {
     filename: "[name].js",
     devtoolModuleFilenameTemplate: "file:///[absolute-resource-path]",
   },
-  devtool: mode == "development" ? "source-map" : false,
+  devtool: "source-map",
   amd: {
     // Enable webpack-friendly use of require in Cesium
     toUrlUndefined: true,
   },
   optimization: {
     splitChunks: { chunks: "all" },
+    usedExports: true,
   },
-  plugins: [
-    browserSync,
-    new HtmlWebpackPlugin({
-      title: "Macrostrat Web – Experimental",
-      template: "./template.html",
-    }),
-    new DotenvPlugin(),
-    new CopyPlugin([
-      { from: path.join(cesiumSource, cesiumWorkers), to: "Workers" },
-    ]),
-    new CopyPlugin([{ from: path.join(cesiumSource, "Assets"), to: "Assets" }]),
-    new CopyPlugin([
-      { from: path.join(cesiumSource, "Widgets"), to: "Widgets" },
-    ]),
-    new DefinePlugin({
-      // Define relative base path in cesium for loading assets
-      CESIUM_BASE_URL: JSON.stringify(publicURL),
-      MACROSTRAT_BASE_URL: JSON.stringify(publicURL),
-      // Git revision information
-    }),
-    new EnvironmentPlugin({
-      ...gitEnv,
-    }),
-  ],
+  plugins,
 };

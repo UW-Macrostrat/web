@@ -1,4 +1,4 @@
-import { MapAction, MapState } from "../map";
+import { MapAction, MapLayer, MapState } from "../map";
 import { CancelToken } from "axios";
 export * from "../map";
 
@@ -19,13 +19,11 @@ type GET_COLUMN = { type: "get-column"; column: any };
 type GET_ELEVATION = { type: "get-elevation"; line: any };
 type GET_PBDB = { type: "get-pbdb"; collection_nos: any };
 // Define constants to be passed with actions
-type PAGE_CLICK = { type: "page-click" };
 type RECIEVE_DATA = { type: "recieve-data" };
 type REQUEST_DATA = { type: "request-data" };
 
 type TOGGLE_MENU = { type: "toggle-menu" };
 type TOGGLE_ABOUT = { type: "toggle-about" };
-type TOGGLE_INFODRAWER = { type: "toggle-infodrawer" };
 type EXPAND_INFODRAWER = { type: "expand-infodrawer" };
 type CLOSE_INFODRAWER = { type: "close-infodrawer" };
 type TOGGLE_ELEVATION_CHART = { type: "toggle-elevation-chart" };
@@ -51,18 +49,28 @@ type RECEIVED_COLUMN_QUERY = {
   column: any;
 };
 
+type MAP_LAYERS_CHANGED = {
+  type: "map-layers-changed";
+  mapLayers: Set<MapLayer>;
+};
+
 type START_GDD_QUERY = { type: "start-gdd-query"; cancelToken: any };
 type RECEIVED_GDD_QUERY = { type: "received-gdd-query"; data: any };
 
-type START_PBDB_QUERY = { type: "start-pbdb-query"; cancelToken: any };
-type UPDATE_PBDB_QUERY = { type: "update-pbdb-query"; cancelToken: any };
+type START_PBDB_QUERY = { type: "start-pbdb-query" };
 type RECEIVED_PBDB_QUERY = { type: "received-pbdb-query"; data: any };
 type RESET_PBDB = { type: "reset-pbdb" };
 
 type SET_INPUT_FOCUS = {
   type: "set-input-focus";
   inputFocus: boolean;
+  menuOpen?: boolean;
 };
+
+type CONTEXT_OUTSIDE_CLICK = {
+  type: "context-outside-click";
+};
+
 type SET_SEARCH_TERM = {
   type: "set-search-term";
   term: string;
@@ -91,6 +99,7 @@ type SET_ACTIVE_INDEX_MAP = { type: "set-active-index-map" };
 type UPDATE_STATE = { type: "update-state"; state: any };
 
 export type CoreAction =
+  | MAP_LAYERS_CHANGED
   | CLEAR_FILTERS
   | SET_INPUT_FOCUS
   | SET_SEARCH_TERM
@@ -103,12 +112,11 @@ export type CoreAction =
   | GET_FILTERED_COLUMNS
   | ASYNC_ADD_FILTER
   | FETCH_SEARCH_QUERY
-  | PAGE_CLICK
+  | CONTEXT_OUTSIDE_CLICK
   | RECIEVE_DATA
   | REQUEST_DATA
   | TOGGLE_MENU
   | TOGGLE_ABOUT
-  | TOGGLE_INFODRAWER
   | EXPAND_INFODRAWER
   | CLOSE_INFODRAWER
   | TOGGLE_ELEVATION_CHART
@@ -123,7 +131,6 @@ export type CoreAction =
   | START_GDD_QUERY
   | RECEIVED_GDD_QUERY
   | START_PBDB_QUERY
-  | UPDATE_PBDB_QUERY
   | RECEIVED_PBDB_QUERY
   | RESET_PBDB
   | START_SEARCH_QUERY
@@ -150,7 +157,6 @@ interface AsyncRequestState {
   gddCancelToken: CancelToken | null;
   searchCancelToken: CancelToken | null;
   elevationCancelToken: CancelToken | null;
-  pbdbCancelToken: CancelToken | null;
 }
 
 interface MapCenterInfo {
@@ -159,6 +165,7 @@ interface MapCenterInfo {
 }
 export interface CoreState extends MapState, AsyncRequestState {
   initialLoadComplete: boolean;
+  contextPanelOpen: boolean;
   menuOpen: boolean;
   aboutOpen: boolean;
   infoDrawerOpen: boolean;
@@ -172,9 +179,11 @@ export interface CoreState extends MapState, AsyncRequestState {
   gddInfo: any[];
   searchResults: any;
   elevationData: any;
+  inputFocus: boolean;
   elevationMarkerLocation: any;
   pbdbData: any[];
   mapCenter: MapCenterInfo;
+  mapUse3D: boolean;
   filtersOpen: boolean;
   filters: any[];
   filteredColumns: object;

@@ -1,22 +1,4 @@
-type LatLng = {
-  lng: number;
-  lat: number;
-};
-
-type TargetPosition = LatLng & {
-  zoom: number;
-};
-
-type CameraPosition = LatLng & {
-  bearing?: number;
-  pitch?: number;
-  altitude: number;
-};
-
-export type MapPosition = {
-  camera: CameraPosition;
-  target?: TargetPosition;
-};
+import { MapPosition } from "@macrostrat/mapbox-utils";
 
 export enum MapBackend {
   MAPBOX,
@@ -30,12 +12,15 @@ export enum MapLayer {
   COLUMNS = "columns",
   FOSSILS = "fossils",
   BEDROCK = "bedrock",
+  SOURCES = "sources",
 }
 
 type MapInitialState = {
   mapPosition: MapPosition;
   mapBackend: MapBackend;
   mapLayers: Set<MapLayer>;
+  mapShowLabels: boolean;
+  mapShowLineSymbols: boolean;
 };
 
 export type MapState = MapInitialState & {
@@ -48,6 +33,9 @@ type GetInitialMapState = { type: "get-initial-map-state" };
 type MapLoading = { type: "map-loading" };
 type MapIdle = { type: "map-idle" };
 type ToggleLayer = { type: "toggle-map-layer"; layer: MapLayer };
+type ToggleLabels = { type: "toggle-labels" };
+type ToggleLineSymbols = { type: "toggle-line-symbols" };
+type ToggleMap3D = { type: "toggle-map-3d" };
 
 export type GotInitialMapState = {
   type: "got-initial-map-state";
@@ -61,4 +49,7 @@ export type MapAction =
   | SetMapBackend
   | MapLoading
   | MapIdle
-  | ToggleLayer;
+  | ToggleLayer
+  | ToggleLabels
+  | ToggleLineSymbols
+  | ToggleMap3D;

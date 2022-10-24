@@ -6,7 +6,7 @@ import {
   MapPosition,
   MapLayer,
   CoreState,
-} from "../sections/core/types";
+} from "../sections/core/actions";
 
 const fmt = format(".3~f");
 const fmt2 = format(".2~f");
@@ -22,14 +22,7 @@ interface HashParams {
 }
 
 function updateURI(state: CoreState) {
-  let args: HashParams = {
-    layers: Array.from(state.mapLayers),
-  };
-
-  if (args.layers.length == 0) {
-    // Special case for no layers
-    args.layers.push("none");
-  }
+  let args: object = {};
 
   for (const filter of state.filters) {
     args[filter.type] = filter.id || filter.name;
@@ -57,6 +50,12 @@ function updateURI(state: CoreState) {
   if (pitch != 0) {
     args.e = fmtInt(pos.pitch);
   }
+
+  const layers = getLayerDescriptionFromLayers(state.mapLayers);
+  if (layers.length != 0) {
+    args.show = layers;
+  }
+
   setHashString(args, { arrayFormat: "comma", sort: false });
   return state;
 }
@@ -109,6 +108,28 @@ function _fmt(x: string | number | string[]) {
   return parseFloat(x.toString());
 }
 
+function getLayerDescriptionFromLayers(layers: Set<MapLayer>): string[] {
+  let layerArr: string[] = Array.from(layers);
+  if (layerArr.length == 0) {
+    // Special case for no layers
+    layerArr.push("none");
+  }
+
+  // If all geology layers are present, remove them and replace with "geology"
+  let geoLayers = layerArr.filter((lyr) => geologyLayers.includes(lyr));
+  if (geoLayers.length == geologyLayers.length) {
+    layerArr = layerArr.filter((lyr) => !geologyLayers.includes(lyr));
+    layerArr.push("geology");
+  }
+
+  // If "geology" is the only layer, we remove it as implicit
+  if (layerArr.length == 1 && layerArr[0] == "geology") {
+    layerArr = [];
+  }
+
+  return layerArr;
+}
+
 function isValidLayer(test: string): test is MapLayer {
   const vals: string[] = Object.values(MapLayer);
   return vals.includes(test);
@@ -118,23 +139,38 @@ function validateLayers(layers: string[]): Set<MapLayer> {
   return new Set(layers.filter(isValidLayer));
 }
 
+const geologyLayers = ["bedrock", "lines"];
+
+function layerDescriptionToLayers(layers: string | string[]): Set<MapLayer> {
+  if (!Array.isArray(layers)) {
+    layers = [layers];
+  }
+
+  if (layers.length == 0) {
+    layers = ["geology"];
+  }
+
+  if (layers.includes("geology")) {
+    layers = layers.filter((lyr) => lyr != "geology");
+    layers.push(...geologyLayers);
+  }
+
+  if (layers.length == 1 && layers[0] == "none") {
+    layers = [];
+  }
+
+  return validateLayers(layers);
+}
+
 function updateStateFromURI(state): GotInitialMapState | void {
   // Get the default map state
   try {
     const hashData: HashParams = getHashString(window.location.hash) ?? {};
 
-    let { layers = ["bedrock", "lines"] } = hashData;
-    const { x = 16, y = 23, z = 1.5, a = 0, e = 0 } = hashData;
+    let { show = [] } = hashData;
+    const { x = 16, y = 23, z = 2, a = 0, e = 0 } = hashData;
 
-    if (!Array.isArray(layers)) {
-      layers = [layers];
-    }
-
-    if (layers == ["none"]) {
-      layers = [];
-    }
-
-    const mapLayers = validateLayers(layers);
+    const mapLayers = layerDescriptionToLayers(show);
 
     const lng = _fmt(x);
     const lat = _fmt(y);

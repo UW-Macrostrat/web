@@ -1,83 +1,215 @@
-import h from "@macrostrat/hyper";
-import { AgeChip, AttrChip, MacrostratAgeChip } from "../info-blocks";
-import { ExpansionPanel } from "../expansion-panel";
+import hyper from "@macrostrat/hyper";
+import { AgeChip, AttrChip } from "../info-blocks";
+import {
+  ExpansionPanel,
+  ExpandableDetailsPanel,
+  ExpansionBody,
+} from "../expansion-panel";
+import styles from "./main.module.styl";
+import { scaleLinear } from "@visx/scale";
+import { AxisBottom } from "@visx/axis";
+import chroma from "chroma-js";
+const h = hyper.styled(styles);
 
 function MacrostratLinkedData(props) {
   const { mapInfo, bedrockMatchExpanded, source } = props;
 
   if (!mapInfo.mapData[0]) return h("div");
 
-  return h("span", [
-    h(
-      ExpansionPanel,
-      {
-        classes: { root: "regional-panel" },
-        title: "Macrostrat-linked data",
-        helpText: "via Macrostrat",
-        expanded: bedrockMatchExpanded,
-      },
-      [
-        h("div", { classes: expansionPanelDetailClasses }, [
-          h(AgeChipRenderer, { mapInfo, source }),
-          h(MacrostratAgeChipRenderer, { source }),
-          h(Thickness, { source }),
-          h(MinorFossilCollections, { source }),
-          h(FossilOccs, { source }),
-          h(MatchBasis, { source }),
-          h(LithsAndClasses, { source }),
-          h(Environments, { source }),
-          h(Economy, { source }),
-        ]),
-      ]
-    ),
-  ]);
+  return h(
+    ExpansionPanel,
+    {
+      className: "regional-panel",
+      title: "Macrostrat-linked data",
+      helpText: "via Macrostrat",
+      expanded: bedrockMatchExpanded,
+    },
+    [
+      h("div", { classes: expansionPanelDetailClasses }, [
+        h(MatchBasis, { source }),
+        h(AgeInformation, { mapInfo, source }),
+        h(Thickness, { source }),
+        h(MinorFossilCollections, { source }),
+        h(FossilOccs, { source }),
+        h(LithsAndClasses, { source }),
+        h(Environments, { source }),
+        h(Economy, { source }),
+      ]),
+    ]
+  );
 }
 
 const expansionPanelDetailClasses = {
   root: "expansion-panel-detail",
 };
 
-function AgeChipRenderer(props) {
+function AgeInformation(props) {
   const { source, mapInfo } = props;
-  return h.if(
-    !source.macrostrat || Object.keys(source.macrostrat).length === 0
-  )(AgeChip, {
-    b_int: mapInfo.mapData[0].b_int,
-    t_int: mapInfo.mapData[0].t_int,
-  });
+  const { macrostrat } = source;
+
+  if (!macrostrat?.b_age) return h(MapAgeRenderer, { mapInfo });
+
+  return h(MacrostratAgeInfo, { macrostrat, mapInfo });
 }
 
-function MacrostratAgeChipRenderer(props) {
-  const { source } = props;
-
-  return h.if(source.macrostrat && source.macrostrat.b_age)(
-    "div.macrostrat-detail",
-    [
-      h("div.expansion-summary-title", "Age: "),
-      h(MacrostratAgeChip, {
-        b_int: source.macrostrat.b_int,
-        t_int: source.macrostrat.t_int,
-        b_age: source.macrostrat.b_age,
-        t_age: source.macrostrat.t_age,
-        color: source.color,
+function MapAgeRenderer(props) {
+  const { mapInfo, ...rest } = props;
+  return h(
+    DescribedAgeInfo,
+    {
+      ageElement: h(AgeChip, {
+        b_int: mapInfo.mapData[0].b_int,
+        t_int: mapInfo.mapData[0].t_int,
       }),
-    ]
+    },
+    "Based on geologic map description."
+  );
+}
+
+function DescribedAgeInfo(props) {
+  const { ageElement, children, className } = props;
+
+  return h("div.described-age.macrostrast-detail", [
+    h("div.expansion-summary-title", "Age"),
+    h("div.age-chips", null, ageElement),
+    h("div.description", children),
+  ]);
+}
+
+function AgeRefinementBar({ scale, data, color, label = null }) {
+  const { b_int, t_int } = data;
+  const b_age = data.b_age ?? b_int.b_age;
+  const t_age = data.t_age ?? t_int.t_age;
+  const backgroundColor = color ?? b_int.color;
+  const accentColor = chroma(backgroundColor).darken(0.5).hex();
+  const labelColor = chroma(backgroundColor).darken(2).hex();
+
+  const left = scale(b_age);
+  const width = scale(t_age) - scale(b_age);
+
+  let labelTranslate = 5;
+  let textAlign = "start";
+
+  // Adjust label placement
+
+  if (width < 100) {
+    if (left < 100) {
+      labelTranslate = width + 5;
+    } else {
+      labelTranslate = -305;
+      textAlign = "end";
+    }
+  }
+
+  return h(
+    "div.age-refinement-bar",
+    {
+      style: {
+        marginLeft: `${left}px`,
+        width: `${width}px`,
+        height: "18px",
+        backgroundColor,
+        border: `2px solid ${accentColor}`,
+        position: "relative",
+      },
+    },
+    h(
+      "div.age-refinement-bar-label",
+      {
+        style: {
+          transform: `translateX(${labelTranslate}px)`,
+          color: labelColor,
+          fontSize: "10px",
+          width: 300,
+          textAlign,
+        },
+      },
+      label
+    )
+  );
+}
+
+function AgeRefinementPlot({ macrostrat, mapInfo }) {
+  // Plot the amount by which the age was refined
+  console.log(macrostrat, mapInfo);
+
+  const mapData = mapInfo.mapData[0];
+  const b_age = Math.max(mapData.b_int.b_age, macrostrat.b_age);
+  const t_age = Math.min(mapData.t_int.t_age, macrostrat.t_age);
+
+  const scale = scaleLinear({
+    domain: [1.02 * b_age, t_age * 0.98],
+    range: [20, 360],
+  });
+
+  // use visx to plot the age refinement
+  return h("div.age-refinement-plot", [
+    h(AgeRefinementBar, {
+      scale,
+      data: macrostrat,
+      label: "Macrostrat age model",
+    }),
+    h(AgeRefinementBar, {
+      scale,
+      data: mapData,
+      label: "Map legend",
+    }),
+    // Age axis
+    h("svg", { width: "100%", height: "40px" }, [
+      h(AxisBottom, {
+        scale,
+        numTicks: 5,
+        top: 1,
+        left: 0,
+        label: "Age (Ma)",
+      }),
+    ]),
+  ]);
+}
+
+function MacrostratAgeInfoCore({ macrostrat }) {
+  const { b_age, t_age, b_int, t_int } = macrostrat;
+
+  if (!b_age) return null;
+
+  let age = b_int.int_name;
+  if (b_int.int_id !== t_int.int_id) {
+    age += ` - ${t_int.int_name}`;
+  }
+  return h(
+    DescribedAgeInfo,
+    {
+      ageElement: h(AgeChip, {
+        b_int: { ...b_int, int_name: age, b_age, t_age },
+        t_int: { ...b_int, int_name: age, b_age, t_age },
+      }),
+    },
+    "Refined using the Macrostrat age model."
+  );
+}
+
+function MacrostratAgeInfo(props) {
+  return h(
+    ExpandableDetailsPanel,
+    { headerElement: h(MacrostratAgeInfoCore, props) },
+    h(ExpansionBody, { title: "Age refinement" }, h(AgeRefinementPlot, props))
   );
 }
 
 function MatchBasis(props) {
   const { source } = props;
-  if (!source.macrostrat.strat_names) return h("div");
+  if (!source.macrostrat?.strat_names) return null;
 
-  return h.if(source.macrostrat && source.macrostrat.strat_names)(
-    ExpansionPanel,
+  return h(
+    ExpandableDetailsPanel,
     {
-      title: "Match basis",
-      helpText: source.macrostrat.strat_names[0].rank_name,
-      subheader: true,
+      className: "macrostrat-unit",
+      headerElement: h([
+        h("h3", source.macrostrat.strat_names[0].rank_name),
+        h("div.description", "Matched stratigraphic unit"),
+      ]),
     },
-    [
-      h("p.expansion-panel-detail-header", ["All matched names:"]),
+    h(ExpansionBody, { title: "All matched names" }, [
       source.macrostrat.strat_names.map((name, i) => {
         let lastElement: boolean =
           i == source.macrostrat.strat_names.length - 1;
@@ -95,7 +227,7 @@ function MatchBasis(props) {
           h.if(!lastElement)([", "]),
         ]);
       }),
-    ]
+    ])
   );
 }
 
@@ -106,7 +238,7 @@ function Thickness(props) {
   return h.if(source.macrostrat && source.macrostrat.max_thick)(
     "div.macrostrat-detail",
     [
-      h("div.expansion-summary-title", "Thickness: "),
+      h("div.expansion-summary-title", "Thickness"),
       h("div", [
         source.macrostrat.min_min_thick,
         " - ",
@@ -125,7 +257,7 @@ function MinorFossilCollections(props) {
   return h.if(macrostrat && macrostrat.pbdb_collections)(
     "div.macrostrat-detail",
     [
-      h("div.expansion-summary-title", "Fossil collections: "),
+      h("div.expansion-summary-title", "Fossil collections"),
       h("div", [macrostrat.pbdb_collections]),
     ]
   );
@@ -135,10 +267,10 @@ function FossilOccs(props) {
   const { source } = props;
   const { macrostrat } = source;
 
-  if (!macrostrat) return h("div");
+  if (!macrostrat?.pbdb_occs) return null;
 
-  return h.if(macrostrat && macrostrat.pbdb_occs)("div.macrostrat-detail", [
-    h("div.expansion-summary-title", "Fossil occurences: "),
+  return h("div.macrostrat-detail", [
+    h("div.expansion-summary-title", "Fossil occurrences"),
     h("div", [macrostrat.pbdb_occs]),
   ]);
 }
@@ -162,26 +294,25 @@ function LithsAndClasses(props) {
   const { macrostrat } = source;
   const { liths = null, lith_types = null } = macrostrat;
 
-  if (!liths) return h("div");
+  if (!liths || liths.length == 0) return null;
 
-  return h.if(liths && liths.length > 0)(
-    ExpansionPanel,
+  return h(
+    ExpandableDetailsPanel,
     {
       title: "Lithology",
-      sideComponent: h(LithTypes, { lith_types }),
-      subheader: true,
+      value: h(LithTypes, { lith_types }),
     },
-    [
-      h("p.expansion-panel-detail-header", ["Matched lithologies: "]),
+    h(ExpansionBody, { title: "Matched lithologies" }, [
       macrostrat.liths.map((lith, i) => {
         return h(AttrChip, {
           key: i,
           name: lith.lith,
           color: lith.color,
           fill: lith.lith_fill,
+          emphasized: false,
         });
       }),
-    ]
+    ])
   );
 }
 
@@ -204,25 +335,24 @@ function Environments(props) {
   const { macrostrat } = source;
   const { environs = null, environ_types = null } = macrostrat;
 
-  if (!environs) return h("div");
+  if (!environs || environs.length == 0) return null;
 
-  return h.if(environs && environs.length > 0)(
-    ExpansionPanel,
+  return h(
+    ExpandableDetailsPanel,
     {
-      title: "Environment ",
-      sideComponent: h(EnvironTypes, { environ_types }),
-      subheader: true,
+      title: "Environment",
+      value: h(EnvironTypes, { environ_types }),
     },
-    [
-      h("p.expansion-panel-detail-header", ["Matched environments: "]),
+    h(ExpansionBody, { title: "Matched environments" }, [
       macrostrat.environs.map((env, i) => {
         return h(AttrChip, {
           key: i,
           name: env.environ,
           color: env.color,
+          emphasized: false,
         });
       }),
-    ]
+    ])
   );
 }
 
@@ -247,14 +377,12 @@ function Economy(props) {
   if (!econs) return h("div");
 
   return h.if(econs && econs.length > 0)(
-    ExpansionPanel,
+    ExpandableDetailsPanel,
     {
       title: "Economy ",
-      subheader: true,
-      sideComponent: h(EconType, { econ_types }),
+      value: h(EconType, { econ_types }),
     },
-    [
-      h("p.expansion-panel-detail-header", ["Matched economic attributes: "]),
+    h(ExpansionBody, { title: "Matched economic attributes" }, [
       econs.map((econ, i) => {
         return h(AttrChip, {
           key: i,
@@ -262,7 +390,7 @@ function Economy(props) {
           color: econ.color,
         });
       }),
-    ]
+    ])
   );
 }
 

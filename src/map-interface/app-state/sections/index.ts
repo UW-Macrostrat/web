@@ -1,6 +1,6 @@
 import { combineReducers } from "redux";
 import reduceReducers from "reduce-reducers";
-import { menuReducer, MenuState, MenuAction } from "./menu";
+//import { menuReducer, MenuState, MenuAction } from "./menu";
 import { coreReducer, CoreState, MapPosition, CoreAction } from "./core";
 import { MapAction } from "./map";
 import {
@@ -17,6 +17,14 @@ import {
   flyToParams,
 } from "@macrostrat/cesium-viewer/position";
 import { performanceReducer, PerformanceState } from "../../performance/core";
+import { createBrowserHistory } from "history";
+import { createRouterReducer } from "@lagunovsky/redux-react-router";
+import {
+  ReduxRouterState,
+  RouterActions,
+} from "@lagunovsky/redux-react-router";
+
+export const browserHistory = createBrowserHistory();
 
 const globeStorage = new LocalStorage("macrostrat-globe");
 
@@ -36,11 +44,14 @@ function storageGlobeReducer(
   return globeReducer(state, action);
 }
 
+const routerReducer = createRouterReducer(browserHistory);
+
 const reducers = combineReducers({
   // list reducers here
   performance: performanceReducer,
-  menu: menuReducer,
+  //menu: menuReducer,
   globe: storageGlobeReducer,
+  router: routerReducer,
   core: coreReducer,
 });
 
@@ -62,14 +73,15 @@ function translateCameraPosition(pos: MapPosition): CameraParams {
   }
 }
 
-type AppState = {
+export type AppState = {
   core: CoreState;
+  router: ReduxRouterState;
   globe: GlobeState;
   performance: PerformanceState;
-  menu: MenuState;
+  //menu: MenuState;
 };
 
-function overallReducer(state: AppState, action: Action) {
+function overallReducer(state: AppState, action: Action): AppState {
   let pos: MapPosition;
   if (action.type === "got-initial-map-state") {
     pos = action.data.mapPosition;
@@ -104,14 +116,35 @@ function overallReducer(state: AppState, action: Action) {
     return appReducer(state, { type: "reset-performance-counter" });
   }
 
-  return state;
+  switch (action.type) {
+    case "@@router/ON_LOCATION_CHANGED":
+      const isOpen = action.payload.location.pathname != "/";
+      return {
+        ...state,
+        core: { ...state.core, menuOpen: isOpen, contextPanelOpen: isOpen },
+      };
+    case "got-initial-map-state":
+    case "map-moved":
+      return {
+        ...state,
+        core: {
+          ...state.core,
+          mapPosition: action.data,
+        },
+      };
+    default:
+      return state;
+  }
 }
 
 const appReducer = reduceReducers(overallReducer, reducers);
 
-export type Action = CoreAction | MenuAction | MapAction | GlobeAction;
+export type Action =
+  | CoreAction
+  | MapAction
+  | GlobeAction
+  | RouterActions;
 
 export default appReducer;
 export * from "./core";
-export * from "./menu";
 export * from "./map";

@@ -58,7 +58,7 @@ function getRemovedOrNewFilters(nextProps, map) {
     }
   }
   // Otherwise, a filter was added
-  else if (incoming.length) {
+  if (incoming.length > 0) {
     let newFilterString = incoming[0].split("|");
     let filterToApply = nextProps.filters.filter((f) => {
       if (
@@ -72,7 +72,6 @@ function getRemovedOrNewFilters(nextProps, map) {
     if (filterToApply.length === 0) {
       return false;
     }
-
     filterToApply = filterToApply[0];
 
     // Check which kind of filter it is
@@ -138,6 +137,9 @@ function getRemovedOrNewFilters(nextProps, map) {
         break;
 
       case "lithologies":
+      case "all_lithologies":
+      case "all_lithology_types":
+      case "all_lithology_classes":
         map.lithFilters.push(filterToApply.name);
         map.lithFiltersIndex[
           `${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`
@@ -180,7 +182,7 @@ function getToApply(map): (string | string[])[] {
   return toApply;
 }
 
-function PBDBHelper(map, bounds, zoom, maxClusterZoom = 6): void {
+function PBDBHelper(map, bounds, zoom, maxClusterZoom = 7): void {
   // One for time, one for everything else because
   // time filters require a separate request for each filter
   let timeQuery = [];
@@ -191,6 +193,13 @@ function PBDBHelper(map, bounds, zoom, maxClusterZoom = 6): void {
       timeQuery.push(`max_ma=${f[2][2]}`, `min_ma=${f[1][2]}`);
     });
   }
+  // lith filters broken on pbdb (500 error returned)
+  // if (map.lithFilters.length) {
+  //   let filters = map.lithFilters.filter((f) => f != "sedimentary");
+  //   if (filters.length) {
+  //     queryString.push(`lithology=${filters.join(",")}`);
+  //   }
+  // }
   if (map.stratNameFilters.length) {
     queryString.push(`strat=${map.stratNameFilters.join(",")}`);
   }
@@ -203,15 +212,32 @@ function PBDBHelper(map, bounds, zoom, maxClusterZoom = 6): void {
   const lngMin = bounds._sw.lng < -180 ? -180 : bounds._sw.lng;
   const lngMax = bounds._ne.lng > 180 ? 180 : bounds._ne.lng;
   // If more than one time filter is present, multiple requests are needed
+
+  /* Currently there is a limitation in the globe for the getBounds function that
+  resolves incorrect latitude ranges for low zoom levels.
+  - https://docs.mapbox.com/mapbox-gl-js/guides/globe/#limitations-of-globe
+  - https://github.com/mapbox/mapbox-gl-js/issues/11795
+  -   https://github.com/UW-Macrostrat/web/issues/68
+
+  This is a workaround for that issue.
+  */
+  let latMin = bounds._sw.lat;
+  let latMax = bounds._ne.lat;
+
+  if (zoom < 5) {
+    latMin = Math.max(Math.min(latMin, latMin * 5), -85);
+    latMax = Math.min(Math.max(latMax, latMax * 5), 85);
+  }
+
+  console.log(latMin, latMax);
+
   if (map.timeFilters.length && map.timeFilters.length > 1) {
     urls = map.timeFilters.map((f) => {
       let url = `${SETTINGS.pbdbDomain}/data1.2/colls/${
         zoom < maxClusterZoom ? "summary" : "list"
-      }.json?lngmin=${lngMin}&lngmax=${lngMax}&latmin=${
-        bounds._sw.lat
-      }&latmax=${bounds._ne.lat}&max_ma=${f[2][2]}&min_ma=${f[1][2]}${
-        zoom < maxClusterZoom ? level : ""
-      }`;
+      }.json?lngmin=${lngMin}&lngmax=${lngMax}&latmin=${latMin}&latmax=${latMax}&max_ma=${
+        f[2][2]
+      }&min_ma=${f[1][2]}${zoom < maxClusterZoom ? level : ""}`;
       if (queryString.length) {
         url += `&${queryString.join("&")}`;
       }
@@ -220,9 +246,9 @@ function PBDBHelper(map, bounds, zoom, maxClusterZoom = 6): void {
   } else {
     let url = `${SETTINGS.pbdbDomain}/data1.2/colls/${
       zoom < maxClusterZoom ? "summary" : "list"
-    }.json?lngmin=${lngMin}&lngmax=${lngMax}&latmin=${bounds._sw.lat}&latmax=${
-      bounds._ne.lat
-    }${zoom < maxClusterZoom ? level : ""}`;
+    }.json?lngmin=${lngMin}&lngmax=${lngMax}&latmin=${latMin}&latmax=${latMax}${
+      zoom < maxClusterZoom ? level : ""
+    }`;
     if (timeQuery.length) {
       url += `&${timeQuery.join("&")}`;
     }
@@ -271,7 +297,7 @@ function PBDBHelper(map, bounds, zoom, maxClusterZoom = 6): void {
     } else {
       map.map.getSource("pbdb-points").setData(map.pbdbPoints);
 
-      map.map.getSource("pbdb-clusters").setData(map.pbdbPoints);
+      //map.map.getSource("pbdb-clusters").setData(map.pbdbPoints);
       map.map.setLayoutProperty("pbdb-clusters", "visibility", "none");
       map.map.setLayoutProperty(
         "pbdb-points-clustered",
@@ -279,7 +305,7 @@ function PBDBHelper(map, bounds, zoom, maxClusterZoom = 6): void {
         "visible"
       );
       //    map.map.setLayoutProperty('pbdb-point-cluster-count', 'visibility', 'visible')
-      map.map.setLayoutProperty("pbdb-points", "visibility", "visible");
+      // map.map.setLayoutProperty("pbdb-points", "visibility", "visible");
     }
   });
 }

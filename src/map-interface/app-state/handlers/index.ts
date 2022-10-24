@@ -5,14 +5,14 @@ import {
   asyncGetColumn,
   asyncQueryMap,
   asyncGetElevation,
-  asyncGetPBDBCollection,
-  asyncGetPBDBOccurences,
-  mergePBDBResponses,
+  getPBDBData,
 } from "./fetch";
-import { Action, CoreState } from "../sections";
+import { Action, AppState } from "../sections";
 import axios from "axios";
 import { asyncFilterHandler } from "./filters";
 import { updateStateFromURI } from "../helpers";
+import { push } from "@lagunovsky/redux-react-router";
+import { routerBasename } from "~/map-interface/Settings";
 
 function getCancelToken() {
   let CancelToken = axios.CancelToken;
@@ -21,13 +21,36 @@ function getCancelToken() {
 }
 
 async function actionRunner(
-  state: CoreState,
+  state: AppState,
   action: Action,
   dispatch = null
 ): Promise<Action | void> {
+  const coreState = state.core;
   switch (action.type) {
     case "get-initial-map-state":
-      return updateStateFromURI(state);
+      return updateStateFromURI(coreState);
+    case "toggle-menu":
+      let pathName = state.router.location.pathname;
+      let baseName = routerBasename;
+      if (!pathName.endsWith("/")) {
+        pathName += "/";
+      }
+      if (pathName.startsWith("/globe/")) {
+        baseName = "/globe/";
+      }
+
+      const isRootRoute = pathName == baseName;
+      const goToLayersPage = push(baseName + "layers" + location.hash);
+      if (state.core.inputFocus) {
+        if (isRootRoute) {
+          dispatch(goToLayersPage);
+        }
+        return { type: "set-input-focus", inputFocus: false };
+      }
+      if (isRootRoute) {
+        return goToLayersPage;
+      }
+      return push(baseName + location.hash);
     case "fetch-search-query":
       let term = action.term;
       let CancelToken = axios.CancelToken;
@@ -40,7 +63,7 @@ async function actionRunner(
       const data = await doSearchAsync(term, source.token);
       return { type: "received-search-query", data };
     case "fetch-gdd":
-      const { mapInfo } = state;
+      const { mapInfo } = coreState;
       let CancelToken1 = axios.CancelToken;
       let source1 = CancelToken1.source();
       dispatch({
@@ -54,7 +77,7 @@ async function actionRunner(
       const filterAction = await asyncFilterHandler(filter);
       return filterAction;
     case "get-filtered-columns":
-      let filteredColumns = await fetchFilteredColumns(state.filters);
+      let filteredColumns = await fetchFilteredColumns(coreState.filters);
       return {
         type: "update-column-filters",
         columns: filteredColumns,
@@ -63,6 +86,10 @@ async function actionRunner(
       const { lng, lat, z, map_id, column } = action;
       let CancelTokenMapQuery = axios.CancelToken;
       let sourceMapQuery = CancelTokenMapQuery.source();
+      if (coreState.inputFocus && coreState.contextPanelOpen) {
+        return { type: "context-outside-click" };
+      }
+
       dispatch({
         type: "start-map-query",
         lng,
@@ -81,8 +108,8 @@ async function actionRunner(
         map_id,
         sourceMapQuery.token
       );
-      state.infoMarkerLng = lng.toFixed(4);
-      state.infoMarkerLat = lat.toFixed(4);
+      coreState.infoMarkerLng = lng;
+      coreState.infoMarkerLat = lat;
       return {
         type: "received-map-query",
         data: mapData,
@@ -118,22 +145,10 @@ async function actionRunner(
       };
     case "get-pbdb":
       let collection_nos = action.collection_nos;
-      const sourceCollection = getCancelToken();
-      const sourceOccur = getCancelToken();
-      dispatch({ type: "start-pdbd-query", cancelToken: sourceCollection });
-      const collection = await asyncGetPBDBCollection(
-        collection_nos,
-        sourceCollection.token
-      );
-      dispatch({ type: "update-pbdb-query", cancelToken: sourceOccur });
-      const occurences = await asyncGetPBDBOccurences(
-        collection_nos,
-        sourceOccur.token
-      );
-      const collections = mergePBDBResponses(occurences, collection);
+      dispatch({ type: "start-pdbd-query" });
       return {
         type: "received-pbdb-query",
-        data: collections,
+        data: await getPBDBData(collection_nos),
       };
     default:
       return action;

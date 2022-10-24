@@ -1,17 +1,3 @@
-/* 
-
-Returns an [xoffset, yoffset] for the map.panTo 
-*/
-function markerOffset() {
-  const width = window.innerWidth;
-  let yOffset = 0;
-  if (width <= 768) {
-    // mobile
-    yOffset = -200;
-  }
-  return yOffset;
-}
-
 function setMapStyle(class_, map, mapStyle, props) {
   mapStyle.layers.forEach((layer) => {
     if (map.getSource(layer.source) && map.getLayer(layer.id)) {
@@ -72,4 +58,4 @@ function setMapStyle(class_, map, mapStyle, props) {
   });
 }
 
-export { setMapStyle, markerOffset };
+export { setMapStyle };

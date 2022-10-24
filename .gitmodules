@@ -1,24 +1,12 @@
-[submodule "bundledDeps/ui-components"]
-	path = packages/ui-components
-	url = git://github.com/UW-Macrostrat/ui-components.git
 [submodule "bundledDeps/cesium-martini"]
 	path = packages/cesium-martini
-	url = git://github.com/davenquinn/cesium-martini.git
+	url = https://github.com/davenquinn/cesium-martini.git
 [submodule "packages/cesium-viewer"]
 	path = packages/cesium-viewer
-	url = git://github.com/UW-Macrostrat/cesium-viewer.git
-[submodule "packages/column-components"]
-	path = packages/column-components
-	url = git://github.com/UW-Macrostrat/column-components.git
-[submodule "map-components"]
-	path = packages/map-components
-	url = git://github.com/UW-Macrostrat/map-components.git
+	url = https://github.com/UW-Macrostrat/cesium-viewer.git
 [submodule "packages/cesium-vector-provider"]
 	path = packages/cesium-vector-provider
-	url = git://github.com/davenquinn/cesium-vector-provider.git
-[submodule "packages/maplibre-gl-js"]
-	path = packages/maplibre-gl-js
-	url = git://github.com/davenquinn/maplibre-gl-js.git
-[submodule "packages/maplibre-basic-renderer"]
-	path = packages/maplibre-basic-renderer
-	url = git://github.com/davenquinn/maplibre-basic-renderer.git
+	url = https://github.com/davenquinn/cesium-vector-provider.git
+[submodule "deps/ui-components"]
+	path = deps/web-components
+	url = https://github.com/UW-Macrostrat/web-components.git
