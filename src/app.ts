@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import loadable from "@loadable/component";
 import { Spinner } from "@blueprintjs/core";
 import "./styles/index.styl";
+import {MapBackend} from "~/map-interface/app-state";
 
 import { Provider } from "react-redux";
 import { createStore, compose, applyMiddleware } from "redux";
@@ -37,7 +38,7 @@ const GlobeDevPage = () =>
   h(Suspense, { fallback: h(Spinner) }, h(_GlobeDevPage));
 
 function GlobePage() {
-  return h(MapPage, { backend: MapBackend.CESIUM });
+  return h(MapPage, { backend: MapBackend.CESIUM, baseRoute: "/globe" });
 }
 
 console.log(routerBasename);
@@ -46,7 +47,7 @@ const _Sources = loadable(() => import("~/burwell-sources"));
 const Sources = () => h(Suspense, { fallback: h(Spinner) }, h(_Sources));
 
 const _MapPage = loadable(() => import("./map-interface/map-page"));
-const MapPage = () => h(Suspense, { fallback: h(Spinner) }, h(_MapPage));
+const MapPage = (props) => h(Suspense, { fallback: h(Spinner) }, h(_MapPage, props));
 
 const App = () => {
   return h(
@@ -59,6 +60,7 @@ const App = () => {
         h(Routes, [
           h(Route, { path: "/sources", element: h(Sources) }),
           h(Route, { path: "/dev/globe", element: h(GlobeDevPage) }),
+          h(Route, { path: "/globe", element: h(GlobePage) }),
           h(Route, { path: "*", element: h(MapPage) }),
         ]),
 

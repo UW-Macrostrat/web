@@ -30,8 +30,17 @@ async function actionRunner(
     case "get-initial-map-state":
       return updateStateFromURI(coreState);
     case "toggle-menu":
-      const isRootRoute = state.router.location.pathname == routerBasename;
-      const goToLayersPage = push(routerBasename + "layers" + location.hash);
+      let pathName = state.router.location.pathname;
+      let baseName = routerBasename;
+      if (!pathName.endsWith("/")) {
+        pathName += "/";
+      }
+      if (pathName.startsWith("/globe/")) {
+        baseName = "/globe/";
+      }
+
+      const isRootRoute = pathName == baseName;
+      const goToLayersPage = push(baseName + "layers" + location.hash);
       if (state.core.inputFocus) {
         if (isRootRoute) {
           dispatch(goToLayersPage);
@@ -41,7 +50,7 @@ async function actionRunner(
       if (isRootRoute) {
         return goToLayersPage;
       }
-      return push(routerBasename + location.hash);
+      return push(baseName + location.hash);
     case "fetch-search-query":
       let term = action.term;
       let CancelToken = axios.CancelToken;

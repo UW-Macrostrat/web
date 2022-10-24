@@ -1,21 +1,21 @@
 import { useMatch, useLocation, useNavigate } from "react-router";
 import classNames from "classnames";
 
-export function usePanelOpen() {
-  const match = useMatch("/");
-  return match?.pathname != "/";
+export function usePanelOpen(baseRoute="/") {
+  const match = useMatch(baseRoute);
+  return match?.pathname != baseRoute;
 }
 
-export function useContextClass() {
-  const panelOpen = usePanelOpen();
-  const pageName = useCurrentPage();
+export function useContextClass(baseRoute) {
+  const panelOpen = usePanelOpen(baseRoute);
+  const pageName = useCurrentPage(baseRoute);
   if (!panelOpen) return null;
   return classNames("panel-open", pageName);
 }
 
-export function useCurrentPage() {
+export function useCurrentPage(baseRoute = "/") {
   const { pathname } = useLocation();
-  return pathname.slice(pathname.lastIndexOf("/") + 1, pathname.length);
+  return pathname.slice(pathname.lastIndexOf(baseRoute) + 1, pathname.length);
 }
 
 export function useHashNavigate(to: string) {

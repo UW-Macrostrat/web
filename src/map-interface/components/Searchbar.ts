@@ -83,10 +83,10 @@ function SearchResults({ className }) {
   return h(Card, { className }, h(ResultList, { searchResults }));
 }
 
-function MenuButton() {
+function MenuButton({baseRoute}) {
   const runAction = useAppActions();
   const mapIsLoading = useSelector((state) => state.core.mapIsLoading);
-  const menuOpen = usePanelOpen();
+  const menuOpen = usePanelOpen(baseRoute);
 
   return h(Button, {
     icon: mapIsLoading ? h(Spinner, { size: 16 }) : "menu",
@@ -100,7 +100,7 @@ function MenuButton() {
   });
 }
 
-function Searchbar({ className }) {
+function Searchbar({ className, baseRoute }) {
   const runAction = useAppActions();
   const { term, searchResults } = useSearchState();
 
@@ -129,7 +129,7 @@ function Searchbar({ className }) {
           large: true,
           onChange: handleSearchInput,
           onClick: gainInputFocus,
-          rightElement: h(MenuButton),
+          rightElement: h(MenuButton, {baseRoute}),
           placeholder: "Search Macrostrat...",
           value: term,
         }),

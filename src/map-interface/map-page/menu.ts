@@ -198,15 +198,25 @@ const menuBacklinkLocationOverrides = {
   "/changelog": "/about",
 };
 
-function useLastPageLocation(): { title: string; to: string } | null {
+function useLastPageLocation(baseRoute="/"): { title: string; to: string } | null {
   const breadcrumbs = useBreadcrumbs();
   if (breadcrumbs.length < 2) return null;
   const prevPage = breadcrumbs[breadcrumbs.length - 2];
   const currentPage = breadcrumbs[breadcrumbs.length - 1];
+  let currentPath = currentPage.match.pathname;
+  let prevPath = prevPage.match.pathname;
+  if (currentPath.startsWith(baseRoute)) {
+    currentPath = "/" + currentPath.slice(baseRoute.length);
+  }
+  if (prevPath.startsWith(baseRoute)) {
+    prevPath = "/" + prevPath.slice(baseRoute.length);
+  }
+
   const prevRoute =
-    menuBacklinkLocationOverrides[currentPage.match.pathname] ??
-    prevPage.match.pathname;
-  if (prevRoute == "/") return null;
+    menuBacklinkLocationOverrides[currentPath] ??
+    prevPath;
+  if (prevRoute == baseRoute) return null;
+
   return { to: prevRoute, title: locationTitleForRoute[prevRoute] ?? "Back" };
 }
 
@@ -271,12 +281,12 @@ function HeaderWrapper({ children, minimal = false }) {
 }
 
 const Menu = (props) => {
-  let { className } = props;
+  let { className, baseRoute = "/" } = props;
   const { inputFocus } = useSearchState();
 
-  const navigateHome = useHashNavigate("/");
+  const navigateHome = useHashNavigate(baseRoute);
 
-  const pageName = useCurrentPage();
+  const pageName = useCurrentPage(baseRoute);
   const isNarrow = pageName == "layers";
   const isNarrowTrans = useTransition(isNarrow, 800);
 

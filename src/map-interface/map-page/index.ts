@@ -117,14 +117,15 @@ const MapTypeSelector = () => {
   ]);
 };
 
-const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
+const MapPage = ({ backend = MapBackend.MAPBOX3, baseRoute = "/" }) => {
   const { inputFocus } = useSearchState();
   const runAction = useAppActions();
   const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
 
   const ref = useRef<HTMLElement>(null);
 
-  const contextPanelOpen = usePanelOpen();
+  const contextPanelOpen = usePanelOpen(baseRoute);
+  const contextClass = useContextClass(baseRoute);
 
   const contextPanelTrans = useTransition(contextPanelOpen || inputFocus, 800);
   const detailPanelTrans = useTransition(infoDrawerOpen, 800);
@@ -144,7 +145,6 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
     `detail-panel-${detailPanelTrans.stage}`
   );
 
-  const contextClass = useContextClass();
 
   const onMouseDown = (event) => {
     if (!(inputFocus || contextPanelOpen)) return;
@@ -174,6 +174,7 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
             h(Searchbar, { className: "searchbar" }),
             h.if(contextPanelTrans.shouldMount)(Menu, {
               className: "context-panel",
+              baseRoute
             }),
           ]),
           h(MapView, {
