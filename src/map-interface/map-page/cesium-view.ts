@@ -26,22 +26,18 @@ import {
 import maplibre from "maplibre-gl/dist/maplibre-gl-dev";
 import { useAppActions, MapLayer, useAppState } from "../app-state";
 import { useCallback } from "react";
-import { positionClass } from "@blueprintjs/core/lib/esm/common/classes";
 import { mapStyle, coreStyle } from "./map-styles";
 import styles from "./main.module.styl";
 
-import "cesium/Source/Widgets/widgets.css"
-import "@znemz/cesium-navigation/dist/index.css"
-import { mergeStyles } from "@macrostrat/mapbox-utils";
+import "cesium/../../Build/Cesium/Widgets/widgets.css";
+import "@znemz/cesium-navigation/dist/index.css";
 
 const h = hyper.styled(styles);
 
 maplibre.accessToken =
   "pk.eyJ1IjoiamN6YXBsZXdza2kiLCJhIjoiY2szNXA5OWcxMDN2bzNtcnI1cWd1ZXJpYiJ9.Dd5GKlrPhg969y1ayY32cg";
 
-
 const VectorGeologyLayer = ({ enabled = true, ...rest }) => {
-
   const provider = useMemo(() => {
     return new MVTImageryProvider({
       style: coreStyle,
@@ -126,49 +122,49 @@ function MacrostratCesiumView(props) {
 
   return h("div.map-view-container.main-view", [
     h("div.cesium-container", [
-    h(
-      CesiumView,
-      {
-        full: true,
-        onViewChange(cpos) {
-          const { camera } = cpos;
-          // Tamp down memory usage by clearing log statements
-          //console.clear();
-          runAction({
-            type: "map-moved",
-            data: {
-              camera: {
-                lng: camera.longitude,
-                lat: camera.latitude,
-                altitude: camera.height,
-                pitch: 90 + camera.pitch,
-                bearing: camera.heading,
+      h(
+        CesiumView,
+        {
+          full: true,
+          onViewChange(cpos) {
+            const { camera } = cpos;
+            // Tamp down memory usage by clearing log statements
+            //console.clear();
+            runAction({
+              type: "map-moved",
+              data: {
+                camera: {
+                  lng: camera.longitude,
+                  lat: camera.latitude,
+                  altitude: camera.height,
+                  pitch: 90 + camera.pitch,
+                  bearing: camera.heading,
+                },
               },
-            },
-          });
+            });
+          },
+          onClick({ latitude, longitude, zoom }) {
+            //dispatch(queryMap(longitude, latitude, zoom, null));
+          },
+          onTileLoadEvent,
+          terrainExaggeration,
+          displayQuality,
+          showInspector,
+          terrainProvider,
+          flyTo: globe.flyToProps,
         },
-        onClick({ latitude, longitude, zoom }) {
-          //dispatch(queryMap(longitude, latitude, zoom, null));
-        },
-        onTileLoadEvent,
-        terrainExaggeration,
-        displayQuality,
-        showInspector,
-        terrainProvider,
-        flyTo: globe.flyToProps,
-      },
-      [
-        //h(BaseLayer, { enabled: !hasSatellite }),
-        h.if(!hasSatellite)(HillshadeLayer),
-        h.if(hasSatellite)(SatelliteLayer),
-        // h.if(style != null)(BaseLayer, {
-        //   alpha: 1,
-        //   style, //"mapbox://styles/jczaplewski/ckxcu9zmu4aln14mfg4monlv3/draft",
-        // }),
-        h(_GeologyLayer, {alpha: 0.5}),
-      ]
-    ),
-    ])
+        [
+          //h(BaseLayer, { enabled: !hasSatellite }),
+          h.if(!hasSatellite)(HillshadeLayer),
+          h.if(hasSatellite)(SatelliteLayer),
+          // h.if(style != null)(BaseLayer, {
+          //   alpha: 1,
+          //   style, //"mapbox://styles/jczaplewski/ckxcu9zmu4aln14mfg4monlv3/draft",
+          // }),
+          h(_GeologyLayer, { alpha: 0.5 }),
+        ]
+      ),
+    ]),
   ]);
 }
 

@@ -145,7 +145,6 @@ const MapPage = ({ backend = MapBackend.MAPBOX3, baseRoute = "/" }) => {
     `detail-panel-${detailPanelTrans.stage}`
   );
 
-
   const onMouseDown = (event) => {
     if (!(inputFocus || contextPanelOpen)) return;
     if (ref.current?.contains(event.target)) return;
@@ -171,10 +170,10 @@ const MapPage = ({ backend = MapBackend.MAPBOX3, baseRoute = "/" }) => {
         },
         [
           h("div.context-stack", { className: contextClass, ref }, [
-            h(Searchbar, { className: "searchbar" }),
+            h(Searchbar, { className: "searchbar", baseRoute }),
             h.if(contextPanelTrans.shouldMount)(Menu, {
               className: "context-panel",
-              baseRoute
+              baseRoute,
             }),
           ]),
           h(MapView, {

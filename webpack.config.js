@@ -12,6 +12,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const mode = process.env.NODE_ENV || "development";
+const devMode = mode == "development";
 
 let publicURL = process.env.PUBLIC_URL || "/";
 
@@ -21,8 +22,14 @@ const packageSrc = (name) =>
 const localPackageSrc = (name) =>
   path.resolve(__dirname, "packages", name, "src");
 
-const cesiumSource = "node_modules/cesium/Source";
-const cesiumWorkers = "node_modules/cesium/Build/Cesium/Workers";
+const cesiumSource = path.join(
+  path.dirname(require.resolve("cesium")),
+  "Source"
+);
+const cesiumWorkers = path.join(
+  path.dirname(require.resolve("cesium")),
+  "Build/Cesium/Workers"
+);
 
 //uglify = new UglifyJsPlugin()
 
@@ -52,14 +59,21 @@ const plugins = [
   }),
   new CopyPlugin({
     patterns: [
-      { from: cesiumWorkers, to: "Workers" },
-      { from: path.join(cesiumSource, "Assets"), to: "Assets" },
-      { from: path.join(cesiumSource, "Widgets"), to: "Widgets" },
+      { from: cesiumWorkers, to: "cesium/Workers" },
+      { from: path.join(cesiumSource, "Assets"), to: "cesium/Assets" },
+      { from: path.join(cesiumSource, "Widgets"), to: "cesium/Widgets" },
+      {
+        from: path.resolve(
+          cesiumSource,
+          `../Build/Cesium${devMode ? "Unminified" : ""}`
+        ),
+        to: "cesium",
+      },
     ],
   }),
   new DefinePlugin({
     // Define relative base path in cesium for loading assets
-    CESIUM_BASE_URL: JSON.stringify(publicURL),
+    CESIUM_BASE_URL: JSON.stringify(publicURL + "cesium"),
     // Git revision information
   }),
   new EnvironmentPlugin({
@@ -71,8 +85,6 @@ const plugins = [
   }),
 ];
 
-const devMode = mode == "development";
-
 /* Use style-loader in development so we can get hot-reloading,
   but use MiniCssExtractPlugin in production for small bundle sizes */
 let finalStyleLoader = "style-loader";
@@ -82,6 +94,8 @@ if (!devMode) {
 }
 
 const styleLoaders = [finalStyleLoader, cssModuleLoader];
+
+console.log(cesiumSource);
 
 module.exports = {
   mode,
@@ -137,11 +151,11 @@ module.exports = {
         ],
       },
       // https://github.com/CesiumGS/cesium/issues/9790#issuecomment-943773870
-      {
-        test: /.js$/,
-        include: path.resolve(__dirname, "node_modules/cesium/Source"),
-        use: { loader: require.resolve("@open-wc/webpack-import-meta-loader") },
-      },
+      // {
+      //   test: /.js$/,
+      //   include: "node_modules/cesium/Source",
+      //   use: { loader: require.resolve("@open-wc/webpack-import-meta-loader") },
+      // },
       {
         test: /\.mdx?$/,
         use: [babelLoader, "@mdx-js/loader"],
@@ -153,10 +167,12 @@ module.exports = {
     extensions: [".ts", ".tsx", ".js", ".jsx"],
     alias: {
       // CesiumJS module name,
-      cesium: path.resolve(__dirname, "node_modules/cesium"),
-      resium: path.resolve(__dirname, "node_modules/resium"),
-      cesiumSource: path.resolve(__dirname, cesiumSource),
-      "maplibre-gl": path.resolve(__dirname, "packages/cesium-vector-provider/packages/maplibre-gl"),
+      cesiumSource,
+      cesium: "cesium/Source/Cesium",
+      "maplibre-gl": path.resolve(
+        __dirname,
+        "packages/cesium-vector-provider/packages/maplibre-gl"
+      ),
       "~": path.resolve(__dirname, "src"),
       "@macrostrat/cesium-viewer": localPackageSrc("cesium-viewer"),
       "@macrostrat/column-components": packageSrc("column-components"),
@@ -167,13 +183,12 @@ module.exports = {
     },
     // We need fallbacks for cesium source files
     fallback: {
-      http: require.resolve("stream-http"),
-      https: require.resolve("https-browserify"),
-      zlib: require.resolve("browserify-zlib"),
-      stream: require.resolve("stream-browserify"),
+      https: false,
+      zlib: false,
+      http: false,
+      url: false,
       path: require.resolve("path-browserify"),
-    }
-
+    },
   },
   entry: {
     main: "./src/index.ts",
