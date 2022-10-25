@@ -107,11 +107,12 @@ module.exports = {
     historyApiFallback: true,
   },
   module: {
+    unknownContextCritical: false,
     rules: [
       {
         test: /\.(js|jsx|ts|tsx)$/,
         use: [babelLoader],
-        exclude: [/node_modules/, /\/packages\/maplibre-gl-js\/dist/],
+        exclude: [/node_modules\/!(@macrostrat\/cesium-viewer\/src)/],
       },
       {
         test: /\.styl$/,
@@ -169,12 +170,7 @@ module.exports = {
       // CesiumJS module name,
       cesiumSource,
       cesium: "cesium/Source/Cesium",
-      "maplibre-gl": path.resolve(
-        __dirname,
-        "packages/cesium-vector-provider/packages/maplibre-gl"
-      ),
       "~": path.resolve(__dirname, "src"),
-      "@macrostrat/cesium-viewer": localPackageSrc("cesium-viewer"),
       "@macrostrat/column-components": packageSrc("column-components"),
       "@macrostrat/ui-components": packageSrc("ui-components"),
       "@macrostrat/mapbox-styles": packageSrc("mapbox-styles"),

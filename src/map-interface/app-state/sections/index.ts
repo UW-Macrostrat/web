@@ -9,13 +9,13 @@ import {
   GlobeState,
   createInitialState,
   DisplayQuality,
-} from "@macrostrat/cesium-viewer/actions";
+} from "@macrostrat/cesium-viewer/src/actions";
 import { LocalStorage } from "@macrostrat/ui-components";
 import {
   nadirCameraParams,
   CameraParams,
   flyToParams,
-} from "@macrostrat/cesium-viewer/position";
+} from "@macrostrat/cesium-viewer";
 import { performanceReducer, PerformanceState } from "../../performance/core";
 import { createBrowserHistory } from "history";
 import { createRouterReducer } from "@lagunovsky/redux-react-router";
@@ -139,11 +139,7 @@ function overallReducer(state: AppState, action: Action): AppState {
 
 const appReducer = reduceReducers(overallReducer, reducers);
 
-export type Action =
-  | CoreAction
-  | MapAction
-  | GlobeAction
-  | RouterActions;
+export type Action = CoreAction | MapAction | GlobeAction | RouterActions;
 
 export default appReducer;
 export * from "./core";

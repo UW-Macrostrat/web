@@ -1,4 +1,5 @@
-import "babel-polyfill";
+import "core-js/stable";
+import "regenerator-runtime/runtime";
 import "@blueprintjs/core/lib/css/blueprint.css";
 import "./styles/padding.css";
 

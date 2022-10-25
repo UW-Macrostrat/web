@@ -1,19 +1,16 @@
 import CesiumView, { DisplayQuality } from "@macrostrat/cesium-viewer";
 import hyper from "@macrostrat/hyper";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  MapChangeTracker,
-  MapClickHandler,
-} from "@macrostrat/cesium-viewer/position";
+import { MapChangeTracker, MapClickHandler } from "@macrostrat/cesium-viewer";
 import {
   HillshadeLayer,
   GeologyLayer,
   SatelliteLayer,
   terrainProvider,
-} from "@macrostrat/cesium-viewer/layers";
+} from "@macrostrat/cesium-viewer/src/layers";
 import { ImageryLayer } from "resium";
-import { useEffect, useMemo } from "react";
-import MVTImageryProvider from "@macrostrat/cesium-vector-provider/src";
+import { useEffect, useMemo, useRef } from "react";
+import VectorProvider from "@macrostrat/cesium-vector-provider";
 import reliefShading from "./map-styles/relief-shading";
 import {
   getHashString,
@@ -22,8 +19,7 @@ import {
 import {
   buildPositionHash,
   getInitialPosition,
-} from "@macrostrat/cesium-viewer/query-string";
-import maplibre from "maplibre-gl/dist/maplibre-gl-dev";
+} from "@macrostrat/cesium-viewer/src/query-string";
 import { useAppActions, MapLayer, useAppState } from "../app-state";
 import { useCallback } from "react";
 import { mapStyle, coreStyle } from "./map-styles";
@@ -34,22 +30,24 @@ import "@znemz/cesium-navigation/dist/index.css";
 
 const h = hyper.styled(styles);
 
-maplibre.accessToken =
-  "pk.eyJ1IjoiamN6YXBsZXdza2kiLCJhIjoiY2szNXA5OWcxMDN2bzNtcnI1cWd1ZXJpYiJ9.Dd5GKlrPhg969y1ayY32cg";
+// , //
 
 const VectorGeologyLayer = ({ enabled = true, ...rest }) => {
-  const provider = useMemo(() => {
-    return new MVTImageryProvider({
-      style: coreStyle,
+  const provider = useRef(
+    new VectorProvider({
+      style: "mapbox://styles/jczaplewski/cklb8aopu2cnv18mpxwfn7c9n", //coreStyle,
       maximumZoom: 15,
       tileSize: 512,
-      opacity: 0.5,
-    });
-  }, [enabled]);
+      //showCanvas: true,
+      //opacity: 0.5,
+      accessToken:
+        "pk.eyJ1IjoiamN6YXBsZXdza2kiLCJhIjoiY2szNXA5OWcxMDN2bzNtcnI1cWd1ZXJpYiJ9.Dd5GKlrPhg969y1ayY32cg",
+    })
+  );
 
-  if (!enabled) return null;
+  //if (!enabled) return null;
 
-  return h(ImageryLayer, { imageryProvider: provider, ...rest });
+  return h(ImageryLayer, { imageryProvider: provider.current, ...rest });
 };
 
 const _GeologyLayer = ({ visibleMaps = null, ...rest }) => {
@@ -69,7 +67,7 @@ function MacrostratSatelliteLayer() {
 
 function BaseLayer({ enabled = true, style, ...rest }) {
   const provider = useMemo(() => {
-    return new MVTImageryProvider({
+    return new VectorProvider({
       style: reliefShading,
       // "mapbox://styles/jczaplewski/ckxeiii3a1jv415o8rxvgqlpd", //
       maximumZoom: 15,
@@ -155,13 +153,13 @@ function MacrostratCesiumView(props) {
         },
         [
           //h(BaseLayer, { enabled: !hasSatellite }),
-          h.if(!hasSatellite)(HillshadeLayer),
+          //h.if(!hasSatellite)(HillshadeLayer),
           h.if(hasSatellite)(SatelliteLayer),
           // h.if(style != null)(BaseLayer, {
           //   alpha: 1,
           //   style, //"mapbox://styles/jczaplewski/ckxcu9zmu4aln14mfg4monlv3/draft",
           // }),
-          h(_GeologyLayer, { alpha: 0.5 }),
+          h(VectorGeologyLayer, { alpha: 0.5 }),
         ]
       ),
     ]),
