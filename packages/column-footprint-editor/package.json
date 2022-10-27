@@ -2,7 +2,7 @@
   "name": "my-project",
   "scripts": {
     "start": "ENV=development parcel serve -p 1235 ./src/index.html",
-    "build": "ENV=production parcel build ./src/index.html"
+    "build": "ENV=production parcel build --public-url /column-topology/ ./src/index.html"
   },
   "babel": {
     "presets": [
