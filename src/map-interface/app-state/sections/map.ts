@@ -40,6 +40,7 @@ type ToggleMap3D = { type: "toggle-map-3d" };
 export type GotInitialMapState = {
   type: "got-initial-map-state";
   data: MapInitialState;
+  age?: number;
 };
 
 export type MapAction =

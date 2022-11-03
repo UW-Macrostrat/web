@@ -1,12 +1,13 @@
 // Settings panel for the map
 
-import { Switch } from "@blueprintjs/core";
+import { Switch, Button } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import { Tag, NumericInput } from "@blueprintjs/core";
 //import { LinkButton } from "@macrostrat/ui-components";
 //import { GlobeSettings } from "@macrostrat/cesium-viewer/settings";
 import { useAppState, useAppActions } from "~/map-interface/app-state";
 import { useLocation } from "react-router";
+import { useState, useEffect } from "react";
 import { MapLayer } from "~/map-interface/app-state";
 //import { DisplayQuality } from "@macrostrat/cesium-viewer";
 import styles from "./settings-panel.module.styl";
@@ -67,16 +68,7 @@ const ExperimentsPanel = (props) => {
         ]),
       ]
     ),
-    // Geologic time input
-    h("h3", "Age"),
-    h(NumericInput, {
-      value: useAppState((s) => s.core.timeCursorAge),
-      onValueChange: (v) => {
-        dispatch({ type: "set-time-cursor", age: v });
-      },
-      min: 0,
-      max: 4600,
-    }),
+
     //h(MapTypeButton),
     //h.if(globeActive)(GlobeSettings),
   ]);
@@ -84,6 +76,12 @@ const ExperimentsPanel = (props) => {
 
 const SettingsPanel = (props) => {
   const runAction = useAppActions();
+  const [localAge, setLocalAge] = useState(null);
+  const age = useAppState((s) => s.core.mapPosition.age);
+  useEffect(() => {
+    setLocalAge(age);
+  }, [age]);
+
   //const { pathname } = useLocation();
   //const globeActive = pathname?.startsWith("/globe");
   return h("div.settings.bp3-text.text-panel", [
@@ -99,6 +97,26 @@ const SettingsPanel = (props) => {
       },
       "Show labels"
     ),
+    // Geologic time input
+    h("div.flex-row", [
+      h("h3", "Age"),
+
+      h(NumericInput, {
+        value: localAge,
+        onValueChange: setLocalAge,
+        min: 0,
+        max: 4600,
+      }),
+      h(
+        Button,
+        {
+          onClick() {
+            runAction({ type: "set-time-cursor", age: localAge });
+          },
+        },
+        "Go"
+      ),
+    ]),
 
     //h(MapTypeButton),
     //h.if(globeActive)(GlobeSettings),

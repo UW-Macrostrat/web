@@ -322,9 +322,7 @@ export const mapStyle = {
   sources: {
     burwell: {
       type: "vector",
-      tiles: [
-        `https://next.macrostrat.org/tiles/tiles/carto_slim_rotated/{z}/{x}/{y}?model_id=3&t_step=240`,
-      ],
+      tiles: [`https://next.macrostrat.org/tiles/tiles/carto-slim/{z}/{x}/{y}`],
       tileSize: 512,
     },
     ...overlaySources,

@@ -146,9 +146,11 @@ class Map extends Component<MapProps, {}> {
   componentDidMount() {
     mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
 
+    const style = createMapStyle(this.props.age);
+
     this.map = new mapboxgl.Map({
       container: "map",
-      style: createMapStyle(this.props.age),
+      style,
       maxZoom: 8,
       //maxTileCacheSize: 0,
       logoPosition: "bottom-left",
@@ -602,6 +604,10 @@ class Map extends Component<MapProps, {}> {
   // and always return `false` to prevent DOM updates
   // We basically intercept the changes, handle them, and tell React to ignore them
   shouldComponentUpdate(nextProps) {
+    if (this.props.age != nextProps.age) {
+      this.map.setStyle(createMapStyle(nextProps.age));
+    }
+
     setMapStyle(this, this.map, mapStyle, nextProps);
     if (this.props.use3D !== nextProps.use3D) {
       return true;
