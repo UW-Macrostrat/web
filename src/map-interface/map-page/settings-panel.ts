@@ -2,7 +2,7 @@
 
 import { Switch } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
-import { Tag } from "@blueprintjs/core";
+import { Tag, NumericInput } from "@blueprintjs/core";
 //import { LinkButton } from "@macrostrat/ui-components";
 //import { GlobeSettings } from "@macrostrat/cesium-viewer/settings";
 import { useAppState, useAppActions } from "~/map-interface/app-state";
@@ -67,6 +67,16 @@ const ExperimentsPanel = (props) => {
         ]),
       ]
     ),
+    // Geologic time input
+    h("h3", "Age"),
+    h(NumericInput, {
+      value: useAppState((s) => s.core.timeCursorAge),
+      onValueChange: (v) => {
+        dispatch({ type: "set-time-cursor", age: v });
+      },
+      min: 0,
+      max: 4600,
+    }),
     //h(MapTypeButton),
     //h.if(globeActive)(GlobeSettings),
   ]);

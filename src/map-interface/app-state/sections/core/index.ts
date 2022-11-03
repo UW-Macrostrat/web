@@ -69,6 +69,7 @@ const defaultState: CoreState = {
       altitude: 300000,
     },
   },
+  timeCursorAge: null,
 };
 
 export function coreReducer(
@@ -85,6 +86,8 @@ export function coreReducer(
     case "map-idle":
       if (!state.mapIsLoading) return state;
       return { ...state, mapIsLoading: false };
+    case "set-time-cursor":
+      return { ...state, timeCursorAge: action.age };
     case "map-layers-changed":
       let columnInfo = state.columnInfo;
       let pbdbData = state.pbdbData;
@@ -126,7 +129,6 @@ export function coreReducer(
       };
     case "expand-infodrawer":
       return { ...state, infoDrawerExpanded: !state.infoDrawerExpanded };
-
     case "toggle-filters":
       // rework this to open menu panel
       return { ...state, filtersOpen: !state.filtersOpen };

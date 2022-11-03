@@ -98,6 +98,8 @@ type SET_ACTIVE_INDEX_MAP = { type: "set-active-index-map" };
 
 type UPDATE_STATE = { type: "update-state"; state: any };
 
+type SET_TIME_CURSOR = { type: "set-time-cursor"; age: number };
+
 export type CoreAction =
   | MAP_LAYERS_CHANGED
   | CLEAR_FILTERS
@@ -140,6 +142,7 @@ export type CoreAction =
   | RECEIVED_ELEVATION_QUERY
   | UPDATE_ELEVATION_MARKER
   | SET_ACTIVE_INDEX_MAP
+  | SET_TIME_CURSOR
   | MapAction;
 
 interface AsyncRequestState {
@@ -188,4 +191,5 @@ export interface CoreState extends MapState, AsyncRequestState {
   filters: any[];
   filteredColumns: object;
   data: [];
+  timeCursorAge: number;
 }

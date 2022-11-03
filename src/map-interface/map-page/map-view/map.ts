@@ -1,6 +1,6 @@
 import { Component, forwardRef } from "react";
 import { SETTINGS } from "../../Settings";
-import { mapStyle } from "../map-style";
+import { mapStyle, baseStyles } from "../map-style";
 import {
   getRemovedOrNewFilters,
   getToApply,
@@ -8,6 +8,7 @@ import {
 } from "./filter-helpers";
 import h from "@macrostrat/hyper";
 import mapboxgl from "mapbox-gl";
+import { mergeStyles } from "@macrostrat/mapbox-utils";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MercatorCoordinate, FreeCameraOptions } from "mapbox-gl";
 import { setMapStyle } from "./style-helpers";
@@ -24,6 +25,69 @@ interface MapProps {
   use3D: boolean;
   mapIsRotated: boolean;
   markerLoadOffset: [number, number];
+}
+
+const blankMapStyle = {
+  version: 8,
+  sources: {},
+  layers: [],
+};
+
+function createMapStyle(age) {
+  let mapTileURL = "https://devtiles.macrostrat.org/carto-slim/{z}/{x}/{y}.mvt";
+
+  if (age != null) {
+    mapTileURL = `https://next.macrostrat.org/tiles/tiles/carto_slim_rotated/{z}/{x}/{y}?model_id=3&t_step=${age}`;
+  }
+
+  return mergeStyles(
+    baseStyles,
+    {
+      layers: [
+        {
+          id: "plate-polygons",
+          type: "fill",
+          source: "burwell",
+          "source-layer": "plates",
+          paint: {
+            "fill-color": "rgb(170,170,200)",
+            "fill-outline-color": "rgb(150,150,150)",
+          },
+        },
+        {
+          id: "land",
+          type: "fill",
+          source: "burwell",
+          "source-layer": "land",
+          paint: {
+            "fill-color": "rgb(190,210,190)",
+          },
+        },
+        {
+          id: "columns",
+          type: "fill",
+          source: "burwell",
+          "source-layer": "columns",
+          paint: {
+            "fill-color": "rgb(180, 180, 200)",
+            "fill-outline-color": "rgb(150,150,150)",
+          },
+        },
+      ],
+    },
+    mapStyle,
+    {
+      version: 8,
+      sources: {
+        burwell: {
+          type: "vector",
+          tiles: [mapTileURL],
+          tileSize: 512,
+        },
+      },
+      layers: [],
+    }
+  );
 }
 
 class Map extends Component<MapProps, {}> {
@@ -84,10 +148,8 @@ class Map extends Component<MapProps, {}> {
 
     this.map = new mapboxgl.Map({
       container: "map",
-      style: this.props.mapHasSatellite
-        ? SETTINGS.satelliteMapURL
-        : SETTINGS.baseMapURL,
-      maxZoom: 14,
+      style: createMapStyle(this.props.age),
+      maxZoom: 8,
       //maxTileCacheSize: 0,
       logoPosition: "bottom-left",
       trackResize: true,
@@ -155,49 +217,49 @@ class Map extends Component<MapProps, {}> {
 
     this.map.on("style.load", () => {
       // Add the sources to the map
-      Object.keys(mapStyle.sources).forEach((source) => {
-        if (this.map.getSource(source) == null) {
-          this.map.addSource(source, mapStyle.sources[source]);
-        }
-      });
+      // Object.keys(mapStyle.sources).forEach((source) => {
+      //   if (this.map.getSource(source) == null) {
+      //     this.map.addSource(source, mapStyle.sources[source]);
+      //   }
+      // });
 
       // The initial draw of the layers
-      mapStyle.layers.forEach((layer) => {
-        // Populate the objects that track interaction states
-        this.hoverStates[layer.id] = null;
-        this.selectedStates[layer.id] = null;
+      // mapStyle.layers.forEach((layer) => {
+      //   // Populate the objects that track interaction states
+      //   this.hoverStates[layer.id] = null;
+      //   this.selectedStates[layer.id] = null;
 
-        if (layer.source === "columns" || layer.source === "info_marker") {
-          this.map.addLayer(layer);
-        } else {
-          this.map.addLayer(layer, "airport-label");
-        }
+      //   if (layer.source === "columns" || layer.source === "info_marker") {
+      //     this.map.addLayer(layer);
+      //   } else {
+      //     this.map.addLayer(layer, "airport-label");
+      //   }
 
-        // Accomodate any URI parameters
-        if (
-          layer.source === "burwell" &&
-          layer["source-layer"] === "units" &&
-          this.props.mapHasBedrock === false
-        ) {
-          this.map.setLayoutProperty(layer.id, "visibility", "none");
-        }
-        if (
-          layer.source === "burwell" &&
-          layer["source-layer"] === "lines" &&
-          this.props.mapHasLines === false
-        ) {
-          this.map.setLayoutProperty(layer.id, "visibility", "none");
-        }
-        if (
-          (layer.source === "pbdb" || layer.source === "pbdb-points") &&
-          this.props.mapHasFossils === true
-        ) {
-          this.map.setLayoutProperty(layer.id, "visibility", "visible");
-        }
-        if (layer.source === "columns" && this.props.mapHasColumns === true) {
-          this.map.setLayoutProperty(layer.id, "visibility", "visible");
-        }
-      });
+      //   // Accomodate any URI parameters
+      //   if (
+      //     layer.source === "burwell" &&
+      //     layer["source-layer"] === "units" &&
+      //     this.props.mapHasBedrock === false
+      //   ) {
+      //     this.map.setLayoutProperty(layer.id, "visibility", "none");
+      //   }
+      //   if (
+      //     layer.source === "burwell" &&
+      //     layer["source-layer"] === "lines" &&
+      //     this.props.mapHasLines === false
+      //   ) {
+      //     this.map.setLayoutProperty(layer.id, "visibility", "none");
+      //   }
+      //   if (
+      //     (layer.source === "pbdb" || layer.source === "pbdb-points") &&
+      //     this.props.mapHasFossils === true
+      //   ) {
+      //     this.map.setLayoutProperty(layer.id, "visibility", "visible");
+      //   }
+      //   if (layer.source === "columns" && this.props.mapHasColumns === true) {
+      //     this.map.setLayoutProperty(layer.id, "visibility", "visible");
+      //   }
+      // });
 
       if (this.props.mapHasFossils) {
         this.refreshPBDB();

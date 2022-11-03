@@ -322,7 +322,9 @@ export const mapStyle = {
   sources: {
     burwell: {
       type: "vector",
-      tiles: [`https://next.macrostrat.org/tiles/tiles/carto-slim/{z}/{x}/{y}`],
+      tiles: [
+        `https://next.macrostrat.org/tiles/tiles/carto_slim_rotated/{z}/{x}/{y}?model_id=3&t_step=240`,
+      ],
       tileSize: 512,
     },
     ...overlaySources,
@@ -908,5 +910,39 @@ export const mapStyle = {
       },
     },
     ...overlayLayers,
+  ],
+};
+
+export const baseStyles = {
+  version: 8,
+  name: "macrostrat-basics",
+  light: { intensity: 0.55 },
+  fog: {
+    color: "#ffffff",
+    "space-color": [
+      "interpolate",
+      ["linear"],
+      ["zoom"],
+      4,
+      "hsl(215, 28%, 64%)",
+      7,
+      "hsl(209, 92%, 85%)",
+    ],
+    "star-intensity": ["interpolate", ["linear"], ["zoom"], 5, 0.35, 6, 0],
+    range: [5, 15],
+  },
+  sources: {},
+  sprite:
+    "mapbox://sprites/jczaplewski/cl3w3bdai001f14ob27ckmpxz/8j4dc343h1clh55c2iq653hly",
+  glyphs: "mapbox://fonts/jczaplewski/{fontstack}/{range}.pbf",
+  projection: { name: "globe" },
+  layers: [
+    {
+      type: "background",
+      id: "background",
+      paint: {
+        "background-color": "rgb(150,150,200)",
+      },
+    },
   ],
 };

@@ -78,6 +78,7 @@ function MapContainer(props) {
     mapIsLoading,
     mapShowLabels,
     mapShowLineSymbols,
+    timeCursorAge,
   } = useAppState((state) => state.core);
 
   const runAction = useAppActions();
@@ -173,6 +174,7 @@ function MapContainer(props) {
       markerLoadOffset: offset.current,
       ...props,
       use3D: mapUse3D,
+      age: timeCursorAge,
       ref,
     }),
     h.if(mapLayers.has(MapLayer.SOURCES))(MapSourcesLayer),
