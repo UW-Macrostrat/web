@@ -37,7 +37,7 @@ function createMapStyle(age) {
   let mapTileURL = "https://devtiles.macrostrat.org/carto-slim/{z}/{x}/{y}.mvt";
 
   if (age != null) {
-    mapTileURL = `https://next.macrostrat.org/tiles/tiles/carto_slim_rotated/{z}/{x}/{y}?model_id=3&t_step=${age}`;
+    mapTileURL = `https://next.macrostrat.org/tiles/tiles/carto-slim-rotated/{z}/{x}/{y}?model_id=3&t_step=${age}`;
   }
 
   return mergeStyles(
@@ -60,7 +60,7 @@ function createMapStyle(age) {
           source: "burwell",
           "source-layer": "land",
           paint: {
-            "fill-color": "rgb(190,210,190)",
+            "fill-color": "rgb(200,200,203)",
           },
         },
         {
