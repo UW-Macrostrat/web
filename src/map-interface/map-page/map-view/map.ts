@@ -14,6 +14,8 @@ import { MercatorCoordinate, FreeCameraOptions } from "mapbox-gl";
 import { setMapStyle } from "./style-helpers";
 import classNames from "classnames";
 
+import { defaultIntervals } from "@macrostrat/timescale/src/intervals";
+
 const maxClusterZoom = 6;
 const highlightLayers = [
   { layer: "pbdb-points", source: "pbdb-points" },
@@ -38,6 +40,15 @@ function createMapStyle(age) {
 
   if (age != null) {
     mapTileURL = `https://next.macrostrat.org/tiles/tiles/carto-slim-rotated/{z}/{x}/{y}?model_id=3&t_step=${age}`;
+  }
+
+  let color = "rgb(180, 180, 200)";
+  let ageSpan = 4500;
+  for (let interval of defaultIntervals) {
+    let intAgeSpan = interval.eag - interval.lag;
+    if (interval.eag > age && interval.lag < age && intAgeSpan < ageSpan) {
+      color = interval.col;
+    }
   }
 
   return mergeStyles(
@@ -69,7 +80,7 @@ function createMapStyle(age) {
           source: "burwell",
           "source-layer": "columns",
           paint: {
-            "fill-color": "rgb(180, 180, 200)",
+            "fill-color": color,
             "fill-outline-color": "rgb(150,150,150)",
           },
         },
