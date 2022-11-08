@@ -4,3 +4,6 @@
 [submodule "deps/ui-components"]
 	path = deps/web-components
 	url = https://github.com/UW-Macrostrat/web-components.git
+[submodule "deps/cesium-vector-provider"]
+	path = deps/cesium-vector-provider
+	url = https://github.com/davenquinn/cesium-vector-provider.git

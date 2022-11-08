@@ -38,7 +38,7 @@ const VectorGeologyLayer = ({ enabled = true, ...rest }) => {
       style: "mapbox://styles/jczaplewski/cklb8aopu2cnv18mpxwfn7c9n", //coreStyle,
       maximumZoom: 15,
       tileSize: 512,
-      //showCanvas: true,
+      // showCanvas: true,
       //opacity: 0.5,
       accessToken:
         "pk.eyJ1IjoiamN6YXBsZXdza2kiLCJhIjoiY2szNXA5OWcxMDN2bzNtcnI1cWd1ZXJpYiJ9.Dd5GKlrPhg969y1ayY32cg",
@@ -153,7 +153,7 @@ function MacrostratCesiumView(props) {
         },
         [
           //h(BaseLayer, { enabled: !hasSatellite }),
-          //h.if(!hasSatellite)(HillshadeLayer),
+          h.if(!hasSatellite)(HillshadeLayer),
           h.if(hasSatellite)(SatelliteLayer),
           // h.if(style != null)(BaseLayer, {
           //   alpha: 1,

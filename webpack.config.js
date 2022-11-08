@@ -162,6 +162,10 @@ module.exports = {
         use: [babelLoader, "@mdx-js/loader"],
         exclude: /node_modules/,
       },
+      {
+        test: /\.glsl$/,
+        loader: "webpack-glsl-loader",
+      },
     ],
   },
   resolve: {
@@ -171,11 +175,20 @@ module.exports = {
       cesiumSource,
       cesium: "cesium/Source/Cesium",
       "~": path.resolve(__dirname, "src"),
+      "@macrostrat/cesium-vector-provider": path.resolve(
+        __dirname,
+        "deps/cesium-vector-provider/packages/cesium-vector-provider/src"
+      ),
       "@macrostrat/column-components": packageSrc("column-components"),
       "@macrostrat/ui-components": packageSrc("ui-components"),
       "@macrostrat/mapbox-styles": packageSrc("mapbox-styles"),
       "@macrostrat/mapbox-utils": packageSrc("mapbox-utils"),
       "@macrostrat/mapbox-react": packageSrc("mapbox-react"),
+      "maplibre-gl": path.resolve(
+        __dirname,
+        "deps/cesium-vector-provider/packages",
+        "maplibre-gl"
+      ),
     },
     // We need fallbacks for cesium source files
     fallback: {
