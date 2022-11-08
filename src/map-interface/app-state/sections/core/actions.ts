@@ -94,6 +94,8 @@ type UPDATE_ELEVATION_MARKER = {
   lat: number;
 };
 
+type SET_PLATE_MODEL = { type: "set-plate-model"; plateModel: any };
+
 type SET_ACTIVE_INDEX_MAP = { type: "set-active-index-map" };
 
 type UPDATE_STATE = { type: "update-state"; state: any };
@@ -143,6 +145,7 @@ export type CoreAction =
   | UPDATE_ELEVATION_MARKER
   | SET_ACTIVE_INDEX_MAP
   | SET_TIME_CURSOR
+  | SET_PLATE_MODEL
   | MapAction;
 
 interface AsyncRequestState {
@@ -192,4 +195,5 @@ export interface CoreState extends MapState, AsyncRequestState {
   filteredColumns: object;
   data: [];
   timeCursorAge: number;
+  plateModelId: number;
 }

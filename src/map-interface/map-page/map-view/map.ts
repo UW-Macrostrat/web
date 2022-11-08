@@ -35,11 +35,13 @@ const blankMapStyle = {
   layers: [],
 };
 
-function createMapStyle(age) {
+function createMapStyle(age, model) {
+  let _model = model ?? 1;
+
   let mapTileURL = "https://devtiles.macrostrat.org/carto-slim/{z}/{x}/{y}.mvt";
 
   if (age != null) {
-    mapTileURL = `https://next.macrostrat.org/tiles/tiles/carto-slim-rotated/{z}/{x}/{y}?model_id=3&t_step=${age}`;
+    mapTileURL = `https://next.macrostrat.org/tiles/tiles/carto-slim-rotated/{z}/{x}/{y}?model_id=${_model}&t_step=${age}`;
   }
 
   let color = "rgb(180, 180, 200)";
@@ -157,7 +159,7 @@ class Map extends Component<MapProps, {}> {
   componentDidMount() {
     mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
 
-    const style = createMapStyle(this.props.age);
+    const style = createMapStyle(this.props.age, this.props.plateModelId);
 
     this.map = new mapboxgl.Map({
       container: "map",

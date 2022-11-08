@@ -79,6 +79,7 @@ function MapContainer(props) {
     mapShowLabels,
     mapShowLineSymbols,
     timeCursorAge,
+    plateModelId,
   } = useAppState((state) => state.core);
 
   const runAction = useAppActions();
@@ -172,6 +173,7 @@ function MapContainer(props) {
       mapIsRotated,
       mapRef,
       markerLoadOffset: offset.current,
+      plateModelId,
       ...props,
       use3D: mapUse3D,
       age: timeCursorAge,

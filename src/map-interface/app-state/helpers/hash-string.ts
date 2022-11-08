@@ -51,6 +51,10 @@ function updateURI(state: CoreState) {
     args.age = state.timeCursorAge;
   }
 
+  if (state.plateModelId) {
+    args.model = state.plateModelId;
+  }
+
   setHashString(args, { arrayFormat: "comma", sort: false });
   return state;
 }
@@ -163,9 +167,10 @@ function updateStateFromURI(state): GotInitialMapState | void {
     const hashData = getHashString(window.location.hash) ?? {};
 
     let { show = [] } = hashData;
-    const { x = 16, y = 23, z = 2, a = 0, e = 0, age } = hashData;
+    const { x = 16, y = 23, z = 2, a = 0, e = 0, age, model } = hashData;
 
     let _age = age != null ? Math.round(parseFloat(age)) : null;
+    let _model = model != null ? parseInt(model) : null;
 
     const mapLayers = layerDescriptionToLayers(show);
 
@@ -213,6 +218,7 @@ function updateStateFromURI(state): GotInitialMapState | void {
         mapBackend: MapBackend.MAPBOX3,
       },
       age: _age,
+      plateModelId: _model,
     };
   } catch (e) {
     console.error("Invalid map state:", e);
@@ -224,6 +230,7 @@ export function gotInitialMapState(mapState) {
     type: "got-initial-map-state",
     data: mapState,
     age: null,
+    plateModelId: null,
   };
 }
 

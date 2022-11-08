@@ -1,6 +1,6 @@
 // Settings panel for the map
 
-import { Switch, Button } from "@blueprintjs/core";
+import { Switch, Button, HTMLSelect } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import { Tag, NumericInput } from "@blueprintjs/core";
 //import { LinkButton } from "@macrostrat/ui-components";
@@ -77,7 +77,7 @@ const ExperimentsPanel = (props) => {
 const SettingsPanel = (props) => {
   const runAction = useAppActions();
   const [localAge, setLocalAge] = useState(null);
-  const age = useAppState((s) => s.core.mapPosition.age);
+  const age = useAppState((s) => s.core.timeCursorAge);
   useEffect(() => {
     setLocalAge(age);
   }, [age]);
@@ -115,6 +115,24 @@ const SettingsPanel = (props) => {
           },
         },
         "Go"
+      ),
+    ]),
+
+    h("div.flex-row", [
+      h("h3", "Plate model"),
+      h(
+        HTMLSelect,
+        {
+          value: useAppState((s) => s.core.plateModelId) ?? 1,
+          onChange(e) {
+            runAction({ type: "set-plate-model", plateModel: e.target.value });
+          },
+        },
+        [
+          h("option", { value: 1 }, "PaleoPlates"),
+          h("option", { value: 2 }, "Scotese"),
+          h("option", { value: 3 }, "Wright et al., 2013"),
+        ]
       ),
     ]),
 
