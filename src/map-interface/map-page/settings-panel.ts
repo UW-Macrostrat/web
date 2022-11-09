@@ -129,9 +129,10 @@ const SettingsPanel = (props) => {
           },
         },
         [
-          h("option", { value: 1 }, "PaleoPlates"),
-          h("option", { value: 2 }, "Scotese"),
+          h("option", { value: 1 }, "Eglington (in prep)"),
+          h("option", { value: 2 }, "Seton et al., 2012"),
           h("option", { value: 3 }, "Wright et al., 2013"),
+          h("option", { value: 4 }, "Scotese"),
         ]
       ),
     ]),
