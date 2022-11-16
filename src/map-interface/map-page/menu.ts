@@ -198,8 +198,12 @@ const menuBacklinkLocationOverrides = {
   "/changelog": "/about",
 };
 
-function useLastPageLocation(baseRoute="/"): { title: string; to: string } | null {
-  const breadcrumbs = useBreadcrumbs();
+function useLastPageLocation(
+  baseRoute = "/"
+): { title: string; to: string } | null {
+  const breadcrumbs = useBreadcrumbs().filter((b) =>
+    b.key.startsWith(baseRoute)
+  );
   if (breadcrumbs.length < 2) return null;
   const prevPage = breadcrumbs[breadcrumbs.length - 2];
   const currentPage = breadcrumbs[breadcrumbs.length - 1];
@@ -212,16 +216,14 @@ function useLastPageLocation(baseRoute="/"): { title: string; to: string } | nul
     prevPath = "/" + prevPath.slice(baseRoute.length);
   }
 
-  const prevRoute =
-    menuBacklinkLocationOverrides[currentPath] ??
-    prevPath;
-  if (prevRoute == baseRoute) return null;
+  const prevRoute = menuBacklinkLocationOverrides[currentPath] ?? prevPath;
+  if (prevRoute == "/") return null;
 
   return { to: prevRoute, title: locationTitleForRoute[prevRoute] ?? "Back" };
 }
 
-function MenuHeaderButtons() {
-  const backLoc = useLastPageLocation();
+function MenuHeaderButtons({ baseRoute = "/" }) {
+  const backLoc = useLastPageLocation(baseRoute);
   const { pathname } = useLocation();
 
   if (backLoc != null) {
@@ -309,7 +311,11 @@ const Menu = (props) => {
       insetContent: false,
       className,
       renderHeader: () =>
-        h(HeaderWrapper, { minimal: isNarrow }, h(MenuHeaderButtons)),
+        h(
+          HeaderWrapper,
+          { minimal: isNarrow },
+          h(MenuHeaderButtons, { baseRoute })
+        ),
     },
     [
       h(Routes, [

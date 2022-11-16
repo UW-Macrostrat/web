@@ -26,13 +26,14 @@ function useMapBackend() {
 }
 
 function MapTypeButton(props) {
-  const { hash } = useLocation();
+  const { hash, pathname } = useLocation();
 
-  const globeActive = useMapBackend() == MapBackend.CESIUM;
-  const pathname = globeActive ? "/map" : "/globe";
+  const globeActive = pathname?.startsWith("/globe");
+
+  const switchLink = globeActive ? "/settings" : "/globe/settings";
   const name = globeActive ? "map" : "globe";
 
-  return h(LinkButton, { to: pathname }, `Switch to ${name}`);
+  return h(LinkButton, { to: switchLink }, `Switch to ${name}`);
 }
 
 const ExperimentsPanel = (props) => {
@@ -96,7 +97,10 @@ const SettingsPanel = (props) => {
     h("h2", "Map view settings"),
     h("p", "Advanced configuration for Macrostrat's map."),
     h(MapTypeButton),
-    h.if(globeActive)(GlobeSettings),
+    h.if(globeActive)(GlobeSettings, {
+      state: useAppState((s) => s.globe),
+      dispatch: runAction,
+    }),
     h(PerformanceDisplay, { data }),
     h(
       Switch,

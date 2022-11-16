@@ -50,9 +50,9 @@ const MapView = (props: { backend: MapBackend }) => {
 
   //  backend = MapBackend.CESIUM;
   let { backend = MapBackend.MAPBOX3 } = props;
-  if (location.pathname.includes("/globe")) {
-    backend = MapBackend.CESIUM;
-  }
+  // if (location.pathname.includes("/globe")) {
+  //   backend = MapBackend.CESIUM;
+  // }
 
   switch (backend) {
     case MapBackend.CESIUM:
