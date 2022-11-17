@@ -1,7 +1,7 @@
 import { combineReducers } from "redux";
 import reduceReducers from "reduce-reducers";
 //import { menuReducer, MenuState, MenuAction } from "./menu";
-import { coreReducer, CoreState, MapPosition, CoreAction } from "./core";
+import { coreReducer, CoreState, CoreAction } from "./core";
 import { MapAction } from "./map";
 import {
   reducer as globeReducer,
@@ -9,13 +9,12 @@ import {
   GlobeState,
   createInitialState,
   DisplayQuality,
-} from "@macrostrat/cesium-viewer/src/actions";
-import { LocalStorage } from "@macrostrat/ui-components";
-import {
   nadirCameraParams,
-  CameraParams,
   flyToParams,
+  translateCameraPosition,
 } from "@macrostrat/cesium-viewer";
+import { MapPosition } from "@macrostrat/mapbox-utils";
+import { LocalStorage } from "@macrostrat/ui-components";
 import { performanceReducer, PerformanceState } from "../../performance/core";
 import { createBrowserHistory } from "history";
 import { createRouterReducer } from "@lagunovsky/redux-react-router";
@@ -54,24 +53,6 @@ const reducers = combineReducers({
   router: routerReducer,
   core: coreReducer,
 });
-
-function translateCameraPosition(pos: MapPosition): CameraParams {
-  const { bearing = 0, pitch, altitude } = pos.camera;
-  const { zoom } = pos.target ?? {};
-  if (bearing == 0 && pitch == 0 && zoom != null) {
-    const { lng, lat } = pos.target;
-    return nadirCameraParams(lng, lat, zoom);
-  } else {
-    return {
-      longitude: pos.camera.lng,
-      latitude: pos.camera.lat,
-      height: altitude,
-      heading: bearing,
-      pitch: -90 + (pitch ?? 0),
-      roll: 0,
-    };
-  }
-}
 
 export type AppState = {
   core: CoreState;

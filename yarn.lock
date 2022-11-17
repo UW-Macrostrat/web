@@ -3898,19 +3898,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/cesium-viewer@npm:^1.0.3":
-  version: 1.0.3
-  resolution: "@macrostrat/cesium-viewer@npm:1.0.3"
+"@macrostrat/cesium-viewer@npm:^1.1.4":
+  version: 1.1.4
+  resolution: "@macrostrat/cesium-viewer@npm:1.1.4"
   dependencies:
+    "@macrostrat/cesium-martini": ^1.2.3
     "@macrostrat/hyper": ^2.0.1
+    "@macrostrat/mapbox-utils": ^1.1.1
     "@znemz/cesium-navigation": ^4.0.0
     cesium: ^1.81.0
     d3-format: ^3.1.0
+    regl: ^2.1.0
     resium: ^1.13.1
   peerDependencies:
+    "@blueprintjs/core": ^4.12.0
     react: ^16||^17
-    react-dom: ^17.0.2
-  checksum: bd05c37e1a3d569a02415ccab98aa12b5f9be365fc1a92e2d2b50c10218a6600c3503acd6dfcba295a071342ffa69837a77492918358771b9b48fccac39f05f5
+    react-dom: ^16||^17
+  checksum: c19a6dadfcd9d038465a68a53682a8d97abe85a44a9419b4339eb2883e54fd9401effeb02073d0176b652c3916b387c9b1f7b229407d147601446e869f6d85b5
   languageName: node
   linkType: hard
 
@@ -4202,7 +4206,7 @@ __metadata:
     "@loadable/component": ^5.14.1
     "@macrostrat/cesium-martini": ^1.2.3
     "@macrostrat/cesium-vector-provider": "workspace:*"
-    "@macrostrat/cesium-viewer": ^1.0.3
+    "@macrostrat/cesium-viewer": ^1.1.4
     "@macrostrat/column-components": "*"
     "@macrostrat/hyper": ^2.2.1
     "@macrostrat/mapbox-react": "*"
@@ -4315,7 +4319,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@macrostrat/mapbox-utils@*, @macrostrat/mapbox-utils@^1.0.0, @macrostrat/mapbox-utils@workspace:deps/web-components/packages/mapbox-utils":
+"@macrostrat/mapbox-utils@*, @macrostrat/mapbox-utils@^1.0.0, @macrostrat/mapbox-utils@^1.1.1, @macrostrat/mapbox-utils@workspace:deps/web-components/packages/mapbox-utils":
   version: 0.0.0-use.local
   resolution: "@macrostrat/mapbox-utils@workspace:deps/web-components/packages/mapbox-utils"
   dependencies:
@@ -33148,6 +33152,13 @@ __metadata:
   version: 1.7.0
   resolution: "regl@npm:1.7.0"
   checksum: 93baff0b49d33709b95e7ad8ca689889498afd113bc212037c9b37e86aaa8547cd4e1a5e3d335a7a513d6db42946044dce7e3b1df2196726913247e9c6d1916a
+  languageName: node
+  linkType: hard
+
+"regl@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "regl@npm:2.1.0"
+  checksum: dd890b7f50f0cc803f53212870343f910c135343d99b1e3de8cf6167bfde8beaa968aab59a41ea88c6dd58a192be07cbb9ae64989efea329457467f5c491cfbe
   languageName: node
   linkType: hard
 

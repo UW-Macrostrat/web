@@ -56,7 +56,7 @@
     "@loadable/component": "^5.14.1",
     "@macrostrat/cesium-martini": "^1.2.3",
     "@macrostrat/cesium-vector-provider": "workspace:*",
-    "@macrostrat/cesium-viewer": "^1.0.3",
+    "@macrostrat/cesium-viewer": "^1.1.4",
     "@macrostrat/column-components": "*",
     "@macrostrat/hyper": "^2.2.1",
     "@macrostrat/mapbox-react": "*",

@@ -7,7 +7,7 @@ import {
   GeologyLayer,
   SatelliteLayer,
   terrainProvider,
-} from "@macrostrat/cesium-viewer/src/layers";
+} from "@macrostrat/cesium-viewer";
 import { ImageryLayer } from "resium";
 import { useEffect, useMemo, useRef } from "react";
 import VectorProvider from "@macrostrat/cesium-vector-provider";
@@ -19,7 +19,7 @@ import {
 import {
   buildPositionHash,
   getInitialPosition,
-} from "@macrostrat/cesium-viewer/src/query-string";
+} from "@macrostrat/cesium-viewer";
 import { useAppActions, MapLayer, useAppState } from "../app-state";
 import { useCallback } from "react";
 import { mapStyle, coreStyle } from "./map-styles";

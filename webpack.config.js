@@ -112,7 +112,7 @@ module.exports = {
       {
         test: /\.(js|jsx|ts|tsx)$/,
         use: [babelLoader],
-        exclude: [/node_modules\/!(@macrostrat\/cesium-viewer\/src)/],
+        exclude: /node_modules/,
       },
       {
         test: /\.styl$/,

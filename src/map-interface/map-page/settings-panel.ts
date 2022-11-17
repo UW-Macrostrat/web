@@ -2,7 +2,7 @@
 
 // TODO: re-integrate LinkButton to @macrostrat/router-components
 import { LinkButton } from "~/map-interface/components/buttons";
-import { GlobeSettings } from "@macrostrat/cesium-viewer/src/settings";
+import { GlobeSettings } from "@macrostrat/cesium-viewer";
 import { useLocation } from "react-router";
 import {
   MapBackend,
@@ -14,7 +14,6 @@ import { Switch } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import { Tag } from "@blueprintjs/core";
 //import { LinkButton } from "@macrostrat/ui-components";
-//import { GlobeSettings } from "@macrostrat/cesium-viewer/settings";
 import { MapLayer } from "~/map-interface/app-state";
 //import { DisplayQuality } from "@macrostrat/cesium-viewer";
 import styles from "./settings-panel.module.styl";
