@@ -1,25 +1,25 @@
-import CesiumView, { DisplayQuality } from "@macrostrat/cesium-viewer";
 import hyper from "@macrostrat/hyper";
 import { useDispatch, useSelector } from "react-redux";
 import { MapChangeTracker, MapClickHandler } from "@macrostrat/cesium-viewer";
 import {
   HillshadeLayer,
   GeologyLayer,
+} from "@macrostrat/cesium-viewer/src/layers";
+import CesiumView, {
+  DisplayQuality,
   SatelliteLayer,
   terrainProvider,
+  buildPositionHash,
+  getInitialPosition,
 } from "@macrostrat/cesium-viewer";
 import { ImageryLayer } from "resium";
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import VectorProvider from "@macrostrat/cesium-vector-provider";
 import reliefShading from "./map-styles/relief-shading";
 import {
   getHashString,
   setHashString,
 } from "@macrostrat/ui-components/util/query-string";
-import {
-  buildPositionHash,
-  getInitialPosition,
-} from "@macrostrat/cesium-viewer";
 import { useAppActions, MapLayer, useAppState } from "../app-state";
 import { useCallback } from "react";
 import { mapStyle, coreStyle } from "./map-styles";

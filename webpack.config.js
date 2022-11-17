@@ -1,7 +1,7 @@
 const path = require("path");
 const { EnvironmentPlugin, DefinePlugin } = require("webpack");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-//UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+// UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const CopyPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const revisionInfo = require("@macrostrat/revision-info-webpack");
@@ -95,8 +95,6 @@ if (!devMode) {
 
 const styleLoaders = [finalStyleLoader, cssModuleLoader];
 
-console.log(cesiumSource);
-
 module.exports = {
   mode,
   devServer: {
@@ -113,6 +111,13 @@ module.exports = {
         test: /\.(js|jsx|ts|tsx)$/,
         use: [babelLoader],
         exclude: /node_modules/,
+      },
+      // Extra loader for cesium-viewer source while we figure out how
+      // to bundle this module correctly.
+      {
+        test: /\.ts$/,
+        use: [babelLoader],
+        include: [/node_modules\/@macrostrat\/cesium-viewer\/src/],
       },
       {
         test: /\.styl$/,

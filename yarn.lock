@@ -3898,9 +3898,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/cesium-viewer@npm:^1.1.4":
-  version: 1.1.4
-  resolution: "@macrostrat/cesium-viewer@npm:1.1.4"
+"@macrostrat/cesium-viewer@npm:^1.1.5":
+  version: 1.1.5
+  resolution: "@macrostrat/cesium-viewer@npm:1.1.5"
   dependencies:
     "@macrostrat/cesium-martini": ^1.2.3
     "@macrostrat/hyper": ^2.0.1
@@ -3914,7 +3914,7 @@ __metadata:
     "@blueprintjs/core": ^4.12.0
     react: ^16||^17
     react-dom: ^16||^17
-  checksum: c19a6dadfcd9d038465a68a53682a8d97abe85a44a9419b4339eb2883e54fd9401effeb02073d0176b652c3916b387c9b1f7b229407d147601446e869f6d85b5
+  checksum: 63dfbec9629bb5eac3b7b0f4308067484d6eac127f0a99390e79e1cb142ad56aa751a9a43bc9f82a4c674e27768037e2bbae372b503af839d44579e8f026f43c
   languageName: node
   linkType: hard
 
@@ -4206,7 +4206,7 @@ __metadata:
     "@loadable/component": ^5.14.1
     "@macrostrat/cesium-martini": ^1.2.3
     "@macrostrat/cesium-vector-provider": "workspace:*"
-    "@macrostrat/cesium-viewer": ^1.1.4
+    "@macrostrat/cesium-viewer": ^1.1.5
     "@macrostrat/column-components": "*"
     "@macrostrat/hyper": ^2.2.1
     "@macrostrat/mapbox-react": "*"
