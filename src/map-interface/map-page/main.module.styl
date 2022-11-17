@@ -41,6 +41,10 @@ This stylesheet the overall application page layout.
   max-height 100%
   height: 100%
 
+  .map-view-container
+    flex-grow 1
+    position relative
+
 .context-stack
   display: flex
   flex-direction: column
@@ -68,9 +72,7 @@ This stylesheet the overall application page layout.
   flex-grow 1
   pointer-events: none
 
-.map-view-container
-  flex-grow 1
-  position relative
+
 
 .searchbar-holder
   margin-bottom 0.5em
@@ -270,6 +272,11 @@ map-control()
     &.searching .context-stack
       width: 24em
 
+    /* Make map fill page rather than containing div,
+      by unsetting map position */
+    .map-view-container
+      position: unset
+
 
   .context-stack
     max-width 34em
@@ -310,10 +317,7 @@ map-control()
     &>div.spacer
       pointer-events: none
 
-  /* Make map fill page rather than containing div,
-    by unsetting map position */
-  .map-view-container
-    position: unset
+
 
   // .map-holder
   //   z-index: 1;

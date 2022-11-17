@@ -41,6 +41,13 @@ function GlobePage() {
   return h(MapPage, { backend: MapBackend.CESIUM, baseRoute: "/globe/" });
 }
 
+const _SplitMapPage = loadable(() =>
+  import("./map-interface/debug").then((d) => d.SplitMapPage)
+);
+const SplitMapPage = () => {
+  return h(Suspense, { fallback: h(Spinner) }, h(_SplitMapPage));
+};
+
 const _Sources = loadable(() => import("~/burwell-sources"));
 const Sources = () => h(Suspense, { fallback: h(Spinner) }, h(_Sources));
 
@@ -59,6 +66,7 @@ const App = () => {
         h(Routes, [
           h(Route, { path: "/sources", element: h(Sources) }),
           h(Route, { path: "/dev/globe", element: h(GlobeDevPage) }),
+          h(Route, { path: "/debug/split-view", element: h(SplitMapPage) }),
           h(Route, { path: "/globe/*", element: h(GlobePage) }),
           h(Route, { path: "*", element: h(MapPage) }),
         ]),
