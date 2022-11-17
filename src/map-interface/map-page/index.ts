@@ -48,48 +48,6 @@ const MapView = (props: { backend: MapBackend }) => {
   }
 };
 
-const MapTypeSelector = () => {
-  const backend = useSelector((d) => d.update.mapBackend);
-  const dispatch = useDispatch();
-
-  const setBackend = (backend) => {
-    dispatch({ type: "set-map-backend", backend });
-  };
-
-  return h(ButtonGroup, { className: "map-type-selector" }, [
-    h(
-      Button,
-      {
-        active: backend == MapBackend.MAPBOX,
-        onClick() {
-          setBackend(MapBackend.MAPBOX);
-        },
-      },
-      "2D"
-    ),
-    h(
-      Button,
-      {
-        active: backend == MapBackend.MAPBOX3,
-        onClick() {
-          setBackend(MapBackend.MAPBOX3);
-        },
-      },
-      "3D"
-    ),
-    h(
-      Button,
-      {
-        active: backend == MapBackend.CESIUM,
-        onClick() {
-          setBackend(MapBackend.CESIUM);
-        },
-      },
-      "Globe (alpha)"
-    ),
-  ]);
-};
-
 const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   const { inputFocus } = useSearchState();
   const runAction = useAppActions();

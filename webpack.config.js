@@ -154,6 +154,10 @@ module.exports = {
       "@macrostrat/mapbox-styles": packageSrc("mapbox-styles"),
       "@macrostrat/mapbox-utils": packageSrc("mapbox-utils"),
       "@macrostrat/mapbox-react": packageSrc("mapbox-react"),
+      // Added to help with modules
+      "@macrostrat/concept-app-helpers": packageSrc("concept-app-helpers"),
+      "@macrostrat/timescale": packageSrc("timescale"),
+      common: packageSrc("common"),
     },
   },
   entry: {
