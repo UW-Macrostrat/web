@@ -111,10 +111,6 @@ class VestigialMap extends Component<MapProps, {}> {
     }, 1);
   }
 
-  componentDidMount() {
-    this.setupMapHandlers();
-  }
-
   setupMapHandlers() {
     if (this.map != null) {
       return;

@@ -1,4 +1,4 @@
-import { forwardRef, useRef } from "react";
+import { forwardRef, useRef, useState } from "react";
 import {
   useAppActions,
   useAppState,
@@ -78,6 +78,8 @@ async function initializeMap(baseMapURL, mapLayers, mapPosition) {
   // setup the basic map
   mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
 
+  console.log("Initializing map");
+
   const map = new mapboxgl.Map({
     container: "map",
     style: await buildMapStyle(baseMapURL),
@@ -130,6 +132,10 @@ function MapContainer(props) {
   } = useAppState((state) => state.core);
 
   const runAction = useAppActions();
+  /* HACK: Right now we need this to force a render when the map
+    is done loading
+    */
+  const [mapInitialized, setMapInitialized] = useState(false);
   const offset = useRef([0, 0]);
 
   let mapRef = useMapRef();
@@ -145,6 +151,7 @@ function MapContainer(props) {
   useEffect(() => {
     initializeMap(baseMapURL, mapLayers, mapPosition).then((map) => {
       mapRef.current = map;
+      setMapInitialized(true);
     });
   }, []);
   useEffect(() => {
@@ -168,6 +175,8 @@ function MapContainer(props) {
     const map = mapRef.current;
     if (map == null) return;
 
+    console.log("Wiring up map position");
+
     setMapPosition(map, mapPosition);
     // Update the URI when the map moves
 
@@ -179,7 +188,7 @@ function MapContainer(props) {
       });
     };
     map.on("moveend", debounce(mapMovedCallback, 100));
-  }, [mapRef.current]);
+  }, [mapRef.current, mapInitialized]);
 
   useEffect(() => {
     if (mapLayers.has(MapLayer.COLUMNS)) {
