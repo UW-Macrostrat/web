@@ -179,12 +179,6 @@ class VestigialMap extends Component<MapProps, {}> {
       if (this.panning) {
         return;
       }
-      // Make sure this doesn't fire before infoMarker is added to map
-      // Can happen on a slow connection
-      if (this.map.getLayer("infoMarker")) {
-        // Hide the info marker and close the info drawer
-        //this.map.setLayoutProperty("infoMarker", "visibility", "none");
-      }
     });
 
     this.map.on("click", (event) => {
@@ -391,37 +385,6 @@ class VestigialMap extends Component<MapProps, {}> {
     });
   }
 
-  // Swap between standard and satellite base layers
-  swapBasemap(toAdd) {
-    this.currentSources = [];
-    this.currentLayers = [];
-
-    // First record which layers are currently on the map
-    Object.keys(mapStyle.sources).forEach((source) => {
-      let isPresent = this.map.getSource(source);
-      if (isPresent) {
-        this.currentSources.push({
-          id: source,
-          config: mapStyle.sources[source],
-          data: isPresent._data || null,
-        });
-      }
-    });
-
-    mapStyle.layers.forEach((layer) => {
-      let isPresent = this.map.getLayer(layer.id);
-      if (isPresent) {
-        this.currentLayers.push({
-          layer: layer,
-          filters: this.map.getFilter(layer.id),
-        });
-      }
-    });
-
-    // Set the style. `style.load` will be fired after to readd other layers
-    //this.map.setStyle(toAdd);
-  }
-
   // Handle updates to the state of the map
   // Since react isn't in charge of updating the map state we use shouldComponentUpdate
   // and always return `false` to prevent DOM updates
@@ -554,7 +517,6 @@ class VestigialMap extends Component<MapProps, {}> {
   // PBDB hexgrids and points are refreshed on every map move
   refreshPBDB() {
     let bounds = this.map.getBounds();
-    console.log(bounds);
     let zoom = this.map.getZoom();
     PBDBHelper(this, bounds, zoom);
   }
