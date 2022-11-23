@@ -31,16 +31,6 @@ const ExperimentsPanel = (props) => {
     h(
       Switch,
       {
-        checked: useAppState((s) => s.core.mapShowLabels),
-        onChange() {
-          dispatch({ type: "toggle-labels" });
-        },
-      },
-      "Show labels"
-    ),
-    h(
-      Switch,
-      {
         checked: useAppState((s) => s.core.mapLayers.has(MapLayer.SOURCES)),
         onChange() {
           dispatch({ type: "toggle-map-layer", layer: MapLayer.SOURCES });
@@ -79,17 +69,6 @@ const SettingsPanel = (props) => {
   return h("div.settings.bp3-text.text-panel", [
     h("h2", "Map view settings"),
     h("p", "Advanced configuration for Macrostrat's map."),
-    h(
-      Switch,
-      {
-        checked: useAppState((s) => s.core.mapShowLabels),
-        onChange() {
-          runAction({ type: "toggle-labels" });
-        },
-      },
-      "Show labels"
-    ),
-
     //h(MapTypeButton),
     //h.if(globeActive)(GlobeSettings),
   ]);

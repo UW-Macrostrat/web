@@ -26,7 +26,7 @@ const defaultState: CoreState = {
   infoDrawerExpanded: false,
   elevationChartOpen: false,
   mapBackend: MapBackend.MAPBOX,
-  mapLayers: new Set([MapLayer.BEDROCK, MapLayer.LINES]),
+  mapLayers: new Set([MapLayer.BEDROCK, MapLayer.LINES, MapLayer.LABELS]),
   // Events and tokens for xhr
   isFetching: false,
   fetchingMapInfo: false,
@@ -56,7 +56,6 @@ const defaultState: CoreState = {
     type: null,
   },
   mapUse3D: false,
-  mapShowLabels: true,
   mapShowLineSymbols: false,
   filtersOpen: false,
   filters: [],
@@ -130,8 +129,6 @@ export function coreReducer(
     case "toggle-filters":
       // rework this to open menu panel
       return { ...state, filtersOpen: !state.filtersOpen };
-    case "toggle-labels":
-      return { ...state, mapShowLabels: !state.mapShowLabels };
     case "toggle-line-symbols":
       return { ...state, mapShowLineSymbols: !state.mapShowLineSymbols };
     case "add-filter":

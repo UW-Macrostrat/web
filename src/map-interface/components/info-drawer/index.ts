@@ -22,6 +22,8 @@ function InfoDrawerContainer(props) {
 }
 
 function InfoDrawer(props) {
+  // We used to enable panels when certain layers were on,
+  // but now we just show all panels always
   let { className } = props;
   const {
     mapInfo,
@@ -32,13 +34,6 @@ function InfoDrawer(props) {
     infoMarkerLat,
     gddInfo,
     pbdbData,
-    // We used to enable panels when certain layers were on,
-    // but now we just show all panels always
-    //mapLayers
-    // mapHasBedrock,
-    // mapHasSatellite,
-    // mapHasColumns,
-    // mapHasFossils,
   } = useAppState((state) => state.core);
 
   const runAction = useAppActions();

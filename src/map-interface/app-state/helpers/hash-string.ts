@@ -55,21 +55,11 @@ function updateURI(state: CoreState) {
 /*
   let {
     mapXYZ,
-    mapHasBedrock,
-    mapHasLines,
-    mapHasSatellite,
-    mapHasColumns,
-    mapHasFossils,
   } = state;
   let defaultState = {
     z: mapXYZ.z,
     x: mapXYZ.x,
     y: mapXYZ.y,
-    satellite: mapHasSatellite,
-    bedrock: mapHasBedrock,
-    lines: mapHasLines,
-    columns: mapHasColumns,
-    fossils: mapHasFossils,
   };
   let filterTypes = [
     "strat_name_concepts",
@@ -113,8 +103,12 @@ function getLayerDescriptionFromLayers(layers: Set<MapLayer>): string[] {
     layerArr.push("geology");
   }
 
-  // If "geology" is the only layer, we remove it as implicit
-  if (layerArr.length == 1 && layerArr[0] == "geology") {
+  // If "geology" + "labels" are the only layers, we remove them as implicit
+  if (
+    layerArr.length == 2 &&
+    layerArr.includes("geology") &&
+    layerArr.includes("labels")
+  ) {
     layerArr = [];
   }
 
@@ -138,7 +132,8 @@ function layerDescriptionToLayers(layers: string | string[]): Set<MapLayer> {
   }
 
   if (layers.length == 0) {
-    layers = ["geology"];
+    // Add implicit layers
+    layers = ["geology", "labels"];
   }
 
   if (layers.includes("geology")) {

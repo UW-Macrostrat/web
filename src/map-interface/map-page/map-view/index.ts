@@ -126,7 +126,6 @@ function MapContainer(props) {
     mapPosition,
     infoDrawerOpen,
     mapIsLoading,
-    mapShowLabels,
     mapShowLineSymbols,
   } = useAppState((state) => state.core);
 
@@ -193,7 +192,7 @@ function MapContainer(props) {
     runAction({ type: "map-layers-changed", mapLayers });
   }, [filters, mapLayers]);
 
-  useMapLabelVisibility(mapRef, mapShowLabels);
+  useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));
   useMapConditionalStyle(
     mapRef,
     mapShowLineSymbols && mapLayers.has(MapLayer.LINES),

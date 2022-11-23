@@ -164,6 +164,11 @@ const LayerList = (props) => {
         layer: MapLayer.SATELLITE,
         icon: "satellite",
       }),
+      h(LayerButton, {
+        name: "Labels",
+        layer: MapLayer.LABELS,
+        icon: "tag",
+      }),
     ]),
     h(MenuGroup, [
       h(YourLocationButton),
