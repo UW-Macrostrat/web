@@ -362,9 +362,8 @@ class VestigialMap extends Component<MapProps, {}> {
         ],
       });
 
-      const iconSize = this.props.mapHasSatellite ? 0.1 : 0.8;
-
-      this.map.setLayoutProperty("infoMarker", "icon-size", iconSize);
+      //const iconSize = this.props.mapHasSatellite ? 0.1 : 0.8;
+      //this.map.setLayoutProperty("infoMarker", "icon-size", iconSize);
       this.map.setLayoutProperty("infoMarker", "visibility", "visible");
     });
 
@@ -373,8 +372,6 @@ class VestigialMap extends Component<MapProps, {}> {
       if (!this.currentSources.length) {
         return;
       }
-
-      this.enable3DTerrain(this.props.use3D);
 
       this.currentSources.forEach((source) => {
         if (this.map.getSource(source.id) == null) {
@@ -387,9 +384,7 @@ class VestigialMap extends Component<MapProps, {}> {
 
       // Readd all the previous layers to the map
       this.currentLayers.forEach((layer) => {
-        if (layer.layer.id != "infoMarker") {
-          this.map.addLayer(layer.layer, "airport-label");
-        } else {
+        if (layer.layer.id == "infoMarker") {
           this.map.addLayer(layer.layer);
         }
 
@@ -428,8 +423,6 @@ class VestigialMap extends Component<MapProps, {}> {
       }
     });
 
-    this.enable3DTerrain(this.props.use3D);
-
     // Set the style. `style.load` will be fired after to readd other layers
     this.map.setStyle(toAdd);
   }
@@ -440,9 +433,6 @@ class VestigialMap extends Component<MapProps, {}> {
   // We basically intercept the changes, handle them, and tell React to ignore them
   shouldComponentUpdate(nextProps) {
     setMapStyle(this, this.map, mapStyle, nextProps);
-    if (this.props.use3D !== nextProps.use3D) {
-      return true;
-    }
 
     if (nextProps.mapIsRotated !== this.props.mapIsRotated) {
       return true;
@@ -627,6 +617,9 @@ export default forwardRef((props, ref) =>
 export function enable3DTerrain(map, shouldEnable: boolean) {
   console.log("Trying to enable 3D terrain");
   if (!map.style._loaded) {
+    map.once("style.load", () => {
+      enable3DTerrain(map, shouldEnable);
+    });
     return;
   }
   if (shouldEnable) {

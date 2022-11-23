@@ -158,13 +158,14 @@ function MapContainer(props) {
     // Update the URI when the map moves
 
     const mapMovedCallback = () => {
+      console.log("map moved");
       runAction({
         type: "map-moved",
         data: getMapPosition(map),
       });
     };
     map.on("moveend", debounce(mapMovedCallback, 100));
-  }, [mapRef]);
+  }, [mapRef.current]);
 
   // useMapConditionalStyle(mapRef, true, (map, isOn) => {
   //   map.showTileBoundaries = isOn;
