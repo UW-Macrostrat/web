@@ -234,11 +234,8 @@ function MapContainer(props) {
     h(VestigialMap, {
       filters,
       filteredColumns,
-      mapHasBedrock: mapLayers.has(MapLayer.BEDROCK),
-      mapHasLines: mapLayers.has(MapLayer.LINES),
-      mapHasSatellite: mapLayers.has(MapLayer.SATELLITE),
-      mapHasColumns: mapLayers.has(MapLayer.COLUMNS),
-      mapHasFossils: mapLayers.has(MapLayer.FOSSILS),
+      // Recreate the set every time to force a re-render
+      mapLayers,
       mapCenter,
       elevationChartOpen,
       elevationData,

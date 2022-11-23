@@ -10,7 +10,7 @@ import h from "@macrostrat/hyper";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { setMapStyle } from "./style-helpers";
-import classNames from "classnames";
+import { MapLayer } from "~/map-interface/app-state";
 
 const maxClusterZoom = 6;
 const highlightLayers = [
@@ -69,6 +69,7 @@ class VestigialMap extends Component<MapProps, {}> {
     if (!this.map.style._loaded) {
       return;
     }
+    const { mapLayers } = this.props;
     mapStyle.layers.forEach((layer) => {
       // Populate the objects that track interaction states
       this.hoverStates[layer.id] = null;
@@ -78,29 +79,29 @@ class VestigialMap extends Component<MapProps, {}> {
       if (
         layer.source === "burwell" &&
         layer["source-layer"] === "units" &&
-        this.props.mapHasBedrock === false
+        mapLayers.has(MapLayer.BEDROCK)
       ) {
         this.map.setLayoutProperty(layer.id, "visibility", "none");
       }
       if (
         layer.source === "burwell" &&
         layer["source-layer"] === "lines" &&
-        this.props.mapHasLines === false
+        mapLayers.has(MapLayer.LINES)
       ) {
         this.map.setLayoutProperty(layer.id, "visibility", "none");
       }
       if (
         (layer.source === "pbdb" || layer.source === "pbdb-points") &&
-        this.props.mapHasFossils === true
+        mapLayers.has(MapLayer.FOSSILS)
       ) {
         this.map.setLayoutProperty(layer.id, "visibility", "visible");
       }
-      if (layer.source === "columns" && this.props.mapHasColumns === true) {
+      if (layer.source === "columns" && mapLayers.has(MapLayer.COLUMNS)) {
         this.map.setLayoutProperty(layer.id, "visibility", "visible");
       }
     });
 
-    if (this.props.mapHasFossils) {
+    if (mapLayers.has(MapLayer.FOSSILS)) {
       this.refreshPBDB();
     }
 
@@ -146,7 +147,7 @@ class VestigialMap extends Component<MapProps, {}> {
 
     this.map.on("moveend", () => {
       // Force a hit to the API to refresh
-      if (this.props.mapHasFossils) {
+      if (this.props.mapLayers.has(MapLayer.FOSSILS)) {
         this.refreshPBDB();
       }
     });
@@ -231,7 +232,7 @@ class VestigialMap extends Component<MapProps, {}> {
       }
 
       // If we are viewing fossils, prioritize clicks on those
-      if (this.props.mapHasFossils) {
+      if (this.props.mapLayers.has(MapLayer.FOSSILS)) {
         let collections = this.map.queryRenderedFeatures(event.point, {
           layers: ["pbdb-points-clustered", "pbdb-points", "pbdb-clusters"],
         });
@@ -363,8 +364,6 @@ class VestigialMap extends Component<MapProps, {}> {
         ],
       });
 
-      //const iconSize = this.props.mapHasSatellite ? 0.1 : 0.8;
-      //this.map.setLayoutProperty("infoMarker", "icon-size", iconSize);
       this.map.setLayoutProperty("infoMarker", "visibility", "visible");
     });
 
@@ -458,8 +457,6 @@ class VestigialMap extends Component<MapProps, {}> {
       } else {
         // zoom to user location
       }
-
-      // Swap satellite/normal
     }
 
     // Handle changes to map filters
@@ -475,7 +472,7 @@ class VestigialMap extends Component<MapProps, {}> {
         this.applyFilters();
 
         // Remove filtered columns and add unfiltered columns
-        if (this.props.mapHasColumns) {
+        if (this.props.mapLayers.has(MapLayer.COLUMNS)) {
           mapStyle.layers.forEach((layer) => {
             if (layer.source === "columns") {
               this.map.setLayoutProperty(layer.id, "visibility", "visible");
@@ -488,7 +485,7 @@ class VestigialMap extends Component<MapProps, {}> {
           });
         }
 
-        if (nextProps.mapHasFossils === true) {
+        if (nextProps.mapLayers.has(MapLayer.FOSSILS)) {
           this.refreshPBDB();
         }
 
@@ -497,7 +494,7 @@ class VestigialMap extends Component<MapProps, {}> {
 
       this.handleFilterChanges(nextProps);
 
-      if (nextProps.mapHasFossils === true) {
+      if (nextProps.mapLayers.has(MapLayer.FOSSILS)) {
         this.refreshPBDB();
       }
 
