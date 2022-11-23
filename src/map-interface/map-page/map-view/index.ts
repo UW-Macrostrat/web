@@ -67,31 +67,26 @@ function useElevationMarkerLocation(mapRef, elevationMarkerLocation) {
   }, [mapRef, elevationMarkerLocation]);
 }
 
-async function buildMapStyle(baseURL: string) {
-  const style = await getMapboxStyle(baseURL, {
+async function buildMapStyle(baseMapURL) {
+  const style = await getMapboxStyle(baseMapURL, {
     access_token: mapboxgl.accessToken,
   });
   return mergeStyles(style, mapStyle);
 }
 
-async function initializeMap(mapLayers, mapPosition) {
+async function initializeMap(baseMapURL, mapLayers, mapPosition) {
   // setup the basic map
   mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
 
-  const baseMapURL = mapLayers.has(MapLayer.SATELLITE)
-    ? SETTINGS.satelliteMapURL
-    : SETTINGS.baseMapURL;
-  const style = await buildMapStyle(baseMapURL);
-
   const map = new mapboxgl.Map({
     container: "map",
-    style,
+    style: await buildMapStyle(baseMapURL),
     maxZoom: 18,
     //maxTileCacheSize: 0,
     logoPosition: "bottom-left",
     trackResize: true,
     //antialias: true,
-    //optimizeForTerrain: true,
+    optimizeForTerrain: true,
   });
 
   map.setProjection("globe");
@@ -141,12 +136,31 @@ function MapContainer(props) {
 
   const ref = useRef<HTMLDivElement>();
   const parentRef = useRef<HTMLDivElement>();
+  const { mapUse3D, mapIsRotated } = mapViewInfo(mapPosition);
+
+  const baseMapURL = mapLayers.has(MapLayer.SATELLITE)
+    ? SETTINGS.satelliteMapURL
+    : SETTINGS.baseMapURL;
 
   useEffect(() => {
-    initializeMap(mapLayers, mapPosition).then((map) => {
+    initializeMap(baseMapURL, mapLayers, mapPosition).then((map) => {
       mapRef.current = map;
     });
   }, []);
+  useEffect(() => {
+    if (mapRef.current == null) return;
+    buildMapStyle(baseMapURL).then((style) => {
+      console.log(style);
+      mapRef.current.setStyle(style);
+      enable3DTerrain(mapRef.current, mapUse3D);
+    });
+  }, [baseMapURL]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map == null) return;
+    enable3DTerrain(map, mapUse3D);
+  }, [mapRef.current, mapUse3D]);
 
   useEffect(() => {
     // Get the current value of the map. Useful for gradually moving away
@@ -166,10 +180,6 @@ function MapContainer(props) {
     };
     map.on("moveend", debounce(mapMovedCallback, 100));
   }, [mapRef.current]);
-
-  // useMapConditionalStyle(mapRef, true, (map, isOn) => {
-  //   map.showTileBoundaries = isOn;
-  // });
 
   useEffect(() => {
     if (mapLayers.has(MapLayer.COLUMNS)) {
@@ -208,14 +218,6 @@ function MapContainer(props) {
   });
 
   useElevationMarkerLocation(mapRef, elevationMarkerLocation);
-
-  const { mapUse3D, mapIsRotated } = mapViewInfo(mapPosition);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null) return;
-    enable3DTerrain(map, mapUse3D);
-  }, [mapRef.current, mapUse3D]);
 
   const className = classNames({
     "is-rotated": mapIsRotated ?? false,

@@ -29,7 +29,6 @@ class VestigialMap extends Component<MapProps, {}> {
   map: mapboxgl.Map;
   constructor(props) {
     super(props);
-    this.swapBasemap = this.swapBasemap.bind(this);
     this.handleFilterChanges = this.handleFilterChanges.bind(this);
     this.mapLoaded = false;
     this.currentSources = [];
@@ -384,10 +383,6 @@ class VestigialMap extends Component<MapProps, {}> {
 
       // Readd all the previous layers to the map
       this.currentLayers.forEach((layer) => {
-        if (layer.layer.id == "infoMarker") {
-          this.map.addLayer(layer.layer);
-        }
-
         if (layer.filters) {
           this.map.setFilter(layer.layer.id, layer.filters);
         }
@@ -424,7 +419,7 @@ class VestigialMap extends Component<MapProps, {}> {
     });
 
     // Set the style. `style.load` will be fired after to readd other layers
-    this.map.setStyle(toAdd);
+    //this.map.setStyle(toAdd);
   }
 
   // Handle updates to the state of the map
@@ -492,12 +487,6 @@ class VestigialMap extends Component<MapProps, {}> {
       }
 
       // Swap satellite/normal
-    } else if (nextProps.mapHasSatellite != this.props.mapHasSatellite) {
-      if (nextProps.mapHasSatellite) {
-        this.swapBasemap.bind(this)(SETTINGS.satelliteMapURL);
-      } else {
-        this.swapBasemap.bind(this)(SETTINGS.baseMapURL);
-      }
     }
 
     // Handle changes to map filters
