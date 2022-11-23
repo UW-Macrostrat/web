@@ -4,7 +4,8 @@ import {
   useAppState,
   MapLayer,
 } from "~/map-interface/app-state";
-import Map, { enable3DTerrain } from "./map";
+import Map from "./map";
+import { enable3DTerrain } from "./terrain";
 import hyper from "@macrostrat/hyper";
 import { useEffect } from "react";
 import useResizeObserver from "use-resize-observer";
@@ -77,8 +78,6 @@ async function buildMapStyle(baseMapURL) {
 async function initializeMap(baseMapURL, mapLayers, mapPosition) {
   // setup the basic map
   mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
-
-  console.log("Initializing map");
 
   const map = new mapboxgl.Map({
     container: "map",
@@ -175,13 +174,10 @@ function MapContainer(props) {
     const map = mapRef.current;
     if (map == null) return;
 
-    console.log("Wiring up map position");
-
     setMapPosition(map, mapPosition);
     // Update the URI when the map moves
 
     const mapMovedCallback = () => {
-      console.log("map moved");
       runAction({
         type: "map-moved",
         data: getMapPosition(map),
