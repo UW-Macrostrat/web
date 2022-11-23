@@ -56,26 +56,61 @@ class VestigialMap extends Component<MapProps, {}> {
     this.maxValue = 500;
     this.previousZoom = 0;
 
-    this.resMax = {
-      0: 143,
-      1: 143,
-      2: 143,
-      3: 76,
-      4: 44,
-      5: 44,
-      6: 29,
-      7: 20,
-      8: 16,
-      9: 16,
-      10: 16,
-    };
-
     // We need to store these for cluster querying...
     this.pbdbPoints = {};
 
     // Keep track of unique ids for interaction states
     this.hoverStates = {};
     this.selectedStates = {};
+  }
+
+  onStyleLoad() {
+    // The initial draw of the layers
+    if (!this.map.style._loaded) {
+      return;
+    }
+    mapStyle.layers.forEach((layer) => {
+      // Populate the objects that track interaction states
+      this.hoverStates[layer.id] = null;
+      this.selectedStates[layer.id] = null;
+
+      // Accomodate any URI parameters
+      if (
+        layer.source === "burwell" &&
+        layer["source-layer"] === "units" &&
+        this.props.mapHasBedrock === false
+      ) {
+        this.map.setLayoutProperty(layer.id, "visibility", "none");
+      }
+      if (
+        layer.source === "burwell" &&
+        layer["source-layer"] === "lines" &&
+        this.props.mapHasLines === false
+      ) {
+        this.map.setLayoutProperty(layer.id, "visibility", "none");
+      }
+      if (
+        (layer.source === "pbdb" || layer.source === "pbdb-points") &&
+        this.props.mapHasFossils === true
+      ) {
+        this.map.setLayoutProperty(layer.id, "visibility", "visible");
+      }
+      if (layer.source === "columns" && this.props.mapHasColumns === true) {
+        this.map.setLayoutProperty(layer.id, "visibility", "visible");
+      }
+    });
+
+    if (this.props.mapHasFossils) {
+      this.refreshPBDB();
+    }
+
+    this.enable3DTerrain(this.props.use3D);
+
+    // NO idea why timeout is needed
+    setTimeout(() => {
+      this.mapLoaded = true;
+      this.applyFilters();
+    }, 1);
   }
 
   componentDidMount() {
@@ -114,64 +149,8 @@ class VestigialMap extends Component<MapProps, {}> {
       }
     });
 
-    this.map.on("style.load", () => {
-      // Add the sources to the map
-      Object.keys(mapStyle.sources).forEach((source) => {
-        if (this.map.getSource(source) == null) {
-          this.map.addSource(source, mapStyle.sources[source]);
-        }
-      });
-
-      // The initial draw of the layers
-      mapStyle.layers.forEach((layer) => {
-        // Populate the objects that track interaction states
-        this.hoverStates[layer.id] = null;
-        this.selectedStates[layer.id] = null;
-
-        if (layer.source === "columns" || layer.source === "info_marker") {
-          this.map.addLayer(layer);
-        } else {
-          this.map.addLayer(layer, "airport-label");
-        }
-
-        // Accomodate any URI parameters
-        if (
-          layer.source === "burwell" &&
-          layer["source-layer"] === "units" &&
-          this.props.mapHasBedrock === false
-        ) {
-          this.map.setLayoutProperty(layer.id, "visibility", "none");
-        }
-        if (
-          layer.source === "burwell" &&
-          layer["source-layer"] === "lines" &&
-          this.props.mapHasLines === false
-        ) {
-          this.map.setLayoutProperty(layer.id, "visibility", "none");
-        }
-        if (
-          (layer.source === "pbdb" || layer.source === "pbdb-points") &&
-          this.props.mapHasFossils === true
-        ) {
-          this.map.setLayoutProperty(layer.id, "visibility", "visible");
-        }
-        if (layer.source === "columns" && this.props.mapHasColumns === true) {
-          this.map.setLayoutProperty(layer.id, "visibility", "visible");
-        }
-      });
-
-      if (this.props.mapHasFossils) {
-        this.refreshPBDB();
-      }
-
-      this.enable3DTerrain(this.props.use3D);
-
-      // NO idea why timeout is needed
-      setTimeout(() => {
-        this.mapLoaded = true;
-        this.applyFilters();
-      }, 1);
-    });
+    this.map.on("style.load", this.onStyleLoad.bind(this));
+    this.onStyleLoad();
 
     highlightLayers.forEach((layer) => {
       this.map.on("mousemove", layer.layer, (evt) => {
