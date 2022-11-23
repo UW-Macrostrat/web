@@ -23,8 +23,10 @@ import {
   mapViewInfo,
   getMapPosition,
   setMapPosition,
+  getMapboxStyle,
+  mergeStyles,
 } from "@macrostrat/mapbox-utils";
-import { MapSourcesLayer, toggleLineSymbols } from "../map-style";
+import { MapSourcesLayer, mapStyle, toggleLineSymbols } from "../map-style";
 import { SETTINGS } from "../../Settings";
 import mapboxgl, { MercatorCoordinate, FreeCameraOptions } from "mapbox-gl";
 
@@ -65,6 +67,57 @@ function useElevationMarkerLocation(mapRef, elevationMarkerLocation) {
   }, [mapRef, elevationMarkerLocation]);
 }
 
+async function buildMapStyle(baseURL: string) {
+  const style = await getMapboxStyle(baseURL, {
+    access_token: mapboxgl.accessToken,
+  });
+  return mergeStyles(style, mapStyle);
+}
+
+async function initializeMap(mapLayers, mapPosition) {
+  // setup the basic map
+  mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
+
+  const baseMapURL = mapLayers.has(MapLayer.SATELLITE)
+    ? SETTINGS.satelliteMapURL
+    : SETTINGS.baseMapURL;
+  const style = await buildMapStyle(baseMapURL);
+
+  const map = new mapboxgl.Map({
+    container: "map",
+    style,
+    maxZoom: 18,
+    //maxTileCacheSize: 0,
+    logoPosition: "bottom-left",
+    trackResize: true,
+    //antialias: true,
+    //optimizeForTerrain: true,
+  });
+
+  map.setProjection("globe");
+
+  // set initial map position
+  const pos = mapPosition;
+  const { pitch = 0, bearing = 0, altitude } = pos.camera;
+  const zoom = pos.target?.zoom;
+  if (zoom != null && altitude == null) {
+    const { lng, lat } = pos.target;
+    map.setCenter([lng, lat]);
+    map.setZoom(zoom);
+  } else {
+    const { altitude, lng, lat } = pos.camera;
+    const cameraOptions = new FreeCameraOptions(
+      MercatorCoordinate.fromLngLat({ lng, lat }, altitude),
+      [0, 0, 0, 1]
+    );
+    cameraOptions.setPitchBearing(pitch, bearing);
+
+    map.setFreeCameraOptions(cameraOptions);
+  }
+
+  return map;
+}
+
 function MapContainer(props) {
   const {
     filters,
@@ -90,44 +143,9 @@ function MapContainer(props) {
   const parentRef = useRef<HTMLDivElement>();
 
   useEffect(() => {
-    // setup the basic map
-    mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
-
-    const map = new mapboxgl.Map({
-      container: "map",
-      style: mapLayers.has(MapLayer.SATELLITE)
-        ? SETTINGS.satelliteMapURL
-        : SETTINGS.baseMapURL,
-      maxZoom: 14,
-      //maxTileCacheSize: 0,
-      logoPosition: "bottom-left",
-      trackResize: true,
-      //antialias: true,
-      //optimizeForTerrain: true,
+    initializeMap(mapLayers, mapPosition).then((map) => {
+      mapRef.current = map;
     });
-
-    map.setProjection("globe");
-
-    // set initial map position
-    const pos = mapPosition;
-    const { pitch = 0, bearing = 0, altitude } = pos.camera;
-    const zoom = pos.target?.zoom;
-    if (zoom != null && altitude == null) {
-      const { lng, lat } = pos.target;
-      map.setCenter([lng, lat]);
-      map.setZoom(zoom);
-    } else {
-      const { altitude, lng, lat } = pos.camera;
-      const cameraOptions = new FreeCameraOptions(
-        MercatorCoordinate.fromLngLat({ lng, lat }, altitude),
-        [0, 0, 0, 1]
-      );
-      cameraOptions.setPitchBearing(pitch, bearing);
-
-      map.setFreeCameraOptions(cameraOptions);
-    }
-
-    mapRef.current = map;
   }, []);
 
   useEffect(() => {
