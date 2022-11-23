@@ -18,7 +18,6 @@ import {
   useMapLabelVisibility,
 } from "@macrostrat/mapbox-react";
 import classNames from "classnames";
-import { Icon } from "@blueprintjs/core";
 import { debounce } from "lodash";
 import {
   mapViewInfo,
@@ -27,7 +26,7 @@ import {
 } from "@macrostrat/mapbox-utils";
 import { MapSourcesLayer, toggleLineSymbols } from "../map-style";
 import { SETTINGS } from "../../Settings";
-import { MercatorCoordinate, FreeCameraOptions } from "mapbox-gl";
+import mapboxgl, { MercatorCoordinate, FreeCameraOptions } from "mapbox-gl";
 
 const h = hyper.styled(styles);
 
