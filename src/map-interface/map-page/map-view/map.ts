@@ -65,6 +65,7 @@ class VestigialMap extends Component<MapProps, {}> {
 
   onStyleLoad() {
     // The initial draw of the layers
+    console.log("Style loaded", this.props);
     if (!this.map.style._loaded) {
       return;
     }
@@ -111,8 +112,19 @@ class VestigialMap extends Component<MapProps, {}> {
   }
 
   componentDidMount() {
+    this.setupMapHandlers();
+  }
+
+  setupMapHandlers() {
+    if (this.map != null) {
+      return;
+    }
+
     this.map = this.props.mapRef.current;
 
+    if (this.map == null) {
+      return;
+    }
     // disable map rotation using right click + drag
     //this.map.dragRotate.disable();
 
@@ -390,6 +402,9 @@ class VestigialMap extends Component<MapProps, {}> {
   // and always return `false` to prevent DOM updates
   // We basically intercept the changes, handle them, and tell React to ignore them
   shouldComponentUpdate(nextProps) {
+    this.setupMapHandlers();
+    if (this.map == null) return false;
+
     setMapStyle(this, this.map, mapStyle, nextProps);
 
     if (nextProps.mapIsRotated !== this.props.mapIsRotated) {
@@ -590,7 +605,7 @@ export function enable3DTerrain(map, shouldEnable: boolean) {
         type: "raster-dem",
         url: "mapbox://mapbox.mapbox-terrain-dem-v1",
         tileSize: 512,
-        maxzoom: 14,
+        maxzoom: 18,
       });
     }
 

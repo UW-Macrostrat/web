@@ -226,7 +226,7 @@ function MapContainer(props) {
 
   return h("div.map-view-container.main-view", { ref: parentRef }, [
     h("div.mapbox-map#map", { ref, className }),
-    h.if(mapRef.current != null)(VestigialMap, {
+    h(VestigialMap, {
       filters,
       filteredColumns,
       mapHasBedrock: mapLayers.has(MapLayer.BEDROCK),
