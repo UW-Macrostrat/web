@@ -90,6 +90,8 @@ function MapContainer(props) {
   const ref = useRef<HTMLDivElement>();
   const parentRef = useRef<HTMLDivElement>();
 
+  console.log(plateModelId);
+
   useEffect(() => {
     // Get the current value of the map. Useful for gradually moving away
     // from class component

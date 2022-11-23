@@ -36,7 +36,7 @@ const blankMapStyle = {
 };
 
 function createMapStyle(age, model) {
-  let _model = model ?? 1;
+  let _model = 1;
 
   let mapTileURL = "https://devtiles.macrostrat.org/carto-slim/{z}/{x}/{y}.mvt";
 
@@ -763,6 +763,12 @@ class Map extends Component<MapProps, {}> {
   }
 
   componentDidUpdate(prevProps, prevState) {
+    if (this.props.plateModelId !== prevProps.plateModelId) {
+      this.map.setStyle(
+        createMapStyle(this.props.age, this.props.plateModelId)
+      );
+    }
+
     this.enable3DTerrain(this.props.use3D);
   }
 
