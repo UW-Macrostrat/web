@@ -62,25 +62,18 @@ const YourLocationButton = () => {
   const onClick = () => {
     navigator.geolocation.getCurrentPosition(
       function (position) {
-        const lngLat = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
+        const place = {
+          bbox: [],
+          category: "place",
+          center: [position.coords.longitude, position.coords.latitude],
+          name: "Your location",
+          place_type: "poi",
+          type: "place",
         };
-        const mapPosition: MapPosition = {
-          camera: {
-            altitude: 0,
-            bearing: 0,
-            pitch: 0,
-            ...lngLat,
-          },
-          target: {
-            zoom: 6,
-            ...lngLat,
-          },
-        };
+
         runAction({
-          type: "map-moved",
-          data: mapPosition,
+          type: "go-to-place",
+          place,
         });
       },
       (e) => {
@@ -91,7 +84,7 @@ const YourLocationButton = () => {
   };
   return h(
     ListButton,
-    { icon: "map-marker", onClick, disabled: true },
+    { icon: "map-marker", onClick, disabled: false },
     "Your location"
   );
 };
