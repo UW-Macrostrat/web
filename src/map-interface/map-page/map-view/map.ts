@@ -20,7 +20,6 @@ const highlightLayers = [
 ];
 
 interface MapProps {
-  use3D: boolean;
   mapIsRotated: boolean;
   markerLoadOffset: [number, number];
 }

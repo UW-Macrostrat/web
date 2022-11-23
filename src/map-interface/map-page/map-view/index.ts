@@ -248,7 +248,6 @@ function MapContainer(props) {
       mapRef,
       markerLoadOffset: offset.current,
       ...props,
-      use3D: mapUse3D,
       ref,
     }),
     h.if(mapLayers.has(MapLayer.SOURCES))(MapSourcesLayer),
