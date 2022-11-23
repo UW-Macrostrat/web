@@ -565,17 +565,28 @@ export default forwardRef((props, ref) =>
   h(VestigialMap, { ...props, elementRef: ref })
 );
 
+function getTerrainSource(map) {
+  for (const [key, source] of Object.entries(map.getStyle().sources)) {
+    if (source.type == "raster-dem") {
+      return key;
+    }
+  }
+  return null;
+}
+
 export function enable3DTerrain(map, shouldEnable: boolean) {
-  console.log("Trying to enable 3D terrain");
   if (!map.style._loaded) {
     map.once("style.load", () => {
       enable3DTerrain(map, shouldEnable);
     });
     return;
   }
+  let demSource = getTerrainSource(map);
+
   if (shouldEnable) {
-    if (map.getSource("mapbox-dem") == null) {
-      map.addSource("mapbox-dem", {
+    if (demSource == null) {
+      demSource = "mapbox-dem";
+      map.addSource(demSource, {
         type: "raster-dem",
         url: "mapbox://mapbox.mapbox-terrain-dem-v1",
         tileSize: 512,
@@ -599,7 +610,7 @@ export function enable3DTerrain(map, shouldEnable: boolean) {
   // Enable or disable terrain depending on our current desires...
   const currentTerrain = map.getTerrain();
   if (shouldEnable && currentTerrain == null) {
-    map.setTerrain({ source: "mapbox-dem", exaggeration: 1 });
+    map.setTerrain({ source: demSource, exaggeration: 1 });
   } else if (!shouldEnable && currentTerrain != null) {
     map.setTerrain(null);
   }
