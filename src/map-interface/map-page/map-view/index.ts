@@ -4,7 +4,7 @@ import {
   useAppState,
   MapLayer,
 } from "~/map-interface/app-state";
-import Map from "./map";
+import Map, { enable3DTerrain } from "./map";
 import hyper from "@macrostrat/hyper";
 import { useEffect } from "react";
 import useResizeObserver from "use-resize-observer";
@@ -209,6 +209,12 @@ function MapContainer(props) {
   useElevationMarkerLocation(mapRef, elevationMarkerLocation);
 
   const { mapUse3D, mapIsRotated } = mapViewInfo(mapPosition);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map == null) return;
+    enable3DTerrain(map, mapUse3D);
+  }, [mapRef.current, mapUse3D]);
 
   const className = classNames({
     "is-rotated": mapIsRotated ?? false,

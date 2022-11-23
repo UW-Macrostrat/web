@@ -104,8 +104,6 @@ class VestigialMap extends Component<MapProps, {}> {
       this.refreshPBDB();
     }
 
-    this.enable3DTerrain(this.props.use3D);
-
     // NO idea why timeout is needed
     setTimeout(() => {
       this.mapLoaded = true;
@@ -115,9 +113,6 @@ class VestigialMap extends Component<MapProps, {}> {
 
   componentDidMount() {
     this.map = this.props.mapRef.current;
-    console.log(this.map);
-
-    this.enable3DTerrain(this.props.use3D);
 
     // disable map rotation using right click + drag
     //this.map.dragRotate.disable();
@@ -406,43 +401,6 @@ class VestigialMap extends Component<MapProps, {}> {
     });
   }
 
-  enable3DTerrain(shouldEnable: boolean) {
-    console.log("Trying to enable 3D terrain");
-    if (!this.map.style._loaded) {
-      return;
-    }
-    if (shouldEnable) {
-      if (this.map.getSource("mapbox-dem") == null) {
-        this.map.addSource("mapbox-dem", {
-          type: "raster-dem",
-          url: "mapbox://mapbox.mapbox-terrain-dem-v1",
-          tileSize: 512,
-          maxzoom: 14,
-        });
-      }
-
-      // add a sky layer that will show when the map is highly pitched
-      if (this.map.getLayer("sky") == null) {
-        this.map.addLayer({
-          id: "sky",
-          type: "sky",
-          paint: {
-            "sky-type": "atmosphere",
-            "sky-atmosphere-sun": [0.0, 0.0],
-            "sky-atmosphere-sun-intensity": 15,
-          },
-        });
-      }
-    }
-    // Enable or disable terrain depending on our current desires...
-    const currentTerrain = this.map.getTerrain();
-    if (shouldEnable && currentTerrain == null) {
-      this.map.setTerrain({ source: "mapbox-dem", exaggeration: 1 });
-    } else if (!shouldEnable && currentTerrain != null) {
-      this.map.setTerrain(null);
-    }
-  }
-
   // Swap between standard and satellite base layers
   swapBasemap(toAdd) {
     this.currentSources = [];
@@ -622,10 +580,6 @@ class VestigialMap extends Component<MapProps, {}> {
     PBDBHelper(this, bounds, zoom);
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    this.enable3DTerrain(this.props.use3D);
-  }
-
   // Update the colors of the hexgrids
   updateColors(data) {
     for (let i = 0; i < data.length; i++) {
@@ -669,3 +623,40 @@ class VestigialMap extends Component<MapProps, {}> {
 export default forwardRef((props, ref) =>
   h(VestigialMap, { ...props, elementRef: ref })
 );
+
+export function enable3DTerrain(map, shouldEnable: boolean) {
+  console.log("Trying to enable 3D terrain");
+  if (!map.style._loaded) {
+    return;
+  }
+  if (shouldEnable) {
+    if (map.getSource("mapbox-dem") == null) {
+      map.addSource("mapbox-dem", {
+        type: "raster-dem",
+        url: "mapbox://mapbox.mapbox-terrain-dem-v1",
+        tileSize: 512,
+        maxzoom: 14,
+      });
+    }
+
+    // add a sky layer that will show when the map is highly pitched
+    if (map.getLayer("sky") == null) {
+      map.addLayer({
+        id: "sky",
+        type: "sky",
+        paint: {
+          "sky-type": "atmosphere",
+          "sky-atmosphere-sun": [0.0, 0.0],
+          "sky-atmosphere-sun-intensity": 15,
+        },
+      });
+    }
+  }
+  // Enable or disable terrain depending on our current desires...
+  const currentTerrain = map.getTerrain();
+  if (shouldEnable && currentTerrain == null) {
+    map.setTerrain({ source: "mapbox-dem", exaggeration: 1 });
+  } else if (!shouldEnable && currentTerrain != null) {
+    map.setTerrain(null);
+  }
+}
