@@ -5,6 +5,7 @@ import {
   MapLayer,
 } from "~/map-interface/app-state";
 import Map from "./map";
+import { GeolocateControl } from "mapbox-gl";
 import hyper from "@macrostrat/hyper";
 import { useEffect } from "react";
 import useResizeObserver from "use-resize-observer";
@@ -16,6 +17,7 @@ import {
   ThreeDControl,
   useMapConditionalStyle,
   useMapLabelVisibility,
+  MapControlWrapper,
 } from "@macrostrat/mapbox-react";
 import classNames from "classnames";
 import { Icon } from "@blueprintjs/core";
@@ -38,6 +40,21 @@ function calcMapPadding(rect, childRect) {
     right: Math.max(childRect.right - rect.right, 0),
     bottom: Math.max(childRect.bottom - rect.bottom, 0),
   };
+}
+
+function GeolocationControl(props) {
+  return h(MapControlWrapper, {
+    control: GeolocateControl,
+    options: {
+      showAccuracyCircle: true,
+      showUserLocation: true,
+      trackUserLocation: true,
+      positionOptions: {
+        enableHighAccuracy: true,
+      },
+    },
+    ...props,
+  });
 }
 
 function useElevationMarkerLocation(mapRef, elevationMarkerLocation) {
@@ -184,6 +201,7 @@ export function MapBottomControls() {
     h(ThreeDControl, { className: "map-3d-control" }),
     h(CompassControl, { className: "compass-control" }),
     h(GlobeControl, { className: "globe-control" }),
+    h(GeolocationControl, { className: "geolocation-control" }),
   ]);
 }
 
