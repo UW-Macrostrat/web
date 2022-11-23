@@ -26,10 +26,12 @@ import {
   setMapPosition,
 } from "@macrostrat/mapbox-utils";
 import { MapSourcesLayer, toggleLineSymbols } from "../map-style";
+import { SETTINGS } from "../../Settings";
+import { MercatorCoordinate, FreeCameraOptions } from "mapbox-gl";
 
 const h = hyper.styled(styles);
 
-const _Map = forwardRef((props, ref) => h(Map, { ...props, ref }));
+const VestigialMap = forwardRef((props, ref) => h(Map, { ...props, ref }));
 
 function calcMapPadding(rect, childRect) {
   return {
@@ -83,7 +85,7 @@ function MapContainer(props) {
   const runAction = useAppActions();
   const offset = useRef([0, 0]);
 
-  const mapRef = useMapRef();
+  let mapRef = useMapRef();
 
   const ref = useRef<HTMLDivElement>();
   const parentRef = useRef<HTMLDivElement>();
@@ -150,9 +152,59 @@ function MapContainer(props) {
 
   const { mapUse3D, mapIsRotated } = mapViewInfo(mapPosition);
 
-  console.log(mapLayers);
+  useEffect(() => {
+    // setup the basic map
+    mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
+
+    const map = new mapboxgl.Map({
+      container: "map",
+      style: mapLayers.has(MapLayer.SATELLITE)
+        ? SETTINGS.satelliteMapURL
+        : SETTINGS.baseMapURL,
+      maxZoom: 14,
+      //maxTileCacheSize: 0,
+      logoPosition: "bottom-left",
+      trackResize: true,
+      //antialias: true,
+      //optimizeForTerrain: true,
+    });
+
+    map.setProjection("globe");
+
+    // set initial map position
+    const pos = mapPosition;
+    const { pitch = 0, bearing = 0, altitude } = pos.camera;
+    const zoom = pos.target?.zoom;
+    if (zoom != null && altitude == null) {
+      const { lng, lat } = pos.target;
+      map.setCenter([lng, lat]);
+      map.setZoom(zoom);
+    } else {
+      const { altitude, lng, lat } = pos.camera;
+      const cameraOptions = new FreeCameraOptions(
+        MercatorCoordinate.fromLngLat({ lng, lat }, altitude),
+        [0, 0, 0, 1]
+      );
+      cameraOptions.setPitchBearing(pitch, bearing);
+
+      console.log("Setting free camera options");
+
+      map.setFreeCameraOptions(cameraOptions);
+    }
+
+    //enable3DTerrain(this.props.use3D);
+
+    mapRef.current = map;
+  }, []);
+
+  const className = classNames({
+    "is-rotated": mapIsRotated ?? false,
+    "is-3d-available": mapUse3D ?? false,
+  });
+
   return h("div.map-view-container.main-view", { ref: parentRef }, [
-    h(_Map, {
+    h("div.mapbox-map#map", { ref, className }),
+    h.if(mapRef.current != null)(VestigialMap, {
       filters,
       filteredColumns,
       mapHasBedrock: mapLayers.has(MapLayer.BEDROCK),

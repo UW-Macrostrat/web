@@ -9,7 +9,6 @@ import {
 import h from "@macrostrat/hyper";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { MercatorCoordinate, FreeCameraOptions } from "mapbox-gl";
 import { setMapStyle } from "./style-helpers";
 import classNames from "classnames";
 
@@ -26,7 +25,7 @@ interface MapProps {
   markerLoadOffset: [number, number];
 }
 
-class Map extends Component<MapProps, {}> {
+class VestigialMap extends Component<MapProps, {}> {
   map: mapboxgl.Map;
   constructor(props) {
     super(props);
@@ -80,48 +79,10 @@ class Map extends Component<MapProps, {}> {
   }
 
   componentDidMount() {
-    mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
-
-    this.map = new mapboxgl.Map({
-      container: "map",
-      style: this.props.mapHasSatellite
-        ? SETTINGS.satelliteMapURL
-        : SETTINGS.baseMapURL,
-      maxZoom: 14,
-      //maxTileCacheSize: 0,
-      logoPosition: "bottom-left",
-      trackResize: true,
-      //antialias: true,
-      //optimizeForTerrain: true,
-    });
-
-    this.map.setProjection("globe");
-
-    //this.map.addControl(new ZoomControl(), "top-right");
-    //this.map.addControl(new ThreeDControl(), "bottom-right");
-    //this.map.addControl(new CompassControl(), "bottom-right");
-
-    const pos = this.props.mapPosition;
-    const { pitch = 0, bearing = 0, altitude } = pos.camera;
-    const zoom = pos.target?.zoom;
-    if (zoom != null && altitude == null) {
-      const { lng, lat } = pos.target;
-      this.map.setCenter([lng, lat]);
-      this.map.setZoom(zoom);
-    } else {
-      const { altitude, lng, lat } = pos.camera;
-      const cameraOptions = new FreeCameraOptions(
-        MercatorCoordinate.fromLngLat({ lng, lat }, altitude),
-        [0, 0, 0, 1]
-      );
-      cameraOptions.setPitchBearing(pitch, bearing);
-
-      this.map.setFreeCameraOptions(cameraOptions);
-    }
+    this.map = this.props.mapRef.current;
+    console.log(this.map);
 
     this.enable3DTerrain(this.props.use3D);
-
-    this.props.mapRef.current = this.map;
 
     // disable map rotation using right click + drag
     //this.map.dragRotate.disable();
@@ -721,14 +682,10 @@ class Map extends Component<MapProps, {}> {
   }
 
   render() {
-    const className = classNames({
-      "is-rotated": this.props.mapIsRotated ?? false,
-      "is-3d-available": this.props.use3D ?? false,
-    });
-    return h("div.mapbox-map#map", { ref: this.props.elementRef, className });
+    return null;
   }
 }
 
 export default forwardRef((props, ref) =>
-  h(Map, { ...props, elementRef: ref })
+  h(VestigialMap, { ...props, elementRef: ref })
 );
