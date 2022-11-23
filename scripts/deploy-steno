@@ -1,5 +1,21 @@
 #!/usr/bin/env bash
 
+version=$(node -p "require('./package.json').version")
+
+if [[ $(git diff --stat) != '' ]]; then
+  echo 'Cannot deploy with uncommitted changes'
+  exit 1
+fi
+echo 'Working directory is clean.'
+
+
+echo "Tagging version v$version"
+
+git tag -a "v${version}" -m "Version ${version}"
+
+git push
+
+echo "Deploying to steno"
 deploy_dir=/data/projects/macrostrat/map
 
 npm run clean
@@ -8,8 +24,3 @@ export NODE_ENV=production
 npm run bundle
 
 rsync -azv --delete dist/ steno:$deploy_dir/
-
-ssh steno "cd $deploy_dir && ln -s /data/projects/burwell-sources/ sources"
-ssh steno "cd $deploy_dir && ls -la"
-
-##/data/projects/burwell-sources/

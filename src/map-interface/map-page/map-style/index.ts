@@ -1,4 +1,6 @@
-import { SETTINGS } from "../Settings";
+import { SETTINGS } from "../../Settings";
+export * from "./line-symbols";
+export * from "./map-sources";
 
 const overlaySources = {
   // "pbdb": {
@@ -83,8 +85,8 @@ const overlayLayers = [
     type: "fill",
     source: "columns",
     paint: {
-      "fill-color": "#777777",
-      "fill-opacity": 0.2,
+      "fill-color": "dodgerblue",
+      "fill-opacity": 0.1,
     },
     layout: {
       visibility: "none",
@@ -95,11 +97,11 @@ const overlayLayers = [
     type: "line",
     source: "columns",
     paint: {
-      "line-color": "#777777",
+      "line-color": "dodgerblue",
       "line-width": {
         stops: [
-          [0, 0.2],
-          [10, 1],
+          [0, 1],
+          [10, 2],
         ],
       },
     },

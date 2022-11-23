@@ -56,10 +56,11 @@ const defaultState: CoreState = {
     type: null,
   },
   mapUse3D: false,
+  mapShowLabels: true,
+  mapShowLineSymbols: false,
   filtersOpen: false,
   filters: [],
   filteredColumns: {},
-
   data: [],
   mapPosition: {
     camera: {
@@ -108,8 +109,10 @@ export function coreReducer(
       if (state.inputFocus) {
         return {
           ...state,
+          inputFocus: false,
           contextPanelOpen: false,
           menuOpen: false,
+          term: "",
         };
       }
       return state;
@@ -127,6 +130,10 @@ export function coreReducer(
     case "toggle-filters":
       // rework this to open menu panel
       return { ...state, filtersOpen: !state.filtersOpen };
+    case "toggle-labels":
+      return { ...state, mapShowLabels: !state.mapShowLabels };
+    case "toggle-line-symbols":
+      return { ...state, mapShowLineSymbols: !state.mapShowLineSymbols };
     case "add-filter":
       let alreadyHasFiter = false;
       state.filters.forEach((filter) => {
@@ -384,8 +391,10 @@ export function coreReducer(
     case "set-input-focus":
       return {
         ...state,
+        term: action.inputFocus ? state.term : "",
         inputFocus: action.inputFocus,
-        contextPanelOpen: action.inputFocus || state.menuOpen,
+        menuOpen: action.menuOpen ?? state.menuOpen,
+        contextPanelOpen: action.inputFocus || action.menuOpen,
       };
     case "set-search-term":
       return { ...state, term: action.term };

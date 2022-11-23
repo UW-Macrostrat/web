@@ -10,26 +10,36 @@ import {
   Alignment,
   ButtonProps,
   IconName,
-  PanelStack2,
-  Panel,
+  NonIdealState,
 } from "@blueprintjs/core";
 import { CloseableCard } from "../components/closeable-card";
-import { useSelector, useDispatch } from "react-redux";
-import { SettingsPanel } from "./settings-panel";
 import {
   useAppActions,
-  useMenuState,
   useAppState,
   useSearchState,
-  MenuPanel,
   MapLayer,
   MapPosition,
+  useHashNavigate,
 } from "../app-state";
 import { SearchResults } from "../components/searchbar";
 import classNames from "classnames";
 import styles from "./main.module.styl";
 import loadable from "@loadable/component";
-import UsagePanel from "../usage.mdx";
+import UsageText from "../usage.mdx";
+import { Routes, Route } from "react-router-dom";
+import Changelog from "~/changelog.mdx";
+import { useMatch, useLocation } from "react-router";
+import { useTransition } from "transition-hook";
+import { useCurrentPage } from "../app-state/nav-hooks";
+import useBreadcrumbs from "use-react-router-breadcrumbs";
+import { SettingsPanel, ExperimentsPanel } from "./settings-panel";
+import { useState, useEffect } from "react";
+import { LinkButton } from "../components/buttons";
+import { Switch } from "@blueprintjs/core";
+
+function ChangelogPanel() {
+  return h("div.bp3-text.text-panel", [h(Changelog)]);
+}
 
 const AboutText = loadable(() => import("../components/About"));
 
@@ -81,14 +91,14 @@ const YourLocationButton = () => {
 
 const MinimalButton = (props) => h(Button, { ...props, minimal: true });
 
-const TabButton = (props: ButtonProps & { tab: MenuPanel }) => {
-  const { tab, ...rest } = props;
-  const dispatch = useDispatch();
-  const onClick = () => dispatch({ type: "set-panel", panel: tab });
-  const active = useAppState((state) => state.menu.activePanel == tab);
-  return h(MinimalButton, {
+const TabButton = (props: ButtonProps & { to: string }) => {
+  const { to, ...rest } = props;
+  const active = useMatch(to) != null;
+
+  return h(LinkButton, {
+    minimal: true,
     active,
-    onClick,
+    to,
     ...rest,
     className: "tab-button",
   });
@@ -166,120 +176,155 @@ const LayerList = (props) => {
   ]);
 };
 
-function useMainPanel(): Panel<{}> {
-  const activePanel = useSelector((state) => state.menu.activePanel);
-  switch (activePanel) {
-    case MenuPanel.LAYERS:
-      return {
-        title: "Layers",
-        renderPanel: () => h(LayerList),
-      };
-    case MenuPanel.SETTINGS:
-      return {
-        title: "Settings",
-        renderPanel: () => h(SettingsPanel),
-      };
-    case MenuPanel.ABOUT:
-      return {
-        title: "About",
-        renderPanel: () => h(AboutText),
-      };
-    case MenuPanel.USAGE:
-      return {
-        title: "Usage",
-        renderPanel: () => h(UsagePanel),
-      };
+const UsagePanel = () => h("div.text-panel", h(UsageText));
+
+const locationTitleForRoute = {
+  "/about": "About",
+  "/usage": "Usage",
+  "/settings": "Settings",
+  "/experiments": "Experiments",
+  "/layers": "Layers",
+  "/changelog": "Changelog",
+};
+
+const menuBacklinkLocationOverrides = {
+  "/changelog": "/about",
+};
+
+function useLastPageLocation(): { title: string; to: string } | null {
+  const breadcrumbs = useBreadcrumbs();
+  if (breadcrumbs.length < 2) return null;
+  const prevPage = breadcrumbs[breadcrumbs.length - 2];
+  const currentPage = breadcrumbs[breadcrumbs.length - 1];
+  const prevRoute =
+    menuBacklinkLocationOverrides[currentPage.match.pathname] ??
+    prevPage.match.pathname;
+  if (prevRoute == "/") return null;
+  return { to: prevRoute, title: locationTitleForRoute[prevRoute] ?? "Back" };
+}
+
+function MenuHeaderButtons() {
+  const backLoc = useLastPageLocation();
+  const { pathname } = useLocation();
+
+  if (backLoc != null) {
+    return h([
+      h(
+        LinkButton,
+        {
+          icon: "chevron-left",
+          minimal: true,
+          to: backLoc.to,
+        },
+        backLoc.title
+      ),
+      h("h2.panel-title", locationTitleForRoute[pathname] ?? ""),
+    ]);
   }
-  return null;
+
+  return h("div.buttons", [
+    h(TabButton, {
+      icon: "layers",
+      text: "Layers",
+      to: "layers",
+    }),
+    h(TabButton, { icon: "settings", text: "Settings", to: "settings" }),
+    h(TabButton, {
+      icon: "info-sign",
+      text: "About",
+      to: "about",
+    }),
+    h(TabButton, {
+      icon: "help",
+      text: "Usage",
+      to: "usage",
+    }),
+  ]);
 }
 
-function usePanelStack() {
-  const { panelStack = [] } = useMenuState();
-  return [useMainPanel(), ...panelStack];
-}
+function HeaderWrapper({ children, minimal = false }) {
+  /* A small component that changes whether a "minimal" class is applied, but only if the item isn't hovered.
+  This prevents buttons from moving around when the user is hovering over them. */
+  const [isHovered, setIsHovered] = useState(false);
+  const [isMinimal, setIsMinimal] = useState(minimal);
+  const onMouseEnter = () => setIsHovered(true);
+  const onMouseLeave = () => setIsHovered(false);
+  useEffect(() => {
+    if (isHovered) return;
+    setIsMinimal(minimal);
+  }, [minimal, isHovered]);
 
-export function useContextClass() {
-  const panelOpen = useSelector((state) => state.core.contextPanelOpen);
-  const stack = usePanelStack();
-  if (!panelOpen) return null;
-  return classNames("panel-open", stack[stack.length - 1].title.toLowerCase());
+  const className = classNames("panel-header", { minimal: isMinimal });
+
+  return h(
+    CloseableCard.Header,
+    { onMouseEnter, onMouseLeave, className },
+    children
+  );
 }
 
 const Menu = (props) => {
   let { className } = props;
-  const runAction = useAppActions();
-  const { infoDrawerOpen } = useMenuState();
   const { inputFocus } = useSearchState();
 
-  const toggleMenu = () => {
-    runAction({ type: "toggle-menu" });
-  };
+  const navigateHome = useHashNavigate("/");
 
-  const stack = usePanelStack();
+  const pageName = useCurrentPage();
+  const isNarrow = pageName == "layers";
+  const isNarrowTrans = useTransition(isNarrow, 800);
 
   if (inputFocus) {
     return h(SearchResults, { className });
   }
 
-  if (window.innerWidth <= 768 && infoDrawerOpen) {
-    return null;
-  }
-
   className = classNames(
     className,
     "menu-card",
-    stack[stack.length - 1].title.toLowerCase()
+    pageName,
+    { "narrow-card": isNarrowTrans.shouldMount },
+    `narrow-${isNarrowTrans.stage}`
   );
 
   return h(
     CloseableCard,
     {
-      onClose: toggleMenu,
+      onClose: navigateHome,
       insetContent: false,
       className,
       renderHeader: () =>
-        h(CloseableCard.Header, [
-          h.if(stack.length == 1)("div.buttons", [
-            h(TabButton, {
-              icon: "layers",
-              text: "Layers",
-              tab: MenuPanel.LAYERS,
-            }),
-            // Settings are mostly for globe, which is currently disabled
-            //h(TabButton, {icon: "settings", text: "Settings", tab: MenuPanel.SETTINGS}),
-            h(TabButton, {
-              icon: "info-sign",
-              text: "About",
-              tab: MenuPanel.ABOUT,
-            }),
-            h(TabButton, {
-              icon: "help",
-              text: "Usage",
-              tab: MenuPanel.USAGE,
-            }),
-          ]),
-          h.if(stack.length > 1)([
-            h(
-              Button,
-              {
-                icon: "chevron-left",
-                minimal: true,
-                onClick: () => runAction({ type: "close-panel" }),
-              },
-              stack[stack.length - 2]?.title ?? "Back"
-            ),
-            h("h2.panel-title", stack[stack.length - 1]?.title),
-          ]),
-        ]),
+        h(HeaderWrapper, { minimal: isNarrow }, h(MenuHeaderButtons)),
     },
     [
-      h(PanelStack2, {
-        showPanelHeader: false,
-        renderActivePanelOnly: true,
-        stack,
-      }),
+      h(Routes, [
+        h(Route, { path: "layers", element: h(LayerList) }),
+        h(Route, { path: "about", element: h(AboutText) }),
+        h(Route, { path: "usage", element: h(UsagePanel) }),
+        h(Route, { path: "settings", element: h(SettingsPanel) }),
+        h(Route, { path: "changelog", element: h(ChangelogPanel) }),
+        h(Route, { path: "experiments", element: h(ExperimentsPanel) }),
+        //h(Route, { path: "*", element: h(NotFoundPage) }),
+      ]),
     ]
   );
 };
+
+function NotFoundPage() {
+  const navigate = useHashNavigate("/");
+  return h(
+    "div.text-panel",
+    h(NonIdealState, {
+      title: "Unknown page",
+      action: h(
+        Button,
+        {
+          onClick: navigate,
+          minimal: true,
+          rightIcon: "chevron-right",
+        },
+        "Main page"
+      ),
+    })
+  );
+}
 
 export default Menu;

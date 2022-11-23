@@ -1,45 +1,35 @@
 import { DocsVideo, NewSwatch } from "./components/docs";
+import { Icon } from "@blueprintjs/core";
 
-## Using the Macrostrat map interface
+## Using Macrostrat's map interface
 
-Macrostrat's map interface is the primary tool to interact with our geologic map holdings.
+Macrostrat's map interface is the primary tool to interact with
+our harmonized multiscale geologic map.
 
-### Map filtering
+### Globe projection <NewSwatch>New in version 4.0!</NewSwatch>
 
-The map can be searched and filtered by a variety of geological criteria.
+<DocsVideo slug="map-globe-demo" />
 
-<DocsVideo slug="map-filtering-demo" />
+The map interface is now based on an orthographic (globe) projection at low zoom levels. This display
+is intuitive and accurate, but it cannot show all continents at once. To switch back to a mercator projection,
+click the <Icon icon="map" size={16}></Icon> button in the bottom right
+of the map interface.
 
-### 3D view <NewSwatch>New in version 4!</NewSwatch>
+### 3D terrain <NewSwatch>New in version 4.0!</NewSwatch>
+
+<DocsVideo slug="map-3d-demo" />
 
 When zoomed to a localized area, the map can be rotated to 3D by pressing the '3D'
 button that appears in the bottom right corner of the map. Drag while right-clicking
 the mouse to adjust the view orientation. Click the compass at
 the bottom right corner to return to a north-up, overhead view.
 
-<DocsVideo slug="map-3d-demo" />
+### Map filters
 
-### Elevation profile
+<DocsVideo slug="map-filtering-demo" />
 
-<DocsVideo slug="map-elevation-profile-demo" />
-
-### Fossil collections
-
-<DocsVideo slug="map-fossils-demo" />
-
-### Location information
-
-<DocsVideo slug="map-infobox-demo" />
-
-Clicking the map will pull up data about each location.
-
-### Map layers
-
-<DocsVideo slug="map-layers-demo" />
-
-Additional layers such as Macrostrat columns,
-[PBDB](https://paleobiodb.org) fossil collections, and satellite imagery
-can be overlaid on the geologic map.
+The map can be searched and filtered by geologic criteria
+including formation names, lithology types, and time intervals.
 
 ### Primary literature
 
@@ -47,3 +37,33 @@ can be overlaid on the geologic map.
 
 The [xDD](https://www.xdd.org) machine-reading system provides links to
 papers relevant to specific units and map areas.
+
+### Linked map + stratigraphic legend
+
+<DocsVideo slug="map-infobox-demo" />
+
+Clicking the map reports location-specific data sourced from
+geologic maps and stratigraphic columns.
+
+### Geologic layers
+
+<DocsVideo slug="map-layers-demo" />
+
+Additional layers such as Macrostrat columns,
+[PBDB](https://paleobiodb.org) fossil collections, and satellite imagery
+can be overlaid on the geologic map.
+
+### Elevation profile
+
+<DocsVideo slug="map-elevation-profile-demo" />
+
+In <em>Elevation profile</em> mode, click two points on the map to create
+an elevation profile between them. This capability is a placeholder
+for in-development 3D cross-section functionality.
+
+### Fossil collections
+
+<DocsVideo slug="map-fossils-demo" />
+
+Detailed information about [PBDB](https://paleobiodb.org) fossil
+collections can be found in the info panel.

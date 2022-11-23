@@ -19,9 +19,24 @@
       "~/*": ["./src/*"],
       "@macrostrat/cesium-viewer": ["packages/cesium-viewer/src/"],
       "@macrostrat/cesium-martini": ["packages/cesium-martini"],
-      "@macrostrat/ui-components": ["deps/ui-components/packages/ui-components/src/"],
-      "@macrostrat/column-components": ["deps/ui-components/packages/column-components/src/"],
-      "@macrostrat/map-components": ["deps/ui-components/packages/map-components/src/"]
+      "@macrostrat/ui-components": [
+        "deps/web-components/packages/ui-components/src/"
+      ],
+      "@macrostrat/column-components": [
+        "deps/web-components/packages/column-components/src/"
+      ],
+      "@macrostrat/map-components": [
+        "deps/web-components/packages/map-components/src/"
+      ],
+      "@macrostrat/mapbox-styles": [
+        "deps/web-components/packages/mapbox-styles/src"
+      ],
+      "@macrostrat/mapbox-react": [
+        "deps/web-components/packages/mapbox-react/src"
+      ],
+      "@macrostrat/mapbox-utils": [
+        "deps/web-components/packages/mapbox-utils/src"
+      ]
     }
   },
   "include": ["src"]

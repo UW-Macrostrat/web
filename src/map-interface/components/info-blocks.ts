@@ -1,10 +1,13 @@
-import h from "@macrostrat/hyper";
+import hyper from "@macrostrat/hyper";
 import { hexToRgb } from "../utils";
+import styles from "./info-blocks.module.styl";
+
+const h = hyper.styled(styles);
 
 function IntervalChip(props) {
   const { interval, className } = props;
   return h(
-    "div.age-chip",
+    "div.chip.age-chip",
     {
       className,
       style: { backgroundColor: hexToRgb(interval.color, 0.8) },
@@ -36,18 +39,22 @@ function AgeChip(props) {
 }
 
 function AttrChip(props) {
-  const { fill = null, color, name } = props;
+  const { fill = null, color, name, className, emphasized = true } = props;
+
   let styles = {};
   if (fill) {
     styles["backgroundImage"] = `url('dist/img/geologic-patterns/${fill}.png')`;
   }
-  return h("div.lith-chip", { style: { ...styles } }, [
+  return h("div.lith-chip", { style: { ...styles }, className }, [
     h(
-      "div.lith-chip-inner",
-      { style: { backgroundColor: hexToRgb(color, 0.6) } },
+      "div.lith-chip-inner.chip",
+      {
+        style: { backgroundColor: hexToRgb(color, 0.6) },
+        className: emphasized ? "emphasized" : null,
+      },
       [name]
     ),
   ]);
 }
 
-export { AgeChip, AttrChip };
+export { AgeChip, AttrChip, IntervalChip };
