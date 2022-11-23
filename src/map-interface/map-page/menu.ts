@@ -119,6 +119,20 @@ function LayerButton(props: LayerButtonProps) {
   });
 }
 
+function LayerSwitch(props: LayerButtonProps) {
+  const { layer, name, ...rest } = props;
+  const checked = useAppState((state) => state.core.mapLayers.has(layer));
+  const runAction = useAppActions();
+  const onChange = () => runAction({ type: "toggle-map-layer", layer });
+  return h(Switch, {
+    className: "layer-switch",
+    checked,
+    onChange,
+    label: name,
+    ...rest,
+  });
+}
+
 const MenuGroup = (props) =>
   h(ButtonGroup, {
     className: "menu-options",
@@ -164,11 +178,6 @@ const LayerList = (props) => {
         layer: MapLayer.SATELLITE,
         icon: "satellite",
       }),
-      h(LayerButton, {
-        name: "Labels",
-        layer: MapLayer.LABELS,
-        icon: "tag",
-      }),
     ]),
     h(MenuGroup, [
       h(YourLocationButton),
@@ -177,6 +186,7 @@ const LayerList = (props) => {
         { onClick: toggleElevationChart, icon: ElevationIcon },
         "Elevation profile"
       ),
+      h(LayerSwitch, { layer: MapLayer.LABELS, name: "Labels" }),
     ]),
   ]);
 };
