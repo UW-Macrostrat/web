@@ -152,6 +152,7 @@ const LayerList = (props) => {
   };
 
   return h("div.menu-content", [
+    h("h4", "Layers"),
     h(MenuGroup, [
       h(LayerButton, {
         name: "Bedrock",
@@ -179,6 +180,9 @@ const LayerList = (props) => {
         icon: "satellite",
       }),
     ]),
+    h(LayerSwitch, { layer: MapLayer.LABELS, name: "Labels" }),
+    h("hr"),
+    h("h4", "Tools"),
     h(MenuGroup, [
       h(YourLocationButton),
       h(
@@ -186,7 +190,6 @@ const LayerList = (props) => {
         { onClick: toggleElevationChart, icon: ElevationIcon },
         "Elevation profile"
       ),
-      h(LayerSwitch, { layer: MapLayer.LABELS, name: "Labels" }),
     ]),
   ]);
 };
