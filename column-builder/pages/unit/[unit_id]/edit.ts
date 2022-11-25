@@ -9,6 +9,7 @@ import pg, {
 import { persistUnitChanges } from "../../../src/components/unit/edit-helpers";
 import { GetServerSidePropsContext } from "next";
 import { PostgrestError, PostgrestResponse } from "@supabase/postgrest-js";
+import { getSectionData } from "~/data-fetching";
 
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   let {
@@ -23,16 +24,13 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 
   const query: IdsFromUnit = await fetchIdsFromUnitId(parseInt(unit_id));
 
-  const { data: units, error: e }: PostgrestResponse<UnitsView> = await pg
-    .from("unit_strat_name_expanded")
-    .select(
-      "*,strat_names(*, strat_names_meta(*)),lith_unit!unit_liths_unit_id_fkey(*),environ_unit!unit_environs_unit_id_fkey(*)"
-    )
-    .match({ id: unit_id })
-    .limit(1);
+  const { data: units, error: e } = await getSectionData({ id: unit_id }, 1);
+
+  // This is kind of crazy but it seems to work OK
+  const unit = Object.values(units[0])[0][0];
 
   const errors = e == null ? [] : [e];
-  return { props: { unit_id, unit: units?.[0] ?? [], query, errors } };
+  return { props: { unit_id, unit, query, errors } };
 }
 
 /* 
@@ -47,10 +45,10 @@ function UnitEdit(props: {
   query: IdsFromUnit;
   errors: PostgrestError[];
 }) {
-  const { unit, errors } = props;
+  const { unit, errors, unit_id } = props;
 
   const model = unit;
-  console.log("Unit", unit);
+  console.log("UnitA", model);
 
   const persistChanges = async (
     updatedModel: UnitsView,
