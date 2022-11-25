@@ -48,14 +48,10 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   
   const u1 = units ?? [];
 
-  
   const unitsMapped: UnitsView[] = u1.map(d => {
     const { unit_strat_name_expanded, ...rest } = d;
     return { ...rest, strat_names: unit_strat_name_expanded };
   });
-
-  console.log(unitsMapped);
-
 
   const sections: { [section_id: string | number]: UnitsView[] }[] =
     createUnitBySections(unitsMapped);
