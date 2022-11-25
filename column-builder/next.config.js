@@ -2,7 +2,7 @@
 const path = require("path");
 
 const packageSrc = (name) =>
-  path.resolve(__dirname, "deps", "ui-components", "packages", name, "src");
+  path.resolve(__dirname, "deps", "web-components", "packages", name, "src");
 
 const nextConfig = {
   assetPrefix: process.env.NEXT_PUBLIC_BASE_URL,
