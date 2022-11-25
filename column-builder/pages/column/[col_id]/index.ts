@@ -13,6 +13,8 @@ import pg, {
   isServer,
 } from "~/index";
 
+import { getSectionData } from "~/data-fetching";
+
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   let {
     query: { col_id },
@@ -36,25 +38,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     .select("col_name")
     .match({ id: col_id });
 
-  const { data: units, error: unit_error }: PostgrestResponse<any> =
-    await pg
-      .from("units")
-      .select(
-        /// joins the lith_unit and environ_unit table
-        "*, unit_strat_name_expanded(*,strat_names(*, strat_names_meta(*))),lith_unit(*),environ_unit(*)"
-      )
-      .order("position_bottom", { ascending: true })
-      .match({ col_id: col_id });
-  
-  const u1 = units ?? [];
-
-  const unitsMapped: UnitsView[] = u1.map(d => {
-    const { unit_strat_name_expanded, ...rest } = d;
-    return { ...rest, strat_names: unit_strat_name_expanded };
-  });
-
-  const sections: { [section_id: string | number]: UnitsView[] }[] =
-    createUnitBySections(unitsMapped);
+  const {data: sections, error: unit_error} = await getSectionData({col_id})
 
   const errors = [e, col_error, unit_error].filter((e) => e != null);
   return {
