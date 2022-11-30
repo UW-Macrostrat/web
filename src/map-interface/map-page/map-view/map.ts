@@ -27,6 +27,7 @@ interface MapProps {
   use3D: boolean;
   mapIsRotated: boolean;
   markerLoadOffset: [number, number];
+  plateModelId: number;
 }
 
 const blankMapStyle = {
@@ -36,12 +37,12 @@ const blankMapStyle = {
 };
 
 function createMapStyle(age, model) {
-  let _model = 1;
+  //let _model = 1;
 
   let mapTileURL = "https://devtiles.macrostrat.org/carto-slim/{z}/{x}/{y}.mvt";
 
   if (age != null) {
-    mapTileURL = `https://next.macrostrat.org/tiles/tiles/carto-slim-rotated/{z}/{x}/{y}?model_id=${_model}&t_step=${age}`;
+    mapTileURL = `https://next.macrostrat.org/tiles/tiles/carto-slim-rotated/{z}/{x}/{y}?model_id=${model}&t_step=${age}`;
   }
 
   let color = "rgb(180, 180, 200)";
@@ -617,8 +618,11 @@ class Map extends Component<MapProps, {}> {
   // and always return `false` to prevent DOM updates
   // We basically intercept the changes, handle them, and tell React to ignore them
   shouldComponentUpdate(nextProps) {
-    if (this.props.age != nextProps.age) {
-      this.map.setStyle(createMapStyle(nextProps.age));
+    if (
+      this.props.age != nextProps.age ||
+      this.props.plateModelId != nextProps.plateModelId
+    ) {
+      this.map.setStyle(createMapStyle(nextProps.age, nextProps.plateModelId));
     }
 
     setMapStyle(this, this.map, mapStyle, nextProps);

@@ -70,7 +70,7 @@ const defaultState: CoreState = {
     },
   },
   timeCursorAge: null,
-  plateModelId: null,
+  plateModelId: 1,
 };
 
 export function coreReducer(
@@ -82,7 +82,7 @@ export function coreReducer(
       return updateURI({ ...state, mapBackend: action.backend });
     }
     case "set-plate-model": {
-      return updateURI({ ...state, plateModelId: action.plateModel });
+      return updateURI({ ...state, plateModelId: parseInt(action.plateModel) });
     }
     case "map-loading":
       if (state.mapIsLoading) return state;

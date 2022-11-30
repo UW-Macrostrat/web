@@ -94,7 +94,7 @@ type UPDATE_ELEVATION_MARKER = {
   lat: number;
 };
 
-type SET_PLATE_MODEL = { type: "set-plate-model"; plateModel: any };
+type SET_PLATE_MODEL = { type: "set-plate-model"; plateModel: number };
 
 type SET_ACTIVE_INDEX_MAP = { type: "set-active-index-map" };
 

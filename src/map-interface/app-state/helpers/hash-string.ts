@@ -230,7 +230,7 @@ export function gotInitialMapState(mapState) {
     type: "got-initial-map-state",
     data: mapState,
     age: null,
-    plateModelId: null,
+    plateModelId: 1,
   };
 }
 
