@@ -8,7 +8,7 @@ import {
   LngLatMap as LngLatMap_,
   LngLatInputs,
   Point,
-} from "deps/ui-components/packages/form-components/src";
+} from "@macrostrat/form-components";
 const h = hyperStyled(styles);
 
 mapboxgl.accessToken =
