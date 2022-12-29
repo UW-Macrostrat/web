@@ -1,14 +1,13 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+This web application is based on [Next.js](https://nextjs.org/) and installed using Yarn PnP.
+
 
 ## Getting Started
 
-First, run the development server:
+**You should use Yarn (>v2), not NPM, to install this application.
+Everything is set up for "Plug'n'Play" modules.**
 
-```bash
-npm run dev
-# or
-yarn dev
-```
+1. Install modules: `yarn`
+2. Run the development server: `yarn run dev`.
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
