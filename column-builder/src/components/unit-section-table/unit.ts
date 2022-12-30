@@ -24,7 +24,7 @@ import { Button, Dialog, TextArea } from "@blueprintjs/core";
 import {
   ModelEditor,
   useModelEditor,
-} from "deps/ui-components/packages/ui-components/src";
+} from "@macrostrat/ui-components";
 import { SubmitButton } from "../buttons";
 
 const h = hyperStyled(styles);

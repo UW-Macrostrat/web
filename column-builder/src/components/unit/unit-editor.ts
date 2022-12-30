@@ -52,12 +52,16 @@ function UnitThicknesses() {
 function StratName() {
   const { model: unit }: { model: UnitsView } = useModelEditor();
 
+  if (unit?.strat_names == null) {
+    return null;
+  }
+
   const baseURl = `/unit/${unit.id}`;
   // this complexity is born of the confusing strat_name issues in the db
-  const href =
-    unit.strat_names.length > 0
-      ? `${baseURl}/strat-name/${unit.strat_names[0].id}/edit`
-      : `${baseURl}/strat-name/new`;
+  // const href =
+  unit.strat_names.length > 0
+    ? `${baseURl}/strat-name/${unit.strat_names[0].id}/edit`
+    : `${baseURl}/strat-name/new`;
 
   const linkText = unit.strat_names.length > 0 ? "(modify)" : "(create)";
 

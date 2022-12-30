@@ -18,13 +18,13 @@
     "paths": {
       "~/*": ["./src/*"],
       "@macrostrat/ui-components": [
-        "deps/ui-components/packages/ui-components/src/"
+        "deps/web-components/packages/ui-components/src/"
       ],
       "@macrostrat/form-components": [
-        "deps/ui-components/packages/form-components/src/"
+        "deps/web-components/packages/form-components/src/"
       ],
       "@macrostrat/data-components": [
-        "deps/ui-components/packages/data-components/src/"
+        "deps/web-components/packages/data-components/src/"
       ]
     }
   },

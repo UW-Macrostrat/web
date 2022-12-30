@@ -16,11 +16,11 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   } = ctx;
   const { data, error } = await pg
     .from("col_group_with_cols")
-    .select("*, project_id(project)")
-    .match({ project_id: project_id });
+    .select("*, projects(project)")
+    .match({ project_id });
 
   const projectName: string =
-    data && data.length > 0 ? data[0].project_id.project : "";
+    data && data.length > 0 ? data[0].projects.project : "";
   const errors = [error].filter((e) => e != null);
 
   return { props: { project_id, projectName, columnGroups: data, errors } };

@@ -25,7 +25,7 @@ import {
   Point,
   Pub,
   PublicationFinder,
-} from "deps/ui-components/packages/form-components/src";
+} from "@macrostrat/form-components";
 import { ModelEditor, useModelEditor } from "@macrostrat/ui-components";
 import { ItemRenderer } from "@blueprintjs/select";
 import { Model } from "./column-editor";
