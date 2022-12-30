@@ -3,7 +3,7 @@ The different data types used in the application. Usually matching up with a spe
 macrostrat_api schema
 */
 
-import { PointGeom } from "deps/ui-components/packages/form-components/src";
+import { PointGeom } from "@macrostrat/form-components";
 
 export interface Project {
   descrip: string;

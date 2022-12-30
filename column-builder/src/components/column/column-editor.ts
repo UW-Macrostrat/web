@@ -12,7 +12,7 @@ import { ColumnForm, ColumnGroupI } from "~/types";
 
 import { SubmitButton } from "..";
 import { LngLatMap } from "./map";
-import { Point } from "deps/ui-components/packages/form-components/src";
+import { Point } from "@macrostrat/form-components";
 import { ModelEditor, useModelEditor } from "@macrostrat/ui-components";
 import { ColumnRef } from "./column-ref";
 
