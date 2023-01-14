@@ -18,13 +18,21 @@ export function InfoDrawerHeader(props) {
     h("div.infodrawer-header", [
       h("div.infodrawer-header-item lnglat-container", [
         h("span.lnglat", [normalizeLng(infoMarkerLng), ", ", infoMarkerLat]),
-        h.if(elevation)("span.z", [elevation]),
-        h.if(elevation)("span.age-chip-ma", ["m"]),
-        " | ",
-        metersToFeet(elevation),
-        h.if(elevation)("span.age-chip-ma", ["ft"]),
+        h(Elevation, { elevation }),
       ]),
     ]),
     h(Button, { minimal: true, icon: "cross", onClick: onCloseClick }),
+  ]);
+}
+
+function Elevation(props) {
+  const { elevation } = props;
+  if (elevation == null) return null;
+  return h("span.elevation", [
+    h("span.z", [elevation]),
+    h("span.age-chip-ma", ["m"]),
+    " | ",
+    metersToFeet(elevation),
+    h("span.age-chip-ma", ["ft"]),
   ]);
 }
