@@ -139,11 +139,6 @@ class VestigialMap extends Component<MapProps, {}> {
       this.props.runAction({ type: "map-loading" });
     });
 
-    this.map.on("idle", () => {
-      if (!this.props.mapIsLoading) return;
-      this.props.runAction({ type: "map-idle" });
-    });
-
     this.map.on("moveend", () => {
       // Force a hit to the API to refresh
       if (this.props.mapLayers.has(MapLayer.FOSSILS)) {

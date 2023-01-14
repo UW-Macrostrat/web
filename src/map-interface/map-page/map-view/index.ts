@@ -193,6 +193,17 @@ function MapContainer(props) {
     runAction({ type: "map-layers-changed", mapLayers });
   }, [filters, mapLayers]);
 
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map == null) return;
+    console.log(map);
+    map.on("idle", () => {
+      debugger;
+      if (!mapIsLoading) return;
+      runAction({ type: "map-idle" });
+    });
+  }, [mapRef.current, mapIsLoading]);
+
   useMapLabelVisibility(mapRef, mapShowLabels);
   useMapConditionalStyle(
     mapRef,
@@ -242,11 +253,11 @@ function MapContainer(props) {
       elevationMarkerLocation,
       mapPosition,
       infoDrawerOpen,
-      runAction,
       mapIsLoading,
       mapIsRotated,
       mapRef,
       markerLoadOffset: offset.current,
+      runAction,
       ...props,
       ref,
     }),
