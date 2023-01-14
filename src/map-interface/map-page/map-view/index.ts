@@ -196,9 +196,7 @@ function MapContainer(props) {
   useEffect(() => {
     const map = mapRef.current;
     if (map == null) return;
-    console.log(map);
     map.on("idle", () => {
-      debugger;
       if (!mapIsLoading) return;
       runAction({ type: "map-idle" });
     });
