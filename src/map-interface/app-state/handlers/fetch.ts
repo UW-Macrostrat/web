@@ -209,7 +209,6 @@ export const asyncQueryMap = async (lng, lat, z, map_id, cancelToken) => {
   if (map_id) {
     url += `map_id=${map_id}`;
   }
-
   let res = await axios.get(url, { cancelToken, responseType: "json" });
   const data = addMapIdToRef(res.data).success.data;
   return data;

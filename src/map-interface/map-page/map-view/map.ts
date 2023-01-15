@@ -9,9 +9,8 @@ import {
 import h from "@macrostrat/hyper";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { MercatorCoordinate, FreeCameraOptions } from "mapbox-gl";
 import { setMapStyle } from "./style-helpers";
-import classNames from "classnames";
+import { MapLayer } from "~/map-interface/app-state";
 
 const maxClusterZoom = 6;
 const highlightLayers = [
@@ -21,16 +20,14 @@ const highlightLayers = [
 ];
 
 interface MapProps {
-  use3D: boolean;
   mapIsRotated: boolean;
   markerLoadOffset: [number, number];
 }
 
-class Map extends Component<MapProps, {}> {
+class VestigialMap extends Component<MapProps, {}> {
   map: mapboxgl.Map;
   constructor(props) {
     super(props);
-    this.swapBasemap = this.swapBasemap.bind(this);
     this.handleFilterChanges = this.handleFilterChanges.bind(this);
     this.mapLoaded = false;
     this.currentSources = [];
@@ -57,20 +54,6 @@ class Map extends Component<MapProps, {}> {
     this.maxValue = 500;
     this.previousZoom = 0;
 
-    this.resMax = {
-      0: 143,
-      1: 143,
-      2: 143,
-      3: 76,
-      4: 44,
-      5: 44,
-      6: 29,
-      7: 20,
-      8: 16,
-      9: 16,
-      10: 16,
-    };
-
     // We need to store these for cluster querying...
     this.pbdbPoints = {};
 
@@ -79,50 +62,65 @@ class Map extends Component<MapProps, {}> {
     this.selectedStates = {};
   }
 
-  componentDidMount() {
-    mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
+  onStyleLoad() {
+    // The initial draw of the layers
+    console.log("Style loaded", this.props);
+    if (!this.map.style._loaded) {
+      return;
+    }
+    const { mapLayers } = this.props;
+    mapStyle.layers.forEach((layer) => {
+      // Populate the objects that track interaction states
+      this.hoverStates[layer.id] = null;
+      this.selectedStates[layer.id] = null;
 
-    this.map = new mapboxgl.Map({
-      container: "map",
-      style: this.props.mapHasSatellite
-        ? SETTINGS.satelliteMapURL
-        : SETTINGS.baseMapURL,
-      maxZoom: 14,
-      //maxTileCacheSize: 0,
-      logoPosition: "bottom-left",
-      trackResize: true,
-      //antialias: true,
-      //optimizeForTerrain: true,
+      // Accomodate any URI parameters
+      if (
+        layer.source === "burwell" &&
+        layer["source-layer"] === "units" &&
+        mapLayers.has(MapLayer.BEDROCK)
+      ) {
+        this.map.setLayoutProperty(layer.id, "visibility", "none");
+      }
+      if (
+        layer.source === "burwell" &&
+        layer["source-layer"] === "lines" &&
+        mapLayers.has(MapLayer.LINES)
+      ) {
+        this.map.setLayoutProperty(layer.id, "visibility", "none");
+      }
+      if (
+        (layer.source === "pbdb" || layer.source === "pbdb-points") &&
+        mapLayers.has(MapLayer.FOSSILS)
+      ) {
+        this.map.setLayoutProperty(layer.id, "visibility", "visible");
+      }
+      if (layer.source === "columns" && mapLayers.has(MapLayer.COLUMNS)) {
+        this.map.setLayoutProperty(layer.id, "visibility", "visible");
+      }
     });
 
-    this.map.setProjection("globe");
-
-    //this.map.addControl(new ZoomControl(), "top-right");
-    //this.map.addControl(new ThreeDControl(), "bottom-right");
-    //this.map.addControl(new CompassControl(), "bottom-right");
-
-    const pos = this.props.mapPosition;
-    const { pitch = 0, bearing = 0, altitude } = pos.camera;
-    const zoom = pos.target?.zoom;
-    if (zoom != null && altitude == null) {
-      const { lng, lat } = pos.target;
-      this.map.setCenter([lng, lat]);
-      this.map.setZoom(zoom);
-    } else {
-      const { altitude, lng, lat } = pos.camera;
-      const cameraOptions = new FreeCameraOptions(
-        MercatorCoordinate.fromLngLat({ lng, lat }, altitude),
-        [0, 0, 0, 1]
-      );
-      cameraOptions.setPitchBearing(pitch, bearing);
-
-      this.map.setFreeCameraOptions(cameraOptions);
+    if (mapLayers.has(MapLayer.FOSSILS)) {
+      this.refreshPBDB();
     }
 
-    this.enable3DTerrain(this.props.use3D);
+    // NO idea why timeout is needed
+    setTimeout(() => {
+      this.mapLoaded = true;
+      this.applyFilters();
+    }, 1);
+  }
 
-    this.props.mapRef.current = this.map;
+  setupMapHandlers() {
+    if (this.map != null) {
+      return;
+    }
 
+    this.map = this.props.mapRef.current;
+
+    if (this.map == null) {
+      return;
+    }
     // disable map rotation using right click + drag
     //this.map.dragRotate.disable();
 
@@ -141,76 +139,15 @@ class Map extends Component<MapProps, {}> {
       this.props.runAction({ type: "map-loading" });
     });
 
-    this.map.on("idle", () => {
-      if (!this.props.mapIsLoading) return;
-      this.props.runAction({ type: "map-idle" });
-    });
-
     this.map.on("moveend", () => {
       // Force a hit to the API to refresh
-      if (this.props.mapHasFossils) {
+      if (this.props.mapLayers.has(MapLayer.FOSSILS)) {
         this.refreshPBDB();
       }
     });
 
-    this.map.on("style.load", () => {
-      // Add the sources to the map
-      Object.keys(mapStyle.sources).forEach((source) => {
-        if (this.map.getSource(source) == null) {
-          this.map.addSource(source, mapStyle.sources[source]);
-        }
-      });
-
-      // The initial draw of the layers
-      mapStyle.layers.forEach((layer) => {
-        // Populate the objects that track interaction states
-        this.hoverStates[layer.id] = null;
-        this.selectedStates[layer.id] = null;
-
-        if (layer.source === "columns" || layer.source === "info_marker") {
-          this.map.addLayer(layer);
-        } else {
-          this.map.addLayer(layer, "airport-label");
-        }
-
-        // Accomodate any URI parameters
-        if (
-          layer.source === "burwell" &&
-          layer["source-layer"] === "units" &&
-          this.props.mapHasBedrock === false
-        ) {
-          this.map.setLayoutProperty(layer.id, "visibility", "none");
-        }
-        if (
-          layer.source === "burwell" &&
-          layer["source-layer"] === "lines" &&
-          this.props.mapHasLines === false
-        ) {
-          this.map.setLayoutProperty(layer.id, "visibility", "none");
-        }
-        if (
-          (layer.source === "pbdb" || layer.source === "pbdb-points") &&
-          this.props.mapHasFossils === true
-        ) {
-          this.map.setLayoutProperty(layer.id, "visibility", "visible");
-        }
-        if (layer.source === "columns" && this.props.mapHasColumns === true) {
-          this.map.setLayoutProperty(layer.id, "visibility", "visible");
-        }
-      });
-
-      if (this.props.mapHasFossils) {
-        this.refreshPBDB();
-      }
-
-      this.enable3DTerrain(this.props.use3D);
-
-      // NO idea why timeout is needed
-      setTimeout(() => {
-        this.mapLoaded = true;
-        this.applyFilters();
-      }, 1);
-    });
+    this.map.on("style.load", this.onStyleLoad.bind(this));
+    this.onStyleLoad();
 
     highlightLayers.forEach((layer) => {
       this.map.on("mousemove", layer.layer, (evt) => {
@@ -244,12 +181,6 @@ class Map extends Component<MapProps, {}> {
     this.map.on("movestart", () => {
       if (this.panning) {
         return;
-      }
-      // Make sure this doesn't fire before infoMarker is added to map
-      // Can happen on a slow connection
-      if (this.map.getLayer("infoMarker")) {
-        // Hide the info marker and close the info drawer
-        //this.map.setLayoutProperty("infoMarker", "visibility", "none");
       }
     });
 
@@ -295,7 +226,7 @@ class Map extends Component<MapProps, {}> {
       }
 
       // If we are viewing fossils, prioritize clicks on those
-      if (this.props.mapHasFossils) {
+      if (this.props.mapLayers.has(MapLayer.FOSSILS)) {
         let collections = this.map.queryRenderedFeatures(event.point, {
           layers: ["pbdb-points-clustered", "pbdb-points", "pbdb-clusters"],
         });
@@ -427,9 +358,6 @@ class Map extends Component<MapProps, {}> {
         ],
       });
 
-      const iconSize = this.props.mapHasSatellite ? 0.1 : 0.8;
-
-      this.map.setLayoutProperty("infoMarker", "icon-size", iconSize);
       this.map.setLayoutProperty("infoMarker", "visibility", "visible");
     });
 
@@ -438,8 +366,6 @@ class Map extends Component<MapProps, {}> {
       if (!this.currentSources.length) {
         return;
       }
-
-      this.enable3DTerrain(this.props.use3D);
 
       this.currentSources.forEach((source) => {
         if (this.map.getSource(source.id) == null) {
@@ -452,12 +378,6 @@ class Map extends Component<MapProps, {}> {
 
       // Readd all the previous layers to the map
       this.currentLayers.forEach((layer) => {
-        if (layer.layer.id != "infoMarker") {
-          this.map.addLayer(layer.layer, "airport-label");
-        } else {
-          this.map.addLayer(layer.layer);
-        }
-
         if (layer.filters) {
           this.map.setFilter(layer.layer.id, layer.filters);
         }
@@ -466,84 +386,15 @@ class Map extends Component<MapProps, {}> {
     });
   }
 
-  enable3DTerrain(shouldEnable: boolean) {
-    if (!this.map.style._loaded) {
-      return;
-    }
-    if (shouldEnable) {
-      if (this.map.getSource("mapbox-dem") == null) {
-        this.map.addSource("mapbox-dem", {
-          type: "raster-dem",
-          url: "mapbox://mapbox.mapbox-terrain-dem-v1",
-          tileSize: 512,
-          maxzoom: 14,
-        });
-      }
-
-      // add a sky layer that will show when the map is highly pitched
-      if (this.map.getLayer("sky") == null) {
-        this.map.addLayer({
-          id: "sky",
-          type: "sky",
-          paint: {
-            "sky-type": "atmosphere",
-            "sky-atmosphere-sun": [0.0, 0.0],
-            "sky-atmosphere-sun-intensity": 15,
-          },
-        });
-      }
-    }
-    // Enable or disable terrain depending on our current desires...
-    const currentTerrain = this.map.getTerrain();
-    if (shouldEnable && currentTerrain == null) {
-      this.map.setTerrain({ source: "mapbox-dem", exaggeration: 1 });
-    } else if (!shouldEnable && currentTerrain != null) {
-      this.map.setTerrain(null);
-    }
-  }
-
-  // Swap between standard and satellite base layers
-  swapBasemap(toAdd) {
-    this.currentSources = [];
-    this.currentLayers = [];
-
-    // First record which layers are currently on the map
-    Object.keys(mapStyle.sources).forEach((source) => {
-      let isPresent = this.map.getSource(source);
-      if (isPresent) {
-        this.currentSources.push({
-          id: source,
-          config: mapStyle.sources[source],
-          data: isPresent._data || null,
-        });
-      }
-    });
-
-    mapStyle.layers.forEach((layer) => {
-      let isPresent = this.map.getLayer(layer.id);
-      if (isPresent) {
-        this.currentLayers.push({
-          layer: layer,
-          filters: this.map.getFilter(layer.id),
-        });
-      }
-    });
-
-    this.enable3DTerrain(this.props.use3D);
-
-    // Set the style. `style.load` will be fired after to readd other layers
-    this.map.setStyle(toAdd);
-  }
-
   // Handle updates to the state of the map
   // Since react isn't in charge of updating the map state we use shouldComponentUpdate
   // and always return `false` to prevent DOM updates
   // We basically intercept the changes, handle them, and tell React to ignore them
   shouldComponentUpdate(nextProps) {
+    this.setupMapHandlers();
+    if (this.map == null) return false;
+
     setMapStyle(this, this.map, mapStyle, nextProps);
-    if (this.props.use3D !== nextProps.use3D) {
-      return true;
-    }
 
     if (nextProps.mapIsRotated !== this.props.mapIsRotated) {
       return true;
@@ -583,7 +434,6 @@ class Map extends Component<MapProps, {}> {
               nextProps.mapCenter.place.bbox[3],
             ],
           ];
-          console.log(nextProps.mapCenter, bounds);
           this.map.fitBounds(bounds, {
             duration: 0,
             maxZoom: 16,
@@ -601,14 +451,6 @@ class Map extends Component<MapProps, {}> {
       } else {
         // zoom to user location
       }
-
-      // Swap satellite/normal
-    } else if (nextProps.mapHasSatellite != this.props.mapHasSatellite) {
-      if (nextProps.mapHasSatellite) {
-        this.swapBasemap.bind(this)(SETTINGS.satelliteMapURL);
-      } else {
-        this.swapBasemap.bind(this)(SETTINGS.baseMapURL);
-      }
     }
 
     // Handle changes to map filters
@@ -624,7 +466,7 @@ class Map extends Component<MapProps, {}> {
         this.applyFilters();
 
         // Remove filtered columns and add unfiltered columns
-        if (this.props.mapHasColumns) {
+        if (this.props.mapLayers.has(MapLayer.COLUMNS)) {
           mapStyle.layers.forEach((layer) => {
             if (layer.source === "columns") {
               this.map.setLayoutProperty(layer.id, "visibility", "visible");
@@ -637,7 +479,7 @@ class Map extends Component<MapProps, {}> {
           });
         }
 
-        if (nextProps.mapHasFossils === true) {
+        if (nextProps.mapLayers.has(MapLayer.FOSSILS)) {
           this.refreshPBDB();
         }
 
@@ -646,7 +488,7 @@ class Map extends Component<MapProps, {}> {
 
       this.handleFilterChanges(nextProps);
 
-      if (nextProps.mapHasFossils === true) {
+      if (nextProps.mapLayers.has(MapLayer.FOSSILS)) {
         this.refreshPBDB();
       }
 
@@ -676,13 +518,8 @@ class Map extends Component<MapProps, {}> {
   // PBDB hexgrids and points are refreshed on every map move
   refreshPBDB() {
     let bounds = this.map.getBounds();
-    console.log(bounds);
     let zoom = this.map.getZoom();
     PBDBHelper(this, bounds, zoom);
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    this.enable3DTerrain(this.props.use3D);
   }
 
   // Update the colors of the hexgrids
@@ -721,14 +558,10 @@ class Map extends Component<MapProps, {}> {
   }
 
   render() {
-    const className = classNames({
-      "is-rotated": this.props.mapIsRotated ?? false,
-      "is-3d-available": this.props.use3D ?? false,
-    });
-    return h("div.mapbox-map#map", { ref: this.props.elementRef, className });
+    return null;
   }
 }
 
 export default forwardRef((props, ref) =>
-  h(Map, { ...props, elementRef: ref })
+  h(VestigialMap, { ...props, elementRef: ref })
 );

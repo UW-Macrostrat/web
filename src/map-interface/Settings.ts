@@ -1,6 +1,6 @@
 export const SETTINGS = {
   baseMapURL:
-    "mapbox://styles/jczaplewski/cl3w3bdai001f14ob27ckmpxz?optimize=true",
+    "mapbox://styles/jczaplewski/clatdbkw4002q14lov8zx0bm0?optimize=true",
   satelliteMapURL:
     "mapbox://styles/jczaplewski/cl51esfdm000e14mq51erype3?optimize=true",
   // TODO: make these configurable with environment variables

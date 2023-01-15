@@ -24,13 +24,14 @@ function InfoDrawerContainer(props) {
 
 function InfoDrawer(props) {
   let { className } = props;
-  const { mapInfo, infoMarkerLng, infoMarkerLat } = useAppState(
-    (state) => state.core
-  );
+  const { mapInfo, fetchingMapInfo, infoMarkerLng, infoMarkerLat } =
+    useAppState((state) => state.core);
 
   const runAction = useAppActions();
 
-  className = classNames("infodrawer", className);
+  className = classNames("infodrawer", className, {
+    loading: fetchingMapInfo,
+  });
 
   return h(Card, { className }, [
     h(InfoDrawerHeader, {
@@ -39,14 +40,21 @@ function InfoDrawer(props) {
       infoMarkerLat,
       onCloseClick: () => runAction({ type: "close-infodrawer" }),
     }),
-    h("div.infodrawer-body", [h(ErrorBoundary, [h(StratColumn)])]),
+    h("div.infodrawer-body", [
+      h(ErrorBoundary, [
+        h(
+          LoadingArea,
+          { loaded: !fetchingMapInfo },
+          h.if(!fetchingMapInfo)(InfoDrawerInterior)
+        ),
+      ]),
+    ]),
   ]);
 }
 
-function MapInfo() {
+function InfoDrawerInterior(props) {
   const {
     mapInfo,
-    fetchingMapInfo,
     fetchingGdd,
     columnInfo,
     gddInfo,
@@ -83,31 +91,29 @@ function MapInfo() {
           ref: {},
         };
 
-  return h(
-    LoadingArea,
-    { loaded: !fetchingMapInfo },
-    h("div", [
-      h(FossilCollections, { data: pbdbData, expanded: true }),
-      h(RegionalStratigraphy, { mapInfo, columnInfo }),
-      h(GeologicMapInfo, {
-        mapInfo,
-        bedrockExpanded: true,
-        source,
-      }),
-      h(MacrostratLinkedData, {
-        mapInfo,
-        bedrockMatchExpanded: true,
-        source,
-      }),
-      h(GddExpansion, {
-        mapInfo,
-        gddInfo,
-        openGdd,
-        fetchingGdd,
-      }),
-      h(Physiography, { mapInfo }),
-    ])
-  );
+  //return h(StratColumn);
+
+  return h("div", [
+    h(FossilCollections, { data: pbdbData, expanded: true }),
+    h(RegionalStratigraphy, { mapInfo, columnInfo }),
+    h(GeologicMapInfo, {
+      mapInfo,
+      bedrockExpanded: true,
+      source,
+    }),
+    h(MacrostratLinkedData, {
+      mapInfo,
+      bedrockMatchExpanded: true,
+      source,
+    }),
+    h(GddExpansion, {
+      mapInfo,
+      gddInfo,
+      openGdd,
+      fetchingGdd,
+    }),
+    h(Physiography, { mapInfo }),
+  ]);
 }
 
 export default InfoDrawer;

@@ -1,9 +1,15 @@
+import { MapLayer } from "~/map-interface/app-state";
+
 function setMapStyle(class_, map, mapStyle, props) {
+  const prevMapLayers = class_.props.mapLayers;
+  const { mapLayers } = props;
   mapStyle.layers.forEach((layer) => {
     if (map.getSource(layer.source) && map.getLayer(layer.id)) {
       const visibility = map.getLayoutProperty(layer.id, "visibility");
       if (layer.source === "burwell" && layer["source-layer"] === "units") {
-        const showBedRock = props.mapHasBedrock ? "visible" : "none";
+        const showBedRock = mapLayers.has(MapLayer.BEDROCK)
+          ? "visible"
+          : "none";
         if (visibility !== showBedRock) {
           map.setLayoutProperty(layer.id, "visibility", showBedRock);
         }
@@ -11,7 +17,7 @@ function setMapStyle(class_, map, mapStyle, props) {
         layer.source === "burwell" &&
         layer["source-layer"] === "lines"
       ) {
-        const showLines = props.mapHasLines ? "visible" : "none";
+        const showLines = mapLayers.has(MapLayer.LINES) ? "visible" : "none";
         if (visibility !== showLines) {
           map.setLayoutProperty(layer.id, "visibility", showLines);
         }
@@ -22,24 +28,32 @@ function setMapStyle(class_, map, mapStyle, props) {
         // points and clusters are visible at different zooms
         // currently this difference is handled by refreshPBDB()
         // it's annoying but doesn't cause an infinite loop
-        const showFossils = props.mapHasFossils ? "visible" : "none";
+        const hasFossils = mapLayers.has(MapLayer.FOSSILS);
         if (
-          class_.props.mapHasFossils != props.mapHasFossils &&
-          props.mapHasFossils
+          class_.props.mapLayers.has(MapLayer.FOSSILS) != hasFossils &&
+          hasFossils
         ) {
           class_.refreshPBDB();
         } else {
-          map.setLayoutProperty(layer.id, "visibility", showFossils);
+          map.setLayoutProperty(
+            layer.id,
+            "visibility",
+            hasFossils ? "visible" : "none"
+          );
         }
       } else if (layer.source === "columns") {
         const showColumns =
-          props.mapHasColumns && !props.filters.length ? "visible" : "none";
+          mapLayers.has(MapLayer.COLUMNS) && !props.filters.length
+            ? "visible"
+            : "none";
         if (visibility !== showColumns) {
           map.setLayoutProperty(layer.id, "visibility", showColumns);
         }
       } else if (layer.source === "filteredColumns") {
         const showFilteredColumns =
-          props.mapHasColumns && props.filters.length ? "visible" : "none";
+          mapLayers.has(MapLayer.COLUMNS) && props.filters.length
+            ? "visible"
+            : "none";
         if (
           JSON.stringify(props.filteredColumns) !=
           JSON.stringify(class_.props.filteredColumns)
