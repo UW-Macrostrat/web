@@ -20,9 +20,11 @@ function ColumnOverlay({ col_id }: { col_id: number }) {
   return h("div.column-overlay", [
     h(Column, {
       data: units,
-      showLabels: false,
+      showLabels: true,
       targetUnitHeight: 40,
       unconformityLabels: true,
+      width: 280,
+      columnWidth: 180,
     }),
   ]);
 }

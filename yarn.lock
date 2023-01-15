@@ -3649,11 +3649,14 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@macrostrat/api-views@workspace:deps/web-components/packages/api-views"
   dependencies:
+    "@macrostrat/hyper": ^2.2.1
     typescript: ^4.2.3
+  peerDependencies:
+    react: ^16.8.6||^17||^18
   languageName: unknown
   linkType: soft
 
-"@macrostrat/column-components@*, @macrostrat/column-components@^0.8.0, @macrostrat/column-components@^0.8.2, @macrostrat/column-components@workspace:deps/web-components/packages/column-components":
+"@macrostrat/column-components@*, @macrostrat/column-components@workspace:*, @macrostrat/column-components@workspace:deps/web-components/packages/column-components":
   version: 0.0.0-use.local
   resolution: "@macrostrat/column-components@workspace:deps/web-components/packages/column-components"
   dependencies:
@@ -3702,7 +3705,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@macrostrat/column-views@workspace:deps/web-components/packages/column-views"
   dependencies:
-    "@macrostrat/column-components": ^0.8.0
+    "@macrostrat/column-components": "workspace:*"
+    "@macrostrat/hyper": ^2.2.1
+    "@macrostrat/timescale": "workspace:*"
+    d3-array: ^3.2.1
+  peerDependencies:
+    "@blueprintjs/core": ^3.43.0 || ^4.3.0
+    react: ^16.8.6||^17.0.0||^18.0.0
   languageName: unknown
   linkType: soft
 
@@ -3842,7 +3851,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/hyper@npm:^2.0.1, @macrostrat/hyper@npm:^2.1.0, @macrostrat/hyper@npm:^2.2.1":
+"@macrostrat/hyper@npm:^2.0, @macrostrat/hyper@npm:^2.0.1, @macrostrat/hyper@npm:^2.1.0, @macrostrat/hyper@npm:^2.2.1":
   version: 2.2.1
   resolution: "@macrostrat/hyper@npm:2.2.1"
   dependencies:
@@ -4058,26 +4067,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/timescale@npm:*":
-  version: 1.0.3
-  resolution: "@macrostrat/timescale@npm:1.0.3"
-  dependencies:
-    "@macrostrat/hyper": ^1.2.11
-    "@types/classnames": ^2.2.10
-    "@types/d3-array": ^2.0.0
-    "@vx/axis": 0.0.198
-    "@vx/scale": 0.0.198
-    classnames: ^2.2.6
-    d3-array: ^2.5.1
-    d3-format: ^2.0.0
-  peerDependencies:
-    react: ^16.13.1
-    react-dom: ^16.13.1
-  checksum: 5795bbf7fa05e7de0ff98537c50e8b862f977b206a82094d45e1fa3a845bcb8ccb02080dba7d1c125436e95f2809020e9f39e6dfe4b073e53ee53bf9be9177da
-  languageName: node
-  linkType: hard
-
-"@macrostrat/timescale@workspace:deps/web-components/packages/timescale":
+"@macrostrat/timescale@workspace:*, @macrostrat/timescale@workspace:deps/web-components/packages/timescale":
   version: 0.0.0-use.local
   resolution: "@macrostrat/timescale@workspace:deps/web-components/packages/timescale"
   dependencies:
@@ -4089,9 +4079,9 @@ __metadata:
     "@babel/preset-env": ^7.7.7
     "@babel/preset-typescript": ^7.7.7
     "@blueprintjs/core": ^4.3.0
-    "@macrostrat/column-components": ^0.8.2
-    "@macrostrat/hyper": ^1.2.11
-    "@macrostrat/timescale": "*"
+    "@macrostrat/column-components": "workspace:*"
+    "@macrostrat/hyper": ^2.0
+    "@macrostrat/timescale": "workspace:*"
     "@parcel/transformer-typescript-tsc": ^2.0.0-alpha.3
     "@rehooks/local-storage": ^2.4.0
     "@rollup/plugin-babel": ^5.2.0
@@ -13034,6 +13024,15 @@ __metadata:
   dependencies:
     internmap: 1 - 2
   checksum: e236f6670b60b64abb6c435da25b5cbbdc2c7c0decdbf9355bc4cf6803d6da4fa820b7b78b9cbd127edb493555934a9788d45084c2f39d7c2e1a2b7aa48264a4
+  languageName: node
+  linkType: hard
+
+"d3-array@npm:^3.2.1":
+  version: 3.2.1
+  resolution: "d3-array@npm:3.2.1"
+  dependencies:
+    internmap: 1 - 2
+  checksum: 0bed33cc33b70f9d48ccef3e7a5956e134862e09179bf14df0bf9c8fc0ec02b8f847d4f5e1d32729cd5e02032af1d0a32bcc968ff1333795028455a749994623
   languageName: node
   linkType: hard
 
