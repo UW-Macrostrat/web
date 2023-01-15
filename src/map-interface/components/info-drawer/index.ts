@@ -91,7 +91,11 @@ function InfoDrawerInterior(props) {
           ref: {},
         };
 
-  //return h(StratColumn);
+  const col_id = columnInfo?.col_id;
+
+  if (col_id != null) {
+    return h(StratColumn, { col_id });
+  }
 
   return h("div", [
     h(FossilCollections, { data: pbdbData, expanded: true }),

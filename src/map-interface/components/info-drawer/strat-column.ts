@@ -1,44 +1,40 @@
 import { compose, hyperStyled } from "@macrostrat/hyper";
 import { useAPIResult } from "@macrostrat/ui-components";
-import {
-  MacrostratAPIProvider,
-  UnitSelectionProvider,
-} from "../../../../deps/web-components/packages/common/src";
 import { GeologicPatternProvider } from "@macrostrat/column-components";
-import Column from "../../../../deps/web-components/concept-apps/column-inspector/column";
-import { preprocessUnits } from "@macrostrat/concept-app-helpers";
+import { preprocessUnits, Column } from "@macrostrat/column-views";
+import "@macrostrat/column-components/main.module.styl";
 
 import styles from "./main.module.styl";
 const h = hyperStyled(styles);
 
-function _StratColumn() {
-  const col_id = 102;
-  const unitData = useAPIResult("/units", {
-    all: true,
-    response: "long",
-    col_id,
-  });
-  if (unitData == null) {
-    return null;
-  }
+function ColumnOverlay({ col_id }: { col_id: number }) {
+  const data = useAPIResult(
+    "https://macrostrat.org/api/v2/units",
+    { col_id, all: true, response: "long" },
+    (res) => res.success.data
+  );
+  if (data == null) return null;
 
+  const units = preprocessUnits(data);
+
+  return h("div.column-overlay", [
+    h(Column, {
+      data: units,
+      showLabels: false,
+      targetUnitHeight: 40,
+      unconformityLabels: true,
+    }),
+  ]);
+}
+
+function resolvePattern(name: string | number) {
+  return `//visualization-assets.s3.amazonaws.com/geologic-patterns/svg/${name}.svg`;
+}
+
+export function StratColumn({ col_id }) {
   return h(
-    "div.strat-column-container",
-    h(Column, { data: preprocessUnits(unitData) })
+    GeologicPatternProvider,
+    { resolvePattern },
+    h(ColumnOverlay, { col_id })
   );
 }
-
-function resolvePattern(id) {
-  return `//visualization-assets.s3.amazonaws.com/geologic-patterns/png/${id}.png`;
-}
-
-function PatternProvider({ children }) {
-  return h(GeologicPatternProvider, { resolvePattern }, children);
-}
-
-export const StratColumn = compose(
-  MacrostratAPIProvider,
-  UnitSelectionProvider,
-  PatternProvider,
-  _StratColumn
-);

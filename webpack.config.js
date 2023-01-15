@@ -5,6 +5,8 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 //const CopyPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const revisionInfo = require("@macrostrat/revision-info-webpack");
+const { alias } = require("./deps/web-components/package.json");
+
 const pkg = require("./package.json");
 
 // Read dotenv file in directory
@@ -15,8 +17,10 @@ const mode = process.env.NODE_ENV || "development";
 
 let publicURL = process.env.PUBLIC_URL || "/";
 
-const packageSrc = (name) =>
-  path.resolve(__dirname, "deps", "web-components", "packages", name, "src");
+let webComponentsAliases = {};
+for (const [k, v] of Object.entries(alias)) {
+  webComponentsAliases[k] = path.resolve(__dirname, "deps/web-components", v);
+}
 
 //const cesiumSource = "node_modules/cesium/Source";
 //const cesiumWorkers = "../Build/Cesium/Workers";
@@ -148,16 +152,7 @@ module.exports = {
       // CesiumJS module name,
       //cesiumSource: path.resolve(__dirname, cesiumSource),
       "~": path.resolve(__dirname, "src"),
-      //"@macrostrat/cesium-viewer": packageSrc("cesium-viewer"),
-      "@macrostrat/column-components": packageSrc("column-components"),
-      "@macrostrat/ui-components": packageSrc("ui-components"),
-      "@macrostrat/mapbox-styles": packageSrc("mapbox-styles"),
-      "@macrostrat/mapbox-utils": packageSrc("mapbox-utils"),
-      "@macrostrat/mapbox-react": packageSrc("mapbox-react"),
-      // Added to help with modules
-      "@macrostrat/concept-app-helpers": packageSrc("concept-app-helpers"),
-      "@macrostrat/timescale": packageSrc("timescale"),
-      common: packageSrc("common"),
+      ...webComponentsAliases,
     },
   },
   entry: {
