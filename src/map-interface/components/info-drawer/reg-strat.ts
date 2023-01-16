@@ -1,6 +1,7 @@
 import h from "@macrostrat/hyper";
 import { ExpansionPanel } from "../expansion-panel";
 import { addCommas } from "~/map-interface/utils";
+import { LinkButton } from "../buttons";
 
 function MapAttribute(props) {
   return h("div.map-source-attr", [
@@ -26,6 +27,11 @@ function RegionalStratigraphy(props) {
     },
     [
       h.if(Object.keys(columnInfo).length != 0)("div", [
+        h(
+          LinkButton,
+          { minimal: true, to: `column/${columnInfo.col_id}` },
+          h("span.col-name", columnInfo.col_name)
+        ),
         h(MapAttribute, {
           label: "Name: ",
           content: [columnInfo.col_name],

@@ -1,6 +1,7 @@
 import { ReactChild } from "react";
 import { Card, Spinner } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
+import { Navigate, Route, Routes, useParams } from "react-router-dom";
 import { useAppActions } from "~/map-interface/app-state";
 import { InfoDrawerHeader } from "./header";
 import { FossilCollections } from "./fossil-collections";
@@ -52,7 +53,71 @@ function InfoDrawer(props) {
   ]);
 }
 
-function InfoDrawerInterior(props) {
+function InfoDrawerInterior() {
+  const {
+    mapInfo,
+    fetchingGdd,
+    columnInfo,
+    gddInfo,
+    pbdbData,
+    // We used to enable panels when certain layers were on,
+    // but now we just show all panels always
+    //mapLayers
+    // mapHasBedrock,
+    // mapHasSatellite,
+    // mapHasColumns,
+    // mapHasFossils,
+  } = useAppState((state) => state.core);
+
+  const params = useParams();
+
+  const runAction = useAppActions();
+
+  const openGdd = () => {
+    runAction({ type: "fetch-gdd" });
+  };
+
+  if (!mapInfo || !mapInfo.mapData) {
+    return null;
+  }
+
+  let source =
+    mapInfo && mapInfo.mapData && mapInfo.mapData.length
+      ? mapInfo.mapData[0]
+      : {
+          name: null,
+          descrip: null,
+          comments: null,
+          liths: [],
+          b_int: {},
+          t_int: {},
+          ref: {},
+        };
+
+  // if (col_id != null && mapInfo.hasColumns) {
+  //   return h(Navigate, { to: `column/${col_id}` });
+  // }
+  return h(Routes, [
+    h(Route, { path: "*", element: h(InfoDrawerCoreInfo) }),
+    h(Route, {
+      path: "column/:col_id",
+      element: h(StratColumnRoute, { currentColID: columnInfo?.col_id }),
+    }),
+  ]);
+}
+
+function StratColumnRoute({ currentColID }) {
+  const { col_id } = useParams();
+
+  if (col_id != currentColID) {
+    // We are at the incorrect column route
+    return h(Navigate, { to: `/column/${col_id}` });
+  }
+
+  return h(StratColumn, { col_id });
+}
+
+function InfoDrawerCoreInfo() {
   const {
     mapInfo,
     fetchingGdd,
@@ -90,12 +155,6 @@ function InfoDrawerInterior(props) {
           t_int: {},
           ref: {},
         };
-
-  const col_id = columnInfo?.col_id;
-
-  if (col_id != null) {
-    return h(StratColumn, { col_id });
-  }
 
   return h("div", [
     h(FossilCollections, { data: pbdbData, expanded: true }),

@@ -1,9 +1,9 @@
 import { useMatch, useLocation, useNavigate } from "react-router";
 import classNames from "classnames";
+import { useAppState } from "./hooks";
 
 export function usePanelOpen() {
-  const match = useMatch("/");
-  return match?.pathname != "/";
+  return useAppState((s) => s.core.contextPanelOpen);
 }
 
 export function useContextClass() {

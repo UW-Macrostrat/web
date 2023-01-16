@@ -27,7 +27,24 @@ const reducers = combineReducers({
 function overallReducer(state: AppState, action: Action): AppState {
   switch (action.type) {
     case "@@router/ON_LOCATION_CHANGED":
-      const isOpen = action.payload.location.pathname != "/";
+      const { location } = action.payload;
+
+      // First, we route based on detail stack, if a detail panel is open...
+      if (
+        location.pathname.startsWith("/location") ||
+        location.pathname.startsWith("/column")
+      ) {
+        return {
+          ...state,
+          core: {
+            ...state.core,
+            infoDrawerOpen: true,
+            // We don't touch the context panel
+          },
+        };
+      }
+      // We route based on context stack
+      const isOpen = location.pathname != "/";
       return {
         ...state,
         core: { ...state.core, menuOpen: isOpen, contextPanelOpen: isOpen },
@@ -39,6 +56,18 @@ function overallReducer(state: AppState, action: Action): AppState {
         core: {
           ...state.core,
           mapPosition: action.data,
+        },
+      };
+    case "close-infodrawer":
+      return {
+        ...state,
+        core: coreReducer(state.core, action),
+        router: {
+          ...state.router,
+          location: {
+            ...state.router.location,
+            pathname: "/",
+          },
         },
       };
     default:
