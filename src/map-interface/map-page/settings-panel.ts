@@ -7,6 +7,7 @@ import { Tag } from "@blueprintjs/core";
 //import { GlobeSettings } from "@macrostrat/cesium-viewer/settings";
 import { useAppState, useAppActions } from "~/map-interface/app-state";
 import { useLocation } from "react-router";
+import { MapLayer } from "~/map-interface/app-state";
 //import { DisplayQuality } from "@macrostrat/cesium-viewer";
 import styles from "./settings-panel.module.styl";
 import { DarkModeButton } from "@macrostrat/ui-components";
@@ -28,6 +29,26 @@ const ExperimentsPanel = (props) => {
   //const globeActive = pathname?.startsWith("/globe");
   return h("div.settings.experiments.bp3-text.text-panel", [
     h("h2", "Experimental settings"),
+    h(
+      Switch,
+      {
+        checked: useAppState((s) => s.core.mapShowLabels),
+        onChange() {
+          dispatch({ type: "toggle-labels" });
+        },
+      },
+      "Show labels"
+    ),
+    h(
+      Switch,
+      {
+        checked: useAppState((s) => s.core.mapLayers.has(MapLayer.SOURCES)),
+        onChange() {
+          dispatch({ type: "toggle-map-layer", layer: MapLayer.SOURCES });
+        },
+      },
+      "Show sources"
+    ),
     h(
       Switch,
       {
@@ -57,21 +78,17 @@ const SettingsPanel = (props) => {
   //const { pathname } = useLocation();
   //const globeActive = pathname?.startsWith("/globe");
   return h("div.settings.bp3-text.text-panel", [
-    h("h2", "Settings"),
-    h(
-      "p",
-      "This page contains useful settings that are not yet fully integrated into the application."
-    ),
+    h("h2", "Map view settings"),
+    h("p", "Advanced configuration for Macrostrat's map."),
     h(
       Switch,
       {
-        large: true,
         checked: useAppState((s) => s.core.mapShowLabels),
         onChange() {
           runAction({ type: "toggle-labels" });
         },
       },
-      "Show map labels"
+      "Show labels"
     ),
     h(DarkModeButton, "Dark mode"),
 

@@ -16,12 +16,8 @@ import classNames from "classnames";
 import { useRef, useEffect } from "react";
 import { useTransition } from "transition-hook";
 import { usePanelOpen, useContextClass } from "../app-state";
-import {
-  MapboxMapProvider,
-  MapBottomControls,
-  MapStyledContainer,
-  MapZoomControl,
-} from "./map-view";
+import { MapboxMapProvider, ZoomControl } from "@macrostrat/mapbox-react";
+import { MapBottomControls, MapStyledContainer } from "./map-view";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));
@@ -160,7 +156,7 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
             h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
               className: "detail-panel",
             }),
-            h(MapZoomControl),
+            h(ZoomControl, { className: "zoom-control" }),
             h("div.spacer"),
             h(MapBottomControls),
           ]),

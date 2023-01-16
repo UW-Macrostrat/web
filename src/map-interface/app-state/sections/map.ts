@@ -1,22 +1,4 @@
-type LatLng = {
-  lng: number;
-  lat: number;
-};
-
-type TargetPosition = LatLng & {
-  zoom: number;
-};
-
-type CameraPosition = LatLng & {
-  bearing?: number;
-  pitch?: number;
-  altitude: number;
-};
-
-export type MapPosition = {
-  camera: CameraPosition;
-  target?: TargetPosition;
-};
+import { MapPosition } from "@macrostrat/mapbox-utils";
 
 export enum MapBackend {
   MAPBOX,
@@ -30,6 +12,7 @@ export enum MapLayer {
   COLUMNS = "columns",
   FOSSILS = "fossils",
   BEDROCK = "bedrock",
+  SOURCES = "sources",
 }
 
 type MapInitialState = {

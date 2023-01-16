@@ -16,7 +16,7 @@ const mode = process.env.NODE_ENV || "development";
 let publicURL = process.env.PUBLIC_URL || "/";
 
 const packageSrc = (name) =>
-  path.resolve(__dirname, "deps", "ui-components", "packages", name, "src");
+  path.resolve(__dirname, "deps", "web-components", "packages", name, "src");
 
 //const cesiumSource = "node_modules/cesium/Source";
 //const cesiumWorkers = "../Build/Cesium/Workers";
@@ -151,7 +151,9 @@ module.exports = {
       //"@macrostrat/cesium-viewer": packageSrc("cesium-viewer"),
       "@macrostrat/column-components": packageSrc("column-components"),
       "@macrostrat/ui-components": packageSrc("ui-components"),
-      "@macrostrat/map-styling": packageSrc("map-styling"),
+      "@macrostrat/mapbox-styles": packageSrc("mapbox-styles"),
+      "@macrostrat/mapbox-utils": packageSrc("mapbox-utils"),
+      "@macrostrat/mapbox-react": packageSrc("mapbox-react"),
     },
   },
   entry: {

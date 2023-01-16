@@ -1,5 +1,5 @@
 import { createContext, useContext, RefObject, useRef } from "react";
-import Map from "mapbox-gl";
+import { Map } from "mapbox-gl";
 import h from "@macrostrat/hyper";
 import { MapPosition } from "~/map-interface/app-state";
 
@@ -14,7 +14,7 @@ export function useMapElement() {
 }
 
 export function MapboxMapProvider({ children }) {
-  const mapRef = useRef<Map>();
+  const mapRef = useRef<Map | null>(null);
   return h(MapContext.Provider, { value: mapRef }, children);
 }
 
