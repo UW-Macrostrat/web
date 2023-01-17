@@ -19,7 +19,7 @@ import {
   useMapLabelVisibility,
 } from "@macrostrat/mapbox-react";
 import classNames from "classnames";
-import { debounce } from "lodash";
+import { debounce } from "underscore";
 import { inDarkMode } from "@macrostrat/ui-components";
 import {
   mapViewInfo,

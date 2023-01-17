@@ -27,7 +27,7 @@ const ExperimentsPanel = (props) => {
   const dispatch = useAppActions();
   //const { pathname } = useLocation();
   //const globeActive = pathname?.startsWith("/globe");
-  return h("div.settings.experiments.bp3-text.text-panel", [
+  return h("div.settings.experiments.bp4-text.text-panel", [
     h("h2", "Experimental settings"),
     h(
       Switch,
@@ -77,7 +77,7 @@ const SettingsPanel = (props) => {
   const runAction = useAppActions();
   //const { pathname } = useLocation();
   //const globeActive = pathname?.startsWith("/globe");
-  return h("div.settings.bp3-text.text-panel", [
+  return h("div.settings.bp4-text.text-panel", [
     h("h2", "Map view settings"),
     h("p", "Advanced configuration for Macrostrat's map."),
     h(
