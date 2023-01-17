@@ -3,6 +3,7 @@ import { MapLayer } from "~/map-interface/app-state";
 function setMapStyle(class_, map, mapStyle, props) {
   const prevMapLayers = class_.props.mapLayers;
   const { mapLayers } = props;
+
   mapStyle.layers.forEach((layer) => {
     if (map.getSource(layer.source) && map.getLayer(layer.id)) {
       const visibility = map.getLayoutProperty(layer.id, "visibility");
@@ -62,10 +63,6 @@ function setMapStyle(class_, map, mapStyle, props) {
         }
         if (visibility != showFilteredColumns) {
           map.setLayoutProperty(layer.id, "visibility", showFilteredColumns);
-        }
-      } else if (layer.source == "info_marker") {
-        if (!props.infoDrawerOpen) {
-          map.setLayoutProperty(layer.id, "visibility", "none");
         }
       }
     }

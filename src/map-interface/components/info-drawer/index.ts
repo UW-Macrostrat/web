@@ -25,13 +25,39 @@ function InfoDrawer(props) {
   // We used to enable panels when certain layers were on,
   // but now we just show all panels always
   let { className } = props;
+  const { mapInfo, fetchingMapInfo, infoMarkerLng, infoMarkerLat } =
+    useAppState((state) => state.core);
+
+  const runAction = useAppActions();
+
+  className = classNames("infodrawer", className, {
+    loading: fetchingMapInfo,
+  });
+
+  return h(Card, { className }, [
+    h(InfoDrawerHeader, {
+      mapInfo,
+      infoMarkerLng,
+      infoMarkerLat,
+      onCloseClick: () => runAction({ type: "close-infodrawer" }),
+    }),
+    h("div.infodrawer-body", [
+      h(ErrorBoundary, [
+        h(
+          LoadingArea,
+          { loaded: !fetchingMapInfo },
+          h.if(!fetchingMapInfo)(InfoDrawerInterior)
+        ),
+      ]),
+    ]),
+  ]);
+}
+
+function InfoDrawerInterior(props) {
   const {
     mapInfo,
-    fetchingMapInfo,
     fetchingGdd,
     columnInfo,
-    infoMarkerLng,
-    infoMarkerLat,
     gddInfo,
     pbdbData,
   } = useAppState((state) => state.core);
@@ -59,46 +85,26 @@ function InfoDrawer(props) {
           ref: {},
         };
 
-  className = classNames("infodrawer", className, {
-    loading: fetchingMapInfo,
-  });
-
-  return h(Card, { className }, [
-    h(InfoDrawerHeader, {
+  return h("div", [
+    h(FossilCollections, { data: pbdbData, expanded: true }),
+    h(RegionalStratigraphy, { mapInfo, columnInfo }),
+    h(GeologicMapInfo, {
       mapInfo,
-      infoMarkerLng,
-      infoMarkerLat,
-      onCloseClick: () => runAction({ type: "close-infodrawer" }),
+      bedrockExpanded: true,
+      source,
     }),
-    h("div.infodrawer-body", [
-      h(ErrorBoundary, [
-        h(
-          LoadingArea,
-          { loaded: !fetchingMapInfo },
-          h("div", [
-            h(FossilCollections, { data: pbdbData, expanded: true }),
-            h(RegionalStratigraphy, { mapInfo, columnInfo }),
-            h(GeologicMapInfo, {
-              mapInfo,
-              bedrockExpanded: true,
-              source,
-            }),
-            h(MacrostratLinkedData, {
-              mapInfo,
-              bedrockMatchExpanded: true,
-              source,
-            }),
-            h(GddExpansion, {
-              mapInfo,
-              gddInfo,
-              openGdd,
-              fetchingGdd,
-            }),
-            h(Physiography, { mapInfo }),
-          ])
-        ),
-      ]),
-    ]),
+    h(MacrostratLinkedData, {
+      mapInfo,
+      bedrockMatchExpanded: true,
+      source,
+    }),
+    h(GddExpansion, {
+      mapInfo,
+      gddInfo,
+      openGdd,
+      fetchingGdd,
+    }),
+    h(Physiography, { mapInfo }),
   ]);
 }
 

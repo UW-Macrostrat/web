@@ -21,7 +21,8 @@ import {
   MapControlWrapper,
 } from "@macrostrat/mapbox-react";
 import classNames from "classnames";
-import { debounce } from "lodash";
+import { debounce } from "underscore";
+import { inDarkMode } from "@macrostrat/ui-components";
 import {
   mapViewInfo,
   getMapPosition,
@@ -89,6 +90,7 @@ async function buildMapStyle(baseMapURL) {
   const style = await getMapboxStyle(baseMapURL, {
     access_token: mapboxgl.accessToken,
   });
+  console.log(style, mapStyle);
   return mergeStyles(style, mapStyle);
 }
 
@@ -159,9 +161,9 @@ function MapContainer(props) {
   const parentRef = useRef<HTMLDivElement>();
   const { mapUse3D, mapIsRotated } = mapViewInfo(mapPosition);
 
-  const baseMapURL = mapLayers.has(MapLayer.SATELLITE)
-    ? SETTINGS.satelliteMapURL
-    : SETTINGS.baseMapURL;
+  const isDarkMode = inDarkMode();
+  const baseMapURL = getBaseMapStyle(mapLayers, isDarkMode);
+  console.log("Base map URL", baseMapURL);
 
   useEffect(() => {
     initializeMap(baseMapURL, mapLayers, mapPosition).then((map) => {
@@ -169,10 +171,10 @@ function MapContainer(props) {
       setMapInitialized(true);
     });
   }, []);
+
   useEffect(() => {
     if (mapRef.current == null) return;
     buildMapStyle(baseMapURL).then((style) => {
-      console.log(style);
       mapRef.current.setStyle(style);
       enable3DTerrain(mapRef.current, mapUse3D);
     });
@@ -210,6 +212,15 @@ function MapContainer(props) {
   }, [filters, mapLayers]);
 
   useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map == null) return;
+    map.on("idle", () => {
+      if (!mapIsLoading) return;
+      runAction({ type: "map-idle" });
+    });
+  }, [mapRef.current, mapIsLoading]);
+
   useMapConditionalStyle(
     mapRef,
     mapShowLineSymbols && mapLayers.has(MapLayer.LINES),
@@ -258,11 +269,11 @@ function MapContainer(props) {
       elevationMarkerLocation,
       mapPosition,
       infoDrawerOpen,
-      runAction,
       mapIsLoading,
       mapIsRotated,
       mapRef,
-      markerLoadOffset: offset.current,
+      isDark: isDarkMode,
+      runAction,
       ...props,
       ref,
     }),
@@ -290,6 +301,16 @@ export function MapStyledContainer({ className, children }) {
   });
 
   return h("div", { className }, children);
+}
+
+function getBaseMapStyle(mapLayers, isDarkMode = false) {
+  if (mapLayers.has(MapLayer.SATELLITE)) {
+    return SETTINGS.satelliteMapURL;
+  }
+  if (isDarkMode) {
+    return SETTINGS.darkMapURL;
+  }
+  return SETTINGS.baseMapURL;
 }
 
 export default MapContainer;

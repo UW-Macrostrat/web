@@ -93,7 +93,7 @@ This stylesheet the overall application page layout.
   min-width: 40px
   overflow: hidden
   text-align: right
-  :global(.bp3-button-text)
+  :global(.bp4-button-text)
     transition all 0.2s
     transition-delay 0.1s
 
@@ -101,19 +101,19 @@ This stylesheet the overall application page layout.
   // Transition opacity when leaving context panel
   .panel-header:not(.minimal)
     // .tab-button
-    //   &:not(:hover) :global(.bp3-button-text)
+    //   &:not(:hover) :global(.bp4-button-text)
     //     //width 0
     //     opacity: 1
         //margin-left: -7px
     // Fancy CSS to select all buttons _after_ the currently hovered one
-    .tab-button:global(.bp3-active) ~ .tab-button :global(.bp3-button-text)
+    .tab-button:global(.bp4-active) ~ .tab-button :global(.bp4-button-text)
         width 0
         opacity: 0
         margin-left: -7px
 
 // When panel is closing, fade out the buttons text-first
 .context-panel-leave .menu-card .panel-header
-  .tab-button :global(.bp3-button-text)
+  .tab-button :global(.bp4-button-text)
     opacity: 0
     width: 0
 
@@ -124,26 +124,26 @@ This stylesheet the overall application page layout.
 
 .panel-header.minimal
   .tab-button:not(:hover)
-    &:not(:global(.bp3-active))
+    &:not(:global(.bp4-active))
       padding-left: 0
       padding-right: 0
       min-width: 30px
       width: 30px
-    :global(.bp3-button-text)
+    :global(.bp4-button-text)
       width 0
       opacity: 0
       margin-left: -7px
 
 .menu-card
   :global
-    .bp3-text, .text-panel
+    .bp4-text, .text-panel
       ul
         padding-left: 1em
 
 .menu-content
   display flex
   flex-direction column
-  .bp3-button-group
+  .bp4-button-group
     margin-bottom 4px
   margin: -4px
   margin-bottom -8px
@@ -153,7 +153,9 @@ map-control()
   min-width: 22px
   min-height: 22px 
   border-radius: 4px
-  box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.1), 0 0 0 rgba(16, 22, 26, 0), 0 1px 1px rgba(16, 22, 26, 0.2) !important
+  background-color: var(--panel-background-color)
+  box-shadow 0 0 0 1px var(--card-shadow-color) !important
+  //box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.1), 0 0 0 rgba(16, 22, 26, 0), 0 1px 1px rgba(16, 22, 26, 0.2) !important
   //box-shadow: 0 0 0 2px rgba(0,0,0,.1)
   button
     width: 22px
@@ -183,6 +185,35 @@ map-control()
     width: 100%
     height: 100%
 
+:global
+  .mapboxgl-ctrl.mapboxgl-ctrl-attrib
+    a
+      color: var(--text-color)
+    background-color: var(--translucent-panel-background-color) !important
+
+
+  .mapboxgl-marker svg
+    path
+      fill: var(--panel-background-color) !important
+    circle
+      fill: var(--secondary-color) !important
+    
+
+  .mapbox-control.mapbox-zoom
+    background: var(--translucent-panel-background-color)
+    svg
+      fill: var(--text-color) !important
+
+  .mapboxgl-ctrl-logo
+    transform: scale(0.9)translate(-8px,2px)
+  .bp4-dark
+    .mapboxgl-ctrl-logo
+      filter: invert(100%)
+
+
+  .mapboxgl-ctrl-group button + button
+    border-top: 1px solid var(--panel-rule-color) !important
+
 .detail-stack
   position relative
 
@@ -211,10 +242,6 @@ map-control()
     margin-left: 0.5em
   :global(.mapbox-control), .map-control
     map-control()
-
-
-:global(.mapbox-control.mapbox-zoom)
-  background: rgba(255,255,255,0.2)
 
 /* For mobile phones, we want to make the most of screen space,
  which in some cases means adding complications to the basic page. */

@@ -5,7 +5,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import { Component } from "react";
-import h from "react-hyperscript";
+import h from "@macrostrat/hyper";
 import classNames from "classnames";
 import { MacrostratColumnConsumer } from "./column-data";
 

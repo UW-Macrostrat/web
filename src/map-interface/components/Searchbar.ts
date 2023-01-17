@@ -140,7 +140,7 @@ function Searchbar({ className }) {
 }
 
 function SearchGuidance() {
-  return h("div.search-guidance.bp3-text", [
+  return h("div.search-guidance.bp4-text", [
     h("h3", ["Available categories"]),
     h("ul", [
       h("li", ["Time intervals"]),

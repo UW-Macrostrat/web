@@ -38,7 +38,7 @@ import { LinkButton } from "../components/buttons";
 import { Switch } from "@blueprintjs/core";
 
 function ChangelogPanel() {
-  return h("div.bp3-text.text-panel", [h(Changelog)]);
+  return h("div.bp4-text.text-panel", [h(Changelog)]);
 }
 
 const AboutText = loadable(() => import("../components/About"));
