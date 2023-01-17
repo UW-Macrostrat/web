@@ -480,14 +480,6 @@ class VestigialMap extends Component<MapProps, {}> {
       } else {
         // zoom to user location
       }
-
-      // Swap satellite/normal
-    } else if (
-      nextProps.mapHasSatellite != this.props.mapHasSatellite ||
-      nextProps.isDark != this.props.isDark
-    ) {
-      const nextBasemap = this.getBaseMapStyle(nextProps);
-      this.swapBasemap.bind(this)(nextBasemap);
     }
 
     // Handle changes to map filters

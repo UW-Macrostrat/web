@@ -144,9 +144,8 @@ function MapContainer(props) {
   const parentRef = useRef<HTMLDivElement>();
   const { mapUse3D, mapIsRotated } = mapViewInfo(mapPosition);
 
-  const baseMapURL = mapLayers.has(MapLayer.SATELLITE)
-    ? SETTINGS.satelliteMapURL
-    : SETTINGS.baseMapURL;
+  const isDarkMode = inDarkMode();
+  const baseMapURL = getBaseMapStyle(mapLayers, isDarkMode);
 
   useEffect(() => {
     initializeMap(baseMapURL, mapLayers, mapPosition).then((map) => {
@@ -234,8 +233,6 @@ function MapContainer(props) {
 
   useElevationMarkerLocation(mapRef, elevationMarkerLocation);
 
-  const isDarkMode = inDarkMode();
-
   const className = classNames({
     "is-rotated": mapIsRotated ?? false,
     "is-3d-available": mapUse3D ?? false,
@@ -286,6 +283,16 @@ export function MapStyledContainer({ className, children }) {
   });
 
   return h("div", { className }, children);
+}
+
+function getBaseMapStyle(mapLayers, isDarkMode) {
+  if (mapLayers.has(MapLayer.SATELLITE)) {
+    return SETTINGS.satelliteMapURL;
+  }
+  if (isDarkMode) {
+    return SETTINGS.darkMapURL;
+  }
+  return SETTINGS.baseMapURL;
 }
 
 export default MapContainer;
