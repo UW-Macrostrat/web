@@ -1,5 +1,5 @@
 import { Component } from "react";
-import h from "react-hyperscript";
+import h from "@macrostrat/hyper";
 import { nest } from "d3-collection";
 import { sum } from "d3-array";
 import { Popover } from "@blueprintjs/core";
