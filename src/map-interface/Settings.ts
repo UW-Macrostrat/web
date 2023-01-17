@@ -1,4 +1,6 @@
 export const SETTINGS = {
+  darkMapURL:
+    "mapbox://styles/jczaplewski/cl5uoqzzq003614o6url9ou9z?optimize=true",
   baseMapURL:
     "mapbox://styles/jczaplewski/clatdbkw4002q14lov8zx0bm0?optimize=true",
   satelliteMapURL:

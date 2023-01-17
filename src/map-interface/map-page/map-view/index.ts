@@ -20,6 +20,7 @@ import {
 } from "@macrostrat/mapbox-react";
 import classNames from "classnames";
 import { debounce } from "underscore";
+import { inDarkMode } from "@macrostrat/ui-components";
 import {
   mapViewInfo,
   getMapPosition,
@@ -143,9 +144,8 @@ function MapContainer(props) {
   const parentRef = useRef<HTMLDivElement>();
   const { mapUse3D, mapIsRotated } = mapViewInfo(mapPosition);
 
-  const baseMapURL = mapLayers.has(MapLayer.SATELLITE)
-    ? SETTINGS.satelliteMapURL
-    : SETTINGS.baseMapURL;
+  const isDarkMode = inDarkMode();
+  const baseMapURL = getBaseMapStyle(mapLayers, isDarkMode);
 
   useEffect(() => {
     initializeMap(baseMapURL, mapLayers, mapPosition).then((map) => {
@@ -254,7 +254,7 @@ function MapContainer(props) {
       mapIsLoading,
       mapIsRotated,
       mapRef,
-      markerLoadOffset: offset.current,
+      isDark: isDarkMode,
       runAction,
       ...props,
       ref,
@@ -282,6 +282,16 @@ export function MapStyledContainer({ className, children }) {
   });
 
   return h("div", { className }, children);
+}
+
+function getBaseMapStyle(mapLayers, isDarkMode) {
+  if (mapLayers.has(MapLayer.SATELLITE)) {
+    return SETTINGS.satelliteMapURL;
+  }
+  if (isDarkMode) {
+    return SETTINGS.darkMapURL;
+  }
+  return SETTINGS.baseMapURL;
 }
 
 export default MapContainer;

@@ -28,21 +28,6 @@ const overlaySources = {
       features: [],
     },
   },
-  info_marker: {
-    type: "geojson",
-    data: {
-      type: "FeatureCollection",
-      features: [
-        {
-          type: "Feature",
-          geometry: {
-            type: "Point",
-            coordinates: [0, 0],
-          },
-        },
-      ],
-    },
-  },
   columns: {
     type: "geojson",
     generateId: true,
@@ -136,18 +121,6 @@ const overlayLayers = [
     },
     layout: {
       visibility: "none",
-    },
-  },
-  {
-    id: "infoMarker",
-    type: "symbol",
-    source: "info_marker",
-    layout: {
-      "icon-size": 0.65,
-      "icon-image": "pin",
-      "icon-offset": [0, -28],
-      visibility: "none",
-      "icon-allow-overlap": true,
     },
   },
   {
