@@ -1,16 +1,23 @@
 import hyper from "@macrostrat/hyper";
 import { hexToRgb } from "../utils";
 import styles from "./info-blocks.module.styl";
+import { useDarkMode } from "@macrostrat/ui-components";
+import chroma from "chroma-js";
 
 const h = hyper.styled(styles);
 
 function IntervalChip(props) {
   const { interval, className } = props;
+  const darkMode = useDarkMode();
+  const darkenAmount = darkMode.isEnabled ? 2 : 0;
+
   return h(
     "div.chip.age-chip",
     {
       className,
-      style: { backgroundColor: hexToRgb(interval.color, 0.8) },
+      style: {
+        backgroundColor: chroma(interval.color).darken(darkenAmount).css(),
+      },
     },
     [
       h("div.age-chip-interval", interval.int_name),
