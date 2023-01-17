@@ -42,12 +42,15 @@ const SoftwareInfo = (props) => {
   ]);
 };
 
-const LinkButton = ({to, ...props}) => {
+const LinkButton = ({ to, ...props }) => {
   const navigate = useNavigate();
-  return h(AnchorButton,  {...props, onClick() {
-    navigate(to)
-  }});
-}
+  return h(AnchorButton, {
+    ...props,
+    onClick() {
+      navigate(to);
+    },
+  });
+};
 
 const AboutText = (props) => {
   const issueURL = newGithubIssueUrl({
@@ -55,10 +58,10 @@ const AboutText = (props) => {
     user: "UW-Macrostrat",
     title: "Found an issue with the Macrostrat web interface",
     body: "Please describe the issue you've found. Feel free to include screenshots or other information.",
-  })
+  });
 
   return (
-    <div className="about bp3-text text-panel">
+    <div className="about bp4-text text-panel">
       <div className={styles["title-block"]}>
         <h2>Macrostrat geologic map</h2>
         <SoftwareInfo />
@@ -66,15 +69,27 @@ const AboutText = (props) => {
 
       <p>
         Macrostrat's geologic map system integrates over 290 bedrock geologic
-        maps from around the world into a single, multiscale
-        database. As you zoom in and out of this map interface, the display
-        shifts between four harmonized levels of detail. Clicking on the map
-        reveals primary data from the map and other regional information.
+        maps from around the world into a single, multiscale database. As you
+        zoom in and out of this map interface, the display shifts between four
+        harmonized levels of detail. Clicking on the map reveals primary data
+        from the map and other regional information.
       </p>
       <ul className={styles["nav-list"]}>
-        <li><LinkButton to="/sources" icon="map" minimal>Explore map sources</LinkButton></li>
-        <li><LinkButton to="/usage" icon="help" minimal>Tips and tricks</LinkButton></li>
-        <li><AnchorButton href={issueURL} target="_blank" icon="issue" minimal>Report a software bug</AnchorButton></li>
+        <li>
+          <LinkButton to="/sources" icon="map" minimal>
+            Explore map sources
+          </LinkButton>
+        </li>
+        <li>
+          <LinkButton to="/usage" icon="help" minimal>
+            Tips and tricks
+          </LinkButton>
+        </li>
+        <li>
+          <AnchorButton href={issueURL} target="_blank" icon="issue" minimal>
+            Report a software bug
+          </AnchorButton>
+        </li>
       </ul>
 
       <h3>Credits</h3>
