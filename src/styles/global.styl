@@ -24,6 +24,7 @@
   --text-color: #333
   --text-subtle-color: #444
   --text-emphasized-color: #000
+  --card-shadow-color: rgba(0,0,0,0.4)
 
 
 html, body
@@ -67,9 +68,10 @@ body
     --tertiary-border-color: #5F6B7C // gray 5
     --accent-hover-color: lighten($accent, 5%) // light gray 1
     --accent-border-color: #5F6B7C // gray5
+    --card-shadow-color: alpha($gray1, 0.4)
 
     .bp4-card, .bp4-navbar
-      box-shadow 0 0 0 1px alpha($light-gray1, 0.15)
+      box-shadow 0 0 0 1px var(--card-shadow-color)
 
     .bp4-input
       &::placeholder

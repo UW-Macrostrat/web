@@ -10,7 +10,7 @@ import { useLocation } from "react-router";
 import { MapLayer } from "~/map-interface/app-state";
 //import { DisplayQuality } from "@macrostrat/cesium-viewer";
 import styles from "./settings-panel.module.styl";
-import { DarkModeButton } from "@macrostrat/ui-components";
+import { DarkModeButton, useDarkMode } from "@macrostrat/ui-components";
 
 const h = hyper.styled(styles);
 
@@ -75,6 +75,10 @@ const ExperimentsPanel = (props) => {
 
 const SettingsPanel = (props) => {
   const runAction = useAppActions();
+  const darkMode = useDarkMode();
+  const darkModeText = darkMode.isEnabled
+    ? "Swich to light mode"
+    : "Switch to dark mode";
   //const { pathname } = useLocation();
   //const globeActive = pathname?.startsWith("/globe");
   return h("div.settings.bp4-text.text-panel", [
@@ -90,7 +94,7 @@ const SettingsPanel = (props) => {
       },
       "Show labels"
     ),
-    h(DarkModeButton, "Dark mode"),
+    h(DarkModeButton, { minimal: true }, darkModeText),
 
     //h(MapTypeButton),
     //h.if(globeActive)(GlobeSettings),
