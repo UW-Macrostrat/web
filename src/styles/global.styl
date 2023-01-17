@@ -1,33 +1,50 @@
-@require "./_legacy/colors"
-
 *
   box-sizing border-box
 
+// Colors taken primarily from blueprintjs v4
+// See https://blueprintjs.com/docs/#core/colors
 :root
-  --secondary-color: $gray3
-  --tertiary-background: $light-gray5
-  --tertiary-color: $light-gray4
-  --tertiary-border-color: $gray5
-  --accent-color: $light-gray3
-  --accent-hover-color: $light-gray1
-  --accent-border-color: $gray5
+  --secondary-color: #8F99A8 // gray3
+  --tertiary-background: #F6F7F9 // light gray 5
+  --tertiary-color: #EDEFF2 // light gray 4
+  --tertiary-border-color: #C5CBD3 // gray 5
+  --accent-color: #E5E8EB // light gray 3
+  --accent-hover-color: #D3D8DE // light gray 1
+  --accent-border-color: #C5CBD3 // gray5
+  --panel-background-color: #fff
+  --panel-rule-color: #ddd
   --accent-secondary-color: #F5F8FA
   --accent-secondary-hover-color: #EBF1F5
   --ui-color-accent: rgb(252, 217, 250)
   --ui-color-accent-text: rgb(143, 39, 138)
   --box-horizontal-padding: 0.8em
+  --text-color: #333
+
 
 html, body
   height 100vh
   height -webkit-fill-available
   overflow hidden
 
-body {
-  color: #333;
+body
+  color: var(--text-color);
   margin:0;
   padding:0;
   font-family: 'Source Sans Pro', sans-serif;
-}
+  &.bp4-dark
+    color: #ccd;
+    --text-color: #ccd
+    --panel-background-color: #222
+    --panel-rule-color: #333
+    --secondary-color: #8F99A8 // gray3
+    --tertiary-background: #404854 // light gray 5
+    --tertiary-color: #383E47 // light gray 4
+    --tertiary-border-color: #5F6B7C // gray 5
+    --accent-color: #2F343C // light gray 3
+    --accent-hover-color: #1C2127 // light gray 1
+    --accent-border-color: #5F6B7C // gray5
+
+
 body, .main-container {
   height: 100%;
   width: 100%;
@@ -49,9 +66,7 @@ body, .main-container {
   flex-shrink: 0;
   margin-right: 16px;
 }
-.search-results {
-  background-color: #ffffff !important;
-}
+
 .search-input {
   border: none;
   font-size: 16px;
@@ -66,11 +81,11 @@ body, .main-container {
   font-size: 1.1em !important;
   font-weight: bold !important;
   lettering-spacing: 2px !important;
-  color: #333 !important;
+  color: var(--text-color);
   position: sticky;
   top: 0px;
-  background: #fff;
-  border-bottom: 2px solid #ddd;
+  background: var(--panel-background-color);
+  border-bottom: 2px solid var(--panel-rule-color);
   margin:0;
   width: 100%;
   padding-top: 10px
@@ -112,7 +127,7 @@ body, .main-container {
   -webkit-transition: 0.8s;
 	-moz-transition: 0.8s;
 	transition: 0.8s;
-  background-color: #ffffff;
+  background-color: var(--panel-background-color);
   padding: 20px;
   /* height: 100vh; */
 }
@@ -133,7 +148,7 @@ body, .main-container {
 }
 .infodrawer-header {
   float: right;
-  background-color: #ffffff;
+  background-color: var(--panel-background-color);
 }
 .infodrawer-header-item {
   display: inline-block;
@@ -307,7 +322,7 @@ body, .main-container {
   font-size: 0.8em;
 }
 .searchbar-background {
-  background-color: #ffffff;
+  background-color: var(--panel-background-color);
 }
 .infoDrawer-map-ref {
   float: left;
