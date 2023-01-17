@@ -10,6 +10,7 @@ import { useLocation } from "react-router";
 import { MapLayer } from "~/map-interface/app-state";
 //import { DisplayQuality } from "@macrostrat/cesium-viewer";
 import styles from "./settings-panel.module.styl";
+import { DarkModeButton, useDarkMode } from "@macrostrat/ui-components";
 
 const h = hyper.styled(styles);
 
@@ -26,7 +27,7 @@ const ExperimentsPanel = (props) => {
   const dispatch = useAppActions();
   //const { pathname } = useLocation();
   //const globeActive = pathname?.startsWith("/globe");
-  return h("div.settings.experiments.bp3-text.text-panel", [
+  return h("div.settings.experiments.bp4-text.text-panel", [
     h("h2", "Experimental settings"),
     h(
       Switch,
@@ -74,9 +75,13 @@ const ExperimentsPanel = (props) => {
 
 const SettingsPanel = (props) => {
   const runAction = useAppActions();
+  const darkMode = useDarkMode();
+  const darkModeText = darkMode.isEnabled
+    ? "Swich to light mode"
+    : "Switch to dark mode";
   //const { pathname } = useLocation();
   //const globeActive = pathname?.startsWith("/globe");
-  return h("div.settings.bp3-text.text-panel", [
+  return h("div.settings.bp4-text.text-panel", [
     h("h2", "Map view settings"),
     h("p", "Advanced configuration for Macrostrat's map."),
     h(
@@ -89,6 +94,7 @@ const SettingsPanel = (props) => {
       },
       "Show labels"
     ),
+    h(DarkModeButton, { minimal: true }, darkModeText),
 
     //h(MapTypeButton),
     //h.if(globeActive)(GlobeSettings),

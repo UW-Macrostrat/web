@@ -1,5 +1,5 @@
 import { Component } from "react";
-import h from "react-hyperscript";
+import h from "@macrostrat/hyper";
 import { NonIdealState } from "@blueprintjs/core";
 import { MacrostratColumnConsumer } from "./column-data";
 import { ColumnContainer } from "./single-column";
