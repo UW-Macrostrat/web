@@ -255,7 +255,6 @@ function MapContainer(props) {
       mapIsRotated,
       mapRef,
       isDark: isDarkMode,
-      markerLoadOffset: offset.current,
       runAction,
       ...props,
       ref,

@@ -23,11 +23,11 @@ interface MapProps {
   use3D: boolean;
   isDark: boolean;
   mapIsRotated: boolean;
-  markerLoadOffset: [number, number];
 }
 
 class VestigialMap extends Component<MapProps, {}> {
   map: mapboxgl.Map;
+  marker: mapboxgl.Marker | null = null;
   constructor(props) {
     super(props);
     this.handleFilterChanges = this.handleFilterChanges.bind(this);
@@ -97,6 +97,7 @@ class VestigialMap extends Component<MapProps, {}> {
     if (!this.map.style._loaded) {
       return;
     }
+
     const { mapLayers } = this.props;
     mapStyle.layers.forEach((layer) => {
       // Populate the objects that track interaction states
@@ -155,11 +156,7 @@ class VestigialMap extends Component<MapProps, {}> {
 
     // disable map rotation using touch rotation gesture
     //this.map.touchZoomRotate.disableRotation();
-    const ignoredSources = [
-      "elevationMarker",
-      "elevationPoints",
-      "info_marker",
-    ];
+    const ignoredSources = ["elevationMarker", "elevationPoints"];
 
     this.map.on("sourcedataloading", (evt) => {
       if (ignoredSources.includes(evt.sourceId) || this.props.mapIsLoading) {
@@ -204,13 +201,6 @@ class VestigialMap extends Component<MapProps, {}> {
         }
         this.hoverStates[layer.layer] = null;
       });
-    });
-
-    // Hide the infoMarker when the map moves
-    this.map.on("movestart", () => {
-      if (this.panning) {
-        return;
-      }
     });
 
     this.map.on("click", (event) => {
@@ -356,8 +346,6 @@ class VestigialMap extends Component<MapProps, {}> {
         });
       }
 
-      let markerOffset = this.props.markerLoadOffset ?? [0, 0];
-
       /*
       Ok. I know this looks jank, and it is, but bear with me.
       When we pan the map to center the marker relative to the side panel
@@ -368,26 +356,12 @@ class VestigialMap extends Component<MapProps, {}> {
       */
       //this.panning = true;
       this.map.panTo(event.lngLat, {
-        offset: markerOffset,
         easing: (t) => t * (2 - t),
         duration: 500,
       });
 
-      // Update the location of the marker
-      this.map.getSource("info_marker").setData({
-        type: "FeatureCollection",
-        features: [
-          {
-            type: "Feature",
-            geometry: {
-              type: "Point",
-              coordinates: [event.lngLat.lng, event.lngLat.lat],
-            },
-          },
-        ],
-      });
-
-      this.map.setLayoutProperty("infoMarker", "visibility", "visible");
+      this.marker ??= new mapboxgl.Marker({ color: "#000000" });
+      this.marker.setLngLat(event.lngLat).addTo(this.map);
     });
 
     // Fired after 'swapBasemap'
@@ -427,6 +401,13 @@ class VestigialMap extends Component<MapProps, {}> {
 
     if (nextProps.mapIsRotated !== this.props.mapIsRotated) {
       return true;
+    }
+
+    if (
+      nextProps.infoDrawerOpen == false &&
+      this.props.infoDrawerOpen == true
+    ) {
+      this.marker?.remove();
     }
 
     // Watch the state of the application and adjust the map accordingly

@@ -59,14 +59,14 @@ body
     --panel-background-color: $dark-background
     --translucent-panel-background-color: alpha($dark-background, 0.6)
     --accent-color: $accent // light gray 3
-    --accent-secondary-color: lighten($accent, 5%)
-    --accent-secondary-hover-color: lighten($accent, 10%)
+    --accent-secondary-color: lighten($accent, 0%)
+    --accent-secondary-hover-color: lighten($accent, 5%)
     --panel-rule-color: #404854
     --secondary-color: $gray1 // gray3
-    --tertiary-background: #404854 // light gray 5
+    --tertiary-background: lighten($accent, 4%) // light gray 5
     --tertiary-color: #383E47 // light gray 4
     --tertiary-border-color: #5F6B7C // gray 5
-    --accent-hover-color: lighten($accent, 5%) // light gray 1
+    --accent-hover-color: lighten($accent, 4%) // light gray 1
     --accent-border-color: #5F6B7C // gray5
     --card-shadow-color: alpha($gray1, 0.4)
 
@@ -79,7 +79,7 @@ body
       box-shadow: 0 0 0 0 alpha($light-gray3, 0), 0 0 0 0 alpha($light-gray3, 0), inset 0 0 0 1px alpha($light-gray1, 0.15), inset 0 1px 1px alpha($light-gray1, 0.2);
 
 .bp4-card, .bp4-navbar
-  border-radius: 4px !important
+  border-radius: 4px
   background-color: var(--panel-background-color) !important
 
 
