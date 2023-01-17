@@ -11,7 +11,6 @@ import { feature } from "topojson-client";
 import h from "@macrostrat/hyper";
 import { withCookies, Cookies } from "react-cookie";
 import { get } from "axios";
-import { instanceOf } from "prop-types";
 import update from "immutability-helper";
 
 const MacrostratColumnContext = createContext({});
@@ -45,9 +44,6 @@ const getID = function (col) {
 class MacrostratColumnManager extends Component {
   static initClass() {
     this.prototype.API = new APIManager("https://dev.macrostrat.org/api/v2");
-    this.propTypes = {
-      cookies: instanceOf(Cookies).isRequired,
-    };
     this.prototype.state = {
       hoveredColumn: null,
       columns: [],
