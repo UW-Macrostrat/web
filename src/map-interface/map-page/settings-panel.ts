@@ -59,27 +59,34 @@ const SettingsPanel = (props) => {
     h(LabelsButton),
     h(ThemeButton),
 
-    h(
-      Button,
-      {
-        minimal: true,
-        icon: "clean",
-        active: showExperiments,
-        intent: "danger",
-        onClick() {
-          setShowExperiments(!showExperiments);
+    h("div.callout-panel", { className: showExperiments ? "expanded" : null }, [
+      h("div.callout-header", [
+        h(
+          Button,
+          {
+            minimal: true,
+            icon: "clean",
+            active: showExperiments,
+            intent: "warning",
+            onClick() {
+              setShowExperiments(!showExperiments);
+            },
+          },
+          "Experiments"
+        ),
+      ]),
+      h(
+        Collapse,
+        {
+          isOpen: showExperiments,
+          className: "callout-content",
         },
-      },
-      "Experiments"
-    ),
-
-    h(
-      Collapse,
-      {
-        isOpen: showExperiments,
-      },
-      h(Callout, [h(LineSymbolsControl), h(SourcesButton)])
-    ),
+        h(Callout, { intent: "warning", icon: null }, [
+          h(LineSymbolsControl),
+          h(SourcesButton),
+        ])
+      ),
+    ]),
 
     //]),
 
@@ -121,8 +128,8 @@ function ThemeButton() {
   const darkMode = useDarkMode();
 
   const darkModeText = darkMode.isEnabled
-    ? "Switch to light mode"
-    : "Switch to dark mode";
+    ? "Switch to light theme"
+    : "Switch to dark theme";
   return h(DarkModeButton, { minimal: true, active: false }, darkModeText);
 }
 
