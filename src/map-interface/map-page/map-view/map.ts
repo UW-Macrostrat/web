@@ -23,6 +23,7 @@ interface MapProps {
   use3D: boolean;
   isDark: boolean;
   mapIsRotated: boolean;
+  onQueryMap: (event: any, columns: any[]) => void;
 }
 
 class VestigialMap extends Component<MapProps, {}> {
@@ -329,39 +330,7 @@ class VestigialMap extends Component<MapProps, {}> {
           return f.properties;
         });
 
-      if (columns.length) {
-        this.props.runAction({
-          type: "map-query",
-          lng: event.lngLat.lng,
-          lat: event.lngLat.lat,
-          z: this.map.getZoom(),
-          column: columns[0],
-        });
-      } else {
-        this.props.runAction({
-          type: "map-query",
-          lng: event.lngLat.lng,
-          lat: event.lngLat.lat,
-          z: this.map.getZoom(),
-        });
-      }
-
-      /*
-      Ok. I know this looks jank, and it is, but bear with me.
-      When we pan the map to center the marker relative to the side panel
-      a `movestart` event is fired on the map. That same `movestart` is the
-      listener we use to listen for user input and remove the marker. By
-      toggling this boolean we are able to ignore the `movestart` even when it
-      is fired by this particular action.
-      */
-      //this.panning = true;
-      this.map.panTo(event.lngLat, {
-        easing: (t) => t * (2 - t),
-        duration: 500,
-      });
-
-      this.marker ??= new mapboxgl.Marker({ color: "#000000" });
-      this.marker.setLngLat(event.lngLat).addTo(this.map);
+      this.props.onQueryMap(event, columns);
     });
 
     // Fired after 'swapBasemap'
@@ -401,13 +370,6 @@ class VestigialMap extends Component<MapProps, {}> {
 
     if (nextProps.mapIsRotated !== this.props.mapIsRotated) {
       return true;
-    }
-
-    if (
-      nextProps.infoDrawerOpen == false &&
-      this.props.infoDrawerOpen == true
-    ) {
-      this.marker?.remove();
     }
 
     // Watch the state of the application and adjust the map accordingly

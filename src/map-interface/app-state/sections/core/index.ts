@@ -24,6 +24,7 @@ const defaultState: CoreState = {
   aboutOpen: false,
   infoDrawerOpen: false,
   infoDrawerExpanded: false,
+  infoMarker: null,
   elevationChartOpen: false,
   mapBackend: MapBackend.MAPBOX,
   mapLayers: new Set([MapLayer.BEDROCK, MapLayer.LINES, MapLayer.LABELS]),
@@ -42,8 +43,6 @@ const defaultState: CoreState = {
   fetchingElevation: false,
   elevationCancelToken: null,
   fetchingPbdb: false,
-  infoMarkerLng: -999,
-  infoMarkerLat: -999,
   mapInfo: [],
   columnInfo: {},
   gddInfo: [],
@@ -204,11 +203,22 @@ export function coreReducer(
       }
       return {
         ...state,
-        infoMarkerLng: action.lng.toFixed(4),
-        infoMarkerLat: action.lat.toFixed(4),
+        infoMarkerPosition: {
+          lng: action.lng,
+          lat: action.lat,
+        },
+        infoMarkerFocus: null,
         fetchingMapInfo: true,
         infoDrawerOpen: true,
         mapInfoCancelToken: action.cancelToken,
+      };
+    case "recenter-query-marker":
+      const pos = state.infoMarkerPosition;
+      if (pos == null) return state;
+      return {
+        ...state,
+        infoMarkerPosition: { ...pos },
+        infoMarkerFocus: null,
       };
     case "received-map-query":
       if (action.data && action.data.mapData) {
@@ -517,7 +527,10 @@ export function coreReducer(
     case "recieve-data":
       return { ...state, isFetching: false, data: action.data };
     case "map-moved":
-      return updateURI({ ...state, mapPosition: action.data });
+      return updateURI({
+        ...state,
+        ...action.data,
+      });
     case "update-state":
       return action.state;
     case "got-initial-map-state":
