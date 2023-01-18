@@ -42,8 +42,7 @@ const defaultState: CoreState = {
   fetchingElevation: false,
   elevationCancelToken: null,
   fetchingPbdb: false,
-  infoMarkerLng: -999,
-  infoMarkerLat: -999,
+  infoMarkerPosition: null,
   mapInfo: [],
   columnInfo: {},
   gddInfo: [],
@@ -204,8 +203,11 @@ export function coreReducer(
       }
       return {
         ...state,
-        infoMarkerLng: action.lng.toFixed(4),
-        infoMarkerLat: action.lat.toFixed(4),
+        infoMarkerPosition: {
+          lng: action.lng,
+          lat: action.lat,
+          status: null,
+        },
         fetchingMapInfo: true,
         infoDrawerOpen: true,
         mapInfoCancelToken: action.cancelToken,
@@ -517,7 +519,7 @@ export function coreReducer(
     case "recieve-data":
       return { ...state, isFetching: false, data: action.data };
     case "map-moved":
-      return updateURI({ ...state, mapPosition: action.data });
+      return updateURI({ ...state, mapPosition: action.position });
     case "update-state":
       return action.state;
     case "got-initial-map-state":

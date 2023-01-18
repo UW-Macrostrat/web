@@ -153,7 +153,6 @@ function MapContainer(props) {
     is done loading
     */
   const [mapInitialized, setMapInitialized] = useState(false);
-  const offset = useRef([0, 0]);
 
   let mapRef = useMapRef();
 
@@ -197,7 +196,8 @@ function MapContainer(props) {
     const mapMovedCallback = () => {
       runAction({
         type: "map-moved",
-        data: getMapPosition(map),
+        position: getMapPosition(map),
+        focusState: null,
       });
     };
     map.on("moveend", debounce(mapMovedCallback, 100));

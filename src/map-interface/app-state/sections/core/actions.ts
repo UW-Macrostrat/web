@@ -1,4 +1,4 @@
-import { MapAction, MapLayer, MapState } from "../map";
+import { MapAction, MapLayer, MapState, PositionFocusState } from "../map";
 import { CancelToken } from "axios";
 export * from "../map";
 
@@ -163,6 +163,12 @@ interface MapCenterInfo {
   type: string;
   [key: string]: any;
 }
+
+type InfoMarkerPosition = {
+  lng: number;
+  lat: number;
+  status: PositionFocusState;
+};
 export interface CoreState extends MapState, AsyncRequestState {
   initialLoadComplete: boolean;
   contextPanelOpen: boolean;
@@ -172,8 +178,7 @@ export interface CoreState extends MapState, AsyncRequestState {
   infoDrawerExpanded: boolean;
   isFetching: boolean;
   elevationChartOpen: false;
-  infoMarkerLng: number;
-  infoMarkerLat: number;
+  infoMarkerPosition: InfoMarkerPosition | null;
   mapInfo: any[];
   columnInfo: object;
   gddInfo: any[];
