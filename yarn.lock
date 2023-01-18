@@ -3649,7 +3649,7 @@ __metadata:
     d3-selection: ^1.4.1
     fscreen: ^1.0.2
     geologic-patterns: 2.0.0-dev1
-    immutability-helper: ^3.1.1
+    immutability-helper: ^3.0.2
     labella: ^1.1.4
     npm-run-all: ^4.1.5
     postcss-modules: ^4.3.0
@@ -17416,7 +17416,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"immutability-helper@npm:^3.1.1":
+"immutability-helper@npm:^3.0.2, immutability-helper@npm:^3.1.1":
   version: 3.1.1
   resolution: "immutability-helper@npm:3.1.1"
   checksum: 6fdbf6d2123efa567263e904bbaff07aca0e24560d270d34967b03aab8ec20bd3e4057f394d59e50eb6c4718c9415591a6281692bb0aafd522ad72cf4887133f
