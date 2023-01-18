@@ -162,6 +162,12 @@ map-control()
     height: 22px
     background-position: center center
     padding 0
+    background-color: var(--panel-background-color)
+    color: var(--text-color)
+
+    &:hover
+      background-color: var(--panel-background-color) !important
+
 
 :global
 
@@ -185,7 +191,6 @@ map-control()
     width: 100%
     height: 100%
 
-:global
   .mapboxgl-ctrl.mapboxgl-ctrl-attrib
     a
       color: var(--text-color)
@@ -211,8 +216,21 @@ map-control()
       filter: invert(100%)
 
 
+
   .mapboxgl-ctrl-group button + button
     border-top: 1px solid var(--panel-rule-color) !important
+
+  .bp4-dark .mapboxgl-ctrl-group .mapboxgl-ctrl-icon
+    filter: invert(40%)
+    &:hover
+      filter: invert(50%)
+    //background-color: var(--)
+
+  .mapboxgl-ctrl-geolocate .mapboxgl-ctrl-icon
+    filter: invert(40%)
+    &:hover
+      filter: invert(50%)
+
 
 .detail-stack
   position relative
@@ -240,7 +258,7 @@ map-control()
   margin-bottom: 0
   &>*
     margin-left: 0.5em
-  :global(.mapbox-control), .map-control
+  :global(.mapbox-control), :global(.map-control-wrapper), .map-control
     map-control()
 
 /* For mobile phones, we want to make the most of screen space,
