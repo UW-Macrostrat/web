@@ -9,16 +9,13 @@ import {
   ButtonGroup,
   Alignment,
   ButtonProps,
-  IconName,
   NonIdealState,
 } from "@blueprintjs/core";
 import { CloseableCard } from "../components/closeable-card";
 import {
   useAppActions,
-  useAppState,
   useSearchState,
   MapLayer,
-  MapPosition,
   useHashNavigate,
 } from "../app-state";
 import { SearchResults } from "../components/searchbar";
@@ -32,10 +29,9 @@ import { useMatch, useLocation } from "react-router";
 import { useTransition } from "transition-hook";
 import { useCurrentPage } from "../app-state/nav-hooks";
 import useBreadcrumbs from "use-react-router-breadcrumbs";
-import { SettingsPanel, ExperimentsPanel } from "./settings-panel";
+import { SettingsPanel, ExperimentsPanel, ThemeButton } from "./settings-panel";
 import { useState, useEffect } from "react";
-import { LinkButton } from "../components/buttons";
-import { Switch } from "@blueprintjs/core";
+import { LinkButton, LayerButton, ListButton } from "../components/buttons";
 
 function ChangelogPanel() {
   return h("div.bp4-text.text-panel", [h(Changelog)]);
@@ -44,52 +40,6 @@ function ChangelogPanel() {
 const AboutText = loadable(() => import("../components/About"));
 
 const h = hyper.styled(styles);
-
-type ListButtonProps = ButtonProps & {
-  icon: React.ComponentType | IconName | React.ReactNode;
-};
-
-const ListButton = (props: ListButtonProps) => {
-  let { icon, ...rest } = props;
-  if (typeof props.icon != "string") {
-    icon = h(props.icon, { size: 20 });
-  }
-  return h(Button, { ...rest, className: "list-button", icon });
-};
-
-const YourLocationButton = () => {
-  const runAction = useAppActions();
-  const onClick = () => {
-    navigator.geolocation.getCurrentPosition(
-      function (position) {
-        const place = {
-          bbox: [],
-          category: "place",
-          center: [position.coords.longitude, position.coords.latitude],
-          name: "Your location",
-          place_type: "poi",
-          type: "place",
-        };
-
-        runAction({
-          type: "go-to-place",
-          place,
-        });
-      },
-      (e) => {
-        console.log(e);
-      },
-      { timeout: 100000 }
-    );
-  };
-  return h(
-    ListButton,
-    { icon: "map-marker", onClick, disabled: false },
-    "Your location"
-  );
-};
-
-const MinimalButton = (props) => h(Button, { ...props, minimal: true });
 
 const TabButton = (props: ButtonProps & { to: string }) => {
   const { to, ...rest } = props;
@@ -104,42 +54,13 @@ const TabButton = (props: ButtonProps & { to: string }) => {
   });
 };
 
-type LayerButtonProps = ListButtonProps & { layer: MapLayer; name: string };
-
-function LayerButton(props: LayerButtonProps) {
-  const { layer, name, ...rest } = props;
-  const active = useAppState((state) => state.core.mapLayers.has(layer));
-  const runAction = useAppActions();
-  const onClick = () => runAction({ type: "toggle-map-layer", layer });
-  return h(ListButton, {
-    active,
-    onClick,
-    text: name,
-    ...rest,
-  });
-}
-
-function LayerSwitch(props: LayerButtonProps) {
-  const { layer, name, ...rest } = props;
-  const checked = useAppState((state) => state.core.mapLayers.has(layer));
-  const runAction = useAppActions();
-  const onChange = () => runAction({ type: "toggle-map-layer", layer });
-  return h(Switch, {
-    className: "layer-switch",
-    checked,
-    onChange,
-    label: name,
-    ...rest,
-  });
-}
-
 const MenuGroup = (props) =>
   h(ButtonGroup, {
-    className: "menu-options",
+    className: "menu-group",
     vertical: true,
     minimal: true,
-    alignText: Alignment.LEFT,
     large: true,
+    alignText: Alignment.LEFT,
     ...props,
   });
 
@@ -152,7 +73,6 @@ const LayerList = (props) => {
   };
 
   return h("div.menu-content", [
-    h("h4", "Layers"),
     h(MenuGroup, [
       h(LayerButton, {
         name: "Bedrock",
@@ -180,11 +100,7 @@ const LayerList = (props) => {
         icon: "satellite",
       }),
     ]),
-    h(LayerSwitch, { layer: MapLayer.LABELS, name: "Labels" }),
-    h("hr"),
-    h("h4", "Tools"),
     h(MenuGroup, [
-      h(YourLocationButton),
       h(
         ListButton,
         { onClick: toggleElevationChart, icon: ElevationIcon },
@@ -288,7 +204,7 @@ const Menu = (props) => {
   const navigateHome = useHashNavigate("/");
 
   const pageName = useCurrentPage();
-  const isNarrow = pageName == "layers";
+  const isNarrow = pageName == "layers" || pageName == "settings";
   const isNarrowTrans = useTransition(isNarrow, 800);
 
   if (inputFocus) {

@@ -48,16 +48,17 @@ function calcMapPadding(rect, childRect) {
 }
 
 function GeolocationControl(props) {
+  const optionsRef = useRef({
+    showAccuracyCircle: true,
+    showUserLocation: true,
+    trackUserLocation: true,
+    positionOptions: {
+      enableHighAccuracy: true,
+    },
+  });
   return h(MapControlWrapper, {
     control: GeolocateControl,
-    options: {
-      showAccuracyCircle: true,
-      showUserLocation: true,
-      trackUserLocation: true,
-      positionOptions: {
-        enableHighAccuracy: true,
-      },
-    },
+    options: optionsRef.current,
     ...props,
   });
 }
@@ -90,7 +91,6 @@ async function buildMapStyle(baseMapURL) {
   const style = await getMapboxStyle(baseMapURL, {
     access_token: mapboxgl.accessToken,
   });
-  console.log(style, mapStyle);
   return mergeStyles(style, mapStyle);
 }
 
@@ -163,7 +163,6 @@ function MapContainer(props) {
 
   const isDarkMode = inDarkMode();
   const baseMapURL = getBaseMapStyle(mapLayers, isDarkMode);
-  console.log("Base map URL", baseMapURL);
 
   useEffect(() => {
     initializeMap(baseMapURL, mapLayers, mapPosition).then((map) => {

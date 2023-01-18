@@ -2,6 +2,52 @@
   display: inline-flex
   align-items center
   justify-content: space-between
+  flex-grow: 1
 
 .control-label-text
   margin-right: 1em
+
+.info, .admonition
+  font-style: italic
+
+
+.admonition
+  color: var(--error-text-color)
+  font-size: 0.9em
+  line-height: 1em
+
+.settings
+  :global
+    .bp4-control
+      display: flex
+      width: 100%
+      align-items: center
+      .control-label
+        flex-grow: 1
+
+    .bp4-callout
+      padding: 0.5em
+      position: relative
+
+    .bp4-button, .bp4-button-group
+      display: block
+      width: 100%
+      margin: 0.1em 0 0.2em
+      justify-content: start
+      //box-shadow: 0 0 0px 1px var(--card-shadow-color)
+      border-radius: 2px
+
+.callout-panel
+  border-radius: 3px
+  overflow: hidden
+  &.expanded
+    .callout-header
+      :global(.bp4-button)
+        border-bottom-left-radius: 0
+        border-bottom-right-radius: 0
+        margin-bottom: 0
+  :global(.bp4-callout)
+    border-top-left-radius: 0
+    border-top-right-radius: 0
+    &>:last-child
+      margin-bottom: 0
