@@ -28,16 +28,19 @@ export type MapState = MapInitialState & {
 };
 
 export enum PositionFocusState {
-  NONE,
   CENTERED,
+  NEAR_CENTER,
   OFF_CENTER,
-  OUT_OF_BOUNDS,
+  OUT_OF_PADDING,
+  OUT_OF_VIEW,
 }
 
 type MapMoved = {
   type: "map-moved";
-  position: MapPosition;
-  focusState: PositionFocusState;
+  data: {
+    mapPosition: MapPosition;
+    infoMarkerFocus: PositionFocusState | null;
+  };
 };
 type SetMapBackend = { type: "set-map-backend"; backend: any };
 type GetInitialMapState = { type: "get-initial-map-state" };
