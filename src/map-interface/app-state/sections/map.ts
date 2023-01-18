@@ -13,13 +13,13 @@ export enum MapLayer {
   FOSSILS = "fossils",
   BEDROCK = "bedrock",
   SOURCES = "sources",
+  LABELS = "labels",
 }
 
 type MapInitialState = {
   mapPosition: MapPosition;
   mapBackend: MapBackend;
   mapLayers: Set<MapLayer>;
-  mapShowLabels: boolean;
   mapShowLineSymbols: boolean;
 };
 
@@ -33,7 +33,6 @@ type GetInitialMapState = { type: "get-initial-map-state" };
 type MapLoading = { type: "map-loading" };
 type MapIdle = { type: "map-idle" };
 type ToggleLayer = { type: "toggle-map-layer"; layer: MapLayer };
-type ToggleLabels = { type: "toggle-labels" };
 type ToggleLineSymbols = { type: "toggle-line-symbols" };
 type ToggleMap3D = { type: "toggle-map-3d" };
 
@@ -50,6 +49,5 @@ export type MapAction =
   | MapLoading
   | MapIdle
   | ToggleLayer
-  | ToggleLabels
   | ToggleLineSymbols
   | ToggleMap3D;

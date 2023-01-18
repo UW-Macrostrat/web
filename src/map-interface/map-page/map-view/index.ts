@@ -6,6 +6,7 @@ import {
 } from "~/map-interface/app-state";
 import Map from "./map";
 import { enable3DTerrain } from "./terrain";
+import { GeolocateControl } from "mapbox-gl";
 import hyper from "@macrostrat/hyper";
 import { useEffect } from "react";
 import useResizeObserver from "use-resize-observer";
@@ -17,6 +18,7 @@ import {
   ThreeDControl,
   useMapConditionalStyle,
   useMapLabelVisibility,
+  MapControlWrapper,
 } from "@macrostrat/mapbox-react";
 import classNames from "classnames";
 import { debounce } from "underscore";
@@ -43,6 +45,22 @@ function calcMapPadding(rect, childRect) {
     right: Math.max(childRect.right - rect.right, 0),
     bottom: Math.max(childRect.bottom - rect.bottom, 0),
   };
+}
+
+function GeolocationControl(props) {
+  const optionsRef = useRef({
+    showAccuracyCircle: true,
+    showUserLocation: true,
+    trackUserLocation: true,
+    positionOptions: {
+      enableHighAccuracy: true,
+    },
+  });
+  return h(MapControlWrapper, {
+    control: GeolocateControl,
+    options: optionsRef.current,
+    ...props,
+  });
 }
 
 function useElevationMarkerLocation(mapRef, elevationMarkerLocation) {
@@ -127,7 +145,6 @@ function MapContainer(props) {
     mapPosition,
     infoDrawerOpen,
     mapIsLoading,
-    mapShowLabels,
     mapShowLineSymbols,
   } = useAppState((state) => state.core);
 
@@ -153,10 +170,10 @@ function MapContainer(props) {
       setMapInitialized(true);
     });
   }, []);
+
   useEffect(() => {
     if (mapRef.current == null) return;
     buildMapStyle(baseMapURL).then((style) => {
-      console.log(style);
       mapRef.current.setStyle(style);
       enable3DTerrain(mapRef.current, mapUse3D);
     });
@@ -193,6 +210,7 @@ function MapContainer(props) {
     runAction({ type: "map-layers-changed", mapLayers });
   }, [filters, mapLayers]);
 
+  useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));
   useEffect(() => {
     const map = mapRef.current;
     if (map == null) return;
@@ -202,7 +220,6 @@ function MapContainer(props) {
     });
   }, [mapRef.current, mapIsLoading]);
 
-  useMapLabelVisibility(mapRef, mapShowLabels);
   useMapConditionalStyle(
     mapRef,
     mapShowLineSymbols && mapLayers.has(MapLayer.LINES),
@@ -268,6 +285,7 @@ export function MapBottomControls() {
     h(ThreeDControl, { className: "map-3d-control" }),
     h(CompassControl, { className: "compass-control" }),
     h(GlobeControl, { className: "globe-control" }),
+    h(GeolocationControl, { className: "geolocation-control" }),
   ]);
 }
 
@@ -284,7 +302,7 @@ export function MapStyledContainer({ className, children }) {
   return h("div", { className }, children);
 }
 
-function getBaseMapStyle(mapLayers, isDarkMode) {
+function getBaseMapStyle(mapLayers, isDarkMode = false) {
   if (mapLayers.has(MapLayer.SATELLITE)) {
     return SETTINGS.satelliteMapURL;
   }

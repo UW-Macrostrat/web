@@ -31,13 +31,13 @@ const SoftwareInfo = (props) => {
         },
         "Changelog"
       ),
-      h(LinkButton, {
-        to: "/experiments",
-        icon: "clean",
-        className: "experimental-settings-button",
-        minimal: true,
-        small: true,
-      }),
+      // h(LinkButton, {
+      //   to: "/experiments",
+      //   icon: "clean",
+      //   className: "experimental-settings-button",
+      //   minimal: true,
+      //   small: true,
+      // }),
     ]),
   ]);
 };
