@@ -1,8 +1,9 @@
-import { forwardRef, useRef, useState } from "react";
+import { forwardRef, useRef, useState, useCallback } from "react";
 import {
   useAppActions,
   useAppState,
   MapLayer,
+  PositionFocusState,
 } from "~/map-interface/app-state";
 import Map from "./map";
 import { enable3DTerrain } from "./terrain";
@@ -133,6 +134,13 @@ async function initializeMap(baseMapURL, mapLayers, mapPosition) {
   return map;
 }
 
+function getMapPadding(ref, parentRef) {
+  const rect = parentRef.current?.getBoundingClientRect();
+  const childRect = ref.current?.getBoundingClientRect();
+  if (rect == null || childRect == null) return;
+  return calcMapPadding(rect, childRect);
+}
+
 function MapContainer(props) {
   const {
     filters,
@@ -142,6 +150,7 @@ function MapContainer(props) {
     elevationChartOpen,
     elevationData,
     elevationMarkerLocation,
+    infoMarkerPosition,
     mapPosition,
     infoDrawerOpen,
     mapIsLoading,
@@ -162,6 +171,8 @@ function MapContainer(props) {
 
   const isDarkMode = inDarkMode();
   const baseMapURL = getBaseMapStyle(mapLayers, isDarkMode);
+
+  const [padding, setPadding] = useState(getMapPadding(ref, parentRef));
 
   useEffect(() => {
     initializeMap(baseMapURL, mapLayers, mapPosition).then((map) => {
@@ -185,13 +196,16 @@ function MapContainer(props) {
   }, [mapRef.current, mapUse3D]);
 
   const markerRef = useRef(null);
-  const [handleMapQuery, clearMarker] = useMapQueryHandler(mapRef, markerRef);
+  const handleMapQuery = useMapQueryHandler(mapRef, markerRef, infoDrawerOpen);
 
+  // Handle map position easing (for both map padding and markers)
   useEffect(() => {
-    if (!infoDrawerOpen) {
-      clearMarker();
-    }
-  }, [infoDrawerOpen]);
+    mapRef.current?.easeTo({
+      center: infoMarkerPosition,
+      padding,
+      duration: 800,
+    });
+  }, [infoMarkerPosition, padding]);
 
   useEffect(() => {
     // Get the current value of the map. Useful for gradually moving away
@@ -202,7 +216,17 @@ function MapContainer(props) {
     setMapPosition(map, mapPosition);
     // Update the URI when the map moves
 
-    const mapMovedCallback = () => {
+    const mapMovedCallback = (event) => {
+      const marker = markerRef.current;
+      const map = mapRef.current;
+
+      let focusState = null;
+      if (marker != null) {
+        const markerPos = map.project(marker.getLngLat());
+        const mapPos = map.project(map.getCenter());
+        console.log(markerPos, mapPos);
+      }
+
       runAction({
         type: "map-moved",
         position: getMapPosition(map),
@@ -238,11 +262,7 @@ function MapContainer(props) {
   useResizeObserver({
     ref: parentRef,
     onResize(sz) {
-      const rect = parentRef.current?.getBoundingClientRect();
-      const childRect = ref.current?.getBoundingClientRect();
-      if (rect == null || childRect == null) return;
-      const padding = calcMapPadding(rect, childRect);
-      mapRef.current?.easeTo({ padding }, { duration: 800 });
+      setPadding(getMapPadding(ref, parentRef));
     },
   });
 
@@ -276,7 +296,6 @@ function MapContainer(props) {
       elevationData,
       elevationMarkerLocation,
       mapPosition,
-      infoDrawerOpen,
       mapIsLoading,
       mapIsRotated,
       onQueryMap: handleMapQuery,
@@ -292,41 +311,42 @@ function MapContainer(props) {
 
 function useMapQueryHandler(
   mapRef: React.RefObject<mapboxgl.Map | null>,
-  markerRef: React.RefObject<mapboxgl.Marker | null>
+  markerRef: React.RefObject<mapboxgl.Marker | null>,
+  infoDrawerOpen: boolean
 ) {
   /** Handler for map query markers */
   const runAction = useAppActions();
 
-  const handleMapQuery = (event, columns = null) => {
-    const column = columns?.[0];
-    const map = mapRef.current;
+  const handleMapQuery = useCallback(
+    (event, columns = null) => {
+      const column = columns?.[0];
+      const map = mapRef.current;
 
-    runAction({
-      type: "map-query",
-      lng: event.lngLat.lng,
-      lat: event.lngLat.lat,
-      z: map.getZoom(),
-      column,
-      map_id: null,
-    });
+      runAction({
+        type: "map-query",
+        lng: event.lngLat.lng,
+        lat: event.lngLat.lat,
+        z: map.getZoom(),
+        column,
+        map_id: null,
+      });
 
-    mapRef.current.panTo(event.lngLat, {
-      easing: (t) => t * (2 - t),
-      duration: 500,
-    });
+      const marker =
+        markerRef.current ?? new mapboxgl.Marker({ color: "#000000" });
+      marker.setLngLat(event.lngLat).addTo(mapRef.current);
+      markerRef.current = marker;
+    },
+    [mapRef, markerRef, infoDrawerOpen]
+  );
 
-    const marker =
-      markerRef.current ?? new mapboxgl.Marker({ color: "#000000" });
-    marker.setLngLat(event.lngLat).addTo(mapRef.current);
-    markerRef.current = marker;
-  };
+  useEffect(() => {
+    if (!infoDrawerOpen) {
+      markerRef.current?.remove();
+      markerRef.current = null;
+    }
+  }, [infoDrawerOpen]);
 
-  const clearMarker = () => {
-    if (markerRef.current == null) return;
-    markerRef.current.remove();
-    markerRef.current = null;
-  };
-  return [handleMapQuery, clearMarker];
+  return handleMapQuery;
 }
 
 export function MapBottomControls() {
