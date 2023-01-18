@@ -184,6 +184,15 @@ function MapContainer(props) {
     enable3DTerrain(map, mapUse3D);
   }, [mapRef.current, mapUse3D]);
 
+  const markerRef = useRef(null);
+  const [handleMapQuery, clearMarker] = useMapQueryHandler(mapRef, markerRef);
+
+  useEffect(() => {
+    if (!infoDrawerOpen) {
+      clearMarker();
+    }
+  }, [infoDrawerOpen]);
+
   useEffect(() => {
     // Get the current value of the map. Useful for gradually moving away
     // from class component
@@ -270,6 +279,7 @@ function MapContainer(props) {
       infoDrawerOpen,
       mapIsLoading,
       mapIsRotated,
+      onQueryMap: handleMapQuery,
       mapRef,
       isDark: isDarkMode,
       runAction,
@@ -278,6 +288,45 @@ function MapContainer(props) {
     }),
     h.if(mapLayers.has(MapLayer.SOURCES))(MapSourcesLayer),
   ]);
+}
+
+function useMapQueryHandler(
+  mapRef: React.RefObject<mapboxgl.Map | null>,
+  markerRef: React.RefObject<mapboxgl.Marker | null>
+) {
+  /** Handler for map query markers */
+  const runAction = useAppActions();
+
+  const handleMapQuery = (event, columns = null) => {
+    const column = columns?.[0];
+    const map = mapRef.current;
+
+    runAction({
+      type: "map-query",
+      lng: event.lngLat.lng,
+      lat: event.lngLat.lat,
+      z: map.getZoom(),
+      column,
+      map_id: null,
+    });
+
+    mapRef.current.panTo(event.lngLat, {
+      easing: (t) => t * (2 - t),
+      duration: 500,
+    });
+
+    const marker =
+      markerRef.current ?? new mapboxgl.Marker({ color: "#000000" });
+    marker.setLngLat(event.lngLat).addTo(mapRef.current);
+    markerRef.current = marker;
+  };
+
+  const clearMarker = () => {
+    if (markerRef.current == null) return;
+    markerRef.current.remove();
+    markerRef.current = null;
+  };
+  return [handleMapQuery, clearMarker];
 }
 
 export function MapBottomControls() {
