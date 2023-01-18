@@ -9,16 +9,13 @@ import {
   ButtonGroup,
   Alignment,
   ButtonProps,
-  IconName,
   NonIdealState,
 } from "@blueprintjs/core";
 import { CloseableCard } from "../components/closeable-card";
 import {
   useAppActions,
-  useAppState,
   useSearchState,
   MapLayer,
-  MapPosition,
   useHashNavigate,
 } from "../app-state";
 import { SearchResults } from "../components/searchbar";
@@ -62,6 +59,7 @@ const MenuGroup = (props) =>
     className: "menu-group",
     vertical: true,
     minimal: true,
+    large: true,
     alignText: Alignment.LEFT,
     ...props,
   });
@@ -75,13 +73,7 @@ const LayerList = (props) => {
   };
 
   return h("div.menu-content", [
-    h(MenuGroup, { large: true }, [
-      h(LayerButton, {
-        layer: MapLayer.LABELS,
-        name: "Labels",
-        icon: "tag",
-        small: true,
-      }),
+    h(MenuGroup, [
       h(LayerButton, {
         name: "Bedrock",
         layer: MapLayer.BEDROCK,
@@ -114,7 +106,6 @@ const LayerList = (props) => {
         { onClick: toggleElevationChart, icon: ElevationIcon },
         "Elevation profile"
       ),
-      h(ThemeButton),
     ]),
   ]);
 };

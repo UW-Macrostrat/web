@@ -12,8 +12,6 @@ import { MapLayer } from "~/map-interface/app-state";
 //import { DisplayQuality } from "@macrostrat/cesium-viewer";
 import styles from "./settings-panel.module.styl";
 import { DarkModeButton, useDarkMode } from "@macrostrat/ui-components";
-import { LayerButton } from "../components/buttons";
-import { show } from "@blueprintjs/core/lib/esm/components/context-menu/contextMenu";
 
 const h = hyper.styled(styles);
 
@@ -87,11 +85,6 @@ const SettingsPanel = (props) => {
         ])
       ),
     ]),
-
-    //]),
-
-    //h(MapTypeButton),
-    //h.if(globeActive)(GlobeSettings),
   ]);
 };
 
