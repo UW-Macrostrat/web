@@ -99,6 +99,8 @@ type SET_ACTIVE_INDEX_MAP = { type: "set-active-index-map" };
 
 type UPDATE_STATE = { type: "update-state"; state: any };
 
+type ToggleHighResolutionTerrain = { type: "toggle-high-resolution-terrain" };
+
 export type CoreAction =
   | MAP_LAYERS_CHANGED
   | CLEAR_FILTERS
@@ -142,7 +144,8 @@ export type CoreAction =
   | UPDATE_ELEVATION_MARKER
   | SET_ACTIVE_INDEX_MAP
   | MapAction
-  | RecenterQueryMarker;
+  | RecenterQueryMarker
+  | ToggleHighResolutionTerrain;
 
 interface AsyncRequestState {
   // Events and tokens for xhr
@@ -166,6 +169,10 @@ interface MapCenterInfo {
   [key: string]: any;
 }
 
+interface MapSettings {
+  highResolutionTerrain: boolean;
+}
+
 export interface CoreState extends MapState, AsyncRequestState {
   initialLoadComplete: boolean;
   contextPanelOpen: boolean;
@@ -178,6 +185,7 @@ export interface CoreState extends MapState, AsyncRequestState {
   infoMarkerPosition: { lat: number; lng: number } | null;
   infoMarkerFocus: PositionFocusState | null;
   mapInfo: any[];
+  mapSettings: MapSettings;
   columnInfo: object;
   gddInfo: any[];
   searchResults: any;

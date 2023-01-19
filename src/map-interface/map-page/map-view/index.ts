@@ -154,6 +154,7 @@ function MapContainer(props) {
     infoDrawerOpen,
     mapIsLoading,
     mapShowLineSymbols,
+    mapSettings,
   } = useAppState((state) => state.core);
 
   const runAction = useAppActions();
@@ -180,18 +181,26 @@ function MapContainer(props) {
     });
   }, []);
 
+  /* If we want to use a high resolution DEM, we need to use a different
+    source ID from the hillshade's source ID. This uses more memory but
+    provides a nicer-looking 3D map.
+    */
+  const demSourceID = mapSettings.highResolutionTerrain
+    ? "mapbox-3d-dem"
+    : null;
+
   useEffect(() => {
     if (mapRef.current == null) return;
     buildMapStyle(baseMapURL).then((style) => {
       mapRef.current.setStyle(style);
-      enable3DTerrain(mapRef.current, mapUse3D);
+      enable3DTerrain(mapRef.current, mapUse3D, demSourceID);
     });
-  }, [baseMapURL]);
+  }, [baseMapURL, demSourceID]);
 
   useEffect(() => {
     const map = mapRef.current;
     if (map == null) return;
-    enable3DTerrain(map, mapUse3D);
+    enable3DTerrain(map, mapUse3D, demSourceID);
   }, [mapRef.current, mapUse3D]);
 
   const markerRef = useRef(null);
