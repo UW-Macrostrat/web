@@ -1,5 +1,4 @@
-import { ReactChild } from "react";
-import { Card, Spinner } from "@blueprintjs/core";
+import { Card } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import { useAppActions } from "~/map-interface/app-state";
 import { InfoDrawerHeader } from "./header";
@@ -14,8 +13,6 @@ import classNames from "classnames";
 import styles from "./main.module.styl";
 import { LoadingArea } from "../transitions";
 import { ErrorBoundary } from "@macrostrat/ui-components";
-import { useNavigate } from "react-router";
-import { routerBasename } from "~/map-interface/Settings";
 
 const h = hyper.styled(styles);
 
