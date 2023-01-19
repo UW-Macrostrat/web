@@ -398,11 +398,16 @@ function useMapEaseToCenter(padding) {
       opts ??= {};
       opts.padding = padding;
     }
-    prevInfoMarkerPosition.current = infoMarkerPosition;
-    prevPadding.current = padding;
     if (opts == null) return;
     opts.duration = 800;
     map.easeTo(opts);
+    map.once("moveend", () => {
+      /* Waiting until moveend to update the refs allows us to
+      batch overlapping movements together, which increases UI
+      smoothness when, e.g., flying to new panels */
+      prevInfoMarkerPosition.current = infoMarkerPosition;
+      prevPadding.current = padding;
+    });
   }, [infoMarkerPosition, padding]);
 }
 
