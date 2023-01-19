@@ -56,6 +56,7 @@ const SettingsPanel = (props) => {
     //h(ButtonGroup, { vertical: true, alignText: Alignment.LEFT }, [
     h(LabelsButton),
     h(ThemeButton),
+    //h(HighResolutionTerrainSwitch),
 
     h("div.callout-panel", { className: showExperiments ? "expanded" : null }, [
       h("div.callout-header", [
@@ -157,6 +158,24 @@ function SourcesButton() {
       },
     },
     "Show sources"
+  );
+}
+
+function HighResolutionTerrainSwitch() {
+  const dispatch = useAppActions();
+  return h(
+    "div.control-wrapper",
+    null,
+    h(
+      Switch,
+      {
+        checked: useAppState((s) => s.core.mapSettings.highResolutionTerrain),
+        onChange() {
+          dispatch({ type: "toggle-high-resolution-terrain" });
+        },
+      },
+      "High-resolution terrain"
+    )
   );
 }
 

@@ -24,10 +24,14 @@ const defaultState: CoreState = {
   aboutOpen: false,
   infoDrawerOpen: false,
   infoDrawerExpanded: false,
-  infoMarker: null,
+  infoMarkerPosition: null,
+  infoMarkerFocus: null,
   elevationChartOpen: false,
   mapBackend: MapBackend.MAPBOX,
   mapLayers: new Set([MapLayer.BEDROCK, MapLayer.LINES, MapLayer.LABELS]),
+  mapSettings: {
+    highResolutionTerrain: true,
+  },
   // Events and tokens for xhr
   isFetching: false,
   fetchingMapInfo: false,
@@ -541,6 +545,10 @@ export function coreReducer(
       };
       // This causes some hilarious problems...
       return updateURI(newState);
+    case "toggle-high-resolution-terrain":
+      return update(state, {
+        mapSettings: { $toggle: ["highResolutionTerrain"] },
+      });
     default:
       return state;
   }
