@@ -400,7 +400,7 @@ function useMapEaseToCenter(padding) {
     }
     if (opts == null) return;
     opts.duration = 800;
-    map.easeTo(opts);
+    map.flyTo(opts);
     map.once("moveend", () => {
       /* Waiting until moveend to update the refs allows us to
       batch overlapping movements together, which increases UI
