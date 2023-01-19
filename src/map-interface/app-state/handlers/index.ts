@@ -99,8 +99,7 @@ async function actionRunner(
         map_id,
         sourceMapQuery.token
       );
-      coreState.infoMarkerLng = lng;
-      coreState.infoMarkerLat = lat;
+      coreState.infoMarkerPosition = { lng, lat, status: null };
       return {
         type: "received-map-query",
         data: mapData,

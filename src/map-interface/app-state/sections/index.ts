@@ -4,6 +4,7 @@ import { createBrowserHistory } from "history";
 import { CoreAction } from "./core/actions";
 import { coreReducer, CoreState } from "./core";
 import { MapAction } from "./map";
+import update, { Spec } from "immutability-helper";
 import { createRouterReducer } from "@lagunovsky/redux-react-router";
 import {
   ReduxRouterState,
@@ -50,12 +51,13 @@ function overallReducer(state: AppState, action: Action): AppState {
         core: { ...state.core, menuOpen: isOpen, contextPanelOpen: isOpen },
       };
     case "got-initial-map-state":
+      return { ...state, core: { ...state.core, ...action.data } };
     case "map-moved":
       return {
         ...state,
         core: {
           ...state.core,
-          mapPosition: action.data,
+          ...action.data,
         },
       };
     case "close-infodrawer":

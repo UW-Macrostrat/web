@@ -24,9 +24,12 @@ function InfoDrawerContainer(props) {
 }
 
 function InfoDrawer(props) {
+  // We used to enable panels when certain layers were on,
+  // but now we just show all panels always
   let { className } = props;
-  const { mapInfo, fetchingMapInfo, infoMarkerLng, infoMarkerLat } =
-    useAppState((state) => state.core);
+  const { mapInfo, fetchingMapInfo, infoMarkerPosition } = useAppState(
+    (state) => state.core
+  );
 
   const runAction = useAppActions();
 
@@ -37,8 +40,7 @@ function InfoDrawer(props) {
   return h(Card, { className }, [
     h(InfoDrawerHeader, {
       mapInfo,
-      infoMarkerLng,
-      infoMarkerLat,
+      infoMarkerPosition,
       onCloseClick: () => runAction({ type: "close-infodrawer" }),
     }),
     h("div.infodrawer-body", [
@@ -53,85 +55,10 @@ function InfoDrawer(props) {
   ]);
 }
 
-function InfoDrawerInterior() {
-  const {
-    mapInfo,
-    fetchingGdd,
-    columnInfo,
-    gddInfo,
-    pbdbData,
-    // We used to enable panels when certain layers were on,
-    // but now we just show all panels always
-    //mapLayers
-    // mapHasBedrock,
-    // mapHasSatellite,
-    // mapHasColumns,
-    // mapHasFossils,
-  } = useAppState((state) => state.core);
-
-  const params = useParams();
-
-  const runAction = useAppActions();
-
-  const openGdd = () => {
-    runAction({ type: "fetch-gdd" });
-  };
-
-  if (!mapInfo || !mapInfo.mapData) {
-    return null;
-  }
-
-  let source =
-    mapInfo && mapInfo.mapData && mapInfo.mapData.length
-      ? mapInfo.mapData[0]
-      : {
-          name: null,
-          descrip: null,
-          comments: null,
-          liths: [],
-          b_int: {},
-          t_int: {},
-          ref: {},
-        };
-
-  // if (col_id != null && mapInfo.hasColumns) {
-  //   return h(Navigate, { to: `column/${col_id}` });
-  // }
-  return h(Routes, [
-    h(Route, { path: "*", element: h(InfoDrawerCoreInfo) }),
-    h(Route, {
-      path: "column/:col_id",
-      element: h(StratColumnRoute, { currentColID: columnInfo?.col_id }),
-    }),
-  ]);
-}
-
-function StratColumnRoute({ currentColID }) {
-  const { col_id } = useParams();
-
-  if (col_id != currentColID) {
-    // We are at the incorrect column route
-    return h(Navigate, { to: `/column/${col_id}` });
-  }
-
-  return h(StratColumn, { col_id });
-}
-
-function InfoDrawerCoreInfo() {
-  const {
-    mapInfo,
-    fetchingGdd,
-    columnInfo,
-    gddInfo,
-    pbdbData,
-    // We used to enable panels when certain layers were on,
-    // but now we just show all panels always
-    //mapLayers
-    // mapHasBedrock,
-    // mapHasSatellite,
-    // mapHasColumns,
-    // mapHasFossils,
-  } = useAppState((state) => state.core);
+function InfoDrawerInterior(props) {
+  const { mapInfo, fetchingGdd, columnInfo, gddInfo, pbdbData } = useAppState(
+    (state) => state.core
+  );
 
   const runAction = useAppActions();
 

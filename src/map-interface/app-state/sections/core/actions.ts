@@ -1,4 +1,4 @@
-import { MapAction, MapLayer, MapState } from "../map";
+import { MapAction, MapLayer, MapState, PositionFocusState } from "../map";
 import { CancelToken } from "axios";
 export * from "../map";
 
@@ -33,6 +33,7 @@ type ADD_FILTER = { type: "add-filter"; filter: any };
 type REMOVE_FILTER = { type: "remove-filter"; filter: any };
 type UPDATE_COLUMN_FILTERS = { type: "update-column-filters"; columns: any };
 type CLEAR_FILTERS = { type: "clear-filters" };
+type RecenterQueryMarker = { type: "recenter-query-marker" };
 
 type START_MAP_QUERY = {
   type: "start-map-query";
@@ -98,6 +99,8 @@ type SET_ACTIVE_INDEX_MAP = { type: "set-active-index-map" };
 
 type UPDATE_STATE = { type: "update-state"; state: any };
 
+type ToggleHighResolutionTerrain = { type: "toggle-high-resolution-terrain" };
+
 export type CoreAction =
   | MAP_LAYERS_CHANGED
   | CLEAR_FILTERS
@@ -140,7 +143,9 @@ export type CoreAction =
   | RECEIVED_ELEVATION_QUERY
   | UPDATE_ELEVATION_MARKER
   | SET_ACTIVE_INDEX_MAP
-  | MapAction;
+  | MapAction
+  | RecenterQueryMarker
+  | ToggleHighResolutionTerrain;
 
 interface AsyncRequestState {
   // Events and tokens for xhr
@@ -163,6 +168,11 @@ interface MapCenterInfo {
   type: string;
   [key: string]: any;
 }
+
+interface MapSettings {
+  highResolutionTerrain: boolean;
+}
+
 export interface CoreState extends MapState, AsyncRequestState {
   initialLoadComplete: boolean;
   contextPanelOpen: boolean;
@@ -172,9 +182,10 @@ export interface CoreState extends MapState, AsyncRequestState {
   infoDrawerExpanded: boolean;
   isFetching: boolean;
   elevationChartOpen: false;
-  infoMarkerLng: number;
-  infoMarkerLat: number;
+  infoMarkerPosition: { lat: number; lng: number } | null;
+  infoMarkerFocus: PositionFocusState | null;
   mapInfo: any[];
+  mapSettings: MapSettings;
   columnInfo: object;
   gddInfo: any[];
   searchResults: any;

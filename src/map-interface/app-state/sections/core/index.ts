@@ -24,9 +24,14 @@ const defaultState: CoreState = {
   aboutOpen: false,
   infoDrawerOpen: false,
   infoDrawerExpanded: false,
+  infoMarkerPosition: null,
+  infoMarkerFocus: null,
   elevationChartOpen: false,
   mapBackend: MapBackend.MAPBOX,
-  mapLayers: new Set([MapLayer.BEDROCK, MapLayer.LINES]),
+  mapLayers: new Set([MapLayer.BEDROCK, MapLayer.LINES, MapLayer.LABELS]),
+  mapSettings: {
+    highResolutionTerrain: true,
+  },
   // Events and tokens for xhr
   isFetching: false,
   fetchingMapInfo: false,
@@ -42,8 +47,6 @@ const defaultState: CoreState = {
   fetchingElevation: false,
   elevationCancelToken: null,
   fetchingPbdb: false,
-  infoMarkerLng: -999,
-  infoMarkerLat: -999,
   mapInfo: [],
   columnInfo: {},
   gddInfo: [],
@@ -56,7 +59,6 @@ const defaultState: CoreState = {
     type: null,
   },
   mapUse3D: false,
-  mapShowLabels: true,
   mapShowLineSymbols: false,
   filtersOpen: false,
   filters: [],
@@ -130,8 +132,6 @@ export function coreReducer(
     case "toggle-filters":
       // rework this to open menu panel
       return { ...state, filtersOpen: !state.filtersOpen };
-    case "toggle-labels":
-      return { ...state, mapShowLabels: !state.mapShowLabels };
     case "toggle-line-symbols":
       return { ...state, mapShowLineSymbols: !state.mapShowLineSymbols };
     case "add-filter":
@@ -207,11 +207,22 @@ export function coreReducer(
       }
       return {
         ...state,
-        infoMarkerLng: action.lng.toFixed(4),
-        infoMarkerLat: action.lat.toFixed(4),
+        infoMarkerPosition: {
+          lng: action.lng,
+          lat: action.lat,
+        },
+        infoMarkerFocus: null,
         fetchingMapInfo: true,
         infoDrawerOpen: true,
         mapInfoCancelToken: action.cancelToken,
+      };
+    case "recenter-query-marker":
+      const pos = state.infoMarkerPosition;
+      if (pos == null) return state;
+      return {
+        ...state,
+        infoMarkerPosition: { ...pos },
+        infoMarkerFocus: null,
       };
     case "received-map-query":
       if (action.data && action.data.mapData) {
@@ -520,7 +531,10 @@ export function coreReducer(
     case "recieve-data":
       return { ...state, isFetching: false, data: action.data };
     case "map-moved":
-      return updateURI({ ...state, mapPosition: action.data });
+      return updateURI({
+        ...state,
+        ...action.data,
+      });
     case "update-state":
       return action.state;
     case "got-initial-map-state":
@@ -531,6 +545,10 @@ export function coreReducer(
       };
       // This causes some hilarious problems...
       return updateURI(newState);
+    case "toggle-high-resolution-terrain":
+      return update(state, {
+        mapSettings: { $toggle: ["highResolutionTerrain"] },
+      });
     default:
       return state;
   }

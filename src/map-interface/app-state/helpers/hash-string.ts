@@ -43,9 +43,7 @@ function updateURI(state: CoreState) {
   }
 
   const layers = getLayerDescriptionFromLayers(state.mapLayers);
-  if (layers.length != 0) {
-    args.show = layers;
-  }
+  args = { ...args, ...layers };
 
   setHashString(args, { arrayFormat: "comma", sort: false });
   return state;
@@ -55,21 +53,11 @@ function updateURI(state: CoreState) {
 /*
   let {
     mapXYZ,
-    mapHasBedrock,
-    mapHasLines,
-    mapHasSatellite,
-    mapHasColumns,
-    mapHasFossils,
   } = state;
   let defaultState = {
     z: mapXYZ.z,
     x: mapXYZ.x,
     y: mapXYZ.y,
-    satellite: mapHasSatellite,
-    bedrock: mapHasBedrock,
-    lines: mapHasLines,
-    columns: mapHasColumns,
-    fossils: mapHasFossils,
   };
   let filterTypes = [
     "strat_name_concepts",
@@ -99,8 +87,15 @@ function _fmt(x: string | number | string[]) {
   return parseFloat(x.toString());
 }
 
-function getLayerDescriptionFromLayers(layers: Set<MapLayer>): string[] {
-  let layerArr: string[] = Array.from(layers);
+interface HashLayerDesc {
+  show?: string[];
+  hide?: string[];
+}
+
+function getLayerDescriptionFromLayers(layers: Set<MapLayer>): HashLayerDesc {
+  // Remove layers that should be managed by the 'hide' flag
+  let layerArr: string[] = Array.from(layers).filter((lyr) => lyr != "labels");
+
   if (layerArr.length == 0) {
     // Special case for no layers
     layerArr.push("none");
@@ -113,12 +108,21 @@ function getLayerDescriptionFromLayers(layers: Set<MapLayer>): string[] {
     layerArr.push("geology");
   }
 
-  // If "geology" is the only layer, we remove it as implicit
-  if (layerArr.length == 1 && layerArr[0] == "geology") {
+  // If "geology" + "labels" are the only layers, we remove them as implicit
+  if (layerArr.length == 1 && layerArr.includes("geology")) {
     layerArr = [];
   }
 
-  return layerArr;
+  let desc: HashLayerDesc = {};
+  if (layerArr.length > 0) {
+    desc.show = layerArr;
+  }
+
+  if (!layers.has(MapLayer.LABELS)) {
+    desc.hide = ["labels"];
+  }
+
+  return desc;
 }
 
 function isValidLayer(test: string): test is MapLayer {
@@ -132,12 +136,16 @@ function validateLayers(layers: string[]): Set<MapLayer> {
 
 const geologyLayers = ["bedrock", "lines"];
 
-function layerDescriptionToLayers(layers: string | string[]): Set<MapLayer> {
+function layerDescriptionToLayers(
+  layers: string | string[],
+  hiddenLayers: string | string[] | null
+): Set<MapLayer> {
   if (!Array.isArray(layers)) {
     layers = [layers];
   }
 
   if (layers.length == 0) {
+    // Add implicit layers
     layers = ["geology"];
   }
 
@@ -150,6 +158,15 @@ function layerDescriptionToLayers(layers: string | string[]): Set<MapLayer> {
     layers = [];
   }
 
+  if (hiddenLayers != null) {
+    if (!Array.isArray(hiddenLayers)) {
+      hiddenLayers = [hiddenLayers];
+    }
+    if (!hiddenLayers.includes("labels")) {
+      layers.push(MapLayer.LABELS);
+    }
+  }
+
   return validateLayers(layers);
 }
 
@@ -158,10 +175,10 @@ function updateStateFromURI(state): GotInitialMapState | void {
   try {
     const hashData = getHashString(window.location.hash) ?? {};
 
-    let { show = [] } = hashData;
+    let { show = [], hide = [] } = hashData;
     const { x = 16, y = 23, z = 2, a = 0, e = 0 } = hashData;
 
-    const mapLayers = layerDescriptionToLayers(show);
+    const mapLayers = layerDescriptionToLayers(show, hide);
 
     const lng = _fmt(x);
     const lat = _fmt(y);

@@ -1,13 +1,15 @@
-import { forwardRef, useRef, useState } from "react";
+import { forwardRef, useRef, useState, useCallback } from "react";
 import {
   useAppActions,
   useAppState,
   MapLayer,
+  PositionFocusState,
 } from "~/map-interface/app-state";
 import Map from "./map";
 import { enable3DTerrain } from "./terrain";
+import { GeolocateControl } from "mapbox-gl";
 import hyper from "@macrostrat/hyper";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import useResizeObserver from "use-resize-observer";
 import styles from "../main.module.styl";
 import {
@@ -17,6 +19,7 @@ import {
   ThreeDControl,
   useMapConditionalStyle,
   useMapLabelVisibility,
+  MapControlWrapper,
 } from "@macrostrat/mapbox-react";
 import classNames from "classnames";
 import { debounce } from "underscore";
@@ -43,6 +46,22 @@ function calcMapPadding(rect, childRect) {
     right: Math.max(childRect.right - rect.right, 0),
     bottom: Math.max(childRect.bottom - rect.bottom, 0),
   };
+}
+
+function GeolocationControl(props) {
+  const optionsRef = useRef({
+    showAccuracyCircle: true,
+    showUserLocation: true,
+    trackUserLocation: true,
+    positionOptions: {
+      enableHighAccuracy: true,
+    },
+  });
+  return h(MapControlWrapper, {
+    control: GeolocateControl,
+    options: optionsRef.current,
+    ...props,
+  });
 }
 
 function useElevationMarkerLocation(mapRef, elevationMarkerLocation) {
@@ -115,6 +134,13 @@ async function initializeMap(baseMapURL, mapLayers, mapPosition) {
   return map;
 }
 
+function getMapPadding(ref, parentRef) {
+  const rect = parentRef.current?.getBoundingClientRect();
+  const childRect = ref.current?.getBoundingClientRect();
+  if (rect == null || childRect == null) return;
+  return calcMapPadding(rect, childRect);
+}
+
 function MapContainer(props) {
   const {
     filters,
@@ -127,8 +153,8 @@ function MapContainer(props) {
     mapPosition,
     infoDrawerOpen,
     mapIsLoading,
-    mapShowLabels,
     mapShowLineSymbols,
+    mapSettings,
   } = useAppState((state) => state.core);
 
   const runAction = useAppActions();
@@ -136,7 +162,6 @@ function MapContainer(props) {
     is done loading
     */
   const [mapInitialized, setMapInitialized] = useState(false);
-  const offset = useRef([0, 0]);
 
   let mapRef = useMapRef();
 
@@ -147,26 +172,41 @@ function MapContainer(props) {
   const isDarkMode = inDarkMode();
   const baseMapURL = getBaseMapStyle(mapLayers, isDarkMode);
 
+  const [padding, setPadding] = useState(getMapPadding(ref, parentRef));
+
   useEffect(() => {
     initializeMap(baseMapURL, mapLayers, mapPosition).then((map) => {
       mapRef.current = map;
       setMapInitialized(true);
     });
   }, []);
+
+  /* If we want to use a high resolution DEM, we need to use a different
+    source ID from the hillshade's source ID. This uses more memory but
+    provides a nicer-looking 3D map.
+    */
+  const demSourceID = mapSettings.highResolutionTerrain
+    ? "mapbox-3d-dem"
+    : null;
+
   useEffect(() => {
     if (mapRef.current == null) return;
     buildMapStyle(baseMapURL).then((style) => {
-      console.log(style);
       mapRef.current.setStyle(style);
-      enable3DTerrain(mapRef.current, mapUse3D);
+      enable3DTerrain(mapRef.current, mapUse3D, demSourceID);
     });
-  }, [baseMapURL]);
+  }, [baseMapURL, demSourceID]);
 
   useEffect(() => {
     const map = mapRef.current;
     if (map == null) return;
-    enable3DTerrain(map, mapUse3D);
+    enable3DTerrain(map, mapUse3D, demSourceID);
   }, [mapRef.current, mapUse3D]);
+
+  const markerRef = useRef(null);
+  const handleMapQuery = useMapQueryHandler(mapRef, markerRef, infoDrawerOpen);
+
+  useMapEaseToCenter(padding);
 
   useEffect(() => {
     // Get the current value of the map. Useful for gradually moving away
@@ -177,10 +217,16 @@ function MapContainer(props) {
     setMapPosition(map, mapPosition);
     // Update the URI when the map moves
 
-    const mapMovedCallback = () => {
+    const mapMovedCallback = (event) => {
+      const marker = markerRef.current;
+      const map = mapRef.current;
+
       runAction({
         type: "map-moved",
-        data: getMapPosition(map),
+        data: {
+          mapPosition: getMapPosition(map),
+          infoMarkerFocus: getFocusState(map, marker),
+        },
       });
     };
     map.on("moveend", debounce(mapMovedCallback, 100));
@@ -193,6 +239,7 @@ function MapContainer(props) {
     runAction({ type: "map-layers-changed", mapLayers });
   }, [filters, mapLayers]);
 
+  useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));
   useEffect(() => {
     const map = mapRef.current;
     if (map == null) return;
@@ -202,7 +249,6 @@ function MapContainer(props) {
     });
   }, [mapRef.current, mapIsLoading]);
 
-  useMapLabelVisibility(mapRef, mapShowLabels);
   useMapConditionalStyle(
     mapRef,
     mapShowLineSymbols && mapLayers.has(MapLayer.LINES),
@@ -212,11 +258,7 @@ function MapContainer(props) {
   useResizeObserver({
     ref: parentRef,
     onResize(sz) {
-      const rect = parentRef.current?.getBoundingClientRect();
-      const childRect = ref.current?.getBoundingClientRect();
-      if (rect == null || childRect == null) return;
-      const padding = calcMapPadding(rect, childRect);
-      mapRef.current?.easeTo({ padding }, { duration: 800 });
+      setPadding(getMapPadding(ref, parentRef));
     },
   });
 
@@ -250,9 +292,9 @@ function MapContainer(props) {
       elevationData,
       elevationMarkerLocation,
       mapPosition,
-      infoDrawerOpen,
       mapIsLoading,
       mapIsRotated,
+      onQueryMap: handleMapQuery,
       mapRef,
       isDark: isDarkMode,
       runAction,
@@ -263,11 +305,52 @@ function MapContainer(props) {
   ]);
 }
 
+function useMapQueryHandler(
+  mapRef: React.RefObject<mapboxgl.Map | null>,
+  markerRef: React.RefObject<mapboxgl.Marker | null>,
+  infoDrawerOpen: boolean
+) {
+  /** Handler for map query markers */
+  const runAction = useAppActions();
+
+  const handleMapQuery = useCallback(
+    (event, columns = null) => {
+      const column = columns?.[0];
+      const map = mapRef.current;
+
+      runAction({
+        type: "map-query",
+        lng: event.lngLat.lng,
+        lat: event.lngLat.lat,
+        z: map.getZoom(),
+        column,
+        map_id: null,
+      });
+
+      const marker =
+        markerRef.current ?? new mapboxgl.Marker({ color: "#000000" });
+      marker.setLngLat(event.lngLat).addTo(mapRef.current);
+      markerRef.current = marker;
+    },
+    [mapRef, markerRef, infoDrawerOpen]
+  );
+
+  useEffect(() => {
+    if (!infoDrawerOpen) {
+      markerRef.current?.remove();
+      markerRef.current = null;
+    }
+  }, [infoDrawerOpen]);
+
+  return handleMapQuery;
+}
+
 export function MapBottomControls() {
   return h("div.map-controls", [
     h(ThreeDControl, { className: "map-3d-control" }),
     h(CompassControl, { className: "compass-control" }),
     h(GlobeControl, { className: "globe-control" }),
+    h(GeolocationControl, { className: "geolocation-control" }),
   ]);
 }
 
@@ -284,7 +367,7 @@ export function MapStyledContainer({ className, children }) {
   return h("div", { className }, children);
 }
 
-function getBaseMapStyle(mapLayers, isDarkMode) {
+function getBaseMapStyle(mapLayers, isDarkMode = false) {
   if (mapLayers.has(MapLayer.SATELLITE)) {
     return SETTINGS.satelliteMapURL;
   }
@@ -292,6 +375,83 @@ function getBaseMapStyle(mapLayers, isDarkMode) {
     return SETTINGS.darkMapURL;
   }
   return SETTINGS.baseMapURL;
+}
+
+function useMapEaseToCenter(padding) {
+  const mapRef = useMapRef();
+  const infoMarkerPosition = useAppState(
+    (state) => state.core.infoMarkerPosition
+  );
+
+  const prevInfoMarkerPosition = useRef<any>(null);
+  const prevPadding = useRef<any>(null);
+  // Handle map position easing (for both map padding and markers)
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map == null) return;
+    let opts = null;
+    if (infoMarkerPosition != prevInfoMarkerPosition.current) {
+      opts ??= {};
+      opts.center = infoMarkerPosition;
+    }
+    if (padding != prevPadding.current) {
+      opts ??= {};
+      opts.padding = padding;
+    }
+    if (opts == null) return;
+    opts.duration = 800;
+    map.flyTo(opts);
+    map.once("moveend", () => {
+      /* Waiting until moveend to update the refs allows us to
+      batch overlapping movements together, which increases UI
+      smoothness when, e.g., flying to new panels */
+      prevInfoMarkerPosition.current = infoMarkerPosition;
+      prevPadding.current = padding;
+    });
+  }, [infoMarkerPosition, padding]);
+}
+
+function getFocusState(
+  map: mapboxgl.Map,
+  marker: mapboxgl.Marker
+): PositionFocusState | null {
+  if (marker == null) return null;
+
+  const markerPos = map.project(marker.getLngLat());
+  const mapPos = map.project(map.getCenter());
+  const dx = Math.abs(markerPos.x - mapPos.x);
+  const dy = Math.abs(markerPos.y - mapPos.y);
+  const padding = map.getPadding();
+  let { width, height } = map.getCanvas();
+  width /= 2;
+  height /= 2;
+  console.log(markerPos, width, height, padding);
+
+  if (dx < 10 && dy < 10) {
+    return PositionFocusState.CENTERED;
+  }
+  if (dx < 150 && dy < 150) {
+    return PositionFocusState.NEAR_CENTER;
+  }
+
+  if (
+    markerPos.x > padding.left &&
+    markerPos.x < width - padding.right &&
+    markerPos.y > padding.top &&
+    markerPos.y < height - padding.bottom
+  ) {
+    return PositionFocusState.OFF_CENTER;
+  }
+
+  if (
+    markerPos.x > 0 &&
+    markerPos.x < width &&
+    markerPos.y > 0 &&
+    markerPos.y < height
+  ) {
+    return PositionFocusState.OUT_OF_PADDING;
+  }
+  return PositionFocusState.OUT_OF_VIEW;
 }
 
 export default MapContainer;
