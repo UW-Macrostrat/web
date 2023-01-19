@@ -15,7 +15,7 @@ import styles from "./main.module.styl";
 import classNames from "classnames";
 import { useRef, useEffect } from "react";
 import { useTransition } from "transition-hook";
-import { usePanelOpen, useContextClass } from "../app-state";
+import { useContextPanelOpen, useContextClass } from "../app-state";
 import { MapboxMapProvider, ZoomControl } from "@macrostrat/mapbox-react";
 import { MapBottomControls, MapStyledContainer } from "./map-view";
 import { Routes, Route, useParams } from "react-router-dom";
@@ -98,7 +98,7 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
 
   const ref = useRef<HTMLElement>(null);
 
-  const contextPanelOpen = usePanelOpen();
+  const contextPanelOpen = useContextPanelOpen();
 
   const contextPanelTrans = useTransition(contextPanelOpen || inputFocus, 800);
   const detailPanelTrans = useTransition(infoDrawerOpen, 800);

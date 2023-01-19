@@ -335,6 +335,7 @@ function useMapQueryHandler(
     [mapRef, markerRef, infoDrawerOpen]
   );
 
+  // Remove the marker when the info drawer is closed
   useEffect(() => {
     if (!infoDrawerOpen) {
       markerRef.current?.remove();
@@ -415,6 +416,7 @@ function getFocusState(
   map: mapboxgl.Map,
   marker: mapboxgl.Marker
 ): PositionFocusState | null {
+  /** Determine whether the infomarker is positioned in the viewport */
   if (marker == null) return null;
 
   const markerPos = map.project(marker.getLngLat());

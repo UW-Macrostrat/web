@@ -1,10 +1,10 @@
 import { combineReducers } from "redux";
 import reduceReducers from "reduce-reducers";
-import { createBrowserHistory, Location } from "history";
+import { Action, createBrowserHistory, Location } from "history";
 import { CoreAction } from "./core/actions";
 import { coreReducer, CoreState } from "./core";
 import { MapAction } from "./map";
-import { contextPanelIsOpen } from "../nav-hooks";
+import { contextPanelIsInitiallyOpen } from "../nav-hooks";
 import { createRouterReducer } from "@lagunovsky/redux-react-router";
 import {
   ReduxRouterState,
@@ -30,7 +30,7 @@ function overallReducer(state: AppState, action: Action): AppState {
     case "@@router/ON_LOCATION_CHANGED": {
       console.log(action.payload.location);
       const { pathname } = action.payload.location;
-      const isOpen = contextPanelIsOpen(pathname);
+      const isOpen = contextPanelIsInitiallyOpen(pathname);
       return {
         ...state,
         core: { ...state.core, menuOpen: isOpen, contextPanelOpen: isOpen },
@@ -39,7 +39,7 @@ function overallReducer(state: AppState, action: Action): AppState {
     case "got-initial-map-state":
       console.log(state.router);
       const { pathname } = state.router.location;
-      const isOpen = contextPanelIsOpen(pathname);
+      const isOpen = contextPanelIsInitiallyOpen(pathname);
 
       return {
         ...state,
@@ -56,6 +56,19 @@ function overallReducer(state: AppState, action: Action): AppState {
         core: {
           ...state.core,
           ...action.data,
+        },
+      };
+    case "close-infodrawer":
+      return {
+        ...state,
+        router: {
+          ...state.router,
+          action: Action.Push,
+          // Move back to the root route on infodrawer close
+          location: {
+            ...state.router.location,
+            pathname: "/",
+          },
         },
       };
     default:

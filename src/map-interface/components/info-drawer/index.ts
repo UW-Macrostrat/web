@@ -31,7 +31,7 @@ function InfoDrawer(props) {
     (state) => state.core
   );
 
-  const navigate = useNavigate();
+  const runAction = useAppActions();
 
   className = classNames("infodrawer", className, {
     loading: fetchingMapInfo,
@@ -41,7 +41,7 @@ function InfoDrawer(props) {
     h(InfoDrawerHeader, {
       mapInfo,
       infoMarkerPosition,
-      onCloseClick: () => navigate(routerBasename),
+      onCloseClick: () => runAction({ type: "close-infodrawer" }),
     }),
     h("div.infodrawer-body", [
       h(ErrorBoundary, [
