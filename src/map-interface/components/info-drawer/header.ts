@@ -45,7 +45,6 @@ function RecenterButton() {
 
 export function InfoDrawerHeader(props) {
   const { mapInfo, infoMarkerPosition: position, onCloseClick } = props;
-  const runAction = useAppActions();
   const { elevation } = mapInfo;
   return h("header", [
     //h("div.left-icon", [h(Icon, { icon: "map-marker" })]),

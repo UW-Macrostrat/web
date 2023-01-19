@@ -1,6 +1,6 @@
 import { combineReducers } from "redux";
 import reduceReducers from "reduce-reducers";
-import { createBrowserHistory } from "history";
+import { createBrowserHistory, Location } from "history";
 import { CoreAction } from "./core/actions";
 import { coreReducer, CoreState } from "./core";
 import { MapAction } from "./map";
@@ -25,16 +25,23 @@ const reducers = combineReducers({
   core: coreReducer,
 });
 
+const menuClosedRoutes = ["/", "/info"];
+
 function overallReducer(state: AppState, action: Action): AppState {
   switch (action.type) {
     case "@@router/ON_LOCATION_CHANGED":
-      const isOpen = action.payload.location.pathname != "/";
+      const isOpen = !menuClosedRoutes.includes(
+        action.payload.location.pathname
+      );
       return {
         ...state,
         core: { ...state.core, menuOpen: isOpen, contextPanelOpen: isOpen },
       };
     case "got-initial-map-state":
-      return { ...state, core: { ...state.core, ...action.data } };
+      return {
+        ...state,
+        core: { ...state.core, ...action.data },
+      };
     case "map-moved":
       return {
         ...state,

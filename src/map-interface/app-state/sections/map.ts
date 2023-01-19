@@ -20,7 +20,6 @@ type MapInitialState = {
   mapPosition: MapPosition;
   mapBackend: MapBackend;
   mapLayers: Set<MapLayer>;
-  mapShowLineSymbols: boolean;
 };
 
 export type MapState = MapInitialState & {

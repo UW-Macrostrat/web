@@ -18,6 +18,7 @@ import { useTransition } from "transition-hook";
 import { usePanelOpen, useContextClass } from "../app-state";
 import { MapboxMapProvider, ZoomControl } from "@macrostrat/mapbox-react";
 import { MapBottomControls, MapStyledContainer } from "./map-view";
+import { Routes, Route, useParams } from "react-router-dom";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));
@@ -153,9 +154,15 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
             backend,
           }),
           h("div.detail-stack.infodrawer-container", [
-            h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
-              className: "detail-panel",
-            }),
+            h(Routes, [
+              h(Route, {
+                path: "position/:lng/:lat",
+                element: h(InfoDrawerRoute),
+              }),
+              // h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
+              //   className: "detail-panel",
+              // }),
+            ]),
             h(ZoomControl, { className: "zoom-control" }),
             h("div.spacer"),
             h(MapBottomControls),
@@ -166,6 +173,28 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
     ]),
   ]);
 };
+
+function InfoDrawerRoute() {
+  const { lat, lng } = useParams();
+  const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
+  const detailPanelTrans = useTransition(infoDrawerOpen, 800);
+  const runAction = useAppActions();
+
+  useEffect(() => {
+    if (lat && lng) {
+      runAction({
+        type: "run-map-query",
+        lat: Number(lat),
+        lng: Number(lng),
+        z: 7,
+      });
+    }
+  }, [lat, lng]);
+
+  return h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
+    className: "detail-panel",
+  });
+}
 
 //const _MapPage = compose(HotkeysProvider, MapPage);
 

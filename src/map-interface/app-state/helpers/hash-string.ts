@@ -12,7 +12,7 @@ const fmt = format(".3~f");
 const fmt2 = format(".2~f");
 const fmtInt = format(".0f");
 
-function updateURI(state: CoreState) {
+export function updateURI(state: CoreState) {
   let args: object = {};
 
   for (const filter of state.filters) {
@@ -170,10 +170,13 @@ function layerDescriptionToLayers(
   return validateLayers(layers);
 }
 
-function updateStateFromURI(state): GotInitialMapState | void {
+export function updateMapPositionForHash(
+  state: CoreState,
+  hashString: string
+): GotInitialMapState | null {
   // Get the default map state
   try {
-    const hashData = getHashString(window.location.hash) ?? {};
+    const hashData = getHashString(hashString) ?? {};
 
     let { show = [], hide = [] } = hashData;
     const { x = 16, y = 23, z = 2, a = 0, e = 0 } = hashData;
@@ -226,6 +229,7 @@ function updateStateFromURI(state): GotInitialMapState | void {
     };
   } catch (e) {
     console.error("Invalid map state:", e);
+    return null;
   }
 }
 
@@ -235,5 +239,3 @@ export function gotInitialMapState(mapState) {
     data: mapState,
   };
 }
-
-export { updateStateFromURI, updateURI };

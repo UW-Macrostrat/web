@@ -10,7 +10,7 @@ import {
 import { Action, AppState } from "../sections";
 import axios from "axios";
 import { asyncFilterHandler } from "./filters";
-import { updateStateFromURI } from "../helpers";
+import { updateMapPositionForHash } from "../helpers";
 import { push } from "@lagunovsky/redux-react-router";
 import { routerBasename } from "~/map-interface/Settings";
 
@@ -28,8 +28,9 @@ async function actionRunner(
   const coreState = state.core;
   switch (action.type) {
     case "get-initial-map-state":
-      return updateStateFromURI(coreState);
+      return updateMapPositionForHash(coreState, state.router.location.hash);
     case "toggle-menu":
+      // Push the menu onto the history stack
       const isRootRoute = state.router.location.pathname == routerBasename;
       const goToLayersPage = push(routerBasename + "layers" + location.hash);
       if (state.core.inputFocus) {
@@ -73,11 +74,21 @@ async function actionRunner(
         type: "update-column-filters",
         columns: filteredColumns,
       };
-    case "map-query":
+    case "map-query": {
+      const { lng, lat } = action;
+      return push(
+        routerBasename +
+          `position/${lng.toFixed(4)}/${lat.toFixed(4)}` +
+          location.hash
+      );
+      //return { ...action, type: "run-map-query" };
+    }
+    case "run-map-query":
       const { lng, lat, z, map_id, column } = action;
       let CancelTokenMapQuery = axios.CancelToken;
       let sourceMapQuery = CancelTokenMapQuery.source();
       if (coreState.inputFocus && coreState.contextPanelOpen) {
+        // Dismiss the current context panel
         return { type: "context-outside-click" };
       }
 
@@ -99,7 +110,7 @@ async function actionRunner(
         map_id,
         sourceMapQuery.token
       );
-      coreState.infoMarkerPosition = { lng, lat, status: null };
+      coreState.infoMarkerPosition = { lng, lat };
       return {
         type: "received-map-query",
         data: mapData,
