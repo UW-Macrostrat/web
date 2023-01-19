@@ -4,7 +4,7 @@ import { createBrowserHistory, Location } from "history";
 import { CoreAction } from "./core/actions";
 import { coreReducer, CoreState } from "./core";
 import { MapAction } from "./map";
-import update, { Spec } from "immutability-helper";
+import { contextPanelIsOpen } from "../nav-hooks";
 import { createRouterReducer } from "@lagunovsky/redux-react-router";
 import {
   ReduxRouterState,
@@ -25,22 +25,30 @@ const reducers = combineReducers({
   core: coreReducer,
 });
 
-const menuClosedRoutes = ["/", "/info"];
-
 function overallReducer(state: AppState, action: Action): AppState {
   switch (action.type) {
-    case "@@router/ON_LOCATION_CHANGED":
-      const isOpen = !menuClosedRoutes.includes(
-        action.payload.location.pathname
-      );
+    case "@@router/ON_LOCATION_CHANGED": {
+      console.log(action.payload.location);
+      const { pathname } = action.payload.location;
+      const isOpen = contextPanelIsOpen(pathname);
       return {
         ...state,
         core: { ...state.core, menuOpen: isOpen, contextPanelOpen: isOpen },
       };
+    }
     case "got-initial-map-state":
+      console.log(state.router);
+      const { pathname } = state.router.location;
+      const isOpen = contextPanelIsOpen(pathname);
+
       return {
         ...state,
-        core: { ...state.core, ...action.data },
+        core: {
+          ...state.core,
+          ...action.data,
+          menuOpen: isOpen,
+          contextPanelOpen: isOpen,
+        },
       };
     case "map-moved":
       return {

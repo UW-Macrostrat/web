@@ -78,7 +78,7 @@ async function actionRunner(
       const { lng, lat } = action;
       return push(
         routerBasename +
-          `position/${lng.toFixed(4)}/${lat.toFixed(4)}` +
+          `position/${lng.toFixed(4)}/${lat.toFixed(4)}/` +
           location.hash
       );
       //return { ...action, type: "run-map-query" };

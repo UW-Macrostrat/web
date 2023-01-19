@@ -14,6 +14,8 @@ import classNames from "classnames";
 import styles from "./main.module.styl";
 import { LoadingArea } from "../transitions";
 import { ErrorBoundary } from "@macrostrat/ui-components";
+import { useNavigate } from "react-router";
+import { routerBasename } from "~/map-interface/Settings";
 
 const h = hyper.styled(styles);
 
@@ -29,7 +31,7 @@ function InfoDrawer(props) {
     (state) => state.core
   );
 
-  const runAction = useAppActions();
+  const navigate = useNavigate();
 
   className = classNames("infodrawer", className, {
     loading: fetchingMapInfo,
@@ -39,7 +41,7 @@ function InfoDrawer(props) {
     h(InfoDrawerHeader, {
       mapInfo,
       infoMarkerPosition,
-      onCloseClick: () => runAction({ type: "close-infodrawer" }),
+      onCloseClick: () => navigate(routerBasename),
     }),
     h("div.infodrawer-body", [
       h(ErrorBoundary, [

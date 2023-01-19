@@ -1,9 +1,13 @@
 import { useMatch, useLocation, useNavigate } from "react-router";
 import classNames from "classnames";
 
+export function contextPanelIsOpen(pathname: string) {
+  return pathname != "/" && !pathname.startsWith("/position");
+}
+
 export function usePanelOpen() {
-  const match = useMatch("/");
-  return match?.pathname != "/";
+  const { pathname } = useLocation();
+  return contextPanelIsOpen(pathname);
 }
 
 export function useContextClass() {
