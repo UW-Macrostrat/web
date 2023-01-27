@@ -19,6 +19,7 @@ import { useContextPanelOpen, useContextClass } from "../app-state";
 import { MapboxMapProvider, ZoomControl } from "@macrostrat/mapbox-react";
 import { MapBottomControls, MapStyledContainer } from "./map-view";
 import { Routes, Route, useParams } from "react-router-dom";
+import { MenuPage } from "./menu";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));
@@ -91,7 +92,13 @@ const MapTypeSelector = () => {
   ]);
 };
 
-const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
+const MapPage = ({
+  backend = MapBackend.MAPBOX3,
+  menuPage = null,
+}: {
+  backend?: MapBackend;
+  menuPage?: MenuPage;
+}) => {
   const { inputFocus } = useSearchState();
   const runAction = useAppActions();
   const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
@@ -148,6 +155,7 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
             h(Searchbar, { className: "searchbar" }),
             h.if(contextPanelTrans.shouldMount)(Menu, {
               className: "context-panel",
+              menuPage,
             }),
           ]),
           h(MapView, {
@@ -156,7 +164,7 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
           h("div.detail-stack.infodrawer-container", [
             h(Routes, [
               h(Route, {
-                path: "position/:lng/:lat",
+                path: "/pos/:lng/:lat",
                 element: h(InfoDrawerRoute),
               }),
               // h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
@@ -173,6 +181,17 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
     ]),
   ]);
 };
+
+function MapPageRoutes() {
+  return h(Routes, [
+    h(
+      Object.values(MenuPage).map((page) =>
+        h(Route, { path: page, element: h(MapPage, { menuPage: page }) })
+      )
+    ),
+    h(Route, { path: "*", element: h(MapPage) }),
+  ]);
+}
 
 function InfoDrawerRoute() {
   const { lat, lng } = useParams();
@@ -199,4 +218,4 @@ function InfoDrawerRoute() {
 //const _MapPage = compose(HotkeysProvider, MapPage);
 
 export { MapBackend };
-export default MapPage;
+export default MapPageRoutes;
