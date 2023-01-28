@@ -6,17 +6,27 @@ import chroma from "chroma-js";
 
 const h = hyper.styled(styles);
 
+function getColor(color, darkenAmount) {
+  try {
+    return chroma(color).darken(darkenAmount).hex();
+  } catch (err) {
+    return color;
+  }
+}
+
 function IntervalChip(props) {
   const { interval, className } = props;
   const darkMode = useDarkMode();
   const darkenAmount = darkMode.isEnabled ? 2 : 0;
+
+  console.log(interval);
 
   return h(
     "div.chip.age-chip",
     {
       className,
       style: {
-        backgroundColor: chroma(interval.color).darken(darkenAmount).css(),
+        backgroundColor: getColor(interval.color, darkenAmount),
       },
     },
     [

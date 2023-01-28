@@ -13,6 +13,8 @@ import { asyncFilterHandler } from "./filters";
 import { updateMapPositionForHash } from "../helpers";
 import { push } from "@lagunovsky/redux-react-router";
 import { routerBasename } from "~/map-interface/Settings";
+import { isDetailPanelRoute } from "../nav-hooks";
+import { MenuPage } from "../sections";
 
 function getCancelToken() {
   let CancelToken = axios.CancelToken;
@@ -29,6 +31,28 @@ async function actionRunner(
   switch (action.type) {
     case "get-initial-map-state":
       return updateMapPositionForHash(coreState, state.router.location.hash);
+    case "toggle-menu": {
+      // Push the menu onto the history stack
+      let activePage = state.menu.activePage;
+      if (activePage != null) {
+        activePage = null;
+      } else {
+        activePage = MenuPage.LAYERS;
+      }
+      return await dispatch({ type: "set-menu-page", page: activePage });
+    }
+    case "set-menu-page": {
+      const { pathname } = state.router.location;
+      if (!isDetailPanelRoute(pathname)) {
+        const newPathname = "/" + (action.page ?? "");
+        await dispatch(push({ pathname: newPathname, hash: location.hash }));
+      }
+      return { type: "set-menu-page", page: action.page };
+    }
+    case "close-infodrawer":
+      const pathname = routerBasename + (state.menu.activePage ?? "");
+      await dispatch(push({ pathname, hash: location.hash }));
+      return action;
     case "fetch-search-query":
       const { term } = action;
       let CancelToken = axios.CancelToken;

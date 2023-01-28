@@ -3,7 +3,11 @@ import { createBrowserHistory, Action } from "history";
 import { CoreAction } from "./core/actions";
 import { coreReducer, CoreState } from "./core";
 import { MapAction } from "./map";
-import { contextPanelIsInitiallyOpen, isDetailPanelRoute } from "../nav-hooks";
+import {
+  contextPanelIsInitiallyOpen,
+  currentPageForPathName,
+  isDetailPanelRoute,
+} from "../nav-hooks";
 import { createRouterReducer, push } from "@lagunovsky/redux-react-router";
 import {
   ReduxRouterState,
@@ -61,7 +65,6 @@ function appReducer(
    * Then, for actions that don't need to affect multiple sections of
    * state, we pass thm to individual reducers.
    */
-  console.log(state);
   switch (action.type) {
     case "@@router/ON_LOCATION_CHANGED": {
       const { pathname } = action.payload.location;
@@ -72,80 +75,19 @@ function appReducer(
         router: routerReducer(state.router, action),
       };
     }
-    case "set-menu-page": {
+    case "got-initial-map-state":
       const { pathname } = state.router.location;
-      let newRouter = { ...state.router };
-      const shouldNavigateToContextPanel = !isDetailPanelRoute(pathname);
-      if (shouldNavigateToContextPanel) {
-        const newPathname = "/" + action.page ?? "";
-        newRouter = {
-          ...state.router,
-          action: Action.Push,
-          location: { ...state.router.location, pathname: newPathname },
-        };
-      }
-      return {
-        ...state,
-        menu: menuReducer(state.menu, action),
-        router: newRouter,
-      };
-    }
-    case "toggle-menu": {
-      // Push the menu onto the history stack
-      const { pathname } = state.router.location;
-      const isRootRoute = state.router.location.pathname == routerBasename;
-
-      let activePage = state.menu.activePage;
-      if (activePage != null) {
-        activePage = null;
-      } else {
-        activePage = MenuPage.LAYERS;
-      }
-
-      let router = state.router;
-
-      if (!isDetailPanelRoute(pathname)) {
-        const dest = routerBasename + (activePage ?? "");
-        router = {
-          ...state.router,
-          action: Action.Push,
-          location: { ...state.router.location, pathname: dest },
-        };
-      }
+      const isOpen = contextPanelIsInitiallyOpen(pathname);
+      const activePage = currentPageForPathName(pathname);
 
       return {
         ...state,
-        core: coreReducer(state.core, action),
-        router,
-        menu: { activePage },
-      };
-    }
-    // case "got-initial-map-state":
-    //   const { pathname } = state.router.location;
-    //   const isOpen = contextPanelIsInitiallyOpen(pathname);
-
-    //   return {
-    //     ...state,
-    //     core: {
-    //       ...state.core,
-    //       ...action.data,
-    //       menuOpen: isOpen,
-    //       contextPanelOpen: isOpen,
-    //     },
-    //   };
-    case "close-infodrawer":
-      return {
-        ...state,
-        core: coreReducer(state.core, action),
-        router: {
-          ...state.router,
-          action: Action.Push,
-          // Move back to the root route on infodrawer close
-          location: {
-            ...state.router.location,
-            pathname: routerBasename + (state.menu.activePage ?? ""),
-          },
+        core: {
+          ...coreReducer(state.core, action),
+          menuOpen: isOpen,
+          contextPanelOpen: isOpen,
         },
+        menu: { activePage },
       };
     default:
       return {

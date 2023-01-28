@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from "react-router";
 import { useAppState } from "./hooks";
 import classNames from "classnames";
+import { MenuPage } from "./sections";
 
 export function isDetailPanelRoute(pathname: string) {
   /* Some routes imply that the detail panel is open. This does not necessarily
@@ -15,6 +16,12 @@ export function contextPanelIsInitiallyOpen(pathname: string) {
 
 export function useContextPanelOpen() {
   return useAppState((s) => s.menu.activePage != null);
+}
+
+export function currentPageForPathName(pathname: string): MenuPage | null {
+  return Object.values(MenuPage).find((page) =>
+    pathname.startsWith("/" + page)
+  );
 }
 
 export function useContextClass() {
