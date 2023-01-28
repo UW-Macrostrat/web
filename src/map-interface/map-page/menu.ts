@@ -17,6 +17,8 @@ import {
   useSearchState,
   MapLayer,
   useHashNavigate,
+  MenuPage,
+  useAppState,
 } from "../app-state";
 import { SearchResults } from "../components/searchbar";
 import classNames from "classnames";
@@ -29,6 +31,7 @@ import { useMatch, useLocation } from "react-router";
 import { useTransition } from "transition-hook";
 import { useCurrentPage } from "../app-state/nav-hooks";
 import useBreadcrumbs from "use-react-router-breadcrumbs";
+import { isDetailPanelRoute } from "../app-state/nav-hooks";
 import { SettingsPanel, ExperimentsPanel, ThemeButton } from "./settings-panel";
 import { useState, useEffect } from "react";
 import { LinkButton, LayerButton, ListButton } from "../components/buttons";
@@ -41,14 +44,17 @@ const AboutText = loadable(() => import("../components/About"));
 
 const h = hyper.styled(styles);
 
-const TabButton = (props: ButtonProps & { to: string }) => {
-  const { to, ...rest } = props;
-  const active = useMatch(to) != null;
+const TabButton = (props: ButtonProps & { page: MenuPage }) => {
+  const { page, ...rest } = props;
+  const active = useAppState((s) => s.menu.activePage) == page;
+  const runAction = useAppActions();
 
-  return h(LinkButton, {
+  return h(Button, {
     minimal: true,
     active,
-    to,
+    onClick() {
+      runAction({ type: "set-menu-page", page });
+    },
     ...rest,
     className: "tab-button",
   });
@@ -141,7 +147,9 @@ function MenuHeaderButtons() {
   const backLoc = useLastPageLocation();
   const { pathname } = useLocation();
 
-  if (backLoc != null) {
+  console.log(backLoc, pathname);
+
+  if (backLoc != null && !isDetailPanelRoute(backLoc.to)) {
     return h([
       h(
         LinkButton,
@@ -160,18 +168,22 @@ function MenuHeaderButtons() {
     h(TabButton, {
       icon: "layers",
       text: "Layers",
-      to: "layers",
+      page: MenuPage.LAYERS,
     }),
-    h(TabButton, { icon: "settings", text: "Settings", to: "settings" }),
+    h(TabButton, {
+      icon: "settings",
+      text: "Settings",
+      page: MenuPage.SETTINGS,
+    }),
     h(TabButton, {
       icon: "info-sign",
       text: "About",
-      to: "about",
+      page: MenuPage.ABOUT,
     }),
     h(TabButton, {
       icon: "help",
       text: "Usage",
-      to: "usage",
+      page: MenuPage.USAGE,
     }),
   ]);
 }
@@ -197,14 +209,17 @@ function HeaderWrapper({ children, minimal = false }) {
   );
 }
 
-const Menu = (props) => {
-  let { className } = props;
+type MenuProps = {
+  className?: string;
+  menuPage: MenuPage;
+};
+
+const Menu = (props: MenuProps) => {
+  let { className, menuPage } = props;
   const { inputFocus } = useSearchState();
+  const runAction = useAppActions();
 
-  const navigateHome = useHashNavigate("/");
-
-  const pageName = useCurrentPage();
-  const isNarrow = pageName == "layers" || pageName == "settings";
+  const isNarrow = menuPage == MenuPage.LAYERS || menuPage == MenuPage.SETTINGS;
   const isNarrowTrans = useTransition(isNarrow, 800);
 
   if (inputFocus) {
@@ -214,7 +229,7 @@ const Menu = (props) => {
   className = classNames(
     className,
     "menu-card",
-    pageName,
+    menuPage,
     { "narrow-card": isNarrowTrans.shouldMount },
     `narrow-${isNarrowTrans.stage}`
   );
@@ -222,25 +237,34 @@ const Menu = (props) => {
   return h(
     CloseableCard,
     {
-      onClose: navigateHome,
+      onClose() {
+        runAction({ type: "toggle-menu" });
+      },
       insetContent: false,
       className,
       renderHeader: () =>
         h(HeaderWrapper, { minimal: isNarrow }, h(MenuHeaderButtons)),
     },
-    [
-      h(Routes, [
-        h(Route, { path: "layers", element: h(LayerList) }),
-        h(Route, { path: "about", element: h(AboutText) }),
-        h(Route, { path: "usage", element: h(UsagePanel) }),
-        h(Route, { path: "settings", element: h(SettingsPanel) }),
-        h(Route, { path: "changelog", element: h(ChangelogPanel) }),
-        h(Route, { path: "experiments", element: h(ExperimentsPanel) }),
-        //h(Route, { path: "*", element: h(NotFoundPage) }),
-      ]),
-    ]
+    elementForMenuPage(menuPage)
   );
 };
+
+function elementForMenuPage(page: MenuPage) {
+  switch (page) {
+    case MenuPage.LAYERS:
+      return h(LayerList);
+    case MenuPage.SETTINGS:
+      return h(SettingsPanel);
+    case MenuPage.ABOUT:
+      return h(AboutText);
+    case MenuPage.USAGE:
+      return h(UsagePanel);
+    case MenuPage.CHANGELOG:
+      return h(ChangelogPanel);
+    case MenuPage.EXPERIMENTS:
+      return h(ExperimentsPanel);
+  }
+}
 
 function NotFoundPage() {
   const navigate = useHashNavigate("/");
@@ -261,4 +285,5 @@ function NotFoundPage() {
   );
 }
 
+export { MenuPage };
 export default Menu;

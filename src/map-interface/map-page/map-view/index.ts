@@ -427,7 +427,6 @@ function getFocusState(
   let { width, height } = map.getCanvas();
   width /= 2;
   height /= 2;
-  console.log(markerPos, width, height, padding);
 
   if (dx < 10 && dy < 10) {
     return PositionFocusState.CENTERED;
