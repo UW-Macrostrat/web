@@ -31,6 +31,7 @@ import { useMatch, useLocation } from "react-router";
 import { useTransition } from "transition-hook";
 import { useCurrentPage } from "../app-state/nav-hooks";
 import useBreadcrumbs from "use-react-router-breadcrumbs";
+import { isDetailPanelRoute } from "../app-state/nav-hooks";
 import { SettingsPanel, ExperimentsPanel, ThemeButton } from "./settings-panel";
 import { useState, useEffect } from "react";
 import { LinkButton, LayerButton, ListButton } from "../components/buttons";
@@ -146,7 +147,9 @@ function MenuHeaderButtons() {
   const backLoc = useLastPageLocation();
   const { pathname } = useLocation();
 
-  if (backLoc != null) {
+  console.log(backLoc, pathname);
+
+  if (backLoc != null && !isDetailPanelRoute(backLoc.to)) {
     return h([
       h(
         LinkButton,
@@ -214,11 +217,9 @@ type MenuProps = {
 const Menu = (props: MenuProps) => {
   let { className, menuPage } = props;
   const { inputFocus } = useSearchState();
+  const runAction = useAppActions();
 
-  const navigateHome = useHashNavigate("/");
-
-  const pageName = useCurrentPage();
-  const isNarrow = pageName == "layers" || pageName == "settings";
+  const isNarrow = menuPage == MenuPage.LAYERS || menuPage == MenuPage.SETTINGS;
   const isNarrowTrans = useTransition(isNarrow, 800);
 
   if (inputFocus) {
@@ -228,7 +229,7 @@ const Menu = (props: MenuProps) => {
   className = classNames(
     className,
     "menu-card",
-    pageName,
+    menuPage,
     { "narrow-card": isNarrowTrans.shouldMount },
     `narrow-${isNarrowTrans.stage}`
   );
@@ -236,7 +237,9 @@ const Menu = (props: MenuProps) => {
   return h(
     CloseableCard,
     {
-      onClose: navigateHome,
+      onClose() {
+        runAction({ type: "toggle-menu" });
+      },
       insetContent: false,
       className,
       renderHeader: () =>

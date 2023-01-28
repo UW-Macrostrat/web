@@ -102,6 +102,7 @@ const MapPage = ({
   const { inputFocus } = useSearchState();
   const runAction = useAppActions();
   const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
+  const navMenuPage = useAppState((s) => s.menu.activePage);
 
   const ref = useRef<HTMLElement>(null);
 
@@ -155,7 +156,7 @@ const MapPage = ({
             h(Searchbar, { className: "searchbar" }),
             h.if(contextPanelTrans.shouldMount)(Menu, {
               className: "context-panel",
-              menuPage,
+              menuPage: menuPage ?? navMenuPage,
             }),
           ]),
           h(MapView, {

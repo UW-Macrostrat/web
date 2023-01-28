@@ -1,6 +1,5 @@
 import { combineReducers } from "redux";
-import reduceReducers from "reduce-reducers";
-import { createBrowserHistory, Location, Action } from "history";
+import { createBrowserHistory, Action } from "history";
 import { CoreAction } from "./core/actions";
 import { coreReducer, CoreState } from "./core";
 import { MapAction } from "./map";
@@ -10,8 +9,8 @@ import {
   ReduxRouterState,
   RouterActions,
 } from "@lagunovsky/redux-react-router";
-import { routerBasename } from "~/map-interface/Settings";
 export const browserHistory = createBrowserHistory();
+import { routerBasename } from "~/map-interface/Settings";
 
 export enum MenuPage {
   LAYERS = "layers",
@@ -48,13 +47,21 @@ function menuReducer(
   }
 }
 
-const reducers = combineReducers({
-  router: routerReducer,
-  core: coreReducer,
-  menu: menuReducer,
-});
+const defaultState: AppState = {
+  core: coreReducer(undefined, { type: "init" }),
+  router: routerReducer(undefined, { type: "init" }),
+  menu: menuReducer(undefined, { type: "init" }),
+};
 
-function overallReducer(state: AppState, action: AppAction): AppState {
+function appReducer(
+  state: AppState = defaultState,
+  action: AppAction
+): AppState {
+  /** First, we operate over the entire state object.
+   * Then, for actions that don't need to affect multiple sections of
+   * state, we pass thm to individual reducers.
+   */
+  console.log(state);
   switch (action.type) {
     case "@@router/ON_LOCATION_CHANGED": {
       const { pathname } = action.payload.location;
@@ -62,56 +69,70 @@ function overallReducer(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         core: { ...state.core, menuOpen: isOpen, contextPanelOpen: isOpen },
+        router: routerReducer(state.router, action),
       };
     }
     case "set-menu-page": {
       const { pathname } = state.router.location;
-      let router = state.router;
-      const shouldNavigateToContextPanel = isDetailPanelRoute(pathname);
+      let newRouter = { ...state.router };
+      const shouldNavigateToContextPanel = !isDetailPanelRoute(pathname);
       if (shouldNavigateToContextPanel) {
-        const pathname = "/" + action.page ?? "";
-        router = routerReducer(state.router, push(pathname));
+        const newPathname = "/" + action.page ?? "";
+        newRouter = {
+          ...state.router,
+          action: Action.Push,
+          location: { ...state.router.location, pathname: newPathname },
+        };
       }
-      return { ...state, menu: menuReducer(state.menu, action), router };
+      return {
+        ...state,
+        menu: menuReducer(state.menu, action),
+        router: newRouter,
+      };
     }
-    // case "toggle-menu": {
-    //   // Push the menu onto the history stack
-    //   const { pathname } = state.router.location;
-    //   const isRootRoute = state.router.location.pathname == routerBasename;
-    //   let dest = routerBasename;
-    //   let activePage = state.menu.activePage;
-    //   if (activePage == null || isRootRoute || isDetailPanelRoute(pathname)) {
-    //     dest += "/layers";
-    //     activePage = MenuPage.LAYERS;
-    //   }
-    //   return {
-    //     ...state,
-    //     core: coreReducer(state.core, action),
-    //     router: routerReducer(state.router, push(dest + location.hash)),
-    //     menu: { activePage },
-    //   };
-    // }
-    case "got-initial-map-state":
+    case "toggle-menu": {
+      // Push the menu onto the history stack
       const { pathname } = state.router.location;
-      const isOpen = contextPanelIsInitiallyOpen(pathname);
+      const isRootRoute = state.router.location.pathname == routerBasename;
+
+      let activePage = state.menu.activePage;
+      if (activePage != null) {
+        activePage = null;
+      } else {
+        activePage = MenuPage.LAYERS;
+      }
+
+      let router = state.router;
+
+      if (!isDetailPanelRoute(pathname)) {
+        const dest = routerBasename + activePage ?? "";
+        router = {
+          ...state.router,
+          action: Action.Push,
+          location: { ...state.router.location, pathname: dest },
+        };
+      }
 
       return {
         ...state,
-        core: {
-          ...state.core,
-          ...action.data,
-          menuOpen: isOpen,
-          contextPanelOpen: isOpen,
-        },
+        core: coreReducer(state.core, action),
+        router,
+        menu: { activePage },
       };
-    case "map-moved":
-      return {
-        ...state,
-        core: {
-          ...state.core,
-          ...action.data,
-        },
-      };
+    }
+    // case "got-initial-map-state":
+    //   const { pathname } = state.router.location;
+    //   const isOpen = contextPanelIsInitiallyOpen(pathname);
+
+    //   return {
+    //     ...state,
+    //     core: {
+    //       ...state.core,
+    //       ...action.data,
+    //       menuOpen: isOpen,
+    //       contextPanelOpen: isOpen,
+    //     },
+    //   };
     case "close-infodrawer":
       return {
         ...state,
@@ -126,11 +147,13 @@ function overallReducer(state: AppState, action: AppAction): AppState {
         },
       };
     default:
-      return state;
+      return {
+        router: routerReducer(state.router, action),
+        core: coreReducer(state.core, action),
+        menu: menuReducer(state.menu, action),
+      };
   }
 }
-
-const appReducer = reduceReducers(overallReducer, reducers);
 
 export type AppAction = CoreAction | MapAction | RouterActions | MenuAction;
 

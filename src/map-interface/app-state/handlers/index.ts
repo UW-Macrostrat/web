@@ -7,7 +7,7 @@ import {
   asyncGetElevation,
   getPBDBData,
 } from "./fetch";
-import { Action, AppState } from "../sections";
+import { AppAction, AppState } from "../sections";
 import axios from "axios";
 import { asyncFilterHandler } from "./filters";
 import { updateMapPositionForHash } from "../helpers";
@@ -22,29 +22,15 @@ function getCancelToken() {
 
 async function actionRunner(
   state: AppState,
-  action: Action,
+  action: AppAction,
   dispatch = null
-): Promise<Action | void> {
+): Promise<AppAction | void> {
   const coreState = state.core;
   switch (action.type) {
     case "get-initial-map-state":
       return updateMapPositionForHash(coreState, state.router.location.hash);
-    case "toggle-menu":
-      // Push the menu onto the history stack
-      const isRootRoute = state.router.location.pathname == routerBasename;
-      const goToLayersPage = push(routerBasename + "layers" + location.hash);
-      if (state.core.inputFocus) {
-        if (isRootRoute) {
-          dispatch(goToLayersPage);
-        }
-        return { type: "set-input-focus", inputFocus: false };
-      }
-      if (isRootRoute) {
-        return goToLayersPage;
-      }
-      return push(routerBasename + location.hash);
     case "fetch-search-query":
-      let term = action.term;
+      const { term } = action;
       let CancelToken = axios.CancelToken;
       let source = CancelToken.source();
       dispatch({
@@ -65,14 +51,11 @@ async function actionRunner(
       const gdd_data = await getAsyncGdd(mapInfo, source1.token);
       return { type: "received-gdd-query", data: gdd_data };
     case "async-add-filter":
-      let filter = action.filter;
-      const filterAction = await asyncFilterHandler(filter);
-      return filterAction;
+      return await asyncFilterHandler(action.filter);
     case "get-filtered-columns":
-      let filteredColumns = await fetchFilteredColumns(coreState.filters);
       return {
         type: "update-column-filters",
-        columns: filteredColumns,
+        columns: await fetchFilteredColumns(coreState.filters),
       };
     case "map-query": {
       const { lng, lat } = action;

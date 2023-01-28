@@ -14,18 +14,13 @@ export function contextPanelIsInitiallyOpen(pathname: string) {
 }
 
 export function useContextPanelOpen() {
-  const { pathname } = useLocation();
-  // If we are at the root path, the context panel is never open
-  if (pathname == "/") return false;
-
-  return contextPanelIsInitiallyOpen(pathname);
+  return useAppState((s) => s.menu.activePage != null);
 }
 
 export function useContextClass() {
-  const panelOpen = useContextPanelOpen();
-  const pageName = useCurrentPage();
-  if (!panelOpen) return null;
-  return classNames("panel-open", pageName);
+  const activePage = useAppState((s) => s.menu.activePage);
+  if (activePage == null) return null;
+  return classNames("panel-open", activePage);
 }
 
 export function useCurrentPage() {
