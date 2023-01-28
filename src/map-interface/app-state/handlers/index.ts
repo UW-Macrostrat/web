@@ -15,6 +15,7 @@ import { push } from "@lagunovsky/redux-react-router";
 import { routerBasename } from "~/map-interface/Settings";
 import { isDetailPanelRoute } from "../nav-hooks";
 import { MenuPage } from "../sections";
+import { formatCoordForZoomLevel } from "../helpers/hash-string";
 
 function getCancelToken() {
   let CancelToken = axios.CancelToken;
@@ -82,12 +83,13 @@ async function actionRunner(
         columns: await fetchFilteredColumns(coreState.filters),
       };
     case "map-query": {
-      const { lng, lat } = action;
-      return push(
-        routerBasename +
-          `pos/${lng.toFixed(4)}/${lat.toFixed(4)}/` +
-          location.hash
-      );
+      const { lng, lat, z } = action;
+      const ln = formatCoordForZoomLevel(lng, z);
+      const lt = formatCoordForZoomLevel(lat, z);
+      return push({
+        pathname: routerBasename + `pos/${ln}/${lt}`,
+        hash: location.hash,
+      });
       //return { ...action, type: "run-map-query" };
     }
     case "run-map-query":

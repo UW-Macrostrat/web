@@ -8,9 +8,22 @@ import {
   CoreState,
 } from "../sections/core/actions";
 
-const fmt = format(".3~f");
+const fmt4 = format(".4~f");
+const fmt3 = format(".3~f");
 const fmt2 = format(".2~f");
+const fmt1 = format(".1~f");
 const fmtInt = format(".0f");
+
+export function formatCoordForZoomLevel(val: number, zoom: number): string {
+  if (zoom < 2) {
+    return fmt1(val);
+  } else if (zoom < 4) {
+    return fmt2(val);
+  } else if (zoom < 7) {
+    return fmt3(val);
+  }
+  return fmt4(val);
+}
 
 export function updateURI(state: CoreState) {
   let args: object = {};
@@ -24,10 +37,10 @@ export function updateURI(state: CoreState) {
   const zoom = state.mapPosition.target?.zoom;
   const { bearing = 0, pitch = 0 } = pos;
 
-  args.x = fmt(pos.lng);
-  args.y = fmt(pos.lat);
+  args.x = formatCoordForZoomLevel(pos.lng, zoom);
+  args.y = formatCoordForZoomLevel(pos.lat, zoom);
   if (bearing == 0 && pitch == 0 && zoom != null) {
-    args.z = fmt2(zoom);
+    args.z = fmt1(zoom);
   } else if (pos.altitude > 5000) {
     args.z = fmt2(pos.altitude / 1000) + "km";
   } else {
