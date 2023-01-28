@@ -105,7 +105,7 @@ function appReducer(
       let router = state.router;
 
       if (!isDetailPanelRoute(pathname)) {
-        const dest = routerBasename + activePage ?? "";
+        const dest = routerBasename + (activePage ?? "");
         router = {
           ...state.router,
           action: Action.Push,
@@ -136,13 +136,14 @@ function appReducer(
     case "close-infodrawer":
       return {
         ...state,
+        core: coreReducer(state.core, action),
         router: {
           ...state.router,
           action: Action.Push,
           // Move back to the root route on infodrawer close
           location: {
             ...state.router.location,
-            pathname: "/",
+            pathname: routerBasename + (state.menu.activePage ?? ""),
           },
         },
       };
