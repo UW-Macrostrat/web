@@ -1,9 +1,9 @@
 import { updateURI } from "../../helpers";
 import { sum, timescale } from "../../../utils";
 import { MapBackend, MapLayer } from "../map";
-import { CoreState, CoreAction } from "./actions";
+import { CoreState, CoreAction } from "./types";
 import update, { Spec } from "immutability-helper";
-export * from "./actions";
+export * from "./types";
 
 const classColors = {
   sedimentary: "#FF8C00",

@@ -6,7 +6,7 @@ import {
   MapPosition,
   MapLayer,
   CoreState,
-} from "./core/actions";
+} from "./core";
 import { AppState, AppAction } from "./types";
 
 const fmt4 = format(".4~f");
