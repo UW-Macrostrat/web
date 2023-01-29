@@ -37,7 +37,7 @@ function InfoDrawer(props) {
     h(InfoDrawerHeader, {
       mapInfo,
       infoMarkerPosition,
-      zoom: mapPosition.target.zoom,
+      zoom: mapPosition.target?.zoom,
       onCloseClick: () => runAction({ type: "close-infodrawer" }),
     }),
     h("div.infodrawer-body", [

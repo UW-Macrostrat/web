@@ -20,6 +20,7 @@ import { MapboxMapProvider, ZoomControl } from "@macrostrat/mapbox-react";
 import { MapBottomControls, MapStyledContainer } from "./map-view";
 import { Routes, Route, useParams, useMatch } from "react-router-dom";
 import { MenuPage } from "./menu";
+import { PositionFocusState } from "../app-state";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));

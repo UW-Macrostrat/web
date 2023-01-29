@@ -30,6 +30,7 @@ import {
   setMapPosition,
   getMapboxStyle,
   mergeStyles,
+  MapPosition,
 } from "@macrostrat/mapbox-utils";
 import { MapSourcesLayer, mapStyle, toggleLineSymbols } from "../map-style";
 import { SETTINGS } from "../../Settings";
@@ -95,7 +96,7 @@ async function buildMapStyle(baseMapURL) {
   return mergeStyles(style, mapStyle);
 }
 
-async function initializeMap(baseMapURL, mapLayers, mapPosition) {
+async function initializeMap(baseMapURL, mapPosition, infoMarkerPosition) {
   // setup the basic map
   mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
 
@@ -113,23 +114,7 @@ async function initializeMap(baseMapURL, mapLayers, mapPosition) {
   map.setProjection("globe");
 
   // set initial map position
-  const pos = mapPosition;
-  const { pitch = 0, bearing = 0, altitude } = pos.camera;
-  const zoom = pos.target?.zoom;
-  if (zoom != null && altitude == null) {
-    const { lng, lat } = pos.target;
-    map.setCenter([lng, lat]);
-    map.setZoom(zoom);
-  } else {
-    const { altitude, lng, lat } = pos.camera;
-    const cameraOptions = new FreeCameraOptions(
-      MercatorCoordinate.fromLngLat({ lng, lat }, altitude),
-      [0, 0, 0, 1]
-    );
-    cameraOptions.setPitchBearing(pitch, bearing);
-
-    map.setFreeCameraOptions(cameraOptions);
-  }
+  //setMapPosition(map, mapPosition);
 
   return map;
 }
@@ -153,6 +138,7 @@ function MapContainer(props) {
     mapPosition,
     infoDrawerOpen,
     mapIsLoading,
+    infoMarkerFocus,
     mapShowLineSymbols,
     mapSettings,
   } = useAppState((state) => state.core);
@@ -173,9 +159,12 @@ function MapContainer(props) {
   const baseMapURL = getBaseMapStyle(mapLayers, isDarkMode);
 
   const [padding, setPadding] = useState(getMapPadding(ref, parentRef));
+  const infoMarkerPosition = useAppState(
+    (state) => state.core.infoMarkerPosition
+  );
 
   useEffect(() => {
-    initializeMap(baseMapURL, mapLayers, mapPosition).then((map) => {
+    initializeMap(baseMapURL, mapPosition, infoMarkerPosition).then((map) => {
       mapRef.current = map;
       setMapInitialized(true);
     });
@@ -206,10 +195,6 @@ function MapContainer(props) {
   const markerRef = useRef(null);
   const handleMapQuery = useMapQueryHandler(mapRef, markerRef, infoDrawerOpen);
 
-  const infoMarkerPosition = useAppState(
-    (state) => state.core.infoMarkerPosition
-  );
-
   useMapEaseToCenter(padding);
   useMapMarker(mapRef, markerRef, infoMarkerPosition);
 
@@ -220,9 +205,9 @@ function MapContainer(props) {
     if (map == null) return;
 
     setMapPosition(map, mapPosition);
-    // Update the URI when the map moves
 
-    const mapMovedCallback = (event) => {
+    // Update the URI when the map moves
+    const mapMovedCallback = () => {
       const marker = markerRef.current;
       const map = mapRef.current;
 
@@ -230,12 +215,32 @@ function MapContainer(props) {
         type: "map-moved",
         data: {
           mapPosition: getMapPosition(map),
-          infoMarkerFocus: getFocusState(map, marker),
+          infoMarkerFocus: getFocusState(map, marker.getLngLat()),
         },
       });
     };
     map.on("moveend", debounce(mapMovedCallback, 100));
-  }, [mapRef.current, mapInitialized]);
+
+    // If we have an initially loaded info marker, we need to make sure
+    // that it is actually visible on the map, and move to it if not
+    if (infoMarkerPosition != null) {
+      const focus = getFocusState(map, infoMarkerPosition);
+      if (
+        ![
+          PositionFocusState.CENTERED,
+          PositionFocusState.NEAR_CENTER,
+          PositionFocusState.OFF_CENTER,
+        ].includes(focus)
+      ) {
+        map.setCenter(infoMarkerPosition);
+        const newFocus = getFocusState(map, infoMarkerPosition);
+        runAction({
+          type: "map-moved",
+          data: { mapPosition: getMapPosition(map), infoMarkerFocus: null },
+        });
+      }
+    }
+  }, [mapInitialized]);
 
   useEffect(() => {
     if (mapLayers.has(MapLayer.COLUMNS)) {
@@ -424,12 +429,12 @@ function useMapEaseToCenter(padding) {
 
 function getFocusState(
   map: mapboxgl.Map,
-  marker: mapboxgl.Marker
+  location: mapboxgl.LngLatLike
 ): PositionFocusState | null {
   /** Determine whether the infomarker is positioned in the viewport */
-  if (marker == null) return null;
+  if (location == null) return null;
 
-  const markerPos = map.project(marker.getLngLat());
+  const markerPos = map.project(location);
   const mapPos = map.project(map.getCenter());
   const dx = Math.abs(markerPos.x - mapPos.x);
   const dy = Math.abs(markerPos.y - mapPos.y);
