@@ -1,4 +1,3 @@
-import { updateURI } from "../../helpers";
 import { sum, timescale } from "../../../utils";
 import { MapBackend, MapLayer } from "../map";
 import { CoreState, CoreAction } from "./types";
@@ -79,7 +78,7 @@ export function coreReducer(
 ): CoreState {
   switch (action.type) {
     case "set-map-backend": {
-      return updateURI({ ...state, mapBackend: action.backend });
+      return { ...state, mapBackend: action.backend };
     }
     case "map-loading":
       if (state.mapIsLoading) return state;
@@ -178,7 +177,7 @@ export function coreReducer(
       }
       // action.filter.type and action.filter.id go to the URI
       // handle search resetting
-      return updateURI({
+      return {
         ...state,
         filters: fs,
         term: "",
@@ -188,16 +187,16 @@ export function coreReducer(
         inputFocus: false,
         // We have to do a lot of extra work to manage this context panel state
         contextPanelOpen: state.menuOpen,
-      });
+      };
     case "remove-filter":
-      return updateURI({
+      return {
         ...state,
         filters: state.filters.filter((d) => {
           if (d.name != action.filter.name) return d;
         }),
-      });
+      };
     case "clear-filters":
-      return updateURI({ ...state, filters: [] });
+      return { ...state, filters: [] };
     case "start-map-query":
       // if (state.inputFocus) {
       //   return { ...state, inputFocus: false };
@@ -389,7 +388,7 @@ export function coreReducer(
       const mapLayers: Spec<Set<MapLayer>, any> = {
         [op]: [action.layer],
       };
-      return updateURI(update(state, { mapLayers }));
+      return update(state, { mapLayers });
     case "toggle-map-3d":
       return { ...state, mapUse3D: !state.mapUse3D };
     case "toggle-elevation-chart":
@@ -531,10 +530,10 @@ export function coreReducer(
     case "recieve-data":
       return { ...state, isFetching: false, data: action.data };
     case "map-moved":
-      return updateURI({
+      return {
         ...state,
         ...action.data,
-      });
+      };
     case "update-state":
       return action.state;
     case "got-initial-map-state":
@@ -544,7 +543,7 @@ export function coreReducer(
         initialLoadComplete: true,
       };
       // This causes some hilarious problems...
-      return updateURI(newState);
+      return newState;
     case "toggle-high-resolution-terrain":
       return update(state, {
         mapSettings: { $toggle: ["highResolutionTerrain"] },

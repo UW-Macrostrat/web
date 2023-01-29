@@ -16,6 +16,15 @@ const fmt1 = format(".1~f");
 const fmtInt = format(".0f");
 
 export function hashStringReducer(state: AppState, action: AppAction) {
+  switch (action.type) {
+    case "set-map-backend":
+    case "add-filter":
+    case "remove-filter":
+    case "clear-filters":
+    case "toggle-map-layer":
+    case "map-moved":
+      updateURI(state.core);
+  }
   return state;
 }
 
