@@ -238,13 +238,21 @@ function layerDescriptionToLayers(
 export function updateMapPositionForHash(
   state: CoreState,
   hashString: string
-): GotInitialMapState | null {
+): CoreState {
   // Get the default map state
   try {
     const hashData = getHashString(hashString) ?? {};
 
     let { show = [], hide = [] } = hashData;
-    const { x = 16, y = 23, z = 2, a = 0, e = 0 } = hashData;
+    // Set default view parameters
+    const {
+      x = state.infoMarkerPosition?.lng ?? 16,
+      y = state.infoMarkerPosition?.lat ?? 23,
+      // Different default for zoom depending on whether we have a marker
+      z = state.infoMarkerPosition != null ? 7 : 2,
+      a = 0,
+      e = 0,
+    } = hashData;
 
     const mapLayers = layerDescriptionToLayers(show, hide);
 
@@ -285,22 +293,13 @@ export function updateMapPositionForHash(
     };
 
     return {
-      type: "got-initial-map-state",
-      data: {
-        mapPosition: position,
-        mapLayers,
-        mapBackend: MapBackend.MAPBOX3,
-      },
+      ...state,
+      mapPosition: position,
+      mapLayers,
+      mapBackend: MapBackend.MAPBOX3,
     };
   } catch (e) {
     console.error("Invalid map state:", e);
-    return null;
+    return state;
   }
-}
-
-export function gotInitialMapState(mapState) {
-  return {
-    type: "got-initial-map-state",
-    data: mapState,
-  };
 }

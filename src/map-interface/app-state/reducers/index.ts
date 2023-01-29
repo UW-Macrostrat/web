@@ -5,7 +5,8 @@ import {
   currentPageForPathName,
 } from "../nav-hooks";
 import { createRouterReducer } from "@lagunovsky/redux-react-router";
-import { hashStringReducer } from "./hash-string";
+import { hashStringReducer, updateMapPositionForHash } from "./hash-string";
+import { matchPath } from "react-router";
 
 export const browserHistory = createBrowserHistory();
 import { MenuState, AppState, AppAction, MenuAction } from "./types";
@@ -49,17 +50,39 @@ function mainReducer(
         router: routerReducer(state.router, action),
       };
     }
-    case "got-initial-map-state":
+    case "get-initial-map-state":
       const { pathname } = state.router.location;
       const isOpen = contextPanelIsInitiallyOpen(pathname);
+
+      let coreState = state.core;
+
+      // Check if we are viewing a specific location
+      const loc = matchPath("/pos/:lng/:lat", pathname);
+      if (loc != null) {
+        const { lng, lat } = loc.params;
+        coreState = {
+          ...coreState,
+          infoMarkerPosition: { lng: Number(lng), lat: Number(lat) },
+        };
+      }
+
       const activePage = currentPageForPathName(pathname);
+
+      // Harvest as much information as possible from the hash string
+      coreState = updateMapPositionForHash(
+        coreState,
+        state.router.location.hash
+      );
+
+      // Fill out the remainder with defaults
 
       return {
         ...state,
         core: {
-          ...coreReducer(state.core, action),
+          ...coreState,
           menuOpen: isOpen,
           contextPanelOpen: isOpen,
+          initialLoadComplete: true,
         },
         menu: { activePage },
       };

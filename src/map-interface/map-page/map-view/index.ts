@@ -206,7 +206,12 @@ function MapContainer(props) {
   const markerRef = useRef(null);
   const handleMapQuery = useMapQueryHandler(mapRef, markerRef, infoDrawerOpen);
 
+  const infoMarkerPosition = useAppState(
+    (state) => state.core.infoMarkerPosition
+  );
+
   useMapEaseToCenter(padding);
+  useMapMarker(mapRef, markerRef, infoMarkerPosition);
 
   useEffect(() => {
     // Get the current value of the map. Useful for gradually moving away
@@ -313,7 +318,7 @@ function useMapQueryHandler(
   /** Handler for map query markers */
   const runAction = useAppActions();
 
-  const handleMapQuery = useCallback(
+  return useCallback(
     (event, columns = null) => {
       const column = columns?.[0];
       const map = mapRef.current;
@@ -334,16 +339,6 @@ function useMapQueryHandler(
     },
     [mapRef, markerRef, infoDrawerOpen]
   );
-
-  // Remove the marker when the info drawer is closed
-  useEffect(() => {
-    if (!infoDrawerOpen) {
-      markerRef.current?.remove();
-      markerRef.current = null;
-    }
-  }, [infoDrawerOpen]);
-
-  return handleMapQuery;
 }
 
 export function MapBottomControls() {
@@ -376,6 +371,21 @@ function getBaseMapStyle(mapLayers, isDarkMode = false) {
     return SETTINGS.darkMapURL;
   }
   return SETTINGS.baseMapURL;
+}
+
+function useMapMarker(mapRef, markerRef, markerPosition) {
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map == null) return;
+    if (markerPosition == null) {
+      markerRef.current?.remove();
+      return;
+    }
+    const marker = markerRef.current ?? new mapboxgl.Marker();
+    marker.setLngLat(markerPosition).addTo(map);
+    markerRef.current = marker;
+    return () => marker.remove();
+  }, [mapRef.current, markerPosition]);
 }
 
 function useMapEaseToCenter(padding) {

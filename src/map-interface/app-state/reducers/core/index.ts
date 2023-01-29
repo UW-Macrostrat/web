@@ -543,7 +543,6 @@ export function coreReducer(
         ...action.data,
         initialLoadComplete: true,
       };
-      // This causes some hilarious problems...
       return newState;
     case "toggle-high-resolution-terrain":
       return update(state, {

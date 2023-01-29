@@ -18,7 +18,7 @@ import { useTransition } from "transition-hook";
 import { useContextPanelOpen, useContextClass } from "../app-state";
 import { MapboxMapProvider, ZoomControl } from "@macrostrat/mapbox-react";
 import { MapBottomControls, MapStyledContainer } from "./map-view";
-import { Routes, Route, useParams } from "react-router-dom";
+import { Routes, Route, useParams, useMatch } from "react-router-dom";
 import { MenuPage } from "./menu";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));

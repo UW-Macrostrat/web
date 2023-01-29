@@ -16,6 +16,7 @@ import { routerBasename } from "~/map-interface/Settings";
 import { isDetailPanelRoute } from "../nav-hooks";
 import { MenuPage } from "../reducers";
 import { formatCoordForZoomLevel } from "../reducers/hash-string";
+import { matchPath } from "react-router-dom";
 
 function getCancelToken() {
   let CancelToken = axios.CancelToken;
@@ -30,8 +31,6 @@ async function actionRunner(
 ): Promise<AppAction | void> {
   const coreState = state.core;
   switch (action.type) {
-    case "get-initial-map-state":
-      return updateMapPositionForHash(coreState, state.router.location.hash);
     case "toggle-menu": {
       // Push the menu onto the history stack
       let activePage = state.menu.activePage;
