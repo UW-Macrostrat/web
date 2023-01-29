@@ -147,8 +147,6 @@ function MenuHeaderButtons() {
   const backLoc = useLastPageLocation();
   const { pathname } = useLocation();
 
-  console.log(backLoc, pathname);
-
   if (backLoc != null && !isDetailPanelRoute(backLoc.to)) {
     return h([
       h(

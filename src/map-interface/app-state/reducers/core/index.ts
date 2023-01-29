@@ -123,6 +123,7 @@ export function coreReducer(
       return {
         ...state,
         infoDrawerOpen: false,
+        infoMarkerPosition: null,
         columnInfo: {},
       };
     case "expand-infodrawer":

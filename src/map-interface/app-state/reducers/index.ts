@@ -42,6 +42,7 @@ function mainReducer(
     case "@@router/ON_LOCATION_CHANGED": {
       const { pathname } = action.payload.location;
       const isOpen = contextPanelIsInitiallyOpen(pathname);
+
       return {
         ...state,
         core: { ...state.core, menuOpen: isOpen, contextPanelOpen: isOpen },
