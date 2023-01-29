@@ -15,7 +15,7 @@ import { push } from "@lagunovsky/redux-react-router";
 import { routerBasename } from "~/map-interface/Settings";
 import { isDetailPanelRoute } from "../nav-hooks";
 import { MenuPage } from "../sections";
-import { formatCoordForZoomLevel } from "../helpers/hash-string";
+import { formatCoordForZoomLevel } from "../sections/hash-string";
 
 function getCancelToken() {
   let CancelToken = axios.CancelToken;

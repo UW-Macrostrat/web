@@ -1,41 +1,14 @@
-import { combineReducers } from "redux";
-import { createBrowserHistory, Action } from "history";
-import { CoreAction } from "./core/actions";
-import { coreReducer, CoreState } from "./core";
-import { MapAction } from "./map";
+import { createBrowserHistory } from "history";
+import { coreReducer } from "./core";
 import {
   contextPanelIsInitiallyOpen,
   currentPageForPathName,
-  isDetailPanelRoute,
 } from "../nav-hooks";
-import { createRouterReducer, push } from "@lagunovsky/redux-react-router";
-import {
-  ReduxRouterState,
-  RouterActions,
-} from "@lagunovsky/redux-react-router";
+import { createRouterReducer } from "@lagunovsky/redux-react-router";
+import { hashStringReducer } from "./hash-string";
+
 export const browserHistory = createBrowserHistory();
-import { routerBasename } from "~/map-interface/Settings";
-
-export enum MenuPage {
-  LAYERS = "layers",
-  SETTINGS = "settings",
-  ABOUT = "about",
-  USAGE = "usage",
-  CHANGELOG = "changelog",
-  EXPERIMENTS = "experiments",
-}
-
-export type MenuState = {
-  activePage: MenuPage | null;
-};
-
-export type MenuAction = { type: "set-menu-page"; page: MenuPage | null };
-
-export type AppState = {
-  core: CoreState;
-  router: ReduxRouterState;
-  menu: MenuState;
-};
+import { MenuState, AppState, AppAction, MenuAction } from "./types";
 
 const routerReducer = createRouterReducer(browserHistory);
 
@@ -57,7 +30,7 @@ const defaultState: AppState = {
   menu: menuReducer(undefined, { type: "init" }),
 };
 
-function appReducer(
+function mainReducer(
   state: AppState = defaultState,
   action: AppAction
 ): AppState {
@@ -98,8 +71,13 @@ function appReducer(
   }
 }
 
-export type AppAction = CoreAction | MapAction | RouterActions | MenuAction;
+const appReducer = (state: AppState, action: AppAction) => {
+  // This might not be the right way to do hash management, but it
+  // centralizes the logic in one place.
+  return hashStringReducer(mainReducer(state, action), action);
+};
 
 export default appReducer;
 export * from "./core";
 export * from "./map";
+export * from "./types";

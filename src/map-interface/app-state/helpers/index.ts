@@ -1,1 +1,1 @@
-export * from "./hash-string";
+export * from "../sections/hash-string";

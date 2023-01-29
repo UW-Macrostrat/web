@@ -6,13 +6,18 @@ import {
   MapPosition,
   MapLayer,
   CoreState,
-} from "../sections/core/actions";
+} from "./core/actions";
+import { AppState, AppAction } from "./types";
 
 const fmt4 = format(".4~f");
 const fmt3 = format(".3~f");
 const fmt2 = format(".2~f");
 const fmt1 = format(".1~f");
 const fmtInt = format(".0f");
+
+export function hashStringReducer(state: AppState, action: AppAction) {
+  return state;
+}
 
 export function formatCoordForZoomLevel(val: number, zoom: number): string {
   if (zoom < 2) {
