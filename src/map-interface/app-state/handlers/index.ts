@@ -10,13 +10,11 @@ import {
 import { AppAction, AppState } from "../reducers";
 import axios from "axios";
 import { asyncFilterHandler } from "./filters";
-import { updateMapPositionForHash } from "../helpers";
 import { push } from "@lagunovsky/redux-react-router";
 import { routerBasename } from "~/map-interface/Settings";
 import { isDetailPanelRoute } from "../nav-hooks";
 import { MenuPage } from "../reducers";
 import { formatCoordForZoomLevel } from "../reducers/hash-string";
-import { matchPath } from "react-router-dom";
 
 function getCancelToken() {
   let CancelToken = axios.CancelToken;
