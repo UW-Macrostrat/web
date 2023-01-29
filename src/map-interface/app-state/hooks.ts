@@ -1,4 +1,4 @@
-import { AppAction } from "./sections";
+import { AppAction } from "./reducers";
 import actionRunner from "./handlers";
 import { useStore, useSelector, useDispatch } from "react-redux";
 import { AppState } from ".";

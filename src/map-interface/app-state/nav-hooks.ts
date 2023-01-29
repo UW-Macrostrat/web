@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "react-router";
 import { useAppState } from "./hooks";
 import classNames from "classnames";
-import { MenuPage } from "./sections";
+import { MenuPage } from "./reducers";
 
 export function isDetailPanelRoute(pathname: string) {
   /* Some routes imply that the detail panel is open. This does not necessarily

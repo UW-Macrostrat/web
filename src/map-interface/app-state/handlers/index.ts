@@ -7,15 +7,15 @@ import {
   asyncGetElevation,
   getPBDBData,
 } from "./fetch";
-import { AppAction, AppState } from "../sections";
+import { AppAction, AppState } from "../reducers";
 import axios from "axios";
 import { asyncFilterHandler } from "./filters";
 import { updateMapPositionForHash } from "../helpers";
 import { push } from "@lagunovsky/redux-react-router";
 import { routerBasename } from "~/map-interface/Settings";
 import { isDetailPanelRoute } from "../nav-hooks";
-import { MenuPage } from "../sections";
-import { formatCoordForZoomLevel } from "../sections/hash-string";
+import { MenuPage } from "../reducers";
+import { formatCoordForZoomLevel } from "../reducers/hash-string";
 
 function getCancelToken() {
   let CancelToken = axios.CancelToken;
