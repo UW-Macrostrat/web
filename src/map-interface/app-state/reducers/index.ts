@@ -44,27 +44,19 @@ function mainReducer(
       const { pathname } = action.payload.location;
       const isOpen = contextPanelIsInitiallyOpen(pathname);
 
+      let s1 = setInfoMarkerPosition(state);
+
       return {
-        ...state,
-        core: { ...state.core, menuOpen: isOpen, contextPanelOpen: isOpen },
+        ...s1,
+        core: { ...s1.core, menuOpen: isOpen, contextPanelOpen: isOpen },
         router: routerReducer(state.router, action),
       };
     }
     case "get-initial-map-state":
       const { pathname } = state.router.location;
       const isOpen = contextPanelIsInitiallyOpen(pathname);
-
-      let coreState = state.core;
-
-      // Check if we are viewing a specific location
-      const loc = matchPath("/pos/:lng/:lat", pathname);
-      if (loc != null) {
-        const { lng, lat } = loc.params;
-        coreState = {
-          ...coreState,
-          infoMarkerPosition: { lng: Number(lng), lat: Number(lat) },
-        };
-      }
+      let s1 = setInfoMarkerPosition(state);
+      let coreState = s1.core;
 
       const activePage = currentPageForPathName(pathname);
 
@@ -100,6 +92,23 @@ const appReducer = (state: AppState, action: AppAction) => {
   // centralizes the logic in one place.
   return hashStringReducer(mainReducer(state, action), action);
 };
+
+function setInfoMarkerPosition(state: AppState): AppState {
+  // Check if we are viewing a specific location
+  const loc = matchPath("/pos/:lng/:lat", state.router.location.pathname);
+  if (loc != null) {
+    const { lng, lat } = loc.params;
+    return {
+      ...state,
+      core: {
+        ...state.core,
+        infoMarkerPosition: { lng: Number(lng), lat: Number(lat) },
+        infoDrawerOpen: true,
+      },
+    };
+  }
+  return state;
+}
 
 export default appReducer;
 export * from "./core";

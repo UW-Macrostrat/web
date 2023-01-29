@@ -1,12 +1,6 @@
 import { format } from "d3-format";
 import { setHashString, getHashString } from "@macrostrat/ui-components";
-import {
-  MapBackend,
-  GotInitialMapState,
-  MapPosition,
-  MapLayer,
-  CoreState,
-} from "./core";
+import { MapBackend, MapPosition, MapLayer, CoreState } from "./core";
 import { AppState, AppAction } from "./types";
 
 export function hashStringReducer(state: AppState, action: AppAction) {

@@ -537,13 +537,6 @@ export function coreReducer(
       };
     case "update-state":
       return action.state;
-    case "got-initial-map-state":
-      const newState = {
-        ...state,
-        ...action.data,
-        initialLoadComplete: true,
-      };
-      return newState;
     case "toggle-high-resolution-terrain":
       return update(state, {
         mapSettings: { $toggle: ["highResolutionTerrain"] },
