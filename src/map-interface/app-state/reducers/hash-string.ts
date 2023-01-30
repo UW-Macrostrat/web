@@ -33,8 +33,9 @@ interface HashParams {
 export function updateURI(state: CoreState) {
   let args: object = {};
 
+  // Get filter information from URI.
   for (const filter of state.filters) {
-    args[filter.type] = filter.id || filter.name;
+    args[filter.type] = filter.id ?? filter.name;
   }
 
   applyXYPosition(args, state);
@@ -97,6 +98,36 @@ function applyHeightAndOrientation(args: HashParams, state: CoreState) {
   }
 }
 
+enum MapFilterType {
+  strat_name_concepts = "strat_name_concepts",
+  strat_name_orphans = "strat_name_orphans",
+  intervals = "intervals",
+  lithology_classes = "lithology_classes",
+  lithology_types = "lithology_types",
+  lithologies = "lithologies",
+  all_lithologies = "all_lithologies",
+  all_lithology_types = "all_lithology_types",
+  all_lithology_classes = "all_lithology_classes",
+  environments = "environments",
+  environment_types = "environment_types",
+  environment_classes = "environment_classes",
+}
+
+const filterTypes = [
+  "strat_name_concepts",
+  "strat_name_orphans",
+  "intervals",
+  "lithology_classes",
+  "lithology_types",
+  "lithologies",
+  "all_lithologies",
+  "all_lithology_types",
+  "all_lithology_classes",
+  "environments",
+  "environment_types",
+  "environment_classes",
+];
+
 // The below disabled material is needed to enable filters in the URI
 /*
   let {
@@ -107,20 +138,7 @@ function applyHeightAndOrientation(args: HashParams, state: CoreState) {
     x: mapXYZ.x,
     y: mapXYZ.y,
   };
-  let filterTypes = [
-    "strat_name_concepts",
-    "strat_name_orphans",
-    "intervals",
-    "lithology_classes",
-    "lithology_types",
-    "lithologies",
-    "all_lithologies",
-    "all_lithology_types",
-    "all_lithology_classes",
-    "environments",
-    "environment_types",
-    "environment_classes",
-  ];
+
   let hash = window.location.hash;
   let mapState = {
     incomingFilters: [],

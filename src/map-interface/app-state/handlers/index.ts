@@ -1,11 +1,11 @@
 import {
-  doSearchAsync,
   fetchFilteredColumns,
   getAsyncGdd,
   asyncGetColumn,
   asyncQueryMap,
   asyncGetElevation,
   getPBDBData,
+  base,
 } from "./fetch";
 import { AppAction, AppState } from "../reducers";
 import axios from "axios";
@@ -15,12 +15,6 @@ import { routerBasename } from "~/map-interface/Settings";
 import { isDetailPanelRoute } from "../nav-hooks";
 import { MenuPage } from "../reducers";
 import { formatCoordForZoomLevel } from "~/map-interface/utils/formatting";
-
-function getCancelToken() {
-  let CancelToken = axios.CancelToken;
-  let source = CancelToken.source();
-  return source;
-}
 
 async function actionRunner(
   state: AppState,
@@ -60,8 +54,15 @@ async function actionRunner(
         term,
         cancelToken: source,
       });
-      const data = await doSearchAsync(term, source.token);
-      return { type: "received-search-query", data };
+      const res = await axios.get(base + "/mobile/autocomplete", {
+        params: {
+          include: "interval,lithology,environ,strat_name",
+          query: term,
+        },
+        cancelToken: source.token,
+        responseType: "json",
+      });
+      return { type: "received-search-query", data: res.data.success.data };
     case "fetch-gdd":
       const { mapInfo } = coreState;
       let CancelToken1 = axios.CancelToken;

@@ -8,10 +8,83 @@ import {
 } from "./fetch";
 import { Action } from "../reducers";
 
+type StratNameConceptsFilter = {
+  type: "strat_name_concepts";
+  id: number;
+};
+
+type StratNameOrphansFilter = {
+  type: "strat_name_orphans";
+  id: number;
+};
+
+type IntervalFilter = {
+  type: "intervals";
+  id: number;
+};
+
+type LithologyClassFilter = {
+  type: "lithology_classes";
+  name: string;
+};
+
+type LithologyTypeFilter = {
+  type: "lithology_types";
+  name: string;
+};
+
+type LithologyFilter = {
+  type: "lithologies";
+  id: number;
+};
+
+type AllLithologyFilter = {
+  type: "all_lithologies";
+};
+
+type AllLithologyTypeFilter = {
+  type: "all_lithology_types";
+};
+
+type AllLithologyClassFilter = {
+  type: "all_lithology_classes";
+};
+
+type EnvironmentFilter = {
+  type: "environments";
+  id: number;
+};
+
+type EnvironmentTypeFilter = {
+  type: "environment_types";
+  name: string;
+};
+
+type EnvironmentClassFilter = {
+  type: "environment_classes";
+  name: string;
+};
+
+type Filter =
+  | StratNameConceptsFilter
+  | StratNameOrphansFilter
+  | IntervalFilter
+  | LithologyClassFilter
+  | LithologyTypeFilter
+  | LithologyFilter
+  | AllLithologyFilter
+  | AllLithologyTypeFilter
+  | AllLithologyClassFilter
+  | EnvironmentFilter
+  | EnvironmentTypeFilter
+  | EnvironmentClassFilter;
+
 // handler to reduce noise on case & switch
 // want this function to return an action object {type: "type", place/filter: fitler}
 // this is still a mess
-const asyncFilterHandler = async (filter): Promise<Action> => {
+const asyncFilterHandler = async (filter: Filter): Promise<Action> => {
+  console.log("filter", filter);
+
   switch (filter.type) {
     case "place":
       return { type: "go-to-place", place: filter };

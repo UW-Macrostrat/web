@@ -1,23 +1,43 @@
 import axios from "axios";
 import { SETTINGS } from "../../Settings";
 
-const base = `${SETTINGS.apiDomain}/api/v2`;
+export const base = `${SETTINGS.apiDomain}/api/v2`;
 const basev1 = `${SETTINGS.gddDomain}/api/v1`;
 const pbdbURL = `${SETTINGS.pbdbDomain}/data1.2/colls/list.json`;
 const pbdbURLOccs = `${SETTINGS.pbdbDomain}/data1.2/occs/list.json`;
 
-export const doSearchAsync = async (term, cancelToken) => {
-  let url = `${base}/mobile/autocomplete?include=interval,lithology,environ,strat_name&query=${term}`;
+enum FilterType {
+  StratNameConcepts = "strat_name_concepts",
+  StratNameOrphans = "strat_name_orphans",
+  Intervals = "intervals",
+  LithologyClasses = "lithology_classes",
+  LithologyTypes = "lithology_types",
+  Lithologies = "lithologies",
+  AllLithologies = "all_lithologies",
+  AllLithologyTypes = "all_lithology_types",
+  AllLithologyClasses = "all_lithology_classes",
+  Environments = "environments",
+  EnvironmentTypes = "environment_types",
+  EnvironmentClasses = "environment_classes",
+}
 
-  const res = await axios.get(url, {
-    cancelToken,
-    responseType: "json",
-  });
-  return res.data.success.data;
+type StratNameConceptsFilter = {
+  type: FilterType.StratNameConcepts;
+  id: number;
+};
+
+type StratNameData = {
+  category: "strat_name";
+  type: FilterType.StratNameConcepts | FilterType.StratNameOrphans;
+  id: number;
+  name: string;
+  legend_ids: number[];
 };
 
 //case "strat_name_concepts"
-export const stratNameConcepts = async (filter) => {
+export const stratNameConcepts = async (
+  filter: StratNameConceptsFilter
+): Promise<StratNameData> => {
   const { id } = filter;
   const conceptUrl = `${base}/defs/strat_name_concepts?concept_id=${id}`;
   const conceptIdRes = await axios.get(conceptUrl, { responseType: "json" });
@@ -30,34 +50,57 @@ export const stratNameConcepts = async (filter) => {
   return {
     category: "strat_name",
     id: id,
-    type: "strat_name_concepts",
+    type: FilterType.StratNameConcepts,
     name: f.name,
     legend_ids,
   };
 };
 
+type StratNameOrphansFilter = {
+  type: FilterType.StratNameOrphans;
+  id: number;
+};
+
 //strat_name_orphans
-export const stratNameOrphans = async (filter) => {
+export const stratNameOrphans = async (
+  filter: StratNameOrphansFilter
+): Promise<StratNameData> => {
   const { id } = filter;
-  const url = `${base}/defs/strat_names?strat_name_id=${id}`;
-  const res = await axios.get(url, { responseType: "json" });
+  const params = { strat_name_id: id };
+  const url = `${base}/defs/strat_names`;
+  const res = await axios.get(url, { params, responseType: "json" });
   let f = res.data.success.data[0];
 
-  const mobileURl = `${base}/mobile/map_filter?strat_name_id=${id}`;
-  const mobileRes = await axios.get(mobileURl, { responseType: "json" });
+  const mobileURl = `${base}/mobile/map_filter`;
+  const mobileRes = await axios.get(mobileURl, {
+    params,
+    responseType: "json",
+  });
   const legend_ids = mobileRes.data;
 
   return {
     category: "strat_name",
     id,
-    type: "strat_name_orphans",
+    type: FilterType.StratNameOrphans,
     name: f.strat_name_long,
     legend_ids,
   };
 };
 
+type IntervalFilter = {
+  type: FilterType.Intervals;
+  id: number;
+};
+
+type IntervalFilterData = IntervalFilter & {
+  name: string;
+  category: "interval";
+};
+
 // intervals
-export const fetchIntervalFilter = async (filter) => {
+export const fetchIntervalFilter = async (
+  filter: IntervalFilter
+): Promise<IntervalFilterData> => {
   const { id } = filter;
 
   let url = `${base}/defs/intervals?int_id=${id}`;
@@ -70,8 +113,52 @@ export const fetchIntervalFilter = async (filter) => {
   return f;
 };
 
+type LithologyClassFilter = {
+  type: FilterType.LithologyClasses;
+  name: string;
+};
+
+type LithologyTypeFilter = {
+  type: FilterType.LithologyTypes;
+  name: string;
+};
+
+type LithologyFilter = {
+  type: FilterType.Lithologies;
+  id: number;
+};
+
+// Environment filters are unused for now
+type EnvironmentFilter = {
+  type: FilterType.Environments;
+  id: number;
+};
+
+type EnvironmentTypeFilter = {
+  type: FilterType.EnvironmentTypes;
+  name: string;
+};
+
+type EnvironmentClassFilter = {
+  type: FilterType.EnvironmentClasses;
+  name: string;
+};
+
+type LithologyFilterData = {
+  category: "lithology";
+  type:
+    | FilterType.LithologyClasses
+    | FilterType.LithologyTypes
+    | FilterType.AllLithologies;
+  id: number;
+  name: string;
+  legend_ids: number[];
+};
+
 //case "lithologies":
-export const fetchLithFilter = async (filter) => {
+export const fetchLithFilter = async (
+  filter: LithologyFilter
+): Promise<LithologyFilterData> => {
   const { id } = filter;
   let url = `${base}/defs/lithologies?lith_id=${id}`;
   const res = await axios.get(url, { responseType: "json" });
@@ -84,14 +171,21 @@ export const fetchLithFilter = async (filter) => {
   return {
     category: "lithology",
     id,
-    type: "lithologies",
+    type: FilterType.Lithologies,
     name: f.name,
     legend_ids,
   };
 };
 
+type AllLithologiesFilter = {
+  type: FilterType.AllLithologies;
+  id: number;
+};
+
 //case "all_lithologies":
-export const fetchAllLithsFilter = async (filter) => {
+export const fetchAllLithsFilter = async (
+  filter: AllLithologiesFilter
+): Promise<LithologyFilterData> => {
   const { id } = filter;
   let url = `${base}/defs/lithologies?lith_id=${id}`;
   let res = await axios.get(url, { responseType: "json" });
@@ -104,15 +198,28 @@ export const fetchAllLithsFilter = async (filter) => {
   return {
     category: "lithology",
     id,
-    type: "all_lithologies",
+    type: FilterType.AllLithologies,
     name: f.name,
     legend_ids,
   };
 };
 
+type AllLithologyTypesFilter = {
+  type: FilterType.AllLithologyTypes;
+  id: number;
+  //name?: string;
+};
+
+type AllLithologyClassesFilter = {
+  type: FilterType.AllLithologyClasses;
+  id: number;
+};
+
 // case "all_lithology_classes":
 //  case "all_lithology_types":
-export const fetchAllLithTypes = async (filter) => {
+export const fetchAllLithTypes = async (
+  filter: AllLithologyClassesFilter | AllLithologyTypesFilter
+): Promise<LithologyFilterData> => {
   const { type, name, id } = filter;
   let param =
     type === "all_lithology_classes" ? "all_lith_class" : "all_lith_type";
@@ -298,3 +405,17 @@ function mergePBDBResponses(collectionResponse, occurrenceResponse) {
     return [];
   }
 }
+
+export type Filter =
+  | StratNameConceptsFilter
+  | StratNameOrphansFilter
+  | IntervalFilter
+  | LithologyClassFilter
+  | LithologyTypeFilter
+  | LithologyFilter
+  | AllLithologyFilter
+  | AllLithologyTypesFilter
+  | AllLithologyClassesFilter
+  | EnvironmentFilter
+  | EnvironmentTypeFilter
+  | EnvironmentClassFilter;
