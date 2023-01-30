@@ -19,8 +19,6 @@ function IntervalChip(props) {
   const darkMode = useDarkMode();
   const darkenAmount = darkMode.isEnabled ? 2 : 0;
 
-  console.log(interval);
-
   return h(
     "div.chip.age-chip",
     {

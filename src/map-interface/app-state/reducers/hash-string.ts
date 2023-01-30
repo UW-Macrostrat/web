@@ -1,28 +1,27 @@
 import { format } from "d3-format";
 import { setHashString, getHashString } from "@macrostrat/ui-components";
-import {
-  MapBackend,
-  GotInitialMapState,
-  MapPosition,
-  MapLayer,
-  CoreState,
-} from "../sections/core/actions";
+import { MapBackend, MapPosition, MapLayer, CoreState } from "./core";
+import { AppState, AppAction } from "./types";
 
-const fmt4 = format(".4~f");
-const fmt3 = format(".3~f");
-const fmt2 = format(".2~f");
-const fmt1 = format(".1~f");
-const fmtInt = format(".0f");
-
-export function formatCoordForZoomLevel(val: number, zoom: number): string {
-  if (zoom < 2) {
-    return fmt1(val);
-  } else if (zoom < 4) {
-    return fmt2(val);
-  } else if (zoom < 7) {
-    return fmt3(val);
+export function hashStringReducer(state: AppState, action: AppAction) {
+  switch (action.type) {
+    case "set-map-backend":
+    case "add-filter":
+    case "remove-filter":
+    case "clear-filters":
+    case "toggle-map-layer":
+    case "map-moved":
+      updateURI(state.core);
   }
-  return fmt4(val);
+  return state;
+}
+
+interface HashParams {
+  x?: string;
+  y?: string;
+  z?: string;
+  a?: string;
+  e?: string;
 }
 
 export function updateURI(state: CoreState) {
@@ -32,34 +31,64 @@ export function updateURI(state: CoreState) {
     args[filter.type] = filter.id || filter.name;
   }
 
-  // Update the hash in the URI
-  const pos = state.mapPosition.camera ?? {};
-  const zoom = state.mapPosition.target?.zoom;
-  const { bearing = 0, pitch = 0 } = pos;
-
-  args.x = formatCoordForZoomLevel(pos.lng, zoom);
-  args.y = formatCoordForZoomLevel(pos.lat, zoom);
-  if (bearing == 0 && pitch == 0 && zoom != null) {
-    args.z = fmt1(zoom);
-  } else if (pos.altitude > 5000) {
-    args.z = fmt2(pos.altitude / 1000) + "km";
-  } else {
-    args.z = fmtInt(pos.altitude) + "m";
-  }
-  if (bearing != 0) {
-    let az = pos.bearing;
-    if (az < 0) az += 360;
-    args.a = fmtInt(az);
-  }
-  if (pitch != 0) {
-    args.e = fmtInt(pos.pitch);
-  }
+  applyXYPosition(args, state);
+  applyHeightAndOrientation(args, state);
 
   const layers = getLayerDescriptionFromLayers(state.mapLayers);
   args = { ...args, ...layers };
 
   setHashString(args, { arrayFormat: "comma", sort: false });
   return state;
+}
+
+function applyXYPosition(args: object, state: CoreState) {
+  const pos = state.mapPosition.camera;
+  if (pos == null) return;
+  const zoom = state.mapPosition.target?.zoom;
+
+  let x = formatCoordForZoomLevel(pos.lng, zoom);
+  let y = formatCoordForZoomLevel(pos.lat, zoom);
+
+  const { infoMarkerPosition } = state;
+  if (infoMarkerPosition != null) {
+    /* If the info marker is at the same position as the map, there
+     * is no need to include it in the hash string. This should lead
+     * to shorter sharable URLs */
+    let infoX = formatCoordForZoomLevel(infoMarkerPosition.lng, zoom);
+    let infoY = formatCoordForZoomLevel(infoMarkerPosition.lat, zoom);
+    if (infoX == x || infoY == y) {
+      return;
+    }
+  }
+  args["x"] = x;
+  args["y"] = y;
+}
+
+function applyHeightAndOrientation(args: HashParams, state: CoreState) {
+  const pos = state.mapPosition.camera ?? {
+    bearing: 0,
+    pitch: 0,
+    altitude: null,
+  };
+  const zoom = state.mapPosition.target?.zoom;
+
+  if (pos.bearing == 0 && pos.pitch == 0 && zoom != null) {
+    args.z = fmt1(zoom);
+  } else if (pos.altitude != null) {
+    if (pos.altitude > 5000) {
+      args.z = fmt2(pos.altitude / 1000) + "km";
+    } else {
+      args.z = fmtInt(pos.altitude) + "m";
+    }
+  }
+  if (pos.bearing != 0) {
+    let az = pos.bearing;
+    if (az < 0) az += 360;
+    args.a = fmtInt(az);
+  }
+  if (pos.pitch != 0) {
+    args.e = fmtInt(pos.pitch);
+  }
 }
 
 // The below disabled material is needed to enable filters in the URI
@@ -93,6 +122,17 @@ export function updateURI(state: CoreState) {
   };
 */
 
+export function formatCoordForZoomLevel(val: number, zoom: number): string {
+  if (zoom < 2) {
+    return fmt1(val);
+  } else if (zoom < 4) {
+    return fmt2(val);
+  } else if (zoom < 7) {
+    return fmt3(val);
+  }
+  return fmt4(val);
+}
+
 function _fmt(x: string | number | string[]) {
   if (Array.isArray(x)) {
     x = x[0];
@@ -100,6 +140,11 @@ function _fmt(x: string | number | string[]) {
   return parseFloat(x.toString());
 }
 
+const fmt4 = format(".4~f");
+const fmt3 = format(".3~f");
+const fmt2 = format(".2~f");
+const fmt1 = format(".1~f");
+const fmtInt = format(".0f");
 interface HashLayerDesc {
   show?: string[];
   hide?: string[];
@@ -186,13 +231,21 @@ function layerDescriptionToLayers(
 export function updateMapPositionForHash(
   state: CoreState,
   hashString: string
-): GotInitialMapState | null {
+): CoreState {
   // Get the default map state
   try {
     const hashData = getHashString(hashString) ?? {};
 
     let { show = [], hide = [] } = hashData;
-    const { x = 16, y = 23, z = 2, a = 0, e = 0 } = hashData;
+    // Set default view parameters
+    const {
+      x = state.infoMarkerPosition?.lng ?? 16,
+      y = state.infoMarkerPosition?.lat ?? 23,
+      // Different default for zoom depending on whether we have a marker
+      z = state.infoMarkerPosition != null ? 7 : 2,
+      a = 0,
+      e = 0,
+    } = hashData;
 
     const mapLayers = layerDescriptionToLayers(show, hide);
 
@@ -233,22 +286,13 @@ export function updateMapPositionForHash(
     };
 
     return {
-      type: "got-initial-map-state",
-      data: {
-        mapPosition: position,
-        mapLayers,
-        mapBackend: MapBackend.MAPBOX3,
-      },
+      ...state,
+      mapPosition: position,
+      mapLayers,
+      mapBackend: MapBackend.MAPBOX3,
     };
   } catch (e) {
     console.error("Invalid map state:", e);
-    return null;
+    return state;
   }
-}
-
-export function gotInitialMapState(mapState) {
-  return {
-    type: "got-initial-map-state",
-    data: mapState,
-  };
 }

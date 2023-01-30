@@ -7,15 +7,14 @@ import {
   asyncGetElevation,
   getPBDBData,
 } from "./fetch";
-import { AppAction, AppState } from "../sections";
+import { AppAction, AppState } from "../reducers";
 import axios from "axios";
 import { asyncFilterHandler } from "./filters";
-import { updateMapPositionForHash } from "../helpers";
 import { push } from "@lagunovsky/redux-react-router";
 import { routerBasename } from "~/map-interface/Settings";
 import { isDetailPanelRoute } from "../nav-hooks";
-import { MenuPage } from "../sections";
-import { formatCoordForZoomLevel } from "../helpers/hash-string";
+import { MenuPage } from "../reducers";
+import { formatCoordForZoomLevel } from "../reducers/hash-string";
 
 function getCancelToken() {
   let CancelToken = axios.CancelToken;
@@ -30,8 +29,6 @@ async function actionRunner(
 ): Promise<AppAction | void> {
   const coreState = state.core;
   switch (action.type) {
-    case "get-initial-map-state":
-      return updateMapPositionForHash(coreState, state.router.location.hash);
     case "toggle-menu": {
       // Push the menu onto the history stack
       let activePage = state.menu.activePage;

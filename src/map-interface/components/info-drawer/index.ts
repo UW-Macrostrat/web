@@ -24,9 +24,8 @@ function InfoDrawer(props) {
   // We used to enable panels when certain layers were on,
   // but now we just show all panels always
   let { className } = props;
-  const { mapInfo, fetchingMapInfo, infoMarkerPosition } = useAppState(
-    (state) => state.core
-  );
+  const { mapInfo, fetchingMapInfo, infoMarkerPosition, mapPosition } =
+    useAppState((state) => state.core);
 
   const runAction = useAppActions();
 
@@ -38,6 +37,7 @@ function InfoDrawer(props) {
     h(InfoDrawerHeader, {
       mapInfo,
       infoMarkerPosition,
+      zoom: mapPosition.target?.zoom,
       onCloseClick: () => runAction({ type: "close-infodrawer" }),
     }),
     h("div.infodrawer-body", [
