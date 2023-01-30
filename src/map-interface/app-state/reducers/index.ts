@@ -95,7 +95,7 @@ const appReducer = (state: AppState, action: AppAction) => {
 
 function setInfoMarkerPosition(state: AppState): AppState {
   // Check if we are viewing a specific location
-  const loc = matchPath("/pos/:lng/:lat", state.router.location.pathname);
+  const loc = matchPath("/loc/:lng/:lat", state.router.location.pathname);
   if (loc != null) {
     const { lng, lat } = loc.params;
     return {

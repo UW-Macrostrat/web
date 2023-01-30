@@ -96,7 +96,7 @@ module.exports = {
       // https://github.com/webpack/webpack-dev-server/issues/454
       rewrites: [
         {
-          from: /^\/pos\/.*$/,
+          from: /^\/loc\/.*$/,
           to: "/",
         },
       ],

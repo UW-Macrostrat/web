@@ -233,7 +233,7 @@ function MapContainer(props) {
         type: "map-moved",
         data: {
           mapPosition: getMapPosition(map),
-          infoMarkerFocus: getFocusState(map, marker.getLngLat()),
+          infoMarkerFocus: getFocusState(map, marker?.getLngLat()),
         },
       });
     };
@@ -428,7 +428,7 @@ function useMapEaseToCenter(padding) {
 
 function getFocusState(
   map: mapboxgl.Map,
-  location: mapboxgl.LngLatLike
+  location: mapboxgl.LngLatLike | null
 ): PositionFocusState | null {
   /** Determine whether the infomarker is positioned in the viewport */
   if (location == null) return null;

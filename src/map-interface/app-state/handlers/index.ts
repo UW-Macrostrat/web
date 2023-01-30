@@ -84,7 +84,7 @@ async function actionRunner(
       const ln = formatCoordForZoomLevel(lng, z);
       const lt = formatCoordForZoomLevel(lat, z);
       return push({
-        pathname: routerBasename + `pos/${ln}/${lt}`,
+        pathname: routerBasename + `loc/${ln}/${lt}`,
         hash: location.hash,
       });
       //return { ...action, type: "run-map-query" };

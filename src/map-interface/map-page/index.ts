@@ -166,7 +166,7 @@ const MapPage = ({
           h("div.detail-stack.infodrawer-container", [
             h(Routes, [
               h(Route, {
-                path: "/pos/:lng/:lat",
+                path: "/loc/:lng/:lat",
                 element: h(InfoDrawerRoute),
               }),
               // h.if(detailPanelTrans.shouldMount)(InfoDrawer, {

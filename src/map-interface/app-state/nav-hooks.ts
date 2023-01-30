@@ -7,7 +7,7 @@ export function isDetailPanelRoute(pathname: string) {
   /* Some routes imply that the detail panel is open. This does not necessarily
   mean that the context panel will be closed when that panel is navigated to, but
   it takes the routing focus off the context panel's status. */
-  return pathname.startsWith("/pos");
+  return pathname.startsWith("/loc");
 }
 
 export function contextPanelIsInitiallyOpen(pathname: string) {
