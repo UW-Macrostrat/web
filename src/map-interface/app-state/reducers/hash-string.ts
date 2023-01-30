@@ -2,6 +2,12 @@ import { format } from "d3-format";
 import { setHashString, getHashString } from "@macrostrat/ui-components";
 import { MapBackend, MapPosition, MapLayer, CoreState } from "./core";
 import { AppState, AppAction } from "./types";
+import {
+  formatCoordForZoomLevel,
+  fmtInt,
+  fmt1,
+  fmt2,
+} from "~/map-interface/utils/formatting";
 
 export function hashStringReducer(state: AppState, action: AppAction) {
   switch (action.type) {
@@ -122,17 +128,6 @@ function applyHeightAndOrientation(args: HashParams, state: CoreState) {
   };
 */
 
-export function formatCoordForZoomLevel(val: number, zoom: number): string {
-  if (zoom < 2) {
-    return fmt1(val);
-  } else if (zoom < 4) {
-    return fmt2(val);
-  } else if (zoom < 7) {
-    return fmt3(val);
-  }
-  return fmt4(val);
-}
-
 function _fmt(x: string | number | string[]) {
   if (Array.isArray(x)) {
     x = x[0];
@@ -140,11 +135,6 @@ function _fmt(x: string | number | string[]) {
   return parseFloat(x.toString());
 }
 
-const fmt4 = format(".4~f");
-const fmt3 = format(".3~f");
-const fmt2 = format(".2~f");
-const fmt1 = format(".1~f");
-const fmtInt = format(".0f");
 interface HashLayerDesc {
   show?: string[];
   hide?: string[];

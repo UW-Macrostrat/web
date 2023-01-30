@@ -7,7 +7,7 @@ import {
   useAppActions,
   useAppState,
 } from "~/map-interface/app-state";
-import { formatCoordForZoomLevel } from "~/map-interface/app-state/helpers";
+import { fmt3 } from "~/map-interface/utils";
 
 const h = hyper.styled(styles);
 
@@ -51,12 +51,8 @@ export function InfoDrawerHeader(props) {
     //h("div.left-icon", [h(Icon, { icon: "map-marker" })]),
     h(RecenterButton),
     h("div.spacer"),
-    h("div.infodrawer-header", [
-      h("div.infodrawer-header-item lnglat-container", [
-        h(LngLatCoords, { position, zoom }),
-        h(Elevation, { elevation }),
-      ]),
-    ]),
+    h(LngLatCoords, { position, zoom }),
+    h(Elevation, { elevation }),
     h(Button, { minimal: true, icon: "cross", onClick: onCloseClick }),
   ]);
 }
@@ -81,19 +77,16 @@ function DegreeCoord(props) {
 
 function LngLatCoords(props) {
   const { position, zoom = 7 } = props;
-  return h("span.lnglat-container", [
+  return h("div.infodrawer-header-item.lnglat-container", [
     h("span.lnglat", [
       h(DegreeCoord, {
-        value: formatCoordForZoomLevel(position.lat, zoom),
+        value: fmt3(position.lat),
         labels: ["N", "S"],
       }),
       ", ",
 
       h(DegreeCoord, {
-        value: formatCoordForZoomLevel(
-          normalizeLng(Number(position.lng)),
-          zoom
-        ),
+        value: fmt3(normalizeLng(Number(position.lng))),
         labels: ["E", "W"],
       }),
     ]),
@@ -103,7 +96,7 @@ function LngLatCoords(props) {
 function Elevation(props) {
   const { elevation } = props;
   if (elevation == null) return null;
-  return h("span.elevation", [
+  return h("div.infodrawer-header-item.elevation", [
     h(ValueWithUnit, { value: elevation, unit: "m" }),
     h("span.secondary", [
       " (",
