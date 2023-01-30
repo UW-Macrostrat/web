@@ -11,11 +11,17 @@ import { fmt3 } from "~/map-interface/utils";
 
 const h = hyper.styled(styles);
 
+import { Toaster } from "@blueprintjs/core";
+
+const AppToaster = Toaster.create({
+  maxToasts: 1,
+});
+
 const metersToFeet = (meters, decimals = 0) => {
   return (meters * 3.28084).toFixed(decimals);
 };
 
-function RecenterButton() {
+function PositionButton() {
   const runAction = useAppActions();
   const pos =
     useAppState((state) => state.core.infoMarkerFocus) ??
@@ -27,21 +33,56 @@ function RecenterButton() {
     intent = "warning";
   }
 
-  return h(
-    Button,
-    {
-      minimal: true,
-      icon: "map-marker",
-      onClick() {
-        runAction({ type: "recenter-query-marker" });
+  const isCentered =
+    pos == PositionFocusState.CENTERED || pos == PositionFocusState.NEAR_CENTER;
+
+  return h("div.position-controls", [
+    h(
+      Button,
+      {
+        minimal: true,
+        icon: "map-marker",
+        onClick() {
+          runAction({ type: "recenter-query-marker" });
+        },
+        intent,
       },
-      intent,
-    },
-    pos == PositionFocusState.OUT_OF_VIEW ||
-      pos == PositionFocusState.OUT_OF_PADDING
-      ? "Recenter"
-      : null
-  );
+      pos == PositionFocusState.OUT_OF_VIEW ||
+        pos == PositionFocusState.OUT_OF_PADDING
+        ? "Recenter"
+        : null
+    ),
+    h.if(isCentered)(
+      Button,
+      {
+        className: "copy-link-button",
+        rightIcon: h(Icon, { icon: "link", size: 12 }),
+        minimal: true,
+        small: true,
+        onClick() {
+          navigator.clipboard.writeText(window.location.href).then(
+            () => {
+              AppToaster.show({
+                message: "Copied link to position!",
+                intent: "success",
+                icon: "clipboard",
+                timeout: 1000,
+              });
+            },
+            () => {
+              AppToaster.show({
+                message: "Failed to copy link",
+                intent: "danger",
+                icon: "error",
+                timeout: 1000,
+              });
+            }
+          );
+        },
+      },
+      "Copy link"
+    ),
+  ]);
 }
 
 export function InfoDrawerHeader(props) {
@@ -49,7 +90,7 @@ export function InfoDrawerHeader(props) {
   const { elevation } = mapInfo;
   return h("header", [
     //h("div.left-icon", [h(Icon, { icon: "map-marker" })]),
-    h(RecenterButton),
+    h(PositionButton),
     h("div.spacer"),
     h(LngLatCoords, { position, zoom }),
     h(Elevation, { elevation }),
