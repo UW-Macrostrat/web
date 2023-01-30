@@ -6,6 +6,14 @@ import chroma from "chroma-js";
 
 const h = hyper.styled(styles);
 
+function getColor(color, darkenAmount) {
+  try {
+    return chroma(color).darken(darkenAmount).hex();
+  } catch (err) {
+    return color;
+  }
+}
+
 function IntervalChip(props) {
   const { interval, className } = props;
   const darkMode = useDarkMode();
@@ -16,7 +24,7 @@ function IntervalChip(props) {
     {
       className,
       style: {
-        backgroundColor: chroma(interval.color).darken(darkenAmount).css(),
+        backgroundColor: getColor(interval.color, darkenAmount),
       },
     },
     [

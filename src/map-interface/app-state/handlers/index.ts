@@ -7,12 +7,14 @@ import {
   asyncGetElevation,
   getPBDBData,
 } from "./fetch";
-import { Action, AppState } from "../sections";
+import { AppAction, AppState } from "../reducers";
 import axios from "axios";
 import { asyncFilterHandler } from "./filters";
-import { updateStateFromURI } from "../helpers";
 import { push } from "@lagunovsky/redux-react-router";
 import { routerBasename } from "~/map-interface/Settings";
+import { isDetailPanelRoute } from "../nav-hooks";
+import { MenuPage } from "../reducers";
+import { formatCoordForZoomLevel } from "~/map-interface/utils/formatting";
 
 function getCancelToken() {
   let CancelToken = axios.CancelToken;
@@ -22,28 +24,35 @@ function getCancelToken() {
 
 async function actionRunner(
   state: AppState,
-  action: Action,
+  action: AppAction,
   dispatch = null
-): Promise<Action | void> {
+): Promise<AppAction | void> {
   const coreState = state.core;
   switch (action.type) {
-    case "get-initial-map-state":
-      return updateStateFromURI(coreState);
-    case "toggle-menu":
-      const isRootRoute = state.router.location.pathname == routerBasename;
-      const goToLayersPage = push(routerBasename + "layers" + location.hash);
-      if (state.core.inputFocus) {
-        if (isRootRoute) {
-          dispatch(goToLayersPage);
-        }
-        return { type: "set-input-focus", inputFocus: false };
+    case "toggle-menu": {
+      // Push the menu onto the history stack
+      let activePage = state.menu.activePage;
+      if (activePage != null) {
+        activePage = null;
+      } else {
+        activePage = MenuPage.LAYERS;
       }
-      if (isRootRoute) {
-        return goToLayersPage;
+      return await dispatch({ type: "set-menu-page", page: activePage });
+    }
+    case "set-menu-page": {
+      const { pathname } = state.router.location;
+      if (!isDetailPanelRoute(pathname)) {
+        const newPathname = "/" + (action.page ?? "");
+        await dispatch(push({ pathname: newPathname, hash: location.hash }));
       }
-      return push(routerBasename + location.hash);
+      return { type: "set-menu-page", page: action.page };
+    }
+    case "close-infodrawer":
+      const pathname = routerBasename + (state.menu.activePage ?? "");
+      await dispatch(push({ pathname, hash: location.hash }));
+      return action;
     case "fetch-search-query":
-      let term = action.term;
+      const { term } = action;
       let CancelToken = axios.CancelToken;
       let source = CancelToken.source();
       dispatch({
@@ -64,20 +73,28 @@ async function actionRunner(
       const gdd_data = await getAsyncGdd(mapInfo, source1.token);
       return { type: "received-gdd-query", data: gdd_data };
     case "async-add-filter":
-      let filter = action.filter;
-      const filterAction = await asyncFilterHandler(filter);
-      return filterAction;
+      return await asyncFilterHandler(action.filter);
     case "get-filtered-columns":
-      let filteredColumns = await fetchFilteredColumns(coreState.filters);
       return {
         type: "update-column-filters",
-        columns: filteredColumns,
+        columns: await fetchFilteredColumns(coreState.filters),
       };
-    case "map-query":
+    case "map-query": {
+      const { lng, lat, z } = action;
+      const ln = formatCoordForZoomLevel(lng, z);
+      const lt = formatCoordForZoomLevel(lat, z);
+      return push({
+        pathname: routerBasename + `loc/${ln}/${lt}`,
+        hash: location.hash,
+      });
+      //return { ...action, type: "run-map-query" };
+    }
+    case "run-map-query":
       const { lng, lat, z, map_id, column } = action;
       let CancelTokenMapQuery = axios.CancelToken;
       let sourceMapQuery = CancelTokenMapQuery.source();
       if (coreState.inputFocus && coreState.contextPanelOpen) {
+        // Dismiss the current context panel
         return { type: "context-outside-click" };
       }
 
@@ -99,7 +116,7 @@ async function actionRunner(
         map_id,
         sourceMapQuery.token
       );
-      coreState.infoMarkerPosition = { lng, lat, status: null };
+      coreState.infoMarkerPosition = { lng, lat };
       return {
         type: "received-map-query",
         data: mapData,

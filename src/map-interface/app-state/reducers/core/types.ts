@@ -8,13 +8,14 @@ type ASYNC_ADD_FILTER = { type: "async-add-filter"; filter: any };
 type GET_FILTERED_COLUMNS = { type: "get-filtered-columns" };
 type FETCH_GDD = { type: "fetch-gdd" };
 type MAP_QUERY = {
-  type: "map-query";
+  type: "map-query" | "run-map-query";
   lng: number;
   lat: number;
   z: string | number;
   map_id: any;
   column: any;
 };
+
 type GET_COLUMN = { type: "get-column"; column: any };
 type GET_ELEVATION = { type: "get-elevation"; line: any };
 type GET_PBDB = { type: "get-pbdb"; collection_nos: any };
@@ -145,7 +146,8 @@ export type CoreAction =
   | SET_ACTIVE_INDEX_MAP
   | MapAction
   | RecenterQueryMarker
-  | ToggleHighResolutionTerrain;
+  | ToggleHighResolutionTerrain
+  | RunMapQuery;
 
 interface AsyncRequestState {
   // Events and tokens for xhr

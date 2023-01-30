@@ -1,52 +1,100 @@
 import { format } from "d3-format";
 import { setHashString, getHashString } from "@macrostrat/ui-components";
+import { MapBackend, MapPosition, MapLayer, CoreState } from "./core";
+import { AppState, AppAction } from "./types";
 import {
-  MapBackend,
-  GotInitialMapState,
-  MapPosition,
-  MapLayer,
-  CoreState,
-} from "../sections/core/actions";
+  formatCoordForZoomLevel,
+  fmtInt,
+  fmt1,
+  fmt2,
+} from "~/map-interface/utils/formatting";
 
-const fmt = format(".3~f");
-const fmt2 = format(".2~f");
-const fmtInt = format(".0f");
+export function hashStringReducer(state: AppState, action: AppAction) {
+  switch (action.type) {
+    case "set-map-backend":
+    case "add-filter":
+    case "remove-filter":
+    case "clear-filters":
+    case "toggle-map-layer":
+    case "map-moved":
+      updateURI(state.core);
+  }
+  return state;
+}
 
-function updateURI(state: CoreState) {
+interface HashParams {
+  x?: string;
+  y?: string;
+  z?: string;
+  a?: string;
+  e?: string;
+}
+
+export function updateURI(state: CoreState) {
   let args: object = {};
 
   for (const filter of state.filters) {
     args[filter.type] = filter.id || filter.name;
   }
 
-  // Update the hash in the URI
-  const pos = state.mapPosition.camera ?? {};
-  const zoom = state.mapPosition.target?.zoom;
-  const { bearing = 0, pitch = 0 } = pos;
-
-  args.x = fmt(pos.lng);
-  args.y = fmt(pos.lat);
-  if (bearing == 0 && pitch == 0 && zoom != null) {
-    args.z = fmt2(zoom);
-  } else if (pos.altitude > 5000) {
-    args.z = fmt2(pos.altitude / 1000) + "km";
-  } else {
-    args.z = fmtInt(pos.altitude) + "m";
-  }
-  if (bearing != 0) {
-    let az = pos.bearing;
-    if (az < 0) az += 360;
-    args.a = fmtInt(az);
-  }
-  if (pitch != 0) {
-    args.e = fmtInt(pos.pitch);
-  }
+  applyXYPosition(args, state);
+  applyHeightAndOrientation(args, state);
 
   const layers = getLayerDescriptionFromLayers(state.mapLayers);
   args = { ...args, ...layers };
 
   setHashString(args, { arrayFormat: "comma", sort: false });
   return state;
+}
+
+function applyXYPosition(args: object, state: CoreState) {
+  const pos = state.mapPosition.camera;
+  if (pos == null) return;
+  const zoom = state.mapPosition.target?.zoom;
+
+  let x = formatCoordForZoomLevel(pos.lng, zoom);
+  let y = formatCoordForZoomLevel(pos.lat, zoom);
+
+  const { infoMarkerPosition } = state;
+  if (infoMarkerPosition != null) {
+    /* If the info marker is at the same position as the map, there
+     * is no need to include it in the hash string. This should lead
+     * to shorter sharable URLs */
+    let infoX = formatCoordForZoomLevel(infoMarkerPosition.lng, zoom);
+    let infoY = formatCoordForZoomLevel(infoMarkerPosition.lat, zoom);
+    if (infoX == x || infoY == y) {
+      return;
+    }
+  }
+  args["x"] = x;
+  args["y"] = y;
+}
+
+function applyHeightAndOrientation(args: HashParams, state: CoreState) {
+  const pos = state.mapPosition.camera ?? {
+    bearing: 0,
+    pitch: 0,
+    altitude: null,
+  };
+  const zoom = state.mapPosition.target?.zoom;
+
+  if (pos.bearing == 0 && pos.pitch == 0 && zoom != null) {
+    args.z = fmt1(zoom);
+  } else if (pos.altitude != null) {
+    if (pos.altitude > 5000) {
+      args.z = fmt2(pos.altitude / 1000) + "km";
+    } else {
+      args.z = fmtInt(pos.altitude) + "m";
+    }
+  }
+  if (pos.bearing != 0) {
+    let az = pos.bearing;
+    if (az < 0) az += 360;
+    args.a = fmtInt(az);
+  }
+  if (pos.pitch != 0) {
+    args.e = fmtInt(pos.pitch);
+  }
 }
 
 // The below disabled material is needed to enable filters in the URI
@@ -170,13 +218,24 @@ function layerDescriptionToLayers(
   return validateLayers(layers);
 }
 
-function updateStateFromURI(state): GotInitialMapState | void {
+export function updateMapPositionForHash(
+  state: CoreState,
+  hashString: string
+): CoreState {
   // Get the default map state
   try {
-    const hashData = getHashString(window.location.hash) ?? {};
+    const hashData = getHashString(hashString) ?? {};
 
     let { show = [], hide = [] } = hashData;
-    const { x = 16, y = 23, z = 2, a = 0, e = 0 } = hashData;
+    // Set default view parameters
+    const {
+      x = state.infoMarkerPosition?.lng ?? 16,
+      y = state.infoMarkerPosition?.lat ?? 23,
+      // Different default for zoom depending on whether we have a marker
+      z = state.infoMarkerPosition != null ? 7 : 2,
+      a = 0,
+      e = 0,
+    } = hashData;
 
     const mapLayers = layerDescriptionToLayers(show, hide);
 
@@ -217,23 +276,13 @@ function updateStateFromURI(state): GotInitialMapState | void {
     };
 
     return {
-      type: "got-initial-map-state",
-      data: {
-        mapPosition: position,
-        mapLayers,
-        mapBackend: MapBackend.MAPBOX3,
-      },
+      ...state,
+      mapPosition: position,
+      mapLayers,
+      mapBackend: MapBackend.MAPBOX3,
     };
   } catch (e) {
     console.error("Invalid map state:", e);
+    return state;
   }
 }
-
-export function gotInitialMapState(mapState) {
-  return {
-    type: "got-initial-map-state",
-    data: mapState,
-  };
-}
-
-export { updateStateFromURI, updateURI };
