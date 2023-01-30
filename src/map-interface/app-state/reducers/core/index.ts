@@ -30,6 +30,7 @@ const defaultState: CoreState = {
   mapLayers: new Set([MapLayer.BEDROCK, MapLayer.LINES, MapLayer.LABELS]),
   mapSettings: {
     highResolutionTerrain: true,
+    showLineSymbols: false,
   },
   // Events and tokens for xhr
   isFetching: false,
@@ -58,7 +59,6 @@ const defaultState: CoreState = {
     type: null,
   },
   mapUse3D: false,
-  mapShowLineSymbols: false,
   filtersOpen: false,
   filters: [],
   filteredColumns: {},
@@ -133,7 +133,9 @@ export function coreReducer(
       // rework this to open menu panel
       return { ...state, filtersOpen: !state.filtersOpen };
     case "toggle-line-symbols":
-      return { ...state, mapShowLineSymbols: !state.mapShowLineSymbols };
+      return update<CoreState>(state, {
+        mapSettings: { $toggle: ["showLineSymbols"] },
+      });
     case "add-filter":
       let alreadyHasFiter = false;
       state.filters.forEach((filter) => {

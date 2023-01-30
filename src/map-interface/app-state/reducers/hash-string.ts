@@ -1,6 +1,6 @@
-import { format } from "d3-format";
 import { setHashString, getHashString } from "@macrostrat/ui-components";
-import { MapBackend, MapPosition, MapLayer, CoreState } from "./core";
+import { MapBackend, MapLayer, CoreState } from "./core";
+import { MapPosition } from "@macrostrat/mapbox-utils";
 import { AppState, AppAction } from "./types";
 import {
   formatCoordForZoomLevel,
@@ -96,21 +96,6 @@ function applyHeightAndOrientation(args: HashParams, state: CoreState) {
   if (pos.pitch != 0) {
     args.e = fmtInt(pos.pitch);
   }
-}
-
-enum MapFilterType {
-  strat_name_concepts = "strat_name_concepts",
-  strat_name_orphans = "strat_name_orphans",
-  intervals = "intervals",
-  lithology_classes = "lithology_classes",
-  lithology_types = "lithology_types",
-  lithologies = "lithologies",
-  all_lithologies = "all_lithologies",
-  all_lithology_types = "all_lithology_types",
-  all_lithology_classes = "all_lithology_classes",
-  environments = "environments",
-  environment_types = "environment_types",
-  environment_classes = "environment_classes",
 }
 
 const filterTypes = [

@@ -9,7 +9,7 @@ import {
 } from "./fetch";
 import { AppAction, AppState } from "../reducers";
 import axios from "axios";
-import { asyncFilterHandler } from "./filters";
+import { runFilter } from "./filters";
 import { push } from "@lagunovsky/redux-react-router";
 import { routerBasename } from "~/map-interface/Settings";
 import { isDetailPanelRoute } from "../nav-hooks";
@@ -74,7 +74,7 @@ async function actionRunner(
       const gdd_data = await getAsyncGdd(mapInfo, source1.token);
       return { type: "received-gdd-query", data: gdd_data };
     case "async-add-filter":
-      return await asyncFilterHandler(action.filter);
+      return await runFilter(action.filter);
     case "get-filtered-columns":
       return {
         type: "update-column-filters",
@@ -82,8 +82,8 @@ async function actionRunner(
       };
     case "map-query": {
       const { lng, lat, z } = action;
-      const ln = formatCoordForZoomLevel(lng, z);
-      const lt = formatCoordForZoomLevel(lat, z);
+      const ln = formatCoordForZoomLevel(lng, Number(z));
+      const lt = formatCoordForZoomLevel(lat, Number(z));
       return push({
         pathname: routerBasename + `loc/${ln}/${lt}`,
         hash: location.hash,

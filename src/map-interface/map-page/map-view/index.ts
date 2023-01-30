@@ -158,8 +158,6 @@ function MapContainer(props) {
     mapPosition,
     infoDrawerOpen,
     mapIsLoading,
-    infoMarkerFocus,
-    mapShowLineSymbols,
     mapSettings,
   } = useAppState((state) => state.core);
 
@@ -260,7 +258,7 @@ function MapContainer(props) {
 
   useMapConditionalStyle(
     mapRef,
-    mapShowLineSymbols && mapLayers.has(MapLayer.LINES),
+    mapSettings.showLineSymbols && mapLayers.has(MapLayer.LINES),
     toggleLineSymbols
   );
 
