@@ -26,5 +26,12 @@ export type AppState = {
   menu: MenuState;
 };
 
-export type AppAction = CoreAction | MapAction | RouterActions | MenuAction;
+type OverallActions = { type: "replace-state"; state: AppState };
+
+export type AppAction =
+  | CoreAction
+  | MapAction
+  | RouterActions
+  | MenuAction
+  | OverallActions;
 export * from "./types";

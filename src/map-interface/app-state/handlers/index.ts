@@ -13,8 +13,10 @@ import { runFilter } from "./filters";
 import { push } from "@lagunovsky/redux-react-router";
 import { routerBasename } from "~/map-interface/Settings";
 import { isDetailPanelRoute } from "../nav-hooks";
-import { MenuPage } from "../reducers";
+import { MenuPage, setInfoMarkerPosition } from "../reducers";
 import { formatCoordForZoomLevel } from "~/map-interface/utils/formatting";
+import { currentPageForPathName } from "../nav-hooks";
+import { updateMapPositionForHash } from "../reducers/hash-string";
 
 async function actionRunner(
   state: AppState,
@@ -23,6 +25,33 @@ async function actionRunner(
 ): Promise<AppAction | void> {
   const coreState = state.core;
   switch (action.type) {
+    case "get-initial-map-state": {
+      const { pathname } = state.router.location;
+      let s1 = setInfoMarkerPosition(state);
+      let coreState = s1.core;
+
+      const activePage = currentPageForPathName(pathname);
+
+      // Harvest as much information as possible from the hash string
+      coreState = updateMapPositionForHash(
+        coreState,
+        state.router.location.hash
+      );
+
+      // Fill out the remainder with defaults
+
+      return {
+        type: "replace-state",
+        state: {
+          ...state,
+          core: {
+            ...coreState,
+            initialLoadComplete: true,
+          },
+          menu: { activePage },
+        },
+      };
+    }
     case "toggle-menu": {
       // Push the menu onto the history stack
       let activePage = state.menu.activePage;
@@ -31,7 +60,11 @@ async function actionRunner(
       } else {
         activePage = MenuPage.LAYERS;
       }
-      return await dispatch({ type: "set-menu-page", page: activePage });
+      return await actionRunner(
+        state,
+        { type: "set-menu-page", page: activePage },
+        dispatch
+      );
     }
     case "set-menu-page": {
       const { pathname } = state.router.location;
@@ -39,6 +72,7 @@ async function actionRunner(
         const newPathname = "/" + (action.page ?? "");
         await dispatch(push({ pathname: newPathname, hash: location.hash }));
       }
+      console.log("Setting menu page", action.page);
       return { type: "set-menu-page", page: action.page };
     }
     case "close-infodrawer":

@@ -31,7 +31,7 @@ interface HashParams {
 }
 
 export function updateURI(state: CoreState) {
-  let args: object = {};
+  let args: HashParams = {};
 
   // Get filter information from URI.
   for (const filter of state.filters) {

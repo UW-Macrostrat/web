@@ -1,10 +1,13 @@
 import { createBrowserHistory } from "history";
-import { coreReducer } from "./core";
+import { CoreAction, coreReducer } from "./core";
 import {
   contextPanelIsInitiallyOpen,
   currentPageForPathName,
 } from "../nav-hooks";
-import { createRouterReducer } from "@lagunovsky/redux-react-router";
+import {
+  createRouterReducer,
+  RouterActions,
+} from "@lagunovsky/redux-react-router";
 import { hashStringReducer, updateMapPositionForHash } from "./hash-string";
 import { matchPath } from "react-router";
 
@@ -52,37 +55,13 @@ function mainReducer(
         router: routerReducer(state.router, action),
       };
     }
-    case "get-initial-map-state":
-      const { pathname } = state.router.location;
-      const isOpen = contextPanelIsInitiallyOpen(pathname);
-      let s1 = setInfoMarkerPosition(state);
-      let coreState = s1.core;
-
-      const activePage = currentPageForPathName(pathname);
-
-      // Harvest as much information as possible from the hash string
-      coreState = updateMapPositionForHash(
-        coreState,
-        state.router.location.hash
-      );
-
-      // Fill out the remainder with defaults
-
-      return {
-        ...state,
-        core: {
-          ...coreState,
-          menuOpen: isOpen,
-          contextPanelOpen: isOpen,
-          initialLoadComplete: true,
-        },
-        menu: { activePage },
-      };
+    case "replace-state":
+      return action.state;
     default:
       return {
-        router: routerReducer(state.router, action),
-        core: coreReducer(state.core, action),
-        menu: menuReducer(state.menu, action),
+        router: routerReducer(state.router, action as RouterActions),
+        core: coreReducer(state.core, action as CoreAction),
+        menu: menuReducer(state.menu, action as MenuAction),
       };
   }
 }
@@ -93,7 +72,7 @@ const appReducer = (state: AppState, action: AppAction) => {
   return hashStringReducer(mainReducer(state, action), action);
 };
 
-function setInfoMarkerPosition(state: AppState): AppState {
+export function setInfoMarkerPosition(state: AppState): AppState {
   // Check if we are viewing a specific location
   const loc = matchPath("/loc/:lng/:lat", state.router.location.pathname);
   if (loc != null) {
