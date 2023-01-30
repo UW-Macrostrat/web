@@ -114,7 +114,27 @@ async function initializeMap(baseMapURL, mapPosition, infoMarkerPosition) {
   map.setProjection("globe");
 
   // set initial map position
-  //setMapPosition(map, mapPosition);
+  setMapPosition(map, mapPosition);
+
+  /* If we have an initially loaded info marker, we need to make sure
+    that it is actually visible on the map, and move to it if not.
+    This works around cases where the map is initialized with a hash string
+    that contradicts the focused location (which would happen if the link was
+    saved once the marker was moved out of view).
+    */
+  if (infoMarkerPosition != null) {
+    const focus = getFocusState(map, infoMarkerPosition);
+    console.log(focus);
+    if (
+      ![
+        PositionFocusState.CENTERED,
+        PositionFocusState.NEAR_CENTER,
+        PositionFocusState.OFF_CENTER,
+      ].includes(focus)
+    ) {
+      map.setCenter(infoMarkerPosition);
+    }
+  }
 
   return map;
 }
@@ -204,8 +224,6 @@ function MapContainer(props) {
     const map = mapRef.current;
     if (map == null) return;
 
-    setMapPosition(map, mapPosition);
-
     // Update the URI when the map moves
     const mapMovedCallback = () => {
       const marker = markerRef.current;
@@ -219,27 +237,8 @@ function MapContainer(props) {
         },
       });
     };
+    mapMovedCallback();
     map.on("moveend", debounce(mapMovedCallback, 100));
-
-    // If we have an initially loaded info marker, we need to make sure
-    // that it is actually visible on the map, and move to it if not
-    if (infoMarkerPosition != null) {
-      const focus = getFocusState(map, infoMarkerPosition);
-      if (
-        ![
-          PositionFocusState.CENTERED,
-          PositionFocusState.NEAR_CENTER,
-          PositionFocusState.OFF_CENTER,
-        ].includes(focus)
-      ) {
-        map.setCenter(infoMarkerPosition);
-        const newFocus = getFocusState(map, infoMarkerPosition);
-        runAction({
-          type: "map-moved",
-          data: { mapPosition: getMapPosition(map), infoMarkerFocus: null },
-        });
-      }
-    }
   }, [mapInitialized]);
 
   useEffect(() => {

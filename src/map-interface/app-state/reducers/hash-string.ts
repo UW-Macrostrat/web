@@ -11,7 +11,6 @@ export function hashStringReducer(state: AppState, action: AppAction) {
     case "clear-filters":
     case "toggle-map-layer":
     case "map-moved":
-      console.log(state);
       updateURI(state.core);
   }
   return state;
