@@ -130,9 +130,22 @@ type IntervalFilter = {
   id: number;
 };
 
-type IntervalFilterData = IntervalFilter & {
+type Timescale = {
+  timescale_id: number;
   name: string;
+};
+
+type IntervalFilterData = IntervalFilter & {
   category: "interval";
+  // These are standard fields for all intervals returned from Macrostrat's API
+  int_id: number;
+  name: string;
+  abbrev: string;
+  t_age: number;
+  b_age: number;
+  int_type: string;
+  timescales: Timescale[];
+  color: string;
 };
 
 // intervals

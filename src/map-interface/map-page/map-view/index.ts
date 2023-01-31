@@ -32,6 +32,7 @@ import {
   mergeStyles,
   MapPosition,
 } from "@macrostrat/mapbox-utils";
+import { getExpressionForFilters } from "./filter-helpers";
 import { MapSourcesLayer, mapStyle, toggleLineSymbols } from "../map-style";
 import { SETTINGS } from "../../Settings";
 import mapboxgl from "mapbox-gl";
@@ -107,7 +108,7 @@ async function initializeMap(baseMapURL, mapPosition, infoMarkerPosition) {
     //maxTileCacheSize: 0,
     logoPosition: "bottom-left",
     trackResize: true,
-    //antialias: true,
+    antialias: true,
     optimizeForTerrain: true,
   });
 
@@ -250,6 +251,18 @@ function MapContainer(props) {
     }
     runAction({ type: "map-layers-changed", mapLayers });
   }, [filters, mapLayers]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map == null) return;
+
+    const expr = getExpressionForFilters(filters);
+
+    console.log(expr);
+
+    map.setFilter("burwell_fill", expr);
+    map.setFilter("burwell_stroke", expr);
+  }, [filters]);
 
   useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));
   useEffect(() => {
