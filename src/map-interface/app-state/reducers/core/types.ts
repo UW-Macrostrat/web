@@ -73,6 +73,8 @@ type CONTEXT_OUTSIDE_CLICK = {
   type: "context-outside-click";
 };
 
+type StopSearching = { type: "stop-searching" };
+
 type SET_SEARCH_TERM = {
   type: "set-search-term";
   term: string;
@@ -101,6 +103,8 @@ type SET_ACTIVE_INDEX_MAP = { type: "set-active-index-map" };
 type UPDATE_STATE = { type: "update-state"; state: any };
 
 type ToggleHighResolutionTerrain = { type: "toggle-high-resolution-terrain" };
+
+type SetFilters = { type: "set-filters"; filters: FilterData[] };
 
 export type CoreAction =
   | MAP_LAYERS_CHANGED
@@ -146,7 +150,9 @@ export type CoreAction =
   | MapAction
   | RecenterQueryMarker
   | ToggleHighResolutionTerrain
-  | AddFilter;
+  | AddFilter
+  | SetFilters
+  | StopSearching;
 
 interface AsyncRequestState {
   // Events and tokens for xhr
@@ -198,7 +204,6 @@ export interface CoreState extends MapState, AsyncRequestState {
   mapCenter: MapCenterInfo;
   mapUse3D: boolean;
   filtersOpen: boolean;
-  filtersDefs: Filter[];
   filters: FilterData[];
   filteredColumns: object;
   data: [];

@@ -53,19 +53,17 @@ async function actionRunner(
       });
 
       // Apply all filters in parallel
-      await Promise.all(
+      const newFilters = await Promise.all(
         filters.map((f) => {
-          return runFilter(f).then((d) => {
-            console.log(d);
-            dispatch(d);
-          });
+          return runFilter(f);
         })
       );
       // Then reload the map by faking a layer change event
-      return {
-        type: "map-layers-changed",
-        mapLayers: coreState1.mapLayers,
-      };
+      return { type: "set-filters", filters: newFilters };
+      // return {
+      //   type: "map-layers-changed",
+      //   mapLayers: coreState1.mapLayers,
+      // };
     }
     case "toggle-menu": {
       // Push the menu onto the history stack
@@ -87,7 +85,6 @@ async function actionRunner(
         const newPathname = "/" + (action.page ?? "");
         await dispatch(push({ pathname: newPathname, hash: location.hash }));
       }
-      console.log("Setting menu page", action.page);
       return { type: "set-menu-page", page: action.page };
     }
     case "close-infodrawer":
@@ -123,7 +120,7 @@ async function actionRunner(
       const gdd_data = await getAsyncGdd(mapInfo, source1.token);
       return { type: "received-gdd-query", data: gdd_data };
     case "async-add-filter":
-      return await runFilter(action.filter);
+      return { type: "add-filter", filter: await runFilter(action.filter) };
     case "get-filtered-columns":
       return {
         type: "update-column-filters",

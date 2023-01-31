@@ -57,6 +57,12 @@ function mainReducer(
     }
     case "replace-state":
       return action.state;
+    case "set-menu-page":
+      return {
+        router: state.router,
+        core: coreReducer(state.core, { type: "stop-searching" }),
+        menu: menuReducer(state.menu, action),
+      };
     default:
       return {
         router: routerReducer(state.router, action as RouterActions),

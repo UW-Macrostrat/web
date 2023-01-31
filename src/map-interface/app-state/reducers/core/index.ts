@@ -2,6 +2,7 @@ import { sum, timescale } from "../../../utils";
 import { MapBackend, MapLayer } from "../map";
 import { CoreState, CoreAction } from "./types";
 import update, { Spec } from "immutability-helper";
+import { FilterData } from "../../handlers/filters";
 export * from "./types";
 
 const classColors = {
@@ -106,6 +107,7 @@ export function coreReducer(
         isSearching: false,
         inputFocus: false,
       };
+    case "stop-searching":
     case "context-outside-click":
       if (state.inputFocus) {
         return {
@@ -128,7 +130,6 @@ export function coreReducer(
       };
     case "expand-infodrawer":
       return { ...state, infoDrawerExpanded: !state.infoDrawerExpanded };
-
     case "toggle-filters":
       // rework this to open menu panel
       return { ...state, filtersOpen: !state.filtersOpen };
@@ -137,59 +138,21 @@ export function coreReducer(
         mapSettings: { $toggle: ["showLineSymbols"] },
       });
     case "add-filter":
-      let alreadyHasFiter = false;
-      state.filters.forEach((filter) => {
-        if (
-          filter.name === action.filter.name &&
-          filter.type === action.filter.type
-        ) {
-          alreadyHasFiter = true;
-        }
-      });
-      let fs = state.filters;
-      // if incoming is 'all', remove non-'all' version
-      if (action.filter.type.substr(0, 4) === "all_") {
-        fs = fs.filter((f) => {
-          if (
-            f.type === action.filter.type.replace("all_", "") &&
-            f.id === action.filter.id &&
-            f.name === action.filter.name
-          ) {
-            // do nothing
-          } else {
-            return f;
-          }
-        });
-      }
-      // if incoming is NOT 'all', remove the 'all' version
-      else {
-        fs = fs.filter((f) => {
-          if (
-            f.type === `all_${action.filter.type}` &&
-            f.id === action.filter.id &&
-            f.name === action.filter.name
-          ) {
-            // do nothing
-          } else {
-            return f;
-          }
-        });
-      }
-      if (!alreadyHasFiter) {
-        fs = fs.concat([action.filter]);
-      }
       // action.filter.type and action.filter.id go to the URI
       // handle search resetting
       return {
         ...state,
-        filters: fs,
+        filters: buildFilters(state.filters, [action.filter]),
         term: "",
         isSearching: false,
         searchResults: null,
         searchCancelToken: null,
         inputFocus: false,
-        // We have to do a lot of extra work to manage this context panel state
-        contextPanelOpen: state.menuOpen,
+      };
+    case "set-filters":
+      return {
+        ...state,
+        filters: buildFilters(state.filters, action.filters),
       };
     case "remove-filter":
       return {
@@ -544,4 +507,28 @@ export function coreReducer(
     default:
       return state;
   }
+}
+
+function isTheSame(f: FilterData, newFilter: FilterData) {
+  return (
+    f.name === newFilter.name &&
+    f.type === newFilter.type &&
+    f.id === newFilter.id
+  );
+}
+
+function isOverlappingType(f1: FilterData, f2: FilterData) {
+  /* Check if the filter is the same type or including all_ */
+  const t1 = f1.type.startsWith("all_") ? f1.type.replace("all_", "") : f1.type;
+  const t2 = f2.type.startsWith("all_") ? f2.type.replace("all_", "") : f2.type;
+  return f1.name === f2.name && t1 === t2 && f1.id === f2.id;
+}
+
+export function buildFilters(filters: FilterData[], newFilters: FilterData[]) {
+  // Remove any existing filters of the same type
+  const remainingFilters = filters.filter((f) => {
+    return !newFilters.some((nf) => isOverlappingType(f, nf));
+  });
+
+  return [...remainingFilters, ...newFilters];
 }
