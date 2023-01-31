@@ -265,6 +265,7 @@ function MapContainer(props) {
     const map = mapRef.current;
     if (map == null || !mapInitialized || !styleLoaded) return;
     const expr = getExpressionForFilters(filters);
+    console.log(filters, expr);
 
     map.setFilter("burwell_fill", expr);
     map.setFilter("burwell_stroke", expr);

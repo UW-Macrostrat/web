@@ -21,8 +21,8 @@ export async function runFilter(filter: Filter): Promise<FilterData> {
       // for some reason when loading from the uri this tiny timeout is required
       return {
         category: "lithology",
-        id: 0,
-        name: filter.name,
+        id: filter.name ?? filter.id,
+        name: filter.name ?? filter.id,
         type: filter.type,
         legend_ids: [],
       };
@@ -164,6 +164,8 @@ export const fetchIntervalFilter = async (
   return f;
 };
 
+/* Lithology classes and lithology types are filtered by name */
+
 type LithologyClassFilter = {
   type: FilterType.LithologyClasses;
   name: string;
@@ -204,8 +206,8 @@ type LithologyFilterData = {
     | FilterType.AllLithologies
     | FilterType.AllLithologyClasses
     | FilterType.AllLithologyTypes;
-  id: number;
   name: string;
+  id: string | number;
   legend_ids: number[];
 };
 
@@ -274,16 +276,16 @@ type AllLithologyClassesFilter = {
 async function fetchAllLithTypes(
   filter: AllLithologyClassesFilter | AllLithologyTypesFilter
 ): Promise<LithologyFilterData> {
-  const { type, name, id } = filter;
+  const { type, id } = filter;
   let param =
     type === "all_lithology_classes" ? "all_lith_class" : "all_lith_type";
-  let url = `${base}/mobile/map_filter?${param}=${id || name}`;
+  let url = `${base}/mobile/map_filter?${param}=${id}`;
   const res = await axios.get(url, { responseType: "json" });
   const legend_ids = res.data;
   return {
     category: "lithology",
-    id: 0,
-    name,
+    id,
+    name: id,
     type,
     legend_ids,
   };

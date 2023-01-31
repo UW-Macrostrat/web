@@ -31,6 +31,11 @@ interface HashParams {
   e?: string;
 }
 
+// function getFilterDescriptor(filter: Filter): string {
+//   if (filter.type.includes("lithology"))
+//   return filter.id ?? filter.name;
+// }
+
 export function updateURI(state: CoreState) {
   let args: HashParams = {};
 
@@ -268,6 +273,18 @@ export function updateMapPositionForHash(
   }
 }
 
+function formatID(id: string, type: FilterType): string | number {
+  switch (type) {
+    case FilterType.AllLithologyClasses:
+    case FilterType.AllLithologyTypes:
+    case FilterType.LithologyClasses:
+    case FilterType.LithologyTypes:
+      return id;
+    default:
+      return Number(id);
+  }
+}
+
 function getActiveFiltersFromHash(hashString: string): Filter[] {
   const hashData = getHashString(hashString) ?? {};
   let filters: Filter[] = [];
@@ -277,7 +294,7 @@ function getActiveFiltersFromHash(hashString: string): Filter[] {
       for (const v of Array.isArray(val) ? val : [val]) {
         filters.push({
           type: type as FilterType,
-          id: Number(v),
+          id: formatID(v, type),
         });
       }
     }

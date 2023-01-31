@@ -25,7 +25,10 @@ export function getExpressionForFilters(
   return expr;
 }
 
-function buildFilterClasses(type: string, name: string): mapboxgl.Expression {
+function buildFilterClasses(
+  type: string,
+  name: string | number
+): mapboxgl.Expression {
   /* This function implements filtering over numbered classes.
    It is used to provide filtering over the complex structure created for
    MVT tiles of the 'carto' style. */
@@ -48,9 +51,9 @@ function buildFilterExpression(filter: FilterData): mapboxgl.Expression {
         ["<", "best_age_top", filter.b_age],
       ];
     case "lithology_classes":
-      return buildFilterClasses("lith_class", filter.name);
+      return buildFilterClasses("lith_class", filter.name ?? filter.id);
     case "lithology_types":
-      return buildFilterClasses("lith_type", filter.name);
+      return buildFilterClasses("lith_type", filter.name ?? filter.id);
     case "lithologies":
     case "all_lithologies":
     case "all_lithology_types":
