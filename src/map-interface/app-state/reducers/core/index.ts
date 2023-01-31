@@ -141,15 +141,11 @@ export function coreReducer(
       // action.filter.type and action.filter.id go to the URI
       // handle search resetting
       return {
-        ...state,
+        ...coreReducer(state, { type: "stop-searching" }),
         filters: buildFilters(state.filters, [action.filter]),
-        term: "",
-        isSearching: false,
-        searchResults: null,
-        searchCancelToken: null,
-        inputFocus: false,
       };
     case "set-filters":
+      /* Set multiple filters at once, usually on app load. */
       return {
         ...state,
         filters: buildFilters(state.filters, action.filters),

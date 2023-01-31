@@ -31,7 +31,6 @@ class VestigialMap extends Component<MapProps, {}> {
   marker: mapboxgl.Marker | null = null;
   constructor(props) {
     super(props);
-    this.handleFilterChanges = this.handleFilterChanges.bind(this);
     this.mapLoaded = false;
     this.currentSources = [];
     this.elevationPoints = [];
@@ -426,9 +425,7 @@ class VestigialMap extends Component<MapProps, {}> {
     }
 
     // Handle changes to map filters
-    else if (
-      JSON.stringify(nextProps.filters) !== JSON.stringify(this.props.filters)
-    ) {
+    if (nextProps.filters != this.props.filters) {
       // If all filters have been removed simply reset the filter states
       if (nextProps.filters.length === 0) {
         this.filters = [];
@@ -483,6 +480,7 @@ class VestigialMap extends Component<MapProps, {}> {
       return;
     }
     const toApply = getToApply(this);
+
     this.map.setFilter("burwell_fill", toApply);
     this.map.setFilter("burwell_stroke", toApply);
   }

@@ -1,3 +1,4 @@
+import { FilterData } from "~/map-interface/app-state/handlers/filters";
 import { SETTINGS } from "../../Settings";
 
 /**
@@ -181,6 +182,28 @@ function getToApply(map): (string | string[])[] {
   }
   return toApply;
 }
+
+// function buildFilterDef(filter: FilterData): mapboxgl.Expression {
+//   switch (filter.type) {
+//     case "intervals":
+//       return [
+//         "all",
+//         [">", "best_age_bottom", filter.t_age],
+//         ["<", "best_age_top", filter.b_age],
+//       ];
+//     case "lithology_classes":
+//     case "lithology_types":
+//       return ["in", filter.name, ...filter.legend_ids];
+//     case "lithologies":
+//     case "all_lithologies":
+//     case "all_lithology_types":
+//     case "all_lithology_classes":
+//       return ["in", "legend_id", ...filter.legend_ids];
+//     case "strat_name_concepts":
+//     case "strat_name_orphans":
+//       return ["in", "legend_id", ...filter.legend_ids];
+//   }
+// }
 
 function PBDBHelper(map, bounds, zoom, maxClusterZoom = 7): void {
   // One for time, one for everything else because

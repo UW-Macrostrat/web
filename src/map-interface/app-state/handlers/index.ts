@@ -58,12 +58,14 @@ async function actionRunner(
           return runFilter(f);
         })
       );
-      // Then reload the map by faking a layer change event
-      return { type: "set-filters", filters: newFilters };
-      // return {
-      //   type: "map-layers-changed",
-      //   mapLayers: coreState1.mapLayers,
-      // };
+      await dispatch({ type: "set-filters", filters: newFilters });
+
+      // Then reload the map by faking a layer change event.
+      // There is probably a better way to do this.
+      return {
+        type: "map-layers-changed",
+        mapLayers: coreState1.mapLayers,
+      };
     }
     case "toggle-menu": {
       // Push the menu onto the history stack

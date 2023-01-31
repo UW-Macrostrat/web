@@ -34,7 +34,7 @@ import {
 } from "@macrostrat/mapbox-utils";
 import { MapSourcesLayer, mapStyle, toggleLineSymbols } from "../map-style";
 import { SETTINGS } from "../../Settings";
-import mapboxgl, { MercatorCoordinate, FreeCameraOptions } from "mapbox-gl";
+import mapboxgl from "mapbox-gl";
 
 const h = hyper.styled(styles);
 
@@ -184,6 +184,11 @@ function MapContainer(props) {
   useEffect(() => {
     initializeMap(baseMapURL, mapPosition, infoMarkerPosition).then((map) => {
       mapRef.current = map;
+
+      /* Right now we need to reload filters when the map is initialized.
+         Otherwise our (super-legacy and janky) filter system doesn't know
+         to update the map. */
+      //runAction({ type: "set-filters", filters: [...filters] });
       setMapInitialized(true);
     });
   }, []);

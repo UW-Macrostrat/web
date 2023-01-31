@@ -305,7 +305,6 @@ function getActiveFiltersFromHash(hashString: string): Filter[] {
   let filters: Filter[] = [];
   for (const type of Object.values(FilterType)) {
     const val = hashData[type];
-    console.log(type, val);
     if (val != null) {
       filters.push({
         type: type as FilterType,

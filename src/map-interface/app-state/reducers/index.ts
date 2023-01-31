@@ -1,14 +1,11 @@
 import { createBrowserHistory } from "history";
 import { CoreAction, coreReducer } from "./core";
-import {
-  contextPanelIsInitiallyOpen,
-  currentPageForPathName,
-} from "../nav-hooks";
+import { contextPanelIsInitiallyOpen } from "../nav-hooks";
 import {
   createRouterReducer,
   RouterActions,
 } from "@lagunovsky/redux-react-router";
-import { hashStringReducer, updateMapPositionForHash } from "./hash-string";
+import { hashStringReducer } from "./hash-string";
 import { matchPath } from "react-router";
 
 export const browserHistory = createBrowserHistory();
