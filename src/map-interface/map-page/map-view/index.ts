@@ -254,12 +254,8 @@ function MapContainer(props) {
 
   useEffect(() => {
     const map = mapRef.current;
-    if (map == null) return;
-
+    if (map == null || mapInitialized == false) return;
     const expr = getExpressionForFilters(filters);
-
-    console.log(expr);
-
     map.setFilter("burwell_fill", expr);
     map.setFilter("burwell_stroke", expr);
   }, [filters, mapInitialized]);
