@@ -167,6 +167,7 @@ function MapContainer(props) {
     is done loading
     */
   const [mapInitialized, setMapInitialized] = useState(false);
+  const [styleLoaded, setStyleLoaded] = useState(false);
 
   let mapRef = useMapRef();
 
@@ -185,6 +186,14 @@ function MapContainer(props) {
   useEffect(() => {
     initializeMap(baseMapURL, mapPosition, infoMarkerPosition).then((map) => {
       mapRef.current = map;
+
+      if (!map.isStyleLoaded()) {
+        map.once("style.load", () => {
+          setStyleLoaded(true);
+        });
+      } else {
+        setStyleLoaded(true);
+      }
 
       /* Right now we need to reload filters when the map is initialized.
          Otherwise our (super-legacy and janky) filter system doesn't know
@@ -254,11 +263,12 @@ function MapContainer(props) {
 
   useEffect(() => {
     const map = mapRef.current;
-    if (map == null || mapInitialized == false) return;
+    if (map == null || !mapInitialized || !styleLoaded) return;
     const expr = getExpressionForFilters(filters);
+
     map.setFilter("burwell_fill", expr);
     map.setFilter("burwell_stroke", expr);
-  }, [filters, mapInitialized]);
+  }, [filters, mapInitialized, styleLoaded]);
 
   useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));
   useEffect(() => {

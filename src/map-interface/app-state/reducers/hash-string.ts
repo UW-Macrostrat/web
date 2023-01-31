@@ -36,7 +36,8 @@ export function updateURI(state: CoreState) {
 
   // Get filter information from URI.
   for (const filter of state.filters) {
-    args[filter.type] = filter.id ?? filter.name;
+    args[filter.type] ??= [];
+    args[filter.type].push(filter.id ?? filter.name);
   }
 
   applyXYPosition(args, state);
@@ -98,39 +99,6 @@ function applyHeightAndOrientation(args: HashParams, state: CoreState) {
     args.e = fmtInt(pos.pitch);
   }
 }
-
-const filterTypes = [
-  "strat_name_concepts",
-  "strat_name_orphans",
-  "intervals",
-  "lithology_classes",
-  "lithology_types",
-  "lithologies",
-  "all_lithologies",
-  "all_lithology_types",
-  "all_lithology_classes",
-  "environments",
-  "environment_types",
-  "environment_classes",
-];
-
-// The below disabled material is needed to enable filters in the URI
-/*
-  let {
-    mapXYZ,
-  } = state;
-  let defaultState = {
-    z: mapXYZ.z,
-    x: mapXYZ.x,
-    y: mapXYZ.y,
-  };
-
-  let hash = window.location.hash;
-  let mapState = {
-    incomingFilters: [],
-    mapBackend: MapBackend.MAPBOX,
-  };
-*/
 
 function _fmt(x: string | number | string[]) {
   if (Array.isArray(x)) {
@@ -306,10 +274,12 @@ function getActiveFiltersFromHash(hashString: string): Filter[] {
   for (const type of Object.values(FilterType)) {
     const val = hashData[type];
     if (val != null) {
-      filters.push({
-        type: type as FilterType,
-        id: Number(val),
-      });
+      for (const v of Array.isArray(val) ? val : [val]) {
+        filters.push({
+          type: type as FilterType,
+          id: Number(v),
+        });
+      }
     }
   }
 
