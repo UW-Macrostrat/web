@@ -262,7 +262,7 @@ function MapContainer(props) {
 
     map.setFilter("burwell_fill", expr);
     map.setFilter("burwell_stroke", expr);
-  }, [filters]);
+  }, [filters, mapInitialized]);
 
   useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));
   useEffect(() => {
