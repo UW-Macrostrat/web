@@ -16,7 +16,7 @@ import { isDetailPanelRoute } from "../nav-hooks";
 import { MenuPage, setInfoMarkerPosition } from "../reducers";
 import { formatCoordForZoomLevel } from "~/map-interface/utils/formatting";
 import { currentPageForPathName } from "../nav-hooks";
-import { updateMapPositionForHash } from "../reducers/hash-string";
+import { getInitialStateFromHash } from "../reducers/hash-string";
 
 async function actionRunner(
   state: AppState,
@@ -33,23 +33,38 @@ async function actionRunner(
       const activePage = currentPageForPathName(pathname);
 
       // Harvest as much information as possible from the hash string
-      coreState = updateMapPositionForHash(
+      let [coreState1, filters] = getInitialStateFromHash(
         coreState,
         state.router.location.hash
       );
 
       // Fill out the remainder with defaults
 
-      return {
+      dispatch({
         type: "replace-state",
         state: {
           ...state,
           core: {
-            ...coreState,
+            ...coreState1,
             initialLoadComplete: true,
           },
           menu: { activePage },
         },
+      });
+
+      // Apply all filters in parallel
+      await Promise.all(
+        filters.map((f) => {
+          return runFilter(f).then((d) => {
+            console.log(d);
+            dispatch(d);
+          });
+        })
+      );
+      // Then reload the map by faking a layer change event
+      return {
+        type: "map-layers-changed",
+        mapLayers: coreState1.mapLayers,
       };
     }
     case "toggle-menu": {

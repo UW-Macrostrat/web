@@ -2,6 +2,7 @@ import { setHashString, getHashString } from "@macrostrat/ui-components";
 import { MapBackend, MapLayer, CoreState } from "./core";
 import { MapPosition } from "@macrostrat/mapbox-utils";
 import { AppState, AppAction } from "./types";
+import { Filter, FilterType } from "../handlers/filters";
 import {
   formatCoordForZoomLevel,
   fmtInt,
@@ -141,6 +142,15 @@ function _fmt(x: string | number | string[]) {
 interface HashLayerDesc {
   show?: string[];
   hide?: string[];
+}
+
+export function getInitialStateFromHash(
+  state: CoreState,
+  hashString: string
+): [CoreState, Filter[]] {
+  const newState = updateMapPositionForHash(state, hashString);
+  const filters = getActiveFiltersFromHash(hashString);
+  return [newState, filters];
 }
 
 function getLayerDescriptionFromLayers(layers: Set<MapLayer>): HashLayerDesc {
@@ -288,4 +298,21 @@ export function updateMapPositionForHash(
     console.error("Invalid map state:", e);
     return state;
   }
+}
+
+function getActiveFiltersFromHash(hashString: string): Filter[] {
+  const hashData = getHashString(hashString) ?? {};
+  let filters: Filter[] = [];
+  for (const type of Object.values(FilterType)) {
+    const val = hashData[type];
+    console.log(type, val);
+    if (val != null) {
+      filters.push({
+        type: type as FilterType,
+        id: Number(val),
+      });
+    }
+  }
+
+  return filters;
 }

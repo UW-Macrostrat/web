@@ -353,14 +353,15 @@ export function MapBottomControls() {
 }
 
 export function MapStyledContainer({ className, children }) {
-  const { mapIsRotated, mapUse3D, mapIsGlobal } = mapViewInfo(
-    useAppState((state) => state.core.mapPosition)
-  );
-  className = classNames(className, {
-    "map-is-rotated": mapIsRotated,
-    "map-3d-available": mapUse3D,
-    "map-is-global": mapIsGlobal,
-  });
+  const mapPosition = useAppState((state) => state.core.mapPosition);
+  if (mapPosition != null) {
+    const { mapIsRotated, mapUse3D, mapIsGlobal } = mapViewInfo(mapPosition);
+    className = classNames(className, {
+      "map-is-rotated": mapIsRotated,
+      "map-3d-available": mapUse3D,
+      "map-is-global": mapIsGlobal,
+    });
+  }
 
   return h("div", { className }, children);
 }

@@ -1,7 +1,7 @@
 import { MapAction, MapLayer, MapState, PositionFocusState } from "../map";
 import { CancelToken } from "axios";
 export * from "../map";
-import { AddFilter, FilterData } from "../../handlers/filters";
+import { AddFilter, FilterData, Filter } from "../../handlers/filters";
 
 //////////// Async Actions ///////////////
 type FETCH_SEARCH_QUERY = { type: "fetch-search-query"; term: string };
@@ -198,6 +198,7 @@ export interface CoreState extends MapState, AsyncRequestState {
   mapCenter: MapCenterInfo;
   mapUse3D: boolean;
   filtersOpen: boolean;
+  filtersDefs: Filter[];
   filters: FilterData[];
   filteredColumns: object;
   data: [];

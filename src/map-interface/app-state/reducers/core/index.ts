@@ -537,8 +537,6 @@ export function coreReducer(
         ...state,
         ...action.data,
       };
-    case "update-state":
-      return action.state;
     case "toggle-high-resolution-terrain":
       return update(state, {
         mapSettings: { $toggle: ["highResolutionTerrain"] },
