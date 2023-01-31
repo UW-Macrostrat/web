@@ -1,7 +1,8 @@
-import { format } from "d3-format";
 import { setHashString, getHashString } from "@macrostrat/ui-components";
-import { MapBackend, MapPosition, MapLayer, CoreState } from "./core";
+import { MapBackend, MapLayer, CoreState } from "./core";
+import { MapPosition } from "@macrostrat/mapbox-utils";
 import { AppState, AppAction } from "./types";
+import { Filter, FilterType } from "../handlers/filters";
 import {
   formatCoordForZoomLevel,
   fmtInt,
@@ -30,11 +31,18 @@ interface HashParams {
   e?: string;
 }
 
-export function updateURI(state: CoreState) {
-  let args: object = {};
+// function getFilterDescriptor(filter: Filter): string {
+//   if (filter.type.includes("lithology"))
+//   return filter.id ?? filter.name;
+// }
 
+export function updateURI(state: CoreState) {
+  let args: HashParams = {};
+
+  // Get filter information from URI.
   for (const filter of state.filters) {
-    args[filter.type] = filter.id || filter.name;
+    args[filter.type] ??= [];
+    args[filter.type].push(filter.id ?? filter.name);
   }
 
   applyXYPosition(args, state);
@@ -97,37 +105,6 @@ function applyHeightAndOrientation(args: HashParams, state: CoreState) {
   }
 }
 
-// The below disabled material is needed to enable filters in the URI
-/*
-  let {
-    mapXYZ,
-  } = state;
-  let defaultState = {
-    z: mapXYZ.z,
-    x: mapXYZ.x,
-    y: mapXYZ.y,
-  };
-  let filterTypes = [
-    "strat_name_concepts",
-    "strat_name_orphans",
-    "intervals",
-    "lithology_classes",
-    "lithology_types",
-    "lithologies",
-    "all_lithologies",
-    "all_lithology_types",
-    "all_lithology_classes",
-    "environments",
-    "environment_types",
-    "environment_classes",
-  ];
-  let hash = window.location.hash;
-  let mapState = {
-    incomingFilters: [],
-    mapBackend: MapBackend.MAPBOX,
-  };
-*/
-
 function _fmt(x: string | number | string[]) {
   if (Array.isArray(x)) {
     x = x[0];
@@ -138,6 +115,15 @@ function _fmt(x: string | number | string[]) {
 interface HashLayerDesc {
   show?: string[];
   hide?: string[];
+}
+
+export function getInitialStateFromHash(
+  state: CoreState,
+  hashString: string
+): [CoreState, Filter[]] {
+  const newState = updateMapPositionForHash(state, hashString);
+  const filters = getActiveFiltersFromHash(hashString);
+  return [newState, filters];
 }
 
 function getLayerDescriptionFromLayers(layers: Set<MapLayer>): HashLayerDesc {
@@ -285,4 +271,34 @@ export function updateMapPositionForHash(
     console.error("Invalid map state:", e);
     return state;
   }
+}
+
+function formatID(id: string, type: FilterType): string | number {
+  switch (type) {
+    case FilterType.AllLithologyClasses:
+    case FilterType.AllLithologyTypes:
+    case FilterType.LithologyClasses:
+    case FilterType.LithologyTypes:
+      return id;
+    default:
+      return Number(id);
+  }
+}
+
+function getActiveFiltersFromHash(hashString: string): Filter[] {
+  const hashData = getHashString(hashString) ?? {};
+  let filters: Filter[] = [];
+  for (const type of Object.values(FilterType)) {
+    const val = hashData[type];
+    if (val != null) {
+      for (const v of Array.isArray(val) ? val : [val]) {
+        filters.push({
+          type: type as FilterType,
+          id: formatID(v, type),
+        });
+      }
+    }
+  }
+
+  return filters;
 }

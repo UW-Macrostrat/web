@@ -51,7 +51,6 @@ function useOutsideClick(props: OutsideClickI) {
 
   useEffect(() => {
     function handleOutsideClick(event) {
-      console.log(ref.current);
       if (ref.current && !ref.current?.contains(event.target)) {
         return fn(event);
       }

@@ -32,9 +32,10 @@ import {
   mergeStyles,
   MapPosition,
 } from "@macrostrat/mapbox-utils";
+import { getExpressionForFilters } from "./filter-helpers";
 import { MapSourcesLayer, mapStyle, toggleLineSymbols } from "../map-style";
 import { SETTINGS } from "../../Settings";
-import mapboxgl, { MercatorCoordinate, FreeCameraOptions } from "mapbox-gl";
+import mapboxgl from "mapbox-gl";
 
 const h = hyper.styled(styles);
 
@@ -107,7 +108,7 @@ async function initializeMap(baseMapURL, mapPosition, infoMarkerPosition) {
     //maxTileCacheSize: 0,
     logoPosition: "bottom-left",
     trackResize: true,
-    //antialias: true,
+    antialias: true,
     optimizeForTerrain: true,
   });
 
@@ -158,8 +159,6 @@ function MapContainer(props) {
     mapPosition,
     infoDrawerOpen,
     mapIsLoading,
-    infoMarkerFocus,
-    mapShowLineSymbols,
     mapSettings,
   } = useAppState((state) => state.core);
 
@@ -168,6 +167,7 @@ function MapContainer(props) {
     is done loading
     */
   const [mapInitialized, setMapInitialized] = useState(false);
+  const [styleLoaded, setStyleLoaded] = useState(false);
 
   let mapRef = useMapRef();
 
@@ -186,6 +186,19 @@ function MapContainer(props) {
   useEffect(() => {
     initializeMap(baseMapURL, mapPosition, infoMarkerPosition).then((map) => {
       mapRef.current = map;
+
+      if (!map.isStyleLoaded()) {
+        map.once("style.load", () => {
+          setStyleLoaded(true);
+        });
+      } else {
+        setStyleLoaded(true);
+      }
+
+      /* Right now we need to reload filters when the map is initialized.
+         Otherwise our (super-legacy and janky) filter system doesn't know
+         to update the map. */
+      //runAction({ type: "set-filters", filters: [...filters] });
       setMapInitialized(true);
     });
   }, []);
@@ -248,6 +261,16 @@ function MapContainer(props) {
     runAction({ type: "map-layers-changed", mapLayers });
   }, [filters, mapLayers]);
 
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map == null || !mapInitialized || !styleLoaded) return;
+    const expr = getExpressionForFilters(filters);
+    console.log(filters, expr);
+
+    map.setFilter("burwell_fill", expr);
+    map.setFilter("burwell_stroke", expr);
+  }, [filters, mapInitialized, styleLoaded]);
+
   useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));
   useEffect(() => {
     const map = mapRef.current;
@@ -260,7 +283,7 @@ function MapContainer(props) {
 
   useMapConditionalStyle(
     mapRef,
-    mapShowLineSymbols && mapLayers.has(MapLayer.LINES),
+    mapSettings.showLineSymbols && mapLayers.has(MapLayer.LINES),
     toggleLineSymbols
   );
 
@@ -355,14 +378,15 @@ export function MapBottomControls() {
 }
 
 export function MapStyledContainer({ className, children }) {
-  const { mapIsRotated, mapUse3D, mapIsGlobal } = mapViewInfo(
-    useAppState((state) => state.core.mapPosition)
-  );
-  className = classNames(className, {
-    "map-is-rotated": mapIsRotated,
-    "map-3d-available": mapUse3D,
-    "map-is-global": mapIsGlobal,
-  });
+  const mapPosition = useAppState((state) => state.core.mapPosition);
+  if (mapPosition != null) {
+    const { mapIsRotated, mapUse3D, mapIsGlobal } = mapViewInfo(mapPosition);
+    className = classNames(className, {
+      "map-is-rotated": mapIsRotated,
+      "map-3d-available": mapUse3D,
+      "map-is-global": mapIsGlobal,
+    });
+  }
 
   return h("div", { className }, children);
 }

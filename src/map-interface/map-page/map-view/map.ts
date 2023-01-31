@@ -1,11 +1,7 @@
 import { Component, forwardRef } from "react";
 import { SETTINGS } from "../../Settings";
 import { mapStyle } from "../map-style";
-import {
-  getRemovedOrNewFilters,
-  getToApply,
-  PBDBHelper,
-} from "./filter-helpers";
+import { PBDBHelper } from "./filter-helpers";
 import h from "@macrostrat/hyper";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -31,28 +27,9 @@ class VestigialMap extends Component<MapProps, {}> {
   marker: mapboxgl.Marker | null = null;
   constructor(props) {
     super(props);
-    this.handleFilterChanges = this.handleFilterChanges.bind(this);
     this.mapLoaded = false;
     this.currentSources = [];
     this.elevationPoints = [];
-
-    // Separate time filters and other filters for different rules
-    // i.e. time filters are <interval> OR <interval> and all others are AND
-    this.timeFilters = [];
-    // Keep track of name: index values of time filters for easier removing
-    this.timeFiltersIndex = {};
-
-    this.filters = [];
-    this.filtersIndex = {};
-
-    this.lithFilters = [];
-    this.lithFiltersIndex = {};
-
-    this.stratNameFilters = [];
-    this.stratNameFiltersIndex = {};
-
-    this.environmentFilters = [];
-    this.environmentFilterIndex = {};
 
     this.maxValue = 500;
     this.previousZoom = 0;
@@ -64,33 +41,6 @@ class VestigialMap extends Component<MapProps, {}> {
     this.hoverStates = {};
     this.selectedStates = {};
   }
-
-  /*
-  getBaseMapStyle(props = null) {
-    props ??= this.props;
-
-    if (props.mapHasSatellite) {
-      return SETTINGS.satelliteMapURL;
-    } else if (props.isDark) {
-      return SETTINGS.darkMapURL;
-    } else {
-      return SETTINGS.baseMapURL;
-    }
-  }
-
-  componentDidMount() {
-    mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
-
-    this.map = new mapboxgl.Map({
-      container: "map",
-      style: this.getBaseMapStyle(),
-      maxZoom: 14,
-      //maxTileCacheSize: 0,
-      logoPosition: "bottom-left",
-      trackResize: true,
-      //antialias: true,
-      //optimizeForTerrain: true,
-  */
 
   onStyleLoad() {
     // The initial draw of the layers
@@ -138,7 +88,6 @@ class VestigialMap extends Component<MapProps, {}> {
     // NO idea why timeout is needed
     setTimeout(() => {
       this.mapLoaded = true;
-      this.applyFilters();
     }, 1);
   }
 
@@ -426,17 +375,9 @@ class VestigialMap extends Component<MapProps, {}> {
     }
 
     // Handle changes to map filters
-    else if (
-      JSON.stringify(nextProps.filters) !== JSON.stringify(this.props.filters)
-    ) {
+    if (nextProps.filters != this.props.filters) {
       // If all filters have been removed simply reset the filter states
       if (nextProps.filters.length === 0) {
-        this.filters = [];
-        this.filtersIndex = {};
-        this.timeFilters = [];
-        this.timeFiltersIndex = {};
-        this.applyFilters();
-
         // Remove filtered columns and add unfiltered columns
         if (this.props.mapLayers.has(MapLayer.COLUMNS)) {
           mapStyle.layers.forEach((layer) => {
@@ -458,33 +399,14 @@ class VestigialMap extends Component<MapProps, {}> {
         return false;
       }
 
-      this.handleFilterChanges(nextProps);
-
       if (nextProps.mapLayers.has(MapLayer.FOSSILS)) {
         this.refreshPBDB();
       }
 
-      // Basically if we are filtering by environments or anything else we can't filter the map with
-      // if (!newFilter.length) {
-      //   return
-      // }
-
       // Update the map styles
-      this.applyFilters();
       return false;
     }
     return false;
-  }
-
-  applyFilters() {
-    // don't try and update featureState if the map is loading
-    if (!this.mapLoaded) {
-      this.shouldUpdateFeatureState = true;
-      return;
-    }
-    const toApply = getToApply(this);
-    this.map.setFilter("burwell_fill", toApply);
-    this.map.setFilter("burwell_stroke", toApply);
   }
 
   // PBDB hexgrids and points are refreshed on every map move
@@ -523,10 +445,6 @@ class VestigialMap extends Component<MapProps, {}> {
     } else {
       return "#bdd7e7";
     }
-  }
-
-  handleFilterChanges(nextProps) {
-    getRemovedOrNewFilters(nextProps, this);
   }
 
   render() {

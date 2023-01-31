@@ -1,26 +1,22 @@
 import {
-  doSearchAsync,
   fetchFilteredColumns,
   getAsyncGdd,
   asyncGetColumn,
   asyncQueryMap,
   asyncGetElevation,
   getPBDBData,
+  base,
 } from "./fetch";
 import { AppAction, AppState } from "../reducers";
 import axios from "axios";
-import { asyncFilterHandler } from "./filters";
+import { runFilter } from "./filters";
 import { push } from "@lagunovsky/redux-react-router";
 import { routerBasename } from "~/map-interface/Settings";
 import { isDetailPanelRoute } from "../nav-hooks";
-import { MenuPage } from "../reducers";
+import { MenuPage, setInfoMarkerPosition } from "../reducers";
 import { formatCoordForZoomLevel } from "~/map-interface/utils/formatting";
-
-function getCancelToken() {
-  let CancelToken = axios.CancelToken;
-  let source = CancelToken.source();
-  return source;
-}
+import { currentPageForPathName } from "../nav-hooks";
+import { getInitialStateFromHash } from "../reducers/hash-string";
 
 async function actionRunner(
   state: AppState,
@@ -29,6 +25,48 @@ async function actionRunner(
 ): Promise<AppAction | void> {
   const coreState = state.core;
   switch (action.type) {
+    case "get-initial-map-state": {
+      const { pathname } = state.router.location;
+      let s1 = setInfoMarkerPosition(state);
+      let coreState = s1.core;
+
+      const activePage = currentPageForPathName(pathname);
+
+      // Harvest as much information as possible from the hash string
+      let [coreState1, filters] = getInitialStateFromHash(
+        coreState,
+        state.router.location.hash
+      );
+
+      // Fill out the remainder with defaults
+
+      dispatch({
+        type: "replace-state",
+        state: {
+          ...state,
+          core: {
+            ...coreState1,
+            initialLoadComplete: true,
+          },
+          menu: { activePage },
+        },
+      });
+
+      // Apply all filters in parallel
+      const newFilters = await Promise.all(
+        filters.map((f) => {
+          return runFilter(f);
+        })
+      );
+      await dispatch({ type: "set-filters", filters: newFilters });
+
+      // Then reload the map by faking a layer change event.
+      // There is probably a better way to do this.
+      return {
+        type: "map-layers-changed",
+        mapLayers: coreState1.mapLayers,
+      };
+    }
     case "toggle-menu": {
       // Push the menu onto the history stack
       let activePage = state.menu.activePage;
@@ -37,7 +75,11 @@ async function actionRunner(
       } else {
         activePage = MenuPage.LAYERS;
       }
-      return await dispatch({ type: "set-menu-page", page: activePage });
+      return await actionRunner(
+        state,
+        { type: "set-menu-page", page: activePage },
+        dispatch
+      );
     }
     case "set-menu-page": {
       const { pathname } = state.router.location;
@@ -60,8 +102,15 @@ async function actionRunner(
         term,
         cancelToken: source,
       });
-      const data = await doSearchAsync(term, source.token);
-      return { type: "received-search-query", data };
+      const res = await axios.get(base + "/mobile/autocomplete", {
+        params: {
+          include: "interval,lithology,environ,strat_name",
+          query: term,
+        },
+        cancelToken: source.token,
+        responseType: "json",
+      });
+      return { type: "received-search-query", data: res.data.success.data };
     case "fetch-gdd":
       const { mapInfo } = coreState;
       let CancelToken1 = axios.CancelToken;
@@ -73,7 +122,7 @@ async function actionRunner(
       const gdd_data = await getAsyncGdd(mapInfo, source1.token);
       return { type: "received-gdd-query", data: gdd_data };
     case "async-add-filter":
-      return await asyncFilterHandler(action.filter);
+      return { type: "add-filter", filter: await runFilter(action.filter) };
     case "get-filtered-columns":
       return {
         type: "update-column-filters",
@@ -81,8 +130,8 @@ async function actionRunner(
       };
     case "map-query": {
       const { lng, lat, z } = action;
-      const ln = formatCoordForZoomLevel(lng, z);
-      const lt = formatCoordForZoomLevel(lat, z);
+      const ln = formatCoordForZoomLevel(lng, Number(z));
+      const lt = formatCoordForZoomLevel(lat, Number(z));
       return push({
         pathname: routerBasename + `loc/${ln}/${lt}`,
         hash: location.hash,

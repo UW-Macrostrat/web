@@ -1,6 +1,7 @@
 import { MapAction, MapLayer, MapState, PositionFocusState } from "../map";
 import { CancelToken } from "axios";
 export * from "../map";
+import { AddFilter, FilterData, Filter } from "../../handlers/filters";
 
 //////////// Async Actions ///////////////
 type FETCH_SEARCH_QUERY = { type: "fetch-search-query"; term: string };
@@ -30,7 +31,6 @@ type CLOSE_INFODRAWER = { type: "close-infodrawer" };
 type TOGGLE_ELEVATION_CHART = { type: "toggle-elevation-chart" };
 
 type TOGGLE_FILTERS = { type: "toggle-filters" };
-type ADD_FILTER = { type: "add-filter"; filter: any };
 type REMOVE_FILTER = { type: "remove-filter"; filter: any };
 type UPDATE_COLUMN_FILTERS = { type: "update-column-filters"; columns: any };
 type CLEAR_FILTERS = { type: "clear-filters" };
@@ -73,6 +73,8 @@ type CONTEXT_OUTSIDE_CLICK = {
   type: "context-outside-click";
 };
 
+type StopSearching = { type: "stop-searching" };
+
 type SET_SEARCH_TERM = {
   type: "set-search-term";
   term: string;
@@ -102,6 +104,8 @@ type UPDATE_STATE = { type: "update-state"; state: any };
 
 type ToggleHighResolutionTerrain = { type: "toggle-high-resolution-terrain" };
 
+type SetFilters = { type: "set-filters"; filters: FilterData[] };
+
 export type CoreAction =
   | MAP_LAYERS_CHANGED
   | CLEAR_FILTERS
@@ -125,7 +129,6 @@ export type CoreAction =
   | CLOSE_INFODRAWER
   | TOGGLE_ELEVATION_CHART
   | TOGGLE_FILTERS
-  | ADD_FILTER
   | REMOVE_FILTER
   | UPDATE_COLUMN_FILTERS
   | START_MAP_QUERY
@@ -147,7 +150,9 @@ export type CoreAction =
   | MapAction
   | RecenterQueryMarker
   | ToggleHighResolutionTerrain
-  | RunMapQuery;
+  | AddFilter
+  | SetFilters
+  | StopSearching;
 
 interface AsyncRequestState {
   // Events and tokens for xhr
@@ -173,6 +178,7 @@ interface MapCenterInfo {
 
 interface MapSettings {
   highResolutionTerrain: boolean;
+  showLineSymbols: boolean;
 }
 
 export interface CoreState extends MapState, AsyncRequestState {
@@ -183,7 +189,7 @@ export interface CoreState extends MapState, AsyncRequestState {
   infoDrawerOpen: boolean;
   infoDrawerExpanded: boolean;
   isFetching: boolean;
-  elevationChartOpen: false;
+  elevationChartOpen: boolean;
   infoMarkerPosition: { lat: number; lng: number } | null;
   infoMarkerFocus: PositionFocusState | null;
   mapInfo: any[];
@@ -198,7 +204,7 @@ export interface CoreState extends MapState, AsyncRequestState {
   mapCenter: MapCenterInfo;
   mapUse3D: boolean;
   filtersOpen: boolean;
-  filters: any[];
+  filters: FilterData[];
   filteredColumns: object;
   data: [];
 }

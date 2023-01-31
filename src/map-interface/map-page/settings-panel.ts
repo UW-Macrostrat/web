@@ -7,7 +7,6 @@ import { useState } from "react";
 //import { LinkButton } from "@macrostrat/ui-components";
 //import { GlobeSettings } from "@macrostrat/cesium-viewer/settings";
 import { useAppState, useAppActions } from "~/map-interface/app-state";
-import { useLocation } from "react-router";
 import { MapLayer } from "~/map-interface/app-state";
 //import { DisplayQuality } from "@macrostrat/cesium-viewer";
 import styles from "./settings-panel.module.styl";
@@ -15,6 +14,7 @@ import { DarkModeButton, useDarkMode } from "@macrostrat/ui-components";
 
 const h = hyper.styled(styles);
 
+/*
 function MapTypeButton(props) {
   const { pathname, hash } = useLocation();
   const globeActive = pathname?.startsWith("/globe");
@@ -23,6 +23,7 @@ function MapTypeButton(props) {
   }
   return h(LinkButton, { to: { pathname: "/globe", hash } }, "Switch to globe");
 }
+*/
 
 const ExperimentsPanel = (props) => {
   const dispatch = useAppActions();
@@ -95,7 +96,7 @@ function LineSymbolsControl() {
     h(
       Switch,
       {
-        checked: useAppState((s) => s.core.mapShowLineSymbols),
+        checked: useAppState((s) => s.core.mapSettings.showLineSymbols),
         onChange() {
           runAction({ type: "toggle-line-symbols" });
         },
