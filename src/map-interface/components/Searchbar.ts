@@ -34,7 +34,7 @@ function ResultList({ searchResults }) {
   const runAction = useAppActions();
   const onSelectResult = useCallback(
     (f) => {
-      runAction({ type: "async-add-filter", filter: f });
+      runAction({ type: "select-search-result", result: f });
     },
     [runAction]
   );

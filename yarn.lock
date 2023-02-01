@@ -3969,6 +3969,7 @@ __metadata:
     react-redux: ^7.2.0
     react-router: ^6.3.0
     react-router-dom: ^6.3.0
+    react-router-hash-link: ^2.4.3
     reduce-reducers: ^1.0.4
     redux: ^4.0.5
     sass: ^1.49.0
@@ -26442,6 +26443,18 @@ __metadata:
     react: ">=16.8"
     react-dom: ">=16.8"
   checksum: 77603a654f8a8dc7f65535a2e5917a65f8d9ffcb06546d28dd297e52adcc4b8a84377e0115f48dca330b080af2da3e78f29d590c89307094d36927d2b1751ec3
+  languageName: node
+  linkType: hard
+
+"react-router-hash-link@npm:^2.4.3":
+  version: 2.4.3
+  resolution: "react-router-hash-link@npm:2.4.3"
+  dependencies:
+    prop-types: ^15.7.2
+  peerDependencies:
+    react: ">=15"
+    react-router-dom: ">=4"
+  checksum: 7dad53ebbd726e8a1ab379f4e68bce3a6b406e55af3de8a9c128510a81ad4a681ce9a5e25c0efc3d3c283b276145729b6228d0173d1d0c6e04b9cc6fb10738d4
   languageName: node
   linkType: hard
 
