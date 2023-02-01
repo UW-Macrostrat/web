@@ -1,6 +1,6 @@
 import {
   fetchFilteredColumns,
-  getAsyncGdd,
+  handleXDDQuery,
   asyncGetColumn,
   asyncQueryMap,
   asyncGetElevation,
@@ -111,16 +111,16 @@ async function actionRunner(
         responseType: "json",
       });
       return { type: "received-search-query", data: res.data.success.data };
-    case "fetch-gdd":
+    case "fetch-xdd":
       const { mapInfo } = coreState;
       let CancelToken1 = axios.CancelToken;
       let source1 = CancelToken1.source();
       dispatch({
-        type: "start-gdd-query",
+        type: "start-xdd-query",
         cancelToken: source1,
       });
-      const gdd_data = await getAsyncGdd(mapInfo, source1.token);
-      return { type: "received-gdd-query", data: gdd_data };
+      const gdd_data = await handleXDDQuery(mapInfo, source1.token);
+      return { type: "received-xdd-query", data: gdd_data };
     case "async-add-filter":
       return { type: "add-filter", filter: await runFilter(action.filter) };
     case "get-filtered-columns":

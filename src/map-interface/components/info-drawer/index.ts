@@ -7,7 +7,7 @@ import { GeologicMapInfo } from "./geo-map";
 import { MacrostratLinkedData } from "./macrostrat-linked";
 import { RegionalStratigraphy } from "./reg-strat";
 import { Physiography } from "./physiography";
-import { GddExpansion } from "./gdd";
+import { XddExpansion } from "./xdd-panel";
 import { useAppState } from "~/map-interface/app-state";
 import classNames from "classnames";
 import styles from "./main.module.styl";
@@ -53,19 +53,13 @@ function InfoDrawer(props) {
 }
 
 function InfoDrawerInterior(props) {
-  const { mapInfo, fetchingGdd, columnInfo, gddInfo, pbdbData } = useAppState(
-    (state) => state.core
-  );
-
-  const runAction = useAppActions();
-
-  const openGdd = () => {
-    runAction({ type: "fetch-gdd" });
-  };
+  const { mapInfo, columnInfo, pbdbData } = useAppState((state) => state.core);
 
   if (!mapInfo || !mapInfo.mapData) {
     return null;
   }
+
+  const { mapData } = mapInfo;
 
   let source =
     mapInfo && mapInfo.mapData && mapInfo.mapData.length
@@ -93,12 +87,7 @@ function InfoDrawerInterior(props) {
       bedrockMatchExpanded: true,
       source,
     }),
-    h(GddExpansion, {
-      mapInfo,
-      gddInfo,
-      openGdd,
-      fetchingGdd,
-    }),
+    h.if(mapData[0] && mapData[0].strat_name.length)(XddExpansion),
     h(Physiography, { mapInfo }),
   ]);
 }

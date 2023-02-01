@@ -2,12 +2,13 @@ import { MapAction, MapLayer, MapState, PositionFocusState } from "../map";
 import { CancelToken } from "axios";
 export * from "../map";
 import { AddFilter, FilterData, Filter } from "../../handlers/filters";
+import { XDDSnippet } from "../../handlers/fetch";
 
 //////////// Async Actions ///////////////
 type FETCH_SEARCH_QUERY = { type: "fetch-search-query"; term: string };
 type ASYNC_ADD_FILTER = { type: "async-add-filter"; filter: any };
 type GET_FILTERED_COLUMNS = { type: "get-filtered-columns" };
-type FETCH_GDD = { type: "fetch-gdd" };
+type FETCH_XDD = { type: "fetch-xdd" };
 type MAP_QUERY = {
   type: "map-query" | "run-map-query";
   lng: number;
@@ -56,8 +57,8 @@ type MAP_LAYERS_CHANGED = {
   mapLayers: Set<MapLayer>;
 };
 
-type START_GDD_QUERY = { type: "start-gdd-query"; cancelToken: any };
-type RECEIVED_GDD_QUERY = { type: "received-gdd-query"; data: any };
+type START_XDD_QUERY = { type: "start-xdd-query"; cancelToken: any };
+type RECEIVED_XDD_QUERY = { type: "received-xdd-query"; data: XDDSnippet[] };
 
 type START_PBDB_QUERY = { type: "start-pbdb-query" };
 type RECEIVED_PBDB_QUERY = { type: "received-pbdb-query"; data: any };
@@ -115,7 +116,9 @@ export type CoreAction =
   | GET_ELEVATION
   | GET_COLUMN
   | MAP_QUERY
-  | FETCH_GDD
+  | FETCH_XDD
+  | START_XDD_QUERY
+  | RECEIVED_XDD_QUERY
   | UPDATE_STATE
   | GET_FILTERED_COLUMNS
   | ASYNC_ADD_FILTER
@@ -135,8 +138,6 @@ export type CoreAction =
   | RECEIVED_MAP_QUERY
   | START_COLUMN_QUERY
   | RECEIVED_COLUMN_QUERY
-  | START_GDD_QUERY
-  | RECEIVED_GDD_QUERY
   | START_PBDB_QUERY
   | RECEIVED_PBDB_QUERY
   | RESET_PBDB
@@ -159,14 +160,14 @@ interface AsyncRequestState {
   // NOTE: we should really improve some of this token infrastructure
   fetchingMapInfo: boolean;
   fetchingColumnInfo: boolean;
-  fetchingGdd: boolean;
+  fetchingXdd: boolean;
+  xddCancelToken: CancelToken | null;
   isSearching: boolean;
   term: string;
   fetchingElevation: boolean;
   fetchingPbdb: boolean;
   mapInfoCancelToken: CancelToken | null;
   columnInfoCancelToken: CancelToken | null;
-  gddCancelToken: CancelToken | null;
   searchCancelToken: CancelToken | null;
   elevationCancelToken: CancelToken | null;
 }
@@ -195,7 +196,7 @@ export interface CoreState extends MapState, AsyncRequestState {
   mapInfo: any[];
   mapSettings: MapSettings;
   columnInfo: object;
-  gddInfo: any[];
+  xddInfo: XDDSnippet[];
   searchResults: any;
   elevationData: any;
   inputFocus: boolean;

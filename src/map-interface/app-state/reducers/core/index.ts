@@ -39,8 +39,9 @@ const defaultState: CoreState = {
   mapInfoCancelToken: null,
   fetchingColumnInfo: false,
   columnInfoCancelToken: null,
-  fetchingGdd: false,
-  gddCancelToken: null,
+  fetchingXdd: false,
+  xddCancelToken: null,
+  xddInfo: [],
   isSearching: false,
   inputFocus: false,
   term: "",
@@ -50,7 +51,6 @@ const defaultState: CoreState = {
   fetchingPbdb: false,
   mapInfo: [],
   columnInfo: {},
-  gddInfo: [],
   searchResults: null,
   elevationData: [],
   elevationMarkerLocation: [],
@@ -389,21 +389,23 @@ export function coreReducer(
         searchCancelToken: null,
       };
 
-    case "start-gdd-query":
+    case "start-xdd-query":
       // When a search is requested, cancel any pending requests first
-      if (state.gddCancelToken) {
-        state.gddCancelToken.cancel();
+      if (state.xddCancelToken) {
+        state.xddCancelToken.cancel();
       }
       return {
         ...state,
-        fetchingGdd: true,
-        gddCancelToken: action.cancelToken,
+        fetchingXdd: true,
+        xddCancelToken: action.cancelToken,
       };
-    case "received-gdd-query":
+    case "received-xdd-query":
       let parsed = {
         journals: [],
       };
       let articles = {};
+
+      console.log(action.data);
 
       for (let i = 0; i < action.data.length; i++) {
         let found = false;
@@ -430,9 +432,9 @@ export function coreReducer(
 
       return {
         ...state,
-        fetchingGdd: false,
-        gddInfo: parsed.journals,
-        gddCancelToken: null,
+        fetchingXdd: false,
+        xddInfo: action.data,
+        xddCancelToken: null,
       };
 
     // Handle elevation
