@@ -1,15 +1,28 @@
 import { Version } from "./map-interface/components/docs";
+import { DocsVideo, DocsMedia } from "./map-interface/components/docs";
 
 <Version spec="4.1.0" date="February 1, 2023" />
 
 ### User interface improvements
+
+<DocsMedia href="version-4.1.0/settings-panel.png" width={120}>
+  The new <em>Settings</em> panel
+</DocsMedia>
 
 - Added a new _Settings_ panel to control map display options. This panel contains an
   _Experiments_ panel to toggle previews of new features that are still in development.
 - Added a **Dark mode** for the entire user interface, including a new map style. This follows
   the browser-level preference by default, but it can be overridden from the _Settings_ panel.
 
+<DocsMedia href="version-4.1.0/dark-mode.mp4" float={null} width="50%">
+  Toggling "Dark mode"
+</DocsMedia>
+
 #### Map features and bug fixes
+
+<DocsMedia href="version-4.1.0/basemap-labels.mp4" float={null} width="70%">
+  Toggling basemap labels
+</DocsMedia>
 
 - Added an option to show and hide text labels on the map (in the _Settings_ panel)
 - Added a scale bar
@@ -18,7 +31,18 @@ import { Version } from "./map-interface/components/docs";
 - Decoupled location marker sizing and visual design from map style
 - Added an experimental _Map sources_ layer (_not yet fully integrated into the user interface_)
 
+<DocsMedia
+  href="version-4.1.0/cordillera-without-labels.png"
+  float={null}
+  width="50%"
+>
+  The Rocky Mountains without map labels
+</DocsMedia>
+
 #### Info panel
+
+<DocsMedia href="version-4.1.0/infobox-header.png" />
+<DocsMedia href="version-4.1.0/age-refinement-panel.png" />
 
 - Update [xDD](https://xdd.wisc.edu) publications list to use the newer snippets API.
 - Added an _Age refinement_ panel to show relative age precision improvement
@@ -27,6 +51,10 @@ import { Version } from "./map-interface/components/docs";
   and to copy the location permalink to the clipboard.
 
 #### Line symbols (_experimental_ 🧫)
+
+<DocsMedia href="version-4.1.0/experimental-line-symbols.mp4" float={null}>
+  Experimental line symbols
+</DocsMedia>
 
 In the _Experiments_ panel, we have added a toggle for _Line symbols_, which
 enables a new rendering system for fault ticks and fold axes. This is
@@ -45,6 +73,10 @@ map-by-map basis.
   `https://macrostrat.org/loc/<longitude>/<latitude>#<hash>`.
 - Correctly save filter states from URL parameters.
 - Major simplification of the internal design of the map filter system.
+
+<DocsMedia href="version-4.1.0/save-location.mp4" float={null} width="50%">
+  Saving location state
+</DocsMedia>
 
 #### Examples of saved state
 
