@@ -48,7 +48,6 @@ function CollectionNumber({ col }) {
 }
 
 function Header({ col }) {
-  console.log(col);
   return h("div.pbdb-panel-header", [
     h.if(col.nam)("h4", {}, col.nam),
     h.if(col.oid)(CollectionNumber, { col }),

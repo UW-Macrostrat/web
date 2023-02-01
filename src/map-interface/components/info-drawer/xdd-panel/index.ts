@@ -25,7 +25,7 @@ function XddExpansion() {
     },
     [
       h.if(fetchingXdd)(Spinner),
-      h.if(xddInfo.length > 0)([
+      h.if(!fetchingXdd && xddInfo.length > 0)([
         Array.from(groupedData.entries()).map(([journal, snippets]) => {
           return h(Journal, {
             name: journal,
@@ -35,12 +35,6 @@ function XddExpansion() {
           });
         }),
       ]),
-
-      // h.if(xddInfo.length > 0)([
-      //   xddInfo.map((journal) => {
-      //     return h(Journal, { data: journal, key: journal.name });
-      //   }),
-      // ]),
     ]
   );
 }
@@ -58,37 +52,5 @@ function groupSnippetsByJournal(
   }
   return journals;
 }
-
-/*
-      let parsed = {
-        journals: [],
-      };
-      let articles = {};
-
-      console.log(action.data);
-
-      for (let i = 0; i < action.data.length; i++) {
-        let found = false;
-        if (articles[action.data[i].docid]) {
-          continue;
-        } else {
-          articles[action.data[i].docid] = true;
-        }
-        for (let j = 0; j < parsed.journals.length; j++) {
-          if (parsed.journals[j].name === action.data[i].journal) {
-            parsed.journals[j].articles.push(action.data[i]);
-            found = true;
-          }
-        }
-
-        if (!found) {
-          parsed.journals.push({
-            name: action.data[i].journal,
-            source: action.data[i].publisher,
-            articles: [action.data[i]],
-          });
-        }
-      }
-*/
 
 export { XddExpansion };

@@ -112,8 +112,6 @@ function PBDBHelper(map, bounds, zoom, maxClusterZoom = 7): void {
     latMax = Math.min(Math.max(latMax, latMax * 5), 85);
   }
 
-  console.log(latMin, latMax);
-
   if (map.timeFilters.length && map.timeFilters.length > 1) {
     urls = map.timeFilters.map((f) => {
       let url = `${SETTINGS.pbdbDomain}/data1.2/colls/${

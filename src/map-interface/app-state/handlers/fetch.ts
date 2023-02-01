@@ -87,9 +87,13 @@ export async function handleXDDQuery(
     })
     .join(",");
 
-  let url = `${basev1}/snippets?term=${stratNames}`;
+  let url = `${basev1}/snippets`;
 
   const res = await axios.get(url, {
+    params: {
+      article_limit: 20,
+      term: stratNames,
+    },
     cancelToken: cancelToken,
     responseType: "json",
   });

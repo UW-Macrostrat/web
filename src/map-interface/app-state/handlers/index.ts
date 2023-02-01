@@ -158,6 +158,7 @@ async function actionRunner(
           await actionRunner(state, { type: "get-column", column }, dispatch)
         );
       }
+
       let mapData = await asyncQueryMap(
         lng,
         lat,
