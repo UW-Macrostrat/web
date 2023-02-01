@@ -1,5 +1,4 @@
-import { ReactChild } from "react";
-import { Card, Spinner } from "@blueprintjs/core";
+import { Card } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import { Navigate, Route, Routes, useParams } from "react-router-dom";
 import { useAppActions } from "~/map-interface/app-state";
@@ -9,7 +8,7 @@ import { GeologicMapInfo } from "./geo-map";
 import { MacrostratLinkedData } from "./macrostrat-linked";
 import { RegionalStratigraphy } from "./reg-strat";
 import { Physiography } from "./physiography";
-import { GddExpansion } from "./gdd";
+import { XddExpansion } from "./xdd-panel";
 import { useAppState } from "~/map-interface/app-state";
 import classNames from "classnames";
 import styles from "./main.module.styl";
@@ -27,9 +26,8 @@ function InfoDrawer(props) {
   // We used to enable panels when certain layers were on,
   // but now we just show all panels always
   let { className } = props;
-  const { mapInfo, fetchingMapInfo, infoMarkerPosition } = useAppState(
-    (state) => state.core
-  );
+  const { mapInfo, fetchingMapInfo, infoMarkerPosition, mapPosition } =
+    useAppState((state) => state.core);
 
   const runAction = useAppActions();
 
@@ -41,6 +39,7 @@ function InfoDrawer(props) {
     h(InfoDrawerHeader, {
       mapInfo,
       infoMarkerPosition,
+      zoom: mapPosition.target?.zoom,
       onCloseClick: () => runAction({ type: "close-infodrawer" }),
     }),
     h("div.infodrawer-body", [
@@ -56,19 +55,13 @@ function InfoDrawer(props) {
 }
 
 function InfoDrawerInterior(props) {
-  const { mapInfo, fetchingGdd, columnInfo, gddInfo, pbdbData } = useAppState(
-    (state) => state.core
-  );
-
-  const runAction = useAppActions();
-
-  const openGdd = () => {
-    runAction({ type: "fetch-gdd" });
-  };
+  const { mapInfo, columnInfo, pbdbData } = useAppState((state) => state.core);
 
   if (!mapInfo || !mapInfo.mapData) {
     return null;
   }
+
+  const { mapData } = mapInfo;
 
   let source =
     mapInfo && mapInfo.mapData && mapInfo.mapData.length
@@ -96,12 +89,7 @@ function InfoDrawerInterior(props) {
       bedrockMatchExpanded: true,
       source,
     }),
-    h(GddExpansion, {
-      mapInfo,
-      gddInfo,
-      openGdd,
-      fetchingGdd,
-    }),
+    h.if(mapData[0] && mapData[0].strat_name.length)(XddExpansion),
     h(Physiography, { mapInfo }),
   ]);
 }

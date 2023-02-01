@@ -1,49 +1,100 @@
 import {
-  doSearchAsync,
   fetchFilteredColumns,
-  getAsyncGdd,
+  handleXDDQuery,
   asyncGetColumn,
   asyncQueryMap,
   asyncGetElevation,
   getPBDBData,
+  base,
 } from "./fetch";
-import { Action, AppState } from "../sections";
+import { AppAction, AppState } from "../reducers";
 import axios from "axios";
-import { asyncFilterHandler } from "./filters";
-import { updateStateFromURI } from "../helpers";
+import { runFilter } from "./filters";
 import { push } from "@lagunovsky/redux-react-router";
 import { routerBasename } from "~/map-interface/Settings";
-
-function getCancelToken() {
-  let CancelToken = axios.CancelToken;
-  let source = CancelToken.source();
-  return source;
-}
+import { isDetailPanelRoute } from "../nav-hooks";
+import { MenuPage, setInfoMarkerPosition } from "../reducers";
+import { formatCoordForZoomLevel } from "~/map-interface/utils/formatting";
+import { currentPageForPathName } from "../nav-hooks";
+import { getInitialStateFromHash } from "../reducers/hash-string";
 
 async function actionRunner(
   state: AppState,
-  action: Action,
+  action: AppAction,
   dispatch = null
-): Promise<Action | void> {
+): Promise<AppAction | void> {
   const coreState = state.core;
   switch (action.type) {
-    case "get-initial-map-state":
-      return updateStateFromURI(coreState);
-    case "toggle-menu":
-      const isRootRoute = state.router.location.pathname == routerBasename;
-      const goToLayersPage = push(routerBasename + "layers" + location.hash);
-      if (state.core.inputFocus) {
-        if (isRootRoute) {
-          dispatch(goToLayersPage);
-        }
-        return { type: "set-input-focus", inputFocus: false };
+    case "get-initial-map-state": {
+      const { pathname } = state.router.location;
+      let s1 = setInfoMarkerPosition(state);
+      let coreState = s1.core;
+
+      const activePage = currentPageForPathName(pathname);
+
+      // Harvest as much information as possible from the hash string
+      let [coreState1, filters] = getInitialStateFromHash(
+        coreState,
+        state.router.location.hash
+      );
+
+      // Fill out the remainder with defaults
+
+      dispatch({
+        type: "replace-state",
+        state: {
+          ...state,
+          core: {
+            ...coreState1,
+            initialLoadComplete: true,
+          },
+          menu: { activePage },
+        },
+      });
+
+      // Apply all filters in parallel
+      const newFilters = await Promise.all(
+        filters.map((f) => {
+          return runFilter(f);
+        })
+      );
+      await dispatch({ type: "set-filters", filters: newFilters });
+
+      // Then reload the map by faking a layer change event.
+      // There is probably a better way to do this.
+      return {
+        type: "map-layers-changed",
+        mapLayers: coreState1.mapLayers,
+      };
+    }
+    case "toggle-menu": {
+      // Push the menu onto the history stack
+      let activePage = state.menu.activePage;
+      if (activePage != null) {
+        activePage = null;
+      } else {
+        activePage = MenuPage.LAYERS;
       }
-      if (isRootRoute) {
-        return goToLayersPage;
+      return await actionRunner(
+        state,
+        { type: "set-menu-page", page: activePage },
+        dispatch
+      );
+    }
+    case "set-menu-page": {
+      const { pathname } = state.router.location;
+      if (!isDetailPanelRoute(pathname)) {
+        const newPathname = "/" + (action.page ?? "");
+        await dispatch(push({ pathname: newPathname, hash: location.hash }));
       }
-      return push(routerBasename + location.hash);
+      return { type: "set-menu-page", page: action.page };
+    }
+    case "close-infodrawer":
+      const pathname = routerBasename + (state.menu.activePage ?? "");
+      await dispatch(push({ pathname, hash: location.hash }));
+      return action;
     case "fetch-search-query":
-      let term = action.term;
+      const { term } = action;
       let CancelToken = axios.CancelToken;
       let source = CancelToken.source();
       dispatch({
@@ -51,33 +102,48 @@ async function actionRunner(
         term,
         cancelToken: source,
       });
-      const data = await doSearchAsync(term, source.token);
-      return { type: "received-search-query", data };
-    case "fetch-gdd":
+      const res = await axios.get(base + "/mobile/autocomplete", {
+        params: {
+          include: "interval,lithology,environ,strat_name",
+          query: term,
+        },
+        cancelToken: source.token,
+        responseType: "json",
+      });
+      return { type: "received-search-query", data: res.data.success.data };
+    case "fetch-xdd":
       const { mapInfo } = coreState;
       let CancelToken1 = axios.CancelToken;
       let source1 = CancelToken1.source();
       dispatch({
-        type: "start-gdd-query",
+        type: "start-xdd-query",
         cancelToken: source1,
       });
-      const gdd_data = await getAsyncGdd(mapInfo, source1.token);
-      return { type: "received-gdd-query", data: gdd_data };
+      const gdd_data = await handleXDDQuery(mapInfo, source1.token);
+      return { type: "received-xdd-query", data: gdd_data };
     case "async-add-filter":
-      let filter = action.filter;
-      const filterAction = await asyncFilterHandler(filter);
-      return filterAction;
+      return { type: "add-filter", filter: await runFilter(action.filter) };
     case "get-filtered-columns":
-      let filteredColumns = await fetchFilteredColumns(coreState.filters);
       return {
         type: "update-column-filters",
-        columns: filteredColumns,
+        columns: await fetchFilteredColumns(coreState.filters),
       };
-    case "map-query":
+    case "map-query": {
+      const { lng, lat, z } = action;
+      const ln = formatCoordForZoomLevel(lng, Number(z));
+      const lt = formatCoordForZoomLevel(lat, Number(z));
+      return push({
+        pathname: routerBasename + `loc/${ln}/${lt}`,
+        hash: location.hash,
+      });
+      //return { ...action, type: "run-map-query" };
+    }
+    case "run-map-query":
       const { lng, lat, z, map_id, column } = action;
       let CancelTokenMapQuery = axios.CancelToken;
       let sourceMapQuery = CancelTokenMapQuery.source();
       if (coreState.inputFocus && coreState.contextPanelOpen) {
+        // Dismiss the current context panel
         return { type: "context-outside-click" };
       }
 
@@ -92,6 +158,7 @@ async function actionRunner(
           await actionRunner(state, { type: "get-column", column }, dispatch)
         );
       }
+
       let mapData = await asyncQueryMap(
         lng,
         lat,
@@ -99,7 +166,7 @@ async function actionRunner(
         map_id,
         sourceMapQuery.token
       );
-      coreState.infoMarkerPosition = { lng, lat, status: null };
+      coreState.infoMarkerPosition = { lng, lat };
       return {
         type: "received-map-query",
         data: mapData,

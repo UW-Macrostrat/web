@@ -1,16 +1,33 @@
-import { useMatch, useLocation, useNavigate } from "react-router";
-import classNames from "classnames";
+import { useLocation, useNavigate } from "react-router";
 import { useAppState } from "./hooks";
+import classNames from "classnames";
+import { MenuPage } from "./reducers";
 
-export function usePanelOpen() {
-  return useAppState((s) => s.core.contextPanelOpen);
+export function isDetailPanelRoute(pathname: string) {
+  /* Some routes imply that the detail panel is open. This does not necessarily
+  mean that the context panel will be closed when that panel is navigated to, but
+  it takes the routing focus off the context panel's status. */
+  return pathname.startsWith("/loc");
+}
+
+export function contextPanelIsInitiallyOpen(pathname: string) {
+  return pathname != "/" && !isDetailPanelRoute(pathname);
+}
+
+export function useContextPanelOpen() {
+  return useAppState((s) => s.menu.activePage != null);
+}
+
+export function currentPageForPathName(pathname: string): MenuPage | null {
+  return Object.values(MenuPage).find((page) =>
+    pathname.startsWith("/" + page)
+  );
 }
 
 export function useContextClass() {
-  const panelOpen = usePanelOpen();
-  const pageName = useCurrentPage();
-  if (!panelOpen) return null;
-  return classNames("panel-open", pageName);
+  const activePage = useAppState((s) => s.menu.activePage);
+  if (activePage == null) return null;
+  return classNames("panel-open", activePage);
 }
 
 export function useCurrentPage() {

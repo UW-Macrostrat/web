@@ -17,6 +17,10 @@
   line-height: 1em
 
 .settings
+  .auto-button
+    font-size: 12px
+    font-style: italic
+
   :global
     .bp4-control
       display: flex
@@ -30,12 +34,20 @@
       position: relative
 
     .bp4-button, .bp4-button-group
-      display: block
       width: 100%
       margin: 0.1em 0 0.2em
       justify-content: start
+      align-items: center
       //box-shadow: 0 0 0px 1px var(--card-shadow-color)
       border-radius: 2px
+      .bp4-button-text
+        flex-grow: 1
+      .spacer
+        flex-grow 1
+      .bp4-button
+        width: auto
+        display: inline
+        margin: 0
 
 .callout-panel
   border-radius: 3px

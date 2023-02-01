@@ -20,7 +20,6 @@ type MapInitialState = {
   mapPosition: MapPosition;
   mapBackend: MapBackend;
   mapLayers: Set<MapLayer>;
-  mapShowLineSymbols: boolean;
 };
 
 export type MapState = MapInitialState & {
@@ -50,15 +49,9 @@ type ToggleLayer = { type: "toggle-map-layer"; layer: MapLayer };
 type ToggleLineSymbols = { type: "toggle-line-symbols" };
 type ToggleMap3D = { type: "toggle-map-3d" };
 
-export type GotInitialMapState = {
-  type: "got-initial-map-state";
-  data: MapInitialState;
-};
-
 export type MapAction =
   | MapMoved
   | GetInitialMapState
-  | GotInitialMapState
   | SetMapBackend
   | MapLoading
   | MapIdle

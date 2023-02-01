@@ -1,20 +1,24 @@
 // Settings panel for the map
 
-import { Alignment, Switch } from "@blueprintjs/core";
+import { Alignment, Switch, Icon } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import { Tag, Button, Collapse, Callout, Text } from "@blueprintjs/core";
 import { useState } from "react";
 //import { LinkButton } from "@macrostrat/ui-components";
 //import { GlobeSettings } from "@macrostrat/cesium-viewer/settings";
 import { useAppState, useAppActions } from "~/map-interface/app-state";
-import { useLocation } from "react-router";
 import { MapLayer } from "~/map-interface/app-state";
 //import { DisplayQuality } from "@macrostrat/cesium-viewer";
 import styles from "./settings-panel.module.styl";
-import { DarkModeButton, useDarkMode } from "@macrostrat/ui-components";
+import {
+  DarkModeButton,
+  useDarkMode,
+  darkModeUpdater,
+} from "@macrostrat/ui-components";
 
 const h = hyper.styled(styles);
 
+/*
 function MapTypeButton(props) {
   const { pathname, hash } = useLocation();
   const globeActive = pathname?.startsWith("/globe");
@@ -23,6 +27,7 @@ function MapTypeButton(props) {
   }
   return h(LinkButton, { to: { pathname: "/globe", hash } }, "Switch to globe");
 }
+*/
 
 const ExperimentsPanel = (props) => {
   const dispatch = useAppActions();
@@ -95,7 +100,7 @@ function LineSymbolsControl() {
     h(
       Switch,
       {
-        checked: useAppState((s) => s.core.mapShowLineSymbols),
+        checked: useAppState((s) => s.core.mapSettings.showLineSymbols),
         onChange() {
           runAction({ type: "toggle-line-symbols" });
         },
@@ -120,11 +125,38 @@ function LineSymbolsControl() {
 
 function ThemeButton() {
   const darkMode = useDarkMode();
+  const update = darkModeUpdater();
+  const icon = darkMode.isAutoset ? "tick" : "desktop";
+
+  const autoButton = h(
+    Button,
+    {
+      minimal: true,
+      active: darkMode.isAutoset,
+      rightIcon: h(Icon, { icon, size: 12 }),
+      intent: darkMode.isAutoset ? "success" : "primary",
+      className: "auto-button sub-button",
+      small: true,
+      onClick(evt) {
+        if (darkMode.isAutoset) return;
+        evt.stopPropagation();
+        update(null);
+      },
+    },
+
+    "auto"
+  );
 
   const darkModeText = darkMode.isEnabled
-    ? "Switch to light theme"
-    : "Switch to dark theme";
-  return h(DarkModeButton, { minimal: true, active: false }, darkModeText);
+    ? "Turn on the lights"
+    : "Turn off the lights";
+  return h("div.dark-mode-controls", [
+    h(
+      DarkModeButton,
+      { minimal: true, active: false, allowReset: true, rightIcon: autoButton },
+      [h("span.text", darkModeText)]
+    ),
+  ]);
 }
 
 function LabelsButton() {

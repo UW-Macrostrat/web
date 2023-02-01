@@ -1,9 +1,9 @@
-import { updateURI } from "../../helpers";
 import { sum, timescale } from "../../../utils";
 import { MapBackend, MapLayer } from "../map";
-import { CoreState, CoreAction } from "./actions";
+import { CoreState, CoreAction } from "./types";
 import update, { Spec } from "immutability-helper";
-export * from "./actions";
+import { FilterData } from "../../handlers/filters";
+export * from "./types";
 
 const classColors = {
   sedimentary: "#FF8C00",
@@ -31,6 +31,7 @@ const defaultState: CoreState = {
   mapLayers: new Set([MapLayer.BEDROCK, MapLayer.LINES, MapLayer.LABELS]),
   mapSettings: {
     highResolutionTerrain: true,
+    showLineSymbols: false,
   },
   // Events and tokens for xhr
   isFetching: false,
@@ -38,8 +39,9 @@ const defaultState: CoreState = {
   mapInfoCancelToken: null,
   fetchingColumnInfo: false,
   columnInfoCancelToken: null,
-  fetchingGdd: false,
-  gddCancelToken: null,
+  fetchingXdd: false,
+  xddCancelToken: null,
+  xddInfo: [],
   isSearching: false,
   inputFocus: false,
   term: "",
@@ -49,7 +51,6 @@ const defaultState: CoreState = {
   fetchingPbdb: false,
   mapInfo: [],
   columnInfo: {},
-  gddInfo: [],
   searchResults: null,
   elevationData: [],
   elevationMarkerLocation: [],
@@ -59,7 +60,6 @@ const defaultState: CoreState = {
     type: null,
   },
   mapUse3D: false,
-  mapShowLineSymbols: false,
   filtersOpen: false,
   filters: [],
   filteredColumns: {},
@@ -79,7 +79,7 @@ export function coreReducer(
 ): CoreState {
   switch (action.type) {
     case "set-map-backend": {
-      return updateURI({ ...state, mapBackend: action.backend });
+      return { ...state, mapBackend: action.backend };
     }
     case "map-loading":
       if (state.mapIsLoading) return state;
@@ -107,6 +107,7 @@ export function coreReducer(
         isSearching: false,
         inputFocus: false,
       };
+    case "stop-searching":
     case "context-outside-click":
       if (state.inputFocus) {
         return {
@@ -124,80 +125,40 @@ export function coreReducer(
       return {
         ...state,
         infoDrawerOpen: false,
+        infoMarkerPosition: null,
         columnInfo: {},
       };
     case "expand-infodrawer":
       return { ...state, infoDrawerExpanded: !state.infoDrawerExpanded };
-
     case "toggle-filters":
       // rework this to open menu panel
       return { ...state, filtersOpen: !state.filtersOpen };
     case "toggle-line-symbols":
-      return { ...state, mapShowLineSymbols: !state.mapShowLineSymbols };
-    case "add-filter":
-      let alreadyHasFiter = false;
-      state.filters.forEach((filter) => {
-        if (
-          filter.name === action.filter.name &&
-          filter.type === action.filter.type
-        ) {
-          alreadyHasFiter = true;
-        }
+      return update<CoreState>(state, {
+        mapSettings: { $toggle: ["showLineSymbols"] },
       });
-      let fs = state.filters;
-      // if incoming is 'all', remove non-'all' version
-      if (action.filter.type.substr(0, 4) === "all_") {
-        fs = fs.filter((f) => {
-          if (
-            f.type === action.filter.type.replace("all_", "") &&
-            f.id === action.filter.id &&
-            f.name === action.filter.name
-          ) {
-            // do nothing
-          } else {
-            return f;
-          }
-        });
-      }
-      // if incoming is NOT 'all', remove the 'all' version
-      else {
-        fs = fs.filter((f) => {
-          if (
-            f.type === `all_${action.filter.type}` &&
-            f.id === action.filter.id &&
-            f.name === action.filter.name
-          ) {
-            // do nothing
-          } else {
-            return f;
-          }
-        });
-      }
-      if (!alreadyHasFiter) {
-        fs = fs.concat([action.filter]);
-      }
+    case "add-filter":
       // action.filter.type and action.filter.id go to the URI
       // handle search resetting
-      return updateURI({
+      return {
+        ...coreReducer(state, { type: "stop-searching" }),
+        filters: buildFilters(state.filters, [action.filter]),
+      };
+    case "set-filters":
+      /* Set multiple filters at once, usually on app load. */
+      return {
         ...state,
-        filters: fs,
-        term: "",
-        isSearching: false,
-        searchResults: null,
-        searchCancelToken: null,
-        inputFocus: false,
-        // We have to do a lot of extra work to manage this context panel state
-        contextPanelOpen: state.menuOpen,
-      });
+        filters: buildFilters(state.filters, action.filters),
+      };
     case "remove-filter":
-      return updateURI({
+      return {
         ...state,
         filters: state.filters.filter((d) => {
           if (d.name != action.filter.name) return d;
         }),
-      });
+      };
     case "clear-filters":
-      return updateURI({ ...state, filters: [] });
+      return { ...state, filters: [] };
     case "start-map-query":
       // if (state.inputFocus) {
       //   return { ...state, inputFocus: false };
@@ -389,7 +350,7 @@ export function coreReducer(
       const mapLayers: Spec<Set<MapLayer>, any> = {
         [op]: [action.layer],
       };
-      return updateURI(update(state, { mapLayers }));
+      return update(state, { mapLayers });
     case "toggle-map-3d":
       return { ...state, mapUse3D: !state.mapUse3D };
     case "toggle-elevation-chart":
@@ -428,21 +389,23 @@ export function coreReducer(
         searchCancelToken: null,
       };
 
-    case "start-gdd-query":
+    case "start-xdd-query":
       // When a search is requested, cancel any pending requests first
-      if (state.gddCancelToken) {
-        state.gddCancelToken.cancel();
+      if (state.xddCancelToken) {
+        state.xddCancelToken.cancel();
       }
       return {
         ...state,
-        fetchingGdd: true,
-        gddCancelToken: action.cancelToken,
+        fetchingXdd: true,
+        xddCancelToken: action.cancelToken,
       };
-    case "received-gdd-query":
+    case "received-xdd-query":
       let parsed = {
         journals: [],
       };
       let articles = {};
+
+      console.log(action.data);
 
       for (let i = 0; i < action.data.length; i++) {
         let found = false;
@@ -469,9 +432,9 @@ export function coreReducer(
 
       return {
         ...state,
-        fetchingGdd: false,
-        gddInfo: parsed.journals,
-        gddCancelToken: null,
+        fetchingXdd: false,
+        xddInfo: action.data,
+        xddCancelToken: null,
       };
 
     // Handle elevation
@@ -531,20 +494,10 @@ export function coreReducer(
     case "recieve-data":
       return { ...state, isFetching: false, data: action.data };
     case "map-moved":
-      return updateURI({
+      return {
         ...state,
         ...action.data,
-      });
-    case "update-state":
-      return action.state;
-    case "got-initial-map-state":
-      const newState = {
-        ...state,
-        ...action.data,
-        initialLoadComplete: true,
       };
-      // This causes some hilarious problems...
-      return updateURI(newState);
     case "toggle-high-resolution-terrain":
       return update(state, {
         mapSettings: { $toggle: ["highResolutionTerrain"] },
@@ -552,4 +505,28 @@ export function coreReducer(
     default:
       return state;
   }
+}
+
+function isTheSame(f: FilterData, newFilter: FilterData) {
+  return (
+    f.name === newFilter.name &&
+    f.type === newFilter.type &&
+    f.id === newFilter.id
+  );
+}
+
+function isOverlappingType(f1: FilterData, f2: FilterData) {
+  /* Check if the filter is the same type or including all_ */
+  const t1 = f1.type.startsWith("all_") ? f1.type.replace("all_", "") : f1.type;
+  const t2 = f2.type.startsWith("all_") ? f2.type.replace("all_", "") : f2.type;
+  return f1.name === f2.name && t1 === t2 && f1.id === f2.id;
+}
+
+export function buildFilters(filters: FilterData[], newFilters: FilterData[]) {
+  // Remove any existing filters of the same type
+  const remainingFilters = filters.filter((f) => {
+    return !newFilters.some((nf) => isOverlappingType(f, nf));
+  });
+
+  return [...remainingFilters, ...newFilters];
 }

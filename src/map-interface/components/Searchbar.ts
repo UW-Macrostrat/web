@@ -1,7 +1,11 @@
 import { useCallback, useRef, useEffect } from "react";
 import { Navbar, Button, InputGroup, Spinner, Card } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
-import { useAppActions, useSearchState, usePanelOpen } from "../app-state";
+import {
+  useAppActions,
+  useSearchState,
+  useContextPanelOpen,
+} from "../app-state";
 import { useSelector } from "react-redux";
 import { SubtleFilterText } from "./filters-panel";
 import styles from "./searchbar.styl";
@@ -86,7 +90,7 @@ function SearchResults({ className }) {
 function MenuButton() {
   const runAction = useAppActions();
   const mapIsLoading = useSelector((state) => state.core.mapIsLoading);
-  const menuOpen = usePanelOpen();
+  const menuOpen = useContextPanelOpen();
 
   return h(Button, {
     icon: mapIsLoading ? h(Spinner, { size: 16 }) : "menu",
@@ -95,7 +99,6 @@ function MenuButton() {
     onClick() {
       runAction({ type: "toggle-menu" });
     },
-    //"aria-label": "Menu",
     active: menuOpen && !mapIsLoading,
   });
 }

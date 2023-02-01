@@ -93,7 +93,18 @@ module.exports = {
     port: 3000,
     hot: true,
     open: true,
-    historyApiFallback: true,
+    historyApiFallback: {
+      // Hack around issues with history API fallback for urls with periods
+      // by sending these directly to react-router
+      // https://github.com/remix-run/react-router/issues/1360
+      // https://github.com/webpack/webpack-dev-server/issues/454
+      rewrites: [
+        {
+          from: /^\/loc\/.*$/,
+          to: "/",
+        },
+      ],
+    },
   },
   module: {
     rules: [

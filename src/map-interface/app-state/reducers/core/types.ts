@@ -1,20 +1,23 @@
 import { MapAction, MapLayer, MapState, PositionFocusState } from "../map";
 import { CancelToken } from "axios";
 export * from "../map";
+import { AddFilter, FilterData, Filter } from "../../handlers/filters";
+import { XDDSnippet } from "../../handlers/fetch";
 
 //////////// Async Actions ///////////////
 type FETCH_SEARCH_QUERY = { type: "fetch-search-query"; term: string };
 type ASYNC_ADD_FILTER = { type: "async-add-filter"; filter: any };
 type GET_FILTERED_COLUMNS = { type: "get-filtered-columns" };
-type FETCH_GDD = { type: "fetch-gdd" };
+type FETCH_XDD = { type: "fetch-xdd" };
 type MAP_QUERY = {
-  type: "map-query";
+  type: "map-query" | "run-map-query";
   lng: number;
   lat: number;
   z: string | number;
   map_id: any;
   column: any;
 };
+
 type GET_COLUMN = { type: "get-column"; column: any };
 type GET_ELEVATION = { type: "get-elevation"; line: any };
 type GET_PBDB = { type: "get-pbdb"; collection_nos: any };
@@ -29,7 +32,6 @@ type CLOSE_INFODRAWER = { type: "close-infodrawer" };
 type TOGGLE_ELEVATION_CHART = { type: "toggle-elevation-chart" };
 
 type TOGGLE_FILTERS = { type: "toggle-filters" };
-type ADD_FILTER = { type: "add-filter"; filter: any };
 type REMOVE_FILTER = { type: "remove-filter"; filter: any };
 type UPDATE_COLUMN_FILTERS = { type: "update-column-filters"; columns: any };
 type CLEAR_FILTERS = { type: "clear-filters" };
@@ -55,8 +57,8 @@ type MAP_LAYERS_CHANGED = {
   mapLayers: Set<MapLayer>;
 };
 
-type START_GDD_QUERY = { type: "start-gdd-query"; cancelToken: any };
-type RECEIVED_GDD_QUERY = { type: "received-gdd-query"; data: any };
+type START_XDD_QUERY = { type: "start-xdd-query"; cancelToken: any };
+type RECEIVED_XDD_QUERY = { type: "received-xdd-query"; data: XDDSnippet[] };
 
 type START_PBDB_QUERY = { type: "start-pbdb-query" };
 type RECEIVED_PBDB_QUERY = { type: "received-pbdb-query"; data: any };
@@ -71,6 +73,8 @@ type SET_INPUT_FOCUS = {
 type CONTEXT_OUTSIDE_CLICK = {
   type: "context-outside-click";
 };
+
+type StopSearching = { type: "stop-searching" };
 
 type SET_SEARCH_TERM = {
   type: "set-search-term";
@@ -101,6 +105,8 @@ type UPDATE_STATE = { type: "update-state"; state: any };
 
 type ToggleHighResolutionTerrain = { type: "toggle-high-resolution-terrain" };
 
+type SetFilters = { type: "set-filters"; filters: FilterData[] };
+
 export type CoreAction =
   | MAP_LAYERS_CHANGED
   | CLEAR_FILTERS
@@ -110,7 +116,9 @@ export type CoreAction =
   | GET_ELEVATION
   | GET_COLUMN
   | MAP_QUERY
-  | FETCH_GDD
+  | FETCH_XDD
+  | START_XDD_QUERY
+  | RECEIVED_XDD_QUERY
   | UPDATE_STATE
   | GET_FILTERED_COLUMNS
   | ASYNC_ADD_FILTER
@@ -124,15 +132,12 @@ export type CoreAction =
   | CLOSE_INFODRAWER
   | TOGGLE_ELEVATION_CHART
   | TOGGLE_FILTERS
-  | ADD_FILTER
   | REMOVE_FILTER
   | UPDATE_COLUMN_FILTERS
   | START_MAP_QUERY
   | RECEIVED_MAP_QUERY
   | START_COLUMN_QUERY
   | RECEIVED_COLUMN_QUERY
-  | START_GDD_QUERY
-  | RECEIVED_GDD_QUERY
   | START_PBDB_QUERY
   | RECEIVED_PBDB_QUERY
   | RESET_PBDB
@@ -145,21 +150,24 @@ export type CoreAction =
   | SET_ACTIVE_INDEX_MAP
   | MapAction
   | RecenterQueryMarker
-  | ToggleHighResolutionTerrain;
+  | ToggleHighResolutionTerrain
+  | AddFilter
+  | SetFilters
+  | StopSearching;
 
 interface AsyncRequestState {
   // Events and tokens for xhr
   // NOTE: we should really improve some of this token infrastructure
   fetchingMapInfo: boolean;
   fetchingColumnInfo: boolean;
-  fetchingGdd: boolean;
+  fetchingXdd: boolean;
+  xddCancelToken: CancelToken | null;
   isSearching: boolean;
   term: string;
   fetchingElevation: boolean;
   fetchingPbdb: boolean;
   mapInfoCancelToken: CancelToken | null;
   columnInfoCancelToken: CancelToken | null;
-  gddCancelToken: CancelToken | null;
   searchCancelToken: CancelToken | null;
   elevationCancelToken: CancelToken | null;
 }
@@ -171,6 +179,7 @@ interface MapCenterInfo {
 
 interface MapSettings {
   highResolutionTerrain: boolean;
+  showLineSymbols: boolean;
 }
 
 export interface CoreState extends MapState, AsyncRequestState {
@@ -181,13 +190,13 @@ export interface CoreState extends MapState, AsyncRequestState {
   infoDrawerOpen: boolean;
   infoDrawerExpanded: boolean;
   isFetching: boolean;
-  elevationChartOpen: false;
+  elevationChartOpen: boolean;
   infoMarkerPosition: { lat: number; lng: number } | null;
   infoMarkerFocus: PositionFocusState | null;
   mapInfo: any[];
   mapSettings: MapSettings;
   columnInfo: object;
-  gddInfo: any[];
+  xddInfo: XDDSnippet[];
   searchResults: any;
   elevationData: any;
   inputFocus: boolean;
@@ -196,7 +205,7 @@ export interface CoreState extends MapState, AsyncRequestState {
   mapCenter: MapCenterInfo;
   mapUse3D: boolean;
   filtersOpen: boolean;
-  filters: any[];
+  filters: FilterData[];
   filteredColumns: object;
   data: [];
 }
