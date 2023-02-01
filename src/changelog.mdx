@@ -2,38 +2,65 @@ import { Version } from "./map-interface/components/docs";
 
 <Version spec="4.1.0" date="February 1, 2023" />
 
-- Load the map info box from URL parameters, allowing map locations to be easily shared.
-  Locations take the form of `https://macrostrat.org/map/loc/{lon}/{lat}`.
-  Optional hash parameters can provide view orientation, layer, and map filter state
-  Here's an example from the [Black Canyon of the Gunnison](/loc/-107.7083/38.5802#x=-107.8909&y=38.7058&z=8.73km&a=132&e=76&show=satellite,geology).
-- Added a "copy link" button to the map info box, allowing the current location to be saved.
-- Correctly save filter states from URL parameters.
+### User interface improvements
 
-Added an "Age refinement" panel to show relative age precision improvement
-using the Macrostrat age model.
+- Added a new _Settings_ panel to control map display options. This panel contains an
+  _Experiments_ panel to toggle previews of new features that are still in development.
+- Added a **Dark mode** for the entire user interface, including a new map style. This follows
+  the browser-level preference by default, but it can be overridden from the _Settings_ panel.
 
-### New map controls
+#### Map features and bug fixes
 
+- Added an option to show and hide text labels on the map (in the _Settings_ panel)
 - Added a scale bar
-- Fixed the location tracking control (which shows the user's location)
+- Moved the _User location_ control to the bottom right corner of the map panel
+- Improved the visual quality of hillshades when 3D terrain is enabled
+- Decoupled location marker sizing and visual design from map style
+- Added an experimental _Map sources_ layer (_not yet fully integrated into the user interface_)
 
-Update [xDD](https://xdd.wisc.edu) publications views to use the newer snippets API.
+#### Info panel
 
-### Map settings
+- Update [xDD](https://xdd.wisc.edu) publications list to use the newer snippets API.
+- Added an _Age refinement_ panel to show relative age precision improvement
+  using the Macrostrat age model.
+- Add buttons in the header to recenter the currently selected map location
+  and to copy the location permalink to the clipboard.
 
-Added a new settings panel to control map display options.
+#### Line symbols (_experimental_ 🧫)
 
-- Added a control to toggle text labels on the map
-- Show and hide map labels.
-- Dark mode
+In the _Experiments_ panel, we have added a toggle for _Line symbols_, which
+enables a new rendering system for fault ticks and fold axes. This is
+an exciting advance that greatly increases the legibility and information
+density of the geologic map to align with printed products. Although the
+graphical style is nearly complete, data inconsistencies block us from
+enabling this feature broadly at the moment. Many sources GIS datasets (especially older ones) do not
+record consistent orientation of faults and folds that allow symbology to be reconstructed. We must develop a
+strategy for correcting these data. As we embark on this process, will begin making this system "live" on a
+map-by-map basis.
+
+### Location and filter state saving
+
+- The focused location and info box can be loaded from URL parameters, allowing map locations to be easily shared.
+  Optional hash parameters set view orientation, layer, and map filter state. The URL signature is
+  `https://macrostrat.org/loc/<longitude>/<latitude>#<hash>`.
+- Correctly save filter states from URL parameters.
+- Major simplification of the internal design of the map filter system.
+
+#### Examples of saved state
+
+- [_Black Canyon of the Gunnison_, oblique satellite view](/loc/-107.7083/38.5802#x=-107.8909&y=38.7058&z=8.73km&a=132&e=76&show=satellite,geology).
+- [_Vishnu Schist in the Grand Canyon_, oblique view](/loc/-112.1976/36.0962#strat_name_concepts=11016&x=-112.236&y=36.2119&z=15.61km&a=165&e=42).
+- [_Mesozoic igneous rocks of California_, overhead view with labels hidden](/#intervals=32&lithology_classes=igneous&x=-116.7569&y=34.7144&z=7.6&hide=labels)
+
+### Internal improvements
 
 - Yarn "Plug-n-Play" for quicker and more repeatable compilation
 - Updated key dependencies, including Webpack, Mapbox GL JS, React, and BlueprintJS.
-- Incorporated numerous updates to Macrostrat shared libraries
-- Greatly simplified the internal tracking of map layers and filter state
-- Decoupled different interactions in the map view
-
-### Experimental line symbols
+- Numerous updates to [Macrostrat shared web components](https://github.com/UW-Macrostrat/web-components).
+- Decoupled interactions in the map view, and moved more components
+  to the [`@macrostrat/mapbox-react`](https://npmjs.org/package/@macrostrat/mapbox-react)
+  and [`@macrostrat/mapbox-utils`](https://npmjs.org/package/@macrostrat/mapbox-utils) shared libraries.
+- Routing improvements in anticipation of adding non-map pages to the application.
 
 <Version spec="4.0.0" date="July 6, 2022" />
 
@@ -50,7 +77,7 @@ holdings, and more.
 This update was produced by Macrostrat technical lead [Daven Quinn](https://davenquinn.com)
 and research software engineer [Casey Idzikowski](https://caseyidzikowski.com).
 
-### User-facing changes
+## User-facing changes
 
 - Add a globe-based map projection and an oblique map
   view with 3D terrain (thanks [Mapbox](https://www.mapbox.com/)!)
@@ -61,7 +88,7 @@ and research software engineer [Casey Idzikowski](https://caseyidzikowski.com).
 - In info panel, expand all sections by default, and improve scrolling through them
   to offset
 
-### Internal changes
+## Internal changes
 
 - Convert codebase to Typescript from Javascript
 - Start converting JSX to hyperscript
