@@ -50,6 +50,19 @@ function calcMapPadding(rect, childRect) {
   };
 }
 
+function ScaleControl(props) {
+  const optionsRef = useRef({
+    maxWidth: 200,
+    unit: "metric",
+  });
+  return h(MapControlWrapper, {
+    className: "map-scale-control",
+    control: mapboxgl.ScaleControl,
+    options: optionsRef.current,
+    ...props,
+  });
+}
+
 function GeolocationControl(props) {
   const optionsRef = useRef({
     showAccuracyCircle: true,
@@ -368,6 +381,7 @@ function useMapQueryHandler(
 
 export function MapBottomControls() {
   return h("div.map-controls", [
+    h(ScaleControl),
     h(ThreeDControl, { className: "map-3d-control" }),
     h(CompassControl, { className: "compass-control" }),
     h(GlobeControl, { className: "globe-control" }),
