@@ -77,7 +77,6 @@ export function MapSourcesLayer() {
     SETTINGS.apiDomain + "/api/v2/defs/sources",
     { all: true, format: "geojson_bare" }
   );
-  console.log(featureData);
   useEffect(() => {
     if (!map || !featureData) return;
 

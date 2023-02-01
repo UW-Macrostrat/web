@@ -25,7 +25,8 @@ function formColumnQueryString(filters) {
     all_lithology_classes: ["lith_class", "name"],
     all_lithology_types: ["lith_type", "name"],
     all_lithologies: ["lith_id", "id"],
-    // Environments are unused for now
+    // Environments are unused for now in map filtering, but used in
+    // column filtering (I think)
     environments: ["environ_id", "id"],
     environment_types: ["environ_type", "name"],
     environment_classes: ["environ_class", "name"],
@@ -56,7 +57,23 @@ export async function fetchFilteredColumns(providedFilters) {
   return res.data;
 }
 
-export async function getAsyncGdd(mapInfo, cancelToken) {
+export interface XDDSnippet {
+  pubname: string;
+  publisher: string;
+  _gddid: string;
+  title: string;
+  doi: string;
+  coverDate: string;
+  URL: string;
+  authors: string;
+  hits: number;
+  highlight: string[];
+}
+
+export async function handleXDDQuery(
+  mapInfo,
+  cancelToken
+): Promise<XDDSnippet[]> {
   if (
     !mapInfo ||
     !mapInfo.mapData.length ||
@@ -70,15 +87,18 @@ export async function getAsyncGdd(mapInfo, cancelToken) {
     })
     .join(",");
 
-  let url = `${basev1}/excerpts?term=${stratNames}`;
+  let url = `${basev1}/snippets`;
 
   const res = await axios.get(url, {
+    params: {
+      article_limit: 20,
+      term: stratNames,
+    },
     cancelToken: cancelToken,
     responseType: "json",
   });
   try {
-    let data = res.data.success.data;
-    return data;
+    return res.data.success.data;
   } catch (error) {
     return [];
   }
