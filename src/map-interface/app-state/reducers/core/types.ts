@@ -107,6 +107,18 @@ type ToggleHighResolutionTerrain = { type: "toggle-high-resolution-terrain" };
 
 type SetFilters = { type: "set-filters"; filters: FilterData[] };
 
+type Place = {
+  type: "place";
+  name: string;
+  bbox?: [number, number, number, number];
+  center?: [number, number];
+};
+
+type SelectSearchResult = {
+  type: "select-search-result";
+  result: Filter | Place;
+};
+
 export type CoreAction =
   | MAP_LAYERS_CHANGED
   | CLEAR_FILTERS
@@ -153,7 +165,8 @@ export type CoreAction =
   | ToggleHighResolutionTerrain
   | AddFilter
   | SetFilters
-  | StopSearching;
+  | StopSearching
+  | SelectSearchResult;
 
 interface AsyncRequestState {
   // Events and tokens for xhr

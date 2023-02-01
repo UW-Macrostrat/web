@@ -477,12 +477,11 @@ export function coreReducer(
       return { ...state, pbdbData: [] };
     case "go-to-place":
       return {
-        ...state,
+        ...coreReducer(state, { type: "set-input-focus", inputFocus: false }),
         mapCenter: {
           type: "place",
           place: action.place,
         },
-        isSearching: false,
       };
     case "update-column-filters":
       return {

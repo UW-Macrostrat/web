@@ -121,6 +121,16 @@ async function actionRunner(
       });
       const gdd_data = await handleXDDQuery(mapInfo, source1.token);
       return { type: "received-xdd-query", data: gdd_data };
+    case "select-search-result":
+      const { result } = action;
+      if (result.type == "place") {
+        return { type: "go-to-place", place: result };
+      } else {
+        return {
+          type: "add-filter",
+          filter: await runFilter(result),
+        };
+      }
     case "async-add-filter":
       return { type: "add-filter", filter: await runFilter(action.filter) };
     case "get-filtered-columns":

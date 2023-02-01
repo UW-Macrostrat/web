@@ -1,23 +1,39 @@
 import { Version } from "./map-interface/components/docs";
 
-<Version spec="4.1.0" date="February 1, 2022" />
+<Version spec="4.1.0" date="February 1, 2023" />
 
-Recover filter states from URL parameters.
+- Load the map info box from URL parameters, allowing map locations to be easily shared.
+  Locations take the form of `https://macrostrat.org/map/loc/{lon}/{lat}`.
+  Optional hash parameters can provide view orientation, layer, and map filter state
+  Here's an example from the [Black Canyon of the Gunnison](/loc/-107.7083/38.5802#x=-107.8909&y=38.7058&z=8.73km&a=132&e=76&show=satellite,geology).
+- Added a "copy link" button to the map info box, allowing the current location to be saved.
+- Correctly save filter states from URL parameters.
 
-Load the map info box from URL parameters.
+Added an "Age refinement" panel to show relative age precision improvement
+using the Macrostrat age model.
+
+### New map controls
+
+- Added a scale bar
+- Fixed the location tracking control (which shows the user's location)
+
+Update [xDD](https://xdd.wisc.edu) publications views to use the newer snippets API.
 
 ### Map settings
 
 Added a new settings panel to control map display options.
 
+- Added a control to toggle text labels on the map
 - Show and hide map labels.
 - Dark mode
 
-Fix map settings button
+- Yarn "Plug-n-Play" for quicker and more repeatable compilation
+- Updated key dependencies, including Webpack, Mapbox GL JS, React, and BlueprintJS.
+- Incorporated numerous updates to Macrostrat shared libraries
+- Greatly simplified the internal tracking of map layers and filter state
+- Decoupled different interactions in the map view
 
-Yarn v2 compilation
-
-Added experimental line symbols
+### Experimental line symbols
 
 <Version spec="4.0.0" date="July 6, 2022" />
 

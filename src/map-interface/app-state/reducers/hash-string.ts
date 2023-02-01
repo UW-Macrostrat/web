@@ -40,7 +40,7 @@ export function updateURI(state: CoreState) {
   let args: HashParams = {};
 
   // Get filter information from URI.
-  for (const filter of state.filters) {
+  for (const filter of state.filters ?? []) {
     args[filter.type] ??= [];
     args[filter.type].push(filter.id ?? filter.name);
   }
