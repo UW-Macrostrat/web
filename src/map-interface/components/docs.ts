@@ -38,10 +38,10 @@ function DocsMediaFile({ href, lazy = true, className }) {
 export function DocsMedia({
   children,
   width,
-  alignment = Alignment.RIGHT,
+  align = Alignment.RIGHT,
   ...rest
 }) {
-  const className = classNames(alignment, {
+  const className = classNames(align, {
     captioned: children != null,
   });
   return h("figure.documentation-figure", { style: { width }, className }, [
@@ -51,21 +51,12 @@ export function DocsMedia({
 }
 
 export function DocsVideo({ slug, lazy = true, className }) {
-  const { ref, inView } = useInView({ triggerOnce: true });
-  let src = null;
-  if (inView || !lazy) {
-    src = `https://macrostrat-media.s3.amazonaws.com/maps/docs/${slug}.mp4`;
-  }
-
-  return h("video.documentation-video-standalone", {
-    ref,
-    autoPlay: true,
-    loop: true,
-    playsInline: true,
-    muted: true,
-    type: "video/mp4",
-    src,
+  // For legacy reasons, the alignment is set to left
+  return h(DocsMedia, {
+    href: slug + ".mp4",
+    lazy,
     className,
+    align: Alignment.LEFT,
   });
 }
 

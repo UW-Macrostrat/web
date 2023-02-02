@@ -1,6 +1,6 @@
 import { useState } from "react";
 import h from "@macrostrat/hyper";
-import { Tag, Card, Button, Collapse, Switch, Icon } from "@blueprintjs/core";
+import { Tag, Card, Button, Collapse, Switch } from "@blueprintjs/core";
 import { useFilterState, useAppActions } from "~/map-interface/app-state";
 
 function Filter({ filter }) {
