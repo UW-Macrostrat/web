@@ -1,4 +1,4 @@
-import { SETTINGS } from "../../Settings";
+import { SETTINGS } from "../../settings";
 export * from "./line-symbols";
 export * from "./map-sources";
 

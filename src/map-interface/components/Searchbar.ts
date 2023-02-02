@@ -7,7 +7,7 @@ import {
   useContextPanelOpen,
 } from "../app-state";
 import { useSelector } from "react-redux";
-import { SubtleFilterText } from "./filters-panel";
+import { FilterPanel } from "./filter-panel";
 import styles from "./searchbar.styl";
 import { PanelSubhead } from "./expansion-panel/headers";
 import classNames from "classnames";
@@ -34,7 +34,7 @@ function ResultList({ searchResults }) {
   const runAction = useAppActions();
   const onSelectResult = useCallback(
     (f) => {
-      runAction({ type: "async-add-filter", filter: f });
+      runAction({ type: "select-search-result", result: f });
     },
     [runAction]
   );
@@ -138,7 +138,7 @@ function Searchbar({ className }) {
         }),
       ]),
     ]),
-    h(SubtleFilterText),
+    h(FilterPanel),
   ]);
 }
 

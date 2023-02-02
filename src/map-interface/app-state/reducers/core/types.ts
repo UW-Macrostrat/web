@@ -107,6 +107,24 @@ type ToggleHighResolutionTerrain = { type: "toggle-high-resolution-terrain" };
 
 type SetFilters = { type: "set-filters"; filters: FilterData[] };
 
+type Place = {
+  type: "place";
+  name: string;
+  bbox?: [number, number, number, number];
+  center?: [number, number];
+};
+
+type ToggleExperimentsPanel = {
+  type: "toggle-experiments-panel";
+  open?: boolean;
+};
+type GoToExperimentsPanel = { type: "go-to-experiments-panel" };
+
+type SelectSearchResult = {
+  type: "select-search-result";
+  result: Filter | Place;
+};
+
 export type CoreAction =
   | MAP_LAYERS_CHANGED
   | CLEAR_FILTERS
@@ -153,7 +171,10 @@ export type CoreAction =
   | ToggleHighResolutionTerrain
   | AddFilter
   | SetFilters
-  | StopSearching;
+  | StopSearching
+  | SelectSearchResult
+  | ToggleExperimentsPanel
+  | GoToExperimentsPanel;
 
 interface AsyncRequestState {
   // Events and tokens for xhr
@@ -179,7 +200,6 @@ interface MapCenterInfo {
 
 interface MapSettings {
   highResolutionTerrain: boolean;
-  showLineSymbols: boolean;
 }
 
 export interface CoreState extends MapState, AsyncRequestState {
@@ -207,5 +227,6 @@ export interface CoreState extends MapState, AsyncRequestState {
   filtersOpen: boolean;
   filters: FilterData[];
   filteredColumns: object;
+  showExperimentsPanel: boolean;
   data: [];
 }

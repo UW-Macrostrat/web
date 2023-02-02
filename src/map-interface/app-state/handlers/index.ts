@@ -11,7 +11,7 @@ import { AppAction, AppState } from "../reducers";
 import axios from "axios";
 import { runFilter } from "./filters";
 import { push } from "@lagunovsky/redux-react-router";
-import { routerBasename } from "~/map-interface/Settings";
+import { routerBasename } from "~/map-interface/settings";
 import { isDetailPanelRoute } from "../nav-hooks";
 import { MenuPage, setInfoMarkerPosition } from "../reducers";
 import { formatCoordForZoomLevel } from "~/map-interface/utils/formatting";
@@ -81,10 +81,18 @@ async function actionRunner(
         dispatch
       );
     }
+    case "go-to-experiments-panel": {
+      await dispatch({ type: "toggle-experiments-panel", open: true });
+      return await actionRunner(
+        state,
+        { type: "set-menu-page", page: MenuPage.SETTINGS },
+        dispatch
+      );
+    }
     case "set-menu-page": {
       const { pathname } = state.router.location;
       if (!isDetailPanelRoute(pathname)) {
-        const newPathname = "/" + (action.page ?? "");
+        const newPathname = routerBasename + (action.page ?? "");
         await dispatch(push({ pathname: newPathname, hash: location.hash }));
       }
       return { type: "set-menu-page", page: action.page };
@@ -121,6 +129,16 @@ async function actionRunner(
       });
       const gdd_data = await handleXDDQuery(mapInfo, source1.token);
       return { type: "received-xdd-query", data: gdd_data };
+    case "select-search-result":
+      const { result } = action;
+      if (result.type == "place") {
+        return { type: "go-to-place", place: result };
+      } else {
+        return {
+          type: "add-filter",
+          filter: await runFilter(result),
+        };
+      }
     case "async-add-filter":
       return { type: "add-filter", filter: await runFilter(action.filter) };
     case "get-filtered-columns":

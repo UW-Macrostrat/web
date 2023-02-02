@@ -31,7 +31,6 @@ const defaultState: CoreState = {
   mapLayers: new Set([MapLayer.BEDROCK, MapLayer.LINES, MapLayer.LABELS]),
   mapSettings: {
     highResolutionTerrain: true,
-    showLineSymbols: false,
   },
   // Events and tokens for xhr
   isFetching: false,
@@ -64,6 +63,7 @@ const defaultState: CoreState = {
   filters: [],
   filteredColumns: {},
   data: [],
+  showExperimentsPanel: false,
   mapPosition: {
     camera: {
       lng: 23,
@@ -121,6 +121,11 @@ export function coreReducer(
       return state;
     case "toggle-about":
       return { ...state, aboutOpen: !state.aboutOpen };
+    case "toggle-experiments-panel":
+      return {
+        ...state,
+        showExperimentsPanel: action.open ?? !state.showExperimentsPanel,
+      };
     case "close-infodrawer":
       return {
         ...state,
@@ -133,10 +138,6 @@ export function coreReducer(
     case "toggle-filters":
       // rework this to open menu panel
       return { ...state, filtersOpen: !state.filtersOpen };
-    case "toggle-line-symbols":
-      return update<CoreState>(state, {
-        mapSettings: { $toggle: ["showLineSymbols"] },
-      });
     case "add-filter":
       // action.filter.type and action.filter.id go to the URI
       // handle search resetting
@@ -477,12 +478,11 @@ export function coreReducer(
       return { ...state, pbdbData: [] };
     case "go-to-place":
       return {
-        ...state,
+        ...coreReducer(state, { type: "set-input-focus", inputFocus: false }),
         mapCenter: {
           type: "place",
           place: action.place,
         },
-        isSearching: false,
       };
     case "update-column-filters":
       return {

@@ -34,7 +34,7 @@ import {
 } from "@macrostrat/mapbox-utils";
 import { getExpressionForFilters } from "./filter-helpers";
 import { MapSourcesLayer, mapStyle, toggleLineSymbols } from "../map-style";
-import { SETTINGS } from "../../Settings";
+import { SETTINGS } from "../../settings";
 import mapboxgl from "mapbox-gl";
 
 const h = hyper.styled(styles);
@@ -48,6 +48,19 @@ function calcMapPadding(rect, childRect) {
     right: Math.max(childRect.right - rect.right, 0),
     bottom: Math.max(childRect.bottom - rect.bottom, 0),
   };
+}
+
+function ScaleControl(props) {
+  const optionsRef = useRef({
+    maxWidth: 200,
+    unit: "metric",
+  });
+  return h(MapControlWrapper, {
+    className: "map-scale-control",
+    control: mapboxgl.ScaleControl,
+    options: optionsRef.current,
+    ...props,
+  });
 }
 
 function GeolocationControl(props) {
@@ -182,6 +195,13 @@ function MapContainer(props) {
     (state) => state.core.infoMarkerPosition
   );
 
+  const hasLineSymbols =
+    mapLayers.has(MapLayer.LINE_SYMBOLS) && mapLayers.has(MapLayer.LINES);
+
+  const updateMapPadding = useCallback(() => {
+    setPadding(getMapPadding(ref, parentRef));
+  }, [ref, parentRef]);
+
   useEffect(() => {
     initializeMap(baseMapURL, mapPosition, infoMarkerPosition).then((map) => {
       mapRef.current = map;
@@ -199,6 +219,9 @@ function MapContainer(props) {
          to update the map. */
       //runAction({ type: "set-filters", filters: [...filters] });
       setMapInitialized(true);
+      // Update map padding on load
+      updateMapPadding();
+      toggleLineSymbols(map, hasLineSymbols);
     });
   }, []);
 
@@ -279,16 +302,12 @@ function MapContainer(props) {
     });
   }, [mapRef.current, mapIsLoading]);
 
-  useMapConditionalStyle(
-    mapRef,
-    mapSettings.showLineSymbols && mapLayers.has(MapLayer.LINES),
-    toggleLineSymbols
-  );
+  useMapConditionalStyle(mapRef, hasLineSymbols, toggleLineSymbols);
 
   useResizeObserver({
     ref: parentRef,
     onResize(sz) {
-      setPadding(getMapPadding(ref, parentRef));
+      updateMapPadding();
     },
   });
 
@@ -368,6 +387,7 @@ function useMapQueryHandler(
 
 export function MapBottomControls() {
   return h("div.map-controls", [
+    h(ScaleControl),
     h(ThreeDControl, { className: "map-3d-control" }),
     h(CompassControl, { className: "compass-control" }),
     h(GlobeControl, { className: "globe-control" }),
