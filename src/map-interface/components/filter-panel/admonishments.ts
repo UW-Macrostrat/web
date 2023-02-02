@@ -41,8 +41,9 @@ function LineSymbolAdmonishment() {
         minimal: true,
         intent: Intent.DANGER,
         icon: h(Icon, { icon: "cross", iconSize: 12 }),
-        onClick() {
+        onClick(evt) {
           runAction({ type: "toggle-map-layer", layer: MapLayer.LINE_SYMBOLS });
+          evt.stopPropagation();
         },
       }),
     ])

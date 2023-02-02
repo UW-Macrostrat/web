@@ -112,7 +112,7 @@ function FilterPanel() {
 
   return h(Card, { className: "filter-tongue" }, [
     h(Admonishments, { admonishments }),
-    h.if(filters.length > 0)([
+    h.if(filters.length > 0)("div.filters", [
       h("div.filter-name-container", [
         h("p.filter-names", [h("b", "Filtering by: "), filterString]),
         h("div.filter-tongue-actions", [
