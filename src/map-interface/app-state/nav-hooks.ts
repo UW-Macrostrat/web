@@ -8,7 +8,11 @@ export function isDetailPanelRoute(pathname: string) {
   /* Some routes imply that the detail panel is open. This does not necessarily
   mean that the context panel will be closed when that panel is navigated to, but
   it takes the routing focus off the context panel's status. */
-  return pathname.startsWith(routerBasename + "loc");
+  // Hack: cover all our bases here by not differentiating between paths that start with
+  // routerBasename (i.e. full location paths) vs. react-router internal paths.
+  return (
+    pathname.startsWith(routerBasename + "loc") || pathname.startsWith("/loc")
+  );
 }
 
 export function contextPanelIsInitiallyOpen(pathname: string) {

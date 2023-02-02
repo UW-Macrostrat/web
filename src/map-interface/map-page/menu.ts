@@ -35,6 +35,7 @@ import { isDetailPanelRoute } from "../app-state/nav-hooks";
 import { SettingsPanel, ExperimentsPanel, ThemeButton } from "./settings-panel";
 import { useState, useEffect } from "react";
 import { LinkButton, LayerButton, ListButton } from "../components/buttons";
+import { routerBasename } from "../settings";
 
 function ChangelogPanel() {
   return h("div.bp4-text.text-panel", [h(Changelog)]);
@@ -139,7 +140,8 @@ function useLastPageLocation(): { title: string; to: string } | null {
   const prevRoute =
     menuBacklinkLocationOverrides[currentPage.match.pathname] ??
     prevPage.match.pathname;
-  if (prevRoute == "/") return null;
+  console.log(breadcrumbs, prevRoute);
+  if (prevRoute == routerBasename) return null;
   return { to: prevRoute, title: locationTitleForRoute[prevRoute] ?? "Back" };
 }
 
