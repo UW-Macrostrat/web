@@ -82,13 +82,17 @@ async function actionRunner(
       );
     }
     case "go-to-experiments-panel": {
-      await dispatch({ type: "set-menu-page", page: MenuPage.SETTINGS });
-      return { type: "toggle-experiments-panel", open: true };
+      await dispatch({ type: "toggle-experiments-panel", open: true });
+      return await actionRunner(
+        state,
+        { type: "set-menu-page", page: MenuPage.SETTINGS },
+        dispatch
+      );
     }
     case "set-menu-page": {
       const { pathname } = state.router.location;
       if (!isDetailPanelRoute(pathname)) {
-        const newPathname = "/" + (action.page ?? "");
+        const newPathname = routerBasename + (action.page ?? "");
         await dispatch(push({ pathname: newPathname, hash: location.hash }));
       }
       return { type: "set-menu-page", page: action.page };
