@@ -1,33 +1,97 @@
 import hyper from "@macrostrat/hyper";
+import { Alignment } from "@blueprintjs/core";
 import styles from "./docs.module.styl";
 import { useInView } from "react-intersection-observer";
+import { HashLink } from "react-router-hash-link";
+import { routerBasename } from "../settings";
+import classNames from "classnames";
 
 const h = hyper.styled(styles);
 
-export function DocsVideo({ slug, lazy = true }) {
+const urlBase = "https://macrostrat-media.s3.amazonaws.com/maps/docs/";
+
+function DocsMediaFile({ href, lazy = true, className }) {
   const { ref, inView } = useInView({ triggerOnce: true });
   let src = null;
   if (inView || !lazy) {
-    src = `https://macrostrat-media.s3.amazonaws.com/maps/docs/${slug}.mp4`;
+    src = joinURL(urlBase, href);
   }
-
-  return h("video", {
+  if (href.endsWith(".mp4")) {
+    return h("video", {
+      ref,
+      autoPlay: true,
+      loop: true,
+      playsInline: true,
+      muted: true,
+      type: "video/mp4",
+      src,
+      className,
+    });
+  }
+  return h("img", {
     ref,
-    autoPlay: true,
-    loop: true,
-    playsInline: true,
-    muted: true,
-    type: "video/mp4",
     src,
+    className,
   });
 }
 
-export function NewSwatch({ children }) {
-  return h("span.new-swatch", children);
+export function DocsMedia({
+  children,
+  width,
+  align = Alignment.RIGHT,
+  ...rest
+}) {
+  const className = classNames(align, {
+    captioned: children != null,
+  });
+  return h("figure.documentation-figure", { style: { width }, className }, [
+    h(DocsMediaFile, rest),
+    h.if(children != null)("figcaption.caption", children),
+  ]);
+}
+
+export function DocsVideo({ slug, lazy = true, className }) {
+  // For legacy reasons, the alignment is set to left
+  return h(DocsMedia, {
+    href: slug + ".mp4",
+    lazy,
+    className,
+    align: Alignment.LEFT,
+  });
+}
+
+function joinURL(...args) {
+  let newURL = args[0];
+  for (let i = 1; i < args.length; i++) {
+    newURL = newURL.replace(/\/$/, "") + "/" + args[i].replace(/^\//, "");
+  }
+  return newURL;
+}
+
+export function InternalLink({ to, children }) {
+  // We'd use a link component, but it doesn't properly navigate to the hash state
+  return h(
+    "a.internal-link",
+    {
+      href: joinURL(routerBasename, to),
+    },
+    children
+  );
+}
+
+export function NewSwatch({ children, version = 0 }) {
+  return h(
+    HashLink,
+    {
+      to: routerBasename + `changelog#version-${version}`,
+      className: "new-swatch",
+    },
+    children
+  );
 }
 
 export function Version({ spec, date }) {
-  return h("h2.version", [
+  return h("h2.version", { id: `version-${spec}` }, [
     h("span.version-name", ["Version ", h("code", spec)]),
     h("span.date", date),
   ]);

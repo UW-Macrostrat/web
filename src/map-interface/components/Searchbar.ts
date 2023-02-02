@@ -1,9 +1,13 @@
 import { useCallback, useRef, useEffect } from "react";
 import { Navbar, Button, InputGroup, Spinner, Card } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
-import { useAppActions, useSearchState, usePanelOpen } from "../app-state";
+import {
+  useAppActions,
+  useSearchState,
+  useContextPanelOpen,
+} from "../app-state";
 import { useSelector } from "react-redux";
-import { SubtleFilterText } from "./filters-panel";
+import { FilterPanel } from "./filter-panel";
 import styles from "./searchbar.styl";
 import { PanelSubhead } from "./expansion-panel/headers";
 import classNames from "classnames";
@@ -14,7 +18,7 @@ const categoryTitles = {
   lithology: "Lithologies",
   interval: "Time Intervals",
   place: "Places (via Mapbox)",
-  strat_name: "Stratigraphic Names",
+  strat_name: "Stratigraphic names",
   environ: "Environments (columns only)",
 };
 
@@ -30,7 +34,7 @@ function ResultList({ searchResults }) {
   const runAction = useAppActions();
   const onSelectResult = useCallback(
     (f) => {
-      runAction({ type: "async-add-filter", filter: f });
+      runAction({ type: "select-search-result", result: f });
     },
     [runAction]
   );
@@ -86,7 +90,7 @@ function SearchResults({ className }) {
 function MenuButton() {
   const runAction = useAppActions();
   const mapIsLoading = useSelector((state) => state.core.mapIsLoading);
-  const menuOpen = usePanelOpen();
+  const menuOpen = useContextPanelOpen();
 
   return h(Button, {
     icon: mapIsLoading ? h(Spinner, { size: 16 }) : "menu",
@@ -95,7 +99,6 @@ function MenuButton() {
     onClick() {
       runAction({ type: "toggle-menu" });
     },
-    //"aria-label": "Menu",
     active: menuOpen && !mapIsLoading,
   });
 }
@@ -135,17 +138,17 @@ function Searchbar({ className }) {
         }),
       ]),
     ]),
-    h(SubtleFilterText),
+    h(FilterPanel),
   ]);
 }
 
 function SearchGuidance() {
-  return h("div.search-guidance.bp3-text", [
+  return h("div.search-guidance.bp4-text", [
     h("h3", ["Available categories"]),
     h("ul", [
       h("li", ["Time intervals"]),
       h("li", ["Lithologies"]),
-      h("li", ["Stratigraphic Names"]),
+      h("li", ["Stratigraphic names"]),
       h("li", ["Environments (columns only)"]),
       h("li", ["Places"]),
     ]),

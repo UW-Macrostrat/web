@@ -15,7 +15,8 @@ import reducerStack, {
   AppState,
 } from "./map-interface/app-state";
 import { createRouterMiddleware } from "@lagunovsky/redux-react-router";
-import { routerBasename } from "./map-interface/Settings";
+import { routerBasename } from "./map-interface/settings";
+import { DarkModeProvider } from "@macrostrat/ui-components";
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
@@ -42,8 +43,6 @@ function GlobePage() {
 }
 */
 
-console.log(routerBasename);
-
 const _Sources = loadable(() => import("~/burwell-sources"));
 const Sources = () => h(Suspense, { fallback: h(Spinner) }, h(_Sources));
 
@@ -52,29 +51,32 @@ const MapPage = () => h(Suspense, { fallback: h(Spinner) }, h(_MapPage));
 
 const App = () => {
   return h(
-    Provider,
-    { store },
+    DarkModeProvider,
     h(
-      ReduxRouter,
-      { basename: routerBasename, store, history: browserHistory },
-      [
-        h(Routes, [
-          h(Route, { path: "/sources", element: h(Sources) }),
-          h(Route, { path: "*", element: h(MapPage) }),
-        ]),
+      Provider,
+      { store },
+      h(
+        ReduxRouter,
+        { basename: routerBasename, store, history: browserHistory },
+        [
+          h(Routes, [
+            h(Route, { path: "/sources", element: h(Sources) }),
+            h(Route, { path: "*", element: h(MapPage) }),
+          ]),
 
-        // h(Route, {
-        //   path: "/globe",
-        //   component: GlobePage,
-        // }),
-        // h(Route, { path: "/columns", component: ColumnPage }),
-        //h(Route, { path: "/dev/globe", component: GlobeDevPage }),
-        // h(Route, {
-        //   exact: true,
-        //   path: "/",
-        //   render: () => h(Redirect, { to: "/map" }),
-        // }),
-      ]
+          // h(Route, {
+          //   path: "/globe",
+          //   component: GlobePage,
+          // }),
+          // h(Route, { path: "/columns", component: ColumnPage }),
+          //h(Route, { path: "/dev/globe", component: GlobeDevPage }),
+          // h(Route, {
+          //   exact: true,
+          //   path: "/",
+          //   render: () => h(Redirect, { to: "/map" }),
+          // }),
+        ]
+      )
     )
   );
 };

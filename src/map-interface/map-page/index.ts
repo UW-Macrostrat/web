@@ -15,13 +15,12 @@ import styles from "./main.module.styl";
 import classNames from "classnames";
 import { useRef, useEffect } from "react";
 import { useTransition } from "transition-hook";
-import { usePanelOpen, useContextClass } from "../app-state";
-import {
-  MapboxMapProvider,
-  MapBottomControls,
-  MapStyledContainer,
-  MapZoomControl,
-} from "./map-view";
+import { useContextPanelOpen, useContextClass } from "../app-state";
+import { MapboxMapProvider, ZoomControl } from "@macrostrat/mapbox-react";
+import { MapBottomControls, MapStyledContainer } from "./map-view";
+import { Routes, Route, useParams, useMatch } from "react-router-dom";
+import { MenuPage } from "./menu";
+import { PositionFocusState } from "../app-state";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));
@@ -94,14 +93,21 @@ const MapTypeSelector = () => {
   ]);
 };
 
-const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
+const MapPage = ({
+  backend = MapBackend.MAPBOX3,
+  menuPage = null,
+}: {
+  backend?: MapBackend;
+  menuPage?: MenuPage;
+}) => {
   const { inputFocus } = useSearchState();
   const runAction = useAppActions();
   const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
+  const navMenuPage = useAppState((s) => s.menu.activePage);
 
   const ref = useRef<HTMLElement>(null);
 
-  const contextPanelOpen = usePanelOpen();
+  const contextPanelOpen = useContextPanelOpen();
 
   const contextPanelTrans = useTransition(contextPanelOpen || inputFocus, 800);
   const detailPanelTrans = useTransition(infoDrawerOpen, 800);
@@ -151,16 +157,23 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
             h(Searchbar, { className: "searchbar" }),
             h.if(contextPanelTrans.shouldMount)(Menu, {
               className: "context-panel",
+              menuPage: menuPage ?? navMenuPage,
             }),
           ]),
           h(MapView, {
             backend,
           }),
           h("div.detail-stack.infodrawer-container", [
-            h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
-              className: "detail-panel",
-            }),
-            h(MapZoomControl),
+            h(Routes, [
+              h(Route, {
+                path: "/loc/:lng/:lat",
+                element: h(InfoDrawerRoute),
+              }),
+              // h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
+              //   className: "detail-panel",
+              // }),
+            ]),
+            h(ZoomControl, { className: "zoom-control" }),
             h("div.spacer"),
             h(MapBottomControls),
           ]),
@@ -171,7 +184,40 @@ const MapPage = ({ backend = MapBackend.MAPBOX3 }) => {
   ]);
 };
 
+function MapPageRoutes() {
+  return h(Routes, [
+    h(
+      Object.values(MenuPage).map((page) =>
+        h(Route, { path: page, element: h(MapPage, { menuPage: page }) })
+      )
+    ),
+    h(Route, { path: "*", element: h(MapPage) }),
+  ]);
+}
+
+function InfoDrawerRoute() {
+  const { lat, lng } = useParams();
+  const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
+  const detailPanelTrans = useTransition(infoDrawerOpen, 800);
+  const runAction = useAppActions();
+
+  useEffect(() => {
+    if (lat && lng) {
+      runAction({
+        type: "run-map-query",
+        lat: Number(lat),
+        lng: Number(lng),
+        z: 7,
+      });
+    }
+  }, [lat, lng]);
+
+  return h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
+    className: "detail-panel",
+  });
+}
+
 //const _MapPage = compose(HotkeysProvider, MapPage);
 
 export { MapBackend };
-export default MapPage;
+export default MapPageRoutes;

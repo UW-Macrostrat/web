@@ -1,32 +1,28 @@
 import React, { useState } from "react";
 import { Collapse, Button } from "@blueprintjs/core";
+import { AuthorList } from "@macrostrat/ui-components";
+import h from "@macrostrat/hyper";
 
 function Article(props) {
   const [expanded, setExpanded] = useState(false);
+  const { data } = props;
 
   const toggleExpand = () => {
     setExpanded(!expanded);
   };
-  const buttonClasses = {
-    root: "expand-button",
-  };
+
   // Attempt to pull out only the year and not the whole date
   let year;
   try {
-    year = this.props.data.coverDate
-      ? this.props.data.coverDate.match(/\d{4}/)[0]
-      : "";
+    year = data.coverDate ? data.coverDate.match(/\d{4}/)[0] : "";
   } catch (e) {
     year = "";
   }
 
-  let authors = props.data.hasOwnProperty("authors")
-    ? props.data.authors
-        .map((d) => {
-          return d.name;
-        })
-        .join(", ")
-    : "";
+  const authors = data?.authors?.split("; ") ?? [];
+
+  const authorList =
+    authors.length > 0 ? h(AuthorList, { names: authors }) : "Unknown";
 
   const iconName = expanded ? "chevron-up" : "chevron-down";
 
@@ -34,11 +30,10 @@ function Article(props) {
     <div className="article">
       <div className="article-title">
         <p className="article-author">
-          {authors ? authors : "Unknown"},{" "}
-          {year.length ? " " + year + ". " : ""}
+          {authorList}, {year.length ? " " + year + ". " : ""}
         </p>
-        <a href={props.data.url} target="_blank" className="title-link">
-          <strong>{props.data.title}.</strong>
+        <a href={data.URL} target="_blank" className="title-link">
+          <strong>{data.title}.</strong>
         </a>
 
         <span>
@@ -53,19 +48,14 @@ function Article(props) {
       <Collapse isOpen={expanded}>
         <span className={expanded ? "" : "hidden"}>
           <div className="quotes">
-            {props.data.snippets.map((snippet, si) => {
-              let text = snippet
-                .replace(/<em class="hl">/g, "@@@")
-                .replace(/<\/em>/g, "***")
-                .replace(/(?:\r\n|\r|\n|\<|\>)/g, " ")
-                .trim()
-                .replace(/@@@/g, '<em class="hl">')
-                .replace(/\*\*\*/g, "</em>");
+            {data.highlight.map((snippet, si) => {
+              let text = snippet;
+
               return (
                 <p
                   className="gdd-snippet"
                   key={si}
-                  dangerouslySetInnerHTML={{ __html: "..." + text + "..." }}
+                  dangerouslySetInnerHTML={{ __html: `...${snippet}...` }}
                 ></p>
               );
             })}

@@ -16,7 +16,7 @@ const mode = process.env.NODE_ENV || "development";
 let publicURL = process.env.PUBLIC_URL || "/";
 
 const packageSrc = (name) =>
-  path.resolve(__dirname, "deps", "ui-components", "packages", name, "src");
+  path.resolve(__dirname, "deps", "web-components", "packages", name, "src");
 
 //const cesiumSource = "node_modules/cesium/Source";
 //const cesiumWorkers = "../Build/Cesium/Workers";
@@ -89,7 +89,18 @@ module.exports = {
     port: 3000,
     hot: true,
     open: true,
-    historyApiFallback: true,
+    historyApiFallback: {
+      // Hack around issues with history API fallback for urls with periods
+      // by sending these directly to react-router
+      // https://github.com/remix-run/react-router/issues/1360
+      // https://github.com/webpack/webpack-dev-server/issues/454
+      rewrites: [
+        {
+          from: /^\/loc\/.*$/,
+          to: "/",
+        },
+      ],
+    },
   },
   module: {
     rules: [
@@ -151,6 +162,9 @@ module.exports = {
       //"@macrostrat/cesium-viewer": packageSrc("cesium-viewer"),
       "@macrostrat/column-components": packageSrc("column-components"),
       "@macrostrat/ui-components": packageSrc("ui-components"),
+      "@macrostrat/mapbox-styles": packageSrc("mapbox-styles"),
+      "@macrostrat/mapbox-utils": packageSrc("mapbox-utils"),
+      "@macrostrat/mapbox-react": packageSrc("mapbox-react"),
     },
   },
   entry: {

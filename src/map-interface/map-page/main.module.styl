@@ -74,11 +74,8 @@ This stylesheet the overall application page layout.
 
 .searchbar-holder
   margin-bottom 0.5em
+    
 
-.list-button
-  border-radius: 4px
-  padding 0
-  margin-bottom 4px
 
 // Menu
 .buttons
@@ -92,7 +89,7 @@ This stylesheet the overall application page layout.
   min-width: 40px
   overflow: hidden
   text-align: right
-  :global(.bp3-button-text)
+  :global(.bp4-button-text)
     transition all 0.2s
     transition-delay 0.1s
 
@@ -100,19 +97,19 @@ This stylesheet the overall application page layout.
   // Transition opacity when leaving context panel
   .panel-header:not(.minimal)
     // .tab-button
-    //   &:not(:hover) :global(.bp3-button-text)
+    //   &:not(:hover) :global(.bp4-button-text)
     //     //width 0
     //     opacity: 1
         //margin-left: -7px
     // Fancy CSS to select all buttons _after_ the currently hovered one
-    .tab-button:global(.bp3-active) ~ .tab-button :global(.bp3-button-text)
+    .tab-button:global(.bp4-active) ~ .tab-button :global(.bp4-button-text)
         width 0
         opacity: 0
         margin-left: -7px
 
 // When panel is closing, fade out the buttons text-first
 .context-panel-leave .menu-card .panel-header
-  .tab-button :global(.bp3-button-text)
+  .tab-button :global(.bp4-button-text)
     opacity: 0
     width: 0
 
@@ -122,37 +119,58 @@ This stylesheet the overall application page layout.
   margin-right: -500px
 
 .panel-header.minimal
-  .tab-button:not(:hover) :global(.bp3-button-text)
+  .tab-button:not(:hover)
+    &:not(:global(.bp4-active))
+      padding-left: 0
+      padding-right: 0
+      min-width: 30px
+      width: 30px
+    :global(.bp4-button-text)
       width 0
       opacity: 0
       margin-left: -7px
 
+.menu-group
+  margin-bottom: 0.5em
+  margin-top: 0.2em
+
+
 .menu-card
   :global
-    .bp3-text, .text-panel
+    .bp4-text, .text-panel
       ul
         padding-left: 1em
 
 .menu-content
   display flex
   flex-direction column
-  .bp3-button-group
+  .bp4-button-group
     margin-bottom 4px
-  margin: -4px
   margin-bottom -8px
+
+  hr
+    width 100%
 
 // Map controls
 map-control()
   min-width: 22px
   min-height: 22px 
   border-radius: 4px
-  box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.1), 0 0 0 rgba(16, 22, 26, 0), 0 1px 1px rgba(16, 22, 26, 0.2) !important
+  background-color: var(--panel-background-color)
+  box-shadow 0 0 0 1px var(--card-shadow-color)
+  //box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.1), 0 0 0 rgba(16, 22, 26, 0), 0 1px 1px rgba(16, 22, 26, 0.2) !important
   //box-shadow: 0 0 0 2px rgba(0,0,0,.1)
   button
     width: 22px
     height: 22px
     background-position: center center
     padding 0
+    background-color: var(--panel-background-color)
+    color: var(--text-color)
+
+    &:hover
+      background-color: var(--panel-background-color) !important
+
 
 :global
 
@@ -175,6 +193,47 @@ map-control()
   .mapboxgl-canvas-container
     width: 100%
     height: 100%
+
+  .mapboxgl-ctrl.mapboxgl-ctrl-attrib
+    a
+      color: var(--text-color)
+    background-color: var(--translucent-panel-background-color) !important
+
+
+  .mapboxgl-marker svg
+    path
+      fill: var(--panel-background-color) !important
+    circle
+      fill: var(--secondary-color) !important
+    
+
+  .mapbox-control.mapbox-zoom
+    background: var(--translucent-panel-background-color)
+    svg
+      fill: var(--text-color) !important
+
+  .mapboxgl-ctrl-logo
+    transform: scale(0.9)translate(-8px,2px)
+  .bp4-dark
+    .mapboxgl-ctrl-logo
+      filter: invert(100%)
+
+
+
+  .mapboxgl-ctrl-group button + button
+    border-top: 1px solid var(--panel-rule-color) !important
+
+  .bp4-dark .mapboxgl-ctrl-group .mapboxgl-ctrl-icon
+    filter: invert(40%)
+    &:hover
+      filter: invert(50%)
+    //background-color: var(--)
+
+  .mapboxgl-ctrl-geolocate .mapboxgl-ctrl-icon
+    filter: invert(40%)
+    &:hover
+      filter: invert(50%)
+
 
 .detail-stack
   position relative
@@ -202,12 +261,18 @@ map-control()
   margin-bottom: 0
   &>*
     margin-left: 0.5em
-  :global(.mapbox-control), .map-control
+  :global(.mapbox-control), :global(.map-control-wrapper), .map-control
     map-control()
 
+  .map-scale-control
+    background: none
+    box-shadow: none
+    padding-top: 8px
+    :global(.mapboxgl-ctrl-scale)
+      background-color: var(--translucent-panel-background-color)
+      border-color: var(--secondary-text-color)
+      color: var(--secondary-text-color)
 
-:global(.mapbox-control.mapbox-zoom)
-  background: rgba(255,255,255,0.2)
 
 /* For mobile phones, we want to make the most of screen space,
  which in some cases means adding complications to the basic page. */
@@ -273,7 +338,7 @@ map-control()
     &.panel-open
       width: 34em
       margin-right 0.5em
-    &.layers
+    &.layers, &.settings
       width: 18em
       margin-right 0.5em
     // Leave a little space for Mapbox logo at the bottom
@@ -326,5 +391,6 @@ map-control()
 //     opacity: 0
 //   to
 //     opacity: 1
+
 
 @require "./transitions.module.styl"

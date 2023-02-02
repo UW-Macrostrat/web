@@ -1,4 +1,6 @@
-import { SETTINGS } from "../Settings";
+import { SETTINGS } from "../../settings";
+export * from "./line-symbols";
+export * from "./map-sources";
 
 const overlaySources = {
   // "pbdb": {
@@ -24,21 +26,6 @@ const overlaySources = {
     data: {
       type: "FeatureCollection",
       features: [],
-    },
-  },
-  info_marker: {
-    type: "geojson",
-    data: {
-      type: "FeatureCollection",
-      features: [
-        {
-          type: "Feature",
-          geometry: {
-            type: "Point",
-            coordinates: [0, 0],
-          },
-        },
-      ],
     },
   },
   columns: {
@@ -83,8 +70,8 @@ const overlayLayers = [
     type: "fill",
     source: "columns",
     paint: {
-      "fill-color": "#777777",
-      "fill-opacity": 0.2,
+      "fill-color": "dodgerblue",
+      "fill-opacity": 0.1,
     },
     layout: {
       visibility: "none",
@@ -95,11 +82,11 @@ const overlayLayers = [
     type: "line",
     source: "columns",
     paint: {
-      "line-color": "#777777",
+      "line-color": "dodgerblue",
       "line-width": {
         stops: [
-          [0, 0.2],
-          [10, 1],
+          [0, 1],
+          [10, 2],
         ],
       },
     },
@@ -134,18 +121,6 @@ const overlayLayers = [
     },
     layout: {
       visibility: "none",
-    },
-  },
-  {
-    id: "infoMarker",
-    type: "symbol",
-    source: "info_marker",
-    layout: {
-      "icon-size": 0.65,
-      "icon-image": "pin",
-      "icon-offset": [0, -28],
-      visibility: "none",
-      "icon-allow-overlap": true,
     },
   },
   {
