@@ -1,8 +1,8 @@
 import {
   fetchFilteredColumns,
   handleXDDQuery,
-  asyncGetColumn,
-  asyncQueryMap,
+  runColumnQuery,
+  runMapQuery,
   asyncGetElevation,
   getPBDBData,
   base,
@@ -171,13 +171,13 @@ async function actionRunner(
         lat,
         cancelToken: sourceMapQuery,
       });
-      if (column) {
+      if (column != null) {
         dispatch(
           await actionRunner(state, { type: "get-column", column }, dispatch)
         );
       }
 
-      let mapData = await asyncQueryMap(
+      let mapData = await runMapQuery(
         lng,
         lat,
         z,
@@ -194,7 +194,7 @@ async function actionRunner(
       let sourceGetColumn = CancelTokenGetColumn.source();
       dispatch({ type: "start-column-query", cancelToken: sourceMapQuery });
 
-      let columnData = await asyncGetColumn(
+      let columnData = await runColumnQuery(
         action.column,
         sourceGetColumn.token
       );

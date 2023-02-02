@@ -112,23 +112,26 @@ function addMapIdToRef(data) {
   return data;
 }
 
-export const asyncQueryMap = async (lng, lat, z, map_id, cancelToken) => {
+export async function runMapQuery(lng, lat, z, map_id, cancelToken) {
   const params = { lng, lat, z, map_id };
   let url = base + "/mobile/map_query_v2";
   let res = await axios.get(url, { cancelToken, responseType: "json", params });
   const data = addMapIdToRef(res.data).success.data;
   return data;
-};
+}
 
-export const asyncGetColumn = async (column, cancelToken) => {
-  let url = `${base}/units?response=long&col_id=${column.col_id}`;
-  const res = await axios.get(url, { cancelToken, responseType: "json" });
+export async function runColumnQuery(column, cancelToken) {
+  const res = await axios.get(base + "/units", {
+    cancelToken,
+    responseType: "json",
+    params: { response: "long", col_id: column.col_id },
+  });
   try {
     return res.data.success.data;
   } catch (error) {
     return [];
   }
-};
+}
 
 export const asyncGetElevation = async (line, cancelToken) => {
   const [start_lng, start_lat] = line[0];
