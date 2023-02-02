@@ -1,10 +1,15 @@
-import { useState } from "react";
-import h from "@macrostrat/hyper";
+import React, { useState } from "react";
+import hyper from "@macrostrat/hyper";
 import { Tag, Card, Button, Collapse, Switch } from "@blueprintjs/core";
 import { useFilterState, useAppActions } from "~/map-interface/app-state";
+import { useAdmoinshments } from "./admonishments";
+import styles from "./filters.module.styl";
+
+const h = hyper.styled(styles);
 
 function Filter({ filter }) {
   const runAction = useAppActions();
+
   const remove = () => runAction({ type: "remove-filter", filter });
 
   const swapFilterType = () => {
@@ -84,12 +89,13 @@ function makeFilterString(filters) {
   return finalString;
 }
 
-function SubtleFilterText() {
+function FilterPanel() {
   const [open, setOpen] = useState(false);
   const { filters } = useFilterState();
   const runAction = useAppActions();
+  const admonishments = useAdmoinshments();
 
-  if (filters.length == 0) {
+  if (filters.length == 0 && admonishments.length == 0) {
     return null;
   }
 
@@ -105,16 +111,31 @@ function SubtleFilterText() {
   const iconName = open ? "chevron-up" : "chevron-down";
 
   return h(Card, { className: "filter-tongue" }, [
-    h("div.filter-name-container", [
-      h("p.filter-names", [h("b", "Filtering by: "), filterString]),
-      h("div.filter-tongue-actions", [
-        h("div.remove", { onClick: onRemoveAll }, ["remove all"]),
-        h(Button, { minimal: true, small: true, icon: iconName, onClick }),
+    h(Admonishments, { admonishments }),
+    h.if(filters.length > 0)([
+      h("div.filter-name-container", [
+        h("p.filter-names", [h("b", "Filtering by: "), filterString]),
+        h("div.filter-tongue-actions", [
+          h("div.remove", { onClick: onRemoveAll }, ["remove all"]),
+          h(Button, { minimal: true, small: true, icon: iconName, onClick }),
+        ]),
       ]),
+      h(Collapse, { isOpen: open }, [h(Filters)]),
     ]),
-    h(Collapse, { isOpen: open }, [h(Filters)]),
   ]);
 }
 
+function Admonishments({
+  admonishments,
+}: {
+  admonishments: React.ReactNode[];
+}) {
+  if (admonishments.length == 0) {
+    return null;
+  }
+
+  return h("div.admonishments", admonishments);
+}
+
 export default Filters;
-export { SubtleFilterText };
+export { FilterPanel };

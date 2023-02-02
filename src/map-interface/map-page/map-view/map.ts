@@ -1,5 +1,5 @@
 import { Component, forwardRef } from "react";
-import { SETTINGS } from "../../Settings";
+import { SETTINGS } from "../../settings";
 import { mapStyle } from "../map-style";
 import { PBDBHelper } from "./filter-helpers";
 import h from "@macrostrat/hyper";

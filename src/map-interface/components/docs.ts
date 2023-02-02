@@ -3,7 +3,7 @@ import { Alignment } from "@blueprintjs/core";
 import styles from "./docs.module.styl";
 import { useInView } from "react-intersection-observer";
 import { HashLink } from "react-router-hash-link";
-import { routerBasename } from "../Settings";
+import { routerBasename } from "../settings";
 import classNames from "classnames";
 
 const h = hyper.styled(styles);

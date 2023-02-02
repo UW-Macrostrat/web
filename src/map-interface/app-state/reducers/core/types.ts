@@ -114,6 +114,12 @@ type Place = {
   center?: [number, number];
 };
 
+type ToggleExperimentsPanel = {
+  type: "toggle-experiments-panel";
+  open?: boolean;
+};
+type GoToExperimentsPanel = { type: "go-to-experiments-panel" };
+
 type SelectSearchResult = {
   type: "select-search-result";
   result: Filter | Place;
@@ -166,7 +172,9 @@ export type CoreAction =
   | AddFilter
   | SetFilters
   | StopSearching
-  | SelectSearchResult;
+  | SelectSearchResult
+  | ToggleExperimentsPanel
+  | GoToExperimentsPanel;
 
 interface AsyncRequestState {
   // Events and tokens for xhr
@@ -192,7 +200,6 @@ interface MapCenterInfo {
 
 interface MapSettings {
   highResolutionTerrain: boolean;
-  showLineSymbols: boolean;
 }
 
 export interface CoreState extends MapState, AsyncRequestState {
@@ -220,5 +227,6 @@ export interface CoreState extends MapState, AsyncRequestState {
   filtersOpen: boolean;
   filters: FilterData[];
   filteredColumns: object;
+  showExperimentsPanel: boolean;
   data: [];
 }

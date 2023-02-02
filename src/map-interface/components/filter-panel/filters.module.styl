@@ -1,0 +1,37 @@
+.admonishments
+  position: relative
+
+.admonishment
+  margin: 0px 0px
+  font-size: 12px
+  position: relative
+  width: 100%
+  padding: 0px 0px
+  display: block
+  .button-contents
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: 0.5em
+    padding: 0 0.5em
+    width: 100%
+    .spacer
+      flex-grow: 1
+    
+  .spacer
+    flex-grow: 1
+  &:global(.bp4-button.bp4-small)
+    border-bottom-left-radius: 0
+    border-bottom-right-radius: 0
+    padding-left: 0
+    padding-right: 0
+    margin-bottom: 0
+
+.filter-container
+  margin-bottom: 5px;
+
+.filter-tag
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 5px;

@@ -7,7 +7,7 @@ import {
   useContextPanelOpen,
 } from "../app-state";
 import { useSelector } from "react-redux";
-import { SubtleFilterText } from "./filters-panel";
+import { FilterPanel } from "./filter-panel";
 import styles from "./searchbar.styl";
 import { PanelSubhead } from "./expansion-panel/headers";
 import classNames from "classnames";
@@ -138,7 +138,7 @@ function Searchbar({ className }) {
         }),
       ]),
     ]),
-    h(SubtleFilterText),
+    h(FilterPanel),
   ]);
 }
 
