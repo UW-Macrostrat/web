@@ -88,7 +88,7 @@ async function actionRunner(
     case "set-menu-page": {
       const { pathname } = state.router.location;
       if (!isDetailPanelRoute(pathname)) {
-        const newPathname = "/" + (action.page ?? "");
+        const newPathname = routerBasename + (action.page ?? "");
         await dispatch(push({ pathname: newPathname, hash: location.hash }));
       }
       return { type: "set-menu-page", page: action.page };

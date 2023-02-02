@@ -2,16 +2,17 @@ import { useLocation, useNavigate } from "react-router";
 import { useAppState } from "./hooks";
 import classNames from "classnames";
 import { MenuPage } from "./reducers";
+import { routerBasename } from "../settings";
 
 export function isDetailPanelRoute(pathname: string) {
   /* Some routes imply that the detail panel is open. This does not necessarily
   mean that the context panel will be closed when that panel is navigated to, but
   it takes the routing focus off the context panel's status. */
-  return pathname.startsWith("/loc");
+  return pathname.startsWith(routerBasename + "loc");
 }
 
 export function contextPanelIsInitiallyOpen(pathname: string) {
-  return pathname != "/" && !isDetailPanelRoute(pathname);
+  return pathname != routerBasename && !isDetailPanelRoute(pathname);
 }
 
 export function useContextPanelOpen() {
@@ -20,7 +21,7 @@ export function useContextPanelOpen() {
 
 export function currentPageForPathName(pathname: string): MenuPage | null {
   return Object.values(MenuPage).find((page) =>
-    pathname.startsWith("/" + page)
+    pathname.startsWith(routerBasename + page)
   );
 }
 
