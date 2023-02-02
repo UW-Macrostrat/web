@@ -195,6 +195,9 @@ function MapContainer(props) {
     (state) => state.core.infoMarkerPosition
   );
 
+  const hasLineSymbols =
+    mapLayers.has(MapLayer.LINE_SYMBOLS) && mapLayers.has(MapLayer.LINES);
+
   const updateMapPadding = useCallback(() => {
     setPadding(getMapPadding(ref, parentRef));
   }, [ref, parentRef]);
@@ -218,6 +221,7 @@ function MapContainer(props) {
       setMapInitialized(true);
       // Update map padding on load
       updateMapPadding();
+      toggleLineSymbols(map, hasLineSymbols);
     });
   }, []);
 
@@ -298,11 +302,7 @@ function MapContainer(props) {
     });
   }, [mapRef.current, mapIsLoading]);
 
-  useMapConditionalStyle(
-    mapRef,
-    mapLayers.has(MapLayer.LINE_SYMBOLS) && mapLayers.has(MapLayer.LINES),
-    toggleLineSymbols
-  );
+  useMapConditionalStyle(mapRef, hasLineSymbols, toggleLineSymbols);
 
   useResizeObserver({
     ref: parentRef,
