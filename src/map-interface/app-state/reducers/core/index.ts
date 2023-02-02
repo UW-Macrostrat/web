@@ -138,10 +138,6 @@ export function coreReducer(
     case "toggle-filters":
       // rework this to open menu panel
       return { ...state, filtersOpen: !state.filtersOpen };
-    case "toggle-line-symbols":
-      return update<CoreState>(state, {
-        mapSettings: { $toggle: ["showLineSymbols"] },
-      });
     case "add-filter":
       // action.filter.type and action.filter.id go to the URI
       // handle search resetting
