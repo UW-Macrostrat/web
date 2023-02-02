@@ -198,6 +198,9 @@ function MapPageRoutes() {
 function InfoDrawerRoute() {
   const { lat, lng } = useParams();
   const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
+  const z = Math.round(
+    useAppState((s) => s.core.mapPosition.target?.zoom) ?? 7
+  );
   const detailPanelTrans = useTransition(infoDrawerOpen, 800);
   const runAction = useAppActions();
 
@@ -207,7 +210,7 @@ function InfoDrawerRoute() {
         type: "run-map-query",
         lat: Number(lat),
         lng: Number(lng),
-        z: 7,
+        z,
       });
     }
   }, [lat, lng]);

@@ -113,13 +113,9 @@ function addMapIdToRef(data) {
 }
 
 export const asyncQueryMap = async (lng, lat, z, map_id, cancelToken) => {
-  let url = `${base}/mobile/map_query_v2?lng=${lng.toFixed(
-    5
-  )}&lat=${lat.toFixed(5)}&z=${parseInt(z)}`;
-  if (map_id) {
-    url += `map_id=${map_id}`;
-  }
-  let res = await axios.get(url, { cancelToken, responseType: "json" });
+  const params = { lng, lat, z, map_id };
+  let url = base + "/mobile/map_query_v2";
+  let res = await axios.get(url, { cancelToken, responseType: "json", params });
   const data = addMapIdToRef(res.data).success.data;
   return data;
 };
