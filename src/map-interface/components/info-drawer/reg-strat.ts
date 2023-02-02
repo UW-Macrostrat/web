@@ -15,7 +15,7 @@ function RegionalStratigraphy(props) {
   const { mapData, hasColumns } = mapInfo;
 
   if (!mapData || !hasColumns || Object.keys(columnInfo).length == 0) {
-    return h("div");
+    return null;
   }
 
   return h(
@@ -29,7 +29,7 @@ function RegionalStratigraphy(props) {
       h.if(Object.keys(columnInfo).length != 0)("div", [
         h(
           LinkButton,
-          { minimal: true, to: `column/${columnInfo.col_id}` },
+          { minimal: true, to: "column" },
           h("span.col-name", columnInfo.col_name)
         ),
         h(MapAttribute, {
