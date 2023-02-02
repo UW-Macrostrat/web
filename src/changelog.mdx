@@ -1,5 +1,9 @@
-import { Version } from "./map-interface/components/docs";
-import { DocsVideo, DocsMedia } from "./map-interface/components/docs";
+import {
+  Version,
+  InternalLink,
+  DocsVideo,
+  DocsMedia,
+} from "./map-interface/components/docs";
 
 <Version spec="4.1.0" date="February 1, 2023" />
 
@@ -70,7 +74,7 @@ map-by-map basis.
 
 - The focused location and info box can be loaded from URL parameters, allowing map locations to be easily shared.
   Optional hash parameters set view orientation, layer, and map filter state. The URL signature is
-  `https://macrostrat.org/loc/<longitude>/<latitude>#<hash>`.
+  `https://macrostrat.org/loc/<lon>/<lat>#<hash>`.
 - Correctly save filter states from URL parameters.
 - Major simplification of the internal design of the map filter system.
 
@@ -80,9 +84,19 @@ map-by-map basis.
 
 #### Examples of saved state
 
-- [_Black Canyon of the Gunnison_, oblique satellite view](/loc/-107.7083/38.5802#x=-107.8909&y=38.7058&z=8.73km&a=132&e=76&show=satellite,geology).
-- [_Vishnu Schist in the Grand Canyon_, oblique view](/loc/-112.1976/36.0962#strat_name_concepts=11016&x=-112.236&y=36.2119&z=15.61km&a=165&e=42).
-- [_Mesozoic igneous rocks of California_, overhead view with labels hidden](/#intervals=32&lithology_classes=igneous&x=-116.7569&y=34.7144&z=7.6&hide=labels)
+- <InternalLink to="loc/-107.7083/38.5802#x=-107.8909&y=38.7058&z=8.73km&a=132&e=76&show=satellite,geology">
+    <em>Black Canyon of the Gunnison</em>, oblique satellite view
+  </InternalLink>
+  .
+- <InternalLink to="loc/-112.1976/36.0962#strat_name_concepts=11016&x=-112.236&y=36.2119&z=15.61km&a=165&e=42">
+    <em>Vishnu Schist in the Grand Canyon</em>, oblique view
+  </InternalLink>
+  .
+- <InternalLink to="#intervals=32&lithology_classes=igneous&x=-116.7569&y=34.7144&z=7.6&hide=labels">
+    <em>Mesozoic igneous rocks of California</em>, overhead view with labels
+    hidden
+  </InternalLink>
+  .
 
 ### Internal improvements
 
