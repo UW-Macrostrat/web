@@ -3,6 +3,12 @@ import { useAppState } from "./hooks";
 import classNames from "classnames";
 import { MenuPage } from "./reducers";
 import { routerBasename } from "../settings";
+import { RouteMatch } from "react-router-dom";
+
+export function isDetailPanelRouteInternal(pathname: string) {
+  /* Check if we're in a detail panel route from within the app. */
+  return pathname.startsWith("/loc");
+}
 
 export function isDetailPanelRoute(pathname: string) {
   /* Some routes imply that the detail panel is open. This does not necessarily
@@ -10,9 +16,7 @@ export function isDetailPanelRoute(pathname: string) {
   it takes the routing focus off the context panel's status. */
   // Hack: cover all our bases here by not differentiating between paths that start with
   // routerBasename (i.e. full location paths) vs. react-router internal paths.
-  return (
-    pathname.startsWith(routerBasename + "loc") || pathname.startsWith("/loc")
-  );
+  return pathname.startsWith(routerBasename + "loc");
 }
 
 export function contextPanelIsInitiallyOpen(pathname: string) {

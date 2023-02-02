@@ -31,7 +31,7 @@ import { useMatch, useLocation } from "react-router";
 import { useTransition } from "transition-hook";
 import { useCurrentPage } from "../app-state/nav-hooks";
 import useBreadcrumbs from "use-react-router-breadcrumbs";
-import { isDetailPanelRoute } from "../app-state/nav-hooks";
+import { isDetailPanelRouteInternal } from "../app-state/nav-hooks";
 import { SettingsPanel, ExperimentsPanel, ThemeButton } from "./settings-panel";
 import { useState, useEffect } from "react";
 import { LinkButton, LayerButton, ListButton } from "../components/buttons";
@@ -140,8 +140,7 @@ function useLastPageLocation(): { title: string; to: string } | null {
   const prevRoute =
     menuBacklinkLocationOverrides[currentPage.match.pathname] ??
     prevPage.match.pathname;
-  console.log(breadcrumbs, prevRoute);
-  if (prevRoute == routerBasename) return null;
+  if (prevRoute == "/" || isDetailPanelRouteInternal(prevRoute)) return null;
   return { to: prevRoute, title: locationTitleForRoute[prevRoute] ?? "Back" };
 }
 
@@ -149,7 +148,7 @@ function MenuHeaderButtons() {
   const backLoc = useLastPageLocation();
   const { pathname } = useLocation();
 
-  if (backLoc != null && !isDetailPanelRoute(backLoc.to)) {
+  if (backLoc != null) {
     return h([
       h(
         LinkButton,
