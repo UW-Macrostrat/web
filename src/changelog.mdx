@@ -1,5 +1,9 @@
-import { Version } from "./map-interface/components/docs";
-import { DocsVideo, DocsMedia } from "./map-interface/components/docs";
+import {
+  Version,
+  InternalLink,
+  DocsVideo,
+  DocsMedia,
+} from "./map-interface/components/docs";
 
 <Version spec="4.1.0" date="February 1, 2023" />
 
@@ -9,18 +13,18 @@ import { DocsVideo, DocsMedia } from "./map-interface/components/docs";
   The new <em>Settings</em> panel
 </DocsMedia>
 
-- Added a new _Settings_ panel to control map display options. This panel contains an
-  _Experiments_ panel to toggle previews of new features that are still in development.
+- Added a new _Settings_ panel to control map display options. The
+  _Experiments_ sub-panel allows previews of new features that are still in development.
 - Added a **Dark mode** for the entire user interface, including a new map style. This follows
   the browser-level preference by default, but it can be overridden from the _Settings_ panel.
 
-<DocsMedia href="version-4.1.0/dark-mode.mp4" float={null} width="50%">
+<DocsMedia href="version-4.1.0/dark-mode.mp4" align="center" width="50%">
   Toggling "Dark mode"
 </DocsMedia>
 
 #### Map features and bug fixes
 
-<DocsMedia href="version-4.1.0/basemap-labels.mp4" float={null} width="70%">
+<DocsMedia href="version-4.1.0/basemap-labels.mp4" align="center" width="70%">
   Toggling basemap labels
 </DocsMedia>
 
@@ -33,7 +37,7 @@ import { DocsVideo, DocsMedia } from "./map-interface/components/docs";
 
 <DocsMedia
   href="version-4.1.0/cordillera-without-labels.png"
-  float={null}
+  align="center"
   width="50%"
 >
   The Rocky Mountains without map labels
@@ -52,8 +56,9 @@ import { DocsVideo, DocsMedia } from "./map-interface/components/docs";
 
 #### Line symbols (_experimental_ 🧫)
 
-<DocsMedia href="version-4.1.0/experimental-line-symbols.mp4" float={null}>
-  Experimental line symbols
+<DocsMedia href="version-4.1.0/experimental-line-symbols.mp4" align="center">
+  Line symbols are critical to the representation of crustal processes on
+  geologic maps
 </DocsMedia>
 
 In the _Experiments_ panel, we have added a toggle for _Line symbols_, which
@@ -70,19 +75,29 @@ map-by-map basis.
 
 - The focused location and info box can be loaded from URL parameters, allowing map locations to be easily shared.
   Optional hash parameters set view orientation, layer, and map filter state. The URL signature is
-  `https://macrostrat.org/loc/<longitude>/<latitude>#<hash>`.
+  `https://macrostrat.org/loc/<lon>/<lat>#<hash>`.
 - Correctly save filter states from URL parameters.
 - Major simplification of the internal design of the map filter system.
 
-<DocsMedia href="version-4.1.0/save-location.mp4" float={null} width="50%">
+<DocsMedia href="version-4.1.0/save-location.mp4" align="center" width="50%">
   Saving location state
 </DocsMedia>
 
 #### Examples of saved state
 
-- [_Black Canyon of the Gunnison_, oblique satellite view](/loc/-107.7083/38.5802#x=-107.8909&y=38.7058&z=8.73km&a=132&e=76&show=satellite,geology).
-- [_Vishnu Schist in the Grand Canyon_, oblique view](/loc/-112.1976/36.0962#strat_name_concepts=11016&x=-112.236&y=36.2119&z=15.61km&a=165&e=42).
-- [_Mesozoic igneous rocks of California_, overhead view with labels hidden](/#intervals=32&lithology_classes=igneous&x=-116.7569&y=34.7144&z=7.6&hide=labels)
+- <InternalLink to="loc/-107.7083/38.5802#x=-107.8909&y=38.7058&z=8.73km&a=132&e=76&show=satellite,geology">
+    <em>Black Canyon of the Gunnison</em>, oblique satellite view
+  </InternalLink>
+  .
+- <InternalLink to="loc/-112.1976/36.0962#strat_name_concepts=11016&x=-112.236&y=36.2119&z=15.61km&a=165&e=42">
+    <em>Vishnu Schist in the Grand Canyon</em>, oblique view
+  </InternalLink>
+  .
+- <InternalLink to="#intervals=32&lithology_classes=igneous&x=-116.7569&y=34.7144&z=7.6&hide=labels">
+    <em>Mesozoic igneous rocks of California</em>, overhead view with labels
+    hidden
+  </InternalLink>
+  .
 
 ### Internal improvements
 

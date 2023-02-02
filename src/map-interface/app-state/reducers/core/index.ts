@@ -31,7 +31,6 @@ const defaultState: CoreState = {
   mapLayers: new Set([MapLayer.BEDROCK, MapLayer.LINES, MapLayer.LABELS]),
   mapSettings: {
     highResolutionTerrain: true,
-    showLineSymbols: false,
   },
   // Events and tokens for xhr
   isFetching: false,
@@ -64,6 +63,7 @@ const defaultState: CoreState = {
   filters: [],
   filteredColumns: {},
   data: [],
+  showExperimentsPanel: false,
   mapPosition: {
     camera: {
       lng: 23,
@@ -121,6 +121,11 @@ export function coreReducer(
       return state;
     case "toggle-about":
       return { ...state, aboutOpen: !state.aboutOpen };
+    case "toggle-experiments-panel":
+      return {
+        ...state,
+        showExperimentsPanel: action.open ?? !state.showExperimentsPanel,
+      };
     case "close-infodrawer":
       return {
         ...state,

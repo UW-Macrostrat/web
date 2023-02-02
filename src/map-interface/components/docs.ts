@@ -1,41 +1,47 @@
 import hyper from "@macrostrat/hyper";
+import { Alignment } from "@blueprintjs/core";
 import styles from "./docs.module.styl";
 import { useInView } from "react-intersection-observer";
-import { Link } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
+import { routerBasename } from "../settings";
 import classNames from "classnames";
 
 const h = hyper.styled(styles);
+
+const urlBase = "https://macrostrat-media.s3.amazonaws.com/maps/docs/";
 
 function DocsMediaFile({ href, lazy = true, className }) {
   const { ref, inView } = useInView({ triggerOnce: true });
   let src = null;
   if (inView || !lazy) {
-    src = `https://macrostrat-media.s3.amazonaws.com/maps/docs/${href}`;
+    src = joinURL(urlBase, href);
   }
-
-  if (href.endsWith(".png")) {
-    return h("img", {
+  if (href.endsWith(".mp4")) {
+    return h("video", {
       ref,
+      autoPlay: true,
+      loop: true,
+      playsInline: true,
+      muted: true,
+      type: "video/mp4",
       src,
       className,
     });
   }
-  return h("video", {
+  return h("img", {
     ref,
-    autoPlay: true,
-    loop: true,
-    playsInline: true,
-    muted: true,
-    type: "video/mp4",
     src,
     className,
   });
 }
 
-export function DocsMedia({ children, width, float = "right", ...rest }) {
-  const className = classNames({
-    [float]: float != null,
+export function DocsMedia({
+  children,
+  width,
+  align = Alignment.RIGHT,
+  ...rest
+}) {
+  const className = classNames(align, {
     captioned: children != null,
   });
   return h("figure.documentation-figure", { style: { width }, className }, [
@@ -45,28 +51,41 @@ export function DocsMedia({ children, width, float = "right", ...rest }) {
 }
 
 export function DocsVideo({ slug, lazy = true, className }) {
-  const { ref, inView } = useInView({ triggerOnce: true });
-  let src = null;
-  if (inView || !lazy) {
-    src = `https://macrostrat-media.s3.amazonaws.com/maps/docs/${slug}.mp4`;
-  }
-
-  return h("video.documentation-video-standalone", {
-    ref,
-    autoPlay: true,
-    loop: true,
-    playsInline: true,
-    muted: true,
-    type: "video/mp4",
-    src,
+  // For legacy reasons, the alignment is set to left
+  return h(DocsMedia, {
+    href: slug + ".mp4",
+    lazy,
     className,
+    align: Alignment.LEFT,
   });
+}
+
+function joinURL(...args) {
+  let newURL = args[0];
+  for (let i = 1; i < args.length; i++) {
+    newURL = newURL.replace(/\/$/, "") + "/" + args[i].replace(/^\//, "");
+  }
+  return newURL;
+}
+
+export function InternalLink({ to, children }) {
+  // We'd use a link component, but it doesn't properly navigate to the hash state
+  return h(
+    "a.internal-link",
+    {
+      href: joinURL(routerBasename, to),
+    },
+    children
+  );
 }
 
 export function NewSwatch({ children, version = 0 }) {
   return h(
     HashLink,
-    { to: `/changelog#version-${version}`, className: "new-swatch" },
+    {
+      to: routerBasename + `changelog#version-${version}`,
+      className: "new-swatch",
+    },
     children
   );
 }

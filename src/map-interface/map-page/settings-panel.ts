@@ -54,7 +54,8 @@ const ExperimentsPanel = (props) => {
 const SettingsPanel = (props) => {
   //const { pathname } = useLocation();
   //const globeActive = pathname?.startsWith("/globe");
-  const [showExperiments, setShowExperiments] = useState(false);
+  const runAction = useAppActions();
+  const showExperiments = useAppState((s) => s.core.showExperimentsPanel);
 
   return h("div.settings", [
     h("p.info", "Display options for Macrostrat's map."),
@@ -73,7 +74,7 @@ const SettingsPanel = (props) => {
             active: showExperiments,
             intent: "warning",
             onClick() {
-              setShowExperiments(!showExperiments);
+              runAction({ type: "toggle-experiments-panel" });
             },
           },
           "Experiments"
@@ -100,9 +101,11 @@ function LineSymbolsControl() {
     h(
       Switch,
       {
-        checked: useAppState((s) => s.core.mapSettings.showLineSymbols),
+        checked: useAppState((s) =>
+          s.core.mapLayers.has(MapLayer.LINE_SYMBOLS)
+        ),
         onChange() {
-          runAction({ type: "toggle-line-symbols" });
+          runAction({ type: "toggle-map-layer", layer: MapLayer.LINE_SYMBOLS });
         },
       },
       [

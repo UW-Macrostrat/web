@@ -11,7 +11,7 @@ import { AppAction, AppState } from "../reducers";
 import axios from "axios";
 import { runFilter } from "./filters";
 import { push } from "@lagunovsky/redux-react-router";
-import { routerBasename } from "~/map-interface/Settings";
+import { routerBasename } from "~/map-interface/settings";
 import { isDetailPanelRoute } from "../nav-hooks";
 import { MenuPage, setInfoMarkerPosition } from "../reducers";
 import { formatCoordForZoomLevel } from "~/map-interface/utils/formatting";
@@ -80,6 +80,10 @@ async function actionRunner(
         { type: "set-menu-page", page: activePage },
         dispatch
       );
+    }
+    case "go-to-experiments-panel": {
+      await dispatch({ type: "set-menu-page", page: MenuPage.SETTINGS });
+      return { type: "toggle-experiments-panel", open: true };
     }
     case "set-menu-page": {
       const { pathname } = state.router.location;

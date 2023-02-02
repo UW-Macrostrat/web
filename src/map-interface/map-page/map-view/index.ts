@@ -34,7 +34,7 @@ import {
 } from "@macrostrat/mapbox-utils";
 import { getExpressionForFilters } from "./filter-helpers";
 import { MapSourcesLayer, mapStyle, toggleLineSymbols } from "../map-style";
-import { SETTINGS } from "../../Settings";
+import { SETTINGS } from "../../settings";
 import mapboxgl from "mapbox-gl";
 
 const h = hyper.styled(styles);
@@ -195,6 +195,10 @@ function MapContainer(props) {
     (state) => state.core.infoMarkerPosition
   );
 
+  const updateMapPadding = useCallback(() => {
+    setPadding(getMapPadding(ref, parentRef));
+  }, [ref, parentRef]);
+
   useEffect(() => {
     initializeMap(baseMapURL, mapPosition, infoMarkerPosition).then((map) => {
       mapRef.current = map;
@@ -212,6 +216,8 @@ function MapContainer(props) {
          to update the map. */
       //runAction({ type: "set-filters", filters: [...filters] });
       setMapInitialized(true);
+      // Update map padding on load
+      updateMapPadding();
     });
   }, []);
 
@@ -294,14 +300,14 @@ function MapContainer(props) {
 
   useMapConditionalStyle(
     mapRef,
-    mapSettings.showLineSymbols && mapLayers.has(MapLayer.LINES),
+    mapLayers.has(MapLayer.LINE_SYMBOLS) && mapLayers.has(MapLayer.LINES),
     toggleLineSymbols
   );
 
   useResizeObserver({
     ref: parentRef,
     onResize(sz) {
-      setPadding(getMapPadding(ref, parentRef));
+      updateMapPadding();
     },
   });
 
