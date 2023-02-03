@@ -3932,6 +3932,8 @@ __metadata:
     "@mapbox/vector-tile": ^1.3.1
     "@mdx-js/loader": ^1.6.22
     "@mdx-js/react": ^1.5
+    "@turf/boolean-contains": ^6.5.0
+    "@types/geojson": ^7946.0.10
     "@types/node": ^13.13.5
     "@types/react-redux": ^7.1.7
     "@visx/axis": ^2.14.0
@@ -7255,6 +7257,49 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@turf/bbox@npm:^6.5.0":
+  version: 6.5.0
+  resolution: "@turf/bbox@npm:6.5.0"
+  dependencies:
+    "@turf/helpers": ^6.5.0
+    "@turf/meta": ^6.5.0
+  checksum: 537be56ae0c5ad44e71a691717b35745e947e19a6bd9f20fdac2ab4318caf98cd88472d7dbf576e8b32ead5da034d273ffb3f4559d6d386820ddcb88a1f7fedd
+  languageName: node
+  linkType: hard
+
+"@turf/boolean-contains@npm:^6.5.0":
+  version: 6.5.0
+  resolution: "@turf/boolean-contains@npm:6.5.0"
+  dependencies:
+    "@turf/bbox": ^6.5.0
+    "@turf/boolean-point-in-polygon": ^6.5.0
+    "@turf/boolean-point-on-line": ^6.5.0
+    "@turf/helpers": ^6.5.0
+    "@turf/invariant": ^6.5.0
+  checksum: 85d062c298ae758ed9afdea1595505f4cbf1cfb9e17c2c1add46b6478c52e5724b7782a57a43e31352d488a92191a92a1fd993deed952764d36c5e983b8ce4c7
+  languageName: node
+  linkType: hard
+
+"@turf/boolean-point-in-polygon@npm:^6.5.0":
+  version: 6.5.0
+  resolution: "@turf/boolean-point-in-polygon@npm:6.5.0"
+  dependencies:
+    "@turf/helpers": ^6.5.0
+    "@turf/invariant": ^6.5.0
+  checksum: 624e54d9956b8f9d955285065f44c80ae66cd4a87e5d893f85871009b62ad9721cca520245a56f8c4401467767c153dda58f67fec0968e3971c7bb3a39617105
+  languageName: node
+  linkType: hard
+
+"@turf/boolean-point-on-line@npm:^6.5.0":
+  version: 6.5.0
+  resolution: "@turf/boolean-point-on-line@npm:6.5.0"
+  dependencies:
+    "@turf/helpers": ^6.5.0
+    "@turf/invariant": ^6.5.0
+  checksum: 469bc39dfe8cdd50be654d3dc1ed94c130e27d5724461333edc6d32352d31c955a1e4f2785994f0a255162fd6075657e49c90b9c805a644e88e05e2a51ead6bc
+  languageName: node
+  linkType: hard
+
 "@turf/distance@npm:6.3.0":
   version: 6.3.0
   resolution: "@turf/distance@npm:6.3.0"
@@ -7272,12 +7317,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@turf/invariant@npm:^6.3.0":
+"@turf/invariant@npm:^6.3.0, @turf/invariant@npm:^6.5.0":
   version: 6.5.0
   resolution: "@turf/invariant@npm:6.5.0"
   dependencies:
     "@turf/helpers": ^6.5.0
   checksum: f45109ee41429d4aab49db9cfcc68f832cadf18b16c1b2c7031f0a6e52545bc4d64d0efd0a980f4d05f22532ed89d6e915aeaab9db44865898d4d030221d968e
+  languageName: node
+  linkType: hard
+
+"@turf/meta@npm:^6.5.0":
+  version: 6.5.0
+  resolution: "@turf/meta@npm:6.5.0"
+  dependencies:
+    "@turf/helpers": ^6.5.0
+  checksum: c6bb936aa92bf3365e87a50dc65f248e070c5767a36fac390754c00c89bf2d1583418686ab19a10332bfa9340b8cac6aaf2c55dad7f5fcf77f1a2dda75ccf363
   languageName: node
   linkType: hard
 
@@ -7583,7 +7637,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/geojson@npm:*, @types/geojson@npm:^7946.0.8":
+"@types/geojson@npm:*, @types/geojson@npm:^7946.0.10, @types/geojson@npm:^7946.0.8":
   version: 7946.0.10
   resolution: "@types/geojson@npm:7946.0.10"
   checksum: 12c407c2dc93ecb26c08af533ee732f1506a9b29456616ba7ba1d525df96206c28ddf44a528f6a5415d7d22893e9d967420940a9c095ee5e539c1eba5fefc1f4

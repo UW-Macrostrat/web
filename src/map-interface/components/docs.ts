@@ -5,6 +5,7 @@ import { useInView } from "react-intersection-observer";
 import { HashLink } from "react-router-hash-link";
 import { routerBasename } from "../settings";
 import classNames from "classnames";
+import { joinURL } from "~/map-interface/utils";
 
 const h = hyper.styled(styles);
 
@@ -60,14 +61,6 @@ export function DocsVideo({ slug, lazy = true, className }) {
   });
 }
 
-function joinURL(...args) {
-  let newURL = args[0];
-  for (let i = 1; i < args.length; i++) {
-    newURL = newURL.replace(/\/$/, "") + "/" + args[i].replace(/^\//, "");
-  }
-  return newURL;
-}
-
 export function InternalLink({ to, children }) {
   // We'd use a link component, but it doesn't properly navigate to the hash state
   return h(
@@ -90,8 +83,8 @@ export function NewSwatch({ children, version = 0 }) {
   );
 }
 
-export function Version({ spec, date }) {
-  return h("h2.version", { id: `version-${spec}` }, [
+export function Version({ spec, date, major = true }) {
+  return h(`h${major ? 2 : 3}.version`, { id: `version-${spec}` }, [
     h("span.version-name", ["Version ", h("code", spec)]),
     h("span.date", date),
   ]);

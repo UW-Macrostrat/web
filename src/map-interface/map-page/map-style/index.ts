@@ -31,7 +31,10 @@ const overlaySources = {
   columns: {
     type: "geojson",
     generateId: true,
-    data: `${SETTINGS.apiDomain}/api/v2/columns?all&format=geojson_bare`,
+    data: {
+      type: "FeatureCollection",
+      features: [],
+    },
   },
   filteredColumns: {
     type: "geojson",
@@ -70,7 +73,7 @@ const overlayLayers = [
     type: "fill",
     source: "columns",
     paint: {
-      "fill-color": "dodgerblue",
+      "fill-color": "#777777",
       "fill-opacity": 0.1,
     },
     layout: {
@@ -82,7 +85,7 @@ const overlayLayers = [
     type: "line",
     source: "columns",
     paint: {
-      "line-color": "dodgerblue",
+      "line-color": "#777777",
       "line-width": {
         stops: [
           [0, 1],

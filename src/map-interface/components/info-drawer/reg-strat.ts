@@ -10,12 +10,8 @@ function MapAttribute(props) {
 }
 
 function RegionalStratigraphy(props) {
-  const { mapInfo, columnInfo } = props;
-  const { mapData, hasColumns } = mapInfo;
-
-  if (!mapData || !hasColumns || Object.keys(columnInfo).length == 0) {
-    return h("div");
-  }
+  const { mapInfo, columnInfo, expanded } = props;
+  if (mapInfo?.mapData == null || columnInfo == null) return null;
 
   return h(
     ExpansionPanel,
