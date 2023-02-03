@@ -64,7 +64,7 @@ type StratNameConceptsFilter = {
   id: number;
 };
 
-type StratNameFilterData = {
+export type StratNameFilterData = {
   category: "strat_name";
   type: FilterType.StratNameConcepts | FilterType.StratNameOrphans;
   id: number;
@@ -135,7 +135,7 @@ type Timescale = {
   name: string;
 };
 
-type IntervalFilterData = IntervalFilter & {
+export type IntervalFilterData = IntervalFilter & {
   category: "interval";
   // These are standard fields for all intervals returned from Macrostrat's API
   int_id: number;

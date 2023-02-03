@@ -1,6 +1,6 @@
 import { Card } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
-import { useAppActions } from "~/map-interface/app-state";
+import { MapLayer, useAppActions } from "~/map-interface/app-state";
 import { InfoDrawerHeader } from "./header";
 import { FossilCollections } from "./fossil-collections";
 import { GeologicMapInfo } from "./geo-map";
@@ -13,6 +13,7 @@ import classNames from "classnames";
 import styles from "./main.module.styl";
 import { LoadingArea } from "../transitions";
 import { ErrorBoundary } from "@macrostrat/ui-components";
+import { useCallback } from "react";
 
 const h = hyper.styled(styles);
 
@@ -24,8 +25,8 @@ function InfoDrawer(props) {
   // We used to enable panels when certain layers were on,
   // but now we just show all panels always
   let { className } = props;
-  const { mapInfo, fetchingMapInfo, infoMarkerPosition, mapPosition } =
-    useAppState((state) => state.core);
+  const mapInfo = useAppState((state) => state.core.mapInfo);
+  const fetchingMapInfo = useAppState((state) => state.core.fetchingMapInfo);
 
   const runAction = useAppActions();
 
@@ -33,12 +34,15 @@ function InfoDrawer(props) {
     loading: fetchingMapInfo,
   });
 
+  const onCloseClick = useCallback(
+    () => runAction({ type: "close-infodrawer" }),
+    [runAction]
+  );
+
   return h(Card, { className }, [
     h(InfoDrawerHeader, {
       mapInfo,
-      infoMarkerPosition,
-      zoom: mapPosition.target?.zoom,
-      onCloseClick: () => runAction({ type: "close-infodrawer" }),
+      onCloseClick,
     }),
     h("div.infodrawer-body", [
       h(ErrorBoundary, [
@@ -53,7 +57,11 @@ function InfoDrawer(props) {
 }
 
 function InfoDrawerInterior(props) {
-  const { mapInfo, columnInfo, pbdbData } = useAppState((state) => state.core);
+  const { mapInfo, columnInfo, pbdbData, mapLayers } = useAppState(
+    (state) => state.core
+  );
+
+  const stratigraphyShown = mapLayers.has(MapLayer.COLUMNS);
 
   if (!mapInfo || !mapInfo.mapData) {
     return null;
@@ -75,13 +83,16 @@ function InfoDrawerInterior(props) {
         };
 
   return h("div", [
-    h(FossilCollections, { data: pbdbData, expanded: true }),
-    h(RegionalStratigraphy, { mapInfo, columnInfo }),
     h(GeologicMapInfo, {
       mapInfo,
       bedrockExpanded: true,
       source,
     }),
+    h.if(stratigraphyShown)(RegionalStratigraphy, {
+      mapInfo,
+      columnInfo,
+    }),
+    h(FossilCollections, { data: pbdbData, expanded: true }),
     h(MacrostratLinkedData, {
       mapInfo,
       bedrockMatchExpanded: true,
