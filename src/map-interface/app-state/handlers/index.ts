@@ -180,6 +180,9 @@ async function actionRunner(
     }
     case "run-map-query":
       const { lng, lat, z, map_id } = action;
+      // Get column data from the map action if it is provided.
+      // This saves us from having to filter the columns more inefficiently
+      let { column } = action;
       let CancelTokenMapQuery = axios.CancelToken;
       let sourceMapQuery = CancelTokenMapQuery.source();
       if (coreState.inputFocus && coreState.contextPanelOpen) {
@@ -201,15 +204,16 @@ async function actionRunner(
         sourceMapQuery.token
       );
 
-      let column: ColumnProperties | null = null;
-      if (state.core.allColumns != null) {
+      if (column == null && state.core.allColumns != null) {
         column = findColumnForLocation(state.core.allColumns, {
           lng,
           lat,
         })?.properties;
       }
 
-      if (column != null) {
+      const { columnInfo } = state.core;
+      if (column != null && columnInfo?.col_id != column.col_id) {
+        // Get the column units if we don't have them already
         await dispatch(
           await actionRunner(
             state,

@@ -7,6 +7,7 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { setMapStyle } from "./style-helpers";
 import { MapLayer } from "~/map-interface/app-state";
+import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
 
 const maxClusterZoom = 6;
 const highlightLayers = [
@@ -19,7 +20,7 @@ interface MapProps {
   use3D: boolean;
   isDark: boolean;
   mapIsRotated: boolean;
-  onQueryMap: (event: any, columns: any[]) => void;
+  onQueryMap: (event: any, columns: ColumnProperties[]) => void;
 }
 
 class VestigialMap extends Component<MapProps, {}> {

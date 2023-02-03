@@ -24,7 +24,7 @@ type MAP_QUERY = {
   type: "map-query" | "run-map-query";
   z: string | number;
   map_id: any;
-  column: any;
+  column: ColumnProperties | null | undefined;
 } & MapLocation;
 
 type GET_COLUMN_UNITS = { type: "get-column-units"; column: ColumnProperties };

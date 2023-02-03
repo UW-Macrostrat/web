@@ -36,6 +36,7 @@ import { getExpressionForFilters } from "./filter-helpers";
 import { MapSourcesLayer, mapStyle, toggleLineSymbols } from "../map-style";
 import { SETTINGS } from "../../settings";
 import mapboxgl from "mapbox-gl";
+import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
 
 const h = hyper.styled(styles);
 
@@ -386,7 +387,7 @@ function useMapQueryHandler(
   const runAction = useAppActions();
 
   return useCallback(
-    (event, columns = null) => {
+    (event: mapboxgl.MapMouseEvent, columns: ColumnProperties[] = null) => {
       const column = columns?.[0];
       const map = mapRef.current;
 
