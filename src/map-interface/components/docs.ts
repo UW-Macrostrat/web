@@ -83,8 +83,8 @@ export function NewSwatch({ children, version = 0 }) {
   );
 }
 
-export function Version({ spec, date }) {
-  return h("h2.version", { id: `version-${spec}` }, [
+export function Version({ spec, date, major = true }) {
+  return h(`h${major ? 2 : 3}.version`, { id: `version-${spec}` }, [
     h("span.version-name", ["Version ", h("code", spec)]),
     h("span.date", date),
   ]);
