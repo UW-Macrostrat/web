@@ -64,7 +64,7 @@ type StratNameConceptsFilter = {
   id: number;
 };
 
-type StratNameFilterData = {
+export type StratNameFilterData = {
   category: "strat_name";
   type: FilterType.StratNameConcepts | FilterType.StratNameOrphans;
   id: number;
