@@ -1,12 +1,13 @@
 import { Component, forwardRef } from "react";
 import { SETTINGS } from "../../settings";
 import { mapStyle } from "../map-style";
-import { PBDBHelper } from "./filter-helpers";
+import { getPBDBData } from "./filter-helpers";
 import h from "@macrostrat/hyper";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { setMapStyle } from "./style-helpers";
 import { MapLayer } from "~/map-interface/app-state";
+import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
 
 const maxClusterZoom = 6;
 const highlightLayers = [
@@ -19,7 +20,7 @@ interface MapProps {
   use3D: boolean;
   isDark: boolean;
   mapIsRotated: boolean;
-  onQueryMap: (event: any, columns: any[]) => void;
+  onQueryMap: (event: any, columns: ColumnProperties[]) => void;
 }
 
 class VestigialMap extends Component<MapProps, {}> {
@@ -194,6 +195,8 @@ class VestigialMap extends Component<MapProps, {}> {
         return;
       }
 
+      const mapZoom = this.map.getZoom();
+
       // If we are viewing fossils, prioritize clicks on those
       if (this.props.mapLayers.has(MapLayer.FOSSILS)) {
         let collections = this.map.queryRenderedFeatures(event.point, {
@@ -204,21 +207,26 @@ class VestigialMap extends Component<MapProps, {}> {
           collections.length &&
           collections[0].properties.hasOwnProperty("hex_id")
         ) {
-          this.map.zoomTo(this.map.getZoom() + 1, { center: event.lngLat });
+          this.map.zoomTo(mapZoom + 1, { center: event.lngLat });
           return;
 
           // Clicked on a summary cluster
         } else if (
           collections.length &&
           collections[0].properties.hasOwnProperty("oid") &&
-          collections[0].properties.oid.split(":")[0] === "clu"
+          collections[0].properties.oid.split(":")[0] === "clu" &&
+          mapZoom <= 12
         ) {
-          this.map.zoomTo(this.map.getZoom() + 2, { center: event.lngLat });
+          this.map.zoomTo(mapZoom + 2, { center: event.lngLat });
           return;
           // Clicked on a real cluster of collections
+
+          // ... the way we do clustering here is kind of strange.
         } else if (
           collections.length &&
-          collections[0].properties.hasOwnProperty("cluster")
+          (collections[0].properties.hasOwnProperty("cluster") ||
+            // Summary cluster when zoom is too high
+            collections[0].properties.oid.split(":")[0] === "clu")
         ) {
           // via https://jsfiddle.net/aznkw784/
           let pointsInCluster = this.pbdbPoints.features
@@ -410,10 +418,37 @@ class VestigialMap extends Component<MapProps, {}> {
   }
 
   // PBDB hexgrids and points are refreshed on every map move
-  refreshPBDB() {
+  async refreshPBDB() {
     let bounds = this.map.getBounds();
     let zoom = this.map.getZoom();
-    PBDBHelper(this, bounds, zoom);
+    const maxClusterZoom = 7;
+    this.pbdbPoints = await getPBDBData(
+      this.props.filters,
+      bounds,
+      zoom,
+      maxClusterZoom
+    );
+
+    // Show or hide the proper PBDB layers
+    if (zoom < maxClusterZoom) {
+      this.map.getSource("pbdb-clusters").setData(this.pbdbPoints);
+      this.map.setLayoutProperty("pbdb-clusters", "visibility", "visible");
+      this.map.setLayoutProperty("pbdb-points-clustered", "visibility", "none");
+      //  map.map.setLayoutProperty('pbdb-point-cluster-count', 'visibility', 'none')
+      this.map.setLayoutProperty("pbdb-points", "visibility", "none");
+    } else {
+      this.map.getSource("pbdb-points").setData(this.pbdbPoints);
+
+      //map.map.getSource("pbdb-clusters").setData(map.pbdbPoints);
+      this.map.setLayoutProperty("pbdb-clusters", "visibility", "none");
+      this.map.setLayoutProperty(
+        "pbdb-points-clustered",
+        "visibility",
+        "visible"
+      );
+      //    map.map.setLayoutProperty('pbdb-point-cluster-count', 'visibility', 'visible')
+      // map.map.setLayoutProperty("pbdb-points", "visibility", "visible");
+    }
   }
 
   // Update the colors of the hexgrids

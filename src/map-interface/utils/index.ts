@@ -35,7 +35,15 @@ export const hexToRgb = (hex, opacity) => {
   return `rgba(${r},${g},${b},${opacity || 0.8})`;
 };
 
-export const timescale = [
+export type TimescaleDivision = {
+  name: string;
+  abbrev: string;
+  t_age: number;
+  b_age: number;
+  color: string;
+};
+
+export const timescale: TimescaleDivision[] = [
   { name: "Quaternary", abbrev: "Q", t_age: 0, b_age: 2.588, color: "#F9F97F" },
   {
     name: "Neogene",

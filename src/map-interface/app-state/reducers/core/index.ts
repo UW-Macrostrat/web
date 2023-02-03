@@ -1,8 +1,8 @@
-import { sum, timescale } from "../../../utils";
 import { MapBackend, MapLayer } from "../map";
 import { CoreState, CoreAction } from "./types";
 import update, { Spec } from "immutability-helper";
 import { FilterData } from "../../handlers/filters";
+import { assembleColumnSummary } from "../../handlers/columns";
 export * from "./types";
 
 const classColors = {
@@ -20,6 +20,8 @@ const classColors = {
 const defaultState: CoreState = {
   initialLoadComplete: false,
   contextPanelOpen: false,
+  allColumns: null,
+  allColumnsCancelToken: null,
   menuOpen: false,
   aboutOpen: false,
   infoDrawerOpen: false,
@@ -49,7 +51,7 @@ const defaultState: CoreState = {
   elevationCancelToken: null,
   fetchingPbdb: false,
   mapInfo: [],
-  columnInfo: {},
+  columnInfo: null,
   searchResults: null,
   elevationData: [],
   elevationMarkerLocation: [],
@@ -90,7 +92,7 @@ export function coreReducer(
     case "map-layers-changed":
       let columnInfo = state.columnInfo;
       let pbdbData = state.pbdbData;
-      if (!action.mapLayers.has(MapLayer.COLUMNS)) columnInfo = [];
+      if (!action.mapLayers.has(MapLayer.COLUMNS)) columnInfo = null;
       if (!action.mapLayers.has(MapLayer.FOSSILS)) pbdbData = [];
       return {
         ...state,
@@ -258,94 +260,19 @@ export function coreReducer(
         columnInfoCancelToken: action.cancelToken,
       };
 
+    case "set-all-columns":
+      return { ...state, allColumns: action.columns };
+
     case "received-column-query":
       // summarize units
-      let columnTimescale = timescale.slice().map((d) => {
-        d.intersectingUnits = 0;
-        d.intersectingUnitIds = [];
-        return d;
-      });
-
-      let columnSummary = {
-        ...action.column,
-        max_thick: sum(action.data, "max_thick"),
-        min_thick: sum(action.data, "min_thick"),
-        pbdb_collections: sum(action.data, "pbdb_collections"),
-        pbdb_occs: sum(action.data, "pbdb_occurrences"),
-        b_age: Math.max(
-          ...action.data.map((d) => {
-            return d.b_age;
-          })
-        ),
-        t_age: Math.min(
-          ...action.data.map((d) => {
-            return d.t_age;
-          })
-        ),
-        area: action.data.length ? parseInt(action.data[0].col_area) : 0,
-      };
-
-      for (let i = 0; i < action.data.length; i++) {
-        action.data[i].intersectingUnits = 0;
-        action.data[i].intersectingUnitIds = [];
-        for (let j = 0; j < action.data.length; j++) {
-          if (
-            // unit *contains* unit
-            ((action.data[i].t_age < action.data[j].b_age &&
-              action.data[j].t_age < action.data[i].b_age) ||
-              // units share t and b age
-              (action.data[i].t_age === action.data[j].t_age &&
-                action.data[i].b_age === action.data[j].b_age) ||
-              // units share t_age, but not b_age
-              (action.data[i].t_age === action.data[j].t_age &&
-                action.data[i].b_age <= action.data[j].b_age) ||
-              // units share b_age, but not t_age
-              (action.data[i].b_age === action.data[j].b_age &&
-                action.data[i].t_age >= action.data[j].t_age)) &&
-            action.data[i].unit_id != action.data[j].unit_id
-          ) {
-            action.data[i].intersectingUnits += 1;
-            action.data[i].intersectingUnitIds.push(action.data[j].unit_id);
-          }
-        }
-
-        for (let j = 0; j < columnTimescale.length; j++) {
-          // Need to explicitly overlap, not
-          if (
-            // interval *contains* unit
-            (action.data[i].t_age < columnTimescale[j].b_age &&
-              columnTimescale[j].t_age < action.data[i].b_age) ||
-            // interval and unit share t and b age
-            (action.data[i].t_age === columnTimescale[j].t_age &&
-              action.data[i].b_age === columnTimescale[j].b_age) ||
-            // interval and unit share t_age, but not b_age
-            (action.data[i].t_age === columnTimescale[j].t_age &&
-              action.data[i].b_age <= columnTimescale[j].b_age) ||
-            // interval and unit share b_age, but not t_age
-            (action.data[i].b_age === columnTimescale[j].b_age &&
-              action.data[i].t_age >= columnTimescale[j].t_age)
-          ) {
-            columnTimescale[j].intersectingUnitIds.push(action.data[i].unit_id);
-          }
-        }
+      if (state.allColumns == null || state.allColumns.length == 0) {
+        return state;
       }
-
-      let unitIdx = {};
-      action.data.forEach((unit) => {
-        unitIdx[unit["unit_id"]] = unit;
-        unitIdx[unit["unit_id"]]["drawn"] = false;
-      });
-
-      columnTimescale = columnTimescale.filter((d) => {
-        if (d.intersectingUnits.length > 0) {
-          return d;
-        }
-      });
-      columnSummary["timescale"] = columnTimescale;
-      columnSummary["units"] = action.data;
-      columnSummary["unitIdx"] = unitIdx;
-
-      return { ...state, fetchingColumnInfo: false, columnInfo: columnSummary };
+      return {
+        ...state,
+        fetchingColumnInfo: false,
+        columnInfo: assembleColumnSummary(action.column, action.data),
+      };
     case "toggle-map-layer":
       const op = state.mapLayers.has(action.layer) ? "$remove" : "$add";
       const mapLayers: Spec<Set<MapLayer>, any> = {

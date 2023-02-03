@@ -3,7 +3,6 @@ import { useAppState } from "./hooks";
 import classNames from "classnames";
 import { MenuPage } from "./reducers";
 import { routerBasename } from "../settings";
-import { RouteMatch } from "react-router-dom";
 
 export function isDetailPanelRouteInternal(pathname: string) {
   /* Check if we're in a detail panel route from within the app. */

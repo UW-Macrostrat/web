@@ -1,5 +1,7 @@
 import axios from "axios";
+import { joinURL } from "~/map-interface/utils";
 import { SETTINGS } from "../../settings";
+import { ColumnGeoJSONRecord } from "../reducers";
 
 export const base = `${SETTINGS.apiDomain}/api/v2`;
 const basev1 = `${SETTINGS.gddDomain}/api/v1`;
@@ -112,11 +114,37 @@ function addMapIdToRef(data) {
   return data;
 }
 
+export async function fetchAllColumns(): Promise<ColumnGeoJSONRecord[]> {
+  let res = await axios.get(joinURL(base, "columns"), {
+    responseType: "json",
+    params: { format: "geojson_bare", all: true },
+  });
+
+  return res.data.features;
+}
+
 export async function runMapQuery(lng, lat, z, map_id, cancelToken) {
   const params = { lng, lat, z, map_id };
   let url = base + "/mobile/map_query_v2";
   let res = await axios.get(url, { cancelToken, responseType: "json", params });
-  const data = addMapIdToRef(res.data).success.data;
+  let data = addMapIdToRef(res.data).success.data;
+
+  // if (data.hasColumns) {
+  //   // TODO: fix this...
+  //   // Somewhat ridiculously, we need to run a separate query to get the
+  //   // column ID, because the map query doesn't return it.
+  //   // This needs to get a lot better.
+  //   const pointData = await axios.get(base + "/mobile/point", {
+  //     params: {
+  //       lng,
+  //       lat,
+  //       z,
+  //     },
+  //   });
+  //   const col_id = pointData.data.success.data.col_id;
+  //   data.col_id = col_id;
+  // }
+
   return data;
 }
 

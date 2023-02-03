@@ -5,6 +5,7 @@ import { useInView } from "react-intersection-observer";
 import { HashLink } from "react-router-hash-link";
 import { routerBasename } from "../settings";
 import classNames from "classnames";
+import { joinURL } from "~/map-interface/utils";
 
 const h = hyper.styled(styles);
 
@@ -58,14 +59,6 @@ export function DocsVideo({ slug, lazy = true, className }) {
     className,
     align: Alignment.LEFT,
   });
-}
-
-function joinURL(...args) {
-  let newURL = args[0];
-  for (let i = 1; i < args.length; i++) {
-    newURL = newURL.replace(/\/$/, "") + "/" + args[i].replace(/^\//, "");
-  }
-  return newURL;
 }
 
 export function InternalLink({ to, children }) {
