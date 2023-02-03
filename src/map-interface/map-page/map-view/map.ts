@@ -20,6 +20,7 @@ interface MapProps {
   use3D: boolean;
   isDark: boolean;
   mapIsRotated: boolean;
+  mapIsLoading: boolean;
   onQueryMap: (event: any, columns: ColumnProperties[]) => void;
 }
 

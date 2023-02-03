@@ -171,9 +171,10 @@ function MapContainer(props) {
     elevationMarkerLocation,
     mapPosition,
     infoDrawerOpen,
-    mapIsLoading,
     mapSettings,
   } = useAppState((state) => state.core);
+
+  const mapIsLoading = useAppState((state) => state.core.mapIsLoading);
 
   const runAction = useAppActions();
   /* HACK: Right now we need this to force a render when the map

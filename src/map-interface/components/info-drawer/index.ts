@@ -13,6 +13,7 @@ import classNames from "classnames";
 import styles from "./main.module.styl";
 import { LoadingArea } from "../transitions";
 import { ErrorBoundary } from "@macrostrat/ui-components";
+import { useCallback } from "react";
 
 const h = hyper.styled(styles);
 
@@ -24,8 +25,8 @@ function InfoDrawer(props) {
   // We used to enable panels when certain layers were on,
   // but now we just show all panels always
   let { className } = props;
-  const { mapInfo, fetchingMapInfo, infoMarkerPosition, mapPosition } =
-    useAppState((state) => state.core);
+  const mapInfo = useAppState((state) => state.core.mapInfo);
+  const fetchingMapInfo = useAppState((state) => state.core.fetchingMapInfo);
 
   const runAction = useAppActions();
 
@@ -33,12 +34,15 @@ function InfoDrawer(props) {
     loading: fetchingMapInfo,
   });
 
+  const onCloseClick = useCallback(
+    () => runAction({ type: "close-infodrawer" }),
+    [runAction]
+  );
+
   return h(Card, { className }, [
     h(InfoDrawerHeader, {
       mapInfo,
-      infoMarkerPosition,
-      zoom: mapPosition.target?.zoom,
-      onCloseClick: () => runAction({ type: "close-infodrawer" }),
+      onCloseClick,
     }),
     h("div.infodrawer-body", [
       h(ErrorBoundary, [
