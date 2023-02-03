@@ -87,12 +87,15 @@ async function actionRunner(
       if (mapLayers.has(MapLayer.COLUMNS) && state.core.allColumns == null) {
         const columns = await fetchAllColumns();
         return { type: "set-all-columns", columns };
+      } else {
+        return null;
       }
     }
     case "toggle-menu": {
       // Push the menu onto the history stack
       let activePage = state.menu.activePage;
-      if (activePage != null) {
+      // If input is focused we want to open the menu if clicked, not run the toggle action.
+      if (activePage != null && !state.core.inputFocus) {
         activePage = null;
       } else {
         activePage = MenuPage.LAYERS;
