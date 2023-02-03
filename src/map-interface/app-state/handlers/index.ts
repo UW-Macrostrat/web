@@ -6,6 +6,7 @@ import {
   asyncGetElevation,
   getPBDBData,
   base,
+  fetchAllColumns,
 } from "./fetch";
 import { AppAction, AppState } from "../reducers";
 import axios from "axios";
@@ -59,6 +60,11 @@ async function actionRunner(
         })
       );
       await dispatch({ type: "set-filters", filters: newFilters });
+
+      // We always get all columns on initial load, which might be
+      // a bit unnecessary
+      const columns = await fetchAllColumns();
+      await dispatch({ type: "set-all-columns", columns });
 
       // Then reload the map by faking a layer change event.
       // There is probably a better way to do this.

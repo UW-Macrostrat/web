@@ -253,6 +253,29 @@ function MapContainer(props) {
   useMapEaseToCenter(padding);
   useMapMarker(mapRef, markerRef, infoMarkerPosition);
 
+  /* Update columns map layer given columns provided by application. */
+  const allColumns = useAppState((state) => state.core.allColumns);
+  useEffect(() => {
+    const map = mapRef.current;
+    const ncols = allColumns?.length ?? 0;
+    if (map == null || ncols == 0) return;
+    // Set source data for columns
+    // map.once("source.load", (src) => {
+    //   if (e.sourceId === "columns") {
+    //     src.setData({
+    //       type: "FeatureCollection",
+    //       features: allColumns,
+    //     });
+    //   }
+    // });
+    const src = map.getSource("columns");
+    if (src == null) return;
+    src.setData({
+      type: "FeatureCollection",
+      features: allColumns ?? [],
+    });
+  }, [mapRef.current, allColumns, mapInitialized]);
+
   useEffect(() => {
     // Get the current value of the map. Useful for gradually moving away
     // from class component

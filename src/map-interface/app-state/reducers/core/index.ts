@@ -20,6 +20,8 @@ const classColors = {
 const defaultState: CoreState = {
   initialLoadComplete: false,
   contextPanelOpen: false,
+  allColumns: null,
+  allColumnsCancelToken: null,
   menuOpen: false,
   aboutOpen: false,
   infoDrawerOpen: false,
@@ -257,6 +259,9 @@ export function coreReducer(
         fetchingColumnInfo: true,
         columnInfoCancelToken: action.cancelToken,
       };
+
+    case "set-all-columns":
+      return { ...state, allColumns: action.columns };
 
     case "received-column-query":
       // summarize units

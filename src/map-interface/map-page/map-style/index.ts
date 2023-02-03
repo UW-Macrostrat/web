@@ -31,7 +31,10 @@ const overlaySources = {
   columns: {
     type: "geojson",
     generateId: true,
-    data: `${SETTINGS.apiDomain}/api/v2/columns?all&format=geojson_bare`,
+    data: {
+      type: "FeatureCollection",
+      features: [],
+    },
   },
   filteredColumns: {
     type: "geojson",

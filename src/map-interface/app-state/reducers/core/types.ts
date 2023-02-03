@@ -125,6 +125,12 @@ type SelectSearchResult = {
   result: Filter | Place;
 };
 
+type GetAllColumns = { type: "get-all-columns" };
+type SetAllColumns = {
+  type: "set-all-columns";
+  columns: ColumnGeoJSONRecord[];
+};
+
 export type CoreAction =
   | MAP_LAYERS_CHANGED
   | CLEAR_FILTERS
@@ -174,7 +180,9 @@ export type CoreAction =
   | StopSearching
   | SelectSearchResult
   | ToggleExperimentsPanel
-  | GoToExperimentsPanel;
+  | GoToExperimentsPanel
+  | GetAllColumns
+  | SetAllColumns;
 
 interface AsyncRequestState {
   // Events and tokens for xhr
@@ -191,6 +199,7 @@ interface AsyncRequestState {
   columnInfoCancelToken: CancelToken | null;
   searchCancelToken: CancelToken | null;
   elevationCancelToken: CancelToken | null;
+  allColumnsCancelToken: CancelToken | null;
 }
 
 interface MapCenterInfo {
@@ -200,6 +209,23 @@ interface MapCenterInfo {
 
 interface MapSettings {
   highResolutionTerrain: boolean;
+}
+
+export interface ColumnGeoJSONRecord {
+  type: "Feature";
+  geometry: {
+    type: "Polygon";
+    coordinates: number[][][];
+  };
+  properties: {
+    col_id: number;
+    col_area: string;
+    col_name: string;
+    col_group?: string;
+    col_group_id?: number;
+    project_id: number;
+    group_col_id?: number;
+  };
 }
 
 export interface CoreState extends MapState, AsyncRequestState {
@@ -228,5 +254,6 @@ export interface CoreState extends MapState, AsyncRequestState {
   filters: FilterData[];
   filteredColumns: object;
   showExperimentsPanel: boolean;
+  allColumns: ColumnGeoJSONRecord[] | null;
   data: [];
 }

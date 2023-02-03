@@ -1,5 +1,7 @@
 import axios from "axios";
+import { joinURL } from "~/map-interface/utils";
 import { SETTINGS } from "../../settings";
+import { ColumnGeoJSONRecord } from "../reducers";
 
 export const base = `${SETTINGS.apiDomain}/api/v2`;
 const basev1 = `${SETTINGS.gddDomain}/api/v1`;
@@ -110,6 +112,15 @@ function addMapIdToRef(data) {
     return source;
   });
   return data;
+}
+
+export async function fetchAllColumns(): Promise<ColumnGeoJSONRecord[]> {
+  let res = await axios.get(joinURL(base, "columns"), {
+    responseType: "json",
+    params: { format: "geojson_bare", all: true },
+  });
+
+  return res.data.features;
 }
 
 export async function runMapQuery(lng, lat, z, map_id, cancelToken) {
