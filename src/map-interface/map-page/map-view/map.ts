@@ -1,7 +1,7 @@
 import { Component, forwardRef } from "react";
 import { SETTINGS } from "../../settings";
 import { mapStyle } from "../map-style";
-import { PBDBHelper } from "./filter-helpers";
+import { getPBDBData } from "./filter-helpers";
 import h from "@macrostrat/hyper";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -410,10 +410,37 @@ class VestigialMap extends Component<MapProps, {}> {
   }
 
   // PBDB hexgrids and points are refreshed on every map move
-  refreshPBDB() {
+  async refreshPBDB() {
     let bounds = this.map.getBounds();
     let zoom = this.map.getZoom();
-    PBDBHelper(this, bounds, zoom);
+    const maxClusterZoom = 7;
+    let res = await getPBDBData(
+      this.props.filters,
+      bounds,
+      zoom,
+      maxClusterZoom
+    );
+
+    // Show or hide the proper PBDB layers
+    if (zoom < maxClusterZoom) {
+      this.map.getSource("pbdb-clusters").setData(res);
+      this.map.setLayoutProperty("pbdb-clusters", "visibility", "visible");
+      this.map.setLayoutProperty("pbdb-points-clustered", "visibility", "none");
+      //  map.map.setLayoutProperty('pbdb-point-cluster-count', 'visibility', 'none')
+      this.map.setLayoutProperty("pbdb-points", "visibility", "none");
+    } else {
+      this.map.getSource("pbdb-points").setData(res);
+
+      //map.map.getSource("pbdb-clusters").setData(map.pbdbPoints);
+      this.map.setLayoutProperty("pbdb-clusters", "visibility", "none");
+      this.map.setLayoutProperty(
+        "pbdb-points-clustered",
+        "visibility",
+        "visible"
+      );
+      //    map.map.setLayoutProperty('pbdb-point-cluster-count', 'visibility', 'visible')
+      // map.map.setLayoutProperty("pbdb-points", "visibility", "visible");
+    }
   }
 
   // Update the colors of the hexgrids

@@ -1,4 +1,8 @@
-import { FilterData } from "~/map-interface/app-state/handlers/filters";
+import { FeatureCollection, Point } from "geojson";
+import {
+  FilterData,
+  IntervalFilterData,
+} from "~/map-interface/app-state/handlers/filters";
 import { SETTINGS } from "../../settings";
 
 export function getExpressionForFilters(
@@ -65,16 +69,28 @@ function buildFilterExpression(filter: FilterData): mapboxgl.Expression {
   }
 }
 
-function PBDBHelper(map, bounds, zoom, maxClusterZoom = 7): void {
+export async function getPBDBData(
+  filters: FilterData[],
+  bounds: mapboxgl.LngLatBounds,
+  zoom: number,
+  maxClusterZoom: number = 7
+): Promise<FeatureCollection<Point, any>> {
   // One for time, one for everything else because
   // time filters require a separate request for each filter
   let timeQuery = [];
   let queryString = [];
 
-  if (map.timeFilters.length) {
-    map.timeFilters.forEach((f) => {
-      timeQuery.push(`max_ma=${f[2][2]}`, `min_ma=${f[1][2]}`);
-    });
+  const timeFilters = filters.filter(
+    (f) => f.type === "intervals"
+  ) as IntervalFilterData[];
+  const stratNameFilters = filters.filter(
+    (f) => f.type === "strat_name_concepts" || f.type === "strat_name_orphans"
+  );
+
+  if (timeFilters.length > 0) {
+    for (const f of timeFilters) {
+      timeQuery.push(`max_ma=${f.b_age}`, `min_ma=${f.t_age}`);
+    }
   }
   // lith filters broken on pbdb (500 error returned)
   // if (map.lithFilters.length) {
@@ -83,8 +99,9 @@ function PBDBHelper(map, bounds, zoom, maxClusterZoom = 7): void {
   //     queryString.push(`lithology=${filters.join(",")}`);
   //   }
   // }
-  if (map.stratNameFilters.length) {
-    queryString.push(`strat=${map.stratNameFilters.join(",")}`);
+  if (stratNameFilters.length > 0) {
+    const names = stratNameFilters.map((f) => f.name);
+    queryString.push(`strat=${names.join(",")}`);
   }
 
   // Define the pbdb cluster level
@@ -112,13 +129,13 @@ function PBDBHelper(map, bounds, zoom, maxClusterZoom = 7): void {
     latMax = Math.min(Math.max(latMax, latMax * 5), 85);
   }
 
-  if (map.timeFilters.length && map.timeFilters.length > 1) {
-    urls = map.timeFilters.map((f) => {
+  if (timeFilters.length && timeFilters.length > 1) {
+    urls = timeFilters.map((f) => {
       let url = `${SETTINGS.pbdbDomain}/data1.2/colls/${
         zoom < maxClusterZoom ? "summary" : "list"
       }.json?lngmin=${lngMin}&lngmax=${lngMax}&latmin=${latMin}&latmax=${latMax}&max_ma=${
-        f[2][2]
-      }&min_ma=${f[1][2]}${zoom < maxClusterZoom ? level : ""}`;
+        f.b_age
+      }&min_ma=${f.t_age}${zoom < maxClusterZoom ? level : ""}`;
       if (queryString.length) {
         url += `&${queryString.join("&")}`;
       }
@@ -140,7 +157,7 @@ function PBDBHelper(map, bounds, zoom, maxClusterZoom = 7): void {
   }
 
   // Fetch the data
-  Promise.all(
+  return await Promise.all(
     urls.map((url) => fetch(url).then((response) => response.json()))
   ).then((responses) => {
     // Ignore data that comes with warnings, as it means nothing was
@@ -154,7 +171,7 @@ function PBDBHelper(map, bounds, zoom, maxClusterZoom = 7): void {
         return [...a, ...b];
       }, []);
 
-    map.pbdbPoints = {
+    return {
       type: "FeatureCollection",
       features: data.map((f, i) => {
         return {
@@ -168,27 +185,5 @@ function PBDBHelper(map, bounds, zoom, maxClusterZoom = 7): void {
         };
       }),
     };
-    // Show or hide the proper PBDB layers
-    if (zoom < maxClusterZoom) {
-      map.map.getSource("pbdb-clusters").setData(map.pbdbPoints);
-      map.map.setLayoutProperty("pbdb-clusters", "visibility", "visible");
-      map.map.setLayoutProperty("pbdb-points-clustered", "visibility", "none");
-      //  map.map.setLayoutProperty('pbdb-point-cluster-count', 'visibility', 'none')
-      map.map.setLayoutProperty("pbdb-points", "visibility", "none");
-    } else {
-      map.map.getSource("pbdb-points").setData(map.pbdbPoints);
-
-      //map.map.getSource("pbdb-clusters").setData(map.pbdbPoints);
-      map.map.setLayoutProperty("pbdb-clusters", "visibility", "none");
-      map.map.setLayoutProperty(
-        "pbdb-points-clustered",
-        "visibility",
-        "visible"
-      );
-      //    map.map.setLayoutProperty('pbdb-point-cluster-count', 'visibility', 'visible')
-      // map.map.setLayoutProperty("pbdb-points", "visibility", "visible");
-    }
   });
 }
-
-export { PBDBHelper };

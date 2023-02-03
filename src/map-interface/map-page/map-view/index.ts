@@ -260,14 +260,14 @@ function MapContainer(props) {
     const ncols = allColumns?.length ?? 0;
     if (map == null || ncols == 0) return;
     // Set source data for columns
-    // map.once("source.load", (src) => {
-    //   if (e.sourceId === "columns") {
-    //     src.setData({
-    //       type: "FeatureCollection",
-    //       features: allColumns,
-    //     });
-    //   }
-    // });
+    map.once("style.load", () => {
+      const src = map.getSource("columns");
+      if (src == null) return;
+      src.setData({
+        type: "FeatureCollection",
+        features: allColumns ?? [],
+      });
+    });
     const src = map.getSource("columns");
     if (src == null) return;
     src.setData({

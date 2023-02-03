@@ -73,7 +73,7 @@ const overlayLayers = [
     type: "fill",
     source: "columns",
     paint: {
-      "fill-color": "dodgerblue",
+      "fill-color": "#777777",
       "fill-opacity": 0.1,
     },
     layout: {
@@ -85,7 +85,7 @@ const overlayLayers = [
     type: "line",
     source: "columns",
     paint: {
-      "line-color": "dodgerblue",
+      "line-color": "#777777",
       "line-width": {
         stops: [
           [0, 1],
