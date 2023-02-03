@@ -3,6 +3,17 @@ import { CancelToken } from "axios";
 export * from "../map";
 import { AddFilter, FilterData, Filter } from "../../handlers/filters";
 import { XDDSnippet } from "../../handlers/fetch";
+import {
+  ColumnGeoJSONRecord,
+  ColumnProperties,
+  ColumnSummary,
+} from "../../handlers/columns";
+import { UnitLong } from "@macrostrat/api-types";
+
+export type MapLocation = {
+  lng: number;
+  lat: number;
+};
 
 //////////// Async Actions ///////////////
 type FETCH_SEARCH_QUERY = { type: "fetch-search-query"; term: string };
@@ -11,14 +22,12 @@ type GET_FILTERED_COLUMNS = { type: "get-filtered-columns" };
 type FETCH_XDD = { type: "fetch-xdd" };
 type MAP_QUERY = {
   type: "map-query" | "run-map-query";
-  lng: number;
-  lat: number;
   z: string | number;
   map_id: any;
   column: any;
-};
+} & MapLocation;
 
-type GET_COLUMN = { type: "get-column"; column: any };
+type GET_COLUMN_UNITS = { type: "get-column-units"; column: ColumnProperties };
 type GET_ELEVATION = { type: "get-elevation"; line: any };
 type GET_PBDB = { type: "get-pbdb"; collection_nos: any };
 // Define constants to be passed with actions
@@ -39,17 +48,15 @@ type RecenterQueryMarker = { type: "recenter-query-marker" };
 
 type START_MAP_QUERY = {
   type: "start-map-query";
-  lng: number;
-  lat: number;
   cancelToken: any;
-};
+} & MapLocation;
 type RECEIVED_MAP_QUERY = { type: "received-map-query"; data: any };
 
 type START_COLUMN_QUERY = { type: "start-column-query"; cancelToken: any };
 type RECEIVED_COLUMN_QUERY = {
   type: "received-column-query";
-  data: any;
-  column: any;
+  data: UnitLong[];
+  column: ColumnProperties;
 };
 
 type MAP_LAYERS_CHANGED = {
@@ -125,11 +132,12 @@ type SelectSearchResult = {
   result: Filter | Place;
 };
 
-type GetAllColumns = { type: "get-all-columns" };
 type SetAllColumns = {
   type: "set-all-columns";
   columns: ColumnGeoJSONRecord[];
 };
+
+type GetAllColumns = { type: "get-all-columns" };
 
 export type CoreAction =
   | MAP_LAYERS_CHANGED
@@ -138,7 +146,7 @@ export type CoreAction =
   | SET_SEARCH_TERM
   | GET_PBDB
   | GET_ELEVATION
-  | GET_COLUMN
+  | GET_COLUMN_UNITS
   | MAP_QUERY
   | FETCH_XDD
   | START_XDD_QUERY
@@ -211,23 +219,6 @@ interface MapSettings {
   highResolutionTerrain: boolean;
 }
 
-export interface ColumnGeoJSONRecord {
-  type: "Feature";
-  geometry: {
-    type: "Polygon";
-    coordinates: number[][][];
-  };
-  properties: {
-    col_id: number;
-    col_area: string;
-    col_name: string;
-    col_group?: string;
-    col_group_id?: number;
-    project_id: number;
-    group_col_id?: number;
-  };
-}
-
 export interface CoreState extends MapState, AsyncRequestState {
   initialLoadComplete: boolean;
   contextPanelOpen: boolean;
@@ -241,7 +232,7 @@ export interface CoreState extends MapState, AsyncRequestState {
   infoMarkerFocus: PositionFocusState | null;
   mapInfo: any[];
   mapSettings: MapSettings;
-  columnInfo: object;
+  columnInfo: ColumnSummary | null;
   xddInfo: XDDSnippet[];
   searchResults: any;
   elevationData: any;

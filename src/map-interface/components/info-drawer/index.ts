@@ -1,6 +1,6 @@
 import { Card } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
-import { useAppActions } from "~/map-interface/app-state";
+import { MapLayer, useAppActions } from "~/map-interface/app-state";
 import { InfoDrawerHeader } from "./header";
 import { FossilCollections } from "./fossil-collections";
 import { GeologicMapInfo } from "./geo-map";
@@ -53,7 +53,11 @@ function InfoDrawer(props) {
 }
 
 function InfoDrawerInterior(props) {
-  const { mapInfo, columnInfo, pbdbData } = useAppState((state) => state.core);
+  const { mapInfo, columnInfo, pbdbData, mapLayers } = useAppState(
+    (state) => state.core
+  );
+
+  const stratigraphyShown = mapLayers.has(MapLayer.COLUMNS);
 
   if (!mapInfo || !mapInfo.mapData) {
     return null;
@@ -75,13 +79,16 @@ function InfoDrawerInterior(props) {
         };
 
   return h("div", [
-    h(FossilCollections, { data: pbdbData, expanded: true }),
-    h(RegionalStratigraphy, { mapInfo, columnInfo }),
     h(GeologicMapInfo, {
       mapInfo,
       bedrockExpanded: true,
       source,
     }),
+    h.if(stratigraphyShown)(RegionalStratigraphy, {
+      mapInfo,
+      columnInfo,
+    }),
+    h(FossilCollections, { data: pbdbData, expanded: true }),
     h(MacrostratLinkedData, {
       mapInfo,
       bedrockMatchExpanded: true,

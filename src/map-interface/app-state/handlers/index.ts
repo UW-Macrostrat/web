@@ -18,6 +18,12 @@ import { MenuPage, setInfoMarkerPosition } from "../reducers";
 import { formatCoordForZoomLevel } from "~/map-interface/utils/formatting";
 import { currentPageForPathName } from "../nav-hooks";
 import { getInitialStateFromHash } from "../reducers/hash-string";
+import {
+  findColumnForLocation,
+  ColumnProperties,
+  ColumnGeoJSONRecord,
+} from "./columns";
+import { MapLayer } from "../reducers/core";
 
 async function actionRunner(
   state: AppState,
@@ -41,12 +47,20 @@ async function actionRunner(
 
       // Fill out the remainder with defaults
 
+      // We always get all columns on initial load, which might be
+      // a bit unnecessary
+      let columns: ColumnGeoJSONRecord[] | null = null;
+      if (coreState1.mapLayers.has(MapLayer.COLUMNS)) {
+        columns = await fetchAllColumns();
+      }
+
       dispatch({
         type: "replace-state",
         state: {
           ...state,
           core: {
             ...coreState1,
+            allColumns: columns,
             initialLoadComplete: true,
           },
           menu: { activePage },
@@ -61,17 +75,19 @@ async function actionRunner(
       );
       await dispatch({ type: "set-filters", filters: newFilters });
 
-      // We always get all columns on initial load, which might be
-      // a bit unnecessary
-      const columns = await fetchAllColumns();
-      await dispatch({ type: "set-all-columns", columns });
-
       // Then reload the map by faking a layer change event.
       // There is probably a better way to do this.
       return {
         type: "map-layers-changed",
         mapLayers: coreState1.mapLayers,
       };
+    }
+    case "map-layers-changed": {
+      const { mapLayers } = action;
+      if (mapLayers.has(MapLayer.COLUMNS) && state.core.allColumns == null) {
+        const columns = await fetchAllColumns();
+        return { type: "set-all-columns", columns };
+      }
     }
     case "toggle-menu": {
       // Push the menu onto the history stack
@@ -163,7 +179,7 @@ async function actionRunner(
       //return { ...action, type: "run-map-query" };
     }
     case "run-map-query":
-      const { lng, lat, z, map_id, column } = action;
+      const { lng, lat, z, map_id } = action;
       let CancelTokenMapQuery = axios.CancelToken;
       let sourceMapQuery = CancelTokenMapQuery.source();
       if (coreState.inputFocus && coreState.contextPanelOpen) {
@@ -185,11 +201,19 @@ async function actionRunner(
         sourceMapQuery.token
       );
 
-      if (mapData.col_id != null) {
+      let column: ColumnProperties | null = null;
+      if (state.core.allColumns != null) {
+        column = findColumnForLocation(state.core.allColumns, {
+          lng,
+          lat,
+        })?.properties;
+      }
+
+      if (column != null) {
         await dispatch(
           await actionRunner(
             state,
-            { type: "get-column", column: { col_id: mapData.col_id } },
+            { type: "get-column-units", column },
             dispatch
           )
         );
@@ -200,7 +224,7 @@ async function actionRunner(
         type: "received-map-query",
         data: mapData,
       };
-    case "get-column":
+    case "get-column-units":
       let CancelTokenGetColumn = axios.CancelToken;
       let sourceGetColumn = CancelTokenGetColumn.source();
       dispatch({ type: "start-column-query", cancelToken: sourceMapQuery });
