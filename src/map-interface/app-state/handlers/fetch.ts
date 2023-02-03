@@ -116,7 +116,24 @@ export async function runMapQuery(lng, lat, z, map_id, cancelToken) {
   const params = { lng, lat, z, map_id };
   let url = base + "/mobile/map_query_v2";
   let res = await axios.get(url, { cancelToken, responseType: "json", params });
-  const data = addMapIdToRef(res.data).success.data;
+  let data = addMapIdToRef(res.data).success.data;
+
+  if (data.hasColumns) {
+    // TODO: fix this...
+    // Somewhat ridiculously, we need to run a separate query to get the
+    // column ID, because the map query doesn't return it.
+    // This needs to get a lot better.
+    const pointData = await axios.get(base + "/mobile/point", {
+      params: {
+        lng,
+        lat,
+        z,
+      },
+    });
+    const col_id = pointData.data.success.data.col_id;
+    data.col_id = col_id;
+  }
+
   return data;
 }
 

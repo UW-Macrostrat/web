@@ -171,12 +171,6 @@ async function actionRunner(
         lat,
         cancelToken: sourceMapQuery,
       });
-      if (column != null) {
-        dispatch(
-          await actionRunner(state, { type: "get-column", column }, dispatch)
-        );
-      }
-
       let mapData = await runMapQuery(
         lng,
         lat,
@@ -184,6 +178,17 @@ async function actionRunner(
         map_id,
         sourceMapQuery.token
       );
+
+      if (mapData.col_id != null) {
+        await dispatch(
+          await actionRunner(
+            state,
+            { type: "get-column", column: { col_id: mapData.col_id } },
+            dispatch
+          )
+        );
+      }
+
       coreState.infoMarkerPosition = { lng, lat };
       return {
         type: "received-map-query",
