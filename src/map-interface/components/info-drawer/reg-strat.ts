@@ -12,7 +12,7 @@ function MapAttribute(props) {
 }
 
 function RegionalStratigraphy(props) {
-  const { mapInfo, columnInfo, expanded } = props;
+  const { mapInfo, columnInfo } = props;
   if (mapInfo?.mapData == null) return null;
 
   const fetchingColumnInfo = useAppState((s) => s.core.fetchingColumnInfo);
