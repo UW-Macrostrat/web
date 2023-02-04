@@ -3,6 +3,7 @@ import { ExpansionPanel } from "../expansion-panel";
 import { addCommas } from "~/map-interface/utils";
 import { useAppState } from "~/map-interface/app-state";
 import { Spinner } from "@blueprintjs/core";
+import {Link} from 'react-router-dom';
 
 function MapAttribute(props) {
   return h("div.map-source-attr", [
@@ -33,6 +34,7 @@ function RegionalStratigraphy(props) {
 
 function ColumnData({ columnInfo }) {
   return h("div.column-data", [
+    h(Link, {to: "column"}, "View column page"),
     h(MapAttribute, {
       label: "Name: ",
       content: [columnInfo.col_name],

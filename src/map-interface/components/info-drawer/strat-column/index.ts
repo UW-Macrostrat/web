@@ -1,10 +1,10 @@
-import { compose, hyperStyled } from "@macrostrat/hyper";
+import { hyperStyled } from "@macrostrat/hyper";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { GeologicPatternProvider } from "@macrostrat/column-components";
 import { preprocessUnits, Column } from "@macrostrat/column-views";
 import "@macrostrat/column-components/main.module.styl";
 
-import styles from "./main.module.styl";
+import styles from "./strat-column.module.styl";
 const h = hyperStyled(styles);
 
 function ColumnOverlay({ col_id }: { col_id: number }) {

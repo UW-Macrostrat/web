@@ -1,0 +1,15 @@
+.strat-column-container
+  min-height: 500px
+
+:global
+  .timescale-container .timescale
+    width: calc(6em + 6px)
+    --timescale-level-size: 1.5em
+
+:global(.bp4-dark) .strat-column-container
+  :global
+    .lithology-column .frame
+      stroke: white
+    g.inner
+      pattern image
+        filter: invert(100%)
