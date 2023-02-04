@@ -257,6 +257,7 @@ export function coreReducer(
       return {
         ...state,
         fetchingColumnInfo: true,
+        columnInfo: null,
         columnInfoCancelToken: action.cancelToken,
       };
 

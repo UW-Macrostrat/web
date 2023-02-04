@@ -207,7 +207,11 @@ async function actionRunner(
         sourceMapQuery.token
       );
 
-      if (column == null && state.core.allColumns != null) {
+      if (
+        column == null &&
+        state.core.allColumns != null &&
+        state.core.mapLayers.has(MapLayer.COLUMNS)
+      ) {
         column = findColumnForLocation(state.core.allColumns, {
           lng,
           lat,
@@ -217,13 +221,11 @@ async function actionRunner(
       const { columnInfo } = state.core;
       if (column != null && columnInfo?.col_id != column.col_id) {
         // Get the column units if we don't have them already
-        await dispatch(
-          await actionRunner(
-            state,
-            { type: "get-column-units", column },
-            dispatch
-          )
-        );
+        actionRunner(
+          state,
+          { type: "get-column-units", column },
+          dispatch
+        ).then(dispatch);
       }
 
       coreState.infoMarkerPosition = { lng, lat };
