@@ -175,8 +175,16 @@ async function actionRunner(
       const { lng, lat, z } = action;
       const ln = formatCoordForZoomLevel(lng, Number(z));
       const lt = formatCoordForZoomLevel(lat, Number(z));
+      // Check if matches column detail route
+      const { pathname } = state.router.location;
+      let newPath = routerBasename + `loc/${ln}/${lt}`;
+      if (pathname.startsWith("/loc") && pathname.endsWith("/column")) {
+        // If so, we want to append columns to the end of the URL
+        newPath += "/column";
+      }
+
       return push({
-        pathname: routerBasename + `loc/${ln}/${lt}`,
+        pathname: newPath,
         hash: location.hash,
       });
       //return { ...action, type: "run-map-query" };
