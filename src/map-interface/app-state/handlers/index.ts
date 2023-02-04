@@ -1,11 +1,12 @@
 import {
   fetchFilteredColumns,
   handleXDDQuery,
-  asyncGetColumn,
-  asyncQueryMap,
+  runColumnQuery,
+  runMapQuery,
   asyncGetElevation,
   getPBDBData,
   base,
+  fetchAllColumns,
 } from "./fetch";
 import { AppAction, AppState } from "../reducers";
 import axios from "axios";
@@ -17,6 +18,12 @@ import { MenuPage, setInfoMarkerPosition } from "../reducers";
 import { formatCoordForZoomLevel } from "~/map-interface/utils/formatting";
 import { currentPageForPathName } from "../nav-hooks";
 import { getInitialStateFromHash } from "../reducers/hash-string";
+import {
+  findColumnForLocation,
+  ColumnProperties,
+  ColumnGeoJSONRecord,
+} from "./columns";
+import { MapLayer } from "../reducers/core";
 
 async function actionRunner(
   state: AppState,
@@ -40,12 +47,20 @@ async function actionRunner(
 
       // Fill out the remainder with defaults
 
+      // We always get all columns on initial load, which might be
+      // a bit unnecessary
+      let columns: ColumnGeoJSONRecord[] | null = null;
+      if (coreState1.mapLayers.has(MapLayer.COLUMNS)) {
+        columns = await fetchAllColumns();
+      }
+
       dispatch({
         type: "replace-state",
         state: {
           ...state,
           core: {
             ...coreState1,
+            allColumns: columns,
             initialLoadComplete: true,
           },
           menu: { activePage },
@@ -67,10 +82,20 @@ async function actionRunner(
         mapLayers: coreState1.mapLayers,
       };
     }
+    case "map-layers-changed": {
+      const { mapLayers } = action;
+      if (mapLayers.has(MapLayer.COLUMNS) && state.core.allColumns == null) {
+        const columns = await fetchAllColumns();
+        return { type: "set-all-columns", columns };
+      } else {
+        return null;
+      }
+    }
     case "toggle-menu": {
       // Push the menu onto the history stack
       let activePage = state.menu.activePage;
-      if (activePage != null) {
+      // If input is focused we want to open the menu if clicked, not run the toggle action.
+      if (activePage != null && !state.core.inputFocus) {
         activePage = null;
       } else {
         activePage = MenuPage.LAYERS;
@@ -157,7 +182,10 @@ async function actionRunner(
       //return { ...action, type: "run-map-query" };
     }
     case "run-map-query":
-      const { lng, lat, z, map_id, column } = action;
+      const { lng, lat, z, map_id } = action;
+      // Get column data from the map action if it is provided.
+      // This saves us from having to filter the columns more inefficiently
+      let { column } = action;
       let CancelTokenMapQuery = axios.CancelToken;
       let sourceMapQuery = CancelTokenMapQuery.source();
       if (coreState.inputFocus && coreState.contextPanelOpen) {
@@ -171,30 +199,46 @@ async function actionRunner(
         lat,
         cancelToken: sourceMapQuery,
       });
-      if (column) {
-        dispatch(
-          await actionRunner(state, { type: "get-column", column }, dispatch)
-        );
-      }
-
-      let mapData = await asyncQueryMap(
+      let mapData = await runMapQuery(
         lng,
         lat,
         z,
         map_id,
         sourceMapQuery.token
       );
+
+      if (
+        column == null &&
+        state.core.allColumns != null &&
+        state.core.mapLayers.has(MapLayer.COLUMNS)
+      ) {
+        column = findColumnForLocation(state.core.allColumns, {
+          lng,
+          lat,
+        })?.properties;
+      }
+
+      const { columnInfo } = state.core;
+      if (column != null && columnInfo?.col_id != column.col_id) {
+        // Get the column units if we don't have them already
+        actionRunner(
+          state,
+          { type: "get-column-units", column },
+          dispatch
+        ).then(dispatch);
+      }
+
       coreState.infoMarkerPosition = { lng, lat };
       return {
         type: "received-map-query",
         data: mapData,
       };
-    case "get-column":
+    case "get-column-units":
       let CancelTokenGetColumn = axios.CancelToken;
       let sourceGetColumn = CancelTokenGetColumn.source();
       dispatch({ type: "start-column-query", cancelToken: sourceMapQuery });
 
-      let columnData = await asyncGetColumn(
+      let columnData = await runColumnQuery(
         action.column,
         sourceGetColumn.token
       );

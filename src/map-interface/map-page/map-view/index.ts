@@ -36,6 +36,7 @@ import { getExpressionForFilters } from "./filter-helpers";
 import { MapSourcesLayer, mapStyle, toggleLineSymbols } from "../map-style";
 import { SETTINGS } from "../../settings";
 import mapboxgl from "mapbox-gl";
+import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
 
 const h = hyper.styled(styles);
 
@@ -170,9 +171,10 @@ function MapContainer(props) {
     elevationMarkerLocation,
     mapPosition,
     infoDrawerOpen,
-    mapIsLoading,
     mapSettings,
   } = useAppState((state) => state.core);
+
+  const mapIsLoading = useAppState((state) => state.core.mapIsLoading);
 
   const runAction = useAppActions();
   /* HACK: Right now we need this to force a render when the map
@@ -252,6 +254,29 @@ function MapContainer(props) {
 
   useMapEaseToCenter(padding);
   useMapMarker(mapRef, markerRef, infoMarkerPosition);
+
+  /* Update columns map layer given columns provided by application. */
+  const allColumns = useAppState((state) => state.core.allColumns);
+  useEffect(() => {
+    const map = mapRef.current;
+    const ncols = allColumns?.length ?? 0;
+    if (map == null || ncols == 0) return;
+    // Set source data for columns
+    map.once("style.load", () => {
+      const src = map.getSource("columns");
+      if (src == null) return;
+      src.setData({
+        type: "FeatureCollection",
+        features: allColumns ?? [],
+      });
+    });
+    const src = map.getSource("columns");
+    if (src == null) return;
+    src.setData({
+      type: "FeatureCollection",
+      features: allColumns ?? [],
+    });
+  }, [mapRef.current, allColumns, mapInitialized]);
 
   useEffect(() => {
     // Get the current value of the map. Useful for gradually moving away
@@ -363,7 +388,7 @@ function useMapQueryHandler(
   const runAction = useAppActions();
 
   return useCallback(
-    (event, columns = null) => {
+    (event: mapboxgl.MapMouseEvent, columns: ColumnProperties[] = null) => {
       const column = columns?.[0];
       const map = mapRef.current;
 

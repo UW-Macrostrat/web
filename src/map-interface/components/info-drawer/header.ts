@@ -86,8 +86,12 @@ function PositionButton() {
 }
 
 export function InfoDrawerHeader(props) {
-  const { mapInfo, infoMarkerPosition: position, onCloseClick, zoom } = props;
+  const { mapInfo, onCloseClick } = props;
   const { elevation } = mapInfo;
+
+  const zoom = useAppState((state) => state.core.mapPosition.target?.zoom);
+  const position = useAppState((state) => state.core.infoMarkerPosition);
+
   return h("header", [
     //h("div.left-icon", [h(Icon, { icon: "map-marker" })]),
     h(PositionButton),

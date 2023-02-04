@@ -20,7 +20,6 @@ import { MapboxMapProvider, ZoomControl } from "@macrostrat/mapbox-react";
 import { MapBottomControls, MapStyledContainer } from "./map-view";
 import { Routes, Route, useParams, useMatch } from "react-router-dom";
 import { MenuPage } from "./menu";
-import { PositionFocusState } from "../app-state";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));
@@ -198,6 +197,9 @@ function MapPageRoutes() {
 function InfoDrawerRoute() {
   const { lat, lng } = useParams();
   const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
+  const z = Math.round(
+    useAppState((s) => s.core.mapPosition.target?.zoom) ?? 7
+  );
   const detailPanelTrans = useTransition(infoDrawerOpen, 800);
   const runAction = useAppActions();
 
@@ -207,7 +209,7 @@ function InfoDrawerRoute() {
         type: "run-map-query",
         lat: Number(lat),
         lng: Number(lng),
-        z: 7,
+        z,
       });
     }
   }, [lat, lng]);

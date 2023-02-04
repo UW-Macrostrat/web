@@ -1,5 +1,7 @@
 import axios from "axios";
+import { joinURL } from "~/map-interface/utils";
 import { SETTINGS } from "../../settings";
+import { ColumnGeoJSONRecord } from "../reducers";
 
 export const base = `${SETTINGS.apiDomain}/api/v2`;
 const basev1 = `${SETTINGS.gddDomain}/api/v1`;
@@ -112,27 +114,52 @@ function addMapIdToRef(data) {
   return data;
 }
 
-export const asyncQueryMap = async (lng, lat, z, map_id, cancelToken) => {
-  let url = `${base}/mobile/map_query_v2?lng=${lng.toFixed(
-    5
-  )}&lat=${lat.toFixed(5)}&z=${parseInt(z)}`;
-  if (map_id) {
-    url += `map_id=${map_id}`;
-  }
-  let res = await axios.get(url, { cancelToken, responseType: "json" });
-  const data = addMapIdToRef(res.data).success.data;
-  return data;
-};
+export async function fetchAllColumns(): Promise<ColumnGeoJSONRecord[]> {
+  let res = await axios.get(joinURL(base, "columns"), {
+    responseType: "json",
+    params: { format: "geojson_bare", all: true },
+  });
 
-export const asyncGetColumn = async (column, cancelToken) => {
-  let url = `${base}/units?response=long&col_id=${column.col_id}`;
-  const res = await axios.get(url, { cancelToken, responseType: "json" });
+  return res.data.features;
+}
+
+export async function runMapQuery(lng, lat, z, map_id, cancelToken) {
+  const params = { lng, lat, z, map_id };
+  let url = base + "/mobile/map_query_v2";
+  let res = await axios.get(url, { cancelToken, responseType: "json", params });
+  let data = addMapIdToRef(res.data).success.data;
+
+  // if (data.hasColumns) {
+  //   // TODO: fix this...
+  //   // Somewhat ridiculously, we need to run a separate query to get the
+  //   // column ID, because the map query doesn't return it.
+  //   // This needs to get a lot better.
+  //   const pointData = await axios.get(base + "/mobile/point", {
+  //     params: {
+  //       lng,
+  //       lat,
+  //       z,
+  //     },
+  //   });
+  //   const col_id = pointData.data.success.data.col_id;
+  //   data.col_id = col_id;
+  // }
+
+  return data;
+}
+
+export async function runColumnQuery(column, cancelToken) {
+  const res = await axios.get(base + "/units", {
+    cancelToken,
+    responseType: "json",
+    params: { response: "long", col_id: column.col_id },
+  });
   try {
     return res.data.success.data;
   } catch (error) {
     return [];
   }
-};
+}
 
 export const asyncGetElevation = async (line, cancelToken) => {
   const [start_lng, start_lat] = line[0];
