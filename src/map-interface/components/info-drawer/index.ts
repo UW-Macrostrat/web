@@ -59,11 +59,11 @@ function InfoDrawer(props) {
 }
 
 function InfoDrawerInterior(props) {
-  const { columnInfo } = useAppState((state) => state.core);
-  const col_id = columnInfo?.col_id;
+  const columnInfo = useAppState((state) => state.core.columnInfo);
+  console.log(columnInfo);
 
   return h(Routes, [
-    h(Route, { path: "/column", element: h(StratColumn, { col_id, units: columnInfo?.units }) }),
+    h(Route, { path: "/column", element: h(StratColumn, { columnInfo }) }),
     h(Route, { path: "*", element: h(InfoDrawerMainPanel) }),
   ]);
 }
