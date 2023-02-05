@@ -1,10 +1,10 @@
 import { Component, forwardRef } from "react";
 import { SETTINGS } from "../../settings";
-import { mapStyle } from "../map-style";
 import { getPBDBData } from "./filter-helpers";
 import h from "@macrostrat/hyper";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
+import { buildMapStyle } from "../map-style";
 import { setMapStyle } from "./style-helpers";
 import { MapLayer } from "~/map-interface/app-state";
 import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
@@ -30,7 +30,6 @@ class VestigialMap extends Component<MapProps, {}> {
   constructor(props) {
     super(props);
     this.mapLoaded = false;
-    this.currentSources = [];
     this.elevationPoints = [];
 
     this.maxValue = 500;
@@ -52,7 +51,7 @@ class VestigialMap extends Component<MapProps, {}> {
     }
 
     const { mapLayers } = this.props;
-    mapStyle.layers.forEach((layer) => {
+    buildMapStyle().layers.forEach((layer) => {
       // Populate the objects that track interaction states
       this.hoverStates[layer.id] = null;
       this.selectedStates[layer.id] = null;
@@ -290,30 +289,6 @@ class VestigialMap extends Component<MapProps, {}> {
 
       this.props.onQueryMap(event, columns);
     });
-
-    // Fired after 'swapBasemap'
-    this.map.on("style.load", () => {
-      if (!this.currentSources.length) {
-        return;
-      }
-
-      this.currentSources.forEach((source) => {
-        if (this.map.getSource(source.id) == null) {
-          this.map.addSource(source.id, source.config);
-        }
-        if (source.data) {
-          this.map.getSource(source.id).setData(source.data);
-        }
-      });
-
-      // Readd all the previous layers to the map
-      this.currentLayers.forEach((layer) => {
-        if (layer.filters) {
-          this.map.setFilter(layer.layer.id, layer.filters);
-        }
-      });
-      setMapStyle(this, this.map, mapStyle, this.props);
-    });
   }
 
   // Handle updates to the state of the map
@@ -324,7 +299,7 @@ class VestigialMap extends Component<MapProps, {}> {
     this.setupMapHandlers();
     if (this.map == null) return false;
 
-    setMapStyle(this, this.map, mapStyle, nextProps);
+    setMapStyle(this, this.map, buildMapStyle(), nextProps);
 
     if (nextProps.mapIsRotated !== this.props.mapIsRotated) {
       return true;

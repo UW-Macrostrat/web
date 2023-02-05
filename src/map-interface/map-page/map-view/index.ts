@@ -33,7 +33,7 @@ import {
   MapPosition,
 } from "@macrostrat/mapbox-utils";
 import { getExpressionForFilters } from "./filter-helpers";
-import { MapSourcesLayer, mapStyle, toggleLineSymbols } from "../map-style";
+import { MapSourcesLayer, buildMapStyle, toggleLineSymbols } from "../map-style";
 import { SETTINGS } from "../../settings";
 import mapboxgl from "mapbox-gl";
 import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
@@ -104,11 +104,11 @@ function useElevationMarkerLocation(mapRef, elevationMarkerLocation) {
   }, [mapRef, elevationMarkerLocation]);
 }
 
-async function buildMapStyle(baseMapURL) {
+async function buildStyle(baseMapURL) {
   const style = await getMapboxStyle(baseMapURL, {
     access_token: mapboxgl.accessToken,
   });
-  return mergeStyles(style, mapStyle);
+  return mergeStyles(style, buildMapStyle());
 }
 
 async function initializeMap(baseMapURL, mapPosition, infoMarkerPosition) {
@@ -117,7 +117,7 @@ async function initializeMap(baseMapURL, mapPosition, infoMarkerPosition) {
 
   const map = new mapboxgl.Map({
     container: "map",
-    style: await buildMapStyle(baseMapURL),
+    style: await buildStyle(baseMapURL),
     maxZoom: 18,
     //maxTileCacheSize: 0,
     logoPosition: "bottom-left",
@@ -237,7 +237,7 @@ function MapContainer(props) {
 
   useEffect(() => {
     if (mapRef.current == null) return;
-    buildMapStyle(baseMapURL).then((style) => {
+    buildStyle(baseMapURL).then((style) => {
       mapRef.current.setStyle(style);
       enable3DTerrain(mapRef.current, mapUse3D, demSourceID);
     });
