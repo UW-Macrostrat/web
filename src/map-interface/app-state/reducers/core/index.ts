@@ -274,6 +274,8 @@ export function coreReducer(
         fetchingColumnInfo: false,
         columnInfo: assembleColumnSummary(action.column, action.data),
       };
+    case "clear-column-info":
+      return { ...state, columnInfo: null, fetchingColumnInfo: false };
     case "toggle-map-layer":
       const op = state.mapLayers.has(action.layer) ? "$remove" : "$add";
       const mapLayers: Spec<Set<MapLayer>, any> = {
@@ -333,8 +335,6 @@ export function coreReducer(
         journals: [],
       };
       let articles = {};
-
-      console.log(action.data);
 
       for (let i = 0; i < action.data.length; i++) {
         let found = false;

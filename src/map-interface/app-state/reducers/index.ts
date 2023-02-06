@@ -46,10 +46,27 @@ function mainReducer(
 
       let s1 = setInfoMarkerPosition(state);
 
+      console.log(state.router, action.payload);
+
+      const newRoute = action.payload.location;
+      let newAction = action;
+      if (newRoute.hash == "") {
+        newAction = {
+          ...action,
+          payload: {
+            ...action.payload,
+            location: {
+              ...action.payload.location,
+              hash: state.router.location.hash,
+            },
+          },
+        };
+      }
+
       return {
         ...s1,
         core: { ...s1.core, menuOpen: isOpen, contextPanelOpen: isOpen },
-        router: routerReducer(state.router, action),
+        router: routerReducer(state.router, newAction),
       };
     }
     case "set-menu-page":

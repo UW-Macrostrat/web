@@ -9,7 +9,7 @@ import Map from "./map";
 import { enable3DTerrain } from "./terrain";
 import { GeolocateControl } from "mapbox-gl";
 import hyper from "@macrostrat/hyper";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import useResizeObserver from "use-resize-observer";
 import styles from "../main.module.styl";
 import {
@@ -30,10 +30,13 @@ import {
   setMapPosition,
   getMapboxStyle,
   mergeStyles,
-  MapPosition,
 } from "@macrostrat/mapbox-utils";
 import { getExpressionForFilters } from "./filter-helpers";
-import { MapSourcesLayer, buildMapStyle, toggleLineSymbols } from "../map-style";
+import {
+  MapSourcesLayer,
+  buildMapStyle,
+  toggleLineSymbols,
+} from "../map-style";
 import { SETTINGS } from "../../settings";
 import mapboxgl from "mapbox-gl";
 import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
@@ -389,7 +392,6 @@ function useMapQueryHandler(
 
   return useCallback(
     (event: mapboxgl.MapMouseEvent, columns: ColumnProperties[] = null) => {
-      const column = columns?.[0];
       const map = mapRef.current;
 
       runAction({
@@ -397,7 +399,7 @@ function useMapQueryHandler(
         lng: event.lngLat.lng,
         lat: event.lngLat.lat,
         z: map.getZoom(),
-        column,
+        columns,
         map_id: null,
       });
 

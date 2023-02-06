@@ -60,7 +60,6 @@ function InfoDrawer(props) {
 
 function InfoDrawerInterior(props) {
   const columnInfo = useAppState((state) => state.core.columnInfo);
-  console.log(columnInfo);
 
   return h(Routes, [
     h(Route, { path: "/column", element: h(StratColumn, { columnInfo }) }),

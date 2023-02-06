@@ -357,7 +357,7 @@ class VestigialMap extends Component<MapProps, {}> {
         // zoom to user location
       }
     }
-
+    const mapStyle = buildMapStyle();
     // Handle changes to map filters
     if (nextProps.filters != this.props.filters) {
       // If all filters have been removed simply reset the filter states
