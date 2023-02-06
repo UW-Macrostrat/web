@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useMapElement } from "@macrostrat/mapbox-react";
 import { useAPIResult } from "@macrostrat/ui-components";
-import { SETTINGS } from "~/map-interface/Settings";
+import { SETTINGS } from "~/map-interface/settings";
 import { features } from "process";
 
 const sourceMapStyle = {
@@ -77,7 +77,6 @@ export function MapSourcesLayer() {
     SETTINGS.apiDomain + "/api/v2/defs/sources",
     { all: true, format: "geojson_bare" }
   );
-  console.log(featureData);
   useEffect(() => {
     if (!map || !featureData) return;
 

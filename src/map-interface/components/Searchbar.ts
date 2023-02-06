@@ -1,9 +1,13 @@
 import { useCallback, useRef, useEffect } from "react";
 import { Navbar, Button, InputGroup, Spinner, Card } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
-import { useAppActions, useSearchState, usePanelOpen } from "../app-state";
+import {
+  useAppActions,
+  useSearchState,
+  useContextPanelOpen,
+} from "../app-state";
 import { useSelector } from "react-redux";
-import { SubtleFilterText } from "./filters-panel";
+import { FilterPanel } from "./filter-panel";
 import styles from "./searchbar.styl";
 import { PanelSubhead } from "./expansion-panel/headers";
 import classNames from "classnames";
@@ -30,7 +34,7 @@ function ResultList({ searchResults }) {
   const runAction = useAppActions();
   const onSelectResult = useCallback(
     (f) => {
-      runAction({ type: "async-add-filter", filter: f });
+      runAction({ type: "select-search-result", result: f });
     },
     [runAction]
   );
@@ -86,16 +90,17 @@ function SearchResults({ className }) {
 function MenuButton() {
   const runAction = useAppActions();
   const mapIsLoading = useSelector((state) => state.core.mapIsLoading);
-  const menuOpen = usePanelOpen();
+  const menuOpen = useContextPanelOpen();
+
+  const onClick = useCallback(() => {
+    runAction({ type: "toggle-menu" });
+  }, []);
 
   return h(Button, {
     icon: mapIsLoading ? h(Spinner, { size: 16 }) : "menu",
     large: true,
     minimal: true,
-    onClick() {
-      runAction({ type: "toggle-menu" });
-    },
-    //"aria-label": "Menu",
+    onClick,
     active: menuOpen && !mapIsLoading,
   });
 }
@@ -104,17 +109,23 @@ function Searchbar({ className }) {
   const runAction = useAppActions();
   const { term, searchResults } = useSearchState();
 
-  const gainInputFocus = (e) => {
-    runAction({ type: "set-input-focus", inputFocus: true });
-  };
+  const gainInputFocus = useCallback(
+    (e) => {
+      runAction({ type: "set-input-focus", inputFocus: true });
+    },
+    [runAction]
+  );
 
-  const handleSearchInput = (event) => {
-    runAction({ type: "set-search-term", term: event.target.value });
-    if (event.target.value.length <= 2) {
-      return;
-    }
-    runAction({ type: "fetch-search-query", term: term });
-  };
+  const handleSearchInput = useCallback(
+    (event) => {
+      runAction({ type: "set-search-term", term: event.target.value });
+      if (event.target.value.length <= 2) {
+        return;
+      }
+      runAction({ type: "fetch-search-query", term: term });
+    },
+    [runAction]
+  );
 
   useEffect(() => {
     if (term == "" && searchResults != null) {
@@ -135,12 +146,12 @@ function Searchbar({ className }) {
         }),
       ]),
     ]),
-    h(SubtleFilterText),
+    h(FilterPanel),
   ]);
 }
 
 function SearchGuidance() {
-  return h("div.search-guidance.bp3-text", [
+  return h("div.search-guidance.bp4-text", [
     h("h3", ["Available categories"]),
     h("ul", [
       h("li", ["Time intervals"]),

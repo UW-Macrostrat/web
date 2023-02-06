@@ -51,16 +51,17 @@
   margin 0
   .searchbar
     width: 100%
-    background-color #fff
+    background-color var(--panel-background-color)
     border-radius 3px
     padding 0 5px
     display flex
     flex-direction: row
     align-items center
-    :global(.bp3-input-group)
+    :global(.bp4-input-group)
       flex-grow 1
       cursor: text
     &>*
       margin-right 5px
       &:last-child
         margin-right 0 
+

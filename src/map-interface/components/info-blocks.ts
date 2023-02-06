@@ -1,16 +1,31 @@
 import hyper from "@macrostrat/hyper";
 import { hexToRgb } from "../utils";
 import styles from "./info-blocks.module.styl";
+import { useDarkMode } from "@macrostrat/ui-components";
+import chroma from "chroma-js";
 
 const h = hyper.styled(styles);
 
+function getColor(color, darkenAmount) {
+  try {
+    return chroma(color).darken(darkenAmount).hex();
+  } catch (err) {
+    return color;
+  }
+}
+
 function IntervalChip(props) {
   const { interval, className } = props;
+  const darkMode = useDarkMode();
+  const darkenAmount = darkMode.isEnabled ? 2 : 0;
+
   return h(
     "div.chip.age-chip",
     {
       className,
-      style: { backgroundColor: hexToRgb(interval.color, 0.8) },
+      style: {
+        backgroundColor: getColor(interval.color, darkenAmount),
+      },
     },
     [
       h("div.age-chip-interval", interval.int_name),
@@ -42,9 +57,10 @@ function AttrChip(props) {
   const { fill = null, color, name, className, emphasized = true } = props;
 
   let styles = {};
-  if (fill) {
-    styles["backgroundImage"] = `url('dist/img/geologic-patterns/${fill}.png')`;
-  }
+  // Deactivated for now
+  // if (fill) {
+  //   styles["backgroundImage"] = `url('dist/img/geologic-patterns/${fill}.png')`;
+  // }
   return h("div.lith-chip", { style: { ...styles }, className }, [
     h(
       "div.lith-chip-inner.chip",

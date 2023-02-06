@@ -1,4 +1,4 @@
-import { SETTINGS } from "../../Settings";
+import { SETTINGS } from "../../settings";
 export * from "./line-symbols";
 export * from "./map-sources";
 
@@ -28,25 +28,13 @@ const overlaySources = {
       features: [],
     },
   },
-  info_marker: {
-    type: "geojson",
-    data: {
-      type: "FeatureCollection",
-      features: [
-        {
-          type: "Feature",
-          geometry: {
-            type: "Point",
-            coordinates: [0, 0],
-          },
-        },
-      ],
-    },
-  },
   columns: {
     type: "geojson",
     generateId: true,
-    data: `${SETTINGS.apiDomain}/api/v2/columns?all&format=geojson_bare`,
+    data: {
+      type: "FeatureCollection",
+      features: [],
+    },
   },
   filteredColumns: {
     type: "geojson",
@@ -85,7 +73,7 @@ const overlayLayers = [
     type: "fill",
     source: "columns",
     paint: {
-      "fill-color": "dodgerblue",
+      "fill-color": "#777777",
       "fill-opacity": 0.1,
     },
     layout: {
@@ -97,7 +85,7 @@ const overlayLayers = [
     type: "line",
     source: "columns",
     paint: {
-      "line-color": "dodgerblue",
+      "line-color": "#777777",
       "line-width": {
         stops: [
           [0, 1],
@@ -136,18 +124,6 @@ const overlayLayers = [
     },
     layout: {
       visibility: "none",
-    },
-  },
-  {
-    id: "infoMarker",
-    type: "symbol",
-    source: "info_marker",
-    layout: {
-      "icon-size": 0.65,
-      "icon-image": "pin",
-      "icon-offset": [0, -28],
-      visibility: "none",
-      "icon-allow-overlap": true,
     },
   },
   {
