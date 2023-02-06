@@ -93,7 +93,7 @@ function InfoDrawerMainPanel(props) {
           ref: {},
         };
 
-  return h("div", [
+  return h("div.infodrawer-main", [
     h(GeologicMapInfo, {
       mapInfo,
       bedrockExpanded: true,

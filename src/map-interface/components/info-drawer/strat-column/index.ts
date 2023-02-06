@@ -3,12 +3,14 @@ import { GeologicPatternProvider } from "@macrostrat/column-components";
 import { preprocessUnits, Column } from "@macrostrat/column-views";
 import { UnitLong } from "@macrostrat/api-types";
 import "@macrostrat/column-components/main.module.styl";
+import { ExpansionPanel } from "../../expansion-panel";
 
 import styles from "./strat-column.module.styl";
 import { ColumnSummary } from "~/map-interface/app-state/handlers/columns";
 import { NonIdealState } from "@blueprintjs/core";
 import useBreadcrumbs from "use-react-router-breadcrumbs";
 import { LinkButton } from "../../buttons";
+import { InfoPanelSection } from "../../expansion-panel";
 
 const h = hyperStyled(styles);
 
@@ -16,11 +18,7 @@ function BackButton() {
   const breadcrumbs = useBreadcrumbs();
   const prevRoute = breadcrumbs[breadcrumbs.length - 2];
   let to = prevRoute?.match.pathname;
-  return h(
-    LinkButton,
-    { to, icon: "caret-left", minimal: true, small: true },
-    "Back"
-  );
+  return h(LinkButton, { to, icon: "arrow-left", minimal: true, small: true });
 }
 
 function ColumnOverlay({ columnInfo }: { columnInfo: ColumnSummary | null }) {
@@ -32,22 +30,27 @@ function ColumnOverlay({ columnInfo }: { columnInfo: ColumnSummary | null }) {
 
   const unitsA = preprocessUnits(units);
 
-  return h("div.column-overlay.strat-column-container", [
-    h("div.column-header.flex-row", [
-      h(BackButton),
-      h("h3", columnInfo.col_name),
-      h("div.spacer"),
-      h("code", columnInfo.col_id),
-    ]),
-    h(Column, {
-      data: unitsA,
-      showLabels: true,
-      targetUnitHeight: 40,
-      unconformityLabels: true,
-      width: 280,
-      columnWidth: 180,
-    }),
+  const headerElement = h([
+    h("div.controls", [h(BackButton)]),
+    h("h4", columnInfo.col_name),
+    h("div.spacer"),
+    h("code", columnInfo.col_id),
   ]);
+
+  return h(
+    InfoPanelSection,
+    { className: "strat-column-panel", headerElement },
+    h("div.strat-column-container", [
+      h(Column, {
+        data: unitsA,
+        showLabels: true,
+        targetUnitHeight: 40,
+        unconformityLabels: true,
+        width: 280,
+        columnWidth: 180,
+      }),
+    ])
+  );
 }
 
 function resolvePattern(name: string | number) {
