@@ -160,6 +160,10 @@ function getMapPadding(ref, parentRef) {
   return calcMapPadding(rect, childRect);
 }
 
+export function DevMapView() {
+  return h(MapContainer);
+}
+
 function MapContainer(props) {
   const {
     filters,

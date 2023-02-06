@@ -17,7 +17,7 @@ import { useRef, useEffect } from "react";
 import { useTransition } from "transition-hook";
 import { useContextPanelOpen, useContextClass } from "../app-state";
 import { MapboxMapProvider, ZoomControl } from "@macrostrat/mapbox-react";
-import { MapBottomControls, MapStyledContainer } from "./map-view";
+import { DevMapView, MapBottomControls, MapStyledContainer } from "./map-view";
 import { Routes, Route, useParams, useMatch } from "react-router-dom";
 import { MenuPage } from "./menu";
 
@@ -226,27 +226,9 @@ export function DevMapPage({
   headerElement?: React.ReactElement;
 }) {
   // A stripped-down page for map development
-  const { inputFocus } = useSearchState();
   const runAction = useAppActions();
-  const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
 
   const ref = useRef<HTMLElement>(null);
-
-  const detailPanelTrans = useTransition(infoDrawerOpen, 800);
-
-  /* We apply a custom style to the panel container when we are interacting
-    with the search bar, so that we can block map interactions until search
-    bar focus is lost.
-    We also apply a custom style when the infodrawer is open so we can hide
-    the search bar on mobile platforms
-  */
-  const className = classNames(
-    {
-      searching: inputFocus,
-      "detail-panel-open": false,
-    },
-    `detail-panel-${detailPanelTrans.stage}`
-  );
 
   const contextClass = useContextClass();
 
@@ -259,26 +241,20 @@ export function DevMapPage({
 
   return h(MapboxMapProvider, [
     h(MapStyledContainer, { className: "map-page map-dev-page" }, [
-      h(
-        "div.main-ui",
-        {
-          className,
-        },
-        [
-          h("div.context-stack", { className: contextClass, ref }, [
-            h(DevNavbar, { className: "searchbar" }, headerElement),
-            h(Menu, {
-              className: "context-panel",
-              menuPage: MenuPage.LAYERS,
-            }),
-          ]),
-          h(MapView),
-          h("div.detail-stack.infodrawer-container", [
-            h("div.spacer"),
-            h(MapBottomControls),
-          ]),
-        ]
-      ),
+      h("div.main-ui", [
+        h("div.context-stack", { className: contextClass, ref }, [
+          h(DevNavbar, { className: "searchbar" }, headerElement),
+          h(Menu, {
+            className: "context-panel",
+            menuPage: MenuPage.LAYERS,
+          }),
+        ]),
+        h(DevMapView),
+        h("div.detail-stack.infodrawer-container", [
+          h("div.spacer"),
+          h(MapBottomControls),
+        ]),
+      ]),
     ]),
   ]);
 }
