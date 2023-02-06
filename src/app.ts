@@ -49,6 +49,8 @@ const Sources = () => h(Suspense, { fallback: h(Spinner) }, h(_Sources));
 const _MapPage = loadable(() => import("./map-interface/map-page"));
 const MapPage = () => h(Suspense, { fallback: h(Spinner) }, h(_MapPage));
 
+const DevMapPage = loadable(() => import("./dev-map"));
+
 const App = () => {
   return h(
     DarkModeProvider,
@@ -61,6 +63,10 @@ const App = () => {
         [
           h(Routes, [
             h(Route, { path: "/sources", element: h(Sources) }),
+            h(Route, {
+              path: "/dev/*",
+              element: h(Suspense, { fallback: h(Spinner) }, h(DevMapPage)),
+            }),
             h(Route, { path: "*", element: h(MapPage) }),
           ]),
 

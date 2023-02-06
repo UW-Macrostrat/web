@@ -163,5 +163,13 @@ function SearchGuidance() {
   ]);
 }
 
+export function DevNavbar({ className, children }) {
+  return h("div.searchbar-holder", { className }, [
+    h("div.navbar-holder", [
+      h(Navbar, { className: "searchbar panel" }, children),
+    ]),
+  ]);
+}
+
 export default Searchbar;
 export { SearchResults };

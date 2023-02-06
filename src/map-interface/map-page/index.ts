@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 // Import other components
 import hyper from "@macrostrat/hyper";
-import Searchbar from "../components/searchbar";
+import Searchbar, { DevNavbar } from "../components/searchbar";
 import { ButtonGroup, Button, Spinner } from "@blueprintjs/core";
 import { useSelector, useDispatch } from "react-redux";
 import loadable from "@loadable/component";
@@ -92,7 +92,7 @@ const MapTypeSelector = () => {
   ]);
 };
 
-const MapPage = ({
+export const MapPage = ({
   backend = MapBackend.MAPBOX3,
   menuPage = null,
 }: {
@@ -218,6 +218,69 @@ function InfoDrawerRoute() {
   return h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
     className: "detail-panel",
   });
+}
+
+export function DevMapPage({
+  headerElement = null,
+}: {
+  headerElement?: React.ReactElement;
+}) {
+  // A stripped-down page for map development
+  const { inputFocus } = useSearchState();
+  const runAction = useAppActions();
+  const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
+
+  const ref = useRef<HTMLElement>(null);
+
+  const detailPanelTrans = useTransition(infoDrawerOpen, 800);
+
+  /* We apply a custom style to the panel container when we are interacting
+    with the search bar, so that we can block map interactions until search
+    bar focus is lost.
+    We also apply a custom style when the infodrawer is open so we can hide
+    the search bar on mobile platforms
+  */
+  const className = classNames(
+    {
+      searching: inputFocus,
+      "detail-panel-open": false,
+    },
+    `detail-panel-${detailPanelTrans.stage}`
+  );
+
+  const contextClass = useContextClass();
+
+  const loaded = useSelector((state) => state.core.initialLoadComplete);
+  useEffect(() => {
+    runAction({ type: "get-initial-map-state" });
+  }, []);
+
+  if (!loaded) return h(Spinner);
+
+  return h(MapboxMapProvider, [
+    h(MapStyledContainer, { className: "map-page map-dev-page" }, [
+      h(
+        "div.main-ui",
+        {
+          className,
+        },
+        [
+          h("div.context-stack", { className: contextClass, ref }, [
+            h(DevNavbar, { className: "searchbar" }, headerElement),
+            h(Menu, {
+              className: "context-panel",
+              menuPage: MenuPage.LAYERS,
+            }),
+          ]),
+          h(MapView),
+          h("div.detail-stack.infodrawer-container", [
+            h("div.spacer"),
+            h(MapBottomControls),
+          ]),
+        ]
+      ),
+    ]),
+  ]);
 }
 
 //const _MapPage = compose(HotkeysProvider, MapPage);
