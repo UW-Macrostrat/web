@@ -202,6 +202,7 @@ function InfoDrawerRoute() {
   );
   const detailPanelTrans = useTransition(infoDrawerOpen, 800);
   const runAction = useAppActions();
+  const allColumns = useAppState((s) => s.core.allColumns);
 
   useEffect(() => {
     if (lat && lng) {
@@ -212,7 +213,7 @@ function InfoDrawerRoute() {
         z,
       });
     }
-  }, [lat, lng]);
+  }, [lat, lng, allColumns]);
 
   return h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
     className: "detail-panel",
