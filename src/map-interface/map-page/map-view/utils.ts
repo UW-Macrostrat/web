@@ -9,8 +9,7 @@ import Map from "./map";
 import { enable3DTerrain } from "./terrain";
 import { GeolocateControl } from "mapbox-gl";
 import hyper from "@macrostrat/hyper";
-import { useEffect, useMemo } from "react";
-import useResizeObserver from "use-resize-observer";
+import { useEffect } from "react";
 import styles from "../main.module.styl";
 import {
   useMapRef,
@@ -24,16 +23,7 @@ import {
 import classNames from "classnames";
 import { debounce } from "underscore";
 import { inDarkMode } from "@macrostrat/ui-components";
-import {
-  mapViewInfo,
-  getMapPosition,
-  setMapPosition,
-  getMapboxStyle,
-  mergeStyles,
-  MapPosition,
-} from "@macrostrat/mapbox-utils";
-import { getExpressionForFilters } from "./filter-helpers";
-import { MapSourcesLayer, mapStyle, toggleLineSymbols } from "../map-style";
+import { mapViewInfo } from "@macrostrat/mapbox-utils";
 import { SETTINGS } from "../../settings";
 import mapboxgl from "mapbox-gl";
 import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";

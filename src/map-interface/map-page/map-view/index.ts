@@ -130,6 +130,29 @@ export default function MainMapView(props) {
   const handleMapQuery = useMapQueryHandler(mapRef, markerRef, infoDrawerOpen);
   const isDarkMode = inDarkMode();
 
+  /* Update columns map layer given columns provided by application. */
+  const allColumns = useAppState((state) => state.core.allColumns);
+  useEffect(() => {
+    const map = mapRef.current;
+    const ncols = allColumns?.length ?? 0;
+    if (map == null || ncols == 0) return;
+    // Set source data for columns
+    map.once("style.load", () => {
+      const src = map.getSource("columns");
+      if (src == null) return;
+      src.setData({
+        type: "FeatureCollection",
+        features: allColumns ?? [],
+      });
+    });
+    const src = map.getSource("columns");
+    if (src == null) return;
+    src.setData({
+      type: "FeatureCollection",
+      features: allColumns ?? [],
+    });
+  }, [mapRef.current, allColumns]);
+
   return h(CoreMapView, props, [
     h(VestigialMap, {
       filters,
@@ -240,29 +263,6 @@ function CoreMapView(props) {
   useMapEaseToCenter(padding);
   useMapMarker(mapRef, markerRef, infoMarkerPosition);
 
-  /* Update columns map layer given columns provided by application. */
-  const allColumns = useAppState((state) => state.core.allColumns);
-  useEffect(() => {
-    const map = mapRef.current;
-    const ncols = allColumns?.length ?? 0;
-    if (map == null || ncols == 0) return;
-    // Set source data for columns
-    map.once("style.load", () => {
-      const src = map.getSource("columns");
-      if (src == null) return;
-      src.setData({
-        type: "FeatureCollection",
-        features: allColumns ?? [],
-      });
-    });
-    const src = map.getSource("columns");
-    if (src == null) return;
-    src.setData({
-      type: "FeatureCollection",
-      features: allColumns ?? [],
-    });
-  }, [mapRef.current, allColumns, mapInitialized]);
-
   useEffect(() => {
     // Get the current value of the map. Useful for gradually moving away
     // from class component
@@ -293,6 +293,7 @@ function CoreMapView(props) {
     runAction({ type: "map-layers-changed", mapLayers });
   }, [filters, mapLayers]);
 
+  // Filters
   useEffect(() => {
     const map = mapRef.current;
     if (map == null || !mapInitialized || !styleLoaded) return;
