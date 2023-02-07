@@ -49,7 +49,8 @@ const Sources = () => h(Suspense, { fallback: h(Spinner) }, h(_Sources));
 const _MapPage = loadable(() => import("./map-interface/map-page"));
 const MapPage = () => h(Suspense, { fallback: h(Spinner) }, h(_MapPage));
 
-const DevMapPage = loadable(() => import("./dev-map"));
+const _DevMapPage = loadable(() => import("./dev-map"));
+const DevMapPage = () => h(Suspense, { fallback: h(Spinner) }, h(_DevMapPage));
 
 const App = () => {
   return h(
@@ -65,7 +66,7 @@ const App = () => {
             h(Route, { path: "/sources", element: h(Sources) }),
             h(Route, {
               path: "/dev/*",
-              element: h(Suspense, { fallback: h(Spinner) }, h(DevMapPage)),
+              element: h(DevMapPage),
             }),
             h(Route, { path: "*", element: h(MapPage) }),
           ]),

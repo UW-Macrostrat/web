@@ -7,19 +7,14 @@ import {
 } from "~/map-interface/app-state";
 import Map from "./map";
 import { enable3DTerrain } from "./terrain";
-import { GeolocateControl } from "mapbox-gl";
 import hyper from "@macrostrat/hyper";
 import { useEffect, useMemo } from "react";
 import useResizeObserver from "use-resize-observer";
 import styles from "../main.module.styl";
 import {
   useMapRef,
-  CompassControl,
-  GlobeControl,
-  ThreeDControl,
   useMapConditionalStyle,
   useMapLabelVisibility,
-  MapControlWrapper,
 } from "@macrostrat/mapbox-react";
 import classNames from "classnames";
 import { debounce } from "underscore";
@@ -110,7 +105,7 @@ async function buildDevMapStyle(baseMapURL) {
   return mergeStyles(style, mapStyle);
 }
 
-async function initializeDevMap(baseMapURL) {
+async function initializeDevMap(baseMapURL, mapPosition) {
   mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
 
   const map = new mapboxgl.Map({
@@ -124,28 +119,104 @@ async function initializeDevMap(baseMapURL) {
     optimizeForTerrain: true,
   });
 
-  map.showTileBoundaries = true;
+  setMapPosition(map, mapPosition);
+  map.showTileBoundaries = false;
 
   return map;
 }
 
 export function DevMapView(props) {
-  const { mapPosition } = props;
+  const {
+    filters,
+    filteredColumns,
+    mapLayers,
+    mapCenter,
+    elevationChartOpen,
+    elevationData,
+    elevationMarkerLocation,
+    mapPosition,
+    infoDrawerOpen,
+  } = useAppState((state) => state.core);
+
+  let mapRef = useMapRef();
+  const mapIsLoading = useAppState((state) => state.core.mapIsLoading);
+  useElevationMarkerLocation(mapRef, elevationMarkerLocation);
+  const { mapUse3D, mapIsRotated } = mapViewInfo(mapPosition);
+  const runAction = useAppActions();
+  const markerRef = useRef(null);
+  const handleMapQuery = useMapQueryHandler(mapRef, markerRef, infoDrawerOpen);
   const isDarkMode = inDarkMode();
-  const baseMapURL = getBaseMapStyle(new Set([]), isDarkMode);
-  const mapRef = useMapRef();
+
+  const baseMapURL = getBaseMapStyle(mapLayers, isDarkMode);
+
+  /* HACK: Right now we need this to force a render when the map
+    is done loading
+    */
+  const [mapInitialized, setMapInitialized] = useState(false);
+  const [styleLoaded, setStyleLoaded] = useState(false);
+
   useEffect(() => {
-    initializeDevMap(baseMapURL).then((map) => {
+    initializeDevMap(baseMapURL, mapPosition).then((map) => {
+      if (!map.isStyleLoaded()) {
+        map.once("style.load", () => {
+          setStyleLoaded(true);
+        });
+      } else {
+        setStyleLoaded(true);
+      }
+
       mapRef.current = map;
+
+      /* Right now we need to reload filters when the map is initialized.
+        Otherwise our (super-legacy and janky) filter system doesn't know
+        to update the map. */
+      //runAction({ type: "set-filters", filters: [...filters] });
+      setMapInitialized(true);
     });
   }, []);
 
-  useEffect(() => {
-    // Set map position from hash if it exists
-    const hash = window.location.hash;
-  }, [mapPosition]);
+  /* If we want to use a high resolution DEM, we need to use a different
+    source ID from the hillshade's source ID. This uses more memory but
+    provides a nicer-looking 3D map.
+    */
 
-  return h(CoreMapView, { props });
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map == null) return;
+    setMapPosition(map, mapPosition);
+  }, [mapRef.current, mapInitialized]);
+
+  // Filters
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map == null || !map?.isStyleLoaded()) return;
+    const expr = getExpressionForFilters(filters);
+
+    map.setFilter("burwell_fill", expr);
+    map.setFilter("burwell_stroke", expr);
+  }, [filters, mapInitialized, styleLoaded]);
+
+  return h(CoreMapView, props, [
+    h(VestigialMap, {
+      filters,
+      filteredColumns,
+      // Recreate the set every time to force a re-render
+      mapLayers,
+      mapCenter,
+      elevationChartOpen,
+      elevationData,
+      elevationMarkerLocation,
+      mapPosition,
+      mapIsLoading,
+      mapIsRotated,
+      onQueryMap: handleMapQuery,
+      mapRef,
+      isDark: isDarkMode,
+      runAction,
+      ...props,
+    }),
+    h.if(mapLayers.has(MapLayer.SOURCES))(MapSourcesLayer),
+  ]);
 }
 
 export default function MainMapView(props) {

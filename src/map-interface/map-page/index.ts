@@ -227,17 +227,50 @@ export function DevMapPage({
   headerElement?: React.ReactElement;
 }) {
   // A stripped-down page for map development
+  const { inputFocus } = useSearchState();
   const runAction = useAppActions();
+  const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
+  const navMenuPage = useAppState((s) => s.menu.activePage);
 
   const ref = useRef<HTMLElement>(null);
 
-  const [isOpen, setOpen] = useState(false);
-  const [showLineSymbols, setShowLineSymbols] = useState(false);
+  const contextPanelOpen = useContextPanelOpen();
+
+  const contextPanelTrans = useTransition(contextPanelOpen || inputFocus, 800);
+  const detailPanelTrans = useTransition(infoDrawerOpen, 800);
+
+  /* We apply a custom style to the panel container when we are interacting
+    with the search bar, so that we can block map interactions until search
+    bar focus is lost.
+    We also apply a custom style when the infodrawer is open so we can hide
+    the search bar on mobile platforms
+  */
+  const className = classNames(
+    {
+      searching: inputFocus,
+      "detail-panel-open": infoDrawerOpen,
+    },
+    `context-panel-${contextPanelTrans.stage}`,
+    `detail-panel-${detailPanelTrans.stage}`
+  );
+
+  const contextClass = useContextClass();
+
+  const onMouseDown = (event) => {
+    if (!(inputFocus || contextPanelOpen)) return;
+    if (ref.current?.contains(event.target)) return;
+
+    runAction({ type: "context-outside-click" });
+    event.stopPropagation();
+  };
 
   const loaded = useSelector((state) => state.core.initialLoadComplete);
   useEffect(() => {
     runAction({ type: "get-initial-map-state" });
   }, []);
+
+  const [isOpen, setOpen] = useState(false);
+  const [showLineSymbols, setShowLineSymbols] = useState(false);
 
   if (!loaded) return h(Spinner);
 
@@ -263,6 +296,7 @@ export function DevMapPage({
             }),
           ]),
         ]),
+        //h(MapView),
         h(DevMapView, { showLineSymbols }),
         h("div.detail-stack.infodrawer-container", [
           h("div.spacer"),
