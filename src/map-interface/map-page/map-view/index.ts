@@ -126,6 +126,7 @@ async function initializeDevMap(baseMapURL, mapPosition) {
 }
 
 export function DevMapView(props) {
+  const { showLineSymbols } = props;
   const { mapPosition } = useAppState((state) => state.core);
 
   let mapRef = useMapRef();
@@ -150,6 +151,8 @@ export function DevMapView(props) {
     if (map == null) return;
     setMapPosition(map, mapPosition);
   }, [mapRef.current, mapInitialized]);
+
+  useMapConditionalStyle(mapRef, showLineSymbols, toggleLineSymbols);
 
   return h(CoreMapView, props);
 }

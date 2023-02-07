@@ -288,9 +288,9 @@ export function DevMapPage({
           ]),
           h.if(isOpen)(PanelCard, [
             h(Switch, {
-              isOn: showLineSymbols,
+              checked: showLineSymbols,
               label: "Show line symbols",
-              onToggle() {
+              onChange() {
                 setShowLineSymbols(!showLineSymbols);
               },
             }),
