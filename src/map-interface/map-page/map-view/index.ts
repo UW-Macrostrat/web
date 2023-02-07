@@ -126,59 +126,24 @@ async function initializeDevMap(baseMapURL, mapPosition) {
 }
 
 export function DevMapView(props) {
-  const {
-    filters,
-    filteredColumns,
-    mapLayers,
-    mapCenter,
-    elevationChartOpen,
-    elevationData,
-    elevationMarkerLocation,
-    mapPosition,
-    infoDrawerOpen,
-  } = useAppState((state) => state.core);
+  const { mapPosition } = useAppState((state) => state.core);
 
   let mapRef = useMapRef();
-  const mapIsLoading = useAppState((state) => state.core.mapIsLoading);
-  useElevationMarkerLocation(mapRef, elevationMarkerLocation);
-  const { mapUse3D, mapIsRotated } = mapViewInfo(mapPosition);
-  const runAction = useAppActions();
-  const markerRef = useRef(null);
-  const handleMapQuery = useMapQueryHandler(mapRef, markerRef, infoDrawerOpen);
   const isDarkMode = inDarkMode();
 
-  const baseMapURL = getBaseMapStyle(mapLayers, isDarkMode);
+  const baseMapURL = getBaseMapStyle(new Set([]), isDarkMode);
 
   /* HACK: Right now we need this to force a render when the map
     is done loading
     */
   const [mapInitialized, setMapInitialized] = useState(false);
-  const [styleLoaded, setStyleLoaded] = useState(false);
 
   useEffect(() => {
     initializeDevMap(baseMapURL, mapPosition).then((map) => {
-      if (!map.isStyleLoaded()) {
-        map.once("style.load", () => {
-          setStyleLoaded(true);
-        });
-      } else {
-        setStyleLoaded(true);
-      }
-
       mapRef.current = map;
-
-      /* Right now we need to reload filters when the map is initialized.
-        Otherwise our (super-legacy and janky) filter system doesn't know
-        to update the map. */
-      //runAction({ type: "set-filters", filters: [...filters] });
       setMapInitialized(true);
     });
   }, []);
-
-  /* If we want to use a high resolution DEM, we need to use a different
-    source ID from the hillshade's source ID. This uses more memory but
-    provides a nicer-looking 3D map.
-    */
 
   useEffect(() => {
     const map = mapRef.current;
@@ -186,37 +151,7 @@ export function DevMapView(props) {
     setMapPosition(map, mapPosition);
   }, [mapRef.current, mapInitialized]);
 
-  // Filters
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null || !map?.isStyleLoaded()) return;
-    const expr = getExpressionForFilters(filters);
-
-    map.setFilter("burwell_fill", expr);
-    map.setFilter("burwell_stroke", expr);
-  }, [filters, mapInitialized, styleLoaded]);
-
-  return h(CoreMapView, props, [
-    h(VestigialMap, {
-      filters,
-      filteredColumns,
-      // Recreate the set every time to force a re-render
-      mapLayers,
-      mapCenter,
-      elevationChartOpen,
-      elevationData,
-      elevationMarkerLocation,
-      mapPosition,
-      mapIsLoading,
-      mapIsRotated,
-      onQueryMap: handleMapQuery,
-      mapRef,
-      isDark: isDarkMode,
-      runAction,
-      ...props,
-    }),
-    h.if(mapLayers.has(MapLayer.SOURCES))(MapSourcesLayer),
-  ]);
+  return h(CoreMapView, props);
 }
 
 export default function MainMapView(props) {
