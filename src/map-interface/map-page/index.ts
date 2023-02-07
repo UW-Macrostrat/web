@@ -2,7 +2,7 @@ import { Suspense } from "react";
 // Import other components
 import hyper from "@macrostrat/hyper";
 import Searchbar, { DevNavbar, LoaderButton } from "../components/navbar";
-import { ButtonGroup, Button, Spinner } from "@blueprintjs/core";
+import { ButtonGroup, Button, Spinner, Switch } from "@blueprintjs/core";
 import { useSelector, useDispatch } from "react-redux";
 import loadable from "@loadable/component";
 import {
@@ -231,9 +231,8 @@ export function DevMapPage({
 
   const ref = useRef<HTMLElement>(null);
 
-  const contextClass = useContextClass();
-
   const [isOpen, setOpen] = useState(false);
+  const [showLineSymbols, setShowLineSymbols] = useState(false);
 
   const loaded = useSelector((state) => state.core.initialLoadComplete);
   useEffect(() => {
@@ -245,7 +244,7 @@ export function DevMapPage({
   return h(MapboxMapProvider, [
     h(MapStyledContainer, { className: "map-page map-dev-page" }, [
       h("div.main-ui", [
-        h("div.context-stack", { className: contextClass, ref }, [
+        h("div.context-stack", { ref }, [
           h(DevNavbar, { className: "searchbar" }, [
             headerElement,
             h("div.spacer"),
@@ -254,9 +253,17 @@ export function DevMapPage({
               onClick: () => setOpen(!isOpen),
             }),
           ]),
-          h.if(isOpen)(PanelCard, "Context panel"),
+          h.if(isOpen)(PanelCard, [
+            h(Switch, {
+              isOn: showLineSymbols,
+              label: "Show line symbols",
+              onToggle() {
+                setShowLineSymbols(!showLineSymbols);
+              },
+            }),
+          ]),
         ]),
-        h(DevMapView),
+        h(DevMapView, { showLineSymbols }),
         h("div.detail-stack.infodrawer-container", [
           h("div.spacer"),
           h(MapBottomControls),

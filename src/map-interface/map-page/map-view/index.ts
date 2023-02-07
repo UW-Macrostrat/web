@@ -103,8 +103,49 @@ async function initializeMap(baseMapURL, mapPosition, infoMarkerPosition) {
   return map;
 }
 
-export function DevMapView() {
-  return h(CoreMapView);
+async function buildDevMapStyle(baseMapURL) {
+  const style = await getMapboxStyle(baseMapURL, {
+    access_token: mapboxgl.accessToken,
+  });
+  return mergeStyles(style, mapStyle);
+}
+
+async function initializeDevMap(baseMapURL) {
+  mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
+
+  const map = new mapboxgl.Map({
+    container: "map",
+    style: await buildDevMapStyle(baseMapURL),
+    maxZoom: 18,
+    //maxTileCacheSize: 0,
+    logoPosition: "bottom-left",
+    trackResize: true,
+    antialias: true,
+    optimizeForTerrain: true,
+  });
+
+  map.showTileBoundaries = true;
+
+  return map;
+}
+
+export function DevMapView(props) {
+  const { mapPosition } = props;
+  const isDarkMode = inDarkMode();
+  const baseMapURL = getBaseMapStyle(new Set([]), isDarkMode);
+  const mapRef = useMapRef();
+  useEffect(() => {
+    initializeDevMap(baseMapURL).then((map) => {
+      mapRef.current = map;
+    });
+  }, []);
+
+  useEffect(() => {
+    // Set map position from hash if it exists
+    const hash = window.location.hash;
+  }, [mapPosition]);
+
+  return h(CoreMapView, { props });
 }
 
 export default function MainMapView(props) {
@@ -118,6 +159,7 @@ export default function MainMapView(props) {
     elevationMarkerLocation,
     mapPosition,
     infoDrawerOpen,
+    infoMarkerPosition,
     mapSettings,
   } = useAppState((state) => state.core);
 
@@ -129,6 +171,46 @@ export default function MainMapView(props) {
   const markerRef = useRef(null);
   const handleMapQuery = useMapQueryHandler(mapRef, markerRef, infoDrawerOpen);
   const isDarkMode = inDarkMode();
+
+  const baseMapURL = getBaseMapStyle(mapLayers, isDarkMode);
+
+  /* HACK: Right now we need this to force a render when the map
+    is done loading
+    */
+  const [mapInitialized, setMapInitialized] = useState(false);
+  const [styleLoaded, setStyleLoaded] = useState(false);
+
+  useEffect(() => {
+    initializeMap(baseMapURL, mapPosition, infoMarkerPosition).then((map) => {
+      if (!map.isStyleLoaded()) {
+        map.once("style.load", () => {
+          setStyleLoaded(true);
+        });
+      } else {
+        setStyleLoaded(true);
+      }
+
+      mapRef.current = map;
+
+      /* Right now we need to reload filters when the map is initialized.
+        Otherwise our (super-legacy and janky) filter system doesn't know
+        to update the map. */
+      //runAction({ type: "set-filters", filters: [...filters] });
+      setMapInitialized(true);
+    });
+  }, []);
+
+  /* If we want to use a high resolution DEM, we need to use a different
+    source ID from the hillshade's source ID. This uses more memory but
+    provides a nicer-looking 3D map.
+    */
+
+  useEffect(() => {
+    if (mapRef.current == null) return;
+    buildMapStyle(baseMapURL).then((style) => {
+      mapRef.current.setStyle(style);
+    });
+  }, [baseMapURL]);
 
   /* Update columns map layer given columns provided by application. */
   const allColumns = useAppState((state) => state.core.allColumns);
@@ -151,7 +233,24 @@ export default function MainMapView(props) {
       type: "FeatureCollection",
       features: allColumns ?? [],
     });
-  }, [mapRef.current, allColumns]);
+  }, [mapRef.current, allColumns, mapInitialized]);
+
+  useEffect(() => {
+    if (mapLayers.has(MapLayer.COLUMNS)) {
+      runAction({ type: "get-filtered-columns" });
+    }
+    runAction({ type: "map-layers-changed", mapLayers });
+  }, [filters, mapLayers]);
+
+  // Filters
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map == null || !map?.isStyleLoaded()) return;
+    const expr = getExpressionForFilters(filters);
+
+    map.setFilter("burwell_fill", expr);
+    map.setFilter("burwell_stroke", expr);
+  }, [filters, mapInitialized, styleLoaded]);
 
   return h(CoreMapView, props, [
     h(VestigialMap, {
@@ -176,29 +275,28 @@ export default function MainMapView(props) {
   ]);
 }
 
-function CoreMapView(props) {
+interface MapViewProps {
+  showLineSymbols?: boolean;
+  children?: React.ReactNode;
+}
+
+function CoreMapView(props: MapViewProps) {
   const { filters, mapLayers, mapPosition, infoDrawerOpen, mapSettings } =
     useAppState((state) => state.core);
 
   const { children } = props;
 
+  // Maybe this shouldn't be global state necessarily...
+  // Could integrate with context...
   const mapIsLoading = useAppState((state) => state.core.mapIsLoading);
 
   const runAction = useAppActions();
-  /* HACK: Right now we need this to force a render when the map
-    is done loading
-    */
-  const [mapInitialized, setMapInitialized] = useState(false);
-  const [styleLoaded, setStyleLoaded] = useState(false);
 
   let mapRef = useMapRef();
 
   const ref = useRef<HTMLDivElement>();
   const parentRef = useRef<HTMLDivElement>();
   const { mapUse3D, mapIsRotated } = mapViewInfo(mapPosition);
-
-  const isDarkMode = inDarkMode();
-  const baseMapURL = getBaseMapStyle(mapLayers, isDarkMode);
 
   const [padding, setPadding] = useState(getMapPadding(ref, parentRef));
   const infoMarkerPosition = useAppState(
@@ -213,49 +311,21 @@ function CoreMapView(props) {
   }, [ref, parentRef]);
 
   useEffect(() => {
-    initializeMap(baseMapURL, mapPosition, infoMarkerPosition).then((map) => {
-      mapRef.current = map;
+    const map = mapRef.current;
+    if (map == null) return;
+    // Update map padding on load
+    updateMapPadding();
+    toggleLineSymbols(map, hasLineSymbols);
+  }, [mapRef.current]);
 
-      if (!map.isStyleLoaded()) {
-        map.once("style.load", () => {
-          setStyleLoaded(true);
-        });
-      } else {
-        setStyleLoaded(true);
-      }
-
-      /* Right now we need to reload filters when the map is initialized.
-         Otherwise our (super-legacy and janky) filter system doesn't know
-         to update the map. */
-      //runAction({ type: "set-filters", filters: [...filters] });
-      setMapInitialized(true);
-      // Update map padding on load
-      updateMapPadding();
-      toggleLineSymbols(map, hasLineSymbols);
-    });
-  }, []);
-
-  /* If we want to use a high resolution DEM, we need to use a different
-    source ID from the hillshade's source ID. This uses more memory but
-    provides a nicer-looking 3D map.
-    */
   const demSourceID = mapSettings.highResolutionTerrain
     ? "mapbox-3d-dem"
     : null;
-
-  useEffect(() => {
-    if (mapRef.current == null) return;
-    buildMapStyle(baseMapURL).then((style) => {
-      mapRef.current.setStyle(style);
-      enable3DTerrain(mapRef.current, mapUse3D, demSourceID);
-    });
-  }, [baseMapURL, demSourceID]);
-
   useEffect(() => {
     const map = mapRef.current;
     if (map == null) return;
     enable3DTerrain(map, mapUse3D, demSourceID);
-  }, [mapRef.current, mapUse3D]);
+  }, [mapRef.current, mapRef.current?.isStyleLoaded(), mapUse3D]);
 
   const markerRef = useRef(null);
   const handleMapQuery = useMapQueryHandler(mapRef, markerRef, infoDrawerOpen);
@@ -284,24 +354,7 @@ function CoreMapView(props) {
     };
     mapMovedCallback();
     map.on("moveend", debounce(mapMovedCallback, 100));
-  }, [mapInitialized]);
-
-  useEffect(() => {
-    if (mapLayers.has(MapLayer.COLUMNS)) {
-      runAction({ type: "get-filtered-columns" });
-    }
-    runAction({ type: "map-layers-changed", mapLayers });
-  }, [filters, mapLayers]);
-
-  // Filters
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null || !mapInitialized || !styleLoaded) return;
-    const expr = getExpressionForFilters(filters);
-
-    map.setFilter("burwell_fill", expr);
-    map.setFilter("burwell_stroke", expr);
-  }, [filters, mapInitialized, styleLoaded]);
+  }, []);
 
   useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));
   useEffect(() => {
