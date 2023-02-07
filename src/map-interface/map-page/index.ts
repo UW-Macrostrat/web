@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 // Import other components
 import hyper from "@macrostrat/hyper";
-import Searchbar, { DevNavbar } from "../components/searchbar";
+import Searchbar, { DevNavbar, LoaderButton } from "../components/navbar";
 import { ButtonGroup, Button, Spinner } from "@blueprintjs/core";
 import { useSelector, useDispatch } from "react-redux";
 import loadable from "@loadable/component";
@@ -19,7 +19,8 @@ import { useContextPanelOpen, useContextClass } from "../app-state";
 import { MapboxMapProvider, ZoomControl } from "@macrostrat/mapbox-react";
 import { DevMapView, MapBottomControls, MapStyledContainer } from "./map-view";
 import { Routes, Route, useParams, useMatch } from "react-router-dom";
-import { MenuPage } from "./menu";
+import { MenuPage, PanelCard } from "./menu";
+import { useState } from "react";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));
@@ -232,6 +233,8 @@ export function DevMapPage({
 
   const contextClass = useContextClass();
 
+  const [isOpen, setOpen] = useState(false);
+
   const loaded = useSelector((state) => state.core.initialLoadComplete);
   useEffect(() => {
     runAction({ type: "get-initial-map-state" });
@@ -243,11 +246,15 @@ export function DevMapPage({
     h(MapStyledContainer, { className: "map-page map-dev-page" }, [
       h("div.main-ui", [
         h("div.context-stack", { className: contextClass, ref }, [
-          h(DevNavbar, { className: "searchbar" }, headerElement),
-          h(Menu, {
-            className: "context-panel",
-            menuPage: MenuPage.LAYERS,
-          }),
+          h(DevNavbar, { className: "searchbar" }, [
+            headerElement,
+            h("div.spacer"),
+            h(LoaderButton, {
+              active: isOpen,
+              onClick: () => setOpen(!isOpen),
+            }),
+          ]),
+          h.if(isOpen)(PanelCard, "Context panel"),
         ]),
         h(DevMapView),
         h("div.detail-stack.infodrawer-container", [

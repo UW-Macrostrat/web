@@ -87,6 +87,21 @@ function SearchResults({ className }) {
   return h(Card, { className }, h(ResultList, { searchResults }));
 }
 
+function LoaderButton({
+  isLoading = false,
+  onClick,
+  active = false,
+  icon = "menu",
+}) {
+  return h(Button, {
+    icon: isLoading ? h(Spinner, { size: 16 }) : icon,
+    large: true,
+    minimal: true,
+    onClick,
+    active: active && !isLoading,
+  });
+}
+
 function MenuButton() {
   const runAction = useAppActions();
   const mapIsLoading = useSelector((state) => state.core.mapIsLoading);
@@ -96,12 +111,11 @@ function MenuButton() {
     runAction({ type: "toggle-menu" });
   }, []);
 
-  return h(Button, {
-    icon: mapIsLoading ? h(Spinner, { size: 16 }) : "menu",
-    large: true,
-    minimal: true,
+  return h(LoaderButton, {
+    icon: "menu",
+    isLoading: mapIsLoading,
     onClick,
-    active: menuOpen && !mapIsLoading,
+    active: menuOpen,
   });
 }
 
@@ -172,4 +186,4 @@ export function DevNavbar({ className, children }) {
 }
 
 export default Searchbar;
-export { SearchResults };
+export { SearchResults, LoaderButton };
