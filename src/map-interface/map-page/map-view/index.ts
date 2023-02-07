@@ -206,6 +206,12 @@ export default function MainMapView(props) {
     */
 
   useEffect(() => {
+    const map = mapRef.current;
+    if (map == null) return;
+    setMapPosition(map, mapPosition);
+  }, [mapRef.current, mapInitialized]);
+
+  useEffect(() => {
     if (mapRef.current == null) return;
     buildMapStyle(baseMapURL).then((style) => {
       mapRef.current.setStyle(style);
@@ -325,7 +331,7 @@ function CoreMapView(props: MapViewProps) {
     const map = mapRef.current;
     if (map == null) return;
     enable3DTerrain(map, mapUse3D, demSourceID);
-  }, [mapRef.current, mapRef.current?.isStyleLoaded(), mapUse3D]);
+  }, [mapRef.current, mapUse3D]);
 
   const markerRef = useRef(null);
   const handleMapQuery = useMapQueryHandler(mapRef, markerRef, infoDrawerOpen);
@@ -354,7 +360,7 @@ function CoreMapView(props: MapViewProps) {
     };
     mapMovedCallback();
     map.on("moveend", debounce(mapMovedCallback, 100));
-  }, []);
+  }, [mapRef.current]);
 
   useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));
   useEffect(() => {
