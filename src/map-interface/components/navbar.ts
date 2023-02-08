@@ -7,7 +7,7 @@ import {
   useContextPanelOpen,
 } from "../app-state";
 import { useSelector } from "react-redux";
-import { FilterPanel } from "./filter-panel";
+import Filters, { FilterPanel } from "./filter-panel";
 import styles from "./searchbar.styl";
 import { PanelSubhead } from "./expansion-panel/headers";
 import classNames from "classnames";
@@ -119,6 +119,29 @@ function MenuButton() {
   });
 }
 
+type AnyChildren = React.ReactNode | React.ReactFragment;
+
+export function FloatingNavbar({
+  className,
+  children,
+  statusElement = null,
+}: {
+  className?: string;
+  children?: AnyChildren;
+  statusElement?: AnyChildren;
+}) {
+  return h("div.searchbar-holder", { className }, [
+    h("div.navbar-holder", [
+      h(Navbar, { className: "searchbar panel" }, children),
+    ]),
+    h.if(statusElement != null)(
+      Card,
+      { className: "status-tongue" },
+      statusElement
+    ),
+  ]);
+}
+
 function Searchbar({ className }) {
   const runAction = useAppActions();
   const { term, searchResults } = useSearchState();
@@ -147,20 +170,15 @@ function Searchbar({ className }) {
     }
   }, [term]);
 
-  return h("div.searchbar-holder", { className }, [
-    h("div.navbar-holder", [
-      h(Navbar, { className: "searchbar panel" }, [
-        h(InputGroup, {
-          large: true,
-          onChange: handleSearchInput,
-          onClick: gainInputFocus,
-          rightElement: h(MenuButton),
-          placeholder: "Search Macrostrat...",
-          value: term,
-        }),
-      ]),
-    ]),
-    h(FilterPanel),
+  return h(FloatingNavbar, { statusElement: h(FilterPanel) }, [
+    h(InputGroup, {
+      large: true,
+      onChange: handleSearchInput,
+      onClick: gainInputFocus,
+      rightElement: h(MenuButton),
+      placeholder: "Search Macrostrat...",
+      value: term,
+    }),
   ]);
 }
 
@@ -173,14 +191,6 @@ function SearchGuidance() {
       h("li", ["Stratigraphic names"]),
       h("li", ["Environments (columns only)"]),
       h("li", ["Places"]),
-    ]),
-  ]);
-}
-
-export function DevNavbar({ className, children }) {
-  return h("div.searchbar-holder", { className }, [
-    h("div.navbar-holder", [
-      h(Navbar, { className: "searchbar panel" }, children),
     ]),
   ]);
 }

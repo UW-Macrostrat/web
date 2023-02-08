@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 // Import other components
 import hyper from "@macrostrat/hyper";
-import Searchbar, { DevNavbar, LoaderButton } from "../components/navbar";
+import Searchbar, { LoaderButton } from "../components/navbar";
 import { ButtonGroup, Button, Spinner, Switch } from "@blueprintjs/core";
 import { useSelector, useDispatch } from "react-redux";
 import loadable from "@loadable/component";
@@ -21,6 +21,7 @@ import { DevMapView, MapBottomControls, MapStyledContainer } from "./map-view";
 import { Routes, Route, useParams, useMatch } from "react-router-dom";
 import { MenuPage, PanelCard } from "./menu";
 import { useState } from "react";
+import { FloatingNavbar } from "../components/navbar";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));
@@ -227,42 +228,14 @@ export function DevMapPage({
   headerElement?: React.ReactElement;
 }) {
   // A stripped-down page for map development
-  const { inputFocus } = useSearchState();
   const runAction = useAppActions();
-  const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
-  const navMenuPage = useAppState((s) => s.menu.activePage);
-
   const ref = useRef<HTMLElement>(null);
-
-  const contextPanelOpen = useContextPanelOpen();
-
-  const contextPanelTrans = useTransition(contextPanelOpen || inputFocus, 800);
-  const detailPanelTrans = useTransition(infoDrawerOpen, 800);
-
   /* We apply a custom style to the panel container when we are interacting
     with the search bar, so that we can block map interactions until search
     bar focus is lost.
     We also apply a custom style when the infodrawer is open so we can hide
     the search bar on mobile platforms
   */
-  const className = classNames(
-    {
-      searching: inputFocus,
-      "detail-panel-open": infoDrawerOpen,
-    },
-    `context-panel-${contextPanelTrans.stage}`,
-    `detail-panel-${detailPanelTrans.stage}`
-  );
-
-  const contextClass = useContextClass();
-
-  const onMouseDown = (event) => {
-    if (!(inputFocus || contextPanelOpen)) return;
-    if (ref.current?.contains(event.target)) return;
-
-    runAction({ type: "context-outside-click" });
-    event.stopPropagation();
-  };
 
   const loaded = useSelector((state) => state.core.initialLoadComplete);
   useEffect(() => {
@@ -279,7 +252,7 @@ export function DevMapPage({
     h(MapStyledContainer, { className: "map-page map-dev-page" }, [
       h("div.main-ui", [
         h("div.context-stack", { ref }, [
-          h(DevNavbar, { className: "searchbar" }, [
+          h(FloatingNavbar, { className: "searchbar" }, [
             headerElement,
             h("div.spacer"),
             h(LoaderButton, {

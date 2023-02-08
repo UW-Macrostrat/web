@@ -110,7 +110,7 @@ function FilterPanel() {
 
   const iconName = open ? "chevron-up" : "chevron-down";
 
-  return h(Card, { className: "filter-tongue" }, [
+  return h([
     h(Admonishments, { admonishments }),
     h.if(filters.length > 0)("div.filters", [
       h("div.filter-name-container", [
