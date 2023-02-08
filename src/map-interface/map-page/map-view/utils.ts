@@ -1,12 +1,9 @@
 import { forwardRef, useRef, useState, useCallback } from "react";
 import {
-  useAppActions,
   useAppState,
   MapLayer,
   PositionFocusState,
 } from "~/map-interface/app-state";
-import Map from "./map";
-import { enable3DTerrain } from "./terrain";
 import { GeolocateControl } from "mapbox-gl";
 import hyper from "@macrostrat/hyper";
 import { useEffect } from "react";
@@ -16,17 +13,12 @@ import {
   CompassControl,
   GlobeControl,
   ThreeDControl,
-  useMapConditionalStyle,
-  useMapLabelVisibility,
   MapControlWrapper,
 } from "@macrostrat/mapbox-react";
 import classNames from "classnames";
-import { debounce } from "underscore";
-import { inDarkMode } from "@macrostrat/ui-components";
 import { mapViewInfo } from "@macrostrat/mapbox-utils";
 import { SETTINGS } from "../../settings";
 import mapboxgl from "mapbox-gl";
-import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
 
 const h = hyper.styled(styles);
 

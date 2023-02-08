@@ -85,20 +85,23 @@ function PositionButton() {
   ]);
 }
 
-export function InfoDrawerHeader(props) {
-  const { mapInfo, onCloseClick } = props;
-  const { elevation } = mapInfo;
+interface InfoDrawerHeaderProps {
+  onClose: () => void;
+  position: mapboxgl.LngLat;
+  zoom?: number;
+  elevation?: number;
+}
 
-  const zoom = useAppState((state) => state.core.mapPosition.target?.zoom);
-  const position = useAppState((state) => state.core.infoMarkerPosition);
+export function InfoDrawerHeader(props: InfoDrawerHeaderProps) {
+  const { onClose, position, zoom = 7, elevation } = props;
 
-  return h("header", [
+  return h("header.location-panel-header", [
     //h("div.left-icon", [h(Icon, { icon: "map-marker" })]),
     h(PositionButton),
     h("div.spacer"),
     h(LngLatCoords, { position, zoom }),
-    h(Elevation, { elevation }),
-    h(Button, { minimal: true, icon: "cross", onClick: onCloseClick }),
+    h.if(elevation != null)(Elevation, { elevation }),
+    h(Button, { minimal: true, icon: "cross", onClick: onClose }),
   ]);
 }
 

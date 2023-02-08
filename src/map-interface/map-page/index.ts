@@ -22,6 +22,9 @@ import { Routes, Route, useParams, useMatch } from "react-router-dom";
 import { MenuPage, PanelCard } from "./menu";
 import { useState } from "react";
 import { FloatingNavbar } from "../components/navbar";
+import { Card } from "@blueprintjs/core";
+import { InfoDrawerHeader } from "../components/info-drawer/header";
+import { LocationPanel } from "../components/info-drawer";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));
@@ -245,8 +248,11 @@ export function DevMapPage({
   const [isOpen, setOpen] = useState(false);
   const [showLineSymbols, setShowLineSymbols] = useState(false);
   const isLoading = useAppState((state) => state.core.mapIsLoading);
-  const [isDetailPanelOpen, setDetailPanelOpen] = useState(false);
 
+  const [inspectPosition, setInspectPosition] =
+    useState<mapboxgl.LngLat | null>(null);
+
+  const isDetailPanelOpen = inspectPosition !== null;
   const detailPanelTrans = useTransition(isDetailPanelOpen, 800);
 
   /* We apply a custom style to the panel container when we are interacting
@@ -263,7 +269,15 @@ export function DevMapPage({
     `detail-panel-${detailPanelTrans.stage}`
   );
 
-  const detailElement = h("h1", "Detail panel");
+  let detailElement = null;
+  if (inspectPosition != null) {
+    detailElement = h(LocationPanel, {
+      onClose() {
+        setInspectPosition(null);
+      },
+      position: inspectPosition,
+    });
+  }
 
   if (!loaded) return h(Spinner);
 
@@ -291,13 +305,17 @@ export function DevMapPage({
           ]),
         ]),
         //h(MapView),
-        h(DevMapView, { showLineSymbols }),
+        h(DevMapView, {
+          showLineSymbols,
+          markerPosition: inspectPosition,
+          setMarkerPosition: setInspectPosition,
+        }),
         h("div.detail-stack.infodrawer-container", [
+          h.if(detailPanelTrans.shouldMount)([detailElement]),
           h("div.spacer"),
           h(MapBottomControls),
         ]),
       ]),
-      h.if(detailPanelTrans.shouldMount)("div.right-panel", detailElement),
     ]),
   ]);
 }

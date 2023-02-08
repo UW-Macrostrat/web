@@ -127,9 +127,8 @@ async function initializeDevMap(baseMapURL, mapPosition) {
 }
 
 export function DevMapView(props) {
-  const { showLineSymbols } = props;
+  const { showLineSymbols, markerPosition, setMarkerPosition } = props;
   const { mapPosition } = useAppState((state) => state.core);
-  const [position, setPosition] = useState(null);
 
   let mapRef = useMapRef();
   const isDarkMode = inDarkMode();
@@ -159,8 +158,8 @@ export function DevMapView(props) {
 
   return h(CoreMapView, null, [
     h(MapMarker, {
-      position,
-      setPosition,
+      position: markerPosition,
+      setPosition: setMarkerPosition,
     }),
   ]);
 }
