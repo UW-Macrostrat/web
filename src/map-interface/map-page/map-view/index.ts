@@ -129,6 +129,7 @@ async function initializeDevMap(baseMapURL, mapPosition) {
 export function DevMapView(props) {
   const { showLineSymbols } = props;
   const { mapPosition } = useAppState((state) => state.core);
+  const [position, setPosition] = useState(null);
 
   let mapRef = useMapRef();
   const isDarkMode = inDarkMode();
@@ -156,7 +157,12 @@ export function DevMapView(props) {
   // This seems to do a bit of a poor job at the moment. Maybe because fo caching?
   useMapConditionalStyle(mapRef, showLineSymbols, toggleLineSymbols);
 
-  return h(CoreMapView, props);
+  return h(CoreMapView, null, [
+    h(MapMarker, {
+      position,
+      setPosition,
+    }),
+  ]);
 }
 
 export default function MainMapView(props) {
@@ -171,7 +177,6 @@ export default function MainMapView(props) {
     mapPosition,
     infoDrawerOpen,
     infoMarkerPosition,
-    mapSettings,
   } = useAppState((state) => state.core);
 
   let mapRef = useMapRef();
@@ -291,6 +296,9 @@ export default function MainMapView(props) {
       runAction,
       ...props,
     }),
+    h(MapMarker, {
+      position: infoMarkerPosition,
+    }),
     h.if(mapLayers.has(MapLayer.SOURCES))(MapSourcesLayer),
   ]);
 }
@@ -347,11 +355,7 @@ function CoreMapView(props: MapViewProps) {
     enable3DTerrain(map, mapUse3D, demSourceID);
   }, [mapRef.current, mapUse3D]);
 
-  const markerRef = useRef(null);
-  const handleMapQuery = useMapQueryHandler(mapRef, markerRef, infoDrawerOpen);
-
   useMapEaseToCenter(padding);
-  useMapMarker(mapRef, markerRef, infoMarkerPosition);
 
   useEffect(() => {
     // Get the current value of the map. Useful for gradually moving away
@@ -361,14 +365,13 @@ function CoreMapView(props: MapViewProps) {
 
     // Update the URI when the map moves
     const mapMovedCallback = () => {
-      const marker = markerRef.current;
       const map = mapRef.current;
 
       runAction({
         type: "map-moved",
         data: {
           mapPosition: getMapPosition(map),
-          infoMarkerFocus: getFocusState(map, marker?.getLngLat()),
+          infoMarkerFocus: getFocusState(map, infoMarkerPosition),
         },
       });
     };
@@ -423,6 +426,36 @@ function CoreMapView(props: MapViewProps) {
     h("div.mapbox-map#map", { ref, className }),
     children,
   ]);
+}
+
+function MapMarker({ position, setPosition, centerMarker = true }) {
+  const mapRef = useMapRef();
+  const markerRef = useRef(null);
+
+  useMapMarker(mapRef, markerRef, position);
+
+  const handleMapClick = useCallback(
+    (event: mapboxgl.MapMouseEvent) => {
+      setPosition(event.lngLat, event);
+      // We should integrate this with the "easeToCenter" hook
+      if (centerMarker) {
+        mapRef.current?.flyTo({ center: event.lngLat, duration: 800 });
+      }
+    }, // eslint-disable-next-line react-hooks/exhaustive-deps
+    [setPosition]
+  );
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map != null && setPosition != null) {
+      map.on("click", handleMapClick);
+    }
+    return () => {
+      map?.off("click", handleMapClick);
+    };
+  }, [mapRef.current, setPosition]);
+
+  return null;
 }
 
 function useMapQueryHandler(

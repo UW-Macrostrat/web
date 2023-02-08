@@ -245,6 +245,25 @@ export function DevMapPage({
   const [isOpen, setOpen] = useState(false);
   const [showLineSymbols, setShowLineSymbols] = useState(false);
   const isLoading = useAppState((state) => state.core.mapIsLoading);
+  const [isDetailPanelOpen, setDetailPanelOpen] = useState(false);
+
+  const detailPanelTrans = useTransition(isDetailPanelOpen, 800);
+
+  /* We apply a custom style to the panel container when we are interacting
+    with the search bar, so that we can block map interactions until search
+    bar focus is lost.
+    We also apply a custom style when the infodrawer is open so we can hide
+    the search bar on mobile platforms
+  */
+  const className = classNames(
+    {
+      "detail-panel-open": isDetailPanelOpen,
+    },
+    //`context-panel-${contextPanelTrans.stage}`,
+    `detail-panel-${detailPanelTrans.stage}`
+  );
+
+  const detailElement = h("h1", "Detail panel");
 
   if (!loaded) return h(Spinner);
 
@@ -278,6 +297,7 @@ export function DevMapPage({
           h(MapBottomControls),
         ]),
       ]),
+      h.if(detailPanelTrans.shouldMount)("div.right-panel", detailElement),
     ]),
   ]);
 }
