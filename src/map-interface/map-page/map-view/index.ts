@@ -29,7 +29,12 @@ import {
   removeMapLabels,
 } from "@macrostrat/mapbox-utils";
 import { getExpressionForFilters } from "./filter-helpers";
-import { MapSourcesLayer, mapStyle, toggleLineSymbols } from "../map-style";
+import {
+  MapSourcesLayer,
+  mapStyle,
+  toggleLineSymbols,
+  xRayStyle,
+} from "../map-style";
 import { SETTINGS } from "../../settings";
 import mapboxgl from "mapbox-gl";
 import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
@@ -103,7 +108,7 @@ async function buildDevMapStyle(baseMapURL) {
   const style = await getMapboxStyle(baseMapURL, {
     access_token: mapboxgl.accessToken,
   });
-  return removeMapLabels(mergeStyles(style, mapStyle));
+  return removeMapLabels(mergeStyles(style, xRayStyle));
 }
 
 async function initializeDevMap(baseMapURL, mapPosition) {
