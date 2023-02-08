@@ -26,6 +26,7 @@ import {
   getMapboxStyle,
   mergeStyles,
   MapPosition,
+  removeMapLabels,
 } from "@macrostrat/mapbox-utils";
 import { getExpressionForFilters } from "./filter-helpers";
 import { MapSourcesLayer, mapStyle, toggleLineSymbols } from "../map-style";
@@ -102,7 +103,7 @@ async function buildDevMapStyle(baseMapURL) {
   const style = await getMapboxStyle(baseMapURL, {
     access_token: mapboxgl.accessToken,
   });
-  return mergeStyles(style, mapStyle);
+  return removeMapLabels(mergeStyles(style, mapStyle));
 }
 
 async function initializeDevMap(baseMapURL, mapPosition) {
@@ -152,6 +153,7 @@ export function DevMapView(props) {
     setMapPosition(map, mapPosition);
   }, [mapRef.current, mapInitialized]);
 
+  // This seems to do a bit of a poor job at the moment. Maybe because fo caching?
   useMapConditionalStyle(mapRef, showLineSymbols, toggleLineSymbols);
 
   return h(CoreMapView, props);
@@ -226,6 +228,9 @@ export default function MainMapView(props) {
       mapRef.current.setStyle(style);
     });
   }, [baseMapURL]);
+
+  // Make map label visibility match the mapLayers state
+  useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));
 
   /* Update columns map layer given columns provided by application. */
   const allColumns = useAppState((state) => state.core.allColumns);
@@ -371,10 +376,18 @@ function CoreMapView(props: MapViewProps) {
     map.on("moveend", debounce(mapMovedCallback, 100));
   }, [mapRef.current]);
 
-  useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));
+  // Map loading state
+  const ignoredSources = ["elevationMarker", "elevationPoints"];
+
   useEffect(() => {
     const map = mapRef.current;
     if (map == null) return;
+
+    map.on("sourcedataloading", (evt) => {
+      if (ignoredSources.includes(evt.sourceId) || mapIsLoading) return;
+      runAction({ type: "map-loading" });
+    });
+
     map.on("idle", () => {
       if (!mapIsLoading) return;
       runAction({ type: "map-idle" });

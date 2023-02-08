@@ -271,6 +271,7 @@ export function DevMapPage({
 
   const [isOpen, setOpen] = useState(false);
   const [showLineSymbols, setShowLineSymbols] = useState(false);
+  const isLoading = useAppState((state) => state.core.mapIsLoading);
 
   if (!loaded) return h(Spinner);
 
@@ -284,6 +285,7 @@ export function DevMapPage({
             h(LoaderButton, {
               active: isOpen,
               onClick: () => setOpen(!isOpen),
+              isLoading,
             }),
           ]),
           h.if(isOpen)(PanelCard, [
