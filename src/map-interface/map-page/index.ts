@@ -280,20 +280,6 @@ export function DevMapPage({
     []
   );
 
-  /* We apply a custom style to the panel container when we are interacting
-    with the search bar, so that we can block map interactions until search
-    bar focus is lost.
-    We also apply a custom style when the infodrawer is open so we can hide
-    the search bar on mobile platforms
-  */
-  const className = classNames(
-    {
-      "detail-panel-open": isDetailPanelOpen,
-    },
-    //`context-panel-${contextPanelTrans.stage}`,
-    `detail-panel-${detailPanelTrans.stage}`
-  );
-
   let detailElement = null;
   if (inspectPosition != null) {
     detailElement = h(
@@ -313,27 +299,26 @@ export function DevMapPage({
   return h(
     MapAreaContainer,
     {
-      contextElement: h([
-        h(FloatingNavbar, { className: "searchbar" }, [
-          headerElement,
-          h("div.spacer"),
-          h(LoaderButton, {
-            active: isOpen,
-            onClick: () => setOpen(!isOpen),
-            isLoading,
-          }),
-        ]),
-        h.if(isOpen)(PanelCard, [
-          h(Switch, {
-            checked: showLineSymbols,
-            label: "Show line symbols",
-            onChange() {
-              setShowLineSymbols(!showLineSymbols);
-            },
-          }),
-        ]),
+      navbar: h(FloatingNavbar, { className: "searchbar" }, [
+        headerElement,
+        h("div.spacer"),
+        h(LoaderButton, {
+          active: isOpen,
+          onClick: () => setOpen(!isOpen),
+          isLoading,
+        }),
       ]),
-      detailElement,
+      contextPanel: h(PanelCard, [
+        h(Switch, {
+          checked: showLineSymbols,
+          label: "Show line symbols",
+          onChange() {
+            setShowLineSymbols(!showLineSymbols);
+          },
+        }),
+      ]),
+      detailPanel: detailElement,
+      contextPanelOpen: isOpen,
     },
     h(DevMapView, {
       showLineSymbols,
@@ -348,21 +333,23 @@ type AnyElement = React.ReactNode | React.ReactElement | React.ReactFragment;
 function MapAreaContainer({
   children,
   className,
-  contextElement,
-  detailElement = null,
+  navbar,
+  contextPanel = null,
+  detailPanel = null,
   detailPanelOpen = true,
   contextPanelOpen = true,
   mapControls = h(MapBottomControls),
 }: {
+  navbar: AnyElement;
   children?: AnyElement;
   mapControls?: AnyElement;
-  contextElement?: AnyElement;
-  detailElement?: AnyElement;
+  contextPanel?: AnyElement;
+  detailPanel?: AnyElement;
   className?: string;
   detailPanelOpen?: boolean;
   contextPanelOpen?: boolean;
 }) {
-  const _detailPanelOpen = detailPanelOpen || detailElement != null;
+  const _detailPanelOpen = detailPanelOpen || detailPanel != null;
   const contextPanelTrans = useTransition(contextPanelOpen, 800);
   const detailPanelTrans = useTransition(_detailPanelOpen, 800);
 
@@ -384,13 +371,16 @@ function MapAreaContainer({
   return h(MapboxMapProvider, [
     h(MapStyledContainer, { className: "map-page map-dev-page" }, [
       h("div.main-ui", { className: _className }, [
-        h("div.context-stack", [contextElement]),
+        h("div.context-stack", [
+          navbar,
+          h.if(contextPanelTrans.shouldMount)([contextPanel]),
+        ]),
         //h(MapView),
         children,
         h("div.detail-stack.infodrawer-container", [
-          h.if(detailPanelTrans.shouldMount)([detailElement]),
+          h.if(detailPanelTrans.shouldMount)([detailPanel]),
           h("div.spacer"),
-          h(MapBottomControls),
+          mapControls,
         ]),
       ]),
     ]),
