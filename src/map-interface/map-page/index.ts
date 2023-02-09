@@ -116,6 +116,11 @@ export const MapPage = ({
   const contextPanelTrans = useTransition(contextPanelOpen || inputFocus, 800);
   const detailPanelTrans = useTransition(infoDrawerOpen, 800);
 
+  const loaded = useSelector((state) => state.core.initialLoadComplete);
+  useEffect(() => {
+    runAction({ type: "get-initial-map-state" });
+  }, []);
+
   /* We apply a custom style to the panel container when we are interacting
     with the search bar, so that we can block map interactions until search
     bar focus is lost.
@@ -140,6 +145,10 @@ export const MapPage = ({
     runAction({ type: "context-outside-click" });
     event.stopPropagation();
   };
+
+  if (!loaded) {
+    return h(Spinner);
+  }
 
   return h(MapboxMapProvider, [
     h(MapStyledContainer, { className: "map-page" }, [
