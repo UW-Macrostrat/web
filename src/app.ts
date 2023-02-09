@@ -43,7 +43,11 @@ const _CesiumExample = loadable(
 );
 
 const CesiumExamplePage = () => {
-  return h(Suspense, { fallback: h(Spinner) }, h(_CesiumExample));
+  return h(
+    Suspense,
+    { fallback: h(Spinner) },
+    h(_CesiumExample, { accessToken: SETTINGS.mapboxAccessToken })
+  );
 };
 
 const GlobeDevPage = () =>

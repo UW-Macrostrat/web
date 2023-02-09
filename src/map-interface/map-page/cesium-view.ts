@@ -40,10 +40,10 @@ const h = hyper.styled(styles);
 const VectorGeologyLayer = ({ enabled = true, ...rest }) => {
   const provider = useRef(
     new VectorProvider({
-      style: buildXRayStyle({}), //coreStyle,
+      style: "mapbox://styles/jczaplewski/ckxeiii3a1jv415o8rxvgqlpd", // buildXRayStyle({}), //coreStyle,
       maximumZoom: 15,
       tileSize: 512,
-      showCanvas: true,
+      showCanvas: false,
       //opacity: 0.5,
       accessToken: SETTINGS.mapboxAccessToken,
     })

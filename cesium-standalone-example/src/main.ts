@@ -11,24 +11,14 @@ import CesiumViewer, {
 } from "@macrostrat/cesium-viewer";
 import "@macrostrat/cesium-viewer/dist/index.css";
 
-const terrainProvider = new TerrainProvider({
-  // @ts-ignore
-  hasVertexNormals: false,
-  hasWaterMask: false,
-  accessToken: process.env.MAPBOX_API_TOKEN,
-  highResolution: false,
-  credit: "Mapbox",
-});
-
 function BaseLayer({ enabled = true, style, accessToken, ...rest }) {
-  console.log(style);
   const provider = useRef(
     new VectorProvider({
       style,
       showCanvas: false,
       maximumZoom: 15,
       tileSize: 512,
-      accessToken: process.env.MAPBOX_API_TOKEN,
+      accessToken,
     })
   );
 
@@ -36,11 +26,21 @@ function BaseLayer({ enabled = true, style, accessToken, ...rest }) {
 }
 
 function CesiumView({ style, accessToken, ...rest }) {
+  const terrainProvider = useRef(
+    new TerrainProvider({
+      hasVertexNormals: false,
+      hasWaterMask: false,
+      accessToken,
+      highResolution: false,
+      credit: "Mapbox",
+    })
+  );
+
   return h(
     CesiumViewer,
     {
-      terrainProvider,
-      displayQuality: DisplayQuality.Ultra,
+      terrainProvider: terrainProvider.current,
+      displayQuality: DisplayQuality.High,
       showInspector: true,
       showIonLogo: false,
       ...rest,
