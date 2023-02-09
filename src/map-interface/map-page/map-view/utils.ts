@@ -19,6 +19,7 @@ import classNames from "classnames";
 import { mapViewInfo } from "@macrostrat/mapbox-utils";
 import { SETTINGS } from "../../settings";
 import mapboxgl from "mapbox-gl";
+import { LinkButton } from "~/map-interface/components/buttons";
 
 const h = hyper.styled(styles);
 
@@ -98,6 +99,7 @@ export function MapBottomControls() {
     h(CompassControl, { className: "compass-control" }),
     h(GlobeControl, { className: "globe-control" }),
     h(GeolocationControl, { className: "geolocation-control" }),
+    h(LinkButton, {className: "show-in-globe", icon: "globe", to: "/globe", small: true}, )
   ]);
 }
 

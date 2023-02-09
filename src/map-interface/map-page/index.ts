@@ -16,7 +16,6 @@ import styles from "./main.module.styl";
 import { useLocation } from "react-router-dom";
 import { usePerformanceWatcher } from "../performance";
 import classNames from "classnames";
-import { useRef, useEffect } from "react";
 import { useTransition } from "transition-hook";
 import { useContextPanelOpen, useContextClass } from "../app-state";
 import { MapboxMapProvider, ZoomControl } from "@macrostrat/mapbox-react";
@@ -27,6 +26,8 @@ import { useState } from "react";
 import { FloatingNavbar } from "../components/navbar";
 import { LocationPanel } from "../components/info-drawer";
 import { useCallback } from "react";
+import { LayoutWaiter } from "../debug";
+import { LinkButton } from "../components/buttons";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));
@@ -139,7 +140,7 @@ export const MapPage = ({
 
   const ref = useRef<HTMLElement>(null);
 
-  const contextPanelOpen = usePanelOpen(baseRoute);
+  const contextPanelOpen = useContextPanelOpen(baseRoute);
   const contextClass = useContextClass(baseRoute);
 
   const contextPanelTrans = useTransition(contextPanelOpen || inputFocus, 800);
@@ -430,6 +431,90 @@ function Features({ features }) {
 }
 
 //const _MapPage = compose(HotkeysProvider, MapPage);
+
+export function GlobePage() {
+  // A stripped-down page for map development
+  const runAction = useAppActions();
+  /* We apply a custom style to the panel container when we are interacting
+    with the search bar, so that we can block map interactions until search
+    bar focus is lost.
+    We also apply a custom style when the infodrawer is open so we can hide
+    the search bar on mobile platforms
+  */
+
+  const [isOpen, setOpen] = useState(false);
+  const [showLineSymbols, setShowLineSymbols] = useState(false);
+  const isLoading = useAppState((state) => state.core.mapIsLoading);
+
+  const [inspectPosition, setInspectPosition] =
+    useState<mapboxgl.LngLat | null>(null);
+
+  const isDetailPanelOpen = inspectPosition !== null;
+  const detailPanelTrans = useTransition(isDetailPanelOpen, 800);
+
+  const [data, setData] = useState(null);
+
+  const loaded = useSelector((state) => state.core.initialLoadComplete);
+  useEffect(() => {
+    runAction({ type: "get-initial-map-state" });
+  }, []);
+
+  /* We apply a custom style to the panel container when we are interacting
+    with the search bar, so that we can block map interactions until search
+    bar focus is lost.
+    We also apply a custom style when the infodrawer is open so we can hide
+    the search bar on mobile platforms
+  */
+  const className = classNames(
+    {
+      "detail-panel-open": isDetailPanelOpen,
+    },
+    //`context-panel-${contextPanelTrans.stage}`,
+    `detail-panel-${detailPanelTrans.stage}`
+  );
+
+  let detailElement = null;
+  if (inspectPosition != null) {
+    detailElement = h(
+      LocationPanel,
+      {
+        onClose() {
+          setInspectPosition(null);
+        },
+        position: inspectPosition,
+      },
+      h(Features, { features: data })
+    );
+  }
+
+  if (!loaded) {
+    return h(Spinner);
+  }
+
+  return h(MapStyledContainer, { className: "map-page" }, [
+    h("div.main-ui", [
+      h("div.context-stack", [
+        h(FloatingNavbar, { className: "searchbar" }, [
+          h("h2", "Globe"),
+          h("div.spacer"),
+          h(LoaderButton, {
+            active: isOpen,
+            onClick: () => setOpen(!isOpen),
+            isLoading,
+          }),
+        ]),
+        h.if(isOpen)(PanelCard, [h(LinkButton, { to: "/" }, "Go to map")]),
+      ]),
+      //h(MapView),
+      h(CesiumView),
+      h("div.detail-stack.infodrawer-container", [
+        h.if(detailPanelTrans.shouldMount)([detailElement]),
+        h("div.spacer"),
+        //h(MapBottomControls),
+      ]),
+    ]),
+  ]);
+}
 
 export { MapBackend };
 export default MapPageRoutes;

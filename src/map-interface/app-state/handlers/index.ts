@@ -32,27 +32,6 @@ async function actionRunner(
 ): Promise<AppAction | void> {
   const coreState = state.core;
   switch (action.type) {
-<<<<<<< HEAD
-    case "get-initial-map-state":
-      return updateStateFromURI(coreState);
-    case "toggle-menu":
-      let pathName = state.router.location.pathname;
-      let baseName = routerBasename;
-      if (!pathName.endsWith("/")) {
-        pathName += "/";
-      }
-      if (pathName.startsWith("/globe/")) {
-        baseName = "/globe/";
-      }
-
-      const isRootRoute = pathName == baseName;
-      const goToLayersPage = push(baseName + "layers" + location.hash);
-      if (state.core.inputFocus) {
-        if (isRootRoute) {
-          dispatch(goToLayersPage);
-        }
-        return { type: "set-input-focus", inputFocus: false };
-=======
     case "get-initial-map-state": {
       const { pathname } = state.router.location;
       let s1 = setInfoMarkerPosition(state);
@@ -73,7 +52,6 @@ async function actionRunner(
       let columns: ColumnGeoJSONRecord[] | null = null;
       if (coreState1.mapLayers.has(MapLayer.COLUMNS)) {
         columns = await fetchAllColumns();
->>>>>>> develop
       }
 
       dispatch({
@@ -112,9 +90,6 @@ async function actionRunner(
       } else {
         return null;
       }
-<<<<<<< HEAD
-      return push(baseName + location.hash);
-=======
     }
     case "toggle-menu": {
       // Push the menu onto the history stack
@@ -151,7 +126,6 @@ async function actionRunner(
       const pathname = routerBasename + (state.menu.activePage ?? "");
       await dispatch(push({ pathname, hash: location.hash }));
       return action;
->>>>>>> develop
     case "fetch-search-query":
       const { term } = action;
       let CancelToken = axios.CancelToken;

@@ -16,8 +16,11 @@ import reducerStack, {
   AppState,
 } from "./map-interface/app-state";
 import { createRouterMiddleware } from "@lagunovsky/redux-react-router";
-import { routerBasename } from "./map-interface/settings";
+import { routerBasename, SETTINGS } from "./map-interface/settings";
 import { DarkModeProvider } from "@macrostrat/ui-components";
+import { GlobePage } from "./map-interface";
+
+import CesiumExample from "cesium-vector-provider-standalone-example";
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
@@ -35,12 +38,20 @@ const _GlobeDevPage = loadable(() =>
   import("./map-interface/map-page/cesium-view").then((d) => d.GlobeDevPage)
 );
 
+const _CesiumExample = loadable(
+  () => import("cesium-vector-provider-standalone-example")
+);
+
+const CesiumExamplePage = () => {
+  return h(
+    Suspense,
+    { fallback: h(Spinner) },
+    h(_CesiumExample, { accessToken: SETTINGS.mapboxAccessToken })
+  );
+};
+
 const GlobeDevPage = () =>
   h(Suspense, { fallback: h(Spinner) }, h(_GlobeDevPage));
-
-function GlobePage() {
-  return h(MapPage, { backend: MapBackend.CESIUM, baseRoute: "/globe/" });
-}
 
 const _SplitMapPage = loadable(() =>
   import("./map-interface/debug").then((d) => d.SplitMapPage)
@@ -72,7 +83,12 @@ const App = () => {
           h(Routes, [
             h(Route, { path: "/sources", element: h(Sources) }),
             h(Route, { path: "/dev/globe", element: h(GlobeDevPage) }),
-            h(Route, { path: "/debug/split-view", element: h(SplitMapPage) }),
+            h(Route, {
+              path: "/dev/cesium-vector-provider",
+              element: h(CesiumExamplePage, {
+                accessToken: SETTINGS.mapboxAccessToken,
+              }),
+            }),
             h(Route, { path: "/globe/*", element: h(GlobePage) }),
             h(Route, {
               path: "/dev/*",
