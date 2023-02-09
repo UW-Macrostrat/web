@@ -16,9 +16,11 @@ import reducerStack, {
   AppState,
 } from "./map-interface/app-state";
 import { createRouterMiddleware } from "@lagunovsky/redux-react-router";
-import { routerBasename } from "./map-interface/settings";
+import { routerBasename, SETTINGS } from "./map-interface/settings";
 import { DarkModeProvider } from "@macrostrat/ui-components";
 import { GlobePage } from "./map-interface";
+
+import CesiumExample from "cesium-vector-provider-standalone-example";
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
@@ -69,7 +71,12 @@ const App = () => {
           h(Routes, [
             h(Route, { path: "/sources", element: h(Sources) }),
             h(Route, { path: "/dev/globe", element: h(GlobeDevPage) }),
-            h(Route, { path: "/debug/split-view", element: h(SplitMapPage) }),
+            h(Route, {
+              path: "/debug/split-view",
+              element: h(CesiumExample, {
+                accessToken: SETTINGS.mapboxAccessToken,
+              }),
+            }),
             h(Route, { path: "/globe/*", element: h(GlobePage) }),
             h(Route, {
               path: "/dev/*",

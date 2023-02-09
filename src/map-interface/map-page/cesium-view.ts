@@ -2,7 +2,7 @@ import hyper from "@macrostrat/hyper";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { MapChangeTracker, MapClickHandler } from "@macrostrat/cesium-viewer";
-import { GeologyLayer } from "@macrostrat/cesium-viewer/src/layers";
+//import { GeologyLayer } from "@macrostrat/cesium-viewer/src/layers";
 import CesiumView, {
   DisplayQuality,
   SatelliteLayer,
@@ -54,12 +54,12 @@ const VectorGeologyLayer = ({ enabled = true, ...rest }) => {
   return h(ImageryLayer, { imageryProvider: provider.current, ...rest });
 };
 
-const _GeologyLayer = ({ visibleMaps = null, ...rest }) => {
-  const hasGeology = useAppState((state) =>
-    state.core.mapLayers.has(MapLayer.BEDROCK)
-  );
-  return h(GeologyLayer, { enabled: true, ...rest });
-};
+// const _GeologyLayer = ({ visibleMaps = null, ...rest }) => {
+//   const hasGeology = useAppState((state) =>
+//     state.core.mapLayers.has(MapLayer.BEDROCK)
+//   );
+//   return h(GeologyLayer, { enabled: true, ...rest });
+// };
 
 function MacrostratSatelliteLayer() {
   const hasSatellite = useAppState((state) =>
