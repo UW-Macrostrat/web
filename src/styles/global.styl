@@ -1,8 +1,10 @@
-@require "./_legacy/colors"
+@require "./_colors";
 
 *
   box-sizing border-box
 
+// Colors taken primarily from blueprintjs v4
+// See https://blueprintjs.com/docs/#core/colors
 :root
   --secondary-color: $gray3
   --tertiary-background: $light-gray5
@@ -11,24 +13,81 @@
   --accent-color: $light-gray3
   --accent-hover-color: $light-gray1
   --accent-border-color: $gray5
+  --panel-background-color: #fff
+  --translucent-panel-background-color: rgba(255,255,255,0.2)
+  --panel-rule-color: #ddd
   --accent-secondary-color: #F5F8FA
   --accent-secondary-hover-color: #EBF1F5
   --main-font: "Source Sans Pro", sans-serif
   --ui-color-accent: rgb(252, 217, 250)
   --ui-color-accent-text: rgb(143, 39, 138)
   --box-horizontal-padding: 0.8em
+  --text-color: #333
+  --text-subtle-color: #444
+  --text-emphasized-color: #000
+  --card-shadow-color: rgba(17, 20, 24, 0.15)
+  --error-text-color: #CD4246
+
 
 html, body
   height 100vh
   height -webkit-fill-available
   overflow hidden
 
-body {
-  color: #333;
+$dark-background = #141a1e
+$accent = lighten($dark-background, 10%)
+$dark-text = $gray4
+
+
+.bp4-input
+  box-shadow: 0 0 0 0 rgba(19, 124, 189, 0), 0 0 0 0 rgba(19, 124, 189, 0), inset 0 0 0 1px rgba(16, 22, 26, 0.15), inset 0 1px 1px rgba(16, 22, 26, 0.2);
+
+.bp4-button
+  color: var(--text-color)
+
+.bp4-control
+  color: var(--text-subtle-color) !important
+
+body
+  color: var(--text-color);
   margin:0;
   padding:0;
-  font-family: var(--main-font);
-}
+  font-family: 'Source Sans Pro', sans-serif;
+  &.bp4-dark
+    color: $dark-text;
+    background-color: $dark-background;
+    --text-color: $dark-text
+    --text-emphasized-color: #fff
+    --text-subtle-color: $gray3
+    --panel-background-color: $dark-background
+    --translucent-panel-background-color: alpha($dark-background, 0.6)
+    --accent-color: $accent // light gray 3
+    --accent-secondary-color: lighten($accent, 0%)
+    --accent-secondary-hover-color: lighten($accent, 5%)
+    --panel-rule-color: #404854
+    --secondary-color: $gray1 // gray3
+    --tertiary-background: lighten($accent, 4%) // light gray 5
+    --tertiary-color: #383E47 // light gray 4
+    --tertiary-border-color: #5F6B7C // gray 5
+    --accent-hover-color: lighten($accent, 4%) // light gray 1
+    --accent-border-color: #5F6B7C // gray5
+    --card-shadow-color: alpha($gray1, 0.4)
+    --ui-color-accent-text: rgb(252, 217, 250)
+    --ui-color-accent: darken(rgb(143, 39, 138), 50%)
+
+    .bp4-card, .bp4-navbar
+      box-shadow 0 0 0 1px var(--card-shadow-color)
+
+    .bp4-input
+      &::placeholder
+        color: var(--secondary-color)
+      box-shadow: 0 0 0 0 alpha($light-gray3, 0), 0 0 0 0 alpha($light-gray3, 0), inset 0 0 0 1px alpha($light-gray1, 0.15), inset 0 1px 1px alpha($light-gray1, 0.2);
+
+.bp4-card, .bp4-navbar
+  border-radius: 4px
+  background-color: var(--panel-background-color) !important
+
+
 body, .main-container {
   height: 100%;
   width: 100%;
@@ -50,9 +109,7 @@ body, .main-container {
   flex-shrink: 0;
   margin-right: 16px;
 }
-.search-results {
-  background-color: #ffffff !important;
-}
+
 .search-input {
   border: none;
   font-size: 16px;
@@ -67,11 +124,11 @@ body, .main-container {
   font-size: 1.1em !important;
   font-weight: bold !important;
   lettering-spacing: 2px !important;
-  color: #333 !important;
+  color: var(--text-color);
   position: sticky;
   top: 0px;
-  background: #fff;
-  border-bottom: 2px solid #ddd;
+  background: var(--panel-background-color);
+  border-bottom: 2px solid var(--panel-rule-color);
   margin:0;
   width: 100%;
   padding-top: 10px
@@ -113,7 +170,7 @@ body, .main-container {
   -webkit-transition: 0.8s;
 	-moz-transition: 0.8s;
 	transition: 0.8s;
-  background-color: #ffffff;
+  background-color: var(--panel-background-color);
   padding: 20px;
   /* height: 100vh; */
 }
@@ -134,18 +191,9 @@ body, .main-container {
 }
 .infodrawer-header {
   float: right;
-  background-color: #ffffff;
+  background-color: var(--panel-background-color);
 }
-.infodrawer-header-item {
-  display: inline-block;
-  font-size: 15px;
-}
-.lnglat-container {
-  margin-right: 15px;
-}
-.lnglat {
-  margin-right: 15px;
-}
+
 .infoDrawer-title {
   font-family: 'Montserrat', sans-serif;
   font-weight: 400;
@@ -265,7 +313,7 @@ body, .main-container {
 .region-group {
   margin-top: -16px;
   font-size: 85%;
-  color: #333;
+  color: var(--secondary-color);
 }
 .region-description {
   margin-top: -5px;
@@ -308,7 +356,7 @@ body, .main-container {
   font-size: 0.8em;
 }
 .searchbar-background {
-  background-color: #ffffff;
+  background-color: var(--panel-background-color);
 }
 .infoDrawer-map-ref {
   float: left;
@@ -356,16 +404,8 @@ body, .main-container {
 .filter-paper {
   border-radius: 0;
 }
-.filter-container {
- 
-  margin-bottom: 5px;
-}
-.filter-tag {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  margin: 5px;
-}
+
+
 
 .searchbar-filter-title {
   font-weight: bold;

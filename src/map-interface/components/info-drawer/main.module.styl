@@ -35,21 +35,13 @@
   flex-direction column
   padding 0
   overflow hidden
-  header
-    padding 5px
-    display flex
-    flex-direction row
-    align-items: center
-    .spacer
-      flex-grow 1
-    .left-icon
-      padding 7px
 
-  .infodrawer-header
-    display flex
-    flex-direction row
-    align-items baseline
-    margin-right 1em
+
+  .infodrawer-header-item
+    margin-left: 0.5em
+    .secondary
+      font-size: 0.9em
+      color: var(--text-subtle-color)
 
   &.loading
     .infodrawer-body
@@ -61,12 +53,32 @@
   // max-height: calc(100vh - 60px)
   // transition: max-height 0.5s ease-in-out 0.25s
 
+.location-panel-header
+  padding 5px
+  display flex
+  flex-direction row
+  align-items: center
+  gap: 0.5em;
+  .spacer
+    flex-grow 1
+  .left-icon
+    padding 7px
+
+  .position-controls :global(.bp4-button)
+    font-size: 12px
+
+
+  .copy-link-button:global(.bp4-minimal.bp4-button)
+    color: var(--text-subtle-color)
+    svg
+      fill: var(--text-subtle-color)
+
 .infodrawer-body
   overflow-y scroll
   flex-shrink 1
   position relative
   min-height: 0
-  transition min-height 0.2s ease
+  transition min-height 0.5s ease
 
 .spacer
   flex-grow 1

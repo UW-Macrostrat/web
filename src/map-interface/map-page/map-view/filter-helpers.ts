@@ -1,197 +1,96 @@
-import { SETTINGS } from "../../Settings";
+import { FeatureCollection, Point } from "geojson";
+import {
+  FilterData,
+  IntervalFilterData,
+} from "~/map-interface/app-state/handlers/filters";
+import { SETTINGS } from "../../settings";
 
-/**
- * Gets the removed or added filters and mutates list
- * @param nextProps
- * @returns void
- */
-function getRemovedOrNewFilters(nextProps, map) {
-  let existingFilters = new Set(
-    map.props.filters.map((f) => {
-      return `${f.category}|${f.type}|${f.name}`;
-    })
-  );
-  let newFilters = new Set(
-    nextProps.filters.map((f) => {
-      return `${f.category}|${f.type}|${f.name}`;
-    })
-  );
+export function getExpressionForFilters(
+  filters: FilterData[]
+): mapboxgl.Expression {
+  // Separate time filters and other filters for different rules
+  // i.e. time filters are <interval> OR <interval> and all others are AND
+  // Keep track of name: index values of time filters for easier removing
+  let expr: mapboxgl.Expression = ["all", ["!=", "color", ""]];
 
-  let incoming = [
-    ...new Set([...newFilters].filter((f) => !existingFilters.has(f))),
-  ];
-  let outgoing = [
-    ...new Set([...existingFilters].filter((f) => !newFilters.has(f))),
-  ];
-
-  // if a filter was removed
-  if (outgoing.length) {
-    switch (outgoing[0].split("|")[0]) {
-      case "interval":
-        var idx = map.timeFiltersIndex[outgoing[0]];
-        map.timeFilters.splice(idx, 1);
-        delete map.timeFiltersIndex[outgoing[0]];
-        break;
-      case "lithology":
-        // Remove it from our lith filter index
-        var idx = map.lithFiltersIndex[outgoing[0]];
-        map.lithFilters.splice(idx, 1);
-        delete map.lithFiltersIndex[outgoing[0]];
-        // Remove it from the general filter index
-        map.filtersIndex[outgoing[0]].reverse().forEach((idx) => {
-          map.filters.splice(idx, 1);
-        });
-        delete map.filtersIndex[outgoing[0]];
-
-        break;
-      case "strat_name":
-        // Remove it from the strat name filter index
-        var idx = map.stratNameFiltersIndex[outgoing[0]];
-        map.stratNameFilters.splice(idx, 1);
-        delete map.stratNameFiltersIndex[outgoing[0]];
-        // Remove it from the general filter index
-        map.filtersIndex[outgoing[0]].reverse().forEach((idx) => {
-          map.filters.splice(idx, 1);
-        });
-        delete map.filtersIndex[outgoing[0]];
-        break;
-    }
+  const timeFilters = filters
+    .filter((f) => f.type === "intervals")
+    .map(buildFilterExpression);
+  if (timeFilters.length > 0) {
+    expr.push(["any", ...timeFilters]);
   }
-  // Otherwise, a filter was added
-  if (incoming.length > 0) {
-    let newFilterString = incoming[0].split("|");
-    let filterToApply = nextProps.filters.filter((f) => {
-      if (
-        f.category === newFilterString[0] &&
-        f.type === newFilterString[1] &&
-        f.name === newFilterString[2]
-      ) {
-        return f;
-      }
-    });
-    if (filterToApply.length === 0) {
-      return false;
-    }
-    filterToApply = filterToApply[0];
 
-    // Check which kind of filter it is
-    switch (filterToApply.type) {
-      case "intervals":
-        map.timeFilters.push([
-          "all",
-          [">", "best_age_bottom", filterToApply.t_age],
-          ["<", "best_age_top", filterToApply.b_age],
-        ]);
-        map.timeFiltersIndex[
-          `${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`
-        ] = map.timeFilters.length - 1;
-        break;
+  const otherFilters = filters
+    .filter((f) => f.type !== "intervals")
+    .map(buildFilterExpression);
+  if (otherFilters.length > 0) {
+    expr.push(["any", ...otherFilters]);
+  }
+  return expr;
+}
 
-      case "lithology_classes":
-        map.lithFilters.push(filterToApply.name);
-        map.lithFiltersIndex[
-          `${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`
-        ] = map.lithFilters.length - 1;
+function buildFilterClasses(
+  type: string,
+  name: string | number
+): mapboxgl.Expression {
+  /* This function implements filtering over numbered classes.
+   It is used to provide filtering over the complex structure created for
+   MVT tiles of the 'carto' style. */
+  let filter: mapboxgl.Expression = ["any"];
+  for (let i = 1; i < 14; i++) {
+    filter.push(["==", `${type}${i}`, name]);
+  }
+  return filter;
+}
 
-        for (let i = 1; i < 14; i++) {
-          map.filters.push(["==", `lith_class${i}`, filterToApply.name]);
-          if (
-            map.filtersIndex[
-              `${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`
-            ]
-          ) {
-            map.filtersIndex[
-              `${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`
-            ].push(map.filters.length - 1);
-          } else {
-            map.filtersIndex[
-              `${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`
-            ] = [map.filters.length - 1];
-          }
-        }
-        break;
-
-      case "lithology_types":
-        map.lithFilters.push(filterToApply.name);
-        map.lithFiltersIndex[
-          `${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`
-        ] = map.lithFilters.length - 1;
-
-        for (let i = 1; i < 14; i++) {
-          map.filters.push(["==", `lith_type${i}`, filterToApply.name]);
-
-          if (
-            map.filtersIndex[
-              `${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`
-            ]
-          ) {
-            map.filtersIndex[
-              `${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`
-            ].push(map.filters.length - 1);
-          } else {
-            map.filtersIndex[
-              `${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`
-            ] = [map.filters.length - 1];
-          }
-        }
-        break;
-
-      case "lithologies":
-      case "all_lithologies":
-      case "all_lithology_types":
-      case "all_lithology_classes":
-        map.lithFilters.push(filterToApply.name);
-        map.lithFiltersIndex[
-          `${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`
-        ] = map.lithFilters.length - 1;
-        map.filters.push(["in", "legend_id", ...filterToApply.legend_ids]);
-        map.filtersIndex[
-          `${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`
-        ] = [map.filters.length - 1];
-        break;
-
-      case "strat_name_orphans":
-      case "strat_name_concepts":
-        map.stratNameFilters.push(filterToApply.name);
-        map.stratNameFiltersIndex[
-          `${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`
-        ] = map.stratNameFilters.length - 1;
-
-        map.filters.push(["in", "legend_id", ...filterToApply.legend_ids]);
-        map.filtersIndex[
-          `${filterToApply.category}|${filterToApply.type}|${filterToApply.name}`
-        ] = [map.filters.length - 1];
-        break;
-    }
+function buildFilterExpression(filter: FilterData): mapboxgl.Expression {
+  // Check which kind of filter it is
+  switch (filter.type) {
+    case "intervals":
+      // These should be added to the timeFilters array
+      // Everything else goes in normal filters
+      return [
+        "all",
+        [">", "best_age_bottom", filter.t_age],
+        ["<", "best_age_top", filter.b_age],
+      ];
+    case "lithology_classes":
+      return buildFilterClasses("lith_class", filter.name ?? filter.id);
+    case "lithology_types":
+      return buildFilterClasses("lith_type", filter.name ?? filter.id);
+    case "lithologies":
+    case "all_lithologies":
+    case "all_lithology_types":
+    case "all_lithology_classes":
+      return ["in", "legend_id", ...filter.legend_ids];
+    case "strat_name_orphans":
+    case "strat_name_concepts":
+      return ["in", "legend_id", ...filter.legend_ids];
   }
 }
 
-/**
- * Helper function for apply function
- * @param map
- * @returns []
- */
-function getToApply(map): (string | string[])[] {
-  let toApply = ["all", ["!=", "color", ""]];
-  if (map.timeFilters.length) {
-    toApply.push(["any", ...map.timeFilters]);
-  }
-  if (map.filters.length) {
-    toApply.push(["any", ...map.filters]);
-  }
-  return toApply;
-}
-
-function PBDBHelper(map, bounds, zoom, maxClusterZoom = 7): void {
+export async function getPBDBData(
+  filters: FilterData[],
+  bounds: mapboxgl.LngLatBounds,
+  zoom: number,
+  maxClusterZoom: number = 7
+): Promise<FeatureCollection<Point, any>> {
   // One for time, one for everything else because
   // time filters require a separate request for each filter
   let timeQuery = [];
   let queryString = [];
 
-  if (map.timeFilters.length) {
-    map.timeFilters.forEach((f) => {
-      timeQuery.push(`max_ma=${f[2][2]}`, `min_ma=${f[1][2]}`);
-    });
+  const timeFilters = filters.filter(
+    (f) => f.type === "intervals"
+  ) as IntervalFilterData[];
+  const stratNameFilters = filters.filter(
+    (f) => f.type === "strat_name_concepts" || f.type === "strat_name_orphans"
+  );
+
+  if (timeFilters.length > 0) {
+    for (const f of timeFilters) {
+      timeQuery.push(`max_ma=${f.b_age}`, `min_ma=${f.t_age}`);
+    }
   }
   // lith filters broken on pbdb (500 error returned)
   // if (map.lithFilters.length) {
@@ -200,8 +99,9 @@ function PBDBHelper(map, bounds, zoom, maxClusterZoom = 7): void {
   //     queryString.push(`lithology=${filters.join(",")}`);
   //   }
   // }
-  if (map.stratNameFilters.length) {
-    queryString.push(`strat=${map.stratNameFilters.join(",")}`);
+  if (stratNameFilters.length > 0) {
+    const names = stratNameFilters.map((f) => f.name);
+    queryString.push(`strat=${names.join(",")}`);
   }
 
   // Define the pbdb cluster level
@@ -229,15 +129,13 @@ function PBDBHelper(map, bounds, zoom, maxClusterZoom = 7): void {
     latMax = Math.min(Math.max(latMax, latMax * 5), 85);
   }
 
-  console.log(latMin, latMax);
-
-  if (map.timeFilters.length && map.timeFilters.length > 1) {
-    urls = map.timeFilters.map((f) => {
+  if (timeFilters.length && timeFilters.length > 1) {
+    urls = timeFilters.map((f) => {
       let url = `${SETTINGS.pbdbDomain}/data1.2/colls/${
         zoom < maxClusterZoom ? "summary" : "list"
       }.json?lngmin=${lngMin}&lngmax=${lngMax}&latmin=${latMin}&latmax=${latMax}&max_ma=${
-        f[2][2]
-      }&min_ma=${f[1][2]}${zoom < maxClusterZoom ? level : ""}`;
+        f.b_age
+      }&min_ma=${f.t_age}${zoom < maxClusterZoom ? level : ""}`;
       if (queryString.length) {
         url += `&${queryString.join("&")}`;
       }
@@ -259,7 +157,7 @@ function PBDBHelper(map, bounds, zoom, maxClusterZoom = 7): void {
   }
 
   // Fetch the data
-  Promise.all(
+  return await Promise.all(
     urls.map((url) => fetch(url).then((response) => response.json()))
   ).then((responses) => {
     // Ignore data that comes with warnings, as it means nothing was
@@ -273,7 +171,7 @@ function PBDBHelper(map, bounds, zoom, maxClusterZoom = 7): void {
         return [...a, ...b];
       }, []);
 
-    map.pbdbPoints = {
+    return {
       type: "FeatureCollection",
       features: data.map((f, i) => {
         return {
@@ -287,27 +185,5 @@ function PBDBHelper(map, bounds, zoom, maxClusterZoom = 7): void {
         };
       }),
     };
-    // Show or hide the proper PBDB layers
-    if (zoom < maxClusterZoom) {
-      map.map.getSource("pbdb-clusters").setData(map.pbdbPoints);
-      map.map.setLayoutProperty("pbdb-clusters", "visibility", "visible");
-      map.map.setLayoutProperty("pbdb-points-clustered", "visibility", "none");
-      //  map.map.setLayoutProperty('pbdb-point-cluster-count', 'visibility', 'none')
-      map.map.setLayoutProperty("pbdb-points", "visibility", "none");
-    } else {
-      map.map.getSource("pbdb-points").setData(map.pbdbPoints);
-
-      //map.map.getSource("pbdb-clusters").setData(map.pbdbPoints);
-      map.map.setLayoutProperty("pbdb-clusters", "visibility", "none");
-      map.map.setLayoutProperty(
-        "pbdb-points-clustered",
-        "visibility",
-        "visible"
-      );
-      //    map.map.setLayoutProperty('pbdb-point-cluster-count', 'visibility', 'visible')
-      // map.map.setLayoutProperty("pbdb-points", "visibility", "visible");
-    }
   });
 }
-
-export { getRemovedOrNewFilters, getToApply, PBDBHelper };

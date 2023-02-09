@@ -16,7 +16,8 @@ import reducerStack, {
   AppState,
 } from "./map-interface/app-state";
 import { createRouterMiddleware } from "@lagunovsky/redux-react-router";
-import { routerBasename } from "./map-interface/Settings";
+import { routerBasename } from "./map-interface/settings";
+import { DarkModeProvider } from "@macrostrat/ui-components";
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
@@ -55,48 +56,44 @@ const _MapPage = loadable(() => import("./map-interface/map-page"));
 const MapPage = (props) =>
   h(Suspense, { fallback: h(Spinner) }, h(_MapPage, props));
 
+const _DevMapPage = loadable(() => import("./dev-map"));
+const DevMapPage = () => h(Suspense, { fallback: h(Spinner) }, h(_DevMapPage));
+
 const App = () => {
   return h(
-    Provider,
-    { store },
+    DarkModeProvider,
     h(
-      ReduxRouter,
-      { basename: routerBasename, store, history: browserHistory },
-      [
-        h(Routes, [
-          h(Route, { path: "/sources", element: h(Sources) }),
-          h(Route, { path: "/dev/globe", element: h(GlobeDevPage) }),
-          h(Route, { path: "/debug/split-view", element: h(SplitMapPage) }),
-          h(Route, { path: "/globe/*", element: h(GlobePage) }),
-          h(Route, { path: "*", element: h(MapPage) }),
-        ]),
+      Provider,
+      { store },
+      h(
+        ReduxRouter,
+        { basename: routerBasename, store, history: browserHistory },
+        [
+          h(Routes, [
+            h(Route, { path: "/sources", element: h(Sources) }),
+            h(Route, { path: "/dev/globe", element: h(GlobeDevPage) }),
+            h(Route, { path: "/debug/split-view", element: h(SplitMapPage) }),
+            h(Route, { path: "/globe/*", element: h(GlobePage) }),
+            h(Route, {
+              path: "/dev/*",
+              element: h(DevMapPage),
+            }),
+            h(Route, { path: "*", element: h(MapPage) }),
+          ]),
 
-        // if (!loaded) return h(Spinner);
-
-        // return h(Router, { basename: MACROSTRAT_BASE_URL }, [
-        //   h("div#app-holder", [
-        //     h(Route, { path: ["/map", "/globe"], component: MapPage }),
-        //     h(Route, { path: "/columns", component: ColumnPage }),
-        //     h(Route, { path: "/dev/globe", component: GlobeDevPage }),
-        //     h(Route, {
-        //       exact: true,
-        //       path: "/",
-        //       render: () => h(Redirect, { to: "/map" }),
-        //     }),
-        //   ]),
-        // ]);
-        // h(Route, {
-        //   path: "/globe",
-        //   component: GlobePage,
-        // }),
-        // h(Route, { path: "/columns", component: ColumnPage }),
-        //h(Route, { path: "/dev/globe", component: GlobeDevPage }),
-        // h(Route, {
-        //   exact: true,
-        //   path: "/",
-        //   render: () => h(Redirect, { to: "/map" }),
-        // }),
-      ]
+          // h(Route, {
+          //   path: "/globe",
+          //   component: GlobePage,
+          // }),
+          // h(Route, { path: "/columns", component: ColumnPage }),
+          //h(Route, { path: "/dev/globe", component: GlobeDevPage }),
+          // h(Route, {
+          //   exact: true,
+          //   path: "/",
+          //   render: () => h(Redirect, { to: "/map" }),
+          // }),
+        ]
+      )
     )
   );
 };

@@ -11,7 +11,6 @@ import { findDOMNode } from "react-dom";
 import h from "@macrostrat/hyper";
 import { ResizeSensor, Button } from "@blueprintjs/core";
 import { geoOrthographic, geoGraticule10, geoPath } from "d3-geo";
-import "d3-jetpack";
 import { select, event } from "d3-selection";
 import { drag } from "d3-drag";
 import { zoom } from "d3-zoom";

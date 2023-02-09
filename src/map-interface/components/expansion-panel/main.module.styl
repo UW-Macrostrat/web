@@ -22,6 +22,9 @@
   .title
     flex-grow 1
 
+// :global(.bp4-dark) .panel-subhead
+//   margin 0 1px
+
 .expansion-panel
   padding 0
   flex-wrap: wrap;
@@ -46,7 +49,7 @@
 
 
   .expansion-panel-header
-    background-color: var(--tertiary-background);
+    background-color: var(--accent-secondary-color);
     cursor pointer
     &:hover
       background-color var(--accent-secondary-hover-color)
@@ -61,14 +64,14 @@
 
 .expansion-summary-title-help
   margin-left 5px;
-  :global(.bp3-icon)
+  :global(.bp4-icon)
     margin-left 5px;
 
 .expansion-panel-header
   cursor pointer
   &:hover
     background-color var(--accent-hover-color)
-  :global(.bp3-icon)
+  :global(.bp4-icon)
     transform: translate(0,3px);
 
 .expansion-children
@@ -113,7 +116,7 @@
   position relative
 
 .expandable-details-toggle
-  :global(.bp3-button)
+  :global(.bp4-button)
     font-size: 10px
 
 .expandable-details

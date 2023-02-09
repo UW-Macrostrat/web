@@ -1,21 +1,33 @@
-import { MapAction, MapLayer, MapState } from "../map";
+import { MapAction, MapLayer, MapState, PositionFocusState } from "../map";
 import { CancelToken } from "axios";
 export * from "../map";
+import { AddFilter, FilterData, Filter } from "../../handlers/filters";
+import { XDDSnippet } from "../../handlers/fetch";
+import {
+  ColumnGeoJSONRecord,
+  ColumnProperties,
+  ColumnSummary,
+} from "../../handlers/columns";
+import { UnitLong } from "@macrostrat/api-types";
+
+export type MapLocation = {
+  lng: number;
+  lat: number;
+};
 
 //////////// Async Actions ///////////////
 type FETCH_SEARCH_QUERY = { type: "fetch-search-query"; term: string };
 type ASYNC_ADD_FILTER = { type: "async-add-filter"; filter: any };
 type GET_FILTERED_COLUMNS = { type: "get-filtered-columns" };
-type FETCH_GDD = { type: "fetch-gdd" };
+type FETCH_XDD = { type: "fetch-xdd" };
 type MAP_QUERY = {
-  type: "map-query";
-  lng: number;
-  lat: number;
+  type: "map-query" | "run-map-query";
   z: string | number;
   map_id: any;
-  column: any;
-};
-type GET_COLUMN = { type: "get-column"; column: any };
+  column: ColumnProperties | null | undefined;
+} & MapLocation;
+
+type GET_COLUMN_UNITS = { type: "get-column-units"; column: ColumnProperties };
 type GET_ELEVATION = { type: "get-elevation"; line: any };
 type GET_PBDB = { type: "get-pbdb"; collection_nos: any };
 // Define constants to be passed with actions
@@ -29,24 +41,22 @@ type CLOSE_INFODRAWER = { type: "close-infodrawer" };
 type TOGGLE_ELEVATION_CHART = { type: "toggle-elevation-chart" };
 
 type TOGGLE_FILTERS = { type: "toggle-filters" };
-type ADD_FILTER = { type: "add-filter"; filter: any };
 type REMOVE_FILTER = { type: "remove-filter"; filter: any };
 type UPDATE_COLUMN_FILTERS = { type: "update-column-filters"; columns: any };
 type CLEAR_FILTERS = { type: "clear-filters" };
+type RecenterQueryMarker = { type: "recenter-query-marker" };
 
 type START_MAP_QUERY = {
   type: "start-map-query";
-  lng: number;
-  lat: number;
   cancelToken: any;
-};
+} & MapLocation;
 type RECEIVED_MAP_QUERY = { type: "received-map-query"; data: any };
 
 type START_COLUMN_QUERY = { type: "start-column-query"; cancelToken: any };
 type RECEIVED_COLUMN_QUERY = {
   type: "received-column-query";
-  data: any;
-  column: any;
+  data: UnitLong[];
+  column: ColumnProperties;
 };
 
 type MAP_LAYERS_CHANGED = {
@@ -54,8 +64,8 @@ type MAP_LAYERS_CHANGED = {
   mapLayers: Set<MapLayer>;
 };
 
-type START_GDD_QUERY = { type: "start-gdd-query"; cancelToken: any };
-type RECEIVED_GDD_QUERY = { type: "received-gdd-query"; data: any };
+type START_XDD_QUERY = { type: "start-xdd-query"; cancelToken: any };
+type RECEIVED_XDD_QUERY = { type: "received-xdd-query"; data: XDDSnippet[] };
 
 type START_PBDB_QUERY = { type: "start-pbdb-query" };
 type RECEIVED_PBDB_QUERY = { type: "received-pbdb-query"; data: any };
@@ -70,6 +80,8 @@ type SET_INPUT_FOCUS = {
 type CONTEXT_OUTSIDE_CLICK = {
   type: "context-outside-click";
 };
+
+type StopSearching = { type: "stop-searching" };
 
 type SET_SEARCH_TERM = {
   type: "set-search-term";
@@ -98,6 +110,35 @@ type SET_ACTIVE_INDEX_MAP = { type: "set-active-index-map" };
 
 type UPDATE_STATE = { type: "update-state"; state: any };
 
+type ToggleHighResolutionTerrain = { type: "toggle-high-resolution-terrain" };
+
+type SetFilters = { type: "set-filters"; filters: FilterData[] };
+
+type Place = {
+  type: "place";
+  name: string;
+  bbox?: [number, number, number, number];
+  center?: [number, number];
+};
+
+type ToggleExperimentsPanel = {
+  type: "toggle-experiments-panel";
+  open?: boolean;
+};
+type GoToExperimentsPanel = { type: "go-to-experiments-panel" };
+
+type SelectSearchResult = {
+  type: "select-search-result";
+  result: Filter | Place;
+};
+
+type SetAllColumns = {
+  type: "set-all-columns";
+  columns: ColumnGeoJSONRecord[];
+};
+
+type GetAllColumns = { type: "get-all-columns" };
+
 export type CoreAction =
   | MAP_LAYERS_CHANGED
   | CLEAR_FILTERS
@@ -105,9 +146,11 @@ export type CoreAction =
   | SET_SEARCH_TERM
   | GET_PBDB
   | GET_ELEVATION
-  | GET_COLUMN
+  | GET_COLUMN_UNITS
   | MAP_QUERY
-  | FETCH_GDD
+  | FETCH_XDD
+  | START_XDD_QUERY
+  | RECEIVED_XDD_QUERY
   | UPDATE_STATE
   | GET_FILTERED_COLUMNS
   | ASYNC_ADD_FILTER
@@ -121,15 +164,12 @@ export type CoreAction =
   | CLOSE_INFODRAWER
   | TOGGLE_ELEVATION_CHART
   | TOGGLE_FILTERS
-  | ADD_FILTER
   | REMOVE_FILTER
   | UPDATE_COLUMN_FILTERS
   | START_MAP_QUERY
   | RECEIVED_MAP_QUERY
   | START_COLUMN_QUERY
   | RECEIVED_COLUMN_QUERY
-  | START_GDD_QUERY
-  | RECEIVED_GDD_QUERY
   | START_PBDB_QUERY
   | RECEIVED_PBDB_QUERY
   | RESET_PBDB
@@ -140,29 +180,45 @@ export type CoreAction =
   | RECEIVED_ELEVATION_QUERY
   | UPDATE_ELEVATION_MARKER
   | SET_ACTIVE_INDEX_MAP
-  | MapAction;
+  | MapAction
+  | RecenterQueryMarker
+  | ToggleHighResolutionTerrain
+  | AddFilter
+  | SetFilters
+  | StopSearching
+  | SelectSearchResult
+  | ToggleExperimentsPanel
+  | GoToExperimentsPanel
+  | GetAllColumns
+  | SetAllColumns;
 
 interface AsyncRequestState {
   // Events and tokens for xhr
   // NOTE: we should really improve some of this token infrastructure
   fetchingMapInfo: boolean;
   fetchingColumnInfo: boolean;
-  fetchingGdd: boolean;
+  fetchingXdd: boolean;
+  xddCancelToken: CancelToken | null;
   isSearching: boolean;
   term: string;
   fetchingElevation: boolean;
   fetchingPbdb: boolean;
   mapInfoCancelToken: CancelToken | null;
   columnInfoCancelToken: CancelToken | null;
-  gddCancelToken: CancelToken | null;
   searchCancelToken: CancelToken | null;
   elevationCancelToken: CancelToken | null;
+  allColumnsCancelToken: CancelToken | null;
 }
 
 interface MapCenterInfo {
   type: string;
   [key: string]: any;
 }
+
+interface MapSettings {
+  highResolutionTerrain: boolean;
+}
+
 export interface CoreState extends MapState, AsyncRequestState {
   initialLoadComplete: boolean;
   contextPanelOpen: boolean;
@@ -171,12 +227,13 @@ export interface CoreState extends MapState, AsyncRequestState {
   infoDrawerOpen: boolean;
   infoDrawerExpanded: boolean;
   isFetching: boolean;
-  elevationChartOpen: false;
-  infoMarkerLng: number;
-  infoMarkerLat: number;
+  elevationChartOpen: boolean;
+  infoMarkerPosition: { lat: number; lng: number } | null;
+  infoMarkerFocus: PositionFocusState | null;
   mapInfo: any[];
-  columnInfo: object;
-  gddInfo: any[];
+  mapSettings: MapSettings;
+  columnInfo: ColumnSummary | null;
+  xddInfo: XDDSnippet[];
   searchResults: any;
   elevationData: any;
   inputFocus: boolean;
@@ -185,7 +242,9 @@ export interface CoreState extends MapState, AsyncRequestState {
   mapCenter: MapCenterInfo;
   mapUse3D: boolean;
   filtersOpen: boolean;
-  filters: any[];
+  filters: FilterData[];
   filteredColumns: object;
+  showExperimentsPanel: boolean;
+  allColumns: ColumnGeoJSONRecord[] | null;
   data: [];
 }

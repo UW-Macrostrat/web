@@ -1,9 +1,13 @@
 import { useCallback, useRef, useEffect } from "react";
 import { Navbar, Button, InputGroup, Spinner, Card } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
-import { useAppActions, useSearchState, usePanelOpen } from "../app-state";
+import {
+  useAppActions,
+  useSearchState,
+  useContextPanelOpen,
+} from "../app-state";
 import { useSelector } from "react-redux";
-import { SubtleFilterText } from "./filters-panel";
+import Filters, { FilterPanel } from "./filter-panel";
 import styles from "./searchbar.styl";
 import { PanelSubhead } from "./expansion-panel/headers";
 import classNames from "classnames";
@@ -30,7 +34,7 @@ function ResultList({ searchResults }) {
   const runAction = useAppActions();
   const onSelectResult = useCallback(
     (f) => {
-      runAction({ type: "async-add-filter", filter: f });
+      runAction({ type: "select-search-result", result: f });
     },
     [runAction]
   );
@@ -83,38 +87,82 @@ function SearchResults({ className }) {
   return h(Card, { className }, h(ResultList, { searchResults }));
 }
 
-function MenuButton({baseRoute}) {
-  const runAction = useAppActions();
-  const mapIsLoading = useSelector((state) => state.core.mapIsLoading);
-  const menuOpen = usePanelOpen(baseRoute);
-
+function LoaderButton({
+  isLoading = false,
+  onClick,
+  active = false,
+  icon = "menu",
+}) {
   return h(Button, {
-    icon: mapIsLoading ? h(Spinner, { size: 16 }) : "menu",
+    icon: isLoading ? h(Spinner, { size: 16 }) : icon,
     large: true,
     minimal: true,
-    onClick() {
-      runAction({ type: "toggle-menu" });
-    },
-    //"aria-label": "Menu",
-    active: menuOpen && !mapIsLoading,
+    onClick,
+    active: active && !isLoading,
   });
 }
 
-function Searchbar({ className, baseRoute }) {
+function MenuButton() {
+  const runAction = useAppActions();
+  const mapIsLoading = useSelector((state) => state.core.mapIsLoading);
+  const menuOpen = useContextPanelOpen();
+
+  const onClick = useCallback(() => {
+    runAction({ type: "toggle-menu" });
+  }, []);
+
+  return h(LoaderButton, {
+    icon: "menu",
+    isLoading: mapIsLoading,
+    onClick,
+    active: menuOpen,
+  });
+}
+
+type AnyChildren = React.ReactNode | React.ReactFragment;
+
+export function FloatingNavbar({
+  className,
+  children,
+  statusElement = null,
+}: {
+  className?: string;
+  children?: AnyChildren;
+  statusElement?: AnyChildren;
+}) {
+  return h("div.searchbar-holder", { className }, [
+    h("div.navbar-holder", [
+      h(Navbar, { className: "searchbar panel" }, children),
+    ]),
+    h.if(statusElement != null)(
+      Card,
+      { className: "status-tongue" },
+      statusElement
+    ),
+  ]);
+}
+
+function Searchbar({ className }) {
   const runAction = useAppActions();
   const { term, searchResults } = useSearchState();
 
-  const gainInputFocus = (e) => {
-    runAction({ type: "set-input-focus", inputFocus: true });
-  };
+  const gainInputFocus = useCallback(
+    (e) => {
+      runAction({ type: "set-input-focus", inputFocus: true });
+    },
+    [runAction]
+  );
 
-  const handleSearchInput = (event) => {
-    runAction({ type: "set-search-term", term: event.target.value });
-    if (event.target.value.length <= 2) {
-      return;
-    }
-    runAction({ type: "fetch-search-query", term: term });
-  };
+  const handleSearchInput = useCallback(
+    (event) => {
+      runAction({ type: "set-search-term", term: event.target.value });
+      if (event.target.value.length <= 2) {
+        return;
+      }
+      runAction({ type: "fetch-search-query", term: term });
+    },
+    [runAction]
+  );
 
   useEffect(() => {
     if (term == "" && searchResults != null) {
@@ -122,25 +170,20 @@ function Searchbar({ className, baseRoute }) {
     }
   }, [term]);
 
-  return h("div.searchbar-holder", { className }, [
-    h("div.navbar-holder", [
-      h(Navbar, { className: "searchbar panel" }, [
-        h(InputGroup, {
-          large: true,
-          onChange: handleSearchInput,
-          onClick: gainInputFocus,
-          rightElement: h(MenuButton, {baseRoute}),
-          placeholder: "Search Macrostrat...",
-          value: term,
-        }),
-      ]),
-    ]),
-    h(SubtleFilterText),
+  return h(FloatingNavbar, { statusElement: h(FilterPanel) }, [
+    h(InputGroup, {
+      large: true,
+      onChange: handleSearchInput,
+      onClick: gainInputFocus,
+      rightElement: h(MenuButton),
+      placeholder: "Search Macrostrat...",
+      value: term,
+    }),
   ]);
 }
 
 function SearchGuidance() {
-  return h("div.search-guidance.bp3-text", [
+  return h("div.search-guidance.bp4-text", [
     h("h3", ["Available categories"]),
     h("ul", [
       h("li", ["Time intervals"]),
@@ -153,4 +196,4 @@ function SearchGuidance() {
 }
 
 export default Searchbar;
-export { SearchResults };
+export { SearchResults, LoaderButton };

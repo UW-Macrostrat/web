@@ -1,9 +1,9 @@
-import { updateURI } from "../../helpers";
-import { sum, timescale } from "../../../utils";
 import { MapBackend, MapLayer } from "../map";
-import { CoreState, CoreAction } from "./actions";
+import { CoreState, CoreAction } from "./types";
 import update, { Spec } from "immutability-helper";
-export * from "./actions";
+import { FilterData } from "../../handlers/filters";
+import { assembleColumnSummary } from "../../handlers/columns";
+export * from "./types";
 
 const classColors = {
   sedimentary: "#FF8C00",
@@ -20,21 +20,29 @@ const classColors = {
 const defaultState: CoreState = {
   initialLoadComplete: false,
   contextPanelOpen: false,
+  allColumns: null,
+  allColumnsCancelToken: null,
   menuOpen: false,
   aboutOpen: false,
   infoDrawerOpen: false,
   infoDrawerExpanded: false,
+  infoMarkerPosition: null,
+  infoMarkerFocus: null,
   elevationChartOpen: false,
   mapBackend: MapBackend.MAPBOX,
-  mapLayers: new Set([MapLayer.BEDROCK, MapLayer.LINES]),
+  mapLayers: new Set([MapLayer.BEDROCK, MapLayer.LINES, MapLayer.LABELS]),
+  mapSettings: {
+    highResolutionTerrain: true,
+  },
   // Events and tokens for xhr
   isFetching: false,
   fetchingMapInfo: false,
   mapInfoCancelToken: null,
   fetchingColumnInfo: false,
   columnInfoCancelToken: null,
-  fetchingGdd: false,
-  gddCancelToken: null,
+  fetchingXdd: false,
+  xddCancelToken: null,
+  xddInfo: [],
   isSearching: false,
   inputFocus: false,
   term: "",
@@ -42,11 +50,8 @@ const defaultState: CoreState = {
   fetchingElevation: false,
   elevationCancelToken: null,
   fetchingPbdb: false,
-  infoMarkerLng: -999,
-  infoMarkerLat: -999,
   mapInfo: [],
-  columnInfo: {},
-  gddInfo: [],
+  columnInfo: null,
   searchResults: null,
   elevationData: [],
   elevationMarkerLocation: [],
@@ -56,12 +61,11 @@ const defaultState: CoreState = {
     type: null,
   },
   mapUse3D: false,
-  mapShowLabels: true,
-  mapShowLineSymbols: false,
   filtersOpen: false,
   filters: [],
   filteredColumns: {},
   data: [],
+  showExperimentsPanel: false,
   mapPosition: {
     camera: {
       lng: 23,
@@ -76,8 +80,14 @@ export function coreReducer(
   action: CoreAction
 ): CoreState {
   switch (action.type) {
+<<<<<<< HEAD:src/map-interface/app-state/sections/core/index.ts
     case "set-map-backend":
       return updateURI({ ...state, mapBackend: action.backend });
+=======
+    case "set-map-backend": {
+      return { ...state, mapBackend: action.backend };
+    }
+>>>>>>> develop:src/map-interface/app-state/reducers/core/index.ts
     case "map-loading":
       if (state.mapIsLoading) return state;
       return { ...state, mapIsLoading: true };
@@ -87,7 +97,7 @@ export function coreReducer(
     case "map-layers-changed":
       let columnInfo = state.columnInfo;
       let pbdbData = state.pbdbData;
-      if (!action.mapLayers.has(MapLayer.COLUMNS)) columnInfo = [];
+      if (!action.mapLayers.has(MapLayer.COLUMNS)) columnInfo = null;
       if (!action.mapLayers.has(MapLayer.FOSSILS)) pbdbData = [];
       return {
         ...state,
@@ -104,6 +114,7 @@ export function coreReducer(
         isSearching: false,
         inputFocus: false,
       };
+    case "stop-searching":
     case "context-outside-click":
       if (state.inputFocus) {
         return {
@@ -117,86 +128,45 @@ export function coreReducer(
       return state;
     case "toggle-about":
       return { ...state, aboutOpen: !state.aboutOpen };
+    case "toggle-experiments-panel":
+      return {
+        ...state,
+        showExperimentsPanel: action.open ?? !state.showExperimentsPanel,
+      };
     case "close-infodrawer":
       return {
         ...state,
         infoDrawerOpen: false,
+        infoMarkerPosition: null,
         columnInfo: {},
       };
     case "expand-infodrawer":
       return { ...state, infoDrawerExpanded: !state.infoDrawerExpanded };
-
     case "toggle-filters":
       // rework this to open menu panel
       return { ...state, filtersOpen: !state.filtersOpen };
-    case "toggle-labels":
-      return { ...state, mapShowLabels: !state.mapShowLabels };
-    case "toggle-line-symbols":
-      return { ...state, mapShowLineSymbols: !state.mapShowLineSymbols };
     case "add-filter":
-      let alreadyHasFiter = false;
-      state.filters.forEach((filter) => {
-        if (
-          filter.name === action.filter.name &&
-          filter.type === action.filter.type
-        ) {
-          alreadyHasFiter = true;
-        }
-      });
-      let fs = state.filters;
-      // if incoming is 'all', remove non-'all' version
-      if (action.filter.type.substr(0, 4) === "all_") {
-        fs = fs.filter((f) => {
-          if (
-            f.type === action.filter.type.replace("all_", "") &&
-            f.id === action.filter.id &&
-            f.name === action.filter.name
-          ) {
-            // do nothing
-          } else {
-            return f;
-          }
-        });
-      }
-      // if incoming is NOT 'all', remove the 'all' version
-      else {
-        fs = fs.filter((f) => {
-          if (
-            f.type === `all_${action.filter.type}` &&
-            f.id === action.filter.id &&
-            f.name === action.filter.name
-          ) {
-            // do nothing
-          } else {
-            return f;
-          }
-        });
-      }
-      if (!alreadyHasFiter) {
-        fs = fs.concat([action.filter]);
-      }
       // action.filter.type and action.filter.id go to the URI
       // handle search resetting
-      return updateURI({
+      return {
+        ...coreReducer(state, { type: "stop-searching" }),
+        filters: buildFilters(state.filters, [action.filter]),
+      };
+    case "set-filters":
+      /* Set multiple filters at once, usually on app load. */
+      return {
         ...state,
-        filters: fs,
-        term: "",
-        isSearching: false,
-        searchResults: null,
-        searchCancelToken: null,
-        inputFocus: false,
-        // We have to do a lot of extra work to manage this context panel state
-        contextPanelOpen: state.menuOpen,
-      });
+        filters: buildFilters(state.filters, action.filters),
+      };
     case "remove-filter":
-      return updateURI({
+      return {
         ...state,
         filters: state.filters.filter((d) => {
           if (d.name != action.filter.name) return d;
         }),
-      });
+      };
     case "clear-filters":
-      return updateURI({ ...state, filters: [] });
+      return { ...state, filters: [] };
     case "start-map-query":
       // if (state.inputFocus) {
       //   return { ...state, inputFocus: false };
@@ -206,11 +176,22 @@ export function coreReducer(
       }
       return {
         ...state,
-        infoMarkerLng: action.lng.toFixed(4),
-        infoMarkerLat: action.lat.toFixed(4),
+        infoMarkerPosition: {
+          lng: action.lng,
+          lat: action.lat,
+        },
+        infoMarkerFocus: null,
         fetchingMapInfo: true,
         infoDrawerOpen: true,
         mapInfoCancelToken: action.cancelToken,
+      };
+    case "recenter-query-marker":
+      const pos = state.infoMarkerPosition;
+      if (pos == null) return state;
+      return {
+        ...state,
+        infoMarkerPosition: { ...pos },
+        infoMarkerFocus: null,
       };
     case "received-map-query":
       if (action.data && action.data.mapData) {
@@ -281,103 +262,29 @@ export function coreReducer(
       return {
         ...state,
         fetchingColumnInfo: true,
+        columnInfo: null,
         columnInfoCancelToken: action.cancelToken,
       };
 
+    case "set-all-columns":
+      return { ...state, allColumns: action.columns };
+
     case "received-column-query":
       // summarize units
-      let columnTimescale = timescale.slice().map((d) => {
-        d.intersectingUnits = 0;
-        d.intersectingUnitIds = [];
-        return d;
-      });
-
-      let columnSummary = {
-        ...action.column,
-        max_thick: sum(action.data, "max_thick"),
-        min_thick: sum(action.data, "min_thick"),
-        pbdb_collections: sum(action.data, "pbdb_collections"),
-        pbdb_occs: sum(action.data, "pbdb_occurrences"),
-        b_age: Math.max(
-          ...action.data.map((d) => {
-            return d.b_age;
-          })
-        ),
-        t_age: Math.min(
-          ...action.data.map((d) => {
-            return d.t_age;
-          })
-        ),
-        area: action.data.length ? parseInt(action.data[0].col_area) : 0,
-      };
-
-      for (let i = 0; i < action.data.length; i++) {
-        action.data[i].intersectingUnits = 0;
-        action.data[i].intersectingUnitIds = [];
-        for (let j = 0; j < action.data.length; j++) {
-          if (
-            // unit *contains* unit
-            ((action.data[i].t_age < action.data[j].b_age &&
-              action.data[j].t_age < action.data[i].b_age) ||
-              // units share t and b age
-              (action.data[i].t_age === action.data[j].t_age &&
-                action.data[i].b_age === action.data[j].b_age) ||
-              // units share t_age, but not b_age
-              (action.data[i].t_age === action.data[j].t_age &&
-                action.data[i].b_age <= action.data[j].b_age) ||
-              // units share b_age, but not t_age
-              (action.data[i].b_age === action.data[j].b_age &&
-                action.data[i].t_age >= action.data[j].t_age)) &&
-            action.data[i].unit_id != action.data[j].unit_id
-          ) {
-            action.data[i].intersectingUnits += 1;
-            action.data[i].intersectingUnitIds.push(action.data[j].unit_id);
-          }
-        }
-
-        for (let j = 0; j < columnTimescale.length; j++) {
-          // Need to explicitly overlap, not
-          if (
-            // interval *contains* unit
-            (action.data[i].t_age < columnTimescale[j].b_age &&
-              columnTimescale[j].t_age < action.data[i].b_age) ||
-            // interval and unit share t and b age
-            (action.data[i].t_age === columnTimescale[j].t_age &&
-              action.data[i].b_age === columnTimescale[j].b_age) ||
-            // interval and unit share t_age, but not b_age
-            (action.data[i].t_age === columnTimescale[j].t_age &&
-              action.data[i].b_age <= columnTimescale[j].b_age) ||
-            // interval and unit share b_age, but not t_age
-            (action.data[i].b_age === columnTimescale[j].b_age &&
-              action.data[i].t_age >= columnTimescale[j].t_age)
-          ) {
-            columnTimescale[j].intersectingUnitIds.push(action.data[i].unit_id);
-          }
-        }
+      if (state.allColumns == null || state.allColumns.length == 0) {
+        return state;
       }
-
-      let unitIdx = {};
-      action.data.forEach((unit) => {
-        unitIdx[unit["unit_id"]] = unit;
-        unitIdx[unit["unit_id"]]["drawn"] = false;
-      });
-
-      columnTimescale = columnTimescale.filter((d) => {
-        if (d.intersectingUnits.length > 0) {
-          return d;
-        }
-      });
-      columnSummary["timescale"] = columnTimescale;
-      columnSummary["units"] = action.data;
-      columnSummary["unitIdx"] = unitIdx;
-
-      return { ...state, fetchingColumnInfo: false, columnInfo: columnSummary };
+      return {
+        ...state,
+        fetchingColumnInfo: false,
+        columnInfo: assembleColumnSummary(action.column, action.data),
+      };
     case "toggle-map-layer":
       const op = state.mapLayers.has(action.layer) ? "$remove" : "$add";
       const mapLayers: Spec<Set<MapLayer>, any> = {
         [op]: [action.layer],
       };
-      return updateURI(update(state, { mapLayers }));
+      return update(state, { mapLayers });
     case "toggle-map-3d":
       return { ...state, mapUse3D: !state.mapUse3D };
     case "toggle-elevation-chart":
@@ -416,21 +323,23 @@ export function coreReducer(
         searchCancelToken: null,
       };
 
-    case "start-gdd-query":
+    case "start-xdd-query":
       // When a search is requested, cancel any pending requests first
-      if (state.gddCancelToken) {
-        state.gddCancelToken.cancel();
+      if (state.xddCancelToken) {
+        state.xddCancelToken.cancel();
       }
       return {
         ...state,
-        fetchingGdd: true,
-        gddCancelToken: action.cancelToken,
+        fetchingXdd: true,
+        xddCancelToken: action.cancelToken,
       };
-    case "received-gdd-query":
+    case "received-xdd-query":
       let parsed = {
         journals: [],
       };
       let articles = {};
+
+      console.log(action.data);
 
       for (let i = 0; i < action.data.length; i++) {
         let found = false;
@@ -457,9 +366,9 @@ export function coreReducer(
 
       return {
         ...state,
-        fetchingGdd: false,
-        gddInfo: parsed.journals,
-        gddCancelToken: null,
+        fetchingXdd: false,
+        xddInfo: action.data,
+        xddCancelToken: null,
       };
 
     // Handle elevation
@@ -502,12 +411,11 @@ export function coreReducer(
       return { ...state, pbdbData: [] };
     case "go-to-place":
       return {
-        ...state,
+        ...coreReducer(state, { type: "set-input-focus", inputFocus: false }),
         mapCenter: {
           type: "place",
           place: action.place,
         },
-        isSearching: false,
       };
     case "update-column-filters":
       return {
@@ -519,18 +427,39 @@ export function coreReducer(
     case "recieve-data":
       return { ...state, isFetching: false, data: action.data };
     case "map-moved":
-      return updateURI({ ...state, mapPosition: action.data });
-    case "update-state":
-      return action.state;
-    case "got-initial-map-state":
-      const newState = {
+      return {
         ...state,
         ...action.data,
-        initialLoadComplete: true,
       };
-      // This causes some hilarious problems...
-      return updateURI(newState);
+    case "toggle-high-resolution-terrain":
+      return update(state, {
+        mapSettings: { $toggle: ["highResolutionTerrain"] },
+      });
     default:
       return state;
   }
+}
+
+function isTheSame(f: FilterData, newFilter: FilterData) {
+  return (
+    f.name === newFilter.name &&
+    f.type === newFilter.type &&
+    f.id === newFilter.id
+  );
+}
+
+function isOverlappingType(f1: FilterData, f2: FilterData) {
+  /* Check if the filter is the same type or including all_ */
+  const t1 = f1.type.startsWith("all_") ? f1.type.replace("all_", "") : f1.type;
+  const t2 = f2.type.startsWith("all_") ? f2.type.replace("all_", "") : f2.type;
+  return f1.name === f2.name && t1 === t2 && f1.id === f2.id;
+}
+
+export function buildFilters(filters: FilterData[], newFilters: FilterData[]) {
+  // Remove any existing filters of the same type
+  const remainingFilters = filters.filter((f) => {
+    return !newFilters.some((nf) => isOverlappingType(f, nf));
+  });
+
+  return [...remainingFilters, ...newFilters];
 }

@@ -9,19 +9,18 @@ import {
   ButtonGroup,
   Alignment,
   ButtonProps,
-  IconName,
   NonIdealState,
 } from "@blueprintjs/core";
 import { CloseableCard } from "../components/closeable-card";
 import {
   useAppActions,
-  useAppState,
   useSearchState,
   MapLayer,
-  MapPosition,
   useHashNavigate,
+  MenuPage,
+  useAppState,
 } from "../app-state";
-import { SearchResults } from "../components/searchbar";
+import { SearchResults } from "../components/navbar";
 import classNames from "classnames";
 import styles from "./main.module.styl";
 import loadable from "@loadable/component";
@@ -32,107 +31,44 @@ import { useMatch, useLocation } from "react-router";
 import { useTransition } from "transition-hook";
 import { useCurrentPage } from "../app-state/nav-hooks";
 import useBreadcrumbs from "use-react-router-breadcrumbs";
-import { SettingsPanel, ExperimentsPanel } from "./settings-panel";
+import { isDetailPanelRouteInternal } from "../app-state/nav-hooks";
+import { SettingsPanel, ExperimentsPanel, ThemeButton } from "./settings-panel";
 import { useState, useEffect } from "react";
-import { LinkButton } from "../components/buttons";
-import { Switch } from "@blueprintjs/core";
+import { LinkButton, LayerButton, ListButton } from "../components/buttons";
+import { routerBasename } from "../settings";
+import { Card } from "@blueprintjs/core";
 
 function ChangelogPanel() {
-  return h("div.bp3-text.text-panel", [h(Changelog)]);
+  return h("div.bp4-text.text-panel", [h(Changelog)]);
 }
 
 const AboutText = loadable(() => import("../components/About"));
 
 const h = hyper.styled(styles);
 
-type ListButtonProps = ButtonProps & {
-  icon: React.ComponentType | IconName | React.ReactNode;
-};
-
-const ListButton = (props: ListButtonProps) => {
-  let { icon, ...rest } = props;
-  if (typeof props.icon != "string") {
-    icon = h(props.icon, { size: 20 });
-  }
-  return h(Button, { ...rest, className: "list-button", icon });
-};
-
-const YourLocationButton = () => {
+const TabButton = (props: ButtonProps & { page: MenuPage }) => {
+  const { page, ...rest } = props;
+  const active = useAppState((s) => s.menu.activePage) == page;
   const runAction = useAppActions();
-  const onClick = () => {
-    navigator.geolocation.getCurrentPosition(
-      function (position) {
-        const lngLat = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        };
-        const mapPosition: MapPosition = {
-          camera: {
-            altitude: 0,
-            bearing: 0,
-            pitch: 0,
-            ...lngLat,
-          },
-          target: {
-            zoom: 6,
-            ...lngLat,
-          },
-        };
-        runAction({
-          type: "map-moved",
-          data: mapPosition,
-        });
-      },
-      (e) => {
-        console.log(e);
-      },
-      { timeout: 100000 }
-    );
-  };
-  return h(
-    ListButton,
-    { icon: "map-marker", onClick, disabled: true },
-    "Your location"
-  );
-};
 
-const MinimalButton = (props) => h(Button, { ...props, minimal: true });
-
-const TabButton = (props: ButtonProps & { to: string }) => {
-  const { to, ...rest } = props;
-  const active = useMatch(to) != null;
-
-  return h(LinkButton, {
+  return h(Button, {
     minimal: true,
     active,
-    to,
+    onClick() {
+      runAction({ type: "set-menu-page", page });
+    },
     ...rest,
     className: "tab-button",
   });
 };
 
-type LayerButtonProps = ListButtonProps & { layer: MapLayer; name: string };
-
-function LayerButton(props: LayerButtonProps) {
-  const { layer, name, ...rest } = props;
-  const active = useAppState((state) => state.core.mapLayers.has(layer));
-  const runAction = useAppActions();
-  const onClick = () => runAction({ type: "toggle-map-layer", layer });
-  return h(ListButton, {
-    active,
-    onClick,
-    text: name,
-    ...rest,
-  });
-}
-
 const MenuGroup = (props) =>
   h(ButtonGroup, {
-    className: "menu-options",
+    className: "menu-group",
     vertical: true,
     minimal: true,
-    alignText: Alignment.LEFT,
     large: true,
+    alignText: Alignment.LEFT,
     ...props,
   });
 
@@ -173,7 +109,6 @@ const LayerList = (props) => {
       }),
     ]),
     h(MenuGroup, [
-      h(YourLocationButton),
       h(
         ListButton,
         { onClick: toggleElevationChart, icon: ElevationIcon },
@@ -207,18 +142,10 @@ function useLastPageLocation(
   if (breadcrumbs.length < 2) return null;
   const prevPage = breadcrumbs[breadcrumbs.length - 2];
   const currentPage = breadcrumbs[breadcrumbs.length - 1];
-  let currentPath = currentPage.match.pathname;
-  let prevPath = prevPage.match.pathname;
-  if (currentPath.startsWith(baseRoute)) {
-    currentPath = "/" + currentPath.slice(baseRoute.length);
-  }
-  if (prevPath.startsWith(baseRoute)) {
-    prevPath = "/" + prevPath.slice(baseRoute.length);
-  }
-
-  const prevRoute = menuBacklinkLocationOverrides[currentPath] ?? prevPath;
-  if (prevRoute == "/") return null;
-
+  const prevRoute =
+    menuBacklinkLocationOverrides[currentPage.match.pathname] ??
+    prevPage.match.pathname;
+  if (prevRoute == "/" || isDetailPanelRouteInternal(prevRoute)) return null;
   return { to: prevRoute, title: locationTitleForRoute[prevRoute] ?? "Back" };
 }
 
@@ -245,18 +172,22 @@ function MenuHeaderButtons({ baseRoute = "/" }) {
     h(TabButton, {
       icon: "layers",
       text: "Layers",
-      to: "layers",
+      page: MenuPage.LAYERS,
     }),
-    h(TabButton, { icon: "settings", text: "Settings", to: "settings" }),
+    h(TabButton, {
+      icon: "settings",
+      text: "Settings",
+      page: MenuPage.SETTINGS,
+    }),
     h(TabButton, {
       icon: "info-sign",
       text: "About",
-      to: "about",
+      page: MenuPage.ABOUT,
     }),
     h(TabButton, {
       icon: "help",
       text: "Usage",
-      to: "usage",
+      page: MenuPage.USAGE,
     }),
   ]);
 }
@@ -282,14 +213,20 @@ function HeaderWrapper({ children, minimal = false }) {
   );
 }
 
-const Menu = (props) => {
-  let { className, baseRoute = "/" } = props;
+type MenuProps = {
+  className?: string;
+  menuPage: MenuPage;
+};
+
+const Menu = (props: MenuProps) => {
+  let { className, menuPage, baseRoute = "/" } = props;
   const { inputFocus } = useSearchState();
+  const runAction = useAppActions();
 
   const navigateHome = useHashNavigate(baseRoute);
 
   const pageName = useCurrentPage(baseRoute);
-  const isNarrow = pageName == "layers";
+  const isNarrow = menuPage == MenuPage.LAYERS || menuPage == MenuPage.SETTINGS;
   const isNarrowTrans = useTransition(isNarrow, 800);
 
   if (inputFocus) {
@@ -299,7 +236,7 @@ const Menu = (props) => {
   className = classNames(
     className,
     "menu-card",
-    pageName,
+    menuPage,
     { "narrow-card": isNarrowTrans.shouldMount },
     `narrow-${isNarrowTrans.stage}`
   );
@@ -307,7 +244,9 @@ const Menu = (props) => {
   return h(
     CloseableCard,
     {
-      onClose: navigateHome,
+      onClose() {
+        runAction({ type: "toggle-menu" });
+      },
       insetContent: false,
       className,
       renderHeader: () =>
@@ -317,19 +256,29 @@ const Menu = (props) => {
           h(MenuHeaderButtons, { baseRoute })
         ),
     },
-    [
-      h(Routes, [
-        h(Route, { path: "layers", element: h(LayerList) }),
-        h(Route, { path: "about", element: h(AboutText) }),
-        h(Route, { path: "usage", element: h(UsagePanel) }),
-        h(Route, { path: "settings", element: h(SettingsPanel) }),
-        h(Route, { path: "changelog", element: h(ChangelogPanel) }),
-        h(Route, { path: "experiments", element: h(ExperimentsPanel) }),
-        //h(Route, { path: "*", element: h(NotFoundPage) }),
-      ]),
-    ]
+    elementForMenuPage(menuPage)
   );
 };
+
+export const PanelCard = (props) =>
+  h(Card, { ...props, className: classNames("panel-card", props.className) });
+
+function elementForMenuPage(page: MenuPage) {
+  switch (page) {
+    case MenuPage.LAYERS:
+      return h(LayerList);
+    case MenuPage.SETTINGS:
+      return h(SettingsPanel);
+    case MenuPage.ABOUT:
+      return h(AboutText);
+    case MenuPage.USAGE:
+      return h(UsagePanel);
+    case MenuPage.CHANGELOG:
+      return h(ChangelogPanel);
+    case MenuPage.EXPERIMENTS:
+      return h(ExperimentsPanel);
+  }
+}
 
 function NotFoundPage() {
   const navigate = useHashNavigate("/");
@@ -350,4 +299,5 @@ function NotFoundPage() {
   );
 }
 
+export { MenuPage };
 export default Menu;
