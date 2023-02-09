@@ -2,7 +2,13 @@ import { Suspense } from "react";
 // Import other components
 import hyper from "@macrostrat/hyper";
 import Searchbar, { LoaderButton } from "../components/navbar";
-import { ButtonGroup, Button, Spinner, Switch } from "@blueprintjs/core";
+import {
+  ButtonGroup,
+  Button,
+  Spinner,
+  Switch,
+  HTMLDivProps,
+} from "@blueprintjs/core";
 import { useSelector, useDispatch } from "react-redux";
 import loadable from "@loadable/component";
 import { JSONView } from "@macrostrat/ui-components";
@@ -113,28 +119,10 @@ export const MapPage = ({
 
   const contextPanelOpen = useContextPanelOpen();
 
-  const contextPanelTrans = useTransition(contextPanelOpen || inputFocus, 800);
-  const detailPanelTrans = useTransition(infoDrawerOpen, 800);
-
   const loaded = useSelector((state) => state.core.initialLoadComplete);
   useEffect(() => {
     runAction({ type: "get-initial-map-state" });
   }, []);
-
-  /* We apply a custom style to the panel container when we are interacting
-    with the search bar, so that we can block map interactions until search
-    bar focus is lost.
-    We also apply a custom style when the infodrawer is open so we can hide
-    the search bar on mobile platforms
-  */
-  const className = classNames(
-    {
-      searching: inputFocus,
-      "detail-panel-open": infoDrawerOpen,
-    },
-    `context-panel-${contextPanelTrans.stage}`,
-    `detail-panel-${detailPanelTrans.stage}`
-  );
 
   const contextClass = useContextClass();
 
@@ -150,44 +138,31 @@ export const MapPage = ({
     return h(Spinner);
   }
 
-  return h(MapboxMapProvider, [
-    h(MapStyledContainer, { className: "map-page" }, [
-      h(
-        "div.main-ui",
-        {
-          className,
-          onMouseDown,
-        },
-        [
-          h("div.context-stack", { className: contextClass, ref }, [
-            h(Searchbar, { className: "searchbar" }),
-            h.if(contextPanelTrans.shouldMount)(Menu, {
-              className: "context-panel",
-              menuPage: menuPage ?? navMenuPage,
-            }),
-          ]),
-          h(MapView, {
-            backend,
-          }),
-          h("div.detail-stack.infodrawer-container", [
-            h(Routes, [
-              h(Route, {
-                path: "/loc/:lng/:lat",
-                element: h(InfoDrawerRoute),
-              }),
-              // h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
-              //   className: "detail-panel",
-              // }),
-            ]),
-            h(ZoomControl, { className: "zoom-control" }),
-            h("div.spacer"),
-            h(MapBottomControls),
-          ]),
-        ]
-      ),
-      h("div.bottom", null, h(ElevationChart, null)),
+  return h(MapAreaContainer, {
+    navbar: h(Searchbar, { className: "searchbar" }),
+    contextPanel: h(Menu, {
+      className: "context-panel",
+      menuPage: menuPage ?? navMenuPage,
+    }),
+    contextStackProps: {
+      className: contextClass,
+    },
+    mainPanel: h(MapView),
+    detailPanel: h([
+      h(Routes, [
+        h(Route, {
+          path: "/loc/:lng/:lat",
+          element: h(InfoDrawerRoute),
+        }),
+      ]),
+      h(ZoomControl, { className: "zoom-control" }),
     ]),
-  ]);
+    bottomPanel: h(ElevationChart, null),
+    contextPanelOpen: contextPanelOpen || inputFocus,
+    detailPanelOpen: infoDrawerOpen,
+    onMouseDown,
+    className: inputFocus ? "searching" : null,
+  });
 };
 
 function MapPageRoutes() {
@@ -338,16 +313,25 @@ function MapAreaContainer({
   detailPanel = null,
   detailPanelOpen = true,
   contextPanelOpen = true,
+  bottomPanel = null,
+  mainPanel,
   mapControls = h(MapBottomControls),
+  contextStackProps = null,
+  detailStackProps = null,
+  ...rest
 }: {
   navbar: AnyElement;
   children?: AnyElement;
   mapControls?: AnyElement;
   contextPanel?: AnyElement;
+  mainPanel?: AnyElement;
   detailPanel?: AnyElement;
+  bottomPanel?: AnyElement;
   className?: string;
   detailPanelOpen?: boolean;
   contextPanelOpen?: boolean;
+  contextStackProps?: HTMLDivProps;
+  detailStackProps?: HTMLDivProps;
 }) {
   const _detailPanelOpen = detailPanelOpen || detailPanel != null;
   const contextPanelTrans = useTransition(contextPanelOpen, 800);
@@ -370,19 +354,20 @@ function MapAreaContainer({
 
   return h(MapboxMapProvider, [
     h(MapStyledContainer, { className: "map-page map-dev-page" }, [
-      h("div.main-ui", { className: _className }, [
-        h("div.context-stack", [
+      h("div.main-ui", { className: _className, ...rest }, [
+        h("div.context-stack", contextStackProps, [
           navbar,
           h.if(contextPanelTrans.shouldMount)([contextPanel]),
         ]),
         //h(MapView),
-        children,
-        h("div.detail-stack.infodrawer-container", [
-          h.if(detailPanelTrans.shouldMount)([detailPanel]),
+        children ?? mainPanel,
+        h("div.detail-stack.infodrawer-container", detailStackProps, [
+          detailPanel,
           h("div.spacer"),
           mapControls,
         ]),
       ]),
+      h("div.bottom", null, bottomPanel),
     ]),
   ]);
 }
