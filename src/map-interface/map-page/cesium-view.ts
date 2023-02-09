@@ -22,7 +22,6 @@ import {
 } from "@macrostrat/ui-components/util/query-string";
 import { useAppActions, MapLayer, useAppState } from "../app-state";
 import { useCallback } from "react";
-import { mapStyle,  } from "./map-styles";
 import styles from "./main.module.styl";
 
 import "cesium/../../Build/Cesium/Widgets/widgets.css";
@@ -97,9 +96,11 @@ function MacrostratCesiumView(props) {
     state.core.mapLayers.has(MapLayer.BEDROCK)
   );
 
+  const mapStyle = useRef(null)
+
   let style = null;
   if (!hasSatellite) {
-    style = bedrockShown ? mapStyle : reliefShading;
+    style = reliefShading;
   }
 
   const onTileLoadEvent = useCallback(
