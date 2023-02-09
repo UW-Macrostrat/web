@@ -19,17 +19,9 @@ let publicURL = process.env.PUBLIC_URL || "/";
 const packageSrc = (name) =>
   path.resolve(__dirname, "deps", "web-components", "packages", name, "src");
 
-const localPackageSrc = (name) =>
-  path.resolve(__dirname, "packages", name, "src");
-
-const cesiumSource = path.join(
-  path.dirname(require.resolve("cesium")),
-  "Source"
-);
-const cesiumWorkers = path.join(
-  path.dirname(require.resolve("cesium")),
-  "Build/Cesium/Workers"
-);
+const cesium = path.dirname(require.resolve("cesium"));
+const cesiumSource = path.join(cesium, "Source");
+const cesiumWorkers = "../Build/CesiumUnminified/Workers";
 
 //uglify = new UglifyJsPlugin()
 
@@ -59,16 +51,9 @@ const plugins = [
   }),
   new CopyPlugin({
     patterns: [
-      { from: cesiumWorkers, to: "cesium/Workers" },
+      { from: path.join(cesiumSource, cesiumWorkers), to: "cesium/Workers" },
       { from: path.join(cesiumSource, "Assets"), to: "cesium/Assets" },
       { from: path.join(cesiumSource, "Widgets"), to: "cesium/Widgets" },
-      {
-        from: path.resolve(
-          cesiumSource,
-          `../Build/Cesium${devMode ? "Unminified" : ""}`
-        ),
-        to: "cesium",
-      },
     ],
   }),
   new DefinePlugin({
@@ -122,13 +107,6 @@ module.exports = {
         test: /\.(js|jsx|ts|tsx)$/,
         use: [babelLoader],
         exclude: /node_modules/,
-      },
-      // Extra loader for cesium-viewer source while we figure out how
-      // to bundle this module correctly.
-      {
-        test: /\.ts$/,
-        use: [babelLoader],
-        include: [/node_modules\/@macrostrat\/cesium-viewer\/src/],
       },
       {
         test: /\.styl$/,

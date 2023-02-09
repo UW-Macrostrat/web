@@ -20,6 +20,8 @@ import { routerBasename } from "./map-interface/settings";
 import { DarkModeProvider } from "@macrostrat/ui-components";
 import { GlobePage } from "./map-interface";
 
+import CesiumExample from "./cesium-example";
+
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 const routerMiddleware = createRouterMiddleware(browserHistory);
@@ -69,7 +71,7 @@ const App = () => {
           h(Routes, [
             h(Route, { path: "/sources", element: h(Sources) }),
             h(Route, { path: "/dev/globe", element: h(GlobeDevPage) }),
-            h(Route, { path: "/debug/split-view", element: h(SplitMapPage) }),
+            h(Route, { path: "/debug/split-view", element: h(CesiumExample) }),
             h(Route, { path: "/globe/*", element: h(GlobePage) }),
             h(Route, {
               path: "/dev/*",
