@@ -108,14 +108,6 @@ class VestigialMap extends Component<MapProps, {}> {
 
     // disable map rotation using touch rotation gesture
     //this.map.touchZoomRotate.disableRotation();
-    const ignoredSources = ["elevationMarker", "elevationPoints"];
-
-    this.map.on("sourcedataloading", (evt) => {
-      if (ignoredSources.includes(evt.sourceId) || this.props.mapIsLoading) {
-        return;
-      }
-      this.props.runAction({ type: "map-loading" });
-    });
 
     this.map.on("moveend", () => {
       // Force a hit to the API to refresh

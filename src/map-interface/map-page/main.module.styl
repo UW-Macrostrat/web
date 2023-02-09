@@ -32,7 +32,6 @@ This stylesheet the overall application page layout.
   &.map-is-global .globe-control
     display: block
 
-
 .main-ui
   flex 1
   position: relative
@@ -40,6 +39,11 @@ This stylesheet the overall application page layout.
   flex-direction: column
   max-height 100%
   height: 100%
+
+.panel-card
+  padding: 10px
+  >:last-child
+    margin-bottom: 0
 
 .context-stack
   display: flex
@@ -74,8 +78,14 @@ This stylesheet the overall application page layout.
 
 .searchbar-holder
   margin-bottom 0.5em
-    
 
+.map-dev-page
+  flex-direction: row
+  .detail-stack
+    width: 24em
+
+.right-panel
+  width: 24em
 
 // Menu
 .buttons
