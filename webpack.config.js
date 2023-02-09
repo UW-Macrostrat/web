@@ -6,6 +6,7 @@ const CopyPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const revisionInfo = require("@macrostrat/revision-info-webpack");
 const pkg = require("./package.json");
+const DotenvPlugin = require("dotenv-webpack");
 
 // Read dotenv file in directory
 const dotenv = require("dotenv");
@@ -56,6 +57,7 @@ const plugins = [
       { from: path.join(cesiumSource, "Widgets"), to: "cesium/Widgets" },
     ],
   }),
+  new DotenvPlugin(),
   new DefinePlugin({
     // Define relative base path in cesium for loading assets
     CESIUM_BASE_URL: JSON.stringify(publicURL + "cesium"),
@@ -182,6 +184,7 @@ module.exports = {
       http: false,
       url: false,
       path: require.resolve("path-browserify"),
+      assert: require.resolve("assert/"),
     },
   },
   entry: {

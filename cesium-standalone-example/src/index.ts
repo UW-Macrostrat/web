@@ -13,7 +13,6 @@ import "./main.css";
 import "cesiumSource/Widgets/widgets.css";
 import "@macrostrat/cesium-viewer/dist/index.css";
 import "@znemz/cesium-navigation/dist/index.css";
-// done with styles!
 
 function VisControl({ show, setShown, name }) {
   const className = show ? "active" : "";
@@ -32,10 +31,9 @@ function VisControl({ show, setShown, name }) {
   );
 }
 
-function App() {
+function App({ accessToken }) {
   // next, figure out labels: mapbox://styles/jczaplewski/cl16w70qs000015qd8aw9sea5
   const style = "mapbox://styles/jczaplewski/cklb8aopu2cnv18mpxwfn7c9n";
-  const accessToken = process.env.MAPBOX_API_TOKEN;
   const [showWireframe, setShowWireframe] = useState(false);
   const [showInspector, setShowInspector] = useState(false);
   const [showMapbox, setShowMapbox] = useState(false);
