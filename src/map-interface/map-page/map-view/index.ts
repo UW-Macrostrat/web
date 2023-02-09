@@ -30,6 +30,7 @@ import {
 } from "@macrostrat/mapbox-utils";
 import { getExpressionForFilters } from "./filter-helpers";
 import {
+  buildXRayStyle,
   MapSourcesLayer,
   mapStyle,
   toggleLineSymbols,
@@ -104,19 +105,20 @@ async function initializeMap(baseMapURL, mapPosition, infoMarkerPosition) {
   return map;
 }
 
-async function buildDevMapStyle(baseMapURL) {
+async function buildDevMapStyle(baseMapURL, styleOptions = {}) {
   const style = await getMapboxStyle(baseMapURL, {
     access_token: mapboxgl.accessToken,
   });
+  const xRayStyle = buildXRayStyle(styleOptions);
   return removeMapLabels(mergeStyles(style, xRayStyle));
 }
 
-async function initializeDevMap(baseMapURL, mapPosition) {
+async function initializeDevMap(baseMapURL, mapPosition, styleOptions) {
   mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
 
   const map = new mapboxgl.Map({
     container: "map",
-    style: await buildDevMapStyle(baseMapURL),
+    style: await buildDevMapStyle(baseMapURL, styleOptions),
     maxZoom: 18,
     //maxTileCacheSize: 0,
     logoPosition: "bottom-left",
@@ -146,11 +148,13 @@ export function DevMapView(props) {
   const [mapInitialized, setMapInitialized] = useState(false);
 
   useEffect(() => {
-    initializeDevMap(baseMapURL, mapPosition).then((map) => {
-      mapRef.current = map;
-      setMapInitialized(true);
-    });
-  }, []);
+    initializeDevMap(baseMapURL, mapPosition, { inDarkMode: isDarkMode }).then(
+      (map) => {
+        mapRef.current = map;
+        setMapInitialized(true);
+      }
+    );
+  }, [isDarkMode]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -440,13 +444,13 @@ function MapMarker({ position, setPosition, centerMarker = true }) {
 
   const handleMapClick = useCallback(
     (event: mapboxgl.MapMouseEvent) => {
-      setPosition(event.lngLat, event);
+      setPosition(event.lngLat, event, mapRef.current);
       // We should integrate this with the "easeToCenter" hook
       if (centerMarker) {
         mapRef.current?.flyTo({ center: event.lngLat, duration: 800 });
       }
     }, // eslint-disable-next-line react-hooks/exhaustive-deps
-    [setPosition]
+    [mapRef.current, setPosition]
   );
 
   useEffect(() => {

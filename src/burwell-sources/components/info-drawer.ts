@@ -1,6 +1,6 @@
 import { useState } from "react";
 import h from "@macrostrat/hyper";
-import { Card, Navbar, Button, Collapse } from "@blueprintjs/core";
+import { Navbar, Button } from "@blueprintjs/core";
 import {
   useBurwellState,
   getVisibleScale,

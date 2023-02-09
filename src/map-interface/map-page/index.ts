@@ -5,6 +5,7 @@ import Searchbar, { LoaderButton } from "../components/navbar";
 import { ButtonGroup, Button, Spinner, Switch } from "@blueprintjs/core";
 import { useSelector, useDispatch } from "react-redux";
 import loadable from "@loadable/component";
+import { JSONView } from "@macrostrat/ui-components";
 import {
   useSearchState,
   MapBackend,
@@ -25,6 +26,7 @@ import { FloatingNavbar } from "../components/navbar";
 import { Card } from "@blueprintjs/core";
 import { InfoDrawerHeader } from "../components/info-drawer/header";
 import { LocationPanel } from "../components/info-drawer";
+import { useCallback } from "react";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));
@@ -255,6 +257,30 @@ export function DevMapPage({
   const isDetailPanelOpen = inspectPosition !== null;
   const detailPanelTrans = useTransition(isDetailPanelOpen, 800);
 
+  const [data, setData] = useState(null);
+
+  const onSelectPosition = useCallback(
+    (
+      position: mapboxgl.LngLat,
+      event: mapboxgl.MapMouseEvent,
+      map: mapboxgl.Map
+    ) => {
+      setInspectPosition(position);
+      let features = null;
+
+      const r = 2;
+      const bbox: [mapboxgl.PointLike, mapboxgl.PointLike] = [
+        [event.point.x - r, event.point.y - r],
+        [event.point.x + r, event.point.y + r],
+      ];
+      if (position != null) {
+        features = map.queryRenderedFeatures(bbox);
+      }
+      setData(features);
+    },
+    []
+  );
+
   /* We apply a custom style to the panel container when we are interacting
     with the search bar, so that we can block map interactions until search
     bar focus is lost.
@@ -271,12 +297,16 @@ export function DevMapPage({
 
   let detailElement = null;
   if (inspectPosition != null) {
-    detailElement = h(LocationPanel, {
-      onClose() {
-        setInspectPosition(null);
+    detailElement = h(
+      LocationPanel,
+      {
+        onClose() {
+          setInspectPosition(null);
+        },
+        position: inspectPosition,
       },
-      position: inspectPosition,
-    });
+      h(Features, { features: data })
+    );
   }
 
   if (!loaded) return h(Spinner);
@@ -308,7 +338,7 @@ export function DevMapPage({
         h(DevMapView, {
           showLineSymbols,
           markerPosition: inspectPosition,
-          setMarkerPosition: setInspectPosition,
+          setMarkerPosition: onSelectPosition,
         }),
         h("div.detail-stack.infodrawer-container", [
           h.if(detailPanelTrans.shouldMount)([detailElement]),
@@ -318,6 +348,27 @@ export function DevMapPage({
       ]),
     ]),
   ]);
+}
+
+function FeatureRecord({ feature }) {
+  return h("div.feature-record", [
+    h("div.feature-record-header", [
+      h(KeyValue, { label: "Source", value: feature.source }),
+      h(KeyValue, { label: "Layer", value: feature.sourceLayer }),
+    ]),
+    h(JSONView, { data: feature.properties, hideRoot: true }),
+  ]);
+}
+
+function KeyValue({ label, value }) {
+  return h("span.key-value", [h("span.key", label), h("code.value", value)]);
+}
+
+function Features({ features }) {
+  return h(
+    "div.features",
+    features.map((feature) => h(FeatureRecord, { feature }))
+  );
 }
 
 //const _MapPage = compose(HotkeysProvider, MapPage);
