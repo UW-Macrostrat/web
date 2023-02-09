@@ -1,4 +1,5 @@
 import hyper from "@macrostrat/hyper";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { MapChangeTracker, MapClickHandler } from "@macrostrat/cesium-viewer";
 import {
@@ -23,6 +24,11 @@ import {
 import { useAppActions, MapLayer, useAppState } from "../app-state";
 import { useCallback } from "react";
 import styles from "./main.module.styl";
+import { ErrorBoundary } from "@macrostrat/ui-components";
+import {
+  flyToParams,
+  translateCameraPosition,
+} from "@macrostrat/cesium-viewer";
 
 import "cesium/../../Build/Cesium/Widgets/widgets.css";
 import "@znemz/cesium-navigation/dist/index.css";
@@ -84,9 +90,9 @@ function MacrostratCesiumView(props) {
   const terrainExaggeration =
     useAppState((state) => state.globe.verticalExaggeration) ?? 1.00001;
   const displayQuality = useAppState((state) => state.globe.displayQuality);
-  const globe = useAppState((state) => state.globe);
+  const pos = useAppState((state) => state.core.mapPosition);
 
-  const showInspector = useAppState((state) => state.globe.showInspector);
+  const showInspector = false; //useAppState((state) => state.globe.showInspector);
   const hasSatellite = useAppState((state) =>
     state.core.mapLayers.has(MapLayer.SATELLITE)
   );
@@ -96,12 +102,16 @@ function MacrostratCesiumView(props) {
     state.core.mapLayers.has(MapLayer.BEDROCK)
   );
 
-  const mapStyle = useRef(null)
-
   let style = null;
   if (!hasSatellite) {
     style = reliefShading;
   }
+
+  // Only use initial position
+  const [flyTo, setFlyTo] = useState({
+    ...flyToParams(translateCameraPosition(pos)),
+    duration: 0,
+  });
 
   const onTileLoadEvent = useCallback(
     (count) => {
@@ -121,48 +131,54 @@ function MacrostratCesiumView(props) {
 
   return h("div.map-view-container.main-view", [
     h("div.cesium-container", [
-      h(
-        CesiumView,
-        {
-          full: true,
-          onViewChange(cpos) {
-            const { camera } = cpos;
-            // Tamp down memory usage by clearing log statements
-            //console.clear();
-            runAction({
-              type: "map-moved",
-              data: {
-                camera: {
-                  lng: camera.longitude,
-                  lat: camera.latitude,
-                  altitude: camera.height,
-                  pitch: 90 + camera.pitch,
-                  bearing: camera.heading,
+      h(ErrorBoundary, [
+        h(
+          CesiumView,
+          {
+            full: true,
+            onViewChange(cpos) {
+              const { camera } = cpos;
+              // Tamp down memory usage by clearing log statements
+              //console.clear();
+              runAction({
+                type: "map-moved",
+                data: {
+                  mapPosition: {
+                    camera: {
+                      lng: camera.longitude,
+                      lat: camera.latitude,
+                      altitude: camera.height,
+                      pitch: 90 + camera.pitch,
+                      bearing: camera.heading,
+                    },
+                  },
+                  infoMarkerFocus: null,
                 },
-              },
-            });
+              });
+            },
+            onClick({ latitude, longitude, zoom }) {
+              //dispatch(queryMap(longitude, latitude, zoom, null));
+            },
+            onTileLoadEvent,
+            terrainExaggeration,
+            displayQuality,
+            showInspector,
+            terrainProvider,
+            //initialPosition: flyTo.destination ?? initialPosition,
+            flyTo,
           },
-          onClick({ latitude, longitude, zoom }) {
-            //dispatch(queryMap(longitude, latitude, zoom, null));
-          },
-          onTileLoadEvent,
-          terrainExaggeration,
-          displayQuality,
-          showInspector,
-          terrainProvider,
-          flyTo: globe.flyToProps,
-        },
-        [
-          //h(BaseLayer, { enabled: !hasSatellite }),
-          h.if(!hasSatellite)(HillshadeLayer),
-          h.if(hasSatellite)(SatelliteLayer),
-          // h.if(style != null)(BaseLayer, {
-          //   alpha: 1,
-          //   style, //"mapbox://styles/jczaplewski/ckxcu9zmu4aln14mfg4monlv3/draft",
-          // }),
-          h(VectorGeologyLayer, { alpha: 0.5 }),
-        ]
-      ),
+          [
+            //h(BaseLayer, { enabled: !hasSatellite }),
+            //h.if(!hasSatellite)(HillshadeLayer),
+            h(SatelliteLayer),
+            // h.if(style != null)(BaseLayer, {
+            //   alpha: 1,
+            //   style, //"mapbox://styles/jczaplewski/ckxcu9zmu4aln14mfg4monlv3/draft",
+            // }),
+            //h(VectorGeologyLayer, { alpha: 0.5 }),
+          ]
+        ),
+      ]),
     ]),
   ]);
 }

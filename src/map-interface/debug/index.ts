@@ -9,7 +9,7 @@ const h = hyperStyled(styles);
 
 const _MapView = compose(MapboxMapProvider, MapContainer);
 
-function LayoutWaiter({ children }) {
+export function LayoutWaiter({ children }) {
   // Hack to ensure Cesium container div has height before rendering viewer
   const [ready, setReady] = useState(false);
   useEffect(() => {

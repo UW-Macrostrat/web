@@ -18,6 +18,7 @@ import reducerStack, {
 import { createRouterMiddleware } from "@lagunovsky/redux-react-router";
 import { routerBasename } from "./map-interface/settings";
 import { DarkModeProvider } from "@macrostrat/ui-components";
+import { GlobePage } from "./map-interface";
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
@@ -37,10 +38,6 @@ const _GlobeDevPage = loadable(() =>
 
 const GlobeDevPage = () =>
   h(Suspense, { fallback: h(Spinner) }, h(_GlobeDevPage));
-
-function GlobePage() {
-  return h(MapPage, { backend: MapBackend.CESIUM, baseRoute: "/globe/" });
-}
 
 const _SplitMapPage = loadable(() =>
   import("./map-interface/debug").then((d) => d.SplitMapPage)
