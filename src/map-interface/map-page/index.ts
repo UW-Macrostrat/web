@@ -310,75 +310,83 @@ export function DevMapPage({
 
   if (!loaded) return h(Spinner);
 
-  return h(MapboxMapProvider, [
-    h(MapStyledContainer, { className: "map-page map-dev-page" }, [
-      h("div.main-ui", [
-        h("div.context-stack", [
-          h(FloatingNavbar, { className: "searchbar" }, [
-            headerElement,
-            h("div.spacer"),
-            h(LoaderButton, {
-              active: isOpen,
-              onClick: () => setOpen(!isOpen),
-              isLoading,
-            }),
-          ]),
-          h.if(isOpen)(PanelCard, [
-            h(Switch, {
-              checked: showLineSymbols,
-              label: "Show line symbols",
-              onChange() {
-                setShowLineSymbols(!showLineSymbols);
-              },
-            }),
-          ]),
-        ]),
-        //h(MapView),
-        h(DevMapView, {
-          showLineSymbols,
-          markerPosition: inspectPosition,
-          setMarkerPosition: onSelectPosition,
-        }),
-        h("div.detail-stack.infodrawer-container", [
-          h.if(detailPanelTrans.shouldMount)([detailElement]),
+  return h(
+    MapAreaContainer,
+    {
+      contextElement: h([
+        h(FloatingNavbar, { className: "searchbar" }, [
+          headerElement,
           h("div.spacer"),
-          h(MapBottomControls),
+          h(LoaderButton, {
+            active: isOpen,
+            onClick: () => setOpen(!isOpen),
+            isLoading,
+          }),
+        ]),
+        h.if(isOpen)(PanelCard, [
+          h(Switch, {
+            checked: showLineSymbols,
+            label: "Show line symbols",
+            onChange() {
+              setShowLineSymbols(!showLineSymbols);
+            },
+          }),
         ]),
       ]),
-    ]),
-  ]);
+      detailElement,
+    },
+    h(DevMapView, {
+      showLineSymbols,
+      markerPosition: inspectPosition,
+      setMarkerPosition: onSelectPosition,
+    })
+  );
 }
 
-function MapAreaContainer({ children, className }) {
+type AnyElement = React.ReactNode | React.ReactElement | React.ReactFragment;
+
+function MapAreaContainer({
+  children,
+  className,
+  contextElement,
+  detailElement = null,
+  detailPanelOpen = true,
+  contextPanelOpen = true,
+  mapControls = h(MapBottomControls),
+}: {
+  children?: AnyElement;
+  mapControls?: AnyElement;
+  contextElement?: AnyElement;
+  detailElement?: AnyElement;
+  className?: string;
+  detailPanelOpen?: boolean;
+  contextPanelOpen?: boolean;
+}) {
+  const _detailPanelOpen = detailPanelOpen || detailElement != null;
+  const contextPanelTrans = useTransition(contextPanelOpen, 800);
+  const detailPanelTrans = useTransition(_detailPanelOpen, 800);
+
+  /* We apply a custom style to the panel container when we are interacting
+    with the search bar, so that we can block map interactions until search
+    bar focus is lost.
+    We also apply a custom style when the infodrawer is open so we can hide
+    the search bar on mobile platforms
+  */
+  const _className = classNames(
+    {
+      searching: false,
+      "detail-panel-open": _detailPanelOpen,
+    },
+    `context-panel-${contextPanelTrans.stage}`,
+    `detail-panel-${detailPanelTrans.stage}`
+  );
+
   return h(MapboxMapProvider, [
     h(MapStyledContainer, { className: "map-page map-dev-page" }, [
-      h("div.main-ui", [
-        h("div.context-stack", { ref }, [
-          h(FloatingNavbar, { className: "searchbar" }, [
-            headerElement,
-            h("div.spacer"),
-            h(LoaderButton, {
-              active: isOpen,
-              onClick: () => setOpen(!isOpen),
-              isLoading,
-            }),
-          ]),
-          h.if(isOpen)(PanelCard, [
-            h(Switch, {
-              checked: showLineSymbols,
-              label: "Show line symbols",
-              onChange() {
-                setShowLineSymbols(!showLineSymbols);
-              },
-            }),
-          ]),
-        ]),
+      h("div.main-ui", { className: _className }, [
+        h("div.context-stack", [contextElement]),
         //h(MapView),
-        h(DevMapView, {
-          showLineSymbols,
-          markerPosition: inspectPosition,
-          setMarkerPosition: onSelectPosition,
-        }),
+        children,
         h("div.detail-stack.infodrawer-container", [
           h.if(detailPanelTrans.shouldMount)([detailElement]),
           h("div.spacer"),
