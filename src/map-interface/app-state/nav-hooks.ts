@@ -4,18 +4,6 @@ import classNames from "classnames";
 import { MenuPage } from "./reducers";
 import { routerBasename } from "../settings";
 
-<<<<<<< HEAD
-export function usePanelOpen(baseRoute = "/") {
-  const match = useMatch(baseRoute);
-  return match?.pathname != baseRoute;
-}
-
-export function useContextClass(baseRoute) {
-  const panelOpen = usePanelOpen(baseRoute);
-  const pageName = useCurrentPage(baseRoute);
-  if (!panelOpen) return null;
-  return classNames("panel-open", pageName);
-=======
 export function isDetailPanelRouteInternal(pathname: string) {
   /* Check if we're in a detail panel route from within the app. */
   return pathname.startsWith("/loc");
@@ -48,7 +36,6 @@ export function useContextClass() {
   const activePage = useAppState((s) => s.menu.activePage);
   if (activePage == null) return null;
   return classNames("panel-open", activePage);
->>>>>>> develop
 }
 
 export function useCurrentPage(baseRoute = "/") {

@@ -80,14 +80,9 @@ export function coreReducer(
   action: CoreAction
 ): CoreState {
   switch (action.type) {
-<<<<<<< HEAD:src/map-interface/app-state/sections/core/index.ts
-    case "set-map-backend":
-      return updateURI({ ...state, mapBackend: action.backend });
-=======
     case "set-map-backend": {
       return { ...state, mapBackend: action.backend };
     }
->>>>>>> develop:src/map-interface/app-state/reducers/core/index.ts
     case "map-loading":
       if (state.mapIsLoading) return state;
       return { ...state, mapIsLoading: true };

@@ -1,11 +1,7 @@
 import { Component, forwardRef } from "react";
 import { SETTINGS } from "../../settings";
-import { mapStyle } from "../map-styles";
-import {
-  getRemovedOrNewFilters,
-  getToApply,
-  PBDBHelper,
-} from "./filter-helpers";
+import { mapStyle } from "../map-style";
+import { getPBDBData } from "./filter-helpers";
 import h from "@macrostrat/hyper";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";

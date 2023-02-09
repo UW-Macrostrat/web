@@ -25,7 +25,6 @@ import {
   setMapPosition,
   getMapboxStyle,
   mergeStyles,
-  MapPosition,
   removeMapLabels,
 } from "@macrostrat/mapbox-utils";
 import { getExpressionForFilters } from "./filter-helpers";
@@ -34,8 +33,7 @@ import {
   MapSourcesLayer,
   mapStyle,
   toggleLineSymbols,
-  xRayStyle,
-} from "../map-styles";
+} from "../map-style";
 import { SETTINGS } from "../../settings";
 import mapboxgl from "mapbox-gl";
 import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";

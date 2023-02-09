@@ -16,7 +16,6 @@ import styles from "./main.module.styl";
 import { useLocation } from "react-router-dom";
 import { usePerformanceWatcher } from "../performance";
 import classNames from "classnames";
-import { useRef, useEffect } from "react";
 import { useTransition } from "transition-hook";
 import { useContextPanelOpen, useContextClass } from "../app-state";
 import { MapboxMapProvider, ZoomControl } from "@macrostrat/mapbox-react";
@@ -139,7 +138,7 @@ export const MapPage = ({
 
   const ref = useRef<HTMLElement>(null);
 
-  const contextPanelOpen = usePanelOpen(baseRoute);
+  const contextPanelOpen = useContextPanelOpen(baseRoute);
   const contextClass = useContextClass(baseRoute);
 
   const contextPanelTrans = useTransition(contextPanelOpen || inputFocus, 800);

@@ -16,7 +16,6 @@ import { Tag, Button, Collapse, Callout, Text } from "@blueprintjs/core";
 import { useState } from "react";
 //import { LinkButton } from "@macrostrat/ui-components";
 //import { GlobeSettings } from "@macrostrat/cesium-viewer/settings";
-import { useAppState, useAppActions } from "~/map-interface/app-state";
 import { MapLayer } from "~/map-interface/app-state";
 //import { DisplayQuality } from "@macrostrat/cesium-viewer";
 import styles from "./settings-panel.module.styl";

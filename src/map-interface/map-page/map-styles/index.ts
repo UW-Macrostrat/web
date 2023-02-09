@@ -1,7 +1,6 @@
-import { coreStyle } from "./core";
 import { overlayStyle } from "./overlay";
 
-export { coreStyle, overlayStyle };
+export { overlayStyle };
 export const mapStyle = {
   version: 8,
   sources: {
