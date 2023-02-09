@@ -2,10 +2,7 @@ import hyper from "@macrostrat/hyper";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { MapChangeTracker, MapClickHandler } from "@macrostrat/cesium-viewer";
-import {
-  HillshadeLayer,
-  GeologyLayer,
-} from "@macrostrat/cesium-viewer/src/layers";
+import { GeologyLayer } from "@macrostrat/cesium-viewer/src/layers";
 import CesiumView, {
   DisplayQuality,
   SatelliteLayer,
@@ -33,6 +30,9 @@ import {
 import "cesium/../../Build/Cesium/Widgets/widgets.css";
 import "@znemz/cesium-navigation/dist/index.css";
 
+import { SETTINGS } from "../settings";
+import { buildXRayStyle } from "./map-style";
+
 const h = hyper.styled(styles);
 
 // , //
@@ -40,13 +40,12 @@ const h = hyper.styled(styles);
 const VectorGeologyLayer = ({ enabled = true, ...rest }) => {
   const provider = useRef(
     new VectorProvider({
-      style: "mapbox://styles/jczaplewski/cklb8aopu2cnv18mpxwfn7c9n", //coreStyle,
+      style: buildXRayStyle({}), //coreStyle,
       maximumZoom: 15,
       tileSize: 512,
-      // showCanvas: true,
+      showCanvas: true,
       //opacity: 0.5,
-      accessToken:
-        "pk.eyJ1IjoiamN6YXBsZXdza2kiLCJhIjoiY2szNXA5OWcxMDN2bzNtcnI1cWd1ZXJpYiJ9.Dd5GKlrPhg969y1ayY32cg",
+      accessToken: SETTINGS.mapboxAccessToken,
     })
   );
 
@@ -77,6 +76,8 @@ function BaseLayer({ enabled = true, style, ...rest }) {
       // "mapbox://styles/jczaplewski/ckxeiii3a1jv415o8rxvgqlpd", //
       maximumZoom: 15,
       tileSize: 512,
+      accessToken: SETTINGS.mapboxAccessToken,
+      showCanvas: true,
     });
   }, [enabled, style]);
 
@@ -101,11 +102,6 @@ function MacrostratCesiumView(props) {
   const bedrockShown = useAppState((state) =>
     state.core.mapLayers.has(MapLayer.BEDROCK)
   );
-
-  let style = null;
-  if (!hasSatellite) {
-    style = reliefShading;
-  }
 
   // Only use initial position
   const [flyTo, setFlyTo] = useState({
@@ -168,14 +164,15 @@ function MacrostratCesiumView(props) {
             flyTo,
           },
           [
-            //h(BaseLayer, { enabled: !hasSatellite }),
+            //h(BaseLayer, { enabled: true }),
             //h.if(!hasSatellite)(HillshadeLayer),
-            h(SatelliteLayer),
+            //h(SatelliteLayer),
             // h.if(style != null)(BaseLayer, {
             //   alpha: 1,
             //   style, //"mapbox://styles/jczaplewski/ckxcu9zmu4aln14mfg4monlv3/draft",
             // }),
-            //h(VectorGeologyLayer, { alpha: 0.5 }),
+            //h(GeologyLayer, { alpha: 0.5 }),
+            h(VectorGeologyLayer),
           ]
         ),
       ]),

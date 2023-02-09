@@ -13,8 +13,7 @@
     "bootstrap": "yarn"
   },
   "workspaces": [
-    "deps/web-components/packages/*",
-    "deps/cesium-vector-provider/packages/*"
+    "deps/web-components/packages/*"
   ],
   "authors": [
     "John Czaplewski <jczaplewski@wisc.edu>",
@@ -55,7 +54,7 @@
     "@lagunovsky/redux-react-router": "^3.2.0",
     "@loadable/component": "^5.14.1",
     "@macrostrat/cesium-martini": "^1.2.3",
-    "@macrostrat/cesium-vector-provider": "workspace:*",
+    "@macrostrat/cesium-vector-provider": "^2.0.2",
     "@macrostrat/cesium-viewer": "^1.1.5",
     "@macrostrat/column-components": "workspace:*",
     "@macrostrat/hyper": "^2.2.1",
