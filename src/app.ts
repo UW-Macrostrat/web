@@ -38,6 +38,14 @@ const _GlobeDevPage = loadable(() =>
   import("./map-interface/map-page/cesium-view").then((d) => d.GlobeDevPage)
 );
 
+const _CesiumExample = loadable(
+  () => import("cesium-vector-provider-standalone-example")
+);
+
+const CesiumExamplePage = () => {
+  return h(Suspense, { fallback: h(Spinner) }, h(_CesiumExample));
+};
+
 const GlobeDevPage = () =>
   h(Suspense, { fallback: h(Spinner) }, h(_GlobeDevPage));
 
@@ -72,8 +80,8 @@ const App = () => {
             h(Route, { path: "/sources", element: h(Sources) }),
             h(Route, { path: "/dev/globe", element: h(GlobeDevPage) }),
             h(Route, {
-              path: "/debug/split-view",
-              element: h(CesiumExample, {
+              path: "/dev/cesium-vector-provider",
+              element: h(CesiumExamplePage, {
                 accessToken: SETTINGS.mapboxAccessToken,
               }),
             }),
