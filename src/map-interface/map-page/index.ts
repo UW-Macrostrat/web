@@ -19,12 +19,10 @@ import { useTransition } from "transition-hook";
 import { useContextPanelOpen, useContextClass } from "../app-state";
 import { MapboxMapProvider, ZoomControl } from "@macrostrat/mapbox-react";
 import { DevMapView, MapBottomControls, MapStyledContainer } from "./map-view";
-import { Routes, Route, useParams, useMatch } from "react-router-dom";
+import { Routes, Route, useParams } from "react-router-dom";
 import { MenuPage, PanelCard } from "./menu";
 import { useState } from "react";
 import { FloatingNavbar } from "../components/navbar";
-import { Card } from "@blueprintjs/core";
-import { InfoDrawerHeader } from "../components/info-drawer/header";
 import { LocationPanel } from "../components/info-drawer";
 import { useCallback } from "react";
 
@@ -143,13 +141,6 @@ export const MapPage = ({
     event.stopPropagation();
   };
 
-  const loaded = useSelector((state) => state.core.initialLoadComplete);
-  useEffect(() => {
-    runAction({ type: "get-initial-map-state" });
-  }, []);
-
-  if (!loaded) return h(Spinner);
-
   return h(MapboxMapProvider, [
     h(MapStyledContainer, { className: "map-page" }, [
       h(
@@ -234,7 +225,6 @@ export function DevMapPage({
 }) {
   // A stripped-down page for map development
   const runAction = useAppActions();
-  const ref = useRef<HTMLElement>(null);
   /* We apply a custom style to the panel container when we are interacting
     with the search bar, so that we can block map interactions until search
     bar focus is lost.
@@ -311,6 +301,46 @@ export function DevMapPage({
 
   if (!loaded) return h(Spinner);
 
+  return h(MapboxMapProvider, [
+    h(MapStyledContainer, { className: "map-page map-dev-page" }, [
+      h("div.main-ui", [
+        h("div.context-stack", [
+          h(FloatingNavbar, { className: "searchbar" }, [
+            headerElement,
+            h("div.spacer"),
+            h(LoaderButton, {
+              active: isOpen,
+              onClick: () => setOpen(!isOpen),
+              isLoading,
+            }),
+          ]),
+          h.if(isOpen)(PanelCard, [
+            h(Switch, {
+              checked: showLineSymbols,
+              label: "Show line symbols",
+              onChange() {
+                setShowLineSymbols(!showLineSymbols);
+              },
+            }),
+          ]),
+        ]),
+        //h(MapView),
+        h(DevMapView, {
+          showLineSymbols,
+          markerPosition: inspectPosition,
+          setMarkerPosition: onSelectPosition,
+        }),
+        h("div.detail-stack.infodrawer-container", [
+          h.if(detailPanelTrans.shouldMount)([detailElement]),
+          h("div.spacer"),
+          h(MapBottomControls),
+        ]),
+      ]),
+    ]),
+  ]);
+}
+
+function MapAreaContainer({ children, className }) {
   return h(MapboxMapProvider, [
     h(MapStyledContainer, { className: "map-page map-dev-page" }, [
       h("div.main-ui", [
