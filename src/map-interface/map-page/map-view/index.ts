@@ -1,56 +1,51 @@
-import { forwardRef, useRef, useState, useCallback } from "react";
-import {
-  useAppActions,
-  useAppState,
-  MapLayer,
-  PositionFocusState,
-} from "~/map-interface/app-state";
-import Map from "./map";
-import { enable3DTerrain } from "./terrain";
 import hyper from "@macrostrat/hyper";
-import { useEffect, useMemo } from "react";
-import useResizeObserver from "use-resize-observer";
-import styles from "../main.module.styl";
 import {
-  useMapRef,
   useMapConditionalStyle,
   useMapLabelVisibility,
+  useMapRef,
 } from "@macrostrat/mapbox-react";
-import classNames from "classnames";
-import { debounce } from "underscore";
-import { inDarkMode } from "@macrostrat/ui-components";
 import {
-  mapViewInfo,
-  getMapPosition,
-  setMapPosition,
   getMapboxStyle,
+  getMapPosition,
+  mapViewInfo,
   mergeStyles,
-  MapPosition,
   removeMapLabels,
+  setMapPosition,
 } from "@macrostrat/mapbox-utils";
-import { getExpressionForFilters } from "./filter-helpers";
+import { inDarkMode } from "@macrostrat/ui-components";
+import classNames from "classnames";
+import mapboxgl from "mapbox-gl";
+import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
+import { debounce } from "underscore";
+import useResizeObserver from "use-resize-observer";
+import {
+  MapLayer,
+  PositionFocusState,
+  useAppActions,
+  useAppState,
+} from "~/map-interface/app-state";
+import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
+import { SETTINGS } from "../../settings";
+import styles from "../main.module.styl";
 import {
   buildXRayStyle,
   MapSourcesLayer,
   mapStyle,
   toggleLineSymbols,
-  xRayStyle,
 } from "../map-style";
-import { SETTINGS } from "../../settings";
-import mapboxgl from "mapbox-gl";
-import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
+import { getExpressionForFilters } from "./filter-helpers";
+import Map from "./map";
+import { enable3DTerrain } from "./terrain";
 import {
-  useMapEaseToCenter,
-  getFocusState,
-  useElevationMarkerLocation,
   getBaseMapStyle,
+  getFocusState,
   getMapPadding,
-  useMapMarker,
-  MapStyledContainer,
   MapBottomControls,
+  MapStyledContainer,
+  useElevationMarkerLocation,
+  useMapEaseToCenter,
+  useMapMarker,
 } from "./utils";
-
-export { MapStyledContainer, MapBottomControls };
 
 const h = hyper.styled(styles);
 
@@ -316,7 +311,7 @@ interface MapViewProps {
   children?: React.ReactNode;
 }
 
-function CoreMapView(props: MapViewProps) {
+export function CoreMapView(props: MapViewProps) {
   const { filters, mapLayers, mapPosition, infoDrawerOpen, mapSettings } =
     useAppState((state) => state.core);
 
@@ -436,7 +431,7 @@ function CoreMapView(props: MapViewProps) {
   ]);
 }
 
-function MapMarker({ position, setPosition, centerMarker = true }) {
+export function MapMarker({ position, setPosition, centerMarker = true }) {
   const mapRef = useMapRef();
   const markerRef = useRef(null);
 
@@ -496,3 +491,5 @@ function useMapQueryHandler(
     [mapRef, markerRef, infoDrawerOpen]
   );
 }
+
+export { MapStyledContainer, MapBottomControls };

@@ -1,6 +1,6 @@
 import h from "@macrostrat/hyper";
 import { Routes, Route, Link } from "react-router-dom";
-import { DevMapPage } from "~/map-interface";
+import { DevMapPage } from "./map";
 import { LinkButton } from "~/map-interface/components/buttons";
 
 export default function MapInspectorApp() {
