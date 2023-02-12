@@ -57,34 +57,16 @@ export function DevMapPage({
 
   const [isOpen, setOpen] = useState(false);
   const [showLineSymbols, setShowLineSymbols] = useState(false);
-  const isLoading = useAppState((state) => state.core.mapIsLoading);
 
   const [inspectPosition, setInspectPosition] =
     useState<mapboxgl.LngLat | null>(null);
 
   const [data, setData] = useState(null);
+  const isLoading = useAppState((state) => state.core.mapIsLoading);
 
-  const onSelectPosition = useCallback(
-    (
-      position: mapboxgl.LngLat,
-      event: mapboxgl.MapMouseEvent,
-      map: mapboxgl.Map
-    ) => {
-      setInspectPosition(position);
-      let features = null;
-
-      const r = 2;
-      const bbox: [mapboxgl.PointLike, mapboxgl.PointLike] = [
-        [event.point.x - r, event.point.y - r],
-        [event.point.x + r, event.point.y + r],
-      ];
-      if (position != null) {
-        features = map.queryRenderedFeatures(bbox);
-      }
-      setData(features);
-    },
-    []
-  );
+  const onSelectPosition = useCallback((position: mapboxgl.LngLat) => {
+    setInspectPosition(position);
+  }, []);
 
   let detailElement = null;
   if (inspectPosition != null) {
@@ -126,11 +108,20 @@ export function DevMapPage({
       detailPanel: detailElement,
       contextPanelOpen: isOpen,
     },
-    h(DevMapView, {
-      showLineSymbols,
-      markerPosition: inspectPosition,
-      setMarkerPosition: onSelectPosition,
-    })
+    h(
+      DevMapView,
+      {
+        showLineSymbols,
+        markerPosition: inspectPosition,
+        setMarkerPosition: onSelectPosition,
+      },
+      [
+        h(FeatureSelectionHandler, {
+          selectedLocation: inspectPosition,
+          setFeatures: setData,
+        }),
+      ]
+    )
   );
 }
 
@@ -144,6 +135,38 @@ function FeatureRecord({ feature }) {
       }),
     ]),
   ]);
+}
+
+function FeatureSelectionHandler({
+  selectedLocation,
+  setFeatures,
+}: {
+  selectedLocation: mapboxgl.LngLat;
+  setFeatures: (features: mapboxgl.MapboxGeoJSONFeature[]) => void;
+}) {
+  const mapRef = useMapRef();
+  const isLoading = useAppState((state) => state.core.mapIsLoading);
+
+  useEffect(() => {
+    const map = mapRef?.current;
+    if (map == null) return;
+    if (selectedLocation == null) {
+      setFeatures(null);
+      return;
+    }
+
+    const r = 2;
+    const pt = map.project(selectedLocation);
+
+    const bbox: [mapboxgl.PointLike, mapboxgl.PointLike] = [
+      [pt.x - r, pt.y - r],
+      [pt.x + r, pt.y + r],
+    ];
+    const features = map.queryRenderedFeatures(bbox);
+    setFeatures(features);
+  }, [mapRef?.current, selectedLocation, isLoading]);
+
+  return null;
 }
 
 function FeatureHeader({ feature }) {
@@ -190,8 +213,6 @@ function Features({ features }) {
 
   const groups = group(features, (d) => `${d.source} - ${d.sourceLayer}`);
 
-  let entries = groups.entries();
-
   return h(
     "div.features",
     Array.from(groups).map(([key, features]) => {
@@ -232,7 +253,8 @@ async function initializeDevMap(baseMapURL, mapPosition, styleOptions) {
 }
 
 export function DevMapView(props) {
-  const { showLineSymbols, markerPosition, setMarkerPosition } = props;
+  const { showLineSymbols, markerPosition, setMarkerPosition, children } =
+    props;
   const { mapPosition, mapIsLoading } = useAppState((state) => state.core);
 
   let mapRef = useMapRef();
@@ -268,6 +290,7 @@ export function DevMapView(props) {
       position: markerPosition,
       setPosition: setMarkerPosition,
     }),
+    children,
   ]);
 }
 
