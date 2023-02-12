@@ -27,6 +27,7 @@ import {
 } from "../map-interface/map-page/map-view/utils";
 import {
   buildXRayStyle,
+  mapStyle,
   toggleLineSymbols,
 } from "../map-interface/map-page/map-style";
 import { CoreMapView, MapMarker } from "~/map-interface/map-page/map-view";
@@ -34,12 +35,19 @@ import styles from "./main.module.styl";
 import { group } from "d3-array";
 import { ExpansionPanel } from "~/map-interface/components/expansion-panel";
 
+export enum MacrostratTileset {
+  Carto = "carto",
+  CartoSlim = "carto-slim",
+}
+
 const h = hyper.styled(styles);
 
 export function DevMapPage({
   headerElement = null,
+  tileset = MacrostratTileset.CartoSlim,
 }: {
   headerElement?: React.ReactElement;
+  tileset?: MacrostratTileset;
 }) {
   // A stripped-down page for map development
   const runAction = useAppActions();
@@ -57,6 +65,7 @@ export function DevMapPage({
 
   const [isOpen, setOpen] = useState(false);
   const [showLineSymbols, setShowLineSymbols] = useState(false);
+  const [xRay, setXRay] = useState(true);
 
   const [inspectPosition, setInspectPosition] =
     useState<mapboxgl.LngLat | null>(null);
@@ -98,6 +107,13 @@ export function DevMapPage({
       ]),
       contextPanel: h(PanelCard, [
         h(Switch, {
+          checked: xRay,
+          label: "X-ray mode",
+          onChange() {
+            setXRay(!xRay);
+          },
+        }),
+        h(Switch, {
           checked: showLineSymbols,
           label: "Show line symbols",
           onChange() {
@@ -114,6 +130,7 @@ export function DevMapPage({
         showLineSymbols,
         markerPosition: inspectPosition,
         setMarkerPosition: onSelectPosition,
+        styleOptions: { xRay, tileset },
       },
       [
         h(FeatureSelectionHandler, {
@@ -189,7 +206,7 @@ function FeaturePanel({ features }) {
     h(
       ExpansionPanel,
       {
-        title: "Macrostrat map features",
+        title: "Macrostrat features",
         className: "macrostrat-features",
         expanded: true,
       },
@@ -224,20 +241,54 @@ function Features({ features }) {
   );
 }
 
-async function buildDevMapStyle(baseMapURL, styleOptions = {}) {
+function setSourceTileset(style: mapboxgl.Style, tileset: MacrostratTileset) {
+  return {
+    ...style,
+    sources: {
+      ...style.sources,
+      burwell: {
+        type: "vector",
+        tiles: [
+          `https://next.macrostrat.org/tiles/tiles/${tileset}/{z}/{x}/{y}`,
+        ],
+        tileSize: 512,
+      },
+    },
+  };
+}
+
+interface DevMapStyleOptions {
+  inDarkMode?: boolean;
+  xRay?: boolean;
+  tileset?: MacrostratTileset;
+}
+
+async function buildDevMapStyle(
+  baseMapURL: string,
+  styleOptions: DevMapStyleOptions = {}
+) {
   const style = await getMapboxStyle(baseMapURL, {
     access_token: mapboxgl.accessToken,
   });
-  const xRayStyle = buildXRayStyle(styleOptions);
-  return removeMapLabels(mergeStyles(style, xRayStyle));
+  const {
+    inDarkMode,
+    xRay = false,
+    tileset = MacrostratTileset.CartoSlim,
+  } = styleOptions;
+  const overlayStyles: any = xRay ? buildXRayStyle({ inDarkMode }) : mapStyle;
+
+  return removeMapLabels(
+    mergeStyles(style, setSourceTileset(overlayStyles, tileset))
+  );
 }
 
 async function initializeDevMap(baseMapURL, mapPosition, styleOptions) {
   mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
+  const style = await buildDevMapStyle(baseMapURL, styleOptions);
 
   const map = new mapboxgl.Map({
     container: "map",
-    style: await buildDevMapStyle(baseMapURL, styleOptions),
+    style,
     maxZoom: 18,
     //maxTileCacheSize: 0,
     logoPosition: "bottom-left",
@@ -252,10 +303,23 @@ async function initializeDevMap(baseMapURL, mapPosition, styleOptions) {
   return map;
 }
 
-export function DevMapView(props) {
-  const { showLineSymbols, markerPosition, setMarkerPosition, children } =
-    props;
-  const { mapPosition, mapIsLoading } = useAppState((state) => state.core);
+interface DevMapViewProps {
+  showLineSymbols: boolean;
+  markerPosition: mapboxgl.LngLat;
+  setMarkerPosition: (pos: mapboxgl.LngLat) => void;
+  styleOptions: DevMapStyleOptions;
+  children: React.ReactNode;
+}
+
+export function DevMapView(props: DevMapViewProps) {
+  const {
+    showLineSymbols,
+    markerPosition,
+    setMarkerPosition,
+    styleOptions,
+    children,
+  } = props;
+  const { mapPosition } = useAppState((state) => state.core);
 
   let mapRef = useMapRef();
   const isDarkMode = inDarkMode();
@@ -268,13 +332,25 @@ export function DevMapView(props) {
   const [mapInitialized, setMapInitialized] = useState(false);
 
   useEffect(() => {
-    initializeDevMap(baseMapURL, mapPosition, { inDarkMode: isDarkMode }).then(
-      (map) => {
-        mapRef.current = map;
-        setMapInitialized(true);
-      }
-    );
-  }, [isDarkMode]);
+    initializeDevMap(baseMapURL, mapPosition, {
+      inDarkMode: isDarkMode,
+      ...styleOptions,
+    }).then((map) => {
+      mapRef.current = map;
+      setMapInitialized(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map == null) return;
+    buildDevMapStyle(baseMapURL, {
+      ...styleOptions,
+      inDarkMode: isDarkMode,
+    }).then((style) => {
+      map.setStyle(style);
+    });
+  }, [styleOptions.xRay, isDarkMode]);
 
   useEffect(() => {
     const map = mapRef.current;

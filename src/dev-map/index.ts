@@ -1,6 +1,6 @@
 import h from "@macrostrat/hyper";
 import { Routes, Route, Link } from "react-router-dom";
-import { DevMapPage } from "./map";
+import { DevMapPage, MacrostratTileset } from "./map";
 import { LinkButton } from "~/map-interface/components/buttons";
 
 export default function MapInspectorApp() {
@@ -9,26 +9,22 @@ export default function MapInspectorApp() {
     h(Routes, [
       h(Route, {
         path: "carto",
-        element: h(MapInspector, { layer: Layer.Carto }),
+        element: h(MapInspector, { tileset: MacrostratTileset.Carto }),
       }),
       h(Route, {
         path: "carto-slim",
-        element: h(MapInspector, { layer: Layer.CartoSlim }),
+        element: h(MapInspector, { tileset: MacrostratTileset.CartoSlim }),
       }),
       h(Route, { path: "*", element: h(MapInspectorIndex) }),
     ]),
   ]);
 }
 
-enum Layer {
-  Carto = "carto",
-  CartoSlim = "carto-slim",
-}
-
-export function MapInspector({ layer }: { layer: Layer }) {
+export function MapInspector({ tileset }: { tileset: MacrostratTileset }) {
   return h("div.map-inspector", [
     h(DevMapPage, {
-      headerElement: h([h(ParentRouteButton), h("h2", `${layer}`)]),
+      tileset,
+      headerElement: h([h(ParentRouteButton), h("h2", `${tileset}`)]),
     }),
   ]);
 }
