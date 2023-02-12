@@ -10,9 +10,8 @@ import {
 } from "@macrostrat/mapbox-utils";
 import { inDarkMode, JSONView } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useSelector } from "react-redux";
-import { useTransition } from "transition-hook";
 import { SETTINGS } from "~/map-interface/settings";
 import { LoaderButton } from "../map-interface/components/navbar";
 import { useAppActions, useAppState } from "../map-interface/app-state";
@@ -38,6 +37,8 @@ import { ExpansionPanel } from "~/map-interface/components/expansion-panel";
 export enum MacrostratTileset {
   Carto = "carto",
   CartoSlim = "carto-slim",
+  CartoImage = "carto-image",
+  CartoEmphasized = "carto-emphasized",
 }
 
 const h = hyper.styled(styles);
@@ -154,6 +155,14 @@ function FeatureRecord({ feature }) {
   ]);
 }
 
+function usePrevious(value) {
+  const ref = useRef();
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
+}
+
 function FeatureSelectionHandler({
   selectedLocation,
   setFeatures,
@@ -163,6 +172,7 @@ function FeatureSelectionHandler({
 }) {
   const mapRef = useMapRef();
   const isLoading = useAppState((state) => state.core.mapIsLoading);
+  const prevLocation = usePrevious(selectedLocation);
 
   useEffect(() => {
     const map = mapRef?.current;
@@ -171,6 +181,8 @@ function FeatureSelectionHandler({
       setFeatures(null);
       return;
     }
+
+    if (isLoading && selectedLocation == prevLocation) return;
 
     const r = 2;
     const pt = map.project(selectedLocation);
@@ -274,16 +286,25 @@ function Features({ features }) {
   );
 }
 
+function getTilesetLink(tilesetID: MacrostratTileset) {
+  if (tilesetID == MacrostratTileset.CartoImage) {
+    return `https://tiles.macrostrat.org/carto/{z}/{x}/{y}.png`;
+  }
+  if (tilesetID == MacrostratTileset.CartoEmphasized) {
+    return `https://tiles.macrostrat.org/emphasized/{z}/{x}/{y}.png`;
+  }
+  return `https://next.macrostrat.org/tiles/tiles/${tilesetID}/{z}/{x}/{y}`;
+}
+
 function setSourceTileset(style: mapboxgl.Style, tileset: MacrostratTileset) {
+  const tilesetLink = getTilesetLink(tileset);
   return {
     ...style,
     sources: {
       ...style.sources,
       burwell: {
         type: "vector",
-        tiles: [
-          `https://next.macrostrat.org/tiles/tiles/${tileset}/{z}/{x}/{y}`,
-        ],
+        tiles: [tilesetLink],
         tileSize: 512,
       },
     },
@@ -303,11 +324,7 @@ async function buildDevMapStyle(
   const style = await getMapboxStyle(baseMapURL, {
     access_token: mapboxgl.accessToken,
   });
-  const {
-    inDarkMode,
-    xRay = false,
-    tileset = MacrostratTileset.CartoSlim,
-  } = styleOptions;
+  const { inDarkMode, xRay = false, tileset } = styleOptions;
   const overlayStyles: any = xRay ? buildXRayStyle({ inDarkMode }) : mapStyle;
 
   return removeMapLabels(

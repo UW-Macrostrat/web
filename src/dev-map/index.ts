@@ -15,6 +15,16 @@ export default function MapInspectorApp() {
         path: "carto-slim",
         element: h(MapInspector, { tileset: MacrostratTileset.CartoSlim }),
       }),
+      h(Route, {
+        path: "carto-image",
+        element: h(MapInspector, { tileset: MacrostratTileset.CartoImage }),
+      }),
+      h(Route, {
+        path: "carto-emphasized",
+        element: h(MapInspector, {
+          tileset: MacrostratTileset.CartoEmphasized,
+        }),
+      }),
       h(Route, { path: "*", element: h(MapInspectorIndex) }),
     ]),
   ]);
@@ -33,7 +43,9 @@ function MapInspectorIndex() {
   return h("div.map-inspector-index", [
     h("ul.layers", [
       h(LinkItem, { to: "carto" }, "Carto"),
-      h(LinkItem, { to: "carto-slim" }, "Carto-Slim"),
+      h(LinkItem, { to: "carto-slim" }, "Carto (slim)"),
+      h(LinkItem, { to: "carto-image" }, "Carto (image)"),
+      h(LinkItem, { to: "carto-emphasized" }, "Carto (image, emphasized)"),
     ]),
   ]);
 }
