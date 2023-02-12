@@ -200,6 +200,34 @@ function KeyValue({ label, value }) {
   return h("span.key-value", [h("span.key", label), h("code.value", value)]);
 }
 
+function LoadingAwareFeatureSet({ features, sourceID }) {
+  const map = useMapRef();
+  if (map?.current == null) return null;
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  const sourceFeatures = features.filter((d) => d.source == "burwell");
+
+  useEffect(() => {
+    if (sourceFeatures.length > 0) {
+      setIsLoaded(true);
+      return;
+    }
+
+    const isLoaded = map.current.isSourceLoaded(sourceID);
+    setIsLoaded(isLoaded);
+    if (!isLoaded) {
+      map.current.once("sourcedata", (e) => {
+        if (e.sourceId == sourceID) {
+          setIsLoaded(true);
+        }
+      });
+    }
+  }, [map.current, sourceID, sourceFeatures.length]);
+
+  if (!isLoaded) return h(Spinner);
+  return h(Features, { features: sourceFeatures });
+}
+
 function FeaturePanel({ features }) {
   if (features == null) return null;
   return h("div.feature-panel", [
@@ -210,7 +238,12 @@ function FeaturePanel({ features }) {
         className: "macrostrat-features",
         expanded: true,
       },
-      [h(Features, { features: features.filter((d) => d.source == "burwell") })]
+      [
+        h(LoadingAwareFeatureSet, {
+          features,
+          sourceID: "burwell",
+        }),
+      ]
     ),
     h(
       ExpansionPanel,
@@ -331,6 +364,7 @@ export function DevMapView(props: DevMapViewProps) {
     */
   const [mapInitialized, setMapInitialized] = useState(false);
 
+  // Map initialization
   useEffect(() => {
     initializeDevMap(baseMapURL, mapPosition, {
       inDarkMode: isDarkMode,
@@ -341,6 +375,7 @@ export function DevMapView(props: DevMapViewProps) {
     });
   }, []);
 
+  // Map style updating
   useEffect(() => {
     const map = mapRef.current;
     if (map == null) return;
