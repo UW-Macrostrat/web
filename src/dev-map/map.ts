@@ -32,6 +32,7 @@ import {
 import { CoreMapView, MapMarker } from "~/map-interface/map-page/map-view";
 import styles from "./main.module.styl";
 import { group } from "d3-array";
+import { ExpansionPanel } from "~/map-interface/components/expansion-panel";
 
 const h = hyper.styled(styles);
 
@@ -60,9 +61,6 @@ export function DevMapPage({
 
   const [inspectPosition, setInspectPosition] =
     useState<mapboxgl.LngLat | null>(null);
-
-  const isDetailPanelOpen = inspectPosition !== null;
-  const detailPanelTrans = useTransition(isDetailPanelOpen, 800);
 
   const [data, setData] = useState(null);
 
@@ -164,7 +162,26 @@ function KeyValue({ label, value }) {
 
 function FeaturePanel({ features }) {
   if (features == null) return null;
-  return h("div.feature-panel", [h(Features, { features })]);
+  return h("div.feature-panel", [
+    h(
+      ExpansionPanel,
+      {
+        title: "Macrostrat map features",
+        className: "macrostrat-features",
+        expanded: true,
+      },
+      [h(Features, { features: features.filter((d) => d.source == "burwell") })]
+    ),
+    h(
+      ExpansionPanel,
+      { title: "Basemap features", className: "basemap-features" },
+      [
+        h(Features, {
+          features: features.filter((d) => d.source != "burwell"),
+        }),
+      ]
+    ),
+  ]);
 }
 
 function Features({ features }) {
