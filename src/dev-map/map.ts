@@ -31,6 +31,7 @@ import {
 } from "../map-interface/map-page/map-style";
 import { CoreMapView, MapMarker } from "~/map-interface/map-page/map-view";
 import styles from "./main.module.styl";
+import { group } from "d3-array";
 
 const h = hyper.styled(styles);
 
@@ -97,7 +98,7 @@ export function DevMapPage({
         },
         position: inspectPosition,
       },
-      h(Features, { features: data })
+      h(FeaturePanel, { features: data })
     );
   }
 
@@ -136,12 +137,24 @@ export function DevMapPage({
 }
 
 function FeatureRecord({ feature }) {
+  const props = feature.properties;
   return h("div.feature-record", [
-    h("div.feature-record-header", [
-      h(KeyValue, { label: "Source", value: feature.source }),
-      h(KeyValue, { label: "Layer", value: feature.sourceLayer }),
+    h.if(Object.keys(props).length > 0)("div.feature-properties", [
+      h(JSONView, {
+        data: props,
+        hideRoot: true,
+      }),
     ]),
-    h(JSONView, { data: feature.properties, hideRoot: true }),
+  ]);
+}
+
+function FeatureHeader({ feature }) {
+  const props = feature.properties;
+  return h("div.feature-header", [
+    h("h3", [
+      h(KeyValue, { label: "Source", value: feature.source }),
+      h(KeyValue, { label: "Source layer", value: feature.sourceLayer }),
+    ]),
   ]);
 }
 
@@ -149,10 +162,27 @@ function KeyValue({ label, value }) {
   return h("span.key-value", [h("span.key", label), h("code.value", value)]);
 }
 
+function FeaturePanel({ features }) {
+  if (features == null) return null;
+  return h("div.feature-panel", [h(Features, { features })]);
+}
+
 function Features({ features }) {
+  /** Group features by source and sourceLayer */
+  if (features == null) return null;
+
+  const groups = group(features, (d) => `${d.source} - ${d.sourceLayer}`);
+
+  let entries = groups.entries();
+
   return h(
     "div.features",
-    features.map((feature) => h(FeatureRecord, { feature }))
+    Array.from(groups).map(([key, features]) => {
+      return h("div.feature-group", [
+        h(FeatureHeader, { feature: features[0] }),
+        features.map((feature, i) => h(FeatureRecord, { key: i, feature })),
+      ]);
+    })
   );
 }
 
@@ -186,7 +216,7 @@ async function initializeDevMap(baseMapURL, mapPosition, styleOptions) {
 
 export function DevMapView(props) {
   const { showLineSymbols, markerPosition, setMarkerPosition } = props;
-  const { mapPosition } = useAppState((state) => state.core);
+  const { mapPosition, mapIsLoading } = useAppState((state) => state.core);
 
   let mapRef = useMapRef();
   const isDarkMode = inDarkMode();
