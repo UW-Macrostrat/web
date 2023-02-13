@@ -1,7 +1,11 @@
 import h from "@macrostrat/hyper";
 import { Routes, Route, Link } from "react-router-dom";
-import { DevMapPage, MacrostratTileset } from "./map";
-import { LinkButton } from "~/map-interface/components/buttons";
+import {
+  VectorMapInspectorPage,
+  MacrostratVectorTileset,
+  MacrostratRasterTileset,
+  RasterMapInspectorPage,
+} from "./map";
 
 export default function MapInspectorApp() {
   // A route for each layer
@@ -9,33 +13,30 @@ export default function MapInspectorApp() {
     h(Routes, [
       h(Route, {
         path: "carto",
-        element: h(MapInspector, { tileset: MacrostratTileset.Carto }),
+        element: h(VectorMapInspectorPage, {
+          tileset: MacrostratVectorTileset.Carto,
+        }),
       }),
       h(Route, {
         path: "carto-slim",
-        element: h(MapInspector, { tileset: MacrostratTileset.CartoSlim }),
+        element: h(VectorMapInspectorPage, {
+          tileset: MacrostratVectorTileset.CartoSlim,
+        }),
       }),
       h(Route, {
-        path: "carto-image",
-        element: h(MapInspector, { tileset: MacrostratTileset.CartoImage }),
+        path: "carto-raster",
+        element: h(RasterMapInspectorPage, {
+          tileset: MacrostratRasterTileset.Carto,
+        }),
       }),
       h(Route, {
-        path: "carto-emphasized",
-        element: h(MapInspector, {
-          tileset: MacrostratTileset.CartoEmphasized,
+        path: "emphasized",
+        element: h(RasterMapInspectorPage, {
+          tileset: MacrostratRasterTileset.Emphasized,
         }),
       }),
       h(Route, { path: "*", element: h(MapInspectorIndex) }),
     ]),
-  ]);
-}
-
-export function MapInspector({ tileset }: { tileset: MacrostratTileset }) {
-  return h("div.map-inspector", [
-    h(DevMapPage, {
-      tileset,
-      headerElement: h([h(ParentRouteButton), h("h2", `${tileset}`)]),
-    }),
   ]);
 }
 
@@ -44,17 +45,12 @@ function MapInspectorIndex() {
     h("ul.layers", [
       h(LinkItem, { to: "carto" }, "Carto"),
       h(LinkItem, { to: "carto-slim" }, "Carto (slim)"),
-      h(LinkItem, { to: "carto-image" }, "Carto (image)"),
-      h(LinkItem, { to: "carto-emphasized" }, "Carto (image, emphasized)"),
+      h(LinkItem, { to: "carto-raster" }, "Carto (image)"),
+      h(LinkItem, { to: "emphasized" }, "Carto (image, emphasized)"),
     ]),
   ]);
 }
 
 function LinkItem({ to, children }) {
   return h("li", h(Link, { to }, children));
-}
-
-export function ParentRouteButton({ children, icon = "arrow-left", ...rest }) {
-  // A button that links to the parent route
-  return h(LinkButton, { to: "..", icon, minimal: true, ...rest });
 }

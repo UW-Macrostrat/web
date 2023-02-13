@@ -2,6 +2,8 @@
 import { Spinner, Switch } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import { useMapConditionalStyle, useMapRef } from "@macrostrat/mapbox-react";
+import { LinkButton } from "~/map-interface/components/buttons";
+
 import {
   getMapboxStyle,
   mergeStyles,
@@ -34,21 +36,28 @@ import styles from "./main.module.styl";
 import { group } from "d3-array";
 import { ExpansionPanel } from "~/map-interface/components/expansion-panel";
 
-export enum MacrostratTileset {
+export enum MacrostratVectorTileset {
   Carto = "carto",
   CartoSlim = "carto-slim",
-  CartoImage = "carto-image",
-  CartoEmphasized = "carto-emphasized",
+}
+
+export enum MacrostratRasterTileset {
+  Carto = "carto",
+  Emphasized = "emphasized",
 }
 
 const h = hyper.styled(styles);
 
-export function DevMapPage({
-  headerElement = null,
-  tileset = MacrostratTileset.CartoSlim,
+export function ParentRouteButton({ children, icon = "arrow-left", ...rest }) {
+  // A button that links to the parent route
+  return h(LinkButton, { to: "..", icon, minimal: true, ...rest });
+}
+
+export function VectorMapInspectorPage({
+  tileset = MacrostratVectorTileset.CartoSlim,
 }: {
   headerElement?: React.ReactElement;
-  tileset?: MacrostratTileset;
+  tileset?: MacrostratVectorTileset;
 }) {
   // A stripped-down page for map development
   const runAction = useAppActions();
@@ -98,7 +107,7 @@ export function DevMapPage({
     MapAreaContainer,
     {
       navbar: h(FloatingNavbar, { className: "searchbar" }, [
-        headerElement,
+        h([h(ParentRouteButton), h("h2", `${tileset}`)]),
         h("div.spacer"),
         h(LoaderButton, {
           active: isOpen,
@@ -141,6 +150,14 @@ export function DevMapPage({
       ]
     )
   );
+}
+
+export function RasterMapInspectorPage({
+  tileset,
+}: {
+  tileset: MacrostratRasterTileset;
+}) {
+  return h("div.raster-inspector");
 }
 
 function FeatureRecord({ feature }) {
@@ -286,17 +303,20 @@ function Features({ features }) {
   );
 }
 
-function getTilesetLink(tilesetID: MacrostratTileset) {
-  if (tilesetID == MacrostratTileset.CartoImage) {
+function getTilesetLink(tilesetID: MacrostratVectorTileset) {
+  if (tilesetID == MacrostratVectorTileset.CartoImage) {
     return `https://tiles.macrostrat.org/carto/{z}/{x}/{y}.png`;
   }
-  if (tilesetID == MacrostratTileset.CartoEmphasized) {
+  if (tilesetID == MacrostratVectorTileset.CartoEmphasized) {
     return `https://tiles.macrostrat.org/emphasized/{z}/{x}/{y}.png`;
   }
   return `https://next.macrostrat.org/tiles/tiles/${tilesetID}/{z}/{x}/{y}`;
 }
 
-function setSourceTileset(style: mapboxgl.Style, tileset: MacrostratTileset) {
+function setSourceTileset(
+  style: mapboxgl.Style,
+  tileset: MacrostratVectorTileset
+) {
   const tilesetLink = getTilesetLink(tileset);
   return {
     ...style,
@@ -314,7 +334,7 @@ function setSourceTileset(style: mapboxgl.Style, tileset: MacrostratTileset) {
 interface DevMapStyleOptions {
   inDarkMode?: boolean;
   xRay?: boolean;
-  tileset?: MacrostratTileset;
+  tileset?: MacrostratVectorTileset;
 }
 
 async function buildDevMapStyle(
