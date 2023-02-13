@@ -157,7 +157,7 @@ function MapAreaContainer({
   navbar,
   contextPanel = null,
   detailPanel = null,
-  detailPanelOpen = true,
+  detailPanelOpen,
   contextPanelOpen = true,
   bottomPanel = null,
   mainPanel,
@@ -179,8 +179,9 @@ function MapAreaContainer({
   contextStackProps?: HTMLDivProps;
   detailStackProps?: HTMLDivProps;
 }) {
+  const _detailPanelOpen = detailPanelOpen ?? detailPanel != null;
   const contextPanelTrans = useTransition(contextPanelOpen, 800);
-  const detailPanelTrans = useTransition(detailPanelOpen, 800);
+  const detailPanelTrans = useTransition(_detailPanelOpen, 800);
 
   /* We apply a custom style to the panel container when we are interacting
     with the search bar, so that we can block map interactions until search
@@ -191,7 +192,7 @@ function MapAreaContainer({
   const _className = classNames(
     {
       searching: false,
-      "detail-panel-open": detailPanelOpen,
+      "detail-panel-open": _detailPanelOpen,
     },
     `context-panel-${contextPanelTrans.stage}`,
     `detail-panel-${detailPanelTrans.stage}`
