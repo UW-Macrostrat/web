@@ -1,5 +1,5 @@
 // Import other components
-import { Spinner, Switch } from "@blueprintjs/core";
+import { FormGroup, Label, Slider, Spinner, Switch } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import { useMapConditionalStyle, useMapRef } from "@macrostrat/mapbox-react";
 import { LinkButton } from "~/map-interface/components/buttons";
@@ -12,7 +12,7 @@ import {
 } from "@macrostrat/mapbox-utils";
 import { JSONView, useDarkMode } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
-import { useCallback, useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { SETTINGS } from "~/map-interface/settings";
 import { LoaderButton } from "../map-interface/components/navbar";
@@ -52,6 +52,17 @@ export function ParentRouteButton({ children, icon = "arrow-left", ...rest }) {
   return h(LinkButton, { to: "..", icon, minimal: true, ...rest });
 }
 
+function useMapStyle(
+  baseMapURL: string,
+  overlayStyle: mapboxgl.Style
+): mapboxgl.Style | null {
+  const [style, setStyle] = useState(null);
+  useEffect(() => {
+    buildMapStyle(baseMapURL, overlayStyle).then(setStyle);
+  }, [baseMapURL, overlayStyle]);
+  return style;
+}
+
 export function VectorMapInspectorPage({
   tileset = MacrostratVectorTileset.CartoSlim,
 }: {
@@ -75,7 +86,6 @@ export function VectorMapInspectorPage({
   const [isOpen, setOpen] = useState(false);
   const [showLineSymbols, setShowLineSymbols] = useState(false);
   const [xRay, setXRay] = useState(true);
-  const [style, setStyle] = useState(null);
 
   const [inspectPosition, setInspectPosition] =
     useState<mapboxgl.LngLat | null>(null);
@@ -105,14 +115,15 @@ export function VectorMapInspectorPage({
 
   // Style management
   const baseMapURL = getBaseMapStyle(new Set([]), isEnabled);
-  useEffect(() => {
+
+  const overlayStyle = useMemo(() => {
     const overlayStyle: mapboxgl.Style = xRay
       ? buildXRayStyle({ inDarkMode: isEnabled })
       : (mapStyle as mapboxgl.Style);
-    buildMapStyle(baseMapURL, setSourceTileset(overlayStyle, tileset)).then(
-      setStyle
-    );
-  }, [baseMapURL, isEnabled, xRay, tileset]);
+    return setSourceTileset(overlayStyle, tileset);
+  }, [xRay, tileset, isEnabled]);
+
+  const style = useMapStyle(baseMapURL, overlayStyle);
 
   if (!loaded) return h(Spinner);
 
@@ -166,8 +177,6 @@ export function RasterMapInspectorPage({
 }: {
   tileset: MacrostratRasterTileset;
 }) {
-  // A stripped-down page for map development
-  const runAction = useAppActions();
   /* We apply a custom style to the panel container when we are interacting
     with the search bar, so that we can block map interactions until search
     bar focus is lost.
@@ -181,15 +190,15 @@ export function RasterMapInspectorPage({
 
   let detailElement = null;
 
-  const style = useRef(null);
-
   const { isEnabled } = useDarkMode();
   const baseMapURL = getBaseMapStyle(new Set([]), isEnabled);
-  useEffect(() => {
-    buildMapStyle(baseMapURL, {}).then((style) => {
-      style.current = style;
-    });
-  }, [baseMapURL]);
+
+  const rasterStyle = useMemo(() => {
+    return buildRasterStyle(tileset);
+  }, [tileset]);
+
+  const style = useMapStyle(baseMapURL, rasterStyle);
+  const [opacity, setOpacity] = useState(0.5);
 
   return h(
     MapAreaContainer,
@@ -204,15 +213,42 @@ export function RasterMapInspectorPage({
         }),
       ]),
       contextPanel: h(PanelCard, [
-        h("p.raster-info", "Macrostrat's raster tileset"),
+        h(FormGroup, { className: "opacity-slider" }, [
+          h(Label, "Opacity"),
+          h(Slider, {
+            min: 0,
+            max: 1,
+            stepSize: 0.01,
+            value: opacity,
+            onChange(v) {
+              setOpacity(v);
+            },
+          }),
+        ]),
       ]),
       detailPanel: detailElement,
       contextPanelOpen: isOpen,
     },
-    h(DevMapView, {
-      style: style.current,
-    })
+    h(
+      DevMapView,
+      {
+        style,
+      },
+      [h(RasterOpacityManager, { layerID: "burwell", opacity })]
+    )
   );
+}
+
+export function RasterOpacityManager({ layerID, opacity }) {
+  const mapRef = useMapRef();
+  useEffect(() => {
+    if (mapRef.current == null) return;
+    const map = mapRef.current;
+    const layer = map.getLayer(layerID);
+    if (layer == null) return;
+    map.setPaintProperty(layerID, "raster-opacity", opacity);
+  }, [mapRef, opacity, layerID]);
+  return null;
 }
 
 export function FeatureRecord({ feature }) {
@@ -227,28 +263,48 @@ export function FeatureRecord({ feature }) {
   ]);
 }
 
-function getTilesetLink(tilesetID: MacrostratVectorTileset) {
-  if (tilesetID == MacrostratVectorTileset.CartoImage) {
-    return `https://tiles.macrostrat.org/carto/{z}/{x}/{y}.png`;
+function buildRasterStyle(layer: MacrostratRasterTileset) {
+  let tileURL = `https://tiles.macrostrat.org/${layer}/{z}/{x}/{y}.png`;
+
+  if (layer == MacrostratRasterTileset.Emphasized) {
+    tileURL = `https://macrostrat.org/api/v2/maps/burwell/emphasized/{z}/{x}/{y}/tile.png`;
   }
-  if (tilesetID == MacrostratVectorTileset.CartoEmphasized) {
-    return `https://tiles.macrostrat.org/emphasized/{z}/{x}/{y}.png`;
-  }
-  return `https://next.macrostrat.org/tiles/tiles/${tilesetID}/{z}/{x}/{y}`;
+
+  return {
+    version: 8,
+    sources: {
+      burwell: {
+        type: "raster",
+        tiles: [tileURL],
+        tileSize: 256,
+      },
+    },
+    layers: [
+      {
+        id: "burwell",
+        type: "raster",
+        source: "burwell",
+        paint: {
+          "raster-opacity": 0.5,
+        },
+      },
+    ],
+  };
 }
 
 function setSourceTileset(
   style: mapboxgl.Style,
   tileset: MacrostratVectorTileset
 ) {
-  const tilesetLink = getTilesetLink(tileset);
   return {
     ...style,
     sources: {
       ...style.sources,
       burwell: {
         type: "vector",
-        tiles: [tilesetLink],
+        tiles: [
+          `https://next.macrostrat.org/tiles/tiles/${tileset}/{z}/{x}/{y}`,
+        ],
         tileSize: 512,
       },
     },
@@ -299,7 +355,7 @@ interface DevMapViewProps {
   children: React.ReactNode;
 }
 
-export function DevMapView(props: DevMapViewProps) {
+export function DevMapView(props: DevMapViewProps): React.ReactElement {
   const { style, children } = props;
   const { mapPosition } = useAppState((state) => state.core);
 
@@ -316,7 +372,6 @@ export function DevMapView(props: DevMapViewProps) {
   useEffect(() => {
     if (mapRef.current != null) return;
     if (style == null) return;
-    console.log(mapRef, style);
     mapRef.current = initializeMap({ style });
     setMapInitialized(true);
   }, [style]);

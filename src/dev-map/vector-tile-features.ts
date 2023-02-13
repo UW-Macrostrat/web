@@ -48,6 +48,7 @@ export function FeatureSelectionHandler({
 
   return null;
 }
+
 function FeatureHeader({ feature }) {
   const props = feature.properties;
   return h("div.feature-header", [
