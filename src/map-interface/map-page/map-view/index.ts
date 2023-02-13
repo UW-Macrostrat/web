@@ -108,66 +108,6 @@ async function buildDevMapStyle(baseMapURL, styleOptions = {}) {
   return removeMapLabels(mergeStyles(style, xRayStyle));
 }
 
-async function initializeDevMap(baseMapURL, mapPosition, styleOptions) {
-  mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
-
-  const map = new mapboxgl.Map({
-    container: "map",
-    style: await buildDevMapStyle(baseMapURL, styleOptions),
-    maxZoom: 18,
-    //maxTileCacheSize: 0,
-    logoPosition: "bottom-left",
-    trackResize: true,
-    antialias: true,
-    optimizeForTerrain: true,
-  });
-
-  setMapPosition(map, mapPosition);
-  map.showTileBoundaries = false;
-
-  return map;
-}
-
-export function DevMapView(props) {
-  const { showLineSymbols, markerPosition, setMarkerPosition } = props;
-  const { mapPosition } = useAppState((state) => state.core);
-
-  let mapRef = useMapRef();
-  const isDarkMode = inDarkMode();
-
-  const baseMapURL = getBaseMapStyle(new Set([]), isDarkMode);
-
-  /* HACK: Right now we need this to force a render when the map
-    is done loading
-    */
-  const [mapInitialized, setMapInitialized] = useState(false);
-
-  useEffect(() => {
-    initializeDevMap(baseMapURL, mapPosition, { inDarkMode: isDarkMode }).then(
-      (map) => {
-        mapRef.current = map;
-        setMapInitialized(true);
-      }
-    );
-  }, [isDarkMode]);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null) return;
-    setMapPosition(map, mapPosition);
-  }, [mapRef.current, mapInitialized]);
-
-  // This seems to do a bit of a poor job at the moment. Maybe because fo caching?
-  useMapConditionalStyle(mapRef, showLineSymbols, toggleLineSymbols);
-
-  return h(CoreMapView, null, [
-    h(MapMarker, {
-      position: markerPosition,
-      setPosition: setMarkerPosition,
-    }),
-  ]);
-}
-
 export default function MainMapView(props) {
   const {
     filters,
