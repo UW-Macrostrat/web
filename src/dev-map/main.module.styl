@@ -25,7 +25,6 @@
   margin-bottom: 0
   margin-top: 0.5em
 
-
 .feature-group
   border-bottom: 1px solid var(--panel-rule-color)
   padding: 0 1em
@@ -35,9 +34,23 @@
   &:last-child
     border-bottom: none
 
+.tile-info
+  display flex
+  flex-direction: row
+  align-items: baseline
+  padding 0 1em
+  gap 0.5em
+    
+
 .opacity-slider
   margin: 0 1em 0.5em
   :global
     .bp4-slider-handle .bp4-slider-label
       background-color: var(--secondary-color)
       color: var(--text-color)
+
+.unit-number
+  .unit
+    font-size: 0.9em
+    margin-left: 0.2em
+    font-weight: bold

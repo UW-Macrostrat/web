@@ -3,6 +3,7 @@ import { FormGroup, Label, Slider, Spinner, Switch } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import { useMapConditionalStyle, useMapRef } from "@macrostrat/mapbox-react";
 import { LinkButton } from "~/map-interface/components/buttons";
+import { createContext } from "react";
 
 import {
   getMapboxStyle,
@@ -32,7 +33,11 @@ import {
   toggleLineSymbols,
 } from "../map-interface/map-page/map-style";
 import { CoreMapView, MapMarker } from "~/map-interface/map-page/map-view";
-import { FeaturePanel, FeatureSelectionHandler } from "./vector-tile-features";
+import {
+  FeaturePanel,
+  FeatureSelectionHandler,
+  TileInfo,
+} from "./vector-tile-features";
 import styles from "./main.module.styl";
 
 export enum MacrostratVectorTileset {
@@ -86,6 +91,7 @@ export function VectorMapInspectorPage({
   const [isOpen, setOpen] = useState(false);
   const [showLineSymbols, setShowLineSymbols] = useState(false);
   const [xRay, setXRay] = useState(true);
+  const [showTileExtent, setShowTileExtent] = useState(false);
 
   const [inspectPosition, setInspectPosition] =
     useState<mapboxgl.LngLat | null>(null);
@@ -107,7 +113,14 @@ export function VectorMapInspectorPage({
         },
         position: inspectPosition,
       },
-      h(FeaturePanel, { features: data })
+      [
+        h(TileInfo, {
+          feature: data?.[0] ?? null,
+          showExtent: showTileExtent,
+          setShowExtent: setShowTileExtent,
+        }),
+        h(FeaturePanel, { features: data }),
+      ]
     );
   }
 
