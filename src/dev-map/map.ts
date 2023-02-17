@@ -12,7 +12,7 @@ import {
 } from "@macrostrat/mapbox-utils";
 import { JSONView, useDarkMode } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
-import { useCallback, useEffect, useState, useRef, useMemo } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { SETTINGS } from "~/map-interface/settings";
 import { LoaderButton } from "../map-interface/components/navbar";
@@ -184,6 +184,13 @@ export function RasterMapInspectorPage({
     the search bar on mobile platforms
   */
 
+  // This appears necessary to get the position to set successfully
+  const runAction = useAppActions();
+  const loaded = useSelector((state) => state.core.initialLoadComplete);
+  useEffect(() => {
+    runAction({ type: "get-initial-map-state" });
+  }, []);
+
   const [isOpen, setOpen] = useState(false);
 
   const isLoading = useAppState((state) => state.core.mapIsLoading);
@@ -199,6 +206,8 @@ export function RasterMapInspectorPage({
 
   const style = useMapStyle(baseMapURL, rasterStyle);
   const [opacity, setOpacity] = useState(0.5);
+
+  if (!loaded) return h(Spinner);
 
   return h(
     MapAreaContainer,
