@@ -273,11 +273,11 @@ export function FeatureRecord({ feature }) {
 }
 
 function buildRasterStyle(layer: MacrostratRasterTileset) {
-  let tileURL = `https://tiles.macrostrat.org/${layer}/{z}/{x}/{y}.png`;
+  let tileURL = SETTINGS.burwellTileDomain + `/${layer}/{z}/{x}/{y}.png`;
 
-  if (layer == MacrostratRasterTileset.Emphasized) {
-    tileURL = `https://next.macrostrat.org/tiles/tiles/carto/{z}/{x}/{y}.png`;
-  }
+  // if (layer == MacrostratRasterTileset.Emphasized) {
+  //   tileURL = `https://next.macrostrat.org/tiles/tiles/carto/{z}/{x}/{y}.png`;
+  // }
 
   return {
     version: 8,
@@ -311,9 +311,7 @@ function setSourceTileset(
       ...style.sources,
       burwell: {
         type: "vector",
-        tiles: [
-          `https://next.macrostrat.org/tiles/tiles/${tileset}/{z}/{x}/{y}`,
-        ],
+        tiles: [SETTINGS.burwellTileDomain + `/${tileset}/{z}/{x}/{y}.mvt`],
         tileSize: 512,
       },
     },

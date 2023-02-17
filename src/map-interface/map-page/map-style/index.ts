@@ -20,9 +20,7 @@ export function buildXRayStyle({ inDarkMode = false }): mapboxgl.Style {
     sources: {
       burwell: {
         type: "vector",
-        tiles: [
-          `https://next.macrostrat.org/tiles/tiles/carto-slim/{z}/{x}/{y}`,
-        ],
+        tiles: [SETTINGS.burwellTileDomain + `/carto-slim/{z}/{x}/{y}`],
         tileSize: 512,
       },
     },
