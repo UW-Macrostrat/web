@@ -3,7 +3,6 @@ import { FormGroup, Label, Slider, Spinner, Switch } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import { useMapConditionalStyle, useMapRef } from "@macrostrat/mapbox-react";
 import { LinkButton } from "~/map-interface/components/buttons";
-import { createContext } from "react";
 
 import {
   getMapboxStyle,
@@ -38,7 +37,9 @@ import {
   FeatureSelectionHandler,
   TileInfo,
 } from "./vector-tile-features";
+import { TileExtentLayer } from "./tile-extent";
 import styles from "./main.module.styl";
+import { tileToGeoJSON } from "@mapbox/tilebelt";
 
 export enum MacrostratVectorTileset {
   Carto = "carto",
@@ -133,10 +134,16 @@ export function VectorMapInspectorPage({
     const overlayStyle: mapboxgl.Style = xRay
       ? buildXRayStyle({ inDarkMode: isEnabled })
       : (mapStyle as mapboxgl.Style);
-    return setSourceTileset(overlayStyle, tileset);
+    return addExtraLayers(overlayStyle, tileset);
   }, [xRay, tileset, isEnabled]);
 
   const style = useMapStyle(baseMapURL, overlayStyle);
+
+  let tile = null;
+  if (showTileExtent && data?.[0] != null) {
+    let f = data[0];
+    tile = { x: f._x, y: f._y, z: f._z };
+  }
 
   if (!loaded) return h(Spinner);
 
@@ -181,6 +188,7 @@ export function VectorMapInspectorPage({
         setPosition: onSelectPosition,
       }),
       h(LineSymbolManager, { showLineSymbols }),
+      h(TileExtentLayer, { tile, color: isEnabled ? "white" : "black" }),
     ])
   );
 }
@@ -314,7 +322,7 @@ function buildRasterStyle(layer: MacrostratRasterTileset) {
   };
 }
 
-function setSourceTileset(
+function addExtraLayers(
   style: mapboxgl.Style,
   tileset: MacrostratVectorTileset
 ) {
