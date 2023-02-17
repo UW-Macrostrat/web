@@ -267,7 +267,7 @@ function buildRasterStyle(layer: MacrostratRasterTileset) {
   let tileURL = `https://tiles.macrostrat.org/${layer}/{z}/{x}/{y}.png`;
 
   if (layer == MacrostratRasterTileset.Emphasized) {
-    tileURL = `https://macrostrat.org/api/v2/maps/burwell/emphasized/{z}/{x}/{y}/tile.png`;
+    tileURL = `https://next.macrostrat.org/tiles/tiles/carto/{z}/{x}/{y}.png`;
   }
 
   return {
