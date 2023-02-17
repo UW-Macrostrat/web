@@ -214,9 +214,11 @@ export function updateMapPositionForHash(
 
     let { show = [], hide = [] } = hashData;
     // Set default view parameters
+    console.log(state.infoMarkerPosition);
+
     const {
-      x = state.infoMarkerPosition?.lng ?? 16,
-      y = state.infoMarkerPosition?.lat ?? 23,
+      x = state.infoMarkerPosition?.lng ?? 0,
+      y = state.infoMarkerPosition?.lat ?? 0,
       // Different default for zoom depending on whether we have a marker
       z = state.infoMarkerPosition != null ? 7 : 2,
       a = 0,
