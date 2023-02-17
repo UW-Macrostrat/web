@@ -19,7 +19,6 @@ export function TileExtentLayer({
       if (val == null) {
         return map.setStyle(style);
       }
-      console.log("moving forward");
       const { x, y, z } = val;
       const extent = tileToGeoJSON([x, y, z]);
       const source = {
