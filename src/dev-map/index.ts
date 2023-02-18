@@ -42,11 +42,17 @@ export default function MapInspectorApp() {
 
 function MapInspectorIndex() {
   return h("div.map-inspector-index", [
+    h("h1", "Map layer inspectors"),
     h("ul.layers", [
       h(LinkItem, { to: "carto" }, "Carto"),
       h(LinkItem, { to: "carto-slim" }, "Carto (slim)"),
       h(LinkItem, { to: "carto-raster" }, "Carto (image)"),
       h(LinkItem, { to: "emphasized" }, "Carto (image, emphasized)"),
+    ]),
+    h("h1", "Rendering libraries"),
+    h("ul.renderers", [
+      h(LinkItem, { to: "globe" }, "Globe"),
+      h(LinkItem, { to: "cesium-vector-providers" }, "Cesium Vector Provider"),
     ]),
   ]);
 }

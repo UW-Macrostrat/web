@@ -20,8 +20,6 @@ import { routerBasename, SETTINGS } from "./map-interface/settings";
 import { DarkModeProvider } from "@macrostrat/ui-components";
 import { GlobePage } from "./map-interface";
 
-import CesiumExample from "cesium-vector-provider-standalone-example";
-
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 const routerMiddleware = createRouterMiddleware(browserHistory);

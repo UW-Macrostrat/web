@@ -2,7 +2,7 @@ import { Suspense, useEffect, useRef } from "react";
 // Import other components
 import hyper from "@macrostrat/hyper";
 import Searchbar from "../components/navbar";
-import { Spinner, HTMLDivProps } from "@blueprintjs/core";
+import { Spinner, HTMLDivProps, Button, Switch } from "@blueprintjs/core";
 import { useSelector } from "react-redux";
 import loadable from "@loadable/component";
 import {
@@ -24,8 +24,6 @@ import { MenuPage, PanelCard } from "./menu";
 import { useState } from "react";
 import { FloatingNavbar } from "../components/navbar";
 import { LocationPanel } from "../components/info-drawer";
-import { useCallback } from "react";
-import { LayoutWaiter } from "../debug";
 import { LinkButton } from "../components/buttons";
 import { LoaderButton } from "../components/navbar";
 
@@ -293,7 +291,6 @@ function MapAreaContainer({
   ]);
 }
 
-
 function FeatureRecord({ feature }) {
   return h("div.feature-record", [
     h("div.feature-record-header", [
@@ -358,6 +355,8 @@ export function GlobePage() {
     `detail-panel-${detailPanelTrans.stage}`
   );
 
+  const [showWireframe, setShowWireframe] = useState(false);
+
   let detailElement = null;
   if (inspectPosition != null) {
     detailElement = h(
@@ -388,10 +387,17 @@ export function GlobePage() {
             isLoading,
           }),
         ]),
-        h.if(isOpen)(PanelCard, [h(LinkButton, { to: "/" }, "Go to map")]),
+        h.if(isOpen)(PanelCard, [
+          h(LinkButton, { to: "/" }, "Go to map"),
+          h(Switch, {
+            onChange: () => setShowWireframe(!showWireframe),
+            checked: showWireframe,
+            label: "Wireframe",
+          }),
+        ]),
       ]),
       //h(MapView),
-      h(CesiumView),
+      h(CesiumView, { showWireframe }),
       h("div.detail-stack.infodrawer-container", [
         h.if(detailPanelTrans.shouldMount)([detailElement]),
         h("div.spacer"),
@@ -401,5 +407,5 @@ export function GlobePage() {
   ]);
 }
 
-export { MapBackend };
+export { MapBackend, MapAreaContainer };
 export default MapPageRoutes;

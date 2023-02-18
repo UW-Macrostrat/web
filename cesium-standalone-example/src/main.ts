@@ -11,7 +11,7 @@ import CesiumViewer, {
 } from "@macrostrat/cesium-viewer";
 import "@macrostrat/cesium-viewer/dist/index.css";
 
-function BaseLayer({ enabled = true, style, accessToken, ...rest }) {
+export function BaseLayer({ enabled = true, style, accessToken, ...rest }) {
   const provider = useRef(
     new VectorProvider({
       style,
