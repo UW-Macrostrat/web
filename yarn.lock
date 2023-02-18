@@ -4001,6 +4001,7 @@ __metadata:
     "@macrostrat/router-components": ^1.0.2
     "@macrostrat/ui-components": "workspace:*"
     "@mapbox/point-geometry": ^0.1.0
+    "@mapbox/tilebelt": ^1.0.2
     "@mapbox/vector-tile": ^1.3.1
     "@mdx-js/loader": ^1.6.22
     "@mdx-js/react": ^1.5
@@ -4447,6 +4448,13 @@ __metadata:
   version: 0.1.0
   resolution: "@mapbox/point-geometry@npm:0.1.0"
   checksum: ed41c1ce0140de81039424415d9a199abba72cdb2287314e1b8c3e295da3224f7e8c1b0ae99a9b097703e7abe63e1978a518e29896989cc8bba3d482360bc22f
+  languageName: node
+  linkType: hard
+
+"@mapbox/tilebelt@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "@mapbox/tilebelt@npm:1.0.2"
+  checksum: 923bdcd93f4db4ef9cee64c622fc1852f4da461af0fb14864083e791192a84ce9d5b8e237db1cc71944c63ed3d0121f8e9da2b28c46e0d61bcbe1f99ebbde6f7
   languageName: node
   linkType: hard
 

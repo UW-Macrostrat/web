@@ -1,54 +1,51 @@
-import { forwardRef, useRef, useState, useCallback } from "react";
-import {
-  useAppActions,
-  useAppState,
-  MapLayer,
-  PositionFocusState,
-} from "~/map-interface/app-state";
-import Map from "./map";
-import { enable3DTerrain } from "./terrain";
 import hyper from "@macrostrat/hyper";
-import { useEffect, useMemo } from "react";
-import useResizeObserver from "use-resize-observer";
-import styles from "../main.module.styl";
 import {
-  useMapRef,
   useMapConditionalStyle,
   useMapLabelVisibility,
+  useMapRef,
 } from "@macrostrat/mapbox-react";
-import classNames from "classnames";
-import { debounce } from "underscore";
-import { inDarkMode } from "@macrostrat/ui-components";
 import {
-  mapViewInfo,
-  getMapPosition,
-  setMapPosition,
   getMapboxStyle,
+  getMapPosition,
+  mapViewInfo,
   mergeStyles,
   removeMapLabels,
+  setMapPosition,
 } from "@macrostrat/mapbox-utils";
-import { getExpressionForFilters } from "./filter-helpers";
+import { inDarkMode } from "@macrostrat/ui-components";
+import classNames from "classnames";
+import mapboxgl from "mapbox-gl";
+import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
+import { debounce } from "underscore";
+import useResizeObserver from "use-resize-observer";
+import {
+  MapLayer,
+  PositionFocusState,
+  useAppActions,
+  useAppState,
+} from "~/map-interface/app-state";
+import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
+import { SETTINGS } from "../../settings";
+import styles from "../main.module.styl";
 import {
   buildXRayStyle,
   MapSourcesLayer,
   mapStyle,
   toggleLineSymbols,
 } from "../map-style";
-import { SETTINGS } from "../../settings";
-import mapboxgl from "mapbox-gl";
-import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
+import { getExpressionForFilters } from "./filter-helpers";
+import Map from "./map";
+import { enable3DTerrain } from "./terrain";
 import {
-  useMapEaseToCenter,
-  getFocusState,
-  useElevationMarkerLocation,
   getBaseMapStyle,
+  getFocusState,
   getMapPadding,
-  useMapMarker,
-  MapStyledContainer,
   MapBottomControls,
+  MapStyledContainer,
+  useElevationMarkerLocation,
+  useMapEaseToCenter,
+  useMapMarker,
 } from "./utils";
-
-export { MapStyledContainer, MapBottomControls };
 
 const h = hyper.styled(styles);
 
@@ -109,66 +106,6 @@ async function buildDevMapStyle(baseMapURL, styleOptions = {}) {
   });
   const xRayStyle = buildXRayStyle(styleOptions);
   return removeMapLabels(mergeStyles(style, xRayStyle));
-}
-
-async function initializeDevMap(baseMapURL, mapPosition, styleOptions) {
-  mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
-
-  const map = new mapboxgl.Map({
-    container: "map",
-    style: await buildDevMapStyle(baseMapURL, styleOptions),
-    maxZoom: 18,
-    //maxTileCacheSize: 0,
-    logoPosition: "bottom-left",
-    trackResize: true,
-    antialias: true,
-    optimizeForTerrain: true,
-  });
-
-  setMapPosition(map, mapPosition);
-  map.showTileBoundaries = false;
-
-  return map;
-}
-
-export function DevMapView(props) {
-  const { showLineSymbols, markerPosition, setMarkerPosition } = props;
-  const { mapPosition } = useAppState((state) => state.core);
-
-  let mapRef = useMapRef();
-  const isDarkMode = inDarkMode();
-
-  const baseMapURL = getBaseMapStyle(new Set([]), isDarkMode);
-
-  /* HACK: Right now we need this to force a render when the map
-    is done loading
-    */
-  const [mapInitialized, setMapInitialized] = useState(false);
-
-  useEffect(() => {
-    initializeDevMap(baseMapURL, mapPosition, { inDarkMode: isDarkMode }).then(
-      (map) => {
-        mapRef.current = map;
-        setMapInitialized(true);
-      }
-    );
-  }, [isDarkMode]);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null) return;
-    setMapPosition(map, mapPosition);
-  }, [mapRef.current, mapInitialized]);
-
-  // This seems to do a bit of a poor job at the moment. Maybe because fo caching?
-  useMapConditionalStyle(mapRef, showLineSymbols, toggleLineSymbols);
-
-  return h(CoreMapView, null, [
-    h(MapMarker, {
-      position: markerPosition,
-      setPosition: setMarkerPosition,
-    }),
-  ]);
 }
 
 export default function MainMapView(props) {
@@ -314,7 +251,7 @@ interface MapViewProps {
   children?: React.ReactNode;
 }
 
-function CoreMapView(props: MapViewProps) {
+export function CoreMapView(props: MapViewProps) {
   const { filters, mapLayers, mapPosition, infoDrawerOpen, mapSettings } =
     useAppState((state) => state.core);
 
@@ -434,7 +371,7 @@ function CoreMapView(props: MapViewProps) {
   ]);
 }
 
-function MapMarker({ position, setPosition, centerMarker = true }) {
+export function MapMarker({ position, setPosition, centerMarker = true }) {
   const mapRef = useMapRef();
   const markerRef = useRef(null);
 
@@ -494,3 +431,5 @@ function useMapQueryHandler(
     [mapRef, markerRef, infoDrawerOpen]
   );
 }
+
+export { MapStyledContainer, MapBottomControls };

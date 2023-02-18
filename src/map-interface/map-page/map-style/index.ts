@@ -3,7 +3,7 @@ export * from "./line-symbols";
 export * from "./map-sources";
 import chroma from "chroma-js";
 
-export function buildXRayStyle({ inDarkMode = false }) {
+export function buildXRayStyle({ inDarkMode = false }): mapboxgl.Style {
   const xRayColor = (opacity = 1, darken = 0) => {
     if (!inDarkMode) {
       return chroma("rgb(74, 242, 161)")
@@ -20,9 +20,7 @@ export function buildXRayStyle({ inDarkMode = false }) {
     sources: {
       burwell: {
         type: "vector",
-        tiles: [
-          `https://next.macrostrat.org/tiles/tiles/carto-slim/{z}/{x}/{y}`,
-        ],
+        tiles: [SETTINGS.burwellTileDomain + `/carto-slim/{z}/{x}/{y}`],
         tileSize: 512,
       },
     },

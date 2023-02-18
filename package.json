@@ -67,6 +67,7 @@
     "@macrostrat/router-components": "^1.0.2",
     "@macrostrat/ui-components": "workspace:*",
     "@mapbox/point-geometry": "^0.1.0",
+    "@mapbox/tilebelt": "^1.0.2",
     "@mapbox/vector-tile": "^1.3.1",
     "@mdx-js/loader": "^1.6.22",
     "@mdx-js/react": "^1.5",
