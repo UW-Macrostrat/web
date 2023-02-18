@@ -32,8 +32,14 @@ import {
   toggleLineSymbols,
 } from "../map-interface/map-page/map-style";
 import { CoreMapView, MapMarker } from "~/map-interface/map-page/map-view";
-import { FeaturePanel, FeatureSelectionHandler } from "./vector-tile-features";
+import {
+  FeaturePanel,
+  FeatureSelectionHandler,
+  TileInfo,
+} from "./vector-tile-features";
+import { TileExtentLayer } from "./tile-extent";
 import styles from "./main.module.styl";
+import { tileToGeoJSON } from "@mapbox/tilebelt";
 
 export enum MacrostratVectorTileset {
   Carto = "carto",
@@ -86,6 +92,7 @@ export function VectorMapInspectorPage({
   const [isOpen, setOpen] = useState(false);
   const [showLineSymbols, setShowLineSymbols] = useState(false);
   const [xRay, setXRay] = useState(true);
+  const [showTileExtent, setShowTileExtent] = useState(false);
 
   const [inspectPosition, setInspectPosition] =
     useState<mapboxgl.LngLat | null>(null);
@@ -107,7 +114,14 @@ export function VectorMapInspectorPage({
         },
         position: inspectPosition,
       },
-      h(FeaturePanel, { features: data })
+      [
+        h(TileInfo, {
+          feature: data?.[0] ?? null,
+          showExtent: showTileExtent,
+          setShowExtent: setShowTileExtent,
+        }),
+        h(FeaturePanel, { features: data }),
+      ]
     );
   }
 
@@ -120,10 +134,16 @@ export function VectorMapInspectorPage({
     const overlayStyle: mapboxgl.Style = xRay
       ? buildXRayStyle({ inDarkMode: isEnabled })
       : (mapStyle as mapboxgl.Style);
-    return setSourceTileset(overlayStyle, tileset);
+    return addExtraLayers(overlayStyle, tileset);
   }, [xRay, tileset, isEnabled]);
 
   const style = useMapStyle(baseMapURL, overlayStyle);
+
+  let tile = null;
+  if (showTileExtent && data?.[0] != null) {
+    let f = data[0];
+    tile = { x: f._x, y: f._y, z: f._z };
+  }
 
   if (!loaded) return h(Spinner);
 
@@ -168,6 +188,7 @@ export function VectorMapInspectorPage({
         setPosition: onSelectPosition,
       }),
       h(LineSymbolManager, { showLineSymbols }),
+      h(TileExtentLayer, { tile, color: isEnabled ? "white" : "black" }),
     ])
   );
 }
@@ -301,7 +322,7 @@ function buildRasterStyle(layer: MacrostratRasterTileset) {
   };
 }
 
-function setSourceTileset(
+function addExtraLayers(
   style: mapboxgl.Style,
   tileset: MacrostratVectorTileset
 ) {
