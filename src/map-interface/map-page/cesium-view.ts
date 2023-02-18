@@ -2,6 +2,7 @@ import hyper from "@macrostrat/hyper";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { MapChangeTracker, MapClickHandler } from "@macrostrat/cesium-viewer";
+import { Resource } from "cesium";
 //import { GeologyLayer } from "@macrostrat/cesium-viewer/src/layers";
 import CesiumView, {
   DisplayQuality,
@@ -26,7 +27,14 @@ import {
   flyToParams,
   translateCameraPosition,
 } from "@macrostrat/cesium-viewer";
-import { BaseLayer } from "cesium-vector-provider-standalone-example/src/main";
+import {
+  BaseLayer,
+  createSkuToken,
+} from "cesium-vector-provider-standalone-example/src/main";
+import {
+  MartiniTerrainProvider,
+  MapboxTerrainResource,
+} from "@macrostrat/cesium-martini";
 
 const Cesium = require("cesiumSource/Cesium");
 import "cesium/../../Build/Cesium/Widgets/widgets.css";
@@ -34,6 +42,7 @@ import "@znemz/cesium-navigation/dist/index.css";
 
 import { SETTINGS } from "../settings";
 import { buildXRayStyle } from "./map-style";
+import { useBaseMapStyle } from "./map-view/style-helpers";
 
 const h = hyper.styled(styles);
 
@@ -102,6 +111,32 @@ function MacrostratSatelliteLayer() {
 //   return h(ImageryLayer, { imageryProvider: provider, ...rest });
 // }
 
+export class MapboxTerrainResource2 extends MapboxTerrainResource {
+  resource: Resource = null;
+
+  constructor(opts = {}) {
+    super(opts);
+
+    // overrides based on highResolution flag
+    this.maxZoom = 14;
+    this.tileSize = 512;
+
+    this.resource = Resource.createIfNeeded(
+      `https://api.mapbox.com/raster/v1/mapbox.mapbox-terrain-dem-v1/{z}/{x}/{y}.png`
+    );
+    if (opts.accessToken) {
+      this.resource.setQueryParameters({
+        access_token: opts.accessToken,
+        sku: createSkuToken().token,
+      });
+    }
+  }
+}
+
+const resource = new MapboxTerrainResource2({
+  accessToken: SETTINGS.mapboxAccessToken,
+});
+
 function MacrostratCesiumView(props) {
   const runAction = useAppActions();
   const terrainExaggeration =
@@ -124,6 +159,10 @@ function MacrostratCesiumView(props) {
     ...flyToParams(translateCameraPosition(pos)),
     duration: 0,
   });
+
+  const baseMapURL = useBaseMapStyle().replace("?optimize=true", "");
+
+  const terrain = useRef(new MartiniTerrainProvider({ resource }));
 
   const onTileLoadEvent = useCallback(
     (count) => {
@@ -175,18 +214,19 @@ function MacrostratCesiumView(props) {
             terrainExaggeration,
             displayQuality,
             showInspector,
-            terrainProvider,
+            terrainProvider: terrain.current,
             //initialPosition: flyTo.destination ?? initialPosition,
             flyTo,
             ...props,
           },
           [
-            h(BaseLayer, {
-              style: "mapbox://styles/jczaplewski/ckxeiii3a1jv415o8rxvgqlpd",
-              accessToken: SETTINGS.mapboxAccessToken,
-            }),
+            // "mapbox://styles/jczaplewski/ckxeiii3a1jv415o8rxvgqlpd"
+            // h(BaseLayer, {
+            //   style: baseMapURL,
+            //   accessToken: SETTINGS.mapboxAccessToken,
+            // }),
             //h.if(!hasSatellite)(HillshadeLayer),
-            //h(SatelliteLayer),
+            h(SatelliteLayer),
             // h.if(style != null)(BaseLayer, {
             //   alpha: 1,
             //   style, //"mapbox://styles/jczaplewski/ckxcu9zmu4aln14mfg4monlv3/draft",

@@ -27,17 +27,12 @@ import {
 import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
 import { SETTINGS } from "../../settings";
 import styles from "../main.module.styl";
-import {
-  buildXRayStyle,
-  MapSourcesLayer,
-  mapStyle,
-  toggleLineSymbols,
-} from "../map-style";
+import { MapSourcesLayer, mapStyle, toggleLineSymbols } from "../map-style";
 import { getExpressionForFilters } from "./filter-helpers";
 import Map from "./map";
 import { enable3DTerrain } from "./terrain";
+import { useBaseMapStyle } from "./style-helpers";
 import {
-  getBaseMapStyle,
   getFocusState,
   getMapPadding,
   MapBottomControls,
@@ -100,14 +95,6 @@ async function initializeMap(baseMapURL, mapPosition, infoMarkerPosition) {
   return map;
 }
 
-async function buildDevMapStyle(baseMapURL, styleOptions = {}) {
-  const style = await getMapboxStyle(baseMapURL, {
-    access_token: mapboxgl.accessToken,
-  });
-  const xRayStyle = buildXRayStyle(styleOptions);
-  return removeMapLabels(mergeStyles(style, xRayStyle));
-}
-
 export default function MainMapView(props) {
   const {
     filters,
@@ -131,7 +118,7 @@ export default function MainMapView(props) {
   const handleMapQuery = useMapQueryHandler(mapRef, markerRef, infoDrawerOpen);
   const isDarkMode = inDarkMode();
 
-  const baseMapURL = getBaseMapStyle(mapLayers, isDarkMode);
+  const baseMapURL = useBaseMapStyle();
 
   /* HACK: Right now we need this to force a render when the map
     is done loading

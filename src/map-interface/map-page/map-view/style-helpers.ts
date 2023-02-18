@@ -1,4 +1,13 @@
 import { MapLayer } from "~/map-interface/app-state";
+import { inDarkMode } from "@macrostrat/ui-components";
+import { useAppState } from "~/map-interface/app-state";
+import { getBaseMapStyle } from "./utils";
+
+export function useBaseMapStyle() {
+  const mapLayers = useAppState((state) => state.core.mapLayers);
+  const isDarkMode = inDarkMode();
+  return getBaseMapStyle(mapLayers, isDarkMode);
+}
 
 function setMapStyle(class_, map, mapStyle, props) {
   const prevMapLayers = class_.props.mapLayers;
