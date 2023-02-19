@@ -20,7 +20,7 @@ import {
   MenuPage,
   useAppState,
 } from "../app-state";
-import { SearchResults } from "../components/searchbar";
+import { SearchResults } from "../components/navbar";
 import classNames from "classnames";
 import styles from "./main.module.styl";
 import loadable from "@loadable/component";
@@ -36,6 +36,7 @@ import { SettingsPanel, ExperimentsPanel, ThemeButton } from "./settings-panel";
 import { useState, useEffect } from "react";
 import { LinkButton, LayerButton, ListButton } from "../components/buttons";
 import { routerBasename } from "../settings";
+import { Card } from "@blueprintjs/core";
 
 function ChangelogPanel() {
   return h("div.bp4-text.text-panel", [h(Changelog)]);
@@ -247,6 +248,9 @@ const Menu = (props: MenuProps) => {
     elementForMenuPage(menuPage)
   );
 };
+
+export const PanelCard = (props) =>
+  h(Card, { ...props, className: classNames("panel-card", props.className) });
 
 function elementForMenuPage(page: MenuPage) {
   switch (page) {

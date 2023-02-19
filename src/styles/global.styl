@@ -14,6 +14,7 @@
   --accent-hover-color: $light-gray1
   --accent-border-color: $gray5
   --panel-background-color: #fff
+  --panel-secondary-background-color: #f5f8fa
   --translucent-panel-background-color: rgba(255,255,255,0.2)
   --panel-rule-color: #ddd
   --accent-secondary-color: #F5F8FA
@@ -54,10 +55,12 @@ body
   font-family: 'Source Sans Pro', sans-serif;
   &.bp4-dark
     color: $dark-text;
+    background-color: $dark-background;
     --text-color: $dark-text
     --text-emphasized-color: #fff
     --text-subtle-color: $gray3
     --panel-background-color: $dark-background
+    --panel-secondary-background-color: lighten($dark-background, 5%)
     --translucent-panel-background-color: alpha($dark-background, 0.6)
     --accent-color: $accent // light gray 3
     --accent-secondary-color: lighten($accent, 0%)

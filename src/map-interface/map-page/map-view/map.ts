@@ -1,10 +1,9 @@
 import { Component, forwardRef } from "react";
-import { SETTINGS } from "../../settings";
 import { getPBDBData } from "./filter-helpers";
 import h from "@macrostrat/hyper";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { buildMapStyle } from "../map-style";
+import { buildMacrostratStyle } from "../map-style";
 import { setMapStyle } from "./style-helpers";
 import { MapLayer } from "~/map-interface/app-state";
 import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
@@ -51,7 +50,7 @@ class VestigialMap extends Component<MapProps, {}> {
     }
 
     const { mapLayers } = this.props;
-    buildMapStyle().layers.forEach((layer) => {
+    buildMacrostratStyle().layers.forEach((layer) => {
       // Populate the objects that track interaction states
       this.hoverStates[layer.id] = null;
       this.selectedStates[layer.id] = null;
@@ -107,14 +106,6 @@ class VestigialMap extends Component<MapProps, {}> {
 
     // disable map rotation using touch rotation gesture
     //this.map.touchZoomRotate.disableRotation();
-    const ignoredSources = ["elevationMarker", "elevationPoints"];
-
-    this.map.on("sourcedataloading", (evt) => {
-      if (ignoredSources.includes(evt.sourceId) || this.props.mapIsLoading) {
-        return;
-      }
-      this.props.runAction({ type: "map-loading" });
-    });
 
     this.map.on("moveend", () => {
       // Force a hit to the API to refresh
@@ -299,7 +290,7 @@ class VestigialMap extends Component<MapProps, {}> {
     this.setupMapHandlers();
     if (this.map == null) return false;
 
-    setMapStyle(this, this.map, buildMapStyle(), nextProps);
+    setMapStyle(this, this.map, buildMacrostratStyle(), nextProps);
 
     if (nextProps.mapIsRotated !== this.props.mapIsRotated) {
       return true;
@@ -357,7 +348,7 @@ class VestigialMap extends Component<MapProps, {}> {
         // zoom to user location
       }
     }
-    const mapStyle = buildMapStyle();
+    const mapStyle = buildMacrostratStyle();
     // Handle changes to map filters
     if (nextProps.filters != this.props.filters) {
       // If all filters have been removed simply reset the filter states

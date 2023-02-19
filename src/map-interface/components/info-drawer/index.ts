@@ -20,7 +20,18 @@ import { useCallback } from "react";
 const h = hyper.styled(styles);
 
 function InfoDrawerContainer(props) {
-  return h(Card, { className: "infodrawer", ...props });
+  const className = classNames("infodrawer", props.className);
+
+  return h(Card, { ...props, className });
+}
+
+export function LocationPanel(props) {
+  const { children, className, ...rest } = props;
+  const cls = classNames("location-panel", className);
+  return h(InfoDrawerContainer, { className: cls }, [
+    h(InfoDrawerHeader, rest),
+    h("div.infodrawer-body", [h(ErrorBoundary, null, children)]),
+  ]);
 }
 
 function InfoDrawer(props) {
@@ -32,30 +43,29 @@ function InfoDrawer(props) {
 
   const runAction = useAppActions();
 
-  className = classNames("infodrawer", className, {
+  className = classNames(className, {
     loading: fetchingMapInfo,
   });
 
-  const onCloseClick = useCallback(
+  const onClose = useCallback(
     () => runAction({ type: "close-infodrawer" }),
     [runAction]
   );
 
-  return h(Card, { className }, [
-    h(InfoDrawerHeader, {
-      mapInfo,
-      onCloseClick,
-    }),
-    h("div.infodrawer-body", [
-      h(ErrorBoundary, [
-        h(
-          LoadingArea,
-          { loaded: !fetchingMapInfo },
-          h.if(!fetchingMapInfo)(InfoDrawerInterior)
-        ),
-      ]),
-    ]),
-  ]);
+  const position = useAppState((state) => state.core.infoMarkerPosition);
+  const zoom = useAppState((state) => state.core.mapPosition.target?.zoom);
+
+  return h(
+    LocationPanel,
+    { className, position, elevation: mapInfo.elevation, zoom, onClose },
+    [
+      h(
+        LoadingArea,
+        { loaded: !fetchingMapInfo },
+        h.if(!fetchingMapInfo)(InfoDrawerInterior)
+      ),
+    ]
+  );
 }
 
 function InfoDrawerInterior(props) {
