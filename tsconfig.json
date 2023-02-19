@@ -39,5 +39,5 @@
       ]
     }
   },
-  "include": ["src", "packages/column-inspector"]
+  "include": ["src"]
 }
