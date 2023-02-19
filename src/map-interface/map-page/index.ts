@@ -95,7 +95,7 @@ export const MapPage = ({
     ]),
     bottomPanel: h(ElevationChart, null),
     contextPanelOpen: contextPanelOpen || inputFocus,
-    detailPanelOpen: true,
+    detailPanelOpen: infoDrawerOpen,
     onMouseDown,
     className: inputFocus ? "searching" : null,
   });
