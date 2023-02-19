@@ -6,6 +6,7 @@ import {
   MacrostratRasterTileset,
   RasterMapInspectorPage,
 } from "./map";
+import { onDemand } from "~/_utils";
 import styles from "./main.module.styl";
 const h = hyper.styled(styles);
 
@@ -36,6 +37,10 @@ export default function MapInspectorApp() {
         element: h(RasterMapInspectorPage, {
           tileset: MacrostratRasterTileset.Emphasized,
         }),
+      }),
+      h(Route, {
+        path: "column-inspector",
+        element: h(onDemand(() => import("./column-inspector"))),
       }),
       h(Route, { path: "*", element: h(MapInspectorIndex) }),
     ]),

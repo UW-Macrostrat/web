@@ -1,5 +1,4 @@
 import { hyperStyled } from "@macrostrat/hyper";
-import { GeologicPatternProvider } from "@macrostrat/column-components";
 import { preprocessUnits, Column } from "@macrostrat/column-views";
 import { UnitLong } from "@macrostrat/api-types";
 import "@macrostrat/column-components/main.module.styl";
@@ -11,6 +10,7 @@ import { NonIdealState } from "@blueprintjs/core";
 import useBreadcrumbs from "use-react-router-breadcrumbs";
 import { LinkButton } from "../../buttons";
 import { InfoPanelSection } from "../../expansion-panel";
+import { PatternProvider } from "~/_providers";
 
 const h = hyperStyled(styles);
 
@@ -53,14 +53,6 @@ function ColumnOverlay({ columnInfo }: { columnInfo: ColumnSummary | null }) {
   );
 }
 
-function resolvePattern(name: string | number) {
-  return `//visualization-assets.s3.amazonaws.com/geologic-patterns/svg/${name}.svg`;
-}
-
 export function StratColumn(props) {
-  return h(
-    GeologicPatternProvider,
-    { resolvePattern },
-    h(ColumnOverlay, props)
-  );
+  return h(PatternProvider, h(ColumnOverlay, props));
 }
