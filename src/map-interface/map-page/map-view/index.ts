@@ -115,10 +115,9 @@ export default function MainMapView(props) {
   let mapRef = useMapRef();
   const mapIsLoading = useAppState((state) => state.core.mapIsLoading);
   useElevationMarkerLocation(mapRef, elevationMarkerLocation);
-  const { mapUse3D, mapIsRotated } = mapViewInfo(mapPosition);
+  const { mapIsRotated } = mapViewInfo(mapPosition);
   const runAction = useAppActions();
-  const markerRef = useRef(null);
-  const handleMapQuery = useMapQueryHandler(mapRef, markerRef, infoDrawerOpen);
+  const handleMapQuery = useMapQueryHandler(mapRef, infoDrawerOpen);
   const isDarkMode = inDarkMode();
 
   const baseMapURL = getBaseMapStyle(mapLayers, isDarkMode);
@@ -393,7 +392,6 @@ export function MapMarker({ position, setPosition, centerMarker = true }) {
 
 function useMapQueryHandler(
   mapRef: React.RefObject<mapboxgl.Map | null>,
-  markerRef: React.RefObject<mapboxgl.Marker | null>,
   infoDrawerOpen: boolean
 ) {
   /** Handler for map query markers */
@@ -412,12 +410,12 @@ function useMapQueryHandler(
         map_id: null,
       });
 
-      const marker =
-        markerRef.current ?? new mapboxgl.Marker({ color: "#000000" });
-      marker.setLngLat(event.lngLat).addTo(mapRef.current);
-      markerRef.current = marker;
+      // const marker =
+      //   markerRef.current ?? new mapboxgl.Marker({ color: "#000000" });
+      // marker.setLngLat(event.lngLat).addTo(mapRef.current);
+      // markerRef.current = marker;
     },
-    [mapRef, markerRef, infoDrawerOpen]
+    [mapRef, infoDrawerOpen]
   );
 }
 
