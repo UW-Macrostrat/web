@@ -1,4 +1,4 @@
-import h from "@macrostrat/hyper";
+import hyper from "@macrostrat/hyper";
 import { Routes, Route, Link } from "react-router-dom";
 import {
   VectorMapInspectorPage,
@@ -6,6 +6,8 @@ import {
   MacrostratRasterTileset,
   RasterMapInspectorPage,
 } from "./map";
+import styles from "./main.module.styl";
+const h = hyper.styled(styles);
 
 export default function MapInspectorApp() {
   // A route for each layer
@@ -41,13 +43,16 @@ export default function MapInspectorApp() {
 }
 
 function MapInspectorIndex() {
-  return h("div.map-inspector-index", [
+  return h("div.page.map-inspector-index", [
+    h("h1", "Map layer inspectors"),
     h("ul.layers", [
       h(LinkItem, { to: "carto" }, "Carto"),
       h(LinkItem, { to: "carto-slim" }, "Carto (slim)"),
       h(LinkItem, { to: "carto-raster" }, "Carto (image)"),
       h(LinkItem, { to: "emphasized" }, "Carto (image, emphasized)"),
     ]),
+    h("h1", "Stratigraphic column inspector"),
+    h(Link, { to: "column-inspector" }, "Stratigraphy"),
   ]);
 }
 
