@@ -1,4 +1,4 @@
-import h, { compose, C } from "@macrostrat/hyper";
+import { hyperStyled, compose, C } from "@macrostrat/hyper";
 import { useAPIResult, DarkModeProvider } from "@macrostrat/ui-components";
 import { MacrostratAPIProvider } from "common";
 import {
@@ -12,6 +12,9 @@ import { useColumnNav } from "common/macrostrat-columns";
 import ModalUnitPanel from "./modal-panel";
 import { preprocessUnits } from "@macrostrat/concept-app-helpers";
 import { ColumnNavigatorMap } from "@macrostrat/column-views";
+import styles from "./column-inspector.module.styl";
+
+const h = hyperStyled(styles);
 
 const ColumnTitle = (props) => {
   return h.if(props.data != null)("h1", props.data?.col_name);
@@ -47,7 +50,7 @@ function ColumnManager() {
         className: "column-map",
         currentColumn: columnFeature,
         setCurrentColumn,
-        margin: 0,
+        margin: 10,
         ...projectParams,
       }),
       h(ModalUnitPanel, { unitData: units }),
@@ -58,7 +61,6 @@ function ColumnManager() {
 const APIProvider = C(MacrostratAPIProvider, { useDev: false });
 
 const App = compose(
-  DarkModeProvider,
   PatternProvider,
   UnitSelectionProvider,
   APIProvider,

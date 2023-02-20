@@ -6,13 +6,13 @@ import {
   MacrostratRasterTileset,
   RasterMapInspectorPage,
 } from "./map";
-import { onDemand } from "~/_utils";
+import { loadableElement } from "~/_utils";
 import styles from "./main.module.styl";
 const h = hyper.styled(styles);
 
-export default function MapInspectorApp() {
+export default function DevIndex() {
   // A route for each layer
-  return h("div.map-inspector", [
+  return h("div.dev-index-page", [
     h(Routes, [
       h(Route, {
         path: "carto",
@@ -40,7 +40,7 @@ export default function MapInspectorApp() {
       }),
       h(Route, {
         path: "column-inspector",
-        element: h(onDemand(() => import("./column-inspector"))),
+        element: loadableElement(() => import("./column-inspector")),
       }),
       h(Route, { path: "*", element: h(MapInspectorIndex) }),
     ]),

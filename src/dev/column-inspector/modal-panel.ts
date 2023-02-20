@@ -1,4 +1,4 @@
-import h from "@macrostrat/hyper";
+import { hyperStyled } from "@macrostrat/hyper";
 import { JSONView, ModalPanel } from "@macrostrat/ui-components";
 import { ButtonGroup, Button } from "@blueprintjs/core";
 import {
@@ -6,10 +6,9 @@ import {
   useUnitSelectionDispatch,
 } from "@macrostrat/column-views";
 import { useEffect } from "react";
+import styles from "./column-inspector.module.styl";
 
-const ColumnTitle = (props) => {
-  return h.if(props.data != null)("h1", props.data?.col_name);
-};
+const h = hyperStyled(styles);
 
 function ModalUnitPanel(props) {
   const { unitData } = props;
@@ -69,7 +68,7 @@ function ModalUnitPanel(props) {
       minimal: true,
       headerChildren,
     },
-    h(JSONView, { data: selectedUnit })
+    h(JSONView, { data: selectedUnit, hideRoot: true })
   );
 }
 
