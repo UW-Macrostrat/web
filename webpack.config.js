@@ -1,6 +1,7 @@
 const path = require("path");
 const { EnvironmentPlugin } = require("webpack");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+//const CopyPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const revisionInfo = require("@macrostrat/revision-info-webpack");
 const { alias } = require("./deps/web-components/package.json");
@@ -19,6 +20,11 @@ let webComponentsAliases = {};
 for (const [k, v] of Object.entries(alias)) {
   webComponentsAliases[k] = path.resolve(__dirname, "deps/web-components", v);
 }
+
+//const cesiumSource = "node_modules/cesium/Source";
+//const cesiumWorkers = "../Build/Cesium/Workers";
+
+//uglify = new UglifyJsPlugin()
 
 const gitEnv = revisionInfo(pkg, "https://github.com/UW-Macrostrat/web");
 
