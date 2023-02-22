@@ -28,8 +28,8 @@ import {
 } from "../map-interface/map-page/map-view/utils";
 import {
   buildXRayStyle,
-  mapStyle,
   toggleLineSymbols,
+  buildMacrostratStyle,
 } from "../map-interface/map-page/map-style";
 import { CoreMapView, MapMarker } from "~/map-interface/map-page/map-view";
 import {
@@ -133,7 +133,7 @@ export function VectorMapInspectorPage({
   const overlayStyle = useMemo(() => {
     const overlayStyle: mapboxgl.Style = xRay
       ? buildXRayStyle({ inDarkMode: isEnabled })
-      : (mapStyle as mapboxgl.Style);
+      : buildMacrostratStyle();
     return addExtraLayers(overlayStyle, tileset);
   }, [xRay, tileset, isEnabled]);
 

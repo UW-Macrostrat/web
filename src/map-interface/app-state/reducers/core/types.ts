@@ -24,7 +24,7 @@ type MAP_QUERY = {
   type: "map-query" | "run-map-query";
   z: string | number;
   map_id: any;
-  column: ColumnProperties | null | undefined;
+  columns: ColumnProperties[] | null | undefined;
 } & MapLocation;
 
 type GET_COLUMN_UNITS = { type: "get-column-units"; column: ColumnProperties };
@@ -138,6 +138,7 @@ type SetAllColumns = {
 };
 
 type GetAllColumns = { type: "get-all-columns" };
+type ClearColumnInfo = { type: "clear-column-info" };
 
 export type CoreAction =
   | MAP_LAYERS_CHANGED
@@ -190,7 +191,8 @@ export type CoreAction =
   | ToggleExperimentsPanel
   | GoToExperimentsPanel
   | GetAllColumns
-  | SetAllColumns;
+  | SetAllColumns
+  | ClearColumnInfo;
 
 interface AsyncRequestState {
   // Events and tokens for xhr

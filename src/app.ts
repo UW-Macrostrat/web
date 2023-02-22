@@ -2,9 +2,6 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { ReduxRouter } from "@lagunovsky/redux-react-router";
 import h from "@macrostrat/hyper";
 
-import { Suspense } from "react";
-import loadable from "@loadable/component";
-import { Spinner } from "@blueprintjs/core";
 import "./styles/index.styl";
 import { MapBackend } from "~/map-interface/app-state";
 
@@ -18,7 +15,11 @@ import reducerStack, {
 import { createRouterMiddleware } from "@lagunovsky/redux-react-router";
 import { routerBasename, SETTINGS } from "./map-interface/settings";
 import { DarkModeProvider } from "@macrostrat/ui-components";
+<<<<<<< HEAD
 import { GlobePage } from "./map-interface";
+=======
+import { onDemand } from "./_utils";
+>>>>>>> develop
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
@@ -58,6 +59,7 @@ const SplitMapPage = () => {
   return h(Suspense, { fallback: h(Spinner) }, h(_SplitMapPage));
 };
 
+<<<<<<< HEAD
 const _Sources = loadable(() => import("~/burwell-sources"));
 const Sources = () => h(Suspense, { fallback: h(Spinner) }, h(_Sources));
 
@@ -67,6 +69,11 @@ const MapPage = (props) =>
 
 const _DevMapPage = loadable(() => import("./dev-map"));
 const DevMapPage = () => h(Suspense, { fallback: h(Spinner) }, h(_DevMapPage));
+=======
+const Sources = onDemand(() => import("~/burwell-sources"));
+const MapPage = onDemand(() => import("./map-interface/map-page"));
+const DevMapPage = onDemand(() => import("./dev"));
+>>>>>>> develop
 
 const App = () => {
   return h(

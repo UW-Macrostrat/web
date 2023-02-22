@@ -9,7 +9,6 @@ import {
   getMapPosition,
   mapViewInfo,
   mergeStyles,
-  removeMapLabels,
   setMapPosition,
 } from "@macrostrat/mapbox-utils";
 import { inDarkMode } from "@macrostrat/ui-components";
@@ -28,9 +27,8 @@ import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
 import { SETTINGS } from "../../settings";
 import styles from "../main.module.styl";
 import {
-  buildXRayStyle,
+  buildMacrostratStyle,
   MapSourcesLayer,
-  mapStyle,
   toggleLineSymbols,
 } from "../map-style";
 import { getExpressionForFilters } from "./filter-helpers";
@@ -51,11 +49,11 @@ const h = hyper.styled(styles);
 
 const VestigialMap = forwardRef((props, ref) => h(Map, { ...props, ref }));
 
-async function buildMapStyle(baseMapURL) {
+async function buildStyle(baseMapURL) {
   const style = await getMapboxStyle(baseMapURL, {
     access_token: mapboxgl.accessToken,
   });
-  return mergeStyles(style, mapStyle);
+  return mergeStyles(style, buildMacrostratStyle());
 }
 
 async function initializeMap(baseMapURL, mapPosition, infoMarkerPosition) {
@@ -64,7 +62,7 @@ async function initializeMap(baseMapURL, mapPosition, infoMarkerPosition) {
 
   const map = new mapboxgl.Map({
     container: "map",
-    style: await buildMapStyle(baseMapURL),
+    style: await buildStyle(baseMapURL),
     maxZoom: 18,
     //maxTileCacheSize: 0,
     logoPosition: "bottom-left",
@@ -100,14 +98,6 @@ async function initializeMap(baseMapURL, mapPosition, infoMarkerPosition) {
   return map;
 }
 
-async function buildDevMapStyle(baseMapURL, styleOptions = {}) {
-  const style = await getMapboxStyle(baseMapURL, {
-    access_token: mapboxgl.accessToken,
-  });
-  const xRayStyle = buildXRayStyle(styleOptions);
-  return removeMapLabels(mergeStyles(style, xRayStyle));
-}
-
 export default function MainMapView(props) {
   const {
     filters,
@@ -125,10 +115,9 @@ export default function MainMapView(props) {
   let mapRef = useMapRef();
   const mapIsLoading = useAppState((state) => state.core.mapIsLoading);
   useElevationMarkerLocation(mapRef, elevationMarkerLocation);
-  const { mapUse3D, mapIsRotated } = mapViewInfo(mapPosition);
+  const { mapIsRotated } = mapViewInfo(mapPosition);
   const runAction = useAppActions();
-  const markerRef = useRef(null);
-  const handleMapQuery = useMapQueryHandler(mapRef, markerRef, infoDrawerOpen);
+  const handleMapQuery = useMapQueryHandler(mapRef, infoDrawerOpen);
   const isDarkMode = inDarkMode();
 
   const baseMapURL = getBaseMapStyle(mapLayers, isDarkMode);
@@ -172,7 +161,7 @@ export default function MainMapView(props) {
 
   useEffect(() => {
     if (mapRef.current == null) return;
-    buildMapStyle(baseMapURL).then((style) => {
+    buildStyle(baseMapURL).then((style) => {
       mapRef.current.setStyle(style);
     });
   }, [baseMapURL]);
@@ -403,7 +392,6 @@ export function MapMarker({ position, setPosition, centerMarker = true }) {
 
 function useMapQueryHandler(
   mapRef: React.RefObject<mapboxgl.Map | null>,
-  markerRef: React.RefObject<mapboxgl.Marker | null>,
   infoDrawerOpen: boolean
 ) {
   /** Handler for map query markers */
@@ -411,7 +399,6 @@ function useMapQueryHandler(
 
   return useCallback(
     (event: mapboxgl.MapMouseEvent, columns: ColumnProperties[] = null) => {
-      const column = columns?.[0];
       const map = mapRef.current;
 
       runAction({
@@ -419,16 +406,16 @@ function useMapQueryHandler(
         lng: event.lngLat.lng,
         lat: event.lngLat.lat,
         z: map.getZoom(),
-        column,
+        columns,
         map_id: null,
       });
 
-      const marker =
-        markerRef.current ?? new mapboxgl.Marker({ color: "#000000" });
-      marker.setLngLat(event.lngLat).addTo(mapRef.current);
-      markerRef.current = marker;
+      // const marker =
+      //   markerRef.current ?? new mapboxgl.Marker({ color: "#000000" });
+      // marker.setLngLat(event.lngLat).addTo(mapRef.current);
+      // markerRef.current = marker;
     },
-    [mapRef, markerRef, infoDrawerOpen]
+    [mapRef, infoDrawerOpen]
   );
 }
 

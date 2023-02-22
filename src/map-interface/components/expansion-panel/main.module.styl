@@ -3,18 +3,16 @@
   padding 0.2em var(--box-horizontal-padding)
   border-top 1px solid var(--accent-border-color)
   border-bottom 1px solid var(--accent-border-color)
+  background-color: var(--accent-color)
   display flex
   flex-direction row
-  position sticky
-  align-items: baseline;
+  align-items: center;
   z-index 1
+  gap var(--box-horizontal-padding)
   top 0px
-  &>*
-    margin-right var(--box-horizontal-padding)
-    &:last-child
-      margin-right: 0
+  position sticky
   h1, h2, h3, h4
-    font-family: Montserrat,sans-serif !important;
+    font-family: Montserrat,sans-serif;
     font-weight: 700;
     margin 0.2em 0;
   h4
@@ -32,10 +30,6 @@
   // &.collapsed
   //   .expansion-panel-header
   //     border-bottom-width: 0;
-  .panel-subhead
-    background-color: var(--accent-color)
-
-
 
 .sub-expansion-panel
   margin -1px calc(var(--panel-padding-h) * -0.5) 0;
