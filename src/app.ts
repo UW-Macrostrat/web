@@ -1,25 +1,22 @@
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { ReduxRouter } from "@lagunovsky/redux-react-router";
 import h from "@macrostrat/hyper";
+import { Route, Routes } from "react-router-dom";
 
 import "./styles/index.styl";
-import { MapBackend } from "~/map-interface/app-state";
 
+import { createRouterMiddleware } from "@lagunovsky/redux-react-router";
+import { DarkModeProvider } from "@macrostrat/ui-components";
 import { Provider } from "react-redux";
-import { createStore, compose, applyMiddleware } from "redux";
+import { applyMiddleware, compose, createStore } from "redux";
+import { GlobePage } from "./map-interface";
 import reducerStack, {
   Action,
-  browserHistory,
   AppState,
+  browserHistory,
 } from "./map-interface/app-state";
-import { createRouterMiddleware } from "@lagunovsky/redux-react-router";
 import { routerBasename, SETTINGS } from "./map-interface/settings";
-import { DarkModeProvider } from "@macrostrat/ui-components";
-<<<<<<< HEAD
-import { GlobePage } from "./map-interface";
-=======
 import { onDemand } from "./_utils";
->>>>>>> develop
+import { BrowserRouter } from "react-router-dom";
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
@@ -33,47 +30,21 @@ let store = createStore<AppState, Action, any, any>(
 //const _ColumnPage = loadable(import("./columns"));
 //const ColumnPage = () => h(Suspense, { fallback: h(Spinner) }, h(_ColumnPage));
 
-const _GlobeDevPage = loadable(() =>
+const GlobeDevPage = onDemand(() =>
   import("./map-interface/map-page/cesium-view").then((d) => d.GlobeDevPage)
 );
 
-const _CesiumExample = loadable(
+const CesiumExample = onDemand(
   () => import("cesium-vector-provider-standalone-example")
 );
 
-const CesiumExamplePage = () => {
-  return h(
-    Suspense,
-    { fallback: h(Spinner) },
-    h(_CesiumExample, { accessToken: SETTINGS.mapboxAccessToken })
-  );
-};
-
-const GlobeDevPage = () =>
-  h(Suspense, { fallback: h(Spinner) }, h(_GlobeDevPage));
-
-const _SplitMapPage = loadable(() =>
+const SplitMapPage = onDemand(() =>
   import("./map-interface/debug").then((d) => d.SplitMapPage)
 );
-const SplitMapPage = () => {
-  return h(Suspense, { fallback: h(Spinner) }, h(_SplitMapPage));
-};
 
-<<<<<<< HEAD
-const _Sources = loadable(() => import("~/burwell-sources"));
-const Sources = () => h(Suspense, { fallback: h(Spinner) }, h(_Sources));
-
-const _MapPage = loadable(() => import("./map-interface/map-page"));
-const MapPage = (props) =>
-  h(Suspense, { fallback: h(Spinner) }, h(_MapPage, props));
-
-const _DevMapPage = loadable(() => import("./dev-map"));
-const DevMapPage = () => h(Suspense, { fallback: h(Spinner) }, h(_DevMapPage));
-=======
 const Sources = onDemand(() => import("~/burwell-sources"));
 const MapPage = onDemand(() => import("./map-interface/map-page"));
 const DevMapPage = onDemand(() => import("./dev"));
->>>>>>> develop
 
 const App = () => {
   return h(
@@ -90,7 +61,7 @@ const App = () => {
             h(Route, { path: "/dev/globe", element: h(GlobeDevPage) }),
             h(Route, {
               path: "/dev/cesium-vector-provider",
-              element: h(CesiumExamplePage, {
+              element: h(CesiumExample, {
                 accessToken: SETTINGS.mapboxAccessToken,
               }),
             }),

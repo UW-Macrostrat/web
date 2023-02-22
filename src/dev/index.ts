@@ -48,11 +48,7 @@ export default function DevIndex() {
 }
 
 function MapInspectorIndex() {
-<<<<<<< HEAD:src/dev-map/index.ts
-  return h("div.map-inspector-index", [
-=======
   return h("div.page.map-inspector-index", [
->>>>>>> develop:src/dev/index.ts
     h("h1", "Map layer inspectors"),
     h("ul.layers", [
       h(LinkItem, { to: "carto" }, "Carto"),
@@ -60,16 +56,13 @@ function MapInspectorIndex() {
       h(LinkItem, { to: "carto-raster" }, "Carto (image)"),
       h(LinkItem, { to: "emphasized" }, "Carto (image, emphasized)"),
     ]),
-<<<<<<< HEAD:src/dev-map/index.ts
     h("h1", "Rendering libraries"),
     h("ul.renderers", [
       h(LinkItem, { to: "globe" }, "Globe"),
       h(LinkItem, { to: "cesium-vector-providers" }, "Cesium Vector Provider"),
     ]),
-=======
     h("h1", "Stratigraphic column inspector"),
     h(Link, { to: "column-inspector" }, "Stratigraphy"),
->>>>>>> develop:src/dev/index.ts
   ]);
 }
 
