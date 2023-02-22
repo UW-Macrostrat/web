@@ -35,20 +35,9 @@ export function CesiumView(props) {
   return h(Suspense, { fallback: h(Spinner) }, h(CesiumViewMod, props));
 }
 
-function MapContainerBase(props) {
+function MapView(props) {
   return h(Suspense, { fallback: h(Spinner) }, h(MapContainer, props));
 }
-
-const MapView = (props: { backend: MapBackend }) => {
-  const { backend = MapBackend.MAPBOX3 } = props;
-  switch (backend) {
-    case MapBackend.CESIUM:
-      return h(CesiumView);
-    default:
-      //const use3D = backend == MapBackend.MAPBOX3;
-      return h(MapContainerBase);
-  }
-};
 
 export const MapPage = ({
   backend = MapBackend.MAPBOX3,
@@ -98,7 +87,7 @@ export const MapPage = ({
     detailPanel: h([
       h(Routes, [
         h(Route, {
-          path: "/loc/:lng/:lat",
+          path: "/loc/:lng/:lat/*",
           element: h(InfoDrawerRoute),
         }),
       ]),

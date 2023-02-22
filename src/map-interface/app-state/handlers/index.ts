@@ -175,8 +175,16 @@ async function actionRunner(
       const { lng, lat, z } = action;
       const ln = formatCoordForZoomLevel(lng, Number(z));
       const lt = formatCoordForZoomLevel(lat, Number(z));
+      // Check if matches column detail route
+      const { pathname } = state.router.location;
+      let newPath = routerBasename + `loc/${ln}/${lt}`;
+      if (pathname.startsWith("/loc") && pathname.endsWith("/column")) {
+        // If so, we want to append columns to the end of the URL
+        newPath += "/column";
+      }
+
       return push({
-        pathname: routerBasename + `loc/${ln}/${lt}`,
+        pathname: newPath,
         hash: location.hash,
       });
       //return { ...action, type: "run-map-query" };
@@ -185,7 +193,7 @@ async function actionRunner(
       const { lng, lat, z, map_id } = action;
       // Get column data from the map action if it is provided.
       // This saves us from having to filter the columns more inefficiently
-      let { column } = action;
+      let { columns } = action;
       let CancelTokenMapQuery = axios.CancelToken;
       let sourceMapQuery = CancelTokenMapQuery.source();
       if (coreState.inputFocus && coreState.contextPanelOpen) {
@@ -208,24 +216,31 @@ async function actionRunner(
       );
 
       if (
-        column == null &&
+        columns == null &&
         state.core.allColumns != null &&
         state.core.mapLayers.has(MapLayer.COLUMNS)
       ) {
-        column = findColumnForLocation(state.core.allColumns, {
+        let col = findColumnForLocation(state.core.allColumns, {
           lng,
           lat,
         })?.properties;
+        if (col != null) {
+          columns = [col];
+        }
       }
 
+      const firstColumn = columns?.[0];
       const { columnInfo } = state.core;
-      if (column != null && columnInfo?.col_id != column.col_id) {
+      if (firstColumn != null && columnInfo?.col_id != firstColumn.col_id) {
         // Get the column units if we don't have them already
         actionRunner(
           state,
-          { type: "get-column-units", column },
+          { type: "get-column-units", column: firstColumn },
           dispatch
         ).then(dispatch);
+      } else if (firstColumn == null && columnInfo != null) {
+        // Clear the column info if we don't have any columns
+        dispatch({ type: "clear-column-info", data: null, column: null });
       }
 
       coreState.infoMarkerPosition = { lng, lat };

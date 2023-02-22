@@ -1,5 +1,6 @@
 import { Card } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
+import { Navigate, Route, Routes, useParams } from "react-router-dom";
 import { MapLayer, useAppActions } from "~/map-interface/app-state";
 import { InfoDrawerHeader } from "./header";
 import { FossilCollections } from "./fossil-collections";
@@ -13,6 +14,7 @@ import classNames from "classnames";
 import styles from "./main.module.styl";
 import { LoadingArea } from "../transitions";
 import { ErrorBoundary } from "@macrostrat/ui-components";
+import { StratColumn } from "./strat-column";
 import { useCallback } from "react";
 
 const h = hyper.styled(styles);
@@ -67,6 +69,15 @@ function InfoDrawer(props) {
 }
 
 function InfoDrawerInterior(props) {
+  const columnInfo = useAppState((state) => state.core.columnInfo);
+
+  return h(Routes, [
+    h(Route, { path: "/column", element: h(StratColumn, { columnInfo }) }),
+    h(Route, { path: "*", element: h(InfoDrawerMainPanel) }),
+  ]);
+}
+
+function InfoDrawerMainPanel(props) {
   const { mapInfo, columnInfo, pbdbData, mapLayers } = useAppState(
     (state) => state.core
   );
@@ -92,7 +103,7 @@ function InfoDrawerInterior(props) {
           ref: {},
         };
 
-  return h("div", [
+  return h("div.infodrawer-main", [
     h(GeologicMapInfo, {
       mapInfo,
       bedrockExpanded: true,
