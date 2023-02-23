@@ -1,17 +1,17 @@
 import { hyperStyled, compose, C } from "@macrostrat/hyper";
-import { useAPIResult, DarkModeProvider } from "@macrostrat/ui-components";
+import { useAPIResult } from "@macrostrat/ui-components";
 import { MacrostratAPIProvider } from "common";
+import { useEffect, useState } from "react";
 import {
   UnitSelectionProvider,
   useSelectedUnit,
+  useUnitSelectionDispatch,
 } from "@macrostrat/column-views";
 
-import { Column } from "@macrostrat/column-views";
+import { Column, useColumnNav } from "@macrostrat/column-views";
 import { PatternProvider } from "~/_providers";
-import { useColumnNav } from "common/macrostrat-columns";
 import ModalUnitPanel from "./modal-panel";
-import { preprocessUnits } from "@macrostrat/concept-app-helpers";
-import { ColumnNavigatorMap } from "@macrostrat/column-views";
+import { ColumnNavigatorMap, preprocessUnits } from "@macrostrat/column-views";
 import styles from "./column-inspector.module.styl";
 
 const h = hyperStyled(styles);
@@ -22,20 +22,43 @@ const ColumnTitle = (props) => {
 
 function ColumnManager() {
   const defaultArgs = { col_id: 495 };
-  const [currentColumn, setCurrentColumn] = useColumnNav(defaultArgs);
+  const [columnNavArgs, setCurrentColumn] = useColumnNav(defaultArgs);
+  const { unit_id, ...currentColumn } = columnNavArgs;
   const selectedUnit = useSelectedUnit();
+  const setSelectedUnit = useUnitSelectionDispatch();
+
   const { col_id, ...projectParams } = currentColumn;
 
   const colParams = { ...currentColumn, format: "geojson" };
   const unitParams = { ...currentColumn, all: true, response: "long" };
-  const columnFeature = useAPIResult("/columns", colParams, [currentColumn])
-    ?.features[0];
+  const columnFeature = useAPIResult("/columns", colParams)?.features[0];
+  const unitData = useAPIResult("/units", unitParams);
 
-  const unitData = useAPIResult("/units", unitParams, [currentColumn]);
+  const units = preprocessUnits(unitData ?? []);
+
+  /* Harmonize selected unit and column data providers
+    TODO: we could link the providers for selecting units and columns,
+    but for now we have just nested together current separate state elements
+  */
+  const [unitSelectionInitialized, setUnitSelectionInitialized] =
+    useState(false);
+
+  useEffect(() => {
+    // Set initial unit selection
+    if (unit_id == null || unitSelectionInitialized || units?.length == 0)
+      return;
+
+    const unit = units.find((d) => d.unit_id == unit_id);
+    setSelectedUnit(unit);
+    setUnitSelectionInitialized(true);
+  }, [units]);
+
+  useEffect(() => {
+    if (selectedUnit == null && !unitSelectionInitialized) return;
+    setCurrentColumn({ ...currentColumn, unit_id: selectedUnit?.unit_id });
+  }, [selectedUnit, unitSelectionInitialized]);
 
   if (unitData == null) return null;
-
-  const units = preprocessUnits(unitData);
 
   // 495
   return h("div.column-ui", [

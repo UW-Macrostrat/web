@@ -1,5 +1,5 @@
 import { hyperStyled } from "@macrostrat/hyper";
-import { JSONView, ModalPanel } from "@macrostrat/ui-components";
+import { JSONView, ModalPanel, useKeyHandler } from "@macrostrat/ui-components";
 import { ButtonGroup, Button } from "@blueprintjs/core";
 import {
   useSelectedUnit,
@@ -24,20 +24,15 @@ function ModalUnitPanel(props) {
     40: ix + 1,
   };
 
-  // Keyboard column selector
-  useEffect(() => {
-    const listener = (event) => {
+  useKeyHandler(
+    (event) => {
       const nextIx = keyMap[event.keyCode];
-      if (nextIx < 0 || nextIx >= unitData.length) return;
+      if (nextIx == null || nextIx < 0 || nextIx >= unitData.length) return;
       selectUnit(unitData[nextIx]);
       event.stopPropagation();
-    };
-
-    document.addEventListener("keydown", listener);
-    return () => {
-      document.removeEventListener("keydown", listener);
-    };
-  }, [unitData, ix]);
+    },
+    [unitData, ix]
+  );
 
   if (selectedUnit == null) return null;
 
