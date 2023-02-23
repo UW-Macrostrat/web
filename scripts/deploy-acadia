@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Import environment variables
+set -a
+source .env
+set +a
+
+version=$(node -p "require('./package.json').version")
+
+if [[ $(git diff --stat) != '' ]]; then
+  echo 'Cannot deploy with uncommitted changes'
+  exit 1
+fi
+echo 'Working directory is clean.'
+
+echo "Deploying to acadia"
+
+yarn run clean
+
+export PUBLIC_URL=/map/
+export NODE_ENV=production
+export MACROSTRAT_TILESERVER_DOMAIN='https://tiles.macrostrat.org'
+export MACROSTRAT_API_DOMAIN='https://macrostrat.org'
+
+yarn run bundle
+
+docker build -t macrostrat/map:develop -f deployment/Dockerfile .
+docker tag macrostrat/map:develop $MACROSTRAT_DOCKER_REGISTRY/macrostrat/map:develop
+
+docker push $MACROSTRAT_DOCKER_REGISTRY/macrostrat/map:develop
+
+ssh acadia "cd /data/macrostrat/map && docker-compose pull && docker-compose up -d"
