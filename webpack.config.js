@@ -5,6 +5,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const revisionInfo = require("@macrostrat/revision-info-webpack");
 const { alias } = require("./deps/web-components/package.json");
+const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 
 const pkg = require("./package.json");
 
@@ -78,7 +79,9 @@ const devMode = mode == "development";
 /* Use style-loader in development so we can get hot-reloading,
   but use MiniCssExtractPlugin in production for small bundle sizes */
 let finalStyleLoader = "style-loader";
-if (!devMode) {
+if (devMode) {
+  plugins.push(new BundleAnalyzerPlugin());
+} else {
   plugins.push(new MiniCssExtractPlugin());
   finalStyleLoader = MiniCssExtractPlugin.loader;
 }
