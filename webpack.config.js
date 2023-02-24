@@ -169,7 +169,7 @@ module.exports = {
     main: "./src/index.ts",
   },
   output: {
-    path: path.join(__dirname, "/dist/"),
+    path: path.join(__dirname, "dist"),
     publicPath: publicURL,
     filename: "[name].js",
     devtoolModuleFilenameTemplate: "file:///[absolute-resource-path]",

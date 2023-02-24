@@ -5,7 +5,6 @@ dist
 ai
 geologic-patterns
 .env
-Dockerfile
 docker-compose.yaml
 
 # For yarn v2 with Plug'n'Play
