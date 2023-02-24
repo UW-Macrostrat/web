@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Next-generation deployment script using Docker to manage deployment.
+# This will allow our process to "grow into" a more complex application.
+
 # Import environment variables
 set -a
 source .env
@@ -39,6 +42,8 @@ docker tag uw-macrostrat/web:develop $MACROSTRAT_DOCKER_REGISTRY/uw-macrostrat/w
 
 docker push $MACROSTRAT_DOCKER_REGISTRY/uw-macrostrat/web:develop
 
+# Run deployment playbook.
+# THis needs to get much better
 ssh -o ClearAllForwardings=yes gunnison "cd /data/macrostrat && ansible-playbook ansible/playbooks/deploy-dev.yaml"
 
 #ssh acadia "cd /data/macrostrat/app && ~/.local/bin/docker-compose pull web && ~/.local/bin/docker-compose up -d"
