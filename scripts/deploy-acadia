@@ -6,26 +6,39 @@ set +a
 
 version=$(node -p "require('./package.json').version")
 
-if [[ $(git diff --stat) != '' ]]; then
-  echo 'Cannot deploy with uncommitted changes'
-  exit 1
+# Check for no-build flag
+
+if [[ $1 == '--no-build' ]]; then
+  echo 'Skipping build'
+  skip_build=true
+else
+  skip_build=false
 fi
-echo 'Working directory is clean.'
-
-echo "Deploying to acadia"
-
-yarn run clean
 
 export PUBLIC_URL=/map/
 export NODE_ENV=production
 export MACROSTRAT_TILESERVER_DOMAIN='https://tiles.macrostrat.org'
 export MACROSTRAT_API_DOMAIN='https://macrostrat.org'
+export MACROSTRAT_DOCKER_REGISTRY='ghcr.io'
 
-yarn run bundle
+if [[ $skip_build == false ]]; then
+  if [[ $(git diff --stat) != '' ]]; then
+    echo 'Cannot deploy with uncommitted changes'
+    exit 1
+  fi
+  echo 'Working directory is clean.'
 
-docker build -t macrostrat/map:develop -f deployment/Dockerfile .
-docker tag macrostrat/map:develop $MACROSTRAT_DOCKER_REGISTRY/macrostrat/map:develop
+  yarn run clean
+  yarn run bundle
+fi
 
-docker push $MACROSTRAT_DOCKER_REGISTRY/macrostrat/map:develop
+echo "Deploying to acadia"
 
-ssh acadia "cd /data/macrostrat/map && docker-compose pull && docker-compose up -d"
+docker build -t uw-macrostrat/web:develop -f deployment/Dockerfile .
+docker tag uw-macrostrat/web:develop $MACROSTRAT_DOCKER_REGISTRY/uw-macrostrat/web:develop
+
+docker push $MACROSTRAT_DOCKER_REGISTRY/uw-macrostrat/web:develop
+
+ssh -o ClearAllForwardings=yes gunnison "cd /data/macrostrat && ansible-playbook ansible/playbooks/deploy-dev.yaml"
+
+#ssh acadia "cd /data/macrostrat/app && ~/.local/bin/docker-compose pull web && ~/.local/bin/docker-compose up -d"
