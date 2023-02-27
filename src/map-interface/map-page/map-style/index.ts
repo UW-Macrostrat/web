@@ -355,7 +355,7 @@ export function buildMacrostratStyle() {
     sources: {
       burwell: {
         type: "vector",
-        tiles: [`${SETTINGS.burwellTileDomain}/tiles/carto-slim/{z}/{x}/{y}`],
+        tiles: [`${SETTINGS.burwellTileDomain}/carto-slim/{z}/{x}/{y}`],
         tileSize: 512,
       },
       ...overlaySources,
