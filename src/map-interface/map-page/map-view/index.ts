@@ -27,6 +27,7 @@ import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
 import { SETTINGS } from "../../settings";
 import styles from "../main.module.styl";
 import {
+  applyAgeModelStyles,
   buildMacrostratStyle,
   MapSourcesLayer,
   toggleLineSymbols,
@@ -47,22 +48,31 @@ import {
 
 const h = hyper.styled(styles);
 
+mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
+
 const VestigialMap = forwardRef((props, ref) => h(Map, { ...props, ref }));
 
-async function buildStyle(baseMapURL) {
-  const style = await getMapboxStyle(baseMapURL, {
-    access_token: mapboxgl.accessToken,
-  });
-  return mergeStyles(style, buildMacrostratStyle());
+function buildStyle(style, age, model = 1, isDark = false) {
+  const overlayStyles = buildMacrostratStyle();
+  if (age != null) {
+    return applyAgeModelStyles(age, model, style, overlayStyles, isDark);
+  }
+  return mergeStyles(style, overlayStyles);
 }
 
-async function initializeMap(baseMapURL, mapPosition, infoMarkerPosition) {
+async function initializeMap(
+  baseStyle,
+  age,
+  model,
+  isDark,
+  mapPosition,
+  infoMarkerPosition
+) {
   // setup the basic map
-  mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
 
   const map = new mapboxgl.Map({
     container: "map",
-    style: await buildStyle(baseMapURL),
+    style: buildStyle(baseStyle, age, model, isDark),
     maxZoom: 18,
     //maxTileCacheSize: 0,
     logoPosition: "bottom-left",
@@ -130,8 +140,27 @@ export default function MainMapView(props) {
   const [mapInitialized, setMapInitialized] = useState(false);
   const [styleLoaded, setStyleLoaded] = useState(false);
 
+  const [baseStyle, setBaseStyle] = useState(null);
   useEffect(() => {
-    initializeMap(baseMapURL, mapPosition, infoMarkerPosition).then((map) => {
+    getMapboxStyle(baseMapURL, {
+      access_token: mapboxgl.accessToken,
+    }).then((s) => {
+      setBaseStyle(s);
+    });
+  }, [baseMapURL]);
+
+  useEffect(() => {
+    if (baseStyle == null) {
+      return;
+    }
+    initializeMap(
+      baseStyle,
+      timeCursorAge,
+      plateModelId,
+      isDarkMode,
+      mapPosition,
+      infoMarkerPosition
+    ).then((map) => {
       if (!map.isStyleLoaded()) {
         map.once("style.load", () => {
           setStyleLoaded(true);
@@ -148,14 +177,12 @@ export default function MainMapView(props) {
       //runAction({ type: "set-filters", filters: [...filters] });
       setMapInitialized(true);
     });
-  }, []);
+  }, [baseStyle]);
 
   /* If we want to use a high resolution DEM, we need to use a different
     source ID from the hillshade's source ID. This uses more memory but
     provides a nicer-looking 3D map.
     */
-
-  console.log(plateModelId);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -164,11 +191,15 @@ export default function MainMapView(props) {
   }, [mapRef.current, mapInitialized]);
 
   useEffect(() => {
-    if (mapRef.current == null) return;
-    buildStyle(baseMapURL).then((style) => {
-      mapRef.current.setStyle(style);
-    });
-  }, [baseMapURL]);
+    if (mapRef.current == null || baseStyle == null) return;
+    const newStyle = buildStyle(
+      baseStyle,
+      timeCursorAge,
+      plateModelId,
+      isDarkMode
+    );
+    mapRef.current.setStyle(newStyle);
+  }, [baseStyle, timeCursorAge, plateModelId, isDarkMode]);
 
   // Make map label visibility match the mapLayers state
   useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));

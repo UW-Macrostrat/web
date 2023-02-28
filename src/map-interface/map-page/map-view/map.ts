@@ -2,14 +2,11 @@ import { Component, forwardRef } from "react";
 import { getPBDBData } from "./filter-helpers";
 import h from "@macrostrat/hyper";
 import mapboxgl from "mapbox-gl";
-import { mergeStyles } from "@macrostrat/mapbox-utils";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { buildMacrostratStyle } from "../map-style";
 import { setMapStyle } from "./style-helpers";
 import { MapLayer } from "~/map-interface/app-state";
 import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
-
-import { intervals as defaultIntervals } from "@macrostrat/timescale";
 
 const maxClusterZoom = 6;
 const highlightLayers = [
@@ -32,74 +29,6 @@ const blankMapStyle = {
   sources: {},
   layers: [],
 };
-
-function createMapStyle(age, model) {
-  //let _model = 1;
-
-  let mapTileURL = "https://devtiles.macrostrat.org/carto-slim/{z}/{x}/{y}.mvt";
-
-  if (age != null) {
-    mapTileURL = `https://next.macrostrat.org/tiles/tiles/carto-slim-rotated/{z}/{x}/{y}?model_id=${model}&t_step=${age}`;
-  }
-
-  let color = "rgb(180, 180, 200)";
-  let ageSpan = 4500;
-  for (let interval of defaultIntervals) {
-    let intAgeSpan = interval.eag - interval.lag;
-    if (interval.eag > age && interval.lag < age && intAgeSpan < ageSpan) {
-      color = interval.col;
-    }
-  }
-
-  return mergeStyles(
-    baseStyles,
-    {
-      layers: [
-        {
-          id: "plate-polygons",
-          type: "fill",
-          source: "burwell",
-          "source-layer": "plates",
-          paint: {
-            "fill-color": "rgb(170,170,200)",
-            "fill-outline-color": "rgb(150,150,150)",
-          },
-        },
-        {
-          id: "land",
-          type: "fill",
-          source: "burwell",
-          "source-layer": "land",
-          paint: {
-            "fill-color": "rgb(200,200,203)",
-          },
-        },
-        {
-          id: "columns",
-          type: "fill",
-          source: "burwell",
-          "source-layer": "columns",
-          paint: {
-            "fill-color": color,
-            "fill-outline-color": "rgb(150,150,150)",
-          },
-        },
-      ],
-    },
-    mapStyle,
-    {
-      version: 8,
-      sources: {
-        burwell: {
-          type: "vector",
-          tiles: [mapTileURL],
-          tileSize: 512,
-        },
-      },
-      layers: [],
-    }
-  );
-}
 
 class VestigialMap extends Component<MapProps, {}> {
   map: mapboxgl.Map;

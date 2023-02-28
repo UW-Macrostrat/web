@@ -67,7 +67,7 @@ const defaultState: CoreState = {
   data: [],
   showExperimentsPanel: false,
   timeCursorAge: null,
-  plateModelId: 1,
+  plateModelId: null,
   mapPosition: {
     camera: {
       lng: 23,

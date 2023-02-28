@@ -57,8 +57,8 @@ const SettingsPanel = (props) => {
   //const globeActive = pathname?.startsWith("/globe");
   const runAction = useAppActions();
   const showExperiments = useAppState((s) => s.core.showExperimentsPanel);
-  const [localAge, setLocalAge] = useState(0);
-  const age = useAppState((s) => s.core.timeCursor);
+  const age = useAppState((s) => s.core.timeCursorAge);
+  const [localAge, setLocalAge] = useState(age);
 
   useEffect(() => {
     setLocalAge(age);
@@ -71,24 +71,24 @@ const SettingsPanel = (props) => {
     h(ThemeButton),
     //h(HighResolutionTerrainSwitch),
     // Geologic time input
-    h("div.flex-row", [
-      h("h4", "Age"),
 
+    h("div.flex-row", [
+      //h("h4", "Age"),
       h(NumericInput, {
         value: localAge,
         onValueChange: setLocalAge,
         min: 0,
         max: 4600,
-      }),
-      h(
-        Button,
-        {
-          onClick() {
-            runAction({ type: "set-time-cursor", age: localAge });
+        rightElement: h(
+          Button,
+          {
+            onClick() {
+              runAction({ type: "set-time-cursor", age: localAge });
+            },
           },
-        },
-        "Go"
-      ),
+          "Go"
+        ),
+      }),
     ]),
 
     h("div.flex-row", [
@@ -98,7 +98,10 @@ const SettingsPanel = (props) => {
         {
           value: useAppState((s) => s.core.plateModelId) ?? 1,
           onChange(e) {
-            runAction({ type: "set-plate-model", plateModel: e.target.value });
+            runAction({
+              type: "set-plate-model",
+              plateModel: parseInt(e.target.value),
+            });
           },
         },
         [
