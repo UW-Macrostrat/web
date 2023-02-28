@@ -5,6 +5,8 @@ import chroma from "chroma-js";
 import { intervals } from "@macrostrat/timescale";
 import { mergeStyles } from "@macrostrat/mapbox-utils";
 import { base } from "~/map-interface/app-state/handlers/filters";
+import map from "../map-view/map";
+import { baseLayers } from "@macrostrat/mapbox-styles/src";
 
 export function buildXRayStyle({ inDarkMode = false }): mapboxgl.Style {
   const xRayColor = (opacity = 1, darken = 0) => {
@@ -59,12 +61,9 @@ export function applyAgeModelStyles(
   mapStyle,
   inDarkMode = false
 ) {
-  //let _model = 1;
-
-  let mapTileURL = "https://tiles.macrostrat.org/carto-slim/{z}/{x}/{y}.mvt";
-
+  let mapTileURL = "https://dev.macrostrat.org/tiles/carto-slim/{z}/{x}/{y}";
   if (age != null) {
-    mapTileURL = `https://next.macrostrat.org/tiles/tiles/carto-slim-rotated/{z}/{x}/{y}?model_id=${model}&t_step=${age}`;
+    mapTileURL = `https://dev.macrostrat.org/tiles/carto-slim-rotated/{z}/{x}/{y}?model_id=${model}&t_step=${age}`;
   }
 
   let color = chroma("rgb(180, 180, 200)");
@@ -80,6 +79,11 @@ export function applyAgeModelStyles(
     ...baseStyle,
     sources: {},
     layers: [],
+  };
+
+  const overlays = {
+    ...mapStyle,
+    //layers: mapStyle.layers.filter((l) => !l.id.startsWith("column")),
   };
 
   let styles = mergeStyles(
@@ -108,20 +112,20 @@ export function applyAgeModelStyles(
             "fill-color": inDarkMode ? "rgb(80,80,90)" : "rgb(200,200,203)",
           },
         },
-        {
-          id: "columns",
-          type: "fill",
-          source: "burwell",
-          "source-layer": "columns",
-          paint: {
-            "fill-color": color.css(),
-            "fill-outline-color": color.darken(1).css(),
-            "fill-opacity": 0.8,
-          },
-        },
+        // {
+        //   id: "column_outline",
+        //   type: "line",
+        //   source: "burwell",
+        //   "source-layer": "columns",
+        //   paint: {
+        //     "line-color": color.css(),
+        //     "line-width": 1.5,
+        //     "line-opacity": 0.8,
+        //   },
+        // },
       ],
     },
-    mapStyle
+    overlays
   );
 
   styles.sources.burwell = {
