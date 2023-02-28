@@ -1,6 +1,14 @@
 // Settings panel for the map
 
-import { Alignment, Switch, Icon, Button, HTMLSelect } from "@blueprintjs/core";
+import {
+  Alignment,
+  Switch,
+  Icon,
+  Button,
+  HTMLSelect,
+  Intent,
+  IconName,
+} from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import { Tag, Collapse, Callout, Text, NumericInput } from "@blueprintjs/core";
 import { useState } from "react";
@@ -72,47 +80,6 @@ const SettingsPanel = (props) => {
     //h(HighResolutionTerrainSwitch),
     // Geologic time input
 
-    h("div.flex-row", [
-      //h("h4", "Age"),
-      h(NumericInput, {
-        value: localAge,
-        onValueChange: setLocalAge,
-        min: 0,
-        max: 4600,
-        rightElement: h(
-          Button,
-          {
-            onClick() {
-              runAction({ type: "set-time-cursor", age: localAge });
-            },
-          },
-          "Go"
-        ),
-      }),
-    ]),
-
-    h("div.flex-row", [
-      h("h4", "Plate model"),
-      h(
-        HTMLSelect,
-        {
-          value: useAppState((s) => s.core.plateModelId) ?? 1,
-          onChange(e) {
-            runAction({
-              type: "set-plate-model",
-              plateModel: parseInt(e.target.value),
-            });
-          },
-        },
-        [
-          h("option", { value: 1 }, "Eglington (in prep)"),
-          h("option", { value: 2 }, "Seton et al., 2012"),
-          h("option", { value: 3 }, "Wright et al., 2013"),
-          h("option", { value: 4 }, "Scotese"),
-        ]
-      ),
-    ]),
-
     h("div.callout-panel", { className: showExperiments ? "expanded" : null }, [
       h("div.callout-header", [
         h(
@@ -141,8 +108,62 @@ const SettingsPanel = (props) => {
         ])
       ),
     ]),
+    // h(CalloutPanel, {
+    //   title: "Geologic time",
+    //   icon: "time",
+    //   intent: "primary",
+    //   isOpen: useAppState((s) => s.core.showTimeCursorPanel),
+    //   setIsOpen: (v) => {
+    //     runAction({ type: "toggle-time-cursor-panel", value: v });
+    //   }
+
+    // }, [
+
+    // ])
   ]);
 };
+
+function CalloutPanel({
+  isOpen,
+  setIsOpen,
+  children,
+  icon,
+  intent = Intent.PRIMARY,
+  title,
+}: {
+  isOpen: boolean;
+  setIsOpen: (v: boolean) => void;
+  children: any;
+  icon: IconName;
+  intent?: Intent;
+  title: string;
+}) {
+  return h("div.callout-panel", { className: isOpen ? "expanded" : null }, [
+    h("div.callout-header", [
+      h(
+        Button,
+        {
+          minimal: true,
+          icon,
+          active: isOpen,
+          intent: "warning",
+          onClick() {
+            setIsOpen(!isOpen);
+          },
+        },
+        title
+      ),
+    ]),
+    h(
+      Collapse,
+      {
+        isOpen: isOpen,
+        className: "callout-content",
+      },
+      h(Callout, { intent, icon: null }, [children])
+    ),
+  ]);
+}
 
 function LineSymbolsControl() {
   const runAction = useAppActions();
