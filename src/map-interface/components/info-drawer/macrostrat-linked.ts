@@ -131,7 +131,6 @@ function AgeRefinementBar({ scale, data, color, label = null }) {
 
 function AgeRefinementPlot({ macrostrat, mapInfo }) {
   // Plot the amount by which the age was refined
-  console.log(macrostrat, mapInfo);
 
   const mapData = mapInfo.mapData[0];
   const b_age = Math.max(mapData.b_int.b_age, macrostrat.b_age);

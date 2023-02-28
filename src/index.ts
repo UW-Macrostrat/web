@@ -8,7 +8,9 @@ import App from "./app";
 
 FocusStyleManager.onlyShowFocusOnTabs();
 
-import { render } from "react-dom";
+import { createRoot } from "react-dom/client";
+
+const root = createRoot(document.getElementById("app-container"));
 
 // Render the application
-render(h(App), document.getElementById("app-container"));
+root.render(h(App));

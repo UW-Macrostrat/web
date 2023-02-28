@@ -18,12 +18,12 @@ git push
 echo "Deploying to strata"
 deploy_dir=/data/projects/macrostrat/map
 
-npm run clean
+yarn run clean
 export PUBLIC_URL=/map/
 export NODE_ENV=production
 export MACROSTRAT_TILESERVER_DOMAIN='https://tiles.macrostrat.org'
 export MACROSTRAT_API_DOMAIN='https://macrostrat.org'
 
-npm run bundle
+yarn run bundle
 
 rsync -azv --delete dist/ strata:$deploy_dir/

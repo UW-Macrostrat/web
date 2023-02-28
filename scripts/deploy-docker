@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# Next-generation deployment script using Docker to manage deployment.
+# This will allow our process to "grow into" a more complex application.
+
+# Import environment variables
+set -a
+source .env
+set +a
+
+version=$(node -p "require('./package.json').version")
+
+# Check for no-build flag
+
+if [[ $1 == '--no-build' ]]; then
+  echo 'Skipping build'
+  skip_build=true
+else
+  skip_build=false
+fi
+
+export PUBLIC_URL=/map/
+export NODE_ENV=production
+export MACROSTRAT_TILESERVER_DOMAIN='https://dev.macrostrat.org/tiles'
+export MACROSTRAT_API_DOMAIN='https://macrostrat.org'
+export MACROSTRAT_DOCKER_REGISTRY='ghcr.io'
+
+if [[ $skip_build == false ]]; then
+  if [[ $(git diff --stat) != '' ]]; then
+    echo 'Cannot deploy with uncommitted changes'
+    exit 1
+  fi
+  echo 'Working directory is clean.'
+
+  yarn run clean
+  yarn run bundle
+fi
+
+echo "Deploying to acadia"
+
+docker build -t uw-macrostrat/web:develop -f deployment/Dockerfile .
+docker tag uw-macrostrat/web:develop $MACROSTRAT_DOCKER_REGISTRY/uw-macrostrat/web:develop
+
+docker push $MACROSTRAT_DOCKER_REGISTRY/uw-macrostrat/web:develop
+
+# Run deployment playbook.
+# THis needs to get much better
+ssh -o ClearAllForwardings=yes gunnison "cd /data/macrostrat && ansible-playbook ansible/playbooks/deploy-dev.yaml"
+
+#ssh acadia "cd /data/macrostrat/app && ~/.local/bin/docker-compose pull web && ~/.local/bin/docker-compose up -d"

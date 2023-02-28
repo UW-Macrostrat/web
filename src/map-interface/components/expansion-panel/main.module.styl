@@ -3,24 +3,25 @@
   padding 0.2em var(--box-horizontal-padding)
   border-top 1px solid var(--accent-border-color)
   border-bottom 1px solid var(--accent-border-color)
+  background-color: var(--accent-color)
   display flex
   flex-direction row
-  position sticky
-  align-items: baseline;
+  align-items: center;
   z-index 1
+  gap var(--box-horizontal-padding)
   top 0px
-  &>*
-    margin-right var(--box-horizontal-padding)
-    &:last-child
-      margin-right: 0
+  position sticky
   h1, h2, h3, h4
-    font-family: Montserrat,sans-serif !important;
+    font-family: Montserrat,sans-serif;
     font-weight: 700;
     margin 0.2em 0;
   h4
     font-weight 600;
   .title
     flex-grow 1
+
+// :global(.bp4-dark) .panel-subhead
+//   margin 0 1px
 
 .expansion-panel
   padding 0
@@ -29,10 +30,6 @@
   // &.collapsed
   //   .expansion-panel-header
   //     border-bottom-width: 0;
-  .panel-subhead
-    background-color: var(--accent-color)
-
-
 
 .sub-expansion-panel
   margin -1px calc(var(--panel-padding-h) * -0.5) 0;
@@ -46,7 +43,7 @@
 
 
   .expansion-panel-header
-    background-color: var(--tertiary-background);
+    background-color: var(--accent-secondary-color);
     cursor pointer
     &:hover
       background-color var(--accent-secondary-hover-color)
@@ -61,14 +58,14 @@
 
 .expansion-summary-title-help
   margin-left 5px;
-  :global(.bp3-icon)
+  :global(.bp4-icon)
     margin-left 5px;
 
 .expansion-panel-header
   cursor pointer
   &:hover
     background-color var(--accent-hover-color)
-  :global(.bp3-icon)
+  :global(.bp4-icon)
     transform: translate(0,3px);
 
 .expansion-children
@@ -113,7 +110,7 @@
   position relative
 
 .expandable-details-toggle
-  :global(.bp3-button)
+  :global(.bp4-button)
     font-size: 10px
 
 .expandable-details

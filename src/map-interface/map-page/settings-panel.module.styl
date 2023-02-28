@@ -2,16 +2,79 @@
   display: inline-flex
   align-items center
   justify-content: space-between
+  flex-grow: 1
 
 .control-label-text
   margin-right: 1em
 
+.info, .admonition
+  font-style: italic
+
+
+.admonition
+  color: var(--error-text-color)
+  font-size: 0.9em
+  line-height: 1em
+
+.settings
+  .auto-button
+    font-size: 12px
+    font-style: italic
+
+  :global
+    .bp4-control
+      display: flex
+      width: 100%
+      align-items: center
+      .control-label
+        flex-grow: 1
+
+    .bp4-callout
+      padding: 0.5em
+      position: relative
+
+    .bp4-button, .bp4-button-group
+      width: 100%
+      margin: 0.1em 0 0.2em
+      justify-content: start
+      align-items: center
+      //box-shadow: 0 0 0px 1px var(--card-shadow-color)
+      border-radius: 2px
+      .bp4-button-text
+        flex-grow: 1
+      .spacer
+        flex-grow 1
+      .bp4-button
+        width: auto
+        display: inline
+        margin: 0
+
+.callout-panel
+  border-radius: 3px
+  overflow: hidden
+  &.expanded
+    .callout-header
+      :global(.bp4-button)
+        border-bottom-left-radius: 0
+        border-bottom-right-radius: 0
+        margin-bottom: 0
+  :global(.bp4-callout)
+    border-top-left-radius: 0
+    border-top-right-radius: 0
+    &>:last-child
+      margin-bottom: 0
+
+
 .flex-row
   align-items baseline
+  max-width: 100%
+  margin: 0 1em
   h3
     flex: 1
     max-width: 9em
   display: flex
   flex: 1
   flex-direction: row
-  max-width: 100%
+  gap: 0.5em
+  &>*
+    flex: 1
