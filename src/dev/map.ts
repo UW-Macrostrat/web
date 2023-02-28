@@ -44,6 +44,7 @@ import { tileToGeoJSON } from "@mapbox/tilebelt";
 export enum MacrostratVectorTileset {
   Carto = "carto",
   CartoSlim = "carto-slim",
+  IGCPOrogens = "igcp-orogens",
 }
 
 export enum MacrostratRasterTileset {
@@ -91,7 +92,7 @@ export function VectorMapInspectorPage({
 
   const [isOpen, setOpen] = useState(false);
   const [showLineSymbols, setShowLineSymbols] = useState(false);
-  const [xRay, setXRay] = useState(true);
+  const [xRay, setXRay] = useState(false);
   const [showTileExtent, setShowTileExtent] = useState(false);
 
   const [inspectPosition, setInspectPosition] =
@@ -332,7 +333,7 @@ function addExtraLayers(
       ...style.sources,
       burwell: {
         type: "vector",
-        tiles: [SETTINGS.burwellTileDomain + `/${tileset}/{z}/{x}/{y}.mvt`],
+        tiles: [SETTINGS.burwellTileDomain + `/${tileset}/{z}/{x}/{y}`],
         tileSize: 512,
       },
     },
