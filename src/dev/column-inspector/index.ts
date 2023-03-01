@@ -81,7 +81,7 @@ function ColumnManager() {
   ]);
 }
 
-const APIProvider = C(MacrostratAPIProvider, { useDev: false });
+const APIProvider = C(MacrostratAPIProvider, { useDev: true });
 
 const App = compose(
   PatternProvider,
