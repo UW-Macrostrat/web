@@ -24,6 +24,7 @@ import {
   ColumnGeoJSONRecord,
 } from "./columns";
 import { MapLayer } from "../reducers/core";
+import { matchPath } from "react-router";
 
 async function actionRunner(
   state: AppState,
@@ -44,6 +45,12 @@ async function actionRunner(
         coreState,
         state.router.location.hash
       );
+
+      // If we are on the column route, the column layer must be enabled
+      const colMatch = matchPath("/loc/:lng/:lat/column", pathname);
+      if (colMatch != null) {
+        coreState1.mapLayers.add(MapLayer.COLUMNS);
+      }
 
       // Fill out the remainder with defaults
 

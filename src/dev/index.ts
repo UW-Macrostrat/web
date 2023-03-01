@@ -27,6 +27,12 @@ export default function DevIndex() {
         }),
       }),
       h(Route, {
+        path: "igcp-orogens",
+        element: h(VectorMapInspectorPage, {
+          tileset: MacrostratVectorTileset.IGCPOrogens,
+        }),
+      }),
+      h(Route, {
         path: "carto-raster",
         element: h(RasterMapInspectorPage, {
           tileset: MacrostratRasterTileset.Carto,
@@ -53,6 +59,7 @@ function MapInspectorIndex() {
     h("ul.layers", [
       h(LinkItem, { to: "carto" }, "Carto"),
       h(LinkItem, { to: "carto-slim" }, "Carto (slim)"),
+      h(LinkItem, { to: "igcp-orogens" }, "IGCP orogens"),
       h(LinkItem, { to: "carto-raster" }, "Carto (image)"),
       h(LinkItem, { to: "emphasized" }, "Carto (image, emphasized)"),
     ]),

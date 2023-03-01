@@ -137,6 +137,16 @@ type SetAllColumns = {
   columns: ColumnGeoJSONRecord[];
 };
 
+type SetTimeCursor = {
+  type: "set-time-cursor";
+  age: number;
+};
+
+type SetPlateModel = {
+  type: "set-plate-model";
+  plateModel: number;
+};
+
 type GetAllColumns = { type: "get-all-columns" };
 type ClearColumnInfo = { type: "clear-column-info" };
 
@@ -186,6 +196,8 @@ export type CoreAction =
   | ToggleHighResolutionTerrain
   | AddFilter
   | SetFilters
+  | SetTimeCursor
+  | SetPlateModel
   | StopSearching
   | SelectSearchResult
   | ToggleExperimentsPanel
@@ -233,6 +245,8 @@ export interface CoreState extends MapState, AsyncRequestState {
   infoMarkerPosition: { lat: number; lng: number } | null;
   infoMarkerFocus: PositionFocusState | null;
   mapInfo: any[];
+  timeCursorAge: number | null;
+  plateModelId: number | null;
   mapSettings: MapSettings;
   columnInfo: ColumnSummary | null;
   xddInfo: XDDSnippet[];

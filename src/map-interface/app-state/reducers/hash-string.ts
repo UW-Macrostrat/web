@@ -48,6 +48,11 @@ export function updateURI(state: CoreState) {
   applyXYPosition(args, state);
   applyHeightAndOrientation(args, state);
 
+  if (state.timeCursorAge != null && state.timeCursorAge != 0) {
+    args.age = fmtInt(state.timeCursorAge);
+    args.plate_model = fmtInt(state.plateModelId);
+  }
+
   const layers = getLayerDescriptionFromLayers(state.mapLayers);
   args = { ...args, ...layers };
 
@@ -263,11 +268,16 @@ export function updateMapPositionForHash(
       target,
     };
 
+    // Get time cursor information
+    const { age, plate_model = 1 } = hashData;
+
     return {
       ...state,
       mapPosition: position,
       mapLayers,
       mapBackend: MapBackend.MAPBOX3,
+      timeCursorAge: age != null ? Number(age) : null,
+      plateModelId: Number(plate_model),
     };
   } catch (e) {
     console.error("Invalid map state:", e);

@@ -1,12 +1,21 @@
 // Settings panel for the map
 
-import { Alignment, Switch, Icon } from "@blueprintjs/core";
+import {
+  Alignment,
+  Switch,
+  Icon,
+  Button,
+  HTMLSelect,
+  Intent,
+  IconName,
+} from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
-import { Tag, Button, Collapse, Callout, Text } from "@blueprintjs/core";
+import { Tag, Collapse, Callout, Text, NumericInput } from "@blueprintjs/core";
 import { useState } from "react";
 //import { LinkButton } from "@macrostrat/ui-components";
 //import { GlobeSettings } from "@macrostrat/cesium-viewer/settings";
 import { useAppState, useAppActions } from "~/map-interface/app-state";
+import { useEffect } from "react";
 import { MapLayer } from "~/map-interface/app-state";
 //import { DisplayQuality } from "@macrostrat/cesium-viewer";
 import styles from "./settings-panel.module.styl";
@@ -56,6 +65,12 @@ const SettingsPanel = (props) => {
   //const globeActive = pathname?.startsWith("/globe");
   const runAction = useAppActions();
   const showExperiments = useAppState((s) => s.core.showExperimentsPanel);
+  const age = useAppState((s) => s.core.timeCursorAge);
+  const [localAge, setLocalAge] = useState(age);
+
+  useEffect(() => {
+    setLocalAge(age);
+  }, [age]);
 
   return h("div.settings", [
     h("p.info", "Display options for Macrostrat's map."),
@@ -63,6 +78,7 @@ const SettingsPanel = (props) => {
     h(LabelsButton),
     h(ThemeButton),
     //h(HighResolutionTerrainSwitch),
+    // Geologic time input
 
     h("div.callout-panel", { className: showExperiments ? "expanded" : null }, [
       h("div.callout-header", [
@@ -92,8 +108,62 @@ const SettingsPanel = (props) => {
         ])
       ),
     ]),
+    // h(CalloutPanel, {
+    //   title: "Geologic time",
+    //   icon: "time",
+    //   intent: "primary",
+    //   isOpen: useAppState((s) => s.core.showTimeCursorPanel),
+    //   setIsOpen: (v) => {
+    //     runAction({ type: "toggle-time-cursor-panel", value: v });
+    //   }
+
+    // }, [
+
+    // ])
   ]);
 };
+
+function CalloutPanel({
+  isOpen,
+  setIsOpen,
+  children,
+  icon,
+  intent = Intent.PRIMARY,
+  title,
+}: {
+  isOpen: boolean;
+  setIsOpen: (v: boolean) => void;
+  children: any;
+  icon: IconName;
+  intent?: Intent;
+  title: string;
+}) {
+  return h("div.callout-panel", { className: isOpen ? "expanded" : null }, [
+    h("div.callout-header", [
+      h(
+        Button,
+        {
+          minimal: true,
+          icon,
+          active: isOpen,
+          intent: "warning",
+          onClick() {
+            setIsOpen(!isOpen);
+          },
+        },
+        title
+      ),
+    ]),
+    h(
+      Collapse,
+      {
+        isOpen: isOpen,
+        className: "callout-content",
+      },
+      h(Callout, { intent, icon: null }, [children])
+    ),
+  ]);
+}
 
 function LineSymbolsControl() {
   const runAction = useAppActions();
@@ -166,6 +236,12 @@ function LabelsButton() {
   const layer = MapLayer.LABELS;
   const isShown = useAppState((state) => state.core.mapLayers.has(layer));
   const runAction = useAppActions();
+  const [localAge, setLocalAge] = useState(null);
+  const age = useAppState((s) => s.core.timeCursorAge);
+  useEffect(() => {
+    setLocalAge(age);
+  }, [age]);
+
   const onClick = () => runAction({ type: "toggle-map-layer", layer });
   return h(ShowHideButton, {
     minimal: true,
