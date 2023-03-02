@@ -70,11 +70,18 @@ function useMapStyle(
   return style;
 }
 
+const _macrostratStyle = buildMacrostratStyle();
+
 export function VectorMapInspectorPage({
   tileset = MacrostratVectorTileset.CartoSlim,
+  overlayStyle = _macrostratStyle,
+  title = null,
+  headerElement = null,
 }: {
   headerElement?: React.ReactElement;
+  title?: string;
   tileset?: MacrostratVectorTileset;
+  overlayStyle?: mapboxgl.Style;
 }) {
   // A stripped-down page for map development
   const runAction = useAppActions();
@@ -131,14 +138,14 @@ export function VectorMapInspectorPage({
   // Style management
   const baseMapURL = getBaseMapStyle(new Set([]), isEnabled);
 
-  const overlayStyle = useMemo(() => {
-    const overlayStyle: mapboxgl.Style = xRay
+  const _overlayStyle = useMemo(() => {
+    const style: mapboxgl.Style = xRay
       ? buildXRayStyle({ inDarkMode: isEnabled })
-      : buildMacrostratStyle();
-    return addExtraLayers(overlayStyle, tileset);
-  }, [xRay, tileset, isEnabled]);
+      : overlayStyle;
+    return replaceSourcesForTileset(style, tileset);
+  }, [xRay, tileset, overlayStyle, isEnabled]) as mapboxgl.Style;
 
-  const style = useMapStyle(baseMapURL, overlayStyle);
+  const style = useMapStyle(baseMapURL, _overlayStyle);
 
   let tile = null;
   if (showTileExtent && data?.[0] != null) {
@@ -152,7 +159,7 @@ export function VectorMapInspectorPage({
     MapAreaContainer,
     {
       navbar: h(FloatingNavbar, { className: "searchbar" }, [
-        h([h(ParentRouteButton), h("h2", `${tileset}`)]),
+        h([h(ParentRouteButton), headerElement ?? h("h2", title ?? tileset)]),
         h("div.spacer"),
         h(LoaderButton, {
           active: isOpen,
@@ -323,7 +330,7 @@ function buildRasterStyle(layer: MacrostratRasterTileset) {
   };
 }
 
-function addExtraLayers(
+function replaceSourcesForTileset(
   style: mapboxgl.Style,
   tileset: MacrostratVectorTileset
 ) {
