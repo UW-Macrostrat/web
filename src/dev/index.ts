@@ -8,6 +8,7 @@ import {
 } from "./map";
 import { loadableElement } from "~/_utils";
 import styles from "./main.module.styl";
+import { MapColorsInspector } from "./color-schemes";
 const h = hyper.styled(styles);
 
 export default function DevIndex() {
@@ -24,6 +25,12 @@ export default function DevIndex() {
         path: "carto-slim",
         element: h(VectorMapInspectorPage, {
           tileset: MacrostratVectorTileset.CartoSlim,
+        }),
+      }),
+      h(Route, {
+        path: "color-schemes",
+        element: h(MapColorsInspector, {
+          title: "Map colors",
         }),
       }),
       h(Route, {
@@ -44,6 +51,7 @@ export default function DevIndex() {
           tileset: MacrostratRasterTileset.Emphasized,
         }),
       }),
+
       h(Route, {
         path: "column-inspector",
         element: loadableElement(() => import("./column-inspector")),
@@ -65,6 +73,8 @@ function MapInspectorIndex() {
     ]),
     h("h1", "Stratigraphic column inspector"),
     h(Link, { to: "column-inspector" }, "Stratigraphy"),
+    h("h1", "Color scheme testing"),
+    h(Link, { to: "color-schemes" }, "Color schemes"),
   ]);
 }
 
