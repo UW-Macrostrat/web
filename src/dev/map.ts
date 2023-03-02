@@ -39,7 +39,6 @@ import {
 } from "./vector-tile-features";
 import { TileExtentLayer } from "./tile-extent";
 import styles from "./main.module.styl";
-import { tileToGeoJSON } from "@mapbox/tilebelt";
 
 export enum MacrostratVectorTileset {
   Carto = "carto",
@@ -70,18 +69,20 @@ function useMapStyle(
   return style;
 }
 
-const _macrostratStyle = buildMacrostratStyle();
+const _macrostratStyle = buildMacrostratStyle() as mapboxgl.Style;
 
 export function VectorMapInspectorPage({
   tileset = MacrostratVectorTileset.CartoSlim,
   overlayStyle = _macrostratStyle,
   title = null,
   headerElement = null,
+  children,
 }: {
   headerElement?: React.ReactElement;
   title?: string;
   tileset?: MacrostratVectorTileset;
   overlayStyle?: mapboxgl.Style;
+  children?: React.ReactNode;
 }) {
   // A stripped-down page for map development
   const runAction = useAppActions();
@@ -168,6 +169,7 @@ export function VectorMapInspectorPage({
         }),
       ]),
       contextPanel: h(PanelCard, [
+        children,
         h(Switch, {
           checked: xRay,
           label: "X-ray mode",
