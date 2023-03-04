@@ -291,10 +291,13 @@ export function coreReducer(
       return update(state, { mapLayers });
     case "toggle-map-3d":
       return { ...state, mapUse3D: !state.mapUse3D };
-    case "toggle-elevation-chart":
+    case "toggle-cross-section":
       return {
         ...state,
         elevationChartOpen: !state.elevationChartOpen,
+        crossSectionLine: state.elevationChartOpen
+          ? null
+          : state.crossSectionLine,
         elevationData: [],
         elevationMarkerLocation: [],
       };
@@ -373,24 +376,6 @@ export function coreReducer(
         xddCancelToken: null,
       };
 
-    // Handle elevation
-    case "start-elevation-query":
-      // When a search is requested, cancel any pending requests first
-      if (state.elevationCancelToken) {
-        state.elevationCancelToken.cancel();
-      }
-      return {
-        ...state,
-        fetchingElevation: true,
-        elevationCancelToken: action.cancelToken,
-      };
-    case "received-elevation-query":
-      return {
-        ...state,
-        fetchingElevation: false,
-        elevationData: action.data,
-        elevationCancelToken: null,
-      };
     case "update-elevation-marker":
       return { ...state, elevationMarkerLocation: [action.lng, action.lat] };
 

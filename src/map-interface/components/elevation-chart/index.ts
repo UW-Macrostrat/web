@@ -183,10 +183,12 @@ function ElevationChart({ elevationData = [] }) {
 
   useEffect(() => {
     if (elevationData.length > 0) {
+      chartRef.current?.remove();
       drawElevationChart(chartRef, { elevationData, updateElevationMarker });
     }
     return () => {
-      chartRef.current?.select("g").remove();
+      chartRef.current?.remove();
+      //chartRef.current?.select("g").remove();
     };
   }, [elevationData]);
 
@@ -244,18 +246,6 @@ function ElevationChartContainer() {
 
   const hasElevationData = crossSectionLine?.coordinates?.length >= 2;
 
-  // let CancelTokenElevation = axios.CancelToken;
-  // let sourceElevation = CancelTokenElevation.source();
-  // dispatch({
-  //   type: "start-elevation-query",
-  //   cancelToken: sourceElevation.token,
-  // });
-  // const elevationData = await getElevation(action.line, sourceElevation);
-  // return {
-  //   type: "received-elevation-query",
-  //   data: elevationData,
-  // };
-
   if (!elevationChartOpen) return null;
 
   return h(
@@ -267,7 +257,7 @@ function ElevationChartContainer() {
         minimal: true,
         className: "close-button",
         onClick() {
-          runAction({ type: "toggle-elevation-chart" });
+          runAction({ type: "toggle-cross-section" });
         },
       }),
       h("div", [

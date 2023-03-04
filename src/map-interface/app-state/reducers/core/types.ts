@@ -29,7 +29,6 @@ type MAP_QUERY = {
 } & MapLocation;
 
 type GET_COLUMN_UNITS = { type: "get-column-units"; column: ColumnProperties };
-type GET_ELEVATION = { type: "get-elevation"; line: any };
 type GET_PBDB = { type: "get-pbdb"; collection_nos: any };
 // Define constants to be passed with actions
 type RECIEVE_DATA = { type: "recieve-data" };
@@ -39,7 +38,6 @@ type TOGGLE_MENU = { type: "toggle-menu" };
 type TOGGLE_ABOUT = { type: "toggle-about" };
 type EXPAND_INFODRAWER = { type: "expand-infodrawer" };
 type CLOSE_INFODRAWER = { type: "close-infodrawer" };
-type TOGGLE_ELEVATION_CHART = { type: "toggle-elevation-chart" };
 
 type TOGGLE_FILTERS = { type: "toggle-filters" };
 type REMOVE_FILTER = { type: "remove-filter"; filter: any };
@@ -96,11 +94,6 @@ type START_SEARCH_QUERY = {
 type RECEIVED_SEARCH_QUERY = { type: "received-search-query"; data: any };
 type GO_TO_PLACE = { type: "go-to-place"; place: any };
 
-type START_ELEVATION_QUERY = {
-  type: "start-elevation-query";
-  cancelToken: any;
-};
-type RECEIVED_ELEVATION_QUERY = { type: "received-elevation-query"; data: any };
 type UPDATE_ELEVATION_MARKER = {
   type: "update-elevation-marker";
   lng: number;
@@ -115,6 +108,8 @@ type ToggleHighResolutionTerrain = { type: "toggle-high-resolution-terrain" };
 
 type SetFilters = { type: "set-filters"; filters: FilterData[] };
 
+// Toggle cross section
+type ToggleCrossSection = { type: "toggle-cross-section" };
 type SetCrossSectionLine = {
   type: "set-cross-section-line";
   data: LineString | null;
@@ -162,7 +157,6 @@ export type CoreAction =
   | SET_INPUT_FOCUS
   | SET_SEARCH_TERM
   | GET_PBDB
-  | GET_ELEVATION
   | GET_COLUMN_UNITS
   | MAP_QUERY
   | FETCH_XDD
@@ -179,7 +173,6 @@ export type CoreAction =
   | TOGGLE_ABOUT
   | EXPAND_INFODRAWER
   | CLOSE_INFODRAWER
-  | TOGGLE_ELEVATION_CHART
   | TOGGLE_FILTERS
   | REMOVE_FILTER
   | UPDATE_COLUMN_FILTERS
@@ -193,8 +186,6 @@ export type CoreAction =
   | START_SEARCH_QUERY
   | RECEIVED_SEARCH_QUERY
   | GO_TO_PLACE
-  | START_ELEVATION_QUERY
-  | RECEIVED_ELEVATION_QUERY
   | UPDATE_ELEVATION_MARKER
   | SET_ACTIVE_INDEX_MAP
   | MapAction
@@ -210,6 +201,7 @@ export type CoreAction =
   | GoToExperimentsPanel
   | GetAllColumns
   | SetAllColumns
+  | ToggleCrossSection
   | SetCrossSectionLine
   | ClearColumnInfo;
 

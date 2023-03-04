@@ -158,7 +158,7 @@ class VestigialMap extends Component<MapProps, {}> {
       if (
         this.props.elevationChartOpen &&
         this.props.elevationData &&
-        this.props.elevationData.length === 0
+        this.elevationPoints.length < 2
       ) {
         this.elevationPoints.push([event.lngLat.lng, event.lngLat.lat]);
         this.map.getSource("elevationPoints").setData({
