@@ -3,7 +3,6 @@ import {
   handleXDDQuery,
   runColumnQuery,
   runMapQuery,
-  getElevation,
   getPBDBData,
   base,
   fetchAllColumns,
@@ -18,13 +17,10 @@ import { MenuPage, setInfoMarkerPosition } from "../reducers";
 import { formatCoordForZoomLevel } from "~/map-interface/utils/formatting";
 import { currentPageForPathName } from "../nav-hooks";
 import { getInitialStateFromHash } from "../reducers/hash-string";
-import {
-  findColumnForLocation,
-  ColumnProperties,
-  ColumnGeoJSONRecord,
-} from "./columns";
+import { findColumnForLocation, ColumnGeoJSONRecord } from "./columns";
 import { MapLayer } from "../reducers/core";
 import { matchPath } from "react-router";
+import { LineString } from "geojson";
 
 async function actionRunner(
   state: AppState,
@@ -122,16 +118,46 @@ async function actionRunner(
       );
     }
     case "set-menu-page": {
-      const { pathname } = state.router.location;
+      const { pathname, hash } = state.router.location;
       if (!isDetailPanelRoute(pathname)) {
         const newPathname = routerBasename + (action.page ?? "");
-        await dispatch(push({ pathname: newPathname, hash: location.hash }));
+        await dispatch(push({ pathname: newPathname, hash }));
       }
       return { type: "set-menu-page", page: action.page };
     }
     case "close-infodrawer":
-      const pathname = routerBasename + (state.menu.activePage ?? "");
-      await dispatch(push({ pathname, hash: location.hash }));
+      // If we are showing a cross-section, we need to go there
+      let nextPathname = "";
+      if (state.core.crossSectionLine != null) {
+        nextPathname = buildCrossSectionPath(state.core.crossSectionLine);
+      } else {
+        nextPathname = state.menu.activePage ?? "";
+      }
+      await dispatch(
+        push({
+          pathname: routerBasename + nextPathname,
+          hash: state.router.location.hash,
+        })
+      );
+      return action;
+    case "toggle-cross-section":
+      if (state.core.crossSectionLine != null) {
+        // Return to the base route
+        let nextPathname = "";
+        const pos = state.core.infoMarkerPosition;
+        if (pos != null) {
+          const z = state.core.mapPosition.target?.zoom ?? 7;
+          nextPathname = buildLocationPath(pos.lng, pos.lat, z);
+        } else {
+          nextPathname = state.menu.activePage ?? "";
+        }
+        await dispatch(
+          push({
+            pathname: routerBasename + nextPathname,
+            hash: state.router.location.hash,
+          })
+        );
+      }
       return action;
     case "fetch-search-query":
       const { term } = action;
@@ -181,23 +207,20 @@ async function actionRunner(
     case "set-cross-section-line": {
       const { line } = action;
 
-      const pts = line.coordinates
-        .map((p) => `${p[0].toFixed(4)},${p[1].toFixed(4)}`)
-        .join("/");
-
-      const pathname = routerBasename + "cross-section/" + pts;
-
-      await dispatch(push({ pathname, hash: location.hash }));
+      if (state.core.infoMarkerPosition == null) {
+        // If we are showing a marker, that route takes precedence
+        const pathname = routerBasename + buildCrossSectionPath(line);
+        await dispatch(push({ pathname, hash: location.hash }));
+      }
 
       return { type: "did-set-cross-section-line", line };
     }
     case "map-query": {
       const { lng, lat, z } = action;
-      const ln = formatCoordForZoomLevel(lng, Number(z));
-      const lt = formatCoordForZoomLevel(lat, Number(z));
       // Check if matches column detail route
       const { pathname } = state.router.location;
-      let newPath = routerBasename + `loc/${ln}/${lt}`;
+
+      let newPath = routerBasename + buildLocationPath(lng, lat, Number(z));
       if (pathname.startsWith("/loc") && pathname.endsWith("/column")) {
         // If so, we want to append columns to the end of the URL
         newPath += "/column";
@@ -292,6 +315,20 @@ async function actionRunner(
     default:
       return action;
   }
+}
+
+function buildCrossSectionPath(line: LineString) {
+  const pts = line.coordinates
+    .map((p) => `${p[0].toFixed(4)},${p[1].toFixed(4)}`)
+    .join("/");
+
+  return "cross-section/" + pts;
+}
+
+function buildLocationPath(lng: number, lat: number, z: number) {
+  const ln = formatCoordForZoomLevel(lng, Number(z));
+  const lt = formatCoordForZoomLevel(lat, Number(z));
+  return `loc/${ln}/${lt}`;
 }
 
 export default actionRunner;

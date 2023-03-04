@@ -15,7 +15,10 @@ export function isDetailPanelRoute(pathname: string) {
   it takes the routing focus off the context panel's status. */
   // Hack: cover all our bases here by not differentiating between paths that start with
   // routerBasename (i.e. full location paths) vs. react-router internal paths.
-  return pathname.startsWith(routerBasename + "loc");
+  return (
+    pathname.startsWith(routerBasename + "loc") ||
+    pathname.startsWith(routerBasename + "cross-section")
+  );
 }
 
 export function contextPanelIsInitiallyOpen(pathname: string) {
