@@ -3,7 +3,7 @@ import {
   handleXDDQuery,
   runColumnQuery,
   runMapQuery,
-  asyncGetElevation,
+  getElevation,
   getPBDBData,
   base,
   fetchAllColumns,
@@ -276,10 +276,7 @@ async function actionRunner(
         type: "start-elevation-query",
         cancelToken: sourceElevation.token,
       });
-      const elevationData = await asyncGetElevation(
-        action.line,
-        sourceElevation
-      );
+      const elevationData = await getElevation(action.line, sourceElevation);
       return {
         type: "received-elevation-query",
         data: elevationData,

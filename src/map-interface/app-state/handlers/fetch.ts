@@ -161,7 +161,7 @@ export async function runColumnQuery(column, cancelToken) {
   }
 }
 
-export const asyncGetElevation = async (line, cancelToken) => {
+export async function getElevation(line, cancelToken) {
   const [start_lng, start_lat] = line[0];
   const [end_lng, end_lat] = line[1];
 
@@ -180,7 +180,7 @@ export const asyncGetElevation = async (line, cancelToken) => {
   } catch (error) {
     return [];
   }
-};
+}
 
 /* PBDB data */
 // use new cancellation API
