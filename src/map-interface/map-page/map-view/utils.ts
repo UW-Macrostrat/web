@@ -60,12 +60,15 @@ function GeolocationControl(props) {
   });
 }
 
-export function useElevationMarkerLocation(mapRef, elevationMarkerLocation) {
+export function usecrossSectionCursorLocation(
+  mapRef,
+  crossSectionCursorLocation
+) {
   // Handle elevation marker location
   useEffect(() => {
     const map = mapRef.current;
     if (map == null) return;
-    if (elevationMarkerLocation == null) return;
+    if (crossSectionCursorLocation == null) return;
     const src = map.getSource("elevationMarker");
     if (src == null) return;
     src.setData({
@@ -76,12 +79,12 @@ export function useElevationMarkerLocation(mapRef, elevationMarkerLocation) {
           properties: {},
           geometry: {
             type: "Point",
-            coordinates: elevationMarkerLocation,
+            coordinates: crossSectionCursorLocation,
           },
         },
       ],
     });
-  }, [mapRef, elevationMarkerLocation]);
+  }, [mapRef, crossSectionCursorLocation]);
 }
 
 export function getMapPadding(ref, parentRef) {

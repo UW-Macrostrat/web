@@ -28,7 +28,7 @@ const defaultState: CoreState = {
   infoDrawerExpanded: false,
   infoMarkerPosition: null,
   infoMarkerFocus: null,
-  elevationChartOpen: false,
+  crossSectionOpen: false,
   mapBackend: MapBackend.MAPBOX,
   mapLayers: new Set([MapLayer.BEDROCK, MapLayer.LINES, MapLayer.LABELS]),
   mapSettings: {
@@ -53,8 +53,7 @@ const defaultState: CoreState = {
   mapInfo: [],
   columnInfo: null,
   searchResults: null,
-  elevationData: [],
-  elevationMarkerLocation: [],
+  crossSectionCursorLocation: [],
   pbdbData: [],
   mapIsLoading: false,
   mapCenter: {
@@ -294,12 +293,11 @@ export function coreReducer(
     case "toggle-cross-section":
       return {
         ...state,
-        elevationChartOpen: !state.elevationChartOpen,
-        crossSectionLine: state.elevationChartOpen
+        crossSectionOpen: !state.crossSectionOpen,
+        crossSectionLine: state.crossSectionOpen
           ? null
           : state.crossSectionLine,
-        elevationData: [],
-        elevationMarkerLocation: [],
+        crossSectionCursorLocation: [],
       };
     case "set-input-focus":
       return {
@@ -377,7 +375,7 @@ export function coreReducer(
       };
 
     case "update-elevation-marker":
-      return { ...state, elevationMarkerLocation: [action.lng, action.lat] };
+      return { ...state, crossSectionCursorLocation: [action.lng, action.lat] };
 
     // Handle PBDB
     case "start-pbdb-query":

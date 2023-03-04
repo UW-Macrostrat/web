@@ -239,14 +239,14 @@ function ElevationChartPanel({ startPos, endPos }) {
 }
 
 function ElevationChartContainer() {
-  const { elevationChartOpen, crossSectionLine } = useSelector(
+  const { crossSectionOpen, crossSectionLine } = useSelector(
     (state) => state.core
   );
   const runAction = useAppActions();
 
   const hasElevationData = crossSectionLine?.coordinates?.length >= 2;
 
-  if (!elevationChartOpen) return null;
+  if (!crossSectionOpen) return null;
 
   return h(
     "div.elevation-chart-panel",

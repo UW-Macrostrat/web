@@ -41,7 +41,7 @@ import {
   getMapPadding,
   MapBottomControls,
   MapStyledContainer,
-  useElevationMarkerLocation,
+  usecrossSectionCursorLocation as useCrossSectionCursorLocation,
   useMapEaseToCenter,
   useMapMarker,
 } from "./utils";
@@ -114,9 +114,8 @@ export default function MainMapView(props) {
     filteredColumns,
     mapLayers,
     mapCenter,
-    elevationChartOpen,
-    elevationData,
-    elevationMarkerLocation,
+    crossSectionOpen,
+    crossSectionCursorLocation,
     mapPosition,
     infoDrawerOpen,
     mapIsLoading,
@@ -126,7 +125,7 @@ export default function MainMapView(props) {
   } = useAppState((state) => state.core);
 
   let mapRef = useMapRef();
-  useElevationMarkerLocation(mapRef, elevationMarkerLocation);
+  useCrossSectionCursorLocation(mapRef, crossSectionCursorLocation);
   const { mapIsRotated } = mapViewInfo(mapPosition);
   const runAction = useAppActions();
   const handleMapQuery = useMapQueryHandler(mapRef, infoDrawerOpen);
@@ -251,9 +250,8 @@ export default function MainMapView(props) {
       // Recreate the set every time to force a re-render
       mapLayers,
       mapCenter,
-      elevationChartOpen,
-      elevationData,
-      elevationMarkerLocation,
+      crossSectionOpen,
+      crossSectionCursorLocation,
       mapPosition,
       mapIsLoading,
       mapIsRotated,

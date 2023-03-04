@@ -178,6 +178,17 @@ async function actionRunner(
         type: "update-column-filters",
         columns: await fetchFilteredColumns(coreState.filters),
       };
+    // case "set-cross-section-line": {
+    //   const { line } = action;
+
+    //   await dispatch({ type: "set-cross-section-line", line });
+
+    //   const pts = line.map((p) => `${p.lng},${p.lat}`).join("/");
+
+    //   const pathname = routerBasename + "/cross-section/" + pts;
+
+    //   return action; //push({ pathname, hash: location.hash });
+    // }
     case "map-query": {
       const { lng, lat, z } = action;
       const ln = formatCoordForZoomLevel(lng, Number(z));

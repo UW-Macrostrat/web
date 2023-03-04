@@ -112,7 +112,7 @@ type SetFilters = { type: "set-filters"; filters: FilterData[] };
 type ToggleCrossSection = { type: "toggle-cross-section" };
 type SetCrossSectionLine = {
   type: "set-cross-section-line";
-  data: LineString | null;
+  line: LineString | null;
 };
 
 type Place = {
@@ -241,7 +241,8 @@ export interface CoreState extends MapState, AsyncRequestState {
   infoDrawerExpanded: boolean;
   isFetching: boolean;
   crossSectionLine: LineString | null;
-  elevationChartOpen: boolean;
+  crossSectionOpen: boolean;
+  crossSectionCursorLocation: any;
   infoMarkerPosition: { lat: number; lng: number } | null;
   infoMarkerFocus: PositionFocusState | null;
   mapInfo: any[];
@@ -251,9 +252,7 @@ export interface CoreState extends MapState, AsyncRequestState {
   columnInfo: ColumnSummary | null;
   xddInfo: XDDSnippet[];
   searchResults: any;
-  elevationData: any;
   inputFocus: boolean;
-  elevationMarkerLocation: any;
   pbdbData: any[];
   mapCenter: MapCenterInfo;
   mapUse3D: boolean;

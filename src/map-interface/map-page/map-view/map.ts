@@ -155,11 +155,7 @@ class VestigialMap extends Component<MapProps, {}> {
 
     this.map.on("click", (event) => {
       // If the elevation drawer is open and we are awaiting to points, add them
-      if (
-        this.props.elevationChartOpen &&
-        this.props.elevationData &&
-        this.elevationPoints.length < 2
-      ) {
+      if (this.props.crossSectionOpen && this.elevationPoints.length < 2) {
         this.elevationPoints.push([event.lngLat.lng, event.lngLat.lat]);
         this.map.getSource("elevationPoints").setData({
           type: "FeatureCollection",
@@ -306,8 +302,8 @@ class VestigialMap extends Component<MapProps, {}> {
 
     // Watch the state of the application and adjust the map accordingly
     if (
-      !nextProps.elevationChartOpen &&
-      this.props.elevationChartOpen &&
+      !nextProps.crossSectionOpen &&
+      this.props.crossSectionOpen &&
       this.map
     ) {
       this.elevationPoints = [];

@@ -161,27 +161,6 @@ export async function runColumnQuery(column, cancelToken) {
   }
 }
 
-export async function getElevation(line, cancelToken) {
-  const [start_lng, start_lat] = line[0];
-  const [end_lng, end_lat] = line[1];
-
-  let params = { start_lng, start_lat, end_lng, end_lat };
-
-  let url = `${base}/elevation`;
-
-  const res = await axios.get(url, {
-    //cancelToken,
-    responseType: "json",
-    params: params,
-  });
-  const data = res.data;
-  try {
-    return data.success.data;
-  } catch (error) {
-    return [];
-  }
-}
-
 /* PBDB data */
 // use new cancellation API
 
