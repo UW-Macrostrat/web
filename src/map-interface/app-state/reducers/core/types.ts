@@ -111,7 +111,7 @@ type SetFilters = { type: "set-filters"; filters: FilterData[] };
 // Toggle cross section
 type ToggleCrossSection = { type: "toggle-cross-section" };
 type SetCrossSectionLine = {
-  type: "set-cross-section-line";
+  type: "set-cross-section-line" | "did-set-cross-section-line";
   line: LineString | null;
 };
 

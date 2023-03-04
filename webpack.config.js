@@ -102,6 +102,10 @@ module.exports = {
           from: /^\/loc\/.*$/,
           to: "/",
         },
+        {
+          from: /^\/cross-section\/.*$/,
+          to: "/",
+        },
       ],
     },
   },

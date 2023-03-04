@@ -172,7 +172,7 @@ class VestigialMap extends Component<MapProps, {}> {
         if (this.elevationPoints.length === 2) {
           this.props.runAction({
             type: "set-cross-section-line",
-            data: { type: "LineString", coordinates: this.elevationPoints },
+            line: { type: "LineString", coordinates: this.elevationPoints },
           });
           this.map.getSource("elevationLine").setData({
             type: "FeatureCollection",

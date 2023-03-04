@@ -29,6 +29,8 @@ const defaultState: CoreState = {
   infoMarkerPosition: null,
   infoMarkerFocus: null,
   crossSectionOpen: false,
+  crossSectionLine: null,
+  crossSectionCursorLocation: [],
   mapBackend: MapBackend.MAPBOX,
   mapLayers: new Set([MapLayer.BEDROCK, MapLayer.LINES, MapLayer.LABELS]),
   mapSettings: {
@@ -53,7 +55,6 @@ const defaultState: CoreState = {
   mapInfo: [],
   columnInfo: null,
   searchResults: null,
-  crossSectionCursorLocation: [],
   pbdbData: [],
   mapIsLoading: false,
   mapCenter: {
@@ -189,10 +190,10 @@ export function coreReducer(
         infoMarkerPosition: { ...pos },
         infoMarkerFocus: null,
       };
-    case "set-cross-section-line":
+    case "did-set-cross-section-line":
       return {
         ...state,
-        crossSectionLine: action.data,
+        crossSectionLine: action.line,
       };
     case "received-map-query":
       if (action.data && action.data.mapData) {
