@@ -8,8 +8,10 @@ import { scaleLinear } from "d3-scale";
 import { axisBottom, axisLeft } from "d3-axis";
 import { line, area } from "d3-shape";
 import { min, max, extent, bisector } from "d3-array";
+import { useAPIResult } from "@macrostrat/ui-components";
 
 import styles from "./main.module.styl";
+import { SETTINGS } from "~/map-interface/settings";
 const h = hyper.styled(styles);
 
 function drawElevationChart(
@@ -175,13 +177,14 @@ function drawElevationChart(
     });
 }
 
-function ElevationChart({ elevationData = [], fetchingElevation }) {
+function ElevationChart({ elevationData = [] }) {
   const chartRef = useRef(null);
   const runAction = useAppActions();
 
   useEffect(() => {
-    if (elevationData.length == 0) return;
-    drawElevationChart(chartRef, { elevationData, updateElevationMarker });
+    if (elevationData.length > 0) {
+      drawElevationChart(chartRef, { elevationData, updateElevationMarker });
+    }
     return () => {
       chartRef.current?.select("g").remove();
     };
@@ -194,19 +197,64 @@ function ElevationChart({ elevationData = [], fetchingElevation }) {
       lat,
     });
 
-  if (fetchingElevation) return h(Spinner);
   if (elevationData.length == 0) return null;
   return h("svg#elevationChart");
 }
 
+function ElevationChartPanel({ startPos, endPos }) {
+  const elevation: any = useAPIResult(
+    SETTINGS.apiDomain + "/api/v2/elevation",
+    {
+      start_lng: startPos[0],
+      start_lat: startPos[1],
+      end_lng: endPos[0],
+      end_lat: endPos[1],
+    }
+  );
+  const elevationData = elevation?.success?.data;
+
+  // let CancelTokenElevation = axios.CancelToken;
+  // let sourceElevation = CancelTokenElevation.source();
+  // dispatch({
+  //   type: "start-elevation-query",
+  //   cancelToken: sourceElevation.token,
+  // });
+  // const elevationData = await getElevation(action.line, sourceElevation);
+  // return {
+  //   type: "received-elevation-query",
+  //   data: elevationData,
+  // };
+
+  if (elevationData == null) return h(Spinner);
+
+  return h(
+    "div.elevation-chart-wrapper",
+    null,
+    h(ElevationChart, {
+      elevationData,
+    })
+  );
+}
+
 function ElevationChartContainer() {
-  const {
-    elevationData = [],
-    elevationChartOpen,
-    fetchingElevation,
-  } = useSelector((state) => state.core);
-  const hasElevationData = elevationData.length > 0;
+  const { elevationChartOpen, crossSectionLine } = useSelector(
+    (state) => state.core
+  );
   const runAction = useAppActions();
+
+  const hasElevationData = crossSectionLine?.coordinates?.length >= 2;
+
+  // let CancelTokenElevation = axios.CancelToken;
+  // let sourceElevation = CancelTokenElevation.source();
+  // dispatch({
+  //   type: "start-elevation-query",
+  //   cancelToken: sourceElevation.token,
+  // });
+  // const elevationData = await getElevation(action.line, sourceElevation);
+  // return {
+  //   type: "received-elevation-query",
+  //   data: elevationData,
+  // };
 
   if (!elevationChartOpen) return null;
 
@@ -227,14 +275,10 @@ function ElevationChartContainer() {
           "div.elevation-instructions",
           "Click two points on the map to draw an elevation profile"
         ),
-        h(
-          "div.elevation-chart-wrapper",
-          null,
-          h(ElevationChart, {
-            elevationData,
-            fetchingElevation,
-          })
-        ),
+        h.if(hasElevationData)(ElevationChartPanel, {
+          startPos: crossSectionLine?.coordinates[0],
+          endPos: crossSectionLine?.coordinates[1],
+        }),
       ]),
     ])
   );

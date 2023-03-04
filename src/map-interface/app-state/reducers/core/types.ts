@@ -9,6 +9,7 @@ import {
   ColumnSummary,
 } from "../../handlers/columns";
 import { UnitLong } from "@macrostrat/api-types";
+import { LineString } from "geojson";
 
 export type MapLocation = {
   lng: number;
@@ -114,6 +115,11 @@ type ToggleHighResolutionTerrain = { type: "toggle-high-resolution-terrain" };
 
 type SetFilters = { type: "set-filters"; filters: FilterData[] };
 
+type SetCrossSectionLine = {
+  type: "set-cross-section-line";
+  data: LineString | null;
+};
+
 type Place = {
   type: "place";
   name: string;
@@ -204,6 +210,7 @@ export type CoreAction =
   | GoToExperimentsPanel
   | GetAllColumns
   | SetAllColumns
+  | SetCrossSectionLine
   | ClearColumnInfo;
 
 interface AsyncRequestState {
@@ -241,6 +248,7 @@ export interface CoreState extends MapState, AsyncRequestState {
   infoDrawerOpen: boolean;
   infoDrawerExpanded: boolean;
   isFetching: boolean;
+  crossSectionLine: LineString | null;
   elevationChartOpen: boolean;
   infoMarkerPosition: { lat: number; lng: number } | null;
   infoMarkerFocus: PositionFocusState | null;

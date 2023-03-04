@@ -269,18 +269,17 @@ async function actionRunner(
         data: columnData,
         column: action.column,
       };
-    case "get-elevation":
-      let CancelTokenElevation = axios.CancelToken;
-      let sourceElevation = CancelTokenElevation.source();
-      dispatch({
-        type: "start-elevation-query",
-        cancelToken: sourceElevation.token,
+    case "get-elevation": {
+      // Navigate to cross-section page
+      const { line } = action;
+      let newPath =
+        routerBasename +
+        `cross-section/${line[0].lng},${line[0].lat}/${line[1].lng},${line[1].lat}`;
+      return push({
+        pathname: newPath,
+        hash: location.hash,
       });
-      const elevationData = await getElevation(action.line, sourceElevation);
-      return {
-        type: "received-elevation-query",
-        data: elevationData,
-      };
+    }
     case "get-pbdb":
       let collection_nos = action.collection_nos;
       dispatch({ type: "start-pdbd-query" });

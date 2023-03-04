@@ -190,6 +190,11 @@ export function coreReducer(
         infoMarkerPosition: { ...pos },
         infoMarkerFocus: null,
       };
+    case "set-cross-section-line":
+      return {
+        ...state,
+        crossSectionLine: action.data,
+      };
     case "received-map-query":
       if (action.data && action.data.mapData) {
         action.data.mapData = action.data.mapData.map((source) => {
