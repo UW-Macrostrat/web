@@ -264,6 +264,7 @@ export default function MainMapView(props) {
     h(MapMarker, {
       position: infoMarkerPosition,
     }),
+    h.if(crossSectionOpen)(CrossSectionLine),
     h.if(mapLayers.has(MapLayer.SOURCES))(MapSourcesLayer),
   ]);
 }
@@ -345,7 +346,7 @@ export function CoreMapView(props: MapViewProps) {
   }, [mapRef.current]);
 
   // Map loading state
-  const ignoredSources = ["elevationMarker", "elevationPoints"];
+  const ignoredSources = ["elevationMarker", "crossSectionEndpoints"];
 
   useEffect(() => {
     const map = mapRef.current;
@@ -420,6 +421,30 @@ export function MapMarker({ position, setPosition, centerMarker = true }) {
     };
   }, [mapRef.current, setPosition]);
 
+  return null;
+}
+
+export function CrossSectionLine() {
+  const mapRef = useMapRef();
+  const crossSectionLine = useAppState((state) => state.core.crossSectionLine);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map == null) return;
+    map.getSource("crossSectionLine")?.setData(crossSectionLine);
+    map.getSource("crossSectionEndpoints")?.setData({
+      type: "FeatureCollection",
+      features: crossSectionLine?.coordinates.map((f) => {
+        return {
+          type: "Feature",
+          properties: {},
+          geometry: {
+            type: "Point",
+            coordinates: f,
+          },
+        };
+      }),
+    });
+  }, [mapRef.current, crossSectionLine]);
   return null;
 }
 

@@ -33,11 +33,11 @@ const blankMapStyle = {
 class VestigialMap extends Component<MapProps, {}> {
   map: mapboxgl.Map;
   marker: mapboxgl.Marker | null = null;
-  elevationPoints: [number, number][] = [];
+  crossSectionEndpoints: [number, number][] = [];
   constructor(props) {
     super(props);
     this.mapLoaded = false;
-    this.elevationPoints = [];
+    this.crossSectionEndpoints = [];
 
     this.maxValue = 500;
     this.previousZoom = 0;
@@ -155,11 +155,14 @@ class VestigialMap extends Component<MapProps, {}> {
 
     this.map.on("click", (event) => {
       // If the elevation drawer is open and we are awaiting to points, add them
-      if (this.props.crossSectionOpen && this.elevationPoints.length < 2) {
-        this.elevationPoints.push([event.lngLat.lng, event.lngLat.lat]);
-        this.map.getSource("elevationPoints").setData({
+      if (
+        this.props.crossSectionOpen &&
+        this.crossSectionEndpoints.length < 2
+      ) {
+        this.crossSectionEndpoints.push([event.lngLat.lng, event.lngLat.lat]);
+        this.map.getSource("crossSectionEndpoints").setData({
           type: "FeatureCollection",
-          features: this.elevationPoints.map((p) => {
+          features: this.crossSectionEndpoints.map((p) => {
             return {
               type: "Feature",
               geometry: {
@@ -169,19 +172,22 @@ class VestigialMap extends Component<MapProps, {}> {
             };
           }),
         });
-        if (this.elevationPoints.length === 2) {
+        if (this.crossSectionEndpoints.length === 2) {
           this.props.runAction({
             type: "set-cross-section-line",
-            line: { type: "LineString", coordinates: this.elevationPoints },
+            line: {
+              type: "LineString",
+              coordinates: this.crossSectionEndpoints,
+            },
           });
-          this.map.getSource("elevationLine").setData({
+          this.map.getSource("crossSectionLine").setData({
             type: "FeatureCollection",
             features: [
               {
                 type: "Feature",
                 geometry: {
                   type: "LineString",
-                  coordinates: this.elevationPoints,
+                  coordinates: this.crossSectionEndpoints,
                 },
               },
             ],
@@ -306,12 +312,12 @@ class VestigialMap extends Component<MapProps, {}> {
       this.props.crossSectionOpen &&
       this.map
     ) {
-      this.elevationPoints = [];
-      this.map.getSource("elevationPoints").setData({
+      this.crossSectionEndpoints = [];
+      this.map.getSource("crossSectionEndpoints").setData({
         type: "FeatureCollection",
         features: [],
       });
-      this.map.getSource("elevationLine").setData({
+      this.map.getSource("crossSectionLine").setData({
         type: "FeatureCollection",
         features: [],
       });

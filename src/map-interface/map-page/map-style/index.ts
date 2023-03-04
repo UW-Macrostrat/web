@@ -179,14 +179,14 @@ const overlaySources = {
       features: [],
     },
   },
-  elevationPoints: {
+  crossSectionEndpoints: {
     type: "geojson",
     data: {
       type: "FeatureCollection",
       features: [],
     },
   },
-  elevationLine: {
+  crossSectionLine: {
     type: "geojson",
     data: {
       type: "FeatureCollection",
@@ -270,9 +270,9 @@ export function buildOverlayLayers() {
       },
     },
     {
-      id: "elevationLine",
+      id: "crossSectionLine",
       type: "line",
-      source: "elevationLine",
+      source: "crossSectionLine",
       paint: {
         "line-dasharray": [4, 2],
         "line-width": {
@@ -288,7 +288,7 @@ export function buildOverlayLayers() {
     {
       id: "elevationPoint",
       type: "circle",
-      source: "elevationPoints",
+      source: "crossSectionEndpoints",
       paint: {
         "circle-radius": 6,
         "circle-color": "#ffffff",

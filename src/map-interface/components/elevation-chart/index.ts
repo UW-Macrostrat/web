@@ -22,7 +22,7 @@ function drawElevationChart(
   const updateElevationMarker = props.updateElevationMarker;
   let data = props.elevationData;
 
-  let margin = { top: 20, right: 50, bottom: 30, left: 70 };
+  let margin = { top: 20, right: 20, bottom: 35, left: 70 };
   let width = window.innerWidth - margin.left - margin.right;
   let height = 150 - margin.top - margin.bottom;
 
@@ -42,7 +42,7 @@ function drawElevationChart(
     .tickSizeOuter(0)
     .tickPadding(10);
 
-  let elevationLine = line()
+  let crossSectionLine = line()
     //  .interpolate('basis')
     .x((d) => {
       return x(d.d);
@@ -121,7 +121,7 @@ function drawElevationChart(
     .attr("class", "line")
     .attr("fill", "rgba(75,192,192,1)")
     .attr("stroke", "rgba(75,192,192,1)")
-    .attr("d", elevationLine);
+    .attr("d", crossSectionLine);
 
   chart
     .append("path")

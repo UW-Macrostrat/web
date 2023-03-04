@@ -8,23 +8,27 @@
   -moz-transition: 0.8s;
   transition: 0.8s;
   background-color: var(--panel-background-color);
-  .close-button
-    float: right
-    margin: 0.25em
+  position: relative;
+  min-height: 100px;
 
 .elevation-instructions
-  padding: 20px;
+  padding: 30px;
   text-align: center;
 
+.close-button
+  position: absolute;
+  top: 0.25em;
+  right: 0.25em;
+
 .elevation-chart-wrapper
-  padding-bottom: 20px;
+  padding-bottom: 0px;
   :global
     text
-      fill: #777;
+      fill: var(--text-color);
 
     .axis path, .axis line
       fill: none;
-      stroke: #000;
+      stroke: var(--text-color);
       opacity: 0.2;
       shape-rendering: crispEdges;
 
