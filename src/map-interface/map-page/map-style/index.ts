@@ -205,7 +205,7 @@ const overlaySources = {
 export function buildOverlayLayers() {
   // Get CSS colors from settings
   const ruleColor = getComputedStyle(document.body).getPropertyValue(
-    "--text-color"
+    "--background-color"
   );
 
   return [
@@ -274,26 +274,28 @@ export function buildOverlayLayers() {
       type: "line",
       source: "crossSectionLine",
       paint: {
-        "line-dasharray": [4, 2],
         "line-width": {
           stops: [
-            [0, 3],
-            [12, 5],
+            [0, 1],
+            [12, 3],
           ],
         },
-        "line-color": "#ffffff",
+        "line-color": ruleColor,
         "line-opacity": 1,
       },
     },
     {
-      id: "elevationPoint",
+      id: "crossSectionEndpoint",
       type: "circle",
       source: "crossSectionEndpoints",
       paint: {
-        "circle-radius": 6,
-        "circle-color": "#ffffff",
-        "circle-stroke-width": 1,
-        "circle-stroke-color": "#333333",
+        "circle-radius": {
+          stops: [
+            [0, 2],
+            [12, 5],
+          ],
+        },
+        "circle-color": ruleColor,
       },
     },
     {
