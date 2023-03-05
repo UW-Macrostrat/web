@@ -156,28 +156,32 @@ class VestigialMap extends Component<MapProps, {}> {
     this.map.on("click", (event) => {
       // If the elevation drawer is open and we are awaiting to points, add them
       if (
-        this.props.crossSectionOpen &&
-        this.crossSectionEndpoints.length < 2
+        (this.props.crossSectionOpen || event.originalEvent.shiftKey) &&
+        this.crossSectionEndpoints.length <= 2
       ) {
         this.crossSectionEndpoints.push([event.lngLat.lng, event.lngLat.lat]);
-        this.map.getSource("crossSectionEndpoints").setData({
+        const src = this.map.getSource("crossSectionEndpoints");
+        const newEndpoints = this.crossSectionEndpoints.map((p) => {
+          return {
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: p,
+            },
+          };
+        });
+
+        console.log(src);
+        src.setData({
           type: "FeatureCollection",
-          features: this.crossSectionEndpoints.map((p) => {
-            return {
-              type: "Feature",
-              geometry: {
-                type: "Point",
-                coordinates: p,
-              },
-            };
-          }),
+          features: [...(src._data?.features ?? []), ...newEndpoints],
         });
         if (this.crossSectionEndpoints.length === 2) {
           this.props.runAction({
             type: "set-cross-section-line",
             line: {
               type: "LineString",
-              coordinates: this.crossSectionEndpoints,
+              coordinates: [...this.crossSectionEndpoints],
             },
           });
           this.map.getSource("crossSectionLine").setData({
@@ -187,11 +191,12 @@ class VestigialMap extends Component<MapProps, {}> {
                 type: "Feature",
                 geometry: {
                   type: "LineString",
-                  coordinates: this.crossSectionEndpoints,
+                  coordinates: [...this.crossSectionEndpoints],
                 },
               },
             ],
           });
+          this.crossSectionEndpoints = [];
         }
         return;
       }

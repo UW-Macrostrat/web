@@ -194,6 +194,7 @@ export function coreReducer(
       return {
         ...state,
         crossSectionLine: action.line,
+        crossSectionOpen: true,
       };
     case "received-map-query":
       if (action.data && action.data.mapData) {

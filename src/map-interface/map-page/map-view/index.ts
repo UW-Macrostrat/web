@@ -83,6 +83,9 @@ async function initializeMap(
 
   map.setProjection("globe");
 
+  // disable shift-key zooming so we can use shift to make cross-sections
+  map.boxZoom.disable();
+
   // set initial map position
   setMapPosition(map, mapPosition);
 
