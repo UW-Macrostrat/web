@@ -34,6 +34,7 @@ import {
 } from "../map-style";
 import { getExpressionForFilters } from "./filter-helpers";
 import Map from "./map";
+import { MapResizeManager } from "./helpers";
 import { enable3DTerrain } from "./terrain";
 import {
   getBaseMapStyle,
@@ -278,16 +279,11 @@ interface MapViewProps {
 }
 
 export function CoreMapView(props: MapViewProps) {
-  const { filters, mapLayers, mapPosition, infoDrawerOpen, mapSettings } =
-    useAppState((state) => state.core);
+  const { mapLayers, mapPosition, mapSettings } = useAppState(
+    (state) => state.core
+  );
 
   const { children } = props;
-
-  // Maybe this shouldn't be global state necessarily...
-  // Could integrate with context...
-  const mapIsLoading = useAppState((state) => state.core.mapIsLoading);
-
-  const runAction = useAppActions();
 
   let mapRef = useMapRef();
 
@@ -295,23 +291,13 @@ export function CoreMapView(props: MapViewProps) {
   const parentRef = useRef<HTMLDivElement>();
   const { mapUse3D, mapIsRotated } = mapViewInfo(mapPosition);
 
-  const [padding, setPadding] = useState(getMapPadding(ref, parentRef));
-  const infoMarkerPosition = useAppState(
-    (state) => state.core.infoMarkerPosition
-  );
-
   const hasLineSymbols =
     mapLayers.has(MapLayer.LINE_SYMBOLS) && mapLayers.has(MapLayer.LINES);
-
-  const updateMapPadding = useCallback(() => {
-    setPadding(getMapPadding(ref, parentRef));
-  }, [ref, parentRef]);
 
   useEffect(() => {
     const map = mapRef.current;
     if (map == null) return;
-    // Update map padding on load
-    updateMapPadding();
+    // Update line symbol visibility on map load
     toggleLineSymbols(map, hasLineSymbols);
   }, [mapRef.current]);
 
@@ -324,8 +310,61 @@ export function CoreMapView(props: MapViewProps) {
     enable3DTerrain(map, mapUse3D, demSourceID);
   }, [mapRef.current, mapUse3D]);
 
+  useMapConditionalStyle(mapRef, hasLineSymbols, toggleLineSymbols);
+
+  const className = classNames({
+    "is-rotated": mapIsRotated ?? false,
+    "is-3d-available": mapUse3D ?? false,
+  });
+
+  return h("div.map-view-container.main-view", { ref: parentRef }, [
+    h("div.mapbox-map#map", { ref, className }),
+    h(MapLoadingReporter, {
+      ignoredSources: ["elevationMarker", "crossSectionEndpoints"],
+    }),
+    h(MapMovedReporter),
+    h(MapResizeManager, { containerRef: ref }),
+    h(MapPaddingManager, { containerRef: ref, parentRef }),
+    children,
+  ]);
+}
+
+function MapPaddingManager({ containerRef, parentRef }) {
+  const mapRef = useMapRef();
+
+  const [padding, setPadding] = useState(
+    getMapPadding(containerRef, parentRef)
+  );
+
+  const updateMapPadding = useCallback(() => {
+    setPadding(getMapPadding(containerRef, parentRef));
+  }, [containerRef, parentRef]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map == null) return;
+    // Update map padding on load
+    updateMapPadding();
+  }, [mapRef.current]);
+
+  useResizeObserver({
+    ref: parentRef,
+    onResize(sz) {
+      updateMapPadding();
+    },
+  });
+
   useMapEaseToCenter(padding);
 
+  return null;
+}
+
+function MapMovedReporter() {
+  const mapRef = useMapRef();
+  const runAction = useAppActions();
+  const infoMarkerPosition = useAppState(
+    (state) => state.core.infoMarkerPosition
+  );
   useEffect(() => {
     // Get the current value of the map. Useful for gradually moving away
     // from class component
@@ -347,10 +386,13 @@ export function CoreMapView(props: MapViewProps) {
     mapMovedCallback();
     map.on("moveend", debounce(mapMovedCallback, 100));
   }, [mapRef.current]);
+  return null;
+}
 
-  // Map loading state
-  const ignoredSources = ["elevationMarker", "crossSectionEndpoints"];
-
+function MapLoadingReporter({ ignoredSources }) {
+  const mapRef = useMapRef();
+  const mapIsLoading = useAppState((state) => state.core.mapIsLoading);
+  const runAction = useAppActions();
   useEffect(() => {
     const map = mapRef.current;
     if (map == null) return;
@@ -365,36 +407,7 @@ export function CoreMapView(props: MapViewProps) {
       runAction({ type: "map-idle" });
     });
   }, [mapRef.current, mapIsLoading]);
-
-  useMapConditionalStyle(mapRef, hasLineSymbols, toggleLineSymbols);
-
-  useResizeObserver({
-    ref: parentRef,
-    onResize(sz) {
-      updateMapPadding();
-    },
-  });
-
-  const debouncedResize = useRef(
-    debounce(() => {
-      mapRef.current?.resize();
-    }, 100)
-  );
-
-  useResizeObserver({
-    ref,
-    onResize: debouncedResize.current,
-  });
-
-  const className = classNames({
-    "is-rotated": mapIsRotated ?? false,
-    "is-3d-available": mapUse3D ?? false,
-  });
-
-  return h("div.map-view-container.main-view", { ref: parentRef }, [
-    h("div.mapbox-map#map", { ref, className }),
-    children,
-  ]);
+  return null;
 }
 
 export function MapMarker({ position, setPosition, centerMarker = true }) {
