@@ -22,7 +22,7 @@ function drawElevationChart(
   const updateElevationMarker = props.updateElevationMarker;
   let data = props.elevationData;
 
-  let margin = { top: 20, right: 20, bottom: 35, left: 70 };
+  let margin = { top: 20, right: 20, bottom: 20, left: 70 };
   let width = window.innerWidth - margin.left - margin.right;
   let height = 150 - margin.top - margin.bottom;
 
@@ -32,8 +32,6 @@ function drawElevationChart(
 
   let x = scaleLinear().range([0, width]);
   let y = scaleLinear().range([height, 0]);
-
-  let xAxis = axisBottom().scale(x);
 
   let yAxis = axisLeft()
     .scale(y)
@@ -94,16 +92,24 @@ function drawElevationChart(
 
   elevationArea.y0(y(minElevationBuffered));
 
+  const scaleRightPadding = 30;
+  const xScaleWithRightPadding = x
+    .copy()
+    .domain([0, x.invert(width - scaleRightPadding)])
+    .range([0, width - scaleRightPadding]);
+
+  let xAxis = axisBottom().scale(xScaleWithRightPadding);
+
   chart
     .append("g")
     .attr("class", "x axis")
     .attr("transform", `translate(0, ${height})`)
     .call(xAxis)
     .append("text")
-    .attr("transform", `translate(${width / 2}, 30)`)
-    .style("text-anchor", "middle")
-    .style("font-size", "12px")
-    .text("Distance (km)");
+    .attr("transform", `translate(${width}, 16)`)
+    .attr("class", styles["elevation-x-axis-unit"])
+    .style("text-anchor", "end")
+    .text("km");
 
   chart
     .append("g")
