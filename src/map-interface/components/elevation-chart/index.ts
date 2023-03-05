@@ -1,4 +1,10 @@
-import React, { useRef, useEffect, useCallback } from "react";
+import React, {
+  useRef,
+  useEffect,
+  useCallback,
+  useMemo,
+  createElement,
+} from "react";
 import { useSelector } from "react-redux";
 import { useAppActions } from "~/map-interface/app-state";
 import hyper from "@macrostrat/hyper";
@@ -119,7 +125,7 @@ function drawElevationChart(
     });
 }
 
-function ElevationChart({ elevationData = [] }) {
+function ElevationChart({ elevationData = [], units, exposure }) {
   const chartRef = useRef(null);
   const runAction = useAppActions();
   const ref = useRef(null);
@@ -127,8 +133,6 @@ function ElevationChart({ elevationData = [] }) {
   let margin = { top: 20, right: 20, bottom: 20, left: 70 };
   let width = window.innerWidth - margin.left - margin.right;
   let height = 150 - margin.top - margin.bottom;
-
-  console.log("Rendering ElevationChart");
 
   let x = useCallback(scaleLinear().range([0, width]), [width]);
   let y = useCallback(scaleLinear().range([height, 0]), [height]);
@@ -161,7 +165,8 @@ function ElevationChart({ elevationData = [] }) {
     line()
       //  .interpolate('basis')
       .x((d) => {
-        return x(d.d);
+        // Not sure why we suddenly have to invert the x axis here
+        return width - x(d.d);
       })
       .y((d) => {
         return y(d.elevation);
@@ -185,7 +190,7 @@ function ElevationChart({ elevationData = [] }) {
   useEffect(() => {
     if (elevationData.length > 0 && ref.current != null) {
       chartRef.current?.remove();
-      chartRef.current = select(ref.current);
+      chartRef.current = select(ref.current).append("g");
       drawElevationChart(chartRef, {
         elevationData,
         updateElevationMarker,
@@ -198,9 +203,6 @@ function ElevationChart({ elevationData = [] }) {
         maxElevationBuffered,
       });
     }
-    return () => {
-      chartRef.current?.remove();
-    };
   }, [elevationData]);
 
   const updateElevationMarker = (lng: number, lat: number) =>
@@ -220,17 +222,47 @@ function ElevationChart({ elevationData = [] }) {
     [
       h("g", { transform: `translate(${margin.left},${margin.top})`, ref }, [
         h("path.line", {
-          fill: "rgba(75,192,192,1)",
-          stroke: "rgba(75,192,192,1)",
+          fill: "transparent",
+          stroke: "url(#unitGradient)",
           d: crossSectionLine(elevationData),
         }),
         h("path", {
-          fill: "rgba(75,192,192,0.4)",
+          fill: "transparent", //"rgba(75,192,192,0.4)",
           d: elevationArea(elevationData),
         }),
+        createElement(
+          "linearGradient",
+          {
+            id: "unitGradient",
+            x1: 0,
+            x2: width,
+            gradientUnits: "userSpaceOnUse",
+          },
+          ...createGradientStops(units, exposure, x, width)
+        ),
       ]),
     ]
   );
+}
+
+function createGradientStops(units, exposure, x, width) {
+  let stops = [];
+  for (let i = 0; i < exposure.length; i++) {
+    const startLen = Math.max(x(exposure[i].d) / width, 0);
+    const endLen = Math.min(x(exposure[i + 1]?.d) / width, 1);
+
+    stops.push(
+      h("stop", {
+        offset: startLen,
+        "stop-color": units.get(exposure[i].u).color,
+      }),
+      h("stop", {
+        offset: endLen,
+        "stop-color": units.get(exposure[i].u).color,
+      })
+    );
+  }
+  return stops;
 }
 
 function ElevationChartPanel({ startPos, endPos }) {
@@ -242,6 +274,12 @@ function ElevationChartPanel({ startPos, endPos }) {
   });
   const crossSectionData = elevation?.data;
   const elevationData = crossSectionData?.elevation;
+
+  const exposure = crossSectionData?.exposure;
+  const units = useMemo(
+    () => new Map((crossSectionData?.units ?? []).map((u) => [u.legend_id, u])),
+    [crossSectionData?.units]
+  );
 
   // let CancelTokenElevation = axios.CancelToken;
   // let sourceElevation = CancelTokenElevation.source();
@@ -255,13 +293,15 @@ function ElevationChartPanel({ startPos, endPos }) {
   //   data: elevationData,
   // };
 
-  if (elevationData == null) return h(Spinner);
+  if (elevationData == null || units == null) return h(Spinner);
 
   return h(
     "div.elevation-chart-wrapper",
     null,
     h(ElevationChart, {
       elevationData,
+      units,
+      exposure,
     })
   );
 }
