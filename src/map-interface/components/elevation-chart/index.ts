@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { useAppActions } from "~/map-interface/app-state";
 import hyper from "@macrostrat/hyper";
@@ -11,7 +11,6 @@ import { min, max, extent, bisector } from "d3-array";
 import { useAPIResult } from "@macrostrat/ui-components";
 
 import styles from "./main.module.styl";
-import { SETTINGS } from "~/map-interface/settings";
 const h = hyper.styled(styles);
 
 function drawElevationChart(
@@ -19,19 +18,18 @@ function drawElevationChart(
   props: { updateElevationMarker: Function; elevationData: any[] }
 ) {
   // Alias these variables because d3 returns ` in mouseover
-  const updateElevationMarker = props.updateElevationMarker;
-  let data = props.elevationData;
-
-  let margin = { top: 20, right: 20, bottom: 20, left: 70 };
-  let width = window.innerWidth - margin.left - margin.right;
-  let height = 150 - margin.top - margin.bottom;
+  const {
+    width,
+    height,
+    x,
+    y,
+    elevationData: data,
+    updateElevationMarker,
+  } = props;
 
   let bisect = bisector((d) => {
     return d.d;
   }).left;
-
-  let x = scaleLinear().range([0, width]);
-  let y = scaleLinear().range([height, 0]);
 
   let yAxis = axisLeft()
     .scale(y)
@@ -40,57 +38,8 @@ function drawElevationChart(
     .tickSizeOuter(0)
     .tickPadding(10);
 
-  let crossSectionLine = line()
-    //  .interpolate('basis')
-    .x((d) => {
-      return x(d.d);
-    })
-    .y((d) => {
-      return y(d.elevation);
-    });
-
-  let elevationArea = area()
-    // .interpolate('basis')
-    .x((d) => {
-      return x(d.d);
-    })
-    .y1((d) => {
-      return y(d.elevation);
-    });
-
-  chartRef.current = select("#elevationChart")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform", `translate(${margin.left},${margin.top})`);
-
   const chart = chartRef.current;
-
-  let minElevation = min(props.elevationData, (d) => {
-    return d.elevation;
-  });
-  let maxElevation = max(props.elevationData, (d) => {
-    return d.elevation;
-  });
-
-  let minElevationBuffered = minElevation - (maxElevation - minElevation) * 0.2;
-  let maxElevationBuffered = maxElevation + (maxElevation - minElevation) * 0.1;
-
-  const exaggeration =
-    max(props.elevationData, (d) => {
-      return d.d;
-    }) /
-    width /
-    (((maxElevationBuffered - minElevationBuffered) * 0.001) / height);
-
-  x.domain(
-    extent(props.elevationData, (d) => {
-      return d.d;
-    })
-  );
-  y.domain([minElevationBuffered, maxElevationBuffered]);
-
-  elevationArea.y0(y(minElevationBuffered));
+  if (chart == null) return;
 
   const scaleRightPadding = 30;
   const xScaleWithRightPadding = x
@@ -120,20 +69,6 @@ function drawElevationChart(
     .style("text-anchor", "middle")
     .style("font-size", "12px")
     .text("Elevation (m)");
-
-  chart
-    .append("path")
-    .datum(props.elevationData)
-    .attr("class", "line")
-    .attr("fill", "rgba(75,192,192,1)")
-    .attr("stroke", "rgba(75,192,192,1)")
-    .attr("d", crossSectionLine);
-
-  chart
-    .append("path")
-    .datum(props.elevationData)
-    .attr("fill", "rgba(75,192,192,0.4)")
-    .attr("d", elevationArea);
 
   let focus = chart.append("g").attr("class", "focus").style("display", "none");
 
@@ -187,15 +122,84 @@ function drawElevationChart(
 function ElevationChart({ elevationData = [] }) {
   const chartRef = useRef(null);
   const runAction = useAppActions();
+  const ref = useRef(null);
+
+  let margin = { top: 20, right: 20, bottom: 20, left: 70 };
+  let width = window.innerWidth - margin.left - margin.right;
+  let height = 150 - margin.top - margin.bottom;
+
+  console.log("Rendering ElevationChart");
+
+  let x = useCallback(scaleLinear().range([0, width]), [width]);
+  let y = useCallback(scaleLinear().range([height, 0]), [height]);
+
+  let minElevation = min(elevationData, (d) => {
+    return d.elevation;
+  });
+  let maxElevation = max(elevationData, (d) => {
+    return d.elevation;
+  });
+
+  let minElevationBuffered = minElevation - (maxElevation - minElevation) * 0.2;
+  let maxElevationBuffered = maxElevation + (maxElevation - minElevation) * 0.1;
+
+  const exaggeration =
+    max(elevationData, (d) => {
+      return d.d;
+    }) /
+    width /
+    (((maxElevationBuffered - minElevationBuffered) * 0.001) / height);
+
+  x.domain(
+    extent(elevationData, (d) => {
+      return d.d;
+    })
+  );
+  y.domain([minElevationBuffered, maxElevationBuffered]);
+
+  let crossSectionLine = useCallback(
+    line()
+      //  .interpolate('basis')
+      .x((d) => {
+        return x(d.d);
+      })
+      .y((d) => {
+        return y(d.elevation);
+      }),
+    [x, y]
+  );
+
+  let elevationArea = useCallback(
+    area()
+      // .interpolate('basis')
+      .x((d) => {
+        return x(d.d);
+      })
+      .y1((d) => {
+        return y(d.elevation);
+      })
+      .y0(y(minElevationBuffered)),
+    [x, y, minElevationBuffered]
+  );
 
   useEffect(() => {
-    if (elevationData.length > 0) {
+    if (elevationData.length > 0 && ref.current != null) {
       chartRef.current?.remove();
-      drawElevationChart(chartRef, { elevationData, updateElevationMarker });
+      chartRef.current = select(ref.current);
+      drawElevationChart(chartRef, {
+        elevationData,
+        updateElevationMarker,
+        x,
+        y,
+        width,
+        height,
+        margin,
+        minElevationBuffered,
+        maxElevationBuffered,
+      });
     }
     return () => {
       chartRef.current?.remove();
-      //chartRef.current?.select("g").remove();
     };
   }, [elevationData]);
 
@@ -207,20 +211,37 @@ function ElevationChart({ elevationData = [] }) {
     });
 
   if (elevationData.length == 0) return null;
-  return h("svg#elevationChart");
+  return h(
+    "svg#elevationChart",
+    {
+      width: width + margin.left + margin.right,
+      height: height + margin.top + margin.bottom,
+    },
+    [
+      h("g", { transform: `translate(${margin.left},${margin.top})`, ref }, [
+        h("path.line", {
+          fill: "rgba(75,192,192,1)",
+          stroke: "rgba(75,192,192,1)",
+          d: crossSectionLine(elevationData),
+        }),
+        h("path", {
+          fill: "rgba(75,192,192,0.4)",
+          d: elevationArea(elevationData),
+        }),
+      ]),
+    ]
+  );
 }
 
 function ElevationChartPanel({ startPos, endPos }) {
-  const elevation: any = useAPIResult(
-    SETTINGS.apiDomain + "/api/v2/elevation",
-    {
-      start_lng: startPos[0],
-      start_lat: startPos[1],
-      end_lng: endPos[0],
-      end_lat: endPos[1],
-    }
-  );
-  const elevationData = elevation?.success?.data;
+  const elevation: any = useAPIResult("http://localhost:8000/cross-section", {
+    start_lng: startPos[0],
+    start_lat: startPos[1],
+    end_lng: endPos[0],
+    end_lat: endPos[1],
+  });
+  const crossSectionData = elevation?.data;
+  const elevationData = crossSectionData?.elevation;
 
   // let CancelTokenElevation = axios.CancelToken;
   // let sourceElevation = CancelTokenElevation.source();
