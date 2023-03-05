@@ -205,8 +205,29 @@ const overlaySources = {
 export function buildOverlayLayers() {
   // Get CSS colors from settings
   const ruleColor = getComputedStyle(document.body).getPropertyValue(
-    "--background-color"
+    "--panel-background-color"
   );
+
+  const centerColor = getComputedStyle(document.body).getPropertyValue(
+    "--panel-rule-color"
+  );
+
+  const crossSectionPointPaint = {
+    "circle-radius": {
+      stops: [
+        [0, 2],
+        [12, 4],
+      ],
+    },
+    "circle-color": centerColor,
+    "circle-stroke-width": {
+      stops: [
+        [0, 1],
+        [12, 3],
+      ],
+    },
+    "circle-stroke-color": ruleColor,
+  };
 
   return [
     {
@@ -288,25 +309,15 @@ export function buildOverlayLayers() {
       id: "crossSectionEndpoint",
       type: "circle",
       source: "crossSectionEndpoints",
-      paint: {
-        "circle-radius": {
-          stops: [
-            [0, 2],
-            [12, 5],
-          ],
-        },
-        "circle-color": ruleColor,
-      },
+      paint: crossSectionPointPaint,
     },
     {
       id: "elevationMarker",
       type: "circle",
       source: "elevationMarker",
       paint: {
-        "circle-radius": 8,
+        ...crossSectionPointPaint,
         "circle-color": "#4bc0c0",
-        "circle-stroke-width": 2,
-        "circle-stroke-color": "#dcdcdc",
       },
     },
     // {

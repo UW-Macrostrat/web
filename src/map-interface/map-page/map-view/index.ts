@@ -41,7 +41,7 @@ import {
   getMapPadding,
   MapBottomControls,
   MapStyledContainer,
-  usecrossSectionCursorLocation as useCrossSectionCursorLocation,
+  useCrossSectionCursorLocation,
   useMapEaseToCenter,
   useMapMarker,
 } from "./utils";

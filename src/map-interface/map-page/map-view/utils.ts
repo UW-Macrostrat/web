@@ -60,7 +60,7 @@ function GeolocationControl(props) {
   });
 }
 
-export function usecrossSectionCursorLocation(
+export function useCrossSectionCursorLocation(
   mapRef,
   crossSectionCursorLocation
 ) {
@@ -68,9 +68,12 @@ export function usecrossSectionCursorLocation(
   useEffect(() => {
     const map = mapRef.current;
     if (map == null) return;
-    if (crossSectionCursorLocation == null) return;
     const src = map.getSource("elevationMarker");
     if (src == null) return;
+    if (crossSectionCursorLocation == null) {
+      src.setData(null);
+      return;
+    }
     src.setData({
       type: "FeatureCollection",
       features: [

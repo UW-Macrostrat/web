@@ -133,18 +133,18 @@ function drawElevationChart(
 
   focus
     .append("circle")
+    .attr("class", styles["elevation-focus-circle"])
     .attr("fill", "rgba(75,192,192,1)")
     .attr("fill-opacity", 1)
-    .attr("stroke", "rgba(220,220,220,1)")
     .attr("stroke-width", 2)
     .attr("r", 7);
 
   focus
     .append("text")
     .attr("x", 0)
+    .attr("class", styles["elevation-focus-text"])
     .style("text-anchor", "middle")
     .style("font-size", "12px")
-    .style("fill", "#333333")
     .attr("dy", "-1.2em");
 
   chart
@@ -157,6 +157,7 @@ function drawElevationChart(
     })
     .on("mouseout", () => {
       focus.style("display", "none");
+      updateElevationMarker(null, null);
     })
     .on("mousemove", function (e) {
       let x0 = x.invert(mouse(this)[0]);
