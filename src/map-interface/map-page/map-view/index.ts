@@ -338,26 +338,49 @@ export function CoreMapView(props: MapViewProps) {
 export function CrossSectionLine() {
   const mapRef = useMapRef();
   const crossSectionLine = useAppState((state) => state.core.crossSectionLine);
+  const previousLine = useRef<LineString | null>(null);
   useEffect(() => {
     const map = mapRef.current;
     if (map == null) return;
     const coords = crossSectionLine?.coordinates ?? [];
-    const endpoints = {
-      type: "FeatureCollection",
-      features: coords.map((f) => {
-        return {
+
+    let lines = [];
+    if (coords.length == 2 || crossSectionLine == null) {
+      previousLine.current = crossSectionLine;
+    }
+
+    if (crossSectionLine != null) {
+      lines.push(crossSectionLine);
+    }
+
+    if (previousLine.current != null) {
+      // We are selecting a new line, and we should still show the previous line
+      // until the new one is selected.
+      lines.push(previousLine.current);
+    }
+
+    let endpointFeatures = [];
+    for (let line of lines) {
+      for (let coord of line.coordinates) {
+        endpointFeatures.push({
           type: "Feature",
           properties: {},
           geometry: {
             type: "Point",
-            coordinates: f,
+            coordinates: coord,
           },
-        };
-      }),
-    };
-    const line = coords.length < 2 ? null : crossSectionLine;
-    map.getSource("crossSectionLine")?.setData(line);
-    map.getSource("crossSectionEndpoints")?.setData(endpoints);
+        });
+      }
+    }
+
+    map.getSource("crossSectionLine")?.setData({
+      type: "GeometryCollection",
+      geometries: lines,
+    });
+    map.getSource("crossSectionEndpoints")?.setData({
+      type: "FeatureCollection",
+      features: endpointFeatures,
+    });
   }, [mapRef.current, crossSectionLine]);
   return null;
 }
