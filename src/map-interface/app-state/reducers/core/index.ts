@@ -28,7 +28,6 @@ const defaultState: CoreState = {
   infoDrawerExpanded: false,
   infoMarkerPosition: null,
   infoMarkerFocus: null,
-  crossSectionOpen: false,
   crossSectionLine: null,
   crossSectionCursorLocation: [],
   mapBackend: MapBackend.MAPBOX,
@@ -190,12 +189,6 @@ export function coreReducer(
         infoMarkerPosition: { ...pos },
         infoMarkerFocus: null,
       };
-    case "did-set-cross-section-line":
-      return {
-        ...state,
-        crossSectionLine: action.line,
-        crossSectionOpen: true,
-      };
     case "received-map-query":
       if (action.data && action.data.mapData) {
         action.data.mapData = action.data.mapData.map((source) => {
@@ -292,13 +285,10 @@ export function coreReducer(
       return update(state, { mapLayers });
     case "toggle-map-3d":
       return { ...state, mapUse3D: !state.mapUse3D };
-    case "toggle-cross-section":
+    case "update-cross-section":
       return {
         ...state,
-        crossSectionOpen: !state.crossSectionOpen,
-        crossSectionLine: state.crossSectionOpen
-          ? null
-          : state.crossSectionLine,
+        crossSectionLine: action.line,
         crossSectionCursorLocation: [],
       };
     case "set-input-focus":

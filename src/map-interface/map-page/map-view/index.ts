@@ -46,6 +46,7 @@ import {
   MapMarker,
   MapResizeManager,
 } from "./helpers";
+import { LineString } from "geojson";
 
 const h = hyper.styled(styles);
 
@@ -118,7 +119,7 @@ export default function MainMapView(props) {
     filteredColumns,
     mapLayers,
     mapCenter,
-    crossSectionOpen,
+    crossSectionLine,
     crossSectionCursorLocation,
     mapPosition,
     infoDrawerOpen,
@@ -231,7 +232,7 @@ export default function MainMapView(props) {
       // Recreate the set every time to force a re-render
       mapLayers,
       mapCenter,
-      crossSectionOpen,
+      crossSectionLine,
       crossSectionCursorLocation,
       mapPosition,
       mapIsLoading,
@@ -245,7 +246,7 @@ export default function MainMapView(props) {
     h(MapMarker, {
       position: infoMarkerPosition,
     }),
-    h.if(crossSectionOpen)(CrossSectionLine),
+    h(CrossSectionLine),
     h.if(mapLayers.has(MapLayer.SOURCES))(MapSourcesLayer),
     h(ColumnDataManager, { mapInitialized }),
   ]);
@@ -340,10 +341,10 @@ export function CrossSectionLine() {
   useEffect(() => {
     const map = mapRef.current;
     if (map == null) return;
-    map.getSource("crossSectionLine")?.setData(crossSectionLine);
-    map.getSource("crossSectionEndpoints")?.setData({
+    const coords = crossSectionLine?.coordinates ?? [];
+    const endpoints = {
       type: "FeatureCollection",
-      features: crossSectionLine?.coordinates.map((f) => {
+      features: coords.map((f) => {
         return {
           type: "Feature",
           properties: {},
@@ -353,7 +354,10 @@ export function CrossSectionLine() {
           },
         };
       }),
-    });
+    };
+    const line = coords.length < 2 ? null : crossSectionLine;
+    map.getSource("crossSectionLine")?.setData(line);
+    map.getSource("crossSectionEndpoints")?.setData(endpoints);
   }, [mapRef.current, crossSectionLine]);
   return null;
 }

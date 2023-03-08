@@ -155,11 +155,28 @@ class VestigialMap extends Component<MapProps, {}> {
 
     this.map.on("click", (event) => {
       // If the elevation drawer is open and we are awaiting to points, add them
+      let crossSectionLine = this.props.crossSectionLine;
+      let crossSectionCoords = crossSectionLine?.coordinates ?? [];
       if (
-        (this.props.crossSectionOpen || event.originalEvent.shiftKey) &&
-        this.crossSectionEndpoints.length <= 2
+        (crossSectionLine != null && crossSectionCoords.length < 2) ||
+        event.originalEvent.shiftKey
       ) {
-        this.crossSectionEndpoints.push([event.lngLat.lng, event.lngLat.lat]);
+        crossSectionLine ??= { type: "LineString", coordinates: [] };
+
+        if (crossSectionCoords.length === 2) {
+          // Restart cross sections
+          crossSectionCoords = [];
+        }
+        crossSectionCoords.push([event.lngLat.lng, event.lngLat.lat]);
+        this.props.runAction({
+          type: "update-cross-section",
+          line: {
+            type: "LineString",
+            coordinates: crossSectionCoords,
+          },
+        });
+        return;
+
         const src = this.map.getSource("crossSectionEndpoints");
         const newEndpoints = this.crossSectionEndpoints.map((p) => {
           return {
@@ -171,7 +188,6 @@ class VestigialMap extends Component<MapProps, {}> {
           };
         });
 
-        console.log(src);
         src.setData({
           type: "FeatureCollection",
           features: [...(src._data?.features ?? []), ...newEndpoints],

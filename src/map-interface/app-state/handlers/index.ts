@@ -141,6 +141,15 @@ async function actionRunner(
       );
       return action;
     case "toggle-cross-section":
+      if (state.core.crossSectionLine == null) {
+        return dispatch({
+          type: "update-cross-section",
+          line: { type: "LineString", coordinates: [] },
+        });
+      } else {
+        return dispatch({ type: "update-cross-section", line: null });
+      }
+    case "update-cross-section":
       if (state.core.crossSectionLine != null) {
         // Return to the base route
         let nextPathname = "";

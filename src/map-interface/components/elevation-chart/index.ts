@@ -1,6 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import { useSelector } from "react-redux";
-import { useAppActions } from "~/map-interface/app-state";
+import { useAppActions, useAppState } from "~/map-interface/app-state";
 import hyper from "@macrostrat/hyper";
 import { Button, Spinner } from "@blueprintjs/core";
 import { select, mouse } from "d3-selection";
@@ -221,21 +220,7 @@ function ElevationChartPanel({ startPos, endPos }) {
     }
   );
   const elevationData = elevation?.success?.data;
-
-  // let CancelTokenElevation = axios.CancelToken;
-  // let sourceElevation = CancelTokenElevation.source();
-  // dispatch({
-  //   type: "start-elevation-query",
-  //   cancelToken: sourceElevation.token,
-  // });
-  // const elevationData = await getElevation(action.line, sourceElevation);
-  // return {
-  //   type: "received-elevation-query",
-  //   data: elevationData,
-  // };
-
   if (elevationData == null) return h(Spinner);
-
   return h(
     "div.elevation-chart-wrapper",
     null,
@@ -246,12 +231,13 @@ function ElevationChartPanel({ startPos, endPos }) {
 }
 
 function ElevationChartContainer() {
-  const { crossSectionOpen, crossSectionLine } = useSelector(
-    (state) => state.core
-  );
+  const crossSectionLine = useAppState((state) => state.core.crossSectionLine);
   const runAction = useAppActions();
 
+  const nCoords = crossSectionLine?.coordinates?.length ?? 0;
+
   const hasElevationData = crossSectionLine?.coordinates?.length >= 2;
+  const crossSectionOpen = crossSectionLine != null;
 
   if (!crossSectionOpen) return null;
 
@@ -268,10 +254,10 @@ function ElevationChartContainer() {
         },
       }),
       h("div", [
-        h.if(!hasElevationData)(
-          "div.elevation-instructions",
-          "Click two points on the map to draw an elevation profile"
-        ),
+        h.if(nCoords < 2)("div.elevation-instructions", [
+          nCoords == 0 ? "Click two points on the map" : "Click a second point",
+          " to draw an elevation profile",
+        ]),
         h.if(hasElevationData)(ElevationChartPanel, {
           startPos: crossSectionLine?.coordinates[0],
           endPos: crossSectionLine?.coordinates[1],

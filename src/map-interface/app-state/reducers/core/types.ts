@@ -111,7 +111,7 @@ type SetFilters = { type: "set-filters"; filters: FilterData[] };
 // Toggle cross section
 type ToggleCrossSection = { type: "toggle-cross-section" };
 type SetCrossSectionLine = {
-  type: "set-cross-section-line" | "did-set-cross-section-line";
+  type: "update-cross-section";
   line: LineString | null;
 };
 
@@ -241,7 +241,6 @@ export interface CoreState extends MapState, AsyncRequestState {
   infoDrawerExpanded: boolean;
   isFetching: boolean;
   crossSectionLine: LineString | null;
-  crossSectionOpen: boolean;
   crossSectionCursorLocation: any;
   infoMarkerPosition: { lat: number; lng: number } | null;
   infoMarkerFocus: PositionFocusState | null;
