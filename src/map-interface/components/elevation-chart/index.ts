@@ -125,7 +125,7 @@ function drawElevationChart(
     });
 }
 
-function ElevationChart({ elevationData = [], units, exposure }) {
+function ElevationChart({ elevationData = [], units, exposure, contacts }) {
   const chartRef = useRef(null);
   const runAction = useAppActions();
   const ref = useRef(null);
@@ -178,7 +178,7 @@ function ElevationChart({ elevationData = [], units, exposure }) {
     area()
       // .interpolate('basis')
       .x((d) => {
-        return x(d.d);
+        return width - x(d.d);
       })
       .y1((d) => {
         return y(d.elevation);
@@ -213,6 +213,8 @@ function ElevationChart({ elevationData = [], units, exposure }) {
     });
 
   if (elevationData.length == 0) return null;
+  const lineData = crossSectionLine(elevationData);
+
   return h(
     "svg#elevationChart",
     {
@@ -220,15 +222,22 @@ function ElevationChart({ elevationData = [], units, exposure }) {
       height: height + margin.top + margin.bottom,
     },
     [
-      h("g", { transform: `translate(${margin.left},${margin.top})`, ref }, [
+      h("g", { transform: `translate(${margin.left},${margin.top})` }, [
+        h("g.axes", { ref }),
+        h("path", {
+          fill: "rgba(200,200,205,0.5)",
+          d: elevationArea(elevationData),
+        }),
+        h("path", {
+          fill: "transparent",
+          stroke: "rgba(255, 255, 255, 1)",
+          strokeWidth: 6,
+          d: lineData,
+        }),
         h("path.line", {
           fill: "transparent",
           stroke: "url(#unitGradient)",
-          d: crossSectionLine(elevationData),
-        }),
-        h("path", {
-          fill: "transparent", //"rgba(75,192,192,0.4)",
-          d: elevationArea(elevationData),
+          d: lineData,
         }),
         createElement(
           "linearGradient",
@@ -240,25 +249,68 @@ function ElevationChart({ elevationData = [], units, exposure }) {
           },
           ...createGradientStops(units, exposure, x, width)
         ),
+        //h("g.contacts", buildContacts(contacts, x, y, width)),
       ]),
     ]
   );
 }
 
+function buildContacts(contacts, x, y, width) {
+  let contactElements = [];
+
+  let contactLine = useCallback(
+    line()
+      //  .interpolate('basis')
+      .x((d) => {
+        // Not sure why we suddenly have to invert the x axis here
+        return x(d.distance);
+      })
+      .y((d) => {
+        return y(d.elevation);
+      }),
+    [x, y]
+  );
+
+  for (const c of contacts) {
+    if (c.distance.length < 2) continue;
+    // zip elevations and distances
+    let points = [];
+    for (let i = 0; i < c.distance.length; i++) {
+      points.push({ distance: c.distance[i], elevation: c.elevation[i] });
+    }
+
+    contactElements.push(
+      h("path.contact", {
+        fill: "transparent",
+        stroke: "red",
+        d: contactLine(points),
+      })
+    );
+  }
+
+  return contactElements;
+}
+
 function createGradientStops(units, exposure, x, width) {
   let stops = [];
+  const dx = 0.005;
   for (let i = 0; i < exposure.length; i++) {
-    const startLen = Math.max(x(exposure[i].d) / width, 0);
-    const endLen = Math.min(x(exposure[i + 1]?.d) / width, 1);
+    let startLen = Math.max(x(exposure[i].d) / width + dx, 0);
+    let endLen = Math.min(x(exposure[i + 1]?.d) / width - dx, 1);
+    if (isNaN(endLen)) endLen = 1;
+    if (endLen < startLen) {
+      startLen = (startLen + endLen) / 2;
+      endLen = startLen;
+    }
 
     stops.push(
       h("stop", {
         offset: startLen,
-        "stop-color": units.get(exposure[i].u).color,
+        stopColor: units.get(exposure[i].u).color,
       }),
       h("stop", {
         offset: endLen,
-        "stop-color": units.get(exposure[i].u).color,
+        stopColor: units.get(exposure[i].u).color,
       })
     );
   }
@@ -271,6 +323,7 @@ function ElevationChartPanel({ startPos, endPos }) {
     start_lat: startPos[1],
     end_lng: endPos[0],
     end_lat: endPos[1],
+    scale: "large",
   });
   const crossSectionData = elevation?.data;
   const elevationData = crossSectionData?.elevation;
@@ -281,6 +334,7 @@ function ElevationChartPanel({ startPos, endPos }) {
     [crossSectionData?.units]
   );
 
+  console.log(crossSectionData);
   // let CancelTokenElevation = axios.CancelToken;
   // let sourceElevation = CancelTokenElevation.source();
   // dispatch({
@@ -302,6 +356,7 @@ function ElevationChartPanel({ startPos, endPos }) {
       elevationData,
       units,
       exposure,
+      contacts: crossSectionData?.contacts,
     })
   );
 }
