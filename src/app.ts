@@ -16,8 +16,8 @@ import reducerStack, {
 } from "./map-interface/app-state";
 import { routerBasename, SETTINGS } from "./map-interface/settings";
 import { onDemand } from "./_utils";
-import { BrowserRouter } from "react-router-dom";
 
+// @ts-ignore
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 const routerMiddleware = createRouterMiddleware(browserHistory);
@@ -46,6 +46,37 @@ const Sources = onDemand(() => import("~/burwell-sources"));
 const MapPage = onDemand(() => import("./map-interface/map-page"));
 const DevMapPage = onDemand(() => import("./dev"));
 
+const AppCore = () => {
+  return h(Routes, [
+    h(Route, { path: "/sources", element: h(Sources) }),
+    h(Route, { path: "/dev/globe", element: h(GlobeDevPage) }),
+    h(Route, {
+      path: "/dev/cesium-vector-provider",
+      element: h(CesiumExample, {
+        accessToken: SETTINGS.mapboxAccessToken,
+      }),
+    }),
+    h(Route, { path: "/globe/*", element: h(GlobePage) }),
+    h(Route, {
+      path: "/dev/*",
+      element: h(DevMapPage),
+    }),
+    h(Route, { path: "*", element: h(MapPage) }),
+  ]);
+
+  // h(Route, {
+  //   path: "/globe",
+  //   component: GlobePage,
+  // }),
+  // h(Route, { path: "/columns", component: ColumnPage }),
+  //h(Route, { path: "/dev/globe", component: GlobeDevPage }),
+  // h(Route, {
+  //   exact: true,
+  //   path: "/",
+  //   render: () => h(Redirect, { to: "/map" }),
+  // }),
+};
+
 const App = () => {
   return h(
     DarkModeProvider,
@@ -55,36 +86,7 @@ const App = () => {
       h(
         ReduxRouter,
         { basename: routerBasename, store, history: browserHistory },
-        [
-          h(Routes, [
-            h(Route, { path: "/sources", element: h(Sources) }),
-            h(Route, { path: "/dev/globe", element: h(GlobeDevPage) }),
-            h(Route, {
-              path: "/dev/cesium-vector-provider",
-              element: h(CesiumExample, {
-                accessToken: SETTINGS.mapboxAccessToken,
-              }),
-            }),
-            h(Route, { path: "/globe/*", element: h(GlobePage) }),
-            h(Route, {
-              path: "/dev/*",
-              element: h(DevMapPage),
-            }),
-            h(Route, { path: "*", element: h(MapPage) }),
-          ]),
-
-          // h(Route, {
-          //   path: "/globe",
-          //   component: GlobePage,
-          // }),
-          // h(Route, { path: "/columns", component: ColumnPage }),
-          //h(Route, { path: "/dev/globe", component: GlobeDevPage }),
-          // h(Route, {
-          //   exact: true,
-          //   path: "/",
-          //   render: () => h(Redirect, { to: "/map" }),
-          // }),
-        ]
+        h(AppCore)
       )
     )
   );
