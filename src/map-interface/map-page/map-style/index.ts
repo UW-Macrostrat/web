@@ -215,15 +215,15 @@ export function buildOverlayLayers() {
   const crossSectionPointPaint = {
     "circle-radius": {
       stops: [
-        [0, 2],
-        [12, 4],
+        [0, 3],
+        [12, 5],
       ],
     },
     "circle-color": centerColor,
     "circle-stroke-width": {
       stops: [
-        [0, 1],
-        [12, 3],
+        [0, 2],
+        [12, 4],
       ],
     },
     "circle-stroke-color": ruleColor,
