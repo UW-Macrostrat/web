@@ -8,6 +8,7 @@ import {
   useAppState,
 } from "~/map-interface/app-state";
 import { fmt3 } from "~/map-interface/utils";
+import classNames from "classnames";
 
 const h = hyper.styled(styles);
 
@@ -36,6 +37,10 @@ function PositionButton() {
   const isCentered =
     pos == PositionFocusState.CENTERED || pos == PositionFocusState.NEAR_CENTER;
 
+  const wayOffCenter =
+    pos == PositionFocusState.OUT_OF_VIEW ||
+    pos == PositionFocusState.OUT_OF_PADDING;
+
   return h("div.position-controls", [
     h(
       Button,
@@ -45,12 +50,10 @@ function PositionButton() {
         onClick() {
           runAction({ type: "recenter-query-marker" });
         },
+        className: classNames("recenter-button", { "is-centered": isCentered }),
         intent,
       },
-      pos == PositionFocusState.OUT_OF_VIEW ||
-        pos == PositionFocusState.OUT_OF_PADDING
-        ? "Recenter"
-        : null
+      wayOffCenter ? h("span.recenter-label", "Recenter") : null
     ),
     h.if(isCentered)(
       Button,

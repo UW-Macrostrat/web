@@ -95,20 +95,30 @@ export function MapLoadingReporter({ ignoredSources }) {
   const mapRef = useMapRef();
   const mapIsLoading = useAppState((state) => state.core.mapIsLoading);
   const runAction = useAppActions();
+
   useEffect(() => {
     const map = mapRef.current;
     if (map == null) return;
 
-    map.on("sourcedataloading", (evt) => {
-      if (ignoredSources.includes(evt.sourceId) || mapIsLoading) return;
-      runAction({ type: "map-loading" });
-    });
+    let didSendLoading = false;
 
-    map.on("idle", () => {
+    const loadingCallback = (evt) => {
+      if (ignoredSources.includes(evt.sourceId) || mapIsLoading) return;
+      if (didSendLoading) return;
+      runAction({ type: "map-loading" });
+      didSendLoading = true;
+    };
+    const idleCallback = () => {
       if (!mapIsLoading) return;
       runAction({ type: "map-idle" });
-    });
-  }, [mapRef.current, mapIsLoading]);
+    };
+    map.on("sourcedataloading", loadingCallback);
+    map.on("idle", idleCallback);
+    return () => {
+      map?.off("sourcedataloading", loadingCallback);
+      map?.off("idle", idleCallback);
+    };
+  }, [ignoredSources, mapRef.current, mapIsLoading]);
   return null;
 }
 

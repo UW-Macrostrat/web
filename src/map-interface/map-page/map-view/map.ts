@@ -22,6 +22,7 @@ interface MapProps {
   mapIsLoading: boolean;
   onQueryMap: (event: any, columns: ColumnProperties[]) => void;
   plateModelId: number;
+  runAction: (action: any) => void;
 }
 
 const blankMapStyle = {
@@ -175,45 +176,6 @@ class VestigialMap extends Component<MapProps, {}> {
             coordinates: crossSectionCoords,
           },
         });
-        return;
-
-        const src = this.map.getSource("crossSectionEndpoints");
-        const newEndpoints = this.crossSectionEndpoints.map((p) => {
-          return {
-            type: "Feature",
-            geometry: {
-              type: "Point",
-              coordinates: p,
-            },
-          };
-        });
-
-        src.setData({
-          type: "FeatureCollection",
-          features: [...(src._data?.features ?? []), ...newEndpoints],
-        });
-        if (this.crossSectionEndpoints.length === 2) {
-          this.props.runAction({
-            type: "set-cross-section-line",
-            line: {
-              type: "LineString",
-              coordinates: [...this.crossSectionEndpoints],
-            },
-          });
-          this.map.getSource("crossSectionLine").setData({
-            type: "FeatureCollection",
-            features: [
-              {
-                type: "Feature",
-                geometry: {
-                  type: "LineString",
-                  coordinates: [...this.crossSectionEndpoints],
-                },
-              },
-            ],
-          });
-          this.crossSectionEndpoints = [];
-        }
         return;
       }
 
