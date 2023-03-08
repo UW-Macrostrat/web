@@ -1,5 +1,5 @@
 import { normalizeLng } from "../../utils";
-import { Icon, Button } from "@blueprintjs/core";
+import { Icon, Button, Intent } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.styl";
 import {
@@ -8,6 +8,7 @@ import {
   useAppState,
 } from "~/map-interface/app-state";
 import { fmt3 } from "~/map-interface/utils";
+import { useMapRef } from "@macrostrat/mapbox-react";
 import classNames from "classnames";
 
 const h = hyper.styled(styles);
@@ -22,18 +23,41 @@ const metersToFeet = (meters, decimals = 0) => {
   return (meters * 3.28084).toFixed(decimals);
 };
 
+function classNameForFocusState(pos: PositionFocusState): string {
+  switch (pos) {
+    case PositionFocusState.CENTERED:
+      return "centered";
+    case PositionFocusState.NEAR_CENTER:
+      return "near-center";
+    case PositionFocusState.OFF_CENTER:
+      return "off-center";
+    case PositionFocusState.OUT_OF_PADDING:
+      return "out-of-padding";
+    case PositionFocusState.OUT_OF_VIEW:
+      return "out-of-view";
+  }
+}
+
+function intentForFocusState(pos: PositionFocusState): Intent {
+  switch (pos) {
+    case PositionFocusState.CENTERED:
+    case PositionFocusState.NEAR_CENTER:
+      return Intent.NONE;
+    case PositionFocusState.OFF_CENTER:
+      return Intent.PRIMARY;
+    case PositionFocusState.OUT_OF_PADDING:
+      return Intent.SUCCESS;
+    case PositionFocusState.OUT_OF_VIEW:
+      return Intent.WARNING;
+  }
+}
+
 function PositionButton() {
   const runAction = useAppActions();
+  const map = useMapRef();
   const pos =
     useAppState((state) => state.core.infoMarkerFocus) ??
     PositionFocusState.CENTERED;
-  let intent = null;
-  if (pos == PositionFocusState.OUT_OF_PADDING) {
-    intent = "success";
-  } else if (pos == PositionFocusState.OUT_OF_VIEW) {
-    intent = "warning";
-  }
-
   const isCentered =
     pos == PositionFocusState.CENTERED || pos == PositionFocusState.NEAR_CENTER;
 
@@ -48,12 +72,16 @@ function PositionButton() {
         minimal: true,
         icon: "map-marker",
         onClick() {
-          runAction({ type: "recenter-query-marker" });
+          if (isCentered) {
+            map.current?.resetNorth();
+          } else {
+            runAction({ type: "recenter-query-marker" });
+          }
         },
-        className: classNames("recenter-button", { "is-centered": isCentered }),
-        intent,
+        className: classNames("recenter-button", classNameForFocusState(pos)),
+        intent: intentForFocusState(pos),
       },
-      wayOffCenter ? h("span.recenter-label", "Recenter") : null
+      isCentered ? null : h("span.recenter-label", "Recenter")
     ),
     h.if(isCentered)(
       Button,

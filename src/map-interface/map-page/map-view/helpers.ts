@@ -86,8 +86,12 @@ export function MapMovedReporter() {
       });
     };
     mapMovedCallback();
-    map.on("moveend", debounce(mapMovedCallback, 100));
-  }, [mapRef.current]);
+    const cb = debounce(mapMovedCallback, 100);
+    map.on("moveend", cb);
+    return () => {
+      map?.off("moveend", cb);
+    };
+  }, [mapRef.current, infoMarkerPosition]);
   return null;
 }
 
