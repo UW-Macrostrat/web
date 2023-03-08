@@ -9,7 +9,11 @@ import {
 } from "~/map-interface/app-state";
 import { fmt3 } from "~/map-interface/utils";
 import { useMapRef } from "@macrostrat/mapbox-react";
-import classNames from "classnames";
+import {
+  LocationFocusButton,
+  useFocusState,
+  isCentered,
+} from "@macrostrat/mapbox-react";
 
 const h = hyper.styled(styles);
 
@@ -23,97 +27,51 @@ const metersToFeet = (meters, decimals = 0) => {
   return (meters * 3.28084).toFixed(decimals);
 };
 
-function classNameForFocusState(pos: PositionFocusState): string {
-  switch (pos) {
-    case PositionFocusState.CENTERED:
-      return "centered";
-    case PositionFocusState.NEAR_CENTER:
-      return "near-center";
-    case PositionFocusState.OFF_CENTER:
-      return "off-center";
-    case PositionFocusState.OUT_OF_PADDING:
-      return "out-of-padding";
-    case PositionFocusState.OUT_OF_VIEW:
-      return "out-of-view";
-  }
-}
-
-function intentForFocusState(pos: PositionFocusState): Intent {
-  switch (pos) {
-    case PositionFocusState.CENTERED:
-    case PositionFocusState.NEAR_CENTER:
-      return Intent.NONE;
-    case PositionFocusState.OFF_CENTER:
-      return Intent.PRIMARY;
-    case PositionFocusState.OUT_OF_PADDING:
-      return Intent.SUCCESS;
-    case PositionFocusState.OUT_OF_VIEW:
-      return Intent.WARNING;
-  }
-}
-
 function PositionButton() {
-  const runAction = useAppActions();
+  const infoMarkerPosition = useAppState(
+    (state) => state.core.infoMarkerPosition
+  );
   const map = useMapRef();
-  const pos =
-    useAppState((state) => state.core.infoMarkerFocus) ??
-    PositionFocusState.CENTERED;
-  const isCentered =
-    pos == PositionFocusState.CENTERED || pos == PositionFocusState.NEAR_CENTER;
 
-  const wayOffCenter =
-    pos == PositionFocusState.OUT_OF_VIEW ||
-    pos == PositionFocusState.OUT_OF_PADDING;
+  const focusState = useFocusState(infoMarkerPosition);
 
   return h("div.position-controls", [
-    h(
-      Button,
-      {
-        minimal: true,
-        icon: "map-marker",
-        onClick() {
-          if (isCentered) {
-            map.current?.resetNorth();
-          } else {
-            runAction({ type: "recenter-query-marker" });
-          }
-        },
-        className: classNames("recenter-button", classNameForFocusState(pos)),
-        intent: intentForFocusState(pos),
-      },
-      isCentered ? null : h("span.recenter-label", "Recenter")
-    ),
-    h.if(isCentered)(
-      Button,
-      {
-        className: "copy-link-button",
-        rightIcon: h(Icon, { icon: "link", size: 12 }),
-        minimal: true,
-        small: true,
-        onClick() {
-          navigator.clipboard.writeText(window.location.href).then(
-            () => {
-              AppToaster.show({
-                message: "Copied link to position!",
-                intent: "success",
-                icon: "clipboard",
-                timeout: 1000,
-              });
-            },
-            () => {
-              AppToaster.show({
-                message: "Failed to copy link",
-                intent: "danger",
-                icon: "error",
-                timeout: 1000,
-              });
-            }
-          );
-        },
-      },
-      "Copy link"
-    ),
+    h(LocationFocusButton, { location: infoMarkerPosition, focusState }, []),
+    isCentered(focusState) ? h(CopyLinkButton) : null,
   ]);
+}
+
+function CopyLinkButton() {
+  return h(
+    Button,
+    {
+      className: "copy-link-button",
+      rightIcon: h(Icon, { icon: "link", size: 12 }),
+      minimal: true,
+      small: true,
+      onClick() {
+        navigator.clipboard.writeText(window.location.href).then(
+          () => {
+            AppToaster.show({
+              message: "Copied link to position!",
+              intent: "success",
+              icon: "clipboard",
+              timeout: 1000,
+            });
+          },
+          () => {
+            AppToaster.show({
+              message: "Failed to copy link",
+              intent: "danger",
+              icon: "error",
+              timeout: 1000,
+            });
+          }
+        );
+      },
+    },
+    "Copy link"
+  );
 }
 
 interface InfoDrawerHeaderProps {

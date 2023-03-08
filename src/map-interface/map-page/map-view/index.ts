@@ -34,11 +34,11 @@ import Map from "./map";
 import { enable3DTerrain } from "./terrain";
 import {
   getBaseMapStyle,
-  getFocusState,
   MapBottomControls,
   MapStyledContainer,
   useCrossSectionCursorLocation,
 } from "./utils";
+import { getFocusState } from "@macrostrat/mapbox-react";
 import {
   MapLoadingReporter,
   MapMovedReporter,

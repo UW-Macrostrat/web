@@ -7,12 +7,8 @@ import { getMapPosition } from "@macrostrat/mapbox-utils";
 import mapboxgl from "mapbox-gl";
 import { useCallback, useEffect, useState } from "react";
 import { useAppActions, useAppState } from "~/map-interface/app-state";
-import {
-  getFocusState,
-  getMapPadding,
-  useMapEaseToCenter,
-  useMapMarker,
-} from "./utils";
+import { getMapPadding, useMapMarker } from "./utils";
+import { getFocusState, useMapEaseToCenter } from "@macrostrat/mapbox-react";
 
 export function MapResizeManager({ containerRef }) {
   const mapRef = useMapRef();
@@ -33,6 +29,9 @@ export function MapResizeManager({ containerRef }) {
 
 export function MapPaddingManager({ containerRef, parentRef }) {
   const mapRef = useMapRef();
+  const infoMarkerPosition = useAppState(
+    (state) => state.core.infoMarkerPosition
+  );
 
   const [padding, setPadding] = useState(
     getMapPadding(containerRef, parentRef)
@@ -56,7 +55,7 @@ export function MapPaddingManager({ containerRef, parentRef }) {
     },
   });
 
-  useMapEaseToCenter(padding);
+  useMapEaseToCenter(infoMarkerPosition, padding);
 
   return null;
 }
