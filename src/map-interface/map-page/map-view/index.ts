@@ -16,7 +16,6 @@ import mapboxgl from "mapbox-gl";
 import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
 import {
   MapLayer,
-  PositionFocusState,
   useAppActions,
   useAppState,
 } from "~/map-interface/app-state";
@@ -38,7 +37,7 @@ import {
   MapStyledContainer,
   useCrossSectionCursorLocation,
 } from "./utils";
-import { getFocusState } from "@macrostrat/mapbox-react";
+import { getFocusState, PositionFocusState } from "@macrostrat/mapbox-react";
 import {
   MapLoadingReporter,
   MapMovedReporter,

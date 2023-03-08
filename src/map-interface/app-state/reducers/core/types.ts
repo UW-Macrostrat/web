@@ -43,7 +43,6 @@ type TOGGLE_FILTERS = { type: "toggle-filters" };
 type REMOVE_FILTER = { type: "remove-filter"; filter: any };
 type UPDATE_COLUMN_FILTERS = { type: "update-column-filters"; columns: any };
 type CLEAR_FILTERS = { type: "clear-filters" };
-type RecenterQueryMarker = { type: "recenter-query-marker" };
 
 type START_MAP_QUERY = {
   type: "start-map-query";
@@ -189,7 +188,6 @@ export type CoreAction =
   | UPDATE_ELEVATION_MARKER
   | SET_ACTIVE_INDEX_MAP
   | MapAction
-  | RecenterQueryMarker
   | ToggleHighResolutionTerrain
   | AddFilter
   | SetFilters
@@ -243,7 +241,6 @@ export interface CoreState extends MapState, AsyncRequestState {
   crossSectionLine: LineString | null;
   crossSectionCursorLocation: any;
   infoMarkerPosition: { lat: number; lng: number } | null;
-  infoMarkerFocus: PositionFocusState | null;
   mapInfo: any[];
   timeCursorAge: number | null;
   plateModelId: number | null;

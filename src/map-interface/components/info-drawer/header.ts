@@ -2,11 +2,7 @@ import { normalizeLng } from "../../utils";
 import { Icon, Button, Intent } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.styl";
-import {
-  PositionFocusState,
-  useAppActions,
-  useAppState,
-} from "~/map-interface/app-state";
+import { useAppState } from "~/map-interface/app-state";
 import { fmt3 } from "~/map-interface/utils";
 import { useMapRef } from "@macrostrat/mapbox-react";
 import {

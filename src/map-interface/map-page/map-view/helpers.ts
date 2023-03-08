@@ -8,7 +8,7 @@ import mapboxgl from "mapbox-gl";
 import { useCallback, useEffect, useState } from "react";
 import { useAppActions, useAppState } from "~/map-interface/app-state";
 import { getMapPadding, useMapMarker } from "./utils";
-import { getFocusState, useMapEaseToCenter } from "@macrostrat/mapbox-react";
+import { useMapEaseToCenter } from "@macrostrat/mapbox-react";
 
 export function MapResizeManager({ containerRef }) {
   const mapRef = useMapRef();
@@ -80,7 +80,6 @@ export function MapMovedReporter() {
         type: "map-moved",
         data: {
           mapPosition: getMapPosition(map),
-          infoMarkerFocus: getFocusState(map, infoMarkerPosition),
         },
       });
     };

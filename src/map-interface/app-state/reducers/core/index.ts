@@ -27,7 +27,6 @@ const defaultState: CoreState = {
   infoDrawerOpen: false,
   infoDrawerExpanded: false,
   infoMarkerPosition: null,
-  infoMarkerFocus: null,
   crossSectionLine: null,
   crossSectionCursorLocation: [],
   mapBackend: MapBackend.MAPBOX,
@@ -176,18 +175,9 @@ export function coreReducer(
           lng: action.lng,
           lat: action.lat,
         },
-        infoMarkerFocus: null,
         fetchingMapInfo: true,
         infoDrawerOpen: true,
         mapInfoCancelToken: action.cancelToken,
-      };
-    case "recenter-query-marker":
-      const pos = state.infoMarkerPosition;
-      if (pos == null) return state;
-      return {
-        ...state,
-        infoMarkerPosition: { ...pos },
-        infoMarkerFocus: null,
       };
     case "received-map-query":
       if (action.data && action.data.mapData) {
