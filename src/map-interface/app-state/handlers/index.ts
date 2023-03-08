@@ -140,15 +140,17 @@ async function actionRunner(
         })
       );
       return action;
-    case "toggle-cross-section":
+    case "toggle-cross-section": {
+      let line: GeoJSON.LineString | null = null;
       if (state.core.crossSectionLine == null) {
-        return dispatch({
-          type: "update-cross-section",
-          line: { type: "LineString", coordinates: [] },
-        });
-      } else {
-        return dispatch({ type: "update-cross-section", line: null });
+        line = { type: "LineString", coordinates: [] };
       }
+      const action = {
+        type: "update-cross-section",
+        line,
+      };
+      return actionRunner(state, action, dispatch);
+    }
     case "update-cross-section":
       if (state.core.crossSectionLine != null) {
         // Return to the base route

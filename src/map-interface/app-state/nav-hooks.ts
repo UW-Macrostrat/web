@@ -6,7 +6,7 @@ import { routerBasename } from "../settings";
 
 export function isDetailPanelRouteInternal(pathname: string) {
   /* Check if we're in a detail panel route from within the app. */
-  return pathname.startsWith("/loc");
+  return pathname.startsWith("/loc") || pathname.startsWith("/cross-section");
 }
 
 export function isDetailPanelRoute(pathname: string) {
