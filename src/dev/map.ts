@@ -39,11 +39,11 @@ import {
 } from "./vector-tile-features";
 import { TileExtentLayer } from "./tile-extent";
 import styles from "./main.module.styl";
-import { tileToGeoJSON } from "@mapbox/tilebelt";
 
 export enum MacrostratVectorTileset {
   Carto = "carto",
   CartoSlim = "carto-slim",
+  IGCPOrogens = "igcp-orogens",
 }
 
 export enum MacrostratRasterTileset {
@@ -69,11 +69,20 @@ function useMapStyle(
   return style;
 }
 
+const _macrostratStyle = buildMacrostratStyle() as mapboxgl.Style;
+
 export function VectorMapInspectorPage({
   tileset = MacrostratVectorTileset.CartoSlim,
+  overlayStyle = _macrostratStyle,
+  title = null,
+  headerElement = null,
+  children,
 }: {
   headerElement?: React.ReactElement;
+  title?: string;
   tileset?: MacrostratVectorTileset;
+  overlayStyle?: mapboxgl.Style;
+  children?: React.ReactNode;
 }) {
   // A stripped-down page for map development
   const runAction = useAppActions();
@@ -91,7 +100,7 @@ export function VectorMapInspectorPage({
 
   const [isOpen, setOpen] = useState(false);
   const [showLineSymbols, setShowLineSymbols] = useState(false);
-  const [xRay, setXRay] = useState(true);
+  const [xRay, setXRay] = useState(false);
   const [showTileExtent, setShowTileExtent] = useState(false);
 
   const [inspectPosition, setInspectPosition] =
@@ -130,14 +139,14 @@ export function VectorMapInspectorPage({
   // Style management
   const baseMapURL = getBaseMapStyle(new Set([]), isEnabled);
 
-  const overlayStyle = useMemo(() => {
-    const overlayStyle: mapboxgl.Style = xRay
+  const _overlayStyle = useMemo(() => {
+    const style: mapboxgl.Style = xRay
       ? buildXRayStyle({ inDarkMode: isEnabled })
-      : buildMacrostratStyle();
-    return addExtraLayers(overlayStyle, tileset);
-  }, [xRay, tileset, isEnabled]);
+      : overlayStyle;
+    return replaceSourcesForTileset(style, tileset);
+  }, [xRay, tileset, overlayStyle, isEnabled]) as mapboxgl.Style;
 
-  const style = useMapStyle(baseMapURL, overlayStyle);
+  const style = useMapStyle(baseMapURL, _overlayStyle);
 
   let tile = null;
   if (showTileExtent && data?.[0] != null) {
@@ -151,7 +160,7 @@ export function VectorMapInspectorPage({
     MapAreaContainer,
     {
       navbar: h(FloatingNavbar, { className: "searchbar" }, [
-        h([h(ParentRouteButton), h("h2", `${tileset}`)]),
+        h([h(ParentRouteButton), headerElement ?? h("h2", title ?? tileset)]),
         h("div.spacer"),
         h(LoaderButton, {
           active: isOpen,
@@ -160,6 +169,7 @@ export function VectorMapInspectorPage({
         }),
       ]),
       contextPanel: h(PanelCard, [
+        children,
         h(Switch, {
           checked: xRay,
           label: "X-ray mode",
@@ -322,7 +332,7 @@ function buildRasterStyle(layer: MacrostratRasterTileset) {
   };
 }
 
-function addExtraLayers(
+function replaceSourcesForTileset(
   style: mapboxgl.Style,
   tileset: MacrostratVectorTileset
 ) {
@@ -332,7 +342,7 @@ function addExtraLayers(
       ...style.sources,
       burwell: {
         type: "vector",
-        tiles: [SETTINGS.burwellTileDomain + `/${tileset}/{z}/{x}/{y}.mvt`],
+        tiles: [SETTINGS.burwellTileDomain + `/${tileset}/{z}/{x}/{y}`],
         tileSize: 512,
       },
     },

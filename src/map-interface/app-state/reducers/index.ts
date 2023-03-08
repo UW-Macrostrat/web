@@ -21,11 +21,8 @@ import {
 } from "@macrostrat/cesium-viewer";
 import { MapPosition } from "@macrostrat/mapbox-utils";
 import { LocalStorage } from "@macrostrat/ui-components";
-import {
-  ReduxRouterState,
-} from "@lagunovsky/redux-react-router";
+import { ReduxRouterState } from "@lagunovsky/redux-react-router";
 import { performanceReducer, PerformanceState } from "../../performance/core";
-
 
 export const browserHistory = createBrowserHistory();
 import { MenuState, AppState, AppAction, MenuAction } from "./types";
@@ -84,8 +81,6 @@ function mainReducer(
       const isOpen = contextPanelIsInitiallyOpen(pathname);
 
       let s1 = setInfoMarkerPosition(state);
-
-      console.log(state.router, action.payload);
 
       const newRoute = action.payload.location;
       let newAction = action;

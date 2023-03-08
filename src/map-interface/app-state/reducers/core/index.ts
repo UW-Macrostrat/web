@@ -66,6 +66,8 @@ const defaultState: CoreState = {
   filteredColumns: {},
   data: [],
   showExperimentsPanel: false,
+  timeCursorAge: null,
+  plateModelId: null,
   mapPosition: {
     camera: {
       lng: 23,
@@ -430,6 +432,10 @@ export function coreReducer(
       return update(state, {
         mapSettings: { $toggle: ["highResolutionTerrain"] },
       });
+    case "set-time-cursor":
+      return { ...state, timeCursorAge: action.age };
+    case "set-plate-model":
+      return { ...state, plateModelId: action.plateModel };
     default:
       return state;
   }

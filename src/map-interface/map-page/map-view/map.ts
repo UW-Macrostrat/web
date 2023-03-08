@@ -21,7 +21,14 @@ interface MapProps {
   mapIsRotated: boolean;
   mapIsLoading: boolean;
   onQueryMap: (event: any, columns: ColumnProperties[]) => void;
+  plateModelId: number;
 }
+
+const blankMapStyle = {
+  version: 8,
+  sources: {},
+  layers: [],
+};
 
 class VestigialMap extends Component<MapProps, {}> {
   map: mapboxgl.Map;

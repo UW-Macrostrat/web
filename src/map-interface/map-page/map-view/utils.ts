@@ -176,6 +176,22 @@ export function useMapEaseToCenter(padding) {
   }, [infoMarkerPosition, padding]);
 }
 
+function greatCircleDistance(
+  l1: mapboxgl.LngLatLike,
+  l2: mapboxgl.LngLatLike
+): number {
+  // get distance in radians between l1 and l2
+  const dLon = ((l2[0] - l1[0]) * Math.PI) / 180;
+
+  // Spherical law of cosines (accurate at large distances)
+  const lat1 = (l1[1] * Math.PI) / 180;
+  const lat2 = (l2[1] * Math.PI) / 180;
+  return Math.acos(
+    Math.sin(lat1) * Math.sin(lat2) +
+      Math.cos(lat1) * Math.cos(lat2) * Math.cos(dLon)
+  );
+}
+
 export function getFocusState(
   map: mapboxgl.Map,
   location: mapboxgl.LngLatLike | null
@@ -183,8 +199,17 @@ export function getFocusState(
   /** Determine whether the infomarker is positioned in the viewport */
   if (location == null) return null;
 
+  const mapCenter = map.getCenter();
+
+  const dist = greatCircleDistance(location, mapCenter);
+  if (dist > Math.PI / 4) {
+    return PositionFocusState.OFF_CENTER;
+  } else if (dist > Math.PI / 2) {
+    return PositionFocusState.OUT_OF_VIEW;
+  }
+
   const markerPos = map.project(location);
-  const mapPos = map.project(map.getCenter());
+  const mapPos = map.project(mapCenter);
   const dx = Math.abs(markerPos.x - mapPos.x);
   const dy = Math.abs(markerPos.y - mapPos.y);
   const padding = map.getPadding();

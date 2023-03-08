@@ -3998,6 +3998,7 @@ __metadata:
     "@macrostrat/mapbox-utils": "workspace:*"
     "@macrostrat/revision-info-webpack": ^1.0.0
     "@macrostrat/router-components": ^1.0.2
+    "@macrostrat/timescale": "workspace:*"
     "@macrostrat/ui-components": "workspace:*"
     "@mapbox/point-geometry": ^0.1.0
     "@mapbox/tilebelt": ^1.0.2
