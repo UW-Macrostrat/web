@@ -8,6 +8,7 @@ import { axisBottom, axisLeft } from "d3-axis";
 import { line, area } from "d3-shape";
 import { min, max, extent, bisector } from "d3-array";
 import { useAPIResult } from "@macrostrat/ui-components";
+import { LocationFocusButton } from "@macrostrat/mapbox-react";
 
 import styles from "./main.module.styl";
 import { SETTINGS } from "~/map-interface/settings";
@@ -245,14 +246,20 @@ function ElevationChartContainer() {
     "div.elevation-chart-panel",
     null,
     h("div.elevation-chart", [
-      h(Button, {
-        icon: "cross",
-        minimal: true,
-        className: "close-button",
-        onClick() {
-          runAction({ type: "toggle-cross-section" });
-        },
-      }),
+      h("div.control-bar", [
+        h(LocationFocusButton, { location: crossSectionLine }),
+        h("div.spacer"),
+        h(Button, {
+          icon: "cross",
+          minimal: true,
+          small: true,
+          className: "close-button",
+          onClick() {
+            runAction({ type: "toggle-cross-section" });
+          },
+        }),
+      ]),
+
       h("div", [
         h.if(nCoords < 2)("div.elevation-instructions", [
           nCoords == 0 ? "Click two points on the map" : "Click a second point",
