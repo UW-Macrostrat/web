@@ -87,6 +87,8 @@ function SearchResults({ className }) {
   return h(Card, { className }, h(ResultList, { searchResults }));
 }
 
+const spinnerElement = h(Spinner, { size: 16 });
+
 function LoaderButton({
   isLoading = false,
   onClick,
@@ -94,7 +96,7 @@ function LoaderButton({
   icon = "menu",
 }) {
   return h(Button, {
-    icon: isLoading ? h(Spinner, { size: 16 }) : icon,
+    icon: isLoading ? spinnerElement : icon,
     large: true,
     minimal: true,
     onClick,
@@ -142,6 +144,8 @@ export function FloatingNavbar({
   ]);
 }
 
+const filterPanelElement = h(FilterPanel);
+
 function Searchbar({ className }) {
   const runAction = useAppActions();
   const { term, searchResults } = useSearchState();
@@ -170,7 +174,7 @@ function Searchbar({ className }) {
     }
   }, [term]);
 
-  return h(FloatingNavbar, { statusElement: h(FilterPanel) }, [
+  return h(FloatingNavbar, { statusElement: filterPanelElement }, [
     h(InputGroup, {
       large: true,
       onChange: handleSearchInput,

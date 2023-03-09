@@ -19,7 +19,6 @@ interface MapProps {
   use3D: boolean;
   isDark: boolean;
   mapIsRotated: boolean;
-  mapIsLoading: boolean;
   onQueryMap: (event: any, columns: ColumnProperties[]) => void;
   plateModelId: number;
   runAction: (action: any) => void;
@@ -37,7 +36,6 @@ class VestigialMap extends Component<MapProps, {}> {
   crossSectionEndpoints: [number, number][] = [];
   constructor(props) {
     super(props);
-    this.mapLoaded = false;
     this.crossSectionEndpoints = [];
 
     this.maxValue = 500;
@@ -93,11 +91,6 @@ class VestigialMap extends Component<MapProps, {}> {
     if (mapLayers.has(MapLayer.FOSSILS)) {
       this.refreshPBDB();
     }
-
-    // NO idea why timeout is needed
-    setTimeout(() => {
-      this.mapLoaded = true;
-    }, 1);
   }
 
   setupMapHandlers() {
@@ -165,7 +158,7 @@ class VestigialMap extends Component<MapProps, {}> {
         crossSectionLine ??= { type: "LineString", coordinates: [] };
 
         if (crossSectionCoords.length === 2) {
-          // Restart cross sections
+          // Restaoss sections
           crossSectionCoords = [];
         }
         crossSectionCoords.push([event.lngLat.lng, event.lngLat.lat]);
