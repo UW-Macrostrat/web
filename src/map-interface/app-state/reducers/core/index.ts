@@ -1,4 +1,4 @@
-import { MapBackend, MapLayer } from "../map";
+import { MapBackend, MapLayer, PositionFocusState } from "../map";
 import { CoreState, CoreAction } from "./types";
 import update, { Spec } from "immutability-helper";
 import { FilterData } from "../../handlers/filters";
@@ -27,8 +27,8 @@ const defaultState: CoreState = {
   infoDrawerOpen: false,
   infoDrawerExpanded: false,
   infoMarkerPosition: null,
-  infoMarkerFocus: null,
-  elevationChartOpen: false,
+  crossSectionLine: null,
+  crossSectionCursorLocation: [],
   mapBackend: MapBackend.MAPBOX,
   mapLayers: new Set([MapLayer.BEDROCK, MapLayer.LINES, MapLayer.LABELS]),
   mapSettings: {
@@ -53,8 +53,6 @@ const defaultState: CoreState = {
   mapInfo: [],
   columnInfo: null,
   searchResults: null,
-  elevationData: [],
-  elevationMarkerLocation: [],
   pbdbData: [],
   mapIsLoading: false,
   mapCenter: {
@@ -177,18 +175,9 @@ export function coreReducer(
           lng: action.lng,
           lat: action.lat,
         },
-        infoMarkerFocus: null,
         fetchingMapInfo: true,
         infoDrawerOpen: true,
         mapInfoCancelToken: action.cancelToken,
-      };
-    case "recenter-query-marker":
-      const pos = state.infoMarkerPosition;
-      if (pos == null) return state;
-      return {
-        ...state,
-        infoMarkerPosition: { ...pos },
-        infoMarkerFocus: null,
       };
     case "received-map-query":
       if (action.data && action.data.mapData) {
@@ -286,12 +275,11 @@ export function coreReducer(
       return update(state, { mapLayers });
     case "toggle-map-3d":
       return { ...state, mapUse3D: !state.mapUse3D };
-    case "toggle-elevation-chart":
+    case "update-cross-section":
       return {
         ...state,
-        elevationChartOpen: !state.elevationChartOpen,
-        elevationData: [],
-        elevationMarkerLocation: [],
+        crossSectionLine: action.line,
+        crossSectionCursorLocation: [],
       };
     case "set-input-focus":
       return {
@@ -368,26 +356,8 @@ export function coreReducer(
         xddCancelToken: null,
       };
 
-    // Handle elevation
-    case "start-elevation-query":
-      // When a search is requested, cancel any pending requests first
-      if (state.elevationCancelToken) {
-        state.elevationCancelToken.cancel();
-      }
-      return {
-        ...state,
-        fetchingElevation: true,
-        elevationCancelToken: action.cancelToken,
-      };
-    case "received-elevation-query":
-      return {
-        ...state,
-        fetchingElevation: false,
-        elevationData: action.data,
-        elevationCancelToken: null,
-      };
     case "update-elevation-marker":
-      return { ...state, elevationMarkerLocation: [action.lng, action.lat] };
+      return { ...state, crossSectionCursorLocation: [action.lng, action.lat] };
 
     // Handle PBDB
     case "start-pbdb-query":

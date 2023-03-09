@@ -6,7 +6,6 @@ import {
 } from "@macrostrat/mapbox-react";
 import {
   getMapboxStyle,
-  getMapPosition,
   mapViewInfo,
   mergeStyles,
   setMapPosition,
@@ -15,11 +14,8 @@ import { inDarkMode } from "@macrostrat/ui-components";
 import classNames from "classnames";
 import mapboxgl from "mapbox-gl";
 import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
-import { debounce } from "underscore";
-import useResizeObserver from "use-resize-observer";
 import {
   MapLayer,
-  PositionFocusState,
   useAppActions,
   useAppState,
 } from "~/map-interface/app-state";
@@ -37,14 +33,19 @@ import Map from "./map";
 import { enable3DTerrain } from "./terrain";
 import {
   getBaseMapStyle,
-  getFocusState,
-  getMapPadding,
   MapBottomControls,
   MapStyledContainer,
-  useElevationMarkerLocation,
-  useMapEaseToCenter,
-  useMapMarker,
+  useCrossSectionCursorLocation,
 } from "./utils";
+import { getFocusState, PositionFocusState } from "@macrostrat/mapbox-react";
+import {
+  MapLoadingReporter,
+  MapMovedReporter,
+  MapPaddingManager,
+  MapMarker,
+  MapResizeManager,
+} from "./helpers";
+import { LineString } from "geojson";
 
 const h = hyper.styled(styles);
 
@@ -83,6 +84,9 @@ async function initializeMap(
 
   map.setProjection("globe");
 
+  // disable shift-key zooming so we can use shift to make cross-sections
+  map.boxZoom.disable();
+
   // set initial map position
   setMapPosition(map, mapPosition);
 
@@ -114,9 +118,8 @@ export default function MainMapView(props) {
     filteredColumns,
     mapLayers,
     mapCenter,
-    elevationChartOpen,
-    elevationData,
-    elevationMarkerLocation,
+    crossSectionLine,
+    crossSectionCursorLocation,
     mapPosition,
     infoDrawerOpen,
     mapIsLoading,
@@ -126,7 +129,7 @@ export default function MainMapView(props) {
   } = useAppState((state) => state.core);
 
   let mapRef = useMapRef();
-  useElevationMarkerLocation(mapRef, elevationMarkerLocation);
+  useCrossSectionCursorLocation(mapRef, crossSectionCursorLocation);
   const { mapIsRotated } = mapViewInfo(mapPosition);
   const runAction = useAppActions();
   const handleMapQuery = useMapQueryHandler(mapRef, infoDrawerOpen);
@@ -204,29 +207,6 @@ export default function MainMapView(props) {
   // Make map label visibility match the mapLayers state
   useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));
 
-  /* Update columns map layer given columns provided by application. */
-  const allColumns = useAppState((state) => state.core.allColumns);
-  useEffect(() => {
-    const map = mapRef.current;
-    const ncols = allColumns?.length ?? 0;
-    if (map == null || ncols == 0) return;
-    // Set source data for columns
-    map.once("style.load", () => {
-      const src = map.getSource("columns");
-      if (src == null) return;
-      src.setData({
-        type: "FeatureCollection",
-        features: allColumns ?? [],
-      });
-    });
-    const src = map.getSource("columns");
-    if (src == null) return;
-    src.setData({
-      type: "FeatureCollection",
-      features: allColumns ?? [],
-    });
-  }, [mapRef.current, allColumns, mapInitialized]);
-
   useEffect(() => {
     if (mapLayers.has(MapLayer.COLUMNS)) {
       runAction({ type: "get-filtered-columns" });
@@ -251,9 +231,8 @@ export default function MainMapView(props) {
       // Recreate the set every time to force a re-render
       mapLayers,
       mapCenter,
-      elevationChartOpen,
-      elevationData,
-      elevationMarkerLocation,
+      crossSectionLine,
+      crossSectionCursorLocation,
       mapPosition,
       mapIsLoading,
       mapIsRotated,
@@ -266,8 +245,37 @@ export default function MainMapView(props) {
     h(MapMarker, {
       position: infoMarkerPosition,
     }),
+    h(CrossSectionLine),
     h.if(mapLayers.has(MapLayer.SOURCES))(MapSourcesLayer),
+    h(ColumnDataManager, { mapInitialized }),
   ]);
+}
+
+function ColumnDataManager({ mapInitialized }) {
+  /* Update columns map layer given columns provided by application. */
+  const mapRef = useMapRef();
+  const allColumns = useAppState((state) => state.core.allColumns);
+  useEffect(() => {
+    const map = mapRef.current;
+    const ncols = allColumns?.length ?? 0;
+    if (map == null || ncols == 0) return;
+    // Set source data for columns
+    map.once("style.load", () => {
+      const src = map.getSource("columns");
+      if (src == null) return;
+      src.setData({
+        type: "FeatureCollection",
+        features: allColumns ?? [],
+      });
+    });
+    const src = map.getSource("columns");
+    if (src == null) return;
+    src.setData({
+      type: "FeatureCollection",
+      features: allColumns ?? [],
+    });
+  }, [mapRef.current, allColumns, mapInitialized]);
+  return null;
 }
 
 interface MapViewProps {
@@ -276,16 +284,11 @@ interface MapViewProps {
 }
 
 export function CoreMapView(props: MapViewProps) {
-  const { filters, mapLayers, mapPosition, infoDrawerOpen, mapSettings } =
-    useAppState((state) => state.core);
+  const { mapLayers, mapPosition, mapSettings } = useAppState(
+    (state) => state.core
+  );
 
   const { children } = props;
-
-  // Maybe this shouldn't be global state necessarily...
-  // Could integrate with context...
-  const mapIsLoading = useAppState((state) => state.core.mapIsLoading);
-
-  const runAction = useAppActions();
 
   let mapRef = useMapRef();
 
@@ -293,23 +296,13 @@ export function CoreMapView(props: MapViewProps) {
   const parentRef = useRef<HTMLDivElement>();
   const { mapUse3D, mapIsRotated } = mapViewInfo(mapPosition);
 
-  const [padding, setPadding] = useState(getMapPadding(ref, parentRef));
-  const infoMarkerPosition = useAppState(
-    (state) => state.core.infoMarkerPosition
-  );
-
   const hasLineSymbols =
     mapLayers.has(MapLayer.LINE_SYMBOLS) && mapLayers.has(MapLayer.LINES);
-
-  const updateMapPadding = useCallback(() => {
-    setPadding(getMapPadding(ref, parentRef));
-  }, [ref, parentRef]);
 
   useEffect(() => {
     const map = mapRef.current;
     if (map == null) return;
-    // Update map padding on load
-    updateMapPadding();
+    // Update line symbol visibility on map load
     toggleLineSymbols(map, hasLineSymbols);
   }, [mapRef.current]);
 
@@ -322,67 +315,7 @@ export function CoreMapView(props: MapViewProps) {
     enable3DTerrain(map, mapUse3D, demSourceID);
   }, [mapRef.current, mapUse3D]);
 
-  useMapEaseToCenter(padding);
-
-  useEffect(() => {
-    // Get the current value of the map. Useful for gradually moving away
-    // from class component
-    const map = mapRef.current;
-    if (map == null) return;
-
-    // Update the URI when the map moves
-    const mapMovedCallback = () => {
-      const map = mapRef.current;
-
-      runAction({
-        type: "map-moved",
-        data: {
-          mapPosition: getMapPosition(map),
-          infoMarkerFocus: getFocusState(map, infoMarkerPosition),
-        },
-      });
-    };
-    mapMovedCallback();
-    map.on("moveend", debounce(mapMovedCallback, 100));
-  }, [mapRef.current]);
-
-  // Map loading state
-  const ignoredSources = ["elevationMarker", "elevationPoints"];
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null) return;
-
-    map.on("sourcedataloading", (evt) => {
-      if (ignoredSources.includes(evt.sourceId) || mapIsLoading) return;
-      runAction({ type: "map-loading" });
-    });
-
-    map.on("idle", () => {
-      if (!mapIsLoading) return;
-      runAction({ type: "map-idle" });
-    });
-  }, [mapRef.current, mapIsLoading]);
-
   useMapConditionalStyle(mapRef, hasLineSymbols, toggleLineSymbols);
-
-  useResizeObserver({
-    ref: parentRef,
-    onResize(sz) {
-      updateMapPadding();
-    },
-  });
-
-  const debouncedResize = useRef(
-    debounce(() => {
-      mapRef.current?.resize();
-    }, 100)
-  );
-
-  useResizeObserver({
-    ref,
-    onResize: debouncedResize.current,
-  });
 
   const className = classNames({
     "is-rotated": mapIsRotated ?? false,
@@ -391,37 +324,63 @@ export function CoreMapView(props: MapViewProps) {
 
   return h("div.map-view-container.main-view", { ref: parentRef }, [
     h("div.mapbox-map#map", { ref, className }),
+    h(MapLoadingReporter, {
+      ignoredSources: ["elevationMarker", "crossSectionEndpoints"],
+    }),
+    h(MapMovedReporter),
+    h(MapResizeManager, { containerRef: ref }),
+    h(MapPaddingManager, { containerRef: ref, parentRef }),
     children,
   ]);
 }
 
-export function MapMarker({ position, setPosition, centerMarker = true }) {
+export function CrossSectionLine() {
   const mapRef = useMapRef();
-  const markerRef = useRef(null);
-
-  useMapMarker(mapRef, markerRef, position);
-
-  const handleMapClick = useCallback(
-    (event: mapboxgl.MapMouseEvent) => {
-      setPosition(event.lngLat, event, mapRef.current);
-      // We should integrate this with the "easeToCenter" hook
-      if (centerMarker) {
-        mapRef.current?.flyTo({ center: event.lngLat, duration: 800 });
-      }
-    }, // eslint-disable-next-line react-hooks/exhaustive-deps
-    [mapRef.current, setPosition]
-  );
-
+  const crossSectionLine = useAppState((state) => state.core.crossSectionLine);
+  const previousLine = useRef<LineString | null>(null);
   useEffect(() => {
     const map = mapRef.current;
-    if (map != null && setPosition != null) {
-      map.on("click", handleMapClick);
-    }
-    return () => {
-      map?.off("click", handleMapClick);
-    };
-  }, [mapRef.current, setPosition]);
+    if (map == null) return;
+    const coords = crossSectionLine?.coordinates ?? [];
 
+    let lines = [];
+    if (coords.length == 2 || crossSectionLine == null) {
+      previousLine.current = crossSectionLine;
+    }
+
+    if (crossSectionLine != null) {
+      lines.push(crossSectionLine);
+    }
+
+    if (previousLine.current != null) {
+      // We are selecting a new line, and we should still show the previous line
+      // until the new one is selected.
+      lines.push(previousLine.current);
+    }
+
+    let endpointFeatures = [];
+    for (let line of lines) {
+      for (let coord of line.coordinates) {
+        endpointFeatures.push({
+          type: "Feature",
+          properties: {},
+          geometry: {
+            type: "Point",
+            coordinates: coord,
+          },
+        });
+      }
+    }
+
+    map.getSource("crossSectionLine")?.setData({
+      type: "GeometryCollection",
+      geometries: lines,
+    });
+    map.getSource("crossSectionEndpoints")?.setData({
+      type: "FeatureCollection",
+      features: endpointFeatures,
+    });
+  }, [mapRef.current, crossSectionLine]);
   return null;
 }
 
@@ -454,4 +413,4 @@ function useMapQueryHandler(
   );
 }
 
-export { MapStyledContainer, MapBottomControls };
+export { MapStyledContainer, MapBottomControls, MapMarker };

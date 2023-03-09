@@ -77,7 +77,7 @@ const LayerList = (props) => {
 
   const toggleElevationChart = () => {
     runAction({ type: "toggle-menu" });
-    runAction({ type: "toggle-elevation-chart" });
+    runAction({ type: "toggle-cross-section" });
   };
 
   return h("div.menu-content", [

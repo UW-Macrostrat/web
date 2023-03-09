@@ -27,21 +27,13 @@ export type MapState = MapInitialState & {
   mapIsLoading: boolean;
 };
 
-export enum PositionFocusState {
-  CENTERED,
-  NEAR_CENTER,
-  OFF_CENTER,
-  OUT_OF_PADDING,
-  OUT_OF_VIEW,
-}
-
 type MapMoved = {
   type: "map-moved";
   data: {
     mapPosition: MapPosition;
-    infoMarkerFocus: PositionFocusState | null;
   };
 };
+
 type SetMapBackend = { type: "set-map-backend"; backend: any };
 type GetInitialMapState = { type: "get-initial-map-state" };
 type MapLoading = { type: "map-loading" };

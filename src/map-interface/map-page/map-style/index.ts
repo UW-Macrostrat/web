@@ -179,14 +179,14 @@ const overlaySources = {
       features: [],
     },
   },
-  elevationPoints: {
+  crossSectionEndpoints: {
     type: "geojson",
     data: {
       type: "FeatureCollection",
       features: [],
     },
   },
-  elevationLine: {
+  crossSectionLine: {
     type: "geojson",
     data: {
       type: "FeatureCollection",
@@ -205,8 +205,29 @@ const overlaySources = {
 export function buildOverlayLayers() {
   // Get CSS colors from settings
   const ruleColor = getComputedStyle(document.body).getPropertyValue(
-    "--text-color"
+    "--panel-background-color"
   );
+
+  const centerColor = getComputedStyle(document.body).getPropertyValue(
+    "--panel-rule-color"
+  );
+
+  const crossSectionPointPaint = {
+    "circle-radius": {
+      stops: [
+        [0, 3],
+        [12, 5],
+      ],
+    },
+    "circle-color": centerColor,
+    "circle-stroke-width": {
+      stops: [
+        [0, 2],
+        [12, 4],
+      ],
+    },
+    "circle-stroke-color": ruleColor,
+  };
 
   return [
     {
@@ -270,41 +291,33 @@ export function buildOverlayLayers() {
       },
     },
     {
-      id: "elevationLine",
+      id: "crossSectionLine",
       type: "line",
-      source: "elevationLine",
+      source: "crossSectionLine",
       paint: {
-        "line-dasharray": [4, 2],
         "line-width": {
           stops: [
-            [0, 3],
-            [12, 5],
+            [0, 1],
+            [12, 3],
           ],
         },
-        "line-color": "#ffffff",
+        "line-color": ruleColor,
         "line-opacity": 1,
       },
     },
     {
-      id: "elevationPoint",
+      id: "crossSectionEndpoint",
       type: "circle",
-      source: "elevationPoints",
-      paint: {
-        "circle-radius": 6,
-        "circle-color": "#ffffff",
-        "circle-stroke-width": 1,
-        "circle-stroke-color": "#333333",
-      },
+      source: "crossSectionEndpoints",
+      paint: crossSectionPointPaint,
     },
     {
       id: "elevationMarker",
       type: "circle",
       source: "elevationMarker",
       paint: {
-        "circle-radius": 8,
+        ...crossSectionPointPaint,
         "circle-color": "#4bc0c0",
-        "circle-stroke-width": 2,
-        "circle-stroke-color": "#dcdcdc",
       },
     },
     // {

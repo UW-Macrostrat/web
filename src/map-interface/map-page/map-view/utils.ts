@@ -1,15 +1,10 @@
-import { forwardRef, useRef, useState, useCallback } from "react";
-import {
-  useAppState,
-  MapLayer,
-  PositionFocusState,
-} from "~/map-interface/app-state";
+import { useRef } from "react";
+import { useAppState, MapLayer } from "~/map-interface/app-state";
 import { GeolocateControl } from "mapbox-gl";
 import hyper from "@macrostrat/hyper";
 import { useEffect } from "react";
 import styles from "../main.module.styl";
 import {
-  useMapRef,
   CompassControl,
   GlobeControl,
   ThreeDControl,
@@ -60,14 +55,20 @@ function GeolocationControl(props) {
   });
 }
 
-export function useElevationMarkerLocation(mapRef, elevationMarkerLocation) {
+export function useCrossSectionCursorLocation(
+  mapRef,
+  crossSectionCursorLocation
+) {
   // Handle elevation marker location
   useEffect(() => {
     const map = mapRef.current;
     if (map == null) return;
-    if (elevationMarkerLocation == null) return;
     const src = map.getSource("elevationMarker");
     if (src == null) return;
+    if (crossSectionCursorLocation == null) {
+      src.setData(null);
+      return;
+    }
     src.setData({
       type: "FeatureCollection",
       features: [
@@ -76,12 +77,12 @@ export function useElevationMarkerLocation(mapRef, elevationMarkerLocation) {
           properties: {},
           geometry: {
             type: "Point",
-            coordinates: elevationMarkerLocation,
+            coordinates: crossSectionCursorLocation,
           },
         },
       ],
     });
-  }, [mapRef, elevationMarkerLocation]);
+  }, [mapRef, crossSectionCursorLocation]);
 }
 
 export function getMapPadding(ref, parentRef) {
@@ -138,106 +139,4 @@ export function useMapMarker(mapRef, markerRef, markerPosition) {
     markerRef.current = marker;
     return () => marker.remove();
   }, [mapRef.current, markerPosition]);
-}
-
-export function useMapEaseToCenter(padding) {
-  const mapRef = useMapRef();
-  const infoMarkerPosition = useAppState(
-    (state) => state.core.infoMarkerPosition
-  );
-
-  const prevInfoMarkerPosition = useRef<any>(null);
-  const prevPadding = useRef<any>(null);
-  // Handle map position easing (for both map padding and markers)
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null) return;
-    let opts = null;
-    if (infoMarkerPosition != prevInfoMarkerPosition.current) {
-      opts ??= {};
-      opts.center = infoMarkerPosition;
-    }
-    if (padding != prevPadding.current) {
-      opts ??= {};
-      opts.padding = padding;
-    }
-    if (opts == null) return;
-    opts.duration = 800;
-    map.flyTo(opts);
-    map.once("moveend", () => {
-      /* Waiting until moveend to update the refs allows us to
-      batch overlapping movements together, which increases UI
-      smoothness when, e.g., flying to new panels */
-      prevInfoMarkerPosition.current = infoMarkerPosition;
-      prevPadding.current = padding;
-    });
-  }, [infoMarkerPosition, padding]);
-}
-
-function greatCircleDistance(
-  l1: mapboxgl.LngLatLike,
-  l2: mapboxgl.LngLatLike
-): number {
-  // get distance in radians between l1 and l2
-  const dLon = ((l2[0] - l1[0]) * Math.PI) / 180;
-
-  // Spherical law of cosines (accurate at large distances)
-  const lat1 = (l1[1] * Math.PI) / 180;
-  const lat2 = (l2[1] * Math.PI) / 180;
-  return Math.acos(
-    Math.sin(lat1) * Math.sin(lat2) +
-      Math.cos(lat1) * Math.cos(lat2) * Math.cos(dLon)
-  );
-}
-
-export function getFocusState(
-  map: mapboxgl.Map,
-  location: mapboxgl.LngLatLike | null
-): PositionFocusState | null {
-  /** Determine whether the infomarker is positioned in the viewport */
-  if (location == null) return null;
-
-  const mapCenter = map.getCenter();
-
-  const dist = greatCircleDistance(location, mapCenter);
-  if (dist > Math.PI / 4) {
-    return PositionFocusState.OFF_CENTER;
-  } else if (dist > Math.PI / 2) {
-    return PositionFocusState.OUT_OF_VIEW;
-  }
-
-  const markerPos = map.project(location);
-  const mapPos = map.project(mapCenter);
-  const dx = Math.abs(markerPos.x - mapPos.x);
-  const dy = Math.abs(markerPos.y - mapPos.y);
-  const padding = map.getPadding();
-  let { width, height } = map.getCanvas();
-  width /= 2;
-  height /= 2;
-
-  if (dx < 10 && dy < 10) {
-    return PositionFocusState.CENTERED;
-  }
-  if (dx < 150 && dy < 150) {
-    return PositionFocusState.NEAR_CENTER;
-  }
-
-  if (
-    markerPos.x > padding.left &&
-    markerPos.x < width - padding.right &&
-    markerPos.y > padding.top &&
-    markerPos.y < height - padding.bottom
-  ) {
-    return PositionFocusState.OFF_CENTER;
-  }
-
-  if (
-    markerPos.x > 0 &&
-    markerPos.x < width &&
-    markerPos.y > 0 &&
-    markerPos.y < height
-  ) {
-    return PositionFocusState.OUT_OF_PADDING;
-  }
-  return PositionFocusState.OUT_OF_VIEW;
 }

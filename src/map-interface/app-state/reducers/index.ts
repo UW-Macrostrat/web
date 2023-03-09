@@ -106,6 +106,34 @@ export function setInfoMarkerPosition(state: AppState): AppState {
       },
     };
   }
+
+  // Check if we're viewing a cross-section
+  const crossSection = matchPath(
+    "/cross-section/:loc1/:loc2",
+    state.router.location.pathname
+  );
+  if (crossSection != null) {
+    const { loc1, loc2 } = crossSection.params;
+    const [lng1, lat1] = loc1.split(",").map(Number);
+    const [lng2, lat2] = loc2.split(",").map(Number);
+    if (lng1 != null && lat1 != null && lng2 != null && lat2 != null) {
+      return {
+        ...state,
+        core: {
+          ...state.core,
+          crossSectionLine: {
+            type: "LineString",
+            coordinates: [
+              [lng1, lat1],
+              [lng2, lat2],
+            ],
+          },
+          crossSectionOpen: true,
+        },
+      };
+    }
+  }
+
   return state;
 }
 

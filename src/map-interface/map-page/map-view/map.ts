@@ -22,6 +22,7 @@ interface MapProps {
   mapIsLoading: boolean;
   onQueryMap: (event: any, columns: ColumnProperties[]) => void;
   plateModelId: number;
+  runAction: (action: any) => void;
 }
 
 const blankMapStyle = {
@@ -33,10 +34,11 @@ const blankMapStyle = {
 class VestigialMap extends Component<MapProps, {}> {
   map: mapboxgl.Map;
   marker: mapboxgl.Marker | null = null;
+  crossSectionEndpoints: [number, number][] = [];
   constructor(props) {
     super(props);
     this.mapLoaded = false;
-    this.elevationPoints = [];
+    this.crossSectionEndpoints = [];
 
     this.maxValue = 500;
     this.previousZoom = 0;
@@ -154,42 +156,26 @@ class VestigialMap extends Component<MapProps, {}> {
 
     this.map.on("click", (event) => {
       // If the elevation drawer is open and we are awaiting to points, add them
+      let crossSectionLine = this.props.crossSectionLine;
+      let crossSectionCoords = crossSectionLine?.coordinates ?? [];
       if (
-        this.props.elevationChartOpen &&
-        this.props.elevationData &&
-        this.props.elevationData.length === 0
+        (crossSectionLine != null && crossSectionCoords.length < 2) ||
+        event.originalEvent.shiftKey
       ) {
-        this.elevationPoints.push([event.lngLat.lng, event.lngLat.lat]);
-        this.map.getSource("elevationPoints").setData({
-          type: "FeatureCollection",
-          features: this.elevationPoints.map((p) => {
-            return {
-              type: "Feature",
-              geometry: {
-                type: "Point",
-                coordinates: p,
-              },
-            };
-          }),
-        });
-        if (this.elevationPoints.length === 2) {
-          this.props.runAction({
-            type: "get-elevation",
-            line: this.elevationPoints,
-          });
-          this.map.getSource("elevationLine").setData({
-            type: "FeatureCollection",
-            features: [
-              {
-                type: "Feature",
-                geometry: {
-                  type: "LineString",
-                  coordinates: this.elevationPoints,
-                },
-              },
-            ],
-          });
+        crossSectionLine ??= { type: "LineString", coordinates: [] };
+
+        if (crossSectionCoords.length === 2) {
+          // Restart cross sections
+          crossSectionCoords = [];
         }
+        crossSectionCoords.push([event.lngLat.lng, event.lngLat.lat]);
+        this.props.runAction({
+          type: "update-cross-section",
+          line: {
+            type: "LineString",
+            coordinates: crossSectionCoords,
+          },
+        });
         return;
       }
 
@@ -305,16 +291,16 @@ class VestigialMap extends Component<MapProps, {}> {
 
     // Watch the state of the application and adjust the map accordingly
     if (
-      !nextProps.elevationChartOpen &&
-      this.props.elevationChartOpen &&
+      !nextProps.crossSectionOpen &&
+      this.props.crossSectionOpen &&
       this.map
     ) {
-      this.elevationPoints = [];
-      this.map.getSource("elevationPoints").setData({
+      this.crossSectionEndpoints = [];
+      this.map.getSource("crossSectionEndpoints").setData({
         type: "FeatureCollection",
         features: [],
       });
-      this.map.getSource("elevationLine").setData({
+      this.map.getSource("crossSectionLine").setData({
         type: "FeatureCollection",
         features: [],
       });
