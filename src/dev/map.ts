@@ -10,6 +10,7 @@ import {
   removeMapLabels,
   setMapPosition,
 } from "@macrostrat/mapbox-utils";
+import { useStoredState } from "@macrostrat/ui-components";
 import { JSONView, useDarkMode } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
 import { useCallback, useEffect, useState, useMemo } from "react";
@@ -71,6 +72,29 @@ function useMapStyle(
 
 const _macrostratStyle = buildMacrostratStyle() as mapboxgl.Style;
 
+function isStateValid(state) {
+  if (state == null) {
+    return false;
+  }
+  if (typeof state != "object") {
+    return false;
+  }
+  // Must have several specific boolean keys
+  for (let k of ["showLineSymbols", "xRay", "showTileExtent", "bypassCache"]) {
+    if (typeof state[k] != "boolean") {
+      return false;
+    }
+  }
+  return true;
+}
+
+const defaultState = {
+  showLineSymbols: false,
+  xRay: false,
+  showTileExtent: false,
+  bypassCache: true,
+};
+
 export function VectorMapInspectorPage({
   tileset = MacrostratVectorTileset.CartoSlim,
   overlayStyle = _macrostratStyle,
@@ -99,15 +123,36 @@ export function VectorMapInspectorPage({
   }, []);
 
   const [isOpen, setOpen] = useState(false);
-  const [showLineSymbols, setShowLineSymbols] = useState(false);
-  const [xRay, setXRay] = useState(false);
-  const [showTileExtent, setShowTileExtent] = useState(false);
+
+  const [state, setState] = useStoredState(
+    "macrostrat:vector-map-inspector",
+    defaultState,
+    isStateValid
+  );
+  const { showLineSymbols, xRay, showTileExtent, bypassCache } = state;
 
   const [inspectPosition, setInspectPosition] =
     useState<mapboxgl.LngLat | null>(null);
 
   const [data, setData] = useState(null);
   const isLoading = useAppState((state) => state.core.mapIsLoading);
+
+  const transformRequest = useCallback(
+    (url, resourceType) => {
+      // remove cache
+      if (
+        bypassCache &&
+        resourceType === "Tile" &&
+        url.startsWith(SETTINGS.burwellTileDomain)
+      ) {
+        return {
+          url: url + "?cache=bypass",
+        };
+      }
+      return { url };
+    },
+    [bypassCache]
+  );
 
   const onSelectPosition = useCallback((position: mapboxgl.LngLat) => {
     setInspectPosition(position);
@@ -127,7 +172,9 @@ export function VectorMapInspectorPage({
         h(TileInfo, {
           feature: data?.[0] ?? null,
           showExtent: showTileExtent,
-          setShowExtent: setShowTileExtent,
+          setShowExtent() {
+            setState({ ...state, showTileExtent: !showTileExtent });
+          },
         }),
         h(FeaturePanel, { features: data }),
       ]
@@ -174,21 +221,28 @@ export function VectorMapInspectorPage({
           checked: xRay,
           label: "X-ray mode",
           onChange() {
-            setXRay(!xRay);
+            setState({ ...state, xRay: !xRay });
           },
         }),
         h(Switch, {
           checked: showLineSymbols,
           label: "Show line symbols",
           onChange() {
-            setShowLineSymbols(!showLineSymbols);
+            setState({ ...state, showLineSymbols: !showLineSymbols });
+          },
+        }),
+        h(Switch, {
+          checked: bypassCache,
+          label: "Bypass cache",
+          onChange() {
+            setState({ ...state, bypassCache: !bypassCache });
           },
         }),
       ]),
       detailPanel: detailElement,
       contextPanelOpen: isOpen,
     },
-    h(DevMapView, { style }, [
+    h(DevMapView, { style, transformRequest }, [
       h(FeatureSelectionHandler, {
         selectedLocation: inspectPosition,
         setFeatures: setData,
@@ -391,10 +445,11 @@ function initializeMap(args = {}) {
 interface DevMapViewProps {
   style: mapboxgl.Style;
   children: React.ReactNode;
+  transformRequest?: mapboxgl.TransformRequestFunction;
 }
 
 export function DevMapView(props: DevMapViewProps): React.ReactElement {
-  const { style, children } = props;
+  const { style, transformRequest, children } = props;
   const { mapPosition } = useAppState((state) => state.core);
 
   let mapRef = useMapRef();
@@ -404,15 +459,14 @@ export function DevMapView(props: DevMapViewProps): React.ReactElement {
   /* HACK: Right now we need this to force a render when the map
     is done loading
     */
-  const [mapInitialized, setMapInitialized] = useState(false);
+  const [mapInitialized, setMapInitialized] = useState(0);
 
   // Map initialization
   useEffect(() => {
-    if (mapRef.current != null) return;
     if (style == null) return;
-    mapRef.current = initializeMap({ style });
-    setMapInitialized(true);
-  }, [style]);
+    mapRef.current = initializeMap({ style, transformRequest });
+    setMapInitialized(mapInitialized + 1);
+  }, [style, transformRequest]);
 
   // Map style updating
   useEffect(() => {
