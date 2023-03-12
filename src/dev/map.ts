@@ -10,6 +10,7 @@ import {
   removeMapLabels,
   setMapPosition,
 } from "@macrostrat/mapbox-utils";
+import { useMapActions } from "@macrostrat/mapbox-react";
 import { useStoredState } from "@macrostrat/ui-components";
 import { JSONView, useDarkMode } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
@@ -59,7 +60,7 @@ export function ParentRouteButton({ children, icon = "arrow-left", ...rest }) {
   return h(LinkButton, { to: "..", icon, minimal: true, ...rest });
 }
 
-function useMapStyle(
+export function useMapStyle(
   baseMapURL: string,
   overlayStyle: mapboxgl.Style
 ): mapboxgl.Style | null {
@@ -409,7 +410,7 @@ interface DevMapStyleOptions {
   tileset?: MacrostratVectorTileset;
 }
 
-async function buildMapStyle(
+export async function buildMapStyle(
   baseMapURL: string,
   overlayStyle: mapboxgl.Style
   //postProcess: (style: mapboxgl.Style) => mapboxgl.Style = (s) => s
@@ -459,13 +460,13 @@ export function DevMapView(props: DevMapViewProps): React.ReactElement {
   /* HACK: Right now we need this to force a render when the map
     is done loading
     */
-  const [mapInitialized, setMapInitialized] = useState(0);
+
+  const actions = useMapActions();
 
   // Map initialization
   useEffect(() => {
     if (style == null) return;
-    mapRef.current = initializeMap({ style, transformRequest });
-    setMapInitialized(mapInitialized + 1);
+    actions.setMap(initializeMap({ style, transformRequest }));
   }, [style, transformRequest]);
 
   // Map style updating
@@ -478,14 +479,14 @@ export function DevMapView(props: DevMapViewProps): React.ReactElement {
     const map = mapRef.current;
     if (map == null) return;
     setMapPosition(map, mapPosition);
-  }, [mapRef.current, mapInitialized]);
+  }, [mapRef.current]);
 
   // This seems to do a bit of a poor job at the moment. Maybe because fo caching?
 
   return h(CoreMapView, null, [children]);
 }
 
-function LineSymbolManager({ showLineSymbols }) {
+export function LineSymbolManager({ showLineSymbols }) {
   const mapRef = useMapRef();
   useMapConditionalStyle(mapRef, showLineSymbols, toggleLineSymbols);
   return null;
