@@ -80,6 +80,10 @@ export default function DevIndex() {
         element: loadableElement(() => import("./column-inspector")),
       }),
       h(Route, { path: "catalog/*", element: h(MapLayerCatalog) }),
+      h(Route, {
+        path: "strabospot",
+        element: loadableElement(() => import("./strabospot-integration")),
+      }),
       h(Route, { path: "*", element: h(MapInspectorIndex) }),
     ]),
   ]);
@@ -111,7 +115,11 @@ function MapInspectorIndex() {
     ]),
     h("h1", "Stratigraphic column inspector"),
     h(Link, { to: "column-inspector" }, "Stratigraphy"),
-    h("h1", "Color scheme testing"),
+    h("h1", "Visualizations"),
+    h(LinkItem, { to: "igcp-orogens" }, "IGCP orogens"),
+    h("h2", "Color scheme testing"),
     h(Link, { to: "color-schemes" }, "Color schemes"),
+    h("h1", "Integrations"),
+    h(Link, { to: "strabospot" }, "StraboSpot"),
   ]);
 }
