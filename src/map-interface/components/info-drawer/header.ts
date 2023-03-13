@@ -72,22 +72,46 @@ function CopyLinkButton() {
 
 interface InfoDrawerHeaderProps {
   onClose: () => void;
+  title?: string;
+  children?: React.ReactNode;
+  rightElement?: React.ReactNode;
+  className?: string;
+}
+
+interface LocationHeaderProps {
   position: mapboxgl.LngLat;
   zoom?: number;
   elevation?: number;
+  onClose: () => void;
 }
 
 export function InfoDrawerHeader(props: InfoDrawerHeaderProps) {
-  const { onClose, position, zoom = 7, elevation } = props;
+  const { onClose, className, rightElement = null, children } = props;
 
-  return h("header.location-panel-header", [
+  return h("header.infodrawer-header", { className }, [
     //h("div.left-icon", [h(Icon, { icon: "map-marker" })]),
-    h(PositionButton),
+    children,
     h("div.spacer"),
-    h(LngLatCoords, { position, zoom }),
-    h.if(elevation != null)(Elevation, { elevation }),
+    rightElement,
     h(Button, { minimal: true, icon: "cross", onClick: onClose }),
   ]);
+}
+
+export function LocationHeader(props: LocationHeaderProps) {
+  const { onClose, position, zoom = 7, elevation } = props;
+
+  return h(
+    InfoDrawerHeader,
+    {
+      className: "location-panel-header",
+      onClose,
+      rightElement: h([
+        h(LngLatCoords, { position, zoom }),
+        h.if(elevation != null)(Elevation, { elevation }),
+      ]),
+    },
+    h(PositionButton)
+  );
 }
 
 function ValueWithUnit(props) {

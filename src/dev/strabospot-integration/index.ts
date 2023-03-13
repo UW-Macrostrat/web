@@ -1,13 +1,15 @@
 import { hyperStyled } from "@macrostrat/hyper";
 import * as styles from "./main.module.styl";
 import { Spinner } from "@blueprintjs/core";
-import { LinkButton } from "~/map-interface/components/buttons";
-import { useDarkMode, useAPIResult } from "@macrostrat/ui-components";
+import { useDarkMode, useAPIResult, JSONView } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useAppActions } from "~/map-interface/app-state";
-import { LocationPanel } from "~/map-interface/components/info-drawer";
+import {
+  BaseInfoDrawer,
+  LocationPanel,
+} from "~/map-interface/components/info-drawer";
 import { FloatingNavbar } from "~/map-interface/components/navbar";
 import { MapAreaContainer } from "~/map-interface/map-page";
 import { PanelCard } from "~/map-interface/map-page/menu";
@@ -17,15 +19,25 @@ import {
   MapStyledContainer,
 } from "~/map-interface/map-page/map-view/utils";
 import { buildMacrostratStyle } from "~/map-interface/map-page/map-style";
-import { FeaturePanel } from "../vector-tile-features";
 import { mergeStyles } from "@macrostrat/mapbox-utils";
 import { useMap } from "@macrostrat/mapbox-react";
-
+import {
+  setupPointSymbols,
+  getOrientationSymbolName,
+  pointLayoutProperties,
+} from "@macrostrat/mapbox-styles";
 import { DevMapView, useMapStyle, ParentRouteButton } from "../map";
 
 const h = hyperStyled(styles);
 
+const featureLayers = [];
+
 const _macrostratStyle = buildMacrostratStyle() as mapboxgl.Style;
+
+const pointLayout = pointLayoutProperties(true);
+
+console.log(pointLayout);
+
 const straboOverlays = {
   version: 8,
   sources: {
@@ -33,7 +45,7 @@ const straboOverlays = {
       type: "geojson",
       data: "https://www.strabospot.org/search/newsearchdatasets.json",
     },
-    "dataset-features": {
+    spots: {
       type: "geojson",
       data: null,
     },
@@ -46,26 +58,88 @@ const straboOverlays = {
       paint: {
         "circle-radius": 5,
         "circle-color": "magenta",
-        "circle-opacity": 0.5,
+        "circle-opacity": 0.3,
         "circle-stroke-width": 1,
         "circle-stroke-color": "magenta",
+        // Scale datasets by spot count
+        // @ts-ignore
+        "circle-radius": [
+          "interpolate",
+          ["exponential", 1.5],
+          ["get", "count"],
+          0,
+          5,
+          10,
+          10,
+          100,
+          15,
+          1000,
+          20,
+          10000,
+          25,
+        ],
       },
     },
     {
-      id: "strabo-dataset-features",
+      id: "strabo-spots",
       type: "circle",
-      source: "dataset-features",
+      source: "spots",
       paint: {
-        "circle-radius": 5,
-        "circle-color": "green",
-        "circle-opacity": 0.5,
+        "circle-radius": 3,
+        "circle-color": "magenta",
+        "circle-opacity": 0.3,
         "circle-stroke-width": 1,
-        "circle-stroke-color": "green",
+        "circle-stroke-color": "magenta",
       },
+      filter: [
+        "all",
+        ["==", ["geometry-type"], "Point"],
+        ["==", ["get", "orientation"], null],
+      ],
     },
+    {
+      id: "strabo-orientations",
+      type: "symbol",
+      source: "spots",
+      // layout: {
+      //   "icon-image": "point",
+      // },
+      layout: pointLayout,
+      filter: [
+        "all",
+        ["==", ["geometry-type"], "Point"],
+        ["!=", ["get", "orientation"], null],
+      ],
+    },
+    {
+      id: "strabo-spots-line",
+      type: "line",
+      source: "spots",
+      paint: {
+        "line-color": "magenta",
+        "line-width": 1,
+        "line-opacity": 0.8,
+      },
+      filter: ["==", ["geometry-type"], "LineString"],
+    },
+    {
+      id: "strabo-spots-polygon",
+      type: "fill",
+      source: "spots",
+      paint: {
+        "fill-color": "magenta",
+        "fill-opacity": 0.3,
+      },
+      filter: ["==", ["geometry-type"], "Polygon"],
+    },
+    ...featureLayers,
   ],
 };
 const overlays = mergeStyles(_macrostratStyle, straboOverlays);
+
+async function onMapSetup(map: mapboxgl.Map) {
+  return setupPointSymbols(map);
+}
 
 // All datasets for searching:
 // https://www.strabospot.org/search/newsearchdatasets.json
@@ -95,22 +169,27 @@ export default function StraboSpotIntegrationPage({
 
   const isOpen = true;
 
-  const [inspectPosition, setInspectPosition] =
-    useState<mapboxgl.LngLat | null>(null);
-
-  const [data, setData] = useState(null);
+  const [selectedDataset, setSelectedDataset] = useState(null);
+  const [selectedSpots, setSelectedSpots] = useState(null);
 
   let detailElement = null;
-  if (inspectPosition != null) {
+  if (selectedSpots != null) {
+    const jsonData = selectedSpots.map((d) => d.properties);
     detailElement = h(
-      LocationPanel,
+      BaseInfoDrawer,
       {
         onClose() {
-          setInspectPosition(null);
+          setSelectedSpots(null);
         },
-        position: inspectPosition,
+        title: "Spots",
       },
-      [h(FeaturePanel, { features: data })]
+      [
+        h(JSONView, {
+          data: jsonData,
+          shouldExpandNode: (keyName, data, level) => level < 2,
+          hideRoot: true,
+        }),
+      ]
     );
   }
 
@@ -127,8 +206,6 @@ export default function StraboSpotIntegrationPage({
 
   const style = useMapStyle(baseMapURL, overlays);
 
-  const [selectedDataset, setSelectedDataset] = useState(null);
-
   if (!loaded) return h(Spinner);
 
   return h(
@@ -141,21 +218,61 @@ export default function StraboSpotIntegrationPage({
         h.if(selectedDataset == null)("h3", "No dataset selected"),
         h.if(selectedDataset != null)([
           h("h3", selectedDataset?.properties.id ?? ""),
-          h("h4", [selectedDataset?.properties.spotcount ?? "?", " spots"]),
+          h("h4", [selectedDataset?.properties.count ?? "?", " spots"]),
         ]),
       ]),
       detailPanel: detailElement,
       contextPanelOpen: isOpen,
     },
-    h(DevMapView, { style }, [
-      h(DatasetClickReporter, {
+    h(DevMapView, { style, onMapSetup }, [
+      h(HideSelectedDataset, { selectedDataset }),
+      h(LayerClickReporter, {
         loaded,
-        selectedDataset,
-        setSelectedDataset,
+        layerID: "strabo-datasets",
+        onSelectItems: (features) => setSelectedDataset(features[0]),
+      }),
+      h(LayerClickReporter, {
+        loaded,
+        layerID: [
+          "strabo-spots",
+          "strabo-spots-line",
+          "strabo-spots-polygon",
+          "strabo-orientations",
+        ],
+        onSelectItems: (features) => setSelectedSpots(features),
       }),
       h.if(selectedDataset != null)(DatasetFeatures, { selectedDataset }),
     ])
   );
+}
+
+function processSpots(spots) {
+  const features = spots?.features?.map((spot, i) => {
+    const { geometry, properties } = spot;
+    let orientationData = properties?.orientation_data;
+    // deserieslize orientation data if it is a string
+    if (typeof orientationData === "string") {
+      orientationData = JSON.parse(orientationData);
+    }
+
+    const orientation = orientationData?.[0] ?? null;
+    return {
+      type: "Feature",
+      geometry,
+      properties: {
+        ...properties,
+        orientation,
+        symbolName: getOrientationSymbolName(orientation),
+      },
+    };
+  });
+
+  console.log(features);
+
+  return {
+    type: "FeatureCollection",
+    features,
+  };
 }
 
 function DatasetFeatures({ selectedDataset }) {
@@ -166,25 +283,15 @@ function DatasetFeatures({ selectedDataset }) {
   const map = useMap();
   useEffect(() => {
     if (data == null) return;
-    console.log(data);
-    map?.getSource("dataset-features")?.setData(data);
-    () => map?.getSource("dataset-features")?.setData(null);
+    map?.getSource("spots")?.setData(processSpots(data));
+    () => map?.getSource("spots")?.setData(null);
   }, [data, map]);
 
   return null;
 }
 
-function DatasetClickReporter({ selectedDataset, setSelectedDataset }) {
+function HideSelectedDataset({ selectedDataset }) {
   const map = useMap();
-  useEffect(() => {
-    map?.on("click", "strabo-datasets", (e) => {
-      console.log(e.features);
-      const { features } = e;
-      setSelectedDataset(features[0]);
-    });
-  }, [map]);
-
-  // Don't show selected dataset on map
   useEffect(() => {
     if (selectedDataset == null) return;
     const { id } = selectedDataset.properties;
@@ -195,6 +302,21 @@ function DatasetClickReporter({ selectedDataset, setSelectedDataset }) {
     };
   }, [map, selectedDataset]);
 
+  return null;
+}
+
+function LayerClickReporter({ onSelectItems, layerID }) {
+  const map = useMap();
+  useEffect(() => {
+    //map?.on("styleimagemissing", console.log);
+    map?.on("click", layerID, (e) => {
+      const { features } = e;
+      onSelectItems(features);
+    });
+    return () => {
+      map?.off("click", layerID);
+    };
+  }, [map, layerID]);
   return null;
 }
 

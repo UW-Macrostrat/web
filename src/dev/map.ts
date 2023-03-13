@@ -447,10 +447,11 @@ interface DevMapViewProps {
   style: mapboxgl.Style;
   children: React.ReactNode;
   transformRequest?: mapboxgl.TransformRequestFunction;
+  onMapSetup?: (map: mapboxgl.Map) => Promise<void>;
 }
 
 export function DevMapView(props: DevMapViewProps): React.ReactElement {
-  const { style, transformRequest, children } = props;
+  const { style, transformRequest, onMapSetup, children } = props;
   const { mapPosition } = useAppState((state) => state.core);
 
   let mapRef = useMapRef();
@@ -466,8 +467,10 @@ export function DevMapView(props: DevMapViewProps): React.ReactElement {
   // Map initialization
   useEffect(() => {
     if (style == null) return;
-    actions.setMap(initializeMap({ style, transformRequest }));
-  }, [style, transformRequest]);
+    const map = initializeMap({ transformRequest, style });
+    const cb = onMapSetup ?? (() => Promise.resolve());
+    cb(map).then(() => actions.setMap(map));
+  }, [style, transformRequest, onMapSetup]);
 
   // Map style updating
   useEffect(() => {

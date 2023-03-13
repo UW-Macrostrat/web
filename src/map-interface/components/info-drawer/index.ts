@@ -2,7 +2,7 @@ import { Card } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import { Navigate, Route, Routes, useParams } from "react-router-dom";
 import { MapLayer, useAppActions } from "~/map-interface/app-state";
-import { InfoDrawerHeader } from "./header";
+import { LocationHeader, InfoDrawerHeader } from "./header";
 import { FossilCollections } from "./fossil-collections";
 import { GeologicMapInfo } from "./geo-map";
 import { MacrostratLinkedData } from "./macrostrat-linked";
@@ -21,17 +21,28 @@ const h = hyper.styled(styles);
 
 function InfoDrawerContainer(props) {
   const className = classNames("infodrawer", props.className);
-
   return h(Card, { ...props, className });
+}
+
+export function BaseInfoDrawer(props) {
+  const { className, headerElement = null, title, onClose, children } = props;
+  const header =
+    headerElement ??
+    h(InfoDrawerHeader, { onClose }, [title == null ? null : h("h3", [title])]);
+  return h(InfoDrawerContainer, { className }, [
+    header,
+    h("div.infodrawer-body", [h(ErrorBoundary, null, children)]),
+  ]);
 }
 
 export function LocationPanel(props) {
   const { children, className, ...rest } = props;
   const cls = classNames("location-panel", className);
-  return h(InfoDrawerContainer, { className: cls }, [
-    h(InfoDrawerHeader, rest),
-    h("div.infodrawer-body", [h(ErrorBoundary, null, children)]),
-  ]);
+  return h(
+    BaseInfoDrawer,
+    { className: cls, headerElement: h(LocationHeader, rest) },
+    children
+  );
 }
 
 function InfoDrawer(props) {
