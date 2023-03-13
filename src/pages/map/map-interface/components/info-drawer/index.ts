@@ -2,6 +2,7 @@ import hyper from "@macrostrat/hyper";
 import { Route, Routes } from "react-router-dom";
 import { MapLayer, useAppActions } from "~/pages/map/map-interface/app-state";
 import { LocationPanel } from "@macrostrat/map-interface";
+import { LocationHeader, InfoDrawerHeader } from "./header";
 import { FossilCollections } from "./fossil-collections";
 import { GeologicMapInfo } from "./geo-map";
 import { MacrostratLinkedData } from "./macrostrat-linked";
@@ -15,6 +16,32 @@ import { StratColumn } from "./strat-column";
 import { useCallback } from "react";
 
 const h = hyper.styled(styles);
+
+function InfoDrawerContainer(props) {
+  const className = classNames("infodrawer", props.className);
+  return h(Card, { ...props, className });
+}
+
+export function BaseInfoDrawer(props) {
+  const { className, headerElement = null, title, onClose, children } = props;
+  const header =
+    headerElement ??
+    h(InfoDrawerHeader, { onClose }, [title == null ? null : h("h3", [title])]);
+  return h(InfoDrawerContainer, { className }, [
+    header,
+    h("div.infodrawer-body", [h(ErrorBoundary, null, children)]),
+  ]);
+}
+
+export function LocationPanel(props) {
+  const { children, className, ...rest } = props;
+  const cls = classNames("location-panel", className);
+  return h(
+    BaseInfoDrawer,
+    { className: cls, headerElement: h(LocationHeader, rest) },
+    children
+  );
+}
 
 function InfoDrawer(props) {
   // We used to enable panels when certain layers were on,
