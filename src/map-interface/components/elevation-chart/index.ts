@@ -249,7 +249,7 @@ function ElevationChart({ elevationData = [], units, exposure, contacts }) {
           },
           ...createGradientStops(units, exposure, x, width)
         ),
-        //h("g.contacts", buildContacts(contacts, x, y, width)),
+        h("g.contacts", buildContacts(contacts, x, y, width)),
       ]),
     ]
   );
@@ -293,7 +293,7 @@ function buildContacts(contacts, x, y, width) {
 
 function createGradientStops(units, exposure, x, width) {
   let stops = [];
-  const dx = 0.005;
+  const dx = 0.0;
   for (let i = 0; i < exposure.length; i++) {
     let startLen = Math.max(x(exposure[i].d) / width + dx, 0);
     let endLen = Math.min(x(exposure[i + 1]?.d) / width - dx, 1);
