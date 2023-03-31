@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from "react";
 import { useAppState } from "../map-interface/app-state";
 import { group } from "d3-array";
 import { ExpansionPanel } from "~/map-interface/components/expansion-panel";
-import { h, FeatureRecord } from "./map";
+import { h, FeatureRecord } from "./map-layers";
 
 function usePrevious(value) {
   const ref = useRef();

@@ -5,7 +5,7 @@ import {
   MacrostratVectorTileset,
   MacrostratRasterTileset,
   RasterMapInspectorPage,
-} from "./map";
+} from "./map-layers";
 import { loadableElement } from "~/_utils";
 import styles from "./main.module.styl";
 import { MapColorsInspector } from "./color-schemes";
@@ -64,13 +64,15 @@ export default function DevIndex() {
 function MapInspectorIndex() {
   return h("div.page.map-inspector-index", [
     h("h1", "Map layer inspectors"),
+    h("h2", "Core layers"),
     h("ul.layers", [
       h(LinkItem, { to: "carto" }, "Carto"),
       h(LinkItem, { to: "carto-slim" }, "Carto (slim)"),
-      h(LinkItem, { to: "igcp-orogens" }, "IGCP orogens"),
       h(LinkItem, { to: "carto-raster" }, "Carto (image)"),
       h(LinkItem, { to: "emphasized" }, "Carto (image, emphasized)"),
     ]),
+    h("h2", "Additional layers"),
+    h("ul.layers", [h(LinkItem, { to: "igcp-orogens" }, "IGCP orogens")]),
     h("h1", "Stratigraphic column inspector"),
     h(Link, { to: "column-inspector" }, "Stratigraphy"),
     h("h1", "Color scheme testing"),

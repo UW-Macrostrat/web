@@ -1,8 +1,7 @@
 // Import other components
-import { FormGroup, Label, Slider, Spinner, Switch } from "@blueprintjs/core";
+import { Spinner, Switch } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import { useMapConditionalStyle, useMapRef } from "@macrostrat/mapbox-react";
-import { LinkButton } from "~/map-interface/components/buttons";
 
 import {
   getMapboxStyle,
@@ -16,30 +15,31 @@ import mapboxgl from "mapbox-gl";
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { SETTINGS } from "~/map-interface/settings";
-import { LoaderButton } from "../map-interface/components/navbar";
-import { useAppActions, useAppState } from "../map-interface/app-state";
-import { LocationPanel } from "../map-interface/components/info-drawer";
-import { FloatingNavbar } from "../map-interface/components/navbar";
-import { MapAreaContainer } from "../map-interface/map-page";
-import { PanelCard } from "../map-interface/map-page/menu";
+import { LoaderButton } from "../../map-interface/components/navbar";
+import { useAppActions, useAppState } from "../../map-interface/app-state";
+import { LocationPanel } from "../../map-interface/components/info-drawer";
+import { FloatingNavbar } from "../../map-interface/components/navbar";
+import { MapAreaContainer } from "../../map-interface/map-page";
+import { PanelCard } from "../../map-interface/map-page/menu";
 import {
   getBaseMapStyle,
   MapBottomControls,
   MapStyledContainer,
-} from "../map-interface/map-page/map-view/utils";
+} from "../../map-interface/map-page/map-view/utils";
 import {
   buildXRayStyle,
   toggleLineSymbols,
   buildMacrostratStyle,
-} from "../map-interface/map-page/map-style";
+} from "../../map-interface/map-page/map-style";
 import { CoreMapView, MapMarker } from "~/map-interface/map-page/map-view";
 import {
   FeaturePanel,
   FeatureSelectionHandler,
   TileInfo,
-} from "./vector-tile-features";
-import { TileExtentLayer } from "./tile-extent";
-import styles from "./main.module.styl";
+} from "../vector-tile-features";
+import { TileExtentLayer } from "../tile-extent";
+import styles from "../main.module.styl";
+import { useMapStyle, ParentRouteButton } from "./utils";
 
 export enum MacrostratVectorTileset {
   Carto = "carto",
@@ -53,22 +53,6 @@ export enum MacrostratRasterTileset {
 }
 
 export const h = hyper.styled(styles);
-
-export function ParentRouteButton({ children, icon = "arrow-left", ...rest }) {
-  // A button that links to the parent route
-  return h(LinkButton, { to: "..", icon, minimal: true, ...rest });
-}
-
-function useMapStyle(
-  baseMapURL: string,
-  overlayStyle: mapboxgl.Style
-): mapboxgl.Style | null {
-  const [style, setStyle] = useState(null);
-  useEffect(() => {
-    buildMapStyle(baseMapURL, overlayStyle).then(setStyle);
-  }, [baseMapURL, overlayStyle]);
-  return style;
-}
 
 const _macrostratStyle = buildMacrostratStyle() as mapboxgl.Style;
 
@@ -257,94 +241,6 @@ export function VectorMapInspectorPage({
   );
 }
 
-export function RasterMapInspectorPage({
-  tileset,
-}: {
-  tileset: MacrostratRasterTileset;
-}) {
-  /* We apply a custom style to the panel container when we are interacting
-    with the search bar, so that we can block map interactions until search
-    bar focus is lost.
-    We also apply a custom style when the infodrawer is open so we can hide
-    the search bar on mobile platforms
-  */
-
-  // This appears necessary to get the position to set successfully
-  const runAction = useAppActions();
-  const loaded = useSelector((state) => state.core.initialLoadComplete);
-  useEffect(() => {
-    runAction({ type: "get-initial-map-state" });
-  }, []);
-
-  const [isOpen, setOpen] = useState(false);
-
-  const isLoading = useAppState((state) => state.core.mapIsLoading);
-
-  let detailElement = null;
-
-  const { isEnabled } = useDarkMode();
-  const baseMapURL = getBaseMapStyle(new Set([]), isEnabled);
-
-  const rasterStyle = useMemo(() => {
-    return buildRasterStyle(tileset);
-  }, [tileset]);
-
-  const style = useMapStyle(baseMapURL, rasterStyle);
-  const [opacity, setOpacity] = useState(0.5);
-
-  if (!loaded) return h(Spinner);
-
-  return h(
-    MapAreaContainer,
-    {
-      navbar: h(FloatingNavbar, { className: "searchbar" }, [
-        h([h(ParentRouteButton), h("h2", `${tileset}`)]),
-        h("div.spacer"),
-        h(LoaderButton, {
-          active: isOpen,
-          onClick: () => setOpen(!isOpen),
-          isLoading,
-        }),
-      ]),
-      contextPanel: h(PanelCard, [
-        h(FormGroup, { className: "opacity-slider" }, [
-          h(Label, "Opacity"),
-          h(Slider, {
-            min: 0,
-            max: 1,
-            stepSize: 0.01,
-            value: opacity,
-            onChange(v) {
-              setOpacity(v);
-            },
-          }),
-        ]),
-      ]),
-      detailPanel: detailElement,
-      contextPanelOpen: isOpen,
-    },
-    h(
-      DevMapView,
-      {
-        style,
-      },
-      [h(RasterOpacityManager, { layerID: "burwell", opacity })]
-    )
-  );
-}
-
-export function RasterOpacityManager({ layerID, opacity }) {
-  const mapRef = useMapRef();
-  useEffect(() => {
-    if (mapRef.current == null) return;
-    const map = mapRef.current;
-    const layer = map.getLayer(layerID);
-    if (layer == null) return;
-    map.setPaintProperty(layerID, "raster-opacity", opacity);
-  }, [mapRef, opacity, layerID]);
-  return null;
-}
-
 export function FeatureRecord({ feature }) {
   const props = feature.properties;
   return h("div.feature-record", [
@@ -357,7 +253,7 @@ export function FeatureRecord({ feature }) {
   ]);
 }
 
-function buildRasterStyle(layer: MacrostratRasterTileset) {
+export function buildRasterStyle(layer: MacrostratRasterTileset) {
   let tileURL = SETTINGS.burwellTileDomain + `/${layer}/{z}/{x}/{y}.png`;
 
   // if (layer == MacrostratRasterTileset.Emphasized) {
@@ -409,7 +305,7 @@ interface DevMapStyleOptions {
   tileset?: MacrostratVectorTileset;
 }
 
-async function buildMapStyle(
+export async function buildMapStyle(
   baseMapURL: string,
   overlayStyle: mapboxgl.Style
   //postProcess: (style: mapboxgl.Style) => mapboxgl.Style = (s) => s
@@ -492,3 +388,4 @@ function LineSymbolManager({ showLineSymbols }) {
 }
 
 export { MapStyledContainer, MapBottomControls };
+export * from "./raster-map";
