@@ -3,7 +3,7 @@ import mapboxgl from "mapbox-gl";
 import { useEffect, useState } from "react";
 import { h, buildMapStyle } from "./index";
 
-export function ParentRouteButton({ children, icon = "arrow-left", ...rest }) {
+export function ParentRouteButton({ icon = "arrow-left", ...rest }) {
   // A button that links to the parent route
   return h(LinkButton, { to: "..", icon, minimal: true, ...rest });
 }

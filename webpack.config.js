@@ -103,6 +103,10 @@ module.exports = {
           to: "/",
         },
         {
+          from: /^\/dev\/.*$/,
+          to: "/",
+        },
+        {
           from: /^\/cross-section\/.*$/,
           to: "/",
         },

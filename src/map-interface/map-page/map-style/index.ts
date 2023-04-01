@@ -4,47 +4,50 @@ export * from "./map-sources";
 import chroma from "chroma-js";
 import { intervals } from "@macrostrat/timescale";
 import { mergeStyles } from "@macrostrat/mapbox-utils";
-import { base } from "~/map-interface/app-state/handlers/filters";
-import map from "../map-view/map";
-import { baseLayers } from "@macrostrat/mapbox-styles/src";
 
-export function buildXRayStyle({ inDarkMode = false }): mapboxgl.Style {
+export function buildBasicStyle({
+  color = "rgb(74, 242, 161)",
+  inDarkMode,
+  lineSourceLayer = "default",
+  polygonSourceLayer = "default",
+  tileURL,
+}): mapboxgl.Style {
   const xRayColor = (opacity = 1, darken = 0) => {
     if (!inDarkMode) {
-      return chroma("rgb(74, 242, 161)")
+      return chroma(color)
         .darken(2 - darken)
         .alpha(opacity)
         .css();
     }
-    return chroma("rgb(74, 242, 161)").alpha(opacity).darken(darken).css();
+    return chroma(color).alpha(opacity).darken(darken).css();
   };
 
   return {
     version: 8,
-    name: "xray",
+    name: "basic",
     sources: {
-      burwell: {
+      tileLayer: {
         type: "vector",
-        tiles: [SETTINGS.burwellTileDomain + `/carto-slim/{z}/{x}/{y}`],
+        tiles: [tileURL],
         tileSize: 512,
       },
     },
     layers: [
       {
-        id: "burwell",
+        id: "polygons",
         type: "fill",
-        source: "burwell",
-        "source-layer": "units",
+        source: "tileLayer",
+        "source-layer": polygonSourceLayer,
         paint: {
           "fill-color": xRayColor(0.1),
           "fill-outline-color": xRayColor(0.5),
         },
       },
       {
-        id: "burwell-line",
+        id: "lines",
         type: "line",
-        source: "burwell",
-        "source-layer": "lines",
+        source: "tileLayer",
+        "source-layer": lineSourceLayer,
         paint: {
           "line-color": xRayColor(1, -1),
           "line-width": 1.5,
@@ -52,6 +55,19 @@ export function buildXRayStyle({ inDarkMode = false }): mapboxgl.Style {
       },
     ],
   };
+}
+
+export function buildXRayStyle({
+  inDarkMode = false,
+  lineLayer = "lines",
+  polygonLayer = "units",
+}): mapboxgl.Style {
+  return buildBasicStyle({
+    inDarkMode,
+    lineSourceLayer: lineLayer,
+    polygonSourceLayer: polygonLayer,
+    tileURL: SETTINGS.burwellTileDomain + `/carto-slim/{z}/{x}/{y}`,
+  });
 }
 
 export function applyAgeModelStyles(

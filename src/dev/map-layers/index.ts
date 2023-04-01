@@ -30,6 +30,7 @@ import {
   buildXRayStyle,
   toggleLineSymbols,
   buildMacrostratStyle,
+  buildBasicStyle,
 } from "../../map-interface/map-page/map-style";
 import { CoreMapView, MapMarker } from "~/map-interface/map-page/map-view";
 import {
@@ -381,6 +382,126 @@ export function DevMapView(props: DevMapViewProps): React.ReactElement {
   return h(CoreMapView, null, [children]);
 }
 
+export function BasicLayerInspectorPage({
+  title = null,
+  headerElement = null,
+  transformRequest = null,
+  children,
+  layer,
+}: {
+  headerElement?: React.ReactElement;
+  transformRequest?: mapboxgl.TransformRequestFunction;
+  title?: string;
+  overlayStyle?: mapboxgl.Style;
+  children?: React.ReactNode;
+}) {
+  // A stripped-down page for map development
+  const runAction = useAppActions();
+  /* We apply a custom style to the panel container when we are interacting
+    with the search bar, so that we can block map interactions until search
+    bar focus is lost.
+    We also apply a custom style when the infodrawer is open so we can hide
+    the search bar on mobile platforms
+  */
+
+  console.log(layer);
+  const tileset = layer.id;
+
+  const loaded = useSelector((state) => state.core.initialLoadComplete);
+  useEffect(() => {
+    runAction({ type: "get-initial-map-state" });
+  }, []);
+
+  const [isOpen, setOpen] = useState(false);
+
+  const [state, setState] = useState({ showTileExtent: false });
+  const { showTileExtent } = state;
+
+  const [inspectPosition, setInspectPosition] =
+    useState<mapboxgl.LngLat | null>(null);
+
+  const [data, setData] = useState(null);
+  const isLoading = useAppState((state) => state.core.mapIsLoading);
+
+  const onSelectPosition = useCallback((position: mapboxgl.LngLat) => {
+    setInspectPosition(position);
+  }, []);
+
+  let detailElement = null;
+  if (inspectPosition != null) {
+    detailElement = h(
+      LocationPanel,
+      {
+        onClose() {
+          setInspectPosition(null);
+        },
+        position: inspectPosition,
+      },
+      [
+        h(TileInfo, {
+          feature: data?.[0] ?? null,
+          showExtent: showTileExtent,
+          setShowExtent() {
+            setState({ ...state, showTileExtent: !showTileExtent });
+          },
+        }),
+        h(FeaturePanel, { features: data }),
+      ]
+    );
+  }
+
+  const { isEnabled } = useDarkMode();
+
+  // Style management
+  const baseMapURL = getBaseMapStyle(new Set([]), isEnabled);
+
+  const _overlayStyle = useMemo(() => {
+    return buildBasicStyle({
+      inDarkMode: isEnabled,
+      tileURL: SETTINGS.burwellTileDomain + `/${tileset}/{z}/{x}/{y}`,
+    });
+  }, [tileset, isEnabled]) as mapboxgl.Style;
+
+  const style = useMapStyle(baseMapURL, _overlayStyle);
+
+  let tile = null;
+  if (showTileExtent && data?.[0] != null) {
+    let f = data[0];
+    tile = { x: f._x, y: f._y, z: f._z };
+  }
+
+  if (!loaded) return h(Spinner);
+
+  return h(
+    MapAreaContainer,
+    {
+      navbar: h(FloatingNavbar, { className: "searchbar" }, [
+        h([h(ParentRouteButton), headerElement ?? h("h2", title ?? tileset)]),
+        h("div.spacer"),
+        h(LoaderButton, {
+          active: isOpen,
+          onClick: () => setOpen(!isOpen),
+          isLoading,
+        }),
+      ]),
+      contextPanel: h(PanelCard, [children]),
+      detailPanel: detailElement,
+      contextPanelOpen: isOpen,
+    },
+    h(DevMapView, { style, transformRequest }, [
+      h(FeatureSelectionHandler, {
+        selectedLocation: inspectPosition,
+        setFeatures: setData,
+      }),
+      h(MapMarker, {
+        position: inspectPosition,
+        setPosition: onSelectPosition,
+      }),
+      h(TileExtentLayer, { tile, color: isEnabled ? "white" : "black" }),
+    ])
+  );
+}
+
 function LineSymbolManager({ showLineSymbols }) {
   const mapRef = useMapRef();
   useMapConditionalStyle(mapRef, showLineSymbols, toggleLineSymbols);
@@ -389,3 +510,4 @@ function LineSymbolManager({ showLineSymbols }) {
 
 export { MapStyledContainer, MapBottomControls };
 export * from "./raster-map";
+export * from "./catalog";

@@ -5,6 +5,8 @@ import {
   MacrostratVectorTileset,
   MacrostratRasterTileset,
   RasterMapInspectorPage,
+  MapLayerCatalog,
+  LinkItem,
 } from "./map-layers";
 import { loadableElement } from "~/_utils";
 import styles from "./main.module.styl";
@@ -51,11 +53,12 @@ export default function DevIndex() {
           tileset: MacrostratRasterTileset.Emphasized,
         }),
       }),
-
+      h(Route, { path: "catalog", element: h(MapLayerCatalog) }),
       h(Route, {
         path: "column-inspector",
         element: loadableElement(() => import("./column-inspector")),
       }),
+      h(Route, { path: "catalog/*", element: h(MapLayerCatalog) }),
       h(Route, { path: "*", element: h(MapInspectorIndex) }),
     ]),
   ]);
@@ -73,13 +76,10 @@ function MapInspectorIndex() {
     ]),
     h("h2", "Additional layers"),
     h("ul.layers", [h(LinkItem, { to: "igcp-orogens" }, "IGCP orogens")]),
+    h("h2", h(Link, { to: "catalog" }, "Map layer catalog")),
     h("h1", "Stratigraphic column inspector"),
     h(Link, { to: "column-inspector" }, "Stratigraphy"),
     h("h1", "Color scheme testing"),
     h(Link, { to: "color-schemes" }, "Color schemes"),
   ]);
-}
-
-function LinkItem({ to, children }) {
-  return h("li", h(Link, { to }, children));
 }
