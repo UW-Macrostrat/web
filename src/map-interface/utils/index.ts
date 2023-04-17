@@ -18,11 +18,6 @@ export const sum = (data, prop) => {
     }, 0);
 };
 
-export const normalizeLng = (lng) => {
-  // via https://github.com/Leaflet/Leaflet/blob/32c9156cb1d1c9bd53130639ec4d8575fbeef5a6/src/core/Util.js#L87
-  return (((((lng - 180) % 360) + 360) % 360) - 180).toFixed(4);
-};
-
 export const hexToRgb = (hex, opacity) => {
   if (!hex) {
     return "rgba(0,0,0,0.3)";

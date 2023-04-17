@@ -1,10 +1,12 @@
-import { normalizeLng } from "../../utils";
 import { Icon, Button, Intent } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.styl";
 import { useAppState } from "~/map-interface/app-state";
-import { fmt3 } from "~/map-interface/utils";
 import { useMapRef } from "@macrostrat/mapbox-react";
+import {
+  LngLatCoords,
+  Elevation,
+} from "@macrostrat/map-interface/src/location-info";
 import {
   LocationFocusButton,
   useFocusState,
@@ -18,10 +20,6 @@ import { Toaster } from "@blueprintjs/core";
 const AppToaster = Toaster.create({
   maxToasts: 1,
 });
-
-const metersToFeet = (meters, decimals = 0) => {
-  return (meters * 3.28084).toFixed(decimals);
-};
 
 function PositionButton() {
   const infoMarkerPosition = useAppState(
@@ -84,57 +82,11 @@ export function InfoDrawerHeader(props: InfoDrawerHeaderProps) {
     //h("div.left-icon", [h(Icon, { icon: "map-marker" })]),
     h(PositionButton),
     h("div.spacer"),
-    h(LngLatCoords, { position, zoom }),
-    h.if(elevation != null)(Elevation, { elevation }),
+    h(LngLatCoords, { position, zoom, className: "infodrawer-header-item" }),
+    h.if(elevation != null)(Elevation, {
+      elevation,
+      className: "infodrawer-header-item",
+    }),
     h(Button, { minimal: true, icon: "cross", onClick: onClose }),
-  ]);
-}
-
-function ValueWithUnit(props) {
-  const { value, unit } = props;
-  return h("span.value-with-unit", [
-    h("span.value", [value]),
-    h("span.spacer", [" "]),
-    h("span.unit", [unit]),
-  ]);
-}
-
-function DegreeCoord(props) {
-  const { value, labels } = props;
-  const direction = value < 0 ? labels[1] : labels[0];
-  return h(ValueWithUnit, {
-    value: Math.abs(value) + "°",
-    unit: direction,
-  });
-}
-
-function LngLatCoords(props) {
-  const { position, zoom = 7 } = props;
-  return h("div.infodrawer-header-item.lnglat-container", [
-    h("span.lnglat", [
-      h(DegreeCoord, {
-        value: fmt3(position.lat),
-        labels: ["N", "S"],
-      }),
-      ", ",
-
-      h(DegreeCoord, {
-        value: fmt3(normalizeLng(Number(position.lng))),
-        labels: ["E", "W"],
-      }),
-    ]),
-  ]);
-}
-
-function Elevation(props) {
-  const { elevation } = props;
-  if (elevation == null) return null;
-  return h("div.infodrawer-header-item.elevation", [
-    h(ValueWithUnit, { value: elevation, unit: "m" }),
-    h("span.secondary", [
-      " (",
-      h(ValueWithUnit, { value: metersToFeet(elevation), unit: "ft" }),
-      ")",
-    ]),
   ]);
 }

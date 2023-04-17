@@ -18,7 +18,17 @@ let publicURL = process.env.PUBLIC_URL || "/";
 
 let webComponentsAliases = {};
 for (const [k, v] of Object.entries(alias)) {
-  webComponentsAliases[k] = path.resolve(__dirname, "deps/web-components", v);
+  webComponentsAliases[k + "/src"] = path.resolve(
+    __dirname,
+    "deps/web-components",
+    v
+  );
+  webComponentsAliases[k + "$"] = path.resolve(
+    __dirname,
+    "deps/web-components",
+    v,
+    "index.ts"
+  );
 }
 
 //const cesiumSource = "node_modules/cesium/Source";
