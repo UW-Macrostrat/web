@@ -1,8 +1,7 @@
 import { Icon, Button, Intent } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.styl";
-import { useAppState } from "~/map-interface/app-state";
-import { useMapRef } from "@macrostrat/mapbox-react";
+import { CopyLinkButton } from "@macrostrat/map-interface/src/location-panel/buttons";
 import {
   LngLatCoords,
   Elevation,
@@ -15,57 +14,13 @@ import {
 
 const h = hyper.styled(styles);
 
-import { Toaster } from "@blueprintjs/core";
-
-const AppToaster = Toaster.create({
-  maxToasts: 1,
-});
-
-function PositionButton() {
-  const infoMarkerPosition = useAppState(
-    (state) => state.core.infoMarkerPosition
-  );
-  const map = useMapRef();
-
-  const focusState = useFocusState(infoMarkerPosition);
+function PositionButton({ position }) {
+  const focusState = useFocusState(position);
 
   return h("div.position-controls", [
-    h(LocationFocusButton, { location: infoMarkerPosition, focusState }, []),
-    isCentered(focusState) ? h(CopyLinkButton) : null,
+    h(LocationFocusButton, { location: position, focusState }, []),
+    isCentered(focusState) ? h(CopyLinkButton, { itemName: "position" }) : null,
   ]);
-}
-
-function CopyLinkButton() {
-  return h(
-    Button,
-    {
-      className: "copy-link-button",
-      rightIcon: h(Icon, { icon: "link", size: 12 }),
-      minimal: true,
-      small: true,
-      onClick() {
-        navigator.clipboard.writeText(window.location.href).then(
-          () => {
-            AppToaster.show({
-              message: "Copied link to position!",
-              intent: "success",
-              icon: "clipboard",
-              timeout: 1000,
-            });
-          },
-          () => {
-            AppToaster.show({
-              message: "Failed to copy link",
-              intent: "danger",
-              icon: "error",
-              timeout: 1000,
-            });
-          }
-        );
-      },
-    },
-    "Copy link"
-  );
 }
 
 interface InfoDrawerHeaderProps {
@@ -80,7 +35,7 @@ export function InfoDrawerHeader(props: InfoDrawerHeaderProps) {
 
   return h("header.location-panel-header", [
     //h("div.left-icon", [h(Icon, { icon: "map-marker" })]),
-    h(PositionButton),
+    h(PositionButton, { position }),
     h("div.spacer"),
     h(LngLatCoords, { position, zoom, className: "infodrawer-header-item" }),
     h.if(elevation != null)(Elevation, {

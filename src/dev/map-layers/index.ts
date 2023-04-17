@@ -17,7 +17,7 @@ import { useSelector } from "react-redux";
 import { SETTINGS } from "~/map-interface/settings";
 import { LoaderButton } from "../../map-interface/components/navbar";
 import { useAppActions, useAppState } from "../../map-interface/app-state";
-import { LocationPanel } from "../../map-interface/components/info-drawer";
+import { LocationPanel } from "@macrostrat/map-interface";
 import { FloatingNavbar } from "../../map-interface/components/navbar";
 import { MapAreaContainer } from "../../map-interface/map-page";
 import { PanelCard } from "../../map-interface/map-page/menu";

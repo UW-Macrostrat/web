@@ -9,7 +9,7 @@ import {
 import Options from "./options";
 
 import FeatureList from "./feature-list";
-import { InfoDrawerContainer } from "~/map-interface/components/info-drawer";
+import { InfoDrawerContainer } from "@macrostrat/map-interface/src/location-panel";
 import { useEffect } from "react";
 
 function BackButton() {

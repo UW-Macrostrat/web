@@ -17,6 +17,7 @@ import { useRef, useEffect } from "react";
 import { useTransition } from "transition-hook";
 import { useContextPanelOpen, useContextClass } from "../app-state";
 import { MapboxMapProvider, ZoomControl } from "@macrostrat/mapbox-react";
+import { ToasterContext } from "@macrostrat/ui-components";
 import { MapBottomControls, MapStyledContainer } from "./map-view";
 import { Routes, Route, useParams } from "react-router-dom";
 import { MenuPage } from "./menu";
@@ -187,24 +188,27 @@ function MapAreaContainer({
     `detail-panel-${detailPanelTrans.stage}`
   );
 
-  return h(MapboxMapProvider, [
-    h(MapStyledContainer, { className: classNames("map-page", className) }, [
-      h("div.main-ui", { className: _className, ...rest }, [
-        h("div.context-stack", contextStackProps, [
-          navbar,
-          h.if(contextPanelTrans.shouldMount)([contextPanel]),
+  return h(
+    ToasterContext,
+    h(MapboxMapProvider, [
+      h(MapStyledContainer, { className: classNames("map-page", className) }, [
+        h("div.main-ui", { className: _className, ...rest }, [
+          h("div.context-stack", contextStackProps, [
+            navbar,
+            h.if(contextPanelTrans.shouldMount)([contextPanel]),
+          ]),
+          //h(MapView),
+          children ?? mainPanel,
+          h("div.detail-stack.infodrawer-container", detailStackProps, [
+            detailPanel,
+            h("div.spacer"),
+            mapControls,
+          ]),
         ]),
-        //h(MapView),
-        children ?? mainPanel,
-        h("div.detail-stack.infodrawer-container", detailStackProps, [
-          detailPanel,
-          h("div.spacer"),
-          mapControls,
-        ]),
+        h("div.bottom", null, bottomPanel),
       ]),
-      h("div.bottom", null, bottomPanel),
-    ]),
-  ]);
+    ])
+  );
 }
 
 //const _MapPage = compose(HotkeysProvider, MapPage);
