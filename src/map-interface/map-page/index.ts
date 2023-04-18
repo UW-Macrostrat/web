@@ -12,14 +12,12 @@ import {
   useAppActions,
 } from "../app-state";
 import styles from "./main.module.styl";
-import classNames from "classnames";
 import { useRef, useEffect } from "react";
 import { useTransition } from "transition-hook";
 import { useContextPanelOpen, useContextClass } from "../app-state";
-import { MapboxMapProvider, ZoomControl } from "@macrostrat/mapbox-react";
-import { ToasterContext } from "@macrostrat/ui-components";
-import { MapBottomControls, MapStyledContainer } from "./map-view";
+import { MapAreaContainer } from "@macrostrat/map-interface";
 import { Routes, Route, useParams } from "react-router-dom";
+import classNames from "classnames";
 import { MenuPage } from "./menu";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
@@ -92,13 +90,15 @@ export const MapPage = ({
           element: h(InfoDrawerRoute),
         }),
       ]),
-      h(ZoomControl, { className: "zoom-control" }),
     ]),
     bottomPanel: h(ElevationChart, null),
     contextPanelOpen: contextPanelOpen || inputFocus,
     detailPanelOpen: infoDrawerOpen,
     onMouseDown,
-    className: inputFocus ? "searching" : null,
+    className: classNames(
+      "macrostrat-map-container",
+      inputFocus ? "searching" : null
+    ),
   });
 };
 
@@ -137,78 +137,6 @@ function InfoDrawerRoute() {
   return h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
     className: "detail-panel",
   });
-}
-
-type AnyElement = React.ReactNode | React.ReactElement | React.ReactFragment;
-
-function MapAreaContainer({
-  children,
-  className,
-  navbar,
-  contextPanel = null,
-  detailPanel = null,
-  detailPanelOpen,
-  contextPanelOpen = true,
-  bottomPanel = null,
-  mainPanel,
-  mapControls = h(MapBottomControls),
-  contextStackProps = null,
-  detailStackProps = null,
-  ...rest
-}: {
-  navbar: AnyElement;
-  children?: AnyElement;
-  mapControls?: AnyElement;
-  contextPanel?: AnyElement;
-  mainPanel?: AnyElement;
-  detailPanel?: AnyElement;
-  bottomPanel?: AnyElement;
-  className?: string;
-  detailPanelOpen?: boolean;
-  contextPanelOpen?: boolean;
-  contextStackProps?: HTMLDivProps;
-  detailStackProps?: HTMLDivProps;
-}) {
-  const _detailPanelOpen = detailPanelOpen ?? detailPanel != null;
-  const contextPanelTrans = useTransition(contextPanelOpen, 800);
-  const detailPanelTrans = useTransition(_detailPanelOpen, 800);
-
-  /* We apply a custom style to the panel container when we are interacting
-    with the search bar, so that we can block map interactions until search
-    bar focus is lost.
-    We also apply a custom style when the infodrawer is open so we can hide
-    the search bar on mobile platforms
-  */
-  const _className = classNames(
-    {
-      searching: false,
-      "detail-panel-open": _detailPanelOpen,
-    },
-    `context-panel-${contextPanelTrans.stage}`,
-    `detail-panel-${detailPanelTrans.stage}`
-  );
-
-  return h(
-    ToasterContext,
-    h(MapboxMapProvider, [
-      h(MapStyledContainer, { className: classNames("map-page", className) }, [
-        h("div.main-ui", { className: _className, ...rest }, [
-          h("div.context-stack", contextStackProps, [
-            navbar,
-            h.if(contextPanelTrans.shouldMount)([contextPanel]),
-          ]),
-          //h(MapView),
-          children ?? mainPanel,
-          h("div.detail-stack.infodrawer-container", detailStackProps, [
-            detailPanel,
-            h("div.spacer"),
-            mapControls,
-          ]),
-        ]),
-        h("div.bottom", null, bottomPanel),
-      ]),
-    ])
-  );
 }
 
 //const _MapPage = compose(HotkeysProvider, MapPage);

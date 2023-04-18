@@ -31,12 +31,9 @@ import {
 import { getExpressionForFilters } from "./filter-helpers";
 import Map from "./map";
 import { enable3DTerrain } from "./terrain";
-import {
-  getBaseMapStyle,
-  MapBottomControls,
-  MapStyledContainer,
-  useCrossSectionCursorLocation,
-} from "./utils";
+import { MapBottomControls } from "@macrostrat/map-interface/src/controls";
+import { MapStyledContainer } from "@macrostrat/map-interface";
+import { getBaseMapStyle, useCrossSectionCursorLocation } from "./utils";
 import { getFocusState, PositionFocusState } from "@macrostrat/mapbox-react";
 import {
   MapLoadingReporter,
@@ -44,7 +41,7 @@ import {
   MapPaddingManager,
   MapMarker,
   MapResizeManager,
-} from "./helpers";
+} from "@macrostrat/map-interface/src/helpers";
 import { LineString } from "geojson";
 
 const h = hyper.styled(styles);
@@ -285,6 +282,11 @@ export function CoreMapView(props: MapViewProps) {
   const { mapLayers, mapPosition, mapSettings } = useAppState(
     (state) => state.core
   );
+  const runAction = useAppActions();
+
+  const infoMarkerPosition = useAppState(
+    (state) => state.core.infoMarkerPosition
+  );
 
   const { children } = props;
 
@@ -320,14 +322,30 @@ export function CoreMapView(props: MapViewProps) {
     "is-3d-available": mapUse3D ?? false,
   });
 
+  const onMapMoved = useCallback(
+    (mapPosition) => {
+      runAction({ type: "map-moved", data: { mapPosition } });
+    },
+    [infoMarkerPosition]
+  );
+
+  const mapIsLoading = useAppState((state) => state.core.mapIsLoading);
+
   return h("div.map-view-container.main-view", { ref: parentRef }, [
     h("div.mapbox-map#map", { ref, className }),
     h(MapLoadingReporter, {
       ignoredSources: ["elevationMarker", "crossSectionEndpoints"],
+      mapIsLoading,
+      onMapLoading() {
+        runAction({ type: "map-loading" });
+      },
+      onMapIdle() {
+        runAction({ type: "map-idle" });
+      },
     }),
-    h(MapMovedReporter),
+    h(MapMovedReporter, { infoMarkerPosition, onMapMoved }),
     h(MapResizeManager, { containerRef: ref }),
-    h(MapPaddingManager, { containerRef: ref, parentRef }),
+    h(MapPaddingManager, { containerRef: ref, parentRef, infoMarkerPosition }),
     children,
   ]);
 }

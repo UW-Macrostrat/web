@@ -21,11 +21,9 @@ import { LocationPanel } from "@macrostrat/map-interface";
 import { FloatingNavbar } from "../../map-interface/components/navbar";
 import { MapAreaContainer } from "../../map-interface/map-page";
 import { PanelCard } from "../../map-interface/map-page/menu";
-import {
-  getBaseMapStyle,
-  MapBottomControls,
-  MapStyledContainer,
-} from "../../map-interface/map-page/map-view/utils";
+import { getBaseMapStyle } from "../../map-interface/map-page/map-view/utils";
+import { MapBottomControls } from "@macrostrat/map-interface/src/controls";
+import { MapStyledContainer } from "@macrostrat/map-interface";
 import {
   buildXRayStyle,
   toggleLineSymbols,

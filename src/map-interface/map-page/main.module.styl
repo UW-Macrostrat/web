@@ -2,64 +2,11 @@
 This stylesheet the overall application page layout.
 */
 
-.map-page
-  height 100vh
-  width 100vw
-  /* mobile viewport bug fix */
-  max-height: -webkit-fill-available;
-  display flex
-  flex-direction column
-  position relative
-
-  // Compass display
-  .compass-control
-    display: none
-  &.map-is-rotated
-    .compass-control
-      display: block
-  
-  .map-3d-control
-    display: none
-  &.map-3d-available .map-3d-control
-    display: block
-  &.map-is-rotated.map-3d-available .map-3d-control
-    display: none
-
-  .globe-control
-    svg
-      color: var(--secondary-color)
-    display: none
-  &.map-is-global .globe-control
-    display: block
-
-.main-ui
-  flex 1
-  position: relative
-  display flex
-  flex-direction: column
-  max-height 100%
-  height: 100%
-  box-shadow 0 0 10px 4px var(--card-shadow-color)
-
-
 .panel-card
   padding: 10px
   >:last-child
     margin-bottom: 0
 
-.context-stack
-  display: flex
-  flex-direction: column
-  max-height: 100%
-  &>div
-    flex-shrink 1
-  &>.searchbar
-    flex 0
-
-// Rename left-stack to context-stack
-
-.context-stack, .detail-stack
-  z-index: 100
 
 .panel-container
   display flex
@@ -69,10 +16,6 @@ This stylesheet the overall application page layout.
 
 .panel-title
   font-size 16px
-
-.spacer
-  flex-grow 1
-  pointer-events: none
 
 .map-view-container
   flex-grow 1
@@ -115,8 +58,9 @@ This stylesheet the overall application page layout.
         opacity: 0
         margin-left: -7px
 
+// Todo: not sure how to deal with this style
 // When panel is closing, fade out the buttons text-first
-.context-panel-leave .menu-card .panel-header
+:global(.map-context-leave) .menu-card .panel-header
   .tab-button :global(.bp4-button-text)
     opacity: 0
     width: 0
@@ -159,128 +103,10 @@ This stylesheet the overall application page layout.
   hr
     width 100%
 
-// Map controls
-map-control()
-  min-width: 22px
-  min-height: 22px 
-  border-radius: 4px
-  background-color: var(--panel-background-color)
-  box-shadow 0 0 0 1px var(--card-shadow-color)
-  //box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.1), 0 0 0 rgba(16, 22, 26, 0), 0 1px 1px rgba(16, 22, 26, 0.2) !important
-  //box-shadow: 0 0 0 2px rgba(0,0,0,.1)
-  button
-    width: 22px
-    height: 22px
-    background-position: center center
-    padding 0
-    background-color: var(--panel-background-color)
-    color: var(--text-color)
 
-    &:hover
-      background-color: var(--panel-background-color) !important
-
-
-:global
-
-  #map
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-
-    .mapbox-compass, .mapbox-3d
-      display: none
-
-  .mapboxgl-ctrl.mapbox-3d.mapbox-control
-    width: unset
-    button
-      width: unset
-      padding-inline 4px
-
-  .mapboxgl-canvas-container
-    width: 100%
-    height: 100%
-
-  .mapboxgl-ctrl.mapboxgl-ctrl-attrib
-    a
-      color: var(--text-color)
-    background-color: var(--translucent-panel-background-color) !important
-
-
-  .mapboxgl-marker svg
-    path
-      fill: var(--panel-background-color) !important
-    circle
-      fill: var(--secondary-color) !important
-    
-
-  .mapbox-control.mapbox-zoom
-    background: var(--translucent-panel-background-color)
-    svg
-      fill: var(--text-color) !important
-
-  .mapboxgl-ctrl-logo
-    transform: scale(0.9)translate(-8px,2px)
-  .bp4-dark
-    .mapboxgl-ctrl-logo
-      filter: invert(100%)
-
-
-
-  .mapboxgl-ctrl-group button + button
-    border-top: 1px solid var(--panel-rule-color) !important
-
-  .bp4-dark .mapboxgl-ctrl-group .mapboxgl-ctrl-icon
-    filter: invert(40%)
-    &:hover
-      filter: invert(50%)
-    //background-color: var(--)
-
-  .mapboxgl-ctrl-geolocate .mapboxgl-ctrl-icon
-    filter: invert(40%)
-    &:hover
-      filter: invert(50%)
-
-
-.detail-stack
-  position relative
-
-.main-ui.detail-panel-open
-  .zoom-control
-    opacity: 0
-    display none
-
-.zoom-control
-  transition opacity 1s ease-in-out
-  width: 30px
-  position absolute
-  top 0
-  right 0
-
-.main-ui.searching
+.macrostrat-map-container.searching
   .map-view-container
     pointer-events: none
-
-.map-controls
-  display flex
-  flex-direction row
-  justify-content: right
-  margin-bottom: 0
-  &>*
-    margin-left: 0.5em
-  :global(.mapbox-control), :global(.map-control-wrapper), .map-control
-    map-control()
-
-  .map-scale-control
-    background: none
-    box-shadow: none
-    padding-top: 8px
-    :global(.mapboxgl-ctrl-scale)
-      background-color: var(--translucent-panel-background-color)
-      border-color: var(--secondary-text-color)
-      color: var(--secondary-text-color)
-
 
 /* For mobile phones, we want to make the most of screen space,
  which in some cases means adding complications to the basic page. */
@@ -293,33 +119,11 @@ map-control()
   //   flex-direction: column-reverse
   //   max-height: 80%
 
-  // Hide searchbar when infodrawer is open
-  .main-ui.detail-panel-enter .context-stack
-    height: 0
-    visibility: hidden
-    transition: height 0.5s ease-in-out
-
-
-  // Make sure that our detail panel doesn't take up the entirety of the page
-  .detail-stack
-    height: fit-content
-    position: inherit
-    max-height: 70%
-
   .infodrawer-stack
     max-height: 70%
     &:global(.exit-active)
       max-height: 0
 
-  // Completely hide zoom control
-  :global(.mapbox-control.mapbox-zoom)
-    display: none
-
-  // Position map controls within the map area
-  .map-controls
-    position absolute
-    top -60px
-    right 10px
 
   .detail-panel
     border-radius: 0px
@@ -328,80 +132,22 @@ map-control()
   to handle a two-column layout. */
 @media screen and (min-width: 768px)
 
-  .main-ui
-    flex-direction row
-    padding 1em 1em 2em
-    min-height: 80px
-    &>*
-      margin-right 0.5em
-      &:last-child
-        margin-right 0
-    &.searching .context-stack
-      width: 24em
+  // This won't quite work
+  .macrostrat-map-container.searching .context-stack
+    width: 24em
 
-
-  .context-stack
-    max-width 34em
-    min-width 14em
-    width: 16em
-    transition width 300ms ease
-    //margin-right: -15.5em
-    &.panel-open
-      width: 34em
-      margin-right 0.5em
+  .map-context-open
+    width: 34em
+    margin-right 0.5em
     &.layers, &.settings
       width: 18em
       margin-right 0.5em
     // Leave a little space for Mapbox logo at the bottom
-    padding-bottom: 0.5em
 
   .main-ui.detail-panel-open .detail-stack
     width: 30em
-
-  .detail-stack
-    width 30em
-    // position absolute
-    // right 0px
-    // top 0px
-    // bottom: 0px
-    pointer-events none
-    display flex
-    flex-direction column
-
-  .context-stack, .detail-stack
-    pointer-events: none
-    z-index: 100
-    &>div
-      pointer-events: all
-      margin-bottom: 0.5em
-      &:last-child
-        margin-bottom 0
-    &>div.spacer
-      pointer-events: none
 
   /* Make map fill page rather than containing div,
     by unsetting map position */
   .map-view-container
     position: unset
-
-  // .map-holder
-  //   z-index: 1;
-  //   position: absolute;
-  //   top 0
-  //   left 0
-  //   bottom 0
-  //   right 0
-  //   height 100%
-
-// padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-
-// Transitions
-
-// @keyframes fadeIn
-//   from
-//     opacity: 0
-//   to
-//     opacity: 1
-
-
-@require "./transitions.module.styl"

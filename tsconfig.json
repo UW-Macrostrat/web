@@ -39,5 +39,8 @@
       ]
     }
   },
-  "include": ["src"]
+  "include": [
+    "src",
+    "deps/web-components/packages/map-interface/src/helpers.ts"
+  ]
 }
