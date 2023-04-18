@@ -35,8 +35,8 @@ import {
   FeaturePanel,
   FeatureSelectionHandler,
   TileInfo,
-} from "../vector-tile-features";
-import { TileExtentLayer } from "../tile-extent";
+} from "@macrostrat/map-interface/src/dev/vector-tile-features";
+import { TileExtentLayer } from "@macrostrat/map-interface/src/dev/tile-extent";
 import styles from "../main.module.styl";
 import { useMapStyle, ParentRouteButton } from "./utils";
 

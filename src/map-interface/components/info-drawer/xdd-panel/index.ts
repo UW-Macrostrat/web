@@ -1,7 +1,7 @@
 import { Spinner } from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
 import Journal from "./Journal";
-import { ExpansionPanel } from "../../expansion-panel";
+import { ExpansionPanel } from "@macrostrat/map-interface/src/expansion-panel";
 import { useAppActions, useAppState } from "~/map-interface/app-state";
 import { XDDSnippet } from "~/map-interface/app-state/handlers/fetch";
 

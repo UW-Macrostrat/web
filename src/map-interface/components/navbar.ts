@@ -9,7 +9,7 @@ import {
 import { useSelector } from "react-redux";
 import Filters, { FilterPanel } from "./filter-panel";
 import styles from "./searchbar.styl";
-import { PanelSubhead } from "./expansion-panel/headers";
+import { PanelSubhead } from "@macrostrat/map-interface/src/expansion-panel/headers";
 import classNames from "classnames";
 
 const h = hyper.styled(styles);

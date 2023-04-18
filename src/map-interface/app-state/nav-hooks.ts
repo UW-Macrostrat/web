@@ -38,7 +38,7 @@ export function currentPageForPathName(pathname: string): MenuPage | null {
 export function useContextClass() {
   const activePage = useAppState((s) => s.menu.activePage);
   if (activePage == null) return null;
-  return classNames("panel-open", activePage);
+  return classNames("map-context-open", activePage);
 }
 
 export function useCurrentPage() {

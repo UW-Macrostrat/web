@@ -41,6 +41,9 @@
   },
   "include": [
     "src",
-    "deps/web-components/packages/map-interface/src/helpers.ts"
+    "deps/web-components/packages/map-interface/src/helpers.ts",
+    "deps/web-components/packages/map-interface/src/dev/tile-extent.ts",
+    "deps/web-components/packages/map-interface/src/dev/vector-tile-features.ts",
+    "deps/web-components/packages/map-interface/src/expansion-panel"
   ]
 }

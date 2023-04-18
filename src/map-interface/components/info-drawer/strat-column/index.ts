@@ -7,7 +7,7 @@ import { ColumnSummary } from "~/map-interface/app-state/handlers/columns";
 import { NonIdealState } from "@blueprintjs/core";
 import useBreadcrumbs from "use-react-router-breadcrumbs";
 import { LinkButton } from "../../buttons";
-import { InfoPanelSection } from "../../expansion-panel";
+import { InfoPanelSection } from "@macrostrat/map-interface/src/expansion-panel";
 import { PatternProvider } from "~/_providers";
 
 const h = hyperStyled(styles);
