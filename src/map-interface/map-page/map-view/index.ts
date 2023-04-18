@@ -30,7 +30,7 @@ import {
 } from "../map-style";
 import { getExpressionForFilters } from "./filter-helpers";
 import Map from "./map";
-import { enable3DTerrain } from "./terrain";
+import { enable3DTerrain } from "@macrostrat/map-interface/src/map-view/terrain";
 import { MapBottomControls } from "@macrostrat/map-interface/src/controls";
 import { MapStyledContainer } from "@macrostrat/map-interface";
 import { getBaseMapStyle, useCrossSectionCursorLocation } from "./utils";
@@ -278,6 +278,29 @@ interface MapViewProps {
   children?: React.ReactNode;
 }
 
+export function MacrostratLineSymbolManager({ showLineSymbols = true }) {
+  const mapRef = useMapRef();
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map == null) return;
+    // Update line symbol visibility on map load
+    toggleLineSymbols(map, showLineSymbols);
+  }, [mapRef.current]);
+
+  useMapConditionalStyle(mapRef, showLineSymbols, toggleLineSymbols);
+  return null;
+}
+
+export function MapTerrainManager({ mapUse3D, demSourceID }) {
+  const mapRef = useMapRef();
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map == null) return;
+    enable3DTerrain(map, mapUse3D, demSourceID);
+  }, [mapRef.current, mapUse3D]);
+}
+
 export function CoreMapView(props: MapViewProps) {
   const { mapLayers, mapPosition, mapSettings } = useAppState(
     (state) => state.core
@@ -290,32 +313,12 @@ export function CoreMapView(props: MapViewProps) {
 
   const { children } = props;
 
-  let mapRef = useMapRef();
-
   const ref = useRef<HTMLDivElement>();
   const parentRef = useRef<HTMLDivElement>();
   const { mapUse3D, mapIsRotated } = mapViewInfo(mapPosition);
 
   const hasLineSymbols =
     mapLayers.has(MapLayer.LINE_SYMBOLS) && mapLayers.has(MapLayer.LINES);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null) return;
-    // Update line symbol visibility on map load
-    toggleLineSymbols(map, hasLineSymbols);
-  }, [mapRef.current]);
-
-  const demSourceID = mapSettings.highResolutionTerrain
-    ? "mapbox-3d-dem"
-    : null;
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null) return;
-    enable3DTerrain(map, mapUse3D, demSourceID);
-  }, [mapRef.current, mapUse3D]);
-
-  useMapConditionalStyle(mapRef, hasLineSymbols, toggleLineSymbols);
 
   const className = classNames({
     "is-rotated": mapIsRotated ?? false,
@@ -346,6 +349,11 @@ export function CoreMapView(props: MapViewProps) {
     h(MapMovedReporter, { infoMarkerPosition, onMapMoved }),
     h(MapResizeManager, { containerRef: ref }),
     h(MapPaddingManager, { containerRef: ref, parentRef, infoMarkerPosition }),
+    h(MapTerrainManager, {
+      mapUse3D,
+      demSourceID: mapSettings.highResolutionTerrain ? "mapbox-3d-dem" : null,
+    }),
+    h(MacrostratLineSymbolManager, { showLineSymbols: hasLineSymbols }),
     children,
   ]);
 }
