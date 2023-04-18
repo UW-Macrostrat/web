@@ -11,7 +11,6 @@ import {
   setMapPosition,
 } from "@macrostrat/mapbox-utils";
 import { inDarkMode } from "@macrostrat/ui-components";
-import classNames from "classnames";
 import mapboxgl from "mapbox-gl";
 import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -30,18 +29,12 @@ import {
 } from "../map-style";
 import { getExpressionForFilters } from "./filter-helpers";
 import Map from "./map";
-import { enable3DTerrain } from "@macrostrat/map-interface/src/map-view/terrain";
 import { MapBottomControls } from "@macrostrat/map-interface/src/controls";
 import { MapStyledContainer } from "@macrostrat/map-interface";
 import { getBaseMapStyle, useCrossSectionCursorLocation } from "./utils";
 import { getFocusState, PositionFocusState } from "@macrostrat/mapbox-react";
-import {
-  MapLoadingReporter,
-  MapMovedReporter,
-  MapPaddingManager,
-  MapMarker,
-  MapResizeManager,
-} from "@macrostrat/map-interface/src/helpers";
+import { MapMarker } from "@macrostrat/map-interface/src/helpers";
+import { MapView } from "@macrostrat/map-interface";
 import { LineString } from "geojson";
 
 const h = hyper.styled(styles);
@@ -291,71 +284,27 @@ export function MacrostratLineSymbolManager({ showLineSymbols = true }) {
   return null;
 }
 
-export function MapTerrainManager({ mapUse3D, demSourceID }) {
-  const mapRef = useMapRef();
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null) return;
-    enable3DTerrain(map, mapUse3D, demSourceID);
-  }, [mapRef.current, mapUse3D]);
-}
-
 export function CoreMapView(props: MapViewProps) {
-  const { mapLayers, mapPosition, mapSettings } = useAppState(
-    (state) => state.core
-  );
-  const runAction = useAppActions();
-
-  const infoMarkerPosition = useAppState(
-    (state) => state.core.infoMarkerPosition
-  );
-
-  const { children } = props;
-
-  const ref = useRef<HTMLDivElement>();
-  const parentRef = useRef<HTMLDivElement>();
-  const { mapUse3D, mapIsRotated } = mapViewInfo(mapPosition);
-
+  const { mapLayers, mapSettings } = useAppState((state) => state.core);
   const hasLineSymbols =
     mapLayers.has(MapLayer.LINE_SYMBOLS) && mapLayers.has(MapLayer.LINES);
 
-  const className = classNames({
-    "is-rotated": mapIsRotated ?? false,
-    "is-3d-available": mapUse3D ?? false,
-  });
+  const { children } = props;
 
-  const onMapMoved = useCallback(
-    (mapPosition) => {
-      runAction({ type: "map-moved", data: { mapPosition } });
+  return h(
+    MapView,
+    {
+      ...props,
+      terrainSourceID: mapSettings.highResolutionTerrain
+        ? "mapbox-3d-dem"
+        : null,
+      accessToken: SETTINGS.mapboxAccessToken,
     },
-    [infoMarkerPosition]
+    [
+      h(MacrostratLineSymbolManager, { showLineSymbols: hasLineSymbols }),
+      children,
+    ]
   );
-
-  const mapIsLoading = useAppState((state) => state.core.mapIsLoading);
-
-  return h("div.map-view-container.main-view", { ref: parentRef }, [
-    h("div.mapbox-map#map", { ref, className }),
-    h(MapLoadingReporter, {
-      ignoredSources: ["elevationMarker", "crossSectionEndpoints"],
-      mapIsLoading,
-      onMapLoading() {
-        runAction({ type: "map-loading" });
-      },
-      onMapIdle() {
-        runAction({ type: "map-idle" });
-      },
-    }),
-    h(MapMovedReporter, { infoMarkerPosition, onMapMoved }),
-    h(MapResizeManager, { containerRef: ref }),
-    h(MapPaddingManager, { containerRef: ref, parentRef, infoMarkerPosition }),
-    h(MapTerrainManager, {
-      mapUse3D,
-      demSourceID: mapSettings.highResolutionTerrain ? "mapbox-3d-dem" : null,
-    }),
-    h(MacrostratLineSymbolManager, { showLineSymbols: hasLineSymbols }),
-    children,
-  ]);
 }
 
 export function CrossSectionLine() {
