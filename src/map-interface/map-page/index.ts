@@ -49,6 +49,7 @@ export const MapPage = ({
   const runAction = useAppActions();
   const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
   const navMenuPage = useAppState((s) => s.menu.activePage);
+  const mapPosition = useAppState((s) => s.core.mapPosition);
 
   const ref = useRef<HTMLElement>(null);
 
@@ -95,6 +96,7 @@ export const MapPage = ({
     contextPanelOpen: contextPanelOpen || inputFocus,
     detailPanelOpen: infoDrawerOpen,
     onMouseDown,
+    mapPosition,
     className: classNames(
       "macrostrat-map-container",
       inputFocus ? "searching" : null
