@@ -3,7 +3,7 @@ import { getPBDBData } from "./filter-helpers";
 import h from "@macrostrat/hyper";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { buildMacrostratStyle } from "../map-style";
+import { buildMacrostratStyle } from "@macrostrat/map-interface/src/styles";
 import { setMapStyle } from "./style-helpers";
 import { MapLayer } from "~/map-interface/app-state";
 import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";

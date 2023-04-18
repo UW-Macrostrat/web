@@ -2,9 +2,11 @@ import { VectorMapInspectorPage, MacrostratVectorTileset } from "./map-layers";
 import h from "@macrostrat/hyper";
 import { useState } from "react";
 import { ButtonGroup, Button } from "@blueprintjs/core";
-import { buildMacrostratStyle } from "~/map-interface/map-page/map-style";
+import { buildMacrostratStyle } from "@macrostrat/map-interface/src/styles";
 
-const baseStyle = buildMacrostratStyle();
+const baseStyle = buildMacrostratStyle({
+  tileserverDomain: "https://tiles.macrostrat.org",
+});
 
 const newStyle = {
   ...baseStyle,

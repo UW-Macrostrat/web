@@ -26,7 +26,7 @@ import {
   buildMacrostratStyle,
   MapSourcesLayer,
   toggleLineSymbols,
-} from "../map-style";
+} from "@macrostrat/map-interface/src/styles";
 import { getExpressionForFilters } from "./filter-helpers";
 import Map from "./map";
 import { MapBottomControls } from "@macrostrat/map-interface/src/controls";
@@ -36,6 +36,7 @@ import { getFocusState, PositionFocusState } from "@macrostrat/mapbox-react";
 import { MapMarker } from "@macrostrat/map-interface/src/helpers";
 import { MapView } from "@macrostrat/map-interface";
 import { LineString } from "geojson";
+import { MacrostratLineSymbolManager } from "@macrostrat/map-interface/src/styles";
 
 const h = hyper.styled(styles);
 
@@ -44,7 +45,9 @@ mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
 const VestigialMap = forwardRef((props, ref) => h(Map, { ...props, ref }));
 
 function buildStyle(style, age, model = 1, isDark = false) {
-  const overlayStyles = buildMacrostratStyle();
+  const overlayStyles = buildMacrostratStyle({
+    tileserverDomain: SETTINGS.burwellTileDomain,
+  });
   if (age != null) {
     return applyAgeModelStyles(age, model, style, overlayStyles, isDark);
   }
@@ -269,19 +272,6 @@ function ColumnDataManager({ mapInitialized }) {
 interface MapViewProps {
   showLineSymbols?: boolean;
   children?: React.ReactNode;
-}
-
-export function MacrostratLineSymbolManager({ showLineSymbols = true }) {
-  const mapRef = useMapRef();
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null) return;
-    // Update line symbol visibility on map load
-    toggleLineSymbols(map, showLineSymbols);
-  }, [mapRef.current]);
-
-  useMapConditionalStyle(mapRef, showLineSymbols, toggleLineSymbols);
-  return null;
 }
 
 export function CoreMapView(props: MapViewProps) {

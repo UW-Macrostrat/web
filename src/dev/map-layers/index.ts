@@ -2,7 +2,6 @@
 import { Spinner, Switch } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import { useMapConditionalStyle, useMapRef } from "@macrostrat/mapbox-react";
-
 import {
   getMapboxStyle,
   mergeStyles,
@@ -29,7 +28,7 @@ import {
   toggleLineSymbols,
   buildMacrostratStyle,
   buildBasicStyle,
-} from "../../map-interface/map-page/map-style";
+} from "@macrostrat/map-interface/src/styles";
 import { CoreMapView, MapMarker } from "~/map-interface/map-page/map-view";
 import {
   FeaturePanel,
@@ -53,7 +52,9 @@ export enum MacrostratRasterTileset {
 
 export const h = hyper.styled(styles);
 
-const _macrostratStyle = buildMacrostratStyle() as mapboxgl.Style;
+const _macrostratStyle = buildMacrostratStyle({
+  tileserverDomain: SETTINGS.burwellTileDomain,
+}) as mapboxgl.Style;
 
 function isStateValid(state) {
   if (state == null) {
