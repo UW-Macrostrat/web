@@ -2,13 +2,12 @@ import { FormGroup, Label, Slider, Spinner } from "@blueprintjs/core";
 import { useDarkMode } from "@macrostrat/ui-components";
 import { useEffect, useState, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { LoaderButton } from "~/map-interface/components/navbar";
 import { useAppActions, useAppState } from "~/map-interface/app-state";
-import { FloatingNavbar } from "~/map-interface/components/navbar";
 import { MapAreaContainer } from "~/map-interface/map-page";
 import { PanelCard } from "~/map-interface/map-page/menu";
 import { getBaseMapStyle } from "~/map-interface/map-page/map-view/utils";
 import { MacrostratRasterTileset, buildRasterStyle, h, DevMapView } from ".";
+import { FloatingNavbar, MapLoadingButton } from "@macrostrat/map-interface";
 import { useMapStyle, ParentRouteButton } from "./utils";
 import { useMapRef } from "@macrostrat/mapbox-react";
 
@@ -66,7 +65,7 @@ export function RasterMapInspectorPage({
       navbar: h(FloatingNavbar, { className: "searchbar" }, [
         h([h(ParentRouteButton), h("h2", `${tileset}`)]),
         h("div.spacer"),
-        h(LoaderButton, {
+        h(MapLoadingButton, {
           active: isOpen,
           onClick: () => setOpen(!isOpen),
           isLoading,

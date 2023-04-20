@@ -1,4 +1,4 @@
-import { MapAction, MapLayer, MapState, PositionFocusState } from "../map";
+import { MapAction, MapLayer, MapState } from "../map";
 import { CancelToken } from "axios";
 export * from "../map";
 import { AddFilter, FilterData, Filter } from "../../handlers/filters";

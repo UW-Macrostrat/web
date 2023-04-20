@@ -9,6 +9,8 @@ import {
 import { useSelector } from "react-redux";
 import Filters, { FilterPanel } from "./filter-panel";
 import styles from "./searchbar.styl";
+import { useMapStatus } from "@macrostrat/mapbox-react";
+import { MapLoadingButton, FloatingNavbar } from "@macrostrat/map-interface";
 import { PanelSubhead } from "@macrostrat/map-interface/src/expansion-panel/headers";
 import classNames from "classnames";
 
@@ -87,62 +89,22 @@ function SearchResults({ className }) {
   return h(Card, { className }, h(ResultList, { searchResults }));
 }
 
-const spinnerElement = h(Spinner, { size: 16 });
-
-function LoaderButton({
-  isLoading = false,
-  onClick,
-  active = false,
-  icon = "menu",
-}) {
-  return h(Button, {
-    icon: isLoading ? spinnerElement : icon,
-    large: true,
-    minimal: true,
-    onClick,
-    active: active && !isLoading,
-  });
-}
-
 function MenuButton() {
   const runAction = useAppActions();
-  const mapIsLoading = useSelector((state) => state.core.mapIsLoading);
   const menuOpen = useContextPanelOpen();
 
   const onClick = useCallback(() => {
     runAction({ type: "toggle-menu" });
   }, []);
 
-  return h(LoaderButton, {
+  return h(MapLoadingButton, {
     icon: "menu",
-    isLoading: mapIsLoading,
     onClick,
     active: menuOpen,
   });
 }
 
 type AnyChildren = React.ReactNode | React.ReactFragment;
-
-export function FloatingNavbar({
-  className,
-  children,
-  statusElement = null,
-}: {
-  className?: string;
-  children?: AnyChildren;
-  statusElement?: AnyChildren;
-}) {
-  return h("div.searchbar-holder", { className }, [
-    h("div.navbar-holder", [
-      h(Navbar, { className: "searchbar panel" }, children),
-    ]),
-    h.if(statusElement != null)(
-      Card,
-      { className: "status-tongue" },
-      statusElement
-    ),
-  ]);
-}
 
 const filterPanelElement = h(FilterPanel);
 
@@ -200,4 +162,4 @@ function SearchGuidance() {
 }
 
 export default Searchbar;
-export { SearchResults, LoaderButton };
+export { SearchResults };

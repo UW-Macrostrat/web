@@ -8,21 +8,19 @@ import {
   removeMapLabels,
   setMapPosition,
 } from "@macrostrat/mapbox-utils";
-import { useStoredState } from "@macrostrat/ui-components";
-import { JSONView, useDarkMode } from "@macrostrat/ui-components";
+import { useStoredState, useDarkMode } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
 import { useCallback, useEffect, useState, useMemo } from "react";
-import { useSelector } from "react-redux";
 import { SETTINGS } from "~/map-interface/settings";
-import { LoaderButton } from "../../map-interface/components/navbar";
-import { useAppActions, useAppState } from "../../map-interface/app-state";
+import { MapLoadingButton, FloatingNavbar } from "@macrostrat/map-interface";
+import { useAppActions } from "../../map-interface/app-state";
 import { LocationPanel } from "@macrostrat/map-interface";
-import { FloatingNavbar } from "../../map-interface/components/navbar";
 import { MapAreaContainer } from "../../map-interface/map-page";
 import { PanelCard } from "../../map-interface/map-page/menu";
 import { getBaseMapStyle } from "../../map-interface/map-page/map-view/utils";
 import { MapBottomControls } from "@macrostrat/map-interface/src/controls";
 import { MapStyledContainer } from "@macrostrat/map-interface";
+import { Spacer } from "@macrostrat/ui-components";
 import {
   buildXRayStyle,
   toggleLineSymbols,
@@ -36,6 +34,7 @@ import {
   TileInfo,
 } from "@macrostrat/map-interface/src/dev/vector-tile-features";
 import { TileExtentLayer } from "@macrostrat/map-interface/src/dev/tile-extent";
+import { useMapStatus, useMapDispatch } from "@macrostrat/mapbox-react";
 import styles from "../main.module.styl";
 import { useMapStyle, ParentRouteButton } from "./utils";
 
@@ -100,8 +99,8 @@ export function VectorMapInspectorPage({
     We also apply a custom style when the infodrawer is open so we can hide
     the search bar on mobile platforms
   */
+  const { isLoading, isInitialized: loaded } = useMapStatus();
 
-  const loaded = useSelector((state) => state.core.initialLoadComplete);
   useEffect(() => {
     runAction({ type: "get-initial-map-state" });
   }, []);
@@ -119,7 +118,6 @@ export function VectorMapInspectorPage({
     useState<mapboxgl.LngLat | null>(null);
 
   const [data, setData] = useState(null);
-  const isLoading = useAppState((state) => state.core.mapIsLoading);
 
   const transformRequest = useCallback(
     (url, resourceType) => {
@@ -192,8 +190,8 @@ export function VectorMapInspectorPage({
     {
       navbar: h(FloatingNavbar, { className: "searchbar" }, [
         h([h(ParentRouteButton), headerElement ?? h("h2", title ?? tileset)]),
-        h("div.spacer"),
-        h(LoaderButton, {
+        h(Spacer),
+        h(MapLoadingButton, {
           active: isOpen,
           onClick: () => setOpen(!isOpen),
           isLoading,
@@ -239,18 +237,6 @@ export function VectorMapInspectorPage({
       h(TileExtentLayer, { tile, color: isEnabled ? "white" : "black" }),
     ])
   );
-}
-
-export function FeatureRecord({ feature }) {
-  const props = feature.properties;
-  return h("div.feature-record", [
-    h.if(Object.keys(props).length > 0)("div.feature-properties", [
-      h(JSONView, {
-        data: props,
-        hideRoot: true,
-      }),
-    ]),
-  ]);
 }
 
 export function buildRasterStyle(layer: MacrostratRasterTileset) {
@@ -346,7 +332,8 @@ interface DevMapViewProps {
 
 export function DevMapView(props: DevMapViewProps): React.ReactElement {
   const { style, transformRequest, children } = props;
-  const { mapPosition } = useAppState((state) => state.core);
+  const { mapPosition } = useMapStatus();
+  const dispatch = useMapDispatch();
 
   let mapRef = useMapRef();
 
@@ -355,14 +342,14 @@ export function DevMapView(props: DevMapViewProps): React.ReactElement {
   /* HACK: Right now we need this to force a render when the map
     is done loading
     */
-  const [mapInitialized, setMapInitialized] = useState(0);
 
   // Map initialization
   useEffect(() => {
+    console.log("Initializing map");
     if (style == null) return;
     mapRef.current = initializeMap({ style, transformRequest });
-    setMapInitialized(mapInitialized + 1);
-  }, [style, transformRequest]);
+    dispatch({ type: "set-initialized", payload: true });
+  }, [style, transformRequest, dispatch]);
 
   // Map style updating
   useEffect(() => {
@@ -374,7 +361,7 @@ export function DevMapView(props: DevMapViewProps): React.ReactElement {
     const map = mapRef.current;
     if (map == null) return;
     setMapPosition(map, mapPosition);
-  }, [mapRef.current, mapInitialized]);
+  }, [mapRef.current]);
 
   // This seems to do a bit of a poor job at the moment. Maybe because fo caching?
 
@@ -403,10 +390,9 @@ export function BasicLayerInspectorPage({
     the search bar on mobile platforms
   */
 
-  console.log(layer);
   const tileset = layer.id;
 
-  const loaded = useSelector((state) => state.core.initialLoadComplete);
+  const { isInitialized: loaded, isLoading } = useMapStatus();
   useEffect(() => {
     runAction({ type: "get-initial-map-state" });
   }, []);
@@ -420,7 +406,6 @@ export function BasicLayerInspectorPage({
     useState<mapboxgl.LngLat | null>(null);
 
   const [data, setData] = useState(null);
-  const isLoading = useAppState((state) => state.core.mapIsLoading);
 
   const onSelectPosition = useCallback((position: mapboxgl.LngLat) => {
     setInspectPosition(position);

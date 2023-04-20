@@ -7,6 +7,7 @@ import { buildMacrostratStyle } from "@macrostrat/map-interface/src/styles";
 import { setMapStyle } from "./style-helpers";
 import { MapLayer } from "~/map-interface/app-state";
 import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
+import { SETTINGS } from "~/map-interface/settings";
 
 const maxClusterZoom = 6;
 const highlightLayers = [
@@ -57,7 +58,9 @@ class VestigialMap extends Component<MapProps, {}> {
     }
 
     const { mapLayers } = this.props;
-    buildMacrostratStyle().layers.forEach((layer) => {
+    buildMacrostratStyle({
+      tileserverDomain: SETTINGS.burwellTileDomain,
+    }).layers.forEach((layer) => {
       // Populate the objects that track interaction states
       this.hoverStates[layer.id] = null;
       this.selectedStates[layer.id] = null;
@@ -276,7 +279,14 @@ class VestigialMap extends Component<MapProps, {}> {
     this.setupMapHandlers();
     if (this.map == null) return false;
 
-    setMapStyle(this, this.map, buildMacrostratStyle(), nextProps);
+    setMapStyle(
+      this,
+      this.map,
+      buildMacrostratStyle({
+        tileserverDomain: SETTINGS.burwellTileDomain,
+      }),
+      nextProps
+    );
 
     if (nextProps.mapIsRotated !== this.props.mapIsRotated) {
       return true;
@@ -334,7 +344,9 @@ class VestigialMap extends Component<MapProps, {}> {
         // zoom to user location
       }
     }
-    const mapStyle = buildMacrostratStyle();
+    const mapStyle = buildMacrostratStyle({
+      tileserverDomain: SETTINGS.burwellTileDomain,
+    });
     // Handle changes to map filters
     if (nextProps.filters != this.props.filters) {
       // If all filters have been removed simply reset the filter states
