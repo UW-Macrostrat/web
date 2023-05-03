@@ -1,6 +1,5 @@
 import h from "@macrostrat/hyper";
 import { ExpansionPanel } from "../expansion-panel";
-import Reference from "../Reference";
 import LongText from "../long-text";
 import { IntervalChip } from "../info-blocks";
 
@@ -86,10 +85,45 @@ function GeologicMapInfo(props) {
           text: source.comments,
         }),
         h(GeoMapLines, { source }),
-        h(Reference, { reference: source.ref }),
+        h(MapReference, { reference: source.ref }),
       ]),
     ]
   );
+}
+
+function MapReference(props) {
+  const { reference: ref } = props;
+  if (!ref || Object.keys(ref).length === 0) {
+    return null;
+  }
+
+  const {
+    authors,
+    ref_year,
+    url,
+    ref_title,
+    ref_source,
+    isbn_doi,
+    source_id,
+    map_id,
+  } = ref;
+
+  const year = ref_year.length ? " " + ref_year + ", " : "";
+  const source = ref_source.length ? ": " + ref_source : "";
+  const doi = isbn_doi.length ? ", " + isbn_doi : "";
+
+  return h("p.reference.map-source-attr", [
+    h("span.attr", "Source: "),
+    authors,
+    year,
+    h("a.ref-link", { href: url, target: "_blank" }, [ref_title]),
+    source,
+    doi,
+    ". ",
+    source_id,
+    " / ",
+    map_id,
+  ]);
 }
 
 export { GeologicMapInfo };
