@@ -111,6 +111,7 @@ export default function MainMapView(props) {
     timeCursorAge,
     plateModelId,
     infoMarkerPosition,
+    focusedMapSource,
   } = useAppState((state) => state.core);
 
   let mapRef = useMapRef();
@@ -131,7 +132,7 @@ export default function MainMapView(props) {
   const [baseStyle, setBaseStyle] = useState(null);
   const mapStyle = useMemo(() => {
     if (baseStyle == null) return null;
-    const overlayStyles = buildMacrostratStyle();
+    const overlayStyles = buildMacrostratStyle(focusedMapSource);
     if (timeCursorAge != null) {
       return applyAgeModelStyles(
         timeCursorAge,
@@ -142,7 +143,7 @@ export default function MainMapView(props) {
       );
     }
     return mergeStyles(baseStyle, overlayStyles);
-  }, [baseStyle, timeCursorAge, plateModelId, isDarkMode]);
+  }, [baseStyle, timeCursorAge, plateModelId, isDarkMode, focusedMapSource]);
 
   useEffect(() => {
     if (mapRef.current == null || baseStyle == null) return;
@@ -218,6 +219,7 @@ export default function MainMapView(props) {
       // Recreate the set every time to force a re-render
       mapLayers,
       mapCenter,
+      mapStyle,
       crossSectionLine,
       crossSectionCursorLocation,
       mapPosition,

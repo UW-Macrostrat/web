@@ -2,6 +2,7 @@ import h from "@macrostrat/hyper";
 import { ExpansionPanel } from "../expansion-panel";
 import LongText from "../long-text";
 import { IntervalChip } from "../info-blocks";
+import { useAppActions } from "~/map-interface/app-state";
 
 function LongTextRenderer(props) {
   const { name, text } = props;
@@ -97,6 +98,8 @@ function MapReference(props) {
     return null;
   }
 
+  const runAction = useAppActions();
+
   const {
     authors,
     ref_year,
@@ -120,7 +123,15 @@ function MapReference(props) {
     source,
     doi,
     ". ",
-    source_id,
+    h(
+      "a",
+      {
+        onClick() {
+          runAction({ type: "set-focused-map-source", source_id });
+        },
+      },
+      source_id
+    ),
     " / ",
     map_id,
   ]);
