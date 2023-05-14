@@ -12,7 +12,7 @@ import { useStoredState, useDarkMode } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { SETTINGS } from "~/map-interface/settings";
-import { MapLoadingButton, FloatingNavbar } from "@macrostrat/map-interface";
+import { FloatingNavbar } from "@macrostrat/map-interface";
 import { useAppActions } from "../../map-interface/app-state";
 import { LocationPanel } from "@macrostrat/map-interface";
 import { MapAreaContainer } from "../../map-interface/map-page";
@@ -20,9 +20,7 @@ import { PanelCard } from "../../map-interface/map-page/menu";
 import { getBaseMapStyle } from "../../map-interface/map-page/map-view/utils";
 import { MapBottomControls } from "@macrostrat/map-interface/src/controls";
 import { MapStyledContainer } from "@macrostrat/map-interface";
-import { Spacer } from "@macrostrat/ui-components";
 import {
-  buildXRayStyle,
   toggleLineSymbols,
   buildMacrostratStyle,
   buildBasicStyle,
@@ -37,6 +35,7 @@ import { TileExtentLayer } from "@macrostrat/map-interface/src/dev/tile-extent";
 import { useMapStatus, useMapDispatch } from "@macrostrat/mapbox-react";
 import styles from "../main.module.styl";
 import { useMapStyle, ParentRouteButton } from "./utils";
+import { DevMapPage } from "@macrostrat/map-interface";
 
 export enum MacrostratVectorTileset {
   Carto = "carto",
@@ -73,8 +72,6 @@ function isStateValid(state) {
 
 const defaultState = {
   showLineSymbols: false,
-  xRay: false,
-  showTileExtent: false,
   bypassCache: true,
 };
 
@@ -92,32 +89,15 @@ export function VectorMapInspectorPage({
   children?: React.ReactNode;
 }) {
   // A stripped-down page for map development
-  const runAction = useAppActions();
-  /* We apply a custom style to the panel container when we are interacting
-    with the search bar, so that we can block map interactions until search
-    bar focus is lost.
-    We also apply a custom style when the infodrawer is open so we can hide
-    the search bar on mobile platforms
-  */
-  const { isLoading, isInitialized: loaded } = useMapStatus();
 
-  useEffect(() => {
-    runAction({ type: "get-initial-map-state" });
-  }, []);
-
-  const [isOpen, setOpen] = useState(false);
+  console.log("Vector map inspector page");
 
   const [state, setState] = useStoredState(
     "macrostrat:vector-map-inspector",
     defaultState,
     isStateValid
   );
-  const { showLineSymbols, xRay, showTileExtent, bypassCache } = state;
-
-  const [inspectPosition, setInspectPosition] =
-    useState<mapboxgl.LngLat | null>(null);
-
-  const [data, setData] = useState(null);
+  const { showLineSymbols, bypassCache } = state;
 
   const transformRequest = useCallback(
     (url, resourceType) => {
@@ -136,47 +116,44 @@ export function VectorMapInspectorPage({
     [bypassCache]
   );
 
-  const onSelectPosition = useCallback((position: mapboxgl.LngLat) => {
-    setInspectPosition(position);
-  }, []);
-
-  let detailElement = null;
-  if (inspectPosition != null) {
-    detailElement = h(
-      LocationPanel,
-      {
-        onClose() {
-          setInspectPosition(null);
-        },
-        position: inspectPosition,
-      },
-      [
-        h(TileInfo, {
-          feature: data?.[0] ?? null,
-          showExtent: showTileExtent,
-          setShowExtent() {
-            setState({ ...state, showTileExtent: !showTileExtent });
-          },
-        }),
-        h(FeaturePanel, { features: data }),
-      ]
-    );
-  }
-
-  const { isEnabled } = useDarkMode();
-
-  // Style management
-  const baseMapURL = getBaseMapStyle(new Set([]), isEnabled);
-
   const _overlayStyle = useMemo(() => {
-    const style: mapboxgl.Style = xRay
-      ? buildXRayStyle({ inDarkMode: isEnabled })
-      : overlayStyle;
-    return replaceSourcesForTileset(style, tileset);
-  }, [xRay, tileset, overlayStyle, isEnabled]) as mapboxgl.Style;
+    const style = replaceSourcesForTileset(overlayStyle, tileset);
+    console.log(style);
+    return style;
+  }, [tileset, overlayStyle]) as mapboxgl.Style;
 
-  const style = useMapStyle(baseMapURL, _overlayStyle);
+  const controls = h([
+    h(Switch, {
+      checked: showLineSymbols,
+      label: "Show line symbols",
+      onChange() {
+        setState({ ...state, showLineSymbols: !showLineSymbols });
+      },
+    }),
+    h(Switch, {
+      checked: bypassCache,
+      label: "Bypass cache",
+      onChange() {
+        setState({ ...state, bypassCache: !bypassCache });
+      },
+    }),
+    h(LineSymbolManager, { showLineSymbols }),
+  ]);
 
+  return h(
+    DevMapPage,
+    {
+      headerElement,
+      mapboxToken: SETTINGS.mapboxAccessToken,
+      title: title ?? tileset,
+      overlayStyle: _overlayStyle,
+      transformRequest,
+    },
+    controls
+  );
+}
+
+/** 
   let tile = null;
   if (showTileExtent && data?.[0] != null) {
     let f = data[0];
@@ -206,20 +183,6 @@ export function VectorMapInspectorPage({
             setState({ ...state, xRay: !xRay });
           },
         }),
-        h(Switch, {
-          checked: showLineSymbols,
-          label: "Show line symbols",
-          onChange() {
-            setState({ ...state, showLineSymbols: !showLineSymbols });
-          },
-        }),
-        h(Switch, {
-          checked: bypassCache,
-          label: "Bypass cache",
-          onChange() {
-            setState({ ...state, bypassCache: !bypassCache });
-          },
-        }),
       ]),
       detailPanel: detailElement,
       contextPanelOpen: isOpen,
@@ -233,11 +196,11 @@ export function VectorMapInspectorPage({
         position: inspectPosition,
         setPosition: onSelectPosition,
       }),
-      h(LineSymbolManager, { showLineSymbols }),
       h(TileExtentLayer, { tile, color: isEnabled ? "white" : "black" }),
     ])
   );
 }
+*/
 
 export function buildRasterStyle(layer: MacrostratRasterTileset) {
   let tileURL = SETTINGS.burwellTileDomain + `/${layer}/{z}/{x}/{y}.png`;

@@ -216,7 +216,7 @@ export default function MainMapView(props) {
     map.setFilter("burwell_stroke", expr);
   }, [filters, mapInitialized, styleLoaded]);
 
-  return h(CoreMapView, props, [
+  return h(CoreMapView, { ...props, infoMarkerPosition }, [
     h(VestigialMap, {
       filters,
       filteredColumns,

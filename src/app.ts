@@ -14,6 +14,7 @@ import reducerStack, {
 import { createRouterMiddleware } from "@lagunovsky/redux-react-router";
 import { routerBasename } from "./map-interface/settings";
 import { DarkModeProvider } from "@macrostrat/ui-components";
+import { WeaverPage } from "./weaver";
 import { onDemand } from "./_utils";
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
@@ -61,6 +62,7 @@ const App = () => {
               path: "/dev/*",
               element: h(DevMapPage),
             }),
+            h(Route, { path: "/weaver", element: h(WeaverPage) }),
             h(Route, { path: "*", element: h(MapPage) }),
           ]),
 
