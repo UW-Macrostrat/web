@@ -14,3 +14,5 @@ const root = createRoot(document.getElementById("app-container"));
 
 // Render the application
 root.render(h(App));
+
+FocusStyleManager.onlyShowFocusOnTabs();

@@ -19,6 +19,7 @@ import { useContextPanelOpen, useContextClass } from "../app-state";
 import { MapboxMapProvider, ZoomControl } from "@macrostrat/mapbox-react";
 import { MapBottomControls, MapStyledContainer } from "./map-view";
 import { Routes, Route, useParams } from "react-router-dom";
+import { TimescalePanel } from "../paleo";
 import { MenuPage } from "./menu";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
@@ -70,9 +71,13 @@ export const MapPage = ({
     event.stopPropagation();
   };
 
+  const inPaleoMode = useAppState((s) => s.core.timeCursorAge != null);
+
   if (!loaded) {
     return h(Spinner);
   }
+
+  const bottomPanel = inPaleoMode ? h(TimescalePanel) : h(ElevationChart, null);
 
   return h(MapAreaContainer, {
     navbar: h(Searchbar, { className: "searchbar" }),
@@ -87,13 +92,13 @@ export const MapPage = ({
     detailPanel: h([
       h(Routes, [
         h(Route, {
-          path: "/loc/:lng/:lat/*",
+          path: "loc/:lng/:lat/*",
           element: h(InfoDrawerRoute),
         }),
       ]),
       h(ZoomControl, { className: "zoom-control" }),
     ]),
-    bottomPanel: h(ElevationChart, null),
+    bottomPanel,
     contextPanelOpen: contextPanelOpen || inputFocus,
     detailPanelOpen: infoDrawerOpen,
     onMouseDown,
