@@ -18,6 +18,8 @@ export function hashStringReducer(state: AppState, action: AppAction) {
     case "clear-filters":
     case "toggle-map-layer":
     case "map-moved":
+    case "set-time-cursor":
+    case "set-plate-model":
       updateURI(state.core);
   }
   return state;
@@ -29,6 +31,8 @@ interface HashParams {
   z?: string;
   a?: string;
   e?: string;
+  age?: string;
+  plate_model?: string;
 }
 
 // function getFilterDescriptor(filter: Filter): string {
@@ -48,7 +52,9 @@ export function updateURI(state: CoreState) {
   applyXYPosition(args, state);
   applyHeightAndOrientation(args, state);
 
-  if (state.timeCursorAge != null && state.timeCursorAge != 0) {
+  console.log(state);
+
+  if (state.timeCursorAge != null) {
     args.age = fmtInt(state.timeCursorAge);
     args.plate_model = fmtInt(state.plateModelId);
   }
@@ -219,7 +225,6 @@ export function updateMapPositionForHash(
 
     let { show = [], hide = [] } = hashData;
     // Set default view parameters
-    console.log(state.infoMarkerPosition);
 
     const {
       x = state.infoMarkerPosition?.lng ?? 0,
@@ -268,6 +273,8 @@ export function updateMapPositionForHash(
       target,
     };
 
+    console.log(hashData);
+
     // Get time cursor information
     const { age, plate_model = 1 } = hashData;
 
@@ -276,7 +283,7 @@ export function updateMapPositionForHash(
       mapPosition: position,
       mapLayers,
       mapBackend: MapBackend.MAPBOX3,
-      timeCursorAge: age != null ? Number(age) : null,
+      timeCursorAge: age == null ? null : Number(age),
       plateModelId: Number(plate_model),
     };
   } catch (e) {

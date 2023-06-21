@@ -46,8 +46,6 @@ function mainReducer(
 
       let s1 = setInfoMarkerPosition(state);
 
-      console.log(state.router, action.payload);
-
       const newRoute = action.payload.location;
       let newAction = action;
       if (newRoute.hash == "") {

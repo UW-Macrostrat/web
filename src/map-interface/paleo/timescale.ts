@@ -99,6 +99,7 @@ export function TimescalePanel() {
   useEffect(() => {
     if (model == null) return;
     const { max_age, min_age } = model;
+    if (max_age == null || min_age == null) return;
     if (age > max_age) {
       runAction({
         type: "set-time-cursor",
