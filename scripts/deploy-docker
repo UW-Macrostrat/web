@@ -22,6 +22,7 @@ export PUBLIC_URL=/map/
 export NODE_ENV=production
 export MACROSTRAT_TILESERVER_DOMAIN='https://dev.macrostrat.org/tiles'
 export MACROSTRAT_API_DOMAIN='https://dev.macrostrat.org'
+export CORELLE_API_DOMAIN='https://rotate.macrostrat.org'
 export MACROSTRAT_DOCKER_REGISTRY='ghcr.io'
 
 if [[ $skip_build == false ]]; then
