@@ -3,7 +3,6 @@ import { getPBDBData } from "./filter-helpers";
 import h from "@macrostrat/hyper";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { buildMacrostratStyle } from "../map-style";
 import { setMapStyle } from "./style-helpers";
 import { MapLayer } from "~/map-interface/app-state";
 import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
@@ -56,8 +55,8 @@ class VestigialMap extends Component<MapProps, {}> {
       return;
     }
 
-    const { mapLayers } = this.props;
-    buildMacrostratStyle().layers.forEach((layer) => {
+    const { mapLayers, mapStyle } = this.props;
+    mapStyle.layers.forEach((layer) => {
       // Populate the objects that track interaction states
       this.hoverStates[layer.id] = null;
       this.selectedStates[layer.id] = null;
@@ -275,8 +274,9 @@ class VestigialMap extends Component<MapProps, {}> {
   shouldComponentUpdate(nextProps) {
     this.setupMapHandlers();
     if (this.map == null) return false;
+    const { mapStyle } = nextProps;
 
-    setMapStyle(this, this.map, buildMacrostratStyle(), nextProps);
+    setMapStyle(this, this.map, mapStyle, nextProps);
 
     if (nextProps.mapIsRotated !== this.props.mapIsRotated) {
       return true;
@@ -334,7 +334,6 @@ class VestigialMap extends Component<MapProps, {}> {
         // zoom to user location
       }
     }
-    const mapStyle = buildMacrostratStyle();
     // Handle changes to map filters
     if (nextProps.filters != this.props.filters) {
       // If all filters have been removed simply reset the filter states

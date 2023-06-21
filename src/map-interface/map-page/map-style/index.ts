@@ -450,13 +450,18 @@ export function buildOverlayLayers() {
   ];
 }
 
-export function buildMacrostratStyle() {
+export function buildMacrostratStyle(focusedMap: number | null) {
+  let tileURL = `${SETTINGS.burwellTileDomain}/carto-slim/{z}/{x}/{y}`;
+  if (focusedMap != null) {
+    tileURL = `${SETTINGS.burwellTileDomain}/map/{z}/{x}/{y}?source_id=${focusedMap}`;
+  }
+
   return {
     version: 8,
     sources: {
       burwell: {
         type: "vector",
-        tiles: [`${SETTINGS.burwellTileDomain}/carto-slim/{z}/{x}/{y}`],
+        tiles: [tileURL],
         tileSize: 512,
       },
       ...overlaySources,
