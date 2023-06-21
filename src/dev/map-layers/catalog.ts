@@ -69,5 +69,6 @@ function MapLayerPage() {
   if (layerDef == null) {
     return h("div", [h(BackButton), h("div.loading", h(Spinner))]);
   }
+  console.log(layerDef);
   return h(ErrorBoundary, h(BasicLayerInspectorPage, { layer: layerDef }));
 }

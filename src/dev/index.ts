@@ -30,6 +30,12 @@ export default function DevIndex() {
         }),
       }),
       h(Route, {
+        path: "all-maps",
+        element: h(VectorMapInspectorPage, {
+          tileset: MacrostratVectorTileset.AllMaps,
+        }),
+      }),
+      h(Route, {
         path: "color-schemes",
         element: h(MapColorsInspector, {
           title: "Map colors",
@@ -53,7 +59,6 @@ export default function DevIndex() {
           tileset: MacrostratRasterTileset.Emphasized,
         }),
       }),
-      h(Route, { path: "catalog", element: h(MapLayerCatalog) }),
       h(Route, {
         path: "column-inspector",
         element: loadableElement(() => import("./column-inspector")),
@@ -73,6 +78,7 @@ function MapInspectorIndex() {
       h(LinkItem, { to: "carto-slim" }, "Carto (slim)"),
       h(LinkItem, { to: "carto-raster" }, "Carto (image)"),
       h(LinkItem, { to: "emphasized" }, "Carto (image, emphasized)"),
+      h(LinkItem, { to: "all-maps" }, "All maps"),
     ]),
     h("h2", "Additional layers"),
     h("ul.layers", [h(LinkItem, { to: "igcp-orogens" }, "IGCP orogens")]),
