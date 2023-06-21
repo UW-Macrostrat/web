@@ -46,13 +46,13 @@ function BrokenTimescale({ length, ageRange = [1000, 0] }) {
   return h("div.broken-timescale", [
     h.if(oldLength != null)(Timescale, {
       length: oldLength,
-      cursorPosition: age,
+      cursorPosition: age > breakAge ? age : null,
       ageRange: [maxAge, breakAge],
       ...props,
     }),
     h(Timescale, {
       length: newLength,
-      cursorPosition: age,
+      cursorPosition: age < breakAge ? age : null,
       ageRange: [breakAge, minAge],
       ...props,
     }),
