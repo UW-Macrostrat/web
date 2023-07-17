@@ -3,7 +3,7 @@ import {
   FilterData,
   IntervalFilterData,
 } from "~/map-interface/app-state/handlers/filters";
-import { SETTINGS } from "../../settings";
+import { SETTINGS } from "../../Settings";
 
 export function getExpressionForFilters(
   filters: FilterData[]

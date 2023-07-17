@@ -15,7 +15,7 @@ import reducerStack, {
   AppState,
 } from "./map-interface/app-state";
 import { createRouterMiddleware } from "@lagunovsky/redux-react-router";
-import { routerBasename } from "./map-interface/settings";
+import { routerBasename } from "./map-interface/Settings";
 import { DarkModeProvider } from "@macrostrat/ui-components";
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
