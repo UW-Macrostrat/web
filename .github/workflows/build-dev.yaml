@@ -25,7 +25,8 @@ jobs:
           tags: |
             type=semver,pattern={{version}}
             type=raw,value=latest-itb
-            type=raw,value={{branch}}{{base_ref}}-{{sha}}-{{date 'YYYYMMDDHHmmss'}}
+            type=ref,enable=true,prefix=pr-,suffix=-{{date 'YYYYMMDDHHmmss'}},event=pr
+            type=raw,value=sha-{{sha}}
       -
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
