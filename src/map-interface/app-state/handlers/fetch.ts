@@ -1,6 +1,6 @@
 import axios from "axios";
 import { joinURL } from "~/map-interface/utils";
-import { SETTINGS } from "../../settings";
+import { SETTINGS } from "../../Settings";
 import { ColumnGeoJSONRecord } from "../reducers";
 
 export const base = `${SETTINGS.apiDomain}/api/v2`;
