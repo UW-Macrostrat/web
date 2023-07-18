@@ -60,6 +60,7 @@
     "@lagunovsky/redux-react-router": "^3.2.0",
     "@loadable/component": "^5.14.1",
     "@macrostrat/column-components": "workspace:*",
+    "@macrostrat/corelle": "^1.1.0",
     "@macrostrat/hyper": "^2.2.1",
     "@macrostrat/mapbox-react": "workspace:*",
     "@macrostrat/mapbox-styles": "workspace:*",

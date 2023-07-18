@@ -61,9 +61,12 @@ export function applyAgeModelStyles(
   mapStyle,
   inDarkMode = false
 ) {
-  let mapTileURL = "https://dev.macrostrat.org/tiles/carto-slim/{z}/{x}/{y}";
+  let tileBaseURL = SETTINGS.burwellTileDomain;
+  let mapTileURL = tileBaseURL + "/carto-slim/{z}/{x}/{y}";
   if (age != null) {
-    mapTileURL = `https://dev.macrostrat.org/tiles/carto-slim-rotated/{z}/{x}/{y}?model_id=${model}&t_step=${age}`;
+    mapTileURL =
+      tileBaseURL +
+      `/carto-slim-rotated/{z}/{x}/{y}?model_id=${model}&t_step=${age}`;
   }
 
   let color = chroma("rgb(180, 180, 200)");
@@ -92,15 +95,26 @@ export function applyAgeModelStyles(
       version: 8,
       layers: [
         {
+          id: "background",
+          type: "background",
+          paint: {
+            "background-color": inDarkMode
+              ? "hsl(242, 12%, 18%)"
+              : "hsl(219, 3%, 78%)",
+          },
+        },
+        {
           id: "plate-polygons",
           type: "fill",
           source: "burwell",
           "source-layer": "plates",
           paint: {
-            "fill-color": inDarkMode ? "rgb(60,60,70)" : "rgb(170,170,200)",
+            "fill-color": inDarkMode
+              ? "hsl(242, 8%, 20%)"
+              : "hsl(219, 3%, 82%)",
             "fill-outline-color": inDarkMode
-              ? "rgb(70, 70, 80)"
-              : "rgb(150,150,150)",
+              ? "hsl(242, 8%, 24%)"
+              : "hsl(219, 3%, 76%)",
           },
         },
         {
@@ -109,7 +123,7 @@ export function applyAgeModelStyles(
           source: "burwell",
           "source-layer": "land",
           paint: {
-            "fill-color": inDarkMode ? "rgb(80,80,90)" : "rgb(200,200,203)",
+            "fill-color": inDarkMode ? "rgb(80,80,90)" : "hsl(179, 4%, 94%)",
           },
         },
         // {
@@ -123,6 +137,16 @@ export function applyAgeModelStyles(
         //     "line-opacity": 0.8,
         //   },
         // },
+        {
+          id: "plates-debug",
+          type: "line",
+          source: "plates-debug",
+          paint: {
+            "line-color": "red",
+            "line-width": 1.5,
+            "line-opacity": 0.8,
+          },
+        },
       ],
     },
     overlays
@@ -133,6 +157,15 @@ export function applyAgeModelStyles(
     tiles: [mapTileURL],
     tileSize: 512,
   };
+
+  styles.sources.push({
+    id: "plates-debug",
+    type: "geojson",
+    data: {
+      type: "FeatureCollection",
+      features: [],
+    },
+  });
 
   return styles;
 }

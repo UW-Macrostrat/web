@@ -23,6 +23,7 @@ export const SETTINGS = {
   gddDomain: "https://xdd.wisc.edu",
   pbdbDomain: "https://paleobiodb.org",
   mapboxAccessToken: process.env.MAPBOX_API_TOKEN,
+  corelleAPIDomain: process.env.CORELLE_API_DOMAIN,
 };
 
 export const routerBasename = process.env.PUBLIC_URL;

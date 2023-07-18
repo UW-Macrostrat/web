@@ -69,6 +69,7 @@ const plugins = [
     MAPBOX_API_TOKEN: "<your-mapbox-api-token>",
     MACROSTRAT_TILESERVER_DOMAIN: "https://tiles.macrostrat.org",
     MACROSTRAT_API_DOMAIN: "https://macrostrat.org",
+    CORELLE_API_DOMAIN: "https://rotate.macrostrat.org",
     PUBLIC_URL: "/",
   }),
 ];
