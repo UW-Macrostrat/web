@@ -27,7 +27,7 @@ docker run -it -p 3010:3000 -v $(pwd):/app -w /app node:20 git config --global -
 This is mainly here for reference, the actual prod image is built via Github CI.
 
 ```bash
-docker build -t macrostrat:latest . # Assumes you have populated a .env file
+docker build -t macrostrat:latest --env . # Assumes you have populated a .env file
 ```
 
 ### Running built image
