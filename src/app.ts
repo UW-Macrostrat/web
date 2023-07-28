@@ -62,7 +62,6 @@ const App = () => {
               path: "/dev/*",
               element: h(DevMapPage),
             }),
-            h(Route, { path: "/weaver", element: h(WeaverPage) }),
             h(Route, { path: "*", element: h(MapPage) }),
           ]),
 

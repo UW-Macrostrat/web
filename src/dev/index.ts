@@ -11,12 +11,14 @@ import {
 import { loadableElement } from "~/_utils";
 import styles from "./main.module.styl";
 import { MapColorsInspector } from "./color-schemes";
+import { WeaverPage } from "../weaver";
 const h = hyper.styled(styles);
 
 export default function DevIndex() {
   // A route for each layer
   return h("div.dev-index-page", [
     h(Routes, [
+      h(Route, { path: "weaver", element: h(WeaverPage) }),
       h(Route, {
         path: "carto",
         element: h(VectorMapInspectorPage, {
@@ -27,6 +29,12 @@ export default function DevIndex() {
         path: "carto-slim",
         element: h(VectorMapInspectorPage, {
           tileset: MacrostratVectorTileset.CartoSlim,
+        }),
+      }),
+      h(Route, {
+        path: "all-maps",
+        element: h(VectorMapInspectorPage, {
+          tileset: MacrostratVectorTileset.AllMaps,
         }),
       }),
       h(Route, {
@@ -53,7 +61,6 @@ export default function DevIndex() {
           tileset: MacrostratRasterTileset.Emphasized,
         }),
       }),
-      h(Route, { path: "catalog", element: h(MapLayerCatalog) }),
       h(Route, {
         path: "column-inspector",
         element: loadableElement(() => import("./column-inspector")),
@@ -73,9 +80,13 @@ function MapInspectorIndex() {
       h(LinkItem, { to: "carto-slim" }, "Carto (slim)"),
       h(LinkItem, { to: "carto-raster" }, "Carto (image)"),
       h(LinkItem, { to: "emphasized" }, "Carto (image, emphasized)"),
+      h(LinkItem, { to: "all-maps" }, "All maps"),
     ]),
     h("h2", "Additional layers"),
-    h("ul.layers", [h(LinkItem, { to: "igcp-orogens" }, "IGCP orogens")]),
+    h("ul.layers", [
+      h(LinkItem, { to: "igcp-orogens" }, "IGCP orogens"),
+      h(LinkItem, { to: "weaver" }, "Weaver (point data experiments)"),
+    ]),
     h("h2", h(Link, { to: "catalog" }, "Map layer catalog")),
     h("h1", "Stratigraphic column inspector"),
     h(Link, { to: "column-inspector" }, "Stratigraphy"),

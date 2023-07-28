@@ -20,6 +20,7 @@ import { PanelCard } from "../../map-interface/map-page/menu";
 import { getBaseMapStyle } from "../../map-interface/map-page/map-view/utils";
 import { MapBottomControls } from "@macrostrat/map-interface/src/controls";
 import { MapStyledContainer } from "@macrostrat/map-interface";
+import { MapLoadingButton } from "@macrostrat/map-interface";
 import {
   toggleLineSymbols,
   buildMacrostratStyle,
@@ -41,6 +42,7 @@ export enum MacrostratVectorTileset {
   Carto = "carto",
   CartoSlim = "carto-slim",
   IGCPOrogens = "igcp-orogens",
+  AllMaps = "all-maps",
 }
 
 export enum MacrostratRasterTileset {
@@ -89,8 +91,6 @@ export function VectorMapInspectorPage({
   children?: React.ReactNode;
 }) {
   // A stripped-down page for map development
-
-  console.log("Vector map inspector page");
 
   const [state, setState] = useStoredState(
     "macrostrat:vector-map-inspector",
@@ -231,7 +231,7 @@ export function buildRasterStyle(layer: MacrostratRasterTileset) {
   };
 }
 
-function replaceSourcesForTileset(
+export function replaceSourcesForTileset(
   style: mapboxgl.Style,
   tileset: MacrostratVectorTileset
 ) {
@@ -323,6 +323,7 @@ export function DevMapView(props: DevMapViewProps): React.ReactElement {
   useEffect(() => {
     const map = mapRef.current;
     if (map == null) return;
+    if (mapPosition == null) return;
     setMapPosition(map, mapPosition);
   }, [mapRef.current]);
 
@@ -343,6 +344,7 @@ export function BasicLayerInspectorPage({
   title?: string;
   overlayStyle?: mapboxgl.Style;
   children?: React.ReactNode;
+  layer: any;
 }) {
   // A stripped-down page for map development
   const runAction = useAppActions();
@@ -356,9 +358,6 @@ export function BasicLayerInspectorPage({
   const tileset = layer.id;
 
   const { isInitialized: loaded, isLoading } = useMapStatus();
-  useEffect(() => {
-    runAction({ type: "get-initial-map-state" });
-  }, []);
 
   const [isOpen, setOpen] = useState(false);
 
@@ -405,9 +404,9 @@ export function BasicLayerInspectorPage({
   const _overlayStyle = useMemo(() => {
     return buildBasicStyle({
       inDarkMode: isEnabled,
-      tileURL: SETTINGS.burwellTileDomain + `/${tileset}/{z}/{x}/{y}`,
+      tileURL: layer.tileurl,
     });
-  }, [tileset, isEnabled]) as mapboxgl.Style;
+  }, [layer, isEnabled]) as mapboxgl.Style;
 
   const style = useMapStyle(baseMapURL, _overlayStyle);
 
@@ -417,7 +416,7 @@ export function BasicLayerInspectorPage({
     tile = { x: f._x, y: f._y, z: f._z };
   }
 
-  if (!loaded) return h(Spinner);
+  //if (!loaded) return h(Spinner);
 
   return h(
     MapAreaContainer,
@@ -425,10 +424,9 @@ export function BasicLayerInspectorPage({
       navbar: h(FloatingNavbar, { className: "searchbar" }, [
         h([h(ParentRouteButton), headerElement ?? h("h2", title ?? tileset)]),
         h("div.spacer"),
-        h(LoaderButton, {
+        h(MapLoadingButton, {
           active: isOpen,
           onClick: () => setOpen(!isOpen),
-          isLoading,
         }),
       ]),
       contextPanel: h(PanelCard, [children]),

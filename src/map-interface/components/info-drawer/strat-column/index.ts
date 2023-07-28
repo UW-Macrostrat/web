@@ -42,7 +42,7 @@ function ColumnOverlay({ columnInfo }: { columnInfo: ColumnSummary | null }) {
       h(Column, {
         data: unitsA,
         showLabels: true,
-        targetUnitHeight: 40,
+        targetUnitHeight: 25,
         unconformityLabels: true,
         width: 280,
         columnWidth: 180,
