@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 // Import other components
 import hyper from "@macrostrat/hyper";
-import Searchbar from "../components/searchbar";
+import Searchbar from "../components/Searchbar";
 import { ButtonGroup, Button, Spinner } from "@blueprintjs/core";
 import { useSelector, useDispatch } from "react-redux";
 import loadable from "@loadable/component";

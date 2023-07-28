@@ -20,7 +20,7 @@ import {
   MenuPage,
   useAppState,
 } from "../app-state";
-import { SearchResults } from "../components/searchbar";
+import {SearchResults } from "../components/Searchbar";
 import classNames from "classnames";
 import styles from "./main.module.styl";
 import loadable from "@loadable/component";
@@ -35,7 +35,7 @@ import { isDetailPanelRouteInternal } from "../app-state/nav-hooks";
 import { SettingsPanel, ExperimentsPanel, ThemeButton } from "./settings-panel";
 import { useState, useEffect } from "react";
 import { LinkButton, LayerButton, ListButton } from "../components/buttons";
-import { routerBasename } from "../settings";
+import { routerBasename } from "../Settings";
 
 function ChangelogPanel() {
   return h("div.bp4-text.text-panel", [h(Changelog)]);
