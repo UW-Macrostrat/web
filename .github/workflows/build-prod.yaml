@@ -43,6 +43,7 @@ jobs:
           context: .
           build-args: |
             MAPBOX_API_TOKEN=${{ secrets.MAPBOX_API_TOKEN }}
+            PUBLIC_URL=/map/
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
