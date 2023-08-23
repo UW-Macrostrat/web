@@ -1,6 +1,6 @@
 import { hyperStyled, compose, C } from "@macrostrat/hyper";
 import { useAPIResult } from "@macrostrat/ui-components";
-import { MacrostratAPIProvider } from "common";
+import { MacrostratAPIProvider } from "@macrostrat/api-views";
 import { useEffect, useState } from "react";
 import {
   UnitSelectionProvider,

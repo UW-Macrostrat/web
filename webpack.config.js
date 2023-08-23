@@ -4,7 +4,18 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 //const CopyPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const revisionInfo = require("@macrostrat/revision-info-webpack");
-const { alias } = require("./deps/web-components/package.json");
+
+const aliasedModules = [
+  "column-components",
+  "column-views",
+  "map-components",
+  "api-views",
+  "timescale",
+  "mapbox-styles",
+  "ui-components",
+  "mapbox-react",
+  "mapbox-utils",
+];
 
 const pkg = require("./package.json");
 
@@ -17,8 +28,13 @@ const mode = process.env.NODE_ENV || "development";
 let publicURL = process.env.PUBLIC_URL || "/";
 
 let webComponentsAliases = {};
-for (const [k, v] of Object.entries(alias)) {
-  webComponentsAliases[k] = path.resolve(__dirname, "deps/web-components", v);
+for (const k of aliasedModules) {
+  webComponentsAliases["@macrostrat/" + k] = path.resolve(
+    __dirname,
+    "deps/web-components/packages",
+    k,
+    "src"
+  );
 }
 
 //const cesiumSource = "node_modules/cesium/Source";
