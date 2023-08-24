@@ -2,6 +2,7 @@ import { UserConfig } from "vite";
 import path from "path";
 import mdx from "@mdx-js/rollup";
 import revisionInfo from "@macrostrat/revision-info-webpack";
+import rewriteAll from "vite-plugin-rewrite-all";
 
 import pkg from "./package.json";
 
@@ -20,7 +21,15 @@ const config: UserConfig = {
       "~": path.resolve("./src"),
     },
   },
-  plugins: [mdx()],
+  plugins: [
+    mdx(),
+    /*
+    Fix error with single-page app reloading where paths
+    with dots (e.g., locations) are not rewritten to index
+    to allow for client-side routing
+    */
+    rewriteAll(),
+  ],
   envDir: path.resolve(__dirname),
 };
 
