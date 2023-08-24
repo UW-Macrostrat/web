@@ -15,3 +15,5 @@ docker-compose.yaml
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+.vite

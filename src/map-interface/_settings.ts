@@ -18,11 +18,11 @@ export const SETTINGS = {
   //     : `https://${window.location.hostname}`,
   // burwellTileDomain: "https://devtiles.macrostrat.org",
   // apiDomain: "https://dev.macrostrat.org",
-  burwellTileDomain: process.env.MACROSTRAT_TILESERVER_DOMAIN,
-  apiDomain: process.env.MACROSTRAT_API_DOMAIN,
+  burwellTileDomain: import.meta.env.VITE_MACROSTRAT_TILESERVER_DOMAIN,
+  apiDomain: import.meta.env.VITE_MACROSTRAT_API_DOMAIN,
   gddDomain: "https://xdd.wisc.edu",
   pbdbDomain: "https://paleobiodb.org",
-  mapboxAccessToken: process.env.MAPBOX_API_TOKEN,
+  mapboxAccessToken: import.meta.env.VITE_MAPBOX_API_TOKEN,
 };
 
-export const routerBasename = process.env.PUBLIC_URL;
+export const routerBasename = import.meta.env.VITE_PUBLIC_URL;

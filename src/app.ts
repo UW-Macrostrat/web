@@ -12,7 +12,7 @@ import reducerStack, {
   AppState,
 } from "./map-interface/app-state";
 import { createRouterMiddleware } from "@lagunovsky/redux-react-router";
-import { routerBasename } from "./map-interface/settings";
+import { routerBasename } from "./map-interface/_settings";
 import { DarkModeProvider } from "@macrostrat/ui-components";
 import { onDemand } from "./_utils";
 

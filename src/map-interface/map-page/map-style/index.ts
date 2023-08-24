@@ -1,4 +1,4 @@
-import { SETTINGS } from "../../settings";
+import { SETTINGS } from "../../_settings";
 export * from "./line-symbols";
 export * from "./map-sources";
 import chroma from "chroma-js";

@@ -11,7 +11,7 @@ import { useAPIResult } from "@macrostrat/ui-components";
 import { LocationFocusButton } from "@macrostrat/mapbox-react";
 
 import styles from "./main.module.styl";
-import { SETTINGS } from "~/map-interface/settings";
+import { SETTINGS } from "~/map-interface/_settings";
 const h = hyper.styled(styles);
 
 function drawElevationChart(

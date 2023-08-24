@@ -20,7 +20,7 @@ import {
   useAppState,
 } from "~/map-interface/app-state";
 import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
-import { SETTINGS } from "../../settings";
+import { SETTINGS } from "../../_settings";
 import styles from "../main.module.styl";
 import {
   applyAgeModelStyles,
