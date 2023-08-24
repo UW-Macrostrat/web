@@ -12,7 +12,7 @@ import {
 } from "@macrostrat/mapbox-react";
 import classNames from "classnames";
 import { mapViewInfo } from "@macrostrat/mapbox-utils";
-import { SETTINGS } from "../../_settings";
+import { SETTINGS } from "../../settings";
 import mapboxgl from "mapbox-gl";
 
 const h = hyper.styled(styles);

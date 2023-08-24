@@ -35,7 +35,7 @@ import { isDetailPanelRouteInternal } from "../app-state/nav-hooks";
 import { SettingsPanel, ExperimentsPanel, ThemeButton } from "./settings-panel";
 import { useState, useEffect } from "react";
 import { LinkButton, LayerButton, ListButton } from "../components/buttons";
-import { routerBasename } from "../_settings";
+import { routerBasename } from "../settings";
 import { Card } from "@blueprintjs/core";
 
 function ChangelogPanel() {

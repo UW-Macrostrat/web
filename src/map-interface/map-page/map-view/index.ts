@@ -20,7 +20,7 @@ import {
   useAppState,
 } from "~/map-interface/app-state";
 import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
-import { SETTINGS } from "../../_settings";
+import { SETTINGS } from "../../settings";
 import styles from "../main.module.styl";
 import {
   applyAgeModelStyles,
@@ -49,6 +49,8 @@ import { useMemo } from "react";
 import { LineString } from "geojson";
 
 const h = hyper.styled(styles);
+
+console.log(SETTINGS);
 
 mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
 

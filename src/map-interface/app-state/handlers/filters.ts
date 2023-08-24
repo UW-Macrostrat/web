@@ -1,5 +1,5 @@
 import axios from "axios";
-import { SETTINGS } from "../../_settings";
+import { SETTINGS } from "../../settings";
 
 export const base = `${SETTINGS.apiDomain}/api/v2`;
 
