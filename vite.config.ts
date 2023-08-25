@@ -23,11 +23,9 @@ const config: UserConfig = {
   },
   plugins: [
     mdx(),
-    /*
-    Fix error with single-page app reloading where paths
+    /* Fix error with single-page app reloading where paths
     with dots (e.g., locations) are not rewritten to index
-    to allow for client-side routing
-    */
+    to allow for client-side routing */
     rewriteAll(),
   ],
   envDir: path.resolve(__dirname),
