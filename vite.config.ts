@@ -29,6 +29,10 @@ const config: UserConfig = {
     rewriteAll(),
   ],
   envDir: path.resolve(__dirname),
+  build: {
+    outDir: path.resolve(__dirname, "dist"),
+    emptyOutDir: true,
+  },
 };
 
 export default config;
