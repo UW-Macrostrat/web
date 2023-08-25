@@ -1,6 +1,6 @@
 import { useCallback, useRef, useEffect } from "react";
 import { Navbar, Button, InputGroup, Spinner, Card } from "@blueprintjs/core";
-import hyper from "@macrostrat/hyper";
+import h from "@macrostrat/hyper";
 import {
   useAppActions,
   useSearchState,
@@ -8,11 +8,9 @@ import {
 } from "../app-state";
 import { useSelector } from "react-redux";
 import Filters, { FilterPanel } from "./filter-panel";
-import styles from "./searchbar.styl";
+import "./searchbar.styl";
 import { PanelSubhead } from "./expansion-panel/headers";
 import classNames from "classnames";
-
-const h = hyper.styled(styles);
 
 const categoryTitles = {
   lithology: "Lithologies",

@@ -50,6 +50,8 @@ import { LineString } from "geojson";
 
 const h = hyper.styled(styles);
 
+console.log(SETTINGS);
+
 mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
 
 const VestigialMap = forwardRef((props, ref) => h(Map, { ...props, ref }));

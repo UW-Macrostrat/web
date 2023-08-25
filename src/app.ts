@@ -2,7 +2,9 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { ReduxRouter } from "@lagunovsky/redux-react-router";
 import h from "@macrostrat/hyper";
 
-import "./styles/index.styl";
+import "./styles/global.styl";
+import "./styles/searchbar.styl";
+import "./styles/ui-components.styl";
 
 import { Provider } from "react-redux";
 import { createStore, compose, applyMiddleware } from "redux";
