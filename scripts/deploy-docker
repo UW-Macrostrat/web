@@ -45,6 +45,6 @@ docker push $MACROSTRAT_DOCKER_REGISTRY/uw-macrostrat/web:develop
 
 # Run deployment playbook.
 # THis needs to get much better
-ssh -o ClearAllForwardings=yes gunnison "cd /data/macrostrat && ansible-playbook ansible/playbooks/deploy-dev.yaml"
+ssh -o ClearAllForwardings=yes gunnison "cd /data/macrostrat && poetry run ansible-playbook ansible/playbooks/deploy-dev.yaml"
 
 #ssh acadia "cd /data/macrostrat/app && ~/.local/bin/docker-compose pull web && ~/.local/bin/docker-compose up -d"
