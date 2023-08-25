@@ -18,12 +18,12 @@ else
   skip_build=false
 fi
 
-export PUBLIC_URL=/map/
 export NODE_ENV=production
-export MACROSTRAT_TILESERVER_DOMAIN='https://dev.macrostrat.org/tiles'
-export MACROSTRAT_API_DOMAIN='https://dev.macrostrat.org'
-export CORELLE_API_DOMAIN='https://rotate.macrostrat.org'
+export VITE_MACROSTRAT_TILESERVER_DOMAIN='https://dev.macrostrat.org/tiles'
+export VITE_MACROSTRAT_API_DOMAIN='https://dev.macrostrat.org'
+export VITE_CORELLE_API_DOMAIN='https://rotate.macrostrat.org'
 export MACROSTRAT_DOCKER_REGISTRY='ghcr.io'
+export PUBLIC_URL='/map/'
 
 if [[ $skip_build == false ]]; then
   if [[ $(git diff --stat) != '' ]]; then
