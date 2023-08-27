@@ -2,19 +2,16 @@
   "compilerOptions": {
     "baseUrl": ".",
     "moduleResolution": "node",
-    "target": "es5",
-    "module": "es2020",
-    "lib": ["es2018", "dom"],
+    "target": "ES2020",
+    "module": "ES2020",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "strict": false,
     "sourceMap": true,
     "declaration": true,
-    "jsx": "react",
-    "allowSyntheticDefaultImports": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "declarationDir": "dist/types",
-    "outDir": "dist/lib",
+    "jsx": "react-jsx",
     "typeRoots": ["node_modules/@types"],
+    "skipLibCheck": true,
+    "esModuleInterop": true,
     "paths": {
       "~/*": ["./src/*"],
       "@macrostrat/cesium-viewer": ["packages/cesium-viewer/src/"],
@@ -39,5 +36,13 @@
       ]
     }
   },
-  "include": ["src"]
+  "include": ["src"],
+  "types": ["vite/client"],
+  "ts-node": {
+    "transpileOnly": true,
+    "esm": true,
+    "compilerOptions": {
+      "moduleResolution": "Node16"
+    }
+  }
 }
