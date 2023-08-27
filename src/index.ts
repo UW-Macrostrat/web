@@ -1,4 +1,3 @@
-import "babel-polyfill";
 import "@blueprintjs/core/lib/css/blueprint.css";
 import "./styles/padding.css";
 
