@@ -1,6 +1,7 @@
-import { Counter } from './Counter'
+import { Link } from "~/renderer/Link";
+import { Counter } from "./Counter";
 
-export { Page }
+export { Page };
 
 function Page() {
   return (
@@ -12,7 +13,10 @@ function Page() {
         <li>
           Interactive. <Counter />
         </li>
+        <li>
+          <Link href="map">Map</Link>
+        </li>
       </ul>
     </>
-  )
+  );
 }

@@ -3,6 +3,7 @@ export { render };
 import { hydrateRoot } from "react-dom/client";
 import { PageShell } from "./page-shell";
 import type { PageContextClient } from "./types";
+import { FocusStyleManager } from "@blueprintjs/core";
 
 // This render() hook only supports SSR, see https://vite-plugin-ssr.com/render-modes for how to modify render() to support SPA
 async function render(pageContext: PageContextClient) {
@@ -11,7 +12,11 @@ async function render(pageContext: PageContextClient) {
     throw new Error(
       "Client-side render() hook expects pageContext.Page to be defined"
     );
-  const root = document.getElementById("react-root");
+
+  FocusStyleManager.onlyShowFocusOnTabs();
+
+  console.log("Rendering on client");
+  const root = document.getElementById("app-container");
   if (!root) throw new Error("DOM element #react-root not found");
   hydrateRoot(
     root,

@@ -3,14 +3,17 @@ import { PageContextProvider } from "./usePageContext";
 import { PageContext } from "./types";
 import h from "@macrostrat/hyper";
 
-export { PageShell };
+import "@blueprintjs/core/lib/css/blueprint.css";
+import "../styles/padding.css";
 
-function PageShell({
+export function PageShell({
   children,
   pageContext,
 }: {
   children: React.ReactNode;
   pageContext: PageContext;
 }) {
-  return h("div.app", [h(PageContextProvider, { pageContext }, children)]);
+  return h("div.app-shell", [
+    h(PageContextProvider, { pageContext }, children),
+  ]);
 }

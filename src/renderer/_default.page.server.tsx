@@ -5,14 +5,13 @@ export const passToClient = ["pageProps", "urlPathname"];
 import ReactDOMServer from "react-dom/server";
 import { PageShell } from "./page-shell";
 import { escapeInject, dangerouslySkipEscape } from "vite-plugin-ssr/server";
-import logoUrl from "./logo.svg";
 import type { PageContextServer } from "./types";
 
 async function render(pageContext: PageContextServer) {
   const { Page, pageProps } = pageContext;
   // This render() hook only supports SSR, see https://vite-plugin-ssr.com/render-modes for how to modify render() to support SPA
   if (!Page)
-    throw new Error("My render() hook expects pageContext.Page to be defined");
+    throw new Error("render() hook expects pageContext.Page to be defined");
   const pageHtml = ReactDOMServer.renderToString(
     <PageShell pageContext={pageContext}>
       <Page {...pageProps} />
@@ -27,14 +26,27 @@ async function render(pageContext: PageContextServer) {
   const documentHtml = escapeInject`<!DOCTYPE html>
     <html lang="en">
       <head>
-        <meta charset="UTF-8" />
-        <link rel="icon" href="${logoUrl}" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta charset="utf-8" />
+        <meta http-equiv="Content-Language" content="en" />
+        <meta name="mobile-wep-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="black-translucent"
+        />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+        />
+        <link
+          href="https://fonts.googleapis.com/css?family=Montserrat:400,700|Source+Sans+Pro"
+          rel="stylesheet"
+        />
         <meta name="description" content="${desc}" />
         <title>${title}</title>
       </head>
       <body>
-        <div id="react-root">${dangerouslySkipEscape(pageHtml)}</div>
+        <div id="app-container">${dangerouslySkipEscape(pageHtml)}</div>
       </body>
     </html>`;
 

@@ -2,9 +2,9 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { ReduxRouter } from "@lagunovsky/redux-react-router";
 import h from "@macrostrat/hyper";
 
-import "./styles/global.styl";
-import "./styles/searchbar.styl";
-import "./styles/ui-components.styl";
+import "../../styles/global.styl";
+import "../../styles/searchbar.styl";
+import "../../styles/ui-components.styl";
 
 import { Provider } from "react-redux";
 import { createStore, compose, applyMiddleware } from "redux";
@@ -12,11 +12,10 @@ import reducerStack, {
   Action,
   browserHistory,
   AppState,
-} from "./map-interface/app-state";
+} from "../../map-interface/app-state";
 import { createRouterMiddleware } from "@lagunovsky/redux-react-router";
-import { routerBasename } from "./map-interface/settings";
 import { DarkModeProvider } from "@macrostrat/ui-components";
-import { onDemand } from "./_utils";
+import { onDemand } from "../../_utils";
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
@@ -44,12 +43,13 @@ function GlobePage() {
 */
 
 const Sources = onDemand(() => import("~/burwell-sources"));
-const MapPage = onDemand(() => import("./map-interface/map-page"));
-const DevMapPage = onDemand(() => import("./dev"));
+const MapPage = onDemand(() => import("../../map-interface/map-page"));
+const DevMapPage = onDemand(() => import("../../dev"));
 
-const App = () => {
+export default function MapApp({ routerBasename }) {
   return h(
     DarkModeProvider,
+    {},
     h(
       Provider,
       { store },
@@ -81,6 +81,4 @@ const App = () => {
       )
     )
   );
-};
-
-export default App;
+}
