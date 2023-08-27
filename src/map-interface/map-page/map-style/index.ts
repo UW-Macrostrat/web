@@ -4,9 +4,6 @@ export * from "./map-sources";
 import chroma from "chroma-js";
 import { intervals } from "@macrostrat/timescale";
 import { mergeStyles } from "@macrostrat/mapbox-utils";
-import { base } from "~/map-interface/app-state/handlers/filters";
-import map from "../map-view/map";
-import { baseLayers } from "@macrostrat/mapbox-styles/src";
 
 export function buildXRayStyle({ inDarkMode = false }): mapboxgl.Style {
   const xRayColor = (opacity = 1, darken = 0) => {

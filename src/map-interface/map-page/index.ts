@@ -79,31 +79,33 @@ export const MapPage = ({
 
   const bottomPanel = inPaleoMode ? h(TimescalePanel) : h(ElevationChart, null);
 
-  return h(MapAreaContainer, {
-    navbar: h(Searchbar, { className: "searchbar" }),
-    contextPanel: h(Menu, {
-      className: "context-panel",
-      menuPage: menuPage ?? navMenuPage,
-    }),
-    contextStackProps: {
-      className: contextClass,
-    },
-    mainPanel: h(MapView),
-    detailPanel: h([
-      h(Routes, [
-        h(Route, {
-          path: "loc/:lng/:lat/*",
-          element: h(InfoDrawerRoute),
-        }),
+  return h(
+    MapAreaContainer,
+    {
+      navbar: h(Searchbar, { className: "searchbar" }),
+      contextPanel: h(Menu, {
+        className: "context-panel",
+        menuPage: menuPage ?? navMenuPage,
+      }),
+      contextStackProps: {
+        className: contextClass,
+      },
+      detailPanel: h([
+        h(Routes, [
+          h(Route, {
+            path: "loc/:lng/:lat/*",
+            element: h(InfoDrawerRoute),
+          }),
+        ]),
+        h(ZoomControl, { className: "zoom-control" }),
       ]),
-      h(ZoomControl, { className: "zoom-control" }),
-    ]),
-    bottomPanel,
-    contextPanelOpen: contextPanelOpen || inputFocus,
-    detailPanelOpen: infoDrawerOpen,
-    onMouseDown,
-    className: inputFocus ? "searching" : null,
-  });
+      bottomPanel,
+      contextPanelOpen: contextPanelOpen || inputFocus,
+      detailPanelOpen: infoDrawerOpen,
+      className: inputFocus ? "searching" : null,
+    },
+    [h("div.context-underlay", { onClick: onMouseDown }), h(MapView)]
+  );
 };
 
 function MapPageRoutes() {

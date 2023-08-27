@@ -41,6 +41,19 @@ This stylesheet the overall application page layout.
   height: 100%
   box-shadow 0 0 10px 4px var(--card-shadow-color)
 
+.context-underlay
+  position absolute
+  top 0
+  bottom 0
+  left 0
+  right 0
+  pointer-events: none
+  z-index: 50
+
+// This allows us to click the map to clear the in-progress search
+&.searching .context-underlay
+  pointer-events: all
+
 
 .panel-card
   padding: 10px
