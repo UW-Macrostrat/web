@@ -40,9 +40,6 @@
   "types": ["vite/client"],
   "ts-node": {
     "transpileOnly": true,
-    "esm": true,
-    "compilerOptions": {
-      "moduleResolution": "Node16"
-    }
+    "esm": true
   }
 }
