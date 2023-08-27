@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { useMapElement } from "@macrostrat/mapbox-react";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "~/map-interface/settings";
-import { features } from "process";
 
 const sourceMapStyle = {
   version: 8,
