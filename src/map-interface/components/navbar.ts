@@ -66,6 +66,7 @@ function ResultList({ searchResults }) {
                 {
                   key,
                   onClick() {
+                    console.log("Clicked", item);
                     onSelectResult(item);
                   },
                 },
