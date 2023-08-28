@@ -306,7 +306,7 @@ async function actionRunner(
     case "get-column-units":
       let CancelTokenGetColumn = axios.CancelToken;
       let sourceGetColumn = CancelTokenGetColumn.source();
-      dispatch({ type: "start-column-query", cancelToken: sourceMapQuery });
+      dispatch({ type: "start-column-query", cancelToken: sourceGetColumn });
 
       let columnData = await runColumnQuery(
         action.column,
