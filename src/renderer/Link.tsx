@@ -1,4 +1,4 @@
-import { usePageContext } from "./usePageContext";
+import { usePageContext } from "./page-context";
 
 export function Link(props: {
   href?: string;

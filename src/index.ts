@@ -3,7 +3,7 @@ import "./styles/padding.css";
 import { FocusStyleManager } from "@blueprintjs/core";
 
 import h from "@macrostrat/hyper";
-import { Page } from "./pages/map/index.page.client";
+import { Page } from "./pages/map/map";
 
 FocusStyleManager.onlyShowFocusOnTabs();
 
