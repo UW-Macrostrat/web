@@ -1,9 +1,17 @@
 import hyper from "@macrostrat/hyper";
 import {
-  useMapConditionalStyle,
+  MapBottomControls,
+  MapMarker,
+  MapStyledContainer,
+  MapView,
+} from "@macrostrat/map-interface";
+import {
+  getFocusState,
+  PositionFocusState,
   useMapLabelVisibility,
   useMapRef,
 } from "@macrostrat/mapbox-react";
+import { MacrostratLineSymbolManager } from "@macrostrat/mapbox-styles";
 import {
   getMapboxStyle,
   mapViewInfo,
@@ -11,14 +19,15 @@ import {
   setMapPosition,
 } from "@macrostrat/mapbox-utils";
 import { inDarkMode } from "@macrostrat/ui-components";
+import { LineString } from "geojson";
 import mapboxgl from "mapbox-gl";
 import {
   forwardRef,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
-  useMemo,
 } from "react";
 import {
   MapLayer,
@@ -32,17 +41,10 @@ import {
   applyAgeModelStyles,
   buildMacrostratStyle,
   MapSourcesLayer,
-  toggleLineSymbols,
 } from "../map-style";
 import { getExpressionForFilters } from "./filter-helpers";
 import Map from "./map";
-import { MapBottomControls } from "@macrostrat/map-interface";
-import { MapStyledContainer } from "@macrostrat/map-interface";
 import { getBaseMapStyle, useCrossSectionCursorLocation } from "./utils";
-import { getFocusState, PositionFocusState } from "@macrostrat/mapbox-react";
-import { MapMarker, MapView } from "@macrostrat/map-interface";
-import { MacrostratLineSymbolManager } from "@macrostrat/mapbox-styles";
-import { LineString } from "geojson";
 
 const h = hyper.styled(styles);
 
