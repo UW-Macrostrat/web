@@ -87,6 +87,7 @@
     "react-router-hash-link": "^2.4.3",
     "reduce-reducers": "^1.0.4",
     "redux": "^4.0.5",
+    "supports-color": "^9.4.0",
     "topojson-client": "^3.0.0",
     "transition-hook": "^1.5.2",
     "use-react-router-breadcrumbs": "^3.2.1",
