@@ -12,6 +12,7 @@ import axios from "axios";
 import { runFilter } from "./filters";
 import { push } from "@lagunovsky/redux-react-router";
 import { routerBasename } from "~/map-interface/settings";
+
 import { isDetailPanelRoute } from "../nav-hooks";
 import { MenuPage, setInfoMarkerPosition } from "../reducers";
 import { formatCoordForZoomLevel } from "~/map-interface/utils/formatting";
@@ -305,7 +306,7 @@ async function actionRunner(
     case "get-column-units":
       let CancelTokenGetColumn = axios.CancelToken;
       let sourceGetColumn = CancelTokenGetColumn.source();
-      dispatch({ type: "start-column-query", cancelToken: sourceMapQuery });
+      dispatch({ type: "start-column-query", cancelToken: sourceGetColumn });
 
       let columnData = await runColumnQuery(
         action.column,

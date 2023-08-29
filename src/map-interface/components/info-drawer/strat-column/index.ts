@@ -1,6 +1,9 @@
 import { hyperStyled } from "@macrostrat/hyper";
 import { preprocessUnits, Column } from "@macrostrat/column-views";
 import "@macrostrat/column-components/src/main.module.scss";
+import { UnitLong } from "@macrostrat/api-types";
+//import "@macrostrat/column-components/src/main.module.scss";
+//import { ExpansionPanel } from "../../expansion-panel";
 
 import styles from "./strat-column.module.styl";
 import { ColumnSummary } from "~/map-interface/app-state/handlers/columns";

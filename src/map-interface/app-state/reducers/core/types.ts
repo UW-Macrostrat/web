@@ -150,6 +150,11 @@ type SetPlateModel = {
 type GetAllColumns = { type: "get-all-columns" };
 type ClearColumnInfo = { type: "clear-column-info" };
 
+type SetFocusedMapSource = {
+  type: "set-focused-map-source";
+  source_id: number | null;
+};
+
 export type CoreAction =
   | MAP_LAYERS_CHANGED
   | CLEAR_FILTERS
@@ -201,6 +206,7 @@ export type CoreAction =
   | SetAllColumns
   | ToggleCrossSection
   | SetCrossSectionLine
+  | SetFocusedMapSource
   | ClearColumnInfo;
 
 interface AsyncRequestState {
@@ -244,6 +250,7 @@ export interface CoreState extends MapState, AsyncRequestState {
   mapInfo: any[];
   timeCursorAge: number | null;
   plateModelId: number | null;
+  focusedMapSource: number | null;
   mapSettings: MapSettings;
   columnInfo: ColumnSummary | null;
   xddInfo: XDDSnippet[];

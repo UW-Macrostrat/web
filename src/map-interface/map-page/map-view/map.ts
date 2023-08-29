@@ -278,6 +278,7 @@ class VestigialMap extends Component<MapProps, {}> {
   shouldComponentUpdate(nextProps) {
     this.setupMapHandlers();
     if (this.map == null) return false;
+    const { mapStyle } = nextProps;
 
     setMapStyle(
       this,

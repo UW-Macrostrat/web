@@ -1,6 +1,6 @@
 import { useCallback, useRef, useEffect } from "react";
 import { Navbar, Button, InputGroup, Spinner, Card } from "@blueprintjs/core";
-import hyper from "@macrostrat/hyper";
+import h from "@macrostrat/hyper";
 import {
   useAppActions,
   useSearchState,
@@ -8,13 +8,16 @@ import {
 } from "../app-state";
 import { useSelector } from "react-redux";
 import Filters, { FilterPanel } from "./filter-panel";
+<<<<<<< HEAD
 import styles from "./searchbar.styl";
 import { useMapStatus } from "@macrostrat/mapbox-react";
 import { MapLoadingButton, FloatingNavbar } from "@macrostrat/map-interface";
 import { PanelSubhead } from "@macrostrat/map-interface/src/expansion-panel/headers";
+=======
+import "./searchbar.styl";
+import { PanelSubhead } from "./expansion-panel/headers";
+>>>>>>> develop
 import classNames from "classnames";
-
-const h = hyper.styled(styles);
 
 const categoryTitles = {
   lithology: "Lithologies",
@@ -70,6 +73,7 @@ function ResultList({ searchResults }) {
                 {
                   key,
                   onClick() {
+                    console.log("Clicked", item);
                     onSelectResult(item);
                   },
                 },

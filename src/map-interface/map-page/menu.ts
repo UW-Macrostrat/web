@@ -74,6 +74,7 @@ const MenuGroup = (props) =>
 
 const LayerList = (props) => {
   const runAction = useAppActions();
+  const inPaleoMode = useAppState((s) => s.core.timeCursorAge != null);
 
   const toggleElevationChart = () => {
     runAction({ type: "toggle-menu" });
@@ -111,7 +112,11 @@ const LayerList = (props) => {
     h(MenuGroup, [
       h(
         ListButton,
-        { onClick: toggleElevationChart, icon: ElevationIcon },
+        {
+          onClick: toggleElevationChart,
+          icon: ElevationIcon,
+          disabled: inPaleoMode,
+        },
         "Elevation profile"
       ),
     ]),

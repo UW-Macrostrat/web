@@ -1,0 +1,24 @@
+.timescale-holder
+  flex-grow: 1
+
+.broken-timescale
+  display: flex
+  flex-direction: row
+  &>:nth-child(2)
+    border-left: 2px solid #000
+    margin-left: -2px
+
+.timescale-panel
+  display: flex
+  flex-direction: row
+  margin: 8px 10px
+  gap: 8px
+  position: relative
+
+  .controls
+    width: 150px
+
+.close-button
+  position: absolute
+  top: 0
+  right: 0

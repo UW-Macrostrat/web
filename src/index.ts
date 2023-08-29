@@ -1,4 +1,3 @@
-import "babel-polyfill";
 import "@blueprintjs/core/lib/css/blueprint.css";
 import "./styles/padding.css";
 
@@ -14,3 +13,5 @@ const root = createRoot(document.getElementById("app-container"));
 
 // Render the application
 root.render(h(App));
+
+FocusStyleManager.onlyShowFocusOnTabs();

@@ -40,33 +40,18 @@ import { MacrostratLineSymbolManager } from "@macrostrat/map-interface/src/style
 
 const h = hyper.styled(styles);
 
+console.log(SETTINGS);
+
 mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
 
 const VestigialMap = forwardRef((props, ref) => h(Map, { ...props, ref }));
 
-function buildStyle(style, age, model = 1, isDark = false) {
-  const overlayStyles = buildMacrostratStyle({
-    tileserverDomain: SETTINGS.burwellTileDomain,
-  });
-  if (age != null) {
-    return applyAgeModelStyles(age, model, style, overlayStyles, isDark);
-  }
-  return mergeStyles(style, overlayStyles);
-}
-
-async function initializeMap(
-  baseStyle,
-  age,
-  model,
-  isDark,
-  mapPosition,
-  infoMarkerPosition
-) {
+async function initializeMap(style, mapPosition, infoMarkerPosition) {
   // setup the basic map
 
   const map = new mapboxgl.Map({
     container: "map",
-    style: buildStyle(baseStyle, age, model, isDark),
+    style,
     maxZoom: 18,
     //maxTileCacheSize: 0,
     logoPosition: "bottom-left",
@@ -118,6 +103,7 @@ export default function MainMapView(props) {
     timeCursorAge,
     plateModelId,
     infoMarkerPosition,
+    focusedMapSource,
   } = useAppState((state) => state.core);
 
   let mapRef = useMapRef();
@@ -136,6 +122,26 @@ export default function MainMapView(props) {
   const [styleLoaded, setStyleLoaded] = useState(false);
 
   const [baseStyle, setBaseStyle] = useState(null);
+  const mapStyle = useMemo(() => {
+    if (baseStyle == null) return null;
+    const overlayStyles = buildMacrostratStyle(focusedMapSource);
+    if (timeCursorAge != null) {
+      return applyAgeModelStyles(
+        timeCursorAge,
+        plateModelId ?? 1,
+        baseStyle,
+        overlayStyles,
+        isDarkMode
+      );
+    }
+    return mergeStyles(baseStyle, overlayStyles);
+  }, [baseStyle, timeCursorAge, plateModelId, isDarkMode, focusedMapSource]);
+
+  useEffect(() => {
+    if (mapRef.current == null || baseStyle == null) return;
+    mapRef.current.setStyle(mapStyle);
+  }, [mapStyle]);
+
   useEffect(() => {
     getMapboxStyle(baseMapURL, {
       access_token: mapboxgl.accessToken,
@@ -148,14 +154,7 @@ export default function MainMapView(props) {
     if (baseStyle == null) {
       return;
     }
-    initializeMap(
-      baseStyle,
-      timeCursorAge,
-      plateModelId,
-      isDarkMode,
-      mapPosition,
-      infoMarkerPosition
-    ).then((map) => {
+    initializeMap(mapStyle, mapPosition, infoMarkerPosition).then((map) => {
       if (!map.isStyleLoaded()) {
         map.once("style.load", () => {
           setStyleLoaded(true);
@@ -185,17 +184,6 @@ export default function MainMapView(props) {
     setMapPosition(map, mapPosition);
   }, [mapRef.current, mapInitialized]);
 
-  useEffect(() => {
-    if (mapRef.current == null || baseStyle == null) return;
-    const newStyle = buildStyle(
-      baseStyle,
-      timeCursorAge,
-      plateModelId,
-      isDarkMode
-    );
-    mapRef.current.setStyle(newStyle);
-  }, [baseStyle, timeCursorAge, plateModelId, isDarkMode]);
-
   // Make map label visibility match the mapLayers state
   useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));
 
@@ -223,6 +211,7 @@ export default function MainMapView(props) {
       // Recreate the set every time to force a re-render
       mapLayers,
       mapCenter,
+      mapStyle,
       crossSectionLine,
       crossSectionCursorLocation,
       mapPosition,

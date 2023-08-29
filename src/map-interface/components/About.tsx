@@ -11,16 +11,16 @@ const h = hyper.styled(styles);
 const SoftwareInfo = (props) => {
   return h("div.software-info", [
     h("p.version", [
-      `Version ${JSON.parse(process.env.NPM_VERSION)} `,
+      `Version ${JSON.parse(import.meta.env.VITE_NPM_VERSION)} `,
       h("span.revision", [
         "(revision ",
         h(
           "a",
-          { href: JSON.parse(process.env.GITHUB_REV_LINK) },
-          JSON.parse(process.env.GIT_COMMIT_HASH)
+          { href: JSON.parse(import.meta.env.VITE_GITHUB_REV_LINK) },
+          JSON.parse(import.meta.env.VITE_GIT_COMMIT_HASH)
         ),
         ")  — ",
-        JSON.parse(process.env.COMPILE_DATE),
+        JSON.parse(import.meta.env.VITE_COMPILE_DATE),
       ]),
     ]),
     h("p.changes", [
