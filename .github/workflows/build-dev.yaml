@@ -47,6 +47,6 @@ jobs:
           build-args: |
             MAPBOX_API_TOKEN=${{ secrets.MAPBOX_API_TOKEN }}
             PUBLIC_URL=/map/
-            MACROSTRAT_API_DOMAIN=""
+            MACROSTRAT_API_DOMAIN=
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

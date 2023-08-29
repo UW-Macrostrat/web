@@ -27,7 +27,7 @@ docker run -it -p 3010:3000 -v $(pwd):/app -w /app node:20 git config --global -
 This is mainly here for reference, the actual prod image is built via Github CI.
 
 ```bash
-docker build -t macrostrat:latest --build-arg PUBLIC_URL=/map/ --build-arg MAPBOX_API_TOKEN=<> .
+docker build -t macrostrat:latest --build-arg PUBLIC_URL=/map/ --build-arg MAPBOX_API_TOKEN=kfja --build-arg MACROSTRAT_API_DOMAIN= .
 ```
 
 ### Running built image
