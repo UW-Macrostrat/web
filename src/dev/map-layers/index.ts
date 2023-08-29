@@ -25,14 +25,14 @@ import {
   toggleLineSymbols,
   buildMacrostratStyle,
   buildBasicStyle,
-} from "@macrostrat/map-interface/src/styles";
+} from "@macrostrat/mapbox-styles";
 import { CoreMapView, MapMarker } from "~/map-interface/map-page/map-view";
 import {
   FeaturePanel,
   FeatureSelectionHandler,
   TileInfo,
-} from "@macrostrat/map-interface/src/dev/vector-tile-features";
-import { TileExtentLayer } from "@macrostrat/map-interface/src/dev/tile-extent";
+} from "@macrostrat/map-interface";
+import { TileExtentLayer } from "@macrostrat/map-interface";
 import { useMapStatus, useMapDispatch } from "@macrostrat/mapbox-react";
 import styles from "../main.module.styl";
 import { useMapStyle, ParentRouteButton } from "./utils";

@@ -1,54 +1,6 @@
-import { SETTINGS } from "../../settings";
 import chroma from "chroma-js";
 import { intervals } from "@macrostrat/timescale";
 import { mergeStyles } from "@macrostrat/mapbox-utils";
-import { buildOverlayLayers } from "@macrostrat/mapbox-styles";
-
-export function buildXRayStyle({ inDarkMode = false }): mapboxgl.Style {
-  const xRayColor = (opacity = 1, darken = 0) => {
-    if (!inDarkMode) {
-      return chroma("rgb(74, 242, 161)")
-        .darken(2 - darken)
-        .alpha(opacity)
-        .css();
-    }
-    return chroma("rgb(74, 242, 161)").alpha(opacity).darken(darken).css();
-  };
-
-  return {
-    version: 8,
-    name: "xray",
-    sources: {
-      burwell: {
-        type: "vector",
-        tiles: [SETTINGS.burwellTileDomain + `/carto-slim/{z}/{x}/{y}`],
-        tileSize: 512,
-      },
-    },
-    layers: [
-      {
-        id: "burwell",
-        type: "fill",
-        source: "burwell",
-        "source-layer": "units",
-        paint: {
-          "fill-color": xRayColor(0.1),
-          "fill-outline-color": xRayColor(0.5),
-        },
-      },
-      {
-        id: "burwell-line",
-        type: "line",
-        source: "burwell",
-        "source-layer": "lines",
-        paint: {
-          "line-color": xRayColor(1, -1),
-          "line-width": 1.5,
-        },
-      },
-    ],
-  };
-}
 
 export function applyAgeModelStyles(
   age,
