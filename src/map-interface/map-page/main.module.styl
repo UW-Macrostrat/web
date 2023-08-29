@@ -133,10 +133,10 @@ This stylesheet the overall application page layout.
 @media screen and (min-width: 768px)
 
   // This won't quite work
-  .macrostrat-map-container.searching .context-stack
+  .macrostrat-map-container.searching .macrostrat-context-stack
     width: 24em
 
-  .map-context-open
+  :global(.macrostrat-context-stack)
     width: 34em
     margin-right 0.5em
     &.layers, &.settings

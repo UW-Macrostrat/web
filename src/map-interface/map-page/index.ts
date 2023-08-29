@@ -89,7 +89,7 @@ export const MapPage = ({
         menuPage: menuPage ?? navMenuPage,
       }),
       contextStackProps: {
-        className: contextClass,
+        className: contextClass + " macrostrat-context-stack",
       },
       detailPanel: h(Routes, [
         h(Route, {
