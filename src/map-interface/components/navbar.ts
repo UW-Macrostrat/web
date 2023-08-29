@@ -8,15 +8,10 @@ import {
 } from "../app-state";
 import { useSelector } from "react-redux";
 import Filters, { FilterPanel } from "./filter-panel";
-<<<<<<< HEAD
 import styles from "./searchbar.styl";
 import { useMapStatus } from "@macrostrat/mapbox-react";
 import { MapLoadingButton, FloatingNavbar } from "@macrostrat/map-interface";
-import { PanelSubhead } from "@macrostrat/map-interface/src/expansion-panel/headers";
-=======
-import "./searchbar.styl";
-import { PanelSubhead } from "./expansion-panel/headers";
->>>>>>> develop
+import { PanelSubhead } from "@macrostrat/map-interface";
 import classNames from "classnames";
 
 const categoryTitles = {

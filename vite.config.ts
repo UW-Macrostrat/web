@@ -16,6 +16,7 @@ const aliasedModules = [
   "map-interface",
   "mapbox-utils",
   "mapbox-react",
+  "mapbox-styles",
 ];
 
 const gitEnv = revisionInfo(pkg, "https://github.com/UW-Macrostrat/web");

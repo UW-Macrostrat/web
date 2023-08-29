@@ -12,7 +12,14 @@ import {
 } from "@macrostrat/mapbox-utils";
 import { inDarkMode } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
-import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+} from "react";
 import {
   MapLayer,
   useAppActions,
@@ -26,17 +33,16 @@ import {
   buildMacrostratStyle,
   MapSourcesLayer,
   toggleLineSymbols,
-} from "@macrostrat/map-interface/src/styles";
+} from "../map-style";
 import { getExpressionForFilters } from "./filter-helpers";
 import Map from "./map";
-import { MapBottomControls } from "@macrostrat/map-interface/src/controls";
+import { MapBottomControls } from "@macrostrat/map-interface";
 import { MapStyledContainer } from "@macrostrat/map-interface";
 import { getBaseMapStyle, useCrossSectionCursorLocation } from "./utils";
 import { getFocusState, PositionFocusState } from "@macrostrat/mapbox-react";
-import { MapMarker } from "@macrostrat/map-interface/src/helpers";
-import { MapView } from "@macrostrat/map-interface";
+import { MapMarker, MapView } from "@macrostrat/map-interface";
+import { MacrostratLineSymbolManager } from "@macrostrat/mapbox-styles";
 import { LineString } from "geojson";
-import { MacrostratLineSymbolManager } from "@macrostrat/map-interface/src/styles";
 
 const h = hyper.styled(styles);
 

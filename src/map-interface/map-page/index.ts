@@ -5,6 +5,7 @@ import Searchbar from "../components/navbar";
 import { Spinner, HTMLDivProps } from "@blueprintjs/core";
 import { useSelector } from "react-redux";
 import loadable from "@loadable/component";
+import { ZoomControl } from "@macrostrat/map-interface";
 import {
   useSearchState,
   MapBackend,
@@ -17,11 +18,8 @@ import { useTransition } from "transition-hook";
 import { useContextPanelOpen, useContextClass } from "../app-state";
 import { MapAreaContainer } from "@macrostrat/map-interface";
 import { Routes, Route, useParams } from "react-router-dom";
-<<<<<<< HEAD
 import classNames from "classnames";
-=======
 import { TimescalePanel } from "../paleo";
->>>>>>> develop
 import { MenuPage } from "./menu";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
@@ -93,36 +91,25 @@ export const MapPage = ({
       contextStackProps: {
         className: contextClass,
       },
-      detailPanel: h([
-        h(Routes, [
-          h(Route, {
-            path: "loc/:lng/:lat/*",
-            element: h(InfoDrawerRoute),
-          }),
-        ]),
-        h(ZoomControl, { className: "zoom-control" }),
+      detailPanel: h(Routes, [
+        h(Route, {
+          path: "loc/:lng/:lat/*",
+          element: h(InfoDrawerRoute),
+        }),
       ]),
-<<<<<<< HEAD
-    ]),
-    bottomPanel: h(ElevationChart, null),
-    contextPanelOpen: contextPanelOpen || inputFocus,
-    detailPanelOpen: infoDrawerOpen,
-    onMouseDown,
-    mapPosition,
-    className: classNames(
-      "macrostrat-map-container",
-      inputFocus ? "searching" : null
-    ),
-  });
-=======
+
       bottomPanel,
       contextPanelOpen: contextPanelOpen || inputFocus,
       detailPanelOpen: infoDrawerOpen,
-      className: inputFocus ? "searching" : null,
+      mapPosition,
+      className: classNames(
+        "macrostrat-map-container",
+        inputFocus ? "searching" : null
+      ),
+      fitViewport: true,
     },
     [h("div.context-underlay", { onClick: onMouseDown }), h(MapView)]
   );
->>>>>>> develop
 };
 
 function MapPageRoutes() {

@@ -6,7 +6,7 @@ import h from "@macrostrat/hyper";
 
 import mapboxgl from "mapbox-gl";
 import { SETTINGS } from "~/map-interface/settings";
-import { buildMacrostratStyle } from "@macrostrat/map-interface/src/styles";
+import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
 
 import { DevMapPage } from "@macrostrat/map-interface";
 import { mergeStyles } from "@macrostrat/mapbox-utils";

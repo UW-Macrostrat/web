@@ -18,7 +18,7 @@ import { LocationPanel } from "@macrostrat/map-interface";
 import { MapAreaContainer } from "../../map-interface/map-page";
 import { PanelCard } from "../../map-interface/map-page/menu";
 import { getBaseMapStyle } from "../../map-interface/map-page/map-view/utils";
-import { MapBottomControls } from "@macrostrat/map-interface/src/controls";
+import { MapBottomControls } from "@macrostrat/map-interface";
 import { MapStyledContainer } from "@macrostrat/map-interface";
 import { MapLoadingButton } from "@macrostrat/map-interface";
 import {

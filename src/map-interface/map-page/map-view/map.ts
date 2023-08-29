@@ -3,7 +3,7 @@ import { getPBDBData } from "./filter-helpers";
 import h from "@macrostrat/hyper";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { buildMacrostratStyle } from "@macrostrat/map-interface/src/styles";
+import { buildMacrostratStyle } from "../map-style";
 import { setMapStyle } from "./style-helpers";
 import { MapLayer } from "~/map-interface/app-state";
 import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
@@ -345,9 +345,9 @@ class VestigialMap extends Component<MapProps, {}> {
         // zoom to user location
       }
     }
-    const mapStyle = buildMacrostratStyle({
-      tileserverDomain: SETTINGS.burwellTileDomain,
-    });
+    // const mapStyle = buildMacrostratStyle({
+    //   tileserverDomain: SETTINGS.burwellTileDomain,
+    // });
     // Handle changes to map filters
     if (nextProps.filters != this.props.filters) {
       // If all filters have been removed simply reset the filter states
