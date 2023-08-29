@@ -37,11 +37,11 @@ import {
 import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
 import { SETTINGS } from "../../settings";
 import styles from "../main.module.styl";
+import { applyAgeModelStyles } from "../map-style";
 import {
-  applyAgeModelStyles,
   buildMacrostratStyle,
   MapSourcesLayer,
-} from "../map-style";
+} from "@macrostrat/mapbox-styles";
 import { getExpressionForFilters } from "./filter-helpers";
 import Map from "./map";
 import { getBaseMapStyle, useCrossSectionCursorLocation } from "./utils";
@@ -132,7 +132,10 @@ export default function MainMapView(props) {
   const [baseStyle, setBaseStyle] = useState(null);
   const mapStyle = useMemo(() => {
     if (baseStyle == null) return null;
-    const overlayStyles = buildMacrostratStyle(focusedMapSource);
+    const overlayStyles = buildMacrostratStyle({
+      focusedMap: focusedMapSource,
+      tileserverDomain: SETTINGS.burwellTileDomain,
+    });
     if (timeCursorAge != null) {
       return applyAgeModelStyles(
         timeCursorAge,
