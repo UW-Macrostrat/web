@@ -40,6 +40,8 @@ function MapView(props) {
   return h(Suspense, { fallback: h(Spinner) }, h(MapContainer, props));
 }
 
+const _ContextStack = (p) => h("div.context-stack", p);
+
 export const MapPage = ({
   backend = MapBackend.MAPBOX3,
   menuPage = null,
@@ -88,9 +90,6 @@ export const MapPage = ({
         className: "context-panel",
         menuPage: menuPage ?? navMenuPage,
       }),
-      contextStackProps: {
-        className: contextClass + " macrostrat-context-stack",
-      },
       detailPanel: h(Routes, [
         h(Route, {
           path: "loc/:lng/:lat/*",
@@ -104,7 +103,8 @@ export const MapPage = ({
       mapPosition,
       className: classNames(
         "macrostrat-map-container",
-        inputFocus ? "searching" : null
+        inputFocus ? "searching" : contextClass,
+        contextPanelOpen || inputFocus ? "context-open" : "context-closed"
       ),
       fitViewport: true,
     },

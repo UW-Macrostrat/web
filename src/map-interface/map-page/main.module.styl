@@ -108,46 +108,14 @@ This stylesheet the overall application page layout.
   .map-view-container
     pointer-events: none
 
-/* For mobile phones, we want to make the most of screen space,
- which in some cases means adding complications to the basic page. */
-@media only screen and (max-width: 768px)
-
-  // Move the search bar and context panel to the bottom of the screen
-  // .context-stack
-  //   display flex
-  //   order 1
-  //   flex-direction: column-reverse
-  //   max-height: 80%
-
-  .infodrawer-stack
-    max-height: 70%
-    &:global(.exit-active)
-      max-height: 0
-
-
-  .detail-panel
-    border-radius: 0px
 
 /* Desktop styling is necessarily much more complicated than mobile
   to handle a two-column layout. */
 @media screen and (min-width: 768px)
-
-  // This won't quite work
-  .macrostrat-map-container.searching .macrostrat-context-stack
-    width: 24em
-
-  :global(.macrostrat-context-stack)
-    width: 34em
-    margin-right 0.5em
+  .macrostrat-map-container
+    &.context-open
+      --map-context-stack-width: 34em
+    &.searching
+      --map-context-stack-width: 24em
     &.layers, &.settings
-      width: 18em
-      margin-right 0.5em
-    // Leave a little space for Mapbox logo at the bottom
-
-  .main-ui.detail-panel-open .detail-stack
-    width: 30em
-
-  /* Make map fill page rather than containing div,
-    by unsetting map position */
-  .map-view-container
-    position: unset
+      --map-context-stack-width: 18em
