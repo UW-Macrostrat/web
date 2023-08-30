@@ -10,6 +10,9 @@ import {
   PositionFocusState,
   useMapLabelVisibility,
   useMapRef,
+  useMapDispatch,
+  useMapStatus,
+  useMapPosition,
 } from "@macrostrat/mapbox-react";
 import { MacrostratLineSymbolManager } from "@macrostrat/mapbox-styles";
 import {
@@ -90,6 +93,7 @@ export default function MainMapView(props) {
   } = useAppState((state) => state.core);
 
   let mapRef = useMapRef();
+  const dispatch = useMapDispatch();
   useCrossSectionCursorLocation(mapRef, crossSectionCursorLocation);
   const { mapIsRotated } = mapViewInfo(mapPosition);
   const runAction = useAppActions();
@@ -97,12 +101,7 @@ export default function MainMapView(props) {
   const isDarkMode = inDarkMode();
 
   const baseMapURL = getBaseMapStyle(mapLayers, isDarkMode);
-
-  /* HACK: Right now we need this to force a render when the map
-    is done loading
-    */
-  const [mapInitialized, setMapInitialized] = useState(false);
-  const [styleLoaded, setStyleLoaded] = useState(false);
+  const { isInitialized, isStyleLoaded } = useMapStatus();
 
   const [baseStyle, setBaseStyle] = useState(null);
   const mapStyle = useMemo(() => {
@@ -158,14 +157,6 @@ export default function MainMapView(props) {
         map.setCenter(infoMarkerPosition);
       }
     }
-
-    if (!map.isStyleLoaded()) {
-      map.once("style.load", () => {
-        setStyleLoaded(true);
-      });
-    } else {
-      setStyleLoaded(true);
-    }
   }, []);
 
   useEffect(() => {
@@ -178,12 +169,11 @@ export default function MainMapView(props) {
       projection: "globe",
     });
     onMapLoad(map);
-    mapRef.current = map;
+    dispatch({ type: "set-map", payload: map });
     /* Right now we need to reload filters when the map is initialized.
         Otherwise our (super-legacy and janky) filter system doesn't know
         to update the map. */
     //runAction({ type: "set-filters", filters: [...filters] });
-    setMapInitialized(true);
   }, [baseStyle]);
 
   /* If we want to use a high resolution DEM, we need to use a different
@@ -195,7 +185,7 @@ export default function MainMapView(props) {
     const map = mapRef.current;
     if (map == null) return;
     setMapPosition(map, mapPosition);
-  }, [mapRef.current, mapInitialized]);
+  }, [mapRef.current, isInitialized]);
 
   // Make map label visibility match the mapLayers state
   useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));
@@ -215,7 +205,7 @@ export default function MainMapView(props) {
 
     map.setFilter("burwell_fill", expr);
     map.setFilter("burwell_stroke", expr);
-  }, [filters, mapInitialized, styleLoaded]);
+  }, [filters, isInitialized, isStyleLoaded]);
 
   return h(CoreMapView, { ...props, infoMarkerPosition }, [
     h(VestigialMap, {
@@ -240,13 +230,26 @@ export default function MainMapView(props) {
     }),
     h(CrossSectionLine),
     h.if(mapLayers.has(MapLayer.SOURCES))(MapSourcesLayer),
-    h(ColumnDataManager, { mapInitialized }),
+    h(ColumnDataManager),
+    h(MapPositionReporter),
   ]);
 }
 
-function ColumnDataManager({ mapInitialized }) {
+function MapPositionReporter() {
+  // Connects map position to Redux app state
+  const mapPosition = useMapPosition();
+  const runAction = useAppActions();
+
+  useEffect(() => {
+    runAction({ type: "map-moved", data: { mapPosition } });
+  }, [mapPosition]);
+
+  return null;
+}
+function ColumnDataManager() {
   /* Update columns map layer given columns provided by application. */
   const mapRef = useMapRef();
+  const { isInitialized } = useMapStatus();
   const allColumns = useAppState((state) => state.core.allColumns);
   useEffect(() => {
     const map = mapRef.current;
@@ -267,7 +270,7 @@ function ColumnDataManager({ mapInitialized }) {
       type: "FeatureCollection",
       features: allColumns ?? [],
     });
-  }, [mapRef.current, allColumns, mapInitialized]);
+  }, [mapRef.current, allColumns, isInitialized]);
   return null;
 }
 
