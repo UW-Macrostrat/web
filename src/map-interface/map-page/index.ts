@@ -5,7 +5,6 @@ import Searchbar from "../components/navbar";
 import { Spinner, HTMLDivProps } from "@blueprintjs/core";
 import { useSelector } from "react-redux";
 import loadable from "@loadable/component";
-import { ZoomControl } from "@macrostrat/map-interface";
 import {
   useSearchState,
   MapBackend,
@@ -39,8 +38,6 @@ export function CesiumView(props) {
 function MapView(props) {
   return h(Suspense, { fallback: h(Spinner) }, h(MapContainer, props));
 }
-
-const _ContextStack = (p) => h("div.context-stack", p);
 
 export const MapPage = ({
   backend = MapBackend.MAPBOX3,
