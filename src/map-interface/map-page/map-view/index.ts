@@ -48,14 +48,13 @@ import { getBaseMapStyle, useCrossSectionCursorLocation } from "./utils";
 
 const h = hyper.styled(styles);
 
-console.log(SETTINGS);
-
 mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
 
 const VestigialMap = forwardRef((props, ref) => h(Map, { ...props, ref }));
 
-async function initializeMap(style, mapPosition, infoMarkerPosition) {
+function initializeMap(containers, opts) {
   // setup the basic map
+  const { style, mapPosition, ...rest } = opts;
 
   const map = new mapboxgl.Map({
     container: "map",
@@ -66,35 +65,11 @@ async function initializeMap(style, mapPosition, infoMarkerPosition) {
     trackResize: true,
     antialias: true,
     optimizeForTerrain: true,
+    ...rest,
   });
-
-  map.setProjection("globe");
-
-  // disable shift-key zooming so we can use shift to make cross-sections
-  map.boxZoom.disable();
 
   // set initial map position
   setMapPosition(map, mapPosition);
-
-  /* If we have an initially loaded info marker, we need to make sure
-    that it is actually visible on the map, and move to it if not.
-    This works around cases where the map is initialized with a hash string
-    that contradicts the focused location (which would happen if the link was
-    saved once the marker was moved out of view).
-    */
-  if (infoMarkerPosition != null) {
-    const focus = getFocusState(map, infoMarkerPosition);
-    if (
-      ![
-        PositionFocusState.CENTERED,
-        PositionFocusState.NEAR_CENTER,
-        PositionFocusState.OFF_CENTER,
-      ].includes(focus)
-    ) {
-      map.setCenter(infoMarkerPosition);
-    }
-  }
-
   return map;
 }
 
@@ -161,27 +136,54 @@ export default function MainMapView(props) {
     });
   }, [baseMapURL]);
 
+  const onMapLoad = useCallback((map) => {
+    // disable shift-key zooming so we can use shift to make cross-sections
+    map.boxZoom.disable();
+
+    /* If we have an initially loaded info marker, we need to make sure
+    that it is actually visible on the map, and move to it if not.
+    This works around cases where the map is initialized with a hash string
+    that contradicts the focused location (which would happen if the link was
+    saved once the marker was moved out of view).
+    */
+    if (infoMarkerPosition != null) {
+      const focus = getFocusState(map, infoMarkerPosition);
+      if (
+        ![
+          PositionFocusState.CENTERED,
+          PositionFocusState.NEAR_CENTER,
+          PositionFocusState.OFF_CENTER,
+        ].includes(focus)
+      ) {
+        map.setCenter(infoMarkerPosition);
+      }
+    }
+
+    if (!map.isStyleLoaded()) {
+      map.once("style.load", () => {
+        setStyleLoaded(true);
+      });
+    } else {
+      setStyleLoaded(true);
+    }
+  }, []);
+
   useEffect(() => {
     if (baseStyle == null) {
       return;
     }
-    initializeMap(mapStyle, mapPosition, infoMarkerPosition).then((map) => {
-      if (!map.isStyleLoaded()) {
-        map.once("style.load", () => {
-          setStyleLoaded(true);
-        });
-      } else {
-        setStyleLoaded(true);
-      }
-
-      mapRef.current = map;
-
-      /* Right now we need to reload filters when the map is initialized.
+    const map = initializeMap("map", {
+      style: mapStyle,
+      mapPosition,
+      projection: "globe",
+    });
+    onMapLoad(map);
+    mapRef.current = map;
+    /* Right now we need to reload filters when the map is initialized.
         Otherwise our (super-legacy and janky) filter system doesn't know
         to update the map. */
-      //runAction({ type: "set-filters", filters: [...filters] });
-      setMapInitialized(true);
-    });
+    //runAction({ type: "set-filters", filters: [...filters] });
+    setMapInitialized(true);
   }, [baseStyle]);
 
   /* If we want to use a high resolution DEM, we need to use a different
