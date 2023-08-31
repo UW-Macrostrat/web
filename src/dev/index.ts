@@ -32,6 +32,20 @@ export default function DevIndex() {
         }),
       }),
       h(Route, {
+        path: "carto-v1",
+        element: h(VectorMapInspectorPage, {
+          title: "Carto (v1)",
+          tileset: "https://tiles.macrostrat.org/carto/{z}/{x}/{y}.mvt",
+        }),
+      }),
+      h(Route, {
+        path: "carto-slim-v1",
+        element: h(VectorMapInspectorPage, {
+          title: "Carto (slim, v1)",
+          tileset: "https://tiles.macrostrat.org/carto-slim/{z}/{x}/{y}.mvt",
+        }),
+      }),
+      h(Route, {
         path: "all-maps",
         element: h(VectorMapInspectorPage, {
           tileset: MacrostratVectorTileset.AllMaps,
@@ -78,6 +92,8 @@ function MapInspectorIndex() {
     h("ul.layers", [
       h(LinkItem, { to: "carto" }, "Carto"),
       h(LinkItem, { to: "carto-slim" }, "Carto (slim)"),
+      h(LinkItem, { to: "carto-v1" }, "Carto (v1)"),
+      h(LinkItem, { to: "carto-slim-v1" }, "Carto (v1)"),
       h(LinkItem, { to: "carto-raster" }, "Carto (image)"),
       h(LinkItem, { to: "emphasized" }, "Carto (image, emphasized)"),
       h(LinkItem, { to: "all-maps" }, "All maps"),

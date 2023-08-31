@@ -233,15 +233,20 @@ export function buildRasterStyle(layer: MacrostratRasterTileset) {
 
 export function replaceSourcesForTileset(
   style: mapboxgl.Style,
-  tileset: MacrostratVectorTileset
+  tileset: MacrostratVectorTileset | string
 ) {
+  let tilesetURL = tileset;
+  if (!tilesetURL.startsWith("http")) {
+    tilesetURL = SETTINGS.burwellTileDomain + `/${tileset}/{z}/{x}/{y}`;
+  }
+
   return {
     ...style,
     sources: {
       ...style.sources,
       burwell: {
         type: "vector",
-        tiles: [SETTINGS.burwellTileDomain + `/${tileset}/{z}/{x}/{y}`],
+        tiles: [tilesetURL],
         tileSize: 512,
       },
     },
@@ -251,7 +256,7 @@ export function replaceSourcesForTileset(
 interface DevMapStyleOptions {
   inDarkMode?: boolean;
   xRay?: boolean;
-  tileset?: MacrostratVectorTileset;
+  tileset?: MacrostratVectorTileset | string;
 }
 
 export async function buildMapStyle(

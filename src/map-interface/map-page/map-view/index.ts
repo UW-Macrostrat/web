@@ -55,12 +55,12 @@ mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
 
 const VestigialMap = forwardRef((props, ref) => h(Map, { ...props, ref }));
 
-function initializeMap(containers, opts) {
+function initializeMap(container, opts) {
   // setup the basic map
   const { style, mapPosition, ...rest } = opts;
 
   const map = new mapboxgl.Map({
-    container: "map",
+    container,
     style,
     maxZoom: 18,
     //maxTileCacheSize: 0,
@@ -123,11 +123,6 @@ export default function MainMapView(props) {
   }, [baseStyle, timeCursorAge, plateModelId, isDarkMode, focusedMapSource]);
 
   useEffect(() => {
-    if (mapRef.current == null || baseStyle == null) return;
-    mapRef.current.setStyle(mapStyle);
-  }, [mapStyle]);
-
-  useEffect(() => {
     getMapboxStyle(baseMapURL, {
       access_token: mapboxgl.accessToken,
     }).then((s) => {
@@ -163,29 +158,30 @@ export default function MainMapView(props) {
     if (baseStyle == null) {
       return;
     }
+    if (mapRef?.current != null) {
+      mapRef.current.setStyle(mapStyle);
+      return;
+    }
     const map = initializeMap("map", {
       style: mapStyle,
       mapPosition,
       projection: "globe",
     });
+    map.on("style.load", () => {
+      dispatch({ type: "set-style-loaded", payload: true });
+    });
     onMapLoad(map);
     dispatch({ type: "set-map", payload: map });
+
     /* Right now we need to reload filters when the map is initialized.
         Otherwise our (super-legacy and janky) filter system doesn't know
         to update the map. */
-    //runAction({ type: "set-filters", filters: [...filters] });
-  }, [baseStyle]);
+  }, [mapStyle]);
 
   /* If we want to use a high resolution DEM, we need to use a different
     source ID from the hillshade's source ID. This uses more memory but
     provides a nicer-looking 3D map.
     */
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null) return;
-    setMapPosition(map, mapPosition);
-  }, [mapRef.current, isInitialized]);
 
   // Make map label visibility match the mapLayers state
   useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));
@@ -200,12 +196,12 @@ export default function MainMapView(props) {
   // Filters
   useEffect(() => {
     const map = mapRef.current;
-    if (map == null || !map?.isStyleLoaded()) return;
+    if (map == null || !isStyleLoaded) return;
     const expr = getExpressionForFilters(filters);
-
-    map.setFilter("burwell_fill", expr);
-    map.setFilter("burwell_stroke", expr);
-  }, [filters, isInitialized, isStyleLoaded]);
+    console.log(expr);
+    map.setFilter("burwell_fill", expr, { validate: false });
+    map.setFilter("burwell_stroke", expr, { validate: false });
+  }, [filters, isInitialized, isStyleLoaded, mapRef.current]);
 
   return h(CoreMapView, { ...props, infoMarkerPosition }, [
     h(VestigialMap, {
@@ -231,13 +227,13 @@ export default function MainMapView(props) {
     h(CrossSectionLine),
     h.if(mapLayers.has(MapLayer.SOURCES))(MapSourcesLayer),
     h(ColumnDataManager),
-    h(MapPositionReporter),
+    h(MapPositionReporter, { initialMapPosition: mapPosition }),
   ]);
 }
 
-function MapPositionReporter() {
+function MapPositionReporter({ initialMapPosition = null }) {
   // Connects map position to Redux app state
-  const mapPosition = useMapPosition();
+  const mapPosition = useMapPosition() ?? initialMapPosition;
   const runAction = useAppActions();
 
   useEffect(() => {

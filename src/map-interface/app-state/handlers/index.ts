@@ -204,10 +204,11 @@ async function actionRunner(
       if (result.type == "place") {
         return { type: "go-to-place", place: result };
       } else {
-        return {
-          type: "add-filter",
-          filter: await runFilter(result),
-        };
+        return actionRunner(
+          state,
+          { type: "async-add-filter", filter: result },
+          dispatch
+        );
       }
     case "async-add-filter":
       return { type: "add-filter", filter: await runFilter(action.filter) };
