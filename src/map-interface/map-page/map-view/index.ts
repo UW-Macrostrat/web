@@ -21,7 +21,7 @@ import {
   mergeStyles,
   setMapPosition,
 } from "@macrostrat/mapbox-utils";
-import { inDarkMode, usePrevious } from "@macrostrat/ui-components";
+import { inDarkMode } from "@macrostrat/ui-components";
 import { LineString } from "geojson";
 import mapboxgl from "mapbox-gl";
 import {
@@ -46,7 +46,7 @@ import {
   MapSourcesLayer,
 } from "@macrostrat/mapbox-styles";
 import { getExpressionForFilters } from "./filter-helpers";
-import Map, { LayerVisibilityManager } from "./map";
+import Map, { MacrostratLayerManager } from "./map";
 import { getBaseMapStyle, useCrossSectionCursorLocation } from "./utils";
 
 const h = hyper.styled(styles);
@@ -130,7 +130,7 @@ export default function MainMapView(props) {
     });
   }, [baseMapURL]);
 
-  const onMapLoaded = useCallback((map) => {
+  const onMapLoad = useCallback((map) => {
     // disable shift-key zooming so we can use shift to make cross-sections
     map.boxZoom.disable();
 
@@ -154,15 +154,29 @@ export default function MainMapView(props) {
     }
   }, []);
 
-  // Filters
   useEffect(() => {
-    const map = mapRef.current;
-    if (map == null || !isStyleLoaded) return;
-    const expr = getExpressionForFilters(filters);
-    console.log("Setting filters", expr);
-    map.setFilter("burwell_fill", expr, { validate: false });
-    map.setFilter("burwell_stroke", expr, { validate: false });
-  }, [filters, isInitialized, isStyleLoaded, mapRef.current]);
+    if (baseStyle == null) {
+      return;
+    }
+    if (mapRef?.current != null) {
+      mapRef.current.setStyle(mapStyle);
+      return;
+    }
+    const map = initializeMap("map", {
+      style: mapStyle,
+      mapPosition,
+      projection: "globe",
+    });
+    map.on("style.load", () => {
+      dispatch({ type: "set-style-loaded", payload: true });
+    });
+    onMapLoad(map);
+    dispatch({ type: "set-map", payload: map });
+
+    /* Right now we need to reload filters when the map is initialized.
+        Otherwise our (super-legacy and janky) filter system doesn't know
+        to update the map. */
+  }, [mapStyle]);
 
   /* If we want to use a high resolution DEM, we need to use a different
     source ID from the hillshade's source ID. This uses more memory but
@@ -179,42 +193,43 @@ export default function MainMapView(props) {
     runAction({ type: "map-layers-changed", mapLayers });
   }, [filters, mapLayers]);
 
-  return h(
-    CoreMapView,
-    {
-      style: mapStyle,
-      mapPosition,
-      onMapLoaded,
-      infoMarkerPosition,
-    },
-    [
-      h(VestigialMap, {
-        filters,
-        filteredColumns,
-        // Recreate the set every time to force a re-render
-        mapLayers,
-        mapCenter,
-        mapStyle,
-        crossSectionLine,
-        crossSectionCursorLocation,
-        mapPosition,
-        mapIsRotated,
-        onQueryMap: handleMapQuery,
-        mapRef,
-        isDark: isDarkMode,
-        runAction,
-        ...props,
-      }),
-      h(MapMarker, {
-        position: infoMarkerPosition,
-      }),
-      h(CrossSectionLine),
-      h.if(mapLayers.has(MapLayer.SOURCES))(MapSourcesLayer),
-      h(ColumnDataManager),
-      h(MapPositionReporter, { initialMapPosition: mapPosition }),
-      h(LayerVisibilityManager, { mapLayers, filters }),
-    ]
-  );
+  // Filters
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map == null || !isStyleLoaded) return;
+    const expr = getExpressionForFilters(filters);
+    console.log(expr);
+    map.setFilter("burwell_fill", expr, { validate: false });
+    map.setFilter("burwell_stroke", expr, { validate: false });
+  }, [filters, isInitialized, isStyleLoaded, mapRef.current]);
+
+  return h(CoreMapView, { ...props, infoMarkerPosition }, [
+    // h(VestigialMap, {
+    //   filters,
+    //   filteredColumns,
+    //   // Recreate the set every time to force a re-render
+    //   mapLayers,
+    //   mapCenter,
+    //   mapStyle,
+    //   crossSectionLine,
+    //   crossSectionCursorLocation,
+    //   mapPosition,
+    //   mapIsRotated,
+    //   onQueryMap: handleMapQuery,
+    //   mapRef,
+    //   isDark: isDarkMode,
+    //   runAction,
+    //   ...props,
+    // }),
+    h(MapMarker, {
+      position: infoMarkerPosition,
+    }),
+    h(CrossSectionLine),
+    h.if(mapLayers.has(MapLayer.SOURCES))(MapSourcesLayer),
+    h(ColumnDataManager),
+    h(MapPositionReporter, { initialMapPosition: mapPosition }),
+    h(MacrostratLayerManager, { mapLayers, filters }),
+  ]);
 }
 
 function MapPositionReporter({ initialMapPosition = null }) {

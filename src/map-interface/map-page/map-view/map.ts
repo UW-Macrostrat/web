@@ -5,11 +5,17 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
 import { setMapStyle } from "./style-helpers";
-import { MapLayer } from "~/map-interface/app-state";
+import {
+  AppAction,
+  MapAction,
+  MapLayer,
+  useAppActions,
+} from "~/map-interface/app-state";
 import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
 import { SETTINGS } from "~/map-interface/settings";
 import { useMapRef, useMapStatus } from "@macrostrat/mapbox-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
+import { useAppState } from "~/map-interface/app-state";
 
 const highlightLayers = [
   { layer: "pbdb-points", source: "pbdb-points" },
@@ -24,6 +30,170 @@ interface MapProps {
   onQueryMap: (event: any, columns: ColumnProperties[]) => void;
   plateModelId: number;
   runAction: (action: any) => void;
+}
+
+type MapZoomAction = {
+  type: "zoom-map";
+  dz: number;
+};
+
+function handleFossilLayerClick(
+  event,
+  map,
+  pbdbPoints
+): AppAction | MapZoomAction | null {
+  const mapZoom = map.getZoom();
+  let collections = map.queryRenderedFeatures(event.point, {
+    layers: ["pbdb-points-clustered", "pbdb-points", "pbdb-clusters"],
+  });
+  // Clicked on a hex grid
+  if (
+    collections.length &&
+    collections[0].properties.hasOwnProperty("hex_id")
+  ) {
+    return { type: "zoom-map", dz: 1 };
+    // Clicked on a summary cluster
+  } else if (
+    collections.length &&
+    collections[0].properties.hasOwnProperty("oid") &&
+    collections[0].properties.oid.split(":")[0] === "clu" &&
+    mapZoom <= 12
+  ) {
+    return { type: "zoom-map", dz: 2 };
+    // Clicked on a real cluster of collections
+
+    // ... the way we do clustering here is kind of strange.
+  } else if (
+    collections.length &&
+    (collections[0].properties.hasOwnProperty("cluster") ||
+      // Summary cluster when zoom is too high
+      collections[0].properties.oid.split(":")[0] === "clu")
+  ) {
+    // via https://jsfiddle.net/aznkw784/
+    let pointsInCluster = pbdbPoints.features
+      .filter((f) => {
+        let pointPixels = this.map.project(f.geometry.coordinates);
+        let pixelDistance = Math.sqrt(
+          Math.pow(event.point.x - pointPixels.x, 2) +
+            Math.pow(event.point.y - pointPixels.y, 2)
+        );
+        return Math.abs(pixelDistance) <= 50;
+      })
+      .map((f) => {
+        return f.properties.oid.replace("col:", "");
+      });
+    return {
+      type: "get-pbdb",
+      collection_nos: pointsInCluster,
+    };
+
+    // Clicked on an unclustered point
+  } else if (
+    collections.length &&
+    collections[0].properties.hasOwnProperty("oid")
+  ) {
+    let collection_nos = collections.map((col) => {
+      return col.properties.oid.replace("col:", "");
+    });
+    return { type: "get-pbdb", collection_nos };
+    //    return
+  } else {
+    // Otherwise make sure that old fossil collections aren't visible
+    return { type: "reset-pbdb" };
+  }
+  return null;
+}
+
+function handleCrossSectionClick(event, _crossSectionLine): MapAction | null {
+  // If the elevation drawer is open and we are awaiting to points, add them
+  let crossSectionLine = _crossSectionLine;
+  let crossSectionCoords = crossSectionLine?.coordinates ?? [];
+  if (
+    (crossSectionLine != null && crossSectionCoords.length < 2) ||
+    event.originalEvent.shiftKey
+  ) {
+    crossSectionLine ??= { type: "LineString", coordinates: [] };
+
+    if (crossSectionCoords.length === 2) {
+      // Resset cross sections
+      crossSectionCoords = [];
+    }
+    crossSectionCoords.push([event.lngLat.lng, event.lngLat.lat]);
+    return {
+      type: "update-cross-section",
+      line: {
+        type: "LineString",
+        coordinates: crossSectionCoords,
+      },
+    };
+  }
+  return null;
+}
+
+function useMapClickHandler(props) {
+  const mapRef = useMapRef();
+  const runAction = useAppActions();
+
+  const { crossSectionLine, mapLayers, pbdbPoints } = props;
+
+  return useCallback(
+    (event) => {
+      const map = mapRef.current;
+
+      const action = handleCrossSectionClick(event, crossSectionLine);
+      if (action != null) {
+        runAction(action);
+      }
+
+      // If we are viewing fossils, prioritize clicks on those
+      if (mapLayers.has(MapLayer.FOSSILS)) {
+        const action = handleFossilLayerClick(event, map, pbdbPoints.current);
+        if (action != null) {
+          if (action.type === "zoom-map") {
+            map.zoomTo(map.getZoom() + action.dz, { center: event.lngLat });
+          } else {
+            runAction(action);
+          }
+          return;
+        }
+      }
+
+      // Otherwise try to query the geologic map
+      let features = map.queryRenderedFeatures(event.point, {
+        layers: ["burwell_fill", "column_fill", "filtered_column_fill"],
+      });
+
+      let burwellFeatures = features
+        .filter((f) => {
+          if (f.layer.id === "burwell_fill") return f;
+        })
+        .map((f) => {
+          return f.properties;
+        });
+
+      const columns: ColumnProperties[] = features
+        .filter((f) => {
+          if (
+            f.layer.id === "column_fill" ||
+            f.layer.id === "filtered_column_fill"
+          )
+            return f;
+        })
+        .map((f) => {
+          return f.properties;
+        });
+
+      runAction({
+        type: "map-query",
+        lng: event.lngLat.lng,
+        lat: event.lngLat.lat,
+        z: map.getZoom(),
+        columns,
+        map_id: null,
+      });
+    },
+    [mapRef.current]
+  );
 }
 
 class VestigialMap extends Component<MapProps, {}> {
@@ -96,125 +266,7 @@ class VestigialMap extends Component<MapProps, {}> {
       });
     });
 
-    this.map.on("click", (event) => {
-      // If the elevation drawer is open and we are awaiting to points, add them
-      let crossSectionLine = this.props.crossSectionLine;
-      let crossSectionCoords = crossSectionLine?.coordinates ?? [];
-      if (
-        (crossSectionLine != null && crossSectionCoords.length < 2) ||
-        event.originalEvent.shiftKey
-      ) {
-        crossSectionLine ??= { type: "LineString", coordinates: [] };
-
-        if (crossSectionCoords.length === 2) {
-          // Restaoss sections
-          crossSectionCoords = [];
-        }
-        crossSectionCoords.push([event.lngLat.lng, event.lngLat.lat]);
-        this.props.runAction({
-          type: "update-cross-section",
-          line: {
-            type: "LineString",
-            coordinates: crossSectionCoords,
-          },
-        });
-        return;
-      }
-
-      const mapZoom = this.map.getZoom();
-
-      // If we are viewing fossils, prioritize clicks on those
-      if (this.props.mapLayers.has(MapLayer.FOSSILS)) {
-        let collections = this.map.queryRenderedFeatures(event.point, {
-          layers: ["pbdb-points-clustered", "pbdb-points", "pbdb-clusters"],
-        });
-        // Clicked on a hex grid
-        if (
-          collections.length &&
-          collections[0].properties.hasOwnProperty("hex_id")
-        ) {
-          this.map.zoomTo(mapZoom + 1, { center: event.lngLat });
-          return;
-
-          // Clicked on a summary cluster
-        } else if (
-          collections.length &&
-          collections[0].properties.hasOwnProperty("oid") &&
-          collections[0].properties.oid.split(":")[0] === "clu" &&
-          mapZoom <= 12
-        ) {
-          this.map.zoomTo(mapZoom + 2, { center: event.lngLat });
-          return;
-          // Clicked on a real cluster of collections
-
-          // ... the way we do clustering here is kind of strange.
-        } else if (
-          collections.length &&
-          (collections[0].properties.hasOwnProperty("cluster") ||
-            // Summary cluster when zoom is too high
-            collections[0].properties.oid.split(":")[0] === "clu")
-        ) {
-          // via https://jsfiddle.net/aznkw784/
-          let pointsInCluster = this.pbdbPoints.features
-            .filter((f) => {
-              let pointPixels = this.map.project(f.geometry.coordinates);
-              let pixelDistance = Math.sqrt(
-                Math.pow(event.point.x - pointPixels.x, 2) +
-                  Math.pow(event.point.y - pointPixels.y, 2)
-              );
-              return Math.abs(pixelDistance) <= 50;
-            })
-            .map((f) => {
-              return f.properties.oid.replace("col:", "");
-            });
-          this.props.runAction({
-            type: "get-pbdb",
-            collection_nos: pointsInCluster,
-          });
-
-          // Clicked on an unclustered point
-        } else if (
-          collections.length &&
-          collections[0].properties.hasOwnProperty("oid")
-        ) {
-          let collection_nos = collections.map((col) => {
-            return col.properties.oid.replace("col:", "");
-          });
-          this.props.runAction({ type: "get-pbdb", collection_nos });
-          //    return
-        } else {
-          // Otherwise make sure that old fossil collections aren't visible
-          this.props.runAction({ type: "reset-pbdb" });
-        }
-      }
-
-      // Otherwise try to query the geologic map
-      let features = this.map.queryRenderedFeatures(event.point, {
-        layers: ["burwell_fill", "column_fill", "filtered_column_fill"],
-      });
-
-      let burwellFeatures = features
-        .filter((f) => {
-          if (f.layer.id === "burwell_fill") return f;
-        })
-        .map((f) => {
-          return f.properties;
-        });
-
-      const columns = features
-        .filter((f) => {
-          if (
-            f.layer.id === "column_fill" ||
-            f.layer.id === "filtered_column_fill"
-          )
-            return f;
-        })
-        .map((f) => {
-          return f.properties;
-        });
-
-      this.props.onQueryMap(event, columns);
-    });
+    this.map.on("click", (event) => {});
   }
 
   // Handle updates to the state of the map
@@ -360,7 +412,7 @@ export async function refreshPBDB(map, pointsRef, filters) {
   }
 }
 
-export function LayerVisibilityManager({ mapLayers, filters }) {
+export function MacrostratLayerManager({ mapLayers, filters }) {
   const mapRef = useMapRef();
   const { isStyleLoaded } = useMapStatus();
 
@@ -409,6 +461,21 @@ export function LayerVisibilityManager({ mapLayers, filters }) {
       refreshPBDB(map, pbdbPoints, filters);
     }
   }, [mapLayers, isStyleLoaded]);
+
+  const crossSectionLine = useAppState((s) => s.core.crossSectionLine);
+  // Map click handler
+  const mapClickHandler = useMapClickHandler({
+    crossSectionLine: crossSectionLine,
+    mapLayers,
+  });
+
+  useEffect(() => {
+    if (mapRef.current == null) return;
+    mapRef.current.on("click", mapClickHandler);
+    return () => {
+      mapRef.current.off("click", mapClickHandler);
+    };
+  }, [mapRef.current, mapClickHandler]);
 
   return null;
 }
