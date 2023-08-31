@@ -46,7 +46,7 @@ import {
   MapSourcesLayer,
 } from "@macrostrat/mapbox-styles";
 import { getExpressionForFilters } from "./filter-helpers";
-import Map, { MacrostratLayerManager } from "./map";
+import Map, { FlyToPlaceManager, MacrostratLayerManager } from "./map";
 import { getBaseMapStyle, useCrossSectionCursorLocation } from "./utils";
 
 const h = hyper.styled(styles);
@@ -81,7 +81,6 @@ export default function MainMapView(props) {
     filters,
     filteredColumns,
     mapLayers,
-    mapCenter,
     crossSectionLine,
     crossSectionCursorLocation,
     mapPosition,
@@ -229,6 +228,7 @@ export default function MainMapView(props) {
     h(ColumnDataManager),
     h(MapPositionReporter, { initialMapPosition: mapPosition }),
     h(MacrostratLayerManager, { mapLayers, filters }),
+    h(FlyToPlaceManager),
   ]);
 }
 

@@ -192,7 +192,7 @@ function useMapClickHandler(props) {
         map_id: null,
       });
     },
-    [mapRef.current]
+    [mapRef.current, mapLayers]
   );
 }
 
@@ -231,13 +231,6 @@ class VestigialMap extends Component<MapProps, {}> {
     // disable map rotation using touch rotation gesture
     //this.map.touchZoomRotate.disableRotation();
 
-    this.map.on("moveend", () => {
-      // Force a hit to the API to refresh
-      if (this.props.mapLayers.has(MapLayer.FOSSILS)) {
-        this.refreshPBDB();
-      }
-    });
-
     highlightLayers.forEach((layer) => {
       this.map.on("mousemove", layer.layer, (evt) => {
         if (evt.features) {
@@ -265,8 +258,6 @@ class VestigialMap extends Component<MapProps, {}> {
         this.hoverStates[layer.layer] = null;
       });
     });
-
-    this.map.on("click", (event) => {});
   }
 
   // Handle updates to the state of the map
@@ -416,8 +407,8 @@ export function MacrostratLayerManager({ mapLayers, filters }) {
   const mapRef = useMapRef();
   const { isStyleLoaded } = useMapStatus();
 
-  const hoverStates = useRef({});
-  const selectedStates = useRef({});
+  const hoveredFeatures = useRef({});
+  const selectedFeatures = useRef({});
   const pbdbPoints = useRef({});
 
   useEffect(() => {
@@ -426,8 +417,8 @@ export function MacrostratLayerManager({ mapLayers, filters }) {
     if (map == null) return;
     const style = map.getStyle();
     for (const layer of style.layers) {
-      hoverStates.current[layer.id] = null;
-      selectedStates.current[layer.id] = null;
+      hoveredFeatures.current[layer.id] = null;
+      selectedFeatures.current[layer.id] = null;
 
       if (!("source" in layer)) continue;
 
@@ -477,10 +468,60 @@ export function MacrostratLayerManager({ mapLayers, filters }) {
     };
   }, [mapRef.current, mapClickHandler]);
 
+  // Handle map movement
+  const mapMovedHandler = useCallback(() => {
+    if (mapRef.current == null) return;
+    if (mapLayers.has(MapLayer.FOSSILS)) {
+      refreshPBDB(mapRef.current, pbdbPoints, filters);
+    }
+  }, [mapRef.current, mapLayers, filters]);
+
+  useEffect(() => {
+    if (mapRef.current == null) return;
+    mapRef.current.on("moveend", mapMovedHandler);
+    return () => {
+      mapRef.current.off("moveend", mapMovedHandler);
+    };
+  }, [mapRef.current, mapMovedHandler]);
+
   return null;
 }
 
 function setVisibility(map, layerID, visible) {
   const visibility = visible ? "visible" : "none";
   map.setLayoutProperty(layerID, "visibility", visibility);
+}
+
+export function FlyToPlaceManager() {
+  const mapCenter = useAppState((s) => s.core.mapCenter);
+  const mapRef = useMapRef();
+  useEffect(() => {
+    /* Increasing the duration somehow breaks this interaction.
+    There's probably some interference between this and the map position handler.
+    */
+    const duration = 0;
+
+    const map = mapRef.current;
+    if (mapCenter.type !== "place" || map == null) return;
+
+    const { bbox, center } = mapCenter.place;
+    if (bbox?.length == 4) {
+      let bounds = [
+        [mapCenter.place.bbox[0], mapCenter.place.bbox[1]],
+        [mapCenter.place.bbox[2], mapCenter.place.bbox[3]],
+      ];
+      map.fitBounds(bounds, {
+        duration,
+        maxZoom: 16,
+      });
+    } else {
+      map.flyTo({
+        center,
+        duration,
+        zoom: Math.max(map.getZoom() ?? 10, 14),
+      });
+    }
+  }, [mapRef.current, mapCenter]);
+
+  return null;
 }
