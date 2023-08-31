@@ -9,7 +9,6 @@ import { MapLayer } from "~/map-interface/app-state";
 import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
 import { SETTINGS } from "~/map-interface/settings";
 
-const maxClusterZoom = 6;
 const highlightLayers = [
   { layer: "pbdb-points", source: "pbdb-points" },
   { layer: "pbdb-points-clustered", source: "pbdb-points" },
@@ -24,12 +23,6 @@ interface MapProps {
   plateModelId: number;
   runAction: (action: any) => void;
 }
-
-const blankMapStyle = {
-  version: 8,
-  sources: {},
-  layers: [],
-};
 
 class VestigialMap extends Component<MapProps, {}> {
   map: mapboxgl.Map;
@@ -48,52 +41,6 @@ class VestigialMap extends Component<MapProps, {}> {
     // Keep track of unique ids for interaction states
     this.hoverStates = {};
     this.selectedStates = {};
-  }
-
-  onStyleLoad() {
-    // The initial draw of the layers
-    // console.log("Style loaded", this.props);
-    if (!this.map.style._loaded) {
-      return;
-    }
-
-    const { mapLayers } = this.props;
-    buildMacrostratStyle({
-      tileserverDomain: SETTINGS.burwellTileDomain,
-    }).layers.forEach((layer) => {
-      // Populate the objects that track interaction states
-      this.hoverStates[layer.id] = null;
-      this.selectedStates[layer.id] = null;
-
-      // Accomodate any URI parameters
-      if (
-        layer.source === "burwell" &&
-        layer["source-layer"] === "units" &&
-        mapLayers.has(MapLayer.BEDROCK)
-      ) {
-        this.map.setLayoutProperty(layer.id, "visibility", "none");
-      }
-      if (
-        layer.source === "burwell" &&
-        layer["source-layer"] === "lines" &&
-        mapLayers.has(MapLayer.LINES)
-      ) {
-        this.map.setLayoutProperty(layer.id, "visibility", "none");
-      }
-      if (
-        (layer.source === "pbdb" || layer.source === "pbdb-points") &&
-        mapLayers.has(MapLayer.FOSSILS)
-      ) {
-        this.map.setLayoutProperty(layer.id, "visibility", "visible");
-      }
-      if (layer.source === "columns" && mapLayers.has(MapLayer.COLUMNS)) {
-        this.map.setLayoutProperty(layer.id, "visibility", "visible");
-      }
-    });
-
-    if (mapLayers.has(MapLayer.FOSSILS)) {
-      this.refreshPBDB();
-    }
   }
 
   setupMapHandlers() {
@@ -118,9 +65,6 @@ class VestigialMap extends Component<MapProps, {}> {
         this.refreshPBDB();
       }
     });
-
-    this.map.on("style.load", this.onStyleLoad.bind(this));
-    this.onStyleLoad();
 
     highlightLayers.forEach((layer) => {
       this.map.on("mousemove", layer.layer, (evt) => {
@@ -383,40 +327,6 @@ class VestigialMap extends Component<MapProps, {}> {
     return false;
   }
 
-  // PBDB hexgrids and points are refreshed on every map move
-  async refreshPBDB() {
-    let bounds = this.map.getBounds();
-    let zoom = this.map.getZoom();
-    const maxClusterZoom = 7;
-    this.pbdbPoints = await getPBDBData(
-      this.props.filters,
-      bounds,
-      zoom,
-      maxClusterZoom
-    );
-
-    // Show or hide the proper PBDB layers
-    if (zoom < maxClusterZoom) {
-      this.map.getSource("pbdb-clusters").setData(this.pbdbPoints);
-      this.map.setLayoutProperty("pbdb-clusters", "visibility", "visible");
-      this.map.setLayoutProperty("pbdb-points-clustered", "visibility", "none");
-      //  map.map.setLayoutProperty('pbdb-point-cluster-count', 'visibility', 'none')
-      this.map.setLayoutProperty("pbdb-points", "visibility", "none");
-    } else {
-      this.map.getSource("pbdb-points").setData(this.pbdbPoints);
-
-      //map.map.getSource("pbdb-clusters").setData(map.pbdbPoints);
-      this.map.setLayoutProperty("pbdb-clusters", "visibility", "none");
-      this.map.setLayoutProperty(
-        "pbdb-points-clustered",
-        "visibility",
-        "visible"
-      );
-      //    map.map.setLayoutProperty('pbdb-point-cluster-count', 'visibility', 'visible')
-      // map.map.setLayoutProperty("pbdb-points", "visibility", "visible");
-    }
-  }
-
   // Update the colors of the hexgrids
   updateColors(data) {
     for (let i = 0; i < data.length; i++) {
@@ -456,3 +366,28 @@ class VestigialMap extends Component<MapProps, {}> {
 export default forwardRef((props, ref) =>
   h(VestigialMap, { ...props, elementRef: ref })
 );
+
+// PBDB hexgrids and points are refreshed on every map move
+export async function refreshPBDB(map, pointsRef, filters) {
+  let bounds = map.getBounds();
+  let zoom = map.getZoom();
+  const maxClusterZoom = 7;
+  pointsRef.current = await getPBDBData(filters, bounds, zoom, maxClusterZoom);
+
+  // Show or hide the proper PBDB layers
+  if (zoom < maxClusterZoom) {
+    map.getSource("pbdb-clusters").setData(pointsRef.current);
+    map.setLayoutProperty("pbdb-clusters", "visibility", "visible");
+    map.setLayoutProperty("pbdb-points-clustered", "visibility", "none");
+    //  map.map.setLayoutProperty('pbdb-point-cluster-count', 'visibility', 'none')
+    map.setLayoutProperty("pbdb-points", "visibility", "none");
+  } else {
+    map.getSource("pbdb-points").setData(pointsRef.current);
+
+    //map.map.getSource("pbdb-clusters").setData(map.pbdbPoints);
+    map.setLayoutProperty("pbdb-clusters", "visibility", "none");
+    map.setLayoutProperty("pbdb-points-clustered", "visibility", "visible");
+    //    map.map.setLayoutProperty('pbdb-point-cluster-count', 'visibility', 'visible')
+    // map.map.setLayoutProperty("pbdb-points", "visibility", "visible");
+  }
+}
