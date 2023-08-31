@@ -21,7 +21,7 @@ import {
   mergeStyles,
   setMapPosition,
 } from "@macrostrat/mapbox-utils";
-import { inDarkMode } from "@macrostrat/ui-components";
+import { inDarkMode, usePrevious } from "@macrostrat/ui-components";
 import { LineString } from "geojson";
 import mapboxgl from "mapbox-gl";
 import {
@@ -46,9 +46,8 @@ import {
   MapSourcesLayer,
 } from "@macrostrat/mapbox-styles";
 import { getExpressionForFilters } from "./filter-helpers";
-import Map from "./map";
+import Map, { LayerVisibilityManager } from "./map";
 import { getBaseMapStyle, useCrossSectionCursorLocation } from "./utils";
-import { refreshPBDB } from "./map";
 
 const h = hyper.styled(styles);
 
@@ -165,30 +164,6 @@ export default function MainMapView(props) {
     map.setFilter("burwell_stroke", expr, { validate: false });
   }, [filters, isInitialized, isStyleLoaded, mapRef.current]);
 
-  // useEffect(() => {
-  //   if (baseStyle == null) {
-  //     return;
-  //   }
-  //   if (mapRef?.current != null) {
-  //     mapRef.current.setStyle(mapStyle);
-  //     return;
-  //   }
-  //   const map = initializeMap("map", {
-  //     style: mapStyle,
-  //     mapPosition,
-  //     projection: "globe",
-  //   });
-  //   map.on("style.load", () => {
-  //     dispatch({ type: "set-style-loaded", payload: true });
-  //   });
-  //   onMapLoad(map);
-  //   dispatch({ type: "set-map", payload: map });
-
-  //   /* Right now we need to reload filters when the map is initialized.
-  //       Otherwise our (super-legacy and janky) filter system doesn't know
-  //       to update the map. */
-  // }, [mapStyle]);
-
   /* If we want to use a high resolution DEM, we need to use a different
     source ID from the hillshade's source ID. This uses more memory but
     provides a nicer-looking 3D map.
@@ -237,53 +212,9 @@ export default function MainMapView(props) {
       h.if(mapLayers.has(MapLayer.SOURCES))(MapSourcesLayer),
       h(ColumnDataManager),
       h(MapPositionReporter, { initialMapPosition: mapPosition }),
-      h(LayerVisibilityManager, { mapLayers }),
+      h(LayerVisibilityManager, { mapLayers, filters }),
     ]
   );
-}
-
-function LayerVisibilityManager({ mapLayers }) {
-  const mapRef = useMapRef();
-  const { isStyleLoaded } = useMapStatus();
-
-  const hoverStates = useRef({});
-  const selectedStates = useRef({});
-  const pbdbPoints = useRef({});
-
-  useEffect(() => {
-    if (!isStyleLoaded) return;
-    const map = mapRef.current;
-    if (map == null) return;
-    const style = map.getStyle();
-    for (const layer of style.layers) {
-      hoverStates.current[layer.id] = null;
-      selectedStates.current[layer.id] = null;
-
-      if (layer.source === "burwell" && layer["source-layer"] === "units") {
-        setVisibility(map, layer.id, mapLayers.has(MapLayer.BEDROCK));
-      }
-      if (layer.source === "burwell" && layer["source-layer"] === "lines") {
-        setVisibility(map, layer.id, mapLayers.has(MapLayer.LINES));
-      }
-      if (layer.source === "pbdb" || layer.source === "pbdb-points") {
-        setVisibility(map, layer.id, mapLayers.has(MapLayer.FOSSILS));
-      }
-      if (layer.source === "columns") {
-        setVisibility(map, layer.id, mapLayers.has(MapLayer.COLUMNS));
-      }
-
-      if (mapLayers.has(MapLayer.FOSSILS)) {
-        refreshPBDB(map, pbdbPoints, filters);
-      }
-    }
-  }, [mapLayers, isStyleLoaded]);
-
-  return null;
-}
-
-function setVisibility(map, layerID, visible) {
-  const visibility = visible ? "visible" : "none";
-  map.setLayoutProperty(layerID, "visibility", visibility);
 }
 
 function MapPositionReporter({ initialMapPosition = null }) {

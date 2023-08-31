@@ -8,6 +8,8 @@ import { setMapStyle } from "./style-helpers";
 import { MapLayer } from "~/map-interface/app-state";
 import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
 import { SETTINGS } from "~/map-interface/settings";
+import { useMapRef, useMapStatus } from "@macrostrat/mapbox-react";
+import { useEffect, useRef } from "react";
 
 const highlightLayers = [
   { layer: "pbdb-points", source: "pbdb-points" },
@@ -220,9 +222,9 @@ class VestigialMap extends Component<MapProps, {}> {
   // and always return `false` to prevent DOM updates
   // We basically intercept the changes, handle them, and tell React to ignore them
   shouldComponentUpdate(nextProps) {
-    this.setupMapHandlers();
-    if (this.map == null) return false;
     const { mapStyle } = nextProps;
+    this.setupMapHandlers();
+    if (this.map == null || mapStyle == null) return false;
 
     setMapStyle(
       this,
@@ -289,41 +291,7 @@ class VestigialMap extends Component<MapProps, {}> {
         // zoom to user location
       }
     }
-    // const mapStyle = buildMacrostratStyle({
-    //   tileserverDomain: SETTINGS.burwellTileDomain,
-    // });
-    // Handle changes to map filters
-    if (nextProps.filters != this.props.filters) {
-      // If all filters have been removed simply reset the filter states
-      if (nextProps.filters.length === 0) {
-        // Remove filtered columns and add unfiltered columns
-        if (this.props.mapLayers.has(MapLayer.COLUMNS)) {
-          mapStyle.layers.forEach((layer) => {
-            if (layer.source === "columns") {
-              this.map.setLayoutProperty(layer.id, "visibility", "visible");
-            }
-          });
-          mapStyle.layers.forEach((layer) => {
-            if (layer.source === "filteredColumns") {
-              this.map.setLayoutProperty(layer.id, "visibility", "none");
-            }
-          });
-        }
 
-        if (nextProps.mapLayers.has(MapLayer.FOSSILS)) {
-          this.refreshPBDB();
-        }
-
-        return false;
-      }
-
-      if (nextProps.mapLayers.has(MapLayer.FOSSILS)) {
-        this.refreshPBDB();
-      }
-
-      // Update the map styles
-      return false;
-    }
     return false;
   }
 
@@ -390,4 +358,62 @@ export async function refreshPBDB(map, pointsRef, filters) {
     //    map.map.setLayoutProperty('pbdb-point-cluster-count', 'visibility', 'visible')
     // map.map.setLayoutProperty("pbdb-points", "visibility", "visible");
   }
+}
+
+export function LayerVisibilityManager({ mapLayers, filters }) {
+  const mapRef = useMapRef();
+  const { isStyleLoaded } = useMapStatus();
+
+  const hoverStates = useRef({});
+  const selectedStates = useRef({});
+  const pbdbPoints = useRef({});
+
+  useEffect(() => {
+    if (!isStyleLoaded) return;
+    const map = mapRef.current;
+    if (map == null) return;
+    const style = map.getStyle();
+    for (const layer of style.layers) {
+      hoverStates.current[layer.id] = null;
+      selectedStates.current[layer.id] = null;
+
+      if (!("source" in layer)) continue;
+
+      if (layer.source === "burwell" && layer["source-layer"] === "units") {
+        setVisibility(map, layer.id, mapLayers.has(MapLayer.BEDROCK));
+      }
+      if (layer.source === "burwell" && layer["source-layer"] === "lines") {
+        setVisibility(map, layer.id, mapLayers.has(MapLayer.LINES));
+      }
+      if (layer.source === "pbdb" || layer.source === "pbdb-points") {
+        setVisibility(map, layer.id, mapLayers.has(MapLayer.FOSSILS));
+      }
+      if (layer.source === "columns") {
+        setVisibility(
+          map,
+          layer.id,
+          mapLayers.has(MapLayer.COLUMNS) && filters.length === 0
+        );
+      }
+
+      if (layer.source === "filteredColumns") {
+        setVisibility(
+          map,
+          layer.id,
+          mapLayers.has(MapLayer.COLUMNS) && filters.length !== 0
+        );
+      }
+    }
+
+    if (mapLayers.has(MapLayer.FOSSILS)) {
+      refreshPBDB(map, pbdbPoints, filters);
+    }
+  }, [mapLayers, isStyleLoaded]);
+
+  return null;
+}
+
+function setVisibility(map, layerID, visible) {
+  const visibility = visible ? "visible" : "none";
+  map.setLayoutProperty(layerID, "visibility", visibility);
 }
