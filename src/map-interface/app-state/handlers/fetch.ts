@@ -2,6 +2,7 @@ import axios from "axios";
 import { joinURL } from "~/map-interface/utils";
 import { SETTINGS } from "../../settings";
 import { ColumnGeoJSONRecord } from "../reducers";
+import { UPDATE_FILTERED_COLUMNS } from "../reducers/filtered-columns";
 
 export const base = `${SETTINGS.apiDomain}/api/v2`;
 const basev1 = `${SETTINGS.gddDomain}/api/v1`;
@@ -14,7 +15,7 @@ type PossibleFields = {
   [Property in FilterType]: string[];
 };
 
-function formColumnQueryString(filters) {
+function buildColumnQueryParams(filters) {
   let possibleFields: PossibleFields = {
     intervals: ["int_id", "id"], // [value, attr]
     strat_name_concepts: ["strat_name_concept_id", "id"],
@@ -43,20 +44,33 @@ function formColumnQueryString(filters) {
       query[value] = [f[attr]];
     }
   });
-  let queryString = Object.keys(query)
-    .map((k) => {
-      return `${k}=${query[k].join(",")}`;
-    })
-    .join("&");
+  for (let key in query) {
+    query[key] = query[key].join(",");
+  }
 
-  return queryString;
+  return query;
 }
 
-export async function fetchFilteredColumns(providedFilters) {
-  let queryString = formColumnQueryString(providedFilters);
-  let url = `${base}/columns?format=geojson_bare&${queryString}`;
-  let res = await axios.get(url, { responseType: "json" });
-  return res.data;
+export async function fetchFilteredColumns(
+  providedFilters
+): Promise<UPDATE_FILTERED_COLUMNS | void> {
+  let queryString = buildColumnQueryParams(providedFilters);
+  let url = `${base}/columns`;
+  if (Object.keys(queryString).length === 0) {
+    return;
+  }
+  let res = await axios.get(url, {
+    params: {
+      format: "geojson_bare",
+      ...queryString,
+    },
+    responseType: "json",
+  });
+  // TODO: report errors
+  return {
+    type: "update-column-filters",
+    columns: res.data,
+  };
 }
 
 export interface XDDSnippet {

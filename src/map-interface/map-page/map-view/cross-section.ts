@@ -4,8 +4,18 @@ import { useAppState } from "~/map-interface/app-state";
 import { LineString } from "geojson";
 
 export function CrossSectionLine() {
-  const mapRef = useMapRef();
   const crossSectionLine = useAppState((state) => state.core.crossSectionLine);
+  const crossSectionCursor = useAppState(
+    (state) => state.core.crossSectionCursorLocation
+  );
+  useCrossSectionCursorLocation(crossSectionCursor);
+  useCrossSectionLine(crossSectionLine);
+
+  return null;
+}
+
+function useCrossSectionLine(crossSectionLine) {
+  const mapRef = useMapRef();
   const previousLine = useRef<LineString | null>(null);
   useEffect(() => {
     const map = mapRef.current;
@@ -63,5 +73,32 @@ export function CrossSectionLine() {
       features: endpointFeatures,
     });
   }, [mapRef.current, crossSectionLine]);
-  return null;
+}
+
+function useCrossSectionCursorLocation(crossSectionCursorLocation) {
+  const mapRef = useMapRef();
+  // Handle elevation marker location
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map == null) return;
+    const src = map.getSource("elevationMarker");
+    if (src == null) return;
+    if (crossSectionCursorLocation == null) {
+      src.setData(null);
+      return;
+    }
+    src.setData({
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          properties: {},
+          geometry: {
+            type: "Point",
+            coordinates: crossSectionCursorLocation,
+          },
+        },
+      ],
+    });
+  }, [mapRef, crossSectionCursorLocation]);
 }

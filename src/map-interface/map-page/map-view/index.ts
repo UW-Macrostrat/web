@@ -22,7 +22,7 @@ import {
 } from "@macrostrat/mapbox-utils";
 import { inDarkMode } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
-import { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   MapLayer,
   useAppActions,
@@ -35,20 +35,26 @@ import {
   buildMacrostratStyle,
   MapSourcesLayer,
 } from "@macrostrat/mapbox-styles";
-import { getExpressionForFilters } from "./filter-helpers";
 import { CrossSectionLine } from "./cross-section";
 import {
   FlyToPlaceManager,
   HoveredFeatureManager,
   MacrostratLayerManager,
 } from "./map";
-import { getBaseMapStyle, useCrossSectionCursorLocation } from "./utils";
 
 const h = hyper.styled(styles);
 
 mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
 
-const VestigialMap = forwardRef((props, ref) => h(Map, { ...props, ref }));
+function getBaseMapStyle(mapLayers, isDarkMode = false) {
+  if (mapLayers.has(MapLayer.SATELLITE)) {
+    return SETTINGS.satelliteMapURL;
+  }
+  if (isDarkMode) {
+    return SETTINGS.darkMapURL;
+  }
+  return SETTINGS.baseMapURL;
+}
 
 function initializeMap(container, opts) {
   // setup the basic map
@@ -73,9 +79,7 @@ function initializeMap(container, opts) {
 
 export default function MainMapView(props) {
   const {
-    filters,
     mapLayers,
-    crossSectionCursorLocation,
     mapPosition,
     timeCursorAge,
     plateModelId,
@@ -85,11 +89,11 @@ export default function MainMapView(props) {
 
   let mapRef = useMapRef();
   const dispatch = useMapDispatch();
-  useCrossSectionCursorLocation(mapRef, crossSectionCursorLocation);
-  const runAction = useAppActions();
   const isDarkMode = inDarkMode();
 
   const baseMapURL = getBaseMapStyle(mapLayers, isDarkMode);
+
+  // At the moment, these seem to force a re-render of the map
   const { isInitialized, isStyleLoaded } = useMapStatus();
 
   const [baseStyle, setBaseStyle] = useState(null);
@@ -175,23 +179,6 @@ export default function MainMapView(props) {
   // Make map label visibility match the mapLayers state
   useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));
 
-  useEffect(() => {
-    if (mapLayers.has(MapLayer.COLUMNS)) {
-      runAction({ type: "get-filtered-columns" });
-    }
-    runAction({ type: "map-layers-changed", mapLayers });
-  }, [filters, mapLayers]);
-
-  // Filters
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null || !isStyleLoaded) return;
-    const expr = getExpressionForFilters(filters);
-    console.log(expr);
-    map.setFilter("burwell_fill", expr, { validate: false });
-    map.setFilter("burwell_stroke", expr, { validate: false });
-  }, [filters, isInitialized, isStyleLoaded, mapRef.current]);
-
   return h(CoreMapView, { ...props, infoMarkerPosition }, [
     h(MapMarker, {
       position: infoMarkerPosition,
@@ -200,7 +187,7 @@ export default function MainMapView(props) {
     h.if(mapLayers.has(MapLayer.SOURCES))(MapSourcesLayer),
     h(ColumnDataManager),
     h(MapPositionReporter, { initialMapPosition: mapPosition }),
-    h(MacrostratLayerManager, { mapLayers, filters }),
+    h(MacrostratLayerManager),
     h(FlyToPlaceManager),
     h(HoveredFeatureManager),
   ]);

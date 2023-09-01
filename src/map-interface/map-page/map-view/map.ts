@@ -4,6 +4,7 @@ import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
 import { useMapRef, useMapStatus } from "@macrostrat/mapbox-react";
 import { useEffect, useRef, useCallback } from "react";
 import { useAppState } from "~/map-interface/app-state";
+import { getExpressionForFilters } from "./filter-helpers";
 
 interface MapProps {
   use3D: boolean;
@@ -212,17 +213,44 @@ export async function refreshPBDB(map, pointsRef, filters) {
   }
 }
 
-export function MacrostratLayerManager({ mapLayers, filters }) {
+export function MacrostratLayerManager() {
   const mapRef = useMapRef();
   const { isStyleLoaded } = useMapStatus();
+  const filters = useAppState((s) => s.core.filters);
+  const mapLayers = useAppState((s) => s.core.mapLayers);
+  const filteredColumns = useAppState((s) => s.core.filteredColumns);
+  const runAction = useAppActions();
+  const map = mapRef.current;
 
   // This selection tracking used to be used for PBDB but I think no longer is
   const selectedFeatures = useRef({});
   const pbdbPoints = useRef({});
 
   useEffect(() => {
-    if (!isStyleLoaded) return;
+    if (mapLayers.has(MapLayer.COLUMNS)) {
+      runAction({ type: "get-filtered-columns" });
+    }
+    runAction({ type: "map-layers-changed", mapLayers });
+  }, [filters, mapLayers]);
+
+  // Filters
+  useEffect(() => {
     const map = mapRef.current;
+    if (map == null || !isStyleLoaded) return;
+
+    const source = map.getSource("filteredColumns");
+    if (filteredColumns != null) {
+      console.log(filteredColumns);
+      source?.setData(filteredColumns);
+    }
+
+    const expr = getExpressionForFilters(filters);
+    map.setFilter("burwell_fill", expr);
+    map.setFilter("burwell_stroke", expr);
+  }, [filters, isStyleLoaded, mapRef.current]);
+
+  useEffect(() => {
+    if (!isStyleLoaded) return;
     if (map == null) return;
     const style = map.getStyle();
     for (const layer of style.layers) {
@@ -259,7 +287,7 @@ export function MacrostratLayerManager({ mapLayers, filters }) {
     if (mapLayers.has(MapLayer.FOSSILS)) {
       refreshPBDB(map, pbdbPoints, filters);
     }
-  }, [mapLayers, isStyleLoaded]);
+  }, [mapLayers, isStyleLoaded, filters]);
 
   // Map click handler
   const mapClickHandler = useMapClickHandler(pbdbPoints);
