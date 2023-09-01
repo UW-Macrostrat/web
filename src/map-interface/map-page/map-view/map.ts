@@ -4,7 +4,7 @@ import h from "@macrostrat/hyper";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
-import { setMapStyle } from "./style-helpers";
+import { setMapStyle } from "./__archive";
 import {
   AppAction,
   MapAction,
@@ -16,12 +16,6 @@ import { SETTINGS } from "~/map-interface/settings";
 import { useMapRef, useMapStatus } from "@macrostrat/mapbox-react";
 import { useEffect, useRef, useCallback } from "react";
 import { useAppState } from "~/map-interface/app-state";
-
-const highlightLayers = [
-  { layer: "pbdb-points", source: "pbdb-points" },
-  { layer: "pbdb-points-clustered", source: "pbdb-points" },
-  { layer: "pbdb-clusters", source: "pbdb-clusters" },
-];
 
 interface MapProps {
   use3D: boolean;
@@ -163,6 +157,7 @@ function useMapClickHandler(props) {
         layers: ["burwell_fill", "column_fill", "filtered_column_fill"],
       });
 
+      // TODO: re-enable this geologic map querying
       let burwellFeatures = features
         .filter((f) => {
           if (f.layer.id === "burwell_fill") return f;
@@ -196,188 +191,6 @@ function useMapClickHandler(props) {
   );
 }
 
-class VestigialMap extends Component<MapProps, {}> {
-  map: mapboxgl.Map;
-  marker: mapboxgl.Marker | null = null;
-  crossSectionEndpoints: [number, number][] = [];
-  constructor(props) {
-    super(props);
-    this.crossSectionEndpoints = [];
-
-    this.maxValue = 500;
-    this.previousZoom = 0;
-
-    // We need to store these for cluster querying...
-    this.pbdbPoints = {};
-
-    // Keep track of unique ids for interaction states
-    this.hoverStates = {};
-    this.selectedStates = {};
-  }
-
-  setupMapHandlers() {
-    if (this.map != null) {
-      return;
-    }
-
-    this.map = this.props.mapRef.current;
-
-    if (this.map == null) {
-      return;
-    }
-    // disable map rotation using right click + drag
-    //this.map.dragRotate.disable();
-
-    // disable map rotation using touch rotation gesture
-    //this.map.touchZoomRotate.disableRotation();
-
-    highlightLayers.forEach((layer) => {
-      this.map.on("mousemove", layer.layer, (evt) => {
-        if (evt.features) {
-          if (this.hoverStates[layer.layer]) {
-            this.map.setFeatureState(
-              { source: layer.source, id: this.hoverStates[layer.layer] },
-              { hover: false }
-            );
-          }
-          this.hoverStates[layer.layer] = evt.features[0].id;
-          this.map.setFeatureState(
-            { source: layer.source, id: evt.features[0].id },
-            { hover: true }
-          );
-        }
-      });
-
-      this.map.on("mouseleave", layer.layer, (evt) => {
-        if (this.hoverStates[layer.layer]) {
-          this.map.setFeatureState(
-            { source: layer.source, id: this.hoverStates[layer.layer] },
-            { hover: false }
-          );
-        }
-        this.hoverStates[layer.layer] = null;
-      });
-    });
-  }
-
-  // Handle updates to the state of the map
-  // Since react isn't in charge of updating the map state we use shouldComponentUpdate
-  // and always return `false` to prevent DOM updates
-  // We basically intercept the changes, handle them, and tell React to ignore them
-  shouldComponentUpdate(nextProps) {
-    const { mapStyle } = nextProps;
-    this.setupMapHandlers();
-    if (this.map == null || mapStyle == null) return false;
-
-    setMapStyle(
-      this,
-      this.map,
-      buildMacrostratStyle({
-        tileserverDomain: SETTINGS.burwellTileDomain,
-      }),
-      nextProps
-    );
-
-    if (nextProps.mapIsRotated !== this.props.mapIsRotated) {
-      return true;
-    }
-
-    // Watch the state of the application and adjust the map accordingly
-    if (
-      !nextProps.crossSectionOpen &&
-      this.props.crossSectionOpen &&
-      this.map
-    ) {
-      this.crossSectionEndpoints = [];
-      this.map.getSource("crossSectionEndpoints").setData({
-        type: "FeatureCollection",
-        features: [],
-      });
-      this.map.getSource("crossSectionLine").setData({
-        type: "FeatureCollection",
-        features: [],
-      });
-    }
-    // Bedrock
-    if (
-      JSON.stringify(nextProps.mapCenter) !=
-      JSON.stringify(this.props.mapCenter)
-    ) {
-      if (nextProps.mapCenter.type === "place") {
-        const { bbox, center } = nextProps.mapCenter.place;
-        if (bbox?.length == 4) {
-          let bounds = [
-            [
-              nextProps.mapCenter.place.bbox[0],
-              nextProps.mapCenter.place.bbox[1],
-            ],
-            [
-              nextProps.mapCenter.place.bbox[2],
-              nextProps.mapCenter.place.bbox[3],
-            ],
-          ];
-          this.map.fitBounds(bounds, {
-            duration: 0,
-            maxZoom: 16,
-          });
-        } else {
-          this.map.flyTo({
-            center,
-            duration: 0,
-            zoom: Math.max(
-              nextProps.mapPosition?.camera?.target?.zoom ?? 10,
-              14
-            ),
-          });
-        }
-      } else {
-        // zoom to user location
-      }
-    }
-
-    return false;
-  }
-
-  // Update the colors of the hexgrids
-  updateColors(data) {
-    for (let i = 0; i < data.length; i++) {
-      this.map.setFeatureState(
-        {
-          source: "pbdb",
-          sourceLayer: "hexgrid",
-          id: data[i].hex_id,
-        },
-        {
-          color: this.colorScale(parseInt(data[i].count)),
-        }
-      );
-    }
-  }
-
-  colorScale(val) {
-    let mid = this.maxValue / 2;
-
-    // Max
-    if (Math.abs(val - this.maxValue) <= Math.abs(val - mid)) {
-      return "#2171b5";
-      // Mid
-    } else if (Math.abs(val - mid) <= Math.abs(val - 1)) {
-      return "#6baed6";
-      // Min
-    } else {
-      return "#bdd7e7";
-    }
-  }
-
-  render() {
-    return null;
-  }
-}
-
-export default forwardRef((props, ref) =>
-  h(VestigialMap, { ...props, elementRef: ref })
-);
-
 // PBDB hexgrids and points are refreshed on every map move
 export async function refreshPBDB(map, pointsRef, filters) {
   let bounds = map.getBounds();
@@ -407,7 +220,7 @@ export function MacrostratLayerManager({ mapLayers, filters }) {
   const mapRef = useMapRef();
   const { isStyleLoaded } = useMapStatus();
 
-  const hoveredFeatures = useRef({});
+  // This selection tracking used to be used for PBDB but I think no longer is
   const selectedFeatures = useRef({});
   const pbdbPoints = useRef({});
 
@@ -417,7 +230,6 @@ export function MacrostratLayerManager({ mapLayers, filters }) {
     if (map == null) return;
     const style = map.getStyle();
     for (const layer of style.layers) {
-      hoveredFeatures.current[layer.id] = null;
       selectedFeatures.current[layer.id] = null;
 
       if (!("source" in layer)) continue;
@@ -523,5 +335,80 @@ export function FlyToPlaceManager() {
     }
   }, [mapRef.current, mapCenter]);
 
+  return null;
+}
+
+export function CrossSectionLineManager({ crossSectionInProgressEndpoints }) {
+  const mapRef = useMapRef();
+  const crossSectionOpen = useAppState(
+    (state) => state.core.crossSectionLine != null
+  );
+  const map = mapRef.current;
+
+  useEffect(() => {
+    if (map == null || !crossSectionOpen) return;
+    // Watch the state of the application and adjust the map accordingly
+    crossSectionInProgressEndpoints.current = [];
+    map.getSource("crossSectionEndpoints").setData({
+      type: "FeatureCollection",
+      features: [],
+    });
+    map.getSource("crossSectionLine").setData({
+      type: "FeatureCollection",
+      features: [],
+    });
+  }, [map, crossSectionOpen]);
+  return null;
+}
+
+const highlightLayers = [
+  { layer: "pbdb-points", source: "pbdb-points" },
+  { layer: "pbdb-points-clustered", source: "pbdb-points" },
+  { layer: "pbdb-clusters", source: "pbdb-clusters" },
+];
+
+export function HoveredFeatureManager() {
+  const mapRef = useMapRef();
+  const { isStyleLoaded } = useMapStatus();
+  const map = mapRef.current;
+  const hoveredFeatures = useRef({});
+
+  useEffect(() => {
+    if (map == null) return;
+    if (!isStyleLoaded) return;
+    hoveredFeatures.current = {};
+  }, [map, isStyleLoaded]);
+
+  useEffect(() => {
+    if (map == null) return;
+    const hoverState = hoveredFeatures.current;
+    for (const layer of highlightLayers) {
+      map.on("mousemove", layer.layer, (evt) => {
+        if (evt.features) {
+          if (hoverState[layer.layer]) {
+            map.setFeatureState(
+              { source: layer.source, id: hoverState[layer.layer] },
+              { hover: false }
+            );
+          }
+          hoverState[layer.layer] = evt.features[0].id;
+          map.setFeatureState(
+            { source: layer.source, id: evt.features[0].id },
+            { hover: true }
+          );
+        }
+      });
+
+      map.on("mouseleave", layer.layer, (evt) => {
+        if (hoverState[layer.layer]) {
+          map.setFeatureState(
+            { source: layer.source, id: hoverState[layer.layer] },
+            { hover: false }
+          );
+        }
+        hoverState[layer.layer] = null;
+      });
+    }
+  }, [map]);
   return null;
 }

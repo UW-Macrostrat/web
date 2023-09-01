@@ -46,7 +46,12 @@ import {
   MapSourcesLayer,
 } from "@macrostrat/mapbox-styles";
 import { getExpressionForFilters } from "./filter-helpers";
-import Map, { FlyToPlaceManager, MacrostratLayerManager } from "./map";
+import {
+  CrossSectionLineManager,
+  FlyToPlaceManager,
+  HoveredFeatureManager,
+  MacrostratLayerManager,
+} from "./map";
 import { getBaseMapStyle, useCrossSectionCursorLocation } from "./utils";
 
 const h = hyper.styled(styles);
@@ -229,6 +234,8 @@ export default function MainMapView(props) {
     h(MapPositionReporter, { initialMapPosition: mapPosition }),
     h(MacrostratLayerManager, { mapLayers, filters }),
     h(FlyToPlaceManager),
+    h(CrossSectionLineManager),
+    h(HoveredFeatureManager),
   ]);
 }
 
@@ -243,6 +250,7 @@ function MapPositionReporter({ initialMapPosition = null }) {
 
   return null;
 }
+
 function ColumnDataManager() {
   /* Update columns map layer given columns provided by application. */
   const mapRef = useMapRef();
