@@ -213,10 +213,7 @@ async function actionRunner(
     case "async-add-filter":
       return { type: "add-filter", filter: await runFilter(action.filter) };
     case "get-filtered-columns":
-      return {
-        type: "update-column-filters",
-        columns: await fetchFilteredColumns(coreState.filters),
-      };
+      return await fetchFilteredColumns(coreState.filters);
     case "set-cross-section-line": {
       const { line } = action;
 

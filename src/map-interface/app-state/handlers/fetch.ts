@@ -66,6 +66,7 @@ export async function fetchFilteredColumns(
     },
     responseType: "json",
   });
+
   // TODO: report errors
   return {
     type: "update-column-filters",

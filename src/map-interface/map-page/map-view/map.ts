@@ -253,6 +253,7 @@ export function MacrostratLayerManager() {
     if (!isStyleLoaded) return;
     if (map == null) return;
     const style = map.getStyle();
+    console.log("Running style loaded functions");
     for (const layer of style.layers) {
       selectedFeatures.current[layer.id] = null;
 
@@ -296,7 +297,7 @@ export function MacrostratLayerManager() {
     if (mapRef.current == null) return;
     mapRef.current.on("click", mapClickHandler);
     return () => {
-      mapRef.current.off("click", mapClickHandler);
+      mapRef.current?.off("click", mapClickHandler);
     };
   }, [mapRef.current, mapClickHandler]);
 
@@ -312,7 +313,7 @@ export function MacrostratLayerManager() {
     if (mapRef.current == null) return;
     mapRef.current.on("moveend", mapMovedHandler);
     return () => {
-      mapRef.current.off("moveend", mapMovedHandler);
+      mapRef.current?.off("moveend", mapMovedHandler);
     };
   }, [mapRef.current, mapMovedHandler]);
 
