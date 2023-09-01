@@ -17,27 +17,17 @@ import {
 import { MacrostratLineSymbolManager } from "@macrostrat/mapbox-styles";
 import {
   getMapboxStyle,
-  mapViewInfo,
   mergeStyles,
   setMapPosition,
 } from "@macrostrat/mapbox-utils";
 import { inDarkMode } from "@macrostrat/ui-components";
-import { LineString } from "geojson";
 import mapboxgl from "mapbox-gl";
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
 import {
   MapLayer,
   useAppActions,
   useAppState,
 } from "~/map-interface/app-state";
-import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
 import { SETTINGS } from "../../settings";
 import styles from "../main.module.styl";
 import { applyAgeModelStyles } from "../map-style";
@@ -46,8 +36,8 @@ import {
   MapSourcesLayer,
 } from "@macrostrat/mapbox-styles";
 import { getExpressionForFilters } from "./filter-helpers";
+import { CrossSectionLine } from "./cross-section";
 import {
-  CrossSectionLineManager,
   FlyToPlaceManager,
   HoveredFeatureManager,
   MacrostratLayerManager,
@@ -84,12 +74,9 @@ function initializeMap(container, opts) {
 export default function MainMapView(props) {
   const {
     filters,
-    filteredColumns,
     mapLayers,
-    crossSectionLine,
     crossSectionCursorLocation,
     mapPosition,
-    infoDrawerOpen,
     timeCursorAge,
     plateModelId,
     infoMarkerPosition,
@@ -99,9 +86,7 @@ export default function MainMapView(props) {
   let mapRef = useMapRef();
   const dispatch = useMapDispatch();
   useCrossSectionCursorLocation(mapRef, crossSectionCursorLocation);
-  const { mapIsRotated } = mapViewInfo(mapPosition);
   const runAction = useAppActions();
-  const handleMapQuery = useMapQueryHandler(mapRef, infoDrawerOpen);
   const isDarkMode = inDarkMode();
 
   const baseMapURL = getBaseMapStyle(mapLayers, isDarkMode);
@@ -208,23 +193,6 @@ export default function MainMapView(props) {
   }, [filters, isInitialized, isStyleLoaded, mapRef.current]);
 
   return h(CoreMapView, { ...props, infoMarkerPosition }, [
-    // h(VestigialMap, {
-    //   filters,
-    //   filteredColumns,
-    //   // Recreate the set every time to force a re-render
-    //   mapLayers,
-    //   mapCenter,
-    //   mapStyle,
-    //   crossSectionLine,
-    //   crossSectionCursorLocation,
-    //   mapPosition,
-    //   mapIsRotated,
-    //   onQueryMap: handleMapQuery,
-    //   mapRef,
-    //   isDark: isDarkMode,
-    //   runAction,
-    //   ...props,
-    // }),
     h(MapMarker, {
       position: infoMarkerPosition,
     }),
@@ -234,7 +202,6 @@ export default function MainMapView(props) {
     h(MapPositionReporter, { initialMapPosition: mapPosition }),
     h(MacrostratLayerManager, { mapLayers, filters }),
     h(FlyToPlaceManager),
-    h(CrossSectionLineManager),
     h(HoveredFeatureManager),
   ]);
 }
@@ -304,85 +271,6 @@ export function CoreMapView(props: MapViewProps) {
       h(MacrostratLineSymbolManager, { showLineSymbols: hasLineSymbols }),
       children,
     ]
-  );
-}
-
-export function CrossSectionLine() {
-  const mapRef = useMapRef();
-  const crossSectionLine = useAppState((state) => state.core.crossSectionLine);
-  const previousLine = useRef<LineString | null>(null);
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null) return;
-    const coords = crossSectionLine?.coordinates ?? [];
-
-    let lines = [];
-    if (coords.length == 2 || crossSectionLine == null) {
-      previousLine.current = crossSectionLine;
-    }
-
-    if (crossSectionLine != null) {
-      lines.push(crossSectionLine);
-    }
-
-    if (previousLine.current != null) {
-      // We are selecting a new line, and we should still show the previous line
-      // until the new one is selected.
-      lines.push(previousLine.current);
-    }
-
-    let endpointFeatures = [];
-    for (let line of lines) {
-      for (let coord of line.coordinates) {
-        endpointFeatures.push({
-          type: "Feature",
-          properties: {},
-          geometry: {
-            type: "Point",
-            coordinates: coord,
-          },
-        });
-      }
-    }
-
-    map.getSource("crossSectionLine")?.setData({
-      type: "GeometryCollection",
-      geometries: lines,
-    });
-    map.getSource("crossSectionEndpoints")?.setData({
-      type: "FeatureCollection",
-      features: endpointFeatures,
-    });
-  }, [mapRef.current, crossSectionLine]);
-  return null;
-}
-
-function useMapQueryHandler(
-  mapRef: React.RefObject<mapboxgl.Map | null>,
-  infoDrawerOpen: boolean
-) {
-  /** Handler for map query markers */
-  const runAction = useAppActions();
-
-  return useCallback(
-    (event: mapboxgl.MapMouseEvent, columns: ColumnProperties[] = null) => {
-      const map = mapRef.current;
-
-      runAction({
-        type: "map-query",
-        lng: event.lngLat.lng,
-        lat: event.lngLat.lat,
-        z: map.getZoom(),
-        columns,
-        map_id: null,
-      });
-
-      // const marker =
-      //   markerRef.current ?? new mapboxgl.Marker({ color: "#000000" });
-      // marker.setLngLat(event.lngLat).addTo(mapRef.current);
-      // markerRef.current = marker;
-    },
-    [mapRef, infoDrawerOpen]
   );
 }
 

@@ -1,18 +1,6 @@
-import { Component, forwardRef } from "react";
 import { getPBDBData } from "./filter-helpers";
-import h from "@macrostrat/hyper";
-import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
-import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
-import { setMapStyle } from "./__archive";
-import {
-  AppAction,
-  MapAction,
-  MapLayer,
-  useAppActions,
-} from "~/map-interface/app-state";
+import { AppAction, MapLayer, useAppActions } from "~/map-interface/app-state";
 import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
-import { SETTINGS } from "~/map-interface/settings";
 import { useMapRef, useMapStatus } from "@macrostrat/mapbox-react";
 import { useEffect, useRef, useCallback } from "react";
 import { useAppState } from "~/map-interface/app-state";
@@ -66,7 +54,7 @@ function handleFossilLayerClick(
     // via https://jsfiddle.net/aznkw784/
     let pointsInCluster = pbdbPoints.features
       .filter((f) => {
-        let pointPixels = this.map.project(f.geometry.coordinates);
+        let pointPixels = map.project(f.geometry.coordinates);
         let pixelDistance = Math.sqrt(
           Math.pow(event.point.x - pointPixels.x, 2) +
             Math.pow(event.point.y - pointPixels.y, 2)
@@ -76,6 +64,9 @@ function handleFossilLayerClick(
       .map((f) => {
         return f.properties.oid.replace("col:", "");
       });
+
+    // Need to recolor on selection somehow
+    d;
     return {
       type: "get-pbdb",
       collection_nos: pointsInCluster,
@@ -91,14 +82,12 @@ function handleFossilLayerClick(
     });
     return { type: "get-pbdb", collection_nos };
     //    return
-  } else {
-    // Otherwise make sure that old fossil collections aren't visible
-    return { type: "reset-pbdb" };
   }
+
   return null;
 }
 
-function handleCrossSectionClick(event, _crossSectionLine): MapAction | null {
+function handleCrossSectionClick(event, _crossSectionLine): AppAction | null {
   // If the elevation drawer is open and we are awaiting to points, add them
   let crossSectionLine = _crossSectionLine;
   let crossSectionCoords = crossSectionLine?.coordinates ?? [];
@@ -124,11 +113,12 @@ function handleCrossSectionClick(event, _crossSectionLine): MapAction | null {
   return null;
 }
 
-function useMapClickHandler(props) {
+function useMapClickHandler(pbdbPoints) {
   const mapRef = useMapRef();
   const runAction = useAppActions();
 
-  const { crossSectionLine, mapLayers, pbdbPoints } = props;
+  const crossSectionLine = useAppState((s) => s.core.crossSectionLine);
+  const mapLayers = useAppState((s) => s.core.mapLayers);
 
   return useCallback(
     (event) => {
@@ -137,11 +127,13 @@ function useMapClickHandler(props) {
       const action = handleCrossSectionClick(event, crossSectionLine);
       if (action != null) {
         runAction(action);
+        return;
       }
 
       // If we are viewing fossils, prioritize clicks on those
       if (mapLayers.has(MapLayer.FOSSILS)) {
         const action = handleFossilLayerClick(event, map, pbdbPoints.current);
+        console.log(action);
         if (action != null) {
           if (action.type === "zoom-map") {
             map.zoomTo(map.getZoom() + action.dz, { center: event.lngLat });
@@ -149,6 +141,9 @@ function useMapClickHandler(props) {
             runAction(action);
           }
           return;
+        } else {
+          // Otherwise make sure that old fossil collections aren't visible
+          runAction({ type: "reset-pbdb" });
         }
       }
 
@@ -187,7 +182,7 @@ function useMapClickHandler(props) {
         map_id: null,
       });
     },
-    [mapRef.current, mapLayers]
+    [mapRef.current, mapLayers, crossSectionLine]
   );
 }
 
@@ -199,6 +194,7 @@ export async function refreshPBDB(map, pointsRef, filters) {
   pointsRef.current = await getPBDBData(filters, bounds, zoom, maxClusterZoom);
 
   // Show or hide the proper PBDB layers
+  // TODO: this is a bit janky
   if (zoom < maxClusterZoom) {
     map.getSource("pbdb-clusters").setData(pointsRef.current);
     map.setLayoutProperty("pbdb-clusters", "visibility", "visible");
@@ -265,12 +261,8 @@ export function MacrostratLayerManager({ mapLayers, filters }) {
     }
   }, [mapLayers, isStyleLoaded]);
 
-  const crossSectionLine = useAppState((s) => s.core.crossSectionLine);
   // Map click handler
-  const mapClickHandler = useMapClickHandler({
-    crossSectionLine: crossSectionLine,
-    mapLayers,
-  });
+  const mapClickHandler = useMapClickHandler(pbdbPoints);
 
   useEffect(() => {
     if (mapRef.current == null) return;
@@ -335,29 +327,6 @@ export function FlyToPlaceManager() {
     }
   }, [mapRef.current, mapCenter]);
 
-  return null;
-}
-
-export function CrossSectionLineManager({ crossSectionInProgressEndpoints }) {
-  const mapRef = useMapRef();
-  const crossSectionOpen = useAppState(
-    (state) => state.core.crossSectionLine != null
-  );
-  const map = mapRef.current;
-
-  useEffect(() => {
-    if (map == null || !crossSectionOpen) return;
-    // Watch the state of the application and adjust the map accordingly
-    crossSectionInProgressEndpoints.current = [];
-    map.getSource("crossSectionEndpoints").setData({
-      type: "FeatureCollection",
-      features: [],
-    });
-    map.getSource("crossSectionLine").setData({
-      type: "FeatureCollection",
-      features: [],
-    });
-  }, [map, crossSectionOpen]);
   return null;
 }
 
