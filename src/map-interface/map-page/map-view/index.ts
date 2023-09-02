@@ -10,7 +10,6 @@ import {
   PositionFocusState,
   useMapLabelVisibility,
   useMapRef,
-  useMapDispatch,
   useMapStatus,
   useMapPosition,
 } from "@macrostrat/mapbox-react";
@@ -41,12 +40,13 @@ import {
   HoveredFeatureManager,
   MacrostratLayerManager,
 } from "./map";
+import { Spinner } from "@blueprintjs/core";
 
 const h = hyper.styled(styles);
 
 mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
 
-function getBaseMapStyle(mapLayers, isDarkMode = false) {
+export function getBaseMapStyle(mapLayers, isDarkMode = false) {
   if (mapLayers.has(MapLayer.SATELLITE)) {
     return SETTINGS.satelliteMapURL;
   }
@@ -88,7 +88,6 @@ export default function MainMapView(props) {
   } = useAppState((state) => state.core);
 
   let mapRef = useMapRef();
-  const dispatch = useMapDispatch();
   const isDarkMode = inDarkMode();
 
   const baseMapURL = getBaseMapStyle(mapLayers, isDarkMode);
@@ -103,6 +102,8 @@ export default function MainMapView(props) {
       focusedMap: focusedMapSource,
       tileserverDomain: SETTINGS.burwellTileDomain,
     });
+    console.log("Building map style", baseStyle);
+
     if (timeCursorAge != null) {
       return applyAgeModelStyles(
         timeCursorAge,
@@ -147,30 +148,6 @@ export default function MainMapView(props) {
     }
   }, []);
 
-  // useEffect(() => {
-  //   if (baseStyle == null) {
-  //     return;
-  //   }
-  //   if (mapRef?.current != null) {
-  //     mapRef.current.setStyle(mapStyle);
-  //     return;
-  //   }
-  //   const map = initializeMap("map", {
-  //     style: mapStyle,
-  //     mapPosition,
-  //     projection: "globe",
-  //   });
-  //   map.on("style.load", () => {
-  //     dispatch({ type: "set-style-loaded", payload: true });
-  //   });
-  //   onMapLoad(map);
-  //   dispatch({ type: "set-map", payload: map });
-
-  //   /* Right now we need to reload filters when the map is initialized.
-  //       Otherwise our (super-legacy and janky) filter system doesn't know
-  //       to update the map. */
-  // }, [mapStyle]);
-
   /* If we want to use a high resolution DEM, we need to use a different
     source ID from the hillshade's source ID. This uses more memory but
     provides a nicer-looking 3D map.
@@ -178,6 +155,10 @@ export default function MainMapView(props) {
 
   // Make map label visibility match the mapLayers state
   useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));
+
+  if (mapStyle == null) {
+    return h(Spinner);
+  }
 
   return h(
     CoreMapView,

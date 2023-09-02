@@ -249,11 +249,10 @@ export function MacrostratLayerManager() {
     map.setFilter("burwell_stroke", expr);
   }, [filters, isStyleLoaded, mapRef.current]);
 
-  useEffect(() => {
-    if (!isStyleLoaded) return;
+  const styleLoadedCallback = useCallback(() => {
+    const map = mapRef.current;
     if (map == null) return;
     const style = map.getStyle();
-    console.log("Running style loaded functions");
     for (const layer of style.layers) {
       selectedFeatures.current[layer.id] = null;
 
@@ -265,7 +264,11 @@ export function MacrostratLayerManager() {
       if (layer.source === "burwell" && layer["source-layer"] === "lines") {
         setVisibility(map, layer.id, mapLayers.has(MapLayer.LINES));
       }
-      if (layer.source === "pbdb" || layer.source === "pbdb-points") {
+      if (
+        layer.source === "pbdb" ||
+        layer.source === "pbdb-points" ||
+        layer.source === "pbdb-clusters"
+      ) {
         setVisibility(map, layer.id, mapLayers.has(MapLayer.FOSSILS));
       }
       if (layer.source === "columns") {
@@ -288,7 +291,15 @@ export function MacrostratLayerManager() {
     if (mapLayers.has(MapLayer.FOSSILS)) {
       refreshPBDB(map, pbdbPoints, filters);
     }
-  }, [mapLayers, isStyleLoaded, filters]);
+  }, [mapLayers, filters]);
+
+  useEffect(() => {
+    styleLoadedCallback();
+    mapRef.current?.on("style.load", styleLoadedCallback);
+    return () => {
+      mapRef.current?.off("style.load", styleLoadedCallback);
+    };
+  }, [mapRef.current, styleLoadedCallback]);
 
   // Map click handler
   const mapClickHandler = useMapClickHandler(pbdbPoints);
