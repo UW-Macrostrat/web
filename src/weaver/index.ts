@@ -12,7 +12,8 @@ import mapboxgl from "mapbox-gl";
 import { useCallback, useState, useEffect } from "react";
 import { buildInspectorStyle } from "@macrostrat/map-interface";
 import { MapAreaContainer, PanelCard } from "@macrostrat/map-interface";
-import { Spinner } from "@blueprintjs/core";
+import { Button, Spinner, MenuItem } from "@blueprintjs/core";
+import { Select2 } from "@blueprintjs/select";
 import {
   FloatingNavbar,
   MapLoadingButton,
@@ -37,51 +38,69 @@ const _macrostratStyle = buildMacrostratStyle({
   strokeOpacity: 0.1,
 }) as mapboxgl.Style;
 
-const weaverStyle = {
-  sources: {
-    weaver: {
-      type: "vector",
-      tiles: [
-        "https://dev.macrostrat.org/tiles/weaver-tile/{z}/{x}/{y}?model_name=MineralResourceSite",
-      ],
-    },
+const types = [
+  {
+    id: "MineralResourceSite",
+    name: "Mineral Resource Site",
+    color: "dodgerblue",
   },
-  layers: [
-    {
-      id: "weaver",
-      type: "circle",
-      source: "weaver",
-      "source-layer": "default",
-      paint: {
-        "circle-radius": [
-          "step",
-          ["get", "n"],
-          2,
-          1,
-          2,
-          5,
-          4,
-          10,
-          8,
-          50,
-          12,
-          100,
-          16,
-          200,
-          20,
+  { id: "AgeSpectrum", name: "Detrital Zircon Age Spectrum", color: "red" },
+  {
+    id: "Sample",
+    name: "Sample",
+    color: "purple",
+  },
+];
+
+function weaverStyle(type: object) {
+  const color = type?.color ?? "dodgerblue";
+  return {
+    sources: {
+      weaver: {
+        type: "vector",
+        tiles: [
+          "https://dev.macrostrat.org/tiles/weaver-tile/{z}/{x}/{y}?model_name=" +
+            type.id,
         ],
-        "circle-color": "dodgerblue",
-        "circle-opacity": 0.8,
-        "circle-stroke-width": 0.5,
-        "circle-stroke-color": "dodgerblue",
       },
     },
-  ],
-};
+    layers: [
+      {
+        id: "weaver",
+        type: "circle",
+        source: "weaver",
+        "source-layer": "default",
+        paint: {
+          "circle-radius": [
+            "step",
+            ["get", "n"],
+            2,
+            1,
+            2,
+            5,
+            4,
+            10,
+            8,
+            50,
+            12,
+            100,
+            16,
+            200,
+            20,
+          ],
+          "circle-color": color,
+          "circle-opacity": 0.8,
+          "circle-stroke-width": 0.5,
+          "circle-stroke-color": color,
+        },
+      },
+    ],
+  };
+}
 
-const overlayStyle = mergeStyles(_macrostratStyle, weaverStyle);
+const overlayStyle = mergeStyles(_macrostratStyle, weaverStyle(types[0]));
 
-function FeatureDetails({ position }) {
+function FeatureDetails({ position, model_name }) {
   const mapRef = useMapRef();
   const result = useAPIResult(
     "https://dev.macrostrat.org/weaver-api/rpc/nearby_data",
@@ -89,7 +108,7 @@ function FeatureDetails({ position }) {
       x: position.lng,
       y: position.lat,
       zoom: Math.round(mapRef.current?.getZoom()) ?? 10,
-      model_name: "MineralResourceSite",
+      model_name,
     }
   );
 
@@ -128,12 +147,12 @@ function WeaverMap({
 
   const [isOpen, setOpen] = useState(false);
 
-  const style = useMapStyle(overlayStyle, mapboxToken);
+  const [type, setType] = useState(types[0]);
+
+  const style = useMapStyle(type, mapboxToken);
 
   const [inspectPosition, setInspectPosition] =
     useState<mapboxgl.LngLat | null>(null);
-
-  const [data, setData] = useState(null);
 
   const onSelectPosition = useCallback((position: mapboxgl.LngLat) => {
     setInspectPosition(position);
@@ -150,7 +169,7 @@ function WeaverMap({
         position: inspectPosition,
       },
 
-      h(FeatureDetails, { position: inspectPosition })
+      h(FeatureDetails, { position: inspectPosition, model_name: type.id })
     );
   }
 
@@ -167,6 +186,32 @@ function WeaverMap({
       ]),
       contextPanel: h(PanelCard, [
         h(DarkModeButton, { showText: true, minimal: true }),
+        h(
+          Select2,
+          {
+            items: types,
+            itemRenderer: (data, { handleClick, modifiers }) =>
+              h(MenuItem, {
+                roleStructure: "listoption",
+                active: modifiers.active,
+                disabled: modifiers.disabled,
+                text: data.name,
+                //style: { color: d.color },
+                key: data.id,
+                onClick() {
+                  handleClick();
+                },
+              }),
+            itemPredicate: (query, item) =>
+              item.name.toLowerCase().includes(query.toLowerCase()),
+            onItemSelect: (item) => setType(item),
+          },
+          h(Button, {
+            text: type?.name,
+            placeholder: "Select type",
+            rightIcon: "caret-down",
+          })
+        ),
       ]),
       detailPanel: detailElement,
       contextPanelOpen: isOpen,
@@ -188,7 +233,7 @@ function WeaverMap({
   );
 }
 
-function useMapStyle(overlayStyle = null, mapboxToken = null) {
+function useMapStyle(type, mapboxToken = null) {
   const dark = useDarkMode();
   const isEnabled = dark?.isEnabled;
 
@@ -203,6 +248,7 @@ function useMapStyle(overlayStyle = null, mapboxToken = null) {
   const [actualStyle, setActualStyle] = useState(baseStyle);
 
   useEffect(() => {
+    const overlayStyle = weaverStyle(type);
     buildInspectorStyle(baseStyle, overlayStyle, {
       mapboxToken,
       inDarkMode: isEnabled,
@@ -210,6 +256,6 @@ function useMapStyle(overlayStyle = null, mapboxToken = null) {
       console.log(s);
       setActualStyle(s);
     });
-  }, [baseStyle, mapboxToken, isEnabled, overlayStyle]);
+  }, [baseStyle, mapboxToken, isEnabled, type]);
   return actualStyle;
 }

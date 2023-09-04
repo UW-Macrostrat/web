@@ -44,6 +44,7 @@
   },
   "dependencies": {
     "@blueprintjs/core": "^4.14.1",
+    "@blueprintjs/select": "4",
     "@lagunovsky/redux-react-router": "^3.2.0",
     "@loadable/component": "^5.14.1",
     "@macrostrat/api-utils": "workspace:*",
