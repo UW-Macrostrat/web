@@ -1,66 +1,67 @@
 import hyper from "@macrostrat/hyper";
 import {
-  useMapConditionalStyle,
+  MapBottomControls,
+  MapMarker,
+  MapStyledContainer,
+  MapView,
+} from "@macrostrat/map-interface";
+import {
+  getFocusState,
+  PositionFocusState,
   useMapLabelVisibility,
   useMapRef,
+  useMapStatus,
+  useMapPosition,
 } from "@macrostrat/mapbox-react";
+import { MacrostratLineSymbolManager } from "@macrostrat/mapbox-styles";
 import {
   getMapboxStyle,
-  mapViewInfo,
   mergeStyles,
   setMapPosition,
 } from "@macrostrat/mapbox-utils";
 import { inDarkMode } from "@macrostrat/ui-components";
-import classNames from "classnames";
 import mapboxgl from "mapbox-gl";
-import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   MapLayer,
   useAppActions,
   useAppState,
 } from "~/map-interface/app-state";
-import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
 import { SETTINGS } from "../../settings";
 import styles from "../main.module.styl";
+import { applyAgeModelStyles } from "../map-style";
 import {
-  applyAgeModelStyles,
   buildMacrostratStyle,
   MapSourcesLayer,
-  toggleLineSymbols,
-} from "../map-style";
-import { getExpressionForFilters } from "./filter-helpers";
-import Map from "./map";
-import { enable3DTerrain } from "./terrain";
+} from "@macrostrat/mapbox-styles";
+import { CrossSectionLine } from "./cross-section";
 import {
-  getBaseMapStyle,
-  MapBottomControls,
-  MapStyledContainer,
-  useCrossSectionCursorLocation,
-} from "./utils";
-import { getFocusState, PositionFocusState } from "@macrostrat/mapbox-react";
-import {
-  MapLoadingReporter,
-  MapMovedReporter,
-  MapPaddingManager,
-  MapMarker,
-  MapResizeManager,
-} from "./helpers";
-import { useMemo } from "react";
-import { LineString } from "geojson";
+  FlyToPlaceManager,
+  HoveredFeatureManager,
+  MacrostratLayerManager,
+} from "./map";
+import { Spinner } from "@blueprintjs/core";
 
 const h = hyper.styled(styles);
 
-console.log(SETTINGS);
-
 mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
 
-const VestigialMap = forwardRef((props, ref) => h(Map, { ...props, ref }));
+export function getBaseMapStyle(mapLayers, isDarkMode = false) {
+  if (mapLayers.has(MapLayer.SATELLITE)) {
+    return SETTINGS.satelliteMapURL;
+  }
+  if (isDarkMode) {
+    return SETTINGS.darkMapURL;
+  }
+  return SETTINGS.baseMapURL;
+}
 
-async function initializeMap(style, mapPosition, infoMarkerPosition) {
+function initializeMap(container, opts) {
   // setup the basic map
+  const { style, mapPosition, ...rest } = opts;
 
   const map = new mapboxgl.Map({
-    container: "map",
+    container,
     style,
     maxZoom: 18,
     //maxTileCacheSize: 0,
@@ -68,48 +69,18 @@ async function initializeMap(style, mapPosition, infoMarkerPosition) {
     trackResize: true,
     antialias: true,
     optimizeForTerrain: true,
+    ...rest,
   });
-
-  map.setProjection("globe");
-
-  // disable shift-key zooming so we can use shift to make cross-sections
-  map.boxZoom.disable();
 
   // set initial map position
   setMapPosition(map, mapPosition);
-
-  /* If we have an initially loaded info marker, we need to make sure
-    that it is actually visible on the map, and move to it if not.
-    This works around cases where the map is initialized with a hash string
-    that contradicts the focused location (which would happen if the link was
-    saved once the marker was moved out of view).
-    */
-  if (infoMarkerPosition != null) {
-    const focus = getFocusState(map, infoMarkerPosition);
-    if (
-      ![
-        PositionFocusState.CENTERED,
-        PositionFocusState.NEAR_CENTER,
-        PositionFocusState.OFF_CENTER,
-      ].includes(focus)
-    ) {
-      map.setCenter(infoMarkerPosition);
-    }
-  }
-
   return map;
 }
 
 export default function MainMapView(props) {
   const {
-    filters,
-    filteredColumns,
     mapLayers,
-    mapCenter,
-    crossSectionLine,
-    crossSectionCursorLocation,
     mapPosition,
-    infoDrawerOpen,
     timeCursorAge,
     plateModelId,
     infoMarkerPosition,
@@ -117,24 +88,22 @@ export default function MainMapView(props) {
   } = useAppState((state) => state.core);
 
   let mapRef = useMapRef();
-  useCrossSectionCursorLocation(mapRef, crossSectionCursorLocation);
-  const { mapIsRotated } = mapViewInfo(mapPosition);
-  const runAction = useAppActions();
-  const handleMapQuery = useMapQueryHandler(mapRef, infoDrawerOpen);
   const isDarkMode = inDarkMode();
 
   const baseMapURL = getBaseMapStyle(mapLayers, isDarkMode);
 
-  /* HACK: Right now we need this to force a render when the map
-    is done loading
-    */
-  const [mapInitialized, setMapInitialized] = useState(false);
-  const [styleLoaded, setStyleLoaded] = useState(false);
+  // At the moment, these seem to force a re-render of the map
+  const { isInitialized, isStyleLoaded } = useMapStatus();
 
   const [baseStyle, setBaseStyle] = useState(null);
   const mapStyle = useMemo(() => {
     if (baseStyle == null) return null;
-    const overlayStyles = buildMacrostratStyle(focusedMapSource);
+    const overlayStyles = buildMacrostratStyle({
+      focusedMap: focusedMapSource,
+      tileserverDomain: SETTINGS.burwellTileDomain,
+    });
+    console.log("Building map style", baseStyle);
+
     if (timeCursorAge != null) {
       return applyAgeModelStyles(
         timeCursorAge,
@@ -148,11 +117,6 @@ export default function MainMapView(props) {
   }, [baseStyle, timeCursorAge, plateModelId, isDarkMode, focusedMapSource]);
 
   useEffect(() => {
-    if (mapRef.current == null || baseStyle == null) return;
-    mapRef.current.setStyle(mapStyle);
-  }, [mapStyle]);
-
-  useEffect(() => {
     getMapboxStyle(baseMapURL, {
       access_token: mapboxgl.accessToken,
     }).then((s) => {
@@ -160,90 +124,76 @@ export default function MainMapView(props) {
     });
   }, [baseMapURL]);
 
-  useEffect(() => {
-    if (baseStyle == null) {
-      return;
-    }
-    initializeMap(mapStyle, mapPosition, infoMarkerPosition).then((map) => {
-      if (!map.isStyleLoaded()) {
-        map.once("style.load", () => {
-          setStyleLoaded(true);
-        });
-      } else {
-        setStyleLoaded(true);
+  const onMapLoaded = useCallback((map) => {
+    // disable shift-key zooming so we can use shift to make cross-sections
+    map.boxZoom.disable();
+
+    /* If we have an initially loaded info marker, we need to make sure
+    that it is actually visible on the map, and move to it if not.
+    This works around cases where the map is initialized with a hash string
+    that contradicts the focused location (which would happen if the link was
+    saved once the marker was moved out of view).
+    */
+    if (infoMarkerPosition != null) {
+      const focus = getFocusState(map, infoMarkerPosition);
+      if (
+        ![
+          PositionFocusState.CENTERED,
+          PositionFocusState.NEAR_CENTER,
+          PositionFocusState.OFF_CENTER,
+        ].includes(focus)
+      ) {
+        map.setCenter(infoMarkerPosition);
       }
-
-      mapRef.current = map;
-
-      /* Right now we need to reload filters when the map is initialized.
-        Otherwise our (super-legacy and janky) filter system doesn't know
-        to update the map. */
-      //runAction({ type: "set-filters", filters: [...filters] });
-      setMapInitialized(true);
-    });
-  }, [baseStyle]);
+    }
+  }, []);
 
   /* If we want to use a high resolution DEM, we need to use a different
     source ID from the hillshade's source ID. This uses more memory but
     provides a nicer-looking 3D map.
     */
 
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null) return;
-    setMapPosition(map, mapPosition);
-  }, [mapRef.current, mapInitialized]);
-
   // Make map label visibility match the mapLayers state
   useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));
 
-  useEffect(() => {
-    if (mapLayers.has(MapLayer.COLUMNS)) {
-      runAction({ type: "get-filtered-columns" });
-    }
-    runAction({ type: "map-layers-changed", mapLayers });
-  }, [filters, mapLayers]);
+  if (mapStyle == null) {
+    return h(Spinner);
+  }
 
-  // Filters
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null || !map?.isStyleLoaded()) return;
-    const expr = getExpressionForFilters(filters);
-
-    map.setFilter("burwell_fill", expr);
-    map.setFilter("burwell_stroke", expr);
-  }, [filters, mapInitialized, styleLoaded]);
-
-  return h(CoreMapView, props, [
-    h(VestigialMap, {
-      filters,
-      filteredColumns,
-      // Recreate the set every time to force a re-render
-      mapLayers,
-      mapCenter,
-      mapStyle,
-      crossSectionLine,
-      crossSectionCursorLocation,
-      mapPosition,
-      mapIsRotated,
-      onQueryMap: handleMapQuery,
-      mapRef,
-      isDark: isDarkMode,
-      runAction,
-      ...props,
-    }),
-    h(MapMarker, {
-      position: infoMarkerPosition,
-    }),
-    h(CrossSectionLine),
-    h.if(mapLayers.has(MapLayer.SOURCES))(MapSourcesLayer),
-    h(ColumnDataManager, { mapInitialized }),
-  ]);
+  return h(
+    CoreMapView,
+    { ...props, infoMarkerPosition, onMapLoaded, style: mapStyle, mapPosition },
+    [
+      h(MapMarker, {
+        position: infoMarkerPosition,
+      }),
+      h(CrossSectionLine),
+      h.if(mapLayers.has(MapLayer.SOURCES))(MapSourcesLayer),
+      h(ColumnDataManager),
+      h(MapPositionReporter, { initialMapPosition: mapPosition }),
+      h(MacrostratLayerManager),
+      h(FlyToPlaceManager),
+      h(HoveredFeatureManager),
+    ]
+  );
 }
 
-function ColumnDataManager({ mapInitialized }) {
+function MapPositionReporter({ initialMapPosition = null }) {
+  // Connects map position to Redux app state
+  const mapPosition = useMapPosition() ?? initialMapPosition;
+  const runAction = useAppActions();
+
+  useEffect(() => {
+    runAction({ type: "map-moved", data: { mapPosition } });
+  }, [mapPosition]);
+
+  return null;
+}
+
+function ColumnDataManager() {
   /* Update columns map layer given columns provided by application. */
   const mapRef = useMapRef();
+  const { isInitialized } = useMapStatus();
   const allColumns = useAppState((state) => state.core.allColumns);
   useEffect(() => {
     const map = mapRef.current;
@@ -264,7 +214,7 @@ function ColumnDataManager({ mapInitialized }) {
       type: "FeatureCollection",
       features: allColumns ?? [],
     });
-  }, [mapRef.current, allColumns, mapInitialized]);
+  }, [mapRef.current, allColumns, isInitialized]);
   return null;
 }
 
@@ -274,132 +224,25 @@ interface MapViewProps {
 }
 
 export function CoreMapView(props: MapViewProps) {
-  const { mapLayers, mapPosition, mapSettings } = useAppState(
-    (state) => state.core
-  );
-
-  const { children } = props;
-
-  let mapRef = useMapRef();
-
-  const ref = useRef<HTMLDivElement>();
-  const parentRef = useRef<HTMLDivElement>();
-  const { mapUse3D, mapIsRotated } = mapViewInfo(mapPosition);
-
+  const { mapLayers, mapSettings } = useAppState((state) => state.core);
   const hasLineSymbols =
     mapLayers.has(MapLayer.LINE_SYMBOLS) && mapLayers.has(MapLayer.LINES);
 
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null) return;
-    // Update line symbol visibility on map load
-    toggleLineSymbols(map, hasLineSymbols);
-  }, [mapRef.current]);
+  const { children } = props;
 
-  const demSourceID = mapSettings.highResolutionTerrain
-    ? "mapbox-3d-dem"
-    : null;
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null) return;
-    enable3DTerrain(map, mapUse3D, demSourceID);
-  }, [mapRef.current, mapUse3D]);
-
-  useMapConditionalStyle(mapRef, hasLineSymbols, toggleLineSymbols);
-
-  const className = classNames({
-    "is-rotated": mapIsRotated ?? false,
-    "is-3d-available": mapUse3D ?? false,
-  });
-
-  return h("div.map-view-container.main-view", { ref: parentRef }, [
-    h("div.mapbox-map#map", { ref, className }),
-    h(MapLoadingReporter, {
-      ignoredSources: ["elevationMarker", "crossSectionEndpoints"],
-    }),
-    h(MapMovedReporter),
-    h(MapResizeManager, { containerRef: ref }),
-    h(MapPaddingManager, { containerRef: ref, parentRef }),
-    children,
-  ]);
-}
-
-export function CrossSectionLine() {
-  const mapRef = useMapRef();
-  const crossSectionLine = useAppState((state) => state.core.crossSectionLine);
-  const previousLine = useRef<LineString | null>(null);
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null) return;
-    const coords = crossSectionLine?.coordinates ?? [];
-
-    let lines = [];
-    if (coords.length == 2 || crossSectionLine == null) {
-      previousLine.current = crossSectionLine;
-    }
-
-    if (crossSectionLine != null) {
-      lines.push(crossSectionLine);
-    }
-
-    if (previousLine.current != null) {
-      // We are selecting a new line, and we should still show the previous line
-      // until the new one is selected.
-      lines.push(previousLine.current);
-    }
-
-    let endpointFeatures = [];
-    for (let line of lines) {
-      for (let coord of line.coordinates) {
-        endpointFeatures.push({
-          type: "Feature",
-          properties: {},
-          geometry: {
-            type: "Point",
-            coordinates: coord,
-          },
-        });
-      }
-    }
-
-    map.getSource("crossSectionLine")?.setData({
-      type: "GeometryCollection",
-      geometries: lines,
-    });
-    map.getSource("crossSectionEndpoints")?.setData({
-      type: "FeatureCollection",
-      features: endpointFeatures,
-    });
-  }, [mapRef.current, crossSectionLine]);
-  return null;
-}
-
-function useMapQueryHandler(
-  mapRef: React.RefObject<mapboxgl.Map | null>,
-  infoDrawerOpen: boolean
-) {
-  /** Handler for map query markers */
-  const runAction = useAppActions();
-
-  return useCallback(
-    (event: mapboxgl.MapMouseEvent, columns: ColumnProperties[] = null) => {
-      const map = mapRef.current;
-
-      runAction({
-        type: "map-query",
-        lng: event.lngLat.lng,
-        lat: event.lngLat.lat,
-        z: map.getZoom(),
-        columns,
-        map_id: null,
-      });
-
-      // const marker =
-      //   markerRef.current ?? new mapboxgl.Marker({ color: "#000000" });
-      // marker.setLngLat(event.lngLat).addTo(mapRef.current);
-      // markerRef.current = marker;
+  return h(
+    MapView,
+    {
+      ...props,
+      terrainSourceID: mapSettings.highResolutionTerrain
+        ? "mapbox-3d-dem"
+        : null,
+      accessToken: SETTINGS.mapboxAccessToken,
     },
-    [mapRef, infoDrawerOpen]
+    [
+      h(MacrostratLineSymbolManager, { showLineSymbols: hasLineSymbols }),
+      children,
+    ]
   );
 }
 

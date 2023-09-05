@@ -1,5 +1,6 @@
 import h from "@macrostrat/hyper";
-import { ExpansionPanel } from "../expansion-panel";
+import { ExpansionPanel } from "@macrostrat/map-interface";
+import Reference from "../Reference";
 import LongText from "../long-text";
 import { IntervalChip } from "../info-blocks";
 import { useAppActions } from "~/map-interface/app-state";

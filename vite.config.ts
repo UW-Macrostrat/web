@@ -16,15 +16,8 @@ const aliasedModules = [
   "map-interface",
   "mapbox-utils",
   "mapbox-react",
+  "mapbox-styles",
 ];
-
-let aliases = {};
-for (const mod of aliasedModules) {
-  aliases["@macrostrat/" + mod] = path.resolve(
-    __dirname,
-    `./deps/web-components/packages/${mod}/src`
-  );
-}
 
 const gitEnv = revisionInfo(pkg, "https://github.com/UW-Macrostrat/web");
 // prefix with VITE_ to make available to client
@@ -40,8 +33,12 @@ const config: UserConfig = {
     conditions: ["typescript"],
     alias: {
       "~": path.resolve("./src"),
-      ...aliases,
     },
+    dedupe: [
+      "react",
+      "react-dom",
+      ...aliasedModules.map((d) => "@macrostrat/" + d),
+    ],
   },
   plugins: [
     mdx(),
@@ -53,7 +50,7 @@ const config: UserConfig = {
   envDir: path.resolve(__dirname),
   build: {
     outDir: path.resolve(__dirname, "dist"),
-    //emptyOutDir: true,
+    emptyOutDir: true,
   },
 };
 
