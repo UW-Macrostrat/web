@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { useAppActions, useAppState } from "~/map-interface/app-state";
 import { MapAreaContainer } from "~/map-interface/map-page";
 import { PanelCard } from "~/map-interface/map-page/menu";
-import { getBaseMapStyle } from "~/map-interface/map-page/map-view/utils";
+import { getBaseMapStyle } from "~/map-interface/map-page/map-view";
 import { MacrostratRasterTileset, buildRasterStyle, h, DevMapView } from ".";
 import { FloatingNavbar, MapLoadingButton } from "@macrostrat/map-interface";
 import { useMapStyle, ParentRouteButton } from "./utils";
