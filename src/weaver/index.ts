@@ -239,6 +239,8 @@ function useMapStyle(type, mapboxToken = null) {
 
   if (mapboxToken == null) {
     return null;
+  } else {
+    mapboxgl.accessToken = mapboxToken;
   }
 
   const baseStyle = isEnabled
@@ -248,7 +250,7 @@ function useMapStyle(type, mapboxToken = null) {
   const [actualStyle, setActualStyle] = useState(baseStyle);
 
   useEffect(() => {
-    const overlayStyle = weaverStyle(type);
+    const overlayStyle = mergeStyles(_macrostratStyle, weaverStyle(type));
     buildInspectorStyle(baseStyle, overlayStyle, {
       mapboxToken,
       inDarkMode: isEnabled,
