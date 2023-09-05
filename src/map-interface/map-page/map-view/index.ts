@@ -40,7 +40,6 @@ import {
   HoveredFeatureManager,
   MacrostratLayerManager,
 } from "./map";
-import { Spinner } from "@blueprintjs/core";
 
 const h = hyper.styled(styles);
 
@@ -54,27 +53,6 @@ export function getBaseMapStyle(mapLayers, isDarkMode = false) {
     return SETTINGS.darkMapURL;
   }
   return SETTINGS.baseMapURL;
-}
-
-function initializeMap(container, opts) {
-  // setup the basic map
-  const { style, mapPosition, ...rest } = opts;
-
-  const map = new mapboxgl.Map({
-    container,
-    style,
-    maxZoom: 18,
-    //maxTileCacheSize: 0,
-    logoPosition: "bottom-left",
-    trackResize: true,
-    antialias: true,
-    optimizeForTerrain: true,
-    ...rest,
-  });
-
-  // set initial map position
-  setMapPosition(map, mapPosition);
-  return map;
 }
 
 export default function MainMapView(props) {
@@ -155,10 +133,6 @@ export default function MainMapView(props) {
 
   // Make map label visibility match the mapLayers state
   useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));
-
-  if (mapStyle == null) {
-    return h(Spinner);
-  }
 
   return h(
     CoreMapView,

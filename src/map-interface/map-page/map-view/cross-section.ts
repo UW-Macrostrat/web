@@ -1,7 +1,8 @@
-import { useMapRef } from "@macrostrat/mapbox-react";
+import { useMapRef, useMapStatus } from "@macrostrat/mapbox-react";
 import { useEffect, useRef } from "react";
 import { useAppState } from "~/map-interface/app-state";
 import { LineString } from "geojson";
+import { GeoJSONSource } from "mapbox-gl";
 
 export function CrossSectionLine() {
   const crossSectionLine = useAppState((state) => state.core.crossSectionLine);
@@ -17,9 +18,16 @@ export function CrossSectionLine() {
 function useCrossSectionLine(crossSectionLine) {
   const mapRef = useMapRef();
   const previousLine = useRef<LineString | null>(null);
+  const { isStyleLoaded } = useMapStatus();
   useEffect(() => {
     const map = mapRef.current;
-    if (map == null) return;
+    if (map == null || !isStyleLoaded) return;
+    const endpointsSrc = map.getSource(
+      "crossSectionEndpoints"
+    ) as GeoJSONSource | null;
+    const lineSrc = map.getSource("crossSectionLine") as GeoJSONSource | null;
+    if (endpointsSrc == null || lineSrc == null) return;
+
     const coords = crossSectionLine?.coordinates ?? [];
 
     let lines = [];
@@ -39,11 +47,11 @@ function useCrossSectionLine(crossSectionLine) {
 
     if (coords.length == 0) {
       // Reset the cross section line
-      map.getSource("crossSectionEndpoints").setData({
+      endpointsSrc.setData({
         type: "FeatureCollection",
         features: [],
       });
-      map.getSource("crossSectionLine").setData({
+      lineSrc.setData({
         type: "FeatureCollection",
         features: [],
       });
@@ -64,24 +72,26 @@ function useCrossSectionLine(crossSectionLine) {
       }
     }
 
-    map.getSource("crossSectionLine")?.setData({
+    endpointsSrc.setData({
       type: "GeometryCollection",
       geometries: lines,
     });
-    map.getSource("crossSectionEndpoints")?.setData({
+    lineSrc.setData({
       type: "FeatureCollection",
       features: endpointFeatures,
     });
-  }, [mapRef.current, crossSectionLine]);
+  }, [mapRef.current, crossSectionLine, isStyleLoaded]);
 }
 
 function useCrossSectionCursorLocation(crossSectionCursorLocation) {
   const mapRef = useMapRef();
+  const { isStyleLoaded } = useMapStatus();
+
   // Handle elevation marker location
   useEffect(() => {
     const map = mapRef.current;
     if (map == null) return;
-    const src = map.getSource("elevationMarker");
+    const src = map.getSource("elevationMarker") as GeoJSONSource | null;
     if (src == null) return;
     if (crossSectionCursorLocation == null) {
       src.setData(null);
@@ -100,5 +110,5 @@ function useCrossSectionCursorLocation(crossSectionCursorLocation) {
         },
       ],
     });
-  }, [mapRef, crossSectionCursorLocation]);
+  }, [mapRef, crossSectionCursorLocation, isStyleLoaded]);
 }
