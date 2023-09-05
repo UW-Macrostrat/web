@@ -44,5 +44,5 @@ docker tag uw-macrostrat/web:develop $MACROSTRAT_DOCKER_REGISTRY/uw-macrostrat/w
 docker push $MACROSTRAT_DOCKER_REGISTRY/uw-macrostrat/web:develop
 
 # Deploy to development server
-# THis needs to get much better
-ssh gunnison "macrostrat restart web"
+# This needs to support kubernetes (maybe)
+ssh gunnison bash "macrostrat compose pull web && macrostrat up web"
