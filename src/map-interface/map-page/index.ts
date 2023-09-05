@@ -29,14 +29,18 @@ const Menu = loadable(() => import("./menu"));
 const h = hyper.styled(styles);
 
 //const CesiumViewMod = loadable(() => import("./cesium-view"));
-const CesiumViewMod = () => h("div", "Globe is currently disabled");
+// const CesiumViewMod = () => h("div", "Globe is currently disabled");
 
-export function CesiumView(props) {
-  return h(Suspense, { fallback: h(Spinner) }, h(CesiumViewMod, props));
-}
+// export function CesiumView(props) {
+//   return h(Suspense, { fallback: h(Spinner) }, h(CesiumViewMod, props));
+// }
 
 function MapView(props) {
-  return h(Suspense, { fallback: h(Spinner) }, h(MapContainer, props));
+  return h(
+    Suspense,
+    { fallback: h("div.map-view-placeholder") },
+    h(MapContainer, props)
+  );
 }
 
 export const MapPage = ({
@@ -130,8 +134,10 @@ function InfoDrawerRoute() {
   const runAction = useAppActions();
   const allColumns = useAppState((s) => s.core.allColumns);
 
+  // Todo: this is a pretty janky way to do state management
   useEffect(() => {
     if (lat && lng) {
+      console.log("Updating infomarker position");
       runAction({
         type: "run-map-query",
         lat: Number(lat),

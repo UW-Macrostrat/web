@@ -252,6 +252,7 @@ export function MacrostratLayerManager() {
   const styleLoadedCallback = useCallback(() => {
     const map = mapRef.current;
     if (map == null) return;
+    if (!map.isStyleLoaded()) return;
     const style = map.getStyle();
     for (const layer of style.layers) {
       selectedFeatures.current[layer.id] = null;
