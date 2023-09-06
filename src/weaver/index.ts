@@ -4,35 +4,38 @@
 
 import h from "@macrostrat/hyper";
 
-import { SETTINGS } from "~/map-interface/settings";
-import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
-import { DarkModeButton } from "@macrostrat/ui-components";
-import { Spacer, useDarkMode, useAPIResult } from "@macrostrat/ui-components";
-import mapboxgl from "mapbox-gl";
-import { useCallback, useState, useEffect } from "react";
-import { buildInspectorStyle } from "@macrostrat/map-interface";
-import { MapAreaContainer, PanelCard } from "@macrostrat/map-interface";
-import { Button, Spinner, MenuItem } from "@blueprintjs/core";
+import { Button, MenuItem, Spinner } from "@blueprintjs/core";
 import { Select2 } from "@blueprintjs/select";
 import {
-  FloatingNavbar,
-  MapLoadingButton,
-  MapView,
+  buildInspectorStyle,
   FeatureProperties,
+  FloatingNavbar,
+  LocationPanel,
+  MapAreaContainer,
+  MapLoadingButton,
+  MapMarker,
+  MapView,
+  PanelCard,
 } from "@macrostrat/map-interface";
-import { MapMarker, LocationPanel } from "@macrostrat/map-interface";
-import { MapPosition } from "@macrostrat/mapbox-utils";
-import { mergeStyles } from "@macrostrat/mapbox-utils";
-import { useMapRef } from "@macrostrat/mapbox-react";
+import { useMapRef, useMapStatus } from "@macrostrat/mapbox-react";
+import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
+import { MapPosition, mergeStyles } from "@macrostrat/mapbox-utils";
+import {
+  DarkModeButton,
+  Spacer,
+  useAPIResult,
+  useDarkMode,
+} from "@macrostrat/ui-components";
+import mapboxgl from "mapbox-gl";
+import { useCallback, useEffect, useState } from "react";
+import { SETTINGS } from "~/map-interface/settings";
 
 export function WeaverPage() {
   return h(
     "div.weaver-page",
-    h(WeaverMap, { overlayStyle, mapboxToken: SETTINGS.mapboxAccessToken })
+    h(WeaverMap, { mapboxToken: SETTINGS.mapboxAccessToken })
   );
 }
-
-mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
 
 const _macrostratStyle = buildMacrostratStyle({
   tileserverDomain: SETTINGS.burwellTileDomain,
@@ -100,8 +103,6 @@ function weaverStyle(type: object) {
   };
 }
 
-const overlayStyle = mergeStyles(_macrostratStyle, weaverStyle(types[0]));
-
 function FeatureDetails({ position, model_name }) {
   const mapRef = useMapRef();
   const result = useAPIResult(
@@ -116,8 +117,6 @@ function FeatureDetails({ position, model_name }) {
 
   if (result == null) return h(Spinner);
 
-  console.log(result);
-
   return h(
     "div.features",
     result.map((f, i) => {
@@ -129,16 +128,12 @@ function FeatureDetails({ position, model_name }) {
 function WeaverMap({
   title = "Weaver",
   headerElement = null,
-  mapPosition = null,
   mapboxToken = null,
-  overlayStyle = null,
 }: {
   headerElement?: React.ReactElement;
   title?: string;
   children?: React.ReactNode;
   mapboxToken?: string;
-  overlayStyle?: mapboxgl.Style | string;
-  mapPosition?: MapPosition;
 }) {
   /* We apply a custom style to the panel container when we are interacting
     with the search bar, so that we can block map interactions until search
@@ -218,30 +213,33 @@ function WeaverMap({
       detailPanel: detailElement,
       contextPanelOpen: isOpen,
     },
-    h(
-      MapView,
-      {
-        style,
-        mapPosition,
-        projection: "globe",
-      },
-      [
-        h(MapMarker, {
-          position: inspectPosition,
-          setPosition: onSelectPosition,
-        }),
-      ]
-    )
+    h(_MapView, { style, mapboxToken, inspectPosition, onSelectPosition })
+  );
+}
+
+function _MapView({ style, mapboxToken, onSelectPosition, inspectPosition }) {
+  const { isInitialized, isStyleLoaded } = useMapStatus();
+
+  return h(
+    MapView,
+    {
+      style,
+      //mapPosition,
+      //projection: "globe",
+      mapboxToken,
+    },
+    [
+      h(MapMarker, {
+        position: inspectPosition,
+        setPosition: onSelectPosition,
+      }),
+    ]
   );
 }
 
 function useMapStyle(type, mapboxToken = null) {
   const dark = useDarkMode();
   const isEnabled = dark?.isEnabled;
-
-  if (mapboxToken == null) {
-    return null;
-  }
 
   const baseStyle = isEnabled
     ? "mapbox://styles/mapbox/dark-v10"
@@ -250,12 +248,14 @@ function useMapStyle(type, mapboxToken = null) {
   const [actualStyle, setActualStyle] = useState(baseStyle);
 
   useEffect(() => {
+    if (mapboxToken == null) {
+      return setActualStyle(baseStyle);
+    }
     const overlayStyle = mergeStyles(_macrostratStyle, weaverStyle(type));
     buildInspectorStyle(baseStyle, overlayStyle, {
       mapboxToken,
       inDarkMode: isEnabled,
     }).then((s) => {
-      console.log(s);
       setActualStyle(s);
     });
   }, [baseStyle, mapboxToken, isEnabled, type]);
