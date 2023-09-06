@@ -37,6 +37,7 @@ const config: UserConfig = {
     dedupe: [
       "react",
       "react-dom",
+      "mapbox-gl",
       ...aliasedModules.map((d) => "@macrostrat/" + d),
     ],
   },
