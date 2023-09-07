@@ -53,7 +53,7 @@
     "@macrostrat/column-views": "workspace:*",
     "@macrostrat/hyper": "^2.2.1",
     "@macrostrat/map-interface": "workspace:*",
-    "@macrostrat/mapbox-react": "workspace:*",
+    "@macrostrat/mapbox-react": "^2.1.0",
     "@macrostrat/mapbox-styles": "workspace:*",
     "@macrostrat/mapbox-utils": "workspace:*",
     "@macrostrat/timescale": "workspace:*",
@@ -104,5 +104,5 @@
     "react-dom": "^18.2.0"
   },
   "prettier": {},
-  "packageManager": "yarn@3.4.1"
+  "packageManager": "yarn@3.6.3"
 }

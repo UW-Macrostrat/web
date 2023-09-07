@@ -220,6 +220,8 @@ function WeaverMap({
 function _MapView({ style, mapboxToken, onSelectPosition, inspectPosition }) {
   const { isInitialized, isStyleLoaded } = useMapStatus();
 
+  console.log("Map status", isInitialized, isStyleLoaded);
+
   return h(
     MapView,
     {
