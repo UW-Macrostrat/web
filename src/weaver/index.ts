@@ -233,9 +233,6 @@ function useMapStyle(type, mapboxToken = null) {
   const [actualStyle, setActualStyle] = useState(baseStyle);
 
   useEffect(() => {
-    if (mapboxToken == null) {
-      return setActualStyle(baseStyle);
-    }
     const overlayStyle = mergeStyles(_macrostratStyle, weaverStyle(type));
     buildInspectorStyle(baseStyle, overlayStyle, {
       mapboxToken,
