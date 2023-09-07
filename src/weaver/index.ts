@@ -213,29 +213,12 @@ function WeaverMap({
       detailPanel: detailElement,
       contextPanelOpen: isOpen,
     },
-    h(_MapView, { style, mapboxToken, inspectPosition, onSelectPosition })
-  );
-}
-
-function _MapView({ style, mapboxToken, onSelectPosition, inspectPosition }) {
-  const { isInitialized, isStyleLoaded } = useMapStatus();
-
-  console.log("Map status", isInitialized, isStyleLoaded);
-
-  return h(
-    MapView,
-    {
-      style,
-      //mapPosition,
-      //projection: "globe",
-      mapboxToken,
-    },
-    [
+    h(MapView, { style, mapboxToken }, [
       h(MapMarker, {
         position: inspectPosition,
         setPosition: onSelectPosition,
       }),
-    ]
+    ])
   );
 }
 

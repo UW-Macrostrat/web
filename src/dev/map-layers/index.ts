@@ -18,23 +18,20 @@ import { LocationPanel } from "@macrostrat/map-interface";
 import { MapAreaContainer } from "../../map-interface/map-page";
 import { PanelCard } from "../../map-interface/map-page/menu";
 import { getBaseMapStyle } from "../../map-interface/map-page/map-view";
-import { MapBottomControls } from "@macrostrat/map-interface";
-import { MapStyledContainer } from "@macrostrat/map-interface";
 import { MapLoadingButton } from "@macrostrat/map-interface";
 import {
   toggleLineSymbols,
   buildMacrostratStyle,
   buildBasicStyle,
 } from "@macrostrat/mapbox-styles";
-import { MapView } from "@macrostrat/map-interface";
-import { MapMarker } from "~/map-interface/map-page/map-view";
+import { MapView, MapMarker } from "@macrostrat/map-interface";
 import {
   FeaturePanel,
   FeatureSelectionHandler,
   TileInfo,
 } from "@macrostrat/map-interface";
 import { TileExtentLayer } from "@macrostrat/map-interface";
-import { useMapStatus, useMapDispatch } from "@macrostrat/mapbox-react";
+import { useMapStatus } from "@macrostrat/mapbox-react";
 import styles from "../main.module.styl";
 import { useMapStyle, ParentRouteButton } from "./utils";
 import { DevMapPage } from "@macrostrat/map-interface";
@@ -414,6 +411,5 @@ function LineSymbolManager({ showLineSymbols }) {
   return null;
 }
 
-export { MapStyledContainer, MapBottomControls };
 export * from "./raster-map";
 export * from "./catalog";

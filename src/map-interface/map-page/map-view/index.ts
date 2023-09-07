@@ -1,10 +1,5 @@
 import hyper from "@macrostrat/hyper";
-import {
-  MapBottomControls,
-  MapMarker,
-  MapStyledContainer,
-  MapView,
-} from "@macrostrat/map-interface";
+import { MapMarker, MapView } from "@macrostrat/map-interface";
 import {
   getFocusState,
   PositionFocusState,
@@ -207,5 +202,3 @@ function ColumnDataManager() {
   }, [mapRef.current, allColumns, isInitialized]);
   return null;
 }
-
-export { MapStyledContainer, MapBottomControls, MapMarker };
