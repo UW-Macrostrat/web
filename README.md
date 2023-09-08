@@ -37,3 +37,15 @@ If for some reason you want to run the prod image locally you can do it like so.
 ```bash
 docker run -d -p 8089:80 macrostrat:latest
 ```
+
+## Deploying on Kubernetes
+
+To deploy to kubernetes there is two steps.
+
+1. Tag the image
+
+   You do this by `git tag <semver-tag>` and `git push --tag origin`
+
+2. Update the deployment in Kubernetes
+
+   You do this by updating the image tag here to whatever you tagged above: https://github.com/UW-Macrostrat/tiger-macrostrat-config/blob/main/manifests/development/web/deployment-patch.yaml
