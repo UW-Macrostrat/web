@@ -4,12 +4,11 @@ import hyper from "@macrostrat/hyper";
 import {
   useAppActions,
   useSearchState,
+  useAppState,
   useContextPanelOpen,
 } from "../app-state";
-import { useSelector } from "react-redux";
-import Filters, { FilterPanel } from "./filter-panel";
+import { FilterPanel } from "./filter-panel";
 import styles from "./searchbar.module.styl";
-import { useMapStatus } from "@macrostrat/mapbox-react";
 import { MapLoadingButton, FloatingNavbar } from "@macrostrat/map-interface";
 import { PanelSubhead } from "@macrostrat/map-interface";
 import classNames from "classnames";
@@ -111,7 +110,8 @@ const filterPanelElement = h(FilterPanel);
 
 function Searchbar({ className }) {
   const runAction = useAppActions();
-  const { term, searchResults } = useSearchState();
+  const term = useAppState((s) => s.core.term);
+  const searchResults = useAppState((s) => s.core.searchResults);
 
   const gainInputFocus = useCallback(
     (e) => {
