@@ -26,9 +26,11 @@ function useFilterState() {
 }
 
 function useSearchState() {
-  const { searchResults, isSearching, term, inputFocus, infoDrawerOpen } =
-    useSelector((state) => state.core);
-  return { searchResults, isSearching, term, inputFocus, infoDrawerOpen };
+  return useSelector((state) => {
+    const { searchResults, isSearching, term, inputFocus, infoDrawerOpen } =
+      state.core;
+    return { searchResults, isSearching, term, inputFocus, infoDrawerOpen };
+  });
 }
 
 function useMenuState() {

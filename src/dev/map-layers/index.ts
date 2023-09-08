@@ -18,22 +18,20 @@ import { LocationPanel } from "@macrostrat/map-interface";
 import { MapAreaContainer } from "../../map-interface/map-page";
 import { PanelCard } from "../../map-interface/map-page/menu";
 import { getBaseMapStyle } from "../../map-interface/map-page/map-view";
-import { MapBottomControls } from "@macrostrat/map-interface";
-import { MapStyledContainer } from "@macrostrat/map-interface";
 import { MapLoadingButton } from "@macrostrat/map-interface";
 import {
   toggleLineSymbols,
   buildMacrostratStyle,
   buildBasicStyle,
 } from "@macrostrat/mapbox-styles";
-import { CoreMapView, MapMarker } from "~/map-interface/map-page/map-view";
+import { MapView, MapMarker } from "@macrostrat/map-interface";
 import {
   FeaturePanel,
   FeatureSelectionHandler,
   TileInfo,
 } from "@macrostrat/map-interface";
 import { TileExtentLayer } from "@macrostrat/map-interface";
-import { useMapStatus, useMapDispatch } from "@macrostrat/mapbox-react";
+import { useMapStatus } from "@macrostrat/mapbox-react";
 import styles from "../main.module.styl";
 import { useMapStyle, ParentRouteButton } from "./utils";
 import { DevMapPage } from "@macrostrat/map-interface";
@@ -292,51 +290,6 @@ function initializeMap(args = {}) {
   return map;
 }
 
-interface DevMapViewProps {
-  style: mapboxgl.Style;
-  children: React.ReactNode;
-  transformRequest?: mapboxgl.TransformRequestFunction;
-}
-
-export function DevMapView(props: DevMapViewProps): React.ReactElement {
-  const { style, transformRequest, children } = props;
-  const { mapPosition } = useMapStatus();
-  const dispatch = useMapDispatch();
-
-  let mapRef = useMapRef();
-
-  //const baseMapURL = getBaseMapStyle(new Set([]), isDarkMode);
-
-  /* HACK: Right now we need this to force a render when the map
-    is done loading
-    */
-
-  // Map initialization
-  useEffect(() => {
-    console.log("Initializing map");
-    if (style == null) return;
-    mapRef.current = initializeMap({ style, transformRequest });
-    dispatch({ type: "set-initialized", payload: true });
-  }, [style, transformRequest, dispatch]);
-
-  // Map style updating
-  useEffect(() => {
-    if (mapRef?.current == null || style == null) return;
-    mapRef?.current?.setStyle(style);
-  }, [mapRef.current, style]);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null) return;
-    if (mapPosition == null) return;
-    setMapPosition(map, mapPosition);
-  }, [mapRef.current]);
-
-  // This seems to do a bit of a poor job at the moment. Maybe because fo caching?
-
-  return h(CoreMapView, null, [children]);
-}
-
 export function BasicLayerInspectorPage({
   title = null,
   headerElement = null,
@@ -438,7 +391,7 @@ export function BasicLayerInspectorPage({
       detailPanel: detailElement,
       contextPanelOpen: isOpen,
     },
-    h(DevMapView, { style, transformRequest }, [
+    h(MapView, { style, transformRequest }, [
       h(FeatureSelectionHandler, {
         selectedLocation: inspectPosition,
         setFeatures: setData,
@@ -458,6 +411,5 @@ function LineSymbolManager({ showLineSymbols }) {
   return null;
 }
 
-export { MapStyledContainer, MapBottomControls };
 export * from "./raster-map";
 export * from "./catalog";

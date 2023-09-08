@@ -2,17 +2,12 @@ import { Suspense } from "react";
 // Import other components
 import hyper from "@macrostrat/hyper";
 import Searchbar from "../components/navbar";
-import { Spinner, HTMLDivProps } from "@blueprintjs/core";
+import { Spinner } from "@blueprintjs/core";
 import { useSelector } from "react-redux";
 import loadable from "@loadable/component";
-import {
-  useSearchState,
-  MapBackend,
-  useAppState,
-  useAppActions,
-} from "../app-state";
+import { MapBackend, useAppState, useAppActions } from "../app-state";
 import styles from "./main.module.styl";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useCallback } from "react";
 import { useTransition } from "transition-hook";
 import { useContextPanelOpen, useContextClass } from "../app-state";
 import { MapAreaContainer } from "@macrostrat/map-interface";
@@ -20,6 +15,7 @@ import { Routes, Route, useParams } from "react-router-dom";
 import classNames from "classnames";
 import { TimescalePanel } from "../paleo";
 import { MenuPage } from "./menu";
+import MapView from "./map-view";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));
@@ -50,11 +46,11 @@ export const MapPage = ({
   backend?: MapBackend;
   menuPage?: MenuPage;
 }) => {
-  const { inputFocus } = useSearchState();
   const runAction = useAppActions();
+  const inputFocus = useAppState((s) => s.core.inputFocus);
   const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
   const navMenuPage = useAppState((s) => s.menu.activePage);
-  const mapPosition = useAppState((s) => s.core.mapPosition);
+  const inPaleoMode = useAppState((s) => s.core.timeCursorAge != null);
 
   const ref = useRef<HTMLElement>(null);
 
@@ -67,15 +63,16 @@ export const MapPage = ({
 
   const contextClass = useContextClass();
 
-  const onMouseDown = (event) => {
-    if (!(inputFocus || contextPanelOpen)) return;
-    if (ref.current?.contains(event.target)) return;
+  const onMouseDown = useCallback(
+    (event) => {
+      if (!(inputFocus || contextPanelOpen)) return;
+      if (ref.current?.contains(event.target)) return;
 
-    runAction({ type: "context-outside-click" });
-    event.stopPropagation();
-  };
-
-  const inPaleoMode = useAppState((s) => s.core.timeCursorAge != null);
+      runAction({ type: "context-outside-click" });
+      event.stopPropagation();
+    },
+    [inputFocus, contextPanelOpen]
+  );
 
   if (!loaded) {
     return h(Spinner);
@@ -101,7 +98,6 @@ export const MapPage = ({
       bottomPanel,
       contextPanelOpen: contextPanelOpen || inputFocus,
       detailPanelOpen: infoDrawerOpen,
-      mapPosition,
       className: classNames(
         "macrostrat-map-container",
         inputFocus ? "searching" : contextClass,

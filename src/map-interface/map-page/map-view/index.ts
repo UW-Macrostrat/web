@@ -1,10 +1,5 @@
 import hyper from "@macrostrat/hyper";
-import {
-  MapBottomControls,
-  MapMarker,
-  MapStyledContainer,
-  MapView,
-} from "@macrostrat/map-interface";
+import { MapMarker, MapView } from "@macrostrat/map-interface";
 import {
   getFocusState,
   PositionFocusState,
@@ -73,6 +68,8 @@ export default function MainMapView(props) {
   // At the moment, these seem to force a re-render of the map
   const { isInitialized, isStyleLoaded } = useMapStatus();
 
+  const mapSettings = useAppState((state) => state.core.mapSettings);
+
   const [baseStyle, setBaseStyle] = useState(null);
   const mapStyle = useMemo(() => {
     if (baseStyle == null) return null;
@@ -101,6 +98,9 @@ export default function MainMapView(props) {
       setBaseStyle(s);
     });
   }, [baseMapURL]);
+
+  const hasLineSymbols =
+    mapLayers.has(MapLayer.LINE_SYMBOLS) && mapLayers.has(MapLayer.LINES);
 
   const onMapLoaded = useCallback((map) => {
     // disable shift-key zooming so we can use shift to make cross-sections
@@ -135,9 +135,20 @@ export default function MainMapView(props) {
   useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));
 
   return h(
-    CoreMapView,
-    { ...props, infoMarkerPosition, onMapLoaded, style: mapStyle, mapPosition },
+    MapView,
+    {
+      ...props,
+      infoMarkerPosition,
+      onMapLoaded,
+      style: mapStyle,
+      mapPosition,
+      terrainSourceID: mapSettings.highResolutionTerrain
+        ? "mapbox-3d-dem"
+        : null,
+      accessToken: SETTINGS.mapboxAccessToken,
+    },
     [
+      h(MacrostratLineSymbolManager, { showLineSymbols: hasLineSymbols }),
       h(MapMarker, {
         position: infoMarkerPosition,
       }),
@@ -191,33 +202,3 @@ function ColumnDataManager() {
   }, [mapRef.current, allColumns, isInitialized]);
   return null;
 }
-
-interface MapViewProps {
-  showLineSymbols?: boolean;
-  children?: React.ReactNode;
-}
-
-export function CoreMapView(props: MapViewProps) {
-  const { mapLayers, mapSettings } = useAppState((state) => state.core);
-  const hasLineSymbols =
-    mapLayers.has(MapLayer.LINE_SYMBOLS) && mapLayers.has(MapLayer.LINES);
-
-  const { children } = props;
-
-  return h(
-    MapView,
-    {
-      ...props,
-      terrainSourceID: mapSettings.highResolutionTerrain
-        ? "mapbox-3d-dem"
-        : null,
-      accessToken: SETTINGS.mapboxAccessToken,
-    },
-    [
-      h(MacrostratLineSymbolManager, { showLineSymbols: hasLineSymbols }),
-      children,
-    ]
-  );
-}
-
-export { MapStyledContainer, MapBottomControls, MapMarker };
