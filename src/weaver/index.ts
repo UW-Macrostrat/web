@@ -37,6 +37,8 @@ export function WeaverPage() {
   );
 }
 
+mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
+
 const _macrostratStyle = buildMacrostratStyle({
   tileserverDomain: SETTINGS.burwellTileDomain,
   fillOpacity: 0.3,
