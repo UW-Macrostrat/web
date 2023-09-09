@@ -130,7 +130,7 @@ function FeatureDetails({ position, model_name }) {
 function WeaverMap({
   title = "Weaver",
   headerElement = null,
-  mapboxToken = null,
+  mapboxToken,
 }: {
   headerElement?: React.ReactElement;
   title?: string;
@@ -224,7 +224,7 @@ function WeaverMap({
   );
 }
 
-function useMapStyle(type, mapboxToken = null) {
+function useMapStyle(type, mapboxToken) {
   const dark = useDarkMode();
   const isEnabled = dark?.isEnabled;
 
