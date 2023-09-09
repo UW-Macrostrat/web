@@ -145,7 +145,7 @@ export default function MainMapView(props) {
       terrainSourceID: mapSettings.highResolutionTerrain
         ? "mapbox-3d-dem"
         : null,
-      accessToken: SETTINGS.mapboxAccessToken,
+      mapboxToken: SETTINGS.mapboxAccessToken,
     },
     [
       h(MacrostratLineSymbolManager, { showLineSymbols: hasLineSymbols }),

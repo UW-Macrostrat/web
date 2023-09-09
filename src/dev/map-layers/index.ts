@@ -273,23 +273,6 @@ export async function buildMapStyle(
   return removeMapLabels(mergeStyles(style, overlayStyle));
 }
 
-function initializeMap(args = {}) {
-  mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
-  const map = new mapboxgl.Map({
-    container: "map",
-    maxZoom: 18,
-    //maxTileCacheSize: 0,
-    logoPosition: "bottom-left",
-    trackResize: true,
-    antialias: true,
-    optimizeForTerrain: true,
-    ...args,
-  });
-
-  //setMapPosition(map, mapPosition);
-  return map;
-}
-
 export function BasicLayerInspectorPage({
   title = null,
   headerElement = null,
@@ -391,7 +374,7 @@ export function BasicLayerInspectorPage({
       detailPanel: detailElement,
       contextPanelOpen: isOpen,
     },
-    h(MapView, { style, transformRequest }, [
+    h(MapView, { style, transformRequest, accessToken: mapboxgl.accessToken }, [
       h(FeatureSelectionHandler, {
         selectedLocation: inspectPosition,
         setFeatures: setData,
