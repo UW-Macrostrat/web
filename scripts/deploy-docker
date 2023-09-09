@@ -45,4 +45,4 @@ docker push $MACROSTRAT_DOCKER_REGISTRY/uw-macrostrat/web:develop
 
 # Deploy to development server
 # This needs to support kubernetes (maybe)
-ssh gunnison bash "macrostrat compose pull web && macrostrat up web"
+ssh gunnison bash "macrostrat compose pull web && macrostrat compose restart web"
