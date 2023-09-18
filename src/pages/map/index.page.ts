@@ -1,8 +1,15 @@
 import h from "@macrostrat/hyper";
-import { onDemand } from "~/_utils";
+import { ClientOnly } from "~/renderer/client-only";
 
-const MapPage = onDemand(() => import("./map"));
+const MapPage = () => import("./map")
 
 export function Page() {
-  return h(MapPage, { routerBasename: "/map" });
+
+  return h(
+    ClientOnly,
+    {
+      component: MapPage,
+    },
+    null
+  )
 }
