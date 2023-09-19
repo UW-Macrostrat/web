@@ -44,10 +44,20 @@ async function startServer() {
   // Vite-plugin-ssr middleware. It should always be our last middleware (because it's a
   // catch-all middleware superseding any middleware placed after it).
   app.get('*', async (req, res, next) => {
+
+    console.log(new Date().toISOString(), "Starting Response", req.method, req.originalUrl)
+
+
     const pageContextInit = {
       urlOriginal: req.originalUrl
     }
+
+    console.log(new Date().toISOString(), "Starting Rendering", req.method, req.originalUrl)
+
     const pageContext = await renderPage(pageContextInit)
+
+    console.log(new Date().toISOString(), "End Rendering", req.method, req.originalUrl)
+
     const { httpResponse } = pageContext
     if (!httpResponse) {
       return next()
@@ -59,6 +69,9 @@ async function startServer() {
       // For HTTP streams use httpResponse.pipe() instead, see https://vite-plugin-ssr.com/stream
       res.send(body)
     }
+
+    console.log(new Date().toISOString(), "Concluding Response", req.method, req.originalUrl)
+
   })
 
   const port = process.env.PORT || 3000
