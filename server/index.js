@@ -31,7 +31,7 @@ async function startServer() {
     const viteDevMiddleware = (
       await vite.createServer({
         root,
-        server: { middlewareMode: true }
+        server: { middlewareMode: true },
       })
     ).middlewares
     app.use(viteDevMiddleware)
@@ -45,18 +45,11 @@ async function startServer() {
   // catch-all middleware superseding any middleware placed after it).
   app.get('*', async (req, res, next) => {
 
-    console.log(new Date().toISOString(), "Starting Response", req.method, req.originalUrl)
-
-
     const pageContextInit = {
       urlOriginal: req.originalUrl
     }
 
-    console.log(new Date().toISOString(), "Starting Rendering", req.method, req.originalUrl)
-
     const pageContext = await renderPage(pageContextInit)
-
-    console.log(new Date().toISOString(), "End Rendering", req.method, req.originalUrl)
 
     const { httpResponse } = pageContext
     if (!httpResponse) {
@@ -66,12 +59,10 @@ async function startServer() {
       if (res.writeEarlyHints) res.writeEarlyHints({ link: earlyHints.map((e) => e.earlyHintLink) })
       headers.forEach(([name, value]) => res.setHeader(name, value))
       res.status(statusCode)
+      if (!res.hasHeader('Content-Type')) res.setHeader('Content-Type', 'text/html');
       // For HTTP streams use httpResponse.pipe() instead, see https://vite-plugin-ssr.com/stream
       res.send(body)
     }
-
-    console.log(new Date().toISOString(), "Concluding Response", req.method, req.originalUrl)
-
   })
 
   const port = process.env.PORT || 3000

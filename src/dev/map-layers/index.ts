@@ -200,6 +200,8 @@ export function VectorMapInspectorPage({
 }
 */
 
+function LineSymbolMapControls() {}
+
 export function buildRasterStyle(layer: MacrostratRasterTileset) {
   let tileURL = SETTINGS.burwellTileDomain + `/${layer}/{z}/{x}/{y}.png`;
 
