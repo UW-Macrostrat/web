@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import styles from "./about.module.styl";
 import newGithubIssueUrl from "new-github-issue-url";
 import { AnchorButton } from "@blueprintjs/core";
+import { mapPagePrefix } from "~/map-interface/settings";
 
 const h = hyper.styled(styles);
 
@@ -27,7 +28,7 @@ const SoftwareInfo = (props) => {
       h(
         Link,
         {
-          to: "/changelog",
+          to: mapPagePrefix + "/changelog",
         },
         "Changelog"
       ),
@@ -47,7 +48,7 @@ const LinkButton = ({ to, ...props }) => {
   return h(AnchorButton, {
     ...props,
     onClick() {
-      navigate(to);
+      navigate(mapPagePrefix + to);
     },
   });
 };

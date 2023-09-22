@@ -2,11 +2,14 @@ import { useLocation, useNavigate } from "react-router";
 import { useAppState } from "./hooks";
 import classNames from "classnames";
 import { MenuPage } from "./reducers";
-import { routerBasename } from "../settings";
+import { routerBasename, mapPagePrefix } from "../settings";
 
 export function isDetailPanelRouteInternal(pathname: string) {
   /* Check if we're in a detail panel route from within the app. */
-  return pathname.startsWith("/loc") || pathname.startsWith("/cross-section");
+  return (
+    pathname.startsWith(mapPagePrefix + "/loc") ||
+    pathname.startsWith(mapPagePrefix + "/cross-section")
+  );
 }
 
 export function isDetailPanelRoute(pathname: string) {
@@ -16,8 +19,8 @@ export function isDetailPanelRoute(pathname: string) {
   // Hack: cover all our bases here by not differentiating between paths that start with
   // routerBasename (i.e. full location paths) vs. react-router internal paths.
   return (
-    pathname.startsWith(routerBasename + "loc") ||
-    pathname.startsWith(routerBasename + "cross-section")
+    pathname.startsWith(routerBasename + "/loc") ||
+    pathname.startsWith(routerBasename + "/cross-section")
   );
 }
 
@@ -31,7 +34,7 @@ export function useContextPanelOpen() {
 
 export function currentPageForPathName(pathname: string): MenuPage | null {
   return Object.values(MenuPage).find((page) =>
-    pathname.startsWith(routerBasename + page)
+    pathname.startsWith(routerBasename + "/" + page)
   );
 }
 

@@ -7,7 +7,7 @@ import {
 } from "@lagunovsky/redux-react-router";
 import { hashStringReducer } from "./hash-string";
 import { matchPath } from "react-router";
-
+import { mapPagePrefix } from "~/map-interface/settings";
 export const browserHistory = createBrowserHistory();
 import { MenuState, AppState, AppAction, MenuAction } from "./types";
 
@@ -94,7 +94,10 @@ const appReducer = (state: AppState, action: AppAction) => {
 
 export function setInfoMarkerPosition(state: AppState): AppState {
   // Check if we are viewing a specific location
-  const loc = matchPath("/loc/:lng/:lat", state.router.location.pathname);
+  const loc = matchPath(
+    mapPagePrefix + "/loc/:lng/:lat",
+    state.router.location.pathname
+  );
   if (loc != null) {
     const { lng, lat } = loc.params;
     return {
@@ -109,7 +112,7 @@ export function setInfoMarkerPosition(state: AppState): AppState {
 
   // Check if we're viewing a cross-section
   const crossSection = matchPath(
-    "/cross-section/:loc1/:loc2",
+    mapPagePrefix + "/cross-section/:loc1/:loc2",
     state.router.location.pathname
   );
   if (crossSection != null) {

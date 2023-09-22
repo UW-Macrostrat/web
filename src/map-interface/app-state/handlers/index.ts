@@ -11,7 +11,7 @@ import { AppAction, AppState } from "../reducers";
 import axios from "axios";
 import { runFilter } from "./filters";
 import { push } from "@lagunovsky/redux-react-router";
-import { routerBasename } from "~/map-interface/settings";
+import { routerBasename, mapPagePrefix } from "~/map-interface/settings";
 
 import { isDetailPanelRoute } from "../nav-hooks";
 import { MenuPage, setInfoMarkerPosition } from "../reducers";
@@ -22,6 +22,14 @@ import { findColumnForLocation, ColumnGeoJSONRecord } from "./columns";
 import { MapLayer } from "../reducers/core";
 import { matchPath } from "react-router";
 import { LineString } from "geojson";
+
+function routeForActivePage(page: MenuPage) {
+  let newPathname = routerBasename;
+  if (page != null) {
+    newPathname += "/" + page;
+  }
+  return newPathname;
+}
 
 async function actionRunner(
   state: AppState,
@@ -36,6 +44,7 @@ async function actionRunner(
       let coreState = s1.core;
 
       const activePage = currentPageForPathName(pathname);
+      console.log(pathname, "activePage", activePage);
 
       // Harvest as much information as possible from the hash string
       let [coreState1, filters] = getInitialStateFromHash(
@@ -44,7 +53,10 @@ async function actionRunner(
       );
 
       // If we are on the column route, the column layer must be enabled
-      const colMatch = matchPath("/loc/:lng/:lat/column", pathname);
+      const colMatch = matchPath(
+        mapPagePrefix + "/loc/:lng/:lat/column",
+        pathname
+      );
       if (colMatch != null) {
         coreState1.mapLayers.add(MapLayer.COLUMNS);
       }
@@ -121,22 +133,19 @@ async function actionRunner(
     case "set-menu-page": {
       const { pathname, hash } = state.router.location;
       if (!isDetailPanelRoute(pathname)) {
-        const newPathname = routerBasename + (action.page ?? "");
+        const newPathname = routeForActivePage(action.page);
         await dispatch(push({ pathname: newPathname, hash }));
       }
       return { type: "set-menu-page", page: action.page };
     }
     case "close-infodrawer":
       // If we are showing a cross-section, we need to go there
-      let nextPathname = "";
-      if (state.core.crossSectionLine != null) {
-        nextPathname = buildCrossSectionPath(state.core.crossSectionLine);
-      } else {
-        nextPathname = state.menu.activePage ?? "";
-      }
       await dispatch(
         push({
-          pathname: routerBasename + nextPathname,
+          pathname:
+            state.core.crossSectionLine == null
+              ? routeForActivePage(state.menu.activePage)
+              : buildCrossSectionPath(state.core.crossSectionLine),
           hash: state.router.location.hash,
         })
       );
@@ -161,11 +170,11 @@ async function actionRunner(
           const z = state.core.mapPosition.target?.zoom ?? 7;
           nextPathname = buildLocationPath(pos.lng, pos.lat, z);
         } else {
-          nextPathname = state.menu.activePage ?? "";
+          nextPathname = routeForActivePage(state.menu.activePage);
         }
         await dispatch(
           push({
-            pathname: routerBasename + nextPathname,
+            pathname: nextPathname,
             hash: state.router.location.hash,
           })
         );
@@ -219,7 +228,7 @@ async function actionRunner(
 
       if (state.core.infoMarkerPosition == null) {
         // If we are showing a marker, that route takes precedence
-        const pathname = routerBasename + buildCrossSectionPath(line);
+        const pathname = buildCrossSectionPath(line);
         await dispatch(push({ pathname, hash: location.hash }));
       }
 
@@ -230,8 +239,11 @@ async function actionRunner(
       // Check if matches column detail route
       const { pathname } = state.router.location;
 
-      let newPath = routerBasename + buildLocationPath(lng, lat, Number(z));
-      if (pathname.startsWith("/loc") && pathname.endsWith("/column")) {
+      let newPath = buildLocationPath(lng, lat, Number(z));
+      if (
+        pathname.startsWith(mapPagePrefix + "/loc") &&
+        pathname.endsWith("/column")
+      ) {
         // If so, we want to append columns to the end of the URL
         newPath += "/column";
       }
@@ -332,13 +344,13 @@ function buildCrossSectionPath(line: LineString) {
     .map((p) => `${p[0].toFixed(4)},${p[1].toFixed(4)}`)
     .join("/");
 
-  return "cross-section/" + pts;
+  return mapPagePrefix + "/cross-section/" + pts;
 }
 
 function buildLocationPath(lng: number, lat: number, z: number) {
   const ln = formatCoordForZoomLevel(lng, Number(z));
   const lt = formatCoordForZoomLevel(lat, Number(z));
-  return `loc/${ln}/${lt}`;
+  return mapPagePrefix + `/loc/${ln}/${lt}`;
 }
 
 export default actionRunner;

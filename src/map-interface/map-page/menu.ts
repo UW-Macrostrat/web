@@ -35,7 +35,7 @@ import { isDetailPanelRouteInternal } from "../app-state/nav-hooks";
 import { SettingsPanel, ExperimentsPanel, ThemeButton } from "./settings-panel";
 import { useState, useEffect } from "react";
 import { LinkButton, LayerButton, ListButton } from "../components/buttons";
-import { routerBasename } from "../settings";
+import { routerBasename, mapPagePrefix } from "../settings";
 import { Card } from "@blueprintjs/core";
 
 function ChangelogPanel() {
@@ -146,8 +146,12 @@ function useLastPageLocation(): { title: string; to: string } | null {
   const prevRoute =
     menuBacklinkLocationOverrides[currentPage.match.pathname] ??
     prevPage.match.pathname;
-  if (prevRoute == "/" || isDetailPanelRouteInternal(prevRoute)) return null;
-  return { to: prevRoute, title: locationTitleForRoute[prevRoute] ?? "Back" };
+  if (prevRoute == mapPagePrefix || isDetailPanelRouteInternal(prevRoute))
+    return null;
+  return {
+    to: mapPagePrefix + prevRoute,
+    title: locationTitleForRoute[prevRoute] ?? "Back",
+  };
 }
 
 function MenuHeaderButtons() {
