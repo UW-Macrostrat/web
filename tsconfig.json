@@ -33,6 +33,9 @@
       ],
       "@macrostrat/mapbox-utils": [
         "deps/web-components/packages/mapbox-utils/src"
+      ],
+      "@macrostrat/map-interface": [
+        "deps/web-components/packages/map-interface/src"
       ]
     }
   },

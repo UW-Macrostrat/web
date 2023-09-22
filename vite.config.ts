@@ -8,6 +8,19 @@ import rewriteAll from "vite-plugin-rewrite-all";
 
 import pkg from "./package.json";
 
+const aliasedModules = [
+  "ui-components",
+  "column-components",
+  "api-types",
+  "api-views",
+  "column-views",
+  "timescale",
+  "map-interface",
+  "mapbox-utils",
+  "mapbox-react",
+  "mapbox-styles",
+];
+
 const gitEnv = revisionInfo(pkg, "https://github.com/UW-Macrostrat/web");
 // prefix with VITE_ to make available to client
 for (const [key, value] of Object.entries(gitEnv)) {
@@ -23,6 +36,12 @@ const config: UserConfig = {
     alias: {
       "~": path.resolve("./src"),
     },
+    dedupe: [
+      "react",
+      "react-dom",
+      "mapbox-gl",
+      ...aliasedModules.map((d) => "@macrostrat/" + d),
+    ],
   },
   plugins: [
     react(),
@@ -37,6 +56,7 @@ const config: UserConfig = {
   build: {
     outDir: path.resolve(__dirname, "dist"),
     emptyOutDir: true,
+    sourcemap: true,
   },
 };
 

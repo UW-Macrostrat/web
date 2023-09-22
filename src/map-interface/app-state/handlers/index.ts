@@ -204,18 +204,16 @@ async function actionRunner(
       if (result.type == "place") {
         return { type: "go-to-place", place: result };
       } else {
-        return {
-          type: "add-filter",
-          filter: await runFilter(result),
-        };
+        return actionRunner(
+          state,
+          { type: "async-add-filter", filter: result },
+          dispatch
+        );
       }
     case "async-add-filter":
       return { type: "add-filter", filter: await runFilter(action.filter) };
     case "get-filtered-columns":
-      return {
-        type: "update-column-filters",
-        columns: await fetchFilteredColumns(coreState.filters),
-      };
+      return await fetchFilteredColumns(coreState.filters);
     case "set-cross-section-line": {
       const { line } = action;
 
@@ -306,7 +304,7 @@ async function actionRunner(
     case "get-column-units":
       let CancelTokenGetColumn = axios.CancelToken;
       let sourceGetColumn = CancelTokenGetColumn.source();
-      dispatch({ type: "start-column-query", cancelToken: sourceMapQuery });
+      dispatch({ type: "start-column-query", cancelToken: sourceGetColumn });
 
       let columnData = await runColumnQuery(
         action.column,

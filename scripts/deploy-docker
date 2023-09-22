@@ -43,8 +43,6 @@ docker tag uw-macrostrat/web:develop $MACROSTRAT_DOCKER_REGISTRY/uw-macrostrat/w
 
 docker push $MACROSTRAT_DOCKER_REGISTRY/uw-macrostrat/web:develop
 
-# Run deployment playbook.
-# THis needs to get much better
-ssh -o ClearAllForwardings=yes gunnison "cd /data/macrostrat && poetry run ansible-playbook ansible/playbooks/deploy-dev.yaml"
-
-#ssh acadia "cd /data/macrostrat/app && ~/.local/bin/docker-compose pull web && ~/.local/bin/docker-compose up -d"
+# Deploy to development server
+# This needs to support kubernetes (maybe)
+ssh gunnison bash "macrostrat compose pull web && macrostrat compose restart web"

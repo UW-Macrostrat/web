@@ -1,16 +1,14 @@
-import { useState } from "react";
+import { Button, Navbar } from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
-import { Navbar, Button } from "@blueprintjs/core";
+import { useState, useEffect } from "react";
 import {
-  useBurwellState,
   getVisibleScale,
   useBurwellActions,
+  useBurwellState,
 } from "../app-state";
 import Options from "./options";
-
+import { InfoDrawerContainer } from "@macrostrat/map-interface";
 import FeatureList from "./feature-list";
-import { InfoDrawerContainer } from "~/map-interface/components/info-drawer";
-import { useEffect } from "react";
 
 function BackButton() {
   const runAction = useBurwellActions();

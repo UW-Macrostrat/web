@@ -38,7 +38,7 @@ export function currentPageForPathName(pathname: string): MenuPage | null {
 export function useContextClass() {
   const activePage = useAppState((s) => s.menu.activePage);
   if (activePage == null) return null;
-  return classNames("panel-open", activePage);
+  return classNames("map-context-open", activePage);
 }
 
 export function useCurrentPage() {
@@ -48,7 +48,22 @@ export function useCurrentPage() {
 
 export function useHashNavigate(to: string) {
   const navigate = useNavigate();
+  const location = useLocation();
+
   return () => {
-    navigate(to + location.hash);
+    // This may be needed because of module/context stuff
+    // Compute relative path if necessary
+    if (to.startsWith(".")) {
+      // Do our own relative path calculations
+      let currentPath = location.pathname;
+      if (!currentPath.endsWith("/")) {
+        currentPath += "/";
+      }
+      to = currentPath + to;
+    }
+    navigate({
+      pathname: to,
+      hash: location.hash,
+    });
   };
 }

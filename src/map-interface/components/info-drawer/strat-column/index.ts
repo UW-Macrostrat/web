@@ -1,15 +1,15 @@
 import { hyperStyled } from "@macrostrat/hyper";
 import { preprocessUnits, Column } from "@macrostrat/column-views";
+//import "@macrostrat/column-components/src/main.module.scss";
 import { UnitLong } from "@macrostrat/api-types";
 //import "@macrostrat/column-components/src/main.module.scss";
-import { ExpansionPanel } from "../../expansion-panel";
 
 import styles from "./strat-column.module.styl";
 import { ColumnSummary } from "~/map-interface/app-state/handlers/columns";
 import { NonIdealState } from "@blueprintjs/core";
 import useBreadcrumbs from "use-react-router-breadcrumbs";
 import { LinkButton } from "../../buttons";
-import { InfoPanelSection } from "../../expansion-panel";
+import { InfoPanelSection } from "@macrostrat/map-interface";
 import { PatternProvider } from "~/_providers";
 
 const h = hyperStyled(styles);
@@ -44,7 +44,7 @@ function ColumnOverlay({ columnInfo }: { columnInfo: ColumnSummary | null }) {
       h(Column, {
         data: unitsA,
         showLabels: true,
-        targetUnitHeight: 40,
+        targetUnitHeight: 25,
         unconformityLabels: true,
         width: 280,
         columnWidth: 180,

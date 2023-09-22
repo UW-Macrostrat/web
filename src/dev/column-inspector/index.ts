@@ -1,7 +1,7 @@
 import { hyperStyled, compose, C } from "@macrostrat/hyper";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { MacrostratAPIProvider } from "@macrostrat/api-views";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   UnitSelectionProvider,
   useSelectedUnit,
@@ -34,7 +34,9 @@ function ColumnManager() {
   const columnFeature = useAPIResult("/columns", colParams)?.features[0];
   const unitData = useAPIResult("/units", unitParams);
 
-  const units = preprocessUnits(unitData ?? []);
+  const units = useMemo(() => {
+    return preprocessUnits(unitData ?? []);
+  }, [unitData]);
 
   /* Harmonize selected unit and column data providers
     TODO: we could link the providers for selecting units and columns,
@@ -81,7 +83,7 @@ function ColumnManager() {
   ]);
 }
 
-const APIProvider = C(MacrostratAPIProvider, { useDev: true });
+const APIProvider = C(MacrostratAPIProvider, { useDev: false });
 
 const App = compose(
   PatternProvider,
