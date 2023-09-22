@@ -35,7 +35,7 @@ export function useContextPanelOpen() {
 
 export function currentPageForPathName(pathname: string): MenuPage | null {
   return Object.values(MenuPage).find((page) =>
-    pathname.startsWith(routerBasename + page)
+    pathname.startsWith(routerBasename + "/" + page)
   );
 }
 

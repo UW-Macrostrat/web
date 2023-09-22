@@ -15,12 +15,11 @@ import { Routes, Route, useParams } from "react-router-dom";
 import classNames from "classnames";
 import { TimescalePanel } from "../paleo";
 import { MenuPage } from "./menu";
-import MapView from "./map-view";
 import { mapPagePrefix } from "../settings";
+import MapContainer from "./map-view";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));
-const MapContainer = loadable(() => import("./map-view"));
 const Menu = loadable(() => import("./menu"));
 
 const h = hyper.styled(styles);
