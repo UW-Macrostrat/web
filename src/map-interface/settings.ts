@@ -27,4 +27,4 @@ export const SETTINGS = {
 
 export const mapPagePrefix = "/map";
 
-export const routerBasename = import.meta.env.BASE_URL + mapPagePrefix;
+export const routerBasename = import.meta.env.BASE_URL + "map";

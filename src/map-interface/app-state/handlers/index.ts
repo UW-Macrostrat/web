@@ -126,7 +126,10 @@ async function actionRunner(
     case "set-menu-page": {
       const { pathname, hash } = state.router.location;
       if (!isDetailPanelRoute(pathname)) {
-        const newPathname = routerBasename + (action.page ?? "");
+        let newPathname = routerBasename;
+        if (action.page != null) {
+          newPathname += "/" + action.page;
+        }
         await dispatch(push({ pathname: newPathname, hash }));
       }
       return { type: "set-menu-page", page: action.page };
@@ -340,7 +343,7 @@ function buildCrossSectionPath(line: LineString) {
     .map((p) => `${p[0].toFixed(4)},${p[1].toFixed(4)}`)
     .join("/");
 
-  return mapPagePrefix + "cross-section/" + pts;
+  return mapPagePrefix + "/cross-section/" + pts;
 }
 
 function buildLocationPath(lng: number, lat: number, z: number) {
