@@ -42,9 +42,9 @@ function GlobePage() {
   return h(MapPage, { backend: MapBackend.CESIUM });
 }
 */
+import MapPage from "../../map-interface/map-page";
 
 const Sources = onDemand(() => import("~/burwell-sources"));
-const MapPage = onDemand(() => import("../../map-interface/map-page"));
 const DevMapPage = onDemand(() => import("../../dev"));
 
 export default function MapApp({ routerBasename }) {
