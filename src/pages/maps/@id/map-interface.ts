@@ -24,6 +24,7 @@ import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
 import { useDarkMode, useAPIResult, JSONView } from "@macrostrat/ui-components";
 import { InfoDrawerContainer, ExpansionPanel } from "@macrostrat/map-interface";
+import { MapMarker } from "@macrostrat/map-interface";
 
 const h = hyper.styled(styles);
 
@@ -81,6 +82,7 @@ export default function MapInterface({ map }) {
   }, [map.geometry]);
 
   const [layer, setLayer] = useState(Basemap.None);
+  const [selectedLocation, setSelectedLocation] = useState(null);
 
   const [mapStyle, setMapStyle] = useState(null);
   useEffect(() => {
@@ -128,7 +130,16 @@ export default function MapInterface({ map }) {
           mapPosition: null,
           maxBounds,
           fitBoundsOptions: { padding: 50 },
-        }
+          infoMarkerPosition: selectedLocation,
+        },
+        [
+          h(MapMarker, {
+            position: selectedLocation,
+            setPosition(lnglat) {
+              setSelectedLocation(lnglat);
+            },
+          }),
+        ]
         //[h(FitBoundsManager, { bounds })]
       ),
     ]
