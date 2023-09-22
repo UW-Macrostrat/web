@@ -7,7 +7,8 @@ export async function onBeforeRender(pageContext) {
   // `.page.server.js` files always run in Node.js; we could use SQL/ORM queries here.
   const response = await fetch(apiAddress + "?format=json");
   const res = await response.json();
-  const sources = res.success.data;
+  let sources = res.success.data;
+  sources.sort((a, b) => a.source_id - b.source_id);
 
   const pageProps = { sources };
   return {
