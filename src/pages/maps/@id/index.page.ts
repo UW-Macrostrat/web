@@ -1,6 +1,7 @@
-import h from "@macrostrat/hyper";
 import { PageContextBuiltInServer } from "vite-plugin-ssr/types";
 import { SETTINGS } from "~/map-interface/settings";
+import h from "@macrostrat/hyper";
+import { ClientOnly } from "~/renderer/client-only";
 
 const apiAddress = SETTINGS.apiDomain + "/api/v2/defs/sources";
 
@@ -28,6 +29,8 @@ export async function onBeforeRender(pageContext: PageContextBuiltInServer) {
   };
 }
 
+const MapInterface = () => import("./map-interface");
+
 export function Page({ map }) {
-  return h("div.single-map", ["Map ", map.properties.source_id]);
+  return h("div.single-map", h(ClientOnly, { component: MapInterface, map }));
 }

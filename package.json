@@ -61,6 +61,7 @@
     "@macrostrat/mapbox-styles": "workspace:*",
     "@macrostrat/mapbox-utils": "workspace:*",
     "@macrostrat/timescale": "workspace:*",
+    "@macrostrat/style-system": "workspace:*",
     "@macrostrat/ui-components": "workspace:*",
     "@mapbox/point-geometry": "^0.1.0",
     "@mapbox/tilebelt": "^1.0.2",
