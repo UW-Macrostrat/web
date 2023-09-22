@@ -77,7 +77,6 @@ export default function MainMapView(props) {
       focusedMap: focusedMapSource,
       tileserverDomain: SETTINGS.burwellTileDomain,
     });
-    console.log("Building map style", baseStyle);
 
     if (timeCursorAge != null) {
       return applyAgeModelStyles(

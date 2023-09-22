@@ -11,7 +11,7 @@ import { AppAction, AppState } from "../reducers";
 import axios from "axios";
 import { runFilter } from "./filters";
 import { push } from "@lagunovsky/redux-react-router";
-import { routerBasename } from "~/map-interface/settings";
+import { routerBasename, mapPagePrefix } from "~/map-interface/settings";
 
 import { isDetailPanelRoute } from "../nav-hooks";
 import { MenuPage, setInfoMarkerPosition } from "../reducers";
@@ -22,6 +22,8 @@ import { findColumnForLocation, ColumnGeoJSONRecord } from "./columns";
 import { MapLayer } from "../reducers/core";
 import { matchPath } from "react-router";
 import { LineString } from "geojson";
+
+const mapPrefix = "/map";
 
 async function actionRunner(
   state: AppState,
@@ -44,7 +46,10 @@ async function actionRunner(
       );
 
       // If we are on the column route, the column layer must be enabled
-      const colMatch = matchPath("/loc/:lng/:lat/column", pathname);
+      const colMatch = matchPath(
+        mapPagePrefix + "/loc/:lng/:lat/column",
+        pathname
+      );
       if (colMatch != null) {
         coreState1.mapLayers.add(MapLayer.COLUMNS);
       }
@@ -230,8 +235,11 @@ async function actionRunner(
       // Check if matches column detail route
       const { pathname } = state.router.location;
 
-      let newPath = routerBasename + buildLocationPath(lng, lat, Number(z));
-      if (pathname.startsWith("/loc") && pathname.endsWith("/column")) {
+      let newPath = buildLocationPath(lng, lat, Number(z));
+      if (
+        pathname.startsWith(mapPagePrefix + "/loc") &&
+        pathname.endsWith("/column")
+      ) {
         // If so, we want to append columns to the end of the URL
         newPath += "/column";
       }
@@ -332,13 +340,13 @@ function buildCrossSectionPath(line: LineString) {
     .map((p) => `${p[0].toFixed(4)},${p[1].toFixed(4)}`)
     .join("/");
 
-  return "cross-section/" + pts;
+  return mapPagePrefix + "cross-section/" + pts;
 }
 
 function buildLocationPath(lng: number, lat: number, z: number) {
   const ln = formatCoordForZoomLevel(lng, Number(z));
   const lt = formatCoordForZoomLevel(lat, Number(z));
-  return `loc/${ln}/${lt}`;
+  return mapPagePrefix + `/loc/${ln}/${lt}`;
 }
 
 export default actionRunner;

@@ -16,6 +16,7 @@ import classNames from "classnames";
 import { TimescalePanel } from "../paleo";
 import { MenuPage } from "./menu";
 import MapView from "./map-view";
+import { mapPagePrefix } from "../settings";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));
@@ -90,7 +91,7 @@ export const MapPage = ({
       }),
       detailPanel: h(Routes, [
         h(Route, {
-          path: "loc/:lng/:lat/*",
+          path: mapPagePrefix + "/loc/:lng/:lat/*",
           element: h(InfoDrawerRoute),
         }),
       ]),
