@@ -4,7 +4,13 @@ import {
   MapView,
   PanelCard,
 } from "@macrostrat/map-interface";
-import { Spinner, Radio, RadioGroup } from "@blueprintjs/core";
+import {
+  Spinner,
+  Radio,
+  RadioGroup,
+  NonIdealState,
+  Collapse,
+} from "@blueprintjs/core";
 import { SETTINGS } from "~/map-interface/settings";
 import { useMapRef } from "@macrostrat/mapbox-react";
 import { useEffect } from "react";
@@ -16,7 +22,8 @@ import boundingBox from "@turf/bbox";
 import { LngLatBoundsLike } from "mapbox-gl";
 import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
-import { useDarkMode } from "@macrostrat/ui-components";
+import { useDarkMode, useAPIResult, JSONView } from "@macrostrat/ui-components";
+import { InfoDrawerContainer, ExpansionPanel } from "@macrostrat/map-interface";
 
 const h = hyper.styled(styles);
 
@@ -89,7 +96,7 @@ export default function MapInterface({ map }) {
   const maxBounds: LatLngBoundsLike = useMemo(() => {
     const dx = bounds[2] - bounds[0];
     const dy = bounds[3] - bounds[1];
-    const buf = 0.5 * Math.max(dx, dy);
+    const buf = 1 * Math.max(dx, dy);
 
     return ensureBoxInGeographicRange([
       bounds[0] - buf,
@@ -108,6 +115,7 @@ export default function MapInterface({ map }) {
       navbar: h(MapNavbar, { title, parentRoute: "/maps", isOpen, setOpen }),
       contextPanel: h(PanelCard, [h(BaseLayerSelector, { layer, setLayer })]),
       contextPanelOpen: isOpen,
+      detailPanel: h(MapLegendPanel, { source_id: map.properties.source_id }),
     },
     [
       h(
@@ -144,5 +152,78 @@ function BaseLayerSelector({ layer, setLayer }) {
         h(Radio, { label: "None", value: Basemap.None }),
       ]
     ),
+  ]);
+}
+
+function MapLegendPanel(params) {
+  return h(
+    InfoDrawerContainer,
+    h(
+      "div.map-legend-container",
+      h("div.map-legend", [h("h3", "Legend"), h(MapLegendData, params)])
+    )
+  );
+}
+
+function MapLegendData({ source_id }) {
+  const mapLegend = useAPIResult(
+    SETTINGS.apiDomain + "/api/v2/geologic_units/map/legend",
+    { source_id }
+  );
+  if (mapLegend == null) return h(Spinner);
+  const legendData = mapLegend?.success?.data;
+  if (legendData == null) return h(NonIdealState, { icon: "error" });
+
+  legendData.sort((a, b) => a.t_age - b.t_age);
+
+  return h(
+    "div.legend-data",
+    legendData.map((d) => h(LegendEntry, { data: d }))
+  );
+  return h(JSONView, { data: mapLegend?.success?.data, showRoot: false });
+}
+
+function LegendEntry({ data }) {
+  const { map_unit_name, color, ...rest } = data;
+  const {
+    legend_id,
+    source_id,
+    t_interval,
+    b_interval,
+    strat_name,
+    strat_name_id,
+    unit_id,
+    area,
+    tiny_area,
+    small_area,
+    medium_area,
+    large_area,
+    lith,
+    // lith_classes,
+    // lith_types,
+    lith_id,
+    scale,
+    comments,
+    ...r1
+  } = rest;
+
+  const [isOpen, setOpen] = useState(false);
+
+  const title = h(
+    "div.legend-title",
+    {
+      onClick() {
+        setOpen(!isOpen);
+      },
+    },
+    [
+      h("div.legend-swatch", { style: { backgroundColor: color } }),
+      h("div.legend-label", h("h4", map_unit_name)),
+    ]
+  );
+
+  return h("div.legend-entry", [
+    title,
+    h(Collapse, { isOpen }, h(JSONView, { data: r1, hideRoot: true })),
   ]);
 }

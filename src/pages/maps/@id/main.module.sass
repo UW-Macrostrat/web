@@ -7,3 +7,28 @@ body
   height: 100vh
   margin: 0
   --map-context-stack-width: 16em
+
+.map-legend-container
+  overflow-y: scroll
+
+.map-legend
+  margin: 1em
+
+.legend-entry
+  margin: 0.5em 0
+
+.legend-title
+  display: flex
+  flex-direction: row
+  &:hover
+    cursor: pointer
+    background: #eee
+  h4
+    margin: 0
+    margin-right: 0.5em
+
+.legend-swatch
+  width: 1em
+  height: 1em
+  display: inline-block
+  margin-right: 0.5em
