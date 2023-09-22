@@ -139,15 +139,12 @@ async function actionRunner(
     }
     case "close-infodrawer":
       // If we are showing a cross-section, we need to go there
-      let nextPathname = "";
-      if (state.core.crossSectionLine != null) {
-        nextPathname = buildCrossSectionPath(state.core.crossSectionLine);
-      } else {
-        nextPathname = routeForActivePage(state.menu.activePage);
-      }
       await dispatch(
         push({
-          pathname: routerBasename + nextPathname,
+          pathname:
+            state.core.crossSectionLine == null
+              ? routeForActivePage(state.menu.activePage)
+              : buildCrossSectionPath(state.core.crossSectionLine),
           hash: state.router.location.hash,
         })
       );
