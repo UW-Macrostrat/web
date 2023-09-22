@@ -113,7 +113,10 @@ function MapPageRoutes() {
   return h(Routes, [
     h(
       Object.values(MenuPage).map((page) =>
-        h(Route, { path: page, element: h(MapPage, { menuPage: page }) })
+        h(Route, {
+          path: mapPagePrefix + "/" + page,
+          element: h(MapPage, { menuPage: page }),
+        })
       )
     ),
     h(Route, { path: "*", element: h(MapPage) }),

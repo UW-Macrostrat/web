@@ -148,7 +148,10 @@ function useLastPageLocation(): { title: string; to: string } | null {
     prevPage.match.pathname;
   if (prevRoute == mapPagePrefix || isDetailPanelRouteInternal(prevRoute))
     return null;
-  return { to: prevRoute, title: locationTitleForRoute[prevRoute] ?? "Back" };
+  return {
+    to: mapPagePrefix + prevRoute,
+    title: locationTitleForRoute[prevRoute] ?? "Back",
+  };
 }
 
 function MenuHeaderButtons() {
