@@ -72,11 +72,11 @@ function useCrossSectionLine(crossSectionLine) {
       }
     }
 
-    endpointsSrc.setData({
+    lineSrc.setData({
       type: "GeometryCollection",
       geometries: lines,
     });
-    lineSrc.setData({
+    endpointsSrc.setData({
       type: "FeatureCollection",
       features: endpointFeatures,
     });

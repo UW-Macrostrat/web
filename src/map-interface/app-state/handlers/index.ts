@@ -23,7 +23,13 @@ import { MapLayer } from "../reducers/core";
 import { matchPath } from "react-router";
 import { LineString } from "geojson";
 
-const mapPrefix = "/map";
+function routeForActivePage(page: MenuPage) {
+  let newPathname = routerBasename;
+  if (page != null) {
+    newPathname += "/" + page;
+  }
+  return newPathname;
+}
 
 async function actionRunner(
   state: AppState,
@@ -126,10 +132,7 @@ async function actionRunner(
     case "set-menu-page": {
       const { pathname, hash } = state.router.location;
       if (!isDetailPanelRoute(pathname)) {
-        let newPathname = routerBasename;
-        if (action.page != null) {
-          newPathname += "/" + action.page;
-        }
+        const newPathname = routeForActivePage(action.page);
         await dispatch(push({ pathname: newPathname, hash }));
       }
       return { type: "set-menu-page", page: action.page };
@@ -140,7 +143,7 @@ async function actionRunner(
       if (state.core.crossSectionLine != null) {
         nextPathname = buildCrossSectionPath(state.core.crossSectionLine);
       } else {
-        nextPathname = state.menu.activePage ?? "";
+        nextPathname = routeForActivePage(state.menu.activePage);
       }
       await dispatch(
         push({
@@ -169,11 +172,11 @@ async function actionRunner(
           const z = state.core.mapPosition.target?.zoom ?? 7;
           nextPathname = buildLocationPath(pos.lng, pos.lat, z);
         } else {
-          nextPathname = state.menu.activePage ?? "";
+          nextPathname = routeForActivePage(state.menu.activePage);
         }
         await dispatch(
           push({
-            pathname: routerBasename + nextPathname,
+            pathname: nextPathname,
             hash: state.router.location.hash,
           })
         );
@@ -227,7 +230,7 @@ async function actionRunner(
 
       if (state.core.infoMarkerPosition == null) {
         // If we are showing a marker, that route takes precedence
-        const pathname = routerBasename + buildCrossSectionPath(line);
+        const pathname = buildCrossSectionPath(line);
         await dispatch(push({ pathname, hash: location.hash }));
       }
 
