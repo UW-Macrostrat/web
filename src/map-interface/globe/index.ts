@@ -1,11 +1,10 @@
 import { Suspense, useEffect, useRef } from "react";
 // Import other components
-import hyper from "@macrostrat/hyper";
+import h from "@macrostrat/hyper";
 import { Spinner, Switch } from "@blueprintjs/core";
 import { useSelector } from "react-redux";
 import loadable from "@loadable/component";
 import { useAppState, useAppActions } from "../app-state";
-import styles from "./main.module.styl";
 import { useTransition } from "transition-hook";
 import classNames from "classnames";
 import { PanelCard } from "../map-page/menu";
@@ -15,18 +14,17 @@ import {
   FloatingNavbar,
   LoadingButton,
   LocationPanel,
+  MapStyledContainer,
 } from "@macrostrat/map-interface";
 
-const h = hyper.styled(styles);
-
-const CesiumViewMod = loadable(() => import("../globe/cesium-view"));
+const CesiumViewMod = loadable(() => import("./cesium-view"));
 export function CesiumView(props) {
   return h(Suspense, { fallback: h(Spinner) }, h(CesiumViewMod, props));
 }
 
-export function GlobePage() {
+export default function GlobePage() {
   // A stripped-down page for map development
-  const runAction = useAppActions();
+  //const runAction = useAppActions();
   /* We apply a custom style to the panel container when we are interacting
     with the search bar, so that we can block map interactions until search
     bar focus is lost.
@@ -36,7 +34,7 @@ export function GlobePage() {
 
   const [isOpen, setOpen] = useState(false);
   const [showLineSymbols, setShowLineSymbols] = useState(false);
-  const isLoading = useAppState((state) => state.core.mapIsLoading);
+  const isLoading = false; //useAppState((state) => state.core.mapIsLoading);
 
   const [inspectPosition, setInspectPosition] =
     useState<mapboxgl.LngLat | null>(null);
@@ -46,10 +44,10 @@ export function GlobePage() {
 
   const [data, setData] = useState(null);
 
-  const loaded = useSelector((state) => state.core.initialLoadComplete);
-  useEffect(() => {
-    runAction({ type: "get-initial-map-state" });
-  }, []);
+  const loaded = true; //useSelector((state) => state.core.initialLoadComplete);
+  // useEffect(() => {
+  //   runAction({ type: "get-initial-map-state" });
+  // }, []);
 
   /* We apply a custom style to the panel container when we are interacting
     with the search bar, so that we can block map interactions until search
