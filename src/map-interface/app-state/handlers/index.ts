@@ -3,7 +3,6 @@ import {
   handleXDDQuery,
   runColumnQuery,
   runMapQuery,
-  asyncGetElevation,
   getPBDBData,
   base,
   fetchAllColumns,
@@ -12,19 +11,25 @@ import { AppAction, AppState } from "../reducers";
 import axios from "axios";
 import { runFilter } from "./filters";
 import { push } from "@lagunovsky/redux-react-router";
-import { routerBasename } from "~/map-interface/settings";
+import { routerBasename, mapPagePrefix } from "~/map-interface/settings";
+
 import { isDetailPanelRoute } from "../nav-hooks";
 import { MenuPage, setInfoMarkerPosition } from "../reducers";
 import { formatCoordForZoomLevel } from "~/map-interface/utils/formatting";
 import { currentPageForPathName } from "../nav-hooks";
 import { getInitialStateFromHash } from "../reducers/hash-string";
-import {
-  findColumnForLocation,
-  ColumnProperties,
-  ColumnGeoJSONRecord,
-} from "./columns";
+import { findColumnForLocation, ColumnGeoJSONRecord } from "./columns";
 import { MapLayer } from "../reducers/core";
 import { matchPath } from "react-router";
+import { LineString } from "geojson";
+
+function routeForActivePage(page: MenuPage) {
+  let newPathname = routerBasename;
+  if (page != null) {
+    newPathname += "/" + page;
+  }
+  return newPathname;
+}
 
 async function actionRunner(
   state: AppState,
@@ -39,6 +44,7 @@ async function actionRunner(
       let coreState = s1.core;
 
       const activePage = currentPageForPathName(pathname);
+      console.log(pathname, "activePage", activePage);
 
       // Harvest as much information as possible from the hash string
       let [coreState1, filters] = getInitialStateFromHash(
@@ -47,7 +53,10 @@ async function actionRunner(
       );
 
       // If we are on the column route, the column layer must be enabled
-      const colMatch = matchPath("/loc/:lng/:lat/column", pathname);
+      const colMatch = matchPath(
+        mapPagePrefix + "/loc/:lng/:lat/column",
+        pathname
+      );
       if (colMatch != null) {
         coreState1.mapLayers.add(MapLayer.COLUMNS);
       }
@@ -122,16 +131,54 @@ async function actionRunner(
       );
     }
     case "set-menu-page": {
-      const { pathname } = state.router.location;
+      const { pathname, hash } = state.router.location;
       if (!isDetailPanelRoute(pathname)) {
-        const newPathname = routerBasename + (action.page ?? "");
-        await dispatch(push({ pathname: newPathname, hash: location.hash }));
+        const newPathname = routeForActivePage(action.page);
+        await dispatch(push({ pathname: newPathname, hash }));
       }
       return { type: "set-menu-page", page: action.page };
     }
     case "close-infodrawer":
-      const pathname = routerBasename + (state.menu.activePage ?? "");
-      await dispatch(push({ pathname, hash: location.hash }));
+      // If we are showing a cross-section, we need to go there
+      await dispatch(
+        push({
+          pathname:
+            state.core.crossSectionLine == null
+              ? routeForActivePage(state.menu.activePage)
+              : buildCrossSectionPath(state.core.crossSectionLine),
+          hash: state.router.location.hash,
+        })
+      );
+      return action;
+    case "toggle-cross-section": {
+      let line: GeoJSON.LineString | null = null;
+      if (state.core.crossSectionLine == null) {
+        line = { type: "LineString", coordinates: [] };
+      }
+      const action = {
+        type: "update-cross-section",
+        line,
+      };
+      return actionRunner(state, action, dispatch);
+    }
+    case "update-cross-section":
+      if (state.core.crossSectionLine != null) {
+        // Return to the base route
+        let nextPathname = "";
+        const pos = state.core.infoMarkerPosition;
+        if (pos != null) {
+          const z = state.core.mapPosition.target?.zoom ?? 7;
+          nextPathname = buildLocationPath(pos.lng, pos.lat, z);
+        } else {
+          nextPathname = routeForActivePage(state.menu.activePage);
+        }
+        await dispatch(
+          push({
+            pathname: nextPathname,
+            hash: state.router.location.hash,
+          })
+        );
+      }
       return action;
     case "fetch-search-query":
       const { term } = action;
@@ -166,26 +213,37 @@ async function actionRunner(
       if (result.type == "place") {
         return { type: "go-to-place", place: result };
       } else {
-        return {
-          type: "add-filter",
-          filter: await runFilter(result),
-        };
+        return actionRunner(
+          state,
+          { type: "async-add-filter", filter: result },
+          dispatch
+        );
       }
     case "async-add-filter":
       return { type: "add-filter", filter: await runFilter(action.filter) };
     case "get-filtered-columns":
-      return {
-        type: "update-column-filters",
-        columns: await fetchFilteredColumns(coreState.filters),
-      };
+      return await fetchFilteredColumns(coreState.filters);
+    case "set-cross-section-line": {
+      const { line } = action;
+
+      if (state.core.infoMarkerPosition == null) {
+        // If we are showing a marker, that route takes precedence
+        const pathname = buildCrossSectionPath(line);
+        await dispatch(push({ pathname, hash: location.hash }));
+      }
+
+      return { type: "did-set-cross-section-line", line };
+    }
     case "map-query": {
       const { lng, lat, z } = action;
-      const ln = formatCoordForZoomLevel(lng, Number(z));
-      const lt = formatCoordForZoomLevel(lat, Number(z));
       // Check if matches column detail route
       const { pathname } = state.router.location;
-      let newPath = routerBasename + `loc/${ln}/${lt}`;
-      if (pathname.startsWith("/loc") && pathname.endsWith("/column")) {
+
+      let newPath = buildLocationPath(lng, lat, Number(z));
+      if (
+        pathname.startsWith(mapPagePrefix + "/loc") &&
+        pathname.endsWith("/column")
+      ) {
         // If so, we want to append columns to the end of the URL
         newPath += "/column";
       }
@@ -258,7 +316,7 @@ async function actionRunner(
     case "get-column-units":
       let CancelTokenGetColumn = axios.CancelToken;
       let sourceGetColumn = CancelTokenGetColumn.source();
-      dispatch({ type: "start-column-query", cancelToken: sourceMapQuery });
+      dispatch({ type: "start-column-query", cancelToken: sourceGetColumn });
 
       let columnData = await runColumnQuery(
         action.column,
@@ -268,21 +326,6 @@ async function actionRunner(
         type: "received-column-query",
         data: columnData,
         column: action.column,
-      };
-    case "get-elevation":
-      let CancelTokenElevation = axios.CancelToken;
-      let sourceElevation = CancelTokenElevation.source();
-      dispatch({
-        type: "start-elevation-query",
-        cancelToken: sourceElevation.token,
-      });
-      const elevationData = await asyncGetElevation(
-        action.line,
-        sourceElevation
-      );
-      return {
-        type: "received-elevation-query",
-        data: elevationData,
       };
     case "get-pbdb":
       let collection_nos = action.collection_nos;
@@ -294,6 +337,20 @@ async function actionRunner(
     default:
       return action;
   }
+}
+
+function buildCrossSectionPath(line: LineString) {
+  const pts = line.coordinates
+    .map((p) => `${p[0].toFixed(4)},${p[1].toFixed(4)}`)
+    .join("/");
+
+  return mapPagePrefix + "/cross-section/" + pts;
+}
+
+function buildLocationPath(lng: number, lat: number, z: number) {
+  const ln = formatCoordForZoomLevel(lng, Number(z));
+  const lt = formatCoordForZoomLevel(lat, Number(z));
+  return mapPagePrefix + `/loc/${ln}/${lt}`;
 }
 
 export default actionRunner;

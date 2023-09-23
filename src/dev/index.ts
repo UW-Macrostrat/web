@@ -5,16 +5,20 @@ import {
   MacrostratVectorTileset,
   MacrostratRasterTileset,
   RasterMapInspectorPage,
-} from "./map";
+  MapLayerCatalog,
+  LinkItem,
+} from "./map-layers";
 import { loadableElement } from "~/_utils";
 import styles from "./main.module.styl";
 import { MapColorsInspector } from "./color-schemes";
+import { WeaverPage } from "../weaver";
 const h = hyper.styled(styles);
 
 export default function DevIndex() {
   // A route for each layer
   return h("div.dev-index-page", [
     h(Routes, [
+      h(Route, { path: "weaver", element: h(WeaverPage) }),
       h(Route, {
         path: "carto",
         element: h(VectorMapInspectorPage, {
@@ -25,6 +29,26 @@ export default function DevIndex() {
         path: "carto-slim",
         element: h(VectorMapInspectorPage, {
           tileset: MacrostratVectorTileset.CartoSlim,
+        }),
+      }),
+      h(Route, {
+        path: "carto-v1",
+        element: h(VectorMapInspectorPage, {
+          title: "Carto (v1)",
+          tileset: "https://tiles.macrostrat.org/carto/{z}/{x}/{y}.mvt",
+        }),
+      }),
+      h(Route, {
+        path: "carto-slim-v1",
+        element: h(VectorMapInspectorPage, {
+          title: "Carto (slim, v1)",
+          tileset: "https://tiles.macrostrat.org/carto-slim/{z}/{x}/{y}.mvt",
+        }),
+      }),
+      h(Route, {
+        path: "all-maps",
+        element: h(VectorMapInspectorPage, {
+          tileset: MacrostratVectorTileset.AllMaps,
         }),
       }),
       h(Route, {
@@ -51,11 +75,11 @@ export default function DevIndex() {
           tileset: MacrostratRasterTileset.Emphasized,
         }),
       }),
-
       h(Route, {
         path: "column-inspector",
         element: loadableElement(() => import("./column-inspector")),
       }),
+      h(Route, { path: "catalog/*", element: h(MapLayerCatalog) }),
       h(Route, { path: "*", element: h(MapInspectorIndex) }),
     ]),
   ]);
@@ -64,13 +88,22 @@ export default function DevIndex() {
 function MapInspectorIndex() {
   return h("div.page.map-inspector-index", [
     h("h1", "Map layer inspectors"),
+    h("h2", "Core layers"),
     h("ul.layers", [
       h(LinkItem, { to: "carto" }, "Carto"),
       h(LinkItem, { to: "carto-slim" }, "Carto (slim)"),
-      h(LinkItem, { to: "igcp-orogens" }, "IGCP orogens"),
+      h(LinkItem, { to: "carto-v1" }, "Carto (v1)"),
+      h(LinkItem, { to: "carto-slim-v1" }, "Carto (v1)"),
       h(LinkItem, { to: "carto-raster" }, "Carto (image)"),
       h(LinkItem, { to: "emphasized" }, "Carto (image, emphasized)"),
+      h(LinkItem, { to: "all-maps" }, "All maps"),
     ]),
+    h("h2", "Additional layers"),
+    h("ul.layers", [
+      h(LinkItem, { to: "igcp-orogens" }, "IGCP orogens"),
+      h(LinkItem, { to: "weaver" }, "Weaver (point data experiments)"),
+    ]),
+    h("h2", h(Link, { to: "catalog" }, "Map layer catalog")),
     h("h1", "Rendering libraries"),
     h("ul.renderers", [
       h(LinkItem, { to: "globe" }, "Globe"),
@@ -81,8 +114,4 @@ function MapInspectorIndex() {
     h("h1", "Color scheme testing"),
     h(Link, { to: "color-schemes" }, "Color schemes"),
   ]);
-}
-
-function LinkItem({ to, children }) {
-  return h("li", h(Link, { to }, children));
 }

@@ -24,6 +24,7 @@ import { LocalStorage } from "@macrostrat/ui-components";
 import { ReduxRouterState } from "@lagunovsky/redux-react-router";
 import { performanceReducer, PerformanceState } from "../../performance/core";
 
+import { mapPagePrefix } from "~/map-interface/settings";
 export const browserHistory = createBrowserHistory();
 import { MenuState, AppState, AppAction, MenuAction } from "./types";
 
@@ -130,7 +131,10 @@ const appReducer = (state: AppState, action: AppAction) => {
 
 export function setInfoMarkerPosition(state: AppState): AppState {
   // Check if we are viewing a specific location
-  const loc = matchPath("/loc/:lng/:lat", state.router.location.pathname);
+  const loc = matchPath(
+    mapPagePrefix + "/loc/:lng/:lat",
+    state.router.location.pathname
+  );
   if (loc != null) {
     const { lng, lat } = loc.params;
     return {
@@ -142,6 +146,34 @@ export function setInfoMarkerPosition(state: AppState): AppState {
       },
     };
   }
+
+  // Check if we're viewing a cross-section
+  const crossSection = matchPath(
+    mapPagePrefix + "/cross-section/:loc1/:loc2",
+    state.router.location.pathname
+  );
+  if (crossSection != null) {
+    const { loc1, loc2 } = crossSection.params;
+    const [lng1, lat1] = loc1.split(",").map(Number);
+    const [lng2, lat2] = loc2.split(",").map(Number);
+    if (lng1 != null && lat1 != null && lng2 != null && lat2 != null) {
+      return {
+        ...state,
+        core: {
+          ...state.core,
+          crossSectionLine: {
+            type: "LineString",
+            coordinates: [
+              [lng1, lat1],
+              [lng2, lat2],
+            ],
+          },
+          crossSectionOpen: true,
+        },
+      };
+    }
+  }
+
   return state;
 }
 

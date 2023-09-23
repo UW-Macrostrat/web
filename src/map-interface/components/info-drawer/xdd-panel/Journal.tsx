@@ -1,7 +1,7 @@
 import Article from "./Article";
 import { Divider } from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
-import { SubExpansionPanel } from "../../expansion-panel";
+import { SubExpansionPanel } from "@macrostrat/map-interface";
 import { XDDSnippet } from "~/map-interface/app-state/handlers/fetch";
 
 function Journal(props) {

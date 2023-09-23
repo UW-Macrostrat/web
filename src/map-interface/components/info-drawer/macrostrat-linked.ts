@@ -4,7 +4,7 @@ import {
   ExpansionPanel,
   ExpandableDetailsPanel,
   ExpansionBody,
-} from "../expansion-panel";
+} from "@macrostrat/map-interface";
 import styles from "./main.module.styl";
 import { scaleLinear } from "@visx/scale";
 import { AxisBottom } from "@visx/axis";

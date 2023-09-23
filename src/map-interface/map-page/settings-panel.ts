@@ -33,6 +33,7 @@ import {
   useDarkMode,
   darkModeUpdater,
 } from "@macrostrat/ui-components";
+import { LinkButton } from "../components/buttons";
 
 const h = hyper.styled(styles);
 
@@ -93,48 +94,40 @@ const SettingsPanel = (props) => {
     //h(HighResolutionTerrainSwitch),
     // Geologic time input
 
-    h("div.callout-panel", { className: showExperiments ? "expanded" : null }, [
-      h("div.callout-header", [
-        h(
-          Button,
-          {
-            minimal: true,
-            icon: "clean",
-            active: showExperiments,
-            intent: "warning",
-            onClick() {
-              runAction({ type: "toggle-experiments-panel" });
-            },
-          },
-          "Experiments"
-        ),
-      ]),
-      h(
-        Collapse,
-        {
-          isOpen: showExperiments,
-          className: "callout-content",
+    h(
+      CalloutPanel,
+      {
+        icon: "clean",
+        isOpen: showExperiments,
+        title: "Experiments",
+        intent: "warning",
+        setIsOpen() {
+          runAction({ type: "toggle-experiments-panel" });
         },
-        h(Callout, { intent: "warning", icon: null }, [
-          h(LineSymbolsControl),
-          h(SourcesButton),
-        ])
-      ),
-    ]),
-    // h(CalloutPanel, {
-    //   title: "Geologic time",
-    //   icon: "time",
-    //   intent: "primary",
-    //   isOpen: useAppState((s) => s.core.showTimeCursorPanel),
-    //   setIsOpen: (v) => {
-    //     runAction({ type: "toggle-time-cursor-panel", value: v });
-    //   }
-
-    // }, [
-
+      },
+      [h(LineSymbolsControl), h(SourcesButton), h(PaleogeographyButton)]
+    ),
     // ])
   ]);
 };
+
+function PaleogeographyButton() {
+  const runAction = useAppActions();
+  const age = useAppState((s) => s.core.timeCursorAge);
+  return h(
+    Button,
+    {
+      onClick() {
+        runAction({ type: "set-time-cursor", age: age != null ? null : 0 });
+      },
+      icon: "time",
+      intent: "warning",
+      minimal: true,
+      active: age != null,
+    },
+    "Paleogeography"
+  );
+}
 
 function CalloutPanel({
   isOpen,

@@ -18,11 +18,12 @@ else
   skip_build=false
 fi
 
-export PUBLIC_URL=/map/
 export NODE_ENV=production
-export MACROSTRAT_TILESERVER_DOMAIN='https://dev.macrostrat.org/tiles'
-export MACROSTRAT_API_DOMAIN='https://dev.macrostrat.org'
+export VITE_MACROSTRAT_TILESERVER_DOMAIN='https://dev.macrostrat.org/tiles'
+export VITE_MACROSTRAT_API_DOMAIN='https://dev.macrostrat.org'
+export VITE_CORELLE_API_DOMAIN='https://rotate.macrostrat.org'
 export MACROSTRAT_DOCKER_REGISTRY='ghcr.io'
+export PUBLIC_URL='/map/'
 
 if [[ $skip_build == false ]]; then
   if [[ $(git diff --stat) != '' ]]; then
@@ -42,8 +43,6 @@ docker tag uw-macrostrat/web:develop $MACROSTRAT_DOCKER_REGISTRY/uw-macrostrat/w
 
 docker push $MACROSTRAT_DOCKER_REGISTRY/uw-macrostrat/web:develop
 
-# Run deployment playbook.
-# THis needs to get much better
-ssh -o ClearAllForwardings=yes gunnison "cd /data/macrostrat && ansible-playbook ansible/playbooks/deploy-dev.yaml"
-
-#ssh acadia "cd /data/macrostrat/app && ~/.local/bin/docker-compose pull web && ~/.local/bin/docker-compose up -d"
+# Deploy to development server
+# This needs to support kubernetes (maybe)
+ssh gunnison bash "macrostrat compose pull web && macrostrat compose restart web"

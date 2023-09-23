@@ -1,30 +1,42 @@
 .elevationChart-root
   z-index: 0 !important;
   position: relative !important;
+  height: 150px;
 
 
 .elevation-chart
   -webkit-transition: 0.8s;
   -moz-transition: 0.8s;
   transition: 0.8s;
-  background-color: var(--panel-background-color);
-  .close-button
-    float: right
-    margin: 0.25em
+  position: relative;
+  height: 160px;
 
 .elevation-instructions
-  padding: 20px;
+  padding: 30px;
   text-align: center;
 
+.control-bar
+  position: absolute;
+  top: 0.25em;
+  right: 0.25em;
+  display: flex;
+  flex-direction: row;
+
+.elevation-focus-text
+  fill: var(--text-color);
+
+.elevation-focus-circle
+  stroke: var(--panel-secondary-background-color);
+
 .elevation-chart-wrapper
-  padding-bottom: 20px;
+  padding-bottom: 0px;
   :global
     text
-      fill: #777;
+      fill: var(--text-color);
 
     .axis path, .axis line
       fill: none;
-      stroke: #000;
+      stroke: var(--text-color);
       opacity: 0.2;
       shape-rendering: crispEdges;
 

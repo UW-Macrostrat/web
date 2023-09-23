@@ -35,7 +35,7 @@ import { isDetailPanelRouteInternal } from "../app-state/nav-hooks";
 import { SettingsPanel, ExperimentsPanel, ThemeButton } from "./settings-panel";
 import { useState, useEffect } from "react";
 import { LinkButton, LayerButton, ListButton } from "../components/buttons";
-import { routerBasename } from "../settings";
+import { routerBasename, mapPagePrefix } from "../settings";
 import { Card } from "@blueprintjs/core";
 
 function ChangelogPanel() {
@@ -74,10 +74,11 @@ const MenuGroup = (props) =>
 
 const LayerList = (props) => {
   const runAction = useAppActions();
+  const inPaleoMode = useAppState((s) => s.core.timeCursorAge != null);
 
   const toggleElevationChart = () => {
     runAction({ type: "toggle-menu" });
-    runAction({ type: "toggle-elevation-chart" });
+    runAction({ type: "toggle-cross-section" });
   };
 
   return h("div.menu-content", [
@@ -111,7 +112,11 @@ const LayerList = (props) => {
     h(MenuGroup, [
       h(
         ListButton,
-        { onClick: toggleElevationChart, icon: ElevationIcon },
+        {
+          onClick: toggleElevationChart,
+          icon: ElevationIcon,
+          disabled: inPaleoMode,
+        },
         "Elevation profile"
       ),
     ]),
@@ -145,8 +150,12 @@ function useLastPageLocation(
   const prevRoute =
     menuBacklinkLocationOverrides[currentPage.match.pathname] ??
     prevPage.match.pathname;
-  if (prevRoute == "/" || isDetailPanelRouteInternal(prevRoute)) return null;
-  return { to: prevRoute, title: locationTitleForRoute[prevRoute] ?? "Back" };
+  if (prevRoute == mapPagePrefix || isDetailPanelRouteInternal(prevRoute))
+    return null;
+  return {
+    to: mapPagePrefix + prevRoute,
+    title: locationTitleForRoute[prevRoute] ?? "Back",
+  };
 }
 
 function MenuHeaderButtons({ baseRoute = "/" }) {

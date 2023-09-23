@@ -1,5 +1,8 @@
 @require "../../../styles/_common"
 
+.infodrawer-main
+  margin: 0 -1em -1em;
+
 .macrostrat-detail
   display: flex;
   align-items: center;
@@ -26,60 +29,16 @@
   .age-chips
     flex-grow 1
 
-.infodrawer
-  pointer-events all
-  max-height 100%
-  max-width 100%
-  height fit-content
-  display flex
-  flex-direction column
-  padding 0
-  overflow hidden
 
-
-  .infodrawer-header-item
-    margin-left: 0.5em
-    .secondary
-      font-size: 0.9em
-      color: var(--text-subtle-color)
-
-  &.loading
-    .infodrawer-body
-      overflow-y: hidden
-      min-height: 70px
 
   // &.loading
   //   max-height: 200px
   // max-height: calc(100vh - 60px)
   // transition: max-height 0.5s ease-in-out 0.25s
 
-.location-panel-header
-  padding 5px
-  display flex
-  flex-direction row
-  align-items: center
-  gap: 0.5em;
-  border-bottom: 1px solid var(--panel-rule-color)
-  .spacer
-    flex-grow 1
-  .left-icon
-    padding 7px
-
-  .position-controls :global(.bp4-button)
-    font-size: 12px
 
 
-  .copy-link-button:global(.bp4-minimal.bp4-button)
-    color: var(--text-subtle-color)
-    svg
-      fill: var(--text-subtle-color)
 
-.infodrawer-body
-  flex-shrink 1
-  min-height: 0
-  transition min-height 0.5s ease
-  overflow-y scroll
-  position relative
 
 .spacer
   flex-grow 1
@@ -101,8 +60,3 @@
     border-radius: 3px
     margin-bottom: 1px
 
-
-
-@media screen and (max-width: 768px)
-  .infodrawer
-    border-radius: 0px;

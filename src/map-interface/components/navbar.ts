@@ -4,12 +4,13 @@ import hyper from "@macrostrat/hyper";
 import {
   useAppActions,
   useSearchState,
+  useAppState,
   useContextPanelOpen,
 } from "../app-state";
-import { useSelector } from "react-redux";
-import Filters, { FilterPanel } from "./filter-panel";
-import styles from "./searchbar.styl";
-import { PanelSubhead } from "./expansion-panel/headers";
+import { FilterPanel } from "./filter-panel";
+import styles from "./searchbar.module.styl";
+import { MapLoadingButton, FloatingNavbar } from "@macrostrat/map-interface";
+import { PanelSubhead } from "@macrostrat/map-interface";
 import classNames from "classnames";
 
 const h = hyper.styled(styles);
@@ -68,6 +69,7 @@ function ResultList({ searchResults }) {
                 {
                   key,
                   onClick() {
+                    console.log("Clicked", item);
                     onSelectResult(item);
                   },
                 },
@@ -87,33 +89,16 @@ function SearchResults({ className }) {
   return h(Card, { className }, h(ResultList, { searchResults }));
 }
 
-function LoaderButton({
-  isLoading = false,
-  onClick,
-  active = false,
-  icon = "menu",
-}) {
-  return h(Button, {
-    icon: isLoading ? h(Spinner, { size: 16 }) : icon,
-    large: true,
-    minimal: true,
-    onClick,
-    active: active && !isLoading,
-  });
-}
-
 function MenuButton() {
   const runAction = useAppActions();
-  const mapIsLoading = useSelector((state) => state.core.mapIsLoading);
   const menuOpen = useContextPanelOpen();
 
   const onClick = useCallback(() => {
     runAction({ type: "toggle-menu" });
   }, []);
 
-  return h(LoaderButton, {
+  return h(MapLoadingButton, {
     icon: "menu",
-    isLoading: mapIsLoading,
     onClick,
     active: menuOpen,
   });
@@ -121,30 +106,12 @@ function MenuButton() {
 
 type AnyChildren = React.ReactNode | React.ReactFragment;
 
-export function FloatingNavbar({
-  className,
-  children,
-  statusElement = null,
-}: {
-  className?: string;
-  children?: AnyChildren;
-  statusElement?: AnyChildren;
-}) {
-  return h("div.searchbar-holder", { className }, [
-    h("div.navbar-holder", [
-      h(Navbar, { className: "searchbar panel" }, children),
-    ]),
-    h.if(statusElement != null)(
-      Card,
-      { className: "status-tongue" },
-      statusElement
-    ),
-  ]);
-}
+const filterPanelElement = h(FilterPanel);
 
 function Searchbar({ className }) {
   const runAction = useAppActions();
-  const { term, searchResults } = useSearchState();
+  const term = useAppState((s) => s.core.term);
+  const searchResults = useAppState((s) => s.core.searchResults);
 
   const gainInputFocus = useCallback(
     (e) => {
@@ -170,7 +137,7 @@ function Searchbar({ className }) {
     }
   }, [term]);
 
-  return h(FloatingNavbar, { statusElement: h(FilterPanel) }, [
+  return h(FloatingNavbar, { statusElement: filterPanelElement }, [
     h(InputGroup, {
       large: true,
       onChange: handleSearchInput,
@@ -196,4 +163,4 @@ function SearchGuidance() {
 }
 
 export default Searchbar;
-export { SearchResults, LoaderButton };
+export { SearchResults };

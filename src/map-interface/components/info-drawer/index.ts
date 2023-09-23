@@ -1,8 +1,7 @@
-import { Card } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
-import { Navigate, Route, Routes, useParams } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { MapLayer, useAppActions } from "~/map-interface/app-state";
-import { InfoDrawerHeader } from "./header";
+import { LocationPanel } from "@macrostrat/map-interface";
 import { FossilCollections } from "./fossil-collections";
 import { GeologicMapInfo } from "./geo-map";
 import { MacrostratLinkedData } from "./macrostrat-linked";
@@ -10,29 +9,12 @@ import { RegionalStratigraphy } from "./reg-strat";
 import { Physiography } from "./physiography";
 import { XddExpansion } from "./xdd-panel";
 import { useAppState } from "~/map-interface/app-state";
-import classNames from "classnames";
 import styles from "./main.module.styl";
 import { LoadingArea } from "../transitions";
-import { ErrorBoundary } from "@macrostrat/ui-components";
 import { StratColumn } from "./strat-column";
 import { useCallback } from "react";
 
 const h = hyper.styled(styles);
-
-function InfoDrawerContainer(props) {
-  const className = classNames("infodrawer", props.className);
-
-  return h(Card, { ...props, className });
-}
-
-export function LocationPanel(props) {
-  const { children, className, ...rest } = props;
-  const cls = classNames("location-panel", className);
-  return h(InfoDrawerContainer, { className: cls }, [
-    h(InfoDrawerHeader, rest),
-    h("div.infodrawer-body", [h(ErrorBoundary, null, children)]),
-  ]);
-}
 
 function InfoDrawer(props) {
   // We used to enable panels when certain layers were on,
@@ -42,10 +24,6 @@ function InfoDrawer(props) {
   const fetchingMapInfo = useAppState((state) => state.core.fetchingMapInfo);
 
   const runAction = useAppActions();
-
-  className = classNames(className, {
-    loading: fetchingMapInfo,
-  });
 
   const onClose = useCallback(
     () => runAction({ type: "close-infodrawer" }),
@@ -57,7 +35,14 @@ function InfoDrawer(props) {
 
   return h(
     LocationPanel,
-    { className, position, elevation: mapInfo.elevation, zoom, onClose },
+    {
+      className,
+      position,
+      elevation: mapInfo.elevation,
+      zoom,
+      onClose,
+      loading: fetchingMapInfo,
+    },
     [
       h(
         LoadingArea,
@@ -125,4 +110,3 @@ function InfoDrawerMainPanel(props) {
 }
 
 export default InfoDrawer;
-export { InfoDrawerContainer };

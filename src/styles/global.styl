@@ -34,11 +34,14 @@
 html, body
   height 100vh
   height -webkit-fill-available
-  overflow hidden
 
 $dark-background = #141a1e
 $accent = lighten($dark-background, 10%)
 $dark-text = $gray4
+
+.hello-world
+  background-color: red
+  color: var(--error-text-color)
 
 
 .bp4-input
@@ -75,7 +78,7 @@ body
     --tertiary-border-color: #5F6B7C // gray 5
     --accent-hover-color: lighten($accent, 4%) // light gray 1
     --accent-border-color: #5F6B7C // gray5
-    --card-shadow-color: alpha($gray1, 0.4)
+    --card-shadow-color: alpha($gray1, 0.2)
     --ui-color-accent-text: rgb(252, 217, 250)
     --ui-color-accent: darken(rgb(143, 39, 138), 50%)
 
@@ -543,13 +546,3 @@ td {
 .spinner{
   margin: 10px;
 }
-
-// @media screen and (max-width: 768px) {
-//   .infodrawer{
-//     max-height: 60%;
-//     width: 100%;
-//     border-radius: 0px;
-//     position: absolute;
-//     bottom: 0px;
-//   }
-// }
