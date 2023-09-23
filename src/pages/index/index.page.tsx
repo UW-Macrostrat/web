@@ -17,7 +17,7 @@ function Page() {
           <Link href="map">Map</Link>
         </li>
         <li>
-          <Link href="about">About</Link>
+          <Link href="maps">Map index</Link>
         </li>
       </ul>
     </>
