@@ -18,10 +18,12 @@ import { MenuPage, PanelCard } from "./menu";
 import { mapPagePrefix } from "../settings";
 import MapContainer from "./map-view";
 import { useState } from "react";
-import { FloatingNavbar } from "../components/navbar";
-import { LocationPanel } from "../components/info-drawer";
 import { LinkButton } from "../components/buttons";
-import { LoaderButton } from "../components/navbar";
+import {
+  FloatingNavbar,
+  LoadingButton,
+  LocationPanel,
+} from "@macrostrat/map-interface";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));
@@ -65,8 +67,6 @@ export const MapPage = ({
   useEffect(() => {
     runAction({ type: "get-initial-map-state" });
   }, []);
-
-  const contextClass = useContextClass();
 
   const onMouseDown = useCallback(
     (event) => {
@@ -225,7 +225,7 @@ export function GlobePage() {
         h(FloatingNavbar, { className: "searchbar" }, [
           h("h2", "Globe"),
           h("div.spacer"),
-          h(LoaderButton, {
+          h(LoadingButton, {
             active: isOpen,
             onClick: () => setOpen(!isOpen),
             isLoading,

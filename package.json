@@ -18,7 +18,8 @@
     "server:prod": "cross-env NODE_ENV=production npm run server"
   },
   "workspaces": [
-    "deps/web-components/packages/*"
+    "deps/web-components/packages/*",
+    "deps/cesium-viewer"
   ],
   "authors": [
     "John Czaplewski <jczaplewski@wisc.edu>",
@@ -50,7 +51,7 @@
     "@macrostrat/api-views": "workspace:*",
     "@macrostrat/cesium-martini": "^1.2.3",
     "@macrostrat/cesium-vector-provider": "^2.0.2",
-    "@macrostrat/cesium-viewer": "^1.1.5",
+    "@macrostrat/cesium-viewer": "workspace:*",
     "@macrostrat/column-components": "workspace:*",
     "@macrostrat/column-views": "workspace:*",
     "@macrostrat/hyper": "^2.2.1",
@@ -65,6 +66,7 @@
     "@mapbox/point-geometry": "^0.1.0",
     "@mapbox/tilebelt": "^1.0.2",
     "@mapbox/vector-tile": "^1.3.1",
+    "@turf/bbox": "^6.5.0",
     "@turf/boolean-contains": "^6.5.0",
     "@turf/buffer": "^6.5.0",
     "@types/cesium": "^1.67.4",
@@ -125,6 +127,7 @@
     "use-react-router-breadcrumbs": "^3.2.1",
     "use-resize-observer": "^9.1.0",
     "vite": "^4.4.9",
+    "vite-plugin-cesium": "^1.2.22",
     "vite-plugin-ssr": "^0.4.139"
   },
   "resolutions": {

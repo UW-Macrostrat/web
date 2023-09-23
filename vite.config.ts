@@ -5,6 +5,7 @@ import react from "@vitejs/plugin-react";
 import ssr from "vite-plugin-ssr/plugin";
 import revisionInfo from "@macrostrat/revision-info-webpack";
 import rewriteAll from "vite-plugin-rewrite-all";
+import cesium from "vite-plugin-cesium";
 
 import pkg from "./package.json";
 
@@ -19,6 +20,7 @@ const aliasedModules = [
   "mapbox-utils",
   "mapbox-react",
   "mapbox-styles",
+  "cesium-viewer",
 ];
 
 const gitEnv = revisionInfo(pkg, "https://github.com/UW-Macrostrat/web");
@@ -46,6 +48,7 @@ const config: UserConfig = {
   plugins: [
     react(),
     mdx(),
+    cesium(),
     /* Fix error with single-page app reloading where paths
     with dots (e.g., locations) are not rewritten to index
     to allow for client-side routing */

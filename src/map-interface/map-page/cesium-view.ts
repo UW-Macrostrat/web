@@ -14,10 +14,7 @@ import { ImageryLayer } from "resium";
 import { useMemo, useRef } from "react";
 import VectorProvider from "@macrostrat/cesium-vector-provider";
 import reliefShading from "./map-styles/relief-shading";
-import {
-  getHashString,
-  setHashString,
-} from "@macrostrat/ui-components/util/query-string";
+import { getHashString, setHashString } from "@macrostrat/ui-components";
 import { useAppActions, MapLayer, useAppState } from "../app-state";
 import { useCallback } from "react";
 import styles from "./main.module.styl";
@@ -26,14 +23,26 @@ import {
   flyToParams,
   translateCameraPosition,
 } from "@macrostrat/cesium-viewer";
-import { BaseLayer } from "cesium-vector-provider-standalone-example/src/main";
 
-const Cesium = require("cesiumSource/Cesium");
-import "cesium/../../Build/Cesium/Widgets/widgets.css";
+export function BaseLayer({ enabled = true, style, accessToken, ...rest }) {
+  const provider = useRef(
+    new VectorProvider({
+      style,
+      showCanvas: false,
+      maximumZoom: 15,
+      tileSize: 512,
+      accessToken,
+    })
+  );
+
+  return h(ImageryLayer, { imageryProvider: provider.current, ...rest });
+}
+
+//import "cesium/../../Build/Cesium/Widgets/widgets.css";
 import "@znemz/cesium-navigation/dist/index.css";
 
 import { SETTINGS } from "../settings";
-import { buildXRayStyle } from "./map-style";
+import { buildXRayStyle } from "@macrostrat/mapbox-styles";
 
 const h = hyper.styled(styles);
 
