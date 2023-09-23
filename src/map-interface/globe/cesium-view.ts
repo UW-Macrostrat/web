@@ -1,28 +1,38 @@
 import h from "@macrostrat/hyper";
-
+import CesiumView, {
+  SatelliteLayer,
+  getInitialPosition,
+  buildPositionHash,
+  terrainProvider,
+  DisplayQuality,
+} from "@macrostrat/cesium-viewer";
+import { useRef } from "react";
+import { getHashString, setHashString } from "@macrostrat/ui-components";
 import "@znemz/cesium-navigation/dist/index.css";
 
 function MacrostratCesiumView(props) {
   return h("div.map-view", "Hello world");
 }
 
-// const initialPosition = getInitialPosition(getHashString());
+function GlobeDevPage() {
+  const initialPosition = useRef(getInitialPosition(getHashString()));
 
-// export function GlobeDevPage() {
-//   return h(
-//     CesiumView,
-//     {
-//       terrainProvider,
-//       showInspector: true,
-//       flyTo: null,
-//       initialPosition,
-//       displayQuality: DisplayQuality.High,
-//       onViewChange(cpos) {
-//         setHashString(buildPositionHash(cpos.camera));
-//       },
-//     },
-//     [h(SatelliteLayer)]
-//   );
-// }
+  return h(
+    CesiumView,
+    {
+      terrainProvider,
+      showInspector: true,
+      flyTo: null,
+      initialPosition: initialPosition.current,
+      displayQuality: DisplayQuality.High,
+      highResolution: true,
+      showIonLogo: false,
+      onViewChange(cpos) {
+        setHashString(buildPositionHash(cpos.camera));
+      },
+    },
+    [h(SatelliteLayer)]
+  );
+}
 
 export default MacrostratCesiumView;

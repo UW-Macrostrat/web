@@ -1,8 +1,9 @@
 import h from "@macrostrat/hyper";
-import { onDemand } from "~/_utils";
-
-const GlobeDevPage = onDemand(() => import("~/map-interface/globe"));
+import { ClientOnly } from "~/renderer/client-only";
 
 export function Page() {
-  return h("div.globe", h(GlobeDevPage));
+  return h(
+    "div.globe",
+    h(ClientOnly, { component: () => import("~/map-interface/globe") })
+  );
 }
