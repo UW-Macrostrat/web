@@ -13,7 +13,7 @@ import CesiumView, {
 import { ImageryLayer } from "resium";
 import { useMemo, useRef } from "react";
 import VectorProvider from "@macrostrat/cesium-vector-provider";
-import reliefShading from "./map-styles/relief-shading";
+import reliefShading from "../map-page/map-styles/relief-shading";
 import { getHashString, setHashString } from "@macrostrat/ui-components";
 import { useAppActions, MapLayer, useAppState } from "../app-state";
 import { useCallback } from "react";

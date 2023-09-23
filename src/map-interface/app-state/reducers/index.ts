@@ -7,21 +7,6 @@ import {
 } from "@lagunovsky/redux-react-router";
 import { hashStringReducer } from "./hash-string";
 import { matchPath } from "react-router";
-//import { menuReducer, MenuState, MenuAction } from "./menu";
-import { MapAction } from "./map";
-import {
-  reducer as globeReducer,
-  GlobeAction,
-  GlobeState,
-  createInitialState,
-  DisplayQuality,
-  nadirCameraParams,
-  flyToParams,
-  translateCameraPosition,
-} from "@macrostrat/cesium-viewer";
-import { MapPosition } from "@macrostrat/mapbox-utils";
-import { LocalStorage } from "@macrostrat/ui-components";
-import { ReduxRouterState } from "@lagunovsky/redux-react-router";
 import { performanceReducer, PerformanceState } from "../../performance/core";
 
 import { mapPagePrefix } from "~/map-interface/settings";
@@ -29,24 +14,6 @@ export const browserHistory = createBrowserHistory();
 import { MenuState, AppState, AppAction, MenuAction } from "./types";
 
 const routerReducer = createRouterReducer(browserHistory);
-
-const globeStorage = new LocalStorage("macrostrat-globe");
-
-function getInitialGlobeState() {
-  const { displayQuality = DisplayQuality.Low } = globeStorage.get() ?? {};
-  return createInitialState({ displayQuality });
-}
-
-function storageGlobeReducer(
-  state = getInitialGlobeState(),
-  action: GlobeAction
-) {
-  if (action.type === "set-display-quality") {
-    globeStorage.set({ displayQuality: action.value });
-  }
-
-  return globeReducer(state, action);
-}
 
 function menuReducer(
   state: MenuState = { activePage: null },
@@ -64,8 +31,6 @@ const defaultState: AppState = {
   core: coreReducer(undefined, { type: "init" }),
   router: routerReducer(undefined, { type: "init" }),
   menu: menuReducer(undefined, { type: "init" }),
-  globe: storageGlobeReducer(undefined, { type: "init" }),
-  performance: performanceReducer(undefined, { type: "init" }),
 };
 
 function mainReducer(
@@ -117,7 +82,6 @@ function mainReducer(
         router: routerReducer(state.router, action as RouterActions),
         core: coreReducer(state.core, action as CoreAction),
         menu: menuReducer(state.menu, action as MenuAction),
-        globe: storageGlobeReducer(state.globe, action as GlobeAction),
         performance: performanceReducer(state.performance, action),
       };
   }
