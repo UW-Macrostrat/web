@@ -8,8 +8,11 @@ import {
   DebugOptions,
   useMapRef,
 } from "@macrostrat/mapbox-react";
-import { getMapPosition, setMapPosition } from "@macrostrat/mapbox-utils";
-import { MapPosition } from "@macrostrat/mapbox-utils";
+import {
+  getMapPosition,
+  setMapPosition,
+  MapPosition,
+} from "@macrostrat/mapbox-utils";
 
 const defaultPosition = {
   camera: {
