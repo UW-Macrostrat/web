@@ -1,6 +1,5 @@
 import h from "@macrostrat/hyper";
 import CesiumView from "./cesium-view";
-import Map from "./map";
 import { MapPosition } from "@macrostrat/mapbox-utils";
 import { useState, useMemo } from "react";
 import {
@@ -35,7 +34,6 @@ function App({ accessToken }) {
   const style = "mapbox://styles/jczaplewski/cklb8aopu2cnv18mpxwfn7c9n";
   const [showWireframe, setShowWireframe] = useState(false);
   const [showInspector, setShowInspector] = useState(false);
-  const [showMapbox, setShowMapbox] = useState(false);
   const [position, setPosition] = useState<MapPosition>({
     camera: {
       lng: 16.1987,
@@ -54,45 +52,8 @@ function App({ accessToken }) {
 
   return h("div.example-app", [
     h("header", [
-      h("div.basics", [
-        h("div.title", [h("h1", "Cesium vector provider")]),
-        h("p.author", [
-          "by ",
-          h("a", { href: "https://davenquinn.com" }, "Daven Quinn"),
-          ", 2021–2022",
-        ]),
-      ]),
-      h("div.about", [
-        h("p.github", [
-          "GitHub: ",
-          h(
-            "a",
-            {
-              href: "https://github.com/davenquinn/cesium-vector-provider",
-            },
-            "Cesium Vector Provider"
-          ),
-          " • ",
-          h(
-            "a",
-            {
-              href: "https://github.com/davenquinn/cesium-martini",
-            },
-            "Cesium Martini (terrain)"
-          ),
-        ]),
-        h(
-          "p.description",
-          "Mapbox GL vector maps atop the Cesium JS digital globe"
-        ),
-      ]),
       h("div.spacer"),
       h("ul.controls", [
-        h(VisControl, {
-          name: "Mapbox GL reference map",
-          show: showMapbox,
-          setShown: setShowMapbox,
-        }),
         h(VisControl, {
           name: "Cesium inspector",
           show: showInspector,
@@ -128,26 +89,6 @@ function App({ accessToken }) {
             },
           }),
         ]),
-        h(
-          "div.caption",
-          "Cesium JS rendering Mapbox data using Cesium Vector Provider (backed by Maplibre GL) atop Cesium Martini"
-        ),
-      ]),
-      h.if(showMapbox)("div.map-panel", [
-        h("div.mapbox-gl-container.map-sizer", [
-          h(Map, {
-            style,
-            accessToken,
-            position,
-            onChangePosition: setPosition,
-            debug: {
-              showTileBoundaries: showInspector,
-              showCollisionBoxes: showInspector,
-              showTerrainWireframe: showWireframe,
-            },
-          }),
-        ]),
-        h("div.caption", "Mapbox GL JS v2"),
       ]),
     ]),
   ]);

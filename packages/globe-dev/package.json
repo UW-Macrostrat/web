@@ -1,10 +1,10 @@
 {
-  "name": "example-vite",
+  "name": "@macrostrat/web-globe",
   "private": true,
   "scripts": {
     "dev": "vite"
   },
-  "author": "",
+  "main": "src/index.ts",
   "license": "ISC",
   "devDependencies": {
     "react": "^18",
@@ -13,15 +13,12 @@
     "vite": "^4.4.9",
     "vite-plugin-cesium": "^1.2.22"
   },
-  "packageManager": "yarn@3.6.3",
   "dependencies": {
     "@macrostrat/cesium-martini": "^1.3.0",
     "@macrostrat/cesium-vector-provider": "2.0.2",
     "@macrostrat/cesium-viewer": "workspace:*",
     "@macrostrat/hyper": "^2.0.1",
-    "@macrostrat/mapbox-react": "workspace:*",
     "@macrostrat/mapbox-utils": "workspace:*",
-    "cesium": "^1.109.0",
-    "mapbox-gl": "^2.11.0"
+    "cesium": "^1.109.0"
   }
 }
