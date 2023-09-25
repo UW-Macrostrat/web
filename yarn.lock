@@ -3085,6 +3085,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@macrostrat/cesium-martini@npm:^1.3.0":
+  version: 1.3.0
+  resolution: "@macrostrat/cesium-martini@npm:1.3.0"
+  dependencies:
+    "@mapbox/martini": ^0.2.0
+    "@types/ndarray": ^1.0.7
+    axios: ^0.21.1
+    cesium: ^1.81.0
+    get-pixels: ^3.3.2
+    ndarray: ^1.0.19
+  checksum: 34b6bc2780a834c1164ed407aecd1e412fe8769eecd5601f8bad379100224548e7e24c292a37088e91a636e8738e0f195ac5c9bc85f2316943bf5b8762ab793c
+  languageName: node
+  linkType: hard
+
 "@macrostrat/cesium-vector-provider@npm:^2.0.2":
   version: 2.0.2
   resolution: "@macrostrat/cesium-vector-provider@npm:2.0.2"
@@ -3403,7 +3417,7 @@ __metadata:
   dependencies:
     "@blueprintjs/core": ^4.17.8
     "@macrostrat/hyper": ^2.2.1
-    "@macrostrat/mapbox-utils": ^1.2.1
+    "@macrostrat/mapbox-utils": ^1.2.2
     "@parcel/config-default": ^2.6.2
     "@turf/bbox": ^6.5.0
     "@turf/centroid": ^6.5.0
@@ -3431,7 +3445,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@macrostrat/mapbox-utils@^1.1.1, @macrostrat/mapbox-utils@^1.2.1, @macrostrat/mapbox-utils@workspace:*, @macrostrat/mapbox-utils@workspace:deps/web-components/packages/mapbox-utils":
+"@macrostrat/mapbox-utils@^1.1.1, @macrostrat/mapbox-utils@^1.2.1, @macrostrat/mapbox-utils@^1.2.2, @macrostrat/mapbox-utils@workspace:*, @macrostrat/mapbox-utils@workspace:deps/web-components/packages/mapbox-utils":
   version: 0.0.0-use.local
   resolution: "@macrostrat/mapbox-utils@workspace:deps/web-components/packages/mapbox-utils"
   dependencies:
@@ -9112,7 +9126,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cesium@npm:>=1.48, cesium@npm:^1.81.0, cesium@npm:^1.98.1":
+"cesium@npm:>=1.48, cesium@npm:^1.109.0, cesium@npm:^1.81.0, cesium@npm:^1.98.1":
   version: 1.109.0
   resolution: "cesium@npm:1.109.0"
   dependencies:
@@ -12443,6 +12457,18 @@ __metadata:
   checksum: 1875311c42fcfe9c707b2712c32664a245629b42bb0a5a84439762dd0fd637fc54d078155ea83c2af9e0323c9ac13687e03cfba79b03af9f40c89b4960099374
   languageName: node
   linkType: hard
+
+"example-vite@workspace:packages/globe-dev":
+  version: 0.0.0-use.local
+  resolution: "example-vite@workspace:packages/globe-dev"
+  dependencies:
+    "@macrostrat/cesium-martini": ^1.3.0
+    cesium: ^1.109.0
+    typescript: ^5.0.0
+    vite: ^4.4.9
+    vite-plugin-cesium: ^1.2.22
+  languageName: unknown
+  linkType: soft
 
 "exec-sh@npm:^0.2.0":
   version: 0.2.2
@@ -19931,7 +19957,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ndarray@npm:^1.0.13":
+"ndarray@npm:^1.0.13, ndarray@npm:^1.0.19":
   version: 1.0.19
   resolution: "ndarray@npm:1.0.19"
   dependencies:
@@ -27326,7 +27352,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^4.6.4 || ^5.0.0, typescript@npm:^5.1.6":
+"typescript@npm:^4.6.4 || ^5.0.0, typescript@npm:^5.0.0, typescript@npm:^5.1.6":
   version: 5.2.2
   resolution: "typescript@npm:5.2.2"
   bin:
@@ -27366,7 +27392,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@^4.6.4 || ^5.0.0#~builtin<compat/typescript>, typescript@patch:typescript@^5.1.6#~builtin<compat/typescript>":
+"typescript@patch:typescript@^4.6.4 || ^5.0.0#~builtin<compat/typescript>, typescript@patch:typescript@^5.0.0#~builtin<compat/typescript>, typescript@patch:typescript@^5.1.6#~builtin<compat/typescript>":
   version: 5.2.2
   resolution: "typescript@patch:typescript@npm%3A5.2.2#~builtin<compat/typescript>::version=5.2.2&hash=f3b441"
   bin:

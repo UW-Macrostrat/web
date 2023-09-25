@@ -19,7 +19,8 @@
   },
   "workspaces": [
     "deps/web-components/packages/*",
-    "deps/cesium-viewer"
+    "deps/cesium-viewer",
+    "packages/*"
   ],
   "authors": [
     "John Czaplewski <jczaplewski@wisc.edu>",

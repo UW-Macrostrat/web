@@ -1,0 +1,19 @@
+{
+  "name": "example-vite",
+  "private": true,
+  "scripts": {
+    "dev": "vite"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vite": "^4.4.9",
+    "vite-plugin-cesium": "^1.2.22"
+  },
+  "packageManager": "yarn@3.6.3",
+  "dependencies": {
+    "@macrostrat/cesium-martini": "^1.3.0",
+    "cesium": "^1.109.0"
+  }
+}
