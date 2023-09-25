@@ -1,5 +1,5 @@
 import h from "@macrostrat/hyper";
-import CesiumView from "./main";
+import CesiumView from "./cesium-view";
 import Map from "./map";
 import { MapPosition } from "@macrostrat/mapbox-utils";
 import { useState, useMemo } from "react";
@@ -9,9 +9,8 @@ import {
   translateCameraPosition,
 } from "@macrostrat/cesium-viewer";
 
-import "./main.css";
-import "cesiumSource/Widgets/widgets.css";
-import "@macrostrat/cesium-viewer/dist/index.css";
+import "./app.css";
+import "cesium/Source/Widgets/widgets.css";
 import "@znemz/cesium-navigation/dist/index.css";
 
 function VisControl({ show, setShown, name }) {
@@ -154,4 +153,4 @@ function App({ accessToken }) {
   ]);
 }
 
-export default App;
+export { App };

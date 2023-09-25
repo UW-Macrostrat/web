@@ -3099,7 +3099,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/cesium-vector-provider@npm:^2.0.2":
+"@macrostrat/cesium-vector-provider@npm:2.0.2, @macrostrat/cesium-vector-provider@npm:^2.0.2":
   version: 2.0.2
   resolution: "@macrostrat/cesium-vector-provider@npm:2.0.2"
   dependencies:
@@ -3411,7 +3411,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@macrostrat/mapbox-react@^2.1.0, @macrostrat/mapbox-react@workspace:deps/web-components/packages/mapbox-react":
+"@macrostrat/mapbox-react@^2.1.0, @macrostrat/mapbox-react@workspace:*, @macrostrat/mapbox-react@workspace:deps/web-components/packages/mapbox-react":
   version: 0.0.0-use.local
   resolution: "@macrostrat/mapbox-react@workspace:deps/web-components/packages/mapbox-react"
   dependencies:
@@ -12463,7 +12463,15 @@ __metadata:
   resolution: "example-vite@workspace:packages/globe-dev"
   dependencies:
     "@macrostrat/cesium-martini": ^1.3.0
+    "@macrostrat/cesium-vector-provider": 2.0.2
+    "@macrostrat/cesium-viewer": "workspace:*"
+    "@macrostrat/hyper": ^2.0.1
+    "@macrostrat/mapbox-react": "workspace:*"
+    "@macrostrat/mapbox-utils": "workspace:*"
     cesium: ^1.109.0
+    mapbox-gl: ^2.11.0
+    react: ^18
+    react-dom: ^18
     typescript: ^5.0.0
     vite: ^4.4.9
     vite-plugin-cesium: ^1.2.22
@@ -18577,7 +18585,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mapbox-gl@npm:^2.15.0":
+"mapbox-gl@npm:^2.11.0, mapbox-gl@npm:^2.15.0":
   version: 2.15.0
   resolution: "mapbox-gl@npm:2.15.0"
   dependencies:

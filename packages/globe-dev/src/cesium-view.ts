@@ -1,6 +1,5 @@
-const Cesium = require("cesiumSource/Cesium");
 // Import @types/cesium to use along with CesiumJS
-import VectorProvider from "@macrostrat/cesium-vector-provider";
+//import VectorProvider from "@macrostrat/cesium-vector-provider";
 import TerrainProvider from "@macrostrat/cesium-martini";
 import { useRef } from "react";
 import h from "@macrostrat/hyper";
@@ -9,21 +8,34 @@ import CesiumViewer, {
   DisplayQuality,
   MapboxLogo,
 } from "@macrostrat/cesium-viewer";
-import "@macrostrat/cesium-viewer/dist/index.css";
+import { MapboxImageryProvider } from "cesium";
 
-export function BaseLayer({ enabled = true, style, accessToken, ...rest }) {
-  const provider = useRef(
-    new VectorProvider({
-      style,
-      showCanvas: false,
-      maximumZoom: 15,
-      tileSize: 512,
+// export function BaseLayer({ enabled = true, style, accessToken, ...rest }) {
+//   const provider = useRef(
+//     new VectorProvider({
+//       style,
+//       showCanvas: false,
+//       maximumZoom: 15,
+//       tileSize: 512,
+//       accessToken,
+//     })
+//   );
+
+//   return h(ImageryLayer, { imageryProvider: provider.current, ...rest });
+// }
+
+const SatelliteLayer = (props) => {
+  const { accessToken, ...rest } = props;
+  let satellite = useRef(
+    new MapboxImageryProvider({
+      mapId: "mapbox.satellite",
+      maximumLevel: 19,
       accessToken,
     })
   );
 
-  return h(ImageryLayer, { imageryProvider: provider.current, ...rest });
-}
+  return h(ImageryLayer, { imageryProvider: satellite.current, ...rest });
+};
 
 function CesiumView({ style, accessToken, ...rest }) {
   const terrainProvider = useRef(
@@ -45,7 +57,7 @@ function CesiumView({ style, accessToken, ...rest }) {
       showIonLogo: false,
       ...rest,
     },
-    [h(BaseLayer, { style, accessToken }), h(MapboxLogo)]
+    [h(SatelliteLayer, { accessToken }), h(MapboxLogo)]
   );
 }
 

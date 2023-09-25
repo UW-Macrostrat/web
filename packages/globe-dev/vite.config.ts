@@ -14,6 +14,9 @@ const config: UserConfig = {
       NODE_DEBUG: false,
     },
   },
+  resolve: {
+    conditions: ["typescript"],
+  },
   envDir: path.join(__dirname, "..", ".."),
   // Not sure what the difference between cesiumBuildPath and cesiumBuildRootPath is
   plugins: [
