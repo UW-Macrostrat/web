@@ -29,7 +29,6 @@ for (const [key, value] of Object.entries(gitEnv)) {
 
 const config: UserConfig = {
   cacheDir: ".vite",
-  base: process.env.PUBLIC_URL,
   root: "./src",
   resolve: {
     conditions: ["typescript"],
