@@ -1,3 +1,6 @@
+@import "mapbox-gl/dist/mapbox-gl.css";
+
+
 html,
 body {
   margin: 0;
@@ -9,7 +12,7 @@ body {
   box-sizing: border-box;
 }
 
-.example-app {
+.globe-page {
   width: 100vw;
   height: 100vh;
   display: flex;
@@ -28,19 +31,23 @@ header {
   border-radius: 8px;
 }
 
-.cesium-container {
+.map-container {
   position: relative;
   width: 100vw;
   height: 100vh;
+  display: flex;
+  flex-direction: row;
+  gap: 0.5em
 }
 
-body {
-  margin: 0;
-  padding: 0;
-}
-
-.cesium-panel {
+.cesium-panel, .map-panel {
+  flex-grow: 1;
   position: relative;
+  height: 100vh;
+}
+
+.map-panel .map {
+  height: 100%;
 }
 
 .cesium-widget canvas {

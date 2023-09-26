@@ -1,7 +1,7 @@
 import h from "@macrostrat/hyper";
 import CesiumView from "./cesium-view";
 import { MapPosition } from "@macrostrat/mapbox-utils";
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback, memo } from "react";
 import {
   flyToParams,
   ViewInfo,
@@ -13,7 +13,7 @@ import {
 } from "@macrostrat/cesium-viewer";
 import { Link } from "~/renderer/Link";
 
-import "./app.css";
+import "./app.scss";
 import "cesium/Source/Widgets/widgets.css";
 import "@znemz/cesium-navigation/dist/index.css";
 import {
@@ -21,6 +21,11 @@ import {
   setHashString,
   buildQueryString,
 } from "@macrostrat/ui-components";
+import Map from "./map-comparison";
+import {
+  getMapPositionForHash,
+  applyMapPositionToHash,
+} from "~/map-interface/app-state/reducers/hash-string";
 
 function VisControl({ show, setShown, name }) {
   const className = show ? "active" : "";
@@ -39,39 +44,59 @@ function VisControl({ show, setShown, name }) {
   );
 }
 
-function getStartingPosition() {
-  const hash = getHashString(window.location.hash);
-  if (hash == null) {
-    return translateCameraPosition({
-      camera: {
-        lng: -118.1987,
-        lat: 34,
-        altitude: 280000,
-      },
-    });
-  }
-  return getInitialPosition(hash);
+function getStartingPosition(): MapPosition {
+  const hashData = getHashString(window.location.hash) ?? {};
+  return getMapPositionForHash(hashData, null);
 }
 
+const _CesiumView = memo(CesiumView);
+
 function App({ accessToken }) {
-  const initialPosition = useRef(getStartingPosition());
-  console.log(initialPosition);
+  const initialPosition = useRef<MapPosition>(getStartingPosition());
 
   // next, figure out labels: mapbox://styles/jczaplewski/cl16w70qs000015qd8aw9sea5
   const style = "mapbox://styles/jczaplewski/cklb8aopu2cnv18mpxwfn7c9n";
   const [showWireframe, setShowWireframe] = useState(false);
   const [showInspector, setShowInspector] = useState(false);
-  const [position, setPosition] = useState<CameraParams>(
+  const [showMapbox, setShowMapbox] = useState(false);
+  const [position, setPosition] = useState<MapPosition>(
     initialPosition.current
   );
 
+  const queryString = useRef<object>({});
+
+  useEffect(() => {
+    let hashData = {};
+    applyMapPositionToHash(hashData, position);
+    queryString.current = buildQueryString(hashData);
+    setHashString(hashData);
+  }, [position]);
+
   const flyTo = useMemo(
     () =>
-      flyToParams(initialPosition.current, {
+      flyToParams(translateCameraPosition(initialPosition.current), {
         duration: 0,
       }),
     []
   );
+
+  let mapURL = "/map#show=satellite&hide=labels";
+  if (queryString.current != null) {
+    mapURL += "&" + queryString.current;
+  }
+
+  const onViewChange = useCallback((cpos: CameraParams) => {
+    const { camera } = cpos;
+    setPosition({
+      camera: {
+        lng: camera.longitude,
+        lat: camera.latitude,
+        altitude: camera.height,
+        pitch: 90 + (camera.pitch ?? -90),
+        bearing: camera.heading,
+      },
+    });
+  }, []);
 
   return h("div.globe-page", [
     h("header", [
@@ -87,20 +112,17 @@ function App({ accessToken }) {
           show: showWireframe,
           setShown: setShowWireframe,
         }),
-        h(
-          Link,
-          {
-            href:
-              "/map#show=satellite&hide=labels&" +
-              buildQueryString(buildPositionHash(position)),
-          },
-          "Switch to map"
-        ),
+        h(VisControl, {
+          name: "comparison",
+          show: showMapbox,
+          setShown: setShowMapbox,
+        }),
+        h(Link, { href: mapURL }, "Switch to map"),
       ]),
     ]),
     h("div.map-container", [
-      h("div.cesium-container.map-sizer", [
-        h(CesiumView, {
+      h("div.cesium-panel", [
+        h(_CesiumView, {
           style,
           accessToken,
           flyTo,
@@ -108,18 +130,19 @@ function App({ accessToken }) {
           showInspector,
           highResolution: true,
           displayQuality: DisplayQuality.High,
-          onViewChange(cpos: ViewInfo) {
-            setHashString(buildPositionHash(cpos.camera));
-            //const { camera } = cpos;
-            // setPosition({
-            //   camera: {
-            //     lng: camera.longitude,
-            //     lat: camera.latitude,
-            //     altitude: camera.height,
-            //     pitch: 90 + (camera.pitch ?? -90),
-            //     bearing: camera.heading,
-            //   },
-            // });
+          onViewChange,
+        }),
+      ]),
+      h.if(showMapbox)("div.map-panel", [
+        h(Map, {
+          style: "mapbox://styles/mapbox/satellite-v9",
+          accessToken,
+          position,
+          //onChangePosition: setPosition,
+          debug: {
+            showTileBoundaries: showInspector,
+            showCollisionBoxes: showInspector,
+            showTerrainWireframe: showWireframe,
           },
         }),
       ]),

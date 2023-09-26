@@ -3,6 +3,7 @@ import { MapBackend, MapLayer, CoreState, InfoMarkerPosition } from "./core";
 import { MapPosition } from "@macrostrat/mapbox-utils";
 import { AppState, AppAction } from "./types";
 import { Filter, FilterType } from "../handlers/filters";
+import { ParsedQuery } from "query-string";
 import {
   formatCoordForZoomLevel,
   fmtInt,
@@ -45,7 +46,7 @@ export function updateURI(state: CoreState) {
     args[filter.type].push(filter.id ?? filter.name);
   }
 
-  applyPosition(args, state.mapPosition);
+  applyMapPositionToHash(args, state.mapPosition);
   applyInfoMarkerPosition(
     args,
     state.infoMarkerPosition,
@@ -82,15 +83,16 @@ function applyInfoMarkerPosition(
   }
 }
 
-export function applyPosition(args: HashParams, mapPosition: MapPosition) {
+export function applyMapPositionToHash(
+  args: HashParams,
+  mapPosition: MapPosition
+) {
   const pos = mapPosition.camera;
   if (pos == null) return;
   const zoom = mapPosition.target?.zoom;
 
   args.x = formatCoordForZoomLevel(pos.lng, zoom);
   args.y = formatCoordForZoomLevel(pos.lat, zoom);
-
-  console.log(pos, args);
 
   if (pos.bearing == 0 && pos.pitch == 0 && zoom != null) {
     args.z = fmt1(zoom);
@@ -210,6 +212,56 @@ function layerDescriptionToLayers(
   return validateLayers(layers);
 }
 
+export function getMapPositionForHash(
+  hashData: ParsedQuery<string>,
+  infoMarkerPosition: InfoMarkerPosition | null
+): MapPosition {
+  const {
+    x = infoMarkerPosition?.lng ?? 0,
+    y = infoMarkerPosition?.lat ?? 0,
+    // Different default for zoom depending on whether we have a marker
+    z = infoMarkerPosition != null ? 7 : 2,
+    a = 0,
+    e = 0,
+  } = hashData;
+
+  const lng = _fmt(x);
+  const lat = _fmt(y);
+
+  let altitude = null;
+  let zoom = null;
+  const _z = z.toString();
+  if (_z.endsWith("km")) {
+    altitude = _fmt(_z.substring(0, _z.length - 2)) * 1000;
+  } else if (_z.endsWith("m")) {
+    altitude = _fmt(_z.substring(0, _z.length - 1));
+  } else {
+    zoom = _fmt(z);
+  }
+  const bearing = _fmt(a);
+  const pitch = _fmt(e);
+
+  let target = undefined;
+  if (bearing == 0 && pitch == 0 && zoom != null) {
+    target = {
+      lat,
+      lng,
+      zoom,
+    };
+  }
+
+  return {
+    camera: {
+      lng: _fmt(x),
+      lat: _fmt(y),
+      altitude,
+      bearing: _fmt(a),
+      pitch: _fmt(e),
+    },
+    target,
+  };
+}
+
 export function updateMapPositionForHash(
   state: CoreState,
   hashString: string
@@ -220,54 +272,8 @@ export function updateMapPositionForHash(
 
     let { show = [], hide = [] } = hashData;
     // Set default view parameters
-    console.log(state.infoMarkerPosition);
-
-    const {
-      x = state.infoMarkerPosition?.lng ?? 0,
-      y = state.infoMarkerPosition?.lat ?? 0,
-      // Different default for zoom depending on whether we have a marker
-      z = state.infoMarkerPosition != null ? 7 : 2,
-      a = 0,
-      e = 0,
-    } = hashData;
-
     const mapLayers = layerDescriptionToLayers(show, hide);
-
-    const lng = _fmt(x);
-    const lat = _fmt(y);
-
-    let altitude = null;
-    let zoom = null;
-    const _z = z.toString();
-    if (_z.endsWith("km")) {
-      altitude = _fmt(_z.substring(0, _z.length - 2)) * 1000;
-    } else if (_z.endsWith("m")) {
-      altitude = _fmt(_z.substring(0, _z.length - 1));
-    } else {
-      zoom = _fmt(z);
-    }
-    const bearing = _fmt(a);
-    const pitch = _fmt(e);
-
-    let target = undefined;
-    if (bearing == 0 && pitch == 0 && zoom != null) {
-      target = {
-        lat,
-        lng,
-        zoom,
-      };
-    }
-
-    const position: MapPosition = {
-      camera: {
-        lng: _fmt(x),
-        lat: _fmt(y),
-        altitude,
-        bearing: _fmt(a),
-        pitch: _fmt(e),
-      },
-      target,
-    };
+    const position = getMapPositionForHash(hashData, state.infoMarkerPosition);
 
     // Get time cursor information
     const { age, plate_model = 1 } = hashData;
