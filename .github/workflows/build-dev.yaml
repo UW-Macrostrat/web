@@ -49,6 +49,6 @@ jobs:
             VITE_MACROSTRAT_TILESERVER_DOMAIN=https://tileserver.macrostrat-dev.chtc.io
             VITE_MACROSTRAT_API_DOMAIN=https://macrostrat.macrostrat-dev.chtc.io/
             VITE_CORELLE_API_DOMAIN=https://rotate.macrostrat.org
-            PUBLIC_URL=/map/
+            PUBLIC_URL=/
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
