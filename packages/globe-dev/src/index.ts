@@ -47,15 +47,15 @@ function App({ accessToken }) {
       flyToParams(translateCameraPosition(position), {
         duration: 0,
       }),
-    [position]
+    []
   );
 
   return h("div.example-app", [
     h("header", [
-      h("div.spacer"),
+      h("h1", "Macrostrat globe"),
       h("ul.controls", [
         h(VisControl, {
-          name: "Cesium inspector",
+          name: "inspector",
           show: showInspector,
           setShown: setShowInspector,
         }),
@@ -67,28 +67,27 @@ function App({ accessToken }) {
       ]),
     ]),
     h("div.map-container", [
-      h("div.map-panel.cesium", [
-        h("div.cesium-container.map-sizer", [
-          h(CesiumView, {
-            style,
-            accessToken,
-            flyTo,
-            showWireframe,
-            showInspector,
-            onViewChange(cpos: ViewInfo) {
-              const { camera } = cpos;
-              setPosition({
-                camera: {
-                  lng: camera.longitude,
-                  lat: camera.latitude,
-                  altitude: camera.height,
-                  pitch: 90 + (camera.pitch ?? -90),
-                  bearing: camera.heading,
-                },
-              });
-            },
-          }),
-        ]),
+      h("div.cesium-container.map-sizer", [
+        h(CesiumView, {
+          style,
+          accessToken,
+          flyTo,
+          showWireframe,
+          showInspector,
+          highResolution: true,
+          onViewChange(cpos: ViewInfo) {
+            //const { camera } = cpos;
+            // setPosition({
+            //   camera: {
+            //     lng: camera.longitude,
+            //     lat: camera.latitude,
+            //     altitude: camera.height,
+            //     pitch: 90 + (camera.pitch ?? -90),
+            //     bearing: camera.heading,
+            //   },
+            // });
+          },
+        }),
       ]),
     ]),
   ]);

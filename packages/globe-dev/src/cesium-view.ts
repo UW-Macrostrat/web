@@ -52,7 +52,7 @@ function CesiumView({ style, accessToken, ...rest }) {
     CesiumViewer,
     {
       terrainProvider: terrainProvider.current,
-      displayQuality: DisplayQuality.High,
+      displayQuality: DisplayQuality.Ultra,
       showInspector: true,
       showIonLogo: false,
       ...rest,

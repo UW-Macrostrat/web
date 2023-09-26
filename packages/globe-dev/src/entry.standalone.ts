@@ -1,6 +1,6 @@
 import { render } from "react-dom";
 import h from "@macrostrat/hyper";
-import { App } from "./app";
+import { App } from ".";
 
 const main = document.createElement("div");
 main.className = "main";

@@ -3579,7 +3579,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@macrostrat/web-globe@workspace:packages/globe-dev":
+"@macrostrat/web-globe@workspace:*, @macrostrat/web-globe@workspace:packages/globe-dev":
   version: 0.0.0-use.local
   resolution: "@macrostrat/web-globe@workspace:packages/globe-dev"
   dependencies:
@@ -3625,6 +3625,7 @@ __metadata:
     "@macrostrat/style-system": "workspace:*"
     "@macrostrat/timescale": "workspace:*"
     "@macrostrat/ui-components": "workspace:*"
+    "@macrostrat/web-globe": "workspace:*"
     "@mapbox/point-geometry": ^0.1.0
     "@mapbox/tilebelt": ^1.0.2
     "@mapbox/vector-tile": ^1.3.1

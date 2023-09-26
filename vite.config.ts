@@ -5,6 +5,7 @@ import react from "@vitejs/plugin-react";
 import ssr from "vite-plugin-ssr/plugin";
 import revisionInfo from "@macrostrat/revision-info-webpack";
 import rewriteAll from "vite-plugin-rewrite-all";
+import cesium from "vite-plugin-cesium";
 
 import pkg from "./package.json";
 
@@ -27,6 +28,8 @@ const gitEnv = revisionInfo(pkg, "https://github.com/UW-Macrostrat/web");
 for (const [key, value] of Object.entries(gitEnv)) {
   process.env["VITE_" + key] = value;
 }
+
+const cesiumRoot = require.resolve("cesium").replace("/index.cjs", "/Build");
 
 const config: UserConfig = {
   cacheDir: ".vite",
@@ -52,12 +55,18 @@ const config: UserConfig = {
     to allow for client-side routing */
     //rewriteAll(),
     ssr(),
+    cesium({ cesiumBuildPath: cesiumRoot, cesiumBuildRootPath: cesiumRoot }),
   ],
   envDir: path.resolve(__dirname),
   build: {
     outDir: path.resolve(__dirname, "dist"),
     emptyOutDir: true,
     sourcemap: true,
+  },
+  define: {
+    "process.env": {
+      NODE_DEBUG: false,
+    },
   },
 };
 

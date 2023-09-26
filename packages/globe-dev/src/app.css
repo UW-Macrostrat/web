@@ -14,31 +14,24 @@ body {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 0.5em 1em;
-}
-
-.map-container {
-  display: flex;
-  flex-grow: 1;
-  flex-direction: row;
-  margin: -4px;
-}
-
-.map-panel {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  margin: 4px;
-}
-
-.map-sizer {
-  flex-grow: 1;
+  padding: 0;
   position: relative;
 }
 
-.mapboxgl-map {
-  width: 100%;
-  height: 100%;
+header {
+  position: absolute;
+  top: 1em;
+  left: 1em;
+  width: 12em;
+  z-index: 50;
+  background-color: #fff;
+  border-radius: 8px;
+}
+
+.cesium-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
 }
 
 body {
@@ -51,7 +44,7 @@ body {
 }
 
 .cesium-widget canvas {
-  cursor: hand;
+  cursor: drag;
 }
 
 div.caption {
@@ -63,18 +56,15 @@ div.caption {
 
 header {
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  padding: 0em 2em;
+  flex-direction: column;
+  align-items: right;
+  padding: 0.5em;
+  gap: 0.5em
 }
 
 h1 {
   margin: 0;
-  font-size: 1.2em;
-}
-
-header > * {
-  margin-right: 1em;
+  font-size: 1em;
 }
 
 header p {
@@ -89,6 +79,7 @@ header p {
 ul.controls {
   list-style: none;
   padding-left: 0px;
+  margin: 0
 }
 
 .controls li a {
