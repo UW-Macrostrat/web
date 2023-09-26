@@ -90,7 +90,8 @@ function GlobeLink() {
 
   return h(AnchorButton, {
     href:
-      "/globe#" + buildQueryString(args, { arrayFormat: "comma", sort: false }),
+      "/dev/globe#" +
+      buildQueryString(args, { arrayFormat: "comma", sort: false }),
     minimal: true,
     intent: "warning",
     icon: "globe-network",
