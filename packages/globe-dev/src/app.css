@@ -82,7 +82,7 @@ ul.controls {
   margin: 0
 }
 
-.controls li a {
+a {
   display: block;
   cursor: pointer;
   padding: 2px 6px;

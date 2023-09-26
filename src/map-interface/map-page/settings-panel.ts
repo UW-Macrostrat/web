@@ -18,12 +18,14 @@ import {
   HTMLSelect,
   Intent,
   IconName,
+  AnchorButton,
 } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import { Tag, Collapse, Callout, Text, NumericInput } from "@blueprintjs/core";
 import { useState } from "react";
 //import { LinkButton } from "@macrostrat/ui-components";
 //import { GlobeSettings } from "@macrostrat/cesium-viewer/settings";
+import { useMapPosition } from "@macrostrat/mapbox-react";
 import { useEffect } from "react";
 import { MapLayer } from "~/map-interface/app-state";
 //import { DisplayQuality } from "@macrostrat/cesium-viewer";
@@ -32,6 +34,7 @@ import {
   DarkModeButton,
   useDarkMode,
   darkModeUpdater,
+  buildQueryString,
 } from "@macrostrat/ui-components";
 import { LinkButton } from "../components/buttons";
 
@@ -105,11 +108,33 @@ const SettingsPanel = (props) => {
           runAction({ type: "toggle-experiments-panel" });
         },
       },
-      [h(LineSymbolsControl), h(SourcesButton), h(PaleogeographyButton)]
+      [
+        h(LineSymbolsControl),
+        h(SourcesButton),
+        h(PaleogeographyButton),
+        h(GlobeLink),
+      ]
     ),
     // ])
   ]);
 };
+
+import { applyPosition } from "~/map-interface/app-state/reducers/hash-string";
+
+function GlobeLink() {
+  const mapPosition = useAppState((s) => s.core.mapPosition);
+  let args = {};
+  applyPosition(args, mapPosition);
+
+  return h(AnchorButton, {
+    href:
+      "/globe#" + buildQueryString(args, { arrayFormat: "comma", sort: false }),
+    minimal: true,
+    intent: "warning",
+    icon: "globe-network",
+    text: "Switch to globe",
+  });
+}
 
 function PaleogeographyButton() {
   const runAction = useAppActions();

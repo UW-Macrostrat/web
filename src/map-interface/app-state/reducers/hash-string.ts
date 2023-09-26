@@ -1,5 +1,5 @@
 import { setHashString, getHashString } from "@macrostrat/ui-components";
-import { MapBackend, MapLayer, CoreState } from "./core";
+import { MapBackend, MapLayer, CoreState, InfoMarkerPosition } from "./core";
 import { MapPosition } from "@macrostrat/mapbox-utils";
 import { AppState, AppAction } from "./types";
 import { Filter, FilterType } from "../handlers/filters";
@@ -45,8 +45,12 @@ export function updateURI(state: CoreState) {
     args[filter.type].push(filter.id ?? filter.name);
   }
 
-  applyXYPosition(args, state);
-  applyHeightAndOrientation(args, state);
+  applyPosition(args, state.mapPosition);
+  applyInfoMarkerPosition(
+    args,
+    state.infoMarkerPosition,
+    state.mapPosition.target?.zoom
+  );
 
   if (state.timeCursorAge != null && state.timeCursorAge != 0) {
     args.age = fmtInt(state.timeCursorAge);
@@ -60,36 +64,33 @@ export function updateURI(state: CoreState) {
   return state;
 }
 
-function applyXYPosition(args: object, state: CoreState) {
-  const pos = state.mapPosition.camera;
-  if (pos == null) return;
-  const zoom = state.mapPosition.target?.zoom;
-
-  let x = formatCoordForZoomLevel(pos.lng, zoom);
-  let y = formatCoordForZoomLevel(pos.lat, zoom);
-
-  const { infoMarkerPosition } = state;
-  if (infoMarkerPosition != null) {
+function applyInfoMarkerPosition(
+  args: object,
+  position: InfoMarkerPosition,
+  zoom: number | null
+) {
+  if (position != null) {
     /* If the info marker is at the same position as the map, there
      * is no need to include it in the hash string. This should lead
      * to shorter sharable URLs */
-    let infoX = formatCoordForZoomLevel(infoMarkerPosition.lng, zoom);
-    let infoY = formatCoordForZoomLevel(infoMarkerPosition.lat, zoom);
-    if (infoX == x || infoY == y) {
-      return;
+    let infoX = formatCoordForZoomLevel(position.lng, zoom);
+    let infoY = formatCoordForZoomLevel(position.lat, zoom);
+    if (infoX == args["x"] || infoY == args["y"]) {
+      delete args["x"];
+      delete args["y"];
     }
   }
-  args["x"] = x;
-  args["y"] = y;
 }
 
-function applyHeightAndOrientation(args: HashParams, state: CoreState) {
-  const pos = state.mapPosition.camera ?? {
-    bearing: 0,
-    pitch: 0,
-    altitude: null,
-  };
-  const zoom = state.mapPosition.target?.zoom;
+export function applyPosition(args: HashParams, mapPosition: MapPosition) {
+  const pos = mapPosition.camera;
+  if (pos == null) return;
+  const zoom = mapPosition.target?.zoom;
+
+  args.x = formatCoordForZoomLevel(pos.lng, zoom);
+  args.y = formatCoordForZoomLevel(pos.lat, zoom);
+
+  console.log(pos, args);
 
   if (pos.bearing == 0 && pos.pitch == 0 && zoom != null) {
     args.z = fmt1(zoom);

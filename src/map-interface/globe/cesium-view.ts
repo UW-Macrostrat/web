@@ -25,7 +25,7 @@ function GlobeDevPage() {
       flyTo: null,
       initialPosition: initialPosition.current,
       displayQuality: DisplayQuality.High,
-      highResolution: true,
+      highResolution: false,
       showIonLogo: false,
       onViewChange(cpos) {
         setHashString(buildPositionHash(cpos.camera));

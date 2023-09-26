@@ -236,6 +236,8 @@ interface MapSettings {
   highResolutionTerrain: boolean;
 }
 
+export type InfoMarkerPosition = { lat: number; lng: number } | null;
+
 export interface CoreState extends MapState, AsyncRequestState {
   initialLoadComplete: boolean;
   contextPanelOpen: boolean;
@@ -246,7 +248,7 @@ export interface CoreState extends MapState, AsyncRequestState {
   isFetching: boolean;
   crossSectionLine: LineString | null;
   crossSectionCursorLocation: any;
-  infoMarkerPosition: { lat: number; lng: number } | null;
+  infoMarkerPosition: InfoMarkerPosition;
   mapInfo: any[];
   timeCursorAge: number | null;
   plateModelId: number | null;

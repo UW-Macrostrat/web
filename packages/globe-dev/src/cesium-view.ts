@@ -43,7 +43,7 @@ function CesiumView({ style, accessToken, ...rest }) {
       hasVertexNormals: false,
       hasWaterMask: false,
       accessToken,
-      highResolution: false,
+      highResolution: true,
       credit: "Mapbox",
     })
   );
@@ -52,7 +52,7 @@ function CesiumView({ style, accessToken, ...rest }) {
     CesiumViewer,
     {
       terrainProvider: terrainProvider.current,
-      displayQuality: DisplayQuality.Ultra,
+      displayQuality: DisplayQuality.High,
       showInspector: true,
       showIonLogo: false,
       ...rest,
