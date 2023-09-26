@@ -104,6 +104,11 @@ function MapInspectorIndex() {
       h(LinkItem, { to: "weaver" }, "Weaver (point data experiments)"),
     ]),
     h("h2", h(Link, { to: "catalog" }, "Map layer catalog")),
+    h("h1", "Rendering libraries"),
+    h("ul.renderers", [
+      h(LinkItem, { to: "globe" }, "Globe"),
+      h(LinkItem, { to: "cesium-vector-providers" }, "Cesium Vector Provider"),
+    ]),
     h("h1", "Stratigraphic column inspector"),
     h(Link, { to: "column-inspector" }, "Stratigraphy"),
     h("h1", "Color scheme testing"),

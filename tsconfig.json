@@ -14,8 +14,9 @@
     "esModuleInterop": true,
     "paths": {
       "~/*": ["./src/*"],
-      "@macrostrat/cesium-viewer": ["packages/cesium-viewer/src/"],
-      "@macrostrat/cesium-martini": ["packages/cesium-martini"],
+      "@macrostrat/cesium-vector-provider": [
+        "./packages/cesium-vector-provider/src/"
+      ],
       "@macrostrat/ui-components": [
         "deps/web-components/packages/ui-components/src/"
       ],
@@ -36,10 +37,13 @@
       ],
       "@macrostrat/map-interface": [
         "deps/web-components/packages/map-interface/src"
-      ]
+      ],
+      "@macrostrat/cesium-viewer": [
+        "deps/cesium-viewer/src"
+      ],
     }
   },
-  "include": ["src"],
+  "include": ["src", "packages/globe-dev/globe"],
   "types": ["vite/client"],
   "ts-node": {
     "transpileOnly": true,

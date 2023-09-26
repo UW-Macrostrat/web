@@ -5,7 +5,7 @@ import { Spinner } from "@blueprintjs/core";
 
 function ClientOnly(props) {
   const fallback = props.fallback || Spinner;
-  const [Component, setComponent] = useState(() => fallback);
+  const [Component, setComponent] = useState(null);
   const rest = useMemo(() => {
     const { fallback, component, ...r } = props;
     return r;
@@ -15,7 +15,9 @@ function ClientOnly(props) {
     setComponent(() => loadable(props.component));
   }, []);
 
-  return h(Suspense, { fallback: fallback }, h(Component, rest));
+  const element = Component == null ? h(fallback) : h(Component, rest);
+
+  return h(Suspense, { fallback: fallback }, element);
 }
 
 export { ClientOnly };

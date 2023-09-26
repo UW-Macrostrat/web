@@ -1,20 +1,19 @@
-import { Suspense } from "react";
+import { Suspense, useEffect, useCallback, useRef } from "react";
 // Import other components
 import hyper from "@macrostrat/hyper";
 import Searchbar from "../components/navbar";
-import { Spinner } from "@blueprintjs/core";
+import { Spinner, Button, Switch } from "@blueprintjs/core";
 import { useSelector } from "react-redux";
 import loadable from "@loadable/component";
-import { MapBackend, useAppState, useAppActions } from "../app-state";
+import { useAppState, useAppActions } from "../app-state";
 import styles from "./main.module.styl";
-import { useRef, useEffect, useCallback } from "react";
 import { useTransition } from "transition-hook";
 import { useContextPanelOpen, useContextClass } from "../app-state";
 import { MapAreaContainer } from "@macrostrat/map-interface";
 import { Routes, Route, useParams } from "react-router-dom";
 import classNames from "classnames";
 import { TimescalePanel } from "../paleo";
-import { MenuPage } from "./menu";
+import { MenuPage, PanelCard } from "./menu";
 import { mapPagePrefix } from "../settings";
 import MapContainer from "./map-view";
 
@@ -23,13 +22,6 @@ const InfoDrawer = loadable(() => import("../components/info-drawer"));
 const Menu = loadable(() => import("./menu"));
 
 const h = hyper.styled(styles);
-
-//const CesiumViewMod = loadable(() => import("./cesium-view"));
-// const CesiumViewMod = () => h("div", "Globe is currently disabled");
-
-// export function CesiumView(props) {
-//   return h(Suspense, { fallback: h(Spinner) }, h(CesiumViewMod, props));
-// }
 
 function MapView(props) {
   return h(
@@ -40,10 +32,9 @@ function MapView(props) {
 }
 
 export const MapPage = ({
-  backend = MapBackend.MAPBOX3,
+  baseRoute = "/",
   menuPage = null,
 }: {
-  backend?: MapBackend;
   menuPage?: MenuPage;
 }) => {
   const runAction = useAppActions();
@@ -54,14 +45,13 @@ export const MapPage = ({
 
   const ref = useRef<HTMLElement>(null);
 
-  const contextPanelOpen = useContextPanelOpen();
+  const contextPanelOpen = useContextPanelOpen(baseRoute);
+  const contextClass = useContextClass(baseRoute);
 
   const loaded = useSelector((state) => state.core.initialLoadComplete);
   useEffect(() => {
     runAction({ type: "get-initial-map-state" });
   }, []);
-
-  const contextClass = useContextClass();
 
   const onMouseDown = useCallback(
     (event) => {
@@ -151,7 +141,5 @@ function InfoDrawerRoute() {
   });
 }
 
-//const _MapPage = compose(HotkeysProvider, MapPage);
-
-export { MapBackend, MapAreaContainer };
+export { MapAreaContainer };
 export default MapPageRoutes;

@@ -44,9 +44,9 @@ export function useContextClass() {
   return classNames("map-context-open", activePage);
 }
 
-export function useCurrentPage() {
+export function useCurrentPage(baseRoute = "/") {
   const { pathname } = useLocation();
-  return pathname.slice(pathname.lastIndexOf("/") + 1, pathname.length);
+  return pathname.slice(baseRoute.length);
 }
 
 export function useHashNavigate(to: string) {

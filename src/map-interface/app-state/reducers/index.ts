@@ -7,6 +7,8 @@ import {
 } from "@lagunovsky/redux-react-router";
 import { hashStringReducer } from "./hash-string";
 import { matchPath } from "react-router";
+import { performanceReducer, PerformanceState } from "../../performance/core";
+
 import { mapPagePrefix } from "~/map-interface/settings";
 export const browserHistory = createBrowserHistory();
 import { MenuState, AppState, AppAction, MenuAction } from "./types";
@@ -46,8 +48,6 @@ function mainReducer(
 
       let s1 = setInfoMarkerPosition(state);
 
-      console.log(state.router, action.payload);
-
       const newRoute = action.payload.location;
       let newAction = action;
       if (newRoute.hash == "") {
@@ -82,6 +82,7 @@ function mainReducer(
         router: routerReducer(state.router, action as RouterActions),
         core: coreReducer(state.core, action as CoreAction),
         menu: menuReducer(state.menu, action as MenuAction),
+        performance: performanceReducer(state.performance, action),
       };
   }
 }
@@ -144,3 +145,69 @@ export default appReducer;
 export * from "./core";
 export * from "./map";
 export * from "./types";
+
+/*
+function overallReducer(state: AppState, action: Action): AppState {
+  let pos: MapPosition;
+  if (action.type === "got-initial-map-state") {
+    pos = action.data.mapPosition;
+  } else if (action.type == "map-moved") {
+    pos = action.data;
+  }
+
+  if (pos) {
+    // You can access both app and globe states here
+    const params = flyToParams(translateCameraPosition(pos));
+    //console.log("Set globe position", destination);
+    return {
+      ...state,
+      core: {
+        ...state.core,
+        mapPosition: pos,
+      },
+      globe: {
+        ...state.globe,
+        flyToProps: { ...params, duration: 0, once: true },
+      },
+    };
+  }
+
+  if (action.type == "map-loading" && !state.core.mapIsLoading) {
+    return appReducer(state, {
+      type: "reset-performance-counter",
+      name: "map-loading",
+    });
+  }
+  if (action.type == "map-idle" && state.core.mapIsLoading) {
+    return appReducer(state, { type: "reset-performance-counter" });
+  }
+
+  switch (action.type) {
+    case "@@router/ON_LOCATION_CHANGED":
+      const isOpen = action.payload.location.pathname != "/";
+      return {
+        ...state,
+        core: { ...state.core, menuOpen: isOpen, contextPanelOpen: isOpen },
+      };
+    case "got-initial-map-state":
+    case "map-moved":
+      return {
+        ...state,
+        core: {
+          ...state.core,
+          mapPosition: action.data,
+        },
+      };
+    default:
+      return state;
+  }
+}
+
+const appReducer = reduceReducers(overallReducer, reducers);
+
+export type Action = CoreAction | MapAction | GlobeAction | RouterActions;
+
+export default appReducer;
+export * from "./core";
+export * from "./map";
+*/

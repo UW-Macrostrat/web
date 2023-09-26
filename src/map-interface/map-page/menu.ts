@@ -138,8 +138,12 @@ const menuBacklinkLocationOverrides = {
   "/changelog": "/about",
 };
 
-function useLastPageLocation(): { title: string; to: string } | null {
-  const breadcrumbs = useBreadcrumbs();
+function useLastPageLocation(
+  baseRoute = "/"
+): { title: string; to: string } | null {
+  const breadcrumbs = useBreadcrumbs().filter((b) =>
+    b.key.startsWith(baseRoute)
+  );
   if (breadcrumbs.length < 2) return null;
   const prevPage = breadcrumbs[breadcrumbs.length - 2];
   const currentPage = breadcrumbs[breadcrumbs.length - 1];
@@ -154,8 +158,8 @@ function useLastPageLocation(): { title: string; to: string } | null {
   };
 }
 
-function MenuHeaderButtons() {
-  const backLoc = useLastPageLocation();
+function MenuHeaderButtons({ baseRoute = "/" }) {
+  const backLoc = useLastPageLocation(baseRoute);
   const { pathname } = useLocation();
 
   if (backLoc != null) {
@@ -224,10 +228,13 @@ type MenuProps = {
 };
 
 const Menu = (props: MenuProps) => {
-  let { className, menuPage } = props;
+  let { className, menuPage, baseRoute = "/" } = props;
   const { inputFocus } = useSearchState();
   const runAction = useAppActions();
 
+  const navigateHome = useHashNavigate(baseRoute);
+
+  const pageName = useCurrentPage(baseRoute);
   const isNarrow = menuPage == MenuPage.LAYERS || menuPage == MenuPage.SETTINGS;
   const isNarrowTrans = useTransition(isNarrow, 800);
 
@@ -252,7 +259,11 @@ const Menu = (props: MenuProps) => {
       insetContent: false,
       className,
       renderHeader: () =>
-        h(HeaderWrapper, { minimal: isNarrow }, h(MenuHeaderButtons)),
+        h(
+          HeaderWrapper,
+          { minimal: isNarrow },
+          h(MenuHeaderButtons, { baseRoute })
+        ),
     },
     elementForMenuPage(menuPage)
   );

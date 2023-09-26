@@ -19,6 +19,9 @@ function Page() {
         <li>
           <Link href="maps">Map index</Link>
         </li>
+        <li>
+          <Link href="globe">Globe</Link>
+        </li>
       </ul>
     </>
   );
