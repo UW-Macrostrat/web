@@ -43,7 +43,7 @@
       ],
     }
   },
-  "include": ["src"],
+  "include": ["src", "packages/globe-dev/globe"],
   "types": ["vite/client"],
   "ts-node": {
     "transpileOnly": true,

@@ -30,18 +30,6 @@ let store = createStore<AppState, Action, any, any>(
 //const _ColumnPage = loadable(import("./columns"));
 //const ColumnPage = () => h(Suspense, { fallback: h(Spinner) }, h(_ColumnPage));
 
-/*
-const _GlobeDevPage = loadable(() =>
-  import("./map-page/cesium-view").then((d) => d.GlobeDevPage)
-);
-
-const GlobeDevPage = () =>
-  h(Suspense, { fallback: h(Spinner) }, h(_GlobeDevPage));
-
-function GlobePage() {
-  return h(MapPage, { backend: MapBackend.CESIUM });
-}
-*/
 import MapPage from "../../map-interface/map-page";
 
 const Sources = onDemand(() => import("~/burwell-sources"));
@@ -66,13 +54,7 @@ export default function MapApp({ routerBasename }) {
             }),
             h(Route, { path: "*", element: h(MapPage) }),
           ]),
-
-          // h(Route, {
-          //   path: "/globe",
-          //   component: GlobePage,
-          // }),
           // h(Route, { path: "/columns", component: ColumnPage }),
-          //h(Route, { path: "/dev/globe", component: GlobeDevPage }),
           // h(Route, {
           //   exact: true,
           //   path: "/",

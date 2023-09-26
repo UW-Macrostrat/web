@@ -1589,38 +1589,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blueprintjs/colors@npm:^4.0.0-alpha.3, @blueprintjs/colors@npm:^4.1.22, @blueprintjs/colors@npm:^4.2.1":
+"@blueprintjs/colors@npm:^4.1.22, @blueprintjs/colors@npm:^4.2.1":
   version: 4.2.1
   resolution: "@blueprintjs/colors@npm:4.2.1"
   dependencies:
     tslib: ~2.5.0
   checksum: d8073d0146f1d9b99e1d9dbbe4ab5b57d41c41f7a70da287b4dd6f02781df52b772e66348b79a3a6c9a7d9ed311d93934d2a4413da04ebfd215cfae143bed446
-  languageName: node
-  linkType: hard
-
-"@blueprintjs/core@npm:^3.23.0":
-  version: 3.54.0
-  resolution: "@blueprintjs/core@npm:3.54.0"
-  dependencies:
-    "@blueprintjs/colors": ^4.0.0-alpha.3
-    "@blueprintjs/icons": ^3.33.0
-    "@juggle/resize-observer": ^3.3.1
-    "@types/dom4": ^2.0.1
-    classnames: ^2.2
-    dom4: ^2.1.5
-    normalize.css: ^8.0.1
-    popper.js: ^1.16.1
-    react-lifecycles-compat: ^3.0.4
-    react-popper: ^1.3.7
-    react-transition-group: ^2.9.0
-    tslib: ~2.3.1
-  peerDependencies:
-    react: ^15.3.0 || 16 || 17
-    react-dom: ^15.3.0 || 16 || 17
-  bin:
-    upgrade-blueprint-2.0.0-rename: scripts/upgrade-blueprint-2.0.0-rename.sh
-    upgrade-blueprint-3.0.0-rename: scripts/upgrade-blueprint-3.0.0-rename.sh
-  checksum: 97b8811bfc32284bb36e62a44210e84d5abe164ef553670866e0628718db4a98c79b9665f73014b1474f534a3d3260e94af274e669fb0ebfeb323305a81b5375
   languageName: node
   linkType: hard
 
@@ -1669,16 +1643,6 @@ __metadata:
     "@types/react":
       optional: true
   checksum: 6a3be461c9738175d104d0eb51ba0b68e812c6fbf542d34c145fc28144e7b2789451e3664c7682716e31153f8a15a5509b3744636266aa3672208c48cee42587
-  languageName: node
-  linkType: hard
-
-"@blueprintjs/icons@npm:^3.33.0":
-  version: 3.33.0
-  resolution: "@blueprintjs/icons@npm:3.33.0"
-  dependencies:
-    classnames: ^2.2
-    tslib: ~2.3.1
-  checksum: 9b1485a3ce17a97596b7fa7276ddbe85e33c56f061358351a626d353bf3eab6ab1b36a1860aec2feb7933ef0293c5f8e1f3342a89051720d1953343aab753cb3
   languageName: node
   linkType: hard
 
@@ -3099,7 +3063,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/cesium-vector-provider@npm:2.0.2, @macrostrat/cesium-vector-provider@npm:^2.0.2":
+"@macrostrat/cesium-vector-provider@npm:2.0.2":
   version: 2.0.2
   resolution: "@macrostrat/cesium-vector-provider@npm:2.0.2"
   dependencies:
@@ -3291,7 +3255,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@macrostrat/hyper@npm:^1.2.0, @macrostrat/hyper@npm:^1.2.12":
+"@macrostrat/hyper@npm:^1.2.12":
   version: 1.4.2
   resolution: "@macrostrat/hyper@npm:1.4.2"
   dependencies:
@@ -3411,7 +3375,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@macrostrat/mapbox-react@^2.1.0, @macrostrat/mapbox-react@workspace:deps/web-components/packages/mapbox-react":
+"@macrostrat/mapbox-react@^2.1.0, @macrostrat/mapbox-react@workspace:*, @macrostrat/mapbox-react@workspace:^2.1.0, @macrostrat/mapbox-react@workspace:deps/web-components/packages/mapbox-react":
   version: 0.0.0-use.local
   resolution: "@macrostrat/mapbox-react@workspace:deps/web-components/packages/mapbox-react"
   dependencies:
@@ -3466,21 +3430,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/router-components@npm:^1.0.2":
-  version: 1.0.2
-  resolution: "@macrostrat/router-components@npm:1.0.2"
-  dependencies:
-    "@blueprintjs/core": ^3.23.0
-    "@macrostrat/hyper": ^1.2.0
-    "@macrostrat/ui-components": ">=0.5.0"
-    classnames: ^2.3.1
-  peerDependencies:
-    react-router: ^5.0.1
-    react-router-dom: ^5.0.1
-  checksum: 67b3c0cad35a0d47e2219842b2cd57710b70e7ce56d6614c806ff999165d484f7d48dbd4fc2642869378e00d44ea7a8d21613d1c608560fd9e4b18be72e4bc27
-  languageName: node
-  linkType: hard
-
 "@macrostrat/style-system@workspace:*, @macrostrat/style-system@workspace:deps/web-components/packages/style-system":
   version: 0.0.0-use.local
   resolution: "@macrostrat/style-system@workspace:deps/web-components/packages/style-system"
@@ -3531,7 +3480,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@macrostrat/ui-components@>=0.5.0, @macrostrat/ui-components@^3.1.0, @macrostrat/ui-components@workspace:*, @macrostrat/ui-components@workspace:deps/web-components/packages/ui-components":
+"@macrostrat/ui-components@^3.1.0, @macrostrat/ui-components@workspace:*, @macrostrat/ui-components@workspace:deps/web-components/packages/ui-components":
   version: 0.0.0-use.local
   resolution: "@macrostrat/ui-components@workspace:deps/web-components/packages/ui-components"
   dependencies:
@@ -3587,6 +3536,7 @@ __metadata:
     "@macrostrat/cesium-vector-provider": 2.0.2
     "@macrostrat/cesium-viewer": "workspace:*"
     "@macrostrat/hyper": ^2.0.1
+    "@macrostrat/mapbox-react": "workspace:*"
     "@macrostrat/mapbox-utils": "workspace:*"
     cesium: ^1.109.0
     react: ^18
@@ -3610,18 +3560,14 @@ __metadata:
     "@loadable/component": ^5.14.1
     "@macrostrat/api-utils": "workspace:*"
     "@macrostrat/api-views": "workspace:*"
-    "@macrostrat/cesium-martini": ^1.2.3
-    "@macrostrat/cesium-vector-provider": ^2.0.2
-    "@macrostrat/cesium-viewer": "workspace:*"
     "@macrostrat/column-components": "workspace:*"
     "@macrostrat/column-views": "workspace:*"
     "@macrostrat/hyper": ^2.2.1
     "@macrostrat/map-interface": "workspace:*"
-    "@macrostrat/mapbox-react": ^2.1.0
+    "@macrostrat/mapbox-react": "workspace:^2.1.0"
     "@macrostrat/mapbox-styles": "workspace:*"
     "@macrostrat/mapbox-utils": "workspace:*"
     "@macrostrat/revision-info-webpack": ^1.0.0
-    "@macrostrat/router-components": ^1.0.2
     "@macrostrat/style-system": "workspace:*"
     "@macrostrat/timescale": "workspace:*"
     "@macrostrat/ui-components": "workspace:*"
@@ -3647,9 +3593,7 @@ __metadata:
     "@visx/scale": ^2.2.2
     "@vitejs/plugin-react": ^4.0.4
     "@yarnpkg/sdks": ^3.0.0-rc.39
-    "@znemz/cesium-navigation": ^4.0.0
     axios: ^0.25.0
-    browserify-zlib: ^0.2.0
     cesium: ^1.98.1
     chroma-js: ^2.4.2
     classnames: ^2.2.6
@@ -3668,7 +3612,6 @@ __metadata:
     immutability-helper: ^3.1.1
     mapbox-gl: ^2.15.0
     new-github-issue-url: ^1.0.0
-    path-browserify: ^1.0.1
     pbf: ^3.2.1
     prettier: ^2.7.1
     prop-types: ^15.6.0
@@ -3687,8 +3630,6 @@ __metadata:
     resium: ^1.13.1
     sass: ^1.49.0
     sirv: ^2.0.3
-    stream-browserify: ^3.0.0
-    stream-http: ^3.2.0
     stylus: ^0.55.0
     supports-color: ^9.4.0
     topojson-client: ^3.0.0
@@ -6230,7 +6171,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/dom4@npm:^2.0.1, @types/dom4@npm:^2.0.2":
+"@types/dom4@npm:^2.0.2":
   version: 2.0.2
   resolution: "@types/dom4@npm:2.0.2"
   checksum: 33af62348979c54dc227ad6c943c374a5e0e4af17f6d7d18957662c1247242ec8e0718a43a62bf4288de6d5e6e59f8e1801a499e3aa2e3899bf116e5b3170805
@@ -8739,15 +8680,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"browserify-zlib@npm:^0.2.0":
-  version: 0.2.0
-  resolution: "browserify-zlib@npm:0.2.0"
-  dependencies:
-    pako: ~1.0.5
-  checksum: 5cd9d6a665190fedb4a97dfbad8dabc8698d8a507298a03f42c734e96d58ca35d3c7d4085e283440bbca1cd1938cff85031728079bedb3345310c58ab1ec92d6
-  languageName: node
-  linkType: hard
-
 "browserslist@npm:^4.0.0, browserslist@npm:^4.21.10, browserslist@npm:^4.21.4, browserslist@npm:^4.21.9, browserslist@npm:^4.6.6":
   version: 4.21.11
   resolution: "browserslist@npm:4.21.11"
@@ -8815,13 +8747,6 @@ __metadata:
   version: 3.3.0
   resolution: "builtin-modules@npm:3.3.0"
   checksum: db021755d7ed8be048f25668fe2117620861ef6703ea2c65ed2779c9e3636d5c3b82325bd912244293959ff3ae303afa3471f6a15bf5060c103e4cc3a839749d
-  languageName: node
-  linkType: hard
-
-"builtin-status-codes@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "builtin-status-codes@npm:3.0.0"
-  checksum: 1119429cf4b0d57bf76b248ad6f529167d343156ebbcc4d4e4ad600484f6bc63002595cbb61b67ad03ce55cd1d3c4711c03bbf198bf24653b8392420482f3773
   languageName: node
   linkType: hard
 
@@ -9368,7 +9293,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"classnames@npm:*, classnames@npm:^2.2, classnames@npm:^2.2.5, classnames@npm:^2.2.6, classnames@npm:^2.3.0, classnames@npm:^2.3.1, classnames@npm:^2.3.2":
+"classnames@npm:*, classnames@npm:^2.2.5, classnames@npm:^2.2.6, classnames@npm:^2.3.0, classnames@npm:^2.3.1, classnames@npm:^2.3.2":
   version: 2.3.2
   resolution: "classnames@npm:2.3.2"
   checksum: 2c62199789618d95545c872787137262e741f9db13328e216b093eea91c85ef2bfb152c1f9e63027204e2559a006a92eb74147d46c800a9f96297ae1d9f96f4e
@@ -14905,7 +14830,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"inherits@npm:2, inherits@npm:2.0.4, inherits@npm:^2.0.1, inherits@npm:^2.0.3, inherits@npm:^2.0.4, inherits@npm:~2.0.1, inherits@npm:~2.0.3, inherits@npm:~2.0.4":
+"inherits@npm:2, inherits@npm:2.0.4, inherits@npm:^2.0.1, inherits@npm:^2.0.3, inherits@npm:^2.0.4, inherits@npm:~2.0.1, inherits@npm:~2.0.3":
   version: 2.0.4
   resolution: "inherits@npm:2.0.4"
   checksum: 4a48a733847879d6cf6691860a6b1e3f0f4754176e4d71494c41f3475553768b10f84b5ce1d40fbd0e34e6bfbb864ee35858ad4dd2cf31e02fc4a154b724d7f1
@@ -21207,13 +21132,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pako@npm:~1.0.5":
-  version: 1.0.11
-  resolution: "pako@npm:1.0.11"
-  checksum: 1be2bfa1f807608c7538afa15d6f25baa523c30ec870a3228a89579e474a4d992f4293859524e46d5d87fd30fa17c5edf34dbef0671251d9749820b488660b16
-  languageName: node
-  linkType: hard
-
 "parallel-transform@npm:^1.1.0":
   version: 1.2.0
   resolution: "parallel-transform@npm:1.2.0"
@@ -21378,13 +21296,6 @@ __metadata:
   version: 0.1.1
   resolution: "pascalcase@npm:0.1.1"
   checksum: f83681c3c8ff75fa473a2bb2b113289952f802ff895d435edd717e7cb898b0408cbdb247117a938edcbc5d141020909846cc2b92c47213d764e2a94d2ad2b925
-  languageName: node
-  linkType: hard
-
-"path-browserify@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "path-browserify@npm:1.0.1"
-  checksum: c6d7fa376423fe35b95b2d67990060c3ee304fc815ff0a2dc1c6c3cfaff2bd0d572ee67e18f19d0ea3bbe32e8add2a05021132ac40509416459fffee35200699
   languageName: node
   linkType: hard
 
@@ -23432,7 +23343,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-popper@npm:^1.3.11, react-popper@npm:^1.3.7":
+"react-popper@npm:^1.3.11":
   version: 1.3.11
   resolution: "react-popper@npm:1.3.11"
   dependencies:
@@ -23893,7 +23804,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"readable-stream@npm:3, readable-stream@npm:^3.0.0, readable-stream@npm:^3.1.1, readable-stream@npm:^3.4.0, readable-stream@npm:^3.5.0, readable-stream@npm:^3.6.0":
+"readable-stream@npm:3, readable-stream@npm:^3.0.0, readable-stream@npm:^3.1.1, readable-stream@npm:^3.4.0, readable-stream@npm:^3.6.0":
   version: 3.6.2
   resolution: "readable-stream@npm:3.6.2"
   dependencies:
@@ -25800,16 +25711,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"stream-browserify@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "stream-browserify@npm:3.0.0"
-  dependencies:
-    inherits: ~2.0.4
-    readable-stream: ^3.5.0
-  checksum: 4c47ef64d6f03815a9ca3874e2319805e8e8a85f3550776c47ce523b6f4c6cd57f40e46ec6a9ab8ad260fde61863c2718f250d3bedb3fe9052444eb9abfd9921
-  languageName: node
-  linkType: hard
-
 "stream-combiner2@npm:~1.1.1":
   version: 1.1.1
   resolution: "stream-combiner2@npm:1.1.1"
@@ -25827,18 +25728,6 @@ __metadata:
     end-of-stream: ^1.1.0
     stream-shift: ^1.0.0
   checksum: f243de78e9fcc60757994efc4e8ecae9f01a4b2c6a505d786b11fcaa68b1a75ca54afc1669eac9e08f19ff0230792fc40d0f3e3e2935d76971b4903af18b76ab
-  languageName: node
-  linkType: hard
-
-"stream-http@npm:^3.2.0":
-  version: 3.2.0
-  resolution: "stream-http@npm:3.2.0"
-  dependencies:
-    builtin-status-codes: ^3.0.0
-    inherits: ^2.0.4
-    readable-stream: ^3.6.0
-    xtend: ^4.0.2
-  checksum: c9b78453aeb0c84fcc59555518ac62bacab9fa98e323e7b7666e5f9f58af8f3155e34481078509b02929bd1268427f664d186604cdccee95abc446099b339f83
   languageName: node
   linkType: hard
 
@@ -27024,13 +26913,6 @@ __metadata:
   version: 2.6.2
   resolution: "tslib@npm:2.6.2"
   checksum: 329ea56123005922f39642318e3d1f0f8265d1e7fcb92c633e0809521da75eeaca28d2cf96d7248229deb40e5c19adf408259f4b9640afd20d13aecc1430f3ad
-  languageName: node
-  linkType: hard
-
-"tslib@npm:~2.3.1":
-  version: 2.3.1
-  resolution: "tslib@npm:2.3.1"
-  checksum: de17a98d4614481f7fcb5cd53ffc1aaf8654313be0291e1bfaee4b4bb31a20494b7d218ff2e15017883e8ea9626599b3b0e0229c18383ba9dce89da2adf15cb9
   languageName: node
   linkType: hard
 

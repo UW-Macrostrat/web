@@ -1,11 +1,5 @@
 import { MapPosition } from "@macrostrat/mapbox-utils";
 
-export enum MapBackend {
-  MAPBOX,
-  CESIUM,
-  MAPBOX3,
-}
-
 export enum MapLayer {
   SATELLITE = "satellite",
   LINES = "lines",
@@ -19,7 +13,6 @@ export enum MapLayer {
 
 type MapInitialState = {
   mapPosition: MapPosition;
-  mapBackend: MapBackend;
   mapLayers: Set<MapLayer>;
 };
 
@@ -34,7 +27,6 @@ type MapMoved = {
   };
 };
 
-type SetMapBackend = { type: "set-map-backend"; backend: any };
 type GetInitialMapState = { type: "get-initial-map-state" };
 type MapLoading = { type: "map-loading" };
 type MapIdle = { type: "map-idle" };
@@ -44,7 +36,6 @@ type ToggleMap3D = { type: "toggle-map-3d" };
 export type MapAction =
   | MapMoved
   | GetInitialMapState
-  | SetMapBackend
   | MapLoading
   | MapIdle
   | ToggleLayer

@@ -1,4 +1,4 @@
-import { MapBackend, MapLayer, PositionFocusState } from "../map";
+import { MapLayer, PositionFocusState } from "../map";
 import { CoreState, CoreAction } from "./types";
 import update, { Spec } from "immutability-helper";
 import { FilterData } from "../../handlers/filters";
@@ -29,7 +29,6 @@ const defaultState: CoreState = {
   infoMarkerPosition: null,
   crossSectionLine: null,
   crossSectionCursorLocation: [],
-  mapBackend: MapBackend.MAPBOX,
   mapLayers: new Set([MapLayer.BEDROCK, MapLayer.LINES, MapLayer.LABELS]),
   mapSettings: {
     highResolutionTerrain: true,
@@ -81,9 +80,6 @@ export function coreReducer(
   action: CoreAction
 ): CoreState {
   switch (action.type) {
-    case "set-map-backend": {
-      return { ...state, mapBackend: action.backend };
-    }
     case "map-loading":
       if (state.mapIsLoading) return state;
       return { ...state, mapIsLoading: true };

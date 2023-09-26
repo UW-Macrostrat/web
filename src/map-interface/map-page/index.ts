@@ -5,7 +5,7 @@ import Searchbar from "../components/navbar";
 import { Spinner, Button, Switch } from "@blueprintjs/core";
 import { useSelector } from "react-redux";
 import loadable from "@loadable/component";
-import { MapBackend, useAppState, useAppActions } from "../app-state";
+import { useAppState, useAppActions } from "../app-state";
 import styles from "./main.module.styl";
 import { useTransition } from "transition-hook";
 import { useContextPanelOpen, useContextClass } from "../app-state";
@@ -32,11 +32,9 @@ function MapView(props) {
 }
 
 export const MapPage = ({
-  backend = MapBackend.MAPBOX3,
   baseRoute = "/",
   menuPage = null,
 }: {
-  backend?: MapBackend;
   menuPage?: MenuPage;
 }) => {
   const runAction = useAppActions();
@@ -143,5 +141,5 @@ function InfoDrawerRoute() {
   });
 }
 
-export { MapBackend, MapAreaContainer };
+export { MapAreaContainer };
 export default MapPageRoutes;

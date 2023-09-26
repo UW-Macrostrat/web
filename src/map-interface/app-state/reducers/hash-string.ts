@@ -1,5 +1,5 @@
 import { setHashString, getHashString } from "@macrostrat/ui-components";
-import { MapBackend, MapLayer, CoreState, InfoMarkerPosition } from "./core";
+import { MapLayer, CoreState, InfoMarkerPosition } from "./core";
 import { MapPosition } from "@macrostrat/mapbox-utils";
 import { AppState, AppAction } from "./types";
 import { Filter, FilterType } from "../handlers/filters";
@@ -13,7 +13,6 @@ import {
 
 export function hashStringReducer(state: AppState, action: AppAction) {
   switch (action.type) {
-    case "set-map-backend":
     case "add-filter":
     case "remove-filter":
     case "clear-filters":
@@ -282,7 +281,6 @@ export function updateMapPositionForHash(
       ...state,
       mapPosition: position,
       mapLayers,
-      mapBackend: MapBackend.MAPBOX3,
       timeCursorAge: age != null ? Number(age) : null,
       plateModelId: Number(plate_model),
     };

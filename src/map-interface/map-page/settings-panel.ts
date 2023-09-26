@@ -1,21 +1,11 @@
 // Settings panel for the map
 
 // TODO: re-integrate LinkButton to @macrostrat/router-components
-import { LinkButton } from "~/map-interface/components/buttons";
-import { GlobeSettings } from "@macrostrat/cesium-viewer";
-import { useLocation } from "react-router";
+import { useAppState, useAppActions } from "~/map-interface/app-state";
 import {
-  MapBackend,
-  useAppState,
-  useAppActions,
-} from "~/map-interface/app-state";
-import { PerformanceDisplay } from "../performance";
-import {
-  Alignment,
   Switch,
   Icon,
   Button,
-  HTMLSelect,
   Intent,
   IconName,
   AnchorButton,
@@ -23,12 +13,8 @@ import {
 import hyper from "@macrostrat/hyper";
 import { Tag, Collapse, Callout, Text, NumericInput } from "@blueprintjs/core";
 import { useState } from "react";
-//import { LinkButton } from "@macrostrat/ui-components";
-//import { GlobeSettings } from "@macrostrat/cesium-viewer/settings";
-import { useMapPosition } from "@macrostrat/mapbox-react";
 import { useEffect } from "react";
 import { MapLayer } from "~/map-interface/app-state";
-//import { DisplayQuality } from "@macrostrat/cesium-viewer";
 import styles from "./settings-panel.module.styl";
 import {
   DarkModeButton,
@@ -39,21 +25,6 @@ import {
 import { LinkButton } from "../components/buttons";
 
 const h = hyper.styled(styles);
-
-function useMapBackend() {
-  return useAppState((d) => d.core.mapBackend);
-}
-
-function MapTypeButton(props) {
-  const { hash, pathname } = useLocation();
-
-  const globeActive = pathname?.startsWith("/globe");
-
-  const switchLink = globeActive ? "/settings" : "/globe/settings";
-  const name = globeActive ? "map" : "globe";
-
-  return h(LinkButton, { to: switchLink }, `Switch to ${name}`);
-}
 
 const ExperimentsPanel = (props) => {
   const dispatch = useAppActions();
@@ -71,15 +42,10 @@ const ExperimentsPanel = (props) => {
       },
       "Show sources"
     ),
-
-    //h(MapTypeButton),
-    //h.if(globeActive)(GlobeSettings),
   ]);
 };
 
 const SettingsPanel = (props) => {
-  //const { pathname } = useLocation();
-  //const globeActive = pathname?.startsWith("/globe");
   const runAction = useAppActions();
   const showExperiments = useAppState((s) => s.core.showExperimentsPanel);
   const age = useAppState((s) => s.core.timeCursorAge);
@@ -91,12 +57,8 @@ const SettingsPanel = (props) => {
 
   return h("div.settings", [
     h("p.info", "Display options for Macrostrat's map."),
-    //h(ButtonGroup, { vertical: true, alignText: Alignment.LEFT }, [
     h(LabelsButton),
     h(ThemeButton),
-    //h(HighResolutionTerrainSwitch),
-    // Geologic time input
-
     h(
       CalloutPanel,
       {
@@ -119,12 +81,12 @@ const SettingsPanel = (props) => {
   ]);
 };
 
-import { applyPosition } from "~/map-interface/app-state/reducers/hash-string";
+import { applyMapPositionToHash } from "~/map-interface/app-state/reducers/hash-string";
 
 function GlobeLink() {
   const mapPosition = useAppState((s) => s.core.mapPosition);
   let args = {};
-  applyPosition(args, mapPosition);
+  applyMapPositionToHash(args, mapPosition);
 
   return h(AnchorButton, {
     href:
