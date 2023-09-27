@@ -1,9 +1,6 @@
 import { Link } from "~/renderer/Link";
-import { Counter } from "./Counter";
 
-export { Page };
-
-function Page() {
+export function Page() {
   return (
     <>
       <h1>Macrostrat dev</h1>
