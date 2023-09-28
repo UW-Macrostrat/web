@@ -20,6 +20,7 @@
   "workspaces": [
     "deps/web-components/packages/*",
     "deps/cesium-viewer",
+    "deps/cesium-martini",
     "packages/*"
   ],
   "authors": [

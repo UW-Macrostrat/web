@@ -44,6 +44,7 @@ function CesiumView({ style, accessToken, ...rest }) {
       hasWaterMask: false,
       accessToken,
       highResolution: true,
+      skipZoomLevels: (z) => z % 3 != 0,
       credit: "Mapbox",
     })
   );
