@@ -25,22 +25,59 @@ import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
 import { useDarkMode, useAPIResult, JSONView } from "@macrostrat/ui-components";
 import { InfoDrawerContainer, ExpansionPanel } from "@macrostrat/map-interface";
 import { MapMarker } from "@macrostrat/map-interface";
+import { tempImageIndex, s3Address } from "../raster-images";
 
 const h = hyper.styled(styles);
 
+function rasterURL(source_id) {
+  const image = tempImageIndex[source_id];
+  if (image == null) return null;
+  return `${s3Address}/${image}`;
+}
+
 async function buildStyle({ style, mapboxToken, focusedMap }) {
-  const mapStyle = buildMacrostratStyle({
+  let mapStyle = buildMacrostratStyle({
     tileserverDomain: SETTINGS.burwellTileDomain,
     focusedMap,
     fillOpacity: style == null ? 0.8 : 0.4,
     strokeOpacity: style == null ? 0.8 : 0.2,
   });
+
+  console.log("Map", focusedMap);
+  const raster = rasterURL(focusedMap);
+  if (raster != null) {
+    const rasterStyle = {
+      version: 8,
+      sprite: "mapbox://sprites/mapbox/bright-v9",
+      glyphs: "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
+      sources: {
+        raster: {
+          type: "raster",
+          tiles: ["http://127.0.0.1:8000/tiles/{z}/{x}/{y}.png?url=" + raster],
+          tileSize: 256,
+        },
+      },
+      layers: [
+        {
+          id: "raster",
+          type: "raster",
+          source: "raster",
+          minzoom: 0,
+          maxzoom: 22,
+        },
+      ],
+    };
+
+    mapStyle = mergeStyles(rasterStyle, mapStyle);
+  }
+
   if (style == null) {
     return mapStyle;
   }
   const baseStyle = await getMapboxStyle(style, {
     access_token: mapboxToken,
   });
+
   console.log("Merging styles", baseStyle, mapStyle);
   return mergeStyles(baseStyle, mapStyle);
 }
