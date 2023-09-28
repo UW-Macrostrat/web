@@ -56,7 +56,7 @@ async function startServer() {
       return next()
     } else {
       const { body, statusCode, headers, earlyHints } = httpResponse
-      if (res.writeEarlyHints) res.writeEarlyHints({ link: earlyHints.map((e) => e.earlyHintLink) })
+      // if (res.writeEarlyHints) res.writeEarlyHints({ link: earlyHints.map((e) => e.earlyHintLink) })
       headers.forEach(([name, value]) => res.setHeader(name, value))
       res.status(statusCode)
       if (!res.hasHeader('Content-Type')) res.setHeader('Content-Type', 'text/html');
