@@ -25,6 +25,5 @@ COPY . ./
 
 RUN yarn cache clean
 RUN yarn add
-RUN yarn run bundle
 
-CMD ["yarn", "run", "server"]
+CMD ["sh", "server/server.sh"]
