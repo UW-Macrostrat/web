@@ -10,6 +10,7 @@ import {
   RadioGroup,
   NonIdealState,
   Collapse,
+  Switch,
 } from "@blueprintjs/core";
 import { SETTINGS } from "~/map-interface/settings";
 import { useMapRef } from "@macrostrat/mapbox-react";
@@ -25,24 +26,90 @@ import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
 import { useDarkMode, useAPIResult, JSONView } from "@macrostrat/ui-components";
 import { InfoDrawerContainer, ExpansionPanel } from "@macrostrat/map-interface";
 import { MapMarker } from "@macrostrat/map-interface";
+import { NullableSlider } from "@macrostrat/ui-components";
+import { tempImageIndex, s3Address } from "../raster-images";
 
 const h = hyper.styled(styles);
 
-async function buildStyle({ style, mapboxToken, focusedMap }) {
-  const mapStyle = buildMacrostratStyle({
-    tileserverDomain: SETTINGS.burwellTileDomain,
-    focusedMap,
-    fillOpacity: style == null ? 0.8 : 0.4,
-    strokeOpacity: style == null ? 0.8 : 0.2,
-  });
+function rasterURL(source_id) {
+  const image = tempImageIndex[source_id];
+  if (image == null) return null;
+  return `${s3Address}/${image}`;
+}
+
+interface StyleOpts {
+  style: string;
+  focusedMap: number;
+  layerOpacity: {
+    vector: number | null;
+    raster: number | null;
+  };
+}
+
+const emptyStyle: any = {
+  version: 8,
+  sprite: "mapbox://sprites/mapbox/bright-v9",
+  glyphs: "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
+  sources: {},
+  layers: [],
+};
+
+function buildOverlayStyle({
+  style,
+  focusedMap,
+  layerOpacity,
+}: StyleOpts): any {
+  let mapStyle = emptyStyle;
+  if (layerOpacity.vector != null) {
+    mapStyle = buildMacrostratStyle({
+      tileserverDomain: SETTINGS.burwellTileDomain,
+      focusedMap,
+      fillOpacity: layerOpacity.vector - 0.1,
+      strokeOpacity: layerOpacity.vector + 0.2,
+      lineOpacity: layerOpacity.vector + 0.4,
+    });
+  }
+
+  const raster = rasterURL(focusedMap);
+  if (raster != null && layerOpacity.raster != null) {
+    const rasterStyle = {
+      ...emptyStyle,
+      sources: {
+        raster: {
+          type: "raster",
+          tiles: [
+            SETTINGS.burwellTileDomain +
+              "/cog/tiles/{z}/{x}/{y}.png?url=" +
+              raster,
+          ],
+          tileSize: 256,
+        },
+      },
+      layers: [
+        {
+          id: "raster",
+          type: "raster",
+          source: "raster",
+          minzoom: 0,
+          maxzoom: 22,
+          layout: {
+            visibility: "visible",
+          },
+          paint: {
+            "raster-opacity": layerOpacity.raster,
+          },
+        },
+      ],
+    };
+
+    mapStyle = mergeStyles(rasterStyle, mapStyle);
+  }
+
   if (style == null) {
     return mapStyle;
   }
-  const baseStyle = await getMapboxStyle(style, {
-    access_token: mapboxToken,
-  });
-  console.log("Merging styles", baseStyle, mapStyle);
-  return mergeStyles(baseStyle, mapStyle);
+
+  return mergeStyles(style, mapStyle);
 }
 
 function ensureBoxInGeographicRange(bounds: LngLatBoundsLike) {
@@ -77,23 +144,95 @@ export default function MapInterface({ map }) {
     map.properties.name,
   ]);
 
+  const hasRaster = rasterURL(map.properties.source_id) != null;
+
   const bounds: LngLatBoundsLike = useMemo(() => {
     return ensureBoxInGeographicRange(boundingBox(map.geometry));
   }, [map.geometry]);
 
   const [layer, setLayer] = useState(Basemap.None);
+  const [style, setStyle] = useState(null);
+  // Basemap style
+  useEffect(() => {
+    if (layer == null) setStyle(null);
+    const styleURL = basemapStyle(layer, dark);
+    getMapboxStyle(styleURL, {
+      access_token: SETTINGS.mapboxAccessToken,
+    }).then(setStyle);
+  }, [layer, dark]);
+
   const [selectedLocation, setSelectedLocation] = useState(null);
 
+  const [layerOpacity, setLayerOpacity] = useState({
+    vector: 0.5,
+    raster: 0.5,
+  });
+
+  // Overlay style
   const [mapStyle, setMapStyle] = useState(null);
   useEffect(() => {
-    buildStyle({
-      style: basemapStyle(layer, dark),
-      mapboxToken: SETTINGS.mapboxAccessToken,
+    setMapStyle(
+      buildOverlayStyle({
+        style,
+        focusedMap: map.properties.source_id,
+        layerOpacity,
+      })
+    );
+  }, [
+    map.properties.source_id,
+    style,
+    layerOpacity.raster == null,
+    layerOpacity.vector == null,
+  ]);
+
+  // Layer opacity
+  useEffect(() => {
+    if (mapStyle == null) return;
+    const mergeLayers = buildOverlayStyle({
+      style,
       focusedMap: map.properties.source_id,
-    }).then((style) => {
-      setMapStyle(style);
-    });
-  }, [map.properties.source_id, layer, dark]);
+      layerOpacity,
+    }).layers;
+
+    for (const layer of mapStyle.layers) {
+      let mergeLayer = mergeLayers.find((l) => l.id == layer.id);
+      layer.layout ??= {};
+      layer.paint ??= {};
+      if (mergeLayer == null) {
+        layer.layout.visibility = "none";
+        continue;
+      } else {
+        layer.layout.visibility = "visible";
+      }
+      for (const prop in ["fill-opacity", "line-opacity", "raster-opacity"]) {
+        if (mergeLayer.paint[prop] != null) {
+          layer.paint[prop] = mergeLayer.paint[prop];
+        }
+      }
+      setMapStyle({ ...mapStyle, layers: mergeLayers });
+    }
+  }, [layerOpacity]);
+
+  // useEffect(() => {
+  //   if (mapStyle == null) return;
+  //   const layers = mapStyle.layers;
+  //   const rasterLayer = layers.find((l) => l.id == "raster");
+  //   if (rasterLayer == null) return;
+  //   rasterLayer.paint ??= {};
+  //   rasterLayer.paint["raster-opacity"] = layerOpacity.raster;
+  //   setMapStyle({ ...mapStyle, layers });
+  // }, [layerOpacity.raster]);
+
+  // useEffect(() => {
+  //   if (mapStyle == null) return;
+  //   const layers = mapStyle.layers;
+  //   const vectorLayers = layers.filter((l) => l.type == "fill");
+  //   for (const layer of vectorLayers) {
+  //     layer.paint ??= {};
+  //     layer.paint["fill-opacity"] = layerOpacity.vector;
+  //   }
+  //   setMapStyle({ ...mapStyle, layers });
+  // }, [layerOpacity.vector]);
 
   const maxBounds: LatLngBoundsLike = useMemo(() => {
     const dx = bounds[2] - bounds[0];
@@ -110,12 +249,34 @@ export default function MapInterface({ map }) {
 
   if (bounds == null || mapStyle == null) return h(Spinner);
 
+  const contextPanel = h(PanelCard, [
+    h("div.vector-controls", [
+      h("h3", "Vector map"),
+      h(OpacitySlider, {
+        opacity: layerOpacity.vector,
+        setOpacity(v) {
+          setLayerOpacity({ ...layerOpacity, vector: v });
+        },
+      }),
+    ]),
+    h.if(hasRaster)("div.raster-controls", [
+      h("h3", "Raster map"),
+      h(OpacitySlider, {
+        opacity: layerOpacity.raster,
+        setOpacity(v) {
+          setLayerOpacity({ ...layerOpacity, raster: v });
+        },
+      }),
+    ]),
+    h(BaseLayerSelector, { layer, setLayer }),
+  ]);
+
   return h(
     MapAreaContainer,
     {
       className: "single-map",
       navbar: h(MapNavbar, { title, parentRoute: "/maps", isOpen, setOpen }),
-      contextPanel: h(PanelCard, [h(BaseLayerSelector, { layer, setLayer })]),
+      contextPanel,
       contextPanelOpen: isOpen,
       detailPanel: h(MapLegendPanel, { source_id: map.properties.source_id }),
     },
@@ -236,5 +397,20 @@ function LegendEntry({ data }) {
   return h("div.legend-entry", [
     title,
     h(Collapse, { isOpen }, h(JSONView, { data: r1, hideRoot: true })),
+  ]);
+}
+
+function OpacitySlider(props) {
+  return h("div.opacity-slider", [
+    h(NullableSlider, {
+      value: props.opacity,
+      min: 0.1,
+      max: 1,
+      labelStepSize: 0.2,
+      stepSize: 0.1,
+      onChange(v) {
+        props.setOpacity(v);
+      },
+    }),
   ]);
 }
