@@ -75,6 +75,7 @@ function App({ accessToken }) {
   const style = "mapbox://styles/jczaplewski/cklb8aopu2cnv18mpxwfn7c9n";
   const [showWireframe, setShowWireframe] = useState(false);
   const [showInspector, setShowInspector] = useState(false);
+  const [useGoogleTiles, setUseGoogleTiles] = useState(false);
   const [showMapbox, setShowMapbox] = useState(false);
   const [position, setPosition] = useState<MapPosition>(
     initialPosition.current
@@ -134,6 +135,11 @@ function App({ accessToken }) {
           show: showMapbox,
           setShown: setShowMapbox,
         }),
+        h(VisControl, {
+          name: "Google tiles",
+          show: useGoogleTiles,
+          setShown: setUseGoogleTiles,
+        }),
         h(Link, { href: mapURL }, "Switch to map"),
         h(GoogleEarthLink, { position }, "Open in Google Earth"),
       ]),
@@ -146,6 +152,7 @@ function App({ accessToken }) {
           flyTo,
           showWireframe,
           showInspector,
+          useGoogleTiles,
           highResolution: true,
           displayQuality: DisplayQuality.High,
           onViewChange,
