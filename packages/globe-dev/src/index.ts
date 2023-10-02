@@ -75,6 +75,7 @@ function App({ accessToken }) {
   const style = "mapbox://styles/jczaplewski/cklb8aopu2cnv18mpxwfn7c9n";
   const [showWireframe, setShowWireframe] = useState(false);
   const [showInspector, setShowInspector] = useState(false);
+  const [useGoogleTiles, setUseGoogleTiles] = useState(false);
   const [showMapbox, setShowMapbox] = useState(false);
   const [showGeology, setShowGeology] = useState(false);
   const [position, setPosition] = useState<MapPosition>(
@@ -136,6 +137,11 @@ function App({ accessToken }) {
           setShown: setShowMapbox,
         }),
         h(VisControl, {
+          name: "Google tiles",
+          show: useGoogleTiles,
+          setShown: setUseGoogleTiles,
+        }),
+        h(VisControl, {
           name: "geology",
           show: showGeology,
           setShown: setShowGeology,
@@ -153,6 +159,7 @@ function App({ accessToken }) {
           showWireframe,
           showInspector,
           showGeology,
+          useGoogleTiles,
           highResolution: true,
           displayQuality: DisplayQuality.High,
           onViewChange,

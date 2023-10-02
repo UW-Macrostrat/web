@@ -1,7 +1,7 @@
 // Import @types/cesium to use along with CesiumJS
 //import VectorProvider from "@macrostrat/cesium-vector-provider";
 import TerrainProvider from "@macrostrat/cesium-martini";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import h from "@macrostrat/hyper";
 import { ImageryLayer } from "resium";
 import CesiumViewer, {
@@ -10,6 +10,11 @@ import CesiumViewer, {
   SatelliteLayer,
   GeologyLayer,
 } from "@macrostrat/cesium-viewer";
+import { useCesium } from "resium";
+import {
+  MapboxImageryProvider,
+  createGooglePhotorealistic3DTileset,
+} from "cesium";
 import { MapboxImageryProvider } from "cesium";
 import { elevationLayerURL } from "@macrostrat-web/settings";
 
@@ -36,7 +41,7 @@ function buildSatelliteLayer({ accessToken }) {
   return provider;
 }
 
-function CesiumView({ style, showGeology, accessToken, ...rest }) {
+function CesiumView({ style, showGeology, accessToken, useGoogleTiles = false, ...rest }) {
   const terrainProvider = useRef(
     new TerrainProvider({
       hasVertexNormals: false,
@@ -49,7 +54,25 @@ function CesiumView({ style, showGeology, accessToken, ...rest }) {
     })
   );
 
-  console.log("Access token", accessToken);
+  if (useGoogleTiles) {
+    return h(
+      CesiumViewer,
+      {
+        terrainProvider: null,
+        displayQuality: DisplayQuality.High,
+        fogDensity: 0.0002,
+        //skyBox: true,
+        showInspector: true,
+        showIonLogo: false,
+        ...rest,
+      },
+      [
+        h(GooglePhotorealistic3DTileset, {
+          googleMapsAPIKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+        }),
+      ]
+    );
+  }
 
   return h(
     CesiumViewer,
@@ -68,6 +91,26 @@ function CesiumView({ style, showGeology, accessToken, ...rest }) {
       h(MapboxLogo),
     ]
   );
+}
+
+// https://cesium.com/learn/cesiumjs-learn/cesiumjs-photorealistic-3d-tiles/
+function GooglePhotorealistic3DTileset({ googleMapsAPIKey }) {
+  const viewer = useCesium();
+  const tileset = useRef(null);
+  useEffect(() => {
+    if (tileset.current != null) {
+      viewer.scene.primitives.add(tileset.current);
+    } else {
+      createGooglePhotorealistic3DTileset(googleMapsAPIKey).then((ts) => {
+        tileset.current = ts;
+        viewer.scene.primitives.add(ts);
+      });
+    }
+    return () => {
+      viewer.scene.primitives.remove(tileset.current);
+    };
+  }, [googleMapsAPIKey, viewer]);
+  return null;
 }
 
 export default CesiumView;
