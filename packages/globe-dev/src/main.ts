@@ -35,7 +35,7 @@ var opts = {
   // Makes cesium not render high fps all the time
   requestRenderMode: true,
   // Use full scene buffer (respecting pixel ratio) if this is false
-  useBrowserRecommendedResolution: false,
+  //useBrowserRecommendedResolution: false,
   // We have a bug in the tile bounding box calculation somewhere.
   terrainExaggeration: 1.0,
   baseLayer: new Cesium.ImageryLayer(satellite),

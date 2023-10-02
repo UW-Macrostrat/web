@@ -24,15 +24,18 @@ import { MapboxImageryProvider } from "cesium";
 //   return h(ImageryLayer, { imageryProvider: provider.current, ...rest });
 // }
 
+function buildSatelliteLayer({ accessToken }) {
+  const provider = new MapboxImageryProvider({
+    mapId: "mapbox.satellite",
+    maximumLevel: 19,
+    accessToken,
+  });
+  return provider;
+}
+
 const SatelliteLayer = (props) => {
   const { accessToken, ...rest } = props;
-  let satellite = useRef(
-    new MapboxImageryProvider({
-      mapId: "mapbox.satellite",
-      maximumLevel: 19,
-      accessToken,
-    })
-  );
+  let satellite = useRef(buildSatelliteLayer({ accessToken }));
 
   return h(ImageryLayer, { imageryProvider: satellite.current, ...rest });
 };
@@ -54,6 +57,8 @@ function CesiumView({ style, accessToken, ...rest }) {
     {
       terrainProvider: terrainProvider.current,
       displayQuality: DisplayQuality.High,
+      fogDensity: 0.0002,
+      //skyBox: true,
       showInspector: true,
       showIonLogo: false,
       ...rest,
