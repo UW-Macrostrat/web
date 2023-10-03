@@ -51,6 +51,23 @@ function getStartingPosition(): MapPosition {
 
 const _CesiumView = memo(CesiumView);
 
+function GoogleEarthLink({ position }) {
+  const base = "https://earth.google.com/web/";
+  const { camera, target } = position;
+  const { altitude, pitch, bearing, azimuth } = camera;
+  let url = base;
+  if (target == null) {
+    url += `@${camera.lat},${camera.lng},${
+      altitude * 100
+    }d,${bearing}h,${pitch}t`;
+  } else {
+    const { lat, lng, distance } = target;
+    url += `@${lat},${lng},${distance}d,${bearing}h,${pitch}t`;
+  }
+
+  return h("a", { href: url, target: "_blank" }, "Open in Google Earth");
+}
+
 function App({ accessToken }) {
   const initialPosition = useRef<MapPosition>(getStartingPosition());
 
@@ -118,6 +135,7 @@ function App({ accessToken }) {
           setShown: setShowMapbox,
         }),
         h(Link, { href: mapURL }, "Switch to map"),
+        h(GoogleEarthLink, { position }, "Open in Google Earth"),
       ]),
     ]),
     h("div.map-container", [
