@@ -30,6 +30,7 @@ for (const [key, value] of Object.entries(gitEnv)) {
 }
 
 const cesiumRoot = require.resolve("cesium").replace("/index.cjs", "/Build");
+const cesiumBuildPath = path.resolve(cesiumRoot, "Cesium");
 
 const config: UserConfig = {
   cacheDir: ".vite",
@@ -54,7 +55,10 @@ const config: UserConfig = {
     to allow for client-side routing */
     //rewriteAll(),
     ssr(),
-    cesium({ cesiumBuildPath: cesiumRoot, cesiumBuildRootPath: cesiumRoot }),
+    cesium({
+      cesiumBuildPath: cesiumBuildPath,
+      cesiumBuildRootPath: cesiumRoot,
+    }),
   ],
   envDir: path.resolve(__dirname),
   build: {
