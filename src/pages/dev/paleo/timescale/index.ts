@@ -1,11 +1,9 @@
 import hyper from "@macrostrat/hyper";
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import { Timescale } from "@macrostrat/timescale";
-import { useElementSize, useAPIResult } from "@macrostrat/ui-components";
-import { useAppActions } from "../../../../map-interface/app-state";
-import { HTMLSelect, Spinner, Button } from "@blueprintjs/core";
+import { useElementSize } from "@macrostrat/ui-components";
+import { Spinner, Button } from "@blueprintjs/core";
 import styles from "./main.module.styl";
-import { useAppState } from "../../../../map-interface/app-state";
 
 const h = hyper.styled(styles);
 
