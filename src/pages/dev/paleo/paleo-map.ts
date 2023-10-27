@@ -1,6 +1,6 @@
 import h from "@macrostrat/hyper";
 import { MacrostratVectorTileset } from "~/dev/map-layers";
-import { DevMapPage } from "@macrostrat/map-interface";
+import { DevMapPage } from "./map-area";
 import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
 import { useStoredState } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
@@ -9,40 +9,9 @@ import { SETTINGS } from "~/map-interface/settings";
 // Having to include these global styles is a bit awkward
 import "~/styles/global.styl";
 
-export default function PaleoMap() {
-  return h(VectorMapInspectorPage, {
-    tileset: MacrostratVectorTileset.Carto,
-  });
-}
-
 // Import other components
 
-const _macrostratStyle = buildMacrostratStyle({
-  tileserverDomain: SETTINGS.burwellTileDomain,
-}) as mapboxgl.Style;
-
-function isStateValid(state) {
-  if (state == null) {
-    return false;
-  }
-  if (typeof state != "object") {
-    return false;
-  }
-  // Must have several specific boolean keys
-  for (let k of ["showLineSymbols", "xRay", "showTileExtent", "bypassCache"]) {
-    if (typeof state[k] != "boolean") {
-      return false;
-    }
-  }
-  return true;
-}
-
-const defaultState = {
-  showLineSymbols: false,
-  bypassCache: true,
-};
-
-export function VectorMapInspectorPage({
+export default function PaleoMap({
   tileset = MacrostratVectorTileset.CartoSlim,
   overlayStyle = _macrostratStyle,
   title = null,
@@ -64,7 +33,7 @@ export function VectorMapInspectorPage({
   return h(DevMapPage, {
     headerElement,
     mapboxToken: SETTINGS.mapboxAccessToken,
-    title: title ?? tileset,
+    title: "Paleogeography",
     overlayStyle: _overlayStyle,
   });
 }
@@ -89,4 +58,24 @@ export function replaceSourcesForTileset(
       },
     },
   };
+}
+
+const _macrostratStyle = buildMacrostratStyle({
+  tileserverDomain: SETTINGS.burwellTileDomain,
+}) as mapboxgl.Style;
+
+function isStateValid(state) {
+  if (state == null) {
+    return false;
+  }
+  if (typeof state != "object") {
+    return false;
+  }
+  // Must have several specific boolean keys
+  for (let k of ["showLineSymbols", "xRay", "showTileExtent", "bypassCache"]) {
+    if (typeof state[k] != "boolean") {
+      return false;
+    }
+  }
+  return true;
 }
