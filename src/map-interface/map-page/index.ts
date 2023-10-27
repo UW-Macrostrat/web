@@ -12,7 +12,6 @@ import { useContextPanelOpen, useContextClass } from "../app-state";
 import { MapAreaContainer } from "@macrostrat/map-interface";
 import { Routes, Route, useParams } from "react-router-dom";
 import classNames from "classnames";
-import { TimescalePanel } from "../../pages/dev/paleo/timescale";
 import { MenuPage, PanelCard } from "./menu";
 import { mapPagePrefix } from "../settings";
 import MapContainer from "./map-view";
@@ -69,8 +68,6 @@ export const MapPage = ({
     return h(Spinner);
   }
 
-  const bottomPanel = inPaleoMode ? h(TimescalePanel) : h(ElevationChart, null);
-
   return h(
     MapAreaContainer,
     {
@@ -86,7 +83,7 @@ export const MapPage = ({
         }),
       ]),
 
-      bottomPanel,
+      bottomPanel: h(ElevationChart, null),
       contextPanelOpen: contextPanelOpen || inputFocus,
       detailPanelOpen: infoDrawerOpen,
       className: classNames(

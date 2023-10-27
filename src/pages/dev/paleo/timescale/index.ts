@@ -6,13 +6,10 @@ import { useAppActions } from "../../../../map-interface/app-state";
 import { HTMLSelect, Spinner, Button } from "@blueprintjs/core";
 import styles from "./main.module.styl";
 import { useAppState } from "../../../../map-interface/app-state";
-import { SETTINGS } from "~/map-interface/settings";
 
 const h = hyper.styled(styles);
 
-function BrokenTimescale({ length, ageRange = [1000, 0] }) {
-  const runAction = useAppActions();
-  const age = useAppState((s) => s.core.timeCursorAge);
+function BrokenTimescale({ length, ageRange = [1000, 0], age, setAge }) {
   if (length == null) return h(Spinner);
 
   let [maxAge, minAge] = ageRange;
@@ -37,10 +34,7 @@ function BrokenTimescale({ length, ageRange = [1000, 0] }) {
     absoluteAgeScale: true,
     levels: ageSpan < 80 ? [2, 4] : [1, 3],
     onClick(d, t) {
-      runAction({
-        type: "set-time-cursor",
-        age: Math.round(t),
-      });
+      setAge(Math.round(t));
     },
   };
 
@@ -60,76 +54,17 @@ function BrokenTimescale({ length, ageRange = [1000, 0] }) {
   ]);
 }
 
-function PlateModelSelector({ models }) {
-  const runAction = useAppActions();
-  const plateModelId = useAppState((s) => s.core.plateModelId);
-
-  if (models == null) return null;
-
-  const onChange = (evt) => {
-    const { value } = evt.target;
-    runAction({
-      type: "set-plate-model",
-      plateModel: value,
-    });
-  };
-
-  return h(HTMLSelect, {
-    value: plateModelId,
-    onChange,
-    options: models
-      .filter((d) => {
-        return d.id != 5;
-      })
-      .map((d) => ({
-        label: d.name,
-        value: d.id,
-      })),
-  });
-}
-
-export function TimescalePanel() {
-  const plateModelId = useAppState((s) => s.core.plateModelId);
-  const models = useAPIResult(
-    SETTINGS.burwellTileDomain + "/carto/rotation-models"
-  );
+export function TimescalePanel({ age, setAge, ageRange }) {
   const ref = useRef<HTMLDivElement>(null);
-  const age = useAppState((s) => s.core.timeCursorAge);
   const sz = useElementSize(ref);
-  const model = models?.find((d) => d.id == plateModelId);
-  const runAction = useAppActions();
-
-  useEffect(() => {
-    if (model == null) return;
-    const { max_age, min_age } = model;
-    if (age > max_age) {
-      runAction({
-        type: "set-time-cursor",
-        age: max_age,
-      });
-    } else if (age < min_age) {
-      runAction({
-        type: "set-time-cursor",
-        age: min_age,
-      });
-    }
-  }, [model]);
 
   return h("div.timescale-panel", [
-    h("div.controls", [
-      h("h3", [
-        h("span", "Age:"),
-        " ",
-        h("span.age", age),
-        " ",
-        h("span", "Ma"),
-      ]),
-      h(PlateModelSelector, { models }),
-    ]),
     h("div.timescale-holder", { ref }, [
       h(BrokenTimescale, {
         length: sz?.width,
-        ageRange: ageRangeForModel(model),
+        ageRange,
+        age,
+        setAge,
       }),
     ]),
     h(Button, {
@@ -138,14 +73,8 @@ export function TimescalePanel() {
       small: true,
       className: "close-button",
       onClick() {
-        runAction({ type: "set-time-cursor", age: null });
+        //runAction({ type: "set-time-cursor", age: null });
       },
     }),
   ]);
-}
-
-function ageRangeForModel(model) {
-  if (model == null) return [3500, 0];
-  const { max_age, min_age } = model;
-  return [max_age ?? 3500, min_age ?? 0];
 }

@@ -1,6 +1,5 @@
 // Import other components
-import { Switch } from "@blueprintjs/core";
-import hyper from "@macrostrat/hyper";
+import { Switch, HTMLSelect } from "@blueprintjs/core";
 import { Spacer, useDarkMode, useStoredState } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
 import { useCallback, useState, useEffect } from "react";
@@ -20,6 +19,9 @@ import {
   buildXRayStyle,
 } from "@macrostrat/map-interface";
 import { MapPosition } from "@macrostrat/mapbox-utils";
+import { TimescalePanel } from "./timescale";
+import { useAPIResult } from "@macrostrat/ui-components";
+import { SETTINGS } from "~/map-interface/settings";
 
 export enum MacrostratVectorTileset {
   Carto = "carto",
@@ -85,6 +87,24 @@ export function DevMapPage({
 
   const [actualStyle, setActualStyle] = useState(style);
 
+  const [plateModelId, setPlateModelId] = useState(null);
+  const [age, setAge] = useState(null);
+
+  const models: { id: string; max_age: number; min_age: number }[] =
+    useAPIResult(SETTINGS.burwellTileDomain + "/carto/rotation-models");
+
+  const model = models?.find((d) => d.id == plateModelId);
+
+  useEffect(() => {
+    if (model == null) return;
+    const { max_age, min_age } = model;
+    if (age > max_age) {
+      setAge(max_age);
+    } else if (age < min_age) {
+      setAge(min_age);
+    }
+  }, [model]);
+
   useEffect(() => {
     buildInspectorStyle(style, overlayStyle, {
       mapboxToken,
@@ -139,6 +159,12 @@ export function DevMapPage({
         }),
       ]),
       contextPanel: h(PanelCard, [
+        h(PlateModelControls, {
+          models,
+          activeModel: plateModelId,
+          setModel: setPlateModelId,
+          age,
+        }),
         h(Switch, {
           checked: xRay,
           label: "X-ray mode",
@@ -150,6 +176,11 @@ export function DevMapPage({
       ]),
       detailPanel: detailElement,
       contextPanelOpen: isOpen,
+      bottomPanel: h(TimescalePanel, {
+        age,
+        setAge,
+        ageRange: ageRangeForModel(model),
+      }),
     },
     h(
       MapView,
@@ -172,4 +203,39 @@ export function DevMapPage({
       ]
     )
   );
+}
+
+function ageRangeForModel(model) {
+  if (model == null) return [3500, 0];
+  const { max_age, min_age } = model;
+  return [max_age ?? 3500, min_age ?? 0];
+}
+
+function PlateModelControls({ models, activeModel, age, setModel }) {
+  return h("div.controls", [
+    h("h3", [h("span", "Age:"), " ", h("span.age", age), " ", h("span", "Ma")]),
+    h(PlateModelSelector, { models, activeModel, setModel }),
+  ]);
+}
+
+function PlateModelSelector({ models, activeModel, setModel }) {
+  if (models == null) return null;
+
+  const onChange = (evt) => {
+    const { value } = evt.target;
+    setModel(value);
+  };
+
+  return h(HTMLSelect, {
+    value: activeModel,
+    onChange,
+    options: models
+      .filter((d) => {
+        return d.id != 5;
+      })
+      .map((d) => ({
+        label: d.name,
+        value: d.id,
+      })),
+  });
 }
