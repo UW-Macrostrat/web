@@ -6,6 +6,7 @@ import { useAppActions } from "../app-state";
 import { HTMLSelect, Spinner, Button } from "@blueprintjs/core";
 import styles from "./main.module.styl";
 import { useAppState } from "../app-state";
+import { SETTINGS } from "~/map-interface/settings";
 
 const h = hyper.styled(styles);
 
@@ -89,7 +90,9 @@ function PlateModelSelector({ models }) {
 
 export function TimescalePanel() {
   const plateModelId = useAppState((s) => s.core.plateModelId);
-  const models = useAPIResult("https://rotate.macrostrat.org/api/model");
+  const models = useAPIResult(
+    SETTINGS.burwellTileDomain + "/carto/rotation-models"
+  );
   const ref = useRef<HTMLDivElement>(null);
   const age = useAppState((s) => s.core.timeCursorAge);
   const sz = useElementSize(ref);

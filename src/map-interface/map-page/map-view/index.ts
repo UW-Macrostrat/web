@@ -22,9 +22,8 @@ import {
   useAppActions,
   useAppState,
 } from "~/map-interface/app-state";
-import { SETTINGS } from "../../settings";
 import styles from "../main.module.styl";
-import { applyAgeModelStyles } from "../map-style";
+import { applyAgeModelStyles } from "@macrostrat/mapbox-styles";
 import {
   buildMacrostratStyle,
   MapSourcesLayer,
@@ -35,6 +34,7 @@ import {
   HoveredFeatureManager,
   MacrostratLayerManager,
 } from "./map";
+import { SETTINGS } from "~/map-interface/settings";
 
 const h = hyper.styled(styles);
 
@@ -79,13 +79,14 @@ export default function MainMapView(props) {
     });
 
     if (timeCursorAge != null) {
-      return applyAgeModelStyles(
-        timeCursorAge,
-        plateModelId ?? 1,
+      return applyAgeModelStyles(baseStyle, overlayStyles, {
+        age: timeCursorAge,
+        model: plateModelId ?? 1,
         baseStyle,
         overlayStyles,
-        isDarkMode
-      );
+        isDarkMode,
+        tileserverDomain: SETTINGS.burwellTileDomain,
+      });
     }
     return mergeStyles(baseStyle, overlayStyles);
   }, [baseStyle, timeCursorAge, plateModelId, isDarkMode, focusedMapSource]);
