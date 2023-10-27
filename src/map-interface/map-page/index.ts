@@ -12,7 +12,7 @@ import { useContextPanelOpen, useContextClass } from "../app-state";
 import { MapAreaContainer } from "@macrostrat/map-interface";
 import { Routes, Route, useParams } from "react-router-dom";
 import classNames from "classnames";
-import { TimescalePanel } from "../paleo";
+import { TimescalePanel } from "../../pages/dev/paleo/timescale";
 import { MenuPage, PanelCard } from "./menu";
 import { mapPagePrefix } from "../settings";
 import MapContainer from "./map-view";
