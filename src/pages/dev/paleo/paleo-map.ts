@@ -2,9 +2,9 @@ import h from "@macrostrat/hyper";
 import { MacrostratVectorTileset } from "~/dev/map-layers";
 import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
 import mapboxgl from "mapbox-gl";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useReducer } from "react";
 import { SETTINGS } from "~/map-interface/settings";
-import { Switch, HTMLSelect } from "@blueprintjs/core";
+import { Switch, HTMLSelect, Spinner } from "@blueprintjs/core";
 import { Spacer, useDarkMode, useStoredState } from "@macrostrat/ui-components";
 import { useState, useEffect } from "react";
 import {
@@ -20,20 +20,77 @@ import {
   PanelCard,
   buildInspectorStyle,
 } from "@macrostrat/map-interface";
-import { MapPosition } from "@macrostrat/mapbox-utils";
 import { TimescalePanel } from "./timescale";
 import { useAPIResult } from "@macrostrat/ui-components";
+import { getHashString, setHashString } from "@macrostrat/ui-components";
 
 // Having to include these global styles is a bit awkward
 import "~/styles/global.styl";
 
 // Import other components
 
+type PaleogeographyState = {
+  model_id: number;
+  age: number;
+};
+
+type PaleogeographyAction =
+  | { type: "set-model"; model_id: number }
+  | { type: "set-age"; age: number }
+  | { type: "initialize"; state: PaleogeographyState };
+
+function usePaleogeographyState(
+  defaultState: PaleogeographyState
+): [PaleogeographyState, (s: PaleogeographyAction) => void] {
+  /** Use state synced with hash string for paleogeography layer */
+  const defaultModelID = defaultState.model_id;
+  const defaultAge = defaultState.age;
+
+  const [state, dispatch] = useReducer(
+    (state: PaleogeographyState, action: PaleogeographyAction) => {
+      console.log(state, action);
+      switch (action.type) {
+        case "set-model":
+          return {
+            ...state,
+            model_id: action.model_id,
+            age: state.age ?? defaultAge,
+          };
+        case "set-age":
+          return { ...state, age: action.age };
+        case "initialize":
+          return action.state;
+      }
+    },
+    { model_id: null, age: null }
+  );
+
+  useEffect(() => {
+    const { model_id, age } = state;
+    if (model_id == null || age == null) return;
+    setHashString({ model_id, age }, { sort: false });
+  }, [state]);
+
+  useEffect(() => {
+    const { model_id, age } = getHashString(window.location.hash) ?? {};
+    if (model_id == null || age == null) return;
+    if (Array.isArray(model_id)) return;
+    if (Array.isArray(age)) return;
+    dispatch({
+      type: "initialize",
+      state: {
+        model_id: parseInt(model_id) ?? defaultModelID,
+        age: parseInt(age) ?? defaultAge,
+      },
+    });
+  }, []);
+
+  return [state, dispatch];
+}
+
 export default function PaleoMap({
   tileset = MacrostratVectorTileset.CartoSlim,
   overlayStyle = _macrostratStyle,
-  title = null,
-  headerElement = null,
   children,
 }: {
   headerElement?: React.ReactElement;
@@ -44,58 +101,22 @@ export default function PaleoMap({
 }) {
   // A stripped-down page for map development
 
-  const _overlayStyle = useMemo(() => {
-    return replaceSourcesForTileset(overlayStyle, 6, 0);
-  }, [tileset, overlayStyle]) as mapboxgl.Style;
-
-  return h(DevMapPage, {
-    headerElement,
-    mapboxToken: SETTINGS.mapboxAccessToken,
-    title: "Paleogeography",
-    overlayStyle: _overlayStyle,
-  });
-}
-
-export function DevMapPage({
-  title = "Map inspector",
-  headerElement = null,
-  transformRequest = null,
-  mapPosition = null,
-  mapboxToken = null,
-  overlayStyle = null,
-  children,
-  style,
-  focusedSource = null,
-  focusedSourceTitle = null,
-  projection = null,
-}: {
-  headerElement?: React.ReactElement;
-  transformRequest?: mapboxgl.TransformRequestFunction;
-  title?: string;
-  style?: mapboxgl.Style | string;
-  children?: React.ReactNode;
-  mapboxToken?: string;
-  overlayStyle?: mapboxgl.Style | string;
-  focusedSource?: string;
-  focusedSourceTitle?: string;
-  projection?: string;
-  mapPosition?: MapPosition;
-}) {
   /* We apply a custom style to the panel container when we are interacting
     with the search bar, so that we can block map interactions until search
     bar focus is lost.
     We also apply a custom style when the infodrawer is open so we can hide
     the search bar on mobile platforms
   */
-
+  const title = "Paleogeography";
   const dark = useDarkMode();
   const isEnabled = dark?.isEnabled;
+  const mapboxToken = SETTINGS.mapboxAccessToken;
+  mapboxgl.accessToken = mapboxToken;
 
-  if (mapboxToken != null) {
-    mapboxgl.accessToken = mapboxToken;
-  }
+  let transformRequest = null;
+  let mapPosition = null;
 
-  style ??= isEnabled
+  const style = isEnabled
     ? "mapbox://styles/mapbox/dark-v10"
     : "mapbox://styles/mapbox/light-v10";
 
@@ -108,9 +129,13 @@ export function DevMapPage({
   const { showTileExtent, xRay } = state;
 
   const [actualStyle, setActualStyle] = useState(style);
+  const [paleoState, dispatch] = usePaleogeographyState({
+    model_id: 6,
+    age: 0,
+  });
 
-  const [plateModelId, setPlateModelId] = useState(null);
-  const [age, setAge] = useState(null);
+  const { age, model_id } = paleoState;
+  const plateModelId = model_id;
 
   const models: { id: string; max_age: number; min_age: number }[] =
     useAPIResult(SETTINGS.burwellTileDomain + "/carto/rotation-models");
@@ -118,29 +143,36 @@ export function DevMapPage({
   useEffect(() => {
     if (models == null) return;
     if (plateModelId == null) {
-      setPlateModelId(models[0].id);
+      dispatch({ type: "set-model", model_id: parseInt(models[0].id) });
     }
   }, [models]);
 
   const model = models?.find((d) => d.id == plateModelId);
 
-  useEffect(() => {
-    if (model == null) return;
-    const { max_age, min_age } = model;
-    if (age > max_age) {
-      setAge(max_age);
-    } else if (age < min_age) {
-      setAge(min_age);
-    }
-  }, [model]);
+  // useEffect(() => {
+  //   console.log("effect", model, age);
+  //   if (model == null) return;
+  //   const { max_age = 4000, min_age = 0 } = model;
+  //   console.log("effect", model, age, max_age, min_age);
+  //   if (age > max_age) {
+  //     dispatch({ type: "set-age", age: max_age });
+  //   } else if (age < min_age) {
+  //     dispatch({ type: "set-age", age: min_age });
+  //   }
+  // }, [model, age]);
+
+  const _overlayStyle = useMemo(() => {
+    if (plateModelId == null || age == null) return overlayStyle;
+    return replaceSourcesForTileset(overlayStyle, plateModelId, age);
+  }, [tileset, overlayStyle, plateModelId, age]) as mapboxgl.Style;
 
   useEffect(() => {
-    buildInspectorStyle(style, overlayStyle, {
+    buildInspectorStyle(style, _overlayStyle, {
       mapboxToken,
       inDarkMode: isEnabled,
       xRay,
     }).then(setActualStyle);
-  }, [style, xRay, mapboxToken, isEnabled, overlayStyle]);
+  }, [style, xRay, mapboxToken, isEnabled, _overlayStyle]);
 
   const [inspectPosition, setInspectPosition] =
     useState<mapboxgl.LngLat | null>(null);
@@ -150,6 +182,10 @@ export function DevMapPage({
   const onSelectPosition = useCallback((position: mapboxgl.LngLat) => {
     setInspectPosition(position);
   }, []);
+
+  if (age == null || model_id == null) {
+    return h(Spinner);
+  }
 
   let detailElement = null;
   if (inspectPosition != null) {
@@ -169,18 +205,20 @@ export function DevMapPage({
             setState({ ...state, showTileExtent: !showTileExtent });
           },
         }),
-        h(FeaturePanel, { features: data, focusedSource, focusedSourceTitle }),
+        h(FeaturePanel, {
+          features: data,
+          focusedSource: "burwell",
+          focusedSourceTitle: "Paleogeography",
+        }),
       ]
     );
   }
-
-  let tile = null;
 
   return h(
     MapAreaContainer,
     {
       navbar: h(FloatingNavbar, [
-        headerElement ?? h("h2", title),
+        h("h2", title),
         h(Spacer),
         h(MapLoadingButton, {
           active: isOpen,
@@ -191,7 +229,9 @@ export function DevMapPage({
         h(PlateModelControls, {
           models,
           activeModel: plateModelId,
-          setModel: setPlateModelId,
+          setModel(model_id) {
+            dispatch({ type: "set-model", model_id });
+          },
           age,
         }),
         h(Switch, {
@@ -207,7 +247,9 @@ export function DevMapPage({
       contextPanelOpen: isOpen,
       bottomPanel: h(TimescalePanel, {
         age,
-        setAge,
+        setAge(age) {
+          dispatch({ type: "set-age", age });
+        },
         ageRange: ageRangeForModel(model),
       }),
     },
@@ -276,7 +318,7 @@ export function replaceSourcesForTileset(
 ) {
   const tilesetURL =
     SETTINGS.burwellTileDomain +
-    `/carto-slim-rotated/{z}/{x}/{y}?model_id=${model_id}&time=${age}`;
+    `/carto-slim-rotated/{z}/{x}/{y}?model_id=${model_id}&t_step=${age}`;
 
   return {
     ...style,
