@@ -5,7 +5,12 @@ import mapboxgl from "mapbox-gl";
 import { useCallback, useMemo, useReducer } from "react";
 import { SETTINGS } from "~/map-interface/settings";
 import { Switch, HTMLSelect, Spinner } from "@blueprintjs/core";
-import { Spacer, useDarkMode, useStoredState } from "@macrostrat/ui-components";
+import {
+  Spacer,
+  useDarkMode,
+  useStoredState,
+  DarkModeButton,
+} from "@macrostrat/ui-components";
 import { useState, useEffect } from "react";
 import {
   FeaturePanel,
@@ -88,6 +93,60 @@ function usePaleogeographyState(
   return [state, dispatch];
 }
 
+const common = {
+  version: 8,
+  sources: {},
+  glyphs: "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
+  sprite: "mapbox://sprites/mapbox/light-v10",
+};
+
+const darkStyle = {
+  name: "PaleoLight",
+  ...common,
+  layers: [
+    {
+      id: "background",
+      type: "background",
+      paint: {
+        "background-color": "hsl(185, 2%, 10%)",
+      },
+    },
+    {
+      id: "plate",
+      type: "fill",
+      source: "burwell",
+      "source-layer": "plate",
+      paint: {
+        "fill-color": "hsl(55, 1%, 20%)",
+        //"fill-opacity": 0.8,
+      },
+    },
+  ],
+};
+const lightStyle = {
+  name: "PaleoLight",
+  ...common,
+  layers: [
+    {
+      id: "background",
+      type: "background",
+      paint: {
+        "background-color": "hsl(185, 9%, 81%)",
+      },
+    },
+    {
+      id: "plate",
+      type: "fill",
+      source: "burwell",
+      "source-layer": "plate",
+      paint: {
+        "fill-color": "hsl(55, 11%, 96%)",
+        //"fill-opacity": 0.8,
+      },
+    },
+  ],
+};
+
 export default function PaleoMap({
   tileset = MacrostratVectorTileset.CartoSlim,
   overlayStyle = _macrostratStyle,
@@ -116,9 +175,7 @@ export default function PaleoMap({
   let transformRequest = null;
   let mapPosition = null;
 
-  const style = isEnabled
-    ? "mapbox://styles/mapbox/dark-v10"
-    : "mapbox://styles/mapbox/light-v10";
+  const style = isEnabled ? darkStyle : lightStyle;
 
   const [isOpen, setOpen] = useState(false);
 
@@ -241,6 +298,7 @@ export default function PaleoMap({
             setState({ ...state, xRay: !xRay });
           },
         }),
+        h(DarkModeButton),
         children,
       ]),
       detailPanel: detailElement,
