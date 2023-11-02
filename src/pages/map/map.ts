@@ -16,7 +16,6 @@ import reducerStack, {
 import { createRouterMiddleware } from "@lagunovsky/redux-react-router";
 import { DarkModeProvider } from "@macrostrat/ui-components";
 import { onDemand } from "../../_utils";
-import { WeaverPage } from "../../weaver";
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 

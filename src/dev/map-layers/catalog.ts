@@ -4,7 +4,7 @@ import hyper from "@macrostrat/hyper";
 import { Routes, Route, Link, useParams } from "react-router-dom";
 import styles from "../main.module.styl";
 import { useAPIResult, ErrorBoundary } from "@macrostrat/ui-components";
-import { ParentRouteButton } from "./utils";
+import { ParentRouteButton } from "~/components/map-navbar";
 import { SETTINGS } from "~/map-interface/settings";
 import { Spinner } from "@blueprintjs/core";
 import { BasicLayerInspectorPage } from ".";
