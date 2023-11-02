@@ -39,11 +39,6 @@ $dark-background = #141a1e
 $accent = lighten($dark-background, 10%)
 $dark-text = $gray4
 
-.hello-world
-  background-color: red
-  color: var(--error-text-color)
-
-
 .bp4-input
   box-shadow: 0 0 0 0 rgba(19, 124, 189, 0), 0 0 0 0 rgba(19, 124, 189, 0), inset 0 0 0 1px rgba(16, 22, 26, 0.15), inset 0 1px 1px rgba(16, 22, 26, 0.2);
 
@@ -83,7 +78,8 @@ body
     --ui-color-accent: darken(rgb(143, 39, 138), 50%)
 
     .bp4-card, .bp4-navbar
-      box-shadow 0 0 0 1px var(--card-shadow-color)
+      box-shadow 0 0 0 1.5px var(--card-shadow-color)
+      background-color: var(--panel-background-color)
 
     .bp4-input
       &::placeholder
@@ -92,7 +88,7 @@ body
 
 .bp4-card, .bp4-navbar
   border-radius: 4px
-  background-color: var(--panel-background-color) !important
+  background-color: var(--panel-background-color)
 
 
 body, .main-container {

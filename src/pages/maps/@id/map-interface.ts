@@ -13,10 +13,8 @@ import {
   Switch,
 } from "@blueprintjs/core";
 import { SETTINGS } from "~/map-interface/settings";
-import { useMapRef } from "@macrostrat/mapbox-react";
 import { useEffect } from "react";
 import styles from "./main.module.sass";
-import { MapNavbar } from "~/dev/map-layers/utils";
 import { useMemo, useState } from "react";
 import "~/styles/global.styl";
 import boundingBox from "@turf/bbox";
@@ -26,6 +24,7 @@ import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
 import { useDarkMode, useAPIResult, JSONView } from "@macrostrat/ui-components";
 import { InfoDrawerContainer, ExpansionPanel } from "@macrostrat/map-interface";
 import { MapMarker } from "@macrostrat/map-interface";
+import { MapNavbar } from "~/components/map-navbar";
 import { NullableSlider } from "@macrostrat/ui-components";
 import { tempImageIndex, s3Address } from "../raster-images";
 
@@ -138,11 +137,7 @@ function basemapStyle(basemap, inDarkMode) {
 export default function MapInterface({ map }) {
   const [isOpen, setOpen] = useState(false);
   const dark = useDarkMode()?.isEnabled ?? false;
-  const title = h([
-    h("code", map.properties.source_id),
-    " ",
-    map.properties.name,
-  ]);
+  const title = map.properties.name;
 
   const hasRaster = rasterURL(map.properties.source_id) != null;
 
@@ -250,6 +245,10 @@ export default function MapInterface({ map }) {
   if (bounds == null || mapStyle == null) return h(Spinner);
 
   const contextPanel = h(PanelCard, [
+    h("div.map-meta", [
+      h("p", map.properties.description),
+      h("p", ["Map ID: ", h("code", map.properties.source_id)]),
+    ]),
     h("div.vector-controls", [
       h("h3", "Vector map"),
       h(OpacitySlider, {
@@ -278,7 +277,11 @@ export default function MapInterface({ map }) {
       navbar: h(MapNavbar, { title, parentRoute: "/maps", isOpen, setOpen }),
       contextPanel,
       contextPanelOpen: isOpen,
+      contextStackProps: {
+        adaptiveWidth: true,
+      },
       detailPanel: h(MapLegendPanel, { source_id: map.properties.source_id }),
+      showPanelOutlines: true,
     },
     [
       h(
@@ -352,7 +355,6 @@ function MapLegendData({ source_id }) {
     "div.legend-data",
     legendData.map((d) => h(LegendEntry, { data: d }))
   );
-  return h(JSONView, { data: mapLegend?.success?.data, showRoot: false });
 }
 
 function LegendEntry({ data }) {
@@ -362,8 +364,8 @@ function LegendEntry({ data }) {
     source_id,
     t_interval,
     b_interval,
-    strat_name,
-    strat_name_id,
+    //strat_name,
+    //strat_name_id,
     unit_id,
     area,
     tiny_area,

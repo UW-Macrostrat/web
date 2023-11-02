@@ -1,0 +1,14 @@
+.map-title
+  // Don't allow the title to wrap
+  white-space: nowrap
+  overflow-x: hidden
+  text-overflow: ellipsis
+
+.map-navbar
+  transition: min-width 0.5s
+  :global(.bp4-navbar)
+    &:hover
+      min-width: fit-content
+      .map-title
+        // Allow the title to wrap on hover
+        overflow-x: visible

@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { ReduxRouter } from "@lagunovsky/redux-react-router";
 import h from "@macrostrat/hyper";
 
-import "../../styles/global.styl";
+import "~/styles/global.styl";
 import "../../styles/searchbar.styl";
 import "../../styles/ui-components.styl";
 
@@ -14,9 +14,7 @@ import reducerStack, {
   AppState,
 } from "../../map-interface/app-state";
 import { createRouterMiddleware } from "@lagunovsky/redux-react-router";
-import { DarkModeProvider } from "@macrostrat/ui-components";
 import { onDemand } from "../../_utils";
-import { WeaverPage } from "../../weaver";
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
@@ -37,31 +35,27 @@ const DevMapPage = onDemand(() => import("../../dev"));
 
 export default function MapApp({ routerBasename }) {
   return h(
-    DarkModeProvider,
-    {},
+    Provider,
+    { store },
     h(
-      Provider,
-      { store },
-      h(
-        ReduxRouter,
-        { basename: routerBasename, store, history: browserHistory },
-        [
-          h(Routes, [
-            h(Route, { path: "/sources", element: h(Sources) }),
-            h(Route, {
-              path: "/dev/*",
-              element: h(DevMapPage),
-            }),
-            h(Route, { path: "*", element: h(MapPage) }),
-          ]),
-          // h(Route, { path: "/columns", component: ColumnPage }),
-          // h(Route, {
-          //   exact: true,
-          //   path: "/",
-          //   render: () => h(Redirect, { to: "/map" }),
-          // }),
-        ]
-      )
+      ReduxRouter,
+      { basename: routerBasename, store, history: browserHistory },
+      [
+        h(Routes, [
+          h(Route, { path: "/sources", element: h(Sources) }),
+          h(Route, {
+            path: "/dev/*",
+            element: h(DevMapPage),
+          }),
+          h(Route, { path: "*", element: h(MapPage) }),
+        ]),
+        // h(Route, { path: "/columns", component: ColumnPage }),
+        // h(Route, {
+        //   exact: true,
+        //   path: "/",
+        //   render: () => h(Redirect, { to: "/map" }),
+        // }),
+      ]
     )
   );
 }

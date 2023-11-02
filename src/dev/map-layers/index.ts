@@ -33,8 +33,9 @@ import {
 import { TileExtentLayer } from "@macrostrat/map-interface";
 import { useMapStatus } from "@macrostrat/mapbox-react";
 import styles from "../main.module.styl";
-import { useMapStyle, ParentRouteButton } from "./utils";
+import { useMapStyle } from "./utils";
 import { DevMapPage } from "@macrostrat/map-interface";
+import { ParentRouteButton } from "~/components/map-navbar";
 
 export enum MacrostratVectorTileset {
   Carto = "carto",
