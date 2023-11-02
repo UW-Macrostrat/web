@@ -3,7 +3,7 @@ import { SETTINGS } from "~/map-interface/settings";
 import h from "@macrostrat/hyper";
 import { ClientOnly } from "~/renderer/client-only";
 
-const apiAddress = "http://localhost:5001" + "/v2/defs/sources";
+const apiAddress = SETTINGS.apiDomain + "/api/v2/defs/sources";
 
 export async function onBeforeRender(pageContext: PageContextBuiltInServer) {
   const { id } = pageContext.routeParams;
