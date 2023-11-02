@@ -355,7 +355,6 @@ function MapLegendData({ source_id }) {
     "div.legend-data",
     legendData.map((d) => h(LegendEntry, { data: d }))
   );
-  return h(JSONView, { data: mapLegend?.success?.data, showRoot: false });
 }
 
 function LegendEntry({ data }) {
@@ -365,8 +364,8 @@ function LegendEntry({ data }) {
     source_id,
     t_interval,
     b_interval,
-    strat_name,
-    strat_name_id,
+    //strat_name,
+    //strat_name_id,
     unit_id,
     area,
     tiny_area,
