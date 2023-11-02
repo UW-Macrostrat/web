@@ -1,11 +1,12 @@
-import { PageContextBuiltInServer } from "vite-plugin-ssr/types";
+import { PageContextBuiltInServer } from "vike/types";
 import { SETTINGS } from "~/map-interface/settings";
 import h from "@macrostrat/hyper";
 import { ClientOnly } from "~/renderer/client-only";
 
-const apiAddress = "http://localhost:5001" + "/v2/defs/sources";
+const apiAddress = SETTINGS.apiDomain + "/api/v2/defs/sources";
 
 export async function onBeforeRender(pageContext: PageContextBuiltInServer) {
+
   const { id } = pageContext.routeParams;
 
   const params = new URLSearchParams({
@@ -19,6 +20,7 @@ export async function onBeforeRender(pageContext: PageContextBuiltInServer) {
   return {
     pageContext: {
       pageProps: {
+        id,
         map,
       },
       documentProps: {
@@ -31,6 +33,6 @@ export async function onBeforeRender(pageContext: PageContextBuiltInServer) {
 
 const MapInterface = () => import("./map-interface");
 
-export function Page({ map }) {
-  return h("div.single-map", h(ClientOnly, { component: MapInterface, map }));
+export function Page({ id, map }) {
+  return h("div.single-map", h(ClientOnly, { component: MapInterface, id, map }));
 }

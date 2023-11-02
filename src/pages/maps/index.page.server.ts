@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 import { SETTINGS } from "~/map-interface/settings";
 
-const apiAddress = SETTINGS.apiDomain + "/api/v2/defs/sources";
+const apiAddress = "http://localhost:5001" + "/v2/defs/sources";
 
 export async function onBeforeRender(pageContext) {
   // `.page.server.js` files always run in Node.js; we could use SQL/ORM queries here.
