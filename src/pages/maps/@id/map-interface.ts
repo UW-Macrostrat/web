@@ -22,7 +22,11 @@ import { LngLatBoundsLike } from "mapbox-gl";
 import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
 import { useDarkMode, useAPIResult, JSONView } from "@macrostrat/ui-components";
-import { InfoDrawerContainer, ExpansionPanel } from "@macrostrat/map-interface";
+import {
+  InfoDrawerContainer,
+  ExpansionPanel,
+  DetailPanelStyle,
+} from "@macrostrat/map-interface";
 import { MapMarker } from "@macrostrat/map-interface";
 import { MapNavbar } from "~/components/map-navbar";
 import { NullableSlider } from "@macrostrat/ui-components";
@@ -280,8 +284,8 @@ export default function MapInterface({ map }) {
       contextStackProps: {
         adaptiveWidth: true,
       },
+      detailPanelStyle: DetailPanelStyle.FIXED,
       detailPanel: h(MapLegendPanel, { source_id: map.properties.source_id }),
-      showPanelOutlines: true,
     },
     [
       h(

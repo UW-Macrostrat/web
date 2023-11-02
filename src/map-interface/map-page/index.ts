@@ -82,7 +82,7 @@ export const MapPage = ({
           element: h(InfoDrawerRoute),
         }),
       ]),
-
+      detailPanelStyle: "floating",
       bottomPanel: h(ElevationChart, null),
       contextPanelOpen: contextPanelOpen || inputFocus,
       detailPanelOpen: infoDrawerOpen,
