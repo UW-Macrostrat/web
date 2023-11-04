@@ -80,18 +80,16 @@ export default function EditInterface({
   parentRoute,
   source_id,
 }: EditInterfaceProps) {
-  const [menu, setMenu] = useState(undefined);
+  const [activePage, setActivePage] = useState(undefined);
 
   return h("div.interface", {}, [
-    menu == undefined ? h(EditMenu, { setMenu }) : null,
-    h(EditTableDrawer, { menu }, [
-      menu == "polygons"
-        ? h(
-            EditTable,
-            { url: `http://localhost:8000/sources/${source_id}/polygons` },
-            []
-          )
-        : null,
+    h.if(activePage == null)(EditMenu, { setMenu: setActivePage }),
+    h(EditTableDrawer, { menu: activePage }, [
+      h.if(activePage == "polygons")(
+        EditTable,
+        { url: `http://localhost:8000/sources/${source_id}/polygons` },
+        []
+      ),
     ]),
   ]);
 }

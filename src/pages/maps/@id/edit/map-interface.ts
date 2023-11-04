@@ -18,6 +18,7 @@ import { useDarkMode } from "@macrostrat/ui-components";
 import { MapMarker } from "@macrostrat/map-interface";
 import { NullableSlider } from "@macrostrat/ui-components";
 import { tempImageIndex, s3Address } from "../../raster-images";
+import { MapNavbar } from "~/components/map-navbar";
 import EditInterface from "./edit-interface";
 
 const h = hyper.styled(styles);
@@ -61,41 +62,6 @@ function buildOverlayStyle({
     });
   }
 
-  const raster = rasterURL(focusedMap);
-  if (raster != null && layerOpacity.raster != null) {
-    const rasterStyle = {
-      ...emptyStyle,
-      sources: {
-        raster: {
-          type: "raster",
-          tiles: [
-            SETTINGS.burwellTileDomain +
-              "/cog/tiles/{z}/{x}/{y}.png?url=" +
-              raster,
-          ],
-          tileSize: 256,
-        },
-      },
-      layers: [
-        {
-          id: "raster",
-          type: "raster",
-          source: "raster",
-          minzoom: 0,
-          maxzoom: 22,
-          layout: {
-            visibility: "visible",
-          },
-          paint: {
-            "raster-opacity": layerOpacity.raster,
-          },
-        },
-      ],
-    };
-
-    mapStyle = mergeStyles(rasterStyle, mapStyle);
-  }
-
   if (style == null) {
     return mapStyle;
   }
@@ -129,11 +95,7 @@ function basemapStyle(basemap, inDarkMode) {
 export default function MapInterface({ id, map }) {
   const [isOpen, setOpen] = useState(false);
   const dark = useDarkMode()?.isEnabled ?? false;
-  const title = h([
-    h("code", map.properties.source_id),
-    " ",
-    map.properties.name,
-  ]);
+  const title = map.properties.name;
 
   const hasRaster = rasterURL(map.properties.source_id) != null;
 
@@ -245,13 +207,16 @@ export default function MapInterface({ id, map }) {
     MapAreaContainer,
     {
       className: "single-map",
-      navbar: h(
+      navbar: h(MapNavbar, { title, parentRoute: "/maps", isOpen, setOpen }),
+      contextPanel,
+      contextPanelOpen: isOpen,
+      detailPanelOpen: true,
+      detailPanelStyle: "fixed",
+      detailPanel: h(
         EditInterface,
         { title: "Source 1", parentRoute: "/maps/", source_id: id },
         []
       ),
-      contextPanel,
-      contextPanelOpen: isOpen,
     },
     [
       h(
