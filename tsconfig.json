@@ -2,23 +2,21 @@
   "compilerOptions": {
     "baseUrl": ".",
     "moduleResolution": "node",
-    "target": "es5",
-    "module": "es2020",
-    "lib": ["es2018", "dom"],
+    "target": "ES2020",
+    "module": "ES2020",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "strict": false,
     "sourceMap": true,
     "declaration": true,
-    "jsx": "react",
-    "allowSyntheticDefaultImports": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "declarationDir": "dist/types",
-    "outDir": "dist/lib",
+    "jsx": "react-jsx",
     "typeRoots": ["node_modules/@types"],
+    "skipLibCheck": true,
+    "esModuleInterop": true,
     "paths": {
       "~/*": ["./src/*"],
-      "@macrostrat/cesium-viewer": ["packages/cesium-viewer/src/"],
-      "@macrostrat/cesium-martini": ["packages/cesium-martini"],
+      "@macrostrat/cesium-vector-provider": [
+        "./packages/cesium-vector-provider/src/"
+      ],
       "@macrostrat/ui-components": [
         "deps/web-components/packages/ui-components/src/"
       ],
@@ -36,8 +34,19 @@
       ],
       "@macrostrat/mapbox-utils": [
         "deps/web-components/packages/mapbox-utils/src"
-      ]
+      ],
+      "@macrostrat/map-interface": [
+        "deps/web-components/packages/map-interface/src"
+      ],
+      "@macrostrat/cesium-viewer": [
+        "deps/cesium-viewer/src"
+      ],
     }
   },
-  "include": ["src"]
+  "include": ["src", "packages/globe-dev/globe"],
+  "types": ["vite/client"],
+  "ts-node": {
+    "transpileOnly": true,
+    "esm": true
+  }
 }

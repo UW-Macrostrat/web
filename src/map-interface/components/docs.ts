@@ -3,7 +3,7 @@ import { Alignment } from "@blueprintjs/core";
 import styles from "./docs.module.styl";
 import { useInView } from "react-intersection-observer";
 import { HashLink } from "react-router-hash-link";
-import { routerBasename } from "../Settings";
+import { routerBasename } from "../settings";
 import classNames from "classnames";
 import { joinURL } from "~/map-interface/utils";
 
@@ -83,9 +83,10 @@ export function NewSwatch({ children, version = 0 }) {
   );
 }
 
-export function Version({ spec, date, major = true }) {
+export function Version({ spec, date, major = true, dev = false }) {
   return h(`h${major ? 2 : 3}.version`, { id: `version-${spec}` }, [
     h("span.version-name", ["Version ", h("code", spec)]),
     h("span.date", date),
+    h.if(dev)("span.dev-tag", "dev"),
   ]);
 }

@@ -1,14 +1,19 @@
 import { format } from "d3-format";
 
-export function formatCoordForZoomLevel(val: number, zoom: number): string {
+function trailingDigitsForZoom(zoom: number): number {
   if (zoom < 2) {
-    return fmt1(val);
+    return 1;
   } else if (zoom < 4) {
-    return fmt2(val);
+    return 2;
   } else if (zoom < 7) {
-    return fmt3(val);
+    return 3;
+  } else {
+    return 4;
   }
-  return fmt4(val);
+}
+
+export function formatCoordForZoomLevel(val: number, zoom: number): string {
+  return val.toFixed(trailingDigitsForZoom(zoom));
 }
 
 export function joinURL(...args) {

@@ -1,261 +1,184 @@
-import { forwardRef, useRef, useState, useCallback } from "react";
-import {
-  useAppActions,
-  useAppState,
-  MapLayer,
-  PositionFocusState,
-} from "~/map-interface/app-state";
-import Map from "./map";
-import { enable3DTerrain } from "./terrain";
-import { GeolocateControl } from "mapbox-gl";
 import hyper from "@macrostrat/hyper";
-import { useEffect, useMemo } from "react";
-import useResizeObserver from "use-resize-observer";
-import styles from "../main.module.styl";
+import { MapMarker, MapView } from "@macrostrat/map-interface";
 import {
-  useMapRef,
-  CompassControl,
-  GlobeControl,
-  ThreeDControl,
-  useMapConditionalStyle,
+  getFocusState,
+  PositionFocusState,
   useMapLabelVisibility,
-  MapControlWrapper,
+  useMapRef,
+  useMapStatus,
+  useMapPosition,
 } from "@macrostrat/mapbox-react";
-import classNames from "classnames";
-import { debounce } from "underscore";
-import { inDarkMode } from "@macrostrat/ui-components";
+import { MacrostratLineSymbolManager } from "@macrostrat/mapbox-styles";
 import {
-  mapViewInfo,
-  getMapPosition,
-  setMapPosition,
   getMapboxStyle,
   mergeStyles,
-  MapPosition,
+  setMapPosition,
 } from "@macrostrat/mapbox-utils";
-import { getExpressionForFilters } from "./filter-helpers";
-import { MapSourcesLayer, mapStyle, toggleLineSymbols } from "../map-style";
-import { SETTINGS } from "../../Settings";
+import { inDarkMode } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
-import { ColumnProperties } from "~/map-interface/app-state/handlers/columns";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  MapLayer,
+  useAppActions,
+  useAppState,
+} from "~/map-interface/app-state";
+import styles from "../main.module.styl";
+import { applyAgeModelStyles } from "@macrostrat/mapbox-styles";
+import {
+  buildMacrostratStyle,
+  MapSourcesLayer,
+} from "@macrostrat/mapbox-styles";
+import { CrossSectionLine } from "./cross-section";
+import {
+  FlyToPlaceManager,
+  HoveredFeatureManager,
+  MacrostratLayerManager,
+} from "./map";
+import { SETTINGS } from "~/map-interface/settings";
 
 const h = hyper.styled(styles);
 
-const VestigialMap = forwardRef((props, ref) => h(Map, { ...props, ref }));
+mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
 
-function calcMapPadding(rect, childRect) {
-  return {
-    left: Math.max(rect.left - childRect.left, 0),
-    top: Math.max(rect.top - childRect.top, 0),
-    right: Math.max(childRect.right - rect.right, 0),
-    bottom: Math.max(childRect.bottom - rect.bottom, 0),
-  };
+export function getBaseMapStyle(mapLayers, isDarkMode = false) {
+  if (mapLayers.has(MapLayer.SATELLITE)) {
+    return SETTINGS.satelliteMapURL;
+  }
+  if (isDarkMode) {
+    return SETTINGS.darkMapURL;
+  }
+  return SETTINGS.baseMapURL;
 }
 
-function ScaleControl(props) {
-  const optionsRef = useRef({
-    maxWidth: 200,
-    unit: "metric",
-  });
-  return h(MapControlWrapper, {
-    className: "map-scale-control",
-    control: mapboxgl.ScaleControl,
-    options: optionsRef.current,
-    ...props,
-  });
-}
+export default function MainMapView(props) {
+  const {
+    mapLayers,
+    mapPosition,
+    timeCursorAge,
+    plateModelId,
+    infoMarkerPosition,
+    focusedMapSource,
+  } = useAppState((state) => state.core);
 
-function GeolocationControl(props) {
-  const optionsRef = useRef({
-    showAccuracyCircle: true,
-    showUserLocation: true,
-    trackUserLocation: true,
-    positionOptions: {
-      enableHighAccuracy: true,
-    },
-  });
-  return h(MapControlWrapper, {
-    control: GeolocateControl,
-    options: optionsRef.current,
-    ...props,
-  });
-}
+  let mapRef = useMapRef();
+  const isDarkMode = inDarkMode();
 
-function useElevationMarkerLocation(mapRef, elevationMarkerLocation) {
-  // Handle elevation marker location
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null) return;
-    if (elevationMarkerLocation == null) return;
-    const src = map.getSource("elevationMarker");
-    if (src == null) return;
-    src.setData({
-      type: "FeatureCollection",
-      features: [
-        {
-          type: "Feature",
-          properties: {},
-          geometry: {
-            type: "Point",
-            coordinates: elevationMarkerLocation,
-          },
-        },
-      ],
+  const baseMapURL = getBaseMapStyle(mapLayers, isDarkMode);
+
+  // At the moment, these seem to force a re-render of the map
+  const { isInitialized, isStyleLoaded } = useMapStatus();
+
+  const mapSettings = useAppState((state) => state.core.mapSettings);
+
+  const [baseStyle, setBaseStyle] = useState(null);
+  const mapStyle = useMemo(() => {
+    if (baseStyle == null) return null;
+    const overlayStyles = buildMacrostratStyle({
+      focusedMap: focusedMapSource,
+      tileserverDomain: SETTINGS.burwellTileDomain,
     });
-  }, [mapRef, elevationMarkerLocation]);
-}
 
-async function buildMapStyle(baseMapURL) {
-  const style = await getMapboxStyle(baseMapURL, {
-    access_token: mapboxgl.accessToken,
-  });
-  return mergeStyles(style, mapStyle);
-}
+    if (timeCursorAge != null) {
+      return applyAgeModelStyles(baseStyle, overlayStyles, {
+        age: timeCursorAge,
+        model: plateModelId ?? 1,
+        baseStyle,
+        overlayStyles,
+        isDarkMode,
+        tileserverDomain: SETTINGS.burwellTileDomain,
+      });
+    }
+    return mergeStyles(baseStyle, overlayStyles);
+  }, [baseStyle, timeCursorAge, plateModelId, isDarkMode, focusedMapSource]);
 
-async function initializeMap(baseMapURL, mapPosition, infoMarkerPosition) {
-  // setup the basic map
-  mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
+  useEffect(() => {
+    getMapboxStyle(baseMapURL, {
+      access_token: mapboxgl.accessToken,
+    }).then((s) => {
+      setBaseStyle(s);
+    });
+  }, [baseMapURL]);
 
-  const map = new mapboxgl.Map({
-    container: "map",
-    style: await buildMapStyle(baseMapURL),
-    maxZoom: 18,
-    //maxTileCacheSize: 0,
-    logoPosition: "bottom-left",
-    trackResize: true,
-    antialias: true,
-    optimizeForTerrain: true,
-  });
+  const hasLineSymbols =
+    mapLayers.has(MapLayer.LINE_SYMBOLS) && mapLayers.has(MapLayer.LINES);
 
-  map.setProjection("globe");
+  const onMapLoaded = useCallback((map) => {
+    // disable shift-key zooming so we can use shift to make cross-sections
+    map.boxZoom.disable();
 
-  // set initial map position
-  setMapPosition(map, mapPosition);
-
-  /* If we have an initially loaded info marker, we need to make sure
+    /* If we have an initially loaded info marker, we need to make sure
     that it is actually visible on the map, and move to it if not.
     This works around cases where the map is initialized with a hash string
     that contradicts the focused location (which would happen if the link was
     saved once the marker was moved out of view).
     */
-  if (infoMarkerPosition != null) {
-    const focus = getFocusState(map, infoMarkerPosition);
-    if (
-      ![
-        PositionFocusState.CENTERED,
-        PositionFocusState.NEAR_CENTER,
-        PositionFocusState.OFF_CENTER,
-      ].includes(focus)
-    ) {
-      map.setCenter(infoMarkerPosition);
-    }
-  }
-
-  return map;
-}
-
-function getMapPadding(ref, parentRef) {
-  const rect = parentRef.current?.getBoundingClientRect();
-  const childRect = ref.current?.getBoundingClientRect();
-  if (rect == null || childRect == null) return;
-  return calcMapPadding(rect, childRect);
-}
-
-function MapContainer(props) {
-  const {
-    filters,
-    filteredColumns,
-    mapLayers,
-    mapCenter,
-    elevationChartOpen,
-    elevationData,
-    elevationMarkerLocation,
-    mapPosition,
-    infoDrawerOpen,
-    mapSettings,
-  } = useAppState((state) => state.core);
-
-  const mapIsLoading = useAppState((state) => state.core.mapIsLoading);
-
-  const runAction = useAppActions();
-  /* HACK: Right now we need this to force a render when the map
-    is done loading
-    */
-  const [mapInitialized, setMapInitialized] = useState(false);
-  const [styleLoaded, setStyleLoaded] = useState(false);
-
-  let mapRef = useMapRef();
-
-  const ref = useRef<HTMLDivElement>();
-  const parentRef = useRef<HTMLDivElement>();
-  const { mapUse3D, mapIsRotated } = mapViewInfo(mapPosition);
-
-  const isDarkMode = inDarkMode();
-  const baseMapURL = getBaseMapStyle(mapLayers, isDarkMode);
-
-  const [padding, setPadding] = useState(getMapPadding(ref, parentRef));
-  const infoMarkerPosition = useAppState(
-    (state) => state.core.infoMarkerPosition
-  );
-
-  const hasLineSymbols =
-    mapLayers.has(MapLayer.LINE_SYMBOLS) && mapLayers.has(MapLayer.LINES);
-
-  const updateMapPadding = useCallback(() => {
-    setPadding(getMapPadding(ref, parentRef));
-  }, [ref, parentRef]);
-
-  useEffect(() => {
-    initializeMap(baseMapURL, mapPosition, infoMarkerPosition).then((map) => {
-      mapRef.current = map;
-
-      if (!map.isStyleLoaded()) {
-        map.once("style.load", () => {
-          setStyleLoaded(true);
-        });
-      } else {
-        setStyleLoaded(true);
+    if (infoMarkerPosition != null) {
+      const focus = getFocusState(map, infoMarkerPosition);
+      if (
+        ![
+          PositionFocusState.CENTERED,
+          PositionFocusState.NEAR_CENTER,
+          PositionFocusState.OFF_CENTER,
+        ].includes(focus)
+      ) {
+        map.setCenter(infoMarkerPosition);
       }
-
-      /* Right now we need to reload filters when the map is initialized.
-         Otherwise our (super-legacy and janky) filter system doesn't know
-         to update the map. */
-      //runAction({ type: "set-filters", filters: [...filters] });
-      setMapInitialized(true);
-      // Update map padding on load
-      updateMapPadding();
-      toggleLineSymbols(map, hasLineSymbols);
-    });
+    }
   }, []);
 
   /* If we want to use a high resolution DEM, we need to use a different
     source ID from the hillshade's source ID. This uses more memory but
     provides a nicer-looking 3D map.
     */
-  const demSourceID = mapSettings.highResolutionTerrain
-    ? "mapbox-3d-dem"
-    : null;
+
+  // Make map label visibility match the mapLayers state
+  useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));
+
+  return h(
+    MapView,
+    {
+      ...props,
+      infoMarkerPosition,
+      onMapLoaded,
+      style: mapStyle,
+      mapPosition,
+      terrainSourceID: mapSettings.highResolutionTerrain
+        ? "mapbox-3d-dem"
+        : null,
+      mapboxToken: SETTINGS.mapboxAccessToken,
+    },
+    [
+      h(MacrostratLineSymbolManager, { showLineSymbols: hasLineSymbols }),
+      h(MapMarker, {
+        position: infoMarkerPosition,
+      }),
+      h(CrossSectionLine),
+      h.if(mapLayers.has(MapLayer.SOURCES))(MapSourcesLayer),
+      h(ColumnDataManager),
+      h(MapPositionReporter, { initialMapPosition: mapPosition }),
+      h(MacrostratLayerManager),
+      h(FlyToPlaceManager),
+      h(HoveredFeatureManager),
+    ]
+  );
+}
+
+function MapPositionReporter({ initialMapPosition = null }) {
+  // Connects map position to Redux app state
+  const mapPosition = useMapPosition() ?? initialMapPosition;
+  const runAction = useAppActions();
 
   useEffect(() => {
-    if (mapRef.current == null) return;
-    buildMapStyle(baseMapURL).then((style) => {
-      mapRef.current.setStyle(style);
-      enable3DTerrain(mapRef.current, mapUse3D, demSourceID);
-    });
-  }, [baseMapURL, demSourceID]);
+    runAction({ type: "map-moved", data: { mapPosition } });
+  }, [mapPosition]);
 
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null) return;
-    enable3DTerrain(map, mapUse3D, demSourceID);
-  }, [mapRef.current, mapUse3D]);
+  return null;
+}
 
-  const markerRef = useRef(null);
-  const handleMapQuery = useMapQueryHandler(mapRef, markerRef, infoDrawerOpen);
-
-  useMapEaseToCenter(padding);
-  useMapMarker(mapRef, markerRef, infoMarkerPosition);
-
+function ColumnDataManager() {
   /* Update columns map layer given columns provided by application. */
+  const mapRef = useMapRef();
+  const { isInitialized } = useMapStatus();
   const allColumns = useAppState((state) => state.core.allColumns);
   useEffect(() => {
     const map = mapRef.current;
@@ -276,264 +199,6 @@ function MapContainer(props) {
       type: "FeatureCollection",
       features: allColumns ?? [],
     });
-  }, [mapRef.current, allColumns, mapInitialized]);
-
-  useEffect(() => {
-    // Get the current value of the map. Useful for gradually moving away
-    // from class component
-    const map = mapRef.current;
-    if (map == null) return;
-
-    // Update the URI when the map moves
-    const mapMovedCallback = () => {
-      const marker = markerRef.current;
-      const map = mapRef.current;
-
-      runAction({
-        type: "map-moved",
-        data: {
-          mapPosition: getMapPosition(map),
-          infoMarkerFocus: getFocusState(map, marker?.getLngLat()),
-        },
-      });
-    };
-    mapMovedCallback();
-    map.on("moveend", debounce(mapMovedCallback, 100));
-  }, [mapInitialized]);
-
-  useEffect(() => {
-    if (mapLayers.has(MapLayer.COLUMNS)) {
-      runAction({ type: "get-filtered-columns" });
-    }
-    runAction({ type: "map-layers-changed", mapLayers });
-  }, [filters, mapLayers]);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null || !mapInitialized || !styleLoaded) return;
-    const expr = getExpressionForFilters(filters);
-
-    map.setFilter("burwell_fill", expr);
-    map.setFilter("burwell_stroke", expr);
-  }, [filters, mapInitialized, styleLoaded]);
-
-  useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null) return;
-    map.on("idle", () => {
-      if (!mapIsLoading) return;
-      runAction({ type: "map-idle" });
-    });
-  }, [mapRef.current, mapIsLoading]);
-
-  useMapConditionalStyle(mapRef, hasLineSymbols, toggleLineSymbols);
-
-  useResizeObserver({
-    ref: parentRef,
-    onResize(sz) {
-      updateMapPadding();
-    },
-  });
-
-  const debouncedResize = useRef(
-    debounce(() => {
-      mapRef.current?.resize();
-    }, 100)
-  );
-
-  useResizeObserver({
-    ref,
-    onResize: debouncedResize.current,
-  });
-
-  useElevationMarkerLocation(mapRef, elevationMarkerLocation);
-
-  const className = classNames({
-    "is-rotated": mapIsRotated ?? false,
-    "is-3d-available": mapUse3D ?? false,
-  });
-
-  return h("div.map-view-container.main-view", { ref: parentRef }, [
-    h("div.mapbox-map#map", { ref, className }),
-    h(VestigialMap, {
-      filters,
-      filteredColumns,
-      // Recreate the set every time to force a re-render
-      mapLayers,
-      mapCenter,
-      elevationChartOpen,
-      elevationData,
-      elevationMarkerLocation,
-      mapPosition,
-      mapIsLoading,
-      mapIsRotated,
-      onQueryMap: handleMapQuery,
-      mapRef,
-      isDark: isDarkMode,
-      runAction,
-      ...props,
-      ref,
-    }),
-    h.if(mapLayers.has(MapLayer.SOURCES))(MapSourcesLayer),
-  ]);
+  }, [mapRef.current, allColumns, isInitialized]);
+  return null;
 }
-
-function useMapQueryHandler(
-  mapRef: React.RefObject<mapboxgl.Map | null>,
-  markerRef: React.RefObject<mapboxgl.Marker | null>,
-  infoDrawerOpen: boolean
-) {
-  /** Handler for map query markers */
-  const runAction = useAppActions();
-
-  return useCallback(
-    (event: mapboxgl.MapMouseEvent, columns: ColumnProperties[] = null) => {
-      const column = columns?.[0];
-      const map = mapRef.current;
-
-      runAction({
-        type: "map-query",
-        lng: event.lngLat.lng,
-        lat: event.lngLat.lat,
-        z: map.getZoom(),
-        column,
-        map_id: null,
-      });
-
-      const marker =
-        markerRef.current ?? new mapboxgl.Marker({ color: "#000000" });
-      marker.setLngLat(event.lngLat).addTo(mapRef.current);
-      markerRef.current = marker;
-    },
-    [mapRef, markerRef, infoDrawerOpen]
-  );
-}
-
-export function MapBottomControls() {
-  return h("div.map-controls", [
-    h(ScaleControl),
-    h(ThreeDControl, { className: "map-3d-control" }),
-    h(CompassControl, { className: "compass-control" }),
-    h(GlobeControl, { className: "globe-control" }),
-    h(GeolocationControl, { className: "geolocation-control" }),
-  ]);
-}
-
-export function MapStyledContainer({ className, children }) {
-  const mapPosition = useAppState((state) => state.core.mapPosition);
-  if (mapPosition != null) {
-    const { mapIsRotated, mapUse3D, mapIsGlobal } = mapViewInfo(mapPosition);
-    className = classNames(className, {
-      "map-is-rotated": mapIsRotated,
-      "map-3d-available": mapUse3D,
-      "map-is-global": mapIsGlobal,
-    });
-  }
-
-  return h("div", { className }, children);
-}
-
-function getBaseMapStyle(mapLayers, isDarkMode = false) {
-  if (mapLayers.has(MapLayer.SATELLITE)) {
-    return SETTINGS.satelliteMapURL;
-  }
-  if (isDarkMode) {
-    return SETTINGS.darkMapURL;
-  }
-  return SETTINGS.baseMapURL;
-}
-
-function useMapMarker(mapRef, markerRef, markerPosition) {
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null) return;
-    if (markerPosition == null) {
-      markerRef.current?.remove();
-      return;
-    }
-    const marker = markerRef.current ?? new mapboxgl.Marker();
-    marker.setLngLat(markerPosition).addTo(map);
-    markerRef.current = marker;
-    return () => marker.remove();
-  }, [mapRef.current, markerPosition]);
-}
-
-function useMapEaseToCenter(padding) {
-  const mapRef = useMapRef();
-  const infoMarkerPosition = useAppState(
-    (state) => state.core.infoMarkerPosition
-  );
-
-  const prevInfoMarkerPosition = useRef<any>(null);
-  const prevPadding = useRef<any>(null);
-  // Handle map position easing (for both map padding and markers)
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null) return;
-    let opts = null;
-    if (infoMarkerPosition != prevInfoMarkerPosition.current) {
-      opts ??= {};
-      opts.center = infoMarkerPosition;
-    }
-    if (padding != prevPadding.current) {
-      opts ??= {};
-      opts.padding = padding;
-    }
-    if (opts == null) return;
-    opts.duration = 800;
-    map.flyTo(opts);
-    map.once("moveend", () => {
-      /* Waiting until moveend to update the refs allows us to
-      batch overlapping movements together, which increases UI
-      smoothness when, e.g., flying to new panels */
-      prevInfoMarkerPosition.current = infoMarkerPosition;
-      prevPadding.current = padding;
-    });
-  }, [infoMarkerPosition, padding]);
-}
-
-function getFocusState(
-  map: mapboxgl.Map,
-  location: mapboxgl.LngLatLike | null
-): PositionFocusState | null {
-  /** Determine whether the infomarker is positioned in the viewport */
-  if (location == null) return null;
-
-  const markerPos = map.project(location);
-  const mapPos = map.project(map.getCenter());
-  const dx = Math.abs(markerPos.x - mapPos.x);
-  const dy = Math.abs(markerPos.y - mapPos.y);
-  const padding = map.getPadding();
-  let { width, height } = map.getCanvas();
-  width /= 2;
-  height /= 2;
-
-  if (dx < 10 && dy < 10) {
-    return PositionFocusState.CENTERED;
-  }
-  if (dx < 150 && dy < 150) {
-    return PositionFocusState.NEAR_CENTER;
-  }
-
-  if (
-    markerPos.x > padding.left &&
-    markerPos.x < width - padding.right &&
-    markerPos.y > padding.top &&
-    markerPos.y < height - padding.bottom
-  ) {
-    return PositionFocusState.OFF_CENTER;
-  }
-
-  if (
-    markerPos.x > 0 &&
-    markerPos.x < width &&
-    markerPos.y > 0 &&
-    markerPos.y < height
-  ) {
-    return PositionFocusState.OUT_OF_PADDING;
-  }
-  return PositionFocusState.OUT_OF_VIEW;
-}
-
-export default MapContainer;

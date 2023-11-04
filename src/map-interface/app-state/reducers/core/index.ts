@@ -1,4 +1,4 @@
-import { MapBackend, MapLayer } from "../map";
+import { MapLayer, PositionFocusState } from "../map";
 import { CoreState, CoreAction } from "./types";
 import update, { Spec } from "immutability-helper";
 import { FilterData } from "../../handlers/filters";
@@ -27,9 +27,8 @@ const defaultState: CoreState = {
   infoDrawerOpen: false,
   infoDrawerExpanded: false,
   infoMarkerPosition: null,
-  infoMarkerFocus: null,
-  elevationChartOpen: false,
-  mapBackend: MapBackend.MAPBOX,
+  crossSectionLine: null,
+  crossSectionCursorLocation: [],
   mapLayers: new Set([MapLayer.BEDROCK, MapLayer.LINES, MapLayer.LABELS]),
   mapSettings: {
     highResolutionTerrain: true,
@@ -53,8 +52,6 @@ const defaultState: CoreState = {
   mapInfo: [],
   columnInfo: null,
   searchResults: null,
-  elevationData: [],
-  elevationMarkerLocation: [],
   pbdbData: [],
   mapIsLoading: false,
   mapCenter: {
@@ -66,6 +63,9 @@ const defaultState: CoreState = {
   filteredColumns: {},
   data: [],
   showExperimentsPanel: false,
+  timeCursorAge: null,
+  plateModelId: 3,
+  focusedMapSource: null,
   mapPosition: {
     camera: {
       lng: 23,
@@ -80,9 +80,6 @@ export function coreReducer(
   action: CoreAction
 ): CoreState {
   switch (action.type) {
-    case "set-map-backend": {
-      return { ...state, mapBackend: action.backend };
-    }
     case "map-loading":
       if (state.mapIsLoading) return state;
       return { ...state, mapIsLoading: true };
@@ -175,18 +172,9 @@ export function coreReducer(
           lng: action.lng,
           lat: action.lat,
         },
-        infoMarkerFocus: null,
         fetchingMapInfo: true,
         infoDrawerOpen: true,
         mapInfoCancelToken: action.cancelToken,
-      };
-    case "recenter-query-marker":
-      const pos = state.infoMarkerPosition;
-      if (pos == null) return state;
-      return {
-        ...state,
-        infoMarkerPosition: { ...pos },
-        infoMarkerFocus: null,
       };
     case "received-map-query":
       if (action.data && action.data.mapData) {
@@ -274,6 +262,8 @@ export function coreReducer(
         fetchingColumnInfo: false,
         columnInfo: assembleColumnSummary(action.column, action.data),
       };
+    case "clear-column-info":
+      return { ...state, columnInfo: null, fetchingColumnInfo: false };
     case "toggle-map-layer":
       const op = state.mapLayers.has(action.layer) ? "$remove" : "$add";
       const mapLayers: Spec<Set<MapLayer>, any> = {
@@ -282,12 +272,11 @@ export function coreReducer(
       return update(state, { mapLayers });
     case "toggle-map-3d":
       return { ...state, mapUse3D: !state.mapUse3D };
-    case "toggle-elevation-chart":
+    case "update-cross-section":
       return {
         ...state,
-        elevationChartOpen: !state.elevationChartOpen,
-        elevationData: [],
-        elevationMarkerLocation: [],
+        crossSectionLine: action.line,
+        crossSectionCursorLocation: [],
       };
     case "set-input-focus":
       return {
@@ -334,8 +323,6 @@ export function coreReducer(
       };
       let articles = {};
 
-      console.log(action.data);
-
       for (let i = 0; i < action.data.length; i++) {
         let found = false;
         if (articles[action.data[i].docid]) {
@@ -366,26 +353,8 @@ export function coreReducer(
         xddCancelToken: null,
       };
 
-    // Handle elevation
-    case "start-elevation-query":
-      // When a search is requested, cancel any pending requests first
-      if (state.elevationCancelToken) {
-        state.elevationCancelToken.cancel();
-      }
-      return {
-        ...state,
-        fetchingElevation: true,
-        elevationCancelToken: action.cancelToken,
-      };
-    case "received-elevation-query":
-      return {
-        ...state,
-        fetchingElevation: false,
-        elevationData: action.data,
-        elevationCancelToken: null,
-      };
     case "update-elevation-marker":
-      return { ...state, elevationMarkerLocation: [action.lng, action.lat] };
+      return { ...state, crossSectionCursorLocation: [action.lng, action.lat] };
 
     // Handle PBDB
     case "start-pbdb-query":
@@ -430,6 +399,16 @@ export function coreReducer(
       return update(state, {
         mapSettings: { $toggle: ["highResolutionTerrain"] },
       });
+    case "set-time-cursor":
+      return { ...state, timeCursorAge: action.age };
+    case "set-plate-model":
+      return { ...state, plateModelId: action.plateModel };
+    case "set-focused-map-source":
+      let focusedMapSource = action.source_id;
+      if (focusedMapSource === state.focusedMapSource) {
+        focusedMapSource = null;
+      }
+      return { ...state, focusedMapSource };
     default:
       return state;
   }

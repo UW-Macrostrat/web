@@ -1,7 +1,7 @@
-import { Card } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
+import { Route, Routes } from "react-router-dom";
 import { MapLayer, useAppActions } from "~/map-interface/app-state";
-import { InfoDrawerHeader } from "./header";
+import { LocationPanel } from "@macrostrat/map-interface";
 import { FossilCollections } from "./fossil-collections";
 import { GeologicMapInfo } from "./geo-map";
 import { MacrostratLinkedData } from "./macrostrat-linked";
@@ -9,17 +9,12 @@ import { RegionalStratigraphy } from "./reg-strat";
 import { Physiography } from "./physiography";
 import { XddExpansion } from "./xdd-panel";
 import { useAppState } from "~/map-interface/app-state";
-import classNames from "classnames";
 import styles from "./main.module.styl";
 import { LoadingArea } from "../transitions";
-import { ErrorBoundary } from "@macrostrat/ui-components";
+import { StratColumn } from "./strat-column";
 import { useCallback } from "react";
 
 const h = hyper.styled(styles);
-
-function InfoDrawerContainer(props) {
-  return h(Card, { className: "infodrawer", ...props });
-}
 
 function InfoDrawer(props) {
   // We used to enable panels when certain layers were on,
@@ -30,33 +25,44 @@ function InfoDrawer(props) {
 
   const runAction = useAppActions();
 
-  className = classNames("infodrawer", className, {
-    loading: fetchingMapInfo,
-  });
-
-  const onCloseClick = useCallback(
+  const onClose = useCallback(
     () => runAction({ type: "close-infodrawer" }),
     [runAction]
   );
 
-  return h(Card, { className }, [
-    h(InfoDrawerHeader, {
-      mapInfo,
-      onCloseClick,
-    }),
-    h("div.infodrawer-body", [
-      h(ErrorBoundary, [
-        h(
-          LoadingArea,
-          { loaded: !fetchingMapInfo },
-          h.if(!fetchingMapInfo)(InfoDrawerInterior)
-        ),
-      ]),
-    ]),
-  ]);
+  const position = useAppState((state) => state.core.infoMarkerPosition);
+  const zoom = useAppState((state) => state.core.mapPosition.target?.zoom);
+
+  return h(
+    LocationPanel,
+    {
+      className,
+      position,
+      elevation: mapInfo.elevation,
+      zoom,
+      onClose,
+      loading: fetchingMapInfo,
+    },
+    [
+      h(
+        LoadingArea,
+        { loaded: !fetchingMapInfo },
+        h.if(!fetchingMapInfo)(InfoDrawerInterior)
+      ),
+    ]
+  );
 }
 
 function InfoDrawerInterior(props) {
+  const columnInfo = useAppState((state) => state.core.columnInfo);
+
+  return h(Routes, [
+    h(Route, { path: "/column", element: h(StratColumn, { columnInfo }) }),
+    h(Route, { path: "*", element: h(InfoDrawerMainPanel) }),
+  ]);
+}
+
+function InfoDrawerMainPanel(props) {
   const { mapInfo, columnInfo, pbdbData, mapLayers } = useAppState(
     (state) => state.core
   );
@@ -82,7 +88,7 @@ function InfoDrawerInterior(props) {
           ref: {},
         };
 
-  return h("div", [
+  return h("div.infodrawer-main", [
     h(GeologicMapInfo, {
       mapInfo,
       bedrockExpanded: true,
@@ -104,4 +110,3 @@ function InfoDrawerInterior(props) {
 }
 
 export default InfoDrawer;
-export { InfoDrawerContainer };

@@ -2,11 +2,14 @@ import { useLocation, useNavigate } from "react-router";
 import { useAppState } from "./hooks";
 import classNames from "classnames";
 import { MenuPage } from "./reducers";
-import { routerBasename } from "../Settings";
+import { routerBasename, mapPagePrefix } from "../settings";
 
 export function isDetailPanelRouteInternal(pathname: string) {
   /* Check if we're in a detail panel route from within the app. */
-  return pathname.startsWith("/loc");
+  return (
+    pathname.startsWith(mapPagePrefix + "/loc") ||
+    pathname.startsWith(mapPagePrefix + "/cross-section")
+  );
 }
 
 export function isDetailPanelRoute(pathname: string) {
@@ -15,7 +18,10 @@ export function isDetailPanelRoute(pathname: string) {
   it takes the routing focus off the context panel's status. */
   // Hack: cover all our bases here by not differentiating between paths that start with
   // routerBasename (i.e. full location paths) vs. react-router internal paths.
-  return pathname.startsWith(routerBasename + "loc");
+  return (
+    pathname.startsWith(routerBasename + "/loc") ||
+    pathname.startsWith(routerBasename + "/cross-section")
+  );
 }
 
 export function contextPanelIsInitiallyOpen(pathname: string) {
@@ -28,24 +34,39 @@ export function useContextPanelOpen() {
 
 export function currentPageForPathName(pathname: string): MenuPage | null {
   return Object.values(MenuPage).find((page) =>
-    pathname.startsWith(routerBasename + page)
+    pathname.startsWith(routerBasename + "/" + page)
   );
 }
 
 export function useContextClass() {
   const activePage = useAppState((s) => s.menu.activePage);
   if (activePage == null) return null;
-  return classNames("panel-open", activePage);
+  return classNames("map-context-open", activePage);
 }
 
-export function useCurrentPage() {
+export function useCurrentPage(baseRoute = "/") {
   const { pathname } = useLocation();
-  return pathname.slice(pathname.lastIndexOf("/") + 1, pathname.length);
+  return pathname.slice(baseRoute.length);
 }
 
 export function useHashNavigate(to: string) {
   const navigate = useNavigate();
+  const location = useLocation();
+
   return () => {
-    navigate(to + location.hash);
+    // This may be needed because of module/context stuff
+    // Compute relative path if necessary
+    if (to.startsWith(".")) {
+      // Do our own relative path calculations
+      let currentPath = location.pathname;
+      if (!currentPath.endsWith("/")) {
+        currentPath += "/";
+      }
+      to = currentPath + to;
+    }
+    navigate({
+      pathname: to,
+      hash: location.hash,
+    });
   };
 }

@@ -20,7 +20,7 @@ import {
   MenuPage,
   useAppState,
 } from "../app-state";
-import {SearchResults } from "../components/Searchbar";
+import { SearchResults } from "../components/navbar";
 import classNames from "classnames";
 import styles from "./main.module.styl";
 import loadable from "@loadable/component";
@@ -35,7 +35,8 @@ import { isDetailPanelRouteInternal } from "../app-state/nav-hooks";
 import { SettingsPanel, ExperimentsPanel, ThemeButton } from "./settings-panel";
 import { useState, useEffect } from "react";
 import { LinkButton, LayerButton, ListButton } from "../components/buttons";
-import { routerBasename } from "../Settings";
+import { routerBasename, mapPagePrefix } from "../settings";
+import { Card } from "@blueprintjs/core";
 
 function ChangelogPanel() {
   return h("div.bp4-text.text-panel", [h(Changelog)]);
@@ -73,10 +74,11 @@ const MenuGroup = (props) =>
 
 const LayerList = (props) => {
   const runAction = useAppActions();
+  const inPaleoMode = useAppState((s) => s.core.timeCursorAge != null);
 
   const toggleElevationChart = () => {
     runAction({ type: "toggle-menu" });
-    runAction({ type: "toggle-elevation-chart" });
+    runAction({ type: "toggle-cross-section" });
   };
 
   return h("div.menu-content", [
@@ -110,7 +112,11 @@ const LayerList = (props) => {
     h(MenuGroup, [
       h(
         ListButton,
-        { onClick: toggleElevationChart, icon: ElevationIcon },
+        {
+          onClick: toggleElevationChart,
+          icon: ElevationIcon,
+          disabled: inPaleoMode,
+        },
         "Elevation profile"
       ),
     ]),
@@ -132,20 +138,28 @@ const menuBacklinkLocationOverrides = {
   "/changelog": "/about",
 };
 
-function useLastPageLocation(): { title: string; to: string } | null {
-  const breadcrumbs = useBreadcrumbs();
+function useLastPageLocation(
+  baseRoute = "/"
+): { title: string; to: string } | null {
+  const breadcrumbs = useBreadcrumbs().filter((b) =>
+    b.key.startsWith(baseRoute)
+  );
   if (breadcrumbs.length < 2) return null;
   const prevPage = breadcrumbs[breadcrumbs.length - 2];
   const currentPage = breadcrumbs[breadcrumbs.length - 1];
   const prevRoute =
     menuBacklinkLocationOverrides[currentPage.match.pathname] ??
     prevPage.match.pathname;
-  if (prevRoute == "/" || isDetailPanelRouteInternal(prevRoute)) return null;
-  return { to: prevRoute, title: locationTitleForRoute[prevRoute] ?? "Back" };
+  if (prevRoute == mapPagePrefix || isDetailPanelRouteInternal(prevRoute))
+    return null;
+  return {
+    to: mapPagePrefix + prevRoute,
+    title: locationTitleForRoute[prevRoute] ?? "Back",
+  };
 }
 
-function MenuHeaderButtons() {
-  const backLoc = useLastPageLocation();
+function MenuHeaderButtons({ baseRoute = "/" }) {
+  const backLoc = useLastPageLocation(baseRoute);
   const { pathname } = useLocation();
 
   if (backLoc != null) {
@@ -214,10 +228,13 @@ type MenuProps = {
 };
 
 const Menu = (props: MenuProps) => {
-  let { className, menuPage } = props;
+  let { className, menuPage, baseRoute = "/" } = props;
   const { inputFocus } = useSearchState();
   const runAction = useAppActions();
 
+  const navigateHome = useHashNavigate(baseRoute);
+
+  const pageName = useCurrentPage(baseRoute);
   const isNarrow = menuPage == MenuPage.LAYERS || menuPage == MenuPage.SETTINGS;
   const isNarrowTrans = useTransition(isNarrow, 800);
 
@@ -242,11 +259,18 @@ const Menu = (props: MenuProps) => {
       insetContent: false,
       className,
       renderHeader: () =>
-        h(HeaderWrapper, { minimal: isNarrow }, h(MenuHeaderButtons)),
+        h(
+          HeaderWrapper,
+          { minimal: isNarrow },
+          h(MenuHeaderButtons, { baseRoute })
+        ),
     },
     elementForMenuPage(menuPage)
   );
 };
+
+export const PanelCard = (props) =>
+  h(Card, { ...props, className: classNames("panel-card", props.className) });
 
 function elementForMenuPage(page: MenuPage) {
   switch (page) {

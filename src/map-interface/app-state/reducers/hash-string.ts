@@ -1,8 +1,9 @@
 import { setHashString, getHashString } from "@macrostrat/ui-components";
-import { MapBackend, MapLayer, CoreState } from "./core";
+import { MapLayer, CoreState, InfoMarkerPosition } from "./core";
 import { MapPosition } from "@macrostrat/mapbox-utils";
 import { AppState, AppAction } from "./types";
 import { Filter, FilterType } from "../handlers/filters";
+import { ParsedQuery } from "query-string";
 import {
   formatCoordForZoomLevel,
   fmtInt,
@@ -12,7 +13,6 @@ import {
 
 export function hashStringReducer(state: AppState, action: AppAction) {
   switch (action.type) {
-    case "set-map-backend":
     case "add-filter":
     case "remove-filter":
     case "clear-filters":
@@ -45,8 +45,17 @@ export function updateURI(state: CoreState) {
     args[filter.type].push(filter.id ?? filter.name);
   }
 
-  applyXYPosition(args, state);
-  applyHeightAndOrientation(args, state);
+  applyMapPositionToHash(args, state.mapPosition);
+  applyInfoMarkerPosition(
+    args,
+    state.infoMarkerPosition,
+    state.mapPosition.target?.zoom
+  );
+
+  if (state.timeCursorAge != null && state.timeCursorAge != 0) {
+    args.age = fmtInt(state.timeCursorAge);
+    args.plate_model = fmtInt(state.plateModelId);
+  }
 
   const layers = getLayerDescriptionFromLayers(state.mapLayers);
   args = { ...args, ...layers };
@@ -55,36 +64,34 @@ export function updateURI(state: CoreState) {
   return state;
 }
 
-function applyXYPosition(args: object, state: CoreState) {
-  const pos = state.mapPosition.camera;
-  if (pos == null) return;
-  const zoom = state.mapPosition.target?.zoom;
-
-  let x = formatCoordForZoomLevel(pos.lng, zoom);
-  let y = formatCoordForZoomLevel(pos.lat, zoom);
-
-  const { infoMarkerPosition } = state;
-  if (infoMarkerPosition != null) {
+function applyInfoMarkerPosition(
+  args: object,
+  position: InfoMarkerPosition,
+  zoom: number | null
+) {
+  if (position != null) {
     /* If the info marker is at the same position as the map, there
      * is no need to include it in the hash string. This should lead
      * to shorter sharable URLs */
-    let infoX = formatCoordForZoomLevel(infoMarkerPosition.lng, zoom);
-    let infoY = formatCoordForZoomLevel(infoMarkerPosition.lat, zoom);
-    if (infoX == x || infoY == y) {
-      return;
+    let infoX = formatCoordForZoomLevel(position.lng, zoom);
+    let infoY = formatCoordForZoomLevel(position.lat, zoom);
+    if (infoX == args["x"] || infoY == args["y"]) {
+      delete args["x"];
+      delete args["y"];
     }
   }
-  args["x"] = x;
-  args["y"] = y;
 }
 
-function applyHeightAndOrientation(args: HashParams, state: CoreState) {
-  const pos = state.mapPosition.camera ?? {
-    bearing: 0,
-    pitch: 0,
-    altitude: null,
-  };
-  const zoom = state.mapPosition.target?.zoom;
+export function applyMapPositionToHash(
+  args: HashParams,
+  mapPosition: MapPosition
+) {
+  const pos = mapPosition.camera;
+  if (pos == null) return;
+  const zoom = mapPosition.target?.zoom;
+
+  args.x = formatCoordForZoomLevel(pos.lng, zoom);
+  args.y = formatCoordForZoomLevel(pos.lat, zoom);
 
   if (pos.bearing == 0 && pos.pitch == 0 && zoom != null) {
     args.z = fmt1(zoom);
@@ -204,6 +211,56 @@ function layerDescriptionToLayers(
   return validateLayers(layers);
 }
 
+export function getMapPositionForHash(
+  hashData: ParsedQuery<string>,
+  infoMarkerPosition: InfoMarkerPosition | null
+): MapPosition {
+  const {
+    x = infoMarkerPosition?.lng ?? 0,
+    y = infoMarkerPosition?.lat ?? 0,
+    // Different default for zoom depending on whether we have a marker
+    z = infoMarkerPosition != null ? 7 : 2,
+    a = 0,
+    e = 0,
+  } = hashData;
+
+  const lng = _fmt(x);
+  const lat = _fmt(y);
+
+  let altitude = null;
+  let zoom = null;
+  const _z = z.toString();
+  if (_z.endsWith("km")) {
+    altitude = _fmt(_z.substring(0, _z.length - 2)) * 1000;
+  } else if (_z.endsWith("m")) {
+    altitude = _fmt(_z.substring(0, _z.length - 1));
+  } else {
+    zoom = _fmt(z);
+  }
+  const bearing = _fmt(a);
+  const pitch = _fmt(e);
+
+  let target = undefined;
+  if (bearing == 0 && pitch == 0 && zoom != null) {
+    target = {
+      lat,
+      lng,
+      zoom,
+    };
+  }
+
+  return {
+    camera: {
+      lng: _fmt(x),
+      lat: _fmt(y),
+      altitude,
+      bearing: _fmt(a),
+      pitch: _fmt(e),
+    },
+    target,
+  };
+}
+
 export function updateMapPositionForHash(
   state: CoreState,
   hashString: string
@@ -214,58 +271,18 @@ export function updateMapPositionForHash(
 
     let { show = [], hide = [] } = hashData;
     // Set default view parameters
-    const {
-      x = state.infoMarkerPosition?.lng ?? 16,
-      y = state.infoMarkerPosition?.lat ?? 23,
-      // Different default for zoom depending on whether we have a marker
-      z = state.infoMarkerPosition != null ? 7 : 2,
-      a = 0,
-      e = 0,
-    } = hashData;
-
     const mapLayers = layerDescriptionToLayers(show, hide);
+    const position = getMapPositionForHash(hashData, state.infoMarkerPosition);
 
-    const lng = _fmt(x);
-    const lat = _fmt(y);
-
-    let altitude = null;
-    let zoom = null;
-    const _z = z.toString();
-    if (_z.endsWith("km")) {
-      altitude = _fmt(_z.substring(0, _z.length - 2)) * 1000;
-    } else if (_z.endsWith("m")) {
-      altitude = _fmt(_z.substring(0, _z.length - 1));
-    } else {
-      zoom = _fmt(z);
-    }
-    const bearing = _fmt(a);
-    const pitch = _fmt(e);
-
-    let target = undefined;
-    if (bearing == 0 && pitch == 0 && zoom != null) {
-      target = {
-        lat,
-        lng,
-        zoom,
-      };
-    }
-
-    const position: MapPosition = {
-      camera: {
-        lng: _fmt(x),
-        lat: _fmt(y),
-        altitude,
-        bearing: _fmt(a),
-        pitch: _fmt(e),
-      },
-      target,
-    };
+    // Get time cursor information
+    const { age, plate_model = 1 } = hashData;
 
     return {
       ...state,
       mapPosition: position,
       mapLayers,
-      mapBackend: MapBackend.MAPBOX3,
+      timeCursorAge: age != null ? Number(age) : null,
+      plateModelId: Number(plate_model),
     };
   } catch (e) {
     console.error("Invalid map state:", e);

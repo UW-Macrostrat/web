@@ -1,33 +1,30 @@
 // Settings panel for the map
 
-import { Alignment, Switch, Icon } from "@blueprintjs/core";
-import hyper from "@macrostrat/hyper";
-import { Tag, Button, Collapse, Callout, Text } from "@blueprintjs/core";
-import { useState } from "react";
-//import { LinkButton } from "@macrostrat/ui-components";
-//import { GlobeSettings } from "@macrostrat/cesium-viewer/settings";
+// TODO: re-integrate LinkButton to @macrostrat/router-components
 import { useAppState, useAppActions } from "~/map-interface/app-state";
+import {
+  Switch,
+  Icon,
+  Button,
+  Intent,
+  IconName,
+  AnchorButton,
+} from "@blueprintjs/core";
+import hyper from "@macrostrat/hyper";
+import { Tag, Collapse, Callout, Text, NumericInput } from "@blueprintjs/core";
+import { useState } from "react";
+import { useEffect } from "react";
 import { MapLayer } from "~/map-interface/app-state";
-//import { DisplayQuality } from "@macrostrat/cesium-viewer";
 import styles from "./settings-panel.module.styl";
 import {
   DarkModeButton,
   useDarkMode,
   darkModeUpdater,
+  buildQueryString,
 } from "@macrostrat/ui-components";
+import { LinkButton } from "../components/buttons";
 
 const h = hyper.styled(styles);
-
-/*
-function MapTypeButton(props) {
-  const { pathname, hash } = useLocation();
-  const globeActive = pathname?.startsWith("/globe");
-  if (globeActive) {
-    return h(LinkButton, { to: { pathname: "/map", hash } }, "Switch to map");
-  }
-  return h(LinkButton, { to: { pathname: "/globe", hash } }, "Switch to globe");
-}
-*/
 
 const ExperimentsPanel = (props) => {
   const dispatch = useAppActions();
@@ -45,55 +42,122 @@ const ExperimentsPanel = (props) => {
       },
       "Show sources"
     ),
-
-    //h(MapTypeButton),
-    //h.if(globeActive)(GlobeSettings),
   ]);
 };
 
 const SettingsPanel = (props) => {
-  //const { pathname } = useLocation();
-  //const globeActive = pathname?.startsWith("/globe");
   const runAction = useAppActions();
   const showExperiments = useAppState((s) => s.core.showExperimentsPanel);
+  const age = useAppState((s) => s.core.timeCursorAge);
+  const [localAge, setLocalAge] = useState(age);
+
+  useEffect(() => {
+    setLocalAge(age);
+  }, [age]);
 
   return h("div.settings", [
     h("p.info", "Display options for Macrostrat's map."),
-    //h(ButtonGroup, { vertical: true, alignText: Alignment.LEFT }, [
     h(LabelsButton),
     h(ThemeButton),
-    //h(HighResolutionTerrainSwitch),
-
-    h("div.callout-panel", { className: showExperiments ? "expanded" : null }, [
-      h("div.callout-header", [
-        h(
-          Button,
-          {
-            minimal: true,
-            icon: "clean",
-            active: showExperiments,
-            intent: "warning",
-            onClick() {
-              runAction({ type: "toggle-experiments-panel" });
-            },
-          },
-          "Experiments"
-        ),
-      ]),
-      h(
-        Collapse,
-        {
-          isOpen: showExperiments,
-          className: "callout-content",
+    h(
+      CalloutPanel,
+      {
+        icon: "clean",
+        isOpen: showExperiments,
+        title: "Experiments",
+        intent: "warning",
+        setIsOpen() {
+          runAction({ type: "toggle-experiments-panel" });
         },
-        h(Callout, { intent: "warning", icon: null }, [
-          h(LineSymbolsControl),
-          h(SourcesButton),
-        ])
-      ),
-    ]),
+      },
+      [
+        h(LineSymbolsControl),
+        h(SourcesButton),
+        h(PaleogeographyButton),
+        h(GlobeLink),
+      ]
+    ),
+    // ])
   ]);
 };
+
+import { applyMapPositionToHash } from "~/map-interface/app-state/reducers/hash-string";
+
+function GlobeLink() {
+  const mapPosition = useAppState((s) => s.core.mapPosition);
+  let args = {};
+  applyMapPositionToHash(args, mapPosition);
+
+  return h(AnchorButton, {
+    href:
+      "/dev/globe#" +
+      buildQueryString(args, { arrayFormat: "comma", sort: false }),
+    minimal: true,
+    intent: "warning",
+    icon: "globe-network",
+    text: "Switch to globe",
+  });
+}
+
+function PaleogeographyButton() {
+  const runAction = useAppActions();
+  const age = useAppState((s) => s.core.timeCursorAge);
+  return h(
+    Button,
+    {
+      onClick() {
+        runAction({ type: "set-time-cursor", age: age != null ? null : 0 });
+      },
+      icon: "time",
+      intent: "warning",
+      minimal: true,
+      active: age != null,
+    },
+    "Paleogeography"
+  );
+}
+
+function CalloutPanel({
+  isOpen,
+  setIsOpen,
+  children,
+  icon,
+  intent = Intent.PRIMARY,
+  title,
+}: {
+  isOpen: boolean;
+  setIsOpen: (v: boolean) => void;
+  children: any;
+  icon: IconName;
+  intent?: Intent;
+  title: string;
+}) {
+  return h("div.callout-panel", { className: isOpen ? "expanded" : null }, [
+    h("div.callout-header", [
+      h(
+        Button,
+        {
+          minimal: true,
+          icon,
+          active: isOpen,
+          intent: "warning",
+          onClick() {
+            setIsOpen(!isOpen);
+          },
+        },
+        title
+      ),
+    ]),
+    h(
+      Collapse,
+      {
+        isOpen: isOpen,
+        className: "callout-content",
+      },
+      h(Callout, { intent, icon: null }, [children])
+    ),
+  ]);
+}
 
 function LineSymbolsControl() {
   const runAction = useAppActions();
@@ -166,6 +230,12 @@ function LabelsButton() {
   const layer = MapLayer.LABELS;
   const isShown = useAppState((state) => state.core.mapLayers.has(layer));
   const runAction = useAppActions();
+  const [localAge, setLocalAge] = useState(null);
+  const age = useAppState((s) => s.core.timeCursorAge);
+  useEffect(() => {
+    setLocalAge(age);
+  }, [age]);
+
   const onClick = () => runAction({ type: "toggle-map-layer", layer });
   return h(ShowHideButton, {
     minimal: true,
