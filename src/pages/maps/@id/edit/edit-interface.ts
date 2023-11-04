@@ -1,46 +1,33 @@
 import hyper from "@macrostrat/hyper";
-import { ReactElement, ReactFragment, useEffect } from "react";
+import { ReactNode, useEffect } from "react";
 import styles from "./edit-menu.module.sass";
 import { useState } from "react";
 import "~/styles/global.styl";
-import { Icon } from "@blueprintjs/core";
+import { Icon, Button } from "@blueprintjs/core";
 import EditTable from "./edit-table";
 
 const h = hyper.styled(styles);
 
 interface TableProps {}
 
-interface IconButtonProps {
-  icon: string;
-  name: string;
-  onClick: () => void;
-}
-
-function IconButton({ icon, name, onClick }: IconButtonProps) {
-  return h("button.icon-button", { onClick: onClick }, [
-    h("div.icon-container", {}, [h(Icon, { icon: icon, size: 24 })]),
-    h("span.icon-label", {}, name),
-  ]);
-}
-
 interface EditMenuProps {
-  setMenu: () => void;
+  setActivePage: (page: string) => void;
 }
 
-function EditMenu({
-  setMenu,
-}: EditMenuProps): ReactElement<{}> | ReactElement | ReactFragment {
+function EditMenu({ setActivePage }: EditMenuProps) {
   return h("div.edit-menu", {}, [
-    h(IconButton, {
+    h(Button, {
       icon: "polygon-filter",
-      name: "Polygons",
-      onClick: () => setMenu("polygons"),
+      text: "Polygons",
+      large: true,
+      onClick: () => setActivePage("polygons"),
     }),
   ]);
 }
 
 interface EditTableDrawerProps {
   menu: string;
+  children: ReactNode;
 }
 
 function EditTableDrawer({ menu, children }: EditTableDrawerProps) {
@@ -48,7 +35,7 @@ function EditTableDrawer({ menu, children }: EditTableDrawerProps) {
   const [startPosition, setStartPosition] = useState(0);
 
   useEffect(() => {
-    setMaxWidth(menu != undefined ? window.innerWidth / 2 : 0);
+    setMaxWidth(menu != null ? window.innerWidth / 2 : 0);
   }, [menu]);
 
   return h("div.edit-table-drawer", { style: { maxWidth: maxWidth + "px" } }, [
@@ -83,7 +70,7 @@ export default function EditInterface({
   const [activePage, setActivePage] = useState(undefined);
 
   return h("div.interface", {}, [
-    h.if(activePage == null)(EditMenu, { setMenu: setActivePage }),
+    h.if(activePage == null)(EditMenu, { setActivePage }),
     h(EditTableDrawer, { menu: activePage }, [
       h.if(activePage == "polygons")(
         EditTable,
