@@ -97,7 +97,7 @@ export default function EditTable({ url }) {
   }
 
   const columns = Object.keys(data[0])
-    .filter((x) => x != "db_id")
+    .filter((x) => x != "_pkid")
     .map((key) => {
       return h(Column, {
         name: key,
@@ -128,8 +128,8 @@ export default function EditTable({ url }) {
     } else {
       const selectedRowIndices =
         rows != undefined ? range(rows[0], rows[1] + 1) : range(0, data.length);
-      const dbIds = selectedRowIndices.map((row) => data[row]["db_id"]);
-      const filter = new Filter("db_id", "in", "(" + dbIds.join(",") + ")");
+      const dbIds = selectedRowIndices.map((row) => data[row]["_pkid"]);
+      const filter = new Filter("_pkid", "in", "(" + dbIds.join(",") + ")");
 
       selection = {
         columns: selectedColumnKeys,
@@ -141,7 +141,7 @@ export default function EditTable({ url }) {
   };
 
   const rowHeaderCellRenderer = (rowIndex: number) => {
-    return h(RowHeaderCell2, { name: data[rowIndex]["db_id"] }, []);
+    return h(RowHeaderCell2, { name: data[rowIndex]["_pkid"] }, []);
   };
 
   const submitChange = async (value: string) => {
