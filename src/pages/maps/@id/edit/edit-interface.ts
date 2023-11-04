@@ -34,24 +34,28 @@ function WidthAdjustablePanel({ children }: { children: ReactNode }) {
     setMaxWidth(window.innerWidth / 2);
   }, []);
 
-  return h("div.edit-table-drawer", { style: { maxWidth: maxWidth + "px" } }, [
-    h(
-      "div.width-adjuster",
-      {
-        onDragStart: (e) => {
-          setStartPosition(e.clientX);
+  return h(
+    "div.width-adjustable-panel",
+    { style: { maxWidth: maxWidth + "px" } },
+    [
+      h(
+        "div.width-adjuster",
+        {
+          onDragStart: (e) => {
+            setStartPosition(e.clientX);
+          },
+          onDragEnd: (e) => {
+            const dx = e.clientX - startPosition;
+            const newMaxWidth = maxWidth - dx;
+            setMaxWidth(newMaxWidth);
+          },
+          draggable: true,
         },
-        onDragEnd: (e) => {
-          const dx = e.clientX - startPosition;
-          const newMaxWidth = maxWidth - dx;
-          setMaxWidth(newMaxWidth);
-        },
-        draggable: true,
-      },
-      []
-    ),
-    children,
-  ]);
+        []
+      ),
+      h("div.width-adjustable-panel-content", {}, children),
+    ]
+  );
 }
 
 interface EditInterfaceProps {
