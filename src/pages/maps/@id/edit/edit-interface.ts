@@ -1,23 +1,7 @@
 import hyper from "@macrostrat/hyper";
-import {
-  MapAreaContainer,
-  MapView,
-  PanelCard,
-} from "@macrostrat/map-interface";
-import {
-  Spinner,
-  Radio,
-  RadioGroup,
-  NonIdealState,
-  Collapse,
-  Switch,
-} from "@blueprintjs/core";
-import { SETTINGS } from "~/map-interface/settings";
-import { useMapRef } from "@macrostrat/mapbox-react";
 import { ReactElement, ReactFragment, useEffect } from "react";
 import styles from "./edit-menu.module.sass";
-import { MapNavbar } from "~/dev/map-layers/utils";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import "~/styles/global.styl";
 import { Icon } from "@blueprintjs/core";
 import EditTable from "./edit-table";

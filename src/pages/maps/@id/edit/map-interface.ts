@@ -4,27 +4,17 @@ import {
   MapView,
   PanelCard,
 } from "@macrostrat/map-interface";
-import {
-  Spinner,
-  Radio,
-  RadioGroup,
-  NonIdealState,
-  Collapse,
-  Switch,
-} from "@blueprintjs/core";
+import { Spinner, Radio, RadioGroup } from "@blueprintjs/core";
 import { SETTINGS } from "~/map-interface/settings";
-import { useMapRef } from "@macrostrat/mapbox-react";
 import { useEffect } from "react";
 import styles from "./main.module.sass";
-import { MapNavbar } from "~/dev/map-layers/utils";
 import { useMemo, useState } from "react";
 import "~/styles/global.styl";
 import boundingBox from "@turf/bbox";
 import { LngLatBoundsLike } from "mapbox-gl";
 import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
-import { useDarkMode, useAPIResult, JSONView } from "@macrostrat/ui-components";
-import { InfoDrawerContainer, ExpansionPanel } from "@macrostrat/map-interface";
+import { useDarkMode } from "@macrostrat/ui-components";
 import { MapMarker } from "@macrostrat/map-interface";
 import { NullableSlider } from "@macrostrat/ui-components";
 import { tempImageIndex, s3Address } from "../../raster-images";
