@@ -1,6 +1,6 @@
 import hyper from "@macrostrat/hyper";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { HotkeysProvider, InputGroup, Button } from "@blueprintjs/core";
 import { Spinner } from "@blueprintjs/core";
 import {
@@ -10,6 +10,7 @@ import {
   RowHeaderCell2,
   SelectionModes,
 } from "@blueprintjs/table";
+import update from "immutability-helper";
 import { TablePagination } from "@mui/material";
 
 import "@blueprintjs/table/lib/css/table.css";
@@ -67,13 +68,53 @@ export default function EditTable({ url }) {
     filters: [],
   });
 
-  const cellRenderer = ({ key, row, cell }) => {
-    return h(
-      EditableCell2,
-      { onChange: (e) => console.log(), value: data[row][key] },
-      []
-    );
+  // Sparse array to hold edited data
+  const [editedData, setEditedData] = useState(new Array());
+
+  const onChange = (key, row, text) => {
+    let rowSpec = {};
+    if (text == null || text == "") {
+      rowSpec = { $unset: [key] };
+    } else {
+      const rowOp = editedData[row] == null ? "$set" : "$merge";
+      rowSpec = { [rowOp]: { [key]: text } };
+    }
+
+    const newData = update(editedData, {
+      [row]: rowSpec,
+    });
+    setEditedData(newData);
   };
+
+  const isValid = (key, row, text) => {
+    // Placeholder for future validation
+    return true;
+  };
+
+  const intentForCell = (key, row) => {
+    const _val = editedData[row]?.[key];
+    if (_val != null) {
+      return isValid(key, row, _val) ? "success" : "danger";
+    }
+    return "none";
+  };
+
+  const cellRenderer = useCallback(
+    ({ key, row, cell }) => {
+      return h(
+        EditableCell2,
+        {
+          onConfirm: (value) => {
+            onChange(key, row, value);
+          },
+          value: editedData[row]?.[key] ?? data[row][key],
+          intent: intentForCell(key, row),
+        },
+        []
+      );
+    },
+    [data, editedData]
+  );
 
   let getData = async () => {
     let dataURL = new URL(url);
@@ -90,7 +131,7 @@ export default function EditTable({ url }) {
 
   useEffect(() => {
     getData();
-  }, [page, pageSize, dataToggle]);
+  }, [page, pageSize]);
 
   if (data == undefined) {
     return h(Spinner);
@@ -190,8 +231,11 @@ export default function EditTable({ url }) {
           onSelection: (selections: Selection[]) =>
             getSelectionValues(selections),
           numRows: data.length,
+          // Dumb hacks to try to get the table to rerender on changes
+          cellRendererDependencies: [editedData],
+          enableFocusedCell: true,
         },
-        [columns]
+        columns
       ),
       // h(TablePagination, {
       //   component: "div",
@@ -203,4 +247,28 @@ export default function EditTable({ url }) {
       // }),
     ]),
   ]);
+}
+
+class TableDataManager {
+  /** Low-level manager for windowed loading of table data. This will eventually be how
+   * we work with the data, hopefully. */
+  baseURL: string;
+  totalCount: number;
+  chunkSize: number = 100;
+
+  init(baseURL: string) {
+    this.baseURL = baseURL;
+  }
+
+  async getData(page: number) {
+    let dataURL = new URL(this.baseURL);
+
+    dataURL.searchParams.append("page", page.toString());
+    dataURL.searchParams.append("page_size", this.chunkSize.toString());
+
+    let response = await fetch(dataURL);
+    let data = await response.json();
+
+    this.totalCount = Number.parseInt(response.headers.get("X-Total-Count"));
+  }
 }
