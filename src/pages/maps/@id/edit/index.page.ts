@@ -6,7 +6,6 @@ import { ClientOnly } from "~/renderer/client-only";
 const apiAddress = SETTINGS.apiDomain + "/api/v2/defs/sources";
 
 export async function onBeforeRender(pageContext: PageContextBuiltInServer) {
-
   const { id } = pageContext.routeParams;
 
   const params = new URLSearchParams({
@@ -34,5 +33,8 @@ export async function onBeforeRender(pageContext: PageContextBuiltInServer) {
 const MapInterface = () => import("./map-interface");
 
 export function Page({ id, map }) {
-  return h("div.single-map", h(ClientOnly, { component: MapInterface, id, map }));
+  return h(
+    "div.single-map",
+    h(ClientOnly, { component: MapInterface, id, map })
+  );
 }

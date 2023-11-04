@@ -17,11 +17,6 @@ This stylesheet the overall application page layout.
 .panel-title
   font-size 16px
 
-.map-view-container
-  flex-grow 1
-  position relative
-  overflow: hidden
-
 .map-view-placeholder
   flex-grow: 1
   position: relative
@@ -111,11 +106,23 @@ This stylesheet the overall application page layout.
   hr
     width 100%
 
-
+// This is a good candidate for moving to the map-interface package
 .macrostrat-map-container.searching
+  .context-underlay
+    background-color: var(--panel-background-color)
+    opacity: 0.5
+    pointer-events: all
   .map-view-container
     pointer-events: none
 
+.context-underlay
+  position: absolute
+  top: 0
+  left: 0
+  right: 0
+  bottom: 0
+  pointer-events: none
+  z-index: 1
 
 /* Desktop styling is necessarily much more complicated than mobile
   to handle a two-column layout. */

@@ -1,34 +1,23 @@
+import { Radio, RadioGroup, Spinner } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import {
   MapAreaContainer,
+  MapMarker,
   MapView,
   PanelCard,
 } from "@macrostrat/map-interface";
-import {
-  Spinner,
-  Radio,
-  RadioGroup,
-  NonIdealState,
-  Collapse,
-  Switch,
-} from "@blueprintjs/core";
-import { SETTINGS } from "~/map-interface/settings";
-import { useMapRef } from "@macrostrat/mapbox-react";
-import { useEffect } from "react";
-import styles from "./main.module.sass";
-import { MapNavbar } from "~/dev/map-layers/utils";
-import { useMemo, useState } from "react";
-import "~/styles/global.styl";
-import boundingBox from "@turf/bbox";
-import { LngLatBoundsLike } from "mapbox-gl";
 import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
-import { useDarkMode, useAPIResult, JSONView } from "@macrostrat/ui-components";
-import { InfoDrawerContainer, ExpansionPanel } from "@macrostrat/map-interface";
-import { MapMarker } from "@macrostrat/map-interface";
-import { NullableSlider } from "@macrostrat/ui-components";
-import { tempImageIndex, s3Address } from "../../raster-images";
-import EditInterface from "./EditInterface";
+import { NullableSlider, useDarkMode } from "@macrostrat/ui-components";
+import boundingBox from "@turf/bbox";
+import { LngLatBoundsLike } from "mapbox-gl";
+import { useEffect, useMemo, useState } from "react";
+import { MapNavbar } from "~/components/map-navbar";
+import { SETTINGS } from "~/map-interface/settings";
+import "~/styles/global.styl";
+import { s3Address, tempImageIndex } from "../../raster-images";
+import EditInterface from "./edit-interface";
+import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
 
@@ -71,41 +60,6 @@ function buildOverlayStyle({
     });
   }
 
-  const raster = rasterURL(focusedMap);
-  if (raster != null && layerOpacity.raster != null) {
-    const rasterStyle = {
-      ...emptyStyle,
-      sources: {
-        raster: {
-          type: "raster",
-          tiles: [
-            SETTINGS.burwellTileDomain +
-              "/cog/tiles/{z}/{x}/{y}.png?url=" +
-              raster,
-          ],
-          tileSize: 256,
-        },
-      },
-      layers: [
-        {
-          id: "raster",
-          type: "raster",
-          source: "raster",
-          minzoom: 0,
-          maxzoom: 22,
-          layout: {
-            visibility: "visible",
-          },
-          paint: {
-            "raster-opacity": layerOpacity.raster,
-          },
-        },
-      ],
-    };
-
-    mapStyle = mergeStyles(rasterStyle, mapStyle);
-  }
-
   if (style == null) {
     return mapStyle;
   }
@@ -139,11 +93,7 @@ function basemapStyle(basemap, inDarkMode) {
 export default function MapInterface({ id, map }) {
   const [isOpen, setOpen] = useState(false);
   const dark = useDarkMode()?.isEnabled ?? false;
-  const title = h([
-    h("code", map.properties.source_id),
-    " ",
-    map.properties.name,
-  ]);
+  const title = map.properties.name;
 
   const hasRaster = rasterURL(map.properties.source_id) != null;
 
@@ -255,9 +205,16 @@ export default function MapInterface({ id, map }) {
     MapAreaContainer,
     {
       className: "single-map",
-      navbar: h(EditInterface, {title:"Source 1", parentRoute:"/maps/", source_id:id}, []),
+      navbar: h(MapNavbar, { title, parentRoute: "/maps", isOpen, setOpen }),
       contextPanel,
-      contextPanelOpen: isOpen
+      contextPanelOpen: isOpen,
+      detailPanelOpen: true,
+      detailPanelStyle: "fixed",
+      detailPanel: h(
+        EditInterface,
+        { title: "Source 1", parentRoute: "/maps/", source_id: id },
+        []
+      ),
     },
     [
       h(
@@ -305,7 +262,6 @@ function BaseLayerSelector({ layer, setLayer }) {
     ),
   ]);
 }
-
 
 function OpacitySlider(props) {
   return h("div.opacity-slider", [

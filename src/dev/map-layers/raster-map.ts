@@ -8,7 +8,7 @@ import { PanelCard } from "~/map-interface/map-page/menu";
 import { getBaseMapStyle } from "~/map-interface/map-page/map-view";
 import { MacrostratRasterTileset, buildRasterStyle, h } from ".";
 import { FloatingNavbar, MapLoadingButton } from "@macrostrat/map-interface";
-import { useMapStyle, ParentRouteButton } from "./utils";
+import { useMapStyle } from "./utils";
 import { useMapRef } from "@macrostrat/mapbox-react";
 import { MapView } from "@macrostrat/map-interface";
 
