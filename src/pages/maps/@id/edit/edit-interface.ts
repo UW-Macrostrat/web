@@ -15,12 +15,12 @@ import {
 import { SETTINGS } from "~/map-interface/settings";
 import { useMapRef } from "@macrostrat/mapbox-react";
 import { ReactElement, ReactFragment, useEffect } from "react";
-import styles from "./editMenu.module.sass";
+import styles from "./edit-menu.module.sass";
 import { MapNavbar } from "~/dev/map-layers/utils";
 import { useMemo, useState } from "react";
 import "~/styles/global.styl";
 import { Icon } from "@blueprintjs/core";
-import EditTable from "./EditTable";
+import EditTable from "./edit-table";
 
 const h = hyper.styled(styles);
 

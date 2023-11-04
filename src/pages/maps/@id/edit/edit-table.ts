@@ -19,7 +19,7 @@ import {
 import { TablePagination } from "@mui/material";
 
 import "@blueprintjs/table/lib/css/table.css";
-import styles from "./editTable.module.sass";
+import styles from "./edit-table.module.sass";
 
 const h = hyper.styled(styles);
 

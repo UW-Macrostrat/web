@@ -28,7 +28,7 @@ import { InfoDrawerContainer, ExpansionPanel } from "@macrostrat/map-interface";
 import { MapMarker } from "@macrostrat/map-interface";
 import { NullableSlider } from "@macrostrat/ui-components";
 import { tempImageIndex, s3Address } from "../../raster-images";
-import EditInterface from "./EditInterface";
+import EditInterface from "./edit-interface";
 
 const h = hyper.styled(styles);
 
