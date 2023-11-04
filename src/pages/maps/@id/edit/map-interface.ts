@@ -255,9 +255,13 @@ export default function MapInterface({ id, map }) {
     MapAreaContainer,
     {
       className: "single-map",
-      navbar: h(EditInterface, {title:"Source 1", parentRoute:"/maps/", source_id:id}, []),
+      navbar: h(
+        EditInterface,
+        { title: "Source 1", parentRoute: "/maps/", source_id: id },
+        []
+      ),
       contextPanel,
-      contextPanelOpen: isOpen
+      contextPanelOpen: isOpen,
     },
     [
       h(
@@ -305,7 +309,6 @@ function BaseLayerSelector({ layer, setLayer }) {
     ),
   ]);
 }
-
 
 function OpacitySlider(props) {
   return h("div.opacity-slider", [

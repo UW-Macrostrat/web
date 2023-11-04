@@ -24,9 +24,7 @@ import EditTable from "./EditTable";
 
 const h = hyper.styled(styles);
 
-interface TableProps {
-
-}
+interface TableProps {}
 
 interface IconButtonProps {
   icon: string;
@@ -35,82 +33,81 @@ interface IconButtonProps {
 }
 
 function IconButton({ icon, name, onClick }: IconButtonProps) {
-  return h("button.icon-button", {onClick: onClick},
-    [
-      h("div.icon-container", {}, [
-        h(Icon, {icon: icon, size: 24})
-      ]),
-      h("span.icon-label", {}, name)
-    ]
-  );
+  return h("button.icon-button", { onClick: onClick }, [
+    h("div.icon-container", {}, [h(Icon, { icon: icon, size: 24 })]),
+    h("span.icon-label", {}, name),
+  ]);
 }
 
 interface EditMenuProps {
   setMenu: () => void;
 }
 
-function EditMenu({setMenu}: EditMenuProps): ReactElement<{}> | ReactElement | ReactFragment {
-  return h(
-    "div.edit-menu",
-    {},
-    [
-      h(IconButton, {icon: "polygon-filter", name: "Polygons", onClick: () => setMenu("polygons")}),
-    ]
-  )
+function EditMenu({
+  setMenu,
+}: EditMenuProps): ReactElement<{}> | ReactElement | ReactFragment {
+  return h("div.edit-menu", {}, [
+    h(IconButton, {
+      icon: "polygon-filter",
+      name: "Polygons",
+      onClick: () => setMenu("polygons"),
+    }),
+  ]);
 }
 
 interface EditTableDrawerProps {
   menu: string;
 }
 
-function EditTableDrawer({menu, children}: EditTableDrawerProps){
-
+function EditTableDrawer({ menu, children }: EditTableDrawerProps) {
   const [maxWidth, setMaxWidth] = useState(0);
   const [startPosition, setStartPosition] = useState(0);
 
-
   useEffect(() => {
-    setMaxWidth(menu != undefined ? window.innerWidth / 2 : 0)
-  }, [menu])
+    setMaxWidth(menu != undefined ? window.innerWidth / 2 : 0);
+  }, [menu]);
 
-  return h(
-    "div.edit-table-drawer",
-    { style: { maxWidth: maxWidth + "px" }},
-    [
-      children,
-      h("div.width-adjuster", {
+  return h("div.edit-table-drawer", { style: { maxWidth: maxWidth + "px" } }, [
+    children,
+    h(
+      "div.width-adjuster",
+      {
         onDragStart: (e) => {
-          setStartPosition(e.clientX)
+          setStartPosition(e.clientX);
         },
         onDragEnd: (e) => {
-          setMaxWidth(maxWidth + (e.clientX - startPosition))
+          setMaxWidth(maxWidth + (e.clientX - startPosition));
         },
-        draggable: true
-      }, [])
-    ]
-  )
+        draggable: true,
+      },
+      []
+    ),
+  ]);
 }
-
 
 interface EditInterfaceProps {
-  title ?: string;
-  parentRoute ?: string;
-  source ?: number;
+  title?: string;
+  parentRoute?: string;
+  source?: number;
 }
 
-export default function EditInterface({title, parentRoute, source_id} : EditInterfaceProps){
-
+export default function EditInterface({
+  title,
+  parentRoute,
+  source_id,
+}: EditInterfaceProps) {
   const [menu, setMenu] = useState(undefined);
 
-
-
   return h("div.interface", {}, [
-    menu == undefined ? h(EditMenu, {setMenu}) : null,
-    h(EditTableDrawer, {menu},
-      [
-        menu == "polygons" ? h(EditTable, {url: `http://localhost:8000/sources/${source_id}/polygons`}, []) : null
-      ]
-    )
-  ])
-
+    menu == undefined ? h(EditMenu, { setMenu }) : null,
+    h(EditTableDrawer, { menu }, [
+      menu == "polygons"
+        ? h(
+            EditTable,
+            { url: `http://localhost:8000/sources/${source_id}/polygons` },
+            []
+          )
+        : null,
+    ]),
+  ]);
 }
