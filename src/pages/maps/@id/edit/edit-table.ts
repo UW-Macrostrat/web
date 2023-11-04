@@ -193,14 +193,14 @@ export default function EditTable({ url }) {
         },
         [columns]
       ),
-      h(TablePagination, {
-        component: "div",
-        count: totalCount,
-        rowsPerPage: pageSize,
-        page: page,
-        onRowsPerPageChange: (e) => setPageSize(e.target.value),
-        onPageChange: (e, p) => setPage(p),
-      }),
+      // h(TablePagination, {
+      //   component: "div",
+      //   count: totalCount,
+      //   rowsPerPage: pageSize,
+      //   page: page,
+      //   onRowsPerPageChange: (e) => setPageSize(e.target.value),
+      //   onPageChange: (e, p) => setPage(p),
+      // }),
     ]),
   ]);
 }

@@ -3,8 +3,9 @@ import { ReactNode, useEffect } from "react";
 import styles from "./edit-menu.module.sass";
 import { useState } from "react";
 import "~/styles/global.styl";
-import { Icon, Button } from "@blueprintjs/core";
 import EditTable from "./edit-table";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { LinkButton } from "~/map-interface/components/buttons";
 
 const h = hyper.styled(styles);
 
@@ -16,11 +17,11 @@ interface EditMenuProps {
 
 function EditMenu({ setActivePage }: EditMenuProps) {
   return h("div.edit-menu", {}, [
-    h(Button, {
+    h(LinkButton, {
       icon: "polygon-filter",
       text: "Polygons",
       large: true,
-      onClick: () => setActivePage("polygons"),
+      to: "polygons",
     }),
   ]);
 }
@@ -69,13 +70,20 @@ export default function EditInterface({ source_id }: EditInterfaceProps) {
 
   return h(
     WidthAdjustablePanel,
-    h([
-      h.if(activePage == null)(EditMenu, { setActivePage }),
-      h.if(activePage == "polygons")(
-        EditTable,
-        { url: `http://localhost:8000/sources/${source_id}/polygons` },
-        []
-      ),
+    // TODO: make this basename dynamic
+    h(Router, { basename: `/maps/${source_id}/edit` }, [
+      h(Routes, [
+        h(Route, {
+          path: "",
+          element: h(EditMenu, { setActivePage }),
+        }),
+        h(Route, {
+          path: "polygons",
+          element: h(EditTable, {
+            url: `http://localhost:8000/sources/${source_id}/polygons`,
+          }),
+        }),
+      ]),
     ])
   );
 }
