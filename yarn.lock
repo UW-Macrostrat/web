@@ -1707,7 +1707,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blueprintjs/colors@npm:^4.0.0-alpha.3, @blueprintjs/colors@npm:^4.1.22, @blueprintjs/colors@npm:^4.2.1":
+"@blueprintjs/colors@npm:^4.1.22, @blueprintjs/colors@npm:^4.2.1":
   version: 4.2.1
   resolution: "@blueprintjs/colors@npm:4.2.1"
   dependencies:
@@ -1716,33 +1716,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blueprintjs/core@npm:^3.52.0":
-  version: 3.54.0
-  resolution: "@blueprintjs/core@npm:3.54.0"
-  dependencies:
-    "@blueprintjs/colors": ^4.0.0-alpha.3
-    "@blueprintjs/icons": ^3.33.0
-    "@juggle/resize-observer": ^3.3.1
-    "@types/dom4": ^2.0.1
-    classnames: ^2.2
-    dom4: ^2.1.5
-    normalize.css: ^8.0.1
-    popper.js: ^1.16.1
-    react-lifecycles-compat: ^3.0.4
-    react-popper: ^1.3.7
-    react-transition-group: ^2.9.0
-    tslib: ~2.3.1
-  peerDependencies:
-    react: ^15.3.0 || 16 || 17
-    react-dom: ^15.3.0 || 16 || 17
-  bin:
-    upgrade-blueprint-2.0.0-rename: scripts/upgrade-blueprint-2.0.0-rename.sh
-    upgrade-blueprint-3.0.0-rename: scripts/upgrade-blueprint-3.0.0-rename.sh
-  checksum: 97b8811bfc32284bb36e62a44210e84d5abe164ef553670866e0628718db4a98c79b9665f73014b1474f534a3d3260e94af274e669fb0ebfeb323305a81b5375
-  languageName: node
-  linkType: hard
-
-"@blueprintjs/core@npm:^3||^4, @blueprintjs/core@npm:^4.14.1, @blueprintjs/core@npm:^4.17.8, @blueprintjs/core@npm:^4.18.0, @blueprintjs/core@npm:^4.20.2":
+"@blueprintjs/core@npm:^4.14.1, @blueprintjs/core@npm:^4.17.8, @blueprintjs/core@npm:^4.18.0, @blueprintjs/core@npm:^4.20.2":
   version: 4.20.2
   resolution: "@blueprintjs/core@npm:4.20.2"
   dependencies:
@@ -1790,16 +1764,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blueprintjs/icons@npm:^3.33.0":
-  version: 3.33.0
-  resolution: "@blueprintjs/icons@npm:3.33.0"
-  dependencies:
-    classnames: ^2.2
-    tslib: ~2.3.1
-  checksum: 9b1485a3ce17a97596b7fa7276ddbe85e33c56f061358351a626d353bf3eab6ab1b36a1860aec2feb7933ef0293c5f8e1f3342a89051720d1953343aab753cb3
-  languageName: node
-  linkType: hard
-
 "@blueprintjs/icons@npm:^4.14.5, @blueprintjs/icons@npm:^4.16.0":
   version: 4.16.0
   resolution: "@blueprintjs/icons@npm:4.16.0"
@@ -1808,23 +1772,6 @@ __metadata:
     classnames: ^2.3.1
     tslib: ~2.5.0
   checksum: d7d1d2ada376401df46b23977338686b6a5cfd203cf92fafb2bd5c19f9a8f4b1134277b6e3bf758b1df763bcf4fb89f80fb157c8ce49d732f1f6ca1f71942e8c
-  languageName: node
-  linkType: hard
-
-"@blueprintjs/popover2@npm:^0.12.9":
-  version: 0.12.9
-  resolution: "@blueprintjs/popover2@npm:0.12.9"
-  dependencies:
-    "@blueprintjs/core": ^3.52.0
-    "@popperjs/core": ^2.5.4
-    classnames: ^2.2
-    dom4: ^2.1.5
-    react-popper: ^2.2.4
-    resize-observer-polyfill: ^1.5.1
-    tslib: ~1.13.0
-  peerDependencies:
-    react: ^16.8.0 || ^17
-  checksum: f782600f3cd372abbdd47b9ca3ab9265c1e62e4b3b353d4b06c11c3663d62b01d597df11ba21aff9885a825c7960af878d8448922944489de4bc80c5019981de
   languageName: node
   linkType: hard
 
@@ -3515,12 +3462,15 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@macrostrat/data-sheet@workspace:deps/web-components/packages/data-sheet"
   dependencies:
-    "@blueprintjs/core": ^3||^4
-    "@blueprintjs/popover2": ^0.12.9
+    "@blueprintjs/core": ^4.17.8
+    "@blueprintjs/popover2": ^1.13.12
     "@macrostrat/hyper": ^1.2.12
+    chroma-js: ^2.4.2
+    classnames: ^2.3.1
     d3-array: ^2.12.1
     immutability-helper: ^3.1.1
-    react: ^17.0.2
+    react: ^17.0.2||^18
+    react-color: ^2.19.3
     react-datasheet: ^1.4.9
     react-dnd: ^14.0.2
     react-dnd-html5-backend: ^14.0.0
@@ -3954,6 +3904,7 @@ __metadata:
     transition-hook: ^1.5.2
     ts-node: ^10.9.1
     typescript: ^5.1.6
+    use-debounce: ^9.0.4
     use-react-router-breadcrumbs: ^3.2.1
     use-resize-observer: ^9.1.0
     vite: ^4.4.9
@@ -5447,7 +5398,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@popperjs/core@npm:^2.11.7, @popperjs/core@npm:^2.11.8, @popperjs/core@npm:^2.5.4, @popperjs/core@npm:^2.9.3":
+"@popperjs/core@npm:^2.11.7, @popperjs/core@npm:^2.11.8, @popperjs/core@npm:^2.9.3":
   version: 2.11.8
   resolution: "@popperjs/core@npm:2.11.8"
   checksum: e5c69fdebf52a4012f6a1f14817ca8e9599cb1be73dd1387e1785e2ed5e5f0862ff817f420a87c7fc532add1f88a12e25aeb010ffcbdc98eace3d55ce2139cf0
@@ -6678,13 +6629,6 @@ __metadata:
   dependencies:
     "@types/ms": "*"
   checksum: e88ee8b19d106f33eb0d3bc58bacff9702e98d821fd1ebd1de8942e6b97419e19a1ccf39370f1764a1dc66f79fd4619f3412e1be6eeb9f0b76412f5ffe4ead93
-  languageName: node
-  linkType: hard
-
-"@types/dom4@npm:^2.0.1":
-  version: 2.0.3
-  resolution: "@types/dom4@npm:2.0.3"
-  checksum: b8b3d73b4c3fafa0080feb44bb3aeb1718ce0878d18f5ae86ed480bf012d16185afcd82afcd965be4636176de94c351ee3fe74b40430385c3ac8f9192ef86b1b
   languageName: node
   linkType: hard
 
@@ -10249,7 +10193,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"classnames@npm:*, classnames@npm:^2.2, classnames@npm:^2.2.5, classnames@npm:^2.2.6, classnames@npm:^2.3.0, classnames@npm:^2.3.1, classnames@npm:^2.3.2":
+"classnames@npm:*, classnames@npm:^2.2.5, classnames@npm:^2.2.6, classnames@npm:^2.3.0, classnames@npm:^2.3.1, classnames@npm:^2.3.2":
   version: 2.3.2
   resolution: "classnames@npm:2.3.2"
   checksum: 2c62199789618d95545c872787137262e741f9db13328e216b093eea91c85ef2bfb152c1f9e63027204e2559a006a92eb74147d46c800a9f96297ae1d9f96f4e
@@ -24931,7 +24875,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-popper@npm:^1.3.11, react-popper@npm:^1.3.7":
+"react-popper@npm:^1.3.11":
   version: 1.3.11
   resolution: "react-popper@npm:1.3.11"
   dependencies:
@@ -24948,7 +24892,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-popper@npm:^2.2.4, react-popper@npm:^2.2.5, react-popper@npm:^2.3.0":
+"react-popper@npm:^2.2.5, react-popper@npm:^2.3.0":
   version: 2.3.0
   resolution: "react-popper@npm:2.3.0"
   dependencies:
@@ -25875,13 +25819,6 @@ __metadata:
   version: 1.5.0
   resolution: "resize-observer-polyfill@npm:1.5.0"
   checksum: ecc6aab5d4f967f1b76cee0748c1967c8b6b5d8c4393764ca3b788dbd15c0f846326c4ebff9f4f39aba45fea8016cd42bb95e28e8fab1d14349e173790c58133
-  languageName: node
-  linkType: hard
-
-"resize-observer-polyfill@npm:^1.5.1":
-  version: 1.5.1
-  resolution: "resize-observer-polyfill@npm:1.5.1"
-  checksum: 57e7f79489867b00ba43c9c051524a5c8f162a61d5547e99333549afc23e15c44fd43f2f318ea0261ea98c0eb3158cca261e6f48d66e1ed1cd1f340a43977094
   languageName: node
   linkType: hard
 
@@ -28727,20 +28664,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:~1.13.0":
-  version: 1.13.0
-  resolution: "tslib@npm:1.13.0"
-  checksum: 50e9327361f94f328c0715582a7f725f69838ab3c2559d143643c5367262fe14552768ba8cfc65bc7dc924a619aea599b3a28b6653458cdca77bbebaf9bc8df4
-  languageName: node
-  linkType: hard
-
-"tslib@npm:~2.3.1":
-  version: 2.3.1
-  resolution: "tslib@npm:2.3.1"
-  checksum: de17a98d4614481f7fcb5cd53ffc1aaf8654313be0291e1bfaee4b4bb31a20494b7d218ff2e15017883e8ea9626599b3b0e0229c18383ba9dce89da2adf15cb9
-  languageName: node
-  linkType: hard
-
 "tslib@npm:~2.5.0":
   version: 2.5.3
   resolution: "tslib@npm:2.5.3"
@@ -29607,6 +29530,15 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0
   checksum: f771cbadfdc91e03b7ab9eb32d0fc0cc647755711801bf507e891ad38c4bbc5f02b2509acadf9c965ec9c5f2f642fd33bdfdfb17b0873c4ad0a9b1f5e5e724bf
+  languageName: node
+  linkType: hard
+
+"use-debounce@npm:^9.0.4":
+  version: 9.0.4
+  resolution: "use-debounce@npm:9.0.4"
+  peerDependencies:
+    react: ">=16.8.0"
+  checksum: 37da4ecbe4e10a6230580cac03a8cae1788ea3e417dfdd92fcf654325458cf1b4567fd57bebf888edab62701a6abe47059a585008fd04228784f223f94d66ce4
   languageName: node
   linkType: hard
 
