@@ -16,6 +16,10 @@ export function PageShell({
   pageContext: PageContext;
 }) {
   return h("div.app-shell", [
-    h(PageContextProvider, { pageContext }, h(DarkModeProvider, children)),
+    h(
+      PageContextProvider,
+      { pageContext },
+      h(DarkModeProvider, { followSystem: true }, children)
+    ),
   ]);
 }
