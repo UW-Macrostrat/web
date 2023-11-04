@@ -25,21 +25,16 @@ function EditMenu({ setActivePage }: EditMenuProps) {
   ]);
 }
 
-interface EditTableDrawerProps {
-  menu: string;
-  children: ReactNode;
-}
-
-function EditTableDrawer({ menu, children }: EditTableDrawerProps) {
+function WidthAdjustablePanel({ children }: { children: ReactNode }) {
   const [maxWidth, setMaxWidth] = useState(0);
   const [startPosition, setStartPosition] = useState(0);
 
   useEffect(() => {
-    setMaxWidth(menu != null ? window.innerWidth / 2 : 0);
-  }, [menu]);
+    if (typeof window === "undefined") return;
+    setMaxWidth(window.innerWidth / 2);
+  }, []);
 
   return h("div.edit-table-drawer", { style: { maxWidth: maxWidth + "px" } }, [
-    children,
     h(
       "div.width-adjuster",
       {
@@ -47,36 +42,36 @@ function EditTableDrawer({ menu, children }: EditTableDrawerProps) {
           setStartPosition(e.clientX);
         },
         onDragEnd: (e) => {
-          setMaxWidth(maxWidth + (e.clientX - startPosition));
+          const dx = e.clientX - startPosition;
+          const newMaxWidth = maxWidth - dx;
+          setMaxWidth(newMaxWidth);
         },
         draggable: true,
       },
       []
     ),
+    children,
   ]);
 }
 
 interface EditInterfaceProps {
   title?: string;
   parentRoute?: string;
-  source?: number;
+  source_id?: number;
 }
 
-export default function EditInterface({
-  title,
-  parentRoute,
-  source_id,
-}: EditInterfaceProps) {
-  const [activePage, setActivePage] = useState(undefined);
+export default function EditInterface({ source_id }: EditInterfaceProps) {
+  const [activePage, setActivePage] = useState(null);
 
-  return h("div.interface", {}, [
-    h.if(activePage == null)(EditMenu, { setActivePage }),
-    h(EditTableDrawer, { menu: activePage }, [
+  return h(
+    WidthAdjustablePanel,
+    h([
+      h.if(activePage == null)(EditMenu, { setActivePage }),
       h.if(activePage == "polygons")(
         EditTable,
         { url: `http://localhost:8000/sources/${source_id}/polygons` },
         []
       ),
-    ]),
-  ]);
+    ])
+  );
 }

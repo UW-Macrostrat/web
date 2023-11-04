@@ -1,25 +1,23 @@
+import { Radio, RadioGroup, Spinner } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import {
   MapAreaContainer,
+  MapMarker,
   MapView,
   PanelCard,
 } from "@macrostrat/map-interface";
-import { Spinner, Radio, RadioGroup } from "@blueprintjs/core";
-import { SETTINGS } from "~/map-interface/settings";
-import { useEffect } from "react";
-import styles from "./main.module.sass";
-import { useMemo, useState } from "react";
-import "~/styles/global.styl";
-import boundingBox from "@turf/bbox";
-import { LngLatBoundsLike } from "mapbox-gl";
 import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
-import { useDarkMode } from "@macrostrat/ui-components";
-import { MapMarker } from "@macrostrat/map-interface";
-import { NullableSlider } from "@macrostrat/ui-components";
-import { tempImageIndex, s3Address } from "../../raster-images";
+import { NullableSlider, useDarkMode } from "@macrostrat/ui-components";
+import boundingBox from "@turf/bbox";
+import { LngLatBoundsLike } from "mapbox-gl";
+import { useEffect, useMemo, useState } from "react";
 import { MapNavbar } from "~/components/map-navbar";
+import { SETTINGS } from "~/map-interface/settings";
+import "~/styles/global.styl";
+import { s3Address, tempImageIndex } from "../../raster-images";
 import EditInterface from "./edit-interface";
+import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
 
