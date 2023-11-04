@@ -2,7 +2,7 @@ import hyper from "@macrostrat/hyper";
 
 import { useState, useEffect, useCallback } from "react";
 import { HotkeysProvider, InputGroup, Button } from "@blueprintjs/core";
-import { Spinner } from "@blueprintjs/core";
+import { Spinner, ButtonGroup } from "@blueprintjs/core";
 import {
   Column,
   Table2,
@@ -73,7 +73,7 @@ export default function EditTable({ url }) {
 
   const onChange = (key, row, text) => {
     let rowSpec = {};
-    if (text == null || text == "") {
+    if (text == data[row][key] || (text == "" && data[row][key] == null)) {
       rowSpec = { $unset: [key] };
     } else {
       const rowOp = editedData[row] == null ? "$set" : "$merge";
@@ -219,8 +219,25 @@ export default function EditTable({ url }) {
           className: "update-input-group",
           onChange: (e) => setInputValue(e.target.value),
         }),
-        h(Button, { type: "submit", onClick: () => submitChange(inputValue) }, [
-          "Submit",
+        h(ButtonGroup, [
+          h(
+            Button,
+            {
+              onClick: () => setEditedData(new Array()),
+              disabled: isEmptyArray(editedData),
+            },
+            ["Clear changes"]
+          ),
+          h(
+            Button,
+            {
+              type: "submit",
+              onClick: () => submitChange(inputValue),
+              disabled: isEmptyArray(editedData),
+              intent: "success",
+            },
+            ["Submit"]
+          ),
         ]),
       ]),
       h(
@@ -247,6 +264,10 @@ export default function EditTable({ url }) {
       // }),
     ]),
   ]);
+}
+
+function isEmptyArray(arr) {
+  return arr.length == 0 || arr.every((x) => x == null);
 }
 
 class TableDataManager {
