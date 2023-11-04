@@ -6,9 +6,9 @@ import {
   useSearchState,
   useAppState,
   useContextPanelOpen,
-} from "../app-state";
-import { FilterPanel } from "./filter-panel";
-import styles from "./searchbar.module.styl";
+} from "../../app-state";
+import { FilterPanel } from "../filter-panel";
+import styles from "./navbar.module.sass";
 import { MapLoadingButton, FloatingNavbar } from "@macrostrat/map-interface";
 import { PanelSubhead } from "@macrostrat/map-interface";
 import classNames from "classnames";

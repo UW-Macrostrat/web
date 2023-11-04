@@ -2,17 +2,12 @@ import { Suspense, useEffect, useRef } from "react";
 // Import other components
 import h from "@macrostrat/hyper";
 import { Spinner, Switch } from "@blueprintjs/core";
-import { useSelector } from "react-redux";
 import loadable from "@loadable/component";
-import {
-  useAppState,
-  useAppActions,
-} from "/Users/Daven/Projects/Macrostrat/Software/web/src/map-interface/app-state";
 import { useTransition } from "transition-hook";
 import classNames from "classnames";
-import { PanelCard } from "/Users/Daven/Projects/Macrostrat/Software/web/src/map-interface/map-page/menu";
+import { PanelCard } from "~/map-page/menu";
 import { useState } from "react";
-import { LinkButton } from "/Users/Daven/Projects/Macrostrat/Software/web/src/map-interface/components/buttons";
+import { LinkButton } from "~/components/buttons";
 import {
   FloatingNavbar,
   LoadingButton,
@@ -109,11 +104,6 @@ export default function GlobePage() {
       ]),
       //h(MapView),
       h(CesiumView, { showWireframe }),
-      h("div.detail-stack.infodrawer-container", [
-        h.if(detailPanelTrans.shouldMount)([detailElement]),
-        h("div.spacer"),
-        //h(MapBottomControls),
-      ]),
     ]),
   ]);
 }
