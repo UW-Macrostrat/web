@@ -36,7 +36,7 @@ export class Filter {
 
 
 
-export function buildURL(baseURL: string, filters: Filter[]){
+export function buildURL(baseURL: string, filters: Filter[], group: string | undefined){
 	let updateURL = new URL(baseURL)
 
 	for(const filter of filters){
@@ -45,6 +45,10 @@ export function buildURL(baseURL: string, filters: Filter[]){
 			const [key, value] = filter.to_array()
 			updateURL.searchParams.append(key, value)
 		}
+	}
+
+	if(group != undefined){
+		updateURL.searchParams.append(group, "group_by")
 	}
 
 	return updateURL

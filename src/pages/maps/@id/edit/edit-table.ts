@@ -148,6 +148,13 @@ export default function EditTable({ url }) {
 
     const dataURL = buildURL(url, Object.values(filters), group)
 
+    if(group == undefined){
+      dataURL.searchParams.append("_pkid", "order_by" )
+    }
+
+    dataURL.searchParams.append("page", page.toString());
+    dataURL.searchParams.append("page_size", pageSize.toString());
+
     const response = await fetch(dataURL)
     const newData = await response.json()
 
@@ -158,6 +165,7 @@ export default function EditTable({ url }) {
 
       setError(undefined)
       setData(newData)
+      setTotalCount(Number.parseInt(response.headers.get("X-Total-Count")));
     }
 
     return newData
@@ -231,7 +239,10 @@ export default function EditTable({ url }) {
   const rowHeaderCellRenderer = (rowIndex: number) => {
     const headerKey = group ? group : "_pkid"
     let name = data[rowIndex][headerKey]
-    if(name.length > 47){
+
+    if (name == null) {
+      name = "NULL";
+    } else if(name.length > 47){
       name = name.slice(0, 47) + "..."
     }
 
