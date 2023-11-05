@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
+    "baseUrl": "./",
     "moduleResolution": "node",
     "target": "ES2020",
     "module": "ES2020",
@@ -38,12 +38,10 @@
       "@macrostrat/map-interface": [
         "deps/web-components/packages/map-interface/src"
       ],
-      "@macrostrat/cesium-viewer": [
-        "deps/cesium-viewer/src"
-      ],
+      "@macrostrat/cesium-viewer": ["deps/cesium-viewer/src"]
     }
   },
-  "include": ["src", "packages/globe-dev/globe"],
+  "include": ["src", "packages/globe-dev/globe", "packages/*/src"],
   "types": ["vite/client"],
   "ts-node": {
     "transpileOnly": true,
