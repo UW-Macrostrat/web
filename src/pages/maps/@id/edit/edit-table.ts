@@ -1,6 +1,6 @@
 import hyper from "@macrostrat/hyper";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef, useLayoutEffect } from "react";
 import { HotkeysProvider, InputGroup, Button } from "@blueprintjs/core";
 import { Spinner, ButtonGroup } from "@blueprintjs/core";
 import {
@@ -8,11 +8,16 @@ import {
   Table2,
   EditableCell2,
   RowHeaderCell2,
+  ColumnHeaderCell2,
   SelectionModes,
 } from "@blueprintjs/table";
 import update from "immutability-helper";
-import { TablePagination } from "@mui/material";
 
+import { OperatorQueryParameter } from "~/pages/maps/@id/edit/table";
+import { buildURL, Filter } from "~/pages/maps/@id/edit/table-util";
+import TableMenu from "~/pages/maps/@id/edit/table-menu";
+
+import "./override.sass"
 import "@blueprintjs/table/lib/css/table.css";
 import styles from "./edit-table.module.sass";
 
@@ -28,22 +33,6 @@ interface Selection {
   rows: number[];
 }
 
-class Filter {
-  constructor(column_name: string, operator: string, value: string) {
-    this.column_name = column_name;
-    this.operator = operator;
-    this.value = value;
-  }
-  to_object = () => {
-    let o = {};
-    o[this.column_name] = this.operator + "." + this.value;
-    return o;
-  };
-
-  to_array = () => {
-    return [this.column_name, this.operator + "." + this.value];
-  };
-}
 
 interface Filters {
   [key: string]: Filter;
@@ -60,13 +49,13 @@ export default function EditTable({ url }) {
   const [pageSize, setPageSize] = useState(999999);
   const [totalCount, setTotalCount] = useState(0);
 
-  const [data, setData] = useState(undefined);
-  const [dataToggle, setDataToggle] = useState(false);
-  const [inputValue, setInputValue] = useState("");
-  const [tableSelection, setTableSelection] = useState<TableSelection>({
-    columns: [],
-    filters: [],
-  });
+  const [data, setData] = useState<any[]>([]);
+  const [dataToggle, setDataToggle] = useState<boolean>(false);
+  const [inputValue, setInputValue] = useState<string>("");
+  const [error, setError] = useState<string | undefined>(undefined)
+  const [filters, setFilters] = useState<Filters>({})
+  const [tableSelection, setTableSelection] = useState<TableSelection>({columns: [], filter: new Filter("_pkid", "in", "")})
+
 
   // Sparse array to hold edited data
   const [editedData, setEditedData] = useState(new Array());
@@ -99,6 +88,29 @@ export default function EditTable({ url }) {
     return "none";
   };
 
+  const columnHeaderCellRenderer = (columnIndex: number) => {
+
+    const columnName: string = Object.keys(data[0])[columnIndex]
+
+    const onChange = (param: OperatorQueryParameter) => {
+
+      const columnFilter = new Filter(columnName, param.operator, param.value)
+
+      setFilters({...filters, [columnName]: columnFilter})
+    }
+
+    let filter = filters[columnName]
+
+
+    return h(ColumnHeaderCell2, {
+      menuRenderer: () => h(TableMenu, {"onChange": onChange, filter}),
+      name: columnName,
+      style: {
+        backgroundColor: filter.is_valid() ? "#ff1b651f" : "#ffffff00"
+      }
+    }, [])
+  }
+
   const cellRenderer = useCallback(
     ({ key, row, cell }) => {
       return h(
@@ -117,69 +129,87 @@ export default function EditTable({ url }) {
   );
 
   let getData = async () => {
-    let dataURL = new URL(url);
 
-    dataURL.searchParams.append("page", page.toString());
-    dataURL.searchParams.append("page_size", pageSize.toString());
+    const dataURL = buildURL(url, Object.values(filters))
 
-    let response = await fetch(dataURL);
-    let data = await response.json();
+    const response = await fetch(dataURL)
+    const newData = await response.json()
 
-    setTotalCount(Number.parseInt(response.headers.get("X-Total-Count")));
-    setData(data);
-  };
+    if(newData.length == 0){
+      setError("Warning: No results matched query")
+    } else {
+      console.log("Data fetched successfully")
 
-  useEffect(() => {
-    getData();
-  }, [page, pageSize]);
+      setError(undefined)
+      setData(newData)
+    }
 
-  if (data == undefined) {
-    return h(Spinner);
+    return newData
   }
 
-  const columns = Object.keys(data[0])
-    .filter((x) => x != "_pkid")
-    .map((key) => {
-      return h(Column, {
-        name: key,
-        cellRenderer: (row, cell) =>
-          cellRenderer({ key: key, row: row, cell: cell }),
-        key: key,
-      });
-    });
+  // On mount get data and set filters
+  useEffect(() => {
+    (async function () {
+      let data = await getData()
+      let newFilters: Filters = Object.keys(data[0]).reduce((original, key) => {
+        let originalFilters: Filters = {...original}
+        originalFilters[key] = new Filter(key, undefined, "")
+        return originalFilters
+      }, {})
+      setFilters({...filters, ...newFilters})
+    }());
+  }, [])
+
+  // Update data on filter change and on data toggle / Not on mount
+  const dataFetched = useRef(false)
+  useLayoutEffect(() => {
+    if(!dataFetched.current){
+      dataFetched.current = true
+      return
+    }
+    getData()
+  }, [dataToggle, filters])
+
+  if(data.length == 0 && error == undefined){
+    return h(Spinner)
+  }
+
+  const columns = Object.keys(data[0]).filter(x => x != "_pkid").map((key) => {
+    return h(Column, {
+      name: key,
+      columnHeaderCellRenderer: columnHeaderCellRenderer,
+      cellRenderer: (row, cell) => cellRenderer({"key": key, "row": row, "cell": cell}),
+      "key": key
+    })
+  })
 
   const getSelectionValues = (selections: Selection[]) => {
-    if (selections.length == 0) {
-      setTableSelection({
-        columns: [],
-        filters: { ...tableSelection.filters, tableSelection: undefined },
-      });
-      return;
+
+    if(selections.length == 0){
+      setTableSelection({columns: [], filter: new Filter("_pkid", "in", "")})
+      return
     }
 
-    const rows = selections[0]?.rows;
-    const cols = selections[0]?.cols;
+    const rows = selections[0]?.rows
+    const cols = selections[0]?.cols
 
-    const columnsKeys = Object.keys(data[0]);
-    const selectedColumnKeys = columnsKeys.slice(cols[0], cols[1] + 1);
+    const columnsKeys = Object.keys(data[0])
+    const selectedColumnKeys: string[] = columnsKeys.slice(cols[0], cols[1] + 1)
+    const selectedRowIndices: number[] = rows != undefined ? range(rows[0], rows[1] + 1) : range(0, data.length)
 
-    let selection: TableSelection;
-    if (rows == undefined) {
-      selection = { columns: selectedColumnKeys, ...tableSelection };
+    let selection: TableSelection
+    if(rows == undefined){
+
+      selection = {filter: new Filter("_pkid", "in", ""), columns: selectedColumnKeys}
+
     } else {
-      const selectedRowIndices =
-        rows != undefined ? range(rows[0], rows[1] + 1) : range(0, data.length);
-      const dbIds = selectedRowIndices.map((row) => data[row]["_pkid"]);
-      const filter = new Filter("_pkid", "in", "(" + dbIds.join(",") + ")");
-
-      selection = {
-        columns: selectedColumnKeys,
-        filters: { ...tableSelection.filters, tableSelection: filter },
-      };
+      const dbIds = selectedRowIndices.map((row) => data[row]['_pkid'])
+      const filter = new Filter("_pkid", "in", "(" + dbIds.join(",") + ")")
+      selection = {columns: selectedColumnKeys, "filter": filter}
     }
 
-    setTableSelection(selection);
-  };
+    setTableSelection(selection)
+  }
 
   const rowHeaderCellRenderer = (rowIndex: number) => {
     return h(RowHeaderCell2, { name: data[rowIndex]["_pkid"] }, []);
@@ -213,6 +243,7 @@ export default function EditTable({ url }) {
 
   return h(HotkeysProvider, {}, [
     h("div.table-container", {}, [
+      h.if(error)("div.warning", {}, [error]),
       h("div.input-form", {}, [
         h(InputGroup, {
           value: inputValue,
@@ -250,18 +281,9 @@ export default function EditTable({ url }) {
           numRows: data.length,
           // Dumb hacks to try to get the table to rerender on changes
           cellRendererDependencies: [editedData],
-          enableFocusedCell: true,
         },
         columns
-      ),
-      // h(TablePagination, {
-      //   component: "div",
-      //   count: totalCount,
-      //   rowsPerPage: pageSize,
-      //   page: page,
-      //   onRowsPerPageChange: (e) => setPageSize(e.target.value),
-      //   onPageChange: (e, p) => setPage(p),
-      // }),
+      )
     ]),
   ]);
 }
