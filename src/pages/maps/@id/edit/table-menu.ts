@@ -11,7 +11,7 @@ import {OperatorQueryParameter, ColumnOperatorOption} from "./table";
 import "@blueprintjs/core/lib/css/blueprint.css"
 import "@blueprintjs/select/lib/css/blueprint-select.css";
 import styles from "./edit-table.module.sass";
-import {Filter} from "./table-util.ts";
+import {Filter} from "./table-util";
 
 
 const h = hyper.styled(styles);
@@ -47,11 +47,13 @@ const OperatorFilterOption: ItemRenderer<ColumnOperatorOption> = (column, { hand
 }
 
 interface TableMenuProps {
-	onChange: (query: OperatorQueryParameter) => void;
+	onFilterChange: (query: OperatorQueryParameter) => void;
 	filter: Filter;
+	onGroupChange: (group: string | undefined) => void;
+	group: string | undefined;
 }
 
-const TableMenu = ({onChange, filter} : TableMenuProps) => {
+const TableMenu = ({onFilterChange, filter, onGroupChange, group} : TableMenuProps) => {
 
 	const [menuOpen, setMenuOpen] = React.useState<boolean>(false);
 	const [inputPlaceholder, setInputPlaceholder] = React.useState<string>("");
@@ -59,14 +61,16 @@ const TableMenu = ({onChange, filter} : TableMenuProps) => {
 	// Create a debounced version of the text state
 	const [inputValue, setInputValue] = React.useState<string>(filter.value);
 	const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		console.log("Its morphin time!")
 		setMenuOpen(false);
-		onChange({operator: filter.operator, value: e.target.value})
+		onFilterChange({operator: filter.operator, value: e.target.value})
 	}
 	const debouncedInputChange = useDebouncedCallback(onInputChange, 1000);
 
 	// Set the expression current value from the parent filter
 	const selectedExpression = validExpressions.find((expression) => expression.key === filter.operator);
+
+	// Set if this group is active
+	const groupActive: boolean = group === filter.column_name;
 
 	return h(Menu, {}, [
 		h("div.filter-container", {}, [
@@ -82,7 +86,7 @@ const TableMenu = ({onChange, filter} : TableMenuProps) => {
 					onItemSelect: (operator: ColumnOperatorOption) => {
 						setMenuOpen(false);
 						setInputPlaceholder(operator.placeholder || "");
-						onChange({operator: operator.key, value: filter.value})
+						onFilterChange({operator: operator.key, value: filter.value})
 					},
 					noResults: h(MenuItem, {disabled: true, text: "No results.", roleStructure: "listoption"}, []),
 				}, [
@@ -102,9 +106,21 @@ const TableMenu = ({onChange, filter} : TableMenuProps) => {
 					"value": inputValue,
 					className: "update-input-group",
 					placeholder: inputPlaceholder,
-					onChange: (e: React.ChangeEvent<HTMLInputElement>) => {setInputValue(e.target.value); debouncedInputChange(e)}
+					onFilterChange: (e: React.ChangeEvent<HTMLInputElement>) => {setInputValue(e.target.value); debouncedInputChange(e)}
 				}, [])
-			])
+			]),
+			h("div.filter-header", {}, ["Group"]),
+			h("div.filter-select", {}, [
+				h(Button,
+					{
+						rightIcon: groupActive ? "tick" : "disable",
+						alignText: "left",
+						intent: groupActive ? "success" : "warning",
+						text: groupActive ? "Active" : "Inactive",
+						fill: true,
+						onClick: () => onGroupChange(filter.column_name)
+					}, [])
+			]),
 		])
 	])
 }

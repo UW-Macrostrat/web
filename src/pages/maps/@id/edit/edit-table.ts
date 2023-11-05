@@ -10,6 +10,7 @@ import {
   RowHeaderCell2,
   ColumnHeaderCell2,
   SelectionModes,
+  RegionCardinality
 } from "@blueprintjs/table";
 import update from "immutability-helper";
 
@@ -54,6 +55,7 @@ export default function EditTable({ url }) {
   const [inputValue, setInputValue] = useState<string>("");
   const [error, setError] = useState<string | undefined>(undefined)
   const [filters, setFilters] = useState<Filters>({})
+  const [group, setGroup] = useState<string | undefined>(undefined)
   const [tableSelection, setTableSelection] = useState<TableSelection>({columns: [], filter: new Filter("_pkid", "in", "")})
 
 
@@ -92,7 +94,7 @@ export default function EditTable({ url }) {
 
     const columnName: string = Object.keys(data[0])[columnIndex]
 
-    const onChange = (param: OperatorQueryParameter) => {
+    const onFilterChange = (param: OperatorQueryParameter) => {
 
       const columnFilter = new Filter(columnName, param.operator, param.value)
 
@@ -103,10 +105,10 @@ export default function EditTable({ url }) {
 
 
     return h(ColumnHeaderCell2, {
-      menuRenderer: () => h(TableMenu, {"onChange": onChange, filter}),
+      menuRenderer: () => h(TableMenu, {"onFilterChange": onFilterChange, filter, "onGroupChange": setGroup, group}),
       name: columnName,
       style: {
-        backgroundColor: filter.is_valid() ? "#ff1b651f" : "#ffffff00"
+        backgroundColor: filter.is_valid() || group == columnName ? "rgba(27,187,255,0.12)" : "#ffffff00"
       }
     }, [])
   }
@@ -130,7 +132,7 @@ export default function EditTable({ url }) {
 
   let getData = async () => {
 
-    const dataURL = buildURL(url, Object.values(filters))
+    const dataURL = buildURL(url, Object.values(filters), group)
 
     const response = await fetch(dataURL)
     const newData = await response.json()
@@ -168,7 +170,7 @@ export default function EditTable({ url }) {
       return
     }
     getData()
-  }, [dataToggle, filters])
+  }, [dataToggle, filters, group])
 
   if(data.length == 0 && error == undefined){
     return h(Spinner)
@@ -212,14 +214,21 @@ export default function EditTable({ url }) {
   }
 
   const rowHeaderCellRenderer = (rowIndex: number) => {
-    return h(RowHeaderCell2, { name: data[rowIndex]["_pkid"] }, []);
+    const headerKey = group ? group : "_pkid"
+    let name = data[rowIndex][headerKey]
+    if(name.length > 47){
+      name = name.slice(0, 47) + "..."
+    }
+
+
+    return h(RowHeaderCell2, { "name": name }, []);
   };
 
   const submitChange = async (value: string) => {
     for (const column of tableSelection.columns) {
       let updateURL = new URL(url);
 
-      for (const filter: Filter of Object.values(tableSelection.filters)) {
+      for (const filter of Object.values(tableSelection.filters)) {
         updateURL.searchParams.append(...filter.to_array());
       }
 
@@ -274,7 +283,7 @@ export default function EditTable({ url }) {
       h(
         Table2,
         {
-          selectionModes: SelectionModes.COLUMNS_AND_CELLS,
+          selectionModes: group ? RegionCardinality.CELLS : SelectionModes.COLUMNS_AND_CELLS,
           rowHeaderCellRenderer: rowHeaderCellRenderer,
           onSelection: (selections: Selection[]) =>
             getSelectionValues(selections),
