@@ -1,0 +1,12 @@
+{
+  "name": "@macrostrat-web/data-sheet-test",
+  "private": true,
+  "main": "src/index.ts",
+  "license": "ISC",
+  "dependencies": {
+    "@macrostrat/data-sheet": "^1.0.0",
+    "@macrostrat/hyper": "^2.2.1",
+    "@macrostrat/ui-components": "^1.0.0",
+    "chroma-js": "^2.4.2"
+  }
+}

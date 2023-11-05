@@ -1698,12 +1698,38 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blueprintjs/colors@npm:^4.1.22, @blueprintjs/colors@npm:^4.2.1":
+"@blueprintjs/colors@npm:^4.0.0-alpha.3, @blueprintjs/colors@npm:^4.1.22, @blueprintjs/colors@npm:^4.2.1":
   version: 4.2.1
   resolution: "@blueprintjs/colors@npm:4.2.1"
   dependencies:
     tslib: ~2.5.0
   checksum: d8073d0146f1d9b99e1d9dbbe4ab5b57d41c41f7a70da287b4dd6f02781df52b772e66348b79a3a6c9a7d9ed311d93934d2a4413da04ebfd215cfae143bed446
+  languageName: node
+  linkType: hard
+
+"@blueprintjs/core@npm:^3.52.0, @blueprintjs/core@npm:^3.54.0":
+  version: 3.54.0
+  resolution: "@blueprintjs/core@npm:3.54.0"
+  dependencies:
+    "@blueprintjs/colors": ^4.0.0-alpha.3
+    "@blueprintjs/icons": ^3.33.0
+    "@juggle/resize-observer": ^3.3.1
+    "@types/dom4": ^2.0.1
+    classnames: ^2.2
+    dom4: ^2.1.5
+    normalize.css: ^8.0.1
+    popper.js: ^1.16.1
+    react-lifecycles-compat: ^3.0.4
+    react-popper: ^1.3.7
+    react-transition-group: ^2.9.0
+    tslib: ~2.3.1
+  peerDependencies:
+    react: ^15.3.0 || 16 || 17
+    react-dom: ^15.3.0 || 16 || 17
+  bin:
+    upgrade-blueprint-2.0.0-rename: scripts/upgrade-blueprint-2.0.0-rename.sh
+    upgrade-blueprint-3.0.0-rename: scripts/upgrade-blueprint-3.0.0-rename.sh
+  checksum: 97b8811bfc32284bb36e62a44210e84d5abe164ef553670866e0628718db4a98c79b9665f73014b1474f534a3d3260e94af274e669fb0ebfeb323305a81b5375
   languageName: node
   linkType: hard
 
@@ -1736,6 +1762,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@blueprintjs/datetime@npm:^3.23.19":
+  version: 3.24.1
+  resolution: "@blueprintjs/datetime@npm:3.24.1"
+  dependencies:
+    "@blueprintjs/core": ^3.54.0
+    classnames: ^2.2
+    react-day-picker: 7.4.9
+    react-lifecycles-compat: ^3.0.4
+    tslib: ~2.3.1
+  peerDependencies:
+    react: ^15.3.0 || 16 || 17
+    react-dom: ^15.3.0 || 16 || 17
+  checksum: 022f8f668b8094350716a57f860415b7a07acf28454c96bd086b39dad3deea93d9019bc46c8d6c044264e06a9d43938a2e5962f87be5a91552a4843e67a9884d
+  languageName: node
+  linkType: hard
+
 "@blueprintjs/datetime@npm:^4.1.2":
   version: 4.4.37
   resolution: "@blueprintjs/datetime@npm:4.4.37"
@@ -1752,6 +1794,16 @@ __metadata:
     "@types/react":
       optional: true
   checksum: 6a3be461c9738175d104d0eb51ba0b68e812c6fbf542d34c145fc28144e7b2789451e3664c7682716e31153f8a15a5509b3744636266aa3672208c48cee42587
+  languageName: node
+  linkType: hard
+
+"@blueprintjs/icons@npm:^3.33.0":
+  version: 3.33.0
+  resolution: "@blueprintjs/icons@npm:3.33.0"
+  dependencies:
+    classnames: ^2.2
+    tslib: ~2.3.1
+  checksum: 9b1485a3ce17a97596b7fa7276ddbe85e33c56f061358351a626d353bf3eab6ab1b36a1860aec2feb7933ef0293c5f8e1f3342a89051720d1953343aab753cb3
   languageName: node
   linkType: hard
 
@@ -3135,6 +3187,41 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@macrostrat-web/data-sheet-test@workspace:*, @macrostrat-web/data-sheet-test@workspace:packages/data-sheet-test":
+  version: 0.0.0-use.local
+  resolution: "@macrostrat-web/data-sheet-test@workspace:packages/data-sheet-test"
+  dependencies:
+    "@macrostrat/data-sheet": ^1.0.0
+    "@macrostrat/hyper": ^2.2.1
+    "@macrostrat/ui-components": ^1.0.0
+    chroma-js: ^2.4.2
+    react: ^18
+    react-dom: ^18
+    typescript: ^5.0.0
+    vite: ^4.4.9
+    vite-plugin-cesium: ^1.2.22
+  languageName: unknown
+  linkType: soft
+
+"@macrostrat-web/globe@workspace:*, @macrostrat-web/globe@workspace:packages/globe-dev":
+  version: 0.0.0-use.local
+  resolution: "@macrostrat-web/globe@workspace:packages/globe-dev"
+  dependencies:
+    "@macrostrat/cesium-martini": "workspace:^1.3.0"
+    "@macrostrat/cesium-vector-provider": 2.0.2
+    "@macrostrat/cesium-viewer": "workspace:*"
+    "@macrostrat/hyper": ^2.0.1
+    "@macrostrat/mapbox-react": "workspace:*"
+    "@macrostrat/mapbox-utils": "workspace:*"
+    cesium: ^1.109.0
+    react: ^18
+    react-dom: ^18
+    typescript: ^5.0.0
+    vite: ^4.4.9
+    vite-plugin-cesium: ^1.2.22
+  languageName: unknown
+  linkType: soft
+
 "@macrostrat/api-types@workspace:deps/web-components/packages/api-types":
   version: 0.0.0-use.local
   resolution: "@macrostrat/api-types@workspace:deps/web-components/packages/api-types"
@@ -3312,7 +3399,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@macrostrat/data-sheet@workspace:deps/web-components/packages/data-sheet":
+"@macrostrat/data-sheet@^1.0.0, @macrostrat/data-sheet@workspace:deps/web-components/packages/data-sheet":
   version: 0.0.0-use.local
   resolution: "@macrostrat/data-sheet@workspace:deps/web-components/packages/data-sheet"
   dependencies:
@@ -3646,24 +3733,36 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@macrostrat/web-globe@workspace:*, @macrostrat/web-globe@workspace:packages/globe-dev":
-  version: 0.0.0-use.local
-  resolution: "@macrostrat/web-globe@workspace:packages/globe-dev"
+"@macrostrat/ui-components@npm:^1.0.0":
+  version: 1.1.5
+  resolution: "@macrostrat/ui-components@npm:1.1.5"
   dependencies:
-    "@macrostrat/cesium-martini": "workspace:^1.3.0"
-    "@macrostrat/cesium-vector-provider": 2.0.2
-    "@macrostrat/cesium-viewer": "workspace:*"
+    "@babel/polyfill": ^7.4.4
+    "@blueprintjs/core": ^3.52.0
+    "@blueprintjs/datetime": ^3.23.19
     "@macrostrat/hyper": ^2.0.1
-    "@macrostrat/mapbox-react": "workspace:*"
-    "@macrostrat/mapbox-utils": "workspace:*"
-    cesium: ^1.109.0
-    react: ^18
-    react-dom: ^18
-    typescript: ^5.0.0
-    vite: ^4.4.9
-    vite-plugin-cesium: ^1.2.22
-  languageName: unknown
-  linkType: soft
+    "@types/react": ^17.0.11
+    "@types/react-dom": ^17.0.8
+    axios: ^0.21.4
+    classnames: ^2.3.0
+    core-js: ^3.6.4
+    d3-array: ^3.0.4
+    date-fns: ^2.15.0
+    fp-ts: ^2.5.3
+    immutability-helper: ^3.1.1
+    io-ts: ^2.1.2
+    query-string: ^7.0.0
+    react-dropzone: ^11.4.2
+    react-intersection-observer: ^8.32.1
+    react-json-tree: ^0.15.0
+    underscore: ^1.9.1
+    use-async-effect: ^2.2.1
+  peerDependencies:
+    react: ^16.8.6 || ^17
+    react-dom: ^16.8.6 || ^17
+  checksum: 11f1294d7513f2baae384613cdd3e48fa914bde5a00272eb47025b9463a77f0c0e511882f7aa07a2d5817a3684b5bb6d04ca4b899d6dfbb64d93978b83d62975
+  languageName: node
+  linkType: hard
 
 "@macrostrat/web@workspace:.":
   version: 0.0.0-use.local
@@ -3676,6 +3775,8 @@ __metadata:
     "@blueprintjs/select": 4
     "@lagunovsky/redux-react-router": ^3.2.0
     "@loadable/component": ^5.14.1
+    "@macrostrat-web/data-sheet-test": "workspace:*"
+    "@macrostrat-web/globe": "workspace:*"
     "@macrostrat/api-utils": "workspace:*"
     "@macrostrat/api-views": "workspace:*"
     "@macrostrat/column-components": "workspace:*"
@@ -3689,7 +3790,6 @@ __metadata:
     "@macrostrat/style-system": "workspace:*"
     "@macrostrat/timescale": "workspace:*"
     "@macrostrat/ui-components": "workspace:*"
-    "@macrostrat/web-globe": "workspace:*"
     "@mapbox/point-geometry": ^0.1.0
     "@mapbox/tilebelt": ^1.0.2
     "@mapbox/vector-tile": ^1.3.1
@@ -6323,6 +6423,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/dom4@npm:^2.0.1":
+  version: 2.0.3
+  resolution: "@types/dom4@npm:2.0.3"
+  checksum: b8b3d73b4c3fafa0080feb44bb3aeb1718ce0878d18f5ae86ed480bf012d16185afcd82afcd965be4636176de94c351ee3fe74b40430385c3ac8f9192ef86b1b
+  languageName: node
+  linkType: hard
+
 "@types/dom4@npm:^2.0.2":
   version: 2.0.2
   resolution: "@types/dom4@npm:2.0.2"
@@ -6787,6 +6894,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react-dom@npm:^17.0.8":
+  version: 17.0.22
+  resolution: "@types/react-dom@npm:17.0.22"
+  dependencies:
+    "@types/react": ^17
+  checksum: 3c24331c0a2211370968befaad107598ee4f796c08e9b0de0b0126ee598a7c51f7bf4e0e7d9a76522a3b60d91f091d46131d136bcbe49aeb6ec3b8480dff03f9
+  languageName: node
+  linkType: hard
+
 "@types/react-dom@npm:^18.2.7":
   version: 18.2.7
   resolution: "@types/react-dom@npm:18.2.7"
@@ -6847,6 +6963,17 @@ __metadata:
     "@types/scheduler": "*"
     csstype: ^3.0.2
   checksum: bb862f0f97a49e690cd5c62743307d17398ee62b87bbb2c85c1b01cb992244c0aef4ecdedaab0e8d33c6315d5a8f067cf90e7f1c366b8819678c59204e202932
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:^17.0.11":
+  version: 17.0.69
+  resolution: "@types/react@npm:17.0.69"
+  dependencies:
+    "@types/prop-types": "*"
+    "@types/scheduler": "*"
+    csstype: ^3.0.2
+  checksum: b83d4ec968b712b2b1a444c614b1ef3e59879c6911bc4001158de5de49b80b6a20fc4859353244f0171b94845d4c85a6379071445242ff23bbbc9b0ff24577d7
   languageName: node
   linkType: hard
 
@@ -8520,6 +8647,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"axios@npm:^0.21.4":
+  version: 0.21.4
+  resolution: "axios@npm:0.21.4"
+  dependencies:
+    follow-redirects: ^1.14.0
+  checksum: 44245f24ac971e7458f3120c92f9d66d1fc695e8b97019139de5b0cc65d9b8104647db01e5f46917728edfc0cfd88eb30fc4c55e6053eef4ace76768ce95ff3c
+  languageName: node
+  linkType: hard
+
 "axios@npm:^0.25.0":
   version: 0.25.0
   resolution: "axios@npm:0.25.0"
@@ -9868,7 +10004,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"classnames@npm:*, classnames@npm:^2.2.5, classnames@npm:^2.2.6, classnames@npm:^2.3.0, classnames@npm:^2.3.1, classnames@npm:^2.3.2":
+"classnames@npm:*, classnames@npm:^2.2, classnames@npm:^2.2.5, classnames@npm:^2.2.6, classnames@npm:^2.3.0, classnames@npm:^2.3.1, classnames@npm:^2.3.2":
   version: 2.3.2
   resolution: "classnames@npm:2.3.2"
   checksum: 2c62199789618d95545c872787137262e741f9db13328e216b093eea91c85ef2bfb152c1f9e63027204e2559a006a92eb74147d46c800a9f96297ae1d9f96f4e
@@ -13894,7 +14030,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.0.0, follow-redirects@npm:^1.14.7, follow-redirects@npm:^1.14.9":
+"follow-redirects@npm:^1.0.0, follow-redirects@npm:^1.14.0, follow-redirects@npm:^1.14.7, follow-redirects@npm:^1.14.9":
   version: 1.15.3
   resolution: "follow-redirects@npm:1.15.3"
   peerDependenciesMeta:
@@ -24526,7 +24662,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-popper@npm:^1.3.11":
+"react-popper@npm:^1.3.11, react-popper@npm:^1.3.7":
   version: 1.3.11
   resolution: "react-popper@npm:1.3.11"
   dependencies:
@@ -28312,6 +28448,13 @@ __metadata:
   version: 2.6.2
   resolution: "tslib@npm:2.6.2"
   checksum: 329ea56123005922f39642318e3d1f0f8265d1e7fcb92c633e0809521da75eeaca28d2cf96d7248229deb40e5c19adf408259f4b9640afd20d13aecc1430f3ad
+  languageName: node
+  linkType: hard
+
+"tslib@npm:~2.3.1":
+  version: 2.3.1
+  resolution: "tslib@npm:2.3.1"
+  checksum: de17a98d4614481f7fcb5cd53ffc1aaf8654313be0291e1bfaee4b4bb31a20494b7d218ff2e15017883e8ea9626599b3b0e0229c18383ba9dce89da2adf15cb9
   languageName: node
   linkType: hard
 
