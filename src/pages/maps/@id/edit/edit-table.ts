@@ -44,6 +44,20 @@ interface TableSelection {
   filters: Filters;
 }
 
+const FINAL_COLUMNS = [
+  "source_id",
+  "orig_id",
+  "descrip",
+  "ready",
+  "name",
+  "strat_name",
+  "age",
+  "lith",
+  "comments",
+  "t_interval",
+  "b_interval"
+]
+
 export default function EditTable({ url }) {
   // Table values
   const [page, setPage] = useState(0);
@@ -179,6 +193,7 @@ export default function EditTable({ url }) {
   const columns = Object.keys(data[0]).filter(x => x != "_pkid").map((key) => {
     return h(Column, {
       name: key,
+      className: FINAL_COLUMNS.includes(key) ? "final-column" : "",
       columnHeaderCellRenderer: columnHeaderCellRenderer,
       cellRenderer: (row, cell) => cellRenderer({"key": key, "row": row, "cell": cell}),
       "key": key
