@@ -85,15 +85,3 @@ function buildTestData() {
   }
   return repeatedData;
 }
-
-// const Template1: ComponentStory<typeof DataSheet> = ({ data, columns }) => {};
-
-// export const Virtualized = Template1.bind({});
-// Virtualized.args = {
-//   columns: columnSpec,
-//   containerWidth: 500,
-//   height: 500,
-//   width: 400,
-// };
-
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
