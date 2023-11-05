@@ -6,6 +6,7 @@ import {
   Table2,
   Cell,
   FocusedCellCoordinates,
+  Region,
 } from "@blueprintjs/table";
 import { useInDarkMode } from "@macrostrat/ui-components";
 import { useMemo, useState, useRef, useCallback } from "react";
@@ -23,6 +24,13 @@ export default function DataSheetTestPage() {
     HotkeysProvider,
     h("div.main", [
       h("h1", "Data sheet test"),
+      h("p", [
+        "This is a test of the a spreadsheet-like editor based on the ",
+        h("code", "@blueprintjs/core"),
+        " component. It will eventually be used as the basis for the ",
+        h("code", "@macrostrat/data-sheet"),
+        " library, which will underpin several important Macrostrat v2 user interfaces.",
+      ]),
       h("div.data-sheet-container", h(DataSheetTest)),
     ])
   );
@@ -39,6 +47,7 @@ function DataSheetTest() {
   const data = useMemo(buildTestData, []);
 
   // A sparse array to hold updates
+  // TODO: create a "changeset" concept to facilitate undo/redo
   const [updatedData, setUpdatedData] = useState([]);
   const onCellEdited = useCallback(
     (row: number, key: string, value: any) => {
@@ -65,6 +74,9 @@ function DataSheetTest() {
       focusedCell,
       onFocusedCell(cell) {
         setFocusedCell(cell);
+      },
+      onSelection(val: Region[]) {
+        console.log(val);
       },
       cellRendererDependencies: [focusedCell, updatedData],
     },
