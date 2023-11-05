@@ -1,5 +1,5 @@
 {
-  "name": "@macrostrat/web-globe",
+  "name": "@macrostrat-web/globe",
   "private": true,
   "scripts": {
     "dev": "vite"
