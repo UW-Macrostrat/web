@@ -1,5 +1,7 @@
 import hyper from "@macrostrat/hyper";
 import { DataSheet, ColorEditor } from "@macrostrat/data-sheet";
+import { HotkeysProvider } from "@blueprintjs/core";
+import { Column, Table2 } from "@blueprintjs/table";
 import { useState } from "react";
 import chroma from "chroma-js";
 import styles from "./main.module.sass";
@@ -12,7 +14,7 @@ export default function DataSheetTestPage() {
   return h("div.main", [h("h1", "Data sheet test"), h(DataSheetTest)]);
 }
 
-function DataSheetTest() {
+function DataSheetTestOld() {
   const [data, setData] = useState(buildTestData());
   return h(DataSheet, {
     columns: columnSpec,
@@ -28,6 +30,19 @@ function DataSheetTest() {
     },
   });
 }
+
+function DataSheetTest() {
+  return h(HotkeysProvider, [
+    h(
+      Table2,
+      {
+        nRows: 5,
+      },
+      [h(Column), h(Column), h(Column)]
+    ),
+  ]);
+}
+
 const columnSpec = [
   { name: "Strike", key: "strike" },
   { name: "Dip", key: "dip" },
