@@ -10,6 +10,7 @@ import {
   RowHeaderCell2,
   ColumnHeaderCell2,
   SelectionModes,
+  RegionCardinality
 } from "@blueprintjs/table";
 import update from "immutability-helper";
 
@@ -43,6 +44,20 @@ interface TableSelection {
   filters: Filters;
 }
 
+const FINAL_COLUMNS = [
+  "source_id",
+  "orig_id",
+  "descrip",
+  "ready",
+  "name",
+  "strat_name",
+  "age",
+  "lith",
+  "comments",
+  "t_interval",
+  "b_interval"
+]
+
 export default function EditTable({ url }) {
   // Table values
   const [page, setPage] = useState(0);
@@ -54,6 +69,7 @@ export default function EditTable({ url }) {
   const [inputValue, setInputValue] = useState<string>("");
   const [error, setError] = useState<string | undefined>(undefined)
   const [filters, setFilters] = useState<Filters>({})
+  const [group, setGroup] = useState<string | undefined>(undefined)
   const [tableSelection, setTableSelection] = useState<TableSelection>({columns: [], filter: new Filter("_pkid", "in", "")})
 
 
@@ -92,7 +108,7 @@ export default function EditTable({ url }) {
 
     const columnName: string = Object.keys(data[0])[columnIndex]
 
-    const onChange = (param: OperatorQueryParameter) => {
+    const onFilterChange = (param: OperatorQueryParameter) => {
 
       const columnFilter = new Filter(columnName, param.operator, param.value)
 
@@ -103,10 +119,10 @@ export default function EditTable({ url }) {
 
 
     return h(ColumnHeaderCell2, {
-      menuRenderer: () => h(TableMenu, {"onChange": onChange, filter}),
+      menuRenderer: () => h(TableMenu, {"onFilterChange": onFilterChange, filter, "onGroupChange": setGroup, group}),
       name: columnName,
       style: {
-        backgroundColor: filter.is_valid() ? "#ff1b651f" : "#ffffff00"
+        backgroundColor: filter.is_valid() || group == columnName ? "rgba(27,187,255,0.12)" : "#ffffff00"
       }
     }, [])
   }
@@ -130,7 +146,14 @@ export default function EditTable({ url }) {
 
   let getData = async () => {
 
-    const dataURL = buildURL(url, Object.values(filters))
+    const dataURL = buildURL(url, Object.values(filters), group)
+
+    if(group == undefined){
+      dataURL.searchParams.append("_pkid", "order_by" )
+    }
+
+    dataURL.searchParams.append("page", page.toString());
+    dataURL.searchParams.append("page_size", pageSize.toString());
 
     const response = await fetch(dataURL)
     const newData = await response.json()
@@ -142,6 +165,7 @@ export default function EditTable({ url }) {
 
       setError(undefined)
       setData(newData)
+      setTotalCount(Number.parseInt(response.headers.get("X-Total-Count")));
     }
 
     return newData
@@ -168,7 +192,7 @@ export default function EditTable({ url }) {
       return
     }
     getData()
-  }, [dataToggle, filters])
+  }, [dataToggle, filters, group])
 
   if(data.length == 0 && error == undefined){
     return h(Spinner)
@@ -177,6 +201,7 @@ export default function EditTable({ url }) {
   const columns = Object.keys(data[0]).filter(x => x != "_pkid").map((key) => {
     return h(Column, {
       name: key,
+      className: FINAL_COLUMNS.includes(key) ? "final-column" : "",
       columnHeaderCellRenderer: columnHeaderCellRenderer,
       cellRenderer: (row, cell) => cellRenderer({"key": key, "row": row, "cell": cell}),
       "key": key
@@ -212,14 +237,24 @@ export default function EditTable({ url }) {
   }
 
   const rowHeaderCellRenderer = (rowIndex: number) => {
-    return h(RowHeaderCell2, { name: data[rowIndex]["_pkid"] }, []);
+    const headerKey = group ? group : "_pkid"
+    let name = data[rowIndex][headerKey]
+
+    if (name == null) {
+      name = "NULL";
+    } else if(name.length > 47){
+      name = name.slice(0, 47) + "..."
+    }
+
+
+    return h(RowHeaderCell2, { "name": name }, []);
   };
 
   const submitChange = async (value: string) => {
     for (const column of tableSelection.columns) {
       let updateURL = new URL(url);
 
-      for (const filter: Filter of Object.values(tableSelection.filters)) {
+      for (const filter of Object.values(tableSelection.filters)) {
         updateURL.searchParams.append(...filter.to_array());
       }
 
@@ -274,7 +309,7 @@ export default function EditTable({ url }) {
       h(
         Table2,
         {
-          selectionModes: SelectionModes.COLUMNS_AND_CELLS,
+          selectionModes: group ? RegionCardinality.CELLS : SelectionModes.COLUMNS_AND_CELLS,
           rowHeaderCellRenderer: rowHeaderCellRenderer,
           onSelection: (selections: Selection[]) =>
             getSelectionValues(selections),
