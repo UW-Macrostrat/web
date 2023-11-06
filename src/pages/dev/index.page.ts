@@ -6,6 +6,7 @@ export function Page() {
     h("ul", [
       h("li", h("a", { href: "/dev/globe" }, "Globe")),
       h("li", h("a", { href: "/dev/paleo" }, "Paleogeography")),
+      h("li", h("a", { href: "/dev/ui-tests" }, "UI tests")),
     ]),
   ]);
 }
