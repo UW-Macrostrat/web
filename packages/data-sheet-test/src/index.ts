@@ -1,13 +1,6 @@
 import hyper from "@macrostrat/hyper";
 import { ColorPicker, EditorPopup } from "@macrostrat/data-sheet";
-import {
-  HotkeysProvider,
-  useHotkeys,
-  InputGroup,
-  ButtonGroup,
-  Button,
-  Intent,
-} from "@blueprintjs/core";
+import { ButtonGroup, Button, Intent } from "@blueprintjs/core";
 import {
   Column,
   Table2,

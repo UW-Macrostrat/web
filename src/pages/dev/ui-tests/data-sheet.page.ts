@@ -1,5 +1,5 @@
 import hyper from "@macrostrat/hyper";
-import { HotkeysProvider } from "@blueprintjs/core";
+import { Breadcrumbs, HotkeysProvider } from "@blueprintjs/core";
 import { ClientOnly } from "~/renderer/client-only";
 import style from "./main.module.sass";
 
@@ -15,7 +15,15 @@ export function Page() {
   return h(
     HotkeysProvider,
     h("div.main", [
-      h("h1", "Data sheet test"),
+      h(Breadcrumbs, {
+        items: [
+          { text: "Macrostrat", href: "/" },
+          { text: "Development", href: "/dev" },
+          { text: "UI tests", href: "/dev/ui-tests" },
+          { text: "Data sheet" },
+        ],
+      }),
+      h("h1", "Data sheet"),
       h("p", [
         "This is a test of the a spreadsheet-like editor based on the ",
         h("code", "@blueprintjs/core"),
