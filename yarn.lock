@@ -1707,7 +1707,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blueprintjs/core@npm:^4.14.1, @blueprintjs/core@npm:^4.17.8, @blueprintjs/core@npm:^4.18.0, @blueprintjs/core@npm:^4.20.2":
+"@blueprintjs/core@npm:^4, @blueprintjs/core@npm:^4.14.1, @blueprintjs/core@npm:^4.17.8, @blueprintjs/core@npm:^4.18.0, @blueprintjs/core@npm:^4.20.2":
   version: 4.20.2
   resolution: "@blueprintjs/core@npm:4.20.2"
   dependencies:
@@ -1804,6 +1804,27 @@ __metadata:
     "@types/react":
       optional: true
   checksum: 1ba595f58f36a8c0df3f8707ed035814021d7b3ca763182941e2a5f0844d79888cd12811c787eeb1b33669f43fd6b90d7cef9750c715fe9145d144c558ca800a
+  languageName: node
+  linkType: hard
+
+"@blueprintjs/table@npm:^4":
+  version: 4.10.12
+  resolution: "@blueprintjs/table@npm:4.10.12"
+  dependencies:
+    "@blueprintjs/core": ^4.20.2
+    "@blueprintjs/popover2": ^1.14.11
+    classnames: ^2.3.1
+    prop-types: ^15.7.2
+    react-innertext: ^1.1.5
+    tslib: ~2.5.0
+  peerDependencies:
+    "@types/react": ^16.14.32 || 17 || 18
+    react: ^16.8 || 17 || 18
+    react-dom: ^16.8 || 17 || 18
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+  checksum: f38c20fe0c88bd1aa5a1fcd7b2c72c2678e47e9f44cf461c5ec81570a2a7c9035d918a4a026c530e1b6f2f6c304b22763674923f832baa60fc95cd4dabc82e8f
   languageName: node
   linkType: hard
 
@@ -3135,6 +3156,39 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@macrostrat-web/data-sheet-test@workspace:*, @macrostrat-web/data-sheet-test@workspace:packages/data-sheet-test":
+  version: 0.0.0-use.local
+  resolution: "@macrostrat-web/data-sheet-test@workspace:packages/data-sheet-test"
+  dependencies:
+    "@blueprintjs/core": ^4
+    "@blueprintjs/table": ^4
+    "@macrostrat/data-sheet": ^1.0.0
+    "@macrostrat/hyper": ^2.2.1
+    "@macrostrat/ui-components": "workspace:^3.0.0"
+    chroma-js: ^2.4.2
+    react: ^18.2.0
+  languageName: unknown
+  linkType: soft
+
+"@macrostrat-web/globe@workspace:*, @macrostrat-web/globe@workspace:packages/globe-dev":
+  version: 0.0.0-use.local
+  resolution: "@macrostrat-web/globe@workspace:packages/globe-dev"
+  dependencies:
+    "@macrostrat/cesium-martini": "workspace:^1.3.0"
+    "@macrostrat/cesium-vector-provider": 2.0.2
+    "@macrostrat/cesium-viewer": "workspace:*"
+    "@macrostrat/hyper": ^2.0.1
+    "@macrostrat/mapbox-react": "workspace:*"
+    "@macrostrat/mapbox-utils": "workspace:*"
+    cesium: ^1.109.0
+    react: ^18
+    react-dom: ^18
+    typescript: ^5.0.0
+    vite: ^4.4.9
+    vite-plugin-cesium: ^1.2.22
+  languageName: unknown
+  linkType: soft
+
 "@macrostrat/api-types@workspace:deps/web-components/packages/api-types":
   version: 0.0.0-use.local
   resolution: "@macrostrat/api-types@workspace:deps/web-components/packages/api-types"
@@ -3312,7 +3366,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@macrostrat/data-sheet@workspace:deps/web-components/packages/data-sheet":
+"@macrostrat/data-sheet@^1.0.0, @macrostrat/data-sheet@workspace:deps/web-components/packages/data-sheet":
   version: 0.0.0-use.local
   resolution: "@macrostrat/data-sheet@workspace:deps/web-components/packages/data-sheet"
   dependencies:
@@ -3598,7 +3652,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@macrostrat/ui-components@^3.1.0, @macrostrat/ui-components@workspace:*, @macrostrat/ui-components@workspace:deps/web-components/packages/ui-components":
+"@macrostrat/ui-components@^3.1.0, @macrostrat/ui-components@workspace:*, @macrostrat/ui-components@workspace:^3.0.0, @macrostrat/ui-components@workspace:deps/web-components/packages/ui-components":
   version: 0.0.0-use.local
   resolution: "@macrostrat/ui-components@workspace:deps/web-components/packages/ui-components"
   dependencies:
@@ -3646,25 +3700,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@macrostrat/web-globe@workspace:*, @macrostrat/web-globe@workspace:packages/globe-dev":
-  version: 0.0.0-use.local
-  resolution: "@macrostrat/web-globe@workspace:packages/globe-dev"
-  dependencies:
-    "@macrostrat/cesium-martini": "workspace:^1.3.0"
-    "@macrostrat/cesium-vector-provider": 2.0.2
-    "@macrostrat/cesium-viewer": "workspace:*"
-    "@macrostrat/hyper": ^2.0.1
-    "@macrostrat/mapbox-react": "workspace:*"
-    "@macrostrat/mapbox-utils": "workspace:*"
-    cesium: ^1.109.0
-    react: ^18
-    react-dom: ^18
-    typescript: ^5.0.0
-    vite: ^4.4.9
-    vite-plugin-cesium: ^1.2.22
-  languageName: unknown
-  linkType: soft
-
 "@macrostrat/web@workspace:.":
   version: 0.0.0-use.local
   resolution: "@macrostrat/web@workspace:."
@@ -3676,6 +3711,8 @@ __metadata:
     "@blueprintjs/select": 4
     "@lagunovsky/redux-react-router": ^3.2.0
     "@loadable/component": ^5.14.1
+    "@macrostrat-web/data-sheet-test": "workspace:*"
+    "@macrostrat-web/globe": "workspace:*"
     "@macrostrat/api-utils": "workspace:*"
     "@macrostrat/api-views": "workspace:*"
     "@macrostrat/column-components": "workspace:*"
@@ -3689,7 +3726,6 @@ __metadata:
     "@macrostrat/style-system": "workspace:*"
     "@macrostrat/timescale": "workspace:*"
     "@macrostrat/ui-components": "workspace:*"
-    "@macrostrat/web-globe": "workspace:*"
     "@mapbox/point-geometry": ^0.1.0
     "@mapbox/tilebelt": ^1.0.2
     "@mapbox/vector-tile": ^1.3.1
@@ -24446,6 +24482,16 @@ __metadata:
     react: ^15.3.0 || ^16.2.0
     react-dom: ^15.3.0 || ^16.2.0
   checksum: 6ce47e9531c281109bc41a99dad710642db42ecc3f5e517ff1028c8a6715e26baf4278b562e3994ebf8bcc18cba28df860eb764bc41ea4f3adc3d6b072f8271e
+  languageName: node
+  linkType: hard
+
+"react-innertext@npm:^1.1.5":
+  version: 1.1.5
+  resolution: "react-innertext@npm:1.1.5"
+  peerDependencies:
+    "@types/react": ">=0.0.0 <=99"
+    react: ">=0.0.0 <=99"
+  checksum: 01c9c8a5a471f03965b9d69c8bee02d420fd3a607b678004f0bdee098c9bccb3e2eae8460c90b1d180d2a8d544a3ddb09b8c2a11e5aa8b3a077733e2d9c25c2c
   languageName: node
   linkType: hard
 
