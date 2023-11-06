@@ -9,7 +9,7 @@ import {
   Region,
 } from "@blueprintjs/table";
 import { useInDarkMode } from "@macrostrat/ui-components";
-import { useMemo, useState, useRef, useCallback } from "react";
+import { useMemo, useState, useRef, useCallback, useEffect } from "react";
 import chroma from "chroma-js";
 import update from "immutability-helper";
 import styles from "./main.module.sass";
@@ -49,6 +49,15 @@ function DataSheetTest() {
   const [selection, setSelection] = useState<Region[]>(null);
   const _topLeftCell = useMemo(() => topLeftCell(selection), [selection]);
   const focusedCell = useMemo(() => singleFocusedCell(selection), [selection]);
+  const [fillValueBase, setFillValueBase] =
+    useState<FocusedCellCoordinates>(null);
+
+  useEffect(() => {
+    // Cancel value filling if we change the selection
+    if (focusedCell != null) {
+      setFillValueBase(null);
+    }
+  }, [focusedCell]);
 
   const ref = useRef<HTMLDivElement>(null);
 
@@ -70,6 +79,26 @@ function DataSheetTest() {
       setUpdatedData(update(updatedData, spec));
     },
     [setUpdatedData, updatedData]
+  );
+
+  const fillValues = useCallback(
+    (fillValueBase, selection) => {
+      // Fill values downwards
+      if (fillValueBase == null) return;
+      const { col, row } = fillValueBase;
+      const key = columnSpec[col].key;
+      const value = updatedData[row]?.[key] ?? data[row][key];
+      const spec = {};
+      for (const region of selection) {
+        const { cols, rows } = region;
+        for (const row of range(rows)) {
+          let op = updatedData[row] == null ? "$set" : "$merge";
+          spec[row] = { [op]: { [key]: value } };
+        }
+      }
+      setUpdatedData(update(updatedData, spec));
+    },
+    [updatedData]
   );
 
   const clearSelection = useCallback(() => {
@@ -103,6 +132,9 @@ function DataSheetTest() {
       onSelection(val: Region[]) {
         console.log(val);
         setSelection(val);
+        if (fillValueBase != null) {
+          fillValues(fillValueBase, val);
+        }
       },
       cellRendererDependencies: [selection, updatedData],
     },
@@ -156,6 +188,8 @@ function DataSheetTest() {
             // Could probably put the hidden input elsewhere,
           }
 
+          // Single focused cell
+
           const onChange = (e) => {
             const value = e.target.value;
             onCellEdited(rowIndex, col.key, value);
@@ -185,13 +219,21 @@ function DataSheetTest() {
               interactive: true,
               intent,
               className: "input-container",
-              truncated: true,
+              truncated: false,
             },
             [
               h("input", {
                 value: valueRenderer(value),
                 autoFocus: true,
                 onChange,
+              }),
+              // This should be on the last cell of a selection
+              h("div.corner-drag-handle", {
+                onMouseDown(e) {
+                  console.log("Starting to fill values");
+                  setFillValueBase(focusedCell);
+                  e.preventDefault();
+                },
               }),
             ]
           );
