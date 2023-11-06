@@ -1,19 +1,13 @@
 @import "@blueprintjs/core/lib/scss/variables.scss"
-  
-.main
-  padding: 2em 8em
-  display: flex
-  flex-direction: column
-  position: fixed
-  width: 100vw
-  height: 100vh
-  top: 0
-  left: 0
 
-.data-sheet-container
+.data-sheet-container, .data-sheet-holder
   flex: 1
   position: relative
   min-height: 0
+
+.data-sheet-container
+  display: flex
+  flex-direction: column
 
 .data-sheet
   height: 100%
@@ -51,3 +45,11 @@
   background-color: $dark-gray1
   cursor: nwse-resize
   background-color: dodgerblue
+
+.data-sheet-toolbar
+  display: flex
+  flex-direction: row
+  margin-bottom: 4px
+
+.spacer
+  flex-grow: 1

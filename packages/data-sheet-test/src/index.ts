@@ -1,6 +1,13 @@
 import hyper from "@macrostrat/hyper";
 import { ColorPicker, EditorPopup } from "@macrostrat/data-sheet";
-import { HotkeysProvider, useHotkeys, InputGroup } from "@blueprintjs/core";
+import {
+  HotkeysProvider,
+  useHotkeys,
+  InputGroup,
+  ButtonGroup,
+  Button,
+  Intent,
+} from "@blueprintjs/core";
 import {
   Column,
   Table2,
@@ -19,34 +26,17 @@ const h = hyper.styled(styles);
 
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
 
-export default function DataSheetTestPage() {
-  return h(
-    HotkeysProvider,
-    h("div.main", [
-      h("h1", "Data sheet test"),
-      h("p", [
-        "This is a test of the a spreadsheet-like editor based on the ",
-        h("code", "@blueprintjs/core"),
-        " component. It will eventually be used as the basis for the ",
-        h("code", "@macrostrat/data-sheet"),
-        " library, which will underpin several important Macrostrat v2 user interfaces.",
-      ]),
-      h("div.data-sheet-container", h(DataSheetTest)),
-    ])
-  );
-}
-
 // TODO: add a "copy to selection" tool (the little square in the bottom right corner of a cell)
 // This should copy the value of a cell (or a set of cells in the same row) downwards.
 
-function DataSheetTest() {
+export default function DataSheetTest() {
   const darkMode = useInDarkMode();
   const columnSpec = buildColumnSpec(darkMode);
 
   // For now, we only consider a single cell "focused" when we have one cell selected.
   // Multi-cell selections have a different set of "bulk" actions.
   //const [focusedCell, setFocusedCell] = useState<FocusedCellCoordinates>(null);
-  const [selection, setSelection] = useState<Region[]>(null);
+  const [selection, setSelection] = useState<Region[]>([]);
   const _topLeftCell = useMemo(() => topLeftCell(selection), [selection]);
   const focusedCell = useMemo(() => singleFocusedCell(selection), [selection]);
   const [fillValueBase, setFillValueBase] =
@@ -66,6 +56,8 @@ function DataSheetTest() {
   // A sparse array to hold updates
   // TODO: create a "changeset" concept to facilitate undo/redo
   const [updatedData, setUpdatedData] = useState([]);
+  const hasUpdates = updatedData.length > 0;
+
   const onCellEdited = useCallback(
     (row: number, key: string, value: any) => {
       let rowSpec = {};
@@ -117,130 +109,169 @@ function DataSheetTest() {
         spec[row] = { [op]: vals };
       }
     }
-    console.log(spec);
     setUpdatedData(update(updatedData, spec));
   }, [selection, updatedData, columnSpec]);
 
-  return h(
-    Table2,
-    {
-      ref,
-      numRows: data.length,
-      className: "data-sheet",
-      //enableFocusedCell: true,
-      //focusedCell,
-      onSelection(val: Region[]) {
-        console.log(val);
-        setSelection(val);
-        if (fillValueBase != null) {
-          fillValues(fillValueBase, val);
-        }
-      },
-      cellRendererDependencies: [selection, updatedData],
-    },
-    columnSpec.map((col, colIndex) => {
-      return h(Column, {
-        name: col.name,
-        cellRenderer: (rowIndex) => {
-          const value =
-            updatedData[rowIndex]?.[col.key] ?? data[rowIndex][col.key];
-          const valueRenderer = col.valueRenderer ?? ((d) => d);
-          const focused =
-            focusedCell?.col === colIndex && focusedCell?.row === rowIndex;
-          // Top left cell of a ranged selection
-          const topLeft =
-            _topLeftCell?.col === colIndex && _topLeftCell?.row === rowIndex;
+  return h("div.data-sheet-container", [
+    h("div.data-sheet-toolbar", [
+      h("div.spacer"),
+      h(ButtonGroup, [
+        h(
+          Button,
+          {
+            intent: Intent.WARNING,
+            disabled: !hasUpdates,
+            onClick() {
+              setUpdatedData([]);
+            },
+          },
+          "Reset"
+        ),
+        h(
+          Button,
+          {
+            intent: Intent.SUCCESS,
+            icon: "floppy-disk",
+            disabled: !hasUpdates,
+            onClick() {
+              console.log("Here is where we would save data");
+            },
+          },
+          "Save"
+        ),
+      ]),
+    ]),
+    h("div.data-sheet-holder", [
+      h(
+        Table2,
+        {
+          ref,
+          numRows: data.length,
+          className: "data-sheet",
+          //enableFocusedCell: true,
+          //focusedCell,
+          selectedRegions: selection,
+          onSelection(val: Region[]) {
+            if (fillValueBase != null) {
+              let regions = val.map((region) => {
+                const { cols, rows } = region;
+                const [col] = cols;
+                return { cols: <[number, number]>[col, col], rows };
+              });
+              fillValues(fillValueBase, regions);
+              setSelection(regions);
+            } else {
+              setSelection(val);
+            }
+          },
+          cellRendererDependencies: [selection, updatedData],
+        },
+        columnSpec.map((col, colIndex) => {
+          return h(Column, {
+            name: col.name,
+            cellRenderer: (rowIndex) => {
+              const value =
+                updatedData[rowIndex]?.[col.key] ?? data[rowIndex][col.key];
+              const valueRenderer = col.valueRenderer ?? ((d) => d);
+              const focused =
+                focusedCell?.col === colIndex && focusedCell?.row === rowIndex;
+              // Top left cell of a ranged selection
+              const topLeft =
+                _topLeftCell?.col === colIndex &&
+                _topLeftCell?.row === rowIndex;
 
-          const edited = updatedData[rowIndex]?.[col.key] != null;
-          const intent = edited ? "success" : undefined;
-          const renderer =
-            col.cellRenderer ??
-            ((d) =>
-              h(
+              const edited = updatedData[rowIndex]?.[col.key] != null;
+              const intent = edited ? "success" : undefined;
+              const renderer =
+                col.cellRenderer ??
+                ((d) =>
+                  h(
+                    Cell,
+                    {
+                      intent,
+                    },
+                    valueRenderer(d)
+                  ));
+
+              if (!topLeft) {
+                // This should be the case for every cell except the focused one
+                return renderer(value);
+              }
+
+              if (!focused) {
+                // This should be the case for the focused cell
+                // Selection
+                return h(Cell, { interactive: true, intent }, [
+                  h("input.hidden-input", {
+                    autoFocus: true,
+                    onKeyDown(e) {
+                      console.log(e.key);
+                      if (e.key == "Backspace" || e.key == "Delete") {
+                        clearSelection();
+                      }
+                      e.preventDefault();
+                    },
+                  }),
+                  valueRenderer(value),
+                ]);
+                // Could probably put the hidden input elsewhere,
+              }
+
+              // Single focused cell
+
+              const onChange = (e) => {
+                const value = e.target.value;
+                onCellEdited(rowIndex, col.key, value);
+              };
+
+              if (col.dataEditor != null) {
+                return h(
+                  Cell,
+                  { interactive: true, intent },
+                  h(
+                    EditorPopup,
+                    {
+                      content: h(col.dataEditor, {
+                        value,
+                        onChange,
+                      }),
+                    },
+                    valueRenderer(value)
+                  )
+                );
+              }
+
+              // Hidden html input
+              return h(
                 Cell,
                 {
+                  interactive: true,
                   intent,
+                  className: "input-container",
+                  truncated: false,
                 },
-                valueRenderer(d)
-              ));
-
-          if (!topLeft) {
-            // This should be the case for every cell except the focused one
-            return renderer(value);
-          }
-
-          if (!focused) {
-            // This should be the case for the focused cell
-            // Selection
-            return h(Cell, { interactive: true, intent }, [
-              h("input.hidden-input", {
-                autoFocus: true,
-                onKeyDown(e) {
-                  console.log(e.key);
-                  if (e.key == "Backspace" || e.key == "Delete") {
-                    clearSelection();
-                  }
-                  e.preventDefault();
-                },
-              }),
-              valueRenderer(value),
-            ]);
-            // Could probably put the hidden input elsewhere,
-          }
-
-          // Single focused cell
-
-          const onChange = (e) => {
-            const value = e.target.value;
-            onCellEdited(rowIndex, col.key, value);
-          };
-
-          if (col.dataEditor != null) {
-            return h(
-              Cell,
-              { interactive: true, intent },
-              h(
-                EditorPopup,
-                {
-                  content: h(col.dataEditor, {
-                    value,
+                [
+                  h("input", {
+                    value: valueRenderer(value),
+                    autoFocus: true,
                     onChange,
                   }),
-                },
-                valueRenderer(value)
-              )
-            );
-          }
-
-          // Hidden html input
-          return h(
-            Cell,
-            {
-              interactive: true,
-              intent,
-              className: "input-container",
-              truncated: false,
+                  // This should be on the last cell of a selection
+                  h("div.corner-drag-handle", {
+                    onMouseDown(e) {
+                      console.log("Starting to fill values");
+                      setFillValueBase(focusedCell);
+                      e.preventDefault();
+                    },
+                  }),
+                ]
+              );
             },
-            [
-              h("input", {
-                value: valueRenderer(value),
-                autoFocus: true,
-                onChange,
-              }),
-              // This should be on the last cell of a selection
-              h("div.corner-drag-handle", {
-                onMouseDown(e) {
-                  console.log("Starting to fill values");
-                  setFillValueBase(focusedCell);
-                  e.preventDefault();
-                },
-              }),
-            ]
-          );
-        },
-      });
-    })
-  );
+          });
+        })
+      ),
+    ]),
+  ]);
 }
 
 function valueRenderer(d) {
@@ -280,8 +311,9 @@ function buildColumnSpec(inDarkMode: boolean) {
         } catch (e) {
           color = null;
         }
-        return color?.hex();
+        return color?.hex() ?? "";
       },
+      // Maybe this should be changed to CellProps?
       cellRenderer(data) {
         let color = data;
         return h(
