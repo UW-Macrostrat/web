@@ -47,6 +47,7 @@ function DataSheetTest() {
   // Multi-cell selections have a different set of "bulk" actions.
   //const [focusedCell, setFocusedCell] = useState<FocusedCellCoordinates>(null);
   const [selection, setSelection] = useState<Region[]>(null);
+  const _topLeftCell = useMemo(() => topLeftCell(selection), [selection]);
   const focusedCell = useMemo(() => singleFocusedCell(selection), [selection]);
 
   const ref = useRef<HTMLDivElement>(null);
@@ -71,6 +72,26 @@ function DataSheetTest() {
     [setUpdatedData, updatedData]
   );
 
+  const clearSelection = useCallback(() => {
+    // Delete all selected cells
+    let spec = {};
+    console.log(selection);
+    for (const region of selection) {
+      const { cols, rows } = region;
+      for (const row of range(rows)) {
+        let vals = {};
+        for (const col of range(cols)) {
+          const key = columnSpec[col].key;
+          vals[key] = "";
+        }
+        let op = updatedData[row] == null ? "$set" : "$merge";
+        spec[row] = { [op]: vals };
+      }
+    }
+    console.log(spec);
+    setUpdatedData(update(updatedData, spec));
+  }, [selection, updatedData, columnSpec]);
+
   return h(
     Table2,
     {
@@ -79,13 +100,11 @@ function DataSheetTest() {
       className: "data-sheet",
       //enableFocusedCell: true,
       //focusedCell,
-      onFocusedCell(cell) {
-        console.log(cell);
-      },
       onSelection(val: Region[]) {
+        console.log(val);
         setSelection(val);
       },
-      cellRendererDependencies: [focusedCell, updatedData],
+      cellRendererDependencies: [selection, updatedData],
     },
     columnSpec.map((col, colIndex) => {
       return h(Column, {
@@ -96,6 +115,9 @@ function DataSheetTest() {
           const valueRenderer = col.valueRenderer ?? ((d) => d);
           const focused =
             focusedCell?.col === colIndex && focusedCell?.row === rowIndex;
+          // Top left cell of a ranged selection
+          const topLeft =
+            _topLeftCell?.col === colIndex && _topLeftCell?.row === rowIndex;
 
           const edited = updatedData[rowIndex]?.[col.key] != null;
           const intent = edited ? "success" : undefined;
@@ -110,9 +132,28 @@ function DataSheetTest() {
                 valueRenderer(d)
               ));
 
-          if (!focused) {
+          if (!topLeft) {
             // This should be the case for every cell except the focused one
             return renderer(value);
+          }
+
+          if (!focused) {
+            // This should be the case for the focused cell
+            // Selection
+            return h(Cell, { interactive: true, intent }, [
+              h("input.hidden-input", {
+                autoFocus: true,
+                onKeyDown(e) {
+                  console.log(e.key);
+                  if (e.key == "Backspace" || e.key == "Delete") {
+                    clearSelection();
+                  }
+                  e.preventDefault();
+                },
+              }),
+              valueRenderer(value),
+            ]);
+            // Could probably put the hidden input elsewhere,
           }
 
           const onChange = (e) => {
@@ -168,6 +209,12 @@ function valueRenderer(d) {
   }
 }
 
+function range(arr: number[]) {
+  if (arr.length != 2) throw new Error("Range must have two elements");
+  const [start, end] = arr;
+  return Array.from({ length: end - start + 1 }, (_, i) => i + start);
+}
+
 function buildColumnSpec(inDarkMode: boolean) {
   const brighten = inDarkMode ? 0.5 : 0.1;
 
@@ -199,25 +246,36 @@ function buildColumnSpec(inDarkMode: boolean) {
           Cell,
           {
             style: {
-              color: color?.luminance(brighten).css(),
-              backgroundColor: color?.alpha(0.2).css(),
+              color: color?.luminance?.(brighten).css(),
+              backgroundColor: color?.alpha?.(0.2).css(),
             },
           },
-          color?.hex()
+          color?.hex?.() ?? ""
         );
       },
     },
   ];
 }
 
+function topLeftCell(
+  regions: Region[],
+  requireSolitaryCell: boolean = false
+): FocusedCellCoordinates | null {
+  /** Top left cell of a ranged selection  */
+  if (regions == null) return null;
+  const [region] = regions;
+  if (region == null) return null;
+  const { cols, rows } = region;
+  if (cols == null || rows == null) return null;
+  if (requireSolitaryCell && (cols[0] !== cols[1] || rows[0] !== rows[1]))
+    return null;
+  return { col: cols[0], row: rows[0], focusSelectionIndex: 0 };
+}
+
 function singleFocusedCell(sel: Region[]): FocusedCellCoordinates | null {
   /** Derive a single focused cell from a selected region, if possible */
   if (sel?.length !== 1) return null;
-  const [region] = sel;
-  if (!("cols" in region && "rows" in region)) return null;
-  const { cols, rows } = region;
-  if (cols[0] !== cols[1] || rows[0] !== rows[1]) return null;
-  return { col: cols[0], row: rows[0], focusSelectionIndex: 0 };
+  return topLeftCell(sel, true);
 }
 
 function buildTestData() {
