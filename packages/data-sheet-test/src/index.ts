@@ -182,26 +182,25 @@ export default function DataSheetTest() {
 
               const edited = updatedData[rowIndex]?.[col.key] != null;
               const intent = edited ? "success" : undefined;
-              const renderer =
-                col.cellRenderer ??
-                ((d) =>
-                  h(
-                    Cell,
-                    {
-                      intent,
-                    },
-                    valueRenderer(d)
-                  ));
+
+              const _Cell = col.cellComponent ?? BaseCell;
 
               if (!topLeft) {
                 // This should be the case for every cell except the focused one
-                return renderer(value);
+                return h(
+                  _Cell,
+                  {
+                    intent,
+                    value,
+                  },
+                  valueRenderer(value)
+                );
               }
 
               if (!focused) {
                 // This should be the case for the focused cell
                 // Selection
-                return h(Cell, { interactive: true, intent }, [
+                return h(_Cell, { intent, value }, [
                   h("input.hidden-input", {
                     autoFocus: true,
                     onKeyDown(e) {
@@ -224,42 +223,46 @@ export default function DataSheetTest() {
                 onCellEdited(rowIndex, col.key, value);
               };
 
+              let cellContents = null;
+              let cellClass = null;
+
               if (col.dataEditor != null) {
-                return h(
-                  Cell,
-                  { interactive: true, intent },
-                  h(
-                    EditorPopup,
-                    {
-                      content: h(col.dataEditor, {
-                        value,
-                        onChange,
-                      }),
-                    },
-                    valueRenderer(value)
-                  )
+                cellContents = h(
+                  EditorPopup,
+                  {
+                    content: h(col.dataEditor, {
+                      value,
+                      onChange(value) {
+                        onCellEdited(rowIndex, col.key, value);
+                      },
+                    }),
+                    className: cellClass,
+                  },
+                  valueRenderer(value)
                 );
+              } else {
+                cellClass = "input-cell";
+                cellContents = h("input", {
+                  value: valueRenderer(value),
+                  autoFocus: true,
+                  onChange,
+                });
               }
 
               // Hidden html input
               return h(
-                Cell,
+                _Cell,
                 {
-                  interactive: true,
                   intent,
-                  className: "input-container",
+                  className: cellClass,
                   truncated: false,
                 },
                 [
-                  h("input", {
-                    value: valueRenderer(value),
-                    autoFocus: true,
-                    onChange,
-                  }),
+                  cellContents,
+                  // TODO: we might want to drag multiple columns
                   // This should be on the last cell of a selection
                   h("div.corner-drag-handle", {
                     onMouseDown(e) {
-                      console.log("Starting to fill values");
                       setFillValueBase(focusedCell);
                       e.preventDefault();
                     },
@@ -272,6 +275,17 @@ export default function DataSheetTest() {
       ),
     ]),
   ]);
+}
+
+function BaseCell({ children, value, ...rest }) {
+  return h(
+    Cell,
+    {
+      interactive: true,
+      ...rest,
+    },
+    children
+  );
 }
 
 function valueRenderer(d) {
@@ -288,9 +302,7 @@ function range(arr: number[]) {
   return Array.from({ length: end - start + 1 }, (_, i) => i + start);
 }
 
-function buildColumnSpec(inDarkMode: boolean) {
-  const brighten = inDarkMode ? 0.5 : 0.1;
-
+function buildColumnSpec() {
   return [
     { name: "Strike", key: "strike", valueRenderer },
     { name: "Dip", key: "dip", valueRenderer },
@@ -311,24 +323,29 @@ function buildColumnSpec(inDarkMode: boolean) {
         } catch (e) {
           color = null;
         }
-        return color?.hex() ?? "";
+        return color?.name() ?? "";
       },
       // Maybe this should be changed to CellProps?
-      cellRenderer(data) {
-        let color = data;
-        return h(
-          Cell,
-          {
-            style: {
-              color: color?.luminance?.(brighten).css(),
-              backgroundColor: color?.alpha?.(0.2).css(),
-            },
-          },
-          color?.hex?.() ?? ""
-        );
-      },
+      cellComponent: ColorCell,
     },
   ];
+}
+
+function ColorCell({ value, children, style, intent, ...rest }) {
+  const brighten = useInDarkMode() ? 0.5 : 0.1;
+  const color = value;
+  return h(
+    Cell,
+    {
+      ...rest,
+      style: {
+        ...style,
+        color: color?.luminance?.(brighten).css(),
+        backgroundColor: color?.alpha?.(0.2).css(),
+      },
+    },
+    children
+  );
 }
 
 function topLeftCell(
