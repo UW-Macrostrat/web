@@ -36,11 +36,18 @@ export default function DataSheetTestPage() {
   );
 }
 
+// TODO: add a "copy to selection" tool (the little square in the bottom right corner of a cell)
+// This should copy the value of a cell (or a set of cells in the same row) downwards.
+
 function DataSheetTest() {
   const darkMode = useInDarkMode();
   const columnSpec = buildColumnSpec(darkMode);
 
-  const [focusedCell, setFocusedCell] = useState<FocusedCellCoordinates>(null);
+  // For now, we only consider a single cell "focused" when we have one cell selected.
+  // Multi-cell selections have a different set of "bulk" actions.
+  //const [focusedCell, setFocusedCell] = useState<FocusedCellCoordinates>(null);
+  const [selection, setSelection] = useState<Region[]>(null);
+  const focusedCell = useMemo(() => singleFocusedCell(selection), [selection]);
 
   const ref = useRef<HTMLDivElement>(null);
 
@@ -70,13 +77,13 @@ function DataSheetTest() {
       ref,
       numRows: data.length,
       className: "data-sheet",
-      enableFocusedCell: true,
-      focusedCell,
+      //enableFocusedCell: true,
+      //focusedCell,
       onFocusedCell(cell) {
-        setFocusedCell(cell);
+        console.log(cell);
       },
       onSelection(val: Region[]) {
-        console.log(val);
+        setSelection(val);
       },
       cellRendererDependencies: [focusedCell, updatedData],
     },
@@ -201,6 +208,16 @@ function buildColumnSpec(inDarkMode: boolean) {
       },
     },
   ];
+}
+
+function singleFocusedCell(sel: Region[]): FocusedCellCoordinates | null {
+  /** Derive a single focused cell from a selected region, if possible */
+  if (sel?.length !== 1) return null;
+  const [region] = sel;
+  if (!("cols" in region && "rows" in region)) return null;
+  const { cols, rows } = region;
+  if (cols[0] !== cols[1] || rows[0] !== rows[1]) return null;
+  return { col: cols[0], row: rows[0], focusSelectionIndex: 0 };
 }
 
 function buildTestData() {
