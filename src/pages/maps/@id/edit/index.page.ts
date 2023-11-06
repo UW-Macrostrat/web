@@ -30,11 +30,11 @@ export async function onBeforeRender(pageContext: PageContextBuiltInServer) {
   };
 }
 
-const MapInterface = () => import("./map-interface");
+const EditInterface = () => import("./edit-page");
 
 export function Page({ id, map }) {
   return h(
     "div.single-map",
-    h(ClientOnly, { component: MapInterface, id, map })
+    h(ClientOnly, { component: EditInterface, source_id: id, mapBounds: map })
   );
 }

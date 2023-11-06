@@ -1,0 +1,22 @@
+.width-adjustable-panel
+  transition: max-width 0.1s ease-in-out
+  height: 100%
+  display: flex
+  flex-direction: row
+  position: relative
+
+.width-adjustable-panel-content
+  overflow: scroll
+  height: 100%
+  flex-grow: 1
+  padding: 1em
+
+.width-adjuster
+  cursor: col-resize
+  width: 6px
+  height: 100%
+  // Not sure why this defaults to shrinking
+  flex-shrink: 0
+  background-color: #efefef
+  &:hover
+    background-color: #ddd

@@ -16,7 +16,6 @@ import { MapNavbar } from "~/components/map-navbar";
 import { SETTINGS } from "~/map-interface/settings";
 import "~/styles/global.styl";
 import { s3Address, tempImageIndex } from "../../raster-images";
-import EditInterface from "./edit-interface";
 import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
@@ -205,16 +204,11 @@ export default function MapInterface({ id, map }) {
     MapAreaContainer,
     {
       className: "single-map",
-      navbar: h(MapNavbar, { title, parentRoute: "/maps", isOpen, setOpen }),
+      navbar: h(MapNavbar, { isOpen, setOpen, minimal: true }),
       contextPanel,
       contextPanelOpen: isOpen,
-      detailPanelOpen: true,
-      detailPanelStyle: "fixed",
-      detailPanel: h(
-        EditInterface,
-        { title: "Source 1", parentRoute: "/maps/", source_id: id },
-        []
-      ),
+      detailPanelOpen: false,
+      fitViewport: false,
     },
     [
       h(
