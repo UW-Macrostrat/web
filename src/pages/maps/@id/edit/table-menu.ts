@@ -106,7 +106,7 @@ const TableMenu = ({onFilterChange, filter, onGroupChange, group} : TableMenuPro
 					"value": inputValue,
 					className: "update-input-group",
 					placeholder: inputPlaceholder,
-					onFilterChange: (e: React.ChangeEvent<HTMLInputElement>) => {setInputValue(e.target.value); debouncedInputChange(e)}
+					onChange: (e: React.ChangeEvent<HTMLInputElement>) => {setInputValue(e.target.value); debouncedInputChange(e)}
 				}, [])
 			]),
 			h("div.filter-header", {}, ["Group"]),
@@ -118,7 +118,7 @@ const TableMenu = ({onFilterChange, filter, onGroupChange, group} : TableMenuPro
 						intent: groupActive ? "success" : "warning",
 						text: groupActive ? "Active" : "Inactive",
 						fill: true,
-						onClick: () => onGroupChange(filter.column_name)
+						onClick: () => onGroupChange(group ? "" : filter.column_name)
 					}, [])
 			]),
 		])
