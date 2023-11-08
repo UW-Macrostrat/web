@@ -132,10 +132,10 @@ const darkStyle = {
       },
     },
     {
-      id: "plate",
+      id: "plates",
       type: "fill",
       source: "burwell",
-      "source-layer": "plate",
+      "source-layer": "plates",
       paint: {
         "fill-color": "hsl(55, 1%, 20%)",
         //"fill-opacity": 0.8,
@@ -155,10 +155,10 @@ const lightStyle = {
       },
     },
     {
-      id: "plate",
+      id: "plates",
       type: "fill",
       source: "burwell",
-      "source-layer": "plate",
+      "source-layer": "plates",
       paint: {
         "fill-color": "hsl(55, 11%, 96%)",
         //"fill-opacity": 0.8,
@@ -296,7 +296,7 @@ export default function PaleoMap({
         }),
         h(FeaturePanel, {
           features: data,
-          focusedSource: "burwell",
+          focusedSource: "plates",
           focusedSourceTitle: "Paleogeography",
         }),
       ]
