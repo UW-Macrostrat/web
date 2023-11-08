@@ -43,6 +43,7 @@ type PaleogeographyState = {
   model_id: number;
   age: number;
   mapPosition: MapPosition;
+  initialized: boolean;
 };
 
 type PaleogeographyAction =
@@ -60,7 +61,6 @@ function usePaleogeographyState(
 
   const [state, dispatch] = useReducer(
     (state: PaleogeographyState, action: PaleogeographyAction) => {
-      console.log(state, action);
       switch (action.type) {
         case "set-model":
           return {
@@ -73,16 +73,16 @@ function usePaleogeographyState(
         case "set-map-position":
           return { ...state, mapPosition: action.mapPosition };
         case "initialize":
-          return action.state;
+          return { ...action.state, initialized: true };
       }
     },
-    { model_id: null, age: null, mapPosition: null }
+    { model_id: null, age: null, mapPosition: null, initialized: false }
   );
 
   const { model_id, age, mapPosition } = state;
 
   useEffect(() => {
-    if (model_id == null || age == null) return;
+    if (model_id == null || age == null || mapPosition == null) return;
     let args: any = { model_id, age };
     applyMapPositionToHash(args, mapPosition);
     setHashString(args, { sort: false, arrayFormat: "comma" });
@@ -91,7 +91,10 @@ function usePaleogeographyState(
   useEffect(() => {
     const hashData = getHashString(window.location.hash) ?? {};
     const { model_id, age, ...rest } = hashData;
-    const mapPosition = getMapPositionForHash(rest, null);
+    const mapPosition = getMapPositionForHash(
+      rest,
+      defaultState.mapPosition.camera
+    );
 
     if (model_id == null || age == null) return;
     if (Array.isArray(model_id)) return;
@@ -102,6 +105,7 @@ function usePaleogeographyState(
         model_id: parseInt(model_id) ?? defaultModelID,
         age: parseInt(age) ?? defaultAge,
         mapPosition,
+        initialized: true,
       },
     });
   }, []);
@@ -188,8 +192,6 @@ export default function PaleoMap({
   const mapboxToken = SETTINGS.mapboxAccessToken;
   mapboxgl.accessToken = mapboxToken;
 
-  let transformRequest = null;
-
   const style = isEnabled ? darkStyle : lightStyle;
 
   const [isOpen, setOpen] = useState(false);
@@ -204,6 +206,7 @@ export default function PaleoMap({
   const [paleoState, dispatch] = usePaleogeographyState({
     model_id: null,
     age: 0,
+    initialized: false,
     mapPosition: {
       camera: {
         lng: -40,
@@ -344,7 +347,6 @@ export default function PaleoMap({
       MapView,
       {
         style: actualStyle,
-        transformRequest,
         mapPosition,
         projection: { name: "globe" },
         enableTerrain: false,
