@@ -118,7 +118,7 @@ const TableMenu = ({onFilterChange, filter, onGroupChange, group} : TableMenuPro
 						intent: groupActive ? "success" : "warning",
 						text: groupActive ? "Active" : "Inactive",
 						fill: true,
-						onClick: () => onGroupChange(group ? "" : filter.column_name)
+						onClick: () => onGroupChange(group == filter.column_name ? undefined : filter.column_name)
 					}, [])
 			]),
 		])

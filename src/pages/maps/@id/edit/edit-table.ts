@@ -1,6 +1,6 @@
 import hyper from "@macrostrat/hyper";
 
-import { useState, useEffect, useCallback, useRef, useLayoutEffect } from "react";
+import { useState, useEffect, useCallback, useRef, useLayoutEffect, useMemo } from "react";
 import { HotkeysProvider, InputGroup, Button } from "@blueprintjs/core";
 import { Spinner, ButtonGroup } from "@blueprintjs/core";
 import {
@@ -76,6 +76,11 @@ export default function EditTable({ url }) {
   // Sparse array to hold edited data
   const [editedData, setEditedData] = useState(new Array());
 
+  // Memoize non-id columns
+  const nonIdColumns = useMemo(() => {
+    return data.length ? Object.keys(data[0]).filter(x => x != "_pkid") : []
+  }, [data])
+
   const onChange = (key, row, text) => {
     let rowSpec = {};
     if (text == data[row][key] || (text == "" && data[row][key] == null)) {
@@ -106,7 +111,7 @@ export default function EditTable({ url }) {
 
   const columnHeaderCellRenderer = (columnIndex: number) => {
 
-    const columnName: string = Object.keys(data[0])[columnIndex]
+    const columnName: string = nonIdColumns[columnIndex]
 
     const onFilterChange = (param: OperatorQueryParameter) => {
 
@@ -198,7 +203,7 @@ export default function EditTable({ url }) {
     return h(Spinner)
   }
 
-  const columns = Object.keys(data[0]).filter(x => x != "_pkid").map((key) => {
+  const columns = nonIdColumns.map((key) => {
     return h(Column, {
       name: key,
       className: FINAL_COLUMNS.includes(key) ? "final-column" : "",
