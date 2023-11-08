@@ -26,22 +26,29 @@ import {
   buildInspectorStyle,
 } from "@macrostrat/map-interface";
 import { TimescalePanel } from "./timescale";
+import { MapPosition, getMapPosition } from "@macrostrat/mapbox-utils";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { getHashString, setHashString } from "@macrostrat/ui-components";
 
 // Having to include these global styles is a bit awkward
 import "~/styles/global.styl";
+import {
+  applyMapPositionToHash,
+  getMapPositionForHash,
+} from "~/map-interface/app-state/reducers/hash-string";
 
 // Import other components
 
 type PaleogeographyState = {
   model_id: number;
   age: number;
+  mapPosition: MapPosition;
 };
 
 type PaleogeographyAction =
   | { type: "set-model"; model_id: number }
   | { type: "set-age"; age: number }
+  | { type: "set-map-position"; mapPosition: MapPosition }
   | { type: "initialize"; state: PaleogeographyState };
 
 function usePaleogeographyState(
@@ -63,21 +70,29 @@ function usePaleogeographyState(
           };
         case "set-age":
           return { ...state, age: action.age };
+        case "set-map-position":
+          return { ...state, mapPosition: action.mapPosition };
         case "initialize":
           return action.state;
       }
     },
-    { model_id: null, age: null }
+    { model_id: null, age: null, mapPosition: null }
   );
 
-  useEffect(() => {
-    const { model_id, age } = state;
-    if (model_id == null || age == null) return;
-    setHashString({ model_id, age }, { sort: false });
-  }, [state]);
+  const { model_id, age, mapPosition } = state;
 
   useEffect(() => {
-    const { model_id, age } = getHashString(window.location.hash) ?? {};
+    if (model_id == null || age == null) return;
+    let args: any = { model_id, age };
+    applyMapPositionToHash(args, mapPosition);
+    setHashString(args, { sort: false, arrayFormat: "comma" });
+  }, [model_id, age, mapPosition]);
+
+  useEffect(() => {
+    const hashData = getHashString(window.location.hash) ?? {};
+    const { model_id, age, ...rest } = hashData;
+    const mapPosition = getMapPositionForHash(rest, null);
+
     if (model_id == null || age == null) return;
     if (Array.isArray(model_id)) return;
     if (Array.isArray(age)) return;
@@ -86,6 +101,7 @@ function usePaleogeographyState(
       state: {
         model_id: parseInt(model_id) ?? defaultModelID,
         age: parseInt(age) ?? defaultAge,
+        mapPosition,
       },
     });
   }, []);
@@ -173,7 +189,6 @@ export default function PaleoMap({
   mapboxgl.accessToken = mapboxToken;
 
   let transformRequest = null;
-  let mapPosition = null;
 
   const style = isEnabled ? darkStyle : lightStyle;
 
@@ -187,11 +202,18 @@ export default function PaleoMap({
 
   const [actualStyle, setActualStyle] = useState(style);
   const [paleoState, dispatch] = usePaleogeographyState({
-    model_id: 6,
+    model_id: null,
     age: 0,
+    mapPosition: {
+      camera: {
+        lng: -40,
+        lat: 45,
+        altitude: 5000000,
+      },
+    },
   });
 
-  const { age, model_id } = paleoState;
+  const { age, model_id, mapPosition } = paleoState;
   const plateModelId = model_id;
 
   const models: { id: string; max_age: number; min_age: number }[] =
@@ -218,6 +240,8 @@ export default function PaleoMap({
   //   }
   // }, [model, age]);
 
+  // Manage location hash
+
   const _overlayStyle = useMemo(() => {
     if (plateModelId == null || age == null) return overlayStyle;
     return replaceSourcesForTileset(overlayStyle, plateModelId, age);
@@ -239,6 +263,11 @@ export default function PaleoMap({
   const onSelectPosition = useCallback((position: mapboxgl.LngLat) => {
     setInspectPosition(position);
   }, []);
+
+  const onMapMoved = useCallback(
+    (pos) => dispatch({ type: "set-map-position", mapPosition: pos }),
+    []
+  );
 
   if (age == null || model_id == null) {
     return h(Spinner);
@@ -318,7 +347,9 @@ export default function PaleoMap({
         transformRequest,
         mapPosition,
         projection: { name: "globe" },
+        enableTerrain: false,
         mapboxToken,
+        onMapMoved,
       },
       [
         h(FeatureSelectionHandler, {

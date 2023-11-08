@@ -84,9 +84,9 @@ function applyInfoMarkerPosition(
 
 export function applyMapPositionToHash(
   args: HashParams,
-  mapPosition: MapPosition
+  mapPosition: MapPosition | null
 ) {
-  const pos = mapPosition.camera;
+  const pos = mapPosition?.camera;
   if (pos == null) return;
   const zoom = mapPosition.target?.zoom;
 
