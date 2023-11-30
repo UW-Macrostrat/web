@@ -9,7 +9,7 @@ export const secureFetch = async (url, options) => {
 
   const response = await fetch(url, options);
 
-  if (response.status === 401) {
+  if (response.status === 401 || response.status === 403) {
     window.open(`${import.meta.env.VITE_MACROSTRAT_INGEST_API}/security/login`, '_blank').focus();
     throw {name: "UnauthorizedError", message: "User is not logged in"}
   }
