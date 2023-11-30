@@ -2,7 +2,10 @@
 // Handles fetch requests that require authentication
 export const secureFetch = async (url, options) => {
 
-  console.log(url, options)
+  options = {
+    credentials: "include",
+    ...options,
+  }
 
   const response = await fetch(url, options);
 

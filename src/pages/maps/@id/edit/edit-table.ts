@@ -158,7 +158,6 @@ export default function EditTable({ url }) {
     if(newData.length == 0){
       setError("Warning: No results matched query")
     } else {
-      console.log("Data fetched successfully")
 
       setError(undefined)
       setData(newData)
@@ -308,7 +307,7 @@ export default function EditTable({ url }) {
             getSelectionValues(selections),
           numRows: data.length,
           // Dumb hacks to try to get the table to rerender on changes
-          cellRendererDependencies: [editedData],
+          cellRendererDependencies: [editedData, data],
         },
         columns
       ),
