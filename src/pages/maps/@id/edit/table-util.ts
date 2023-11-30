@@ -1,4 +1,5 @@
-import {ColumnOperators, Filters} from "./table";
+import { ColumnOperators, Filters, TableSelection, TableUpdate } from "./table";
+import {secureFetch} from "@macrostrat-web/security";
 
 
 export class Filter {
@@ -34,8 +35,6 @@ export class Filter {
 
 }
 
-
-
 export function buildURL(baseURL: string, filters: Filter[], group: string | undefined){
 	let updateURL = new URL(baseURL)
 
@@ -52,4 +51,87 @@ export function buildURL(baseURL: string, filters: Filter[], group: string | und
 	}
 
 	return updateURL
+}
+
+/**
+ * Builds a table update from the current table state
+ */
+export const getTableUpdate = (
+	value: string,
+	columnName: string,
+	rowIndex: number,
+	data: any[],
+	filters: Filters,
+	group: string | undefined
+): TableUpdate => {
+
+	filters = {...filters}
+	if( group != undefined){
+		filters[group] = new Filter(group, "eq", data[rowIndex][group])
+	} else {
+		filters["_pkid"] = new Filter("_pkid", "eq", data[rowIndex]["_pkid"])
+	}
+
+	const selection: TableSelection = {
+		columns: [columnName],
+		filters: filters
+	}
+
+	return {
+		selection,
+		value: value
+	}
+}
+
+export const submitChanges = async (url: string, updates: TableUpdate[]) => {
+	for(const update of updates){
+		console.log("Update: ", update)
+
+		// await submitChange(url, update)
+	}
+}
+
+export const submitChange = async (url: string, {selection, value}: TableUpdate) => {
+
+	// Query per column
+	for (const column of selection.columns) {
+
+		let updateURL = new URL(url);
+
+		// Add the filters to the query parameters
+		for (const filter of Object.values(selection.filters)) {
+
+			// Check that the filter is valid
+			if(!filter.is_valid()){
+				continue
+			}
+
+			console.log("Filter: ", filter)
+
+			const [searchTerm, searchValue] = filter.to_array()
+			updateURL.searchParams.append(searchTerm, searchValue);
+		}
+
+		// Create the request body
+		let patch = { [column]: value };
+
+		// Send the request
+		let response = await secureFetch(updateURL, {
+			method: "PATCH",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(patch),
+		});
+
+		if (response.status != 204) {
+
+			// Stop execution if the request failed
+			throw Error("Failed to update");
+		}
+	}
+};
+
+export function isEmptyArray(arr) {
+	return arr.length == 0 || arr.every((x) => x == null);
 }

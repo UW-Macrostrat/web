@@ -19,3 +19,24 @@ interface Filters {
 	[key: string]: Filter;
 }
 
+interface Selection {
+	cols: number[];
+	rows: number[];
+}
+
+
+interface Filters {
+	[key: string]: Filter;
+}
+
+// An object that represents a selection of rows and columns
+interface TableSelection {
+	columns: string[];
+	filters: Filters;
+}
+
+// An object that represents a value update made on top of a specific TableSelection
+interface TableUpdate {
+	selection: TableSelection;
+	value: string;
+}

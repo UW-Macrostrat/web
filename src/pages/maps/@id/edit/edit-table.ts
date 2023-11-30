@@ -1,5 +1,7 @@
 import hyper from "@macrostrat/hyper";
 
+
+
 import { useState, useEffect, useCallback, useRef, useLayoutEffect, useMemo } from "react";
 import { HotkeysProvider, InputGroup, Button } from "@blueprintjs/core";
 import { Spinner, ButtonGroup } from "@blueprintjs/core";
@@ -14,9 +16,10 @@ import {
 } from "@blueprintjs/table";
 import update from "immutability-helper";
 
-import { OperatorQueryParameter } from "~/pages/maps/@id/edit/table";
-import { buildURL, Filter } from "~/pages/maps/@id/edit/table-util";
+import { Filters, OperatorQueryParameter, TableUpdate, TableSelection, Selection } from "~/pages/maps/@id/edit/table";
+import { buildURL, Filter, isEmptyArray, submitChange, getTableUpdate } from "~/pages/maps/@id/edit/table-util";
 import TableMenu from "~/pages/maps/@id/edit/table-menu";
+import ProgressPopover from "~/pages/maps/@id/edit/components/progress-popover/progress-popover";
 
 import "./override.sass"
 import "@blueprintjs/table/lib/css/table.css";
@@ -28,21 +31,6 @@ const range = (start, stop, step = 1) =>
   Array(Math.ceil((stop - start) / step))
     .fill(start)
     .map((x, y) => x + y * step);
-
-interface Selection {
-  cols: number[];
-  rows: number[];
-}
-
-
-interface Filters {
-  [key: string]: Filter;
-}
-
-interface TableSelection {
-  columns: string[];
-  filters: Filters;
-}
 
 const FINAL_COLUMNS = [
   "source_id",
@@ -59,6 +47,7 @@ const FINAL_COLUMNS = [
 ]
 
 export default function EditTable({ url }) {
+
   // Table values
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(999999);
@@ -66,12 +55,12 @@ export default function EditTable({ url }) {
 
   const [data, setData] = useState<any[]>([]);
   const [dataToggle, setDataToggle] = useState<boolean>(false);
-  const [inputValue, setInputValue] = useState<string>("");
   const [error, setError] = useState<string | undefined>(undefined)
   const [filters, setFilters] = useState<Filters>({})
   const [group, setGroup] = useState<string | undefined>(undefined)
   const [tableSelection, setTableSelection] = useState<TableSelection>({columns: [], filter: new Filter("_pkid", "in", "")})
-
+  const [tableUpdates, setTableUpdates] = useState<TableUpdate[]>([])
+  const [updateProgress, setUpdateProgress] = useState<number | undefined>(undefined)
 
   // Sparse array to hold edited data
   const [editedData, setEditedData] = useState(new Array());
@@ -81,13 +70,14 @@ export default function EditTable({ url }) {
     return data.length ? Object.keys(data[0]).filter(x => x != "_pkid") : []
   }, [data])
 
-  const onChange = (key, row, text) => {
+  const onChange = (column, row, text) => {
+
     let rowSpec = {};
-    if (text == data[row][key] || (text == "" && data[row][key] == null)) {
-      rowSpec = { $unset: [key] };
+    if (text == data[row][column] || (text == "" && data[row][column] == null)) {
+      rowSpec = { $unset: [column] };
     } else {
       const rowOp = editedData[row] == null ? "$set" : "$merge";
-      rowSpec = { [rowOp]: { [key]: text } };
+      rowSpec = { [rowOp]: { [column]: text } };
     }
 
     const newData = update(editedData, {
@@ -133,15 +123,17 @@ export default function EditTable({ url }) {
   }
 
   const cellRenderer = useCallback(
-    ({ key, row, cell }) => {
+    ({ columnName, rowIndex, cell }) => {
       return h(
         EditableCell2,
         {
           onConfirm: (value) => {
-            onChange(key, row, value);
+            const tableUpdate = getTableUpdate(value, columnName, rowIndex, data, filters, group)
+            setTableUpdates([...tableUpdates, tableUpdate])
+            onChange(columnName, rowIndex, value);
           },
-          value: editedData[row]?.[key] ?? data[row][key],
-          intent: intentForCell(key, row),
+          value: editedData[rowIndex]?.[columnName] ?? data[rowIndex][columnName],
+          intent: intentForCell(columnName, rowIndex),
         },
         []
       );
@@ -203,13 +195,38 @@ export default function EditTable({ url }) {
     return h(Spinner)
   }
 
-  const columns = nonIdColumns.map((key) => {
+  const submitTableUpdates = async () => {
+
+    setUpdateProgress(0)
+
+    let index = 0
+    for(const update of tableUpdates){
+
+      try {
+        await submitChange(url, update)
+      } catch (e) {
+
+        setUpdateProgress(undefined)
+        return // If there is an error, stop submitting
+      }
+
+      index += 1
+      setUpdateProgress(index / tableUpdates.length)
+    }
+
+    setTableUpdates([])
+    setEditedData([])
+    setDataToggle(!dataToggle)
+    setUpdateProgress(undefined)
+  }
+
+  const columns = nonIdColumns.map((columnName) => {
     return h(Column, {
-      name: key,
-      className: FINAL_COLUMNS.includes(key) ? "final-column" : "",
+      name: columnName,
+      className: FINAL_COLUMNS.includes(columnName) ? "final-column" : "",
       columnHeaderCellRenderer: columnHeaderCellRenderer,
-      cellRenderer: (row, cell) => cellRenderer({"key": key, "row": row, "cell": cell}),
-      "key": key
+      cellRenderer: (rowIndex, cell) => cellRenderer({"columnName": columnName, "rowIndex": rowIndex, "cell": cell}),
+      "key": columnName
     })
   })
 
@@ -230,12 +247,12 @@ export default function EditTable({ url }) {
     let selection: TableSelection
     if(rows == undefined){
 
-      selection = {filter: new Filter("_pkid", "in", ""), columns: selectedColumnKeys}
+      selection = {filters: new Filter("_pkid", "in", ""), columns: selectedColumnKeys}
 
     } else {
       const dbIds = selectedRowIndices.map((row) => data[row]['_pkid'])
       const filter = new Filter("_pkid", "in", "(" + dbIds.join(",") + ")")
-      selection = {columns: selectedColumnKeys, "filter": filter}
+      selection = {columns: selectedColumnKeys, "filters": [filter]}
     }
 
     setTableSelection(selection)
@@ -251,50 +268,21 @@ export default function EditTable({ url }) {
       name = name.slice(0, 47) + "..."
     }
 
-
     return h(RowHeaderCell2, { "name": name }, []);
-  };
-
-  const submitChange = async (value: string) => {
-    for (const column of tableSelection.columns) {
-      let updateURL = new URL(url);
-
-      for (const filter of Object.values(tableSelection.filters)) {
-        updateURL.searchParams.append(...filter.to_array());
-      }
-
-      let patch = { [column]: value };
-      console.log(patch, JSON.stringify(patch));
-
-      let response = await fetch(updateURL, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(patch),
-      });
-
-      if (response.status != 204) {
-        console.error("Failed to update", response);
-      }
-    }
-    setDataToggle(!dataToggle);
   };
 
   return h(HotkeysProvider, {}, [
     h("div.table-container", {}, [
-      h.if(error)("div.warning", {}, [error]),
+      h.if(error != undefined)("div.warning", {}, [error]),
       h("div.input-form", {}, [
-        h(InputGroup, {
-          value: inputValue,
-          className: "update-input-group",
-          onChange: (e) => setInputValue(e.target.value),
-        }),
         h(ButtonGroup, [
           h(
             Button,
             {
-              onClick: () => setEditedData(new Array()),
+              onClick: () => {
+                setTableUpdates([]);
+                setEditedData([]);
+              },
               disabled: isEmptyArray(editedData),
             },
             ["Clear changes"]
@@ -303,7 +291,7 @@ export default function EditTable({ url }) {
             Button,
             {
               type: "submit",
-              onClick: () => submitChange(inputValue),
+              onClick: submitTableUpdates,
               disabled: isEmptyArray(editedData),
               intent: "success",
             },
@@ -323,35 +311,17 @@ export default function EditTable({ url }) {
           cellRendererDependencies: [editedData],
         },
         columns
+      ),
+      h.if(updateProgress != undefined)(
+        ProgressPopover,
+        {
+          text: "Submitting Changes",
+          value: updateProgress,
+          progressBarProps: { intent: "success" },
+        }
       )
     ]),
   ]);
 }
 
-function isEmptyArray(arr) {
-  return arr.length == 0 || arr.every((x) => x == null);
-}
 
-class TableDataManager {
-  /** Low-level manager for windowed loading of table data. This will eventually be how
-   * we work with the data, hopefully. */
-  baseURL: string;
-  totalCount: number;
-  chunkSize: number = 100;
-
-  init(baseURL: string) {
-    this.baseURL = baseURL;
-  }
-
-  async getData(page: number) {
-    let dataURL = new URL(this.baseURL);
-
-    dataURL.searchParams.append("page", page.toString());
-    dataURL.searchParams.append("page_size", this.chunkSize.toString());
-
-    let response = await fetch(dataURL);
-    let data = await response.json();
-
-    this.totalCount = Number.parseInt(response.headers.get("X-Total-Count"));
-  }
-}

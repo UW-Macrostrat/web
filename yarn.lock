@@ -3314,6 +3314,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@macrostrat-web/security@workspace:*, @macrostrat-web/security@workspace:packages/security":
+  version: 0.0.0-use.local
+  resolution: "@macrostrat-web/security@workspace:packages/security"
+  languageName: unknown
+  linkType: soft
+
 "@macrostrat/api-types@workspace:deps/web-components/packages/api-types":
   version: 0.0.0-use.local
   resolution: "@macrostrat/api-types@workspace:deps/web-components/packages/api-types"
@@ -3841,6 +3847,7 @@ __metadata:
     "@loadable/component": ^5.14.1
     "@macrostrat-web/data-sheet-test": "workspace:*"
     "@macrostrat-web/globe": "workspace:*"
+    "@macrostrat-web/security": "workspace:*"
     "@macrostrat/api-utils": "workspace:*"
     "@macrostrat/api-views": "workspace:*"
     "@macrostrat/column-components": "workspace:*"
