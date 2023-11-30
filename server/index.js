@@ -8,6 +8,11 @@ import express from 'express'
 import compression from 'compression'
 import { renderPage } from 'vite-plugin-ssr/server'
 import { root } from './root.js'
+
+// Auth imports
+import cookieParser from 'cookie-parser'
+import * as jose from 'jose'
+
 const isProduction = process.env.NODE_ENV === 'production'
 
 startServer()
@@ -16,6 +21,7 @@ async function startServer() {
   const app = express()
 
   app.use(compression())
+  app.use(cookieParser())
 
   // Vite integration
   if (isProduction) {
@@ -45,8 +51,25 @@ async function startServer() {
   // catch-all middleware superseding any middleware placed after it).
   app.get('*', async (req, res, next) => {
 
+    // Pull out the authorization cookie and decrypt it
+    let user = undefined
+
+    try {
+      const authHeader = req.cookies?.Authorization
+      const secret = new TextEncoder().encode(
+        process.env.SECRET_KEY
+      );
+      const jwt = authHeader.substring(7, authHeader.length)
+      user = (await jose.jwtVerify(jwt, secret)).payload
+
+
+    } catch (e) {
+      // I don't care if it fails, it just means the user isn't logged in
+    }
+
     const pageContextInit = {
-      urlOriginal: req.originalUrl
+      urlOriginal: req.originalUrl,
+      user: user
     }
 
     const pageContext = await renderPage(pageContextInit)

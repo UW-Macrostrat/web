@@ -3888,6 +3888,7 @@ __metadata:
     chroma-js: ^2.4.2
     classnames: ^2.2.6
     compression: ^1.7.4
+    cookie-parser: ^1.4.6
     cross-env: ^7.0.3
     d3-array: ^3.1.1
     d3-axis: ^3.0.0
@@ -3900,6 +3901,7 @@ __metadata:
     express: ^4.18.2
     history: ^5.3.0
     immutability-helper: ^3.1.1
+    jose: ^5.1.2
     mapbox-gl: ^2.15.0
     new-github-issue-url: ^1.0.0
     pbf: ^3.2.1
@@ -10918,10 +10920,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cookie-parser@npm:^1.4.6":
+  version: 1.4.6
+  resolution: "cookie-parser@npm:1.4.6"
+  dependencies:
+    cookie: 0.4.1
+    cookie-signature: 1.0.6
+  checksum: 1e5a63aa82e8eb4e02d2977c6902983dee87b02e87ec5ec43ac3cb1e72da354003716570cd5190c0ad9e8a454c9d3237f4ad6e2f16d0902205a96a1c72b77ba5
+  languageName: node
+  linkType: hard
+
 "cookie-signature@npm:1.0.6":
   version: 1.0.6
   resolution: "cookie-signature@npm:1.0.6"
   checksum: f4e1b0a98a27a0e6e66fd7ea4e4e9d8e038f624058371bf4499cfcd8f3980be9a121486995202ba3fca74fbed93a407d6d54d43a43f96fd28d0bd7a06761591a
+  languageName: node
+  linkType: hard
+
+"cookie@npm:0.4.1":
+  version: 0.4.1
+  resolution: "cookie@npm:0.4.1"
+  checksum: bd7c47f5d94ab70ccdfe8210cde7d725880d2fcda06d8e375afbdd82de0c8d3b73541996e9ce57d35f67f672c4ee6d60208adec06b3c5fc94cebb85196084cf8
   languageName: node
   linkType: hard
 
@@ -18332,6 +18351,13 @@ __metadata:
   bin:
     jest: bin/jest.js
   checksum: 96f1d69042b3c6dfc695f2a4e4b0db38af6fb78582ad1a02beaa57cfcd77cbd31567d7d865c1c85709b7c3e176eefa3b2035ffecd646005f15d8ef528eccf205
+  languageName: node
+  linkType: hard
+
+"jose@npm:^5.1.2":
+  version: 5.1.2
+  resolution: "jose@npm:5.1.2"
+  checksum: 035aff9c3413c2dbcb4fe240f14249e59c91225575063c1e27a0944e6b78a24b20b61f3b687ccff2012ff430b335c002f4af7e3599e284475b451752866041a0
   languageName: node
   linkType: hard
 
