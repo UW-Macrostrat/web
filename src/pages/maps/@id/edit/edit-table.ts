@@ -164,6 +164,9 @@ export default function EditTable({ url }) {
       setTotalCount(Number.parseInt(response.headers.get("X-Total-Count")));
     }
 
+    // Remove the progress bar on data reload
+    setUpdateProgress(undefined)
+
     return newData
   }
 
@@ -216,7 +219,6 @@ export default function EditTable({ url }) {
     setTableUpdates([])
     setEditedData([])
     setDataToggle(!dataToggle)
-    setUpdateProgress(undefined)
   }
 
   const columns = nonIdColumns.map((columnName) => {
