@@ -25,7 +25,7 @@ jobs:
           tags: |
             type=semver,pattern={{version}}
             type=raw,value=latest-itb
-            type=ref,enable=true,prefix=main-,suffix=-{{date 'YYYYMMDDHHmmss'}}
+            type=ref,enable=true,prefix=main-,suffix=-{{date 'YYYYMMDDHHmmss'}},event=tag
             type=raw,value=sha-{{sha}}
       -
         name: Set up Docker Buildx
