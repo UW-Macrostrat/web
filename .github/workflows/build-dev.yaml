@@ -25,6 +25,7 @@ jobs:
           tags: |
             type=semver,pattern={{version}}
             type=raw,value=latest-itb
+            type=raw,value={{tag}}-{{date 'YYYYMMDDHHmmss'}}
             type=raw,value=latest-itb-{{date 'YYYYMMDDHHmmss'}}
             type=raw,value=sha-{{sha}}
       -
