@@ -7,15 +7,13 @@
   "scripts": {
     "bundle": "vite build",
     "clean": "rm -rf dist/*",
-    "deploy:dev": "scripts/deploy-docker",
-    "deploy:strata": "scripts/deploy-strata",
-    "dev:webpack": "webpack serve",
     "bootstrap": "yarn",
     "dev": "yarn run server:dev",
     "build": "vite build",
     "server": "node --env-file=.env ./server/index.js",
     "server:dev": "yarn run server",
-    "server:prod": "cross-env NODE_ENV=production npm run server"
+    "server:prod": "cross-env NODE_ENV=production npm run server",
+    "start": "yarn run build && yarn run server:prod"
   },
   "workspaces": [
     "deps/web-components/packages/*",

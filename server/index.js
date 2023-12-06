@@ -29,6 +29,8 @@ async function startServer() {
     // (In dev, Vite's middleware serves our static assets.)
     const sirv = (await import("sirv")).default;
     app.use(sirv(`${root}/dist/client`));
+
+    app.use("/cesium", sirv(`${root}/dist/cesium`));
   } else {
     // We instantiate Vite's development server and integrate its middleware to our server.
     // ⚠️ We instantiate it only in development. (It isn't needed in production and it
