@@ -56,6 +56,7 @@ const config: UserConfig = {
     //rewriteAll(),
     ssr(),
     cesium({
+      rebuildCesium: true,
       cesiumBuildPath: cesiumBuildPath,
       cesiumBuildRootPath: cesiumRoot,
     }),

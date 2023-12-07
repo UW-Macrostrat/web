@@ -42,7 +42,6 @@ async function render(pageContext: PageContextServer) {
           href="https://fonts.googleapis.com/css?family=Montserrat:400,700|Source+Sans+Pro"
           rel="stylesheet"
         />
-        <script src="/cesium/Cesium.js"></script>
         <meta name="description" content="${desc}" />
         <title>${title}</title>
       </head>
