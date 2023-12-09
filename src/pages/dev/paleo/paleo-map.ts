@@ -113,9 +113,19 @@ function usePaleogeographyState(
   return [state, dispatch];
 }
 
+const baseTilesetURL =
+  SETTINGS.burwellTileDomain +
+  "/carto-slim-rotated/{z}/{x}/{y}?model_id=6&t_step=0";
+
 const common = {
   version: 8,
-  sources: {},
+  sources: {
+    burwell: {
+      type: "vector",
+      tiles: [baseTilesetURL],
+      tileSize: 512,
+    },
+  },
   glyphs: "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
   sprite: "mapbox://sprites/mapbox/light-v10",
 };
@@ -137,8 +147,9 @@ const darkStyle = {
       source: "burwell",
       "source-layer": "plates",
       paint: {
+        //"fill-color": "color",
         "fill-color": "hsl(55, 1%, 20%)",
-        //"fill-opacity": 0.8,
+        "fill-opacity": 0.8,
       },
     },
   ],
@@ -160,8 +171,9 @@ const lightStyle = {
       source: "burwell",
       "source-layer": "plates",
       paint: {
+        //"fill-color": "color",
         "fill-color": "hsl(55, 11%, 96%)",
-        //"fill-opacity": 0.8,
+        "fill-opacity": 0.8,
       },
     },
   ],
