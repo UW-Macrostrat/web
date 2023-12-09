@@ -1,9 +1,9 @@
 import h from "@macrostrat/hyper";
-import { MacrostratVectorTileset } from "~/dev/map-layers";
+import { MacrostratVectorTileset } from "~/_legacy/map-dev/map-layers";
 import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
 import mapboxgl from "mapbox-gl";
 import { useCallback, useMemo, useReducer } from "react";
-import { SETTINGS } from "~/map-interface/settings";
+import { SETTINGS } from "~/settings";
 import { Switch, HTMLSelect, Spinner } from "@blueprintjs/core";
 import {
   Spacer,
@@ -35,7 +35,7 @@ import "~/styles/global.styl";
 import {
   applyMapPositionToHash,
   getMapPositionForHash,
-} from "~/map-interface/app-state/reducers/hash-string";
+} from "~/pages/map/map-interface/app-state/reducers/hash-string";
 
 // Import other components
 

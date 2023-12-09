@@ -25,7 +25,7 @@ import Map from "./map-comparison";
 import {
   getMapPositionForHash,
   applyMapPositionToHash,
-} from "~/map-interface/app-state/reducers/hash-string";
+} from "/Users/Daven/Projects/Macrostrat/Software/web/src/pages/map/map-interface/app-state/reducers/hash-string";
 
 function VisControl({ show, setShown, name }) {
   const className = show ? "active" : "";

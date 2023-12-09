@@ -28,7 +28,7 @@ import {
 } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
 import { useCallback, useEffect, useState } from "react";
-import { SETTINGS } from "~/map-interface/settings";
+import { SETTINGS } from "~/settings";
 
 export function WeaverPage() {
   return h(
