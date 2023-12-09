@@ -14,7 +14,7 @@ import {
   mergeStyles,
   setMapPosition,
 } from "@macrostrat/mapbox-utils";
-import { inDarkMode } from "@macrostrat/ui-components";
+import { useInDarkMode } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -61,7 +61,7 @@ export default function MainMapView(props) {
   } = useAppState((state) => state.core);
 
   let mapRef = useMapRef();
-  const isDarkMode = inDarkMode();
+  const isDarkMode = useInDarkMode();
 
   const baseMapURL = getBaseMapStyle(mapLayers, isDarkMode);
 

@@ -26,7 +26,7 @@ import styles from "./main.module.styl";
 import loadable from "@loadable/component";
 import UsageText from "../usage.mdx";
 import { Routes, Route } from "react-router-dom";
-import Changelog from "~/changelog.mdx";
+import Changelog from "../../changelog.mdx";
 import { useMatch, useLocation } from "react-router";
 import { useTransition } from "transition-hook";
 import { useCurrentPage } from "../app-state/nav-hooks";

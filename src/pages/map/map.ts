@@ -3,8 +3,8 @@ import { ReduxRouter } from "@lagunovsky/redux-react-router";
 import h from "@macrostrat/hyper";
 
 import "~/styles/global.styl";
-import "../../styles/searchbar.styl";
-import "../../styles/ui-components.styl";
+import "./searchbar.styl";
+import "./ui-components.styl";
 
 import { Provider } from "react-redux";
 import { createStore, compose, applyMiddleware } from "redux";
