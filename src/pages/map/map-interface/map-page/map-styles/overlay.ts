@@ -1,4 +1,4 @@
-import { SETTINGS } from "../../../../../settings";
+import { SETTINGS } from "~/settings";
 
 export const overlayStyle = {
   version: 8,
