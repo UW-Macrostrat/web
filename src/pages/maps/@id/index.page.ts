@@ -1,5 +1,5 @@
 import { PageContextBuiltInServer } from "vike/types";
-import { SETTINGS } from "~/pages/map/map-interface/settings";
+import { SETTINGS } from "~/settings";
 import h from "@macrostrat/hyper";
 import { ClientOnly } from "~/renderer/client-only";
 const MapInterface = () => import("./map-interface");

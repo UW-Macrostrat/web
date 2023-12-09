@@ -2,7 +2,7 @@ import { Suspense, useEffect, useCallback, useRef } from "react";
 // Import other components
 import hyper from "@macrostrat/hyper";
 import Searchbar from "../components/navbar";
-import { Spinner, Button, Switch } from "@blueprintjs/core";
+import { Spinner } from "@blueprintjs/core";
 import { useSelector } from "react-redux";
 import loadable from "@loadable/component";
 import { useAppState, useAppActions } from "../app-state";
@@ -12,8 +12,8 @@ import { useContextPanelOpen, useContextClass } from "../app-state";
 import { MapAreaContainer } from "@macrostrat/map-interface";
 import { Routes, Route, useParams } from "react-router-dom";
 import classNames from "classnames";
-import { MenuPage, PanelCard } from "./menu";
-import { mapPagePrefix } from "../settings";
+import { MenuPage } from "./menu";
+import { mapPagePrefix } from "~/settings";
 import MapContainer from "./map-view";
 import DevIndex from "../../../../dev";
 

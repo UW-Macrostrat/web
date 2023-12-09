@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import styles from "./about.module.styl";
 import newGithubIssueUrl from "new-github-issue-url";
 import { AnchorButton } from "@blueprintjs/core";
-import { mapPagePrefix } from "~/pages/map/map-interface/settings";
+import { mapPagePrefix } from "~/settings";
 
 const h = hyper.styled(styles);
 

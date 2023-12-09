@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { SETTINGS } from "~/pages/map/map-interface/settings";
+import { SETTINGS } from "~/settings";
 
 const apiAddress = SETTINGS.apiDomain + "/api/v2/units";
 

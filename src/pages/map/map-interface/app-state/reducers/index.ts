@@ -9,7 +9,7 @@ import { hashStringReducer } from "./hash-string";
 import { matchPath } from "react-router";
 import { performanceReducer, PerformanceState } from "../../performance/core";
 
-import { mapPagePrefix } from "~/pages/map/map-interface/settings";
+import { mapPagePrefix } from "~/settings";
 export const browserHistory = createBrowserHistory();
 import { MenuState, AppState, AppAction, MenuAction } from "./types";
 

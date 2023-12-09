@@ -3,7 +3,7 @@ import { MacrostratVectorTileset } from "~/dev/map-layers";
 import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
 import mapboxgl from "mapbox-gl";
 import { useCallback, useMemo, useReducer } from "react";
-import { SETTINGS } from "~/pages/map/map-interface/settings";
+import { SETTINGS } from "~/settings";
 import { Switch, HTMLSelect, Spinner } from "@blueprintjs/core";
 import {
   Spacer,

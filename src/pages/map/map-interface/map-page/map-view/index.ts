@@ -34,7 +34,7 @@ import {
   HoveredFeatureManager,
   MacrostratLayerManager,
 } from "./map";
-import { SETTINGS } from "~/pages/map/map-interface/settings";
+import { SETTINGS } from "~/settings";
 
 const h = hyper.styled(styles);
 

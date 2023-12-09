@@ -11,10 +11,7 @@ import { AppAction, AppState } from "../reducers";
 import axios from "axios";
 import { runFilter } from "./filters";
 import { push } from "@lagunovsky/redux-react-router";
-import {
-  routerBasename,
-  mapPagePrefix,
-} from "~/pages/map/map-interface/settings";
+import { routerBasename, mapPagePrefix } from "~/settings";
 
 import { isDetailPanelRoute } from "../nav-hooks";
 import { MenuPage, setInfoMarkerPosition } from "../reducers";

@@ -17,7 +17,7 @@ import {
 } from "@macrostrat/mapbox-react";
 import classNames from "classnames";
 import { mapViewInfo } from "@macrostrat/mapbox-utils";
-import { SETTINGS } from "../../settings";
+import { SETTINGS } from "../../../../../settings";
 import mapboxgl from "mapbox-gl";
 import { LinkButton } from "~/pages/map/map-interface/components/buttons";
 
