@@ -6,7 +6,7 @@
   "dependencies": {
     "@blueprintjs/core": "^4",
     "@blueprintjs/table": "^4",
-    "@macrostrat/data-sheet": "^1.0.0",
+    "@macrostrat/data-sheet": "workspace:*",
     "@macrostrat/hyper": "^2.2.1",
     "@macrostrat/ui-components": "workspace:^3.0.0",
     "chroma-js": "^2.4.2",

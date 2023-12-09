@@ -3162,7 +3162,7 @@ __metadata:
   dependencies:
     "@blueprintjs/core": ^4
     "@blueprintjs/table": ^4
-    "@macrostrat/data-sheet": ^1.0.0
+    "@macrostrat/data-sheet": "workspace:*"
     "@macrostrat/hyper": ^2.2.1
     "@macrostrat/ui-components": "workspace:^3.0.0"
     chroma-js: ^2.4.2
@@ -3366,7 +3366,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@macrostrat/data-sheet@^1.0.0, @macrostrat/data-sheet@workspace:deps/web-components/packages/data-sheet":
+"@macrostrat/data-sheet@workspace:*, @macrostrat/data-sheet@workspace:deps/web-components/packages/data-sheet":
   version: 0.0.0-use.local
   resolution: "@macrostrat/data-sheet@workspace:deps/web-components/packages/data-sheet"
   dependencies:
