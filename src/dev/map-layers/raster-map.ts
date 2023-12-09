@@ -2,10 +2,13 @@ import { FormGroup, Label, Slider, Spinner } from "@blueprintjs/core";
 import { useDarkMode } from "@macrostrat/ui-components";
 import { useEffect, useState, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { useAppActions, useAppState } from "~/map-interface/app-state";
-import { MapAreaContainer } from "~/map-interface/map-page";
-import { PanelCard } from "~/map-interface/map-page/menu";
-import { getBaseMapStyle } from "~/map-interface/map-page/map-view";
+import {
+  useAppActions,
+  useAppState,
+} from "~/pages/map/map-interface/app-state";
+import { MapAreaContainer } from "~/pages/map/map-interface/map-page";
+import { PanelCard } from "~/pages/map/map-interface/map-page/menu";
+import { getBaseMapStyle } from "~/pages/map/map-interface/map-page/map-view";
 import { MacrostratRasterTileset, buildRasterStyle, h } from ".";
 import { FloatingNavbar, MapLoadingButton } from "@macrostrat/map-interface";
 import { useMapStyle } from "./utils";

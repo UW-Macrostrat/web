@@ -12,7 +12,7 @@ import reducerStack, {
   Action,
   browserHistory,
   AppState,
-} from "../../map-interface/app-state";
+} from "./map-interface/app-state";
 import { createRouterMiddleware } from "@lagunovsky/redux-react-router";
 import { onDemand } from "../../_utils";
 
@@ -28,7 +28,7 @@ let store = createStore<AppState, Action, any, any>(
 //const _ColumnPage = loadable(import("./columns"));
 //const ColumnPage = () => h(Suspense, { fallback: h(Spinner) }, h(_ColumnPage));
 
-import MapPage from "../../map-interface/map-page";
+import MapPage from "./map-interface/map-page";
 
 const Sources = onDemand(() => import("~/burwell-sources"));
 const DevMapPage = onDemand(() => import("../../dev"));

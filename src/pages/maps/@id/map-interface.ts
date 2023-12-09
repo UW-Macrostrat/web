@@ -12,7 +12,7 @@ import {
   Collapse,
   Switch,
 } from "@blueprintjs/core";
-import { SETTINGS } from "~/map-interface/settings";
+import { SETTINGS } from "~/pages/map/map-interface/settings";
 import { useEffect } from "react";
 import styles from "./main.module.sass";
 import { useMemo, useState } from "react";
