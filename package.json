@@ -121,9 +121,9 @@
     "ts-node": "^10.9.1",
     "use-react-router-breadcrumbs": "^3.2.1",
     "use-resize-observer": "^9.1.0",
+    "vike": "^0.4.150",
     "vite": "^4.4.9",
-    "vite-plugin-cesium": "^1.2.22",
-    "vite-plugin-ssr": "^0.4.139"
+    "vite-plugin-cesium": "^1.2.22"
   },
   "resolutions": {
     "react": "^18.2.0",
