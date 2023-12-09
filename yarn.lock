@@ -1835,17 +1835,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@brillout/json-serializer@npm:^0.5.6":
-  version: 0.5.6
-  resolution: "@brillout/json-serializer@npm:0.5.6"
-  checksum: 5b32a8aa70f9b079e3ee517bc2c2a1e19ad8e91bbae7c8d5224da15ad2c1d0a51e8103586a4283688cc63baaaea42d1a47018a71306bceefa7ee16fba874baf3
+"@brillout/json-serializer@npm:^0.5.8":
+  version: 0.5.8
+  resolution: "@brillout/json-serializer@npm:0.5.8"
+  checksum: 7d737a8a20c04c27a41ecf0c5f8bd60031b7f58d80f76f7bf9719f237b2bcd8dafb4495771638a7546cdadac08c629c3e08be801ea0dd14b70ecf9213e6400fa
   languageName: node
   linkType: hard
 
-"@brillout/picocolors@npm:^1.0.9":
-  version: 1.0.9
-  resolution: "@brillout/picocolors@npm:1.0.9"
-  checksum: 157b3ec0a965244acba0d0c96abb0c7343f115408eddb3563545f2bf5d2a8b3b38d43908af3347b612c908fac50b1707f52296a9c3eaef0a004cd6883aeeb468
+"@brillout/picocolors@npm:^1.0.10":
+  version: 1.0.10
+  resolution: "@brillout/picocolors@npm:1.0.10"
+  checksum: e14436613d6c4c6f3f6921b5244b13f5bd21b69cb8645f4c454961ceba41bc666613ee11d03534000cdfc8da95eb09efb1f90bf8a941f9e37f362359f8b2b4c3
   languageName: node
   linkType: hard
 
@@ -1856,12 +1856,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@brillout/vite-plugin-import-build@npm:^0.2.18":
-  version: 0.2.18
-  resolution: "@brillout/vite-plugin-import-build@npm:0.2.18"
+"@brillout/vite-plugin-import-build@npm:^0.2.20":
+  version: 0.2.20
+  resolution: "@brillout/vite-plugin-import-build@npm:0.2.20"
   dependencies:
     "@brillout/import": ^0.2.3
-  checksum: 3dd2bb19912b3075d8d96f4a04518fe3adbc15f14aa46b27776706203400ed44bd1b4316d95cc9e21636211c747cbf8c6a4590416f7a53593132fed039584f98
+  checksum: 761d9c8e370f385bc28164091e583a31e9f43437451e186a5ec9c244399988846db4fa8ca7e6582c0f1b5c09461a2840f88d979e82636e030b421e6ca6d1582d
   languageName: node
   linkType: hard
 
@@ -3792,10 +3792,10 @@ __metadata:
     typescript: ^5.1.6
     use-react-router-breadcrumbs: ^3.2.1
     use-resize-observer: ^9.1.0
+    vike: ^0.4.150
     vite: ^4.4.9
     vite-plugin-cesium: ^1.2.22
     vite-plugin-rewrite-all: ^1.0.1
-    vite-plugin-ssr: ^0.4.139
   dependenciesMeta:
     "@esbuild-kit/esm-loader@2.5.5":
       unplugged: true
@@ -29527,6 +29527,34 @@ __metadata:
   languageName: node
   linkType: hard
 
+"vike@npm:^0.4.150":
+  version: 0.4.150
+  resolution: "vike@npm:0.4.150"
+  dependencies:
+    "@brillout/import": 0.2.3
+    "@brillout/json-serializer": ^0.5.8
+    "@brillout/picocolors": ^1.0.10
+    "@brillout/require-shim": ^0.1.2
+    "@brillout/vite-plugin-import-build": ^0.2.20
+    acorn: ^8.8.2
+    cac: ^6.7.14
+    es-module-lexer: ^1.3.0
+    esbuild: ^0.17.18
+    fast-glob: ^3.2.12
+    sirv: ^2.0.2
+    source-map-support: ^0.5.21
+  peerDependencies:
+    react-streaming: ">=0.3.5"
+    vite: ">=3.1.0"
+  peerDependenciesMeta:
+    react-streaming:
+      optional: true
+  bin:
+    vike: node/cli/bin-entry.js
+  checksum: 3c925b3339286ac6bb2e89fa4f066350b407efb7f128f2e6851fc8b2ce7975e369b46dc4821092fe5c1811656aac33656c6cbda511dfe45a72067bf73a4b3ada
+  languageName: node
+  linkType: hard
+
 "vite-plugin-cesium@npm:^1.2.22":
   version: 1.2.22
   resolution: "vite-plugin-cesium@npm:1.2.22"
@@ -29549,34 +29577,6 @@ __metadata:
   peerDependencies:
     vite: ^2.0.0 || ^3.0.0 || ^4.0.0
   checksum: 9a22e51e80fc14d58d32556208c26740baf3f02eae2d0a5f356ddc1ea478bd2f56803cc17e77261ffad33d27301017ba03736143446685c03bb0f076eef2fdd0
-  languageName: node
-  linkType: hard
-
-"vite-plugin-ssr@npm:^0.4.139":
-  version: 0.4.142
-  resolution: "vite-plugin-ssr@npm:0.4.142"
-  dependencies:
-    "@brillout/import": 0.2.3
-    "@brillout/json-serializer": ^0.5.6
-    "@brillout/picocolors": ^1.0.9
-    "@brillout/require-shim": ^0.1.2
-    "@brillout/vite-plugin-import-build": ^0.2.18
-    acorn: ^8.8.2
-    cac: ^6.7.14
-    es-module-lexer: ^1.3.0
-    esbuild: ^0.17.18
-    fast-glob: ^3.2.12
-    sirv: ^2.0.2
-    source-map-support: ^0.5.21
-  peerDependencies:
-    react-streaming: ">=0.3.5"
-    vite: ">=3.1.0"
-  peerDependenciesMeta:
-    react-streaming:
-      optional: true
-  bin:
-    vite-plugin-ssr: node/cli/bin-entry.js
-  checksum: b89f194747da06554982fbd79db04b6962e8bfbfc9f11656948651917f52b1a5d0c16079cf1ac6d077684c3396cd9b1026529215df2142dc691b18e911cc8050
   languageName: node
   linkType: hard
 
