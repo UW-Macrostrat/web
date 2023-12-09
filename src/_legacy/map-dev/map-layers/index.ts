@@ -13,11 +13,11 @@ import mapboxgl from "mapbox-gl";
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { SETTINGS } from "~/settings";
 import { FloatingNavbar } from "@macrostrat/map-interface";
-import { useAppActions } from "../../pages/map/map-interface/app-state";
+import { useAppActions } from "../../../pages/map/map-interface/app-state";
 import { LocationPanel } from "@macrostrat/map-interface";
-import { MapAreaContainer } from "../../pages/map/map-interface/map-page";
-import { PanelCard } from "../../pages/map/map-interface/map-page/menu";
-import { getBaseMapStyle } from "../../pages/map/map-interface/map-page/map-view";
+import { MapAreaContainer } from "../../../pages/map/map-interface/map-page";
+import { PanelCard } from "../../../pages/map/map-interface/map-page/menu";
+import { getBaseMapStyle } from "../../../pages/map/map-interface/map-page/map-view";
 import { MapLoadingButton } from "@macrostrat/map-interface";
 import {
   toggleLineSymbols,

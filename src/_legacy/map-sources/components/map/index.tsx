@@ -3,7 +3,7 @@ import {
   useBurwellActions,
   useBurwellState,
   flyToData,
-} from "~/burwell-sources/app-state";
+} from "~/_legacy/map-sources/app-state";
 import { initializeMap } from "./initialize-map";
 import { mapSources } from "./map-sources";
 import h from "@macrostrat/hyper";

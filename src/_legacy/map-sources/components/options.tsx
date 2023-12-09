@@ -10,7 +10,7 @@ import {
 import {
   useBurwellActions,
   useBurwellState,
-} from "~/burwell-sources/app-state";
+} from "~/_legacy/map-sources/app-state";
 import h from "@macrostrat/hyper";
 
 const capitalizeWord = (word) => {

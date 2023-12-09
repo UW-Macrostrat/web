@@ -15,7 +15,6 @@ import classNames from "classnames";
 import { MenuPage } from "./menu";
 import { mapPagePrefix } from "~/settings";
 import MapContainer from "./map-view";
-import DevIndex from "../../../../dev";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));
@@ -107,7 +106,6 @@ function MapPageRoutes() {
         })
       )
     ),
-    h(Route, { path: mapPagePrefix + "/dev/*", element: h(DevIndex) }),
     h(Route, { path: "*", element: h(MapPage) }),
   ]);
 }

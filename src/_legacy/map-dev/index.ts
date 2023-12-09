@@ -11,7 +11,7 @@ import {
 import { loadableElement } from "~/_utils";
 import styles from "./main.module.styl";
 import { MapColorsInspector } from "./color-schemes";
-import { WeaverPage } from "../weaver";
+import { WeaverPage } from "../../weaver";
 const h = hyper.styled(styles);
 
 export default function DevIndex() {

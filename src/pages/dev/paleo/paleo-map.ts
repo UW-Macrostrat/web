@@ -1,5 +1,5 @@
 import h from "@macrostrat/hyper";
-import { MacrostratVectorTileset } from "~/dev/map-layers";
+import { MacrostratVectorTileset } from "~/_legacy/map-dev/map-layers";
 import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
 import mapboxgl from "mapbox-gl";
 import { useCallback, useMemo, useReducer } from "react";

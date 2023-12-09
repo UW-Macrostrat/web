@@ -11,6 +11,7 @@ import { createStore, compose, applyMiddleware } from "redux";
 import reducerStack, { Action, browserHistory, AppState } from "./app-state";
 import { createRouterMiddleware } from "@lagunovsky/redux-react-router";
 import { onDemand } from "~/_utils";
+import { mapPagePrefix } from "~/settings";
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
@@ -23,8 +24,8 @@ let store = createStore<AppState, Action, any, any>(
 
 import MapPage from "./map-page";
 
-const Sources = onDemand(() => import("~/burwell-sources"));
-const DevMapPage = onDemand(() => import("../../../dev"));
+const Sources = onDemand(() => import("~/_legacy/map-sources"));
+const DevMapPage = onDemand(() => import("~/_legacy/map-dev"));
 
 export default function MapApp({ routerBasename }) {
   return h(
@@ -35,11 +36,8 @@ export default function MapApp({ routerBasename }) {
       { basename: routerBasename, store, history: browserHistory },
       [
         h(Routes, [
-          h(Route, { path: "/sources", element: h(Sources) }),
-          h(Route, {
-            path: "/dev/*",
-            element: h(DevMapPage),
-          }),
+          h(Route, { path: mapPagePrefix + "/dev/*", element: h(DevMapPage) }),
+          h(Route, { path: mapPagePrefix + "/sources", element: h(Sources) }),
           h(Route, { path: "*", element: h(MapPage) }),
         ]),
       ]

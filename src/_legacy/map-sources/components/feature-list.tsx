@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { useBurwellActions } from "~/burwell-sources/app-state";
+import { useBurwellActions } from "~/_legacy/map-sources/app-state";
 import { ExpansionPanel } from "@macrostrat/map-interface";
 import h from "@macrostrat/hyper";
 import { settings, zoomMap } from "../app-state/utils";
