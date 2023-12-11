@@ -27,7 +27,7 @@ import {
   applyTableUpdates
 } from "~/pages/maps/@id/edit/table-util";
 import TableMenu from "~/pages/maps/@id/edit/table-menu";
-import IntervalSelection from "./components/cell/interval-selection";
+import IntervalSelection from "../components/cell/interval-selection";
 import ProgressPopover from "~/pages/maps/@id/edit/components/progress-popover/progress-popover";
 
 import "./override.sass"
@@ -69,7 +69,7 @@ interface TableState {
 export default function TableInterface({ url }: EditTableProps) {
 
   // Data State
-  const [dataParameters, setDataParameters] = useState<DataParameters>({select: {page: "0", pageSize: "999999"}, filter: {}})
+  const [dataParameters, setDataParameters] = useState<DataParameters>({select: {page: "0", pageSize: "999999"}})
   const [data, setData] = useState<any[]>([])
   const [dataToggle, setDataToggle] = useState<boolean>(false);
 
@@ -84,8 +84,6 @@ export default function TableInterface({ url }: EditTableProps) {
   const nonIdColumnNames = useMemo(() => {
     return data.length ? Object.keys(data[0]).filter(x => x != "_pkid") : []
   }, [data])
-
-  console.log(tableUpdates)
 
 
   let getData = async () => {
@@ -150,13 +148,7 @@ export default function TableInterface({ url }: EditTableProps) {
       setDataParameters({...dataParameters, filter: {...dataParameters.filter, [columnName]: columnFilter}})
     }
 
-
-    let filter = undefined
-    if(dataParameters.filter != undefined && dataParameters.filter[columnName] != undefined){
-      filter = dataParameters.filter[columnName]
-    } else {
-      filter = new Filter(columnName, undefined, "")
-    }
+    const filter = dataParameters.filter[columnName]
 
     const setGroup = (group: string | undefined) => {
       setDataParameters({...dataParameters, group: group})
@@ -172,52 +164,35 @@ export default function TableInterface({ url }: EditTableProps) {
   }
 
 
-  const defaultColumnConfig = nonIdColumnNames.reduce((prev, columnName, index) => {
-    return {
-      ...prev,
-      [columnName]: h(Column, {
-        name: columnName,
-        className: FINAL_COLUMNS.includes(columnName) ? "final-column" : "",
-        columnHeaderCellRenderer: columnHeaderCellRenderer,
-        cellRenderer: (rowIndex) => h(EditableCell, {
-          onConfirm: (value) => {
-            const tableUpdate = getTableUpdate(url, value, columnName, rowIndex, data, dataParameters)
-            setTableUpdates([...tableUpdates, tableUpdate])
-          },
-          value: applyTableUpdates(data[rowIndex], columnName, tableUpdates)
-        }),
-        "key": columnName
-      })
-    }
-  }, {})
-
-  console.log(defaultColumnConfig)
+  const defaultColumnConfig = Object.entries(nonIdColumnNames).map(([columnName, value], index) => {
+    return h(Column, {
+      name: columnName,
+      className: FINAL_COLUMNS.includes(columnName) ? "final-column" : "",
+      columnHeaderCellRenderer: columnHeaderCellRenderer,
+      cellRenderer: (rowIndex) => h(EditableCell, {
+        onConfirm: (value) => {
+          const tableUpdate = getTableUpdate(url, value, columnName, rowIndex, data, dataParameters)
+          setTableUpdates([...tableUpdates, tableUpdate])
+        },
+        value: applyTableUpdates(data[rowIndex], columnName, tableUpdates)
+      }),
+      "key": columnName
+    })
+  })
 
   const columnConfig = {
     ...defaultColumnConfig,
     "t_interval": h(Column, {
-      ...defaultColumnConfig["t_interval"].props,
+      ...defaultColumnConfig["t_interval"],
       cellRenderer: (rowIndex) => h(IntervalSelection, {
         onConfirm: (value) => {
           const tableUpdate = getTableUpdate(url, value, "t_interval", rowIndex, data, dataParameters)
           setTableUpdates([...tableUpdates, tableUpdate])
         },
-        value: applyTableUpdates(data[rowIndex], "t_interval", tableUpdates)
-      })
-    }),
-    "b_interval": h(Column, {
-      ...defaultColumnConfig["b_interval"].props,
-      cellRenderer: (rowIndex) => h(IntervalSelection, {
-        onConfirm: (value) => {
-          const tableUpdate = getTableUpdate(url, value, "b_interval", rowIndex, data, dataParameters)
-          setTableUpdates([...tableUpdates, tableUpdate])
-        },
-        value: applyTableUpdates(data[rowIndex], "b_interval", tableUpdates)
+        value: data[rowIndex]["t_interval"]
       })
     })
   }
-
-
 
   const rowHeaderCellRenderer = (rowIndex: number) => {
     const headerKey = dataParameters?.group ? dataParameters?.group : "_pkid"
@@ -264,11 +239,13 @@ export default function TableInterface({ url }: EditTableProps) {
         {
           selectionModes: dataParameters?.group ? RegionCardinality.CELLS : SelectionModes.COLUMNS_AND_CELLS,
           rowHeaderCellRenderer: rowHeaderCellRenderer,
+          onSelection: (selections: Selection[]) =>
+            getSelectionValues(selections),
           numRows: data.length,
           // Dumb hacks to try to get the table to rerender on changes
-          cellRendererDependencies: [data, tableUpdates],
+          cellRendererDependencies: [data],
         },
-        Object.values(columnConfig)
+        columnConfig
       ),
       h.if(updateProgress != undefined)(
         ProgressPopover,
@@ -281,5 +258,3 @@ export default function TableInterface({ url }: EditTableProps) {
     ]),
   ]);
 }
-
-

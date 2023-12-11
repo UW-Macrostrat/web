@@ -1,4 +1,4 @@
-import { ColumnOperators, Filters, TableSelection, TableUpdate } from "./table";
+import { ColumnOperators, Filters, TableSelection, TableUpdate, DataParameters } from "./table";
 import {secureFetch} from "@macrostrat-web/security";
 
 
@@ -22,6 +22,36 @@ export class Filter {
 		}
 	}
 
+	get urlValue() {
+		return this.operator + "." + this.formattedValue
+	}
+
+	passes = (data: {[key: string] : string}) => {
+		const filterValue = data[this.column_name]
+		switch (this.operator) {
+			case "eq":
+				return filterValue == this.value
+			case "lt":
+				return filterValue < this.value
+			case "le":
+				return filterValue <= this.value
+			case "gt":
+				return filterValue > this.value
+			case "ge":
+				return filterValue >= this.value
+			case "ne":
+				return filterValue != this.value
+			case "like":
+				return filterValue.includes(this.value)
+			case "in":
+				return this.value.includes(filterValue)
+			case "is":
+				return filterValue == this.value
+			default:
+				return false
+		}
+	}
+
 	is_valid = () => {
 		if(this.operator == undefined || this.value == ""){
 			return false
@@ -35,81 +65,107 @@ export class Filter {
 
 }
 
-export function buildURL(baseURL: string, filters: Filter[], group: string | undefined){
-	let updateURL = new URL(baseURL)
 
-	for(const filter of filters){
+export function buildURL(baseURL: string, dataParameters: DataParameters){
+	let url = new URL(baseURL)
 
-		if(filter.is_valid()) {
-			const [key, value] = filter.to_array()
-			updateURL.searchParams.append(key, value)
+	// Order by ID if no group is specified
+	if(dataParameters?.group == undefined){
+		url.searchParams.append("_pkid", "order_by" )
+
+	// Otherwise order by group and group by group
+	} else {
+		url.searchParams.append(dataParameters.group, "order_by" )
+		url.searchParams.append(dataParameters.group, "group_by")
+	}
+
+	// Add the page and page size
+	url.searchParams.append("page", dataParameters.select.page);
+	url.searchParams.append("page_size", dataParameters.select.pageSize);
+
+	// Add the rest of the filters
+	if(dataParameters?.filter != undefined){
+		for(const filter of Object.values(dataParameters?.filter)){
+			const [columnName, filterValue] = filter.to_array()
+			url.searchParams.append(columnName, filterValue);
 		}
 	}
 
-	if(group != undefined){
-		updateURL.searchParams.append(group, "group_by")
+	return url
+}
+
+export const applyTableUpdates = (data: {[key: string]: string}, columnName: string, updates: TableUpdate[]) : string => {
+
+	let value = data[columnName]
+
+	for(const update of updates) {
+		value = update.applyToCell(value, data, columnName)
 	}
 
-	return updateURL
+	return value
 }
 
 /**
- * Builds a table update from the current table state
+ * Wraps around submitChange to filter based on the group
  */
 export const getTableUpdate = (
+	url: string,
 	value: string,
 	columnName: string,
 	rowIndex: number,
 	data: any[],
-	filters: Filters,
-	group: string | undefined
+	dataParameters: DataParameters
 ): TableUpdate => {
 
-	filters = {...filters}
-	if( group != undefined){
-		filters[group] = new Filter(group, "eq", data[rowIndex][group])
+	dataParameters = structuredClone(dataParameters)
+	if( dataParameters?.group != undefined){
+		dataParameters.filter[dataParameters?.group] = new Filter(dataParameters?.group, "eq", data[rowIndex][dataParameters?.group])
 	} else {
-		filters["_pkid"] = new Filter("_pkid", "eq", data[rowIndex]["_pkid"])
+		dataParameters.filter["_pkid"] = new Filter("_pkid", "eq", data[rowIndex]["_pkid"])
 	}
 
-	const selection: TableSelection = {
-		columns: [columnName],
-		filters: filters
+	const execute = async () => submitChange(url, value, [columnName], dataParameters.filter)
+
+	const apply = (currentValue: string, row: {[key: string]: string}, cellColumnName: string) => {
+
+		// If this function does not apply to this column skip it
+		if (cellColumnName != columnName) {
+			return currentValue
+		}
+
+		// If this row doesn't pass all the filters skip it
+		if(dataParameters?.filter != undefined) {
+			for (const filter of Object.values(dataParameters.filter)) {
+				if (!filter.passes(row)) {
+					return currentValue
+				}
+			}
+		}
+
+		// Return the new value
+		return value
 	}
 
-	return {
-		selection,
-		value: value
-	}
+	return {"execute": execute, "applyToCell": apply} as TableUpdate
 }
 
-export const submitChanges = async (url: string, updates: TableUpdate[]) => {
-	for(const update of updates){
-		console.log("Update: ", update)
-
-		// await submitChange(url, update)
-	}
-}
-
-export const submitChange = async (url: string, {selection, value}: TableUpdate) => {
+export const submitChange = async (url: string, value: string, columns: string[], filters: {[key: string] : Filter}) => {
 
 	// Query per column
-	for (const column of selection.columns) {
+	for (const column of columns) {
 
 		let updateURL = new URL(url);
 
 		// Add the filters to the query parameters
-		for (const filter of Object.values(selection.filters)) {
+		for (const filter of Object.values(filters)) {
 
 			// Check that the filter is valid
 			if(!filter.is_valid()){
 				continue
 			}
 
-			console.log("Filter: ", filter)
-
-			const [searchTerm, searchValue] = filter.to_array()
-			updateURL.searchParams.append(searchTerm, searchValue);
+			const [columnName, filterValue] = filter.to_array()
+			updateURL.searchParams.append(columnName, filterValue);
 		}
 
 		// Create the request body
@@ -135,3 +191,8 @@ export const submitChange = async (url: string, {selection, value}: TableUpdate)
 export function isEmptyArray(arr) {
 	return arr.length == 0 || arr.every((x) => x == null);
 }
+
+export const range = (start, stop, step = 1) =>
+	Array(Math.ceil((stop - start) / step))
+		.fill(start)
+		.map((x, y) => x + y * step);

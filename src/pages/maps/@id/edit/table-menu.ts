@@ -47,13 +47,14 @@ const OperatorFilterOption: ItemRenderer<ColumnOperatorOption> = (column, { hand
 }
 
 interface TableMenuProps {
+	columnName: string;
 	onFilterChange: (query: OperatorQueryParameter) => void;
 	filter: Filter;
 	onGroupChange: (group: string | undefined) => void;
 	group: string | undefined;
 }
 
-const TableMenu = ({onFilterChange, filter, onGroupChange, group} : TableMenuProps) => {
+const TableMenu = ({columnName, onFilterChange, filter, onGroupChange, group} : TableMenuProps) => {
 
 	const [menuOpen, setMenuOpen] = React.useState<boolean>(false);
 	const [inputPlaceholder, setInputPlaceholder] = React.useState<string>("");
@@ -70,7 +71,7 @@ const TableMenu = ({onFilterChange, filter, onGroupChange, group} : TableMenuPro
 	const selectedExpression = validExpressions.find((expression) => expression.key === filter.operator);
 
 	// Set if this group is active
-	const groupActive: boolean = group === filter.column_name;
+	const groupActive: boolean = group === columnName;
 
 	return h(Menu, {}, [
 		h("div.filter-container", {}, [
