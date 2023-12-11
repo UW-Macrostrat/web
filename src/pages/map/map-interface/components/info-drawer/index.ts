@@ -46,7 +46,7 @@ function InfoDrawer(props) {
     [
       h(
         LoadingArea,
-        { loaded: !fetchingMapInfo },
+        { loaded: !fetchingMapInfo, className: "infodrawer-content" },
         h.if(!fetchingMapInfo)(InfoDrawerInterior)
       ),
     ]
@@ -88,7 +88,7 @@ function InfoDrawerMainPanel(props) {
           ref: {},
         };
 
-  return h("div.infodrawer-main", [
+  return h([
     h(GeologicMapInfo, {
       mapInfo,
       bedrockExpanded: true,
