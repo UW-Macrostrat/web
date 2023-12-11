@@ -111,6 +111,7 @@ function MapPageRoutes() {
 }
 
 function InfoDrawerRoute() {
+  // We could probably do this in the reducer...
   const { lat, lng } = useParams();
   const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
   const z = Math.round(
@@ -118,20 +119,23 @@ function InfoDrawerRoute() {
   );
   const detailPanelTrans = useTransition(infoDrawerOpen, 800);
   const runAction = useAppActions();
-  const allColumns = useAppState((s) => s.core.allColumns);
 
   // Todo: this is a pretty janky way to do state management
   useEffect(() => {
     if (lat && lng) {
-      console.log("Updating infomarker position");
       runAction({
         type: "run-map-query",
         lat: Number(lat),
         lng: Number(lng),
         z,
+        // Focused column or map unit from active layers.
+        // This is a bit anachronistic, since we want to be
+        // able to show columns that aren't necessarily shown on the map
+        columns: [],
+        map_id: null,
       });
     }
-  }, [lat, lng, allColumns]);
+  }, [lat, lng]);
 
   return h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
     className: "detail-panel",

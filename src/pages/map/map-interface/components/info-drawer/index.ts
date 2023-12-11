@@ -63,11 +63,9 @@ function InfoDrawerInterior(props) {
 }
 
 function InfoDrawerMainPanel(props) {
-  const { mapInfo, columnInfo, pbdbData, mapLayers } = useAppState(
-    (state) => state.core
-  );
-
-  const stratigraphyShown = mapLayers.has(MapLayer.COLUMNS);
+  const mapInfo = useAppState((state) => state.core.mapInfo);
+  const pbdbData = useAppState((state) => state.core.pbdbData);
+  const columnInfo = useAppState((state) => state.core.columnInfo);
 
   if (!mapInfo || !mapInfo.mapData) {
     return null;
@@ -94,7 +92,7 @@ function InfoDrawerMainPanel(props) {
       bedrockExpanded: true,
       source,
     }),
-    h.if(stratigraphyShown)(RegionalStratigraphy, {
+    h(RegionalStratigraphy, {
       mapInfo,
       columnInfo,
     }),
