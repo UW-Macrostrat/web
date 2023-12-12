@@ -1,5 +1,5 @@
 import {Button, MenuItem} from "@blueprintjs/core";
-import {Select2, ItemRenderer} from "@blueprintjs/select";
+import { Select, ItemRenderer, ItemPredicate } from "@blueprintjs/select";
 import {EditableCell2Props, EditableCell2, Cell} from "@blueprintjs/table";
 import React, {useEffect, useMemo} from "react";
 
@@ -51,7 +51,7 @@ const IntervalOption: ItemRenderer<Interval> = (interval: Interval, { handleClic
 		active: modifiers.active,
 		disabled: modifiers.disabled,
 		key: interval.int_id,
-		label: interval.name,
+		label: interval.int_id.toString(),
 		onClick: handleClick,
 		onFocus: handleFocus,
 		text: interval.name,
@@ -62,55 +62,67 @@ const IntervalOption: ItemRenderer<Interval> = (interval: Interval, { handleClic
 
 const IntervalSelection = ({value, onConfirm, intent, ...props} : EditableCell2Props) => {
 
-	const [menuOpen, setMenuOpen] = React.useState<boolean>(false);
 	const [intervalValues, setIntervalValues] = React.useState<Interval[]>([]);
+	const [localValue, setLocalValue] = React.useState<string>(value);
 
-	async function getIntervals() {
-		let response = await fetch(`https://macrostrat.org/api/defs/intervals?tilescale_id=11`)
+	const filterInterval: ItemPredicate<Interval> = (query, interval) => {
 
-		if (response.ok) {
-			let response_data = await response.json();
-			setIntervalValues(response_data.success.data);
+		if(interval?.name == undefined){
+			return false
 		}
+		return interval.name.toLowerCase().indexOf(query.toLowerCase()) >= 0;
 	}
 
 	const interval = useMemo(() => {
 		if(intervalValues.length == 0){
 			return null
 		} else {
-			return intervalValues.filter((interval) => interval.int_id == parseInt(value))[0]
+			return intervalValues.filter((interval) => interval.int_id == parseInt(localValue))[0]
 		}
-	}, [value, intervalValues])
+	}, [localValue, intervalValues])
 
 	useEffect(() => {
+
+		async function getIntervals() {
+			let response = await fetch(`https://macrostrat.org/api/defs/intervals?tilescale_id=11`)
+
+			if (response.ok) {
+				let response_data = await response.json();
+				setIntervalValues(response_data.success.data);
+			}
+		}
+
 		getIntervals()
 	}, [])
 
-	console.log(interval)
-
 	return h(Cell, {
-		style: {padding: 0},
-		...props
+		...props,
+		style: {...props.style, padding: 0},
 	}, [
-		h(Select2<Interval>, {
+		h(Select<Interval>, {
 			fill: true,
 			items: intervalValues,
 			className: "update-input-group",
-			filterable: false,
-			popoverProps: {isOpen: menuOpen},
-			itemRenderer: IntervalOption,
-			onItemSelect: (interval: Interval) => {
-				setMenuOpen(false);
-				onConfirm(interval.int_id.toString())
+			popoverProps: {
+				position: "bottom",
+				minimal: true
 			},
-			noResults: h(MenuItem, {disabled: true, text: "No results.", roleStructure: "listoption"}, []),
+			popoverContentProps:{
+				onWheelCapture: (event) => event.stopPropagation()
+			},
+			itemPredicate: filterInterval,
+			itemRenderer: IntervalOption,
+			onItemSelect: (interval: Interval, e) => {
+				onConfirm(interval.int_id.toString())
+				setLocalValue(interval.int_id.toString())
+			},
+			noResults: h(MenuItem, {disabled: true, text: "No results.", roleStructure: "listoption"}),
 		}, [
 			h(Button, {
 				style: {backgroundColor: interval?.color ?? "white", fontSize: "12px", minHeight: "0px", padding: "1.7px 10px", boxShadow: "none"},
 				fill: true,
-				onClick: () => setMenuOpen(!menuOpen),
 				alignText: "left",
-				text: interval?.name ?? "Select an Interval",
+				text: h("span", {style: {overflow: "hidden", textOverflow: "ellipses"}}, interval?.name ?? "Select an Interval"),
 				rightIcon: "double-caret-vertical",
 				className: "update-input-group",
 				placeholder: "Select A Filter"
