@@ -13,8 +13,8 @@ export const guard = (pageContext) => {
     throw redirect('/login')
     */
   }
-  if (!user.groups.includes("admin")) {
+  if (!user.groups.includes(1)) {
     // Render the error page and show message to the user
-    throw render(403, 'Only admins are allowed to access this page.')
+    return render(403, 'Only admins are allowed to access this page.')
   }
 }
