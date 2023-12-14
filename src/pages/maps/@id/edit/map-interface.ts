@@ -13,7 +13,7 @@ import boundingBox from "@turf/bbox";
 import { LngLatBoundsLike } from "mapbox-gl";
 import { useEffect, useMemo, useState } from "react";
 import { MapNavbar } from "~/components/map-navbar";
-import { SETTINGS } from "~/map-interface/settings";
+import { SETTINGS } from "~/settings";
 import "~/styles/global.styl";
 import { s3Address, tempImageIndex } from "../../raster-images";
 import styles from "./main.module.sass";

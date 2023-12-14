@@ -1,4 +1,4 @@
-import { render, redirect } from 'vite-plugin-ssr/abort'
+import { render, redirect } from 'vike/abort'
 
 export const guard = (pageContext) => {
   const { user } = pageContext

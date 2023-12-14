@@ -6,7 +6,7 @@
 
 import express from "express"
 import compression from "compression"
-import { renderPage } from "vite-plugin-ssr/server"
+import { renderPage } from "vike/server";
 import { root } from "./root.js"
 
 // Auth imports
