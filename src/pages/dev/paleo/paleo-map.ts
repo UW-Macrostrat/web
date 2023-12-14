@@ -1,9 +1,9 @@
 import h from "@macrostrat/hyper";
-import { MacrostratVectorTileset } from "~/dev/map-layers";
+import { MacrostratVectorTileset } from "~/_legacy/map-dev/map-layers";
 import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
 import mapboxgl from "mapbox-gl";
 import { useCallback, useMemo, useReducer } from "react";
-import { SETTINGS } from "~/map-interface/settings";
+import { SETTINGS } from "~/settings";
 import { Switch, HTMLSelect, Spinner } from "@blueprintjs/core";
 import {
   Spacer,
@@ -26,22 +26,30 @@ import {
   buildInspectorStyle,
 } from "@macrostrat/map-interface";
 import { TimescalePanel } from "./timescale";
+import { MapPosition, getMapPosition } from "@macrostrat/mapbox-utils";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { getHashString, setHashString } from "@macrostrat/ui-components";
 
 // Having to include these global styles is a bit awkward
 import "~/styles/global.styl";
+import {
+  applyMapPositionToHash,
+  getMapPositionForHash,
+} from "~/pages/map/map-interface/app-state/reducers/hash-string";
 
 // Import other components
 
 type PaleogeographyState = {
   model_id: number;
   age: number;
+  mapPosition: MapPosition;
+  initialized: boolean;
 };
 
 type PaleogeographyAction =
   | { type: "set-model"; model_id: number }
   | { type: "set-age"; age: number }
+  | { type: "set-map-position"; mapPosition: MapPosition }
   | { type: "initialize"; state: PaleogeographyState };
 
 function usePaleogeographyState(
@@ -53,7 +61,6 @@ function usePaleogeographyState(
 
   const [state, dispatch] = useReducer(
     (state: PaleogeographyState, action: PaleogeographyAction) => {
-      console.log(state, action);
       switch (action.type) {
         case "set-model":
           return {
@@ -63,21 +70,32 @@ function usePaleogeographyState(
           };
         case "set-age":
           return { ...state, age: action.age };
+        case "set-map-position":
+          return { ...state, mapPosition: action.mapPosition };
         case "initialize":
-          return action.state;
+          return { ...action.state, initialized: true };
       }
     },
-    { model_id: null, age: null }
+    { model_id: null, age: null, mapPosition: null, initialized: false }
   );
 
-  useEffect(() => {
-    const { model_id, age } = state;
-    if (model_id == null || age == null) return;
-    setHashString({ model_id, age }, { sort: false });
-  }, [state]);
+  const { model_id, age, mapPosition } = state;
 
   useEffect(() => {
-    const { model_id, age } = getHashString(window.location.hash) ?? {};
+    if (model_id == null || age == null || mapPosition == null) return;
+    let args: any = { model_id, age };
+    applyMapPositionToHash(args, mapPosition);
+    setHashString(args, { sort: false, arrayFormat: "comma" });
+  }, [model_id, age, mapPosition]);
+
+  useEffect(() => {
+    const hashData = getHashString(window.location.hash) ?? {};
+    const { model_id, age, ...rest } = hashData;
+    const mapPosition = getMapPositionForHash(
+      rest,
+      defaultState.mapPosition.camera
+    );
+
     if (model_id == null || age == null) return;
     if (Array.isArray(model_id)) return;
     if (Array.isArray(age)) return;
@@ -86,6 +104,8 @@ function usePaleogeographyState(
       state: {
         model_id: parseInt(model_id) ?? defaultModelID,
         age: parseInt(age) ?? defaultAge,
+        mapPosition,
+        initialized: true,
       },
     });
   }, []);
@@ -93,9 +113,19 @@ function usePaleogeographyState(
   return [state, dispatch];
 }
 
+const baseTilesetURL =
+  SETTINGS.burwellTileDomain +
+  "/carto-slim-rotated/{z}/{x}/{y}?model_id=6&t_step=0";
+
 const common = {
   version: 8,
-  sources: {},
+  sources: {
+    burwell: {
+      type: "vector",
+      tiles: [baseTilesetURL],
+      tileSize: 512,
+    },
+  },
   glyphs: "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
   sprite: "mapbox://sprites/mapbox/light-v10",
 };
@@ -112,13 +142,14 @@ const darkStyle = {
       },
     },
     {
-      id: "plate",
+      id: "plates",
       type: "fill",
       source: "burwell",
-      "source-layer": "plate",
+      "source-layer": "plates",
       paint: {
+        //"fill-color": "color",
         "fill-color": "hsl(55, 1%, 20%)",
-        //"fill-opacity": 0.8,
+        "fill-opacity": 0.8,
       },
     },
   ],
@@ -135,13 +166,14 @@ const lightStyle = {
       },
     },
     {
-      id: "plate",
+      id: "plates",
       type: "fill",
       source: "burwell",
-      "source-layer": "plate",
+      "source-layer": "plates",
       paint: {
+        //"fill-color": "color",
         "fill-color": "hsl(55, 11%, 96%)",
-        //"fill-opacity": 0.8,
+        "fill-opacity": 0.8,
       },
     },
   ],
@@ -172,9 +204,6 @@ export default function PaleoMap({
   const mapboxToken = SETTINGS.mapboxAccessToken;
   mapboxgl.accessToken = mapboxToken;
 
-  let transformRequest = null;
-  let mapPosition = null;
-
   const style = isEnabled ? darkStyle : lightStyle;
 
   const [isOpen, setOpen] = useState(false);
@@ -187,11 +216,19 @@ export default function PaleoMap({
 
   const [actualStyle, setActualStyle] = useState(style);
   const [paleoState, dispatch] = usePaleogeographyState({
-    model_id: 6,
+    model_id: null,
     age: 0,
+    initialized: false,
+    mapPosition: {
+      camera: {
+        lng: -40,
+        lat: 45,
+        altitude: 5000000,
+      },
+    },
   });
 
-  const { age, model_id } = paleoState;
+  const { age, model_id, mapPosition } = paleoState;
   const plateModelId = model_id;
 
   const models: { id: string; max_age: number; min_age: number }[] =
@@ -218,6 +255,8 @@ export default function PaleoMap({
   //   }
   // }, [model, age]);
 
+  // Manage location hash
+
   const _overlayStyle = useMemo(() => {
     if (plateModelId == null || age == null) return overlayStyle;
     return replaceSourcesForTileset(overlayStyle, plateModelId, age);
@@ -239,6 +278,11 @@ export default function PaleoMap({
   const onSelectPosition = useCallback((position: mapboxgl.LngLat) => {
     setInspectPosition(position);
   }, []);
+
+  const onMapMoved = useCallback(
+    (pos) => dispatch({ type: "set-map-position", mapPosition: pos }),
+    []
+  );
 
   if (age == null || model_id == null) {
     return h(Spinner);
@@ -264,7 +308,7 @@ export default function PaleoMap({
         }),
         h(FeaturePanel, {
           features: data,
-          focusedSource: "burwell",
+          focusedSource: "plates",
           focusedSourceTitle: "Paleogeography",
         }),
       ]
@@ -315,10 +359,11 @@ export default function PaleoMap({
       MapView,
       {
         style: actualStyle,
-        transformRequest,
         mapPosition,
         projection: { name: "globe" },
+        enableTerrain: false,
         mapboxToken,
+        onMapMoved,
       },
       [
         h(FeatureSelectionHandler, {

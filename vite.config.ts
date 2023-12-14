@@ -2,7 +2,7 @@ import { UserConfig } from "vite";
 import path from "path";
 import mdx from "@mdx-js/rollup";
 import react from "@vitejs/plugin-react";
-import ssr from "vite-plugin-ssr/plugin";
+import ssr from "vike/plugin";
 import revisionInfo from "@macrostrat/revision-info-webpack";
 import rewriteAll from "vite-plugin-rewrite-all";
 import cesium from "vite-plugin-cesium";
