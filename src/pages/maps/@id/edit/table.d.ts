@@ -37,6 +37,8 @@ interface TableSelection {
 
 // An object that represents a value update made on top of a specific TableSelection
 interface TableUpdate {
+	// Helpful for debugging
+	description?: string
 	// Function to execute this update
 	execute: () => Promise<void>;
 	// Function to apply this update to a cell

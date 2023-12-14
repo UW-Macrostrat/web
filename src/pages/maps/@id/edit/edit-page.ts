@@ -8,7 +8,7 @@ import { WidthAdjustablePanel } from "./components";
 import MapInterface from "./map-interface";
 import { useStoredState } from "@macrostrat/ui-components";
 import { ParentRouteButton } from "~/components/map-navbar";
-import { Button } from "@blueprintjs/core";
+import { Button, HotkeysProvider } from "@blueprintjs/core";
 
 export const h = hyper.styled(styles);
 
@@ -43,41 +43,43 @@ export default function EditInterface({
 
   const title = mapBounds.properties.name;
 
-  return h("div.edit-page", [
-    h(
-      WidthAdjustablePanel,
-      {
-        expand: !showMap,
-        className: "edit-page-content",
-        storageID: "edit-panel-width",
-      },
-      // TODO: make this basename dynamic
-      h([
-        h("div.edit-page-header", [
-          h(ParentRouteButton, { parentRoute: "/maps/" }),
-          h("h2", title),
-          h("div.spacer"),
-          h("div.edit-page-buttons", [
-            h(ShowMapButton, { showMap, setShowMap }),
+  return h(HotkeysProvider, [
+    h("div.edit-page", [
+      h(
+        WidthAdjustablePanel,
+        {
+          expand: !showMap,
+          className: "edit-page-content",
+          storageID: "edit-panel-width",
+        },
+        // TODO: make this basename dynamic
+        h([
+          h("div.edit-page-header", [
+            h(ParentRouteButton, { parentRoute: "/maps/" }),
+            h("h2", title),
+            h("div.spacer"),
+            h("div.edit-page-buttons", [
+              h(ShowMapButton, { showMap, setShowMap }),
+            ]),
           ]),
-        ]),
-        h(Router, { basename: `/maps/${source_id}/edit` }, [
-          h(Routes, [
-            h(Route, {
-              path: "",
-              element: h(EditMenu),
-            }),
-            h(Route, {
-              path: "polygons",
-              element: h(EditTable, {
-                url: `${import.meta.env.VITE_MACROSTRAT_INGEST_API}/sources/${source_id}/polygons`,
+          h(Router, { basename: `/maps/${source_id}/edit` }, [
+            h(Routes, [
+              h(Route, {
+                path: "",
+                element: h(EditMenu),
               }),
-            }),
-          ]),
-        ]),
-      ])
-    ),
-    h.if(showMap)(MapInterface, { id: source_id, map: mapBounds }),
+              h(Route, {
+                path: "polygons",
+                element: h(EditTable, {
+                  url: `${import.meta.env.VITE_MACROSTRAT_INGEST_API}/sources/${source_id}/polygons`,
+                }),
+              }),
+            ]),
+          ])
+        ])
+      ),
+      h.if(showMap)(MapInterface, { id: source_id, map: mapBounds }),
+    ]),
   ]);
 }
 

@@ -1,5 +1,5 @@
 import {Button, MenuItem} from "@blueprintjs/core";
-import { Select, ItemRenderer, ItemPredicate } from "@blueprintjs/select";
+import { Select2, ItemRenderer, ItemPredicate } from "@blueprintjs/select";
 import {EditableCell2Props, EditableCell2, Cell} from "@blueprintjs/table";
 import React, {useEffect, useMemo} from "react";
 
@@ -33,7 +33,7 @@ const IntervalOption: ItemRenderer<Interval> = (interval: Interval, { handleClic
 
 	if (interval == null) {
 		return h(MenuItem, {
-			shouldDismissPopover: false,
+			shouldDismissPopover: true,
 			active: modifiers.active,
 			disabled: modifiers.disabled,
 			key: "",
@@ -47,7 +47,7 @@ const IntervalOption: ItemRenderer<Interval> = (interval: Interval, { handleClic
 
 	return h(MenuItem, {
 		style: {backgroundColor: interval.color},
-		shouldDismissPopover: false,
+		shouldDismissPopover: true,
 		active: modifiers.active,
 		disabled: modifiers.disabled,
 		key: interval.int_id,
@@ -74,12 +74,14 @@ const IntervalSelection = ({value, onConfirm, intent, ...props} : EditableCell2P
 	}
 
 	const interval = useMemo(() => {
-		if(intervalValues.length == 0){
-			return null
-		} else {
-			return intervalValues.filter((interval) => interval.int_id == parseInt(localValue))[0]
+
+		let interval = null
+		if(intervalValues.length != 0){
+			interval = intervalValues.filter((interval) => interval.int_id == parseInt(value))[0]
 		}
-	}, [localValue, intervalValues])
+
+		return interval
+	}, [value, localValue, intervalValues])
 
 	useEffect(() => {
 
@@ -99,7 +101,7 @@ const IntervalSelection = ({value, onConfirm, intent, ...props} : EditableCell2P
 		...props,
 		style: {...props.style, padding: 0},
 	}, [
-		h(Select<Interval>, {
+		h(Select2<Interval>, {
 			fill: true,
 			items: intervalValues,
 			className: "update-input-group",

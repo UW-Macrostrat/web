@@ -94,15 +94,26 @@ export function buildURL(baseURL: string, dataParameters: DataParameters){
 	return url
 }
 
-export const applyTableUpdates = (data: {[key: string]: string}, columnName: string, updates: TableUpdate[]) : string => {
+export const applyTableUpdate = (data: any[], tableUpdate: TableUpdate) => {
 
-	let value = data[columnName]
-
-	for(const update of updates) {
-		value = update.applyToCell(value, data, columnName)
+	let appliedData = structuredClone(data)
+	for(const [rowIndex, row] of data.entries()){
+		for(const columnName of Object.keys(row)){
+			appliedData[rowIndex][columnName] = tableUpdate.applyToCell(appliedData[rowIndex][columnName], row, columnName)
+		}
 	}
 
-	return value
+	return appliedData
+}
+
+export const applyTableUpdates = (data: any[], tableUpdates: TableUpdate[]) => {
+
+	let appliedData = structuredClone(data)
+	for(const tableUpdate of tableUpdates){
+		appliedData = applyTableUpdate(appliedData, tableUpdate)
+	}
+
+	return appliedData
 }
 
 /**
@@ -141,12 +152,15 @@ export const getTableUpdate = (
 				}
 			}
 		}
-
 		// Return the new value
 		return value
 	}
 
-	return {"execute": execute, "applyToCell": apply} as TableUpdate
+	return {
+		description: "Update " + columnName + " to " + value + " for " + JSON.stringify(dataParameters.filter),
+		"execute": execute,
+		"applyToCell": apply
+	} as TableUpdate
 }
 
 export const submitChange = async (url: string, value: string, columns: string[], filters: {[key: string] : Filter}) => {
@@ -187,6 +201,42 @@ export const submitChange = async (url: string, value: string, columns: string[]
 		}
 	}
 };
+
+export const submitColumnCopy = async (url: string, sourceColumn: string, targetColumn: string, dataParameters: DataParameters) => {
+
+
+	let updateURL = new URL(url + "/" + targetColumn);
+
+	// Add the filters to the query parameters
+	for (const filter of Object.values(dataParameters.filter)) {
+
+		// Check that the filter is valid
+		if(!filter.is_valid()){
+			continue
+		}
+
+		const [columnName, filterValue] = filter.to_array()
+		updateURL.searchParams.append(columnName, filterValue);
+	}
+
+	// Create the request body
+	let patch = { "source_column": sourceColumn };
+
+	// Send the request
+	let response = await secureFetch(updateURL, {
+		method: "PATCH",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify(patch),
+	});
+
+	if (response.status != 204) {
+
+		// Stop execution if the request failed
+		throw Error("Failed to update");
+	}
+}
 
 export function isEmptyArray(arr) {
 	return arr.length == 0 || arr.every((x) => x == null);
