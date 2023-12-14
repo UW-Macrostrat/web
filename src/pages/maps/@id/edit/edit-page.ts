@@ -3,7 +3,7 @@ import styles from "./edit-page.module.sass";
 import { useState } from "react";
 import EditTable from "./edit-table";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import { LinkButton } from "~/map-interface/components/buttons";
+import { LinkButton } from "~/pages/map/map-interface/components/buttons";
 import { WidthAdjustablePanel } from "./components";
 import MapInterface from "./map-interface";
 import { useStoredState } from "@macrostrat/ui-components";

@@ -1,7 +1,5 @@
 import hyper from "@macrostrat/hyper";
 
-
-
 import { useState, useEffect, useCallback, useRef, useLayoutEffect, useMemo, FunctionComponent } from "react";
 import { HotkeysProvider, InputGroup, Button, useHotkeys } from "@blueprintjs/core";
 import { Spinner, ButtonGroup } from "@blueprintjs/core";
@@ -85,23 +83,25 @@ export default function TableInterface({ url }: EditTableProps) {
     return data.length ? Object.keys(data[0]).filter(x => x != "_pkid") : []
   }, [data])
 
-  const setTableUpdates = useCallback((newTableUpdates: TableUpdate[]) => {
+  const setTableUpdates = useCallback(async (newTableUpdates: TableUpdate[]) => {
 
     // If the table updates are empty, reset the data
     if (newTableUpdates.length == 0) {
-      getData()
+      let newData = await getData(newTableUpdates, dataParameters)
+      setData(newData)
     }
 
     // If a new update is available apply it to the data
     if(newTableUpdates.length > tableUpdates.length){
-      setData(applyTableUpdate(data, newTableUpdates.slice(-1)[0]))
+      let newData = applyTableUpdate(data, newTableUpdates.slice(-1)[0])
+      setData(newData)
     }
 
     _setTableUpdates(newTableUpdates)
 
-  }, [tableUpdates, data])
+  }, [data, tableUpdates, dataParameters])
 
-  const getData = useCallback( async () => {
+  const getData = useCallback( async (tableUpdates: TableUpdate[], dataParameters: DataParameters) => {
 
     const dataURL = buildURL(url, dataParameters)
 
@@ -116,18 +116,19 @@ export default function TableInterface({ url }: EditTableProps) {
     } else {
 
       setError(undefined)
-      setData(data)
     }
 
     // Remove the progress bar on data reload
     setUpdateProgress(undefined)
 
     return data
-  }, [dataParameters, tableUpdates])
+  }, [])
 
   // On mount get data
   useEffect(() => {
-    getData()
+    (async () => {
+      setData(await getData(tableUpdates, dataParameters))
+    })()
   }, [dataParameters])
 
   const handlePaste = useCallback(() => {
@@ -203,7 +204,6 @@ export default function TableInterface({ url }: EditTableProps) {
     }
 
     setTableUpdates([])
-    getData()
   }, [tableUpdates])
 
   const columnHeaderCellRenderer = useCallback((columnIndex: number) => {
@@ -300,8 +300,6 @@ export default function TableInterface({ url }: EditTableProps) {
       })
     })
   }
-
-  console.log("TableUpdates", tableUpdates, tableUpdates.length, tableUpdates.length == 0)
 
   return h("div", {
     onKeyDown: handleKeyDown,
