@@ -86,8 +86,10 @@ export function buildURL(baseURL: string, dataParameters: DataParameters){
 	// Add the rest of the filters
 	if(dataParameters?.filter != undefined){
 		for(const filter of Object.values(dataParameters?.filter)){
-			const [columnName, filterValue] = filter.to_array()
-			url.searchParams.append(columnName, filterValue);
+			if(filter.is_valid()){
+				const [columnName, filterValue] = filter.to_array()
+				url.searchParams.append(columnName, filterValue);
+			}
 		}
 	}
 
