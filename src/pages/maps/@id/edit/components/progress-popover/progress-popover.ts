@@ -5,7 +5,7 @@ import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
 const h = hyper.styled(styles);
 
-interface ProgressPopoverProps extends React.HTMLProps<HTMLDivElement> {
+export interface ProgressPopoverProps extends React.HTMLProps<HTMLDivElement> {
   text: string;
   value: number;
   progressBarProps?: ProgressBarProps;

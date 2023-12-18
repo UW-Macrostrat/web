@@ -28,7 +28,9 @@ import {
 } from "~/pages/maps/@id/edit/table-util";
 import TableMenu from "~/pages/maps/@id/edit/table-menu";
 import IntervalSelection, {Interval} from "./components/cell/interval-selection";
-import ProgressPopover from "~/pages/maps/@id/edit/components/progress-popover/progress-popover";
+import ProgressPopover, {
+  ProgressPopoverProps
+} from "~/pages/maps/@id/edit/components/progress-popover/progress-popover";
 
 import "./override.sass"
 import "@blueprintjs/table/lib/css/table.css";
@@ -77,7 +79,7 @@ export default function TableInterface({ url }: EditTableProps) {
 
   // Table Update State
   const [tableUpdates, _setTableUpdates] = useState<TableUpdate[]>([])
-  const [updateProgress, setUpdateProgress] = useState<number | undefined>(undefined)
+  const [updateProgress, setUpdateProgress] = useState<ProgressPopoverProps>(undefined)
 
   // Cell Values
   const [intervals, setIntervals] = useState<Interval[]>([])
@@ -203,21 +205,33 @@ export default function TableInterface({ url }: EditTableProps) {
 
   const submitTableUpdates = useCallback(async () => {
 
-    setUpdateProgress(0)
+    setUpdateProgress({value: 0, text: "Submitting changes"})
 
     let index = 0
     for(const tableUpdate of tableUpdates){
+
+      setUpdateProgress({...updateProgress, text: tableUpdate?.description ?? "Submitting changes"})
 
       try {
         await tableUpdate.execute()
       } catch (e) {
 
-        setUpdateProgress(undefined)
+        setUpdateProgress({
+          progressBarProps: { intent: "danger" },
+          value: 1,
+          text: "Error submitting changes"
+        })
+        console.error(e)
+
+        setTimeout(() => {
+          setUpdateProgress(undefined)
+        }, 5000)
+
         return // If there is an error, stop submitting
       }
 
       index += 1
-      setUpdateProgress(index / tableUpdates.length)
+      setUpdateProgress({...updateProgress, value: index / tableUpdates.length})
     }
 
     setTableUpdates([])
@@ -373,9 +387,8 @@ export default function TableInterface({ url }: EditTableProps) {
       h.if(updateProgress != undefined)(
         ProgressPopover,
         {
-          text: "Submitting Changes",
-          value: updateProgress,
           progressBarProps: { intent: "success" },
+          ...updateProgress
         }
       )
     ]),
