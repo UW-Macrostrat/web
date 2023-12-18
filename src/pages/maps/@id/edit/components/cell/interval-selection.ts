@@ -60,9 +60,8 @@ const IntervalOption: ItemRenderer<Interval> = (interval: Interval, { handleClic
 }
 
 
-const IntervalSelection = ({value, onConfirm, intent, ...props} : EditableCell2Props) => {
+const IntervalSelection = ({value, onConfirm, intent, intervals, ...props} : EditableCell2Props & {intervals: Interval[]}) => {
 
-	const [intervalValues, setIntervalValues] = React.useState<Interval[]>([]);
 	const [localValue, setLocalValue] = React.useState<string>(value);
 
 	const filterInterval: ItemPredicate<Interval> = (query, interval) => {
@@ -76,26 +75,12 @@ const IntervalSelection = ({value, onConfirm, intent, ...props} : EditableCell2P
 	const interval = useMemo(() => {
 
 		let interval = null
-		if(intervalValues.length != 0){
-			interval = intervalValues.filter((interval) => interval.int_id == parseInt(value))[0]
+		if(intervals.length != 0){
+			interval = intervals.filter((interval) => interval.int_id == parseInt(value))[0]
 		}
 
 		return interval
-	}, [value, localValue, intervalValues])
-
-	useEffect(() => {
-
-		async function getIntervals() {
-			let response = await fetch(`https://macrostrat.org/api/defs/intervals?tilescale_id=11`)
-
-			if (response.ok) {
-				let response_data = await response.json();
-				setIntervalValues(response_data.success.data);
-			}
-		}
-
-		getIntervals()
-	}, [])
+	}, [value, localValue, intervals])
 
 	return h(Cell, {
 		...props,
@@ -103,7 +88,7 @@ const IntervalSelection = ({value, onConfirm, intent, ...props} : EditableCell2P
 	}, [
 		h(Select2<Interval>, {
 			fill: true,
-			items: intervalValues,
+			items: intervals,
 			className: "update-input-group",
 			popoverProps: {
 				position: "bottom",

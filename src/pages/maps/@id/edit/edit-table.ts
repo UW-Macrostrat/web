@@ -27,7 +27,7 @@ import {
   submitColumnCopy
 } from "~/pages/maps/@id/edit/table-util";
 import TableMenu from "~/pages/maps/@id/edit/table-menu";
-import IntervalSelection from "./components/cell/interval-selection";
+import IntervalSelection, {Interval} from "./components/cell/interval-selection";
 import ProgressPopover from "~/pages/maps/@id/edit/components/progress-popover/progress-popover";
 
 import "./override.sass"
@@ -69,7 +69,7 @@ export default function TableInterface({ url }: EditTableProps) {
   const [copiedColumn, setCopiedColumn] = useState<string | undefined>(undefined)
 
   // Data State
-  const [dataParameters, setDataParameters] = useState<DataParameters>({select: {page: "0", pageSize: "9999999"}, filter: {}})
+  const [dataParameters, setDataParameters] = useState<DataParameters>({select: {page: "0", pageSize: "99"}, filter: {}})
   const [data, setData] = useState<any[]>([])
 
   // Error State
@@ -78,6 +78,23 @@ export default function TableInterface({ url }: EditTableProps) {
   // Table Update State
   const [tableUpdates, _setTableUpdates] = useState<TableUpdate[]>([])
   const [updateProgress, setUpdateProgress] = useState<number | undefined>(undefined)
+
+  // Cell Values
+  const [intervals, setIntervals] = useState<Interval[]>([])
+
+  useEffect(() => {
+
+    async function getIntervals() {
+      let response = await fetch(`https://macrostrat.org/api/defs/intervals?tilescale_id=11`)
+
+      if (response.ok) {
+        let response_data = await response.json();
+        setIntervals(response_data.success.data);
+      }
+    }
+
+    getIntervals()
+  }, [])
 
   const nonIdColumnNames = useMemo(() => {
     return data.length ? Object.keys(data[0]).filter(x => x != "_pkid") : []
@@ -282,6 +299,7 @@ export default function TableInterface({ url }: EditTableProps) {
     "t_interval": h(Column, {
       ...defaultColumnConfig["t_interval"].props,
       cellRenderer: (rowIndex) => h(IntervalSelection, {
+        "intervals": intervals,
         onConfirm: (value) => {
           const tableUpdate = getTableUpdate(url, value, "t_interval", rowIndex, data, dataParameters)
           setTableUpdates([...tableUpdates, tableUpdate])
@@ -292,6 +310,7 @@ export default function TableInterface({ url }: EditTableProps) {
     "b_interval": h(Column, {
       ...defaultColumnConfig["b_interval"].props,
       cellRenderer: (rowIndex) => h(IntervalSelection, {
+        "intervals": intervals,
         onConfirm: (value) => {
           const tableUpdate = getTableUpdate(url, value, "b_interval", rowIndex, data, dataParameters)
           setTableUpdates([...tableUpdates, tableUpdate])
@@ -344,7 +363,6 @@ export default function TableInterface({ url }: EditTableProps) {
             } else {
               setSelectedColumn(undefined)
             }
-            console.log(selectedColumn)
           },
           numRows: data.length,
           // Dumb hacks to try to get the table to rerender on changes
