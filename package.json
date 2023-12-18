@@ -129,7 +129,7 @@
     "use-debounce": "^9.0.4",
     "use-react-router-breadcrumbs": "^3.2.1",
     "use-resize-observer": "^9.1.0",
-    "vike": "^0.4.150",
+    "vike": "0.4.150-commit-63b1c32",
     "vite": "^4.4.9",
     "vite-plugin-cesium": "^1.2.22"
   },
