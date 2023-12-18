@@ -71,7 +71,7 @@ export default function TableInterface({ url }: EditTableProps) {
   const [copiedColumn, setCopiedColumn] = useState<string | undefined>(undefined)
 
   // Data State
-  const [dataParameters, setDataParameters] = useState<DataParameters>({select: {page: "0", pageSize: "99"}, filter: {}})
+  const [dataParameters, setDataParameters] = useState<DataParameters>({select: {page: "0", pageSize: "50"}, filter: {}})
   const [data, setData] = useState<any[]>([])
 
   // Error State
@@ -338,6 +338,9 @@ export default function TableInterface({ url }: EditTableProps) {
     onKeyDown: handleKeyDown,
     onKeyUp: handleKeyUp,
     tabIndex: 0,
+    style: {
+      minHeight: "0"
+    }
   }, [
     h("div.table-container", {}, [
       h.if(error != undefined)("div.warning", {}, [error]),
@@ -376,6 +379,15 @@ export default function TableInterface({ url }: EditTableProps) {
               setSelectedColumn(nonIdColumnNames[selectedColumns[0]])
             } else {
               setSelectedColumn(undefined)
+            }
+          },
+          onVisibleCellsChange: (visibleCells) => {
+
+            console.log(visibleCells)
+            if(visibleCells["rowIndexEnd"] > parseInt(dataParameters.select.pageSize) - 10){
+              const newPageSize = (parseInt(dataParameters.select.pageSize) + 50).toString()
+
+              setDataParameters({...dataParameters, select: {...dataParameters.select, pageSize: newPageSize}})
             }
           },
           numRows: data.length,
