@@ -6,7 +6,6 @@ import { Spinner, ButtonGroup } from "@blueprintjs/core";
 import {
   Column,
   Table2,
-  EditableCell2,
   RowHeaderCell2,
   ColumnHeaderCell2,
   SelectionModes,
@@ -36,6 +35,7 @@ import "./override.sass"
 import "@blueprintjs/table/lib/css/table.css";
 import styles from "./edit-table.module.sass";
 import { EditableCell } from "~/pages/maps/@id/edit/components/cell/editable-cell";
+import LongTextCell from "~/pages/maps/@id/edit/components/cell/long-text";
 
 const h = hyper.styled(styles);
 
@@ -321,7 +321,7 @@ export default function TableInterface({ url }: EditTableProps) {
         name: columnName,
         className: FINAL_COLUMNS.includes(columnName) ? "final-column" : "",
         columnHeaderCellRenderer: columnHeaderCellRenderer,
-        cellRenderer: (rowIndex) => h(EditableCell, {
+        cellRenderer: (rowIndex) => h(LongTextCell, {
           onConfirm: (value) => {
             const tableUpdate = getTableUpdate(url, value, columnName, rowIndex, data, dataParameters)
             setTableUpdates([...tableUpdates, tableUpdate])
