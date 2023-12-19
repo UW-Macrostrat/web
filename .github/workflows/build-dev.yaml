@@ -2,6 +2,7 @@ name: Build Development
 
 on:
   push:
+    branches: [ '**' ]
     tags:
       - v[0-9]+.[0-9]+.[0-9]+-**  # Semver Pre-Release
   pull_request:
@@ -25,7 +26,10 @@ jobs:
           tags: |
             type=semver,pattern={{version}}
             type=raw,value=latest-itb
-            type=ref,enable=true,prefix=pr-,suffix=-{{date 'YYYYMMDDHHmmss'}},event=pr
+            type=ref,event=pr,suffix=-{{date 'YYYYMMDDHHmmss'}}
+            type=ref,event=branch,suffix=-{{date 'YYYYMMDDHHmmss'}}
+            type=ref,event=tag,suffix=-{{date 'YYYYMMDDHHmmss'}}
+            type=raw,value=latest-itb-{{date 'YYYYMMDDHHmmss'}}
             type=raw,value=sha-{{sha}}
       -
         name: Set up Docker Buildx
@@ -39,7 +43,7 @@ jobs:
           password: ${{ secrets.HARBOR_CLI_SECRET }}
       -
         name: Build and push
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: true

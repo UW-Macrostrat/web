@@ -1,0 +1,55 @@
+@import "@blueprintjs/core/lib/scss/variables.scss"
+
+.data-sheet-container, .data-sheet-holder
+  flex: 1
+  position: relative
+  min-height: 0
+
+.data-sheet-container
+  display: flex
+  flex-direction: column
+
+.data-sheet
+  height: 100%
+
+:global(.bp4-dark) .data-sheet :global(.bp4-table-quadrant)
+  background-color: $dark-gray1
+
+.input-cell
+  padding: 0 2px !important
+  input
+    width: 100%
+    height: 100%
+    padding: 0 8px
+    z-index: 0
+    position: relative
+    border: none
+    margin: 0
+    font-size: 1em
+    pointer-events: all
+    background: transparent
+    &:focus
+      outline: none
+
+.hidden-input
+  opacity: 0
+  position: absolute
+  width: 0
+
+.corner-drag-handle
+  position: absolute
+  bottom: 0
+  right: 0
+  width: 8px
+  height: 8px
+  background-color: $dark-gray1
+  cursor: ns-resize
+  background-color: dodgerblue
+
+.data-sheet-toolbar
+  display: flex
+  flex-direction: row
+  margin-bottom: 4px
+
+.spacer
+  flex-grow: 1

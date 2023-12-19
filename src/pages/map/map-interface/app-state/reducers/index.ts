@@ -145,6 +145,7 @@ export default appReducer;
 export * from "./core";
 export * from "./map";
 export * from "./types";
+export * from "./hash-string";
 
 /*
 function overallReducer(state: AppState, action: Action): AppState {

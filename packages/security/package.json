@@ -1,0 +1,6 @@
+{
+  "name": "@macrostrat-web/security",
+  "private": true,
+  "main": "src/index.ts",
+  "license": "ISC"
+}

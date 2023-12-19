@@ -20,7 +20,16 @@ export function ParentRouteButton({
   return h(LinkButton, { to: "..", icon, minimal: true, ...rest });
 }
 
-export function MapNavbar({ title, isOpen, setOpen, parentRoute }) {
+export function MapNavbar({
+  title,
+  isOpen,
+  setOpen,
+  parentRoute,
+  minimal = false,
+}) {
+  if (minimal) {
+    return MapMinimalNavbar({ isOpen, setOpen });
+  }
   const { isLoading } = useMapStatus();
   return h(FloatingNavbar, { className: "searchbar map-navbar" }, [
     h([h(ParentRouteButton, { parentRoute }), h("h2.map-title", title)]),
@@ -30,5 +39,19 @@ export function MapNavbar({ title, isOpen, setOpen, parentRoute }) {
       onClick: () => setOpen(!isOpen),
       isLoading,
     }),
+  ]);
+}
+
+function MapMinimalNavbar({ isOpen, setOpen }) {
+  const { isLoading } = useMapStatus();
+  return h("div.map-minimal-navbar map-navbar", [
+    h(FloatingNavbar, { className: "searchbar" }, [
+      h(MapLoadingButton, {
+        active: isOpen,
+        onClick: () => setOpen(!isOpen),
+        isLoading,
+      }),
+    ]),
+    h("div.spacer"),
   ]);
 }
