@@ -67,8 +67,11 @@ interface TableState {
 export default function TableInterface({ url }: EditTableProps) {
 
   // Selection State
-  const [selectedColumn, setSelectedColumn] = useState<string | undefined>(undefined)
+  const [selectedColumns, setSelectedColumns] = useState<string[]>([])
   const [copiedColumn, setCopiedColumn] = useState<string | undefined>(undefined)
+  
+  // Hidden Columns
+  const [hiddenColumns, setHiddenColumns] = useState<string[]>([])
 
   // Data State
   const [dataParameters, setDataParameters] = useState<DataParameters>({select: {page: "0", pageSize: "50"}, filter: {}})
@@ -98,9 +101,16 @@ export default function TableInterface({ url }: EditTableProps) {
     getIntervals()
   }, [])
 
-  const nonIdColumnNames = useMemo(() => {
-    return data.length ? Object.keys(data[0]).filter(x => x != "_pkid") : []
-  }, [data])
+  const visibleColumnNames = useMemo(() => {
+
+    if (data.length == 0) {
+      return []
+    }
+
+    const allHiddenColumns = [...hiddenColumns, "_pkid"]
+
+    return Object.keys(data[0]).filter(x => !allHiddenColumns.includes(x))
+  }, [hiddenColumns, data])
 
   const setTableUpdates = useCallback(async (newTableUpdates: TableUpdate[]) => {
 
@@ -150,8 +160,16 @@ export default function TableInterface({ url }: EditTableProps) {
     })()
   }, [dataParameters])
 
+  const handleHide = useCallback(() => {
+    if(selectedColumns != undefined){
+      setHiddenColumns([...hiddenColumns, ...selectedColumns])
+    }
+  }, [selectedColumns])
+
   const handlePaste = useCallback(() => {
-    if(copiedColumn != undefined && selectedColumn != undefined){
+    if(copiedColumn != undefined && selectedColumns.length == 1){
+
+      const selectedColumn = selectedColumns[0]
 
       const tableUpdate = {
         description: "Copy column " + copiedColumn + " to column " + selectedColumn + " for all rows",
@@ -183,17 +201,24 @@ export default function TableInterface({ url }: EditTableProps) {
 
       setTableUpdates([...tableUpdates, tableUpdate])
     }
-  }, [selectedColumn, copiedColumn, dataParameters])
+  }, [selectedColumns, copiedColumn, dataParameters])
 
   const handleCopy = useCallback(() => {
-    setCopiedColumn(selectedColumn)
-  }, [selectedColumn])
+    if(selectedColumns.length == 1){
+      setCopiedColumn(selectedColumns[0])
+    }
+  }, [selectedColumns])
 
   const hotkeys = useMemo(() => [
     {
       combo: "cmd+c",
       label: "Copy data",
       onKeyDown: handleCopy,
+    },
+    {
+      combo: "shift+h",
+      label: "Hide Column",
+      onKeyDown: handleHide,
     },
     {
       combo: "cmd+v",
@@ -239,7 +264,7 @@ export default function TableInterface({ url }: EditTableProps) {
 
   const columnHeaderCellRenderer = useCallback((columnIndex: number) => {
 
-    const columnName: string = nonIdColumnNames[columnIndex]
+    const columnName: string = visibleColumnNames[columnIndex]
 
     const onFilterChange = (param: OperatorQueryParameter) => {
       const columnFilter = new Filter(columnName, param.operator, param.value)
@@ -265,7 +290,7 @@ export default function TableInterface({ url }: EditTableProps) {
         backgroundColor: filter.is_valid() || dataParameters?.group == columnName ? "rgba(27,187,255,0.12)" : "#ffffff00"
       }
     }, [])
-  }, [dataParameters, data])
+  }, [dataParameters, data, visibleColumnNames])
 
   const rowHeaderCellRenderer = useCallback((rowIndex: number) => {
 
@@ -283,13 +308,13 @@ export default function TableInterface({ url }: EditTableProps) {
     }
 
     return h(RowHeaderCell2, { "name": name }, []);
-  }, [dataParameters, data])
+  }, [dataParameters, data, ])
 
   if(data.length == 0 && error == undefined){
     return h(Spinner)
   }
 
-  const defaultColumnConfig = nonIdColumnNames.reduce((prev, columnName, index) => {
+  const defaultColumnConfig = visibleColumnNames.reduce((prev, columnName, index) => {
     return {
       ...prev,
       [columnName]: h(Column, {
@@ -374,11 +399,15 @@ export default function TableInterface({ url }: EditTableProps) {
           selectionModes: dataParameters?.group ? RegionCardinality.CELLS : SelectionModes.COLUMNS_AND_CELLS,
           rowHeaderCellRenderer: rowHeaderCellRenderer,
           onSelection: (selections: Selection[]) => {
-            const selectedColumns = selections[0]?.cols
-            if(selectedColumns[0] == selectedColumns[1] && selections[0]?.rows == undefined){
-              setSelectedColumn(nonIdColumnNames[selectedColumns[0]])
+            const selectedColumnRange = selections[0]?.cols
+            if(selections[0]?.rows == undefined){
+
+              const selectedColumnIndices = range(selectedColumnRange[0], selectedColumnRange[1] + 1)
+              setSelectedColumns(selectedColumnIndices?.map((index) => visibleColumnNames[index]))
+
             } else {
-              setSelectedColumn(undefined)
+
+              setSelectedColumns(undefined)
             }
           },
           onVisibleCellsChange: (visibleCells) => {
