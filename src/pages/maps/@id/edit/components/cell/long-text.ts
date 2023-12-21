@@ -18,6 +18,10 @@ const LongTextCell = ({value, onConfirm, intent, ...props} : EditableCell2Props)
 
   const [localValue, setLocalValue] = React.useState(value == null ? "" : value.toString());
 
+  useEffect(() => {
+    setLocalValue(value == null ? "" : value.toString())
+  }, [value])
+
   return h(Cell, {
     ...props,
     style: {...props.style, padding: 0},
