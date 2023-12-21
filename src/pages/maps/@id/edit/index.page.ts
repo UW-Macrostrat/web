@@ -3,18 +3,24 @@ import { SETTINGS } from "~/settings";
 import h from "@macrostrat/hyper";
 import { ClientOnly } from "~/renderer/client-only";
 
-const apiAddress = SETTINGS.apiDomain + "/api/v2/defs/sources";
+const apiAddress = import.meta.env.VITE_MACROSTRAT_INGEST_API + "/sources/";
 
 export async function onBeforeRender(pageContext: PageContextBuiltInServer) {
   const { id } = pageContext.routeParams;
 
-  const params = new URLSearchParams({
-    format: "geojson",
-    source_id: id,
-  });
-  const response = await fetch(apiAddress + "?" + params);
+  const response = await fetch(apiAddress + id);
   const data: any = await response.json();
-  const map = data?.success?.data?.features[0];
+  const map = {
+    "type": "Feature",
+    "geometry": {
+      ...data.geometry
+    },
+    properties: {
+      ...data
+    }
+  }
+
+  console.log(map, apiAddress + id, map.type)
 
   return {
     pageContext: {
@@ -24,7 +30,7 @@ export async function onBeforeRender(pageContext: PageContextBuiltInServer) {
       },
       documentProps: {
         // The page's <title>
-        title: map.properties.name,
+        title: data.name,
       },
     },
   };
