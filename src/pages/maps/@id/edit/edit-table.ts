@@ -76,6 +76,7 @@ export default function TableInterface({ url }: EditTableProps) {
   // Data State
   const [dataParameters, setDataParameters] = useState<DataParameters>({select: {page: "0", pageSize: "50"}, filter: {}})
   const [data, setData] = useState<any[]>([])
+  const [tableColumns, setTableColumns] = useState<string[]>([])
 
   // Error State
   const [error, setError] = useState<string | undefined>(undefined)
@@ -101,16 +102,6 @@ export default function TableInterface({ url }: EditTableProps) {
     getIntervals()
   }, [])
 
-  const visibleColumnNames = useMemo(() => {
-
-    if (data.length == 0) {
-      return []
-    }
-
-    const allHiddenColumns = [...hiddenColumns, "_pkid"]
-
-    return Object.keys(data[0]).filter(x => !allHiddenColumns.includes(x))
-  }, [hiddenColumns, data])
 
   const setTableUpdates = useCallback(async (newTableUpdates: TableUpdate[]) => {
 
@@ -137,6 +128,11 @@ export default function TableInterface({ url }: EditTableProps) {
     const response = await fetch(dataURL)
     let data = await response.json()
 
+    // Update the table columns on first load
+    setTableColumns((p) => {
+      return typeof p == "object" && p.length > 0 ? p : Object.keys(data[0])
+    })
+
     // Apply tableupdates to the data
     data = applyTableUpdates(data, tableUpdates)
 
@@ -159,6 +155,18 @@ export default function TableInterface({ url }: EditTableProps) {
       setData(await getData(tableUpdates, dataParameters))
     })()
   }, [dataParameters])
+
+  // Get the visible columns
+  const visibleColumnNames = useMemo(() => {
+
+    if (tableColumns.length == 0) {
+      return []
+    }
+
+    const allHiddenColumns = [...hiddenColumns, "_pkid"]
+
+    return tableColumns.filter(x => !allHiddenColumns.includes(x))
+  }, [tableColumns, hiddenColumns])
 
   const handleHide = useCallback(() => {
     if(selectedColumns != undefined){
@@ -268,9 +276,12 @@ export default function TableInterface({ url }: EditTableProps) {
 
     const onFilterChange = (param: OperatorQueryParameter) => {
       const columnFilter = new Filter(columnName, param.operator, param.value)
-      setDataParameters({...dataParameters, filter: {...dataParameters.filter, [columnName]: columnFilter}})
+      setDataParameters((p) => {
+        const newDataParameters = {...p, filter: {...p.filter, [columnName]: columnFilter}}
+        console.log(newDataParameters)
+        return newDataParameters
+      })
     }
-
 
     let filter = undefined
     if(dataParameters.filter != undefined && dataParameters.filter[columnName] != undefined){
@@ -280,7 +291,11 @@ export default function TableInterface({ url }: EditTableProps) {
     }
 
     const setGroup = (group: string | undefined) => {
-      setDataParameters({...dataParameters, group: group})
+      setDataParameters((p) => {
+        const newDataParameters = {...p, filter: {...p.filter, [columnName]: columnFilter}}
+        console.log(newDataParameters)
+        return newDataParameters
+      })
     }
 
     return h(ColumnHeaderCell2, {
@@ -310,53 +325,68 @@ export default function TableInterface({ url }: EditTableProps) {
     return h(RowHeaderCell2, { "name": name }, []);
   }, [dataParameters, data, ])
 
-  if(data.length == 0 && error == undefined){
-    return h(Spinner)
-  }
+  const defaultColumnConfig = useMemo(() => {
 
-  const defaultColumnConfig = visibleColumnNames.reduce((prev, columnName, index) => {
+    if (tableColumns.length == 0) {
+      return {}
+    }
+
+    return visibleColumnNames.reduce((prev, columnName, index) => {
+      return {
+        ...prev,
+        [columnName]: h(Column, {
+          name: columnName,
+          className: FINAL_COLUMNS.includes(columnName) ? "final-column" : "",
+          columnHeaderCellRenderer: columnHeaderCellRenderer,
+          cellRenderer: (rowIndex) => h(LongTextCell, {
+            onConfirm: (value) => {
+              const tableUpdate = getTableUpdate(url, value, columnName, rowIndex, data, dataParameters)
+              setTableUpdates([...tableUpdates, tableUpdate])
+            },
+            value: data.length == 0 ? "" : data[rowIndex][columnName]
+          }),
+          "key": columnName
+        })
+      }
+    }, {})
+  }, [visibleColumnNames, tableColumns, dataParameters, data])
+
+  const columnConfig = useMemo(() => {
+
+    if (tableColumns.length == 0) {
+      return defaultColumnConfig
+    }
+
     return {
-      ...prev,
-      [columnName]: h(Column, {
-        name: columnName,
-        className: FINAL_COLUMNS.includes(columnName) ? "final-column" : "",
-        columnHeaderCellRenderer: columnHeaderCellRenderer,
-        cellRenderer: (rowIndex) => h(LongTextCell, {
+      ...defaultColumnConfig,
+      "t_interval": h(Column, {
+        ...defaultColumnConfig["t_interval"].props,
+        cellRenderer: (rowIndex) => h(IntervalSelection, {
+          "intervals": intervals,
           onConfirm: (value) => {
-            const tableUpdate = getTableUpdate(url, value, columnName, rowIndex, data, dataParameters)
+            const tableUpdate = getTableUpdate(url, value, "t_interval", rowIndex, data, dataParameters)
             setTableUpdates([...tableUpdates, tableUpdate])
           },
-          value: data[rowIndex][columnName]
-        }),
-        "key": columnName
+          value: data.length == 0 ? "" : data[rowIndex]["t_interval"]
+        })
+      }),
+      "b_interval": h(Column, {
+        ...defaultColumnConfig["b_interval"].props,
+        cellRenderer: (rowIndex) => h(IntervalSelection, {
+          "intervals": intervals,
+          onConfirm: (value) => {
+            const tableUpdate = getTableUpdate(url, value, "b_interval", rowIndex, data, dataParameters)
+            setTableUpdates([...tableUpdates, tableUpdate])
+          },
+          value: data.length == 0 ? "" : data[rowIndex]["b_interval"]
+        })
       })
     }
-  }, {})
+  }, [defaultColumnConfig, tableColumns, dataParameters, data])
 
-  const columnConfig = {
-    ...defaultColumnConfig,
-    "t_interval": h(Column, {
-      ...defaultColumnConfig["t_interval"].props,
-      cellRenderer: (rowIndex) => h(IntervalSelection, {
-        "intervals": intervals,
-        onConfirm: (value) => {
-          const tableUpdate = getTableUpdate(url, value, "t_interval", rowIndex, data, dataParameters)
-          setTableUpdates([...tableUpdates, tableUpdate])
-        },
-        value:  data[rowIndex]["t_interval"]
-      })
-    }),
-    "b_interval": h(Column, {
-      ...defaultColumnConfig["b_interval"].props,
-      cellRenderer: (rowIndex) => h(IntervalSelection, {
-        "intervals": intervals,
-        onConfirm: (value) => {
-          const tableUpdate = getTableUpdate(url, value, "b_interval", rowIndex, data, dataParameters)
-          setTableUpdates([...tableUpdates, tableUpdate])
-        },
-        value:  data[rowIndex]["b_interval"]
-      })
-    })
+
+  if(data.length == 0 && error == undefined){
+    return h(Spinner)
   }
 
   return h("div", {
@@ -411,17 +441,18 @@ export default function TableInterface({ url }: EditTableProps) {
             }
           },
           onVisibleCellsChange: (visibleCells) => {
-
-            console.log(visibleCells)
-            if(visibleCells["rowIndexEnd"] > parseInt(dataParameters.select.pageSize) - 10){
+            if(visibleCells["rowIndexEnd"] > parseInt(dataParameters.select.pageSize) - 2){
               const newPageSize = (parseInt(dataParameters.select.pageSize) + 50).toString()
 
-              setDataParameters({...dataParameters, select: {...dataParameters.select, pageSize: newPageSize}})
+              setDataParameters((p) => {
+                const newDataParameters = {...p, select: {...p.select, pageSize: newPageSize}}
+                console.log(newDataParameters)
+                return newDataParameters
+              })
             }
           },
           numRows: data.length,
-          // Dumb hacks to try to get the table to rerender on changes
-          cellRendererDependencies: [data, tableUpdates],
+          cellRendererDependencies: [data],
         },
         Object.values(columnConfig)
       ),
