@@ -5,7 +5,7 @@ import react from "@vitejs/plugin-react";
 import ssr from "vike/plugin";
 import revisionInfo from "@macrostrat/revision-info-webpack";
 import rewriteAll from "vite-plugin-rewrite-all";
-import cesium from "vite-plugin-cesium";
+import cesium from "./_toolchain/vite-plugin-cesium";
 
 import pkg from "./package.json";
 
