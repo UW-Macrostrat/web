@@ -292,8 +292,7 @@ export default function TableInterface({ url }: EditTableProps) {
 
     const setGroup = (group: string | undefined) => {
       setDataParameters((p) => {
-        const newDataParameters = {...p, filter: {...p.filter, [columnName]: columnFilter}}
-        console.log(newDataParameters)
+        const newDataParameters = {...p, group: group}
         return newDataParameters
       })
     }

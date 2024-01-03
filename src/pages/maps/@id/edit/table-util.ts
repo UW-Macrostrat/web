@@ -98,7 +98,7 @@ export function buildURL(baseURL: string, dataParameters: DataParameters){
 
 export const applyTableUpdate = (data: any[], tableUpdate: TableUpdate) => {
 
-	let appliedData = {...data}
+	let appliedData = [...data]
 	for(const [rowIndex, row] of data.entries()){
 		for(const columnName of Object.keys(row)){
 			appliedData[rowIndex][columnName] = tableUpdate.applyToCell(appliedData[rowIndex][columnName], row, columnName)
