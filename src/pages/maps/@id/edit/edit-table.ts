@@ -23,7 +23,8 @@ import {
   range,
   applyTableUpdate,
   applyTableUpdates,
-  submitColumnCopy
+  submitColumnCopy,
+  cloneDataParameters
 } from "~/pages/maps/@id/edit/table-util";
 import TableMenu from "~/pages/maps/@id/edit/table-menu";
 import IntervalSelection, {Interval} from "./components/cell/interval-selection";
@@ -277,8 +278,8 @@ export default function TableInterface({ url }: EditTableProps) {
     const onFilterChange = (param: OperatorQueryParameter) => {
       const columnFilter = new Filter(columnName, param.operator, param.value)
       setDataParameters((p) => {
-        const newDataParameters = {...p, filter: {...p.filter, [columnName]: columnFilter}}
-        console.log(newDataParameters)
+        let newDataParameters = cloneDataParameters(p)
+        newDataParameters.filter[columnName] = columnFilter
         return newDataParameters
       })
     }
@@ -292,7 +293,8 @@ export default function TableInterface({ url }: EditTableProps) {
 
     const setGroup = (group: string | undefined) => {
       setDataParameters((p) => {
-        const newDataParameters = {...p, group: group}
+        let newDataParameters = cloneDataParameters(p)
+        newDataParameters.group = group
         return newDataParameters
       })
     }
@@ -444,8 +446,8 @@ export default function TableInterface({ url }: EditTableProps) {
               const newPageSize = (parseInt(dataParameters.select.pageSize) + 50).toString()
 
               setDataParameters((p) => {
-                const newDataParameters = {...p, select: {...p.select, pageSize: newPageSize}}
-                console.log(newDataParameters)
+                let newDataParameters = cloneDataParameters(p)
+                newDataParameters.select.pageSize = newPageSize
                 return newDataParameters
               })
             }
