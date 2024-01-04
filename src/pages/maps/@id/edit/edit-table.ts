@@ -269,6 +269,7 @@ export default function TableInterface({ url }: EditTableProps) {
     }
 
     setTableUpdates([])
+    setDataParameters({select: {page: "0", pageSize: "50"}, filter: {}})
   }, [tableUpdates])
 
   const columnHeaderCellRenderer = useCallback((columnIndex: number) => {
