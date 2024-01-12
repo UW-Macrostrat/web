@@ -430,6 +430,10 @@ export default function TableInterface({ url }: EditTableProps) {
         {
           selectionModes: dataParameters?.group ? RegionCardinality.CELLS : SelectionModes.COLUMNS_AND_CELLS,
           rowHeaderCellRenderer: rowHeaderCellRenderer,
+          onPaste: (clipboardData, rowIndex, columnIndex) => {
+            const pastedText = clipboardData.getData("text/plain")
+            console.log(pastedText, ":", rowIndex, ",", columnIndex)
+          },
           onSelection: (selections: Selection[]) => {
             const selectedColumnRange = selections[0]?.cols
             if(selections[0]?.rows == undefined){

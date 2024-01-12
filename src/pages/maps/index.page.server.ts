@@ -14,10 +14,14 @@ export async function onBeforeRender(pageContext) {
   const sources = await response.json();
   sources.sort((a, b) => a.source_id - b.source_id);
 
-  const pageProps = { sources };
+  const pageProps = {
+    sources: sources,
+    user: pageContext.user,
+    url: pageContext.url
+  };
   return {
     pageContext: {
-      pageProps,
+      pageProps
     },
   };
 }
