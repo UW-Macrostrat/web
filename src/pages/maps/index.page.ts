@@ -11,7 +11,7 @@ import { Icon, IconSize, Navbar, AnchorButton, Tooltip, Card } from "@blueprintj
 
 const h = hyper.styled(styles);
 
-export function Page({ sources, user, url }) {
+export function Page({ sources, user, url, ingest_api }) {
 
   const sources1 = sources.map((source) => {
     const { source_id } = source;
@@ -34,7 +34,7 @@ export function Page({ sources, user, url }) {
             borderRadius: "50%",
             backgroundColor: user == undefined ? "#fdeb88" : "#90d090",
           },
-          href: `${import.meta.env.VITE_MACROSTRAT_INGEST_API}/security/login?return_url=${url}`,
+          href: `${ingest_api}/security/login?return_url=${url}`,
         })),
       ])
     ]),
