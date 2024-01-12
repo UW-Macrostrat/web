@@ -78,8 +78,8 @@ const SourceCard = ({source, user}: {source: Source, user: any | undefined}) => 
     h("div", {}, [
       h("h4", {style: {margin: "0px"}}, source.name),
       h("h6", {style: {margin: "0px"}}, source.scale),
+      h.if(source.rasterURL != null)([" ", h("span.raster", {style: {marginTop: ".5rem"}}, "Raster")]),
     ]),
-    h.if(source.rasterURL != null)([" ", h("span.raster", "Raster")]),
     h("div", {}, [
       h(AnchorButton, { href: href, icon: "map" }, "View"),
       h.if(user !== undefined)([
@@ -87,5 +87,21 @@ const SourceCard = ({source, user}: {source: Source, user: any | undefined}) => 
         h(AnchorButton, { href: edit_href, icon: "edit" }, "Edit")
       ])
     ]),
+  ]);
+}
+
+function SourceItem({ source }) {
+  const { source_id, name } = source;
+  const href = `/maps/${source_id}`;
+  const edit_href = `/maps/${source_id}/edit`;
+  return h("li", [
+    h("span.source-id", {}, source_id),
+    " ",
+    h("a", { href }, [name]),
+    " ",
+    h("span.scale", {}, source.scale),
+    h.if(source.rasterURL != null)([" ", h("span.raster", "Raster")]),
+    " ",
+    h("a", { href: edit_href }, [h(Icon, { icon: "edit", size: IconSize.SMALL })]),
   ]);
 }
