@@ -1,7 +1,7 @@
 import hyper from "@macrostrat/hyper";
 
 import { useState, useEffect, useCallback, useRef, useLayoutEffect, useMemo, FunctionComponent } from "react";
-import { HotkeysProvider, InputGroup, Button, useHotkeys } from "@blueprintjs/core";
+import { HotkeysProvider, InputGroup, Button, useHotkeys, Icon, IconSize } from "@blueprintjs/core";
 import { Spinner, ButtonGroup } from "@blueprintjs/core";
 import {
   Column,
@@ -301,6 +301,18 @@ export default function TableInterface({ url }: EditTableProps) {
     }
 
     return h(ColumnHeaderCell2, {
+      nameRenderer: () => h("div.column-name", {
+        style: {
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center"
+        }
+      }, [
+        h("span.selected-column", {}, [columnName]),
+        h.if(columnName in dataParameters.filter)(Icon, {icon: "filter-list", size: "15", color: "#333333"}),
+        h.if(!(columnName in dataParameters.filter))(Icon, {icon: "filter", size: "15", color: "#d0d0d0"})
+      ]),
       menuRenderer: () => h(TableMenu, {"columnName": columnName, "onFilterChange": onFilterChange, "filter": filter, "onGroupChange": setGroup, "group": dataParameters?.group}),
       name: columnName,
       style: {
