@@ -76,7 +76,7 @@ const SourceCard = ({source, user}: {source: Source, user: any | undefined}) => 
     }
   }, [
     h("div", {}, [
-      h("h4", {style: {margin: "0px"}}, source.name),
+      h("h4", {style: {margin: "0px"}}, source.source_id + " " + source.name),
       h("h6", {style: {margin: "0px"}}, source.scale),
       h.if(source.rasterURL != null)([" ", h("span.raster", {style: {marginTop: ".5rem"}}, "Raster")]),
     ]),
