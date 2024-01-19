@@ -67,6 +67,7 @@ const TableMenu = ({columnName, onFilterChange, filter, onGroupChange, group} : 
 						borderBottom: "none",
 						borderRadius: "2px 2px 0 0",
 					},
+					value: filter.operator,
 					onChange: (e) => {
 						if (e.target.value === "na") {
 							onFilterChange({operator: undefined, value: filter.value})
@@ -76,7 +77,9 @@ const TableMenu = ({columnName, onFilterChange, filter, onGroupChange, group} : 
 					}
 				}, [
 					...validExpressions.map((expression) => {
-						return h("option", {value: expression.key, selected: expression.key === filter.operator}, [expression.verbose])
+						return h("option", {
+							value: expression.key,
+						}, [expression.verbose])
 					})
 				]),
 				h("div.filter-input", {}, [
@@ -87,6 +90,10 @@ const TableMenu = ({columnName, onFilterChange, filter, onGroupChange, group} : 
 						onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
 							setInputValue(e.target.value);
 							debouncedInputChange(e)
+						},
+						onBlur: (e: React.FocusEvent<HTMLInputElement>) => {
+							// Make sure this value gets published if the menu is hidden be debounce
+							onInputChange(e)
 						}
 					}, [])
 				])
