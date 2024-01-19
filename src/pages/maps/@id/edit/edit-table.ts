@@ -148,7 +148,7 @@ export default function TableInterface({ url }: EditTableProps) {
       return typeof p == "object" && p.length > 0 ? p : Object.keys(data[0])
     })
 
-    // Apply tableupdates to the data
+    // Apply table updates to the data
     data = applyTableUpdates(data, tableUpdates)
 
     if(data.length == 0){
@@ -162,7 +162,7 @@ export default function TableInterface({ url }: EditTableProps) {
 
     // Set the table ref
     ref.current = Array.from({ length: data.length == 0 ? 1 : data.length }, () =>
-      Array.from({ length: Object.keys(data[0]).length == 0 ? 1 : Object.keys(data[0]).length }, () => null)
+      Array.from({ length: data.length == 0 ? 1 : Object.keys(data[0]).length }, () => null)
     );
 
     return data
