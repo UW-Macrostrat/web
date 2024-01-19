@@ -1,7 +1,7 @@
 import axios from "axios";
-import { SETTINGS } from "~/settings";
+import { apiV2Prefix } from "~/settings";
 
-export const base = `${SETTINGS.apiDomain}/api/v2`;
+export const base = apiV2Prefix;
 
 export type AddFilter = { type: "add-filter"; filter: FilterData };
 
