@@ -2,7 +2,7 @@ import {Button, MenuItem} from "@blueprintjs/core";
 import { Popover2 } from "@blueprintjs/popover2";
 import { Select2, ItemRenderer, ItemPredicate } from "@blueprintjs/select";
 import {EditableCell2Props, EditableCell2, Cell} from "@blueprintjs/table";
-import React, {useEffect, useMemo} from "react";
+import React, {useEffect, useMemo, forwardRef} from "react";
 
 // @ts-ignore
 import hyper from "@macrostrat/hyper";
@@ -14,7 +14,9 @@ import styles from "../../edit-table.module.sass";
 
 const h = hyper.styled(styles);
 
-const LongTextCell = ({value, onConfirm, intent, ...props} : EditableCell2Props) => {
+const LongTextCell = forwardRef((props: EditableCell2Props, forwardRef) => {
+
+  const {value, onConfirm} = props;
 
   const [localValue, setLocalValue] = React.useState(value == null ? "" : value.toString());
 
@@ -47,8 +49,8 @@ const LongTextCell = ({value, onConfirm, intent, ...props} : EditableCell2Props)
               }
             },
             onChange: (e) => {
-              console.log(e.target.value)
               setLocalValue(e.target.value)
+              e.preventDefault()
             }
           })
         ]),
@@ -57,7 +59,9 @@ const LongTextCell = ({value, onConfirm, intent, ...props} : EditableCell2Props)
         },
         renderTarget: ({isOpen, ref, ...targetProps }) => h(Button, {
           ...targetProps,
-          elementRef: ref,
+          onDoubleClick: (e) => {targetProps.onClick(e); e.stopPropagation()},
+          onClick: (e) => {e.stopPropagation()},
+          elementRef: (el) => {ref(el); forwardRef(el);},
           style: {backgroundColor: "white", fontSize: "12px", minHeight: "0px", padding: "1.7px 10px", boxShadow: "none"},
           fill: true,
           alignText: "left",
@@ -69,7 +73,7 @@ const LongTextCell = ({value, onConfirm, intent, ...props} : EditableCell2Props)
 
     )
   ])
-}
+})
 
 
 export default LongTextCell;

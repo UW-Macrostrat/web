@@ -1,6 +1,15 @@
 import hyper from "@macrostrat/hyper";
 
-import { useState, useEffect, useCallback, useRef, useLayoutEffect, useMemo, FunctionComponent } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useLayoutEffect,
+  useMemo,
+  FunctionComponent,
+  MutableRefObject
+} from "react";
 import { HotkeysProvider, InputGroup, Button, useHotkeys, Icon, IconSize } from "@blueprintjs/core";
 import { Spinner, ButtonGroup } from "@blueprintjs/core";
 import {
@@ -9,7 +18,7 @@ import {
   RowHeaderCell2,
   ColumnHeaderCell2,
   SelectionModes,
-  RegionCardinality
+  RegionCardinality, FocusedCellCoordinates
 } from "@blueprintjs/table";
 import update from "immutability-helper";
 
@@ -67,6 +76,9 @@ interface TableState {
 
 export default function TableInterface({ url }: EditTableProps) {
 
+  // Cell refs
+  const ref = useRef<MutableRefObject<any>[][]>(null)
+
   // Selection State
   const [selectedColumns, setSelectedColumns] = useState<string[]>([])
   const [copiedColumn, setCopiedColumn] = useState<string | undefined>(undefined)
@@ -89,6 +101,9 @@ export default function TableInterface({ url }: EditTableProps) {
   // Cell Values
   const [intervals, setIntervals] = useState<Interval[]>([])
 
+  // Focused Cell
+  const [focusedCell, setFocusedCell] = useState<FocusedCellCoordinates | undefined>(undefined)
+
   useEffect(() => {
 
     async function getIntervals() {
@@ -102,7 +117,6 @@ export default function TableInterface({ url }: EditTableProps) {
 
     getIntervals()
   }, [])
-
 
   const setTableUpdates = useCallback(async (newTableUpdates: TableUpdate[]) => {
 
@@ -140,12 +154,16 @@ export default function TableInterface({ url }: EditTableProps) {
     if(data.length == 0){
       setError("Warning: No results matched query")
     } else {
-
       setError(undefined)
     }
 
     // Remove the progress bar on data reload
     setUpdateProgress(undefined)
+
+    // Set the table ref
+    ref.current = Array.from({ length: data.length == 0 ? 1 : data.length }, () =>
+      Array.from({ length: Object.keys(data[0]).length == 0 ? 1 : Object.keys(data[0]).length }, () => null)
+    );
 
     return data
   }, [])
@@ -218,23 +236,38 @@ export default function TableInterface({ url }: EditTableProps) {
     }
   }, [selectedColumns])
 
+  const handleEnter = useCallback((e) => {
+    ref.current[focusedCell?.row][focusedCell?.col]?.click()
+    e.preventDefault()
+    e.stopPropagation()
+  }, [focusedCell])
+
   const hotkeys = useMemo(() => [
     {
       combo: "cmd+c",
       label: "Copy data",
       onKeyDown: handleCopy,
+      group: "Table"
     },
     {
       combo: "shift+h",
       label: "Hide Column",
       onKeyDown: handleHide,
+      group: "Table"
     },
     {
       combo: "cmd+v",
       label: "Paste Data",
       onKeyDown: handlePaste,
+      group: "Table"
+    },
+    {
+      combo: "enter",
+      label: "Edit Cell",
+      onKeyDown: handleEnter,
+      group: "Table"
     }
-  ], [handlePaste, handleCopy]);
+  ], [handlePaste, handleCopy, handleEnter, handleHide])
   const { handleKeyDown, handleKeyUp } = useHotkeys(hotkeys);
 
   const submitTableUpdates = useCallback(async () => {
@@ -255,7 +288,6 @@ export default function TableInterface({ url }: EditTableProps) {
           value: 1,
           text: "Error submitting changes"
         })
-        console.error(e)
 
         setTimeout(() => {
           setUpdateProgress(undefined)
@@ -310,8 +342,8 @@ export default function TableInterface({ url }: EditTableProps) {
         }
       }, [
         h("span.selected-column", {}, [columnName]),
-        h.if(columnName in dataParameters.filter)(Icon, {icon: "filter-list", size: "15", color: "#333333"}),
-        h.if(!(columnName in dataParameters.filter))(Icon, {icon: "filter", size: "15", color: "#d0d0d0"})
+        h.if(columnName in dataParameters.filter || columnName == dataParameters?.group)(Icon, {icon: "filter-list", size: "15", color: "#333333"}),
+        h.if(!(columnName in dataParameters.filter || columnName == dataParameters?.group))(Icon, {icon: "filter", size: "15", color: "#d0d0d0"})
       ]),
       menuRenderer: () => h(TableMenu, {"columnName": columnName, "onFilterChange": onFilterChange, "filter": filter, "onGroupChange": setGroup, "group": dataParameters?.group}),
       name: columnName,
@@ -319,6 +351,8 @@ export default function TableInterface({ url }: EditTableProps) {
         backgroundColor: filter.is_valid() || dataParameters?.group == columnName ? "rgba(27,187,255,0.12)" : "#ffffff00"
       }
     }, [])
+
+    console.log(dataParameters)
   }, [dataParameters, data, visibleColumnNames])
 
   const rowHeaderCellRenderer = useCallback((rowIndex: number) => {
@@ -352,7 +386,12 @@ export default function TableInterface({ url }: EditTableProps) {
           name: columnName,
           className: FINAL_COLUMNS.includes(columnName) ? "final-column" : "",
           columnHeaderCellRenderer: columnHeaderCellRenderer,
-          cellRenderer: (rowIndex) => h(LongTextCell, {
+          cellRenderer: (rowIndex: number, columnIndex: number) => h(EditableCell, {
+            ref: (el) => {
+              try {
+                ref.current[rowIndex][columnIndex] = el
+              } catch {}
+            },
             onConfirm: (value) => {
               const tableUpdate = getTableUpdate(url, value, columnName, rowIndex, data, dataParameters)
               setTableUpdates([...tableUpdates, tableUpdate])
@@ -375,7 +414,12 @@ export default function TableInterface({ url }: EditTableProps) {
       ...defaultColumnConfig,
       "t_interval": h(Column, {
         ...defaultColumnConfig["t_interval"].props,
-        cellRenderer: (rowIndex) => h(IntervalSelection, {
+        cellRenderer: (rowIndex: number, columnIndex: number) => h(IntervalSelection, {
+          ref: (el) => {
+            try {
+              ref.current[rowIndex][columnIndex] = el
+            } catch (e){}
+          },
           "intervals": intervals,
           onConfirm: (value) => {
             const tableUpdate = getTableUpdate(url, value, "t_interval", rowIndex, data, dataParameters)
@@ -386,7 +430,12 @@ export default function TableInterface({ url }: EditTableProps) {
       }),
       "b_interval": h(Column, {
         ...defaultColumnConfig["b_interval"].props,
-        cellRenderer: (rowIndex) => h(IntervalSelection, {
+        cellRenderer: (rowIndex: number, columnIndex: number) => h(IntervalSelection, {
+          ref: (el) => {
+            try {
+              ref.current[rowIndex][columnIndex] = el
+            } catch (e) {}
+          },
           "intervals": intervals,
           onConfirm: (value) => {
             const tableUpdate = getTableUpdate(url, value, "b_interval", rowIndex, data, dataParameters)
@@ -440,8 +489,19 @@ export default function TableInterface({ url }: EditTableProps) {
       h(
         Table2,
         {
+          enableFocusedCell: true,
           selectionModes: dataParameters?.group ? RegionCardinality.CELLS : SelectionModes.COLUMNS_AND_CELLS,
           rowHeaderCellRenderer: rowHeaderCellRenderer,
+          onFocusedCell: (focusedCellCoordinates) => {
+            try {
+              console.log(ref.current[focusedCell?.col][focusedCell?.row])
+              ref.current[focusedCellCoordinates?.row][focusedCellCoordinates?.col]?.focus()
+            } catch (e) {}
+
+            setFocusedCell(focusedCellCoordinates)
+
+          },
+          focusedCell: focusedCell,
           onPaste: (clipboardData, rowIndex, columnIndex) => {
             const pastedText = clipboardData.getData("text/plain")
             console.log(pastedText, ":", rowIndex, ",", columnIndex)

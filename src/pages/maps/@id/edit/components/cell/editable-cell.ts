@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { forwardRef, useEffect } from "react";
 
-import {EditableCell2, EditableCell2Props} from "@blueprintjs/table";
+import {Cell, EditableCell2Props} from "@blueprintjs/table";
 
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
@@ -14,7 +14,51 @@ interface EditableCell extends EditableCell2Props {
   rowIndex: number
 }
 
-export const EditableCell = ({...props}: EditableCell2Props) => {
+export const EditableCell = forwardRef((props: EditableCell2Props, ref) => {
 
-  return h(EditableCell2, {...props});
-}
+  const [value, setValue] = React.useState(props.value);
+
+  useEffect(() => {
+    setValue(props.value)
+  }, [props.value])
+
+  return h(Cell,
+    {...props,
+      style: {...props.style, padding: 0},
+      truncated: false
+    },
+    [
+      h("input", {
+        ref: ref,
+        className: "editable-cell",
+        style: {
+          width: (value?.length ?? 2) + "ch"
+        },
+        value: value || "",
+        onChange: (e) => {
+          setValue(e.target.value)
+          e.target.style.width = (e.target.value.length + 8) + "ch"
+          console.log(e.target.value.length)
+        },
+        onClick: (e) => {
+          e.target.select()
+        },
+        onFocus: (e) => {
+          console.log("Focus")
+          e.target.select()
+          e.target.select()
+          e.target.select()
+          e.target.select()
+          e.preventDefault()
+          e.stopPropagation()
+
+        },
+        onBlur: (e) => {
+          if(value != props.value) {
+            props.onConfirm(value)
+          }
+        }
+      }, [])
+    ]
+  )
+})

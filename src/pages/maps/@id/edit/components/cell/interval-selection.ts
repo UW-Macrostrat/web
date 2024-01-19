@@ -1,7 +1,7 @@
 import {Button, MenuItem} from "@blueprintjs/core";
 import { Select2, ItemRenderer, ItemPredicate } from "@blueprintjs/select";
 import {EditableCell2Props, EditableCell2, Cell} from "@blueprintjs/table";
-import React, {useEffect, useMemo} from "react";
+import React, {useEffect, useMemo, forwardRef} from "react";
 
 // @ts-ignore
 import hyper from "@macrostrat/hyper";
@@ -60,7 +60,9 @@ const IntervalOption: ItemRenderer<Interval> = (interval: Interval, { handleClic
 }
 
 
-const IntervalSelection = ({value, onConfirm, intent, intervals, ...props} : EditableCell2Props & {intervals: Interval[]}) => {
+const IntervalSelection = forwardRef((props : EditableCell2Props & {intervals: Interval[]} , ref) => {
+
+	const {value, onConfirm, intent, intervals, ...cellProps} = props
 
 	const [localValue, setLocalValue] = React.useState<string>(value);
 
@@ -83,7 +85,7 @@ const IntervalSelection = ({value, onConfirm, intent, intervals, ...props} : Edi
 	}, [value, localValue, intervals])
 
 	return h(Cell, {
-		...props,
+		...cellProps,
 		style: {...props.style, padding: 0},
 	}, [
 		h(Select2<Interval>, {
@@ -106,6 +108,7 @@ const IntervalSelection = ({value, onConfirm, intent, intervals, ...props} : Edi
 			noResults: h(MenuItem, {disabled: true, text: "No results.", roleStructure: "listoption"}),
 		}, [
 			h(Button, {
+				elementRef: ref,
 				style: {backgroundColor: interval?.color ?? "white", fontSize: "12px", minHeight: "0px", padding: "1.7px 10px", boxShadow: "none"},
 				fill: true,
 				alignText: "left",
@@ -116,7 +119,7 @@ const IntervalSelection = ({value, onConfirm, intent, intervals, ...props} : Edi
 			}, [])
 		]),
 	])
-}
+})
 
 
 export default IntervalSelection;

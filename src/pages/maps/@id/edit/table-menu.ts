@@ -62,7 +62,6 @@ const TableMenu = ({columnName, onFilterChange, filter, onGroupChange, group} : 
 	// Create a debounced version of the text state
 	const [inputValue, setInputValue] = React.useState<string>(filter.value);
 	const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setMenuOpen(false);
 		onFilterChange({operator: filter.operator, value: e.target.value})
 	}
 	const debouncedInputChange = useDebouncedCallback(onInputChange, 1000);
@@ -73,6 +72,8 @@ const TableMenu = ({columnName, onFilterChange, filter, onGroupChange, group} : 
 	// Set if this group is active
 	const groupActive: boolean = group === columnName;
 
+	console.log(menuOpen)
+
 	return h(Menu, {}, [
 		h("div.filter-container", {}, [
 			h("div.filter-header", {}, ["Filter"]),
@@ -82,10 +83,12 @@ const TableMenu = ({columnName, onFilterChange, filter, onGroupChange, group} : 
 					items: validExpressions,
 					className: "update-input-group",
 					filterable: false,
-					popoverProps: {isOpen: menuOpen},
+					popoverProps: {
+						isOpen: menuOpen,
+						captureDismiss: true
+					},
 					itemRenderer: OperatorFilterOption,
 					onItemSelect: (operator: ColumnOperatorOption) => {
-						setMenuOpen(false);
 						setInputPlaceholder(operator.placeholder || "");
 						onFilterChange({operator: operator.key, value: filter.value})
 					},
@@ -107,7 +110,15 @@ const TableMenu = ({columnName, onFilterChange, filter, onGroupChange, group} : 
 					"value": inputValue,
 					className: "update-input-group",
 					placeholder: inputPlaceholder,
-					onChange: (e: React.ChangeEvent<HTMLInputElement>) => {setInputValue(e.target.value); debouncedInputChange(e)}
+					onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+						// If they hit enter close the menu
+						if(e.key == "Enter") {
+							setMenuOpen(false);
+						}
+
+						setInputValue(e.target.value);
+						debouncedInputChange(e)
+					}
 				}, [])
 			]),
 			h("div.filter-header", {}, ["Group"]),
@@ -119,7 +130,10 @@ const TableMenu = ({columnName, onFilterChange, filter, onGroupChange, group} : 
 						intent: groupActive ? "success" : "warning",
 						text: groupActive ? "Active" : "Inactive",
 						fill: true,
-						onClick: () => onGroupChange(group == filter.column_name ? undefined : filter.column_name)
+						onClick: () => {
+							onGroupChange(group == filter.column_name ? undefined : filter.column_name)
+							setMenuOpen(false);
+						}
 					}, [])
 			]),
 		])
