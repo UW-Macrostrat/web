@@ -25,7 +25,7 @@ export default function vitePluginCesium(
   } = options;
 
   let CESIUM_BASE_URL = "cesium/";
-  let outDir = "dist";
+  let outDir = "dist/client";
   let base: string = "/";
   let isBuild: boolean = false;
 
@@ -34,17 +34,6 @@ export default function vitePluginCesium(
 
     config(c, { command }) {
       isBuild = command === "build";
-      if (c.base !== undefined) {
-        base = c.base;
-        if (base === "") base = "./";
-      }
-      if (c.build?.outDir) {
-        if (c.root !== undefined) {
-          outDir = path.join(c.root, c.build.outDir);
-        } else {
-          outDir = c.build.outDir;
-        }
-      }
       CESIUM_BASE_URL = path.posix.join(base, CESIUM_BASE_URL);
       const userConfig: UserConfig = {};
       if (!isBuild) {
@@ -61,7 +50,7 @@ export default function vitePluginCesium(
             chunkSizeWarningLimit: 5000,
             rollupOptions: {
               output: {
-                intro: `window.CESIUM_BASE_URL = "${CESIUM_BASE_URL}";`,
+                intro: `if (typeof window !== 'undefined') window.CESIUM_BASE_URL = "${CESIUM_BASE_URL}";`,
               },
             },
           };
@@ -79,6 +68,7 @@ export default function vitePluginCesium(
     },
 
     configureServer({ middlewares }) {
+      console.log(cesiumBuildRootPath);
       const cesiumPath = path.join(
         cesiumBuildRootPath,
         devMinifyCesium ? "Cesium" : "CesiumUnminified"
