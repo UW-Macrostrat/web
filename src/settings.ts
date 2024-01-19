@@ -25,6 +25,9 @@ export const SETTINGS = {
   mapboxAccessToken: import.meta.env.VITE_MAPBOX_API_TOKEN,
 };
 
+export const apiV2Prefix =
+  import.meta.env.VITE_MACROSTRAT_API_V2 ?? SETTINGS.apiDomain + "/api/v2";
+
 export const mapPagePrefix = "/map";
 
 export const routerBasename = import.meta.env.BASE_URL + "map";

@@ -1,9 +1,9 @@
-import { PageContextBuiltInServer } from "vike/types";
-import { SETTINGS } from "~/settings";
 import h from "@macrostrat/hyper";
+import { PageContextBuiltInServer } from "vike/types";
 import { ClientOnly } from "~/renderer/client-only";
+import { apiV2Prefix } from "~/settings";
 
-const apiAddress = SETTINGS.apiDomain + "/api/v2/defs/sources";
+const apiAddress = apiV2Prefix + "/defs/sources";
 
 export async function onBeforeRender(pageContext: PageContextBuiltInServer) {
   const { id } = pageContext.routeParams;

@@ -1,20 +1,20 @@
-import React, { useRef, useEffect } from "react";
+import { Button, Spinner } from "@blueprintjs/core";
+import hyper from "@macrostrat/hyper";
+import { LocationFocusButton } from "@macrostrat/mapbox-react";
+import { useAPIResult } from "@macrostrat/ui-components";
+import { bisector, extent, max, min } from "d3-array";
+import { axisBottom, axisLeft } from "d3-axis";
+import { scaleLinear } from "d3-scale";
+import { mouse, select } from "d3-selection";
+import { area, line } from "d3-shape";
+import React, { useEffect, useRef } from "react";
 import {
   useAppActions,
   useAppState,
 } from "~/pages/map/map-interface/app-state";
-import hyper from "@macrostrat/hyper";
-import { Button, Spinner } from "@blueprintjs/core";
-import { select, mouse } from "d3-selection";
-import { scaleLinear } from "d3-scale";
-import { axisBottom, axisLeft } from "d3-axis";
-import { line, area } from "d3-shape";
-import { min, max, extent, bisector } from "d3-array";
-import { useAPIResult } from "@macrostrat/ui-components";
-import { LocationFocusButton } from "@macrostrat/mapbox-react";
 
+import { apiV2Prefix } from "~/settings";
 import styles from "./main.module.styl";
-import { SETTINGS } from "~/settings";
 const h = hyper.styled(styles);
 
 function drawElevationChart(
@@ -214,15 +214,12 @@ function ElevationChart({ elevationData = [] }) {
 }
 
 function ElevationChartPanel({ startPos, endPos }) {
-  const elevation: any = useAPIResult(
-    SETTINGS.apiDomain + "/api/v2/elevation",
-    {
-      start_lng: startPos[0],
-      start_lat: startPos[1],
-      end_lng: endPos[0],
-      end_lat: endPos[1],
-    }
-  );
+  const elevation: any = useAPIResult(apiV2Prefix + "/elevation", {
+    start_lng: startPos[0],
+    start_lat: startPos[1],
+    end_lng: endPos[0],
+    end_lat: endPos[1],
+  });
   const elevationData = elevation?.success?.data;
   if (elevationData == null) return h(Spinner);
   return h(

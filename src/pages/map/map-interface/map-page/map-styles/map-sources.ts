@@ -1,8 +1,7 @@
-import { useEffect } from "react";
 import { useMapElement } from "@macrostrat/mapbox-react";
 import { useAPIResult } from "@macrostrat/ui-components";
-import { SETTINGS } from "~/settings";
-import { features } from "process";
+import { useEffect } from "react";
+import { apiV2Prefix } from "~/settings";
 
 const sourceMapStyle = {
   version: 8,
@@ -73,10 +72,10 @@ function removeStyle(map, style) {
 
 export function MapSourcesLayer() {
   const map = useMapElement();
-  const featureData: any = useAPIResult(
-    SETTINGS.apiDomain + "/api/v2/defs/sources",
-    { all: true, format: "geojson_bare" }
-  );
+  const featureData: any = useAPIResult(apiV2Prefix + "/defs/sources", {
+    all: true,
+    format: "geojson_bare",
+  });
   useEffect(() => {
     if (!map || !featureData) return;
 
