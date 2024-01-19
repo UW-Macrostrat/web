@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
-import { SETTINGS } from "~/settings";
+import { apiV2Prefix } from "~/settings";
 
-const apiAddress = SETTINGS.apiDomain + "/api/v2/defs/sources";
+const apiAddress = apiV2Prefix + "/defs/sources";
 
 export async function onBeforeRender(pageContext) {
   // `.page.server.js` files always run in Node.js; we could use SQL/ORM queries here.
