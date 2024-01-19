@@ -342,8 +342,8 @@ export default function TableInterface({ url }: EditTableProps) {
         }
       }, [
         h("span.selected-column", {}, [columnName]),
-        h.if(columnName in dataParameters.filter || columnName == dataParameters?.group)(Icon, {icon: "filter-list", size: "15", color: "#333333"}),
-        h.if(!(columnName in dataParameters.filter || columnName == dataParameters?.group))(Icon, {icon: "filter", size: "15", color: "#d0d0d0"})
+        h.if((columnName in dataParameters.filter && dataParameters.filter[columnName].is_valid()) || columnName == dataParameters?.group)(Icon, {icon: "filter-list", size: "15", color: "#333333"}),
+        h.if(!((columnName in dataParameters.filter && dataParameters.filter[columnName].is_valid()) || columnName == dataParameters?.group))(Icon, {icon: "filter", size: "15", color: "#d0d0d0"})
       ]),
       menuRenderer: () => h(TableMenu, {"columnName": columnName, "onFilterChange": onFilterChange, "filter": filter, "onGroupChange": setGroup, "group": dataParameters?.group}),
       name: columnName,
