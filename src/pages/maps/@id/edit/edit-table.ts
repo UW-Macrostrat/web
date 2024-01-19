@@ -120,12 +120,6 @@ export default function TableInterface({ url }: EditTableProps) {
 
   const setTableUpdates = useCallback(async (newTableUpdates: TableUpdate[]) => {
 
-    // If the table updates are empty, reset the data
-    if (newTableUpdates.length == 0) {
-      let newData = await getData(newTableUpdates, dataParameters)
-      setData(newData)
-    }
-
     // If a new update is available apply it to the data
     if(newTableUpdates.length > tableUpdates.length){
       let newData = applyTableUpdate(data, newTableUpdates.slice(-1)[0])
@@ -351,8 +345,6 @@ export default function TableInterface({ url }: EditTableProps) {
         backgroundColor: filter.is_valid() || dataParameters?.group == columnName ? "rgba(27,187,255,0.12)" : "#ffffff00"
       }
     }, [])
-
-    console.log(dataParameters)
   }, [dataParameters, data, visibleColumnNames])
 
   const rowHeaderCellRenderer = useCallback((rowIndex: number) => {
@@ -494,7 +486,6 @@ export default function TableInterface({ url }: EditTableProps) {
           rowHeaderCellRenderer: rowHeaderCellRenderer,
           onFocusedCell: (focusedCellCoordinates) => {
             try {
-              console.log(ref.current[focusedCell?.col][focusedCell?.row])
               ref.current[focusedCellCoordinates?.row][focusedCellCoordinates?.col]?.focus()
             } catch (e) {}
 
@@ -504,7 +495,6 @@ export default function TableInterface({ url }: EditTableProps) {
           focusedCell: focusedCell,
           onPaste: (clipboardData, rowIndex, columnIndex) => {
             const pastedText = clipboardData.getData("text/plain")
-            console.log(pastedText, ":", rowIndex, ",", columnIndex)
           },
           onSelection: (selections: Selection[]) => {
             const selectedColumnRange = selections[0]?.cols
