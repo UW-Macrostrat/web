@@ -66,6 +66,10 @@ const IntervalSelection = forwardRef((props : EditableCell2Props & {intervals: I
 
 	const [localValue, setLocalValue] = React.useState<string>(value);
 
+	useEffect(() => {
+		setLocalValue(value)
+	}, [value])
+
 	const filterInterval: ItemPredicate<Interval> = (query, interval) => {
 
 		if(interval?.name == undefined){
