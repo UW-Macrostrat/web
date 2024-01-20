@@ -1,14 +1,14 @@
 // Import @types/cesium to use along with CesiumJS
 //import VectorProvider from "@macrostrat/cesium-vector-provider";
 import TerrainProvider from "@macrostrat/cesium-martini";
-import { useRef } from "react";
-import h from "@macrostrat/hyper";
-import { ImageryLayer } from "resium";
 import CesiumViewer, {
   DisplayQuality,
   MapboxLogo,
 } from "@macrostrat/cesium-viewer";
+import h from "@macrostrat/hyper";
 import { MapboxImageryProvider } from "cesium";
+import { useRef } from "react";
+import { ImageryLayer } from "resium";
 
 // export function BaseLayer({ enabled = true, style, accessToken, ...rest }) {
 //   const provider = useRef(
@@ -46,8 +46,8 @@ function CesiumView({ style, accessToken, ...rest }) {
       hasVertexNormals: false,
       hasWaterMask: false,
       accessToken,
-      highResolution: true,
-      skipZoomLevels: (z) => z % 3 != 0,
+      highResolution: false,
+      skipZoomLevels: (z) => z % 2 != 0,
       credit: "Mapbox",
     })
   );
