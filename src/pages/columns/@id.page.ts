@@ -4,7 +4,7 @@ import { ClientOnly } from "~/renderer/client-only";
 
 const StratColumn = (props) => {
   return h(ClientOnly, {
-    component: () => import("./strat-column").then((d) => d.StratColumn),
+    component: () => import("./column-inspector"),
     ...props,
   });
 };
