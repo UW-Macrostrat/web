@@ -1,8 +1,18 @@
 import h from "@macrostrat/hyper";
 
-export function Page({ units, col_id }) {
+import { ClientOnly } from "~/renderer/client-only";
+
+const StratColumn = (props) => {
+  return h(ClientOnly, {
+    component: () => import("./strat-column").then((d) => d.StratColumn),
+    ...props,
+  });
+};
+
+export function Page({ columnInfo }) {
+  const { col_id } = columnInfo;
   return h("div", [
-    "Column " + col_id,
-    h("pre", JSON.stringify(units, null, 2)),
+    h("h1", "Column " + col_id),
+    h(StratColumn, { columnInfo }),
   ]);
 }

@@ -1,19 +1,37 @@
+import { preprocessUnits } from "@macrostrat/column-views/src/helpers";
 import fetch from "node-fetch";
+import { ColumnSummary } from "~/pages/map/map-interface/app-state/handlers/columns";
 import { apiV2Prefix } from "~/settings";
 
-const apiAddress = apiV2Prefix + "/units";
+async function getAndUnwrap<T>(url: string): Promise<T> {
+  const res = await fetch(url);
+  const res1 = await res.json();
+  return res1.success.data;
+}
 
 export async function onBeforeRender(pageContext) {
   // `.page.server.js` files always run in Node.js; we could use SQL/ORM queries here.
   const col_id = pageContext.routeParams.id;
-  const response = await fetch(apiAddress + "?col_id=" + col_id);
-  const res = await response.json();
-  const units = res.success.data;
 
-  const pageProps = { units, col_id };
+  // https://v2.macrostrat.org/api/v2/columns?col_id=3&response=long
+
+  const responses = await Promise.all([
+    getAndUnwrap(apiV2Prefix + "/columns?response=long&col_id=" + col_id),
+    getAndUnwrap(apiV2Prefix + "/units?response=long&col_id=" + col_id),
+  ]);
+
+  const [column, unitsLong]: [any, any] = responses;
+
+  const columnInfo: ColumnSummary = {
+    ...column[0],
+    units: preprocessUnits(unitsLong),
+  };
+
   return {
     pageContext: {
-      pageProps,
+      pageProps: {
+        columnInfo,
+      },
     },
   };
 }
