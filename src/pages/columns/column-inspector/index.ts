@@ -1,3 +1,4 @@
+import { MacrostratAPIProvider } from "@macrostrat/api-views";
 import {
   ColumnNavigatorMap,
   UnitSelectionProvider,
@@ -10,8 +11,11 @@ import { useEffect, useRef } from "react";
 
 import { Column } from "@macrostrat/column-views";
 import { PatternProvider } from "~/_providers";
+import { apiV2Prefix } from "~/settings";
 import styles from "./column-inspector.module.styl";
 import ModalUnitPanel from "./modal-panel";
+
+// import { navigate } from "vike/client/router";
 
 const h = hyperStyled(styles);
 
@@ -52,7 +56,14 @@ function ColumnPage({ columnInfo }) {
             project_id: columnInfo.project_id,
           },
         },
-        setCurrentColumn() {},
+        setCurrentColumn(newColumn) {
+          const { col_id } = newColumn.properties;
+          window.location.href = `/columns/${col_id}`;
+          //console.log("Set current column", args);
+          // TODO: this should be a client-side route
+          // Once we enable client-side routing, we can use this to navigate
+          //navigate(`/columns/${columnInfo.col_id}`);
+        },
         margin: 10,
         project_id: columnInfo.project_id,
       }),
@@ -63,8 +74,9 @@ function ColumnPage({ columnInfo }) {
 
 export default function ColumnInspector({ columnInfo }) {
   return h(
-    UnitSelectionProvider,
-    h(PatternProvider, h(ColumnPage, { columnInfo }))
+    MacrostratAPIProvider,
+    { baseURL: apiV2Prefix },
+    h(UnitSelectionProvider, h(PatternProvider, h(ColumnPage, { columnInfo })))
   );
 }
 
