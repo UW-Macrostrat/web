@@ -4,15 +4,11 @@ import { ClientOnly } from "~/renderer/client-only";
 
 const StratColumn = (props) => {
   return h(ClientOnly, {
-    component: () => import("./strat-column").then((d) => d.StratColumn),
+    component: () => import("./column-inspector"),
     ...props,
   });
 };
 
 export function Page({ columnInfo }) {
-  const { col_id } = columnInfo;
-  return h("div", [
-    h("h1", "Column " + col_id),
-    h(StratColumn, { columnInfo }),
-  ]);
+  return h(StratColumn, { columnInfo });
 }

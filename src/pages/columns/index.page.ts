@@ -7,6 +7,8 @@ export function Page({ columnGroups }) {
   ]);
 }
 
+export const pageStyle = "content";
+
 function ColumnGroup({ data }) {
   const { id, name, columns } = data;
   return h("div.column-group", [
