@@ -1,11 +1,10 @@
-import { hyperStyled } from "@macrostrat/hyper";
-import { JSONView, ModalPanel, useKeyHandler } from "@macrostrat/ui-components";
-import { ButtonGroup, Button } from "@blueprintjs/core";
+import { Button, ButtonGroup } from "@blueprintjs/core";
 import {
   useSelectedUnit,
   useUnitSelectionDispatch,
 } from "@macrostrat/column-views";
-import { useEffect } from "react";
+import { hyperStyled } from "@macrostrat/hyper";
+import { JSONView, ModalPanel, useKeyHandler } from "@macrostrat/ui-components";
 import styles from "./column-inspector.module.styl";
 
 const h = hyperStyled(styles);

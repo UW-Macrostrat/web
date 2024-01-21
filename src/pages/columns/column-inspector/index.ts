@@ -48,8 +48,8 @@ function ColumnPage({ columnInfo }) {
   // This seems a little outdated
   useEffect(() => {
     if (selectedUnit == null && !unitSelectionInitialized) return;
-    setSelectedUnit({ unit_id: selectedUnit?.unit_id });
-  }, [unit_id, unitSelectionInitialized]);
+    setSelectedUnit(selectedUnit);
+  }, [selectedUnit, unitSelectionInitialized]);
 
   // 495
   return h("div.column-ui", [
