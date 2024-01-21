@@ -1,10 +1,10 @@
-export { render };
+export { render as onRenderHtml };
 // See https://vike.dev/data-fetching
-export const passToClient = ["pageProps", "urlPathname"];
 
+import h from "@macrostrat/hyper";
 import ReactDOMServer from "react-dom/server";
+import { dangerouslySkipEscape, escapeInject } from "vike/server";
 import { PageShell } from "./page-shell";
-import { escapeInject, dangerouslySkipEscape } from "vike/server";
 import type { PageContextServer } from "./types";
 
 async function render(pageContext: PageContextServer) {
@@ -13,9 +13,7 @@ async function render(pageContext: PageContextServer) {
   if (!Page)
     throw new Error("render() hook expects pageContext.Page to be defined");
   const pageHtml = ReactDOMServer.renderToString(
-    <PageShell pageContext={pageContext}>
-      <Page {...pageProps} />
-    </PageShell>
+    h(PageShell, { pageContext }, h(Page, pageProps))
   );
 
   // See https://vike.dev/head
