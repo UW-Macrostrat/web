@@ -5,7 +5,7 @@ import {
 } from "@macrostrat/column-views";
 import { hyperStyled } from "@macrostrat/hyper";
 import { getHashString, setHashString } from "@macrostrat/ui-components";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 import { Column } from "@macrostrat/column-views";
 import { PatternProvider } from "~/_providers";
@@ -16,15 +16,9 @@ const h = hyperStyled(styles);
 
 function ColumnPage({ columnInfo }) {
   const { units } = columnInfo;
-  //const { unit_id, ...currentColumn } = columnNavArgs;
-
-  const unitsA = useMemo(() => units, []);
-
-  //const columnFeature = useAPIResult("/columns", colParams)?.features[0];
 
   useUnitSelection(units);
 
-  // 495
   return h("div.column-ui", [
     h("div.left-column", [
       h("div.column-view", [
@@ -34,7 +28,15 @@ function ColumnPage({ columnInfo }) {
           ", ",
           h("span.project", ["project ", columnInfo.project_id]),
         ]),
-        h(Column, { data: units, unconformityLabels: true }),
+        h(Column, {
+          data: units,
+          unconformityLabels: true,
+          columnWidth: 250,
+          width: 500,
+          unitComponentProps: {
+            nColumns: 3,
+          },
+        }),
       ]),
     ]),
     h("div.right-column", [
@@ -77,13 +79,13 @@ function useUnitSelection(units) {
     if (!initialized) {
       // Harvest selected unit ID from hash string
       const unit_id =
-        getHashString(document.location.hash)?.unit_id ?? selectedUnit?.unit_id;
+        getHashString(document.location.hash)?.unit ?? selectedUnit?.unit_id;
 
       const unit = units.find((d) => d.unit_id == unit_id);
       setSelectedUnit(unit);
       initializedRef.current = true;
     } else {
-      setHashString({ unit_id: selectedUnit?.unit_id });
+      setHashString({ unit: selectedUnit?.unit_id });
       setSelectedUnit(selectedUnit);
     }
   }, [units, selectedUnit]);
