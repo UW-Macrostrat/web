@@ -1,10 +1,9 @@
-import { MacrostratAPIProvider } from "@macrostrat/api-views";
 import {
   UnitSelectionProvider,
   useSelectedUnit,
   useUnitSelectionDispatch,
 } from "@macrostrat/column-views";
-import { C, compose, hyperStyled } from "@macrostrat/hyper";
+import { hyperStyled } from "@macrostrat/hyper";
 import { useEffect, useMemo, useState } from "react";
 
 import { Column } from "@macrostrat/column-views";
@@ -46,10 +45,11 @@ function ColumnPage({ columnInfo }) {
     setUnitSelectionInitialized(true);
   }, []);
 
+  // This seems a little outdated
   useEffect(() => {
     if (selectedUnit == null && !unitSelectionInitialized) return;
     setSelectedUnit({ unit_id: selectedUnit?.unit_id });
-  }, [selectedUnit, unitSelectionInitialized]);
+  }, [unit_id, unitSelectionInitialized]);
 
   // 495
   return h("div.column-ui", [
@@ -72,13 +72,16 @@ function ColumnPage({ columnInfo }) {
   ]);
 }
 
-const APIProvider = C(MacrostratAPIProvider, { useDev: false });
+export default function ColumnInspector({ columnInfo }) {
+  return h(
+    UnitSelectionProvider,
+    h(PatternProvider, h(ColumnPage, { columnInfo }))
+  );
+}
 
-const ColumnInspector = compose(
-  PatternProvider,
-  UnitSelectionProvider,
-  APIProvider,
-  ColumnPage
-);
-
-export default ColumnInspector;
+// const ColumnInspector = compose(
+//   PatternProvider,
+//   UnitSelectionProvider,
+//   APIProvider,
+//   ColumnPage
+// );
