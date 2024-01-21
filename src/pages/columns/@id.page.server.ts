@@ -16,14 +16,19 @@ export async function onBeforeRender(pageContext) {
   // https://v2.macrostrat.org/api/v2/columns?col_id=3&response=long
 
   const responses = await Promise.all([
-    getAndUnwrap(apiV2Prefix + "/columns?response=long&col_id=" + col_id),
+    getAndUnwrap(
+      apiV2Prefix + "/columns?format=geojson&response=long&col_id=" + col_id
+    ),
     getAndUnwrap(apiV2Prefix + "/units?response=long&col_id=" + col_id),
   ]);
 
   const [column, unitsLong]: [any, any] = responses;
 
+  const col = column?.features[0];
+
   const columnInfo: ColumnSummary = {
-    ...column[0],
+    ...col.properties,
+    geometry: col.geometry,
     units: preprocessUnits(unitsLong),
   };
 

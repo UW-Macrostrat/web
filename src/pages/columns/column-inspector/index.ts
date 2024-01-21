@@ -1,4 +1,5 @@
 import {
+  ColumnNavigatorMap,
   UnitSelectionProvider,
   useSelectedUnit,
   useUnitSelectionDispatch,
@@ -15,9 +16,9 @@ import ModalUnitPanel from "./modal-panel";
 const h = hyperStyled(styles);
 
 function ColumnPage({ columnInfo }) {
-  const { units } = columnInfo;
+  const { units, geometry } = columnInfo;
 
-  useUnitSelection(units);
+  const selectedUnit = useUnitSelection(units);
 
   return h("div.column-ui", [
     h("div.left-column", [
@@ -40,13 +41,21 @@ function ColumnPage({ columnInfo }) {
       ]),
     ]),
     h("div.right-column", [
-      // h.if(selectedUnit == null)(ColumnNavigatorMap, {
-      //   className: "column-map",
-      //   currentColumn: columnFeature,
-      //   setCurrentColumn,
-      //   margin: 10,
-      //   ...projectParams,
-      // }),
+      h.if(selectedUnit == null)(ColumnNavigatorMap, {
+        className: "column-map",
+        currentColumn: {
+          geometry,
+          type: "Feature",
+          properties: {
+            col_id: columnInfo.col_id,
+            col_name: columnInfo.col_name,
+            project_id: columnInfo.project_id,
+          },
+        },
+        setCurrentColumn() {},
+        margin: 10,
+        project_id: columnInfo.project_id,
+      }),
       h(ModalUnitPanel, { unitData: units }),
     ]),
   ]);
@@ -59,7 +68,7 @@ export default function ColumnInspector({ columnInfo }) {
   );
 }
 
-function useUnitSelection(units) {
+function useUnitSelection(units): number {
   /* Harmonize selected unit and column data providers
     TODO: we could link the providers for selecting units and columns,
     but for now we have just nested together current separate state elements
@@ -89,4 +98,6 @@ function useUnitSelection(units) {
       setSelectedUnit(selectedUnit);
     }
   }, [units, selectedUnit]);
+
+  return selectedUnit?.unit_id;
 }
