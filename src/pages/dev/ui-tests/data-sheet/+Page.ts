@@ -1,7 +1,7 @@
-import hyper from "@macrostrat/hyper";
 import { Breadcrumbs, HotkeysProvider } from "@blueprintjs/core";
+import hyper from "@macrostrat/hyper";
 import { ClientOnly } from "~/renderer/client-only";
-import style from "./main.module.sass";
+import style from "../main.module.sass";
 
 const h = hyper.styled(style);
 

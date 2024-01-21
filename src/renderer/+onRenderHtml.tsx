@@ -1,10 +1,9 @@
-export { render };
+export { render as onRenderHtml };
 // See https://vike.dev/data-fetching
-export const passToClient = ["pageProps", "urlPathname"];
 
 import ReactDOMServer from "react-dom/server";
+import { dangerouslySkipEscape, escapeInject } from "vike/server";
 import { PageShell } from "./page-shell";
-import { escapeInject, dangerouslySkipEscape } from "vike/server";
 import type { PageContextServer } from "./types";
 
 async function render(pageContext: PageContextServer) {

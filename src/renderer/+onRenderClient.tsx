@@ -1,9 +1,9 @@
-export { render };
+export { render as onRenderClient };
 
+import { FocusStyleManager } from "@blueprintjs/core";
 import { hydrateRoot } from "react-dom/client";
 import { PageShell } from "./page-shell";
 import type { PageContextClient } from "./types";
-import { FocusStyleManager } from "@blueprintjs/core";
 
 // This render() hook only supports SSR, see https://vike.dev/render-modes for how to modify render() to support SPA
 async function render(pageContext: PageContextClient) {
