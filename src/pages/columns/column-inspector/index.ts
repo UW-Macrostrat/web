@@ -14,14 +14,12 @@ import ModalUnitPanel from "./modal-panel";
 const h = hyperStyled(styles);
 
 function ColumnPage({ columnInfo }) {
-  const { col_id, units } = columnInfo;
+  const { units } = columnInfo;
   //const { unit_id, ...currentColumn } = columnNavArgs;
   const selectedUnit = useSelectedUnit();
   const setSelectedUnit = useUnitSelectionDispatch();
 
   const unitsA = useMemo(() => units, []);
-
-  console.log("Rendering");
 
   //const columnFeature = useAPIResult("/columns", colParams)?.features[0];
 
@@ -56,7 +54,7 @@ function ColumnPage({ columnInfo }) {
     h("div.left-column", [
       h("div.column-view", [
         h("h1", columnInfo.col_name),
-        h(Column, { data: unitsA }),
+        h(Column, { data: unitsA, unconformityLabels: true }),
       ]),
     ]),
     h("div.right-column", [
