@@ -5,6 +5,7 @@ import {
   RadioGroup,
   Spinner,
 } from "@blueprintjs/core";
+import { SETTINGS, apiV2Prefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import {
   DetailPanelStyle,
@@ -26,7 +27,6 @@ import boundingBox from "@turf/bbox";
 import { LngLatBoundsLike } from "mapbox-gl";
 import { useEffect, useMemo, useState } from "react";
 import { MapNavbar } from "~/components/map-navbar";
-import { SETTINGS, apiV2Prefix } from "~/settings";
 import "~/styles/global.styl";
 import { s3Address, tempImageIndex } from "../raster-images";
 import styles from "./main.module.sass";

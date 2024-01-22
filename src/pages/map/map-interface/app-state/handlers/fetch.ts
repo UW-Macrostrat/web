@@ -1,6 +1,6 @@
+import { SETTINGS, apiV2Prefix } from "@macrostrat-web/settings";
 import axios from "axios";
 import { joinURL } from "~/pages/map/map-interface/utils";
-import { SETTINGS, apiV2Prefix } from "~/settings";
 import { ColumnGeoJSONRecord } from "../reducers";
 import { UPDATE_FILTERED_COLUMNS } from "../reducers/filtered-columns";
 

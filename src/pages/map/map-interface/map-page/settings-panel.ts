@@ -2,30 +2,32 @@
 
 // TODO: re-integrate LinkButton to @macrostrat/router-components
 import {
-  useAppState,
-  useAppActions,
-} from "~/pages/map/map-interface/app-state";
-import {
-  Switch,
-  Icon,
-  Button,
-  Intent,
-  IconName,
   AnchorButton,
+  Button,
+  Callout,
+  Collapse,
+  Icon,
+  IconName,
+  Intent,
+  Switch,
+  Tag,
 } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
-import { Tag, Collapse, Callout, Text, NumericInput } from "@blueprintjs/core";
-import { useState } from "react";
-import { useEffect } from "react";
-import { MapLayer } from "~/pages/map/map-interface/app-state";
-import styles from "./settings-panel.module.styl";
+import { applyMapPositionToHash } from "@macrostrat/map-interface";
 import {
   DarkModeButton,
-  useDarkMode,
-  darkModeUpdater,
   buildQueryString,
+  darkModeUpdater,
+  useDarkMode,
 } from "@macrostrat/ui-components";
-import { LinkButton } from "../components/buttons";
+import { useEffect, useState } from "react";
+import {
+  MapLayer,
+  useAppActions,
+  useAppState,
+} from "~/pages/map/map-interface/app-state";
+
+import styles from "./settings-panel.module.styl";
 
 const h = hyper.styled(styles);
 
@@ -83,8 +85,6 @@ const SettingsPanel = (props) => {
     // ])
   ]);
 };
-
-import { applyMapPositionToHash } from "~/pages/map/map-interface/app-state/reducers/hash-string";
 
 function GlobeLink() {
   const mapPosition = useAppState((s) => s.core.mapPosition);

@@ -1,7 +1,7 @@
+import { apiV2Prefix } from "@macrostrat-web/settings";
 import { useMapElement } from "@macrostrat/mapbox-react";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { useEffect } from "react";
-import { apiV2Prefix } from "~/settings";
 
 const sourceMapStyle = {
   version: 8,

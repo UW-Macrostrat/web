@@ -1,12 +1,12 @@
+import h from "@macrostrat/hyper";
+import { DarkModeProvider } from "@macrostrat/ui-components";
 import React from "react";
 import { PageContextProvider } from "./page-context";
 import { PageContext } from "./types";
-import h from "@macrostrat/hyper";
-import { DarkModeProvider } from "@macrostrat/ui-components";
 
-import "@blueprintjs/core/lib/css/blueprint.css";
-import "../styles/padding.css";
-import "../styles/core.sass";
+import "~/styles/blueprint-core";
+import "~/styles/core.sass";
+import "~/styles/padding.css";
 
 export function PageShell({
   children,

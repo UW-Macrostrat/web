@@ -1,10 +1,9 @@
-import { UserConfig } from "vite";
-import path from "path";
+import revisionInfo from "@macrostrat/revision-info-webpack";
 import mdx from "@mdx-js/rollup";
 import react from "@vitejs/plugin-react";
+import path from "path";
 import ssr from "vike/plugin";
-import revisionInfo from "@macrostrat/revision-info-webpack";
-import rewriteAll from "vite-plugin-rewrite-all";
+import { UserConfig } from "vite";
 import cesium from "vite-plugin-cesium";
 
 import pkg from "./package.json";

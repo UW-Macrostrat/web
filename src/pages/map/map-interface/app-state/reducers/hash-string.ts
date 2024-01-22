@@ -1,15 +1,15 @@
-import { setHashString, getHashString } from "@macrostrat/ui-components";
-import { MapLayer, CoreState, InfoMarkerPosition } from "./core";
-import { MapPosition } from "@macrostrat/mapbox-utils";
-import { AppState, AppAction } from "./types";
-import { Filter, FilterType } from "../handlers/filters";
-import { ParsedQuery } from "query-string";
 import {
-  formatCoordForZoomLevel,
-  fmtInt,
-  fmt1,
-  fmt2,
-} from "~/pages/map/map-interface/utils/formatting";
+  applyMapPositionToHash,
+  getMapPositionForHash,
+} from "@macrostrat/map-interface";
+import { formatCoordForZoomLevel } from "@macrostrat/mapbox-utils";
+import { getHashString, setHashString } from "@macrostrat/ui-components";
+import { format } from "d3-format";
+import { Filter, FilterType } from "../handlers/filters";
+import { CoreState, InfoMarkerPosition, MapLayer } from "./core";
+import { AppAction, AppState } from "./types";
+
+const fmtInt = format(".0f");
 
 export function hashStringReducer(state: AppState, action: AppAction) {
   switch (action.type) {
@@ -80,43 +80,6 @@ function applyInfoMarkerPosition(
       delete args["y"];
     }
   }
-}
-
-export function applyMapPositionToHash(
-  args: HashParams,
-  mapPosition: MapPosition | null
-) {
-  const pos = mapPosition?.camera;
-  if (pos == null) return;
-  const zoom = mapPosition.target?.zoom;
-
-  args.x = formatCoordForZoomLevel(pos.lng, zoom);
-  args.y = formatCoordForZoomLevel(pos.lat, zoom);
-
-  if (pos.bearing == 0 && pos.pitch == 0 && zoom != null) {
-    args.z = fmt1(zoom);
-  } else if (pos.altitude != null) {
-    if (pos.altitude > 5000) {
-      args.z = fmt2(pos.altitude / 1000) + "km";
-    } else {
-      args.z = fmtInt(pos.altitude) + "m";
-    }
-  }
-  if (pos.bearing != 0) {
-    let az = pos.bearing;
-    if (az < 0) az += 360;
-    args.a = fmtInt(az);
-  }
-  if (pos.pitch != 0) {
-    args.e = fmtInt(pos.pitch);
-  }
-}
-
-function _fmt(x: string | number | string[]) {
-  if (Array.isArray(x)) {
-    x = x[0];
-  }
-  return parseFloat(x.toString());
 }
 
 interface HashLayerDesc {
@@ -209,56 +172,6 @@ function layerDescriptionToLayers(
   }
 
   return validateLayers(layers);
-}
-
-export function getMapPositionForHash(
-  hashData: ParsedQuery<string>,
-  infoMarkerPosition: InfoMarkerPosition | null
-): MapPosition {
-  const {
-    x = infoMarkerPosition?.lng ?? 0,
-    y = infoMarkerPosition?.lat ?? 0,
-    // Different default for zoom depending on whether we have a marker
-    z = infoMarkerPosition != null ? 7 : 2,
-    a = 0,
-    e = 0,
-  } = hashData;
-
-  const lng = _fmt(x);
-  const lat = _fmt(y);
-
-  let altitude = null;
-  let zoom = null;
-  const _z = z.toString();
-  if (_z.endsWith("km")) {
-    altitude = _fmt(_z.substring(0, _z.length - 2)) * 1000;
-  } else if (_z.endsWith("m")) {
-    altitude = _fmt(_z.substring(0, _z.length - 1));
-  } else {
-    zoom = _fmt(z);
-  }
-  const bearing = _fmt(a);
-  const pitch = _fmt(e);
-
-  let target = undefined;
-  if (bearing == 0 && pitch == 0 && zoom != null) {
-    target = {
-      lat,
-      lng,
-      zoom,
-    };
-  }
-
-  return {
-    camera: {
-      lng: _fmt(x),
-      lat: _fmt(y),
-      altitude,
-      bearing: _fmt(a),
-      pitch: _fmt(e),
-    },
-    target,
-  };
 }
 
 export function updateMapPositionForHash(

@@ -1,7 +1,7 @@
+import { apiV2Prefix } from "@macrostrat-web/settings";
 import h from "@macrostrat/hyper";
 import { PageContextBuiltInServer } from "vike/types";
 import { ClientOnly } from "~/renderer/client-only";
-import { apiV2Prefix } from "~/settings";
 
 const apiAddress = apiV2Prefix + "/defs/sources";
 

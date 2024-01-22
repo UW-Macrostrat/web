@@ -1,5 +1,5 @@
+import { apiV2Prefix } from "@macrostrat-web/settings";
 import fetch from "node-fetch";
-import { apiV2Prefix } from "~/settings";
 
 const apiAddress = apiV2Prefix + "/units";
 

@@ -1,5 +1,5 @@
+import { apiV2Prefix } from "@macrostrat-web/settings";
 import { PageContextBuiltInServer } from "vike/types";
-import { apiV2Prefix } from "~/settings";
 
 const apiAddress = apiV2Prefix + "/defs/sources";
 

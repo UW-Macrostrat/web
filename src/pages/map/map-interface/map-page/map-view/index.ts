@@ -1,19 +1,21 @@
+import { SETTINGS } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import { MapMarker, MapView } from "@macrostrat/map-interface";
 import {
-  getFocusState,
   PositionFocusState,
+  getFocusState,
   useMapLabelVisibility,
+  useMapPosition,
   useMapRef,
   useMapStatus,
-  useMapPosition,
 } from "@macrostrat/mapbox-react";
-import { MacrostratLineSymbolManager } from "@macrostrat/mapbox-styles";
 import {
-  getMapboxStyle,
-  mergeStyles,
-  setMapPosition,
-} from "@macrostrat/mapbox-utils";
+  MacrostratLineSymbolManager,
+  MapSourcesLayer,
+  applyAgeModelStyles,
+  buildMacrostratStyle,
+} from "@macrostrat/mapbox-styles";
+import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
 import { useInDarkMode } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -23,18 +25,12 @@ import {
   useAppState,
 } from "~/pages/map/map-interface/app-state";
 import styles from "../main.module.styl";
-import { applyAgeModelStyles } from "@macrostrat/mapbox-styles";
-import {
-  buildMacrostratStyle,
-  MapSourcesLayer,
-} from "@macrostrat/mapbox-styles";
 import { CrossSectionLine } from "./cross-section";
 import {
   FlyToPlaceManager,
   HoveredFeatureManager,
   MacrostratLayerManager,
 } from "./map";
-import { SETTINGS } from "~/settings";
 
 const h = hyper.styled(styles);
 

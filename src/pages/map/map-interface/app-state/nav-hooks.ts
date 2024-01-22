@@ -1,8 +1,8 @@
+import { mapPagePrefix, routerBasename } from "@macrostrat-web/settings";
+import classNames from "classnames";
 import { useLocation, useNavigate } from "react-router";
 import { useAppState } from "./hooks";
-import classNames from "classnames";
 import { MenuPage } from "./reducers";
-import { routerBasename, mapPagePrefix } from "~/settings";
 
 export function isDetailPanelRouteInternal(pathname: string) {
   /* Check if we're in a detail panel route from within the app. */

@@ -1,27 +1,26 @@
+import { push } from "@lagunovsky/redux-react-router";
+import { mapPagePrefix, routerBasename } from "@macrostrat-web/settings";
+import axios from "axios";
+import { AppAction, AppState } from "../reducers";
 import {
+  base,
+  fetchAllColumns,
   fetchFilteredColumns,
+  getPBDBData,
   handleXDDQuery,
   runColumnQuery,
   runMapQuery,
-  getPBDBData,
-  base,
-  fetchAllColumns,
 } from "./fetch";
-import { AppAction, AppState } from "../reducers";
-import axios from "axios";
 import { runFilter } from "./filters";
-import { push } from "@lagunovsky/redux-react-router";
-import { routerBasename, mapPagePrefix } from "~/settings";
 
-import { isDetailPanelRoute } from "../nav-hooks";
-import { MenuPage, setInfoMarkerPosition } from "../reducers";
-import { formatCoordForZoomLevel } from "~/pages/map/map-interface/utils/formatting";
-import { currentPageForPathName } from "../nav-hooks";
-import { getInitialStateFromHash } from "../reducers/hash-string";
-import { findColumnForLocation, ColumnGeoJSONRecord } from "./columns";
-import { MapLayer } from "../reducers/core";
-import { matchPath } from "react-router";
+import { formatCoordForZoomLevel } from "@macrostrat/mapbox-utils";
 import { LineString } from "geojson";
+import { matchPath } from "react-router";
+import { currentPageForPathName, isDetailPanelRoute } from "../nav-hooks";
+import { MenuPage, setInfoMarkerPosition } from "../reducers";
+import { MapLayer } from "../reducers/core";
+import { getInitialStateFromHash } from "../reducers/hash-string";
+import { ColumnGeoJSONRecord, findColumnForLocation } from "./columns";
 
 function routeForActivePage(page: MenuPage) {
   let newPathname = routerBasename;
