@@ -14,7 +14,6 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router";
 import { useTransition } from "transition-hook";
 import useBreadcrumbs from "use-react-router-breadcrumbs";
-import Changelog from "../../changelog.mdx";
 import {
   MapLayer,
   MenuPage,
@@ -27,6 +26,7 @@ import {
   isDetailPanelRouteInternal,
   useCurrentPage,
 } from "../app-state/nav-hooks";
+import Changelog from "../changelog.mdx";
 import { LayerButton, LinkButton, ListButton } from "../components/buttons";
 import { CloseableCard } from "../components/closeable-card";
 import BedrockIcon from "../components/icons/BedrockIcon";
