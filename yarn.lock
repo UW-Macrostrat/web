@@ -3814,11 +3814,6 @@ __metadata:
     vite: "npm:^5.0.12"
     vite-plugin-cesium: "npm:^1.2.22"
     vite-plugin-rewrite-all: "npm:^1.0.1"
-  dependenciesMeta:
-    "@esbuild-kit/esm-loader@2.5.5":
-      unplugged: true
-    ts-node@10.9.1:
-      unplugged: true
   languageName: unknown
   linkType: soft
 
