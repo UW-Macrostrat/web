@@ -1,17 +1,16 @@
-import { createBrowserHistory } from "history";
-import { CoreAction, coreReducer } from "./core";
-import { contextPanelIsInitiallyOpen } from "../nav-hooks";
 import {
-  createRouterReducer,
   RouterActions,
+  createRouterReducer,
 } from "@lagunovsky/redux-react-router";
-import { hashStringReducer } from "./hash-string";
+import { mapPagePrefix } from "@macrostrat-web/settings";
+import { createBrowserHistory } from "history";
 import { matchPath } from "react-router";
-import { performanceReducer, PerformanceState } from "../../performance/core";
-
-import { mapPagePrefix } from "~/settings";
+import { performanceReducer } from "../../performance/core";
+import { contextPanelIsInitiallyOpen } from "../nav-hooks";
+import { CoreAction, coreReducer } from "./core";
+import { hashStringReducer } from "./hash-string";
+import { AppAction, AppState, MenuAction, MenuState } from "./types";
 export const browserHistory = createBrowserHistory();
-import { MenuState, AppState, AppAction, MenuAction } from "./types";
 
 const routerReducer = createRouterReducer(browserHistory);
 
@@ -143,9 +142,9 @@ export function setInfoMarkerPosition(state: AppState): AppState {
 
 export default appReducer;
 export * from "./core";
+export * from "./hash-string";
 export * from "./map";
 export * from "./types";
-export * from "./hash-string";
 
 /*
 function overallReducer(state: AppState, action: Action): AppState {

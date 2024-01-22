@@ -1,4 +1,5 @@
 import { HTMLSelect, Spinner, Switch } from "@blueprintjs/core";
+import { burwellTileDomain } from "@macrostrat-web/settings";
 import h from "@macrostrat/hyper";
 import {
   FeaturePanel,
@@ -29,7 +30,6 @@ import {
 import mapboxgl from "mapbox-gl";
 import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import { MacrostratVectorTileset } from "~/_legacy/map-dev/map-layers";
-import { SETTINGS } from "~/settings";
 import { TimescalePanel } from "./timescale";
 
 import "~/styles/global.styl";
@@ -229,7 +229,7 @@ export default function PaleoMap({
   const plateModelId = model_id;
 
   const models: { id: string; max_age: number; min_age: number }[] =
-    useAPIResult(SETTINGS.burwellTileDomain + "/carto/rotation-models");
+    useAPIResult(burwellTileDomain + "/carto/rotation-models");
 
   useEffect(() => {
     if (models == null) return;

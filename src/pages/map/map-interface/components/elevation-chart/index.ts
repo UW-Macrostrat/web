@@ -13,7 +13,7 @@ import {
   useAppState,
 } from "~/pages/map/map-interface/app-state";
 
-import { apiV2Prefix } from "~/settings";
+import { apiV2Prefix } from "@macrostrat-web/settings";
 import styles from "./main.module.styl";
 const h = hyper.styled(styles);
 

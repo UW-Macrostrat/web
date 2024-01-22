@@ -53,6 +53,7 @@
     "@macrostrat-web/data-sheet-test": "workspace:*",
     "@macrostrat-web/globe": "workspace:*",
     "@macrostrat-web/security": "workspace:*",
+    "@macrostrat-web/settings": "workspace:*",
     "@macrostrat/api-utils": "workspace:*",
     "@macrostrat/api-views": "workspace:*",
     "@macrostrat/column-components": "workspace:*",

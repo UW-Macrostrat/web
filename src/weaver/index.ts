@@ -6,8 +6,8 @@ import h from "@macrostrat/hyper";
 
 import { Button, MenuItem, Spinner } from "@blueprintjs/core";
 import { Select2 } from "@blueprintjs/select";
+import { SETTINGS } from "@macrostrat-web/settings";
 import {
-  buildInspectorStyle,
   FeatureProperties,
   FloatingNavbar,
   LocationPanel,
@@ -16,10 +16,11 @@ import {
   MapMarker,
   MapView,
   PanelCard,
+  buildInspectorStyle,
 } from "@macrostrat/map-interface";
-import { useMapRef, useMapStatus } from "@macrostrat/mapbox-react";
+import { useMapRef } from "@macrostrat/mapbox-react";
 import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
-import { MapPosition, mergeStyles } from "@macrostrat/mapbox-utils";
+import { mergeStyles } from "@macrostrat/mapbox-utils";
 import {
   DarkModeButton,
   Spacer,
@@ -28,7 +29,6 @@ import {
 } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
 import { useCallback, useEffect, useState } from "react";
-import { SETTINGS } from "~/settings";
 
 export function WeaverPage() {
   return h(

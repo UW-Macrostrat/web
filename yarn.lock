@@ -3202,6 +3202,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@macrostrat-web/settings@workspace:*, @macrostrat-web/settings@workspace:packages/settings":
+  version: 0.0.0-use.local
+  resolution: "@macrostrat-web/settings@workspace:packages/settings"
+  languageName: unknown
+  linkType: soft
+
 "@macrostrat/api-types@workspace:deps/web-components/packages/api-types":
   version: 0.0.0-use.local
   resolution: "@macrostrat/api-types@workspace:deps/web-components/packages/api-types"
@@ -3550,6 +3556,7 @@ __metadata:
     d3-array: "npm:^3.2.4"
     d3-format: "npm:^3.1.0"
     mapbox-gl: "npm:^2.15.0"
+    query-string: "npm:^8.1.0"
     transition-hook: "npm:^1.5.2"
     underscore: "npm:^1.13.6"
     use-resize-observer: "npm:^9.1.0"
@@ -3728,6 +3735,7 @@ __metadata:
     "@macrostrat-web/data-sheet-test": "workspace:*"
     "@macrostrat-web/globe": "workspace:*"
     "@macrostrat-web/security": "workspace:*"
+    "@macrostrat-web/settings": "workspace:*"
     "@macrostrat/api-utils": "workspace:*"
     "@macrostrat/api-views": "workspace:*"
     "@macrostrat/column-components": "workspace:*"
@@ -11931,6 +11939,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"decode-uri-component@npm:^0.4.1":
+  version: 0.4.1
+  resolution: "decode-uri-component@npm:0.4.1"
+  checksum: 74eec26f7bec3767164e37d526ef19bc1214cb0bbeeeea1c4f0ceb79299e5c38d3ba734e7243d829842aa140f24e5d020f54cc25b17c7082461c8eead8a72ce3
+  languageName: node
+  linkType: hard
+
 "decompress-response@npm:^3.3.0":
   version: 3.3.0
   resolution: "decompress-response@npm:3.3.0"
@@ -13920,6 +13935,13 @@ __metadata:
   version: 1.1.0
   resolution: "filter-obj@npm:1.1.0"
   checksum: 9d681939eec2b4b129cb4f307b7e93d954a0657421d4e5357d86093b26d3f4f570909ed43717dcfd62428b3cf8cddd9841b35f9d40d12ac62cfabaa677942593
+  languageName: node
+  linkType: hard
+
+"filter-obj@npm:^5.1.0":
+  version: 5.1.0
+  resolution: "filter-obj@npm:5.1.0"
+  checksum: 8f6dab6d8d8855f686e8cc6be289bbbd64a80be52c660124e36e982f78017cf5dae7de95f79ec167fbf62101d6aab93067a3105ae8f56251785a721e678d6b07
   languageName: node
   linkType: hard
 
@@ -24286,6 +24308,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"query-string@npm:^8.1.0":
+  version: 8.1.0
+  resolution: "query-string@npm:8.1.0"
+  dependencies:
+    decode-uri-component: "npm:^0.4.1"
+    filter-obj: "npm:^5.1.0"
+    split-on-first: "npm:^3.0.0"
+  checksum: f693d77bc3e8c5cb7bda9c928e9c625bf8adacb1ebd63fd97c9ffd3f65c7df0cfc86aebf92588b5caddccfcb379bc7f4d81fcc4e64c64e4e75eabaca823c2293
+  languageName: node
+  linkType: hard
+
 "querystringify@npm:^2.1.1":
   version: 2.2.0
   resolution: "querystringify@npm:2.2.0"
@@ -27186,6 +27219,13 @@ __metadata:
   version: 1.1.0
   resolution: "split-on-first@npm:1.1.0"
   checksum: 16ff85b54ddcf17f9147210a4022529b343edbcbea4ce977c8f30e38408b8d6e0f25f92cd35b86a524d4797f455e29ab89eb8db787f3c10708e0b47ebf528d30
+  languageName: node
+  linkType: hard
+
+"split-on-first@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "split-on-first@npm:3.0.0"
+  checksum: 75dc27ecbac65cfbeab9a3b90cf046307220192d3d7a30e46aa0f19571cc9b4802aac813f3de2cc9b16f2e46aae72f275659b5d2614bb5369c77724d739e5f73
   languageName: node
   linkType: hard
 

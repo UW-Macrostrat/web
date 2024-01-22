@@ -1,4 +1,4 @@
-import { apiV2Prefix } from "~/settings";
+import { apiV2Prefix } from "@macrostrat-web/settings";
 
 export const overlayStyle = {
   version: 8,

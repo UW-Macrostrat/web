@@ -1,6 +1,6 @@
 import { push } from "@lagunovsky/redux-react-router";
+import { mapPagePrefix, routerBasename } from "@macrostrat-web/settings";
 import axios from "axios";
-import { mapPagePrefix, routerBasename } from "~/settings";
 import { AppAction, AppState } from "../reducers";
 import {
   base,
