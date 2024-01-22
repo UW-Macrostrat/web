@@ -1,41 +1,44 @@
 // Import other components
-import { Spinner, Switch } from "@blueprintjs/core";
+import { Switch } from "@blueprintjs/core";
+import { burwellTileDomain, mapboxAccessToken } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
-import { useMapConditionalStyle, useMapRef } from "@macrostrat/mapbox-react";
+import {
+  DevMapPage,
+  FeaturePanel,
+  FeatureSelectionHandler,
+  FloatingNavbar,
+  LocationPanel,
+  MapLoadingButton,
+  MapMarker,
+  MapView,
+  TileExtentLayer,
+  TileInfo,
+} from "@macrostrat/map-interface";
+import {
+  useMapConditionalStyle,
+  useMapRef,
+  useMapStatus,
+} from "@macrostrat/mapbox-react";
+import {
+  buildBasicStyle,
+  buildMacrostratStyle,
+  toggleLineSymbols,
+} from "@macrostrat/mapbox-styles";
 import {
   getMapboxStyle,
   mergeStyles,
   removeMapLabels,
-  setMapPosition,
 } from "@macrostrat/mapbox-utils";
-import { useStoredState, useDarkMode } from "@macrostrat/ui-components";
+import { useDarkMode, useStoredState } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
-import { useCallback, useEffect, useState, useMemo } from "react";
-import { SETTINGS } from "~/settings";
-import { FloatingNavbar } from "@macrostrat/map-interface";
+import { useCallback, useMemo, useState } from "react";
+import { ParentRouteButton } from "~/components/map-navbar";
 import { useAppActions } from "../../../pages/map/map-interface/app-state";
-import { LocationPanel } from "@macrostrat/map-interface";
 import { MapAreaContainer } from "../../../pages/map/map-interface/map-page";
-import { PanelCard } from "../../../pages/map/map-interface/map-page/menu";
 import { getBaseMapStyle } from "../../../pages/map/map-interface/map-page/map-view";
-import { MapLoadingButton } from "@macrostrat/map-interface";
-import {
-  toggleLineSymbols,
-  buildMacrostratStyle,
-  buildBasicStyle,
-} from "@macrostrat/mapbox-styles";
-import { MapView, MapMarker } from "@macrostrat/map-interface";
-import {
-  FeaturePanel,
-  FeatureSelectionHandler,
-  TileInfo,
-} from "@macrostrat/map-interface";
-import { TileExtentLayer } from "@macrostrat/map-interface";
-import { useMapStatus } from "@macrostrat/mapbox-react";
+import { PanelCard } from "../../../pages/map/map-interface/map-page/menu";
 import styles from "../main.module.styl";
 import { useMapStyle } from "./utils";
-import { DevMapPage } from "@macrostrat/map-interface";
-import { ParentRouteButton } from "~/components/map-navbar";
 
 export enum MacrostratVectorTileset {
   Carto = "carto",
@@ -52,7 +55,7 @@ export enum MacrostratRasterTileset {
 export const h = hyper.styled(styles);
 
 const _macrostratStyle = buildMacrostratStyle({
-  tileserverDomain: SETTINGS.burwellTileDomain,
+  tileserverDomain: burwellTileDomain,
 }) as mapboxgl.Style;
 
 function isStateValid(state) {
@@ -104,7 +107,7 @@ export function VectorMapInspectorPage({
       if (
         bypassCache &&
         resourceType === "Tile" &&
-        url.startsWith(SETTINGS.burwellTileDomain)
+        url.startsWith(burwellTileDomain)
       ) {
         return {
           url: url + "?cache=bypass",
@@ -143,7 +146,7 @@ export function VectorMapInspectorPage({
     DevMapPage,
     {
       headerElement,
-      mapboxToken: SETTINGS.mapboxAccessToken,
+      mapboxToken: mapboxAccessToken,
       title: title ?? tileset,
       overlayStyle: _overlayStyle,
       transformRequest,
@@ -397,5 +400,5 @@ function LineSymbolManager({ showLineSymbols }) {
   return null;
 }
 
-export * from "./raster-map";
 export * from "./catalog";
+export * from "./raster-map";

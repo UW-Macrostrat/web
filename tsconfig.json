@@ -10,6 +10,7 @@
     "typeRoots": ["node_modules/@types"],
     "skipLibCheck": true,
     "esModuleInterop": true,
+    "types": ["vite/client"],
     "paths": {
       "~/*": ["./src/*"],
       "@macrostrat/cesium-vector-provider": [
@@ -39,11 +40,11 @@
       "@macrostrat/map-interface": [
         "deps/web-components/packages/map-interface/src"
       ],
-      "@macrostrat/cesium-viewer": ["deps/cesium-viewer/src"]
+      "@macrostrat/cesium-viewer": ["deps/cesium-viewer/src"],
+      "@macrostrat-web/settings": ["deps/packages/settings"]
     }
   },
   "include": ["src", "packages/globe-dev/globe", "packages/*/src"],
-  "types": ["vite/client"],
   "ts-node": {
     "transpileOnly": true,
     "esm": true

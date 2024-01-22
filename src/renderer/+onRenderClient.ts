@@ -1,9 +1,10 @@
-export { render };
+export { render as onRenderClient };
 
+import { FocusStyleManager } from "@blueprintjs/core";
+import h from "@macrostrat/hyper";
 import { hydrateRoot } from "react-dom/client";
 import { PageShell } from "./page-shell";
 import type { PageContextClient } from "./types";
-import { FocusStyleManager } from "@blueprintjs/core";
 
 // This render() hook only supports SSR, see https://vike.dev/render-modes for how to modify render() to support SPA
 async function render(pageContext: PageContextClient) {
@@ -18,12 +19,7 @@ async function render(pageContext: PageContextClient) {
   console.log("Rendering on client");
   const root = document.getElementById("app-container");
   if (!root) throw new Error("DOM element #react-root not found");
-  hydrateRoot(
-    root,
-    <PageShell pageContext={pageContext}>
-      <Page {...pageProps} />
-    </PageShell>
-  );
+  hydrateRoot(root, h(PageShell, { pageContext }, h(Page, pageProps)));
 }
 
 /* To enable Client-side Routing:

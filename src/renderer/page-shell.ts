@@ -4,7 +4,7 @@ import React from "react";
 import { PageContextProvider } from "./page-context";
 import { PageContext, PageStyle } from "./types";
 
-import "@blueprintjs/core/lib/css/blueprint.css";
+import "~/styles/blueprint-core";
 import "../styles/_theme.styl";
 import "../styles/core.sass";
 import "../styles/padding.css";

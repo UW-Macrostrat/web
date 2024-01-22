@@ -1,42 +1,43 @@
-import hyper from "@macrostrat/hyper";
-import ColumnIcon from "../components/icons/ColumnIcon";
-import LineIcon from "../components/icons/LineIcon";
-import ElevationIcon from "../components/icons/ElevationIcon";
-import FossilIcon from "../components/icons/FossilIcon";
-import BedrockIcon from "../components/icons/BedrockIcon";
 import {
+  Alignment,
   Button,
   ButtonGroup,
-  Alignment,
   ButtonProps,
+  Card,
   NonIdealState,
 } from "@blueprintjs/core";
-import { CloseableCard } from "../components/closeable-card";
-import {
-  useAppActions,
-  useSearchState,
-  MapLayer,
-  useHashNavigate,
-  MenuPage,
-  useAppState,
-} from "../app-state";
-import { SearchResults } from "../components/navbar";
-import classNames from "classnames";
-import styles from "./main.module.styl";
 import loadable from "@loadable/component";
-import UsageText from "../usage.mdx";
-import { Routes, Route } from "react-router-dom";
-import Changelog from "../../changelog.mdx";
-import { useMatch, useLocation } from "react-router";
+import { mapPagePrefix } from "@macrostrat-web/settings";
+import hyper from "@macrostrat/hyper";
+import classNames from "classnames";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router";
 import { useTransition } from "transition-hook";
-import { useCurrentPage } from "../app-state/nav-hooks";
 import useBreadcrumbs from "use-react-router-breadcrumbs";
-import { isDetailPanelRouteInternal } from "../app-state/nav-hooks";
-import { SettingsPanel, ExperimentsPanel, ThemeButton } from "./settings-panel";
-import { useState, useEffect } from "react";
-import { LinkButton, LayerButton, ListButton } from "../components/buttons";
-import { routerBasename, mapPagePrefix } from "~/settings";
-import { Card } from "@blueprintjs/core";
+import {
+  MapLayer,
+  MenuPage,
+  useAppActions,
+  useAppState,
+  useHashNavigate,
+  useSearchState,
+} from "../app-state";
+import {
+  isDetailPanelRouteInternal,
+  useCurrentPage,
+} from "../app-state/nav-hooks";
+import Changelog from "../changelog.mdx";
+import { LayerButton, LinkButton, ListButton } from "../components/buttons";
+import { CloseableCard } from "../components/closeable-card";
+import BedrockIcon from "../components/icons/BedrockIcon";
+import ColumnIcon from "../components/icons/ColumnIcon";
+import ElevationIcon from "../components/icons/ElevationIcon";
+import FossilIcon from "../components/icons/FossilIcon";
+import LineIcon from "../components/icons/LineIcon";
+import { SearchResults } from "../components/navbar";
+import UsageText from "../usage.mdx";
+import styles from "./main.module.styl";
+import { ExperimentsPanel, SettingsPanel } from "./settings-panel";
 
 function ChangelogPanel() {
   return h("div.bp4-text.text-panel", [h(Changelog)]);

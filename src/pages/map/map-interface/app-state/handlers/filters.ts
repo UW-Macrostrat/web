@@ -1,5 +1,5 @@
+import { apiV2Prefix } from "@macrostrat-web/settings";
 import axios from "axios";
-import { apiV2Prefix } from "~/settings";
 
 export const base = apiV2Prefix;
 

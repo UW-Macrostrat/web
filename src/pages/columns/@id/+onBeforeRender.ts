@@ -1,7 +1,7 @@
+import { apiV2Prefix } from "@macrostrat-web/settings";
 import { preprocessUnits } from "@macrostrat/column-views/src/helpers";
 import fetch from "node-fetch";
 import { ColumnSummary } from "~/pages/map/map-interface/app-state/handlers/columns";
-import { apiV2Prefix } from "~/settings";
 
 async function getAndUnwrap<T>(url: string): Promise<T> {
   const res = await fetch(url);
