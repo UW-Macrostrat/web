@@ -1,6 +1,6 @@
 {
-  "name": "sift",
-  "version": "0.1.1",
+  "name": "@macrostrat-web/sift",
+  "version": "0.2.0",
   "description": "",
   "main": "index.js",
   "scripts": {

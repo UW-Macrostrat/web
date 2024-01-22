@@ -21,7 +21,10 @@
     "deps/web-components/packages/*",
     "deps/cesium-viewer",
     "deps/cesium-martini",
-    "packages/*"
+    "packages/data-sheet-test",
+    "packages/globe-dev",
+    "packages/security",
+    "packages/settings"
   ],
   "authors": [
     "John Czaplewski <jczaplewski@wisc.edu>",
