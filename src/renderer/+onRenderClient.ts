@@ -6,6 +6,8 @@ import ReactDOM from "react-dom/client";
 import { PageShell } from "./page-shell";
 import type { PageContextClient } from "./types";
 
+let root: ReactDOM.Root;
+
 // This render() hook only supports SSR, see https://vike.dev/render-modes for how to modify render() to support SPA
 async function render(pageContext: PageContextClient) {
   const { Page, pageProps } = pageContext;
@@ -18,7 +20,6 @@ async function render(pageContext: PageContextClient) {
 
   const page = h(PageShell, { pageContext }, h(Page, pageProps));
 
-  let root: ReactDOM.Root;
   console.log("Rendering on client");
   const container = document.getElementById("app-container")!;
 

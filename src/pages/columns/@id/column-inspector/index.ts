@@ -4,13 +4,14 @@ import {
   UnitSelectionProvider,
   useSelectedUnit,
   useUnitSelectionDispatch,
+  Column,
 } from "@macrostrat/column-views";
 import { hyperStyled } from "@macrostrat/hyper";
 import { getHashString, setHashString } from "@macrostrat/ui-components";
 import { useEffect, useRef } from "react";
-
+import { ClientOnly } from "~/renderer/client-only";
 import { apiV2Prefix } from "@macrostrat-web/settings";
-import { Column } from "@macrostrat/column-views";
+//import { Column } from "@macrostrat/column-views";
 import { PatternProvider } from "~/_providers";
 import styles from "./column-inspector.module.styl";
 import ModalUnitPanel from "./modal-panel";
