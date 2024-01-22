@@ -46,7 +46,7 @@ function InfoDrawer(props) {
     [
       h(
         LoadingArea,
-        { loaded: !fetchingMapInfo },
+        { loaded: !fetchingMapInfo, className: "infodrawer-content" },
         h.if(!fetchingMapInfo)(InfoDrawerInterior)
       ),
     ]
@@ -55,6 +55,7 @@ function InfoDrawer(props) {
 
 function InfoDrawerInterior(props) {
   const columnInfo = useAppState((state) => state.core.columnInfo);
+  console.log("Column info", columnInfo);
 
   return h(Routes, [
     h(Route, { path: "/column", element: h(StratColumn, { columnInfo }) }),
@@ -63,11 +64,9 @@ function InfoDrawerInterior(props) {
 }
 
 function InfoDrawerMainPanel(props) {
-  const { mapInfo, columnInfo, pbdbData, mapLayers } = useAppState(
-    (state) => state.core
-  );
-
-  const stratigraphyShown = mapLayers.has(MapLayer.COLUMNS);
+  const mapInfo = useAppState((state) => state.core.mapInfo);
+  const pbdbData = useAppState((state) => state.core.pbdbData);
+  const columnInfo = useAppState((state) => state.core.columnInfo);
 
   if (!mapInfo || !mapInfo.mapData) {
     return null;
@@ -88,13 +87,13 @@ function InfoDrawerMainPanel(props) {
           ref: {},
         };
 
-  return h("div.infodrawer-main", [
+  return h([
     h(GeologicMapInfo, {
       mapInfo,
       bedrockExpanded: true,
       source,
     }),
-    h.if(stratigraphyShown)(RegionalStratigraphy, {
+    h(RegionalStratigraphy, {
       mapInfo,
       columnInfo,
     }),

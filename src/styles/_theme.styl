@@ -1,0 +1,60 @@
+@require "./_colors";
+
+$dark-background = #141a1e
+$accent = lighten($dark-background, 10%)
+$dark-text = $gray4
+
+// Colors taken primarily from blueprintjs v4
+// See https://blueprintjs.com/docs/#core/colors
+:root
+  --accent-border-color: $gray5
+  --accent-color: $light-gray3
+  --accent-hover-color: $light-gray1
+  --accent-secondary-color: #F5F8FA
+  --accent-secondary-hover-color: #EBF1F5
+  --background-color: #fff
+  --box-horizontal-padding: 0.8em
+  --card-shadow-color: rgba(17, 20, 24, 0.15)
+  --error-text-color: #CD4246
+  --main-font: "Source Sans Pro", sans-serif
+  --panel-background-color: #fff
+  --panel-rule-color: #ddd
+  --panel-secondary-background-color: #f5f8fa
+  --secondary-color: $gray3
+  --tertiary-background: $light-gray5
+  --tertiary-border-color: $gray5
+  --tertiary-color: $light-gray4
+  --text-color: #333
+  --text-emphasized-color: #000
+  --text-subtle-color: #444
+  --translucent-panel-background-color: rgba(255,255,255,0.2)
+  --ui-color-accent-text: rgb(143, 39, 138)
+  --ui-color-accent: rgb(252, 217, 250)
+
+body
+  color: var(--text-color);
+  margin:0;
+  padding:0;
+  &.bp4-dark
+    color: $dark-text;
+    background-color: $dark-background;
+    --accent-border-color: #5F6B7C // gray5
+    --accent-color: $accent // light gray 3
+    --accent-hover-color: lighten($accent, 4%) // light gray 1
+    --accent-secondary-color: lighten($accent, 0%)
+    --accent-secondary-hover-color: lighten($accent, 5%)
+    --background-color: $dark-background
+    --card-shadow-color: alpha($gray1, 0.2)
+    --panel-background-color: $dark-background
+    --panel-rule-color: #404854
+    --panel-secondary-background-color: lighten($dark-background, 5%)
+    --secondary-color: $gray1 // gray3
+    --tertiary-background: lighten($accent, 4%) // light gray 5
+    --tertiary-border-color: #5F6B7C // gray 5
+    --tertiary-color: #383E47 // light gray 4
+    --text-color: $dark-text
+    --text-emphasized-color: #fff
+    --text-subtle-color: $gray3
+    --translucent-panel-background-color: alpha($dark-background, 0.6)
+    --ui-color-accent-text: rgb(252, 217, 250)
+    --ui-color-accent: darken(rgb(143, 39, 138), 50%)

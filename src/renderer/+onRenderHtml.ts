@@ -8,12 +8,13 @@ import { PageShell } from "./page-shell";
 import type { PageContextServer } from "./types";
 
 async function render(pageContext: PageContextServer) {
-  const { Page, pageProps } = pageContext;
+  const { Page, pageProps, exports } = pageContext;
+  const pageStyle = exports?.pageStyle || "fullscreen";
   // This render() hook only supports SSR, see https://vike.dev/render-modes for how to modify render() to support SPA
   if (!Page)
     throw new Error("render() hook expects pageContext.Page to be defined");
   const pageHtml = ReactDOMServer.renderToString(
-    h(PageShell, { pageContext }, h(Page, pageProps))
+    h(PageShell, { pageContext, pageStyle }, h(Page, pageProps))
   );
 
   // See https://vike.dev/head

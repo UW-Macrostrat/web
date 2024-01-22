@@ -11,6 +11,7 @@ import useBreadcrumbs from "use-react-router-breadcrumbs";
 import { LinkButton } from "../../buttons";
 import { InfoPanelSection } from "@macrostrat/map-interface";
 import { PatternProvider } from "~/_providers";
+import { useMemo } from "react";
 
 const h = hyperStyled(styles);
 
@@ -28,13 +29,17 @@ function ColumnOverlay({ columnInfo }: { columnInfo: ColumnSummary | null }) {
       h("p", "A stratigraphic column has not been assigned for this location."),
     ]);
 
-  const unitsA = preprocessUnits(units);
+  const unitsA = useMemo(() => preprocessUnits(units), []);
 
   const headerElement = h([
     h("div.controls", [h(BackButton)]),
     h("h4", columnInfo.col_name),
     h("div.spacer"),
-    h("code", columnInfo.col_id),
+    h(
+      "a",
+      { href: `/columns/${columnInfo.col_id}` },
+      h("code", columnInfo.col_id)
+    ),
   ]);
 
   return h(

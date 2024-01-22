@@ -20,7 +20,7 @@ import { currentPageForPathName, isDetailPanelRoute } from "../nav-hooks";
 import { MenuPage, setInfoMarkerPosition } from "../reducers";
 import { MapLayer } from "../reducers/core";
 import { getInitialStateFromHash } from "../reducers/hash-string";
-import { ColumnGeoJSONRecord, findColumnForLocation } from "./columns";
+import { ColumnGeoJSONRecord, findColumnsForLocation } from "./columns";
 
 function routeForActivePage(page: MenuPage) {
   let newPathname = routerBasename;
@@ -64,10 +64,7 @@ async function actionRunner(
 
       // We always get all columns on initial load, which might be
       // a bit unnecessary
-      let columns: ColumnGeoJSONRecord[] | null = null;
-      if (coreState1.mapLayers.has(MapLayer.COLUMNS)) {
-        columns = await fetchAllColumns();
-      }
+      let allColumns: ColumnGeoJSONRecord[] | null = await fetchAllColumns();
 
       dispatch({
         type: "replace-state",
@@ -75,7 +72,7 @@ async function actionRunner(
           ...state,
           core: {
             ...coreState1,
-            allColumns: columns,
+            allColumns,
             initialLoadComplete: true,
           },
           menu: { activePage },
@@ -257,7 +254,6 @@ async function actionRunner(
       const { lng, lat, z, map_id } = action;
       // Get column data from the map action if it is provided.
       // This saves us from having to filter the columns more inefficiently
-      let { columns } = action;
       let CancelTokenMapQuery = axios.CancelToken;
       let sourceMapQuery = CancelTokenMapQuery.source();
       if (coreState.inputFocus && coreState.contextPanelOpen) {
@@ -279,20 +275,17 @@ async function actionRunner(
         sourceMapQuery.token
       );
 
+      let { columns } = action;
+      // If no columns are provided, try to find them from the active column dataset
       if (
-        columns == null &&
-        state.core.allColumns != null &&
-        state.core.mapLayers.has(MapLayer.COLUMNS)
+        (columns == null || columns.length == 0) &&
+        state.core.allColumns != null
       ) {
-        let col = findColumnForLocation(state.core.allColumns, {
+        columns = findColumnsForLocation(state.core.allColumns, {
           lng,
           lat,
-        })?.properties;
-        if (col != null) {
-          columns = [col];
-        }
+        }).map((c) => c.properties);
       }
-
       const firstColumn = columns?.[0];
       const { columnInfo } = state.core;
       if (firstColumn != null && columnInfo?.col_id != firstColumn.col_id) {
