@@ -276,13 +276,16 @@ async function actionRunner(
       );
 
       let { columns } = action;
-      if (columns == null && state.core.allColumns != null) {
+      // If no columns are provided, try to find them from the active column dataset
+      if (
+        (columns == null || columns.length == 0) &&
+        state.core.allColumns != null
+      ) {
         columns = findColumnsForLocation(state.core.allColumns, {
           lng,
           lat,
         }).map((c) => c.properties);
       }
-
       const firstColumn = columns?.[0];
       const { columnInfo } = state.core;
       if (firstColumn != null && columnInfo?.col_id != firstColumn.col_id) {

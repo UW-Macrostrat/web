@@ -42,19 +42,12 @@ export function findColumnsForLocation(
   const { lat, lng } = position;
   const point = { type: "Point", coordinates: [lng, lat] };
   return columns.filter((column) => {
-    let polygons = [];
     if (column.geometry.type == "MultiPolygon") {
-      polygons = column.geometry.coordinates.map((coordinates) => {
-        return { type: "Polygon", coordinates };
-      });
-    } else {
-      polygons = [column.geometry.coordinates];
-    }
-    for (let poly of polygons) {
-      if (booleanContains(poly, point)) {
-        return true;
+      for (let poly of column.geometry.coordinates) {
+        if (booleanContains({ type: "Polygon", coordinates: poly }, point))
+          return true;
       }
-    }
+    } else if (booleanContains(column.geometry, point)) return true;
     return false;
   });
 }
