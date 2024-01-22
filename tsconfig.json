@@ -2,8 +2,6 @@
   "compilerOptions": {
     "baseUrl": "./",
     "moduleResolution": "node",
-    "target": "ES2020",
-    "module": "ES2020",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "strict": false,
     "sourceMap": true,
@@ -12,6 +10,7 @@
     "typeRoots": ["node_modules/@types"],
     "skipLibCheck": true,
     "esModuleInterop": true,
+    "types": ["vite/client"],
     "paths": {
       "~/*": ["./src/*"],
       "@macrostrat/cesium-vector-provider": [
@@ -29,6 +28,9 @@
       "@macrostrat/mapbox-styles": [
         "deps/web-components/packages/mapbox-styles/src"
       ],
+      "@macrostrat/column-views": [
+        "deps/web-components/packages/column-views/src"
+      ],
       "@macrostrat/mapbox-react": [
         "deps/web-components/packages/mapbox-react/src"
       ],
@@ -38,11 +40,11 @@
       "@macrostrat/map-interface": [
         "deps/web-components/packages/map-interface/src"
       ],
-      "@macrostrat/cesium-viewer": ["deps/cesium-viewer/src"]
+      "@macrostrat/cesium-viewer": ["deps/cesium-viewer/src"],
+      "@macrostrat-web/settings": ["deps/packages/settings"]
     }
   },
   "include": ["src", "packages/globe-dev/globe", "packages/*/src"],
-  "types": ["vite/client"],
   "ts-node": {
     "transpileOnly": true,
     "esm": true

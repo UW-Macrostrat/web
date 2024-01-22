@@ -1,4 +1,4 @@
-import { SETTINGS } from "~/settings";
+import { apiV2Prefix } from "@macrostrat-web/settings";
 
 export const overlayStyle = {
   version: 8,
@@ -46,7 +46,7 @@ export const overlayStyle = {
     columns: {
       type: "geojson",
       generateId: true,
-      data: `${SETTINGS.apiDomain}/api/v2/columns?all&format=geojson_bare`,
+      data: `${apiV2Prefix}/columns?all&format=geojson_bare`,
     },
     filteredColumns: {
       type: "geojson",

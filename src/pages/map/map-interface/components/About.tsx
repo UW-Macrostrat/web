@@ -1,11 +1,9 @@
-import React from "react";
-import hyper from "@macrostrat/hyper";
-import { NavLink, useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
-import styles from "./about.module.styl";
-import newGithubIssueUrl from "new-github-issue-url";
 import { AnchorButton } from "@blueprintjs/core";
-import { mapPagePrefix } from "~/settings";
+import { mapPagePrefix } from "@macrostrat-web/settings";
+import hyper from "@macrostrat/hyper";
+import newGithubIssueUrl from "new-github-issue-url";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import styles from "./about.module.styl";
 
 const h = hyper.styled(styles);
 

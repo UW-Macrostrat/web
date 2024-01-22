@@ -1,25 +1,23 @@
-import { forwardRef, useRef, useState, useCallback } from "react";
-import {
-  useAppState,
-  MapLayer,
-  PositionFocusState,
-} from "~/pages/map/map-interface/app-state";
-import { GeolocateControl } from "mapbox-gl";
+import { SETTINGS } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
-import { useEffect } from "react";
-import styles from "../main.module.styl";
 import {
-  useMapRef,
   CompassControl,
   GlobeControl,
-  ThreeDControl,
   MapControlWrapper,
+  ThreeDControl,
+  useMapRef,
 } from "@macrostrat/mapbox-react";
-import classNames from "classnames";
 import { mapViewInfo } from "@macrostrat/mapbox-utils";
-import { SETTINGS } from "~/settings";
-import mapboxgl from "mapbox-gl";
+import classNames from "classnames";
+import mapboxgl, { GeolocateControl } from "mapbox-gl";
+import { useEffect, useRef } from "react";
+import {
+  MapLayer,
+  PositionFocusState,
+  useAppState,
+} from "~/pages/map/map-interface/app-state";
 import { LinkButton } from "~/pages/map/map-interface/components/buttons";
+import styles from "../main.module.styl";
 
 const h = hyper.styled(styles);
 

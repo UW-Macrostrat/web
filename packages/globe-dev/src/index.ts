@@ -1,31 +1,28 @@
-import h from "@macrostrat/hyper";
-import CesiumView from "./cesium-view";
-import { MapPosition } from "@macrostrat/mapbox-utils";
-import { useState, useMemo, useRef, useEffect, useCallback, memo } from "react";
 import {
-  flyToParams,
-  ViewInfo,
-  translateCameraPosition,
-  getInitialPosition,
-  buildPositionHash,
   CameraParams,
   DisplayQuality,
+  flyToParams,
+  translateCameraPosition,
 } from "@macrostrat/cesium-viewer";
+import h from "@macrostrat/hyper";
+import { MapPosition } from "@macrostrat/mapbox-utils";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "~/renderer/Link";
+import CesiumView from "./cesium-view";
 
-import "./app.scss";
-import "cesium/Source/Widgets/widgets.css";
-import "@znemz/cesium-navigation/dist/index.css";
 import {
+  applyMapPositionToHash,
+  getMapPositionForHash,
+} from "@macrostrat/map-interface";
+import {
+  buildQueryString,
   getHashString,
   setHashString,
-  buildQueryString,
 } from "@macrostrat/ui-components";
+import "@znemz/cesium-navigation/dist/index.css";
+import "cesium/Source/Widgets/widgets.css";
+import "./app.scss";
 import Map from "./map-comparison";
-import {
-  getMapPositionForHash,
-  applyMapPositionToHash,
-} from "../../../src/pages/map/map-interface/app-state/reducers/hash-string";
 
 function VisControl({ show, setShown, name }) {
   const className = show ? "active" : "";

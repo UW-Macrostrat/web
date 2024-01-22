@@ -1,10 +1,7 @@
+import { apiV2Prefix } from "@macrostrat-web/settings";
 import { PageContextBuiltInServer } from "vike/types";
-import { SETTINGS } from "~/settings";
-import h from "@macrostrat/hyper";
-import { ClientOnly } from "~/renderer/client-only";
-const MapInterface = () => import("./map-interface");
 
-const apiAddress = SETTINGS.apiDomain + "/api/v2/defs/sources";
+const apiAddress = apiV2Prefix + "/defs/sources";
 
 export async function onBeforeRender(pageContext: PageContextBuiltInServer) {
   const { id } = pageContext.routeParams;
@@ -28,8 +25,4 @@ export async function onBeforeRender(pageContext: PageContextBuiltInServer) {
       },
     },
   };
-}
-
-export function Page({ map }) {
-  return h("div.single-map", h(ClientOnly, { component: MapInterface, map }));
 }

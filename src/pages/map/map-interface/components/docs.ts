@@ -1,11 +1,11 @@
-import hyper from "@macrostrat/hyper";
 import { Alignment } from "@blueprintjs/core";
-import styles from "./docs.module.styl";
+import { routerBasename } from "@macrostrat-web/settings";
+import hyper from "@macrostrat/hyper";
+import classNames from "classnames";
 import { useInView } from "react-intersection-observer";
 import { HashLink } from "react-router-hash-link";
-import { routerBasename } from "~/settings";
-import classNames from "classnames";
 import { joinURL } from "~/pages/map/map-interface/utils";
+import styles from "./docs.module.styl";
 
 const h = hyper.styled(styles);
 

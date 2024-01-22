@@ -1,17 +1,17 @@
-import { Route, Routes } from "react-router-dom";
 import { ReduxRouter } from "@lagunovsky/redux-react-router";
 import h from "@macrostrat/hyper";
+import { Route, Routes } from "react-router-dom";
 
 import "~/styles/global.styl";
 import "./searchbar.styl";
 import "./ui-components.styl";
 
-import { Provider } from "react-redux";
-import { createStore, compose, applyMiddleware } from "redux";
-import reducerStack, { Action, browserHistory, AppState } from "./app-state";
 import { createRouterMiddleware } from "@lagunovsky/redux-react-router";
+import { mapPagePrefix } from "@macrostrat-web/settings";
+import { Provider } from "react-redux";
+import { applyMiddleware, compose, createStore } from "redux";
 import { onDemand } from "~/_utils";
-import { mapPagePrefix } from "~/settings";
+import reducerStack, { Action, AppState, browserHistory } from "./app-state";
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 

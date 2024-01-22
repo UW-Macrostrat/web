@@ -1,10 +1,10 @@
+import { SETTINGS, apiV2Prefix } from "@macrostrat-web/settings";
 import axios from "axios";
 import { joinURL } from "~/pages/map/map-interface/utils";
-import { SETTINGS } from "~/settings";
 import { ColumnGeoJSONRecord } from "../reducers";
 import { UPDATE_FILTERED_COLUMNS } from "../reducers/filtered-columns";
 
-export const base = `${SETTINGS.apiDomain}/api/v2`;
+export const base = apiV2Prefix;
 const basev1 = `${SETTINGS.gddDomain}/api/v1`;
 const pbdbURL = `${SETTINGS.pbdbDomain}/data1.2/colls/list.json`;
 const pbdbURLOccs = `${SETTINGS.pbdbDomain}/data1.2/occs/list.json`;

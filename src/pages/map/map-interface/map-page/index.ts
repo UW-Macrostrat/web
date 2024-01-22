@@ -1,20 +1,24 @@
-import { Suspense, useEffect, useCallback, useRef } from "react";
+import { Suspense, useCallback, useEffect, useRef } from "react";
 // Import other components
-import hyper from "@macrostrat/hyper";
-import Searchbar from "../components/navbar";
 import { Spinner } from "@blueprintjs/core";
-import { useSelector } from "react-redux";
 import loadable from "@loadable/component";
-import { useAppState, useAppActions } from "../app-state";
-import styles from "./main.module.styl";
-import { useTransition } from "transition-hook";
-import { useContextPanelOpen, useContextClass } from "../app-state";
+import { mapPagePrefix } from "@macrostrat-web/settings";
+import hyper from "@macrostrat/hyper";
 import { MapAreaContainer } from "@macrostrat/map-interface";
-import { Routes, Route, useParams } from "react-router-dom";
 import classNames from "classnames";
-import { MenuPage } from "./menu";
-import { mapPagePrefix } from "~/settings";
+import { useSelector } from "react-redux";
+import { Route, Routes, useParams } from "react-router-dom";
+import { useTransition } from "transition-hook";
+import {
+  useAppActions,
+  useAppState,
+  useContextClass,
+  useContextPanelOpen,
+} from "../app-state";
+import Searchbar from "../components/navbar";
+import styles from "./main.module.styl";
 import MapContainer from "./map-view";
+import { MenuPage } from "./menu";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));
@@ -111,6 +115,7 @@ function MapPageRoutes() {
 }
 
 function InfoDrawerRoute() {
+  // We could probably do this in the reducer...
   const { lat, lng } = useParams();
   const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
   const z = Math.round(
@@ -118,20 +123,23 @@ function InfoDrawerRoute() {
   );
   const detailPanelTrans = useTransition(infoDrawerOpen, 800);
   const runAction = useAppActions();
-  const allColumns = useAppState((s) => s.core.allColumns);
 
   // Todo: this is a pretty janky way to do state management
   useEffect(() => {
     if (lat && lng) {
-      console.log("Updating infomarker position");
       runAction({
         type: "run-map-query",
         lat: Number(lat),
         lng: Number(lng),
         z,
+        // Focused column or map unit from active layers.
+        // This is a bit anachronistic, since we want to be
+        // able to show columns that aren't necessarily shown on the map
+        columns: [],
+        map_id: null,
       });
     }
-  }, [lat, lng, allColumns]);
+  }, [lat, lng]);
 
   return h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
     className: "detail-panel",

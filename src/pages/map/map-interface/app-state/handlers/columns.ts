@@ -35,28 +35,21 @@ export interface ColumnGeoJSONRecord {
   properties: ColumnProperties;
 }
 
-export function findColumnForLocation(
+export function findColumnsForLocation(
   columns: ColumnGeoJSONRecord[],
   position: MapLocation
-): ColumnGeoJSONRecord | null {
+): ColumnGeoJSONRecord[] {
   const { lat, lng } = position;
   const point = { type: "Point", coordinates: [lng, lat] };
-  for (let column of columns) {
+  return columns.filter((column) => {
     if (column.geometry.type == "MultiPolygon") {
-      // For some reason, booleanContains doesn't work with MultiPolygon
-      // This should be fixed in turf.js v7
       for (let poly of column.geometry.coordinates) {
-        if (booleanContains({ type: "Polygon", coordinates: poly }, point)) {
-          return column;
-        }
+        if (booleanContains({ type: "Polygon", coordinates: poly }, point))
+          return true;
       }
-    } else {
-      if (booleanContains(column.geometry, point)) {
-        return column;
-      }
-    }
-  }
-  return null;
+    } else if (booleanContains(column.geometry, point)) return true;
+    return false;
+  });
 }
 
 type IntersectionTracker = {

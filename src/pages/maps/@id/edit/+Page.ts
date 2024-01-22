@@ -1,9 +1,9 @@
-import { PageContextBuiltInServer } from "vike/types";
-import { SETTINGS } from "~/settings";
+import { apiV2Prefix } from "@macrostrat-web/settings";
 import h from "@macrostrat/hyper";
+import { PageContextBuiltInServer } from "vike/types";
 import { ClientOnly } from "~/renderer/client-only";
 
-const apiAddress = import.meta.env.VITE_MACROSTRAT_INGEST_API + "/sources/";
+const apiAddress = apiV2Prefix + "/defs/sources";
 
 export async function onBeforeRender(pageContext: PageContextBuiltInServer) {
   const { id } = pageContext.routeParams;

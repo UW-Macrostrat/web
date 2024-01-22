@@ -1,3 +1,4 @@
+import h from "@macrostrat/hyper";
 import { usePageContext } from "./page-context";
 
 export function Link(props: {
@@ -12,5 +13,5 @@ export function Link(props: {
   ]
     .filter(Boolean)
     .join(" ");
-  return <a {...props} className={className} />;
+  return h("a", { ...props, className });
 }

@@ -1,36 +1,35 @@
+import {
+  Collapse,
+  NonIdealState,
+  Radio,
+  RadioGroup,
+  Spinner,
+} from "@blueprintjs/core";
+import { SETTINGS, apiV2Prefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import {
+  DetailPanelStyle,
+  InfoDrawerContainer,
   MapAreaContainer,
+  MapMarker,
   MapView,
   PanelCard,
 } from "@macrostrat/map-interface";
-import {
-  Spinner,
-  Radio,
-  RadioGroup,
-  NonIdealState,
-  Collapse,
-  Switch,
-} from "@blueprintjs/core";
-import { SETTINGS } from "~/settings";
-import { useEffect } from "react";
-import styles from "./main.module.sass";
-import { useMemo, useState } from "react";
-import "~/styles/global.styl";
-import boundingBox from "@turf/bbox";
-import { LngLatBoundsLike } from "mapbox-gl";
 import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
-import { useDarkMode, useAPIResult, JSONView } from "@macrostrat/ui-components";
 import {
-  InfoDrawerContainer,
-  ExpansionPanel,
-  DetailPanelStyle,
-} from "@macrostrat/map-interface";
-import { MapMarker } from "@macrostrat/map-interface";
+  JSONView,
+  NullableSlider,
+  useAPIResult,
+  useDarkMode,
+} from "@macrostrat/ui-components";
+import boundingBox from "@turf/bbox";
+import { LngLatBoundsLike } from "mapbox-gl";
+import { useEffect, useMemo, useState } from "react";
 import { MapNavbar } from "~/components/map-navbar";
-import { NullableSlider } from "@macrostrat/ui-components";
-import { tempImageIndex, s3Address } from "../raster-images";
+import "~/styles/global.styl";
+import { s3Address, tempImageIndex } from "../raster-images";
+import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
 
@@ -345,10 +344,9 @@ function MapLegendPanel(params) {
 }
 
 function MapLegendData({ source_id }) {
-  const mapLegend = useAPIResult(
-    SETTINGS.apiDomain + "/api/v2/geologic_units/map/legend",
-    { source_id }
-  );
+  const mapLegend = useAPIResult(apiV2Prefix + "/geologic_units/map/legend", {
+    source_id,
+  });
   if (mapLegend == null) return h(Spinner);
   const legendData = mapLegend?.success?.data;
   if (legendData == null) return h(NonIdealState, { icon: "error" });

@@ -1,7 +1,7 @@
+import { apiV2Prefix } from "@macrostrat-web/settings";
 import fetch from "node-fetch";
-import { SETTINGS } from "~/settings";
 
-const apiAddress = import.meta.env.VITE_MACROSTRAT_INGEST_API + "/sources";
+const apiAddress = apiV2Prefix + "/defs/sources";
 
 export async function onBeforeRender(pageContext) {
   // `.page.server.js` files always run in Node.js; we could use SQL/ORM queries here.

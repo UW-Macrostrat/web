@@ -1,7 +1,7 @@
-import h from "@macrostrat/hyper";
-import { useState, useEffect, Suspense, useMemo } from "react";
-import loadable from "@loadable/component";
 import { Spinner } from "@blueprintjs/core";
+import loadable from "@loadable/component";
+import h from "@macrostrat/hyper";
+import { Suspense, useEffect, useMemo, useState } from "react";
 
 function ClientOnly(props) {
   const fallback = props.fallback || Spinner;

@@ -1,4 +1,5 @@
 import { Radio, RadioGroup, Spinner } from "@blueprintjs/core";
+import { SETTINGS } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import {
   MapAreaContainer,
@@ -13,7 +14,6 @@ import boundingBox from "@turf/bbox";
 import { LngLatBoundsLike } from "mapbox-gl";
 import { useEffect, useMemo, useState } from "react";
 import { MapNavbar } from "~/components/map-navbar";
-import { SETTINGS } from "~/settings";
 import "~/styles/global.styl";
 import { s3Address, tempImageIndex } from "../../raster-images";
 import styles from "./main.module.sass";

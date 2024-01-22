@@ -1,9 +1,9 @@
+import { SETTINGS } from "@macrostrat-web/settings";
 import { FeatureCollection, Point } from "geojson";
 import {
   FilterData,
   IntervalFilterData,
 } from "~/pages/map/map-interface/app-state/handlers/filters";
-import { SETTINGS } from "~/settings";
 
 export function getExpressionForFilters(
   filters: FilterData[]

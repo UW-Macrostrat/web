@@ -1,41 +1,38 @@
+import { HTMLSelect, Spinner, Switch } from "@blueprintjs/core";
+import { burwellTileDomain } from "@macrostrat-web/settings";
 import h from "@macrostrat/hyper";
-import { MacrostratVectorTileset } from "~/_legacy/map-dev/map-layers";
-import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
-import mapboxgl from "mapbox-gl";
-import { useCallback, useMemo, useReducer } from "react";
-import { SETTINGS } from "~/settings";
-import { Switch, HTMLSelect, Spinner } from "@blueprintjs/core";
-import {
-  Spacer,
-  useDarkMode,
-  useStoredState,
-  DarkModeButton,
-} from "@macrostrat/ui-components";
-import { useState, useEffect } from "react";
 import {
   FeaturePanel,
   FeatureSelectionHandler,
-  TileInfo,
-  MapView,
+  FloatingNavbar,
   LocationPanel,
-  MapMarker,
   MapAreaContainer,
   MapLoadingButton,
-  FloatingNavbar,
+  MapMarker,
+  MapView,
   PanelCard,
-  buildInspectorStyle,
-} from "@macrostrat/map-interface";
-import { TimescalePanel } from "./timescale";
-import { MapPosition, getMapPosition } from "@macrostrat/mapbox-utils";
-import { useAPIResult } from "@macrostrat/ui-components";
-import { getHashString, setHashString } from "@macrostrat/ui-components";
-
-// Having to include these global styles is a bit awkward
-import "~/styles/global.styl";
-import {
+  TileInfo,
   applyMapPositionToHash,
+  buildInspectorStyle,
   getMapPositionForHash,
-} from "~/pages/map/map-interface/app-state/reducers/hash-string";
+} from "@macrostrat/map-interface";
+import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
+import { MapPosition } from "@macrostrat/mapbox-utils";
+import {
+  DarkModeButton,
+  Spacer,
+  getHashString,
+  setHashString,
+  useAPIResult,
+  useDarkMode,
+  useStoredState,
+} from "@macrostrat/ui-components";
+import mapboxgl from "mapbox-gl";
+import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import { MacrostratVectorTileset } from "~/_legacy/map-dev/map-layers";
+import { TimescalePanel } from "./timescale";
+
+import "~/styles/global.styl";
 
 // Import other components
 
@@ -232,7 +229,7 @@ export default function PaleoMap({
   const plateModelId = model_id;
 
   const models: { id: string; max_age: number; min_age: number }[] =
-    useAPIResult(SETTINGS.burwellTileDomain + "/carto/rotation-models");
+    useAPIResult(burwellTileDomain + "/carto/rotation-models");
 
   useEffect(() => {
     if (models == null) return;

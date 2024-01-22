@@ -1,5 +1,4 @@
-import {Button, Menu, MenuItem, InputGroup, Classes} from "@blueprintjs/core";
-import {Select2, ItemRenderer} from "@blueprintjs/select";
+import {Button, Menu, InputGroup} from "@blueprintjs/core";
 import React from "react";
 import {useDebouncedCallback} from "use-debounce";
 
@@ -8,8 +7,7 @@ import hyper from "@macrostrat/hyper";
 
 import {OperatorQueryParameter, ColumnOperatorOption} from "./table";
 
-import "@blueprintjs/core/lib/css/blueprint.css"
-import "@blueprintjs/select/lib/css/blueprint-select.css";
+import "~/styles/blueprint-select";
 import styles from "./edit-table.module.sass";
 import {Filter} from "./table-util";
 
