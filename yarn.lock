@@ -3753,6 +3753,7 @@ __metadata:
     "@turf/bbox": "npm:^6.5.0"
     "@turf/boolean-contains": "npm:^6.5.0"
     "@turf/buffer": "npm:^6.5.0"
+    "@turf/centroid": "npm:^6.5.0"
     "@types/cesium": "npm:^1.67.4"
     "@types/compression": "npm:^1.7.2"
     "@types/express": "npm:^4.17.17"

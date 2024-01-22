@@ -9,9 +9,7 @@ import {
 import { hyperStyled } from "@macrostrat/hyper";
 import { getHashString, setHashString } from "@macrostrat/ui-components";
 import { useEffect, useRef } from "react";
-import { ClientOnly } from "~/renderer/client-only";
 import { apiV2Prefix } from "@macrostrat-web/settings";
-//import { Column } from "@macrostrat/column-views";
 import { PatternProvider } from "~/_providers";
 import styles from "./column-inspector.module.styl";
 import ModalUnitPanel from "./modal-panel";
@@ -25,6 +23,12 @@ function ColumnPage({ columnInfo }) {
 
   const selectedUnit = useUnitSelection(units);
 
+  console.log(columnInfo);
+
+  const lon = new Number(columnInfo.lng);
+  const lat = new Number(columnInfo.lat);
+  const zoom = 7;
+
   return h("div.column-ui", [
     h("div.left-column", [
       h("div.column-view", [
@@ -33,6 +37,15 @@ function ColumnPage({ columnInfo }) {
           h("span.column-id", ["#", columnInfo.col_id]),
           ", ",
           h("span.project", ["project ", columnInfo.project_id]),
+          ", ",
+          h(
+            "a",
+            {
+              href: `/map/loc/${lon}/${lat}/column#z=${zoom}&show=columns,geology`,
+            },
+            "show in map"
+          ),
+          ".",
         ]),
         h(Column, {
           data: units,
@@ -48,6 +61,7 @@ function ColumnPage({ columnInfo }) {
     h("div.right-column", [
       h.if(selectedUnit == null)(ColumnNavigatorMap, {
         className: "column-map",
+        format: "geojson_bare",
         currentColumn: {
           geometry,
           type: "Feature",
@@ -60,10 +74,6 @@ function ColumnPage({ columnInfo }) {
         setCurrentColumn(newColumn) {
           const { col_id } = newColumn.properties;
           navigate(`/columns/${col_id}`);
-          //console.log("Set current column", args);
-          // TODO: this should be a client-side route
-          // Once we enable client-side routing, we can use this to navigate
-          //navigate(`/columns/${columnInfo.col_id}`);
         },
         margin: 10,
         project_id: columnInfo.project_id,

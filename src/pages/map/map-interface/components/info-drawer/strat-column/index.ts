@@ -35,7 +35,11 @@ function ColumnOverlay({ columnInfo }: { columnInfo: ColumnSummary | null }) {
     h("div.controls", [h(BackButton)]),
     h("h4", columnInfo.col_name),
     h("div.spacer"),
-    h("code", columnInfo.col_id),
+    h(
+      "a",
+      { href: `/columns/${columnInfo.col_id}` },
+      h("code", columnInfo.col_id)
+    ),
   ]);
 
   return h(
