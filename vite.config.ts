@@ -70,6 +70,9 @@ const config: UserConfig = {
       NODE_DEBUG: false,
     },
   },
+  ssr: {
+    noExternal: ["labella"],
+  },
 };
 
 export default config;

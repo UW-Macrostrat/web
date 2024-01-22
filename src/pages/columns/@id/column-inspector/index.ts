@@ -4,18 +4,19 @@ import {
   UnitSelectionProvider,
   useSelectedUnit,
   useUnitSelectionDispatch,
+  Column,
 } from "@macrostrat/column-views";
 import { hyperStyled } from "@macrostrat/hyper";
 import { getHashString, setHashString } from "@macrostrat/ui-components";
 import { useEffect, useRef } from "react";
-
+import { ClientOnly } from "~/renderer/client-only";
 import { apiV2Prefix } from "@macrostrat-web/settings";
-import { Column } from "@macrostrat/column-views";
+//import { Column } from "@macrostrat/column-views";
 import { PatternProvider } from "~/_providers";
 import styles from "./column-inspector.module.styl";
 import ModalUnitPanel from "./modal-panel";
 
-// import { navigate } from "vike/client/router";
+import { navigate } from "vike/client/router";
 
 const h = hyperStyled(styles);
 
@@ -58,7 +59,7 @@ function ColumnPage({ columnInfo }) {
         },
         setCurrentColumn(newColumn) {
           const { col_id } = newColumn.properties;
-          window.location.href = `/columns/${col_id}`;
+          navigate(`/columns/${col_id}`);
           //console.log("Set current column", args);
           // TODO: this should be a client-side route
           // Once we enable client-side routing, we can use this to navigate

@@ -119,6 +119,7 @@
     "use-react-router-breadcrumbs": "^3.2.1",
     "use-resize-observer": "^9.1.0",
     "vike": "^0.4.159",
+    "vike-react": "^0.4.2",
     "vite": "^5.0.12",
     "vite-plugin-cesium": "^1.2.22"
   },
