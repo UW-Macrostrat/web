@@ -135,13 +135,5 @@
     "react-dom": "^18.2.0"
   },
   "prettier": {},
-  "packageManager": "yarn@3.6.3",
-  "dependenciesMeta": {
-    "@esbuild-kit/esm-loader@2.5.5": {
-      "unplugged": true
-    },
-    "ts-node@10.9.1": {
-      "unplugged": true
-    }
-  }
+  "packageManager": "yarn@4.0.2"
 }
