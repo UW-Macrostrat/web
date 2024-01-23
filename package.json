@@ -21,10 +21,7 @@
     "deps/web-components/packages/*",
     "deps/cesium-viewer",
     "deps/cesium-martini",
-    "packages/data-sheet-test",
-    "packages/globe-dev",
-    "packages/security",
-    "packages/settings"
+    "packages/*"
   ],
   "authors": [
     "John Czaplewski <jczaplewski@wisc.edu>",
@@ -57,6 +54,7 @@
     "@macrostrat-web/globe": "workspace:*",
     "@macrostrat-web/security": "workspace:*",
     "@macrostrat-web/settings": "workspace:*",
+    "@macrostrat-web/sift": "workspace:*",
     "@macrostrat/api-utils": "workspace:*",
     "@macrostrat/api-views": "workspace:*",
     "@macrostrat/column-components": "workspace:*",
@@ -126,10 +124,6 @@
     "vike-react": "^0.4.2",
     "vite": "^5.0.12",
     "vite-plugin-cesium": "^1.2.22"
-  },
-  "resolutions": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
   },
   "prettier": {},
   "packageManager": "yarn@4.0.2"
