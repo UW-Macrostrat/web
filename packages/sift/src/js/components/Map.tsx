@@ -1,8 +1,8 @@
-import React from 'react';
-import Centroid from 'turf-centroid';
-import Utilities from './Utilities';
-import Loading from './Loading';
-import MapControls from './MapControls';
+import React from "react";
+import Centroid from "turf-centroid";
+import Utilities from "./Utilities";
+import Loading from "./Loading";
+import MapControls from "./MapControls";
 
 class Map extends React.Component {
   constructor(props) {
@@ -19,15 +19,15 @@ class Map extends React.Component {
 
   _resetState() {
     return {
-      data: {features: [], _id: -1},
-      fossils: {features: [], _id: -1},
-      target: '',
-      outcrop: {features: [], _id: -1},
+      data: { features: [], _id: -1 },
+      fossils: { features: [], _id: -1 },
+      target: "",
+      outcrop: { features: [], _id: -1 },
       outcropLoading: false,
       showOutcrop: false,
       showFossils: false,
-      showSatellite: false
-    }
+      showSatellite: false,
+    };
   }
 
   componentDidMount() {
@@ -35,43 +35,59 @@ class Map extends React.Component {
       this.map.remove();
     }
 
-    var map = this.map = L.map(document.getElementById('map'), {
+    var map = (this.map = L.map(document.getElementById("map"), {
       minZoom: 1,
       maxZoom: 10,
       zoomControl: false,
       scrollWheelZoom: false,
-    //  keyboard: false,
-    //  dragging: false,
+      //  keyboard: false,
+      //  dragging: false,
       touchZoom: true,
-    //  doubleClickZoom: false,
-    //  boxZoom: false
-    }).setView([40, -97], 6);
+      //  doubleClickZoom: false,
+      //  boxZoom: false
+    }).setView([40, -97], 6));
 
-    var control = L.control.zoom({
-      position: 'topright'
-    }).addTo(map);
+    var control = L.control
+      .zoom({
+        position: "topright",
+      })
+      .addTo(map);
 
-    this.tiles = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
-      attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a></strong>',
-      tileSize: 512,
-      maxZoom: 18,
-      zoomOffset: -1,
-      id: 'mapbox/outdoors-v11',
-      accessToken: 'pk.eyJ1IjoiamN6YXBsZXdza2kiLCJhIjoiY2tpcjQ1cG1yMGZvcTJ6b3psbXB6bmtweiJ9.TkabsM8gNsZ7bHGJXu6vOQ'
-    }).addTo(map);;
+    this.tiles = L.tileLayer(
+      "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
+      {
+        attribution:
+          '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a></strong>',
+        tileSize: 512,
+        maxZoom: 18,
+        zoomOffset: -1,
+        id: "mapbox/outdoors-v11",
+        accessToken:
+          "pk.eyJ1IjoiamN6YXBsZXdza2kiLCJhIjoiY2tpcjQ1cG1yMGZvcTJ6b3psbXB6bmtweiJ9.TkabsM8gNsZ7bHGJXu6vOQ",
+      }
+    ).addTo(map);
 
-    this.darkTiles = L.tileLayer("https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png", {
-      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>'
-    });
+    this.darkTiles = L.tileLayer(
+      "https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png",
+      {
+        attribution:
+          '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
+      }
+    );
 
-    this.satellite = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
-      attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a></strong>',
-      tileSize: 512,
-      maxZoom: 18,
-      zoomOffset: -1,
-      id: 'mapbox/satellite-v9',
-      accessToken: 'pk.eyJ1IjoiamN6YXBsZXdza2kiLCJhIjoiY2tpcjQ1cG1yMGZvcTJ6b3psbXB6bmtweiJ9.TkabsM8gNsZ7bHGJXu6vOQ'
-    }).addTo(map);
+    this.satellite = L.tileLayer(
+      "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
+      {
+        attribution:
+          '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a></strong>',
+        tileSize: 512,
+        maxZoom: 18,
+        zoomOffset: -1,
+        id: "mapbox/satellite-v9",
+        accessToken:
+          "pk.eyJ1IjoiamN6YXBsZXdza2kiLCJhIjoiY2tpcjQ1cG1yMGZvcTJ6b3psbXB6bmtweiJ9.TkabsM8gNsZ7bHGJXu6vOQ",
+      }
+    ).addTo(map);
 
     this.outcropLayer = L.geoJson(null, {
       style: (feature) => {
@@ -80,18 +96,21 @@ class Map extends React.Component {
           fillOpacity: 0.8,
           opacity: 0.8,
           weight: 1,
-          outline: 0
-        }
-      }
+          outline: 0,
+        };
+      },
     });
 
-    this.outcropLayer.on('click', (event) => {
-      Utilities.fetchData(`/geologic_units/burwell?scale=medium&lat=${event.latlng.lat}&lng=${event.latlng.lng}`, (error, data) => {
-        if (data.success && data.success.data.length) {
-          var burwellData = data.success.data[0];
-          L.popup()
-            .setLatLng(event.latlng)
-            .setContent(`
+    this.outcropLayer.on("click", (event) => {
+      Utilities.fetchData(
+        `/geologic_units/burwell?scale=medium&lat=${event.latlng.lat}&lng=${event.latlng.lng}`,
+        (error, data) => {
+          if (data.success && data.success.data.length) {
+            var burwellData = data.success.data[0];
+            L.popup()
+              .setLatLng(event.latlng)
+              .setContent(
+                `
               <div class='burwell-popup'>
                 <h4>${burwellData.strat_name} (${burwellData.map_id})</h4>
                 <table class="table table-stripped">
@@ -115,16 +134,18 @@ class Map extends React.Component {
                   </tbody>
                 </table>
               </div>
-            `)
-            .openOn(this.map);
+            `
+              )
+              .openOn(this.map);
+          }
         }
-      });
+      );
     });
 
     // Set up fossil layer
     this.fossilLayer = L.geoJson(null, {
       pointToLayer: (feature, latlng) => {
-        return L.circleMarker(latlng, this.props.defaultFossilStyle)
+        return L.circleMarker(latlng, this.props.defaultFossilStyle);
       },
       onEachFeature: (feature, layer) => {
         layer.bindPopup(`
@@ -137,14 +158,14 @@ class Map extends React.Component {
             <br>
             ${feature.properties.pbdb_occs} occurrences
           </div>
-          `)
-      }
+          `);
+      },
     }).addTo(map);
   }
 
   changeSatelliteState() {
     this.setState({
-      showSatellite: !this.state.showSatellite
+      showSatellite: !this.state.showSatellite,
     });
   }
 
@@ -154,7 +175,7 @@ class Map extends React.Component {
     } else {
       this.map.addLayer(this.satellite);
     }
-    console.log('Done toggling')
+    console.log("Done toggling");
   }
 
   toggleOutcrop() {
@@ -179,87 +200,88 @@ class Map extends React.Component {
     }
   }
 
-
   changeOutcropState() {
-    if (!(this.state.outcrop.features.length)) {
-      var ids = this.props.stratNameIDs.join(',');
+    if (!this.state.outcrop.features.length) {
+      var ids = this.props.stratNameIDs.join(",");
       this.setState({
-        outcropLoading: true
+        outcropLoading: true,
       });
-      Utilities.fetchMapData(`geologic_units/burwell?scale=medium&strat_name_id=${ids}&map=true`, (error, data, refs) => {
-        this.setState({
-          outcrop: data,
-          showOutcrop: !this.state.showOutcrop,
-          outcropLoading: false//,
-          //refs: this.state.refs.concat(Object.keys(refs).map(d => { return refs[d] }))
-        });
-        this.outcropLayer.addData(data);
-      });
+      Utilities.fetchMapData(
+        `geologic_units/burwell?scale=medium&strat_name_id=${ids}&map=true`,
+        (error, data, refs) => {
+          this.setState({
+            outcrop: data,
+            showOutcrop: !this.state.showOutcrop,
+            outcropLoading: false, //,
+            //refs: this.state.refs.concat(Object.keys(refs).map(d => { return refs[d] }))
+          });
+          this.outcropLayer.addData(data);
+        }
+      );
     } else {
       this.setState({
-        showOutcrop: !this.state.showOutcrop
+        showOutcrop: !this.state.showOutcrop,
       });
     }
   }
 
-
   toggleFossils() {
     if (!this.state.showFossils) {
       this.fossilLayer.setStyle((feature, layer) => {
-        return this.props.highlightedFossilStyle
+        return this.props.highlightedFossilStyle;
       });
     } else {
       this.fossilLayer.setStyle((feature, layer) => {
-        return this.props.defaultFossilStyle
+        return this.props.defaultFossilStyle;
       });
     }
 
     this.setState({
-      showFossils: !this.state.showFossils
+      showFossils: !this.state.showFossils,
     });
 
     this.fossilLayer.bringToFront();
-
   }
 
   addLayer(geojson, target, props) {
     if (this.layer) {
       this.layer.clearLayers();
     }
-    if (!(geojson.features.length)) {
+    if (!geojson.features.length) {
       return;
     }
-    var target = (target) ? geojson.features[0].properties.col_id : '';
+    var target = target ? geojson.features[0].properties.col_id : "";
 
     this.layer = L.geoJson(geojson, {
       style: (feature) => {
         if (feature.properties.col_id === target) {
           return {
-            color: '#990000',
+            color: "#990000",
             fillOpacity: 0.6,
             opacity: 0.8,
             weight: 1,
-            outline: 0
-          }
+            outline: 0,
+          };
         } else {
           return {
-            color: '#777777',
+            color: "#777777",
             fillOpacity: 0.4,
             opacity: 0.8,
             weight: 1,
-            outline: 0
-          }
+            outline: 0,
+          };
         }
       },
-      onEachFeature: (feature,layer) => {
-        layer.on('click', function(d) {
-          window.location.hash = '#/column/' + d.target.feature.properties.col_id;
+      onEachFeature: (feature, layer) => {
+        layer.on("click", function (d) {
+          window.location.hash =
+            "#/column/" + d.target.feature.properties.col_id;
         });
-      }
+      },
     });
 
     // Add columns if we are not showing outcrops and not showing columns
-    if (!(this.map.hasLayer(this.layer)) && (props.showOutcrop == false)) {
+    if (!this.map.hasLayer(this.layer) && props.showOutcrop == false) {
       this.map.addLayer(this.layer);
       this.layer.bringToBack();
     }
@@ -267,30 +289,26 @@ class Map extends React.Component {
     if (target) {
       var center = Centroid(geojson.features[0]).geometry.coordinates;
       setTimeout(() => {
-
-        var latlng = [center[1], center[0]]
-        var offset = [100, 0]
+        var latlng = [center[1], center[0]];
+        var offset = [100, 0];
 
         // Replicated internal logic of panToOffset
         // https://gis.stackexchange.com/questions/218102/how-do-i-zoom-pan-to-a-leaflet-map-such-that-the-given-point-is-off-center
-        var x = this.map.latLngToContainerPoint(latlng).x - offset[0]
-        var y = this.map.latLngToContainerPoint(latlng).y - offset[1]
-        var point = this.map.containerPointToLatLng([x, y])
-        this.map.setView(point, this._zoom, { pan: {animate: true} })
-
-      }, 10)
-
+        var x = this.map.latLngToContainerPoint(latlng).x - offset[0];
+        var y = this.map.latLngToContainerPoint(latlng).y - offset[1];
+        var point = this.map.containerPointToLatLng([x, y]);
+        this.map.setView(point, this._zoom, { pan: { animate: true } });
+      }, 10);
     } else {
       // No f'ing clue why I need a timeout to make this work...
       setTimeout(() => {
         this.map.fitBounds(this.layer.getBounds(), {
-          animate: false
+          animate: false,
         });
-      }, 10)
+      }, 10);
     }
 
     this.map.invalidateSize();
-
   }
 
   addFossils(geojson) {
@@ -298,7 +316,7 @@ class Map extends React.Component {
       this.fossilLayer.clearLayers();
     }
 
-    if (!(geojson.features.length)) {
+    if (!geojson.features.length) {
       return;
     }
 
@@ -318,62 +336,65 @@ class Map extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.hasOwnProperty('fossils') && nextProps.fossils._id != this.props.fossils._id) {
+    if (
+      nextProps.hasOwnProperty("fossils") &&
+      nextProps.fossils._id != this.props.fossils._id
+    ) {
       this.addFossils(nextProps.fossils);
     }
     if (nextProps.data._id != this.props.data._id) {
       this.setState(this._resetState());
       this.addLayer(nextProps.data, nextProps.target, nextProps);
     }
-
   }
 
   render() {
     return (
-      <div className='map-container'>
+      <div className="map-container">
         <MapControls
           toggleOutcrop={this.changeOutcropState}
           toggleFossils={this.toggleFossils}
           toggleSatellite={this.changeSatelliteState}
-
           showOutcrop={this.state.showOutcrop}
           showFossils={this.state.showFossils}
           showSatellite={this.state.showSatellite}
         />
 
-        <Loading
-          loading={this.state.outcropLoading}
-        />
-        <div id='map' className="mapbox-map">
-          <a href="http://mapbox.com/about/maps" className='mapbox-logo' target="_blank">Mapbox</a>
+        <Loading loading={this.state.outcropLoading} />
+        <div id="map" className="mapbox-map">
+          <a
+            href="http://mapbox.com/about/maps"
+            className="mapbox-logo"
+            target="_blank"
+          >
+            Mapbox
+          </a>
         </div>
       </div>
-
     );
   }
-
 }
 
 Map.defaultProps = {
   showOutcrop: false,
   defaultFossilStyle: {
-    color: '#ffffff',
-    fillColor: '#ffffff',
+    color: "#ffffff",
+    fillColor: "#ffffff",
     fillOpacity: 0.8,
     opacity: 0.8,
     weight: 1,
     outline: 0,
-    radius: 1
+    radius: 1,
   },
   highlightedFossilStyle: {
-    color: '#eeeeee',
-    fillColor: '#2E3837',
+    color: "#eeeeee",
+    fillColor: "#2E3837",
     fillOpacity: 0.8,
     opacity: 0.8,
     weight: 1,
     outline: 1.5,
-    radius: 7
-  }
-}
+    radius: 7,
+  },
+};
 
 export default Map;

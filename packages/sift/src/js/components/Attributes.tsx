@@ -1,15 +1,15 @@
-import React from 'react';
-import async from 'async';
-import Utilities from './Utilities';
-import Chart from './Chart';
-import Map from './Map';
-import SummaryStats from './SummaryStats';
-import ChartLegend from './ChartLegend';
-import PrevalentTaxa from './PrevalentTaxa';
-import StratColumn from './StratColumn';
-import NoData from './NoData';
-import Loading from './Loading';
-import Footer from './Footer';
+import React from "react";
+import async from "async";
+import Utilities from "./Utilities";
+import Chart from "./Chart";
+import Map from "./Map";
+import SummaryStats from "./SummaryStats";
+import ChartLegend from "./ChartLegend";
+import PrevalentTaxa from "./PrevalentTaxa";
+import StratColumn from "./StratColumn";
+import NoData from "./NoData";
+import Loading from "./Loading";
+import Footer from "./Footer";
 
 class Attributes extends React.Component {
   constructor(props) {
@@ -18,77 +18,77 @@ class Attributes extends React.Component {
     this.state = this._resetState();
 
     this.stateLookup = {
-      'column': {
-        classifier: 'col_id',
-        def: ''
+      column: {
+        classifier: "col_id",
+        def: "",
       },
-      'unit': {
-        classifier: 'unit_id',
-        def: ''
+      unit: {
+        classifier: "unit_id",
+        def: "",
       },
-      'group': {
-        classifier: 'col_group_id',
-        def: 'groups'
+      group: {
+        classifier: "col_group_id",
+        def: "groups",
       },
-      'strat_name': {
-        classifier: 'strat_name_id',
-        def: ''
+      strat_name: {
+        classifier: "strat_name_id",
+        def: "",
       },
-      'strat_name_concept': {
-        classifier: 'concept_id',
-        def: ''
+      strat_name_concept: {
+        classifier: "concept_id",
+        def: "",
       },
-      'interval': {
-        classifier: 'int_id',
-        def: 'intervals'
+      interval: {
+        classifier: "int_id",
+        def: "intervals",
       },
-      'lithology': {
-        classifier: 'lith_id',
-        def: 'lithologies'
+      lithology: {
+        classifier: "lith_id",
+        def: "lithologies",
       },
-      'lithology_type': {
-        classifier: 'lith_type',
-        def: 'lithologies'
+      lithology_type: {
+        classifier: "lith_type",
+        def: "lithologies",
       },
-      'lithology_class': {
-        classifier: 'lith_class',
-        def: 'lithologies'
+      lithology_class: {
+        classifier: "lith_class",
+        def: "lithologies",
       },
-      'environment': {
-        classifier: 'environ_id',
-        def: 'environments'
+      environment: {
+        classifier: "environ_id",
+        def: "environments",
       },
-      'environment_type': {
-        classifier: 'environ_type',
-        def: 'environments'
+      environment_type: {
+        classifier: "environ_type",
+        def: "environments",
       },
-      'environment_class': {
-        classifier: 'environ_class',
-        def: 'environments'
+      environment_class: {
+        classifier: "environ_class",
+        def: "environments",
       },
-      'economic': {
-        classifier: 'econ_id',
-        def: 'econs'
+      economic: {
+        classifier: "econ_id",
+        def: "econs",
       },
-      'economic_type': {
-        classifier: 'econ_type',
-        def: 'econs'
+      economic_type: {
+        classifier: "econ_type",
+        def: "econs",
       },
-      'economic_class': {
-        classifier: 'econ_class',
-        def: 'econs'
-      }
-    }
+      economic_class: {
+        classifier: "econ_class",
+        def: "econs",
+      },
+    };
   }
 
   _resetState() {
     return {
-      type: '',
-      id: '',
+      type: "",
+      id: "",
       loading: false,
-      mapData: {features: [], _id: -1},
-      fossils: {features: [], _id: -1},
-      prevalentTaxa: [{oid: null, nam: '', img: null, noc: null}],
+      mapData: { features: [], _id: -1 },
+      fossils: { features: [], _id: -1 },
+      prevalentTaxa: [{ oid: null, nam: "", img: null, noc: null }],
       strat_name_ids: [],
       units: [],
       liths: [],
@@ -96,30 +96,30 @@ class Attributes extends React.Component {
       environs: [],
       refs: [],
       name: {
-        name: '',
-        id: '',
-        url: ''
+        name: "",
+        id: "",
+        url: "",
       },
       summary: {
-        col_area: '',
-        max_thick: '',
-        min_thick: '',
-        b_age: '',
-        t_age: '',
-        pbdb_collections: '',
-        t_units: '',
-        t_sections: ''
-      }
-    }
+        col_area: "",
+        max_thick: "",
+        min_thick: "",
+        b_age: "",
+        t_age: "",
+        pbdb_collections: "",
+        t_units: "",
+        t_sections: "",
+      },
+    };
   }
 
   setLegend(which, html) {
-    document.getElementById(which + '-legend').innerHTML = html
+    document.getElementById(which + "-legend").innerHTML = html;
   }
 
   _update(type, id) {
     this.setState({
-      loading: true
+      loading: true,
     });
     /*
       - Get columns
@@ -129,135 +129,185 @@ class Attributes extends React.Component {
       - Get fossils
         - if fossils, Get prevalent taxa
     */
-    async.parallel({
-      columns: function(callback) {
-        Utilities.fetchMapData(`columns?${this.stateLookup[type].classifier}=${id}&response=long` + ((type === 'column') ? '&adjacents=true' : ''), (error, data, refs) => {
-          if (error) {
-            return callback(error);
-          }
-          callback(null, {data, refs});
-        });
-      }.bind(this),
-
-      units: function(callback) {
-        if (type === 'column' || type === 'unit') {
-          Utilities.fetchData(`units?${this.stateLookup[type].classifier}=${id}&response=long`, (error, data) => {
-            if (error) {
-              return callback(error);
-            }
-            callback(null, data.success.data);
-          });
-        } else {
-          callback(null, []);
-        }
-      }.bind(this),
-
-      definitions: function(callback) {
-        if (this.stateLookup[type].def.length) {
-          Utilities.fetchData(`defs/${this.stateLookup[type].def}?${this.stateLookup[type].classifier}=${id}`, (error, data) => {
-            if (error) {
-              return callback(error);
-            }
-            callback(null, data.success.data);
-          });
-        } else {
-          callback(null, []);
-        }
-      }.bind(this),
-
-      strat_names: function(callback) {
-        callback(null, []);
-      }.bind(this),
-
-      fossils: function(callback) {
-        Utilities.fetchMapData(`fossils?${this.stateLookup[type].classifier}=${id}`, (error, data, refs) => {
-          if (error) {
-            return callback(error);
-          }
-
-          var collections = data.features.map(d => { return d.properties.cltn_id });
-
-          if (collections.length) {
-            Utilities.fetchPrevalentTaxa(collections.join(','), (prevalentError, prevalentData) => {
-              if (prevalentError) {
+    async.parallel(
+      {
+        columns: function (callback) {
+          Utilities.fetchMapData(
+            `columns?${this.stateLookup[type].classifier}=${id}&response=long` +
+              (type === "column" ? "&adjacents=true" : ""),
+            (error, data, refs) => {
+              if (error) {
                 return callback(error);
               }
-              // Normalize the names a bit
-              prevalentData.records.forEach(d => {
-                var splitName = d.nam.split(' ');
-                d.nam = splitName[0] + ( (splitName.length > 1) ? '*' : '');
-              });
+              callback(null, { data, refs });
+            }
+          );
+        }.bind(this),
 
-              callback(null, {
-                data,
-                refs,
-                taxa: prevalentData.records
-              });
-
-            });
+        units: function (callback) {
+          if (type === "column" || type === "unit") {
+            Utilities.fetchData(
+              `units?${this.stateLookup[type].classifier}=${id}&response=long`,
+              (error, data) => {
+                if (error) {
+                  return callback(error);
+                }
+                callback(null, data.success.data);
+              }
+            );
           } else {
-            callback(null, {data, refs, taxa: [{oid: null, nam: '', img: null, noc: null}]});
+            callback(null, []);
           }
+        }.bind(this),
 
+        definitions: function (callback) {
+          if (this.stateLookup[type].def.length) {
+            Utilities.fetchData(
+              `defs/${this.stateLookup[type].def}?${this.stateLookup[type].classifier}=${id}`,
+              (error, data) => {
+                if (error) {
+                  return callback(error);
+                }
+                callback(null, data.success.data);
+              }
+            );
+          } else {
+            callback(null, []);
+          }
+        }.bind(this),
+
+        strat_names: function (callback) {
+          callback(null, []);
+        }.bind(this),
+
+        fossils: function (callback) {
+          Utilities.fetchMapData(
+            `fossils?${this.stateLookup[type].classifier}=${id}`,
+            (error, data, refs) => {
+              if (error) {
+                return callback(error);
+              }
+
+              var collections = data.features.map((d) => {
+                return d.properties.cltn_id;
+              });
+
+              if (collections.length) {
+                Utilities.fetchPrevalentTaxa(
+                  collections.join(","),
+                  (prevalentError, prevalentData) => {
+                    if (prevalentError) {
+                      return callback(error);
+                    }
+                    // Normalize the names a bit
+                    prevalentData.records.forEach((d) => {
+                      var splitName = d.nam.split(" ");
+                      d.nam = splitName[0] + (splitName.length > 1 ? "*" : "");
+                    });
+
+                    callback(null, {
+                      data,
+                      refs,
+                      taxa: prevalentData.records,
+                    });
+                  }
+                );
+              } else {
+                callback(null, {
+                  data,
+                  refs,
+                  taxa: [{ oid: null, nam: "", img: null, noc: null }],
+                });
+              }
+            }
+          );
+        }.bind(this),
+      },
+      function (error, data) {
+        if (error) {
+          // Make sure no data is shown
+        }
+
+        console.log(data);
+
+        var name;
+        // Title is treated differently if it's a *_type or _class because it's a string instead of an integer
+        if (isNaN(id)) {
+          name = {
+            name: id,
+            id: id,
+            url: "#/" + type + "/" + id,
+          };
+        } else if (this.stateLookup[type].def.length) {
+          name = {
+            name: data.definitions[0].name,
+            id: data.definitions[0][this.stateLookup[type].classifier],
+            url:
+              "#/" +
+              type +
+              "/" +
+              data.definitions[0][this.stateLookup[type].classifier],
+          };
+        } else if (type === "column") {
+          name = {
+            name: data.columns.data.features[0].properties.col_name,
+            id: data.columns.data.features[0].properties.col_id,
+            url: "#/column/" + data.columns.data.features[0].properties.col_id,
+          };
+        } else if (type === "unit") {
+          name = {
+            name:
+              "Unit " + data.units[0].unit_id + " - " + data.units[0].unit_name,
+            id: data.units[0].unit_id,
+            url: "#/unit/" + data.units[0].unit_id,
+          };
+        }
+
+        console.log("Name - ", name);
+
+        this.setState({
+          type,
+          id,
+          name,
+          units: data.units,
+          fossils: data.fossils.data,
+          strat_name_ids: data.units
+            .map((d) => {
+              return d.strat_name_id;
+            })
+            .filter((d) => {
+              if (d) {
+                return d;
+              }
+            }),
+          liths: Utilities.parseAttributes(
+            "lith",
+            Utilities.summarizeAttributes("lith", data.columns.data.features)
+          ),
+          environs: Utilities.parseAttributes(
+            "environ",
+            Utilities.summarizeAttributes("environ", data.columns.data.features)
+          ),
+          econs: Utilities.parseAttributes(
+            "econ",
+            Utilities.summarizeAttributes("econ", data.columns.data.features)
+          ),
+          summary: Utilities.summarize(data.columns.data.features),
+          prevalentTaxa: data.fossils.taxa,
+          mapData: data.columns.data,
+          refs: Object.keys(data.columns.refs)
+            .map((ref) => {
+              return data.columns.refs[ref];
+            })
+            .concat(
+              Object.keys(data.fossils.refs).map((ref) => {
+                return data.fossils.refs[ref];
+              })
+            ),
+          loading: false,
         });
       }.bind(this)
-
-    }, function(error, data) {
-      if (error) {
-        // Make sure no data is shown
-      }
-
-      console.log(data);
-
-      var name;
-      // Title is treated differently if it's a *_type or _class because it's a string instead of an integer
-      if (isNaN(id)) {
-        name = {
-          name: id,
-          id: id,
-          url: '#/' + type + '/' + id
-        }
-      } else if (this.stateLookup[type].def.length) {
-        name = {
-          name: data.definitions[0].name,
-          id: data.definitions[0][this.stateLookup[type].classifier],
-          url: '#/' + type + '/' + data.definitions[0][this.stateLookup[type].classifier]
-        }
-      } else if (type === 'column') {
-        name = {
-          name: data.columns.data.features[0].properties.col_name,
-          id: data.columns.data.features[0].properties.col_id,
-          url: '#/column/' + data.columns.data.features[0].properties.col_id
-        }
-      } else if (type === 'unit') {
-        name = {
-          name: 'Unit ' + data.units[0].unit_id + ' - ' + data.units[0].unit_name,
-          id: data.units[0].unit_id,
-          url: '#/unit/' + data.units[0].unit_id
-        }
-      }
-
-      console.log('Name - ', name);
-
-      this.setState({
-        type,
-        id,
-        name,
-        units: data.units,
-        fossils: data.fossils.data,
-        strat_name_ids: data.units.map(d => { return d.strat_name_id }).filter(d => { if (d) { return d } }),
-        liths: Utilities.parseAttributes('lith', Utilities.summarizeAttributes('lith', data.columns.data.features)),
-        environs: Utilities.parseAttributes('environ', Utilities.summarizeAttributes('environ', data.columns.data.features)),
-        econs: Utilities.parseAttributes('econ', Utilities.summarizeAttributes('econ', data.columns.data.features)),
-        summary: Utilities.summarize(data.columns.data.features),
-        prevalentTaxa: data.fossils.taxa,
-        mapData: data.columns.data,
-        refs: Object.keys(data.columns.refs).map(ref => { return data.columns.refs[ref]; }).concat(Object.keys(data.fossils.refs).map(ref => { return data.fossils.refs[ref]; })),
-        loading: false
-      });
-    }.bind(this));
-
-
+    );
   }
 
   componentDidMount() {
@@ -271,7 +321,10 @@ class Attributes extends React.Component {
     var currentRoutes = this.context.router.getCurrentRoutes();
     var activeRoute = currentRoutes[currentRoutes.length - 1].name;
     // Only update if the URI actually changed
-    if (nextProps.params.id !== this.props.params.id || activeRoute !== this.state.type) {
+    if (
+      nextProps.params.id !== this.props.params.id ||
+      activeRoute !== this.state.type
+    ) {
       this._update(activeRoute, nextProps.params.id);
     }
   }
@@ -283,104 +336,95 @@ class Attributes extends React.Component {
     var totalCharts = 0;
     if (this.state.econs.length) {
       totalCharts += 1;
-      econChart = <div>
-        <Chart
-        title='Economic'
-        id={'column-econ-chart'}
-        data={this.state.econs}
-        shareLegend={this.setLegend}
-        returnLegend={true}
-      />
-      <div id='column-econ-chart-legend'></div>
-      </div>
+      econChart = (
+        <div>
+          <Chart
+            title="Economic"
+            id={"column-econ-chart"}
+            data={this.state.econs}
+            shareLegend={this.setLegend}
+            returnLegend={true}
+          />
+          <div id="column-econ-chart-legend"></div>
+        </div>
+      );
     }
 
     if (this.state.liths.length) {
       totalCharts += 1;
-      lithChart = <div>
-        <Chart
-          title='Lithology'
-          id={'column-lith-chart'}
-          data={this.state.liths}
-          shareLegend={this.setLegend}
-          returnLegend={true}
-        />
-        <div id='column-lith-chart-legend'></div>
-      </div>
+      lithChart = (
+        <div>
+          <Chart
+            title="Lithology"
+            id={"column-lith-chart"}
+            data={this.state.liths}
+            shareLegend={this.setLegend}
+            returnLegend={true}
+          />
+          <div id="column-lith-chart-legend"></div>
+        </div>
+      );
     }
 
     if (this.state.environs.length) {
       totalCharts += 1;
-      environChart = <div>
-        <Chart
-          title='Environment'
-          id={'column-environ-chart'}
-          data={this.state.environs}
-          shareLegend={this.setLegend}
-          returnLegend={true}
-        />
-      <div id='column-environ-chart-legend'></div>
-      </div>
+      environChart = (
+        <div>
+          <Chart
+            title="Environment"
+            id={"column-environ-chart"}
+            data={this.state.environs}
+            shareLegend={this.setLegend}
+            returnLegend={true}
+          />
+          <div id="column-environ-chart-legend"></div>
+        </div>
+      );
     }
 
-
     return (
-      <div className='page-content'>
-        <Loading
-          loading={this.state.loading}
-        />
+      <div className="page-content">
+        <Loading loading={this.state.loading} />
         <NoData
           features={this.state.mapData.features}
-          type={'lithology'}
+          type={"lithology"}
           loading={this.state.loading}
         />
 
-        <div className={this.state.mapData.features.length ? '' : 'hidden'}>
-          <div className='page-title'>
+        <div className={this.state.mapData.features.length ? "" : "hidden"}>
+          <div className="page-title">
             <a href={this.state.name.url}>{this.state.name.name}</a>
           </div>
-          <div className='random-column'>
-            <div className='random-column-stats'>
-              <SummaryStats
-                data={this.state.summary}
-              />
+          <div className="random-column">
+            <div className="random-column-stats">
+              <SummaryStats data={this.state.summary} />
             </div>
             <Map
-              className='table-cell'
+              className="table-cell"
               data={this.state.mapData}
-              target={(this.state.type === 'column') ? true : false}
+              target={this.state.type === "column" ? true : false}
               fossils={this.state.fossils}
             />
           </div>
 
-          <div className='row chart-row'>
-            <div className={'col-sm-' + (12/totalCharts)}>
-              {lithChart}
-            </div>
-            <div className={'col-sm-' + (12/totalCharts)}>
-              {environChart}
-            </div>
-            <div className={'col-sm-' + (12/totalCharts)}>
-              {econChart}
-            </div>
+          <div className="row chart-row">
+            <div className={"col-sm-" + 12 / totalCharts}>{lithChart}</div>
+            <div className={"col-sm-" + 12 / totalCharts}>{environChart}</div>
+            <div className={"col-sm-" + 12 / totalCharts}>{econChart}</div>
           </div>
 
           <PrevalentTaxa data={this.state.prevalentTaxa} />
 
-          <StratColumn data={this.state.units}/>
+          <StratColumn data={this.state.units} />
         </div>
-        <Footer
-          data={this.state.refs}
-          loading={this.state.loading}
-        />
+        <Footer data={this.state.refs} loading={this.state.loading} />
       </div>
     );
-
   }
 }
 
 Attributes.contextTypes = {
-  router: React.PropTypes.func.isRequired
-}
+  router: React.PropTypes.func.isRequired,
+};
 
 export default Attributes;

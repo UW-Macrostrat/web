@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 class AutocompleteResultItem extends React.Component {
   constructor() {
@@ -18,12 +18,22 @@ class AutocompleteResultItem extends React.Component {
   render() {
     return (
       <li
-        className={(this.props.selected === this.props.index) ? 'result-item focused' : 'result-item'}
+        className={
+          this.props.selected === this.props.index
+            ? "result-item focused"
+            : "result-item"
+        }
         onMouseOver={this.handleMouse}
         onMouseOut={this.handleMouse}
         onClick={this.handleClick}
-      >{this.props.title} {(this.props.id > 0) ?
-        (<span className='result-item-id'>{this.props.id}</span>) : ''}</li>
+      >
+        {this.props.title}{" "}
+        {this.props.id > 0 ? (
+          <span className="result-item-id">{this.props.id}</span>
+        ) : (
+          ""
+        )}
+      </li>
     );
   }
 }

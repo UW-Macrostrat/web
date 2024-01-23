@@ -1,15 +1,17 @@
-import React from 'react';
-import Utilities from './Utilities';
+import React from "react";
+import Utilities from "./Utilities";
 
 class Stats extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {stats: {
-      columns: 0,
-      packages: 0,
-      units: 0,
-      collections: 0
-    }};
+    this.state = {
+      stats: {
+        columns: 0,
+        packages: 0,
+        units: 0,
+        collections: 0,
+      },
+    };
   }
 
   componentWillMount() {
@@ -19,9 +21,9 @@ class Stats extends React.Component {
         packages: 0,
         units: 0,
         collections: 0,
-        measurements: 0
-      }
-      data.success.data.forEach(d => {
+        measurements: 0,
+      };
+      data.success.data.forEach((d) => {
         summary.columns += d.columns;
         summary.packages += d.packages;
         summary.units += d.units;
@@ -29,23 +31,31 @@ class Stats extends React.Component {
         summary.measurements += d.measurements;
       });
 
-      this.setState({stats: summary});
+      this.setState({ stats: summary });
     });
   }
 
   render() {
     return (
-      <div className='main-stats'>
-        <table className='main-stats-table'>
+      <div className="main-stats">
+        <table className="main-stats-table">
           <tr>
-            <td className='main-stats-stat'>{Utilities.addCommas(this.state.stats.columns)} columns</td>
-            <td className='main-stats-stat'>{Utilities.addCommas(this.state.stats.packages)} packages</td>
-            <td className='main-stats-stat'>{Utilities.addCommas(this.state.stats.units)} units</td>
-            <td className='main-stats-stat'>{Utilities.addCommas(this.state.stats.measurements)} measurements</td>
+            <td className="main-stats-stat">
+              {Utilities.addCommas(this.state.stats.columns)} columns
+            </td>
+            <td className="main-stats-stat">
+              {Utilities.addCommas(this.state.stats.packages)} packages
+            </td>
+            <td className="main-stats-stat">
+              {Utilities.addCommas(this.state.stats.units)} units
+            </td>
+            <td className="main-stats-stat">
+              {Utilities.addCommas(this.state.stats.measurements)} measurements
+            </td>
           </tr>
         </table>
       </div>
-    )
+    );
   }
 }
 
