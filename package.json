@@ -13,8 +13,8 @@
     "bootstrap": "yarn",
     "dev": "yarn run server:dev",
     "build": "vite build",
-    "server": "node --env-file=.env ./server/index.js",
-    "server:dev": "yarn run server",
+    "server": "node ./server/index.js",
+    "server:dev": "node --env-file=.env ./server/index.js",
     "server:prod": "NODE_ENV=production npm run server"
   },
   "workspaces": [
