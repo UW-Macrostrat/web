@@ -1,23 +1,21 @@
-import React from "react";
+import React, { Component } from "react";
 
-var LongText = React.createClass({
-  getInitialState: function () {
-    return {
-      hidden: true,
-    };
-  },
+class LongText extends Component {
+  state = {
+    hidden: true,
+  };
 
-  show: function () {
+  show = () => {
     this.setState({ hidden: false });
-  },
+  };
 
-  hide: function () {
+  hide = () => {
     this.setState({ hidden: true });
-  },
+  };
 
-  render: function () {
-    var maxLength = 200;
-    var text = this.props.text;
+  render() {
+    const maxLength = 200;
+    const text = this.props.text;
 
     if (text.length > maxLength && text.length - maxLength > 50) {
       return (
@@ -55,7 +53,7 @@ var LongText = React.createClass({
         </div>
       );
     }
-  },
-});
+  }
+}
 
 export default LongText;

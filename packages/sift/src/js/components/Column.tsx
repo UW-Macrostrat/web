@@ -1,16 +1,13 @@
 import React from "react";
-import Utilities from "./Utilities";
 import Chart from "./Chart";
-import Map from "./Map";
-import Config from "./Config";
-import SummaryStats from "./SummaryStats";
-import ChartLegend from "./ChartLegend";
-import StratColumn from "./StratColumn";
-import NoData from "./NoData";
-import Loading from "./Loading";
-import PrevalentTaxa from "./PrevalentTaxa";
-import MapControls from "./MapControls";
 import Footer from "./Footer";
+import Loading from "./Loading";
+import Map from "./Map";
+import NoData from "./NoData";
+import PrevalentTaxa from "./PrevalentTaxa";
+import StratColumn from "./StratColumn";
+import SummaryStats from "./SummaryStats";
+import Utilities from "./Utilities";
 
 class Column extends React.Component {
   constructor(props) {
@@ -298,8 +295,8 @@ class Column extends React.Component {
   }
 }
 
-Column.contextTypes = {
-  router: React.PropTypes.func.isRequired,
-};
+// Column.contextTypes = {
+//   router: React.PropTypes.func.isRequired,
+// };
 
 export default Column;

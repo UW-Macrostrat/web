@@ -1,15 +1,14 @@
-import React from "react";
 import async from "async";
-import Utilities from "./Utilities";
+import React from "react";
 import Chart from "./Chart";
+import Footer from "./Footer";
+import Loading from "./Loading";
 import Map from "./Map";
-import SummaryStats from "./SummaryStats";
-import ChartLegend from "./ChartLegend";
+import NoData from "./NoData";
 import PrevalentTaxa from "./PrevalentTaxa";
 import StratColumn from "./StratColumn";
-import NoData from "./NoData";
-import Loading from "./Loading";
-import Footer from "./Footer";
+import SummaryStats from "./SummaryStats";
+import Utilities from "./Utilities";
 
 class Attributes extends React.Component {
   constructor(props) {
@@ -423,8 +422,8 @@ class Attributes extends React.Component {
   }
 }
 
-Attributes.contextTypes = {
-  router: React.PropTypes.func.isRequired,
-};
+// Attributes.contextTypes = {
+//   router: React.PropTypes.func.isRequired,
+// };
 
 export default Attributes;

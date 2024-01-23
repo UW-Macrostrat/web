@@ -1,43 +1,43 @@
 import React from "react";
 
-var MenuToggle = React.createClass({
+class MenuToggle extends React.Component {
   getInitialState() {
     return {
       open: false,
     };
-  },
-  toggle: function () {
+  }
+  toggle() {
     this.setState({ open: !this.state.open });
-  },
+  }
 
   toggleOutcrop(event) {
     this.toggle();
     event.preventDefault();
     this.props.toggleOutcrop();
-  },
+  }
 
   toggleSatellite(event) {
     this.toggle();
     event.preventDefault();
     this.props.toggleSatellite();
-  },
+  }
 
   toggleFossils(event) {
     this.toggle();
     event.preventDefault();
     this.props.toggleFossils();
-  },
+  }
 
   // A little hack to make sure the menu doesn't animate on load
-  componentDidMount: function () {
+  componentDidMount() {
     setTimeout(function () {
       document
         .getElementsByClassName("expand-menu")[0]
         .classList.remove("preload");
     }, 1000);
-  },
+  }
 
-  render: function () {
+  render() {
     var orientation =
       window.innerHeight > window.innerWidth ? "portrait" : "landscape";
 
@@ -99,7 +99,7 @@ var MenuToggle = React.createClass({
         </div>
       </div>
     );
-  },
-});
+  }
+}
 
 export default MenuToggle;

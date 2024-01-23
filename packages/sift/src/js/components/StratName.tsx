@@ -1,16 +1,14 @@
 import React from "react";
-import Utilities from "./Utilities";
 import Chart from "./Chart";
-import Map from "./Map";
-import SummaryStats from "./SummaryStats";
-import ChartLegend from "./ChartLegend";
-import StratNameHierarchy from "./StratNameHierarchy";
-import NoData from "./NoData";
-import Loading from "./Loading";
-import PrevalentTaxa from "./PrevalentTaxa";
-import MapControls from "./MapControls";
-import LongText from "./LongText";
 import Footer from "./Footer";
+import Loading from "./Loading";
+import LongText from "./LongText";
+import Map from "./Map";
+import NoData from "./NoData";
+import PrevalentTaxa from "./PrevalentTaxa";
+import StratNameHierarchy from "./StratNameHierarchy";
+import SummaryStats from "./SummaryStats";
+import Utilities from "./Utilities";
 
 class StratName extends React.Component {
   constructor(props) {
@@ -477,8 +475,8 @@ class StratName extends React.Component {
   }
 }
 
-StratName.contextTypes = {
-  router: React.PropTypes.func.isRequired,
-};
+// StratName.contextTypes = {
+//   router: React.PropTypes.func.isRequired,
+// };
 
 export default StratName;

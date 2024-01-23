@@ -1,8 +1,8 @@
 import React from "react";
-import Utilities from "./Utilities";
-import NoData from "./NoData";
-import Loading from "./Loading";
 import _ from "underscore";
+import Loading from "./Loading";
+import NoData from "./NoData";
+import Utilities from "./Utilities";
 
 if (!String.prototype.startsWith) {
   String.prototype.startsWith = function (searchString, position) {
@@ -300,8 +300,8 @@ class Definitions extends React.Component {
   }
 }
 
-Definitions.contextTypes = {
-  router: React.PropTypes.func.isRequired,
-};
+// Definitions.contextTypes = {
+//   router: React.PropTypes.func.isRequired,
+// };
 
 export default Definitions;
