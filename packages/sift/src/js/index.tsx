@@ -152,7 +152,7 @@ class App extends React.Component {
         </div>
 
         <div>
-          <RouteHandler />
+          <SiftRouter />
         </div>
       </div>
     );
