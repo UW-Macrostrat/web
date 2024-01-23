@@ -1,16 +1,14 @@
 {
   "compilerOptions": {
+    "composite": true,
     "baseUrl": "./",
-    "moduleResolution": "node",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "strict": false,
     "sourceMap": true,
     "declaration": true,
     "jsx": "react-jsx",
-    "typeRoots": ["node_modules/@types"],
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "types": ["vite/client"],
     "paths": {
       "~/*": ["./src/*"],
       "@macrostrat/cesium-vector-provider": [
@@ -44,9 +42,14 @@
       "@macrostrat-web/settings": ["deps/packages/settings"]
     }
   },
-  "include": ["src", "packages/globe-dev/globe", "packages/*/src"],
+  "include": ["src"],
   "ts-node": {
     "transpileOnly": true,
     "esm": true
-  }
+  },
+  "references": [
+    {
+      "path": "./packages/sift"
+    }
+  ]
 }
