@@ -26,6 +26,10 @@ export class Filter {
 		return this.operator + "." + this.formattedValue
 	}
 
+	clone = () => {
+		return new Filter(this.column_name, this.operator, this.value)
+	}
+
 	passes = (data: {[key: string] : string}) => {
 		const filterValue = data[this.column_name]
 		switch (this.operator) {
@@ -98,7 +102,7 @@ export function buildURL(baseURL: string, dataParameters: DataParameters){
 
 export const applyTableUpdate = (data: any[], tableUpdate: TableUpdate) => {
 
-	let appliedData = structuredClone(data)
+	let appliedData = [...data]
 	for(const [rowIndex, row] of data.entries()){
 		for(const columnName of Object.keys(row)){
 			appliedData[rowIndex][columnName] = tableUpdate.applyToCell(appliedData[rowIndex][columnName], row, columnName)
@@ -118,6 +122,17 @@ export const applyTableUpdates = (data: any[], tableUpdates: TableUpdate[]) => {
 	return appliedData
 }
 
+export const cloneDataParameters = (dataParameters: DataParameters) => {
+	return {
+		group: dataParameters?.group,
+		select: {...dataParameters?.select},
+		filter: Object.entries(dataParameters?.filter).reduce((acc, [key, value]) => {
+			acc[key] = value.clone()
+			return acc
+		}, {})
+	}
+}
+
 /**
  * Wraps around submitChange to filter based on the group
  */
@@ -130,14 +145,14 @@ export const getTableUpdate = (
 	dataParameters: DataParameters
 ): TableUpdate => {
 
-	dataParameters = structuredClone(dataParameters)
-	if( dataParameters?.group != undefined){
-		dataParameters.filter[dataParameters?.group] = new Filter(dataParameters?.group, "eq", data[rowIndex][dataParameters?.group])
+	let pointInTimeDataParameters = cloneDataParameters(dataParameters)
+	if( pointInTimeDataParameters?.group != undefined){
+		pointInTimeDataParameters.filter[pointInTimeDataParameters?.group] = new Filter(pointInTimeDataParameters?.group, "eq", data[rowIndex][pointInTimeDataParameters?.group])
 	} else {
-		dataParameters.filter["_pkid"] = new Filter("_pkid", "eq", data[rowIndex]["_pkid"])
+		pointInTimeDataParameters.filter["_pkid"] = new Filter("_pkid", "eq", data[rowIndex]["_pkid"])
 	}
 
-	const execute = async () => submitChange(url, value, [columnName], dataParameters.filter)
+	const execute = async () => submitChange(url, value, [columnName], pointInTimeDataParameters.filter)
 
 	const apply = (currentValue: string, row: {[key: string]: string}, cellColumnName: string) => {
 
@@ -147,8 +162,8 @@ export const getTableUpdate = (
 		}
 
 		// If this row doesn't pass all the filters skip it
-		if(dataParameters?.filter != undefined) {
-			for (const filter of Object.values(dataParameters.filter)) {
+		if(pointInTimeDataParameters?.filter != undefined) {
+			for (const filter of Object.values(pointInTimeDataParameters.filter)) {
 				if (!filter.passes(row)) {
 					return currentValue
 				}
@@ -159,7 +174,7 @@ export const getTableUpdate = (
 	}
 
 	return {
-		description: "Update " + columnName + " to " + value + " for " + JSON.stringify(dataParameters.filter),
+		description: "Update " + columnName + " to " + value + " for " + JSON.stringify(pointInTimeDataParameters.filter),
 		"execute": execute,
 		"applyToCell": apply
 	} as TableUpdate

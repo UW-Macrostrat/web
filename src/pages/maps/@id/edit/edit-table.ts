@@ -1,16 +1,24 @@
 import hyper from "@macrostrat/hyper";
 
-import { useState, useEffect, useCallback, useRef, useLayoutEffect, useMemo, FunctionComponent } from "react";
-import { HotkeysProvider, InputGroup, Button, useHotkeys } from "@blueprintjs/core";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useLayoutEffect,
+  useMemo,
+  FunctionComponent,
+  MutableRefObject
+} from "react";
+import { HotkeysProvider, InputGroup, Button, useHotkeys, Icon, IconSize } from "@blueprintjs/core";
 import { Spinner, ButtonGroup } from "@blueprintjs/core";
 import {
   Column,
   Table2,
-  EditableCell2,
   RowHeaderCell2,
   ColumnHeaderCell2,
   SelectionModes,
-  RegionCardinality
+  RegionCardinality, FocusedCellCoordinates
 } from "@blueprintjs/table";
 import update from "immutability-helper";
 
@@ -24,7 +32,8 @@ import {
   range,
   applyTableUpdate,
   applyTableUpdates,
-  submitColumnCopy
+  submitColumnCopy,
+  cloneDataParameters
 } from "~/pages/maps/@id/edit/table-util";
 import TableMenu from "~/pages/maps/@id/edit/table-menu";
 import IntervalSelection, {Interval} from "./components/cell/interval-selection";
@@ -36,6 +45,7 @@ import "./override.sass"
 import "@blueprintjs/table/lib/css/table.css";
 import styles from "./edit-table.module.sass";
 import { EditableCell } from "~/pages/maps/@id/edit/components/cell/editable-cell";
+import LongTextCell from "~/pages/maps/@id/edit/components/cell/long-text";
 
 const h = hyper.styled(styles);
 
@@ -66,13 +76,20 @@ interface TableState {
 
 export default function TableInterface({ url }: EditTableProps) {
 
+  // Cell refs
+  const ref = useRef<MutableRefObject<any>[][]>(null)
+
   // Selection State
-  const [selectedColumn, setSelectedColumn] = useState<string | undefined>(undefined)
+  const [selectedColumns, setSelectedColumns] = useState<string[]>([])
   const [copiedColumn, setCopiedColumn] = useState<string | undefined>(undefined)
+  
+  // Hidden Columns
+  const [hiddenColumns, setHiddenColumns] = useState<string[]>([])
 
   // Data State
   const [dataParameters, setDataParameters] = useState<DataParameters>({select: {page: "0", pageSize: "50"}, filter: {}})
   const [data, setData] = useState<any[]>([])
+  const [tableColumns, setTableColumns] = useState<string[]>([])
 
   // Error State
   const [error, setError] = useState<string | undefined>(undefined)
@@ -83,6 +100,9 @@ export default function TableInterface({ url }: EditTableProps) {
 
   // Cell Values
   const [intervals, setIntervals] = useState<Interval[]>([])
+
+  // Focused Cell
+  const [focusedCell, setFocusedCell] = useState<FocusedCellCoordinates | undefined>(undefined)
 
   useEffect(() => {
 
@@ -98,17 +118,7 @@ export default function TableInterface({ url }: EditTableProps) {
     getIntervals()
   }, [])
 
-  const nonIdColumnNames = useMemo(() => {
-    return data.length ? Object.keys(data[0]).filter(x => x != "_pkid") : []
-  }, [data])
-
   const setTableUpdates = useCallback(async (newTableUpdates: TableUpdate[]) => {
-
-    // If the table updates are empty, reset the data
-    if (newTableUpdates.length == 0) {
-      let newData = await getData(newTableUpdates, dataParameters)
-      setData(newData)
-    }
 
     // If a new update is available apply it to the data
     if(newTableUpdates.length > tableUpdates.length){
@@ -127,18 +137,27 @@ export default function TableInterface({ url }: EditTableProps) {
     const response = await fetch(dataURL)
     let data = await response.json()
 
-    // Apply tableupdates to the data
+    // Update the table columns on first load
+    setTableColumns((p) => {
+      return typeof p == "object" && p.length > 0 ? p : Object.keys(data[0])
+    })
+
+    // Apply table updates to the data
     data = applyTableUpdates(data, tableUpdates)
 
     if(data.length == 0){
       setError("Warning: No results matched query")
     } else {
-
       setError(undefined)
     }
 
     // Remove the progress bar on data reload
     setUpdateProgress(undefined)
+
+    // Set the table ref
+    ref.current = Array.from({ length: data.length == 0 ? 1 : data.length }, () =>
+      Array.from({ length: data.length == 0 ? 1 : Object.keys(data[0]).length }, () => null)
+    );
 
     return data
   }, [])
@@ -150,8 +169,28 @@ export default function TableInterface({ url }: EditTableProps) {
     })()
   }, [dataParameters])
 
+  // Get the visible columns
+  const visibleColumnNames = useMemo(() => {
+
+    if (tableColumns.length == 0) {
+      return []
+    }
+
+    const allHiddenColumns = [...hiddenColumns, "_pkid"]
+
+    return tableColumns.filter(x => !allHiddenColumns.includes(x))
+  }, [tableColumns, hiddenColumns])
+
+  const handleHide = useCallback(() => {
+    if(selectedColumns != undefined){
+      setHiddenColumns([...hiddenColumns, ...selectedColumns])
+    }
+  }, [selectedColumns])
+
   const handlePaste = useCallback(() => {
-    if(copiedColumn != undefined && selectedColumn != undefined){
+    if(copiedColumn != undefined && selectedColumns.length == 1){
+
+      const selectedColumn = selectedColumns[0]
 
       const tableUpdate = {
         description: "Copy column " + copiedColumn + " to column " + selectedColumn + " for all rows",
@@ -183,24 +222,46 @@ export default function TableInterface({ url }: EditTableProps) {
 
       setTableUpdates([...tableUpdates, tableUpdate])
     }
-  }, [selectedColumn, copiedColumn, dataParameters])
+  }, [selectedColumns, copiedColumn, dataParameters])
 
   const handleCopy = useCallback(() => {
-    setCopiedColumn(selectedColumn)
-  }, [selectedColumn])
+    if(selectedColumns.length == 1){
+      setCopiedColumn(selectedColumns[0])
+    }
+  }, [selectedColumns])
+
+  const handleEnter = useCallback((e) => {
+    ref.current[focusedCell?.row][focusedCell?.col]?.click()
+    e.preventDefault()
+    e.stopPropagation()
+  }, [focusedCell])
 
   const hotkeys = useMemo(() => [
     {
       combo: "cmd+c",
       label: "Copy data",
       onKeyDown: handleCopy,
+      group: "Table"
+    },
+    {
+      combo: "shift+h",
+      label: "Hide Column",
+      onKeyDown: handleHide,
+      group: "Table"
     },
     {
       combo: "cmd+v",
       label: "Paste Data",
       onKeyDown: handlePaste,
+      group: "Table"
+    },
+    {
+      combo: "enter",
+      label: "Edit Cell",
+      onKeyDown: handleEnter,
+      group: "Table"
     }
-  ], [handlePaste, handleCopy]);
+  ], [handlePaste, handleCopy, handleEnter, handleHide])
   const { handleKeyDown, handleKeyUp } = useHotkeys(hotkeys);
 
   const submitTableUpdates = useCallback(async () => {
@@ -221,7 +282,6 @@ export default function TableInterface({ url }: EditTableProps) {
           value: 1,
           text: "Error submitting changes"
         })
-        console.error(e)
 
         setTimeout(() => {
           setUpdateProgress(undefined)
@@ -235,17 +295,21 @@ export default function TableInterface({ url }: EditTableProps) {
     }
 
     setTableUpdates([])
+    setDataParameters({select: {page: "0", pageSize: "50"}, filter: {}})
   }, [tableUpdates])
 
   const columnHeaderCellRenderer = useCallback((columnIndex: number) => {
 
-    const columnName: string = nonIdColumnNames[columnIndex]
+    const columnName: string = visibleColumnNames[columnIndex]
 
     const onFilterChange = (param: OperatorQueryParameter) => {
       const columnFilter = new Filter(columnName, param.operator, param.value)
-      setDataParameters({...dataParameters, filter: {...dataParameters.filter, [columnName]: columnFilter}})
+      setDataParameters((p) => {
+        let newDataParameters = cloneDataParameters(p)
+        newDataParameters.filter[columnName] = columnFilter
+        return newDataParameters
+      })
     }
-
 
     let filter = undefined
     if(dataParameters.filter != undefined && dataParameters.filter[columnName] != undefined){
@@ -255,17 +319,33 @@ export default function TableInterface({ url }: EditTableProps) {
     }
 
     const setGroup = (group: string | undefined) => {
-      setDataParameters({...dataParameters, group: group})
+      setDataParameters((p) => {
+        let newDataParameters = cloneDataParameters(p)
+        newDataParameters.group = group
+        return newDataParameters
+      })
     }
 
     return h(ColumnHeaderCell2, {
+      nameRenderer: () => h("div.column-name", {
+        style: {
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center"
+        }
+      }, [
+        h("span.selected-column", {}, [columnName]),
+        h.if((columnName in dataParameters.filter && dataParameters.filter[columnName].is_valid()) || columnName == dataParameters?.group)(Icon, {icon: "filter-list", size: "15", color: "#333333"}),
+        h.if(!((columnName in dataParameters.filter && dataParameters.filter[columnName].is_valid()) || columnName == dataParameters?.group))(Icon, {icon: "filter", size: "15", color: "#d0d0d0"})
+      ]),
       menuRenderer: () => h(TableMenu, {"columnName": columnName, "onFilterChange": onFilterChange, "filter": filter, "onGroupChange": setGroup, "group": dataParameters?.group}),
       name: columnName,
       style: {
         backgroundColor: filter.is_valid() || dataParameters?.group == columnName ? "rgba(27,187,255,0.12)" : "#ffffff00"
       }
     }, [])
-  }, [dataParameters, data])
+  }, [dataParameters, data, visibleColumnNames])
 
   const rowHeaderCellRenderer = useCallback((rowIndex: number) => {
 
@@ -283,55 +363,85 @@ export default function TableInterface({ url }: EditTableProps) {
     }
 
     return h(RowHeaderCell2, { "name": name }, []);
-  }, [dataParameters, data])
+  }, [dataParameters, data, ])
+
+  const defaultColumnConfig = useMemo(() => {
+
+    if (tableColumns.length == 0) {
+      return {}
+    }
+
+    return visibleColumnNames.reduce((prev, columnName, index) => {
+      return {
+        ...prev,
+        [columnName]: h(Column, {
+          name: columnName,
+          className: FINAL_COLUMNS.includes(columnName) ? "final-column" : "",
+          columnHeaderCellRenderer: columnHeaderCellRenderer,
+          cellRenderer: (rowIndex: number, columnIndex: number) => h(EditableCell, {
+            ref: (el) => {
+              try {
+                ref.current[rowIndex][columnIndex] = el
+              } catch {}
+            },
+            onConfirm: (value) => {
+              const tableUpdate = getTableUpdate(url, value, columnName, rowIndex, data, dataParameters)
+              setTableUpdates([...tableUpdates, tableUpdate])
+            },
+            value: data.length == 0 ? "" : data[rowIndex][columnName]
+          }),
+          "key": columnName
+        })
+      }
+    }, {})
+  }, [visibleColumnNames, tableColumns, dataParameters, data])
+
+  const columnConfig = useMemo(() => {
+
+    if (tableColumns.length == 0) {
+      return defaultColumnConfig
+    }
+
+    return {
+      ...defaultColumnConfig,
+      "t_interval": h(Column, {
+        ...defaultColumnConfig["t_interval"].props,
+        cellRenderer: (rowIndex: number, columnIndex: number) => h(IntervalSelection, {
+          ref: (el) => {
+            try {
+              ref.current[rowIndex][columnIndex] = el
+            } catch (e){}
+          },
+          "intervals": intervals,
+          onConfirm: (value) => {
+            const tableUpdate = getTableUpdate(url, value, "t_interval", rowIndex, data, dataParameters)
+            setTableUpdates([...tableUpdates, tableUpdate])
+          },
+          value: data.length == 0 ? "" : data[rowIndex]["t_interval"]
+        })
+      }),
+      "b_interval": h(Column, {
+        ...defaultColumnConfig["b_interval"].props,
+        cellRenderer: (rowIndex: number, columnIndex: number) => h(IntervalSelection, {
+          ref: (el) => {
+            try {
+              ref.current[rowIndex][columnIndex] = el
+            } catch (e) {}
+          },
+          "intervals": intervals,
+          onConfirm: (value) => {
+            const tableUpdate = getTableUpdate(url, value, "b_interval", rowIndex, data, dataParameters)
+            setTableUpdates([...tableUpdates, tableUpdate])
+          },
+          value: data.length == 0 ? "" : data[rowIndex]["b_interval"]
+        })
+      })
+    }
+  }, [defaultColumnConfig, tableColumns, dataParameters, data])
+
 
   if(data.length == 0 && error == undefined){
     return h(Spinner)
-  }
-
-  const defaultColumnConfig = nonIdColumnNames.reduce((prev, columnName, index) => {
-    return {
-      ...prev,
-      [columnName]: h(Column, {
-        name: columnName,
-        className: FINAL_COLUMNS.includes(columnName) ? "final-column" : "",
-        columnHeaderCellRenderer: columnHeaderCellRenderer,
-        cellRenderer: (rowIndex) => h(EditableCell, {
-          onConfirm: (value) => {
-            const tableUpdate = getTableUpdate(url, value, columnName, rowIndex, data, dataParameters)
-            setTableUpdates([...tableUpdates, tableUpdate])
-          },
-          value: data[rowIndex][columnName]
-        }),
-        "key": columnName
-      })
-    }
-  }, {})
-
-  const columnConfig = {
-    ...defaultColumnConfig,
-    "t_interval": h(Column, {
-      ...defaultColumnConfig["t_interval"].props,
-      cellRenderer: (rowIndex) => h(IntervalSelection, {
-        "intervals": intervals,
-        onConfirm: (value) => {
-          const tableUpdate = getTableUpdate(url, value, "t_interval", rowIndex, data, dataParameters)
-          setTableUpdates([...tableUpdates, tableUpdate])
-        },
-        value:  data[rowIndex]["t_interval"]
-      })
-    }),
-    "b_interval": h(Column, {
-      ...defaultColumnConfig["b_interval"].props,
-      cellRenderer: (rowIndex) => h(IntervalSelection, {
-        "intervals": intervals,
-        onConfirm: (value) => {
-          const tableUpdate = getTableUpdate(url, value, "b_interval", rowIndex, data, dataParameters)
-          setTableUpdates([...tableUpdates, tableUpdate])
-        },
-        value:  data[rowIndex]["b_interval"]
-      })
-    })
   }
 
   return h("div", {
@@ -371,28 +481,46 @@ export default function TableInterface({ url }: EditTableProps) {
       h(
         Table2,
         {
+          enableFocusedCell: true,
           selectionModes: dataParameters?.group ? RegionCardinality.CELLS : SelectionModes.COLUMNS_AND_CELLS,
           rowHeaderCellRenderer: rowHeaderCellRenderer,
+          onFocusedCell: (focusedCellCoordinates) => {
+            try {
+              ref.current[focusedCellCoordinates?.row][focusedCellCoordinates?.col]?.focus()
+            } catch (e) {}
+
+            setFocusedCell(focusedCellCoordinates)
+
+          },
+          focusedCell: focusedCell,
+          onPaste: (clipboardData, rowIndex, columnIndex) => {
+            const pastedText = clipboardData.getData("text/plain")
+          },
           onSelection: (selections: Selection[]) => {
-            const selectedColumns = selections[0]?.cols
-            if(selectedColumns[0] == selectedColumns[1] && selections[0]?.rows == undefined){
-              setSelectedColumn(nonIdColumnNames[selectedColumns[0]])
+            const selectedColumnRange = selections[0]?.cols
+            if(selections[0]?.rows == undefined){
+
+              const selectedColumnIndices = range(selectedColumnRange[0], selectedColumnRange[1] + 1)
+              setSelectedColumns(selectedColumnIndices?.map((index) => visibleColumnNames[index]))
+
             } else {
-              setSelectedColumn(undefined)
+
+              setSelectedColumns(undefined)
             }
           },
           onVisibleCellsChange: (visibleCells) => {
-
-            console.log(visibleCells)
-            if(visibleCells["rowIndexEnd"] > parseInt(dataParameters.select.pageSize) - 10){
+            if(visibleCells["rowIndexEnd"] > parseInt(dataParameters.select.pageSize) - 2){
               const newPageSize = (parseInt(dataParameters.select.pageSize) + 50).toString()
 
-              setDataParameters({...dataParameters, select: {...dataParameters.select, pageSize: newPageSize}})
+              setDataParameters((p) => {
+                let newDataParameters = cloneDataParameters(p)
+                newDataParameters.select.pageSize = newPageSize
+                return newDataParameters
+              })
             }
           },
           numRows: data.length,
-          // Dumb hacks to try to get the table to rerender on changes
-          cellRendererDependencies: [data, tableUpdates],
+          cellRendererDependencies: [data],
         },
         Object.values(columnConfig)
       ),
