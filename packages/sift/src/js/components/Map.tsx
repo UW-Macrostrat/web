@@ -1,8 +1,9 @@
+import L from "leaflet";
 import React from "react";
 import Centroid from "turf-centroid";
-import Utilities from "./Utilities";
 import Loading from "./Loading";
 import MapControls from "./MapControls";
+import Utilities from "./Utilities";
 
 class Map extends React.Component {
   constructor(props) {

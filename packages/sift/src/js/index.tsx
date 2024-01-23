@@ -1,6 +1,6 @@
 import h from "@macrostrat/hyper";
 import { createRoot } from "react-dom/client";
-import { Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import Attributes from "./components/Attributes";
 import Column from "./components/Column";
@@ -125,36 +125,38 @@ class App extends React.Component {
 
   render() {
     return (
-      <div className="container-fluid">
-        <div
-          className={
-            this.state.autocompleteIsOpen ? "autocomplete-mask" : "hidden"
-          }
-        ></div>
-        <div id="header">
-          <div className="headerItem left">
-            <a href="/">
-              <img src="dist/img/logo_red.png" className="header-logo" />
-            </a>
-            <a href="#">
-              <h3 className="header-title">SIFT</h3>
-            </a>
-          </div>
-          <div className="headerItem right">
-            <div className="autocomplete-wrapper">
-              <Autocomplete
-                minLength="2"
-                reportState={this.toggleAutocomplete}
-                onComplete={this.finishAutocomplete}
-              />
+      <BrowserRouter>
+        <div className="container-fluid">
+          <div
+            className={
+              this.state.autocompleteIsOpen ? "autocomplete-mask" : "hidden"
+            }
+          ></div>
+          <div id="header">
+            <div className="headerItem left">
+              <a href="/">
+                <img src="dist/img/logo_red.png" className="header-logo" />
+              </a>
+              <a href="#">
+                <h3 className="header-title">SIFT</h3>
+              </a>
+            </div>
+            <div className="headerItem right">
+              <div className="autocomplete-wrapper">
+                <Autocomplete
+                  minLength="2"
+                  reportState={this.toggleAutocomplete}
+                  onComplete={this.finishAutocomplete}
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        <div>
-          <SiftRouter />
+          <div>
+            <SiftRouter />
+          </div>
         </div>
-      </div>
+      </BrowserRouter>
     );
   }
 }

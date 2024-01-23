@@ -1,11 +1,10 @@
 import React from "react";
 
 class MenuToggle extends React.Component {
-  getInitialState() {
-    return {
-      open: false,
-    };
-  }
+  state = {
+    open: false,
+  };
+
   toggle() {
     this.setState({ open: !this.state.open });
   }
