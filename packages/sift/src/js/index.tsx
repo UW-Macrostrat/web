@@ -11,6 +11,9 @@ import StratName from "./components/StratName";
 
 import NoData from "./components/NoData";
 
+import React from "react";
+import Autocomplete from "./components/Autocomplete";
+
 // ReactRouter scroll behavior from 0.13
 //scrollBehavior: Router.ScrollToTopBehavior,
 
@@ -22,76 +25,77 @@ function SiftRouter() {
       <Route
         name="column"
         path="column/:id"
-        handler={Column}
+        element={h(Column)}
         addHandlerKey={true}
       />
       <Route
         name="group"
         path="group/:id"
-        handler={Attributes}
+        element={h(Attributes)}
         addHandlerKey={true}
       />
-      <Route name="interval" path="interval/:id" handler={Attributes} />
+      <Route name="interval" path="interval/:id" element={h(Attributes)} />
 
       <Route
         name="strat_name_concept"
         path="strat_name_concept/:id"
-        handler={StratName}
+        element={h(StratName)}
       />
-      <Route name="strat_name" path="strat_name/:id" handler={StratName} />
+      <Route name="strat_name" path="strat_name/:id" element={h(StratName)} />
 
-      <Route name="lithology" path="lithology/:id" handler={Attributes} />
+      <Route name="lithology" path="lithology/:id" element={h(Attributes)} />
       <Route
         name="lithology_type"
         path="lithology_type/:id"
-        handler={Attributes}
+        element={h(Attributes)}
       />
       <Route
         name="lithology_class"
         path="lithology_class/:id"
-        handler={Attributes}
+        element={h(Attributes)}
       />
 
-      <Route name="environment" path="environment/:id" handler={Attributes} />
+      <Route
+        name="environment"
+        path="environment/:id"
+        element={h(Attributes)}
+      />
       <Route
         name="environment_type"
         path="environment_type/:id"
-        handler={Attributes}
+        element={h(Attributes)}
       />
       <Route
         name="environment_class"
         path="environment_class/:id"
-        handler={Attributes}
+        element={h(Attributes)}
       />
 
-      <Route name="economic" path="economic/:id" handler={Attributes} />
+      <Route name="economic" path="economic/:id" element={h(Attributes)} />
       <Route
         name="economic_type"
         path="economic_type/:id"
-        handler={Attributes}
+        element={h(Attributes)}
       />
       <Route
         name="economic_class"
         path="economic_class/:id"
-        handler={Attributes}
+        element={h(Attributes)}
       />
 
       <Route
         name="definitions"
         path="definitions/:type"
-        handler={Definitions}
+        element={h(Definitions)}
       />
 
-      <Route name="explore_bare" path="explore" handler={Explore} />
-      <Route name="explore" path="explore/:x?" handler={Explore} />
+      <Route name="explore_bare" path="explore" element={h(Explore)} />
+      <Route name="explore" path="explore/:x?" element={h(Explore)} />
 
-      <NotFoundRoute handler={NoData} />
+      <Route path="*" element={h(NoData)} />
     </Routes>
   );
 }
-
-import React from "react";
-import Autocomplete from "./Autocomplete";
 
 class App extends React.Component {
   constructor(props) {
