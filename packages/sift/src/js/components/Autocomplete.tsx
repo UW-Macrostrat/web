@@ -1,6 +1,8 @@
+import h from "@macrostrat/hyper";
 import React from "react";
-import AutocompleteResultItem from "./AutocompleteResultItem";
+import { Link } from "react-router-dom";
 import xhr from "xhr";
+import AutocompleteResultItem from "./AutocompleteResultItem";
 import Config from "./Config";
 
 class Autocomplete extends React.Component {
@@ -285,52 +287,7 @@ class Autocomplete extends React.Component {
         >
           <div className="autocomplete-hint">
             <p>Available categories</p>
-            <ul>
-              <li>
-                <a onClick={this.enableAndHide} href="#/definitions/intervals">
-                  Time intervals
-                </a>
-              </li>
-              <li>
-                <a
-                  onClick={this.enableAndHide}
-                  href="#/definitions/strat_names"
-                >
-                  Stratigraphic names
-                </a>
-              </li>
-              <li>
-                <a onClick={this.enableAndHide} href="#/definitions/columns">
-                  Columns
-                </a>
-              </li>
-              <li>
-                <a onClick={this.enableAndHide} href="#/definitions/groups">
-                  Column groups
-                </a>
-              </li>
-              <li>
-                <a
-                  onClick={this.enableAndHide}
-                  href="#/definitions/lithologies"
-                >
-                  Lithologies
-                </a>
-              </li>
-              <li>
-                <a
-                  onClick={this.enableAndHide}
-                  href="#/definitions/environments"
-                >
-                  Environments
-                </a>
-              </li>
-              <li>
-                <a onClick={this.enableAndHide} href="#/definitions/economics">
-                  Economics
-                </a>
-              </li>
-            </ul>
+            <AutocompleteCategoryList onClick={this.enableAndHide} />
           </div>
         </div>
 
@@ -368,6 +325,28 @@ class Autocomplete extends React.Component {
       </div>
     );
   }
+}
+
+const autoCompleteCategories = {
+  intervals: "Time intervals",
+  strat_names: "Stratigraphic names",
+  columns: "Columns",
+  groups: "Column groups",
+  lithologies: "Lithologies",
+  environments: "Environments",
+  economics: "Economics",
+};
+
+function AutocompleteCategoryList({ onClick }) {
+  const categories = Object.entries(autoCompleteCategories);
+
+  return h("ul.autocomplete-category-list", [
+    categories.map(([key, value]) => {
+      const to = `/definitions/${key}`;
+
+      return h("li", [h(Link, { onClick, to }, value)]);
+    }),
+  ]);
 }
 
 Autocomplete.defaultProps = {

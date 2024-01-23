@@ -12,6 +12,12 @@ if (!String.prototype.startsWith) {
 }
 
 class Definitions extends React.Component {
+  static defaultProps = {
+    params: {
+      type: "",
+    },
+  };
+
   constructor(props) {
     super(props);
     this.filter = this.filter.bind(this);
@@ -164,6 +170,9 @@ class Definitions extends React.Component {
           return this.setState(this._resetState());
         }
 
+        console.log(data);
+        console.log(data.success.data);
+
         // Sort, if applicable
         if (this.stateLookup[type].sort) {
           this.stateLookup[type].sort.forEach(function (d) {
@@ -187,10 +196,10 @@ class Definitions extends React.Component {
     this._update(this.props.params.type);
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentDidUpdate(prevProps) {
     // Only update if the URI actually changed
-    if (nextProps.params.type !== this.props.params.type) {
-      this._update(nextProps.params.type);
+    if (prevProps.params.type !== this.props.params.type) {
+      this._update(this.props.params.type);
     }
   }
 
