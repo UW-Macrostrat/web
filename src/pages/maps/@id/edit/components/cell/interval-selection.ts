@@ -1,7 +1,7 @@
 import { Button, MenuItem } from "@blueprintjs/core";
 import { ItemPredicate, ItemRenderer, Select2 } from "@blueprintjs/select";
 import { Cell, EditableCell2Props } from "@blueprintjs/table";
-import React, { useMemo } from "react";
+import React, { useMemo, memo } from "react";
 
 // @ts-ignore
 import hyper from "@macrostrat/hyper";
@@ -27,10 +27,13 @@ export interface Interval {
   color: string;
 }
 
-const IntervalOption: ItemRenderer<Interval> = (
-  interval: Interval,
-  { handleClick, handleFocus, modifiers }
-) => {
+const IntervalOption: React.FC = ({
+  interval,
+  props: { handleClick, handleFocus, modifiers, ...restProps },
+}) => {
+
+  console.log("test")
+
   if (interval == null) {
     return h(
       MenuItem,
@@ -44,6 +47,7 @@ const IntervalOption: ItemRenderer<Interval> = (
         onFocus: handleFocus,
         text: "",
         roleStructure: "listoption",
+        ...restProps
       },
       []
     );
@@ -62,12 +66,32 @@ const IntervalOption: ItemRenderer<Interval> = (
       onFocus: handleFocus,
       text: interval.name,
       roleStructure: "listoption",
+      ...restProps
     },
     []
   );
 };
 
-const IntervalSelection = ({
+const IntervalOptionMemo = memo(IntervalOption);
+
+const IntervalOptionRenderer: ItemRenderer<Interval> = (
+  interval: Interval,
+  props
+) => {
+  return h(IntervalOptionMemo, {
+    interval,
+    props
+  });
+}
+
+const filterInterval: ItemPredicate<Interval> = (query, interval) => {
+  if (interval?.name == undefined) {
+    return false;
+  }
+  return interval.name.toLowerCase().indexOf(query.toLowerCase()) >= 0;
+};
+
+let IntervalSelection = ({
   value,
   onConfirm,
   intent,
@@ -75,13 +99,6 @@ const IntervalSelection = ({
   ...props
 }: EditableCell2Props & { intervals: Interval[] }) => {
   const [localValue, setLocalValue] = React.useState<string>(value);
-
-  const filterInterval: ItemPredicate<Interval> = (query, interval) => {
-    if (interval?.name == undefined) {
-      return false;
-    }
-    return interval.name.toLowerCase().indexOf(query.toLowerCase()) >= 0;
-  };
 
   const interval = useMemo(() => {
     let interval = null;
@@ -114,8 +131,7 @@ const IntervalSelection = ({
           popoverContentProps: {
             onWheelCapture: (event) => event.stopPropagation(),
           },
-          itemPredicate: filterInterval,
-          itemRenderer: IntervalOption,
+          itemRenderer: IntervalOptionRenderer,
           onItemSelect: (interval: Interval, e) => {
             onConfirm(interval.int_id.toString());
             setLocalValue(interval.int_id.toString());
@@ -155,5 +171,7 @@ const IntervalSelection = ({
     ]
   );
 };
+
+IntervalSelection = memo(IntervalSelection);
 
 export default IntervalSelection;

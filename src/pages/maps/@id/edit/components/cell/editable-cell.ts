@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect } from "react";
+import React, { forwardRef, memo, useEffect } from "react";
 
 import {Cell, EditableCell2Props} from "@blueprintjs/table";
 
@@ -14,7 +14,7 @@ interface EditableCell extends EditableCell2Props {
   rowIndex: number
 }
 
-export const EditableCell = forwardRef((props: EditableCell2Props, ref) => {
+let EditableCell = forwardRef((props: EditableCell2Props, ref) => {
 
   const [value, setValue] = React.useState(props.value);
 
@@ -62,3 +62,7 @@ export const EditableCell = forwardRef((props: EditableCell2Props, ref) => {
     ]
   )
 })
+
+EditableCell = memo(EditableCell)
+
+export default EditableCell
