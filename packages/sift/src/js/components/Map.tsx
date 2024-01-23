@@ -324,14 +324,14 @@ class Map extends React.Component {
     this.fossilLayer.addData(geojson);
   }
 
-  componentWillUpdate(nextProps, nextState) {
-    if (nextState.showOutcrop != this.state.showOutcrop) {
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.showOutcrop != this.state.showOutcrop) {
       this.toggleOutcrop();
     }
-    if (nextState.showFossils != this.state.showFossils) {
+    if (prevState.showFossils != this.state.showFossils) {
       this.toggleFossils();
     }
-    if (nextState.showSatellite != this.state.showSatellite) {
+    if (prevState.showSatellite != this.state.showSatellite) {
       this.toggleSatellite();
     }
   }

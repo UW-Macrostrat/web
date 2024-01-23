@@ -14,7 +14,7 @@ class Stats extends React.Component {
     };
   }
 
-  componentWillMount() {
+  componentDidMount() {
     Utilities.fetchData(`stats?all`, (error, data) => {
       var summary = {
         columns: 0,
