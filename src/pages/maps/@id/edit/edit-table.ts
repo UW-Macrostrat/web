@@ -44,8 +44,7 @@ import ProgressPopover, {
 import "./override.sass"
 import "@blueprintjs/table/lib/css/table.css";
 import styles from "./edit-table.module.sass";
-import { EditableCell } from "~/pages/maps/@id/edit/components/cell/editable-cell";
-import LongTextCell from "~/pages/maps/@id/edit/components/cell/long-text";
+import EditableCell from "~/pages/maps/@id/edit/components/cell/editable-cell";
 
 const h = hyper.styled(styles);
 
