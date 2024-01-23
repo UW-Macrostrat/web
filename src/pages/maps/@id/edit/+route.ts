@@ -5,8 +5,6 @@ import { render, redirect } from 'vike/abort'
 export const guard = (pageContext) => {
   const { user } = pageContext
 
-  console.log("User: ", user)
-
   if (user === undefined) {
     // Render the login page while preserving the URL. (This is novel technique
     // which we explain down below.)

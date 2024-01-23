@@ -1,7 +1,7 @@
-import { apiV2Prefix } from "@macrostrat-web/settings";
+import { ingestPrefix } from "@macrostrat-web/settings";
 import fetch from "node-fetch";
 
-const apiAddress = apiV2Prefix + "/defs/sources";
+const apiAddress = ingestPrefix + "/sources";
 
 export async function onBeforeRender(pageContext) {
   // `.page.server.js` files always run in Node.js; we could use SQL/ORM queries here.
@@ -12,13 +12,14 @@ export async function onBeforeRender(pageContext) {
 
   const response = await fetch(url.toString());
   const sources = await response.json();
+
   sources.sort((a, b) => a.source_id - b.source_id);
 
   const pageProps = {
     sources: sources,
     user: pageContext.user,
     url: pageContext.url,
-    ingest_api: import.meta.env.VITE_MACROSTRAT_INGEST_API
+    ingest_api: ingestPrefix
   };
   return {
     pageContext: {
