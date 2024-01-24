@@ -1,8 +1,7 @@
-import { Button, MenuItem } from "@blueprintjs/core";
+import { Button } from "@blueprintjs/core";
 import { Popover2 } from "@blueprintjs/popover2";
-import { Select2, ItemRenderer, ItemPredicate } from "@blueprintjs/select";
-import { EditableCell2Props, EditableCell2, Cell } from "@blueprintjs/table";
-import React, { useEffect, useMemo, forwardRef } from "react";
+import { Cell, EditableCell2Props } from "@blueprintjs/table";
+import React, { forwardRef, useEffect } from "react";
 
 // @ts-ignore
 import hyper from "@macrostrat/hyper";

@@ -29,7 +29,7 @@ import {
   TableSelection,
   Selection,
   DataParameters,
-} from "~/pages/maps/@id/edit/table";
+} from "../table";
 import {
   buildURL,
   Filter,
@@ -38,16 +38,16 @@ import {
   getTableUpdate,
   range,
   applyTableUpdates,
-} from "~/pages/maps/@id/edit/table-util";
-import TableMenu from "~/pages/maps/@id/edit/table-menu";
-import IntervalSelection from "../components/cell/interval-selection";
-import ProgressPopover from "~/pages/maps/@id/edit/components/progress-popover/progress-popover";
+} from "../table-util";
+import TableMenu from "../table-menu";
+import IntervalSelection from "./cell/interval-selection";
+import ProgressPopover from "./progress-popover/progress-popover";
 
 import "./override.sass";
 import "@blueprintjs/table/lib/css/table.css";
 import styles from "./edit-table.module.sass";
-import { EditableCell } from "~/pages/maps/@id/edit/components/cell/editable-cell";
-import EditTable from "~/pages/maps/@id/edit/edit-table";
+import { EditableCell } from "./cell/editable-cell";
+import EditTable from "../edit-table";
 
 const h = hyper.styled(styles);
 
