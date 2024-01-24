@@ -1,0 +1,23 @@
+.raster {
+  color: white;
+  background-color: lightgreen;
+  padding: 0.2em 0.5em;
+  border-radius: 0.2em;
+  display: inline-block;
+  font-size: 0.8em;
+}
+
+.maps-list {
+  list-style: none;
+  padding: 0;
+}
+
+.source-id {
+  &::before {
+    content: "#";
+    color: --text-dim-color;
+  }
+  color: --text-subtle-color;
+  min-width: 3em;
+  display: inline-block;
+}

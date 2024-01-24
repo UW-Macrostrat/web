@@ -1,6 +1,6 @@
 import hyper from "@macrostrat/hyper";
 // Page for a list of maps
-import styles from "./main.module.sass";
+import styles from "./main.module.scss";
 import { tempImageIndex, s3Address } from "./raster-images";
 import { AnchorButton } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
@@ -26,7 +26,7 @@ export function Page({ sources }) {
     ]),
     h("h1", "Maps"),
     h(
-      "ul",
+      "ul.maps-list",
       sources1.map((d) => h(SourceItem, { source: d, key: d.source_id }))
     ),
   ]);
