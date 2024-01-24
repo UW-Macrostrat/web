@@ -1,8 +1,14 @@
 import hyper from "@macrostrat/hyper";
 
-
-
-import { useState, useEffect, useCallback, useRef, useLayoutEffect, useMemo, FunctionComponent } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useLayoutEffect,
+  useMemo,
+  FunctionComponent,
+} from "react";
 import { HotkeysProvider, InputGroup, Button } from "@blueprintjs/core";
 import { Spinner, ButtonGroup } from "@blueprintjs/core";
 import {
@@ -12,11 +18,18 @@ import {
   RowHeaderCell2,
   ColumnHeaderCell2,
   SelectionModes,
-  RegionCardinality
+  RegionCardinality,
 } from "@blueprintjs/table";
 import update from "immutability-helper";
 
-import { Filters, OperatorQueryParameter, TableUpdate, TableSelection, Selection, DataParameters } from "~/pages/maps/@id/edit/table";
+import {
+  Filters,
+  OperatorQueryParameter,
+  TableUpdate,
+  TableSelection,
+  Selection,
+  DataParameters,
+} from "~/pages/maps/@id/edit/table";
 import {
   buildURL,
   Filter,
@@ -24,13 +37,13 @@ import {
   submitChange,
   getTableUpdate,
   range,
-  applyTableUpdates
+  applyTableUpdates,
 } from "~/pages/maps/@id/edit/table-util";
 import TableMenu from "~/pages/maps/@id/edit/table-menu";
 import IntervalSelection from "../components/cell/interval-selection";
 import ProgressPopover from "~/pages/maps/@id/edit/components/progress-popover/progress-popover";
 
-import "./override.sass"
+import "./override.sass";
 import "@blueprintjs/table/lib/css/table.css";
 import styles from "./edit-table.module.sass";
 import { EditableCell } from "~/pages/maps/@id/edit/components/cell/editable-cell";
@@ -49,13 +62,13 @@ const FINAL_COLUMNS = [
   "lith",
   "comments",
   "t_interval",
-  "b_interval"
-]
+  "b_interval",
+];
 
 interface EditTableProps {
   url: string;
   data: {
-    [key: string]: any
+    [key: string]: any;
   };
 }
 
@@ -67,144 +80,174 @@ interface TableState {
 }
 
 export default function TableInterface({ url }: EditTableProps) {
-
   // Data State
-  const [dataParameters, setDataParameters] = useState<DataParameters>({select: {page: "0", pageSize: "999999"}})
-  const [data, setData] = useState<any[]>([])
+  const [dataParameters, setDataParameters] = useState<DataParameters>({
+    select: { page: "0", pageSize: "999999" },
+  });
+  const [data, setData] = useState<any[]>([]);
   const [dataToggle, setDataToggle] = useState<boolean>(false);
 
   // Error State
-  const [error, setError] = useState<string | undefined>(undefined)
+  const [error, setError] = useState<string | undefined>(undefined);
 
   // Table Update State
-  const [tableUpdates, setTableUpdates] = useState<TableUpdate[]>([])
-  const [updateProgress, setUpdateProgress] = useState<number | undefined>(undefined)
+  const [tableUpdates, setTableUpdates] = useState<TableUpdate[]>([]);
+  const [updateProgress, setUpdateProgress] = useState<number | undefined>(
+    undefined
+  );
 
   // Memoize non-id columns
   const nonIdColumnNames = useMemo(() => {
-    return data.length ? Object.keys(data[0]).filter(x => x != "_pkid") : []
-  }, [data])
-
+    return data.length ? Object.keys(data[0]).filter((x) => x != "_pkid") : [];
+  }, [data]);
 
   let getData = async () => {
+    const dataURL = buildURL(url, dataParameters);
 
-    const dataURL = buildURL(url, dataParameters)
+    const response = await fetch(dataURL);
+    const data = await response.json();
 
-    const response = await fetch(dataURL)
-    const data = await response.json()
-
-    if(data.length == 0){
-      setError("Warning: No results matched query")
+    if (data.length == 0) {
+      setError("Warning: No results matched query");
     } else {
-
-      setError(undefined)
-      setData(data)
+      setError(undefined);
+      setData(data);
     }
 
     // Remove the progress bar on data reload
-    setUpdateProgress(undefined)
+    setUpdateProgress(undefined);
 
-    return data
-  }
+    return data;
+  };
 
   // On mount get data
   useEffect(() => {
-    getData()
-  }, [dataParameters])
+    getData();
+  }, [dataParameters]);
 
-  if(data.length == 0 && error == undefined){
-    return h(Spinner)
+  if (data.length == 0 && error == undefined) {
+    return h(Spinner);
   }
 
   const submitTableUpdates = async () => {
+    setUpdateProgress(0);
 
-    setUpdateProgress(0)
-
-    let index = 0
-    for(const tableUpdate of tableUpdates){
-
+    let index = 0;
+    for (const tableUpdate of tableUpdates) {
       try {
-        await tableUpdate.execute()
+        await tableUpdate.execute();
       } catch (e) {
-
-        setUpdateProgress(undefined)
-        return // If there is an error, stop submitting
+        setUpdateProgress(undefined);
+        return; // If there is an error, stop submitting
       }
 
-      index += 1
-      setUpdateProgress(index / tableUpdates.length)
+      index += 1;
+      setUpdateProgress(index / tableUpdates.length);
     }
 
-    setTableUpdates([])
-    setDataToggle(!dataToggle)
-  }
+    setTableUpdates([]);
+    setDataToggle(!dataToggle);
+  };
 
   const columnHeaderCellRenderer = (columnIndex: number) => {
-
-    const columnName: string = nonIdColumnNames[columnIndex]
+    const columnName: string = nonIdColumnNames[columnIndex];
 
     const onFilterChange = (param: OperatorQueryParameter) => {
-      const columnFilter = new Filter(columnName, param.operator, param.value)
-      setDataParameters({...dataParameters, filter: {...dataParameters.filter, [columnName]: columnFilter}})
-    }
+      const columnFilter = new Filter(columnName, param.operator, param.value);
+      setDataParameters({
+        ...dataParameters,
+        filter: { ...dataParameters.filter, [columnName]: columnFilter },
+      });
+    };
 
-    const filter = dataParameters.filter[columnName]
+    const filter = dataParameters.filter[columnName];
 
     const setGroup = (group: string | undefined) => {
-      setDataParameters({...dataParameters, group: group})
-    }
+      setDataParameters({ ...dataParameters, group: group });
+    };
 
-    return h(ColumnHeaderCell2, {
-      menuRenderer: () => h(TableMenu, {"columnName": columnName, "onFilterChange": onFilterChange, "filter": filter, "onGroupChange": setGroup, "group": dataParameters?.group}),
-      name: columnName,
-      style: {
-        backgroundColor: filter.is_valid() || dataParameters?.group == columnName ? "rgba(27,187,255,0.12)" : "#ffffff00"
-      }
-    }, [])
-  }
-
-
-  const defaultColumnConfig = Object.entries(nonIdColumnNames).map(([columnName, value], index) => {
-    return h(Column, {
-      name: columnName,
-      className: FINAL_COLUMNS.includes(columnName) ? "final-column" : "",
-      columnHeaderCellRenderer: columnHeaderCellRenderer,
-      cellRenderer: (rowIndex) => h(EditableCell, {
-        onConfirm: (value) => {
-          const tableUpdate = getTableUpdate(url, value, columnName, rowIndex, data, dataParameters)
-          setTableUpdates([...tableUpdates, tableUpdate])
+    return h(
+      ColumnHeaderCell2,
+      {
+        menuRenderer: () =>
+          h(TableMenu, {
+            columnName: columnName,
+            onFilterChange: onFilterChange,
+            filter: filter,
+            onGroupChange: setGroup,
+            group: dataParameters?.group,
+          }),
+        name: columnName,
+        style: {
+          backgroundColor:
+            filter.is_valid() || dataParameters?.group == columnName
+              ? "rgba(27,187,255,0.12)"
+              : "#ffffff00",
         },
-        value: applyTableUpdates(data[rowIndex], columnName, tableUpdates)
-      }),
-      "key": columnName
-    })
-  })
+      },
+      []
+    );
+  };
+
+  const defaultColumnConfig = Object.entries(nonIdColumnNames).map(
+    ([columnName, value], index) => {
+      return h(Column, {
+        name: columnName,
+        className: FINAL_COLUMNS.includes(columnName) ? "final-column" : "",
+        columnHeaderCellRenderer: columnHeaderCellRenderer,
+        cellRenderer: (rowIndex) =>
+          h(EditableCell, {
+            onConfirm: (value) => {
+              const tableUpdate = getTableUpdate(
+                url,
+                value,
+                columnName,
+                rowIndex,
+                data,
+                dataParameters
+              );
+              setTableUpdates([...tableUpdates, tableUpdate]);
+            },
+            value: applyTableUpdates(data[rowIndex], columnName, tableUpdates),
+          }),
+        key: columnName,
+      });
+    }
+  );
 
   const columnConfig = {
     ...defaultColumnConfig,
-    "t_interval": h(Column, {
+    t_interval: h(Column, {
       ...defaultColumnConfig["t_interval"],
-      cellRenderer: (rowIndex) => h(IntervalSelection, {
-        onConfirm: (value) => {
-          const tableUpdate = getTableUpdate(url, value, "t_interval", rowIndex, data, dataParameters)
-          setTableUpdates([...tableUpdates, tableUpdate])
-        },
-        value: data[rowIndex]["t_interval"]
-      })
-    })
-  }
+      cellRenderer: (rowIndex) =>
+        h(IntervalSelection, {
+          onConfirm: (value) => {
+            const tableUpdate = getTableUpdate(
+              url,
+              value,
+              "t_interval",
+              rowIndex,
+              data,
+              dataParameters
+            );
+            setTableUpdates([...tableUpdates, tableUpdate]);
+          },
+          value: data[rowIndex]["t_interval"],
+        }),
+    }),
+  };
 
   const rowHeaderCellRenderer = (rowIndex: number) => {
-    const headerKey = dataParameters?.group ? dataParameters?.group : "_pkid"
-    let name = data[rowIndex][headerKey]
+    const headerKey = dataParameters?.group ? dataParameters?.group : "_pkid";
+    let name = data[rowIndex][headerKey];
 
     if (name == null) {
       name = "NULL";
-    } else if(name.length > 47){
-      name = name.slice(0, 47) + "..."
+    } else if (name.length > 47) {
+      name = name.slice(0, 47) + "...";
     }
 
-    return h(RowHeaderCell2, { "name": name }, []);
+    return h(RowHeaderCell2, { name: name }, []);
   };
 
   return h(HotkeysProvider, {}, [
@@ -237,7 +280,9 @@ export default function TableInterface({ url }: EditTableProps) {
       h(
         Table2,
         {
-          selectionModes: dataParameters?.group ? RegionCardinality.CELLS : SelectionModes.COLUMNS_AND_CELLS,
+          selectionModes: dataParameters?.group
+            ? RegionCardinality.CELLS
+            : SelectionModes.COLUMNS_AND_CELLS,
           rowHeaderCellRenderer: rowHeaderCellRenderer,
           onSelection: (selections: Selection[]) =>
             getSelectionValues(selections),
@@ -247,14 +292,11 @@ export default function TableInterface({ url }: EditTableProps) {
         },
         columnConfig
       ),
-      h.if(updateProgress != undefined)(
-        ProgressPopover,
-        {
-          text: "Submitting Changes",
-          value: updateProgress,
-          progressBarProps: { intent: "success" },
-        }
-      )
+      h.if(updateProgress != undefined)(ProgressPopover, {
+        text: "Submitting Changes",
+        value: updateProgress,
+        progressBarProps: { intent: "success" },
+      }),
     ]),
   ]);
 }
