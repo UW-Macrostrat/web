@@ -1,12 +1,11 @@
-import { Button, InputGroup, Menu, MenuItem } from "@blueprintjs/core";
-import { ItemRenderer, Select2 } from "@blueprintjs/select";
+import { Button, Menu, InputGroup } from "@blueprintjs/core";
 import React from "react";
 import { useDebouncedCallback } from "use-debounce";
 
 // @ts-ignore
 import hyper from "@macrostrat/hyper";
 
-import { ColumnOperatorOption, OperatorQueryParameter } from "./table";
+import { OperatorQueryParameter, ColumnOperatorOption } from "./table";
 
 import "~/styles/blueprint-select";
 import styles from "./edit-table.module.sass";
@@ -15,6 +14,7 @@ import { Filter } from "./table-util";
 const h = hyper.styled(styles);
 
 const validExpressions: ColumnOperatorOption[] = [
+  { key: "na", value: "", verbose: "None" },
   { key: "eq", value: "=", verbose: "Equals" },
   { key: "lt", value: "<", verbose: "Is less than" },
   { key: "le", value: "<=", verbose: "Is less than or equal to" },
@@ -25,27 +25,6 @@ const validExpressions: ColumnOperatorOption[] = [
   { key: "is", value: "IS", verbose: "Is", placeholder: "true | false | null" },
   { key: "in", value: "IN", verbose: "In", placeholder: "1,2,3" },
 ];
-
-const OperatorFilterOption: ItemRenderer<ColumnOperatorOption> = (
-  column,
-  { handleClick, handleFocus, modifiers }
-) => {
-  return h(
-    MenuItem,
-    {
-      shouldDismissPopover: false,
-      active: modifiers.active,
-      disabled: modifiers.disabled,
-      key: column.key,
-      label: column.verbose,
-      onClick: handleClick,
-      onFocus: handleFocus,
-      text: column.value,
-      roleStructure: "listoption",
-    },
-    []
-  );
-};
 
 interface TableMenuProps {
   columnName: string;
@@ -62,13 +41,11 @@ const TableMenu = ({
   onGroupChange,
   group,
 }: TableMenuProps) => {
-  const [menuOpen, setMenuOpen] = React.useState<boolean>(false);
   const [inputPlaceholder, setInputPlaceholder] = React.useState<string>("");
 
   // Create a debounced version of the text state
   const [inputValue, setInputValue] = React.useState<string>(filter.value);
   const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setMenuOpen(false);
     onFilterChange({ operator: filter.operator, value: e.target.value });
   };
   const debouncedInputChange = useDebouncedCallback(onInputChange, 1000);
@@ -86,60 +63,57 @@ const TableMenu = ({
       h("div.filter-header", {}, ["Filter"]),
       h("div.filter-select", {}, [
         h(
-          Select2<ColumnOperatorOption>,
+          "select",
           {
-            fill: true,
-            items: validExpressions,
-            className: "update-input-group",
-            filterable: false,
-            popoverProps: { isOpen: menuOpen },
-            itemRenderer: OperatorFilterOption,
-            onItemSelect: (operator: ColumnOperatorOption) => {
-              setMenuOpen(false);
-              setInputPlaceholder(operator.placeholder || "");
-              onFilterChange({ operator: operator.key, value: filter.value });
+            style: {
+              padding: "6px",
+              border: "#d7d8d9 1px solid",
+              borderBottom: "none",
+              borderRadius: "2px 2px 0 0",
             },
-            noResults: h(
-              MenuItem,
-              {
-                disabled: true,
-                text: "No results.",
-                roleStructure: "listoption",
-              },
-              []
-            ),
+            value: filter.operator,
+            onChange: (e) => {
+              if (e.target.value === "na") {
+                onFilterChange({ operator: undefined, value: filter.value });
+              } else {
+                onFilterChange({
+                  operator: e.target.value,
+                  value: filter.value,
+                });
+              }
+            },
           },
           [
-            h(
-              Button,
-              {
-                fill: true,
-                onClick: () => setMenuOpen(!menuOpen),
-                alignText: "left",
-                text: selectedExpression?.verbose,
-                rightIcon: "double-caret-vertical",
-                className: "update-input-group",
-                placeholder: "Select A Filter",
-              },
-              []
-            ),
+            ...validExpressions.map((expression) => {
+              return h(
+                "option",
+                {
+                  value: expression.key,
+                },
+                [expression.verbose]
+              );
+            }),
           ]
         ),
-      ]),
-      h("div.filter-input", {}, [
-        h(
-          InputGroup,
-          {
-            value: inputValue,
-            className: "update-input-group",
-            placeholder: inputPlaceholder,
-            onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-              setInputValue(e.target.value);
-              debouncedInputChange(e);
+        h("div.filter-input", {}, [
+          h(
+            InputGroup,
+            {
+              value: inputValue,
+              className: "update-input-group",
+              placeholder: inputPlaceholder,
+              onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                setInputValue(e.target.value);
+                debouncedInputChange(e);
+              },
+              onBlur: (e: React.FocusEvent<HTMLInputElement>) => {
+                // Make sure this value gets published if the menu is hidden be debounce
+                onInputChange(e);
+              },
             },
-          },
-          []
-        ),
+            []
+          ),
+        ]),
       ]),
       h("div.filter-header", {}, ["Group"]),
       h("div.filter-select", {}, [
@@ -151,10 +125,11 @@ const TableMenu = ({
             intent: groupActive ? "success" : "warning",
             text: groupActive ? "Active" : "Inactive",
             fill: true,
-            onClick: () =>
+            onClick: () => {
               onGroupChange(
                 group == filter.column_name ? undefined : filter.column_name
-              ),
+              );
+            },
           },
           []
         ),

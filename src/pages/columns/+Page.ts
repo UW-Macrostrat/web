@@ -1,13 +1,12 @@
 import h from "@macrostrat/hyper";
+import { ContentPage } from "~/layouts";
 
 export function Page({ columnGroups }) {
-  return h("div", [
+  return h(ContentPage, [
     h("h1", "Columns"),
     columnGroups.map((d) => h(ColumnGroup, { data: d, key: d.id })),
   ]);
 }
-
-export const pageStyle = "content";
 
 function ColumnGroup({ data }) {
   const { id, name, columns } = data;

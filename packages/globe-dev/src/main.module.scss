@@ -1,0 +1,110 @@
+@import "mapbox-gl/dist/mapbox-gl.css";
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.globe-page {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  position: relative;
+
+  header {
+    position: absolute;
+    top: 1em;
+    left: 1em;
+    width: 12em;
+    z-index: 50;
+    background-color: #fff;
+    border-radius: 8px;
+  }
+
+  .map-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: row;
+    gap: 0.5em;
+  }
+
+  .cesium-panel,
+  .map-panel {
+    flex-grow: 1;
+    position: relative;
+    height: 100vh;
+  }
+
+  .map-panel .map {
+    height: 100%;
+  }
+
+  .cesium-widget canvas {
+    cursor: drag;
+  }
+
+  div.caption {
+    font-size: 0.8em;
+    font-style: italic;
+    color: #888;
+    text-align: left;
+  }
+
+  header {
+    display: flex;
+    flex-direction: column;
+    align-items: right;
+    padding: 0.5em;
+    gap: 0.5em;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 1em;
+  }
+
+  header p {
+    margin: 0.2em 0 0.3em;
+    font-style: italic;
+  }
+
+  .spacer {
+    flex-grow: 1;
+  }
+
+  ul.controls {
+    list-style: none;
+    padding-left: 0px;
+    margin: 0;
+  }
+
+  a {
+    display: block;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-bottom: 2px;
+    text-decoration: none;
+    background-color: #eee;
+  }
+
+  .controls li a.active {
+    background-color: #a3d0fd;
+  }
+
+  /* These styles make up for deficiencies in cesium-viewer */
+  .mapbox-logo {
+    display: block !important;
+    margin-left: 8px;
+  }
+}

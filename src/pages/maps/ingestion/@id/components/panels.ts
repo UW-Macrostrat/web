@@ -3,7 +3,6 @@ import { useRef } from "react";
 import { useStoredState } from "@macrostrat/ui-components";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
-import { on } from "events";
 export const h = hyper.styled(styles);
 
 export enum AdjustSide {

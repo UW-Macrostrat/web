@@ -53,3 +53,23 @@
 
 .spacer
   flex-grow: 1
+
+
+.editable-cell
+  background-color: white
+  height: 18px
+  padding: 1.7px 8px
+  font-size: 12px
+  min-height: 0px
+  min-width: 99%
+  box-shadow: none
+  border: 0
+  z-index: 0
+  position: relative
+  max-width: 99%
+  &:focus
+    z-index: 99
+    max-width: 999%
+    border: #2d72d2 solid 2px
+    margin: -1px
+    height: 22px

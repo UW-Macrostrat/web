@@ -1,8 +1,9 @@
 import hyper from "@macrostrat/hyper";
 // Page for a list of maps
-import styles from "./main.module.sass";
+import styles from "./main.module.scss";
 import { tempImageIndex, s3Address } from "./raster-images";
-import { Icon, IconSize } from "@blueprintjs/core";
+import { AnchorButton } from "@blueprintjs/core";
+import { ContentPage } from "~/layouts";
 
 const h = hyper.styled(styles);
 
@@ -15,10 +16,17 @@ export function Page({ sources }) {
     return source;
   });
 
-  return h("div", [
+  return h(ContentPage, [
+    h("div.float-right.padding.stick-to-top", [
+      h(
+        AnchorButton,
+        { icon: "flows", href: "/maps/ingestion", large: true },
+        "Ingestion system"
+      ),
+    ]),
     h("h1", "Maps"),
     h(
-      "ul",
+      "ul.maps-list",
       sources1.map((d) => h(SourceItem, { source: d, key: d.source_id }))
     ),
   ]);
@@ -35,7 +43,5 @@ function SourceItem({ source }) {
     " ",
     h("span.scale", {}, source.scale),
     h.if(source.rasterURL != null)([" ", h("span.raster", "Raster")]),
-    " ",
-    h("a", { href: edit_href }, [h(Icon, { icon: "edit", size: IconSize.SMALL })]),
   ]);
 }

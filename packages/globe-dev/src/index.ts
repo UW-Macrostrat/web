@@ -4,7 +4,7 @@ import {
   flyToParams,
   translateCameraPosition,
 } from "@macrostrat/cesium-viewer";
-import h from "@macrostrat/hyper";
+import hyper from "@macrostrat/hyper";
 import { MapPosition } from "@macrostrat/mapbox-utils";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "~/renderer/Link";
@@ -21,8 +21,10 @@ import {
 } from "@macrostrat/ui-components";
 import "@znemz/cesium-navigation/dist/index.css";
 import "cesium/Source/Widgets/widgets.css";
-import "./app.scss";
+import styles from "./main.module.scss";
 import Map from "./map-comparison";
+
+const h = hyper.styled(styles);
 
 function VisControl({ show, setShown, name }) {
   const className = show ? "active" : "";

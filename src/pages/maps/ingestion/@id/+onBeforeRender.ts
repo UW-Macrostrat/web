@@ -1,9 +1,7 @@
 import { apiV2Prefix } from "@macrostrat-web/settings";
-import h from "@macrostrat/hyper";
 import { PageContextBuiltInServer } from "vike/types";
-import { ClientOnly } from "~/renderer/client-only";
 
-const apiAddress = apiV2Prefix + "/defs/sources";
+const apiAddress = apiV2Prefix + "/defs/sources/";
 
 export async function onBeforeRender(pageContext: PageContextBuiltInServer) {
   const { id } = pageContext.routeParams;
@@ -28,13 +26,4 @@ export async function onBeforeRender(pageContext: PageContextBuiltInServer) {
       },
     },
   };
-}
-
-const EditInterface = () => import("./edit-page");
-
-export function Page({ id, map }) {
-  return h(
-    "div.single-map",
-    h(ClientOnly, { component: EditInterface, source_id: id, mapBounds: map })
-  );
 }
