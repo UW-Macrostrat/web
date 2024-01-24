@@ -15,7 +15,7 @@ import { LngLatBoundsLike } from "mapbox-gl";
 import { useEffect, useMemo, useState } from "react";
 import { MapNavbar } from "~/components/map-navbar";
 import "~/styles/global.styl";
-import { s3Address, tempImageIndex } from "../../raster-images";
+import { s3Address, tempImageIndex } from "../raster-images";
 import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
