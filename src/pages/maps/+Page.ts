@@ -41,7 +41,12 @@ export function Page({ sources, user, url, ingest_api }) {
               borderRadius: "50%",
               backgroundColor: user == undefined ? "#fdeb88" : "#90d090",
             },
-            href: `${ingest_api}/security/login?return_url=${url}`,
+            onClick() {
+              // Assemble the return URL on click based on the current page
+              const return_url =
+                window.location.origin + window.location.pathname;
+              window.location.href = `${ingest_api}/security/login?return_url=${return_url}`;
+            },
           })
         ),
       ]),

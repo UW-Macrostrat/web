@@ -16,7 +16,6 @@ export async function onBeforeRender(pageContext) {
   const pageProps = {
     sources: sources,
     user: pageContext.user,
-    url: pageContext.url,
     ingest_api: ingestPrefix,
   };
   return {
