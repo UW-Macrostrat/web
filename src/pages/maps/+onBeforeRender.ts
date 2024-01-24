@@ -8,8 +8,6 @@ export async function onBeforeRender(pageContext) {
   const url = new URL(apiAddress);
   url.searchParams.set("page_size", "9999");
 
-
-
   const response = await fetch(url.toString());
   const sources = await response.json();
 
@@ -19,11 +17,11 @@ export async function onBeforeRender(pageContext) {
     sources: sources,
     user: pageContext.user,
     url: pageContext.url,
-    ingest_api: ingestPrefix
+    ingest_api: ingestPrefix,
   };
   return {
     pageContext: {
-      pageProps
+      pageProps,
     },
   };
 }

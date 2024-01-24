@@ -71,11 +71,13 @@ export default function EditInterface({
               h(Route, {
                 path: "polygons",
                 element: h(EditTable, {
-                  url: `${import.meta.env.VITE_MACROSTRAT_INGEST_API}/sources/${source_id}/polygons`,
+                  url: `${
+                    import.meta.env.VITE_MACROSTRAT_INGEST_API
+                  }/sources/${source_id}/polygons`,
                 }),
               }),
             ]),
-          ])
+          ]),
         ])
       ),
       h.if(showMap)(MapInterface, { id: source_id, map: mapBounds }),
@@ -92,5 +94,3 @@ function ShowMapButton({ showMap, setShowMap }) {
     onClick: () => setShowMap(!showMap),
   });
 }
-
-

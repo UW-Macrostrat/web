@@ -31,8 +31,7 @@ const IntervalOption: React.FC = ({
   interval,
   props: { handleClick, handleFocus, modifiers, ...restProps },
 }) => {
-
-  console.log("test")
+  console.log("test");
 
   if (interval == null) {
     return h(
@@ -47,7 +46,7 @@ const IntervalOption: React.FC = ({
         onFocus: handleFocus,
         text: "",
         roleStructure: "listoption",
-        ...restProps
+        ...restProps,
       },
       []
     );
@@ -66,7 +65,7 @@ const IntervalOption: React.FC = ({
       onFocus: handleFocus,
       text: interval.name,
       roleStructure: "listoption",
-      ...restProps
+      ...restProps,
     },
     []
   );
@@ -80,9 +79,9 @@ const IntervalOptionRenderer: ItemRenderer<Interval> = (
 ) => {
   return h(IntervalOptionMemo, {
     interval,
-    props
+    props,
   });
-}
+};
 
 const filterInterval: ItemPredicate<Interval> = (query, interval) => {
   if (interval?.name == undefined) {

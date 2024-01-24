@@ -1,7 +1,6 @@
 import h from "@macrostrat/hyper";
 import { ClientOnly } from "~/renderer/client-only";
 
-
 const EditInterface = () => import("./edit-page");
 
 export function Page({ id, map }) {
