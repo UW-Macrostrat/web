@@ -1,24 +1,13 @@
 import hyper from "@macrostrat/hyper";
-
-// Styles
-
-import "../../styles/padding.css";
-
 // Page for a list of maps
-import styles from "./main.module.sass";
+import styles from "./main.module.scss";
 import { tempImageIndex, s3Address } from "./raster-images";
-import {
-  Icon,
-  IconSize,
-  Navbar,
-  AnchorButton,
-  Tooltip,
-  Card,
-} from "@blueprintjs/core";
+import { AnchorButton } from "@blueprintjs/core";
+import { ContentPage } from "~/layouts";
 
 const h = hyper.styled(styles);
 
-export function Page({ sources, user, url, ingest_api }) {
+export function Page({ sources }) {
   const sources1 = sources.map((source) => {
     const { source_id } = source;
     const image = tempImageIndex[source_id];
@@ -27,100 +16,21 @@ export function Page({ sources, user, url, ingest_api }) {
     return source;
   });
 
-  return h("div", [
-    h(Navbar, {}, [
-      h(Navbar.Group, { align: "left" }, [h(Navbar.Heading, "Source Maps")]),
-      h(Navbar.Group, { align: "right" }, [
-        h(
-          Tooltip,
-          { content: user == undefined ? "Log In" : "Logged In" },
-          h(AnchorButton, {
-            icon: user == undefined ? "log-in" : "user",
-            style: {
-              margin: "0 0.5em",
-              borderRadius: "50%",
-              backgroundColor: user == undefined ? "#fdeb88" : "#90d090",
-            },
-            href: `${ingest_api}/security/login?return_url=${url}`,
-          })
-        ),
-      ]),
+  return h(ContentPage, [
+    h("div.float-right.padding.stick-to-top", [
+      h(
+        AnchorButton,
+        { icon: "flows", href: "/maps/ingestion", large: true },
+        "Ingestion system"
+      ),
     ]),
+    h("h1", "Maps"),
     h(
-      "div",
-      {
-        style: {
-          display: "flex",
-          justifyContent: "center",
-          flexDirection: "column",
-        },
-      },
-      [
-        ...sources1.map((d) => {
-          return h(
-            "div",
-            { style: { maxWidth: "1000px", minWidth: "50%", margin: "auto" } },
-            [h(SourceCard, { source: d, key: d.source_id, user: user })]
-          );
-        }),
-      ]
+      "ul.maps-list",
+      sources1.map((d) => h(SourceItem, { source: d, key: d.source_id }))
     ),
   ]);
 }
-
-interface Source {
-  source_id: number;
-  name: string;
-  scale: number;
-  rasterURL?: string;
-}
-
-const SourceCard = ({
-  source,
-  user,
-}: {
-  source: Source;
-  user: any | undefined;
-}) => {
-  const href = `/maps/${source.source_id}`;
-  const edit_href = `/maps/${source.source_id}/edit`;
-
-  return h(
-    Card,
-    {
-      style: {
-        display: "flex",
-        flexDirection: "row",
-        justifyContent: "space-between",
-        padding: "0.5em",
-        margin: "0.5em",
-        borderRadius: "0.5em",
-        backgroundColor: "#f0f0f0",
-      },
-    },
-    [
-      h("div", {}, [
-        h(
-          "h4",
-          { style: { margin: "0px" } },
-          source.source_id + " " + source.name
-        ),
-        h("h6", { style: { margin: "0px" } }, source.scale),
-        h.if(source.rasterURL != null)([
-          " ",
-          h("span.raster", { style: { marginTop: ".5rem" } }, "Raster"),
-        ]),
-      ]),
-      h("div", {}, [
-        h(AnchorButton, { href: href, icon: "map" }, "View"),
-        h.if(user !== undefined)([
-          "",
-          h(AnchorButton, { href: edit_href, icon: "edit" }, "Edit"),
-        ]),
-      ]),
-    ]
-  );
-};
 
 function SourceItem({ source }) {
   const { source_id, name } = source;
@@ -133,9 +43,5 @@ function SourceItem({ source }) {
     " ",
     h("span.scale", {}, source.scale),
     h.if(source.rasterURL != null)([" ", h("span.raster", "Raster")]),
-    " ",
-    h("a", { href: edit_href }, [
-      h(Icon, { icon: "edit", size: IconSize.SMALL }),
-    ]),
   ]);
 }

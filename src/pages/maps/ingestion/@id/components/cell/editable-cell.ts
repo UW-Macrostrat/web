@@ -4,7 +4,6 @@ import { Cell, EditableCell2Props } from "@blueprintjs/table";
 
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
-import { getTableUpdate } from "~/pages/maps/@id/edit/table-util";
 
 export const h = hyper.styled(styles);
 
