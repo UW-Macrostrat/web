@@ -2,7 +2,7 @@ import hyper from "@macrostrat/hyper";
 // Page for a list of maps
 import styles from "./main.module.sass";
 import { tempImageIndex, s3Address } from "./raster-images";
-import { AnchorButton, Icon, IconSize } from "@blueprintjs/core";
+import { AnchorButton } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 
 const h = hyper.styled(styles);
@@ -43,9 +43,5 @@ function SourceItem({ source }) {
     " ",
     h("span.scale", {}, source.scale),
     h.if(source.rasterURL != null)([" ", h("span.raster", "Raster")]),
-    " ",
-    h("a", { href: edit_href }, [
-      h(Icon, { icon: "edit", size: IconSize.SMALL }),
-    ]),
   ]);
 }
