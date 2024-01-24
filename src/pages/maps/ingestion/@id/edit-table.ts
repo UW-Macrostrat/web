@@ -207,7 +207,7 @@ export default function TableInterface({ url }: EditTableProps) {
       return [];
     }
 
-    const allHiddenColumns = [...hiddenColumns, "_pkid"];
+    const allHiddenColumns = [...hiddenColumns, "_pkid", "source_id"];
 
     return tableColumns.filter((x) => !allHiddenColumns.includes(x));
   }, [tableColumns, hiddenColumns]);
