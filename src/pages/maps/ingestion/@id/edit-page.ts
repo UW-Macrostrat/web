@@ -62,7 +62,7 @@ export default function EditInterface({
               h(ShowMapButton, { showMap, setShowMap }),
             ]),
           ]),
-          h(Router, { basename: `/maps/${source_id}/edit` }, [
+          h(Router, { basename: `/maps/ingestion/${source_id}` }, [
             h(Routes, [
               h(Route, {
                 path: "",

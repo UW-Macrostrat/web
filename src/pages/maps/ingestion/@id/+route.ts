@@ -1,4 +1,4 @@
-export default "/maps/@id/edit/*";
+export default "/maps/ingestion/@id/*";
 
 import { render, redirect } from "vike/abort";
 

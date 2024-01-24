@@ -4,7 +4,7 @@ import hyper from "@macrostrat/hyper";
 
 // Page for a list of maps
 import styles from "./main.module.sass";
-import { tempImageIndex, s3Address } from "../raster-images";
+import { tempImageIndex, s3Address } from "../../maps/raster-images";
 import {
   Icon,
   IconSize,
