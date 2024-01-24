@@ -18,7 +18,7 @@ Features:
 
 - [Overview](#overview)
 - [Starred Column Descriptions](#starred-column-description)
-- [Table Commands]()
+- [Table Commands](#table-commands)
 
 ### Overview
 
@@ -84,6 +84,10 @@ Navigate Cells Horizontally
 
 Navigate Cells Vertically
 
+**shift + h ( Well a column is selected )**
+
+Hide a column
+
 **cmd + c ( Well a column is selected )**
 
 Copy a column
@@ -91,3 +95,4 @@ Copy a column
 **cmd + v ( Well a column is selected )**
 
 Paste a column
+
