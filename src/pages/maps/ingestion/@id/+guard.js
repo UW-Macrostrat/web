@@ -1,6 +1,6 @@
 import { render, redirect } from "vike/abort";
 
-const guard = (pageContext) => {
+export const guard = (pageContext) => {
   const { user } = pageContext;
 
   if (user === undefined) {
@@ -20,5 +20,3 @@ const guard = (pageContext) => {
     return render(403, "Only admins are allowed to access this page.");
   }
 };
-
-export default guard;
