@@ -396,7 +396,10 @@ export default function TableInterface({ url }: EditTableProps) {
                 },
               },
               [
-                h("span.selected-column", {}, [columnName]),
+                h("span.selected-column", {}, [
+                  columnName,
+                  h.if(FINAL_COLUMNS.includes(columnName))(Icon, {icon: "star-empty", size: "12", color: "#333333", style: {marginLeft: "5px", marginBottom: "2px"}})
+                ]),
                 h.if(
                   (columnName in dataParameters.filter &&
                     dataParameters.filter[columnName].is_valid()) ||

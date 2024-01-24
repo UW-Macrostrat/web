@@ -8,7 +8,7 @@ import { WidthAdjustablePanel } from "./components";
 import MapInterface from "./map-interface";
 import { useStoredState } from "@macrostrat/ui-components";
 import { ParentRouteButton } from "~/components/map-navbar";
-import { Button, HotkeysProvider } from "@blueprintjs/core";
+import { Button, AnchorButton, HotkeysProvider, Icon } from "@blueprintjs/core";
 
 export const h = hyper.styled(styles);
 
@@ -56,7 +56,10 @@ export default function EditInterface({
         h([
           h("div.edit-page-header", [
             h(ParentRouteButton, { parentRoute: "/maps/" }),
-            h("h2", title),
+            h("h2", {}, [
+              `${title} Ingestion`,
+              h(ShowDocsButton, {href: "https://github.com/UW-Macrostrat/web/blob/main/src/pages/maps/ingestion/%40id/README.md"}),
+            ]),
             h("div.spacer"),
             h("div.edit-page-buttons", [
               h(ShowMapButton, { showMap, setShowMap }),
@@ -83,6 +86,17 @@ export default function EditInterface({
       h.if(showMap)(MapInterface, { id: source_id, map: mapBounds }),
     ]),
   ]);
+}
+
+function ShowDocsButton({href}: {href: string}) {
+  return h(AnchorButton, {
+    minimal: true,
+    title: "View Ingestion Documentation",
+    icon: "manual",
+    target: "_blank",
+    large: true,
+    href: href
+  });
 }
 
 function ShowMapButton({ showMap, setShowMap }) {
