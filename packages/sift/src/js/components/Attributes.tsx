@@ -1,5 +1,7 @@
+import h from "@macrostrat/hyper";
 import async from "async";
 import React from "react";
+import { useMatch } from "react-router-dom";
 import Chart from "./Chart";
 import Footer from "./Footer";
 import Loading from "./Loading";
@@ -10,7 +12,7 @@ import StratColumn from "./StratColumn";
 import SummaryStats from "./SummaryStats";
 import Utilities from "./Utilities";
 
-class Attributes extends React.Component {
+class _Attributes extends React.Component {
   constructor(props) {
     super(props);
     this._update = this._update.bind(this);
@@ -187,6 +189,10 @@ class Attributes extends React.Component {
                 return callback(error);
               }
 
+              if (data == null) {
+                data = { features: [] };
+              }
+
               var collections = data.features.map((d) => {
                 return d.properties.cltn_id;
               });
@@ -235,30 +241,28 @@ class Attributes extends React.Component {
           name = {
             name: id,
             id: id,
-            url: "#/" + type + "/" + id,
+            url: `/${type}/` + id,
           };
         } else if (this.stateLookup[type].def.length) {
           name = {
             name: data.definitions[0].name,
             id: data.definitions[0][this.stateLookup[type].classifier],
             url:
-              "#/" +
-              type +
-              "/" +
+              `/${type}/` +
               data.definitions[0][this.stateLookup[type].classifier],
           };
         } else if (type === "column") {
           name = {
             name: data.columns.data.features[0].properties.col_name,
             id: data.columns.data.features[0].properties.col_id,
-            url: "#/column/" + data.columns.data.features[0].properties.col_id,
+            url: "/column/" + data.columns.data.features[0].properties.col_id,
           };
         } else if (type === "unit") {
           name = {
             name:
               "Unit " + data.units[0].unit_id + " - " + data.units[0].unit_name,
             id: data.units[0].unit_id,
-            url: "#/unit/" + data.units[0].unit_id,
+            url: "/unit/" + data.units[0].unit_id,
           };
         }
 
@@ -299,7 +303,7 @@ class Attributes extends React.Component {
               return data.columns.refs[ref];
             })
             .concat(
-              Object.keys(data.fossils.refs).map((ref) => {
+              Object.keys(data.fossils.refs ?? {}).map((ref) => {
                 return data.fossils.refs[ref];
               })
             ),
@@ -310,15 +314,13 @@ class Attributes extends React.Component {
   }
 
   componentDidMount() {
-    var currentRoutes = this.context.router.getCurrentRoutes();
-    var activeRoute = currentRoutes[currentRoutes.length - 1].name;
-
+    var activeRoute = this.props.params.type;
+    console.log("Active route", activeRoute);
     this._update(activeRoute, this.props.params.id);
   }
 
   componentWillReceiveProps(nextProps) {
-    var currentRoutes = this.context.router.getCurrentRoutes();
-    var activeRoute = currentRoutes[currentRoutes.length - 1].name;
+    var activeRoute = nextProps.params.type;
     // Only update if the URI actually changed
     if (
       nextProps.params.id !== this.props.params.id ||
@@ -420,6 +422,11 @@ class Attributes extends React.Component {
       </div>
     );
   }
+}
+
+function Attributes(props) {
+  const { params } = useMatch("/:type/:id");
+  return h(_Attributes, { ...props, params });
 }
 
 // Attributes.contextTypes = {

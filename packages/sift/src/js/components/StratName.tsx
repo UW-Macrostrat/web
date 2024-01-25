@@ -1,6 +1,9 @@
+import h from "@macrostrat/hyper";
 import React from "react";
+import { useMatch } from "react-router-dom";
 import Chart from "./Chart";
 import Footer from "./Footer";
+import { SiftLink } from "./Link";
 import Loading from "./Loading";
 import LongText from "./LongText";
 import Map from "./Map";
@@ -10,14 +13,10 @@ import StratNameHierarchy from "./StratNameHierarchy";
 import SummaryStats from "./SummaryStats";
 import Utilities from "./Utilities";
 
-class StratName extends React.Component {
+class _StratName extends React.Component {
   constructor(props) {
     super(props);
-    (this.stateLookup = {
-      strat_name_concept: "strat_name_concept_id",
-      strat_name: "strat_name_id",
-    }),
-      (this.state = this._resetState());
+    this.state = this._resetState();
   }
 
   _resetState() {
@@ -83,7 +82,7 @@ class StratName extends React.Component {
     document.getElementById(which + "-legend").innerHTML = html;
   }
 
-  _update(type, id) {
+  _update(type: MatchType, id: number) {
     this.setState({
       loading: true,
     });
@@ -101,12 +100,12 @@ class StratName extends React.Component {
     Utilities.fetchMapData(
       `columns?${type}=${id}&response=long`,
       (mapError, data, refs) => {
-        if (mapError || !data.features.length) {
+        if (mapError || !data?.features.length) {
           console.log("reset");
           this.setState(this._resetState());
         }
 
-        var parsedRefs = Object.keys(refs).map((d) => {
+        var parsedRefs = Object.keys(refs ?? {}).map((d) => {
           return refs[d];
         });
 
@@ -117,6 +116,10 @@ class StratName extends React.Component {
             if (fossilError) {
               return console.log("Error fetching fossils ", error);
             }
+            if (fossilData?.features == null) {
+              return;
+            }
+
             this.setState({
               fossils: fossilData,
             });
@@ -126,7 +129,7 @@ class StratName extends React.Component {
             });
 
             // If there are any fossil collections, get prevalent taxa from PBDB
-            if (collections.length) {
+            if (collections?.length) {
               Utilities.fetchPrevalentTaxa(
                 collections.join(","),
                 (prevalentError, prevalentData) => {
@@ -198,7 +201,7 @@ class StratName extends React.Component {
                     name = {
                       id: target[0].strat_name_id,
                       name: target[0].strat_name + " " + target[0].rank,
-                      url: "#/strat_name/" + target[0].strat_name_id,
+                      url: "/strat_name/" + target[0].strat_name_id,
                     };
                   }
                 } else {
@@ -206,7 +209,7 @@ class StratName extends React.Component {
                     id: conceptData.success.data[0].concept_id,
                     name: conceptData.success.data[0].name,
                     url:
-                      "#/strat_name_concept/" +
+                      "/strat_name_concept/" +
                       conceptData.success.data[0].concept_id,
                   };
                 }
@@ -272,18 +275,12 @@ class StratName extends React.Component {
   }
 
   componentDidMount() {
-    var currentRoutes = this.context.router.getCurrentRoutes();
-    var activeRoute = currentRoutes[currentRoutes.length - 1].name;
-
-    this._update(this.stateLookup[activeRoute], this.props.params.id);
+    this._update(this.props.params.type, this.props.params.id);
   }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.params.id !== this.props.params.id) {
-      var currentRoutes = this.context.router.getCurrentRoutes();
-      var activeRoute = currentRoutes[currentRoutes.length - 1].name;
-
-      this._update(this.stateLookup[activeRoute], nextProps.params.id);
+      this._update(this.props.params.type, nextProps.params.id);
     }
   }
 
@@ -453,14 +450,14 @@ class StratName extends React.Component {
                   ? " of " + d[rankMap[d.rank]] + " " + rankFormat[d.rank]
                   : "";
                 return (
-                  <a
+                  <SiftLink
                     key={i}
-                    href={"#/strat_name/" + d.strat_name_id}
+                    href={"/strat_name/" + d.strat_name_id}
                     className="list-group-item"
                   >
                     {d.strat_name} {d.rank} {parent}{" "}
                     <span className="badge">{d.t_units}</span>
-                  </a>
+                  </SiftLink>
                 );
               })}
             </div>
@@ -473,6 +470,17 @@ class StratName extends React.Component {
       </div>
     );
   }
+}
+
+enum MatchType {
+  strat_name_id = "strat_name_id",
+  strat_name_concept_id = "strat_name_concept_id",
+}
+
+function StratName(props, context) {
+  const { params } = useMatch("/:type/:id");
+
+  return h(_StratName, { ...props, params });
 }
 
 // StratName.contextTypes = {

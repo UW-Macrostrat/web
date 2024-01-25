@@ -1,7 +1,9 @@
+import h from "@macrostrat/hyper";
 import React from "react";
+import { useSiftNavigate } from "./Link";
 import Utilities from "./Utilities";
 
-class StratNameHierarchy extends React.Component {
+class _StratNameHierarchy extends React.Component {
   constructor(props) {
     super(props);
     this.state = this._resetState();
@@ -110,7 +112,7 @@ class StratNameHierarchy extends React.Component {
   }
 
   handleClick(id, event) {
-    window.location.hash = "#/strat_name/" + id;
+    this.props.navigate(`/strat_name/${id}`);
     event.stopPropagation();
   }
 
@@ -198,6 +200,11 @@ class StratNameHierarchy extends React.Component {
       </div>
     );
   }
+}
+
+function StratNameHierarchy(props) {
+  const navigate = useSiftNavigate();
+  return h(_StratNameHierarchy, { ...props, navigate });
 }
 
 export default StratNameHierarchy;

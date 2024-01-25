@@ -1,11 +1,12 @@
 import L from "leaflet";
 import React from "react";
 import Centroid from "turf-centroid";
+import { useSiftNavigate } from "./Link";
 import Loading from "./Loading";
 import MapControls from "./MapControls";
 import Utilities from "./Utilities";
 
-class Map extends React.Component {
+class _Map extends React.Component {
   constructor(props) {
     super(props);
     this.addLayer = this.addLayer.bind(this);
@@ -253,6 +254,8 @@ class Map extends React.Component {
     }
     var target = target ? geojson.features[0].properties.col_id : "";
 
+    const navigate = this.props.navigate;
+
     this.layer = L.geoJson(geojson, {
       style: (feature) => {
         if (feature.properties.col_id === target) {
@@ -275,8 +278,7 @@ class Map extends React.Component {
       },
       onEachFeature: (feature, layer) => {
         layer.on("click", function (d) {
-          window.location.hash =
-            "#/column/" + d.target.feature.properties.col_id;
+          navigate(`/column/${d.target.feature.properties.col_id}`);
         });
       },
     });
@@ -397,5 +399,10 @@ Map.defaultProps = {
     radius: 7,
   },
 };
+
+function Map(props) {
+  const navigate = useSiftNavigate();
+  return <_Map {...props} navigate={navigate} />;
+}
 
 export default Map;

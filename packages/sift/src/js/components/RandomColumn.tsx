@@ -1,10 +1,10 @@
 import React from "react";
-import Config from "./Config";
 import Chart from "./Chart";
-import Utilities from "./Utilities";
+import ChartLegend from "./ChartLegend";
+import { SiftLink } from "./Link";
 import Map from "./Map";
 import SummaryStats from "./SummaryStats";
-import ChartLegend from "./ChartLegend";
+import Utilities from "./Utilities";
 
 class RandomColumn extends React.Component {
   constructor(props) {
@@ -65,9 +65,9 @@ class RandomColumn extends React.Component {
     return (
       <div>
         <h3 className="title">
-          <a href={"#/column/" + this.props.colID}>
+          <SiftLink to={"/column/" + this.props.colID}>
             {this.state.properties.col_name}
-          </a>
+          </SiftLink>
         </h3>
         <div className="random-column">
           <div className="random-column-stats">

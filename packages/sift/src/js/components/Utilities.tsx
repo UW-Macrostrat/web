@@ -1,6 +1,5 @@
-import _ from "underscore";
-import xhr from "xhr";
 import topojson from "topojson";
+import xhr from "xhr";
 import Config from "./Config";
 
 var typeLookup = {
@@ -17,6 +16,10 @@ var Utilities = {
       },
       (error, response, body) => {
         var apiResponse = JSON.parse(body);
+        if (apiResponse.error || !apiResponse.success.data) {
+          return callback(error, null, null);
+        }
+
         var data = apiResponse.success.data;
         var refs = apiResponse.success.refs ? apiResponse.success.refs : {};
         var geojson = topojson.feature(data, data.objects.output);

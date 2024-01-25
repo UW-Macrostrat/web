@@ -1,6 +1,6 @@
 import h from "@macrostrat/hyper";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 
 import Attributes from "./components/Attributes";
 import Column from "./components/Column";
@@ -13,6 +13,7 @@ import NoData from "./components/NoData";
 
 import React from "react";
 import Autocomplete from "./components/Autocomplete";
+import { SiftLink, siftPrefix, useSiftNavigate } from "./components/Link";
 
 // ReactRouter scroll behavior from 0.13
 //scrollBehavior: Router.ScrollToTopBehavior,
@@ -103,23 +104,16 @@ class App extends React.Component {
     this.state = {
       autocompleteIsOpen: false,
     };
-    this.toggleAutocomplete = this.toggleAutocomplete.bind(this);
-    this.finishAutocomplete = this.finishAutocomplete.bind(this);
-  }
 
-  toggleAutocomplete() {
-    //  this.setState({
-    //      autocompleteIsOpen: !this.state.autocompleteIsOpen
-    //  });
+    this.getNavigateURL = this.getNavigateURL.bind(this);
   }
-
-  finishAutocomplete(item) {
+  getNavigateURL(item) {
+    let prefix =
+      siftPrefix + "/" + this.props.categoryRouteLookup[item.dataset] + "/";
     if (item.id != 0) {
-      window.location.hash =
-        "#/" + this.props.categoryRouteLookup[item.dataset] + "/" + item.id;
+      return prefix + item.id;
     } else {
-      window.location.hash =
-        "#/" + this.props.categoryRouteLookup[item.dataset] + "/" + item.title;
+      return prefix + item.title;
     }
   }
 
@@ -134,21 +128,18 @@ class App extends React.Component {
           ></div>
           <div id="header">
             <div className="headerItem left">
-              <a href="/">
+              <Link to="/">
                 <img src="dist/img/logo_red.png" className="header-logo" />
-              </a>
-              <a href="#">
+              </Link>
+              <SiftLink to="/">
                 <h3 className="header-title">SIFT</h3>
-              </a>
+              </SiftLink>
             </div>
             <div className="headerItem right">
-              <div className="autocomplete-wrapper">
-                <Autocomplete
-                  minLength="2"
-                  reportState={this.toggleAutocomplete}
-                  onComplete={this.finishAutocomplete}
-                />
-              </div>
+              <TopBarAutocomplete
+                minLength="2"
+                getNavigateURL={this.getNavigateURL}
+              />
             </div>
           </div>
 
@@ -212,6 +203,24 @@ App.defaultProps = {
     econ_classes: "economic_class",
   },
 };
+
+function TopBarAutocomplete(props) {
+  const navigate = useSiftNavigate();
+
+  const finish = React.useCallback(
+    (item) => {
+      let url = props.getNavigateURL(item);
+      navigate(url);
+    },
+    [navigate]
+  );
+
+  return (
+    <div className="autocomplete-wrapper">
+      <Autocomplete minLength="2" onComplete={finish} />
+    </div>
+  );
+}
 
 const container = document.getElementsByClassName("react")[0];
 const root = createRoot(container);

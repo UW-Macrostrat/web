@@ -1,9 +1,10 @@
 import React from "react";
+import { SiftLink } from "./Link";
 
 class StratColumnUnit extends React.Component {
   render() {
     return (
-      <a href={"#/unit/" + this.props.data.unit_id}>
+      <SiftLink to={"/unit/" + this.props.data.unit_id}>
         <div
           className="unit-box"
           style={{
@@ -34,7 +35,7 @@ class StratColumnUnit extends React.Component {
             ""
           )}
         </div>
-      </a>
+      </SiftLink>
     );
   }
 }

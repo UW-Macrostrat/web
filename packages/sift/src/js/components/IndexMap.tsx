@@ -1,4 +1,5 @@
 import React from "react";
+import { siftPrefix } from "./Link";
 import Utilities from "./Utilities";
 
 class IndexMap extends React.Component {
@@ -61,12 +62,12 @@ class IndexMap extends React.Component {
           layer.bindPopup(`
             <div class='pbdb-popup'>
               <a class='pbdb-popup-link'
-                href='#/column/${feature.properties.col_id}'
+                href='${siftPrefix}/column/${feature.properties.col_id}'
               >
                 ${feature.properties.col_name}
               </a>
               <br>
-              <a class='index-map-group-link' href='#/group/${feature.properties.col_group_id}'>
+              <a class='index-map-group-link' href='${siftPrefix}/group/${feature.properties.col_group_id}'>
                 ${feature.properties.col_group} (${feature.properties.group_col_id})
               </a>
             </div>

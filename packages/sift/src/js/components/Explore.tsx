@@ -1,6 +1,7 @@
 import React from "react";
-import Utilities from "./Utilities";
 import Autocomplete from "./Autocomplete";
+import { siftPrefix } from "./Link";
+import Utilities from "./Utilities";
 
 class Explore extends React.Component {
   constructor(props) {
@@ -36,7 +37,7 @@ class Explore extends React.Component {
     L.control.zoom({ position: "topright" }).addTo(map);
 
     var hash = new L.Hash(map, {
-      baseURI: "#/explore/",
+      baseURI: siftPrefix + "/explore/",
       query: true,
     });
 
@@ -81,12 +82,12 @@ class Explore extends React.Component {
             layer.bindPopup(`
             <div class='pbdb-popup'>
               <a class='pbdb-popup-link'
-                href='#/column/${feature.properties.col_id}'
+                href='${siftPrefix}/column/${feature.properties.col_id}'
               >
                 ${feature.properties.col_name}
               </a>
               <br>
-              <a class='index-map-group-link' href='#/group/${feature.properties.col_group_id}'>
+              <a class='index-map-group-link' href='${siftPrefix}/group/${feature.properties.col_group_id}'>
                 ${feature.properties.col_group} (${feature.properties.group_col_id})
               </a>
             </div>
@@ -288,7 +289,6 @@ class Explore extends React.Component {
 
         <div id="exploreMap"></div>
         <div
-          className="filterMenu"
           className={this.state.showFilters ? "filterMenu open" : "filterMenu"}
         >
           <div className="filterMenu-tab" onClick={this.toggleFilters}>

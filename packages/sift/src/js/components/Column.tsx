@@ -1,6 +1,9 @@
+import h from "@macrostrat/hyper";
 import React from "react";
+import { Link, useParams } from "react-router-dom";
 import Chart from "./Chart";
 import Footer from "./Footer";
+import { SiftLink } from "./Link";
 import Loading from "./Loading";
 import Map from "./Map";
 import NoData from "./NoData";
@@ -9,7 +12,7 @@ import StratColumn from "./StratColumn";
 import SummaryStats from "./SummaryStats";
 import Utilities from "./Utilities";
 
-class Column extends React.Component {
+class _Column extends React.Component {
   constructor(props) {
     super(props);
     this.state = this._resetState();
@@ -229,14 +232,14 @@ class Column extends React.Component {
         <div className="page-title">
           {this.state.properties.col_id ? (
             <p>
-              <a href={"#/column/" + this.state.properties.col_id}>
+              <SiftLink to={"/column/" + this.state.properties.col_id}>
                 {this.state.properties.col_name}{" "}
-              </a>
+              </SiftLink>
               <small>
-                <a href={"#/group/" + this.state.properties.col_group_id}>
+                <SiftLink to={"/group/" + this.state.properties.col_group_id}>
                   ({this.state.properties.col_group}{" "}
                   {this.state.properties.group_col_id})
-                </a>
+                </SiftLink>
               </small>
             </p>
           ) : (
@@ -277,22 +280,24 @@ class Column extends React.Component {
           <PrevalentTaxa data={this.state.prevalentTaxa} />
 
           <StratColumn data={this.state.units} />
-          <a
-            href={
-              "https://dev.macrostrat.org/unit-renderer/#/column=" +
-              this.state.properties.col_id
-            }
+          <Link
+            to={"/column/" + this.state.properties.col_id}
             target="_blank"
             className="normalize-link alternate-column"
           >
             Alternate column view
-          </a>
+          </Link>
         </div>
 
         <Footer data={this.state.refs} />
       </div>
     );
   }
+}
+
+function Column(props) {
+  const params = useParams();
+  return h(_Column, { ...props, params });
 }
 
 // Column.contextTypes = {

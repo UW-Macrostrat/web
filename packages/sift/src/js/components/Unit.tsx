@@ -1,14 +1,14 @@
 import React from "react";
-import Utilities from "./Utilities";
 import Chart from "./Chart";
+import Footer from "./Footer";
+import { SiftLink } from "./Link";
+import Loading from "./Loading";
 import Map from "./Map";
-import SummaryStats from "./SummaryStats";
-import ChartLegend from "./ChartLegend";
-import StratNameHierarchy from "./StratNameHierarchy";
 import NoData from "./NoData";
 import PrevalentTaxa from "./PrevalentTaxa";
-import Loading from "./Loading";
-import Footer from "./Footer";
+import StratNameHierarchy from "./StratNameHierarchy";
+import SummaryStats from "./SummaryStats";
+import Utilities from "./Utilities";
 
 class Unit extends React.Component {
   constructor(props) {
@@ -220,10 +220,10 @@ class Unit extends React.Component {
 
         <div className={this.state.mapData.features.length ? "" : "hidden"}>
           <div className="page-title">
-            <a href={"#/unit/" + this.state.properties.unit_id}>
+            <SiftLink href={"/unit/" + this.state.properties.unit_id}>
               Unit {this.state.properties.unit_id} &mdash;{" "}
               {this.state.properties.unit_name}
-            </a>
+            </SiftLink>
           </div>
 
           <div className="random-column">

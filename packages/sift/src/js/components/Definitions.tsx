@@ -1,5 +1,8 @@
+import h from "@macrostrat/hyper";
 import React from "react";
+import { useParams } from "react-router-dom";
 import _ from "underscore";
+import { SiftLink, useSiftNavigate } from "./Link";
 import Loading from "./Loading";
 import NoData from "./NoData";
 import Utilities from "./Utilities";
@@ -11,7 +14,7 @@ if (!String.prototype.startsWith) {
   };
 }
 
-class Definitions extends React.Component {
+class _Definitions extends React.Component {
   static defaultProps = {
     params: {
       type: "",
@@ -243,7 +246,7 @@ class Definitions extends React.Component {
   }
 
   goToPage(event) {
-    window.document.location = event.target.parentNode.getAttribute("data-url");
+    this.props.navigate(event.target.parentNode.getAttribute("data-url"));
   }
 
   render() {
@@ -258,10 +261,10 @@ class Definitions extends React.Component {
 
         <div className={this.state.data.length ? "def-page" : "hidden"}>
           <div className="def-page-title">
-            <a href={"#/definitions/" + this.state.type}>
+            <SiftLink to={"/definitions/" + this.state.type}>
               <small>definitions / </small>
               {this.stateLookup[this.state.type].title}
-            </a>
+            </SiftLink>
           </div>
 
           <input
@@ -288,9 +291,7 @@ class Definitions extends React.Component {
                   <tr
                     key={idx}
                     data-url={
-                      "#/" +
-                      this.stateLookup[this.state.type].route +
-                      "/" +
+                      `/${this.stateLookup[this.state.type].route}/` +
                       d[this.stateLookup[this.state.type].classifier]
                     }
                     onClick={this.goToPage}
@@ -312,5 +313,11 @@ class Definitions extends React.Component {
 // Definitions.contextTypes = {
 //   router: React.PropTypes.func.isRequired,
 // };
+
+function Definitions(props) {
+  const navigate = useSiftNavigate();
+  const params = useParams();
+  return h(_Definitions, { ...props, params, navigate });
+}
 
 export default Definitions;
