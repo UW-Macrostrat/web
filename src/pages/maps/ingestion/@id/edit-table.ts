@@ -647,7 +647,7 @@ export default function TableInterface({ url }: EditTableProps) {
               }
             },
             numRows: data.length,
-            cellRendererDependencies: [data],
+            cellRendererDependencies: [data, intervals],
           },
           Object.values(columnConfig)
         ),
