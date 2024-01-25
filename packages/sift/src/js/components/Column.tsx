@@ -77,6 +77,10 @@ class _Column extends React.Component {
                 if (fossilError) {
                   return console.log("Error fetching fossils ", error);
                 }
+                if (fossilData == null) {
+                  return;
+                }
+
                 this.setState({
                   fossils: fossilData,
                   cltn_ids: fossilData.features.map((d) => {

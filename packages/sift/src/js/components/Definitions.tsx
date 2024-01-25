@@ -27,6 +27,7 @@ class _Definitions extends React.Component {
     this._update = this._update.bind(this);
     this.showMore = this.showMore.bind(this);
     this.checkScrollPosition = this.checkScrollPosition.bind(this);
+    this.goToPage = this.goToPage.bind(this);
     this.state = this._resetState();
     this.stateLookup = {
       "": {

@@ -83,6 +83,7 @@ class _StratName extends React.Component {
   }
 
   _update(type: MatchType, id: number) {
+    console.log("StratNames", type, id);
     this.setState({
       loading: true,
     });
@@ -238,15 +239,15 @@ class _StratName extends React.Component {
                   ),
                   liths: Utilities.parseAttributes(
                     "lith",
-                    Utilities.summarizeAttributes("lith", data.features)
+                    Utilities.summarizeAttributes("lith", data?.features)
                   ),
                   environs: Utilities.parseAttributes(
                     "environ",
-                    Utilities.summarizeAttributes("environ", data.features)
+                    Utilities.summarizeAttributes("environ", data?.features)
                   ),
                   econs: Utilities.parseAttributes(
                     "econ",
-                    Utilities.summarizeAttributes("econ", data.features)
+                    Utilities.summarizeAttributes("econ", data?.features)
                   ),
                   strat_name_ids: stratNameConceptData.success.data
                     .map((d) => {
@@ -275,12 +276,12 @@ class _StratName extends React.Component {
   }
 
   componentDidMount() {
-    this._update(this.props.params.type, this.props.params.id);
+    this._update(this.props.params.type + "_id", this.props.params.id);
   }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.params.id !== this.props.params.id) {
-      this._update(this.props.params.type, nextProps.params.id);
+      this._update(this.props.params.type + "_id", nextProps.params.id);
     }
   }
 
@@ -479,6 +480,7 @@ enum MatchType {
 
 function StratName(props, context) {
   const { params } = useMatch("/:type/:id");
+  console.log(params);
 
   return h(_StratName, { ...props, params });
 }
