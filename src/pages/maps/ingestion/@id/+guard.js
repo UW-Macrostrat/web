@@ -17,6 +17,6 @@ export const guard = (pageContext) => {
   }
   if (!user.groups.includes(1)) {
     // Render the error page and show message to the user
-    return render(403, "Only admins are allowed to access this page.");
+    throw render(403, "Only admins are allowed to access this page.");
   }
 };
