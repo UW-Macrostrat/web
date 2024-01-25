@@ -31,7 +31,6 @@ const IntervalOption: React.FC = ({
   interval,
   props: { handleClick, handleFocus, modifiers, ...restProps },
 }) => {
-  console.log("test");
 
   if (interval == null) {
     return h(
@@ -130,6 +129,7 @@ let IntervalSelection = ({
           popoverContentProps: {
             onWheelCapture: (event) => event.stopPropagation(),
           },
+          itemPredicate: filterInterval,
           itemRenderer: IntervalOptionRenderer,
           onItemSelect: (interval: Interval, e) => {
             onConfirm(interval.int_id.toString());
