@@ -11,7 +11,7 @@ export async function onBeforeRender(pageContext) {
   const response = await fetch(url.toString());
   const sources = await response.json();
 
-  sources.sort((a, b) => a.source_id - b.source_id);
+  sources.sort((a, b) => b.source_id - a.source_id);
 
   const pageProps = {
     sources: sources,

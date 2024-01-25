@@ -55,7 +55,7 @@ export default function EditInterface({
         // TODO: make this basename dynamic
         h([
           h("div.edit-page-header", [
-            h(ParentRouteButton, { parentRoute: "/maps/" }),
+            h(ParentRouteButton, { parentRoute: "/maps/ingestion" }),
             h("h2", {}, [
               `${title} Ingestion`,
               h(ShowDocsButton, {href: "https://github.com/UW-Macrostrat/web/blob/main/src/pages/maps/ingestion/%40id/README.md"}),
