@@ -1,0 +1,36 @@
+{
+  "name": "@macrostrat-web/sift",
+  "version": "0.2.0",
+  "description": "",
+  "main": "src/js/index.tsx",
+  "module": "src/js/index.tsx",
+  "scripts": {
+    "dev": "vite"
+  },
+  "author": "John J Czaplewski <jczaplew@gmail.com>",
+  "license": "CC0-1.0",
+  "dependencies": {
+    "@macrostrat/hyper": "^2.2.1",
+    "async": "^1.5.2",
+    "chart.js": "^1.0.2",
+    "fastclick": "^1.0.6",
+    "leaflet": "^1.0.0-beta.2",
+    "leaflet-hash": "^0.2.1",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-router-dom": "^6.21.3",
+    "topojson": "1.6.19",
+    "turf-centroid": "^1.1.2",
+    "turf-convex": "^1.0.1",
+    "turf-explode": "^1.0.1",
+    "underscore": "^1.8.3",
+    "wellknown": "^0.3.2",
+    "xhr": "^2.0.3"
+  },
+  "devDependencies": {
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@vitejs/plugin-react": "^4.2.1",
+    "vite": "^5.0.12"
+  }
+}
