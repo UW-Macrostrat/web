@@ -1,6 +1,7 @@
 import h from "@macrostrat/hyper";
 import React from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { Link as VikeLink } from "~/renderer/Link";
 import Chart from "./Chart";
 import Footer from "./Footer";
 import { SiftLink } from "./Link";
@@ -284,13 +285,13 @@ class _Column extends React.Component {
           <PrevalentTaxa data={this.state.prevalentTaxa} />
 
           <StratColumn data={this.state.units} />
-          <Link
-            to={"/column/" + this.state.properties.col_id}
+          <VikeLink
+            href={"/columns/" + this.state.properties.col_id}
             target="_blank"
             className="normalize-link alternate-column"
           >
             Alternate column view
-          </Link>
+          </VikeLink>
         </div>
 
         <Footer data={this.state.refs} />

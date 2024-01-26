@@ -5,6 +5,7 @@ export function Link(props: {
   href?: string;
   className?: string;
   children: React.ReactNode;
+  target?: string;
 }) {
   const pageContext = usePageContext();
   const className = [

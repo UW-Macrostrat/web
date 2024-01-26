@@ -124,8 +124,7 @@ class App extends React.Component {
     this.getNavigateURL = this.getNavigateURL.bind(this);
   }
   getNavigateURL(item) {
-    let prefix =
-      siftPrefix + "/" + this.props.categoryRouteLookup[item.dataset] + "/";
+    let prefix = "/" + this.props.categoryRouteLookup[item.dataset] + "/";
     if (item.id != 0) {
       return prefix + item.id;
     } else {
@@ -226,6 +225,7 @@ function TopBarAutocomplete(props) {
   const finish = React.useCallback(
     (item) => {
       let url = props.getNavigateURL(item);
+      console.log(url);
       navigate(url);
     },
     [navigate]
