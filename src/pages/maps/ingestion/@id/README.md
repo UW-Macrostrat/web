@@ -4,7 +4,12 @@ Created as part of Macrostrat's mapping pipeline for the CriticalMAAS project to
 
 Table interface built for quick reconciliation of outside geometries with Macrostrats map representation.
 
-Features:
+- [Features](#features)
+- [Overview](#process-overview)
+- [Starred Column Descriptions](#starred-column-description)
+- [Table Commands](#table-commands)
+
+## Features:
 
 - Hide and Copy columns
 - Standard Filter and Grouping
@@ -12,69 +17,77 @@ Features:
 - View of running operations, as well as push and clear functionality
 - Virtualized 'infinite' scrolling of table data to keep data downloads web friendly
 - Group based auth to prevent outside changes
+- Download the ingested map files to view metadata
+- (More incoming)
 
 
-## Using the Editing Interface
+## Process Overview
 
-- [Overview](#overview)
-- [Starred Column Descriptions](#starred-column-description)
-- [Table Commands](#table-commands)
+### 1. Select the map you wish to process
 
-### Overview
+Log in and find the map that you wish to process on the ingestion page, clicking "Edit" will bring you into the ingestion interface.
 
-This ingestion interface is used to clean/transform ingested maps legend data. 
+### 2. Download the ingested maps metadata
+
+Click on the download link to download the metadata for the ingested map, you will need this to provide more
+context about the values shown in the table.
+
+### 3. Use the interface to reconcile the map
+
+Using the table interface the user manipulates the ingested data into standardized fields made easier through the above [features](#features). The table will provide feedback on the level of completion as you work and provide a link to view your processed map. 
 
 The starred columns (★) denote the columns
 that are intended to be populated by the non-star columns which are populated via the ingestion process.
 
-### Starred Column Description
+- [Starred Column Description](#starred-column-description)
+- [Table Commands](#table-commands)
+
+#### Starred Column Description
 
 All the columns in addition to these are filled in from the ingested map and can typically be transformed via the
-table interface to populate these values. Otherwise, we provide the original .zip file that was ingested to help locate the
-appropriate README files.
+table interface to populate these values. Otherwise, we provide the original .zip file that was ingested to help locate the appropriate README files.
 
-#### orig_id
+**orig_id**
 
-This columns is composed of ids for each polygon. The best way to populate this is to copy and paste the column from
-the ingestion that most closely resembles a list of discrete values.
+This column is composed of ids for each polygon. The best way to populate this is to copy and paste the column from the ingestion that most closely resembles a list of discrete values.
 
-#### descrip
+**descrip**
 
 This column is the description of the polygon.
 
-#### ready
+**ready**
 
 This column is a **True/False** column used to denote a row as "Ready". These "Ready" rows can then be removed by a column filter.
 
-#### name
+**name**
 
 Name of the polygon, typically taken from the ingestion.
 
-#### strat_name
+**strat_name**
 
 Name of the stratigraphy.
 
-#### age
+**age**
 
 Age of the polygon.
 
-#### comments
+**comments**
 
 Any comments that you would like to make can be entered here.
 
-#### t_interval
+**t_interval**
 
 ?
 
-#### b_interval
+**b_interval**
 
 ?
 
-#### lith
+**lith**
 
 ?
 
-### Table Commands
+#### Table Commands
 
 **tab/shift + tab**
 
