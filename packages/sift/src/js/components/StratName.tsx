@@ -16,6 +16,7 @@ import Utilities from "./Utilities";
 class _StratName extends React.Component {
   constructor(props) {
     super(props);
+
     this.state = this._resetState();
   }
 

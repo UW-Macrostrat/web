@@ -29,7 +29,7 @@ class StratColumnUnit extends React.Component {
                   ? "hasFossils black"
                   : "hasFossils"
               }
-              src="dist/img/noun_3167.png"
+              src="/dist/img/noun_3167.png"
             />
           ) : (
             ""

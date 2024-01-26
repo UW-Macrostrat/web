@@ -341,10 +341,10 @@ function AutocompleteCategoryList({ onClick }) {
   const categories = Object.entries(autoCompleteCategories);
 
   return h("ul.autocomplete-category-list", [
-    categories.map(([key, value]) => {
+    categories.map(([key, value], i) => {
       const to = `/definitions/${key}`;
 
-      return h("li", [h(Link, { onClick, to }, value)]);
+      return h("li", { key }, h(Link, { onClick, to }, value));
     }),
   ]);
 }

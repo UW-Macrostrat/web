@@ -129,7 +129,7 @@ class App extends React.Component {
           <div id="header">
             <div className="headerItem left">
               <Link to="/">
-                <img src="dist/img/logo_red.png" className="header-logo" />
+                <img src="/dist/img/logo_red.png" className="header-logo" />
               </Link>
               <SiftLink to="/">
                 <h3 className="header-title">SIFT</h3>

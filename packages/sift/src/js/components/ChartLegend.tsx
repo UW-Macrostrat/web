@@ -20,7 +20,7 @@ class ChartLegend extends React.Component {
 
     this.props.data.forEach((d, i) => {
       if (i % 3 === 0 && i !== 0) {
-        tables.push(<TableTemplate data={row} />);
+        tables.push(<TableTemplate data={row} key={i} />);
         row = [];
       }
 
@@ -36,7 +36,7 @@ class ChartLegend extends React.Component {
     });
 
     // Put the last row in a table
-    tables.push(<TableTemplate data={row} />);
+    tables.push(<TableTemplate data={row} key={-1} />);
 
     return <div>{tables}</div>;
   }

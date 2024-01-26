@@ -1,8 +1,8 @@
 import React from "react";
-import Stats from "./Stats";
-import RandomColumn from "./RandomColumn";
-import IndexMap from "./IndexMap";
 import Footer from "./Footer";
+import IndexMap from "./IndexMap";
+import RandomColumn from "./RandomColumn";
+import Stats from "./Stats";
 
 class Main extends React.Component {
   constructor(props) {
@@ -30,7 +30,9 @@ class Main extends React.Component {
         <div className="main">
           <div
             className="main-search"
-            style={{ backgroundImage: "url(dist/img/" + randomColID + ".jpg)" }}
+            style={{
+              backgroundImage: "url(/dist/img/" + randomColID + ".jpg)",
+            }}
           >
             <div className="main-title">
               <div className="main-title-container">

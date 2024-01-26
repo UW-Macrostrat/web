@@ -7,11 +7,11 @@ class Footer extends React.Component {
         <div className="footer-left">
           <div className="footer-brand">
             <a href="/">
-              <img src="dist/img/logo.png" className="footer-logo" /> Macrostrat{" "}
-              <br />
+              <img src="/dist/img/logo.png" className="footer-logo" />{" "}
+              Macrostrat <br />
             </a>
             <a href="https://creativecommons.org/licenses/by/4.0/">
-              <img src="dist/img/cc-by.png" className="footer-license" />
+              <img src="/dist/img/cc-by.png" className="footer-license" />
             </a>
           </div>
         </div>
