@@ -2,8 +2,8 @@
   "name": "@macrostrat-web/sift",
   "version": "0.2.0",
   "description": "",
-  "main": "src/index.tsx",
-  "module": "src/index.tsx",
+  "main": "src/js/index.tsx",
+  "module": "src/js/index.tsx",
   "scripts": {
     "dev": "vite"
   },

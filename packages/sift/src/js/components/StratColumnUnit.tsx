@@ -1,4 +1,5 @@
 import React from "react";
+import fossilImg from "../../img/noun_3167.png";
 import { SiftLink } from "./Link";
 
 class StratColumnUnit extends React.Component {
@@ -29,7 +30,7 @@ class StratColumnUnit extends React.Component {
                   ? "hasFossils black"
                   : "hasFossils"
               }
-              src="/dist/img/noun_3167.png"
+              src={fossilImg}
             />
           ) : (
             ""

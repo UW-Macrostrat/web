@@ -1,6 +1,7 @@
 import React from "react";
 import Footer from "./Footer";
 import IndexMap from "./IndexMap";
+import { siftImages } from "./Link";
 import RandomColumn from "./RandomColumn";
 import Stats from "./Stats";
 
@@ -25,13 +26,15 @@ class Main extends React.Component {
     ];
     var randomColID = options[Math.floor(Math.random() * (12 - 1) + 1) + 1];
 
+    const imgLink = siftImages[`../../img/${randomColID}.jpg`].default;
+
     return (
       <div className="page-content">
         <div className="main">
           <div
             className="main-search"
             style={{
-              backgroundImage: "url(/dist/img/" + randomColID + ".jpg)",
+              backgroundImage: `url(${imgLink})`,
             }}
           >
             <div className="main-title">

@@ -9,7 +9,7 @@
   // Disable organized imports for typescript
   "[typescript]": {
     "editor.codeActionsOnSave": {
-      "source.organizeImports": false
+      "source.organizeImports": "never"
     }
   }
 }

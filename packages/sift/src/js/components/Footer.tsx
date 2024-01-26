@@ -1,4 +1,5 @@
 import React from "react";
+import { SiftImage } from "./Link";
 
 class Footer extends React.Component {
   render() {
@@ -7,11 +8,11 @@ class Footer extends React.Component {
         <div className="footer-left">
           <div className="footer-brand">
             <a href="/">
-              <img src="/dist/img/logo.png" className="footer-logo" />{" "}
-              Macrostrat <br />
+              <SiftImage name="logo" className="footer-logo" /> Macrostrat{" "}
+              <br />
             </a>
             <a href="https://creativecommons.org/licenses/by/4.0/">
-              <img src="/dist/img/cc-by.png" className="footer-license" />
+              <SiftImage name="cc-by" className="footer-license" />
             </a>
           </div>
         </div>

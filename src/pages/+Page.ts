@@ -8,7 +8,10 @@ export function Page() {
     h("ul", [
       h("li", h(Link, { href: "map" }, "Map")),
       h("li", h(Link, { href: "maps" }, "Map index")),
+      h("li", h(Link, { href: "columns" }, "Columns")),
       h("li", h(Link, { href: "dev" }, "Dev layers")),
     ]),
+    h("h2", "Apps"),
+    h("ul", [h("li", h(Link, { href: "sift" }, "Sift"))]),
   ]);
 }

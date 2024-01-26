@@ -1,5 +1,4 @@
 import h from "@macrostrat/hyper";
-import { createRoot } from "react-dom/client";
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 
 import Attributes from "./components/Attributes";
@@ -11,16 +10,33 @@ import StratName from "./components/StratName";
 
 import NoData from "./components/NoData";
 
-import React from "react";
+import React, { ReactNode } from "react";
 import Autocomplete from "./components/Autocomplete";
-import { SiftLink, siftPrefix, useSiftNavigate } from "./components/Link";
+import {
+  SiftImage,
+  SiftLink,
+  siftPrefix,
+  useSiftNavigate,
+} from "./components/Link";
+
+import "leaflet/dist/leaflet.css";
+import "../css/animate.min.css";
+import "../css/bootstrap.min.css";
+import "../css/normalize.css";
+import "../css/skeleton.css";
+import "../css/styles.css";
+
+//import "../../dist/css/styles.min.css";
 
 // ReactRouter scroll behavior from 0.13
 //scrollBehavior: Router.ScrollToTopBehavior,
 
+// Not sure if this is the correct way to deal with type errors
+const _Routes = Routes as unknown as ReactNode;
+
 function SiftRouter() {
   return (
-    <Routes>
+    <_Routes>
       <Route index path="" element={h(Main)} />
       <Route name="unit" path="unit/:id" element={h(Attributes)} />
       <Route
@@ -94,7 +110,7 @@ function SiftRouter() {
       <Route name="explore" path="explore/:x?" element={h(Explore)} />
 
       <Route path="*" element={h(NoData)} />
-    </Routes>
+    </_Routes>
   );
 }
 
@@ -119,7 +135,7 @@ class App extends React.Component {
 
   render() {
     return (
-      <BrowserRouter>
+      <BrowserRouter basename={siftPrefix}>
         <div className="container-fluid">
           <div
             className={
@@ -129,7 +145,7 @@ class App extends React.Component {
           <div id="header">
             <div className="headerItem left">
               <Link to="/">
-                <img src="/dist/img/logo_red.png" className="header-logo" />
+                <SiftImage name="logo_red" className="header-logo" />
               </Link>
               <SiftLink to="/">
                 <h3 className="header-title">SIFT</h3>
@@ -222,9 +238,13 @@ function TopBarAutocomplete(props) {
   );
 }
 
-const container = document.getElementsByClassName("react")[0];
-const root = createRoot(container);
+// const container = document.getElementsByClassName("react")[0];
+// const root = createRoot(container);
 
-root.render(<App />);
+// root.render(<App />);
 
 //ga("send", "pageview", document.location.href);
+
+const Sift = App;
+
+export { Sift };
