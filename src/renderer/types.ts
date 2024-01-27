@@ -21,6 +21,7 @@ export type PageContextCustom = {
   urlPathname: string;
   exports: {
     pageStyle?: PageStyle;
+    supportsDarkMode?: boolean;
     documentProps?: {
       title?: string;
       description?: string;

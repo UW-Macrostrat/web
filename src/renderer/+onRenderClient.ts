@@ -20,7 +20,6 @@ async function render(pageContext: PageContextClient) {
 
   const page = h(PageShell, { pageContext }, h(Page, pageProps));
 
-  console.log("Rendering on client");
   const container = document.getElementById("app-container")!;
 
   // TODO: we might be able to switch to vike-react's internal renderer

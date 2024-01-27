@@ -16,19 +16,26 @@ const h = hyper.styled(styles);
 export function PageShell({
   children,
   pageContext,
-  pageStyle = "fullscreen",
 }: {
   children: React.ReactNode;
   pageContext: PageContext;
-  pageStyle?: PageStyle;
+  supportsDarkMode?: boolean;
 }) {
+  const { exports } = pageContext;
+  const supportsDarkMode = exports?.supportsDarkMode || true;
+  const pageStyle = exports?.pageStyle || "fullscreen";
+
   return h(
     PageContextProvider,
     { pageContext },
     h(
-      DarkModeProvider,
+      supportsDarkMode ? DarkModeProvider : NoOpDarkModeProvider,
       { followSystem: true },
       h("div.app-shell", { className: pageStyle + "-page" }, children)
     )
   );
+}
+
+function NoOpDarkModeProvider(props) {
+  return props.children;
 }
