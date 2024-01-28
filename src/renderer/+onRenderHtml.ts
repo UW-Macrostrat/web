@@ -25,7 +25,7 @@ async function render(pageContext: PageContextServer) {
     );
   }
 
-  if (!isolateStyles && !clientRouting) {
+  if (!isolateStyles || clientRouting) {
     await import("~/styles/blueprint-core");
     await import("../styles/_theme.styl");
     await import("../styles/core.sass");
