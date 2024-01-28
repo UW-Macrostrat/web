@@ -1,7 +1,27 @@
-import { Config } from "vike/types";
+import { Config, ConfigDefinition } from "vike/types";
 
 export default {
-  passToClient: ["pageProps", "urlPathname", "pageStyle"],
+  passToClient: [
+    "pageProps",
+    "urlPathname",
+    "pageStyle",
+    "supportsDarkMode",
+    "isolateStyles",
+  ],
   clientRouting: true,
   hydrationCanBeAborted: true,
+  meta: {
+    supportsDarkMode: {
+      env: {
+        client: true,
+        server: true,
+      },
+    },
+    isolateStyles: {
+      env: {
+        client: true,
+        server: true,
+      },
+    },
+  },
 } satisfies Config;

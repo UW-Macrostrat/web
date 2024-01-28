@@ -7,6 +7,7 @@ class _StratNameHierarchy extends React.Component {
   constructor(props) {
     super(props);
     this.state = this._resetState();
+    this.handleClick = this.handleClick.bind(this);
   }
 
   _resetState() {

@@ -7,8 +7,6 @@ export const siftImages = import.meta.glob("../../img/*.{png,jpg,jpeg}", {
   eager: true,
 });
 
-console.log(siftImages);
-
 export function SiftLink(props): ReactNode {
   const { to, ...rest } = props;
   return h(Link, { to, ...rest });

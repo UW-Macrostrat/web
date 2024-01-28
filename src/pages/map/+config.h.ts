@@ -1,7 +1,8 @@
+import MapInterface from "./map-interface";
+
 export default {
-  clientRouting: false,
-  supportsDarkMode: false,
-  isolateStyles: true,
+  Page: MapInterface,
+  route: "/map/*",
   meta: {
     Page: {
       /* Sift must be rendered as a single-page app, because that is its design.

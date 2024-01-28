@@ -16,11 +16,12 @@ async function render(pageContext: PageContextClient) {
       "Client-side render() hook expects pageContext.Page to be defined"
     );
 
+  console.log("Rendering on client side");
+
   FocusStyleManager.onlyShowFocusOnTabs();
 
   const page = h(PageShell, { pageContext }, h(Page, pageProps));
 
-  console.log("Rendering on client");
   const container = document.getElementById("app-container")!;
 
   // TODO: we might be able to switch to vike-react's internal renderer
