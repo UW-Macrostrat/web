@@ -8,7 +8,7 @@ import { PageShell } from "./page-shell";
 import type { PageContextServer } from "./types";
 
 async function render(pageContext: PageContextServer) {
-  const { Page, pageProps } = pageContext;
+  const { Page, pageProps, config } = pageContext;
   // This render() hook only supports SSR, see https://vike.dev/render-modes for how to modify render() to support SPA
   let pageHtml = "";
   if (Page != null) {
@@ -17,10 +17,20 @@ async function render(pageContext: PageContextServer) {
     );
   }
 
-  // await import("~/styles/blueprint-core");
-  // await import("~/styles/_theme.styl");
-  // await import("../styles/core.sass");
-  // await import("../styles/padding.css");
+  const { clientRouting, isolateStyles = false } = config;
+
+  if (isolateStyles && clientRouting) {
+    throw new Error(
+      "Isolating styles is not allowed when using client routing"
+    );
+  }
+
+  if (!isolateStyles && !clientRouting) {
+    await import("~/styles/blueprint-core");
+    await import("../styles/_theme.styl");
+    await import("../styles/core.sass");
+    await import("../styles/padding.css");
+  }
 
   // See https://vike.dev/head
   const { documentProps } = pageContext.exports;

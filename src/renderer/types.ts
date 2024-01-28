@@ -1,5 +1,6 @@
 export type { PageContext, PageContextClient, PageContextServer, PageProps };
 
+import { PageContextBuiltInServerInternal } from "vike/dist/esm/shared/types";
 import type {
   /*
           // When using Client Routing https://vike.dev/clientRouting
@@ -8,6 +9,7 @@ import type {
   // When using Server Routing
   PageContextBuiltInClientWithServerRouting as PageContextBuiltInClient,
   PageContextBuiltInServer,
+  PageContextBuiltIn,
 } from "vike/types";
 
 type Page = (pageProps: PageProps) => React.ReactElement;
@@ -19,6 +21,12 @@ export type PageContextCustom = {
   Page: Page;
   pageProps?: PageProps;
   urlPathname: string;
+  config: PageContextBuiltInServerInternal["config"] & {
+    clientRouting?: boolean;
+    supportsDarkMode?: boolean;
+    isolateStyles?: boolean;
+    hydrationCanBeAborted?: boolean;
+  };
   exports: {
     pageStyle?: PageStyle;
     supportsDarkMode?: boolean;
