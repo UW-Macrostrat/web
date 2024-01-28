@@ -16,8 +16,8 @@ export function PageShell({
   pageContext: PageContext;
   supportsDarkMode?: boolean;
 }) {
-  const { config, exports } = pageContext;
-  const supportsDarkMode = config.supportsDarkMode ?? true;
+  const { exports, config } = pageContext;
+  const supportsDarkMode = config?.supportsDarkMode ?? true;
   const pageStyle = exports?.pageStyle ?? "fullscreen";
 
   return h(
