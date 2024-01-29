@@ -4,9 +4,9 @@ import { Spinner } from "@blueprintjs/core";
 import { useDarkMode, useAPIResult, JSONView } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { useAppActions } from "~/pages/map/map-interface/app-state";
-import { BaseInfoDrawer } from "~/pages/map/map-interface/components/info-drawer";
+import { useCallback } from "react";
+import { LocationPanel } from "@macrostrat/map-interface";
+
 import { FloatingNavbar } from "@macrostrat/map-interface";
 import { MapAreaContainer } from "~/pages/map/map-interface/map-page";
 import { PanelCard } from "~/pages/map/map-interface/map-page/menu";
@@ -141,10 +141,6 @@ const straboOverlays = {
 };
 const overlays = mergeStyles(_macrostratStyle, straboOverlays);
 
-function onMapLoaded(map: mapboxgl.Map) {
-  return setupPointSymbols(map);
-}
-
 // All datasets for searching:
 // https://www.strabospot.org/search/newsearchdatasets.json
 
@@ -158,18 +154,13 @@ export default function StraboSpotIntegrationPage({
   children?: React.ReactNode;
 }) {
   // A stripped-down page for map development
-  const runAction = useAppActions();
+  const [loaded, setLoaded] = useState(false);
   /* We apply a custom style to the panel container when we are interacting
     with the search bar, so that we can block map interactions until search
     bar focus is lost.
     We also apply a custom style when the infodrawer is open so we can hide
     the search bar on mobile platforms
   */
-
-  const loaded = useSelector((state) => state.core.initialLoadComplete);
-  useEffect(() => {
-    runAction({ type: "get-initial-map-state" });
-  }, []);
 
   const isOpen = true;
 
@@ -180,7 +171,7 @@ export default function StraboSpotIntegrationPage({
   if (selectedSpots != null) {
     const jsonData = selectedSpots.map((d) => d.properties);
     detailElement = h(
-      BaseInfoDrawer,
+      LocationPanel,
       {
         onClose() {
           setSelectedSpots(null);
@@ -199,6 +190,11 @@ export default function StraboSpotIntegrationPage({
 
   const { isEnabled } = useDarkMode();
 
+  const onMapLoaded = useCallback((map: mapboxgl.Map) => {
+    setupPointSymbols(map);
+    setLoaded(true);
+  }, []);
+
   // const datasets = useAPIResult(
   //   "https://www.strabospot.org/search/newsearchdatasets.json"
   // );
@@ -209,8 +205,6 @@ export default function StraboSpotIntegrationPage({
   const baseMapURL = getBaseMapStyle(new Set([]), isEnabled);
 
   const style = useMapStyle(baseMapURL, overlays);
-
-  if (!loaded) return h(Spinner);
 
   return h(
     MapAreaContainer,
@@ -281,7 +275,7 @@ function processSpots(spots) {
 
 function DatasetFeatures({ selectedDataset }) {
   const data = useAPIResult(
-    "https://www.strabospot.org/search/interfacesearch.php?dsids=" +
+    "https://strabospot.org/search/interfacesearch.php?dsids=" +
       selectedDataset.properties.id
   );
   const map = useMap();
