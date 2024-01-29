@@ -177,6 +177,7 @@ export default function StraboSpotIntegrationPage({
           setSelectedSpots(null);
         },
         title: "Spots",
+        showCopyPositionButton: false,
       },
       [
         h(JSONView, {

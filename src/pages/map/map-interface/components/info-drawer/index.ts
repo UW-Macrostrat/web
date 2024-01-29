@@ -42,6 +42,7 @@ function InfoDrawer(props) {
       zoom,
       onClose,
       loading: fetchingMapInfo,
+      showCopyPositionButton: true,
     },
     [
       h(

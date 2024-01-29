@@ -330,6 +330,8 @@ export function BasicLayerInspectorPage({
           setInspectPosition(null);
         },
         position: inspectPosition,
+        // This should be inverted probably
+        showCopyPositionButton: false,
       },
       [
         h(TileInfo, {
