@@ -39,6 +39,7 @@ import { getBaseMapStyle } from "../../../pages/map/map-interface/map-page/map-v
 import { PanelCard } from "../../../pages/map/map-interface/map-page/menu";
 import styles from "../main.module.styl";
 import { useMapStyle } from "./utils";
+import { SETTINGS } from "@macrostrat-web/settings";
 
 export enum MacrostratVectorTileset {
   Carto = "carto",

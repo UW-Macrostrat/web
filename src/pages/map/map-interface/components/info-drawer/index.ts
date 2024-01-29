@@ -2,7 +2,6 @@ import hyper from "@macrostrat/hyper";
 import { Route, Routes } from "react-router-dom";
 import { MapLayer, useAppActions } from "~/pages/map/map-interface/app-state";
 import { LocationPanel } from "@macrostrat/map-interface";
-import { LocationHeader, InfoDrawerHeader } from "./header";
 import { FossilCollections } from "./fossil-collections";
 import { GeologicMapInfo } from "./geo-map";
 import { MacrostratLinkedData } from "./macrostrat-linked";

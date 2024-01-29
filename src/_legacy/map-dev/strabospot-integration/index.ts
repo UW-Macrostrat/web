@@ -5,20 +5,17 @@ import { useDarkMode, useAPIResult, JSONView } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { useAppActions } from "~/map-interface/app-state";
+import { useAppActions } from "~/pages/map/map-interface/app-state";
+import { BaseInfoDrawer } from "~/pages/map/map-interface/components/info-drawer";
+import { FloatingNavbar } from "@macrostrat/map-interface";
+import { MapAreaContainer } from "~/pages/map/map-interface/map-page";
+import { PanelCard } from "~/pages/map/map-interface/map-page/menu";
+import { getBaseMapStyle } from "~/pages/map/map-interface/map-page/map-view";
 import {
-  BaseInfoDrawer,
-  LocationPanel,
-} from "~/map-interface/components/info-drawer";
-import { FloatingNavbar } from "~/map-interface/components/navbar";
-import { MapAreaContainer } from "~/map-interface/map-page";
-import { PanelCard } from "~/map-interface/map-page/menu";
-import {
-  getBaseMapStyle,
   MapBottomControls,
   MapStyledContainer,
-} from "~/map-interface/map-page/map-view/utils";
-import { buildMacrostratStyle } from "~/map-interface/map-page/map-style";
+} from "@macrostrat/map-interface";
+import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
 import { mergeStyles } from "@macrostrat/mapbox-utils";
 import { useMap } from "@macrostrat/mapbox-react";
 import {
@@ -26,13 +23,20 @@ import {
   getOrientationSymbolName,
   pointLayoutProperties,
 } from "@macrostrat/mapbox-styles";
-import { DevMapView, useMapStyle, ParentRouteButton } from "../map";
+import { ParentRouteButton } from "~/components/map-navbar";
+import { useMapStyle } from "../map-layers/utils";
+import { MapView } from "@macrostrat/map-interface";
+import { burwellTileDomain } from "@macrostrat-web/settings";
 
 const h = hyperStyled(styles);
 
 const featureLayers = [];
 
-const _macrostratStyle = buildMacrostratStyle() as mapboxgl.Style;
+const _macrostratStyle = buildMacrostratStyle({
+  tileserverDomain: burwellTileDomain,
+  fillOpacity: 0.1,
+  strokeOpacity: 0.2,
+}) as mapboxgl.Style;
 
 const pointLayout = pointLayoutProperties(true);
 
@@ -43,7 +47,7 @@ const straboOverlays = {
   sources: {
     datasets: {
       type: "geojson",
-      data: "https://www.strabospot.org/search/newsearchdatasets.json",
+      data: "https://strabospot.org/search/newsearchdatasets.json",
     },
     spots: {
       type: "geojson",
@@ -137,7 +141,7 @@ const straboOverlays = {
 };
 const overlays = mergeStyles(_macrostratStyle, straboOverlays);
 
-async function onMapSetup(map: mapboxgl.Map) {
+function onMapLoaded(map: mapboxgl.Map) {
   return setupPointSymbols(map);
 }
 
@@ -224,7 +228,7 @@ export default function StraboSpotIntegrationPage({
       detailPanel: detailElement,
       contextPanelOpen: isOpen,
     },
-    h(DevMapView, { style, onMapSetup }, [
+    h(MapView, { style, onMapLoaded }, [
       h(HideSelectedDataset, { selectedDataset }),
       h(LayerClickReporter, {
         loaded,
