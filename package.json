@@ -22,7 +22,6 @@
   "workspaces": [
     "deps/web-components/packages/*",
     "deps/web-components/storybook",
-    "deps/web-components",
     "deps/cesium-viewer",
     "deps/cesium-martini",
     "packages/*"
@@ -39,7 +38,6 @@
     "@babel/preset-typescript": "^7.18.6",
     "@macrostrat/revision-info-webpack": "^1.0.0",
     "@macrostrat/storybook": "workspace:*",
-    "@macrostrat/web-components": "workspace:*",
     "@mdx-js/rollup": "^2.3.0",
     "@typescript-eslint/eslint-plugin": "^6.3.0",
     "@typescript-eslint/parser": "^6.3.0",
