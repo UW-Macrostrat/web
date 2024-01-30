@@ -1,6 +1,6 @@
 import hyper from "@macrostrat/hyper";
 import { Route, Routes } from "react-router-dom";
-import { MapLayer, useAppActions } from "~/pages/map/map-interface/app-state";
+import { useAppActions } from "~/pages/map/map-interface/app-state";
 import { LocationPanel } from "@macrostrat/map-interface";
 import { FossilCollections } from "./fossil-collections";
 import { GeologicMapInfo } from "./geo-map";
@@ -42,6 +42,7 @@ function InfoDrawer(props) {
       zoom,
       onClose,
       loading: fetchingMapInfo,
+      showCopyPositionButton: true,
     },
     [
       h(

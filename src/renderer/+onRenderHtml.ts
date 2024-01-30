@@ -25,7 +25,7 @@ async function render(pageContext: PageContextServer) {
     );
   }
 
-  if (!isolateStyles && !clientRouting) {
+  if (!isolateStyles || clientRouting) {
     await import("~/styles/blueprint-core");
     await import("../styles/_theme.styl");
     await import("../styles/core.sass");
@@ -60,6 +60,8 @@ async function render(pageContext: PageContextServer) {
         <title>${title}</title>
       </head>
       <body>
+        <!-- Workaround for Firefox flash of unstyled content -->
+        <script>0</script>
         <div id="app-container">${dangerouslySkipEscape(pageHtml)}</div>
       </body>
     </html>`;
