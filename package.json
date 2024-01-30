@@ -7,17 +7,14 @@
   "scripts": {
     "bundle": "vite build",
     "clean": "rm -rf dist/*",
-    "deploy:dev": "scripts/deploy-docker",
-    "deploy:strata": "scripts/deploy-strata",
-    "dev:webpack": "webpack serve",
-    "bootstrap": "yarn",
     "dev": "yarn run server:dev",
     "build": "vite build",
     "server": "node ./server/index.js",
     "server:dev": "node --env-file=.env ./server/index.js",
     "format": "prettier --write src packages",
     "server:prod": "NODE_ENV=production npm run server",
-    "dev:storybook": "yarn workspace @macrostrat/storybook run dev"
+    "dev:storybook": "yarn workspace @macrostrat/storybook run dev",
+    "start": "yarn run build && yarn run server"
   },
   "workspaces": [
     "deps/web-components/packages/*",
