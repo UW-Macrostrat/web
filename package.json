@@ -16,10 +16,13 @@
     "server": "node ./server/index.js",
     "server:dev": "node --env-file=.env ./server/index.js",
     "format": "prettier --write src packages",
-    "server:prod": "NODE_ENV=production npm run server"
+    "server:prod": "NODE_ENV=production npm run server",
+    "dev:storybook": "yarn workspace @macrostrat/storybook run dev"
   },
   "workspaces": [
     "deps/web-components/packages/*",
+    "deps/web-components/storybook",
+    "deps/web-components",
     "deps/cesium-viewer",
     "deps/cesium-martini",
     "packages/*"
@@ -35,6 +38,8 @@
     "@babel/preset-env": "^7.19.4",
     "@babel/preset-typescript": "^7.18.6",
     "@macrostrat/revision-info-webpack": "^1.0.0",
+    "@macrostrat/storybook": "workspace:*",
+    "@macrostrat/web-components": "workspace:*",
     "@mdx-js/rollup": "^2.3.0",
     "@typescript-eslint/eslint-plugin": "^6.3.0",
     "@typescript-eslint/parser": "^6.3.0",
@@ -127,5 +132,5 @@
     "vite-plugin-cesium": "^1.2.22"
   },
   "prettier": {},
-  "packageManager": "yarn@4.0.2"
+  "packageManager": "yarn@4.1.0"
 }
