@@ -1,5 +1,5 @@
 import { HTMLSelect, Spinner, Switch } from "@blueprintjs/core";
-import { burwellTileDomain } from "@macrostrat-web/settings";
+import { burwellTileDomain, mapboxAccessToken } from "@macrostrat-web/settings";
 import h from "@macrostrat/hyper";
 import {
   FeaturePanel,
@@ -111,8 +111,7 @@ function usePaleogeographyState(
 }
 
 const baseTilesetURL =
-  SETTINGS.burwellTileDomain +
-  "/carto-slim-rotated/{z}/{x}/{y}?model_id=6&t_step=0";
+  burwellTileDomain + "/carto-slim-rotated/{z}/{x}/{y}?model_id=6&t_step=0";
 
 const common = {
   version: 8,
@@ -198,7 +197,7 @@ export default function PaleoMap({
   const title = "Paleogeography";
   const dark = useDarkMode();
   const isEnabled = dark?.isEnabled;
-  const mapboxToken = SETTINGS.mapboxAccessToken;
+  const mapboxToken = mapboxAccessToken;
   mapboxgl.accessToken = mapboxToken;
 
   const style = isEnabled ? darkStyle : lightStyle;
@@ -417,7 +416,7 @@ export function replaceSourcesForTileset(
   age = 0
 ) {
   const tilesetURL =
-    SETTINGS.burwellTileDomain +
+    burwellTileDomain +
     `/carto-slim-rotated/{z}/{x}/{y}?model_id=${model_id}&t_step=${age}`;
 
   return {
@@ -434,7 +433,7 @@ export function replaceSourcesForTileset(
 }
 
 const _macrostratStyle = buildMacrostratStyle({
-  tileserverDomain: SETTINGS.burwellTileDomain,
+  tileserverDomain: burwellTileDomain,
 }) as mapboxgl.Style;
 
 function isStateValid(state) {

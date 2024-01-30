@@ -207,7 +207,7 @@ export function VectorMapInspectorPage({
 function LineSymbolMapControls() {}
 
 export function buildRasterStyle(layer: MacrostratRasterTileset) {
-  let tileURL = SETTINGS.burwellTileDomain + `/${layer}/{z}/{x}/{y}.png`;
+  let tileURL = burwellTileDomain + `/${layer}/{z}/{x}/{y}.png`;
 
   // if (layer == MacrostratRasterTileset.Emphasized) {
   //   tileURL = `https://next.macrostrat.org/tiles/tiles/carto/{z}/{x}/{y}.png`;
@@ -241,7 +241,7 @@ export function replaceSourcesForTileset(
 ) {
   let tilesetURL = tileset;
   if (!tilesetURL.startsWith("http")) {
-    tilesetURL = SETTINGS.burwellTileDomain + `/${tileset}/{z}/{x}/{y}`;
+    tilesetURL = burwellTileDomain + `/${tileset}/{z}/{x}/{y}`;
   }
 
   return {
@@ -269,7 +269,7 @@ export async function buildMapStyle(
   //postProcess: (style: mapboxgl.Style) => mapboxgl.Style = (s) => s
   //styleOptions: DevMapStyleOptions = {}
 ) {
-  mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
+  mapboxgl.accessToken = mapboxAccessToken;
   const style = await getMapboxStyle(baseMapURL, {
     access_token: mapboxgl.accessToken,
   });
