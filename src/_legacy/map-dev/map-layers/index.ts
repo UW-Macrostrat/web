@@ -39,7 +39,7 @@ import { getBaseMapStyle } from "../../../pages/map/map-interface/map-page/map-v
 import { PanelCard } from "../../../pages/map/map-interface/map-page/menu";
 import styles from "../main.module.styl";
 import { useMapStyle } from "./utils";
-import { SETTINGS } from "@macrostrat-web/settings";
+import { Spacer } from "@macrostrat/ui-components";
 
 export enum MacrostratVectorTileset {
   Carto = "carto",
@@ -373,7 +373,7 @@ export function BasicLayerInspectorPage({
     {
       navbar: h(FloatingNavbar, { className: "searchbar" }, [
         h([h(ParentRouteButton), headerElement ?? h("h2", title ?? tileset)]),
-        h("div.spacer"),
+        h(Spacer),
         h(MapLoadingButton, {
           active: isOpen,
           onClick: () => setOpen(!isOpen),
