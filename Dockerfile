@@ -18,4 +18,4 @@ RUN yarn run bundle
 
 EXPOSE 3000
 
-CMD ["yarn", "run", "server:prod"]
+CMD ["sh", "server/server.sh"]
