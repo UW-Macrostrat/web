@@ -96,6 +96,7 @@
     "d3-scale": "^4.0.2",
     "d3-selection": "^1.0.0",
     "d3-shape": "^3.2.0",
+    "esbuild": "^0.20.0",
     "express": "^4.18.2",
     "history": "^5.3.0",
     "immutability-helper": "^3.1.1",
