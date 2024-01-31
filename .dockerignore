@@ -14,3 +14,12 @@ docker-compose.yaml
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+
+.vite
+dist
+
+deps/web-components/.yarn
+deps/web-components/storybook/node_modules
+
+
