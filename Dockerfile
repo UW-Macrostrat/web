@@ -3,7 +3,7 @@ FROM node:20
 # Install rsync
 RUN apt-get update && apt-get install -y rsync
 
-ENV NODE_ENV=production
+#ENV NODE_ENV=production
 
 WORKDIR /usr/src/app
 COPY . ./
@@ -12,10 +12,10 @@ COPY . ./
 RUN --mount=type=cache,target=/yarn-cache \
      rsync -a /yarn-cache/ .yarn/cache \
   && yarn install --immutable \
-  && yarn run bundle \
   && rsync -a .yarn/cache/ /yarn-cache
 
+RUN yarn run bundle
 
 EXPOSE 3000
 
-CMD ["yarn", "run", "server"]
+CMD ["yarn", "run", "server:prod"]

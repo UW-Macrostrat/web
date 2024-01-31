@@ -4,6 +4,11 @@ import React from "react";
 import { PageContextProvider } from "./page-context";
 import { PageContext, PageStyle } from "./types";
 
+import "~/styles/blueprint-core";
+import "../styles/_theme.styl";
+import "../styles/core.sass";
+import "../styles/padding.css";
+
 import styles from "./page-shell.module.sass";
 
 const h = hyper.styled(styles);

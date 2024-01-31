@@ -33,7 +33,7 @@ const cesiumBuildPath = path.resolve(cesiumRoot, "Cesium");
 
 const config: UserConfig = {
   cacheDir: ".vite",
-  root: "./src",
+  root: path.resolve("./src"),
   resolve: {
     conditions: ["typescript"],
     alias: {
