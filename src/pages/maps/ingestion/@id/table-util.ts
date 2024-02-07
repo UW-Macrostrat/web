@@ -295,3 +295,18 @@ export const range = (start, stop, step = 1) =>
   Array(Math.ceil((stop - start) / step))
     .fill(start)
     .map((x, y) => x + y * step);
+
+
+export const download_file = (url) => {
+  // Create an anchor element
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = url.substring(url.lastIndexOf('/') + 1);
+
+  // Simulate click to trigger download
+  document.body.appendChild(link);
+  link.click();
+
+  // Remove the element from the DOM
+  document.body.removeChild(link);
+}

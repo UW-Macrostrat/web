@@ -34,7 +34,8 @@ interface EditInterfaceProps {
 export default function EditInterface({
   source_id,
   mapBounds,
-  source
+  source,
+  ingest_process
 }: EditInterfaceProps) {
   const [showMap, setShowMap] = useStoredState(
     "edit:showMap",
@@ -79,6 +80,7 @@ export default function EditInterface({
                   url: `${
                     import.meta.env.VITE_MACROSTRAT_INGEST_API
                   }/sources/${source_id}/polygons`,
+                  ingest_process: ingest_process
                 }),
               }),
             ]),
