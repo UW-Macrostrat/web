@@ -28,20 +28,22 @@ interface EditInterfaceProps {
   parentRoute?: string;
   source_id?: number;
   mapBounds?: any;
+  source?: any;
 }
 
 export default function EditInterface({
   source_id,
   mapBounds,
+  source
 }: EditInterfaceProps) {
   const [showMap, setShowMap] = useStoredState(
     "edit:showMap",
-    true,
+    false,
     // Check if is valid boolean
     (v) => typeof v === "boolean"
   );
 
-  const title = mapBounds.properties.name;
+  const title = source.name;
 
   return h(HotkeysProvider, [
     h("div.edit-page", [
