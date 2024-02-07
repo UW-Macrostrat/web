@@ -91,6 +91,10 @@ function basemapStyle(basemap, inDarkMode) {
 
 export default function MapInterface({ id, map }) {
   const [isOpen, setOpen] = useState(false);
+
+  // Catch empty map data
+  if (map == null) return h("div", {style: {display: "flex", margin: "auto"}}, "No map data");
+
   const dark = useDarkMode()?.isEnabled ?? false;
   const title = map.properties.name;
 

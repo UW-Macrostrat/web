@@ -1,4 +1,4 @@
-import { apiV2Prefix } from "@macrostrat-web/settings";
+import { apiV2Prefix, ingestPrefix } from "@macrostrat-web/settings";
 import { PageContextBuiltInServer } from "vike/types";
 
 const apiAddress = apiV2Prefix + "/defs/sources/";
@@ -6,6 +6,7 @@ const apiAddress = apiV2Prefix + "/defs/sources/";
 export async function onBeforeRender(pageContext: PageContextBuiltInServer) {
   const { id } = pageContext.routeParams;
 
+  // API v2 query
   const params = new URLSearchParams({
     format: "geojson",
     source_id: id,
@@ -14,15 +15,20 @@ export async function onBeforeRender(pageContext: PageContextBuiltInServer) {
   const data: any = await response.json();
   const map = data?.success?.data?.features[0];
 
+  // API v3 query
+  const source_response = await fetch(`${ingestPrefix}/sources/${id}`);
+  const source = await source_response.json();
+
   return {
     pageContext: {
       pageProps: {
         id,
         map,
+        source
       },
       documentProps: {
         // The page's <title>
-        title: map.properties.name,
+        title: source.name,
       },
     },
   };
