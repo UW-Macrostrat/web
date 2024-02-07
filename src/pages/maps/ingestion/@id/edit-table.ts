@@ -49,6 +49,7 @@ import {
   applyTableUpdates,
   submitColumnCopy,
   cloneDataParameters,
+  download_file
 } from "./table-util";
 import TableMenu from "./table-menu";
 import IntervalSelection, {
@@ -62,6 +63,7 @@ import "./override.sass";
 import "@blueprintjs/table/lib/css/table.css";
 import styles from "./edit-table.module.sass";
 import EditableCell from "./components/cell/editable-cell";
+import { ingestPrefix } from "../../../../../packages/settings";
 
 const h = hyper.styled(styles);
 
@@ -81,6 +83,7 @@ const FINAL_COLUMNS = [
 
 interface EditTableProps {
   url: string;
+  ingest_process: any;
 }
 
 interface TableState {
@@ -90,7 +93,7 @@ interface TableState {
   tableSelection: TableSelection;
 }
 
-export default function TableInterface({ url }: EditTableProps) {
+export default function TableInterface({ url, ingest_process }: EditTableProps) {
   // Cell refs
   const ref = useRef<MutableRefObject<any>[][]>(null);
 
@@ -590,6 +593,17 @@ export default function TableInterface({ url }: EditTableProps) {
                 intent: "success",
               },
               ["Submit"]
+            ),
+            h(
+              Button,
+              {
+                onClick: async  () => {
+                  const objects_response = await fetch(`${ingestPrefix}/ingest-process/${ingest_process.id}/objects`)
+                  const objects: any[] = await objects_response.json()
+                  objects.forEach(object => download_file(object.pre_signed_url))
+                }
+              },
+              ["Download Source"]
             ),
           ]),
         ]),
