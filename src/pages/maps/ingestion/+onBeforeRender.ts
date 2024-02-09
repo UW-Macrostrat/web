@@ -3,7 +3,7 @@ import fetch from "node-fetch";
 
 export async function onBeforeRender(pageContext) {
   // `.page.server.js` files always run in Node.js; we could use SQL/ORM queries here.
-  const response = await fetch(`${ingestPrefix}/ingest-process`);
+  const response = await fetch(`${ingestPrefix}/ingest-process?source_id=not.is.null&state=eq.ingested`);
   const ingest_processes = await response.json();
 
   const sources = await Promise.all(ingest_processes.map(async x => {
