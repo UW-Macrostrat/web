@@ -44,7 +44,6 @@ export const MapPage = ({
   const inputFocus = useAppState((s) => s.core.inputFocus);
   const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
   const navMenuPage = useAppState((s) => s.menu.activePage);
-  const inPaleoMode = useAppState((s) => s.core.timeCursorAge != null);
 
   const ref = useRef<HTMLElement>(null);
 

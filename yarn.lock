@@ -5324,6 +5324,7 @@ __metadata:
     d3-shape: "npm:^3.2.0"
     esbuild: "npm:^0.20.0"
     express: "npm:^4.18.2"
+    hex-to-css-filter: "npm:^5.4.0"
     history: "npm:^5.3.0"
     immutability-helper: "npm:^3.1.1"
     jose: "npm:^5.1.2"
@@ -19375,6 +19376,15 @@ __metadata:
   version: 1.1.0
   resolution: "hex-color-regex@npm:1.1.0"
   checksum: 10/2102799f1ff2865ca712d5fc40de841ca056dc85acb6e910abfb38ac5113d4040d01908421829cd68d9829597ae963f498705bb370f60d8b8beabc363b75483a
+  languageName: node
+  linkType: hard
+
+"hex-to-css-filter@npm:^5.4.0":
+  version: 5.4.0
+  resolution: "hex-to-css-filter@npm:5.4.0"
+  dependencies:
+    tslib: "npm:^2.3.0"
+  checksum: 10/33fce010b21aa3955c5c5ad30dd626c557f0d39cdd07d22e5a3b12cfcf43fb5c3f1659b37618bea503195322a35b9f485cfe8b315f09a224f45547f9b5d1320b
   languageName: node
   linkType: hard
 
