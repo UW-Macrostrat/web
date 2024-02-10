@@ -1,0 +1,17 @@
+export { ContentPage as default } from "~/layouts";
+import { Link } from "~/renderer/Link";
+import { LinkCard } from "~/components/cards";
+
+# Macrostrat <span class="subtitle"><span class="secondary">v2</span> <span class="tertiary">{import.meta.env.VITE_MACROSTRAT_INSTANCE}</span></span>
+
+<LinkCard href="/map" title="Map interface">
+  Macrostrat's main map interface
+</LinkCard>
+
+- <Link href="/maps">Maps index</Link>
+- <Link href="/columns">Stratigraphic columns</Link>
+- <Link href="/dev">Developer layers</Link>
+
+## Legacy apps
+
+- <Link href="/sift">Sift</Link>
