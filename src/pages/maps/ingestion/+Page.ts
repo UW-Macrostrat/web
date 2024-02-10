@@ -63,7 +63,7 @@ export function Page({ sources, user, url, ingest_api }) {
         ...sources1.map((d) => {
           return h(
             "div",
-            { style: { maxWidth: "1000px", minWidth: "50%", margin: "auto" } },
+            { style: { maxWidth: "1000px", width: "100%", margin: "auto" } },
             [h(SourceCard, { source: d, key: d.source_id, user: user })]
           );
         }),
@@ -92,6 +92,8 @@ const SourceCard = ({
   return h(
     Card,
     {
+      interactive: true,
+      onClick: () => { window.location = edit_href },
       style: {
         display: "flex",
         flexDirection: "row",
@@ -116,7 +118,6 @@ const SourceCard = ({
         ]),
       ]),
       h("div", {}, [
-        h(AnchorButton, { href: href, icon: "map" }, "View"),
         h.if(user !== undefined)([
           "",
           h(AnchorButton, { href: edit_href, icon: "edit" }, "Edit"),
