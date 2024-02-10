@@ -1,14 +1,14 @@
 export { ContentPage as default } from "~/layouts";
 import { Link } from "~/renderer/Link";
 import { LinkCard } from "~/components/cards";
-import { PageTitle } from "~/components/page-title";
+import { PageHeader } from "~/components";
 
-<PageTitle title="Macrostrat">
+<PageHeader title="Macrostrat">
   <span class="subtitle">
     <span class="secondary">v2</span>{" "}
     <span class="tertiary">{import.meta.env.VITE_MACROSTRAT_INSTANCE}</span>
   </span>
-</PageTitle>
+</PageHeader>
 
 <LinkCard href="/map" title="Map interface">
   Macrostrat's main map interface
@@ -22,10 +22,10 @@ import { PageTitle } from "~/components/page-title";
   A list of all available stratigraphic columns
 </LinkCard>
 
+<LinkCard href="/lex" title="Geologic lexicon">
+  Geologic units and data dictionaries
+</LinkCard>
+
 <LinkCard href="/dev" title="Developer apps">
   Layers and testbed apps that aren't ready for prime time
 </LinkCard>
-
-## Legacy apps
-
-- <Link href="/sift">Sift</Link>

@@ -4,6 +4,7 @@ import styles from "./main.module.scss";
 import { tempImageIndex, s3Address } from "./raster-images";
 import { AnchorButton } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
+import { PageHeader } from "~/components/page-header";
 
 const h = hyper.styled(styles);
 
@@ -24,7 +25,7 @@ export function Page({ sources }) {
         "Ingestion system"
       ),
     ]),
-    h("h1", "Maps"),
+    h(PageHeader, { title: "Maps" }),
     h(
       "ul.maps-list",
       sources1.map((d) => h(SourceItem, { source: d, key: d.source_id }))
