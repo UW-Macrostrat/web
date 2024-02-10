@@ -1,9 +1,10 @@
 import h from "@macrostrat/hyper";
 import { ContentPage } from "~/layouts";
+import { PageHeader } from "~/components";
 
 export function Page({ columnGroups }) {
   return h(ContentPage, [
-    h("h1", "Columns"),
+    h(PageHeader, { title: "Columns" }),
     columnGroups.map((d) => h(ColumnGroup, { data: d, key: d.id })),
   ]);
 }

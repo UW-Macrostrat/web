@@ -1,13 +1,7 @@
 /** A dynamic icon for Macrostrat */
 import hyper from "@macrostrat/hyper";
 import { resolvePattern } from "~/_utils";
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./icon.module.sass";
 import chroma from "chroma-js";
 import { hexToCSSFilter } from "hex-to-css-filter";
@@ -81,7 +75,7 @@ export function MacrostratIcon({
     el.style.filter = filter.slice(0, -1) + " opacity(0.8)";
   }, [ref.current, color]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const el = ref.current;
     if (el == null) return;
     setSize(_sz ?? width ?? height ?? getLineHeight(el));

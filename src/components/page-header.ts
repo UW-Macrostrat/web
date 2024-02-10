@@ -1,5 +1,5 @@
 import hyper from "@macrostrat/hyper";
-import { MacrostratIcon } from "./macrostrat-icon";
+import { Link, MacrostratIcon } from "~/components";
 import styles from "./icon.module.sass";
 
 const h = hyper.styled(styles);
@@ -15,7 +15,7 @@ export function PageHeader(props) {
   return h("h1.page-title", [
     h(MacrostratIcon, { size: 24 }),
     h.if(_showSiteName)([
-      h("span.site-name", { hidden: !_showSiteName }, siteName),
+      h(Link, { href: "/", className: "site-name" }, siteName),
       " ",
     ]),
     h("span.title", title),
