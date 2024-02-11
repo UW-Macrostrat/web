@@ -1,7 +1,11 @@
 function deduplicateArray<T = any>(arr: T[], keyFn = (d) => d.id): T[] {
   let index = {};
   for (const item of arr) {
-    index[keyFn(item)] = item;
+    const ident = keyFn(item);
+    if (ident == null) {
+      continue;
+    }
+    index[ident] = item;
   }
   return Object.values(index);
 }
@@ -37,6 +41,10 @@ export function processStratName(d, includeColors = false) {
   }
 
   const processAtts = (atts: Attr[]): Attr[] => {
+    const attsLength = atts?.length ?? 0;
+    if (attsLength === 0) {
+      return atts ?? [];
+    }
     let atts1 = deduplicateArray(atts);
 
     if (!includeColors) {
@@ -44,6 +52,7 @@ export function processStratName(d, includeColors = false) {
         return att.type != "color";
       });
     }
+
     atts1 = atts1.sort((a, b) => {
       return a.name.localeCompare(b.name);
     });

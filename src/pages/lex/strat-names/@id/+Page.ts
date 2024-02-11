@@ -85,7 +85,7 @@ function Liths({ liths, candidate = false }) {
 
 function RelationshipsView({ relationships }) {
   return h("div.relationships", [
-    h("h2", "Relationships"),
+    h("h2", "Candidate lithology extractions"),
     relationships.map((d) => h(RelationshipItem, { data: d })),
   ]);
 }
@@ -100,10 +100,11 @@ type Relationship = {
   strat_name_implicit: boolean;
   strat_name_correct?: boolean;
   search_strat_name: string;
+  lith: any;
 };
 
 function RelationshipItem({ data }: { data: Relationship }) {
-  const { head, tail, head_pos, tail_pos } = data;
+  const { head, tail, head_pos, tail_pos, lith } = data;
 
   let highlights: Highlight[] = [];
 
@@ -131,14 +132,18 @@ function RelationshipItem({ data }: { data: Relationship }) {
   }
 
   return h("div.relationship-item", [
-    h("h3.relationship", [
-      head,
-      " ",
-      h(Icon, { icon: "arrow-right" }),
-      " ",
-      tail,
+    h("div.relationship-header.flex.row", [
+      h(AttributedLithTag, { lith, candidate: true }),
+      h("p.relationship", [
+        head,
+        " ",
+        h(Icon, { icon: "arrow-right" }),
+        " ",
+        tail,
+      ]),
+      h("div.spacer"),
+      h("p", [h(LinkStatus, { data })]),
     ]),
-    h("p", [h(LinkStatus, { data })]),
     h(CollapseCard, { isOpen: true, className: "source-info" }, [
       h("p", h(HighlightedText, { text: data.paragraph_txt, highlights })),
       h(GDDReferenceCard, { docid: data.article_id, wrapper: Para }),

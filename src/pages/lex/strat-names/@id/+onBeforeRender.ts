@@ -16,8 +16,8 @@ export async function onBeforeRender(pageContext) {
     strat_name_id;
 
   const [data, relationships] = await Promise.all([
-    fetchJSON(addr).then((res) => res.map(processStratName)),
-    fetchJSON(relURL),
+    fetchJSON(addr).then((res) => res.map((d) => processStratName(d, true))),
+    fetchJSON(relURL).then((res) => postProcessRelationships(res)),
   ]);
 
   const pageProps = { data, relationships };
@@ -26,6 +26,33 @@ export async function onBeforeRender(pageContext) {
       pageProps,
     },
   };
+}
+
+function postProcessRelationships(data) {
+  let res = [];
+  // Only use the relationships for which we can assemble lith IDs
+  // This way we skip some of the more confusing extractions...
+  for (const d of data) {
+    let atts = [];
+    if (d.lith_att_id != null) {
+      atts.push({
+        id: d.lith_att_id,
+        name: d.lith_att,
+        type: d.lith_att_type,
+      });
+    }
+
+    const lith = {
+      id: d.lith_id,
+      name: d.lith,
+      color: d.lith_color,
+      atts,
+    };
+
+    res.push({ ...d, lith });
+  }
+
+  return res;
 }
 
 function fetchJSON(url) {
