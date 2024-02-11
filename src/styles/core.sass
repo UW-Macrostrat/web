@@ -3,6 +3,17 @@
 .float-right
   float: right
 
+.flex
+  display: flex
+  gap: 1em
+
+  &.row
+    flex-direction: row
+    align-items: baseline
+
+  .spacer
+    flex-grow: 1
+
 .stick-to-top
   position: sticky
   top: 0

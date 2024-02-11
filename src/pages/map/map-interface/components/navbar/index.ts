@@ -12,6 +12,8 @@ import styles from "./navbar.module.sass";
 import { MapLoadingButton, FloatingNavbar } from "@macrostrat/map-interface";
 import { PanelSubhead } from "@macrostrat/map-interface";
 import classNames from "classnames";
+import { navigate } from "vike/client/router";
+import { MacrostratIcon } from "~/components/macrostrat-icon";
 
 const h = hyper.styled(styles);
 
@@ -138,6 +140,12 @@ function Searchbar({ className }) {
   }, [term]);
 
   return h(FloatingNavbar, { statusElement: filterPanelElement }, [
+    h(MacrostratIcon, {
+      size: 36,
+      onClick() {
+        navigate("/");
+      },
+    }),
     h(InputGroup, {
       large: true,
       onChange: handleSearchInput,

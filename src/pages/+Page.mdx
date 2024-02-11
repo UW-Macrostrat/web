@@ -1,0 +1,38 @@
+export { ContentPage as default } from "~/layouts";
+import { Link } from "~/renderer/Link";
+import { LinkCard } from "~/components/cards";
+import { PageHeader } from "~/components";
+
+<PageHeader title="Macrostrat">
+  <span class="subtitle">
+    <span class="secondary">v2</span>{" "}
+    <span class="tertiary">{import.meta.env.VITE_MACROSTRAT_INSTANCE}</span>
+  </span>
+</PageHeader>
+
+<LinkCard href="/map" title="Map interface">
+  Macrostrat's main map interface showing a harmonized view of the Earth's crust
+</LinkCard>
+
+## Data products
+
+Macrostrat integrates a variety of geological data products into a community-accessibe, space-time model of the Earth's crust.
+These products come from a variety of sources throughout the geosciences.
+
+<LinkCard href="/maps" title="Maps">
+  The spatial footprint of rocks on the Earth's surface
+</LinkCard>
+
+<LinkCard href="/columns" title="Columns">
+  Stratigraphic and geological columns showing the organization of rocks in time
+</LinkCard>
+
+<LinkCard href="/lex" title="Geologic lexicon">
+  Geologic units and data dictionaries
+</LinkCard>
+
+### Development pages
+
+<LinkCard href="/dev" title="Developer apps">
+  Layers and testbed apps that aren't ready for prime time
+</LinkCard>

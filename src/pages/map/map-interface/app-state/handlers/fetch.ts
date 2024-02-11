@@ -3,6 +3,7 @@ import axios from "axios";
 import { joinURL } from "~/pages/map/map-interface/utils";
 import { ColumnGeoJSONRecord } from "../reducers";
 import { UPDATE_FILTERED_COLUMNS } from "../reducers/filtered-columns";
+import { XDDSnippet } from "~/types";
 
 export const base = apiV2Prefix;
 const basev1 = `${SETTINGS.gddDomain}/api/v1`;
@@ -72,19 +73,6 @@ export async function fetchFilteredColumns(
     type: "update-column-filters",
     columns: res.data,
   };
-}
-
-export interface XDDSnippet {
-  pubname: string;
-  publisher: string;
-  _gddid: string;
-  title: string;
-  doi: string;
-  coverDate: string;
-  URL: string;
-  authors: string;
-  hits: number;
-  highlight: string[];
 }
 
 export async function handleXDDQuery(

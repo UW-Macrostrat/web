@@ -23,8 +23,6 @@ function ColumnPage({ columnInfo }) {
 
   const selectedUnit = useUnitSelection(units);
 
-  console.log(columnInfo);
-
   const lon = new Number(columnInfo.lng);
   const lat = new Number(columnInfo.lat);
   const zoom = 7;

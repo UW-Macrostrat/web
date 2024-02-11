@@ -33,6 +33,9 @@ export const mapPagePrefix = "/map";
 
 export const routerBasename = import.meta.env.BASE_URL + "map";
 
+export const postgrestPrefix =
+  import.meta.env.VITE_MACROSTRAT_POSTGREST_PREFIX ?? apiDomain + "/api/pg";
+
 /** Legacy settings object */
 export const SETTINGS = {
   darkMapURL,
