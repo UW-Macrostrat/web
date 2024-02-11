@@ -8,27 +8,36 @@ import {
 } from "~/pages/map/map-interface/app-state";
 import { XDDSnippet } from "~/pages/map/map-interface/app-state/handlers/fetch";
 
-function XddExpansion() {
+export function XddExpansion() {
   const runAction = useAppActions();
 
   const fetchingXdd = useAppState((state) => state.core.fetchingXdd);
   const xddInfo = useAppState((state) => state.core.xddInfo);
 
+  return h(xDDPanelCore, {
+    className: "regional-panel",
+    onChange() {
+      runAction({ type: "fetch-xdd" });
+    },
+    data: xddInfo,
+    isFetching: fetchingXdd,
+  });
+}
+
+export function xDDPanelCore({ isFetching, data: xddInfo, ...rest }) {
   const groupedData = groupSnippetsByJournal(xddInfo);
 
   return h(
     ExpansionPanel,
     {
       className: "regional-panel",
-      onChange() {
-        runAction({ type: "fetch-xdd" });
-      },
       title: "Primary literature",
       helpText: "via xDD",
+      ...rest,
     },
     [
-      h.if(fetchingXdd)(Spinner),
-      h.if(!fetchingXdd && xddInfo.length > 0)([
+      h.if(isFetching)(Spinner),
+      h.if(!isFetching && xddInfo.length > 0)([
         Array.from(groupedData.entries()).map(([journal, snippets]) => {
           return h(Journal, {
             name: journal,
@@ -55,5 +64,3 @@ function groupSnippetsByJournal(
   }
   return journals;
 }
-
-export { XddExpansion };

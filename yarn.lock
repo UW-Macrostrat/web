@@ -5330,6 +5330,7 @@ __metadata:
     jose: "npm:^5.1.2"
     mapbox-gl: "npm:^2.15.0"
     new-github-issue-url: "npm:^1.0.0"
+    postgrest-js: "npm:^1.0.0-rc2"
     prettier: "npm:^2.7.1"
     react: "npm:^18.2.0"
     react-cookie: "npm:^3.0.4"
@@ -11923,6 +11924,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"axios@npm:^0.18.1":
+  version: 0.18.1
+  resolution: "axios@npm:0.18.1"
+  dependencies:
+    follow-redirects: "npm:1.5.10"
+    is-buffer: "npm:^2.0.2"
+  checksum: 10/e89e662c4998a2617bd7c34b9444a5d0b2029e3df952e5aa8756c5882e3f1d5a7143d10b5d6435d9276a71a199a3494672d7f1cc72cc8e598224feaf99793ef7
+  languageName: node
+  linkType: hard
+
 "axios@npm:^0.25.0":
   version: 0.25.0
   resolution: "axios@npm:0.25.0"
@@ -15415,7 +15426,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"debug@npm:3.1.0, debug@npm:~3.1.0":
+"debug@npm:3.1.0, debug@npm:=3.1.0, debug@npm:~3.1.0":
   version: 3.1.0
   resolution: "debug@npm:3.1.0"
   dependencies:
@@ -17990,6 +18001,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"follow-redirects@npm:1.5.10":
+  version: 1.5.10
+  resolution: "follow-redirects@npm:1.5.10"
+  dependencies:
+    debug: "npm:=3.1.0"
+  checksum: 10/7cf3bb10dbffabce317d1de3e3f85ea8c47fea388c4bc3da1052fd6bbb7b036772f48eed2f154d63ac39c49ab5fe4df0dda94b8e0c54eda8ca2edb001b2550b7
+  languageName: node
+  linkType: hard
+
 "follow-redirects@npm:^1.0.0, follow-redirects@npm:^1.14.7, follow-redirects@npm:^1.14.9":
   version: 1.15.3
   resolution: "follow-redirects@npm:1.15.3"
@@ -20472,7 +20492,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-buffer@npm:^2.0.0":
+"is-buffer@npm:^2.0.0, is-buffer@npm:^2.0.2":
   version: 2.0.5
   resolution: "is-buffer@npm:2.0.5"
   checksum: 10/3261a8b858edcc6c9566ba1694bf829e126faa88911d1c0a747ea658c5d81b14b6955e3a702d59dabadd58fdd440c01f321aa71d6547105fd21d03f94d0597e7
@@ -28491,6 +28511,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"postgrest-js@npm:^1.0.0-rc2":
+  version: 1.0.0-rc2
+  resolution: "postgrest-js@npm:1.0.0-rc2"
+  dependencies:
+    axios: "npm:^0.18.1"
+    qs: "npm:^6.9.3"
+    ramda: "npm:^0.26.1"
+  checksum: 10/d84a29cc085fd6300d08f8fc092bef19b71ec6fb92dab48f994a375923488905778f5c0bbcdfe2d10b49553e610151acb37445294d45aff84ed5c88ae8355860
+  languageName: node
+  linkType: hard
+
 "posthtml-parser@npm:^0.10.1":
   version: 0.10.2
   resolution: "posthtml-parser@npm:0.10.2"
@@ -28945,7 +28976,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"qs@npm:^6.10.0":
+"qs@npm:^6.10.0, qs@npm:^6.9.3":
   version: 6.11.2
   resolution: "qs@npm:6.11.2"
   dependencies:
@@ -29085,6 +29116,13 @@ __metadata:
   version: 0.29.0
   resolution: "ramda@npm:0.29.0"
   checksum: 10/b156660f2c58b4a13bcc4f1a0eabc1145d8db11d33d26a2fb03cd6adf3983a1c1f2bbaaf708c421029e9b09684262d056752623f7e62b79a503fb9217dec69d4
+  languageName: node
+  linkType: hard
+
+"ramda@npm:^0.26.1":
+  version: 0.26.1
+  resolution: "ramda@npm:0.26.1"
+  checksum: 10/32f99fa901bf54a42f7cef607668921d2553c34fe6ba3ea9776309604a57ea91cce36624de50d9547f82335d814de6ebe1dce83442b8a5ff002a53130be31e43
   languageName: node
   linkType: hard
 
