@@ -1,0 +1,32 @@
+.lith-tag-area, .lith-tag
+  display: inline-block
+  border-radius: 0.5em
+
+.lith-tag
+  padding: 0.2em 0.5em
+  margin: -1px
+  border: 2px solid black
+
+
+.lith-atts
+  padding: 0.2em 0.5em
+
+.lith-att
+  display: inline-block
+  &::after
+    content: ","
+    margin: 0 0.1em
+    color: var(--accent-secondary-text-color)
+  &:last-child
+    &::after
+      content: ""
+      margin: 0
+
+.lith-tag-area
+  margin: 0.2em 0.5em 
+  border: 1px solid black
+  &.candidate
+    border-style: dashed
+    .lith-tag
+      border: 1px solid black
+      background-color: var(--accent-secondary-color)
