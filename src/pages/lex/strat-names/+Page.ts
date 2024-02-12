@@ -2,14 +2,16 @@ import h from "@macrostrat/hyper";
 import { ContentPage } from "~/layouts";
 import { PageHeader, Link } from "~/components";
 import { AttributedLithTag } from "~/components";
-import { InputGroup } from "@blueprintjs/core";
+import { InputGroup, Spinner } from "@blueprintjs/core";
 import { InfiniteScroll } from "@macrostrat/ui-components";
+import { useReducer } from "react";
+import { fetchStratNames } from "./data-service";
 
 export function Page({ data, filters }) {
   return h(ContentPage, [
     h(PageHeader, { title: "Stratigraphic names" }),
     h(FilterControl, { filters }),
-    h(StratNamesView, { data }),
+    h(StratNamesView, { initialData: data }),
   ]);
 }
 
@@ -19,22 +21,56 @@ function FilterControl({ filters }) {
   ]);
 }
 
-function StratNamesView({ data }) {
+type StratNameViewState = {
+  data: any[];
+  isLoading: boolean;
+  hasMore: boolean;
+};
+
+function infiniteScrollReducer(
+  state: StratNameViewState,
+  action
+): StratNameViewState {
+  switch (action.type) {
+    case "set-loading":
+      return { ...state, isLoading: true };
+    case "append":
+      return {
+        isLoading: false,
+        data: [...state.data, ...action.data],
+        hasMore: action.data.length > 0,
+      };
+    default:
+      return state;
+  }
+}
+
+function StratNamesView({ initialData }) {
+  const [state, dispatch] = useReducer(infiniteScrollReducer, {
+    data: initialData,
+    isLoading: false,
+    hasMore: true,
+  });
+  const { data, hasMore, isLoading } = state;
   return h(
     InfiniteScroll,
     {
-      hasMore: false,
-      loadMore: () => {
-        console.log("Load more");
+      hasMore,
+      loadMore() {
+        dispatch({ type: "set-loading" });
+        const lastId = data[data.length - 1].id;
+        fetchStratNames({}, lastId).then((newData) => {
+          dispatch({ type: "append", data: newData });
+        });
       },
     },
-    h(StratNamesList, { data })
+    [h(StratNamesList, { data }), h.if(isLoading)(Spinner)]
   );
 }
 
 function StratNamesList({ data }) {
   return h("div.strat-names-list", [
-    data.map((d) => h(StratNameItem, { data: d })),
+    data.map((d) => h(StratNameItem, { data: d, key: d.id })),
   ]);
 }
 

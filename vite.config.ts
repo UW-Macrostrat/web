@@ -71,7 +71,7 @@ const config: UserConfig = {
     },
   },
   ssr: {
-    noExternal: ["labella"],
+    noExternal: ["labella", "@supabase/postgrest-js"],
   },
 };
 

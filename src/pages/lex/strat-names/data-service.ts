@@ -1,15 +1,20 @@
-import mod from "@supabase/postgrest-js";
+import { PostgrestClient } from "@supabase/postgrest-js";
 import { postgrestPrefix } from "@macrostrat-web/settings";
-const { PostgrestClient } = mod;
 
 const postgrest = new PostgrestClient(postgrestPrefix);
 
-export async function fetchStratNames() {
+export async function fetchStratNames(
+  filterParams = {},
+  afterId = 0,
+  perPage = 20
+) {
   const res = await postgrest
     .from("strat_names_units_kg")
     .select("*")
     .not("kg_liths", "is", null)
-    .limit(20);
+    .order("id", { ascending: true })
+    .gt("id", afterId)
+    .limit(perPage);
   console.log(res);
   const data = res.data;
   return data.map((d) => processStratName(d));
