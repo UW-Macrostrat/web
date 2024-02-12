@@ -1,17 +1,51 @@
-import h from "@macrostrat/hyper";
+import hyper from "@macrostrat/hyper";
 import { ContentPage } from "~/layouts";
 import { PageHeader, Link } from "~/components";
 import { AttributedLithTag } from "~/components";
-import { InputGroup, Spinner } from "@blueprintjs/core";
+import {
+  InputGroup,
+  Spinner,
+  Button,
+  Collapse,
+  Card,
+  Switch,
+} from "@blueprintjs/core";
 import { InfiniteScroll } from "@macrostrat/ui-components";
-import { useReducer } from "react";
+import { useReducer, useState } from "react";
 import { fetchStratNames } from "./data-service";
+import styles from "./main.module.sass";
+
+const h = hyper.styled(styles);
 
 export function Page({ data, filters }) {
+  const [showSettings, setShowSettings] = useState(false);
   return h(ContentPage, [
-    h(PageHeader, { title: "Stratigraphic names" }),
-    h(FilterControl, { filters }),
+    h("div.page-header.stick-to-top", [
+      h("div.flex.row.align-center", [
+        h(PageHeader, { title: "Stratigraphic names" }),
+        h("div.spacer"),
+        h(FilterControl, { filters }),
+        h(Button, {
+          icon: "settings",
+          minimal: true,
+          active: showSettings,
+          onClick() {
+            setShowSettings(!showSettings);
+          },
+        }),
+      ]),
+      h(SettingsPanel, { isOpen: showSettings }),
+    ]),
     h(StratNamesView, { initialData: data }),
+    h("div.background-placeholder"),
+  ]);
+}
+
+function SettingsPanel({ isOpen = false }) {
+  return h(Collapse, { isOpen }, [
+    h(Card, { elevation: 0 }, [
+      h(Switch, { label: "Limit to units with candidate lithologies" }),
+    ]),
   ]);
 }
 
