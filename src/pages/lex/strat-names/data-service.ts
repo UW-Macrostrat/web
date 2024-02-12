@@ -1,3 +1,20 @@
+import mod from "@supabase/postgrest-js";
+import { postgrestPrefix } from "@macrostrat-web/settings";
+const { PostgrestClient } = mod;
+
+const postgrest = new PostgrestClient(postgrestPrefix);
+
+export async function fetchStratNames() {
+  const res = await postgrest
+    .from("strat_names_units_kg")
+    .select("*")
+    .not("kg_liths", "is", null)
+    .limit(20);
+  console.log(res);
+  const data = res.data;
+  return data.map((d) => processStratName(d));
+}
+
 function deduplicateArray<T = any>(arr: T[], keyFn = (d) => d.id): T[] {
   let index = {};
   for (const item of arr) {
