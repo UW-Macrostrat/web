@@ -1,14 +1,17 @@
-import { postgrestPrefix } from "@macrostrat-web/settings";
-import fetch from "node-fetch";
-import { fetchStratNames } from "./data-service";
+import { fetchStratNames, FilterState } from "./data-service";
 
-const apiAddress =
-  postgrestPrefix + "/strat_names_units_kg?kg_liths=not.is.null";
+const defaultFilterState: FilterState = {
+  match: "",
+  candidates: false,
+};
 
 export async function onBeforeRender(pageContext) {
-  const data = await fetchStratNames();
+  // Get filters from query string
+  const filters = defaultFilterState;
 
-  const pageProps = { data };
+  const data = await fetchStratNames(filters);
+
+  const pageProps = { data, filters };
   return {
     pageContext: {
       pageProps,

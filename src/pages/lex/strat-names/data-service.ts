@@ -1,23 +1,33 @@
 import { PostgrestClient } from "@supabase/postgrest-js";
 import { postgrestPrefix } from "@macrostrat-web/settings";
 
+export type FilterState = {
+  match?: string;
+  candidates?: boolean;
+};
+
 const postgrest = new PostgrestClient(postgrestPrefix);
 
 export async function fetchStratNames(
-  filterParams = {},
+  filters: FilterState = {},
   afterId = 0,
   perPage = 20
 ) {
-  const res = await postgrest
-    .from("strat_names_units_kg")
-    .select("*")
-    .not("kg_liths", "is", null)
+  let base = postgrest.from("strat_names_units_kg").select("*");
+  if (filters.match != null) {
+    base = base.ilike("strat_name", `%${filters.match}%`);
+  }
+  if (filters.candidates ?? false) {
+    base = base.not("kg_liths", "is", null);
+  }
+
+  const q = base
     .order("id", { ascending: true })
     .gt("id", afterId)
     .limit(perPage);
-  console.log(res);
+  const res = await q;
   const data = res.data;
-  return data.map((d) => processStratName(d));
+  return data?.map((d) => processStratName(d));
 }
 
 function deduplicateArray<T = any>(arr: T[], keyFn = (d) => d.id): T[] {

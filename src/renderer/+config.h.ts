@@ -7,6 +7,7 @@ export default {
     "pageStyle",
     "supportsDarkMode",
     "isolateStyles",
+    "randomSeed",
   ],
   clientRouting: true,
   hydrationCanBeAborted: true,

@@ -11,20 +11,36 @@ import {
   Switch,
 } from "@blueprintjs/core";
 import { InfiniteScroll } from "@macrostrat/ui-components";
-import { useReducer, useState } from "react";
-import { fetchStratNames } from "./data-service";
+import { useReducer, useEffect, useState, useCallback } from "react";
+import { fetchStratNames, FilterState } from "./data-service";
 import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
 
-export function Page({ data, filters }) {
+function filterReducer(state: FilterState, action): FilterState {
+  switch (action.type) {
+    case "set-search-string":
+      return { ...state, match: action.value };
+    case "toggle-candidate-liths":
+      return { ...state, candidates: !state.candidates };
+  }
+}
+
+export function Page({ data, filters: startingFilters }) {
   const [showSettings, setShowSettings] = useState(false);
+  const [state, dispatch] = useReducer(filterReducer, startingFilters);
+
   return h(ContentPage, [
     h("div.page-header.stick-to-top", [
       h("div.flex.row.align-center", [
         h(PageHeader, { title: "Stratigraphic names" }),
         h("div.spacer"),
-        h(FilterControl, { filters }),
+        h(FilterControl, {
+          searchString: state.match,
+          setSearchString(value) {
+            dispatch({ type: "set-search-string", value });
+          },
+        }),
         h(Button, {
           icon: "settings",
           minimal: true,
@@ -34,24 +50,37 @@ export function Page({ data, filters }) {
           },
         }),
       ]),
-      h(SettingsPanel, { isOpen: showSettings }),
+      h(SettingsPanel, { isOpen: showSettings, state, dispatch }),
     ]),
-    h(StratNamesView, { initialData: data }),
+    h(StratNamesView, { initialData: data, filters: state }),
     h("div.background-placeholder"),
   ]);
 }
 
-function SettingsPanel({ isOpen = false }) {
+function SettingsPanel({ isOpen = false, state, dispatch }) {
   return h(Collapse, { isOpen }, [
     h(Card, { elevation: 0 }, [
-      h(Switch, { label: "Limit to units with candidate lithologies" }),
+      h(Switch, {
+        label: "Limit to units with candidate lithologies",
+        checked: state.candidates,
+        onChange() {
+          dispatch({ type: "toggle-candidate-liths" });
+        },
+      }),
     ]),
   ]);
 }
 
-function FilterControl({ filters }) {
+function FilterControl({ searchString, setSearchString }) {
   return h("div.filter-control", [
-    h(InputGroup, { leftIcon: "filter", placeholder: "Filter" }),
+    h(InputGroup, {
+      leftIcon: "filter",
+      placeholder: "Filter",
+      value: searchString,
+      onChange(e) {
+        setSearchString(e.target.value);
+      },
+    }),
   ]);
 }
 
@@ -68,6 +97,8 @@ function infiniteScrollReducer(
   switch (action.type) {
     case "set-loading":
       return { ...state, isLoading: true };
+    case "reset":
+      return { isLoading: true, data: [], hasMore: true };
     case "append":
       return {
         isLoading: false,
@@ -79,12 +110,22 @@ function infiniteScrollReducer(
   }
 }
 
-function StratNamesView({ initialData }) {
+function StratNamesView({ initialData, filters }) {
   const [state, dispatch] = useReducer(infiniteScrollReducer, {
     data: initialData,
     isLoading: false,
     hasMore: true,
   });
+
+  useEffect(() => {
+    console.log("Changed filters", filters);
+    dispatch({ type: "reset" });
+    // Wait to debounce query
+    fetchStratNames(filters).then((data) => {
+      dispatch({ type: "append", data });
+    });
+  }, [filters]);
+
   const { data, hasMore, isLoading } = state;
   return h(
     InfiniteScroll,
@@ -92,8 +133,8 @@ function StratNamesView({ initialData }) {
       hasMore,
       loadMore() {
         dispatch({ type: "set-loading" });
-        const lastId = data[data.length - 1].id;
-        fetchStratNames({}, lastId).then((newData) => {
+        const lastId = data[data.length - 1]?.id ?? 0;
+        fetchStratNames(filters, lastId).then((newData) => {
           dispatch({ type: "append", data: newData });
         });
       },
