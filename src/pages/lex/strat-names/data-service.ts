@@ -7,6 +7,11 @@ export type FilterState = {
   candidates?: boolean;
 };
 
+export const defaultFilterState: FilterState = {
+  match: "",
+  candidates: null,
+};
+
 const postgrest = new PostgrestClient(postgrestPrefix);
 
 export function useDebouncedStratNames(

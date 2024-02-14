@@ -12,7 +12,12 @@ import {
 } from "@blueprintjs/core";
 import { InfiniteScroll } from "@macrostrat/ui-components";
 import { useReducer, useEffect, useState, useCallback } from "react";
-import { FilterState, useDebouncedStratNames } from "./data-service";
+import {
+  FilterState,
+  useDebouncedStratNames,
+  defaultFilterState,
+} from "./data-service";
+import { setQueryString } from "@macrostrat/ui-components";
 import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
@@ -26,9 +31,31 @@ function filterReducer(state: FilterState, action): FilterState {
   }
 }
 
+function compareQueryParams(a, b) {
+  let newParams = {};
+  for (let key in a) {
+    if (a[key] !== b[key]) {
+      newParams[key] = a[key];
+    }
+  }
+  if (Object.keys(newParams).length === 0) {
+    return null;
+  }
+
+  return newParams;
+}
+
 export function Page({ data, filters: startingFilters }) {
   const [showSettings, setShowSettings] = useState(false);
   const [state, dispatch] = useReducer(filterReducer, startingFilters);
+
+  useEffect(() => {
+    let s1 = state;
+    const q = compareQueryParams(s1, startingFilters);
+    if (q != null) {
+      setQueryString(s1);
+    }
+  }, [state]);
 
   return h(ContentPage, [
     h("div.page-header.stick-to-top", [

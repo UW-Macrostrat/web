@@ -1,13 +1,19 @@
-import { fetchStratNames, FilterState } from "./data-service";
-
-const defaultFilterState: FilterState = {
-  match: "",
-  candidates: false,
-};
+import {
+  fetchStratNames,
+  FilterState,
+  defaultFilterState,
+} from "./data-service";
 
 export async function onBeforeRender(pageContext) {
   // Get filters from query string
-  const filters = defaultFilterState;
+  const { search } = pageContext.urlParsed;
+
+  const search_ = new URLSearchParams(search);
+
+  const filters: FilterState = {
+    match: search_.get("match"),
+    candidates: search_.get("candidates") === "true",
+  };
 
   const data = await fetchStratNames(filters);
 
