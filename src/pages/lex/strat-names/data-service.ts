@@ -1,5 +1,6 @@
 import { PostgrestClient } from "@supabase/postgrest-js";
 import { postgrestPrefix } from "@macrostrat-web/settings";
+import { useEffect, useState, useRef } from "react";
 
 export type FilterState = {
   match?: string;
@@ -8,13 +9,86 @@ export type FilterState = {
 
 const postgrest = new PostgrestClient(postgrestPrefix);
 
+export function useDebouncedStratNames(
+  filters: FilterState,
+  opts: { perPage: number; delay: number },
+  initialData = null
+): [
+  { data: any; error: any; isLoading: boolean; hasMore: boolean },
+  () => void
+] {
+  const [data, setData] = useState(initialData);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [lastID, setLastID] = useState(0);
+  const { perPage, delay } = opts;
+
+  console.log(filters, data, initialData);
+
+  const loadNextPage = () => {
+    setLastID(data[data.length - 1]?.id ?? 0);
+  };
+
+  const prevFilters = useRef<FilterState>();
+
+  useEffect(() => {
+    let timerId: any;
+    const controller = new AbortController();
+
+    prevFilters.current = filters;
+    if (prevFilters.current == null && initialData != null) {
+      return;
+    }
+
+    const fetchData = async () => {
+      let startingData = data;
+      let startingOffset = lastID;
+      if (prevFilters.current != filters) {
+        startingData = [];
+        startingOffset = 0;
+        setLastID(startingOffset);
+        setData(startingData);
+      }
+      setIsLoading(true);
+      try {
+        const newData = await fetchStratNames(
+          filters,
+          startingOffset,
+          perPage,
+          controller.signal
+        );
+        const prevData = startingData ?? [];
+        setData([...prevData, ...newData]);
+      } catch (error) {
+        if (error.name === "AbortError") {
+          console.log("Fetch cancelled");
+        } else {
+          setError(error);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    timerId = setTimeout(fetchData, delay);
+
+    return () => {
+      clearTimeout(timerId);
+      controller.abort();
+    };
+  }, [filters, delay, lastID, perPage]);
+
+  return [{ data, error, isLoading, hasMore: data?.length > 0 }, loadNextPage];
+}
+
 export async function fetchStratNames(
   filters: FilterState = {},
   afterId = 0,
-  perPage = 20
+  perPage = 20,
+  abortSignal?: AbortSignal
 ) {
   let base = postgrest.from("strat_names_units_kg").select("*");
-  if (filters.match != null) {
+  if (filters.match != null && filters.match != "") {
     base = base.ilike("strat_name", `%${filters.match}%`);
   }
   if (filters.candidates ?? false) {
@@ -24,10 +98,20 @@ export async function fetchStratNames(
   const q = base
     .order("id", { ascending: true })
     .gt("id", afterId)
-    .limit(perPage);
-  const res = await q;
-  const data = res.data;
-  return data?.map((d) => processStratName(d));
+    .limit(perPage)
+    .abortSignal(abortSignal);
+  try {
+    const res = await q;
+    const data = res.data;
+    const error = res.error;
+    if (error != null) {
+      throw error;
+    }
+
+    return data?.map((d) => processStratName(d));
+  } catch (e) {
+    throw e;
+  }
 }
 
 function deduplicateArray<T = any>(arr: T[], keyFn = (d) => d.id): T[] {

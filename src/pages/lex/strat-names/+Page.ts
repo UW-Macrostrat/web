@@ -12,7 +12,7 @@ import {
 } from "@blueprintjs/core";
 import { InfiniteScroll } from "@macrostrat/ui-components";
 import { useReducer, useEffect, useState, useCallback } from "react";
-import { fetchStratNames, FilterState } from "./data-service";
+import { FilterState, useDebouncedStratNames } from "./data-service";
 import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
@@ -94,11 +94,18 @@ function infiniteScrollReducer(
   state: StratNameViewState,
   action
 ): StratNameViewState {
+  console.log(action);
   switch (action.type) {
     case "set-loading":
       return { ...state, isLoading: true };
     case "reset":
       return { isLoading: true, data: [], hasMore: true };
+    case "replace":
+      return {
+        isLoading: false,
+        data: action.data,
+        hasMore: action.data.length > 0,
+      };
     case "append":
       return {
         isLoading: false,
@@ -111,39 +118,29 @@ function infiniteScrollReducer(
 }
 
 function StratNamesView({ initialData, filters }) {
-  const [state, dispatch] = useReducer(infiniteScrollReducer, {
-    data: initialData,
-    isLoading: false,
-    hasMore: true,
-  });
+  const [{ data, error, isLoading, hasMore }, loadNextPage] =
+    useDebouncedStratNames(filters, { perPage: 20, delay: 300 }, initialData);
 
-  useEffect(() => {
-    console.log("Changed filters", filters);
-    dispatch({ type: "reset" });
-    // Wait to debounce query
-    fetchStratNames(filters).then((data) => {
-      dispatch({ type: "append", data });
-    });
-  }, [filters]);
-
-  const { data, hasMore, isLoading } = state;
   return h(
     InfiniteScroll,
     {
       hasMore,
-      loadMore() {
-        dispatch({ type: "set-loading" });
-        const lastId = data[data.length - 1]?.id ?? 0;
-        fetchStratNames(filters, lastId).then((newData) => {
-          dispatch({ type: "append", data: newData });
-        });
-      },
+      loadMore: loadNextPage,
     },
-    [h(StratNamesList, { data }), h.if(isLoading)(Spinner)]
+    [
+      h(StratNamesList, { data }),
+      h.if(isLoading)(Spinner),
+      h.if(error)("p", "Error"),
+      h.if(!hasMore && !isLoading)("p", "No more data"),
+    ]
   );
 }
 
 function StratNamesList({ data }) {
+  if (data == null) {
+    return null;
+  }
+
   return h("div.strat-names-list", [
     data.map((d) => h(StratNameItem, { data: d, key: d.id })),
   ]);
