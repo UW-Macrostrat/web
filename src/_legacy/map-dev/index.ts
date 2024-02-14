@@ -6,12 +6,15 @@ import {
   MacrostratRasterTileset,
   RasterMapInspectorPage,
   MapLayerCatalog,
+  MapLayerPage,
   LinkItem,
 } from "./map-layers";
+import { tileserverDomain } from "@macrostrat-web/settings";
 import { loadableElement } from "~/_utils";
 import styles from "./main.module.styl";
 import { MapColorsInspector } from "./color-schemes";
 import { WeaverPage } from "../../weaver";
+
 const h = hyper.styled(styles);
 
 export default function DevIndex() {
@@ -50,6 +53,10 @@ export default function DevIndex() {
         element: h(VectorMapInspectorPage, {
           tileset: MacrostratVectorTileset.AllMaps,
         }),
+      }),
+      h(Route, {
+        path: "sources/:layer",
+        element: h(MapLayerPage),
       }),
       h(Route, {
         path: "color-schemes",

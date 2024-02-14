@@ -1,4 +1,4 @@
-import { render, redirect } from "vike/abort";
+import { redirect, render } from "vike/abort";
 
 export const guard = (pageContext) => {
   const { user } = pageContext;
