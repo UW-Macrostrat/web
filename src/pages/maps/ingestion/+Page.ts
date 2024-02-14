@@ -122,11 +122,15 @@ const SourceCard = ({
     },
     [
       h("div", {}, [
-        h(
-          "h4",
-          { style: { margin: "0px" } },
-          source.source_id + " " + source.name
-        ),
+        h("div.flex.row", [
+          h(
+            "h4",
+            { style: { margin: "0px" } },
+            source.source_id + " " + source.name
+          ),
+          h("div.spacer"),
+          h("code", slug),
+        ]),
         h("h6", { style: { margin: "0px" } }, source.scale),
         h.if(source.rasterURL != null)([
           " ",
