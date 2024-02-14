@@ -4,16 +4,16 @@
 //  - To use your environment variables defined in your .env files, you need to install dotenv, see https://vike.dev/env
 //  - To use your path aliases defined in your vite.config.js, you need to tell Node.js about them, see https://vike.dev/path-aliases
 
-import express from "express"
-import compression from "compression"
+import compression from "compression";
+import express from "express";
 import { renderPage } from "vike/server";
-import { root } from "./root.js"
+import { root } from "./root.js";
 
 // Auth imports
-import cookieParser from "cookie-parser"
-import * as jose from "jose"
+import cookieParser from "cookie-parser";
+import * as jose from "jose";
 
-const isProduction = process.env.NODE_ENV === "production"
+const isProduction = process.env.NODE_ENV === "production";
 
 startServer();
 
@@ -49,27 +49,23 @@ async function startServer() {
 
   // vike middleware. It should always be our last middleware (because it's a
   // catch-all middleware superseding any middleware placed after it).
-  app.get('*', async (req, res, next) => {
-
+  app.get("*", async (req, res, next) => {
     // Pull out the authorization cookie and decrypt it
-    let user = undefined
+    let user = undefined;
 
     try {
-      const authHeader = req.cookies?.Authorization
-      const secret = new TextEncoder().encode(
-        process.env.SECRET_KEY
-      );
-      const jwt = authHeader.substring(7, authHeader.length)
-      user = (await jose.jwtVerify(jwt, secret)).payload
-
-
+      const authHeader = req.cookies?.Authorization;
+      const secret = new TextEncoder().encode(process.env.SECRET_KEY);
+      const jwt = authHeader.substring(7, authHeader.length);
+      user = (await jose.jwtVerify(jwt, secret)).payload;
     } catch (e) {
       // I don't care if it fails, it just means the user isn't logged in
     }
 
     const pageContextInit = {
       urlOriginal: req.originalUrl,
-      user: user
+      user: user,
+      randomSeed: `${Math.random()}`.slice(2),
     };
 
     const pageContext = await renderPage(pageContextInit);

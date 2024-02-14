@@ -156,7 +156,6 @@ function Para({ href, docid, ...rest }) {
 }
 
 function LinkStatus({ data }) {
-  console.log(data);
   const correct = data.strat_name_correct;
   if (correct != null && !correct) {
     return h(

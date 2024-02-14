@@ -1,23 +1,23 @@
-import { postgrestPrefix } from "@macrostrat-web/settings";
-import fetch from "node-fetch";
-import { processStratName } from "./data-service";
-
-const apiAddress =
-  postgrestPrefix + "/strat_names_units_kg?kg_liths=not.is.null";
+import {
+  fetchStratNames,
+  FilterState,
+  defaultFilterState,
+} from "./data-service";
 
 export async function onBeforeRender(pageContext) {
-  // `.page.server.js` files always run in Node.js; we could use SQL/ORM queries here.
-  console.log("Page context", pageContext);
+  // Get filters from query string
+  const { search } = pageContext.urlParsed;
 
-  const addr = apiAddress + "&limit=20";
-  console.log("Fetching", addr);
+  const search_ = new URLSearchParams(search);
 
-  const response = await fetch(addr);
-  const res = await response.json();
+  const filters: FilterState = {
+    match: search_.get("match"),
+    candidates: search_.get("candidates") === "true",
+  };
 
-  const data = res.map(processStratName);
+  const data = await fetchStratNames(filters);
 
-  const pageProps = { data };
+  const pageProps = { data, filters };
   return {
     pageContext: {
       pageProps,
