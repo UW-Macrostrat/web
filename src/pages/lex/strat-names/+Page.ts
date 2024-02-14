@@ -25,9 +25,12 @@ const h = hyper.styled(styles);
 function filterReducer(state: FilterState, action): FilterState {
   switch (action.type) {
     case "set-search-string":
+      if (action.value === "") {
+        action.value = null;
+      }
       return { ...state, match: action.value };
     case "toggle-candidate-liths":
-      return { ...state, candidates: !state.candidates };
+      return { ...state, candidates: state.candidates == null ? true : null };
   }
 }
 
@@ -51,6 +54,9 @@ export function Page({ data, filters: startingFilters }) {
 
   useEffect(() => {
     let s1 = state;
+    if (s1.match === "") {
+      delete s1.match;
+    }
     const q = compareQueryParams(s1, startingFilters);
     if (q != null) {
       setQueryString(s1);
@@ -89,7 +95,7 @@ function SettingsPanel({ isOpen = false, state, dispatch }) {
     h(Card, { elevation: 0 }, [
       h(Switch, {
         label: "Limit to units with candidate lithologies",
-        checked: state.candidates,
+        checked: state.candidates != null,
         onChange() {
           dispatch({ type: "toggle-candidate-liths" });
         },
@@ -109,38 +115,6 @@ function FilterControl({ searchString, setSearchString }) {
       },
     }),
   ]);
-}
-
-type StratNameViewState = {
-  data: any[];
-  isLoading: boolean;
-  hasMore: boolean;
-};
-
-function infiniteScrollReducer(
-  state: StratNameViewState,
-  action
-): StratNameViewState {
-  switch (action.type) {
-    case "set-loading":
-      return { ...state, isLoading: true };
-    case "reset":
-      return { isLoading: true, data: [], hasMore: true };
-    case "replace":
-      return {
-        isLoading: false,
-        data: action.data,
-        hasMore: action.data.length > 0,
-      };
-    case "append":
-      return {
-        isLoading: false,
-        data: [...state.data, ...action.data],
-        hasMore: action.data.length > 0,
-      };
-    default:
-      return state;
-  }
 }
 
 function StratNamesView({ initialData, filters }) {

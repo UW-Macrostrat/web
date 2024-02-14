@@ -12,6 +12,38 @@ export const defaultFilterState: FilterState = {
   candidates: null,
 };
 
+type StratNameViewState = {
+  data: any[];
+  isLoading: boolean;
+  hasMore: boolean;
+};
+
+function infiniteScrollReducer(
+  state: StratNameViewState,
+  action
+): StratNameViewState {
+  switch (action.type) {
+    case "set-loading":
+      return { ...state, isLoading: true };
+    case "reset":
+      return { isLoading: true, data: [], hasMore: true };
+    case "replace":
+      return {
+        isLoading: false,
+        data: action.data,
+        hasMore: action.data.length > 0,
+      };
+    case "append":
+      return {
+        isLoading: false,
+        data: [...state.data, ...action.data],
+        hasMore: action.data.length > 0,
+      };
+    default:
+      return state;
+  }
+}
+
 const postgrest = new PostgrestClient(postgrestPrefix);
 
 export function useDebouncedStratNames(
