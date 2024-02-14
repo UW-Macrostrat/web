@@ -20,10 +20,8 @@ export function useDebouncedStratNames(
   const [data, setData] = useState(initialData);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [lastID, setLastID] = useState(0);
+  const [lastID, setLastID] = useState(null);
   const { perPage, delay } = opts;
-
-  console.log(filters, data, initialData);
 
   const loadNextPage = () => {
     setLastID(data[data.length - 1]?.id ?? 0);
@@ -35,8 +33,8 @@ export function useDebouncedStratNames(
     let timerId: any;
     const controller = new AbortController();
 
-    prevFilters.current = filters;
     if (prevFilters.current == null && initialData != null) {
+      prevFilters.current = filters;
       return;
     }
 
@@ -49,6 +47,7 @@ export function useDebouncedStratNames(
         setLastID(startingOffset);
         setData(startingData);
       }
+      prevFilters.current = filters;
       setIsLoading(true);
       try {
         const newData = await fetchStratNames(

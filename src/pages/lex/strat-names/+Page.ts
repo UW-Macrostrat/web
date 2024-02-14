@@ -94,7 +94,6 @@ function infiniteScrollReducer(
   state: StratNameViewState,
   action
 ): StratNameViewState {
-  console.log(action);
   switch (action.type) {
     case "set-loading":
       return { ...state, isLoading: true };
@@ -125,12 +124,13 @@ function StratNamesView({ initialData, filters }) {
     InfiniteScroll,
     {
       hasMore,
-      loadMore: loadNextPage,
+      loadMore() {
+        loadNextPage();
+      },
     },
     [
       h(StratNamesList, { data }),
       h.if(isLoading)(Spinner),
-      h.if(error)("p", "Error"),
       h.if(!hasMore && !isLoading)("p", "No more data"),
     ]
   );
