@@ -7,7 +7,10 @@ import {
   MapView,
   PanelCard,
 } from "@macrostrat/map-interface";
-import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
+import {
+  buildMacrostratStyle,
+  buildXRayStyle,
+} from "@macrostrat/mapbox-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
 import { NullableSlider, useDarkMode } from "@macrostrat/ui-components";
 import boundingBox from "@turf/bbox";
@@ -93,7 +96,12 @@ export default function MapInterface({ id, map }) {
   const [isOpen, setOpen] = useState(false);
 
   // Catch empty map data
-  if (map == null) return h("div", {style: {display: "flex", margin: "auto"}}, "No map data");
+  if (map == null)
+    return h(
+      "div",
+      { style: { display: "flex", margin: "auto" } },
+      "No map data"
+    );
 
   const dark = useDarkMode()?.isEnabled ?? false;
   const title = map.properties.name;

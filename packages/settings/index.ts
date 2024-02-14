@@ -20,6 +20,8 @@ export const satelliteMapURL =
 export const burwellTileDomain = import.meta.env
   .VITE_MACROSTRAT_TILESERVER_DOMAIN;
 export const apiDomain = import.meta.env.VITE_MACROSTRAT_API_DOMAIN;
+
+export const tileserverDomain = burwellTileDomain;
 export const gddDomain = "https://xdd.wisc.edu";
 export const pbdbDomain = "https://paleobiodb.org";
 export const mapboxAccessToken = import.meta.env.VITE_MAPBOX_API_TOKEN;

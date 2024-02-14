@@ -61,10 +61,12 @@ function MapLayerCatalogItem({ layer }) {
   return h(LinkItem, { to: layer.id }, layer.id);
 }
 
-function MapLayerPage() {
+export function MapLayerPage() {
   const { layer } = useParams();
+  const l1 = `sources.${layer}_polygons`;
   // get path from URL
-  const url = burwellTileDomain + "/table/" + layer + ".json";
+  const url = burwellTileDomain + "/table/" + l1 + ".json";
+  console.log(url);
   const layerDef = useAPIResult(url);
   if (layerDef == null) {
     return h("div", [h(BackButton), h("div.loading", h(Spinner))]);
