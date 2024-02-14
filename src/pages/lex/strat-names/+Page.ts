@@ -1,7 +1,6 @@
 import hyper from "@macrostrat/hyper";
 import { ContentPage } from "~/layouts";
-import { PageHeader, Link } from "~/components";
-import { AttributedLithTag } from "~/components";
+import { PageHeader, Link, AttributedLithTag } from "~/components";
 import {
   InputGroup,
   Spinner,
@@ -11,7 +10,7 @@ import {
   Switch,
 } from "@blueprintjs/core";
 import { InfiniteScroll } from "@macrostrat/ui-components";
-import { useReducer, useEffect, useState, useCallback } from "react";
+import { useReducer, useEffect, useState } from "react";
 import {
   FilterState,
   useDebouncedStratNames,

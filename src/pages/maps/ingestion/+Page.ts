@@ -64,7 +64,13 @@ export function Page({ sources, user, url, ingest_api }) {
           return h(
             "div",
             { style: { maxWidth: "1000px", width: "100%", margin: "auto" } },
-            [h(SourceCard, { source: d, key: d.source_id, user: user })]
+            [
+              h(SourceCard, {
+                source: d,
+                key: d.source_id,
+                user: user,
+              }),
+            ]
           );
         }),
       ]
@@ -89,11 +95,21 @@ const SourceCard = ({
   const href = `/maps/${source.source_id}`;
   const edit_href = `/maps/ingestion/${source.source_id}`;
 
+  const slug = source.primary_table
+    .replace("source.", "")
+    .replace("_polygons", "");
+
+  const sourcesRecordURL = `/map/dev/sources/${slug}`;
+
+  console.log("source", source);
+
   return h(
     Card,
     {
       interactive: true,
-      onClick: () => { window.location = edit_href },
+      onClick: () => {
+        window.location = edit_href;
+      },
       style: {
         display: "flex",
         flexDirection: "row",
@@ -116,6 +132,7 @@ const SourceCard = ({
           " ",
           h("span.raster", { style: { marginTop: ".5rem" } }, "Raster"),
         ]),
+        h("a", { href: sourcesRecordURL }, "Sources record map"),
       ]),
       h("div", {}, [
         h.if(user !== undefined)([
