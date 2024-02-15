@@ -1,6 +1,5 @@
 import h from "@macrostrat/hyper";
 import { ExpansionPanel } from "@macrostrat/map-interface";
-import Reference from "../Reference";
 import LongText from "../long-text";
 import { IntervalChip } from "../info-blocks";
 import { useAppActions } from "~/pages/map/map-interface/app-state";
@@ -40,6 +39,7 @@ function GeoMapLines(props) {
 
 function GeologicMapInfo(props) {
   const { bedrockExpanded, source } = props;
+  const runAction = useAppActions();
 
   if (!source) return h("div");
 
@@ -87,19 +87,25 @@ function GeologicMapInfo(props) {
           text: source.comments,
         }),
         h(GeoMapLines, { source }),
-        h(MapReference, { reference: source.ref }),
+        h(MapReference, {
+          reference: source.ref,
+          onClickSourceID() {
+            runAction({
+              type: "set-focused-map-source",
+              source_id: source.source_id,
+            });
+          },
+        }),
       ]),
     ]
   );
 }
 
-function MapReference(props) {
-  const { reference: ref } = props;
+export function MapReference(props) {
+  const { reference: ref, onClickSourceID = null } = props;
   if (!ref || Object.keys(ref).length === 0) {
     return null;
   }
-
-  const runAction = useAppActions();
 
   const {
     authors,
@@ -128,7 +134,7 @@ function MapReference(props) {
       "a",
       {
         onClick() {
-          runAction({ type: "set-focused-map-source", source_id });
+          onClickSourceID?.(source_id);
         },
       },
       source_id
