@@ -94,10 +94,7 @@ const SourceCard = ({
 }) => {
   const href = `/maps/${source.source_id}`;
   const edit_href = `/maps/ingestion/${source.source_id}`;
-
-  const slug = source.primary_table
-    .replace("source.", "")
-    .replace("_polygons", "");
+  const { slug } = source;
 
   const sourcesRecordURL = `/map/dev/sources/${slug}`;
 

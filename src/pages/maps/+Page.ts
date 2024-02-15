@@ -34,9 +34,10 @@ export function Page({ sources }) {
 }
 
 function SourceItem({ source }) {
-  const { source_id, name } = source;
+  const { source_id, slug, name } = source;
   const href = `/maps/${source_id}`;
-  const edit_href = `/maps/${source_id}/edit`;
+  const href1 = `/map/dev/sources/${slug}`;
+
   return h("li", [
     h("span.source-id", {}, source_id),
     " ",
@@ -44,5 +45,6 @@ function SourceItem({ source }) {
     " ",
     h("span.scale", {}, source.scale),
     h.if(source.rasterURL != null)([" ", h("span.raster", "Raster")]),
+    h("span", ["   ", h("a", { href: href1 }, h("code", {}, slug))]),
   ]);
 }
