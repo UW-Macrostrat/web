@@ -7,6 +7,13 @@ import chroma from "chroma-js";
 import { hexToCSSFilter } from "hex-to-css-filter";
 import { navigate } from "vike/client/router";
 import { useLinkIsActive } from "~/renderer/Link";
+import { usePageContext } from "~/renderer/page-context";
+
+function useRandomNumberGenerator() {
+  const ctx = usePageContext();
+  const seed = ctx?.exports?.randomSeed ?? Date.now();
+  return randomGenerator(seed);
+}
 
 const h = hyper.styled(styles);
 
@@ -28,6 +35,7 @@ const flavors: Flavor[] = [
 
 function useFlavor(name): [Flavor, (name: string | null | undefined) => void] {
   /** Use a specific flavor or a random one */
+  const randomGenerator = useRandomNumberGenerator();
   const stateCreator = useCallback(
     (name = undefined, randomNumber = undefined) => {
       if (name == null) {
@@ -42,7 +50,7 @@ function useFlavor(name): [Flavor, (name: string | null | undefined) => void] {
   return [
     flavor,
     (name: string | null | undefined) =>
-      setFlavor(stateCreator(name, Math.random())),
+      setFlavor(stateCreator(name, randomGenerator())),
   ];
 }
 
@@ -112,4 +120,14 @@ export function MacrostratIcon({
       ref,
     })
   );
+}
+
+/* Simple seeded random number generator */
+function randomGenerator(seed) {
+  var m = 2 ** 35 - 31;
+  var a = 185852;
+  var s = seed % m;
+  return function () {
+    return (s = (s * a) % m) / m;
+  };
 }

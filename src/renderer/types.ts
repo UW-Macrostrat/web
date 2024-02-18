@@ -8,8 +8,8 @@ import type {
           /*/
   // When using Server Routing
   PageContextBuiltInClientWithServerRouting as PageContextBuiltInClient,
-  PageContextBuiltInServer,
-  PageContextBuiltIn,
+  PageContextClient as PageContextClientBase,
+  PageContextServer as PageContextServerBase,
 } from "vike/types";
 
 type Page = (pageProps: PageProps) => React.ReactElement;
@@ -28,6 +28,7 @@ export type PageContextCustom = {
     hydrationCanBeAborted?: boolean;
   };
   exports: {
+    randomSeed?: string;
     pageStyle?: PageStyle;
     supportsDarkMode?: boolean;
     documentProps?: {
@@ -37,7 +38,7 @@ export type PageContextCustom = {
   };
 };
 
-type PageContextServer = PageContextBuiltInServer<Page> & PageContextCustom;
-type PageContextClient = PageContextBuiltInClient<Page> & PageContextCustom;
+type OurPageContextServer = PageContextServerBase<Page> & PageContextCustom;
+type OurPageContextClient = PageContextClientBase<Page> & PageContextCustom;
 
-type PageContext = PageContextClient | PageContextServer;
+type PageContext = OurPageContextClient | OurPageContextServer;
