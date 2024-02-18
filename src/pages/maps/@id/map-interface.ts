@@ -28,16 +28,10 @@ import { LngLatBoundsLike } from "mapbox-gl";
 import { useEffect, useMemo, useState } from "react";
 import { MapNavbar } from "~/components/map-navbar";
 import "~/styles/global.styl";
-import { s3Address, tempImageIndex } from "../raster-images";
+import { MapReference } from "~/components";
 import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
-
-function rasterURL(source_id) {
-  const image = tempImageIndex[source_id];
-  if (image == null) return null;
-  return `${s3Address}/${image}`;
-}
 
 interface StyleOpts {
   style: string;
@@ -46,6 +40,7 @@ interface StyleOpts {
     vector: number | null;
     raster: number | null;
   };
+  rasterURL?: string;
 }
 
 const emptyStyle: any = {
@@ -60,6 +55,7 @@ function buildOverlayStyle({
   style,
   focusedMap,
   layerOpacity,
+  rasterURL = null,
 }: StyleOpts): any {
   let mapStyle = emptyStyle;
   if (layerOpacity.vector != null) {
@@ -72,8 +68,7 @@ function buildOverlayStyle({
     });
   }
 
-  const raster = rasterURL(focusedMap);
-  if (raster != null && layerOpacity.raster != null) {
+  if (rasterURL != null && layerOpacity.raster != null) {
     const rasterStyle = {
       ...emptyStyle,
       sources: {
@@ -82,7 +77,7 @@ function buildOverlayStyle({
           tiles: [
             SETTINGS.burwellTileDomain +
               "/cog/tiles/{z}/{x}/{y}.png?url=" +
-              raster,
+              rasterURL,
           ],
           tileSize: 256,
         },
@@ -142,7 +137,7 @@ export default function MapInterface({ map }) {
   const dark = useDarkMode()?.isEnabled ?? false;
   const title = map.properties.name;
 
-  const hasRaster = rasterURL(map.properties.source_id) != null;
+  const hasRaster = map.rasterURL != null;
 
   const bounds: LngLatBoundsLike = useMemo(() => {
     return ensureBoxInGeographicRange(boundingBox(map.geometry));
@@ -284,7 +279,7 @@ export default function MapInterface({ map }) {
         adaptiveWidth: true,
       },
       detailPanelStyle: DetailPanelStyle.FIXED,
-      detailPanel: h(MapLegendPanel, { source_id: map.properties.source_id }),
+      detailPanel: h(MapLegendPanel, map.properties),
     },
     [
       h(
@@ -334,11 +329,18 @@ function BaseLayerSelector({ layer, setLayer }) {
 }
 
 function MapLegendPanel(params) {
+  console.log(params);
   return h(
     InfoDrawerContainer,
     h(
       "div.map-legend-container",
-      h("div.map-legend", [h("h3", "Legend"), h(MapLegendData, params)])
+      h("div.map-legend", [
+        h("div.legend-header", [
+          h(MapReference, { reference: params, showSourceID: false }),
+        ]),
+        h("h3", "Legend"),
+        h(MapLegendData, params),
+      ])
     )
   );
 }

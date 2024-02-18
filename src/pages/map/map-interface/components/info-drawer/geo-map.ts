@@ -3,6 +3,7 @@ import { ExpansionPanel } from "@macrostrat/map-interface";
 import LongText from "../long-text";
 import { IntervalChip } from "../info-blocks";
 import { useAppActions } from "~/pages/map/map-interface/app-state";
+import { MapReference } from "~/components/map-info";
 
 function LongTextRenderer(props) {
   const { name, text } = props;
@@ -99,49 +100,6 @@ function GeologicMapInfo(props) {
       ]),
     ]
   );
-}
-
-export function MapReference(props) {
-  const { reference: ref, onClickSourceID = null } = props;
-  if (!ref || Object.keys(ref).length === 0) {
-    return null;
-  }
-
-  const {
-    authors,
-    ref_year,
-    url,
-    ref_title,
-    ref_source,
-    isbn_doi,
-    source_id,
-    map_id,
-  } = ref;
-
-  const year = ref_year.length ? " " + ref_year + ", " : "";
-  const source = ref_source.length ? ": " + ref_source : "";
-  const doi = isbn_doi.length ? ", " + isbn_doi : "";
-
-  return h("p.reference.map-source-attr", [
-    h("span.attr", "Source: "),
-    authors,
-    year,
-    h("a.ref-link", { href: url, target: "_blank" }, [ref_title]),
-    source,
-    doi,
-    ". ",
-    h(
-      "a",
-      {
-        onClick() {
-          onClickSourceID?.(source_id);
-        },
-      },
-      source_id
-    ),
-    " / ",
-    map_id,
-  ]);
 }
 
 export { GeologicMapInfo };

@@ -1,18 +1,15 @@
-import { apiV2Prefix } from "@macrostrat-web/settings";
-import { PageContextBuiltInServer } from "vike/types";
+import { apiV2Prefix, postgrestPrefix } from "@macrostrat-web/settings";
+import { PageContextServer } from "vike/types";
+import { PostgrestClient } from "@supabase/postgrest-js";
 
-const apiAddress = apiV2Prefix + "/defs/sources";
+const client = new PostgrestClient(postgrestPrefix, {
+  headers: { Accept: "application/geo+json" },
+});
 
-export async function onBeforeRender(pageContext: PageContextBuiltInServer) {
+export async function onBeforeRender(pageContext: PageContextServer) {
   const { id } = pageContext.routeParams;
-
-  const params = new URLSearchParams({
-    format: "geojson",
-    source_id: id,
-  });
-  const response = await fetch(apiAddress + "?" + params);
-  const data: any = await response.json();
-  const map = data?.success?.data?.features[0];
+  const res: any = await client.from("sources").select("*").eq("source_id", id);
+  const map = res?.data?.features[0];
 
   return {
     pageContext: {
