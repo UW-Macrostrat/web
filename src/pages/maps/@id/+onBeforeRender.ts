@@ -1,4 +1,4 @@
-import { apiV2Prefix, postgrestPrefix } from "@macrostrat-web/settings";
+import { postgrestPrefix } from "@macrostrat-web/settings";
 import { PageContextServer } from "vike/types";
 import { PostgrestClient } from "@supabase/postgrest-js";
 

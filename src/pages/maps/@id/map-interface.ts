@@ -22,6 +22,7 @@ import {
   NullableSlider,
   useAPIResult,
   useDarkMode,
+  ErrorBoundary,
 } from "@macrostrat/ui-components";
 import boundingBox from "@turf/bbox";
 import { LngLatBoundsLike } from "mapbox-gl";
@@ -136,8 +137,9 @@ export default function MapInterface({ map }) {
   const [isOpen, setOpen] = useState(false);
   const dark = useDarkMode()?.isEnabled ?? false;
   const title = map.properties.name;
+  console.log(map);
 
-  const hasRaster = map.rasterURL != null;
+  const hasRaster = map.properties.raster_url != null;
 
   const bounds: LngLatBoundsLike = useMemo(() => {
     return ensureBoxInGeographicRange(boundingBox(map.geometry));
@@ -169,6 +171,7 @@ export default function MapInterface({ map }) {
         style,
         focusedMap: map.properties.source_id,
         layerOpacity,
+        rasterURL: map.properties.raster_url,
       })
     );
   }, [
@@ -185,6 +188,7 @@ export default function MapInterface({ map }) {
       style,
       focusedMap: map.properties.source_id,
       layerOpacity,
+      rasterURL: map.properties.raster_url,
     }).layers;
 
     for (const layer of mapStyle.layers) {
@@ -336,7 +340,9 @@ function MapLegendPanel(params) {
       "div.map-legend-container",
       h("div.map-legend", [
         h("div.legend-header", [
-          h(MapReference, { reference: params, showSourceID: false }),
+          h(ErrorBoundary, [
+            h(MapReference, { reference: params, showSourceID: false }),
+          ]),
         ]),
         h("h3", "Legend"),
         h(MapLegendData, params),
