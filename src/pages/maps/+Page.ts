@@ -1,7 +1,6 @@
 import hyper from "@macrostrat/hyper";
 // Page for a list of maps
 import styles from "./main.module.scss";
-import { tempImageIndex, s3Address } from "./raster-images";
 import { AnchorButton } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import { PageHeader } from "~/components/page-header";
@@ -9,14 +8,6 @@ import { PageHeader } from "~/components/page-header";
 const h = hyper.styled(styles);
 
 export function Page({ sources }) {
-  const sources1 = sources.map((source) => {
-    const { source_id } = source;
-    const image = tempImageIndex[source_id];
-    if (image == null) return source;
-    source.rasterURL = `${s3Address}/${image}`;
-    return source;
-  });
-
   return h(ContentPage, [
     h("div.float-right.padding.stick-to-top", [
       h(
@@ -28,7 +19,7 @@ export function Page({ sources }) {
     h(PageHeader, { title: "Maps" }),
     h(
       "ul.maps-list",
-      sources1.map((d) => h(SourceItem, { source: d, key: d.source_id }))
+      sources.map((d) => h(SourceItem, { source: d, key: d.source_id }))
     ),
   ]);
 }
@@ -44,7 +35,7 @@ function SourceItem({ source }) {
     h("a", { href }, [name]),
     " ",
     h("span.scale", {}, source.scale),
-    h.if(source.rasterURL != null)([" ", h("span.raster", "Raster")]),
+    h.if(source.raster_url != null)([" ", h("span.raster", "Raster")]),
     h("span", ["   ", h("a", { href: href1 }, h("code", {}, slug))]),
   ]);
 }

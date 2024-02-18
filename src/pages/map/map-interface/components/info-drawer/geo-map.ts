@@ -1,9 +1,9 @@
 import h from "@macrostrat/hyper";
 import { ExpansionPanel } from "@macrostrat/map-interface";
-import Reference from "../Reference";
 import LongText from "../long-text";
 import { IntervalChip } from "../info-blocks";
 import { useAppActions } from "~/pages/map/map-interface/app-state";
+import { MapReference } from "~/components/map-info";
 
 function LongTextRenderer(props) {
   const { name, text } = props;
@@ -40,6 +40,7 @@ function GeoMapLines(props) {
 
 function GeologicMapInfo(props) {
   const { bedrockExpanded, source } = props;
+  const runAction = useAppActions();
 
   if (!source) return h("div");
 
@@ -87,55 +88,18 @@ function GeologicMapInfo(props) {
           text: source.comments,
         }),
         h(GeoMapLines, { source }),
-        h(MapReference, { reference: source.ref }),
+        h(MapReference, {
+          reference: source.ref,
+          onClickSourceID() {
+            runAction({
+              type: "set-focused-map-source",
+              source_id: source.source_id,
+            });
+          },
+        }),
       ]),
     ]
   );
-}
-
-function MapReference(props) {
-  const { reference: ref } = props;
-  if (!ref || Object.keys(ref).length === 0) {
-    return null;
-  }
-
-  const runAction = useAppActions();
-
-  const {
-    authors,
-    ref_year,
-    url,
-    ref_title,
-    ref_source,
-    isbn_doi,
-    source_id,
-    map_id,
-  } = ref;
-
-  const year = ref_year.length ? " " + ref_year + ", " : "";
-  const source = ref_source.length ? ": " + ref_source : "";
-  const doi = isbn_doi.length ? ", " + isbn_doi : "";
-
-  return h("p.reference.map-source-attr", [
-    h("span.attr", "Source: "),
-    authors,
-    year,
-    h("a.ref-link", { href: url, target: "_blank" }, [ref_title]),
-    source,
-    doi,
-    ". ",
-    h(
-      "a",
-      {
-        onClick() {
-          runAction({ type: "set-focused-map-source", source_id });
-        },
-      },
-      source_id
-    ),
-    " / ",
-    map_id,
-  ]);
 }
 
 export { GeologicMapInfo };
