@@ -9,10 +9,9 @@ import { navigate } from "vike/client/router";
 import { useLinkIsActive } from "~/renderer/Link";
 import { usePageContext } from "~/renderer/page-context";
 
-function useRandomNumberGenerator() {
+function useInitialFlavor() {
   const ctx = usePageContext();
-  const seed = ctx?.exports?.randomSeed ?? Date.now();
-  return randomGenerator(seed);
+  return ctx?.macrostratLogoFlavor;
 }
 
 const h = hyper.styled(styles);
@@ -31,27 +30,31 @@ const flavors: Flavor[] = [
   { name: "granite", color: "pink", pattern: "723", scale: 1.2 },
   { name: "limestone", color: "purple", pattern: "627" },
   { name: "basalt", color: "#40061e", pattern: "717" },
+  { name: "gabbro", color: "black", pattern: "720", scale: 0.8 },
 ];
 
-function useFlavor(name): [Flavor, (name: string | null | undefined) => void] {
+function useFlavor(
+  name: string | null | undefined
+): [Flavor, (name: string | null | undefined) => void] {
   /** Use a specific flavor or a random one */
-  const randomGenerator = useRandomNumberGenerator();
-  const stateCreator = useCallback(
-    (name = undefined, randomNumber = undefined) => {
-      if (name == null) {
-        const random = randomNumber ?? Math.random();
-        return flavors[Math.floor(random * flavors.length)];
-      }
-      return flavors.find((d) => d.name === name);
-    },
-    [name]
+  const initialFlavor = useInitialFlavor();
+  const [flavor, setFlavor_] = useState(
+    () => flavors.find((d) => d.name === initialFlavor) ?? flavors[0]
   );
-  const [flavor, setFlavor] = useState(stateCreator);
-  return [
-    flavor,
-    (name: string | null | undefined) =>
-      setFlavor(stateCreator(name, randomGenerator())),
-  ];
+  const setFlavor = useCallback(
+    (name: string | null | undefined) => {
+      let flavor: Flavor;
+      if (name == null) {
+        const randomNumber = Math.random();
+        flavor = flavors[Math.floor(randomNumber * flavors.length)];
+      } else {
+        flavor = flavors.find((d) => d.name === name);
+      }
+      setFlavor_(flavor);
+    },
+    [setFlavor_]
+  );
+  return [flavor, setFlavor];
 }
 
 function getLineHeight(el) {
@@ -66,6 +69,7 @@ export function MacrostratIcon({
   width,
   height,
   radius = null,
+  style,
   ...rest
 }) {
   const [flavor, setFlavor] = useFlavor(name);

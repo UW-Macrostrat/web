@@ -7,7 +7,7 @@ export default {
     "pageStyle",
     "supportsDarkMode",
     "isolateStyles",
-    "randomSeed",
+    "macrostratLogoFlavor",
   ],
   clientRouting: true,
   hydrationCanBeAborted: true,

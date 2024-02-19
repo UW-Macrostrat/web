@@ -21,6 +21,7 @@ export type PageContextCustom = {
   Page: Page;
   pageProps?: PageProps;
   urlPathname: string;
+  macrostratLogoFlavor?: string;
   config: PageContextBuiltInServerInternal["config"] & {
     clientRouting?: boolean;
     supportsDarkMode?: boolean;
@@ -28,7 +29,6 @@ export type PageContextCustom = {
     hydrationCanBeAborted?: boolean;
   };
   exports: {
-    randomSeed?: string;
     pageStyle?: PageStyle;
     supportsDarkMode?: boolean;
     documentProps?: {
@@ -38,7 +38,7 @@ export type PageContextCustom = {
   };
 };
 
-type OurPageContextServer = PageContextServerBase<Page> & PageContextCustom;
-type OurPageContextClient = PageContextClientBase<Page> & PageContextCustom;
+type PageContextServer = PageContextServerBase<Page> & PageContextCustom;
+type PageContextClient = PageContextClientBase<Page> & PageContextCustom;
 
-type PageContext = OurPageContextClient | OurPageContextServer;
+type PageContext = PageContextClient | PageContextServer;
