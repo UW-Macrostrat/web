@@ -127,7 +127,8 @@
     "vike": "^0.4.159",
     "vike-react": "^0.4.2",
     "vite": "^5.0.12",
-    "vite-plugin-cesium": "^1.2.22"
+    "vite-plugin-cesium": "^1.2.22",
+    "zustand": "^4.5.1"
   },
   "prettier": {},
   "packageManager": "yarn@4.1.0"
