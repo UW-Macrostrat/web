@@ -31,6 +31,7 @@ import {
   HoveredFeatureManager,
   MacrostratLayerManager,
 } from "./map";
+import { run } from "node:test";
 
 const h = hyper.styled(styles);
 
@@ -63,6 +64,8 @@ export default function MainMapView(props) {
 
   // At the moment, these seem to force a re-render of the map
   const { isInitialized, isStyleLoaded } = useMapStatus();
+
+  const runAction = useAppActions();
 
   const mapSettings = useAppState((state) => state.core.mapSettings);
 
@@ -130,6 +133,10 @@ export default function MainMapView(props) {
   // Make map label visibility match the mapLayers state
   useMapLabelVisibility(mapRef, mapLayers.has(MapLayer.LABELS));
 
+  const onMapMoved = useCallback((pos, map) => {
+    runAction({ type: "map-moved", data: { mapPosition: pos } });
+  }, []);
+
   return h(
     MapView,
     {
@@ -142,6 +149,7 @@ export default function MainMapView(props) {
         ? "mapbox-3d-dem"
         : null,
       mapboxToken: SETTINGS.mapboxAccessToken,
+      onMapMoved,
     },
     [
       h(MacrostratLineSymbolManager, { showLineSymbols: hasLineSymbols }),
@@ -151,24 +159,11 @@ export default function MainMapView(props) {
       h(CrossSectionLine),
       h.if(mapLayers.has(MapLayer.SOURCES))(MapSourcesLayer),
       h(ColumnDataManager),
-      h(MapPositionReporter, { initialMapPosition: mapPosition }),
       h(MacrostratLayerManager),
       h(FlyToPlaceManager),
       h(HoveredFeatureManager),
     ]
   );
-}
-
-function MapPositionReporter({ initialMapPosition = null }) {
-  // Connects map position to Redux app state
-  const mapPosition = useMapPosition() ?? initialMapPosition;
-  const runAction = useAppActions();
-
-  useEffect(() => {
-    runAction({ type: "map-moved", data: { mapPosition } });
-  }, [mapPosition]);
-
-  return null;
 }
 
 function ColumnDataManager() {
