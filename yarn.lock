@@ -4671,6 +4671,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@macrostrat-web/map-utils@workspace:*, @macrostrat-web/map-utils@workspace:packages/map-utils":
+  version: 0.0.0-use.local
+  resolution: "@macrostrat-web/map-utils@workspace:packages/map-utils"
+  languageName: unknown
+  linkType: soft
+
 "@macrostrat-web/security@workspace:*, @macrostrat-web/security@workspace:packages/security":
   version: 0.0.0-use.local
   resolution: "@macrostrat-web/security@workspace:packages/security"
@@ -5273,6 +5279,7 @@ __metadata:
     "@loadable/component": "npm:^5.14.1"
     "@macrostrat-web/data-sheet-test": "workspace:*"
     "@macrostrat-web/globe": "workspace:*"
+    "@macrostrat-web/map-utils": "workspace:*"
     "@macrostrat-web/security": "workspace:*"
     "@macrostrat-web/settings": "workspace:*"
     "@macrostrat-web/sift": "workspace:*"

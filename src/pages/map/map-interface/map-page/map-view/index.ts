@@ -31,21 +31,11 @@ import {
   HoveredFeatureManager,
   MacrostratLayerManager,
 } from "./map";
-import { run } from "node:test";
+import { getBaseMapStyle } from "@macrostrat-web/map-utils";
 
 const h = hyper.styled(styles);
 
 mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
-
-export function getBaseMapStyle(mapLayers, isDarkMode = false) {
-  if (mapLayers.has(MapLayer.SATELLITE)) {
-    return SETTINGS.satelliteMapURL;
-  }
-  if (isDarkMode) {
-    return SETTINGS.darkMapURL;
-  }
-  return SETTINGS.baseMapURL;
-}
 
 export default function MainMapView(props) {
   const {
@@ -60,7 +50,10 @@ export default function MainMapView(props) {
   let mapRef = useMapRef();
   const isDarkMode = useInDarkMode();
 
-  const baseMapURL = getBaseMapStyle(mapLayers, isDarkMode);
+  const baseMapURL = getBaseMapStyle(
+    mapLayers.has(MapLayer.SATELLITE),
+    isDarkMode
+  );
 
   // At the moment, these seem to force a re-render of the map
   const { isInitialized, isStyleLoaded } = useMapStatus();
