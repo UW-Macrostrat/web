@@ -1,19 +1,22 @@
 import { FormGroup, Label, Slider, Spinner } from "@blueprintjs/core";
+import { getBaseMapStyle } from "@macrostrat-web/map-utils";
+import {
+  FloatingNavbar,
+  MapAreaContainer,
+  MapLoadingButton,
+  MapView,
+  PanelCard,
+} from "@macrostrat/map-interface";
+import { useMapRef } from "@macrostrat/mapbox-react";
 import { useDarkMode } from "@macrostrat/ui-components";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import {
   useAppActions,
   useAppState,
 } from "~/pages/map/map-interface/app-state";
-import { MapAreaContainer } from "~/pages/map/map-interface/map-page";
-import { PanelCard } from "~/pages/map/map-interface/map-page/menu";
-import { getBaseMapStyle } from "~/pages/map/map-interface/map-page/map-view";
 import { MacrostratRasterTileset, buildRasterStyle, h } from ".";
-import { FloatingNavbar, MapLoadingButton } from "@macrostrat/map-interface";
 import { useMapStyle } from "./utils";
-import { useMapRef } from "@macrostrat/mapbox-react";
-import { MapView } from "@macrostrat/map-interface";
 
 export function RasterOpacityManager({ layerID, opacity }) {
   const mapRef = useMapRef();
@@ -52,7 +55,7 @@ export function RasterMapInspectorPage({
   let detailElement = null;
 
   const { isEnabled } = useDarkMode();
-  const baseMapURL = getBaseMapStyle(new Set([]), isEnabled);
+  const baseMapURL = getBaseMapStyle(false, isEnabled);
 
   const rasterStyle = useMemo(() => {
     return buildRasterStyle(tileset);

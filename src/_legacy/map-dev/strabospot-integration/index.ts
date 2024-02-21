@@ -1,32 +1,30 @@
 import { hyperStyled } from "@macrostrat/hyper";
-import * as styles from "./main.module.styl";
-import { Spinner } from "@blueprintjs/core";
-import { useDarkMode, useAPIResult, JSONView } from "@macrostrat/ui-components";
+import { JSONView, useAPIResult, useDarkMode } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
-import { useEffect, useState } from "react";
-import { useCallback } from "react";
-import { LocationPanel } from "@macrostrat/map-interface";
+import { useCallback, useEffect, useState } from "react";
+import * as styles from "./main.module.styl";
 
-import { FloatingNavbar } from "@macrostrat/map-interface";
-import { MapAreaContainer } from "~/pages/map/map-interface/map-page";
-import { PanelCard } from "~/pages/map/map-interface/map-page/menu";
-import { getBaseMapStyle } from "~/pages/map/map-interface/map-page/map-view";
 import {
-  MapBottomControls,
+  FloatingNavbar,
+  MapAreaContainer,
+  PanelCard,
   MapStyledContainer,
+  MapView,
+  LocationPanel,
 } from "@macrostrat/map-interface";
-import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
-import { mergeStyles } from "@macrostrat/mapbox-utils";
+
+import { getBaseMapStyle } from "@macrostrat-web/map-utils";
+import { burwellTileDomain } from "@macrostrat-web/settings";
 import { useMap } from "@macrostrat/mapbox-react";
 import {
-  setupPointSymbols,
+  buildMacrostratStyle,
   getOrientationSymbolName,
   pointLayoutProperties,
+  setupPointSymbols,
 } from "@macrostrat/mapbox-styles";
+import { mergeStyles } from "@macrostrat/mapbox-utils";
 import { ParentRouteButton } from "~/components/map-navbar";
 import { useMapStyle } from "../map-layers/utils";
-import { MapView } from "@macrostrat/map-interface";
-import { burwellTileDomain } from "@macrostrat-web/settings";
 
 const h = hyperStyled(styles);
 
@@ -203,7 +201,7 @@ export default function StraboSpotIntegrationPage({
   //console.log(datasets);
 
   // Style management
-  const baseMapURL = getBaseMapStyle(new Set([]), isEnabled);
+  const baseMapURL = getBaseMapStyle(false, isEnabled);
 
   const style = useMapStyle(baseMapURL, overlays);
 
@@ -319,4 +317,4 @@ function LayerClickReporter({ onSelectItems, layerID }) {
   return null;
 }
 
-export { MapStyledContainer, MapBottomControls };
+export { MapStyledContainer };

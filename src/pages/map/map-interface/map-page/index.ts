@@ -145,5 +145,4 @@ function InfoDrawerRoute() {
   });
 }
 
-export { MapAreaContainer };
 export default MapPageRoutes;
