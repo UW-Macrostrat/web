@@ -7,10 +7,7 @@ import {
   MapView,
   PanelCard,
 } from "@macrostrat/map-interface";
-import {
-  buildMacrostratStyle,
-  buildXRayStyle,
-} from "@macrostrat/mapbox-styles";
+import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
 import { NullableSlider, useDarkMode } from "@macrostrat/ui-components";
 import boundingBox from "@turf/bbox";
@@ -18,15 +15,13 @@ import { LngLatBoundsLike } from "mapbox-gl";
 import { useEffect, useMemo, useState } from "react";
 import { MapNavbar } from "~/components/map-navbar";
 import "~/styles/global.styl";
-import { s3Address, tempImageIndex } from "~/pages/maps/raster-images";
 import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
 
 function rasterURL(source_id) {
-  const image = tempImageIndex[source_id];
-  if (image == null) return null;
-  return `${s3Address}/${image}`;
+  // Placeholder for figuring out a better version of this.
+  return null;
 }
 
 interface StyleOpts {
