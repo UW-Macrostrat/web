@@ -1,5 +1,4 @@
 import { ingestPrefix, postgrestPrefix } from "@macrostrat-web/settings";
-import fetch from "node-fetch";
 import { PostgrestClient } from "@supabase/postgrest-js";
 
 const postgrest = new PostgrestClient(postgrestPrefix);

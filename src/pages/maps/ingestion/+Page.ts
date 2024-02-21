@@ -4,7 +4,6 @@ import hyper from "@macrostrat/hyper";
 
 // Page for a list of maps
 import styles from "./main.module.sass";
-import { tempImageIndex, s3Address } from "../../maps/raster-images";
 import {
   Icon,
   IconSize,
@@ -18,14 +17,6 @@ import { ContentPage } from "~/layouts";
 const h = hyper.styled(styles);
 
 export function Page({ sources, user, url, ingest_api }) {
-  const sources1 = sources.map((source) => {
-    const { source_id } = source;
-    const image = tempImageIndex[source_id];
-    if (image == null) return source;
-    source.rasterURL = `${s3Address}/${image}`;
-    return source;
-  });
-
   return h(ContentPage, [
     h(Navbar, {}, [
       h(Navbar.Group, { align: "left" }, [h(Navbar.Heading, "Source Maps")]),
@@ -59,30 +50,29 @@ export function Page({ sources, user, url, ingest_api }) {
           flexDirection: "column",
         },
       },
-      [
-        ...sources1.map((d) => {
-          return h(
-            "div",
-            { style: { maxWidth: "1000px", width: "100%", margin: "auto" } },
-            [
-              h(SourceCard, {
-                source: d,
-                key: d.source_id,
-                user: user,
-              }),
-            ]
-          );
-        }),
-      ]
+      sources.map((d) => {
+        return h(
+          "div",
+          { style: { maxWidth: "1000px", width: "100%", margin: "auto" } },
+          [
+            h(SourceCard, {
+              source: d,
+              key: d.source_id,
+              user: user,
+            }),
+          ]
+        );
+      })
     ),
   ]);
 }
 
 interface Source {
   source_id: number;
+  slug: string;
   name: string;
   scale: number;
-  rasterURL?: string;
+  raster_url?: string;
 }
 
 const SourceCard = ({
@@ -129,7 +119,7 @@ const SourceCard = ({
           h("code", slug),
         ]),
         h("h6", { style: { margin: "0px" } }, source.scale),
-        h.if(source.rasterURL != null)([
+        h.if(source.raster_url != null)([
           " ",
           h("span.raster", { style: { marginTop: ".5rem" } }, "Raster"),
         ]),
