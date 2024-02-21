@@ -17,6 +17,16 @@ const isProduction = process.env.NODE_ENV === "production";
 
 startServer();
 
+const flavors = [
+  "sandstone",
+  "shale",
+  "limestone",
+  "granite",
+  "basalt",
+  "gabbro",
+  "dolomite",
+];
+
 async function startServer() {
   const app = express();
 
@@ -61,11 +71,13 @@ async function startServer() {
     } catch (e) {
       // I don't care if it fails, it just means the user isn't logged in
     }
+    const random = Math.random();
+    const flavor = flavors[Math.floor(random * flavors.length)];
 
     const pageContextInit = {
       urlOriginal: req.originalUrl,
       user: user,
-      randomSeed: `${Math.random()}`.slice(2),
+      macrostratLogoFlavor: flavor,
     };
 
     const pageContext = await renderPage(pageContextInit);

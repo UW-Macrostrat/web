@@ -13,6 +13,8 @@ import {
   MapView,
   TileExtentLayer,
   TileInfo,
+  MapAreaContainer,
+  PanelCard,
 } from "@macrostrat/map-interface";
 import {
   useMapConditionalStyle,
@@ -33,10 +35,7 @@ import { useDarkMode, useStoredState } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
 import { useCallback, useMemo, useState } from "react";
 import { ParentRouteButton } from "~/components/map-navbar";
-import { useAppActions } from "../../../pages/map/map-interface/app-state";
-import { MapAreaContainer } from "../../../pages/map/map-interface/map-page";
-import { getBaseMapStyle } from "../../../pages/map/map-interface/map-page/map-view";
-import { PanelCard } from "../../../pages/map/map-interface/map-page/menu";
+import { getBaseMapStyle } from "@macrostrat-web/map-utils";
 import styles from "../main.module.styl";
 import { useMapStyle } from "./utils";
 import { Spacer } from "@macrostrat/ui-components";
@@ -295,7 +294,6 @@ export function BasicLayerInspectorPage({
   layer: any;
 }) {
   // A stripped-down page for map development
-  const runAction = useAppActions();
   /* We apply a custom style to the panel container when we are interacting
     with the search bar, so that we can block map interactions until search
     bar focus is lost.
@@ -349,7 +347,7 @@ export function BasicLayerInspectorPage({
   const { isEnabled } = useDarkMode();
 
   // Style management
-  const baseMapURL = getBaseMapStyle(new Set([]), isEnabled);
+  const baseMapURL = getBaseMapStyle(false, isEnabled);
 
   const _overlayStyle = useMemo(() => {
     return buildBasicStyle({

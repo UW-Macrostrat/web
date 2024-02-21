@@ -8,8 +8,8 @@ import type {
           /*/
   // When using Server Routing
   PageContextBuiltInClientWithServerRouting as PageContextBuiltInClient,
-  PageContextBuiltInServer,
-  PageContextBuiltIn,
+  PageContextClient as PageContextClientBase,
+  PageContextServer as PageContextServerBase,
 } from "vike/types";
 
 type Page = (pageProps: PageProps) => React.ReactElement;
@@ -21,6 +21,7 @@ export type PageContextCustom = {
   Page: Page;
   pageProps?: PageProps;
   urlPathname: string;
+  macrostratLogoFlavor?: string;
   config: PageContextBuiltInServerInternal["config"] & {
     clientRouting?: boolean;
     supportsDarkMode?: boolean;
@@ -37,7 +38,7 @@ export type PageContextCustom = {
   };
 };
 
-type PageContextServer = PageContextBuiltInServer<Page> & PageContextCustom;
-type PageContextClient = PageContextBuiltInClient<Page> & PageContextCustom;
+type PageContextServer = PageContextServerBase<Page> & PageContextCustom;
+type PageContextClient = PageContextClientBase<Page> & PageContextCustom;
 
 type PageContext = PageContextClient | PageContextServer;
