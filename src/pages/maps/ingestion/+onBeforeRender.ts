@@ -1,16 +1,13 @@
-import { ingestPrefix, postgrestPrefix } from "@macrostrat-web/settings";
-import { PostgrestClient } from "@supabase/postgrest-js";
+import { ingestPrefix } from "@macrostrat-web/settings";
 
-const postgrest = new PostgrestClient(postgrestPrefix);
 
 export async function onBeforeRender(pageContext) {
-  const res = await postgrest
-    .from("sources_ingestion")
-    .select("*")
-    .order("source_id", { ascending: false });
+
+  const response = await fetch(`${ingestPrefix}/ingest-process?source_id=order_by&source_id=not.is.null&state=eq.ingested&page_size=1000`);
+  const ingest_processes = await response.json();
 
   const pageProps = {
-    sources: res.data,
+    sources: ingest_processes.map(x => x.source),
     user: pageContext.user,
     ingest_api: ingestPrefix,
   };
