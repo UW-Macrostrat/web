@@ -18,7 +18,7 @@ import { navigate } from "vike/client/router";
 
 const h = hyperStyled(styles);
 
-function ColumnPage({ columnInfo }) {
+function ColumnPage({ columnInfo, linkPrefix = "/" }) {
   const { units, geometry } = columnInfo;
 
   const selectedUnit = useUnitSelection(units);
@@ -71,7 +71,7 @@ function ColumnPage({ columnInfo }) {
         },
         setCurrentColumn(newColumn) {
           const { col_id } = newColumn.properties;
-          navigate(`/columns/${col_id}`);
+          navigate(linkPrefix + `columns/${col_id}`);
         },
         margin: 10,
         project_id: columnInfo.project_id,
@@ -81,11 +81,14 @@ function ColumnPage({ columnInfo }) {
   ]);
 }
 
-export default function ColumnInspector({ columnInfo }) {
+export default function ColumnInspector({ columnInfo, linkPrefix }) {
   return h(
     MacrostratAPIProvider,
     { baseURL: apiV2Prefix },
-    h(UnitSelectionProvider, h(PatternProvider, h(ColumnPage, { columnInfo })))
+    h(
+      UnitSelectionProvider,
+      h(PatternProvider, h(ColumnPage, { columnInfo, linkPrefix }))
+    )
   );
 }
 

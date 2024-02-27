@@ -1,13 +1,8 @@
-import { apiV2Prefix } from "@macrostrat-web/settings";
-import fetch from "node-fetch";
-
-const apiAddress = apiV2Prefix + "/defs/projects";
+import { fetchAPIData } from "../columns/utils";
 
 export async function onBeforeRender(pageContext) {
   // `.page.server.js` files always run in Node.js; we could use SQL/ORM queries here.
-  const response = await fetch(apiAddress + "?all");
-  const res = await response.json();
-  let projects = res.success.data;
+  const projects = await fetchAPIData("/defs/projects", { all: true });
 
   return {
     pageContext: {
