@@ -13,6 +13,8 @@ import { apiV2Prefix } from "@macrostrat-web/settings";
 import { PatternProvider } from "~/_providers";
 import styles from "./column-inspector.module.styl";
 import ModalUnitPanel from "./modal-panel";
+import { BasePage } from "~/layouts";
+import { PageHeader } from "~/components";
 
 import { navigate } from "vike/client/router";
 
@@ -27,56 +29,58 @@ function ColumnPage({ columnInfo, linkPrefix = "/" }) {
   const lat = new Number(columnInfo.lat);
   const zoom = 7;
 
-  return h("div.column-ui", [
-    h("div.left-column", [
-      h("div.column-view", [
-        h("h1", columnInfo.col_name),
-        h("p.column-details", [
-          h("span.column-id", ["#", columnInfo.col_id]),
-          ", ",
-          h("span.project", ["project ", columnInfo.project_id]),
-          ", ",
-          h(
-            "a",
-            {
-              href: `/map/loc/${lon}/${lat}/column#z=${zoom}&show=columns,geology`,
+  return h(BasePage, [
+    h(PageHeader, { title: columnInfo.col_name, className: "column-header" }),
+    h("div.column-ui", [
+      h("div.left-column", [
+        h("div.column-view", [
+          h("p.column-details", [
+            h("span.column-id", ["#", columnInfo.col_id]),
+            ", ",
+            h("span.project", ["project ", columnInfo.project_id]),
+            ", ",
+            h(
+              "a",
+              {
+                href: `/map/loc/${lon}/${lat}/column#z=${zoom}&show=columns,geology`,
+              },
+              "show in map"
+            ),
+            ".",
+          ]),
+          h(Column, {
+            data: units,
+            unconformityLabels: true,
+            columnWidth: 250,
+            width: 500,
+            unitComponentProps: {
+              nColumns: 3,
             },
-            "show in map"
-          ),
-          ".",
+          }),
         ]),
-        h(Column, {
-          data: units,
-          unconformityLabels: true,
-          columnWidth: 250,
-          width: 500,
-          unitComponentProps: {
-            nColumns: 3,
-          },
-        }),
       ]),
-    ]),
-    h("div.right-column", [
-      h.if(selectedUnit == null)(ColumnNavigatorMap, {
-        className: "column-map",
-        format: "geojson_bare",
-        currentColumn: {
-          geometry,
-          type: "Feature",
-          properties: {
-            col_id: columnInfo.col_id,
-            col_name: columnInfo.col_name,
-            project_id: columnInfo.project_id,
+      h("div.right-column", [
+        h.if(selectedUnit == null)(ColumnNavigatorMap, {
+          className: "column-map",
+          format: "geojson_bare",
+          currentColumn: {
+            geometry,
+            type: "Feature",
+            properties: {
+              col_id: columnInfo.col_id,
+              col_name: columnInfo.col_name,
+              project_id: columnInfo.project_id,
+            },
           },
-        },
-        setCurrentColumn(newColumn) {
-          const { col_id } = newColumn.properties;
-          navigate(linkPrefix + `columns/${col_id}`);
-        },
-        margin: 10,
-        project_id: columnInfo.project_id,
-      }),
-      h(ModalUnitPanel, { unitData: units }),
+          setCurrentColumn(newColumn) {
+            const { col_id } = newColumn.properties;
+            navigate(linkPrefix + `columns/${col_id}`);
+          },
+          margin: 10,
+          project_id: columnInfo.project_id,
+        }),
+        h(ModalUnitPanel, { unitData: units }),
+      ]),
     ]),
   ]);
 }

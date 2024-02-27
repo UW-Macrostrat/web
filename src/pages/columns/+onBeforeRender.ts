@@ -1,4 +1,4 @@
-import { getGroupedColumns } from "../projects/@project/+onBeforeRender";
+import { getGroupedColumns } from "./utils";
 
 export async function onBeforeRender(pageContext) {
   const columnGroups = await getGroupedColumns(1);

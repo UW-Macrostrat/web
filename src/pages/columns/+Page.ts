@@ -34,5 +34,13 @@ function ColumnItem({ data, linkPrefix = "/" }) {
       " ",
       h(Tag, { minimal: true }, "in process"),
     ]),
+    h.if(data.status == "obsolete")([
+      " ",
+      h(Tag, { minimal: true, intent: "danger" }, "obsolete"),
+    ]),
+    h.if(data?.t_units == 0)([
+      " ",
+      h(Tag, { minimal: true, intent: "warning" }, "empty"),
+    ]),
   ]);
 }

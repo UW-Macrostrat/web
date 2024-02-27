@@ -2,6 +2,7 @@ import { apiV2Prefix } from "@macrostrat-web/settings";
 import { preprocessUnits } from "@macrostrat/column-views/src/helpers";
 import fetch from "node-fetch";
 import { ColumnSummary } from "~/pages/map/map-interface/app-state/handlers/columns";
+import { fetchAPIData } from "~/pages/columns/utils";
 
 async function getAndUnwrap<T>(url: string): Promise<T> {
   const res = await fetch(url);
@@ -26,9 +27,10 @@ export async function onBeforeRender(pageContext) {
         "?format=geojson&response=long&in_process=true&col_id=" +
         col_id
     ),
-    getAndUnwrap(
-      apiV2Prefix + "/units?response=long&in_process=true&col_id=" + col_id
-    ),
+    fetchAPIData(`/units`, {
+      response: "long",
+      col_id,
+    }),
   ]);
 
   const [column, unitsLong]: [any, any] = responses;
