@@ -11,15 +11,23 @@ async function getAndUnwrap<T>(url: string): Promise<T> {
 
 export async function onBeforeRender(pageContext) {
   // `.page.server.js` files always run in Node.js; we could use SQL/ORM queries here.
-  const col_id = pageContext.routeParams.id;
+  const col_id = pageContext.routeParams.column;
+  const project_id = pageContext.routeParams.project;
 
   // https://v2.macrostrat.org/api/v2/columns?col_id=3&response=long
 
+  const baseRoute = project_id == null ? "/columns" : `/defs/columns`;
+
   const responses = await Promise.all([
     getAndUnwrap(
-      apiV2Prefix + "/columns?format=geojson&response=long&col_id=" + col_id
+      apiV2Prefix +
+        baseRoute +
+        "?format=geojson&response=long&in_process=true&col_id=" +
+        col_id
     ),
-    getAndUnwrap(apiV2Prefix + "/units?response=long&col_id=" + col_id),
+    getAndUnwrap(
+      apiV2Prefix + "/units?response=long&in_process=true&col_id=" + col_id
+    ),
   ]);
 
   const [column, unitsLong]: [any, any] = responses;
