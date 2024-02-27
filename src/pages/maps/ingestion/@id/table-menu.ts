@@ -32,6 +32,8 @@ interface TableMenuProps {
   filter: Filter;
   onGroupChange: (group: string | undefined) => void;
   group: string | undefined;
+  onHide: () => void;
+  hidden: boolean;
 }
 
 const TableMenu = ({
@@ -40,6 +42,7 @@ const TableMenu = ({
   filter,
   onGroupChange,
   group,
+  onHide
 }: TableMenuProps) => {
   const [inputPlaceholder, setInputPlaceholder] = React.useState<string>("");
 
@@ -115,7 +118,6 @@ const TableMenu = ({
           ),
         ]),
       ]),
-      h("div.filter-header", {}, ["Group"]),
       h("div.filter-select", {}, [
         h(
           Button,
@@ -123,12 +125,29 @@ const TableMenu = ({
             rightIcon: groupActive ? "tick" : "disable",
             alignText: "left",
             intent: groupActive ? "success" : "warning",
-            text: groupActive ? "Active" : "Inactive",
+            text: groupActive ? "Grouped By" : "Group By",
             fill: true,
             onClick: () => {
               onGroupChange(
                 group == filter.column_name ? undefined : filter.column_name
               );
+            },
+          },
+          []
+        ),
+      ]),
+      ,
+      h("div.filter-select", {}, [
+        h(
+          Button,
+          {
+            rightIcon: "disable",
+            alignText: "left",
+            intent: "warning",
+            text: "Hide",
+            fill: true,
+            onClick: () => {
+              onHide()
             },
           },
           []

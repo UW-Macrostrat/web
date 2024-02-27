@@ -384,6 +384,10 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
         });
       };
 
+      const setHidden = () => {
+          setHiddenColumns([...hiddenColumns, columnName]);
+      }
+
       return h(
         ColumnHeaderCell2,
         {
@@ -424,6 +428,8 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
               filter: filter,
               onGroupChange: setGroup,
               group: dataParameters?.group,
+              onHide: setHidden,
+              hidden: hiddenColumns.includes(columnName)
             }),
           name: columnName,
           style: {
