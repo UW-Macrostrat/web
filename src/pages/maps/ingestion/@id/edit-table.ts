@@ -13,11 +13,16 @@ import {
 import {
   HotkeysProvider,
   InputGroup,
+  Menu,
+  MenuItem,
   Button,
   useHotkeys,
   Icon,
-  IconSize,
+  IconSize
 } from "@blueprintjs/core";
+import {
+  Popover2
+} from "@blueprintjs/popover2";
 import { Spinner, ButtonGroup } from "@blueprintjs/core";
 import {
   Column,
@@ -578,6 +583,24 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
         h.if(error != undefined)("div.warning", {}, [error]),
         h("div.input-form", {}, [
           h(ButtonGroup, [
+            h(
+              Popover2,
+              {
+                interactionKind: "click",
+                minimal: true,
+                placement: "bottom-start",
+                content: h(
+                  Menu, {
+
+                  }, [
+                    h(MenuItem, {disabled: hiddenColumns.length == 0, icon: "eye-open", text: "Show All", onClick: () => setHiddenColumns([])}, [])
+                  ]
+                ),
+                renderTarget: ({ isOpen, ref, ...targetProps }) => (
+                  h(Button, {...targetProps, elementRef: ref, icon: "menu"}, [])
+                )
+              }
+            ),
             h(
               Button,
               {
