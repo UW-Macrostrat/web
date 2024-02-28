@@ -86,13 +86,6 @@ interface EditTableProps {
   ingest_process: any;
 }
 
-interface TableState {
-  error: string | undefined;
-  filters: Filters;
-  group: string | undefined;
-  tableSelection: TableSelection;
-}
-
 export default function TableInterface({ url, ingest_process }: EditTableProps) {
   // Cell refs
   const ref = useRef<MutableRefObject<any>[][]>(null);
@@ -103,6 +96,9 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
     undefined
   );
 
+  // Data Loading
+  const [loading, setLoading] = useState<boolean>(true);
+
   // Hidden Columns
   const [hiddenColumns, setHiddenColumns] = useState<string[]>([]);
 
@@ -112,7 +108,7 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
     filter: {},
   });
   const [data, setData] = useState<any[]>([]);
-  const [tableColumns, setTableColumns] = useState<string[]>([]);
+  const [tableColumns, setTableColumns] = useState<string[]>(["orig_id", "descrip", "ready", "name", "strat_name", "age", "lith", "comments", "t_interval", "b_interval"]);
 
   // Error State
   const [error, setError] = useState<string | undefined>(undefined);
@@ -167,7 +163,7 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
 
       // Update the table columns on first load
       setTableColumns((p) => {
-        return typeof p == "object" && p.length > 0 ? p : Object.keys(data[0]);
+        return Object.keys(data[0]).length > 0 ? Object.keys(data[0]) : p;
       });
 
       // Apply table updates to the data
@@ -200,7 +196,12 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
   // On mount get data
   useEffect(() => {
     (async () => {
+
+      setLoading(true)
+
       setData(await getData(tableUpdates, dataParameters));
+
+      setLoading(false)
     })();
   }, [dataParameters]);
 
@@ -345,6 +346,8 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
       });
     }
 
+    setDataParameters(structuredClone(dataParameters))
+    setUpdateProgress(undefined);
     setTableUpdates([]);
   }, [tableUpdates]);
 
@@ -560,10 +563,6 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
     };
   }, [defaultColumnConfig, tableColumns, dataParameters, data]);
 
-  if (data.length == 0 && error == undefined) {
-    return h(Spinner);
-  }
-
   return h(
     "div",
     {
@@ -629,6 +628,7 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
 
               setFocusedCell(focusedCellCoordinates);
             },
+            loadingOptions: loading ? ["cells", "column-header"] : [],
             focusedCell: focusedCell,
             onPaste: (clipboardData, rowIndex, columnIndex) => {
               const pastedText = clipboardData.getData("text/plain");
