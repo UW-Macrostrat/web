@@ -2,7 +2,7 @@
 
 Macrostrat's map interface is the intersection of stratigraphic, bedrock, paleoenvironment, and paleontology data in the modern world.
 
-Currently the application is bundled using webpackv5; however, in the near future we will be transitioning to use [NextJs](https://nextjs.org/) to take advantage of server-side rendering, simplified page routing, and already managed bundling.
+Version 5 of the application transitions to using [Vite](https://vitejs.dev/) for bundling and [Vike](https://vike.dev/) for server-side rendering. We are working on updating this version for performance and stability.
 
 ## Installation for local development
 
