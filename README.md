@@ -12,9 +12,17 @@ This package should work with Yarn, but we haven't yet tested it.
 
 Install dependencies with `npm bootstrap` (which is simply an alias to `npm install --workspaces && npm install`).
 
-To begin the development server run `npm run dev`. The server will be hosted to `localhost:3000` by defualt.
+To begin the development server run `npm run dev`. The server will be hosted to `localhost:3000` by default.
 
-## Running Locally
+## Installation for local development
+
+1. Clone the repository
+2. Pull down submodules (`git submodule update --init --recursive`)
+3. Run `yarn install` to update packages
+
+## Packaging
+
+### Running locally with Docker
 
 Spins up a instance of the website for development on the same node image used for prod. 
 
@@ -22,7 +30,7 @@ Spins up a instance of the website for development on the same node image used f
 docker run -it -p 3010:3000 -v $(pwd):/app -w /app node:20 git config --global --add safe.directory /app && yarn run dev
 ```
 
-## Building Production Locally
+### Building for production
 
 This is mainly here for reference, the actual prod image is built via Github CI.
 
