@@ -4,21 +4,12 @@ Macrostrat's map interface is the intersection of stratigraphic, bedrock, paleoe
 
 Currently the application is bundled using webpackv5; however, in the near future we will be transitioning to use [NextJs](https://nextjs.org/) to take advantage of server-side rendering, simplified page routing, and already managed bundling.
 
-## Getting started
-
-This package requires relatively new features of package managers for multi-package workspaces.
-Make sure you have NPM version 7 or higher. This can be installed with `npm install -g npm@7`.
-This package should work with Yarn, but we haven't yet tested it.
-
-Install dependencies with `npm bootstrap` (which is simply an alias to `npm install --workspaces && npm install`).
-
-To begin the development server run `npm run dev`. The server will be hosted to `localhost:3000` by default.
-
 ## Installation for local development
 
 1. Clone the repository
 2. Pull down submodules (`git submodule update --init --recursive`)
 3. Run `yarn install` to update packages
+4. `yarn run dev` starts the development server
 
 ## Packaging
 
