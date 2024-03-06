@@ -8,8 +8,9 @@ Currently the application is bundled using webpackv5; however, in the near futur
 
 1. Clone the repository
 2. Pull down submodules (`git submodule update --init --recursive`)
-3. Run `yarn install` to update packages
-4. `yarn run dev` starts the development server
+3. Create and populate a `.env` file with the appropriate environment variables (See [`.env.example`](https://github.com/UW-Macrostrat/web/blob/main/.env.example) for more information.)
+4. Run `yarn install` to update packages
+5. `yarn run dev` starts the development server
 
 ## Packaging
 
