@@ -150,7 +150,13 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
     async (newTableUpdates: TableUpdate[]) => {
       // If a new update is available apply it to the data
       if (newTableUpdates.length > tableUpdates.length) {
-        let newData = applyTableUpdate(data, newTableUpdates.slice(-1)[0]);
+
+        let newData = data;
+        // Run the new table updates
+        for( const updateIndex in [...Array(newTableUpdates.length - tableUpdates.length).keys()] ){
+          let updateIndexInt = -1 * (parseInt(updateIndex) + 1)
+          newData = applyTableUpdate(newData, newTableUpdates.slice(updateIndexInt)[0]);
+        }
         setData(newData);
       }
 
@@ -551,7 +557,23 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
                 data,
                 dataParameters
               );
-              setTableUpdates([...tableUpdates, tableUpdate]);
+
+              let newTableUpdates = [...tableUpdates, tableUpdate]
+
+              if(data[rowIndex]['b_interval'] == undefined || data[rowIndex]['b_interval'] == ""){
+                let oppositeIntervalTableUpdate = getTableUpdate(
+                  url,
+                  value,
+                  "b_interval",
+                  rowIndex,
+                  data,
+                  dataParameters
+                );
+
+                newTableUpdates.push(oppositeIntervalTableUpdate)
+              }
+
+              setTableUpdates(newTableUpdates);
             },
             value: data.length == 0 ? "" : data[rowIndex]["t_interval"],
           }),
@@ -575,7 +597,23 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
                 data,
                 dataParameters
               );
-              setTableUpdates([...tableUpdates, tableUpdate]);
+
+              let newTableUpdates = [...tableUpdates, tableUpdate]
+
+              if(data[rowIndex]['t_interval'] == undefined || data[rowIndex]['t_interval'] == ""){
+                let oppositeIntervalTableUpdate = getTableUpdate(
+                  url,
+                  value,
+                  "t_interval",
+                  rowIndex,
+                  data,
+                  dataParameters
+                );
+
+                newTableUpdates.push(oppositeIntervalTableUpdate)
+              }
+
+              setTableUpdates(newTableUpdates);
             },
             value: data.length == 0 ? "" : data[rowIndex]["b_interval"],
           }),
