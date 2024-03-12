@@ -76,14 +76,14 @@ const FINAL_COLUMNS = [
   "source_id",
   "orig_id",
   "descrip",
-  "ready",
+  "omit",
   "name",
   "strat_name",
   "age",
   "lith",
   "comments",
-  "t_interval",
   "b_interval",
+  "t_interval"
 ];
 
 interface EditTableProps {
@@ -113,7 +113,7 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
     filter: {},
   });
   const [data, setData] = useState<any[]>([]);
-  const [tableColumns, setTableColumns] = useState<string[]>(["orig_id", "descrip", "ready", "name", "strat_name", "age", "lith", "comments", "b_interval", "t_interval"]);
+  const [tableColumns, setTableColumns] = useState<string[]>(FINAL_COLUMNS);
 
   // Error State
   const [error, setError] = useState<string | undefined>(undefined);
@@ -168,7 +168,22 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
 
       // Update the table columns on first load
       setTableColumns((p) => {
-        return Object.keys(data[0]).length > 0 ? Object.keys(data[0]) : p;
+
+        // Catch when there is no data
+        if(data == undefined || data.length == 0) {
+          return p;
+        }
+
+        // If the data has its own columns defined
+        if(Object.keys(data[0]).length > 0){
+
+          // Get the keys that are not in the final columns
+          const additionalColumns = Object.keys(data[0]).filter((x) => !FINAL_COLUMNS.includes(x));
+
+          return [...FINAL_COLUMNS, ...additionalColumns];
+        }
+
+        return p;
       });
 
       // Apply table updates to the data
