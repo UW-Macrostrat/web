@@ -27,6 +27,7 @@ let EditableCell = forwardRef((props: EditableCell2Props, ref) => {
         "input",
         {
           ref: ref,
+          disabled: props.editableTextProps.disabled,
           className: "editable-cell",
           style: {
             width: (value?.length ?? 2) + "ch",

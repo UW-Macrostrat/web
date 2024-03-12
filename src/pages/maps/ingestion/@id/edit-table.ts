@@ -523,6 +523,9 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
                 );
                 setTableUpdates([...tableUpdates, tableUpdate]);
               },
+              editableTextProps: {
+                disabled: !FINAL_COLUMNS.includes(columnName),
+              },
               value: data.length == 0 ? "" : data[rowIndex][columnName],
             }),
           key: columnName,
