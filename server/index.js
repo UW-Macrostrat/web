@@ -62,7 +62,6 @@ async function startServer() {
   app.get("*", async (req, res, next) => {
     // Pull out the authorization cookie and decrypt it
     let user = undefined;
-
     try {
       const authHeader = req.cookies?.Authorization;
       const secret = new TextEncoder().encode(process.env.SECRET_KEY);
@@ -71,6 +70,11 @@ async function startServer() {
     } catch (e) {
       // I don't care if it fails, it just means the user isn't logged in
     }
+    if(!isProduction) {
+      user = {groups: [1]}
+    }
+
+    // Generate a Random logo
     const random = Math.random();
     const flavor = flavors[Math.floor(random * flavors.length)];
 

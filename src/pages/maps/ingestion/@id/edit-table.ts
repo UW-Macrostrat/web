@@ -113,7 +113,7 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
     filter: {},
   });
   const [data, setData] = useState<any[]>([]);
-  const [tableColumns, setTableColumns] = useState<string[]>(["orig_id", "descrip", "ready", "name", "strat_name", "age", "lith", "comments", "t_interval", "b_interval"]);
+  const [tableColumns, setTableColumns] = useState<string[]>(["orig_id", "descrip", "ready", "name", "strat_name", "age", "lith", "comments", "b_interval", "t_interval"]);
 
   // Error State
   const [error, setError] = useState<string | undefined>(undefined);
