@@ -4,7 +4,7 @@ export const guard = (pageContext) => {
   const { user } = pageContext;
 
   // Check that we are in production mode
-  if (import.meta.env.NODE_ENV === "production") {
+  if (import.meta.env.PUBLIC_ENV__NODE_ENV !== "development") {
     if (user === undefined) {
       // Render the login page while preserving the URL. (This is novel technique
       // which we explain down below.)
