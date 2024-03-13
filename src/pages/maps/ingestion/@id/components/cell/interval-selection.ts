@@ -96,7 +96,6 @@ let IntervalSelection = ({
   intervals,
   ...props
 }: EditableCell2Props & { intervals: Interval[] }) => {
-  const [localValue, setLocalValue] = React.useState<string>(value);
 
   const interval = useMemo(() => {
     let interval = null;
@@ -107,7 +106,7 @@ let IntervalSelection = ({
     }
 
     return interval;
-  }, [value, localValue, intervals]);
+  }, [value, intervals, intent]);
 
   return h(
     Cell,
@@ -133,7 +132,6 @@ let IntervalSelection = ({
           itemRenderer: IntervalOptionRenderer,
           onItemSelect: (interval: Interval, e) => {
             onConfirm(interval.int_id.toString());
-            setLocalValue(interval.int_id.toString());
           },
           noResults: h(MenuItem, {
             disabled: true,
@@ -149,8 +147,9 @@ let IntervalSelection = ({
                 backgroundColor: interval?.color ?? "white",
                 fontSize: "12px",
                 minHeight: "0px",
-                padding: "1.7px 10px",
+                padding: intent ? "0px 10px" : "1.7px 10px",
                 boxShadow: "none",
+                border: intent ? "2px solid green" : "none",
               },
               fill: true,
               alignText: "left",

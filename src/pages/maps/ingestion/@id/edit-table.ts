@@ -69,6 +69,7 @@ import "@blueprintjs/table/lib/css/table.css";
 import styles from "./edit-table.module.sass";
 import EditableCell from "./components/cell/editable-cell";
 import { ingestPrefix } from "../../../../../packages/settings";
+import CheckboxCell from "~/pages/maps/ingestion/@id/components/cell/checkbox-cell";
 
 const h = hyper.styled(styles);
 
@@ -76,14 +77,14 @@ const FINAL_COLUMNS = [
   "source_id",
   "orig_id",
   "descrip",
-  "ready",
+  "omit",
   "name",
   "strat_name",
   "age",
   "lith",
   "comments",
-  "t_interval",
   "b_interval",
+  "t_interval"
 ];
 
 interface EditTableProps {
@@ -92,6 +93,10 @@ interface EditTableProps {
 }
 
 export default function TableInterface({ url, ingest_process }: EditTableProps) {
+
+  // Table Configurations
+  const [showOmitted, setShowOmitted] = useState<boolean>(false);
+
   // Cell refs
   const ref = useRef<MutableRefObject<any>[][]>(null);
 
@@ -113,7 +118,9 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
     filter: {},
   });
   const [data, setData] = useState<any[]>([]);
-  const [tableColumns, setTableColumns] = useState<string[]>(["orig_id", "descrip", "ready", "name", "strat_name", "age", "lith", "comments", "t_interval", "b_interval"]);
+  const [transformedData, setTransformedData] = useState<any[]>([]);
+  const [tableColumns, setTableColumns] = useState<string[]>(FINAL_COLUMNS);
+  const [numberOfRows, setNumberOfRows] = useState<number | undefined>(undefined);
 
   // Error State
   const [error, setError] = useState<string | undefined>(undefined);
@@ -150,8 +157,15 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
     async (newTableUpdates: TableUpdate[]) => {
       // If a new update is available apply it to the data
       if (newTableUpdates.length > tableUpdates.length) {
-        let newData = applyTableUpdate(data, newTableUpdates.slice(-1)[0]);
-        setData(newData);
+
+        let newData = structuredClone(transformedData);
+        // Run the new table updates
+        for( const updateIndex in [...Array(newTableUpdates.length - tableUpdates.length).keys()] ){
+          let updateIndexInt = -1 * (parseInt(updateIndex) + 1)
+          newData = applyTableUpdate(newData, newTableUpdates.slice(updateIndexInt)[0]);
+        }
+
+        setTransformedData(newData);
       }
 
       _setTableUpdates(newTableUpdates);
@@ -166,9 +180,31 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
       const response = await fetch(dataURL);
       let data = await response.json();
 
+      data = data.filter(x => showOmitted ? true : !x.omit)
+
+      setData(data)
+
+      // Update the number of rows
+      setNumberOfRows(parseInt(response.headers.get("X-Total-Count")))
+
       // Update the table columns on first load
       setTableColumns((p) => {
-        return Object.keys(data[0]).length > 0 ? Object.keys(data[0]) : p;
+
+        // Catch when there is no data
+        if(data == undefined || data.length == 0) {
+          return p;
+        }
+
+        // If the data has its own columns defined
+        if(Object.keys(data[0]).length > 0){
+
+          // Get the keys that are not in the final columns
+          const additionalColumns = Object.keys(data[0]).filter((x) => !FINAL_COLUMNS.includes(x));
+
+          return [...FINAL_COLUMNS, ...additionalColumns];
+        }
+
+        return p;
       });
 
       // Apply table updates to the data
@@ -195,7 +231,7 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
 
       return data;
     },
-    []
+    [showOmitted]
   );
 
   // On mount get data
@@ -204,11 +240,11 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
 
       setLoading(true)
 
-      setData(await getData(tableUpdates, dataParameters));
+      setTransformedData(await getData(tableUpdates, dataParameters));
 
       setLoading(false)
     })();
-  }, [dataParameters]);
+  }, [dataParameters, showOmitted]);
 
   // Get the visible columns
   const visibleColumnNames = useMemo(() => {
@@ -449,17 +485,17 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
         []
       );
     },
-    [dataParameters, data, visibleColumnNames]
+    [dataParameters, visibleColumnNames]
   );
 
   const rowHeaderCellRenderer = useCallback(
     (rowIndex: number) => {
-      if (data.length == 0) {
+      if (transformedData.length == 0) {
         return h(RowHeaderCell2, { name: "NULL" }, []);
       }
 
       const headerKey = dataParameters?.group ? dataParameters?.group : "_pkid";
-      let name = data[rowIndex][headerKey];
+      let name = transformedData[rowIndex][headerKey];
 
       if (name == null) {
         name = "NULL";
@@ -469,7 +505,7 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
 
       return h(RowHeaderCell2, { name: name }, []);
     },
-    [dataParameters, data]
+    [dataParameters, transformedData]
   );
 
   const defaultColumnConfig = useMemo(() => {
@@ -497,18 +533,22 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
                   value,
                   columnName,
                   rowIndex,
-                  data,
+                  transformedData,
                   dataParameters
                 );
                 setTableUpdates([...tableUpdates, tableUpdate]);
               },
-              value: data.length == 0 ? "" : data[rowIndex][columnName],
+              editableTextProps: {
+                disabled: !FINAL_COLUMNS.includes(columnName),
+              },
+              intent: data[rowIndex][columnName] != transformedData[rowIndex][columnName] ? "success" : undefined,
+              value: transformedData.length == 0 ? "" : transformedData[rowIndex][columnName],
             }),
           key: columnName,
         }),
       };
     }, {});
-  }, [visibleColumnNames, tableColumns, dataParameters, data]);
+  }, [visibleColumnNames, tableColumns, dataParameters, transformedData, data]);
 
   const columnConfig = useMemo(() => {
     if (tableColumns.length == 0) {
@@ -533,12 +573,29 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
                 value,
                 "t_interval",
                 rowIndex,
-                data,
+                transformedData,
                 dataParameters
               );
-              setTableUpdates([...tableUpdates, tableUpdate]);
+
+              let newTableUpdates = [...tableUpdates, tableUpdate]
+
+              if(transformedData[rowIndex]['b_interval'] == undefined || transformedData[rowIndex]['b_interval'] == ""){
+                let oppositeIntervalTableUpdate = getTableUpdate(
+                  url,
+                  value,
+                  "b_interval",
+                  rowIndex,
+                  transformedData,
+                  dataParameters
+                );
+
+                newTableUpdates.push(oppositeIntervalTableUpdate)
+              }
+
+              setTableUpdates(newTableUpdates);
             },
-            value: data.length == 0 ? "" : data[rowIndex]["t_interval"],
+            intent: data[rowIndex]["t_interval"] != transformedData[rowIndex]["t_interval"] ? "success" : undefined,
+            value: transformedData.length == 0 ? "" : transformedData[rowIndex]["t_interval"],
           }),
       }),
       b_interval: h(Column, {
@@ -557,16 +614,57 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
                 value,
                 "b_interval",
                 rowIndex,
-                data,
+                transformedData,
                 dataParameters
               );
+
+              let newTableUpdates = [...tableUpdates, tableUpdate]
+
+              if(transformedData[rowIndex]['t_interval'] == undefined || transformedData[rowIndex]['t_interval'] == ""){
+                let oppositeIntervalTableUpdate = getTableUpdate(
+                  url,
+                  value,
+                  "t_interval",
+                  rowIndex,
+                  transformedData,
+                  dataParameters
+                );
+
+                newTableUpdates.push(oppositeIntervalTableUpdate)
+              }
+
+              setTableUpdates(newTableUpdates);
+            },
+            intent: data[rowIndex]["b_interval"] != transformedData[rowIndex]["b_interval"] ? "success" : undefined,
+            value: transformedData.length == 0 ? "" : transformedData[rowIndex]["b_interval"],
+          }),
+      }),
+      omit: h(Column, {
+        ...defaultColumnConfig["omit"].props,
+        cellRenderer: (rowIndex: number, columnIndex: number) =>
+          h(CheckboxCell, {
+            ref: (el) => {
+              try {
+                ref.current[rowIndex][columnIndex] = el;
+              } catch (e) {}
+            },
+            onConfirm: (value) => {
+              const tableUpdate = getTableUpdate(
+                url,
+                value,
+                "omit",
+                rowIndex,
+                transformedData,
+                dataParameters
+              );
+
               setTableUpdates([...tableUpdates, tableUpdate]);
             },
-            value: data.length == 0 ? "" : data[rowIndex]["b_interval"],
+            value: transformedData[rowIndex]["omit"],
           }),
       }),
     };
-  }, [defaultColumnConfig, tableColumns, dataParameters, data]);
+  }, [defaultColumnConfig, tableColumns, dataParameters, transformedData, data]);
 
   return h(
     "div",
@@ -593,7 +691,8 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
                   Menu, {
 
                   }, [
-                    h(MenuItem, {disabled: hiddenColumns.length == 0, icon: "eye-open", text: "Show All", onClick: () => setHiddenColumns([])}, [])
+                    h(MenuItem, {disabled: hiddenColumns.length == 0, icon: "eye-open", text: "Show All", onClick: () => setHiddenColumns([])}, []),
+                    h(MenuItem, {icon: "cross", text: "Show Omitted", onClick: () => setShowOmitted(!showOmitted)}, [])
                   ]
                 ),
                 renderTarget: ({ isOpen, ref, ...targetProps }) => (
@@ -631,6 +730,13 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
                 }
               },
               ["Download Source"]
+            ),
+            h.if(numberOfRows != undefined)(
+              Button,
+              {
+                disabled: true
+              },
+              [`${numberOfRows} Total Rows`]
             ),
           ]),
         ]),
@@ -689,7 +795,7 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
               }
             },
             numRows: data.length,
-            cellRendererDependencies: [data, intervals],
+            cellRendererDependencies: [transformedData, intervals],
           },
           Object.values(columnConfig)
         ),

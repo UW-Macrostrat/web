@@ -10,6 +10,7 @@ export const h = hyper.styled(styles);
 interface EditableCell extends EditableCell2Props {
   columnName: string;
   rowIndex: number;
+  edited: boolean;
 }
 
 let EditableCell = forwardRef((props: EditableCell2Props, ref) => {
@@ -27,9 +28,12 @@ let EditableCell = forwardRef((props: EditableCell2Props, ref) => {
         "input",
         {
           ref: ref,
+          disabled: props.editableTextProps.disabled,
           className: "editable-cell",
           style: {
             width: (value?.length ?? 2) + "ch",
+            color: "inherit",
+            backgroundColor: "#ff000000",
           },
           value: value || "",
           onChange: (e) => {

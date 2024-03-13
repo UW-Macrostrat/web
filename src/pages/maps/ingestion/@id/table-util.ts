@@ -228,7 +228,7 @@ export const submitChange = async (
       }
 
       const [columnName, filterValue] = filter.to_array();
-      updateURL.searchParams.append(columnName, filterValue);
+      updateURL.searchParams.append(columnName, encodeURI(filterValue));
     }
 
     // Create the request body
