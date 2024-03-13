@@ -113,6 +113,7 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
     filter: {},
   });
   const [data, setData] = useState<any[]>([]);
+  const [transformedData, setTransformedData] = useState<any[]>([]);
   const [tableColumns, setTableColumns] = useState<string[]>(FINAL_COLUMNS);
   const [numberOfRows, setNumberOfRows] = useState<number | undefined>(undefined);
 
@@ -152,13 +153,14 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
       // If a new update is available apply it to the data
       if (newTableUpdates.length > tableUpdates.length) {
 
-        let newData = data;
+        let newData = structuredClone(transformedData);
         // Run the new table updates
         for( const updateIndex in [...Array(newTableUpdates.length - tableUpdates.length).keys()] ){
           let updateIndexInt = -1 * (parseInt(updateIndex) + 1)
           newData = applyTableUpdate(newData, newTableUpdates.slice(updateIndexInt)[0]);
         }
-        setData(newData);
+
+        setTransformedData(newData);
       }
 
       _setTableUpdates(newTableUpdates);
@@ -172,6 +174,8 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
 
       const response = await fetch(dataURL);
       let data = await response.json();
+
+      setData(data)
 
       // Update the number of rows
       setNumberOfRows(parseInt(response.headers.get("X-Total-Count")))
@@ -229,7 +233,7 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
 
       setLoading(true)
 
-      setData(await getData(tableUpdates, dataParameters));
+      setTransformedData(await getData(tableUpdates, dataParameters));
 
       setLoading(false)
     })();
@@ -474,17 +478,17 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
         []
       );
     },
-    [dataParameters, data, visibleColumnNames]
+    [dataParameters, visibleColumnNames]
   );
 
   const rowHeaderCellRenderer = useCallback(
     (rowIndex: number) => {
-      if (data.length == 0) {
+      if (transformedData.length == 0) {
         return h(RowHeaderCell2, { name: "NULL" }, []);
       }
 
       const headerKey = dataParameters?.group ? dataParameters?.group : "_pkid";
-      let name = data[rowIndex][headerKey];
+      let name = transformedData[rowIndex][headerKey];
 
       if (name == null) {
         name = "NULL";
@@ -494,7 +498,7 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
 
       return h(RowHeaderCell2, { name: name }, []);
     },
-    [dataParameters, data]
+    [dataParameters, transformedData]
   );
 
   const defaultColumnConfig = useMemo(() => {
@@ -522,7 +526,7 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
                   value,
                   columnName,
                   rowIndex,
-                  data,
+                  transformedData,
                   dataParameters
                 );
                 setTableUpdates([...tableUpdates, tableUpdate]);
@@ -530,13 +534,14 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
               editableTextProps: {
                 disabled: !FINAL_COLUMNS.includes(columnName),
               },
-              value: data.length == 0 ? "" : data[rowIndex][columnName],
+              intent: data[rowIndex][columnName] != transformedData[rowIndex][columnName] ? "success" : undefined,
+              value: transformedData.length == 0 ? "" : transformedData[rowIndex][columnName],
             }),
           key: columnName,
         }),
       };
     }, {});
-  }, [visibleColumnNames, tableColumns, dataParameters, data]);
+  }, [visibleColumnNames, tableColumns, dataParameters, transformedData, data]);
 
   const columnConfig = useMemo(() => {
     if (tableColumns.length == 0) {
@@ -561,19 +566,19 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
                 value,
                 "t_interval",
                 rowIndex,
-                data,
+                transformedData,
                 dataParameters
               );
 
               let newTableUpdates = [...tableUpdates, tableUpdate]
 
-              if(data[rowIndex]['b_interval'] == undefined || data[rowIndex]['b_interval'] == ""){
+              if(transformedData[rowIndex]['b_interval'] == undefined || transformedData[rowIndex]['b_interval'] == ""){
                 let oppositeIntervalTableUpdate = getTableUpdate(
                   url,
                   value,
                   "b_interval",
                   rowIndex,
-                  data,
+                  transformedData,
                   dataParameters
                 );
 
@@ -582,7 +587,8 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
 
               setTableUpdates(newTableUpdates);
             },
-            value: data.length == 0 ? "" : data[rowIndex]["t_interval"],
+            intent: data[rowIndex]["t_interval"] != transformedData[rowIndex]["t_interval"] ? "success" : undefined,
+            value: transformedData.length == 0 ? "" : transformedData[rowIndex]["t_interval"],
           }),
       }),
       b_interval: h(Column, {
@@ -601,19 +607,19 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
                 value,
                 "b_interval",
                 rowIndex,
-                data,
+                transformedData,
                 dataParameters
               );
 
               let newTableUpdates = [...tableUpdates, tableUpdate]
 
-              if(data[rowIndex]['t_interval'] == undefined || data[rowIndex]['t_interval'] == ""){
+              if(transformedData[rowIndex]['t_interval'] == undefined || transformedData[rowIndex]['t_interval'] == ""){
                 let oppositeIntervalTableUpdate = getTableUpdate(
                   url,
                   value,
                   "t_interval",
                   rowIndex,
-                  data,
+                  transformedData,
                   dataParameters
                 );
 
@@ -622,11 +628,12 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
 
               setTableUpdates(newTableUpdates);
             },
-            value: data.length == 0 ? "" : data[rowIndex]["b_interval"],
+            intent: data[rowIndex]["b_interval"] != transformedData[rowIndex]["b_interval"] ? "success" : undefined,
+            value: transformedData.length == 0 ? "" : transformedData[rowIndex]["b_interval"],
           }),
       }),
     };
-  }, [defaultColumnConfig, tableColumns, dataParameters, data]);
+  }, [defaultColumnConfig, tableColumns, dataParameters, transformedData, data]);
 
   return h(
     "div",
@@ -756,7 +763,7 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
               }
             },
             numRows: data.length,
-            cellRendererDependencies: [data, intervals],
+            cellRendererDependencies: [transformedData, intervals],
           },
           Object.values(columnConfig)
         ),

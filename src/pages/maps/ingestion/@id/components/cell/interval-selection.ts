@@ -105,10 +105,8 @@ let IntervalSelection = ({
       )[0];
     }
 
-    console.log(value)
-
     return interval;
-  }, [value, intervals]);
+  }, [value, intervals, intent]);
 
   return h(
     Cell,
@@ -149,8 +147,9 @@ let IntervalSelection = ({
                 backgroundColor: interval?.color ?? "white",
                 fontSize: "12px",
                 minHeight: "0px",
-                padding: "1.7px 10px",
+                padding: intent ? "0px 10px" : "1.7px 10px",
                 boxShadow: "none",
+                border: intent ? "2px solid green" : "none",
               },
               fill: true,
               alignText: "left",
