@@ -69,6 +69,7 @@ import "@blueprintjs/table/lib/css/table.css";
 import styles from "./edit-table.module.sass";
 import EditableCell from "./components/cell/editable-cell";
 import { ingestPrefix } from "../../../../../packages/settings";
+import CheckboxCell from "~/pages/maps/ingestion/@id/components/cell/checkbox-cell";
 
 const h = hyper.styled(styles);
 
@@ -92,6 +93,10 @@ interface EditTableProps {
 }
 
 export default function TableInterface({ url, ingest_process }: EditTableProps) {
+
+  // Table Configurations
+  const [showOmitted, setShowOmitted] = useState<boolean>(false);
+
   // Cell refs
   const ref = useRef<MutableRefObject<any>[][]>(null);
 
@@ -175,6 +180,8 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
       const response = await fetch(dataURL);
       let data = await response.json();
 
+      data = data.filter(x => showOmitted ? true : !x.omit)
+
       setData(data)
 
       // Update the number of rows
@@ -224,7 +231,7 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
 
       return data;
     },
-    []
+    [showOmitted]
   );
 
   // On mount get data
@@ -237,7 +244,7 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
 
       setLoading(false)
     })();
-  }, [dataParameters]);
+  }, [dataParameters, showOmitted]);
 
   // Get the visible columns
   const visibleColumnNames = useMemo(() => {
@@ -632,6 +639,30 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
             value: transformedData.length == 0 ? "" : transformedData[rowIndex]["b_interval"],
           }),
       }),
+      omit: h(Column, {
+        ...defaultColumnConfig["omit"].props,
+        cellRenderer: (rowIndex: number, columnIndex: number) =>
+          h(CheckboxCell, {
+            ref: (el) => {
+              try {
+                ref.current[rowIndex][columnIndex] = el;
+              } catch (e) {}
+            },
+            onConfirm: (value) => {
+              const tableUpdate = getTableUpdate(
+                url,
+                value,
+                "omit",
+                rowIndex,
+                transformedData,
+                dataParameters
+              );
+
+              setTableUpdates([...tableUpdates, tableUpdate]);
+            },
+            value: transformedData[rowIndex]["omit"],
+          }),
+      }),
     };
   }, [defaultColumnConfig, tableColumns, dataParameters, transformedData, data]);
 
@@ -660,7 +691,8 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
                   Menu, {
 
                   }, [
-                    h(MenuItem, {disabled: hiddenColumns.length == 0, icon: "eye-open", text: "Show All", onClick: () => setHiddenColumns([])}, [])
+                    h(MenuItem, {disabled: hiddenColumns.length == 0, icon: "eye-open", text: "Show All", onClick: () => setHiddenColumns([])}, []),
+                    h(MenuItem, {icon: "cross", text: "Show Omitted", onClick: () => setShowOmitted(!showOmitted)}, [])
                   ]
                 ),
                 renderTarget: ({ isOpen, ref, ...targetProps }) => (
