@@ -114,6 +114,7 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
   });
   const [data, setData] = useState<any[]>([]);
   const [tableColumns, setTableColumns] = useState<string[]>(FINAL_COLUMNS);
+  const [numberOfRows, setNumberOfRows] = useState<number | undefined>(undefined);
 
   // Error State
   const [error, setError] = useState<string | undefined>(undefined);
@@ -171,6 +172,9 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
 
       const response = await fetch(dataURL);
       let data = await response.json();
+
+      // Update the number of rows
+      setNumberOfRows(parseInt(response.headers.get("X-Total-Count")))
 
       // Update the table columns on first load
       setTableColumns((p) => {
@@ -687,6 +691,13 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
                 }
               },
               ["Download Source"]
+            ),
+            h.if(numberOfRows != undefined)(
+              Button,
+              {
+                disabled: true
+              },
+              [`${numberOfRows} Total Rows`]
             ),
           ]),
         ]),
