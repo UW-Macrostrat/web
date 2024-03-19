@@ -66,3 +66,23 @@ export interface DataParameters {
     [key: string]: Filter; // Used for filters
   };
 }
+
+export interface ColumnConfigGenerator {
+  url: string;
+  defaultColumnConfig: ColumnConfig;
+  tableColumns: string[];
+  dataParameters: DataParameters;
+  setTableUpdates: any;
+  transformedData: any[];
+  data: any[];
+  ref: any;
+}
+
+export type ColumnConfig = {
+  [key: string] : ColumnProps
+}
+
+export interface CustomTableProps {
+  url: string;
+  ingestProcessId: number;
+}
