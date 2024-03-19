@@ -61,16 +61,10 @@ export default function EditInterface({
 
   const title = source.name;
 
-  const RootHeaderProps = {
+  const HeaderProps = {
     title: title,
     showMap: showMap,
-    setShowMap: setShowMap,
-    parentRoute: "/maps/ingestion",
-  }
-
-  const LeafHeaderProps = {
-    ...RootHeaderProps,
-    parentRoute: `/maps/ingestion/${source_id}`
+    setShowMap: setShowMap
   }
 
   return h(HotkeysProvider, [
@@ -90,7 +84,7 @@ export default function EditInterface({
                 path: "",
                 element:  h("div", {},
                   [
-                    h(Header, RootHeaderProps),
+                    h(Header, HeaderProps),
                     h(EditMenu)
                   ]
                 )
@@ -99,7 +93,7 @@ export default function EditInterface({
                 path: "polygons",
                 element: h("div", {},
                   [
-                    h(Header, LeafHeaderProps),
+                    h(Header, HeaderProps),
                     h(PolygonTable,
                       {
                         url: `${
@@ -115,7 +109,7 @@ export default function EditInterface({
                 path: "points",
                 element: h("div", {},
                   [
-                    h(Header, LeafHeaderProps),
+                    h(Header, HeaderProps),
                     h(PointTable,
                       {
                         url: `${
@@ -131,7 +125,7 @@ export default function EditInterface({
                 path: "linestrings",
                 element: h("div", {},
                   [
-                    h(Header, LeafHeaderProps),
+                    h(Header, HeaderProps),
                     h(LineStringTable,
                       {
                         url: `${
@@ -152,11 +146,11 @@ export default function EditInterface({
   ]);
 }
 
-function Header({ title, parentRoute, showMap, setShowMap }) {
+function Header({ title, showMap, setShowMap }) {
   return h(
     "div.edit-page-header",
     [
-      h(ParentRouteButton, { parentRoute: parentRoute }),
+      h(ParentRouteButton, {}),
       h("h2.m-0", {}, [
         `${title} Ingestion`,
         h(ShowDocsButton, {href: "https://github.com/UW-Macrostrat/web/blob/main/src/pages/maps/ingestion/%40id/README.md"}),
