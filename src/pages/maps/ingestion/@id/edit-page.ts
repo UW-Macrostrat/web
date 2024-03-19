@@ -84,7 +84,7 @@ export default function EditInterface({
                 path: "",
                 element:  h("div", {},
                   [
-                    h(Header, HeaderProps),
+                    h(Header, {...HeaderProps, parentRoute: "/maps/ingestion"}),
                     h(EditMenu)
                   ]
                 )
@@ -146,11 +146,11 @@ export default function EditInterface({
   ]);
 }
 
-function Header({ title, showMap, setShowMap }) {
+function Header({ title, showMap, setShowMap, parentRoute }: { title: string, showMap: boolean, setShowMap: (b: boolean) => void, parentRoute?: string }) {
   return h(
     "div.edit-page-header",
     [
-      h(ParentRouteButton, {}),
+      h(ParentRouteButton, {parentRoute: parentRoute}),
       h("h2.m-0", {}, [
         `${title} Ingestion`,
         h(ShowDocsButton, {href: "https://github.com/UW-Macrostrat/web/blob/main/src/pages/maps/ingestion/%40id/README.md"}),
