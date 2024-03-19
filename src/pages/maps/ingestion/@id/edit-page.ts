@@ -61,14 +61,10 @@ export default function EditInterface({
 
   const title = source.name;
 
-  const RootHeaderProps = {
+  const HeaderProps = {
     title: title,
     showMap: showMap,
     setShowMap: setShowMap
-  }
-
-  const LeafHeaderProps = {
-    ...RootHeaderProps
   }
 
   return h(HotkeysProvider, [
@@ -88,7 +84,7 @@ export default function EditInterface({
                 path: "",
                 element:  h("div", {},
                   [
-                    h(Header, RootHeaderProps),
+                    h(Header, HeaderProps),
                     h(EditMenu)
                   ]
                 )
@@ -97,7 +93,7 @@ export default function EditInterface({
                 path: "polygons",
                 element: h("div", {},
                   [
-                    h(Header, LeafHeaderProps),
+                    h(Header, HeaderProps),
                     h(PolygonTable,
                       {
                         url: `${
@@ -113,7 +109,7 @@ export default function EditInterface({
                 path: "points",
                 element: h("div", {},
                   [
-                    h(Header, LeafHeaderProps),
+                    h(Header, HeaderProps),
                     h(PointTable,
                       {
                         url: `${
@@ -129,7 +125,7 @@ export default function EditInterface({
                 path: "linestrings",
                 element: h("div", {},
                   [
-                    h(Header, LeafHeaderProps),
+                    h(Header, HeaderProps),
                     h(LineStringTable,
                       {
                         url: `${
