@@ -64,13 +64,11 @@ export default function EditInterface({
   const RootHeaderProps = {
     title: title,
     showMap: showMap,
-    setShowMap: setShowMap,
-    parentRoute: "/maps/ingestion",
+    setShowMap: setShowMap
   }
 
   const LeafHeaderProps = {
-    ...RootHeaderProps,
-    parentRoute: `/maps/ingestion/${source_id}`
+    ...RootHeaderProps
   }
 
   return h(HotkeysProvider, [
@@ -152,11 +150,11 @@ export default function EditInterface({
   ]);
 }
 
-function Header({ title, parentRoute, showMap, setShowMap }) {
+function Header({ title, showMap, setShowMap }) {
   return h(
     "div.edit-page-header",
     [
-      h(ParentRouteButton, { parentRoute: parentRoute }),
+      h(ParentRouteButton, {}),
       h("h2.m-0", {}, [
         `${title} Ingestion`,
         h(ShowDocsButton, {href: "https://github.com/UW-Macrostrat/web/blob/main/src/pages/maps/ingestion/%40id/README.md"}),
