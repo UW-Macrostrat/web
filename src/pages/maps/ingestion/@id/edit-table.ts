@@ -41,7 +41,7 @@ import {
   TableUpdate,
   TableSelection,
   Selection,
-  DataParameters,
+  DataParameters, ColumnConfigGenerator, ColumnConfig
 } from "./table";
 import {
   buildURL,
@@ -73,29 +73,27 @@ import CheckboxCell from "~/pages/maps/ingestion/@id/components/cell/checkbox-ce
 
 const h = hyper.styled(styles);
 
-const FINAL_COLUMNS = [
-  "source_id",
-  "orig_id",
-  "descrip",
-  "omit",
-  "name",
-  "strat_name",
-  "age",
-  "lith",
-  "comments",
-  "b_interval",
-  "t_interval"
-];
 
-interface EditTableProps {
+
+const INTERNAL_COLUMNS = [
+  "_pkid",
+  "source_id"
+]
+
+export interface EditTableProps {
   url: string;
-  ingest_process: any;
+  ingestProcessId: number;
+  finalColumns: string[];
+  columnGenerator: (props: ColumnConfigGenerator) => ColumnConfig;
 }
 
-export default function TableInterface({ url, ingest_process }: EditTableProps) {
+export default function TableInterface({ url, ingestProcessId, finalColumns, columnGenerator }: EditTableProps) {
 
   // Table Configurations
   const [showOmitted, setShowOmitted] = useState<boolean>(false);
+
+  // Hidden Columns
+  const [hiddenColumns, _setHiddenColumns] = useState<string[]>([]);
 
   // Cell refs
   const ref = useRef<MutableRefObject<any>[][]>(null);
@@ -109,72 +107,77 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
   // Data Loading
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Hidden Columns
-  const [hiddenColumns, setHiddenColumns] = useState<string[]>([]);
-
   // Data State
   const [dataParameters, setDataParameters] = useState<DataParameters>({
     select: { page: "0", pageSize: "50" },
     filter: {},
   });
   const [data, setData] = useState<any[]>([]);
-  const [transformedData, setTransformedData] = useState<any[]>([]);
-  const [tableColumns, setTableColumns] = useState<string[]>(FINAL_COLUMNS);
   const [numberOfRows, setNumberOfRows] = useState<number | undefined>(undefined);
 
   // Error State
   const [error, setError] = useState<string | undefined>(undefined);
 
   // Table Update State
-  const [tableUpdates, _setTableUpdates] = useState<TableUpdate[]>([]);
-  const [updateProgress, setUpdateProgress] =
+  const [tableUpdates, setTableUpdates] = useState<TableUpdate[]>([]);
+  const [updateProgress, _setUpdateProgress] =
     useState<ProgressPopoverProps>(undefined);
 
-  // Cell Values
-  const [intervals, setIntervals] = useState<Interval[]>([]);
 
   // Focused Cell
   const [focusedCell, setFocusedCell] = useState<
     FocusedCellCoordinates | undefined
   >(undefined);
 
-  useEffect(() => {
-    async function getIntervals() {
-      let response = await fetch(
-        `https://macrostrat.org/api/defs/intervals?tilescale_id=11`
-      );
+  const transformedData = useMemo(() => {
+    return applyTableUpdates(data, tableUpdates);
+  }, [data, tableUpdates])
 
-      if (response.ok) {
-        let response_data = await response.json();
-        setIntervals(response_data.success.data);
-      }
+  const tableColumns = useMemo(() => {
+    // Catch when there is no data
+    if(data == undefined || data.length == 0) {
+      return finalColumns
     }
 
-    getIntervals();
-  }, []);
+    // If the data has its own columns defined
+    if(Object.keys(data[0]).length > 0){
 
-  const setTableUpdates = useCallback(
-    async (newTableUpdates: TableUpdate[]) => {
-      // If a new update is available apply it to the data
-      if (newTableUpdates.length > tableUpdates.length) {
+      // Get the keys that are not in the final columns
+      const additionalColumns = Object.keys(data[0]).filter((x) => !finalColumns.includes(x));
 
-        let newData = structuredClone(transformedData);
-        // Run the new table updates
-        for( const updateIndex in [...Array(newTableUpdates.length - tableUpdates.length).keys()] ){
-          let updateIndexInt = -1 * (parseInt(updateIndex) + 1)
-          newData = applyTableUpdate(newData, newTableUpdates.slice(updateIndexInt)[0]);
-        }
+      return [...finalColumns, ...additionalColumns];
+    }
 
-        setTransformedData(newData);
+    return finalColumns;
+  }, [data])
+
+  const setHiddenColumns = useCallback((column: string | string[]) => {
+    _setHiddenColumns((prev) => {
+      if (Array.isArray(column)) {
+        return [...prev, ...column];
       }
 
-      _setTableUpdates(newTableUpdates);
-    },
-    [data, tableUpdates, dataParameters]
-  );
+      return [...prev, column];
+    });
+  }, [])
+
+  const setUpdateProgress = useCallback((progress: Partial<ProgressPopoverProps> | undefined) => {
+    _setUpdateProgress((prev) => {
+
+      // Check if the progress is undefined
+      if(progress == undefined){
+        return undefined
+      }
+
+      return {
+        ...prev,
+        ...progress,
+      };
+    })
+  }, [])
 
   const getData = useCallback(
-    async (tableUpdates: TableUpdate[], dataParameters: DataParameters) => {
+    async (dataParameters: DataParameters) => {
       const dataURL = buildURL(url, dataParameters);
 
       const response = await fetch(dataURL);
@@ -182,42 +185,8 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
 
       data = data.filter(x => showOmitted ? true : !x.omit)
 
-      setData(data)
-
       // Update the number of rows
       setNumberOfRows(parseInt(response.headers.get("X-Total-Count")))
-
-      // Update the table columns on first load
-      setTableColumns((p) => {
-
-        // Catch when there is no data
-        if(data == undefined || data.length == 0) {
-          return p;
-        }
-
-        // If the data has its own columns defined
-        if(Object.keys(data[0]).length > 0){
-
-          // Get the keys that are not in the final columns
-          const additionalColumns = Object.keys(data[0]).filter((x) => !FINAL_COLUMNS.includes(x));
-
-          return [...FINAL_COLUMNS, ...additionalColumns];
-        }
-
-        return p;
-      });
-
-      // Apply table updates to the data
-      data = applyTableUpdates(data, tableUpdates);
-
-      if (data.length == 0) {
-        setError("Warning: No results matched query");
-      } else {
-        setError(undefined);
-      }
-
-      // Remove the progress bar on data reload
-      setUpdateProgress(undefined);
 
       // Set the table ref
       ref.current = Array.from(
@@ -234,15 +203,13 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
     [showOmitted]
   );
 
-  // On mount get data
   useEffect(() => {
     (async () => {
 
       setLoading(true)
-
-      setTransformedData(await getData(tableUpdates, dataParameters));
-
+      setData(await getData(dataParameters));
       setLoading(false)
+
     })();
   }, [dataParameters, showOmitted]);
 
@@ -252,14 +219,14 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
       return [];
     }
 
-    const allHiddenColumns = [...hiddenColumns, "_pkid", "source_id"];
+    const allHiddenColumns = [...hiddenColumns, ...INTERNAL_COLUMNS];
 
     return tableColumns.filter((x) => !allHiddenColumns.includes(x));
   }, [tableColumns, hiddenColumns]);
 
   const handleHide = useCallback(() => {
     if (selectedColumns != undefined) {
-      setHiddenColumns([...hiddenColumns, ...selectedColumns]);
+      setHiddenColumns(selectedColumns);
     }
   }, [selectedColumns]);
 
@@ -360,7 +327,6 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
     let index = 0;
     for (const tableUpdate of tableUpdates) {
       setUpdateProgress({
-        ...updateProgress,
         text: tableUpdate?.description ?? "Submitting changes",
       });
 
@@ -382,7 +348,6 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
 
       index += 1;
       setUpdateProgress({
-        ...updateProgress,
         value: index / tableUpdates.length,
       });
     }
@@ -392,22 +357,30 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
     setTableUpdates([]);
   }, [tableUpdates]);
 
+  const onFilterChange = useCallback((columnName: string, param: OperatorQueryParameter) => {
+    const columnFilter = new Filter(
+      columnName,
+      param.operator,
+      param.value
+    );
+    setDataParameters((p) => {
+      let newDataParameters = cloneDataParameters(p);
+      newDataParameters.filter[columnName] = columnFilter;
+      return newDataParameters;
+    });
+  }, [])
+
+  const onGroupChange = useCallback((group: string | undefined) => {
+    setDataParameters((p) => {
+      let newDataParameters = cloneDataParameters(p);
+      newDataParameters.group = group;
+      return newDataParameters;
+    });
+  }, [])
+
   const columnHeaderCellRenderer = useCallback(
     (columnIndex: number) => {
       const columnName: string = visibleColumnNames[columnIndex];
-
-      const onFilterChange = (param: OperatorQueryParameter) => {
-        const columnFilter = new Filter(
-          columnName,
-          param.operator,
-          param.value
-        );
-        setDataParameters((p) => {
-          let newDataParameters = cloneDataParameters(p);
-          newDataParameters.filter[columnName] = columnFilter;
-          return newDataParameters;
-        });
-      };
 
       let filter = undefined;
       if (
@@ -419,60 +392,49 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
         filter = new Filter(columnName, undefined, "");
       }
 
-      const setGroup = (group: string | undefined) => {
-        setDataParameters((p) => {
-          let newDataParameters = cloneDataParameters(p);
-          newDataParameters.group = group;
-          return newDataParameters;
-        });
-      };
-
-      const setHidden = () => {
-          setHiddenColumns([...hiddenColumns, columnName]);
-      }
-
       return h(
         ColumnHeaderCell2,
         {
           nameRenderer: () =>
-            h(
-              "div.column-name",
-              {
-                style: {
-                  display: "flex",
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
+            h("div.column-name",
+              h("div",
+                {
+                  style: {
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  },
                 },
-              },
-              [
-                h("span.selected-column", {}, [
-                  columnName,
-                  h.if(FINAL_COLUMNS.includes(columnName))(Icon, {icon: "star-empty", size: "12", color: "#333333", style: {marginLeft: "5px", marginBottom: "2px"}})
-                ]),
-                h.if(
-                  (columnName in dataParameters.filter &&
-                    dataParameters.filter[columnName].is_valid()) ||
-                    columnName == dataParameters?.group
-                )(Icon, { icon: "filter-list", size: "15", color: "#333333" }),
-                h.if(
-                  !(
+                [
+                  h("span.selected-column", {}, [
+                    columnName,
+                    h.if(finalColumns.includes(columnName))(Icon, {icon: "star-empty", size: "12", color: "#333333", style: {marginLeft: "5px", marginBottom: "2px"}})
+                  ]),
+                  h.if(
                     (columnName in dataParameters.filter &&
                       dataParameters.filter[columnName].is_valid()) ||
-                    columnName == dataParameters?.group
-                  )
-                )(Icon, { icon: "filter", size: "15", color: "#d0d0d0" }),
-              ]
+                      columnName == dataParameters?.group
+                  )(Icon, { icon: "filter-list", size: "15", color: "#333333" }),
+                  h.if(
+                    !(
+                      (columnName in dataParameters.filter &&
+                        dataParameters.filter[columnName].is_valid()) ||
+                      columnName == dataParameters?.group
+                    )
+                  )(Icon, { icon: "filter", size: "15", color: "#d0d0d0" }),
+                ]
+              )
             ),
           menuRenderer: () =>
             h(TableMenu, {
               columnName: columnName,
-              onFilterChange: onFilterChange,
+              onFilterChange: (x: OperatorQueryParameter) => onFilterChange(columnName, x),
               filter: filter,
-              onGroupChange: setGroup,
+              onGroupChange: onGroupChange,
               group: dataParameters?.group,
-              onHide: setHidden,
-              hidden: hiddenColumns.includes(columnName)
+              onHide: () => setHiddenColumns(columnName),
+              hidden: !visibleColumnNames.includes(columnName)
             }),
           name: columnName,
           style: {
@@ -518,7 +480,7 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
         ...prev,
         [columnName]: h(Column, {
           name: columnName,
-          className: FINAL_COLUMNS.includes(columnName) ? "final-column" : "",
+          className: finalColumns.includes(columnName) ? "final-column" : "",
           columnHeaderCellRenderer: columnHeaderCellRenderer,
           cellRenderer: (rowIndex: number, columnIndex: number) =>
             h(EditableCell, {
@@ -539,7 +501,7 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
                 setTableUpdates([...tableUpdates, tableUpdate]);
               },
               editableTextProps: {
-                disabled: !FINAL_COLUMNS.includes(columnName),
+                disabled: !finalColumns.includes(columnName),
               },
               intent: data[rowIndex][columnName] != transformedData[rowIndex][columnName] ? "success" : undefined,
               value: transformedData.length == 0 ? "" : transformedData[rowIndex][columnName],
@@ -555,115 +517,19 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
       return defaultColumnConfig;
     }
 
-    return {
-      ...defaultColumnConfig,
-      t_interval: h(Column, {
-        ...defaultColumnConfig["t_interval"].props,
-        cellRenderer: (rowIndex: number, columnIndex: number) =>
-          h(IntervalSelection, {
-            ref: (el) => {
-              try {
-                ref.current[rowIndex][columnIndex] = el;
-              } catch (e) {}
-            },
-            intervals: intervals,
-            onConfirm: (value) => {
-              const tableUpdate = getTableUpdate(
-                url,
-                value,
-                "t_interval",
-                rowIndex,
-                transformedData,
-                dataParameters
-              );
+    const generatedColumns = columnGenerator({
+      url,
+      defaultColumnConfig,
+      tableColumns,
+      dataParameters,
+      setTableUpdates,
+      transformedData,
+      data,
+      ref
+    });
 
-              let newTableUpdates = [...tableUpdates, tableUpdate]
+    return generatedColumns
 
-              if(transformedData[rowIndex]['b_interval'] == undefined || transformedData[rowIndex]['b_interval'] == ""){
-                let oppositeIntervalTableUpdate = getTableUpdate(
-                  url,
-                  value,
-                  "b_interval",
-                  rowIndex,
-                  transformedData,
-                  dataParameters
-                );
-
-                newTableUpdates.push(oppositeIntervalTableUpdate)
-              }
-
-              setTableUpdates(newTableUpdates);
-            },
-            intent: data[rowIndex]["t_interval"] != transformedData[rowIndex]["t_interval"] ? "success" : undefined,
-            value: transformedData.length == 0 ? "" : transformedData[rowIndex]["t_interval"],
-          }),
-      }),
-      b_interval: h(Column, {
-        ...defaultColumnConfig["b_interval"].props,
-        cellRenderer: (rowIndex: number, columnIndex: number) =>
-          h(IntervalSelection, {
-            ref: (el) => {
-              try {
-                ref.current[rowIndex][columnIndex] = el;
-              } catch (e) {}
-            },
-            intervals: intervals,
-            onConfirm: (value) => {
-              const tableUpdate = getTableUpdate(
-                url,
-                value,
-                "b_interval",
-                rowIndex,
-                transformedData,
-                dataParameters
-              );
-
-              let newTableUpdates = [...tableUpdates, tableUpdate]
-
-              if(transformedData[rowIndex]['t_interval'] == undefined || transformedData[rowIndex]['t_interval'] == ""){
-                let oppositeIntervalTableUpdate = getTableUpdate(
-                  url,
-                  value,
-                  "t_interval",
-                  rowIndex,
-                  transformedData,
-                  dataParameters
-                );
-
-                newTableUpdates.push(oppositeIntervalTableUpdate)
-              }
-
-              setTableUpdates(newTableUpdates);
-            },
-            intent: data[rowIndex]["b_interval"] != transformedData[rowIndex]["b_interval"] ? "success" : undefined,
-            value: transformedData.length == 0 ? "" : transformedData[rowIndex]["b_interval"],
-          }),
-      }),
-      omit: h(Column, {
-        ...defaultColumnConfig["omit"].props,
-        cellRenderer: (rowIndex: number, columnIndex: number) =>
-          h(CheckboxCell, {
-            ref: (el) => {
-              try {
-                ref.current[rowIndex][columnIndex] = el;
-              } catch (e) {}
-            },
-            onConfirm: (value) => {
-              const tableUpdate = getTableUpdate(
-                url,
-                value,
-                "omit",
-                rowIndex,
-                transformedData,
-                dataParameters
-              );
-
-              setTableUpdates([...tableUpdates, tableUpdate]);
-            },
-            value: transformedData[rowIndex]["omit"],
-          }),
-      }),
-    };
   }, [defaultColumnConfig, tableColumns, dataParameters, transformedData, data]);
 
   return h(
@@ -724,7 +590,7 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
               Button,
               {
                 onClick: async  () => {
-                  const objects_response = await fetch(`${ingestPrefix}/ingest-process/${ingest_process.id}/objects`)
+                  const objects_response = await fetch(`${ingestPrefix}/ingest-process/${ingestProcessId}/objects`)
                   const objects: any[] = await objects_response.json()
                   objects.forEach(object => download_file(object.pre_signed_url))
                 }
@@ -795,7 +661,7 @@ export default function TableInterface({ url, ingest_process }: EditTableProps) 
               }
             },
             numRows: data.length,
-            cellRendererDependencies: [transformedData, intervals],
+            cellRendererDependencies: [transformedData],
           },
           Object.values(columnConfig)
         ),
