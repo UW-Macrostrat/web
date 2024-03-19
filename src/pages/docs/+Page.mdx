@@ -1,0 +1,16 @@
+export { ContentPage as default } from "~/layouts";
+import { PageHeader } from "~/components";
+import { LinkCard } from "~/components/cards";
+
+<PageHeader title="Macrostrat">
+  <span className="subtitle">
+    <span className="secondary">v2</span>{" "}
+    <span className="tertiary">{import.meta.env.VITE_MACROSTRAT_INSTANCE}</span>
+  </span>
+</PageHeader>
+
+## Data products
+
+<LinkCard href="/docs/ingestion" title="Ingestion">
+  Documentation for ingesting data into Macrostrat
+</LinkCard>
