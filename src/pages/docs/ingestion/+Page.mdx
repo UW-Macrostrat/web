@@ -1,6 +1,7 @@
-export { ContentPage as default } from "~/layouts";
+export { DocumentationPage as default } from "~/layouts";
 import { LinkCard } from "~/components/cards";
 import { PageHeader } from "~/components";
+import imgUrl from "../images/IngestionProcess.png"
 
 <PageHeader title="Ingestion" showSiteName={false}>
   <span className="subtitle">
@@ -10,6 +11,8 @@ import { PageHeader } from "~/components";
 
 The Macrostrat ingestion process is built to enable the registration, processing and distribution of new maps. Depending
 on the registered maps attributes candidate maps that add value to the coalesced interface are added on expert approval.
+
+<img style={{maxWidth: "100%"}} src={imgUrl} />
 
 ## Registering a Map for Ingestion
 
@@ -36,7 +39,7 @@ is processed into our points, lines and polygon tables in the previous step we c
 set of geological properties. As you go through this process Macrostrat will continuously ( In progress ) update this maps
 tiles and associated metadata APIs. This allows you to continuously improve this map as new information comes in.
 
-[How to use this interface](./harmonization)
+[How to use this interface](/docs/ingestion/harmonization)
 
 ## Prioritization
 

@@ -25,6 +25,14 @@ export function ContentPage({ children, className }) {
   );
 }
 
+export function DocumentationPage({ children, className }) {
+  return h(
+    BasePage,
+    { className: classNames("documentation-page", className) },
+    children
+  );
+}
+
 export function CenteredContentPage({ children }) {
   return h(ContentPage, { className: "centered" }, children);
 }
