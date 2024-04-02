@@ -1,6 +1,6 @@
 # Macrostrat's map interface
 
-Macrostrat's map interface is the intersection of stratigraphic, bedrock, paleoenvironment, and paleontology data in the modern world.
+Macrostrat's map interface is web portal to a geologic model of the Earth's crust.
 
 Version 5 of the application transitions to using [Vite](https://vitejs.dev/) for bundling and [Vike](https://vike.dev/) for server-side rendering. We are working on updating this version for performance and stability.
 
@@ -9,14 +9,15 @@ Version 5 of the application transitions to using [Vite](https://vitejs.dev/) fo
 1. Clone the repository
 2. Pull down submodules (`git submodule update --init --recursive`)
 3. Create and populate a `.env` file with the appropriate environment variables (See [`.env.example`](https://github.com/UW-Macrostrat/web/blob/main/.env.example) for more information.)
-4. Run `yarn install` to update packages
-5. `yarn run dev` starts the development server
+4. Verify that you have access to recent versions of Node.js and the Yarn package manager ( `node >= 16.0.0` and `yarn >= 4.0.0`; run `node -v` and `yarn -v` to check)
+5. Run `yarn install` to update packages
+6. Start the live-reloading development server with `yarn run dev`. The server will be available at `http://localhost:3000` by default.
 
 ## Packaging
 
 ### Running locally with Docker
 
-Spins up a instance of the website for development on the same node image used for prod. 
+Spins up a instance of the website for development on the same node image used for prod.
 
 ```bash
 docker run -it -p 3010:3000 -v $(pwd):/app -w /app node:20 git config --global --add safe.directory /app && yarn run dev

@@ -7,7 +7,7 @@
   "scripts": {
     "bundle": "vite build",
     "clean": "rm -rf dist/*",
-    "dev": "yarn run server:dev",
+    "dev": "NODE_NO_WARNINGS=1 yarn run server:dev",
     "build": "vite build",
     "server": "node ./server/index.js",
     "server:dev": "node --env-file=.env ./server/index.js",
