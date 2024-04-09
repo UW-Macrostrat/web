@@ -1,3 +1,4 @@
+import { ingestPrefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 
 // Styles
@@ -13,13 +14,30 @@ import {
   Card,
 } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
+import AddButton from "~/pages/maps/ingestion/components/AddButton";
+import IngestProcessCard from "~/pages/maps/ingestion/components/IngestProcessCard";
+import { useEffect, useState, useContext } from "react";
 
 const h = hyper.styled(styles);
 
-export function Page({ sources, user, url, ingest_api }) {
-  return h(ContentPage, [
+
+export function Page({ user, url }) {
+
+  const [ingestProcess, setIngestProcess] = useState<IngestProcess[]>([])
+
+  useEffect(() => {
+    const getIngestProcesses = async () => {
+      const response = await fetch(`${ingestPrefix}/ingest-process?source_id=order_by&source_id=not.is.null&state=eq.ingested&page_size=1000`);
+      const ingest_processes = await response.json();
+      setIngestProcess(ingest_processes);
+    }
+    getIngestProcesses();
+  }, [])
+
+
+  return h("div", [
     h(Navbar, {}, [
-      h(Navbar.Group, { align: "left" }, [h(Navbar.Heading, "Source Maps")]),
+      h(Navbar.Group, { align: "left" }, [h(Navbar.Heading, "Map Ingestion")]),
       h(Navbar.Group, { align: "right" }, [
         h(
           Tooltip,
@@ -35,120 +53,32 @@ export function Page({ sources, user, url, ingest_api }) {
               // Assemble the return URL on click based on the current page
               const return_url =
                 window.location.origin + window.location.pathname;
-              window.location.href = `${ingest_api}/security/login?return_url=${return_url}`;
+              window.location.href = `${ingestPrefix}/security/login?return_url=${return_url}`;
             },
           })
         ),
       ]),
     ]),
-    h(
-      "div",
-      {
-        style: {
-          display: "flex",
-          justifyContent: "center",
-          flexDirection: "column",
-        },
-      },
-      sources.map((d) => {
-        return h(
-          "div",
-          { style: { maxWidth: "1000px", width: "100%", margin: "auto" } },
-          [
-            h(SourceCard, {
-              source: d,
-              key: d.source_id,
-              user: user,
-            }),
-          ]
-        );
-      })
+    h(ContentPage, [
+        h("div", {style: {display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(400px, 1fr))"}}, [
+          ingestProcess.map((d) => {
+            return h(
+              "div",
+              { style: { maxWidth: "1000px", width: "100%", margin: "auto" } },
+              [
+                h(IngestProcessCard, {
+                  ingestProcess: d,
+                  user: user,
+                }),
+              ]
+            );
+          })
+        ])
+      ]
     ),
   ]);
 }
 
-interface Source {
-  source_id: number;
-  slug: string;
-  name: string;
-  scale: number;
-  raster_url?: string;
-}
 
-const SourceCard = ({
-  source,
-  user,
-}: {
-  source: Source;
-  user: any | undefined;
-}) => {
-  const href = `/maps/${source.source_id}`;
-  const edit_href = `/maps/ingestion/${source.source_id}`;
-  const { slug } = source;
 
-  const sourcesRecordURL = `/map/dev/sources/${slug}`;
 
-  console.log("source", source);
-
-  return h(
-    Card,
-    {
-      interactive: true,
-      onClick: () => {
-        window.location = edit_href;
-      },
-      style: {
-        display: "flex",
-        flexDirection: "row",
-        justifyContent: "space-between",
-        padding: "0.5em",
-        margin: "0.5em",
-        borderRadius: "0.5em",
-        backgroundColor: "#f0f0f0",
-      },
-    },
-    [
-      h("div", {}, [
-        h("div.flex.row", [
-          h(
-            "h4",
-            { style: { margin: "0px" } },
-            source.source_id + " " + source.name
-          ),
-          h("div.spacer"),
-          h("code", slug),
-        ]),
-        h("h6", { style: { margin: "0px" } }, source.scale),
-        h.if(source.raster_url != null)([
-          " ",
-          h("span.raster", { style: { marginTop: ".5rem" } }, "Raster"),
-        ]),
-        h("a", { href: sourcesRecordURL }, "Sources record map"),
-      ]),
-      h("div", {}, [
-        h.if(user !== undefined)([
-          "",
-          h(AnchorButton, { href: edit_href, icon: "edit" }, "Edit"),
-        ]),
-      ]),
-    ]
-  );
-};
-
-function SourceItem({ source }) {
-  const { source_id, name } = source;
-  const href = `/maps/${source_id}`;
-  const edit_href = `/maps/${source_id}/edit`;
-  return h("li", [
-    h("span.source-id", {}, source_id),
-    " ",
-    h("a", { href }, [name]),
-    " ",
-    h("span.scale", {}, source.scale),
-    h.if(source.rasterURL != null)([" ", h("span.raster", "Raster")]),
-    " ",
-    h("a", { href: edit_href }, [
-      h(Icon, { icon: "edit", size: IconSize.SMALL }),
-    ]),
-  ]);
-}
