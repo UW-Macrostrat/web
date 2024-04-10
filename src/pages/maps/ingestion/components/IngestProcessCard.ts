@@ -9,6 +9,28 @@ import Tag from "./Tag"
 
 const h = hyper.styled(styles);
 
+
+const deleteTag = async (tag: string, ingestId: number) => {
+
+  const response = await fetch(
+    `${ingestPrefix}/ingest-process/${ingestId}/tags/${tag}`,
+    {
+      method: "DELETE",
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    }
+  )
+
+  if(response.ok){
+    return
+  } else {
+    console.log("error", response)
+  }
+
+}
+
 const IngestProcessCard = ({
   ingestProcess,
   user
@@ -28,8 +50,6 @@ const IngestProcessCard = ({
   const { slug, name, source_id, scale, raster_url } = _ingestProcess.source;
   const edit_href = `/maps/ingestion/${source_id}`;
   const sourcesRecordURL = `/map/dev/sources/${slug}`;
-
-
 
   return h(
     Card,
@@ -70,8 +90,11 @@ const IngestProcessCard = ({
               return h(Tag, {
                 key: tag,
                 value: tag,
-                ingestId: id,
-                onChange: updateIngestProcess
+                style: {marginTop: "auto", marginBottom: "auto"},
+                onClick: async () => {
+                  await updateIngestProcess()
+                  await deleteTag(tag, id)
+                }
               })
             }),
             h(AddButton, {

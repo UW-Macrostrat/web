@@ -24,46 +24,23 @@ function intToRGB(i: number){
   return "#0000000".substring(0, 7 - c.length) + c;
 }
 
-const deleteTag = async (tag: string, ingestId: number) => {
-
-  const response = await fetch(
-    `${ingestPrefix}/ingest-process/${ingestId}/tags/${tag}`,
-    {
-      method: "DELETE",
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
-    }
-  )
-
-  if(response.ok){
-    return
-  } else {
-    console.log("error", response)
-  }
-
-}
 
 interface TagProps extends BlueprintTagProps {
   value: string;
-  ingestId: number;
   color?: string;
-  onChange: () => Promise<void>;
+  onClick: () => Promise<void>;
 }
 
-const Tag = ({value, ingestId, color, onChange, ...props} : TagProps) => {
+const Tag = ({value, color, onClick, ...props} : TagProps) => {
 
   color = color ? color : intToRGB(hashCode(value));
 
   return h(
     BlueprintTag,
     {
-      onClick: async () => {
-        await deleteTag(value, ingestId)
-        await onChange()
-      },
-      style: { backgroundColor: color, marginTop: "auto", marginBottom: "auto" }, ...props
+      ...props,
+      onClick: onClick,
+      style: { backgroundColor: color, ...props?.style }
     }, [
       value
     ])
