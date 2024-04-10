@@ -70,7 +70,7 @@ const AddTagButton = ({ingestId, onChange, ...props} : AddTagButtonProps) => {
 
   return h(Tag, {
     style: {
-      backgroundColor: "rgb(142,255,168)",
+      backgroundColor: "rgb(228,228,228)",
       color: "black"
     },
     ...props

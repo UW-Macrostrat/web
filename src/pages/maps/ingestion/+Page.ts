@@ -29,20 +29,21 @@ export function Page({ user, url }) {
   const [ingestFilter, setIngestFilter] = useState<string>("")
   const [tags, setTags] = useState<string[]>([]);
 
-  useEffect(() => {
-    const getIngestProcesses = async () => {
+  const getIngestProcesses = async () => {
 
-      // Get the query from the url
-      let urlFilter = "";
-      if(window.location.search) {
-        urlFilter = window.location.search.substring(1);
-      }
-
-
-      const response = await fetch(`${ingestPrefix}/ingest-process?source_id=order_by&source_id=not.is.null&state=eq.ingested&page_size=1000&${ingestFilter}&${urlFilter}`);
-      const ingest_processes = await response.json();
-      setIngestProcess(ingest_processes);
+    // Get the query from the url
+    let urlFilter = "";
+    if(window.location.search) {
+      urlFilter = window.location.search.substring(1);
     }
+
+
+    const response = await fetch(`${ingestPrefix}/ingest-process?source_id=order_by&source_id=not.is.null&state=eq.ingested&page_size=1000&${ingestFilter}&${urlFilter}`);
+    const ingest_processes = await response.json();
+    setIngestProcess(ingest_processes);
+  }
+
+  useEffect(() => {
     getIngestProcesses();
   }, [ingestFilter])
 
@@ -53,9 +54,11 @@ export function Page({ user, url }) {
       setTags(tags);
     }
     getTags();
-  }, [])
 
-  console.log(ingestProcess)
+    window.onpopstate = () => {
+      getIngestProcesses()
+    }
+  }, [])
 
 
   return h("div", [
@@ -98,7 +101,7 @@ export function Page({ user, url }) {
               "div",
               {
                 key: d.id,
-                style: { maxWidth: "1000px", width: "100%", margin: "auto" }
+                style: { maxWidth: "1000px", width: "100%" }
               },
               [
                 h(IngestProcessCard, {
