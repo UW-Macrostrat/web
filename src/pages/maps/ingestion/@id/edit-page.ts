@@ -10,6 +10,7 @@ import { useStoredState } from "@macrostrat/ui-components";
 import { ParentRouteButton } from "~/components/map-navbar";
 import { Button, AnchorButton, HotkeysProvider, Icon } from "@blueprintjs/core";
 import {PolygonTable, LineStringTable, PointTable} from "./tables";
+import SourceForm from "./source-form"
 
 export const h = hyper.styled(styles);
 
@@ -33,6 +34,12 @@ function EditMenu() {
       text: "Points",
       large: true,
       to: "points",
+    }),
+    h(LinkButton, {
+      icon: "edit",
+      text: "Edit Metadata",
+      large: true,
+      to: "edit",
     }),
   ]);
 }
@@ -134,6 +141,15 @@ export default function EditInterface({
                         ingestProcessId: ingestProcess.id
                       }
                     ),
+                  ]
+                )
+              }),
+              h(Route, {
+                path: "edit",
+                element: h("div", {},
+                  [
+                    h(Header, HeaderProps),
+                    h(SourceForm, {sourceId: source_id}),
                   ]
                 )
               }),
