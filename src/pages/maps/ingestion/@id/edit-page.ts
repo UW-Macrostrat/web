@@ -10,7 +10,7 @@ import { useStoredState } from "@macrostrat/ui-components";
 import { ParentRouteButton } from "~/components/map-navbar";
 import { Button, AnchorButton, HotkeysProvider, Icon } from "@blueprintjs/core";
 import {PolygonTable, LineStringTable, PointTable} from "./tables";
-import SourceForm from "./source-form"
+import {EditSourceForm} from "./source-form"
 
 export const h = hyper.styled(styles);
 
@@ -149,7 +149,7 @@ export default function EditInterface({
                 element: h("div", {},
                   [
                     h(Header, HeaderProps),
-                    h(SourceForm, {sourceId: source_id}),
+                    h(EditSourceForm, {sourceId: source_id}),
                   ]
                 )
               }),
