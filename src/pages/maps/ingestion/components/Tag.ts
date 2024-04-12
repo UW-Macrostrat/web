@@ -1,5 +1,5 @@
 
-import { Tag as BlueprintTag, TagProps as BlueprintTagProps } from "@blueprintjs/core"
+import { Icon, Tag as BlueprintTag, TagProps as BlueprintTagProps } from "@blueprintjs/core";
 import { ComponentType, HTMLAttributes, ReactNode } from "react";
 
 import { ingestPrefix } from "@macrostrat-web/settings";
@@ -28,10 +28,11 @@ function intToRGB(i: number){
 interface TagProps extends BlueprintTagProps {
   value: string;
   color?: string;
-  onClick: () => Promise<void>;
+  active?: boolean;
+  onClick?: () => Promise<void>;
 }
 
-const Tag = ({value, color, onClick, ...props} : TagProps) => {
+const Tag = ({value, color, onClick, active,  ...props} : TagProps) => {
 
   color = color ? color : intToRGB(hashCode(value));
 
@@ -42,7 +43,10 @@ const Tag = ({value, color, onClick, ...props} : TagProps) => {
       onClick: onClick,
       style: { backgroundColor: color, ...props?.style }
     }, [
-      value
+      h("div", {style: {display: "flex"}}, [
+        value,
+        h.if(active)(Icon, {icon: "small-tick", style: {marginLeft: "auto"}, iconSize: 16})
+      ]),
     ])
 }
 

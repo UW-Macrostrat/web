@@ -23,29 +23,46 @@ import IngestNavbar from "~/pages/maps/ingestion/components/navbar";
 
 const h = hyper.styled(styles);
 
+const toggleUrlParam = (urlSearchParam: URLSearchParams, key: string, value: string) => {
+  // Check if this key value pair is already in the search params iteratively
+  if (urlSearchParam.getAll(key).includes(value)) {
+    urlSearchParam.delete(key, value);
+  } else {
+    urlSearchParam.append(key, value);
+  }
+
+  return new URLSearchParams(urlSearchParam.toString());
+}
+
 
 export function Page({ user, url }) {
 
   const [ingestProcess, setIngestProcess] = useState<IngestProcess[]>([])
-  const [ingestFilter, setIngestFilter] = useState<string>("")
+  const [ingestFilter, setIngestFilter] = useState<URLSearchParams>(undefined)
   const [tags, setTags] = useState<string[]>([]);
 
   const getIngestProcesses = async () => {
-
-    // Get the query from the url
-    let urlFilter = "";
-    if(window.location.search) {
-      urlFilter = window.location.search.substring(1);
-    }
-
-
-    const response = await fetch(`${ingestPrefix}/ingest-process?source_id=order_by&source_id=not.is.null&state=eq.ingested&page_size=1000&${ingestFilter}&${urlFilter}`);
+    const response = await fetch(`${ingestPrefix}/ingest-process?source_id=order_by&source_id=not.is.null&page_size=1000&${ingestFilter || ""}`);
     const ingest_processes = await response.json();
     setIngestProcess(ingest_processes);
   }
 
   useEffect(() => {
     getIngestProcesses();
+  }, [ingestFilter])
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const searchParams = new URLSearchParams(url.search);
+    setIngestFilter(searchParams)
+  }, [])
+
+  useEffect(() => {
+    if(ingestFilter){
+      const url = new URL(window.location.href);
+      const urlWithSearch = new URL(url.origin + url.pathname + "?" + ingestFilter)
+      window.history.pushState({page: "Update Search Params"}, "Title", urlWithSearch);
+    }
   }, [ingestFilter])
 
   useEffect(() => {
@@ -127,11 +144,24 @@ export function Page({ user, url }) {
         }, [
           h("h3", {style: {margin: 0, marginBottom: "7px"}}, ["Tags"]),
           h(Tag, {
-            value: "None",
+            value: "pending",
+            active: ingestFilter?.getAll("state").includes("eq.pending"),
             onClick: async () => {
-              setIngestFilter("")
+              const url = new URL(window.location.href);
+              url.searchParams.set("state", `eq.pending`);
+              setIngestFilter(() => { return toggleUrlParam(ingestFilter, "state", "eq.pending") })
+              window.history.pushState({page: "Update Search Params"}, "Title", url);
+            },
+            style: {width: "100%", marginBottom: "7px"}
+          }),
+          h(Tag, {
+            value: "ingested",
+            active: ingestFilter?.getAll("state").includes("eq.ingested"),
+            onClick: async () => {
+
               const url = new URL(window.location.origin + window.location.pathname);
-              url.searchParams.delete("tags")
+              url.searchParams.set("state", `eq.ingested`);
+              setIngestFilter(() => { return toggleUrlParam(ingestFilter, "state", "eq.ingested")})
               window.history.pushState({page: "Update Search Params"}, "Title", url);
             },
             style: {width: "100%", marginBottom: "7px"}
@@ -140,12 +170,9 @@ export function Page({ user, url }) {
             return h(Tag, {
               key: tag,
               value: tag,
+              active: ingestFilter?.getAll("tags").includes(`eq.${tag}`),
               onClick: async () => {
-
-                const url = new URL(window.location.origin + window.location.pathname);
-                url.searchParams.set("tags", `eq.${tag}`);
-                setIngestFilter(`tags=eq.${tag}`)
-                window.history.pushState({page: "Update Search Params"}, "Title", url);
+                setIngestFilter(() => {return toggleUrlParam(ingestFilter, "tags", `eq.${tag}`)})
               },
               style: {width: "100%", marginBottom: "7px"}
             })
