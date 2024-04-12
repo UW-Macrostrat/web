@@ -75,6 +75,34 @@ export function Page({ user, url }) {
       },
       [
         h("div", {style: {display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(400px, 1fr))"}}, [
+          h.if(user != null)(Card, {
+              interactive: true,
+              style: {
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
+                padding: "0.5em",
+                margin: "0.5em",
+                borderRadius: "0.5em",
+                backgroundColor: "#f0f0f0",
+                overflow: "scroll"
+              },
+              onClick: () => {
+                window.location = "/maps/ingestion/add"
+              }
+            }, [
+              h("div", {style: {display: "flex", margin: "auto"}}, [
+                h(Icon, {
+                  icon: "add",
+                  size: 36,
+                  style: {
+                    margin: "auto"
+                  }
+                }, []),
+                h("h3", {style: {margin: "auto", marginLeft: "7px"}}, ["Add Source Map"])
+              ])
+            ]
+          ),
           ingestProcess.map((d) => {
             return h(
               "div",

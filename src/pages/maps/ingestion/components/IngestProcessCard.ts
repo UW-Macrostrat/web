@@ -54,7 +54,6 @@ const IngestProcessCard = ({
   return h(
     Card,
     {
-      interactive: true,
       style: {
         display: "flex",
         flexDirection: "row",
