@@ -19,6 +19,7 @@ import IngestProcessCard from "~/pages/maps/ingestion/components/IngestProcessCa
 import { useEffect, useState, useContext } from "react";
 
 import Tag from "./components/Tag"
+import IngestNavbar from "~/pages/maps/ingestion/components/navbar";
 
 const h = hyper.styled(styles);
 
@@ -62,29 +63,7 @@ export function Page({ user, url }) {
 
 
   return h("div", [
-    h(Navbar, {}, [
-      h(Navbar.Group, { align: "left" }, [h(Navbar.Heading, "Map Ingestion")]),
-      h(Navbar.Group, { align: "right" }, [
-        h(
-          Tooltip,
-          { content: user == undefined ? "Log In" : "Logged In" },
-          h(AnchorButton, {
-            icon: user == undefined ? "log-in" : "user",
-            style: {
-              margin: "0 0.5em",
-              borderRadius: "50%",
-              backgroundColor: user == undefined ? "#fdeb88" : "#90d090",
-            },
-            onClick() {
-              // Assemble the return URL on click based on the current page
-              const return_url =
-                window.location.origin + window.location.pathname;
-              window.location.href = `${ingestPrefix}/security/login?return_url=${return_url}`;
-            },
-          })
-        ),
-      ]),
-    ]),
+    h(IngestNavbar, { user: user }),
     h("div",
       { style: {display: "grid", gridTemplateColumns: "1000px", justifyContent: "center"} },
       [h("h1", {style: {marginLeft: "7px"}}, ["Source Map Ingestion"])]
@@ -96,6 +75,34 @@ export function Page({ user, url }) {
       },
       [
         h("div", {style: {display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(400px, 1fr))"}}, [
+          h.if(user != null)(Card, {
+              interactive: true,
+              style: {
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
+                padding: "0.5em",
+                margin: "0.5em",
+                borderRadius: "0.5em",
+                backgroundColor: "#f0f0f0",
+                overflow: "scroll"
+              },
+              onClick: () => {
+                window.location = "/maps/ingestion/add"
+              }
+            }, [
+              h("div", {style: {display: "flex", margin: "auto"}}, [
+                h(Icon, {
+                  icon: "add",
+                  size: 36,
+                  style: {
+                    margin: "auto"
+                  }
+                }, []),
+                h("h3", {style: {margin: "auto", marginLeft: "7px"}}, ["Add Source Map"])
+              ])
+            ]
+          ),
           ingestProcess.map((d) => {
             return h(
               "div",
