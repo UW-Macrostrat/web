@@ -143,7 +143,7 @@ const AddSourceForm = () => {
     const source = await postSource(data)
 
     setProgress({text: "Creating Ingest Process", value: .33})
-    const ingestProcess = await postIngestProcess({source_id: source.id})
+    const ingestProcess = await postIngestProcess({source_id: source.source_id, state: "pending"})
 
     setProgress({text: "Uploading Files", value: .66})
     const ingestProcessObject = await postIngestProcessObject(ingestProcess.id, files)

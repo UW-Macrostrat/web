@@ -85,6 +85,11 @@ const IngestProcessCard = ({
         h("div.flex.row",
           { style: { paddingBottom: "4px", display: "flex", gap: "0.5em" } },
           [
+            h.if(ingestProcess.state !== undefined)(Tag, {
+                value: ingestProcess.state,
+                style: { marginTop: "auto", marginBottom: "auto" }
+              }, []
+            ),
             tags.map((tag, i) => {
               return h(Tag, {
                 key: tag,

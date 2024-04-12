@@ -2,7 +2,7 @@ interface IngestProcess {
   id: number;
   source: Source;
   tags: string[];
-
+  state: string;
 }
 
 interface Source {
