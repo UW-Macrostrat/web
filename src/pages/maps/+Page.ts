@@ -1,6 +1,6 @@
 import hyper from "@macrostrat/hyper";
 // Page for a list of maps
-import styles from "./main.module.sass";
+import styles from "./main.module.scss";
 import { AnchorButton } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import { PageHeader } from "~/components/page-header";
