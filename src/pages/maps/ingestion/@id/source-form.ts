@@ -60,6 +60,11 @@ const postIngestProcess = async (data: any) => {
 }
 
 const postIngestProcessObject = async (ingestProcessId: number, files: FileList) => {
+
+  if(files.length == 0) {
+    return
+  }
+
   const data = new FormData()
   Array.from<File>(files).forEach(file => {
     data.append("object", file, file.name)
