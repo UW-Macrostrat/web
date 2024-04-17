@@ -183,7 +183,7 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
       const response = await fetch(dataURL);
       let data = await response.json();
 
-      data = data.filter(x => showOmitted ? true : !x.omit)
+      data = data.filter(x => showOmitted ? true : x.omit != true)
 
       // Update the number of rows
       setNumberOfRows(parseInt(response.headers.get("X-Total-Count")))
