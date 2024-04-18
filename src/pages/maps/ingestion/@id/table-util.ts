@@ -310,3 +310,12 @@ export const download_file = (url) => {
   // Remove the element from the DOM
   document.body.removeChild(link);
 }
+
+export const updateInput = async (input, value) => {
+  const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+    window.HTMLInputElement.prototype,
+    'value').set;
+  nativeInputValueSetter.call(input, value);
+  const event = new Event('input', { bubbles: true });
+  input.dispatchEvent(event);
+}
