@@ -11,14 +11,18 @@ interface EditableCell extends EditableCell2Props {
   columnName: string;
   rowIndex: number;
   edited: boolean;
+  onPaste: (e) => Promise<boolean>;
+  onCopy: (e) => Promise<boolean>;
 }
 
-let EditableCell = forwardRef((props: EditableCell2Props, ref) => {
+let EditableCell = forwardRef((props: EditableCell, ref) => {
   const [value, setValue] = React.useState(props.value);
 
   useEffect(() => {
     setValue(props.value);
   }, [props.value]);
+
+  ref.value = value;
 
   return h(
     Cell,
@@ -33,19 +37,25 @@ let EditableCell = forwardRef((props: EditableCell2Props, ref) => {
           style: {
             width: (value?.length ?? 2) + "ch",
             color: "inherit",
-            backgroundColor: "#ff000000",
+            backgroundColor: "#ffffff",
           },
           value: value || "",
           onChange: (e) => {
             setValue(e.target.value);
             e.target.style.width = e.target.value.length + 8 + "ch";
-            console.log(e.target.value.length);
+          },
+          onPaste: async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            await props.onPaste(e);
+          },
+          onCopy: async (e) => {
+            await props.onCopy(e);
           },
           onClick: (e) => {
             e.target.select();
           },
           onFocus: (e) => {
-            console.log("Focus");
             e.target.select();
             e.target.select();
             e.target.select();

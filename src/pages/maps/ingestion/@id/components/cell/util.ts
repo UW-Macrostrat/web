@@ -15,3 +15,4 @@ export const toBoolean = (value: string | boolean): boolean | undefined => {
       return undefined;
   }
 }
+

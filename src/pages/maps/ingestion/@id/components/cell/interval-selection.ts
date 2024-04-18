@@ -1,13 +1,14 @@
 import { Button, MenuItem } from "@blueprintjs/core";
 import { ItemPredicate, ItemRenderer, Select2 } from "@blueprintjs/select";
 import { Cell, EditableCell2Props } from "@blueprintjs/table";
-import React, { useMemo, memo } from "react";
+import React, { useMemo, memo, forwardRef } from "react";
 
 // @ts-ignore
 import hyper from "@macrostrat/hyper";
 
 import "~/styles/blueprint-select";
 import styles from "../../edit-table.module.sass";
+import EditableCell from "~/pages/maps/ingestion/@id/components/cell/editable-cell";
 
 const h = hyper.styled(styles);
 
@@ -89,13 +90,22 @@ const filterInterval: ItemPredicate<Interval> = (query, interval) => {
   return interval.name.toLowerCase().indexOf(query.toLowerCase()) >= 0;
 };
 
-let IntervalSelection = ({
-  value,
-  onConfirm,
-  intent,
-  intervals,
-  ...props
-}: EditableCell2Props & { intervals: Interval[] }) => {
+interface IntervalSelectionProps extends EditableCell2Props {
+  intervals: Interval[];
+  onPaste: (e) => Promise<boolean>;
+  onCopy: (e) => Promise<boolean>;
+}
+
+let IntervalSelection = forwardRef((
+  {
+    value,
+    onConfirm,
+    intent,
+    intervals,
+    onPaste,
+    onCopy,
+    ...props
+  }: IntervalSelectionProps, ref) => {
 
   const interval = useMemo(() => {
     let interval = null;
@@ -118,6 +128,7 @@ let IntervalSelection = ({
       h(
         Select2<Interval>,
         {
+          ref: ref,
           fill: true,
           items: intervals,
           className: "update-input-group",
@@ -168,7 +179,7 @@ let IntervalSelection = ({
       ),
     ]
   );
-};
+});
 
 IntervalSelection = memo(IntervalSelection);
 
