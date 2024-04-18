@@ -19,6 +19,7 @@ import CheckboxCell from "~/pages/maps/ingestion/@id/components/cell/checkbox-ce
 import EditTable from "~/pages/maps/ingestion/@id/edit-table";
 import styles from "~/pages/maps/ingestion/@id/edit-table.module.sass";
 import { COMMON_COLUMNS } from "../tables";
+import { toBoolean } from "~/pages/maps/ingestion/@id/components/cell/util";
 
 const h = hyper.styled(styles);
 
@@ -168,7 +169,7 @@ export default function PolygonTable({url, ingestProcessId}: CustomTableProps) {
 
               setTableUpdates(p => [...p, tableUpdate]);
             },
-            value: transformedData[rowIndex]["omit"],
+            value: toBoolean(transformedData[rowIndex]["omit"]),
           }),
       }),
     };

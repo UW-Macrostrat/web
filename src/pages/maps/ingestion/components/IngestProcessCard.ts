@@ -78,9 +78,7 @@ const IngestProcessCard = ({
             "h3",
             { style: { margin: "0px"} },
             name
-          ),
-          h("div.spacer"),
-          h("code", slug),
+          )
         ]),
         h("div.flex.row",
           { style: { paddingBottom: "4px", display: "flex", gap: "0.5em" } },
@@ -109,6 +107,7 @@ const IngestProcessCard = ({
         h("div.flex.row", [
           h("h6", { style: { margin: "0px" } }, `Scale: ${scale}`),
           h("h6", { style: { margin: "0px" } }, `Source ID: ${source_id}`),
+          h("h6", { style: { margin: "0px" } }, `Slug: ${slug}`),
         ]),
         h.if(raster_url != null)([
           " ",
