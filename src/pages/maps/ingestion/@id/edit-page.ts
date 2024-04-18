@@ -98,7 +98,7 @@ export default function EditInterface({
               }),
               h(Route, {
                 path: "polygons",
-                element: h("div", {},
+                element: h(TableContainer, {},
                   [
                     h(Header, HeaderProps),
                     h(PolygonTable,
@@ -114,7 +114,7 @@ export default function EditInterface({
               }),
               h(Route, {
                 path: "points",
-                element: h("div", {},
+                element: h(TableContainer, {},
                   [
                     h(Header, HeaderProps),
                     h(PointTable,
@@ -130,7 +130,7 @@ export default function EditInterface({
               }),
               h(Route, {
                 path: "linestrings",
-                element: h("div", {},
+                element: h(TableContainer, {},
                   [
                     h(Header, HeaderProps),
                     h(LineStringTable,
@@ -160,6 +160,12 @@ export default function EditInterface({
       h.if(showMap)(MapInterface, { id: source_id, map: mapBounds }),
     ]),
   ]);
+}
+
+const TableContainer = ({ children }) => {
+  return h("div.table-container", {style: {display: "flex",
+      flexDirection: "column",
+  height: "100%"}}, children);
 }
 
 function Header({ title, showMap, setShowMap, parentRoute }: { title: string, showMap: boolean, setShowMap: (b: boolean) => void, parentRoute?: string }) {

@@ -627,6 +627,9 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
       tabIndex: 0,
       style: {
         minHeight: "0",
+        display: "flex",
+        flexDirection: "column",
+        height: "100%"
       },
     },
     [
