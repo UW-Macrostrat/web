@@ -10,6 +10,7 @@ import { DataParameters } from "~/pages/maps/ingestion/@id/table";
 import IntervalSelection from "~/pages/maps/ingestion/@id/components/cell/interval-selection";
 import { getTableUpdate } from "~/pages/maps/ingestion/@id/table-util";
 import CheckboxCell from "~/pages/maps/ingestion/@id/components/cell/checkbox-cell";
+import {toBoolean} from "~/pages/maps/ingestion/@id/components/cell/util";
 import styles from "~/pages/maps/ingestion/@id/edit-table.module.sass";
 
 const h = hyper.styled(styles);
@@ -146,7 +147,7 @@ const polygonColumnGenerator = ({
 
             setTableUpdates(tableUpdate);
           },
-          value: transformedData[rowIndex]["omit"],
+          value: toBoolean(transformedData[rowIndex]["omit"]),
         }),
     }),
   };

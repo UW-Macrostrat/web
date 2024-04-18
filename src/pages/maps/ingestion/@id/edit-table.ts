@@ -99,7 +99,7 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
   const ref = useRef<MutableRefObject<any>[][]>(null);
 
   // Selection State
-  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+  const [selection, setSelection] = useState<Selection[]>([]);
   const [copiedColumn, setCopiedColumn] = useState<string | undefined>(
     undefined
   );
@@ -224,6 +224,26 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
     return tableColumns.filter((x) => !allHiddenColumns.includes(x));
   }, [tableColumns, hiddenColumns]);
 
+  const selectedColumns = useMemo(() => {
+
+    if (selection.length == 0) {
+      return undefined;
+    }
+
+    const selectedColumnRange = selection[0]?.cols;
+    if (selection[0]?.rows == undefined) {
+      const selectedColumnIndices = range(
+        selectedColumnRange[0],
+        selectedColumnRange[1] + 1
+      );
+      return selectedColumnIndices?.map(
+        (index) => visibleColumnNames[index]
+      )
+    } else {
+      return undefined
+    }
+  }, [selection, visibleColumnNames])
+
   const handleHide = useCallback(() => {
     if (selectedColumns != undefined) {
       setHiddenColumns(selectedColumns);
@@ -231,6 +251,9 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
   }, [selectedColumns]);
 
   const handlePaste = useCallback(() => {
+
+    console.log(selection, "Test")
+
     if (copiedColumn != undefined && selectedColumns.length == 1) {
       const selectedColumn = selectedColumns[0];
 
@@ -273,7 +296,7 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
 
       setTableUpdates([...tableUpdates, tableUpdate]);
     }
-  }, [selectedColumns, copiedColumn, dataParameters]);
+  }, [selectedColumns, copiedColumn, dataParameters, selection]);
 
   const handleCopy = useCallback(() => {
     if (selectedColumns.length == 1) {
@@ -629,20 +652,7 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
               const pastedText = clipboardData.getData("text/plain");
             },
             onSelection: (selections: Selection[]) => {
-              const selectedColumnRange = selections[0]?.cols;
-              if (selections[0]?.rows == undefined) {
-                const selectedColumnIndices = range(
-                  selectedColumnRange[0],
-                  selectedColumnRange[1] + 1
-                );
-                setSelectedColumns(
-                  selectedColumnIndices?.map(
-                    (index) => visibleColumnNames[index]
-                  )
-                );
-              } else {
-                setSelectedColumns(undefined);
-              }
+              setSelection(selections);
             },
             onVisibleCellsChange: (visibleCells) => {
               if (
