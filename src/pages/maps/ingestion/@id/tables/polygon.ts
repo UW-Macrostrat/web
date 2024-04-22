@@ -21,6 +21,7 @@ import { TableInterface } from "../edit-table";
 import styles from "~/pages/maps/ingestion/@id/edit-table.module.sass";
 import { COMMON_COLUMNS } from "../tables";
 import { toBoolean } from "~/pages/maps/ingestion/@id/components/cell/util";
+import { apiV2Prefix } from "@macrostrat-web/settings";
 
 const h = hyper.styled(styles);
 
@@ -45,7 +46,7 @@ export default function PolygonTable({
   useEffect(() => {
     async function getIntervals() {
       let response = await fetch(
-        `https://macrostrat.org/api/defs/intervals?tilescale_id=11`
+        `${apiV2Prefix}/defs/intervals?timescale_id=11`
       );
 
       if (response.ok) {
