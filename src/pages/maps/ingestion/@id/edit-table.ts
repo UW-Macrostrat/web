@@ -155,7 +155,14 @@ export default function TableInterface({
 
   const setHiddenColumns = useCallback((column: string | string[]) => {
     _setHiddenColumns((prev) => {
+
       if (Array.isArray(column)) {
+
+        // Check if they are emptying the list
+        if (column.length == 0) {
+          return [];
+        }
+
         return [...prev, ...column];
       }
 
@@ -655,7 +662,7 @@ export default function TableInterface({
     return generatedColumns;
   }, [
     defaultColumnConfig,
-    tableColumns,
+    visibleColumnNames,
     dataParameters,
     transformedData,
     data,
