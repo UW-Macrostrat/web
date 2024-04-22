@@ -17,7 +17,7 @@ import IntervalSelection, {
 } from "~/pages/maps/ingestion/@id/components/cell/interval-selection";
 import { getTableUpdate } from "~/pages/maps/ingestion/@id/table-util";
 import CheckboxCell from "~/pages/maps/ingestion/@id/components/cell/checkbox-cell";
-import EditTable from "~/pages/maps/ingestion/@id/edit-table";
+import { TableInterface } from "../edit-table";
 import styles from "~/pages/maps/ingestion/@id/edit-table.module.sass";
 import { COMMON_COLUMNS } from "../tables";
 import { toBoolean } from "~/pages/maps/ingestion/@id/components/cell/util";
@@ -77,7 +77,7 @@ export default function LineStringTable({
     []
   );
 
-  return h(EditTable, {
+  return h(TableInterface, {
     url: url,
     ingestProcessId: ingestProcessId,
     finalColumns: FINAL_LINE_COLUMNS,
