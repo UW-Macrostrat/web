@@ -77,6 +77,7 @@ const IntervalOptionRenderer: ItemRenderer<Interval> = (
   props
 ) => {
   return h(IntervalOptionMemo, {
+    key: interval.int_id,
     interval,
     props,
   });
