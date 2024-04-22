@@ -54,7 +54,7 @@ import {
   applyTableUpdates,
   submitColumnCopy,
   cloneDataParameters,
-  download_file
+  download_file, updateInput
 } from "./table-util";
 import TableMenu from "./table-menu";
 import IntervalSelection, {
@@ -99,7 +99,7 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
   const ref = useRef<MutableRefObject<any>[][]>(null);
 
   // Selection State
-  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+  const [selection, setSelection] = useState<Selection[]>([]);
   const [copiedColumn, setCopiedColumn] = useState<string | undefined>(
     undefined
   );
@@ -183,7 +183,7 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
       const response = await fetch(dataURL);
       let data = await response.json();
 
-      data = data.filter(x => showOmitted ? true : !x.omit)
+      data = data.filter(x => showOmitted ? true : x.omit != true)
 
       // Update the number of rows
       setNumberOfRows(parseInt(response.headers.get("X-Total-Count")))
@@ -224,13 +224,79 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
     return tableColumns.filter((x) => !allHiddenColumns.includes(x));
   }, [tableColumns, hiddenColumns]);
 
+  const selectedColumns = useMemo(() => {
+
+    if (selection.length == 0) {
+      return undefined;
+    }
+
+    const selectedColumnRange = selection[0]?.cols;
+    if (selection[0]?.rows == undefined) {
+      const selectedColumnIndices = range(
+        selectedColumnRange[0],
+        selectedColumnRange[1] + 1
+      );
+      return selectedColumnIndices?.map(
+        (index) => visibleColumnNames[index]
+      )
+    } else {
+      return undefined
+    }
+  }, [selection, visibleColumnNames])
+
   const handleHide = useCallback(() => {
     if (selectedColumns != undefined) {
       setHiddenColumns(selectedColumns);
     }
   }, [selectedColumns]);
 
-  const handlePaste = useCallback(() => {
+  const handlePaste = useCallback(async () => {
+
+    const firstSelection = selection[0]
+    if(firstSelection?.cols != undefined && firstSelection?.rows != undefined){
+
+      // Get value from clipboard
+      const clipboardText = await navigator.clipboard.readText()
+
+      let clipboardValue = clipboardText.split("\n").map((row) => row.split("\t"))
+
+      let rowRange = range(firstSelection.rows[0], firstSelection.rows[1] + 1)
+      let colRange = range(firstSelection.cols[0], firstSelection.cols[1] + 1)
+
+      // If one cell is selected go through and paste
+      if( rowRange.length == 1 && colRange.length == 1){
+
+        let rowStart = rowRange[0]
+        let colStart = colRange[0]
+
+        const newTableUpdates = clipboardValue.flatMap((row, rowIndex) => {
+          return row.flatMap((value, columnIndex) => {
+            // Ignore copying null values
+            if (value == "") {
+              return []
+            }
+
+            const tableUpdate = getTableUpdate(
+              url,
+              value,
+              visibleColumnNames[columnIndex + colStart],
+              rowIndex + rowStart,
+              transformedData,
+              dataParameters
+            );
+            return [tableUpdate]
+          })
+        })
+
+        setTableUpdates([...tableUpdates, ...newTableUpdates])
+      }
+
+      const clipboardValueText = clipboardValue.map((row) => row.join("\t")).join("\n")
+
+      // Copy clipboard value to clipboard
+      navigator.clipboard.writeText(clipboardValueText);
+    }
+
     if (copiedColumn != undefined && selectedColumns.length == 1) {
       const selectedColumn = selectedColumns[0];
 
@@ -273,13 +339,28 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
 
       setTableUpdates([...tableUpdates, tableUpdate]);
     }
-  }, [selectedColumns, copiedColumn, dataParameters]);
+  }, [selectedColumns, copiedColumn, dataParameters, selection]);
 
   const handleCopy = useCallback(() => {
-    if (selectedColumns.length == 1) {
+
+    const firstSelection = selection[0]
+    if(firstSelection?.cols != undefined && firstSelection?.rows != undefined){
+      let clipboardValue = range(firstSelection.rows[0], firstSelection.rows[1] + 1).map((rowIndex) => {
+        return range(firstSelection.cols[0], firstSelection.cols[1] + 1).map((colIndex) => {
+          return transformedData[rowIndex][visibleColumnNames[colIndex]]
+        })
+      })
+
+      const clipboardValueText = clipboardValue.map((row) => row.join("\t")).join("\n")
+
+      // Copy clipboard value to clipboard
+      navigator.clipboard.writeText(clipboardValueText);
+    }
+
+    if (selectedColumns?.length == 1) {
       setCopiedColumn(selectedColumns[0]);
     }
-  }, [selectedColumns]);
+  }, [selection, selectedColumns, transformedData]);
 
   const handleEnter = useCallback(
     (e) => {
@@ -500,6 +581,12 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
                 );
                 setTableUpdates([...tableUpdates, tableUpdate]);
               },
+              onCopy: (e) => {
+                handleCopy(e)
+              },
+              onPaste: (e) => {
+                handlePaste(e)
+              },
               editableTextProps: {
                 disabled: !finalColumns.includes(columnName),
               },
@@ -510,7 +597,7 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
         }),
       };
     }, {});
-  }, [visibleColumnNames, tableColumns, dataParameters, transformedData, data]);
+  }, [visibleColumnNames, tableColumns, dataParameters, transformedData, data, selection]);
 
   const columnConfig = useMemo(() => {
     if (tableColumns.length == 0) {
@@ -530,7 +617,7 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
 
     return generatedColumns
 
-  }, [defaultColumnConfig, tableColumns, dataParameters, transformedData, data]);
+  }, [defaultColumnConfig, tableColumns, dataParameters, transformedData, data, selection]);
 
   return h(
     "div",
@@ -540,6 +627,9 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
       tabIndex: 0,
       style: {
         minHeight: "0",
+        display: "flex",
+        flexDirection: "column",
+        height: "100%"
       },
     },
     [
@@ -610,9 +700,7 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
           Table2,
           {
             enableFocusedCell: true,
-            selectionModes: dataParameters?.group
-              ? RegionCardinality.CELLS
-              : SelectionModes.COLUMNS_AND_CELLS,
+            selectionModes: SelectionModes.COLUMNS_AND_CELLS,
             rowHeaderCellRenderer: rowHeaderCellRenderer,
             onFocusedCell: (focusedCellCoordinates) => {
               try {
@@ -625,24 +713,9 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
             },
             loadingOptions: loading ? ["cells", "column-header"] : [],
             focusedCell: focusedCell,
-            onPaste: (clipboardData, rowIndex, columnIndex) => {
-              const pastedText = clipboardData.getData("text/plain");
-            },
             onSelection: (selections: Selection[]) => {
-              const selectedColumnRange = selections[0]?.cols;
-              if (selections[0]?.rows == undefined) {
-                const selectedColumnIndices = range(
-                  selectedColumnRange[0],
-                  selectedColumnRange[1] + 1
-                );
-                setSelectedColumns(
-                  selectedColumnIndices?.map(
-                    (index) => visibleColumnNames[index]
-                  )
-                );
-              } else {
-                setSelectedColumns(undefined);
-              }
+              console.log("Columns:", selections[0].cols, "Rows:", selections[0].rows)
+              setSelection(selections);
             },
             onVisibleCellsChange: (visibleCells) => {
               if (
@@ -661,7 +734,7 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
               }
             },
             numRows: data.length,
-            cellRendererDependencies: [transformedData],
+            cellRendererDependencies: [transformedData, selection],
           },
           Object.values(columnConfig)
         ),

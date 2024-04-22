@@ -7,7 +7,7 @@
   "scripts": {
     "bundle": "vite build",
     "clean": "rm -rf dist/*",
-    "dev": "yarn run server:dev",
+    "dev": "NODE_NO_WARNINGS=1 yarn run server:dev",
     "build": "vite build",
     "server": "node ./server/index.js",
     "server:dev": "node --env-file=.env ./server/index.js",
@@ -121,6 +121,7 @@
     "resium": "^1.13.1",
     "sirv": "^2.0.3",
     "supports-color": "^9.4.0",
+    "swagger-ui-react": "^5.12.3",
     "topojson-client": "^3.0.0",
     "transition-hook": "^1.5.2",
     "use-debounce": "^9.0.4",

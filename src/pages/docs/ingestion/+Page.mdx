@@ -1,114 +1,66 @@
-export { ContentPage as default } from "~/layouts";
+export { DocumentationPage as default } from "~/layouts";
+import { LinkCard } from "~/components/cards";
+import { PageHeader } from "~/components";
+import imgUrl from "../images/IngestionProcess.png"
 
+<PageHeader title="Ingestion" showSiteName={false}>
+  <span className="subtitle">
+    <span className="tertiary">{import.meta.env.VITE_MACROSTRAT_INSTANCE}</span>
+  </span>
+</PageHeader>
 
-# Map Editing Interface
+The Macrostrat ingestion process is built to enable the registration, processing and distribution of new maps.
 
-Created as part of Macrostrat's mapping pipeline for the CriticalMAAS project to facilitate the consumption and validation of TA1 maps.
+<img style={{maxWidth: "100%"}} src={imgUrl} />
 
-Table interface built for quick reconciliation of outside geometries with Macrostrats map representation.
+## Staging
 
-- [Features](#features)
-- [Overview](#process-overview)
-- [Starred Column Descriptions](#starred-column-description)
-- [Table Commands](#table-commands)
+### Registering a Map for Ingestion
 
-## Features:
+Registration involves uploading all relevant files to an S3 bucket and
+recording them in Macrostrat's database via the API. Once a map has been
+registered, its progress through the ingestion process can be tracked.
 
-- Hide and Copy columns
-- Standard Filter and Grouping
-- Purpose built interfaces for certain columns ( Example: Selection interface for all valid age intervals )
-- View of running operations, as well as push and clear functionality
-- Virtualized 'infinite' scrolling of table data to keep data downloads web friendly
-- Group based auth to prevent outside changes
-- Download the ingested map files to view metadata
-- (More incoming)
+### Preprocessing
 
+After a map has been registered, the internal map processing pipeline can
+prepare the map for harmonization. This step involves determining the format
+of the map's data (e.g., Shapefiles, Geopackage, or TA1 output); parsing it
+into its component parts; and pulling out the points, lines, and polygons.
 
-## Process Overview
+### In Progress
 
-### 1. Select the map you wish to process
+We are currently working on adding subcommands to the `macrostrat`
+command-line interface for taking a collection of files for a map and
+processing them through the staging process outlines above. Briefly:
 
-Log in and find the map that you wish to process on the ingestion page, clicking "Edit" will bring you into the ingestion interface.
+1. Install the `macrostrat` command by following the instructions in the
+   [UW-Macrostrat/macrostrat](https://github.com/UW-Macrostrat/macrostrat)
+   GitHub repository.
 
-### 2. Download the ingested maps metadata
+2. Run `macrostrat maps run-pipeline --help` for an overview of how to
+   stage a map.
 
-Click on the download link to download the metadata for the ingested map, you will need this to provide more
-context about the values shown in the table.
+We are also currently working to make the registration of a map more available via the web interface. In progress are the
+creation of API routes that will allow a user to provide the map files directly via the ingestion interface and have the
+automated pipelines that are currently in place translate this map into a new candidate in the Macrostrat system.
 
-### 3. Use the interface to reconcile the map
+## Integration
 
-Using the table interface the user manipulates the ingested data into standardized fields made easier through the above [features](#features). The table will provide feedback on the level of completion as you work and provide a link to view your processed map. 
+### Harmonization
 
-The starred columns (★) denote the columns
-that are intended to be populated by the non-star columns which are populated via the ingestion process.
+This process is what allows Macrostrat to present heterogenous maps in a homogenized map interface. Using the data that
+is processed into our points, lines and polygon tables in the previous step we can begin to assign them with our curated
+set of geological properties. As you go through this process Macrostrat will continuously ( in progress ) update this maps
+tiles and associated metadata APIs. This allows you to continuously improve this map as new information comes in.
 
-- [Starred Column Description](#starred-column-description)
-- [Table Commands](#table-commands)
+[How to use this interface](/docs/ingestion/harmonization)
 
-#### Starred Column Description
+### Prioritization
 
-All the columns in addition to these are filled in from the ingested map and can typically be transformed via the
-table interface to populate these values. Otherwise, we provide the original .zip file that was ingested to help locate the appropriate README files.
+After the harmonization process is deemed complete a expert will review the resulting map. Checking for novelty in the existing
+system and quality of ingestion they will decide whether to integrate this map into Macrostrat's Carto dataset that powers
+its main interface.
 
-**orig_id**
-
-This column is composed of ids for each polygon. The best way to populate this is to copy and paste the column from the ingestion that most closely resembles a list of discrete values.
-
-**descrip**
-
-This column is the description of the polygon.
-
-**ready**
-
-This column is a **True/False** column used to denote a row as "Ready". These "Ready" rows can then be removed by a column filter.
-
-**name**
-
-Name of the polygon, typically taken from the ingestion.
-
-**strat_name**
-
-Name of the stratigraphy.
-
-**age**
-
-Age of the polygon.
-
-**comments**
-
-Any comments that you would like to make can be entered here.
-
-**t_interval**
-
-?
-
-**b_interval**
-
-?
-
-**lith**
-
-?
-
-#### Table Commands
-
-**tab/shift + tab**
-
-Navigate Cells Horizontally
-
-**enter/shift + enter**
-
-Navigate Cells Vertically
-
-**shift + h ( Well a column is selected )**
-
-Hide a column
-
-**cmd + c ( Well a column is selected )**
-
-Copy a column
-
-**cmd + v ( Well a column is selected )**
-
-Paste a column
-
+__Note__: A map does not need to be integrated into the Carto dataset for its information/tiles to be exposed via API.
+Prioritization is a optional step that maps might not reach.
