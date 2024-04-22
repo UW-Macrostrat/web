@@ -4,20 +4,19 @@
 
 import hyper from "@macrostrat/hyper";
 
-
 import { ColumnProps, Column } from "@blueprintjs/table";
 import { DataParameters } from "~/pages/maps/ingestion/@id/table";
 import IntervalSelection from "~/pages/maps/ingestion/@id/components/cell/interval-selection";
 import { getTableUpdate } from "~/pages/maps/ingestion/@id/table-util";
 import CheckboxCell from "~/pages/maps/ingestion/@id/components/cell/checkbox-cell";
-import {toBoolean} from "~/pages/maps/ingestion/@id/components/cell/util";
+import { toBoolean } from "~/pages/maps/ingestion/@id/components/cell/util";
 import styles from "~/pages/maps/ingestion/@id/edit-table.module.sass";
 
 const h = hyper.styled(styles);
 
 type ColumnConfig = {
-  [key: string] : ColumnProps
-}
+  [key: string]: ColumnProps;
+};
 
 interface ColumnConfigGenerator {
   url: string;
@@ -40,7 +39,7 @@ const polygonColumnGenerator = ({
   transformedData,
   data,
   intervals,
-  ref
+  ref,
 }: ColumnConfigGenerator): ColumnProps[] => {
   return {
     ...defaultColumnConfig,
@@ -64,9 +63,12 @@ const polygonColumnGenerator = ({
               dataParameters
             );
 
-            let newTableUpdates = [tableUpdate]
+            let newTableUpdates = [tableUpdate];
 
-            if(transformedData[rowIndex]['b_interval'] == undefined || transformedData[rowIndex]['b_interval'] == ""){
+            if (
+              transformedData[rowIndex]["b_interval"] == undefined ||
+              transformedData[rowIndex]["b_interval"] == ""
+            ) {
               let oppositeIntervalTableUpdate = getTableUpdate(
                 url,
                 value,
@@ -76,13 +78,20 @@ const polygonColumnGenerator = ({
                 dataParameters
               );
 
-              newTableUpdates.push(oppositeIntervalTableUpdate)
+              newTableUpdates.push(oppositeIntervalTableUpdate);
             }
 
             setTableUpdates(newTableUpdates);
           },
-          intent: data[rowIndex]["t_interval"] != transformedData[rowIndex]["t_interval"] ? "success" : undefined,
-          value: transformedData.length == 0 ? "" : transformedData[rowIndex]["t_interval"],
+          intent:
+            data[rowIndex]["t_interval"] !=
+            transformedData[rowIndex]["t_interval"]
+              ? "success"
+              : undefined,
+          value:
+            transformedData.length == 0
+              ? ""
+              : transformedData[rowIndex]["t_interval"],
         }),
     }),
     b_interval: h(Column, {
@@ -105,9 +114,12 @@ const polygonColumnGenerator = ({
               dataParameters
             );
 
-            let newTableUpdates = [tableUpdate]
+            let newTableUpdates = [tableUpdate];
 
-            if(transformedData[rowIndex]['t_interval'] == undefined || transformedData[rowIndex]['t_interval'] == ""){
+            if (
+              transformedData[rowIndex]["t_interval"] == undefined ||
+              transformedData[rowIndex]["t_interval"] == ""
+            ) {
               let oppositeIntervalTableUpdate = getTableUpdate(
                 url,
                 value,
@@ -117,13 +129,20 @@ const polygonColumnGenerator = ({
                 dataParameters
               );
 
-              newTableUpdates.push(oppositeIntervalTableUpdate)
+              newTableUpdates.push(oppositeIntervalTableUpdate);
             }
 
             setTableUpdates(newTableUpdates);
           },
-          intent: data[rowIndex]["b_interval"] != transformedData[rowIndex]["b_interval"] ? "success" : undefined,
-          value: transformedData.length == 0 ? "" : transformedData[rowIndex]["b_interval"],
+          intent:
+            data[rowIndex]["b_interval"] !=
+            transformedData[rowIndex]["b_interval"]
+              ? "success"
+              : undefined,
+          value:
+            transformedData.length == 0
+              ? ""
+              : transformedData[rowIndex]["b_interval"],
         }),
     }),
     omit: h(Column, {
@@ -151,4 +170,4 @@ const polygonColumnGenerator = ({
         }),
     }),
   };
-}
+};

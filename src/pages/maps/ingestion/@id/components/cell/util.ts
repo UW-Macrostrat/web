@@ -1,8 +1,8 @@
 /*
-  * Converts a string to a boolean or undefined
+ * Converts a string to a boolean or undefined
  */
 export const toBoolean = (value: string | boolean): boolean | undefined => {
-  switch(value) {
+  switch (value) {
     case "true":
       return true;
     case "false":
@@ -14,5 +14,4 @@ export const toBoolean = (value: string | boolean): boolean | undefined => {
     default:
       return undefined;
   }
-}
-
+};

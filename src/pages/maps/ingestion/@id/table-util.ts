@@ -296,12 +296,11 @@ export const range = (start, stop, step = 1) =>
     .fill(start)
     .map((x, y) => x + y * step);
 
-
 export const download_file = (url) => {
   // Create an anchor element
-  const link = document.createElement('a');
+  const link = document.createElement("a");
   link.href = url;
-  link.download = url.substring(url.lastIndexOf('/') + 1);
+  link.download = url.substring(url.lastIndexOf("/") + 1);
 
   // Simulate click to trigger download
   document.body.appendChild(link);
@@ -309,13 +308,14 @@ export const download_file = (url) => {
 
   // Remove the element from the DOM
   document.body.removeChild(link);
-}
+};
 
 export const updateInput = async (input, value) => {
   const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
     window.HTMLInputElement.prototype,
-    'value').set;
+    "value"
+  ).set;
   nativeInputValueSetter.call(input, value);
-  const event = new Event('input', { bubbles: true });
+  const event = new Event("input", { bubbles: true });
   input.dispatchEvent(event);
-}
+};

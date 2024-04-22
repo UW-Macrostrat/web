@@ -4,7 +4,6 @@ import { PageContextBuiltInServer } from "vike/types";
 const apiAddress = apiV2Prefix + "/defs/sources/";
 
 export async function onBeforeRender(pageContext: PageContextBuiltInServer) {
-
   const { id } = pageContext.routeParams;
 
   // API v2 query
@@ -23,7 +22,7 @@ export async function onBeforeRender(pageContext: PageContextBuiltInServer) {
   const ingestProcesses = await ingest_processes_response.json();
   const ingestProcess = ingestProcesses[0];
 
-  const source = ingestProcess['source'];
+  const source = ingestProcess["source"];
 
   return {
     pageContext: {
@@ -31,7 +30,7 @@ export async function onBeforeRender(pageContext: PageContextBuiltInServer) {
         id,
         map,
         source,
-        ingestProcess
+        ingestProcess,
       },
       documentProps: {
         // The page's <title>

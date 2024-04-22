@@ -16,7 +16,6 @@ interface CheckboxCell extends Omit<EditableCell2Props, "value" | "onConfirm"> {
 }
 
 let CheckboxCell = forwardRef((props: CheckboxCell, ref) => {
-
   const [value, setValue] = React.useState<boolean | undefined>(props.value);
 
   useEffect(() => {
@@ -24,22 +23,21 @@ let CheckboxCell = forwardRef((props: CheckboxCell, ref) => {
   }, [props.value]);
 
   const text = useMemo(() => {
-
     // Check if value is a string
-    if(value == undefined) {
-      return "Multiple"
+    if (value == undefined) {
+      return "Multiple";
     } else {
-      return value ? "Omit" : "Use"
+      return value ? "Omit" : "Use";
     }
-  }, [value])
+  }, [value]);
 
   const intent = useMemo(() => {
-    if(value == undefined) {
-      return "warning"
+    if (value == undefined) {
+      return "warning";
     } else {
-      return value ? "danger" : "success"
+      return value ? "danger" : "success";
     }
-  }, [value])
+  }, [value]);
 
   return h(
     Cell,
@@ -58,7 +56,7 @@ let CheckboxCell = forwardRef((props: CheckboxCell, ref) => {
           onFocus: (e) => {
             e.preventDefault();
             e.stopPropagation();
-          }
+          },
         },
         []
       ),

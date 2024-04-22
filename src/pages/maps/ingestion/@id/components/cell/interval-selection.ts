@@ -32,7 +32,6 @@ const IntervalOption: React.FC = ({
   interval,
   props: { handleClick, handleFocus, modifiers, ...restProps },
 }) => {
-
   if (interval == null) {
     return h(
       MenuItem,
@@ -96,90 +95,93 @@ interface IntervalSelectionProps extends EditableCell2Props {
   onCopy: (e) => Promise<boolean>;
 }
 
-let IntervalSelection = forwardRef((
-  {
-    value,
-    onConfirm,
-    intent,
-    intervals,
-    onPaste,
-    onCopy,
-    ...props
-  }: IntervalSelectionProps, ref) => {
-
-  const interval = useMemo(() => {
-    let interval = null;
-    if (intervals.length != 0) {
-      interval = intervals.filter(
-        (interval) => interval.int_id == parseInt(value)
-      )[0];
-    }
-
-    return interval;
-  }, [value, intervals, intent]);
-
-  return h(
-    Cell,
+let IntervalSelection = forwardRef(
+  (
     {
-      ...props,
-      style: { ...props.style, padding: 0 },
-    },
-    [
-      h(
-        Select2<Interval>,
-        {
-          ref: ref,
-          fill: true,
-          items: intervals,
-          className: "update-input-group",
-          popoverProps: {
-            position: "bottom",
-            minimal: true,
-          },
-          popoverContentProps: {
-            onWheelCapture: (event) => event.stopPropagation(),
-          },
-          itemPredicate: filterInterval,
-          itemRenderer: IntervalOptionRenderer,
-          onItemSelect: (interval: Interval, e) => {
-            onConfirm(interval.int_id.toString());
-          },
-          noResults: h(MenuItem, {
-            disabled: true,
-            text: "No results.",
-            roleStructure: "listoption",
-          }),
-        },
-        [
-          h(
-            Button,
-            {
-              style: {
-                backgroundColor: interval?.color ?? "white",
-                fontSize: "12px",
-                minHeight: "0px",
-                padding: intent ? "0px 10px" : "1.7px 10px",
-                boxShadow: "none",
-                border: intent ? "2px solid green" : "none",
-              },
-              fill: true,
-              alignText: "left",
-              text: h(
-                "span",
-                { style: { overflow: "hidden", textOverflow: "ellipses" } },
-                interval?.name ?? "Select an Interval"
-              ),
-              rightIcon: "double-caret-vertical",
-              className: "update-input-group",
-              placeholder: "Select A Filter",
+      value,
+      onConfirm,
+      intent,
+      intervals,
+      onPaste,
+      onCopy,
+      ...props
+    }: IntervalSelectionProps,
+    ref
+  ) => {
+    const interval = useMemo(() => {
+      let interval = null;
+      if (intervals.length != 0) {
+        interval = intervals.filter(
+          (interval) => interval.int_id == parseInt(value)
+        )[0];
+      }
+
+      return interval;
+    }, [value, intervals, intent]);
+
+    return h(
+      Cell,
+      {
+        ...props,
+        style: { ...props.style, padding: 0 },
+      },
+      [
+        h(
+          Select2<Interval>,
+          {
+            ref: ref,
+            fill: true,
+            items: intervals,
+            className: "update-input-group",
+            popoverProps: {
+              position: "bottom",
+              minimal: true,
             },
-            []
-          ),
-        ]
-      ),
-    ]
-  );
-});
+            popoverContentProps: {
+              onWheelCapture: (event) => event.stopPropagation(),
+            },
+            itemPredicate: filterInterval,
+            itemRenderer: IntervalOptionRenderer,
+            onItemSelect: (interval: Interval, e) => {
+              onConfirm(interval.int_id.toString());
+            },
+            noResults: h(MenuItem, {
+              disabled: true,
+              text: "No results.",
+              roleStructure: "listoption",
+            }),
+          },
+          [
+            h(
+              Button,
+              {
+                style: {
+                  backgroundColor: interval?.color ?? "white",
+                  fontSize: "12px",
+                  minHeight: "0px",
+                  padding: intent ? "0px 10px" : "1.7px 10px",
+                  boxShadow: "none",
+                  border: intent ? "2px solid green" : "none",
+                },
+                fill: true,
+                alignText: "left",
+                text: h(
+                  "span",
+                  { style: { overflow: "hidden", textOverflow: "ellipses" } },
+                  interval?.name ?? "Select an Interval"
+                ),
+                rightIcon: "double-caret-vertical",
+                className: "update-input-group",
+                placeholder: "Select A Filter",
+              },
+              []
+            ),
+          ]
+        ),
+      ]
+    );
+  }
+);
 
 IntervalSelection = memo(IntervalSelection);
 

@@ -4,7 +4,7 @@ import {
   Navbar,
   AnchorButton,
   Tooltip,
-  Card
+  Card,
 } from "@blueprintjs/core";
 
 import { ingestPrefix } from "@macrostrat-web/settings";
@@ -13,7 +13,7 @@ import hyper from "@macrostrat/hyper";
 import styles from "./empty.module.sass";
 const h = hyper.styled(styles);
 
-const IngestNavbar = ({user}) => {
+const IngestNavbar = ({ user }) => {
   return h(Navbar, {}, [
     h(Navbar.Group, { align: "left" }, [h(Navbar.Heading, "Map Ingestion")]),
     h(Navbar.Group, { align: "right" }, [
@@ -36,7 +36,7 @@ const IngestNavbar = ({user}) => {
         })
       ),
     ]),
-  ])
-}
+  ]);
+};
 
 export default IngestNavbar;

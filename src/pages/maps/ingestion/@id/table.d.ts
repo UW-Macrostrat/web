@@ -79,8 +79,8 @@ export interface ColumnConfigGenerator {
 }
 
 export type ColumnConfig = {
-  [key: string] : ColumnProps
-}
+  [key: string]: ColumnProps;
+};
 
 export interface CustomTableProps {
   url: string;

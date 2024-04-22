@@ -9,11 +9,10 @@ import MapInterface from "./map-interface";
 import { useStoredState } from "@macrostrat/ui-components";
 import { ParentRouteButton } from "~/components/map-navbar";
 import { Button, AnchorButton, HotkeysProvider, Icon } from "@blueprintjs/core";
-import {PolygonTable, LineStringTable, PointTable} from "./tables";
-import {EditSourceForm} from "./source-form"
+import { PolygonTable, LineStringTable, PointTable } from "./tables";
+import { EditSourceForm } from "./source-form";
 
 export const h = hyper.styled(styles);
-
 
 function EditMenu() {
   return h("div.edit-menu", {}, [
@@ -57,7 +56,7 @@ export default function EditInterface({
   source_id,
   mapBounds,
   source,
-  ingestProcess
+  ingestProcess,
 }: EditInterfaceProps) {
   const [showMap, setShowMap] = useStoredState(
     "edit:showMap",
@@ -71,8 +70,8 @@ export default function EditInterface({
   const HeaderProps = {
     title: title,
     showMap: showMap,
-    setShowMap: setShowMap
-  }
+    setShowMap: setShowMap,
+  };
 
   return h(HotkeysProvider, [
     h("div.edit-page", [
@@ -89,69 +88,53 @@ export default function EditInterface({
             h(Routes, [
               h(Route, {
                 path: "",
-                element:  h("div", {},
-                  [
-                    h(Header, {...HeaderProps, parentRoute: "/maps/ingestion"}),
-                    h(EditMenu)
-                  ]
-                )
+                element: h("div", {}, [
+                  h(Header, { ...HeaderProps, parentRoute: "/maps/ingestion" }),
+                  h(EditMenu),
+                ]),
               }),
               h(Route, {
                 path: "polygons",
-                element: h(TableContainer, {},
-                  [
-                    h(Header, HeaderProps),
-                    h(PolygonTable,
-                      {
-                        url: `${
-                          import.meta.env.VITE_MACROSTRAT_INGEST_API
-                        }/sources/${source_id}/polygons`,
-                        ingestProcessId: ingestProcess.id
-                      }
-                    )
-                  ]
-                )
+                element: h(TableContainer, {}, [
+                  h(Header, HeaderProps),
+                  h(PolygonTable, {
+                    url: `${
+                      import.meta.env.VITE_MACROSTRAT_INGEST_API
+                    }/sources/${source_id}/polygons`,
+                    ingestProcessId: ingestProcess.id,
+                  }),
+                ]),
               }),
               h(Route, {
                 path: "points",
-                element: h(TableContainer, {},
-                  [
-                    h(Header, HeaderProps),
-                    h(PointTable,
-                      {
-                        url: `${
-                          import.meta.env.VITE_MACROSTRAT_INGEST_API
-                        }/sources/${source_id}/points`,
-                        ingestProcessId: ingestProcess.id
-                      }
-                    )
-                  ]
-                )
+                element: h(TableContainer, {}, [
+                  h(Header, HeaderProps),
+                  h(PointTable, {
+                    url: `${
+                      import.meta.env.VITE_MACROSTRAT_INGEST_API
+                    }/sources/${source_id}/points`,
+                    ingestProcessId: ingestProcess.id,
+                  }),
+                ]),
               }),
               h(Route, {
                 path: "linestrings",
-                element: h(TableContainer, {},
-                  [
-                    h(Header, HeaderProps),
-                    h(LineStringTable,
-                      {
-                        url: `${
-                          import.meta.env.VITE_MACROSTRAT_INGEST_API
-                        }/sources/${source_id}/linestrings`,
-                        ingestProcessId: ingestProcess.id
-                      }
-                    ),
-                  ]
-                )
+                element: h(TableContainer, {}, [
+                  h(Header, HeaderProps),
+                  h(LineStringTable, {
+                    url: `${
+                      import.meta.env.VITE_MACROSTRAT_INGEST_API
+                    }/sources/${source_id}/linestrings`,
+                    ingestProcessId: ingestProcess.id,
+                  }),
+                ]),
               }),
               h(Route, {
                 path: "edit",
-                element: h("div", {},
-                  [
-                    h(Header, HeaderProps),
-                    h(EditSourceForm, {sourceId: source_id}),
-                  ]
-                )
+                element: h("div", {}, [
+                  h(Header, HeaderProps),
+                  h(EditSourceForm, { sourceId: source_id }),
+                ]),
               }),
             ]),
           ]),
@@ -163,36 +146,45 @@ export default function EditInterface({
 }
 
 const TableContainer = ({ children }) => {
-  return h("div.table-container", {style: {display: "flex",
-      flexDirection: "column",
-  height: "100%"}}, children);
-}
-
-function Header({ title, showMap, setShowMap, parentRoute }: { title: string, showMap: boolean, setShowMap: (b: boolean) => void, parentRoute?: string }) {
   return h(
-    "div.edit-page-header",
-    [
-      h(ParentRouteButton, {parentRoute: parentRoute}),
-      h("h2.m-0", {}, [
-        `${title} Ingestion`,
-        h(ShowDocsButton, {href: "https://github.com/UW-Macrostrat/web/blob/main/src/pages/maps/ingestion/%40id/README.md"}),
-      ]),
-      h("div.spacer"),
-      h("div.edit-page-buttons", [
-        h(ShowMapButton, { showMap, setShowMap }),
-      ]),
-    ]
-  )
+    "div.table-container",
+    { style: { display: "flex", flexDirection: "column", height: "100%" } },
+    children
+  );
+};
+
+function Header({
+  title,
+  showMap,
+  setShowMap,
+  parentRoute,
+}: {
+  title: string;
+  showMap: boolean;
+  setShowMap: (b: boolean) => void;
+  parentRoute?: string;
+}) {
+  return h("div.edit-page-header", [
+    h(ParentRouteButton, { parentRoute: parentRoute }),
+    h("h2.m-0", {}, [
+      `${title} Ingestion`,
+      h(ShowDocsButton, {
+        href: "https://github.com/UW-Macrostrat/web/blob/main/src/pages/maps/ingestion/%40id/README.md",
+      }),
+    ]),
+    h("div.spacer"),
+    h("div.edit-page-buttons", [h(ShowMapButton, { showMap, setShowMap })]),
+  ]);
 }
 
-function ShowDocsButton({href}: {href: string}) {
+function ShowDocsButton({ href }: { href: string }) {
   return h(AnchorButton, {
     minimal: true,
     title: "View Ingestion Documentation",
     icon: "manual",
     target: "_blank",
     large: true,
-    href: href
+    href: href,
   });
 }
 

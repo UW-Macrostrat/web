@@ -18,11 +18,9 @@ import {
   Button,
   useHotkeys,
   Icon,
-  IconSize
+  IconSize,
 } from "@blueprintjs/core";
-import {
-  Popover2
-} from "@blueprintjs/popover2";
+import { Popover2 } from "@blueprintjs/popover2";
 import { Spinner, ButtonGroup } from "@blueprintjs/core";
 import {
   Column,
@@ -41,7 +39,9 @@ import {
   TableUpdate,
   TableSelection,
   Selection,
-  DataParameters, ColumnConfigGenerator, ColumnConfig
+  DataParameters,
+  ColumnConfigGenerator,
+  ColumnConfig,
 } from "./table";
 import {
   buildURL,
@@ -54,7 +54,8 @@ import {
   applyTableUpdates,
   submitColumnCopy,
   cloneDataParameters,
-  download_file, updateInput
+  download_file,
+  updateInput,
 } from "./table-util";
 import TableMenu from "./table-menu";
 import IntervalSelection, {
@@ -73,12 +74,7 @@ import CheckboxCell from "~/pages/maps/ingestion/@id/components/cell/checkbox-ce
 
 const h = hyper.styled(styles);
 
-
-
-const INTERNAL_COLUMNS = [
-  "_pkid",
-  "source_id"
-]
+const INTERNAL_COLUMNS = ["_pkid", "source_id"];
 
 export interface EditTableProps {
   url: string;
@@ -87,8 +83,12 @@ export interface EditTableProps {
   columnGenerator: (props: ColumnConfigGenerator) => ColumnConfig;
 }
 
-export default function TableInterface({ url, ingestProcessId, finalColumns, columnGenerator }: EditTableProps) {
-
+export default function TableInterface({
+  url,
+  ingestProcessId,
+  finalColumns,
+  columnGenerator,
+}: EditTableProps) {
   // Table Configurations
   const [showOmitted, setShowOmitted] = useState<boolean>(false);
 
@@ -113,7 +113,9 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
     filter: {},
   });
   const [data, setData] = useState<any[]>([]);
-  const [numberOfRows, setNumberOfRows] = useState<number | undefined>(undefined);
+  const [numberOfRows, setNumberOfRows] = useState<number | undefined>(
+    undefined
+  );
 
   // Error State
   const [error, setError] = useState<string | undefined>(undefined);
@@ -123,7 +125,6 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
   const [updateProgress, _setUpdateProgress] =
     useState<ProgressPopoverProps>(undefined);
 
-
   // Focused Cell
   const [focusedCell, setFocusedCell] = useState<
     FocusedCellCoordinates | undefined
@@ -131,25 +132,26 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
 
   const transformedData = useMemo(() => {
     return applyTableUpdates(data, tableUpdates);
-  }, [data, tableUpdates])
+  }, [data, tableUpdates]);
 
   const tableColumns = useMemo(() => {
     // Catch when there is no data
-    if(data == undefined || data.length == 0) {
-      return finalColumns
+    if (data == undefined || data.length == 0) {
+      return finalColumns;
     }
 
     // If the data has its own columns defined
-    if(Object.keys(data[0]).length > 0){
-
+    if (Object.keys(data[0]).length > 0) {
       // Get the keys that are not in the final columns
-      const additionalColumns = Object.keys(data[0]).filter((x) => !finalColumns.includes(x));
+      const additionalColumns = Object.keys(data[0]).filter(
+        (x) => !finalColumns.includes(x)
+      );
 
       return [...finalColumns, ...additionalColumns];
     }
 
     return finalColumns;
-  }, [data])
+  }, [data]);
 
   const setHiddenColumns = useCallback((column: string | string[]) => {
     _setHiddenColumns((prev) => {
@@ -159,22 +161,24 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
 
       return [...prev, column];
     });
-  }, [])
+  }, []);
 
-  const setUpdateProgress = useCallback((progress: Partial<ProgressPopoverProps> | undefined) => {
-    _setUpdateProgress((prev) => {
+  const setUpdateProgress = useCallback(
+    (progress: Partial<ProgressPopoverProps> | undefined) => {
+      _setUpdateProgress((prev) => {
+        // Check if the progress is undefined
+        if (progress == undefined) {
+          return undefined;
+        }
 
-      // Check if the progress is undefined
-      if(progress == undefined){
-        return undefined
-      }
-
-      return {
-        ...prev,
-        ...progress,
-      };
-    })
-  }, [])
+        return {
+          ...prev,
+          ...progress,
+        };
+      });
+    },
+    []
+  );
 
   const getData = useCallback(
     async (dataParameters: DataParameters) => {
@@ -183,10 +187,10 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
       const response = await fetch(dataURL);
       let data = await response.json();
 
-      data = data.filter(x => showOmitted ? true : x.omit != true)
+      data = data.filter((x) => (showOmitted ? true : x.omit != true));
 
       // Update the number of rows
-      setNumberOfRows(parseInt(response.headers.get("X-Total-Count")))
+      setNumberOfRows(parseInt(response.headers.get("X-Total-Count")));
 
       // Set the table ref
       ref.current = Array.from(
@@ -205,11 +209,9 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
 
   useEffect(() => {
     (async () => {
-
-      setLoading(true)
+      setLoading(true);
       setData(await getData(dataParameters));
-      setLoading(false)
-
+      setLoading(false);
     })();
   }, [dataParameters, showOmitted]);
 
@@ -225,7 +227,6 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
   }, [tableColumns, hiddenColumns]);
 
   const selectedColumns = useMemo(() => {
-
     if (selection.length == 0) {
       return undefined;
     }
@@ -236,13 +237,11 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
         selectedColumnRange[0],
         selectedColumnRange[1] + 1
       );
-      return selectedColumnIndices?.map(
-        (index) => visibleColumnNames[index]
-      )
+      return selectedColumnIndices?.map((index) => visibleColumnNames[index]);
     } else {
-      return undefined
+      return undefined;
     }
-  }, [selection, visibleColumnNames])
+  }, [selection, visibleColumnNames]);
 
   const handleHide = useCallback(() => {
     if (selectedColumns != undefined) {
@@ -251,29 +250,31 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
   }, [selectedColumns]);
 
   const handlePaste = useCallback(async () => {
-
-    const firstSelection = selection[0]
-    if(firstSelection?.cols != undefined && firstSelection?.rows != undefined){
-
+    const firstSelection = selection[0];
+    if (
+      firstSelection?.cols != undefined &&
+      firstSelection?.rows != undefined
+    ) {
       // Get value from clipboard
-      const clipboardText = await navigator.clipboard.readText()
+      const clipboardText = await navigator.clipboard.readText();
 
-      let clipboardValue = clipboardText.split("\n").map((row) => row.split("\t"))
+      let clipboardValue = clipboardText
+        .split("\n")
+        .map((row) => row.split("\t"));
 
-      let rowRange = range(firstSelection.rows[0], firstSelection.rows[1] + 1)
-      let colRange = range(firstSelection.cols[0], firstSelection.cols[1] + 1)
+      let rowRange = range(firstSelection.rows[0], firstSelection.rows[1] + 1);
+      let colRange = range(firstSelection.cols[0], firstSelection.cols[1] + 1);
 
       // If one cell is selected go through and paste
-      if( rowRange.length == 1 && colRange.length == 1){
-
-        let rowStart = rowRange[0]
-        let colStart = colRange[0]
+      if (rowRange.length == 1 && colRange.length == 1) {
+        let rowStart = rowRange[0];
+        let colStart = colRange[0];
 
         const newTableUpdates = clipboardValue.flatMap((row, rowIndex) => {
           return row.flatMap((value, columnIndex) => {
             // Ignore copying null values
             if (value == "") {
-              return []
+              return [];
             }
 
             const tableUpdate = getTableUpdate(
@@ -284,14 +285,16 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
               transformedData,
               dataParameters
             );
-            return [tableUpdate]
-          })
-        })
+            return [tableUpdate];
+          });
+        });
 
-        setTableUpdates([...tableUpdates, ...newTableUpdates])
+        setTableUpdates([...tableUpdates, ...newTableUpdates]);
       }
 
-      const clipboardValueText = clipboardValue.map((row) => row.join("\t")).join("\n")
+      const clipboardValueText = clipboardValue
+        .map((row) => row.join("\t"))
+        .join("\n");
 
       // Copy clipboard value to clipboard
       navigator.clipboard.writeText(clipboardValueText);
@@ -342,16 +345,25 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
   }, [selectedColumns, copiedColumn, dataParameters, selection]);
 
   const handleCopy = useCallback(() => {
+    const firstSelection = selection[0];
+    if (
+      firstSelection?.cols != undefined &&
+      firstSelection?.rows != undefined
+    ) {
+      let clipboardValue = range(
+        firstSelection.rows[0],
+        firstSelection.rows[1] + 1
+      ).map((rowIndex) => {
+        return range(firstSelection.cols[0], firstSelection.cols[1] + 1).map(
+          (colIndex) => {
+            return transformedData[rowIndex][visibleColumnNames[colIndex]];
+          }
+        );
+      });
 
-    const firstSelection = selection[0]
-    if(firstSelection?.cols != undefined && firstSelection?.rows != undefined){
-      let clipboardValue = range(firstSelection.rows[0], firstSelection.rows[1] + 1).map((rowIndex) => {
-        return range(firstSelection.cols[0], firstSelection.cols[1] + 1).map((colIndex) => {
-          return transformedData[rowIndex][visibleColumnNames[colIndex]]
-        })
-      })
-
-      const clipboardValueText = clipboardValue.map((row) => row.join("\t")).join("\n")
+      const clipboardValueText = clipboardValue
+        .map((row) => row.join("\t"))
+        .join("\n");
 
       // Copy clipboard value to clipboard
       navigator.clipboard.writeText(clipboardValueText);
@@ -433,23 +445,22 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
       });
     }
 
-    setDataParameters(structuredClone(dataParameters))
+    setDataParameters(structuredClone(dataParameters));
     setUpdateProgress(undefined);
     setTableUpdates([]);
   }, [tableUpdates]);
 
-  const onFilterChange = useCallback((columnName: string, param: OperatorQueryParameter) => {
-    const columnFilter = new Filter(
-      columnName,
-      param.operator,
-      param.value
-    );
-    setDataParameters((p) => {
-      let newDataParameters = cloneDataParameters(p);
-      newDataParameters.filter[columnName] = columnFilter;
-      return newDataParameters;
-    });
-  }, [])
+  const onFilterChange = useCallback(
+    (columnName: string, param: OperatorQueryParameter) => {
+      const columnFilter = new Filter(columnName, param.operator, param.value);
+      setDataParameters((p) => {
+        let newDataParameters = cloneDataParameters(p);
+        newDataParameters.filter[columnName] = columnFilter;
+        return newDataParameters;
+      });
+    },
+    []
+  );
 
   const onGroupChange = useCallback((group: string | undefined) => {
     setDataParameters((p) => {
@@ -457,7 +468,7 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
       newDataParameters.group = group;
       return newDataParameters;
     });
-  }, [])
+  }, []);
 
   const columnHeaderCellRenderer = useCallback(
     (columnIndex: number) => {
@@ -477,8 +488,10 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
         ColumnHeaderCell2,
         {
           nameRenderer: () =>
-            h("div.column-name",
-              h("div",
+            h(
+              "div.column-name",
+              h(
+                "div",
                 {
                   style: {
                     display: "flex",
@@ -490,13 +503,22 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
                 [
                   h("span.selected-column", {}, [
                     columnName,
-                    h.if(finalColumns.includes(columnName))(Icon, {icon: "star-empty", size: "12", color: "#333333", style: {marginLeft: "5px", marginBottom: "2px"}})
+                    h.if(finalColumns.includes(columnName))(Icon, {
+                      icon: "star-empty",
+                      size: "12",
+                      color: "#333333",
+                      style: { marginLeft: "5px", marginBottom: "2px" },
+                    }),
                   ]),
                   h.if(
                     (columnName in dataParameters.filter &&
                       dataParameters.filter[columnName].is_valid()) ||
                       columnName == dataParameters?.group
-                  )(Icon, { icon: "filter-list", size: "15", color: "#333333" }),
+                  )(Icon, {
+                    icon: "filter-list",
+                    size: "15",
+                    color: "#333333",
+                  }),
                   h.if(
                     !(
                       (columnName in dataParameters.filter &&
@@ -510,12 +532,13 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
           menuRenderer: () =>
             h(TableMenu, {
               columnName: columnName,
-              onFilterChange: (x: OperatorQueryParameter) => onFilterChange(columnName, x),
+              onFilterChange: (x: OperatorQueryParameter) =>
+                onFilterChange(columnName, x),
               filter: filter,
               onGroupChange: onGroupChange,
               group: dataParameters?.group,
               onHide: () => setHiddenColumns(columnName),
-              hidden: !visibleColumnNames.includes(columnName)
+              hidden: !visibleColumnNames.includes(columnName),
             }),
           name: columnName,
           style: {
@@ -582,22 +605,36 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
                 setTableUpdates([...tableUpdates, tableUpdate]);
               },
               onCopy: (e) => {
-                handleCopy(e)
+                handleCopy(e);
               },
               onPaste: (e) => {
-                handlePaste(e)
+                handlePaste(e);
               },
               editableTextProps: {
                 disabled: !finalColumns.includes(columnName),
               },
-              intent: data[rowIndex][columnName] != transformedData[rowIndex][columnName] ? "success" : undefined,
-              value: transformedData.length == 0 ? "" : transformedData[rowIndex][columnName],
+              intent:
+                data[rowIndex][columnName] !=
+                transformedData[rowIndex][columnName]
+                  ? "success"
+                  : undefined,
+              value:
+                transformedData.length == 0
+                  ? ""
+                  : transformedData[rowIndex][columnName],
             }),
           key: columnName,
         }),
       };
     }, {});
-  }, [visibleColumnNames, tableColumns, dataParameters, transformedData, data, selection]);
+  }, [
+    visibleColumnNames,
+    tableColumns,
+    dataParameters,
+    transformedData,
+    data,
+    selection,
+  ]);
 
   const columnConfig = useMemo(() => {
     if (tableColumns.length == 0) {
@@ -612,12 +649,18 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
       setTableUpdates,
       transformedData,
       data,
-      ref
+      ref,
     });
 
-    return generatedColumns
-
-  }, [defaultColumnConfig, tableColumns, dataParameters, transformedData, data, selection]);
+    return generatedColumns;
+  }, [
+    defaultColumnConfig,
+    tableColumns,
+    dataParameters,
+    transformedData,
+    data,
+    selection,
+  ]);
 
   return h(
     "div",
@@ -629,7 +672,7 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
         minHeight: "0",
         display: "flex",
         flexDirection: "column",
-        height: "100%"
+        height: "100%",
       },
     },
     [
@@ -637,25 +680,38 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
         h.if(error != undefined)("div.warning", {}, [error]),
         h("div.input-form", {}, [
           h(ButtonGroup, [
-            h(
-              Popover2,
-              {
-                interactionKind: "click",
-                minimal: true,
-                placement: "bottom-start",
-                content: h(
-                  Menu, {
-
-                  }, [
-                    h(MenuItem, {disabled: hiddenColumns.length == 0, icon: "eye-open", text: "Show All", onClick: () => setHiddenColumns([])}, []),
-                    h(MenuItem, {icon: "cross", text: "Show Omitted", onClick: () => setShowOmitted(!showOmitted)}, [])
-                  ]
+            h(Popover2, {
+              interactionKind: "click",
+              minimal: true,
+              placement: "bottom-start",
+              content: h(Menu, {}, [
+                h(
+                  MenuItem,
+                  {
+                    disabled: hiddenColumns.length == 0,
+                    icon: "eye-open",
+                    text: "Show All",
+                    onClick: () => setHiddenColumns([]),
+                  },
+                  []
                 ),
-                renderTarget: ({ isOpen, ref, ...targetProps }) => (
-                  h(Button, {...targetProps, elementRef: ref, icon: "menu"}, [])
-                )
-              }
-            ),
+                h(
+                  MenuItem,
+                  {
+                    icon: "cross",
+                    text: "Show Omitted",
+                    onClick: () => setShowOmitted(!showOmitted),
+                  },
+                  []
+                ),
+              ]),
+              renderTarget: ({ isOpen, ref, ...targetProps }) =>
+                h(
+                  Button,
+                  { ...targetProps, elementRef: ref, icon: "menu" },
+                  []
+                ),
+            }),
             h(
               Button,
               {
@@ -679,18 +735,22 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
             h(
               Button,
               {
-                onClick: async  () => {
-                  const objects_response = await fetch(`${ingestPrefix}/ingest-process/${ingestProcessId}/objects`)
-                  const objects: any[] = await objects_response.json()
-                  objects.forEach(object => download_file(object.pre_signed_url))
-                }
+                onClick: async () => {
+                  const objects_response = await fetch(
+                    `${ingestPrefix}/ingest-process/${ingestProcessId}/objects`
+                  );
+                  const objects: any[] = await objects_response.json();
+                  objects.forEach((object) =>
+                    download_file(object.pre_signed_url)
+                  );
+                },
               },
               ["Download Source"]
             ),
             h.if(numberOfRows != undefined)(
               Button,
               {
-                disabled: true
+                disabled: true,
               },
               [`${numberOfRows} Total Rows`]
             ),
@@ -714,7 +774,12 @@ export default function TableInterface({ url, ingestProcessId, finalColumns, col
             loadingOptions: loading ? ["cells", "column-header"] : [],
             focusedCell: focusedCell,
             onSelection: (selections: Selection[]) => {
-              console.log("Columns:", selections[0].cols, "Rows:", selections[0].rows)
+              console.log(
+                "Columns:",
+                selections[0].cols,
+                "Rows:",
+                selections[0].rows
+              );
               setSelection(selections);
             },
             onVisibleCellsChange: (visibleCells) => {

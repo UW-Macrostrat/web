@@ -9,7 +9,7 @@ import { LinkCard } from "~/components/cards";
 </PageHeader>
 
 Macrostrat's goal is to provide a unified interface to view the earth's geography. The following documentation is intended
-to help __Users consume Macrostrat's data and services__ and __Administrators deploy and develop Macrostrat__.
+to help **Users consume Macrostrat's data and services** and **Administrators deploy and develop Macrostrat**.
 
 ## User Documentation
 
@@ -18,7 +18,6 @@ This section contains documentation for users of Macrostrat's web services. This
 <LinkCard href="/docs/ingestion" title="Ingestion">
   Documentation for ingesting data into Macrostrat
 </LinkCard>
-
 
 ### User APIs
 
@@ -36,11 +35,12 @@ This section contains documentation for users of Macrostrat's web services. This
   Documentation for General use Postgrest API
 </LinkCard>
 
-<LinkCard href={`${import.meta.env.VITE_MACROSTRAT_TILESERVER_DOMAIN}/docs`} title="Tileserver API Docs">
+<LinkCard
+  href={`${import.meta.env.VITE_MACROSTRAT_TILESERVER_DOMAIN}/docs`}
+  title="Tileserver API Docs"
+>
   Documentation for Tileserver API
 </LinkCard>
-
-
 
 ## Administrator Documentation
 
@@ -60,16 +60,16 @@ will contain the primary deliverables of the CriticalMAAS project and will be
 designed to be well-documented and runnable by USGS staff.
 
 - [`UW-Macrostrat/macrostrat`](https://github.com/UW-Macrostrat/macrostrat):
-Macrostrat's core system, including its database definitions, control scripts,
-and ingestion pipelines. This repository is the primary focus of the
-CriticalMAAS project.
+  Macrostrat's core system, including its database definitions, control scripts,
+  and ingestion pipelines. This repository is the primary focus of the
+  CriticalMAAS project.
 - [`UW-Macrostrat/tileserver`](https://github.com/UW-Macrostrat/tileserver):
-Server for vector and raster tiles to GIS software
+  Server for vector and raster tiles to GIS software
 - [`UW-Macrostrat/web`](https://github.com/UW-Macrostrat/web): Macrostrat's main
-web interface
+  web interface
 - [`UW-Macrostrat/api-v3`](https://github.com/UW-Macrostrat/api-v3`):
-Macrostrat's v3 API, which will be the primary API for CriticalMAAS
-capabilities
+  Macrostrat's v3 API, which will be the primary API for CriticalMAAS
+  capabilities
 
 ### Reusable libraries
 
@@ -92,18 +92,18 @@ including CriticalMAAS.
 ### Geologic metadata curation
 
 - [`UW-Macrostrat/macrostrat-xdd`](https://github.com/UW-Macrostrat/macrostrat-xdd):
-System to synthesize xDD-driven geologic unit descriptions from the scientific
-literature (_placeholder for future development_)
+  System to synthesize xDD-driven geologic unit descriptions from the scientific
+  literature (_placeholder for future development_)
 - [`UW-Macrostrat/factsheet-generator`](https://github.com/UW-Macrostrat/factsheet-generator):
-An LLM-assisted generator for geological "fact sheets" that operates over the
-scientific literature (_Bill Xia_; Computer Science)
+  An LLM-assisted generator for geological "fact sheets" that operates over the
+  scientific literature (_Bill Xia_; Computer Science)
 - [`UW-Macrostrat/unsupervised-kg`](https://github.com/UW-Macrostrat/unsupervised-kg):
-Knowledge graph construction to discover new geologic entities in the
-scientific literature (_Devesh Sarda_; Computer Science)
+  Knowledge graph construction to discover new geologic entities in the
+  scientific literature (_Devesh Sarda_; Computer Science)
 - [`UW-Macrostrat/map-metadata-curation`](https://github.com/UW-Macrostrat/map-metadata-curation):
-Documentation of efforts to align current archive of maps with **Macrostrat
-v2** data standards. Focus on point data, raster image alignment, and
-ingestion metadata recovery (_Kate Akin_; Geoscience)
+  Documentation of efforts to align current archive of maps with **Macrostrat
+  v2** data standards. Focus on point data, raster image alignment, and
+  ingestion metadata recovery (_Kate Akin_; Geoscience)
 
 ### External integrations
 
@@ -113,18 +113,18 @@ for the CriticalMAAS project, but integrations with Macrostrat can provide
 useful capabilities to the CriticalMAAS program.
 
 - [**Mapboard topology-manager**](https://github.com/Mapboard/topology-manager):
-Topological map manager for PostGIS databases (for editing **TA1** maps and
-topologically synthesizing them for Macrostrat output layers)
+  Topological map manager for PostGIS databases (for editing **TA1** maps and
+  topologically synthesizing them for Macrostrat output layers)
 - [**Corelle**](https://github.com/UW-Macrostrat/corelle): Paleogeographic
-rotation system compatible with GPlates
+  rotation system compatible with GPlates
 - [**xDD**](https://xdd.wisc.edu/): A system for extracting geologic metadata
-from the scientific literature
+  from the scientific literature
 - [**Mapboard GIS**](https://mapboard-gis.app): An iPad-based GIS for
-geologists, with a focus on rapid, intuitive drawing (for **TA1** map editing
-if required)
+  geologists, with a focus on rapid, intuitive drawing (for **TA1** map editing
+  if required)
 - [**Weaver**](https://github.com/digitalcrust/weaver): Ingestion, curation,
-performant filtering, and visualization of massive geological point datasets
-(for **TA2** data integration)
+  performant filtering, and visualization of massive geological point datasets
+  (for **TA2** data integration)
 
 ### Map interface examples
 
@@ -136,9 +136,9 @@ point-based data.
 ### Document extraction
 
 - [COSMOS visualizer example](https://xdd.wisc.edu/set_visualizer/sets/dolomites?query=Belle%20Fourche):
-A demonstration of the COSMOS visualizer used to showcase data from a document
-set relative to carbonate rocks.
+  A demonstration of the COSMOS visualizer used to showcase data from a document
+  set relative to carbonate rocks.
 - [Design for document management system](https://github.com/UW-xDD/document-store/blob/main/docs/design_doc.md)
 - [xDD API documentation](https://xdd.wisc.edu/api/)
 - [xDD example notebook](./notebooks/xDD and COSMOS examples.ipynb): A Jupyter
-notebook demonstrating the xDD API
+  notebook demonstrating the xDD API

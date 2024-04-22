@@ -42,7 +42,7 @@ const TableMenu = ({
   filter,
   onGroupChange,
   group,
-  onHide
+  onHide,
 }: TableMenuProps) => {
   const [inputPlaceholder, setInputPlaceholder] = React.useState<string>("");
 
@@ -147,7 +147,7 @@ const TableMenu = ({
             text: "Hide",
             fill: true,
             onClick: () => {
-              onHide()
+              onHide();
             },
           },
           []

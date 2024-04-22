@@ -1,7 +1,7 @@
 export { DocumentationPage as default } from "~/layouts";
 import { LinkCard } from "~/components/cards";
 import { PageHeader } from "~/components";
-import imgUrl from "../images/IngestionProcess.png"
+import imgUrl from "../images/IngestionProcess.png";
 
 <PageHeader title="Ingestion" showSiteName={false}>
   <span className="subtitle">
@@ -11,7 +11,7 @@ import imgUrl from "../images/IngestionProcess.png"
 
 The Macrostrat ingestion process is built to enable the registration, processing and distribution of new maps.
 
-<img style={{maxWidth: "100%"}} src={imgUrl} />
+<img style={{ maxWidth: "100%" }} src={imgUrl} />
 
 ## Staging
 
@@ -62,5 +62,5 @@ After the harmonization process is deemed complete a expert will review the resu
 system and quality of ingestion they will decide whether to integrate this map into Macrostrat's Carto dataset that powers
 its main interface.
 
-__Note__: A map does not need to be integrated into the Carto dataset for its information/tiles to be exposed via API.
+**Note**: A map does not need to be integrated into the Carto dataset for its information/tiles to be exposed via API.
 Prioritization is a optional step that maps might not reach.
