@@ -37,7 +37,7 @@ let EditableCell = forwardRef((props: EditableCell, ref) => {
           style: {
             width: (value?.length ?? 2) + "ch",
             color: "inherit",
-            backgroundColor: "#ffffff",
+            //backgroundColor: "#ffffff",
           },
           value: value || "",
           onChange: (e) => {
