@@ -25,7 +25,7 @@ let CheckboxCell = forwardRef((props: CheckboxCell, ref) => {
   const text = useMemo(() => {
     // Check if value is a string
     if (value == undefined) {
-      return "Multiple";
+      return "Toggle";
     } else {
       return value ? "Omit" : "Use";
     }
