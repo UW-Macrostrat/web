@@ -14,13 +14,13 @@ import {
 } from "~/pages/maps/ingestion/@id/table";
 import IntervalSelection, {
   Interval,
-} from "~/pages/maps/ingestion/@id/components/cell/interval-selection";
-import { getTableUpdate } from "~/pages/maps/ingestion/@id/table-util";
-import CheckboxCell from "~/pages/maps/ingestion/@id/components/cell/checkbox-cell";
+} from "~/pages/maps/ingestion/@id/components/cells/interval-selection";
+import { getTableUpdate } from "~/pages/maps/ingestion/@id/components/table-util";
+import CheckboxCell from "~/pages/maps/ingestion/@id/components/cells/checkbox-cell";
 import { TableInterface } from "../edit-table";
 import styles from "~/pages/maps/ingestion/@id/edit-table.module.sass";
 import { COMMON_COLUMNS } from "../tables";
-import { toBoolean } from "~/pages/maps/ingestion/@id/components/cell/util";
+import { toBoolean } from "~/pages/maps/ingestion/@id/components/cells/util";
 import { apiV2Prefix } from "@macrostrat-web/settings";
 
 const h = hyper.styled(styles);

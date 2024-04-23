@@ -5,10 +5,10 @@ import { useDebouncedCallback } from "use-debounce";
 // @ts-ignore
 import hyper from "@macrostrat/hyper";
 
-import { OperatorQueryParameter, ColumnOperatorOption } from "./table";
+import { OperatorQueryParameter, ColumnOperatorOption } from "../table";
 
 import "~/styles/blueprint-select";
-import styles from "./edit-table.module.sass";
+import styles from "../edit-table.module.sass";
 import { Filter } from "./table-util";
 
 const h = hyper.styled(styles);
@@ -36,7 +36,7 @@ interface TableMenuProps {
   hidden: boolean;
 }
 
-const TableMenu = ({
+export const TableMenu = ({
   columnName,
   onFilterChange,
   filter,
@@ -156,5 +156,3 @@ const TableMenu = ({
     ]),
   ]);
 };
-
-export default TableMenu;

@@ -8,7 +8,7 @@ import hyper from "@macrostrat/hyper";
 
 import "~/styles/blueprint-select";
 import styles from "../../edit-table.module.sass";
-import EditableCell from "~/pages/maps/ingestion/@id/components/cell/editable-cell";
+import EditableCell from "~/pages/maps/ingestion/@id/components/cells/editable";
 
 const h = hyper.styled(styles);
 

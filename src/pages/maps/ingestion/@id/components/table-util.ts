@@ -4,7 +4,7 @@ import {
   TableSelection,
   TableUpdate,
   DataParameters,
-} from "./table";
+} from "../table";
 import { secureFetch } from "@macrostrat-web/security";
 
 export class Filter {

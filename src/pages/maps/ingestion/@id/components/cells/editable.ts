@@ -5,7 +5,7 @@ import { Cell, EditableCell2Props } from "@blueprintjs/table";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
 
-export const h = hyper.styled(styles);
+const h = hyper.styled(styles);
 
 interface EditableCell extends EditableCell2Props {
   columnName: string;
@@ -15,7 +15,7 @@ interface EditableCell extends EditableCell2Props {
   onCopy: (e) => Promise<boolean>;
 }
 
-let EditableCell = forwardRef((props: EditableCell, ref) => {
+const _EditableCell = forwardRef((props: EditableCell, ref) => {
   const [value, setValue] = React.useState(props.value);
 
   useEffect(() => {
@@ -75,6 +75,4 @@ let EditableCell = forwardRef((props: EditableCell, ref) => {
   );
 });
 
-EditableCell = memo(EditableCell);
-
-export default EditableCell;
+export const EditableCell = memo(_EditableCell);

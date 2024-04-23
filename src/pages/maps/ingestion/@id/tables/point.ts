@@ -12,12 +12,12 @@ import {
   ColumnConfigGenerator,
   CustomTableProps,
 } from "~/pages/maps/ingestion/@id/table";
-import { getTableUpdate } from "~/pages/maps/ingestion/@id/table-util";
-import CheckboxCell from "~/pages/maps/ingestion/@id/components/cell/checkbox-cell";
+import { getTableUpdate } from "~/pages/maps/ingestion/@id/components/table-util";
+import CheckboxCell from "~/pages/maps/ingestion/@id/components/cells/checkbox-cell";
 import { TableInterface } from "../edit-table";
 import styles from "~/pages/maps/ingestion/@id/edit-table.module.sass";
 import { COMMON_COLUMNS } from "../tables";
-import { toBoolean } from "~/pages/maps/ingestion/@id/components/cell/util";
+import { toBoolean } from "~/pages/maps/ingestion/@id/components/cells/util";
 
 const h = hyper.styled(styles);
 

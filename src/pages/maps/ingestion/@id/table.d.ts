@@ -1,4 +1,4 @@
-import { Filter } from "./table-util.ts";
+import { Filter } from "./components/table-util.js";
 
 export type ColumnOperators =
   | "eq"

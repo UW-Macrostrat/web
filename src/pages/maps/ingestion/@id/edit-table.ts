@@ -1,76 +1,58 @@
 import hyper from "@macrostrat/hyper";
 
 import {
-  useState,
-  useEffect,
-  useCallback,
-  useRef,
-  useLayoutEffect,
-  useMemo,
-  FunctionComponent,
-  MutableRefObject,
-} from "react";
-import {
-  HotkeysProvider,
-  InputGroup,
+  Button,
+  ButtonGroup,
+  Icon,
   Menu,
   MenuItem,
-  Button,
   useHotkeys,
-  Icon,
-  IconSize,
 } from "@blueprintjs/core";
 import { Popover2 } from "@blueprintjs/popover2";
-import { Spinner, ButtonGroup } from "@blueprintjs/core";
 import {
   Column,
-  Table2,
-  RowHeaderCell2,
   ColumnHeaderCell2,
-  SelectionModes,
-  RegionCardinality,
   FocusedCellCoordinates,
+  RowHeaderCell2,
+  SelectionModes,
+  Table2,
 } from "@blueprintjs/table";
-import update from "immutability-helper";
+import {
+  MutableRefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import {
-  Filters,
-  OperatorQueryParameter,
-  TableUpdate,
-  TableSelection,
-  Selection,
-  DataParameters,
-  ColumnConfigGenerator,
-  ColumnConfig,
-} from "./table";
-import {
-  buildURL,
+  EditableCell,
   Filter,
-  isEmptyArray,
-  submitChange,
-  getTableUpdate,
-  range,
-  applyTableUpdate,
+  ProgressPopover,
+  ProgressPopoverProps,
+  TableMenu,
   applyTableUpdates,
-  submitColumnCopy,
+  buildURL,
   cloneDataParameters,
   download_file,
-  updateInput,
-} from "./table-util";
-import TableMenu from "./table-menu";
-import IntervalSelection, {
-  Interval,
-} from "./components/cell/interval-selection";
-import ProgressPopover, {
-  ProgressPopoverProps,
-} from "./components/progress-popover/progress-popover";
+  getTableUpdate,
+  range,
+  submitColumnCopy,
+} from "./components";
+import {
+  ColumnConfig,
+  ColumnConfigGenerator,
+  DataParameters,
+  OperatorQueryParameter,
+  Selection,
+  TableUpdate,
+} from "./table";
 
-import "./override.sass";
 import "@blueprintjs/table/lib/css/table.css";
-import styles from "./edit-table.module.sass";
-import EditableCell from "./components/cell/editable-cell";
 import { ingestPrefix } from "@macrostrat-web/settings";
-import CheckboxCell from "~/pages/maps/ingestion/@id/components/cell/checkbox-cell";
+import styles from "./edit-table.module.sass";
+import "./override.sass";
 
 const h = hyper.styled(styles);
 
@@ -157,9 +139,7 @@ export function TableInterface({
 
   const setHiddenColumns = useCallback((column: string | string[]) => {
     _setHiddenColumns((prev) => {
-
       if (Array.isArray(column)) {
-
         // Check if they are emptying the list
         if (column.length == 0) {
           return [];
