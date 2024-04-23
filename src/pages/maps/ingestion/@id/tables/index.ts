@@ -1,7 +1,5 @@
-import PolygonTable from "./polygon";
-import LineStringTable from "./linestring";
-import PointTable from "./point";
+export * from "./polygons";
+export * from "./lines";
+export * from "./points";
 
 export const COMMON_COLUMNS = ["source_id", "orig_id", "descrip", "omit"];
-
-export { PolygonTable, LineStringTable, PointTable };

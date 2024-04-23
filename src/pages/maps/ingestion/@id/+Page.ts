@@ -7,40 +7,11 @@ import MapInterface from "./map-interface";
 import { useStoredState } from "@macrostrat/ui-components";
 import { ParentRouteButton } from "~/components/map-navbar";
 import { Button, AnchorButton, HotkeysProvider, Icon } from "@blueprintjs/core";
-import { PolygonTable, LineStringTable, PointTable } from "./tables";
+import { PolygonsTable, LinesTable, PointsTable } from "./tables";
 import { EditSourceForm } from "./source-form";
 import { ingestPrefix } from "@macrostrat-web/settings";
 
-export const h = hyper.styled(styles);
-
-function EditMenu() {
-  return h("div.edit-menu", {}, [
-    h(LinkButton, {
-      icon: "polygon-filter",
-      text: "Polygons",
-      large: true,
-      to: "polygons",
-    }),
-    h(LinkButton, {
-      icon: "minus",
-      text: "Line Strings",
-      large: true,
-      to: "linestrings",
-    }),
-    h(LinkButton, {
-      icon: "selection",
-      text: "Points",
-      large: true,
-      to: "points",
-    }),
-    h(LinkButton, {
-      icon: "edit",
-      text: "Edit Metadata",
-      large: true,
-      to: "edit",
-    }),
-  ]);
-}
+const h = hyper.styled(styles);
 
 interface EditInterfaceProps {
   title?: string;
@@ -50,6 +21,12 @@ interface EditInterfaceProps {
   source?: any;
   ingestProcess?: any;
 }
+
+const routeMap = {
+  polygons: PolygonsTable,
+  lines: LinesTable,
+  points: PointsTable,
+};
 
 export function Page({
   source_id,
@@ -94,35 +71,22 @@ export function Page({
                   h(EditMenu),
                 ]),
               }),
-              h(Route, {
-                path: "polygons",
-                element: h(TableContainer, {}, [
-                  h(Header, HeaderProps),
-                  h(PolygonTable, {
-                    url: sourcePrefix + `/polygons`,
-                    ingestProcessId: ingestProcess.id,
-                  }),
-                ]),
-              }),
-              h(Route, {
-                path: "points",
-                element: h(TableContainer, {}, [
-                  h(Header, HeaderProps),
-                  h(PointTable, {
-                    url: sourcePrefix + `/points`,
-                    ingestProcessId: ingestProcess.id,
-                  }),
-                ]),
-              }),
-              h(Route, {
-                path: "linestrings",
-                element: h(TableContainer, {}, [
-                  h(Header, HeaderProps),
-                  h(LineStringTable, {
-                    url: sourcePrefix + `/linestrings`,
-                    ingestProcessId: ingestProcess.id,
-                  }),
-                ]),
+              Object.entries(routeMap).map(([key, value]) => {
+                let url = sourcePrefix + `/${key}`;
+                if (key === "lines") {
+                  url = sourcePrefix + `/linestrings`;
+                }
+
+                return h(Route, {
+                  path: key,
+                  element: h(TableContainer, {}, [
+                    h(Header, HeaderProps),
+                    h(value, {
+                      url,
+                      ingestProcessId: ingestProcess.id,
+                    }),
+                  ]),
+                });
               }),
               h(Route, {
                 path: "edit",
@@ -137,6 +101,35 @@ export function Page({
       ),
       h.if(showMap)(MapInterface, { id: source_id, map: mapBounds }),
     ]),
+  ]);
+}
+
+function EditMenu() {
+  return h("div.edit-menu", {}, [
+    h(LinkButton, {
+      icon: "polygon-filter",
+      text: "Polygons",
+      large: true,
+      to: "polygons",
+    }),
+    h(LinkButton, {
+      icon: "minus",
+      text: "Lines",
+      large: true,
+      to: "lines",
+    }),
+    h(LinkButton, {
+      icon: "selection",
+      text: "Points",
+      large: true,
+      to: "points",
+    }),
+    h(LinkButton, {
+      icon: "edit",
+      text: "Edit Metadata",
+      large: true,
+      to: "edit",
+    }),
   ]);
 }
 

@@ -16,12 +16,12 @@ import { getTableUpdate } from "~/pages/maps/ingestion/@id/components/table-util
 import CheckboxCell from "~/pages/maps/ingestion/@id/components/cells/checkbox-cell";
 import { TableInterface } from "../edit-table";
 import styles from "~/pages/maps/ingestion/@id/edit-table.module.sass";
-import { COMMON_COLUMNS } from "../tables";
+import { COMMON_COLUMNS } from ".";
 import { toBoolean } from "~/pages/maps/ingestion/@id/components/cells/util";
 
 const h = hyper.styled(styles);
 
-export default function PointTable({ url, ingestProcessId }: CustomTableProps) {
+export function PointsTable({ url, ingestProcessId }: CustomTableProps) {
   const FINAL_POINT_COLUMNS = [
     ...COMMON_COLUMNS,
     "comments",

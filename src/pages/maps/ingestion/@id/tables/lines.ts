@@ -16,15 +16,12 @@ import { getTableUpdate } from "~/pages/maps/ingestion/@id/components/table-util
 import CheckboxCell from "~/pages/maps/ingestion/@id/components/cells/checkbox-cell";
 import { TableInterface } from "../edit-table";
 import styles from "../edit-table.module.sass";
-import { COMMON_COLUMNS } from "../tables";
+import { COMMON_COLUMNS } from ".";
 import { toBoolean } from "../components/cells/util";
 
 const h = hyper.styled(styles);
 
-export default function LineStringTable({
-  url,
-  ingestProcessId,
-}: CustomTableProps) {
+export function LinesTable({ url, ingestProcessId }: CustomTableProps) {
   const FINAL_LINE_COLUMNS = [
     ...COMMON_COLUMNS,
     "name",
