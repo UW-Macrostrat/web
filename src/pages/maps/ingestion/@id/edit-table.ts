@@ -3,6 +3,7 @@ import hyper from "@macrostrat/hyper";
 import {
   Button,
   ButtonGroup,
+  Hotkey,
   Icon,
   Menu,
   MenuItem,
@@ -381,7 +382,6 @@ export function TableInterface({
     ],
     [handlePaste, handleCopy, handleEnter, handleHide]
   );
-  const { handleKeyDown, handleKeyUp } = useHotkeys(hotkeys);
 
   const submitTableUpdates = useCallback(async () => {
     setUpdateProgress({ value: 0, text: "Submitting changes" });
@@ -626,11 +626,9 @@ export function TableInterface({
   ]);
 
   return h(
-    "div",
+    HotkeysManager,
     {
-      onKeyDown: handleKeyDown,
-      onKeyUp: handleKeyUp,
-      tabIndex: 0,
+      hotkeys,
       style: {
         minHeight: "0",
         display: "flex",
@@ -767,4 +765,16 @@ export function TableInterface({
       ]),
     ]
   );
+}
+
+function HotkeysManager({ hotkeys, style, children }) {
+  const { handleKeyDown, handleKeyUp } = useHotkeys(hotkeys);
+
+  return h("div", {
+    onKeyDown: handleKeyDown,
+    onKeyUp: handleKeyUp,
+    tabIndex: 0,
+    style,
+    children,
+  });
 }

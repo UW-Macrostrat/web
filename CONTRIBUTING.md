@@ -14,5 +14,10 @@
 
 # Dumb things to avoid
 
-- Hard-coding specific colors!
-- Creating URLs by concatenating strings!
+This codebase has been modernized and kept maintainable
+by avoiding (or belatedly correcting) many anti-patterns:
+
+- Hard-coding specific colors
+- Creating URLs by concatenating strings
+- Deeply nested code blocks (often with confusing [control flow](https://en.wikipedia.org/wiki/Control_flow) or [side effects](https://en.wikipedia.org/wiki/Side_effect_(computer_science) instead of unambiguous returns)
+- Duplicated code of more than a few lines
