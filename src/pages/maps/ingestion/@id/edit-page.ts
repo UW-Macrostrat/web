@@ -1,7 +1,5 @@
 import hyper from "@macrostrat/hyper";
 import styles from "./edit-page.module.sass";
-import { useState } from "react";
-import EditTable from "./edit-table";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { LinkButton } from "~/pages/map/map-interface/components/buttons";
 import { WidthAdjustablePanel } from "./components";
@@ -11,6 +9,7 @@ import { ParentRouteButton } from "~/components/map-navbar";
 import { Button, AnchorButton, HotkeysProvider, Icon } from "@blueprintjs/core";
 import { PolygonTable, LineStringTable, PointTable } from "./tables";
 import { EditSourceForm } from "./source-form";
+import { ingestPrefix } from "@macrostrat-web/settings";
 
 export const h = hyper.styled(styles);
 
@@ -73,6 +72,8 @@ export default function EditInterface({
     setShowMap: setShowMap,
   };
 
+  const sourcePrefix = `${ingestPrefix}/sources/${source_id}`;
+
   return h(HotkeysProvider, [
     h("div.edit-page", [
       h(
@@ -98,9 +99,7 @@ export default function EditInterface({
                 element: h(TableContainer, {}, [
                   h(Header, HeaderProps),
                   h(PolygonTable, {
-                    url: `${
-                      import.meta.env.VITE_MACROSTRAT_INGEST_API
-                    }/sources/${source_id}/polygons`,
+                    url: sourcePrefix + `/polygons`,
                     ingestProcessId: ingestProcess.id,
                   }),
                 ]),
@@ -110,9 +109,7 @@ export default function EditInterface({
                 element: h(TableContainer, {}, [
                   h(Header, HeaderProps),
                   h(PointTable, {
-                    url: `${
-                      import.meta.env.VITE_MACROSTRAT_INGEST_API
-                    }/sources/${source_id}/points`,
+                    url: sourcePrefix + `/points`,
                     ingestProcessId: ingestProcess.id,
                   }),
                 ]),
@@ -122,9 +119,7 @@ export default function EditInterface({
                 element: h(TableContainer, {}, [
                   h(Header, HeaderProps),
                   h(LineStringTable, {
-                    url: `${
-                      import.meta.env.VITE_MACROSTRAT_INGEST_API
-                    }/sources/${source_id}/linestrings`,
+                    url: sourcePrefix + `/linestrings`,
                     ingestProcessId: ingestProcess.id,
                   }),
                 ]),

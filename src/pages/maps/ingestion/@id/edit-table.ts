@@ -69,7 +69,7 @@ import "./override.sass";
 import "@blueprintjs/table/lib/css/table.css";
 import styles from "./edit-table.module.sass";
 import EditableCell from "./components/cell/editable-cell";
-import { ingestPrefix } from "../../../../../packages/settings";
+import { ingestPrefix } from "@macrostrat-web/settings";
 import CheckboxCell from "~/pages/maps/ingestion/@id/components/cell/checkbox-cell";
 
 const h = hyper.styled(styles);
@@ -83,13 +83,15 @@ export interface EditTableProps {
   columnGenerator: (props: ColumnConfigGenerator) => ColumnConfig;
 }
 
-export default function TableInterface({
+export function TableInterface({
   url,
   ingestProcessId,
   finalColumns,
   columnGenerator,
 }: EditTableProps) {
   // Table Configurations
+  console.log(url);
+
   const [showOmitted, setShowOmitted] = useState<boolean>(false);
 
   // Hidden Columns

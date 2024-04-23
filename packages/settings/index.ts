@@ -29,7 +29,8 @@ export const mapboxAccessToken = import.meta.env.VITE_MAPBOX_API_TOKEN;
 export const apiV2Prefix =
   import.meta.env.VITE_MACROSTRAT_API_V2 ?? apiDomain + "/api/v2";
 
-export const ingestPrefix = import.meta.env.VITE_MACROSTRAT_INGEST_API;
+export const ingestPrefix =
+  import.meta.env.VITE_MACROSTRAT_INGEST_API ?? apiDomain + "/api/ingest";
 
 export const mapPagePrefix = "/map";
 

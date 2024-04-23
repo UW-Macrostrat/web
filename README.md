@@ -13,6 +13,10 @@ Version 5 of the application transitions to using [Vite](https://vitejs.dev/) fo
 5. Run `yarn install` to update packages
 6. Start the live-reloading development server with `yarn run dev`. The server will be available at `http://localhost:3000` by default.
 
+## Contributing
+
+Please see the [Contributing guide](./CONTRIBUTING.md) for information on how to contribute to this codebase.
+
 ## Packaging
 
 ### Running locally with Docker

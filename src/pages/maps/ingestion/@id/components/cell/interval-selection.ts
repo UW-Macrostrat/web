@@ -157,7 +157,7 @@ let IntervalSelection = forwardRef(
               Button,
               {
                 style: {
-                  backgroundColor: interval?.color ?? "white",
+                  backgroundColor: interval?.color ?? null,
                   fontSize: "12px",
                   minHeight: "0px",
                   padding: intent ? "0px 10px" : "1.7px 10px",
