@@ -7,36 +7,29 @@ import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
 
-interface EditableCell extends EditableCell2Props {
+interface EditableCellProps extends EditableCell2Props {
   columnName: string;
   rowIndex: number;
   edited: boolean;
   onPaste: (e) => Promise<boolean>;
   onCopy: (e) => Promise<boolean>;
+  setValue: (value: any) => void;
+  value: string;
 }
 
-const _EditableCell = forwardRef((props: EditableCell, ref) => {
-  const [value, setValue] = React.useState(props.value);
-
-  useEffect(() => {
-    setValue(props.value);
-  }, [props.value]);
-
-  ref.value = value;
-
+const _EditableCell = (props: EditableCellProps) => {
+  const { value, setValue, style, ...rest } = props;
   return h(
     Cell,
-    { ...props, style: { ...props.style, padding: 0 }, truncated: false },
+    { ...rest, style: { ...style, padding: 0 }, truncated: false },
     [
       h(
         "input",
         {
-          ref: ref,
           disabled: props.editableTextProps.disabled,
           className: "editable-cell",
           style: {
             width: (value?.length ?? 2) + "ch",
-            color: "inherit",
             //backgroundColor: "#ffffff",
           },
           value: value || "",
@@ -57,9 +50,6 @@ const _EditableCell = forwardRef((props: EditableCell, ref) => {
           },
           onFocus: (e) => {
             e.target.select();
-            e.target.select();
-            e.target.select();
-            e.target.select();
             e.preventDefault();
             e.stopPropagation();
           },
@@ -73,6 +63,6 @@ const _EditableCell = forwardRef((props: EditableCell, ref) => {
       ),
     ]
   );
-});
+};
 
 export const EditableCell = memo(_EditableCell);

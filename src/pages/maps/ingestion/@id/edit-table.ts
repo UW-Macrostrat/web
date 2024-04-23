@@ -17,14 +17,7 @@ import {
   SelectionModes,
   Table2,
 } from "@blueprintjs/table";
-import {
-  MutableRefObject,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
   EditableCell,
@@ -78,9 +71,6 @@ export function TableInterface({
 
   // Hidden Columns
   const [hiddenColumns, _setHiddenColumns] = useState<string[]>([]);
-
-  // Cell refs
-  const ref = useRef<MutableRefObject<any>[][]>(null);
 
   // Selection State
   const [selection, setSelection] = useState<Selection[]>([]);
@@ -180,16 +170,6 @@ export function TableInterface({
 
       // Update the number of rows
       setNumberOfRows(parseInt(response.headers.get("X-Total-Count")));
-
-      // Set the table ref
-      ref.current = Array.from(
-        { length: data.length == 0 ? 1 : data.length },
-        () =>
-          Array.from(
-            { length: data.length == 0 ? 1 : Object.keys(data[0]).length },
-            () => null
-          )
-      );
 
       return data;
     },
@@ -365,7 +345,7 @@ export function TableInterface({
 
   const handleEnter = useCallback(
     (e) => {
-      ref.current[focusedCell?.row][focusedCell?.col]?.click();
+      //ref.current[focusedCell?.row][focusedCell?.col]?.click();
       e.preventDefault();
       e.stopPropagation();
     },
@@ -577,11 +557,6 @@ export function TableInterface({
           columnHeaderCellRenderer: columnHeaderCellRenderer,
           cellRenderer: (rowIndex: number, columnIndex: number) =>
             h(EditableCell, {
-              ref: (el) => {
-                try {
-                  ref.current[rowIndex][columnIndex] = el;
-                } catch {}
-              },
               onConfirm: (value) => {
                 const tableUpdate = getTableUpdate(
                   url,
@@ -638,7 +613,6 @@ export function TableInterface({
       setTableUpdates,
       transformedData,
       data,
-      ref,
     });
 
     return generatedColumns;
@@ -752,12 +726,6 @@ export function TableInterface({
             selectionModes: SelectionModes.COLUMNS_AND_CELLS,
             rowHeaderCellRenderer: rowHeaderCellRenderer,
             onFocusedCell: (focusedCellCoordinates) => {
-              try {
-                ref.current[focusedCellCoordinates?.row][
-                  focusedCellCoordinates?.col
-                ]?.focus();
-              } catch (e) {}
-
               setFocusedCell(focusedCellCoordinates);
             },
             loadingOptions: loading ? ["cells", "column-header"] : [],
