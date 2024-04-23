@@ -109,6 +109,7 @@ let IntervalSelection = forwardRef(
     }: IntervalSelectionProps,
     ref
   ) => {
+
     const interval = useMemo(() => {
       let interval = null;
       if (intervals.length != 0) {
@@ -119,6 +120,8 @@ let IntervalSelection = forwardRef(
 
       return interval;
     }, [value, intervals, intent]);
+
+    const [active, setActive] = React.useState(false);
 
     return h(
       Cell,
@@ -132,7 +135,7 @@ let IntervalSelection = forwardRef(
           {
             ref: ref,
             fill: true,
-            items: intervals,
+            items: active ? intervals: [],
             className: "update-input-group",
             popoverProps: {
               position: "bottom",
@@ -174,6 +177,7 @@ let IntervalSelection = forwardRef(
                 rightIcon: "double-caret-vertical",
                 className: "update-input-group",
                 placeholder: "Select A Filter",
+                onClick: () => setActive(true),
               },
               []
             ),
