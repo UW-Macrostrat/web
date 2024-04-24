@@ -89,9 +89,6 @@ export function TableInterface({
   finalColumns,
   columnGenerator,
 }: EditTableProps) {
-  // Table Configurations
-  console.log(url);
-
   const [showOmitted, setShowOmitted] = useState<boolean>(false);
 
   // Hidden Columns
@@ -157,9 +154,7 @@ export function TableInterface({
 
   const setHiddenColumns = useCallback((column: string | string[]) => {
     _setHiddenColumns((prev) => {
-
       if (Array.isArray(column)) {
-
         // Check if they are emptying the list
         if (column.length == 0) {
           return [];
@@ -672,11 +667,9 @@ export function TableInterface({
   ]);
 
   return h(
-    "div",
+    HotkeysManager,
     {
-      onKeyDown: handleKeyDown,
-      onKeyUp: handleKeyUp,
-      tabIndex: 0,
+      hotkeys: hotkeys,
       style: {
         minHeight: "0",
         display: "flex",
@@ -687,84 +680,17 @@ export function TableInterface({
     [
       h("div.table-container", {}, [
         h.if(error != undefined)("div.warning", {}, [error]),
-        h("div.input-form", {}, [
-          h(ButtonGroup, [
-            h(Popover2, {
-              interactionKind: "click",
-              minimal: true,
-              placement: "bottom-start",
-              content: h(Menu, {}, [
-                h(
-                  MenuItem,
-                  {
-                    disabled: hiddenColumns.length == 0,
-                    icon: "eye-open",
-                    text: "Show All",
-                    onClick: () => setHiddenColumns([]),
-                  },
-                  []
-                ),
-                h(
-                  MenuItem,
-                  {
-                    icon: "cross",
-                    text: "Show Omitted",
-                    onClick: () => setShowOmitted(!showOmitted),
-                  },
-                  []
-                ),
-              ]),
-              renderTarget: ({ isOpen, ref, ...targetProps }) =>
-                h(
-                  Button,
-                  { ...targetProps, elementRef: ref, icon: "menu" },
-                  []
-                ),
-            }),
-            h(
-              Button,
-              {
-                onClick: () => {
-                  setTableUpdates([]);
-                },
-                disabled: tableUpdates.length == 0,
-              },
-              ["Clear changes"]
-            ),
-            h(
-              Button,
-              {
-                type: "submit",
-                onClick: submitTableUpdates,
-                disabled: tableUpdates.length == 0,
-                intent: "success",
-              },
-              ["Submit"]
-            ),
-            h(
-              Button,
-              {
-                onClick: async () => {
-                  const objects_response = await fetch(
-                    `${ingestPrefix}/ingest-process/${ingestProcessId}/objects`
-                  );
-                  const objects: any[] = await objects_response.json();
-                  objects.forEach((object) =>
-                    download_file(object.pre_signed_url)
-                  );
-                },
-              },
-              ["Download Source"]
-            ),
-            h.if(numberOfRows != undefined)(
-              Button,
-              {
-                disabled: true,
-              },
-              [`${numberOfRows} Total Rows`]
-            ),
-          ]),
-        ]),
+        h(InputForm, {
+          hiddenColumns,
+          setHiddenColumns,
+          setShowOmitted,
+          showOmitted,
+          tableUpdates,
+          setTableUpdates,
+          numberOfRows,
+          ingestProcessId,
+          submitTableUpdates,
+        }),
         h(
           Table2,
           {
@@ -819,4 +745,101 @@ export function TableInterface({
       ]),
     ]
   );
+}
+
+function HotkeysManager({ hotkeys, style, children }) {
+  const { handleKeyDown, handleKeyUp } = useHotkeys(hotkeys);
+
+  return h("div", {
+    onKeyDown: handleKeyDown,
+    onKeyUp: handleKeyUp,
+    tabIndex: 0,
+    style,
+    children,
+  });
+}
+
+function InputForm({
+  hiddenColumns,
+  setHiddenColumns,
+  setShowOmitted,
+  showOmitted,
+  tableUpdates,
+  setTableUpdates,
+  numberOfRows,
+  ingestProcessId,
+  submitTableUpdates,
+}) {
+  return h("div.input-form", {}, [
+    h(ButtonGroup, [
+      h(Popover2, {
+        interactionKind: "click",
+        minimal: true,
+        placement: "bottom-start",
+        content: h(Menu, {}, [
+          h(
+            MenuItem,
+            {
+              disabled: hiddenColumns.length == 0,
+              icon: "eye-open",
+              text: "Show All",
+              onClick: () => setHiddenColumns([]),
+            },
+            []
+          ),
+          h(
+            MenuItem,
+            {
+              icon: "cross",
+              text: "Show Omitted",
+              onClick: () => setShowOmitted(!showOmitted),
+            },
+            []
+          ),
+        ]),
+        renderTarget: ({ isOpen, ref, ...targetProps }) =>
+          h(Button, { ...targetProps, elementRef: ref, icon: "menu" }, []),
+      }),
+      h(
+        Button,
+        {
+          onClick: () => {
+            setTableUpdates([]);
+          },
+          disabled: tableUpdates.length == 0,
+        },
+        ["Clear changes"]
+      ),
+      h(
+        Button,
+        {
+          type: "submit",
+          onClick: submitTableUpdates,
+          disabled: tableUpdates.length == 0,
+          intent: "success",
+        },
+        ["Submit"]
+      ),
+      h(
+        Button,
+        {
+          onClick: async () => {
+            const objects_response = await fetch(
+              `${ingestPrefix}/ingest-process/${ingestProcessId}/objects`
+            );
+            const objects: any[] = await objects_response.json();
+            objects.forEach((object) => download_file(object.pre_signed_url));
+          },
+        },
+        ["Download Source"]
+      ),
+      h.if(numberOfRows != undefined)(
+        Button,
+        {
+          disabled: true,
+        },
+        [`${numberOfRows} Total Rows`]
+      ),
+    ]),
+  ]);
 }
