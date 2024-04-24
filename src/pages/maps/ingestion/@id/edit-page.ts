@@ -164,7 +164,7 @@ function Header({
     h("h2.m-0", {}, [
       `${title} Ingestion`,
       h(ShowDocsButton, {
-        href: "https://github.com/UW-Macrostrat/web/blob/main/src/pages/maps/ingestion/%40id/README.md",
+        href: "/docs/ingestion/harmonization",
       }),
     ]),
     h("div.spacer"),
