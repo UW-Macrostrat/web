@@ -37,9 +37,11 @@ const deleteTag = async (tag: string, ingestId: number) => {
 const IngestProcessCard = ({
   ingestProcess,
   user,
+  onUpdate
 }: {
   ingestProcess: IngestProcess;
   user: any | undefined;
+  onUpdate: () => void;
 }) => {
   const [_ingestProcess, setIngestProcess] =
     useState<IngestProcess>(ingestProcess);
@@ -49,6 +51,7 @@ const IngestProcessCard = ({
       `${ingestPrefix}/ingest-process/${ingestProcess.id}`
     );
     setIngestProcess(await response.json());
+    onUpdate();
   }, []);
 
   const { id, tags } = _ingestProcess;
