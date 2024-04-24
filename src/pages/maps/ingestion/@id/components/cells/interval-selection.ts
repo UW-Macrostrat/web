@@ -104,6 +104,9 @@ let IntervalSelection = ({
   onCopy,
   ...props
 }: IntervalSelectionProps) => {
+
+  const [active, setActive] = React.useState(false);
+
   const interval = useMemo(() => {
     let interval = null;
     if (intervals.length != 0) {
@@ -126,7 +129,7 @@ let IntervalSelection = ({
         Select2<Interval>,
         {
           fill: true,
-          items: intervals,
+          items: active ? intervals : [],
           className: "update-input-group",
           popoverProps: {
             position: "bottom",
@@ -168,6 +171,7 @@ let IntervalSelection = ({
               rightIcon: "double-caret-vertical",
               className: "update-input-group",
               placeholder: "Select A Filter",
+              onClick: () => setActive(true)
             },
             []
           ),

@@ -13,12 +13,18 @@ interface EditableCellProps extends EditableCell2Props {
   edited: boolean;
   onPaste: (e) => Promise<boolean>;
   onCopy: (e) => Promise<boolean>;
-  setValue: (value: any) => void;
+  onConfirm: (value: any) => void;
   value: string;
 }
 
 const _EditableCell = (props: EditableCellProps) => {
-  const { value, setValue, style, ...rest } = props;
+  const { style, ...rest } = props;
+  const [value, setValue] = React.useState(props.value);
+
+  useEffect(() => {
+    setValue(props.value);
+  }, [props.value]);
+
   return h(
     Cell,
     { ...rest, style: { ...style, padding: 0 }, truncated: false },
@@ -30,12 +36,17 @@ const _EditableCell = (props: EditableCellProps) => {
           className: "editable-cell",
           style: {
             width: (value?.length ?? 2) + "ch",
-            //backgroundColor: "#ffffff",
+            color: "inherit" // Necessary so changed cells have the correct color text
           },
           value: value || "",
           onChange: (e) => {
             setValue(e.target.value);
             e.target.style.width = e.target.value.length + 8 + "ch";
+          },
+          onKeyDown: async (e) => {
+            if (e.key === "Enter") {
+              props.onConfirm(value);
+            }
           },
           onPaste: async (e) => {
             e.preventDefault();
