@@ -38,6 +38,25 @@ const toggleUrlParam = (
   return new URLSearchParams(urlSearchParam.toString());
 };
 
+const updateUrl = (key: string, value: string, setIngestFilter: (filter: (filter: URLSearchParams) => URLSearchParams) => void) => {
+  const url = new URL(window.location.href);
+  url.searchParams.set(key, value);
+  setIngestFilter((ingestFilter: URLSearchParams) => {
+    return toggleUrlParam(ingestFilter, key, value);
+  });
+  window.history.pushState(
+    { page: "Update Search Params" },
+    "Title",
+    url
+  );
+}
+
+const getTags = async () => {
+  const response = await fetch(`${ingestPrefix}/ingest-process/tags`);
+  const tags = await response.json();
+  return tags
+};
+
 export function Page({ user, url }) {
   const [ingestProcess, setIngestProcess] = useState<IngestProcess[]>([]);
   const [ingestFilter, setIngestFilter] = useState<URLSearchParams>(undefined);
@@ -78,12 +97,7 @@ export function Page({ user, url }) {
   }, [ingestFilter]);
 
   useEffect(() => {
-    const getTags = async () => {
-      const response = await fetch(`${ingestPrefix}/ingest-process/tags`);
-      const tags = await response.json();
-      setTags(tags);
-    };
-    getTags();
+    getTags().then((tags) => setTags(tags));
 
     window.onpopstate = () => {
       getIngestProcesses();
@@ -171,6 +185,7 @@ export function Page({ user, url }) {
                   h(IngestProcessCard, {
                     ingestProcess: d,
                     user: user,
+                    onUpdate: () => getTags().then((tags) => setTags(tags))
                   }),
                 ]
               );
@@ -191,16 +206,7 @@ export function Page({ user, url }) {
               value: "pending",
               active: ingestFilter?.getAll("state").includes("eq.pending"),
               onClick: async () => {
-                const url = new URL(window.location.href);
-                url.searchParams.set("state", `eq.pending`);
-                setIngestFilter(() => {
-                  return toggleUrlParam(ingestFilter, "state", "eq.pending");
-                });
-                window.history.pushState(
-                  { page: "Update Search Params" },
-                  "Title",
-                  url
-                );
+                updateUrl("state", "eq.pending", setIngestFilter);
               },
               style: { width: "100%", marginBottom: "7px" },
             }),
@@ -208,18 +214,7 @@ export function Page({ user, url }) {
               value: "ingested",
               active: ingestFilter?.getAll("state").includes("eq.ingested"),
               onClick: async () => {
-                const url = new URL(
-                  window.location.origin + window.location.pathname
-                );
-                url.searchParams.set("state", `eq.ingested`);
-                setIngestFilter(() => {
-                  return toggleUrlParam(ingestFilter, "state", "eq.ingested");
-                });
-                window.history.pushState(
-                  { page: "Update Search Params" },
-                  "Title",
-                  url
-                );
+                updateUrl("state", "eq.ingested", setIngestFilter);
               },
               style: { width: "100%", marginBottom: "7px" },
             }),
