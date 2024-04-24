@@ -1,6 +1,7 @@
 export { DocumentationPage as default } from "~/layouts";
 import { LinkCard } from "~/components/cards";
 import { PageHeader } from "~/components";
+import { Icon } from "@blueprintjs/core";
 
 <PageHeader title="Legend Harmonization" showSiteName={false}>
   <span className="subtitle">
@@ -22,8 +23,30 @@ representation.
 
 ## Features:
 
-- Hide and Copy columns
-- Standard Filter and Grouping
+### Hide, Group by and Copy/Paste columns
+
+To hide and group by columns, click on the column header and select the appropriate option. To reveal previously hidden
+columns, click on the menu icon ( <Icon icon="menu" /> ) in the top left corner of the table and click `Show all`.
+
+### Copy and Paste Columns
+
+To copy a column, click on the column header to select it, then using `cmd + c` copy that column. To then paste that column
+click on the column header where you would like to paste the column and use `cmd + v`.
+
+### Filtering Columns
+
+To filter a column, hover the column header to reveal the menu dropdown. Clicking on the menu dropdown will reveal the
+filtering options. The filter option can be selected from the selection input and the text input into the text box below.
+
+### Keyboard Navigation
+
+To navigate the table using the keyboard, use the following commands:
+
+- **tab/shift + tab** - Navigate Cells Horizontally
+- **enter/shift + enter** - Navigate Cells Vertically
+
+### Other Features
+
 - Purpose built interfaces for certain columns ( Example: Selection interface for all valid age intervals )
 - View of running operations, as well as push and clear functionality
 - Virtualized 'infinite' scrolling of table data to keep data downloads web friendly
@@ -59,15 +82,15 @@ table interface to populate these values. Otherwise, we provide the original .zi
 
 **orig_id**
 
-This column is composed of ids for each polygon. The best way to populate this is to copy and paste the column from the ingestion that most closely resembles a list of discrete values.
+Unique ids for each polygon. You can check a column for uniqueness by grouping by that column and asserting the row count has not changed.
 
 **descrip**
 
-This column is the description of the polygon.
+Description of the polygon.
 
 **omit**
 
-This column is a **True/False** column used to denote a row as "Ready". These "Ready" rows can then be removed by a column filter.
+This column is a **True/False** column used to omit the polygons from the final output and table view.
 
 **name**
 
@@ -84,25 +107,3 @@ Age of the polygon.
 **comments**
 
 Any comments that you would like to make can be entered here.
-
-#### Table Commands
-
-**tab/shift + tab**
-
-Navigate Cells Horizontally
-
-**enter/shift + enter**
-
-Navigate Cells Vertically
-
-**shift + h ( Well a column is selected )**
-
-Hide a column
-
-**cmd + c ( Well a column is selected )**
-
-Copy a column
-
-**cmd + v ( Well a column is selected )**
-
-Paste a column
