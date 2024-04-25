@@ -10,7 +10,6 @@ import {
 } from "@blueprintjs/table";
 import { useInDarkMode } from "@macrostrat/ui-components";
 import { useMemo, useState, useRef, useCallback, useEffect } from "react";
-import chroma from "chroma-js";
 import update from "immutability-helper";
 import styles from "./main.module.sass";
 import "@blueprintjs/table/lib/css/table.css";
@@ -22,10 +21,13 @@ const h = hyper.styled(styles);
 // TODO: add a "copy to selection" tool (the little square in the bottom right corner of a cell)
 // This should copy the value of a cell (or a set of cells in the same row) downwards.
 
-export default function DataSheetTest() {
-  const darkMode = useInDarkMode();
-  const columnSpec = buildColumnSpec(darkMode);
-
+export default function DataSheet<T>({
+  data,
+  columnSpec: _columnSpec,
+}: {
+  data: T[];
+  columnSpec?: ColumnSpec[];
+}) {
   // For now, we only consider a single cell "focused" when we have one cell selected.
   // Multi-cell selections have a different set of "bulk" actions.
   //const [focusedCell, setFocusedCell] = useState<FocusedCellCoordinates>(null);
@@ -44,7 +46,12 @@ export default function DataSheetTest() {
 
   const ref = useRef<HTMLDivElement>(null);
 
-  const data = useMemo(buildTestData, []);
+  const columnSpec =
+    _columnSpec ??
+    useMemo(() => {
+      // Only build the column spec if it's not provided at the start
+      return buildDefaultColumnSpec(data);
+    }, [data]);
 
   // A sparse array to hold updates
   // TODO: create a "changeset" concept to facilitate undo/redo
@@ -104,6 +111,8 @@ export default function DataSheetTest() {
     }
     setUpdatedData(update(updatedData, spec));
   }, [selection, updatedData, columnSpec]);
+
+  if (data == null) return null;
 
   return h("div.data-sheet-container", [
     h("div.data-sheet-toolbar", [
@@ -295,33 +304,80 @@ function range(arr: number[]) {
   return Array.from({ length: end - start + 1 }, (_, i) => i + start);
 }
 
-function buildColumnSpec() {
-  return [
-    { name: "Strike", key: "strike", valueRenderer },
-    { name: "Dip", key: "dip", valueRenderer },
-    { name: "Rake", key: "rake", valueRenderer },
-    { name: "Max.", key: "maxError", category: "Errors", valueRenderer },
-    { name: "Min.", key: "minError", category: "Errors", valueRenderer },
-    {
-      name: "Color",
-      key: "color",
-      required: false,
-      isValid: (d) => true, //getColor(d) != null,
-      transform: (d) => d,
-      dataEditor: ColorPicker,
-      valueRenderer: (d) => {
-        let color = d;
-        try {
-          color = chroma(d);
-        } catch (e) {
-          color = null;
+const defaultRenderers = {
+  string: (d) => d,
+  number: (d) => d?.toFixed(2),
+  boolean: (d) => (d ? "T" : "F"),
+  object: (d) => JSON.stringify(d),
+  integer: (d) => d?.toFixed(0),
+  array: (d) => d?.join(", "),
+};
+
+function buildDefaultColumnSpec(data, n = 10): ColumnSpec[] {
+  /** Build a default column spec from a dataset based on the first n rows */
+  if (data == null) return [];
+  // Get the first n rows
+  const rows = data.slice(0, n);
+  // Get the keys
+  const keys = new Set();
+  const types = new Map();
+  for (const row of rows) {
+    for (const key of Object.keys(row)) {
+      keys.add(key);
+      const val = row[key];
+      if (val == null) continue;
+      let type: string = typeof val;
+      // Special 'type' for integers
+      if (Number.isInteger(val)) {
+        type = "integer";
+      }
+
+      // Special 'type' for arrays of simple values
+      if (
+        Array.isArray(val) &&
+        val.every((d) => typeof d === "string" || typeof d === "number")
+      ) {
+        type = "array";
+      }
+
+      if (types.has(key)) {
+        if (types.get(key) !== type) {
+          if (type === "number" && types.get(key) === "integer") {
+            types.set(key, "number");
+          }
+          if (type === "object" && types.get(key) === "array") {
+            types.set(key, "object");
+          }
+
+          types.set(key, "string");
         }
-        return color?.name() ?? "";
-      },
-      // Maybe this should be changed to CellProps?
-      cellComponent: ColorCell,
-    },
-  ];
+      } else {
+        types.set(key, type);
+      }
+    }
+  }
+
+  // Build a column spec
+  const spec = [];
+  for (const key of keys) {
+    spec.push({
+      name: key,
+      key,
+      valueRenderer: defaultRenderers[types.get(key)],
+    });
+  }
+  return spec;
+}
+
+export interface ColumnSpec {
+  name: string;
+  key: string;
+  required?: boolean;
+  isValid?: (d: any) => boolean;
+  valueRenderer?: (d: any) => string;
+  dataEditor?: any;
+  cellComponent?: any;
+  category?: string;
 }
 
 function ColorCell({ value, children, style, intent, ...rest }) {
@@ -360,26 +416,4 @@ function singleFocusedCell(sel: Region[]): FocusedCellCoordinates | null {
   /** Derive a single focused cell from a selected region, if possible */
   if (sel?.length !== 1) return null;
   return topLeftCell(sel, true);
-}
-
-function buildTestData() {
-  const repeatedData = [];
-
-  for (const i of Array(5000).keys()) {
-    const errors = [4 + Math.random() * 10, 2 + Math.random() * 10];
-    repeatedData.push({
-      color: chroma.mix(
-        "red",
-        "blue",
-        (Math.random() + Math.abs((i % 20) - 10)) / 10,
-        "rgb"
-      ),
-      strike: 10 + Math.random() * 10,
-      dip: 5 + Math.random() * 10,
-      rake: 20 + Math.random() * 10,
-      maxError: Math.max(...errors),
-      minError: Math.min(...errors),
-    });
-  }
-  return repeatedData;
 }
