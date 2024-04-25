@@ -6,7 +6,7 @@ import classNames from "classnames";
 
 const h = hyper.styled(styles);
 
-export function BasePage({ children, className }) {
+export function BasePage({ children, className, fitViewport = false }) {
   const inPageTransition = usePageTransitionStore(
     (state) => state.inPageTransition
   );
@@ -14,21 +14,39 @@ export function BasePage({ children, className }) {
     return h("div.page-transition", [h(Spinner)]);
   }
 
-  return h("div", { className }, children);
-}
-
-export function ContentPage({ children, className }) {
   return h(
-    BasePage,
-    { className: classNames("content-page", className) },
+    "div",
+    {
+      className: classNames(className, { "fit-viewport": fitViewport }),
+    },
     children
   );
 }
 
-export function DocumentationPage({ children, className }) {
+export function FullscreenPage({ children, className, ...rest }) {
   return h(
     BasePage,
-    { className: classNames("documentation-page", className) },
+    {
+      className: classNames("fullscreen-page", className),
+      fitViewport: true,
+      ...rest,
+    },
+    children
+  );
+}
+
+export function ContentPage({ children, className, ...rest }) {
+  return h(
+    BasePage,
+    { className: classNames("content-page", className), ...rest },
+    children
+  );
+}
+
+export function DocumentationPage({ children, className, ...rest }) {
+  return h(
+    BasePage,
+    { className: classNames("documentation-page", className), ...rest },
     children
   );
 }
