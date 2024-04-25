@@ -34,13 +34,13 @@ export default function DataSheet<T>({
   const [selection, setSelection] = useState<Region[]>([]);
   const _topLeftCell = useMemo(() => topLeftCell(selection), [selection]);
   const focusedCell = useMemo(() => singleFocusedCell(selection), [selection]);
-  const [fillValueBase, setFillValueBase] =
+  const [fillValueBaseCell, setFillValueBaseCell] =
     useState<FocusedCellCoordinates>(null);
 
   useEffect(() => {
     // Cancel value filling if we change the selection
     if (focusedCell != null) {
-      setFillValueBase(null);
+      setFillValueBaseCell(null);
     }
   }, [focusedCell]);
 
@@ -115,34 +115,7 @@ export default function DataSheet<T>({
   if (data == null) return null;
 
   return h("div.data-sheet-container", [
-    h("div.data-sheet-toolbar", [
-      h("div.spacer"),
-      h(ButtonGroup, [
-        h(
-          Button,
-          {
-            intent: Intent.WARNING,
-            disabled: !hasUpdates,
-            onClick() {
-              setUpdatedData([]);
-            },
-          },
-          "Reset"
-        ),
-        h(
-          Button,
-          {
-            intent: Intent.SUCCESS,
-            icon: "floppy-disk",
-            disabled: !hasUpdates,
-            onClick() {
-              console.log("Here is where we would save data");
-            },
-          },
-          "Save"
-        ),
-      ]),
-    ]),
+    h(DataSheetEditToolbar, { hasUpdates, setUpdatedData }),
     h("div.data-sheet-holder", [
       h(
         Table2,
@@ -150,17 +123,17 @@ export default function DataSheet<T>({
           ref,
           numRows: data.length,
           className: "data-sheet",
-          //enableFocusedCell: true,
-          //focusedCell,
+          enableFocusedCell: true,
+          focusedCell,
           selectedRegions: selection,
           onSelection(val: Region[]) {
-            if (fillValueBase != null) {
+            if (fillValueBaseCell != null) {
               let regions = val.map((region) => {
                 const { cols, rows } = region;
                 const [col] = cols;
                 return { cols: <[number, number]>[col, col], rows };
               });
-              fillValues(fillValueBase, regions);
+              fillValues(fillValueBaseCell, regions);
               setSelection(regions);
             } else {
               setSelection(val);
@@ -279,6 +252,37 @@ export default function DataSheet<T>({
   ]);
 }
 
+function DataSheetEditToolbar({ hasUpdates, setUpdatedData }) {
+  return h("div.data-sheet-toolbar", [
+    h("div.spacer"),
+    h(ButtonGroup, [
+      h(
+        Button,
+        {
+          intent: Intent.WARNING,
+          disabled: !hasUpdates,
+          onClick() {
+            setUpdatedData([]);
+          },
+        },
+        "Reset"
+      ),
+      h(
+        Button,
+        {
+          intent: Intent.SUCCESS,
+          icon: "floppy-disk",
+          disabled: !hasUpdates,
+          onClick() {
+            console.log("Here is where we would save data");
+          },
+        },
+        "Save"
+      ),
+    ]),
+  ]);
+}
+
 function BaseCell({ children, value, ...rest }) {
   return h(
     Cell,
@@ -288,14 +292,6 @@ function BaseCell({ children, value, ...rest }) {
     },
     children
   );
-}
-
-function valueRenderer(d) {
-  try {
-    return d.toFixed(2);
-  } catch (e) {
-    return `${d}`;
-  }
 }
 
 function range(arr: number[]) {
