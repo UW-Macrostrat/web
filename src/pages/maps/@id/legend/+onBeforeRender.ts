@@ -12,6 +12,7 @@ export async function onBeforeRender(pageContext: PageContextServer) {
     .eq("source_id", id);
 
   const map = res?.data?.[0];
+  const name = map?.name ?? "Unknown map";
 
   return {
     pageContext: {

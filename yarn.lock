@@ -5152,6 +5152,23 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@macrostrat/data-sheet2@workspace:*, @macrostrat/data-sheet2@workspace:deps/web-components/packages/data-sheet2":
+  version: 0.0.0-use.local
+  resolution: "@macrostrat/data-sheet2@workspace:deps/web-components/packages/data-sheet2"
+  dependencies:
+    "@blueprintjs/core": "npm:^4.17.8"
+    "@blueprintjs/popover2": "npm:^1.13.12"
+    "@blueprintjs/table": "npm:^4"
+    "@macrostrat/hyper": "npm:^1.2.12"
+    chroma-js: "npm:^2.4.2"
+    classnames: "npm:^2.3.1"
+    immutability-helper: "npm:^3.1.1"
+    react: "npm:^17.0.2||^18"
+    react-color: "npm:^2.19.3"
+    typescript: "npm:^4.2.3"
+  languageName: unknown
+  linkType: soft
+
 "@macrostrat/data-sheet@workspace:*, @macrostrat/data-sheet@workspace:deps/web-components/packages/data-sheet":
   version: 0.0.0-use.local
   resolution: "@macrostrat/data-sheet@workspace:deps/web-components/packages/data-sheet"
@@ -5543,6 +5560,7 @@ __metadata:
     "@macrostrat/api-views": "workspace:*"
     "@macrostrat/column-components": "workspace:*"
     "@macrostrat/column-views": "workspace:*"
+    "@macrostrat/data-sheet2": "workspace:*"
     "@macrostrat/hyper": "npm:^2.2.1"
     "@macrostrat/map-interface": "workspace:*"
     "@macrostrat/mapbox-react": "workspace:^2.1.0"

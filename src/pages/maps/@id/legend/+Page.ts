@@ -1,5 +1,5 @@
 import { Breadcrumbs, HotkeysProvider } from "@blueprintjs/core";
-import LegendTable from "./lib";
+import DataSheet from "@macrostrat/data-sheet2";
 import { useState } from "react";
 import { FullscreenPage } from "~/layouts";
 import hyper from "@macrostrat/hyper";
@@ -39,7 +39,7 @@ export function Page({ map }) {
         ],
       }),
       h("h1", map.name + " map units"),
-      h("div.data-sheet-container", h(LegendTable, { data })),
+      h("div.data-sheet-container", h(DataSheet, { data })),
     ])
   );
 }

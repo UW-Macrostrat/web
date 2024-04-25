@@ -61,6 +61,7 @@
     "@macrostrat/api-views": "workspace:*",
     "@macrostrat/column-components": "workspace:*",
     "@macrostrat/column-views": "workspace:*",
+    "@macrostrat/data-sheet2": "workspace:*",
     "@macrostrat/hyper": "^2.2.1",
     "@macrostrat/map-interface": "workspace:*",
     "@macrostrat/mapbox-react": "workspace:^2.1.0",
