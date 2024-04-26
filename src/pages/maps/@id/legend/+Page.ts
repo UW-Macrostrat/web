@@ -45,8 +45,7 @@ export function Page({ map }) {
           overrides: {
             liths: {
               name: "Lithologies",
-              cellComponent: LithologiesCell,
-              //inlineEditor: false,
+              valueRenderer: lithologyRenderer,
               dataEditor: ExpandedLithologies,
             },
             name: "Unit name",
@@ -76,9 +75,10 @@ function IntervalCell({ value, children, ...rest }) {
   return h(ColorCell, { value: value?.color, ...rest }, value?.name);
 }
 
-function LithologiesCell({ value, children, ...rest }) {
-  const names = value?.map((d) => h(LithTag, { data: d }));
-  return h(Cell, { ...rest, className: "inline-lithology" }, addJoiner(names));
+function lithologyRenderer(value) {
+  return h("span.liths", [
+    addJoiner(value?.map((d) => h(LithTag, { data: d }))),
+  ]);
 }
 
 function LithTag({ data }) {
@@ -86,9 +86,10 @@ function LithTag({ data }) {
   const luminance = darkMode ? 0.9 : 0.4;
   const color = asChromaColor(data.color);
   return h(
-    "span.lithology",
+    Tag,
     {
       key: data.id,
+      minimal: true,
       style: {
         color: color?.luminance(luminance).hex(),
         backgroundColor: color?.luminance(1 - luminance).hex(),
@@ -99,17 +100,33 @@ function LithTag({ data }) {
 }
 
 function ExpandedLithologies({ value, onChange }) {
-  const darkMode = useInDarkMode();
-  const names = value?.map((d) => {
-    return h("div", { key: d.id }, [
-      h(LithTag, { data: d }),
+  console.log(value);
+  if (value == null) return h("div.basis-panel", "No lithologies");
+  return h("div.basis-panel", [
+    h("p.description", "Match source"),
+    h("table", [
       h(
-        "div.basis",
-        d?.basis_cols?.map((d) => h(Tag, { minimal: true }, d))
+        "tbody",
+        value.map((d) => {
+          return h("tr", [
+            h("td", [h(LithTag, { data: d })]),
+            h(
+              "td",
+              addJoiner(
+                d.basis_col?.map((d) => {
+                  return h(Tag, { minimal: true }, [
+                    h("span.tag-header", "Column"),
+                    " ",
+                    h("code", d),
+                  ]);
+                })
+              )
+            ),
+          ]);
+        })
       ),
-    ]);
-  });
-  return h("div", {}, "Hello, world!");
+    ]),
+  ]);
 }
 
 function addJoiner(arr) {
