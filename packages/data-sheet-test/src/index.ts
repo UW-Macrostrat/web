@@ -1,6 +1,6 @@
 import hyper from "@macrostrat/hyper";
 import { ColorPicker } from "@macrostrat/data-sheet";
-import { Cell } from "@blueprintjs/table";
+import { ColorCell } from "@macrostrat/data-sheet2";
 import { useInDarkMode } from "@macrostrat/ui-components";
 import { useMemo } from "react";
 import chroma from "chroma-js";
@@ -58,23 +58,6 @@ function buildColumnSpec() {
       cellComponent: ColorCell,
     },
   ];
-}
-
-function ColorCell({ value, children, style, intent, ...rest }) {
-  const brighten = useInDarkMode() ? 0.5 : 0.1;
-  const color = value;
-  return h(
-    Cell,
-    {
-      ...rest,
-      style: {
-        ...style,
-        color: color?.luminance?.(brighten).css(),
-        backgroundColor: color?.alpha?.(0.2).css(),
-      },
-    },
-    children
-  );
 }
 
 function buildTestData() {
