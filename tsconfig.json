@@ -9,6 +9,7 @@
     "jsx": "react-jsx",
     "skipLibCheck": true,
     "esModuleInterop": true,
+    "downlevelIteration": true,
     "paths": {
       "~/*": ["./src/*"],
       "@macrostrat/cesium-vector-provider": [
