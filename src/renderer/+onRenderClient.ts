@@ -16,8 +16,6 @@ async function render(pageContext: PageContextClient) {
       "Client-side render() hook expects pageContext.Page to be defined"
     );
 
-  console.log("Rendering on client side");
-
   FocusStyleManager.onlyShowFocusOnTabs();
 
   const page = h(PageShell, { pageContext }, h(Page, pageProps));

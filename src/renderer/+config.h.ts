@@ -7,6 +7,7 @@ export default {
     "supportsDarkMode",
     "isolateStyles",
     "macrostratLogoFlavor",
+    "routeParams",
   ],
   clientRouting: true,
   hydrationCanBeAborted: true,

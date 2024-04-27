@@ -1,7 +1,8 @@
-import { Breadcrumbs, HotkeysProvider } from "@blueprintjs/core";
+import { HotkeysProvider } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import { ClientOnly } from "~/renderer/client-only";
 import style from "../main.module.sass";
+import { PageBreadcrumbs } from "~/renderer";
 
 const h = hyper.styled(style);
 
@@ -15,14 +16,7 @@ export function Page() {
   return h(
     HotkeysProvider,
     h("div.main", [
-      h(Breadcrumbs, {
-        items: [
-          { text: "Macrostrat", href: "/" },
-          { text: "Development", href: "/dev" },
-          { text: "UI tests", href: "/dev/ui-tests" },
-          { text: "Data sheet" },
-        ],
-      }),
+      h(PageBreadcrumbs),
       h("h1", "Data sheet"),
       h("p", [
         "This is a test of the a spreadsheet-like editor based on the ",

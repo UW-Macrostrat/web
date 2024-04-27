@@ -6,6 +6,7 @@ import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
 import { useAsyncEffect, useInDarkMode } from "@macrostrat/ui-components";
 import { ColorCell, Cell, asChromaColor } from "@macrostrat/data-sheet2";
+import { PageBreadcrumbs } from "~/renderer";
 
 import { postgrest } from "~/providers";
 
@@ -30,14 +31,7 @@ export function Page({ map }) {
   return h(
     HotkeysProvider,
     h(FullscreenPage, { className: "main" }, [
-      h(Breadcrumbs, {
-        items: [
-          { text: "Macrostrat", href: "/" },
-          { text: "Maps", href: "/maps" },
-          { text: h("code", slug), href: `/maps/${map.source_id}` },
-          { text: "Legend" },
-        ],
-      }),
+      h(PageBreadcrumbs),
       h("h1", map.name + " map units"),
       h(DataSheet, {
         data,
