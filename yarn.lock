@@ -4930,6 +4930,21 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@macrostrat-web/lithology-hierarchy@workspace:*, @macrostrat-web/lithology-hierarchy@workspace:packages/lithology-hierarchy":
+  version: 0.0.0-use.local
+  resolution: "@macrostrat-web/lithology-hierarchy@workspace:packages/lithology-hierarchy"
+  dependencies:
+    "@macrostrat-web/settings": "workspace:^1.0.0"
+    "@macrostrat/hyper": "npm:^2.2.1"
+    "@macrostrat/ui-components": "workspace:^3.0.0"
+    "@visx/gradient": "npm:^3.3.0"
+    "@visx/group": "npm:^3.3.0"
+    "@visx/hierarchy": "npm:^3.3.0"
+    chroma-js: "npm:^2.4.2"
+    react: "npm:^18.2.0"
+  languageName: unknown
+  linkType: soft
+
 "@macrostrat-web/map-utils@workspace:*, @macrostrat-web/map-utils@workspace:packages/map-utils":
   version: 0.0.0-use.local
   resolution: "@macrostrat-web/map-utils@workspace:packages/map-utils"
@@ -4942,7 +4957,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@macrostrat-web/settings@workspace:*, @macrostrat-web/settings@workspace:packages/settings":
+"@macrostrat-web/settings@workspace:*, @macrostrat-web/settings@workspace:^1.0.0, @macrostrat-web/settings@workspace:packages/settings":
   version: 0.0.0-use.local
   resolution: "@macrostrat-web/settings@workspace:packages/settings"
   languageName: unknown
@@ -5520,8 +5535,6 @@ __metadata:
     "@macrostrat/hyper": "npm:^2.2.1"
     "@mantine/core": "npm:^4.1.3"
     "@mantine/hooks": "npm:^4.1.3"
-    "@rollup/plugin-babel": "npm:^5.3.0"
-    "@rollup/plugin-node-resolve": "npm:^13.1.3"
     axios: "npm:^0.27.2"
     chroma-js: "npm:^2.4.2"
     classnames: "npm:^2.3.0"
@@ -5563,6 +5576,7 @@ __metadata:
     "@loadable/component": "npm:^5.14.1"
     "@macrostrat-web/data-sheet-test": "workspace:*"
     "@macrostrat-web/globe": "workspace:*"
+    "@macrostrat-web/lithology-hierarchy": "workspace:*"
     "@macrostrat-web/map-utils": "workspace:*"
     "@macrostrat-web/security": "workspace:*"
     "@macrostrat-web/settings": "workspace:*"
@@ -9786,6 +9800,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/d3-hierarchy@npm:^1.1.6":
+  version: 1.1.11
+  resolution: "@types/d3-hierarchy@npm:1.1.11"
+  checksum: 10/057948069a5c1a366462bc08d597aaaf8b6f7eb96d785273d20ab56456deb01958c8500de60b491c1bc4cb08c7bf05fdcb6a94ffb91b3548d6b9c1b365840ccc
+  languageName: node
+  linkType: hard
+
 "@types/d3-interpolate@npm:^1, @types/d3-interpolate@npm:^1.3.1":
   version: 1.4.3
   resolution: "@types/d3-interpolate@npm:1.4.3"
@@ -10904,6 +10925,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@visx/gradient@npm:^3.3.0":
+  version: 3.3.0
+  resolution: "@visx/gradient@npm:3.3.0"
+  dependencies:
+    "@types/react": "npm:*"
+    prop-types: "npm:^15.5.7"
+  peerDependencies:
+    react: ^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0
+  checksum: 10/7a371c788a09c8fc53484cfe375444332c5893f3b6fe7a86ed1bb02761deaa92e53208dab140a5a7c8d610af9396a7bcf6794d9b70d6945048fc9aeb0f4757ce
+  languageName: node
+  linkType: hard
+
 "@visx/group@npm:2.17.0":
   version: 2.17.0
   resolution: "@visx/group@npm:2.17.0"
@@ -10914,6 +10947,35 @@ __metadata:
   peerDependencies:
     react: ^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0
   checksum: 10/a93e5e586e78901a0403487f47918ed575aff37a73a9552d14586e51e6b42a0474cec8e05700b298d279a64448e42db568c6540658ba459a9e3bb5b5b94397a7
+  languageName: node
+  linkType: hard
+
+"@visx/group@npm:3.3.0, @visx/group@npm:^3.3.0":
+  version: 3.3.0
+  resolution: "@visx/group@npm:3.3.0"
+  dependencies:
+    "@types/react": "npm:*"
+    classnames: "npm:^2.3.1"
+    prop-types: "npm:^15.6.2"
+  peerDependencies:
+    react: ^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0
+  checksum: 10/a2f950664f43f1f1700a329f3a66bc3921ce8be35a93095a9ea28334ae4f9943c1082f21ba0f57f2bda913d2a40da8b7124235c2ae666c0e5d58a900c7148a8b
+  languageName: node
+  linkType: hard
+
+"@visx/hierarchy@npm:^3.3.0":
+  version: 3.3.0
+  resolution: "@visx/hierarchy@npm:3.3.0"
+  dependencies:
+    "@types/d3-hierarchy": "npm:^1.1.6"
+    "@types/react": "npm:*"
+    "@visx/group": "npm:3.3.0"
+    classnames: "npm:^2.3.1"
+    d3-hierarchy: "npm:^1.1.4"
+    prop-types: "npm:^15.6.1"
+  peerDependencies:
+    react: ^16.3.0-0 || ^17.0.0-0 || ^18.0.0-0
+  checksum: 10/4f14c09887f8080d8130b320424926f61353dba73a18b2ae465f6c66fa810f050a6faeb57963203a108fd49b012325d42db0224141e60905fa287faf0fe714ad
   languageName: node
   linkType: hard
 
@@ -15633,6 +15695,13 @@ __metadata:
   dependencies:
     d3-array: "npm:1"
   checksum: 10/c8f1f8254c3e47a3d514606f166f2c200c2979b31b7530cdfde23146f3f266d2dbb08bab97a1ac4515eb8478d8e76c399889195e0ee55f6365b83e6ea628a9eb
+  languageName: node
+  linkType: hard
+
+"d3-hierarchy@npm:^1.1.4":
+  version: 1.1.9
+  resolution: "d3-hierarchy@npm:1.1.9"
+  checksum: 10/d2a4e518c3e35de15e0ac7f0a420300a658435850fc32eaf15b7811697e34565b89012e07e60a53babb723dc43df8981102079b4097b790b42ac21c8d23c0424
   languageName: node
   linkType: hard
 
@@ -29625,7 +29694,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.5.10, prop-types@npm:^15.5.8, prop-types@npm:^15.6.0, prop-types@npm:^15.6.1, prop-types@npm:^15.6.2, prop-types@npm:^15.7.2, prop-types@npm:^15.8.0, prop-types@npm:^15.8.1":
+"prop-types@npm:^15.5.10, prop-types@npm:^15.5.7, prop-types@npm:^15.5.8, prop-types@npm:^15.6.0, prop-types@npm:^15.6.1, prop-types@npm:^15.6.2, prop-types@npm:^15.7.2, prop-types@npm:^15.8.0, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
