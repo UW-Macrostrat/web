@@ -25,10 +25,24 @@
   line-height: 1.2em
 
 .basis-panel
-  padding: 1em
+  :global(.bp4-tag)
+    margin: 0 0.5em 0.5em 0
+  td
+    vertical-align: top
+  th
+    text-align: left
+    font-weight: 400
+    font-size: 0.9em
+    font-style: italic
+    color: var(--secondary-color)
+
+.basis-panel, .long-text
+  max-width: 20em
+  padding: 8px
 
 .description
   font-style: italic
+
 
 .tag-header
   font-weight: bold

@@ -64,11 +64,19 @@ export function Page({ map }) {
               name: "Color",
               cellComponent: ColorCell,
             },
+            descrip: {
+              name: "Description",
+              dataEditor: LongTextViewer,
+            },
           },
         },
       }),
     ])
   );
+}
+
+function LongTextViewer({ value, onChange }) {
+  return h("div.long-text", value);
 }
 
 function IntervalCell({ value, children, ...rest }) {
@@ -103,18 +111,18 @@ function ExpandedLithologies({ value, onChange }) {
   console.log(value);
   if (value == null) return h("div.basis-panel", "No lithologies");
   return h("div.basis-panel", [
-    h("p.description", "Match source"),
     h("table", [
+      h("thead", h("tr", [h("th", "Lithology"), h("th", "Source")])),
       h(
         "tbody",
         value.map((d) => {
-          return h("tr", [
-            h("td", [h(LithTag, { data: d })]),
+          return h("tr", { key: d.id }, [
+            h("td", h(LithTag, { data: d })),
             h(
-              "td",
+              "td.basis-col",
               addJoiner(
                 d.basis_col?.map((d) => {
-                  return h(Tag, { minimal: true }, [
+                  return h(Tag, { minimal: true, key: d }, [
                     h("span.tag-header", "Column"),
                     " ",
                     h("code", d),
