@@ -9,7 +9,7 @@ import {
   JSONView,
 } from "@macrostrat/ui-components";
 import { useState } from "react";
-import Example from "./example";
+import Example, { TreeNode } from "./example";
 
 const h = hyper.styled(styles);
 
@@ -33,7 +33,51 @@ export default function MacrostratLithologyHierarchy() {
   const liths = res.success.data;
 
   return h("div.flex.row", [
-    h("div.example-container", h(Example, { width: 800, height: 800 })),
+    h(
+      "div.example-container",
+      h(Example, { width: 800, height: 800, data: testData })
+    ),
     h(JSONView, { className: "data-viewer", data: liths }),
   ]);
 }
+
+const testData: TreeNode = {
+  name: "T",
+  children: [
+    {
+      name: "A",
+      children: [
+        { name: "A1" },
+        { name: "A2" },
+        { name: "A3" },
+        {
+          name: "C",
+          children: [
+            {
+              name: "C1",
+            },
+            {
+              name: "D",
+              children: [
+                {
+                  name: "D1",
+                },
+                {
+                  name: "D2",
+                },
+                {
+                  name: "D3",
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    { name: "Z" },
+    {
+      name: "B",
+      children: [{ name: "B1" }, { name: "B2" }, { name: "B3" }],
+    },
+  ],
+};

@@ -23,62 +23,23 @@ function useForceUpdate() {
   return () => setValue((value) => value + 1); // update state to force render
 }
 
-interface TreeNode {
+const defaultMargin = { top: 30, left: 30, right: 30, bottom: 70 };
+
+export interface TreeNode {
   name: string;
   isExpanded?: boolean;
   children?: TreeNode[];
 }
 
-const data: TreeNode = {
-  name: "T",
-  children: [
-    {
-      name: "A",
-      children: [
-        { name: "A1" },
-        { name: "A2" },
-        { name: "A3" },
-        {
-          name: "C",
-          children: [
-            {
-              name: "C1",
-            },
-            {
-              name: "D",
-              children: [
-                {
-                  name: "D1",
-                },
-                {
-                  name: "D2",
-                },
-                {
-                  name: "D3",
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-    { name: "Z" },
-    {
-      name: "B",
-      children: [{ name: "B1" }, { name: "B2" }, { name: "B3" }],
-    },
-  ],
-};
-
-const defaultMargin = { top: 30, left: 30, right: 30, bottom: 70 };
-
 export type LinkTypesProps = {
   width: number;
   height: number;
   margin?: { top: number; right: number; bottom: number; left: number };
+  data: TreeNode;
 };
 
 export default function Example({
+  data,
   width: totalWidth,
   height: totalHeight,
   margin = defaultMargin,
