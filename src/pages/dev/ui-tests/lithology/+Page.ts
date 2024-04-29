@@ -1,5 +1,5 @@
 import LithologyHierarchy from "@macrostrat-web/lithology-hierarchy";
-import { FullscreenPage } from "~/layouts";
+import { ContentPage } from "~/layouts";
 import hyper from "@macrostrat/hyper";
 import { PageBreadcrumbs } from "~/renderer";
 import styles from "./main.module.sass";
@@ -8,7 +8,7 @@ import { useElementSize } from "@macrostrat/ui-components";
 const h = hyper.styled(styles);
 
 export function Page() {
-  return h(FullscreenPage, [
+  return h(ContentPage, [
     h("div.main", [h(PageBreadcrumbs), h(HierarchyContainer)]),
   ]);
 }

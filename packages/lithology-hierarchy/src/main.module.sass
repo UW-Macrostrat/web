@@ -3,3 +3,28 @@
 
 .data-viewer
   min-width: 200px
+
+.tree
+  display: flex
+  flex-direction: row
+  align-items: baseline
+  gap: 1em
+
+  &.tree-level-0, &.tree-level-1
+    h2
+      display: none
+      padding-left: 0
+    flex-direction: column
+    gap: 0
+
+  .inner
+    flex-grow: 1
+
+  ul
+    list-style-type: none
+    padding-left: 0
+    margin: 0
+
+  li
+    display: inline-block
+    margin-right: 1em

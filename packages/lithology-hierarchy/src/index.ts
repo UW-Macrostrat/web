@@ -5,7 +5,7 @@ import { Spinner } from "@blueprintjs/core";
 import { useAPIResult, ErrorCallout } from "@macrostrat/ui-components";
 import { useState } from "react";
 import { nestLiths, Lith } from "./nest-data";
-import Hierarchy from "./svg-hierarchy";
+import Hierarchy from "./simple-hierarchy";
 
 const h = hyper.styled(styles);
 

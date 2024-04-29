@@ -8,11 +8,11 @@ export interface Lith {
   fill?: number;
 }
 
-export interface TreeNode {
+export interface TreeNodeData {
   name: string;
   lith?: Lith;
   isExpanded?: boolean;
-  children?: TreeNode[];
+  children?: TreeNodeData[];
 }
 
 interface TreeNodeMap {
@@ -21,7 +21,7 @@ interface TreeNodeMap {
   children?: Map<string, TreeNodeMap>;
 }
 
-export function nestLiths(liths: Lith[]): TreeNode {
+export function nestLiths(liths: Lith[]): TreeNodeData {
   const root: TreeNodeMap = { name: "Rocks", children: new Map() };
   // Ensure that empty strings are treated as null
   for (let lith of liths) {
@@ -103,7 +103,7 @@ export function nestLiths(liths: Lith[]): TreeNode {
   return convert(root);
 }
 
-function convert(data: TreeNodeMap): TreeNode {
+function convert(data: TreeNodeMap): TreeNodeData {
   if (data.children == null) {
     return { name: data.name, lith: data.lith };
   }
