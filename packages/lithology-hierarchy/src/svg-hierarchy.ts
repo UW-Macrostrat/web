@@ -7,6 +7,7 @@ import { useState, useRef, createElement } from "react";
 import { getLinkComponent, LinkControls } from "./Controls";
 import { useElementSize } from "@macrostrat/ui-components";
 import { TreeNode } from "./nest-data";
+import { LithologySwatch } from "./swatch";
 
 function useForceUpdate() {
   const [, setValue] = useState<number>(0);
@@ -185,14 +186,13 @@ function Node({ layout, orientation, node, key, forceUpdate }) {
     //   },
     //   node.data.name
     // ),
-    h(LithologySwatch, { node }),
+    h(LithologySwatch_, { node }),
   ]);
 }
 
-function LithologySwatch({ node }) {
+function LithologySwatch_({ node }) {
   const ref = useRef(null);
   const { width, height } = useElementSize(ref) ?? {};
-  console.log(node.data);
   return createElement(
     "foreignObject",
     {
@@ -202,15 +202,6 @@ function LithologySwatch({ node }) {
       y: -height / 2,
       style: { overflow: "visible" },
     },
-    h(
-      "span.lithology-swatch",
-      {
-        ref,
-        style: {
-          backgroundColor: node.data.lith?.color,
-        },
-      },
-      [node.data.name]
-    )
+    h("span", { ref }, [h(LithologySwatch, { node })])
   );
 }

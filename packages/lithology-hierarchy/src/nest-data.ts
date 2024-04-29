@@ -46,7 +46,7 @@ export function nestLiths(liths: Lith[]): TreeNodeData {
       }
     } else {
       if (!root.children.has(lith.name)) {
-        root.children.set(lith.name, { name: lith.name });
+        root.children.set(lith.name, { name: lith.name, lith });
       }
     }
 
@@ -57,6 +57,7 @@ export function nestLiths(liths: Lith[]): TreeNodeData {
         parent.children.set(lith.type, {
           name: lith.type,
           children: new Map<string, TreeNodeMap>(),
+          lith,
         });
       }
     }
@@ -76,7 +77,7 @@ export function nestLiths(liths: Lith[]): TreeNodeData {
         const parent = root.children.get(lith.class);
         const grandparent = parent.children.get(lith.type);
         if (!grandparent.children.has(lith.name)) {
-          grandparent.children.set(lith.name, { name: lith.name });
+          grandparent.children.set(lith.name, { name: lith.name, lith });
         }
       }
     }

@@ -1,6 +1,8 @@
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
 import { TreeNodeData } from "./nest-data";
+import { LithologySwatch } from "./swatch";
+import { LithologyTag } from "~/components";
 
 const h = hyper.styled(styles);
 
@@ -17,7 +19,9 @@ function Tree({ data, level = 0 }: { data: TreeNodeData; level: number }) {
     h("div.inner", [
       h.if(nodes.length > 0)(
         "ul.nodes",
-        nodes.map((d, i) => h("li", d.name))
+        nodes.map((d) =>
+          h("li", { key: d.name }, [h(LithologyTag, { data: d.lith ?? d })])
+        )
       ),
       subTrees.map((d, i) => h(Tree, { key: i, data: d, level: level + 1 })),
     ]),

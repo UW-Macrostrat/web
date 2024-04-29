@@ -5067,6 +5067,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@macrostrat/color-utils@workspace:*, @macrostrat/color-utils@workspace:deps/web-components/packages/color-utils":
+  version: 0.0.0-use.local
+  resolution: "@macrostrat/color-utils@workspace:deps/web-components/packages/color-utils"
+  dependencies:
+    chroma-js: "npm:^2.4.2"
+    typescript: "npm:^4.2.3"
+  languageName: unknown
+  linkType: soft
+
 "@macrostrat/column-components@workspace:*, @macrostrat/column-components@workspace:deps/web-components/packages/column-components":
   version: 0.0.0-use.local
   resolution: "@macrostrat/column-components@workspace:deps/web-components/packages/column-components"
@@ -5586,6 +5595,7 @@ __metadata:
     "@macrostrat-web/sift": "workspace:*"
     "@macrostrat/api-utils": "workspace:*"
     "@macrostrat/api-views": "workspace:*"
+    "@macrostrat/color-utils": "workspace:*"
     "@macrostrat/column-components": "workspace:*"
     "@macrostrat/column-views": "workspace:*"
     "@macrostrat/data-sheet2": "workspace:*"

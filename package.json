@@ -60,6 +60,7 @@
     "@macrostrat-web/sift": "workspace:*",
     "@macrostrat/api-utils": "workspace:*",
     "@macrostrat/api-views": "workspace:*",
+    "@macrostrat/color-utils": "workspace:*",
     "@macrostrat/column-components": "workspace:*",
     "@macrostrat/column-views": "workspace:*",
     "@macrostrat/data-sheet2": "workspace:*",
