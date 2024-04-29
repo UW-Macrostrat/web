@@ -5,10 +5,19 @@
   min-width: 200px
 
 .tree
-  display: flex
-  flex-direction: row
   align-items: baseline
   gap: 1em
+  margin-bottom: 1em
+
+  .main-tree
+    display: flex
+    flex-direction: row
+    align-items: baseline
+    gap: 2em
+
+  &:not(.tree-level-0, .tree-level-1)
+    border-left: 2px solid var(--tertiary-color)
+    padding-left: 1em
 
   &.tree-level-0, &.tree-level-1
     h2

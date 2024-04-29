@@ -15,16 +15,16 @@ function Tree({ data, level = 0 }: { data: TreeNodeData; level: number }) {
   const [subTrees, nodes] = divideChildren(data);
 
   return h("div.tree", { className: `tree-level-${level}` }, [
-    h.if(data.lith == null)(headerEl, capitalize(data.name)),
-    h("div.inner", [
+    h("div.main-tree", [
+      h.if(data.children != null)(headerEl, capitalize(data.name)),
       h.if(nodes.length > 0)(
         "ul.nodes",
         nodes.map((d) =>
           h("li", { key: d.name }, [h(LithologyTag, { data: d.lith ?? d })])
         )
       ),
-      subTrees.map((d, i) => h(Tree, { key: i, data: d, level: level + 1 })),
     ]),
+    subTrees.map((d, i) => h(Tree, { key: i, data: d, level: level + 1 })),
   ]);
 }
 

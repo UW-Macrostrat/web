@@ -8,10 +8,6 @@ export function Page() {
     h("h1", "Macrostrat user interface tests"),
     h("ul", [
       h("li", h("a", { href: "/dev/ui-tests/data-sheet" }, "Data sheet")),
-      h(
-        "li",
-        h("a", { href: "/dev/ui-tests/lithology" }, "Lithology hierarchy")
-      ),
     ]),
   ]);
 }

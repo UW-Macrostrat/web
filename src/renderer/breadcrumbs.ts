@@ -118,5 +118,15 @@ const sitemap: Routes = {
         },
       ],
     },
+    {
+      slug: "lex",
+      name: "Lexicon",
+      children: [
+        {
+          slug: "lithology",
+          name: "Lithology",
+        },
+      ],
+    },
   ],
 };

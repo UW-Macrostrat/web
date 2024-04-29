@@ -5,6 +5,8 @@ import { Spinner } from "@blueprintjs/core";
 import { useAPIResult, ErrorCallout } from "@macrostrat/ui-components";
 import { useState } from "react";
 import { nestLiths, Lith } from "./nest-data";
+import { useRef } from "react";
+import { useElementSize } from "@macrostrat/ui-components";
 import Hierarchy from "./simple-hierarchy";
 
 const h = hyper.styled(styles);
@@ -18,8 +20,7 @@ export default function MacrostratLithologyHierarchy({ width, height }) {
     },
     { onError: setError }
   );
-  //if (liths.error) const data = liths?.success?.data;
-  console.log("Test");
+
   if (error != null) {
     return h(ErrorCallout, { error });
   }
@@ -33,4 +34,14 @@ export default function MacrostratLithologyHierarchy({ width, height }) {
       h(Hierarchy, { width, height, data: nestLiths(liths) }),
     ]),
   ]);
+}
+
+function HierarchyContainer() {
+  const ref = useRef(null);
+  const { width, height } = useElementSize(ref) ?? {};
+  return h(
+    "div.lith-main",
+    { ref },
+    h(MacrostratLithologyHierarchy, { width, height })
+  );
 }

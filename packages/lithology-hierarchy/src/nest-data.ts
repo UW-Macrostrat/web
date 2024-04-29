@@ -41,6 +41,7 @@ export function nestLiths(liths: Lith[]): TreeNodeData {
       if (!root.children.has(lith.class)) {
         root.children.set(lith.class, {
           name: lith.class,
+          lith,
           children: new Map<string, TreeNodeMap>(),
         });
       }
