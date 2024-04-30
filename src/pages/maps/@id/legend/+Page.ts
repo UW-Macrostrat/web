@@ -80,7 +80,7 @@ function IntervalCell({ value, children, ...rest }) {
 
 function lithologyRenderer(value) {
   return h("span.liths", [
-    addJoiner(value?.map((d) => h(LithTag, { data: d }))),
+    addJoiner(value?.map((d) => h(LithologyTag, { data: d }))),
   ]);
 }
 
