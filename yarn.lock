@@ -4930,6 +4930,22 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@macrostrat-web/lithology-hierarchy@workspace:*, @macrostrat-web/lithology-hierarchy@workspace:packages/lithology-hierarchy":
+  version: 0.0.0-use.local
+  resolution: "@macrostrat-web/lithology-hierarchy@workspace:packages/lithology-hierarchy"
+  dependencies:
+    "@macrostrat-web/settings": "workspace:^1.0.0"
+    "@macrostrat/hyper": "npm:^2.2.1"
+    "@macrostrat/ui-components": "workspace:^3.0.0"
+    "@visx/gradient": "npm:^3.3.0"
+    "@visx/group": "npm:^3.3.0"
+    "@visx/hierarchy": "npm:^3.3.0"
+    "@visx/zoom": "npm:^3.3.0"
+    chroma-js: "npm:^2.4.2"
+    react: "npm:^18.2.0"
+  languageName: unknown
+  linkType: soft
+
 "@macrostrat-web/map-utils@workspace:*, @macrostrat-web/map-utils@workspace:packages/map-utils":
   version: 0.0.0-use.local
   resolution: "@macrostrat-web/map-utils@workspace:packages/map-utils"
@@ -4942,7 +4958,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@macrostrat-web/settings@workspace:*, @macrostrat-web/settings@workspace:packages/settings":
+"@macrostrat-web/settings@workspace:*, @macrostrat-web/settings@workspace:^1.0.0, @macrostrat-web/settings@workspace:packages/settings":
   version: 0.0.0-use.local
   resolution: "@macrostrat-web/settings@workspace:packages/settings"
   languageName: unknown
@@ -5048,6 +5064,15 @@ __metadata:
     "@blueprintjs/core": ^4.12.0
     react: ^16||^17
     react-dom: ^16||^17
+  languageName: unknown
+  linkType: soft
+
+"@macrostrat/color-utils@workspace:*, @macrostrat/color-utils@workspace:deps/web-components/packages/color-utils":
+  version: 0.0.0-use.local
+  resolution: "@macrostrat/color-utils@workspace:deps/web-components/packages/color-utils"
+  dependencies:
+    chroma-js: "npm:^2.4.2"
+    typescript: "npm:^4.2.3"
   languageName: unknown
   linkType: soft
 
@@ -5563,12 +5588,14 @@ __metadata:
     "@loadable/component": "npm:^5.14.1"
     "@macrostrat-web/data-sheet-test": "workspace:*"
     "@macrostrat-web/globe": "workspace:*"
+    "@macrostrat-web/lithology-hierarchy": "workspace:*"
     "@macrostrat-web/map-utils": "workspace:*"
     "@macrostrat-web/security": "workspace:*"
     "@macrostrat-web/settings": "workspace:*"
     "@macrostrat-web/sift": "workspace:*"
     "@macrostrat/api-utils": "workspace:*"
     "@macrostrat/api-views": "workspace:*"
+    "@macrostrat/color-utils": "workspace:*"
     "@macrostrat/column-components": "workspace:*"
     "@macrostrat/column-views": "workspace:*"
     "@macrostrat/data-sheet2": "workspace:*"
@@ -9786,6 +9813,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/d3-hierarchy@npm:^1.1.6":
+  version: 1.1.11
+  resolution: "@types/d3-hierarchy@npm:1.1.11"
+  checksum: 10/057948069a5c1a366462bc08d597aaaf8b6f7eb96d785273d20ab56456deb01958c8500de60b491c1bc4cb08c7bf05fdcb6a94ffb91b3548d6b9c1b365840ccc
+  languageName: node
+  linkType: hard
+
 "@types/d3-interpolate@npm:^1, @types/d3-interpolate@npm:^1.3.1":
   version: 1.4.3
   resolution: "@types/d3-interpolate@npm:1.4.3"
@@ -10876,6 +10910,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@use-gesture/core@npm:10.3.1":
+  version: 10.3.1
+  resolution: "@use-gesture/core@npm:10.3.1"
+  checksum: 10/66c5bda4cf75927e0d1f9cb1b1a0a06d9812f918dfd634b768b6011385ce7b295ca89e0b016f4fe7a6d97d571726653b75c4271fd7f635bb8c159bf7886ce21c
+  languageName: node
+  linkType: hard
+
+"@use-gesture/react@npm:^10.0.0-beta.22":
+  version: 10.3.1
+  resolution: "@use-gesture/react@npm:10.3.1"
+  dependencies:
+    "@use-gesture/core": "npm:10.3.1"
+  peerDependencies:
+    react: ">= 16.8.0"
+  checksum: 10/2c01c1b73bbdeecb9d51370f9117418953accad6789818e1b50f505dcba9e38685612b3fcb25a5dfcbf3a10ae561506378f5ab7586c773c4485ef86107d53898
+  languageName: node
+  linkType: hard
+
 "@visx/axis@npm:^2.14.0":
   version: 2.18.0
   resolution: "@visx/axis@npm:2.18.0"
@@ -10904,6 +10956,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@visx/event@npm:3.3.0":
+  version: 3.3.0
+  resolution: "@visx/event@npm:3.3.0"
+  dependencies:
+    "@types/react": "npm:*"
+    "@visx/point": "npm:3.3.0"
+  checksum: 10/3cdb86848d9ae7cc8b6a14a0cc4efd7fc2186fca582ee374bb1f2dfe104ec5cd04dbdbbfc41ccb8c94e1885e2b6e6060a488f3a0a0554ad9e831ecc1b28339de
+  languageName: node
+  linkType: hard
+
+"@visx/gradient@npm:^3.3.0":
+  version: 3.3.0
+  resolution: "@visx/gradient@npm:3.3.0"
+  dependencies:
+    "@types/react": "npm:*"
+    prop-types: "npm:^15.5.7"
+  peerDependencies:
+    react: ^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0
+  checksum: 10/7a371c788a09c8fc53484cfe375444332c5893f3b6fe7a86ed1bb02761deaa92e53208dab140a5a7c8d610af9396a7bcf6794d9b70d6945048fc9aeb0f4757ce
+  languageName: node
+  linkType: hard
+
 "@visx/group@npm:2.17.0":
   version: 2.17.0
   resolution: "@visx/group@npm:2.17.0"
@@ -10917,10 +10991,46 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@visx/group@npm:3.3.0, @visx/group@npm:^3.3.0":
+  version: 3.3.0
+  resolution: "@visx/group@npm:3.3.0"
+  dependencies:
+    "@types/react": "npm:*"
+    classnames: "npm:^2.3.1"
+    prop-types: "npm:^15.6.2"
+  peerDependencies:
+    react: ^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0
+  checksum: 10/a2f950664f43f1f1700a329f3a66bc3921ce8be35a93095a9ea28334ae4f9943c1082f21ba0f57f2bda913d2a40da8b7124235c2ae666c0e5d58a900c7148a8b
+  languageName: node
+  linkType: hard
+
+"@visx/hierarchy@npm:^3.3.0":
+  version: 3.3.0
+  resolution: "@visx/hierarchy@npm:3.3.0"
+  dependencies:
+    "@types/d3-hierarchy": "npm:^1.1.6"
+    "@types/react": "npm:*"
+    "@visx/group": "npm:3.3.0"
+    classnames: "npm:^2.3.1"
+    d3-hierarchy: "npm:^1.1.4"
+    prop-types: "npm:^15.6.1"
+  peerDependencies:
+    react: ^16.3.0-0 || ^17.0.0-0 || ^18.0.0-0
+  checksum: 10/4f14c09887f8080d8130b320424926f61353dba73a18b2ae465f6c66fa810f050a6faeb57963203a108fd49b012325d42db0224141e60905fa287faf0fe714ad
+  languageName: node
+  linkType: hard
+
 "@visx/point@npm:2.17.0":
   version: 2.17.0
   resolution: "@visx/point@npm:2.17.0"
   checksum: 10/71eaad7b6619c81715d52d001c23407a7afd01bc71b2916d6aee2c713d75afee28f568898c5ee51bf555f840a7ee25b1a13a6c9c9883385b44408b354e9dc5a8
+  languageName: node
+  linkType: hard
+
+"@visx/point@npm:3.3.0":
+  version: 3.3.0
+  resolution: "@visx/point@npm:3.3.0"
+  checksum: 10/f00f45b2bdff7c991d206320ad834bb23af90ab8c4727b9c4b9e8417b5c1b3830147bea53ceda1e1ce074571eb5e5eace1ca6bd530b61de3b4b13902668bc88c
   languageName: node
   linkType: hard
 
@@ -10973,6 +11083,20 @@ __metadata:
   peerDependencies:
     react: ^16.3.0-0 || ^17.0.0-0 || ^18.0.0-0
   checksum: 10/2616fc419678594ed5010b00ca84e31dc588ab5594a15e0a6b10832c7da16849e9f65b6411a8707a39a09b656c7f8a1448d60f635b0a77f67bab6c03256cc1bc
+  languageName: node
+  linkType: hard
+
+"@visx/zoom@npm:^3.3.0":
+  version: 3.3.0
+  resolution: "@visx/zoom@npm:3.3.0"
+  dependencies:
+    "@types/react": "npm:*"
+    "@use-gesture/react": "npm:^10.0.0-beta.22"
+    "@visx/event": "npm:3.3.0"
+    prop-types: "npm:^15.6.2"
+  peerDependencies:
+    react: ^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0
+  checksum: 10/263b2adc9587df4fa1af976207d0e5bb7470649c11b716709663ed5480905355361b546e8db460d94fb9c8701d2536362b41fbfe55b4acf5d91b2dd3b18ffb15
   languageName: node
   linkType: hard
 
@@ -15633,6 +15757,13 @@ __metadata:
   dependencies:
     d3-array: "npm:1"
   checksum: 10/c8f1f8254c3e47a3d514606f166f2c200c2979b31b7530cdfde23146f3f266d2dbb08bab97a1ac4515eb8478d8e76c399889195e0ee55f6365b83e6ea628a9eb
+  languageName: node
+  linkType: hard
+
+"d3-hierarchy@npm:^1.1.4":
+  version: 1.1.9
+  resolution: "d3-hierarchy@npm:1.1.9"
+  checksum: 10/d2a4e518c3e35de15e0ac7f0a420300a658435850fc32eaf15b7811697e34565b89012e07e60a53babb723dc43df8981102079b4097b790b42ac21c8d23c0424
   languageName: node
   linkType: hard
 
@@ -29625,7 +29756,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.5.10, prop-types@npm:^15.5.8, prop-types@npm:^15.6.0, prop-types@npm:^15.6.1, prop-types@npm:^15.6.2, prop-types@npm:^15.7.2, prop-types@npm:^15.8.0, prop-types@npm:^15.8.1":
+"prop-types@npm:^15.5.10, prop-types@npm:^15.5.7, prop-types@npm:^15.5.8, prop-types@npm:^15.6.0, prop-types@npm:^15.6.1, prop-types@npm:^15.6.2, prop-types@npm:^15.7.2, prop-types@npm:^15.8.0, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:

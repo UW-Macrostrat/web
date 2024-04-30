@@ -32,6 +32,7 @@ import { MapNavbar } from "~/components/map-navbar";
 import "~/styles/global.styl";
 import { Link, MapReference } from "~/components";
 import styles from "./main.module.sass";
+import { PageBreadcrumbs } from "~/renderer";
 
 const h = hyper.styled(styles);
 
@@ -343,6 +344,7 @@ function MapLegendPanel(params) {
     h(
       "div.map-legend-container",
       h("div.map-legend", [
+        h(PageBreadcrumbs),
         h("div.legend-header", [
           h(ErrorBoundary, [
             h(MapReference, { reference: params, showSourceID: false }),

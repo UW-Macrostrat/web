@@ -1,11 +1,13 @@
-import { Breadcrumbs, HotkeysProvider, Tag } from "@blueprintjs/core";
+import { HotkeysProvider, Tag } from "@blueprintjs/core";
 import DataSheet from "@macrostrat/data-sheet2";
 import { useState } from "react";
 import { FullscreenPage } from "~/layouts";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
-import { useAsyncEffect, useInDarkMode } from "@macrostrat/ui-components";
-import { ColorCell, Cell, asChromaColor } from "@macrostrat/data-sheet2";
+import { useAsyncEffect } from "@macrostrat/ui-components";
+import { ColorCell } from "@macrostrat/data-sheet2";
+import { PageBreadcrumbs } from "~/renderer";
+import { LithologyTag } from "~/components";
 
 import { postgrest } from "~/providers";
 
@@ -30,14 +32,7 @@ export function Page({ map }) {
   return h(
     HotkeysProvider,
     h(FullscreenPage, { className: "main" }, [
-      h(Breadcrumbs, {
-        items: [
-          { text: "Macrostrat", href: "/" },
-          { text: "Maps", href: "/maps" },
-          { text: h("code", slug), href: `/maps/${map.source_id}` },
-          { text: "Legend" },
-        ],
-      }),
+      h(PageBreadcrumbs),
       h("h1", map.name + " map units"),
       h(DataSheet, {
         data,
@@ -85,26 +80,8 @@ function IntervalCell({ value, children, ...rest }) {
 
 function lithologyRenderer(value) {
   return h("span.liths", [
-    addJoiner(value?.map((d) => h(LithTag, { data: d }))),
+    addJoiner(value?.map((d) => h(LithologyTag, { data: d }))),
   ]);
-}
-
-function LithTag({ data }) {
-  const darkMode = useInDarkMode();
-  const luminance = darkMode ? 0.9 : 0.4;
-  const color = asChromaColor(data.color);
-  return h(
-    Tag,
-    {
-      key: data.id,
-      minimal: true,
-      style: {
-        color: color?.luminance(luminance).hex(),
-        backgroundColor: color?.luminance(1 - luminance).hex(),
-      },
-    },
-    data.name
-  );
 }
 
 function ExpandedLithologies({ value, onChange }) {
@@ -117,7 +94,7 @@ function ExpandedLithologies({ value, onChange }) {
         "tbody",
         value.map((d) => {
           return h("tr", { key: d.id }, [
-            h("td", h(LithTag, { data: d })),
+            h("td", h(LithologyTag, { data: d })),
             h(
               "td.basis-col",
               addJoiner(

@@ -1,6 +1,5 @@
 export { ContentPage as default } from "~/layouts";
-import { PageHeader } from "~/components";
-import { LinkCard } from "~/components";
+import { LinkCard, PageHeader } from "~/components";
 
 <PageHeader title="Lexicon"></PageHeader>
 
@@ -10,6 +9,9 @@ the USGS's [Geolex](https://ngmdb.usgs.gov/Geolex/search), and other
 sources. The lexicon is continually updated in partnership with
 researchers and data providers.
 
+<LinkCard href="/lex/lithology" title="Lithologies">
+  A tree-based representation of lithologies
+</LinkCard>
 <LinkCard href="/lex/strat-names" title="Stratigraphic names"></LinkCard>
 
 **[Sift](/sift)**, Macrostrat's legacy lexicon app, is still available for use
