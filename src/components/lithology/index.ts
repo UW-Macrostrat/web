@@ -1,8 +1,7 @@
 import { useInDarkMode } from "@macrostrat/ui-components";
 import hyper from "@macrostrat/hyper";
-import { Tag, Card } from "@blueprintjs/core";
+import { Tag, Card, Popover } from "@blueprintjs/core";
 import { asChromaColor } from "@macrostrat/color-utils";
-import { Popover2 } from "@blueprintjs/popover2";
 import styles from "./main.module.sass";
 import classNames from "classnames";
 
@@ -41,7 +40,7 @@ export function LithologyTag({
 
   if (tooltip != null) {
     return h(
-      Popover2,
+      Popover,
       {
         content: tooltip,
         interactionKind: "click",
@@ -57,7 +56,7 @@ export function LithologyTag({
 }
 
 function DefaultTooltip({ data, showExternalLinks = false }) {
-  return h(Card, { className: "lithology-tooltip" }, [
+  return h("div.lithology-tooltip", [
     h("div.lithology-swatch", {
       style: {
         backgroundColor: data.color,
@@ -65,7 +64,7 @@ function DefaultTooltip({ data, showExternalLinks = false }) {
     }),
     h("div.header", [
       h("span.name", data.name),
-      h("code.lith-id", `${data.lith_id}`),
+      h("code.lithology-id", `${data.lith_id}`),
     ]),
     h("ul.tight-list", [
       h(LinkItem, { href: `/map#lithologies=${data.lith_id}` }, "Filter map"),
