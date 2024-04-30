@@ -1,12 +1,12 @@
 import h from "@macrostrat/hyper";
 import { usePageContext } from "./page-context";
-import { Breadcrumbs2 } from "@blueprintjs/popover2";
+import { Breadcrumbs } from "@blueprintjs/core";
 import type { PageContext } from "./types";
 import React from "react";
 
 export function PageBreadcrumbs() {
   const ctx = usePageContext();
-  return h(Breadcrumbs2, {
+  return h(Breadcrumbs, {
     items: buildBreadcrumns(ctx.urlPathname, sitemap, ctx),
   });
 }

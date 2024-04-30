@@ -1,6 +1,6 @@
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
-import { Tooltip2 } from "@blueprintjs/popover2";
+import { Tooltip } from "@blueprintjs/popover";
 
 const h = hyper.styled(styles);
 
@@ -22,7 +22,7 @@ export function LithologySwatch({ node, tooltip = false }) {
     return content;
   }
 
-  return h(Tooltip2, { content }, h(LithologyTooltipPanel, { node }));
+  return h(Tooltip, { content }, h(LithologyTooltipPanel, { node }));
 }
 
 function LithologyTooltipPanel({ node }) {

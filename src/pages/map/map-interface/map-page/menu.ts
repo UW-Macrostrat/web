@@ -40,7 +40,7 @@ import styles from "./main.module.styl";
 import { ExperimentsPanel, SettingsPanel } from "./settings-panel";
 
 function ChangelogPanel() {
-  return h("div.bp4-text.text-panel", [h(Changelog)]);
+  return h("div.bp5-text.text-panel", [h(Changelog)]);
 }
 
 const AboutText = loadable(() => import("../components/About"));

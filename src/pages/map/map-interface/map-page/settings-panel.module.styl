@@ -22,29 +22,29 @@
     font-style: italic
 
   :global
-    .bp4-control
+    .bp5-control
       display: flex
       width: 100%
       align-items: center
       .control-label
         flex-grow: 1
 
-    .bp4-callout
+    .bp5-callout
       padding: 0.5em
       position: relative
 
-    .bp4-button, .bp4-button-group
+    .bp5-button, .bp5-button-group
       width: 100%
       margin: 0.1em 0 0.2em
       justify-content: start
       align-items: center
       //box-shadow: 0 0 0px 1px var(--card-shadow-color)
       border-radius: 2px
-      .bp4-button-text
+      .bp5-button-text
         flex-grow: 1
       .spacer
         flex-grow 1
-      .bp4-button
+      .bp5-button
         width: auto
         display: inline
         margin: 0
@@ -54,11 +54,11 @@
   overflow: hidden
   &.expanded
     .callout-header
-      :global(.bp4-button)
+      :global(.bp5-button)
         border-bottom-left-radius: 0
         border-bottom-right-radius: 0
         margin-bottom: 0
-  :global(.bp4-callout)
+  :global(.bp5-callout)
     border-top-left-radius: 0
     border-top-right-radius: 0
     &>:last-child

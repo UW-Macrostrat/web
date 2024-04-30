@@ -19,8 +19,8 @@ import {
   useHotkeys,
   Icon,
   IconSize,
+  Popover,
 } from "@blueprintjs/core";
-import { Popover2 } from "@blueprintjs/popover2";
 import { Spinner, ButtonGroup } from "@blueprintjs/core";
 import {
   Column,
@@ -772,7 +772,7 @@ function InputForm({
 }) {
   return h("div.input-form", {}, [
     h(ButtonGroup, [
-      h(Popover2, {
+      h(Popover, {
         interactionKind: "click",
         minimal: true,
         placement: "bottom-start",
