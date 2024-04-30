@@ -4,10 +4,17 @@ import { Tag, Card } from "@blueprintjs/core";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { Popover2 } from "@blueprintjs/popover2";
 import styles from "./main.module.sass";
+import classNames from "classnames";
 
 const h = hyper.styled(styles);
 
-export function LithologyTag({ data, tooltip = null, tooltipProps = {} }) {
+export function LithologyTag({
+  data,
+  className,
+  tooltip = null,
+  tooltipProps = {},
+  expandOnHover = false,
+}) {
   const darkMode = useInDarkMode();
   const luminance = darkMode ? 0.9 : 0.4;
   const color = asChromaColor(data.color);
@@ -15,13 +22,17 @@ export function LithologyTag({ data, tooltip = null, tooltipProps = {} }) {
     Tag,
     {
       key: data.id,
+      className: classNames("lithology-tag", className),
       minimal: true,
       style: {
         color: color?.luminance(luminance).hex(),
         backgroundColor: color?.luminance(1 - luminance).hex(),
       },
     },
-    data.name
+    h("span.contents", [
+      h("span.name", data.name),
+      h.if(expandOnHover)("code.lithology-id", `${data.lith_id}`),
+    ])
   );
 
   if (tooltip == true) {
