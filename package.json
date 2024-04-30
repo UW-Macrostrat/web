@@ -46,9 +46,9 @@
     "vite-plugin-rewrite-all": "^1.0.1"
   },
   "dependencies": {
-    "@blueprintjs/core": "^4.14.1",
-    "@blueprintjs/select": "4",
-    "@blueprintjs/table": "^4",
+    "@blueprintjs/core": "^5.10.2",
+    "@blueprintjs/select": "^5.1.4",
+    "@blueprintjs/table": "^5.1.4",
     "@lagunovsky/redux-react-router": "^3.2.0",
     "@loadable/component": "^5.14.1",
     "@macrostrat-web/data-sheet-test": "workspace:*",

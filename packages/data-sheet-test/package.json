@@ -4,11 +4,11 @@
   "main": "src/index.ts",
   "license": "ISC",
   "dependencies": {
-    "@blueprintjs/core": "^4",
-    "@blueprintjs/table": "^4",
+    "@blueprintjs/core": "^5.10.2",
+    "@blueprintjs/table": "^5.1.4",
     "@macrostrat/data-sheet": "workspace:*",
     "@macrostrat/hyper": "^2.2.1",
-    "@macrostrat/ui-components": "workspace:^3.0.0",
+    "@macrostrat/ui-components": "workspace:*",
     "chroma-js": "^2.4.2",
     "react": "^18.2.0"
   }

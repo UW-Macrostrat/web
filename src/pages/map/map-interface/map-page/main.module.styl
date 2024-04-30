@@ -43,7 +43,7 @@ This stylesheet the overall application page layout.
   min-width: 40px
   overflow: hidden
   text-align: right
-  :global(.bp4-button-text)
+  :global(.bp5-button-text)
     transition all 0.2s
     transition-delay 0.1s
 
@@ -51,12 +51,12 @@ This stylesheet the overall application page layout.
   // Transition opacity when leaving context panel
   .panel-header:not(.minimal)
     // .tab-button
-    //   &:not(:hover) :global(.bp4-button-text)
+    //   &:not(:hover) :global(.bp5-button-text)
     //     //width 0
     //     opacity: 1
         //margin-left: -7px
     // Fancy CSS to select all buttons _after_ the currently hovered one
-    .tab-button:global(.bp4-active) ~ .tab-button :global(.bp4-button-text)
+    .tab-button:global(.bp5-active) ~ .tab-button :global(.bp5-button-text)
         width 0
         opacity: 0
         margin-left: -7px
@@ -64,7 +64,7 @@ This stylesheet the overall application page layout.
 // Todo: not sure how to deal with this style
 // When panel is closing, fade out the buttons text-first
 :global(.map-context-leave) .menu-card .panel-header
-  .tab-button :global(.bp4-button-text)
+  .tab-button :global(.bp5-button-text)
     opacity: 0
     width: 0
 
@@ -75,12 +75,12 @@ This stylesheet the overall application page layout.
 
 .panel-header.minimal
   .tab-button:not(:hover)
-    &:not(:global(.bp4-active))
+    &:not(:global(.bp5-active))
       padding-left: 0
       padding-right: 0
       min-width: 30px
       width: 30px
-    :global(.bp4-button-text)
+    :global(.bp5-button-text)
       width 0
       opacity: 0
       margin-left: -7px
@@ -92,14 +92,14 @@ This stylesheet the overall application page layout.
 
 .menu-card
   :global
-    .bp4-text, .text-panel
+    .bp5-text, .text-panel
       ul
         padding-left: 1em
 
 .menu-content
   display flex
   flex-direction column
-  .bp4-button-group
+  .bp5-button-group
     margin-bottom 4px
   margin-bottom -8px
 

@@ -6,7 +6,7 @@
   "dependencies": {
     "@macrostrat-web/settings": "workspace:^1.0.0",
     "@macrostrat/hyper": "^2.2.1",
-    "@macrostrat/ui-components": "workspace:^3.0.0",
+    "@macrostrat/ui-components": "workspace:*",
     "@visx/gradient": "^3.3.0",
     "@visx/group": "^3.3.0",
     "@visx/hierarchy": "^3.3.0",
