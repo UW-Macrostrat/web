@@ -294,6 +294,7 @@ function LithsAndClasses(props) {
   const { liths = null, lith_types = null } = macrostrat;
 
   if (!liths || liths.length == 0) return null;
+  console.log(liths, lith_types);
 
   return h(
     ExpandableDetailsPanel,

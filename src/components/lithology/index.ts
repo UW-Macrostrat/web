@@ -7,7 +7,7 @@ import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
 
-export function LithologyTag({ data, tooltip = null }) {
+export function LithologyTag({ data, tooltip = null, tooltipProps = {} }) {
   const darkMode = useInDarkMode();
   const luminance = darkMode ? 0.9 : 0.4;
   const color = asChromaColor(data.color);
@@ -36,6 +36,7 @@ export function LithologyTag({ data, tooltip = null }) {
         interactionKind: "click",
         minimal: true,
         className: "lithology-tag-popover-holder",
+        ...tooltipProps,
       },
       contents
     );
@@ -44,7 +45,7 @@ export function LithologyTag({ data, tooltip = null }) {
   return contents;
 }
 
-function DefaultTooltip({ data }) {
+function DefaultTooltip({ data, showExternalLinks = false }) {
   return h(Card, { className: "lithology-tooltip" }, [
     h("div.lithology-swatch", {
       style: {
@@ -55,8 +56,24 @@ function DefaultTooltip({ data }) {
       h("span.name", data.name),
       h("code.lith-id", `${data.lith_id}`),
     ]),
-    h("div", [
-      h("a", { href: `/map#lithologies=${data.lith_id}` }, "Show on map"),
+    h("ul.tight-list", [
+      h(LinkItem, { href: `/map#lithologies=${data.lith_id}` }, "Filter map"),
+      h.if(showExternalLinks)([
+        h(
+          LinkItem,
+          { href: `https://www.mindat.org/search.php?search=${data.name}` },
+          "Mindat.org"
+        ),
+        h(
+          LinkItem,
+          { href: `https://en.wikipedia.org/wiki/${data.name}` },
+          "Wikipedia"
+        ),
+      ]),
     ]),
   ]);
+}
+
+function LinkItem({ href, children }) {
+  return h("li", h("a", { href }, children));
 }

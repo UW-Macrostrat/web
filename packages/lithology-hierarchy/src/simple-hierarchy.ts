@@ -20,7 +20,11 @@ function Tree({ data, level = 0 }: { data: TreeNodeData; level: number }) {
         "ul.nodes",
         nodes.map((d) =>
           h("li", { key: d.name }, [
-            h(LithologyTag, { data: d.lith ?? d, tooltip: true }),
+            h(LithologyTag, {
+              data: d.lith ?? d,
+              tooltip: true,
+              tooltipProps: { showExternalLinks: true },
+            }),
           ])
         )
       ),
