@@ -43,7 +43,11 @@
       "@macrostrat-web/settings": ["deps/packages/settings"]
     }
   },
-  "include": ["src"],
+  "include": [
+    "src",
+    "packages/lithology-hierarchy/src/simple-hierarchy.ts",
+    "packages/hierarchy"
+  ],
   "ts-node": {
     "transpileOnly": true,
     "esm": true
