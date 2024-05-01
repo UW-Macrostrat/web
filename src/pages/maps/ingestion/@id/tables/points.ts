@@ -12,12 +12,12 @@ import {
   ColumnConfigGenerator,
   CustomTableProps,
 } from "~/pages/maps/ingestion/@id/table";
-import { getTableUpdate } from "~/pages/maps/ingestion/@id/components/table-util";
 import CheckboxCell from "~/pages/maps/ingestion/@id/components/cells/checkbox-cell";
 import { TableInterface } from "../edit-table";
 import styles from "~/pages/maps/ingestion/@id/edit-table.module.sass";
 import { COMMON_COLUMNS } from ".";
 import { toBoolean } from "~/pages/maps/ingestion/@id/components/cells/util";
+import { createTableUpdate } from "~/pages/maps/ingestion/@id/utils";
 
 const h = hyper.styled(styles);
 
@@ -37,9 +37,8 @@ export function PointsTable({ url, ingestProcessId }: CustomTableProps) {
       url,
       defaultColumnConfig,
       dataParameters,
-      setTableUpdates,
+       addTableUpdate,
       transformedData,
-      data,
       ref,
     }: ColumnConfigGenerator): ColumnConfig => {
       return {
@@ -54,16 +53,16 @@ export function PointsTable({ url, ingestProcessId }: CustomTableProps) {
                 } catch (e) {}
               },
               onConfirm: (value) => {
-                const tableUpdate = getTableUpdate(
-                  url,
-                  value,
-                  "omit",
-                  rowIndex,
-                  transformedData,
-                  dataParameters
-                );
-
-                setTableUpdates((p) => [...p, tableUpdate]);
+                addTableUpdate([
+                  createTableUpdate(
+                    url,
+                    value,
+                    "omit",
+                    rowIndex,
+                    transformedData,
+                    dataParameters
+                  )
+                ])
               },
               value: toBoolean(transformedData[rowIndex]["omit"]),
             }),

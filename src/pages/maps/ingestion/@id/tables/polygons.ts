@@ -15,13 +15,13 @@ import {
 import IntervalSelection, {
   Interval,
 } from "~/pages/maps/ingestion/@id/components/cells/interval-selection";
-import { getTableUpdate } from "~/pages/maps/ingestion/@id/components/table-util";
 import CheckboxCell from "~/pages/maps/ingestion/@id/components/cells/checkbox-cell";
 import { TableInterface } from "../edit-table";
 import styles from "~/pages/maps/ingestion/@id/edit-table.module.sass";
 import { COMMON_COLUMNS } from ".";
 import { toBoolean } from "~/pages/maps/ingestion/@id/components/cells/util";
 import { apiV2Prefix } from "@macrostrat-web/settings";
+import { createTableUpdate } from "~/pages/maps/ingestion/@id/utils";
 
 const h = hyper.styled(styles);
 
@@ -59,8 +59,7 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
     ({
       url,
       defaultColumnConfig,
-      dataParameters,
-      setTableUpdates,
+      dataParameters, addTableUpdate,
       transformedData,
       data,
       ref,
@@ -78,12 +77,11 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
               },
               intervals: intervals,
               onConfirm: (value) => {
-                const tableUpdate = getTableUpdate(
+                const tableUpdate = createTableUpdate(
                   url,
                   value,
                   "t_interval",
-                  rowIndex,
-                  transformedData,
+                  transformedData[rowIndex],
                   dataParameters
                 );
 
@@ -93,19 +91,18 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
                   transformedData[rowIndex]["b_interval"] == undefined ||
                   transformedData[rowIndex]["b_interval"] == ""
                 ) {
-                  let oppositeIntervalTableUpdate = getTableUpdate(
+                  let oppositeIntervalTableUpdate = createTableUpdate(
                     url,
                     value,
                     "b_interval",
-                    rowIndex,
-                    transformedData,
+                    transformedData[rowIndex],
                     dataParameters
                   );
 
                   newTableUpdates.push(oppositeIntervalTableUpdate);
                 }
 
-                setTableUpdates((p) => [...p, ...newTableUpdates]);
+                addTableUpdate(newTableUpdates);
               },
               intent:
                 data[rowIndex]["t_interval"] !=
@@ -129,12 +126,11 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
               },
               intervals: intervals,
               onConfirm: (value) => {
-                const tableUpdate = getTableUpdate(
+                const tableUpdate = createTableUpdate(
                   url,
                   value,
                   "b_interval",
-                  rowIndex,
-                  transformedData,
+                  transformedData[rowIndex],
                   dataParameters
                 );
 
@@ -144,19 +140,18 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
                   transformedData[rowIndex]["t_interval"] == undefined ||
                   transformedData[rowIndex]["t_interval"] == ""
                 ) {
-                  let oppositeIntervalTableUpdate = getTableUpdate(
+                  let oppositeIntervalTableUpdate = createTableUpdate(
                     url,
                     value,
                     "t_interval",
-                    rowIndex,
-                    transformedData,
+                    transformedData[rowIndex],
                     dataParameters
                   );
 
                   newTableUpdates.push(oppositeIntervalTableUpdate);
                 }
 
-                setTableUpdates((p) => [...p, ...newTableUpdates]);
+                addTableUpdate(newTableUpdates);
               },
               intent:
                 data[rowIndex]["b_interval"] !=
@@ -179,16 +174,15 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
                 } catch (e) {}
               },
               onConfirm: (value) => {
-                const tableUpdate = getTableUpdate(
-                  url,
-                  value,
-                  "omit",
-                  rowIndex,
-                  transformedData,
-                  dataParameters
-                );
-
-                setTableUpdates((p) => [...p, tableUpdate]);
+                addTableUpdate([
+                  createTableUpdate(
+                    url,
+                    value,
+                    "omit",
+                    transformedData[rowIndex],
+                    dataParameters
+                  )
+                ])
               },
               value: toBoolean(transformedData[rowIndex]["omit"]),
             }),

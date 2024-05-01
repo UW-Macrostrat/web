@@ -17,12 +17,14 @@ interface EditableCellProps extends EditableCell2Props {
   value: string;
 }
 
-const _EditableCell = (props: EditableCellProps) => {
-  const { style, ...rest } = props;
-  const [value, setValue] = React.useState(props.value);
+const _EditableCell = forwardRef((props: EditableCellProps, ref) => {
 
+  const { style, ...rest } = props;
+
+  // Keep an optimistic value so that the ui is responsive in case of slow onConfirm
+  const [optimisticValue, setOptimisticValue] = React.useState(props.value);
   useEffect(() => {
-    setValue(props.value);
+    setOptimisticValue(props.value);
   }, [props.value]);
 
   return h(
@@ -32,21 +34,18 @@ const _EditableCell = (props: EditableCellProps) => {
       h(
         "input",
         {
-          disabled: props.editableTextProps.disabled,
+          ref,
+          disabled: props?.editableTextProps?.disabled,
           className: "editable-cell",
           style: {
-            width: (value?.length ?? 2) + "ch",
+            width: (props.value?.length ?? 2) + "ch",
             color: "inherit" // Necessary so changed cells have the correct color text
           },
-          value: value || "",
+          value: optimisticValue || "",
           onChange: (e) => {
-            setValue(e.target.value);
+            setOptimisticValue(e.target.value);
+            props.onConfirm(e.target.value);
             e.target.style.width = e.target.value.length + 8 + "ch";
-          },
-          onKeyDown: async (e) => {
-            if (e.key === "Enter") {
-              props.onConfirm(value);
-            }
           },
           onPaste: async (e) => {
             e.preventDefault();
@@ -56,24 +55,21 @@ const _EditableCell = (props: EditableCellProps) => {
           onCopy: async (e) => {
             await props.onCopy(e);
           },
-          onClick: (e) => {
+          onDoubleClick: (e) => {
             e.target.select();
           },
           onFocus: (e) => {
-            e.target.select();
             e.preventDefault();
             e.stopPropagation();
           },
           onBlur: (e) => {
-            if (value != props.value) {
-              props.onConfirm(value);
-            }
-          },
+            props.onConfirm(e.target.value);
+          }
         },
         []
       ),
     ]
   );
-};
+});
 
 export const EditableCell = memo(_EditableCell);

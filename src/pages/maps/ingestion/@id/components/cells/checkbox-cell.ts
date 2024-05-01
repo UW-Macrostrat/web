@@ -46,7 +46,7 @@ let CheckboxCell = forwardRef((props: CheckboxCell, ref) => {
       h(
         Button,
         {
-          ref: ref,
+          buttonRef: ref,
           className: "editable-cell",
           text: text,
           intent: intent,

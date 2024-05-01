@@ -42,37 +42,11 @@ interface TableSelection {
   filters: Filters;
 }
 
-// An object that represents a value update made on top of a specific TableSelection
-interface TableUpdate {
-  // Helpful for debugging
-  description?: string;
-  // Function to execute this update
-  execute: () => Promise<void>;
-  // Function to apply this update to a cell
-  applyToCell: (
-    currentValue: string,
-    row: { [key: string]: string },
-    cellColumnName: string
-  ) => string;
-}
-
-export interface DataParameters {
-  group?: string;
-  select: {
-    page?: string;
-    pageSize?: string;
-  };
-  filter: {
-    [key: string]: Filter; // Used for filters
-  };
-}
-
 export interface ColumnConfigGenerator {
   url: string;
   defaultColumnConfig: ColumnConfig;
-  tableColumns: string[];
   dataParameters: DataParameters;
-  setTableUpdates: any;
+  addTableUpdate: (updates: TableUpdate[]) => void;
   transformedData: any[];
   data: any[];
   ref: any;
