@@ -116,6 +116,11 @@ const sitemap: Routes = {
             },
           ],
         },
+        {
+          slug: "ingestion",
+          name: "Ingestion",
+        },
+        { slug: "legend", name: "Legend items" },
       ],
     },
     {
