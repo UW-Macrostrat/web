@@ -1,12 +1,10 @@
 import { HotkeysProvider } from "@blueprintjs/core";
 import DataSheet from "@macrostrat/data-sheet2";
-import { useState } from "react";
 import { FullscreenPage } from "~/layouts";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
 import { useAsyncEffect } from "@macrostrat/ui-components";
 import { ColorCell } from "@macrostrat/data-sheet2";
-import { Region } from "@blueprintjs/table";
 import { PageBreadcrumbs } from "~/renderer";
 import { debounce } from "underscore";
 import {
@@ -16,7 +14,7 @@ import {
   ExpandedLithologies,
 } from "~/components/legend-table";
 import { postgrest } from "~/providers";
-import { useRef, useReducer } from "react";
+import { useReducer } from "react";
 
 const h = hyper.styled(styles);
 
@@ -31,19 +29,6 @@ function preprocessData(data) {
 }
 
 export function Page() {
-  // const [data, setData] = useState(null);
-
-  // useAsyncEffect(async () => {
-  //   const res = await postgrest
-  //     .from("legend")
-  //     .select(
-  //       "source_id, legend_id, name, strat_name, age, lith, descrip, comments, liths, b_interval, t_interval, best_age_bottom, best_age_top, unit_ids, concept_ids"
-  //     )
-  //     .order("legend_id", { ascending: true })
-  //     .limit(100);
-  //   setData(preprocessData(res.data));
-  // }, []);
-
   const { data, onScroll } = useLazyLoadedPostgRESTData();
 
   if (data == null) {
@@ -147,10 +132,11 @@ function lazyLoadingReducer<T>(
       };
     case "loaded":
       let data = adjustArraySize(state.data, action.totalSize);
-      for (let i = 0; i < action.data.length; i++) {
-        data[action.offset + i] = action.data[i];
-      }
-      //data.splice(action.offset, action.data.length, ...action.data);
+      data = [
+        ...data.slice(0, action.offset),
+        ...action.data,
+        ...data.slice(action.offset + action.data.length),
+      ];
 
       return {
         ...state,
@@ -204,36 +190,70 @@ function distanceToNextNonEmptyRow(
   return i;
 }
 
+interface QueryConfig {
+  columns?: string;
+  count?: "exact" | "estimated";
+  limit?: number;
+  offset?: number;
+  order?: { key: string; ascending: boolean };
+  sortValue?: any;
+}
+
+function buildQuery<T>(config: QueryConfig) {
+  const { columns = "*", count } = config;
+  const opts = { count };
+
+  let query = postgrest.from("legend").select(columns, opts);
+
+  if (config.order != null) {
+    query = query.order(config.order.key, {
+      ascending: config.order.ascending,
+    });
+    if (config.sortValue != null) {
+      query = query.gt(config.order.key, config.sortValue);
+    }
+  }
+  if (config.limit != null) {
+    if (config.offset != null) {
+      query = query.range(config.offset, config.offset + config.limit - 1);
+      console.log(`Random seek from ${config.offset}, this will be slow`);
+    } else {
+      query = query.limit(config.limit);
+    }
+  }
+  return query;
+}
+
 async function loadMoreData<T>(state: LazyLoaderState<T>, dispatch: any) {
   const rowIndex = indexOfFirstNullInRegion(state.data, state.visibleRegion);
   if (state.loading || rowIndex == null) {
     return;
   }
 
-  let opts = undefined;
-
   dispatch({ type: "start-loading" });
+
+  let cfg: QueryConfig = {
+    limit: state.chunkSize,
+    order: { key: state.sortKey, ascending: true },
+  };
 
   // Allows random seeking
   const isInitialQuery = state.data.length === 0;
   if (isInitialQuery) {
-    opts = { count: "exact" };
+    cfg.count = "exact";
   }
-  let query = postgrest.from("legend").select("*", opts);
 
   // This only works for forward queries
   if (!isInitialQuery) {
-    const val = state.data[rowIndex - 1]?.[state.sortKey];
-    query = query.gt(state.sortKey, val);
+    cfg.sortValue = state.data[rowIndex - 1]?.[state.sortKey];
+    if (cfg.sortValue == null) {
+      cfg.offset = rowIndex;
+    }
   }
 
-  query = query
-    .order(state.sortKey, { ascending: true })
-    .limit(state.chunkSize);
+  const query = buildQuery(cfg);
 
   const res = await query;
-
-  console.log(res);
 
   const { data, count } = res;
 
@@ -250,7 +270,6 @@ function useLazyLoadedPostgRESTData() {
     data: [],
     loading: false,
     error: null,
-    totalSize: 0,
     chunkSize: 100,
     sortKey: "legend_id",
     visibleRegion: { rowIndexStart: 0, rowIndexEnd: 1 },
@@ -261,17 +280,19 @@ function useLazyLoadedPostgRESTData() {
 
   useAsyncEffect(async () => {
     loadMoreData(state, dispatch);
-  }, [data, loading, state.visibleRegion]);
+  }, [data, state.visibleRegion]);
+
+  const onScroll = debounce((visibleCells: RowRegion) => {
+    dispatch({
+      type: "set-visible",
+      region: visibleCells,
+    });
+  }, 500);
 
   return {
     data,
     loading,
-    onScroll(visibleCells: RowRegion) {
-      dispatch({
-        type: "set-visible",
-        region: visibleCells,
-      });
-    },
+    onScroll,
   };
 }
 

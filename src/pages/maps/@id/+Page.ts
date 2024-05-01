@@ -30,7 +30,7 @@ import { LngLatBoundsLike } from "mapbox-gl";
 import { useEffect, useMemo, useState } from "react";
 import { MapNavbar } from "~/components/map-navbar";
 import "~/styles/global.styl";
-import { Link, MapReference } from "~/components";
+import { MapReference, DevLink } from "~/components";
 import styles from "./main.module.sass";
 import { PageBreadcrumbs } from "~/renderer";
 
@@ -332,10 +332,6 @@ function BaseLayerSelector({ layer, setLayer }) {
       ]
     ),
   ]);
-}
-
-function DevLink({ children, ...props }) {
-  return h(Link, props, [children, " ", h(Tag, { minimal: true }, ["Beta"])]);
 }
 
 function MapLegendPanel(params) {

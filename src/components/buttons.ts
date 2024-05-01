@@ -1,12 +1,9 @@
-import { Button, ButtonProps } from "@blueprintjs/core";
+import { Tag } from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
-import { useHashNavigate } from "../app-state";
+import { Link } from "~/renderer/Link";
 
-export const LinkButton = (props: ButtonProps & { to: string }) => {
-  const { to, ...rest } = props;
-  const onClick = useHashNavigate(to);
-  return h(Button, {
-    ...rest,
-    onClick,
-  });
-};
+export function DevLink({ children, tagText = "Beta", ...props }) {
+  return h(Link, props, [children, " ", h(Tag, { minimal: true }, [tagText])]);
+}
+
+export { Link };
