@@ -22,43 +22,27 @@ export interface TableUpdate {
 
 export const applyTableUpdate = (
   data: Record<string, boolean | string | number | null>[],
-  patchData: Record<string, boolean | string | number | null>[],
   tableUpdate: TableUpdate
 ) => {
   for (const [rowIndex, row] of data.entries()) {
-
-    // Make sure the patch data has an object to populate
-    if(patchData[rowIndex] == undefined) {
-      patchData[rowIndex] = {};
-    }
-
-    // If the data is different, apply the patch
-    const appliedValue = tableUpdate.applyToCell(
+    data[rowIndex][tableUpdate.column] = tableUpdate.applyToCell(
       data[rowIndex][tableUpdate.column],
       row,
       tableUpdate.column
     );
-
-    if(data[rowIndex][tableUpdate.column] != appliedValue){
-      patchData[rowIndex][tableUpdate.column] = appliedValue
-    }
   }
 
-  return patchData;
+  return data;
 };
 
 export const applyTableUpdates = (
   data: Record<string, boolean | string | number | null>[],
-  patchData: Record<string, boolean | string | number | null>[],
   tableUpdates: TableUpdate[]
 ) => {
-  data = structuredClone(data)
   for (const tableUpdate of tableUpdates) {
-    patchData = applyTableUpdate(data, patchData, tableUpdate);
-    data = getPatchedData(data, patchData);
+    data = applyTableUpdate(data, tableUpdate);
   }
-
-  return patchData;
+  return data;
 };
 
 export const createTableUpdateCopyColumn = (
@@ -201,20 +185,6 @@ export const squashTableUpdates = (tableUpdates: TableUpdate[]) : TableUpdate[] 
   }
 
   return squashedTableUpdates;
-}
-
-/*
- * Get patched data
- */
-export const getPatchedData = (
-  data: Record<string, boolean | string | number | null>[],
-  patchData: Record<string, boolean | string | number | null>[]
-) : Record<string, boolean | string | number | null>[] => {
-  const patchedData = structuredClone(data)
-  patchData.forEach((patch, i) => {
-    patchedData[i] = { ...patchedData[i], ...patch }
-  })
-  return patchedData
 }
 
 /*

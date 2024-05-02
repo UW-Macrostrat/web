@@ -16,7 +16,6 @@ interface TableData {
   allColumns: string[];
   hiddenColumns: string[];
   showOmittedRows: boolean;
-  localPatches: Record<string, boolean | string | number | null>[];
   tableUpdates: TableUpdate[];
   parameters: DataParameters;
 }
@@ -28,7 +27,6 @@ export const initialState: TableData = {
   allColumns: [],
   hiddenColumns: [],
   showOmittedRows: false,
-  localPatches: [],
   tableUpdates: [],
   parameters: {
     select: {
@@ -43,13 +41,8 @@ export const addTableUpdates = (state: TableData, tableUpdates: TableUpdate[]) =
   // Squash new and existing updates
   const newTableUpdates = squashTableUpdates([...state.tableUpdates, ...tableUpdates]);
 
-  // Apply the updates to the local data
-  let newLocalPatches = structuredClone(state.localPatches);
-  newLocalPatches = applyTableUpdates(state.remoteData, newLocalPatches, newTableUpdates);
-
   return {
     ...state,
-    localPatches: newLocalPatches,
     tableUpdates: newTableUpdates
   }
 }
@@ -57,7 +50,6 @@ export const addTableUpdates = (state: TableData, tableUpdates: TableUpdate[]) =
 export const clearTableUpdates = (state: TableData) => {
   return {
     ...state,
-    localPatches: [],
     tableUpdates: []
   };
 }
@@ -66,13 +58,8 @@ export const revertTableUpdate = (state: TableData) => {
   const newTableUpdates = [...state.tableUpdates];
   newTableUpdates.pop();
 
-  // Apply the updates to the local data
-  let newLocalPatches = structuredClone(state.localPatches);
-  newLocalPatches = applyTableUpdates(state.remoteData, newLocalPatches, newTableUpdates);
-
   return {
     ...state,
-    localPatches: newLocalPatches,
     tableUpdates: newTableUpdates
   };
 }
@@ -114,7 +101,7 @@ export const updateData = (
 ) => {
 
   // Check if there are new columns to record
-  const dataColumns = Object.keys(action.data[0]);
+  const dataColumns = action.data.length == 0 ? [] : Object.keys(action.data[0]);
   const allColumns = [...new Set([...state.allColumns, ...dataColumns])];
 
   // Add a filter for all the new columns
@@ -124,15 +111,11 @@ export const updateData = (
     }
   })
 
-  // Apply the updates to the local data
-  const localPatches = applyTableUpdates(action.data, [], state.tableUpdates);
-
   return {
     ...state,
     remoteData: action.data,
     totalNumberOfRows: action.totalNumberOfRows,
     allColumns,
-    localPatches,
     loading: false
   }
 }
@@ -143,12 +126,10 @@ export const appendData = (
 ) => {
 
   const remoteData = [...state.remoteData, ...data];
-  const localPatches = applyTableUpdates(remoteData, [], state.tableUpdates);
 
   return {
     ...state,
-    remoteData,
-    localPatches
+    remoteData
   };
 }
 

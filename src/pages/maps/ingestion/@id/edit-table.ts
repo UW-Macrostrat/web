@@ -23,7 +23,7 @@ import {
   Filter,
   getPatchedData,
   createTableUpdateCopyColumn,
-  isColumnActive, createTableUpdate, submitTableUpdates
+  isColumnActive, createTableUpdate, submitTableUpdates, applyTableUpdates
 } from "./utils/";
 import { tableDataReducer, initialState } from "./reducer/";
 import {
@@ -111,9 +111,11 @@ export function TableInterface({
     })()
   }, [tableData.parameters]);
 
+
   const transformedData = useMemo(() => {
-    return getPatchedData(tableData.remoteData, tableData.localPatches);
-  }, [tableData.remoteData, tableData.localPatches]);
+    const data = structuredClone(tableData.remoteData);
+    return applyTableUpdates(data, tableData.tableUpdates)
+  }, [tableData.remoteData, tableData.tableUpdates]);
 
   const visibleColumns = useMemo(() => {
     const hiddenColumns = [...INTERNAL_COLUMNS, ...tableData.hiddenColumns];
@@ -329,7 +331,10 @@ export function TableInterface({
               },
               onCopy: (e) => handleCopy(e),
               onPaste: handlePaste,
-              intent: tableData.localPatches[rowIndex]?.[columnName] ? "success" : undefined,
+              intent: tableData.remoteData[rowIndex][columnName] !=
+                transformedData[rowIndex][columnName] ?
+                "success" :
+                undefined,
               value:
                 transformedData.length == 0
                   ? ""
@@ -341,7 +346,7 @@ export function TableInterface({
     }, {});
   }, [
     visibleColumns,
-    tableData.localPatches,
+    tableData.remoteData,
     tableData.parameters,
     transformedData,
     handleCopy,
