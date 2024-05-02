@@ -9,7 +9,7 @@ export const guard = (pageContext) => {
     throw redirect(
       `${
         import.meta.env.VITE_MACROSTRAT_INGEST_API
-      }/security/login?return_url=${pageContext.url}`
+      }/security/login?return_url=${pageContext.urlOriginal}`
     );
     /* The more traditional way, redirect the user:
     throw redirect('/login')

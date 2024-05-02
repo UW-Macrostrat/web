@@ -1,13 +1,11 @@
-import { Button } from "@blueprintjs/core";
-import { Popover2 } from "@blueprintjs/popover2";
+import { Button, Popover } from "@blueprintjs/core";
 import { Cell, EditableCell2Props } from "@blueprintjs/table";
 import React, { forwardRef, useEffect } from "react";
 
 // @ts-ignore
 import hyper from "@macrostrat/hyper";
 
-import "@blueprintjs/core/lib/css/blueprint.css";
-import "@blueprintjs/popover2/lib/css/blueprint-popover2.css";
+//import "@blueprintjs/core/lib/css/blueprint.css";
 import styles from "../../edit-table.module.sass";
 
 const h = hyper.styled(styles);
@@ -30,7 +28,7 @@ const LongTextCell = forwardRef((props: EditableCell2Props, forwardRef) => {
       style: { ...props.style, padding: 0 },
     },
     [
-      h(Popover2, {
+      h(Popover, {
         interactionKind: "click",
         placement: "bottom-start",
         minimal: true,

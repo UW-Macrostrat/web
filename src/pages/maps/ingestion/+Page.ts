@@ -38,57 +38,69 @@ const toggleUrlParam = (
   return new URLSearchParams(urlSearchParam.toString());
 };
 
+const updateUrl = (key: string, value: string, setIngestFilter: (filter: (filter: URLSearchParams) => URLSearchParams) => void) => {
+  setIngestFilter((ingestFilter: URLSearchParams) => {
+
+    const toggledUrl = toggleUrlParam(ingestFilter, key, value);
+
+    const url = new URL(window.location.href);
+    const urlWithSearch = new URL(
+      url.origin + url.pathname + "?" + toggledUrl
+    );
+
+    window.history.pushState(
+      { page: "Update Search Params" },
+      "Title",
+      urlWithSearch
+    );
+
+    return toggledUrl;
+  });
+}
+
+const getTags = async () => {
+  const response = await fetch(`${ingestPrefix}/ingest-process/tags`);
+  return await response.json();
+};
+
+const getIngestProcesses = async (ingestFilter: URLSearchParams) => {
+  const response = await fetch(
+    `${ingestPrefix}/ingest-process?source_id=order_by&source_id=not.is.null&page_size=1000&${
+      ingestFilter || ""
+    }`
+  );
+  return await response.json();
+};
+
 export function Page({ user, url }) {
   const [ingestProcess, setIngestProcess] = useState<IngestProcess[]>([]);
   const [ingestFilter, setIngestFilter] = useState<URLSearchParams>(undefined);
   const [tags, setTags] = useState<string[]>([]);
 
-  const getIngestProcesses = async () => {
-    const response = await fetch(
-      `${ingestPrefix}/ingest-process?source_id=order_by&source_id=not.is.null&page_size=1000&${
-        ingestFilter || ""
-      }`
-    );
-    const ingest_processes = await response.json();
-    setIngestProcess(ingest_processes);
-  };
-
+  // Get the initial data with the filter from the URL
   useEffect(() => {
-    getIngestProcesses();
-  }, [ingestFilter]);
 
-  useEffect(() => {
+    // Get the ingest process data
     const url = new URL(window.location.href);
     const searchParams = new URLSearchParams(url.search);
-    setIngestFilter(searchParams);
+    setIngestFilter(searchParams)
+    getIngestProcesses(searchParams).then((ingestProcesses) => {setIngestProcess(ingestProcesses)});
+
+    // Get the current set of tags
+    getTags().then((tags) => setTags(tags));
+
+    // Set up the popstate event listener
+    window.onpopstate = () => {
+      getIngestProcesses(ingestFilter).then((ingestProcesses) => {setIngestProcess(ingestProcesses)});
+    };
   }, []);
 
+  // Re-fetch data when the filter changes
   useEffect(() => {
     if (ingestFilter) {
-      const url = new URL(window.location.href);
-      const urlWithSearch = new URL(
-        url.origin + url.pathname + "?" + ingestFilter
-      );
-      window.history.pushState(
-        { page: "Update Search Params" },
-        "Title",
-        urlWithSearch
-      );
+      getIngestProcesses(ingestFilter).then((ingestProcesses) => {setIngestProcess(ingestProcesses)});
     }
   }, [ingestFilter]);
-
-  useEffect(() => {
-    const getTags = async () => {
-      const response = await fetch(`${ingestPrefix}/ingest-process/tags`);
-      const tags = await response.json();
-      setTags(tags);
-    };
-    getTags();
-
-    window.onpopstate = () => {
-      getIngestProcesses();
-    };
-  }, []);
 
   return h("div", [
     h(IngestNavbar, { user: user }),
@@ -171,6 +183,7 @@ export function Page({ user, url }) {
                   h(IngestProcessCard, {
                     ingestProcess: d,
                     user: user,
+                    onUpdate: () => getTags().then((tags) => setTags(tags))
                   }),
                 ]
               );
@@ -191,16 +204,7 @@ export function Page({ user, url }) {
               value: "pending",
               active: ingestFilter?.getAll("state").includes("eq.pending"),
               onClick: async () => {
-                const url = new URL(window.location.href);
-                url.searchParams.set("state", `eq.pending`);
-                setIngestFilter(() => {
-                  return toggleUrlParam(ingestFilter, "state", "eq.pending");
-                });
-                window.history.pushState(
-                  { page: "Update Search Params" },
-                  "Title",
-                  url
-                );
+                updateUrl("state", "eq.pending", setIngestFilter);
               },
               style: { width: "100%", marginBottom: "7px" },
             }),
@@ -208,18 +212,7 @@ export function Page({ user, url }) {
               value: "ingested",
               active: ingestFilter?.getAll("state").includes("eq.ingested"),
               onClick: async () => {
-                const url = new URL(
-                  window.location.origin + window.location.pathname
-                );
-                url.searchParams.set("state", `eq.ingested`);
-                setIngestFilter(() => {
-                  return toggleUrlParam(ingestFilter, "state", "eq.ingested");
-                });
-                window.history.pushState(
-                  { page: "Update Search Params" },
-                  "Title",
-                  url
-                );
+                updateUrl("state", "eq.ingested", setIngestFilter);
               },
               style: { width: "100%", marginBottom: "7px" },
             }),
@@ -229,9 +222,7 @@ export function Page({ user, url }) {
                 value: tag,
                 active: ingestFilter?.getAll("tags").includes(`eq.${tag}`),
                 onClick: async () => {
-                  setIngestFilter(() => {
-                    return toggleUrlParam(ingestFilter, "tags", `eq.${tag}`);
-                  });
+                  updateUrl("tags", `eq.${tag}`, setIngestFilter);
                 },
                 style: { width: "100%", marginBottom: "7px" },
               });

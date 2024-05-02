@@ -1,15 +1,9 @@
 import hyper from "@macrostrat/hyper";
 
 import {
-  Button,
-  ButtonGroup,
-  Hotkey,
   Icon,
-  Menu,
-  MenuItem,
-  useHotkeys,
+  useHotkeys
 } from "@blueprintjs/core";
-import { Popover2 } from "@blueprintjs/popover2";
 import {
   Column,
   ColumnHeaderCell2,
@@ -21,9 +15,10 @@ import {
 import { useCallback, useReducer, useEffect, useMemo, useState, useRef, MutableRefObject } from "react";
 import {
   Filter,
-  getPatchedData,
   createTableUpdateCopyColumn,
-  isColumnActive, createTableUpdate, submitTableUpdates, applyTableUpdates
+  isColumnActive,
+  createTableUpdate,
+  applyTableUpdates, submitTableUpdates
 } from "./utils/";
 import { tableDataReducer, initialState } from "./reducer/";
 import {
@@ -31,9 +26,11 @@ import {
   ProgressPopover,
   ProgressPopoverProps,
   TableMenu,
-  download_file,
-  range,
-  submitColumnCopy, getSelectedColumns, selectionToText, textToTableUpdates, getData, getCellSelected
+  getSelectedColumns,
+  selectionToText,
+  textToTableUpdates,
+  getData,
+  getCellSelected, download_file
 } from "./components/index";
 import {
   ColumnConfig,
@@ -46,6 +43,7 @@ import "@blueprintjs/table/lib/css/table.css";
 import { ingestPrefix } from "@macrostrat-web/settings";
 import styles from "./edit-table.module.sass";
 import "./override.sass";
+import TableHeader from "~/pages/maps/ingestion/@id/components/table-header";
 
 const h = hyper.styled(styles);
 
@@ -380,7 +378,7 @@ export function TableInterface({
   return h(
     HotkeysManager,
     {
-      hotkeys,
+      hotkeys: hotkeys,
       style: {
         minHeight: "0",
         display: "flex",
@@ -391,93 +389,32 @@ export function TableInterface({
     [
       h("div.table-container", {}, [
         h.if(error != undefined)("div.warning", {}, [error]),
-        h("div.input-form", {}, [
-          h(ButtonGroup, [
-            h(Popover2, {
-              interactionKind: "click",
-              minimal: true,
-              placement: "bottom-start",
-              content: h(Menu, {}, [
-                h(
-                  MenuItem,
-                  {
-                    disabled: tableData.hiddenColumns.length == 0,
-                    icon: "eye-open",
-                    text: "Show All",
-                    onClick: () => dispatch({ type: "showAllColumns" })
-                  },
-                  []
-                ),
-                h(
-                  MenuItem,
-                  {
-                    icon: "cross",
-                    text: "Show Omitted",
-                    onClick: () => dispatch({ type: "toggleShowOmittedRows" })
-                  },
-                  []
-                ),
-              ]),
-              renderTarget: ({ isOpen, ref, ...targetProps }) =>
-                h(
-                  Button,
-                  { ...targetProps, elementRef: ref, icon: "menu" },
-                  []
-                ),
-            }),
-            h(
-              Button,
-              {
-                onClick: () => dispatch({ type: "clearTableUpdates" }),
-                disabled: tableData.tableUpdates.length == 0,
-              },
-              ["Clear changes"]
-            ),
-            h(
-              Button,
-              {
-                type: "submit",
-                onClick: () => {
-                  (async () => {
-                    // Submit the table updates
-                    await submitTableUpdates(
-                      tableData.tableUpdates,
-                      setUpdateProgress
-                    )
-                    // Update the table data
-                    dispatch({ type: "updateData", ...(await getData(url, tableData.parameters))})
-                    dispatch({ type: "clearTableUpdates" })
-                  })();
-                },
-                disabled: tableData.tableUpdates.length == 0,
-                intent: "success",
-              },
-              ["Submit"]
-            ),
-            h(
-              Button,
-              {
-                onClick: async () => {
-                  const objects_response = await fetch(
-                    `${ingestPrefix}/ingest-process/${ingestProcessId}/objects`
-                  );
-                  const objects: any[] = await objects_response.json();
-                  objects.forEach((object) =>
-                    download_file(object.pre_signed_url)
-                  );
-                },
-              },
-              ["Download Source"]
-            ),
-            h.if(tableData.totalNumberOfRows != undefined)(
-              Button,
-              {
-                disabled: true,
-              },
-              [`${tableData.totalNumberOfRows} Rows`]
-            ),
-          ]),
-        ]),
+        h(TableHeader, {
+          hiddenColumns: tableData.hiddenColumns,
+          tableUpdates: tableData.tableUpdates,
+          totalNumberOfRows: tableData.totalNumberOfRows,
+          showAllColumns: () => dispatch({ type: "showAllColumns" }),
+          toggleShowOmittedRows: () => dispatch({ type: "toggleShowOmittedRows" }),
+          clearTableUpdates: () => dispatch({ type: "clearTableUpdates" }),
+          submitTableUpdates: async () => {
+            await submitTableUpdates(
+              tableData.tableUpdates,
+              setUpdateProgress
+            )
+            // Update the table data
+            dispatch({ type: "updateData", ...(await getData(url, tableData.parameters)) })
+            dispatch({ type: "clearTableUpdates" })
+          },
+          downloadSourceFiles: async () => {
+            const objects_response = await fetch(
+              `${ingestPrefix}/ingest-process/${ingestProcessId}/objects`
+            );
+            const objects: any[] = await objects_response.json();
+            objects.forEach((object) =>
+              download_file(object.pre_signed_url)
+            );
+          }
+        }),
         h(
           Table2,
           {

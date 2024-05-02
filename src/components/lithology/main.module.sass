@@ -1,0 +1,40 @@
+.lithology-tooltip
+  padding: 10px
+  min-width: 8em
+
+  &>:last-child
+    margin-bottom: 0
+
+  .header
+    display: flex
+    flex-direction: row
+    justify-content: space-between
+    align-items: baseline
+
+.lithology-id
+  color: var(--secondary-color)
+  &::before
+    content: '#'
+  padding-left: 0.5em
+
+.lithology-tag-popover-holder
+  cursor: pointer
+
+.tight-list
+  padding-left: 1em
+
+
+.lithology-tag
+  margin: 0.2em 0.5em 0.3em 0
+  span, code
+    display: inline-block
+
+  .lithology-id
+    width: 0
+    overflow: hidden
+    white-space: nowrap
+    transition: width 0.3s
+
+  &:hover
+    .lithology-id
+      width: 100%

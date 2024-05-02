@@ -1,0 +1,40 @@
+.example-container
+  height: 500px
+
+.data-viewer
+  min-width: 200px
+
+.tree
+  align-items: baseline
+  gap: 1em
+  margin-bottom: 1em
+
+  .main-tree
+    display: flex
+    flex-direction: row
+    align-items: baseline
+    gap: 2em
+
+  &:not(.tree-level-0, .tree-level-1)
+    border-left: 2px solid var(--tertiary-color)
+    padding-left: 1em
+
+  &.tree-level-0, &.tree-level-1
+    h2
+      display: none
+      padding-left: 0
+    flex-direction: column
+    gap: 0
+
+  .inner
+    flex-grow: 1
+
+  ul
+    list-style-type: none
+    padding-left: 0
+    margin: 0
+
+  li
+    display: inline-block
+    margin-right: 0.5em
+    line-height: 2em

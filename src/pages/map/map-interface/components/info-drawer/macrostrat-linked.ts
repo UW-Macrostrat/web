@@ -9,6 +9,7 @@ import styles from "./main.module.styl";
 import { scaleLinear } from "@visx/scale";
 import { AxisBottom } from "@visx/axis";
 import chroma from "chroma-js";
+import { LithologyTag } from "~/components";
 const h = hyper.styled(styles);
 
 function MacrostratLinkedData(props) {
@@ -216,9 +217,7 @@ function MatchBasis(props) {
           h(
             "a.externalLink",
             {
-              href:
-                "https://macrostrat.org/sift/#/strat_name/" +
-                name.strat_name_id,
+              href: "/sift/#/strat_name/" + name.strat_name_id,
               key: i,
             },
             [name.rank_name]
@@ -277,15 +276,19 @@ function FossilOccs(props) {
 function LithTypes(props) {
   const { lith_types } = props;
 
-  return h.if(lith_types && lith_types.length > 0)("div", [
-    lith_types.map((lithClass, i) => {
-      return h(AttrChip, {
-        key: i,
-        name: lithClass.name,
-        color: lithClass.color,
-      });
-    }),
-  ]);
+  return h.if(lith_types && lith_types.length > 0)(
+    "div.lithologies.lithology-types",
+    [
+      lith_types.map((lithClass, i) => {
+        return h(LithologyTag, {
+          data: {
+            ...lithClass,
+          },
+          tooltip: false,
+        });
+      }),
+    ]
+  );
 }
 
 function LithsAndClasses(props) {
@@ -302,15 +305,17 @@ function LithsAndClasses(props) {
       value: h(LithTypes, { lith_types }),
     },
     h(ExpansionBody, { title: "Matched lithologies" }, [
-      macrostrat.liths.map((lith, i) => {
-        return h(AttrChip, {
-          key: i,
-          name: lith.lith,
-          color: lith.color,
-          fill: lith.lith_fill,
-          emphasized: false,
-        });
-      }),
+      h(
+        "span.lithologies",
+        macrostrat.liths.map((lith, i) => {
+          const l1 = {
+            lith_id: lith.lith_id,
+            name: lith.lith,
+            color: lith.color,
+          };
+          return h(LithologyTag, { data: l1, expandOnHover: false });
+        })
+      ),
     ])
   );
 }

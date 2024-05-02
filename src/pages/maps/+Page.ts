@@ -3,18 +3,23 @@ import hyper from "@macrostrat/hyper";
 import styles from "./main.module.scss";
 import { AnchorButton } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
-import { PageHeader } from "~/components/page-header";
+import { PageHeader, DevLink } from "~/components";
 
 const h = hyper.styled(styles);
 
 export function Page({ sources }) {
   return h(ContentPage, [
     h("div.float-right.padding.stick-to-top", [
-      h(
-        AnchorButton,
-        { icon: "flows", href: "/maps/ingestion", large: true },
-        "Ingestion system"
-      ),
+      h("ul.nav-list", [
+        h("li", [
+          h(
+            AnchorButton,
+            { icon: "flows", href: "/maps/ingestion", large: true },
+            "Ingestion system"
+          ),
+        ]),
+        h("li", [h(DevLink, { href: "/maps/legend" }, "Legend table")]),
+      ]),
     ]),
     h(PageHeader, { title: "Maps" }),
     h(

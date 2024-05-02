@@ -41,4 +41,4 @@ export type PageContextCustom = {
 type PageContextServer = PageContextServerBase<Page> & PageContextCustom;
 type PageContextClient = PageContextClientBase<Page> & PageContextCustom;
 
-type PageContext = PageContextClient | PageContextServer;
+export type PageContext = PageContextClient | PageContextServer;

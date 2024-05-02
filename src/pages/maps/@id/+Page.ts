@@ -4,6 +4,7 @@ import {
   Radio,
   RadioGroup,
   Spinner,
+  Tag,
 } from "@blueprintjs/core";
 import { SETTINGS, apiV2Prefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
@@ -29,8 +30,9 @@ import { LngLatBoundsLike } from "mapbox-gl";
 import { useEffect, useMemo, useState } from "react";
 import { MapNavbar } from "~/components/map-navbar";
 import "~/styles/global.styl";
-import { MapReference } from "~/components";
+import { MapReference, DevLink } from "~/components";
 import styles from "./main.module.sass";
+import { PageBreadcrumbs } from "~/renderer";
 
 const h = hyper.styled(styles);
 
@@ -333,18 +335,28 @@ function BaseLayerSelector({ layer, setLayer }) {
 }
 
 function MapLegendPanel(params) {
-  console.log(params);
   return h(
     InfoDrawerContainer,
     h(
       "div.map-legend-container",
       h("div.map-legend", [
+        h(PageBreadcrumbs),
         h("div.legend-header", [
           h(ErrorBoundary, [
             h(MapReference, { reference: params, showSourceID: false }),
           ]),
         ]),
-        h("h3", "Legend"),
+        h("div.flex.row", [
+          h("h3", "Legend"),
+          h("div.spacer"),
+          h(
+            DevLink,
+            // Not sure why we have to fully construct the URL here, vs. constructing a relative route.
+            // Probably lack of a trailing slash in the main page?
+            { href: `/maps/${params.source_id}/legend` },
+            "Legend table"
+          ),
+        ]),
         h(MapLegendData, params),
       ])
     )

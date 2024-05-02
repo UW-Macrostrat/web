@@ -1,5 +1,6 @@
 import hyper from "@macrostrat/hyper";
-import { Link, MacrostratIcon } from "~/components";
+import { MacrostratIcon } from "./macrostrat-icon";
+import { Link } from "./buttons";
 import styles from "./icon.module.sass";
 
 const h = hyper.styled(styles);
