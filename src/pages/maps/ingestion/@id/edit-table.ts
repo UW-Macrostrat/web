@@ -30,7 +30,9 @@ import {
   selectionToText,
   textToTableUpdates,
   getData,
-  getCellSelected, download_file
+  getCellSelected,
+  download_file,
+  sleep
 } from "./components/index";
 import {
   ColumnConfig,
@@ -410,9 +412,12 @@ export function TableInterface({
               `${ingestPrefix}/ingest-process/${ingestProcessId}/objects`
             );
             const objects: any[] = await objects_response.json();
-            objects.forEach((object) =>
-              download_file(object.pre_signed_url)
-            );
+
+            // Download each function sleeping for a second between each attempt
+            for(const o of objects) {
+              await sleep(1000)
+              download_file(o.pre_signed_url)
+            }
           }
         }),
         h(
