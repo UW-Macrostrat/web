@@ -60,7 +60,7 @@ async function startServer() {
 
   createMacrostratQlrAPI(
     app,
-    "/integrations/qgis/layers",
+    "/docs/integrations/qgis/layers",
     process.env.VITE_MACROSTRAT_TILESERVER_DOMAIN,
     process.env.VITE_MACROSTRAT_INSTANCE
   );
