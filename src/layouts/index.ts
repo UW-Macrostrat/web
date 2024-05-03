@@ -3,6 +3,7 @@ import styles from "./main.module.sass";
 import { Spinner } from "@blueprintjs/core";
 import { usePageTransitionStore } from "~/renderer/transitions";
 import classNames from "classnames";
+import { PageBreadcrumbs } from "~/renderer";
 
 const h = hyper.styled(styles);
 
@@ -45,12 +46,16 @@ export function ContentPage({ children, className, ...rest }) {
 
 export function DocumentationPage({ children, className, ...rest }) {
   return h(
-    BasePage,
+    CenteredContentPage,
     { className: classNames("documentation-page", className), ...rest },
-    children
+    h([h(PageBreadcrumbs), children])
   );
 }
 
-export function CenteredContentPage({ children }) {
-  return h(ContentPage, { className: "centered" }, children);
+export function CenteredContentPage({ children, className }) {
+  return h(
+    ContentPage,
+    { className: classNames("centered", className) },
+    children
+  );
 }

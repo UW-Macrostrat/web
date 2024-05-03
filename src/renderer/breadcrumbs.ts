@@ -22,9 +22,9 @@ function buildBreadcrumns(
   let route = "";
 
   for (const urlPart of parts) {
-    if (children == null) {
-      break;
-    }
+    // if (children == null) {
+    //   break;
+    // }
     const child = children?.find((d) => {
       if (d.param != null) {
         const param = d.param.replace(/^@/, "");
@@ -37,28 +37,31 @@ function buildBreadcrumns(
       return d.slug == urlPart;
     });
 
-    if (child == null) {
-      break;
-    }
+    // if (child == null) {
+    //   break;
+    // }
+    const name = child?.name ?? urlPart;
     if (route.endsWith("/")) {
       route = route.slice(0, -1);
     }
     route += `/${urlPart}`;
-    const { name } = child;
 
-    const text = typeof name === "function" ? name(urlPart, ctx) : name;
+    let text = typeof name === "function" ? name(urlPart, ctx) : name;
+    if (name == urlPart) {
+      text = h("code", text);
+    }
 
     items.push({
       text,
       href: route == currentPath ? undefined : route,
     });
-    children = child.children;
+    children = child?.children;
   }
   return items;
 }
 
 interface Item {
-  text: string;
+  text: string | React.ReactNode;
   href?: string;
   current?: boolean;
 }
