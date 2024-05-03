@@ -4,6 +4,7 @@
 //  - To use your environment variables defined in your .env files, you need to install dotenv, see https://vike.dev/env
 //  - To use your path aliases defined in your vite.config.js, you need to tell Node.js about them, see https://vike.dev/path-aliases
 
+import { createMacrostratQlrAPI } from "@macrostrat-web/qgis-integration";
 import compression from "compression";
 import express from "express";
 import { renderPage } from "vike/server";
@@ -57,6 +58,13 @@ async function startServer() {
   // Other middlewares (e.g. some RPC middleware such as Telefunc)
   // ...
 
+  createMacrostratQlrAPI(
+    app,
+    "/docs/integrations/qgis/layers",
+    process.env.VITE_MACROSTRAT_TILESERVER_DOMAIN,
+    process.env.VITE_MACROSTRAT_INSTANCE
+  );
+
   // vike middleware. It should always be our last middleware (because it's a
   // catch-all middleware superseding any middleware placed after it).
   app.get("*", async (req, res, next) => {
@@ -70,8 +78,8 @@ async function startServer() {
     } catch (e) {
       // I don't care if it fails, it just means the user isn't logged in
     }
-    if(!isProduction) {
-      user = {groups: [1]}
+    if (!isProduction) {
+      user = { groups: [1] };
     }
 
     // Generate a Random logo

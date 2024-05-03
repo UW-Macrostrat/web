@@ -1,0 +1,295 @@
+<!DOCTYPE qgis-layer-definition>
+<qlr>
+  <layer-tree-group expanded="1" checked="Qt::Checked" groupLayer="" name="">
+    <customproperties>
+      <Option />
+    </customproperties>
+    <layer-tree-layer
+      id="Macrostrat_{{LAYER_NAME}}__{{INSTANCE}}__163fd3ea_6876_4158_9a62_ab995ed83a70"
+      expanded="1"
+      legend_exp="" patch_size="-1,-1" legend_split_behavior="0"
+      source="type=xyz&amp;url={{TILE_LAYER_URL}}/%7Bz%7D/%7Bx%7D/%7By%7D&amp;zmax=14&amp;zmin=0&amp;http-header:referer="
+      checked="Qt::Checked" providerKey="xyzvectortiles"
+      name="Macrostrat {{LAYER_NAME}} ({{INSTANCE}})">
+      <customproperties>
+        <Option />
+      </customproperties>
+    </layer-tree-layer>
+  </layer-tree-group>
+  <maplayers>
+    <maplayer autoRefreshTime="0" refreshOnNotifyMessage="" legendPlaceholderImage=""
+      type="vector-tile" refreshOnNotifyEnabled="0" minScale="1e+08"
+      styleCategories="AllStyleCategories" hasScaleBasedVisibilityFlag="0" autoRefreshEnabled="0"
+      maxScale="0">
+      <extent>
+        <xmin>-20037508.34278919920325279</xmin>
+        <ymin>-20037508.34278919920325279</ymin>
+        <xmax>20037508.34278919920325279</xmax>
+        <ymax>20037508.34278919920325279</ymax>
+      </extent>
+      <wgs84extent>
+        <xmin>-179.9999999999996021</xmin>
+        <ymin>-85.05112877980656094</ymin>
+        <xmax>179.99999999999977263</xmax>
+        <ymax>85.05112877980657515</ymax>
+      </wgs84extent>
+      <id>Macrostrat_{{LAYER_NAME}}__{{INSTANCE}}__163fd3ea_6876_4158_9a62_ab995ed83a70</id>
+      <datasource>
+        type=xyz&amp;url={{TILE_LAYER_URL}}/%7Bz%7D/%7Bx%7D/%7By%7D&amp;zmax=14&amp;zmin=0&amp;http-header:referer=</datasource>
+      <keywordList>
+        <value></value>
+      </keywordList>
+      <layername>Macrostrat {{LAYER_NAME}} ({{INSTANCE}})</layername>
+      <srs>
+        {{SPATIAL_REF_SYS}}
+      </srs>
+      <resourceMetadata>
+        <identifier></identifier>
+        <parentidentifier></parentidentifier>
+        <language></language>
+        <type></type>
+        <title></title>
+        <abstract></abstract>
+        <links />
+        <dates />
+        <fees></fees>
+        <encoding></encoding>
+        <crs>
+          <spatialrefsys nativeFormat="Wkt">
+            <wkt></wkt>
+            <proj4></proj4>
+            <srsid>0</srsid>
+            <srid>0</srid>
+            <authid></authid>
+            <description></description>
+            <projectionacronym></projectionacronym>
+            <ellipsoidacronym></ellipsoidacronym>
+            <geographicflag>false</geographicflag>
+          </spatialrefsys>
+        </crs>
+        <extent />
+      </resourceMetadata>
+      <matrixSet scaleToZoomMethod="MapBox">
+        <matrix matrixWidth="1" yMax="20037508.34278919920325279" xMin="-20037508.34278919920325279"
+          xMax="20037508.34278919920325279" matrixHeight="1" tileYSpan="40075016.68557839840650558"
+          zoomLevel="0" scale="559082264.0287165641784668" tileXSpan="40075016.68557839840650558"
+          yMin="-20037508.34278919920325279">
+          {{SPATIAL_REF_SYS}}
+        </matrix>
+        <matrix matrixWidth="2" yMax="20037508.34278919920325279" xMin="-20037508.34278919920325279"
+          xMax="20037508.34278919920325279" matrixHeight="2" tileYSpan="20037508.34278919920325279"
+          zoomLevel="1" scale="279541132.0143582820892334" tileXSpan="20037508.34278919920325279"
+          yMin="-20037508.34278919920325279">
+          {{SPATIAL_REF_SYS}}
+        </matrix>
+        <matrix matrixWidth="4" yMax="20037508.34278919920325279" xMin="-20037508.34278919920325279"
+          xMax="20037508.34278919920325279" matrixHeight="4" tileYSpan="10018754.1713945996016264"
+          zoomLevel="2" scale="139770566.0071791410446167" tileXSpan="10018754.1713945996016264"
+          yMin="-20037508.34278919920325279">
+          {{SPATIAL_REF_SYS}}
+        </matrix>
+        <matrix matrixWidth="8" yMax="20037508.34278919920325279" xMin="-20037508.34278919920325279"
+          xMax="20037508.34278919920325279" matrixHeight="8" tileYSpan="5009377.0856972998008132"
+          zoomLevel="3" scale="69885283.00358957052230835" tileXSpan="5009377.0856972998008132"
+          yMin="-20037508.34278919920325279">
+          {{SPATIAL_REF_SYS}}
+        </matrix>
+        <matrix matrixWidth="16" yMax="20037508.34278919920325279"
+          xMin="-20037508.34278919920325279" xMax="20037508.34278919920325279" matrixHeight="16"
+          tileYSpan="2504688.5428486499004066" zoomLevel="4" scale="34942641.50179478526115417"
+          tileXSpan="2504688.5428486499004066" yMin="-20037508.34278919920325279">
+          {{SPATIAL_REF_SYS}}
+        </matrix>
+        <matrix matrixWidth="32" yMax="20037508.34278919920325279"
+          xMin="-20037508.34278919920325279" xMax="20037508.34278919920325279" matrixHeight="32"
+          tileYSpan="1252344.2714243249502033" zoomLevel="5" scale="17471320.75089739263057709"
+          tileXSpan="1252344.2714243249502033" yMin="-20037508.34278919920325279">
+          {{SPATIAL_REF_SYS}}
+        </matrix>
+        <matrix matrixWidth="64" yMax="20037508.34278919920325279"
+          xMin="-20037508.34278919920325279" xMax="20037508.34278919920325279" matrixHeight="64"
+          tileYSpan="626172.13571216247510165" zoomLevel="6" scale="8735660.37544869631528854"
+          tileXSpan="626172.13571216247510165" yMin="-20037508.34278919920325279">
+          {{SPATIAL_REF_SYS}}
+        </matrix>
+        <matrix matrixWidth="128" yMax="20037508.34278919920325279"
+          xMin="-20037508.34278919920325279" xMax="20037508.34278919920325279" matrixHeight="128"
+          tileYSpan="313086.06785608123755082" zoomLevel="7" scale="4367830.18772434815764427"
+          tileXSpan="313086.06785608123755082" yMin="-20037508.34278919920325279">
+          {{SPATIAL_REF_SYS}}
+        </matrix>
+        <matrix matrixWidth="256" yMax="20037508.34278919920325279"
+          xMin="-20037508.34278919920325279" xMax="20037508.34278919920325279" matrixHeight="256"
+          tileYSpan="156543.03392804061877541" zoomLevel="8" scale="2183915.09386217407882214"
+          tileXSpan="156543.03392804061877541" yMin="-20037508.34278919920325279">
+          {{SPATIAL_REF_SYS}}
+        </matrix>
+        <matrix matrixWidth="512" yMax="20037508.34278919920325279"
+          xMin="-20037508.34278919920325279" xMax="20037508.34278919920325279" matrixHeight="512"
+          tileYSpan="78271.51696402030938771" zoomLevel="9" scale="1091957.54693108703941107"
+          tileXSpan="78271.51696402030938771" yMin="-20037508.34278919920325279">
+          {{SPATIAL_REF_SYS}}
+        </matrix>
+        <matrix matrixWidth="1024" yMax="20037508.34278919920325279"
+          xMin="-20037508.34278919920325279" xMax="20037508.34278919920325279" matrixHeight="1024"
+          tileYSpan="39135.75848201015469385" zoomLevel="10" scale="545978.77346554351970553"
+          tileXSpan="39135.75848201015469385" yMin="-20037508.34278919920325279">
+          {{SPATIAL_REF_SYS}}
+        </matrix>
+        <matrix matrixWidth="2048" yMax="20037508.34278919920325279"
+          xMin="-20037508.34278919920325279" xMax="20037508.34278919920325279" matrixHeight="2048"
+          tileYSpan="19567.87924100507734693" zoomLevel="11" scale="272989.38673277175985277"
+          tileXSpan="19567.87924100507734693" yMin="-20037508.34278919920325279">
+          {{SPATIAL_REF_SYS}}
+        </matrix>
+        <matrix matrixWidth="4096" yMax="20037508.34278919920325279"
+          xMin="-20037508.34278919920325279" xMax="20037508.34278919920325279" matrixHeight="4096"
+          tileYSpan="9783.93962050253867346" zoomLevel="12" scale="136494.69336638587992638"
+          tileXSpan="9783.93962050253867346" yMin="-20037508.34278919920325279">
+          {{SPATIAL_REF_SYS}}
+        </matrix>
+        <matrix matrixWidth="8192" yMax="20037508.34278919920325279"
+          xMin="-20037508.34278919920325279" xMax="20037508.34278919920325279" matrixHeight="8192"
+          tileYSpan="4891.96981025126933673" zoomLevel="13" scale="68247.34668319293996319"
+          tileXSpan="4891.96981025126933673" yMin="-20037508.34278919920325279">
+          {{SPATIAL_REF_SYS}}
+        </matrix>
+        <matrix matrixWidth="16384" yMax="20037508.34278919920325279"
+          xMin="-20037508.34278919920325279" xMax="20037508.34278919920325279" matrixHeight="16384"
+          tileYSpan="2445.98490512563466837" zoomLevel="14" scale="34123.6733415964699816"
+          tileXSpan="2445.98490512563466837" yMin="-20037508.34278919920325279">
+          {{SPATIAL_REF_SYS}}
+        </matrix>
+        <rootMatrix matrixWidth="1" yMax="20037508.34278919920325279"
+          xMin="-20037508.34278919920325279" xMax="20037508.34278919920325279" matrixHeight="1"
+          tileYSpan="40075016.68557839840650558" zoomLevel="0" scale="559082264.0287165641784668"
+          tileXSpan="40075016.68557839840650558" yMin="-20037508.34278919920325279">
+          {{SPATIAL_REF_SYS}}
+        </rootMatrix>
+      </matrixSet>
+      <provider>xyzvectortiles</provider>
+      <map-layer-style-manager current="default">
+        <map-layer-style name="default" />
+      </map-layer-style-manager>
+      <flags>
+        <Identifiable>1</Identifiable>
+        <Removable>1</Removable>
+        <Searchable>0</Searchable>
+        <Private>0</Private>
+      </flags>
+      <customproperties>
+        <Option />
+      </customproperties>
+      <renderer type="basic">
+        <styles>
+          <style expression="" max-zoom="-1" layer="units" geometry="2" enabled="1" min-zoom="-1"
+            name="">
+            <symbols>
+              <symbol type="fill" is_animated="0" alpha="1" clip_to_extent="1" force_rhr="0"
+                frame_rate="10" name="0">
+                <data_defined_properties>
+                  <Option type="Map">
+                    <Option type="QString" value="" name="name" />
+                    <Option name="properties" />
+                    <Option type="QString" value="collection" name="type" />
+                  </Option>
+                </data_defined_properties>
+                <layer id="{f867cc2f-f7d9-46de-86a4-abe4a869b404}" class="SimpleFill" enabled="1"
+                  pass="0" locked="0">
+                  <Option type="Map">
+                    <Option type="QString" value="3x:0,0,0,0,0,0" name="border_width_map_unit_scale" />
+                    <Option type="QString" value="164,113,88,255" name="color" />
+                    <Option type="QString" value="bevel" name="joinstyle" />
+                    <Option type="QString" value="0,0" name="offset" />
+                    <Option type="QString" value="3x:0,0,0,0,0,0" name="offset_map_unit_scale" />
+                    <Option type="QString" value="MM" name="offset_unit" />
+                    <Option type="QString" value="35,35,35,255" name="outline_color" />
+                    <Option type="QString" value="solid" name="outline_style" />
+                    <Option type="QString" value="0.26" name="outline_width" />
+                    <Option type="QString" value="MM" name="outline_width_unit" />
+                    <Option type="QString" value="solid" name="style" />
+                  </Option>
+                  <data_defined_properties>
+                    <Option type="Map">
+                      <Option type="QString" value="" name="name" />
+                      <Option type="Map" name="properties">
+                        <Option type="Map" name="fillColor">
+                          <Option type="bool" value="true" name="active" />
+                          <Option type="QString" value="&quot;color&quot;" name="expression" />
+                          <Option type="int" value="3" name="type" />
+                        </Option>
+                      </Option>
+                      <Option type="QString" value="collection" name="type" />
+                    </Option>
+                  </data_defined_properties>
+                </layer>
+              </symbol>
+            </symbols>
+          </style>
+          <style expression="geometry_type($geometry)='Line'" max-zoom="-1" layer="lines"
+            geometry="1" enabled="1" min-zoom="-1" name="">
+            <symbols>
+              <symbol type="line" is_animated="0" alpha="1" clip_to_extent="1" force_rhr="0"
+                frame_rate="10" name="0">
+                <data_defined_properties>
+                  <Option type="Map">
+                    <Option type="QString" value="" name="name" />
+                    <Option name="properties" />
+                    <Option type="QString" value="collection" name="type" />
+                  </Option>
+                </data_defined_properties>
+                <layer id="{6ce7f921-9b76-4aac-8f38-282a956a27ad}" class="SimpleLine" enabled="1"
+                  pass="0" locked="0">
+                  <Option type="Map">
+                    <Option type="QString" value="0" name="align_dash_pattern" />
+                    <Option type="QString" value="square" name="capstyle" />
+                    <Option type="QString" value="5;2" name="customdash" />
+                    <Option type="QString" value="3x:0,0,0,0,0,0" name="customdash_map_unit_scale" />
+                    <Option type="QString" value="MM" name="customdash_unit" />
+                    <Option type="QString" value="0" name="dash_pattern_offset" />
+                    <Option type="QString" value="3x:0,0,0,0,0,0"
+                      name="dash_pattern_offset_map_unit_scale" />
+                    <Option type="QString" value="MM" name="dash_pattern_offset_unit" />
+                    <Option type="QString" value="0" name="draw_inside_polygon" />
+                    <Option type="QString" value="bevel" name="joinstyle" />
+                    <Option type="QString" value="0,0,0,255" name="line_color" />
+                    <Option type="QString" value="solid" name="line_style" />
+                    <Option type="QString" value="0.5" name="line_width" />
+                    <Option type="QString" value="MM" name="line_width_unit" />
+                    <Option type="QString" value="0" name="offset" />
+                    <Option type="QString" value="3x:0,0,0,0,0,0" name="offset_map_unit_scale" />
+                    <Option type="QString" value="MM" name="offset_unit" />
+                    <Option type="QString" value="0" name="ring_filter" />
+                    <Option type="QString" value="0" name="trim_distance_end" />
+                    <Option type="QString" value="3x:0,0,0,0,0,0"
+                      name="trim_distance_end_map_unit_scale" />
+                    <Option type="QString" value="MM" name="trim_distance_end_unit" />
+                    <Option type="QString" value="0" name="trim_distance_start" />
+                    <Option type="QString" value="3x:0,0,0,0,0,0"
+                      name="trim_distance_start_map_unit_scale" />
+                    <Option type="QString" value="MM" name="trim_distance_start_unit" />
+                    <Option type="QString" value="0" name="tweak_dash_pattern_on_corners" />
+                    <Option type="QString" value="0" name="use_custom_dash" />
+                    <Option type="QString" value="3x:0,0,0,0,0,0" name="width_map_unit_scale" />
+                  </Option>
+                  <data_defined_properties>
+                    <Option type="Map">
+                      <Option type="QString" value="" name="name" />
+                      <Option name="properties" />
+                      <Option type="QString" value="collection" name="type" />
+                    </Option>
+                  </data_defined_properties>
+                </layer>
+              </symbol>
+            </symbols>
+          </style>
+        </styles>
+      </renderer>
+      <labeling type="basic">
+        <styles />
+      </labeling>
+      <blendMode>0</blendMode>
+      <layerOpacity>1</layerOpacity>
+    </maplayer>
+  </maplayers>
+</qlr>
