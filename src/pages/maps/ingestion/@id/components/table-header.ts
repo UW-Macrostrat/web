@@ -6,33 +6,42 @@ import {
   Popover,
 } from "@blueprintjs/core";
 
-import { TableUpdate } from "~/pages/maps/ingestion/@id/utils";
+import { DataParameters, TableUpdate } from "~/pages/maps/ingestion/@id/utils";
 import styles from "./main.module.sass";
 import hyper from "@macrostrat/hyper";
+import { clearDataParameters } from "~/pages/maps/ingestion/@id/reducer";
 
 const h = hyper.styled(styles);
 
 interface TableHeaderProps {
   hiddenColumns: string[];
   tableUpdates: TableUpdate[];
+  dataParameters: DataParameters;
   totalNumberOfRows: number;
   showAllColumns: () => void;
   toggleShowOmittedRows: () => void;
   clearTableUpdates: () => void;
   submitTableUpdates: () => Promise<void>;
   downloadSourceFiles: () => void;
+  clearDataParameters: () => void;
 }
 
 export const TableHeader = ({
   hiddenColumns,
   tableUpdates,
+  dataParameters,
   totalNumberOfRows,
   showAllColumns,
   toggleShowOmittedRows,
   clearTableUpdates,
   submitTableUpdates,
-  downloadSourceFiles
+  downloadSourceFiles,
+  clearDataParameters
 }: TableHeaderProps) => {
+
+  const activeFilters = Object.values(dataParameters.filter).filter(f => f.is_valid())
+
+  console.log(activeFilters)
 
   return (
     h("div.input-form", {}, [
@@ -76,6 +85,14 @@ export const TableHeader = ({
             disabled: tableUpdates.length == 0,
           },
           ["Clear changes"]
+        ),
+        h(
+          Button,
+          {
+            onClick: clearDataParameters,
+            disabled: dataParameters.group == undefined && activeFilters.length == 0,
+          },
+          ["Clear filters/grouping"]
         ),
         h(
           Button,
