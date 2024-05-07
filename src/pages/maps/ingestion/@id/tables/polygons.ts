@@ -67,7 +67,7 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
       return {
         ...defaultColumnConfig,
         t_interval: h(Column, {
-          ...defaultColumnConfig["t_interval"].props,
+          ...defaultColumnConfig?.["t_interval"]?.props,
           cellRenderer: (rowIndex: number, columnIndex: number) =>
             h(IntervalSelection, {
               ref: (el) => {
@@ -116,7 +116,7 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
             }),
         }),
         b_interval: h(Column, {
-          ...defaultColumnConfig["b_interval"].props,
+          ...defaultColumnConfig?.["b_interval"]?.props,
           cellRenderer: (rowIndex: number, columnIndex: number) =>
             h(IntervalSelection, {
               ref: (el) => {
@@ -165,7 +165,7 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
             }),
         }),
         omit: h(Column, {
-          ...defaultColumnConfig["omit"].props,
+          ...defaultColumnConfig?.["omit"]?.props,
           cellRenderer: (rowIndex: number, columnIndex: number) =>
             h(CheckboxCell, {
               ref: (el) => {

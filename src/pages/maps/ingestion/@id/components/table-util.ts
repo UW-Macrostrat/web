@@ -1,6 +1,7 @@
 import { addFilterToURL, Filter } from "../utils/filter";
 import { DataParameters } from "../utils/data-parameter";
 import { secureFetch } from "@macrostrat-web/security";
+import { ingestPrefix } from "@macrostrat-web/settings";
 import { Selection } from "../table"
 import { createTableUpdate } from "../utils";
 
@@ -258,4 +259,17 @@ export const reorderColumns = (columns: string[], visibleColumns: string[], oldI
   }
 
   return newColumns
+}
+
+export const downloadSourceFiles = async (id: number) => {
+  const objects_response = await fetch(
+    `${ingestPrefix}/ingest-process/${id}/objects`
+  );
+  const objects: any[] = await objects_response.json();
+
+  // Download each function sleeping for a second between each attempt
+  for(const o of objects) {
+    await sleep(1000)
+    download_file(o.pre_signed_url)
+  }
 }
