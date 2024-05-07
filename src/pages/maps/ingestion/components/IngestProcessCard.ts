@@ -6,6 +6,7 @@ import {
   useCallback,
   useState,
 } from "react";
+import { LinkCard } from "~/components";
 
 import { ingestPrefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
@@ -34,15 +35,15 @@ const deleteTag = async (tag: string, ingestId: number) => {
   }
 };
 
-const IngestProcessCard = ({
+function IngestProcessCard({
   ingestProcess,
   user,
-  onUpdate
+  onUpdate,
 }: {
   ingestProcess: IngestProcess;
   user: any | undefined;
   onUpdate: () => void;
-}) => {
+}) {
   const [_ingestProcess, setIngestProcess] =
     useState<IngestProcess>(ingestProcess);
 
@@ -59,89 +60,72 @@ const IngestProcessCard = ({
   const edit_href = `/maps/ingestion/${source_id}`;
   const sourcesRecordURL = `/map/dev/sources/${slug}`;
 
-  return h(
-    Card,
-    {
-      style: {
-        display: "flex",
-        flexDirection: "row",
-        justifyContent: "space-between",
-        padding: "0.5em",
-        margin: "0.5em",
-        borderRadius: "0.5em",
-        backgroundColor: "#f0f0f0",
-        overflow: "scroll",
+  return (
+    h(
+      Card,
+      {
+        className: "map-card",
       },
-    },
-    [
-      h(
-        "div",
-        {
-          style: {
-            maxWidth: "90%",
-          },
-        },
-        [
-          h("div.flex.row", { style: { paddingBottom: "4px" } }, [
-            h("h3", { style: { margin: "0px" } }, name),
-          ]),
-          h(
-            "div.flex.row",
-            { style: { paddingBottom: "4px", display: "flex", gap: "0.5em" } },
-            [
-              h.if(ingestProcess.state !== undefined)(
-                Tag,
-                {
-                  value: ingestProcess.state,
-                  style: { marginTop: "auto", marginBottom: "auto" },
-                },
-                []
-              ),
-              tags.map((tag, i) => {
-                return h(Tag, {
-                  key: tag,
-                  value: tag,
-                  style: { marginTop: "auto", marginBottom: "auto" },
-                  onClick: async () => {
-                    await updateIngestProcess();
-                    await deleteTag(tag, id);
-                  },
-                });
-              }),
-              h(
-                AddButton,
-                {
-                  ingestId: id,
-                  onChange: updateIngestProcess,
-                },
-                []
-              ),
-            ]
-          ),
-          h("div.flex.row", [
-            h("h6", { style: { margin: "0px" } }, `Scale: ${scale}`),
-            h("h6", { style: { margin: "0px" } }, `Source ID: ${source_id}`),
-            h("h6", { style: { margin: "0px" } }, `Slug: ${slug}`),
-          ]),
-          h.if(raster_url != null)([
-            " ",
-            h("span.raster", { style: { marginTop: ".5rem" } }, "Raster"),
-          ]),
-          h.if(slug !== undefined)(
-            "a",
-            { href: sourcesRecordURL },
-            "Sources record map"
-          ),
-        ]
-      ),
-      h("div", {}, [
-        h.if(user !== undefined)([
-          "",
-          h(AnchorButton, { href: edit_href, icon: "edit" }),
+      [
+        h("div.flex.row", { style: { paddingBottom: "4px" } }, [
+          h("h3", { style: { margin: "0px" } }, name),
         ]),
-      ]),
-    ]
+        h(
+          "div.flex.row",
+          { style: { paddingBottom: "4px", display: "flex", gap: "0.5em" } },
+          [
+            h.if(ingestProcess.state !== undefined)(
+              Tag,
+              {
+                value: ingestProcess.state,
+                style: { marginTop: "auto", marginBottom: "auto" },
+              },
+              []
+            ),
+            tags.map((tag, i) => {
+              return h(Tag, {
+                key: tag,
+                value: tag,
+                style: { marginTop: "auto", marginBottom: "auto" },
+                onClick: async () => {
+                  await updateIngestProcess();
+                  await deleteTag(tag, id);
+                },
+              });
+            }),
+            h(
+              AddButton,
+              {
+                ingestId: id,
+                onChange: updateIngestProcess,
+              },
+              []
+            ),
+          ]
+        ),
+        h("div.flex.row", [
+          h("h6", { style: { margin: "0px" } }, `Scale: ${scale}`),
+          h("h6", { style: { margin: "0px" } }, `Source ID: ${source_id}`),
+          h("h6", { style: { margin: "0px" } }, `Slug: ${slug}`),
+        ]),
+        h.if(raster_url != null)([
+          " ",
+          h("span.raster", { style: { marginTop: ".5rem" } }, "Raster"),
+        ]),
+        h.if(slug !== undefined)(
+          "a",
+          { href: sourcesRecordURL },
+          "Sources record map"
+        ),
+        h("div", {}, [
+          h.if(user !== undefined)([
+            h(AnchorButton, { href: edit_href, icon: "edit" }),
+          ]),
+        ])
+      ]
+    ),
+
   );
-};
+}
 
 export default IngestProcessCard;

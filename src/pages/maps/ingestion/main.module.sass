@@ -6,5 +6,20 @@
   display: inline-block
   font-size: 0.8em
 
-body
-  margin: 0
+.ingestion-title-bar
+  display: grid
+  grid-template-columns: 1000px
+  justify-content: center
+
+.ingestion-body
+  display: grid
+  //grid-template-columns: 800px 200px
+  justify-content: center
+
+.ingestion-cards, .ingestion-context
+  display: grid
+  column-gap: 1em
+  row-gap: 1em
+  grid-template-columns: 1fr 1fr
+  justify-content: repeat(auto-fill)
+
