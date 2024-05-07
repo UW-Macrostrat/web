@@ -15,7 +15,7 @@ import {
 } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import AddButton from "~/pages/maps/ingestion/components/AddButton";
-import IngestProcessCard from "~/pages/maps/ingestion/components/IngestProcessCard";
+import IngestProcessCard from "~/pages/maps/ingestion/components/ingest-process-card";
 import { useEffect, useState, useContext } from "react";
 
 import Tag from "./components/Tag";

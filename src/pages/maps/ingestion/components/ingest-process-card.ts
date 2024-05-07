@@ -135,7 +135,7 @@ const IngestProcessCard = ({
         ]
       ),
       h("div", {}, [
-        h.if(user !== undefined)([
+        h.if(user !== undefined && !["failed", "pending"].includes(ingestProcess.state))([
           "",
           h(AnchorButton, { href: edit_href, icon: "edit" }),
         ]),
