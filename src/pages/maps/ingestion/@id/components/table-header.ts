@@ -40,8 +40,10 @@ export const TableHeader = ({
 }: TableHeaderProps) => {
 
   const activeFilters = Object.values(dataParameters.filter).filter(f => f.is_valid())
+  const isMenuActive = (dataParameters.group != undefined || activeFilters.length != 0) ||
+    hiddenColumns.length != 0 ||
+    tableUpdates.length != 0
 
-  console.log(activeFilters)
 
   return (
     h("div.input-form", {}, [
@@ -54,46 +56,57 @@ export const TableHeader = ({
             h(
               MenuItem,
               {
+                icon: "refresh",
+                text: "Clear Changes",
+                onClick: clearTableUpdates,
+                disabled: tableUpdates.length == 0
+              }
+            ),
+            h(
+              MenuItem,
+              {
+                icon: "filter",
+                text: "Clear Filters/Group",
+                onClick: clearDataParameters,
+                disabled: dataParameters.group == undefined && activeFilters.length == 0
+              }
+            ),
+            h(
+              MenuItem,
+              {
                 disabled: hiddenColumns.length == 0,
                 icon: "eye-open",
-                text: "Show All",
+                text: "Show Hidden Columns",
                 onClick: showAllColumns
-              },
-              []
+              }
             ),
             h(
               MenuItem,
               {
                 icon: "cross",
-                text: "Show Omitted",
+                text: "Show Omitted Rows",
                 onClick: toggleShowOmittedRows
-              },
-              []
+              }
             ),
+            h(
+              MenuItem,
+              {
+                icon: "download",
+                text: "Download Source Files",
+                onClick: downloadSourceFiles
+              }
+            )
           ]),
-          renderTarget: ({ isOpen, ref, ...targetProps }) =>
+          renderTarget: ({ ...targetProps }) =>
             h(
               Button,
-              { ...targetProps, elementRef: ref, icon: "menu" },
-              []
+              {
+                ...targetProps,
+                icon: "menu",
+                intent: isMenuActive ? "success" : undefined
+              }
             ),
         }),
-        h(
-          Button,
-          {
-            onClick: clearTableUpdates,
-            disabled: tableUpdates.length == 0,
-          },
-          ["Clear changes"]
-        ),
-        h(
-          Button,
-          {
-            onClick: clearDataParameters,
-            disabled: dataParameters.group == undefined && activeFilters.length == 0,
-          },
-          ["Clear filters/grouping"]
-        ),
         h(
           Button,
           {
@@ -102,14 +115,7 @@ export const TableHeader = ({
             disabled: tableUpdates.length == 0,
             intent: "success",
           },
-          ["Submit"]
-        ),
-        h(
-          Button,
-          {
-            onClick: downloadSourceFiles
-          },
-          ["Download Source"]
+          ["Submit Changes"]
         ),
         h.if(totalNumberOfRows != undefined)(
           Button,
