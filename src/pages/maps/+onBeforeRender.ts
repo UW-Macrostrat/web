@@ -4,7 +4,7 @@ export async function onBeforeRender(pageContext) {
   // `.page.server.js` files always run in Node.js; we could use SQL/ORM queries here.
 
   const res = await postgrest
-    .from("sources")
+    .from("sources_metadata")
     .select("*")
     .order("source_id", { ascending: true })
 
