@@ -400,6 +400,7 @@ export function TableInterface({
         h(TableHeader, {
           hiddenColumns: tableData.hiddenColumns,
           tableUpdates: tableData.tableUpdates,
+          dataParameters: tableData.parameters,
           totalNumberOfRows: tableData.totalNumberOfRows,
           showAllColumns: () => dispatch({ type: "showAllColumns" }),
           toggleShowOmittedRows: () => dispatch({ type: "toggleShowOmittedRows" }),
@@ -424,7 +425,8 @@ export function TableInterface({
               await sleep(1000)
               download_file(o.pre_signed_url)
             }
-          }
+          },
+          clearDataParameters: () => dispatch({ type: "clearDataParameters" })
         }),
         h(
           Table2,
