@@ -47,6 +47,7 @@ export function Page({
     title: title,
     showMap: showMap,
     setShowMap: setShowMap,
+    source_href: source.url
   };
 
   const sourcePrefix = `${ingestPrefix}/sources/${source_id}`;
@@ -146,16 +147,21 @@ function Header({
   showMap,
   setShowMap,
   parentRoute,
+  source_href
 }: {
   title: string;
   showMap: boolean;
   setShowMap: (b: boolean) => void;
   parentRoute?: string;
+  source_href: string;
 }) {
   return h("div.edit-page-header", [
     h(ParentRouteButton, { parentRoute: parentRoute }),
     h("h2.m-0", {}, [
       `${title} Ingestion`,
+      h.if(source_href != null)(NavigateMapSourceButton, {
+        href: source_href,
+      }),
       h(ShowDocsButton, {
         href: "https://github.com/UW-Macrostrat/web/blob/main/src/pages/maps/ingestion/%40id/README.md",
       }),
@@ -183,5 +189,16 @@ function ShowMapButton({ showMap, setShowMap }) {
     large: true,
     intent: showMap ? "primary" : "none",
     onClick: () => setShowMap(!showMap),
+  });
+}
+
+function NavigateMapSourceButton({ href } : { href: string }) {
+  return h(AnchorButton, {
+    minimal: true,
+    title: "View Map Source",
+    icon: "third-party",
+    target: "_blank",
+    large: true,
+    href: href,
   });
 }
