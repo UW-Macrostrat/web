@@ -19,7 +19,7 @@ const INPUT_FIELDS = {
   "Reference Title": "ref_title",
   Authors: "authors",
   "Reference Year": "ref_year",
-  "ISBN DOI": "isbn_dui",
+  "ISBN DOI": "isbn_doi",
   Scale: "scale",
   Licence: "licence",
   Area: "area",
