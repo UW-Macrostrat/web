@@ -27,8 +27,8 @@ export async function onBeforeRender(pageContext: PageContextBuiltInServer) {
   return {
     pageContext: {
       pageProps: {
-        id,
-        map,
+        source_id: id,
+        mapBounds: map,
         source,
         ingestProcess,
       },

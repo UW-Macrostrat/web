@@ -6,7 +6,7 @@ import { Cell, EditableCell2Props } from "@blueprintjs/table";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
 
-export const h = hyper.styled(styles);
+const h = hyper.styled(styles);
 
 interface CheckboxCell extends Omit<EditableCell2Props, "value" | "onConfirm"> {
   value: boolean | undefined;
@@ -46,7 +46,7 @@ let CheckboxCell = forwardRef((props: CheckboxCell, ref) => {
       h(
         Button,
         {
-          ref: ref,
+          buttonRef: ref,
           className: "editable-cell",
           text: text,
           intent: intent,

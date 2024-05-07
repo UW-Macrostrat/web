@@ -6,9 +6,10 @@ import { ingestPrefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import styles from "./source-form.module.sass";
 import { ReactNode, useCallback, useEffect, useState, useRef } from "react";
-import ProgressPopover, {
+import {
+  ProgressPopover,
   ProgressPopoverProps,
-} from "~/pages/maps/ingestion/@id/components/progress-popover/progress-popover";
+} from "~/pages/maps/ingestion/@id/components";
 import { setupPointSymbols } from "@macrostrat/mapbox-styles";
 export const h = hyper.styled(styles);
 

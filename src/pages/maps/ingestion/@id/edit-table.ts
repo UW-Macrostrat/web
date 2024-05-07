@@ -1,76 +1,51 @@
 import hyper from "@macrostrat/hyper";
 
 import {
-  useState,
-  useEffect,
-  useCallback,
-  useRef,
-  useLayoutEffect,
-  useMemo,
-  FunctionComponent,
-  MutableRefObject,
-} from "react";
-import {
-  HotkeysProvider,
-  InputGroup,
-  Menu,
-  MenuItem,
-  Button,
-  useHotkeys,
   Icon,
-  IconSize,
-  Popover,
+  useHotkeys
 } from "@blueprintjs/core";
-import { Spinner, ButtonGroup } from "@blueprintjs/core";
 import {
   Column,
-  Table2,
-  RowHeaderCell2,
   ColumnHeaderCell2,
-  SelectionModes,
-  RegionCardinality,
   FocusedCellCoordinates,
+  RowHeaderCell2,
+  SelectionModes,
+  Table2,
 } from "@blueprintjs/table";
-import update from "immutability-helper";
-
+import { useCallback, useReducer, useEffect, useMemo, useState, useRef, MutableRefObject } from "react";
 import {
-  Filters,
-  OperatorQueryParameter,
-  TableUpdate,
-  TableSelection,
-  Selection,
-  DataParameters,
-  ColumnConfigGenerator,
-  ColumnConfig,
-} from "./table";
-import {
-  buildURL,
   Filter,
-  isEmptyArray,
-  submitChange,
-  getTableUpdate,
-  range,
-  applyTableUpdate,
-  applyTableUpdates,
-  submitColumnCopy,
-  cloneDataParameters,
-  download_file,
-  updateInput,
-} from "./table-util";
-import TableMenu from "./table-menu";
-import IntervalSelection, {
-  Interval,
-} from "./components/cell/interval-selection";
-import ProgressPopover, {
+  createTableUpdateCopyColumn,
+  isColumnActive,
+  createTableUpdate,
+  applyTableUpdates, submitTableUpdates
+} from "./utils/";
+import { tableDataReducer, initialState } from "./reducer/";
+import {
+  EditableCell,
+  ProgressPopover,
   ProgressPopoverProps,
-} from "./components/progress-popover/progress-popover";
+  TableMenu,
+  getSelectedColumns,
+  selectionToText,
+  textToTableUpdates,
+  getData,
+  getCellSelected,
+  download_file,
+  sleep
+} from "./components/index";
+import {
+  ColumnConfig,
+  ColumnConfigGenerator,
+  OperatorQueryParameter,
+  Selection,
+} from "./table";
 
-import "./override.sass";
 import "@blueprintjs/table/lib/css/table.css";
-import styles from "./edit-table.module.sass";
-import EditableCell from "./components/cell/editable-cell";
 import { ingestPrefix } from "@macrostrat-web/settings";
-import CheckboxCell from "~/pages/maps/ingestion/@id/components/cell/checkbox-cell";
+import styles from "./edit-table.module.sass";
+import "./override.sass";
+import TableHeader from "~/pages/maps/ingestion/@id/components/table-header";
 
 const h = hyper.styled(styles);
 
@@ -89,39 +64,26 @@ export function TableInterface({
   finalColumns,
   columnGenerator,
 }: EditTableProps) {
-  const [showOmitted, setShowOmitted] = useState<boolean>(false);
 
-  // Hidden Columns
-  const [hiddenColumns, _setHiddenColumns] = useState<string[]>([]);
-
-  // Cell refs
-  const ref = useRef<MutableRefObject<any>[][]>(null);
+  const [tableData, dispatch] = useReducer(
+    tableDataReducer,
+    {...initialState, allColumns: finalColumns}
+  )
 
   // Selection State
   const [selection, setSelection] = useState<Selection[]>([]);
-  const [copiedColumn, setCopiedColumn] = useState<string | undefined>(
+  const [copiedSelection, setCopiedSelection] = useState<Selection[] | undefined>(
     undefined
   );
 
-  // Data Loading
-  const [loading, setLoading] = useState<boolean>(true);
-
-  // Data State
-  const [dataParameters, setDataParameters] = useState<DataParameters>({
-    select: { page: "0", pageSize: "50" },
-    filter: {},
-  });
-  const [data, setData] = useState<any[]>([]);
-  const [numberOfRows, setNumberOfRows] = useState<number | undefined>(
-    undefined
-  );
+  // Cell refs
+  const ref = useRef<MutableRefObject<any>[][]>(null);
 
   // Error State
   const [error, setError] = useState<string | undefined>(undefined);
 
   // Table Update State
-  const [tableUpdates, setTableUpdates] = useState<TableUpdate[]>([]);
-  const [updateProgress, _setUpdateProgress] =
+  const [updateProgress, setUpdateProgress] =
     useState<ProgressPopoverProps>(undefined);
 
   // Focused Cell
@@ -129,129 +91,36 @@ export function TableInterface({
     FocusedCellCoordinates | undefined
   >(undefined);
 
-  const transformedData = useMemo(() => {
-    return applyTableUpdates(data, tableUpdates);
-  }, [data, tableUpdates]);
+  useEffect(() => {
+    (async () => {
+      const newData = await getData(url, tableData.parameters)
 
-  const tableColumns = useMemo(() => {
-    // Catch when there is no data
-    if (data == undefined || data.length == 0) {
-      return finalColumns;
-    }
-
-    // If the data has its own columns defined
-    if (Object.keys(data[0]).length > 0) {
-      // Get the keys that are not in the final columns
-      const additionalColumns = Object.keys(data[0]).filter(
-        (x) => !finalColumns.includes(x)
-      );
-
-      return [...finalColumns, ...additionalColumns];
-    }
-
-    return finalColumns;
-  }, [data]);
-
-  const setHiddenColumns = useCallback((column: string | string[]) => {
-    _setHiddenColumns((prev) => {
-      if (Array.isArray(column)) {
-        // Check if they are emptying the list
-        if (column.length == 0) {
-          return [];
-        }
-
-        return [...prev, ...column];
-      }
-
-      return [...prev, column];
-    });
-  }, []);
-
-  const setUpdateProgress = useCallback(
-    (progress: Partial<ProgressPopoverProps> | undefined) => {
-      _setUpdateProgress((prev) => {
-        // Check if the progress is undefined
-        if (progress == undefined) {
-          return undefined;
-        }
-
-        return {
-          ...prev,
-          ...progress,
-        };
-      });
-    },
-    []
-  );
-
-  const getData = useCallback(
-    async (dataParameters: DataParameters) => {
-      const dataURL = buildURL(url, dataParameters);
-
-      const response = await fetch(dataURL);
-      let data = await response.json();
-
-      data = data.filter((x) => (showOmitted ? true : x.omit != true));
-
-      // Update the number of rows
-      setNumberOfRows(parseInt(response.headers.get("X-Total-Count")));
-
-      // Set the table ref
       ref.current = Array.from(
-        { length: data.length == 0 ? 1 : data.length },
+        { length: newData.data.length == 0 ? 1 : newData.data.length },
         () =>
           Array.from(
-            { length: data.length == 0 ? 1 : Object.keys(data[0]).length },
+            { length: newData.data.length == 0 ? 1 : Object.keys(newData.data[0]).length },
             () => null
           )
       );
 
-      return data;
-    },
-    [showOmitted]
-  );
+      dispatch({
+        type: "updateData",
+        ...newData
+      })
+    })()
+  }, [tableData.parameters]);
 
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      setData(await getData(dataParameters));
-      setLoading(false);
-    })();
-  }, [dataParameters, showOmitted]);
 
-  // Get the visible columns
-  const visibleColumnNames = useMemo(() => {
-    if (tableColumns.length == 0) {
-      return [];
-    }
+  const transformedData = useMemo(() => {
+    const data = structuredClone(tableData.remoteData);
+    return applyTableUpdates(data, tableData.tableUpdates)
+  }, [tableData.remoteData, tableData.tableUpdates]);
 
-    const allHiddenColumns = [...hiddenColumns, ...INTERNAL_COLUMNS];
-
-    return tableColumns.filter((x) => !allHiddenColumns.includes(x));
-  }, [tableColumns, hiddenColumns]);
-
-  const selectedColumns = useMemo(() => {
-    if (selection.length == 0) {
-      return undefined;
-    }
-
-    const selectedColumnRange = selection[0]?.cols;
-    if (selection[0]?.rows == undefined) {
-      const selectedColumnIndices = range(
-        selectedColumnRange[0],
-        selectedColumnRange[1] + 1
-      );
-      return selectedColumnIndices?.map((index) => visibleColumnNames[index]);
-    } else {
-      return undefined;
-    }
-  }, [selection, visibleColumnNames]);
-
-  const handleHide = useCallback(() => {
-    if (selectedColumns != undefined) {
-      setHiddenColumns(selectedColumns);
-    }
-  }, [selectedColumns]);
+  const visibleColumns = useMemo(() => {
+    const hiddenColumns = [...INTERNAL_COLUMNS, ...tableData.hiddenColumns];
+    return tableData.allColumns.filter((col) => !hiddenColumns.includes(col));
+  }, [tableData.hiddenColumns, tableData.allColumns]);
 
   const handlePaste = useCallback(async () => {
     const firstSelection = selection[0];
@@ -261,131 +130,45 @@ export function TableInterface({
     ) {
       // Get value from clipboard
       const clipboardText = await navigator.clipboard.readText();
-
-      let clipboardValue = clipboardText
-        .split("\n")
-        .map((row) => row.split("\t"));
-
-      let rowRange = range(firstSelection.rows[0], firstSelection.rows[1] + 1);
-      let colRange = range(firstSelection.cols[0], firstSelection.cols[1] + 1);
-
-      // If one cell is selected go through and paste
-      if (rowRange.length == 1 && colRange.length == 1) {
-        let rowStart = rowRange[0];
-        let colStart = colRange[0];
-
-        const newTableUpdates = clipboardValue.flatMap((row, rowIndex) => {
-          return row.flatMap((value, columnIndex) => {
-            // Ignore copying null values
-            if (value == "") {
-              return [];
-            }
-
-            const tableUpdate = getTableUpdate(
-              url,
-              value,
-              visibleColumnNames[columnIndex + colStart],
-              rowIndex + rowStart,
-              transformedData,
-              dataParameters
-            );
-            return [tableUpdate];
-          });
-        });
-
-        setTableUpdates([...tableUpdates, ...newTableUpdates]);
-      }
-
-      const clipboardValueText = clipboardValue
-        .map((row) => row.join("\t"))
-        .join("\n");
-
-      // Copy clipboard value to clipboard
-      navigator.clipboard.writeText(clipboardValueText);
+      const tableUpdates = textToTableUpdates(
+        clipboardText,
+        firstSelection,
+        url,
+        visibleColumns,
+        transformedData,
+        tableData.parameters
+      );
+      dispatch({ type: "addTableUpdates", tableUpdates });
     }
 
-    if (copiedColumn != undefined && selectedColumns.length == 1) {
-      const selectedColumn = selectedColumns[0];
-
-      const tableUpdate = {
-        description:
-          "Copy column " +
-          copiedColumn +
-          " to column " +
-          selectedColumn +
-          " for all rows",
-        applyToCell: (value: string, row, cellColumnName) => {
-          if (cellColumnName != selectedColumn) {
-            return value;
-          }
-
-          // If this row doesn't pass all the filters skip it
-          if (dataParameters?.filter != undefined) {
-            for (const filter of Object.values(dataParameters.filter)) {
-              if (!filter.passes(row)) {
-                return value;
-              }
-            }
-          }
-
-          if (cellColumnName == selectedColumn) {
-            return row[copiedColumn];
-          }
-
-          return value;
-        },
-        execute: async () => {
-          await submitColumnCopy(
-            url,
-            copiedColumn,
-            selectedColumn,
-            dataParameters
-          );
-        },
-      };
-
-      setTableUpdates([...tableUpdates, tableUpdate]);
-    }
-  }, [selectedColumns, copiedColumn, dataParameters, selection]);
-
-  const handleCopy = useCallback(() => {
-    const firstSelection = selection[0];
+    const selectedColumns = getSelectedColumns(visibleColumns, selection);
+    const copiedColumns = getSelectedColumns(visibleColumns, copiedSelection);
     if (
-      firstSelection?.cols != undefined &&
-      firstSelection?.rows != undefined
+      copiedColumns != undefined && copiedColumns.length == 1 &&
+      selectedColumns != undefined && selectedColumns.length == 1
     ) {
-      let clipboardValue = range(
-        firstSelection.rows[0],
-        firstSelection.rows[1] + 1
-      ).map((rowIndex) => {
-        return range(firstSelection.cols[0], firstSelection.cols[1] + 1).map(
-          (colIndex) => {
-            return transformedData[rowIndex][visibleColumnNames[colIndex]];
-          }
-        );
-      });
+      const selectedColumn = selectedColumns[0];
+      const copiedColumn = copiedColumns[0];
 
-      const clipboardValueText = clipboardValue
-        .map((row) => row.join("\t"))
-        .join("\n");
+      const tableUpdate = createTableUpdateCopyColumn(
+        url,
+        selectedColumn,
+        copiedColumn,
+        tableData.parameters
+      )
 
-      // Copy clipboard value to clipboard
-      navigator.clipboard.writeText(clipboardValueText);
+      dispatch({ type: "addTableUpdates", tableUpdates: [tableUpdate] });
     }
+  }, [selection]);
 
-    if (selectedColumns?.length == 1) {
-      setCopiedColumn(selectedColumns[0]);
-    }
-  }, [selection, selectedColumns, transformedData]);
+  const handleCopy = useCallback((e) => {
+    setCopiedSelection(selection);
 
-  const handleEnter = useCallback(
-    (e) => {
-      ref.current[focusedCell?.row][focusedCell?.col]?.click();
-      e.preventDefault();
-      e.stopPropagation();
-    },
-    [focusedCell]
-  );
+    // Only copy the first selection
+    const firstSelection = selection[0];
+    const selectedText = selectionToText(firstSelection, visibleColumns, transformedData);
+    navigator.clipboard.writeText(selectedText);
+  }, [selection, transformedData, visibleColumns]);
 
   const hotkeys = useMemo(
     () => [
@@ -398,7 +181,10 @@ export function TableInterface({
       {
         combo: "shift+h",
         label: "Hide Column",
-        onKeyDown: handleHide,
+        onKeyDown: () => dispatch({
+          type: "hideColumn",
+          column: getSelectedColumns(visibleColumns, selection)
+        }),
         group: "Table",
       },
       {
@@ -407,86 +193,14 @@ export function TableInterface({
         onKeyDown: handlePaste,
         group: "Table",
       },
-      {
-        combo: "enter",
-        label: "Edit Cell",
-        onKeyDown: handleEnter,
-        group: "Table",
-      },
     ],
-    [handlePaste, handleCopy, handleEnter, handleHide]
+    [handlePaste, handleCopy, visibleColumns, selection]
   );
-  const { handleKeyDown, handleKeyUp } = useHotkeys(hotkeys);
-
-  const submitTableUpdates = useCallback(async () => {
-    setUpdateProgress({ value: 0, text: "Submitting changes" });
-
-    let index = 0;
-    for (const tableUpdate of tableUpdates) {
-      setUpdateProgress({
-        text: tableUpdate?.description ?? "Submitting changes",
-      });
-
-      try {
-        await tableUpdate.execute();
-      } catch (e) {
-        setUpdateProgress({
-          progressBarProps: { intent: "danger" },
-          value: 1,
-          text: "Error submitting changes",
-        });
-
-        setTimeout(() => {
-          setUpdateProgress(undefined);
-        }, 5000);
-
-        return; // If there is an error, stop submitting
-      }
-
-      index += 1;
-      setUpdateProgress({
-        value: index / tableUpdates.length,
-      });
-    }
-
-    setDataParameters(structuredClone(dataParameters));
-    setUpdateProgress(undefined);
-    setTableUpdates([]);
-  }, [tableUpdates]);
-
-  const onFilterChange = useCallback(
-    (columnName: string, param: OperatorQueryParameter) => {
-      const columnFilter = new Filter(columnName, param.operator, param.value);
-      setDataParameters((p) => {
-        let newDataParameters = cloneDataParameters(p);
-        newDataParameters.filter[columnName] = columnFilter;
-        return newDataParameters;
-      });
-    },
-    []
-  );
-
-  const onGroupChange = useCallback((group: string | undefined) => {
-    setDataParameters((p) => {
-      let newDataParameters = cloneDataParameters(p);
-      newDataParameters.group = group;
-      return newDataParameters;
-    });
-  }, []);
 
   const columnHeaderCellRenderer = useCallback(
     (columnIndex: number) => {
-      const columnName: string = visibleColumnNames[columnIndex];
-
-      let filter = undefined;
-      if (
-        dataParameters.filter != undefined &&
-        dataParameters.filter[columnName] != undefined
-      ) {
-        filter = dataParameters.filter[columnName];
-      } else {
-        filter = new Filter(columnName, undefined, "");
-      }
+      const columnName: string = visibleColumns[columnIndex];
+      let filter = tableData.parameters.filter[columnName];
 
       return h(
         ColumnHeaderCell2,
@@ -507,47 +221,49 @@ export function TableInterface({
                 [
                   h("span.selected-column", {}, [
                     columnName,
-                    h.if(finalColumns.includes(columnName))(Icon, {
-                      icon: "star-empty",
-                      size: "12",
-                      color: "#333333",
-                      style: { marginLeft: "5px", marginBottom: "2px" },
-                    }),
+                    h.if(finalColumns.includes(columnName))(
+                      Icon, {
+                        icon: "star-empty",
+                        size: 12,
+                        color: "#333333",
+                        style: { marginLeft: "5px", marginBottom: "2px" },
+                      }
+                    ),
                   ]),
-                  h.if(
-                    (columnName in dataParameters.filter &&
-                      dataParameters.filter[columnName].is_valid()) ||
-                      columnName == dataParameters?.group
-                  )(Icon, {
-                    icon: "filter-list",
-                    size: "15",
-                    color: "#333333",
-                  }),
-                  h.if(
-                    !(
-                      (columnName in dataParameters.filter &&
-                        dataParameters.filter[columnName].is_valid()) ||
-                      columnName == dataParameters?.group
-                    )
-                  )(Icon, { icon: "filter", size: "15", color: "#d0d0d0" }),
+                  h.if(isColumnActive(tableData.parameters, columnName))(
+                    Icon, {
+                      icon: "filter-list",
+                      size: 15,
+                      color: "#333333",
+                    }
+                  ),
+                  h.if(!isColumnActive(tableData.parameters, columnName))(
+                    Icon, { icon: "filter", size: 15, color: "#d0d0d0" }
+                  ),
                 ]
               )
             ),
           menuRenderer: () =>
             h(TableMenu, {
               columnName: columnName,
-              onFilterChange: (x: OperatorQueryParameter) =>
-                onFilterChange(columnName, x),
+              onFilterChange: (param: OperatorQueryParameter) => {
+                dispatch({
+                  type: "setFilter",
+                  filter: new Filter(columnName, param.operator, param.value)
+                })
+              },
               filter: filter,
-              onGroupChange: onGroupChange,
-              group: dataParameters?.group,
-              onHide: () => setHiddenColumns(columnName),
-              hidden: !visibleColumnNames.includes(columnName),
+              onGroupChange: (column: string | undefined) => {
+                dispatch({ type: "setGroupBy", groupBy: column })
+              },
+              group: tableData.parameters?.group,
+              onHide: () => dispatch({ type: "hideColumn", column: columnName }),
+              hidden: !tableData.hiddenColumns.includes(columnName)
             }),
           name: columnName,
           style: {
             backgroundColor:
-              filter.is_valid() || dataParameters?.group == columnName
+              filter?.is_valid() || tableData.parameters?.group == columnName
                 ? "rgba(27,187,255,0.12)"
                 : "#ffffff00",
           },
@@ -555,7 +271,7 @@ export function TableInterface({
         []
       );
     },
-    [dataParameters, visibleColumnNames]
+    [tableData.parameters, tableData.hiddenColumns, visibleColumns]
   );
 
   const rowHeaderCellRenderer = useCallback(
@@ -564,26 +280,25 @@ export function TableInterface({
         return h(RowHeaderCell2, { name: "NULL" }, []);
       }
 
-      const headerKey = dataParameters?.group ? dataParameters?.group : "_pkid";
-      let name = transformedData[rowIndex][headerKey];
+      const headerKey = tableData.parameters?.group || "_pkid";
+      let name = transformedData[rowIndex][headerKey]
 
       if (name == null) {
         name = "NULL";
-      } else if (name.length > 47) {
+      } else if (typeof name == "string" && name.length > 47) {
         name = name.slice(0, 47) + "...";
       }
 
-      return h(RowHeaderCell2, { name: name }, []);
+      return h(RowHeaderCell2, { name: name.toString() }, []);
     },
-    [dataParameters, transformedData]
-  );
+    [tableData.parameters, transformedData]);
 
   const defaultColumnConfig = useMemo(() => {
-    if (tableColumns.length == 0) {
+    if (visibleColumns.length == 0) {
       return {};
     }
 
-    return visibleColumnNames.reduce((prev, columnName, index) => {
+    return visibleColumns.reduce((prev, columnName, index) => {
       return {
         ...prev,
         [columnName]: h(Column, {
@@ -597,31 +312,29 @@ export function TableInterface({
                   ref.current[rowIndex][columnIndex] = el;
                 } catch {}
               },
+              columnName: columnName,
               onConfirm: (value) => {
-                const tableUpdate = getTableUpdate(
-                  url,
-                  value,
-                  columnName,
-                  rowIndex,
-                  transformedData,
-                  dataParameters
-                );
-                setTableUpdates([...tableUpdates, tableUpdate]);
+                if(value != transformedData[rowIndex][columnName]) {
+                  dispatch({
+                    type: "addTableUpdates",
+                    tableUpdates: [
+                      createTableUpdate(
+                        url,
+                        value,
+                        columnName,
+                        transformedData[rowIndex],
+                        tableData.parameters
+                      ),
+                    ],
+                  })
+                }
               },
-              onCopy: (e) => {
-                handleCopy(e);
-              },
-              onPaste: (e) => {
-                handlePaste(e);
-              },
-              editableTextProps: {
-                disabled: !finalColumns.includes(columnName),
-              },
-              intent:
-                data[rowIndex][columnName] !=
-                transformedData[rowIndex][columnName]
-                  ? "success"
-                  : undefined,
+              onCopy: (e) => handleCopy(e),
+              onPaste: handlePaste,
+              intent: tableData.remoteData[rowIndex][columnName] !=
+                transformedData[rowIndex][columnName] ?
+                "success" :
+                undefined,
               value:
                 transformedData.length == 0
                   ? ""
@@ -632,38 +345,36 @@ export function TableInterface({
       };
     }, {});
   }, [
-    visibleColumnNames,
-    tableColumns,
-    dataParameters,
+    visibleColumns,
+    tableData.remoteData,
+    tableData.parameters,
     transformedData,
-    data,
-    selection,
+    handleCopy,
+    handlePaste
   ]);
 
   const columnConfig = useMemo(() => {
-    if (tableColumns.length == 0) {
+    if (visibleColumns.length == 0) {
       return defaultColumnConfig;
     }
 
     const generatedColumns = columnGenerator({
       url,
       defaultColumnConfig,
-      tableColumns,
-      dataParameters,
-      setTableUpdates,
+      dataParameters : tableData.parameters,
+      addTableUpdate: (t) =>
+        dispatch({type: "addTableUpdates", tableUpdates: t}),
       transformedData,
-      data,
-      ref,
+      data: tableData.remoteData,
+      ref
     });
 
     return generatedColumns;
   }, [
     defaultColumnConfig,
-    visibleColumnNames,
-    dataParameters,
+    tableData.parameters,
     transformedData,
-    data,
-    selection,
+    tableData.remoteData,
   ]);
 
   return h(
@@ -680,16 +391,34 @@ export function TableInterface({
     [
       h("div.table-container", {}, [
         h.if(error != undefined)("div.warning", {}, [error]),
-        h(InputForm, {
-          hiddenColumns,
-          setHiddenColumns,
-          setShowOmitted,
-          showOmitted,
-          tableUpdates,
-          setTableUpdates,
-          numberOfRows,
-          ingestProcessId,
-          submitTableUpdates,
+        h(TableHeader, {
+          hiddenColumns: tableData.hiddenColumns,
+          tableUpdates: tableData.tableUpdates,
+          totalNumberOfRows: tableData.totalNumberOfRows,
+          showAllColumns: () => dispatch({ type: "showAllColumns" }),
+          toggleShowOmittedRows: () => dispatch({ type: "toggleShowOmittedRows" }),
+          clearTableUpdates: () => dispatch({ type: "clearTableUpdates" }),
+          submitTableUpdates: async () => {
+            await submitTableUpdates(
+              tableData.tableUpdates,
+              setUpdateProgress
+            )
+            // Update the table data
+            dispatch({ type: "updateData", ...(await getData(url, tableData.parameters)) })
+            dispatch({ type: "clearTableUpdates" })
+          },
+          downloadSourceFiles: async () => {
+            const objects_response = await fetch(
+              `${ingestPrefix}/ingest-process/${ingestProcessId}/objects`
+            );
+            const objects: any[] = await objects_response.json();
+
+            // Download each function sleeping for a second between each attempt
+            for(const o of objects) {
+              await sleep(1000)
+              download_file(o.pre_signed_url)
+            }
+          }
         }),
         h(
           Table2,
@@ -698,43 +427,25 @@ export function TableInterface({
             selectionModes: SelectionModes.COLUMNS_AND_CELLS,
             rowHeaderCellRenderer: rowHeaderCellRenderer,
             onFocusedCell: (focusedCellCoordinates) => {
-              try {
-                ref.current[focusedCellCoordinates?.row][
-                  focusedCellCoordinates?.col
-                ]?.focus();
-              } catch (e) {}
-
               setFocusedCell(focusedCellCoordinates);
             },
-            loadingOptions: loading ? ["cells", "column-header"] : [],
+            loadingOptions: tableData.loading ? ["cells", "column-header"] : [],
             focusedCell: focusedCell,
-            onSelection: (selections: Selection[]) => {
-              console.log(
-                "Columns:",
-                selections[0].cols,
-                "Rows:",
-                selections[0].rows
-              );
-              setSelection(selections);
+            onSelection: (s) => {
+              setSelection(s)
+              const cell = getCellSelected(visibleColumns, s)
+              ref.current[cell.rowIndex][cell.columnIndex]?.focus()
             },
             onVisibleCellsChange: (visibleCells) => {
               if (
                 visibleCells["rowIndexEnd"] >
-                parseInt(dataParameters.select.pageSize) - 2
+                parseInt(tableData.parameters.select.pageSize) - 5
               ) {
-                const newPageSize = (
-                  parseInt(dataParameters.select.pageSize) + 50
-                ).toString();
-
-                setDataParameters((p) => {
-                  let newDataParameters = cloneDataParameters(p);
-                  newDataParameters.select.pageSize = newPageSize;
-                  return newDataParameters;
-                });
+                dispatch({ type: "incrementPageSize", increment: 50 });
               }
             },
-            numRows: data.length,
-            cellRendererDependencies: [transformedData, selection],
+            numRows: tableData.remoteData.length,
+            cellRendererDependencies: [transformedData, selection]
           },
           Object.values(columnConfig)
         ),
@@ -757,89 +468,4 @@ function HotkeysManager({ hotkeys, style, children }) {
     style,
     children,
   });
-}
-
-function InputForm({
-  hiddenColumns,
-  setHiddenColumns,
-  setShowOmitted,
-  showOmitted,
-  tableUpdates,
-  setTableUpdates,
-  numberOfRows,
-  ingestProcessId,
-  submitTableUpdates,
-}) {
-  return h("div.input-form", {}, [
-    h(ButtonGroup, [
-      h(Popover, {
-        interactionKind: "click",
-        minimal: true,
-        placement: "bottom-start",
-        content: h(Menu, {}, [
-          h(
-            MenuItem,
-            {
-              disabled: hiddenColumns.length == 0,
-              icon: "eye-open",
-              text: "Show All",
-              onClick: () => setHiddenColumns([]),
-            },
-            []
-          ),
-          h(
-            MenuItem,
-            {
-              icon: "cross",
-              text: "Show Omitted",
-              onClick: () => setShowOmitted(!showOmitted),
-            },
-            []
-          ),
-        ]),
-        renderTarget: ({ isOpen, ref, ...targetProps }) =>
-          h(Button, { ...targetProps, elementRef: ref, icon: "menu" }, []),
-      }),
-      h(
-        Button,
-        {
-          onClick: () => {
-            setTableUpdates([]);
-          },
-          disabled: tableUpdates.length == 0,
-        },
-        ["Clear changes"]
-      ),
-      h(
-        Button,
-        {
-          type: "submit",
-          onClick: submitTableUpdates,
-          disabled: tableUpdates.length == 0,
-          intent: "success",
-        },
-        ["Submit"]
-      ),
-      h(
-        Button,
-        {
-          onClick: async () => {
-            const objects_response = await fetch(
-              `${ingestPrefix}/ingest-process/${ingestProcessId}/objects`
-            );
-            const objects: any[] = await objects_response.json();
-            objects.forEach((object) => download_file(object.pre_signed_url));
-          },
-        },
-        ["Download Source"]
-      ),
-      h.if(numberOfRows != undefined)(
-        Button,
-        {
-          disabled: true,
-        },
-        [`${numberOfRows} Total Rows`]
-      ),
-    ]),
-  ]);
 }
