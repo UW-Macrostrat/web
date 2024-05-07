@@ -24,6 +24,7 @@ interface TableHeaderProps {
   submitTableUpdates: () => Promise<void>;
   downloadSourceFiles: () => void;
   clearDataParameters: () => void;
+  markAsHarmonized: () => void;
 }
 
 export const TableHeader = ({
@@ -36,14 +37,14 @@ export const TableHeader = ({
   clearTableUpdates,
   submitTableUpdates,
   downloadSourceFiles,
-  clearDataParameters
+  clearDataParameters,
+  markAsHarmonized
 }: TableHeaderProps) => {
 
   const activeFilters = Object.values(dataParameters.filter).filter(f => f.is_valid())
   const isMenuActive = (dataParameters.group != undefined || activeFilters.length != 0) ||
     hiddenColumns.length != 0 ||
     tableUpdates.length != 0
-
 
   return (
     h("div.input-form", {}, [
@@ -116,6 +117,16 @@ export const TableHeader = ({
             intent: "success",
           },
           ["Submit Changes"]
+        ),
+        h(
+          Button,
+          {
+            type: "submit",
+            onClick: markAsHarmonized,
+            intent: "success",
+            title: "Mark the legend as harmonized and generate the map",
+          },
+          ["Generate Map"]
         ),
         h.if(totalNumberOfRows != undefined)(
           Button,

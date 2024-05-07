@@ -21,6 +21,7 @@ import {
   applyTableUpdates, submitTableUpdates
 } from "./utils/";
 import { tableDataReducer, initialState } from "./reducer/";
+import { ingestPrefix } from "@macrostrat-web/settings";
 import {
   EditableCell,
   ProgressPopover,
@@ -33,7 +34,7 @@ import {
   getCellSelected,
   download_file,
   sleep,
-  reorderColumns
+  reorderColumns, downloadSourceFiles
 } from "./components/index";
 import {
   ColumnConfig,
@@ -43,7 +44,6 @@ import {
 } from "./table";
 
 import "@blueprintjs/table/lib/css/table.css";
-import { ingestPrefix } from "@macrostrat-web/settings";
 import styles from "./edit-table.module.sass";
 import "./override.sass";
 import TableHeader from "~/pages/maps/ingestion/@id/components/table-header";
@@ -414,19 +414,27 @@ export function TableInterface({
             dispatch({ type: "updateData", ...(await getData(url, tableData.parameters)) })
             dispatch({ type: "clearTableUpdates" })
           },
-          downloadSourceFiles: async () => {
-            const objects_response = await fetch(
-              `${ingestPrefix}/ingest-process/${ingestProcessId}/objects`
+          downloadSourceFiles: async () => downloadSourceFiles(ingestProcessId),
+          clearDataParameters: () => dispatch({ type: "clearDataParameters" }),
+          markAsHarmonized: async () => {
+            const response = await fetch(
+              `${ingestPrefix}/ingest-process/${ingestProcessId}`,
+              {
+                method: "PATCH",
+                headers: {
+                  Accept: "application/json",
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({state: "post_harmonization"})
+              }
             );
-            const objects: any[] = await objects_response.json();
-
-            // Download each function sleeping for a second between each attempt
-            for(const o of objects) {
-              await sleep(1000)
-              download_file(o.pre_signed_url)
+            if (response.ok) {
+              dispatch({ type: "clearTableUpdates" });
+              dispatch({ type: "updateData", ...(await getData(url, tableData.parameters)) });
+            } else {
+              console.error("uh oh", response);
             }
           },
-          clearDataParameters: () => dispatch({ type: "clearDataParameters" })
         }),
         h(
           Table2,
