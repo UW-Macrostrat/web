@@ -111,14 +111,16 @@ export function TableInterface({
     })()
   }, [tableData.parameters]);
 
+  const omittedData = useMemo(() => {
+    return tableData.remoteData.filter((d) => d?.omit !== true || tableData.showOmittedRows);
+  }, [tableData.remoteData, tableData.showOmittedRows]);
 
   const transformedData = useMemo(() => {
-    let data = structuredClone(tableData.remoteData);
-    data = data.filter((d) => d?.omit !== true || tableData.showOmittedRows);
+    let data = structuredClone(omittedData);
     data = applyTableUpdates(data, tableData.tableUpdates)
     return data;
 
-  }, [tableData.remoteData, tableData.tableUpdates, tableData.showOmittedRows]);
+  }, [omittedData, tableData.tableUpdates]);
 
   const visibleColumns = useMemo(() => {
     const hiddenColumns = [...INTERNAL_COLUMNS, ...tableData.hiddenColumns];
@@ -334,7 +336,7 @@ export function TableInterface({
               },
               onCopy: (e) => handleCopy(e),
               onPaste: handlePaste,
-              intent: tableData.remoteData[rowIndex][columnName] !=
+              intent: omittedData[rowIndex][columnName] !=
                 transformedData[rowIndex][columnName] ?
                 "success" :
                 undefined,
@@ -349,7 +351,7 @@ export function TableInterface({
     }, {});
   }, [
     visibleColumns,
-    tableData.remoteData,
+    omittedData,
     tableData.parameters,
     transformedData,
     handleCopy,
@@ -368,7 +370,7 @@ export function TableInterface({
       addTableUpdate: (t) =>
         dispatch({type: "addTableUpdates", tableUpdates: t}),
       transformedData,
-      data: tableData.remoteData,
+      data: omittedData,
       ref
     });
 
@@ -377,7 +379,7 @@ export function TableInterface({
     defaultColumnConfig,
     tableData.parameters,
     transformedData,
-    tableData.remoteData,
+    omittedData,
   ]);
 
   return h(
