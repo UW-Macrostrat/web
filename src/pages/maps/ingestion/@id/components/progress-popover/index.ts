@@ -11,7 +11,7 @@ export interface ProgressPopoverProps extends React.HTMLProps<HTMLDivElement> {
   progressBarProps?: ProgressBarProps;
 }
 
-export default function ProgressPopover({
+export function ProgressPopover({
   text,
   value,
   progressBarProps,

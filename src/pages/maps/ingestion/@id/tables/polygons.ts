@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import hyper from "@macrostrat/hyper";
 
-import { ColumnProps, Column } from "@blueprintjs/table";
+import { Column } from "@blueprintjs/table";
 import {
   ColumnConfig,
   ColumnConfigGenerator,
@@ -14,21 +14,18 @@ import {
 } from "~/pages/maps/ingestion/@id/table";
 import IntervalSelection, {
   Interval,
-} from "~/pages/maps/ingestion/@id/components/cell/interval-selection";
-import { getTableUpdate } from "~/pages/maps/ingestion/@id/table-util";
-import CheckboxCell from "~/pages/maps/ingestion/@id/components/cell/checkbox-cell";
+} from "~/pages/maps/ingestion/@id/components/cells/interval-selection";
+import CheckboxCell from "~/pages/maps/ingestion/@id/components/cells/checkbox-cell";
 import { TableInterface } from "../edit-table";
 import styles from "~/pages/maps/ingestion/@id/edit-table.module.sass";
-import { COMMON_COLUMNS } from "../tables";
-import { toBoolean } from "~/pages/maps/ingestion/@id/components/cell/util";
+import { COMMON_COLUMNS } from ".";
+import { toBoolean } from "~/pages/maps/ingestion/@id/components/cells/util";
 import { apiV2Prefix } from "@macrostrat-web/settings";
+import { createTableUpdate } from "~/pages/maps/ingestion/@id/utils";
 
 const h = hyper.styled(styles);
 
-export default function PolygonTable({
-  url,
-  ingestProcessId,
-}: CustomTableProps) {
+export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
   const FINAL_POLYGON_COLUMNS = [
     ...COMMON_COLUMNS,
     "name",
@@ -62,8 +59,7 @@ export default function PolygonTable({
     ({
       url,
       defaultColumnConfig,
-      dataParameters,
-      setTableUpdates,
+      dataParameters, addTableUpdate,
       transformedData,
       data,
       ref,
@@ -81,12 +77,11 @@ export default function PolygonTable({
               },
               intervals: intervals,
               onConfirm: (value) => {
-                const tableUpdate = getTableUpdate(
+                const tableUpdate = createTableUpdate(
                   url,
                   value,
                   "t_interval",
-                  rowIndex,
-                  transformedData,
+                  transformedData[rowIndex],
                   dataParameters
                 );
 
@@ -96,19 +91,18 @@ export default function PolygonTable({
                   transformedData[rowIndex]["b_interval"] == undefined ||
                   transformedData[rowIndex]["b_interval"] == ""
                 ) {
-                  let oppositeIntervalTableUpdate = getTableUpdate(
+                  let oppositeIntervalTableUpdate = createTableUpdate(
                     url,
                     value,
                     "b_interval",
-                    rowIndex,
-                    transformedData,
+                    transformedData[rowIndex],
                     dataParameters
                   );
 
                   newTableUpdates.push(oppositeIntervalTableUpdate);
                 }
 
-                setTableUpdates((p) => [...p, ...newTableUpdates]);
+                addTableUpdate(newTableUpdates);
               },
               intent:
                 data[rowIndex]["t_interval"] !=
@@ -132,12 +126,11 @@ export default function PolygonTable({
               },
               intervals: intervals,
               onConfirm: (value) => {
-                const tableUpdate = getTableUpdate(
+                const tableUpdate = createTableUpdate(
                   url,
                   value,
                   "b_interval",
-                  rowIndex,
-                  transformedData,
+                  transformedData[rowIndex],
                   dataParameters
                 );
 
@@ -147,19 +140,18 @@ export default function PolygonTable({
                   transformedData[rowIndex]["t_interval"] == undefined ||
                   transformedData[rowIndex]["t_interval"] == ""
                 ) {
-                  let oppositeIntervalTableUpdate = getTableUpdate(
+                  let oppositeIntervalTableUpdate = createTableUpdate(
                     url,
                     value,
                     "t_interval",
-                    rowIndex,
-                    transformedData,
+                    transformedData[rowIndex],
                     dataParameters
                   );
 
                   newTableUpdates.push(oppositeIntervalTableUpdate);
                 }
 
-                setTableUpdates((p) => [...p, ...newTableUpdates]);
+                addTableUpdate(newTableUpdates);
               },
               intent:
                 data[rowIndex]["b_interval"] !=
@@ -182,16 +174,15 @@ export default function PolygonTable({
                 } catch (e) {}
               },
               onConfirm: (value) => {
-                const tableUpdate = getTableUpdate(
-                  url,
-                  value,
-                  "omit",
-                  rowIndex,
-                  transformedData,
-                  dataParameters
-                );
-
-                setTableUpdates((p) => [...p, tableUpdate]);
+                addTableUpdate([
+                  createTableUpdate(
+                    url,
+                    value,
+                    "omit",
+                    transformedData[rowIndex],
+                    dataParameters
+                  )
+                ])
               },
               value: toBoolean(transformedData[rowIndex]["omit"]),
             }),

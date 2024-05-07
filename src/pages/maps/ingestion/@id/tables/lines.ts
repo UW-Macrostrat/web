@@ -2,32 +2,26 @@
  * Generators for the table columns in the ingestion table
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 
 import hyper from "@macrostrat/hyper";
 
-import { ColumnProps, Column } from "@blueprintjs/table";
+import { Column } from "@blueprintjs/table";
 import {
   ColumnConfig,
   ColumnConfigGenerator,
   CustomTableProps,
 } from "~/pages/maps/ingestion/@id/table";
-import IntervalSelection, {
-  Interval,
-} from "~/pages/maps/ingestion/@id/components/cell/interval-selection";
-import { getTableUpdate } from "~/pages/maps/ingestion/@id/table-util";
-import CheckboxCell from "~/pages/maps/ingestion/@id/components/cell/checkbox-cell";
+import CheckboxCell from "~/pages/maps/ingestion/@id/components/cells/checkbox-cell";
 import { TableInterface } from "../edit-table";
-import styles from "~/pages/maps/ingestion/@id/edit-table.module.sass";
-import { COMMON_COLUMNS } from "../tables";
-import { toBoolean } from "~/pages/maps/ingestion/@id/components/cell/util";
+import styles from "../edit-table.module.sass";
+import { COMMON_COLUMNS } from ".";
+import { toBoolean } from "../components/cells/util";
+import { createTableUpdate } from "~/pages/maps/ingestion/@id/utils";
 
 const h = hyper.styled(styles);
 
-export default function LineStringTable({
-  url,
-  ingestProcessId,
-}: CustomTableProps) {
+export function LinesTable({ url, ingestProcessId }: CustomTableProps) {
   const FINAL_LINE_COLUMNS = [
     ...COMMON_COLUMNS,
     "name",
@@ -41,9 +35,8 @@ export default function LineStringTable({
       url,
       defaultColumnConfig,
       dataParameters,
-      setTableUpdates,
+       addTableUpdate,
       transformedData,
-      data,
       ref,
     }: ColumnConfigGenerator): ColumnConfig => {
       return {
@@ -58,16 +51,16 @@ export default function LineStringTable({
                 } catch (e) {}
               },
               onConfirm: (value) => {
-                const tableUpdate = getTableUpdate(
-                  url,
-                  value,
-                  "omit",
-                  rowIndex,
-                  transformedData,
-                  dataParameters
-                );
-
-                setTableUpdates((p) => [...p, tableUpdate]);
+                addTableUpdate([
+                  createTableUpdate(
+                    url,
+                    value,
+                    "omit",
+                    rowIndex,
+                    transformedData,
+                    dataParameters
+                  )
+                ])
               },
               value: toBoolean(transformedData[rowIndex]["omit"]),
             }),
