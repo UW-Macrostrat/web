@@ -113,9 +113,12 @@ export function TableInterface({
 
 
   const transformedData = useMemo(() => {
-    const data = structuredClone(tableData.remoteData);
-    return applyTableUpdates(data, tableData.tableUpdates)
-  }, [tableData.remoteData, tableData.tableUpdates]);
+    let data = structuredClone(tableData.remoteData);
+    data = data.filter((d) => d?.omit !== true || tableData.showOmittedRows);
+    data = applyTableUpdates(data, tableData.tableUpdates)
+    return data;
+
+  }, [tableData.remoteData, tableData.tableUpdates, tableData.showOmittedRows]);
 
   const visibleColumns = useMemo(() => {
     const hiddenColumns = [...INTERNAL_COLUMNS, ...tableData.hiddenColumns];
@@ -444,7 +447,7 @@ export function TableInterface({
                 dispatch({ type: "incrementPageSize", increment: 50 });
               }
             },
-            numRows: tableData.remoteData.length,
+            numRows: transformedData.length,
             cellRendererDependencies: [transformedData, selection]
           },
           Object.values(columnConfig)
