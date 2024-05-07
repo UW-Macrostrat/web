@@ -231,3 +231,31 @@ export const getCellSelected = (
 export function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+export const reorderColumns = (columns: string[], visibleColumns: string[], oldIndex: number, newIndex: number, length: number) => {
+
+  let newColumns = [...columns];
+
+  // Get the columns that are being moved and then remove them
+  let movedColumns = [...visibleColumns.slice(oldIndex, oldIndex + length)];
+
+  // Remove the moved columns from columns
+  newColumns = newColumns.filter((c) => !movedColumns.includes(c));
+
+  // Place the columns at the new index
+  if(newIndex == visibleColumns.length - 1) {
+    newColumns = [...newColumns, ...movedColumns];
+  } else {
+    let columnAfter;
+    if(newIndex > oldIndex) {
+      columnAfter = visibleColumns[newIndex + length]
+    } else {
+      columnAfter = visibleColumns[newIndex];
+    }
+
+    let indexAfter = newColumns.indexOf(columnAfter);
+    newColumns.splice(indexAfter, 0, ...movedColumns);
+  }
+
+  return newColumns
+}

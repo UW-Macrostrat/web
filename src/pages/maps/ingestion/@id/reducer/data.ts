@@ -64,6 +64,13 @@ export const revertTableUpdate = (state: TableData) => {
   };
 }
 
+export const updateColumns = (state: TableData, columns: string[]) => {
+  return {
+    ...state,
+    allColumns: columns
+  };
+}
+
 export const hideColumn = (state: TableData, column: string) => {
   return {
     ...state,
@@ -191,6 +198,8 @@ export const tableDataReducer = (state: TableData, action: any): TableData => {
       return updateData(state, action);
     case "appendData":
       return appendData(state, action.data);
+    case "updateColumns":
+      return updateColumns(state, action.columns);
     case "hideColumn":
       return hideColumn(state, action.column);
     case "showColumn":

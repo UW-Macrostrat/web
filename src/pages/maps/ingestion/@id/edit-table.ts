@@ -32,7 +32,8 @@ import {
   getData,
   getCellSelected,
   download_file,
-  sleep
+  sleep,
+  reorderColumns
 } from "./components/index";
 import {
   ColumnConfig,
@@ -429,6 +430,7 @@ export function TableInterface({
           Table2,
           {
             enableFocusedCell: true,
+            enableColumnReordering: true,
             selectionModes: SelectionModes.COLUMNS_AND_CELLS,
             rowHeaderCellRenderer: rowHeaderCellRenderer,
             onFocusedCell: (focusedCellCoordinates) => {
@@ -439,7 +441,9 @@ export function TableInterface({
             onSelection: (s) => {
               setSelection(s)
               const cell = getCellSelected(visibleColumns, s)
-              ref.current[cell.rowIndex][cell.columnIndex]?.focus()
+              if (cell != undefined) {
+                ref.current[cell.rowIndex][cell.columnIndex]?.focus()
+              }
             },
             onVisibleCellsChange: (visibleCells) => {
               if (
@@ -448,6 +452,11 @@ export function TableInterface({
               ) {
                 dispatch({ type: "incrementPageSize", increment: 50 });
               }
+            },
+            onColumnsReordered: (oldIndex, newIndex, length) => {
+              console.log(oldIndex, newIndex, length, visibleColumns[oldIndex], visibleColumns[newIndex])
+              let newColumns = reorderColumns(tableData.allColumns, visibleColumns, oldIndex, newIndex, length)
+              dispatch({ type: "updateColumns", columns: newColumns});
             },
             numRows: transformedData.length,
             cellRendererDependencies: [transformedData, selection]
