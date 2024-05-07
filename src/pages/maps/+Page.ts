@@ -24,7 +24,7 @@ export function Page({ sources }) {
     h(PageHeader, { title: "Maps" }),
     h(
       "ul.maps-list",
-      sources.map((d) => h(SourceItem, { source: d, key: d.source_id }))
+      sources.map((d) => h.if(d.is_mapped)(SourceItem, { source: d, key: d.source_id }))
     ),
   ]);
 }
