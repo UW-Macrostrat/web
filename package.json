@@ -61,6 +61,7 @@
     "@macrostrat-web/sift": "workspace:*",
     "@macrostrat/api-utils": "workspace:*",
     "@macrostrat/api-views": "workspace:*",
+    "@macrostrat/auth-components": "workspace:*",
     "@macrostrat/color-utils": "workspace:*",
     "@macrostrat/column-components": "workspace:*",
     "@macrostrat/column-views": "workspace:*",
@@ -138,5 +139,5 @@
     "zustand": "^4.5.1"
   },
   "prettier": {},
-  "packageManager": "yarn@4.1.1"
+  "packageManager": "yarn@4.2.1"
 }
