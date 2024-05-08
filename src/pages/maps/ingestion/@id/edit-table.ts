@@ -21,6 +21,7 @@ import {
   applyTableUpdates, submitTableUpdates
 } from "./utils/";
 import { tableDataReducer, initialState } from "./reducer/";
+import { ingestPrefix } from "@macrostrat-web/settings";
 import {
   EditableCell,
   ProgressPopover,
@@ -32,7 +33,8 @@ import {
   getData,
   getCellSelected,
   download_file,
-  sleep
+  sleep,
+  reorderColumns, downloadSourceFiles
 } from "./components/index";
 import {
   ColumnConfig,
@@ -42,7 +44,6 @@ import {
 } from "./table";
 
 import "@blueprintjs/table/lib/css/table.css";
-import { ingestPrefix } from "@macrostrat-web/settings";
 import styles from "./edit-table.module.sass";
 import "./override.sass";
 import TableHeader from "~/pages/maps/ingestion/@id/components/table-header";
@@ -111,11 +112,16 @@ export function TableInterface({
     })()
   }, [tableData.parameters]);
 
+  const omittedData = useMemo(() => {
+    return tableData.remoteData.filter((d) => d?.omit !== true || tableData.showOmittedRows);
+  }, [tableData.remoteData, tableData.showOmittedRows]);
 
   const transformedData = useMemo(() => {
-    const data = structuredClone(tableData.remoteData);
-    return applyTableUpdates(data, tableData.tableUpdates)
-  }, [tableData.remoteData, tableData.tableUpdates]);
+    let data = structuredClone(omittedData);
+    data = applyTableUpdates(data, tableData.tableUpdates)
+    return data;
+
+  }, [omittedData, tableData.tableUpdates]);
 
   const visibleColumns = useMemo(() => {
     const hiddenColumns = [...INTERNAL_COLUMNS, ...tableData.hiddenColumns];
@@ -331,7 +337,7 @@ export function TableInterface({
               },
               onCopy: (e) => handleCopy(e),
               onPaste: handlePaste,
-              intent: tableData.remoteData[rowIndex][columnName] !=
+              intent: omittedData[rowIndex][columnName] !=
                 transformedData[rowIndex][columnName] ?
                 "success" :
                 undefined,
@@ -346,7 +352,7 @@ export function TableInterface({
     }, {});
   }, [
     visibleColumns,
-    tableData.remoteData,
+    omittedData,
     tableData.parameters,
     transformedData,
     handleCopy,
@@ -365,7 +371,7 @@ export function TableInterface({
       addTableUpdate: (t) =>
         dispatch({type: "addTableUpdates", tableUpdates: t}),
       transformedData,
-      data: tableData.remoteData,
+      data: omittedData,
       ref
     });
 
@@ -374,7 +380,7 @@ export function TableInterface({
     defaultColumnConfig,
     tableData.parameters,
     transformedData,
-    tableData.remoteData,
+    omittedData,
   ]);
 
   return h(
@@ -394,6 +400,7 @@ export function TableInterface({
         h(TableHeader, {
           hiddenColumns: tableData.hiddenColumns,
           tableUpdates: tableData.tableUpdates,
+          dataParameters: tableData.parameters,
           totalNumberOfRows: tableData.totalNumberOfRows,
           showAllColumns: () => dispatch({ type: "showAllColumns" }),
           toggleShowOmittedRows: () => dispatch({ type: "toggleShowOmittedRows" }),
@@ -407,23 +414,33 @@ export function TableInterface({
             dispatch({ type: "updateData", ...(await getData(url, tableData.parameters)) })
             dispatch({ type: "clearTableUpdates" })
           },
-          downloadSourceFiles: async () => {
-            const objects_response = await fetch(
-              `${ingestPrefix}/ingest-process/${ingestProcessId}/objects`
+          downloadSourceFiles: async () => downloadSourceFiles(ingestProcessId),
+          clearDataParameters: () => dispatch({ type: "clearDataParameters" }),
+          markAsHarmonized: async () => {
+            const response = await fetch(
+              `${ingestPrefix}/ingest-process/${ingestProcessId}`,
+              {
+                method: "PATCH",
+                headers: {
+                  Accept: "application/json",
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({state: "post_harmonization"})
+              }
             );
-            const objects: any[] = await objects_response.json();
-
-            // Download each function sleeping for a second between each attempt
-            for(const o of objects) {
-              await sleep(1000)
-              download_file(o.pre_signed_url)
+            if (response.ok) {
+              dispatch({ type: "clearTableUpdates" });
+              dispatch({ type: "updateData", ...(await getData(url, tableData.parameters)) });
+            } else {
+              console.error("uh oh", response);
             }
-          }
+          },
         }),
         h(
           Table2,
           {
             enableFocusedCell: true,
+            enableColumnReordering: true,
             selectionModes: SelectionModes.COLUMNS_AND_CELLS,
             rowHeaderCellRenderer: rowHeaderCellRenderer,
             onFocusedCell: (focusedCellCoordinates) => {
@@ -434,7 +451,9 @@ export function TableInterface({
             onSelection: (s) => {
               setSelection(s)
               const cell = getCellSelected(visibleColumns, s)
-              ref.current[cell.rowIndex][cell.columnIndex]?.focus()
+              if (cell != undefined) {
+                ref.current[cell.rowIndex][cell.columnIndex]?.focus()
+              }
             },
             onVisibleCellsChange: (visibleCells) => {
               if (
@@ -444,7 +463,12 @@ export function TableInterface({
                 dispatch({ type: "incrementPageSize", increment: 50 });
               }
             },
-            numRows: tableData.remoteData.length,
+            onColumnsReordered: (oldIndex, newIndex, length) => {
+              console.log(oldIndex, newIndex, length, visibleColumns[oldIndex], visibleColumns[newIndex])
+              let newColumns = reorderColumns(tableData.allColumns, visibleColumns, oldIndex, newIndex, length)
+              dispatch({ type: "updateColumns", columns: newColumns});
+            },
+            numRows: transformedData.length,
             cellRendererDependencies: [transformedData, selection]
           },
           Object.values(columnConfig)

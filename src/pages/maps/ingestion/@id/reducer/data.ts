@@ -64,6 +64,13 @@ export const revertTableUpdate = (state: TableData) => {
   };
 }
 
+export const updateColumns = (state: TableData, columns: string[]) => {
+  return {
+    ...state,
+    allColumns: columns
+  };
+}
+
 export const hideColumn = (state: TableData, column: string) => {
   return {
     ...state,
@@ -185,12 +192,26 @@ export const setFilter = (state: TableData, filter: Filter) => {
   };
 }
 
+export const clearDataParameters = (state: TableData) => {
+  const newDataParameters = cloneDataParameters(state.parameters);
+  newDataParameters.filter = {};
+  newDataParameters.group = undefined;
+
+  return {
+    ...state,
+    parameters: newDataParameters
+  };
+
+}
+
 export const tableDataReducer = (state: TableData, action: any): TableData => {
   switch (action.type) {
     case "updateData":
       return updateData(state, action);
     case "appendData":
       return appendData(state, action.data);
+    case "updateColumns":
+      return updateColumns(state, action.columns);
     case "hideColumn":
       return hideColumn(state, action.column);
     case "showColumn":
@@ -209,6 +230,8 @@ export const tableDataReducer = (state: TableData, action: any): TableData => {
       return setGroupBy(state, action.groupBy);
     case "setFilter":
       return setFilter(state, action.filter);
+    case "clearDataParameters":
+      return clearDataParameters(state);
     case "setPage":
       return setPage(state, action.page);
     case "incrementPage":

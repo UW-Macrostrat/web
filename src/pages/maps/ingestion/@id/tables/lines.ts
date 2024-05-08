@@ -42,7 +42,7 @@ export function LinesTable({ url, ingestProcessId }: CustomTableProps) {
       return {
         ...defaultColumnConfig,
         omit: h(Column, {
-          ...defaultColumnConfig["omit"].props,
+          ...defaultColumnConfig?.["omit"]?.props,
           cellRenderer: (rowIndex: number, columnIndex: number) =>
             h(CheckboxCell, {
               ref: (el) => {

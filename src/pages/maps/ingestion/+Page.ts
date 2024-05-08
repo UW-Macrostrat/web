@@ -1,15 +1,15 @@
+import { Icon } from "@blueprintjs/core";
 import { ingestPrefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
-import { Card, Icon } from "@blueprintjs/core";
 import { useEffect, useState } from "react";
-import IngestProcessCard from "~/pages/maps/ingestion/components/IngestProcessCard";
-import styles from "./main.module.sass";
 import { PageBreadcrumbs } from "~/renderer";
+import { IngestProcessCard } from "./components/ingest-process-card";
+import styles from "./main.module.sass";
 
-import IngestNavbar from "./components/navbar";
-import Tag from "./components/Tag";
 import { LinkCard } from "~/components";
 import { ContentPage } from "~/layouts";
+import IngestNavbar from "./components/navbar";
+import Tag from "./components/Tag";
 
 const h = hyper.styled(styles);
 
