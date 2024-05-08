@@ -3,9 +3,6 @@ import {ingestPrefix} from "@macrostrat-web/settings";
 
 export const guard = (pageContext) => {
 
-  console.log(pageContext);
-
-
   const { user } = pageContext;
 
   if (user === undefined) {
