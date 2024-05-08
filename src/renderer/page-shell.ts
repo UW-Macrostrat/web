@@ -3,6 +3,7 @@ import { DarkModeProvider } from "@macrostrat/ui-components";
 import React from "react";
 import { PageContextProvider } from "./page-context";
 import { PageContext, PageStyle } from "./types";
+import { AuthProvider } from "./auth";
 
 import "~/styles/blueprint-core";
 import "../styles/_theme.styl";
@@ -21,7 +22,7 @@ export function PageShell({
   pageContext: PageContext;
   supportsDarkMode?: boolean;
 }) {
-  const { exports, config } = pageContext;
+  const { exports, config, user } = pageContext;
   const supportsDarkMode = config?.supportsDarkMode ?? true;
   const pageStyle = exports?.pageStyle ?? "fullscreen";
 
@@ -29,13 +30,21 @@ export function PageShell({
     PageContextProvider,
     { pageContext },
     h(
-      supportsDarkMode ? DarkModeProvider : NoOpDarkModeProvider,
-      { followSystem: true },
-      h("div.app-shell", { className: pageStyle + "-page" }, children)
+      AuthProvider,
+      { user },
+      h(
+        supportsDarkMode ? DarkModeProvider : NoOpDarkModeProvider,
+        { followSystem: true },
+        h("div.app-shell", { className: pageStyle + "-page" }, children)
+      )
     )
   );
 }
 
 function NoOpDarkModeProvider(props) {
   return props.children;
+}
+
+function AuthContextProvider(props) {
+  return h(AuthProvider, props);
 }

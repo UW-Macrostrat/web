@@ -8,6 +8,7 @@ export default {
     "isolateStyles",
     "macrostratLogoFlavor",
     "routeParams",
+    "user",
   ],
   clientRouting: true,
   hydrationCanBeAborted: true,

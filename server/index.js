@@ -74,11 +74,13 @@ async function startServer() {
       const authHeader = req.cookies?.Authorization;
       const secret = new TextEncoder().encode(process.env.SECRET_KEY);
       const jwt = authHeader.substring(7, authHeader.length);
+      // We probably don't need to verify the JWT on each request
       user = (await jose.jwtVerify(jwt, secret)).payload;
     } catch (e) {
       // I don't care if it fails, it just means the user isn't logged in
     }
     if (!isProduction) {
+      // Haha wow this is sketchy...this needs to be stopped.
       user = { groups: [1] };
     }
 
