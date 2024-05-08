@@ -1,4 +1,4 @@
-import { Icon } from "@blueprintjs/core";
+import { AnchorButton } from "@blueprintjs/core";
 import { ingestPrefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import { useEffect, useState } from "react";
@@ -6,7 +6,6 @@ import { PageBreadcrumbs } from "~/renderer";
 import { IngestProcessCard } from "./components";
 import styles from "./main.module.sass";
 
-import { LinkCard } from "~/components";
 import { ContentPage } from "~/layouts";
 import IngestNavbar from "./components/navbar";
 import Tag from "./components/Tag";
@@ -108,37 +107,15 @@ function TagFilterManager({ tags, setIngestFilter, ingestFilter }) {
 }
 
 function AddMapButton({ user }) {
-  if (user == null) return null;
   return h(
-    LinkCard,
+    AnchorButton,
     {
-      style: {
-        display: "flex",
-        flexDirection: "row",
-        justifyContent: "space-between",
-        padding: "0.5em",
-        margin: "0.5em",
-        borderRadius: "0.5em",
-        overflow: "scroll",
-      },
+      large: true,
+      icon: "add",
       href: "/maps/ingestion/add",
+      disabled: user == null,
     },
-    [
-      h("div", [
-        h(
-          Icon,
-          {
-            icon: "add",
-            size: 36,
-            style: {
-              margin: "auto",
-            },
-          },
-          []
-        ),
-        h("h3", ["Add a map"]),
-      ]),
-    ]
+    "Add a map"
   );
 }
 

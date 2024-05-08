@@ -1,4 +1,4 @@
-import { Card } from "@blueprintjs/core";
+import { Card, AnchorButton } from "@blueprintjs/core";
 import { useCallback, useState } from "react";
 
 import { ingestPrefix } from "@macrostrat-web/settings";
@@ -59,8 +59,13 @@ export function IngestProcessCard({
       className: "map-card",
     },
     [
-      h("div.flex.row", { style: { paddingBottom: "4px" } }, [
+      h("div.flex.row", [
         h("h3", { style: { margin: "0px" } }, name),
+        h("div.spacer"),
+        h.if(
+          user !== undefined &&
+            !["failed", "pending"].includes(ingestProcess.state)
+        )(AnchorButton, { href: edit_href, icon: "edit" }),
       ]),
       h(
         "div.flex.row",
