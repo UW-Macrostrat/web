@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 import { PageBreadcrumbs } from "~/renderer";
 import { IngestProcessCard } from "./components";
 import styles from "./main.module.sass";
+import { AuthStatus } from "@macrostrat/auth-components";
 
 import { ContentPage } from "~/layouts";
-import IngestNavbar from "./components/navbar";
 import Tag from "./components/Tag";
 
 const h = hyper.styled(styles);
@@ -49,8 +49,12 @@ export function Page({ user, url }) {
 
   return h(ContentPage, [
     h(PageBreadcrumbs),
-    h(IngestNavbar, { user }),
-    h("div.ingestion-title-bar", [h("h1", ["Map ingestion"])]),
+    //h(IngestNavbar, { user }),
+    h("div.ingestion-title-bar", [
+      h("h1", ["Map ingestion"]),
+      h("div.spacer"),
+      h(AuthStatus),
+    ]),
     h("div.ingestion-body", [
       h("div.ingestion-context", [
         h(AddMapButton, { user }),

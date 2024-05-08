@@ -21,12 +21,7 @@ const IngestNavbar = ({ user }) => {
         Tooltip,
         { content: user == undefined ? "Log In" : "Logged In" },
         h(AnchorButton, {
-          icon: user == undefined ? "log-in" : "user",
-          style: {
-            margin: "0 0.5em",
-            borderRadius: "50%",
-            backgroundColor: user == undefined ? "#fdeb88" : "#90d090",
-          },
+          icon: user == undefined ? "blocked-person" : "user",
           onClick() {
             // Assemble the return URL on click based on the current page
             const return_url =

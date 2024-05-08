@@ -8,12 +8,12 @@ import { PageShell } from "./page-shell";
 import type { PageContextServer } from "./types";
 
 async function render(pageContext: PageContextServer) {
-  const { Page, pageProps, config } = pageContext;
+  const { Page, pageProps, config, user } = pageContext;
   // This render() hook only supports SSR, see https://vike.dev/render-modes for how to modify render() to support SPA
   let pageHtml = "";
   if (Page != null) {
     pageHtml = ReactDOMServer.renderToString(
-      h(PageShell, { pageContext }, h(Page, pageProps))
+      h(PageShell, { pageContext, user }, h(Page, pageProps))
     );
   }
 

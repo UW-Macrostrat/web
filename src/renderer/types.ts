@@ -17,10 +17,13 @@ type PageProps = Record<string, unknown>;
 
 export type PageStyle = "content" | "fullscreen";
 
+type User = { groups: string[] };
+
 export type PageContextCustom = {
   Page: Page;
   pageProps?: PageProps;
   urlPathname: string;
+  user?: User;
   macrostratLogoFlavor?: string;
   config: PageContextBuiltInServerInternal["config"] & {
     clientRouting?: boolean;
