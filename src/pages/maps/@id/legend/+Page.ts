@@ -1,4 +1,4 @@
-import { HotkeysProvider, Tag } from "@blueprintjs/core";
+import { HotkeysProvider, Spinner, Tag } from "@blueprintjs/core";
 import DataSheet from "@macrostrat/data-sheet2";
 import { useState } from "react";
 import { FullscreenPage } from "~/layouts";
@@ -33,6 +33,10 @@ export function Page({ map }) {
       .order("legend_id", { ascending: true });
     setData(res.data);
   }, [map.source_id]);
+
+  if (data == null) {
+    return h(Spinner);
+  }
 
   return h(
     HotkeysProvider,
