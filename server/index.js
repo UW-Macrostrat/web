@@ -79,7 +79,8 @@ async function startServer() {
     } catch (e) {
       // I don't care if it fails, it just means the user isn't logged in
     }
-    if (!isProduction) {
+
+    if (!isProduction && process.env.ENABLE_AUTH !== "true") {
       // Haha wow this is sketchy...this needs to be stopped.
       user = { groups: [1] };
     }
