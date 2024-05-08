@@ -4,6 +4,7 @@ import {
   AsyncAuthAction,
 } from "@macrostrat/auth-components";
 import h from "@macrostrat/hyper";
+import { ingestPrefix } from "@macrostrat-web/settings";
 
 async function authTransformer(
   action: AuthAction | AsyncAuthAction
@@ -22,12 +23,21 @@ async function authTransformer(
     case "login":
       return null;
     case "logout":
-      return null;
+      // Delete the token from the session
+      // and redirect to the login page
+      const response = await fetch(`${ingestPrefix}/security/logout`);
+      return { type: "update-status", payload: { login: false, user: null } };
     default:
       return action;
   }
 }
 
 export function AuthProvider(props) {
-  return h(BaseAuthProvider, { ...props, transformer: authTransformer });
+  return h(BaseAuthProvider, {
+    ...props,
+    transformer: authTransformer,
+    userIdentity(user) {
+      return h("code", JSON.stringify(user));
+    },
+  });
 }

@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { PageBreadcrumbs } from "~/renderer";
 import { IngestProcessCard } from "./components";
 import styles from "./main.module.sass";
-import { AuthStatus } from "@macrostrat/auth-components";
+import { LoginButton } from "./components/navbar";
 
 import { ContentPage } from "~/layouts";
 import Tag from "./components/Tag";
@@ -51,9 +51,9 @@ export function Page({ user, url }) {
     h(PageBreadcrumbs),
     //h(IngestNavbar, { user }),
     h("div.ingestion-title-bar", [
-      h("h1", ["Map ingestion"]),
+      h("h1", ["Map ingestion queue"]),
       h("div.spacer"),
-      h(AuthStatus),
+      h(LoginButton, { user }),
     ]),
     h("div.ingestion-body", [
       h("div.ingestion-context", [

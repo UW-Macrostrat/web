@@ -3,7 +3,7 @@ import { DarkModeProvider } from "@macrostrat/ui-components";
 import React from "react";
 import { PageContextProvider } from "./page-context";
 import { PageContext, PageStyle } from "./types";
-import { AuthProvider } from "@macrostrat/auth-components";
+import { AuthProvider } from "./auth";
 
 import "~/styles/blueprint-core";
 import "../styles/_theme.styl";

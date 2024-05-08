@@ -16,22 +16,25 @@ const h = hyper.styled(styles);
 const IngestNavbar = ({ user }) => {
   return h(Navbar, {}, [
     h(Navbar.Group, { align: "left" }, [h(Navbar.Heading, "Map Ingestion")]),
-    h(Navbar.Group, { align: "right" }, [
-      h(
-        Tooltip,
-        { content: user == undefined ? "Log In" : "Logged In" },
-        h(AnchorButton, {
-          icon: user == undefined ? "blocked-person" : "user",
-          onClick() {
-            // Assemble the return URL on click based on the current page
-            const return_url =
-              window.location.origin + window.location.pathname;
-            window.location.href = `${ingestPrefix}/security/login?return_url=${return_url}`;
-          },
-        })
-      ),
-    ]),
+    h(Navbar.Group, { align: "right" }, [h(LoginButton, { user })]),
   ]);
 };
+
+export function LoginButton({ user }) {
+  return h(
+    Tooltip,
+    { content: user == undefined ? "Log In" : "Logged In" },
+    h(AnchorButton, {
+      icon: user == undefined ? "blocked-person" : "user",
+      intent: user == undefined ? "primary" : "success",
+      large: true,
+      onClick() {
+        // Assemble the return URL on click based on the current page
+        const return_url = window.location.origin + window.location.pathname;
+        window.location.href = `${ingestPrefix}/security/login?return_url=${return_url}`;
+      },
+    })
+  );
+}
 
 export default IngestNavbar;
