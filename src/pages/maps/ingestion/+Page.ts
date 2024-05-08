@@ -13,62 +13,6 @@ import Tag from "./components/Tag";
 
 const h = hyper.styled(styles);
 
-const toggleUrlParam = (
-  urlSearchParam: URLSearchParams,
-  key: string,
-  value: string
-) => {
-  // Check if this key value pair is already in the search params iteratively
-  if (urlSearchParam.getAll(key).includes(value)) {
-    urlSearchParam.delete(key, value);
-  } else {
-    urlSearchParam.append(key, value);
-  }
-
-  return new URLSearchParams(urlSearchParam.toString());
-};
-
-const updateUrl = (
-  key: string,
-  value: string,
-  setIngestFilter: (
-    filter: (filter: URLSearchParams) => URLSearchParams
-  ) => void
-) => {
-  setIngestFilter((ingestFilter: URLSearchParams) => {
-    const toggledUrl = toggleUrlParam(ingestFilter, key, value);
-
-    let url = new URL(window.location.href);
-
-    let urlSuffix = "";
-    if (toggledUrl?.toString() !== "") {
-      urlSuffix = "?" + toggledUrl;
-    }
-    url = new URL(url.origin + url.pathname + urlSuffix);
-
-    window.history.pushState({ page: "Update search params" }, "Title", url);
-
-    return toggledUrl;
-  });
-};
-
-const getTags = async () => {
-  const response = await fetch(`${ingestPrefix}/ingest-process/tags`);
-  return await response.json();
-};
-
-const getIngestProcesses = async (ingestFilter: URLSearchParams) => {
-  const response = await fetch(
-    `${ingestPrefix}/ingest-process?source_id=order_by&source_id=not.is.null&page_size=1000&${
-      ingestFilter || ""
-    }`
-  );
-  let res = await response.json();
-  // Reverse the array so that the most recent ingestions are at the top
-  res = res.reverse();
-  return res;
-};
-
 export function Page({ user, url }) {
   const [ingestProcess, setIngestProcess] = useState<IngestProcess[]>([]);
   const [ingestFilter, setIngestFilter] = useState<URLSearchParams>(undefined);
@@ -168,7 +112,6 @@ function AddMapButton({ user }) {
   return h(
     LinkCard,
     {
-      interactive: true,
       style: {
         display: "flex",
         flexDirection: "row",
@@ -198,3 +141,59 @@ function AddMapButton({ user }) {
     ]
   );
 }
+
+const toggleUrlParam = (
+  urlSearchParam: URLSearchParams,
+  key: string,
+  value: string
+) => {
+  // Check if this key value pair is already in the search params iteratively
+  if (urlSearchParam.getAll(key).includes(value)) {
+    urlSearchParam.delete(key, value);
+  } else {
+    urlSearchParam.append(key, value);
+  }
+
+  return new URLSearchParams(urlSearchParam.toString());
+};
+
+const updateUrl = (
+  key: string,
+  value: string,
+  setIngestFilter: (
+    filter: (filter: URLSearchParams) => URLSearchParams
+  ) => void
+) => {
+  setIngestFilter((ingestFilter: URLSearchParams) => {
+    const toggledUrl = toggleUrlParam(ingestFilter, key, value);
+
+    let url = new URL(window.location.href);
+
+    let urlSuffix = "";
+    if (toggledUrl?.toString() !== "") {
+      urlSuffix = "?" + toggledUrl;
+    }
+    url = new URL(url.origin + url.pathname + urlSuffix);
+
+    window.history.pushState({ page: "Update search params" }, "Title", url);
+
+    return toggledUrl;
+  });
+};
+
+const getTags = async () => {
+  const response = await fetch(`${ingestPrefix}/ingest-process/tags`);
+  return await response.json();
+};
+
+const getIngestProcesses = async (ingestFilter: URLSearchParams) => {
+  const response = await fetch(
+    `${ingestPrefix}/ingest-process?source_id=order_by&source_id=not.is.null&page_size=1000&${
+      ingestFilter || ""
+    }`
+  );
+  let res = await response.json();
+  // Reverse the array so that the most recent ingestions are at the top
+  res = res.reverse();
+  return res;
+};
