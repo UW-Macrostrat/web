@@ -3,7 +3,7 @@ import { ingestPrefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import { useEffect, useState } from "react";
 import { PageBreadcrumbs } from "~/renderer";
-import { IngestProcessCard } from "./components/ingest-process-card";
+import { IngestProcessCard } from "./components";
 import styles from "./main.module.sass";
 
 import { LinkCard } from "~/components";
@@ -38,14 +38,15 @@ const updateUrl = (
   setIngestFilter((ingestFilter: URLSearchParams) => {
     const toggledUrl = toggleUrlParam(ingestFilter, key, value);
 
-    const url = new URL(window.location.href);
-    const urlWithSearch = new URL(url.origin + url.pathname + "?" + toggledUrl);
+    let url = new URL(window.location.href);
 
-    window.history.pushState(
-      { page: "Update search params" },
-      "Title",
-      urlWithSearch
-    );
+    let urlSuffix = "";
+    if (toggledUrl?.toString() !== "") {
+      urlSuffix = "?" + toggledUrl;
+    }
+    url = new URL(url.origin + url.pathname + urlSuffix);
+
+    window.history.pushState({ page: "Update search params" }, "Title", url);
 
     return toggledUrl;
   });

@@ -1,18 +1,11 @@
-import { AnchorButton, Button, ButtonProps, Card } from "@blueprintjs/core";
-import {
-  ComponentType,
-  HTMLAttributes,
-  ReactNode,
-  useCallback,
-  useState,
-} from "react";
-import { LinkCard } from "~/components";
+import { Card } from "@blueprintjs/core";
+import { useCallback, useState } from "react";
 
 import { ingestPrefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
-import styles from "./ingest-process-card.module.sass";
 import AddButton from "~/pages/maps/ingestion/components/AddButton";
 import Tag from "./Tag";
+import styles from "./ingest-process-card.module.sass";
 
 const h = hyper.styled(styles);
 
@@ -66,65 +59,55 @@ export function IngestProcessCard({
       className: "map-card",
     },
     [
+      h("div.flex.row", { style: { paddingBottom: "4px" } }, [
+        h("h3", { style: { margin: "0px" } }, name),
+      ]),
       h(
-        "div",
-        {
-          style: {
-            maxWidth: "90%",
-          },
-        },
+        "div.flex.row",
+        { style: { paddingBottom: "4px", display: "flex", gap: "0.5em" } },
         [
-          h("div.flex.row", { style: { paddingBottom: "4px" } }, [
-            h("h3", { style: { margin: "0px" } }, name),
-          ]),
-          h(
-            "div.flex.row",
-            { style: { paddingBottom: "4px", display: "flex", gap: "0.5em" } },
-            [
-              h.if(ingestProcess.state !== undefined)(
-                Tag,
-                {
-                  value: ingestProcess.state,
-                  style: { marginTop: "auto", marginBottom: "auto" },
-                },
-                []
-              ),
-              tags.map((tag, i) => {
-                return h(Tag, {
-                  key: tag,
-                  value: tag,
-                  style: { marginTop: "auto", marginBottom: "auto" },
-                  onClick: async () => {
-                    await updateIngestProcess();
-                    await deleteTag(tag, id);
-                  },
-                });
-              }),
-              h(
-                AddButton,
-                {
-                  ingestId: id,
-                  onChange: updateIngestProcess,
-                },
-                []
-              ),
-            ]
+          h.if(ingestProcess.state !== undefined)(
+            Tag,
+            {
+              value: ingestProcess.state,
+              style: { marginTop: "auto", marginBottom: "auto" },
+            },
+            []
           ),
-          h("div.flex.row", [
-            h("h6", { style: { margin: "0px" } }, `Scale: ${scale}`),
-            h("h6", { style: { margin: "0px" } }, `Source ID: ${source_id}`),
-            h("h6", { style: { margin: "0px" } }, `Slug: ${slug}`),
-          ]),
-          h.if(raster_url != null)([
-            " ",
-            h("span.raster", { style: { marginTop: ".5rem" } }, "Raster"),
-          ]),
-          h.if(slug !== undefined)(
-            "a",
-            { href: sourcesRecordURL },
-            "Sources record map"
+          tags.map((tag, i) => {
+            return h(Tag, {
+              key: tag,
+              value: tag,
+              style: { marginTop: "auto", marginBottom: "auto" },
+              onClick: async () => {
+                await updateIngestProcess();
+                await deleteTag(tag, id);
+              },
+            });
+          }),
+          h(
+            AddButton,
+            {
+              ingestId: id,
+              onChange: updateIngestProcess,
+            },
+            []
           ),
         ]
+      ),
+      h("div.flex.row", [
+        h("h6", { style: { margin: "0px" } }, `Scale: ${scale}`),
+        h("h6", { style: { margin: "0px" } }, `Source ID: ${source_id}`),
+        h("h6", { style: { margin: "0px" } }, `Slug: ${slug}`),
+      ]),
+      h.if(raster_url != null)([
+        " ",
+        h("span.raster", { style: { marginTop: ".5rem" } }, "Raster"),
+      ]),
+      h.if(slug !== undefined)(
+        "a",
+        { href: sourcesRecordURL },
+        "Sources record map"
       ),
     ]
   );
