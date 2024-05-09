@@ -9,6 +9,7 @@ import {
 import Options from "./options";
 import { InfoDrawerContainer } from "@macrostrat/map-interface";
 import FeatureList from "./feature-list";
+import { PageBreadcrumbs } from "~/renderer";
 
 function BackButton() {
   const runAction = useBurwellActions();
@@ -28,11 +29,7 @@ function BackButton() {
 
 function Header({ len, btn }) {
   return h(Navbar, [
-    h.if(len == 0)(Navbar.Group, [
-      h(Navbar.Heading, [
-        h("div.expansion-summary-title", ["Macrostrat - map sources"]),
-      ]),
-    ]),
+    h.if(len == 0)(Navbar.Group, [h(Navbar.Heading, [h(PageBreadcrumbs)])]),
     h.if(len > 0)(Navbar.Group, [
       h(BackButton),
       h(Navbar.Heading, { style: { marginLeft: "20px" } }, [
