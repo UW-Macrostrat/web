@@ -54,9 +54,8 @@ export function Page({ user, url }) {
     h("div.ingestion-title-bar", [
       h("h1", ["Map ingestion queue"]),
       h("div.spacer"),
-      //h(AuthStatus),
-
-      h(UserMenu, { user }),
+      h(AuthStatus),
+      //h(UserMenu, { user }),
     ]),
     h("div", [
       h("div.ingestion-context", [
