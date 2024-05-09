@@ -56,7 +56,7 @@ export function Page({ user, url }) {
       h("div.spacer"),
       //h(AuthStatus),
 
-      h(UserMenu, { user }),
+      h(LoginButton, { user }),
     ]),
     h("div", [
       h("div.ingestion-context", [
