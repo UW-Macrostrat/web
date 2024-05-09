@@ -34,7 +34,6 @@ async function render(pageContext: PageContextServer) {
   // }
 
   // See https://vike.dev/head
-  console.log(pageContext);
   const { documentProps } = pageContext.exports;
   const title = (documentProps && documentProps.title) || "Macrostrat";
   const desc = (documentProps && documentProps.description) || "Macrostrat";
