@@ -17,6 +17,12 @@ type PageProps = Record<string, unknown>;
 
 export type PageStyle = "content" | "fullscreen";
 
+export type DocumentProps = {
+  title?: string;
+  description?: string;
+  scripts?: string[];
+};
+
 type User = { groups: string[] };
 
 export type PageContextCustom = {
@@ -34,10 +40,7 @@ export type PageContextCustom = {
   exports: {
     pageStyle?: PageStyle;
     supportsDarkMode?: boolean;
-    documentProps?: {
-      title?: string;
-      description?: string;
-    };
+    documentProps?: DocumentProps;
   };
 };
 

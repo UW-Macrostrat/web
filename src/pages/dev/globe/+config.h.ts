@@ -1,5 +1,3 @@
-import { App } from "@macrostrat-web/globe";
-
 export default {
   meta: {
     Page: {
@@ -8,5 +6,10 @@ export default {
         server: false,
       },
     },
+  },
+  clientRouting: false,
+  documentProps: {
+    scripts: ["/cesium/Cesium.js"],
+    title: "Macrostrat – Globe",
   },
 };

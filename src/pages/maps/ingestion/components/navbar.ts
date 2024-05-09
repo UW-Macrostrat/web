@@ -31,7 +31,9 @@ export function LoginButton({ user }) {
       onClick() {
         // Assemble the return URL on click based on the current page
         const return_url = window.location.origin + window.location.pathname;
-        window.location.href = `${ingestPrefix}/security/login?return_url=${return_url}`;
+        const url = `${ingestPrefix}/security/login`;
+        console.log(url, return_url);
+        window.location.href = `${url}?return_url=${return_url}`;
       },
     })
   );

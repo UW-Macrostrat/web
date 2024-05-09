@@ -38,6 +38,11 @@ async function render(pageContext: PageContextServer) {
   const title = (documentProps && documentProps.title) || "Macrostrat";
   const desc = (documentProps && documentProps.description) || "Macrostrat";
 
+  const scripts = documentProps?.scripts ?? [];
+  const scriptTags = scripts
+    .map((src) => `<script src="${src}"></script>`)
+    .join("\n");
+
   const documentHtml = escapeInject`<!DOCTYPE html>
     <html lang="en">
       <head>
@@ -57,6 +62,7 @@ async function render(pageContext: PageContextServer) {
           href="https://fonts.googleapis.com/css?family=Montserrat:400,700|Source+Sans+Pro"
           rel="stylesheet"
         />
+        ${dangerouslySkipEscape(scriptTags)}
         <meta name="description" content="${desc}" />
         <title>${title}</title>
       </head>

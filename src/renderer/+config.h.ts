@@ -9,6 +9,7 @@ export default {
     "macrostratLogoFlavor",
     "routeParams",
     "user",
+    "urlPathname",
   ],
   clientRouting: true,
   hydrationCanBeAborted: true,
@@ -20,6 +21,12 @@ export default {
       },
     },
     isolateStyles: {
+      env: {
+        client: true,
+        server: true,
+      },
+    },
+    documentProps: {
       env: {
         client: true,
         server: true,
