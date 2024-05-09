@@ -1,13 +1,13 @@
-import { useEffect, useRef, useState } from "react";
-import {
-  useBurwellActions,
-  useBurwellState,
-  flyToData,
-} from "~/_legacy/map-sources/app-state";
-import { initializeMap } from "./initialize-map";
-import { mapSources } from "./map-sources";
 import h from "@macrostrat/hyper";
 import "mapbox-gl/dist/mapbox-gl.css";
+import { useEffect, useRef, useState } from "react";
+import {
+  flyToData,
+  useBurwellActions,
+  useBurwellState,
+} from "~/pages/map/sources/app-state";
+import { initializeMap } from "./initialize-map";
+import { mapSources } from "./map-sources";
 
 function IndexMapContainer() {
   const [viewport, setViewport] = useState({

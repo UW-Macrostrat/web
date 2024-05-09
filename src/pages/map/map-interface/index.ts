@@ -24,7 +24,7 @@ let store = createStore<AppState, Action, any, any>(
 
 import MapPage from "./map-page";
 
-const Sources = onDemand(() => import("~/_legacy/map-sources"));
+//const Sources = onDemand(() => import("~/pages/map/sources/+Page"));
 const DevMapPage = onDemand(() => import("~/_legacy/map-dev"));
 
 export default function MapApp({ routerBasename }) {
@@ -37,7 +37,7 @@ export default function MapApp({ routerBasename }) {
       [
         h(Routes, [
           h(Route, { path: mapPagePrefix + "/dev/*", element: h(DevMapPage) }),
-          h(Route, { path: mapPagePrefix + "/sources", element: h(Sources) }),
+          //h(Route, { path: mapPagePrefix + "/sources", element: h(Sources) }),
           h(Route, { path: "*", element: h(MapPage) }),
         ]),
       ]

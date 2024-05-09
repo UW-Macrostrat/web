@@ -1,17 +1,17 @@
 import {
-  Menu,
-  MenuItem,
-  Popover,
   Button,
   Icon,
-  Switch,
+  Menu,
   MenuDivider,
+  MenuItem,
+  Popover,
+  Switch,
 } from "@blueprintjs/core";
+import h from "@macrostrat/hyper";
 import {
   useBurwellActions,
   useBurwellState,
-} from "~/_legacy/map-sources/app-state";
-import h from "@macrostrat/hyper";
+} from "~/pages/map/sources/app-state";
 
 const capitalizeWord = (word) => {
   return word.charAt(0).toUpperCase() + word.slice(1);

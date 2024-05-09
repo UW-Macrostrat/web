@@ -1,9 +1,8 @@
-import React from "react";
-import { NavLink } from "react-router-dom";
-import { useBurwellActions } from "~/_legacy/map-sources/app-state";
-import { ExpansionPanel } from "@macrostrat/map-interface";
 import h from "@macrostrat/hyper";
-import { settings, zoomMap } from "../app-state/utils";
+import { ExpansionPanel } from "@macrostrat/map-interface";
+import { NavLink } from "react-router-dom";
+import { useBurwellActions } from "~/pages/map/sources/app-state";
+import { zoomMap } from "../app-state/utils";
 
 function FeatureTable(props) {
   const { d } = props;
