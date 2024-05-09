@@ -31,6 +31,24 @@ function setStyle(props) {
   }
 }
 
+function validateCoordinates(coordinates) {
+  // If any coordinate is greater than 180 or less than -180, return false,
+  // progress into nested arrays if they exist.
+  // This happens because some of our coordinates are in pixel space.
+  if (coordinates.length == 0) {
+    return true;
+  }
+  if (typeof coordinates[0] == "number") {
+    return (
+      coordinates[0] <= 180 &&
+      coordinates[0] >= -180 &&
+      coordinates[1] <= 90 &&
+      coordinates[1] >= -90
+    );
+  }
+  return coordinates.every(validateCoordinates);
+}
+
 function addMapSources(map, maps) {
   if (map.getSource("burwell-sources") != null) {
     map.removeLayer("sources-fill");
@@ -39,7 +57,13 @@ function addMapSources(map, maps) {
   }
 
   // Ensure all maps have valid geometry
-  maps = maps.filter((f) => f.geometry?.type != null);
+  // This is a temporary fix for a bug in the API and data service
+  maps = maps.filter((f) => {
+    if (f.geometry?.type == null) {
+      return false;
+    }
+    return validateCoordinates(f.geometry.coordinates);
+  });
 
   const filteredMaps = {
     type: "FeatureCollection",
@@ -55,7 +79,7 @@ function addMapSources(map, maps) {
     type: "fill",
     source: "burwell-sources", // reference the data source
     paint: {
-      "fill-opacity": 0.5,
+      "fill-opacity": 0.1,
       "fill-color": [
         "case",
         ["boolean", ["feature-state", "active"], false],
