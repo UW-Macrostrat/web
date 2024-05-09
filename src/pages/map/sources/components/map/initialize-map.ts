@@ -1,5 +1,5 @@
 import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
+import { mapboxAccessToken } from "@macrostrat-web/settings";
 
 interface viewport {
   longitude: number;
@@ -17,8 +17,7 @@ interface MapProps {
 shared function to initialize a Mapbox Gl Js map in a useEffect 
 */
 async function initializeMap(props: MapProps): Promise<mapboxgl.Map> {
-  mapboxgl.accessToken =
-    "pk.eyJ1IjoiamN6YXBsZXdza2kiLCJhIjoiY2tpcjQ1cG1yMGZvcTJ6b3psbXB6bmtweiJ9.TkabsM8gNsZ7bHGJXu6vOQ";
+  mapboxgl.accessToken = mapboxAccessToken;
   var map = new mapboxgl.Map({
     container: props.mapContainer,
     style: "mapbox://styles/mapbox/outdoors-v11", // style URL

@@ -57,10 +57,3 @@ export function flyToData(feature) {
 
   return { center: [long + offset, lat], zoom };
 }
-
-export const settings = {
-  uri:
-    window.location.hostname === "localhost"
-      ? "https://dev.macrostrat.org"
-      : window.location.origin,
-};

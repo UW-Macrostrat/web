@@ -14,6 +14,12 @@ export function Link(props: {
   children: React.ReactNode;
   target?: string;
 }) {
+  /** Basic link function for navigating the application.
+   *
+   * TODO: make this work transparently inside React router contexts
+   * as well as Vike
+   */
+
   const linkIsActive = useLinkIsActive(props.href);
   const className = [props.className, linkIsActive && "is-active"]
     .filter(Boolean)

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useBurwellActions } from "~/_legacy/map-sources/app-state";
+import { useBurwellActions } from "~/pages/map/sources/app-state";
 import hyper from "@macrostrat/hyper";
 import IndexMapContainer from "./map";
 import { InfoDrawer } from "./info-drawer";

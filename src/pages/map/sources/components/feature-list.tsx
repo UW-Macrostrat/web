@@ -1,9 +1,8 @@
-import React from "react";
-import { NavLink } from "react-router-dom";
-import { useBurwellActions } from "~/_legacy/map-sources/app-state";
-import { ExpansionPanel } from "@macrostrat/map-interface";
 import h from "@macrostrat/hyper";
-import { settings, zoomMap } from "../app-state/utils";
+import { ExpansionPanel } from "@macrostrat/map-interface";
+import { Link } from "~/components";
+import { useBurwellActions } from "~/pages/map/sources/app-state";
+import { zoomMap } from "../app-state/utils";
 
 function FeatureTable(props) {
   const { d } = props;
@@ -41,14 +40,18 @@ function FeatureTable(props) {
 function ViewMap({ feature }) {
   const { geometry, properties } = feature;
   const { coordinates } = geometry;
+
+  if (coordinates == null) {
+    return null;
+  }
   //                       lon      lat     zoom
   // #layers=bedrock,lines&x=5.012&y=29.031&z=1.45
   const zoom = zoomMap[properties.scale];
   const lat = (coordinates[0][0][1] + coordinates[0][2][1]) / 2;
   const long = (coordinates[0][0][0] + coordinates[0][2][0]) / 2;
-  const to = `/#layers=bedrock,lines&x=${long}&y=${lat}&z=${zoom}`;
+  const to = `/map#layers=bedrock,lines&x=${long}&y=${lat}&z=${zoom}`;
 
-  return <NavLink to={to}>View map</NavLink>;
+  return <Link href={to}>View map</Link>;
 }
 
 function FeatureContent({ d, activateFeature }) {

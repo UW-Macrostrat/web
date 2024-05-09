@@ -9,6 +9,7 @@ import { MapPosition } from "@macrostrat/mapbox-utils";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "~/renderer/Link";
 import CesiumView from "./cesium-view";
+import * as Cesium from "cesium";
 
 import {
   applyMapPositionToHash,
@@ -25,6 +26,8 @@ import styles from "./main.module.scss";
 import Map from "./map-comparison";
 
 const h = hyper.styled(styles);
+
+window.Cesium = Cesium;
 
 function VisControl({ show, setShown, name }) {
   const className = show ? "active" : "";
