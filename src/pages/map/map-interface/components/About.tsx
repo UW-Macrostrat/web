@@ -2,7 +2,7 @@ import { AnchorButton } from "@blueprintjs/core";
 import { mapPagePrefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import newGithubIssueUrl from "new-github-issue-url";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styles from "./about.module.styl";
 
 const h = hyper.styled(styles);
@@ -142,9 +142,9 @@ const AboutText = (props) => {
         </li>
         <li>
           Geologic map data adapted from{" "}
-          <NavLink className="ref-link" to="/sources">
+          <Link className="ref-link" href="/sources">
             various providers
-          </NavLink>{" "}
+          </Link>{" "}
           as noted.
         </li>
       </ul>

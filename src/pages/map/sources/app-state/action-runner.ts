@@ -1,5 +1,6 @@
 import { BurwellSourceActions as Action, BurwellState } from "./types";
-import { fetchBurwellMapData } from "./fetch";
+import axios from "axios";
+import { apiV2Prefix } from "@macrostrat-web/settings";
 
 async function actionRunner(action: Action): Promise<Action | void> {
   switch (action.type) {
@@ -9,6 +10,16 @@ async function actionRunner(action: Action): Promise<Action | void> {
     default:
       return action;
   }
+}
+
+async function fetchBurwellMapData() {
+  const url = `${apiV2Prefix}/defs/sources`;
+
+  const res = await axios.get(url, {
+    responseType: "json",
+    params: { all: true, format: "geojson_bare" },
+  });
+  return res.data.features;
 }
 
 export default actionRunner;
