@@ -56,9 +56,9 @@ export function Page({ user, url }) {
       h("div.spacer"),
       //h(AuthStatus),
 
-      h(LoginButton, { user }),
+      h(UserMenu, { user }),
     ]),
-    h("div.ingestion-body", [
+    h("div", [
       h("div.ingestion-context", [
         h(AddMapButton, { user }),
         h(TagFilterManager, {
@@ -172,7 +172,7 @@ const getTags = async () => {
 
 const getIngestProcesses = async (ingestFilter: URLSearchParams) => {
   const response = await fetch(
-    `${ingestPrefix}/ingest-process?source_id=order_by&source_id=not.is.null&page_size=1000&${
+    `${ingestPrefix}/ingest-process?source_id=order_by.desc&source_id=not.is.null&page_size=1000&${
       ingestFilter || ""
     }`
   );
