@@ -9,6 +9,11 @@
 - Put the most important function in the file first, and the least important (ex., utility functions) last.
 - Prefer `function foo() {}` over `const foo = () => {}` for named functions.
 
+# Code format
+
+- Use Prettier to format your code. You can run `yarn format` to format the entire codebase, or set up your editor to format on save.
+- Sort and prune imports periodically to keep them organized.
+
 # Styling and interface design
 
 - Prefer CSS modules where possible, but don't be afraid to use semantically named global classes for straightforward cases.
