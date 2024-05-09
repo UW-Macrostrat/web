@@ -6535,7 +6535,6 @@ __metadata:
     "@turf/boolean-contains": "npm:^6.5.0"
     "@turf/buffer": "npm:^6.5.0"
     "@turf/centroid": "npm:^6.5.0"
-    "@types/cesium": "npm:^1.67.4"
     "@types/compression": "npm:^1.7.2"
     "@types/express": "npm:^4.17.17"
     "@types/geojson": "npm:^7946.0.10"
@@ -6550,7 +6549,6 @@ __metadata:
     "@vitejs/plugin-react": "npm:^4.0.4"
     "@yarnpkg/sdks": "npm:^3.1.0"
     axios: "npm:^0.25.0"
-    cesium: "npm:^1.98.1"
     chroma-js: "npm:^2.4.2"
     classnames: "npm:^2.2.6"
     compression: "npm:^1.7.4"
@@ -10544,13 +10542,6 @@ __metadata:
     "@types/node": "npm:*"
     "@types/responselike": "npm:^1.0.0"
   checksum: 10/159f9fdb2a1b7175eef453ae2ced5ea04c0d2b9610cc9ccd9f9abb066d36dacb1f37acd879ace10ad7cbb649490723feb396fb7307004c9670be29636304b988
-  languageName: node
-  linkType: hard
-
-"@types/cesium@npm:^1.67.4":
-  version: 1.67.14
-  resolution: "@types/cesium@npm:1.67.14"
-  checksum: 10/3c2de2fca3d38e843cb11cd833a8b60bbc4ff4b05ee226654c98ee9d37539c443d43b11f8b611b36d08f42606176ad5796de3c0f61b57d98ac63b3a8fca80e1a
   languageName: node
   linkType: hard
 
@@ -14698,7 +14689,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cesium@npm:>=1.48, cesium@npm:^1.109.0, cesium@npm:^1.81.0, cesium@npm:^1.98.1":
+"cesium@npm:>=1.48, cesium@npm:^1.109.0, cesium@npm:^1.81.0":
   version: 1.109.0
   resolution: "cesium@npm:1.109.0"
   dependencies:
