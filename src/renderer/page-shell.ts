@@ -1,9 +1,10 @@
 import hyper from "@macrostrat/hyper";
 import { DarkModeProvider } from "@macrostrat/ui-components";
-import React from "react";
+import React, { useEffect } from "react";
 import { PageContextProvider } from "./page-context";
 import { PageContext, PageStyle } from "./types";
 import { AuthProvider } from "./auth";
+
 
 import "~/styles/blueprint-core";
 import "../styles/_theme.styl";
@@ -31,7 +32,7 @@ export function PageShell({
     { pageContext },
     h(
       AuthProvider,
-      { user },
+      { user }, // Prefer detailed user if available
       h(
         supportsDarkMode ? DarkModeProvider : NoOpDarkModeProvider,
         { followSystem: true },

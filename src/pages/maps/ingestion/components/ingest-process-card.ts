@@ -48,6 +48,8 @@ export function IngestProcessCard({
     onUpdate();
   }, []);
 
+  console.log("ingestProcess", ingestProcess);
+
   const { id, tags } = _ingestProcess;
   const { slug, name, source_id, scale, raster_url } = _ingestProcess.source;
   const edit_href = `/maps/ingestion/${source_id}`;
@@ -60,7 +62,7 @@ export function IngestProcessCard({
     },
     [
       h("div.flex.row", [
-        h("h3", { style: { margin: "0px" } }, name),
+        h("h3.map-card-title", name),
         h("div.spacer"),
         h.if(
           user !== undefined &&
@@ -111,7 +113,7 @@ export function IngestProcessCard({
       ]),
       h.if(slug !== undefined)(
         "a",
-        { href: sourcesRecordURL },
+        { href: sourcesRecordURL, style: { display: "block" } },
         "Sources record map"
       ),
     ]

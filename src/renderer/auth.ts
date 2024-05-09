@@ -12,21 +12,31 @@ async function authTransformer(
   /** This transformer is taken directly from Sparrow */
   switch (action.type) {
     case "get-status":
-      // Right now, we get login status from the
-      // /auth/refresh endpoint, which refreshes access
-      // tokens allowing us to extend our session.
-      // It could be desirable for security (especially
-      // when editing information becomes a factor) to
-      // only refresh tokens when access is proactively
-      // granted by the application.
-      return null;
+      try {
+        const user = await fetchUser();
+        return { type: "update-user", user };
+      } catch (error) {
+        return { type: "update-status", payload: { error } };
+      }
     case "login":
-      return null;
+      // Assemble the return URL on click based on the current page
+      const return_url = window.location.origin + window.location.pathname;
+      window.location.href = `${ingestPrefix}/security/login?return_url=${return_url}`;
     case "logout":
       // Delete the token from the session
-      // and redirect to the login page
-      const response = await fetch(`${ingestPrefix}/security/logout`);
-      return { type: "update-status", payload: { login: false, user: null } };
+      try {
+        const response = await fetch(
+          `${ingestPrefix}/security/logout`,
+          { method: "POST", credentials: "include"}
+        );
+        if(response.ok){
+          return { type: "logout" };
+        } else {
+          throw new Error("Failed to logout");
+        }
+      } catch (error) {
+        return { type: "update-status", payload: { error } };
+      }
     default:
       return action;
   }
@@ -40,4 +50,17 @@ export function AuthProvider(props) {
       return h("code", JSON.stringify(user));
     },
   });
+}
+
+export async function fetchUser() {
+  const response = await fetch(`${ingestPrefix}/security/me`, {
+    method: "GET",
+    credentials: "include"
+  });
+  if(response.ok){
+    const user = await response.json();
+    return user
+  } else {
+    throw new Error("Failed to get user status");
+  }
 }
