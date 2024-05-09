@@ -10,11 +10,11 @@ export function buildURL(baseURL: string, dataParameters: DataParameters) {
 
   // Order by ID if no group is specified
   if (dataParameters?.group == undefined) {
-    url.searchParams.append("_pkid", "order_by");
+    url.searchParams.append("_pkid", "order_by.asc");
 
     // Otherwise order by group and group by group
   } else {
-    url.searchParams.append(dataParameters.group, "order_by");
+    url.searchParams.append(dataParameters.group, "order_by.asc");
     url.searchParams.append(dataParameters.group, "group_by");
   }
 
