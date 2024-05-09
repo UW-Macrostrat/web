@@ -44,7 +44,3 @@ export function PageShell({
 function NoOpDarkModeProvider(props) {
   return props.children;
 }
-
-function AuthContextProvider(props) {
-  return h(AuthProvider, props);
-}

@@ -1,9 +1,10 @@
 import { redirect, render } from "vike/abort";
-import {ingestPrefix} from "@macrostrat-web/settings";
+import { ingestPrefix } from "@macrostrat-web/settings";
 
 export const guard = (pageContext) => {
-
   const { user } = pageContext;
+
+  console.log(pageContext.urlParsed);
 
   if (user === undefined) {
     // Render the login page while preserving the URL. (This is novel technique

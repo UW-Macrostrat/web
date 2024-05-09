@@ -69,6 +69,8 @@ const config: UserConfig = {
     "process.env": {
       NODE_DEBUG: false,
     },
+    // Cesium base URL
+    CESIUM_BASE_URL: JSON.stringify("/cesium"),
   },
   ssr: {
     noExternal: ["labella", "@supabase/postgrest-js"],
