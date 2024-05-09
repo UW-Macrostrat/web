@@ -10,6 +10,6 @@ export default {
   clientRouting: false,
   documentProps: {
     scripts: ["/cesium/Cesium.js"],
-    title: "Globe",
+    title: "Macrostrat – Globe",
   },
 };
