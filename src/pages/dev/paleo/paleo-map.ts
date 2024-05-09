@@ -29,7 +29,7 @@ import {
 } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
 import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
-import { MacrostratVectorTileset } from "~/_legacy/map-dev/map-layers";
+import { MacrostratVectorTileset } from "~/pages/map/dev/map-layers";
 import { TimescalePanel } from "./timescale";
 
 import "~/styles/global.styl";
