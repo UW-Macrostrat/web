@@ -31,6 +31,56 @@ function setStyle(props) {
   }
 }
 
+function addMapSources(map, maps) {
+  if (map.getSource("burwell-sources") != null) {
+    map.removeLayer("sources-fill");
+    map.removeLayer("outline");
+    map.removeSource("burwell-sources");
+  }
+
+  // Ensure all maps have valid geometry
+  maps = maps.filter((f) => f.geometry?.type != null);
+
+  const filteredMaps = {
+    type: "FeatureCollection",
+    features: maps,
+  };
+
+  map.addSource("burwell-sources", {
+    type: "geojson",
+    data: filteredMaps,
+  });
+  map.addLayer({
+    id: "sources-fill",
+    type: "fill",
+    source: "burwell-sources", // reference the data source
+    paint: {
+      "fill-opacity": 0.5,
+      "fill-color": [
+        "case",
+        ["boolean", ["feature-state", "active"], false],
+        "#ffae80",
+        "#aaaaaa",
+      ],
+    },
+  });
+  map.addLayer({
+    id: "outline",
+    type: "line",
+    source: "burwell-sources",
+    layout: {},
+    paint: {
+      "line-color": [
+        "case",
+        ["boolean", ["feature-state", "clicked"], false],
+        "#ffae80",
+        "#333",
+      ],
+      "line-width": 2,
+    },
+  });
+}
+
 async function mapSources(
   map,
   maps,
@@ -38,50 +88,21 @@ async function mapSources(
   activeFeature,
   selectedScale
 ) {
-  map.on("load", () => {
-    map.scale = selectedScale;
-    const filteredMaps = {
-      type: "FeatureCollection",
-      features: getVisibleScale(maps, selectedScale).filter(
-        (f) => f.properties.source_id != 154
-      ),
-    };
-    map.addSource("burwell-sources", {
-      type: "geojson",
-      data: filteredMaps,
-    });
-    map.addLayer({
-      id: "sources-fill",
-      type: "fill",
-      source: "burwell-sources", // reference the data source
-      paint: {
-        "fill-opacity": 0.5,
-        "fill-color": [
-          "case",
-          ["boolean", ["feature-state", "active"], false],
-          "#ffae80",
-          "#aaaaaa",
-        ],
-      },
-    });
-    map.addLayer({
-      id: "outline",
-      type: "line",
-      source: "burwell-sources",
-      layout: {},
-      paint: {
-        "line-color": [
-          "case",
-          ["boolean", ["feature-state", "clicked"], false],
-          "#ffae80",
-          "#333",
-        ],
-        "line-width": 2,
-      },
-    });
-  });
+  map.scale = selectedScale;
 
-  setStyle({ map, maps, selectedScale, activeFeature });
+  const filteredMaps = getVisibleScale(maps, selectedScale).filter(
+    (f) => f.properties.source_id != 154
+  );
+
+  if (!map.isStyleLoaded()) {
+    map.on("load", () => {
+      addMapSources(map, filteredMaps);
+      setStyle({ map, maps, selectedScale, activeFeature });
+    });
+  } else {
+    addMapSources(map, filteredMaps);
+    setStyle({ map, maps, selectedScale, activeFeature });
+  }
 
   map.sourcesFillListener = (e) => {
     if (map.clickedFeatures) {
