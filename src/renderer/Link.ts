@@ -3,6 +3,8 @@ import { usePageContext } from "./page-context";
 
 export function useLinkIsActive(href: string) {
   const pageContext = usePageContext();
+  // Page context can be null during static rendering, I guess?
+  if (pageContext == null) return false;
   return pageContext.urlPathname === href;
 }
 

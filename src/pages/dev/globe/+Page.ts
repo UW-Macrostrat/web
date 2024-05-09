@@ -1,13 +1,7 @@
 import h from "@macrostrat/hyper";
-import { ClientOnly } from "~/renderer/client-only";
-import "react-datasheet/lib/react-datasheet.css";
+import { mapboxAccessToken } from "@macrostrat-web/settings";
+import { App } from "@macrostrat-web/globe";
 
 export function Page() {
-  return h(
-    "div.globe",
-    h(ClientOnly, {
-      component: () => import("@macrostrat-web/globe").then((d) => d.App),
-      accessToken: import.meta.env.VITE_MAPBOX_API_TOKEN,
-    })
-  );
+  return h("div.globe", h(App, { accessToken: mapboxAccessToken }));
 }
