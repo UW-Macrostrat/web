@@ -1,30 +1,31 @@
 import hyper from "@macrostrat/hyper";
 // Page for a list of maps
 import styles from "./main.module.scss";
-import { AnchorButton } from "@blueprintjs/core";
+import { AnchorButton, ButtonGroup } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
-import { PageHeader, DevLink } from "~/components";
+import { PageHeader, DevLinkButton } from "~/components";
 
 const h = hyper.styled(styles);
 
 export function Page({ sources }) {
   return h(ContentPage, [
     h("div.float-right.padding.stick-to-top", [
-      h("ul.nav-list", [
-        h("li", [
-          h(
-            AnchorButton,
-            { icon: "flows", href: "/maps/ingestion", large: true },
-            "Ingestion system"
-          ),
-        ]),
-        h("li", [h(DevLink, { href: "/maps/legend" }, "Legend table")]),
+      h(ButtonGroup, { vertical: true, large: true }, [
+        h(
+          AnchorButton,
+          { icon: "flows", href: "/maps/ingestion" },
+          "Ingestion system"
+        ),
+        h(AnchorButton, { icon: "map", href: "/map/sources" }, "Show on map"),
+        h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
       ]),
     ]),
     h(PageHeader, { title: "Maps" }),
     h(
       "ul.maps-list",
-      sources.map((d) => h.if(d.is_mapped)(SourceItem, { source: d, key: d.source_id }))
+      sources.map((d) =>
+        h.if(d.is_mapped)(SourceItem, { source: d, key: d.source_id })
+      )
     ),
   ]);
 }

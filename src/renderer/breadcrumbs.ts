@@ -122,6 +122,26 @@ const sitemap: Routes = {
         {
           slug: "ingestion",
           name: "Ingestion",
+          children: [
+            {
+              param: "@id",
+              name(urlPart, ctx) {
+                return h(
+                  "code",
+                  // Get the map slug from either JSON or GeoJSON
+                  ctx.pageProps?.source?.slug ??
+                    ctx.pageProps?.source?.properties?.slug ??
+                    urlPart
+                );
+              },
+              children: [
+                { slug: "meta", name: "Metadata" },
+                { slug: "polygons", name: "Polygons" },
+                { slug: "lines", name: "Lines" },
+                { slug: "points", name: "Points" },
+              ],
+            },
+          ],
         },
         { slug: "legend", name: "Legend items" },
       ],
