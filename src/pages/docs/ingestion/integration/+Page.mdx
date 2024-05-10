@@ -1,0 +1,42 @@
+export { DocumentationPage as default } from "~/layouts";
+
+First, set the active map:
+
+```
+> macrostrat maps set-active criticalmaas_09_ngmdb_10243
+```
+
+This is not necessary in a pipeline but helps avoid repeated typing in the CLI.
+Either a `source_id` integer or a `slug` can be ussed
+
+### Insert the map into the maps schema
+
+```sh
+> macrostrat maps process insert -
+```
+
+- If map data is already there, this command will fail. You can use the `--delete-existing` flag to overwrite all existing data for that map.
+- If the scale is not already set in the `maps.sources` table, the `--scale large` flag can be used.
+
+### Create legend entries
+
+```sh
+> macrostrat maps process legend -
+```
+
+### Match data dictionaries
+
+```sh
+> macrostrat maps process strat-names -
+> macrostrat maps process units -
+> macrostrat maps process liths -
+```
+
+### Build lookup tables
+
+```sh
+> macrostrat maps process lookup - # This step is what actually colors the map
+# macrostrat maps process legend-lookup - # Omit for now, this hangs indefinitely...
+```
+
+This leads to a colored map!
