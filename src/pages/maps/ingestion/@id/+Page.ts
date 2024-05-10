@@ -42,6 +42,7 @@ export function Page({
   );
 
   const title = source.name;
+  const slug = source.slug;
 
   const HeaderProps = {
     title: title,
@@ -100,7 +101,7 @@ export function Page({
           ]),
         ])
       ),
-      h.if(showMap)(MapInterface, { id: source_id, map: mapBounds }),
+      h.if(showMap)(MapInterface, { id: source_id, map: mapBounds, slug }),
     ]),
   ]);
 }
@@ -162,24 +163,32 @@ function Header({
       h.if(source_href != null)(NavigateMapSourceButton, {
         href: source_href,
       }),
-      h(ShowDocsButton, {
-        href: "https://github.com/UW-Macrostrat/web/blob/main/src/pages/maps/ingestion/%40id/README.md",
-      }),
     ]),
+    h(
+      ShowDocsButton,
+      {
+        href: "/docs/ingestion",
+      },
+      "Documentation"
+    ),
     h("div.spacer"),
     h("div.edit-page-buttons", [h(ShowMapButton, { showMap, setShowMap })]),
   ]);
 }
 
-function ShowDocsButton({ href }: { href: string }) {
-  return h(AnchorButton, {
-    minimal: true,
-    title: "View Ingestion Documentation",
-    icon: "manual",
-    target: "_blank",
-    large: true,
-    href: href,
-  });
+function ShowDocsButton({ href, children }: { href: string }) {
+  return h(
+    AnchorButton,
+    {
+      minimal: true,
+      title: "Ingestion Documentation",
+      icon: "manual",
+      target: "_blank",
+      large: true,
+      href,
+    },
+    children
+  );
 }
 
 function ShowMapButton({ showMap, setShowMap }) {

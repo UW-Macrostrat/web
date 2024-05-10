@@ -1,5 +1,5 @@
 import { Radio, RadioGroup } from "@blueprintjs/core";
-import { SETTINGS } from "@macrostrat-web/settings";
+import { SETTINGS, tileserverDomain } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import {
   MapAreaContainer,
@@ -17,6 +17,7 @@ import { useEffect, useMemo, useState } from "react";
 import { MapNavbar } from "~/components/map-navbar";
 import "~/styles/global.styl";
 import styles from "./main.module.sass";
+import chroma from "chroma-js";
 
 const h = hyper.styled(styles);
 
@@ -27,7 +28,7 @@ function rasterURL(source_id) {
 
 interface StyleOpts {
   style: string;
-  focusedMap: number;
+  table: string;
   layerOpacity: {
     vector: number | null;
     raster: number | null;
@@ -42,27 +43,27 @@ const emptyStyle: any = {
   layers: [],
 };
 
-function buildOverlayStyle({
-  style,
-  focusedMap,
-  layerOpacity,
-}: StyleOpts): any {
+function buildOverlayStyle({ style, table, layerOpacity }: StyleOpts): any {
+  let baseStyle = style ?? emptyStyle;
   let mapStyle = emptyStyle;
   if (layerOpacity.vector != null) {
     mapStyle = buildMacrostratStyle({
       tileserverDomain: SETTINGS.burwellTileDomain,
-      //focusedMap,
       fillOpacity: layerOpacity.vector - 0.1,
       strokeOpacity: layerOpacity.vector + 0.2,
       lineOpacity: layerOpacity.vector + 0.4,
     });
   }
 
-  if (style == null) {
-    return mapStyle;
+  let tableStyle = {};
+  if (table != null) {
+    tableStyle = buildStyle({
+      inDarkMode: false,
+      tileURL: tileserverDomain + `/${table}/tilejson.json`,
+    });
   }
 
-  return mergeStyles(style, mapStyle);
+  return mergeStyles(mapStyle ?? {}, tableStyle);
 }
 
 function ensureBoxInGeographicRange(bounds: LngLatBoundsLike) {
@@ -89,7 +90,7 @@ function basemapStyle(basemap, inDarkMode) {
   }
 }
 
-export default function MapInterface({ id, map }) {
+export default function MapInterface({ id, map, slug }) {
   const [isOpen, setOpen] = useState(false);
 
   // Catch empty map data
@@ -102,6 +103,7 @@ export default function MapInterface({ id, map }) {
 
   const dark = useDarkMode()?.isEnabled ?? false;
   const title = map.properties.name;
+  const table = `sources.${slug}_polygons`;
 
   const hasRaster = rasterURL(map.properties.source_id) != null;
 
@@ -127,13 +129,16 @@ export default function MapInterface({ id, map }) {
     raster: 0.5,
   });
 
+  console.log(map);
+
   // Overlay style
   const [mapStyle, setMapStyle] = useState(null);
   useEffect(() => {
     setMapStyle(
       buildOverlayStyle({
         style,
-        focusedMap: map.properties.source_id,
+        table,
+        //focusedMap: map.properties.source_id,
         layerOpacity,
       })
     );
@@ -149,7 +154,7 @@ export default function MapInterface({ id, map }) {
     if (mapStyle == null) return;
     const mergeLayers = buildOverlayStyle({
       style,
-      focusedMap: null, //map.properties.source_id,
+      table,
       layerOpacity,
     }).layers;
 
@@ -295,4 +300,56 @@ function OpacitySlider(props) {
       },
     }),
   ]);
+}
+
+export function buildStyle({
+  color = "rgb(74, 242, 161)",
+  inDarkMode,
+  lineSourceLayer = "default",
+  polygonSourceLayer = "default",
+  sourceID = "tileLayer",
+  tileURL,
+}): mapboxgl.Style {
+  const xRayColor = (opacity = 1, darken = 0) => {
+    if (!inDarkMode) {
+      return chroma(color)
+        .darken(2 - darken)
+        .alpha(opacity)
+        .css();
+    }
+    return chroma(color).alpha(opacity).darken(darken).css();
+  };
+
+  return {
+    version: 8,
+    name: "basic",
+    sources: {
+      [sourceID]: {
+        type: "vector",
+        url: tileURL,
+      },
+    },
+    layers: [
+      {
+        id: "polygons",
+        type: "fill",
+        source: sourceID,
+        "source-layer": polygonSourceLayer,
+        paint: {
+          "fill-color": xRayColor(0.1),
+          "fill-outline-color": xRayColor(0.5),
+        },
+      },
+      {
+        id: "lines",
+        type: "line",
+        source: sourceID,
+        "source-layer": lineSourceLayer,
+        paint: {
+          "line-color": xRayColor(1, -1),
+          "line-width": 1.5,
+        },
+      },
+    ],
+  };
 }
