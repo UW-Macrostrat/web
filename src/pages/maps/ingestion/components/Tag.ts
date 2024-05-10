@@ -40,11 +40,12 @@ const Tag = ({ value, color, onClick, active, ...props }: TagProps) => {
     BlueprintTag,
     {
       ...props,
+      className: "ingest-tag",
       onClick: onClick,
       style: { backgroundColor: color, ...props?.style },
     },
     [
-      h("div", { style: { display: "flex" } }, [
+      h("div.ingest-tag", { style: { display: "flex" } }, [
         value,
         h.if(active)(Icon, {
           icon: "small-tick",
