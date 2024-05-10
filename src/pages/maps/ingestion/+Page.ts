@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { PageBreadcrumbs } from "~/renderer";
 import { IngestProcessCard } from "./components";
 import styles from "./main.module.sass";
-import { LoginButton } from "./components/navbar";
 import { AuthStatus } from "@macrostrat/auth-components";
 
 import { ContentPage } from "~/layouts";
@@ -175,8 +174,5 @@ const getIngestProcesses = async (ingestFilter: URLSearchParams) => {
       ingestFilter || ""
     }`
   );
-  let res = await response.json();
-  // Reverse the array so that the most recent ingestions are at the top
-  res = res.reverse();
-  return res;
+  return await response.json();
 };

@@ -47,7 +47,7 @@ export function Page({
     title: title,
     showMap: showMap,
     setShowMap: setShowMap,
-    source_href: source.url
+    source_href: source.url,
   };
 
   const sourcePrefix = `${ingestPrefix}/sources/${source_id}`;
@@ -147,7 +147,7 @@ function Header({
   showMap,
   setShowMap,
   parentRoute,
-  source_href
+  source_href,
 }: {
   title: string;
   showMap: boolean;
@@ -192,7 +192,7 @@ function ShowMapButton({ showMap, setShowMap }) {
   });
 }
 
-function NavigateMapSourceButton({ href } : { href: string }) {
+function NavigateMapSourceButton({ href }: { href: string }) {
   return h(AnchorButton, {
     minimal: true,
     title: "View Map Source",

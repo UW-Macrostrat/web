@@ -1,4 +1,4 @@
-import { Radio, RadioGroup, Spinner } from "@blueprintjs/core";
+import { Radio, RadioGroup } from "@blueprintjs/core";
 import { SETTINGS } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import {
@@ -7,6 +7,7 @@ import {
   MapView,
   PanelCard,
 } from "@macrostrat/map-interface";
+import { NonIdealState } from "@blueprintjs/core";
 import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
 import { NullableSlider, useDarkMode } from "@macrostrat/ui-components";
@@ -50,7 +51,7 @@ function buildOverlayStyle({
   if (layerOpacity.vector != null) {
     mapStyle = buildMacrostratStyle({
       tileserverDomain: SETTINGS.burwellTileDomain,
-      focusedMap,
+      //focusedMap,
       fillOpacity: layerOpacity.vector - 0.1,
       strokeOpacity: layerOpacity.vector + 0.2,
       lineOpacity: layerOpacity.vector + 0.4,
@@ -67,6 +68,7 @@ function buildOverlayStyle({
 function ensureBoxInGeographicRange(bounds: LngLatBoundsLike) {
   if (bounds[1] < -90) bounds[1] = -90;
   if (bounds[3] > 90) bounds[3] = 90;
+  if (bounds[0] < -180 || bounds[2] > 180) return "invalid";
   return bounds;
 }
 
@@ -91,19 +93,19 @@ export default function MapInterface({ id, map }) {
   const [isOpen, setOpen] = useState(false);
 
   // Catch empty map data
-  if (map == null || Object.keys(map.geometry).length == 0)
-    return h(
-      "div",
-      { style: { display: "flex", margin: "auto" } },
-      "No map data"
-    );
+  // if (map == null || Object.keys(map.geometry).length == 0)
+  //   return h(
+  //     "div",
+  //     { style: { display: "flex", margin: "auto" } },
+  //     "No map data"
+  //   );
 
   const dark = useDarkMode()?.isEnabled ?? false;
   const title = map.properties.name;
 
   const hasRaster = rasterURL(map.properties.source_id) != null;
 
-  const bounds: LngLatBoundsLike = useMemo(() => {
+  const bounds: LngLatBoundsLike | "invalid" = useMemo(() => {
     return ensureBoxInGeographicRange(boundingBox(map.geometry));
   }, [map.geometry]);
 
@@ -147,7 +149,7 @@ export default function MapInterface({ id, map }) {
     if (mapStyle == null) return;
     const mergeLayers = buildOverlayStyle({
       style,
-      focusedMap: map.properties.source_id,
+      focusedMap: null, //map.properties.source_id,
       layerOpacity,
     }).layers;
 
@@ -170,20 +172,37 @@ export default function MapInterface({ id, map }) {
     }
   }, [layerOpacity]);
 
-  const maxBounds: LatLngBoundsLike = useMemo(() => {
-    const dx = bounds[2] - bounds[0];
-    const dy = bounds[3] - bounds[1];
-    const buf = 1 * Math.max(dx, dy);
-
-    return ensureBoxInGeographicRange([
-      bounds[0] - buf,
-      bounds[1] - buf,
-      bounds[2] + buf,
-      bounds[3] + buf,
+  if (bounds == null || bounds == "invalid") {
+    let title = "No map data";
+    let description = "This map has no geometry";
+    if (bounds == "invalid") {
+      title = "Invalid map bounds for geographic data";
+      description =
+        "The map likely has not been georeferenced or converted to a geographic projection";
+    }
+    return h("div.map-interface.no-map", [
+      h(NonIdealState, {
+        icon: "map",
+        title,
+        description,
+      }),
     ]);
-  }, [bounds]);
+  }
 
-  if (bounds == null || mapStyle == null) return h(Spinner);
+  // const maxBounds: LatLngBoundsLike = useMemo(() => {
+  //   const dx = bounds[2] - bounds[0];
+  //   const dy = bounds[3] - bounds[1];
+  //   const buf = 1 * Math.max(dx, dy);
+
+  //   return ensureBoxInGeographicRange([
+  //     bounds[0] - buf,
+  //     bounds[1] - buf,
+  //     bounds[2] + buf,
+  //     bounds[3] + buf,
+  //   ]);
+  // }, [bounds]);
+
+  //if (bounds == null || mapStyle == null) return h(Spinner);
 
   const contextPanel = h(PanelCard, [
     h("div.vector-controls", [
@@ -221,12 +240,12 @@ export default function MapInterface({ id, map }) {
       h(
         MapView,
         {
-          style: mapStyle, //"mapbox://styles/mapbox/satellite-v9",
+          style: mapStyle, ///"mapbox://styles/mapbox/satellite-v9",
           mapboxToken: SETTINGS.mapboxAccessToken,
           //projection: { name: "globe" },
           bounds,
           mapPosition: null,
-          maxBounds,
+          //maxBounds,
           fitBoundsOptions: { padding: 50 },
           infoMarkerPosition: selectedLocation,
         },
@@ -238,7 +257,6 @@ export default function MapInterface({ id, map }) {
             },
           }),
         ]
-        //[h(FitBoundsManager, { bounds })]
       ),
     ]
   );
