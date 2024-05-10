@@ -18,8 +18,8 @@ representation.
 
 - [Features](#features)
 - [Overview](#process-overview)
-- [Starred Column Descriptions](#starred-column-description)
-- [Table Commands](#table-commands)
+- [Starred columns](#starred-column-description)
+- [Table commands](#table-commands)
 
 ## Features:
 
@@ -62,8 +62,8 @@ Log in and find the map that you wish to process on the ingestion page, clicking
 
 ### 2. Download the ingested maps metadata
 
-Click on the `Download source` button to download the metadata for the ingested map, you will need this to provide more
-context about the values shown in the table.
+Click on the `Download source` button to download the metadata for the ingested map, you may need this to provide more
+context about the values shown in the table if they are incomplete.
 
 ### 3. Use the interface to reconcile the map
 
@@ -75,7 +75,7 @@ that are intended to be populated by the non-star columns which are populated vi
 - [Starred Column Description](#starred-column-description)
 - [Table Commands](#table-commands)
 
-#### Starred Column Description
+#### Starred columns
 
 All the columns in addition to these are filled in from the ingested map and can typically be transformed via the
 table interface to populate these values. Otherwise, we provide the original .zip file that was ingested to help locate the appropriate README files.
@@ -104,6 +104,13 @@ Name of the stratigraphy.
 
 Age of the polygon.
 
+*Note:* This is one of the most important fields in Macrostrat, and is used to intersect the map with our age model.
+
+Often, age ranges can be inferred from the symbology used to discuss them. Further reading:
+
+- [Age abbreviations](https://pubs.usgs.gov/of/1999/of99-430/of99-430_sec38.pdf)
+- [Divisions of geologic time](https://pubs.usgs.gov/fs/2007/3015/fs2007-3015.pdf)
+
 **comments**
 
-Any comments that you would like to make can be entered here.
+Any comments that you or the authors made can be entered here.
