@@ -22,6 +22,7 @@ export function Page({ user, url }) {
     // Get the ingest process data
     const url = new URL(window.location.href);
     const searchParams = new URLSearchParams(url.search);
+    searchParams.set("state", "not.eq.abandoned");
     setIngestFilter(searchParams);
     getIngestProcesses(searchParams).then((ingestProcesses) => {
       setIngestProcess(ingestProcesses);
