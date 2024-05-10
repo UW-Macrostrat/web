@@ -54,10 +54,9 @@ export function Page({ user, url }) {
       h("h1", ["Map ingestion queue"]),
       h("div.spacer"),
       h(AuthStatus),
-      //h(UserMenu, { user }),
     ]),
     h("div", [
-      h("div.ingestion-context", [
+      h("div.ingestion-body", [
         h(AddMapButton, { user }),
         h(TagFilterManager, {
           tags,
@@ -67,9 +66,10 @@ export function Page({ user, url }) {
       ]),
       h("h2", "Maps"),
       h(
-        "div.ingestion-cards",
+        "div.ingestion-body",
         ingestProcess.map((d) => {
           return h(IngestProcessCard, {
+            key: d.id,
             ingestProcess: d,
             user: user,
             // What is this doing?

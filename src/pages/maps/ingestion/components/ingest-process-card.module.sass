@@ -1,3 +1,10 @@
 .map-card
   display: flex
   flex-direction: column
+  grid-column: auto/span 1
+  @media only screen and (max-width: 900px)
+    grid-column: auto/span 2
+
+.map-card-title
+  margin: 0
+  padding-bottom: .5em
