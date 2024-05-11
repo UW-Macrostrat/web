@@ -15,7 +15,6 @@ interface TableData {
   totalNumberOfRows?: number;
   allColumns: string[];
   hiddenColumns: string[];
-  showOmittedRows: boolean;
   tableUpdates: TableUpdate[];
   parameters: DataParameters;
 }
@@ -26,14 +25,15 @@ export const initialState: TableData = {
   totalNumberOfRows: undefined,
   allColumns: [],
   hiddenColumns: [],
-  showOmittedRows: false,
   tableUpdates: [],
   parameters: {
     select: {
       page: "0",
       pageSize: "50"
     },
-    filter: {}
+    filter: {
+      "omit": new Filter("omit", "is_distinct_from", "true")
+    }
   }
 };
 
@@ -93,9 +93,19 @@ export const showAllColumns = (state: TableData) => {
 }
 
 export const toggleShowOmittedRows = (state: TableData) => {
+
+  const newDataParameters = cloneDataParameters(state.parameters);
+  const currentlyHidden = newDataParameters.filter["omit"].is_valid()
+
+  if (currentlyHidden) {
+    newDataParameters.filter["omit"] = new Filter("omit", "eq", "");
+  } else {
+    newDataParameters.filter["omit"] = new Filter("omit", "is_distinct_from", "true");
+  }
+
   return {
     ...state,
-    showOmittedRows: !state.showOmittedRows
+    parameters: newDataParameters
   };
 }
 
