@@ -75,9 +75,6 @@ export function Page({
               }),
               Object.entries(routeMap).map(([key, value]) => {
                 let url = sourcePrefix + `/${key}`;
-                if (key === "lines") {
-                  url = sourcePrefix + `/linestrings`;
-                }
 
                 return h(Route, {
                   path: key,
