@@ -7,6 +7,8 @@ export type ColumnOperators =
   | "gt"
   | "ge"
   | "ne"
+  | "is_distinct_from"
+  | "is_not_distinct_from"
   | "like"
   | "in"
   | "is";

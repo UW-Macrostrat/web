@@ -30,7 +30,7 @@ export function LinesTable({ url, ingestProcessId }: CustomTableProps) {
     "direction",
   ];
 
-  const linestringColumnGenerator = useCallback(
+  const linesColumnGenerator = useCallback(
     ({
       url,
       defaultColumnConfig,
@@ -74,6 +74,6 @@ export function LinesTable({ url, ingestProcessId }: CustomTableProps) {
     url: url,
     ingestProcessId: ingestProcessId,
     finalColumns: FINAL_LINE_COLUMNS,
-    columnGenerator: linestringColumnGenerator,
+    columnGenerator: linesColumnGenerator,
   });
 }
