@@ -1,7 +1,7 @@
 export { DocumentationPage as default } from "~/layouts";
-import { LinkCard } from "~/components/cards";
-import { PageHeader } from "~/components";
 import { Icon } from "@blueprintjs/core";
+import { PageHeader } from "~/components";
+import { LinkCard } from "~/components/cards";
 
 <PageHeader title="Legend Harmonization" showSiteName={false}>
   <span className="subtitle">
@@ -9,7 +9,7 @@ import { Icon } from "@blueprintjs/core";
   </span>
 </PageHeader>
 
-To create the unified interface that Macrostrat provides registered maps must first go through a harmonization step.
+To create the unified interface that Macrostrat provides, registered maps must be structurally harmonized to a small, semantically meaningful set of data fields.
 This step will align the geologic properties (lithologies, ages, types, etc.) with Macrostrat's internal representations. This alignment
 provides value to our ends users by allowing them to query for these geometry characteristics on a global scale.
 
@@ -52,7 +52,9 @@ To navigate the table using the keyboard, use the following commands:
 - Virtualized 'infinite' scrolling of table data to keep data downloads web friendly
 - Group based auth to prevent outside changes
 - Download the ingested map files to view metadata
-- <a href="https://github.com/UW-Macrostrat/web/issues/new" target="_blank">Request a new feature</a>
+- <a href="https://github.com/UW-Macrostrat/web/issues/new" target="_blank">
+    Request a new feature
+  </a>
 
 ## Process Overview
 
@@ -104,7 +106,7 @@ Name of the stratigraphy.
 
 Age of the polygon.
 
-*Note:* This is one of the most important fields in Macrostrat, and is used to intersect the map with our age model.
+_Note:_ This is one of the most important fields in Macrostrat, and is used to intersect the map with our age model.
 
 Often, age ranges can be inferred from the symbology used to discuss them. Further reading:
 

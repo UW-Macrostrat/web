@@ -1,7 +1,6 @@
 import hyper from "@macrostrat/hyper";
 import styles from "./edit-page.module.sass";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import { LinkButton } from "~/pages/map/map-interface/components/buttons";
 import { WidthAdjustablePanel } from "./components";
 import MapInterface from "./map-interface";
 import { useStoredState } from "@macrostrat/ui-components";
@@ -10,6 +9,10 @@ import { Button, AnchorButton, HotkeysProvider, Icon } from "@blueprintjs/core";
 import { PolygonsTable, LinesTable, PointsTable } from "./tables";
 import { EditSourceForm } from "./source-form";
 import { ingestPrefix } from "@macrostrat-web/settings";
+import { ButtonGroup } from "@blueprintjs/core";
+import { FullscreenPage } from "~/layouts";
+import { PageBreadcrumbs } from "~/renderer";
+import { Header } from "./components";
 
 const h = hyper.styled(styles);
 
@@ -28,152 +31,76 @@ const routeMap = {
   points: PointsTable,
 };
 
-export function Page({
-  source_id,
-  mapBounds,
-  source,
-  ingestProcess,
-}: EditInterfaceProps) {
-  const [showMap, setShowMap] = useStoredState(
-    "edit:showMap",
-    false,
-    // Check if is valid boolean
-    (v) => typeof v === "boolean"
-  );
-
+export function Page({ source_id, source }: EditInterfaceProps) {
   const title = source.name;
-  const slug = source.slug;
 
-  const HeaderProps = {
+  const headerProps = {
     title: title,
-    showMap: showMap,
-    setShowMap: setShowMap,
-    source_href: source.url,
+    sourceURL: source.url,
   };
 
-  const sourcePrefix = `${ingestPrefix}/sources/${source_id}`;
+  const basename = `/maps/ingestion/${source_id}`;
 
-  return h(HotkeysProvider, [
-    h("div.edit-page", [
-      h(
-        WidthAdjustablePanel,
-        {
-          expand: !showMap,
-          className: "edit-page-content",
-          storageID: "edit-panel-width",
-        },
-        // TODO: make this basename dynamic
-        h([
-          h(Router, { basename: `/maps/ingestion/${source_id}` }, [
-            h(Routes, [
-              h(Route, {
-                path: "",
-                element: h("div", {}, [
-                  h(Header, { ...HeaderProps, parentRoute: "/maps/ingestion" }),
-                  h(EditMenu),
-                ]),
-              }),
-              Object.entries(routeMap).map(([key, value]) => {
-                let url = sourcePrefix + `/${key}`;
-                if (key === "lines") {
-                  url = sourcePrefix + `/linestrings`;
-                }
-
-                return h(Route, {
-                  path: key,
-                  element: h(TableContainer, {}, [
-                    h(Header, HeaderProps),
-                    h(value, {
-                      url,
-                      ingestProcessId: ingestProcess.id,
-                    }),
-                  ]),
-                });
-              }),
-              h(Route, {
-                path: "edit",
-                element: h("div", {}, [
-                  h(Header, HeaderProps),
-                  h(EditSourceForm, { sourceId: source_id }),
-                ]),
-              }),
-            ]),
-          ]),
-        ])
-      ),
-      h.if(showMap)(MapInterface, { id: source_id, map: mapBounds, slug }),
-    ]),
+  return h(EditPageShell, [
+    h(Header, headerProps),
+    h(EditMenu, { parentRoute: basename }),
   ]);
 }
 
-function EditMenu() {
-  return h("div.edit-menu", {}, [
-    h(LinkButton, {
-      icon: "polygon-filter",
-      text: "Polygons",
-      large: true,
-      to: "polygons",
-    }),
-    h(LinkButton, {
-      icon: "minus",
-      text: "Lines",
-      large: true,
-      to: "lines",
-    }),
-    h(LinkButton, {
-      icon: "selection",
-      text: "Points",
-      large: true,
-      to: "points",
-    }),
-    h(LinkButton, {
-      icon: "edit",
-      text: "Edit Metadata",
-      large: true,
-      to: "edit",
-    }),
-  ]);
+function EditPageShell({ children }) {
+  return h(FullscreenPage, {}, children);
 }
 
-const TableContainer = ({ children }) => {
+function EditMenu({ parentRoute }) {
   return h(
-    "div.table-container",
-    { style: { display: "flex", flexDirection: "column", height: "100%" } },
-    children
+    ButtonGroup,
+    { className: "edit-menu", vertical: true, large: true },
+    [
+      h(
+        AnchorButton,
+        {
+          icon: "edit",
+          large: true,
+          href: parentRoute + "/meta",
+        },
+        "Metadata"
+      ),
+      h(
+        AnchorButton,
+        {
+          icon: "polygon-filter",
+          large: true,
+          href: parentRoute + "/polygons",
+        },
+        "Polygons"
+      ),
+      h(
+        AnchorButton,
+        {
+          icon: "minus",
+          large: true,
+          href: parentRoute + "/lines",
+        },
+        "Lines"
+      ),
+      h(
+        AnchorButton,
+        {
+          icon: "selection",
+          large: true,
+          href: parentRoute + "/points",
+        },
+        "Points"
+      ),
+      h(
+        ShowDocsButton,
+        {
+          href: "/docs/ingestion",
+        },
+        "Documentation"
+      ),
+    ]
   );
-};
-
-function Header({
-  title,
-  showMap,
-  setShowMap,
-  parentRoute,
-  source_href,
-}: {
-  title: string;
-  showMap: boolean;
-  setShowMap: (b: boolean) => void;
-  parentRoute?: string;
-  source_href: string;
-}) {
-  return h("div.edit-page-header", [
-    h(ParentRouteButton, { parentRoute: parentRoute }),
-    h("h2.m-0", {}, [
-      `${title} Ingestion`,
-      h.if(source_href != null)(NavigateMapSourceButton, {
-        href: source_href,
-      }),
-    ]),
-    h(
-      ShowDocsButton,
-      {
-        href: "/docs/ingestion",
-      },
-      "Documentation"
-    ),
-    h("div.spacer"),
-    h("div.edit-page-buttons", [h(ShowMapButton, { showMap, setShowMap })]),
-  ]);
 }
 
 function ShowDocsButton({ href, children }: { href: string }) {
@@ -189,25 +116,4 @@ function ShowDocsButton({ href, children }: { href: string }) {
     },
     children
   );
-}
-
-function ShowMapButton({ showMap, setShowMap }) {
-  return h(Button, {
-    minimal: true,
-    icon: "map",
-    large: true,
-    intent: showMap ? "primary" : "none",
-    onClick: () => setShowMap(!showMap),
-  });
-}
-
-function NavigateMapSourceButton({ href }: { href: string }) {
-  return h(AnchorButton, {
-    minimal: true,
-    title: "View Map Source",
-    icon: "third-party",
-    target: "_blank",
-    large: true,
-    href: href,
-  });
 }
