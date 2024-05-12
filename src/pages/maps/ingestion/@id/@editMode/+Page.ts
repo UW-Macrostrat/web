@@ -1,17 +1,21 @@
-import hyper from "@macrostrat/hyper";
-import styles from "./edit-page.module.sass";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import { WidthAdjustablePanel } from "./components";
-import MapInterface from "./map-interface";
-import { useStoredState } from "@macrostrat/ui-components";
-import { ParentRouteButton } from "~/components/map-navbar";
-import { Button, AnchorButton, HotkeysProvider, Icon } from "@blueprintjs/core";
-import { PolygonsTable, LinesTable, PointsTable } from "./tables";
-import { EditSourceForm } from "./source-form";
+import {
+  AnchorButton,
+  Button,
+  ButtonGroup,
+  HotkeysProvider,
+} from "@blueprintjs/core";
 import { ingestPrefix } from "@macrostrat-web/settings";
-import { ButtonGroup } from "@blueprintjs/core";
+import hyper from "@macrostrat/hyper";
+import { useStoredState } from "@macrostrat/ui-components";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { ParentRouteButton } from "~/components/map-navbar";
 import { FullscreenPage } from "~/layouts";
 import { PageBreadcrumbs } from "~/renderer";
+import { WidthAdjustablePanel } from "../components";
+import styles from "../edit-page.module.sass";
+import MapInterface from "../map-interface";
+import { EditSourceForm } from "../source-form";
+import { LinesTable, PointsTable, PolygonsTable } from "../tables";
 
 const h = hyper.styled(styles);
 
@@ -101,33 +105,32 @@ function EditModePageShell({ title, url, tableComponent, ingestProcessId }) {
   return h(
     EditPageShell,
     { headerButtons: [h(ShowMapButton, { showMap, setShowMap })] },
-    h("div", "Hello")
-    // h(HotkeysProvider, [
-    //   h("div.edit-page", [
-    //     h(
-    //       WidthAdjustablePanel,
-    //       {
-    //         expand: !showMap,
-    //         className: "edit-page-content",
-    //         storageID: "edit-panel-width",
-    //       },
-    //       // TODO: make this basename dynamic
-    //       [
-    //         h(TableContainer, {}, [
-    //           h(tableComponent, {
-    //             url,
-    //             ingestProcessId,
-    //           }),
-    //         ]),
-    //         h.if(showMap)(MapInterface, {
-    //           id: source_id,
-    //           map: mapBounds,
-    //           slug,
-    //         }),
-    //       ]
-    //     ),
-    //   ]),
-    // ])
+    h(HotkeysProvider, [
+      h("div.edit-page", [
+        h(
+          WidthAdjustablePanel,
+          {
+            expand: !showMap,
+            className: "edit-page-content",
+            storageID: "edit-panel-width",
+          },
+          // TODO: make this basename dynamic
+          [
+            h(TableContainer, {}, [
+              h(tableComponent, {
+                url,
+                ingestProcessId,
+              }),
+            ]),
+            h.if(showMap)(MapInterface, {
+              id: source_id,
+              map: mapBounds,
+              slug,
+            }),
+          ]
+        ),
+      ]),
+    ])
   );
 }
 
