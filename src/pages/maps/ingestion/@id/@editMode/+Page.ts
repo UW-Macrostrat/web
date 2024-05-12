@@ -11,7 +11,7 @@ import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { ParentRouteButton } from "~/components/map-navbar";
 import { FullscreenPage } from "~/layouts";
 import { PageBreadcrumbs } from "~/renderer";
-import { WidthAdjustablePanel } from "../components";
+import { Header, WidthAdjustablePanel } from "../components";
 import styles from "../edit-page.module.sass";
 import MapInterface from "../map-interface";
 import { EditSourceForm } from "../source-form";
@@ -41,46 +41,14 @@ export function Page({
   ingestProcess,
   editMode,
 }: EditInterfaceProps) {
-  const title = source.name;
   const slug = source.slug;
-
-  console.log(source);
-
-  const headerProps = {
-    title: title,
-    source_href: source.url,
-  };
 
   const sourcePrefix = `${ingestPrefix}/sources/${source_id}`;
 
-  // return h(FullscreenPage, {}, [
-  //   h(PageBreadcrumbs),
-  //   h(Header, { ...HeaderProps, parentRoute: "/maps/ingestion" }),
-  //   h(EditMenu),
-  // ]);
-
-  //const basename = `/maps/ingestion/${source_id}`;
-
   let url = sourcePrefix + `/${editMode}`;
+  const ingestProcessId = ingestProcess.id;
+  const tableComponent = routeMap[editMode];
 
-  return h(EditModePageShell, {
-    source_id,
-    mapBounds,
-    url,
-    tableComponent: routeMap[editMode],
-    ingestProcessId: ingestProcess.id,
-    slug,
-  });
-}
-
-function EditModePageShell({
-  url,
-  tableComponent,
-  ingestProcessId,
-  source_id,
-  mapBounds,
-  slug,
-}) {
   const [showMap, setShowMap] = useStoredState(
     "edit:showMap",
     false,
@@ -89,8 +57,7 @@ function EditModePageShell({
   );
 
   return h(
-    EditPageShell,
-    { headerButtons: [h(ShowMapButton, { showMap, setShowMap })] },
+    FullscreenPage,
     h(HotkeysProvider, [
       h("div.edit-page", [
         h(
@@ -102,6 +69,14 @@ function EditModePageShell({
           },
           // TODO: make this basename dynamic
           [
+            h(
+              Header,
+              {
+                title: source.name,
+                sourceURL: source.url,
+              },
+              [h(ShowMapButton, { showMap, setShowMap })]
+            ),
             h(TableContainer, {}, [
               h(tableComponent, {
                 url,
@@ -118,10 +93,6 @@ function EditModePageShell({
       ]),
     ])
   );
-}
-
-function EditPageShell({ children, ...rest }) {
-  return h(FullscreenPage, {}, [h(PageBreadcrumbs), children]);
 }
 
 const TableContainer = ({ children }) => {
