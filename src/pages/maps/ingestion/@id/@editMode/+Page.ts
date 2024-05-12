@@ -1,20 +1,11 @@
-import {
-  AnchorButton,
-  Button,
-  ButtonGroup,
-  HotkeysProvider,
-} from "@blueprintjs/core";
+import { Button, HotkeysProvider } from "@blueprintjs/core";
 import { ingestPrefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import { useStoredState } from "@macrostrat/ui-components";
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import { ParentRouteButton } from "~/components/map-navbar";
 import { FullscreenPage } from "~/layouts";
-import { PageBreadcrumbs } from "~/renderer";
 import { Header, WidthAdjustablePanel } from "../components";
-import styles from "../edit-page.module.sass";
+import styles from "./main.module.sass";
 import MapInterface from "../map-interface";
-import { EditSourceForm } from "../source-form";
 import { LinesTable, PointsTable, PolygonsTable } from "../tables";
 
 const h = hyper.styled(styles);

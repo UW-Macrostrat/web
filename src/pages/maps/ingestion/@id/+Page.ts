@@ -1,17 +1,7 @@
 import hyper from "@macrostrat/hyper";
-import styles from "./edit-page.module.sass";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import { WidthAdjustablePanel } from "./components";
-import MapInterface from "./map-interface";
-import { useStoredState } from "@macrostrat/ui-components";
-import { ParentRouteButton } from "~/components/map-navbar";
-import { Button, AnchorButton, HotkeysProvider, Icon } from "@blueprintjs/core";
-import { PolygonsTable, LinesTable, PointsTable } from "./tables";
-import { EditSourceForm } from "./source-form";
-import { ingestPrefix } from "@macrostrat-web/settings";
-import { ButtonGroup } from "@blueprintjs/core";
+import styles from "./main.module.sass";
+import { AnchorButton, ButtonGroup } from "@blueprintjs/core";
 import { FullscreenPage } from "~/layouts";
-import { PageBreadcrumbs } from "~/renderer";
 import { Header } from "./components";
 
 const h = hyper.styled(styles);
@@ -24,12 +14,6 @@ interface EditInterfaceProps {
   source?: any;
   ingestProcess?: any;
 }
-
-const routeMap = {
-  polygons: PolygonsTable,
-  lines: LinesTable,
-  points: PointsTable,
-};
 
 export function Page({ source_id, source }: EditInterfaceProps) {
   const title = source.name;

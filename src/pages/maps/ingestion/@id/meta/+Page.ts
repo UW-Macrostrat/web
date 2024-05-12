@@ -1,10 +1,7 @@
-import hyper from "@macrostrat/hyper";
+import h from "@macrostrat/hyper";
 import { Header } from "../components";
-import styles from "../edit-page.module.sass";
 import { EditSourceForm } from "../source-form";
 import { ContentPage } from "~/layouts";
-
-const h = hyper.styled(styles);
 
 interface EditInterfaceMetaProps {
   source_id?: number;
