@@ -83,13 +83,13 @@ export function Page({
                 ingestProcessId,
               }),
             ]),
-            h.if(showMap)(MapInterface, {
-              id: source_id,
-              map: mapBounds,
-              slug,
-            }),
           ]
         ),
+        h.if(showMap)(MapInterface, {
+          id: source_id,
+          map: mapBounds,
+          slug,
+        }),
       ]),
     ])
   );
