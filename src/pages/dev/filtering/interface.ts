@@ -5,14 +5,17 @@ import hyper from "@macrostrat/hyper";
 import { DevMapPage } from "@macrostrat/map-interface";
 import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
 import { useStoredState } from "@macrostrat/ui-components";
-import { Select } from "@blueprintjs/select";
+import { Select, Omnibar } from "@blueprintjs/select";
 import mapboxgl from "mapbox-gl";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import styles from "./main.module.styl";
 import {
   replaceSourcesForTileset,
   LineSymbolManager,
 } from "~/_utils/map-layers.client";
+import {
+  LithologyMultiSelect
+} from "./lithology-selector";
 
 export const h = hyper.styled(styles);
 
@@ -34,11 +37,7 @@ export function VectorMapInspectorPage({
 }) {
   // A stripped-down page for map development
 
-  const [state, setState] = useStoredState(
-    "macrostrat:map-filter-inspector",
-    defaultState,
-    isStateValid
-  );
+  const [state, setState] = useState(defaultState);
   const { showLineSymbols } = state;
 
   const _overlayStyle = useMemo(() => {
@@ -54,6 +53,12 @@ export function VectorMapInspectorPage({
       },
     }),
     h(LineSymbolManager, { showLineSymbols }),
+    h(LithologyMultiSelect, {
+      selectedLithologyIds: state.lithologies,
+      onChange: (lithologies) => {
+        setState({ ...state, lithologies });
+      }
+    })
   ]);
 
   return h(
@@ -67,6 +72,7 @@ export function VectorMapInspectorPage({
     controls
   );
 }
+
 
 function CompilationSelector({ compilation, setCompilation }) {
   return h(Select, {
@@ -110,4 +116,5 @@ function isStateValid(state) {
 const defaultState = {
   showLineSymbols: false,
   compilation: "carto",
+  lithologies: []
 };
