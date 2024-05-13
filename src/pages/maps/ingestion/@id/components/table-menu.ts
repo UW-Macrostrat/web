@@ -21,6 +21,8 @@ const validExpressions: ColumnOperatorOption[] = [
   { key: "gt", value: ">", verbose: "Is greater than" },
   { key: "ge", value: ">=", verbose: "Is greater than or equal to" },
   { key: "ne", value: "<>", verbose: "Is not equal to" },
+  { key: "is_distinct_from", value: "IS DISTINCT FROM", verbose: "Is distinct from" },
+  { key: "is_not_distinct_from", value: "IS NOT DISTINCT FROM", verbose: "Is not distinct from" },
   { key: "like", value: "LIKE", verbose: "Like" },
   { key: "is", value: "IS", verbose: "Is", placeholder: "true | false | null" },
   { key: "in", value: "IN", verbose: "In", placeholder: "1,2,3" },

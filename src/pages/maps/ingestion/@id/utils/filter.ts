@@ -47,6 +47,10 @@ export class Filter {
         return filterValue >= this.value;
       case "ne":
         return filterValue != this.value;
+      case "is_distinct_from":
+        return filterValue != this.value;
+      case "is_not_distinct_from":
+        return filterValue == this.value;
       case "like":
         if (typeof filterValue != "string" || typeof this.value != "string") {
           return false;
