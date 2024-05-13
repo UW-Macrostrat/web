@@ -3,14 +3,17 @@ import { SETTINGS, tileserverDomain } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import {
   MapAreaContainer,
-  MapMarker,
   MapView,
   PanelCard,
 } from "@macrostrat/map-interface";
 import { NonIdealState } from "@blueprintjs/core";
 import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
-import { NullableSlider, useDarkMode } from "@macrostrat/ui-components";
+import {
+  NullableSlider,
+  useDarkMode,
+  useStoredState,
+} from "@macrostrat/ui-components";
 import boundingBox from "@turf/bbox";
 import { LngLatBoundsLike } from "mapbox-gl";
 import { useEffect, useMemo, useState } from "react";
@@ -28,7 +31,9 @@ function rasterURL(source_id) {
 
 interface StyleOpts {
   style: string;
-  table: string;
+  mapSlug: string;
+  layers: string[];
+  sourceLayers?: any;
   layerOpacity: {
     vector: number | null;
     raster: number | null;
@@ -43,7 +48,12 @@ const emptyStyle: any = {
   layers: [],
 };
 
-function buildOverlayStyle({ style, table, layerOpacity }: StyleOpts): any {
+function buildOverlayStyle({
+  style,
+  mapSlug,
+  layers = ["points", "lines", "polygons"],
+  layerOpacity,
+}: StyleOpts): any {
   let baseStyle = style ?? emptyStyle;
   let mapStyle = emptyStyle;
   if (layerOpacity.vector != null) {
@@ -55,15 +65,17 @@ function buildOverlayStyle({ style, table, layerOpacity }: StyleOpts): any {
     });
   }
 
-  let tableStyle = {};
-  if (table != null) {
-    tableStyle = buildStyle({
+  let tableStyles = layers.map((layer) => {
+    const table = `sources.${mapSlug}_${layer}`;
+    return buildStyle({
       inDarkMode: false,
+      sourceID: table,
+      featureTypes: [layer],
       tileURL: tileserverDomain + `/${table}/tilejson.json`,
     });
-  }
+  });
 
-  return mergeStyles(mapStyle ?? {}, tableStyle);
+  return mergeStyles(mapStyle ?? {}, ...tableStyles);
 }
 
 function ensureBoxInGeographicRange(bounds: LngLatBoundsLike) {
@@ -121,14 +133,19 @@ export function MapInterface({ id, map, slug }) {
     }).then(setStyle);
   }, [layer, dark]);
 
-  const [selectedLocation, setSelectedLocation] = useState(null);
-
-  const [layerOpacity, setLayerOpacity] = useState({
-    vector: 0.5,
-    raster: 0.5,
-  });
-
-  console.log(map);
+  const [layerOpacity, setLayerOpacity] = useStoredState(
+    "ingestion:layerOpacity",
+    {
+      vector: 0.5,
+      raster: 0.5,
+    },
+    (v) => {
+      if (v == null) return false;
+      if (v.vector != null && typeof v.vector != "number") return false;
+      if (v.raster != null && typeof v.raster != "number") return false;
+      return true;
+    }
+  );
 
   // Overlay style
   const [mapStyle, setMapStyle] = useState(null);
@@ -136,7 +153,8 @@ export function MapInterface({ id, map, slug }) {
     setMapStyle(
       buildOverlayStyle({
         style,
-        table,
+        mapSlug: slug,
+        layers: ["points", "lines", "polygons"],
         //focusedMap: map.properties.source_id,
         layerOpacity,
       })
@@ -153,7 +171,8 @@ export function MapInterface({ id, map, slug }) {
     if (mapStyle == null) return;
     const mergeLayers = buildOverlayStyle({
       style,
-      table,
+      layers: ["points", "lines", "polygons"],
+      mapSlug: slug,
       layerOpacity,
     }).layers;
 
@@ -193,21 +212,6 @@ export function MapInterface({ id, map, slug }) {
     ]);
   }
 
-  // const maxBounds: LatLngBoundsLike = useMemo(() => {
-  //   const dx = bounds[2] - bounds[0];
-  //   const dy = bounds[3] - bounds[1];
-  //   const buf = 1 * Math.max(dx, dy);
-
-  //   return ensureBoxInGeographicRange([
-  //     bounds[0] - buf,
-  //     bounds[1] - buf,
-  //     bounds[2] + buf,
-  //     bounds[3] + buf,
-  //   ]);
-  // }, [bounds]);
-
-  //if (bounds == null || mapStyle == null) return h(Spinner);
-
   const contextPanel = h(PanelCard, [
     h("div.vector-controls", [
       h("h3", "Vector map"),
@@ -241,27 +245,13 @@ export function MapInterface({ id, map, slug }) {
       fitViewport: false,
     },
     [
-      h(
-        MapView,
-        {
-          style: mapStyle, ///"mapbox://styles/mapbox/satellite-v9",
-          mapboxToken: SETTINGS.mapboxAccessToken,
-          //projection: { name: "globe" },
-          bounds,
-          mapPosition: null,
-          //maxBounds,
-          fitBoundsOptions: { padding: 50 },
-          infoMarkerPosition: selectedLocation,
-        },
-        [
-          h(MapMarker, {
-            position: selectedLocation,
-            setPosition(lnglat) {
-              setSelectedLocation(lnglat);
-            },
-          }),
-        ]
-      ),
+      h(MapView, {
+        style: mapStyle, ///"mapbox://styles/mapbox/satellite-v9",
+        mapboxToken: SETTINGS.mapboxAccessToken,
+        bounds,
+        mapPosition: null,
+        fitBoundsOptions: { padding: 50 },
+      }),
     ]
   );
 }
@@ -304,9 +294,9 @@ function OpacitySlider(props) {
 export function buildStyle({
   color = "rgb(74, 242, 161)",
   inDarkMode,
-  lineSourceLayer = "default",
-  polygonSourceLayer = "default",
+  sourceLayers,
   sourceID = "tileLayer",
+  featureTypes = ["points", "lines", "polygons"],
   tileURL,
 }): mapboxgl.Style {
   const xRayColor = (opacity = 1, darken = 0) => {
@@ -319,6 +309,46 @@ export function buildStyle({
     return chroma(color).alpha(opacity).darken(darken).css();
   };
 
+  let layers = [];
+  if (featureTypes.includes("points")) {
+    layers.push({
+      id: sourceID + "_points",
+      type: "circle",
+      source: sourceID,
+      "source-layer": sourceLayers?.points ?? "default",
+      paint: {
+        "circle-color": xRayColor(1, 1),
+        "circle-radius": 5,
+      },
+    });
+  }
+
+  if (featureTypes.includes("lines")) {
+    layers.push({
+      id: sourceID + "_lines",
+      type: "line",
+      source: sourceID,
+      "source-layer": sourceLayers?.lines ?? "default",
+      paint: {
+        "line-color": xRayColor(1, -1),
+        "line-width": 1.5,
+      },
+    });
+  }
+
+  if (featureTypes.includes("polygons")) {
+    layers.push({
+      id: sourceID + "_polygons",
+      type: "fill",
+      source: sourceID,
+      "source-layer": sourceLayers?.polygons ?? "default",
+      paint: {
+        "fill-color": xRayColor(0.1),
+        "fill-outline-color": xRayColor(0.5),
+      },
+    });
+  }
+
   return {
     version: 8,
     name: "basic",
@@ -328,27 +358,6 @@ export function buildStyle({
         url: tileURL,
       },
     },
-    layers: [
-      {
-        id: "polygons",
-        type: "fill",
-        source: sourceID,
-        "source-layer": polygonSourceLayer,
-        paint: {
-          "fill-color": xRayColor(0.1),
-          "fill-outline-color": xRayColor(0.5),
-        },
-      },
-      {
-        id: "lines",
-        type: "line",
-        source: sourceID,
-        "source-layer": lineSourceLayer,
-        paint: {
-          "line-color": xRayColor(1, -1),
-          "line-width": 1.5,
-        },
-      },
-    ],
+    layers,
   };
 }
