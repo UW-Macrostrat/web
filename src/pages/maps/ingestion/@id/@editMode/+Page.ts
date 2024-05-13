@@ -80,6 +80,7 @@ export function Page({
           id: source_id,
           map: mapBounds,
           slug,
+          featureTypes: [editMode],
         }),
       ]),
     ])

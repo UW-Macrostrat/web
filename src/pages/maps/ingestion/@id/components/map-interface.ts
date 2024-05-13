@@ -6,7 +6,7 @@ import {
   MapView,
   PanelCard,
 } from "@macrostrat/map-interface";
-import { NonIdealState } from "@blueprintjs/core";
+import { NonIdealState, Switch } from "@blueprintjs/core";
 import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
 import {
@@ -55,9 +55,9 @@ function buildOverlayStyle({
   layerOpacity,
 }: StyleOpts): any {
   let baseStyle = style ?? emptyStyle;
-  let mapStyle = emptyStyle;
+  let macrostratStyle = {};
   if (layerOpacity.vector != null) {
-    mapStyle = buildMacrostratStyle({
+    macrostratStyle = buildMacrostratStyle({
       tileserverDomain: SETTINGS.burwellTileDomain,
       fillOpacity: layerOpacity.vector - 0.1,
       strokeOpacity: layerOpacity.vector + 0.2,
@@ -75,7 +75,7 @@ function buildOverlayStyle({
     });
   });
 
-  return mergeStyles(mapStyle ?? {}, ...tableStyles);
+  return mergeStyles(baseStyle, macrostratStyle, ...tableStyles);
 }
 
 function ensureBoxInGeographicRange(bounds: LngLatBoundsLike) {
@@ -102,7 +102,12 @@ function basemapStyle(basemap, inDarkMode) {
   }
 }
 
-export function MapInterface({ id, map, slug }) {
+export function MapInterface({
+  id,
+  map,
+  slug,
+  featureTypes = ["points", "lines", "polygons"],
+}) {
   const [isOpen, setOpen] = useState(false);
 
   // Catch empty map data
@@ -122,7 +127,15 @@ export function MapInterface({ id, map, slug }) {
     return ensureBoxInGeographicRange(boundingBox(map.geometry));
   }, [map.geometry]);
 
-  const [layer, setLayer] = useState(Basemap.None);
+  const [_featureTypes, setFeatureTypes] = useState(featureTypes);
+
+  const [layer, setLayer] = useStoredState(
+    "ingestion:baseLayer",
+    Basemap.None,
+    (v) => {
+      return Object.values(Basemap).includes(v);
+    }
+  );
   const [style, setStyle] = useState(null);
   // Basemap style
   useEffect(() => {
@@ -154,46 +167,12 @@ export function MapInterface({ id, map, slug }) {
       buildOverlayStyle({
         style,
         mapSlug: slug,
-        layers: ["points", "lines", "polygons"],
+        layers: _featureTypes,
         //focusedMap: map.properties.source_id,
         layerOpacity,
       })
     );
-  }, [
-    map.properties.source_id,
-    style,
-    layerOpacity.raster == null,
-    layerOpacity.vector == null,
-  ]);
-
-  // Layer opacity
-  useEffect(() => {
-    if (mapStyle == null) return;
-    const mergeLayers = buildOverlayStyle({
-      style,
-      layers: ["points", "lines", "polygons"],
-      mapSlug: slug,
-      layerOpacity,
-    }).layers;
-
-    for (const layer of mapStyle.layers) {
-      let mergeLayer = mergeLayers.find((l) => l.id == layer.id);
-      layer.layout ??= {};
-      layer.paint ??= {};
-      if (mergeLayer == null) {
-        layer.layout.visibility = "none";
-        continue;
-      } else {
-        layer.layout.visibility = "visible";
-      }
-      for (const prop in ["fill-opacity", "line-opacity", "raster-opacity"]) {
-        if (mergeLayer.paint[prop] != null) {
-          layer.paint[prop] = mergeLayer.paint[prop];
-        }
-      }
-      setMapStyle({ ...mapStyle, layers: mergeLayers });
-    }
-  }, [layerOpacity]);
+  }, [map.properties.source_id, style, layerOpacity, _featureTypes]);
 
   if (bounds == null || bounds == "invalid") {
     let title = "No map data";
@@ -213,8 +192,9 @@ export function MapInterface({ id, map, slug }) {
   }
 
   const contextPanel = h(PanelCard, [
+    h(FeatureTypeSwitches, { featureTypes: _featureTypes, setFeatureTypes }),
     h("div.vector-controls", [
-      h("h3", "Vector map"),
+      h("h3", "Macrostrat"),
       h(OpacitySlider, {
         opacity: layerOpacity.vector,
         setOpacity(v) {
@@ -254,6 +234,26 @@ export function MapInterface({ id, map, slug }) {
       }),
     ]
   );
+}
+
+function FeatureTypeSwitches({ featureTypes, setFeatureTypes }) {
+  return h("div.feature-type-switches", [
+    h("h3", "Map layers"),
+    ["points", "lines", "polygons"].map((t) => {
+      return h(Switch, {
+        label: t.charAt(0).toUpperCase() + t.slice(1),
+        checked: featureTypes.includes(t),
+        onChange() {
+          setFeatureTypes((types) => {
+            if (types.includes(t)) {
+              return types.filter((t2) => t2 != t);
+            }
+            return [...types, t];
+          });
+        },
+      });
+    }),
+  ]);
 }
 
 function BaseLayerSelector({ layer, setLayer }) {
@@ -310,15 +310,16 @@ export function buildStyle({
   };
 
   let layers = [];
-  if (featureTypes.includes("points")) {
+
+  if (featureTypes.includes("polygons")) {
     layers.push({
-      id: sourceID + "_points",
-      type: "circle",
+      id: sourceID + "_polygons",
+      type: "fill",
       source: sourceID,
-      "source-layer": sourceLayers?.points ?? "default",
+      "source-layer": sourceLayers?.polygons ?? "default",
       paint: {
-        "circle-color": xRayColor(1, 1),
-        "circle-radius": 5,
+        "fill-color": xRayColor(0.1),
+        "fill-outline-color": xRayColor(0.5),
       },
     });
   }
@@ -336,15 +337,15 @@ export function buildStyle({
     });
   }
 
-  if (featureTypes.includes("polygons")) {
+  if (featureTypes.includes("points")) {
     layers.push({
-      id: sourceID + "_polygons",
-      type: "fill",
+      id: sourceID + "_points",
+      type: "circle",
       source: sourceID,
-      "source-layer": sourceLayers?.polygons ?? "default",
+      "source-layer": sourceLayers?.points ?? "default",
       paint: {
-        "fill-color": xRayColor(0.1),
-        "fill-outline-color": xRayColor(0.5),
+        "circle-color": xRayColor(1, 1),
+        "circle-radius": 5,
       },
     });
   }
