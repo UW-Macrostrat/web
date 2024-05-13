@@ -5,7 +5,7 @@ import { useStoredState } from "@macrostrat/ui-components";
 import { FullscreenPage } from "~/layouts";
 import { Header, WidthAdjustablePanel } from "../components";
 import styles from "./main.module.sass";
-import MapInterface from "../map-interface";
+import { MapInterface } from "../components";
 import { LinesTable, PointsTable, PolygonsTable } from "../tables";
 
 const h = hyper.styled(styles);

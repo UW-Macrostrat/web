@@ -90,7 +90,7 @@ function basemapStyle(basemap, inDarkMode) {
   }
 }
 
-export default function MapInterface({ id, map, slug }) {
+export function MapInterface({ id, map, slug }) {
   const [isOpen, setOpen] = useState(false);
 
   // Catch empty map data
