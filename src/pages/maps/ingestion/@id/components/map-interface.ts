@@ -3,17 +3,21 @@ import { SETTINGS, tileserverDomain } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import {
   MapAreaContainer,
-  MapMarker,
   MapView,
   PanelCard,
 } from "@macrostrat/map-interface";
-import { NonIdealState } from "@blueprintjs/core";
+import { useMapRef } from "@macrostrat/mapbox-react";
+import { NonIdealState, Switch } from "@blueprintjs/core";
 import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
-import { NullableSlider, useDarkMode } from "@macrostrat/ui-components";
+import {
+  NullableSlider,
+  useDarkMode,
+  useStoredState,
+} from "@macrostrat/ui-components";
 import boundingBox from "@turf/bbox";
 import { LngLatBoundsLike } from "mapbox-gl";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { MapNavbar } from "~/components/map-navbar";
 import "~/styles/global.styl";
 import styles from "./main.module.sass";
@@ -28,7 +32,9 @@ function rasterURL(source_id) {
 
 interface StyleOpts {
   style: string;
-  table: string;
+  mapSlug: string;
+  layers: string[];
+  sourceLayers?: any;
   layerOpacity: {
     vector: number | null;
     raster: number | null;
@@ -43,11 +49,16 @@ const emptyStyle: any = {
   layers: [],
 };
 
-function buildOverlayStyle({ style, table, layerOpacity }: StyleOpts): any {
+function buildOverlayStyle({
+  style,
+  mapSlug,
+  layers = ["points", "lines", "polygons"],
+  layerOpacity,
+}: StyleOpts): any {
   let baseStyle = style ?? emptyStyle;
-  let mapStyle = emptyStyle;
+  let macrostratStyle = {};
   if (layerOpacity.vector != null) {
-    mapStyle = buildMacrostratStyle({
+    macrostratStyle = buildMacrostratStyle({
       tileserverDomain: SETTINGS.burwellTileDomain,
       fillOpacity: layerOpacity.vector - 0.1,
       strokeOpacity: layerOpacity.vector + 0.2,
@@ -55,15 +66,21 @@ function buildOverlayStyle({ style, table, layerOpacity }: StyleOpts): any {
     });
   }
 
-  let tableStyle = {};
-  if (table != null) {
-    tableStyle = buildStyle({
+  let tableStyles = layers.map((layer) => {
+    const table = tableName(mapSlug, layer);
+    return buildStyle({
       inDarkMode: false,
+      sourceID: table,
+      featureTypes: [layer],
       tileURL: tileserverDomain + `/${table}/tilejson.json`,
     });
-  }
+  });
 
-  return mergeStyles(mapStyle ?? {}, tableStyle);
+  return mergeStyles(baseStyle, macrostratStyle, ...tableStyles);
+}
+
+function tableName(slug, layer) {
+  return `sources.${slug}_${layer}`;
 }
 
 function ensureBoxInGeographicRange(bounds: LngLatBoundsLike) {
@@ -90,7 +107,12 @@ function basemapStyle(basemap, inDarkMode) {
   }
 }
 
-export default function MapInterface({ id, map, slug }) {
+export function MapInterface({
+  id,
+  map,
+  slug,
+  featureTypes = ["points", "lines", "polygons"],
+}) {
   const [isOpen, setOpen] = useState(false);
 
   // Catch empty map data
@@ -102,7 +124,6 @@ export default function MapInterface({ id, map, slug }) {
   //   );
 
   const dark = useDarkMode()?.isEnabled ?? false;
-  const title = map.properties.name;
   const table = `sources.${slug}_polygons`;
 
   const hasRaster = rasterURL(map.properties.source_id) != null;
@@ -111,7 +132,15 @@ export default function MapInterface({ id, map, slug }) {
     return ensureBoxInGeographicRange(boundingBox(map.geometry));
   }, [map.geometry]);
 
-  const [layer, setLayer] = useState(Basemap.None);
+  const [_featureTypes, setFeatureTypes] = useState(featureTypes);
+
+  const [layer, setLayer] = useStoredState(
+    "ingestion:baseLayer",
+    Basemap.None,
+    (v) => {
+      return Object.values(Basemap).includes(v);
+    }
+  );
   const [style, setStyle] = useState(null);
   // Basemap style
   useEffect(() => {
@@ -122,14 +151,19 @@ export default function MapInterface({ id, map, slug }) {
     }).then(setStyle);
   }, [layer, dark]);
 
-  const [selectedLocation, setSelectedLocation] = useState(null);
-
-  const [layerOpacity, setLayerOpacity] = useState({
-    vector: 0.5,
-    raster: 0.5,
-  });
-
-  console.log(map);
+  const [layerOpacity, setLayerOpacity] = useStoredState(
+    "ingestion:layerOpacity",
+    {
+      vector: 0.5,
+      raster: 0.5,
+    },
+    (v) => {
+      if (v == null) return false;
+      if (v.vector != null && typeof v.vector != "number") return false;
+      if (v.raster != null && typeof v.raster != "number") return false;
+      return true;
+    }
+  );
 
   // Overlay style
   const [mapStyle, setMapStyle] = useState(null);
@@ -137,45 +171,13 @@ export default function MapInterface({ id, map, slug }) {
     setMapStyle(
       buildOverlayStyle({
         style,
-        table,
+        mapSlug: slug,
+        layers: _featureTypes,
         //focusedMap: map.properties.source_id,
         layerOpacity,
       })
     );
-  }, [
-    map.properties.source_id,
-    style,
-    layerOpacity.raster == null,
-    layerOpacity.vector == null,
-  ]);
-
-  // Layer opacity
-  useEffect(() => {
-    if (mapStyle == null) return;
-    const mergeLayers = buildOverlayStyle({
-      style,
-      table,
-      layerOpacity,
-    }).layers;
-
-    for (const layer of mapStyle.layers) {
-      let mergeLayer = mergeLayers.find((l) => l.id == layer.id);
-      layer.layout ??= {};
-      layer.paint ??= {};
-      if (mergeLayer == null) {
-        layer.layout.visibility = "none";
-        continue;
-      } else {
-        layer.layout.visibility = "visible";
-      }
-      for (const prop in ["fill-opacity", "line-opacity", "raster-opacity"]) {
-        if (mergeLayer.paint[prop] != null) {
-          layer.paint[prop] = mergeLayer.paint[prop];
-        }
-      }
-      setMapStyle({ ...mapStyle, layers: mergeLayers });
-    }
-  }, [layerOpacity]);
+  }, [map.properties.source_id, style, layerOpacity, _featureTypes]);
 
   if (bounds == null || bounds == "invalid") {
     let title = "No map data";
@@ -194,24 +196,10 @@ export default function MapInterface({ id, map, slug }) {
     ]);
   }
 
-  // const maxBounds: LatLngBoundsLike = useMemo(() => {
-  //   const dx = bounds[2] - bounds[0];
-  //   const dy = bounds[3] - bounds[1];
-  //   const buf = 1 * Math.max(dx, dy);
-
-  //   return ensureBoxInGeographicRange([
-  //     bounds[0] - buf,
-  //     bounds[1] - buf,
-  //     bounds[2] + buf,
-  //     bounds[3] + buf,
-  //   ]);
-  // }, [bounds]);
-
-  //if (bounds == null || mapStyle == null) return h(Spinner);
-
   const contextPanel = h(PanelCard, [
+    h(FeatureTypeSwitches, { featureTypes: _featureTypes, setFeatureTypes }),
     h("div.vector-controls", [
-      h("h3", "Vector map"),
+      h("h3", "Macrostrat"),
       h(OpacitySlider, {
         opacity: layerOpacity.vector,
         setOpacity(v) {
@@ -242,29 +230,67 @@ export default function MapInterface({ id, map, slug }) {
       fitViewport: false,
     },
     [
-      h(
-        MapView,
-        {
-          style: mapStyle, ///"mapbox://styles/mapbox/satellite-v9",
-          mapboxToken: SETTINGS.mapboxAccessToken,
-          //projection: { name: "globe" },
-          bounds,
-          mapPosition: null,
-          //maxBounds,
-          fitBoundsOptions: { padding: 50 },
-          infoMarkerPosition: selectedLocation,
-        },
-        [
-          h(MapMarker, {
-            position: selectedLocation,
-            setPosition(lnglat) {
-              setSelectedLocation(lnglat);
-            },
-          }),
-        ]
-      ),
+      h(MapView, {
+        style: mapStyle, ///"mapbox://styles/mapbox/satellite-v9",
+        mapboxToken: SETTINGS.mapboxAccessToken,
+        bounds,
+        mapPosition: null,
+        fitBoundsOptions: { padding: 50 },
+      }),
+      h(MapFeatureSelector, { featureTypes: _featureTypes, slug }),
     ]
   );
+}
+
+function MapFeatureSelector({ featureTypes, slug }) {
+  const queryLayers = useMemo(
+    () => featureTypes.map((t) => tableName(slug, t) + "_" + t),
+    [featureTypes, slug]
+  );
+
+  const mapRef = useMapRef();
+
+  const listener = useCallback(
+    (e) => {
+      const features = mapRef.current?.queryRenderedFeatures(e.point, {
+        layers: queryLayers,
+      });
+      console.log(features);
+    },
+    [mapRef.current, queryLayers]
+  );
+
+  useEffect(() => {
+    console.log("Setting up listener");
+    const map = mapRef.current;
+    if (map == null) return;
+    map.on("click", listener);
+    return () => {
+      map.off("click", listener);
+    };
+  }, [listener]);
+
+  return null;
+}
+
+function FeatureTypeSwitches({ featureTypes, setFeatureTypes }) {
+  return h("div.feature-type-switches", [
+    h("h3", "Map layers"),
+    ["points", "lines", "polygons"].map((t) => {
+      return h(Switch, {
+        label: t.charAt(0).toUpperCase() + t.slice(1),
+        checked: featureTypes.includes(t),
+        onChange() {
+          setFeatureTypes((types) => {
+            if (types.includes(t)) {
+              return types.filter((t2) => t2 != t);
+            }
+            return [...types, t];
+          });
+        },
+      });
+    }),
+  ]);
 }
 
 function BaseLayerSelector({ layer, setLayer }) {
@@ -305,9 +331,9 @@ function OpacitySlider(props) {
 export function buildStyle({
   color = "rgb(74, 242, 161)",
   inDarkMode,
-  lineSourceLayer = "default",
-  polygonSourceLayer = "default",
+  sourceLayers,
   sourceID = "tileLayer",
+  featureTypes = ["points", "lines", "polygons"],
   tileURL,
 }): mapboxgl.Style {
   const xRayColor = (opacity = 1, darken = 0) => {
@@ -320,6 +346,47 @@ export function buildStyle({
     return chroma(color).alpha(opacity).darken(darken).css();
   };
 
+  let layers = [];
+
+  if (featureTypes.includes("polygons")) {
+    layers.push({
+      id: sourceID + "_polygons",
+      type: "fill",
+      source: sourceID,
+      "source-layer": sourceLayers?.polygons ?? "default",
+      paint: {
+        "fill-color": xRayColor(0.1),
+        "fill-outline-color": xRayColor(0.5),
+      },
+    });
+  }
+
+  if (featureTypes.includes("lines")) {
+    layers.push({
+      id: sourceID + "_lines",
+      type: "line",
+      source: sourceID,
+      "source-layer": sourceLayers?.lines ?? "default",
+      paint: {
+        "line-color": xRayColor(1, -1),
+        "line-width": 1.5,
+      },
+    });
+  }
+
+  if (featureTypes.includes("points")) {
+    layers.push({
+      id: sourceID + "_points",
+      type: "circle",
+      source: sourceID,
+      "source-layer": sourceLayers?.points ?? "default",
+      paint: {
+        "circle-color": xRayColor(1, 1),
+        "circle-radius": 5,
+      },
+    });
+  }
+
   return {
     version: 8,
     name: "basic",
@@ -329,27 +396,6 @@ export function buildStyle({
         url: tileURL,
       },
     },
-    layers: [
-      {
-        id: "polygons",
-        type: "fill",
-        source: sourceID,
-        "source-layer": polygonSourceLayer,
-        paint: {
-          "fill-color": xRayColor(0.1),
-          "fill-outline-color": xRayColor(0.5),
-        },
-      },
-      {
-        id: "lines",
-        type: "line",
-        source: sourceID,
-        "source-layer": lineSourceLayer,
-        paint: {
-          "line-color": xRayColor(1, -1),
-          "line-width": 1.5,
-        },
-      },
-    ],
+    layers,
   };
 }

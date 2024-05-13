@@ -3,6 +3,7 @@ import styles from "./main.module.sass";
 import { AnchorButton, ButtonGroup } from "@blueprintjs/core";
 import { FullscreenPage } from "~/layouts";
 import { Header } from "./components";
+import { MapInterface } from "./components";
 
 const h = hyper.styled(styles);
 
@@ -15,7 +16,7 @@ interface EditInterfaceProps {
   ingestProcess?: any;
 }
 
-export function Page({ source_id, source }: EditInterfaceProps) {
+export function Page({ source_id, source, mapBounds }: EditInterfaceProps) {
   const title = source.name;
 
   const headerProps = {
@@ -25,14 +26,15 @@ export function Page({ source_id, source }: EditInterfaceProps) {
 
   const basename = `/maps/ingestion/${source_id}`;
 
-  return h(EditPageShell, [
+  return h(FullscreenPage, { className: "page" }, [
     h(Header, headerProps),
-    h(EditMenu, { parentRoute: basename }),
+    h("div.ingestion-main-panel", [
+      h("div.context-panel", [h(EditMenu, { parentRoute: basename })]),
+      h("div.main-content", [
+        h(MapInterface, { id: source_id, map: mapBounds, slug: source.slug }),
+      ]),
+    ]),
   ]);
-}
-
-function EditPageShell({ children }) {
-  return h(FullscreenPage, {}, children);
 }
 
 function EditMenu({ parentRoute }) {

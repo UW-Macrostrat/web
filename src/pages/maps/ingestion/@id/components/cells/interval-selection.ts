@@ -2,6 +2,8 @@ import { Button, MenuItem } from "@blueprintjs/core";
 import { ItemPredicate, ItemRenderer, Select2 } from "@blueprintjs/select";
 import { Cell, EditableCell2Props } from "@blueprintjs/table";
 import React, { useMemo, memo } from "react";
+import { useInDarkMode } from "@macrostrat/ui-components";
+import { getColorPair } from "@macrostrat/color-utils";
 
 // @ts-ignore
 import hyper from "@macrostrat/hyper";
@@ -31,6 +33,9 @@ const IntervalOption: React.FC = ({
   interval,
   props: { handleClick, handleFocus, modifiers, ...restProps },
 }) => {
+  const inDarkMode = useInDarkMode();
+  const colors = getColorPair(interval?.color, inDarkMode);
+
   if (interval == null) {
     return h(
       MenuItem,
@@ -53,7 +58,7 @@ const IntervalOption: React.FC = ({
   return h(
     MenuItem,
     {
-      style: { backgroundColor: interval.color },
+      style: colors,
       shouldDismissPopover: true,
       active: modifiers.active,
       disabled: modifiers.disabled,
@@ -104,7 +109,6 @@ let IntervalSelection = ({
   onCopy,
   ...props
 }: IntervalSelectionProps) => {
-
   const [active, setActive] = React.useState(false);
 
   const interval = useMemo(() => {
@@ -149,37 +153,41 @@ let IntervalSelection = ({
             roleStructure: "listoption",
           }),
         },
-        [
-          h(
-            Button,
-            {
-              style: {
-                backgroundColor: interval?.color ?? null,
-                fontSize: "12px",
-                minHeight: "0px",
-                padding: intent ? "0px 10px" : "1.7px 10px",
-                boxShadow: "none",
-                border: intent ? "2px solid green" : "none",
-              },
-              fill: true,
-              alignText: "left",
-              text: h(
-                "span",
-                { style: { overflow: "hidden", textOverflow: "ellipses" } },
-                interval?.name ?? "Select an Interval"
-              ),
-              rightIcon: "double-caret-vertical",
-              className: "update-input-group",
-              placeholder: "Select A Filter",
-              onClick: () => setActive(true)
-            },
-            []
-          ),
-        ]
+        h(IntervalButton, { interval, intent, setActive })
       ),
     ]
   );
 };
+
+function IntervalButton({ interval, intent, setActive }) {
+  const inDarkMode = useInDarkMode();
+  const colors = getColorPair(interval?.color, inDarkMode);
+  return h(
+    Button,
+    {
+      style: {
+        ...colors,
+        fontSize: "12px",
+        minHeight: "0px",
+        padding: intent ? "0px 10px" : "1.7px 10px",
+        boxShadow: "none",
+        border: intent ? "2px solid green" : "none",
+      },
+      fill: true,
+      alignText: "left",
+      text: h(
+        "span",
+        { style: { overflow: "hidden", textOverflow: "ellipses" } },
+        interval?.name ?? "Select an Interval"
+      ),
+      rightIcon: "double-caret-vertical",
+      className: "update-input-group",
+      placeholder: "Select A Filter",
+      onClick: () => setActive(true),
+    },
+    []
+  );
+}
 
 IntervalSelection = memo(IntervalSelection);
 
