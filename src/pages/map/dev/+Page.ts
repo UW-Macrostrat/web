@@ -37,13 +37,6 @@ export function Page() {
           }),
         }),
         h(Route, {
-          path: "filterable",
-          element: h(VectorMapInspectorPage, {
-            title: "Server-side filtering",
-            tileset: tileserverDomain + "/v2/carto/{z}/{x}/{y}",
-          }),
-        }),
-        h(Route, {
           path: "carto-v1",
           element: h(VectorMapInspectorPage, {
             title: "Carto (v1)",
@@ -113,7 +106,6 @@ function MapInspectorIndex() {
     h("ul.layers", [
       h(LinkItem, { to: "carto" }, "Carto"),
       h(LinkItem, { to: "carto-slim" }, "Carto (slim)"),
-      h(LinkItem, { to: "filterable" }, "Server-side filtering"),
       h(LinkItem, { to: "carto-v1" }, "Carto (v1)"),
       h(LinkItem, { to: "carto-slim-v1" }, "Carto (v1)"),
       h(LinkItem, { to: "carto-raster" }, "Carto (image)"),
