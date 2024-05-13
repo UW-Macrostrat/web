@@ -10,7 +10,6 @@ import {
   ProgressPopover,
   ProgressPopoverProps,
 } from "~/pages/maps/ingestion/@id/components";
-import { setupPointSymbols } from "@macrostrat/mapbox-styles";
 export const h = hyper.styled(styles);
 
 const INPUT_FIELDS = {
