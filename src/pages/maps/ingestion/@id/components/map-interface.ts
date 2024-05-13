@@ -6,6 +6,7 @@ import {
   MapView,
   PanelCard,
 } from "@macrostrat/map-interface";
+import { useMapRef } from "@macrostrat/mapbox-react";
 import { NonIdealState, Switch } from "@blueprintjs/core";
 import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
@@ -16,7 +17,7 @@ import {
 } from "@macrostrat/ui-components";
 import boundingBox from "@turf/bbox";
 import { LngLatBoundsLike } from "mapbox-gl";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { MapNavbar } from "~/components/map-navbar";
 import "~/styles/global.styl";
 import styles from "./main.module.sass";
@@ -66,7 +67,7 @@ function buildOverlayStyle({
   }
 
   let tableStyles = layers.map((layer) => {
-    const table = `sources.${mapSlug}_${layer}`;
+    const table = tableName(mapSlug, layer);
     return buildStyle({
       inDarkMode: false,
       sourceID: table,
@@ -76,6 +77,10 @@ function buildOverlayStyle({
   });
 
   return mergeStyles(baseStyle, macrostratStyle, ...tableStyles);
+}
+
+function tableName(slug, layer) {
+  return `sources.${slug}_${layer}`;
 }
 
 function ensureBoxInGeographicRange(bounds: LngLatBoundsLike) {
@@ -232,8 +237,40 @@ export function MapInterface({
         mapPosition: null,
         fitBoundsOptions: { padding: 50 },
       }),
+      h(MapFeatureSelector, { featureTypes: _featureTypes, slug }),
     ]
   );
+}
+
+function MapFeatureSelector({ featureTypes, slug }) {
+  const queryLayers = useMemo(
+    () => featureTypes.map((t) => tableName(slug, t) + "_" + t),
+    [featureTypes, slug]
+  );
+
+  const mapRef = useMapRef();
+
+  const listener = useCallback(
+    (e) => {
+      const features = mapRef.current?.queryRenderedFeatures(e.point, {
+        layers: queryLayers,
+      });
+      console.log(features);
+    },
+    [mapRef.current, queryLayers]
+  );
+
+  useEffect(() => {
+    console.log("Setting up listener");
+    const map = mapRef.current;
+    if (map == null) return;
+    map.on("click", listener);
+    return () => {
+      map.off("click", listener);
+    };
+  }, [listener]);
+
+  return null;
 }
 
 function FeatureTypeSwitches({ featureTypes, setFeatureTypes }) {
