@@ -14,7 +14,6 @@ import styles from "./main.module.styl";
 import { MapColorsInspector } from "./color-schemes";
 import { WeaverPage } from "../../../weaver";
 import { BrowserRouter as Router } from "react-router-dom";
-import { tileserverDomain } from "@macrostrat-web/settings";
 
 const h = hyper.styled(styles);
 

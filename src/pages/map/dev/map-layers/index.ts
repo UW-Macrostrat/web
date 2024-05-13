@@ -36,7 +36,7 @@ import {
   buildRasterStyle,
   replaceSourcesForTileset,
   LineSymbolManager,
-} from "~/_utils";
+} from "~/_utils/map-layers.client";
 
 // Re-export things just in case
 export {
