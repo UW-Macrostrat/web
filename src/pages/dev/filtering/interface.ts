@@ -12,7 +12,7 @@ import styles from "./main.module.styl";
 import {
   replaceSourcesForTileset,
   LineSymbolManager,
-} from "~/_utils/map-layers";
+} from "~/_utils/map-layers.client";
 
 export const h = hyper.styled(styles);
 
