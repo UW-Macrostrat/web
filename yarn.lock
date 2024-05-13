@@ -6133,7 +6133,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@macrostrat/feedback-components@workspace:deps/web-components/packages/feedback-components":
+"@macrostrat/feedback-components@workspace:*, @macrostrat/feedback-components@workspace:deps/web-components/packages/feedback-components":
   version: 0.0.0-use.local
   resolution: "@macrostrat/feedback-components@workspace:deps/web-components/packages/feedback-components"
   dependencies:
@@ -6519,6 +6519,7 @@ __metadata:
     "@macrostrat/column-components": "workspace:*"
     "@macrostrat/column-views": "workspace:*"
     "@macrostrat/data-sheet2": "workspace:*"
+    "@macrostrat/feedback-components": "workspace:*"
     "@macrostrat/hyper": "npm:^2.2.1"
     "@macrostrat/map-interface": "workspace:*"
     "@macrostrat/mapbox-react": "workspace:^2.1.0"
