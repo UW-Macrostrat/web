@@ -47,9 +47,11 @@ const Button = ({ onClick }: { onClick: () => void }) => {
 const Input = ({
   ingestId,
   onChange,
+  onBlur
 }: {
   ingestId: number;
   onChange: () => Promise<void>;
+  onBlur: () => void;
 }) => {
   const handleKeyDown = useCallback(
     async (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -76,6 +78,7 @@ const Input = ({
       },
       autoFocus: true,
       onKeyDown: handleKeyDown,
+      onBlur: onBlur,
     },
     []
   );
@@ -113,6 +116,7 @@ const AddTagButton = ({ ingestId, onChange, ...props }: AddTagButtonProps) => {
               await onChange();
               setToggled(!toggled);
             },
+            onBlur: () => setToggled(!toggled),
           },
           []
         ),
