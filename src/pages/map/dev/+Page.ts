@@ -14,6 +14,7 @@ import styles from "./main.module.styl";
 import { MapColorsInspector } from "./color-schemes";
 import { WeaverPage } from "../../../weaver";
 import { BrowserRouter as Router } from "react-router-dom";
+import { tileserverDomain } from "@macrostrat-web/settings";
 
 const h = hyper.styled(styles);
 
@@ -33,6 +34,13 @@ export function Page() {
           path: "carto-slim",
           element: h(VectorMapInspectorPage, {
             tileset: MacrostratVectorTileset.CartoSlim,
+          }),
+        }),
+        h(Route, {
+          path: "filterable",
+          element: h(VectorMapInspectorPage, {
+            title: "Server-side filtering",
+            tileset: tileserverDomain + "/v2/carto/{z}/{x}/{y}",
           }),
         }),
         h(Route, {
@@ -105,6 +113,7 @@ function MapInspectorIndex() {
     h("ul.layers", [
       h(LinkItem, { to: "carto" }, "Carto"),
       h(LinkItem, { to: "carto-slim" }, "Carto (slim)"),
+      h(LinkItem, { to: "filterable" }, "Server-side filtering"),
       h(LinkItem, { to: "carto-v1" }, "Carto (v1)"),
       h(LinkItem, { to: "carto-slim-v1" }, "Carto (v1)"),
       h(LinkItem, { to: "carto-raster" }, "Carto (image)"),
