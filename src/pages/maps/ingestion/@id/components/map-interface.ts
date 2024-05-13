@@ -102,7 +102,6 @@ export function MapInterface({ id, map, slug }) {
   //   );
 
   const dark = useDarkMode()?.isEnabled ?? false;
-  const title = map.properties.name;
   const table = `sources.${slug}_polygons`;
 
   const hasRaster = rasterURL(map.properties.source_id) != null;

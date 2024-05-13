@@ -49,16 +49,11 @@ body
 .edit-page-header
   padding-bottom: 1rem
 
-.map-interface
-  height: 100%
-
-.map-interface.no-map
+.page
   display: flex
   flex-direction: column
-  align-items: center
-  justify-content: center
-  height: 100vh
-  flex: 1
+  height: 100%
+  overflow: hidden
 
 .edit-menu
   flex-grow: 1
@@ -74,3 +69,18 @@ body
       padding: 6px
     .icon-label
       padding-bottom: 10px
+
+.ingestion-main-panel
+  display: flex
+  flex-direction: row
+  flex-grow: 1
+  position: relative
+  gap: 2em
+  padding-bottom: 3em
+
+.main-content
+  position: relative
+  flex-grow: 1
+  border-radius: 8px
+  overflow: hidden
+
