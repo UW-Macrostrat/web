@@ -53,7 +53,6 @@ export function IngestProcessCard({
   const { id, tags } = _ingestProcess;
   const { slug, name, source_id, scale, raster_url } = _ingestProcess.source;
   const edit_href = `/maps/ingestion/${source_id}`;
-  const sourcesRecordURL = `/map/dev/sources/${slug}`;
 
   return h(
     Card,
@@ -111,11 +110,6 @@ export function IngestProcessCard({
         " ",
         h("span.raster", { style: { marginTop: ".5rem" } }, "Raster"),
       ]),
-      h.if(slug !== undefined)(
-        "a",
-        { href: sourcesRecordURL, style: { display: "block" } },
-        "Sources record map"
-      ),
     ]
   );
 }
