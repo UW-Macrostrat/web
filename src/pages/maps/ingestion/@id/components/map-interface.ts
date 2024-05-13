@@ -116,12 +116,13 @@ export function MapInterface({
   const [isOpen, setOpen] = useState(false);
 
   // Catch empty map data
-  // if (map == null || Object.keys(map.geometry).length == 0)
-  //   return h(
-  //     "div",
-  //     { style: { display: "flex", margin: "auto" } },
-  //     "No map data"
-  //   );
+  if (map == null || Object.keys(map.geometry).length == 0) {
+    return h(
+      "div",
+      { style: { display: "flex", margin: "auto" } },
+      "Map data not generated"
+    );
+  }
 
   const dark = useDarkMode()?.isEnabled ?? false;
   const table = `sources.${slug}_polygons`;
