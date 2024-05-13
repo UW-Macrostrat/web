@@ -42,13 +42,16 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
 
   useEffect(() => {
     async function getIntervals() {
-      let response = await fetch(
-        `${apiV2Prefix}/defs/intervals?timescale_id=11`
-      );
+      let response = await fetch(`${apiV2Prefix}/defs/intervals?all`);
 
       if (response.ok) {
         let response_data = await response.json();
-        setIntervals(response_data.success.data);
+        let data = response_data.success.data;
+        data.sort(
+          (a: Interval, b: Interval) =>
+            b.timescales.length - a.timescales.length
+        );
+        setIntervals(data);
       }
     }
 
@@ -59,7 +62,8 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
     ({
       url,
       defaultColumnConfig,
-      dataParameters, addTableUpdate,
+      dataParameters,
+      addTableUpdate,
       transformedData,
       data,
       ref,
@@ -181,8 +185,8 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
                     "omit",
                     transformedData[rowIndex],
                     dataParameters
-                  )
-                ])
+                  ),
+                ]);
               },
               value: toBoolean(transformedData[rowIndex]["omit"]),
             }),
