@@ -16,21 +16,11 @@ import {
   MapAreaContainer,
   PanelCard,
 } from "@macrostrat/map-interface";
-import {
-  useMapConditionalStyle,
-  useMapRef,
-  useMapStatus,
-} from "@macrostrat/mapbox-react";
+import { useMapStatus } from "@macrostrat/mapbox-react";
 import {
   buildBasicStyle,
   buildMacrostratStyle,
-  toggleLineSymbols,
 } from "@macrostrat/mapbox-styles";
-import {
-  getMapboxStyle,
-  mergeStyles,
-  removeMapLabels,
-} from "@macrostrat/mapbox-utils";
 import { useDarkMode, useStoredState } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
 import { useCallback, useMemo, useState } from "react";
@@ -39,18 +29,22 @@ import { getBaseMapStyle } from "@macrostrat-web/map-utils";
 import styles from "../main.module.styl";
 import { useMapStyle } from "./utils";
 import { Spacer } from "@macrostrat/ui-components";
+import {
+  MacrostratVectorTileset,
+  MacrostratRasterTileset,
+  buildMapStyle,
+  buildRasterStyle,
+  replaceSourcesForTileset,
+  LineSymbolManager,
+} from "~/_utils/map-layers.client";
 
-export enum MacrostratVectorTileset {
-  Carto = "carto",
-  CartoSlim = "carto-slim",
-  IGCPOrogens = "igcp-orogens",
-  AllMaps = "all-maps",
-}
-
-export enum MacrostratRasterTileset {
-  Carto = "carto",
-  Emphasized = "emphasized",
-}
+// Re-export things just in case
+export {
+  MacrostratVectorTileset,
+  MacrostratRasterTileset,
+  buildRasterStyle,
+  buildMapStyle,
+};
 
 export const h = hyper.styled(styles);
 
@@ -84,7 +78,6 @@ export function VectorMapInspectorPage({
   overlayStyle = _macrostratStyle,
   title = null,
   headerElement = null,
-  children,
 }: {
   headerElement?: React.ReactElement;
   title?: string;
@@ -153,130 +146,6 @@ export function VectorMapInspectorPage({
     },
     controls
   );
-}
-
-/** 
-  let tile = null;
-  if (showTileExtent && data?.[0] != null) {
-    let f = data[0];
-    tile = { x: f._x, y: f._y, z: f._z };
-  }
-
-  if (!loaded) return h(Spinner);
-
-  return h(
-    MapAreaContainer,
-    {
-      navbar: h(FloatingNavbar, { className: "searchbar" }, [
-        h([h(ParentRouteButton), headerElement ?? h("h2", title ?? tileset)]),
-        h(Spacer),
-        h(MapLoadingButton, {
-          active: isOpen,
-          onClick: () => setOpen(!isOpen),
-          isLoading,
-        }),
-      ]),
-      contextPanel: h(PanelCard, [
-        children,
-        h(Switch, {
-          checked: xRay,
-          label: "X-ray mode",
-          onChange() {
-            setState({ ...state, xRay: !xRay });
-          },
-        }),
-      ]),
-      detailPanel: detailElement,
-      contextPanelOpen: isOpen,
-    },
-    h(DevMapView, { style, transformRequest }, [
-      h(FeatureSelectionHandler, {
-        selectedLocation: inspectPosition,
-        setFeatures: setData,
-      }),
-      h(MapMarker, {
-        position: inspectPosition,
-        setPosition: onSelectPosition,
-      }),
-      h(TileExtentLayer, { tile, color: isEnabled ? "white" : "black" }),
-    ])
-  );
-}
-*/
-
-function LineSymbolMapControls() {}
-
-export function buildRasterStyle(layer: MacrostratRasterTileset) {
-  let tileURL = burwellTileDomain + `/${layer}/{z}/{x}/{y}.png`;
-
-  // if (layer == MacrostratRasterTileset.Emphasized) {
-  //   tileURL = `https://next.macrostrat.org/tiles/tiles/carto/{z}/{x}/{y}.png`;
-  // }
-
-  return {
-    version: 8,
-    sources: {
-      burwell: {
-        type: "raster",
-        tiles: [tileURL],
-        tileSize: 256,
-      },
-    },
-    layers: [
-      {
-        id: "burwell",
-        type: "raster",
-        source: "burwell",
-        paint: {
-          "raster-opacity": 0.5,
-        },
-      },
-    ],
-  };
-}
-
-export function replaceSourcesForTileset(
-  style: mapboxgl.Style,
-  tileset: MacrostratVectorTileset | string
-) {
-  let tilesetURL = tileset;
-  if (!tilesetURL.startsWith("http")) {
-    tilesetURL = burwellTileDomain + `/${tileset}/{z}/{x}/{y}`;
-  }
-
-  return {
-    ...style,
-    sources: {
-      ...style.sources,
-      burwell: {
-        type: "vector",
-        tiles: [tilesetURL],
-        tileSize: 512,
-      },
-    },
-  };
-}
-
-interface DevMapStyleOptions {
-  inDarkMode?: boolean;
-  xRay?: boolean;
-  tileset?: MacrostratVectorTileset | string;
-}
-
-export async function buildMapStyle(
-  baseMapURL: string,
-  overlayStyle: mapboxgl.Style
-  //postProcess: (style: mapboxgl.Style) => mapboxgl.Style = (s) => s
-  //styleOptions: DevMapStyleOptions = {}
-) {
-  mapboxgl.accessToken = mapboxAccessToken;
-  const style = await getMapboxStyle(baseMapURL, {
-    access_token: mapboxgl.accessToken,
-  });
-  //const { inDarkMode, xRay = false, tileset } = styleOptions;
-  //const overlayStyles: any = xRay ? buildXRayStyle({ inDarkMode }) : mapStyle;
-
-  return removeMapLabels(mergeStyles(style, overlayStyle));
 }
 
 export function BasicLayerInspectorPage({
@@ -393,12 +262,6 @@ export function BasicLayerInspectorPage({
       h(TileExtentLayer, { tile, color: isEnabled ? "white" : "black" }),
     ])
   );
-}
-
-function LineSymbolManager({ showLineSymbols }) {
-  const mapRef = useMapRef();
-  useMapConditionalStyle(mapRef, showLineSymbols, toggleLineSymbols);
-  return null;
 }
 
 export * from "./catalog";
