@@ -1,5 +1,5 @@
 export default {
-  route: "/map/dev*",
+  route: "/map/dev/*",
   meta: {
     Page: {
       env: {
