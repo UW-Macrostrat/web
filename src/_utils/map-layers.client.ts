@@ -23,11 +23,35 @@ export enum MacrostratRasterTileset {
 
 export function replaceSourcesForTileset(
   style: mapboxgl.Style,
-  tileset: MacrostratVectorTileset | string
+  tileset: MacrostratVectorTileset | string,
+  parameters: Record<string, string | string[]>
 ) {
-  let tilesetURL = tileset;
-  if (!tilesetURL.startsWith("http")) {
-    tilesetURL = burwellTileDomain + `/${tileset}/{z}/{x}/{y}`;
+
+  let tilesetURL;
+  if (!tileset.startsWith("http")) {
+    tilesetURL = burwellTileDomain + `/${tileset}/{z}/{x}/{y}`
+  } else {
+    tilesetURL = tileset;
+  }
+
+  if(parameters != null){
+    let urlParams = new URLSearchParams();
+    // For each parameter that isn't empty add it to the URL
+    for (const [key, value] of Object.entries(parameters)) {
+      if(value != null && value != ""){
+
+        // If the value is a list of strings append each one
+        if(Array.isArray(value)){
+          for (const v of value) {
+            urlParams.append(key, v);
+          }
+        } else {
+          urlParams.append(key, value);
+        }
+      }
+    }
+
+    tilesetURL += urlParams.toString() ? `?${urlParams.toString()}` : "";
   }
 
   return {

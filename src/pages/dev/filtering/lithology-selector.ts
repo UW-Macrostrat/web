@@ -12,10 +12,10 @@ export const h = hyper.styled(styles);
 
 function LithologyMultiSelect({
   onChange,
-  selectedLithologyIds
+  selectedLithologyNames
 } : {
-  onChange: (lith: number[]) => void,
-  selectedLithologyIds: number[]
+  onChange: (lith: string[]) => void,
+  selectedLithologyNames: string[]
 }) {
 
   const [lithologies, setLithologies] = useState([]);
@@ -23,19 +23,19 @@ function LithologyMultiSelect({
   useEffect(() => {
     (async () => {
       const liths = await getLithologies();
-      setLithologies(liths?.success?.data);
+      setLithologies(liths);
     })()
   }, []);
 
   const selectedLithologies = useMemo(() => {
-    return lithologies.filter(l => selectedLithologyIds.includes(l.lith_id));
-  }, [selectedLithologyIds, lithologies]);
+    return lithologies.filter(l => selectedLithologyNames.includes(l.name));
+  }, [selectedLithologyNames, lithologies]);
 
   const _onChange = (lith: Lithology) => {
-    if (selectedLithologyIds.includes(lith.lith_id)) {
-      onChange(lithologies.filter(l => l !== lith.lith_id));
+    if (selectedLithologyNames.includes(lith.name)) {
+      onChange(selectedLithologyNames.filter(l => l !== lith.name));
     } else {
-      onChange([...selectedLithologyIds, lith.lith_id]);
+      onChange([...selectedLithologyNames, lith.name]);
     }
   }
 
@@ -53,7 +53,7 @@ function LithologyMultiSelect({
       return h("div.lithology-item",
         {
           style: {
-            backgroundColor: item.color
+            borderColor: item.color
           },
           onClick: handleClick
         },
@@ -82,23 +82,38 @@ function LithologyMultiSelect({
   })
 }
 
-async function getLithologies() : Promise<{success: { data: Lithology[]}}> {
+async function getLithologies() : Promise<Lithology[]> {
   const response = await fetch(`${apiV2Prefix}/defs/lithologies?all`);
   if (response.ok) {
-    return response.json();
+    let data : Lithology[] = (await response.json()).success.data;
+
+    // Enumerate the lithology tree
+    let enumeratedLithologyTree = {}
+    for (const lith of data) {
+      enumeratedLithologyTree = { ...enumeratedLithologyTree, ...ascendLithologyTree(lith) }
+    }
+
+    return Object.values(enumeratedLithologyTree)
   }
   throw new Error("Failed to get lithologies");
 }
 
+function ascendLithologyTree(lith: Lithology): Record<string, Partial<Lithology>> {
+
+  return {
+    [lith.name]: lith,
+    [lith.class]: {name: lith.class},
+    [lith.group]: {name: lith.group, class: lith.class},
+    [lith.type]: {name: lith.type, group: lith.group, class: lith.class}
+  }
+}
+
 interface Lithology {
-  lith_id: number;
   name: string
   type: string
   group: string
   class: string
   color: string
-  fill: number
-  t_units: number
 }
 
 export { LithologyMultiSelect };

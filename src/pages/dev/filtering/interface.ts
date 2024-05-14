@@ -41,8 +41,8 @@ export function VectorMapInspectorPage({
   const { showLineSymbols } = state;
 
   const _overlayStyle = useMemo(() => {
-    return replaceSourcesForTileset(overlayStyle, tileset);
-  }, [tileset, overlayStyle]) as mapboxgl.Style;
+    return replaceSourcesForTileset(overlayStyle, tileset, {lithology: state.lithologies});
+  }, [tileset, overlayStyle, state.lithologies]) as mapboxgl.Style;
 
   const controls = h([
     h(Switch, {
@@ -54,7 +54,7 @@ export function VectorMapInspectorPage({
     }),
     h(LineSymbolManager, { showLineSymbols }),
     h(LithologyMultiSelect, {
-      selectedLithologyIds: state.lithologies,
+      selectedLithologyNames: state.lithologies,
       onChange: (lithologies) => {
         setState({ ...state, lithologies });
       }
@@ -73,7 +73,6 @@ export function VectorMapInspectorPage({
   );
 }
 
-
 function CompilationSelector({ compilation, setCompilation }) {
   return h(Select, {
     items: Object.values(Compilation),
@@ -89,7 +88,7 @@ function CompilationSelector({ compilation, setCompilation }) {
 }
 
 const _macrostratStyle = buildMacrostratStyle({
-  tileserverDomain,
+  tileserverDomain
 }) as mapboxgl.Style;
 
 function isStateValid(state) {
