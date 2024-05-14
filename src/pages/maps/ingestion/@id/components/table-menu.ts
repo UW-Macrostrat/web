@@ -104,7 +104,7 @@ export const TableMenu = ({
           h(
             InputGroup,
             {
-              value: inputValue,
+              value: inputValue || "",
               className: "update-input-group",
               placeholder: inputPlaceholder,
               onChange: (e: React.ChangeEvent<HTMLInputElement>) => {

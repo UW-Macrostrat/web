@@ -98,7 +98,7 @@ export const toggleShowOmittedRows = (state: TableData) => {
   const currentlyHidden = newDataParameters.filter["omit"].is_valid()
 
   if (currentlyHidden) {
-    newDataParameters.filter["omit"] = new Filter("omit", "eq", "");
+    newDataParameters.filter["omit"] = new Filter("omit", "eq", null);
   } else {
     newDataParameters.filter["omit"] = new Filter("omit", "is_distinct_from", "true");
   }
@@ -124,7 +124,7 @@ export const updateData = (
   // Add a filter for all the new columns
   allColumns.forEach((c) => {
     if (!(c in state.parameters.filter)) {
-      state.parameters.filter[c] = new Filter(c, "eq", "");
+      state.parameters.filter[c] = new Filter(c, "eq", null);
     }
   })
 

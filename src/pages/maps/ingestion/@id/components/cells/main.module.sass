@@ -66,9 +66,19 @@
   z-index: 0
   position: relative
   max-width: 99%
+
+.short
   &:focus
     z-index: 99
     max-width: 999%
     border: #2d72d2 solid 2px
     margin: -1px
     height: 22px
+
+.long
+  width: 100%
+  overflow: hidden
+  &:focus
+    z-index: 99
+    border: #2d72d2 solid 2px
+    margin: -1px

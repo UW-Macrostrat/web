@@ -251,7 +251,7 @@ export function TableInterface({
               onFilterChange: (param: OperatorQueryParameter) => {
                 dispatch({
                   type: "setFilter",
-                  filter: new Filter(columnName, param.operator, param.value)
+                  filter: new Filter(columnName, param.operator, param.value || null)
                 })
               },
               filter: filter,

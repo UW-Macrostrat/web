@@ -69,7 +69,7 @@ export class Filter {
   };
 
   is_valid = () => {
-    if (this.operator == undefined || this.value == "") {
+    if (this.operator == undefined || this.value == null) {
       return false;
     }
     return true;
