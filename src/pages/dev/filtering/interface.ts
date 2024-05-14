@@ -1,5 +1,5 @@
 // Import other components
-import { Switch } from "@blueprintjs/core";
+import { Switch, Button, MenuItem } from "@blueprintjs/core";
 import { tileserverDomain, mapboxAccessToken } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import { DevMapPage } from "@macrostrat/map-interface";
@@ -20,20 +20,18 @@ import {
 export const h = hyper.styled(styles);
 
 enum Compilation {
-  Carto = "carto",
-  Maps = "maps",
+  Carto = "v2/carto",
+  Maps = "v2/maps",
 }
 
 export function VectorMapInspectorPage({
   overlayStyle = _macrostratStyle,
   title = null,
-  headerElement = null,
-  tileset,
+  headerElement = null
 }: {
   headerElement?: React.ReactElement;
   title?: string;
   overlayStyle?: mapboxgl.Style;
-  tileset: string;
 }) {
   // A stripped-down page for map development
 
@@ -41,8 +39,8 @@ export function VectorMapInspectorPage({
   const { showLineSymbols } = state;
 
   const _overlayStyle = useMemo(() => {
-    return replaceSourcesForTileset(overlayStyle, tileset, {lithology: state.lithologies});
-  }, [tileset, overlayStyle, state.lithologies]) as mapboxgl.Style;
+    return replaceSourcesForTileset(overlayStyle, state.compilation, {lithology: state.lithologies});
+  }, [overlayStyle, state.lithologies, state.compilation]) as mapboxgl.Style;
 
   const controls = h([
     h(Switch, {
@@ -53,6 +51,12 @@ export function VectorMapInspectorPage({
       },
     }),
     h(LineSymbolManager, { showLineSymbols }),
+    h(CompilationSelector, {
+      compilation: state.compilation,
+      setCompilation: (compilation) => {
+        setState({ ...state, compilation });
+      }
+    }),
     h(LithologyMultiSelect, {
       selectedLithologyNames: state.lithologies,
       onChange: (lithologies) => {
@@ -66,25 +70,27 @@ export function VectorMapInspectorPage({
     {
       headerElement,
       mapboxToken: mapboxAccessToken,
-      title: title ?? tileset,
+      title: title ?? state.compilation,
       overlayStyle: _overlayStyle,
     },
     controls
   );
 }
 
-function CompilationSelector({ compilation, setCompilation }) {
+const CompilationSelector = ({ compilation, setCompilation }) => {
   return h(Select, {
     items: Object.values(Compilation),
     itemRenderer: (item: any, { handleClick }) => {
-      return h("div", { onClick: handleClick }, item);
+      return h(MenuItem, { onClick: handleClick, text: item });
     },
     onItemSelect: (item) => {
       setCompilation(item);
     },
     filterable: false,
     activeItem: compilation,
-  });
+  }, [
+    h(Button, {text: compilation, rightIcon: "double-caret-vertical", placeholder: "Select a film" })
+  ]);
 }
 
 const _macrostratStyle = buildMacrostratStyle({
@@ -114,6 +120,6 @@ function isStateValid(state) {
 
 const defaultState = {
   showLineSymbols: false,
-  compilation: "carto",
+  compilation: "v2/carto",
   lithologies: []
 };
