@@ -4,7 +4,8 @@ export default {
     Page: {
       env: {
         client: true,
-      }
-    }
-  }
+        server: false,
+      },
+    },
+  },
 };
