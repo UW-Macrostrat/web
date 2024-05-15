@@ -100,12 +100,16 @@ async function getLithologies() : Promise<Lithology[]> {
 
 function ascendLithologyTree(lith: Lithology): Record<string, Partial<Lithology>> {
 
-  return {
+  let lithTree = {
     [lith.name]: lith,
     [lith.class]: {name: lith.class},
     [lith.group]: {name: lith.group, class: lith.class},
     [lith.type]: {name: lith.type, group: lith.group, class: lith.class}
   }
+
+  delete lithTree[""]
+
+  return lithTree
 }
 
 interface Lithology {
