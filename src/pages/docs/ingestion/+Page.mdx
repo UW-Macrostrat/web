@@ -1,16 +1,22 @@
 export { DocumentationPage as default } from "~/layouts";
 import { LinkCard } from "~/components/cards";
 import { PageHeader } from "~/components";
+import { macrostratInstance } from "@macrostrat-web/settings";
 
 <PageHeader title="Ingestion" showSiteName={false}>
   <span className="subtitle">
-    <span className="tertiary">{import.meta.env.VITE_MACROSTRAT_INSTANCE}</span>
+    <span className="tertiary">{macrostratInstance}</span>
   </span>
 </PageHeader>
 
 The Macrostrat ingestion process is built to enable the registration, processing and distribution of new maps.
 
-<img style={{ maxWidth: "100%" }} src={"https://storage.macrostrat.org/web-assets/criticalmaas/docs/images/IngestionProcess.png"} />
+<img
+  style={{ maxWidth: "100%" }}
+  src={
+    "https://storage.macrostrat.org/web-assets/criticalmaas/docs/images/IngestionProcess.png"
+  }
+/>
 
 ## Staging
 

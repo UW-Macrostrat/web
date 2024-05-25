@@ -5,7 +5,6 @@ import path from "path";
 import ssr from "vike/plugin";
 import { UserConfig } from "vite";
 import cesium from "vite-plugin-cesium";
-
 import pkg from "./package.json";
 
 const aliasedModules = [
@@ -24,6 +23,7 @@ const aliasedModules = [
 
 const gitEnv = revisionInfo(pkg, "https://github.com/UW-Macrostrat/web");
 // prefix with VITE_ to make available to client
+
 for (const [key, value] of Object.entries(gitEnv)) {
   process.env["VITE_" + key] = value;
 }

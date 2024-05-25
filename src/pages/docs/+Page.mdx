@@ -1,10 +1,11 @@
 export { DocumentationPage as default } from "~/layouts";
 import { PageHeader } from "~/components";
 import { LinkCard } from "~/components/cards";
+import { macrostratInstance, tileserverDomain } from "@macrostrat-web/settings";
 
 <PageHeader title="Documentation">
   <span className="subtitle">
-    <span className="tertiary">{import.meta.env.VITE_MACROSTRAT_INSTANCE}</span>
+    <span className="tertiary">{macrostratInstance}</span>
   </span>
 </PageHeader>
 
@@ -33,10 +34,7 @@ This section contains documentation for users of Macrostrat's web services, APIs
   Documentation for General use Postgrest API
 </LinkCard>
 
-<LinkCard
-  href={`${import.meta.env.VITE_MACROSTRAT_TILESERVER_DOMAIN}/docs`}
-  title="Tileserver API Docs"
->
+<LinkCard href={`${tileserverDomain}/docs`} title="Tileserver API Docs">
   Documentation for Tileserver API
 </LinkCard>
 
@@ -109,7 +107,7 @@ including CriticalMAAS.
   v2** data standards. Focus on point data, raster image alignment, and
   ingestion metadata recovery (_Kate Akin_; Geoscience)
 
-### External integrations
+### Integrations
 
 Macrostrat is integrated with systems that provide additional functionality
 relevant to CriticalMAAS. Major adjustments to these systems are out-of-scope

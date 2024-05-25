@@ -28,6 +28,9 @@ const flavors = [
   "dolomite",
 ];
 
+// Synthesize the config from the environment at runtime
+const environment = synthesizeConfigFromEnvironment();
+
 async function startServer() {
   const app = express();
 
@@ -93,6 +96,7 @@ async function startServer() {
       urlOriginal: req.originalUrl,
       user: user,
       macrostratLogoFlavor: flavor,
+      environment,
     };
 
     const pageContext = await renderPage(pageContextInit);
@@ -117,4 +121,21 @@ async function startServer() {
   console.log(
     `Server (${process.env.NODE_ENV}) running at http://localhost:${port}`
   );
+}
+
+function synthesizeConfigFromEnvironment() {
+  /** Creates a mapping of environment variables that start with VITE_,
+   * and returns them as an object. This allows us to pass environment
+   * variables to the client.
+   *
+   * TODO: Ideally this would be defined in library code.
+   * */
+  const env = {};
+  for (const key of Object.keys(process.env)) {
+    if (key.startsWith("VITE_")) {
+      let newKey = key.substring(5);
+      env[newKey] = process.env[key];
+    }
+  }
+  return env;
 }
