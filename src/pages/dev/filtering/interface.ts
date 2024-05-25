@@ -4,18 +4,15 @@ import { tileserverDomain, mapboxAccessToken } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import { DevMapPage } from "@macrostrat/map-interface";
 import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
-import { useStoredState } from "@macrostrat/ui-components";
-import { Select, Omnibar } from "@blueprintjs/select";
+import { Select } from "@blueprintjs/select";
 import mapboxgl from "mapbox-gl";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import styles from "./main.module.styl";
 import {
   replaceSourcesForTileset,
   LineSymbolManager,
 } from "~/_utils/map-layers.client";
-import {
-  LithologyMultiSelect
-} from "./lithology-selector";
+import { LithologyMultiSelect } from "./lithology-selector";
 
 export const h = hyper.styled(styles);
 
@@ -27,7 +24,7 @@ enum Compilation {
 export function VectorMapInspectorPage({
   overlayStyle = _macrostratStyle,
   title = null,
-  headerElement = null
+  headerElement = null,
 }: {
   headerElement?: React.ReactElement;
   title?: string;
@@ -39,7 +36,9 @@ export function VectorMapInspectorPage({
   const { showLineSymbols } = state;
 
   const _overlayStyle = useMemo(() => {
-    return replaceSourcesForTileset(overlayStyle, state.compilation, {lithology: state.lithologies});
+    return replaceSourcesForTileset(overlayStyle, state.compilation, {
+      lithology: state.lithologies,
+    });
   }, [overlayStyle, state.lithologies, state.compilation]) as mapboxgl.Style;
 
   const controls = h([
@@ -55,14 +54,14 @@ export function VectorMapInspectorPage({
       compilation: state.compilation,
       setCompilation: (compilation) => {
         setState({ ...state, compilation });
-      }
+      },
     }),
     h(LithologyMultiSelect, {
       selectedLithologyNames: state.lithologies,
       onChange: (lithologies) => {
         setState({ ...state, lithologies });
-      }
-    })
+      },
+    }),
   ]);
 
   return h(
@@ -78,23 +77,31 @@ export function VectorMapInspectorPage({
 }
 
 const CompilationSelector = ({ compilation, setCompilation }) => {
-  return h(Select, {
-    items: Object.values(Compilation),
-    itemRenderer: (item: any, { handleClick }) => {
-      return h(MenuItem, { onClick: handleClick, text: item });
+  return h(
+    Select,
+    {
+      items: Object.values(Compilation),
+      itemRenderer: (item: any, { handleClick }) => {
+        return h(MenuItem, { onClick: handleClick, text: item });
+      },
+      onItemSelect: (item) => {
+        setCompilation(item);
+      },
+      filterable: false,
+      activeItem: compilation,
     },
-    onItemSelect: (item) => {
-      setCompilation(item);
-    },
-    filterable: false,
-    activeItem: compilation,
-  }, [
-    h(Button, {text: compilation, rightIcon: "double-caret-vertical", placeholder: "Select a film" })
-  ]);
-}
+    [
+      h(Button, {
+        text: compilation,
+        rightIcon: "double-caret-vertical",
+        placeholder: "Select a film",
+      }),
+    ]
+  );
+};
 
 const _macrostratStyle = buildMacrostratStyle({
-  tileserverDomain
+  tileserverDomain,
 }) as mapboxgl.Style;
 
 function isStateValid(state) {
@@ -121,5 +128,5 @@ function isStateValid(state) {
 const defaultState = {
   showLineSymbols: false,
   compilation: "v2/carto",
-  lithologies: []
+  lithologies: [],
 };
