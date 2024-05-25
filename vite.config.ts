@@ -30,6 +30,8 @@ for (const [key, value] of Object.entries(gitEnv)) {
 const cesiumRoot = require.resolve("cesium").replace("/index.cjs", "/Build");
 const cesiumBuildPath = path.resolve(cesiumRoot, "Cesium");
 
+// Check if we are building for server context
+
 const config: UserConfig = {
   cacheDir: ".vite",
   root: path.resolve("./src"),
@@ -67,6 +69,7 @@ const config: UserConfig = {
   define: {
     // Cesium base URL
     CESIUM_BASE_URL: JSON.stringify("/cesium"),
+    // If not building for server context
   },
   ssr: {
     noExternal: ["labella", "@supabase/postgrest-js"],

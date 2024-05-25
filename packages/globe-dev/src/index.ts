@@ -1,6 +1,3 @@
-import * as Cesium from "cesium";
-window.Cesium = Cesium;
-
 import {
   CameraParams,
   DisplayQuality,

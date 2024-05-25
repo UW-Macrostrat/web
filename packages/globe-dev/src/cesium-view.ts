@@ -7,6 +7,7 @@ import { ImageryLayer } from "resium";
 import CesiumViewer, {
   DisplayQuality,
   MapboxLogo,
+  SatelliteLayer,
 } from "@macrostrat/cesium-viewer";
 import { MapboxImageryProvider } from "cesium";
 
@@ -33,13 +34,6 @@ function buildSatelliteLayer({ accessToken }) {
   return provider;
 }
 
-const SatelliteLayer = (props) => {
-  const { accessToken, ...rest } = props;
-  let satellite = useRef(buildSatelliteLayer({ accessToken }));
-
-  return h(ImageryLayer, { imageryProvider: satellite.current, ...rest });
-};
-
 function CesiumView({ style, accessToken, ...rest }) {
   const terrainProvider = useRef(
     new TerrainProvider({
@@ -51,6 +45,8 @@ function CesiumView({ style, accessToken, ...rest }) {
       credit: "Mapbox",
     })
   );
+
+  console.log("Access token", accessToken);
 
   return h(
     CesiumViewer,
