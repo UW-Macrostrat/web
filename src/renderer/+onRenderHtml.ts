@@ -28,10 +28,13 @@ async function render(pageContext: PageContextServer) {
   /** Get runtime environment synthesized by server. This is a substitute for using
    * compile-time environment variables in the client. The environment is
    * injected into vite as a global variable.
+   *
+   * We also set `process.env.NODE_ENV` to "production" to allow Cesium to work properly.
    */
-  const envScript = `<script>window.env = ${JSON.stringify(
-    environment
-  )}</script>`;
+  const envScript = `<script>
+    window.env = ${JSON.stringify(environment)};
+    window.process = {env: {NODE_ENV: "production"}};
+  </script>`;
 
   // This doesn't work in production
   // if (!isolateStyles || clientRouting) {

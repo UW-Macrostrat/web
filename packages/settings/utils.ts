@@ -5,7 +5,7 @@ export function getRuntimeConfig(
   /** Get a configuration variable from the environment, either directly (node) or via a server-defined mapping */
   let val: string | undefined;
   const activeEnv = typeof window === "undefined" ? "server" : "client";
-  if (import.meta.env.SSR) {
+  if (activeEnv === "server") {
     // We are running on the server, try to get directly from process.env
     val = process.env["VITE_" + key];
   } else {
@@ -14,7 +14,7 @@ export function getRuntimeConfig(
   }
   if (val === undefined) {
     val = import.meta.env["VITE_" + key];
-    if (val !== undefined) {
+    if (val !== undefined && import.meta.env.DEV) {
       console.warn(`Environment variable ${key} loaded statically`);
     }
   }
