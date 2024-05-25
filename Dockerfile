@@ -14,8 +14,10 @@ RUN --mount=type=cache,target=/yarn-cache \
   && yarn install --immutable \
   && rsync -a .yarn/cache/ /yarn-cache
 
-RUN yarn run bundle
+RUN yarn run build
 
 EXPOSE 3000
 
-CMD ["sh", "server/server.sh"]
+ENV NODE_NO_WARNINGS=1
+
+CMD ["yarn", "run", "server"]

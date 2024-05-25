@@ -8,7 +8,7 @@ import { PageShell } from "./page-shell";
 import type { PageContextServer } from "./types";
 
 async function render(pageContext: PageContextServer) {
-  const { Page, pageProps, config, user } = pageContext;
+  const { Page, pageProps, config, user, environment } = pageContext;
   // This render() hook only supports SSR, see https://vike.dev/render-modes for how to modify render() to support SPA
   let pageHtml = "";
   if (Page != null) {
@@ -24,6 +24,14 @@ async function render(pageContext: PageContextServer) {
       "Isolating styles is not allowed when using client routing"
     );
   }
+
+  /** Get runtime environment synthesized by server. This is a substitute for using
+   * compile-time environment variables in the client. The environment is
+   * injected into vite as a global variable.
+   */
+  const envScript = `<script>window.env = ${JSON.stringify(
+    environment
+  )}</script>`;
 
   // This doesn't work in production
   // if (!isolateStyles || clientRouting) {
@@ -63,6 +71,7 @@ async function render(pageContext: PageContextServer) {
           rel="stylesheet"
         />
         ${dangerouslySkipEscape(scriptTags)}
+        ${dangerouslySkipEscape(envScript)}
         <meta name="description" content="${desc}" />
         <title>${title}</title>
       </head>
