@@ -18,4 +18,6 @@ RUN yarn run bundle
 
 EXPOSE 3000
 
-CMD ["sh", "server/server.sh"]
+ENV NODE_NO_WARNINGS=1
+
+CMD ["yarn", "run", "server"]

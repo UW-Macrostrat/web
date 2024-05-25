@@ -29,7 +29,7 @@ async function render(pageContext: PageContextServer) {
    * compile-time environment variables in the client. The environment is
    * injected into vite as a global variable.
    */
-  const cfgScript = `<script>window.env = ${JSON.stringify(
+  const envScript = `<script>window.env = ${JSON.stringify(
     environment
   )}</script>`;
 
@@ -71,7 +71,7 @@ async function render(pageContext: PageContextServer) {
           rel="stylesheet"
         />
         ${dangerouslySkipEscape(scriptTags)}
-        ${dangerouslySkipEscape(cfgScript)}
+        ${dangerouslySkipEscape(envScript)}
         <meta name="description" content="${desc}" />
         <title>${title}</title>
       </head>

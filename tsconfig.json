@@ -41,7 +41,7 @@
         "deps/web-components/packages/map-interface/src"
       ],
       "@macrostrat/cesium-viewer": ["deps/cesium-viewer/src"],
-      "@macrostrat-web/settings": ["deps/packages/settings"]
+      "@macrostrat-web/settings": ["packages/settings"]
     }
   },
   "include": [
