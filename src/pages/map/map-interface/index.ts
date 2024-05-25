@@ -29,12 +29,7 @@ export default function MapApp({ routerBasename }) {
     h(
       ReduxRouter,
       { basename: routerBasename, store, history: browserHistory },
-      [
-        h(Routes, [
-          //h(Route, { path: mapPagePrefix + "/sources", element: h(Sources) }),
-          h(Route, { path: "*", element: h(MapPage) }),
-        ]),
-      ]
+      [h(Routes, [h(Route, { path: "*", element: h(MapPage) })])]
     )
   );
 }

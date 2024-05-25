@@ -5,7 +5,6 @@ import {
   PositionFocusState,
   getFocusState,
   useMapLabelVisibility,
-  useMapPosition,
   useMapRef,
   useMapStatus,
 } from "@macrostrat/mapbox-react";
@@ -133,6 +132,7 @@ export default function MainMapView(props) {
   return h(
     MapView,
     {
+      projection: { name: "globe" },
       ...props,
       infoMarkerPosition,
       onMapLoaded,
