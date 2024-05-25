@@ -6581,12 +6581,9 @@ __metadata:
     react-router-hash-link: "npm:^2.4.3"
     reduce-reducers: "npm:^1.0.4"
     redux: "npm:^4.0.5"
-    regl: "npm:^1.5.0"
-    resium: "npm:^1.13.1"
     sass: "npm:^1.49.0"
     sirv: "npm:^2.0.3"
     stylus: "npm:^0.55.0"
-    supports-color: "npm:^9.4.0"
     swagger-ui-react: "npm:^5.12.3"
     topojson-client: "npm:^3.0.0"
     transition-hook: "npm:^1.5.2"
@@ -32487,13 +32484,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"regl@npm:^1.5.0":
-  version: 1.7.0
-  resolution: "regl@npm:1.7.0"
-  checksum: 10/085b9df406c1b2564999a13d2e323158b2b9d608b52b9b2ceae209e88885fde70d5059abf3ca2474290790d2b4058288321b7d323ef4dfdb557336252ae5515c
-  languageName: node
-  linkType: hard
-
 "regl@npm:^2.1.0":
   version: 2.1.0
   resolution: "regl@npm:2.1.0"
@@ -35301,13 +35291,6 @@ __metadata:
   dependencies:
     has-flag: "npm:^4.0.0"
   checksum: 10/157b534df88e39c5518c5e78c35580c1eca848d7dbaf31bbe06cdfc048e22c7ff1a9d046ae17b25691128f631a51d9ec373c1b740c12ae4f0de6e292037e4282
-  languageName: node
-  linkType: hard
-
-"supports-color@npm:^9.4.0":
-  version: 9.4.0
-  resolution: "supports-color@npm:9.4.0"
-  checksum: 10/cb8ff8daeaf1db642156f69a9aa545b6c01dd9c4def4f90a49f46cbf24be0c245d392fcf37acd119cd1819b99dad2cc9b7e3260813f64bcfd7f5b18b5a1eefb8
   languageName: node
   linkType: hard
 
