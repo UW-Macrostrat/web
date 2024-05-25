@@ -23,7 +23,6 @@ const aliasedModules = [
 
 const gitEnv = revisionInfo(pkg, "https://github.com/UW-Macrostrat/web");
 // prefix with VITE_ to make available to client
-
 for (const [key, value] of Object.entries(gitEnv)) {
   process.env["VITE_" + key] = value;
 }
@@ -66,9 +65,6 @@ const config: UserConfig = {
     sourcemap: true,
   },
   define: {
-    "process.env": {
-      NODE_DEBUG: false,
-    },
     // Cesium base URL
     CESIUM_BASE_URL: JSON.stringify("/cesium"),
   },

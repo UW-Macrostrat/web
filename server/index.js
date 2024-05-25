@@ -30,7 +30,6 @@ const flavors = [
 
 // Synthesize the config from the environment at runtime
 const environment = synthesizeConfigFromEnvironment();
-globalThis.environment = environment;
 
 async function startServer() {
   const app = express();
@@ -44,6 +43,10 @@ async function startServer() {
     // (In dev, Vite's middleware serves our static assets.)
     const sirv = (await import("sirv")).default;
     app.use(sirv(`${root}/dist/client`));
+    // Special case for cesium files at /cesium prefix
+    // These should be copied into the client bundle but are not right now.
+    // Ideally we'd be able to remove this fix.
+    app.use("/cesium", sirv(`${root}/dist/cesium`));
   } else {
     // We instantiate Vite's development server and integrate its middleware to our server.
     // ⚠️ We instantiate it only in development. (It isn't needed in production and it
