@@ -1,56 +1,12 @@
 {
   "compilerOptions": {
-    "composite": true,
     "baseUrl": "./",
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "strict": false,
-    "sourceMap": true,
-    "declaration": true,
-    "jsx": "react-jsx",
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "downlevelIteration": true,
-    "module": "ESNext",
     "paths": {
-      "~/*": ["./src/*"],
-      "@macrostrat/cesium-vector-provider": [
-        "./packages/cesium-vector-provider/src/"
-      ],
-      "@macrostrat/ui-components": [
-        "deps/web-components/packages/ui-components/src/"
-      ],
-      "@macrostrat/column-components": [
-        "deps/web-components/packages/column-components/src/"
-      ],
-      "@macrostrat/map-components": [
-        "deps/web-components/packages/map-components/src/"
-      ],
-      "@macrostrat/mapbox-styles": [
-        "deps/web-components/packages/mapbox-styles/src"
-      ],
-      "@macrostrat/column-views": [
-        "deps/web-components/packages/column-views/src"
-      ],
-      "@macrostrat/mapbox-react": [
-        "deps/web-components/packages/mapbox-react/src"
-      ],
-      "@macrostrat/mapbox-utils": [
-        "deps/web-components/packages/mapbox-utils/src"
-      ],
-      "@macrostrat/map-interface": [
-        "deps/web-components/packages/map-interface/src"
-      ],
+      // Workspace code
       "@macrostrat/cesium-viewer": ["deps/cesium-viewer/src"],
-      "@macrostrat-web/settings": ["packages/settings"]
+      "@macrostrat/cesium-martini": ["deps/cesium-martini/src"],
+      "@macrostrat/*": ["deps/web-components/packages/*/src"],
+      "@macrostrat-web/*": ["packages/*/src"]
     }
-  },
-  "include": [
-    "src",
-    "packages/lithology-hierarchy/src/simple-hierarchy.ts",
-    "packages/hierarchy"
-  ],
-  "ts-node": {
-    "transpileOnly": true,
-    "esm": true
   }
 }

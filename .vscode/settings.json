@@ -14,5 +14,11 @@
     "editor.codeActionsOnSave": {
       "source.organizeImports": "never"
     }
-  }
+  },
+  "cSpell.enableFiletypes": [
+    "!javascript",
+    "!javascriptreact",
+    "!scss",
+    "!typescript"
+  ]
 }
