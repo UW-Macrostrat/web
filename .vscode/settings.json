@@ -18,6 +18,7 @@
   "cSpell.enableFiletypes": [
     "!javascript",
     "!javascriptreact",
+    "!json",
     "!scss",
     "!typescript"
   ]

@@ -1,12 +1,15 @@
 {
   "compilerOptions": {
     "baseUrl": "./",
+    // Allow importing of JSON and default imports from CommonJS modules
+    "esModuleInterop": true,
     "paths": {
       // Workspace code
       "@macrostrat/cesium-viewer": ["deps/cesium-viewer/src"],
       "@macrostrat/cesium-martini": ["deps/cesium-martini/src"],
       "@macrostrat/*": ["deps/web-components/packages/*/src"],
-      "@macrostrat-web/*": ["packages/*/src"]
+      "@macrostrat-web/*": ["packages/*/src"],
+      "~/*": ["src/*"]
     }
   }
 }
