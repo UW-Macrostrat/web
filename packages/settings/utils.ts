@@ -7,7 +7,7 @@ export function getRuntimeConfig(
   const activeEnv = typeof window === "undefined" ? "server" : "client";
   if (import.meta.env.SSR) {
     // We are running on the server, try to get directly from process.env
-    val = globalThis.environment[key];
+    val = globalThis.environment?.[key];
   } else {
     // We are running on the client and have access to window.env
     val = window.env[key];

@@ -8,7 +8,7 @@ export const guard = (pageContext) => {
     // Render the login page while preserving the URL. (This is novel technique
     // which we explain down below.)
     throw redirect(
-      `${ingestPrefix}/security/login?return_url=${pageContext.url}`
+      ingestPrefix + `/security/login?return_url=${pageContext.url}`
     );
     /* The more traditional way, redirect the user:
     throw redirect('/login')

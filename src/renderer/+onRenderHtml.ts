@@ -33,8 +33,6 @@ async function render(pageContext: PageContextServer) {
     environment
   )}</script>`;
 
-  globalThis.environment = environment;
-
   // This doesn't work in production
   // if (!isolateStyles || clientRouting) {
   //   await import("@blueprintjs/core/lib/css/blueprint.css");

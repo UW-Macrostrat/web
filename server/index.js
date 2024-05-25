@@ -30,6 +30,7 @@ const flavors = [
 
 // Synthesize the config from the environment at runtime
 const environment = synthesizeConfigFromEnvironment();
+globalThis.environment = environment;
 
 async function startServer() {
   const app = express();
