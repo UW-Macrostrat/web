@@ -14,7 +14,7 @@ RUN --mount=type=cache,target=/yarn-cache \
   && yarn install --immutable \
   && rsync -a .yarn/cache/ /yarn-cache
 
-RUN yarn run bundle
+RUN yarn run build
 
 EXPOSE 3000
 
