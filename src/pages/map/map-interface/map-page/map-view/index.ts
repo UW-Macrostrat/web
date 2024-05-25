@@ -11,7 +11,6 @@ import {
 import {
   MacrostratLineSymbolManager,
   MapSourcesLayer,
-  applyAgeModelStyles,
   buildMacrostratStyle,
 } from "@macrostrat/mapbox-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
@@ -31,6 +30,7 @@ import {
   MacrostratLayerManager,
 } from "./map";
 import { getBaseMapStyle } from "@macrostrat-web/map-utils";
+import { buildOverlayStyle, applyAgeModelStyles } from "../map-styles";
 
 const h = hyper.styled(styles);
 
@@ -64,13 +64,15 @@ export default function MainMapView(props) {
   const [baseStyle, setBaseStyle] = useState(null);
   const mapStyle = useMemo(() => {
     if (baseStyle == null) return null;
-    const overlayStyles = buildMacrostratStyle({
+    const macrostratStyle = buildMacrostratStyle({
       focusedMap: focusedMapSource,
       tileserverDomain: SETTINGS.burwellTileDomain,
     });
 
+    const overlayStyle = buildOverlayStyle();
+
     if (timeCursorAge != null) {
-      return applyAgeModelStyles(baseStyle, overlayStyles, {
+      return applyAgeModelStyles(baseStyle, macrostratStyle, {
         age: timeCursorAge,
         model: plateModelId ?? 1,
         baseStyle,
@@ -79,7 +81,7 @@ export default function MainMapView(props) {
         tileserverDomain: SETTINGS.burwellTileDomain,
       });
     }
-    return mergeStyles(baseStyle, overlayStyles);
+    return mergeStyles(baseStyle, macrostratStyle, overlayStyle);
   }, [baseStyle, timeCursorAge, plateModelId, isDarkMode, focusedMapSource]);
 
   useEffect(() => {

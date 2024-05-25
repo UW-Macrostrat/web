@@ -1,91 +1,119 @@
-import { apiV2Prefix } from "@macrostrat-web/settings";
+/** Add extra types we use in this style... */
+interface SourceExt extends mapboxgl.Source {
+  cluster?: boolean;
+  clusterRadius?: number;
+  generateId?: boolean;
+  data?: any;
+}
 
-export const overlayStyle = {
-  version: 8,
-  sources: {
-    // "pbdb": {
-    //     "type": "vector",
-    //     "tiles": [
-    //       `${SETTINGS.burwellTileDomain}/hexgrid/{z}/{x}/{y}.mvt`
-    //     ],
-    //     "tileSize": 512,
-    //     "maxzoom": 6,
-    // },
-    "pbdb-points": {
-      type: "geojson",
-      cluster: true,
-      clusterRadius: 50,
-      data: {
-        type: "FeatureCollection",
-        features: [],
-      },
-    },
-    "pbdb-clusters": {
-      type: "geojson",
-      generateId: true,
-      data: {
-        type: "FeatureCollection",
-        features: [],
-      },
-    },
-    info_marker: {
-      type: "geojson",
-      data: {
-        type: "FeatureCollection",
-        features: [
-          {
-            type: "Feature",
-            geometry: {
-              type: "Point",
-              coordinates: [0, 0],
-            },
-          },
-        ],
-      },
-    },
-    columns: {
-      type: "geojson",
-      generateId: true,
-      data: `${apiV2Prefix}/columns?all&format=geojson_bare`,
-    },
-    filteredColumns: {
-      type: "geojson",
-      generateId: true,
-      data: {
-        type: "FeatureCollection",
-        features: [],
-      },
-    },
-    elevationPoints: {
-      type: "geojson",
-      data: {
-        type: "FeatureCollection",
-        features: [],
-      },
-    },
-    elevationLine: {
-      type: "geojson",
-      data: {
-        type: "FeatureCollection",
-        features: [],
-      },
-    },
-    elevationMarker: {
-      type: "geojson",
-      data: {
-        type: "FeatureCollection",
-        features: [],
-      },
+export function buildOverlayStyle() {
+  return {
+    version: 8,
+    layers: buildOverlayLayers(),
+    sources: overlaySources,
+  };
+}
+
+const overlaySources: { [k: string]: SourceExt } = {
+  // "pbdb": {
+  //     "type": "vector",
+  //     "tiles": [
+  //       `${SETTINGS.burwellTileDomain}/hexgrid/{z}/{x}/{y}.mvt`
+  //     ],
+  //     "tileSize": 512,
+  //     "maxzoom": 6,
+  // },
+  "pbdb-points": {
+    type: "geojson",
+    cluster: true,
+    clusterRadius: 50,
+    data: {
+      type: "FeatureCollection",
+      features: [],
     },
   },
-  layers: [
+  "pbdb-clusters": {
+    type: "geojson",
+    generateId: true,
+    data: {
+      type: "FeatureCollection",
+      features: [],
+    },
+  },
+  columns: {
+    type: "geojson",
+    generateId: true,
+    data: {
+      type: "FeatureCollection",
+      features: [],
+    },
+  },
+  filteredColumns: {
+    type: "geojson",
+    generateId: true,
+    data: {
+      type: "FeatureCollection",
+      features: [],
+    },
+  },
+  crossSectionEndpoints: {
+    type: "geojson",
+    data: {
+      type: "FeatureCollection",
+      features: [],
+    },
+  },
+  crossSectionLine: {
+    type: "geojson",
+    data: {
+      type: "FeatureCollection",
+      features: [],
+    },
+  },
+  elevationMarker: {
+    type: "geojson",
+    data: {
+      type: "FeatureCollection",
+      features: [],
+    },
+  },
+};
+
+export function buildOverlayLayers(): mapboxgl.Layer[] {
+  // Get CSS colors from settings
+  const ruleColor = getComputedStyle(document.body).getPropertyValue(
+    "--panel-background-color"
+  );
+
+  const centerColor = getComputedStyle(document.body).getPropertyValue(
+    "--panel-rule-color"
+  );
+
+  const crossSectionPointPaint = {
+    "circle-radius": {
+      stops: [
+        [0, 3],
+        [12, 5],
+      ],
+    },
+    "circle-color": centerColor,
+    "circle-stroke-width": {
+      stops: [
+        [0, 2],
+        [12, 4],
+      ],
+    },
+    "circle-stroke-color": ruleColor,
+  };
+
+  return [
     {
       id: "column_fill",
       type: "fill",
       source: "columns",
       paint: {
         "fill-color": "#777777",
-        "fill-opacity": 0.2,
+        "fill-opacity": 0,
       },
       layout: {
         visibility: "none",
@@ -96,11 +124,13 @@ export const overlayStyle = {
       type: "line",
       source: "columns",
       paint: {
-        "line-color": "#777777",
+        "line-color": ruleColor,
+        "line-opacity": 0.5,
         "line-width": {
           stops: [
             [0, 0.2],
-            [10, 1],
+            [4, 0.8],
+            [10, 2],
           ],
         },
       },
@@ -138,53 +168,33 @@ export const overlayStyle = {
       },
     },
     {
-      id: "infoMarker",
-      type: "symbol",
-      source: "info_marker",
-      layout: {
-        "icon-size": 0.65,
-        "icon-image": "pin",
-        "icon-offset": [0, -28],
-        visibility: "none",
-        "icon-allow-overlap": true,
-      },
-    },
-    {
-      id: "elevationLine",
+      id: "crossSectionLine",
       type: "line",
-      source: "elevationLine",
+      source: "crossSectionLine",
       paint: {
-        "line-dasharray": [4, 2],
         "line-width": {
           stops: [
-            [0, 3],
-            [12, 5],
+            [0, 1],
+            [12, 3],
           ],
         },
-        "line-color": "#ffffff",
+        "line-color": ruleColor,
         "line-opacity": 1,
       },
     },
     {
-      id: "elevationPoint",
+      id: "crossSectionEndpoint",
       type: "circle",
-      source: "elevationPoints",
-      paint: {
-        "circle-radius": 6,
-        "circle-color": "#ffffff",
-        "circle-stroke-width": 1,
-        "circle-stroke-color": "#333333",
-      },
+      source: "crossSectionEndpoints",
+      paint: crossSectionPointPaint,
     },
     {
       id: "elevationMarker",
       type: "circle",
       source: "elevationMarker",
       paint: {
-        "circle-radius": 8,
+        ...crossSectionPointPaint,
         "circle-color": "#4bc0c0",
-        "circle-stroke-width": 2,
-        "circle-stroke-color": "#dcdcdc",
       },
     },
     // {
@@ -314,5 +324,5 @@ export const overlayStyle = {
         "circle-stroke-color": "#fff",
       },
     },
-  ],
-};
+  ];
+}

@@ -277,6 +277,7 @@ export function MacrostratLayerManager() {
         setVisibility(map, layer.id, mapLayers.has(MapLayer.FOSSILS));
       }
       if (layer.source === "columns") {
+        console.log("Column layer", layer);
         setVisibility(
           map,
           layer.id,
