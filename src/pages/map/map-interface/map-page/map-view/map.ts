@@ -5,7 +5,11 @@ import {
   useAppActions,
 } from "~/pages/map/map-interface/app-state";
 import { ColumnProperties } from "~/pages/map/map-interface/app-state/handlers/columns";
-import { useMapRef, useMapStatus } from "@macrostrat/mapbox-react";
+import {
+  useMapRef,
+  useMapStatus,
+  useMapStyleOperator,
+} from "@macrostrat/mapbox-react";
 import { useEffect, useRef, useCallback } from "react";
 import { useAppState } from "~/pages/map/map-interface/app-state";
 import { getExpressionForFilters } from "./filter-helpers";
@@ -138,7 +142,6 @@ function useMapClickHandler(pbdbPoints) {
       // If we are viewing fossils, prioritize clicks on those
       if (mapLayers.has(MapLayer.FOSSILS)) {
         const action = handleFossilLayerClick(event, map, pbdbPoints.current);
-        console.log(action);
         if (action != null) {
           if (action.type === "zoom-map") {
             map.zoomTo(map.getZoom() + action.dz, { center: event.lngLat });
@@ -218,6 +221,7 @@ export async function refreshPBDB(map, pointsRef, filters) {
 }
 
 export function MacrostratLayerManager() {
+  /** Manager for map layers */
   const mapRef = useMapRef();
   const { isStyleLoaded } = useMapStatus();
   const filters = useAppState((s) => s.core.filters);
@@ -226,8 +230,6 @@ export function MacrostratLayerManager() {
   const runAction = useAppActions();
   const map = mapRef.current;
 
-  // This selection tracking used to be used for PBDB but I think no longer is
-  const selectedFeatures = useRef({});
   const pbdbPoints = useRef({});
 
   useEffect(() => {
@@ -242,9 +244,8 @@ export function MacrostratLayerManager() {
     const map = mapRef.current;
     if (map == null || !isStyleLoaded) return;
 
-    const source = map.getSource("filteredColumns");
+    const source = map.getSource("filteredColumns") as mapboxgl.GeoJSONSource;
     if (filteredColumns != null) {
-      console.log(filteredColumns);
       source?.setData(filteredColumns);
     }
 
@@ -253,59 +254,7 @@ export function MacrostratLayerManager() {
     map.setFilter("burwell_stroke", expr);
   }, [filters, isStyleLoaded, mapRef.current]);
 
-  const styleLoadedCallback = useCallback(() => {
-    const map = mapRef.current;
-    if (map == null) return;
-    if (!map.isStyleLoaded()) return;
-    const style = map.getStyle();
-    for (const layer of style.layers) {
-      selectedFeatures.current[layer.id] = null;
-
-      if (!("source" in layer)) continue;
-
-      if (layer.source === "burwell" && layer["source-layer"] === "units") {
-        setVisibility(map, layer.id, mapLayers.has(MapLayer.BEDROCK));
-      }
-      if (layer.source === "burwell" && layer["source-layer"] === "lines") {
-        setVisibility(map, layer.id, mapLayers.has(MapLayer.LINES));
-      }
-      if (
-        layer.source === "pbdb" ||
-        layer.source === "pbdb-points" ||
-        layer.source === "pbdb-clusters"
-      ) {
-        setVisibility(map, layer.id, mapLayers.has(MapLayer.FOSSILS));
-      }
-      if (layer.source === "columns") {
-        console.log("Column layer", layer);
-        setVisibility(
-          map,
-          layer.id,
-          mapLayers.has(MapLayer.COLUMNS) && filters.length === 0
-        );
-      }
-
-      if (layer.source === "filteredColumns") {
-        setVisibility(
-          map,
-          layer.id,
-          mapLayers.has(MapLayer.COLUMNS) && filters.length !== 0
-        );
-      }
-    }
-
-    if (mapLayers.has(MapLayer.FOSSILS)) {
-      refreshPBDB(map, pbdbPoints, filters);
-    }
-  }, [mapLayers, filters]);
-
-  useEffect(() => {
-    styleLoadedCallback();
-    mapRef.current?.on("style.load", styleLoadedCallback);
-    return () => {
-      mapRef.current?.off("style.load", styleLoadedCallback);
-    };
-  }, [mapRef.current, styleLoadedCallback]);
+  useStyleReloader(pbdbPoints);
 
   // Map click handler
   const mapClickHandler = useMapClickHandler(pbdbPoints);
@@ -335,6 +284,58 @@ export function MacrostratLayerManager() {
   }, [mapRef.current, mapMovedHandler]);
 
   return null;
+}
+
+function useStyleReloader(pbdbPoints) {
+  // This selection tracking used to be used for PBDB but I think no longer is
+  const selectedFeatures = useRef({});
+  const filters = useAppState((s) => s.core.filters);
+  const mapLayers = useAppState((s) => s.core.mapLayers);
+
+  return useMapStyleOperator(
+    (map) => {
+      const style = map.getStyle();
+      for (const layer of style.layers) {
+        selectedFeatures.current[layer.id] = null;
+
+        if (!("source" in layer)) continue;
+
+        if (layer.source === "burwell" && layer["source-layer"] === "units") {
+          setVisibility(map, layer.id, mapLayers.has(MapLayer.BEDROCK));
+        }
+        if (layer.source === "burwell" && layer["source-layer"] === "lines") {
+          setVisibility(map, layer.id, mapLayers.has(MapLayer.LINES));
+        }
+        if (
+          layer.source === "pbdb" ||
+          layer.source === "pbdb-points" ||
+          layer.source === "pbdb-clusters"
+        ) {
+          setVisibility(map, layer.id, mapLayers.has(MapLayer.FOSSILS));
+        }
+        if (layer.source === "columns") {
+          setVisibility(
+            map,
+            layer.id,
+            mapLayers.has(MapLayer.COLUMNS) && filters.length === 0
+          );
+        }
+
+        if (layer.source === "filteredColumns") {
+          setVisibility(
+            map,
+            layer.id,
+            mapLayers.has(MapLayer.COLUMNS) && filters.length !== 0
+          );
+        }
+      }
+
+      if (mapLayers.has(MapLayer.FOSSILS)) {
+        refreshPBDB(map, pbdbPoints, filters);
+      }
+    },
+    [mapLayers, filters]
+  );
 }
 
 function setVisibility(map, layerID, visible) {

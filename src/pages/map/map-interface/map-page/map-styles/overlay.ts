@@ -112,8 +112,8 @@ export function buildOverlayLayers(): mapboxgl.Layer[] {
       type: "fill",
       source: "columns",
       paint: {
-        "fill-color": "#777777",
-        "fill-opacity": 0,
+        "fill-color": centerColor,
+        "fill-opacity": 0.3,
       },
       layout: {
         visibility: "none",
@@ -125,11 +125,11 @@ export function buildOverlayLayers(): mapboxgl.Layer[] {
       source: "columns",
       paint: {
         "line-color": ruleColor,
-        "line-opacity": 0.5,
+        "line-opacity": 0.75,
         "line-width": {
           stops: [
-            [0, 0.2],
-            [4, 0.8],
+            [0, 0.5],
+            [4, 1],
             [10, 2],
           ],
         },

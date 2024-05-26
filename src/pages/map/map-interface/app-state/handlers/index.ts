@@ -43,7 +43,6 @@ async function actionRunner(
       let coreState = s1.core;
 
       const activePage = currentPageForPathName(pathname);
-      console.log(pathname, "activePage", activePage);
 
       // Harvest as much information as possible from the hash string
       let [coreState1, filters] = getInitialStateFromHash(
