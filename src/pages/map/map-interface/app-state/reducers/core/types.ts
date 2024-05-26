@@ -41,7 +41,10 @@ type CLOSE_INFODRAWER = { type: "close-infodrawer" };
 
 type TOGGLE_FILTERS = { type: "toggle-filters" };
 type REMOVE_FILTER = { type: "remove-filter"; filter: any };
-type UPDATE_COLUMN_FILTERS = { type: "update-column-filters"; columns: any };
+type UPDATE_COLUMN_FILTERS = {
+  type: "update-column-filters";
+  columns: ColumnGeoJSONRecord[];
+};
 type CLEAR_FILTERS = { type: "clear-filters" };
 
 type START_MAP_QUERY = {
@@ -263,7 +266,7 @@ export interface CoreState extends MapState, AsyncRequestState {
   mapUse3D: boolean;
   filtersOpen: boolean;
   filters: FilterData[];
-  filteredColumns: object;
+  filteredColumns: ColumnGeoJSONRecord[] | null;
   showExperimentsPanel: boolean;
   allColumns: ColumnGeoJSONRecord[] | null;
   data: [];

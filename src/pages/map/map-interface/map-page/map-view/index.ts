@@ -5,14 +5,13 @@ import {
   PositionFocusState,
   getFocusState,
   useMapLabelVisibility,
-  useMapPosition,
   useMapRef,
   useMapStatus,
+  useMapStyleOperator,
 } from "@macrostrat/mapbox-react";
 import {
   MacrostratLineSymbolManager,
   MapSourcesLayer,
-  applyAgeModelStyles,
   buildMacrostratStyle,
 } from "@macrostrat/mapbox-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
@@ -32,6 +31,7 @@ import {
   MacrostratLayerManager,
 } from "./map";
 import { getBaseMapStyle } from "@macrostrat-web/map-utils";
+import { buildOverlayStyle, applyAgeModelStyles } from "../map-styles";
 
 const h = hyper.styled(styles);
 
@@ -65,22 +65,24 @@ export default function MainMapView(props) {
   const [baseStyle, setBaseStyle] = useState(null);
   const mapStyle = useMemo(() => {
     if (baseStyle == null) return null;
-    const overlayStyles = buildMacrostratStyle({
+    const macrostratStyle = buildMacrostratStyle({
       focusedMap: focusedMapSource,
       tileserverDomain: SETTINGS.burwellTileDomain,
     });
 
+    const overlayStyle = buildOverlayStyle();
+
     if (timeCursorAge != null) {
-      return applyAgeModelStyles(baseStyle, overlayStyles, {
+      return applyAgeModelStyles(baseStyle, macrostratStyle, {
         age: timeCursorAge,
         model: plateModelId ?? 1,
         baseStyle,
-        overlayStyles,
+        overlayStyles: overlayStyle,
         isDarkMode,
         tileserverDomain: SETTINGS.burwellTileDomain,
       });
     }
-    return mergeStyles(baseStyle, overlayStyles);
+    return mergeStyles(baseStyle, macrostratStyle, overlayStyle);
   }, [baseStyle, timeCursorAge, plateModelId, isDarkMode, focusedMapSource]);
 
   useEffect(() => {
@@ -133,6 +135,7 @@ export default function MainMapView(props) {
   return h(
     MapView,
     {
+      projection: { name: "globe" },
       ...props,
       infoMarkerPosition,
       onMapLoaded,
@@ -161,28 +164,19 @@ export default function MainMapView(props) {
 
 function ColumnDataManager() {
   /* Update columns map layer given columns provided by application. */
-  const mapRef = useMapRef();
-  const { isInitialized } = useMapStatus();
   const allColumns = useAppState((state) => state.core.allColumns);
-  useEffect(() => {
-    const map = mapRef.current;
-    const ncols = allColumns?.length ?? 0;
-    if (map == null || ncols == 0) return;
-    // Set source data for columns
-    map.once("style.load", () => {
-      const src = map.getSource("columns");
-      if (src == null) return;
-      src.setData({
+  useMapStyleOperator(
+    (map) => {
+      const ncols = allColumns?.length ?? 0;
+      if (ncols == 0) return;
+      const source = map.getSource("columns");
+      if (source == null) return;
+      source.setData({
         type: "FeatureCollection",
-        features: allColumns ?? [],
+        features: allColumns,
       });
-    });
-    const src = map.getSource("columns");
-    if (src == null) return;
-    src.setData({
-      type: "FeatureCollection",
-      features: allColumns ?? [],
-    });
-  }, [mapRef.current, allColumns, isInitialized]);
+    },
+    [allColumns]
+  );
   return null;
 }

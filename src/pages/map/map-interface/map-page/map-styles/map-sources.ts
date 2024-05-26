@@ -93,7 +93,6 @@ export function MapSourcesLayer() {
       mergeStyles(map, styles);
     } else {
       map.on("style.load", () => {
-        console.log("Merging styles");
         mergeStyles(map, styles);
       });
     }
