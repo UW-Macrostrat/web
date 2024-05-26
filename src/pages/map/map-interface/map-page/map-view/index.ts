@@ -76,7 +76,7 @@ export default function MainMapView(props) {
         age: timeCursorAge,
         model: plateModelId ?? 1,
         baseStyle,
-        overlayStyles,
+        overlayStyles: overlayStyle,
         isDarkMode,
         tileserverDomain: SETTINGS.burwellTileDomain,
       });
