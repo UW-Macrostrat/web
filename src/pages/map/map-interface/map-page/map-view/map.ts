@@ -75,7 +75,6 @@ function handleFossilLayerClick(
       });
 
     // Need to recolor on selection somehow
-    d;
     return {
       type: "get-pbdb",
       collection_nos: pointsInCluster,
