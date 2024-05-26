@@ -78,12 +78,7 @@ export const MapPage = ({
         className: "context-panel",
         menuPage: menuPage ?? navMenuPage,
       }),
-      detailPanel: h(Routes, [
-        h(Route, {
-          path: mapPagePrefix + "/loc/:lng/:lat/*",
-          element: h(InfoDrawerRoute),
-        }),
-      ]),
+      detailPanel: h(InfoDrawerHolder),
       detailPanelStyle: "floating",
       bottomPanel: h(ElevationChart, null),
       contextPanelOpen: contextPanelOpen || inputFocus,
@@ -113,14 +108,31 @@ function MapPageRoutes() {
   ]);
 }
 
-function InfoDrawerRoute() {
+function InfoDrawerHolder() {
+  // We could probably do this in the reducer...
+  const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
+  const detailPanelTrans = useTransition(infoDrawerOpen, 800);
+
+  return h([
+    // This is essentially a shim implementation of React Router
+    h(Routes, [
+      h(Route, {
+        path: mapPagePrefix + "/loc/:lng/:lat/*",
+        element: h(InfoDrawerLocationGrabber),
+      }),
+    ]),
+    h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
+      className: "detail-panel",
+    }),
+  ]);
+}
+
+function InfoDrawerLocationGrabber() {
   // We could probably do this in the reducer...
   const { lat, lng } = useParams();
-  const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
   const z = Math.round(
     useAppState((s) => s.core.mapPosition.target?.zoom) ?? 7
   );
-  const detailPanelTrans = useTransition(infoDrawerOpen, 800);
   const runAction = useAppActions();
 
   // Todo: this is a pretty janky way to do state management
@@ -139,10 +151,7 @@ function InfoDrawerRoute() {
       });
     }
   }, [lat, lng]);
-
-  return h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
-    className: "detail-panel",
-  });
+  return null;
 }
 
 export default MapPageRoutes;
