@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import hyper from "@macrostrat/hyper";
 import { Tag, Card, Button, Collapse, Switch } from "@blueprintjs/core";
 import {
-  useFilterState,
   useAppActions,
+  useAppState,
 } from "~/pages/map/map-interface/app-state";
 import { useAdmoinshments } from "./admonishments";
 import styles from "./filters.module.styl";
@@ -54,7 +54,7 @@ function Filter({ filter }) {
 }
 
 function Filters() {
-  const { filters } = useFilterState();
+  const { filters } = useAppState((state) => state.core.filters);
   const shouldFiltersBeOpen = filters.length > 0;
   return h("div.filter-container", [
     h.if(!shouldFiltersBeOpen)("div", [
@@ -94,7 +94,7 @@ function makeFilterString(filters) {
 
 function FilterPanel() {
   const [open, setOpen] = useState(false);
-  const { filters } = useFilterState();
+  const filters = useAppState((s) => s.core.filters);
   const runAction = useAppActions();
   const admonishments = useAdmoinshments();
 

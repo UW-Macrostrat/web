@@ -3,7 +3,6 @@ import { Navbar, Button, InputGroup, Spinner, Card } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import {
   useAppActions,
-  useSearchState,
   useAppState,
   useContextPanelOpen,
 } from "../../app-state";
@@ -84,7 +83,7 @@ function ResultList({ searchResults }) {
 }
 
 function SearchResults({ className }) {
-  const { searchResults } = useSearchState();
+  const searchResults = useAppState((s) => s.core.searchResults);
   className = classNames(className, "search-results-card");
 
   return h(Card, { className }, h(ResultList, { searchResults }));
