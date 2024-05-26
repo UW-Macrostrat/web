@@ -7,6 +7,7 @@ import {
   useMapLabelVisibility,
   useMapRef,
   useMapStatus,
+  useMapStyleOperator,
 } from "@macrostrat/mapbox-react";
 import {
   MacrostratLineSymbolManager,
@@ -163,28 +164,19 @@ export default function MainMapView(props) {
 
 function ColumnDataManager() {
   /* Update columns map layer given columns provided by application. */
-  const mapRef = useMapRef();
-  const { isInitialized } = useMapStatus();
   const allColumns = useAppState((state) => state.core.allColumns);
-  useEffect(() => {
-    const map = mapRef.current;
-    const ncols = allColumns?.length ?? 0;
-    if (map == null || ncols == 0) return;
-    // Set source data for columns
-    map.once("style.load", () => {
-      const src = map.getSource("columns");
-      if (src == null) return;
-      src.setData({
+  useMapStyleOperator(
+    (map) => {
+      const ncols = allColumns?.length ?? 0;
+      if (ncols == 0) return;
+      const source = map.getSource("columns");
+      if (source == null) return;
+      source.setData({
         type: "FeatureCollection",
-        features: allColumns ?? [],
+        features: allColumns,
       });
-    });
-    const src = map.getSource("columns");
-    if (src == null) return;
-    src.setData({
-      type: "FeatureCollection",
-      features: allColumns ?? [],
-    });
-  }, [mapRef.current, allColumns, isInitialized]);
+    },
+    [allColumns]
+  );
   return null;
 }

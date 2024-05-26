@@ -223,12 +223,10 @@ export async function refreshPBDB(map, pointsRef, filters) {
 export function MacrostratLayerManager() {
   /** Manager for map layers */
   const mapRef = useMapRef();
-  const { isStyleLoaded } = useMapStatus();
   const filters = useAppState((s) => s.core.filters);
   const mapLayers = useAppState((s) => s.core.mapLayers);
   const filteredColumns = useAppState((s) => s.core.filteredColumns);
   const runAction = useAppActions();
-  const map = mapRef.current;
 
   const pbdbPoints = useRef({});
 
@@ -239,20 +237,26 @@ export function MacrostratLayerManager() {
     runAction({ type: "map-layers-changed", mapLayers });
   }, [filters, mapLayers]);
 
-  // Filters
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map == null || !isStyleLoaded) return;
+  // Update filtered columns
+  useMapStyleOperator(
+    (map) => {
+      const source = map.getSource("filteredColumns") as mapboxgl.GeoJSONSource;
+      source?.setData({
+        type: "FeatureCollection",
+        features: filteredColumns ?? [],
+      });
+    },
+    [filteredColumns]
+  );
 
-    const source = map.getSource("filteredColumns") as mapboxgl.GeoJSONSource;
-    if (filteredColumns != null) {
-      source?.setData(filteredColumns);
-    }
-
-    const expr = getExpressionForFilters(filters);
-    map.setFilter("burwell_fill", expr);
-    map.setFilter("burwell_stroke", expr);
-  }, [filters, isStyleLoaded, mapRef.current]);
+  useMapStyleOperator(
+    (map) => {
+      const expr = getExpressionForFilters(filters);
+      map.setFilter("burwell_fill", expr);
+      map.setFilter("burwell_stroke", expr);
+    },
+    [filters]
+  );
 
   useStyleReloader(pbdbPoints);
 
