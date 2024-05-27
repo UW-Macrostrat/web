@@ -39,6 +39,8 @@ export const postgrestPrefix = getRuntimeConfig(
 
 export const macrostratInstance = getRuntimeConfig("MACROSTRAT_INSTANCE");
 
+export const elevationLayerURL = getRuntimeConfig("ELEVATION_LAYER_URL");
+
 /** Legacy settings object */
 export const SETTINGS = {
   darkMapURL,
