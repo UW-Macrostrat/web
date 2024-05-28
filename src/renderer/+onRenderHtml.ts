@@ -78,9 +78,9 @@ async function render(pageContext: PageContextServer) {
         <meta name="description" content="${desc}" />
         <title>${title}</title>
       </head>
-      <body>
+      <body onload="document.body.style.visibility='visible'">
         <!-- Workaround for Firefox flash of unstyled content -->
-        <script>0</script>
+        <script>document.body.style.visibility='hidden';</script>
         <div id="app-container">${dangerouslySkipEscape(pageHtml)}</div>
       </body>
     </html>`;

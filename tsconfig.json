@@ -11,5 +11,12 @@
       "@macrostrat-web/*": ["packages/*/src"],
       "~/*": ["src/*"]
     }
-  }
+  },
+  "include": [
+    "deps/cesium-viewer/src/**/*",
+    "deps/cesium-martini/src/**/*",
+    "deps/web-components/packages/*/src/**/*",
+    "packages/*/src/**/*",
+    "src/**/*"
+  ]
 }
