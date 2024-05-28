@@ -1,5 +1,5 @@
 {
-  "name": "@macrostrat-web/section-editor",
+  "name": "@macrostrat-web/section-editor-demo",
   "version": "1.0.0",
   "description": "A demonstration web tool for defining a stratigraphic section.",
   "main": "src/index.ts",

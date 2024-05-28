@@ -262,4 +262,4 @@ class App extends StatefulComponent {
   }
 }
 
-export { App };
+export default App;

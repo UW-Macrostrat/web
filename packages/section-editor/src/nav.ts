@@ -1,10 +1,10 @@
-import h from "~/hyper";
+import h from "./hyper";
 import { Navbar, Button, Menu, Icon, Intent } from "@blueprintjs/core";
 import T from "prop-types";
 
 import { Page } from "./enum";
 
-const TitleBar = function(props) {
+const TitleBar = function (props) {
   const { toggleSettings } = props;
   return h(Navbar, [
     h(Navbar.Group, [
@@ -15,19 +15,19 @@ const TitleBar = function(props) {
         {
           minimal: true,
           icon: "settings",
-          onClick: toggleSettings
+          onClick: toggleSettings,
         },
         "Settings"
-      )
-    ])
+      ),
+    ]),
   ]);
 };
 
 TitleBar.propTypes = {
-  toggleSettings: T.func
+  toggleSettings: T.func,
 };
 
-const GiantIconButton = function(props) {
+const GiantIconButton = function (props) {
   let { icon, iconSize, ...rest } = props;
   if (iconSize == null) {
     iconSize = 24;
@@ -37,27 +37,27 @@ const GiantIconButton = function(props) {
     {
       large: true,
       minimal: true,
-      ...rest
+      ...rest,
     },
     h(Icon, { icon, iconSize })
   );
 };
 
-const SideMenu = function(props) {
+const SideMenu = function (props) {
   const { currentPage, setPage } = props;
   return h("div.menu-column", [
     h("div.main-menu", [
       h(GiantIconButton, {
         onClick: setPage(Page.SETTINGS),
         active: currentPage === Page.SETTINGS,
-        icon: "settings"
+        icon: "settings",
       }),
       h(GiantIconButton, {
         onClick: setPage(Page.ABOUT),
         active: currentPage === Page.ABOUT,
-        icon: "info-sign"
-      })
-    ])
+        icon: "info-sign",
+      }),
+    ]),
   ]);
 };
 

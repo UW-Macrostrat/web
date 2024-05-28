@@ -18,17 +18,15 @@ import {
   GeneralizedSectionColumn,
   CoveredOverlay,
   FaciesColumnInner,
-  NotesColumn
+  NotesColumn,
 } from "@macrostrat/column-components";
-import h from "~/hyper";
+import h from "../hyper";
 import T from "prop-types";
-import defaultFacies from "./default-facies";
+import defaultFacies from "./default-facies.json";
 import { NoteEditor } from "./note-editor";
-import patterns from "url:../../../../geologic-patterns/*.png";
 import assetPaths from "url:../../sed-patterns/*.svg";
-import { animateScroll as scroll } from "react-scroll";
 
-const ColumnSVG = function(props) {
+const ColumnSVG = function (props) {
   const { width: innerWidth, margin, children, ...rest } = props;
   const { pixelHeight } = useContext(ColumnContext);
   const { left, right, top, bottom } = margin;
@@ -40,19 +38,19 @@ const ColumnSVG = function(props) {
       width,
       height,
       className: "section",
-      ...rest
+      ...rest,
     },
     h(
       "g.backdrop",
       {
-        transform: `translate(${left},${top})`
+        transform: `translate(${left},${top})`,
       },
       children
     )
   );
 };
 
-const MainColumn = function({ generalized, lithologyWidth: width, ...rest }) {
+const MainColumn = function ({ generalized, lithologyWidth: width, ...rest }) {
   if (generalized) {
     return h(GeneralizedSectionColumn, rest);
   }
@@ -71,11 +69,11 @@ class StratColumn extends Component {
         left: 30,
         top: 30,
         right: 10,
-        bottom: 30
+        bottom: 30,
       },
       showFacies: false,
       hideDefaultColumn: false,
-      columnImage: null
+      columnImage: null,
     };
     this.propTypes = {
       inEditMode: T.bool.isRequired,
@@ -89,7 +87,7 @@ class StratColumn extends Component {
       hideDetailColumn: T.bool,
       onUpdateNote: T.func.isRequired,
       onDeleteNote: T.func.isRequired,
-      columnImage: T.string
+      columnImage: T.string,
     };
   }
 
@@ -115,7 +113,7 @@ class StratColumn extends Component {
       removeInterval,
       editInterval,
       onUpdate,
-      columnImage
+      columnImage,
     } = this.props;
 
     const lithologyWidth = 40;
@@ -140,7 +138,7 @@ class StratColumn extends Component {
       {
         divisions: this.props.surfaces,
         range: [0, height],
-        pixelsPerMeter: 20
+        pixelsPerMeter: 20,
       },
       [
         h("div.column-container", [
@@ -148,13 +146,13 @@ class StratColumn extends Component {
             GrainsizeLayoutProvider,
             {
               width: columnWidth,
-              grainsizeScaleStart
+              grainsizeScaleStart,
             },
             [
               h.if(!generalized && columnImage)(ColumnImage, {
                 left: this.props.margin.left + lithologyWidth,
                 top: this.props.margin.top,
-                src: columnImage
+                src: columnImage,
               }),
               h.if(inEditMode)(DivisionEditOverlay, {
                 top: this.props.margin.top,
@@ -162,20 +160,20 @@ class StratColumn extends Component {
                 width: 200,
                 onClick: this.props.editInterval,
                 color: "dodgerblue",
-                editingInterval
+                editingInterval,
               }),
               h(
                 ColumnSVG,
                 {
                   width: containerWidth,
                   margin,
-                  style: { zIndex: 10, position: "relative" }
+                  style: { zIndex: 10, position: "relative" },
                 },
                 [
                   h(MainColumn, { generalized, lithologyWidth }, [
                     h.if(showFacies)(FaciesColumnInner),
                     h(CoveredOverlay),
-                    h(LithologyBoxes)
+                    h(LithologyBoxes),
                   ]),
                   h(SymbolColumn, { left: 90, symbols: [] }),
                   h(ColumnAxis),
@@ -188,12 +186,12 @@ class StratColumn extends Component {
                     onUpdateNote: this.props.onUpdateNote,
                     onDeleteNote: this.props.onDeleteNote,
                     noteEditor: NoteEditor,
-                    allowPositionEditing: true
-                  })
+                    allowPositionEditing: true,
+                  }),
                 ]
-              )
+              ),
             ]
-          )
+          ),
         ]),
         h.if(this.props.editingInterval)(IntervalEditor, {
           interval: editingInterval,
@@ -204,24 +202,22 @@ class StratColumn extends Component {
           addInterval,
           removeInterval,
           setEditingInterval: editInterval,
-          onUpdate
-        })
+          onUpdate,
+        }),
       ]
     );
   }
 }
 StratColumn.initClass();
 
-const resolvePattern = id => {
+const resolvePattern = (id) => {
   return patterns[id];
 };
 
-const __StratOuter = function(props) {
-  return h(
-    GeologicPatternProvider,
-    { resolvePattern },
-    h(FaciesProvider, { initialFacies: defaultFacies }, [h(StratColumn, props)])
-  );
+const __StratOuter = function (props) {
+  return h(FaciesProvider, { initialFacies: defaultFacies }, [
+    h(StratColumn, props),
+  ]);
 };
 
 export { __StratOuter as StratColumn };

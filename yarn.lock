@@ -5897,9 +5897,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@macrostrat-web/section-editor@workspace:*, @macrostrat-web/section-editor@workspace:packages/section-editor":
+"@macrostrat-web/section-editor-demo@workspace:*, @macrostrat-web/section-editor-demo@workspace:packages/section-editor":
   version: 0.0.0-use.local
-  resolution: "@macrostrat-web/section-editor@workspace:packages/section-editor"
+  resolution: "@macrostrat-web/section-editor-demo@workspace:packages/section-editor"
   dependencies:
     "@blueprintjs/core": "npm:^5.10.3"
     "@macrostrat/hyper": "npm:^2.0"
@@ -6574,7 +6574,7 @@ __metadata:
     "@macrostrat-web/lithology-hierarchy": "workspace:*"
     "@macrostrat-web/map-utils": "workspace:*"
     "@macrostrat-web/qgis-integration": "workspace:*"
-    "@macrostrat-web/section-editor": "workspace:*"
+    "@macrostrat-web/section-editor-demo": "workspace:*"
     "@macrostrat-web/security": "workspace:*"
     "@macrostrat-web/settings": "workspace:*"
     "@macrostrat-web/sift": "workspace:*"
