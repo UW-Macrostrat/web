@@ -1,0 +1,110 @@
+
+:root
+  --timescale-cursor-color: black
+
+*
+  font-family: "San Francisco", "Helvetica Neue", sans-serif
+
+html, body
+  margin: 0
+  width: 100vw
+  height 100vh
+  position relative
+
+.app
+  width 100vw
+  height 100vh
+  display flex
+  flex-direction column
+  overflow hidden
+
+.world-map
+  flex 1
+  cursor move
+  position relative
+  a.reset-map
+    color #888
+    position absolute
+    bottom 0.5em
+    left 0.5em
+    cursor pointer
+    font-size 12px
+
+plate_color=#888
+
+g.plates path
+  fill: alpha(plate_color,0.2)
+  stroke: alpha(plate_color, 0.8)
+  stroke-width: 1px
+  outline: none
+  &:hover
+    fill: alpha(plate_color,0.5)
+    stroke-width: 1px
+    outline: none
+
+land_color=#E9FCEA
+g.ne_110m_land
+  path
+    fill land_color
+    stroke darken(land_color, 10%)
+    stroke-width: 1px
+
+.credits
+  position fixed
+  top 10px
+  left 10px
+  width 6em
+  margin-bottom 0
+  font-style italic
+  color #888
+  text-align left
+  z-index 20
+  h1
+    font-size 1.2em
+  p
+    margin 0.2em 0 0.5em
+    font-size 12px
+  a
+    color inherit
+    text-decoration: underline
+
+:global(.drag-overlay) rect
+  fill transparent
+
+:global(.graticule)
+  fill none
+  stroke #aaa
+  stroke-width 1px
+  stroke-dasharray 2,2
+
+/*
+The code below styles the timescale correctly.
+Eventually this will all be integrated as better options to
+the timescale component itself.
+*/
+.timescale.horizontal
+  cursor: pointer
+  position relative
+  margin 0 auto
+  &>.interval
+    border 1px solid var(--timescale-cursor-color)
+  margin-bottom 10px
+  flex-direction: column-reverse !important
+
+.interval
+  flex-direction: column-reverse !important;
+
+.interval-label
+  color #222
+  font-weight 500
+
+g.vx-group.vx-axis
+  transform translate(20px,20px)
+
+.timescale .cursor-text
+  font-weight bold
+  font-size 14px
+  padding 0 4px
+
+path.pbdb-collection
+  fill: rgb(129, 79, 164)

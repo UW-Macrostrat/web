@@ -1,0 +1,8 @@
+{
+  "/stories": {
+    "target": "http://localhost:6006/",
+    "pathRewrite": {
+      "^/stories": ""
+    }
+  }
+}

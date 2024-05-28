@@ -1,0 +1,72 @@
+//@require '~react-select/dist/react-select.css'
+.interval-editor
+  .panel-header
+    .height-range
+      font-weight: 400
+      color #444
+      display inline-block
+      padding-left 1em
+
+.facies-picker-row
+  display flex
+  flex-direction row
+  align-items: center
+  span
+    display block
+  .facies-picker-name
+    flex-grow 1
+    display block
+    text-align left
+    font-style italic
+    color #444
+  .facies-color-swatch, .lithology-swatch
+    margin-right 0.5em
+    margin-left -0.5em
+.facies-picker-name, .lithology-swatch
+  border-radius 3px
+.picker-label
+  font-style: italic
+
+margin=0.5em
+
+.editor-dialog-title
+  margin-right: -margin
+  display flex
+  align-items: baseline
+  code
+    font-family: "Fira Code", monospace
+    color: #aaa
+  *
+    margin-right: margin
+  .title-center
+    flex-grow 1
+  .height-range
+    font-weight 400
+
+.lithology-swatch
+  height 2em
+  width 2em
+  background-size: 6em
+  image-rendering: crisp-edges
+  border 1px solid black
+
+.lithology-symbol-picker
+  display: flex
+  flex-direction: row
+  align-items: center
+  *
+    margin-right margin
+  margin 0 4px
+
+// Note editor
+.note-editor
+  z-index 100
+  pointer-events all
+  :global(.bp5-input)
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif
+    font-style: italic
+    padding: 5px
+    margin-bottom: 0.5em
+  .toolbar
+    display flex
+    justify-content space-between
