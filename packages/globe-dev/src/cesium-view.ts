@@ -10,6 +10,7 @@ import CesiumViewer, {
   SatelliteLayer,
 } from "@macrostrat/cesium-viewer";
 import { MapboxImageryProvider } from "cesium";
+import { elevationLayerURL } from "@macrostrat-web/settings";
 
 // export function BaseLayer({ enabled = true, style, accessToken, ...rest }) {
 //   const provider = useRef(
@@ -43,6 +44,7 @@ function CesiumView({ style, accessToken, ...rest }) {
       highResolution: true,
       skipZoomLevels: (z) => z % 3 != 0,
       credit: "Mapbox",
+      urlTemplate: elevationLayerURL,
     })
   );
 
