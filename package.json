@@ -55,6 +55,7 @@
     "@macrostrat-web/lithology-hierarchy": "workspace:*",
     "@macrostrat-web/map-utils": "workspace:*",
     "@macrostrat-web/qgis-integration": "workspace:*",
+    "@macrostrat-web/section-editor": "workspace:*",
     "@macrostrat-web/security": "workspace:*",
     "@macrostrat-web/settings": "workspace:*",
     "@macrostrat-web/sift": "workspace:*",

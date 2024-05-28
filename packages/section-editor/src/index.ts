@@ -5,26 +5,21 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-import h from "~/hyper";
+import h from "./hyper";
 import { StatefulComponent } from "@macrostrat/ui-components";
 
 import { StratColumn } from "./column";
 import { SettingsPanel } from "./settings";
 import { TitleBar, SideMenu } from "./nav";
-import T from "prop-types";
 import { Page } from "./enum";
 import { Panel } from "./ui";
 
-import defaultColumnData from "~/example-data/Naukluft-Section-J.json";
-import testImage from "url:~/example-data/Naukluft-Section-J.png";
+import defaultColumnData from "../example-data/Naukluft-Section-J.json";
+import testImage from "../example-data/Naukluft-Section-J.png";
 
-const createID = () =>
-  "_" +
-  Math.random()
-    .toString(36)
-    .substr(2, 9);
+const createID = () => "_" + Math.random().toString(36).substr(2, 9);
 
-const AboutPanel = props =>
+const AboutPanel = (props) =>
   h(Panel, { title: "About", ...props }, [h("div", "This is an app")]);
 
 class App extends StatefulComponent {
@@ -53,7 +48,7 @@ class App extends StatefulComponent {
       generalized: false,
       editingInterval: null,
       clickedHeight: null,
-      currentPage: Page.MAIN
+      currentPage: Page.MAIN,
     };
   }
 
@@ -65,7 +60,7 @@ class App extends StatefulComponent {
       editingNote,
       clickedHeight,
       columnData,
-      currentPage
+      currentPage,
     } = this.state;
     const { surfaces, notes, height } = columnData;
 
@@ -91,24 +86,24 @@ class App extends StatefulComponent {
           hideDetailColumn: currentPage !== Page.MAIN,
           columnImage: this.state.columnImage,
           onUpdateNote: this.onUpdateNote,
-          onDeleteNote: this.onDeleteNote
+          onDeleteNote: this.onDeleteNote,
         }),
         h.if(currentPage === Page.SETTINGS)(SettingsPanel, {
           inEditMode,
           generalized,
           onClose: this.setPage(Page.SETTINGS),
           resetDemoData: this.isChanged() ? this.resetDemoData : null,
-          updateState: this.updateState
+          updateState: this.updateState,
         }),
         h.if(currentPage === Page.ABOUT)(AboutPanel, {
-          onClose: this.setPage(Page.ABOUT)
-        })
-      ])
+          onClose: this.setPage(Page.ABOUT),
+        }),
+      ]),
     ]);
   }
 
   prepareSurface(totalHeight) {
-    return function(surface, i, allSurfaces) {
+    return function (surface, i, allSurfaces) {
       if (surface.id == null) {
         surface.id = createID();
       }
@@ -127,7 +122,9 @@ class App extends StatefulComponent {
     const v = columnData.surfaces.map(this.prepareSurface(columnData.height));
     columnData.surfaces = v;
 
-    columnData.notes.forEach(d => (d.id != null ? d.id : (d.id = createID())));
+    columnData.notes.forEach((d) =>
+      d.id != null ? d.id : (d.id = createID())
+    );
 
     return columnData;
   }
@@ -153,13 +150,13 @@ class App extends StatefulComponent {
     return this.updateState({
       currentPage: { $set: Page.MAIN },
       editingInterval: { $set: division },
-      clickedHeight: { $set: height }
+      clickedHeight: { $set: height },
     });
   }
 
   surfaceIndex(id) {
     const s = this.state.columnData.surfaces;
-    return s.findIndex(d => d.id === id);
+    return s.findIndex((d) => d.id === id);
   }
 
   updateInterval(interval, newItems) {
@@ -180,7 +177,7 @@ class App extends StatefulComponent {
     console.log(ix, spec);
     return this.updateState({
       columnData: { surfaces: { [ix]: spec } },
-      editingInterval: spec
+      editingInterval: spec,
     });
   }
 
@@ -232,7 +229,7 @@ class App extends StatefulComponent {
   }
 
   getNoteIndex(note) {
-    return this.state.columnData.notes.findIndex(d => d.id === note.id);
+    return this.state.columnData.notes.findIndex((d) => d.id === note.id);
   }
 
   onDeleteNote(note) {
@@ -260,7 +257,7 @@ class App extends StatefulComponent {
     return this.updateState({
       columnData: { $set: this.defaultData },
       columnImage: { $set: testImage },
-      editingInterval: { $set: null }
+      editingInterval: { $set: null },
     });
   }
 }
