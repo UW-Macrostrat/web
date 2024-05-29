@@ -15,7 +15,7 @@ function useTimeState(initialValue) {
   const _init = isNaN(val) ? initialValue : val;
 
   const [time, _setTime] = useState(_init);
-  const setTime = t => {
+  const setTime = (t) => {
     _setTime(t);
     setQueryString({ time: t });
   };
@@ -49,17 +49,18 @@ function IntervalName() {
   const int = useSelectedInterval();
   return h("div.interval-info", [
     h("h4.interval-name", int.nam),
-    h("p.interval-age", `${int.eag}–${int.lag} Ma`)
+    h("p.interval-age", `${int.eag}–${int.lag} Ma`),
   ]);
 }
-function App() {
+
+export function Page() {
   /** The core app component */
   const model = "Wright2013";
 
   const [time, setTime] = useTimeRange([542, 0], 300);
   const [size, setSize] = useState({
     width: 1100,
-    height: 800
+    height: 800,
   });
 
   return h(
@@ -68,7 +69,7 @@ function App() {
       onResize(entries) {
         const { width, height } = entries[0].contentRect;
         return setSize({ width, height });
-      }
+      },
     },
     [
       h(IntervalProvider, { time }, [
@@ -89,23 +90,19 @@ function App() {
                   orientation: "left",
                   tickLength: 4,
                   hideAxisLine: true,
-                  labelOffset: 10
+                  labelOffset: 10,
                 },
                 onClick(event, age) {
                   setTime(Math.round(age));
-                }
-              })
-            ])
+                },
+              }),
+            ]),
           ]),
           h(RotationsProvider, { model, time, debounce: 1000 }, [
-            h(Map, { width: size.width - 200, height: size.height })
-          ])
-        ])
-      ])
+            h(Map, { width: size.width - 200, height: size.height }),
+          ]),
+        ]),
+      ]),
     ]
   );
 }
-
-App.isReactComponent = true;
-
-export default App;

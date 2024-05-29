@@ -65,6 +65,7 @@
     "@macrostrat/color-utils": "workspace:*",
     "@macrostrat/column-components": "workspace:*",
     "@macrostrat/column-views": "workspace:*",
+    "@macrostrat/corelle": "^2.0.0",
     "@macrostrat/data-sheet2": "workspace:*",
     "@macrostrat/feedback-components": "workspace:*",
     "@macrostrat/hyper": "^2.2.1",
