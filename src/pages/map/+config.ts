@@ -1,7 +1,4 @@
-import MapInterface from "./map-interface";
-
 export default {
-  Page: MapInterface,
   route: "/map/*",
   meta: {
     Page: {
