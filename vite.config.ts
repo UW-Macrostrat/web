@@ -19,6 +19,7 @@ const aliasedModules = [
   "mapbox-react",
   "mapbox-styles",
   "cesium-viewer",
+  "map-components",
 ];
 
 const gitEnv = revisionInfo(pkg, "https://github.com/UW-Macrostrat/web");

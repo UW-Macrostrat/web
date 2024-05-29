@@ -8,11 +8,11 @@ import styles from "./main.module.styl";
 
 const h = hyperStyled(styles);
 
-const Map = props => {
+const Map = (props) => {
   /** Map that implements callback to reset internal map state */
   const { width, height } = props;
   const projection = geoNaturalEarth1().precision(0.5);
-  const mapRef = useRef<Globe>();
+  const mapRef = useRef<typeof Globe>();
 
   const resetMap = () => {
     // We have to totally recreate the projection for it to be immutable
@@ -28,8 +28,7 @@ const Map = props => {
         projection,
         width,
         height,
-        keepNorthUp: false,
-        scale: Math.min(width / 5.5, height / 3) - 10
+        scale: Math.min(width / 5.5, height / 3) - 10,
       },
       [
         h(PlateFeatureLayer, {
@@ -37,13 +36,13 @@ const Map = props => {
           useCanvas: false,
           style: {
             fill: "#E9FCEA",
-            stroke: "#9dc99f"
-          }
+            stroke: "#9dc99f",
+          },
         }),
-        h(PBDBCollectionLayer)
+        h(PBDBCollectionLayer),
       ]
     ),
-    h("a.reset-map", { onClick: resetMap }, "Reset projection")
+    h("a.reset-map", { onClick: resetMap }, "Reset projection"),
   ]);
 };
 

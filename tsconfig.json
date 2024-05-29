@@ -8,6 +8,7 @@
       "@macrostrat/cesium-viewer": ["deps/cesium-viewer/src"],
       "@macrostrat/cesium-martini": ["deps/cesium-martini/src"],
       "@macrostrat/*": ["deps/web-components/packages/*/src"],
+      "@macrostrat/corelle": ["node_modules/@macrostrat/corelle/src"],
       "@macrostrat-web/*": ["packages/*/src"],
       "~/*": ["src/*"]
     }

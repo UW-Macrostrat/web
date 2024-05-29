@@ -1,11 +1,13 @@
-import h from "@macrostrat/hyper";
+import hyper from "@macrostrat/hyper";
+import styles from "./main.module.styl";
 import { useState, useEffect } from "react";
 import { ResizeSensor } from "@blueprintjs/core";
 import { RotationsProvider } from "@macrostrat/corelle";
-import { Timescale } from "@macrostrat/timescale";
+import { Timescale, TimescaleOrientation } from "@macrostrat/timescale";
 // import "@macrostrat/timescale/dist/timescale.css";
 import { Map } from "./map";
 import { getQueryString, setQueryString } from "@macrostrat/ui-components";
+const h = hyper.styled(styles);
 
 function useTimeState(initialValue) {
   /** Time state hook that also manages query URL */
@@ -14,7 +16,7 @@ function useTimeState(initialValue) {
   const _init = isNaN(val) ? initialValue : val;
 
   const [time, _setTime] = useState(_init);
-  const setTime = t => {
+  const setTime = (t) => {
     _setTime(t);
     setQueryString({ time: t });
   };
@@ -44,14 +46,14 @@ function useTimeRange(range: [number, number], initialValue: number) {
   return [time, setTime];
 }
 
-function App() {
+export function Page() {
   /** The core app component */
   const model = "Wright2013";
 
   const [time, setTime] = useTimeRange([542, 0], 300);
   const [size, setSize] = useState({
     width: 1100,
-    height: 800
+    height: 800,
   });
 
   return h(
@@ -60,37 +62,31 @@ function App() {
       onResize(entries) {
         const { width, height } = entries[0].contentRect;
         return setSize({ width, height });
-      }
+      },
     },
     [
       h("div.app", [
         h(RotationsProvider, { model, time, debounce: 1000 }, [
-          h(Map, { width: size.width, height: size.height - 100 })
+          h(Map, { width: size.width, height: size.height - 100 }),
         ]),
         // Many of these timescale options need to be simplified
         h(Timescale, {
           ageRange: [542, 0],
-          orientation: "horizontal",
+          orientation: TimescaleOrientation.HORIZONTAL,
           length: size.width - 20,
           absoluteAgeScale: true,
           rootInterval: 751,
           levels: [2, 3],
           cursorPosition: time,
           axisProps: {
-            orientation: "top",
-            tickLength: 4,
-            hideAxisLine: true,
-            labelOffset: 10
+            width: size.width,
+            margin: 20,
           },
           onClick(event, age) {
             setTime(Math.round(age));
-          }
-        })
-      ])
+          },
+        }),
+      ]),
     ]
   );
 }
-
-App.isReactComponent = true;
-
-export default App;
