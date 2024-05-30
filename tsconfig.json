@@ -3,6 +3,7 @@
     "baseUrl": "./",
     // Allow importing of JSON and default imports from CommonJS modules
     "esModuleInterop": true,
+    "jsx": "react",
     "paths": {
       // Workspace code
       "@macrostrat/cesium-viewer": ["deps/cesium-viewer/src"],
