@@ -13,7 +13,8 @@
     "format": "prettier --write src packages",
     "server:prod": "NODE_NO_WARNINGS=1 NODE_ENV=production yarn run server",
     "dev:storybook": "yarn workspace @macrostrat/storybook run dev",
-    "start": "yarn run build && yarn run server"
+    "start": "yarn run build && yarn run server",
+    "test": "vitest"
   },
   "workspaces": [
     "deps/web-components/packages/*",
@@ -35,6 +36,7 @@
     "@macrostrat/revision-info-webpack": "^1.0.0",
     "@macrostrat/storybook": "workspace:*",
     "@mdx-js/rollup": "^2.3.0",
+    "@types/esprima": "^4",
     "@typescript-eslint/eslint-plugin": "^6.3.0",
     "@typescript-eslint/parser": "^6.3.0",
     "@yarnpkg/sdks": "^3.1.0",
@@ -42,7 +44,7 @@
     "sass": "^1.49.0",
     "stylus": "^0.55.0",
     "typescript": "^5.1.6",
-    "vite-plugin-rewrite-all": "^1.0.1"
+    "vitest": "^1.6.0"
   },
   "dependencies": {
     "@blueprintjs/core": "^5.10.2",
@@ -107,6 +109,7 @@
     "d3-selection": "^1.0.0",
     "d3-shape": "^3.2.0",
     "esbuild": "^0.20.0",
+    "esprima": "^4.0.1",
     "express": "^4.18.2",
     "hex-to-css-filter": "^5.4.0",
     "history": "^5.3.0",
