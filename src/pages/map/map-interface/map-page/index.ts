@@ -16,7 +16,6 @@ import {
   useContextPanelOpen,
 } from "../app-state";
 import Searchbar from "../components/navbar";
-import styles from "./main.module.styl";
 import MapContainer from "./map-view";
 import { MenuPage } from "./menu";
 import { info } from "console";
@@ -25,7 +24,7 @@ const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));
 const Menu = loadable(() => import("./menu"));
 
-const h = hyper.styled(styles);
+import h from "./main.module.styl";
 
 function MapView(props) {
   return h(
