@@ -2,162 +2,164 @@ import { PageHeader } from "~/components";
 import { LinkCard } from "~/components/cards";
 import "./main.styl";
 
-<div id="snapContent" class="snap-content scrollable">
-  <div class="container-fluid">
-    [//]: # "Nav Bar"
-    <div class="nav">
-      <ul>
-        <li><a href="#about">About</a></li>
-        <li><a href="#apps">Apps</a></li>
-        <li><a href="#api">API</a></li>
-        <li><a href="#people">People</a></li>
-        <li><a href="#donate">Donate</a></li>
-        <li><a href="#publications">Publications</a></li>
-        <li><img id="logo-jpg"></img></li>
-      </ul>
-    </div>
+[//]: # "Nav Bar"
+<div class="nav">
+  <ul>
+    <li><a href="#about">About</a></li>
+    <li><a href="#apps">Apps</a></li>
+    <li><a href="#api">API</a></li>
+    <li><a href="#people">People</a></li>
+    <li><a href="#donate">Donate</a></li>
+    <li><a href="#publications">Publications</a></li>
+    <li><img id="logo-jpg"></img></li>
+  </ul>
+</div>
 
-    [//]: # "Start Page"
-    <div class="parent">
-      <div class="left">
-        <h1 class="big">Macrostrat</h1>
-        <p class="big-text">A platform for geological data exploration, integration, and analysis</p>
-        <ul class="buttons1">
-          <li><a type="button" class="btn btn12" href="/sift/#/">Search</a></li>
-          <li><a type="button" class="btn btn12" href="/map/#3/40.78/-94.13">Geologic Map</a></li>
-          <li><div type="button" class="btn btn12 rockd" onclick="window.location='https://rockd.org'">
-            <div class="rockd-button-container">
-              <img id="rockd-png"></img>
-              <a href="https://rockd.org" target="_blank">Go mobile</a>
-            </div>
-          </div></li>
-        </ul>
-      </div>
-      
-      <div class="right">
-        <ul class="stats-row">
-          <li>
-            <span class="top-stat" id="n_columns">1,400</span>
-            <span class="top-stat-label">Regional Rock Columns</span>
-          </li>
-          <li>
-            <span class="top-stat" id="n_units">33,903</span>
-            <span class="top-stat-label">Rock Units</span>
-          </li>
-          <li>
-            <span class="top-stat" id="n_polys">2,500,000</span>
-            <span class="top-stat-label">Geologic Map Polygons</span>
-          </li>
-          <li>
-            <span class="top-stat" id="n_names">51,212</span>
-            <span class="top-stat-label nohighlight"><a href="Macrostrat_strat_names.html" target="_blank">Stratigraphic Names</a></span>
-          </li>
-        </ul>
-      </div>
-    </div>
-
-    [//]: # "Locations"
-    <div class="country_container north-america">
-      <div class="country">
-        <h1>North America</h1>\
-        <div class="caption">7,239 packages. 24,141 units. 48,696 collections.</div>
-      </div>
-      <div class="country caribbean">
-        <h1>Caribbean</h1>\
-        <div class="caption">243 packages. 798 units. 897 collections.</div>
-      </div>
-      <div class="country new-zealand">
-        <h1>New Zealand</h1>\
-        <div class="caption">828 packages. 2,168 units. 328 collections.</div>
-      </div>
-      <div class="country deep-sea">
-        <h1>Deep Sea</h1>\
-        <div class="caption">388 packages. 7,124 units. 0 collections.</div>
-      </div>
-    </div>
-
-    [//]: # "Geological Maps"
-    <h1 class="big">Geologic Maps</h1>
-    <div class="map-info">
-      With over 225 maps from data providers around the world across every scale, Macrostrat is the world's largest homogenized geologic map database. Our data processing pipeline links geologic map polygons to Macrostrat column polygons, external stratigraphic name lexicons, and geochronological intervals, enabling the enhancement of the original map data and allowing for direct links into <a href="https://xdd.wisc.edu" target="_blank">xDD</a> (formly GeoDeepDive).
-      \
-      \
-      Are you affiliated with a state or national geologic survey? <a href="mailto:contact@macrostrat.org?Subject=Geologic%20Map%20Collaboration">Get in touch</a> with us - we'd love to collaborate and help publicize your maps!
-      \
-      \
-      Get started by <a href="/map">exploring the map</a> or <a href="/map/sources">taking a look at</a> which maps are currently a part of Macrostrat.
-    </div>
-         
-    [//]: # "About"
-    <div class="row slide" id="about">
-      <div class="col-xs-12 slide-container">
-        <div class="slide-content slide-content-padded">
-          <div class="row">
-            <div class="col-xs-12">
-              <div class="page-title-holder about-title">
-                <h1 class="big">About</h1>
-              </div>
-            </div>
-          </div>
-          <div class="row about-row">
-            <div class="col-sm-3 about-body-subtitle">
-              Summary
-            </div>
-            <div class="col-sm-9 about-body page-info">
-              Macrostrat is a platform for the aggregation and distribution of geological data relevant to the spatial and temporal distribution of sedimentary, igneous, and metamorphic rocks as well as data extracted from them. It is linked to the <a href="https://xdd.wisc.edu" target="_blank">xDD</a> (formly GeoDeepDive) digital library and machine reading system, and it aims to become a community resource for the addition, editing, and distribution of new stratigraphic, lithological, environmental, and economic data. Interactive applications built upon Macrostrat are designed for educational and research purposes.
-            </div>
-          </div>
-
-          <div class="row about-row">
-            <div class="col-sm-3 about-body-subtitle">
-              License
-            </div>
-            <div class="col-sm-9 about-body page-info">
-              All data are provided under a Creative Commons Attribution 4.0 International license (<a href="http://creativecommons.org/licenses/by/4.0/" target="_blank">CC-BY-4.0</a>).
-            </div>
-          </div>
-
-          <div class="row about-row">
-            <div class="col-sm-3 about-body-subtitle">
-              Citation
-            </div>
-            <div class="col-sm-9 about-body page-info">
-              <b>In presentations:</b> Acknowledge Macrostrat by name. You may also include any of the Macrostrat logos accessible on this webpage.
-              \
-              \
-              <b>In publications:</b> Acknowledge Macrostrat as the source of any information or data. In publications, you may cite our most recent infrastructure paper, <a href="https://doi.org/10.1029/2018GC007467" target="_blank">Peters et al. (2018)</a>. In addition, you should also include citations to the original references associated with the data set that was used. These references are accessible from the API. If you would like your paper listed in the official publications, please contact us and we will provide a citation and link.
-            </div>
-          </div>
-
-          <div class="row about-row">
-            <div class="col-sm-3 about-body-subtitle">
-              Collaboration
-            </div>
-            <div class="col-sm-9 about-body page-info">
-              Our small team has worked hard to compile, format, and make data available via Macrostrat. We strongly encourage and welcome active collaborations, both scientific and geoinformatic. All data are provided freely on under a <a href="http://creativecommons.org/licenses/by/4.0/" target="_blank">CC-BY-4.0</a> license.
-            </div>
-          </div>
-
-          <div class="row about-row">
-            <div class="col-sm-3 about-body-subtitle">
-              Funding
-            </div>
-            <div class="col-sm-9 about-body page-info">
-              Major Macrostrat data infrastructure development was supported by the US National Science Foundation (EAR-1150082, ICER-1440312), with ongoing support for data acquisition supported by NSF EAR-1948843 and ICER-1928323. Continuous and ongoing support has also been provided by the UW-Madison <a href="http://geoscience.wisc.edu/geoscience/">Department of Geoscience</a>. If you use Macrostrat and like what we do, please consider helping out with a <a href="#donate">donation</a>. Every contribute helps us to maintain infrastructure and keep improving.
-            </div>
-          </div>
+[//]: # "Start Page"
+<div class="parent">
+  <div class="left">
+    <h1 class="big">Macrostrat</h1>
+    <p class="big-text">A platform for geological data exploration, integration, and analysis</p>
+    <ul class="buttons1">
+      <li><a type="button" class="btn btn12" href="/sift/#/">Search</a></li>
+      <li><a type="button" class="btn btn12" href="/map/#3/40.78/-94.13">Geologic Map</a></li>
+      <li><div type="button" class="btn btn12 rockd" onclick="window.location='https://rockd.org'">
+        <div class="rockd-button-container">
+          <img id="rockd-png"></img>
+          <a href="https://rockd.org" target="_blank">Go mobile</a>
         </div>
-      </div>
-    </div>
-
+      </div></li>
+    </ul>
+  </div>
+  
+  <div class="right">
+    <ul class="stats-row">
+      <li>
+        <span class="top-stat" id="n_columns">1,400</span>
+        <span class="top-stat-label">Regional Rock Columns</span>
+      </li>
+      <li>
+        <span class="top-stat" id="n_units">33,903</span>
+        <span class="top-stat-label">Rock Units</span>
+      </li>
+      <li>
+        <span class="top-stat" id="n_polys">2,500,000</span>
+        <span class="top-stat-label">Geologic Map Polygons</span>
+      </li>
+      <li>
+        <span class="top-stat" id="n_names">51,212</span>
+        <span class="top-stat-label nohighlight"><a href="Macrostrat_strat_names.html" target="_blank">Stratigraphic Names</a></span>
+      </li>
+    </ul>
   </div>
 </div>
 
+[//]: # "Locations"
+<div class="country_container">
+  <div class="country north-america">
+    <h1>North America</h1>\
+    <div class="caption">7,239 packages. 24,141 units. 48,696 collections.</div>
+  </div>
+  <div class="country caribbean">
+    <h1>Caribbean</h1>\
+    <div class="caption">243 packages. 798 units. 897 collections.</div>
+  </div>
+  <div class="country new-zealand">
+    <h1>New Zealand</h1>\
+    <div class="caption">828 packages. 2,168 units. 328 collections.</div>
+  </div>
+  <div class="country deep-sea">
+    <h1>Deep Sea</h1>\
+    <div class="caption">388 packages. 7,124 units. 0 collections.</div>
+  </div>
+</div>
+
+[//]: # "Geological Maps"
+<div class="geologic-maps">
+  <h1 class="title map-title">Geologic Maps</h1>
+  <div class="map-info">
+    With over 225 maps from data providers around the world across every scale, Macrostrat is the world's largest homogenized geologic map database. Our data processing pipeline links geologic map polygons to Macrostrat column polygons, external stratigraphic name lexicons, and geochronological intervals, enabling the enhancement of the original map data and allowing for direct links into <a href="https://xdd.wisc.edu" target="_blank">xDD</a> (formly GeoDeepDive).
+    \
+    \
+    Are you affiliated with a state or national geologic survey? <a href="mailto:contact@macrostrat.org?Subject=Geologic%20Map%20Collaboration">Get in touch</a> with us - we'd love to collaborate and help publicize your maps!
+    \
+    \
+    Get started by <a href="/map">exploring the map</a> or <a href="/map/sources">taking a look at</a> which maps are currently a part of Macrostrat.
+  </div>
+</div>
+
+<div class="rock-border"></div>
+      
+[//]: # "About"
+<div class="row slide" id="about">
+  <div class="col-xs-12 slide-container">
+    <div class="slide-content slide-content-padded">
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="page-title-holder about-title">
+            <h1 class="title about-title">About</h1>
+          </div>
+        </div>
+      </div>
+      <div class="row about-row">
+        <div class="col-sm-3 about-body-subtitle">
+          Summary
+        </div>
+        <div class="col-sm-9 about-body page-info">
+          Macrostrat is a platform for the aggregation and distribution of geological data relevant to the spatial and temporal distribution of sedimentary, igneous, and metamorphic rocks as well as data extracted from them. It is linked to the <a href="https://xdd.wisc.edu" target="_blank">xDD</a> (formly GeoDeepDive) digital library and machine reading system, and it aims to become a community resource for the addition, editing, and distribution of new stratigraphic, lithological, environmental, and economic data. Interactive applications built upon Macrostrat are designed for educational and research purposes.
+        </div>
+      </div>
+
+      <div class="row about-row">
+        <div class="col-sm-3 about-body-subtitle">
+          License
+        </div>
+        <div class="col-sm-9 about-body page-info">
+          All data are provided under a Creative Commons Attribution 4.0 International license (<a href="http://creativecommons.org/licenses/by/4.0/" target="_blank">CC-BY-4.0</a>).
+        </div>
+      </div>
+
+      <div class="row about-row">
+        <div class="col-sm-3 about-body-subtitle">
+          Citation
+        </div>
+        <div class="col-sm-9 about-body page-info">
+          <b>In presentations:</b> Acknowledge Macrostrat by name. You may also include any of the Macrostrat logos accessible on this webpage.
+          \
+          \
+          <b>In publications:</b> Acknowledge Macrostrat as the source of any information or data. In publications, you may cite our most recent infrastructure paper, <a href="https://doi.org/10.1029/2018GC007467" target="_blank">Peters et al. (2018)</a>. In addition, you should also include citations to the original references associated with the data set that was used. These references are accessible from the API. If you would like your paper listed in the official publications, please contact us and we will provide a citation and link.
+        </div>
+      </div>
+
+      <div class="row about-row">
+        <div class="col-sm-3 about-body-subtitle">
+          Collaboration
+        </div>
+        <div class="col-sm-9 about-body page-info">
+          Our small team has worked hard to compile, format, and make data available via Macrostrat. We strongly encourage and welcome active collaborations, both scientific and geoinformatic. All data are provided freely on under a <a href="http://creativecommons.org/licenses/by/4.0/" target="_blank">CC-BY-4.0</a> license.
+        </div>
+      </div>
+
+      <div class="row about-row">
+        <div class="col-sm-3 about-body-subtitle">
+          Funding
+        </div>
+        <div class="col-sm-9 about-body page-info">
+          Major Macrostrat data infrastructure development was supported by the US National Science Foundation (EAR-1150082, ICER-1440312), with ongoing support for data acquisition supported by NSF EAR-1948843 and ICER-1928323. Continuous and ongoing support has also been provided by the UW-Madison <a href="http://geoscience.wisc.edu/geoscience/">Department of Geoscience</a>. If you use Macrostrat and like what we do, please consider helping out with a <a href="#donate">donation</a>. Every contribute helps us to maintain infrastructure and keep improving.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="rock-border"></div>
+
+[//]: # "Built With Macrostrat"
 <div class="row slide" id="apps">
   <div class="col-xs-12 slide-container">
     <div class="row">
       <div class="col-xs-12" id="app-title">
-        <h1 class="big apps">Built with Macrostrat</h1>
+        <h1 class="title">Built with Macrostrat</h1>
       </div>
     </div>
 
@@ -239,6 +241,9 @@ import "./main.styl";
       </div>
     </div>
 
+    <div class="rock-border"></div>
+
+
     [//]: # "API"
     <div class="row slide" id="api">
       <div class="col-xs-12 slide-container">
@@ -258,8 +263,9 @@ import "./main.styl";
         </div>
       </div>
     </div>
+    <div class="rock-border"></div>
 
-    [//]: # "About"
+    [//]: # "People"
     <div class="row slide" id="people">
       <div class="col-xs-12 slide-container">
         <div class="slide-content slide-content-padded">
@@ -402,25 +408,11 @@ import "./main.styl";
     </div>
 
     [//]: # "Donate"
-    <div class="row slide" id="donate-row">
-      <div class="col-xs-12 slide-container" id="donate">
-        <div class="slide-content slide-content-padded">
-          <div class="row row-eq-height">
-            <div class="col-sm-6">
-              <div class="page-title-holder" id="donate-title-container">
-                <div class="donate-container">
-                <h1 class="big">Donate</h1>
-                <a class="btn btn-danger btn-lg" href="https://secure.supportuw.org/give/?id=E0A03FA3-B2A0-431C-83EE-A121A04EEB5D" target="_blank">Donate now</a>
-              </div>
-              </div>
-            </div>
-            <div class="col-sm-6">
-              <div class="page-info donate">
-                  Grant funding, principally from the <a href="http://www.nsf.gov" target="_blank">U.S. National Science Foundation</a>, got Macrostrat off the ground and keeps us innovating, but maintaining and growing a free and open digital resource involves ongoing expenses beyond the grant cycle, like annual certificate renewals, cloud server hosting and backup storage that keep your connection safe, domain name registrations that keep us located on the web, and system upgrades to keep us fast and efficient. If you would like to help us continue to grow and provide free resources, you can do so with a one-time or recurring gift to the UW Foundation Paleontology Program Fund in Geology. Thank you!
-              </div>
-            </div>
-          </div>
-        </div>
+    <div class="donate-container">
+      <h1 class="title donate-title">Donate</h1>
+      <a class="btn btn-danger btn-lg" href="https://secure.supportuw.org/give/?id=E0A03FA3-B2A0-431C-83EE-A121A04EEB5D" target="_blank">Donate now</a>
+      <div class="page-info donate">
+          Grant funding, principally from the <a href="http://www.nsf.gov" target="_blank">U.S. National Science Foundation</a>, got Macrostrat off the ground and keeps us innovating, but maintaining and growing a free and open digital resource involves ongoing expenses beyond the grant cycle, like annual certificate renewals, cloud server hosting and backup storage that keep your connection safe, domain name registrations that keep us located on the web, and system upgrades to keep us fast and efficient. If you would like to help us continue to grow and provide free resources, you can do so with a one-time or recurring gift to the UW Foundation Paleontology Program Fund in Geology. Thank you!
       </div>
     </div>
     
