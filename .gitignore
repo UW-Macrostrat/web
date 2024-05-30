@@ -16,4 +16,8 @@ docker-compose.yaml
 !.yarn/sdks
 !.yarn/versions
 
+# For ignoring static files
+*.png
+*.jpg 
+
 .vite
