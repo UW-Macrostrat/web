@@ -15,8 +15,10 @@ interface TextToolChainOptions {
 export default function viteTextToolchain({
   contentDir,
 }: TextToolChainOptions) {
-  const [pageIndex, permalinkIndex] = buildPageIndex();
+  const [pageIndex, permalinkIndex] = buildPageIndex(contentDir);
   const permalinks = Object.keys(permalinkIndex);
+
+  console.log(pageIndex, permalinkIndex);
 
   const include = [join(contentDir, "**/*.md"), "**/*.mdx"];
 

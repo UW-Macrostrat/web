@@ -2,30 +2,40 @@ import matter from "gray-matter";
 import { readFileSync } from "fs";
 import slugify from "@sindresorhus/slugify";
 import { globSync } from "glob";
+import { join } from "path";
 
 export type PageIndex = { [k: string]: string[] };
 export type PermalinkIndex = {
   [k: string]: { contentFile: string; title: string };
 };
 
-export function buildPageIndex(): [PageIndex, PermalinkIndex] {
+export function buildPageIndex(
+  contentDir: string
+): [PageIndex, PermalinkIndex] {
   // Walk the tree and generate permalinks for each page
   // Always happens on the server side.
-  const files = globSync("../content/**/*.md");
+
+  const globPath = join(contentDir, "**/*.md");
+  const replacePattern = new RegExp(`^${contentDir}/`);
+
+  const files = globSync(globPath);
   let pageIndex: PageIndex = {};
   let permalinkIndex: PermalinkIndex = {};
 
+  console.log(files);
+
   for (const path of files) {
     // Get yaml frontmatter from file
+    console.log(path);
     const content = readFileSync(path, "utf8");
     const { data = {} } = matter(content);
 
-    let sluggedPath = slugifyPath(path.replace(/^\.\.\/content/, ""), data);
+    const newPath = path.replace(replacePattern, "");
+
+    let sluggedPath = slugifyPath(newPath, data);
     if (sluggedPath == "") {
       sluggedPath = "/";
     }
-
-    const newPath = path.replace(/^\.\.\/content\//, "");
 
     if (newPath.startsWith("__drafts__")) {
       // Skip drafts for page index

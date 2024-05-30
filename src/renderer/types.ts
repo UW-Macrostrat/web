@@ -31,6 +31,8 @@ export type PageContextCustom = {
   urlPathname: string;
   user?: User;
   macrostratLogoFlavor?: string;
+  mdxContent?: string;
+  title?: string;
   config: PageContextBuiltInServerInternal["config"] & {
     clientRouting?: boolean;
     supportsDarkMode?: boolean;
