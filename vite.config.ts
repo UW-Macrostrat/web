@@ -3,7 +3,7 @@ import mdx from "@mdx-js/rollup";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import ssr from "vike/plugin";
-import { UserConfig } from "vite";
+import { UserConfig, Plugin } from "vite";
 import cesium from "vite-plugin-cesium";
 import pkg from "./package.json";
 
@@ -33,8 +33,31 @@ const cesiumBuildPath = path.resolve(cesiumRoot, "Cesium");
 
 // Check if we are building for server context
 
+const cssModuleMatcher = /\.module\.(css|scss|sass|styl)$/;
+
+function hyperStyles(): Plugin {
+  return {
+    name: "hyper-styles",
+    enforce: "post",
+    // Post-process the output to add the hyperStyled import
+    transform(code, id) {
+      const code1 = code.replace("export default", "const styles =");
+      if (cssModuleMatcher.test(id)) {
+        //const code2 = code1 + "\nexport default styles\n";
+        const code3 = `import hyper from "@macrostrat/hyper";
+        ${code1}
+        let h = hyper.styled(styles);
+        // Keep backwards compatibility with the existing default style object.
+        Object.assign(h, styles);
+        export default h;`;
+        //console.log(code3, id);
+        return code3;
+      }
+    },
+  };
+}
+
 const config: UserConfig = {
-  cacheDir: ".vite",
   root: path.resolve("./src"),
   resolve: {
     conditions: ["typescript"],
@@ -60,6 +83,7 @@ const config: UserConfig = {
       cesiumBuildPath,
       cesiumBuildRootPath: cesiumRoot,
     }),
+    hyperStyles(),
   ],
   envDir: path.resolve(__dirname),
   build: {
