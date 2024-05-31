@@ -10,12 +10,14 @@ export { buildPageIndex };
 
 interface TextToolChainOptions {
   contentDir: string;
+  wikiPrefix?: string;
 }
 
 export default function viteTextToolchain({
   contentDir,
+  wikiPrefix = "/",
 }: TextToolChainOptions) {
-  const [pageIndex, permalinkIndex] = buildPageIndex(contentDir);
+  const [pageIndex, permalinkIndex] = buildPageIndex(contentDir, wikiPrefix);
   const permalinks = Object.keys(permalinkIndex);
 
   console.log(pageIndex, permalinkIndex);

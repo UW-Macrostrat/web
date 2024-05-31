@@ -10,7 +10,8 @@ export type PermalinkIndex = {
 };
 
 export function buildPageIndex(
-  contentDir: string
+  contentDir: string,
+  prefix: string = "/"
 ): [PageIndex, PermalinkIndex] {
   // Walk the tree and generate permalinks for each page
   // Always happens on the server side.
@@ -29,15 +30,13 @@ export function buildPageIndex(
 
     const newPath = path.replace(replacePattern, "");
 
-    let sluggedPath = slugifyPath(newPath, data);
-    if (!sluggedPath.startsWith("/")) {
-      sluggedPath = "/" + sluggedPath;
-    }
-
     if (newPath.startsWith("__drafts__")) {
       // Skip drafts for page index
       continue;
     }
+
+    let sluggedPath = join(prefix, slugifyPath(newPath, data));
+
     const lastPart = newPath.split("/").pop();
 
     if (lastPart == null) continue;
@@ -48,11 +47,9 @@ export function buildPageIndex(
 
     const pathWithoutExt = newPath.split(".")[0];
 
-    const prefixedSluggedPath = join("/docs2", sluggedPath);
-
-    pageIndex[pathWithoutExt] = [prefixedSluggedPath];
+    pageIndex[pathWithoutExt] = [sluggedPath];
     if (lastPart && pageIndex[name] == null) {
-      pageIndex[name] = [prefixedSluggedPath];
+      pageIndex[name] = [sluggedPath];
     }
   }
   return [pageIndex, permalinkIndex];
@@ -79,8 +76,5 @@ export function slugifyPath(path: string, frontmatter: any) {
 
   // Join the path tokens back together
   let urlPath = tokens.join("/");
-  if (urlPath == "") {
-    urlPath = "/";
-  }
   return urlPath;
 }

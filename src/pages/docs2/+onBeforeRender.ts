@@ -12,7 +12,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const contentDirName = "../../../content";
 const contentDir = join(__dirname, contentDirName);
 
-const [pageIndex, permalinkIndex] = buildPageIndex(contentDir);
+const [pageIndex, permalinkIndex] = buildPageIndex(contentDir, "/docs2");
 
 type OurPageContext = {
   mdxContent: string | null;
@@ -24,18 +24,14 @@ export async function onBeforeRender(
 ): Promise<{ pageContext: OurPageContext }> {
   /** Server-side render hook to render Markdown pages */
 
-  console.log(pageContext.urlPathname);
-  const prefix = "/docs2";
-
   // Normalize the URL pathname
   let key = pageContext.urlPathname;
-  if (key.startsWith(prefix)) {
-    key = key.slice(prefix.length);
-  }
   if (key == "") {
     key = "/";
   }
 
+  // TODO: If the key is not in the permalink index, we need to return 404
+  // but instead we have an internal server errror.
   const ctx = permalinkIndex[key];
   const mdxContentFile = ctx?.contentFile;
 

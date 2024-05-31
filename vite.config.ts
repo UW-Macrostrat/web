@@ -53,7 +53,10 @@ const config: UserConfig = {
   },
   plugins: [
     react(),
-    textToolchain({ contentDir: path.resolve(__dirname, "content") }),
+    textToolchain({
+      contentDir: path.resolve(__dirname, "content"),
+      wikiPrefix: "/docs2",
+    }),
     /* Fix error with single-page app reloading where paths
     with dots (e.g., locations) are not rewritten to index
     to allow for client-side routing */
