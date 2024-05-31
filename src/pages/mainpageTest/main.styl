@@ -9,6 +9,7 @@ a:hover
 .nav
   position: fixed
   width: 100%
+  z-index: 10000
 
   ul 
     list-style-type: none;
@@ -27,6 +28,7 @@ a:hover
     text-align: center;
     padding: 14px 16px;
     text-decoration: none
+
 .parent
   height: 100vh
 
@@ -34,9 +36,6 @@ a:hover
   width: 70%
   text-align: center
   height: 100vh
-  background-image url("./img/cover_large.jpg")
-  background-repeat: no-repeat;
-  background-size: cover;
   color: white
 
   li
@@ -44,15 +43,32 @@ a:hover
     list-style-type: none
   
   ul
-    display: inline-block;
+    display: inline-block
+
+.text
+  position:absolute
+  z-index: 100
+
+.cover-image
+  position:absolute
+  z-index:5
+  left:0px
+  top:0px
+  height: 100vh
+  width: 70%
+  object-fit: cover
+
+.sea-image
+  position:absolute
+  z-index: 6
+  height: 100vh
+  width: 30%
+  object-fit: cover
 
 .right
   background-color: blue
   height: 100vh
   width: 30%
-  background-image url("./img/deep_sea_new_medium.jpg")
-  background-repeat: no-repeat;
-  background-size: cover;
 
   ul 
     list-style-type: none
@@ -116,13 +132,6 @@ a:hover
 .btn:hover 
   background-color: #545151 
 
-.small-rockd
-  background-image url("../img/north_america_small.jpg")
-  float: left
-
-#placeholder
-    background-image url("../img/north_america_small.jpg")
-
 .buttons1 
   font-size: 20px
   padding: 0px
@@ -155,17 +164,16 @@ a:hover
   text-align: center;
   color: white
 
-.deep-sea
-  background-image url("./img/deep_sea_new.jpg")
+.img
+  position:absolute
+  z-index:5
+  height: 100vh
+  width: 100%
+  object-fit: cover
 
-.north-america
-  background-image url("./img/north_america_med.jpg")
-
-.caribbean
-  background-image url("./img/caribbean_new.jpg")
-
-.new-zealand
-  background-image url("./img/new_zealand_new.jpg")
+.country-image
+  height: 50vh
+  width: 50%
 
 .rock-border
   width: 100%
@@ -205,9 +213,6 @@ a:hover
 
 .donate-container
   height: 80vh
-  background-image url("./img/donate_medium.jpg")
-  background-repeat: no-repeat;
-  background-size: cover;
 
 .donate-title
   a 
@@ -247,6 +252,13 @@ a:hover
     color: black
     font-weight: bold
     text-decoration: none
+
+.donate-img
+  position:absolute
+  z-index:5
+  height: 80vh
+  width: 100%
+  object-fit: cover
 
 .footer 
   width: 100%

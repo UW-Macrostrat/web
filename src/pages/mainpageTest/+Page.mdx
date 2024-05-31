@@ -19,59 +19,79 @@ import "./main.styl";
 [//]: # "Start Page"
 <div class="parent">
   <div class="left">
-    <h1 class="big">Macrostrat</h1>
-    <p class="big-text">A platform for geological data exploration, integration, and analysis</p>
-    <ul class="buttons1">
-      <li><a type="button" class="btn btn12" href="/sift/#/">Search</a></li>
-      <li><a type="button" class="btn btn12" href="/map/#3/40.78/-94.13">Geologic Map</a></li>
-      <li><div type="button" class="btn btn12 rockd" onclick="window.location='https://rockd.org'">
-        <div class="rockd-button-container">
-          <Image src="rockd.jpg" width="22px" className="rockd-png"></Image>
-          <a href="https://rockd.org" target="_blank">Go mobile</a>
-        </div>
-      </div></li>
-    </ul>
+    <Image className="back-img cover-image" src="cover_large.jpg"></Image>
+    <div class="text">
+      <h1 class="big">Macrostrat</h1>
+      <p class="big-text">A platform for geological data exploration, integration, and analysis</p>
+      <ul class="buttons1">
+        <li><a type="button" class="btn btn12" href="/sift/#/">Search</a></li>
+        <li><a type="button" class="btn btn12" href="/map/#3/40.78/-94.13">Geologic Map</a></li>
+        <li><div type="button" class="btn btn12 rockd" onclick="window.location='https://rockd.org'">
+          <div class="rockd-button-container">
+            <Image src="rockd.jpg" width="22px" className="rockd-png"></Image>
+            <a href="https://rockd.org" target="_blank">Go mobile</a>
+          </div>
+        </div></li>
+      </ul>
+    </div>
   </div>
   
+
   <div class="right">
-    <ul class="stats-row">
-      <li>
-        <span class="top-stat" id="n_columns">1,400</span>
-        <span class="top-stat-label">Regional Rock Columns</span>
-      </li>
-      <li>
-        <span class="top-stat" id="n_units">33,903</span>
-        <span class="top-stat-label">Rock Units</span>
-      </li>
-      <li>
-        <span class="top-stat" id="n_polys">2,500,000</span>
-        <span class="top-stat-label">Geologic Map Polygons</span>
-      </li>
-      <li>
-        <span class="top-stat" id="n_names">51,212</span>
-        <span class="top-stat-label nohighlight"><a href="Macrostrat_strat_names.html" target="_blank">Stratigraphic Names</a></span>
-      </li>
-    </ul>
+    <Image className="back-img sea-image" src="deep_sea_new_medium.jpg"></Image>
+    <div class="text">
+      <ul class="stats-row">
+        <li>
+          <span class="top-stat" id="n_columns">1,400</span>
+          <span class="top-stat-label">Regional Rock Columns</span>
+        </li>
+        <li>
+          <span class="top-stat" id="n_units">33,903</span>
+          <span class="top-stat-label">Rock Units</span>
+        </li>
+        <li>
+          <span class="top-stat" id="n_polys">2,500,000</span>
+          <span class="top-stat-label">Geologic Map Polygons</span>
+        </li>
+        <li>
+          <span class="top-stat" id="n_names">51,212</span>
+          <span class="top-stat-label nohighlight"><a href="Macrostrat_strat_names.html" target="_blank">Stratigraphic Names</a></span>
+        </li>
+      </ul>
+    </div>
   </div>
+
 </div>
 
 [//]: # "Locations"
 <div class="country_container">
   <div class="country north-america">
-    <h1>North America</h1>\
-    <div class="caption">7,239 packages. 24,141 units. 48,696 collections.</div>
+    <Image className="img country-image" src="north_america_med.jpg"></Image>
+    <div class="text">
+      <h1>North America</h1>\
+      <div class="caption">7,239 packages. 24,141 units. 48,696 collections.</div>
+    </div>
   </div>
   <div class="country caribbean">
-    <h1>Caribbean</h1>\
-    <div class="caption">243 packages. 798 units. 897 collections.</div>
+    <Image className="img country-image" src="caribbean_new_medium.jpg"></Image>
+    <div class="text">
+      <h1>Caribbean</h1>\
+      <div class="caption">243 packages. 798 units. 897 collections.</div>
+    </div>
   </div>
   <div class="country new-zealand">
-    <h1>New Zealand</h1>\
-    <div class="caption">828 packages. 2,168 units. 328 collections.</div>
+    <Image className="img country-image" src="new_zealand_new_medium.jpg"></Image>
+    <div class="text">
+      <h1>New Zealand</h1>\
+      <div class="caption">828 packages. 2,168 units. 328 collections.</div>
+    </div>
   </div>
   <div class="country deep-sea">
-    <h1>Deep Sea</h1>\
-    <div class="caption">388 packages. 7,124 units. 0 collections.</div>
+    <Image className="img country-image" src="deep_sea_new_medium.jpg"></Image>
+    <div class="text">
+      <h1>Deep Sea</h1>\
+      <div class="caption">388 packages. 7,124 units. 0 collections.</div>
+    </div>
   </div>
 </div>
 
@@ -410,12 +430,15 @@ import "./main.styl";
 
     [//]: # "Donate"
     <div class="donate-container" id="donate">
-      <div class="donate-left">
-        <h1 class="title donate-title"><a href="https://secure.supportuw.org/give/?id=E0A03FA3-B2A0-431C-83EE-A121A04EEB5D" target="_blank">Donate Now</a></h1>
-      </div>
-      <div class="donate-right">
-        <div class="donate-info">
-            Grant funding, principally from the <a href="http://www.nsf.gov" target="_blank">U.S. National Science Foundation</a>, got Macrostrat off the ground and keeps us innovating, but maintaining and growing a free and open digital resource involves ongoing expenses beyond the grant cycle, like annual certificate renewals, cloud server hosting and backup storage that keep your connection safe, domain name registrations that keep us located on the web, and system upgrades to keep us fast and efficient. If you would like to help us continue to grow and provide free resources, you can do so with a one-time or recurring gift to the UW Foundation Paleontology Program Fund in Geology. Thank you!
+      <Image className="back-img donate-img" src="donate_medium.jpg"></Image>
+      <div class="text">
+        <div class="donate-left">
+          <h1 class="title donate-title"><a href="https://secure.supportuw.org/give/?id=E0A03FA3-B2A0-431C-83EE-A121A04EEB5D" target="_blank">Donate Now</a></h1>
+        </div>
+        <div class="donate-right">
+          <div class="donate-info">
+              Grant funding, principally from the <a href="http://www.nsf.gov" target="_blank">U.S. National Science Foundation</a>, got Macrostrat off the ground and keeps us innovating, but maintaining and growing a free and open digital resource involves ongoing expenses beyond the grant cycle, like annual certificate renewals, cloud server hosting and backup storage that keep your connection safe, domain name registrations that keep us located on the web, and system upgrades to keep us fast and efficient. If you would like to help us continue to grow and provide free resources, you can do so with a one-time or recurring gift to the UW Foundation Paleontology Program Fund in Geology. Thank you!
+          </div>
         </div>
       </div>
     </div>
