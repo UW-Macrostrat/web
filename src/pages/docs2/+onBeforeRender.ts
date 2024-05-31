@@ -39,13 +39,8 @@ export async function onBeforeRender(
   const ctx = permalinkIndex[key];
   const mdxContentFile = ctx?.contentFile;
 
-  console.log(mdxContentFile, ctx, pageIndex, permalinkIndex);
-
   const fileName = join(contentDirName, mdxContentFile);
   const pageFile = modules[fileName];
-
-  console.log(modules);
-  console.log(pageIndex, fileName);
 
   if (pageFile == null) {
     return {
@@ -59,8 +54,6 @@ export async function onBeforeRender(
   const pageContent = h(_mdxContent.default);
 
   const mdxContent = await renderToString(pageContent);
-
-  console.log(mdxContent);
 
   const title = ctx?.title;
   return {

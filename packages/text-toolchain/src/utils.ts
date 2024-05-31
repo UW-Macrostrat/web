@@ -22,19 +22,16 @@ export function buildPageIndex(
   let pageIndex: PageIndex = {};
   let permalinkIndex: PermalinkIndex = {};
 
-  console.log(files);
-
   for (const path of files) {
     // Get yaml frontmatter from file
-    console.log(path);
     const content = readFileSync(path, "utf8");
     const { data = {} } = matter(content);
 
     const newPath = path.replace(replacePattern, "");
 
     let sluggedPath = slugifyPath(newPath, data);
-    if (sluggedPath == "") {
-      sluggedPath = "/";
+    if (!sluggedPath.startsWith("/")) {
+      sluggedPath = "/" + sluggedPath;
     }
 
     if (newPath.startsWith("__drafts__")) {
@@ -51,9 +48,11 @@ export function buildPageIndex(
 
     const pathWithoutExt = newPath.split(".")[0];
 
-    pageIndex[pathWithoutExt] = [sluggedPath];
+    const prefixedSluggedPath = join("/docs2", sluggedPath);
+
+    pageIndex[pathWithoutExt] = [prefixedSluggedPath];
     if (lastPart && pageIndex[name] == null) {
-      pageIndex[name] = [sluggedPath];
+      pageIndex[name] = [prefixedSluggedPath];
     }
   }
   return [pageIndex, permalinkIndex];
