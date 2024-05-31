@@ -4,6 +4,7 @@ import { usePageContext } from "~/renderer/page-context";
 import { ErrorBoundary } from "@macrostrat/ui-components";
 import { ContentPage } from "~/layouts";
 import { PageBreadcrumbs } from "~/renderer";
+import { Popover, Tag } from "@blueprintjs/core";
 
 export function Page() {
   const ctx = usePageContext();
@@ -25,8 +26,23 @@ export function Page() {
   });
 
   return h(ContentPage, [
-    h(PageBreadcrumbs),
+    h(FlexRow, [h(PageBreadcrumbs), h("div.spacer"), h(BetaTagWithPopup)]),
     h("h1", title),
     h(ErrorBoundary, [pageContent]),
   ]);
+}
+
+function BetaTagWithPopup() {
+  return h(
+    Popover,
+    {
+      content:
+        "This wiki-based documentation is in beta and may be incomplete.",
+    },
+    [h(Tag, { intent: "warning" }, "Beta")]
+  );
+}
+
+function FlexRow({ children }) {
+  return h("div.flex-row", children);
 }

@@ -2,17 +2,17 @@ import { buildPageIndex } from "@macrostrat-web/text-toolchain";
 import { renderToString } from "react-dom/server";
 import { PageContext } from "vike/types";
 import h from "@macrostrat/hyper";
-const modules = import.meta.glob("../../../content/**/*.md");
+const modules = import.meta.glob("../../../../content/**/*.md");
 import { join } from "path";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const contentDirName = "../../../content";
+const contentDirName = "../../../../content";
 const contentDir = join(__dirname, contentDirName);
 
-const [pageIndex, permalinkIndex] = buildPageIndex(contentDir, "/docs2");
+const [pageIndex, permalinkIndex] = buildPageIndex(contentDir, "/dev/docs");
 
 type OurPageContext = {
   mdxContent: string | null;
@@ -35,8 +35,18 @@ export async function onBeforeRender(
   const ctx = permalinkIndex[key];
   const mdxContentFile = ctx?.contentFile;
 
-  const fileName = join(contentDirName, mdxContentFile);
-  const pageFile = modules[fileName];
+  let pageFile = null;
+
+  console.log("mdxContentFile", mdxContentFile);
+
+  if (mdxContentFile != null) {
+    const fileName = join(contentDirName, mdxContentFile);
+    pageFile = modules[fileName];
+  }
+
+  console.log("modules", modules);
+
+  console.log("pageFile", pageFile);
 
   if (pageFile == null) {
     return {
@@ -45,6 +55,7 @@ export async function onBeforeRender(
       },
     };
   }
+
   const _mdxContent = pageFile == null ? null : await pageFile();
 
   const pageContent = h(_mdxContent.default);

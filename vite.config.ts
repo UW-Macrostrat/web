@@ -55,7 +55,7 @@ const config: UserConfig = {
     react(),
     textToolchain({
       contentDir: path.resolve(__dirname, "content"),
-      wikiPrefix: "/docs2",
+      wikiPrefix: "/dev/docs",
     }),
     /* Fix error with single-page app reloading where paths
     with dots (e.g., locations) are not rewritten to index
