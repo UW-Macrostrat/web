@@ -34,20 +34,24 @@ a:hover
 
 .left
   width: 70%
-  text-align: center
-  height: 100vh
+  display: flex;
+  justify-content: center;
+  align-items: center;  height: 100vh
   color: white
 
   li
     float: left
     list-style-type: none
-  
+    width: 33%
+
   ul
     display: inline-block
+    width: 100%
 
 .text
   position:absolute
   z-index: 100
+  padding: 0 20px
 
 .cover-image
   position:absolute
@@ -88,17 +92,12 @@ a:hover
 .big
   font-size: 72px
   font-family: "Maven Pro", sans-serif;
-  margin-top: 32vh
-  width: 40%
-  margin-left: 30%
   text-align: center
 
 .big-text
   font-family: Helvetica, sans-serif
   font-weight: 900
   font-size: 20px
-  margin-bottom: 5%
-  padding: 0 100px
 
 .top-stat, .top-stat-label
   display: block
@@ -117,6 +116,9 @@ a:hover
     color: black
     width: 100%
     
+.rockd
+  background-color: green
+
 .btn
   background-color: #363434;
   border: none;
