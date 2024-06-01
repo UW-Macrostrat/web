@@ -1,20 +1,13 @@
-import { HotkeysProvider, Spinner } from "@blueprintjs/core";
-import DataSheet from "@macrostrat/data-sheet2";
+import { Spinner } from "@blueprintjs/core";
 import { FullscreenPage } from "~/layouts";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
 import { PageBreadcrumbs } from "~/renderer";
 import { useLegendData, MapInfo } from "../utils";
-import {
-  useElementSize,
-  useAPIResult,
-  useInDarkMode,
-} from "@macrostrat/ui-components";
+import { useElementSize, useInDarkMode } from "@macrostrat/ui-components";
 import { useMemo, useRef } from "react";
-import { Bar } from "@visx/shape";
 import { Group } from "@visx/group";
 import { scaleBand, scaleLinear } from "@visx/scale";
-import { apiV2Prefix } from "@macrostrat-web/settings";
 import { AxisLeft } from "@visx/axis";
 import { Timescale, TimescaleOrientation } from "@macrostrat/timescale";
 import { ForeignObject } from "@macrostrat/column-components";
@@ -120,16 +113,16 @@ function CorrelationChart({ width, height, events = false, data }: BarsProps) {
     [data]
   );
 
-  const xMin = 60;
+  const xMin = 100;
 
   // scales, memoize for performance
   const xScale = useMemo(
     () =>
       scaleBand<string>({
         range: [xMin, xMax],
-        round: true,
+        round: false,
         domain: data.map((d, i) => `${i}`),
-        padding: 0.4,
+        padding: 0.2,
       }),
     [xMax]
   );
@@ -167,7 +160,6 @@ function CorrelationChart({ width, height, events = false, data }: BarsProps) {
         ]),
         h(
           Group,
-          { key: "bars" },
           data.map((d, i) => {
             const { ageRange } = d;
 
