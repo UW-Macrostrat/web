@@ -64,14 +64,14 @@ function buildCorrelationChartData(
     };
   });
 
-  return data1.sort((a, b) => {
-    return midpointAge(b.ageRange) - midpointAge(a.ageRange);
-  });
+  return data1.sort((a, b) => intervalComparison(a.ageRange, b.ageRange));
 }
+
+type AgeRange = [number, number];
 
 type CorrelationItem = {
   color: string;
-  ageRange: [number, number];
+  ageRange: AgeRange;
   legend_id: number;
 };
 
@@ -214,9 +214,7 @@ function AgeAxis({ scale, width }) {
   });
 }
 
-function getAgeRangeForInterval(
-  interval: IntervalShort
-): [number, number] | null {
+function getAgeRangeForInterval(interval: IntervalShort): AgeRange | null {
   /** Get the age range for an interval, building up an index as we go */
   return [interval.b_age, interval.t_age];
 }
@@ -227,9 +225,9 @@ enum MergeMode {
 }
 
 function mergeAgeRanges(
-  ranges: [number, number][],
+  ranges: AgeRange[],
   mergeMode: MergeMode = MergeMode.Outer
-): [number, number] {
+): AgeRange {
   /** Merge a set of age ranges to get the inner or outer bounds */
   let min = Infinity;
   let max = 0;
@@ -252,4 +250,44 @@ function mergeAgeRanges(
 
 function midpointAge(range: [number, number]) {
   return (range[0] + range[1]) / 2;
+}
+
+enum AgeRangeRelationship {
+  Disjoint,
+  Contains,
+  Contained,
+  Identical,
+}
+
+function convertToForwardOrdinal(a: AgeRange): AgeRange {
+  /** Age ranges are naturally expressed as [b_age, t_age] where
+   * b_age is the older age and t_age is the younger age. This function
+   * converts the age range to [min, max] where min is the oldest age,
+   * expressed as negative numbers. This assists with intuitive ordering
+   * in certain cases.
+   */
+  return [-a[0], -a[1]];
+}
+
+function compareAgeRanges(a: AgeRange, b: AgeRange): AgeRangeRelationship {
+  const a1 = convertToForwardOrdinal(a);
+  const b1 = convertToForwardOrdinal(b);
+  /** Compare two age ranges */
+  if (a1[0] > b1[1] || a1[1] < b1[0]) {
+    return AgeRangeRelationship.Disjoint;
+  }
+  if (a1[0] === b1[0] && a1[1] === b1[1]) {
+    return AgeRangeRelationship.Identical;
+  }
+  if (a1[0] <= b1[0] && a1[1] >= b1[1]) {
+    return AgeRangeRelationship.Contains;
+  }
+  if (a1[0] >= b1[0] && a1[1] <= b1[1]) {
+    return AgeRangeRelationship.Contained;
+  }
+}
+
+function intervalComparison(a: AgeRange, b: AgeRange) {
+  // If age range fully overlaps with another, put the wider one first
+  return midpointAge(b) - midpointAge(a);
 }
