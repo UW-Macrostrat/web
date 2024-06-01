@@ -1,4 +1,4 @@
-import { HotkeysProvider, Spinner, Tag } from "@blueprintjs/core";
+import { HotkeysProvider, Spinner } from "@blueprintjs/core";
 import DataSheet from "@macrostrat/data-sheet2";
 import { FullscreenPage } from "~/layouts";
 import hyper from "@macrostrat/hyper";
@@ -16,6 +16,8 @@ import { useLegendData } from "../utils";
 const h = hyper.styled(styles);
 
 export function Page({ map }) {
+  const slug = map.slug;
+
   const data = useLegendData(map);
 
   if (data == null) {
