@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAsyncEffect } from "@macrostrat/ui-components";
 import { postgrest } from "~/providers";
 
-type MapInfo = {
+export type MapInfo = {
   source_id: number;
   slug?: string;
 };
