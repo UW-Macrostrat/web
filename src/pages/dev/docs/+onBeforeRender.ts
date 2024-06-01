@@ -37,16 +37,10 @@ export async function onBeforeRender(
 
   let pageFile = null;
 
-  console.log("mdxContentFile", mdxContentFile);
-
   if (mdxContentFile != null) {
     const fileName = join(contentDirName, mdxContentFile);
     pageFile = modules[fileName];
   }
-
-  console.log("modules", modules);
-
-  console.log("pageFile", pageFile);
 
   if (pageFile == null) {
     return {
