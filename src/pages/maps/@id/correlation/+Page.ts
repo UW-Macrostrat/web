@@ -5,34 +5,37 @@ import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
 import { PageBreadcrumbs } from "~/renderer";
 import { useLegendData, MapInfo } from "../utils";
-import { useElementSize, useAPIResult } from "@macrostrat/ui-components";
+import {
+  useElementSize,
+  useAPIResult,
+  useInDarkMode,
+} from "@macrostrat/ui-components";
 import { useMemo, useRef } from "react";
 import { Bar } from "@visx/shape";
 import { Group } from "@visx/group";
 import { scaleBand, scaleLinear } from "@visx/scale";
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import { AxisLeft } from "@visx/axis";
+import { Timescale, TimescaleOrientation } from "@macrostrat/timescale";
+import { ForeignObject } from "@macrostrat/column-components";
 
 const h = hyper.styled(styles);
-
-const apiRoute = apiV2Prefix + "/defs/intervals";
-const resultUnwrapper = (res) => res.success.data;
 
 export function Page({ map }) {
   const ref = useRef(null);
   const size = useElementSize(ref);
   const legendData = useLegendData(map);
-  const intervals = useAPIResult(apiRoute, { all: true }, resultUnwrapper);
 
   const correlationChartData = useMemo(() => {
-    return buildCorrelationChartData(legendData, intervals);
-  }, [legendData, intervals]);
+    console.log(legendData);
+    return buildCorrelationChartData(legendData);
+  }, [legendData]);
 
   return h(FullscreenPage, [
     h("div.page-inner", [
       h(PageBreadcrumbs),
       h("div.vis-container", { ref }, [
-        h.if(legendData != null)(Example, {
+        h.if(legendData != null)(CorrelationChart, {
           map,
           ...size,
           data: correlationChartData,
@@ -49,19 +52,16 @@ type IntervalShort = {
 };
 
 function buildCorrelationChartData(
-  legendData: LegendItem[],
-  intervals: IntervalShort[]
+  legendData: LegendItem[]
 ): CorrelationItem[] {
   /** Build the data for a correlation chart */
   if (legendData == null) {
     return [];
   }
 
-  console.log(legendData, intervals);
-
-  return legendData.map((d, i) => {
+  let data1 = legendData.map((d, i) => {
     return {
-      letter: d.legend_id.toString(),
+      legend_id: d.legend_id.toString(),
       ageRange: mergeAgeRanges([
         getAgeRangeForInterval(d.b_interval),
         getAgeRangeForInterval(d.t_interval),
@@ -70,15 +70,19 @@ function buildCorrelationChartData(
       color: d.color,
     };
   });
+
+  return data1.sort((a, b) => {
+    return midpointAge(b.ageRange) - midpointAge(a.ageRange);
+  });
 }
 
 type CorrelationItem = {
-  letter: string;
   color: string;
   ageRange: [number, number];
+  legend_id: number;
 };
 
-const verticalMargin = 120;
+const verticalMargin = 60;
 
 export type BarsProps = {
   width: number;
@@ -106,16 +110,23 @@ interface LegendItem {
   color: string;
 }
 
-function Example({ width, height, events = false, data }: BarsProps) {
+function CorrelationChart({ width, height, events = false, data }: BarsProps) {
   // bounds
   const xMax = width;
   const yMax = height - verticalMargin;
+
+  const domain = useMemo(
+    () => mergeAgeRanges(data.map((d) => d.ageRange)),
+    [data]
+  );
+
+  const xMin = 60;
 
   // scales, memoize for performance
   const xScale = useMemo(
     () =>
       scaleBand<string>({
-        range: [0, xMax],
+        range: [xMin, xMax],
         round: true,
         domain: data.map((d, i) => `${i}`),
         padding: 0.4,
@@ -123,17 +134,12 @@ function Example({ width, height, events = false, data }: BarsProps) {
     [xMax]
   );
   const yScale = useMemo(() => {
-    const domain = mergeAgeRanges(
-      data.map((d) => d.ageRange),
-      MergeMode.Outer
-    );
-    console.log("Domain: ", domain);
     return scaleLinear<number>({
-      range: [0, yMax],
-      round: true,
+      range: [yMax, 0],
+      round: false,
       domain,
     });
-  }, [data, yMax]);
+  }, [domain, yMax]);
 
   if (data == null) {
     return h(Spinner);
@@ -141,41 +147,79 @@ function Example({ width, height, events = false, data }: BarsProps) {
 
   if (width < 10) return null;
 
-  const data1 = data.sort((a, b) => {
-    return midpointAge(b.ageRange) - midpointAge(a.ageRange);
-  });
+  return h("div.vis-frame", [
+    h("svg", { width, height }, [
+      h(Group, { top: verticalMargin / 2, key: "main-plot" }, [
+        h(AgeAxis, {
+          scale: yScale,
+          width: 40,
+        }),
+        h(ForeignObject, { width: 60, height, x: 40 }, [
+          h(Timescale, {
+            orientation: TimescaleOrientation.VERTICAL,
+            length: yMax,
+            // Bug in timescale component, the age range appears to be changed
+            // if we pass it in statically.
+            ageRange: [...domain],
+            absoluteAgeScale: true,
+            levels: [2, 3],
+          }),
+        ]),
+        h(
+          Group,
+          { key: "bars" },
+          data.map((d, i) => {
+            const { ageRange } = d;
 
-  return h("svg", { width, height }, [
-    h(Group, { top: verticalMargin / 2 }, [
-      h(AxisLeft, {
-        scale: yScale,
-        left: 30,
-      }),
-      h(
-        Group,
-        data1.map((d, i) => {
-          const { ageRange } = d;
-          const yMin = yScale(ageRange[0]);
-          const yMax = yScale(ageRange[1]);
-          const barWidth = xScale.bandwidth();
-          const barHeight = yMax - yMin;
-          const barX = xScale(`${i}`);
-          const barY = yMin;
-          return h(Bar, {
-            key: `bar-${i}`,
-            x: barX,
-            y: barY,
-            width: barWidth,
-            height: barHeight,
-            fill: d.color,
-            onClick() {
-              if (events) alert(`clicked: ${JSON.stringify(Object.values(d))}`);
-            },
-          });
-        })
-      ),
+            const yMin = yScale(ageRange[1]);
+            const yMax = yScale(ageRange[0]);
+
+            const barWidth = xScale.bandwidth();
+            const barHeight = yMax - yMin;
+            const barX = xScale(`${i}`);
+            const barY = yMin;
+            return h("rect", {
+              key: d.legend_id,
+              x: barX,
+              y: barY,
+              width: barWidth,
+              height: barHeight,
+              fill: d.color,
+              onClick() {
+                if (events)
+                  alert(`clicked: ${JSON.stringify(Object.values(d))}`);
+              },
+            });
+          })
+        ),
+      ]),
     ]),
   ]);
+}
+
+function AgeAxis({ scale, width }) {
+  const darkMode = useInDarkMode();
+
+  const axisColor = darkMode ? "#ccc" : "#222";
+
+  return h(AxisLeft, {
+    scale,
+    left: width,
+    stroke: axisColor,
+    tickStroke: axisColor,
+    labelProps: {
+      fill: axisColor,
+    },
+    tickLabelProps: () => {
+      return {
+        fill: axisColor,
+        textAnchor: "end",
+        verticalAnchor: "middle",
+        dx: "-0.25em",
+        fontSize: 12,
+      };
+    },
+  });
 }
 
 function getAgeRangeForInterval(
@@ -195,15 +239,23 @@ function mergeAgeRanges(
   mergeMode: MergeMode = MergeMode.Outer
 ): [number, number] {
   /** Merge a set of age ranges to get the inner or outer bounds */
+  let min = Infinity;
+  let max = 0;
+  // Negative ages are not handled
+
   if (mergeMode === MergeMode.Inner) {
-    const min = Math.min(...ranges.map((d) => d[0]));
-    const max = Math.max(...ranges.map((d) => d[1]));
-    return [min, max];
+    min = Math.min(...ranges.map((d) => d[0]));
+    max = Math.max(...ranges.map((d) => d[1]));
   } else {
-    const min = Math.max(...ranges.map((d) => d[0]));
-    const max = Math.min(...ranges.map((d) => d[1]));
-    return [min, max];
+    min = Math.max(...ranges.map((d) => d[0]));
+    max = Math.min(...ranges.map((d) => d[1]));
   }
+
+  // Age ranges should start with the oldest (largest) age
+  if (min < max) {
+    return [max, min];
+  }
+  return [min, max];
 }
 
 function midpointAge(range: [number, number]) {
