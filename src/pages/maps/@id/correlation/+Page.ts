@@ -11,7 +11,7 @@ import { Bar } from "@visx/shape";
 import { Group } from "@visx/group";
 import { scaleBand, scaleLinear } from "@visx/scale";
 import { apiV2Prefix } from "@macrostrat-web/settings";
-import fetch from "cross-fetch";
+import { AxisLeft } from "@visx/axis";
 
 const h = hyper.styled(styles);
 
@@ -22,7 +22,7 @@ export function Page({ map }) {
   const ref = useRef(null);
   const size = useElementSize(ref);
   const legendData = useLegendData(map);
-  const intervals = useAPIResult(apiRoute, resultUnwrapper);
+  const intervals = useAPIResult(apiRoute, { all: true }, resultUnwrapper);
 
   const correlationChartData = useMemo(() => {
     return buildCorrelationChartData(legendData, intervals);
@@ -42,82 +42,50 @@ export function Page({ map }) {
   ]);
 }
 
-type CorrelationItem = {
-  legend_id: number;
-  name: string;
-  strat_name: string;
-  age: string;
-  lith: string;
-  descrip: string;
-  comments: string;
-  liths: string;
-  b_interval: number;
-  t_interval: number;
-  best_age_bottom: string;
-  best_age_top: string;
-  unit_ids: string;
-  concept_ids: string;
+type IntervalShort = {
+  id: number;
+  b_age: number;
+  t_age: number;
 };
 
-function buildCorrelationChartData(legendData, intervals): LetterFrequency[] {
+function buildCorrelationChartData(
+  legendData: LegendItem[],
+  intervals: IntervalShort[]
+): CorrelationItem[] {
+  /** Build the data for a correlation chart */
   if (legendData == null) {
     return [];
   }
+
+  console.log(legendData, intervals);
+
   return legendData.map((d, i) => {
     return {
       letter: d.legend_id.toString(),
+      ageRange: mergeAgeRanges([
+        getAgeRangeForInterval(d.b_interval),
+        getAgeRangeForInterval(d.t_interval),
+      ]),
       frequency: i,
+      color: d.color,
     };
   });
 }
 
-type LetterFrequency = {
+type CorrelationItem = {
   letter: string;
-  frequency: number;
+  color: string;
+  ageRange: [number, number];
 };
 
-const letterFrequency: LetterFrequency[] = [
-  { letter: "A", frequency: 0.08167 },
-  { letter: "B", frequency: 0.01492 },
-  { letter: "C", frequency: 0.02782 },
-  { letter: "D", frequency: 0.04253 },
-  { letter: "E", frequency: 0.12702 },
-  { letter: "F", frequency: 0.02288 },
-  { letter: "G", frequency: 0.02015 },
-  { letter: "H", frequency: 0.06094 },
-  { letter: "I", frequency: 0.06966 },
-  { letter: "J", frequency: 0.00153 },
-  { letter: "K", frequency: 0.00772 },
-  { letter: "L", frequency: 0.04025 },
-  { letter: "M", frequency: 0.02406 },
-  { letter: "N", frequency: 0.06749 },
-  { letter: "O", frequency: 0.07507 },
-  { letter: "P", frequency: 0.01929 },
-  { letter: "Q", frequency: 0.00095 },
-  { letter: "R", frequency: 0.05987 },
-  { letter: "S", frequency: 0.06327 },
-  { letter: "T", frequency: 0.09056 },
-  { letter: "U", frequency: 0.02758 },
-  { letter: "V", frequency: 0.00978 },
-  { letter: "W", frequency: 0.0236 },
-  { letter: "X", frequency: 0.0015 },
-  { letter: "Y", frequency: 0.01974 },
-  { letter: "Z", frequency: 0.00074 },
-];
-
-const data = letterFrequency.slice(5);
 const verticalMargin = 120;
-
-// accessors
-const getLetter = (d: LetterFrequency) => d.letter;
-const getLetterFrequency = (d: LetterFrequency) => Number(d.frequency) * 100;
 
 export type BarsProps = {
   width: number;
   height: number;
   events?: boolean;
   map: MapInfo;
-  data: LetterFrequency[];
+  data: CorrelationItem[];
 };
 
 interface LegendItem {
@@ -129,12 +97,13 @@ interface LegendItem {
   descrip: string;
   comments: string;
   liths: string;
-  b_interval: number;
-  t_interval: number;
-  best_age_bottom: string;
-  best_age_top: string;
+  b_interval: IntervalShort;
+  t_interval: IntervalShort;
+  best_age_bottom?: number;
+  best_age_top?: number;
   unit_ids: string;
   concept_ids: string;
+  color: string;
 }
 
 function Example({ width, height, events = false, data }: BarsProps) {
@@ -148,20 +117,23 @@ function Example({ width, height, events = false, data }: BarsProps) {
       scaleBand<string>({
         range: [0, xMax],
         round: true,
-        domain: data.map(getLetter),
+        domain: data.map((d, i) => `${i}`),
         padding: 0.4,
       }),
     [xMax]
   );
-  const yScale = useMemo(
-    () =>
-      scaleLinear<number>({
-        range: [yMax, 0],
-        round: true,
-        domain: [0, Math.max(...data.map(getLetterFrequency))],
-      }),
-    [yMax]
-  );
+  const yScale = useMemo(() => {
+    const domain = mergeAgeRanges(
+      data.map((d) => d.ageRange),
+      MergeMode.Outer
+    );
+    console.log("Domain: ", domain);
+    return scaleLinear<number>({
+      range: [0, yMax],
+      round: true,
+      domain,
+    });
+  }, [data, yMax]);
 
   if (data == null) {
     return h(Spinner);
@@ -169,28 +141,71 @@ function Example({ width, height, events = false, data }: BarsProps) {
 
   if (width < 10) return null;
 
+  const data1 = data.sort((a, b) => {
+    return midpointAge(b.ageRange) - midpointAge(a.ageRange);
+  });
+
   return h("svg", { width, height }, [
-    h(
-      Group,
-      { top: verticalMargin / 2 },
-      data.map((d) => {
-        const letter = getLetter(d);
-        const barWidth = xScale.bandwidth();
-        const barHeight = yMax - (yScale(getLetterFrequency(d)) ?? 0);
-        const barX = xScale(letter);
-        const barY = yMax - barHeight;
-        return h(Bar, {
-          key: `bar-${letter}`,
-          x: barX,
-          y: barY,
-          width: barWidth,
-          height: barHeight,
-          fill: "rgba(23, 233, 217, .5)",
-          onClick() {
-            if (events) alert(`clicked: ${JSON.stringify(Object.values(d))}`);
-          },
-        });
-      })
-    ),
+    h(Group, { top: verticalMargin / 2 }, [
+      h(AxisLeft, {
+        scale: yScale,
+        left: 30,
+      }),
+      h(
+        Group,
+        data1.map((d, i) => {
+          const { ageRange } = d;
+          const yMin = yScale(ageRange[0]);
+          const yMax = yScale(ageRange[1]);
+          const barWidth = xScale.bandwidth();
+          const barHeight = yMax - yMin;
+          const barX = xScale(`${i}`);
+          const barY = yMin;
+          return h(Bar, {
+            key: `bar-${i}`,
+            x: barX,
+            y: barY,
+            width: barWidth,
+            height: barHeight,
+            fill: d.color,
+            onClick() {
+              if (events) alert(`clicked: ${JSON.stringify(Object.values(d))}`);
+            },
+          });
+        })
+      ),
+    ]),
   ]);
+}
+
+function getAgeRangeForInterval(
+  interval: IntervalShort
+): [number, number] | null {
+  /** Get the age range for an interval, building up an index as we go */
+  return [interval.b_age, interval.t_age];
+}
+
+enum MergeMode {
+  Inner,
+  Outer,
+}
+
+function mergeAgeRanges(
+  ranges: [number, number][],
+  mergeMode: MergeMode = MergeMode.Outer
+): [number, number] {
+  /** Merge a set of age ranges to get the inner or outer bounds */
+  if (mergeMode === MergeMode.Inner) {
+    const min = Math.min(...ranges.map((d) => d[0]));
+    const max = Math.max(...ranges.map((d) => d[1]));
+    return [min, max];
+  } else {
+    const min = Math.max(...ranges.map((d) => d[0]));
+    const max = Math.min(...ranges.map((d) => d[1]));
+    return [min, max];
+  }
+}
+
+function midpointAge(range: [number, number]) {
+  return (range[0] + range[1]) / 2;
 }

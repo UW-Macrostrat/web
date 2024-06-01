@@ -14,7 +14,7 @@ export function useLegendData(map: MapInfo): any[] | null {
     const res = await postgrest
       .from("legend")
       .select(
-        "legend_id, name, strat_name, age, lith, descrip, comments, liths, b_interval, t_interval, best_age_bottom, best_age_top, unit_ids, concept_ids"
+        "legend_id, name, strat_name, age, lith, descrip, comments, liths, b_interval, t_interval, best_age_bottom, best_age_top, unit_ids, concept_ids, color"
       )
       .eq("source_id", map.source_id)
       .order("legend_id", { ascending: true });
