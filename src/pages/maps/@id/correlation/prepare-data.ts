@@ -23,10 +23,16 @@ export function buildCorrelationChartData(
         return null;
       }
 
+      let macrostratAgeRange: AgeRange | null = null;
+      if (d.best_age_bottom != null && d.best_age_top != null) {
+        macrostratAgeRange = [d.best_age_bottom, d.best_age_top];
+      }
+
       return {
         details: d,
         id: d.legend_id,
         ageRange: mergeAgeRanges(ageRanges),
+        macrostratAgeRange,
         frequency: i,
         color: d.color,
       };

@@ -3,6 +3,7 @@ export type AgeRange = [number, number];
 export type CorrelationItem = {
   color: string;
   ageRange: AgeRange;
+  macrostratAgeRange: AgeRange | null;
   details: LegendItem;
   id: number;
 };

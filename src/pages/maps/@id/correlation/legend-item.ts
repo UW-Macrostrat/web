@@ -3,6 +3,7 @@ import { LegendItem, IntervalShort } from "./types";
 import { LithologyTag } from "~/components";
 import styles from "./main.module.sass";
 import classNames from "classnames";
+import { mergeAgeRanges } from "./prepare-data";
 
 const h = hyper.styled(styles);
 
@@ -52,7 +53,7 @@ function DataField({
   children,
   unit,
 }: {
-  label: string;
+  label?: string;
   value?: any;
   inline?: boolean;
   showIfEmpty?: boolean;
@@ -60,32 +61,56 @@ function DataField({
   children?: any;
   unit?: string;
 }) {
-  let val = value ?? children;
-
-  if (!showIfEmpty && (val == null || val === "")) {
+  if (!showIfEmpty && (value == null || value === "") && children == null) {
     return null;
   }
 
   return h("div.data-field", { className: classNames(className, { inline }) }, [
     h("div.label", label),
-    h("div.value-container", [
-      h("span.value", val),
-      h.if(unit != null)([" ", h("span.unit", unit)]),
+    h("div.data-container", [
+      h.if(value != null)(Value, { value, unit }),
+      children,
     ]),
   ]);
 }
 
 function IntervalField({ intervals }: { intervals: IntervalShort[] }) {
   const unique = uniqueIntervals(...intervals);
-  return h(
-    DataField,
-    {
-      label: "Intervals",
-    },
-    unique.map((interval) => {
-      return h(Interval, { interval, showAgeRange: true });
-    })
-  );
+  const ageRange = mergeAgeRanges(unique.map((d) => [d.b_age, d.t_age]));
+  return h([
+    h(
+      DataField,
+      {
+        label: "Intervals",
+      },
+      [
+        unique.map((interval) => {
+          return h(Interval, {
+            key: interval.id,
+            interval,
+            showAgeRange: true,
+          });
+        }),
+        h(Value, { unit: "Ma", value: `${ageRange[0]} - ${ageRange[1]}` }),
+      ]
+    ),
+  ]);
+}
+
+function Value({
+  value,
+  unit,
+  children,
+}: {
+  value?: any;
+  unit?: string;
+  children?: any;
+}) {
+  const val = value ?? children;
+  return h("span.value-container", [
+    h("span.value", val),
+    h.if(unit != null)([" ", h("span.unit", unit)]),
+  ]);
 }
 
 function Interval({

@@ -1,4 +1,12 @@
-import { Popover, Spinner } from "@blueprintjs/core";
+import {
+  Button,
+  Popover,
+  Spinner,
+  ButtonGroup,
+  SegmentedControl,
+  Label,
+  FormGroup,
+} from "@blueprintjs/core";
 import { FullscreenPage } from "~/layouts";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
@@ -24,19 +32,28 @@ export function Page({ map }) {
   const size = useElementSize(ref);
   const legendData = useLegendData(map);
 
+  const [ageMode, setAgeMode] = useState(AgeDisplayMode.MapLegend);
+
   const correlationChartData = useMemo(() => {
-    console.log(legendData);
     return buildCorrelationChartData(legendData);
   }, [legendData]);
 
   return h(FullscreenPage, [
     h("div.page-inner", [
-      h(PageBreadcrumbs),
+      h("div.flex.row", [
+        h(PageBreadcrumbs),
+        h("div.spacer"),
+        h(AgeDisplayModeSelector, {
+          displayMode: ageMode,
+          setDisplayMode: setAgeMode,
+        }),
+      ]),
       h("div.vis-container", { ref }, [
         h.if(legendData != null)(CorrelationChart, {
           map,
           ...size,
           data: correlationChartData,
+          ageMode,
         }),
       ]),
     ]),
@@ -51,9 +68,16 @@ export type BarsProps = {
   events?: boolean;
   map: MapInfo;
   data: CorrelationItem[];
+  ageMode: AgeDisplayMode;
 };
 
-function CorrelationChart({ width, height, events = false, data }: BarsProps) {
+function CorrelationChart({
+  width,
+  height,
+  events = false,
+  data,
+  ageMode = AgeDisplayMode.MapLegend,
+}: BarsProps) {
   // bounds
   const xMax = width;
   const yMax = height - verticalMargin;
@@ -124,7 +148,10 @@ function CorrelationChart({ width, height, events = false, data }: BarsProps) {
           h(
             Group,
             data.map((d, i) => {
-              const { ageRange } = d;
+              const ageRange =
+                ageMode === AgeDisplayMode.MapLegend
+                  ? d.ageRange
+                  : d.macrostratAgeRange;
 
               const yMin = yScale(ageRange[1]);
               const yMax = yScale(ageRange[0]);
@@ -157,6 +184,7 @@ function CorrelationChart({ width, height, events = false, data }: BarsProps) {
             [
               h(SelectedLegendItemPopover, {
                 item: selectedItem,
+                ageMode,
                 xScale,
                 yScale,
               }),
@@ -171,17 +199,24 @@ function CorrelationChart({ width, height, events = false, data }: BarsProps) {
 function SelectedLegendItemPopover({
   item,
   xScale,
+  ageMode,
   yScale,
 }: {
   item: CorrelationItem | null;
   xScale: any;
   yScale: any;
+  ageMode: AgeDisplayMode;
 }) {
   if (item == null) {
     return null;
   }
 
-  const { details, id, ageRange } = item;
+  const { details, id } = item;
+
+  const ageRange =
+    ageMode === AgeDisplayMode.MapLegend
+      ? item.ageRange
+      : item.macrostratAgeRange;
 
   const content = h(LegendItemInformation, { legendItem: details });
 
@@ -297,4 +332,30 @@ function useSelectedLegendID(
   );
 
   return [selectedItem, setSelectedLegendID];
+}
+
+enum AgeDisplayMode {
+  MapLegend,
+  Macrostrat,
+}
+
+function AgeDisplayModeSelector({
+  displayMode,
+  setDisplayMode,
+}: {
+  displayMode: AgeDisplayMode;
+  setDisplayMode: (a: AgeDisplayMode) => void;
+}) {
+  return h(FormGroup, { label: "Age source", inline: true }, [
+    h(SegmentedControl, {
+      options: [
+        { label: "Map legend", value: AgeDisplayMode.MapLegend },
+        { label: "Macrostrat", value: AgeDisplayMode.Macrostrat },
+      ],
+      small: true,
+      minimal: true,
+      value: displayMode,
+      onValueChange: setDisplayMode,
+    }),
+  ]);
 }
