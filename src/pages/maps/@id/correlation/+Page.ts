@@ -11,7 +11,7 @@ import { scaleBand, scaleLinear } from "@visx/scale";
 import { AxisLeft } from "@visx/axis";
 import { Timescale, TimescaleOrientation } from "@macrostrat/timescale";
 import { ForeignObject } from "@macrostrat/column-components";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bar } from "@visx/shape";
 
 const h = hyper.styled(styles);
@@ -105,12 +105,44 @@ interface LegendItem {
   color: string;
 }
 
+function useSelectedLegendID(
+  legendItems: CorrelationItem[]
+): [number | null, (a: number) => void] {
+  const [selectedLegendID, setSelectedLegendID] = useState<number | null>(null);
+
+  // Add arrow key navigation and escape key to close popover
+  const handleKeyDown = (e) => {
+    if (selectedLegendID == null) {
+      return;
+    }
+    const idx = legendItems.findIndex((d) => d.legend_id === selectedLegendID);
+    if (idx == null) {
+      return;
+    }
+    if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+      setSelectedLegendID(legendItems[idx + 1].legend_id);
+    } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+      setSelectedLegendID(legendItems[idx - 1].legend_id);
+    } else if (e.key === "Escape") {
+      setSelectedLegendID(null);
+    }
+  };
+
+  // Add event listener
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedLegendID]);
+
+  return [selectedLegendID, setSelectedLegendID];
+}
+
 function CorrelationChart({ width, height, events = false, data }: BarsProps) {
   // bounds
   const xMax = width;
   const yMax = height - verticalMargin;
 
-  const [selectedLegendID, setSelectedLegendID] = useState<number | null>(null);
+  const [selectedLegendID, setSelectedLegendID] = useSelectedLegendID(data);
 
   const domain = useMemo(
     () => mergeAgeRanges(data.map((d) => d.ageRange)),
@@ -150,54 +182,76 @@ function CorrelationChart({ width, height, events = false, data }: BarsProps) {
   if (width < 10) return null;
 
   return h("div.vis-frame", [
-    h("svg", { width, height }, [
-      h(Group, { top: verticalMargin / 2, key: "main-plot" }, [
-        h(AgeAxis, {
-          scale: yScale,
-          width: 40,
-        }),
-        h(ForeignObject, { width: 60, height, x: 40 }, [
-          h(Timescale, {
-            orientation: TimescaleOrientation.VERTICAL,
-            length: yMax,
-            // Bug in timescale component, the age range appears to be changed
-            // if we pass it in statically.
-            ageRange: [...domain],
-            absoluteAgeScale: true,
-            levels: [2, 3],
+    h(
+      "svg.vis-area",
+      {
+        width,
+        height,
+        onClick() {
+          setSelectedLegendID(null);
+        },
+      },
+      [
+        h(Group, { top: verticalMargin / 2, key: "main-plot" }, [
+          h(AgeAxis, {
+            scale: yScale,
+            width: 40,
           }),
-        ]),
-        h(
-          Group,
-          data.map((d, i) => {
-            const { ageRange } = d;
+          h(ForeignObject, { width: 60, height, x: 40 }, [
+            h(Timescale, {
+              orientation: TimescaleOrientation.VERTICAL,
+              length: yMax,
+              // Bug in timescale component, the age range appears to be changed
+              // if we pass it in statically.
+              ageRange: [...domain],
+              absoluteAgeScale: true,
+              levels: [2, 3],
+            }),
+          ]),
+          h(
+            Group,
+            data.map((d, i) => {
+              const { ageRange } = d;
 
-            const yMin = yScale(ageRange[1]);
-            const yMax = yScale(ageRange[0]);
+              const yMin = yScale(ageRange[1]);
+              const yMax = yScale(ageRange[0]);
 
-            const barWidth = xScale.bandwidth();
-            const barHeight = yMax - yMin;
-            const barX = xScale(`${d.legend_id}`);
-            const barY = yMin;
-            return h(Bar, {
-              key: d.legend_id,
-              x: barX,
-              y: barY,
-              width: barWidth,
-              height: barHeight,
-              fill: d.color,
-              onClick() {
-                console.log("Setting selected legend ID to ", d.legend_id);
-                setSelectedLegendID(d.legend_id);
-              },
-            });
-          })
-        ),
-        h(ForeignObject, { width, height, className: "popover-container" }, [
-          h(SelectedLegendItemPopover, { item: selectedItem, xScale, yScale }),
+              const barWidth = xScale.bandwidth();
+              const barHeight = yMax - yMin;
+              const barX = xScale(`${d.legend_id}`);
+              const barY = yMin;
+              return h(Bar, {
+                key: d.legend_id,
+                x: barX,
+                y: barY,
+                width: barWidth,
+                height: barHeight,
+                fill: d.color,
+                onClick(event) {
+                  setSelectedLegendID(d.legend_id);
+                  event.stopPropagation();
+                },
+              });
+            })
+          ),
+          h(
+            ForeignObject,
+            {
+              width,
+              height: height - verticalMargin,
+              className: "popover-container",
+            },
+            [
+              h(SelectedLegendItemPopover, {
+                item: selectedItem,
+                xScale,
+                yScale,
+              }),
+            ]
+          ),
         ]),
-      ]),
-    ]),
+      ]
+    ),
   ]);
 }
 
