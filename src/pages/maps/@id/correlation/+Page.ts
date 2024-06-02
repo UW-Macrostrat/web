@@ -1,4 +1,4 @@
-import { Spinner } from "@blueprintjs/core";
+import { Popover, Spinner } from "@blueprintjs/core";
 import { FullscreenPage } from "~/layouts";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
@@ -11,6 +11,8 @@ import { scaleBand, scaleLinear } from "@visx/scale";
 import { AxisLeft } from "@visx/axis";
 import { Timescale, TimescaleOrientation } from "@macrostrat/timescale";
 import { ForeignObject } from "@macrostrat/column-components";
+import { useState } from "react";
+import { Bar } from "@visx/shape";
 
 const h = hyper.styled(styles);
 
@@ -108,6 +110,8 @@ function CorrelationChart({ width, height, events = false, data }: BarsProps) {
   const xMax = width;
   const yMax = height - verticalMargin;
 
+  const [selectedLegendID, setSelectedLegendID] = useState<number | null>(null);
+
   const domain = useMemo(
     () => mergeAgeRanges(data.map((d) => d.ageRange)),
     [data]
@@ -115,13 +119,18 @@ function CorrelationChart({ width, height, events = false, data }: BarsProps) {
 
   const xMin = 100;
 
+  const selectedItem = useMemo(
+    () => data.find((d) => d.legend_id === selectedLegendID),
+    [data, selectedLegendID]
+  );
+
   // scales, memoize for performance
   const xScale = useMemo(
     () =>
       scaleBand<string>({
         range: [xMin, xMax],
         round: false,
-        domain: data.map((d, i) => `${i}`),
+        domain: data.map((d, i) => `${d.legend_id}`),
         padding: 0.2,
       }),
     [xMax]
@@ -168,9 +177,9 @@ function CorrelationChart({ width, height, events = false, data }: BarsProps) {
 
             const barWidth = xScale.bandwidth();
             const barHeight = yMax - yMin;
-            const barX = xScale(`${i}`);
+            const barX = xScale(`${d.legend_id}`);
             const barY = yMin;
-            return h("rect", {
+            return h(Bar, {
               key: d.legend_id,
               x: barX,
               y: barY,
@@ -178,15 +187,58 @@ function CorrelationChart({ width, height, events = false, data }: BarsProps) {
               height: barHeight,
               fill: d.color,
               onClick() {
-                if (events)
-                  alert(`clicked: ${JSON.stringify(Object.values(d))}`);
+                console.log("Setting selected legend ID to ", d.legend_id);
+                setSelectedLegendID(d.legend_id);
               },
             });
           })
         ),
+        h(ForeignObject, { width, height, className: "popover-container" }, [
+          h(SelectedLegendItemPopover, { item: selectedItem, xScale, yScale }),
+        ]),
       ]),
     ]),
   ]);
+}
+
+function SelectedLegendItemPopover({
+  item,
+  xScale,
+  yScale,
+}: {
+  item: CorrelationItem | null;
+  xScale: any;
+  yScale: any;
+}) {
+  if (item == null) {
+    return null;
+  }
+
+  const content = h("div", [
+    h("h3", item.legend_id.toString()),
+    h("p", item.color),
+  ]);
+
+  const xv = xScale(`${item.legend_id}`);
+  const top = yScale(item.ageRange[1]);
+  const bottom = yScale(item.ageRange[0]);
+
+  return h(
+    "div.popover-main",
+    {
+      style: {
+        top: top,
+        left: xv,
+        width: xScale.bandwidth(),
+        height: bottom - top,
+      },
+    },
+    h(
+      Popover,
+      { content, isOpen: true, usePortal: true },
+      h("span.popover-target")
+    )
+  );
 }
 
 function AgeAxis({ scale, width }) {
