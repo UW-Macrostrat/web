@@ -34,7 +34,7 @@ export function Page({ map }) {
   const size = useElementSize(ref);
   const legendData = useLegendData(map);
 
-  const [ageMode, setAgeMode] = useState(AgeDisplayMode.Macrostrat);
+  const [ageMode, setAgeMode] = useState(AgeDisplayMode.MapLegend);
 
   const correlationChartData = useMemo(() => {
     return buildCorrelationChartData(legendData, ageMode);
@@ -76,7 +76,6 @@ export type BarsProps = {
 function CorrelationChart({
   width,
   height,
-  events = false,
   data,
   ageMode = AgeDisplayMode.MapLegend,
 }: BarsProps) {
@@ -99,10 +98,10 @@ function CorrelationChart({
       scaleBand<string>({
         range: [xMin, xMax],
         round: false,
-        domain: data.map((d, i) => `${d.id}`),
+        domain: data.map((d) => `${d.id}`),
         padding: 0.2,
       }),
-    [xMax]
+    [xMax, data]
   );
   const yScale = useMemo(() => {
     return scaleLinear<number>({
