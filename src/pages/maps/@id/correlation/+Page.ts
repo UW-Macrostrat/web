@@ -1,10 +1,7 @@
 import {
-  Button,
   Popover,
   Spinner,
-  ButtonGroup,
   SegmentedControl,
-  Label,
   FormGroup,
 } from "@blueprintjs/core";
 import { FullscreenPage } from "~/layouts";
@@ -71,6 +68,20 @@ export type BarsProps = {
   ageMode: AgeDisplayMode;
 };
 
+function getBoundingAgeRange(item: CorrelationItem, ageMode: AgeDisplayMode) {
+  switch (ageMode) {
+    case AgeDisplayMode.MapLegend:
+      return item.ageRange;
+    case AgeDisplayMode.Macrostrat:
+      return item.macrostratAgeRange ?? item.ageRange;
+    case AgeDisplayMode.Both:
+      if (item.macrostratAgeRange == null) {
+        return item.ageRange;
+      }
+      return mergeAgeRanges([item.ageRange, item.macrostratAgeRange]);
+  }
+}
+
 function CorrelationChart({
   width,
   height,
@@ -85,8 +96,8 @@ function CorrelationChart({
   const [selectedItem, setSelectedLegendID] = useSelectedLegendID(data);
 
   const domain = useMemo(
-    () => mergeAgeRanges(data.map((d) => d.ageRange)),
-    [data]
+    () => mergeAgeRanges(data.map((d) => getBoundingAgeRange(d, ageMode))),
+    [data, ageMode]
   );
 
   const xMin = 100;
@@ -160,7 +171,7 @@ function CorrelationChart({
               const barHeight = yMax - yMin;
               const barX = xScale(`${d.id}`);
               const barY = yMin;
-              return h(Bar, {
+              const main = h(Bar, {
                 key: d.id,
                 x: barX,
                 y: barY,
@@ -172,6 +183,27 @@ function CorrelationChart({
                   event.stopPropagation();
                 },
               });
+              if (
+                ageMode !== AgeDisplayMode.Both ||
+                d.macrostratAgeRange == null
+              ) {
+                return main;
+              }
+
+              // We need to render the un-corrected age range as well
+              const yMin1 = yScale(d.ageRange[1]);
+              const yMax1 = yScale(d.ageRange[0]);
+              return h(Group, { key: d.id }, [
+                h(Bar, {
+                  x: barX,
+                  y: yMin1,
+                  width: barWidth,
+                  height: yMax1 - yMin1,
+                  fill: d.color,
+                  opacity: 0.5,
+                }),
+                main,
+              ]);
             })
           ),
           h(
@@ -337,6 +369,7 @@ function useSelectedLegendID(
 enum AgeDisplayMode {
   MapLegend,
   Macrostrat,
+  Both,
 }
 
 function AgeDisplayModeSelector({
@@ -351,6 +384,7 @@ function AgeDisplayModeSelector({
       options: [
         { label: "Map legend", value: AgeDisplayMode.MapLegend },
         { label: "Macrostrat", value: AgeDisplayMode.Macrostrat },
+        { label: "Both", value: AgeDisplayMode.Both },
       ],
       small: true,
       minimal: true,
