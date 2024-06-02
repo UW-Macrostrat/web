@@ -11,6 +11,9 @@ export type IntervalShort = {
   id: number;
   b_age: number;
   t_age: number;
+  name: string;
+  color: string;
+  rank: number;
 };
 
 export interface LegendItem {

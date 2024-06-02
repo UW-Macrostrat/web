@@ -1,5 +1,5 @@
 import hyper from "@macrostrat/hyper";
-import { LegendItem } from "./types";
+import { LegendItem, IntervalShort } from "./types";
 import { LithologyTag } from "~/components";
 import styles from "./main.module.sass";
 import classNames from "classnames";
@@ -28,13 +28,13 @@ export function LegendItemInformation({
         h(DataField, { label: "Comments", value: legendItem.comments }),
         h(DataField, { label: "Lithology", value: legendItem.lith }),
         h(LithologyList, { lithologies: legendItem.liths }),
-        h(DataField, {
-          label: "Linked intervals",
-          value: `${legendItem.b_interval.b_age} - ${legendItem.t_interval.t_age}`,
+        h(IntervalField, {
+          intervals: [legendItem.b_interval, legendItem.t_interval],
         }),
         h(DataField, {
           label: "Best age",
           value: `${legendItem.best_age_bottom} - ${legendItem.best_age_top}`,
+          unit: "Ma",
         }),
         h(DataField, { label: "Unit IDs", value: legendItem.unit_ids }),
         h(DataField, { label: "Concept IDs", value: legendItem.concept_ids }),
@@ -67,10 +67,48 @@ function DataField({
   }
 
   return h("div.data-field", { className: classNames(className, { inline }) }, [
-    h("span.label", label),
-    h("span.value", val),
-    h.if(unit != null)("span.unit", unit),
+    h("div.label", label),
+    h("div.value-container", [
+      h("span.value", val),
+      h.if(unit != null)([" ", h("span.unit", unit)]),
+    ]),
   ]);
+}
+
+function IntervalField({ intervals }: { intervals: IntervalShort[] }) {
+  const unique = uniqueIntervals(...intervals);
+  return h(
+    DataField,
+    {
+      label: "Intervals",
+    },
+    unique.map((interval) => {
+      return h(Interval, { interval, showAgeRange: true });
+    })
+  );
+}
+
+function Interval({
+  interval,
+  showAgeRange = false,
+}: {
+  interval: IntervalShort;
+  showAgeRange?: boolean;
+}) {
+  return h(LithologyTag, {
+    data: interval,
+  });
+}
+
+function uniqueIntervals(
+  ...intervals: (IntervalShort | undefined)[]
+): IntervalShort[] {
+  const unique = new Map<number, IntervalShort>();
+  for (const interval of intervals) {
+    if (interval == null) continue;
+    unique.set(interval.id, interval);
+  }
+  return Array.from(unique.values()).sort((a, b) => b.b_age - a.b_age);
 }
 
 function LithologyList({ lithologies }) {
