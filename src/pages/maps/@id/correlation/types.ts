@@ -34,3 +34,9 @@ export interface LegendItem {
   concept_ids: string;
   color: string;
 }
+
+export enum AgeDisplayMode {
+  MapLegend,
+  Macrostrat,
+  Both,
+}

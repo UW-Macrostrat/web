@@ -18,8 +18,13 @@ import { Timescale, TimescaleOrientation } from "@macrostrat/timescale";
 import { ForeignObject } from "@macrostrat/column-components";
 import { useState, useEffect } from "react";
 import { Bar } from "@visx/shape";
-import { CorrelationItem, AgeRange } from "./types";
-import { buildCorrelationChartData, mergeAgeRanges } from "./prepare-data";
+import { CorrelationItem, AgeRange, AgeDisplayMode } from "./types";
+import {
+  buildCorrelationChartData,
+  mergeAgeRanges,
+  getBoundingAgeRange,
+  getBestAgeRange,
+} from "./prepare-data";
 import { LegendItemInformation } from "./legend-item";
 
 const h = hyper.styled(styles);
@@ -29,11 +34,11 @@ export function Page({ map }) {
   const size = useElementSize(ref);
   const legendData = useLegendData(map);
 
-  const [ageMode, setAgeMode] = useState(AgeDisplayMode.MapLegend);
+  const [ageMode, setAgeMode] = useState(AgeDisplayMode.Macrostrat);
 
   const correlationChartData = useMemo(() => {
-    return buildCorrelationChartData(legendData);
-  }, [legendData]);
+    return buildCorrelationChartData(legendData, ageMode);
+  }, [legendData, ageMode]);
 
   return h(FullscreenPage, [
     h("div.page-inner", [
@@ -67,20 +72,6 @@ export type BarsProps = {
   data: CorrelationItem[];
   ageMode: AgeDisplayMode;
 };
-
-function getBoundingAgeRange(item: CorrelationItem, ageMode: AgeDisplayMode) {
-  switch (ageMode) {
-    case AgeDisplayMode.MapLegend:
-      return item.ageRange;
-    case AgeDisplayMode.Macrostrat:
-      return item.macrostratAgeRange ?? item.ageRange;
-    case AgeDisplayMode.Both:
-      if (item.macrostratAgeRange == null) {
-        return item.ageRange;
-      }
-      return mergeAgeRanges([item.ageRange, item.macrostratAgeRange]);
-  }
-}
 
 function CorrelationChart({
   width,
@@ -159,10 +150,7 @@ function CorrelationChart({
           h(
             Group,
             data.map((d, i) => {
-              const ageRange =
-                ageMode === AgeDisplayMode.MapLegend
-                  ? d.ageRange
-                  : d.macrostratAgeRange;
+              const ageRange = getBestAgeRange(d, ageMode);
 
               const yMin = yScale(ageRange[1]);
               const yMax = yScale(ageRange[0]);
@@ -200,7 +188,7 @@ function CorrelationChart({
                   width: barWidth,
                   height: yMax1 - yMin1,
                   fill: d.color,
-                  opacity: 0.5,
+                  opacity: 0.3,
                 }),
                 main,
               ]);
@@ -243,18 +231,15 @@ function SelectedLegendItemPopover({
     return null;
   }
 
-  const { details, id } = item;
+  const range = getBoundingAgeRange(item, ageMode);
 
-  const ageRange =
-    ageMode === AgeDisplayMode.MapLegend
-      ? item.ageRange
-      : item.macrostratAgeRange;
+  const { details, id } = item;
 
   const content = h(LegendItemInformation, { legendItem: details });
 
   const xv = xScale(`${id}`);
-  const top = yScale(ageRange[1]);
-  const bottom = yScale(ageRange[0]);
+  const top = yScale(range[1]);
+  const bottom = yScale(range[0]);
 
   return h(
     "div.popover-main",
@@ -364,12 +349,6 @@ function useSelectedLegendID(
   );
 
   return [selectedItem, setSelectedLegendID];
-}
-
-enum AgeDisplayMode {
-  MapLegend,
-  Macrostrat,
-  Both,
 }
 
 function AgeDisplayModeSelector({

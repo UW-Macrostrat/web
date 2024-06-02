@@ -1,7 +1,14 @@
-import { LegendItem, IntervalShort, CorrelationItem, AgeRange } from "./types";
+import {
+  LegendItem,
+  IntervalShort,
+  CorrelationItem,
+  AgeRange,
+  AgeDisplayMode,
+} from "./types";
 
 export function buildCorrelationChartData(
-  legendData: LegendItem[]
+  legendData: LegendItem[],
+  ageMode: AgeDisplayMode
 ): CorrelationItem[] {
   /** Build the data for a correlation chart */
   if (legendData == null) {
@@ -39,7 +46,9 @@ export function buildCorrelationChartData(
     })
     .filter((d) => d != null) as CorrelationItem[];
 
-  return data1.sort((a, b) => intervalComparison(a.ageRange, b.ageRange));
+  return data1.sort((a, b) =>
+    intervalComparison(getBestAgeRange(a, ageMode), getBestAgeRange(b, ageMode))
+  );
 }
 
 function getAgeRangeForInterval(interval: IntervalShort): AgeRange | null {
@@ -118,4 +127,29 @@ function compareAgeRanges(a: AgeRange, b: AgeRange): AgeRangeRelationship {
 function intervalComparison(a: AgeRange, b: AgeRange) {
   // If age range fully overlaps with another, put the wider one first
   return midpointAge(b) - midpointAge(a);
+}
+
+export function getBoundingAgeRange(
+  item: CorrelationItem,
+  ageMode: AgeDisplayMode
+) {
+  const bestAge = getBestAgeRange(item, ageMode);
+  if (ageMode == AgeDisplayMode.Macrostrat) {
+    return bestAge;
+  }
+  if (bestAge == item.ageRange) {
+    return item.ageRange;
+  } else {
+    return mergeAgeRanges([item.ageRange, bestAge]);
+  }
+}
+
+export function getBestAgeRange(
+  item: CorrelationItem,
+  ageMode: AgeDisplayMode
+) {
+  if (ageMode == AgeDisplayMode.MapLegend || item.macrostratAgeRange == null) {
+    return item.ageRange;
+  }
+  return item.macrostratAgeRange;
 }
