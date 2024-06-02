@@ -8,18 +8,30 @@ export function buildCorrelationChartData(
     return [];
   }
 
-  let data1 = legendData.map((d, i) => {
-    return {
-      details: d,
-      id: d.legend_id,
-      ageRange: mergeAgeRanges([
-        getAgeRangeForInterval(d.b_interval),
-        getAgeRangeForInterval(d.t_interval),
-      ]),
-      frequency: i,
-      color: d.color,
-    };
-  });
+  let data1 = legendData
+    .map((d, i) => {
+      let ageRanges: AgeRange[] = [];
+
+      if (d.b_interval != null) {
+        ageRanges.push(getAgeRangeForInterval(d.b_interval));
+      }
+      if (d.t_interval != null) {
+        ageRanges.push(getAgeRangeForInterval(d.t_interval));
+      }
+
+      if (ageRanges.length === 0) {
+        return null;
+      }
+
+      return {
+        details: d,
+        id: d.legend_id,
+        ageRange: mergeAgeRanges(ageRanges),
+        frequency: i,
+        color: d.color,
+      };
+    })
+    .filter((d) => d != null) as CorrelationItem[];
 
   return data1.sort((a, b) => intervalComparison(a.ageRange, b.ageRange));
 }
