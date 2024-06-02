@@ -13,6 +13,8 @@ import { Timescale, TimescaleOrientation } from "@macrostrat/timescale";
 import { ForeignObject } from "@macrostrat/column-components";
 import { useState, useEffect } from "react";
 import { Bar } from "@visx/shape";
+import { CorrelationItem, AgeRange } from "./types";
+import { buildCorrelationChartData, mergeAgeRanges } from "./prepare-data";
 
 const h = hyper.styled(styles);
 
@@ -40,43 +42,6 @@ export function Page({ map }) {
   ]);
 }
 
-type IntervalShort = {
-  id: number;
-  b_age: number;
-  t_age: number;
-};
-
-function buildCorrelationChartData(
-  legendData: LegendItem[]
-): CorrelationItem[] {
-  /** Build the data for a correlation chart */
-  if (legendData == null) {
-    return [];
-  }
-
-  let data1 = legendData.map((d, i) => {
-    return {
-      legend_id: d.legend_id.toString(),
-      ageRange: mergeAgeRanges([
-        getAgeRangeForInterval(d.b_interval),
-        getAgeRangeForInterval(d.t_interval),
-      ]),
-      frequency: i,
-      color: d.color,
-    };
-  });
-
-  return data1.sort((a, b) => intervalComparison(a.ageRange, b.ageRange));
-}
-
-type AgeRange = [number, number];
-
-type CorrelationItem = {
-  color: string;
-  ageRange: AgeRange;
-  legend_id: number;
-};
-
 const verticalMargin = 60;
 
 export type BarsProps = {
@@ -86,56 +51,6 @@ export type BarsProps = {
   map: MapInfo;
   data: CorrelationItem[];
 };
-
-interface LegendItem {
-  legend_id: number;
-  name: string;
-  strat_name: string;
-  age: string;
-  lith: string;
-  descrip: string;
-  comments: string;
-  liths: string;
-  b_interval: IntervalShort;
-  t_interval: IntervalShort;
-  best_age_bottom?: number;
-  best_age_top?: number;
-  unit_ids: string;
-  concept_ids: string;
-  color: string;
-}
-
-function useSelectedLegendID(
-  legendItems: CorrelationItem[]
-): [number | null, (a: number) => void] {
-  const [selectedLegendID, setSelectedLegendID] = useState<number | null>(null);
-
-  // Add arrow key navigation and escape key to close popover
-  const handleKeyDown = (e) => {
-    if (selectedLegendID == null) {
-      return;
-    }
-    const idx = legendItems.findIndex((d) => d.legend_id === selectedLegendID);
-    if (idx == null) {
-      return;
-    }
-    if (e.key === "ArrowDown" || e.key === "ArrowRight") {
-      setSelectedLegendID(legendItems[idx + 1].legend_id);
-    } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
-      setSelectedLegendID(legendItems[idx - 1].legend_id);
-    } else if (e.key === "Escape") {
-      setSelectedLegendID(null);
-    }
-  };
-
-  // Add event listener
-  useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedLegendID]);
-
-  return [selectedLegendID, setSelectedLegendID];
-}
 
 function CorrelationChart({ width, height, events = false, data }: BarsProps) {
   // bounds
@@ -181,6 +96,8 @@ function CorrelationChart({ width, height, events = false, data }: BarsProps) {
 
   if (width < 10) return null;
 
+  const ageRange = [...domain] as AgeRange;
+
   return h("div.vis-frame", [
     h(
       "svg.vis-area",
@@ -203,7 +120,7 @@ function CorrelationChart({ width, height, events = false, data }: BarsProps) {
               length: yMax,
               // Bug in timescale component, the age range appears to be changed
               // if we pass it in statically.
-              ageRange: [...domain],
+              ageRange,
               absoluteAgeScale: true,
               levels: [2, 3],
             }),
@@ -320,80 +237,36 @@ function AgeAxis({ scale, width }) {
   });
 }
 
-function getAgeRangeForInterval(interval: IntervalShort): AgeRange | null {
-  /** Get the age range for an interval, building up an index as we go */
-  return [interval.b_age, interval.t_age];
-}
+function useSelectedLegendID(
+  legendItems: CorrelationItem[]
+): [number | null, (a: number) => void] {
+  /** Hook to manage the selected legend item, including handling of arrow-key navigation */
 
-enum MergeMode {
-  Inner,
-  Outer,
-}
+  const [selectedLegendID, setSelectedLegendID] = useState<number | null>(null);
 
-function mergeAgeRanges(
-  ranges: AgeRange[],
-  mergeMode: MergeMode = MergeMode.Outer
-): AgeRange {
-  /** Merge a set of age ranges to get the inner or outer bounds */
-  let min = Infinity;
-  let max = 0;
-  // Negative ages are not handled
+  // Add arrow key navigation and escape key to close popover
+  const handleKeyDown = (e) => {
+    if (selectedLegendID == null) {
+      return;
+    }
+    const idx = legendItems.findIndex((d) => d.legend_id === selectedLegendID);
+    if (idx == null) {
+      return;
+    }
+    if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+      setSelectedLegendID(legendItems[idx + 1].legend_id);
+    } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+      setSelectedLegendID(legendItems[idx - 1].legend_id);
+    } else if (e.key === "Escape") {
+      setSelectedLegendID(null);
+    }
+  };
 
-  if (mergeMode === MergeMode.Inner) {
-    min = Math.min(...ranges.map((d) => d[0]));
-    max = Math.max(...ranges.map((d) => d[1]));
-  } else {
-    min = Math.max(...ranges.map((d) => d[0]));
-    max = Math.min(...ranges.map((d) => d[1]));
-  }
+  // Add event listener
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedLegendID]);
 
-  // Age ranges should start with the oldest (largest) age
-  if (min < max) {
-    return [max, min];
-  }
-  return [min, max];
-}
-
-function midpointAge(range: [number, number]) {
-  return (range[0] + range[1]) / 2;
-}
-
-enum AgeRangeRelationship {
-  Disjoint,
-  Contains,
-  Contained,
-  Identical,
-}
-
-function convertToForwardOrdinal(a: AgeRange): AgeRange {
-  /** Age ranges are naturally expressed as [b_age, t_age] where
-   * b_age is the older age and t_age is the younger age. This function
-   * converts the age range to [min, max] where min is the oldest age,
-   * expressed as negative numbers. This assists with intuitive ordering
-   * in certain cases.
-   */
-  return [-a[0], -a[1]];
-}
-
-function compareAgeRanges(a: AgeRange, b: AgeRange): AgeRangeRelationship {
-  const a1 = convertToForwardOrdinal(a);
-  const b1 = convertToForwardOrdinal(b);
-  /** Compare two age ranges */
-  if (a1[0] > b1[1] || a1[1] < b1[0]) {
-    return AgeRangeRelationship.Disjoint;
-  }
-  if (a1[0] === b1[0] && a1[1] === b1[1]) {
-    return AgeRangeRelationship.Identical;
-  }
-  if (a1[0] <= b1[0] && a1[1] >= b1[1]) {
-    return AgeRangeRelationship.Contains;
-  }
-  if (a1[0] >= b1[0] && a1[1] <= b1[1]) {
-    return AgeRangeRelationship.Contained;
-  }
-}
-
-function intervalComparison(a: AgeRange, b: AgeRange) {
-  // If age range fully overlaps with another, put the wider one first
-  return midpointAge(b) - midpointAge(a);
+  return [selectedLegendID, setSelectedLegendID];
 }
