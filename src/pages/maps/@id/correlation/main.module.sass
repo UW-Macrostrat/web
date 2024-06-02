@@ -6,12 +6,10 @@ div.correlation-chart
 
 // Ideally this wouldn't be necessary
 .page-inner
-  position: absolute
-  top: 0
-  left: 0
-  right: 0
-  bottom: 0
-  padding: 2em
+  position: relative
+  width: 100%
+  height: 100%
+  margin: 2em auto 3em
   display: flex
   flex-direction: column
 
@@ -33,3 +31,41 @@ div.correlation-chart
     width: 100%
     display: block
     line-height: 0
+
+.legend-panel-outer
+  width: 25em
+  max-height: 60vh
+  overflow-y: scroll
+
+.legend-info-panel
+  padding: 1em
+  header
+    display: flex
+    justify-content: space-between
+    code
+      font-size: 0.9em
+      color: var(--secondary-color)
+    align-items: baseline
+
+  h3
+    margin: 0 0 0.5em
+    font-size: 1.1em
+
+.data-field
+  margin: 0.2em 0 0.4em
+  &.inline
+    display: flex
+    flex-direction: row
+    align-items: baseline
+    gap: 1em
+    justify-content: space-between
+    .value
+      text-align-last: right
+  .label
+    font-size: 0.8em
+    font-weight: bold
+    display: block
+    color: var(--secondary-color)
+  .value
+    display: block
+

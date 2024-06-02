@@ -15,6 +15,7 @@ import { useState, useEffect } from "react";
 import { Bar } from "@visx/shape";
 import { CorrelationItem, AgeRange } from "./types";
 import { buildCorrelationChartData, mergeAgeRanges } from "./prepare-data";
+import { LegendItemInformation } from "./legend-item";
 
 const h = hyper.styled(styles);
 
@@ -57,7 +58,7 @@ function CorrelationChart({ width, height, events = false, data }: BarsProps) {
   const xMax = width;
   const yMax = height - verticalMargin;
 
-  const [selectedLegendID, setSelectedLegendID] = useSelectedLegendID(data);
+  const [selectedItem, setSelectedLegendID] = useSelectedLegendID(data);
 
   const domain = useMemo(
     () => mergeAgeRanges(data.map((d) => d.ageRange)),
@@ -66,18 +67,13 @@ function CorrelationChart({ width, height, events = false, data }: BarsProps) {
 
   const xMin = 100;
 
-  const selectedItem = useMemo(
-    () => data.find((d) => d.legend_id === selectedLegendID),
-    [data, selectedLegendID]
-  );
-
   // scales, memoize for performance
   const xScale = useMemo(
     () =>
       scaleBand<string>({
         range: [xMin, xMax],
         round: false,
-        domain: data.map((d, i) => `${d.legend_id}`),
+        domain: data.map((d, i) => `${d.id}`),
         padding: 0.2,
       }),
     [xMax]
@@ -135,17 +131,17 @@ function CorrelationChart({ width, height, events = false, data }: BarsProps) {
 
               const barWidth = xScale.bandwidth();
               const barHeight = yMax - yMin;
-              const barX = xScale(`${d.legend_id}`);
+              const barX = xScale(`${d.id}`);
               const barY = yMin;
               return h(Bar, {
-                key: d.legend_id,
+                key: d.id,
                 x: barX,
                 y: barY,
                 width: barWidth,
                 height: barHeight,
                 fill: d.color,
                 onClick(event) {
-                  setSelectedLegendID(d.legend_id);
+                  setSelectedLegendID(d.id);
                   event.stopPropagation();
                 },
               });
@@ -185,14 +181,13 @@ function SelectedLegendItemPopover({
     return null;
   }
 
-  const content = h("div", [
-    h("h3", item.legend_id.toString()),
-    h("p", item.color),
-  ]);
+  const { details, id, ageRange } = item;
 
-  const xv = xScale(`${item.legend_id}`);
-  const top = yScale(item.ageRange[1]);
-  const bottom = yScale(item.ageRange[0]);
+  const content = h(LegendItemInformation, { legendItem: details });
+
+  const xv = xScale(`${id}`);
+  const top = yScale(ageRange[1]);
+  const bottom = yScale(ageRange[0]);
 
   return h(
     "div.popover-main",
@@ -239,7 +234,7 @@ function AgeAxis({ scale, width }) {
 
 function useSelectedLegendID(
   legendItems: CorrelationItem[]
-): [number | null, (a: number) => void] {
+): [CorrelationItem | null, (a: number) => void] {
   /** Hook to manage the selected legend item, including handling of arrow-key navigation */
 
   const [selectedLegendID, setSelectedLegendID] = useState<number | null>(null);
@@ -249,24 +244,57 @@ function useSelectedLegendID(
     if (selectedLegendID == null) {
       return;
     }
-    const idx = legendItems.findIndex((d) => d.legend_id === selectedLegendID);
+    const idx = legendItems.findIndex((d) => d.id === selectedLegendID);
     if (idx == null) {
       return;
     }
     if (e.key === "ArrowDown" || e.key === "ArrowRight") {
-      setSelectedLegendID(legendItems[idx + 1].legend_id);
+      setSelectedLegendID(legendItems[idx + 1].id);
     } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
-      setSelectedLegendID(legendItems[idx - 1].legend_id);
+      setSelectedLegendID(legendItems[idx - 1].id);
     } else if (e.key === "Escape") {
       setSelectedLegendID(null);
     }
   };
 
+  useEffect(() => {
+    // Get the focused legend_id from the query string if set
+    const urlParams = new URLSearchParams(window.location.search);
+    const legendID = urlParams.get("legend_id");
+    if (legendID != null) {
+      setSelectedLegendID(parseInt(legendID));
+    }
+  }, []);
+
   // Add event listener
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (selectedLegendID == null) {
+      urlParams.delete("legend_id");
+    } else {
+      urlParams.set("legend_id", `${selectedLegendID}`);
+    }
+    let qString = urlParams.toString();
+    if (qString.length > 0) {
+      qString = "?" + qString;
+    }
+
+    const newUrl = `${window.location.pathname}${qString}`;
+    window.history.replaceState(null, "", newUrl);
+
+    // Set query string to selected legend item
+    if (selectedLegendID == null) {
+      return;
+    }
+
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selectedLegendID]);
 
-  return [selectedLegendID, setSelectedLegendID];
+  const selectedItem = useMemo(
+    () => legendItems.find((d) => d.id === selectedLegendID),
+    [legendItems, selectedLegendID]
+  );
+
+  return [selectedItem, setSelectedLegendID];
 }

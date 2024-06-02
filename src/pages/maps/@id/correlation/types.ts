@@ -3,7 +3,8 @@ export type AgeRange = [number, number];
 export type CorrelationItem = {
   color: string;
   ageRange: AgeRange;
-  legend_id: number;
+  details: LegendItem;
+  id: number;
 };
 
 export type IntervalShort = {

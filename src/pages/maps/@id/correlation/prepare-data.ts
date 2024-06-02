@@ -10,7 +10,8 @@ export function buildCorrelationChartData(
 
   let data1 = legendData.map((d, i) => {
     return {
-      legend_id: d.legend_id.toString(),
+      details: d,
+      id: d.legend_id,
       ageRange: mergeAgeRanges([
         getAgeRangeForInterval(d.b_interval),
         getAgeRangeForInterval(d.t_interval),
