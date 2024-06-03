@@ -10,8 +10,6 @@ import { contextPanelIsInitiallyOpen } from "../nav-hooks";
 import { CoreAction, coreReducer } from "./core";
 import { hashStringReducer } from "./hash-string";
 import { AppAction, AppState, MenuAction, MenuState } from "./types";
-import update from "immutability-helper";
-import { MapLayer } from "./map";
 export const browserHistory = createBrowserHistory();
 
 const routerReducer = createRouterReducer(browserHistory);
@@ -43,13 +41,23 @@ function mainReducer(
    * state, we pass thm to individual reducers.
    */
   switch (action.type) {
+    case "@@INIT": {
+      const route = state.router.location;
+      const { pathname } = route;
+      const isOpen = contextPanelIsInitiallyOpen(pathname);
+      const s1 = setInfoMarkerPosition(state, pathname);
+      return {
+        ...s1,
+        core: { ...s1.core, menuOpen: isOpen, contextPanelOpen: isOpen },
+      };
+    }
     case "@@router/ON_LOCATION_CHANGED": {
-      const { pathname } = action.payload.location;
+      const newRoute = action.payload.location;
+      const { pathname } = newRoute;
       const isOpen = contextPanelIsInitiallyOpen(pathname);
 
       const s1 = setInfoMarkerPosition(state, pathname);
 
-      const newRoute = action.payload.location;
       let newAction = action;
       if (newRoute.hash == "") {
         newAction = {
