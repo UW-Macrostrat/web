@@ -51,13 +51,13 @@ async function actionRunner(
       );
 
       // If we are on the column route, the column layer must be enabled
-      const colMatch = matchPath(
-        mapPagePrefix + "/loc/:lng/:lat/column",
-        pathname
-      );
-      if (colMatch != null) {
-        coreState1.mapLayers.add(MapLayer.COLUMNS);
-      }
+      // const colMatch = matchPath(
+      //   mapPagePrefix + "/loc/:lng/:lat/column",
+      //   pathname
+      // );
+      // if (colMatch != null) {
+      //   coreState1.mapLayers.add(MapLayer.COLUMNS);
+      // }
 
       // Fill out the remainder with defaults
 
