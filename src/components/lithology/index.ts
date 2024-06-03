@@ -9,7 +9,7 @@ const h = hyper.styled(styles);
 
 export function LithologyTag({
   data,
-  className,
+  className = null,
   tooltip = null,
   tooltipProps = {},
   expandOnHover = false,
