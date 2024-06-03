@@ -47,7 +47,7 @@ export function Page({ map }) {
 
   const settings = h("div.settings", [
     h("h3", "Settings"),
-    h(AgeScaleSelector, { scale: ageScale, setScale: setAgeScale }),
+    //h(AgeScaleSelector, { scale: ageScale, setScale: setAgeScale }),
     h(AgeDisplayModeSelector, {
       displayMode: ageMode,
       setDisplayMode: setAgeMode,
@@ -69,7 +69,7 @@ export function Page({ map }) {
               setSelectedLegendID(null);
             },
           },
-          [h(Button, { icon: "cog", minimal: true })]
+          h(Button, { icon: "cog", minimal: true })
         ),
       ]),
       h("div.vis-container", { ref }, [
@@ -157,8 +157,6 @@ function CorrelationChart({
 
   if (width < 10) return null;
 
-  const ageRange = [...domain] as AgeRange;
-
   return h("div.vis-frame", [
     h(
       "svg.vis-area",
@@ -181,7 +179,7 @@ function CorrelationChart({
               length: yMax,
               // Bug in timescale component, the age range appears to be changed
               // if we pass it in statically.
-              ageRange,
+              ageRange: domain,
               absoluteAgeScale: true,
               levels: [2, 3],
             }),
