@@ -3,6 +3,7 @@ import {
   Spinner,
   SegmentedControl,
   FormGroup,
+  Button,
 } from "@blueprintjs/core";
 import { FullscreenPage } from "~/layouts";
 import hyper from "@macrostrat/hyper";
@@ -12,7 +13,7 @@ import { useLegendData, MapInfo } from "../utils";
 import { useElementSize, useInDarkMode } from "@macrostrat/ui-components";
 import { useMemo, useRef } from "react";
 import { Group } from "@visx/group";
-import { scaleBand, scaleLinear } from "@visx/scale";
+import { scaleBand, scaleLinear, scaleLog } from "@visx/scale";
 import { AxisLeft } from "@visx/axis";
 import { Timescale, TimescaleOrientation } from "@macrostrat/timescale";
 import { ForeignObject } from "@macrostrat/column-components";
@@ -35,27 +36,51 @@ export function Page({ map }) {
   const legendData = useLegendData(map);
 
   const [ageMode, setAgeMode] = useState(AgeDisplayMode.MapLegend);
+  const [ageScale, setAgeScale] = useState<AgeScale>("linear");
 
   const correlationChartData = useMemo(() => {
     return buildCorrelationChartData(legendData, ageMode);
   }, [legendData, ageMode]);
+
+  const [selectedItem, setSelectedLegendID] =
+    useSelectedLegendID(correlationChartData);
+
+  const settings = h("div.settings", [
+    h("h3", "Settings"),
+    h(AgeScaleSelector, { scale: ageScale, setScale: setAgeScale }),
+    h(AgeDisplayModeSelector, {
+      displayMode: ageMode,
+      setDisplayMode: setAgeMode,
+    }),
+  ]);
 
   return h(FullscreenPage, [
     h("div.page-inner", [
       h("div.flex.row", [
         h(PageBreadcrumbs),
         h("div.spacer"),
-        h(AgeDisplayModeSelector, {
-          displayMode: ageMode,
-          setDisplayMode: setAgeMode,
-        }),
+        h(
+          Popover,
+          {
+            content: settings,
+            usePortal: true,
+            rootBoundary: ref.current,
+            onOpening() {
+              setSelectedLegendID(null);
+            },
+          },
+          [h(Button, { icon: "cog", minimal: true })]
+        ),
       ]),
       h("div.vis-container", { ref }, [
         h.if(legendData != null)(CorrelationChart, {
           map,
           ...size,
           data: correlationChartData,
+          selectedItem,
+          setSelectedLegendID,
           ageMode,
+          ageScale,
         }),
       ]),
     ]),
@@ -67,23 +92,28 @@ const verticalMargin = 60;
 export type BarsProps = {
   width: number;
   height: number;
-  events?: boolean;
   map: MapInfo;
   data: CorrelationItem[];
   ageMode: AgeDisplayMode;
+  ageScale: AgeScale;
+  selectedItem: CorrelationItem | null;
+  setSelectedLegendID: (a: number) => void;
 };
+
+type AgeScale = "linear" | "log";
 
 function CorrelationChart({
   width,
   height,
   data,
   ageMode = AgeDisplayMode.MapLegend,
+  ageScale = "linear",
+  selectedItem,
+  setSelectedLegendID,
 }: BarsProps) {
   // bounds
   const xMax = width;
   const yMax = height - verticalMargin;
-
-  const [selectedItem, setSelectedLegendID] = useSelectedLegendID(data);
 
   const domain = useMemo(
     () => mergeAgeRanges(data.map((d) => getBoundingAgeRange(d, ageMode))),
@@ -104,12 +134,22 @@ function CorrelationChart({
     [xMax, data]
   );
   const yScale = useMemo(() => {
+    if (ageScale === "log") {
+      return scaleLog<number>({
+        range: [yMax, 0],
+        round: true,
+        domain: domain,
+        nice: true,
+        base: 10,
+      });
+    }
+
     return scaleLinear<number>({
       range: [yMax, 0],
       round: false,
       domain,
     });
-  }, [domain, yMax]);
+  }, [domain, yMax, ageScale]);
 
   if (data == null) {
     return h(Spinner);
@@ -357,7 +397,7 @@ function AgeDisplayModeSelector({
   displayMode: AgeDisplayMode;
   setDisplayMode: (a: AgeDisplayMode) => void;
 }) {
-  return h(FormGroup, { label: "Age source", inline: true }, [
+  return h(FormGroup, { label: "Age source" }, [
     h(SegmentedControl, {
       options: [
         { label: "Map legend", value: AgeDisplayMode.MapLegend },
@@ -365,9 +405,28 @@ function AgeDisplayModeSelector({
         { label: "Both", value: AgeDisplayMode.Both },
       ],
       small: true,
-      minimal: true,
       value: displayMode,
       onValueChange: setDisplayMode,
+    }),
+  ]);
+}
+
+function AgeScaleSelector({
+  scale,
+  setScale,
+}: {
+  scale: AgeScale;
+  setScale: (a: AgeScale) => void;
+}) {
+  return h(FormGroup, { label: "Age scale" }, [
+    h(SegmentedControl, {
+      options: [
+        { label: "Linear", value: "linear" },
+        { label: "Log", value: "log" },
+      ],
+      small: true,
+      value: scale,
+      onValueChange: setScale,
     }),
   ]);
 }
