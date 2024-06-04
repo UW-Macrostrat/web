@@ -13,6 +13,8 @@ import pg, {
   isServer,
 } from "~/index";
 
+import { getSectionData } from "~/data-fetching";
+
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   let {
     query: { col_id },
@@ -36,18 +38,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     .select("col_name")
     .match({ id: col_id });
 
-  const { data: units, error: unit_error }: PostgrestResponse<UnitsView> =
-    await pg
-      .from("unit_strat_name_expanded")
-      .select(
-        /// joins the lith_unit and environ_unit table
-        "*,strat_names(*, strat_names_meta(*)),lith_unit!unit_liths_unit_id_fkey(*),environ_unit!unit_environs_unit_id_fkey(*)"
-      )
-      .order("position_bottom", { ascending: true })
-      .match({ col_id: col_id });
-
-  const sections: { [section_id: string | number]: UnitsView[] }[] =
-    createUnitBySections(units);
+  const {data: sections, error: unit_error} = await getSectionData({col_id})
 
   const errors = [e, col_error, unit_error].filter((e) => e != null);
   return {
@@ -83,6 +74,6 @@ export default function Columns(props: {
     ]),
     // there doesn't appear to be a good solution yet, so this is the best we can do. It loses the SSR
     // for this component unfortunately
-    h.if(!isServer())(UnitSectionTable, { sections, colSections }),
+    h.if(!isServer())(UnitSectionTable, { sections, colSections, col_id }),
   ]);
 }

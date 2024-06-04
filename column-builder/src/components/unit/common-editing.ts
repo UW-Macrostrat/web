@@ -13,33 +13,28 @@ import {
   //@ts-ignore
 } from "@macrostrat/ui-components";
 import styles from "../comp.module.scss";
-import { EnvTagsAdd, StratNameDataI, StratNameSuggest } from "..";
+import { EnvTagsAdd } from "..";
+import { UnitStratNameModalEditor } from "..";
 import { LithContainer } from "../lith";
 const h = hyperStyled(styles);
 
-export interface UnitEditorModel {
-  unit: UnitsView;
-}
-
 export interface UnitEditorProps {
-  persistChanges: (e: UnitEditorModel, c: Partial<UnitEditorModel>) => void;
+  persistChanges: (e: UnitsView, c: Partial<UnitsView>) => void;
   model: UnitsView | {};
 }
 
 export function EnvTags(props: { large: boolean }) {
   const { large = true } = props;
   const {
-    model,
+    model: unit,
     isEditing,
     actions,
   }: {
-    model: UnitEditorModel;
+    model: UnitsView;
     isEditing: boolean;
     actions: any;
   } = useModelEditor();
-  const {
-    unit: { environ_unit: envs },
-  } = model;
+  const { environ_unit: envs } = unit;
 
   const tagData =
     envs?.map((env) => {
@@ -54,13 +49,13 @@ export function EnvTags(props: { large: boolean }) {
   const onClickDelete = (id: number) => {
     const filteredEnvs = [...(envs ?? [])].filter((l) => l.id != id);
     actions.updateState({
-      model: { unit: { environ_unit: { $set: filteredEnvs } } },
+      model: { environ_unit: { $set: filteredEnvs } },
     });
   };
 
   const onClick = (env: Partial<EnvironUnit>) => {
     actions.updateState({
-      model: { unit: { environ_unit: { $push: [env] } } },
+      model: { environ_unit: { $push: [env] } },
     });
   };
 
@@ -74,31 +69,38 @@ export function EnvTags(props: { large: boolean }) {
 export function LithTags(props: { large?: boolean }) {
   const { large = true } = props;
   const {
-    model,
+    model: unit,
     isEditing,
     actions,
   }: {
-    model: UnitEditorModel;
+    model: UnitsView;
     isEditing: boolean;
     actions: any;
   } = useModelEditor();
-  const {
-    unit: { lith_unit: liths = [] },
-  } = model;
+  const { lith_unit: liths = [] } = unit;
 
   const onClickDelete = (lith: LithUnit) => {
     const filteredLiths = [...(liths ?? [])].filter((l) => l.id != lith.id);
     actions.updateState({
-      model: { unit: { lith_unit: { $set: filteredLiths } } },
+      model: { lith_unit: { $set: filteredLiths } },
     });
   };
 
   const onAdd = (lith: Lith) => {
-    actions.updateState({ model: { unit: { lith_unit: { $push: [lith] } } } });
+    lith.dom = "sub";
+    actions.updateState({ model: { lith_unit: { $push: [lith] } } });
   };
 
-  const onSwitchProp = (id: number, prop: "dom" | "sub") => {
-    console.log(id, prop);
+  const onSwitchProp = (id: number) => {
+    const liths_ = JSON.parse(JSON.stringify(liths));
+    const index = liths_.findIndex((lith: LithUnit) => lith.id == id);
+    const arrayOfDeleted = liths_.splice(index, 1);
+    const lith: LithUnit = arrayOfDeleted[0];
+    if (lith.dom == "dom") {
+      lith.dom = "sub";
+    } else lith.dom = "dom";
+    liths_.splice(index, 0, lith);
+    actions.updateState({ model: { lith_unit: { $set: liths_ } } });
   };
 
   return h("div", [
@@ -120,11 +122,11 @@ export function UnitThickness(props: {
   placeholder: string;
   small?: boolean;
 }) {
-  const { model, actions }: { model: UnitEditorModel; actions: any } =
+  const { model: unit, actions }: { model: UnitsView; actions: any } =
     useModelEditor();
 
   const update = (field: string, e: any) => {
-    actions.updateState({ model: { unit: { [field]: { $set: e } } } });
+    actions.updateState({ model: { [field]: { $set: e } } });
   };
   const width = props.small ?? false ? "60px" : undefined;
 
@@ -139,13 +141,10 @@ export function UnitThickness(props: {
 
 export function UnitRowThicknessEditor() {
   const {
-    model,
+    model: unit,
     actions,
     isEditing,
-  }: { model: UnitEditorModel; actions: any; isEditing: boolean } =
-    useModelEditor();
-
-  const unit = model.unit;
+  }: { model: UnitsView; actions: any; isEditing: boolean } = useModelEditor();
 
   return h(React.Fragment, [
     h.if(!isEditing)("div", [
@@ -172,54 +171,35 @@ export function UnitRowThicknessEditor() {
 }
 
 export function InformalUnitName() {
-  const { model, actions } = useModelEditor();
-  const { unit }: UnitEditorModel = model;
+  const { model: unit, actions, isEditing } = useModelEditor();
 
   const updateUnitName = (e: string) => {
     actions.updateState({
-      model: { unit: { unit_strat_name: { $set: e } } },
+      model: { strat_name: { $set: e } },
     });
   };
 
-  return h(FormGroup, { label: "Informal Unit Name" }, [
-    h(InputGroup, {
+  return h("div", [
+    h.if(!isEditing)("p", [unit.strat_name]),
+    h.if(isEditing)(InputGroup, {
       placeholder: "Informal Unit Name",
-      style: { width: "200px" },
-      value: unit.unit_strat_name || undefined,
+      style: { width: "120px" },
+      value: unit.strat_name || undefined,
       onChange: (e) => updateUnitName(e.target.value),
     }),
   ]);
 }
 
-export function FormalStratName() {
-  const { model, actions } = useModelEditor();
-  const { unit }: UnitEditorModel = model;
+export function UnitRowStratNameEditor() {
+  const {
+    model: unit,
+    actions,
+    isEditing,
+  }: { model: UnitsView; actions: any; isEditing: boolean } = useModelEditor();
 
-  const initialSelected: StratNameDataI | undefined = unit?.strat_names
-    ? {
-        value: `${unit.strat_names.strat_name} ${unit.strat_names.rank}`,
-        data: unit.strat_names,
-      }
-    : undefined;
+  const nameText = unit.strat_names.length
+    ? unit.strat_names.map((sn) => `${sn.strat_name} ${sn.rank}`).join(", ")
+    : "No stratigraphic name";
 
-  const updateStratName = (e: StratNameDataI) => {
-    actions.updateState({
-      model: {
-        unit: {
-          strat_names: { $set: e.data },
-          unit_strat_name: { $set: `${e.data.strat_name} ${e.data.rank}` },
-          strat_name_id: { $set: e.data.id },
-        },
-      },
-    });
-  };
-
-  return h(FormGroup, { label: "Formal strat name" }, [
-    h(StratNameSuggest, {
-      initialSelected,
-      placeholder: "Formal Strat Name",
-      onChange: updateStratName,
-      col_id: unit.col_id,
-    }),
-  ]);
+  return h("div", [nameText, h.if(isEditing)(UnitStratNameModalEditor)]);
 }

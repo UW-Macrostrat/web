@@ -1,26 +1,26 @@
 import React, { useState } from "react";
 import { hyperStyled } from "@macrostrat/hyper";
 import { useModelEditor } from "@macrostrat/ui-components";
-import {
-  Button,
-  Card,
-  Dialog,
-  Divider,
-  Menu,
-  MenuItem,
-} from "@blueprintjs/core";
+import { Button, Callout, Dialog, Tag } from "@blueprintjs/core";
 import styles from "../comp.module.scss";
-import { UnitsView } from "~/types";
-import { FormalStratName, InformalUnitName } from "../unit";
 import pg, { usePostgrest } from "~/db";
-import { StratNameConceptLongI, StratNameI } from "~/types";
+import { RANK, StratNameConceptLongI, StratNameI } from "~/types";
 import { StratNameStack } from "./panel-stack";
+import { AuthorTag } from "./query-list";
 
 const h = hyperStyled(styles);
 
+const rankLong: { [RANK]: string } = {
+  [RANK.Fm]: "Formation",
+  [RANK.Gp]: "Group",
+  [RANK.Mbr]: "Member",
+  [RANK.SGp]: "SuperGroup",
+  [RANK.Bed]: "Bed",
+};
+
 export function StratNameConceptCard(props: {
   concept_id?: number;
-  strat_name: string;
+  strat_name: StratNameI;
 }) {
   const data: StratNameConceptLongI[] = usePostgrest(
     pg
@@ -34,26 +34,38 @@ export function StratNameConceptCard(props: {
   const concept: StratNameConceptLongI = data[0];
 
   return h(
-    Card,
+    Callout,
     {
       className: "concept-card",
-      style: {
-        backgroundColor: concept.intervals.interval_color + "40",
-      },
     },
     [
-      h("h4.underline", [
-        `${props.strat_name} is connected to an official lexicon: ${concept.name}`,
+      h("div.strat-title", [
+        h("h3", [
+          `${props.strat_name.strat_name} ${rankLong[props.strat_name.rank]}`,
+        ]),
+        h(Tag, { intent: "success", minimal: true, icon: "tick" }, [
+          concept.refs.author,
+        ]),
       ]),
       h("p.geologic-age", [concept.province]),
-      h("p.geologic-age", [
-        concept.geologic_age,
-        " (",
-        concept.intervals.age_bottom,
-        "ma",
-        " - ",
-        concept.intervals.age_top,
-        "ma)",
+      h("div", { style: { display: "flex", alignItems: "center" } }, [
+        h("p.geologic-age", [
+          concept.geologic_age,
+          " (",
+          concept.intervals.age_bottom,
+          "ma",
+          " - ",
+          concept.intervals.age_top,
+          "ma)",
+        ]),
+        h("div.color-block", {
+          style: {
+            background: concept.intervals.interval_color,
+            width: "15px",
+            height: "15px",
+            marginLeft: "3px",
+          },
+        }),
       ]),
       h("p.source", [
         "reference: ",
@@ -65,37 +77,41 @@ export function StratNameConceptCard(props: {
 
 function UnitStratNameModalEditor() {
   const [open, setOpen] = useState(false);
-  const { model, actions } = useModelEditor();
-  const { unit }: { unit: UnitsView } = model;
+  const { model: unit, actions } = useModelEditor();
 
   const onSubmitStratName = (e: StratNameI | null) => {
     if (!e) return;
-
     actions.updateState({
       model: {
-        unit: {
-          unit_strat_name: { $set: `${e.strat_name} ${e.rank}` },
-          strat_names: { $set: e },
-          strat_name_id: { $set: e.id },
-        },
+        strat_names: { $push: [e] },
+      },
+    });
+  };
+
+  const onDelete = (id: number) => {
+    const newNames = [...unit.strat_names].filter((sn) => sn.id != id);
+    actions.updateState({
+      model: {
+        strat_names: { $set: newNames },
       },
     });
   };
 
   const onStratNameSelect = (e: StratNameI | null) => {
     onSubmitStratName(e);
-    setOpen(false);
   };
 
   return h(React.Fragment, [
-    h(
-      Button,
-      { minimal: true, onClick: () => setOpen(true), style: { padding: 0 } },
-      ["(modify)"]
-    ),
+    h(Button, {
+      minimal: true,
+      onClick: () => setOpen(true),
+      icon: "edit",
+      style: { padding: 0 },
+    }),
     h(
       Dialog,
       {
+        style: { width: "600px" },
         isOpen: open,
         title: `Modify Unit #${unit.id} strat_name`,
         onClose: () => setOpen(false),
@@ -103,8 +119,9 @@ function UnitStratNameModalEditor() {
       [
         h(StratNameStack, {
           col_id: unit.col_id,
-          stratName: unit.strat_names,
+          stratNames: unit.strat_names,
           onStratNameSelect,
+          onDelete,
         }),
       ]
     ),

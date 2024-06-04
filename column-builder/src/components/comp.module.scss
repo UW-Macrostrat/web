@@ -132,6 +132,7 @@
 }
 .full-width {
   width: 100%;
+  table-layout: fixed;
 }
 
 .ellipse {
@@ -180,6 +181,13 @@
     }
   }
 }
+.strat-title {
+  h3 {
+    margin: 0;
+  }
+  display: flex;
+  justify-content: space-between;
+}
 
 .related-strat-card {
   h3 {
@@ -196,4 +204,18 @@
 }
 .strat-dialog-bottom {
   margin: 10px;
+}
+
+/////////////// ref list item //////////////////
+.ref-author {
+  font-style: italic;
+  &::before {
+    content: "-";
+  }
+}
+.doi {
+  &::before {
+    content: "DOI: ";
+  }
+  color: rgb(86, 109, 138);
 }

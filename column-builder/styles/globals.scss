@@ -1,7 +1,7 @@
-@import "~normalize.css";
-@import "~@blueprintjs/core/lib/css/blueprint.css";
-@import "~@blueprintjs/icons/lib/css/blueprint-icons.css";
-@import "~@blueprintjs/popover2/lib/css/blueprint-popover2.css";
+//@import "normalize.css";
+@import "@blueprintjs/core/lib/css/blueprint.css";
+@import "@blueprintjs/icons/lib/css/blueprint-icons.css";
+@import "@blueprintjs/popover2/lib/css/blueprint-popover2.css";
 
 html,
 body {
@@ -33,7 +33,7 @@ a {
   align-items: center;
 }
 .bp4-menu {
-  max-height: 200px;
+  max-height: 400px;
   max-width: 400px;
   overflow: auto;
 }

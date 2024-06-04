@@ -1,44 +1,5 @@
 import { QueryI } from ".";
-import { EnvironUnit, LithUnit, UnitsView } from "..";
-
-/* 
-performs a shallow difference comparison between two UnitsView objects.
-The model for the unit-editor has Units as a sub-object. Therefore, the 
-calculated changest for units will always be the entire object even when
-only one attribute has been changed. This funciton just allows us to calculate
-the changes in the sub-object of the units.
-*/
-const conductChangeSet = (og: UnitsView, changeset: UnitsView) => {
-  const changes = {};
-  const keys = [
-    "unit_strat_name",
-    "strat_name",
-    "color",
-    "outcrop",
-    "fo",
-    "lo",
-    "position_bottom",
-    "position_top",
-    "max_thick",
-    "min_thick",
-    "section_id",
-    "col_id",
-    "notes",
-  ];
-  Object.entries(og).map(([key, val], i) => {
-    if (key == "strat_name" && changeset.strat_name) {
-      changes.strat_name_id = changeset.strat_name.id;
-    } else if (
-      key == "unit_strat_name" &&
-      changeset.unit_strat_name != undefined
-    ) {
-      changes.strat_name = changeset.unit_strat_name;
-    } else if (changeset[key] && changeset[key] != val && keys.includes(key)) {
-      changes[key] = changeset[key];
-    }
-  });
-  return changes;
-};
+import { EnvironUnit, LithUnit, StratNameI } from "..";
 
 /* 
 returns a list of number ids for the envs or liths to be deleted or 
@@ -47,11 +8,11 @@ added from a unit.
 Otherwise it's impossible to detect if a user has removed envs or liths
 */
 const detectDeletionsAndAdditions = (
-  og: EnvironUnit[] | LithUnit[],
-  changes: EnvironUnit[] | LithUnit[]
+  og: EnvironUnit[] | LithUnit[] | StratNameI[],
+  changes: EnvironUnit[] | LithUnit[] | StratNameI[]
 ) => {
-  let deletions: number[] | [] = [];
-  let additions: number[] | [] = [];
+  let deletions = new Set<number>();
+  let additions = new Set<number>();
 
   const present_og: any = {};
 
@@ -64,10 +25,10 @@ const detectDeletionsAndAdditions = (
     if (present_og[key]) {
       delete present_og[key];
     } else {
-      additions = [...additions, c.id];
+      additions.add(c.id);
     }
   });
-  deletions = Object.keys(present_og).map((i) => parseInt(i));
+  Object.keys(present_og).map((i) => deletions.add(parseInt(i)));
   return { deletions, additions };
 };
 
@@ -96,6 +57,7 @@ const filterOrAddIds = (id: number, mergeIds: number[]): [] | number[] => {
   return [id, ...mergeIds];
 };
 
+/* mapping color names from macrostrat to hex codes */
 const colorMap: { [name: string]: string } = {
   blue: "#0000FF",
   [`blue dark`]: "#00008B",
@@ -126,7 +88,6 @@ const convertColorNameToHex = (name: string): string => {
 };
 
 export {
-  conductChangeSet,
   detectDeletionsAndAdditions,
   createLink,
   filterOrAddIds,

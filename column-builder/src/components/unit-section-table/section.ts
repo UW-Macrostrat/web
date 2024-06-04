@@ -1,19 +1,18 @@
 import { hyperStyled } from "@macrostrat/hyper";
-import { UnitEditorModel, UnitsView } from "~/index";
+import { UnitsView } from "~/index";
 import { DnDTable } from "../table";
-import { UNIT_ADD_POISITON } from "./helpers";
 import { UnitRow } from "./unit";
-import { EditorState } from "./reducer";
 import { useUnitSectionContext } from "./table";
+import { AddBtnBetweenRows } from "./helpers";
 import styles from "~/components/comp.module.scss";
 
 const h = hyperStyled(styles);
 
 const getEmptyUnit = (col_id: number) => {
   let emptyUnit: UnitsView = {
-    id: 66,
-    unit_strat_name: "unnamed",
-    strat_names: null,
+    id: "new",
+    strat_name: "unnamed",
+    strat_names: [],
     lith_unit: [],
     environ_unit: [],
     color: "#fffff",
@@ -31,7 +30,7 @@ interface SectionTableProps {
   section: { [section_id: number | string]: UnitsView[] };
   drag: boolean;
   moved: { [unit_id: number]: boolean };
-  addUnitAt: (unit: UnitEditorModel, unit_index: number) => void;
+  addUnitAt: (unit: UnitsView, unit_index: number) => void;
   editUnitAt: (unit_index: number) => void;
 }
 
@@ -42,6 +41,7 @@ function SectionTable(props: SectionTableProps) {
 
   let headers = [
     "ID",
+    "Unit Name",
     "Strat Name",
     "Liths",
     "Envs",
@@ -50,7 +50,11 @@ function SectionTable(props: SectionTableProps) {
     "notes",
     "",
   ];
-  if (drag) headers = ["", ...headers];
+  let widths = [7, 15, 15, 15, 15, 10, 8, 10, 5];
+  if (drag) {
+    headers = ["", ...headers];
+    widths = [5, 5, 15, 15, 15, 10, 10, 10, 10, 5];
+  }
 
   const units: UnitsView[] = Object.values(props.section)[0];
   const id = Object.keys(props.section)[0];
@@ -61,30 +65,40 @@ function SectionTable(props: SectionTableProps) {
       index,
       interactive: false,
       headers,
+      widths,
       title: `Section #${id}`,
       draggableId: `${id} ${index}`,
       drag,
       droppableId: index.toString() + " " + id.toString(),
     },
+
     [
+      h.if(units.length == 0)(AddBtnBetweenRows, {
+        colSpan: headers.length,
+        onClick: (e) => {
+          e.stopPropagation();
+          props.addUnitAt(getEmptyUnit(state.col_id), 0);
+        },
+      }),
       units.map((unit, j) => {
         const isEditing =
           edit.unit_index == j && edit.section_index == index && edit.open;
 
         // these ids here are meaningless... this action needs to be persisted
         const copyUnitDown = () => {
-          props.addUnitAt({ unit: { ...unit, id: 67 } }, j + 1);
+          props.addUnitAt({ ...unit, id: "new" }, j + 1);
         };
         const copyUnitUp = () => {
-          props.addUnitAt({ unit: { ...unit, id: 66 } }, j);
+          props.addUnitAt({ ...unit, id: "new" }, j);
         };
         const addEmptyUnit = (unit_index: number) => {
-          props.addUnitAt({ unit: getEmptyUnit(unit.col_id) }, unit_index);
+          props.addUnitAt(getEmptyUnit(unit.col_id), unit_index);
         };
         const editUnitAt = (unit_index: number) => {
           props.editUnitAt(unit_index);
         };
         return h(UnitRow, {
+          key: unit.id,
           unit,
           drag,
           unit_index: j,

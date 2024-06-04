@@ -3,6 +3,8 @@ The different data types used in the application. Usually matching up with a spe
 macrostrat_api schema
 */
 
+import { PointGeom } from "@macrostrat/form-components";
+
 export interface Project {
   descrip: string;
   id?: number;
@@ -34,13 +36,19 @@ export interface RefI {
 }
 
 export interface ColumnForm {
-  col_id: number;
+  id: number;
+  col_area: number;
+  col_type: string;
+  coordinate: PointGeom;
+  poly_geom: { type: "Polygon"; coordinates: [][] } | null;
+  project_id: number;
   col_name: string;
-  col_number: number;
+  col: number;
   lng: number;
   lat: number;
   notes?: string;
-  ref: RefI;
+  wkt: string;
+  refs: RefI[];
 }
 
 // interface for col that shows up in column_group
@@ -62,8 +70,8 @@ export interface IColumnSection extends ICol {
 
 export interface UnitsView {
   id: number;
-  unit_strat_name: string;
-  strat_names: StratNameI | null;
+  strat_name: string;
+  strat_names: StratNameI[];
   color: string;
   outcrop?: string;
   fo?: number;
@@ -90,7 +98,7 @@ export interface Lith {
   lith_type: string;
   lith_class: string;
   lith_color: string;
-  prop: "dom" | "sub";
+  dom: "dom" | "sub";
   mod_prop: number;
   comp_prop: number;
 }
@@ -117,6 +125,7 @@ export interface IntervalI {
   age_top: number;
   interval_name: string;
   interval_abbrev?: string;
+  interval_type?: string;
   interval_color: string;
   rank: number;
 }
@@ -157,7 +166,11 @@ export interface StratNameI {
   strat_name: string;
   rank: RANK;
   ref_id: number;
-  strat_names_meta: StratNameConceptI | null;
+  author: string | null;
+  concept_id: number | null;
+  parent: string | null;
+  source?: string;
+  strat_names_meta?: StratNameConceptBase;
 }
 
 export interface ColSectionI {

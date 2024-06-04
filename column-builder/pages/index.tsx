@@ -1,6 +1,7 @@
 import h from "@macrostrat/hyper";
 import { PostgrestError } from "@supabase/postgrest-js";
 import { GetServerSidePropsContext } from "next";
+import Head from "next/head";
 import pg, {
   tableSelect,
   Row,
@@ -29,6 +30,7 @@ function Projects({
   const headers = Object.keys(projects[0]);
 
   return h(BasePage, { query: {}, errors }, [
+    h(Head, [h("title", ["Column-Builder"])]),
     h("h3,", [
       "Choose a Project",
       h(CreateButton, {

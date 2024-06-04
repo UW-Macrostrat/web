@@ -5,20 +5,28 @@ import {
   PostgrestQueryBuilder,
   PostgrestResponse,
 } from "@supabase/postgrest-js";
+import fetch from "cross-fetch"
 
 function isServer() {
   return typeof window === "undefined";
 }
 console.log(
   process.env.NEXT_PUBLIC_SERVER_URL,
-  process.env.NEXT_PUBLIC_CLIENT_URL
+  process.env.NEXT_PUBLIC_CLIENT_URL,
+  process.env.NEXT_PUBLIC_TOPOLOGY_URL
 );
 // The address of the postgrest service is different between the client and the server!
 const pg = new PostgrestClient(
   //@ts-ignore
   isServer()
     ? process.env.NEXT_PUBLIC_SERVER_URL
-    : process.env.NEXT_PUBLIC_CLIENT_URL
+    : process.env.NEXT_PUBLIC_CLIENT_URL,
+  {
+    fetch(input, options) {
+      console.log(input)
+      return fetch(input, options);
+    },
+  }
 );
 
 /**

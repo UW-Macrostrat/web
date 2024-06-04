@@ -8,6 +8,7 @@ import {
   InputGroup,
   Icon,
   Card,
+  Callout,
 } from "@blueprintjs/core";
 import { ModelEditor, useModelEditor } from "@macrostrat/ui-components";
 import styles from "../comp.module.scss";
@@ -26,13 +27,13 @@ interface Model {
   hasChanges: () => boolean;
 }
 
-function RankSelect({
+export function RankSelect({
   updateStratName,
+  rank,
 }: {
   updateStratName: (field: string, i: any) => void;
+  rank?: string;
 }) {
-  const { model, actions, hasChanges }: Model = useModelEditor();
-
   const possibleRanks = [
     { value: "SGp", data: "SGp" },
     { value: "Gp", data: "Gp" },
@@ -42,11 +43,11 @@ function RankSelect({
     { value: "Bed", data: "Bed" },
   ];
 
-  const itemRenderer: ItemRenderer<DataI> = (
-    item: DataI,
+  const itemRenderer: ItemRenderer<DataI<string>> = (
+    item: DataI<string>,
     { handleClick, index }
   ) => {
-    const active = model.rank == item.value;
+    const active = rank == item.value;
     return h(MenuItem, {
       key: index,
       labelElement: active ? h(Icon, { icon: "tick" }) : null,
@@ -64,7 +65,7 @@ function RankSelect({
       // selectedItem: model.rank,
       onItemSelect: (item) => updateStratName("rank", item.value),
     },
-    [h(Button, { rightIcon: "double-caret-vertical" }, [model.rank])]
+    [h(Button, { rightIcon: "double-caret-vertical" }, [rank ?? "Fm"])]
   );
 }
 
@@ -73,25 +74,30 @@ Edit the name and rank of strat_name - text input and select
 Assign other strat_name as parent
 Add to a concept
 */
-function StratNameEdit() {
+function StratNameEdit(props: { new_name?: boolean }) {
+  const { new_name = false } = props;
   const { model, actions, hasChanges }: Model = useModelEditor();
 
   const updateStratName = (field: string, e: any) => {
     actions.updateState({ model: { [field]: { $set: e } } });
   };
 
+  const title = new_name ? "Create new strat name" : "Edit strat name";
+  const helperText = new_name
+    ? "Create new strat name"
+    : "Edit existing strat name";
+
   return h("div", [
     h(StratNameHierarchy, { strat_name_id: model.id }),
     h("div", [
       h(Card, [
-        h("h3", { style: { marginTop: 0 } }, ["Edit strat name string"]),
+        h("h3", { style: { marginTop: 0 } }, [title]),
         h("div.row", [
           h(
             FormGroup,
             {
-              helperText: "Edit existing Strat name",
+              helperText: helperText,
               label: "Stratigraphic Name",
-              labelInfo: "(optional)",
             },
             [
               h(InputGroup, {
@@ -101,15 +107,26 @@ function StratNameEdit() {
               }),
             ]
           ),
-          h(FormGroup, { label: "Rank" }, [h(RankSelect, { updateStratName })]),
+          h(FormGroup, { label: "Rank" }, [
+            h(RankSelect, { updateStratName, rank: model.rank }),
+          ]),
         ]),
-        h("div.row", [
+        h.if(!new_name)("div.row", [
           h(Checkbox, { label: "Apply globally", style: { margin: "5px" } }),
           h(Checkbox, {
             label: "Apply to this unit only (create new strat name)",
             style: { margin: "5px" },
           }),
         ]),
+        h(
+          Callout,
+          {
+            intent: "warning",
+            title: "Unlinked",
+            style: { width: "265px", borderRadius: "5px" },
+          },
+          ["This name will be unlinked to external resources"]
+        ),
       ]),
       h(Card, [
         h("h3", { style: { marginTop: 0 } }, ["Edit Hierarcy"]),
@@ -175,9 +192,11 @@ function StratNameEdit() {
 interface StratNameEditorProps {
   model: StratNameI | {};
   persistChanges: (e: StratNameI, c: Partial<StratNameI>) => StratNameI;
+  new_name?: boolean;
 }
 
 export function StratNameEditor(props: StratNameEditorProps) {
+  const { new_name } = props;
   return h(
     ModelEditor,
     {
@@ -186,6 +205,6 @@ export function StratNameEditor(props: StratNameEditorProps) {
       isEditing: true,
       canEdit: true,
     },
-    [h(StratNameEdit)]
+    [h(StratNameEdit, { new_name })]
   );
 }

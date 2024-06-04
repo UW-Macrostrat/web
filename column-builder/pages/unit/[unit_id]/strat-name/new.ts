@@ -15,7 +15,7 @@ const h = hyperStyled(styles);
 
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   let {
-    query: { unit_id, name },
+    query: { unit_id },
   } = ctx;
   if (Array.isArray(unit_id)) {
     unit_id = unit_id[0];
@@ -25,7 +25,7 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 
   const query: IdsFromUnit = await fetchIdsFromUnitId(parseInt(unit_id));
 
-  return { props: { unit_id, name, query } };
+  return { props: { unit_id, query } };
 }
 
 export default function NewStratName({
@@ -70,6 +70,7 @@ export default function NewStratName({
     h(StratNameEditor, {
       model,
       persistChanges,
+      new_name: true,
     }),
   ]);
 }

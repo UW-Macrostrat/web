@@ -2,7 +2,6 @@ import React from "react";
 import Link from "next/link";
 import { hyperStyled } from "@macrostrat/hyper";
 import {
-  UnitEditorModel,
   UnitsView,
   convertColorNameToHex,
   IntervalDataI,
@@ -13,6 +12,8 @@ import {
   LithTags,
   UnitEditorProps,
   UnitRowThicknessEditor,
+  UnitRowStratNameEditor,
+  InformalUnitName,
 } from "../unit/common-editing";
 import { MinEditorCard } from "../unit/minimal-unit-editor";
 import { DraggableRow } from "../table";
@@ -23,21 +24,17 @@ import { Button, Dialog, TextArea } from "@blueprintjs/core";
 import {
   ModelEditor,
   useModelEditor,
-} from "deps/ui-components/packages/ui-components/src";
+} from "@macrostrat/ui-components";
 import { SubmitButton } from "../buttons";
-import { UnitStratNameModalEditor } from "../strat-name";
 
 const h = hyperStyled(styles);
 
 function UnitRowIntervalEditor() {
   const {
-    model,
+    model: unit,
     actions,
     isEditing,
-  }: { model: UnitEditorModel; actions: any; isEditing: boolean } =
-    useModelEditor();
-
-  const unit = model.unit;
+  }: { model: UnitsView; actions: any; isEditing: boolean } = useModelEditor();
 
   const changeInterval = (interval: IntervalDataI, lo: boolean) => {
     const { id, interval_name } = interval.data;
@@ -50,10 +47,8 @@ function UnitRowIntervalEditor() {
     }
     actions.updateState({
       model: {
-        unit: {
-          [intervalField]: { $set: id },
-          [intervalName]: { $set: interval_name },
-        },
+        [intervalField]: { $set: id },
+        [intervalName]: { $set: interval_name },
       },
     });
   };
@@ -99,20 +94,15 @@ function UnitRowIntervalEditor() {
 
 function UnitRowNotes() {
   const {
-    model,
+    model: unit,
     actions,
     isEditing,
-  }: { model: { unit: UnitsView }; actions: any; isEditing: boolean } =
-    useModelEditor();
-
-  const unit = model.unit;
+  }: { model: UnitsView; actions: any; isEditing: boolean } = useModelEditor();
 
   const updateUnit = (field: string, value: string) => {
     actions.updateState({
       model: {
-        unit: {
-          [field]: { $set: value },
-        },
+        [field]: { $set: value },
       },
     });
   };
@@ -120,28 +110,10 @@ function UnitRowNotes() {
   return h(React.Fragment, [
     h.if(isEditing)(TextArea, {
       style: { maxWidth: "100px" },
-      value: unit.notes,
+      value: unit.notes ?? "",
       onChange: (e) => updateUnit("notes", e.target.value),
     }),
     h.if(!isEditing)("p.ellipse", [unit.notes]),
-  ]);
-}
-
-function UnitRowStratNameEditor() {
-  const {
-    model,
-    actions,
-    isEditing,
-  }: { model: { unit: UnitsView }; actions: any; isEditing: boolean } =
-    useModelEditor();
-
-  const { unit } = model;
-
-  return h("div", [
-    unit.strat_names
-      ? `${unit.strat_names.strat_name} ${unit.strat_names.rank}`
-      : unit.unit_strat_name ?? "unnamed",
-    h.if(isEditing)(UnitStratNameModalEditor),
   ]);
 }
 
@@ -155,9 +127,8 @@ function UnitCellGroup(props: { unit: UnitsView; onCancel: () => void }) {
 
   const backgroundColor = convertColorNameToHex(unit.color) + "80";
   return h(React.Fragment, [
-    h("td", { width: "0%" }, [
-      h(Link, { href: `/unit/${unit.id}/edit` }, [h("a", [unit.id])]),
-    ]),
+    h("td", [h(Link, { href: `/unit/${unit.id}/edit` }, [h("a", [unit.id])])]),
+    h("td", { style: { background: backgroundColor } }, [h(InformalUnitName)]),
     h("td", { style: { background: backgroundColor } }, [
       h(UnitRowStratNameEditor),
     ]),
@@ -190,17 +161,24 @@ interface UnitRowProps {
 function UnitRow(props: UnitRowProps) {
   const { state, runAction } = useUnitSectionContext();
 
-  const persistChanges = (e: UnitEditorModel, c: Partial<UnitEditorModel>) => {
+  const persistChanges = (e: UnitsView, c: Partial<UnitsView>) => {
     runAction({
-      type: "persist-edits-at",
+      type: "save-unit-at",
       unit: e,
+      changeSet: c,
+      og_unit: props.unit,
       unit_index: props.unit_index,
       section_index: props.section_index,
+      sections: state.sections,
     });
   };
 
   const onCancel = () => {
-    runAction({ type: "cancel-editing" });
+    runAction({
+      type: "cancel-editing",
+      section_index: props.section_index,
+      unit_index: props.unit_index,
+    });
   };
 
   return h(React.Fragment, { key: props.unit.id }, [
@@ -217,7 +195,7 @@ function UnitRow(props: UnitRowProps) {
         key: props.unit.id,
         index: props.unit_index,
         drag: props.drag,
-        draggableId: props.unit.unit_strat_name + props.unit.id.toString(),
+        draggableId: props.unit.strat_name + props.unit.id.toString(),
         href: undefined,
         isMoved: props.isMoved,
         onDoubleClick: () => {
@@ -235,7 +213,7 @@ function UnitRow(props: UnitRowProps) {
             isEditing: props.inRowEditing,
             //@ts-ignore
             persistChanges,
-            model: { unit: props.unit },
+            model: { ...props.unit },
           },
           [
             h(UnitCellGroup, {

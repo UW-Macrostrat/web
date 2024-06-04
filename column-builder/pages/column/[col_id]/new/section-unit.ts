@@ -2,9 +2,9 @@ import h from "@macrostrat/hyper";
 import {
   BasePage,
   UnitEditor,
-  UnitEditorModel,
   fetchIdsFromColId,
   IdsFromCol,
+  UnitsView,
 } from "~/index";
 import { persistNewUnitChanges } from "~/components/section/new-helpers";
 import { GetServerSideProps } from "next";
@@ -34,8 +34,8 @@ function NewUnitInSection({
   const model = { unit: { col_id: col_id }, liths: [], envs: [] };
 
   const persistChanges = async (
-    updatedModel: UnitEditorModel,
-    changeSet: Partial<UnitEditorModel>
+    updatedModel: UnitsView,
+    changeSet: Partial<UnitsView>
   ) => {
     return await persistNewUnitChanges(updatedModel, changeSet, null, col_id);
   };

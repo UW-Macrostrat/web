@@ -2,13 +2,14 @@ import React, { createContext, useContext, useReducer } from "react";
 import { hyperStyled } from "@macrostrat/hyper";
 import {
   ColumnStateI,
-  UnitEditorModel,
   UnitsView,
   ColSectionsTable,
   ColSectionI,
   UnitSectionTableCtx,
 } from "~/index";
 import {
+  AsyncActions,
+  Actions,
   columnReducer,
   SyncActions,
   useUnitSectionTableActions,
@@ -49,10 +50,14 @@ function SectionsDropContainer(props: SectionUnitTableProps) {
                 h(NewSectionBtn, {
                   index: 0,
                   addNewSection: (i: number) =>
-                    runAction({ type: "add-section-at", index: i }),
+                    runAction({
+                      type: "create-new-section",
+                      index: i,
+                      col_id: state.col_id,
+                    }),
                 }),
                 sections.map((section, i) => {
-                  const addUnitAt = (e: UnitEditorModel, n: number) => {
+                  const addUnitAt = (e: UnitsView, n: number) => {
                     runAction({
                       type: "add-unit-at",
                       unit_index: n,
@@ -69,7 +74,7 @@ function SectionsDropContainer(props: SectionUnitTableProps) {
                     });
                   };
 
-                  return h(React.Fragment, [
+                  return h(React.Fragment, { key: i }, [
                     h(SectionTable, {
                       addUnitAt,
                       section,
@@ -81,7 +86,11 @@ function SectionsDropContainer(props: SectionUnitTableProps) {
                     h(NewSectionBtn, {
                       index: i + 1,
                       addNewSection: (i: number) =>
-                        runAction({ type: "add-section-at", index: i }),
+                        runAction({
+                          type: "create-new-section",
+                          index: i,
+                          col_id: state.col_id,
+                        }),
                     }),
                   ]);
                 }),
@@ -97,6 +106,7 @@ function SectionsDropContainer(props: SectionUnitTableProps) {
 
 const UnitSectionTableContext = createContext<UnitSectionTableCtx>({
   state: {
+    col_id: 0,
     sections: [],
     originalSections: [],
     mergeIds: [],
@@ -108,19 +118,22 @@ const UnitSectionTableContext = createContext<UnitSectionTableCtx>({
       section_index: 0,
       unit_index: 0,
     },
+    unitsMovedToNewSections: [],
   },
-  runAction: async (action: SyncActions) => {},
+  runAction: async (action: SyncActions | AsyncActions) => {},
 });
 
 const useUnitSectionContext = () => useContext(UnitSectionTableContext);
 
 function UnitSectionTable(props: {
+  col_id: number;
   colSections: ColSectionI[];
   sections: { [section_id: number | string]: UnitsView[] }[];
 }) {
-  const { colSections, sections } = props;
+  const { colSections, sections, col_id } = props;
 
   const initialState: ColumnStateI = {
+    col_id,
     sections,
     originalSections: sections,
     mergeIds: [],
@@ -132,10 +145,10 @@ function UnitSectionTable(props: {
       section_index: 0,
       unit_index: 0,
     },
+    unitsMovedToNewSections: [],
   };
 
   const [state, dispatch] = useReducer(columnReducer, initialState);
-
   const runAction = useUnitSectionTableActions(dispatch);
 
   const onChange = (id: number) => {
@@ -148,6 +161,14 @@ function UnitSectionTable(props: {
     } else {
       dispatch({ type: "dropped-unit", result: r });
     }
+  };
+
+  const onReorderCancel = () => {
+    runAction({ type: "cancel-reorder" });
+  };
+
+  const onReorderSave = () => {
+    runAction({ type: "save-reorder", sections: state.sections });
   };
 
   return h(UnitSectionTableContext.Provider, { value: { state, runAction } }, [
@@ -165,22 +186,21 @@ function UnitSectionTable(props: {
         },
         divideSection: () => {},
         mergeSections: () => {},
+        onCancel: onReorderCancel,
+        onSave: onReorderSave,
         noSectionView: colSections.length == 0,
       }),
       h.if(colSections.length > 0 && !state.unitsView)(ColSectionsTable, {
         colSections,
         onChange,
       }),
-      h.if(state.sections.length > 0 && state.unitsView)(
-        "div.unit-section-container",
-        [
-          h("div.unit-section-tables", [
-            h(SectionsDropContainer, {
-              onDragEnd,
-            }),
-          ]),
-        ]
-      ),
+      h.if(state.unitsView)("div.unit-section-container", [
+        h("div.unit-section-tables", [
+          h(SectionsDropContainer, {
+            onDragEnd,
+          }),
+        ]),
+      ]),
     ]),
   ]);
 }

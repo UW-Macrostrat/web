@@ -18,55 +18,19 @@ export interface StratNameDataI {
   data: StratNameI;
 }
 
-function StratNameTooltipContent(props: { data: StratNameI }) {
-  const { data } = props;
-  const { strat_names_meta, strat_name, rank, ...rest } = data;
-
-  if (!strat_names_meta) {
-    return h("div.no-strat-meta", [
-      h("h4", [
-        strat_name,
-        " ",
-        rank,
-        " is not connected to an official source.",
-      ]),
-    ]);
-  }
-  const { name, geologic_age, url } = strat_names_meta;
-
-  return h(
-    "div.strat-name-tooltip",
-
-    [
-      //summarise concept
-      h("h4.underline", ["Linked to official Lexicon"]),
-      h("h4", [
-        name,
-        "-",
-        h("i", ["view ", h("a", { href: url, target: "_blank" }, ["source"])]),
-      ]),
-      h("h4", [geologic_age]),
-    ]
-  );
-}
-
 const itemRenderer: ItemRenderer<StratNameDataI> = (
   item: StratNameDataI,
   { handleClick, modifiers, index }
 ) => {
   const { value, data } = item;
 
-  return h(
-    MenuItem,
-    {
-      key: index,
-      intent: data.strat_names_meta ? "primary" : "warning",
-      text: value,
-      onClick: handleClick,
-      active: modifiers.active,
-    },
-    [h(StratNameTooltipContent, { data })]
-  );
+  return h(MenuItem, {
+    key: index,
+    intent: data.concept_id ? "primary" : "warning",
+    text: value,
+    onClick: handleClick,
+    active: modifiers.active,
+  });
 };
 
 const getStratNames = async (
@@ -81,7 +45,7 @@ const getStratNames = async (
   }
   if (query.length > 2) {
     const { data, error } = await baseQuery
-      .select("*,strat_names_meta(*)")
+      .select()
       .like("strat_name", `%${query}%`)
       .limit(50);
     const d: StratNameDataI[] = data?.map((d: StratNameI) => {
@@ -89,9 +53,7 @@ const getStratNames = async (
     });
     setNames(d);
   } else {
-    const { data, error } = await baseQuery
-      .select("*,strat_names_meta(*)")
-      .limit(50);
+    const { data, error } = await baseQuery.select().limit(50);
     const d: StratNameDataI[] = data?.map((d: StratNameI) => {
       return { value: `${d.strat_name} ${d.rank}`, data: d };
     });
@@ -116,7 +78,7 @@ function StratNameSuggest(props: StratCellProps) {
   useEffect(() => {
     onQueryChange("");
   }, []);
-  console.log(props.initialSelected);
+  
   return h(ItemSuggest, {
     items: names,
     onQueryChange: onQueryChange,

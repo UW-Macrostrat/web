@@ -1,6 +1,8 @@
 import { Dispatch } from "react";
 import { DropResult } from "react-beautiful-dnd";
-import { filterOrAddIds, UnitEditorModel, UnitsView } from "~/index";
+import { filterOrAddIds, UnitsView } from "~/index";
+import { persistNewUnit, persistUnitChanges } from "../unit/edit-helpers";
+import { createNewSection, saveColumnReorder } from "./async-helpers";
 
 ///////////////// helper functions //////////////
 /* 
@@ -8,18 +10,15 @@ import { filterOrAddIds, UnitEditorModel, UnitsView } from "~/index";
     then would return db representation which we 
     would add to units in a Sync Action
 */
-function persistUnit(unit: UnitEditorModel) {
+function persistUnit(unit: UnitsView) {
   let color = "#FFFFF";
-  if (
-    typeof unit.unit.lith_unit !== "undefined" &&
-    unit.unit.lith_unit.length > 0
-  ) {
-    color = unit.unit?.lith_unit[0].lith_color;
+  if (typeof unit.lith_unit !== "undefined" && unit.lith_unit.length > 0) {
+    color = unit?.lith_unit[0].lith_color;
   }
   const newUnit = {
-    ...unit.unit,
-    id: unit.unit.id ?? 666,
-    color: unit.unit.color ?? color,
+    ...unit,
+    id: unit.id ?? 666,
+    color: unit.color ?? color,
   };
   return newUnit;
 }
@@ -36,10 +35,30 @@ const addElementToList = (list: any[], index: number, element: any): void => {
 
 /////////////// Data Types //////////////////
 
-type SectionUnits = { [section_id: string | number]: UnitsView[] }[];
+export type SectionUnits = { [section_id: string | number]: UnitsView[] }[];
+type UnitSection = { unit_id: number; section_id: number };
 
+/////////////// async actions //////////////////
+
+type CreateNewSection = {
+  type: "create-new-section";
+  index: number;
+  col_id: number;
+};
+
+type SaveReorder = { type: "save-reorder"; sections: SectionUnits };
+type SaveUnitAt = {
+  type: "save-unit-at";
+  section_index: number;
+  unit_index: number;
+  unit: UnitsView;
+  changeSet: Partial<UnitsView>;
+  og_unit: UnitsView;
+  sections: SectionUnits;
+};
 /////////////// Action Types ///////////////
 
+type CancelReorder = { type: "cancel-reorder" };
 type SetMergeIds = { type: "set-merge-ids"; id: number };
 type MergeIds = { type: "merge-ids" };
 type DroppedUnit = {
@@ -55,20 +74,21 @@ type ToggleUnitsView = { type: "toggle-units-view" };
 type AddSectionAt = {
   type: "add-section-at";
   index: number;
+  section_id: number;
 };
 
 type AddUnitAt = {
   type: "add-unit-at";
   section_index: number;
   unit_index: number;
-  unit: UnitEditorModel;
+  unit: UnitsView;
 };
 
 type PersistEditsAt = {
   type: "persist-edits-at";
   section_index: number;
   unit_index: number;
-  unit: UnitEditorModel;
+  unit: UnitsView;
 };
 
 type EditUnitAt = {
@@ -79,6 +99,8 @@ type EditUnitAt = {
 
 type CancelEditing = {
   type: "cancel-editing";
+  section_index: number;
+  unit_index: number;
 };
 
 type RemoveUnit = {
@@ -87,7 +109,11 @@ type RemoveUnit = {
   unit_index: number;
 };
 
+type PersistReorder = { type: "persist-reorder" };
+
 export type SyncActions =
+  | PersistReorder
+  | CancelReorder
   | RemoveUnit
   | CancelEditing
   | AddSectionAt
@@ -101,6 +127,10 @@ export type SyncActions =
   | PersistEditsAt
   | ToggleUnitsView;
 
+export type AsyncActions = CreateNewSection | SaveReorder | SaveUnitAt;
+
+export type Actions = SyncActions | AsyncActions;
+
 export interface EditorState {
   open: boolean;
   section_index: number;
@@ -108,6 +138,7 @@ export interface EditorState {
 }
 
 export interface ColumnStateI {
+  col_id: number;
   sections: SectionUnits;
   originalSections: SectionUnits;
   mergeIds: number[];
@@ -115,27 +146,75 @@ export interface ColumnStateI {
   drag: boolean;
   unitsView: boolean;
   edit: EditorState;
+  unitsMovedToNewSections: UnitSection[];
 }
 
 export interface UnitSectionTableCtx {
   state: ColumnStateI;
-  runAction(action: SyncActions): Promise<void>;
+  runAction(action: Actions): Promise<void>;
 }
 
 /// we can filter async actions through here first
-export const useUnitSectionTableActions = (dispatch: Dispatch<SyncActions>) => {
-  return async (action: SyncActions) => {
+export const useUnitSectionTableActions = (dispatch: Dispatch<Actions>) => {
+  return async (action: Actions) => {
     switch (action.type) {
+      case "create-new-section":
+        const data = await createNewSection(action.col_id);
+        if (!data) {
+          throw Error("Section was not created");
+        }
+        return dispatch({
+          type: "add-section-at",
+          index: action.index,
+          section_id: data[0].id,
+        });
+      case "save-reorder":
+        await saveColumnReorder(action.sections);
+        return dispatch({ type: "persist-reorder" });
+      case "save-unit-at":
+        let persistedUnit: UnitsView;
+        if (action.unit.id === "new") {
+          persistedUnit = await persistNewUnit(
+            action.og_unit,
+            action.unit,
+            action.changeSet
+          );
+        } else {
+          persistedUnit = await persistUnitChanges(
+            action.og_unit,
+            action.unit,
+            action.changeSet
+          );
+        }
+        await saveColumnReorder(action.sections);
+        return dispatch({
+          type: "persist-edits-at",
+          unit: persistedUnit,
+          section_index: action.section_index,
+          unit_index: action.unit_index,
+        });
       default:
         return dispatch(action);
     }
   };
 };
 
-const columnReducer = (state: ColumnStateI, action: SyncActions) => {
+const columnReducer = (state: ColumnStateI, action: Actions): ColumnStateI => {
   const currSections: SectionUnits = JSON.parse(JSON.stringify(state.sections));
   switch (action.type) {
     case "cancel-editing":
+      const _section_id_ = Object.keys(currSections[action.section_index])[0];
+      const _unit_ =
+        currSections[action.section_index][_section_id_][action.unit_index];
+      if (_unit_.id == "new") {
+        state = { ...state, edit: { ...state.edit, open: false } };
+        return columnReducer(state, {
+          type: "remove-unit",
+          section_index: action.section_index,
+          unit_index: action.unit_index,
+        });
+      }
+
       return {
         ...state,
         edit: {
@@ -160,6 +239,19 @@ const columnReducer = (state: ColumnStateI, action: SyncActions) => {
         ...state,
         mergeIds: newIds,
       };
+    case "cancel-reorder":
+      return {
+        ...state,
+        sections: state.originalSections,
+        drag: false,
+        moved: {},
+      };
+    case "persist-reorder":
+      return {
+        ...state,
+        drag: false,
+        moved: {},
+      };
     case "toggle-drag":
       return {
         ...state,
@@ -176,7 +268,7 @@ const columnReducer = (state: ColumnStateI, action: SyncActions) => {
     case "add-section-at":
       const sectionIndex = action.index;
       //@ts-ignore
-      const newSection: SectionUnits = { 666: [] };
+      const newSection: SectionUnits = { [action.section_id]: [] };
       addElementToList(currSections, sectionIndex, newSection);
       return { ...state, sections: currSections };
     case "remove-unit":
@@ -242,12 +334,22 @@ const columnReducer = (state: ColumnStateI, action: SyncActions) => {
         small = { id: s_id, index: parseInt(s_index) };
       }
 
+      const newMoved: { [x: number]: boolean } = {};
+      currSections[big.index][big.id].forEach((unit) => {
+        newMoved[unit.id] = true;
+      });
       currSections[small.index][small.id].push(
         ...currSections[big.index][big.id]
       );
       currSections.splice(big.index, 1);
 
-      return { ...state, sections: currSections };
+      // set all units in moved section to be moved
+
+      return {
+        ...state,
+        sections: currSections,
+        moved: { ...state.moved, ...newMoved },
+      };
     case "dropped-unit":
       if (
         typeof action.result.destination === "undefined" ||
@@ -269,6 +371,10 @@ const columnReducer = (state: ColumnStateI, action: SyncActions) => {
         currSections[parseInt(sourceSectionIndex)][sourceSection][source_index][
           "id"
         ];
+      if (sourceSection == destSection && source_index == destination_index) {
+        //we haven't moved
+        return state;
+      }
 
       if (sourceSection === destSection) {
         // same section
@@ -282,6 +388,7 @@ const columnReducer = (state: ColumnStateI, action: SyncActions) => {
         const [movedUnit] = currSections[parseInt(sourceSectionIndex)][
           sourceSection
         ].splice(source_index, 1);
+
         movedUnit["section_id"] = parseInt(destSection);
 
         currSections[parseInt(destSectionIndex)][destSection].splice(
@@ -296,6 +403,8 @@ const columnReducer = (state: ColumnStateI, action: SyncActions) => {
         moved: { ...state.moved, [movedUnitId]: true },
         sections: currSections,
       };
+    default:
+      return state;
   }
 };
 

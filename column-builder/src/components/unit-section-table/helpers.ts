@@ -44,6 +44,8 @@ function MergeDivideBtn(props: {
 export interface ColBtnMenuI {
   toggleUnitsView?: () => void;
   toggleDrag: () => void;
+  onSave: () => void;
+  onCancel: () => void;
   state: {
     unitsView: boolean;
     drag: boolean;
@@ -89,6 +91,8 @@ function ColumnPageBtnMenu(props: ColBtnMenuI) {
       drag,
       onClick: props.toggleDrag,
       moved,
+      onSave: props.onSave,
+      onCancel: props.onCancel,
     }),
   ]);
 }
@@ -96,6 +100,8 @@ function ColumnPageBtnMenu(props: ColBtnMenuI) {
 function ReorderUnitsBtnGrp(props: {
   drag: boolean;
   onClick: () => void;
+  onCancel: () => void;
+  onSave: () => void;
   moved: { [unit_id: number]: boolean };
 }) {
   //@ts-ignore
@@ -105,12 +111,12 @@ function ReorderUnitsBtnGrp(props: {
       Button,
       {
         intent: "success",
-        onClick: props.onClick,
+        onClick: props.onSave,
         disabled: Object.keys(props.moved).length == 0,
       },
       ["Save"]
     ),
-    h.if(props.drag)(Button, { intent: "danger", onClick: props.onClick }, [
+    h.if(props.drag)(Button, { intent: "danger", onClick: props.onCancel }, [
       "Cancel",
     ]),
   ]);

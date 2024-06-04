@@ -12,7 +12,7 @@ interface LithDialogProps {
   liths?: LithUnit[];
   onRemove?: (l: LithUnit) => void;
   onClose: () => void;
-  onSwitchChange: (i: number, prop: "dom" | "sub") => void;
+  onSwitchChange: (i: number) => void;
   onAdd: (l: Lith) => void;
   isOpen: boolean;
 }
@@ -22,12 +22,14 @@ function LithDialog(props: LithDialogProps) {
     isOpen,
     onRemove = (l) => console.log(l),
     onClose,
+    onSwitchChange,
+    onAdd,
   } = props;
 
   const title = "Manage lithologies";
 
   const onChange = (id: number) => {
-    props.onSwitchChange(id, "dom");
+    onSwitchChange(id);
   };
 
   return h(
@@ -43,11 +45,17 @@ function LithDialog(props: LithDialogProps) {
         h(LithSegmentContainer, { liths, onClick: () => {}, large: false }),
         h("div.lith-switches", [
           liths.map((lith, i) => {
-            return h(LithSwitch, { lith, index: i, onChange, onRemove });
+            return h(LithSwitch, {
+              key: lith.id,
+              lith,
+              index: i,
+              onChange,
+              onRemove,
+            });
           }),
         ]),
         h(Divider),
-        h("div.lith-select", [h(LithSelect, { onItemSelect: props.onAdd })]),
+        h("div.lith-select", [h(LithSelect, { onItemSelect: onAdd })]),
       ]),
     ]
   );
@@ -74,7 +82,7 @@ function LithSwitch(props: LithSwitchProps) {
       h(Switch, {
         innerLabel: "Sub",
         innerLabelChecked: "Dom",
-        checked: lith.prop == "dom",
+        checked: lith.dom == "dom",
         onChange: () => props.onChange(lith.id),
       }),
     ]),

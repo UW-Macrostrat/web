@@ -1,10 +1,9 @@
 import h from "@macrostrat/hyper";
-import {
+import pg, {
   tableUpdate,
   BasePage,
   ColumnEditor,
   ColumnForm,
-  tableSelect,
   selectFirst,
   fetchIdsFromColId,
   IdsFromCol,
@@ -19,18 +18,16 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   if (Array.isArray(col_id)) {
     col_id = col_id[0];
   }
-
   const query: IdsFromCol = await fetchIdsFromColId(parseInt(col_id ?? "0"));
 
-  const { data, error }: PostgrestResponse<ColumnForm> = await tableSelect(
-    "col_ref_expanded",
-    {
-      match: { col_id: parseInt(col_id ?? "0") },
-    }
-  );
+  const { data, error }: PostgrestResponse<ColumnForm> = await pg
+    .from("cols")
+    .select("*,refs(*)")
+    .match({ id: parseInt(col_id ?? "0") });
 
   const { firstData, error: error_ } = await selectFirst("cols", {
     columns: "col_groups!cols_col_group_id_fkey(*)",
+    match: { id: parseInt(col_id ?? "0") },
     limit: 1,
   });
 
@@ -55,7 +52,7 @@ export default function EditColumn(props: {
   errors: PostgrestError[];
 }) {
   const { col_id, curColGroup, column, errors } = props;
-
+  console.log(column);
   const persistChanges = async (
     e: ColumnForm,
     changes: Partial<ColumnForm>
@@ -63,27 +60,35 @@ export default function EditColumn(props: {
     console.log(e, changes);
     // port names to match db (only col_numer -> col)
     let ref_id: number | undefined = undefined;
-    if (changes.col_number) {
-      changes.col = changes.col_number;
-      delete changes.col_number;
-    }
-    if (changes.ref) {
+    if (changes.refs) {
       // handle the changing of a ref, either one that exists or was created
-      ref_id = changes.ref.id;
-      delete changes.ref;
+      ref_id = changes.refs[0].id;
+      delete changes.refs;
     }
+    // lat,lng only need to be entered to update coordinate and wkt.
+    //  DB triggers, see /api-views/02-functions.sql
     const { data, error } = await tableUpdate("cols", {
       changes,
-      id: e.col_id,
+      id: e.id,
     });
 
     if (!error) {
       if (ref_id) {
         const ref_col = { ref_id: ref_id };
-        const { data: data_, error } = await tableUpdate("col_refs", {
-          changes: ref_col,
-          id: { col_id: e.col_id },
-        });
+        const { data: count, error: _ } = await pg
+          .from("col_refs")
+          .select()
+          .match({ col_id: e.id });
+        if (count?.length ?? 0 > 1) {
+          const { data: data_, error } = await pg
+            .from("col_refs")
+            .update({ ref_id })
+            .match({ col_id: e.id });
+        } else {
+          const { data: data_, error } = await pg
+            .from("col_refs")
+            .insert([{ ref_id, col_id: e.id }]);
+        }
       }
       if (error) {
         //catch errror

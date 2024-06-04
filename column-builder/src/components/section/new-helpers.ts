@@ -1,4 +1,4 @@
-import pg, { tableInsert, UnitEditorModel, UnitsView } from "../..";
+import pg, { tableInsert, UnitsView } from "../..";
 
 const keys = [
   "strat_name",
@@ -25,8 +25,8 @@ async function createNewSection(col_id: number) {
 }
 
 export const persistNewUnitAbove = async (
-  updatedModel: UnitEditorModel,
-  changeSet: Partial<UnitEditorModel>,
+  updatedModel: UnitsView,
+  changeSet: Partial<UnitsView>,
   section_id: number,
   col_id: number
 ) => {
@@ -41,8 +41,8 @@ export const persistNewUnitAbove = async (
 };
 
 export const persistNewUnitChanges = async (
-  updatedModel: UnitEditorModel,
-  changeSet: Partial<UnitEditorModel>,
+  updatedModel: UnitsView,
+  changeSet: Partial<UnitsView>,
   section_id: any,
   col_id: number
 ) => {
@@ -57,7 +57,7 @@ export const persistNewUnitChanges = async (
   const unit: Partial<UnitsView> = {};
   keys.map((k) => {
     if (k == "strat_name") {
-      unit.strat_name_id = changeSet.unit?.strat_names.id;
+      unit.strat_name_id = changeSet.strat_names.id;
     } else {
       //@ts-ignore
       unit[k] = changeSet.unit[k];

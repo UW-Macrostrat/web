@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { hyperStyled } from "@macrostrat/hyper";
-import { Spinner } from "@blueprintjs/core";
+import { Spinner, MenuItem } from "@blueprintjs/core";
 import { IntervalI } from "../../types";
 import pg from "../../db";
 import styles from "../comp.module.scss";
 import { ItemSuggest } from "../suggest";
 import { FeatureCell } from "../table";
+import { ItemRenderer } from "@blueprintjs/select";
 
 const h = hyperStyled(styles);
 
@@ -27,6 +28,41 @@ interface IntervalRowProps extends IntervalProps {
   bottom: boolean;
 }
 
+const intervalItemRenderer: ItemRenderer<IntervalDataI> = (
+  item: IntervalDataI,
+  { modifiers, handleClick }
+) => {
+  const {
+    interval_name,
+    age_bottom,
+    age_top,
+    interval_color,
+    interval_type,
+    id,
+  } = item.data;
+
+  const style =
+    modifiers?.active ?? false
+      ? {
+          marginBottom: "2px",
+        }
+      : {
+          backgroundColor: interval_color + "40", // add opaquness
+          marginBottom: "2px",
+        };
+
+  return h(MenuItem, {
+    key: id,
+    text: h("div.interval-row", [
+      `${interval_name} (${interval_type})`,
+      h("i", [`${age_bottom}-${age_top} Ma`]),
+    ]),
+    onClick: handleClick,
+    active: modifiers.active,
+    style,
+  });
+};
+
 function IntervalSuggest(props: IntervalProps) {
   const [intervals, setIntervals] = useState<IntervalDataI[] | []>([]);
   const getIntervals = async (query: string) => {
@@ -35,13 +71,18 @@ function IntervalSuggest(props: IntervalProps) {
         .from("intervals")
         .select()
         .like("interval_name", `%${query}%`)
+        .order("age_bottom")
         .limit(200);
       const d = data?.map((d: IntervalI) => {
         return { value: d.interval_name, data: d };
       });
       setIntervals(d);
     } else {
-      const { data, error } = await pg.from("intervals").select().limit(50);
+      const { data, error } = await pg
+        .from("intervals")
+        .select()
+        .order("age_bottom")
+        .limit(50);
       const d = data?.map((d: IntervalI) => {
         return { value: d.interval_name, data: d };
       });
@@ -51,7 +92,11 @@ function IntervalSuggest(props: IntervalProps) {
 
   useEffect(() => {
     const getData = async () => {
-      const { data, error } = await pg.from("intervals").select().limit(50);
+      const { data, error } = await pg
+        .from("intervals")
+        .select()
+        .order("age_bottom")
+        .limit(50);
       const d = data?.map((d: IntervalI) => {
         return { value: d.interval_name, data: d };
       });
@@ -67,6 +112,7 @@ function IntervalSuggest(props: IntervalProps) {
       onChange: props.onChange,
       onQueryChange: getIntervals,
       initialSelected: props.initialSelected,
+      itemRenderer: intervalItemRenderer,
       placeholder: props.placeholder,
     }),
   ]);

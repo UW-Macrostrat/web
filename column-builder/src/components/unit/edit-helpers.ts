@@ -1,80 +1,204 @@
+import { PostgrestResponse } from "@supabase/postgrest-js";
 import pg, {
   UnitsView,
-  tableInsertMany,
   tableUpdate,
+  StratNameI,
   EnvironUnit,
   LithUnit,
-  UnitEditorModel,
 } from "../..";
-import { conductChangeSet, detectDeletionsAndAdditions } from "../helpers";
+import { detectDeletionsAndAdditions } from "../helpers";
 
-/* 
-handles insertions and deletions for
-the one to many relationship between units and envs/liths
-*/
-async function handleCollections(
-  table: string,
-  column: string,
-  unit_id: number,
-  collection: EnvironUnit[] | LithUnit[],
-  collectionChanges: EnvironUnit[] | LithUnit[]
+async function handleLithCollection(
+  collection: LithUnit[],
+  changes: LithUnit[],
+  unit_id: number
+) {
+  // find deletions, and additions
+  // for rest, set the prop where the id is already set
+  const { deletions, additions } = detectDeletionsAndAdditions(
+    collection,
+    changes
+  );
+
+  changes.map(async (change) => {
+    if (additions.has(change.id)) {
+      // this is completely new! Insert!
+      const { data, error } = await pg
+        .from("unit_liths")
+        .insert([{ unit_id: unit_id, lith_id: change.id, dom: change.dom }]);
+    } else {
+      // already exists! update!
+      const { data, error } = await pg
+        .from("unit_liths")
+        .update({ dom: change.dom })
+        .match({ unit_id: unit_id, lith_id: change.id });
+    }
+  });
+  deletions.forEach(async (id) => {
+    // delete from the table where id
+    const { data, error } = await pg
+      .from("unit_liths")
+      .delete()
+      .match({ unit_id: unit_id, lith_id: id });
+  });
+}
+
+async function handleEnvironCollection(
+  collection: EnvironUnit[],
+  changes: EnvironUnit[],
+  unit_id: number
 ) {
   const { deletions, additions } = detectDeletionsAndAdditions(
     collection,
-    collectionChanges
+    changes
   );
 
-  if (additions.length > 0) {
-    const inserts = additions.map((i) => {
-      return { unit_id, [column]: i };
-    });
-    const { data, error } = await tableInsertMany(table, inserts);
-  }
-  if (deletions.length > 0) {
+  deletions.forEach(async (id) => {
     const { data, error } = await pg
-      .from(table)
+      .from("unit_environs")
       .delete()
-      .in(column, deletions)
-      .match({ unit_id });
+      .match({ unit_id: unit_id, environ_id: id });
+  });
+  const inserts = [];
+  additions.forEach((id) => {
+    inserts.push({ unit_id, environ_id: id });
+  });
+  const { data, error } = await pg.from("unit_environs").insert(inserts);
+}
+
+async function handleStratNameCollection(
+  collection: StratNameI[],
+  changes: StratNameI[],
+  unit_id: number
+) {
+  const { deletions, additions } = detectDeletionsAndAdditions(
+    collection,
+    changes
+  );
+  deletions.forEach(async (id) => {
+    const { data, error } = await pg
+      .from("unit_strat_names")
+      .delete()
+      .match({ unit_id: unit_id, strat_name_id: id });
+  });
+  const inserts = [];
+  additions.forEach((id) => {
+    inserts.push({ unit_id, strat_name_id: id });
+  });
+  const { data, error } = await pg.from("unit_strat_names").insert(inserts);
+}
+
+const persistable_fields = new Set([
+  "strat_name",
+  "lo",
+  "fo",
+  "min_thick",
+  "max_thick",
+  "notes",
+  "color",
+  "section_id",
+  "col_id",
+]);
+
+async function updateExistingUnit(
+  unit: UnitsView,
+  updatedModel: UnitsView,
+  changeSet: Partial<UnitsView>
+) {
+  if (changeSet) {
+    const updates = Object.keys(changeSet)
+      .filter((key) => persistable_fields.has(key))
+      .reduce((cur, key) => {
+        return Object.assign(cur, { [key]: changeSet[key] });
+      }, {});
+    const { data, error } = await tableUpdate("units", {
+      changes: updates,
+      id: unit.id,
+    });
   }
+}
+
+async function insertNewUnit(unit: UnitsView) {
+  const inserts = Object.keys(unit)
+    .filter((key) => persistable_fields.has(key))
+    .reduce((cur, key) => {
+      return Object.assign(cur, { [key]: unit[key] });
+    }, {});
+  const { data, error }: PostgrestResponse<UnitsView> = await pg
+    .from("units")
+    .insert([inserts]);
+  return data[0];
 }
 
 /* 
 Function to handle changes to Units! This is a bit complicated because of the 
-one to many relationship between a unit and environments and lithologies. We need to
-conduct a small algorithm to figure out if any envs or liths with either deleted 
-or added and then handle those changes
+one to many relationship between a unit and environments, lithologies, and strat_names.
 */
 export async function persistUnitChanges(
   unit: UnitsView,
-  updatedModel: UnitEditorModel,
-  changeSet: Partial<UnitEditorModel>
+  updatedModel: UnitsView,
+  changeSet: Partial<UnitsView>
 ) {
-  if (changeSet.unit) {
-    const changes = conductChangeSet(unit, changeSet.unit);
-    const { data, error } = await tableUpdate("units", {
-      changes,
-      id: unit.id,
+  console.log(unit, updatedModel, changeSet);
+
+  await updateExistingUnit(unit, updatedModel, changeSet);
+
+  if (changeSet?.environ_unit) {
+    await handleEnvironCollection(
+      unit.environ_unit ?? [],
+      changeSet.environ_unit,
+      unit.id
+    );
+  }
+  if (changeSet?.lith_unit) {
+    await handleLithCollection(
+      unit.lith_unit ?? [],
+      changeSet.lith_unit,
+      unit.id
+    );
+  }
+  if (changeSet?.strat_names) {
+    await handleStratNameCollection(
+      unit.strat_names ?? [],
+      changeSet.strat_names,
+      unit.id
+    );
+  }
+  return updatedModel;
+}
+
+export async function persistNewUnit(
+  unit: UnitsView,
+  updatedModel: UnitsView,
+  changeSet: Partial<UnitsView>
+) {
+  const { id } = await insertNewUnit(updatedModel);
+  unit.id = id;
+  updatedModel.id = id;
+  console.log(updatedModel);
+
+  if (updatedModel?.environ_unit) {
+    updatedModel.environ_unit.map(async (env) => {
+      const { data, error } = await pg
+        .from("unit_environs")
+        .insert([{ unit_id: updatedModel.id, environ_id: env.id }]);
     });
   }
-
-  if (changeSet.unit?.environ_unit) {
-    await handleCollections(
-      "unit_environs",
-      "environ_id",
-      unit.id,
-      unit.environ_unit ?? [],
-      changeSet.unit.environ_unit
-    );
+  if (updatedModel?.lith_unit) {
+    updatedModel.lith_unit.map(async (lith) => {
+      const { data, error } = await pg
+        .from("unit_liths")
+        .insert([
+          { unit_id: updatedModel.id, lith_id: lith.id, dom: lith.dom },
+        ]);
+    });
   }
-  if (changeSet.unit?.lith_unit) {
-    await handleCollections(
-      "unit_liths",
-      "lith_id",
-      unit.id,
-      unit.lith_unit ?? [],
-      changeSet.unit.lith_unit
-    );
+  if (updatedModel?.strat_names) {
+    updatedModel.strat_names.map(async (strat_name) => {
+      const { data, error } = await pg
+        .from("unit_strat_names")
+        .insert([{ unit_id: updatedModel.id, strat_name_id: strat_name.id }]);
+    });
   }
   return updatedModel;
 }

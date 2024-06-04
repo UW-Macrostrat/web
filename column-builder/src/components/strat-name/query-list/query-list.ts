@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { hyperStyled } from "@macrostrat/hyper";
 import {
   QueryList,
@@ -7,13 +7,21 @@ import {
   ItemPredicate,
 } from "@blueprintjs/select";
 import pg from "~/db";
-import { InputGroup, MenuItem } from "@blueprintjs/core";
+import {
+  Button,
+  Callout,
+  InputGroup,
+  MenuItem,
+  NonIdealState,
+  Tag,
+} from "@blueprintjs/core";
 import styles from "./strat-name.module.scss";
 import {
   PostgrestFilterBuilder,
   PostgrestQueryBuilder,
 } from "@supabase/postgrest-js";
 import { StratNameI } from "~/types";
+import { Tooltip2 } from "@blueprintjs/popover2";
 
 const h = hyperStyled(styles);
 
@@ -25,18 +33,88 @@ const itemPredicate: ItemPredicate<StratNameI> = (query, item, index) => {
   return strat_name?.toLowerCase().indexOf(query.toLowerCase()) >= 0;
 };
 
+const SourceTag = ({ source }: { source: string | undefined }) => {
+  return h.if(typeof source !== "undefined")(
+    Tooltip2,
+    {
+      content: source ?? "",
+      className: "source-text",
+      placement: "top",
+      minimal: true,
+    },
+    [
+      h.if(source === "unrelated")(Tag, { minimal: true, intent: "danger" }, [
+        h("b", ["may be unrelated"]),
+      ]),
+      h.if(source !== "unrelated")(Tag, { minimal: true }, [h("i", [source])]),
+    ]
+  );
+};
+
+const AuthorTag = ({
+  author,
+  concept_id,
+}: {
+  author: string | null;
+  concept_id: number | null;
+}) => {
+  return h(React.Fragment, [
+    h("div.author-tag", [
+      h.if(author != null)(Tag, { intent: "success", minimal: true }, [author]),
+    ]),
+    h("div.author-tag", [
+      h.if(!concept_id)(Tag, { intent: "warning", minimal: true }, "Unlinked"),
+    ]),
+  ]);
+};
+
+const StratNameListItem = (props: StratNameI) => {
+  const { strat_name, author, rank, parent, source, concept_id } = props;
+
+  const parentText = parent ? `${parent}` : "";
+
+  return h("div", [
+    h("div.flex-between", [
+      h("div.name-text", [
+        h("b", [`${strat_name} ${rank}`]),
+        h("i.parent-name", [`${parentText}`]),
+      ]),
+      h("div.author-source-tag", [
+        h(SourceTag, { source }),
+        h(AuthorTag, { author, concept_id }),
+      ]),
+    ]),
+  ]);
+};
+
 const StratNameItemRenderer: ItemRenderer<StratNameI> = (
   item: StratNameI,
   { handleClick, index, modifiers }
 ) => {
-  const { strat_name, strat_names_meta, rank } = item;
-
   return h(MenuItem, {
     key: index,
-    intent: strat_names_meta ? "primary" : "warning",
-    text: `${strat_name} ${rank}`,
+    text: h(StratNameListItem, { ...item }),
     onClick: handleClick,
     active: modifiers.active,
+  });
+};
+
+const StratNameNewRenderer = (props: { onClickCreateNew: () => void }) => {
+  return h(NonIdealState, {
+    icon: "warning-sign",
+    title: "No results in Macrostrat lexicon",
+    description: h("div", [
+      h("li", ["Ensure column location is correct"]),
+      h("li", ["Try an alternative spelling"]),
+    ]),
+    action: h(
+      Button,
+      {
+        intent: "warning",
+        onClick: props.onClickCreateNew,
+      },
+      ["Create new"]
+    ),
   });
 };
 
@@ -44,7 +122,6 @@ const StratNameQueryListRenderer = (
   props: IQueryListRendererProps<StratNameI>
 ) => {
   const { itemList, handleKeyDown, handleKeyUp, ...listProps } = props;
-
   return h(
     "div.lith-query-list-renderer",
     { onKeyDown: handleKeyDown, onKeyUp: handleKeyUp },
@@ -74,26 +151,24 @@ const getStratNames = async (
   }
   if (query.length > 2) {
     const { data, error } = await baseQuery
-      .select("*,strat_names_meta(*,refs(author,pub_year, ref))")
+      .select()
       .ilike("strat_name", `%${query}%`)
       .limit(50);
     setNames(data ?? []);
   } else {
-    const { data, error } = await baseQuery
-      .select("*,strat_names_meta(*, refs(author,pub_year, ref))")
-      .limit(50);
+    const { data, error } = await baseQuery.select().limit(50);
     setNames(data ?? []);
   }
 };
 
 interface StratNameSelectProps {
   onItemSelect: (l: StratNameI) => void;
+  onClickCreateNew: () => void;
   col_id: number;
 }
 
 function StratNameSelect(props: StratNameSelectProps) {
   const [names, setNames] = useState<StratNameI[]>([]);
-
   const onQueryChange = (i: string) => {
     getStratNames(i, (e: StratNameI[]) => setNames(e), props.col_id);
   };
@@ -108,10 +183,19 @@ function StratNameSelect(props: StratNameSelectProps) {
     onItemSelect: props.onItemSelect,
     items: names,
     renderer: StratNameQueryListRenderer,
-    resetOnSelect: true,
-    menuProps: { style: { maxWidth: "100%", margin: "0 10px" } },
+    resetOnSelect: false,
+    noResults: h(StratNameNewRenderer, {
+      onClickCreateNew: props.onClickCreateNew,
+    }),
+    menuProps: {
+      style: {
+        maxWidth: "100%",
+        margin: "0 10px",
+        maxHeight: "400px !important",
+      },
+    },
     onQueryChange,
   });
 }
 
-export { StratNameSelect };
+export { StratNameSelect, StratNameListItem, AuthorTag };

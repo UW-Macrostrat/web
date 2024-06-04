@@ -18,20 +18,18 @@ import {
 import styles from "../comp.module.scss";
 import { SubmitButton } from "..";
 import {
-  UnitEditorModel,
   UnitEditorProps,
   EnvTags,
   LithTags,
-  FormalStratName,
+  UnitRowStratNameEditor,
   InformalUnitName,
   UnitThickness,
 } from "./common-editing";
 const h = hyperStyled(styles);
 
 function UnitThicknesses() {
-  const { model, actions }: { model: UnitEditorModel; actions: any } =
+  const { model: unit, actions }: { model: UnitsView; actions: any } =
     useModelEditor();
-  const { unit } = model;
 
   return h(React.Fragment, [
     h(FeatureCell, { text: "Min-Thick" }, [
@@ -52,21 +50,26 @@ function UnitThicknesses() {
 }
 
 function StratName() {
-  const { model, actions } = useModelEditor();
-  const { unit }: UnitEditorModel = model;
+  const { model: unit }: { model: UnitsView } = useModelEditor();
+
+  if (unit?.strat_names == null) {
+    return null;
+  }
+
   const baseURl = `/unit/${unit.id}`;
   // this complexity is born of the confusing strat_name issues in the db
-  const href = unit.strat_names
-    ? `${baseURl}/strat-name/${unit.strat_names.id}/edit`
+  // const href =
+  unit.strat_names.length > 0
+    ? `${baseURl}/strat-name/${unit.strat_names[0].id}/edit`
     : `${baseURl}/strat-name/new`;
 
-  const linkText = unit.strat_names ? "(modify)" : "(create)";
+  const linkText = unit.strat_names.length > 0 ? "(modify)" : "(create)";
 
   return h("tr", [
     h(FeatureCell, { text: "Informal Unit Name" }, [h(InformalUnitName)]),
     h(FeatureCell, { text: "Formal Stratigraphic Name: " }, [
-      h(FormalStratName),
-      h(Link, { href }, [h("a", { style: { fontSize: "10px" } }, [linkText])]),
+      h(UnitRowStratNameEditor),
+      // h(Link, { href }, [h("a", { style: { fontSize: "10px" } }, [linkText])]),
     ]),
   ]);
 }
@@ -97,11 +100,10 @@ function UnitPosition(props: UnitPositionI) {
 Probably the most complicated component, bc there are so many editable things.
 */
 function UnitEdit() {
-  const { model, hasChanges, actions, ...rest } = useModelEditor();
-  const { unit }: { unit: UnitsView } = model;
+  const { model: unit, hasChanges, actions, ...rest } = useModelEditor();
 
   const updateUnit = (field: string, e: any) => {
-    actions.updateState({ model: { unit: { [field]: { $set: e } } } });
+    actions.updateState({ model: { [field]: { $set: e } } });
   };
 
   const onChangeLo = (interval: IntervalDataI) => {
@@ -109,11 +111,9 @@ function UnitEdit() {
     const { id: lo, interval_name: name_lo, age_top } = data;
     actions.updateState({
       model: {
-        unit: {
-          lo: { $set: lo },
-          name_lo: { $set: name_lo },
-          age_top: { $set: age_top },
-        },
+        lo: { $set: lo },
+        name_lo: { $set: name_lo },
+        age_top: { $set: age_top },
       },
     });
   };
@@ -123,11 +123,9 @@ function UnitEdit() {
     const { id: fo, interval_name: name_fo, age_bottom } = data;
     actions.updateState({
       model: {
-        unit: {
-          fo: { $set: fo },
-          name_fo: { $set: name_fo },
-          age_bottom: { $set: age_bottom },
-        },
+        fo: { $set: fo },
+        name_fo: { $set: name_fo },
+        age_bottom: { $set: age_bottom },
       },
     });
   };
@@ -175,7 +173,7 @@ function UnitEdit() {
           h(ColorBlock, {
             onChange: (color) => {
               actions.updateState({
-                model: { unit: { color: { $set: color } } },
+                model: { color: { $set: color } },
               });
             },
             color: unit?.color,
