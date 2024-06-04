@@ -5,6 +5,7 @@ import h from "@macrostrat/hyper";
 import ReactDOM from "react-dom/client";
 import { PageShell } from "../renderer/page-shell";
 import type { PageContextClient } from "../renderer/types";
+import vikeReact from "vike-react";
 
 let root: ReactDOM.Root;
 
