@@ -60,7 +60,7 @@ function ColumnPage({ columnInfo, linkPrefix = "/" }) {
         ]),
       ]),
       h("div.right-column", [
-        h.if(selectedUnit == null)(ColumnNavigatorMap, {
+        h(ColumnNavigatorMap, {
           className: "column-map",
           format: "geojson_bare",
           currentColumn: {
@@ -71,6 +71,9 @@ function ColumnPage({ columnInfo, linkPrefix = "/" }) {
               col_name: columnInfo.col_name,
               project_id: columnInfo.project_id,
             },
+          },
+          style: {
+            display: selectedUnit == null ? "block" : "none",
           },
           setCurrentColumn(newColumn) {
             const { col_id } = newColumn.properties;
