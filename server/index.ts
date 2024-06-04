@@ -1,8 +1,11 @@
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import cookieParser from "cookie-parser";
+import compression from "compression";
 
 import { vikeHandler } from "./vike-handler";
 import { createMiddleware } from "@universal-middleware/express";
+import { createMacrostratQlrAPI } from "@macrostrat-web/qgis-integration";
 import express from "express";
 import sirv from "sirv";
 
@@ -61,6 +64,9 @@ startServer();
 async function startServer() {
   const app = express();
 
+  app.use(compression());
+  app.use(cookieParser());
+
   if (isProduction) {
     app.use(sirv(`${root}/dist/client`));
     // Special case for cesium files at /cesium prefix
@@ -80,6 +86,14 @@ async function startServer() {
     ).middlewares;
     app.use(viteDevMiddleware);
   }
+
+  // API layer handler: should restructure this as a middleware
+  createMacrostratQlrAPI(
+    app,
+    "/docs/integrations/qgis/layers",
+    process.env.VITE_MACROSTRAT_TILESERVER_DOMAIN,
+    process.env.VITE_MACROSTRAT_INSTANCE
+  );
 
   /**
    * Vike route
