@@ -73,7 +73,7 @@ interface Routes {
   children?: Routes[];
 }
 
-const sitemap: Routes = {
+export const sitemap: Routes = {
   slug: "",
   name: "Macrostrat",
   children: [

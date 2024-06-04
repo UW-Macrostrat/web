@@ -5,6 +5,10 @@ export function buildPageMeta(pageContext: PageContext): {
   description: string;
 } {
   let title = pageContext.exports.title ?? "Macrostrat";
+  if (typeof title === "function") {
+    title = title(pageContext);
+  }
+
   let description =
     pageContext.exports.description ??
     "A platform for geological data exploration, integration, and analysis.";
