@@ -77,7 +77,9 @@ function ColumnPage({ columnInfo, linkPrefix = "/" }) {
           },
           setCurrentColumn(newColumn) {
             const { col_id } = newColumn.properties;
-            navigate(linkPrefix + `columns/${col_id}`);
+            navigate(linkPrefix + `columns/${col_id}`, {
+              overwriteLastHistoryEntry: true,
+            });
           },
           margin: 10,
           project_id: columnInfo.project_id,
