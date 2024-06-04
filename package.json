@@ -134,12 +134,17 @@
     "use-debounce": "^9.0.4",
     "use-react-router-breadcrumbs": "^3.2.1",
     "use-resize-observer": "^9.1.0",
-    "vike": "^0.4.159",
-    "vike-react": "^0.4.2",
-    "vite": "^5.0.12",
+    "vike": "^0.4.172",
+    "vike-react": "^0.4.11",
+    "vite": "^5.2.11",
     "vite-plugin-cesium": "^1.2.22",
     "zustand": "^4.5.1"
   },
   "prettier": {},
-  "packageManager": "yarn@4.2.2"
+  "packageManager": "yarn@4.2.2",
+  "dependenciesMeta": {
+    "vike-react@0.4.11": {
+      "unplugged": true
+    }
+  }
 }

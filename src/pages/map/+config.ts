@@ -12,4 +12,5 @@ export default {
       },
     },
   },
+  title: "Map - Macrostrat",
 };

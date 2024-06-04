@@ -4,8 +4,8 @@ export { render as onRenderHtml };
 import h from "@macrostrat/hyper";
 import ReactDOMServer from "react-dom/server";
 import { dangerouslySkipEscape, escapeInject } from "vike/server";
-import { PageShell } from "./page-shell";
-import type { PageContextServer } from "./types";
+import { PageShell } from "../renderer/page-shell";
+import type { PageContextServer } from "../renderer/types";
 
 async function render(pageContext: PageContextServer) {
   const { Page, pageProps, config, user, environment } = pageContext;
@@ -45,11 +45,12 @@ async function render(pageContext: PageContextServer) {
   // }
 
   // See https://vike.dev/head
-  const { documentProps } = pageContext.exports;
-  const title = (documentProps && documentProps.title) || "Macrostrat";
-  const desc = (documentProps && documentProps.description) || "Macrostrat";
+  const {
+    title = "Macrostrat",
+    desc = "Macrostrat",
+    scripts = [],
+  } = pageContext.exports;
 
-  const scripts = documentProps?.scripts ?? [];
   const scriptTags = scripts
     .map((src) => `<script src="${src}"></script>`)
     .join("\n");

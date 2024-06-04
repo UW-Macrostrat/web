@@ -1,7 +1,6 @@
 export default {
   clientRouting: false,
   supportsDarkMode: false,
-  isolateStyles: true,
   meta: {
     Page: {
       /* Sift must be rendered as a single-page app, because that is its design.

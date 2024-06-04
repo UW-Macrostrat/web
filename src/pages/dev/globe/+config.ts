@@ -8,8 +8,7 @@ export default {
     },
   },
   clientRouting: false,
-  documentProps: {
-    scripts: ["/cesium/Cesium.js"],
-    title: "Macrostrat – Globe",
-  },
+  scripts: ["/cesium/Cesium.js"],
+  title: "Globe - Macrostrat",
+  description: "Macrostrat Globe",
 };

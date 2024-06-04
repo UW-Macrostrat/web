@@ -3,8 +3,8 @@ export { render as onRenderClient };
 import { FocusStyleManager } from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
 import ReactDOM from "react-dom/client";
-import { PageShell } from "./page-shell";
-import type { PageContextClient } from "./types";
+import { PageShell } from "../renderer/page-shell";
+import type { PageContextClient } from "../renderer/types";
 
 let root: ReactDOM.Root;
 
