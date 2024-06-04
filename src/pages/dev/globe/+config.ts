@@ -9,6 +9,6 @@ export default {
   },
   clientRouting: false,
   scripts: ["/cesium/Cesium.js"],
-  title: "Globe - Macrostrat",
+  title: "Globe",
   description: "Macrostrat Globe",
 };

@@ -6,6 +6,7 @@ import ReactDOMServer from "react-dom/server";
 import { dangerouslySkipEscape, escapeInject } from "vike/server";
 import { PageShell } from "../renderer/page-shell";
 import type { PageContextServer } from "../renderer/types";
+import { buildPageMeta } from "~/_utils/page-meta";
 
 async function render(pageContext: PageContextServer) {
   const { Page, pageProps, config, user, environment } = pageContext;
@@ -45,15 +46,13 @@ async function render(pageContext: PageContextServer) {
   // }
 
   // See https://vike.dev/head
-  const {
-    title = "Macrostrat",
-    desc = "Macrostrat",
-    scripts = [],
-  } = pageContext.exports;
+  let { scripts = [] } = pageContext.exports;
 
   const scriptTags = scripts
     .map((src) => `<script src="${src}"></script>`)
     .join("\n");
+
+  const { title, description } = buildPageMeta(pageContext);
 
   const documentHtml = escapeInject`<!DOCTYPE html>
     <html lang="en">
@@ -76,7 +75,7 @@ async function render(pageContext: PageContextServer) {
         />
         ${dangerouslySkipEscape(scriptTags)}
         ${dangerouslySkipEscape(envScript)}
-        <meta name="description" content="${desc}" />
+        <meta name="description" content="${description}" />
         <title>${title}</title>
       </head>
       <body onload="document.body.style.visibility='visible'">
