@@ -6652,9 +6652,6 @@ __metadata:
     vite-plugin-cesium: "npm:^1.2.22"
     vite-plugin-rewrite-all: "npm:^1.0.1"
     zustand: "npm:^4.5.1"
-  dependenciesMeta:
-    vike-react@0.4.11:
-      unplugged: true
   languageName: unknown
   linkType: soft
 

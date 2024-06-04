@@ -141,10 +141,5 @@
     "zustand": "^4.5.1"
   },
   "prettier": {},
-  "packageManager": "yarn@4.2.2",
-  "dependenciesMeta": {
-    "vike-react@0.4.11": {
-      "unplugged": true
-    }
-  }
+  "packageManager": "yarn@4.2.2"
 }
