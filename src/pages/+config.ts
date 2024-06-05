@@ -1,18 +1,27 @@
-import { Config, ConfigDefinition } from "vike/types";
+import vikeReact from "vike-react/config";
+import type { Config } from "vike/types";
+//const Layout = "import:~/layouts:BasePage";
+//import Head from "../layouts/HeadDefault.js";
 
+// Default config (can be overridden by pages)
 export default {
+  //Layout,
+  //Head,
+  // <title>
+  title: "Macrostrat",
+  extends: vikeReact,
   passToClient: [
     "pageProps",
     "pageStyle",
     "supportsDarkMode",
-    "isolateStyles",
     "macrostratLogoFlavor",
     "routeParams",
     "user",
     "urlPathname",
+    "description",
+    "title",
   ],
   clientRouting: true,
-  hydrationCanBeAborted: true,
   meta: {
     supportsDarkMode: {
       env: {
@@ -20,13 +29,13 @@ export default {
         server: true,
       },
     },
-    isolateStyles: {
+    scripts: {
       env: {
-        client: true,
+        client: false,
         server: true,
       },
     },
-    documentProps: {
+    description: {
       env: {
         client: true,
         server: true,
