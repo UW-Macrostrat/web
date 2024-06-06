@@ -1,0 +1,68 @@
+#app
+  width: 40em
+
+.column-array
+  display: flex
+  flex-direction: row
+  padding: 1em
+  .spacer
+    flex-grow: 2
+
+  .timescale
+    margin-top: 30px
+
+div.measured-section
+  display: flex
+  flex-direction: row
+  .timescale
+    margin-top: 30px
+  .spacer
+    flex-grow: 2
+
+.labeled-unit div.unit-overlay
+  font-size: 14px
+  text-align: center
+
+g.unit
+  rect.unit
+    stroke-width: 1.5px
+
+g.lithology-column use.frame
+    stroke: black
+
+@media (prefers-color-scheme: dark)
+  .lithology-column .frame
+    stroke: white
+  g.inner
+    pattern: image
+    filter: invert(100%)
+
+.column.age-axis
+  width: 55px
+
+.column .tick text
+  font-size: 14px
+
+.column
+  flex: 0
+  .age-axis-label
+    font-size: 14px
+
+.map-area
+  height: 220px
+
+interval($color)
+  &>.interval-box
+    margin: 0px
+    background-color: lighten($color, 50%)
+    border: 2px solid lighten($color, 10%) !important
+    .interval-label
+      color: darken($color, 30%)
+
+.interval
+  &.Blueflower
+    interval(dodgerblue)
+  &.Gametrail
+    interval(#c0ddc6)
+  &.Rackla
+    interval(#aaa)

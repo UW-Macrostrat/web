@@ -1,0 +1,36 @@
+@require './column/editor-styles'
+@require './ui/main'
+
+*
+  box-sizing border-box
+
+body, html
+  margin 0
+
+.app
+  margin 0 auto
+  max-width 800px
+
+.main
+  display flex
+  flex-direction row
+
+.menu-column
+  display flex
+  flex-direction column
+  margin-right 1em
+
+.main-menu
+  padding-top 2em
+  top 0
+  position sticky
+  display flex
+  flex-direction column
+  button
+    margin-bottom 0.2em
+
+.column-container
+  position relative
+
+:global(.note-label)
+  font-size 10px

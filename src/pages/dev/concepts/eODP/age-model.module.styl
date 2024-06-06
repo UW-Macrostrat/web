@@ -1,0 +1,239 @@
+.column-view
+  margin 0
+  padding 0
+  position absolute
+  top 0
+  left 0
+  right 0
+  bottom 0
+  padding-left 10px
+  overflow-x hidden
+  h1
+    font-size 1.2em
+    margin-bottom 0.2em
+    padding-left 35px
+
+
+.column-title
+  font-weight: 600
+
+// .column-picker
+//   height: 100% 
+//   width: 500px
+//   max-width: 500px
+//   min-width: 200px
+//   position: absolute
+
+
+
+.timescale-container
+  position sticky
+  bottom 0
+  background-color: var(--column-background-color)
+  z-index 100
+
+  .axis-label
+    font-size: 0.8em
+    text-align: center
+    margin-bottom 4px
+
+.column-map-container
+  min-width 400px
+  flex-grow 1
+  position relative
+  min-height: 100%
+
+  .controls
+    z-index: 100
+    position absolute
+    bottom 0
+    right 0
+    padding 0.5em
+
+.map-container
+  position: relative
+  height: 100%
+  width: 100%
+  flex-grow 1
+
+.column-map
+  position absolute
+  top: 0
+  bottom 0
+  left 0
+  right 0
+
+.unit-details
+  width: 450px
+
+:global
+  *
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif
+
+  html, body
+    margin 0
+    padding 0
+
+
+  body#column-inspector
+    overflow: hidden
+    width 100vw
+    height 100vh
+
+  // Column
+  .column
+    display: flex
+    flex-direction row
+    position relative
+    .age-axis-label
+      writing-mode vertical-lr
+      transform: rotate(180deg)
+      font-size 12px
+      text-align: center
+      position: sticky
+      top: 0
+      max-height: 100%
+    .tick text
+      text-anchor middle
+      font-weight 400 !important
+      transform rotate(-90deg) translate(8px,-12px)
+      
+
+  svg.section.main-section
+    z-index: 50
+
+  rect.unit
+    stroke: black
+    stroke-width: 1px
+
+  g.lithology-column use.frame
+    stroke black
+    stroke-width: 1.5px !important
+    pointer-events none
+
+  .unit-label
+    text-align center
+
+  .col-note-label
+    font-size: 10px
+    margin-top 3px
+    padding 2px
+    padding-left: 3px
+    line-height: 9px
+    border-left none !important
+
+  g.height-range
+    display none
+
+  .note-inner
+    border: none
+
+  .frame rect
+    fill transparent
+
+  .map-placeholder
+    position relative
+
+  .macrostrat-map
+    .graticule
+      stroke-dasharray inherit
+      stroke darken(#AFE6F0, 5%)
+    .neatline
+      stroke-width 1.5px
+
+  .labeled-unit div.unit-overlay
+    font-size 10px
+    font-style: italic
+    display flex
+    align-items center
+    justify-content: center
+    span.unit-label
+      display block
+      $shadow-size=4px
+      text-shadow:
+        0px 0px $shadow-size #ffffff,
+        0px 0px $shadow-size #ffffff,
+        0px 0px $shadow-size #ffffff,
+        0px 0px $shadow-size #ffffff,
+        0px 0px $shadow-size #ffffff,
+        0px 0px $shadow-size #ffffff,
+        0px 0px $shadow-size #ffffff,
+        0px 0px $shadow-size #ffffff,
+        0px 0px $shadow-size #ffffff,
+        0px 0px $shadow-size #ffffff,
+        0px 0px $shadow-size #ffffff,
+        0px 0px $shadow-size #ffffff,
+        0px 0px $shadow-size #ffffff,
+        0px 0px $shadow-size #ffffff,
+        0px 0px $shadow-size #ffffff,
+        0px 0px $shadow-size #ffffff,
+        0px 0px $shadow-size #ffffff,
+        0px 0px $shadow-size #ffffff,
+        0px 0px $shadow-size #ffffff,
+        0px 0px $shadow-size #ffffff;
+
+  .column-nav
+    position sticky
+    top 2.2em
+    h3
+      color: #444
+      margin-bottom: 0.3em
+
+  .default-buttons
+    width: 100%
+    margin 0 -10px
+
+  div.context-map
+    position absolute
+    top 0
+    right 0
+    width: 250px
+    height: 250px
+    cursor pointer
+    z-index 100
+    &.expanded
+      cursor inherit
+      .columns path:hover
+        stroke: rgba(255,0,0,.4) !important
+
+
+    .close-button
+      position absolute
+      top 1em
+      right 1em
+
+    .land
+      background-color rgb(233, 252, 234)
+
+  div.section
+    display flex
+    flex-direction row
+  div.timescale.horizontal
+    // .interval-box
+    //   height: 14px
+    // .interval
+    //   &:last-child
+    //     flex-grow 1
+    .label.interval-label
+      max-width: 100%
+
+
+  .section .divisions .unit
+    cursor pointer
+
+  rect.selection-overlay
+    fill rgba(255,0,0,.5)
+
+  // Helps with darkreader on Firefox
+  html[data-darkreader-scheme="dark"]
+    .lithology-column .frame
+      stroke: transparent
+    g.inner
+      pattern image
+        filter: invert(100%)
+
+  body
+    --column-background-color: #ffffff
+  // Column graph styles
+  .underlay
+    fill: var(--column-background-color)
