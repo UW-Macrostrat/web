@@ -1,0 +1,106 @@
+import { PageHeader } from "~/components";
+import { LinkCard } from "~/components/cards";
+import { Image } from "./index";
+import "./main.styl";
+
+[//]: # "Nav Bar"
+<div class="nav">
+  <ul>
+    <li><a href="#apps">Apps</a></li>
+    <a href="/dev/main-page"><Image className="nav-logo" src="logo_white.png" width="40px"></Image></a>
+  </ul>
+</div>
+
+[//]: # "Apps"
+<div id="apps">
+  <h1 class="big app-header">Built with Macrostrat</h1>
+
+  <a href="/sift">
+    <div class="app-box">
+      <Image className="app-img" src="logo_red.png"></Image>
+      <div class="app-background-text">
+        Sift
+        <p class="blurb">Explore Macrostrat (by Macrostrat)</p>
+      </div>
+    </div>
+  </a>
+
+  <a href="https://rockd.org">
+    <div class="app-box">
+      <Image className="app-img" src="rockd.jpg"></Image>
+      <div class="app-background-text">
+        Rockd
+        <p class="blurb">A mobile field book, Macrostrat style.</p>
+      </div>
+    </div>
+  </a>
+
+  <a href="/map">
+    <div class="app-box">
+      <Image className="app-img" src="burwell.png"></Image>
+      <div class="app-background-text">
+        Map
+        <p class="blurb">Integrating the world's geologic maps (by Macrostrat)</p>
+      </div>
+    </div>
+  </a>
+
+  <a href="https://itunes.apple.com/us/app/mancos/id541570878?mt=8" target="_blank">
+    <div class="app-box">
+      <Image className="app-img" src="mancos.jpg"></Image>
+      <div class="app-background-text">
+        Mancos
+        <p class="blurb">Explore Macrostrat and PBDB in iOS (by Hunt Mountain Software)</p>
+      </div>
+    </div>
+  </a>
+
+  <a href="http://fc.umn.edu/" target="_blank">
+    <div class="app-box">
+      <Image className="app-img" src="foc.png"></Image>
+      <div class="app-background-text">
+        FOC
+        <p class="blurb">A glass bottom jet (by Amy Myrbo, Shane Loeffler et al.)</p>
+      </div>
+    </div>
+  </a>
+
+  <a href="https://github.com/UW-Macrostrat/node-api-template">
+    <div class="app-box">
+      <Image className="app-img" src="api.png"></Image>
+      <div class="app-background-text app-background-text-small">
+        API Template
+        <p class="blurb">Foundation of all Macrostrat services (by Macrostrat)</p>
+      </div>
+    </div>
+  </a>
+</div>
+
+[//]: # "Footer"
+<div class="footer">
+  <div class="footer-container">
+    <div class="col-sm-4" id="who-made-it">
+      <Image className="logo_white" src="logo_white.png" width="100px"></Image>
+      <p class="f1-text">Produced by the <a href="http://strata.geology.wisc.edu" target="_blank">UW Macrostrat Lab</a> <a href="https://github.com/UW-Macrostrat" target="_blank"><Image className="git_logo" src="git-logo.png" width="18px"></Image></a></p>
+    </div>
+    <div class="col-sm-4" id="bottom-nav">
+      <ul class="footer-nav">
+        <li><a href="#about">About</a></li>
+        <li><a href="#apps">Apps</a></li>
+        <li><a href="#api">API</a></li>
+        <li><a href="#people">People</a></li>
+        <li><a href="#donate">Donate</a></li>
+        <li><a href="#publications">Publications</a></li>
+      </ul>
+    </div>
+    <div class="col-sm-4 funding">
+      <Image className="funding-logo" src="nsf.png" width="100px"></Image>
+      <div class="funding-line">
+        Current support: \
+        EAR-1948843 \
+        ICER-1928323 \
+        UW-Madison Dept. Geoscience
+      </div>
+    </div>
+  </div>
+</div>
