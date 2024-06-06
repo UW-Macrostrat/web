@@ -71,7 +71,7 @@ export async function fetchFilteredColumns(
   // TODO: report errors
   return {
     type: "update-column-filters",
-    columns: res.data,
+    columns: res.data.features,
   };
 }
 

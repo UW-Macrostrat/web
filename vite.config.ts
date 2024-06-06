@@ -5,7 +5,6 @@ import path from "path";
 import ssr from "vike/plugin";
 import { UserConfig } from "vite";
 import cesium from "vite-plugin-cesium";
-
 import pkg from "./package.json";
 
 const aliasedModules = [
@@ -20,6 +19,7 @@ const aliasedModules = [
   "mapbox-react",
   "mapbox-styles",
   "cesium-viewer",
+  "map-components",
 ];
 
 const gitEnv = revisionInfo(pkg, "https://github.com/UW-Macrostrat/web");
@@ -30,6 +30,8 @@ for (const [key, value] of Object.entries(gitEnv)) {
 
 const cesiumRoot = require.resolve("cesium").replace("/index.cjs", "/Build");
 const cesiumBuildPath = path.resolve(cesiumRoot, "Cesium");
+
+// Check if we are building for server context
 
 const config: UserConfig = {
   cacheDir: ".vite",
@@ -66,11 +68,9 @@ const config: UserConfig = {
     sourcemap: true,
   },
   define: {
-    "process.env": {
-      NODE_DEBUG: false,
-    },
     // Cesium base URL
     CESIUM_BASE_URL: JSON.stringify("/cesium"),
+    // If not building for server context
   },
   ssr: {
     noExternal: ["labella", "@supabase/postgrest-js"],

@@ -20,7 +20,6 @@ import {
   useAppActions,
   useAppState,
   useHashNavigate,
-  useSearchState,
 } from "../app-state";
 import {
   isDetailPanelRouteInternal,
@@ -230,7 +229,7 @@ type MenuProps = {
 
 const Menu = (props: MenuProps) => {
   let { className, menuPage, baseRoute = "/" } = props;
-  const { inputFocus } = useSearchState();
+  const inputFocus = useAppState((s) => s.core.inputFocus);
   const runAction = useAppActions();
 
   const navigateHome = useHashNavigate(baseRoute);

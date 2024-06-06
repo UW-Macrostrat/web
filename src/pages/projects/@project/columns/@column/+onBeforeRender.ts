@@ -45,6 +45,10 @@ export async function onBeforeRender(pageContext) {
 
   return {
     pageContext: {
+      exports: {
+        ...pageContext.exports,
+        title: columnInfo.col_name,
+      },
       pageProps: {
         columnInfo,
         linkPrefix,

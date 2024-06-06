@@ -41,13 +41,23 @@ function mainReducer(
    * state, we pass thm to individual reducers.
    */
   switch (action.type) {
+    case "@@INIT": {
+      const route = state.router.location;
+      const { pathname } = route;
+      const isOpen = contextPanelIsInitiallyOpen(pathname);
+      const s1 = setInfoMarkerPosition(state, pathname);
+      return {
+        ...s1,
+        core: { ...s1.core, menuOpen: isOpen, contextPanelOpen: isOpen },
+      };
+    }
     case "@@router/ON_LOCATION_CHANGED": {
-      const { pathname } = action.payload.location;
+      const newRoute = action.payload.location;
+      const { pathname } = newRoute;
       const isOpen = contextPanelIsInitiallyOpen(pathname);
 
-      let s1 = setInfoMarkerPosition(state);
+      const s1 = setInfoMarkerPosition(state, pathname);
 
-      const newRoute = action.payload.location;
       let newAction = action;
       if (newRoute.hash == "") {
         newAction = {
@@ -56,7 +66,7 @@ function mainReducer(
             ...action.payload,
             location: {
               ...action.payload.location,
-              hash: state.router.location.hash,
+              hash: s1.router.location.hash,
             },
           },
         };
@@ -65,7 +75,7 @@ function mainReducer(
       return {
         ...s1,
         core: { ...s1.core, menuOpen: isOpen, contextPanelOpen: isOpen },
-        router: routerReducer(state.router, newAction),
+        router: routerReducer(s1.router, newAction),
       };
     }
     case "set-menu-page":
@@ -92,18 +102,45 @@ const appReducer = (state: AppState, action: AppAction) => {
   return hashStringReducer(mainReducer(state, action), action);
 };
 
-export function setInfoMarkerPosition(state: AppState): AppState {
+export function setInfoMarkerPosition(
+  state: AppState,
+  pathname: string | null = null
+): AppState {
   // Check if we are viewing a specific location
   const loc = matchPath(
-    mapPagePrefix + "/loc/:lng/:lat",
-    state.router.location.pathname
+    mapPagePrefix + "/loc/:lng/:lat/*",
+    pathname ?? state.router.location.pathname
   );
+
+  let s1 = state;
+
+  // //If we are on the column route, the column layer must be enabled
+  // let s1 = state;
+  // const colMatch = matchPath(
+  //   mapPagePrefix + "/loc/:lng/:lat/column",
+  //   pathname ?? state.router.location.pathname
+  // );
+  // if (colMatch != null) {
+  //   s1 = update(s1, { core: { mapLayers: { $add: [MapLayer.COLUMNS] } } });
+  // }
+
+  // // If we are disabling the column route, we should remove the column layer
+  // const colMatch2 = matchPath(
+  //   mapPagePrefix + "/loc/:lng/:lat/column",
+  //   state.router.location.pathname
+  // );
+
+  // if (colMatch2 != null && colMatch == null) {
+  //   s1 = update(s1, { core: { mapLayers: { $remove: [MapLayer.COLUMNS] } } });
+  // }
+
+  // Set location
   if (loc != null) {
     const { lng, lat } = loc.params;
     return {
-      ...state,
+      ...s1,
       core: {
-        ...state.core,
+        ...s1.core,
         infoMarkerPosition: { lng: Number(lng), lat: Number(lat) },
         infoDrawerOpen: true,
       },
@@ -113,7 +150,7 @@ export function setInfoMarkerPosition(state: AppState): AppState {
   // Check if we're viewing a cross-section
   const crossSection = matchPath(
     mapPagePrefix + "/cross-section/:loc1/:loc2",
-    state.router.location.pathname
+    pathname ?? state.router.location.pathname
   );
   if (crossSection != null) {
     const { loc1, loc2 } = crossSection.params;
@@ -121,9 +158,9 @@ export function setInfoMarkerPosition(state: AppState): AppState {
     const [lng2, lat2] = loc2.split(",").map(Number);
     if (lng1 != null && lat1 != null && lng2 != null && lat2 != null) {
       return {
-        ...state,
+        ...s1,
         core: {
-          ...state.core,
+          ...s1.core,
           crossSectionLine: {
             type: "LineString",
             coordinates: [

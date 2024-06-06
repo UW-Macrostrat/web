@@ -111,7 +111,6 @@ export function usePerformanceWatcher(
   const observerRef = useRef<PerformanceObserver>();
   const callback = useCallback(
     (data: PerformanceObserverEntryList) => {
-      console.log("Adding performance data");
       dispatch({
         type: "add-performance-data",
         data: data.getEntries().map(buildPerformanceData),
@@ -122,7 +121,6 @@ export function usePerformanceWatcher(
   );
 
   useEffect(() => {
-    console.log("Creating performance observer");
     const observer = new PerformanceObserver(callback);
     observer.observe({ entryTypes: ["resource"] });
     observerRef.current = observer;
