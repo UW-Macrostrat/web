@@ -1,29 +1,85 @@
 .htnl, .body
-    background-color: white
+    background-color: black
+    color: white
+
+a:hover
+    text-decoration: none
+.nav
+  position: fixed
+  width: 100%
+  z-index: 10000
+  top: 0
+
+  ul 
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #015eab;
+
+  li 
+    float: left;
+    font-size: 15px
+
+  li a 
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none
+
+.big
+    color: white
+    text-align: center
 
 .people
-    z-index: 100
-.big
     color: white
 
 .left
     float: left
-    width: 50%
+    width: 30%
     background-color: green
+    margin-left: 20%
 
 .right
-    float: right
-    width: 50%
+    float: left
+    width: 30%
     background-color: red
+    margin-right: 20%
 
 .person-info
-    height: 10vh
-    text-align: right
-    padding: 3px 20px
-    color: blue
-    border: dotted
+    height: 30vh
+    width: 100%
+    position: relative
+
+.text
+    position:absolute
+    padding: 5px 20px
+    z-index: 100
+    background-color: rgba(0, 0, 0, 0.2)
+    bottom:0
+    right: 0
+
+    a
+        color: white
+
+    a:hover
+        color: white
 
 .back-img
     position:absolute
-    z-index:0
+    z-index: 0
+    height: 30vh
     object-fit: cover
+    width: 100%
+
+n
+    font-size: 25px
+    font-weight: 200px
+
+t
+    font-weight: 400px
+
+e 
+    font-size: 14px
+    font-weight: 200px
