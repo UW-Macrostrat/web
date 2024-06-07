@@ -385,5 +385,22 @@ a:hover
   line-height: 28px;
   font-weight: 400;
 
+#publications 
+  margin: 100px 10%
 
+#pub-title 
+  text-align: left
 
+.pub-list
+  margin-left: 20px
+  counter-reset: pub-counter 70
+  color: black
+
+  li
+    counter-increment: pub-counter -1
+
+  li::marker
+    font-size: 35px;
+    color: #babdc8;
+    content: counter(pub-counter) " "
+    counter-increment: pub-counter
