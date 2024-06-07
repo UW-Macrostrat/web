@@ -3,6 +3,7 @@ import { LinkCard } from "~/components/cards";
 import { Image } from "./index";
 import "./main.styl";
 
+<div id="total">
 [//]: # "Nav Bar"
 <div class="nav">
   <ul>
@@ -246,11 +247,10 @@ import "./main.styl";
 
 [//]: # "API"
 <div id="api">
-  <h1 class="big api-header">API</h1>
-  <div class="row">
-  All data contained in the Macrostrat database are freely available via our Application Programming Interface (API), which provides a convinient way to retrieve data for analysis or application creation. For more information head over to the <a href="/api">API root</a> to explore available routes.
-  </div>
+  <div class="api-circle"><div id="api-circle-text">API</div></div>
+  <div id="api-text">All data contained in the Macrostrat database are freely available via our Application Programming Interface (API), which provides a convinient way to retrieve data for analysis or application creation. For more information head over to the <a href="/api">API root</a> to explore available routes.</div>
 </div>
+
 <Image className="rock-border" src="rocks-border.jpg"></Image>
 
 [//]: # "People"
@@ -533,4 +533,5 @@ import "./main.styl";
       </div>
     </div>
   </div>
+</div>
 </div>
