@@ -3,10 +3,12 @@ import { PageBreadcrumbs } from "~/renderer";
 import "./main.styl";
 import { Image } from "./index";
 
+<div class="main">
+
 [//]: # "Nav Bar"
 <div class="nav">
   <ul>
-    <li><a href="#people">People</a></li>
+    <li><a href="/dev/people">People</a></li>
     <a href="/dev/main-page"><Image className="nav-logo" src="logo_white.png" width="40px"></Image></a>
   </ul>
 </div>
@@ -15,6 +17,8 @@ import { Image } from "./index";
 
 [//]: # "People"
 <h1 class="big">People</h1>
+<p>major contributors to the project </p>
+<div class="line"></div>
 
 <div class="people" id="people">
     <div class="left">
@@ -166,12 +170,7 @@ import { Image } from "./index";
     </div>
     <div class="col-sm-4" id="bottom-nav">
         <ul class="footer-nav">
-        <li><a href="#about">About</a></li>
-        <li><a href="#apps">Apps</a></li>
-        <li><a href="#api">API</a></li>
         <li><a href="#people">People</a></li>
-        <li><a href="#donate">Donate</a></li>
-        <li><a href="#publications">Publications</a></li>
         </ul>
     </div>
     <div class="col-sm-4 funding">
@@ -184,4 +183,6 @@ import { Image } from "./index";
         </div>
     </div>
     </div>
+</div>
+
 </div>
