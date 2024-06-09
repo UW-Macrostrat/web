@@ -10,7 +10,7 @@ import { burwellTileDomain } from "@macrostrat-web/settings";
 // Import other components
 
 type MapState = {
-  model_id: number;
+  modelName: string;
   age: number;
   mapPosition: MapPosition;
 };
@@ -21,10 +21,10 @@ type PaleogeographyState = MapState & {
   activeModel: ModelInfo | null;
 };
 
-type ModelInfo = { id: string; max_age: number; min_age: number; name: string };
+type ModelInfo = { id: number; max_age: number; min_age: number; name: string };
 
 type PaleogeographySyncAction =
-  | { type: "set-model"; model_id: number }
+  | { type: "set-model"; modelID: number }
   | { type: "set-age"; age: number }
   | { type: "set-map-position"; mapPosition: MapPosition }
   | { type: "set-initial-state"; state: PaleogeographyState };
@@ -37,14 +37,19 @@ function paleogeographyReducer(
 ): PaleogeographyState {
   switch (action.type) {
     case "set-model":
+      const activeModel = state.allModels.find((d) => d.id == action.modelID);
       return updateHashString({
         ...state,
-        model_id: action.model_id,
+        activeModel,
+        modelName: activeModel?.name ?? state.modelName,
+        age: normalizeAge(state.age, activeModel),
       });
     case "set-age":
       // Round to nearest 5 Ma
-      const age = Math.round(action.age / 5) * 5;
-      return updateHashString({ ...state, age });
+      return updateHashString({
+        ...state,
+        age: normalizeAge(action.age, state.activeModel),
+      });
     case "set-map-position":
       return updateHashString({ ...state, mapPosition: action.mapPosition });
     case "set-initial-state":
@@ -58,9 +63,8 @@ async function transformAction(
   switch (action.type) {
     case "initialize":
       const hashData = getHashString(window.location.hash);
-      console.log("Hash data", hashData);
 
-      const { model_id, age, ...rest } = hashData;
+      const { model, age, ...rest } = hashData;
       const mapPosition = getMapPositionForHash(
         rest,
         defaultState.mapPosition.camera
@@ -71,14 +75,34 @@ async function transformAction(
         res.json()
       );
 
+      let modelName: string | null = null;
+      if (Array.isArray(model)) {
+        modelName = model[0];
+      } else if (model != null) {
+        modelName = model;
+      } else {
+        modelName = "Seton2012";
+      }
+
+      let baseAge: number | null = null;
+      if (Array.isArray(age)) {
+        baseAge = parseInt(age[0]);
+      } else if (age != null) {
+        baseAge = parseInt(age);
+      }
+
+      console.log(age, baseAge);
+
+      const activeModel = models.find((d) => d.name == modelName);
+
       return {
         type: "set-initial-state",
         state: {
-          model_id: parseInt(model_id) ?? 3,
-          age: parseInt(age) ?? 0,
+          modelName,
+          age: normalizeAge(baseAge, activeModel),
           mapPosition,
           allModels: models,
-          activeModel: models.find((d) => d.id == model_id),
+          activeModel,
           initialized: true,
         },
       };
@@ -86,8 +110,16 @@ async function transformAction(
   return action;
 }
 
+function normalizeAge(age: number | null, model: ModelInfo | null): number {
+  if (model == null) return age;
+  let age1 = age ?? 0;
+  age1 = Math.max(model.min_age, Math.min(model.max_age, age));
+  // Round age to nearest 5 Ma
+  return Math.round(age1 / 5) * 5;
+}
+
 const defaultState: PaleogeographyState = {
-  model_id: 3,
+  modelName: "Seton2012",
   age: 0,
   mapPosition: {
     camera: {
@@ -127,8 +159,8 @@ export function usePaleogeographyState(): [
 }
 
 function updateHashString(state: PaleogeographyState): PaleogeographyState {
-  const { model_id, age, mapPosition } = state;
-  let args: any = { model_id, age };
+  const { modelName, age, mapPosition } = state;
+  let args: any = { model: modelName, age };
   applyMapPositionToHash(args, mapPosition);
   setHashString(args, { sort: false, arrayFormat: "comma" });
   return state;

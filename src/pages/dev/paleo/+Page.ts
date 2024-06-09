@@ -1,4 +1,4 @@
-import { HTMLSelect, Spinner, Switch } from "@blueprintjs/core";
+import { HTMLSelect, NonIdealState, Spinner, Switch } from "@blueprintjs/core";
 import { burwellTileDomain, mapboxAccessToken } from "@macrostrat-web/settings";
 import h from "@macrostrat/hyper";
 import {
@@ -41,7 +41,14 @@ export function Page() {
 
   const [paleoState, dispatch] = usePaleogeographyState();
 
-  const { age, mapPosition, allModels: models, activeModel } = paleoState ?? {};
+  const {
+    age,
+    mapPosition,
+    allModels: models,
+    activeModel,
+    initialized,
+    modelName,
+  } = paleoState;
 
   const model_id = activeModel?.id;
 
@@ -67,7 +74,7 @@ export function Page() {
     []
   );
 
-  if (age == null || model_id == null) {
+  if (!initialized) {
     return h(Spinner);
   }
 
@@ -98,6 +105,39 @@ export function Page() {
     );
   }
 
+  let mapView = h(
+    MapView,
+    {
+      style,
+      mapPosition,
+      projection: { name: "globe" },
+      enableTerrain: false,
+      mapboxToken,
+      onMapMoved,
+    },
+    [
+      h(FeatureSelectionHandler, {
+        selectedLocation: inspectPosition,
+        setFeatures: setData,
+      }),
+      h(MapMarker, {
+        position: inspectPosition,
+        setPosition: onSelectPosition,
+      }),
+    ]
+  );
+  if (activeModel == null) {
+    const title =
+      modelName == null
+        ? "No model selected"
+        : h(["Model ", h("code", modelName), " not found"]);
+
+    mapView = h(NonIdealState, {
+      title,
+      description: "Please select a valid model from the control panel",
+    });
+  }
+
   return h(
     MapAreaContainer,
     {
@@ -115,8 +155,8 @@ export function Page() {
         h(PlateModelControls, {
           models,
           activeModel: model_id,
-          setModel(model_id) {
-            dispatch({ type: "set-model", model_id });
+          setModel(modelID) {
+            dispatch({ type: "set-model", modelID });
           },
           age,
         }),
@@ -136,30 +176,10 @@ export function Page() {
         setAge(age) {
           dispatch({ type: "set-age", age });
         },
-        ageRange: ageRangeForModel(model),
+        ageRange: ageRangeForModel(activeModel),
       }),
     },
-    h(
-      MapView,
-      {
-        style,
-        mapPosition,
-        projection: { name: "globe" },
-        enableTerrain: false,
-        mapboxToken,
-        onMapMoved,
-      },
-      [
-        h(FeatureSelectionHandler, {
-          selectedLocation: inspectPosition,
-          setFeatures: setData,
-        }),
-        h(MapMarker, {
-          position: inspectPosition,
-          setPosition: onSelectPosition,
-        }),
-      ]
-    )
+    mapView
   );
 }
 
