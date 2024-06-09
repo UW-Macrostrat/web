@@ -12,178 +12,27 @@ import {
   MapView,
   PanelCard,
   TileInfo,
-  applyMapPositionToHash,
   buildInspectorStyle,
-  getMapPositionForHash,
 } from "@macrostrat/map-interface";
 import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
-import { MapPosition } from "@macrostrat/mapbox-utils";
 import {
   DarkModeButton,
   Spacer,
-  getHashString,
-  setHashString,
   useAPIResult,
   useDarkMode,
   useStoredState,
 } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
-import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { MacrostratVectorTileset } from "~/pages/map/dev/map-layers";
 import { TimescalePanel } from "./timescale";
-
-import "~/styles/global.styl";
+import { usePaleogeographyState } from "./state";
+import { darkStyle, lightStyle } from "./map-style";
 
 // Import other components
 
-type PaleogeographyState = {
-  model_id: number;
-  age: number;
-  mapPosition: MapPosition;
-  initialized: boolean;
-};
-
-type PaleogeographyAction =
-  | { type: "set-model"; model_id: number }
-  | { type: "set-age"; age: number }
-  | { type: "set-map-position"; mapPosition: MapPosition }
-  | { type: "initialize"; state: PaleogeographyState };
-
-function usePaleogeographyState(
-  defaultState: PaleogeographyState
-): [PaleogeographyState, (s: PaleogeographyAction) => void] {
-  /** Use state synced with hash string for paleogeography layer */
-  const defaultModelID = defaultState.model_id;
-  const defaultAge = defaultState.age;
-
-  const [state, dispatch] = useReducer(
-    (state: PaleogeographyState, action: PaleogeographyAction) => {
-      switch (action.type) {
-        case "set-model":
-          return {
-            ...state,
-            model_id: action.model_id,
-            age: state.age ?? defaultAge,
-          };
-        case "set-age":
-          // Round to nearest 5 Ma
-          const age = Math.round(action.age / 5) * 5;
-          return { ...state, age };
-        case "set-map-position":
-          return { ...state, mapPosition: action.mapPosition };
-        case "initialize":
-          return { ...action.state, initialized: true };
-      }
-    },
-    { model_id: null, age: null, mapPosition: null, initialized: false }
-  );
-
-  const { model_id, age, mapPosition } = state;
-
-  useEffect(() => {
-    if (model_id == null || age == null || mapPosition == null) return;
-    let args: any = { model_id, age };
-    applyMapPositionToHash(args, mapPosition);
-    setHashString(args, { sort: false, arrayFormat: "comma" });
-  }, [model_id, age, mapPosition]);
-
-  useEffect(() => {
-    const hashData = getHashString(window.location.hash) ?? {};
-    const { model_id, age, ...rest } = hashData;
-    const mapPosition = getMapPositionForHash(
-      rest,
-      defaultState.mapPosition.camera
-    );
-
-    if (model_id == null || age == null) return;
-    if (Array.isArray(model_id)) return;
-    if (Array.isArray(age)) return;
-    dispatch({
-      type: "initialize",
-      state: {
-        model_id: parseInt(model_id) ?? defaultModelID,
-        age: parseInt(age) ?? defaultAge,
-        mapPosition,
-        initialized: true,
-      },
-    });
-  }, []);
-
-  return [state, dispatch];
-}
-
 const baseTilesetURL =
   burwellTileDomain + "/carto-slim-rotated/{z}/{x}/{y}?model_id=3&t_step=0";
-
-const common = {
-  version: 8,
-  sources: {
-    burwell: {
-      type: "vector",
-      tiles: [baseTilesetURL],
-      tileSize: 512,
-    },
-  },
-  glyphs: "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
-  sprite: "", //mapbox://sprites/mapbox/light-v10",
-  fog: {
-    range: [10, 20],
-    color: "#000000",
-    "high-color": "hsl(207, 23%, 5%)",
-    "space-color": "hsl(207, 23%, 10%)",
-    "horizon-blend": 0.1,
-    "star-intensity": 0,
-  },
-};
-
-const darkStyle = {
-  name: "PaleoLight",
-  ...common,
-  layers: [
-    {
-      id: "background",
-      type: "background",
-      paint: {
-        "background-color": "hsl(207, 18%, 21%)",
-      },
-    },
-    {
-      id: "plates",
-      type: "fill",
-      source: "burwell",
-      "source-layer": "plates",
-      paint: {
-        //"fill-color": "color",
-        "fill-color": "hsl(207, 18%, 30%)",
-        "fill-opacity": 0.8,
-      },
-    },
-  ],
-};
-const lightStyle = {
-  name: "PaleoLight",
-  ...common,
-  layers: [
-    {
-      id: "background",
-      type: "background",
-      paint: {
-        "background-color": "hsl(185, 9%, 81%)",
-      },
-    },
-    {
-      id: "plates",
-      type: "fill",
-      source: "burwell",
-      "source-layer": "plates",
-      paint: {
-        //"fill-color": "color",
-        "fill-color": "hsl(55, 11%, 96%)",
-        "fill-opacity": 0.8,
-      },
-    },
-  ],
-};
 
 export function Page({
   tileset = MacrostratVectorTileset.CartoSlim,
@@ -240,20 +89,6 @@ export function Page({
   }, [models]);
 
   const model = models?.find((d) => d.id == plateModelId);
-
-  // useEffect(() => {
-  //   console.log("effect", model, age);
-  //   if (model == null) return;
-  //   const { max_age = 4000, min_age = 0 } = model;
-  //   console.log("effect", model, age, max_age, min_age);
-  //   if (age > max_age) {
-  //     dispatch({ type: "set-age", age: max_age });
-  //   } else if (age < min_age) {
-  //     dispatch({ type: "set-age", age: min_age });
-  //   }
-  // }, [model, age]);
-
-  // Manage location hash
 
   const _overlayStyle = useMemo(() => {
     if (plateModelId == null || age == null) return overlayStyle;
