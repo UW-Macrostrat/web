@@ -64,7 +64,7 @@ async function transformAction(
     case "initialize":
       const hashData = getHashString(window.location.hash);
 
-      const { model, age, ...rest } = hashData;
+      const { model, age, ...rest } = hashData ?? {};
       const mapPosition = getMapPositionForHash(
         rest,
         defaultState.mapPosition.camera
