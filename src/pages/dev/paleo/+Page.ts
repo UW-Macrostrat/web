@@ -20,7 +20,7 @@ import {
   useStoredState,
 } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { TimescalePanel } from "./timescale";
 import { usePaleogeographyState } from "./state";
 import { usePaleogeographyStyle } from "./map-style";
@@ -39,20 +39,11 @@ export function Page() {
   });
   const { showTileExtent, xRay } = state;
 
-  const [paleoState, dispatch] = usePaleogeographyState({
-    model_id: 3,
-    age: 0,
-    initialized: false,
-    mapPosition: {
-      camera: {
-        lng: -40,
-        lat: 45,
-        altitude: 5000000,
-      },
-    },
-  });
+  const [paleoState, dispatch] = usePaleogeographyState();
 
-  const { age, model_id, mapPosition } = paleoState;
+  const { age, mapPosition, allModels: models, activeModel } = paleoState ?? {};
+
+  const model_id = activeModel?.id;
 
   const style = usePaleogeographyStyle({
     age,
@@ -60,17 +51,7 @@ export function Page() {
     xRay,
   });
 
-  const models: { id: string; max_age: number; min_age: number }[] =
-    useAPIResult(burwellTileDomain + "/carto/rotation-models");
-
-  useEffect(() => {
-    if (models == null) return;
-    if (model_id == null) {
-      dispatch({ type: "set-model", model_id: parseInt(models[0].id) });
-    }
-  }, [models]);
-
-  const model = models?.find((d) => d.id == model_id);
+  const model = activeModel;
 
   const [inspectPosition, setInspectPosition] =
     useState<mapboxgl.LngLat | null>(null);
