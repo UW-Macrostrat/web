@@ -7,11 +7,11 @@ import React from "react";
 export function PageBreadcrumbs() {
   const ctx = usePageContext();
   return h(Breadcrumbs, {
-    items: buildBreadcrumns(ctx.urlPathname, sitemap, ctx),
+    items: buildBreadcrumbs(ctx.urlPathname, sitemap, ctx),
   });
 }
 
-function buildBreadcrumns(
+function buildBreadcrumbs(
   currentPath: string,
   routes: Routes,
   ctx: PageContext
@@ -51,9 +51,12 @@ function buildBreadcrumns(
       text = h("code", text);
     }
 
+    let disabled = child?.disabled ?? false;
+
     items.push({
       text,
       href: route == currentPath ? undefined : route,
+      disabled,
     });
     children = child?.children;
   }
@@ -64,14 +67,31 @@ interface Item {
   text: string | React.ReactNode;
   href?: string;
   current?: boolean;
+  disabled?: boolean;
 }
 
 interface Routes {
   slug?: string;
   name: string | ((urlPart: string, ctx: PageContext) => React.ReactNode);
   param?: string;
+  disabled?: boolean;
   children?: Routes[];
 }
+
+const columnsSubtree = {
+  slug: "columns",
+  name: "Columns",
+  children: [
+    {
+      param: "@column",
+      name(urlPart, ctx) {
+        return h("span.column-name", [
+          ctx.pageProps?.columnInfo?.col_name ?? urlPart,
+        ]);
+      },
+    },
+  ],
+};
 
 export const sitemap: Routes = {
   slug: "",
@@ -153,6 +173,20 @@ export const sitemap: Routes = {
         {
           slug: "lithology",
           name: "Lithology",
+        },
+      ],
+    },
+    columnsSubtree,
+    {
+      slug: "projects",
+      name: "Projects",
+      children: [
+        {
+          param: "@project",
+          name(urlPart, ctx) {
+            return ctx.pageProps?.project?.project ?? urlPart;
+          },
+          children: [{ ...columnsSubtree, disabled: true }],
         },
       ],
     },
