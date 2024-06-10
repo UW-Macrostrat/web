@@ -7,12 +7,13 @@ import { fetchAPIData } from "~/pages/columns/utils";
 
 function assembleColumnURL({
   col_id,
-  project_id,
+  project_id = 1,
 }: {
   col_id: number;
   project_id: number;
 }) {
-  const base = apiV2Prefix + "/columns";
+  const base =
+    project_id == 1 ? apiV2Prefix + "/columns" : apiV2Prefix + "/defs/columns";
   const params = new URLSearchParams({
     col_id: col_id.toString(),
     project_id: project_id.toString(),
