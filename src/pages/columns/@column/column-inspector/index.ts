@@ -17,6 +17,13 @@ import { BasePage } from "~/layouts";
 import { PageHeader } from "~/components";
 
 import { navigate } from "vike/client/router";
+import { create } from "zustand";
+
+const useBearStore = create((set) => ({
+  bears: 0,
+  increasePopulation: () => set((state) => ({ bears: state.bears + 1 })),
+  removeAllBears: () => set({ bears: 0 }),
+}));
 
 const h = hyperStyled(styles);
 
@@ -28,6 +35,9 @@ function ColumnPage({ columnInfo, linkPrefix = "/" }) {
   const lon = new Number(columnInfo.lng);
   const lat = new Number(columnInfo.lat);
   const zoom = 7;
+
+  const store = useBearStore();
+  console.log("Bear count", store.bears);
 
   return h(BasePage, [
     h(PageHeader, { title: columnInfo.col_name, className: "column-header" }),
@@ -76,6 +86,7 @@ function ColumnPage({ columnInfo, linkPrefix = "/" }) {
             display: selectedUnit == null ? "block" : "none",
           },
           setCurrentColumn(newColumn) {
+            store.increasePopulation();
             const { col_id } = newColumn.properties;
             navigate(linkPrefix + `columns/${col_id}`, {
               overwriteLastHistoryEntry: true,
