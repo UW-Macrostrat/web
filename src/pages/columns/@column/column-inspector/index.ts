@@ -14,7 +14,6 @@ import { PatternProvider } from "~/_providers";
 import styles from "./column-inspector.module.styl";
 import ModalUnitPanel from "./modal-panel";
 import { BasePage } from "~/layouts";
-import { PageHeader } from "~/components";
 
 import { navigate } from "vike/client/router";
 import { PageBreadcrumbs } from "~/renderer";
@@ -25,8 +24,6 @@ function ColumnPage({ columnInfo, linkPrefix = "/", project }) {
   const { units, geometry } = columnInfo;
 
   const selectedUnit = useUnitSelection(units);
-
-  console.log(project, columnInfo);
 
   const lon = new Number(columnInfo.lng);
   const lat = new Number(columnInfo.lat);
