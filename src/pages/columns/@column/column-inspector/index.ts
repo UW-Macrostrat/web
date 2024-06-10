@@ -74,6 +74,7 @@ function ColumnPage({ columnInfo, linkPrefix = "/", project }) {
           h(ColumnNavigatorMap, {
             className: "column-map",
             format: "geojson_bare",
+            showInProcessColumns: true,
             currentColumn: {
               geometry,
               type: "Feature",
