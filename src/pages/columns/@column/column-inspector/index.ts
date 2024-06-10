@@ -35,7 +35,7 @@ function ColumnPage({ columnInfo, linkPrefix = "/", project }) {
   return h(BasePage, [
     h("div.main", [
       h("div.column-header", [
-        h("nav", [h(PageBreadcrumbs)]),
+        h("nav", [h(PageBreadcrumbs, { showLogo: true })]),
         h("h1.page-title", [
           h("span.col-name", columnInfo.col_name),
           h.if(columnInfo.col_group != null)("span.subtitle", [

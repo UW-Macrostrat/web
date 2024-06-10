@@ -1,13 +1,24 @@
-import h from "@macrostrat/hyper";
+import hyper from "@macrostrat/hyper";
 import { usePageContext } from "./page-context";
 import { Breadcrumbs } from "@blueprintjs/core";
 import type { PageContext } from "./types";
 import React from "react";
+import { MacrostratIcon } from "~/components";
+import styles from "./breadcrumbs.module.sass";
+const h = hyper.styled(styles);
 
-export function PageBreadcrumbs() {
+export function PageBreadcrumbs({ showLogo = false }) {
   const ctx = usePageContext();
+  let items = buildBreadcrumbs(ctx.urlPathname, sitemap, ctx);
+  if (showLogo) {
+    items[0].text = h("span.breadcrumbs-root", [
+      h(MacrostratIcon, { size: 16 }),
+      "Macrostrat",
+    ]);
+  }
+
   return h(Breadcrumbs, {
-    items: buildBreadcrumbs(ctx.urlPathname, sitemap, ctx),
+    items,
   });
 }
 

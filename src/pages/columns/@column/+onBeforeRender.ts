@@ -5,10 +5,22 @@ import fetch from "node-fetch";
 import { ColumnSummary } from "~/pages/map/map-interface/app-state/handlers/columns";
 import { fetchAPIData } from "~/pages/columns/utils";
 
-async function getAndUnwrap<T>(url: string): Promise<T> {
-  const res = await fetch(url);
-  const res1 = await res.json();
-  return res1.success.data;
+function assembleColumnURL({
+  col_id,
+  project_id,
+}: {
+  col_id: number;
+  project_id: number;
+}) {
+  const base = apiV2Prefix + "/columns";
+  const params = new URLSearchParams({
+    col_id: col_id.toString(),
+    project_id: project_id.toString(),
+    response: "long",
+    format: "geojson",
+    in_process: "true",
+  });
+  return `${base}?${params}`;
 }
 
 export async function onBeforeRender(pageContext) {
@@ -20,20 +32,16 @@ export async function onBeforeRender(pageContext) {
 
   // https://v2.macrostrat.org/api/v2/columns?col_id=3&response=long
 
-  const baseRoute = project_id == null ? "/columns" : `/defs/columns`;
   const linkPrefix = project_id == null ? "/" : `/projects/${project_id}/`;
+  const columnURL = assembleColumnURL({ col_id, project_id });
+  console.log(columnURL);
 
   /** This is a hack to make sure that all requisite data is on the table. */
   const responses = await Promise.all([
     project_id == null
       ? Promise.resolve(null)
       : getAndUnwrap(apiV2Prefix + `/defs/projects?project_id=${project_id}`),
-    getAndUnwrap(
-      apiV2Prefix +
-        baseRoute +
-        "?format=geojson&response=long&in_process=true&col_id=" +
-        col_id
-    ),
+    getAndUnwrap(columnURL),
     fetchAPIData(`/units`, {
       response: "long",
       col_id,
@@ -42,7 +50,7 @@ export async function onBeforeRender(pageContext) {
 
   const [projectData, column, unitsLong]: [any, any, any] = responses;
 
-  const col = column?.features[0];
+  const col = column?.features?.[0];
 
   const columnInfo: ColumnSummary = {
     ...col.properties,
@@ -63,4 +71,11 @@ export async function onBeforeRender(pageContext) {
       },
     },
   };
+}
+
+async function getAndUnwrap<T>(url: string): Promise<T> {
+  console.log(url);
+  const res = await fetch(url);
+  const res1 = await res.json();
+  return res1.success.data;
 }
