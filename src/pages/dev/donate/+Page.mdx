@@ -1,0 +1,57 @@
+import { PageHeader } from "~/components";
+import { PageBreadcrumbs } from "~/renderer";
+import "./main.styl";
+import { Image } from "./index";
+
+[//]: # "Nav Bar"
+<div class="nav">
+  <ul>
+    <li><a href="/dev/about">About</a></li>
+    <li><a href="/dev/publications">Publications</a></li>
+    <li><a href="/dev/people">People</a></li>
+    <li><a href="/dev/donate">Donate</a></li>
+    <a href="/dev/main-page"><Image className="nav-logo" src="logo_white.png" width="40px"></Image></a>
+  </ul>
+</div>
+
+[//]: # "Donate"
+<div class="donate-container" id="donate">
+  <Image className="back-img donate-img" src="donate_medium.jpg"></Image>
+  <div class="text">
+    <div class="donate-left">
+      <h1 class="title donate-title"><a href="https://secure.supportuw.org/give/?id=E0A03FA3-B2A0-431C-83EE-A121A04EEB5D" target="_blank">Donate Now</a></h1>
+    </div>
+    <div class="donate-right">
+      <div class="donate-info">
+          Grant funding, principally from the <a href="http://www.nsf.gov" target="_blank">U.S. National Science Foundation</a>, got Macrostrat off the ground and keeps us innovating, but maintaining and growing a free and open digital resource involves ongoing expenses beyond the grant cycle, like annual certificate renewals, cloud server hosting and backup storage that keep your connection safe, domain name registrations that keep us located on the web, and system upgrades to keep us fast and efficient. If you would like to help us continue to grow and provide free resources, you can do so with a one-time or recurring gift to the UW Foundation Paleontology Program Fund in Geology. Thank you!
+      </div>
+    </div>
+  </div>
+</div>
+
+[//]: # "Footer"
+<div class="footer">
+  <div class="footer-container">
+    <div class="col-sm-4" id="who-made-it">
+      <Image className="logo_white" src="logo_white.png" width="100px"></Image>
+      <p class="f1-text">Produced by the <a href="http://strata.geology.wisc.edu" target="_blank">UW Macrostrat Lab</a> <a href="https://github.com/UW-Macrostrat" target="_blank"><Image className="git_logo" src="git-logo.png" width="18px"></Image></a></p>
+    </div>
+    <div class="col-sm-4" id="bottom-nav">
+      <ul class="footer-nav">
+        <li><a href="/dev/about">About</a></li>
+        <li><a href="/dev/publications">Publications</a></li>
+        <li><a href="/dev/people">People</a></li>
+        <li><a href="/dev/donate">Donate</a></li>
+      </ul>
+    </div>
+    <div class="col-sm-4 funding">
+      <Image className="funding-logo" src="nsf.png" width="100px"></Image>
+      <div class="funding-line">
+        Current support: \
+        EAR-1948843 \
+        ICER-1928323 \
+        UW-Madison Dept. Geoscience
+      </div>
+    </div>
+  </div>
+</div>
