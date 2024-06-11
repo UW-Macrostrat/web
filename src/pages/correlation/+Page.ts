@@ -12,7 +12,8 @@ import { PageBreadcrumbs } from "~/renderer";
 import { FeatureCollection, LineString, Point } from "geojson";
 import { useCallback, useMemo } from "react";
 import { create } from "zustand";
-import { buildCrossSectionLayers } from "../map/map-interface/map-page/map-styles";
+
+import {buildCrossSectionLayers} from "~/_utils/map-layers";
 
 interface CorrelationState {
   focusedLine: LineString | null;
@@ -135,17 +136,11 @@ function setGeoJSON(
   }
 }
 
-function SectionLineManager() {
-  const focusedLine = useCorrelationDiagramStore((state) => state.focusedLine);
-  const onClickMap = useCorrelationDiagramStore((state) => state.onClickMap);
-
-  const clickFn = useCallback(
-    (e) => {
-      onClickMap({ type: "Point", coordinates: e.lngLat.toArray() });
-    },
-    [onClickMap]
-  );
-
+function useMapClickHandler(
+  fn: (e: mapboxgl.MapMouseEvent) => void,
+  deps: any[]
+) {
+  const clickFn = useCallback(fn, deps);
   useMapStyleOperator(
     (map) => {
       map.on("click", clickFn);
@@ -153,16 +148,20 @@ function SectionLineManager() {
         map.off("click", clickFn);
       };
     },
+    [clickFn]
+  );
+}
+
+function SectionLineManager() {
+  const focusedLine = useCorrelationDiagramStore((state) => state.focusedLine);
+  const onClickMap = useCorrelationDiagramStore((state) => state.onClickMap);
+
+  useMapClickHandler(
+    (e) => {
+      onClickMap({ type: "Point", coordinates: e.lngLat.toArray() });
+    },
     [onClickMap]
   );
 
-  const focusedLineSrc = useMemo(() => {
-    if (focusedLine?.coordinates.length == 1) {
-      return null;
-    } else {
-      return focusedLine;
-    }
-  }, [focusedLine]);
-
-  return h(SectionLine, { focusedLine: focusedLineSrc });
+  return h(SectionLine, { focusedLine });
 }
