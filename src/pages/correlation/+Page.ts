@@ -1,19 +1,21 @@
 import { MapView } from "@macrostrat/map-interface";
 import {
   MapboxMapProvider,
-  useMapStyleOperator,
+  useMapClickHandler,
   useMapEaseTo,
+  useMapStyleOperator,
 } from "@macrostrat/mapbox-react";
-import { LngLatBounds, GeoJSONSource } from "mapbox-gl";
+import { LngLatBounds } from "mapbox-gl";
 import { FullscreenPage } from "~/layouts";
 import h from "./main.module.sass";
 import { baseMapURL, mapboxAccessToken } from "@macrostrat-web/settings";
 import { PageBreadcrumbs } from "~/renderer";
 import { FeatureCollection, LineString, Point } from "geojson";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { create } from "zustand";
+import { setGeoJSON } from "@macrostrat/mapbox-utils";
 
-import {buildCrossSectionLayers} from "~/_utils/map-layers";
+import { buildCrossSectionLayers } from "~/_utils/map-layers";
 
 interface CorrelationState {
   focusedLine: LineString | null;
@@ -121,35 +123,6 @@ function SectionLine({ focusedLine }: { focusedLine: LineString }) {
   useMapEaseTo({ bounds, padding: 120 });
 
   return null;
-}
-
-function setGeoJSON(
-  map: mapboxgl.Map,
-  sourceID: string,
-  data: FeatureCollection
-) {
-  let source = map.getSource(sourceID) as GeoJSONSource | null;
-  if (source == null) {
-    map.addSource(sourceID, { type: "geojson", data });
-  } else {
-    source.setData(data);
-  }
-}
-
-function useMapClickHandler(
-  fn: (e: mapboxgl.MapMouseEvent) => void,
-  deps: any[]
-) {
-  const clickFn = useCallback(fn, deps);
-  useMapStyleOperator(
-    (map) => {
-      map.on("click", clickFn);
-      return () => {
-        map.off("click", clickFn);
-      };
-    },
-    [clickFn]
-  );
 }
 
 function SectionLineManager() {
