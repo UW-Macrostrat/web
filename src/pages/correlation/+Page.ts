@@ -1,12 +1,12 @@
-import h from "@macrostrat/hyper";
 import { MapboxMapProvider } from "@macrostrat/mapbox-react";
-import { MapView } from "@macrostrat/map-interface";
+import { MapAreaContainer, MapView } from "@macrostrat/map-interface";
 import { FullscreenPage } from "~/layouts";
+import h from "./main.module.sass";
 
 export function Page() {
   return h(FullscreenPage, [
     h("div", "Hello world"),
-    h(MapboxMapProvider, h(InsetMap)),
+    h(MapAreaContainer, h(InsetMap)),
   ]);
 }
 
