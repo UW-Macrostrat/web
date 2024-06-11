@@ -79,7 +79,7 @@ const overlaySources: { [k: string]: SourceExt } = {
   },
 };
 
-export function buildOverlayLayers(): mapboxgl.Layer[] {
+export function buildCrossSectionLayers(): mapboxgl.Layer[] {
   // Get CSS colors from settings
   const ruleColor = getComputedStyle(document.body).getPropertyValue(
     "--panel-background-color"
@@ -105,6 +105,50 @@ export function buildOverlayLayers(): mapboxgl.Layer[] {
     },
     "circle-stroke-color": ruleColor,
   };
+
+  return [
+    {
+      id: "crossSectionLine",
+      type: "line",
+      source: "crossSectionLine",
+      paint: {
+        "line-width": {
+          stops: [
+            [0, 1],
+            [12, 3],
+          ],
+        },
+        "line-color": ruleColor,
+        "line-opacity": 1,
+      },
+    },
+    {
+      id: "crossSectionEndpoint",
+      type: "circle",
+      source: "crossSectionEndpoints",
+      paint: crossSectionPointPaint,
+    },
+    {
+      id: "elevationMarker",
+      type: "circle",
+      source: "elevationMarker",
+      paint: {
+        ...crossSectionPointPaint,
+        "circle-color": "#4bc0c0",
+      },
+    },
+  ];
+}
+
+export function buildOverlayLayers(): mapboxgl.Layer[] {
+  // Get CSS colors from settings
+  const ruleColor = getComputedStyle(document.body).getPropertyValue(
+    "--panel-background-color"
+  );
+
+  const centerColor = getComputedStyle(document.body).getPropertyValue(
+    "--panel-rule-color"
+  );
 
   return [
     {
@@ -167,36 +211,8 @@ export function buildOverlayLayers(): mapboxgl.Layer[] {
         visibility: "none",
       },
     },
-    {
-      id: "crossSectionLine",
-      type: "line",
-      source: "crossSectionLine",
-      paint: {
-        "line-width": {
-          stops: [
-            [0, 1],
-            [12, 3],
-          ],
-        },
-        "line-color": ruleColor,
-        "line-opacity": 1,
-      },
-    },
-    {
-      id: "crossSectionEndpoint",
-      type: "circle",
-      source: "crossSectionEndpoints",
-      paint: crossSectionPointPaint,
-    },
-    {
-      id: "elevationMarker",
-      type: "circle",
-      source: "elevationMarker",
-      paint: {
-        ...crossSectionPointPaint,
-        "circle-color": "#4bc0c0",
-      },
-    },
+    ...buildCrossSectionLayers(),
+
     // {
     //   "id": "pbdbCollections",
     //   "type": "fill",
