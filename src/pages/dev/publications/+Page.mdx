@@ -2,15 +2,16 @@ import { PageHeader } from "~/components";
 import { PageBreadcrumbs } from "~/renderer";
 import "./main.styl";
 import { Image } from "./index";
+import { MacrostratIcon } from "~/components";
 
 [//]: # "Nav Bar"
 <div class="nav">
   <ul>
+    <li><a href="/dev/main-page"><MacrostratIcon></MacrostratIcon></a></li>
     <li><a href="/dev/about">About</a></li>
     <li><a href="/dev/publications">Publications</a></li>
     <li><a href="/dev/people">People</a></li>
     <li><a href="/dev/donate">Donate</a></li>
-    <a href="/dev/main-page"><Image className="nav-logo" src="logo_white.png" width="40px"></Image></a>
   </ul>
 </div>
 
