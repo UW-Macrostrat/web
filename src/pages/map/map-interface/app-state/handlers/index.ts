@@ -23,8 +23,7 @@ import { currentPageForPathName, isDetailPanelRoute } from "../nav-hooks";
 import { MapLayer } from "../reducers/core";
 import { getInitialStateFromHash } from "../reducers/hash-string";
 import { ColumnGeoJSONRecord, findColumnsForLocation } from "./columns";
-// TODO: remove this
-import { buildLocationPath } from "./pathname";
+import { matchPath } from "react-router";
 
 async function actionRunner(
   state: AppState,
