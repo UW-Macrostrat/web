@@ -22,7 +22,7 @@ export async function runFilter(filter: Filter): Promise<FilterData> {
       return {
         category: "lithology",
         id: filter.name ?? filter.id,
-        name: filter.name ?? filter.id,
+        name: filter.name ?? filter.id.toString(),
         type: filter.type,
         legend_ids: [],
       };
@@ -169,11 +169,13 @@ export const fetchIntervalFilter = async (
 type LithologyClassFilter = {
   type: FilterType.LithologyClasses;
   name: string;
+  id: number;
 };
 
 type LithologyTypeFilter = {
   type: FilterType.LithologyTypes;
   name: string;
+  id: number;
 };
 
 type LithologyFilter = {
@@ -285,7 +287,8 @@ async function fetchAllLithTypes(
   return {
     category: "lithology",
     id,
-    name: id,
+    // TODO: revisit name/id differences
+    name: id.toString(),
     type,
     legend_ids,
   };

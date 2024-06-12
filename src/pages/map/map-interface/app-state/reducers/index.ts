@@ -10,6 +10,8 @@ import { contextPanelIsInitiallyOpen } from "../nav-hooks";
 import { CoreAction, coreReducer } from "./core";
 import { hashStringReducer } from "./hash-string";
 import { AppAction, AppState, MenuAction, MenuState } from "./types";
+import { pathNameAction } from "../handlers/pathname";
+
 export const browserHistory = createBrowserHistory();
 
 const routerReducer = createRouterReducer(browserHistory);
@@ -30,6 +32,7 @@ const defaultState: AppState = {
   core: coreReducer(undefined, { type: "init" }),
   router: routerReducer(undefined, { type: "init" }),
   menu: menuReducer(undefined, { type: "init" }),
+  nextRouterAction: null,
 };
 
 function mainReducer(
@@ -92,15 +95,38 @@ function mainReducer(
         core: coreReducer(state.core, action as CoreAction),
         menu: menuReducer(state.menu, action as MenuAction),
         performance: performanceReducer(state.performance, action),
+        nextRouterAction: state.nextRouterAction,
       };
   }
 }
 
-const appReducer = (state: AppState, action: AppAction) => {
+export default function appReducer(state: AppState, action: AppAction) {
   // This might not be the right way to do hash management, but it
   // centralizes the logic in one place.
-  return hashStringReducer(mainReducer(state, action), action);
-};
+  return applyNextPath(
+    hashStringReducer(mainReducer(state, action), action),
+    action
+  );
+}
+
+const pathChangingActions: AppAction["type"][] = [
+  "set-menu-page",
+  "update-cross-section",
+  "update-state",
+  "start-map-query",
+  "close-infodrawer",
+];
+
+function applyNextPath(state: AppState, action: AppAction): AppState {
+  if (!pathChangingActions.includes(action.type)) return state;
+
+  const nextRouterAction = pathNameAction(state);
+  if (nextRouterAction == null) return state;
+  return {
+    ...state,
+    nextRouterAction,
+  };
+}
 
 export function setInfoMarkerPosition(
   state: AppState,
@@ -114,27 +140,6 @@ export function setInfoMarkerPosition(
 
   let s1 = state;
 
-  // //If we are on the column route, the column layer must be enabled
-  // let s1 = state;
-  // const colMatch = matchPath(
-  //   mapPagePrefix + "/loc/:lng/:lat/column",
-  //   pathname ?? state.router.location.pathname
-  // );
-  // if (colMatch != null) {
-  //   s1 = update(s1, { core: { mapLayers: { $add: [MapLayer.COLUMNS] } } });
-  // }
-
-  // // If we are disabling the column route, we should remove the column layer
-  // const colMatch2 = matchPath(
-  //   mapPagePrefix + "/loc/:lng/:lat/column",
-  //   state.router.location.pathname
-  // );
-
-  // if (colMatch2 != null && colMatch == null) {
-  //   s1 = update(s1, { core: { mapLayers: { $remove: [MapLayer.COLUMNS] } } });
-  // }
-
-  // Set location
   if (loc != null) {
     const { lng, lat } = loc.params;
     return {
@@ -177,74 +182,7 @@ export function setInfoMarkerPosition(
   return state;
 }
 
-export default appReducer;
 export * from "./core";
 export * from "./hash-string";
 export * from "./map";
 export * from "./types";
-
-/*
-function overallReducer(state: AppState, action: Action): AppState {
-  let pos: MapPosition;
-  if (action.type === "got-initial-map-state") {
-    pos = action.data.mapPosition;
-  } else if (action.type == "map-moved") {
-    pos = action.data;
-  }
-
-  if (pos) {
-    // You can access both app and globe states here
-    const params = flyToParams(translateCameraPosition(pos));
-    //console.log("Set globe position", destination);
-    return {
-      ...state,
-      core: {
-        ...state.core,
-        mapPosition: pos,
-      },
-      globe: {
-        ...state.globe,
-        flyToProps: { ...params, duration: 0, once: true },
-      },
-    };
-  }
-
-  if (action.type == "map-loading" && !state.core.mapIsLoading) {
-    return appReducer(state, {
-      type: "reset-performance-counter",
-      name: "map-loading",
-    });
-  }
-  if (action.type == "map-idle" && state.core.mapIsLoading) {
-    return appReducer(state, { type: "reset-performance-counter" });
-  }
-
-  switch (action.type) {
-    case "@@router/ON_LOCATION_CHANGED":
-      const isOpen = action.payload.location.pathname != "/";
-      return {
-        ...state,
-        core: { ...state.core, menuOpen: isOpen, contextPanelOpen: isOpen },
-      };
-    case "got-initial-map-state":
-    case "map-moved":
-      return {
-        ...state,
-        core: {
-          ...state.core,
-          mapPosition: action.data,
-        },
-      };
-    default:
-      return state;
-  }
-}
-
-const appReducer = reduceReducers(overallReducer, reducers);
-
-export type Action = CoreAction | MapAction | GlobeAction | RouterActions;
-
-export default appReducer;
-export * from "./core";
-export * from "./map";
-*/
