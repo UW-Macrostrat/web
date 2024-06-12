@@ -158,6 +158,11 @@ type SetFocusedMapSource = {
   source_id: number | null;
 };
 
+type InitialLoadComplete = {
+  type: "initial-load-complete";
+  filters: FilterData[];
+};
+
 export type CoreAction =
   | MAP_LAYERS_CHANGED
   | CLEAR_FILTERS
@@ -198,7 +203,6 @@ export type CoreAction =
   | MapAction
   | ToggleHighResolutionTerrain
   | AddFilter
-  | SetFilters
   | SetTimeCursor
   | SetPlateModel
   | StopSearching
@@ -210,7 +214,8 @@ export type CoreAction =
   | ToggleCrossSection
   | SetCrossSectionLine
   | SetFocusedMapSource
-  | ClearColumnInfo;
+  | ClearColumnInfo
+  | InitialLoadComplete;
 
 interface AsyncRequestState {
   // Events and tokens for xhr
@@ -265,6 +270,7 @@ export interface CoreState extends MapState, AsyncRequestState {
   mapCenter: MapCenterInfo;
   mapUse3D: boolean;
   filtersOpen: boolean;
+  filtersInfo: Filter[];
   filters: FilterData[];
   filteredColumns: ColumnGeoJSONRecord[] | null;
   showExperimentsPanel: boolean;

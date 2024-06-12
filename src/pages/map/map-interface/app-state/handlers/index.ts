@@ -1,5 +1,3 @@
-import { push } from "@lagunovsky/redux-react-router";
-import { mapPagePrefix, routerBasename } from "@macrostrat-web/settings";
 import axios from "axios";
 import {
   AppAction,
@@ -28,7 +26,6 @@ import {
   ColumnProperties,
   findColumnsForLocation,
 } from "./columns";
-import { matchPath } from "react-router";
 
 export default async function actionRunner(
   state: AppState,
@@ -39,27 +36,7 @@ export default async function actionRunner(
 
   switch (action.type) {
     case "get-initial-map-state": {
-      const { pathname } = state.router.location;
-      let s1 = setInfoMarkerPosition(state);
-      let coreState = s1.core;
-
-      const activePage = currentPageForPathName(pathname);
-
       // Harvest as much information as possible from the hash string
-      let [coreState1, filters] = getInitialStateFromHash(
-        coreState,
-        state.router.location.hash
-      );
-
-      const newState = {
-        ...state,
-        core: {
-          ...coreState1,
-          initialLoadComplete: true,
-        },
-        menu: { activePage },
-      };
-
       // If we are on the column route, the column layer must be enabled
       // const colMatch = matchPath(
       //   mapPagePrefix + "/loc/:lng/:lat/column",
@@ -77,7 +54,7 @@ export default async function actionRunner(
 
       fetchAllColumns().then((res) => {
         runAsyncAction(
-          newState,
+          state,
           {
             type: "set-all-columns",
             columns: res,
@@ -86,15 +63,9 @@ export default async function actionRunner(
         );
       });
 
-      dispatch({
-        type: "replace-state",
-        state: newState,
-      });
-
-      // Set info marker position if it is defined
-      if (newState.core.infoMarkerPosition != null) {
+      if (state.core.infoMarkerPosition != null) {
         runAsyncAction(
-          newState,
+          state,
           {
             type: "map-query",
             z: state.core.mapPosition.target?.zoom ?? 7,
@@ -105,21 +76,13 @@ export default async function actionRunner(
           dispatch
         );
       }
-
       // Apply all filters in parallel
-      const newFilters = await Promise.all(
-        filters.map((f) => {
+      const filters = await Promise.all(
+        state.core.filtersInfo.map((f) => {
           return runFilter(f);
         })
       );
-      await dispatch({ type: "set-filters", filters: newFilters });
-
-      // Then reload the map by faking a layer change event.
-      // There is probably a better way to do this.
-      return {
-        type: "map-layers-changed",
-        mapLayers: coreState1.mapLayers,
-      };
+      return { type: "initial-load-complete", filters };
     }
     case "map-layers-changed": {
       const { mapLayers } = action;

@@ -6,9 +6,12 @@ import { mapPagePrefix } from "@macrostrat-web/settings";
 import { createBrowserHistory } from "history";
 import { matchPath } from "react-router";
 import { performanceReducer } from "../../performance/core";
-import { contextPanelIsInitiallyOpen } from "../nav-hooks";
+import {
+  contextPanelIsInitiallyOpen,
+  currentPageForPathName,
+} from "../nav-hooks";
 import { CoreAction, coreReducer } from "./core";
-import { hashStringReducer } from "./hash-string";
+import { getInitialStateFromHash, hashStringReducer } from "./hash-string";
 import { AppAction, AppState, MenuAction, MenuState } from "./types";
 import { pathNameAction } from "../handlers/pathname";
 
@@ -43,15 +46,29 @@ function mainReducer(
    * Then, for actions that don't need to affect multiple sections of
    * state, we pass thm to individual reducers.
    */
+
   switch (action.type) {
     case "@@INIT": {
       const route = state.router.location;
       const { pathname } = route;
       const isOpen = contextPanelIsInitiallyOpen(pathname);
+      const activePage = currentPageForPathName(pathname);
       const s1 = setInfoMarkerPosition(state, pathname);
+      const [coreState, filters] = getInitialStateFromHash(
+        s1.core,
+        s1.router.location.hash
+      );
+
       return {
         ...s1,
-        core: { ...s1.core, menuOpen: isOpen, contextPanelOpen: isOpen },
+        core: {
+          ...s1.core,
+          ...coreState,
+          filtersInfo: filters,
+          menuOpen: isOpen,
+          contextPanelOpen: isOpen,
+        },
+        menu: { activePage },
       };
     }
     case "@@router/ON_LOCATION_CHANGED": {
@@ -87,8 +104,6 @@ function mainReducer(
         core: { ...state.core, inputFocus: false },
         menu: menuReducer(state.menu, action),
       };
-    case "replace-state":
-      return action.state;
     default:
       return {
         router: routerReducer(state.router, action as RouterActions),
