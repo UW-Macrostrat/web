@@ -4,6 +4,7 @@
 import {
   AnchorButton,
   Button,
+  ButtonGroup,
   Callout,
   Collapse,
   Icon,
@@ -195,33 +196,30 @@ function ThemeButton() {
   const update = darkModeUpdater();
   const icon = darkMode.isAutoset ? "tick" : "desktop";
 
-  const autoButton = h(
-    Button,
-    {
-      minimal: true,
-      active: darkMode.isAutoset,
-      rightIcon: h(Icon, { icon, size: 12 }),
-      intent: darkMode.isAutoset ? "success" : "primary",
-      className: "auto-button sub-button",
-      small: true,
-      onClick(evt) {
-        if (darkMode.isAutoset) return;
-        evt.stopPropagation();
-        update(null);
-      },
-    },
-
-    "auto"
-  );
-
   const darkModeText = darkMode.isEnabled
     ? "Turn on the lights"
     : "Turn off the lights";
   return h("div.dark-mode-controls", [
+    h(DarkModeButton, { minimal: true, active: false, allowReset: true }, [
+      h("span.text", darkModeText),
+    ]),
     h(
-      DarkModeButton,
-      { minimal: true, active: false, allowReset: true, rightIcon: autoButton },
-      [h("span.text", darkModeText)]
+      Button,
+      {
+        minimal: true,
+        active: darkMode.isAutoset,
+        rightIcon: h(Icon, { icon, size: 12 }),
+        intent: darkMode.isAutoset ? "success" : "primary",
+        className: "auto-button sub-button",
+        small: true,
+        onClick(evt) {
+          if (darkMode.isAutoset) return;
+          evt.stopPropagation();
+          update(null);
+        },
+      },
+
+      "auto"
     ),
   ]);
 }
