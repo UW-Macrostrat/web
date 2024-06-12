@@ -1,7 +1,12 @@
 import { push } from "@lagunovsky/redux-react-router";
 import { mapPagePrefix, routerBasename } from "@macrostrat-web/settings";
 import axios from "axios";
-import { AppAction, AppState } from "../reducers";
+import {
+  AppAction,
+  AppState,
+  MenuPage,
+  setInfoMarkerPosition,
+} from "../reducers";
 import {
   base,
   fetchAllColumns,
@@ -13,22 +18,13 @@ import {
 } from "./fetch";
 import { runFilter } from "./filters";
 
-import { formatCoordForZoomLevel } from "@macrostrat/mapbox-utils";
 import { LineString } from "geojson";
-import { matchPath } from "react-router";
 import { currentPageForPathName, isDetailPanelRoute } from "../nav-hooks";
-import { MenuPage, setInfoMarkerPosition } from "../reducers";
 import { MapLayer } from "../reducers/core";
 import { getInitialStateFromHash } from "../reducers/hash-string";
 import { ColumnGeoJSONRecord, findColumnsForLocation } from "./columns";
-
-function routeForActivePage(page: MenuPage) {
-  let newPathname = routerBasename;
-  if (page != null) {
-    newPathname += "/" + page;
-  }
-  return newPathname;
-}
+// TODO: remove this
+import { buildLocationPath } from "./pathname";
 
 async function actionRunner(
   state: AppState,
@@ -36,6 +32,7 @@ async function actionRunner(
   dispatch = null
 ): Promise<AppAction | void> {
   const coreState = state.core;
+
   switch (action.type) {
     case "get-initial-map-state": {
       const { pathname } = state.router.location;
@@ -125,56 +122,17 @@ async function actionRunner(
         dispatch
       );
     }
-    case "set-menu-page": {
-      const { pathname, hash } = state.router.location;
-      if (!isDetailPanelRoute(pathname)) {
-        const newPathname = routeForActivePage(action.page);
-        await dispatch(push({ pathname: newPathname, hash }));
-      }
-      return { type: "set-menu-page", page: action.page };
-    }
-    case "close-infodrawer":
-      // If we are showing a cross-section, we need to go there
-      await dispatch(
-        push({
-          pathname:
-            state.core.crossSectionLine == null
-              ? routeForActivePage(state.menu.activePage)
-              : buildCrossSectionPath(state.core.crossSectionLine),
-          hash: state.router.location.hash,
-        })
-      );
-      return action;
     case "toggle-cross-section": {
-      let line: GeoJSON.LineString | null = null;
+      let line: LineString | null = null;
       if (state.core.crossSectionLine == null) {
         line = { type: "LineString", coordinates: [] };
       }
-      const action = {
+      const action: AppAction = {
         type: "update-cross-section",
         line,
       };
       return actionRunner(state, action, dispatch);
     }
-    case "update-cross-section":
-      if (state.core.crossSectionLine != null) {
-        // Return to the base route
-        let nextPathname = "";
-        const pos = state.core.infoMarkerPosition;
-        if (pos != null) {
-          const z = state.core.mapPosition.target?.zoom ?? 7;
-          nextPathname = buildLocationPath(pos.lng, pos.lat, z);
-        } else {
-          nextPathname = routeForActivePage(state.menu.activePage);
-        }
-        await dispatch(
-          push({
-            pathname: nextPathname,
-            hash: state.router.location.hash,
-          })
-        );
-      }
-      return action;
     case "fetch-search-query":
       const { term } = action;
       let CancelToken = axios.CancelToken;
@@ -218,17 +176,6 @@ async function actionRunner(
       return { type: "add-filter", filter: await runFilter(action.filter) };
     case "get-filtered-columns":
       return await fetchFilteredColumns(coreState.filters);
-    case "set-cross-section-line": {
-      const { line } = action;
-
-      if (state.core.infoMarkerPosition == null) {
-        // If we are showing a marker, that route takes precedence
-        const pathname = buildCrossSectionPath(line);
-        await dispatch(push({ pathname, hash: location.hash }));
-      }
-
-      return { type: "did-set-cross-section-line", line };
-    }
     case "map-query": {
       const { lng, lat, z } = action;
       // Check if matches column detail route
@@ -328,20 +275,6 @@ async function actionRunner(
     default:
       return action;
   }
-}
-
-function buildCrossSectionPath(line: LineString) {
-  const pts = line.coordinates
-    .map((p) => `${p[0].toFixed(4)},${p[1].toFixed(4)}`)
-    .join("/");
-
-  return mapPagePrefix + "/cross-section/" + pts;
-}
-
-function buildLocationPath(lng: number, lat: number, z: number) {
-  const ln = formatCoordForZoomLevel(lng, Number(z));
-  const lt = formatCoordForZoomLevel(lat, Number(z));
-  return mapPagePrefix + `/loc/${ln}/${lt}`;
 }
 
 export default actionRunner;

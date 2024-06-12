@@ -12,7 +12,6 @@ import {
   Switch,
   Tag,
 } from "@blueprintjs/core";
-import hyper from "@macrostrat/hyper";
 import { applyMapPositionToHash } from "@macrostrat/map-interface";
 import {
   DarkModeButton,
@@ -27,9 +26,7 @@ import {
   useAppState,
 } from "~/pages/map/map-interface/app-state";
 
-import styles from "./settings-panel.module.styl";
-
-const h = hyper.styled(styles);
+import h from "./settings-panel.module.styl";
 
 const ExperimentsPanel = (props) => {
   const dispatch = useAppActions();

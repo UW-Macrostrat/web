@@ -6,6 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="0198d26a-1f96-4e99-bb88-c11fcd2caa82" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/map/map-interface/app-state/handlers/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/map/map-interface/app-state/handlers/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/map/map-interface/app-state/reducers/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/map/map-interface/app-state/reducers/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/map/map-interface/app-state/reducers/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/map/map-interface/app-state/reducers/types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/map/map-interface/components/info-drawer/macrostrat-linked.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/map/map-interface/components/info-drawer/macrostrat-linked.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/map/map-interface/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/map/map-interface/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/map/map-interface/map-page/settings-panel.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/map/map-interface/map-page/settings-panel.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,16 +47,18 @@
     "nodejs_interpreter_path": "/Users/Daven/.local/share/mise/installs/node/20.7.0/bin/node",
     "nodejs_package_manager_path": "/Users/Daven/Projects/Macrostrat/Software/web/.yarn/releases/yarn-4.2.2.cjs",
     "prettierjs.PrettierConfiguration.Package": "yarn:package.json:prettier",
-    "settings.editor.selected.configurable": "project.scopes",
+    "settings.editor.selected.configurable": "settings.javascript.prettier",
     "ts.external.directory.path": "yarn:deps/web-components/packages/auth-components/package.json:typescript",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="es6.move.members.recent.items">
+      <recent name="$PROJECT_DIR$/src/pages/map/map-interface/app-state/reducers/pathname.ts" />
       <recent name="$PROJECT_DIR$/src/components/_utils/map-layers.ts" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/pages/map/map-interface/app-state/handlers" />
       <recent name="$PROJECT_DIR$/src/_utils" />
     </key>
   </component>
@@ -72,7 +80,7 @@
       <workItem from="1718136714419" duration="240000" />
       <workItem from="1718136959723" duration="2326000" />
       <workItem from="1718139297254" duration="1998000" />
-      <workItem from="1718153407795" duration="985000" />
+      <workItem from="1718153407795" duration="16102000" />
     </task>
     <servers />
   </component>
@@ -95,5 +103,22 @@
     <option featureType="dependencySupport" implementationName="executable:kubectl" />
     <option featureType="com.intellij.fileTypeFactory" implementationName=".env" />
     <option featureType="dependencySupport" implementationName="javascript:npm:postcss" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/src/pages/map/map-interface/app-state/reducers/types.ts</url>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/src/pages/map/map-interface/index.ts</url>
+          <line>46</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

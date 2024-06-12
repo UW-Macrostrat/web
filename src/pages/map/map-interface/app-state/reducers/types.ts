@@ -24,6 +24,7 @@ export type AppState = {
   core: CoreState;
   router: ReduxRouterState;
   menu: MenuState;
+  nextRouterAction: RouterActions | null;
 };
 
 type OverallActions = { type: "replace-state"; state: AppState };
