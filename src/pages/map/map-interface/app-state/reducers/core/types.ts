@@ -41,7 +41,7 @@ type CLOSE_INFODRAWER = { type: "close-infodrawer" };
 
 type TOGGLE_FILTERS = { type: "toggle-filters" };
 type REMOVE_FILTER = { type: "remove-filter"; filter: any };
-type UPDATE_COLUMN_FILTERS = {
+export type UPDATE_COLUMN_FILTERS = {
   type: "update-column-filters";
   columns: ColumnGeoJSONRecord[];
 };

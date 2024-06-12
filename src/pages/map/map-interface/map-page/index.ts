@@ -31,12 +31,13 @@ function MapView(props) {
   );
 }
 
-export const MapPage = ({
+function MapPage({
   baseRoute = "/",
   menuPage = null,
 }: {
+  baseRoute?: string;
   menuPage?: MenuPage;
-}) => {
+}) {
   const runAction = useAppActions();
   const inputFocus = useAppState((s) => s.core.inputFocus);
   const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
@@ -89,7 +90,7 @@ export const MapPage = ({
     },
     [h("div.context-underlay", { onClick: onMouseDown }), h(MapView)]
   );
-};
+}
 
 function MapPageRoutes() {
   return h(Routes, [

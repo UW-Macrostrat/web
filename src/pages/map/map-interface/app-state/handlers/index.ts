@@ -22,10 +22,15 @@ import { LineString } from "geojson";
 import { currentPageForPathName, isDetailPanelRoute } from "../nav-hooks";
 import { MapLayer } from "../reducers/core";
 import { getInitialStateFromHash } from "../reducers/hash-string";
-import { ColumnGeoJSONRecord, findColumnsForLocation } from "./columns";
+import {
+  ColumnGeoJSONRecord,
+  ColumnSummary,
+  ColumnProperties,
+  findColumnsForLocation,
+} from "./columns";
 import { matchPath } from "react-router";
 
-async function actionRunner(
+export default async function actionRunner(
   state: AppState,
   action: AppAction,
   dispatch = null
@@ -46,6 +51,15 @@ async function actionRunner(
         state.router.location.hash
       );
 
+      const newState = {
+        ...state,
+        core: {
+          ...coreState1,
+          initialLoadComplete: true,
+        },
+        menu: { activePage },
+      };
+
       // If we are on the column route, the column layer must be enabled
       // const colMatch = matchPath(
       //   mapPagePrefix + "/loc/:lng/:lat/column",
@@ -59,17 +73,18 @@ async function actionRunner(
 
       // We always get all columns on initial load, which might be
       // a bit unnecessary and slow.
-      let allColumns: ColumnGeoJSONRecord[] | null = await fetchAllColumns();
+      //let allColumns: ColumnGeoJSONRecord[] | null = await fetchAllColumns();
 
-      const newState = {
-        ...state,
-        core: {
-          ...coreState1,
-          allColumns,
-          initialLoadComplete: true,
-        },
-        menu: { activePage },
-      };
+      fetchAllColumns().then((res) => {
+        runAsyncAction(
+          newState,
+          {
+            type: "set-all-columns",
+            columns: res,
+          },
+          dispatch
+        );
+      });
 
       dispatch({
         type: "replace-state",
@@ -78,7 +93,7 @@ async function actionRunner(
 
       // Set info marker position if it is defined
       if (newState.core.infoMarkerPosition != null) {
-        const nextAction = await actionRunner(
+        runAsyncAction(
           newState,
           {
             type: "map-query",
@@ -89,7 +104,6 @@ async function actionRunner(
           },
           dispatch
         );
-        dispatch(nextAction);
       }
 
       // Apply all filters in parallel
@@ -116,6 +130,20 @@ async function actionRunner(
         return null;
       }
     }
+    case "set-all-columns":
+      if (state.core.infoMarkerPosition != null) {
+        fetchColumnInfo(
+          {
+            lng: state.core.infoMarkerPosition.lng,
+            lat: state.core.infoMarkerPosition.lat,
+            columns: [],
+          },
+          action.columns,
+          state.core.columnInfo,
+          dispatch
+        );
+      }
+      return action;
     case "toggle-menu": {
       // Push the menu onto the history stack
       let activePage = state.menu.activePage;
@@ -212,58 +240,17 @@ async function actionRunner(
       });
 
       // Run a bunch of async queries in ~parallel
-      let mapData = await runMapQuery(
-        lng,
-        lat,
-        z,
-        map_id,
-        sourceMapQuery.token
+      runMapQuery(lng, lat, z, map_id, sourceMapQuery.token).then((res) => {
+        dispatch({ type: "received-map-query", data: res });
+      });
+
+      fetchColumnInfo(
+        { lng, lat, columns: action.columns },
+        state.core.allColumns,
+        state.core.columnInfo,
+        dispatch
       );
-
-      let { columns } = action;
-      // If no columns are provided, try to find them from the active column dataset
-      if (
-        (columns == null || columns.length == 0) &&
-        state.core.allColumns != null
-      ) {
-        columns = findColumnsForLocation(state.core.allColumns, {
-          lng,
-          lat,
-        }).map((c) => c.properties);
-      }
-      const firstColumn = columns?.[0];
-      const { columnInfo } = state.core;
-      if (firstColumn != null && columnInfo?.col_id != firstColumn.col_id) {
-        // Get the column units if we don't have them already
-        actionRunner(
-          state,
-          { type: "get-column-units", column: firstColumn },
-          dispatch
-        ).then(dispatch);
-      } else if (firstColumn == null && columnInfo != null) {
-        // Clear the column info if we don't have any columns
-        dispatch({ type: "clear-column-info", data: null, column: null });
-      }
-
-      coreState.infoMarkerPosition = { lng, lat };
-      return {
-        type: "received-map-query",
-        data: mapData,
-      };
-    case "get-column-units":
-      let CancelTokenGetColumn = axios.CancelToken;
-      let sourceGetColumn = CancelTokenGetColumn.source();
-      dispatch({ type: "start-column-query", cancelToken: sourceGetColumn });
-
-      let columnData = await runColumnQuery(
-        action.column,
-        sourceGetColumn.token
-      );
-      return {
-        type: "received-column-query",
-        data: columnData,
-        column: action.column,
-      };
+      return;
     case "get-pbdb":
       let collection_nos = action.collection_nos;
       dispatch({ type: "start-pdbd-query" });
@@ -276,4 +263,56 @@ async function actionRunner(
   }
 }
 
-export default actionRunner;
+async function runAsyncAction(
+  state: AppState,
+  action: AppAction,
+  dispatch: any
+) {
+  const res = await actionRunner(state, action, dispatch);
+  if (res != null) dispatch(res);
+}
+
+async function getColumnUnits(column: ColumnProperties, dispatch: any) {
+  let CancelTokenGetColumn = axios.CancelToken;
+  let sourceGetColumn = CancelTokenGetColumn.source();
+  dispatch({ type: "start-column-query", cancelToken: sourceGetColumn });
+
+  let columnData = await runColumnQuery(column, sourceGetColumn.token);
+  dispatch({
+    type: "received-column-query",
+    data: columnData,
+    column: column,
+  });
+}
+
+type ColumnFetchParams = {
+  lng: number;
+  lat: number;
+  columns: ColumnProperties[];
+};
+
+function fetchColumnInfo(
+  params: ColumnFetchParams,
+  allColumns: ColumnGeoJSONRecord[] | null,
+  currentColumn: ColumnSummary | null,
+  dispatch: any
+): AppAction | void {
+  const { lng, lat, columns } = params;
+  let providedColumns = columns ?? [];
+
+  if (providedColumns.length == 0) {
+    // We could also just fire off a query using a lat/lon here
+    providedColumns = findColumnsForLocation(allColumns ?? [], {
+      lng,
+      lat,
+    }).map((c) => c.properties);
+  }
+  const nextColumn = providedColumns?.[0];
+  if (nextColumn != null && currentColumn?.col_id != nextColumn.col_id) {
+    // Get the column units if we don't have them already
+    getColumnUnits(nextColumn, dispatch);
+  } else if (nextColumn == null && currentColumn != null) {
+    // Clear the column info if we don't have any columns
+    dispatch({ type: "clear-column-info" });
+  }
+}

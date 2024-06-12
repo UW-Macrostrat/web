@@ -253,10 +253,6 @@ export function coreReducer(
       return { ...state, allColumns: action.columns };
 
     case "received-column-query":
-      // summarize units
-      if (state.allColumns == null || state.allColumns.length == 0) {
-        return state;
-      }
       return {
         ...state,
         fetchingColumnInfo: false,
