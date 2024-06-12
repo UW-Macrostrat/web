@@ -53,7 +53,6 @@ function RouterSync() {
   const runAction = useAppActions();
   useEffect(() => {
     if (nextRouterAction != null) {
-      console.log("Dispatching next router action", nextRouterAction);
       runAction(nextRouterAction);
     }
   }, [nextRouterAction]);

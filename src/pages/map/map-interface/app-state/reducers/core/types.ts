@@ -22,7 +22,7 @@ type ASYNC_ADD_FILTER = { type: "async-add-filter"; filter: any };
 type GET_FILTERED_COLUMNS = { type: "get-filtered-columns" };
 type FETCH_XDD = { type: "fetch-xdd" };
 type MAP_QUERY = {
-  type: "map-query" | "run-map-query";
+  type: "map-query";
   z: string | number;
   map_id: any;
   columns: ColumnProperties[] | null | undefined;

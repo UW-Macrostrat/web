@@ -13,9 +13,13 @@ function useAppActions(): (action: AppAction) => Promise<void> {
   const store = useStore<AppState, AppAction>();
   return async (action) => {
     const appState = store.getState();
-    const newAction = await actionRunner(appState, action, dispatch);
-    if (newAction == undefined || newAction == null) return;
-    dispatch(newAction as AppAction);
+    try {
+      const newAction = await actionRunner(appState, action, dispatch);
+      if (newAction == undefined || newAction == null) return;
+      dispatch(newAction as AppAction);
+    } catch (err) {
+      console.error(err);
+    }
   };
 }
 

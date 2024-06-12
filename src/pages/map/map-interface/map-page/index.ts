@@ -3,11 +3,10 @@ import { Suspense, useCallback, useEffect, useRef } from "react";
 import { Spinner } from "@blueprintjs/core";
 import loadable from "@loadable/component";
 import { mapPagePrefix } from "@macrostrat-web/settings";
-import hyper from "@macrostrat/hyper";
 import { MapAreaContainer } from "@macrostrat/map-interface";
 import classNames from "classnames";
 import { useSelector } from "react-redux";
-import { Route, Routes, useParams } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { useTransition } from "transition-hook";
 import {
   useAppActions,
@@ -18,13 +17,11 @@ import {
 import Searchbar from "../components/navbar";
 import MapContainer from "./map-view";
 import { MenuPage } from "./menu";
-import { info } from "console";
+import h from "./main.module.styl";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));
 const Menu = loadable(() => import("./menu"));
-
-import h from "./main.module.styl";
 
 function MapView(props) {
   return h(
@@ -123,36 +120,8 @@ function InfoDrawerHolder() {
         }),
       }),
     ]),
-    h(InfoDrawerLocationGrabber),
+    //h(InfoDrawerLocationGrabber),
   ]);
-}
-
-function InfoDrawerLocationGrabber() {
-  // We could probably do this in the reducer...
-  const z = Math.round(
-    useAppState((s) => s.core.mapPosition.target?.zoom) ?? 7
-  );
-  const infoMarkerPosition = useAppState((s) => s.core.infoMarkerPosition);
-  const runAction = useAppActions();
-
-  const { lat, lng } = infoMarkerPosition ?? {};
-
-  // Todo: this is a pretty janky way to do state management
-  useEffect(() => {
-    if (lat == null || lng == null) return;
-    runAction({
-      type: "run-map-query",
-      lat: Number(lat),
-      lng: Number(lng),
-      z,
-      // Focused column or map unit from active layers.
-      // This is a bit anachronistic, since we want to be
-      // able to show columns that aren't necessarily shown on the map
-      columns: [],
-      map_id: null,
-    });
-  }, [lat, lng]);
-  return null;
 }
 
 export default MapPageRoutes;

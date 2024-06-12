@@ -19,13 +19,15 @@ export function pathNameAction(
    * 3. If an active page is selected, show that page
    */
 
-  // TODO: specialize based on whether column detail page is selected
-
   const pos = state.core.infoMarkerPosition;
   let nextPathname: string = state.router.location.pathname;
   if (pos != null) {
     const z = state.core.mapPosition.target?.zoom ?? 7;
     nextPathname = buildLocationPath(pos.lng, pos.lat, z);
+    // TODO: we could probably assign column page based on a flag in the state
+    if (state.router.location.pathname.endsWith("/column")) {
+      nextPathname += "/column";
+    }
   } else if (state.core.crossSectionLine != null) {
     nextPathname = buildCrossSectionPath(state.core.crossSectionLine);
   } else if (state.menu.activePage != null) {

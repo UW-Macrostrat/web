@@ -280,7 +280,6 @@ function LithTypes(props) {
     "div.lithologies.lithology-types",
     [
       lith_types.map((lithClass, i) => {
-        console.log(lithClass);
         return h(LithologyTag, {
           key: lithClass.name,
           data: {

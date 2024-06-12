@@ -6,8 +6,13 @@
   <component name="ChangeListManager">
     <list default="true" id="0198d26a-1f96-4e99-bb88-c11fcd2caa82" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/map/map-interface/map-page/settings-panel.module.styl" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/map/map-interface/map-page/settings-panel.module.styl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/map/map-interface/map-page/settings-panel.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/map/map-interface/map-page/settings-panel.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/map/map-interface/app-state/handlers/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/map/map-interface/app-state/handlers/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/map/map-interface/app-state/handlers/pathname.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/map/map-interface/app-state/handlers/pathname.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/map/map-interface/app-state/reducers/core/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/map/map-interface/app-state/reducers/core/types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/map/map-interface/app-state/reducers/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/map/map-interface/app-state/reducers/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/map/map-interface/components/info-drawer/macrostrat-linked.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/map/map-interface/components/info-drawer/macrostrat-linked.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/map/map-interface/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/map/map-interface/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/map/map-interface/map-page/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/map/map-interface/map-page/index.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -76,7 +81,7 @@
       <workItem from="1718136714419" duration="240000" />
       <workItem from="1718136959723" duration="2326000" />
       <workItem from="1718139297254" duration="1998000" />
-      <workItem from="1718153407795" duration="17439000" />
+      <workItem from="1718153407795" duration="20657000" />
     </task>
     <servers />
   </component>

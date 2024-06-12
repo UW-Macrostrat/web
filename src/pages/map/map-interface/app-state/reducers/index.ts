@@ -103,16 +103,28 @@ function mainReducer(
 export default function appReducer(state: AppState, action: AppAction) {
   // This might not be the right way to do hash management, but it
   // centralizes the logic in one place.
-  return applyNextPath(hashStringReducer(mainReducer(state, action), action));
+  return applyNextPath(
+    hashStringReducer(mainReducer(state, action), action),
+    action
+  );
 }
 
-function applyNextPath(state: AppState): AppState {
-  const action = pathNameAction(state);
-  if (action == null) return state;
-  console.log("Applying next path", action);
+const pathChangingActions: AppAction["type"][] = [
+  "set-menu-page",
+  "update-cross-section",
+  "update-state",
+  "start-map-query",
+  "close-infodrawer",
+];
+
+function applyNextPath(state: AppState, action: AppAction): AppState {
+  if (!pathChangingActions.includes(action.type)) return state;
+
+  const nextRouterAction = pathNameAction(state);
+  if (nextRouterAction == null) return state;
   return {
     ...state,
-    nextRouterAction: action,
+    nextRouterAction,
   };
 }
 

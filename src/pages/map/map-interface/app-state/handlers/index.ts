@@ -59,21 +59,39 @@ async function actionRunner(
       // Fill out the remainder with defaults
 
       // We always get all columns on initial load, which might be
-      // a bit unnecessary
+      // a bit unnecessary and slow.
       let allColumns: ColumnGeoJSONRecord[] | null = await fetchAllColumns();
+
+      const newState = {
+        ...state,
+        core: {
+          ...coreState1,
+          allColumns,
+          initialLoadComplete: true,
+        },
+        menu: { activePage },
+      };
 
       dispatch({
         type: "replace-state",
-        state: {
-          ...state,
-          core: {
-            ...coreState1,
-            allColumns,
-            initialLoadComplete: true,
-          },
-          menu: { activePage },
-        },
+        state: newState,
       });
+
+      // Set info marker position if it is defined
+      if (newState.core.infoMarkerPosition != null) {
+        const nextAction = await actionRunner(
+          newState,
+          {
+            type: "map-query",
+            z: state.core.mapPosition.target?.zoom ?? 7,
+            ...state.core.infoMarkerPosition,
+            map_id: null,
+            columns: null,
+          },
+          dispatch
+        );
+        dispatch(nextAction);
+      }
 
       // Apply all filters in parallel
       const newFilters = await Promise.all(
@@ -176,27 +194,7 @@ async function actionRunner(
       return { type: "add-filter", filter: await runFilter(action.filter) };
     case "get-filtered-columns":
       return await fetchFilteredColumns(coreState.filters);
-    case "map-query": {
-      const { lng, lat, z } = action;
-      // Check if matches column detail route
-      const { pathname } = state.router.location;
-
-      let newPath = buildLocationPath(lng, lat, Number(z));
-      if (
-        pathname.startsWith(mapPagePrefix + "/loc") &&
-        pathname.endsWith("/column")
-      ) {
-        // If so, we want to append columns to the end of the URL
-        newPath += "/column";
-      }
-
-      return push({
-        pathname: newPath,
-        hash: location.hash,
-      });
-      //return { ...action, type: "run-map-query" };
-    }
-    case "run-map-query":
+    case "map-query":
       const { lng, lat, z, map_id } = action;
       // Get column data from the map action if it is provided.
       // This saves us from having to filter the columns more inefficiently
@@ -213,6 +211,8 @@ async function actionRunner(
         lat,
         cancelToken: sourceMapQuery,
       });
+
+      // Run a bunch of async queries in ~parallel
       let mapData = await runMapQuery(
         lng,
         lat,
