@@ -38,11 +38,8 @@ a:hover
     padding: 14px 16px;
     text-decoration: none
 
-.parent
-  height: 100vh
-
-.left
-  width: 70%
+.start
+  width: 100%
   display: flex;
   justify-content: center;
   align-items: center;  
@@ -62,6 +59,8 @@ a:hover
   position:absolute
   z-index: 100
   padding: 0 20px
+  display: grid
+  margin: auto
 
 .cover-image
   position:absolute
@@ -69,7 +68,7 @@ a:hover
   left:0px
   top:0px
   height: 100vh
-  width: 70%
+  width: 100%
   object-fit: cover
 
 .sea-image
@@ -77,23 +76,7 @@ a:hover
   z-index: 6
   height: 100vh
   width: 30%
-  object-fit: cover
-
-.right
-  background-color: blue
-  height: 100vh
-  width: 30%
-
-  ul 
-    list-style-type: none
-    margin-top: 32vh
-
-  li 
-    width: 25%
-    padding-left: 10px
-
-  .buttons1
-    padding-left: 27%      
+  object-fit: cover   
 
 .parent
   display: inline-flex
@@ -108,23 +91,29 @@ a:hover
   font-family: Helvetica, sans-serif
   font-weight: 900
   font-size: 20px
+  text-shadow: black 1px 0 10px
 
 .top-stat, .top-stat-label
-  display: block
+  display: grid
+  margin: auto
   color: white
 
 .top-stat
   font-size: 35px
   font-family: Helvetica, sans-serif
 
-.stats-row
-  margin-top: 20%
+.stats
+  display: grid
+  grid-template-columns: 25% 25% 25% 25%
+  margin-bottom: 3%
+  text-shadow: black 1px 0 10px;
 
-  li
-    padding-top: 10px
-    padding-bottom: 20px
-    color: black
-    width: 100%
+  .stat
+    display: grid
+    margin: auto
+
+  a
+    color: white
     
 .rockd
   background-color: green
@@ -134,11 +123,9 @@ a:hover
   border: none;
   color: white;
   padding: 13px 10px;
-  margin: 10px
+  margin: 5% 15%
   text-align: center;
   text-decoration: none;
-  display: inline-block;
-  float: left
   border-radius: 12px;
 
 .btn:hover 
@@ -147,6 +134,8 @@ a:hover
 .buttons1 
   font-size: 20px
   padding: 0px
+  display: grid
+  grid-template-columns: 33.33% 33.33% 33.33%
 
   a 
     color: white
@@ -211,6 +200,7 @@ a:hover
 
 .header 
   margin: 0 20%
+  text-shadow: black 1px 0 10px
 
 #main-title
   display: inline-block
@@ -476,3 +466,8 @@ a:hover
   width: 80%;
   border-bottom: 1px solid #E0E1E6;
   position: absolute;
+
+.text-donate
+  position:absolute
+  z-index: 100
+  padding: 0 20px
