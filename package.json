@@ -13,7 +13,8 @@
     "format": "prettier --write src packages",
     "server:prod": "NODE_NO_WARNINGS=1 NODE_ENV=production yarn run server",
     "dev:storybook": "yarn workspace @macrostrat/storybook run dev",
-    "start": "yarn run build && yarn run server"
+    "start": "yarn run build && yarn run server",
+    "test": "vitest"
   },
   "workspaces": [
     "deps/web-components/packages/*",
@@ -42,7 +43,8 @@
     "sass": "^1.49.0",
     "stylus": "^0.55.0",
     "typescript": "^5.1.6",
-    "vite-plugin-rewrite-all": "^1.0.1"
+    "vite-plugin-rewrite-all": "^1.0.1",
+    "vitest": "^1.6.0"
   },
   "dependencies": {
     "@blueprintjs/core": "^5.10.2",
