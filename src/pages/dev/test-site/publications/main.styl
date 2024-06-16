@@ -2,6 +2,9 @@
     background-color: white
     color: black
 
+#container
+  background-color: white
+
 a:hover
     text-decoration: none
 .nav
@@ -29,76 +32,18 @@ a:hover
     text-decoration: none
 
 .big
+  font-size: 72px
+  font-family: "Maven Pro", sans-serif;
+  text-align: center
+
+p 
+    margin-bottom: 10px;
+    margin-top: 0;
     color: #E0E1E6
-    text-align: left
-    font-size: 75px
-    font-family: "Maven Pro", sans-serif
-    margin: 0
-    margin-left: 20%
-    margin-top: 30px
-
-.line
-  border-bottom: 3px solid #E0E1E6;
-  width: 60%
-  margin: 20px 20% 
-
-
-.people
-    color: white
-
-.left
-    float: left
-    width: 30%
-    margin-left: 20%
-
-.right
-    float: left
-    width: 30%
-    margin-right: 20%
-
-.person-info
-    height: 30vh
-    width: 90%
-    position: relative
-    margin: 5%
-
-.text
-    text-align: right
-    position:absolute
-    padding: 5px 20px
-    z-index: 100
-    background-color: rgba(0, 0, 0, 0.2)
-    bottom:0
-    right: 0
-
-    a
-        color: white
-
-    a:hover
-        color: white
-
-.back-img
-    position:absolute
-    z-index: 0
-    height: 30vh
-    object-fit: cover
-    width: 100%
-
-n
-    font-size: 25px
-    font-weight: 200px
-
-t
-    font-weight: 400px
-
-e 
-    font-size: 14px
-    font-weight: 200px
 
 .footer 
   width: 100%
   background-color: #015EAB
-  margin-top: 280vh
 
 .footer-container
   display: flex;
@@ -147,6 +92,35 @@ e
 #who-made-it
   padding-top: 25px
 
-.subtitle
-  margin-left: 20%
-  color: #E0E1E6;
+.pub-line
+  width: 60%;
+  border-bottom: 1px solid #E0E1E6;
+  position: absolute;
+
+#publications 
+  padding: 50px 20%
+
+#pub-title 
+  text-align: left
+  color: #E0E1E6
+  position: relative
+  padding-bottom: 0
+  margin-bottom: 0
+
+.pub-list
+  padding-top: 10px
+  margin-left: 20px
+  counter-reset: pub-counter 70
+  color: black
+
+  li
+    counter-increment: pub-counter -1
+
+  li::marker
+    font-size: 35px;
+    color: #babdc8;
+    content: counter(pub-counter) " "
+    counter-increment: pub-counter
+
+.blurb
+  font-size: 15px
