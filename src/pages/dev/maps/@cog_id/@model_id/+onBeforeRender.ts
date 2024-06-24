@@ -7,21 +7,20 @@ const client = new PostgrestClient(postgrestPrefix, {
 });
 
 export async function onBeforeRender(pageContext: PageContextServer) {
-  const { id } = pageContext.routeParams;
-  const res: any = await client.from("sources").select("*").eq("source_id", id);
-  const map = res?.data?.features[0];
 
-  console.log(map.geometry.coordinates)
+  const { cog_id, model_id } = pageContext.routeParams;
+
+  const url = `http://localhost:8333/v1/tiles/cog_id/${cog_id}/model_id/${model_id}`
+  const res = await fetch(url)
+  const data = await res.json()
 
   return {
     pageContext: {
       pageProps: {
-        map,
-      },
-      documentProps: {
-        // The page's <title>
-        title: map.properties.name,
-      },
+        cog_id,
+        model_id,
+        envelope: data.web_geom
+      }
     },
   };
 }

@@ -33,6 +33,7 @@ import "~/styles/global.styl";
 import { MapReference, DevLink } from "~/components";
 import styles from "./main.module.sass";
 import { PageBreadcrumbs } from "~/renderer";
+import { urlencoded } from "express";
 
 const h = hyper.styled(styles);
 
@@ -44,6 +45,7 @@ interface StyleOpts {
     raster: number | null;
   };
   rasterURL?: string;
+  tileURL: string
 }
 
 const emptyStyle: any = {
@@ -55,20 +57,22 @@ const emptyStyle: any = {
 };
 
 function buildOverlayStyle({
-  style,
-  focusedMap,
-  layerOpacity,
-  rasterURL = null,
-}: StyleOpts): any {
+                             style,
+                             focusedMap,
+                             layerOpacity,
+                             rasterURL = null,
+                             tileURL
+                           }: StyleOpts): any {
   let mapStyle = emptyStyle;
   if (layerOpacity.vector != null) {
     mapStyle = buildMacrostratStyle({
-      tileserverDomain: SETTINGS.burwellTileDomain,
+      tileserverDomain: "http://localhost:8000",
       focusedMap,
       fillOpacity: layerOpacity.vector - 0.1,
       strokeOpacity: layerOpacity.vector + 0.2,
       lineOpacity: layerOpacity.vector + 0.4,
     });
+    mapStyle.sources.burwell.tiles = [tileURL]
   }
 
   if (rasterURL != null && layerOpacity.raster != null) {
@@ -79,8 +83,8 @@ function buildOverlayStyle({
           type: "raster",
           tiles: [
             SETTINGS.burwellTileDomain +
-              "/cog/tiles/{z}/{x}/{y}.png?url=" +
-              rasterURL,
+            "/cog/tiles/{z}/{x}/{y}.png?url=" +
+            rasterURL,
           ],
           tileSize: 256,
         },
@@ -135,17 +139,42 @@ function basemapStyle(basemap, inDarkMode) {
   }
 }
 
-export default function MapInterface({ map }) {
+export default function MapInterface(cog_id, model_id, envelope) {
+
+  const map = {
+    type: 'Feature',
+    properties: {
+      source_id: 2096,
+      slug: 'criticalmaas_09_ngmdb_10243_v2',
+      name: 'Bedrock geologic map of the Roseau 1 degree x 2 degrees quadrangle, Minnesota, United States, and Ontario and Manitoba, Canada',
+      url: 'https://ngmdb.usgs.gov/Prodesc/proddesc_10243.htm',
+      ref_title: 'Bedrock geologic map of the Roseau 1 degree x 2 degrees quadrangle, Minnesota, United States, and Ontario and Manitoba, Canada',
+      authors: 'Day, W.C., Klein, T.L., and Schulz, K.J.',
+      ref_year: '1994',
+      ref_source: 'U.S. Geological Survey',
+      isbn_doi: null,
+      licence: null,
+      scale: 'large',
+      features: 4514,
+      area: 5662,
+      display_scales: [ 'large' ],
+      priority: false,
+      status_code: 'active',
+      raster_url: null,
+      is_mapped: true,
+      description: "teste"
+    }
+  }
+
   const [isOpen, setOpen] = useState(false);
   const dark = useDarkMode()?.isEnabled ?? false;
   const title = map.properties.name;
-  console.log(map);
 
   const hasRaster = map.properties.raster_url != null;
 
   const bounds: LngLatBoundsLike = useMemo(() => {
-    return ensureBoxInGeographicRange(boundingBox(map.geometry));
-  }, [map.geometry]);
+    return ensureBoxInGeographicRange(boundingBox(envelope));
+  }, [envelope]);
 
   const [layer, setLayer] = useState(Basemap.None);
   const [style, setStyle] = useState(null);
@@ -171,9 +200,10 @@ export default function MapInterface({ map }) {
     setMapStyle(
       buildOverlayStyle({
         style,
-        focusedMap: map.properties.source_id,
+        focusedMap: null,
         layerOpacity,
-        rasterURL: map.properties.raster_url,
+        rasterURL: null,
+        tileURL: `http://localhost:8333/tiles/cog/${cog_id}/model/${encodeURIComponent(model_id)}/tile/{z}/{x}/{y}`
       })
     );
   }, [
@@ -211,27 +241,6 @@ export default function MapInterface({ map }) {
       setMapStyle({ ...mapStyle, layers: mergeLayers });
     }
   }, [layerOpacity]);
-
-  // useEffect(() => {
-  //   if (mapStyle == null) return;
-  //   const layers = mapStyle.layers;
-  //   const rasterLayer = layers.find((l) => l.id == "raster");
-  //   if (rasterLayer == null) return;
-  //   rasterLayer.paint ??= {};
-  //   rasterLayer.paint["raster-opacity"] = layerOpacity.raster;
-  //   setMapStyle({ ...mapStyle, layers });
-  // }, [layerOpacity.raster]);
-
-  // useEffect(() => {
-  //   if (mapStyle == null) return;
-  //   const layers = mapStyle.layers;
-  //   const vectorLayers = layers.filter((l) => l.type == "fill");
-  //   for (const layer of vectorLayers) {
-  //     layer.paint ??= {};
-  //     layer.paint["fill-opacity"] = layerOpacity.vector;
-  //   }
-  //   setMapStyle({ ...mapStyle, layers });
-  // }, [layerOpacity.vector]);
 
   const maxBounds: LatLngBoundsLike = useMemo(() => {
     const dx = bounds[2] - bounds[0];
@@ -347,84 +356,12 @@ function MapLegendPanel(params) {
           h(ErrorBoundary, [
             h(MapReference, { reference: params, showSourceID: false }),
           ]),
-        ]),
-        h("div.flex.row", [
-          h("h3", "Legend"),
-          h("div.spacer"),
-          h(
-            DevLink,
-            // Not sure why we have to fully construct the URL here, vs. constructing a relative route.
-            // Probably lack of a trailing slash in the main page?
-            { href: `/maps/${params.source_id}/legend` },
-            "Legend table"
-          ),
-        ]),
-        h(MapLegendData, params),
+        ])
       ])
     )
   );
 }
 
-function MapLegendData({ source_id }) {
-  const mapLegend = useAPIResult(apiV2Prefix + "/geologic_units/map/legend", {
-    source_id,
-  });
-  if (mapLegend == null) return h(Spinner);
-  const legendData = mapLegend?.success?.data;
-  if (legendData == null) return h(NonIdealState, { icon: "error" });
-
-  legendData.sort((a, b) => a.t_age - b.t_age);
-
-  return h(
-    "div.legend-data",
-    legendData.map((d) => h(LegendEntry, { data: d }))
-  );
-}
-
-function LegendEntry({ data }) {
-  const { map_unit_name, color, ...rest } = data;
-  const {
-    legend_id,
-    source_id,
-    t_interval,
-    b_interval,
-    //strat_name,
-    //strat_name_id,
-    unit_id,
-    area,
-    tiny_area,
-    small_area,
-    medium_area,
-    large_area,
-    lith,
-    // lith_classes,
-    // lith_types,
-    lith_id,
-    scale,
-    comments,
-    ...r1
-  } = rest;
-
-  const [isOpen, setOpen] = useState(false);
-
-  const title = h(
-    "div.legend-title",
-    {
-      onClick() {
-        setOpen(!isOpen);
-      },
-    },
-    [
-      h("div.legend-swatch", { style: { backgroundColor: color } }),
-      h("div.legend-label", h("h4", map_unit_name)),
-    ]
-  );
-
-  return h("div.legend-entry", [
-    title,
-    h(Collapse, { isOpen }, h(JSONView, { data: r1, hideRoot: true })),
-  ]);
-}
 
 function OpacitySlider(props) {
   return h("div.opacity-slider", [

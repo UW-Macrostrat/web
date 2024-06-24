@@ -3,7 +3,8 @@ import {
   NonIdealState,
   Radio,
   RadioGroup,
-  Spinner
+  Spinner,
+  Tag,
 } from "@blueprintjs/core";
 import { SETTINGS, apiV2Prefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
@@ -54,11 +55,11 @@ const emptyStyle: any = {
 };
 
 function buildOverlayStyle({
-  style,
-  focusedMap,
-  layerOpacity,
-  rasterURL = null,
-}: StyleOpts): any {
+                             style,
+                             focusedMap,
+                             layerOpacity,
+                             rasterURL = null,
+                           }: StyleOpts): any {
   let mapStyle = emptyStyle;
   if (layerOpacity.vector != null) {
     mapStyle = buildMacrostratStyle({
@@ -136,10 +137,51 @@ function basemapStyle(basemap, inDarkMode) {
 }
 
 export default function MapInterface() {
+
+  const map = {
+    type: 'Feature',
+    geometry: {
+      type: 'Polygon',
+      coordinates: [[
+        [ -96.003995045, 47.999828964 ],
+        [ -96.003995045, 49.000624631 ],
+        [ -93.999846179, 49.000624631 ],
+        [ -93.999846179, 47.999828964 ],
+        [ -96.003995045, 47.999828964 ]
+      ]]
+    },
+    properties: {
+      source_id: 2096,
+      slug: 'criticalmaas_09_ngmdb_10243_v2',
+      name: 'Bedrock geologic map of the Roseau 1 degree x 2 degrees quadrangle, Minnesota, United States, and Ontario and Manitoba, Canada',
+      url: 'https://ngmdb.usgs.gov/Prodesc/proddesc_10243.htm',
+      ref_title: 'Bedrock geologic map of the Roseau 1 degree x 2 degrees quadrangle, Minnesota, United States, and Ontario and Manitoba, Canada',
+      authors: 'Day, W.C., Klein, T.L., and Schulz, K.J.',
+      ref_year: '1994',
+      ref_source: 'U.S. Geological Survey',
+      isbn_doi: null,
+      licence: null,
+      scale: 'large',
+      features: 4514,
+      area: 5662,
+      display_scales: [ 'large' ],
+      priority: false,
+      status_code: 'active',
+      raster_url: null,
+      is_mapped: true,
+      description: "teste"
+    }
+  }
+
   const [isOpen, setOpen] = useState(false);
   const dark = useDarkMode()?.isEnabled ?? false;
+  const title = map.properties.name;
 
-  const bounds: LngLatBoundsLike = [[47.60427652430807, -96.5679062698988], [49.00845129309501, -93.263602193669]]
+  const hasRaster = map.properties.raster_url != null;
+
+  const bounds: LngLatBoundsLike = useMemo(() => {
+    return ensureBoxInGeographicRange(boundingBox(map.geometry));
+  }, [map.geometry]);
 
   const [layer, setLayer] = useState(Basemap.None);
   const [style, setStyle] = useState(null);
@@ -159,7 +201,56 @@ export default function MapInterface() {
     raster: 0.5,
   });
 
-  const maxBounds: LngLatBoundsLike = useMemo(() => {
+  console.log(layerOpacity)
+
+  // Overlay style
+  const [mapStyle, setMapStyle] = useState(null);
+  useEffect(() => {
+    setMapStyle(
+      buildOverlayStyle({
+        style,
+        focusedMap: map.properties.source_id,
+        layerOpacity,
+        rasterURL: map.properties.raster_url,
+      })
+    );
+  }, [
+    map.properties.source_id,
+    style,
+    layerOpacity.raster == null,
+    layerOpacity.vector == null,
+  ]);
+
+  // Layer opacity
+  useEffect(() => {
+    if (mapStyle == null) return;
+    const mergeLayers = buildOverlayStyle({
+      style,
+      focusedMap: map.properties.source_id,
+      layerOpacity,
+      rasterURL: map.properties.raster_url,
+    }).layers;
+
+    for (const layer of mapStyle.layers) {
+      let mergeLayer = mergeLayers.find((l) => l.id == layer.id);
+      layer.layout ??= {};
+      layer.paint ??= {};
+      if (mergeLayer == null) {
+        layer.layout.visibility = "none";
+        continue;
+      } else {
+        layer.layout.visibility = "visible";
+      }
+      for (const prop in ["fill-opacity", "line-opacity", "raster-opacity"]) {
+        if (mergeLayer.paint[prop] != null) {
+          layer.paint[prop] = mergeLayer.paint[prop];
+        }
+      }
+      setMapStyle({ ...mapStyle, layers: mergeLayers });
+    }
+  }, [layerOpacity]);
+
+  const maxBounds: LatLngBoundsLike = useMemo(() => {
     const dx = bounds[2] - bounds[0];
     const dy = bounds[3] - bounds[1];
     const buf = 1 * Math.max(dx, dy);
@@ -199,6 +290,8 @@ export default function MapInterface() {
     ]),
     h(BaseLayerSelector, { layer, setLayer }),
   ]);
+
+  console.log(mapStyle, bounds, maxBounds)
 
   return h(
     MapAreaContainer,
