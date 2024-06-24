@@ -139,38 +139,12 @@ function basemapStyle(basemap, inDarkMode) {
   }
 }
 
-export default function MapInterface(cog_id, model_id, envelope) {
-
-  const map = {
-    type: 'Feature',
-    properties: {
-      source_id: 2096,
-      slug: 'criticalmaas_09_ngmdb_10243_v2',
-      name: 'Bedrock geologic map of the Roseau 1 degree x 2 degrees quadrangle, Minnesota, United States, and Ontario and Manitoba, Canada',
-      url: 'https://ngmdb.usgs.gov/Prodesc/proddesc_10243.htm',
-      ref_title: 'Bedrock geologic map of the Roseau 1 degree x 2 degrees quadrangle, Minnesota, United States, and Ontario and Manitoba, Canada',
-      authors: 'Day, W.C., Klein, T.L., and Schulz, K.J.',
-      ref_year: '1994',
-      ref_source: 'U.S. Geological Survey',
-      isbn_doi: null,
-      licence: null,
-      scale: 'large',
-      features: 4514,
-      area: 5662,
-      display_scales: [ 'large' ],
-      priority: false,
-      status_code: 'active',
-      raster_url: null,
-      is_mapped: true,
-      description: "teste"
-    }
-  }
+export default function MapInterface({ cog_id, model_id, envelope }) {
 
   const [isOpen, setOpen] = useState(false);
   const dark = useDarkMode()?.isEnabled ?? false;
-  const title = map.properties.name;
-
-  const hasRaster = map.properties.raster_url != null;
+  const title = `${cog_id.substring(0, 10)} ${model_id}`
+  const hasRaster = false
 
   const bounds: LngLatBoundsLike = useMemo(() => {
     return ensureBoxInGeographicRange(boundingBox(envelope));
@@ -203,11 +177,11 @@ export default function MapInterface(cog_id, model_id, envelope) {
         focusedMap: null,
         layerOpacity,
         rasterURL: null,
-        tileURL: `http://localhost:8333/tiles/cog/${cog_id}/model/${encodeURIComponent(model_id)}/tile/{z}/{x}/{y}`
+        tileURL: `http://localhost:8333/v1/tiles/cog/${cog_id}/model/${encodeURIComponent(model_id)}/tile/{z}/{x}/{y}`
       })
     );
   }, [
-    map.properties.source_id,
+    null,
     style,
     layerOpacity.raster == null,
     layerOpacity.vector == null,
@@ -218,9 +192,9 @@ export default function MapInterface(cog_id, model_id, envelope) {
     if (mapStyle == null) return;
     const mergeLayers = buildOverlayStyle({
       style,
-      focusedMap: map.properties.source_id,
+      focusedMap: null,
       layerOpacity,
-      rasterURL: map.properties.raster_url,
+      rasterURL: null,
     }).layers;
 
     for (const layer of mapStyle.layers) {
@@ -259,8 +233,6 @@ export default function MapInterface(cog_id, model_id, envelope) {
 
   const contextPanel = h(PanelCard, [
     h("div.map-meta", [
-      h("p", map.properties.description),
-      h("p", ["Map ID: ", h("code", map.properties.source_id)]),
     ]),
     h("div.vector-controls", [
       h("h3", "Vector map"),
@@ -295,8 +267,7 @@ export default function MapInterface(cog_id, model_id, envelope) {
       contextStackProps: {
         adaptiveWidth: true,
       },
-      detailPanelStyle: DetailPanelStyle.FIXED,
-      detailPanel: h(MapLegendPanel, map.properties),
+      detailPanelStyle: DetailPanelStyle.FLOATING
     },
     [
       h(
@@ -343,23 +314,6 @@ function BaseLayerSelector({ layer, setLayer }) {
       ]
     ),
   ]);
-}
-
-function MapLegendPanel(params) {
-  return h(
-    InfoDrawerContainer,
-    h(
-      "div.map-legend-container",
-      h("div.map-legend", [
-        h(PageBreadcrumbs),
-        h("div.legend-header", [
-          h(ErrorBoundary, [
-            h(MapReference, { reference: params, showSourceID: false }),
-          ]),
-        ])
-      ])
-    )
-  );
 }
 
 

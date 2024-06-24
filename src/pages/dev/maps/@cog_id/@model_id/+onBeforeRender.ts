@@ -10,9 +10,11 @@ export async function onBeforeRender(pageContext: PageContextServer) {
 
   const { cog_id, model_id } = pageContext.routeParams;
 
-  const url = `http://localhost:8333/v1/tiles/cog_id/${cog_id}/model_id/${model_id}`
+  const url = `http://localhost:8333/v1/tiles/cog/${cog_id}/model/${model_id}`
   const res = await fetch(url)
   const data = await res.json()
+
+  console.log(data)
 
   return {
     pageContext: {
