@@ -1,22 +1,14 @@
 import { PageHeader } from "~/components";
 import { PageBreadcrumbs } from "~/renderer";
+import { Image, Navbar, Footer } from "../index";
 import "./main.styl";
-import { Image } from "../index";
+import "../main.styl";
 import { MacrostratIcon } from "~/components";
 
 <div class="main">
 
 [//]: # "Nav Bar"
-<div class="nav">
-  <ul>
-    <li><a href="/dev/test-site/main-page"><MacrostratIcon></MacrostratIcon></a></li>
-    <li><a href="/dev/test-site/about">About</a></li>
-    <li><a href="/dev/test-site/publications">Publications</a></li>
-    <li><a href="/dev/test-site/people">People</a></li>
-    <li><a href="/dev/test-site/donate">Donate</a></li>
-  </ul>
-</div>
-
+<Navbar></Navbar>
 [//]: # "People"
 <h1 class="big">People</h1>
 <p class="subtitle">major contributors to the project </p>
