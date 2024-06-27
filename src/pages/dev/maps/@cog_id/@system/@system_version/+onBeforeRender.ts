@@ -8,19 +8,18 @@ const client = new PostgrestClient(postgrestPrefix, {
 
 export async function onBeforeRender(pageContext: PageContextServer) {
 
-  const { cog_id, model_id } = pageContext.routeParams;
+  const { cog_id, system, system_version } = pageContext.routeParams;
 
-  const url = `http://localhost:8333/v1/tiles/cog/${cog_id}/model/${model_id}`
+  const url = `http://localhost:8333/v1/tiles/cog/${cog_id}/system/${system}/system_version/${system_version}`
   const res = await fetch(url)
   const data = await res.json()
-
-  console.log(data)
 
   return {
     pageContext: {
       pageProps: {
         cog_id,
-        model_id,
+        system,
+        system_version,
         envelope: data.web_geom
       }
     },

@@ -20,7 +20,7 @@ export function Page({ sources }) {
         h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
       ]),
     ]),
-    h(PageHeader, { title: "Maps" }),
+    h(PageHeader, { title: "TA1 Maps" }),
     h(
       "ul.maps-list",
       sources.map((d) =>
@@ -32,13 +32,13 @@ export function Page({ sources }) {
 
 function SourceItem({ source }) {
 
-  const { cog_id, model_id } = source;
-  const href = `./maps/${cog_id}/${model_id}`;
+  const { cog_id, system, system_version } = source;
+  const href = `./maps/${cog_id}/${system}/${system_version}`
 
   return h("li", [
     h("span.source-id", {}, cog_id),
     " ",
-    h("a", { href }, [model_id])
+    h("a", { href }, [system, system_version])
   ]);
 }
 

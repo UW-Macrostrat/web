@@ -6,7 +6,7 @@ import {
   Spinner,
   Tag,
 } from "@blueprintjs/core";
-import { SETTINGS, apiV2Prefix } from "@macrostrat-web/settings";
+import { SETTINGS, apiV2Prefix } from "../../../../../../../packages/settings";
 import hyper from "@macrostrat/hyper";
 import {
   DetailPanelStyle,
@@ -139,11 +139,11 @@ function basemapStyle(basemap, inDarkMode) {
   }
 }
 
-export default function MapInterface({ cog_id, model_id, envelope }) {
+export default function MapInterface({ cog_id, system, system_version, envelope }) {
 
   const [isOpen, setOpen] = useState(false);
   const dark = useDarkMode()?.isEnabled ?? false;
-  const title = `${cog_id.substring(0, 10)} ${model_id}`
+  const title = `${cog_id.substring(0, 10)} ${system} ${system_version}`
   const hasRaster = false
 
   const bounds: LngLatBoundsLike = useMemo(() => {
@@ -177,7 +177,7 @@ export default function MapInterface({ cog_id, model_id, envelope }) {
         focusedMap: null,
         layerOpacity,
         rasterURL: null,
-        tileURL: `http://localhost:8333/v1/tiles/cog/${cog_id}/model/${encodeURIComponent(model_id)}/tile/{z}/{x}/{y}`
+        tileURL: `http://localhost:8333/v1/tiles/cog/${cog_id}/system/${encodeURIComponent(system)}/system_version/${encodeURIComponent(system_version)}/tile/{z}/{x}/{y}`
       })
     );
   }, [
@@ -254,8 +254,6 @@ export default function MapInterface({ cog_id, model_id, envelope }) {
     ]),
     h(BaseLayerSelector, { layer, setLayer }),
   ]);
-
-  console.log(mapStyle, bounds, maxBounds)
 
   return h(
     MapAreaContainer,
