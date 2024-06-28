@@ -15,6 +15,8 @@ import { useEffect, useMemo } from "react";
 import { create } from "zustand";
 import { setGeoJSON } from "@macrostrat/mapbox-utils";
 import { ColumnGeoJSONRecord } from "~/pages/map/map-interface/app-state/handlers/columns";
+// Turf intersection
+import {lineIntersect} from "@turf/line-intersect";
 
 import { buildCrossSectionLayers } from "~/_utils/map-layers";
 import { fetchAllColumns } from "~/pages/map/map-interface/app-state/handlers/fetch";
@@ -82,6 +84,17 @@ function InsetMap() {
   ]);
 }
 
+function computeIntersectingColumns(
+  columns: ColumnGeoJSONRecord[],
+  line: LineString
+): ColumnGeoJSONRecord[] {
+  return columns.filter((col) => {
+    const poly = col.geometry;
+    const intersection = lineIntersect(line, poly);
+    return intersection.features.length > 0;
+  });
+}
+
 function ColumnsLayer({ enabled = true }) {
   const columns = useCorrelationDiagramStore((state) => state.columns);
 
@@ -96,6 +109,16 @@ function ColumnsLayer({ enabled = true }) {
       };
       const sourceID = "columns";
       setGeoJSON(map, sourceID, data);
+
+      if (map.getSource("selected-columns") == null) {
+        map.addSource("selected-columns", {
+          type: "geojson",
+          data: {
+            type: "FeatureCollection",
+            features: [],
+          },
+        });
+      }
 
       const columnLayers = buildColumnLayers(sourceID);
       for (let layer of columnLayers) {
@@ -131,6 +154,14 @@ function buildColumnLayers(sourceID: string) {
         "line-width": 1,
       },
     },
+    {
+      id: "selected-columns-fill",
+      type: "fill",
+      source: "selected-columns",
+      paint: {
+        "fill-color": "rgba(255, 0, 0, 0.1)",
+      },
+    }
   ];
 }
 
@@ -160,6 +191,13 @@ function SectionLine({ focusedLine }: { focusedLine: LineString }) {
           geometry: { type: "Point", coordinates: coord },
           properties: {},
         })),
+      });
+      setGeoJSON(map, "selected-columns", {
+        type: "FeatureCollection",
+        features: computeIntersectingColumns(
+          useCorrelationDiagramStore.getState().columns,
+          focusedLine
+        ),
       });
 
       // Add layers
