@@ -6605,6 +6605,7 @@ __metadata:
     "@types/react": "npm:^18.2.20"
     "@types/react-dom": "npm:^18.2.7"
     "@types/react-redux": "npm:^7.1.7"
+    "@types/underscore": "npm:^1"
     "@typescript-eslint/eslint-plugin": "npm:^6.3.0"
     "@typescript-eslint/parser": "npm:^6.3.0"
     "@universal-middleware/express": "npm:^0.0.2"
@@ -6653,6 +6654,7 @@ __metadata:
     transition-hook: "npm:^1.5.2"
     tsx: "npm:^4.11.2"
     typescript: "npm:^5.1.6"
+    underscore: "npm:^1.13.6"
     use-debounce: "npm:^9.0.4"
     use-react-router-breadcrumbs: "npm:^3.2.1"
     use-resize-observer: "npm:^9.1.0"
@@ -11788,6 +11790,13 @@ __metadata:
   version: 1.0.1
   resolution: "@types/treeify@npm:1.0.1"
   checksum: 10/972022f753b49b16a17cbfc0c6051c64983d333f27dbf456353c8168446fa8948ac11072687be8ba5b2144122bae461481ce7814c7a855ab477fffe45ed7a793
+  languageName: node
+  linkType: hard
+
+"@types/underscore@npm:^1":
+  version: 1.11.15
+  resolution: "@types/underscore@npm:1.11.15"
+  checksum: 10/5a9c262566551f61744e066d33578c0fad1139c2d5314ed77a8f867487a6d7dd18616f32df4c605070fbd569b942c6d2c083be9f9ae649f41a562b52812b06be
   languageName: node
   linkType: hard
 
