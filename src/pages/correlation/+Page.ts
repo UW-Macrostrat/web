@@ -24,12 +24,16 @@ import { centroid } from "@turf/centroid";
 import { buildCrossSectionLayers } from "~/_utils/map-layers";
 import { fetchAllColumns } from "~/pages/map/map-interface/app-state/handlers/fetch";
 import { getFocusedLineFromHashParams, HashStringManager } from "./hash-string";
+import { Button } from "@blueprintjs/core";
+import classNames from "classnames";
 
 interface CorrelationState {
   focusedLine: LineString | null;
   columns: ColumnGeoJSONRecord[];
   focusedColumns: FocusedColumnGeoJSONRecord[];
+  mapExpanded: boolean;
   onClickMap: (point: Point) => void;
+  toggleMapExpanded: () => void;
   startup: () => Promise<void>;
 }
 
@@ -41,6 +45,9 @@ const useCorrelationDiagramStore = create<CorrelationState>((set) => ({
   focusedLine: null as LineString | null,
   columns: [],
   focusedColumns: [],
+  mapExpanded: false,
+  toggleMapExpanded: () =>
+    set((state) => ({ mapExpanded: !state.mapExpanded })),
   onClickMap: (point: Point) =>
     set((state) => {
       if (
@@ -84,10 +91,12 @@ export function Page() {
 
   return h(FullscreenPage, [
     h(HashStringManager, { focusedLine }),
-    h("header", [h(PageBreadcrumbs)]),
-    h("div.flex.row", [
-      h("div.correlation-diagram"),
-      h("div.assistant", [h(InsetMap)]),
+    h("div.main-panel", [
+      h("header", [h(PageBreadcrumbs)]),
+      h("div.flex.row.diagram-container", [
+        h("div.correlation-diagram"),
+        h("div.assistant", [h(InsetMap)]),
+      ]),
     ]),
   ]);
 }
@@ -95,18 +104,38 @@ export function Page() {
 function InsetMap() {
   const focusedLine = useCorrelationDiagramStore((state) => state.focusedLine);
   const columns = useCorrelationDiagramStore((state) => state.columns);
+  const expanded = useCorrelationDiagramStore((state) => state.mapExpanded);
 
-  return h("div.column-selection-map", [
-    h(
-      MapboxMapProvider,
-      h(MapView, { style: baseMapURL, accessToken: mapboxAccessToken }, [
-        h(MapClickHandler),
-        h(SectionLine, { focusedLine }),
-        h(ColumnsLayer, { columns }),
-        h(SelectedColumnsLayer),
-      ])
-    ),
-  ]);
+  return h(
+    "div.column-selection-map",
+    { className: classNames({ expanded }) },
+    [
+      h(MapboxMapProvider, [
+        h(MapExpandedButton),
+        h(MapView, { style: baseMapURL, accessToken: mapboxAccessToken }, [
+          h(MapClickHandler),
+          h(SectionLine, { focusedLine }),
+          h(ColumnsLayer, { columns }),
+          h(SelectedColumnsLayer),
+        ]),
+      ]),
+    ]
+  );
+}
+
+function MapExpandedButton() {
+  const toggleMapExpanded = useCorrelationDiagramStore(
+    (state) => state.toggleMapExpanded
+  );
+  const mapExpanded = useCorrelationDiagramStore((state) => state.mapExpanded);
+
+  const icon = mapExpanded ? "collapse-all" : "expand-all";
+
+  return h(Button, {
+    className: "map-expanded-button",
+    icon,
+    onClick: toggleMapExpanded,
+  });
 }
 
 function MapClickHandler() {

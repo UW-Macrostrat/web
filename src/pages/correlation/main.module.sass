@@ -1,13 +1,35 @@
 $map-size: 40em
+$map-size-inset: 12em
 
 .column-selection-map
-  height: $map-size
-  position: relative
+  box-shadow: 0 0 0.3em 0 rgba(0, 0, 0, 0.5)
+  height: $map-size-inset
+  width: $map-size-inset
+  position: absolute
+  top: 0
+  right: 0
   :global(.main-view)
     height: 100%
-
-.assistant
-  width: $map-size
+  &.expanded
+    height: $map-size
+    width: $map-size
+    position: relative
 
 .correlation-diagram
   flex-grow: 1
+
+.map-expanded-button
+  position: absolute
+  top: 0.5em
+  right: 0.5em
+  z-index: 100
+
+.main-panel
+  position: relative
+  height: 100%
+  display: flex
+  flex-direction: column
+
+.diagram-container
+  flex-grow: 1
+  position: relative
