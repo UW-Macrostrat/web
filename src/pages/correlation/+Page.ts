@@ -26,6 +26,7 @@ import { fetchAllColumns } from "~/pages/map/map-interface/app-state/handlers/fe
 import { getFocusedLineFromHashParams, HashStringManager } from "./hash-string";
 import { Button } from "@blueprintjs/core";
 import classNames from "classnames";
+import { ColumnIdentifier, CorrelationChart } from "./correlation-chart";
 
 interface CorrelationState {
   focusedLine: LineString | null;
@@ -94,11 +95,31 @@ export function Page() {
     h("div.main-panel", [
       h("header", [h(PageBreadcrumbs)]),
       h("div.flex.row.diagram-container", [
-        h("div.correlation-diagram"),
+        h(CorrelationDiagramWrapper),
         h("div.assistant", [h(InsetMap)]),
       ]),
     ]),
   ]);
+}
+
+function CorrelationDiagramWrapper() {
+  const focusedColumns = useCorrelationDiagramStore(
+    (state) => state.focusedColumns
+  );
+
+  const columns = focusedColumns.map(columnGeoJSONRecordToColumnIdentifier);
+
+  return h("div.correlation-diagram", h(CorrelationChart, { columns }));
+}
+
+function columnGeoJSONRecordToColumnIdentifier(
+  col: ColumnGeoJSONRecord
+): ColumnIdentifier {
+  return {
+    col_id: col.properties.col_id,
+    col_name: col.properties.col_name,
+    project_id: col.properties.project_id,
+  };
 }
 
 function InsetMap() {
