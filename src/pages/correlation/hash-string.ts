@@ -16,8 +16,10 @@ export function getFocusedLineFromHashParams(): LineString | null {
 
   try {
     let coords = hash.line;
-
-    console.log("coords", coords);
+    if (!Array.isArray(coords)) {
+      console.error("Invalid line coordinates in hash string");
+      return null;
+    }
 
     if (coords.length < 2) {
       return null;
@@ -27,11 +29,9 @@ export function getFocusedLineFromHashParams(): LineString | null {
       return null;
     }
 
-    coords = chunk(coords, 2);
-
     return {
       type: "LineString",
-      coordinates: coords.map((coord) => coord.map(Number)),
+      coordinates: chunk(coords.map(Number), 2),
     };
   } catch (e) {
     console.error("Error parsing hash string", e);

@@ -28,14 +28,19 @@ import { getFocusedLineFromHashParams, HashStringManager } from "./hash-string";
 interface CorrelationState {
   focusedLine: LineString | null;
   columns: ColumnGeoJSONRecord[];
+  focusedColumns: FocusedColumnGeoJSONRecord[];
   onClickMap: (point: Point) => void;
   startup: () => Promise<void>;
 }
 
-/** Store management with Zustand */
+/** Store management with Zustand.
+ * This is a newer and somewhat more subtle approach than the Redux store
+ * used in the mapping application.
+ * */
 const useCorrelationDiagramStore = create<CorrelationState>((set) => ({
   focusedLine: null as LineString | null,
   columns: [],
+  focusedColumns: [],
   onClickMap: (point: Point) =>
     set((state) => {
       if (
@@ -45,21 +50,27 @@ const useCorrelationDiagramStore = create<CorrelationState>((set) => ({
         return {
           ...state,
           focusedLine: { type: "LineString", coordinates: [point.coordinates] },
+          focusedColumns: [],
         };
       } else {
+        const focusedLine: LineString = {
+          type: "LineString",
+          coordinates: [...state.focusedLine.coordinates, point.coordinates],
+        };
+
         return {
           ...state,
-          focusedLine: {
-            type: "LineString",
-            coordinates: [...state.focusedLine.coordinates, point.coordinates],
-          },
+          focusedLine,
+          focusedColumns: buildCorrelationColumns(state.columns, focusedLine),
         };
       }
     }),
   async startup() {
     const columns = await fetchAllColumns();
-    let focusedLine = getFocusedLineFromHashParams();
-    set({ columns, focusedLine });
+    const focusedLine = getFocusedLineFromHashParams();
+    const focusedColumns = buildCorrelationColumns(columns, focusedLine);
+
+    set({ columns, focusedLine, focusedColumns });
   },
 }));
 
@@ -92,7 +103,7 @@ function InsetMap() {
         h(MapClickHandler),
         h(SectionLine, { focusedLine }),
         h(ColumnsLayer, { columns }),
-        h(SelectedColumnsLayer, { columns, focusedLine }),
+        h(SelectedColumnsLayer),
       ])
     ),
   ]);
@@ -111,6 +122,20 @@ function MapClickHandler() {
   return null;
 }
 
+function buildCorrelationColumns(
+  columns: ColumnGeoJSONRecord[],
+  line: LineString
+): FocusedColumnGeoJSONRecord[] {
+  let features = [];
+  if (columns == null && line == null) {
+    return [];
+  }
+  return orderColumnsByDistance(
+    computeIntersectingColumns(columns, line),
+    line
+  );
+}
+
 function computeIntersectingColumns(
   columns: ColumnGeoJSONRecord[],
   line: LineString
@@ -123,13 +148,12 @@ function computeIntersectingColumns(
 }
 
 function SelectedColumnsLayer({ columns, focusedLine }) {
+  const focusedColumns = useCorrelationDiagramStore(
+    (state) => state.focusedColumns
+  );
   useMapStyleOperator(
     (map) => {
-      let features = [];
-      if (columns != null && focusedLine != null) {
-        features = computeIntersectingColumns(columns, focusedLine);
-        features = orderColumnsByDistance(features, focusedLine);
-      }
+      let features = focusedColumns;
 
       const data: FeatureCollection = {
         type: "FeatureCollection",
@@ -153,15 +177,23 @@ function SelectedColumnsLayer({ columns, focusedLine }) {
         features: [columnCentroidLine],
       });
     },
-    [columns, focusedLine]
+    [focusedColumns]
   );
   return null;
+}
+
+interface FocusedColumnGeoJSONRecord extends ColumnGeoJSONRecord {
+  properties: {
+    centroid: Point;
+    nearestPointOnLine: Point;
+    distanceAlongLine: number;
+  } & ColumnGeoJSONRecord["properties"];
 }
 
 function orderColumnsByDistance(
   columns: ColumnGeoJSONRecord[],
   line: LineString
-): ColumnGeoJSONRecord[] {
+): FocusedColumnGeoJSONRecord[] {
   const centroids = columns.map((col) => centroid(col.geometry));
   const projectedPoints = centroids.map((point) =>
     nearestPointOnLine(line, point)
