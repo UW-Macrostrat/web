@@ -16,7 +16,7 @@ import { create } from "zustand";
 import { setGeoJSON } from "@macrostrat/mapbox-utils";
 import { ColumnGeoJSONRecord } from "~/pages/map/map-interface/app-state/handlers/columns";
 // Turf intersection
-import {lineIntersect} from "@turf/line-intersect";
+import { lineIntersect } from "@turf/line-intersect";
 
 import { buildCrossSectionLayers } from "~/_utils/map-layers";
 import { fetchAllColumns } from "~/pages/map/map-interface/app-state/handlers/fetch";
@@ -28,6 +28,7 @@ interface CorrelationState {
   startup: () => Promise<void>;
 }
 
+/** Store management with Zustand */
 const useCorrelationDiagramStore = create<CorrelationState>((set) => ({
   focusedLine: null as LineString | null,
   columns: [],
@@ -73,15 +74,33 @@ export function Page() {
 }
 
 function InsetMap() {
+  const focusedLine = useCorrelationDiagramStore((state) => state.focusedLine);
+  const columns = useCorrelationDiagramStore((state) => state.columns);
+
   return h("div.column-selection-map", [
     h(
       MapboxMapProvider,
       h(MapView, { style: baseMapURL, accessToken: mapboxAccessToken }, [
-        h(SectionLineManager),
-        h(ColumnsLayer),
+        h(MapClickHandler),
+        h(SectionLine, { focusedLine }),
+        h(ColumnsLayer, { columns }),
+        h(SelectedColumnsLayer, { columns, focusedLine }),
       ])
     ),
   ]);
+}
+
+function MapClickHandler() {
+  const onClickMap = useCorrelationDiagramStore((state) => state.onClickMap);
+
+  useMapClickHandler(
+    (e) => {
+      onClickMap({ type: "Point", coordinates: e.lngLat.toArray() });
+    },
+    [onClickMap]
+  );
+
+  return null;
 }
 
 function computeIntersectingColumns(
@@ -95,9 +114,27 @@ function computeIntersectingColumns(
   });
 }
 
-function ColumnsLayer({ enabled = true }) {
-  const columns = useCorrelationDiagramStore((state) => state.columns);
+function SelectedColumnsLayer({ columns, focusedLine }) {
+  useMapStyleOperator(
+    (map) => {
+      let features = [];
+      if (columns != null && focusedLine != null) {
+        features = computeIntersectingColumns(columns, focusedLine);
+      }
 
+      const data: FeatureCollection = {
+        type: "FeatureCollection",
+        features,
+      };
+
+      setGeoJSON(map, "selected-columns", data);
+    },
+    [columns, focusedLine]
+  );
+  return null;
+}
+
+function ColumnsLayer({ columns, enabled = true }) {
   useMapStyleOperator(
     (map) => {
       if (columns == null) {
@@ -109,16 +146,6 @@ function ColumnsLayer({ enabled = true }) {
       };
       const sourceID = "columns";
       setGeoJSON(map, sourceID, data);
-
-      if (map.getSource("selected-columns") == null) {
-        map.addSource("selected-columns", {
-          type: "geojson",
-          data: {
-            type: "FeatureCollection",
-            features: [],
-          },
-        });
-      }
 
       const columnLayers = buildColumnLayers(sourceID);
       for (let layer of columnLayers) {
@@ -161,7 +188,7 @@ function buildColumnLayers(sourceID: string) {
       paint: {
         "fill-color": "rgba(255, 0, 0, 0.1)",
       },
-    }
+    },
   ];
 }
 
@@ -192,13 +219,6 @@ function SectionLine({ focusedLine }: { focusedLine: LineString }) {
           properties: {},
         })),
       });
-      setGeoJSON(map, "selected-columns", {
-        type: "FeatureCollection",
-        features: computeIntersectingColumns(
-          useCorrelationDiagramStore.getState().columns,
-          focusedLine
-        ),
-      });
 
       // Add layers
       const layers = buildCrossSectionLayers();
@@ -228,18 +248,4 @@ function SectionLine({ focusedLine }: { focusedLine: LineString }) {
   useMapEaseTo({ bounds, padding: 120 });
 
   return null;
-}
-
-function SectionLineManager() {
-  const focusedLine = useCorrelationDiagramStore((state) => state.focusedLine);
-  const onClickMap = useCorrelationDiagramStore((state) => state.onClickMap);
-
-  useMapClickHandler(
-    (e) => {
-      onClickMap({ type: "Point", coordinates: e.lngLat.toArray() });
-    },
-    [onClickMap]
-  );
-
-  return h(SectionLine, { focusedLine });
 }

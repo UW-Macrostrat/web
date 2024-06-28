@@ -2,7 +2,7 @@ export default {
   meta: {
     Page: {
       /* Ideally we'd make it so only the column inset map was rendered client-side,
-      but this will work for now. 
+      but this will work for now.
       */
       env: {
         client: true,
@@ -10,4 +10,5 @@ export default {
       },
     },
   },
+  title: "Correlation diagram",
 };
