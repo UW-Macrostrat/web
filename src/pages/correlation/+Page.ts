@@ -23,6 +23,8 @@ import { centroid } from "@turf/centroid";
 
 import { buildCrossSectionLayers } from "~/_utils/map-layers";
 import { fetchAllColumns } from "~/pages/map/map-interface/app-state/handlers/fetch";
+import { getHashString, setHashString } from "@macrostrat/ui-components";
+import { fmt2 } from "~/pages/map/map-interface/utils";
 
 interface CorrelationState {
   focusedLine: LineString | null;
@@ -57,9 +59,51 @@ const useCorrelationDiagramStore = create<CorrelationState>((set) => ({
     }),
   async startup() {
     const columns = await fetchAllColumns();
-    set({ columns });
+    let focusedLine = getFocusedLineFromHashParams();
+    set({ columns, focusedLine });
   },
 }));
+
+function getFocusedLineFromHashParams(): LineString | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  let hash = getHashString(window.location.hash);
+
+  if (hash?.line == null) {
+    return null;
+  }
+
+  try {
+    let coords = hash.line;
+
+    console.log("coords", coords);
+
+    if (coords.length < 2) {
+      return null;
+    }
+    if (coords.length % 2 != 0) {
+      console.error("Invalid number of coordinates in hash string");
+      return null;
+    }
+
+    coords = chunk(coords, 2);
+
+    return {
+      type: "LineString",
+      coordinates: coords.map((coord) => coord.map(Number)),
+    };
+  } catch (e) {
+    console.error("Error parsing hash string", e);
+    return null;
+  }
+}
+
+function chunk(arr, size) {
+  return Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
+    arr.slice(i * size, i * size + size)
+  );
+}
 
 export function Page() {
   const startup = useCorrelationDiagramStore((state) => state.startup);
@@ -68,12 +112,28 @@ export function Page() {
   }, []);
 
   return h(FullscreenPage, [
+    h(HashStringManager),
     h("header", [h(PageBreadcrumbs)]),
     h("div.flex.row", [
       h("div.correlation-diagram"),
       h("div.assistant", [h(InsetMap)]),
     ]),
   ]);
+}
+
+function HashStringManager() {
+  const focusedLine = useCorrelationDiagramStore((state) => state.focusedLine);
+  useEffect(() => {
+    if (focusedLine == null || focusedLine.coordinates.length < 2) {
+      return;
+    }
+    let hash = {
+      line: focusedLine.coordinates.flatMap((coord) => coord.map(fmt2)),
+    };
+    setHashString(hash);
+  }, [focusedLine]);
+
+  return null;
 }
 
 function InsetMap() {
