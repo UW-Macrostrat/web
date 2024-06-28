@@ -10,13 +10,16 @@ import { FullscreenPage } from "~/layouts";
 import h from "./main.module.sass";
 import { baseMapURL, mapboxAccessToken } from "@macrostrat-web/settings";
 import { PageBreadcrumbs } from "~/renderer";
-import { FeatureCollection, LineString, Point } from "geojson";
+import { Feature, FeatureCollection, LineString, Point } from "geojson";
 import { useEffect, useMemo } from "react";
 import { create } from "zustand";
 import { setGeoJSON } from "@macrostrat/mapbox-utils";
 import { ColumnGeoJSONRecord } from "~/pages/map/map-interface/app-state/handlers/columns";
 // Turf intersection
 import { lineIntersect } from "@turf/line-intersect";
+import { distance } from "@turf/distance";
+import { nearestPointOnLine } from "@turf/nearest-point-on-line";
+import { centroid } from "@turf/centroid";
 
 import { buildCrossSectionLayers } from "~/_utils/map-layers";
 import { fetchAllColumns } from "~/pages/map/map-interface/app-state/handlers/fetch";
@@ -120,6 +123,7 @@ function SelectedColumnsLayer({ columns, focusedLine }) {
       let features = [];
       if (columns != null && focusedLine != null) {
         features = computeIntersectingColumns(columns, focusedLine);
+        features = orderColumnsByDistance(features, focusedLine);
       }
 
       const data: FeatureCollection = {
@@ -127,11 +131,57 @@ function SelectedColumnsLayer({ columns, focusedLine }) {
         features,
       };
 
+      const columnCentroidLine: Feature = {
+        type: "Feature",
+        geometry: {
+          type: "LineString",
+          coordinates: features.map(
+            (col) => col.properties.centroid.geometry.coordinates
+          ),
+        },
+        properties: {},
+      };
+
       setGeoJSON(map, "selected-columns", data);
+      setGeoJSON(map, "selected-column-centroids", {
+        type: "FeatureCollection",
+        features: [columnCentroidLine],
+      });
     },
     [columns, focusedLine]
   );
   return null;
+}
+
+function orderColumnsByDistance(
+  columns: ColumnGeoJSONRecord[],
+  line: LineString
+): ColumnGeoJSONRecord[] {
+  const centroids = columns.map((col) => centroid(col.geometry));
+  const projectedPoints = centroids.map((point) =>
+    nearestPointOnLine(line, point)
+  );
+  const distances = projectedPoints.map((point) =>
+    distance(point.geometry.coordinates, line.coordinates[0])
+  );
+
+  let newColumns = columns.map((col, i) => {
+    return {
+      ...col,
+      properties: {
+        ...col.properties,
+        centroid: centroids[i],
+        nearestPointOnLine: projectedPoints[i],
+        distanceAlongLine: distances[i],
+      },
+    };
+  });
+
+  return sorted(newColumns, (d) => d.properties.distanceAlongLine);
+}
+
+function sorted(data, accessor: (d) => number) {
+  return data.sort((a, b) => accessor(a) - accessor(b));
 }
 
 function ColumnsLayer({ columns, enabled = true }) {
@@ -165,6 +215,33 @@ function ColumnsLayer({ columns, enabled = true }) {
 function buildColumnLayers(sourceID: string) {
   return [
     {
+      id: "selected-columns-fill",
+      type: "fill",
+      source: "selected-columns",
+      paint: {
+        "fill-color": "rgba(255, 0, 0, 0.1)",
+      },
+    },
+    {
+      id: "selected-column-centroids-line",
+      type: "line",
+      source: "selected-column-centroids",
+      paint: {
+        "line-color": "rgba(255, 0, 0, 0.8)",
+        "line-width": 2,
+        "line-dasharray": [2, 2],
+      },
+    },
+    {
+      id: "selected-column-centroids-points",
+      type: "circle",
+      source: "selected-column-centroids",
+      paint: {
+        "circle-radius": 4,
+        "circle-color": "rgba(255, 0, 0, 0.8)",
+      },
+    },
+    {
       id: "columns-fill",
       type: "fill",
       source: sourceID,
@@ -179,14 +256,6 @@ function buildColumnLayers(sourceID: string) {
       paint: {
         "line-color": "rgba(0, 0, 0, 0.5)",
         "line-width": 1,
-      },
-    },
-    {
-      id: "selected-columns-fill",
-      type: "fill",
-      source: "selected-columns",
-      paint: {
-        "fill-color": "rgba(255, 0, 0, 0.1)",
       },
     },
   ];

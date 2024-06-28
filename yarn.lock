@@ -6594,9 +6594,10 @@ __metadata:
     "@turf/bbox": "npm:^6.5.0"
     "@turf/boolean-contains": "npm:^6.5.0"
     "@turf/buffer": "npm:^6.5.0"
-    "@turf/centroid": "npm:^6.5.0"
+    "@turf/centroid": "npm:^7.0.0"
+    "@turf/distance": "npm:^7.0.0"
     "@turf/line-intersect": "npm:^7.0.0"
-    "@turf/line-slice": "npm:^7.0.0"
+    "@turf/nearest-point-on-line": "npm:^7.0.0"
     "@types/compression": "npm:^1.7.2"
     "@types/express": "npm:^4.17.17"
     "@types/geojson": "npm:^7946.0.10"
@@ -10574,6 +10575,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@turf/centroid@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "@turf/centroid@npm:7.0.0"
+  dependencies:
+    "@turf/helpers": "npm:^7.0.0"
+    "@turf/meta": "npm:^7.0.0"
+    tslib: "npm:^2.6.2"
+  checksum: 10/2375762376dc6378616513799f969daa2deaf596281e1dc14c65cd0daf7e7a415dc35eb9d4786f10741e8dcb02b0cd1cf83c728a406a32c256246e66eb4d532a
+  languageName: node
+  linkType: hard
+
 "@turf/clone@npm:^6.5.0":
   version: 6.5.0
   resolution: "@turf/clone@npm:6.5.0"
@@ -10659,17 +10671,6 @@ __metadata:
     sweepline-intersections: "npm:^1.5.0"
     tslib: "npm:^2.6.2"
   checksum: 10/fda3f75f79ba59da1bc974ead94d7a657fce34c2d22d48a1d1685359bccc092e00913b1eb203f95b1a3e51dfc71694b8b0aba0b3b5d24c568dd8ff5bab9dec1c
-  languageName: node
-  linkType: hard
-
-"@turf/line-slice@npm:^7.0.0":
-  version: 7.0.0
-  resolution: "@turf/line-slice@npm:7.0.0"
-  dependencies:
-    "@turf/helpers": "npm:^7.0.0"
-    "@turf/invariant": "npm:^7.0.0"
-    "@turf/nearest-point-on-line": "npm:^7.0.0"
-  checksum: 10/0850da91382e1aa7c24a04ef06de0fae78a7be14329373076f0b5073316e3ae889bdaf9b9bd2216630b9f23660fa0f0abadf0c51fab11e031c6f091769838d2d
   languageName: node
   linkType: hard
 
