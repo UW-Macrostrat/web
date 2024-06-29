@@ -27,6 +27,7 @@ import { getFocusedLineFromHashParams, HashStringManager } from "./hash-string";
 import { Button } from "@blueprintjs/core";
 import classNames from "classnames";
 import { ColumnIdentifier, CorrelationChart } from "./correlation-chart";
+import { DarkModeProvider } from "@macrostrat/ui-components";
 
 interface CorrelationState {
   focusedLine: LineString | null;
@@ -91,14 +92,17 @@ export function Page() {
   const focusedLine = useCorrelationDiagramStore((state) => state.focusedLine);
 
   return h(FullscreenPage, [
-    h(HashStringManager, { focusedLine }),
-    h("div.main-panel", [
-      h("header", [h(PageBreadcrumbs)]),
-      h("div.flex.row.diagram-container", [
-        h(CorrelationDiagramWrapper),
-        h("div.assistant", [h(InsetMap)]),
-      ]),
-    ]),
+    h(
+      DarkModeProvider,
+      h(HashStringManager, { focusedLine }),
+      h("div.main-panel", [
+        h("header", [h(PageBreadcrumbs)]),
+        h("div.diagram-container", [
+          h(CorrelationDiagramWrapper),
+          h("div.assistant", [h(InsetMap)]),
+        ]),
+      ])
+    ),
   ]);
 }
 

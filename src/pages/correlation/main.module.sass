@@ -3,6 +3,8 @@ $map-size-inset: 12em
 
 .column-selection-map
   box-shadow: 0 0 0.3em 0 rgba(0, 0, 0, 0.5)
+  border-radius: 6px
+  overflow: hidden
   height: $map-size-inset
   width: $map-size-inset
   position: absolute
@@ -16,6 +18,7 @@ $map-size-inset: 12em
     position: relative
     top: 0
     right: 0
+    margin-left: 1em
 
 .correlation-diagram
   flex: 1
@@ -23,10 +26,11 @@ $map-size-inset: 12em
   min-height: 0
   height: 100%
   padding: 1em
-  margin: 0 -2em -2em
   background-color: var(--panel-secondary-background-color)
   box-shadow: 0 0 0.3em 0 var(--card-shadow-color)
   border-radius: 6px
+  --column-background-color: var(--background-color)
+  --column-stroke-color: var(--text-color)
 
 
 .map-expanded-button
@@ -45,7 +49,8 @@ $map-size-inset: 12em
   flex: 1
   position: relative
   min-height: 0
-  align-items: center
+  display: flex
+  flex-direction: row
 
 
 .correlation-chart-inner
