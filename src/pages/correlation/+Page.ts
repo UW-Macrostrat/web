@@ -374,6 +374,8 @@ function SectionLine({ focusedLine }: { focusedLine: LineString }) {
         ],
       };
 
+      console.log(data);
+
       setGeoJSON(map, "crossSectionLine", data);
       setGeoJSON(map, "crossSectionEndpoints", {
         type: "FeatureCollection",

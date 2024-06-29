@@ -1,9 +1,10 @@
 /** Correlation chart */
-import { Column, preprocessUnits } from "@macrostrat/column-views";
+import { preprocessUnits } from "@macrostrat/column-views";
 import { runColumnQuery } from "~/pages/map/map-interface/app-state/handlers/fetch";
 import { useAsyncEffect } from "use-async-effect";
 import { useState } from "react";
 import { PatternProvider } from "~/_providers";
+import { Column } from "./column";
 
 import h from "./main.module.sass";
 
