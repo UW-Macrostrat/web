@@ -8,6 +8,7 @@ import { Column, TimescaleColumn } from "./column";
 import { UnitLong } from "@macrostrat/api-types";
 
 import h from "./main.module.sass";
+import { first } from "underscore";
 
 export interface ColumnIdentifier {
   col_id: number;
@@ -31,7 +32,7 @@ export function CorrelationChart({ columns }: { columns: ColumnIdentifier[] }) {
     );
   }, [columns]);
 
-  if (chartData == null) {
+  if (chartData == null || chartData.units.length == 0) {
     return null;
   }
 
@@ -52,16 +53,12 @@ export function CorrelationChart({ columns }: { columns: ColumnIdentifier[] }) {
   return h(
     PatternProvider,
     h("div.correlation-chart-inner", [
-      h(
-        firstColumn.map((units, i) =>
-          h(TimescaleColumnExt, {
-            units: units,
-            range,
-            pixelScale,
-            key: i,
-          })
-        )
-      ),
+      h(TimescaleColumnExt, {
+        units: firstColumn[0],
+        range,
+        pixelScale,
+        key: "timescale",
+      }),
       h(
         chartData.units.map((units, i) =>
           h(SingleColumn, {
