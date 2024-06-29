@@ -54,7 +54,7 @@ export function CorrelationChart({ columns }: { columns: ColumnIdentifier[] }) {
     h("div.correlation-chart-inner", [
       h(
         firstColumn.map((units, i) =>
-          h(SingleColumn, {
+          h(TimescaleColumnExt, {
             units: units,
             range,
             pixelScale,
@@ -74,6 +74,29 @@ export function CorrelationChart({ columns }: { columns: ColumnIdentifier[] }) {
       ),
     ])
   );
+}
+
+function TimescaleColumnExt({
+  units,
+  range,
+  pixelScale,
+}: {
+  column: ColumnIdentifier;
+  units: UnitLong[];
+  range: [number, number];
+  pixelScale: number;
+}) {
+  return h("div.column", [
+    h(TimescaleColumn, {
+      data: units,
+      showLabels: false,
+      unconformityLabels: true,
+      width: 100,
+      columnWidth: 100,
+      range,
+      pixelScale,
+    }),
+  ]);
 }
 
 function SingleColumn({
