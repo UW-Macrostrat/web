@@ -184,6 +184,8 @@ function Column(
     return groups;
   }, [data]);
 
+  sectionGroups = [[0, data]];
+
   const className = classNames(baseClassName, {
     "dark-mode": darkMode?.isEnabled ?? false,
   });

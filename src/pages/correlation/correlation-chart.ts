@@ -2,9 +2,10 @@
 import { preprocessUnits } from "@macrostrat/column-views";
 import { runColumnQuery } from "~/pages/map/map-interface/app-state/handlers/fetch";
 import { useAsyncEffect } from "use-async-effect";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PatternProvider } from "~/_providers";
 import { Column } from "./column";
+import { UnitLong } from "@macrostrat/api-types";
 
 import h from "./main.module.sass";
 
@@ -15,30 +16,37 @@ export interface ColumnIdentifier {
 }
 
 export function CorrelationChart({ columns }: { columns: ColumnIdentifier[] }) {
-  return h(
-    PatternProvider,
-    h(
-      "div.correlation-chart-inner",
-      columns.map((col) => h(SingleColumn, { column: col, key: col.col_id }))
-    )
-  );
-}
-
-function SingleColumn({ column }: { column: ColumnIdentifier }) {
   const [unitData, setUnitData] = useState(null);
 
-  useAsyncEffect(async () => {
-    const data = await fetchUnitsForColumn(column.col_id);
-    setUnitData(data);
-  }, [column.col_id]);
+  useEffect(() => {
+    const promises = columns.map((col) => fetchUnitsForColumn(col.col_id));
+    Promise.all(promises).then((data) => setUnitData(data));
+  }, [columns]);
 
   if (unitData == null) {
     return null;
   }
 
+  console.log(columns, unitData);
+
+  return h(
+    PatternProvider,
+    h(
+      "div.correlation-chart-inner",
+      unitData.map((units, i) => h(SingleColumn, { units: units, key: i }))
+    )
+  );
+}
+
+function SingleColumn({
+  units,
+}: {
+  column: ColumnIdentifier;
+  units: UnitLong[];
+}) {
   return h("div.column", [
     h(Column, {
-      data: unitData,
+      data: units,
       showLabels: false,
       targetUnitHeight: 10,
       unconformityLabels: true,
