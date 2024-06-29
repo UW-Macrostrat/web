@@ -4,7 +4,7 @@ import { runColumnQuery } from "~/pages/map/map-interface/app-state/handlers/fet
 import { useAsyncEffect } from "use-async-effect";
 import { useState, useEffect } from "react";
 import { PatternProvider } from "~/_providers";
-import { Column } from "./column";
+import { Column, TimescaleColumn } from "./column";
 import { UnitLong } from "@macrostrat/api-types";
 
 import h from "./main.module.sass";
@@ -15,43 +15,86 @@ export interface ColumnIdentifier {
   project_id: number;
 }
 
+export interface CorrelationChartData {
+  t_age: number;
+  b_age: number;
+  units: UnitLong[][]; // Units for each column
+}
+
 export function CorrelationChart({ columns }: { columns: ColumnIdentifier[] }) {
-  const [unitData, setUnitData] = useState(null);
+  const [chartData, setChartData] = useState<CorrelationChartData | null>(null);
 
   useEffect(() => {
     const promises = columns.map((col) => fetchUnitsForColumn(col.col_id));
-    Promise.all(promises).then((data) => setUnitData(data));
+    Promise.all(promises).then((data) =>
+      setChartData(preprocessChartData(data))
+    );
   }, [columns]);
 
-  if (unitData == null) {
+  if (chartData == null) {
     return null;
   }
 
-  console.log(columns, unitData);
+  const targetUnitHeight = 20;
+
+  const { t_age, b_age } = chartData;
+  const range = [b_age, t_age];
+
+  const dAge = b_age - t_age;
+  const maxNUnits = Math.max(...chartData.units.map((d) => d.length));
+  const targetHeight = targetUnitHeight * maxNUnits;
+  const pixelScale = Math.ceil(targetHeight / dAge);
+
+  const firstColumn = chartData.units.slice(0, 1);
+
+  console.log(firstColumn);
 
   return h(
     PatternProvider,
-    h(
-      "div.correlation-chart-inner",
-      unitData.map((units, i) => h(SingleColumn, { units: units, key: i }))
-    )
+    h("div.correlation-chart-inner", [
+      h(
+        firstColumn.map((units, i) =>
+          h(SingleColumn, {
+            units: units,
+            range,
+            pixelScale,
+            key: i,
+          })
+        )
+      ),
+      h(
+        chartData.units.map((units, i) =>
+          h(SingleColumn, {
+            units: units,
+            range,
+            pixelScale,
+            key: i,
+          })
+        )
+      ),
+    ])
   );
 }
 
 function SingleColumn({
   units,
+  range,
+  pixelScale,
 }: {
   column: ColumnIdentifier;
   units: UnitLong[];
+  range: [number, number];
+  pixelScale: number;
 }) {
   return h("div.column", [
     h(Column, {
       data: units,
       showLabels: false,
-      targetUnitHeight: 10,
       unconformityLabels: true,
       width: 100,
       columnWidth: 100,
+      range,
+      pixelScale,
     }),
   ]);
 }
@@ -59,4 +102,15 @@ function SingleColumn({
 async function fetchUnitsForColumn(col_id: number) {
   const res = await runColumnQuery({ col_id }, null);
   return preprocessUnits(res);
+}
+
+function preprocessChartData(units: UnitLong[][]): CorrelationChartData {
+  const [b_age, t_age] = findEncompassingScaleBounds(units.flat());
+  return { units, b_age, t_age };
+}
+
+function findEncompassingScaleBounds(units: UnitLong[]) {
+  const b_age = Math.max(...units.map((d) => d.b_age));
+  const t_age = Math.min(...units.map((d) => d.t_age));
+  return [b_age, t_age];
 }

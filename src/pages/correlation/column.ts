@@ -11,6 +11,7 @@ import { group } from "d3-array";
 import { useContext, useMemo } from "react";
 import { AgeAxis } from "@macrostrat/column-views";
 import styles from "./column.module.scss";
+import { useState, useEffect } from "react";
 import {
   CompositeUnitsColumn,
   TrackedLabeledUnit,
@@ -54,8 +55,8 @@ const Section = (props: IColumnProps) => {
     unitComponentProps,
   } = props;
 
-  const b_age = data[data.length - 1].b_age;
-  const t_age = data[0].t_age;
+  const b_age = data[data.length - 1]?.b_age ?? 4200;
+  const t_age = data[0]?.t_age;
 
   const range: [number, number] = useMemo(() => {
     if (_range == null) {
@@ -177,14 +178,14 @@ function Column(
 
   const darkMode = useDarkMode();
 
-  let sectionGroups = useMemo(() => {
-    let groups = Array.from(group(data, (d) => d.section_id));
-    console.log(groups);
-    groups.sort((a, b) => a[1][0].t_age - b[1][0].t_age);
-    return groups;
-  }, [data]);
+  // let sectionGroups = useMemo(() => {
+  //   let groups = Array.from(group(data, (d) => d.section_id));
+  //   console.log(groups);
+  //   groups.sort((a, b) => a[1][0].t_age - b[1][0].t_age);
+  //   return groups;
+  // }, [data]);
 
-  sectionGroups = [[0, data]];
+  const sectionGroups = [[0, data]];
 
   const className = classNames(baseClassName, {
     "dark-mode": darkMode?.isEnabled ?? false,
