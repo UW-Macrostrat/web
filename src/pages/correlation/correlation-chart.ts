@@ -36,15 +36,13 @@ function SingleColumn({ column }: { column: ColumnIdentifier }) {
   }
 
   return h("div.column", [
-    h("h2", column.col_name),
-    h("p", `ID: ${column.col_id}`),
     h(Column, {
       data: unitData,
       showLabels: false,
-      targetUnitHeight: 25,
+      targetUnitHeight: 10,
       unconformityLabels: true,
-      width: 280,
-      columnWidth: 180,
+      width: 100,
+      columnWidth: 100,
     }),
   ]);
 }
