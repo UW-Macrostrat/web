@@ -38,10 +38,10 @@ interface IColumnProps {
   targetUnitHeight?: number;
 }
 
-const timescaleLevels = [2, 5];
+const timescaleLevels: [number, number] = [3, 4];
 
 const Section = (props: IColumnProps) => {
-  // Section with "squishy" time scale
+  // Section with "squishy" timescale
   const {
     data,
     range: _range,
@@ -57,7 +57,7 @@ const Section = (props: IColumnProps) => {
   const b_age = data[data.length - 1].b_age;
   const t_age = data[0].t_age;
 
-  const range = useMemo(() => {
+  const range: [number, number] = useMemo(() => {
     if (_range == null) {
       return [b_age, t_age];
     }
@@ -179,7 +179,8 @@ function Column(
 
   let sectionGroups = useMemo(() => {
     let groups = Array.from(group(data, (d) => d.section_id));
-    groups.sort((a, b) => a.t_age - b.t_age);
+    console.log(groups);
+    groups.sort((a, b) => a[1][0].t_age - b[1][0].t_age);
     return groups;
   }, [data]);
 
