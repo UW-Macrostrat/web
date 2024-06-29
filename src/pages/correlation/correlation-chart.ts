@@ -1,5 +1,11 @@
 /** Correlation chart */
-import h from "@macrostrat/hyper";
+import { Column, preprocessUnits } from "@macrostrat/column-views";
+import { runColumnQuery } from "~/pages/map/map-interface/app-state/handlers/fetch";
+import { useAsyncEffect } from "use-async-effect";
+import { useState } from "react";
+import { PatternProvider } from "~/_providers";
+
+import h from "./main.module.sass";
 
 export interface ColumnIdentifier {
   col_id: number;
@@ -9,9 +15,41 @@ export interface ColumnIdentifier {
 
 export function CorrelationChart({ columns }: { columns: ColumnIdentifier[] }) {
   return h(
-    "ul",
-    columns.map((col) =>
-      h("li", h([h("code", col.col_id), " ", h("span.col-name", col.col_name)]))
+    PatternProvider,
+    h(
+      "div.correlation-chart-inner",
+      columns.map((col) => h(SingleColumn, { column: col, key: col.col_id }))
     )
   );
+}
+
+function SingleColumn({ column }: { column: ColumnIdentifier }) {
+  const [unitData, setUnitData] = useState(null);
+
+  useAsyncEffect(async () => {
+    const data = await fetchUnitsForColumn(column.col_id);
+    setUnitData(data);
+  }, [column.col_id]);
+
+  if (unitData == null) {
+    return null;
+  }
+
+  return h("div.column", [
+    h("h2", column.col_name),
+    h("p", `ID: ${column.col_id}`),
+    h(Column, {
+      data: unitData,
+      showLabels: false,
+      targetUnitHeight: 25,
+      unconformityLabels: true,
+      width: 280,
+      columnWidth: 180,
+    }),
+  ]);
+}
+
+async function fetchUnitsForColumn(col_id: number) {
+  const res = await runColumnQuery({ col_id }, null);
+  return preprocessUnits(res);
 }

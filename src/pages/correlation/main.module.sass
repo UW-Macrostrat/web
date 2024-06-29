@@ -6,17 +6,28 @@ $map-size-inset: 12em
   height: $map-size-inset
   width: $map-size-inset
   position: absolute
-  top: 0
-  right: 0
+  top: 1em
+  right: 1em
   :global(.main-view)
     height: 100%
   &.expanded
     height: $map-size
     width: $map-size
     position: relative
+    top: 0
+    right: 0
 
 .correlation-diagram
-  flex-grow: 1
+  flex: 1
+  overflow: scroll
+  min-height: 0
+  height: 100%
+  padding: 1em
+  margin: 0 -2em -2em
+  background-color: var(--panel-secondary-background-color)
+  box-shadow: 0 0 0.3em 0 var(--card-shadow-color)
+  border-radius: 6px
+
 
 .map-expanded-button
   position: absolute
@@ -31,5 +42,14 @@ $map-size-inset: 12em
   flex-direction: column
 
 .diagram-container
-  flex-grow: 1
+  flex: 1
   position: relative
+  min-height: 0
+  align-items: center
+
+
+.correlation-chart-inner
+  display: flex
+  flex-direction: row
+
+

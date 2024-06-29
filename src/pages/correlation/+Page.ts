@@ -190,6 +190,10 @@ function computeIntersectingColumns(
   columns: ColumnGeoJSONRecord[],
   line: LineString
 ): ColumnGeoJSONRecord[] {
+  if (columns == null || line == null) {
+    return [];
+  }
+
   return columns.filter((col) => {
     const poly = col.geometry;
     const intersection = lineIntersect(line, poly);
