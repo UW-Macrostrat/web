@@ -25,8 +25,8 @@
   stroke-width: 1px;
 }
 .column-container :global g.lithology-column use.frame {
-  stroke: var(--stroke-color);
-  stroke-width: 1.5px !important;
+  ///stroke: var(--stroke-color);
+  //stroke-width: 1.5px !important;
   pointer-events: none;
 }
 .column-container :global .unit-label {
@@ -77,10 +77,10 @@
 .column-container :global rect.selection-overlay {
   fill: rgba(255,0,0,0.5);
 }
-.column-container :global div.timescale {
-  width: calc(3em + 2px);
-  --timescale-level-size: 1.5em;
-}
+//.column-container :global div.timescale {
+//  width: calc(3em + 2px);
+//  --timescale-level-size: 1.5em;
+//}
 .unconformity {
   height: 0px;
   font-size: 10px;
@@ -101,4 +101,9 @@
 }
 .column-container.dark-mode :global g.inner pattern image {
   filter: invert(80%);
+}
+
+.column-container :global div.timescale {
+  width: calc(4.5em + 4px);
+  --timescale-level-size: 1.5em;
 }

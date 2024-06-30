@@ -48,13 +48,10 @@ export function CorrelationChart({ columns }: { columns: ColumnIdentifier[] }) {
 
   const firstColumn = chartData.units.slice(0, 1);
 
-  console.log(firstColumn);
-
   return h(
     PatternProvider,
     h("div.correlation-chart-inner", [
       h(TimescaleColumnExt, {
-        units: firstColumn[0],
         range,
         pixelScale,
         key: "timescale",
