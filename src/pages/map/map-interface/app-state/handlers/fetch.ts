@@ -1,8 +1,8 @@
 import { SETTINGS, apiV2Prefix } from "@macrostrat-web/settings";
 import axios from "axios";
 import { joinURL } from "~/pages/map/map-interface/utils";
-import { ColumnGeoJSONRecord } from "../reducers";
-import { UPDATE_FILTERED_COLUMNS } from "../reducers/filtered-columns";
+import { ColumnGeoJSONRecord } from "./columns";
+import { UPDATE_COLUMN_FILTERS } from "../reducers/core/types";
 import { XDDSnippet } from "~/types";
 
 export const base = apiV2Prefix;
@@ -54,7 +54,7 @@ function buildColumnQueryParams(filters) {
 
 export async function fetchFilteredColumns(
   providedFilters
-): Promise<UPDATE_FILTERED_COLUMNS | void> {
+): Promise<UPDATE_COLUMN_FILTERS | void> {
   let queryString = buildColumnQueryParams(providedFilters);
   let url = `${base}/columns`;
   if (Object.keys(queryString).length === 0) {
