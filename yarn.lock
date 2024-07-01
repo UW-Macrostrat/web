@@ -6667,6 +6667,8 @@ __metadata:
     vite: "npm:^5.2.11"
     vite-plugin-cesium: "npm:^1.2.22"
     vite-plugin-inspect: "npm:^0.8.4"
+    vite-plugin-rewrite-all: "npm:^1.0.1"
+    vitest: "npm:^1.6.0"
     zustand: "npm:^4.5.1"
   languageName: unknown
   linkType: soft
@@ -15350,6 +15352,13 @@ __metadata:
     write-file-atomic: "npm:^2.0.0"
     xdg-basedir: "npm:^3.0.0"
   checksum: 10/948b50af436f72723b464440f5cfe7b5bc34729bd0709892d71e09517f179773f439a185d0b7bec7acbb183e2b53df8f02176e5be26c7f15382d073740ffad67
+  languageName: node
+  linkType: hard
+
+"connect-history-api-fallback@npm:^1.6.0":
+  version: 1.6.0
+  resolution: "connect-history-api-fallback@npm:1.6.0"
+  checksum: 10/59f013870e987f2e921218b88ad99e6b469a058ee7dd35561a360968fd4260f236b5523b7387ddec8991f9f9fbddda098f830ddc701f12c1bfb1f49d5f4b13c1
   languageName: node
   linkType: hard
 
@@ -35091,6 +35100,17 @@ __metadata:
     "@nuxt/kit":
       optional: true
   checksum: 10/7b8997bef0f39ba4a726b47c546aeb1ecd16d5f039e6ca5d5a1b24963197ce894aee6024b456c158d22c0cf37780e38b69e164d4cc5bc6e0d6e2442c809fb9a0
+  languageName: node
+  linkType: hard
+
+"vite-plugin-rewrite-all@npm:^1.0.1":
+  version: 1.0.2
+  resolution: "vite-plugin-rewrite-all@npm:1.0.2"
+  dependencies:
+    connect-history-api-fallback: "npm:^1.6.0"
+  peerDependencies:
+    vite: ^2.0.0 || ^3.0.0 || ^4.0.0
+  checksum: 10/aa3f27309da1c1c84ff6f8de1838d7d1bf5089823ff5393873cf63aef3739eb3c291a3df28172af1945d5f86e9d530213aea08fce813282ab9ac47babcc680d2
   languageName: node
   linkType: hard
 
