@@ -1,47 +1,92 @@
 import { LineString } from "geojson";
 import { getHashString, setHashString } from "@macrostrat/ui-components";
-import { chunk } from "underscore";
-import { useEffect } from "react";
-import { fmt2 } from "~/pages/map/map-interface/utils";
+import type { CorrelationState } from "./state";
 
-export function getFocusedLineFromHashParams(): LineString | null {
+interface CorrelationHashParams {
+  section?: LineString | null;
+  unit?: number;
+}
+
+export function getCorrelationHashParams(): CorrelationHashParams {
   if (typeof window === "undefined") {
     return null;
   }
-  let hash = getHashString(window.location.hash);
 
-  if (hash?.line == null) {
+  const hash = new URLSearchParams(window.location.hash.slice(1));
+  const _section = hash.get("section");
+  const _unit = hash.get("unit");
+
+  let section = parseSectionFromHash(_section);
+  let unit: number = null;
+
+  if (_unit != null) {
+    unit = parseNumber(_unit);
+  }
+
+  return {
+    section,
+    unit,
+  };
+}
+
+function parseSectionFromHash(section: any): LineString | null {
+  /* Section should be specified as space-separated coordinates */
+  if (section == null || typeof section !== "string") {
     return null;
   }
 
+  console.log(section);
+
   try {
-    let coords = hash.line;
-    if (!Array.isArray(coords)) {
-      console.error("Invalid line coordinates in hash string");
-      return null;
-    }
-
-    if (coords.length < 2) {
-      return null;
-    }
-    if (coords.length % 2 != 0) {
-      console.error("Invalid number of coordinates in hash string");
-      return null;
-    }
-
+    let coords = section.split(" ").map(parseCoordinates);
     return {
       type: "LineString",
-      coordinates: chunk(coords.map(Number), 2),
+      coordinates: coords,
     };
   } catch (e) {
-    console.error("Error parsing hash string", e);
+    console.warn(e);
     return null;
   }
 }
 
-export function setHashStringForLine(focusedLine: LineString) {
+function parseCoordinates(s: string): [number, number] {
+  let [x, y] = s.split(",").map(parseNumber);
+  if (x == null || y == null || isNaN(x) || isNaN(y)) {
+    throw new Error("Invalid coordinate string");
+  }
+  if (x > 180 || x < -180 || y > 90 || y < -90) {
+    throw new Error("Invalid coordinate value");
+  }
+  return [x, y];
+}
+
+function parseNumber(s: string): number {
+  let s1 = s;
+  // For some reason, we sometimes get en-dashes in the hash string
+  if (s1[0] == "−") {
+    s1 = "-" + s1.slice(1);
+  }
+  return Number(s1);
+}
+
+export function setHashStringForCorrelation(state: CorrelationHashParams) {
+  const { section, unit } = state;
+  if (section == null) {
+    return;
+  }
+  if (section.coordinates.length < 2) {
+    return;
+  }
+  let _unit = unit;
+  if (unit == null) {
+    _unit = undefined;
+  }
+
   let hash = {
-    line: focusedLine.coordinates.flatMap((coord) => coord.map(fmt2)),
+    section: section.coordinates
+      .map((coord) => coord.map((d) => d.toFixed(2)).join(","))
+      .join(" "),
+    unit: _unit,
   };
   setHashString(hash);
 }

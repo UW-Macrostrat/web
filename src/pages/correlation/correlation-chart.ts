@@ -1,13 +1,15 @@
 /** Correlation chart */
-import { preprocessUnits } from "@macrostrat/column-views";
+import {
+  preprocessUnits,
+  useUnitSelectionDispatch,
+} from "@macrostrat/column-views";
 import { runColumnQuery } from "~/pages/map/map-interface/app-state/handlers/fetch";
-import { useState, useEffect } from "react";
-import { PatternProvider } from "~/_providers";
 import { Column, TimescaleColumn } from "./column";
 import { UnitLong } from "@macrostrat/api-types";
 import { GapBoundPackage, SectionRenderData, AgeComparable } from "./types";
 
 import h from "./main.module.sass";
+import { useCorrelationDiagramStore } from "~/pages/correlation/state";
 
 export interface ColumnIdentifier {
   col_id: number;
@@ -21,45 +23,52 @@ export interface CorrelationChartData {
   columnData: SectionRenderData[][]; // Units for each column
 }
 
-export function CorrelationChart({ columns }: { columns: ColumnIdentifier[] }) {
-  const [chartData, setChartData] = useState<CorrelationChartData | null>(null);
+export async function buildCorrelationChartData(
+  columns: ColumnIdentifier[],
+  ageMode: AgeScaleMode = AgeScaleMode.Broken
+): Promise<CorrelationChartData> {
+  const promises = columns.map((col) => fetchUnitsForColumn(col.col_id));
+  return Promise.all(promises).then((data) => buildColumnData(data, ageMode));
+}
 
-  useEffect(() => {
-    const promises = columns.map((col) => fetchUnitsForColumn(col.col_id));
-    Promise.all(promises).then((data) =>
-      setChartData(buildColumnData(data, AgeScaleMode.Broken))
-    );
-  }, [columns]);
+export function CorrelationChart({ data }: { data: CorrelationChartData }) {
+  const chartData = data;
 
   if (chartData == null || chartData.columnData.length == 0) {
     return null;
   }
 
-  console.log(chartData);
-
-  const targetUnitHeight = 20;
-
-  const { t_age, b_age } = chartData;
-  const range = [b_age, t_age];
-
   const firstColumn = chartData.columnData[0];
 
+  return h(ChartArea, [
+    h(TimescaleColumnExt, {
+      key: "timescale",
+      packages: firstColumn,
+    }),
+    h(
+      chartData.columnData.map((packages, i) =>
+        h(SingleColumn, {
+          packages,
+          key: i,
+        })
+      )
+    ),
+  ]);
+}
+
+function ChartArea({ children }) {
+  const setSelectedUnit = useCorrelationDiagramStore(
+    (state) => state.setSelectedUnit
+  );
+
   return h(
-    PatternProvider,
-    h("div.correlation-chart-inner", [
-      h(TimescaleColumnExt, {
-        key: "timescale",
-        packages: firstColumn,
-      }),
-      h(
-        chartData.columnData.map((packages, i) =>
-          h(SingleColumn, {
-            packages,
-            key: i,
-          })
-        )
-      ),
-    ])
+    "div.correlation-chart-inner",
+    {
+      onClick() {
+        setSelectedUnit(null);
+      },
+    },
+    children
   );
 }
 
@@ -104,14 +113,7 @@ async function fetchUnitsForColumn(col_id: number): Promise<ColumnData> {
 
 const targetUnitHeight = 20;
 
-function preprocessChartData(
-  columnData: SectionRenderData[][]
-): CorrelationChartData {
-  const [b_age, t_age] = findEncompassingScaleBounds(columnData.flat());
-  return { columnData, b_age, t_age };
-}
-
-enum AgeScaleMode {
+export enum AgeScaleMode {
   Continuous = "continuous",
   Broken = "broken",
 }
@@ -153,29 +155,25 @@ function buildColumnData(
 
   // Get the best pixel scale for each gap-bound package
   const pixelScales = pkgs.map(findBestPixelScale);
-  console.log(pixelScales);
 
-  const columnData = columns.map((d, i) => {
-    return pkgs.map((pkg): SectionRenderData => {
+  const columnData = columns.map((d) => {
+    return pkgs.map((pkg, i): SectionRenderData => {
       const { t_age, b_age } = pkg;
+      let units = pkg.unitIndex.get(d.columnID) ?? [];
+
+      units.sort((a, b) => a.b_age - b.b_age);
+
       return {
         t_age,
         b_age,
         columnID: d.columnID,
         bestPixelScale: pixelScales[i],
-        units: pkg.unitIndex.get(d.columnID) ?? [],
+        units,
       };
     });
   });
 
   return { columnData, b_age, t_age };
-
-  // const packages = findGapBoundPackagesSharedByMultipleColumns(units);
-  // console.log(packages);
-  // const columns = units.map((d, i) =>
-  //   recoverGapBoundPackagesForColumn(packages, i)
-  // );
-  // return preprocessChartData(columns);
 }
 
 function findBestPixelScale(pkg: GapBoundPackage) {

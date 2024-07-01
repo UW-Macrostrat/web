@@ -5954,6 +5954,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@macrostrat-web/utility-functions@workspace:*, @macrostrat-web/utility-functions@workspace:packages/utility-functions":
+  version: 0.0.0-use.local
+  resolution: "@macrostrat-web/utility-functions@workspace:packages/utility-functions"
+  languageName: unknown
+  linkType: soft
+
 "@macrostrat/api-types@workspace:deps/web-components/packages/api-types":
   version: 0.0.0-use.local
   resolution: "@macrostrat/api-types@workspace:deps/web-components/packages/api-types"
@@ -6568,6 +6574,7 @@ __metadata:
     "@macrostrat-web/security": "workspace:*"
     "@macrostrat-web/settings": "workspace:*"
     "@macrostrat-web/sift": "workspace:*"
+    "@macrostrat-web/utility-functions": "workspace:*"
     "@macrostrat/api-utils": "workspace:*"
     "@macrostrat/api-views": "workspace:*"
     "@macrostrat/auth-components": "workspace:*"

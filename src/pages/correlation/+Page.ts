@@ -8,86 +8,27 @@ import {
 import { LngLatBounds } from "mapbox-gl";
 import { FullscreenPage } from "~/layouts";
 import h from "./main.module.sass";
+import { compose, C } from "@macrostrat/hyper";
 import { baseMapURL, mapboxAccessToken } from "@macrostrat-web/settings";
 import { PageBreadcrumbs } from "~/renderer";
 import { Feature, FeatureCollection, LineString, Point } from "geojson";
 import { useEffect, useMemo } from "react";
-import { create } from "zustand";
 import { setGeoJSON } from "@macrostrat/mapbox-utils";
-import { ColumnGeoJSONRecord } from "~/pages/map/map-interface/app-state/handlers/columns";
-// Turf intersection
-import { lineIntersect } from "@turf/line-intersect";
-import { distance } from "@turf/distance";
-import { nearestPointOnLine } from "@turf/nearest-point-on-line";
-import { centroid } from "@turf/centroid";
+import { useCorrelationDiagramStore } from "./state";
+import { PatternProvider } from "~/_providers";
 
 import { buildCrossSectionLayers } from "~/_utils/map-layers";
-import { fetchAllColumns } from "~/pages/map/map-interface/app-state/handlers/fetch";
-import {
-  getFocusedLineFromHashParams,
-  setHashStringForLine,
-} from "./hash-string";
-import { Button } from "@blueprintjs/core";
+import { Button, OverlaysProvider } from "@blueprintjs/core";
 import classNames from "classnames";
-import { ColumnIdentifier, CorrelationChart } from "./correlation-chart";
+import { CorrelationChart } from "./correlation-chart";
 import { DarkModeProvider } from "@macrostrat/ui-components";
 import { ErrorBoundary } from "@macrostrat/ui-components";
-
-interface CorrelationState {
-  focusedLine: LineString | null;
-  columns: ColumnGeoJSONRecord[];
-  focusedColumns: FocusedColumnGeoJSONRecord[];
-  mapExpanded: boolean;
-  onClickMap: (point: Point) => void;
-  toggleMapExpanded: () => void;
-  startup: () => Promise<void>;
-}
-
-/** Store management with Zustand.
- * This is a newer and somewhat more subtle approach than the Redux store
- * used in the mapping application.
- * */
-const useCorrelationDiagramStore = create<CorrelationState>((set) => ({
-  focusedLine: null as LineString | null,
-  columns: [],
-  focusedColumns: [],
-  mapExpanded: false,
-  toggleMapExpanded: () =>
-    set((state) => ({ mapExpanded: !state.mapExpanded })),
-  onClickMap: (point: Point) =>
-    set((state) => {
-      if (
-        state.focusedLine == null ||
-        state.focusedLine.coordinates.length == 2
-      ) {
-        return {
-          ...state,
-          focusedLine: { type: "LineString", coordinates: [point.coordinates] },
-          focusedColumns: [],
-        };
-      } else {
-        const focusedLine: LineString = {
-          type: "LineString",
-          coordinates: [...state.focusedLine.coordinates, point.coordinates],
-        };
-
-        setHashStringForLine(focusedLine);
-
-        return {
-          ...state,
-          focusedLine,
-          focusedColumns: buildCorrelationColumns(state.columns, focusedLine),
-        };
-      }
-    }),
-  async startup() {
-    const columns = await fetchAllColumns();
-    const focusedLine = getFocusedLineFromHashParams();
-    const focusedColumns = buildCorrelationColumns(columns, focusedLine);
-
-    set({ columns, focusedLine, focusedColumns });
-  },
-}));
+import { columnGeoJSONRecordToColumnIdentifier } from "./state";
+import {
+  UnitSelectionProvider,
+  useSelectedUnit,
+} from "@macrostrat/column-views";
+import { UnitDescription } from "~/pages/correlation/column";
 
 export function Page() {
   const startup = useCorrelationDiagramStore((state) => state.startup);
@@ -95,41 +36,78 @@ export function Page() {
     startup();
   }, []);
 
-  return h(FullscreenPage, [
+  const expanded = useCorrelationDiagramStore((state) => state.mapExpanded);
+
+  return h(PageWrapper, [
+    h("header", [h(PageBreadcrumbs)]),
     h(
-      DarkModeProvider,
-      h("div.main-panel", [
-        h("header", [h(PageBreadcrumbs)]),
-        h("div.diagram-container", [
+      "div.diagram-container",
+      { className: expanded ? "map-expanded" : "map-inset" },
+      [
+        h("div.main-area", [
           h(CorrelationDiagramWrapper),
-          h("div.assistant", [h(InsetMap)]),
+          h("div.overlay-safe-area"),
         ]),
-      ])
+        h("div.assistant", [h(InsetMap), h(UnitDetailsPanel)]),
+      ]
     ),
   ]);
 }
 
-function CorrelationDiagramWrapper() {
-  const focusedColumns = useCorrelationDiagramStore(
-    (state) => state.focusedColumns
+const PageWrapper = compose(
+  FullscreenPage,
+  DarkModeProvider,
+  PatternProvider,
+  UnitSelectionManager,
+  ({ children }) => h("div.main-panel", children)
+);
+
+function UnitSelectionManager({ children }) {
+  const selectedUnit = useCorrelationDiagramStore(
+    (state) => state.selectedUnit
+  );
+  const setSelectedUnit = useCorrelationDiagramStore(
+    (state) => state.setSelectedUnit
   );
 
-  const columns = focusedColumns.map(columnGeoJSONRecordToColumnIdentifier);
-
   return h(
-    "div.correlation-diagram",
-    h(ErrorBoundary, h(CorrelationChart, { columns }))
+    UnitSelectionProvider,
+    {
+      unit: selectedUnit,
+      setUnit: setSelectedUnit,
+    },
+    children
   );
 }
 
-function columnGeoJSONRecordToColumnIdentifier(
-  col: ColumnGeoJSONRecord
-): ColumnIdentifier {
-  return {
-    col_id: col.properties.col_id,
-    col_name: col.properties.col_name,
-    project_id: col.properties.project_id,
-  };
+function UnitDetailsPanel() {
+  const selectedUnit = useSelectedUnit();
+  const expanded = useCorrelationDiagramStore((state) => state.mapExpanded);
+  const setSelectedUnit = useCorrelationDiagramStore(
+    (state) => state.setSelectedUnit
+  );
+
+  if (selectedUnit == null || !expanded) {
+    return null;
+  }
+
+  return h("div.unit-details-panel", [
+    h(UnitDescription, {
+      unit: selectedUnit,
+      onClose: () => setSelectedUnit(null),
+    }),
+  ]);
+}
+
+function CorrelationDiagramWrapper() {
+  const chartData = useCorrelationDiagramStore((state) => state.chartData);
+
+  return h("div.correlation-diagram", [
+    h(
+      ErrorBoundary,
+      h(OverlaysProvider, [h(CorrelationChart, { data: chartData })])
+    ),
+  ]);
 }
 
 function InsetMap() {
@@ -183,41 +161,12 @@ function MapClickHandler() {
 
   useMapClickHandler(
     (e) => {
-      onClickMap({ type: "Point", coordinates: e.lngLat.toArray() });
+      onClickMap(e, { type: "Point", coordinates: e.lngLat.toArray() });
     },
     [onClickMap]
   );
 
   return null;
-}
-
-function buildCorrelationColumns(
-  columns: ColumnGeoJSONRecord[],
-  line: LineString
-): FocusedColumnGeoJSONRecord[] {
-  let features = [];
-  if (columns == null && line == null) {
-    return [];
-  }
-  return orderColumnsByDistance(
-    computeIntersectingColumns(columns, line),
-    line
-  );
-}
-
-function computeIntersectingColumns(
-  columns: ColumnGeoJSONRecord[],
-  line: LineString
-): ColumnGeoJSONRecord[] {
-  if (columns == null || line == null) {
-    return [];
-  }
-
-  return columns.filter((col) => {
-    const poly = col.geometry;
-    const intersection = lineIntersect(line, poly);
-    return intersection.features.length > 0;
-  });
 }
 
 function SelectedColumnsLayer({ columns, focusedLine }) {
@@ -253,45 +202,6 @@ function SelectedColumnsLayer({ columns, focusedLine }) {
     [focusedColumns]
   );
   return null;
-}
-
-interface FocusedColumnGeoJSONRecord extends ColumnGeoJSONRecord {
-  properties: {
-    centroid: Point;
-    nearestPointOnLine: Point;
-    distanceAlongLine: number;
-  } & ColumnGeoJSONRecord["properties"];
-}
-
-function orderColumnsByDistance(
-  columns: ColumnGeoJSONRecord[],
-  line: LineString
-): FocusedColumnGeoJSONRecord[] {
-  const centroids = columns.map((col) => centroid(col.geometry));
-  const projectedPoints = centroids.map((point) =>
-    nearestPointOnLine(line, point)
-  );
-  const distances = projectedPoints.map((point) =>
-    distance(point.geometry.coordinates, line.coordinates[0])
-  );
-
-  let newColumns = columns.map((col, i) => {
-    return {
-      ...col,
-      properties: {
-        ...col.properties,
-        centroid: centroids[i],
-        nearestPointOnLine: projectedPoints[i],
-        distanceAlongLine: distances[i],
-      },
-    };
-  });
-
-  return sorted(newColumns, (d) => d.properties.distanceAlongLine);
-}
-
-function sorted(data, accessor: (d) => number) {
-  return data.sort((a, b) => accessor(a) - accessor(b));
 }
 
 function ColumnsLayer({ columns, enabled = true }) {

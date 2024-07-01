@@ -59,6 +59,7 @@
     "@macrostrat-web/security": "workspace:*",
     "@macrostrat-web/settings": "workspace:*",
     "@macrostrat-web/sift": "workspace:*",
+    "@macrostrat-web/utility-functions": "workspace:*",
     "@macrostrat/api-utils": "workspace:*",
     "@macrostrat/api-views": "workspace:*",
     "@macrostrat/auth-components": "workspace:*",

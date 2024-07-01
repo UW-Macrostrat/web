@@ -2,24 +2,30 @@ import {
   ColumnLayoutContext,
   ColumnProvider,
   ColumnSVG,
+  useColumn,
 } from "@macrostrat/column-components";
-import { hyperStyled } from "@macrostrat/hyper";
 import { Timescale, TimescaleOrientation } from "@macrostrat/timescale";
-import { useDarkMode } from "@macrostrat/ui-components";
+import { JSONView, useDarkMode } from "@macrostrat/ui-components";
 import classNames from "classnames";
-import { useContext, useMemo } from "react";
-import { AgeAxis } from "@macrostrat/column-views";
-import styles from "./column.module.scss";
+import { useContext, useEffect, useMemo, useRef } from "react";
+import { AgeAxis, useSelectedUnit } from "@macrostrat/column-views";
+import h from "./column.module.scss";
 import { SectionRenderData } from "./types";
 import {
   CompositeUnitsColumn,
   TrackedLabeledUnit,
 } from "@macrostrat/column-views";
-import { IUnit } from "@macrostrat/column-views/src/units/types";
+import styles from "./main.module.sass";
 
 import { ColumnAxisType } from "@macrostrat/column-components";
 
-const h = hyperStyled(styles);
+import { UnitLong } from "@macrostrat/api-types";
+import {
+  LegendJSONView,
+  LegendPanelHeader,
+  UnitDetailsPopover,
+} from "~/components/unit-details";
+import { useCorrelationDiagramStore } from "~/pages/correlation/state";
 
 export function MacrostratColumnProvider(props) {
   // A column provider specialized the Macrostrat API
@@ -46,6 +52,8 @@ function Section(props: ISectionProps) {
     columnWidth = 150,
     unitComponentProps,
   } = props;
+
+  const expanded = useCorrelationDiagramStore((s) => s.mapExpanded);
 
   const { units, bestPixelScale: pixelScale, t_age, b_age } = data;
   const range = [b_age, t_age];
@@ -95,6 +103,7 @@ function Section(props: ISectionProps) {
           clipToFrame: false,
         })
       ),
+      h.if(!expanded)(SelectedUnitPopover, { width }),
     ]
   );
 }
@@ -102,8 +111,6 @@ function Section(props: ISectionProps) {
 export function UnitComponent({ division, nColumns = 2, ...rest }) {
   const { width } = useContext(ColumnLayoutContext);
 
-  //const nCols = Math.min(nColumns, division.overlappingUnits.length+1)
-  //console.log(division);
   return h(TrackedLabeledUnit, {
     division,
     ...rest,
@@ -152,16 +159,7 @@ export function Column(props: IColumnProps) {
 
   const darkMode = useDarkMode();
 
-  // let sectionGroups = useMemo(() => {
-  //   let groups = Array.from(group(data, (d) => d.section_id));
-  //   console.log(groups);
-  //   groups.sort((a, b) => a[1][0].t_age - b[1][0].t_age);
-  //   return groups;
-  // }, [data]);
-
   const sectionGroups = [[0, data]];
-
-  console.log(data);
 
   const className = classNames(baseClassName, {
     "dark-mode": darkMode?.isEnabled ?? false,
@@ -174,13 +172,13 @@ export function Column(props: IColumnProps) {
       h(
         "div.main-column",
         data.map((sectionData, i) => {
-          //const lastGroup = sectionGroups[i - 1]?.[1];
+          const lastGroup = sectionGroups[i - 1]?.[1];
           return h([
-            // h.if(unconformityLabels)(Unconformity, {
-            //   upperUnits: lastGroup,
-            //   lowerUnits: data,
-            //   style: { width: showLabels ? columnWidth : width },
-            // }),
+            h.if(unconformityLabels)(Unconformity, {
+              upperUnits: lastGroup,
+              lowerUnits: data,
+              style: { width: showLabels ? columnWidth : width },
+            }),
             h(`div.section.section-${i}`, [
               h(Section, {
                 data: sectionData,
@@ -207,15 +205,6 @@ export function TimescaleColumn(props: TimescaleColumnProps) {
   const { className: baseClassName, packages } = props;
 
   const darkMode = useDarkMode();
-
-  // let sectionGroups = useMemo(() => {
-  //   let groups = Array.from(group(data, (d) => d.section_id));
-  //   console.log(groups);
-  //   groups.sort((a, b) => a[1][0].t_age - b[1][0].t_age);
-  //   return groups;
-  // }, [data]);
-
-  const sectionGroups = [[0, []]];
 
   const className = classNames(baseClassName, {
     "dark-mode": darkMode?.isEnabled ?? false,
@@ -281,5 +270,60 @@ function TimescaleSection(props: {
         }),
       ]),
     ]
+  );
+}
+
+export function UnitDescription({
+  unit,
+  onClose,
+}: {
+  unit: UnitLong;
+  onClose?: () => void;
+}) {
+  const { unit_name, unit_id, strat_name_long } = unit;
+  const name = strat_name_long ?? unit_name;
+  return h("div.unit-description", [
+    h(LegendPanelHeader, { title: name, id: unit_id, onClose }),
+    h(LegendJSONView, { data: unit }),
+  ]);
+}
+
+function SelectedUnitPopover<T>({ width }: { width: number }) {
+  const { scale, divisions } = useColumn();
+
+  const item0 = useSelectedUnit();
+  const item = divisions.find((d) => d.unit_id == item0?.unit_id);
+
+  const scrollParentRef = useRef(null);
+  useEffect(() => {
+    scrollParentRef.current = document.getElementsByClassName(
+      styles["overlay-safe-area"]
+    )[0];
+  }, []);
+
+  if (item == null) {
+    return null;
+  }
+
+  const { t_age, b_age } = item0;
+  const range = [b_age, t_age];
+
+  const content = h(UnitDescription, { unit: item });
+
+  const top = scale(range[1]) + 10;
+  const bottom = scale(range[0]) + 10;
+
+  return h(
+    UnitDetailsPopover,
+    {
+      style: {
+        top,
+        left: 0,
+        width,
+        height: bottom - top,
+      },
+      boundary: scrollParentRef.current,
+    },
+    content
   );
 }

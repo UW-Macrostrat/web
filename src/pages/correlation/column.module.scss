@@ -64,10 +64,7 @@
   width: 100%;
   margin: 0 -10px;
 }
-.column-container :global div.section {
-  display: flex;
-  flex-direction: row;
-}
+
 .column-container :global div.section :global(.timescale) {
   transform: translateY(0.5);
 }
@@ -77,16 +74,13 @@
 .column-container :global rect.selection-overlay {
   fill: rgba(255,0,0,0.5);
 }
-//.column-container :global div.timescale {
-//  width: calc(3em + 2px);
-//  --timescale-level-size: 1.5em;
-//}
+
 .unconformity {
   height: 0px;
   font-size: 10px;
   font-style: italic;
   text-align: center;
-  margin-left: calc(6em + 4px + 40px);
+  margin-left: 0;
 }
 .unconformity-text {
   transform: translateY(-0.5em);
@@ -106,4 +100,10 @@
 .column-container :global div.timescale {
   width: calc(4.5em + 4px);
   --timescale-level-size: 1.5em;
+}
+
+.section {
+  position: relative;
+  display: flex;
+  flex-direction: row;
 }
