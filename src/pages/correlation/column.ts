@@ -7,11 +7,10 @@ import { hyperStyled } from "@macrostrat/hyper";
 import { Timescale, TimescaleOrientation } from "@macrostrat/timescale";
 import { useDarkMode } from "@macrostrat/ui-components";
 import classNames from "classnames";
-import { group } from "d3-array";
 import { useContext, useMemo } from "react";
 import { AgeAxis } from "@macrostrat/column-views";
 import styles from "./column.module.scss";
-import { useState, useEffect } from "react";
+import { SectionRenderData } from "./types";
 import {
   CompositeUnitsColumn,
   TrackedLabeledUnit,
@@ -27,10 +26,8 @@ export function MacrostratColumnProvider(props) {
   return h(ColumnProvider, { axisType: ColumnAxisType.AGE, ...props });
 }
 
-interface IColumnProps {
-  data: IUnit[];
-  pixelScale?: number;
-  range?: [number, number];
+interface ISectionProps {
+  data: SectionRenderData;
   unitComponent?: React.FunctionComponent<any>;
   unitComponentProps?: any;
   showLabels?: boolean;
@@ -39,18 +36,19 @@ interface IColumnProps {
   targetUnitHeight?: number;
 }
 
-function Section(props: IColumnProps) {
+function Section(props: ISectionProps) {
   // Section with "squishy" timescale
   const {
     data,
-    range,
-    pixelScale,
     unitComponent,
     showLabels = true,
     width = 300,
     columnWidth = 150,
     unitComponentProps,
   } = props;
+
+  const { units, bestPixelScale: pixelScale, t_age, b_age } = data;
+  const range = [b_age, t_age];
 
   const dAge = range[0] - range[1];
 
@@ -64,16 +62,16 @@ function Section(props: IColumnProps) {
     return {
       ...unitComponentProps,
       nColumns: Math.min(
-        Math.max(...data.map((d) => d.column)) + 1,
+        Math.max(...units.map((d) => d.column)) + 1,
         unitComponentProps?.nColumns ?? 2
       ),
     };
-  }, [data, unitComponentProps]);
+  }, [units, unitComponentProps]);
 
   return h(
     MacrostratColumnProvider,
     {
-      divisions: data,
+      divisions: units,
       range,
       pixelsPerMeter: pixelScale, // Actually pixels per myr
     },
@@ -128,9 +126,19 @@ function Unconformity({ upperUnits = [], lowerUnits = [], style }) {
   );
 }
 
-export function Column(
-  props: IColumnProps & { unconformityLabels: boolean; className?: string }
-) {
+interface IColumnProps {
+  data: SectionRenderData[];
+  unitComponent?: React.FunctionComponent<any>;
+  unitComponentProps?: any;
+  showLabels?: boolean;
+  width?: number;
+  columnWidth?: number;
+  targetUnitHeight?: number;
+  unconformityLabels: boolean;
+  className?: string;
+}
+
+export function Column(props: IColumnProps) {
   const {
     data,
     unitComponent = UnitComponent,
@@ -153,6 +161,8 @@ export function Column(
 
   const sectionGroups = [[0, data]];
 
+  console.log(data);
+
   const className = classNames(baseClassName, {
     "dark-mode": darkMode?.isEnabled ?? false,
   });
@@ -163,17 +173,17 @@ export function Column(
     h("div.column", [
       h(
         "div.main-column",
-        sectionGroups.map(([id, data], i) => {
-          const lastGroup = sectionGroups[i - 1]?.[1];
+        data.map((sectionData, i) => {
+          //const lastGroup = sectionGroups[i - 1]?.[1];
           return h([
-            h.if(unconformityLabels)(Unconformity, {
-              upperUnits: lastGroup,
-              lowerUnits: data,
-              style: { width: showLabels ? columnWidth : width },
-            }),
-            h(`div.section.section-${id}`, [
+            // h.if(unconformityLabels)(Unconformity, {
+            //   upperUnits: lastGroup,
+            //   lowerUnits: data,
+            //   style: { width: showLabels ? columnWidth : width },
+            // }),
+            h(`div.section.section-${i}`, [
               h(Section, {
-                data,
+                data: sectionData,
                 unitComponent,
                 showLabels,
                 width,
@@ -188,10 +198,13 @@ export function Column(
   );
 }
 
-export function TimescaleColumn(
-  props: IColumnProps & { unconformityLabels: boolean; className?: string }
-) {
-  const { className: baseClassName, range, pixelScale } = props;
+interface TimescaleColumnProps {
+  packages: SectionRenderData[];
+  className?: string;
+}
+
+export function TimescaleColumn(props: TimescaleColumnProps) {
+  const { className: baseClassName, packages } = props;
 
   const darkMode = useDarkMode();
 
@@ -215,10 +228,12 @@ export function TimescaleColumn(
       h("div.age-axis-label", "Age (Ma)"),
       h(
         "div.main-column",
-        sectionGroups.map(([id, data], i) => {
-          const lastGroup = sectionGroups[i - 1]?.[1];
+        packages.map((data, i) => {
+          const range = [data.b_age, data.t_age];
+          const pixelScale = data.bestPixelScale;
+
           return h([
-            h(`div.section.section-${id}`, [
+            h(`div.section.section-${i}`, [
               h(TimescaleSection, {
                 range,
                 pixelScale,

@@ -23,11 +23,15 @@ import { centroid } from "@turf/centroid";
 
 import { buildCrossSectionLayers } from "~/_utils/map-layers";
 import { fetchAllColumns } from "~/pages/map/map-interface/app-state/handlers/fetch";
-import { getFocusedLineFromHashParams, HashStringManager } from "./hash-string";
+import {
+  getFocusedLineFromHashParams,
+  setHashStringForLine,
+} from "./hash-string";
 import { Button } from "@blueprintjs/core";
 import classNames from "classnames";
 import { ColumnIdentifier, CorrelationChart } from "./correlation-chart";
 import { DarkModeProvider } from "@macrostrat/ui-components";
+import { ErrorBoundary } from "@macrostrat/ui-components";
 
 interface CorrelationState {
   focusedLine: LineString | null;
@@ -67,6 +71,8 @@ const useCorrelationDiagramStore = create<CorrelationState>((set) => ({
           coordinates: [...state.focusedLine.coordinates, point.coordinates],
         };
 
+        setHashStringForLine(focusedLine);
+
         return {
           ...state,
           focusedLine,
@@ -89,12 +95,9 @@ export function Page() {
     startup();
   }, []);
 
-  const focusedLine = useCorrelationDiagramStore((state) => state.focusedLine);
-
   return h(FullscreenPage, [
     h(
       DarkModeProvider,
-      h(HashStringManager, { focusedLine }),
       h("div.main-panel", [
         h("header", [h(PageBreadcrumbs)]),
         h("div.diagram-container", [
@@ -113,7 +116,10 @@ function CorrelationDiagramWrapper() {
 
   const columns = focusedColumns.map(columnGeoJSONRecordToColumnIdentifier);
 
-  return h("div.correlation-diagram", h(CorrelationChart, { columns }));
+  return h(
+    "div.correlation-diagram",
+    h(ErrorBoundary, h(CorrelationChart, { columns }))
+  );
 }
 
 function columnGeoJSONRecordToColumnIdentifier(
@@ -131,18 +137,27 @@ function InsetMap() {
   const columns = useCorrelationDiagramStore((state) => state.columns);
   const expanded = useCorrelationDiagramStore((state) => state.mapExpanded);
 
+  const padding = expanded ? 100 : 20;
+
   return h(
     "div.column-selection-map",
     { className: classNames({ expanded }) },
     [
       h(MapboxMapProvider, [
         h(MapExpandedButton),
-        h(MapView, { style: baseMapURL, accessToken: mapboxAccessToken }, [
-          h(MapClickHandler),
-          h(SectionLine, { focusedLine }),
-          h(ColumnsLayer, { columns }),
-          h(SelectedColumnsLayer),
-        ]),
+        h(
+          MapView,
+          {
+            style: baseMapURL,
+            accessToken: mapboxAccessToken,
+          },
+          [
+            h(MapClickHandler),
+            h(SectionLine, { focusedLine, padding }),
+            h(ColumnsLayer, { columns }),
+            h(SelectedColumnsLayer),
+          ]
+        ),
       ]),
     ]
   );
@@ -374,8 +389,6 @@ function SectionLine({ focusedLine }: { focusedLine: LineString }) {
         ],
       };
 
-      console.log(data);
-
       setGeoJSON(map, "crossSectionLine", data);
       setGeoJSON(map, "crossSectionEndpoints", {
         type: "FeatureCollection",
@@ -411,7 +424,7 @@ function SectionLine({ focusedLine }: { focusedLine: LineString }) {
     return bounds;
   }, [focusedLine]);
 
-  useMapEaseTo({ bounds, padding: 120 });
+  useMapEaseTo({ bounds, padding: 50, trackResize: true });
 
   return null;
 }

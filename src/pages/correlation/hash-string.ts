@@ -39,16 +39,9 @@ export function getFocusedLineFromHashParams(): LineString | null {
   }
 }
 
-export function HashStringManager({ focusedLine }) {
-  useEffect(() => {
-    if (focusedLine == null || focusedLine.coordinates.length < 2) {
-      return;
-    }
-    let hash = {
-      line: focusedLine.coordinates.flatMap((coord) => coord.map(fmt2)),
-    };
-    setHashString(hash);
-  }, [focusedLine]);
-
-  return null;
+export function setHashStringForLine(focusedLine: LineString) {
+  let hash = {
+    line: focusedLine.coordinates.flatMap((coord) => coord.map(fmt2)),
+  };
+  setHashString(hash);
 }
