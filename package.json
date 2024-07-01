@@ -15,8 +15,6 @@
     "dev:storybook": "yarn workspace @macrostrat/storybook run dev",
     "start": "yarn run build && yarn run server",
     "test": "vitest"
-    "start": "yarn run build && yarn run server",
-    "test": "vitest"
   },
   "workspaces": [
     "deps/web-components/packages/*",
