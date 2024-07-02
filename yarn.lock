@@ -5963,6 +5963,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@macrostrat-web/utility-functions@workspace:*, @macrostrat-web/utility-functions@workspace:packages/utility-functions":
+  version: 0.0.0-use.local
+  resolution: "@macrostrat-web/utility-functions@workspace:packages/utility-functions"
+  languageName: unknown
+  linkType: soft
+
 "@macrostrat/api-types@workspace:deps/web-components/packages/api-types":
   version: 0.0.0-use.local
   resolution: "@macrostrat/api-types@workspace:deps/web-components/packages/api-types"
@@ -6577,6 +6583,7 @@ __metadata:
     "@macrostrat-web/security": "workspace:*"
     "@macrostrat-web/settings": "workspace:*"
     "@macrostrat-web/sift": "workspace:*"
+    "@macrostrat-web/utility-functions": "workspace:*"
     "@macrostrat/api-utils": "workspace:*"
     "@macrostrat/api-views": "workspace:*"
     "@macrostrat/auth-components": "workspace:*"
@@ -6603,7 +6610,10 @@ __metadata:
     "@turf/bbox": "npm:^6.5.0"
     "@turf/boolean-contains": "npm:^6.5.0"
     "@turf/buffer": "npm:^6.5.0"
-    "@turf/centroid": "npm:^6.5.0"
+    "@turf/centroid": "npm:^7.0.0"
+    "@turf/distance": "npm:^7.0.0"
+    "@turf/line-intersect": "npm:^7.0.0"
+    "@turf/nearest-point-on-line": "npm:^7.0.0"
     "@types/compression": "npm:^1.7.2"
     "@types/esprima": "npm:^4"
     "@types/express": "npm:^4.17.17"
@@ -6612,6 +6622,7 @@ __metadata:
     "@types/react": "npm:^18.2.20"
     "@types/react-dom": "npm:^18.2.7"
     "@types/react-redux": "npm:^7.1.7"
+    "@types/underscore": "npm:^1"
     "@typescript-eslint/eslint-plugin": "npm:^6.3.0"
     "@typescript-eslint/parser": "npm:^6.3.0"
     "@universal-middleware/express": "npm:^0.0.2"
@@ -6661,6 +6672,7 @@ __metadata:
     transition-hook: "npm:^1.5.2"
     tsx: "npm:^4.11.2"
     typescript: "npm:^5.1.6"
+    underscore: "npm:^1.13.6"
     use-debounce: "npm:^9.0.4"
     use-react-router-breadcrumbs: "npm:^3.2.1"
     use-resize-observer: "npm:^9.1.0"
@@ -10513,6 +10525,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@turf/bearing@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "@turf/bearing@npm:7.0.0"
+  dependencies:
+    "@turf/helpers": "npm:^7.0.0"
+    "@turf/invariant": "npm:^7.0.0"
+    tslib: "npm:^2.6.2"
+  checksum: 10/afd0328ee6c3e6359c1f2d5d6df535e9d1697dfbeff9f33d96e0f2ba1bca2242b543565e8bb98b3a8ea5c44fce9826214e5fff098717287792bfbb102b00badc
+  languageName: node
+  linkType: hard
+
 "@turf/boolean-contains@npm:^6.5.0":
   version: 6.5.0
   resolution: "@turf/boolean-contains@npm:6.5.0"
@@ -10581,12 +10604,34 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@turf/centroid@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "@turf/centroid@npm:7.0.0"
+  dependencies:
+    "@turf/helpers": "npm:^7.0.0"
+    "@turf/meta": "npm:^7.0.0"
+    tslib: "npm:^2.6.2"
+  checksum: 10/2375762376dc6378616513799f969daa2deaf596281e1dc14c65cd0daf7e7a415dc35eb9d4786f10741e8dcb02b0cd1cf83c728a406a32c256246e66eb4d532a
+  languageName: node
+  linkType: hard
+
 "@turf/clone@npm:^6.5.0":
   version: 6.5.0
   resolution: "@turf/clone@npm:6.5.0"
   dependencies:
     "@turf/helpers": "npm:^6.5.0"
   checksum: 10/8ef6f6ba8876bb32b35691b62554a74b1e8e2b9d04a1c4f7bcba9348163b4ae4cde774b9e8e9f63211e5eb816517d94b94c3d54e5f855691a84cd3556d3157e4
+  languageName: node
+  linkType: hard
+
+"@turf/destination@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "@turf/destination@npm:7.0.0"
+  dependencies:
+    "@turf/helpers": "npm:^7.0.0"
+    "@turf/invariant": "npm:^7.0.0"
+    tslib: "npm:^2.6.2"
+  checksum: 10/8e14baefa5a82975b9e329a1d5bfa15e588d4ad4a49554e33cf6da08dd682db803485e7278a8c432c7ee6684ff4a3ca91354f924de102bea2074b0392f612ce3
   languageName: node
   linkType: hard
 
@@ -10600,10 +10645,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@turf/distance@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "@turf/distance@npm:7.0.0"
+  dependencies:
+    "@turf/helpers": "npm:^7.0.0"
+    "@turf/invariant": "npm:^7.0.0"
+    tslib: "npm:^2.6.2"
+  checksum: 10/e43f316efa42d3570b3e3c9cfe5f7bbc341c776560b5ae131f17b91bd59a5dc13f775ca4dece912db68b7d2f0baad4fa1f3ec89102d95ad33783cb3036c578ed
+  languageName: node
+  linkType: hard
+
 "@turf/helpers@npm:^6.3.0, @turf/helpers@npm:^6.5.0":
   version: 6.5.0
   resolution: "@turf/helpers@npm:6.5.0"
   checksum: 10/2d064338c64ffd70e25c50fd8307c89b10c7a7006e7903b27667ffb0aef85ce9dbbede9f3d4b05e961fdae84b2364b24b0cfd85208421062504617e40801be76
+  languageName: node
+  linkType: hard
+
+"@turf/helpers@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "@turf/helpers@npm:7.0.0"
+  dependencies:
+    deep-equal: "npm:^2.2.3"
+    tslib: "npm:^2.6.2"
+  checksum: 10/b356ba499634ff8e13af595c842e2c35efbfe365801848f4395577c402f3336a4e6fb0273dbb9c4dcb447636f29df304eaa68899dbf9368cff970170fe1ce39a
   languageName: node
   linkType: hard
 
@@ -10616,12 +10682,58 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@turf/invariant@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "@turf/invariant@npm:7.0.0"
+  dependencies:
+    "@turf/helpers": "npm:^7.0.0"
+    tslib: "npm:^2.6.2"
+  checksum: 10/5361c27ab080104e08b44c5b49d69c890f9bcb7713512ae78a01c0dd1f5dac1936704c64bfb45c3a05cc8e5fb3ca0648aa92050c80d22c04a373cf3b7eb94683
+  languageName: node
+  linkType: hard
+
+"@turf/line-intersect@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "@turf/line-intersect@npm:7.0.0"
+  dependencies:
+    "@turf/helpers": "npm:^7.0.0"
+    sweepline-intersections: "npm:^1.5.0"
+    tslib: "npm:^2.6.2"
+  checksum: 10/fda3f75f79ba59da1bc974ead94d7a657fce34c2d22d48a1d1685359bccc092e00913b1eb203f95b1a3e51dfc71694b8b0aba0b3b5d24c568dd8ff5bab9dec1c
+  languageName: node
+  linkType: hard
+
 "@turf/meta@npm:^6.5.0":
   version: 6.5.0
   resolution: "@turf/meta@npm:6.5.0"
   dependencies:
     "@turf/helpers": "npm:^6.5.0"
   checksum: 10/93886b3f6fa3ea7e647b22ef7b06416c71e51fd3a654d6ca3b3c54e98c790a2f806994692be0bf6925bd3f244370d407605be4abaed1de7d9aec55fa60eda824
+  languageName: node
+  linkType: hard
+
+"@turf/meta@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "@turf/meta@npm:7.0.0"
+  dependencies:
+    "@turf/helpers": "npm:^7.0.0"
+  checksum: 10/31dbb971f265ed7d33b64934a2ccd1bcd0b949fc303fe11871b786dc92a860815425d6146b7455edfb457c5b51dc54e5490eb34408ccf2239203e9eb1a581770
+  languageName: node
+  linkType: hard
+
+"@turf/nearest-point-on-line@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "@turf/nearest-point-on-line@npm:7.0.0"
+  dependencies:
+    "@turf/bearing": "npm:^7.0.0"
+    "@turf/destination": "npm:^7.0.0"
+    "@turf/distance": "npm:^7.0.0"
+    "@turf/helpers": "npm:^7.0.0"
+    "@turf/invariant": "npm:^7.0.0"
+    "@turf/line-intersect": "npm:^7.0.0"
+    "@turf/meta": "npm:^7.0.0"
+    tslib: "npm:^2.6.2"
+  checksum: 10/729db8018bb469dec78f06a6a2cd443528f2357bc9122918d939e4cf2406fe314da08a49232e2418bd7e45da709a4037239616d5dce12fb960d9f67463730881
   languageName: node
   linkType: hard
 
@@ -11714,6 +11826,13 @@ __metadata:
   version: 1.0.1
   resolution: "@types/treeify@npm:1.0.1"
   checksum: 10/972022f753b49b16a17cbfc0c6051c64983d333f27dbf456353c8168446fa8948ac11072687be8ba5b2144122bae461481ce7814c7a855ab477fffe45ed7a793
+  languageName: node
+  linkType: hard
+
+"@types/underscore@npm:^1":
+  version: 1.11.15
+  resolution: "@types/underscore@npm:1.11.15"
+  checksum: 10/5a9c262566551f61744e066d33578c0fad1139c2d5314ed77a8f867487a6d7dd18616f32df4c605070fbd569b942c6d2c083be9f9ae649f41a562b52812b06be
   languageName: node
   linkType: hard
 
@@ -13473,6 +13592,15 @@ __metadata:
   version: 1.0.5
   resolution: "available-typed-arrays@npm:1.0.5"
   checksum: 10/4d4d5e86ea0425696f40717882f66a570647b94ac8d273ddc7549a9b61e5da099e149bf431530ccbd776bd74e02039eb8b5edf426e3e2211ee61af16698a9064
+  languageName: node
+  linkType: hard
+
+"available-typed-arrays@npm:^1.0.7":
+  version: 1.0.7
+  resolution: "available-typed-arrays@npm:1.0.7"
+  dependencies:
+    possible-typed-array-names: "npm:^1.0.0"
+  checksum: 10/6c9da3a66caddd83c875010a1ca8ef11eac02ba15fb592dc9418b2b5e7b77b645fa7729380a92d9835c2f05f2ca1b6251f39b993e0feb3f1517c74fa1af02cab
   languageName: node
   linkType: hard
 
@@ -16982,6 +17110,32 @@ __metadata:
   languageName: node
   linkType: hard
 
+"deep-equal@npm:^2.2.3":
+  version: 2.2.3
+  resolution: "deep-equal@npm:2.2.3"
+  dependencies:
+    array-buffer-byte-length: "npm:^1.0.0"
+    call-bind: "npm:^1.0.5"
+    es-get-iterator: "npm:^1.1.3"
+    get-intrinsic: "npm:^1.2.2"
+    is-arguments: "npm:^1.1.1"
+    is-array-buffer: "npm:^3.0.2"
+    is-date-object: "npm:^1.0.5"
+    is-regex: "npm:^1.1.4"
+    is-shared-array-buffer: "npm:^1.0.2"
+    isarray: "npm:^2.0.5"
+    object-is: "npm:^1.1.5"
+    object-keys: "npm:^1.1.1"
+    object.assign: "npm:^4.1.4"
+    regexp.prototype.flags: "npm:^1.5.1"
+    side-channel: "npm:^1.0.4"
+    which-boxed-primitive: "npm:^1.0.2"
+    which-collection: "npm:^1.0.1"
+    which-typed-array: "npm:^1.1.13"
+  checksum: 10/1ce49d0b71d0f14d8ef991a742665eccd488dfc9b3cada069d4d7a86291e591c92d2589c832811dea182b4015736b210acaaebce6184be356c1060d176f5a05f
+  languageName: node
+  linkType: hard
+
 "deep-extend@npm:0.6.0, deep-extend@npm:^0.6.0":
   version: 0.6.0
   resolution: "deep-extend@npm:0.6.0"
@@ -19740,7 +19894,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"get-intrinsic@npm:^1.2.4":
+"get-intrinsic@npm:^1.2.2, get-intrinsic@npm:^1.2.4":
   version: 1.2.4
   resolution: "get-intrinsic@npm:1.2.4"
   dependencies:
@@ -20422,6 +20576,15 @@ __metadata:
   dependencies:
     has-symbols: "npm:^1.0.2"
   checksum: 10/95546e7132efc895a9ae64a8a7cf52588601fc3d52e0304ed228f336992cdf0baaba6f3519d2655e560467db35a1ed79f6420c286cc91a13aa0647a31ed92570
+  languageName: node
+  linkType: hard
+
+"has-tostringtag@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "has-tostringtag@npm:1.0.2"
+  dependencies:
+    has-symbols: "npm:^1.0.3"
+  checksum: 10/c74c5f5ceee3c8a5b8bc37719840dc3749f5b0306d818974141dda2471a1a2ca6c8e46b9d6ac222c5345df7a901c9b6f350b1e6d62763fec877e26609a401bfe
   languageName: node
   linkType: hard
 
@@ -27511,6 +27674,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"possible-typed-array-names@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "possible-typed-array-names@npm:1.0.0"
+  checksum: 10/8ed3e96dfeea1c5880c1f4c9cb707e5fb26e8be22f14f82ef92df20fd2004e635c62ba47fbe8f2bb63bfd80dac1474be2fb39798da8c2feba2815435d1f749af
+  languageName: node
+  linkType: hard
+
 "postcss-calc@npm:^7.0.1":
   version: 7.0.5
   resolution: "postcss-calc@npm:7.0.5"
@@ -33114,6 +33284,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"sweepline-intersections@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "sweepline-intersections@npm:1.5.0"
+  dependencies:
+    tinyqueue: "npm:^2.0.0"
+  checksum: 10/2782fec085d0a4c90874096d4b18e51d1210cbb9f5834f6122e49441cc0711a0adfda08260da4e03816a43c88293a672e63fab96a06115f2d854fefdeb532ead
+  languageName: node
+  linkType: hard
+
 "symbol-tree@npm:^3.2.4":
   version: 3.2.4
   resolution: "symbol-tree@npm:3.2.4"
@@ -33466,7 +33645,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tinyqueue@npm:^2.0.3":
+"tinyqueue@npm:^2.0.0, tinyqueue@npm:^2.0.3":
   version: 2.0.3
   resolution: "tinyqueue@npm:2.0.3"
   checksum: 10/b676fdf2050bc9b2b76fe3faa433f3122c623e3f2c32d2a6921487b1e8fb541a85af79ea0eca3618e261b293280db78b02e1f835321783b8c078c507b739017c
@@ -33798,6 +33977,13 @@ __metadata:
   version: 2.6.2
   resolution: "tslib@npm:2.6.2"
   checksum: 10/bd26c22d36736513980091a1e356378e8b662ded04204453d353a7f34a4c21ed0afc59b5f90719d4ba756e581a162ecbf93118dc9c6be5acf70aa309188166ca
+  languageName: node
+  linkType: hard
+
+"tslib@npm:^2.6.2":
+  version: 2.6.3
+  resolution: "tslib@npm:2.6.3"
+  checksum: 10/52109bb681f8133a2e58142f11a50e05476de4f075ca906d13b596ae5f7f12d30c482feb0bff167ae01cfc84c5803e575a307d47938999246f5a49d174fc558c
   languageName: node
   linkType: hard
 
@@ -35777,6 +35963,19 @@ __metadata:
     gopd: "npm:^1.0.1"
     has-tostringtag: "npm:^1.0.0"
   checksum: 10/bc9e8690e71d6c64893c9d88a7daca33af45918861003013faf77574a6a49cc6194d32ca7826e90de341d2f9ef3ac9e3acbe332a8ae73cadf07f59b9c6c6ecad
+  languageName: node
+  linkType: hard
+
+"which-typed-array@npm:^1.1.13":
+  version: 1.1.15
+  resolution: "which-typed-array@npm:1.1.15"
+  dependencies:
+    available-typed-arrays: "npm:^1.0.7"
+    call-bind: "npm:^1.0.7"
+    for-each: "npm:^0.3.3"
+    gopd: "npm:^1.0.1"
+    has-tostringtag: "npm:^1.0.2"
+  checksum: 10/c3b6a99beadc971baa53c3ee5b749f2b9bdfa3b3b9a70650dd8511a48b61d877288b498d424712e9991d16019633086bd8b5923369460d93463c5825fa36c448
   languageName: node
   linkType: hard
 

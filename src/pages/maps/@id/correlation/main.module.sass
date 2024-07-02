@@ -4,6 +4,12 @@ div.correlation-chart
 .bar
   position: absolute
 
+.popover-container
+  pointer-events: none
+  position: relative
+
+
+
 // Ideally this wouldn't be necessary
 .page-inner
   position: relative
@@ -16,39 +22,6 @@ div.correlation-chart
 .vis-container
   flex: 1
   overflow: hidden
-
-.popover-container
-  pointer-events: none
-  position: relative
-
-.popover-main
-  position: absolute
-  outline: 2px solid #f22
-
-  :global(.bp5-popover-target)
-    height: 100%
-    width: 100%
-    display: block
-    line-height: 0
-
-.legend-panel-outer
-  width: 25em
-  max-height: 60vh
-  overflow-y: scroll
-
-.legend-info-panel
-  padding: 1em
-  header
-    display: flex
-    justify-content: space-between
-    code
-      font-size: 0.9em
-      color: var(--secondary-color)
-    align-items: baseline
-
-  h3
-    margin: 0 0 0.5em
-    font-size: 1.1em
 
 .data-field
   margin: 0.2em 0 0.4em
@@ -71,7 +44,7 @@ div.correlation-chart
     break-inside: avoid
   .unit
     color: var(--secondary-color)
-    
+
 .settings
   padding: 1em
   >h3:first-child

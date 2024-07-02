@@ -60,6 +60,7 @@ const defaultState: CoreState = {
   mapUse3D: false,
   filtersOpen: false,
   filters: [],
+  filtersInfo: [],
   filteredColumns: {},
   data: [],
   showExperimentsPanel: false,
@@ -80,6 +81,8 @@ export function coreReducer(
   action: CoreAction
 ): CoreState {
   switch (action.type) {
+    case "initial-load-complete":
+      return { ...state, initialLoadComplete: true, filters: action.filters };
     case "map-loading":
       if (state.mapIsLoading) return state;
       return { ...state, mapIsLoading: true };
@@ -143,12 +146,6 @@ export function coreReducer(
       return {
         ...coreReducer(state, { type: "stop-searching" }),
         filters: buildFilters(state.filters, [action.filter]),
-      };
-    case "set-filters":
-      /* Set multiple filters at once, usually on app load. */
-      return {
-        ...state,
-        filters: buildFilters(state.filters, action.filters),
       };
     case "remove-filter":
       return {

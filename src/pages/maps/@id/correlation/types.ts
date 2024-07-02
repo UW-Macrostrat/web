@@ -1,4 +1,5 @@
-export type AgeRange = [number, number];
+import type { IntervalShort } from "~/components/unit-details";
+import type { AgeRange } from "@macrostrat-web/utility-functions";
 
 export type CorrelationItem = {
   color: string;
@@ -6,15 +7,6 @@ export type CorrelationItem = {
   macrostratAgeRange: AgeRange | null;
   details: LegendItem;
   id: number;
-};
-
-export type IntervalShort = {
-  id: number;
-  b_age: number;
-  t_age: number;
-  name: string;
-  color: string;
-  rank: number;
 };
 
 export interface LegendItem {
