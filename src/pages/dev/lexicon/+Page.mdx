@@ -1,0 +1,58 @@
+import { PageHeader } from "~/components";
+import { PageBreadcrumbs } from "~/renderer";
+import "./main.styl";
+import { Image } from "./index";
+import { MacrostratIcon } from "~/components";
+
+<div class="main">
+
+[//]: # "Nav Bar"
+<div class="nav">
+  <ul>
+    <li><a href="/dev/main-page"><MacrostratIcon></MacrostratIcon></a></li>
+    <li><a href="/dev/about">About</a></li>
+    <li><a href="/dev/publications">Publications</a></li>
+    <li><a href="/dev/people">People</a></li>
+    <li><a href="/dev/donate">Donate</a></li>
+  </ul>
+</div>
+\
+\
+
+[//]: # "Lithologies"
+<div id="lith">
+</div>
+
+[//]: # "Stratigraphic Names"
+<div id="strat">
+</div>
+
+
+[//]: # "Footer"
+<div class="footer">
+    <div class="footer-container">
+    <div class="col-sm-4" id="who-made-it">
+        <Image className="logo_white" src="logo_white.png" width="100px"></Image>
+        <p class="f1-text">Produced by the <a href="http://strata.geology.wisc.edu" target="_blank">UW Macrostrat Lab</a> <a href="https://github.com/UW-Macrostrat" target="_blank"><Image className="git_logo" src="git-logo.png" width="18px"></Image></a></p>
+    </div>
+    <div class="col-sm-4" id="bottom-nav">
+        <ul class="footer-nav">
+        <li><a href="/dev/about">About</a></li>
+        <li><a href="/dev/publications">Publications</a></li>
+        <li><a href="/dev/people">People</a></li>
+        <li><a href="/dev/donate">Donate</a></li>
+        </ul>
+    </div>
+    <div class="col-sm-4 funding">
+        <Image className="funding-logo" src="nsf.png" width="100px"></Image>
+        <div class="funding-line">
+        Current support: \
+        EAR-1948843 \
+        ICER-1928323 \
+        UW-Madison Dept. Geoscience
+        </div>
+    </div>
+    </div>
+</div>
+
+</div>
