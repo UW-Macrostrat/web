@@ -1,8 +1,8 @@
 import hyper from "@macrostrat/hyper";
 import { DarkModeProvider } from "@macrostrat/ui-components";
-import React, { useEffect } from "react";
-import { PageContextProvider } from "./page-context";
-import { PageContext, PageStyle } from "./types";
+import React from "react";
+//import { PageContextProvider } from "./page-context";
+//import { PageContext, PageStyle } from "./types";
 import { AuthProvider } from "./auth";
 import { usePageContext } from "vike-react/usePageContext";
 

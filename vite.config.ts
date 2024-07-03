@@ -3,7 +3,7 @@ import mdx from "@mdx-js/rollup";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import ssr from "vike/plugin";
-import { UserConfig, Plugin } from "vite";
+import { defineConfig, Plugin } from "vite";
 import cesium from "vite-plugin-cesium";
 import pkg from "./package.json";
 
@@ -57,7 +57,7 @@ function hyperStyles(): Plugin {
   };
 }
 
-const config: UserConfig = {
+export default defineConfig({
   root: path.resolve("./src"),
   resolve: {
     conditions: ["typescript"],
@@ -83,7 +83,7 @@ const config: UserConfig = {
       cesiumBuildPath,
       cesiumBuildRootPath: cesiumRoot,
     }),
-    //hyperStyles(),
+    hyperStyles(),
   ],
   envDir: path.resolve(__dirname),
   build: {
@@ -99,6 +99,4 @@ const config: UserConfig = {
   ssr: {
     noExternal: ["labella", "@supabase/postgrest-js"],
   },
-};
-
-export default config;
+});
