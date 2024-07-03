@@ -3,11 +3,10 @@ import { Suspense, useCallback, useEffect, useRef } from "react";
 import { Spinner } from "@blueprintjs/core";
 import loadable from "@loadable/component";
 import { mapPagePrefix } from "@macrostrat-web/settings";
-import hyper from "@macrostrat/hyper";
 import { MapAreaContainer } from "@macrostrat/map-interface";
 import classNames from "classnames";
 import { useSelector } from "react-redux";
-import { Route, Routes, useParams } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { useTransition } from "transition-hook";
 import {
   useAppActions,
@@ -16,15 +15,13 @@ import {
   useContextPanelOpen,
 } from "../app-state";
 import Searchbar from "../components/navbar";
-import styles from "./main.module.styl";
 import MapContainer from "./map-view";
 import { MenuPage } from "./menu";
+import h from "./main.module.styl";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));
 const Menu = loadable(() => import("./menu"));
-
-const h = hyper.styled(styles);
 
 function MapView(props) {
   return h(
@@ -34,12 +31,13 @@ function MapView(props) {
   );
 }
 
-export const MapPage = ({
+function MapPage({
   baseRoute = "/",
   menuPage = null,
 }: {
+  baseRoute?: string;
   menuPage?: MenuPage;
-}) => {
+}) {
   const runAction = useAppActions();
   const inputFocus = useAppState((s) => s.core.inputFocus);
   const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
@@ -92,7 +90,7 @@ export const MapPage = ({
     },
     [h("div.context-underlay", { onClick: onMouseDown }), h(MapView)]
   );
-};
+}
 
 function MapPageRoutes() {
   return h(Routes, [
@@ -118,40 +116,13 @@ function InfoDrawerHolder() {
     h(Routes, [
       h(Route, {
         path: mapPagePrefix + "/loc/:lng/:lat/*",
-        element: h(InfoDrawerLocationGrabber),
+        element: h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
+          className: "detail-panel",
+        }),
       }),
     ]),
-    h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
-      className: "detail-panel",
-    }),
+    //h(InfoDrawerLocationGrabber),
   ]);
-}
-
-function InfoDrawerLocationGrabber() {
-  // We could probably do this in the reducer...
-  const { lat, lng } = useParams();
-  const z = Math.round(
-    useAppState((s) => s.core.mapPosition.target?.zoom) ?? 7
-  );
-  const runAction = useAppActions();
-
-  // Todo: this is a pretty janky way to do state management
-  useEffect(() => {
-    if (lat && lng) {
-      runAction({
-        type: "run-map-query",
-        lat: Number(lat),
-        lng: Number(lng),
-        z,
-        // Focused column or map unit from active layers.
-        // This is a bit anachronistic, since we want to be
-        // able to show columns that aren't necessarily shown on the map
-        columns: [],
-        map_id: null,
-      });
-    }
-  }, [lat, lng]);
-  return null;
 }
 
 export default MapPageRoutes;

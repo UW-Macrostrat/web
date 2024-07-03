@@ -6,6 +6,7 @@ export async function fetchAPIData(apiURL: string, params: any) {
   if (params != null) {
     url.search = new URLSearchParams(params).toString();
   }
+  console.log(url.toString());
   const res = await fetch(url.toString());
   const res1 = await res.json();
   return res1?.success?.data;

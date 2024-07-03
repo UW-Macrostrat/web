@@ -4,6 +4,7 @@ import { Spinner } from "@blueprintjs/core";
 import { usePageTransitionStore } from "~/renderer/transitions";
 import classNames from "classnames";
 import { PageBreadcrumbs } from "~/renderer";
+import { useTransition } from "transition-hook";
 
 const h = hyper.styled(styles);
 
@@ -11,16 +12,22 @@ export function BasePage({ children, className, fitViewport = false }) {
   const inPageTransition = usePageTransitionStore(
     (state) => state.inPageTransition
   );
-  if (inPageTransition) {
-    return h("div.page-transition", [h(Spinner)]);
-  }
+
+  const loadingTransition = useTransition(inPageTransition, 300);
 
   return h(
     "div",
     {
       className: classNames(className, { "fit-viewport": fitViewport }),
     },
-    children
+    [
+      children,
+      h.if(loadingTransition.shouldMount)(
+        "div.page-transition",
+        { className: `page-transition-${loadingTransition.stage}` },
+        h("div.page-transition-content", h(Spinner))
+      ),
+    ]
   );
 }
 

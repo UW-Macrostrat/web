@@ -22,7 +22,7 @@ type ASYNC_ADD_FILTER = { type: "async-add-filter"; filter: any };
 type GET_FILTERED_COLUMNS = { type: "get-filtered-columns" };
 type FETCH_XDD = { type: "fetch-xdd" };
 type MAP_QUERY = {
-  type: "map-query" | "run-map-query";
+  type: "map-query";
   z: string | number;
   map_id: any;
   columns: ColumnProperties[] | null | undefined;
@@ -41,7 +41,7 @@ type CLOSE_INFODRAWER = { type: "close-infodrawer" };
 
 type TOGGLE_FILTERS = { type: "toggle-filters" };
 type REMOVE_FILTER = { type: "remove-filter"; filter: any };
-type UPDATE_COLUMN_FILTERS = {
+export type UPDATE_COLUMN_FILTERS = {
   type: "update-column-filters";
   columns: ColumnGeoJSONRecord[];
 };
@@ -158,6 +158,11 @@ type SetFocusedMapSource = {
   source_id: number | null;
 };
 
+type InitialLoadComplete = {
+  type: "initial-load-complete";
+  filters: FilterData[];
+};
+
 export type CoreAction =
   | MAP_LAYERS_CHANGED
   | CLEAR_FILTERS
@@ -198,7 +203,6 @@ export type CoreAction =
   | MapAction
   | ToggleHighResolutionTerrain
   | AddFilter
-  | SetFilters
   | SetTimeCursor
   | SetPlateModel
   | StopSearching
@@ -210,7 +214,8 @@ export type CoreAction =
   | ToggleCrossSection
   | SetCrossSectionLine
   | SetFocusedMapSource
-  | ClearColumnInfo;
+  | ClearColumnInfo
+  | InitialLoadComplete;
 
 interface AsyncRequestState {
   // Events and tokens for xhr
@@ -265,6 +270,7 @@ export interface CoreState extends MapState, AsyncRequestState {
   mapCenter: MapCenterInfo;
   mapUse3D: boolean;
   filtersOpen: boolean;
+  filtersInfo: Filter[];
   filters: FilterData[];
   filteredColumns: ColumnGeoJSONRecord[] | null;
   showExperimentsPanel: boolean;

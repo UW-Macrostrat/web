@@ -1,0 +1,51 @@
+div.correlation-chart
+  position: relative
+
+.bar
+  position: absolute
+
+.popover-container
+  pointer-events: none
+  position: relative
+
+
+
+// Ideally this wouldn't be necessary
+.page-inner
+  position: relative
+  margin: 2em auto 3em
+  display: flex
+  flex-direction: column
+  height: 100%
+
+
+.vis-container
+  flex: 1
+  overflow: hidden
+
+.data-field
+  margin: 0.2em 0 0.4em
+  &.inline
+    display: flex
+    flex-direction: row
+    align-items: baseline
+    gap: 1em
+    justify-content: space-between
+    .data-container
+      text-align: right
+  .label
+    font-size: 0.9em
+    font-weight: bold
+    display: block
+    color: var(--secondary-color)
+  .value-container
+    font-size: 0.9em
+    display: inline-block
+    break-inside: avoid
+  .unit
+    color: var(--secondary-color)
+
+.settings
+  padding: 1em
+  >h3:first-child
+    margin-top: 0

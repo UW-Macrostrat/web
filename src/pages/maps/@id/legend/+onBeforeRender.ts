@@ -19,10 +19,7 @@ export async function onBeforeRender(pageContext: PageContextServer) {
       pageProps: {
         map,
       },
-      documentProps: {
-        // The page's <title>
-        title: map.name + "– Legend",
-      },
+      title: map.name + "– Legend",
     },
   };
 }
