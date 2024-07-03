@@ -83,7 +83,7 @@ const config: UserConfig = {
       cesiumBuildPath,
       cesiumBuildRootPath: cesiumRoot,
     }),
-    hyperStyles(),
+    //hyperStyles(),
   ],
   envDir: path.resolve(__dirname),
   build: {
