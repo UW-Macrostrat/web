@@ -9,10 +9,9 @@ const environment = synthesizeConfigFromEnvironment();
 export async function vikeHandler<
   Context extends Record<string | number | symbol, unknown>
 >(request: Request, context?: Context): Promise<Response> {
-  const baseContext = context ?? {};
   const user = await getUserFromCookie(request);
   const pageContextInit = {
-    ...baseContext,
+    ...context,
     urlOriginal: request.url,
     environment,
     user,
@@ -21,7 +20,11 @@ export async function vikeHandler<
   const pageContext = await renderPage(pageContextInit);
   const response = pageContext.httpResponse;
 
-  return new Response(response?.getReadableWebStream(), {
+  const { readable, writable } = new TransformStream();
+
+  response?.pipe(writable);
+
+  return new Response(readable, {
     status: response?.statusCode,
     headers: response?.headers,
   });

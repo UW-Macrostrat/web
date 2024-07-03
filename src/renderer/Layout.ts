@@ -10,12 +10,12 @@ import "~/styles/blueprint-core";
 import "../styles/_theme.styl";
 import "../styles/core.sass";
 import "../styles/padding.css";
-
+//
 import styles from "./page-shell.module.sass";
 
 const h = hyper.styled(styles);
 
-export function PageShell({ children }: { children: React.ReactNode }) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   const pageContext = usePageContext();
   const { exports = {}, config, user } = pageContext;
   const supportsDarkMode = config?.supportsDarkMode ?? true;

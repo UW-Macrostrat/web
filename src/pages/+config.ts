@@ -2,8 +2,10 @@
 import vikeReact from "vike-react/config";
 import type { Config } from "vike/types";
 
-const Layout = "import:../renderer/page-shell.ts:PageShell";
-const Head = "import:../renderer/head.ts:Head";
+const Layout = "import:../renderer/Layout.ts:default";
+const Head = "import:../renderer/Head.ts:default";
+
+// import Head from "../renderer/Head.js";
 
 // Default config (can be overridden by pages)
 export default {

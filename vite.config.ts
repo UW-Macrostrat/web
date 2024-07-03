@@ -64,12 +64,7 @@ export default defineConfig({
     alias: {
       "~": path.resolve("./src"),
     },
-    dedupe: [
-      "react",
-      "react-dom",
-      "mapbox-gl",
-      ...aliasedModules.map((d) => "@macrostrat/" + d),
-    ],
+    dedupe: [...aliasedModules.map((d) => "@macrostrat/" + d)],
   },
   plugins: [
     react(),
