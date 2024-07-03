@@ -57,6 +57,10 @@ export async function onBeforeRender(pageContext) {
         linkPrefix,
         project: projectData?.[0],
       },
+      documentProps: {
+        // The page's <title>
+        title: columnInfo.col_name,
+      },
     },
   };
 }

@@ -1,7 +1,8 @@
-.column-container :global {
+.column-container {
   --background-color: var(--column-background-color, #fff);
   --stroke-color: var(--column-stroke-color, #000);
 }
+
 .column-container :global .column {
   display: flex;
   flex-direction: row;
@@ -93,7 +94,8 @@
 .column-container.dark-mode :global .timescale {
   color: #000;
 }
-.column-container.dark-mode :global g.inner pattern image {
+
+.column-container.dark-mode :global g.lithology-column pattern image {
   filter: invert(80%);
 }
 
