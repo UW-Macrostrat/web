@@ -18,7 +18,6 @@ export default {
   extends: vikeReact,
   passToClient: [
     "pageProps",
-    "pageStyle",
     "supportsDarkMode",
     "macrostratLogoFlavor",
     "routeParams",

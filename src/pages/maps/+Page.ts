@@ -1,13 +1,12 @@
-import hyper from "@macrostrat/hyper";
-// Page for a list of maps
-import styles from "./main.module.scss";
+import h from "./main.module.scss";
 import { AnchorButton, ButtonGroup } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import { PageHeader, DevLinkButton } from "~/components";
+import { usePageProps } from "~/renderer";
 
-const h = hyper.styled(styles);
+export function Page() {
+  const { sources } = usePageProps();
 
-export function Page({ sources }) {
   return h(ContentPage, [
     h("div.float-right.padding.stick-to-top", [
       h(ButtonGroup, { vertical: true, large: true }, [

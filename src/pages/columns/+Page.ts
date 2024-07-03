@@ -2,14 +2,11 @@ import h from "@macrostrat/hyper";
 import { ContentPage } from "~/layouts";
 import { PageHeader, Link } from "~/components";
 import { Tag } from "@blueprintjs/core";
+import { usePageProps } from "~/renderer";
 
-export function Page({
-  columnGroups,
-  title = "Columns",
-  linkPrefix = "/",
-  ...rest
-}) {
-  console.log(rest, columnGroups);
+export function Page() {
+  const { columnGroups, title, linkPrefix } = usePageProps();
+
   return h(ContentPage, [
     h(PageHeader, { title }),
     columnGroups.map((d) => h(ColumnGroup, { data: d, key: d.id, linkPrefix })),
