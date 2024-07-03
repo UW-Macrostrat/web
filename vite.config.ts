@@ -7,6 +7,9 @@ import { UserConfig, Plugin } from "vite";
 import cesium from "vite-plugin-cesium";
 import pkg from "./package.json";
 
+// Non-transpiled typescript can't be imported as a standalone package
+import textToolchain from "./packages/text-toolchain/src";
+
 const aliasedModules = [
   "ui-components",
   "column-components",
@@ -73,7 +76,10 @@ const config: UserConfig = {
   },
   plugins: [
     react(),
-    mdx(),
+    textToolchain({
+      contentDir: path.resolve(__dirname, "content"),
+      wikiPrefix: "/dev/docs",
+    }),
     /* Fix error with single-page app reloading where paths
     with dots (e.g., locations) are not rewritten to index
     to allow for client-side routing */
