@@ -6,6 +6,7 @@ import ReactDOM from "react-dom/client";
 import { PageShell } from "../renderer/page-shell";
 import type { PageContextClient } from "../renderer/types";
 import { buildPageMeta } from "~/_utils/page-meta";
+import vikeReact from "vike-react";
 
 let root: ReactDOM.Root;
 

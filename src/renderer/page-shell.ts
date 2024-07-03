@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 import { PageContextProvider } from "./page-context";
 import { PageContext, PageStyle } from "./types";
 import { AuthProvider } from "./auth";
-
+import { usePageContext } from "vike-react/usePageContext";
 
 import "~/styles/blueprint-core";
 import "../styles/_theme.styl";
@@ -15,29 +15,19 @@ import styles from "./page-shell.module.sass";
 
 const h = hyper.styled(styles);
 
-export function PageShell({
-  children,
-  pageContext,
-}: {
-  children: React.ReactNode;
-  pageContext: PageContext;
-  supportsDarkMode?: boolean;
-}) {
-  const { exports, config, user } = pageContext;
+export function PageShell({ children }: { children: React.ReactNode }) {
+  const pageContext = usePageContext();
+  const { exports = {}, config, user } = pageContext;
   const supportsDarkMode = config?.supportsDarkMode ?? true;
   const pageStyle = exports?.pageStyle ?? "fullscreen";
 
   return h(
-    PageContextProvider,
-    { pageContext },
+    AuthProvider,
+    { user }, // Prefer detailed user if available
     h(
-      AuthProvider,
-      { user }, // Prefer detailed user if available
-      h(
-        supportsDarkMode ? DarkModeProvider : NoOpDarkModeProvider,
-        { followSystem: true },
-        h("div.app-shell", { className: pageStyle + "-page" }, children)
-      )
+      supportsDarkMode ? DarkModeProvider : NoOpDarkModeProvider,
+      { followSystem: true },
+      h("div.app-shell", { className: pageStyle + "-page" }, children)
     )
   );
 }
