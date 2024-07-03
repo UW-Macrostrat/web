@@ -10,6 +10,11 @@ export async function vikeHandler<
   Context extends Record<string | number | symbol, unknown>
 >(request: Request, context?: Context): Promise<Response> {
   const user = await getUserFromCookie(request);
+
+  // We add some custom instrumentation to the page context
+  // to adjust titles, etc.
+  console.log(context);
+
   const pageContextInit = {
     ...context,
     urlOriginal: request.url,

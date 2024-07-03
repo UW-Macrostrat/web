@@ -13,6 +13,8 @@ export default {
   Head,
   // <title>
   title: "Macrostrat",
+  description:
+    "A platform for geological data exploration, integration, and analysis.",
   extends: vikeReact,
   passToClient: [
     "pageProps",
@@ -21,7 +23,6 @@ export default {
     "macrostratLogoFlavor",
     "routeParams",
     "user",
-    "urlPathname",
     "description",
     "title",
     "environment",

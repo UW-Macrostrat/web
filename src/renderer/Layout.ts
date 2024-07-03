@@ -15,11 +15,13 @@ import styles from "./page-shell.module.sass";
 
 const h = hyper.styled(styles);
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default function Layout({ children }: { children: React.ReactNode, ...rest }) {
   const pageContext = usePageContext();
   const { exports = {}, config, user } = pageContext;
   const supportsDarkMode = config?.supportsDarkMode ?? true;
   const pageStyle = exports?.pageStyle ?? "fullscreen";
+
+  console.log(rest)
 
   return h(
     AuthProvider,

@@ -3,7 +3,13 @@ import { ContentPage } from "~/layouts";
 import { PageHeader, Link } from "~/components";
 import { Tag } from "@blueprintjs/core";
 
-export function Page({ columnGroups, title = "Columns", linkPrefix = "/" }) {
+export function Page({
+  columnGroups,
+  title = "Columns",
+  linkPrefix = "/",
+  ...rest
+}) {
+  console.log(rest, columnGroups);
   return h(ContentPage, [
     h(PageHeader, { title }),
     columnGroups.map((d) => h(ColumnGroup, { data: d, key: d.id, linkPrefix })),

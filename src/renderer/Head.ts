@@ -17,9 +17,11 @@ export default function Head() {
     h("meta", { name: "description", content: "Macrostrat" }),
     h("script", {
       type: "text/javascript",
-      children: `window.env = ${JSON.stringify(
-        environment
-      )}; window.process = {env: {NODE_ENV: "production"}};`,
+      dangerouslySetInnerHTML: {
+        __html: `window.env = ${JSON.stringify(
+          environment
+        )}; window.process = {env: {NODE_ENV: "production"}};`,
+      },
     }),
   ]);
 }
