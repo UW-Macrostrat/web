@@ -78,12 +78,12 @@ const config: UserConfig = {
     with dots (e.g., locations) are not rewritten to index
     to allow for client-side routing */
     //rewriteAll(),
-    ssr(),
     cesium({
       cesiumBuildPath,
       cesiumBuildRootPath: cesiumRoot,
     }),
     hyperStyles(),
+    ssr(),
   ],
   envDir: path.resolve(__dirname),
   build: {
