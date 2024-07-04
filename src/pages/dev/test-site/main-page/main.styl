@@ -21,7 +21,7 @@ a:hover
   display: flex;
   justify-content: center;
   align-items: center;  
-  height: 80vh
+  height: 35vh
   color: white
 
   li
@@ -44,7 +44,7 @@ a:hover
 .cover-image
   position:absolute
   z-index:5
-  height: 80vh
+  height: 35vh
   width: 60%
   object-fit: cover
   border-radius: 10px
@@ -87,6 +87,7 @@ a:hover
   display: grid
   grid-template-columns: 25% 25% 25% 25%
   margin-bottom: 3%
+  margin-top: 30px
   text-shadow: black 1px 0 10px;
 
   .stat
@@ -109,6 +110,9 @@ a:hover
   text-decoration: none;
   border-radius: 12px;
 
+  a 
+    color: white
+
 .btn:hover 
   background-color: #545151 
 
@@ -116,7 +120,7 @@ a:hover
   font-size: 20px
   padding: 0px
   display: grid
-  grid-template-columns: 33.33% 33.33% 33.33%
+  grid-template-columns: 50% 50%
 
   a 
     color: white
@@ -175,10 +179,13 @@ a:hover
 .header 
   display: grid
   margin: auto
+  margin-bottom: 0
   text-shadow: black 1px 0 10px
 
 #main-title
   display: inline-block
+  margin-bottom: 0
+  padding-bottom: 10px
 
 .version
   display: inline-block
@@ -437,8 +444,8 @@ a:hover
 
 .basic-card
   display: grid
-  grid-template-columns: 40% 60%
-  grid-template-rows: 30vh
+  grid-template-columns: 60% 40%
+  grid-template-rows: 18vh
 
   
   .link-title
@@ -518,6 +525,52 @@ a:hover
     margin: auto
     margin-top: 1%
 
-.long
-  a 
-    color: blue
+.map-card
+  p
+    color: black
+    border-radius: 10px
+    padding: 30px
+
+    a 
+      color: #015eab;
+
+    .btn
+      p 
+        a 
+          color: white
+
+.temp
+  font-size: 20px
+
+.search-card
+  height: 10vh
+  display:grid
+  margin: auto
+
+  a
+    color:black
+
+.mobile-card
+  height: 10vh
+  display: grid
+  grid-template-columns: 10vh 80%
+
+  a
+    color: black
+
+  h1
+    display: grid
+    margin: auto
+    font-size: 50px
+
+.rockd-png
+  height: 10vh
+  width: 10vh
+  padding-top: 0
+  border-radius: 10px 0 0 10px
+
+.search-card
+  h1 
+    display: grid
+    margin: auto
+    font-size: 50px
