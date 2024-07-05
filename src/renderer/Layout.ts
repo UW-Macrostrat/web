@@ -1,8 +1,5 @@
-import hyper from "@macrostrat/hyper";
 import { DarkModeProvider } from "@macrostrat/ui-components";
 import React from "react";
-//import { PageContextProvider } from "./page-context";
-//import { PageContext, PageStyle } from "./types";
 
 import { AuthProvider } from "./auth";
 import { usePageContext } from "vike-react/usePageContext";
@@ -12,9 +9,7 @@ import "../styles/_theme.styl";
 import "../styles/core.sass";
 import "../styles/padding.css";
 //
-import styles from "./page-shell.module.sass";
-
-const h = hyper.styled(styles);
+import h from "./page-shell.module.sass";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const pageContext = usePageContext();
