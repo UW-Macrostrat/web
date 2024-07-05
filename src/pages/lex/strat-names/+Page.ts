@@ -18,6 +18,7 @@ import {
 } from "./data-service";
 import { setQueryString } from "@macrostrat/ui-components";
 import styles from "./main.module.sass";
+import { usePageProps } from "~/renderer";
 
 const h = hyper.styled(styles);
 
@@ -47,7 +48,8 @@ function compareQueryParams(a, b) {
   return newParams;
 }
 
-export function Page({ data, filters: startingFilters }) {
+export function Page() {
+  const { data, filters: startingFilters } = usePageProps();
   const [showSettings, setShowSettings] = useState(false);
   const [state, dispatch] = useReducer(filterReducer, startingFilters);
 

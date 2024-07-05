@@ -32,7 +32,7 @@ import { MapNavbar } from "~/components/map-navbar";
 import "~/styles/global.styl";
 import { MapReference, DevLink } from "~/components";
 import styles from "./main.module.sass";
-import { PageBreadcrumbs } from "~/renderer";
+import { PageBreadcrumbs, usePageProps } from "~/renderer";
 
 const h = hyper.styled(styles);
 
@@ -135,7 +135,8 @@ function basemapStyle(basemap, inDarkMode) {
   }
 }
 
-export default function MapInterface({ map }) {
+export function Page() {
+  const { map } = usePageProps();
   const [isOpen, setOpen] = useState(false);
   const dark = useDarkMode()?.isEnabled ?? false;
   const title = map.properties.name;

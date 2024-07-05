@@ -4,6 +4,7 @@ import { AnchorButton, ButtonGroup } from "@blueprintjs/core";
 import { FullscreenPage } from "~/layouts";
 import { Header } from "./components";
 import { MapInterface } from "./components";
+import { usePageProps } from "~/renderer";
 
 const h = hyper.styled(styles);
 
@@ -16,7 +17,8 @@ interface EditInterfaceProps {
   ingestProcess?: any;
 }
 
-export function Page({ source_id, source, mapBounds }: EditInterfaceProps) {
+export function Page() {
+  const { source_id, source, mapBounds }: EditInterfaceProps = usePageProps();
   const title = source.name;
 
   const headerProps = {

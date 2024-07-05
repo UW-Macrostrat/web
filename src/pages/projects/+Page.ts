@@ -1,8 +1,10 @@
 import h from "@macrostrat/hyper";
 import { ContentPage } from "~/layouts";
 import { PageHeader, LinkCard } from "~/components";
+import { usePageProps } from "~/renderer";
 
-export function Page({ projects }) {
+export function Page() {
+  const { projects } = usePageProps();
   return h(ContentPage, [
     h(PageHeader, { title: "Projects" }),
     projects.map((d) => h(ProjectItem, { data: d, key: d.project_id })),
