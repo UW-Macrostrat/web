@@ -20,6 +20,7 @@ export default {
     "pageProps",
     "supportsDarkMode",
     "macrostratLogoFlavor",
+    "urlPathname",
     "routeParams",
     "user",
     "description",

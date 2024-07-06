@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAsyncEffect } from "@macrostrat/ui-components";
-import { postgrest } from "~/providers";
+import { postgrest } from "~/_providers";
 
 export type MapInfo = {
   source_id: number;
