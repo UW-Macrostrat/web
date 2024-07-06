@@ -53,7 +53,6 @@ function hyperStyles(): Plugin {
         // Keep backwards compatibility with the existing default style object.
         Object.assign(h, styles);
         export default h;`;
-        //console.log(code3, id);
         return code3;
       }
     },

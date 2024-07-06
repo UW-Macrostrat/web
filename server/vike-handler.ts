@@ -11,10 +11,6 @@ export async function vikeHandler<
 >(request: Request, context?: Context): Promise<Response> {
   const user = await getUserFromCookie(request);
 
-  // We add some custom instrumentation to the page context
-  // to adjust titles, etc.
-  console.log(context);
-
   const pageContextInit = {
     ...context,
     urlOriginal: request.url,
