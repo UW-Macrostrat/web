@@ -7,7 +7,7 @@ import {
 } from "@blueprintjs/core";
 import { FullscreenPage } from "~/layouts";
 import h from "./main.module.sass";
-import { PageBreadcrumbs } from "~/renderer";
+import { PageBreadcrumbs, usePageProps } from "~/renderer";
 import { useLegendData, MapInfo } from "../utils";
 import { useElementSize, useInDarkMode } from "@macrostrat/ui-components";
 import { useMemo, useRef } from "react";
@@ -28,7 +28,8 @@ import {
 import { LegendItemInformation } from "./legend-item";
 import { UnitDetailsPopover } from "~/components/unit-details";
 
-export function Page({ map }) {
+export function Page() {
+  const { map } = usePageProps();
   const ref = useRef(null);
   const size = useElementSize(ref);
   const legendData = useLegendData(map);

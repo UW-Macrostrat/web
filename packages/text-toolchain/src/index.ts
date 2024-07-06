@@ -20,8 +20,6 @@ export default function viteTextToolchain({
   const [pageIndex, permalinkIndex] = buildPageIndex(contentDir, wikiPrefix);
   const permalinks = Object.keys(permalinkIndex);
 
-  console.log(pageIndex, permalinkIndex);
-
   const include = [join(contentDir, "**/*.md"), "**/*.mdx"];
 
   return mdx({

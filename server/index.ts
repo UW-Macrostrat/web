@@ -66,7 +66,7 @@ async function startServer() {
 
   app.use(compression());
   app.use(cookieParser());
-
+  //
   if (isProduction) {
     app.use(sirv(`${root}/dist/client`));
     // Special case for cesium files at /cesium prefix
@@ -94,7 +94,7 @@ async function startServer() {
     process.env.VITE_MACROSTRAT_TILESERVER_DOMAIN,
     process.env.VITE_MACROSTRAT_INSTANCE
   );
-
+  //
   /**
    * Vike route
    *

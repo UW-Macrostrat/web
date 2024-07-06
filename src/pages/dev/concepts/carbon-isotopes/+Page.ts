@@ -6,7 +6,7 @@ import {
   MeasurementsLayer,
 } from "@macrostrat/column-views/src/map";
 import { MeasurementDataProvider } from "@macrostrat/concept-app-helpers";
-import { PatternProvider } from "~/_providers";
+import { PatternProvider } from "~/_providers.client";
 import { useColumnNav } from "@macrostrat/column-views";
 
 const ColumnTitle = (props) => {

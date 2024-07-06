@@ -3,7 +3,7 @@ import mdx from "@mdx-js/rollup";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import ssr from "vike/plugin";
-import { UserConfig, Plugin } from "vite";
+import { defineConfig, Plugin } from "vite";
 import cesium from "vite-plugin-cesium";
 import pkg from "./package.json";
 
@@ -53,26 +53,20 @@ function hyperStyles(): Plugin {
         // Keep backwards compatibility with the existing default style object.
         Object.assign(h, styles);
         export default h;`;
-        //console.log(code3, id);
         return code3;
       }
     },
   };
 }
 
-const config: UserConfig = {
+export default defineConfig({
   root: path.resolve("./src"),
   resolve: {
     conditions: ["typescript"],
     alias: {
       "~": path.resolve("./src"),
     },
-    dedupe: [
-      "react",
-      "react-dom",
-      "mapbox-gl",
-      ...aliasedModules.map((d) => "@macrostrat/" + d),
-    ],
+    dedupe: [...aliasedModules.map((d) => "@macrostrat/" + d)],
   },
   plugins: [
     react(),
@@ -105,6 +99,4 @@ const config: UserConfig = {
   ssr: {
     noExternal: ["labella", "@supabase/postgrest-js"],
   },
-};
-
-export default config;
+});
