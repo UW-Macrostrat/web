@@ -1,3 +1,0 @@
-# Test urls for eventual testing
-
-curl /integrations/qgis/layers/macrostrat-carto-slim.qlr

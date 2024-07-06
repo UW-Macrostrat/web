@@ -14,6 +14,7 @@
     "server:prod": "NODE_NO_WARNINGS=1 NODE_ENV=production yarn run server",
     "dev:storybook": "yarn workspace @macrostrat/storybook run dev",
     "start": "yarn run build && yarn run server",
+    "test:runtime": "tsx tests/test-urls.ts",
     "test": "vitest"
   },
   "workspaces": [
