@@ -1,7 +1,7 @@
 import { DarkModeProvider } from "@macrostrat/ui-components";
 import React from "react";
 
-import { AuthProvider } from "./auth";
+import { AuthProvider } from "../_providers/auth";
 import { usePageContext } from "vike-react/usePageContext";
 
 import "~/styles/blueprint-core";
@@ -9,7 +9,7 @@ import "../styles/_theme.styl";
 import "../styles/core.sass";
 import "../styles/padding.css";
 //
-import h from "./page-shell.module.sass";
+import h from "./layout.module.sass";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const pageContext = usePageContext();

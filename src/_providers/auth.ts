@@ -4,7 +4,7 @@ import {
   AsyncAuthAction,
 } from "@macrostrat/auth-components";
 import h from "@macrostrat/hyper";
-import { ingestPrefix } from "@macrostrat-web/settings";
+import { ingestPrefix } from "../../packages/settings";
 
 async function authTransformer(
   action: AuthAction | AsyncAuthAction
@@ -25,11 +25,11 @@ async function authTransformer(
     case "logout":
       // Delete the token from the session
       try {
-        const response = await fetch(
-          `${ingestPrefix}/security/logout`,
-          { method: "POST", credentials: "include"}
-        );
-        if(response.ok){
+        const response = await fetch(`${ingestPrefix}/security/logout`, {
+          method: "POST",
+          credentials: "include",
+        });
+        if (response.ok) {
           return { type: "logout" };
         } else {
           throw new Error("Failed to logout");
@@ -55,11 +55,11 @@ export function AuthProvider(props) {
 export async function fetchUser() {
   const response = await fetch(`${ingestPrefix}/security/me`, {
     method: "GET",
-    credentials: "include"
+    credentials: "include",
   });
-  if(response.ok){
+  if (response.ok) {
     const user = await response.json();
-    return user
+    return user;
   } else {
     throw new Error("Failed to get user status");
   }

@@ -3,7 +3,7 @@ import loadable from "@loadable/component";
 import h from "@macrostrat/hyper";
 import { Suspense, useEffect, useMemo, useState } from "react";
 
-function ClientOnly(props) {
+export function ClientOnly(props) {
   const fallback = props.fallback || Spinner;
   const [Component, setComponent] = useState(null);
   const rest = useMemo(() => {
@@ -19,5 +19,3 @@ function ClientOnly(props) {
 
   return h(Suspense, { fallback: fallback }, element);
 }
-
-export { ClientOnly };
