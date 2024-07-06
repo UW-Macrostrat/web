@@ -1,7 +1,7 @@
 import hyper from "@macrostrat/hyper";
-import { usePageContext } from "./page-context";
+import { usePageContext } from "../../renderer/page-context";
 import { Breadcrumbs } from "@blueprintjs/core";
-import type { PageContext } from "./types";
+import type { PageContext } from "../../renderer/types";
 import React from "react";
 import { MacrostratIcon } from "~/components";
 import styles from "./breadcrumbs.module.sass";

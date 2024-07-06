@@ -30,14 +30,8 @@ export function PageHeader(props) {
   ]);
 }
 
-
 export function Icon(props) {
-  const {
-    title = "",
-    showSiteName = true,
-    children,
-    className,
-  } = props;
+  const { title = "", showSiteName = true, children, className } = props;
   const siteName = "";
   let _showSiteName = showSiteName;
   if (title == siteName) {
