@@ -1,3 +1,5 @@
+// https://vike.dev/onBeforeRender
+
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import { preprocessUnits } from "@macrostrat/column-views/src/helpers";
 import fetch from "node-fetch";

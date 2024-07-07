@@ -7,7 +7,7 @@ import {
 import hyper from "@macrostrat/hyper";
 import { MapPosition } from "@macrostrat/mapbox-utils";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "~/renderer/Link";
+import { Link } from "~/components/navigation/link-component";
 import CesiumView from "./cesium-view";
 
 import {

@@ -14,6 +14,7 @@
     "server:prod": "NODE_NO_WARNINGS=1 NODE_ENV=production yarn run server",
     "dev:storybook": "yarn workspace @macrostrat/storybook run dev",
     "start": "yarn run build && yarn run server",
+    "test:runtime": "tsx tests/test-urls.ts",
     "test": "vitest"
   },
   "workspaces": [
@@ -63,6 +64,7 @@
     "@macrostrat-web/security": "workspace:*",
     "@macrostrat-web/settings": "workspace:*",
     "@macrostrat-web/sift": "workspace:*",
+    "@macrostrat-web/text-toolchain": "workspace:*",
     "@macrostrat-web/utility-functions": "workspace:*",
     "@macrostrat/api-utils": "workspace:*",
     "@macrostrat/api-views": "workspace:*",
@@ -116,6 +118,7 @@
     "d3-selection": "^1.0.0",
     "d3-shape": "^3.2.0",
     "esbuild": "^0.20.0",
+    "esbuild-register": "^3.5.0",
     "esprima": "^4.0.1",
     "express": "^4.18.2",
     "hex-to-css-filter": "^5.4.0",
@@ -144,13 +147,15 @@
     "use-debounce": "^9.0.4",
     "use-react-router-breadcrumbs": "^3.2.1",
     "use-resize-observer": "^9.1.0",
-    "vike": "^0.4.172",
-    "vike-react": "^0.4.11",
-    "vite": "^5.2.11",
+    "vike": "^0.4.177",
+    "vike-react": "^0.4.15",
+    "vite": "^5.3.2",
     "vite-plugin-cesium": "^1.2.22",
     "vite-plugin-inspect": "^0.8.4",
     "zustand": "^4.5.1"
   },
-  "prettier": {},
+  "prettier": {
+    "proseWrap": "always"
+  },
   "packageManager": "yarn@4.2.2"
 }

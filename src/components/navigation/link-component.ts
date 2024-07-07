@@ -1,5 +1,5 @@
 import h from "@macrostrat/hyper";
-import { usePageContext } from "./page-context";
+import { usePageContext } from "../../renderer/page-context";
 
 export function useLinkIsActive(href: string) {
   const pageContext = usePageContext();

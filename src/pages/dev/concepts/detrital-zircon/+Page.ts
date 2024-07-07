@@ -11,7 +11,7 @@ import {
   ColumnNavigatorMap,
   MeasurementsLayer,
 } from "@macrostrat/column-views";
-import { PatternProvider } from "~/_providers";
+import { PatternProvider } from "~/_providers.client";
 import { ColumnDataProvider, useColumnData } from "./column-data";
 import "./main.styl";
 

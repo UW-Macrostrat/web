@@ -1,16 +1,7 @@
 import { HotkeysProvider } from "@blueprintjs/core";
-import hyper from "@macrostrat/hyper";
-import { ClientOnly } from "~/renderer/client-only";
-import style from "../main.module.sass";
+import h from "../main.module.sass";
 import { PageBreadcrumbs } from "~/renderer";
-
-const h = hyper.styled(style);
-
-function DataSheetTest() {
-  return h(ClientOnly, {
-    component: () => import("@macrostrat-web/data-sheet-test"),
-  });
-}
+import DataSheetTest from "@macrostrat-web/data-sheet-test";
 
 export function Page() {
   return h(

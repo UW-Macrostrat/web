@@ -2,7 +2,7 @@ import { AnchorButton } from "@blueprintjs/core";
 import { ingestPrefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import { useEffect, useState } from "react";
-import { PageBreadcrumbs } from "~/renderer";
+import { PageBreadcrumbs, usePageProps } from "~/renderer";
 import { IngestProcessCard } from "./components";
 import styles from "./main.module.sass";
 import { AuthStatus } from "@macrostrat/auth-components";
@@ -12,7 +12,8 @@ import Tag from "./components/Tag";
 
 const h = hyper.styled(styles);
 
-export function Page({ user, url }) {
+export function Page() {
+  const { user, url } = usePageProps();
   const [ingestProcess, setIngestProcess] = useState<IngestProcess[]>([]);
   const [ingestFilter, setIngestFilter] = useState<URLSearchParams>(undefined);
   const [tags, setTags] = useState<string[]>([]);

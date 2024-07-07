@@ -9,7 +9,7 @@ import {
 } from "@macrostrat/column-views";
 
 import { Column, useColumnNav } from "@macrostrat/column-views";
-import { PatternProvider } from "~/_providers";
+import { PatternProvider } from "~/_providers.client";
 import ModalUnitPanel from "./modal-panel";
 import { ColumnNavigatorMap, preprocessUnits } from "@macrostrat/column-views";
 import styles from "./column-inspector.module.styl";

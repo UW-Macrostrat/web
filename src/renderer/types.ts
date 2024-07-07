@@ -1,4 +1,4 @@
-export type { PageContextClient, PageContextServer, PageProps };
+export type { PageContext, PageContextClient, PageContextServer, PageProps };
 
 import type {
   /*
@@ -30,7 +30,8 @@ export type PageContextCustom = {
   urlPathname: string;
   user?: User;
   macrostratLogoFlavor?: string;
-  config: PageContextBuiltInServer["config"] & {
+  mdxContent?: string;
+  config: PageContextBuiltInServerInternal["config"] & {
     clientRouting?: boolean;
     supportsDarkMode?: boolean;
     isolateStyles?: boolean;

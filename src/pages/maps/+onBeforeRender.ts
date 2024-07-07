@@ -1,4 +1,4 @@
-import { postgrest } from "~/providers";
+import { postgrest } from "~/_providers";
 
 export async function onBeforeRender(pageContext) {
   // `.page.server.js` files always run in Node.js; we could use SQL/ORM queries here.
