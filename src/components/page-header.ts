@@ -1,7 +1,8 @@
 import hyper from "@macrostrat/hyper";
 import { MacrostratIcon } from "./macrostrat-icon";
-import { Link } from "./buttons";
+import { DevLinkButton, Link } from "./buttons";
 import styles from "./icon.module.sass";
+import { AnchorButton, ButtonGroup } from "@blueprintjs/core";
 
 const h = hyper.styled(styles);
 
@@ -47,5 +48,11 @@ export function Icon(props) {
     h("span.title", title),
     " ",
     children,
+  ]);
+}
+
+export function AssistantLinks({ children }) {
+  return h("div.float-right.padding.stick-to-top", [
+    h(ButtonGroup, { vertical: true, large: true }, [children]),
   ]);
 }

@@ -9,7 +9,7 @@ import { UnitLong } from "@macrostrat/api-types";
 import { GapBoundPackage, SectionRenderData, AgeComparable } from "./types";
 
 import h from "./main.module.sass";
-import { useCorrelationDiagramStore } from "~/pages/correlation/state";
+import { useCorrelationDiagramStore } from "~/pages/columns/correlation/state";
 
 export interface ColumnIdentifier {
   col_id: number;

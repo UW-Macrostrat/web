@@ -5,7 +5,7 @@ import {
   useColumn,
 } from "@macrostrat/column-components";
 import { Timescale, TimescaleOrientation } from "@macrostrat/timescale";
-import { JSONView, useDarkMode } from "@macrostrat/ui-components";
+import { useDarkMode } from "@macrostrat/ui-components";
 import classNames from "classnames";
 import { useContext, useEffect, useMemo, useRef } from "react";
 import { AgeAxis, useSelectedUnit } from "@macrostrat/column-views";
@@ -25,7 +25,7 @@ import {
   LegendPanelHeader,
   UnitDetailsPopover,
 } from "~/components/unit-details";
-import { useCorrelationDiagramStore } from "~/pages/correlation/state";
+import { useCorrelationDiagramStore } from "~/pages/columns/correlation/state";
 
 export function MacrostratColumnProvider(props) {
   // A column provider specialized the Macrostrat API
