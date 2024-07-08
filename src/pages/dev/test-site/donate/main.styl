@@ -14,54 +14,12 @@ p
   margin-bottom: 10px;
   margin-top: 0;
 
-.donate-container
-  height: 80vh
-
 .title
   margin: 0
   font-size: 72px
   font-family: "Maven Pro", sans-serif;
   padding: 20vh 0
   text-align: center
-  
-.donate-title
-  a 
-    color:white
-  a:hover
-    text-decoration: none
-
-  color: white
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
-  font-family: "Maven Pro", sans-serif;
-  padding: 0
-
-.donate-left
-  float: left
-  width: 50%
-  height: 80vh
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-.donate-right
-  float: right
-  width: 50%
-  height: 80vh
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-.donate-info
-  background: rgba(255,255,255,0.6);
-  padding: 25px
-  color: black
-  width: 80%
-  font-size: 18px
-
-  a
-    color: black
-    font-weight: bold
-    text-decoration: none
 
 .donate-img
   position:absolute
@@ -95,3 +53,46 @@ p
 
   border-radius: 10px
   box-shadow: black 1px 0 10px
+
+.donate-card
+  height: 80vh
+
+.donate-text
+  position:absolute
+  z-index: 100
+  width: 60%
+  display: grid
+  margin:auto
+  grid-template-rows: 20vh 60vh;
+  height: 80vh
+
+.donate-title
+  a 
+    color:white
+  a:hover
+    text-decoration: none
+
+  display: grid
+  margin: auto
+  color: white
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  font-family: "Maven Pro", sans-serif;
+  font-size: 100px
+
+.caption-donate
+  display: grid
+  margin: auto
+  padding: 25px
+  margin-right: 20%
+  margin-left: 20%
+  background: rgba(255,255,255,0.6);
+  color: black
+
+  a
+    color: black
+    font-weight: bold
+    text-decoration: none
+
+  p
+    margin-bottom: 0
+    font-size: 175%
