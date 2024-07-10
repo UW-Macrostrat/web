@@ -6564,6 +6564,7 @@ __metadata:
     d3-shape: "npm:^3.2.0"
     esbuild: "npm:^0.20.0"
     express: "npm:^4.18.2"
+    express-http-proxy: "npm:^2.0.0"
     hex-to-css-filter: "npm:^5.4.0"
     history: "npm:^5.3.0"
     immutability-helper: "npm:^3.1.1"
@@ -16998,7 +16999,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"debug@npm:^3.1.0":
+"debug@npm:^3.0.1, debug@npm:^3.1.0":
   version: 3.2.7
   resolution: "debug@npm:3.2.7"
   dependencies:
@@ -18218,7 +18219,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"es6-promise@npm:^4.0.3":
+"es6-promise@npm:^4.0.3, es6-promise@npm:^4.1.1":
   version: 4.2.8
   resolution: "es6-promise@npm:4.2.8"
   checksum: 10/b250c55523c496c43c9216c2646e58ec182b819e036fe5eb8d83fa16f044ecc6b8dcefc88ace2097be3d3c4d02b6aa8eeae1a66deeaf13e7bee905ebabb350a3
@@ -19052,6 +19053,17 @@ __metadata:
   version: 3.1.1
   resolution: "exponential-backoff@npm:3.1.1"
   checksum: 10/2d9bbb6473de7051f96790d5f9a678f32e60ed0aa70741dc7fdc96fec8d631124ec3374ac144387604f05afff9500f31a1d45bd9eee4cdc2e4f9ad2d9b9d5dbd
+  languageName: node
+  linkType: hard
+
+"express-http-proxy@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "express-http-proxy@npm:2.0.0"
+  dependencies:
+    debug: "npm:^3.0.1"
+    es6-promise: "npm:^4.1.1"
+    raw-body: "npm:^2.3.0"
+  checksum: 10/61b204ece1c78795e7d160893d9d0bad97aed12de7d1f6b6301be4c0f152a0cc2243f2d659a623a7bb1af14321b19d342506028eaf818ad5854a4211735196c3
   languageName: node
   linkType: hard
 
@@ -31068,7 +31080,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"raw-body@npm:2.5.2":
+"raw-body@npm:2.5.2, raw-body@npm:^2.3.0":
   version: 2.5.2
   resolution: "raw-body@npm:2.5.2"
   dependencies:

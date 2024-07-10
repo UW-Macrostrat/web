@@ -6,21 +6,8 @@ import { PageHeader, DevLinkButton } from "~/components";
 
 export function Page({ sources }) {
 
-  console.log(sources)
-
   return h(ContentPage, [
-    h("div.float-right.padding.stick-to-top", [
-      h(ButtonGroup, { vertical: true, large: true }, [
-        h(
-          AnchorButton,
-          { icon: "flows", href: "/maps/ingestion" },
-          "Ingestion system"
-        ),
-        h(AnchorButton, { icon: "map", href: "/map/sources" }, "Show on map"),
-        h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
-      ]),
-    ]),
-    h(PageHeader, { title: "TA1 Maps" }),
+    h(PageHeader, { title: "CDR Maps", showSiteName: false }),
     h(
       "ul.maps-list",
       sources.map((d) =>

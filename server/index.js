@@ -7,6 +7,7 @@
 import { createMacrostratQlrAPI } from "@macrostrat-web/qgis-integration";
 import compression from "compression";
 import express from "express";
+import proxy from "express-http-proxy";
 import { renderPage } from "vike/server";
 import { root } from "./root.js";
 
@@ -64,6 +65,22 @@ async function startServer() {
     process.env.VITE_MACROSTRAT_TILESERVER_DOMAIN,
     process.env.VITE_MACROSTRAT_INSTANCE
   );
+
+  //
+  // Proxy requests to /tile/* to https://api.cdr.land/v1/tiles/*
+  // Add the Authorization header to the proxied request
+  //
+  app.use("/tiles", proxy(
+    "https://api.cdr.land", {
+      proxyReqOptDecorator: (opts) => {
+        opts.headers["Authorization"] = `Bearer ${process.env.CDR_API_KEY}`;
+        return opts;
+      },
+      proxyReqPathResolver: (req) => {
+        return `/v1/tiles${req.url}`;
+      }
+    })
+  )
 
   // vike middleware. It should always be our last middleware (because it's a
   // catch-all middleware superseding any middleware placed after it).

@@ -177,7 +177,7 @@ export default function MapInterface({ cog_id, system, system_version, envelope 
         focusedMap: null,
         layerOpacity,
         rasterURL: null,
-        tileURL: `http://localhost:8333/v1/tiles/cog/${cog_id}/system/${encodeURIComponent(system)}/system_version/${encodeURIComponent(system_version)}/tile/{z}/{x}/{y}`
+        tileURL: `/tiles/cog/${cog_id}/system/${encodeURIComponent(system)}/system_version/${encodeURIComponent(system_version)}/tile/{z}/{x}/{y}`
       })
     );
   }, [
