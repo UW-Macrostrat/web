@@ -1,11 +1,13 @@
 $(document).ready(function () {
   /*
-        ISSUES TO SOLVE
-        -some formations, have themselves as the fisrt 'member', but aren't labeled as members in the db.   see #495
-        -some formations are ordered wrong. this breaks the UnMergedColun function (because it uses filter)
+  Macrostrat's first strat column renderer, by Lance Weaver
 
-        -UNCONFORMITIES need to be in the db, and displayed with a wavy or dashed line and note!
-        -fossils, unconforms, and other notes need to be added to db, and displayed in borderless column on right
+  ISSUES TO SOLVE
+  -some formations, have themselves as the fisrt 'member', but aren't labeled as members in the db.   see #495
+  -some formations are ordered wrong. this breaks the UnMergedColun function (because it uses filter)
+
+  -UNCONFORMITIES need to be in the db, and displayed with a wavy or dashed line and note!
+  -fossils, unconforms, and other notes need to be added to db, and displayed in borderless column on right
 
     */
 
@@ -105,7 +107,7 @@ $(document).ready(function () {
       createUnmergedColumn(unit, n);
     });
     mergeHtmlCells();
-    /* 
+    /*
      // because the api json data is so unpredictable, this option is problematic
         data = getRowSpans(data); // prep the data by calculating rowspan values for the html table
         $.each(data, function( n,unit ) {

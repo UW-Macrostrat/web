@@ -1,13 +1,17 @@
 import h from "@macrostrat/hyper";
 import { ContentPage } from "~/layouts";
-import { PageHeader, Link } from "~/components";
-import { Tag } from "@blueprintjs/core";
+import { PageHeader, Link, AssistantLinks, DevLinkButton } from "~/components";
+import { AnchorButton, Tag } from "@blueprintjs/core";
 import { usePageProps } from "~/renderer";
 
 export function Page() {
   const { columnGroups, title, linkPrefix } = usePageProps();
 
   return h(ContentPage, [
+    h(AssistantLinks, [
+      h(AnchorButton, { href: "/projects", minimal: true }, "Projects"),
+      h(DevLinkButton, { href: "/columns/correlation" }, "Correlation chart"),
+    ]),
     h(PageHeader, { title }),
     columnGroups.map((d) => h(ColumnGroup, { data: d, key: d.id, linkPrefix })),
   ]);

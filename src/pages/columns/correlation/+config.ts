@@ -10,5 +10,5 @@ export default {
       },
     },
   },
-  title: "Correlation diagram",
+  title: "Correlation chart",
 };
