@@ -1,5 +1,6 @@
 import h from "@macrostrat/hyper";
 import { usePageContext } from "vike-react/usePageContext";
+import favicon from "./assets/favicon.png";
 
 export default function Head() {
   const ctx = usePageContext();
@@ -18,6 +19,7 @@ export default function Head() {
       content: "black-translucent",
     }),
     h("meta", { charSet: "utf-8" }),
+    h("link", { rel: "icon", href: favicon }),
     h("link", {
       href: "https://fonts.googleapis.com/css?family=Montserrat:400,700|Source+Sans+Pro",
       rel: "stylesheet",
