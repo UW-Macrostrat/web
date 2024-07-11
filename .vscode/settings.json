@@ -1,15 +1,28 @@
 {
   "search.exclude": {
     "**/.yarn": true,
-    "**/.pnp.*": true
+    "**/.pnp.*": true,
+    ".vite": true,
+    "node_modules": true,
+    "dist": true
   },
   "typescript.tsdk": ".yarn/sdks/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true,
   "prettier.prettierPath": ".yarn/sdks/prettier/index.js",
-  // Disable organized imports for typescript
-  "[typescript]": {
-    "editor.codeActionsOnSave": {
-      "source.organizeImports": "never"
-    }
+  "cSpell.enableFiletypes": [
+    "!javascript",
+    "!javascriptreact",
+    "!json",
+    "!scss",
+    "!typescript"
+  ],
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "**/__pycache__": true
   }
 }

@@ -1,91 +1,104 @@
-import { apiV2Prefix } from "@macrostrat-web/settings";
+import { buildCrossSectionLayers } from "~/_utils/map-layers";
 
-export const overlayStyle = {
-  version: 8,
-  sources: {
-    // "pbdb": {
-    //     "type": "vector",
-    //     "tiles": [
-    //       `${SETTINGS.burwellTileDomain}/hexgrid/{z}/{x}/{y}.mvt`
-    //     ],
-    //     "tileSize": 512,
-    //     "maxzoom": 6,
-    // },
-    "pbdb-points": {
-      type: "geojson",
-      cluster: true,
-      clusterRadius: 50,
-      data: {
-        type: "FeatureCollection",
-        features: [],
-      },
-    },
-    "pbdb-clusters": {
-      type: "geojson",
-      generateId: true,
-      data: {
-        type: "FeatureCollection",
-        features: [],
-      },
-    },
-    info_marker: {
-      type: "geojson",
-      data: {
-        type: "FeatureCollection",
-        features: [
-          {
-            type: "Feature",
-            geometry: {
-              type: "Point",
-              coordinates: [0, 0],
-            },
-          },
-        ],
-      },
-    },
-    columns: {
-      type: "geojson",
-      generateId: true,
-      data: `${apiV2Prefix}/columns?all&format=geojson_bare`,
-    },
-    filteredColumns: {
-      type: "geojson",
-      generateId: true,
-      data: {
-        type: "FeatureCollection",
-        features: [],
-      },
-    },
-    elevationPoints: {
-      type: "geojson",
-      data: {
-        type: "FeatureCollection",
-        features: [],
-      },
-    },
-    elevationLine: {
-      type: "geojson",
-      data: {
-        type: "FeatureCollection",
-        features: [],
-      },
-    },
-    elevationMarker: {
-      type: "geojson",
-      data: {
-        type: "FeatureCollection",
-        features: [],
-      },
+/** Add extra types we use in this style... */
+interface SourceExt extends mapboxgl.Source {
+  cluster?: boolean;
+  clusterRadius?: number;
+  generateId?: boolean;
+  data?: any;
+}
+
+export function buildOverlayStyle() {
+  return {
+    version: 8,
+    layers: buildOverlayLayers(),
+    sources: overlaySources,
+  };
+}
+
+const overlaySources: { [k: string]: SourceExt } = {
+  // "pbdb": {
+  //     "type": "vector",
+  //     "tiles": [
+  //       `${SETTINGS.burwellTileDomain}/hexgrid/{z}/{x}/{y}.mvt`
+  //     ],
+  //     "tileSize": 512,
+  //     "maxzoom": 6,
+  // },
+  "pbdb-points": {
+    type: "geojson",
+    cluster: true,
+    clusterRadius: 50,
+    data: {
+      type: "FeatureCollection",
+      features: [],
     },
   },
-  layers: [
+  "pbdb-clusters": {
+    type: "geojson",
+    generateId: true,
+    data: {
+      type: "FeatureCollection",
+      features: [],
+    },
+  },
+  columns: {
+    type: "geojson",
+    generateId: true,
+    data: {
+      type: "FeatureCollection",
+      features: [],
+    },
+  },
+  filteredColumns: {
+    type: "geojson",
+    generateId: true,
+    data: {
+      type: "FeatureCollection",
+      features: [],
+    },
+  },
+  crossSectionEndpoints: {
+    type: "geojson",
+    data: {
+      type: "FeatureCollection",
+      features: [],
+    },
+  },
+  crossSectionLine: {
+    type: "geojson",
+    data: {
+      type: "FeatureCollection",
+      features: [],
+    },
+  },
+  elevationMarker: {
+    type: "geojson",
+    data: {
+      type: "FeatureCollection",
+      features: [],
+    },
+  },
+};
+
+export function buildOverlayLayers(): mapboxgl.Layer[] {
+  // Get CSS colors from settings
+  const ruleColor = getComputedStyle(document.body).getPropertyValue(
+    "--panel-background-color"
+  );
+
+  const centerColor = getComputedStyle(document.body).getPropertyValue(
+    "--panel-rule-color"
+  );
+
+  return [
     {
       id: "column_fill",
       type: "fill",
       source: "columns",
       paint: {
-        "fill-color": "#777777",
-        "fill-opacity": 0.2,
+        "fill-color": centerColor,
+        "fill-opacity": 0.3,
       },
       layout: {
         visibility: "none",
@@ -96,11 +109,13 @@ export const overlayStyle = {
       type: "line",
       source: "columns",
       paint: {
-        "line-color": "#777777",
+        "line-color": ruleColor,
+        "line-opacity": 0.75,
         "line-width": {
           stops: [
-            [0, 0.2],
-            [10, 1],
+            [0, 0.5],
+            [4, 1],
+            [10, 2],
           ],
         },
       },
@@ -137,56 +152,8 @@ export const overlayStyle = {
         visibility: "none",
       },
     },
-    {
-      id: "infoMarker",
-      type: "symbol",
-      source: "info_marker",
-      layout: {
-        "icon-size": 0.65,
-        "icon-image": "pin",
-        "icon-offset": [0, -28],
-        visibility: "none",
-        "icon-allow-overlap": true,
-      },
-    },
-    {
-      id: "elevationLine",
-      type: "line",
-      source: "elevationLine",
-      paint: {
-        "line-dasharray": [4, 2],
-        "line-width": {
-          stops: [
-            [0, 3],
-            [12, 5],
-          ],
-        },
-        "line-color": "#ffffff",
-        "line-opacity": 1,
-      },
-    },
-    {
-      id: "elevationPoint",
-      type: "circle",
-      source: "elevationPoints",
-      paint: {
-        "circle-radius": 6,
-        "circle-color": "#ffffff",
-        "circle-stroke-width": 1,
-        "circle-stroke-color": "#333333",
-      },
-    },
-    {
-      id: "elevationMarker",
-      type: "circle",
-      source: "elevationMarker",
-      paint: {
-        "circle-radius": 8,
-        "circle-color": "#4bc0c0",
-        "circle-stroke-width": 2,
-        "circle-stroke-color": "#dcdcdc",
-      },
-    },
+    ...buildCrossSectionLayers(),
+
     // {
     //   "id": "pbdbCollections",
     //   "type": "fill",
@@ -314,5 +281,5 @@ export const overlayStyle = {
         "circle-stroke-color": "#fff",
       },
     },
-  ],
-};
+  ];
+}

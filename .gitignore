@@ -16,6 +16,14 @@ docker-compose.yaml
 !.yarn/sdks
 !.yarn/versions
 
-.vite
-
+# IntelliJ
 .idea
+.idea/workspace.xml
+.idea/tasks.xml
+
+
+# For ignoring static files
+*.png
+*.jpg
+
+.vite

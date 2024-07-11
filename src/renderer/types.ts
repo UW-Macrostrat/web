@@ -1,13 +1,12 @@
 export type { PageContext, PageContextClient, PageContextServer, PageProps };
 
-import { PageContextBuiltInServerInternal } from "vike/dist/esm/shared/types";
 import type {
   /*
           // When using Client Routing https://vike.dev/clientRouting
           PageContextBuiltInClientWithClientRouting as PageContextBuiltInClient
           /*/
   // When using Server Routing
-  PageContextBuiltInClientWithServerRouting as PageContextBuiltInClient,
+  PageContextServer as PageContextBuiltInServer,
   PageContextClient as PageContextClientBase,
   PageContextServer as PageContextServerBase,
 } from "vike/types";
@@ -31,6 +30,7 @@ export type PageContextCustom = {
   urlPathname: string;
   user?: User;
   macrostratLogoFlavor?: string;
+  mdxContent?: string;
   config: PageContextBuiltInServerInternal["config"] & {
     clientRouting?: boolean;
     supportsDarkMode?: boolean;
@@ -38,6 +38,8 @@ export type PageContextCustom = {
     hydrationCanBeAborted?: boolean;
   };
   exports: {
+    title?: string;
+    description?: string;
     pageStyle?: PageStyle;
     supportsDarkMode?: boolean;
     documentProps?: DocumentProps;

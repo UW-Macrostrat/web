@@ -1,0 +1,154 @@
+import { PageHeader } from "~/components";
+import { LinkCard } from "~/components/cards";
+import { Image, Navbar, Footer } from "../index";
+import "./main.styl";
+import "../main.styl";
+import { MacrostratIcon } from "~/components";
+
+<div id="total">
+
+[//]: # "Nav Bar"
+<Navbar></Navbar>
+
+[//]: # "Start Page"
+<div class="start">
+    <Image className="back-img cover-image" src="cover_large.jpg"></Image>
+    <div class="text">
+      <span class="header">
+        <h1 id="main-title" class="big">Macrostrat<h2 class="version">v2</h2></h1>
+      </span>
+      <div class="stats">
+        <div class="stat">
+          <span class="top-stat" id="n_columns">1,400</span>
+          <span class="top-stat-label">Regional Rock Columns</span>
+        </div>
+        <div class="stat">
+          <span class="top-stat" id="n_units">33,903</span>
+          <span class="top-stat-label">Rock Units</span>
+        </div>
+        <div class="stat">
+          <span class="top-stat" id="n_polys">2,500,000</span>
+          <span class="top-stat-label">Geologic Map Polygons</span>
+        </div>
+        <div class="stat">
+          <span class="top-stat" id="n_names">51,212</span>
+          <span class="top-stat-label"><a href="Macrostrat_strat_names.html" target="_blank">Stratigraphic Names</a></span>
+        </div>
+      </div>
+      <p class="big-text">A platform for geological data exploration, integration, and analysis</p>
+      <div class="buttons1">
+        <a type="button" class="btn" href="/sift/#/">Search</a>
+        <a type="button" class="btn" href="/map/#3/40.78/-94.13">Geologic Map</a>
+        <div type="button" class="btn rockd" onclick="window.location='https://rockd.org'">
+          <div class="rockd-button-container">
+            <Image src="rockd.jpg" width="22px" className="rockd-png"></Image>
+            <a href="https://rockd.org" target="_blank">Go mobile</a>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+
+[//]: # "Locations"
+<div id="locations">
+  <div class="location">
+    <Image className="location-img t1" src="north_america_med.jpg"></Image>
+    <div class="location-text">
+      <h1>North America</h1>
+      <div class="caption">243 packages. 798 units. 897 collections.</div>
+    </div>
+    <Image className="location-img t2" src="caribbean_new_medium.jpg"></Image>
+    <div class="location-text">
+      <h1>Carribean</h1>
+      <div class="caption">243 packages. 798 units. 897 collections.</div>
+    </div>
+  </div>
+  <div class="location">
+    <div class="location-text">
+      <h1>New Zealand</h1>
+      <div class="caption">828 packages. 2,168 units. 328 collections.</div>
+    </div>
+    <Image className="location-img t1" src="new_zealand_new_medium.jpg"></Image>
+    <div class="location-text">
+      <h1>Deep Sea</h1>
+      <div class="caption">388 packages. 7,124 units. 0 collections.</div>
+    </div>
+    <Image className="location-img t2" src="deep_sea_new_medium.jpg"></Image>
+  </div>
+</div>
+
+[//]: # "Map Interface"
+<div class="temp-class" id="map">
+  <div class="link-title">
+    <a href="/map"><h1>Map Interface</h1></a>
+  </div>
+  <p class="long">
+    <div class="temp">With over 225 maps from data providers around the world across every scale, Macrostrat is the world's largest homogenized geologic map database. Our data processing pipeline links geologic map polygons to Macrostrat column polygons, external stratigraphic name lexicons, and geochronological intervals, enabling the enhancement of the original map data and allowing for direct links into <a href="https://xdd.wisc.edu" target="_blank">xDD</a> (formly GeoDeepDive).</div>
+    \
+    <div class="temp">Are you affiliated with a state or national geologic survey? <a href="mailto:contact@macrostrat.org?Subject=Geologic%20Map%20Collaboration">Get in touch</a> with us - we'd love to collaborate and help publicize your maps!</div>
+    \
+    <div class="temp"> Get started by <a href="/map">exploring the map</a> or <a href="/map/sources">taking a look at</a> which maps are currently a part of Macrostrat.</div>
+  </p>
+</div>
+
+[//]: # "Maps"
+<div class="temp-class" id="maps">
+  <div class="link-title">
+    <a href="/maps"><h1>Maps</h1></a>
+  </div>
+  <p>
+    The spatial footprint of rocks on the Earth's surface
+  </p>
+</div>
+
+[//]: # "Columns"
+<div class="temp-class" id="columns">
+  <div class="link-title">
+    <a href="/columns"><h1>Columns</h1></a>
+  </div>
+  <p>
+    Stratigraphic and geological columns showing the organization of rocks in time
+  </p>
+</div>
+
+[//]: # "Geologic Lexicon"
+<div class="temp-class" id="lexicon">
+  <div class="link-title">
+    <a href="/lex"><h1>Geologic Lexicon</h1></a>
+  </div>
+  <p>
+    Geologic units and data dictionaries
+  </p>
+</div>
+
+[//]: # "Projects"
+<div class="temp-class" id="project">
+  <div class="link-title">
+    <a href="/projects"><h1>Projects</h1></a>
+  </div>
+  <p>
+    Projects for specific regions or geological problems
+  </p>
+</div>
+
+
+[//]: # "Donate"
+<div class="donate-container" id="donate">
+  <Image className="back-img donate-img" src="donate_medium.jpg"></Image>
+  <div class="text-donate">
+    <div class="donate-left">
+      <h1 class="title donate-title"><a href="https://secure.supportuw.org/give/?id=E0A03FA3-B2A0-431C-83EE-A121A04EEB5D" target="_blank">Donate Now</a></h1>
+    </div>
+    <div class="donate-right">
+      <div class="donate-info">
+          Grant funding, principally from the <a href="http://www.nsf.gov" target="_blank">U.S. National Science Foundation</a>, got Macrostrat off the ground and keeps us innovating, but maintaining and growing a free and open digital resource involves ongoing expenses beyond the grant cycle, like annual certificate renewals, cloud server hosting and backup storage that keep your connection safe, domain name registrations that keep us located on the web, and system upgrades to keep us fast and efficient. If you would like to help us continue to grow and provide free resources, you can do so with a one-time or recurring gift to the UW Foundation Paleontology Program Fund in Geology. Thank you!
+      </div>
+    </div>
+  </div>
+</div>
+
+[//]: # "Footer"
+<Footer></Footer>
+
+</div>

@@ -1,20 +1,17 @@
 /** A dynamic icon for Macrostrat */
-import hyper from "@macrostrat/hyper";
 import { resolvePattern } from "~/_utils";
 import { useCallback, useEffect, useRef, useState } from "react";
-import styles from "./icon.module.sass";
+import h from "./icon.module.sass";
 import chroma from "chroma-js";
 import { hexToCSSFilter } from "hex-to-css-filter";
 import { navigate } from "vike/client/router";
-import { useLinkIsActive } from "~/renderer/Link";
+import { useLinkIsActive } from "~/components/navigation/link-component";
 import { usePageContext } from "~/renderer/page-context";
 
 function useInitialFlavor() {
   const ctx = usePageContext();
   return ctx?.macrostratLogoFlavor;
 }
-
-const h = hyper.styled(styles);
 
 type Flavor = {
   name: string;

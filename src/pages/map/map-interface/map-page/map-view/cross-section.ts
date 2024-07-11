@@ -15,7 +15,7 @@ export function CrossSectionLine() {
   return null;
 }
 
-function useCrossSectionLine(crossSectionLine) {
+export function useCrossSectionLine(crossSectionLine) {
   const mapRef = useMapRef();
   const previousLine = useRef<LineString | null>(null);
   const { isStyleLoaded } = useMapStatus();

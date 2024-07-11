@@ -281,6 +281,7 @@ function LithTypes(props) {
     [
       lith_types.map((lithClass, i) => {
         return h(LithologyTag, {
+          key: lithClass.name,
           data: {
             ...lithClass,
           },

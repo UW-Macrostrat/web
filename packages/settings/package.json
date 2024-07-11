@@ -1,5 +1,5 @@
 {
   "name": "@macrostrat-web/settings",
   "version": "1.0.0",
-  "source": "index.ts"
+  "main": "index.ts"
 }

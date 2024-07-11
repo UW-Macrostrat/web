@@ -1,0 +1,103 @@
+$map-size: 40em
+$map-size-inset: 12em
+
+.diagram-container
+  flex: 1
+  position: relative
+  min-height: 0
+  display: flex
+  flex-direction: row
+  gap: 1em
+  overflow: hidden
+  &.map-inset
+    .column-selection-map
+      position: absolute
+      top: 1em
+      right: 2em
+      height: $map-size-inset
+      width: $map-size-inset
+      z-index: 1000
+
+  &.map-expanded
+    .assistant
+      width: 40em
+      position: relative
+
+.column-selection-map, .unit-details-panel, .correlation-diagram
+  box-shadow: 0 0 0.3em 0 rgba(0, 0, 0, 0.5)
+  border-radius: 6px
+
+.column-selection-map
+  overflow: hidden
+  :global(.main-view)
+    height: 100%
+  flex: 1
+  min-height: $map-size-inset
+  max-height: $map-size
+  width: $map-size
+  position: relative
+  top: 0
+  right: 0
+
+.unit-details-panel
+  overflow: scroll
+  background: var(--panel-secondary-background-color)
+  flex: 2
+  padding: 1em
+  max-width: 100%
+
+.main-area
+  position: relative
+  flex: 1
+  min-height: 0
+  min-width: 0
+
+
+.correlation-diagram
+  overflow: scroll
+  min-height: 0
+  height: 100%
+  width: 100%
+  padding: 1em
+  background-color: var(--panel-secondary-background-color)
+  box-shadow: 0 0 0.3em 0 var(--card-shadow-color)
+  --column-background-color: var(--background-color)
+  --column-stroke-color: var(--text-color)
+
+
+.map-expanded-button
+  position: absolute
+  top: 0.5em
+  right: 0.5em
+  z-index: 100
+
+.main-panel
+  position: relative
+  height: 100%
+  display: flex
+  flex-direction: column
+
+
+.correlation-chart-inner
+  display: flex
+  flex-direction: row
+
+.overlay-safe-area
+  position: absolute
+  top: 1em
+  left: 1em
+  right: 1em
+  bottom: 1em
+  pointer-events: none
+
+.map-inset
+  .overlay-safe-area
+    margin-right: $map-size-inset + 1em
+
+  .column-selection-map
+    z-index: 1000
+
+.assistant
+  display: flex
+  flex-direction: column
+  gap: 1em

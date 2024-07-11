@@ -1,0 +1,66 @@
+.popover-main
+  position: absolute
+  outline: 2px solid #f22
+
+  :global(.bp5-popover-target)
+    height: 100%
+    width: 100%
+    display: block
+    line-height: 0
+
+.legend-panel-outer
+  width: 25em
+  max-height: 60vh
+  overflow-y: scroll
+
+.legend-info-panel
+  padding: 1em
+
+.legend-json-view
+  padding-left: 0
+  margin-left: -0.5em
+
+.legend-panel-header
+  display: flex
+  justify-content: space-between
+  gap: 1em
+  border-bottom: 1px solid var(--panel-rule-color)
+  position: sticky
+  top: -1em
+  background-color: var(--panel-secondary-background-color)
+  margin: -1em -1em 0
+  padding: 0.5em 1em
+  code
+    font-size: 0.9em
+    color: var(--secondary-color)
+  align-items: baseline
+  .spacer
+    flex: 1
+  button
+    line-height: 1
+
+  h3
+    margin: 0 0 0.5em
+    font-size: 1.1em
+
+.data-field
+  margin: 0.2em 0 0.4em
+  &.inline
+    display: flex
+    flex-direction: row
+    align-items: baseline
+    gap: 1em
+    justify-content: space-between
+    .data-container
+      text-align: right
+  .label
+    font-size: 0.9em
+    font-weight: bold
+    display: block
+    color: var(--secondary-color)
+  .value-container
+    font-size: 0.9em
+    display: inline-block
+    break-inside: avoid
+  .unit
+    color: var(--secondary-color)
