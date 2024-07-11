@@ -4,6 +4,7 @@ import { usePageContext } from "vike-react/usePageContext";
 export default function Head() {
   const ctx = usePageContext();
   const { environment } = ctx;
+  const { scripts = [] } = ctx.exports;
 
   return h([
     h("meta", {
@@ -16,7 +17,7 @@ export default function Head() {
       name: "apple-mobile-web-app-status-bar-style",
       content: "black-translucent",
     }),
-    h("meta", { charset: "utf-8" }),
+    h("meta", { charSet: "utf-8" }),
     h("link", {
       href: "https://fonts.googleapis.com/css?family=Montserrat:400,700|Source+Sans+Pro",
       rel: "stylesheet",
@@ -30,5 +31,6 @@ export default function Head() {
         )}; window.process = {env: {NODE_ENV: "production"}};`,
       },
     }),
+    scripts.map((src) => h("script", { src, type: "text/javascript" })),
   ]);
 }
