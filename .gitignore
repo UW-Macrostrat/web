@@ -17,3 +17,5 @@ docker-compose.yaml
 !.yarn/versions
 
 .vite
+
+.idea
