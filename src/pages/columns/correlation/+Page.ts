@@ -23,12 +23,11 @@ import classNames from "classnames";
 import { CorrelationChart } from "./correlation-chart";
 import { DarkModeProvider } from "@macrostrat/ui-components";
 import { ErrorBoundary } from "@macrostrat/ui-components";
-import { columnGeoJSONRecordToColumnIdentifier } from "./state";
 import {
   UnitSelectionProvider,
   useSelectedUnit,
 } from "@macrostrat/column-views";
-import { UnitDescription } from "~/pages/correlation/column";
+import { UnitDescription } from "~/pages/columns/correlation/column";
 
 export function Page() {
   const startup = useCorrelationDiagramStore((state) => state.startup);

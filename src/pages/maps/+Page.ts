@@ -1,23 +1,21 @@
 import h from "./main.module.scss";
 import { AnchorButton, ButtonGroup } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
-import { PageHeader, DevLinkButton } from "~/components";
+import { PageHeader, DevLinkButton, AssistantLinks } from "~/components";
 import { usePageProps } from "~/renderer";
 
 export function Page() {
   const { sources } = usePageProps();
 
   return h(ContentPage, [
-    h("div.float-right.padding.stick-to-top", [
-      h(ButtonGroup, { vertical: true, large: true }, [
-        h(
-          AnchorButton,
-          { icon: "flows", href: "/maps/ingestion" },
-          "Ingestion system"
-        ),
-        h(AnchorButton, { icon: "map", href: "/map/sources" }, "Show on map"),
-        h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
-      ]),
+    h(AssistantLinks, [
+      h(
+        AnchorButton,
+        { icon: "flows", href: "/maps/ingestion" },
+        "Ingestion system"
+      ),
+      h(AnchorButton, { icon: "map", href: "/map/sources" }, "Show on map"),
+      h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
     ]),
     h(PageHeader, { title: "Maps" }),
     h(
