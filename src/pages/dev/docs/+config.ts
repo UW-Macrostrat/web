@@ -7,7 +7,6 @@ export default {
     "supportsDarkMode",
     "routeParams",
     "user",
-    "urlPathname",
     "mdxContent",
     "title",
   ],
