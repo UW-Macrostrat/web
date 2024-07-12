@@ -6,6 +6,8 @@ import {
   Spinner,
   Tag,
 } from "@blueprintjs/core";
+import { useData } from "vike-react/useData";
+
 import { SETTINGS, apiV2Prefix } from "../../../../../../../packages/settings";
 import hyper from "@macrostrat/hyper";
 import {
@@ -30,10 +32,7 @@ import { LngLatBoundsLike } from "mapbox-gl";
 import { useEffect, useMemo, useState } from "react";
 import { MapNavbar } from "~/components/map-navbar";
 import "~/styles/global.styl";
-import { MapReference, DevLink } from "~/components";
 import styles from "./main.module.sass";
-import { PageBreadcrumbs } from "~/renderer";
-import { urlencoded } from "express";
 
 const h = hyper.styled(styles);
 
@@ -45,7 +44,7 @@ interface StyleOpts {
     raster: number | null;
   };
   rasterURL?: string;
-  tileURL: string
+  tileURL: string;
 }
 
 const emptyStyle: any = {
@@ -57,12 +56,12 @@ const emptyStyle: any = {
 };
 
 function buildOverlayStyle({
-                             style,
-                             focusedMap,
-                             layerOpacity,
-                             rasterURL = null,
-                             tileURL
-                           }: StyleOpts): any {
+  style,
+  focusedMap,
+  layerOpacity,
+  rasterURL = null,
+  tileURL,
+}: StyleOpts): any {
   let mapStyle = emptyStyle;
   if (layerOpacity.vector != null) {
     mapStyle = buildMacrostratStyle({
@@ -72,7 +71,7 @@ function buildOverlayStyle({
       strokeOpacity: layerOpacity.vector + 0.2,
       lineOpacity: layerOpacity.vector + 0.4,
     });
-    mapStyle.sources.burwell.tiles = [tileURL]
+    mapStyle.sources.burwell.tiles = [tileURL];
   }
 
   if (rasterURL != null && layerOpacity.raster != null) {
@@ -83,8 +82,8 @@ function buildOverlayStyle({
           type: "raster",
           tiles: [
             SETTINGS.burwellTileDomain +
-            "/cog/tiles/{z}/{x}/{y}.png?url=" +
-            rasterURL,
+              "/cog/tiles/{z}/{x}/{y}.png?url=" +
+              rasterURL,
           ],
           tileSize: 256,
         },
@@ -139,12 +138,14 @@ function basemapStyle(basemap, inDarkMode) {
   }
 }
 
-export default function MapInterface({ cog_id, system, system_version, envelope }) {
+export default function MapInterface() {
+  const data = useData();
+  const { cog_id, system, system_version, envelope } = data;
 
   const [isOpen, setOpen] = useState(false);
   const dark = useDarkMode()?.isEnabled ?? false;
-  const title = `${cog_id.substring(0, 10)} ${system} ${system_version}`
-  const hasRaster = false
+  const title = `${cog_id.substring(0, 10)} ${system} ${system_version}`;
+  const hasRaster = false;
 
   const bounds: LngLatBoundsLike = useMemo(() => {
     return ensureBoxInGeographicRange(boundingBox(envelope));
@@ -177,15 +178,14 @@ export default function MapInterface({ cog_id, system, system_version, envelope 
         focusedMap: null,
         layerOpacity,
         rasterURL: null,
-        tileURL: `/tiles/cog/${cog_id}/system/${encodeURIComponent(system)}/system_version/${encodeURIComponent(system_version)}/tile/{z}/{x}/{y}`
+        tileURL: `/tiles/cog/${cog_id}/system/${encodeURIComponent(
+          system
+        )}/system_version/${encodeURIComponent(
+          system_version
+        )}/tile/{z}/{x}/{y}`,
       })
     );
-  }, [
-    null,
-    style,
-    layerOpacity.raster == null,
-    layerOpacity.vector == null,
-  ]);
+  }, [null, style, layerOpacity.raster == null, layerOpacity.vector == null]);
 
   // Layer opacity
   useEffect(() => {
@@ -232,8 +232,7 @@ export default function MapInterface({ cog_id, system, system_version, envelope 
   if (bounds == null || mapStyle == null) return h(Spinner);
 
   const contextPanel = h(PanelCard, [
-    h("div.map-meta", [
-    ]),
+    h("div.map-meta", []),
     h("div.vector-controls", [
       h("h3", "Vector map"),
       h(OpacitySlider, {
@@ -265,7 +264,7 @@ export default function MapInterface({ cog_id, system, system_version, envelope 
       contextStackProps: {
         adaptiveWidth: true,
       },
-      detailPanelStyle: DetailPanelStyle.FLOATING
+      detailPanelStyle: DetailPanelStyle.FLOATING,
     },
     [
       h(
@@ -313,7 +312,6 @@ function BaseLayerSelector({ layer, setLayer }) {
     ),
   ]);
 }
-
 
 function OpacitySlider(props) {
   return h("div.opacity-slider", [
