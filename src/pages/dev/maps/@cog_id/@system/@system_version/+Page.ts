@@ -6,7 +6,9 @@ import {
   Spinner,
   Tag,
 } from "@blueprintjs/core";
-import { SETTINGS, apiV2Prefix } from "@macrostrat-web/settings";
+import { useData } from "vike-react/useData";
+
+import { SETTINGS, apiV2Prefix } from "../../../../../../../packages/settings";
 import hyper from "@macrostrat/hyper";
 import {
   DetailPanelStyle,
@@ -30,9 +32,7 @@ import { LngLatBoundsLike } from "mapbox-gl";
 import { useEffect, useMemo, useState } from "react";
 import { MapNavbar } from "~/components/map-navbar";
 import "~/styles/global.styl";
-import { MapReference, DevLink } from "~/components";
 import styles from "./main.module.sass";
-import { PageBreadcrumbs, usePageProps } from "~/renderer";
 
 const h = hyper.styled(styles);
 
@@ -44,6 +44,7 @@ interface StyleOpts {
     raster: number | null;
   };
   rasterURL?: string;
+  tileURL: string;
 }
 
 const emptyStyle: any = {
@@ -59,16 +60,18 @@ function buildOverlayStyle({
   focusedMap,
   layerOpacity,
   rasterURL = null,
+  tileURL,
 }: StyleOpts): any {
   let mapStyle = emptyStyle;
   if (layerOpacity.vector != null) {
     mapStyle = buildMacrostratStyle({
-      tileserverDomain: SETTINGS.burwellTileDomain,
+      tileserverDomain: "http://localhost:8000",
       focusedMap,
       fillOpacity: layerOpacity.vector - 0.1,
       strokeOpacity: layerOpacity.vector + 0.2,
       lineOpacity: layerOpacity.vector + 0.4,
     });
+    mapStyle.sources.burwell.tiles = [tileURL];
   }
 
   if (rasterURL != null && layerOpacity.raster != null) {
@@ -135,18 +138,18 @@ function basemapStyle(basemap, inDarkMode) {
   }
 }
 
-export function Page() {
-  const { map } = usePageProps();
+export default function MapInterface() {
+  const data = useData();
+  const { cog_id, system, system_version, envelope } = data;
+
   const [isOpen, setOpen] = useState(false);
   const dark = useDarkMode()?.isEnabled ?? false;
-  const title = map.properties.name;
-  console.log(map);
-
-  const hasRaster = map.properties.raster_url != null;
+  const title = `${cog_id.substring(0, 10)} ${system} ${system_version}`;
+  const hasRaster = false;
 
   const bounds: LngLatBoundsLike = useMemo(() => {
-    return ensureBoxInGeographicRange(boundingBox(map.geometry));
-  }, [map.geometry]);
+    return ensureBoxInGeographicRange(boundingBox(envelope));
+  }, [envelope]);
 
   const [layer, setLayer] = useState(Basemap.None);
   const [style, setStyle] = useState(null);
@@ -172,26 +175,26 @@ export function Page() {
     setMapStyle(
       buildOverlayStyle({
         style,
-        focusedMap: map.properties.source_id,
+        focusedMap: null,
         layerOpacity,
-        rasterURL: map.properties.raster_url,
+        rasterURL: null,
+        tileURL: `/tiles/cog/${cog_id}/system/${encodeURIComponent(
+          system
+        )}/system_version/${encodeURIComponent(
+          system_version
+        )}/tile/{z}/{x}/{y}`,
       })
     );
-  }, [
-    map.properties.source_id,
-    style,
-    layerOpacity.raster == null,
-    layerOpacity.vector == null,
-  ]);
+  }, [null, style, layerOpacity.raster == null, layerOpacity.vector == null]);
 
   // Layer opacity
   useEffect(() => {
     if (mapStyle == null) return;
     const mergeLayers = buildOverlayStyle({
       style,
-      focusedMap: map.properties.source_id,
+      focusedMap: null,
       layerOpacity,
-      rasterURL: map.properties.raster_url,
+      rasterURL: null,
     }).layers;
 
     for (const layer of mapStyle.layers) {
@@ -213,27 +216,6 @@ export function Page() {
     }
   }, [layerOpacity]);
 
-  // useEffect(() => {
-  //   if (mapStyle == null) return;
-  //   const layers = mapStyle.layers;
-  //   const rasterLayer = layers.find((l) => l.id == "raster");
-  //   if (rasterLayer == null) return;
-  //   rasterLayer.paint ??= {};
-  //   rasterLayer.paint["raster-opacity"] = layerOpacity.raster;
-  //   setMapStyle({ ...mapStyle, layers });
-  // }, [layerOpacity.raster]);
-
-  // useEffect(() => {
-  //   if (mapStyle == null) return;
-  //   const layers = mapStyle.layers;
-  //   const vectorLayers = layers.filter((l) => l.type == "fill");
-  //   for (const layer of vectorLayers) {
-  //     layer.paint ??= {};
-  //     layer.paint["fill-opacity"] = layerOpacity.vector;
-  //   }
-  //   setMapStyle({ ...mapStyle, layers });
-  // }, [layerOpacity.vector]);
-
   const maxBounds: LatLngBoundsLike = useMemo(() => {
     const dx = bounds[2] - bounds[0];
     const dy = bounds[3] - bounds[1];
@@ -250,10 +232,7 @@ export function Page() {
   if (bounds == null || mapStyle == null) return h(Spinner);
 
   const contextPanel = h(PanelCard, [
-    h("div.map-meta", [
-      h("p", map.properties.description),
-      h("p", ["Map ID: ", h("code", map.properties.source_id)]),
-    ]),
+    h("div.map-meta", []),
     h("div.vector-controls", [
       h("h3", "Vector map"),
       h(OpacitySlider, {
@@ -275,8 +254,6 @@ export function Page() {
     h(BaseLayerSelector, { layer, setLayer }),
   ]);
 
-  console.log(mapStyle, bounds, maxBounds)
-
   return h(
     MapAreaContainer,
     {
@@ -287,8 +264,7 @@ export function Page() {
       contextStackProps: {
         adaptiveWidth: true,
       },
-      detailPanelStyle: DetailPanelStyle.FIXED,
-      detailPanel: h(MapLegendPanel, map.properties),
+      detailPanelStyle: DetailPanelStyle.FLOATING,
     },
     [
       h(
@@ -334,103 +310,6 @@ function BaseLayerSelector({ layer, setLayer }) {
         h(Radio, { label: "None", value: Basemap.None }),
       ]
     ),
-  ]);
-}
-
-function MapLegendPanel(params) {
-  return h(
-    InfoDrawerContainer,
-    h(
-      "div.map-legend-container",
-      h("div.map-legend", [
-        h(PageBreadcrumbs),
-        h("div.legend-header", [
-          h(ErrorBoundary, [
-            h(MapReference, { reference: params, showSourceID: false }),
-          ]),
-        ]),
-        h("div.flex.row", [
-          h("h3", "Legend"),
-          h("div.spacer"),
-          h("div.dev-links", [
-            h(
-              DevLink,
-              // Not sure why we have to fully construct the URL here, vs. constructing a relative route.
-              // Probably lack of a trailing slash in the main page?
-              { href: `/maps/${params.source_id}/legend` },
-              "Legend table"
-            ),
-            h(
-              DevLink,
-              { href: `/maps/${params.source_id}/correlation` },
-              "Correlation of units"
-            ),
-          ]),
-        ]),
-        h(MapLegendData, params),
-      ])
-    )
-  );
-}
-
-function MapLegendData({ source_id }) {
-  const mapLegend = useAPIResult(apiV2Prefix + "/geologic_units/map/legend", {
-    source_id,
-  });
-  if (mapLegend == null) return h(Spinner);
-  const legendData = mapLegend?.success?.data;
-  if (legendData == null) return h(NonIdealState, { icon: "error" });
-
-  legendData.sort((a, b) => a.t_age - b.t_age);
-
-  return h(
-    "div.legend-data",
-    legendData.map((d) => h(LegendEntry, { data: d }))
-  );
-}
-
-function LegendEntry({ data }) {
-  const { map_unit_name, color, ...rest } = data;
-  const {
-    legend_id,
-    source_id,
-    t_interval,
-    b_interval,
-    //strat_name,
-    //strat_name_id,
-    unit_id,
-    area,
-    tiny_area,
-    small_area,
-    medium_area,
-    large_area,
-    lith,
-    // lith_classes,
-    // lith_types,
-    lith_id,
-    scale,
-    comments,
-    ...r1
-  } = rest;
-
-  const [isOpen, setOpen] = useState(false);
-
-  const title = h(
-    "div.legend-title",
-    {
-      onClick() {
-        setOpen(!isOpen);
-      },
-    },
-    [
-      h("div.legend-swatch", { style: { backgroundColor: color } }),
-      h("div.legend-label", h("h4", map_unit_name)),
-    ]
-  );
-
-  return h("div.legend-entry", [
-    title,
-    h(Collapse, { isOpen }, h(JSONView, { data: r1, hideRoot: true })),
   ]);
 }
 
