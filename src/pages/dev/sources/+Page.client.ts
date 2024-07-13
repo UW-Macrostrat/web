@@ -38,7 +38,6 @@ export function Page() {
         rgeom: {
           type: "vector",
           tiles: [burwellTileDomain + "/maps/bounds/{z}/{x}/{y}"],
-          minzoom: 1,
           maxzoom: 9,
         },
       },
