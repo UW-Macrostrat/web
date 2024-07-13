@@ -96,21 +96,24 @@ async function startServer() {
     process.env.VITE_MACROSTRAT_INSTANCE
   );
 
-  //
+  // CriticalMAAS CDR integration
   // Proxy requests to /tile/* to https://api.cdr.land/v1/tiles/*
   // Add the Authorization header to the proxied request
   //
-  app.use("/tiles", proxy(
-    "https://api.cdr.land", {
-      proxyReqOptDecorator: (opts) => {
-        opts.headers["Authorization"] = `Bearer ${process.env.CDR_API_KEY}`;
-        return opts;
-      },
-      proxyReqPathResolver: (req) => {
-        return `/v1/tiles${req.url}`;
-      }
-    })
-  )
+  if (process.env.CDR_API_KEY) {
+    app.use(
+      "/tiles",
+      proxy("https://api.cdr.land", {
+        proxyReqOptDecorator: (opts) => {
+          opts.headers["Authorization"] = `Bearer ${process.env.CDR_API_KEY}`;
+          return opts;
+        },
+        proxyReqPathResolver: (req) => {
+          return `/v1/tiles${req.url}`;
+        },
+      })
+    );
+  }
 
   /**
    * Vike route

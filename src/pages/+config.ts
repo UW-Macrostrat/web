@@ -25,6 +25,7 @@ export default {
     "description",
     "title",
     "environment",
+    "urlPathname",
   ],
   clientRouting: true,
   meta: {
