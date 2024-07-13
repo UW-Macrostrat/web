@@ -11,6 +11,8 @@ export async function onBeforeRender(pageContext: PageContextServer) {
   const res: any = await client.from("sources").select("*").eq("source_id", id);
   const map = res?.data?.features[0];
 
+  console.log(map.geometry.coordinates)
+
   return {
     pageContext: {
       pageProps: {

@@ -193,7 +193,7 @@ export function Page() {
 
   useEffect(() => {
     async function getIntervals() {
-      let response = await fetch(`https://macrostrat.org/api/v2/defs/intervals?all`);
+      let response = await fetch(`https://macrostrat.org/api/v2/defs/intervals?timescale_id=1`);
 
       if (response.ok) {
         let response_data = await response.json();
