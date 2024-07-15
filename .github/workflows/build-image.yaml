@@ -25,8 +25,8 @@ jobs:
           tags: |
             type=raw,value=sha-{{sha}}
             type=raw,value=latest-itb
-            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, '-')}}
-            type=raw,value=latest-itb-{{date 'YYYYMMDDHHmmss'}}
+            type=raw,value=latest-,suffix={{date 'YYYYMMDDHHmmss'}},enable=${{ startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, '-')}}
+            type=raw,value=latest-itb-,suffix={{date 'YYYYMMDDHHmmss'}},enable=${{ startsWith(github.ref, 'refs/tags/v') && contains(github.ref, '-')}}
             type=ref,event=pr,suffix=-{{date 'YYYYMMDDHHmmss'}}
             type=ref,event=branch,suffix=-{{date 'YYYYMMDDHHmmss'}}
             type=ref,event=tag,suffix=-{{date 'YYYYMMDDHHmmss'}}
