@@ -17,3 +17,5 @@ export function loadableElement(func, props = null) {
 export function resolvePattern(name: string | number) {
   return `//visualization-assets.s3.amazonaws.com/geologic-patterns/svg/${name}.svg`;
 }
+
+export * from "./client-only";

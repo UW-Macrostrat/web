@@ -1,5 +1,6 @@
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import proxy from "express-http-proxy";
 import cookieParser from "cookie-parser";
 import compression from "compression";
 
@@ -66,7 +67,7 @@ async function startServer() {
 
   app.use(compression());
   app.use(cookieParser());
-
+  //
   if (isProduction) {
     app.use(sirv(`${root}/dist/client`));
     // Special case for cesium files at /cesium prefix
@@ -94,6 +95,25 @@ async function startServer() {
     process.env.VITE_MACROSTRAT_TILESERVER_DOMAIN,
     process.env.VITE_MACROSTRAT_INSTANCE
   );
+
+  // CriticalMAAS CDR integration
+  // Proxy requests to /tile/* to https://api.cdr.land/v1/tiles/*
+  // Add the Authorization header to the proxied request
+  //
+  if (process.env.CDR_API_KEY) {
+    app.use(
+      "/tiles",
+      proxy("https://api.cdr.land", {
+        proxyReqOptDecorator: (opts) => {
+          opts.headers["Authorization"] = `Bearer ${process.env.CDR_API_KEY}`;
+          return opts;
+        },
+        proxyReqPathResolver: (req) => {
+          return `/v1/tiles${req.url}`;
+        },
+      })
+    );
+  }
 
   /**
    * Vike route

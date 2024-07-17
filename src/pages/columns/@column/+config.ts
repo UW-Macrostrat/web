@@ -11,4 +11,5 @@ export default {
       },
     },
   },
+  //Page: "import:./column-inspector:ColumnPage",
 };

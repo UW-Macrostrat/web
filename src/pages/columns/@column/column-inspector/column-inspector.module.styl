@@ -1,6 +1,4 @@
 .column-ui
-  *
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif
 
   --column-background-color: var(--background-color)
   --column-stroke-color: var(--text-color)
@@ -26,8 +24,14 @@
   padding 0
 
 .column-header
-  margin-left: 2em
-  margin-right: 2em
+  margin: 1em 4em
+  h1
+    font-size: 1.5em
+    .subtitle
+      font-weight: normal
+
+  nav
+    position: sticky
 
 .column-nav
   position sticky

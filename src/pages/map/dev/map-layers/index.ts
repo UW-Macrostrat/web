@@ -113,7 +113,7 @@ export function VectorMapInspectorPage({
 
   const _overlayStyle = useMemo(() => {
     const style = replaceSourcesForTileset(overlayStyle, tileset);
-    console.log(style);
+    console.log("Overlay style", style);
     return style;
   }, [tileset, overlayStyle]) as mapboxgl.Style;
 

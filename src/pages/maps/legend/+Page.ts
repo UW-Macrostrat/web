@@ -13,7 +13,7 @@ import {
   lithologyRenderer,
   ExpandedLithologies,
 } from "~/components/legend-table";
-import { postgrest } from "~/providers";
+import { postgrest } from "~/_providers";
 import { useReducer } from "react";
 
 const h = hyper.styled(styles);

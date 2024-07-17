@@ -6,9 +6,8 @@ import {
   Button,
 } from "@blueprintjs/core";
 import { FullscreenPage } from "~/layouts";
-import hyper from "@macrostrat/hyper";
-import styles from "./main.module.sass";
-import { PageBreadcrumbs } from "~/renderer";
+import h from "./main.module.sass";
+import { PageBreadcrumbs, usePageProps } from "~/renderer";
 import { useLegendData, MapInfo } from "../utils";
 import { useElementSize, useInDarkMode } from "@macrostrat/ui-components";
 import { useMemo, useRef } from "react";
@@ -27,10 +26,10 @@ import {
   getBestAgeRange,
 } from "./prepare-data";
 import { LegendItemInformation } from "./legend-item";
+import { UnitDetailsPopover } from "~/components/unit-details";
 
-const h = hyper.styled(styles);
-
-export function Page({ map }) {
+export function Page() {
+  const { map } = usePageProps();
   const ref = useRef(null);
   const size = useElementSize(ref);
   const legendData = useLegendData(map);
@@ -279,20 +278,11 @@ function SelectedLegendItemPopover({
   const bottom = yScale(range[0]);
 
   return h(
-    "div.popover-main",
+    UnitDetailsPopover,
     {
-      style: {
-        top: top,
-        left: xv,
-        width: xScale.bandwidth(),
-        height: bottom - top,
-      },
+      style: { top, left: xv, width: xScale.bandwidth(), height: bottom - top },
     },
-    h(
-      Popover,
-      { content, isOpen: true, usePortal: true },
-      h("span.popover-target")
-    )
+    content
   );
 }
 

@@ -27,12 +27,5 @@ export type AppState = {
   nextRouterAction: RouterActions | null;
 };
 
-type OverallActions = { type: "replace-state"; state: AppState };
-
-export type AppAction =
-  | CoreAction
-  | MapAction
-  | RouterActions
-  | MenuAction
-  | OverallActions;
+export type AppAction = CoreAction | MapAction | RouterActions | MenuAction;
 export * from "./types";

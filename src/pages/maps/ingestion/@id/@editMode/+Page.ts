@@ -7,6 +7,7 @@ import { Header, WidthAdjustablePanel } from "../components";
 import styles from "./main.module.sass";
 import { MapInterface } from "../components";
 import { LinesTable, PointsTable, PolygonsTable } from "../tables";
+import { usePageProps } from "~/renderer";
 
 const h = hyper.styled(styles);
 
@@ -25,13 +26,8 @@ const routeMap = {
   points: PointsTable,
 };
 
-export function Page({
-  source_id,
-  mapBounds,
-  source,
-  ingestProcess,
-  editMode,
-}: EditInterfaceProps) {
+export function Page() {
+  const { source, ingestProcess, editMode, mapBounds } = usePageProps();
   const slug = source.slug;
 
   const sourcePrefix = `${ingestPrefix}/sources/${source_id}`;

@@ -8,7 +8,7 @@ export function getRuntimeConfig(
   if (activeEnv === "server") {
     // We are running on the server, try to get directly from process.env
     val = process.env["VITE_" + key];
-  } else {
+  } else if (window.env !== undefined) {
     // We are running on the client and have access to window.env
     val = window.env[key];
   }

@@ -1,24 +1,21 @@
-import hyper from "@macrostrat/hyper";
-// Page for a list of maps
-import styles from "./main.module.scss";
+import h from "./main.module.scss";
 import { AnchorButton, ButtonGroup } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
-import { PageHeader, DevLinkButton } from "~/components";
+import { PageHeader, DevLinkButton, AssistantLinks } from "~/components";
+import { usePageProps } from "~/renderer";
 
-const h = hyper.styled(styles);
+export function Page() {
+  const { sources } = usePageProps();
 
-export function Page({ sources }) {
   return h(ContentPage, [
-    h("div.float-right.padding.stick-to-top", [
-      h(ButtonGroup, { vertical: true, large: true }, [
-        h(
-          AnchorButton,
-          { icon: "flows", href: "/maps/ingestion" },
-          "Ingestion system"
-        ),
-        h(AnchorButton, { icon: "map", href: "/map/sources" }, "Show on map"),
-        h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
-      ]),
+    h(AssistantLinks, [
+      h(
+        AnchorButton,
+        { icon: "flows", href: "/maps/ingestion" },
+        "Ingestion system"
+      ),
+      h(AnchorButton, { icon: "map", href: "/map/sources" }, "Show on map"),
+      h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
     ]),
     h(PageHeader, { title: "Maps" }),
     h(
