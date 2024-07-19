@@ -12,21 +12,18 @@ import { SETTINGS, apiV2Prefix } from "../../../../../../../packages/settings";
 import hyper from "@macrostrat/hyper";
 import {
   DetailPanelStyle,
-  InfoDrawerContainer,
+  FeaturePanel,
+  FeatureSelectionHandler,
+  LocationPanel,
   MapAreaContainer,
   MapMarker,
   MapView,
   PanelCard,
+  TileInfo,
 } from "@macrostrat/map-interface";
 import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
-import {
-  JSONView,
-  NullableSlider,
-  useAPIResult,
-  useDarkMode,
-  ErrorBoundary,
-} from "@macrostrat/ui-components";
+import { NullableSlider, useDarkMode } from "@macrostrat/ui-components";
 import boundingBox from "@turf/bbox";
 import { LngLatBoundsLike } from "mapbox-gl";
 import { useEffect, useMemo, useState } from "react";
@@ -140,6 +137,7 @@ function basemapStyle(basemap, inDarkMode) {
 
 export default function MapInterface() {
   const data = useData();
+  const [features, setFeatures] = useState(null);
   const { cog_id, system, system_version, envelope } = data;
 
   const [isOpen, setOpen] = useState(false);
@@ -169,20 +167,18 @@ export default function MapInterface() {
     raster: 0.5,
   });
 
+  const tileURL = `/tiles/cog/${cog_id}/system/${encodeURIComponent(
+    system
+  )}/system_version/${encodeURIComponent(system_version)}/tile/{z}/{x}/{y}`;
+
   // Overlay style
   const [mapStyle, setMapStyle] = useState(null);
   useEffect(() => {
     setMapStyle(
       buildOverlayStyle({
         style,
-        focusedMap: null,
         layerOpacity,
-        rasterURL: null,
-        tileURL: `/tiles/cog/${cog_id}/system/${encodeURIComponent(
-          system
-        )}/system_version/${encodeURIComponent(
-          system_version
-        )}/tile/{z}/{x}/{y}`,
+        tileURL: tileURL,
       })
     );
   }, [null, style, layerOpacity.raster == null, layerOpacity.vector == null]);
@@ -192,9 +188,8 @@ export default function MapInterface() {
     if (mapStyle == null) return;
     const mergeLayers = buildOverlayStyle({
       style,
-      focusedMap: null,
       layerOpacity,
-      rasterURL: null,
+      tileURL: tileURL,
     }).layers;
 
     for (const layer of mapStyle.layers) {
@@ -254,25 +249,49 @@ export default function MapInterface() {
     h(BaseLayerSelector, { layer, setLayer }),
   ]);
 
+  let detailElement = null;
+  if (selectedLocation != null) {
+    detailElement = h(
+      LocationPanel,
+      {
+        onClose() {
+          setSelectedLocation(null);
+        },
+        position: selectedLocation,
+      },
+      [
+        h(TileInfo, {
+          feature: features?.[0] ?? null,
+        }),
+        h(FeaturePanel, { features: features }),
+      ]
+    );
+  }
+
   return h(
     MapAreaContainer,
     {
       className: "single-map",
-      navbar: h(MapNavbar, { title, parentRoute: "/maps", isOpen, setOpen }),
+      navbar: h(MapNavbar, {
+        title,
+        parentRoute: "/dev/cdr-maps",
+        isOpen,
+        setOpen,
+      }),
       contextPanel,
       contextPanelOpen: isOpen,
       contextStackProps: {
         adaptiveWidth: true,
       },
+      detailPanel: detailElement,
       detailPanelStyle: DetailPanelStyle.FLOATING,
     },
     [
       h(
         MapView,
         {
-          style: mapStyle, //"mapbox://styles/mapbox/satellite-v9",
+          style: mapStyle,
           mapboxToken: SETTINGS.mapboxAccessToken,
-          //projection: { name: "globe" },
           bounds,
           mapPosition: null,
           maxBounds,
@@ -280,6 +299,10 @@ export default function MapInterface() {
           infoMarkerPosition: selectedLocation,
         },
         [
+          h(FeatureSelectionHandler, {
+            selectedLocation: selectedLocation,
+            setFeatures: setFeatures,
+          }),
           h(MapMarker, {
             position: selectedLocation,
             setPosition(lnglat) {

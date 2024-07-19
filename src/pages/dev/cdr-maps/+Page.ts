@@ -22,7 +22,7 @@ export function Page() {
 
 function SourceItem({ source }) {
   const { cog_id, system, system_version } = source;
-  const href = `./maps/${cog_id}/${system}/${system_version}`;
+  const href = `./cdr-maps/${cog_id}/${system}/${system_version}`;
 
   return h("li", [
     h("span.source-id", {}, cog_id),
