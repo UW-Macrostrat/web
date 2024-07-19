@@ -1,0 +1,29 @@
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  min-height: 2.5rem;
+}
+.source-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+  text-align: right;
+}
+.name-text {
+  display: flex;
+  flex-direction: column;
+}
+.author-source-tag {
+  display: flex;
+}
+.author-tag {
+  margin-left: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.short {
+  max-width: 150px;
+}
+.parent-name {
+  color: #5f6b7c;
+}
