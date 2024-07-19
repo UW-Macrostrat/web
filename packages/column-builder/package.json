@@ -1,6 +1,5 @@
 {
-  "name": "dacite",
-  "private": true,
+  "name": "@macrostrat-web/column-builder",
   "scripts": {
     "dev": "next dev -p 1234",
     "build": "next build",

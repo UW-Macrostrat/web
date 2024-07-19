@@ -13,6 +13,7 @@
     "format": "prettier --write src packages",
     "server:prod": "NODE_NO_WARNINGS=1 NODE_ENV=production yarn run server",
     "dev:storybook": "yarn workspace @macrostrat/storybook run dev",
+    "dev:column-builder": "yarn workspace @macrostrat-web/column-builder run dev",
     "start": "yarn run build && yarn run server",
     "test:runtime": "tsx tests/test-urls.ts",
     "test": "vitest"
@@ -55,6 +56,7 @@
     "@blueprintjs/table": "^5.1.4",
     "@lagunovsky/redux-react-router": "^3.2.0",
     "@loadable/component": "^5.14.1",
+    "@macrostrat-web/column-builder": "workspace:*",
     "@macrostrat-web/data-sheet-test": "workspace:*",
     "@macrostrat-web/globe": "workspace:*",
     "@macrostrat-web/lithology-hierarchy": "workspace:*",
