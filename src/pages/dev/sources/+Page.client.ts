@@ -16,6 +16,9 @@ import {
   FeaturePanel,
   FeatureSelectionHandler,
 } from "@macrostrat/map-interface";
+import { NonIdealState } from "@blueprintjs/core";
+import { LinkItem } from "~/pages/map/dev/map-layers";
+import { Link } from "~/components";
 
 export function Page() {
   const dark = useDarkMode();
@@ -90,7 +93,7 @@ export function Page() {
         },
         position: inspectPosition,
       },
-      [h(FeaturePanel, { features: data })]
+      h(MapInspectorPanel, { features: data })
     );
   }
 
@@ -132,5 +135,36 @@ export function Page() {
         }),
       ]
     )
+  );
+}
+
+function MapInspectorPanel({ features }) {
+  let maps = features
+    ?.filter((d) => d.source == "rgeom")
+    ?.map((d) => d.properties);
+
+  maps?.sort((a, b) => a.source_id - b.source_id);
+
+  if (maps == null || maps.length == 0) {
+    return h(NonIdealState, { icon: "map", title: "No maps found" });
+  }
+
+  return h("div", [
+    h("h2", "Maps"),
+    h(
+      "ul",
+      maps.map((d) => h(MapItem, { map: d }))
+    ),
+  ]);
+}
+
+function MapItem({ map }) {
+  return h(
+    "li",
+    h(Link, { href: `/maps/${map.source_id}` }, [
+      h("span.name", map.name),
+      " ",
+      h("code.id", map.source_id),
+    ])
   );
 }
