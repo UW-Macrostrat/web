@@ -1,6 +1,5 @@
 {
-  "name": "dacite",
-  "private": true,
+  "name": "@macrostrat-web/column-builder",
   "scripts": {
     "dev": "next dev -p 1234",
     "build": "next build",
@@ -23,26 +22,20 @@
     "axios": "^0.27.2",
     "cross-fetch": "^3.1.5",
     "mapbox-gl": "^2.8.2",
-    "next": "^12.3",
+    "next": "13",
     "next-transpile-modules": "^9.0.0",
-    "react": "^17.0.2",
+    "react": "^18",
     "react-beautiful-dnd": "^13.1.0",
     "react-color": "^2.19.3",
-    "react-dom": "^17.0.2",
+    "react-dom": "^18",
     "sass": "^1.56.1"
   },
-  "workspaces": [
-    "./deps/web-components/packages/*"
-  ],
   "devDependencies": {
     "@types/node": "^17.0.10",
     "@types/react": "^17",
     "@types/react-beautiful-dnd": "^13.1.2",
     "eslint": "^8.7.0",
     "eslint-config-next": "^12.0.8",
-    "prettier": "^2.8.1",
     "typescript": "^4.5.4"
-  },
-  "prettier": {},
-  "packageManager": "yarn@3.3.0"
+  }
 }
