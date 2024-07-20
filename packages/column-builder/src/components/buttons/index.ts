@@ -1,5 +1,5 @@
 import { hyperStyled } from "@macrostrat/hyper";
-import { useModelEditor } from "@macrostrat/ui-components";
+import { useModelEditor } from "@macrostrat/column-components";
 import Link from "next/link";
 import { Button, ButtonGroup } from "@blueprintjs/core";
 import styles from "./btns.module.scss";
