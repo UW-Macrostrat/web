@@ -1,4 +1,4 @@
-import { LinkButton } from "~/pages/map/map-interface/components/buttons";
+import { LinkButton } from "#/map/map-interface/components/buttons";
 import { AnchorButton } from "@blueprintjs/core";
 import { FloatingNavbar, MapLoadingButton } from "@macrostrat/map-interface";
 import { useMapStatus } from "@macrostrat/mapbox-react";
