@@ -1,7 +1,7 @@
 import h from "@macrostrat/hyper";
 import React from "react";
 import { useParams } from "react-router-dom";
-import { Link as VikeLink } from "~/components/navigation/link-component";
+import { Link as VikeLink } from "~/components/navigation/Link";
 import Chart from "./Chart";
 import Footer from "./Footer";
 import { SiftLink } from "./Link";
