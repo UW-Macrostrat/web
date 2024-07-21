@@ -1,6 +1,6 @@
 import h from "@macrostrat/hyper";
 import { Page as ColumnPage } from "~/pages/columns/+Page";
-import { usePageProps } from "~/renderer";
+import { usePageProps } from "~/renderer/usePageProps";
 
 export function Page() {
   const { columnGroups, project } = usePageProps();

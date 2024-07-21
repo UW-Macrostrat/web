@@ -9,7 +9,7 @@ import {
 import Options from "./options";
 import { InfoDrawerContainer } from "@macrostrat/map-interface";
 import FeatureList from "./feature-list";
-import { PageBreadcrumbs } from "~/renderer";
+import { PageBreadcrumbs } from "~/components";
 
 function BackButton() {
   const runAction = useBurwellActions();

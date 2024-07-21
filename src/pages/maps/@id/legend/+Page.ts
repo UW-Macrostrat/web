@@ -4,7 +4,7 @@ import { FullscreenPage } from "~/layouts";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
 import { ColorCell } from "@macrostrat/data-sheet2";
-import { PageBreadcrumbs } from "~/renderer";
+import { PageBreadcrumbs } from "~/components";
 import {
   LongTextViewer,
   IntervalCell,

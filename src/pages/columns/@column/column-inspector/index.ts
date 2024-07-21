@@ -16,7 +16,7 @@ import ModalUnitPanel from "./modal-panel";
 import { BasePage } from "~/layouts";
 
 import { navigate } from "vike/client/router";
-import { PageBreadcrumbs } from "~/renderer";
+import { PageBreadcrumbs } from "~/components";
 
 const h = hyperStyled(styles);
 

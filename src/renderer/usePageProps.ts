@@ -3,8 +3,6 @@
 
 import { usePageContext } from "vike-react/usePageContext";
 
-export { usePageContext };
-
 export function usePageProps() {
   const pageContext = usePageContext();
   console.warn(

@@ -2,7 +2,7 @@ import h from "@macrostrat/hyper";
 import { Header } from "../components";
 import { EditSourceForm } from "../source-form";
 import { ContentPage } from "~/layouts";
-import { usePageProps } from "~/renderer";
+import { usePageProps } from "~/renderer/usePageProps";
 
 interface EditInterfaceMetaProps {
   source_id?: number;

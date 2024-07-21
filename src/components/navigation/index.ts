@@ -1,2 +1,2 @@
-export * from "./breadcrumbs";
-export * from "./link-component";
+export * from "./PageBreadcrumbs";
+export * from "./Link";

@@ -1,6 +1,6 @@
 import { HotkeysProvider } from "@blueprintjs/core";
 import h from "../main.module.sass";
-import { PageBreadcrumbs } from "~/renderer";
+import { PageBreadcrumbs } from "~/components";
 import DataSheetTest from "@macrostrat-web/data-sheet-test";
 
 export function Page() {

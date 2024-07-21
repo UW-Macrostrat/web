@@ -2,7 +2,7 @@ import h from "./main.module.scss";
 import { AnchorButton, ButtonGroup } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import { PageHeader, DevLinkButton, AssistantLinks } from "~/components";
-import { usePageProps } from "~/renderer";
+import { usePageProps } from "~/renderer/usePageProps";
 
 export function Page() {
   const { sources } = usePageProps();

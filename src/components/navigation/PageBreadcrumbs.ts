@@ -1,11 +1,9 @@
-import hyper from "@macrostrat/hyper";
-import { usePageContext } from "../../renderer/page-context";
+import { PageContext } from "vike/types";
+import { usePageContext } from "vike-react/usePageContext";
 import { Breadcrumbs } from "@blueprintjs/core";
-import type { PageContext } from "../../renderer/types";
 import React from "react";
 import { MacrostratIcon } from "~/components";
-import styles from "./breadcrumbs.module.sass";
-const h = hyper.styled(styles);
+import h from "./breadcrumbs.module.sass";
 
 export function PageBreadcrumbs({ showLogo = false }) {
   const ctx = usePageContext();

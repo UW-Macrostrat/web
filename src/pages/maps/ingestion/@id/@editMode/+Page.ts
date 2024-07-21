@@ -7,7 +7,7 @@ import { Header, WidthAdjustablePanel } from "../components";
 import styles from "./main.module.sass";
 import { MapInterface } from "../components";
 import { LinesTable, PointsTable, PolygonsTable } from "../tables";
-import { usePageProps } from "~/renderer";
+import { usePageProps } from "~/renderer/usePageProps";
 
 const h = hyper.styled(styles);
 

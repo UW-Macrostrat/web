@@ -1,6 +1,6 @@
 import h from "@macrostrat/hyper";
 import { ContentPage } from "~/layouts";
-import { PageBreadcrumbs } from "~/renderer";
+import { PageBreadcrumbs } from "~/components";
 
 export function Page() {
   return h(ContentPage, [

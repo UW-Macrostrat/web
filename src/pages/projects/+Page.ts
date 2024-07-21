@@ -1,7 +1,7 @@
 import h from "@macrostrat/hyper";
 import { ContentPage } from "~/layouts";
 import { PageHeader, LinkCard } from "~/components";
-import { usePageProps } from "~/renderer";
+import { usePageProps } from "~/renderer/usePageProps";
 
 export function Page() {
   const { projects } = usePageProps();

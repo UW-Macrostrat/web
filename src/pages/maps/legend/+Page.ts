@@ -5,7 +5,7 @@ import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
 import { useAsyncEffect } from "@macrostrat/ui-components";
 import { ColorCell } from "@macrostrat/data-sheet2";
-import { PageBreadcrumbs } from "~/renderer";
+import { PageBreadcrumbs } from "~/components";
 import { debounce } from "underscore";
 import {
   LongTextViewer,

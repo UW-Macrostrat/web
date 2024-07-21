@@ -1,5 +1,5 @@
 import h from "@macrostrat/hyper";
-import { usePageContext } from "../../renderer/page-context";
+import { usePageContext } from "vike-react/usePageContext";
 
 export function useLinkIsActive(href: string) {
   const pageContext = usePageContext();

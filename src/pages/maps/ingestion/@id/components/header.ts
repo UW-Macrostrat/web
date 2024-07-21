@@ -1,5 +1,5 @@
 import { ButtonGroup, AnchorButton } from "@blueprintjs/core";
-import { PageBreadcrumbs } from "~/renderer";
+import { PageBreadcrumbs } from "~/components";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
 

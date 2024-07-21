@@ -2,7 +2,7 @@ import h from "@macrostrat/hyper";
 import { ContentPage } from "~/layouts";
 import { PageHeader, Link, AssistantLinks, DevLinkButton } from "~/components";
 import { AnchorButton, Tag } from "@blueprintjs/core";
-import { usePageProps } from "~/renderer";
+import { usePageProps } from "~/renderer/usePageProps";
 
 export function Page() {
   const { columnGroups, title, linkPrefix } = usePageProps();

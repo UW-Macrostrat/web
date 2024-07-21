@@ -2,16 +2,8 @@
 import vikeReact from "vike-react/config";
 import type { Config } from "vike/types";
 
-const Layout = "import:../renderer/Layout.ts:default";
-const Head = "import:../renderer/Head.ts:default";
-
-// import Head from "../renderer/Head.js";
-
 // Default config (can be overridden by pages)
 export default {
-  Layout,
-  Head,
-  // <title>
   title: "Macrostrat",
   description:
     "A platform for geological data exploration, integration, and analysis.",
@@ -26,8 +18,10 @@ export default {
     "title",
     "environment",
     "urlPathname",
+    "scripts",
   ],
   clientRouting: true,
+  supportsDarkMode: true,
   meta: {
     supportsDarkMode: {
       env: {

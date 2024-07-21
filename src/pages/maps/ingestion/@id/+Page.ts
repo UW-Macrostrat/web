@@ -4,7 +4,7 @@ import { AnchorButton, ButtonGroup } from "@blueprintjs/core";
 import { FullscreenPage } from "~/layouts";
 import { Header } from "./components";
 import { MapInterface } from "./components";
-import { usePageProps } from "~/renderer";
+import { usePageProps } from "~/renderer/usePageProps";
 
 const h = hyper.styled(styles);
 

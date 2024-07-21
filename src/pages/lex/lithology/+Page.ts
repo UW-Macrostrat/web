@@ -1,7 +1,7 @@
 import LithologyHierarchy from "@macrostrat-web/lithology-hierarchy";
 import { ContentPage } from "~/layouts";
 import hyper from "@macrostrat/hyper";
-import { PageBreadcrumbs } from "~/renderer";
+import { PageBreadcrumbs } from "~/components";
 import styles from "./main.module.sass";
 const h = hyper.styled(styles);
 

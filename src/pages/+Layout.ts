@@ -1,7 +1,7 @@
 import { DarkModeProvider } from "@macrostrat/ui-components";
-import React from "react";
+import { ReactNode } from "react";
 
-import { AuthProvider } from "../_providers/auth";
+import { AuthProvider } from "~/_providers/auth";
 import { usePageContext } from "vike-react/usePageContext";
 
 import "~/styles/blueprint-core";
@@ -11,10 +11,10 @@ import "../styles/padding.css";
 //
 import h from "./layout.module.sass";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default function Layout({ children }: { children: ReactNode }) {
   const pageContext = usePageContext();
   const { exports = {}, config, user } = pageContext;
-  const supportsDarkMode = config?.supportsDarkMode ?? true;
+  const supportsDarkMode = true;
   const pageStyle = exports?.pageStyle ?? "fullscreen";
 
   return h(

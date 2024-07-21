@@ -1,7 +1,7 @@
 import h from "@macrostrat/hyper";
 
 import { ContentPage } from "~/layouts";
-import { PageBreadcrumbs } from "~/renderer";
+import { PageBreadcrumbs } from "~/components";
 import { FeedbackWrap } from "@macrostrat/feedback-components";
 
 export function Page() {

@@ -1,6 +1,6 @@
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
-import { Link } from "~/components/navigation/link-component";
+import { Link } from "~/components/navigation/Link";
 
 const h = hyper.styled(styles);
 

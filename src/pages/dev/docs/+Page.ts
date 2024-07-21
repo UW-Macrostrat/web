@@ -1,9 +1,9 @@
 import h from "@macrostrat/hyper";
 import { Link } from "~/components";
-import { usePageContext } from "~/renderer/page-context";
+import { usePageContext } from "vike-react/usePageContext";
 import { ErrorBoundary } from "@macrostrat/ui-components";
 import { ContentPage } from "~/layouts";
-import { PageBreadcrumbs } from "~/renderer";
+import { PageBreadcrumbs } from "~/components";
 import { Popover, Tag } from "@blueprintjs/core";
 
 export function Page() {

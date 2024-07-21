@@ -1,9 +1,9 @@
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
 import { Spinner } from "@blueprintjs/core";
-import { usePageTransitionStore } from "~/renderer/transitions";
+import { usePageTransitionStore } from "~/renderer/usePageTransitionStore";
 import classNames from "classnames";
-import { PageBreadcrumbs } from "~/renderer";
+import { PageBreadcrumbs } from "~/components";
 import { useTransition } from "transition-hook";
 
 const h = hyper.styled(styles);

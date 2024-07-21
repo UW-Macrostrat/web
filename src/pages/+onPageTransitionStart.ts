@@ -1,5 +1,5 @@
 export { onPageTransitionStart };
-import { usePageTransitionStore } from "../renderer/transitions";
+import { usePageTransitionStore } from "~/renderer/usePageTransitionStore";
 
 async function onPageTransitionStart() {
   // This function is called when a page transition starts.

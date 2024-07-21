@@ -10,7 +10,7 @@ import { FullscreenPage } from "~/layouts";
 import h from "./main.module.sass";
 import { compose, C } from "@macrostrat/hyper";
 import { baseMapURL, mapboxAccessToken } from "@macrostrat-web/settings";
-import { PageBreadcrumbs } from "~/renderer";
+import { PageBreadcrumbs } from "~/components";
 import { Feature, FeatureCollection, LineString, Point } from "geojson";
 import { useEffect, useMemo } from "react";
 import { setGeoJSON } from "@macrostrat/mapbox-utils";

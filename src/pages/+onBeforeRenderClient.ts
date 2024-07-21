@@ -1,5 +1,5 @@
 import { FocusStyleManager } from "@blueprintjs/core";
-import { updatePageMeta } from "~/renderer/page-meta";
+import { updatePageMeta } from "~/renderer/updatePageMeta";
 
 export function onBeforeRenderClient(pageContext) {
   // Adjust title and description as needed

@@ -1,11 +1,11 @@
 import h from "@macrostrat/hyper";
 import { usePageContext } from "vike-react/usePageContext";
-import favicon from "./assets/favicon.png";
+import favicon from "~/_assets/favicon.png";
 
 export default function Head() {
   const ctx = usePageContext();
   const { environment } = ctx;
-  const { scripts = [] } = ctx.exports;
+  const { scripts = [] } = ctx.config;
 
   return h([
     h("meta", {

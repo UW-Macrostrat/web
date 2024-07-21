@@ -18,7 +18,7 @@ import {
 } from "./data-service";
 import { setQueryString } from "@macrostrat/ui-components";
 import styles from "./main.module.sass";
-import { usePageProps } from "~/renderer";
+import { usePageProps } from "~/renderer/usePageProps";
 
 const h = hyper.styled(styles);
 

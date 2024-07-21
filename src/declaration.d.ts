@@ -16,13 +16,13 @@ declare module "*.styl" {
   export default content;
 }
 
+declare module "*.sass" {
+  const content: string;
+  export default content;
+}
+
 // Override declarations for sass module
 declare module "*.module.sass" {
   const classes: { [key: string]: string };
   export default classes;
-}
-
-declare module "*.sass" {
-  const content: string;
-  export default content;
 }
