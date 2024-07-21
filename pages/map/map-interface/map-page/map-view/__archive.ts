@@ -1,4 +1,4 @@
-import { MapLayer } from "~/pages/map/map-interface/app-state";
+import { MapLayer } from "#/map/map-interface/app-state";
 import { Component } from "react";
 
 class VestigialMap extends Component<MapProps, {}> {

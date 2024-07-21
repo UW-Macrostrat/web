@@ -1,1 +1,1 @@
-export { onBeforeRender } from "~/pages/columns/@column/+onBeforeRender";
+export { onBeforeRender } from "#/columns/@column/+onBeforeRender";

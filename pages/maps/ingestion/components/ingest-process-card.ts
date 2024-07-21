@@ -3,7 +3,7 @@ import { useCallback, useState } from "react";
 
 import { ingestPrefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
-import AddButton from "~/pages/maps/ingestion/components/AddButton";
+import AddButton from "#/maps/ingestion/components/AddButton";
 import Tag from "./Tag";
 import styles from "./ingest-process-card.module.sass";
 

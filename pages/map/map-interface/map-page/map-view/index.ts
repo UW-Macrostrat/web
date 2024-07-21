@@ -22,7 +22,7 @@ import {
   MapLayer,
   useAppActions,
   useAppState,
-} from "~/pages/map/map-interface/app-state";
+} from "#/map/map-interface/app-state";
 import styles from "../main.module.styl";
 import { CrossSectionLine } from "./cross-section";
 import {

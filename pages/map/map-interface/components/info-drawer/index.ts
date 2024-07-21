@@ -1,6 +1,6 @@
 import hyper from "@macrostrat/hyper";
 import { Route, Routes } from "react-router-dom";
-import { useAppActions } from "~/pages/map/map-interface/app-state";
+import { useAppActions } from "#/map/map-interface/app-state";
 import { LocationPanel } from "@macrostrat/map-interface";
 import { FossilCollections } from "./fossil-collections";
 import { GeologicMapInfo } from "./geo-map";
@@ -8,7 +8,7 @@ import { MacrostratLinkedData } from "./macrostrat-linked";
 import { RegionalStratigraphy } from "./reg-strat";
 import { Physiography } from "./physiography";
 import { XddExpansion } from "./xdd-panel";
-import { useAppState } from "~/pages/map/map-interface/app-state";
+import { useAppState } from "#/map/map-interface/app-state";
 import styles from "./main.module.styl";
 import { LoadingArea } from "../transitions";
 import { StratColumn } from "./strat-column";

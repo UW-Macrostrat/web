@@ -1,10 +1,7 @@
 import React, { useState } from "react";
 import hyper from "@macrostrat/hyper";
 import { Tag, Card, Button, Collapse, Switch } from "@blueprintjs/core";
-import {
-  useAppActions,
-  useAppState,
-} from "~/pages/map/map-interface/app-state";
+import { useAppActions, useAppState } from "#/map/map-interface/app-state";
 import { useAdmoinshments } from "./admonishments";
 import styles from "./filters.module.styl";
 

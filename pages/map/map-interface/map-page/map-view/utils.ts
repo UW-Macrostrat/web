@@ -1,7 +1,7 @@
 import hyper from "@macrostrat/hyper";
 import { useEffect } from "react";
 import { MapBottomControls } from "@macrostrat/map-interface";
-import { LinkButton } from "~/pages/map/map-interface/components/buttons";
+import { LinkButton } from "#/map/map-interface/components/buttons";
 import styles from "../main.module.styl";
 
 const h = hyper.styled(styles);

@@ -2,7 +2,7 @@ import h from "@macrostrat/hyper";
 import { ExpansionPanel } from "@macrostrat/map-interface";
 import LongText from "../long-text";
 import { IntervalChip } from "../info-blocks";
-import { useAppActions } from "~/pages/map/map-interface/app-state";
+import { useAppActions } from "#/map/map-interface/app-state";
 import { MapReference } from "~/components/map-info";
 
 function LongTextRenderer(props) {

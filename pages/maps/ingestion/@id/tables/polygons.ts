@@ -11,17 +11,17 @@ import {
   ColumnConfig,
   ColumnConfigGenerator,
   CustomTableProps,
-} from "~/pages/maps/ingestion/@id/table";
+} from "#/maps/ingestion/@id/table";
 import IntervalSelection, {
   Interval,
-} from "~/pages/maps/ingestion/@id/components/cells/interval-selection";
-import CheckboxCell from "~/pages/maps/ingestion/@id/components/cells/checkbox-cell";
+} from "#/maps/ingestion/@id/components/cells/interval-selection";
+import CheckboxCell from "#/maps/ingestion/@id/components/cells/checkbox-cell";
 import { TableInterface } from "../edit-table";
-import styles from "~/pages/maps/ingestion/@id/edit-table.module.sass";
+import styles from "#/maps/ingestion/@id/edit-table.module.sass";
 import { COMMON_COLUMNS } from ".";
-import { toBoolean } from "~/pages/maps/ingestion/@id/components/cells/util";
+import { toBoolean } from "#/maps/ingestion/@id/components/cells/util";
 import { apiV2Prefix } from "@macrostrat-web/settings";
-import { createTableUpdate } from "~/pages/maps/ingestion/@id/utils";
+import { createTableUpdate } from "#/maps/ingestion/@id/utils";
 
 const h = hyper.styled(styles);
 

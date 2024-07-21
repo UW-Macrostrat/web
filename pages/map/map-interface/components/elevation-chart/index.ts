@@ -8,10 +8,7 @@ import { scaleLinear } from "d3-scale";
 import { mouse, select } from "d3-selection";
 import { area, line } from "d3-shape";
 import React, { useEffect, useRef } from "react";
-import {
-  useAppActions,
-  useAppState,
-} from "~/pages/map/map-interface/app-state";
+import { useAppActions, useAppState } from "#/map/map-interface/app-state";
 
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import styles from "./main.module.styl";

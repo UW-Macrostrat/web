@@ -5,9 +5,9 @@ import { AuthProvider } from "~/_providers/auth";
 import { usePageContext } from "vike-react/usePageContext";
 
 import "~/styles/blueprint-core";
-import "../styles/_theme.styl";
-import "../styles/core.sass";
-import "../styles/padding.css";
+import "~/styles/_theme.styl";
+import "~/styles/core.sass";
+import "~/styles/padding.css";
 //
 import h from "./layout.module.sass";
 

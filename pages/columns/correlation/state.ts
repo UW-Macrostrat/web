@@ -1,8 +1,8 @@
 import { LineString, Point } from "geojson";
 import { create } from "zustand";
-import { ColumnGeoJSONRecord } from "~/pages/map/map-interface/app-state/handlers/columns";
+import { ColumnGeoJSONRecord } from "#/map/map-interface/app-state/handlers/columns";
 // Turf intersection
-import { fetchAllColumns } from "~/pages/map/map-interface/app-state/handlers/fetch";
+import { fetchAllColumns } from "#/map/map-interface/app-state/handlers/fetch";
 import {
   getCorrelationHashParams,
   setHashStringForCorrelation,

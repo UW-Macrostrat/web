@@ -8,10 +8,7 @@ import {
   Switch,
 } from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
-import {
-  useBurwellActions,
-  useBurwellState,
-} from "~/pages/map/sources/app-state";
+import { useBurwellActions, useBurwellState } from "#/map/sources/app-state";
 
 const capitalizeWord = (word) => {
   return word.charAt(0).toUpperCase() + word.slice(1);

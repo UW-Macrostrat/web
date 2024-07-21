@@ -5,7 +5,7 @@ import { UnitLong } from "@macrostrat/api-types";
 //import "@macrostrat/column-components/src/main.module.scss";
 
 import styles from "./strat-column.module.styl";
-import { ColumnSummary } from "~/pages/map/map-interface/app-state/handlers/columns";
+import { ColumnSummary } from "#/map/map-interface/app-state/handlers/columns";
 import { NonIdealState } from "@blueprintjs/core";
 import useBreadcrumbs from "use-react-router-breadcrumbs";
 import { LinkButton } from "../../buttons";

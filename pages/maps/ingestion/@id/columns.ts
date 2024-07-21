@@ -5,12 +5,12 @@
 import hyper from "@macrostrat/hyper";
 
 import { ColumnProps, Column } from "@blueprintjs/table";
-import { DataParameters } from "~/pages/maps/ingestion/@id/table";
-import IntervalSelection from "~/pages/maps/ingestion/@id/components/cells/interval-selection";
-import { getTableUpdate } from "~/pages/maps/ingestion/@id/components/table-util";
-import CheckboxCell from "~/pages/maps/ingestion/@id/components/cells/checkbox-cell";
-import { toBoolean } from "~/pages/maps/ingestion/@id/components/cells/util";
-import styles from "~/pages/maps/ingestion/@id/edit-table.module.sass";
+import { DataParameters } from "#/maps/ingestion/@id/table";
+import IntervalSelection from "#/maps/ingestion/@id/components/cells/interval-selection";
+import { getTableUpdate } from "#/maps/ingestion/@id/components/table-util";
+import CheckboxCell from "#/maps/ingestion/@id/components/cells/checkbox-cell";
+import { toBoolean } from "#/maps/ingestion/@id/components/cells/util";
+import styles from "#/maps/ingestion/@id/edit-table.module.sass";
 
 const h = hyper.styled(styles);
 

@@ -1,7 +1,15 @@
-import { Filter, createFiltersKey, addFilterToURL, rowPassesFilters } from "./filter";
+import {
+  Filter,
+  createFiltersKey,
+  addFilterToURL,
+  rowPassesFilters,
+} from "./filter";
 import { DataParameters, cloneDataParameters } from "./data-parameter";
 import { secureFetch } from "@macrostrat-web/security";
-import { ProgressPopoverProps, submitColumnCopy } from "~/pages/maps/ingestion/@id/components";
+import {
+  ProgressPopoverProps,
+  submitColumnCopy,
+} from "#/maps/ingestion/@id/components";
 
 export interface TableUpdate {
   // Used to merge updates
@@ -51,15 +59,13 @@ export const createTableUpdateCopyColumn = (
   copiedColumn: string,
   dataParameters: DataParameters
 ): TableUpdate => {
-
   dataParameters = cloneDataParameters(dataParameters);
 
   return {
     column: selectedColumn,
     description: `Copy column ${copiedColumn} to ${selectedColumn}`,
     applyToCell: (value, row, cellColumnName) => {
-
-      if(!rowPassesFilters(row, Object.values(dataParameters.filter))){
+      if (!rowPassesFilters(row, Object.values(dataParameters.filter))) {
         return value;
       }
 
@@ -70,15 +76,10 @@ export const createTableUpdateCopyColumn = (
       return value;
     },
     execute: async () => {
-      await submitColumnCopy(
-        url,
-        copiedColumn,
-        selectedColumn,
-        dataParameters
-      );
-    }
-  }
-}
+      await submitColumnCopy(url, copiedColumn, selectedColumn, dataParameters);
+    },
+  };
+};
 
 export const createTableUpdate = (
   url: string,
@@ -87,21 +88,15 @@ export const createTableUpdate = (
   row: Record<string, boolean | string | number | null>,
   dataParameters: DataParameters
 ): TableUpdate => {
-
   let newDataParameters = cloneDataParameters(dataParameters);
   if (newDataParameters?.group != undefined) {
-    newDataParameters.filter[newDataParameters?.group] =
-      new Filter(
-        newDataParameters?.group,
-        "eq",
-        row[newDataParameters?.group]
-      );
-  } else {
-    newDataParameters.filter["_pkid"] = new Filter(
-      "_pkid",
+    newDataParameters.filter[newDataParameters?.group] = new Filter(
+      newDataParameters?.group,
       "eq",
-      row["_pkid"]
+      row[newDataParameters?.group]
     );
+  } else {
+    newDataParameters.filter["_pkid"] = new Filter("_pkid", "eq", row["_pkid"]);
   }
 
   const execute = async () =>
@@ -112,9 +107,8 @@ export const createTableUpdate = (
     row: { [key: string]: string },
     cellColumnName: string
   ) => {
-
     // If this row doesn't pass all the filters skip it
-    if(!rowPassesFilters(row, Object.values(newDataParameters.filter))){
+    if (!rowPassesFilters(row, Object.values(newDataParameters.filter))) {
       return currentValue;
     }
 
@@ -129,7 +123,7 @@ export const createTableUpdate = (
     key: filterKey,
     description: `Update ${columnName} to ${value} for ${filterKey}`,
     execute: execute,
-    applyToCell: apply
+    applyToCell: apply,
   } as TableUpdate;
 };
 
@@ -139,7 +133,6 @@ export const submitChange = async (
   columns: string[],
   filters: { [key: string]: Filter }
 ) => {
-
   for (const column of columns) {
     let updateURL = new URL(url);
 
@@ -173,11 +166,16 @@ export const submitChange = async (
  * If one update is followed by another update to the same set of cells
  * remove the first update
  */
-export const squashTableUpdates = (tableUpdates: TableUpdate[]) : TableUpdate[] => {
+export const squashTableUpdates = (
+  tableUpdates: TableUpdate[]
+): TableUpdate[] => {
   let squashedTableUpdates = [];
   let lastTableUpdate = null;
   for (const tableUpdate of tableUpdates) {
-    if (tableUpdate.key == lastTableUpdate?.key && tableUpdate.column == lastTableUpdate?.column) {
+    if (
+      tableUpdate.key == lastTableUpdate?.key &&
+      tableUpdate.column == lastTableUpdate?.column
+    ) {
       squashedTableUpdates.pop();
     }
     squashedTableUpdates.push(tableUpdate);
@@ -185,7 +183,7 @@ export const squashTableUpdates = (tableUpdates: TableUpdate[]) : TableUpdate[] 
   }
 
   return squashedTableUpdates;
-}
+};
 
 /*
  * Submit table updates, returning any updates that were not submitted
@@ -193,8 +191,7 @@ export const squashTableUpdates = (tableUpdates: TableUpdate[]) : TableUpdate[] 
 export const submitTableUpdates = async (
   tableUpdates: TableUpdate[],
   setProgress: (p: ProgressPopoverProps) => void
-) : Promise<TableUpdate[]> => {
-
+): Promise<TableUpdate[]> => {
   let index = 0;
   for (const tableUpdate of tableUpdates) {
     setProgress({
@@ -204,7 +201,6 @@ export const submitTableUpdates = async (
     try {
       await tableUpdate.execute();
     } catch (e) {
-
       // If there is an error, set the progress to an error state and stop submitting
       setProgress({
         progressBarProps: { intent: "danger" },
@@ -229,4 +225,4 @@ export const submitTableUpdates = async (
   setProgress(undefined);
 
   return [];
-}
+};

@@ -1,6 +1,6 @@
 import { useMapRef, useMapStatus } from "@macrostrat/mapbox-react";
 import { useEffect, useRef } from "react";
-import { useAppState } from "~/pages/map/map-interface/app-state";
+import { useAppState } from "#/map/map-interface/app-state";
 import { LineString } from "geojson";
 import { GeoJSONSource } from "mapbox-gl";
 

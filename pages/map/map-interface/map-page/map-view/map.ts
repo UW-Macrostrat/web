@@ -3,15 +3,15 @@ import {
   AppAction,
   MapLayer,
   useAppActions,
-} from "~/pages/map/map-interface/app-state";
-import { ColumnProperties } from "~/pages/map/map-interface/app-state/handlers/columns";
+} from "#/map/map-interface/app-state";
+import { ColumnProperties } from "#/map/map-interface/app-state/handlers/columns";
 import {
   useMapRef,
   useMapStatus,
   useMapStyleOperator,
 } from "@macrostrat/mapbox-react";
 import { useEffect, useRef, useCallback } from "react";
-import { useAppState } from "~/pages/map/map-interface/app-state";
+import { useAppState } from "#/map/map-interface/app-state";
 import { getExpressionForFilters } from "./filter-helpers";
 
 interface MapProps {

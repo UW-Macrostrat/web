@@ -3,13 +3,13 @@ import {
   preprocessUnits,
   useUnitSelectionDispatch,
 } from "@macrostrat/column-views";
-import { runColumnQuery } from "~/pages/map/map-interface/app-state/handlers/fetch";
+import { runColumnQuery } from "#/map/map-interface/app-state/handlers/fetch";
 import { Column, TimescaleColumn } from "./column";
 import { UnitLong } from "@macrostrat/api-types";
 import { GapBoundPackage, SectionRenderData, AgeComparable } from "./types";
 
 import h from "./main.module.sass";
-import { useCorrelationDiagramStore } from "~/pages/columns/correlation/state";
+import { useCorrelationDiagramStore } from "#/columns/correlation/state";
 
 export interface ColumnIdentifier {
   col_id: number;

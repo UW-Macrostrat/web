@@ -11,13 +11,13 @@ import {
   ColumnConfig,
   ColumnConfigGenerator,
   CustomTableProps,
-} from "~/pages/maps/ingestion/@id/table";
-import CheckboxCell from "~/pages/maps/ingestion/@id/components/cells/checkbox-cell";
+} from "#/maps/ingestion/@id/table";
+import CheckboxCell from "#/maps/ingestion/@id/components/cells/checkbox-cell";
 import { TableInterface } from "../edit-table";
-import styles from "~/pages/maps/ingestion/@id/edit-table.module.sass";
+import styles from "#/maps/ingestion/@id/edit-table.module.sass";
 import { COMMON_COLUMNS } from ".";
-import { toBoolean } from "~/pages/maps/ingestion/@id/components/cells/util";
-import { createTableUpdate } from "~/pages/maps/ingestion/@id/utils";
+import { toBoolean } from "#/maps/ingestion/@id/components/cells/util";
+import { createTableUpdate } from "#/maps/ingestion/@id/utils";
 
 const h = hyper.styled(styles);
 
@@ -37,7 +37,7 @@ export function PointsTable({ url, ingestProcessId }: CustomTableProps) {
       url,
       defaultColumnConfig,
       dataParameters,
-       addTableUpdate,
+      addTableUpdate,
       transformedData,
       ref,
     }: ColumnConfigGenerator): ColumnConfig => {
@@ -61,8 +61,8 @@ export function PointsTable({ url, ingestProcessId }: CustomTableProps) {
                     rowIndex,
                     transformedData,
                     dataParameters
-                  )
-                ])
+                  ),
+                ]);
               },
               value: toBoolean(transformedData[rowIndex]["omit"]),
             }),

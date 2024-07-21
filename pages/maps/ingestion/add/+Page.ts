@@ -1,4 +1,4 @@
-import { AddSourceForm } from "~/pages/maps/ingestion/@id/source-form";
+import { AddSourceForm } from "#/maps/ingestion/@id/source-form";
 
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";

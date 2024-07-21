@@ -1,7 +1,7 @@
 import h from "@macrostrat/hyper";
 import { ExpansionPanel } from "@macrostrat/map-interface";
-import { addCommas } from "~/pages/map/map-interface/utils";
-import { useAppState } from "~/pages/map/map-interface/app-state";
+import { addCommas } from "#/map/map-interface/utils";
+import { useAppState } from "#/map/map-interface/app-state";
 import { Spinner } from "@blueprintjs/core";
 import { Link } from "react-router-dom";
 

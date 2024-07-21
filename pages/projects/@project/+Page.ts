@@ -1,5 +1,5 @@
 import h from "@macrostrat/hyper";
-import { Page as ColumnPage } from "~/pages/columns/+Page";
+import { Page as ColumnPage } from "#/columns/+Page";
 import { usePageProps } from "~/renderer/usePageProps";
 
 export function Page() {

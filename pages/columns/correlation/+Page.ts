@@ -27,7 +27,7 @@ import {
   UnitSelectionProvider,
   useSelectedUnit,
 } from "@macrostrat/column-views";
-import { UnitDescription } from "~/pages/columns/correlation/column";
+import { UnitDescription } from "#/columns/correlation/column";
 
 export function Page() {
   const startup = useCorrelationDiagramStore((state) => state.startup);

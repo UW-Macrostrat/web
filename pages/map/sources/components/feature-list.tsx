@@ -1,7 +1,7 @@
 import h from "@macrostrat/hyper";
 import { ExpansionPanel } from "@macrostrat/map-interface";
 import { Link } from "~/components";
-import { useBurwellActions } from "~/pages/map/sources/app-state";
+import { useBurwellActions } from "#/map/sources/app-state";
 import { zoomMap } from "../app-state/utils";
 
 function FeatureTable(props) {

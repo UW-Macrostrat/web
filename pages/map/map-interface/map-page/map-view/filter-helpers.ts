@@ -3,7 +3,7 @@ import { FeatureCollection, Point } from "geojson";
 import {
   FilterData,
   IntervalFilterData,
-} from "~/pages/map/map-interface/app-state/handlers/filters";
+} from "#/map/map-interface/app-state/handlers/filters";
 
 export function getExpressionForFilters(
   filters: FilterData[]

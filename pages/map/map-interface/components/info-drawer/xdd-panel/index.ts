@@ -2,11 +2,8 @@ import { Spinner } from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
 import Journal from "./Journal";
 import { ExpansionPanel } from "@macrostrat/map-interface";
-import {
-  useAppActions,
-  useAppState,
-} from "~/pages/map/map-interface/app-state";
-import { XDDSnippet } from "~/pages/map/map-interface/app-state/handlers/fetch";
+import { useAppActions, useAppState } from "#/map/map-interface/app-state";
+import { XDDSnippet } from "#/map/map-interface/app-state/handlers/fetch";
 
 export function XddExpansion() {
   const runAction = useAppActions();

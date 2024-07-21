@@ -5,7 +5,7 @@ import {
   flyToData,
   useBurwellActions,
   useBurwellState,
-} from "~/pages/map/sources/app-state";
+} from "#/map/sources/app-state";
 import { initializeMap } from "./initialize-map";
 import { mapSources } from "./map-sources";
 

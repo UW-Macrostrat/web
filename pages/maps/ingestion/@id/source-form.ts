@@ -9,7 +9,7 @@ import { ReactNode, useCallback, useEffect, useState, useRef } from "react";
 import {
   ProgressPopover,
   ProgressPopoverProps,
-} from "~/pages/maps/ingestion/@id/components";
+} from "#/maps/ingestion/@id/components";
 export const h = hyper.styled(styles);
 
 const INPUT_FIELDS = {

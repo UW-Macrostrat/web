@@ -11,10 +11,7 @@ import { useMapRef } from "@macrostrat/mapbox-react";
 import { useDarkMode } from "@macrostrat/ui-components";
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import {
-  useAppActions,
-  useAppState,
-} from "~/pages/map/map-interface/app-state";
+import { useAppActions, useAppState } from "#/map/map-interface/app-state";
 import { MacrostratRasterTileset, buildRasterStyle, h } from ".";
 import { useMapStyle } from "./utils";
 

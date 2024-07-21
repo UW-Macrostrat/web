@@ -25,7 +25,7 @@ import {
   LegendPanelHeader,
   UnitDetailsPopover,
 } from "~/components/unit-details";
-import { useCorrelationDiagramStore } from "~/pages/columns/correlation/state";
+import { useCorrelationDiagramStore } from "#/columns/correlation/state";
 
 export function MacrostratColumnProvider(props) {
   // A column provider specialized the Macrostrat API

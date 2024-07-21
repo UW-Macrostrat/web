@@ -1,9 +1,6 @@
 import hyper from "@macrostrat/hyper";
 
-import {
-  Icon,
-  useHotkeys
-} from "@blueprintjs/core";
+import { Icon, useHotkeys } from "@blueprintjs/core";
 import {
   Column,
   ColumnHeaderCell2,
@@ -12,13 +9,22 @@ import {
   SelectionModes,
   Table2,
 } from "@blueprintjs/table";
-import { useCallback, useReducer, useEffect, useMemo, useState, useRef, MutableRefObject } from "react";
+import {
+  useCallback,
+  useReducer,
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+  MutableRefObject,
+} from "react";
 import {
   Filter,
   createTableUpdateCopyColumn,
   isColumnActive,
   createTableUpdate,
-  applyTableUpdates, submitTableUpdates
+  applyTableUpdates,
+  submitTableUpdates,
 } from "./utils/";
 import { tableDataReducer, initialState } from "./reducer/";
 import { ingestPrefix } from "@macrostrat-web/settings";
@@ -34,7 +40,8 @@ import {
   getCellSelected,
   download_file,
   sleep,
-  reorderColumns, downloadSourceFiles
+  reorderColumns,
+  downloadSourceFiles,
 } from "./components/index";
 import {
   ColumnConfig,
@@ -46,7 +53,7 @@ import {
 import "@blueprintjs/table/lib/css/table.css";
 import styles from "./edit-table.module.sass";
 import "./override.sass";
-import TableHeader from "~/pages/maps/ingestion/@id/components/table-header";
+import TableHeader from "#/maps/ingestion/@id/components/table-header";
 
 const h = hyper.styled(styles);
 
@@ -65,17 +72,16 @@ export function TableInterface({
   finalColumns,
   columnGenerator,
 }: EditTableProps) {
-
-  const [tableData, dispatch] = useReducer(
-    tableDataReducer,
-    {...initialState, allColumns: finalColumns}
-  )
+  const [tableData, dispatch] = useReducer(tableDataReducer, {
+    ...initialState,
+    allColumns: finalColumns,
+  });
 
   // Selection State
   const [selection, setSelection] = useState<Selection[]>([]);
-  const [copiedSelection, setCopiedSelection] = useState<Selection[] | undefined>(
-    undefined
-  );
+  const [copiedSelection, setCopiedSelection] = useState<
+    Selection[] | undefined
+  >(undefined);
 
   // Cell refs
   const ref = useRef<MutableRefObject<any>[][]>(null);
@@ -94,29 +100,33 @@ export function TableInterface({
 
   useEffect(() => {
     (async () => {
-      const newData = await getData(url, tableData.parameters)
+      const newData = await getData(url, tableData.parameters);
 
       ref.current = Array.from(
         { length: newData.data.length == 0 ? 1 : newData.data.length },
         () =>
           Array.from(
-            { length: newData.data.length == 0 ? 1 : Object.keys(newData.data[0]).length },
+            {
+              length:
+                newData.data.length == 0
+                  ? 1
+                  : Object.keys(newData.data[0]).length,
+            },
             () => null
           )
       );
 
       dispatch({
         type: "updateData",
-        ...newData
-      })
-    })()
+        ...newData,
+      });
+    })();
   }, [tableData.parameters]);
 
   const transformedData = useMemo(() => {
     let data = structuredClone(tableData.remoteData);
-    data = applyTableUpdates(data, tableData.tableUpdates)
+    data = applyTableUpdates(data, tableData.tableUpdates);
     return data;
-
   }, [tableData.remoteData, tableData.tableUpdates]);
 
   const visibleColumns = useMemo(() => {
@@ -146,8 +156,10 @@ export function TableInterface({
     const selectedColumns = getSelectedColumns(visibleColumns, selection);
     const copiedColumns = getSelectedColumns(visibleColumns, copiedSelection);
     if (
-      copiedColumns != undefined && copiedColumns.length == 1 &&
-      selectedColumns != undefined && selectedColumns.length == 1
+      copiedColumns != undefined &&
+      copiedColumns.length == 1 &&
+      selectedColumns != undefined &&
+      selectedColumns.length == 1
     ) {
       const selectedColumn = selectedColumns[0];
       const copiedColumn = copiedColumns[0];
@@ -157,20 +169,27 @@ export function TableInterface({
         selectedColumn,
         copiedColumn,
         tableData.parameters
-      )
+      );
 
       dispatch({ type: "addTableUpdates", tableUpdates: [tableUpdate] });
     }
   }, [selection]);
 
-  const handleCopy = useCallback((e) => {
-    setCopiedSelection(selection);
+  const handleCopy = useCallback(
+    (e) => {
+      setCopiedSelection(selection);
 
-    // Only copy the first selection
-    const firstSelection = selection[0];
-    const selectedText = selectionToText(firstSelection, visibleColumns, transformedData);
-    navigator.clipboard.writeText(selectedText);
-  }, [selection, transformedData, visibleColumns]);
+      // Only copy the first selection
+      const firstSelection = selection[0];
+      const selectedText = selectionToText(
+        firstSelection,
+        visibleColumns,
+        transformedData
+      );
+      navigator.clipboard.writeText(selectedText);
+    },
+    [selection, transformedData, visibleColumns]
+  );
 
   const hotkeys = useMemo(
     () => [
@@ -183,10 +202,11 @@ export function TableInterface({
       {
         combo: "shift+h",
         label: "Hide Column",
-        onKeyDown: () => dispatch({
-          type: "hideColumn",
-          column: getSelectedColumns(visibleColumns, selection)
-        }),
+        onKeyDown: () =>
+          dispatch({
+            type: "hideColumn",
+            column: getSelectedColumns(visibleColumns, selection),
+          }),
         group: "Table",
       },
       {
@@ -223,24 +243,21 @@ export function TableInterface({
                 [
                   h("span.selected-column", {}, [
                     columnName,
-                    h.if(finalColumns.includes(columnName))(
-                      Icon, {
-                        icon: "star-empty",
-                        size: 12,
-                        color: "#333333",
-                        style: { marginLeft: "5px", marginBottom: "2px" },
-                      }
-                    ),
-                  ]),
-                  h.if(isColumnActive(tableData.parameters, columnName))(
-                    Icon, {
-                      icon: "filter-list",
-                      size: 15,
+                    h.if(finalColumns.includes(columnName))(Icon, {
+                      icon: "star-empty",
+                      size: 12,
                       color: "#333333",
-                    }
-                  ),
+                      style: { marginLeft: "5px", marginBottom: "2px" },
+                    }),
+                  ]),
+                  h.if(isColumnActive(tableData.parameters, columnName))(Icon, {
+                    icon: "filter-list",
+                    size: 15,
+                    color: "#333333",
+                  }),
                   h.if(!isColumnActive(tableData.parameters, columnName))(
-                    Icon, { icon: "filter", size: 15, color: "#d0d0d0" }
+                    Icon,
+                    { icon: "filter", size: 15, color: "#d0d0d0" }
                   ),
                 ]
               )
@@ -251,16 +268,21 @@ export function TableInterface({
               onFilterChange: (param: OperatorQueryParameter) => {
                 dispatch({
                   type: "setFilter",
-                  filter: new Filter(columnName, param.operator, param.value || null)
-                })
+                  filter: new Filter(
+                    columnName,
+                    param.operator,
+                    param.value || null
+                  ),
+                });
               },
               filter: filter,
               onGroupChange: (column: string | undefined) => {
-                dispatch({ type: "setGroupBy", groupBy: column })
+                dispatch({ type: "setGroupBy", groupBy: column });
               },
               group: tableData.parameters?.group,
-              onHide: () => dispatch({ type: "hideColumn", column: columnName }),
-              hidden: !tableData.hiddenColumns.includes(columnName)
+              onHide: () =>
+                dispatch({ type: "hideColumn", column: columnName }),
+              hidden: !tableData.hiddenColumns.includes(columnName),
             }),
           name: columnName,
           style: {
@@ -283,7 +305,7 @@ export function TableInterface({
       }
 
       const headerKey = tableData.parameters?.group || "_pkid";
-      let name = transformedData[rowIndex][headerKey]
+      let name = transformedData[rowIndex][headerKey];
 
       if (name == null) {
         name = "NULL";
@@ -293,7 +315,8 @@ export function TableInterface({
 
       return h(RowHeaderCell2, { name: name.toString() }, []);
     },
-    [tableData.parameters, transformedData]);
+    [tableData.parameters, transformedData]
+  );
 
   const defaultColumnConfig = useMemo(() => {
     if (visibleColumns.length == 0) {
@@ -316,7 +339,7 @@ export function TableInterface({
               },
               columnName: columnName,
               onConfirm: (value) => {
-                if(value != transformedData[rowIndex][columnName]) {
+                if (value != transformedData[rowIndex][columnName]) {
                   dispatch({
                     type: "addTableUpdates",
                     tableUpdates: [
@@ -328,15 +351,16 @@ export function TableInterface({
                         tableData.parameters
                       ),
                     ],
-                  })
+                  });
                 }
               },
               onCopy: (e) => handleCopy(e),
               onPaste: handlePaste,
-              intent: tableData.remoteData[rowIndex][columnName] !=
-                transformedData[rowIndex][columnName] ?
-                "success" :
-                undefined,
+              intent:
+                tableData.remoteData[rowIndex][columnName] !=
+                transformedData[rowIndex][columnName]
+                  ? "success"
+                  : undefined,
               value:
                 transformedData.length == 0
                   ? ""
@@ -352,7 +376,7 @@ export function TableInterface({
     tableData.parameters,
     transformedData,
     handleCopy,
-    handlePaste
+    handlePaste,
   ]);
 
   const columnConfig = useMemo(() => {
@@ -363,12 +387,12 @@ export function TableInterface({
     const generatedColumns = columnGenerator({
       url,
       defaultColumnConfig,
-      dataParameters : tableData.parameters,
+      dataParameters: tableData.parameters,
       addTableUpdate: (t) =>
-        dispatch({type: "addTableUpdates", tableUpdates: t}),
+        dispatch({ type: "addTableUpdates", tableUpdates: t }),
       transformedData,
       data: tableData.remoteData,
-      ref
+      ref,
     });
 
     return generatedColumns;
@@ -399,16 +423,17 @@ export function TableInterface({
           dataParameters: tableData.parameters,
           totalNumberOfRows: tableData.totalNumberOfRows,
           showAllColumns: () => dispatch({ type: "showAllColumns" }),
-          toggleShowOmittedRows: () => dispatch({ type: "toggleShowOmittedRows" }),
+          toggleShowOmittedRows: () =>
+            dispatch({ type: "toggleShowOmittedRows" }),
           clearTableUpdates: () => dispatch({ type: "clearTableUpdates" }),
           submitTableUpdates: async () => {
-            await submitTableUpdates(
-              tableData.tableUpdates,
-              setUpdateProgress
-            )
+            await submitTableUpdates(tableData.tableUpdates, setUpdateProgress);
             // Update the table data
-            dispatch({ type: "updateData", ...(await getData(url, tableData.parameters)) })
-            dispatch({ type: "clearTableUpdates" })
+            dispatch({
+              type: "updateData",
+              ...(await getData(url, tableData.parameters)),
+            });
+            dispatch({ type: "clearTableUpdates" });
           },
           downloadSourceFiles: async () => downloadSourceFiles(ingestProcessId),
           clearDataParameters: () => dispatch({ type: "clearDataParameters" }),
@@ -421,12 +446,15 @@ export function TableInterface({
                   Accept: "application/json",
                   "Content-Type": "application/json",
                 },
-                body: JSON.stringify({state: "post_harmonization"})
+                body: JSON.stringify({ state: "post_harmonization" }),
               }
             );
             if (response.ok) {
               dispatch({ type: "clearTableUpdates" });
-              dispatch({ type: "updateData", ...(await getData(url, tableData.parameters)) });
+              dispatch({
+                type: "updateData",
+                ...(await getData(url, tableData.parameters)),
+              });
             } else {
               console.error("uh oh", response);
             }
@@ -445,10 +473,10 @@ export function TableInterface({
             loadingOptions: tableData.loading ? ["cells", "column-header"] : [],
             focusedCell: focusedCell,
             onSelection: (s) => {
-              setSelection(s)
-              const cell = getCellSelected(visibleColumns, s)
+              setSelection(s);
+              const cell = getCellSelected(visibleColumns, s);
               if (cell != undefined) {
-                ref.current[cell.rowIndex][cell.columnIndex]?.focus()
+                ref.current[cell.rowIndex][cell.columnIndex]?.focus();
               }
             },
             onVisibleCellsChange: (visibleCells) => {
@@ -460,12 +488,24 @@ export function TableInterface({
               }
             },
             onColumnsReordered: (oldIndex, newIndex, length) => {
-              console.log(oldIndex, newIndex, length, visibleColumns[oldIndex], visibleColumns[newIndex])
-              let newColumns = reorderColumns(tableData.allColumns, visibleColumns, oldIndex, newIndex, length)
-              dispatch({ type: "updateColumns", columns: newColumns});
+              console.log(
+                oldIndex,
+                newIndex,
+                length,
+                visibleColumns[oldIndex],
+                visibleColumns[newIndex]
+              );
+              let newColumns = reorderColumns(
+                tableData.allColumns,
+                visibleColumns,
+                oldIndex,
+                newIndex,
+                length
+              );
+              dispatch({ type: "updateColumns", columns: newColumns });
             },
             numRows: transformedData.length,
-            cellRendererDependencies: [transformedData, selection]
+            cellRendererDependencies: [transformedData, selection],
           },
           Object.values(columnConfig)
         ),

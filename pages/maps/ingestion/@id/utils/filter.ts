@@ -1,4 +1,4 @@
-import { ColumnOperators } from "~/pages/maps/ingestion/@id/table";
+import { ColumnOperators } from "#/maps/ingestion/@id/table";
 
 export class Filter {
   readonly column_name: string;
@@ -84,12 +84,12 @@ export class Filter {
  * Convert url and filter to a parameterized URL
  */
 export const addFilterToURL = (url: URL, filter: Filter) => {
-  if(filter.is_valid()) {
+  if (filter.is_valid()) {
     const [columnName, filterValue] = filter.to_array();
     url.searchParams.append(columnName, filterValue);
   }
   return url;
-}
+};
 
 /*
  * Sort the filters by column name and stringify
@@ -104,19 +104,21 @@ export const createFiltersKey = (filters: Filter[]) => {
     .sort(sortFilterEntries)
     .map((filter) => filter.urlValue)
     .join("&");
-}
+};
 
-export const rowPassesFilters = (row: Record<string, string | boolean | number | null>, filters: Filter[] | undefined) => {
+export const rowPassesFilters = (
+  row: Record<string, string | boolean | number | null>,
+  filters: Filter[] | undefined
+) => {
   for (const filter of filters) {
-
     // If the filter is invalid skip it
-    if(!filter.is_valid()){
+    if (!filter.is_valid()) {
       continue;
     }
 
     if (!filter.passes(row)) {
-      return false
+      return false;
     }
   }
-  return true
-}
+  return true;
+};

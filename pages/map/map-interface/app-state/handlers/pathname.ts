@@ -1,8 +1,4 @@
-import {
-  AppState,
-  AppAction,
-  MenuPage,
-} from "~/pages/map/map-interface/app-state";
+import { AppState, AppAction, MenuPage } from "#/map/map-interface/app-state";
 import { push, UpdateLocationAction } from "@lagunovsky/redux-react-router";
 import { LineString } from "geojson";
 import { mapPagePrefix, routerBasename } from "@macrostrat-web/settings";

@@ -25,7 +25,7 @@ import {
   MapLayer,
   useAppActions,
   useAppState,
-} from "~/pages/map/map-interface/app-state";
+} from "#/map/map-interface/app-state";
 
 import h from "./settings-panel.module.styl";
 
