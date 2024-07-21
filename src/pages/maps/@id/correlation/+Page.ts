@@ -7,7 +7,8 @@ import {
 } from "@blueprintjs/core";
 import { FullscreenPage } from "~/layouts";
 import h from "./main.module.sass";
-import { PageBreadcrumbs, usePageProps } from "~/renderer";
+import { PageBreadcrumbs } from "~/components";
+import { usePageProps } from "~/renderer/usePageProps";
 import { useLegendData, MapInfo } from "../utils";
 import { useElementSize, useInDarkMode } from "@macrostrat/ui-components";
 import { useMemo, useRef } from "react";

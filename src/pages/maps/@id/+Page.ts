@@ -7,7 +7,6 @@ import {
   Tag,
 } from "@blueprintjs/core";
 import { SETTINGS, apiV2Prefix } from "@macrostrat-web/settings";
-import hyper from "@macrostrat/hyper";
 import {
   DetailPanelStyle,
   InfoDrawerContainer,
@@ -28,13 +27,11 @@ import {
 import boundingBox from "@turf/bbox";
 import { LngLatBoundsLike } from "mapbox-gl";
 import { useEffect, useMemo, useState } from "react";
-import { MapNavbar } from "~/components/map-navbar";
 import "~/styles/global.styl";
-import { MapReference, DevLink } from "~/components";
-import styles from "./main.module.sass";
-import { PageBreadcrumbs, usePageProps } from "~/renderer";
-
-const h = hyper.styled(styles);
+import h from "./main.module.sass";
+import { PageBreadcrumbs, MapReference, DevLink } from "~/components";
+import { MapNavbar } from "~/components/map-navbar";
+import { usePageProps } from "~/renderer/usePageProps";
 
 interface StyleOpts {
   style: string;
@@ -275,7 +272,7 @@ export function Page() {
     h(BaseLayerSelector, { layer, setLayer }),
   ]);
 
-  console.log(mapStyle, bounds, maxBounds)
+  console.log(mapStyle, bounds, maxBounds);
 
   return h(
     MapAreaContainer,
