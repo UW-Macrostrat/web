@@ -5,9 +5,12 @@ import React from "react";
 import { MacrostratIcon } from "~/components";
 import h from "./breadcrumbs.module.sass";
 
-export function PageBreadcrumbs({ showLogo = false }) {
+export function PageBreadcrumbs({ showLogo = false, title }) {
   const ctx = usePageContext();
   let items = buildBreadcrumbs(ctx.urlPathname, sitemap, ctx);
+  if (title != null) {
+    items[items.length - 1].text = title;
+  }
   return h(PageBreadcrumbsInternal, {
     showLogo,
     items,
