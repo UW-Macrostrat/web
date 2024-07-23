@@ -12,7 +12,7 @@ import {
 import { loadableElement } from "~/_utils";
 import styles from "./main.module.styl";
 import { MapColorsInspector } from "./color-schemes";
-import { WeaverPage } from "../../../weaver";
+import { WeaverPage } from "./weaver";
 import { BrowserRouter as Router } from "react-router-dom";
 
 const h = hyper.styled(styles);

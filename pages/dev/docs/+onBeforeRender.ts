@@ -2,14 +2,14 @@ import { buildPageIndex } from "@macrostrat-web/text-toolchain";
 import { renderToString } from "react-dom/server";
 import { PageContext } from "vike/types";
 import h from "@macrostrat/hyper";
-const modules = import.meta.glob("../../../../content/**/*.md");
+const modules = import.meta.glob("../../../content/**/*.md");
 import { join } from "path";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const contentDirName = "../../../../content";
+const contentDirName = "../../../content";
 const contentDir = join(__dirname, contentDirName);
 
 const [pageIndex, permalinkIndex] = buildPageIndex(contentDir, "/dev/docs");

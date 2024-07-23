@@ -8,7 +8,7 @@ import {
 } from "@blueprintjs/core";
 import { useData } from "vike-react/useData";
 
-import { SETTINGS, apiV2Prefix } from "../../../../../../../packages/settings";
+import { SETTINGS, apiV2Prefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import {
   DetailPanelStyle,
