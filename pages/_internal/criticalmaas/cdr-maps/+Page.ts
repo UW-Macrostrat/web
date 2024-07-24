@@ -19,7 +19,8 @@ export function Page() {
 
 function SourceItem({ source }) {
   const { cog_id, system, system_version } = source;
-  const href = `./${cog_id}/${system}/${system_version}`;
+  const currentURL = window.location.pathname;
+  const href = `${currentURL}/${cog_id}/${system}/${system_version}`;
 
   return h("li", [
     h("span.source-id", {}, cog_id),

@@ -1,14 +1,7 @@
-import {
-  Collapse,
-  NonIdealState,
-  Radio,
-  RadioGroup,
-  Spinner,
-  Tag,
-} from "@blueprintjs/core";
+import { Radio, RadioGroup, Spinner } from "@blueprintjs/core";
 import { useData } from "vike-react/useData";
 
-import { SETTINGS, apiV2Prefix } from "@macrostrat-web/settings";
+import { SETTINGS, routerBasename } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import {
   DetailPanelStyle,
@@ -28,7 +21,6 @@ import boundingBox from "@turf/bbox";
 import { LngLatBoundsLike } from "mapbox-gl";
 import { useEffect, useMemo, useState } from "react";
 import { MapNavbar } from "~/components/map-navbar";
-import "~/styles/global.styl";
 import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
@@ -136,15 +128,19 @@ function basemapStyle(basemap, inDarkMode) {
 }
 
 export default function MapInterface() {
+  // Get base URL for tiles (special case since we're using a proxy server)
+  const origin = window.location.origin;
+  const baseURL = origin;
+
   const data = useData();
   const [features, setFeatures] = useState(null);
-  const { cog_id, system, system_version, envelope } = data;
+  const { cog_id, system, system_version, envelope, rasterURL } = data;
   console.log(data);
 
   const [isOpen, setOpen] = useState(false);
   const dark = useDarkMode()?.isEnabled ?? false;
   const title = `${cog_id.substring(0, 10)} ${system} ${system_version}`;
-  const hasRaster = false;
+  const hasRaster = rasterURL != null;
 
   const bounds: LngLatBoundsLike = useMemo(() => {
     return ensureBoxInGeographicRange(boundingBox(envelope));
@@ -168,7 +164,7 @@ export default function MapInterface() {
     raster: 0.5,
   });
 
-  const tileURL = `/cdr/v1/tiles/cog/${cog_id}/system/${encodeURIComponent(
+  const tileURL = `${baseURL}/cdr/v1/tiles/cog/${cog_id}/system/${encodeURIComponent(
     system
   )}/system_version/${encodeURIComponent(system_version)}/tile/{z}/{x}/{y}`;
 
@@ -179,7 +175,8 @@ export default function MapInterface() {
       buildOverlayStyle({
         style,
         layerOpacity,
-        tileURL: tileURL,
+        tileURL,
+        rasterURL,
       })
     );
   }, [null, style, layerOpacity.raster == null, layerOpacity.vector == null]);
@@ -190,7 +187,8 @@ export default function MapInterface() {
     const mergeLayers = buildOverlayStyle({
       style,
       layerOpacity,
-      tileURL: tileURL,
+      tileURL,
+      rasterURL,
     }).layers;
 
     for (const layer of mapStyle.layers) {
@@ -311,7 +309,6 @@ export default function MapInterface() {
             },
           }),
         ]
-        //[h(FitBoundsManager, { bounds })]
       ),
     ]
   );
