@@ -1,7 +1,7 @@
 import { Radio, RadioGroup, Spinner } from "@blueprintjs/core";
 import { useData } from "vike-react/useData";
 
-import { SETTINGS, routerBasename } from "@macrostrat-web/settings";
+import { SETTINGS } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import {
   DetailPanelStyle,
