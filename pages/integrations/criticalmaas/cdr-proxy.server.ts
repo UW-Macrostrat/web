@@ -6,6 +6,8 @@
 import proxy from "express-http-proxy";
 
 export function createCDRProxy() {
+  // TODO: CDR needs to accept authentication so that we can stop proxying requests.
+  // OR tile endpoints need to be public.
   const proxyAddress = process.env.CDR_API_BASE ?? "https://api.cdr.land";
   const proxyToken = process.env.CDR_API_KEY;
 

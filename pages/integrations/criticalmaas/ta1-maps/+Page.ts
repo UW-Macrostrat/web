@@ -9,7 +9,7 @@ export function Page() {
   const { sources } = data;
 
   return h(ContentPage, [
-    h(PageHeader, { title: "CDR Maps", showSiteName: false }),
+    h(PageHeader, { title: "CriticalMAAS CDR Maps", showSiteName: false }),
     h(
       "ul.maps-list",
       sources.map((d) => h(SourceItem, { source: d, key: d.source_id }))

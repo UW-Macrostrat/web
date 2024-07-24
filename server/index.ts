@@ -8,7 +8,7 @@ import { createMiddleware } from "@universal-middleware/express";
 import { createMacrostratQlrAPI } from "@macrostrat-web/qgis-integration";
 import express from "express";
 import sirv from "sirv";
-import { createCDRProxy } from "#/_internal/criticalmaas/cdr-proxy.server";
+import { createCDRProxy } from "../pages/integrations/criticalmaas/cdr-proxy.server";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
