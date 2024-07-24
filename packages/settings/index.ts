@@ -19,6 +19,8 @@ export const pbdbDomain = "https://paleobiodb.org";
 
 export const mapboxAccessToken = getRuntimeConfig("MAPBOX_API_TOKEN");
 
+export const baseURL = getRuntimeConfig("BASE_URL", "/");
+
 export const apiV2Prefix = getRuntimeConfig(
   "MACROSTRAT_API_V2",
   apiDomain + "/api/v2"
