@@ -103,7 +103,7 @@ async function startServer() {
   if (process.env.CDR_API_KEY) {
     app.use(
       "/tiles",
-      proxy("https://api.cdr.land", {
+      proxy("http://0.0.0.0:8333/", {
         proxyReqOptDecorator: (opts) => {
           opts.headers["Authorization"] = `Bearer ${process.env.CDR_API_KEY}`;
           return opts;

@@ -60,11 +60,12 @@ function hyperStyles(): Plugin {
 }
 
 export default defineConfig({
-  root: path.resolve("./src"),
+  //root: path.resolve("./src"),
   resolve: {
     conditions: ["typescript"],
     alias: {
       "~": path.resolve("./src"),
+      "#": path.resolve("./pages"),
     },
     dedupe: [...aliasedModules.map((d) => "@macrostrat/" + d)],
   },
