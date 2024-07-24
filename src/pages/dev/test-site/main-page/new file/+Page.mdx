@@ -9,7 +9,39 @@ import { MacrostratIcon } from "~/components";
 [//]: # "Nav Bar"
 <Navbar></Navbar>
 
+<div class="body">
+
+
 [//]: # "Start Page" 
+<div class="start-card card">
+    <Image className="cover-img back-img" src="cover_large.jpg"></Image>
+    <div class="text">
+      <span class="header">
+        <h1 id="main-title" class="big">Macrostrat<h2 class="version">v2</h2></h1>
+      </span>
+      <p class="big-text">A platform for geological data exploration, integration, and analysis</p>
+      <div class="stats">
+        <div class="stat">
+          <span class="top-stat" id="n_columns">1,400</span>
+          <span class="top-stat-label">Regional Rock Columns</span>
+        </div>
+        <div class="stat">
+          <span class="top-stat" id="n_units">33,903</span>
+          <span class="top-stat-label">Rock Units</span>
+        </div>
+        <div class="stat">
+          <span class="top-stat" id="n_polys">2,500,000</span>
+          <span class="top-stat-label">Geologic Map Polygons</span>
+        </div>
+        <div class="stat">
+          <span class="top-stat" id="n_names">51,212</span>
+          <span class="top-stat-label"><a href="Macrostrat_strat_names.html" target="_blank">Stratigraphic Names</a></span>
+        </div>
+      </div>
+    </div>
+</div>
+
+[//]: # "Start Page (OLD)" 
 <div class="card start-card">
 <div class="start">
     <Image className="back-img cover-image" src="cover_large.jpg"></Image>
@@ -40,7 +72,22 @@ import { MacrostratIcon } from "~/components";
 </div>
 </div>
 
-[//]: # "Map Interface"
+[//]: # "Map Interface (OLD)"
+<div class="map-card card">
+  <p>
+    <div class="map-element">With over 225 maps from data providers around the world across every scale, Macrostrat is the world's largest homogenized geologic map database. Our data processing pipeline links geologic map polygons to Macrostrat column polygons, external stratigraphic name lexicons, and geochronological intervals, enabling the enhancement of the original map data and allowing for direct links into <a href="https://xdd.wisc.edu" target="_blank">xDD</a> (formly GeoDeepDive).</div>
+    \
+    <div class="map-element">Are you affiliated with a state or national geologic survey? <a href="mailto:contact@macrostrat.org?Subject=Geologic%20Map%20Collaboration">Get in touch</a> with us - we'd love to collaborate and help publicize your maps!</div>
+    \
+    <div class="map-element"> Get started by <a href="/map">exploring the map</a> or <a href="/map/sources">taking a look at</a> which maps are currently a part of Macrostrat.</div>
+    <div class="buttons1">
+      <a type="button" class="btn" href="/map/#3/40.78/-94.13">Geologic Map</a>
+      <a type="button" class="btn" href="/sift/#/">Search</a>
+    </div>
+  </p>
+</div>
+
+[//]: # "Map Interface (OLD)"
 <div class="card map-card">
   <p>
     <div class="temp">With over 225 maps from data providers around the world across every scale, Macrostrat is the world's largest homogenized geologic map database. Our data processing pipeline links geologic map polygons to Macrostrat column polygons, external stratigraphic name lexicons, and geochronological intervals, enabling the enhancement of the original map data and allowing for direct links into <a href="https://xdd.wisc.edu" target="_blank">xDD</a> (formly GeoDeepDive).</div>
@@ -62,6 +109,41 @@ import { MacrostratIcon } from "~/components";
 </div>
 
 [//]: # "Locations"
+<div class="header">
+  <h1>Locations</h1>
+</div>
+<div class="locations-card card">
+  <div class="location">
+    <Image className="card-image top" src="north_america_med.jpg"></Image>
+    <div class="location-text">
+      <h1>North America</h1>
+      <p>243 packages. 798 units. 897 collections.</p>
+    </div>
+  </div>
+  <div class="location">
+    <div class="location-text">
+      <h1>Caribbean</h1>
+      <p>243 packages. 798 units. 897 collections.</p>
+    </div>
+    <Image className="card-image" src="caribbean_new_medium.jpg"></Image>
+  </div>
+  <div class="location">
+    <Image className="card-image" src="new_zealand_new_medium.jpg"></Image>
+    <div class="location-text">
+      <h1>New Zealand</h1>
+      <p>828 packages. 2,168 units. 328 collections.</p>
+    </div>
+  </div>
+  <div class="location">
+    <div class="location-text">
+      <h1>Deep Sea</h1>
+      <p>388 packages. 7,124 units. 0 collections.</p>
+    </div>
+    <Image className="card-image bottom" src="deep_sea_new_medium.jpg"></Image>
+  </div>
+</div>
+
+[//]: # "Locations (OLD)"
 <div class="section">
   <h1>Locations</h1>
 </div>
@@ -156,6 +238,8 @@ import { MacrostratIcon } from "~/components";
   <p class="donate-text">
     Grant funding, principally from the <a href="http://www.nsf.gov" target="_blank">U.S. National Science Foundation</a>, got Macrostrat off the ground and keeps us innovating, but maintaining and growing a free and open digital resource involves ongoing expenses beyond the grant cycle, like annual certificate renewals, cloud server hosting and backup storage that keep your connection safe, domain name registrations that keep us located on the web, and system upgrades to keep us fast and efficient. If you would like to help us continue to grow and provide free resources, you can do so with a one-time or recurring gift to the UW Foundation Paleontology Program Fund in Geology. Thank you!
   </p>
+</div>
+
 </div>
 
 [//]: # "Footer"
