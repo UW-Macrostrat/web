@@ -1,0 +1,65 @@
+.lith-segment-container {
+  display: flex;
+  width: 100%;
+  min-width: 100px;
+  max-width: 600px;
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.segment-tooltip {
+  display: flex;
+  flex-direction: column;
+  b {
+    text-transform: capitalize;
+  }
+  i {
+    color: #d3d8de;
+  }
+}
+
+.lith-segment {
+  margin-right: 1px;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  p {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    margin-bottom: 0;
+    color: black;
+    font-size: 13px;
+  }
+
+  .small {
+    font-size: 11px !important;
+  }
+}
+
+.lith-dialog {
+  padding: 10px;
+  min-height: 400px;
+}
+.row {
+  display: flex;
+}
+.lith-switches {
+  list-style: none;
+  .row {
+    display: flex;
+    justify-content: space-around;
+    align-items: baseline;
+    margin: 10px;
+    .lith-item {
+      flex-grow: 1;
+      max-width: 100px;
+    }
+    .switch {
+      flex-grow: 0;
+      display: flex;
+    }
+  }
+}
