@@ -34,11 +34,16 @@ const RowWrapper = (props: {
   children: ReactChild;
 }) => {
   const { link, children } = props;
+
+  return children;
+  // TODO: row links break things, now that links are not ephemeral items
+  /*
   if (typeof link === "undefined") {
     return h(React.Fragment, [children]);
   } else {
     return h(Link, { href: link }, [children]);
   }
+   */
 };
 
 function Row(props: { href: string; children: ReactChild }) {
@@ -120,23 +125,19 @@ interface TableProps {
 function Table(props: TableProps) {
   const { headers = [] } = props;
   const baseClass =
-    "bp4-html-table .bp4-html-table-condensed .bp4-html-table-bordered";
-  let tableClassName = props.interactive
-    ? `${baseClass} .bp4-interactive`
+    "bp5-html-table .bp5-html-table-condensed .bp5-html-table-bordered";
+  let className = props.interactive
+    ? `${baseClass} .bp5-interactive`
     : baseClass;
 
   return h(Card, { className: "table-container" }, [
-    h(
-      `table.${tableClassName}`,
-      { style: { width: "100%", tableLayout: "auto" } },
-      [
-        h.if(headers.length > 0)(TableHeader, {
-          headers: headers,
-          title: props.title,
-        }),
-        h("tbody", [props.children]),
-      ]
-    ),
+    h(`table`, { style: { width: "100%", tableLayout: "auto" }, className }, [
+      h.if(headers.length > 0)(TableHeader, {
+        headers: headers,
+        title: props.title,
+      }),
+      h("tbody", [props.children]),
+    ]),
   ]);
 }
 
@@ -160,9 +161,9 @@ function DnDTable(props: DnDTableProps) {
     droppableId = "table-drop-zone",
   } = props;
   const baseClass =
-    "bp4-html-table .bp4-html-table-condensed .bp4-html-table-bordered .base-table .full-width";
+    "bp5-html-table .bp5-html-table-condensed .bp5-html-table-bordered .base-table .full-width";
   let tableClassName = props.interactive
-    ? `${baseClass} .bp4-interactive`
+    ? `${baseClass} .bp5-interactive`
     : baseClass;
 
   return h(
@@ -227,8 +228,8 @@ function TableHeader(props: {
   dragProps?: any;
 }) {
   return h(React.Fragment, [
-    h("thead", [
-      h.if(typeof props.title !== "undefined")("tr", [
+    h.if(props.title != null)("thead", [
+      h("tr", [
         h(
           "th",
           {

@@ -1,3 +1,33 @@
+.column-builder :global {
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  .table-container {
+    margin: 10px;
+    height: 100%;
+    padding: 0px;
+    border-radius: 3px;
+  }
+
+  .col-group-name {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .bp5-menu {
+    max-height: 400px;
+    max-width: 400px;
+    overflow: auto;
+  }
+
+}
+
 .mySuggest {
   overflow: scroll;
   max-height: 200px;
