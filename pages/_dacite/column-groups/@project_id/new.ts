@@ -5,7 +5,7 @@ import pg, {
   ColumnGroupEditor,
   ColumnGroupI,
   tableSelect,
-} from "../../../src";
+} from "@macrostrat-web/column-builder";
 import styles from "./colgroup.module.scss";
 import { GetServerSidePropsContext } from "next";
 import { PostgrestError } from "@supabase/postgrest-js";

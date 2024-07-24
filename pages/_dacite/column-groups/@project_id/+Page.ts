@@ -1,6 +1,6 @@
 import h from "@macrostrat/hyper";
 import { PostgrestError } from "@supabase/postgrest-js";
-import { GetServerSidePropsContext } from "next";
+import { useData } from "vike-react/useData";
 import pg, {
   ColumnGroupI,
   Row,
@@ -8,30 +8,16 @@ import pg, {
   Table,
   CreateButton,
   EditButton,
-} from "~/index";
+} from "@macrostrat-web/column-builder";
 
-export async function getServerSideProps(ctx: GetServerSidePropsContext) {
-  const {
-    query: { project_id },
-  } = ctx;
-  const { data, error } = await pg
-    .from("col_group_with_cols")
-    .select("*, projects(project)")
-    .match({ project_id });
+export function Page() {
+  const props: {
+    projectName: string;
+    project_id: number;
+    columnGroups: ColumnGroupI[];
+    errors: PostgrestError[];
+  } = useData();
 
-  const projectName: string =
-    data && data.length > 0 ? data[0].projects.project : "";
-  const errors = [error].filter((e) => e != null);
-
-  return { props: { project_id, projectName, columnGroups: data, errors } };
-}
-
-export default function ColumnGroup(props: {
-  projectName: string;
-  project_id: number;
-  columnGroups: ColumnGroupI[];
-  errors: PostgrestError[];
-}) {
   const { project_id, errors } = props;
 
   const headers = ["ID", "Name", "Col #", "Status"];

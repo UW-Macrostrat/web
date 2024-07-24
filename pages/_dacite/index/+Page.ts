@@ -11,14 +11,11 @@ import {
 import { useData } from "vike-react/useData";
 
 export function Page() {
-  const data = useData();
-  const {
-    projects,
-    errors,
-  }: {
+  const data: {
     projects: Project[];
     errors: PostgrestError[];
-  } = data;
+  } = useData();
+  const { projects, errors } = data;
 
   const headers = Object.keys(projects[0]);
 
@@ -37,7 +34,7 @@ export function Page() {
           Row,
           {
             key: i,
-            href: `/column-groups/${project.id}`,
+            href: `/_dacite/column-groups/${project.id}`,
           },
           [
             h("td", [project.id]),
