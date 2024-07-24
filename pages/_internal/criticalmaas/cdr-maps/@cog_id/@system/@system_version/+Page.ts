@@ -139,6 +139,7 @@ export default function MapInterface() {
   const data = useData();
   const [features, setFeatures] = useState(null);
   const { cog_id, system, system_version, envelope } = data;
+  console.log(data);
 
   const [isOpen, setOpen] = useState(false);
   const dark = useDarkMode()?.isEnabled ?? false;
@@ -167,7 +168,7 @@ export default function MapInterface() {
     raster: 0.5,
   });
 
-  const tileURL = `/tiles/cog/${cog_id}/system/${encodeURIComponent(
+  const tileURL = `/cdr/v1/tiles/cog/${cog_id}/system/${encodeURIComponent(
     system
   )}/system_version/${encodeURIComponent(system_version)}/tile/{z}/{x}/{y}`;
 
@@ -274,7 +275,7 @@ export default function MapInterface() {
       className: "single-map",
       navbar: h(MapNavbar, {
         title,
-        parentRoute: "/dev/cdr-maps",
+        parentRoute: "../..",
         isOpen,
         setOpen,
       }),

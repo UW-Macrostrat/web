@@ -1,6 +1,5 @@
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import proxy from "express-http-proxy";
 import cookieParser from "cookie-parser";
 import compression from "compression";
 
@@ -9,6 +8,7 @@ import { createMiddleware } from "@universal-middleware/express";
 import { createMacrostratQlrAPI } from "@macrostrat-web/qgis-integration";
 import express from "express";
 import sirv from "sirv";
+import { createCDRProxy } from "#/_internal/criticalmaas/cdr-proxy.server";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -97,23 +97,10 @@ async function startServer() {
   );
 
   // CriticalMAAS CDR integration
-  // Proxy requests to /tile/* to https://api.cdr.land/v1/tiles/*
+  // Proxy requests to /* to https://api.cdr.land/*
   // Add the Authorization header to the proxied request
-  //
-  if (process.env.CDR_API_KEY) {
-    app.use(
-      "/tiles",
-      proxy("http://0.0.0.0:8333/", {
-        proxyReqOptDecorator: (opts) => {
-          opts.headers["Authorization"] = `Bearer ${process.env.CDR_API_KEY}`;
-          return opts;
-        },
-        proxyReqPathResolver: (req) => {
-          return `/v1/tiles${req.url}`;
-        },
-      })
-    );
-  }
+  // TODO: put this behind authorization, perhaps move to a separate service
+  app.use("/cdr", createCDRProxy());
 
   /**
    * Vike route
