@@ -1,4 +1,4 @@
-/* 
+/*
 The different data types used in the application. Usually matching up with a specific db view in
 macrostrat_api schema
 */
@@ -131,12 +131,12 @@ export interface IntervalI {
 }
 
 export enum RANK {
-  "SGp" = "SGp",
-  "Gp" = "Gp",
-  "SubGp" = "SubGp",
-  "Fm" = "Fm",
-  "Mbr" = "Mbr",
-  "Bed" = "Bed",
+  SGp = "SGp",
+  Gp = "Gp",
+  SubGp = "SubGp",
+  Fm = "Fm",
+  Mbr = "Mbr",
+  Bed = "Bed",
 }
 
 interface StratNameConceptBase {

@@ -1,5 +1,8 @@
 import { PostgrestError, PostgrestResponse } from "@supabase/postgrest-js";
-import pg, { createUnitBySections, UnitsView } from "~/index";
+import pg, {
+  createUnitBySections,
+  UnitsView,
+} from "@macrostrat-web/column-builder/src";
 
 type ReturnType = {
   data: { [section_id: number | string]: UnitsView[] }[];

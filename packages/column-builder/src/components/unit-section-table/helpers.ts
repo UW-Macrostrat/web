@@ -8,7 +8,7 @@ import {
   MenuDivider,
 } from "@blueprintjs/core";
 import { Popover2, Tooltip2 } from "@blueprintjs/popover2";
-import { UnitsView } from "~/index";
+import { UnitsView } from "@macrostrat-web/column-builder/src";
 import styles from "../comp.module.scss";
 import { hyperStyled } from "@macrostrat/hyper";
 import { useUnitSectionContext } from "./index";

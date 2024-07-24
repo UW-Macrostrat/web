@@ -1,5 +1,5 @@
 import { hyperStyled } from "@macrostrat/hyper";
-import { StratNameSuggest } from "~/index";
+import { StratNameSuggest } from "@macrostrat-web/column-builder/src";
 import { Select, ItemRenderer } from "@blueprintjs/select";
 import {
   Button,
@@ -69,7 +69,7 @@ export function RankSelect({
   );
 }
 
-/* 
+/*
 Edit the name and rank of strat_name - text input and select
 Assign other strat_name as parent
 Add to a concept

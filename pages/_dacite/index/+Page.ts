@@ -1,36 +1,28 @@
 import h from "@macrostrat/hyper";
 import { PostgrestError } from "@supabase/postgrest-js";
-import { GetServerSidePropsContext } from "next";
-import Head from "next/head";
-import pg, {
-  tableSelect,
+import {
   Row,
   Project,
   BasePage,
   Table,
   EditButton,
   CreateButton,
-} from "../src";
+} from "@macrostrat-web/column-builder";
+import { useData } from "vike-react/useData";
 
-export async function getServerSideProps(ctx: GetServerSidePropsContext) {
-  const { data, error } = await tableSelect("projects");
-  const projects: Project[] = data ? data : [{}];
+export function Page() {
+  const data = useData();
+  const {
+    projects,
+    errors,
+  }: {
+    projects: Project[];
+    errors: PostgrestError[];
+  } = data;
 
-  const errors = [error].filter((e) => e != null);
-  return { props: { projects, errors } };
-}
-
-function Projects({
-  projects,
-  errors,
-}: {
-  projects: Project[];
-  errors: PostgrestError[];
-}) {
   const headers = Object.keys(projects[0]);
 
   return h(BasePage, { query: {}, errors }, [
-    h(Head, [h("title", ["Column-Builder"])]),
     h("h3,", [
       "Choose a Project",
       h(CreateButton, {
@@ -63,5 +55,3 @@ function Projects({
     ]),
   ]);
 }
-
-export default Projects;

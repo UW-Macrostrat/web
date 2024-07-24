@@ -203,3 +203,24 @@ export function UnitRowStratNameEditor() {
 
   return h("div", [nameText, h.if(isEditing)(UnitStratNameModalEditor)]);
 }
+
+export function FormalStratName() {
+  /** TODO: this is invalid */
+  const { model: unit, actions, isEditing } = useModelEditor();
+
+  const updateUnitName = (e: string) => {
+    actions.updateState({
+      model: { strat_name: { $set: e } },
+    });
+  };
+
+  return h("div", [
+    h.if(!isEditing)("p", [unit.strat_name]),
+    h.if(isEditing)(InputGroup, {
+      placeholder: "Informal Unit Name",
+      style: { width: "120px" },
+      value: unit.strat_name || undefined,
+      onChange: (e) => updateUnitName(e.target.value),
+    }),
+  ]);
+}

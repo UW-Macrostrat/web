@@ -1,13 +1,16 @@
 import { Dispatch } from "react";
 import { DropResult } from "react-beautiful-dnd";
-import { filterOrAddIds, UnitsView } from "~/index";
+import {
+  filterOrAddIds,
+  UnitsView,
+} from "@macrostrat-web/column-builder/src/index";
 import { persistNewUnit, persistUnitChanges } from "../unit/edit-helpers";
 import { createNewSection, saveColumnReorder } from "./async-helpers";
 
 ///////////////// helper functions //////////////
-/* 
-    This would be async and would persist to db 
-    then would return db representation which we 
+/*
+    This would be async and would persist to db
+    then would return db representation which we
     would add to units in a Sync Action
 */
 function persistUnit(unit: UnitsView) {
@@ -318,7 +321,7 @@ const columnReducer = (state: ColumnStateI, action: Actions): ColumnStateI => {
       };
     case "dropped-section":
       if (!action.result.combine) return state;
-      /* Merge sections!! What data should you expect? 
+      /* Merge sections!! What data should you expect?
         draggableId : `${section_id} ${index}` of section that was dropped.
         combine.draggableID: `${section_id} ${index}` of section that was dropped on.
 

@@ -6,6 +6,7 @@
     "start": "next start -p 1234",
     "lint": "next lint"
   },
+  "module": "src/index.ts",
   "dependencies": {
     "@blueprintjs/core": "^4.3.0",
     "@blueprintjs/icons": "^4.10.1",

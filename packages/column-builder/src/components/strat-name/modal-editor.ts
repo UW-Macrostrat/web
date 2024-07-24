@@ -3,19 +3,19 @@ import { hyperStyled } from "@macrostrat/hyper";
 import { useModelEditor } from "@macrostrat/ui-components";
 import { Button, Callout, Dialog, Tag } from "@blueprintjs/core";
 import styles from "../comp.module.scss";
-import pg, { usePostgrest } from "~/db";
+import pg, { usePostgrest } from "../../db";
 import { RANK, StratNameConceptLongI, StratNameI } from "~/types";
 import { StratNameStack } from "./panel-stack";
 import { AuthorTag } from "./query-list";
 
 const h = hyperStyled(styles);
 
-const rankLong: { [RANK]: string } = {
-  [RANK.Fm]: "Formation",
-  [RANK.Gp]: "Group",
-  [RANK.Mbr]: "Member",
-  [RANK.SGp]: "SuperGroup",
-  [RANK.Bed]: "Bed",
+const rankLong = {
+  Fm: "Formation",
+  Gp: "Group",
+  Mbr: "Member",
+  SGp: "SuperGroup",
+  Bed: "Bed",
 };
 
 export function StratNameConceptCard(props: {

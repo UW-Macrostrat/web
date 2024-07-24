@@ -1,6 +1,5 @@
 import React from "react";
 import { hyperStyled } from "@macrostrat/hyper";
-import Link from "next/link";
 import {
   UnitsView,
   IntervalRow,
@@ -96,7 +95,7 @@ function UnitPosition(props: UnitPositionI) {
   ]);
 }
 
-/* 
+/*
 Probably the most complicated component, bc there are so many editable things.
 */
 function UnitEdit() {

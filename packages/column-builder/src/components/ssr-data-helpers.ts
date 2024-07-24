@@ -1,4 +1,4 @@
-import { UnitsView } from "~/index";
+import { UnitsView } from "@macrostrat-web/column-builder/src";
 
 /* A collection of data processing functions to run server side before page is rendered */
 

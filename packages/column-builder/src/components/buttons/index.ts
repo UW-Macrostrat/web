@@ -1,6 +1,6 @@
 import { hyperStyled } from "@macrostrat/hyper";
-import { useModelEditor } from "@macrostrat/column-components";
-import Link from "next/link";
+import { useModelEditor } from "@macrostrat/ui-components";
+import { Link } from "../routing/routing-helpers";
 import { Button, ButtonGroup } from "@blueprintjs/core";
 import styles from "./btns.module.scss";
 import { ReactChild } from "react";

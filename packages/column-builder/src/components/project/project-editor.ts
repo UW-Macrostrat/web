@@ -9,7 +9,7 @@ import {
 } from "@macrostrat/ui-components";
 import styles from "../comp.module.scss";
 import pg, { usePostgrest } from "../..";
-import { CancelButton, SubmitButton } from "~/components";
+import { CancelButton, SubmitButton } from "..";
 import { ItemSuggest } from "../suggest";
 
 const h = hyperStyled(styles);

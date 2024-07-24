@@ -17,15 +17,11 @@ import styles from "../comp.module.scss";
 import { ColumnForm, ColumnGroupI } from "~/types";
 import { DataI, ItemSuggest } from "../suggest";
 import { RefI } from "~/types";
-import pg, { usePostgrest } from "~/db";
+import pg, { usePostgrest } from "../../db";
 import { RefEditor } from "../ref/ref-editor";
 import { SubmitButton } from "..";
 import { LngLatMap } from "./map";
-import {
-  Point,
-  Pub,
-  PublicationFinder,
-} from "@macrostrat/form-components";
+import { Point, Pub, PublicationFinder } from "@macrostrat/form-components";
 import { ModelEditor, useModelEditor } from "@macrostrat/ui-components";
 import { ItemRenderer } from "@blueprintjs/select";
 import { Model } from "./column-editor";

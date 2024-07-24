@@ -19,7 +19,7 @@ import { StratNameListItem, StratNameSelect } from "../query-list";
 import { StratNameHierarchy } from "../hierarchy";
 import { StratNameConceptCard } from "../modal-editor";
 import { RankSelect } from "../strat-name-editor";
-import pg, { usePostgrest } from "~/db";
+import pg, { usePostgrest } from "@macrostrat-web/column-builder/src/db";
 
 const h = hyperStyled(styles);
 
@@ -258,7 +258,7 @@ type StratPanels = Panel<StratPanelTypes>;
 
 /* PanelStack has the limitation of NOT re-rendering on props change.
 https://github.com/palantir/blueprint/issues/3173
-So I use a react context to get around the issue. 
+So I use a react context to get around the issue.
 Not perfect but better than nothing.
 */
 

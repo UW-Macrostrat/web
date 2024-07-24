@@ -1,5 +1,5 @@
 import { hyperStyled } from "@macrostrat/hyper";
-import { Lith } from "~/types";
+import { Lith } from "../../types";
 import { LithMenuItem } from "../tag";
 import styles from "./lith.module.scss";
 import {
@@ -8,7 +8,7 @@ import {
   IQueryListRendererProps,
   ItemPredicate,
 } from "@blueprintjs/select";
-import pg, { usePostgrest } from "~/db";
+import pg, { usePostgrest } from "../../db";
 import { InputGroup } from "@blueprintjs/core";
 
 const h = hyperStyled(styles);

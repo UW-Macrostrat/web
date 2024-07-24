@@ -1,12 +1,12 @@
 import React from "react";
-import Link from "next/link";
+import { Link } from "~/components";
 import { hyperStyled } from "@macrostrat/hyper";
 import {
   UnitsView,
   convertColorNameToHex,
   IntervalDataI,
   IntervalSuggest,
-} from "~/index";
+} from "@macrostrat-web/column-builder/src";
 import {
   EnvTags,
   LithTags,
@@ -18,13 +18,10 @@ import {
 import { MinEditorCard } from "../unit/minimal-unit-editor";
 import { DraggableRow } from "../table";
 import { UnitRowContextMenu, AddBtnBetweenRows } from "./helpers";
-import { useUnitSectionContext } from "~/index";
-import styles from "~/components/comp.module.scss";
+import { useUnitSectionContext } from "@macrostrat-web/column-builder/src";
+import styles from "../comp.module.scss";
 import { Button, Dialog, TextArea } from "@blueprintjs/core";
-import {
-  ModelEditor,
-  useModelEditor,
-} from "@macrostrat/ui-components";
+import { ModelEditor, useModelEditor } from "@macrostrat/ui-components";
 import { SubmitButton } from "../buttons";
 
 const h = hyperStyled(styles);

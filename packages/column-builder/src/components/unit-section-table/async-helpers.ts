@@ -1,5 +1,5 @@
 import { PostgrestError, PostgrestResponse } from "@supabase/postgrest-js";
-import pg from "~/db";
+import pg from "../../db";
 import { UnitsView } from "~/types";
 import { SectionUnits } from "./reducer";
 

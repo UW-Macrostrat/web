@@ -1,10 +1,10 @@
 import { hyperStyled } from "@macrostrat/hyper";
-import { UnitsView } from "~/index";
+import { UnitsView } from "@macrostrat-web/column-builder/src";
 import { DnDTable } from "../table";
 import { UnitRow } from "./unit";
 import { useUnitSectionContext } from "./table";
 import { AddBtnBetweenRows } from "./helpers";
-import styles from "~/components/comp.module.scss";
+import styles from "../comp.module.scss";
 
 const h = hyperStyled(styles);
 

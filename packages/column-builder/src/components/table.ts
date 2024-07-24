@@ -1,6 +1,6 @@
 import React from "react";
 import { hyperStyled } from "@macrostrat/hyper";
-import Link from "next/link";
+import { Link } from "~/components";
 import { ReactChild } from "react";
 import styles from "./comp.module.scss";
 import {

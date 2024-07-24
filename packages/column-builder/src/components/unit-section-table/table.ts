@@ -6,7 +6,7 @@ import {
   ColSectionsTable,
   ColSectionI,
   UnitSectionTableCtx,
-} from "~/index";
+} from "@macrostrat-web/column-builder/src";
 import {
   AsyncActions,
   Actions,
@@ -17,7 +17,7 @@ import {
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
 import { DropResult, DroppableProvided } from "react-beautiful-dnd";
 import { ColumnPageBtnMenu } from "./helpers";
-import styles from "~/components/comp.module.scss";
+import styles from "../comp.module.scss";
 import { SectionTable } from "./section";
 import { NewSectionBtn } from "../unit/minimal-unit-editor";
 

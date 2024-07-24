@@ -6,7 +6,7 @@ import {
   IQueryListRendererProps,
   ItemPredicate,
 } from "@blueprintjs/select";
-import pg from "~/db";
+import pg from "../../../db";
 import {
   Button,
   Callout,

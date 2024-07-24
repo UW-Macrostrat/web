@@ -1,6 +1,13 @@
 import { NextRouter } from "next/router";
 import pg from "../../db";
 import { QueryI, CrumbsI } from "./base-page";
+import { ReactChild } from "react";
+import h from "@macrostrat/hyper";
+
+export function Link(props: { href: string; children: ReactChild }) {
+  // A shim for next/link
+  return h("a", { href: props.href }, [props.children]);
+}
 
 export interface IdsFromColGroup {
   project_id?: number;
@@ -78,6 +85,9 @@ async function fetchIdsFromColId(col_id: number): Promise<IdsFromCol> {
   return {};
 }
 
+/**
+ *
+ * Legacy NextJS implementation of breadcrumbs
 interface BreadCrumbsHookI {
   query: QueryI;
   router: NextRouter;
@@ -134,11 +144,12 @@ function useBreadCrumbs(props: BreadCrumbsHookI) {
 
   return breadCrumbs;
 }
+  */
 
 export {
   fetchIdsFromColId,
   fetchIdsFromSectionId,
   fetchIdsFromUnitId,
   fetchIdsFromColGroup,
-  useBreadCrumbs,
+  //useBreadCrumbs,
 };
