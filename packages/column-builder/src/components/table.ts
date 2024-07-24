@@ -1,6 +1,7 @@
 import React from "react";
 import { hyperStyled } from "@macrostrat/hyper";
 import { Link } from "~/components";
+import { navigate } from "vike/client/router";
 import { ReactChild } from "react";
 import styles from "./comp.module.scss";
 import {
@@ -47,7 +48,10 @@ const RowWrapper = (props: {
 };
 
 function Row(props: { href: string; children: ReactChild }) {
-  return h(RowWrapper, { link: props.href }, [h("tr", [props.children])]);
+  const { href, children } = props;
+  const onClick = href == null ? null : () => navigate(href);
+
+  return h("tr", { onClick }, children);
 }
 
 function DraggableRow(props: RowProps) {
@@ -55,7 +59,12 @@ function DraggableRow(props: RowProps) {
     draggableId = "",
     drag = false,
     onDoubleClick = () => console.log("double clicked!"),
+    href,
+    isMoved,
   } = props;
+
+  const className = isMoved ? "unit-moved" : null;
+
   return h(
     Draggable,
     {
@@ -66,37 +75,39 @@ function DraggableRow(props: RowProps) {
     },
     [
       (provided: DraggableProvided, snapshot: DraggableStateSnapshot) => {
-        return h(RowWrapper, { link: props.href }, [
-          h(
-            `tr${props.isMoved ? ".unit-moved" : ""}`,
-            {
-              onClick: (e: MouseEvent) => {
-                e.stopPropagation();
-                if (e.detail == 2) {
-                  onDoubleClick();
+        return h(
+          `tr`,
+          {
+            onClick: (e: MouseEvent) => {
+              e.stopPropagation();
+              if (e.detail == 2) {
+                onDoubleClick();
+                if (href != null) {
+                  navigate(href);
                 }
-              },
-              ref: provided.innerRef,
-              ...provided.draggableProps,
-              style: getItemStyle(
-                snapshot.isDragging,
-                provided.draggableProps.style
-              ),
+              }
             },
-            [
-              h.if(drag)(
-                "td",
-                {
-                  ...provided.dragHandleProps,
-                  width: "2%",
-                  style: { verticalAlign: "middle" },
-                },
-                [h(Icon, { icon: "drag-handle-vertical" })]
-              ),
-              props.children,
-            ]
-          ),
-        ]);
+            className,
+            ref: provided.innerRef,
+            ...provided.draggableProps,
+            style: getItemStyle(
+              snapshot.isDragging,
+              provided.draggableProps.style
+            ),
+          },
+          [
+            h.if(drag)(
+              "td",
+              {
+                ...provided.dragHandleProps,
+                width: "2%",
+                style: { verticalAlign: "middle" },
+              },
+              [h(Icon, { icon: "drag-handle-vertical" })]
+            ),
+            props.children,
+          ]
+        );
       },
     ]
   );
