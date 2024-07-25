@@ -1,6 +1,5 @@
 import h from "@macrostrat/hyper";
 import { usePageContext } from "vike-react/usePageContext";
-import favicon from "~/_assets/favicon.png";
 
 export default function Head() {
   const ctx = usePageContext();
@@ -19,7 +18,24 @@ export default function Head() {
       content: "black-translucent",
     }),
     h("meta", { charSet: "utf-8" }),
-    h("link", { rel: "icon", href: favicon }),
+    h("link", {
+      rel: "icon",
+      type: "image/png",
+      sizes: "32x32",
+      href: "/favicon-32x32.png",
+    }),
+    h("link", {
+      rel: "icon",
+      type: "image/png",
+      sizes: "16x16",
+      href: "/favicon-16x16.png",
+    }),
+    h("link", {
+      rel: "apple-touch-icon",
+      sizes: "180x180",
+      href: "/apple-touch-icon.png",
+    }),
+    h("link", { rel: "manifest", href: "/site.webmanifest" }),
     h("link", {
       href: "https://fonts.googleapis.com/css?family=Montserrat:400,700|Source+Sans+Pro",
       rel: "stylesheet",
