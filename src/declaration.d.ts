@@ -3,6 +3,12 @@
 import type { Hyper } from "@macrostrat/hyper";
 import type { Component, ReactNode, ReactElement } from "react";
 
+// Favicon etc.
+declare module "*.png" {
+  const value: string;
+  export default value;
+}
+
 // Union of hyper and record
 type StyledHyper = Hyper & Record<string, string>;
 
