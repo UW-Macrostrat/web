@@ -1,8 +1,8 @@
 export async function data(pageContext): Promise<any> {
-  // `.page.server.js` files always run in Node.js; we could use SQL/ORM queries here.
+  const baseURL = pageContext.urlParsed.origin;
 
   // Fetch data from local api
-  const url = `http://localhost:3000/tiles/sources`;
+  const url = `${baseURL}/cdr/v1/tiles/sources`;
   const res = await fetch(url);
   const data = await res.json();
 
