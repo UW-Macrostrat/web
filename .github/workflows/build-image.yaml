@@ -29,7 +29,7 @@ jobs:
             type=raw,value=latest-,suffix={{date 'YYYYMMDDHHmmss'}},enable=${{ startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, '-')}}
             type=raw,value=latest-itb-,suffix={{date 'YYYYMMDDHHmmss'}}
             type=ref,event=pr
-            type=ref,event=branch,suffix={{date 'YYYYMMDDHHmmss'}}
+            type=ref,event=branch,suffix=-{{date 'YYYYMMDDHHmmss'}}
             type=semver,pattern={{version}}
           flavor: |
             latest=false
