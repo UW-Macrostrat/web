@@ -40,7 +40,7 @@ export function Page() {
               h("h3", { style: { margin: 0 } }, colGroup.col_group_long),
               h(EditButton, {
                 small: true,
-                href: `/column-group/${colGroup.id}/edit`,
+                href: `../column-group/${colGroup.id}/edit`,
               }),
             ]),
             h(Table, { interactive: true, headers }, [
@@ -49,7 +49,7 @@ export function Page() {
                   Row,
                   {
                     key: id.col_id,
-                    href: `/column/${id.col_id}`,
+                    href: `../column/${id.col_id}`,
                   },
                   [
                     h("td", [id.col_id]),

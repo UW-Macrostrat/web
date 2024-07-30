@@ -7,7 +7,7 @@ import pg, {
   selectFirst,
   fetchIdsFromColId,
   IdsFromCol,
-} from "~/index";
+} from "@macrostrat-web/column-builder";
 import { GetServerSideProps } from "next";
 import { PostgrestError, PostgrestResponse } from "@supabase/postgrest-js";
 

@@ -5,8 +5,8 @@ import {
   fetchIdsFromColId,
   IdsFromCol,
   UnitsView,
-} from "~/index";
-import { persistNewUnitChanges } from "~/components/section/new-helpers";
+} from "@macrostrat-web/column-builder";
+import { persistNewUnitChanges } from "@macrostrat-web/column-builder/src/components/section/new-helpers";
 import { GetServerSideProps } from "next";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
