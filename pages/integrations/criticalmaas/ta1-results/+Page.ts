@@ -1,34 +1,31 @@
 import h from "@macrostrat/hyper";
 // Page for a list of maps
-import { AnchorButton, ButtonGroup } from "@blueprintjs/core";
+import { AnchorButton, ButtonGroup, Spinner } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import { PageHeader } from "~/components";
-import { useData } from "vike-react/useData";
 import { useEffect, useRef, useState } from "react";
 import { getMapSources } from "./util";
 
 export function Page() {
-  const data = useData();
-  const [sources, setSources] = useState(data.sources);
+  const [sources, setSources] = useState([]);
   const [page, setPage] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const firstUpdate = useRef(true);
   useEffect(() => {
-    if (firstUpdate.current) {
-      firstUpdate.current = false;
-      return;
-    } else {
-      updateResultList(page, 10, setSources, setLoading);
-    }
+    setLoading(true);
+    getMapSources(window.location.origin, page).then((d) => {
+      setSources(d);
+      setLoading(false);
+    });
   }, [page]);
 
   return h(ContentPage, [
     h(PageHeader, { title: "CriticalMAAS CDR Maps", showSiteName: false }),
-    h(
+    h.if(!loading)(
       "ul.maps-list",
       sources.map((d) => h(SourceItem, { source: d, key: d.source_id }))
     ),
+    h.if(loading)(Spinner),
     // Add two buttons to change the page of the list
     h(
       ButtonGroup,
@@ -66,19 +63,23 @@ export function Page() {
 }
 
 function SourceItem({ source }) {
-  const { cog_id, system, system_version } = source;
+  const { cog_id, system, system_version, web_geom } = source;
   const currentURL = window.location.pathname;
   const href = `${currentURL}/${cog_id}/${system}/${system_version}`;
+
+  console.log("source", source);
+
+  if (web_geom == null) {
+    return h("li", [
+      h("span.source-id", {}, cog_id),
+      " ",
+      h("span", [system + " " + system_version]),
+    ]);
+  }
 
   return h("li", [
     h("span.source-id", {}, cog_id),
     " ",
-    h("a", { href }, [system, system_version]),
+    h("a", { href }, [system + " " + system_version]),
   ]);
-}
-
-async function updateResultList(page, pageSize, setSources, setLoading) {
-  setLoading(true);
-  setSources(await getMapSources(page, pageSize));
-  setLoading(false);
 }
