@@ -3,7 +3,7 @@ import h from "@macrostrat/hyper";
 import { AnchorButton, ButtonGroup, Spinner } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import { PageHeader } from "~/components";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { getMapSources } from "./util";
 
 export function Page() {
@@ -66,8 +66,6 @@ function SourceItem({ source }) {
   const { cog_id, system, system_version, web_geom } = source;
   const currentURL = window.location.pathname;
   const href = `${currentURL}/${cog_id}/${system}/${system_version}`;
-
-  console.log("source", source);
 
   if (web_geom == null) {
     return h("li", [
