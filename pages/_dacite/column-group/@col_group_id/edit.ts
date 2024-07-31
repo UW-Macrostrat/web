@@ -7,7 +7,7 @@ import {
   tableUpdate,
   IdsFromColGroup,
   fetchIdsFromColGroup,
-} from "~/index";
+} from "../../../../packages/column-builder";
 import { GetServerSidePropsContext } from "next";
 import { PostgrestError, PostgrestResponse } from "@supabase/postgrest-js";
 
