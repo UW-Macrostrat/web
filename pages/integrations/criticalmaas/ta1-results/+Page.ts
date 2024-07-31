@@ -1,5 +1,6 @@
 import h from "@macrostrat/hyper";
 // Page for a list of maps
+import { cdrPrefix } from "@macrostrat-web/settings";
 import { AnchorButton, ButtonGroup, Spinner } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import { PageHeader } from "~/components";
@@ -13,7 +14,7 @@ export function Page() {
 
   useEffect(() => {
     setLoading(true);
-    getMapSources(window.location.origin, page).then((d) => {
+    getMapSources(cdrPrefix, page).then((d) => {
       setSources(d);
       setLoading(false);
     });

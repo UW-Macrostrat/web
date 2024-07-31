@@ -1,5 +1,5 @@
 export async function getMapSources(baseURL, page) {
-  const url = new URL(baseURL + "/cdr/v1/tiles/sources");
+  const url = new URL(baseURL + "/tiles/sources");
   url.searchParams.set("page_size", 10);
   url.searchParams.set("page", page);
   const res = await fetch(url);

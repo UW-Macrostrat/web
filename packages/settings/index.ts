@@ -31,6 +31,8 @@ export const ingestPrefix = getRuntimeConfig(
   apiDomain + "/api/ingest"
 );
 
+export const cdrPrefix = getRuntimeConfig("CDR_API");
+
 export const mapPagePrefix = "/map";
 export const routerBasename = "/map";
 
@@ -45,6 +47,7 @@ export const elevationLayerURL = getRuntimeConfig("ELEVATION_LAYER_URL");
 
 /** Legacy settings object */
 export const SETTINGS = {
+  cdrPrefix,
   darkMapURL,
   baseMapURL,
   satelliteMapURL,

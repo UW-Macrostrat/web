@@ -1,7 +1,7 @@
 import { Radio, RadioGroup, Spinner } from "@blueprintjs/core";
 import { useData } from "vike-react/useData";
 
-import { SETTINGS } from "@macrostrat-web/settings";
+import { SETTINGS, cdrPrefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import {
   DetailPanelStyle,
@@ -164,7 +164,7 @@ export default function MapInterface() {
     raster: 0.5,
   });
 
-  const tileURL = `${baseURL}/cdr/v1/tiles/cog/${cog_id}/system/${encodeURIComponent(
+  const tileURL = `${cdrPrefix}/tiles/polygon/cog/${cog_id}/system/${encodeURIComponent(
     system
   )}/system_version/${encodeURIComponent(system_version)}/tile/{z}/{x}/{y}`;
 
