@@ -14,7 +14,7 @@ const __dirname = dirname(__filename);
 const isProduction = process.env.NODE_ENV === "production";
 // Serve the app out of the `src` directory.
 const root = resolve(join(__dirname, ".."));
-const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3003;
+const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 const hmrPort = process.env.HMR_PORT
   ? parseInt(process.env.HMR_PORT, 10)
   : 24678;
