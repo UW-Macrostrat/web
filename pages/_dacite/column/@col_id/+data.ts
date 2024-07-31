@@ -4,6 +4,7 @@ import pg, {
   ColSectionI,
   fetchIdsFromColId,
   IdsFromCol,
+  UnitsView,
 } from "@macrostrat-web/column-builder";
 
 import { getSectionData } from "@macrostrat-web/column-builder/src/data-fetching";
@@ -44,4 +45,13 @@ export async function data(ctx: PageContext) {
     query,
     sections,
   };
+}
+
+export interface ColumnProps {
+  col_id: string;
+  colSections: ColSectionI[];
+  column: { col_name: string }[];
+  errors: PostgrestError[];
+  query: IdsFromCol;
+  sections: { [section_id: number | string]: UnitsView[] }[];
 }

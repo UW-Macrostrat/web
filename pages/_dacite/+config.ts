@@ -7,4 +7,5 @@ export default {
       },
     },
   },
+  title: "Column editor",
 };

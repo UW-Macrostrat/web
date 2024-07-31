@@ -1,9 +1,7 @@
 import React from "react";
-import { hyperStyled } from "@macrostrat/hyper";
-import { Link } from "~/components";
 import { navigate } from "vike/client/router";
 import { ReactChild } from "react";
-import styles from "./comp.module.scss";
+import h from "./comp.module.scss";
 import {
   Draggable,
   DraggableProvided,
@@ -12,8 +10,6 @@ import {
   DroppableProvided,
 } from "react-beautiful-dnd";
 import { Card, Icon } from "@blueprintjs/core";
-
-const h = hyperStyled(styles);
 
 interface RowProps {
   children: ReactChild;
@@ -240,13 +236,12 @@ function TableHeader(props: {
 }) {
   return h(React.Fragment, [
     h.if(props.title != null)("thead", [
-      h("tr", [
+      h("tr.table-header-row", [
         h(
-          "th",
+          "th.table-header",
           {
             ...props.dragProps,
             colSpan: props.headers.length,
-            style: { textAlign: "center", backgroundColor: "#D3D8DE" },
           },
           [props.title]
         ),

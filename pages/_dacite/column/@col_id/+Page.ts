@@ -1,27 +1,15 @@
 import h from "@macrostrat/hyper";
-import { PostgrestError } from "@supabase/postgrest-js";
-import pg, {
+import {
   BasePage,
   EditButton,
-  createUnitBySections,
-  UnitsView,
-  ColSectionI,
-  fetchIdsFromColId,
-  IdsFromCol,
-  UnitSectionTable,
   isServer,
+  UnitSectionTable,
 } from "@macrostrat-web/column-builder";
 import { useData } from "vike-react/useData";
+import { ColumnProps } from "./+data";
 
 export function Page() {
-  const props: {
-    col_id: string;
-    colSections: ColSectionI[];
-    column: { col_name: string }[];
-    errors: PostgrestError[];
-    query: IdsFromCol;
-    sections: { [section_id: number | string]: UnitsView[] }[];
-  } = useData();
+  const props: ColumnProps = useData();
   const { col_id, colSections, column, query, sections, errors } = props;
 
   const columnName = column ? column[0].col_name : null;

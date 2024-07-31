@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useReducer } from "react";
-import { hyperStyled } from "@macrostrat/hyper";
 import {
   ColumnStateI,
   UnitsView,
@@ -17,11 +16,10 @@ import {
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
 import { DropResult, DroppableProvided } from "react-beautiful-dnd";
 import { ColumnPageBtnMenu } from "./helpers";
-import styles from "../comp.module.scss";
 import { SectionTable } from "./section";
 import { NewSectionBtn } from "../unit/minimal-unit-editor";
 
-const h = hyperStyled(styles);
+import h from "../comp.module.scss";
 
 interface SectionUnitTableProps {
   onDragEnd: (r: DropResult) => void;
@@ -125,11 +123,13 @@ const UnitSectionTableContext = createContext<UnitSectionTableCtx>({
 
 const useUnitSectionContext = () => useContext(UnitSectionTableContext);
 
-function UnitSectionTable(props: {
+interface UnitSectionTableParams {
   col_id: number;
   colSections: ColSectionI[];
   sections: { [section_id: number | string]: UnitsView[] }[];
-}) {
+}
+
+function UnitSectionTable(props: UnitSectionTableParams) {
   const { colSections, sections, col_id } = props;
 
   const initialState: ColumnStateI = {

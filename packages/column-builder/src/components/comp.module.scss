@@ -32,9 +32,10 @@
   overflow: scroll;
   max-height: 200px;
 }
+
 .itemSelectPopover {
   padding: 5px;
-  background-color: white;
+  background-color: var(--panel-background-color);
   -ms-overflow-style: none; /* Internet Explorer 10+ */
   scrollbar-width: none; /* Firefox */
   ::-webkit-scrollbar {
@@ -51,7 +52,7 @@
 }
 .color-block {
   border-style: solid;
-  border-color: black;
+  //border-color: black;
   border-width: 0.5px;
   height: 30px;
   width: 30px;
@@ -108,7 +109,7 @@
   padding-left: 10px;
   text-transform: capitalize;
   font-size: 15px;
-  background: rgb(211, 216, 222);
+  //background: rgb(211, 216, 222);
   font-weight: bold;
 }
 
@@ -155,9 +156,9 @@
 
 .base-table {
   border: solid 1px;
-  border-color: #c5cbd3;
+  //border-color: #c5cbd3;
   margin: 10px;
-  background-color: white;
+  //background-color: white;
   border-radius: 5px;
 }
 .full-width {
@@ -202,7 +203,7 @@
   }
   .geologic-age {
     font-style: italic;
-    color: #7b7b7b;
+    //color: #7b7b7b;
   }
   p {
     margin: 0;

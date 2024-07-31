@@ -34,6 +34,11 @@ declare module "*.module.sass" {
   export default classes;
 }
 
+declare module "*.scss" {
+  const classes: { [key: string]: string };
+  export default classes;
+}
+
 type Children = ReactNode | ReactNode[];
 
 declare module "@macrostrat/hyper" {
