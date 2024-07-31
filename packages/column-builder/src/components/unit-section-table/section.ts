@@ -4,7 +4,7 @@ import { DnDTable } from "../table";
 import { UnitRow } from "./unit";
 import { useUnitSectionContext } from "./table";
 import { AddBtnBetweenRows } from "./helpers";
-import styles from "../comp.module.scss";
+import styles from "../comp.module.sass";
 
 const h = hyperStyled(styles);
 

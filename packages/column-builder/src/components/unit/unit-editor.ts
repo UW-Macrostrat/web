@@ -14,7 +14,7 @@ import {
   useModelEditor,
   //@ts-ignore
 } from "@macrostrat/ui-components";
-import styles from "../comp.module.scss";
+import styles from "../comp.module.sass";
 import { SubmitButton } from "..";
 import {
   UnitEditorProps,

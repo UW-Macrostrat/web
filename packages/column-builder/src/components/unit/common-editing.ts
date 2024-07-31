@@ -12,7 +12,7 @@ import {
   useModelEditor,
   //@ts-ignore
 } from "@macrostrat/ui-components";
-import styles from "../comp.module.scss";
+import styles from "../comp.module.sass";
 import { EnvTagsAdd } from "..";
 import { UnitStratNameModalEditor } from "..";
 import { LithContainer } from "../lith";

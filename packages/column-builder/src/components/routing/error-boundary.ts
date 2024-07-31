@@ -2,10 +2,9 @@ import React from "react";
 import { hyperStyled } from "@macrostrat/hyper";
 import { Intent, Dialog, Callout, Divider } from "@blueprintjs/core";
 
-import styles from "../comp.module.scss";
+import styles from "../comp.module.sass";
 import { PostgrestError } from "@supabase/postgrest-js";
 const h = hyperStyled(styles);
-
 
 function ErrorDialog(props: { errors: PostgrestError[] }) {
   return h(Dialog, { isOpen: true, style: { paddingBottom: "0" } }, [

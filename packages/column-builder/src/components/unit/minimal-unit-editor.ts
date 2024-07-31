@@ -6,7 +6,7 @@ import {
 } from "@macrostrat-web/column-builder/src";
 import { Button, TextArea, Card, Collapse, Dialog } from "@blueprintjs/core";
 import { ModelEditor, useModelEditor } from "@macrostrat/ui-components";
-import styles from "../comp.module.scss";
+import styles from "../comp.module.sass";
 import { SubmitButton } from "..";
 import {
   UnitThickness,

@@ -19,7 +19,7 @@ import { ColumnPageBtnMenu } from "./helpers";
 import { SectionTable } from "./section";
 import { NewSectionBtn } from "../unit/minimal-unit-editor";
 
-import h from "../comp.module.scss";
+import h from "../comp.module.sass";
 
 interface SectionUnitTableProps {
   onDragEnd: (r: DropResult) => void;

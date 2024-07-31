@@ -13,7 +13,7 @@ import {
   Collapse,
   Callout,
 } from "@blueprintjs/core";
-import styles from "../comp.module.scss";
+import styles from "../comp.module.sass";
 import { ColumnForm, ColumnGroupI } from "~/types";
 import { DataI, ItemSuggest } from "../suggest";
 import { RefI } from "~/types";

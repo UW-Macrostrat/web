@@ -7,8 +7,8 @@ import {
   ModelEditButton,
   //@ts-ignore
 } from "@macrostrat/ui-components";
-import styles from "../comp.module.scss";
-import {SubmitButton } from "..";
+import styles from "../comp.module.sass";
+import { SubmitButton } from "..";
 
 const h = hyperStyled(styles);
 

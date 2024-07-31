@@ -11,7 +11,7 @@ import {
   Callout,
 } from "@blueprintjs/core";
 import { ModelEditor, useModelEditor } from "@macrostrat/ui-components";
-import styles from "../comp.module.scss";
+import styles from "../comp.module.sass";
 import { RANK, StratNameI } from "../../types";
 import { SubmitButton } from "..";
 import { StratNameDataI } from ".";

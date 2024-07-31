@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { hyperStyled } from "@macrostrat/hyper";
 import { useModelEditor } from "@macrostrat/ui-components";
 import { Button, Callout, Dialog, Tag } from "@blueprintjs/core";
-import styles from "../comp.module.scss";
+import styles from "../comp.module.sass";
 import pg, { usePostgrest } from "../../db";
 import { RANK, StratNameConceptLongI, StratNameI } from "~/types";
 import { StratNameStack } from "./panel-stack";

@@ -8,7 +8,7 @@ import {
   ItemListRenderer,
 } from "@blueprintjs/select";
 import { MenuItem, Icon, PopoverPosition } from "@blueprintjs/core";
-import styles from "./comp.module.scss";
+import styles from "./comp.module.sass";
 
 const h = hyperStyled(styles);
 

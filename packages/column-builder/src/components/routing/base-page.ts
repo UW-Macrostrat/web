@@ -1,6 +1,6 @@
 import React from "react";
 import { hyperStyled } from "@macrostrat/hyper";
-import styles from "../comp.module.scss";
+import styles from "../comp.module.sass";
 import { BreadcrumbProps } from "@blueprintjs/core";
 import { ReactChild } from "react";
 import { ErrorDialog } from "./error-boundary";

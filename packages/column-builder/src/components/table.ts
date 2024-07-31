@@ -1,7 +1,7 @@
 import React from "react";
 import { navigate } from "vike/client/router";
 import { ReactChild } from "react";
-import h from "./comp.module.scss";
+import h from "./comp.module.sass";
 import {
   Draggable,
   DraggableProvided,

@@ -3,7 +3,7 @@ import { hyperStyled } from "@macrostrat/hyper";
 import { Spinner, MenuItem } from "@blueprintjs/core";
 import { IntervalI } from "../../types";
 import pg from "../../db";
-import styles from "../comp.module.scss";
+import styles from "../comp.module.sass";
 import { ItemSuggest } from "../suggest";
 import { FeatureCell } from "../table";
 import { ItemRenderer } from "@blueprintjs/select";

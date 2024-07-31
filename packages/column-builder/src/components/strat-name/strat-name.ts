@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import pg from "../../db";
 import { hyperStyled } from "@macrostrat/hyper";
-import styles from "../comp.module.scss";
+import styles from "../comp.module.sass";
 import { StratNameI } from "../..";
 import { MenuItem } from "@blueprintjs/core";
 import { ItemRenderer } from "@blueprintjs/select";
@@ -78,7 +78,7 @@ function StratNameSuggest(props: StratCellProps) {
   useEffect(() => {
     onQueryChange("");
   }, []);
-  
+
   return h(ItemSuggest, {
     items: names,
     onQueryChange: onQueryChange,

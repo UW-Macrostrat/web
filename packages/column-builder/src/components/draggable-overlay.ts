@@ -1,7 +1,7 @@
 import { hyperStyled } from "@macrostrat/hyper";
 import { useState, useEffect, ReactChild } from "react";
 import { Overlay, Card } from "@blueprintjs/core";
-import styles from "./comp.module.scss";
+import styles from "./comp.module.sass";
 
 const h = hyperStyled(styles);
 interface DraggableOverlayPropsI {

@@ -3,7 +3,7 @@ import mapboxgl from "mapbox-gl";
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
 import { useEffect, useState } from "react";
 import "mapbox-gl/dist/mapbox-gl.css";
-import styles from "../comp.module.scss";
+import styles from "../comp.module.sass";
 import {
   LngLatMap as LngLatMap_,
   LngLatInputs,

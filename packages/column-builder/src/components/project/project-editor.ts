@@ -7,7 +7,7 @@ import {
   ModelEditButton,
   ModelEditorContext,
 } from "@macrostrat/ui-components";
-import styles from "../comp.module.scss";
+import styles from "../comp.module.sass";
 import pg, { usePostgrest } from "../..";
 import { CancelButton, SubmitButton } from "..";
 import { ItemSuggest } from "../suggest";

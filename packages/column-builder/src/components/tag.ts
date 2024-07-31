@@ -8,7 +8,7 @@ import {
   ItemRenderer,
 } from "@blueprintjs/select";
 import pg, { usePostgrest } from "../db";
-import styles from "./comp.module.scss";
+import styles from "./comp.module.sass";
 import { EnvironUnit, LithUnit } from "..";
 import { ItemSelect } from "./suggest";
 

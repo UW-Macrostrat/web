@@ -3,7 +3,7 @@ import pkg from "react-color";
 const { ChromePicker } = pkg;
 
 import { Popover2 } from "@blueprintjs/popover2";
-import styles from "../comp.module.scss";
+import styles from "../comp.module.sass";
 
 const h = hyperStyled(styles);
 

@@ -1,5 +1,5 @@
 import { hyperStyled } from "@macrostrat/hyper";
-import styles from "../comp.module.scss";
+import styles from "../comp.module.sass";
 import { ColSectionI } from "~/types";
 import { Table, Row } from "../table";
 import { SectionUnitCheckBox } from "../unit-section-table/helpers";

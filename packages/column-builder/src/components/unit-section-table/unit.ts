@@ -19,7 +19,7 @@ import { MinEditorCard } from "../unit/minimal-unit-editor";
 import { DraggableRow } from "../table";
 import { UnitRowContextMenu, AddBtnBetweenRows } from "./helpers";
 import { useUnitSectionContext } from "@macrostrat-web/column-builder/src";
-import styles from "../comp.module.scss";
+import styles from "../comp.module.sass";
 import { Button, Dialog, TextArea } from "@blueprintjs/core";
 import { ModelEditor, useModelEditor } from "@macrostrat/ui-components";
 import { SubmitButton } from "../buttons";

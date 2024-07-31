@@ -6,7 +6,7 @@ import {
   useModelEditor,
   ModelEditButton,
 } from "@macrostrat/ui-components";
-import styles from "../comp.module.scss";
+import styles from "../comp.module.sass";
 import { RefI } from "~/types";
 import { SubmitButton } from "..";
 import { FeatureCell } from "../table";
