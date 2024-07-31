@@ -124,7 +124,9 @@ function UnitCellGroup(props: { unit: UnitsView; onCancel: () => void }) {
 
   const backgroundColor = convertColorNameToHex(unit.color) + "80";
   return h(React.Fragment, [
-    h("td", [h(Link, { href: `/unit/${unit.id}/edit` }, [h("a", [unit.id])])]),
+    h("td", [
+      h(Link, { href: `../unit/${unit.id}/edit` }, [h("a", [unit.id])]),
+    ]),
     h("td", { style: { background: backgroundColor } }, [h(InformalUnitName)]),
     h("td", { style: { background: backgroundColor } }, [
       h(UnitRowStratNameEditor),

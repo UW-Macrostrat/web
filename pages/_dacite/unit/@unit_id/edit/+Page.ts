@@ -15,7 +15,7 @@ Need interval suggest component (2), Need A color picker, Contact suggests.
 Tags for liths and environs; adding components for those too.
 */
 export function Page() {
-  const { unit, errors, unit_id } = useData<UnitEditParams>();
+  const { unit, errors, unit_id, query } = useData<UnitEditParams>();
 
   const model = unit;
   console.log("UnitA", model);
@@ -27,7 +27,7 @@ export function Page() {
     return await persistUnitChanges(unit, updatedModel, changeSet);
   };
 
-  return h(BasePage, { query: props.query, errors }, [
+  return h(BasePage, { query, errors }, [
     h("h3", [`Edit Unit #${unit.id}: `, unit.strat_name]),
     //@ts-ignore
     h(UnitEditor, { model, persistChanges }),

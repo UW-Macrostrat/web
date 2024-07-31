@@ -18,7 +18,7 @@ export function Page() {
     h("h3", [
       `Sections for Column: ${columnName}`,
       h(EditButton, {
-        href: `/column/${col_id}/edit`,
+        href: `./${col_id}/edit`,
       }),
     ]),
     // there doesn't appear to be a good solution yet, so this is the best we can do. It loses the SSR

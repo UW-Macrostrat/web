@@ -18,7 +18,8 @@ interface EditColumnData {
 }
 
 export function Page() {
-  const { col_id, curColGroup, column, errors }: EditColumnData = useData();
+  const props = useData();
+  const { col_id, curColGroup, column, errors }: EditColumnData = props;
   console.log(column);
   const persistChanges = async (
     e: ColumnForm,

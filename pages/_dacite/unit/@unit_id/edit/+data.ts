@@ -7,9 +7,7 @@ import { PageContext } from "vike/types";
 import { PostgrestError } from "@supabase/postgrest-js";
 import { getSectionData } from "@macrostrat-web/column-builder/src/data-fetching";
 
-export async function getServerSideProps(
-  ctx: PageContext
-): Promise<UnitEditParams> {
+export async function data(ctx: PageContext): Promise<UnitEditParams> {
   let { unit_id } = ctx.routeParams;
 
   if (Array.isArray(unit_id)) {

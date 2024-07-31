@@ -66,7 +66,7 @@ function SectionTable(props: SectionTableProps) {
       interactive: false,
       headers,
       widths,
-      title: `Section #${id}`,
+      title: `Section ${id}`,
       draggableId: `${id} ${index}`,
       drag,
       droppableId: index.toString() + " " + id.toString(),

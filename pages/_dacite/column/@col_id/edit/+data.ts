@@ -27,6 +27,8 @@ export async function data(ctx: PageContext) {
 
   const errors = [error, error_].filter((e) => e != null);
 
+  console.log(data);
+
   return {
     col_id,
     column: data,
