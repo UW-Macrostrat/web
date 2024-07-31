@@ -1,9 +1,12 @@
-import { hyperStyled } from "@macrostrat/hyper";
-import { tableInsert, BasePage, Project, ProjectEditor } from "../../src";
-import styles from "./project.module.scss";
-const h = hyperStyled(styles);
+import {
+  tableInsert,
+  BasePage,
+  Project,
+  ProjectEditor,
+} from "@macrostrat-web/column-builder";
+import h from "../project.module.scss";
 
-export default function NewProject() {
+export function Page() {
   const newProject: Project = {
     project: "",
     descrip: "",

@@ -9,14 +9,10 @@ import pg, {
   CreateButton,
   EditButton,
 } from "@macrostrat-web/column-builder";
+import type { ColumnGroupsData } from "./+data";
 
 export function Page() {
-  const props: {
-    projectName: string;
-    project_id: number;
-    columnGroups: ColumnGroupI[];
-    errors: PostgrestError[];
-  } = useData();
+  const props = useData<ColumnGroupsData>();
 
   const { project_id, errors } = props;
 

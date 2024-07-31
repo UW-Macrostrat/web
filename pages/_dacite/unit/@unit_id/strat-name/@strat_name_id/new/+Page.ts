@@ -1,42 +1,16 @@
-import { hyperStyled } from "@macrostrat/hyper";
 import {
-  StratNameI,
   BasePage,
   StratNameEditor,
+  StratNameI,
   tableInsert,
   tableUpdate,
-  IdsFromUnit,
-  fetchIdsFromUnitId,
-} from "~/index";
-import { GetServerSidePropsContext } from "next";
-import styles from "./stratname.module.scss";
+} from "@macrostrat-web/column-builder";
+import h from "../stratname.module.scss";
+import { useData } from "vike-react/useData";
+import type { StratNameData } from "./+data";
 
-const h = hyperStyled(styles);
-
-export async function getServerSideProps(ctx: GetServerSidePropsContext) {
-  let {
-    query: { unit_id },
-  } = ctx;
-  if (Array.isArray(unit_id)) {
-    unit_id = unit_id[0];
-  } else if (typeof unit_id == "undefined") {
-    unit_id = "0";
-  }
-
-  const query: IdsFromUnit = await fetchIdsFromUnitId(parseInt(unit_id));
-
-  return { props: { unit_id, query } };
-}
-
-export default function NewStratName({
-  name,
-  unit_id,
-  query,
-}: {
-  name: string | undefined;
-  unit_id: number;
-  query: IdsFromUnit;
-}) {
+export default function Page() {
+  const { name, unit_id, query } = useData<StratNameData>();
   const persistChanges = async (e: StratNameI, c: Partial<StratNameI>) => {
     const { data, error } = await tableInsert("strat_names", e);
 

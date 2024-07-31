@@ -1,47 +1,15 @@
 import h from "@macrostrat/hyper";
-import { PostgrestError, PostgrestResponse } from "@supabase/postgrest-js";
-import { GetServerSideProps } from "next";
-import pg, {
+import {
   BasePage,
-  ColumnGroupI,
   ColumnEditor,
   ColumnForm,
   tableInsert,
-  IdsFromColGroup,
-  fetchIdsFromColGroup,
-} from "~/index";
+} from "@macrostrat-web/column-builder";
+import { useData } from "vike-react/useData";
+import { NewColumnData } from "./+data";
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  let {
-    query: { col_group_id },
-  } = ctx;
-
-  if (Array.isArray(col_group_id)) {
-    col_group_id = col_group_id[0];
-  }
-
-  const query: IdsFromColGroup = await fetchIdsFromColGroup(
-    parseInt(col_group_id ?? "0")
-  );
-
-  const { data, error }: PostgrestResponse<Partial<ColumnGroupI>> = await pg
-    .from("col_groups")
-    .select()
-    .match({ id: col_group_id });
-
-  const colGroup = data ? data[0] : {};
-
-  const errors = error == null ? [] : [error];
-  return { props: { col_group_id, colGroup, query, errors } };
-};
-
-export default function NewColumn(props: {
-  col_group_id: string;
-  colGroup: Partial<ColumnGroupI>;
-  query: IdsFromColGroup;
-  errors: PostgrestError[];
-}) {
-  const { colGroup, col_group_id, errors } = props;
+export function Page() {
+  const { colGroup, col_group_id, errors } = useData<NewColumnData>();
 
   const persistChanges = async (
     e: ColumnForm,
