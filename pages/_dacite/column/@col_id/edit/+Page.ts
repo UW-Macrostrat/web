@@ -1,57 +1,24 @@
 import h from "@macrostrat/hyper";
 import pg, {
-  tableUpdate,
   BasePage,
   ColumnEditor,
   ColumnForm,
-  selectFirst,
-  fetchIdsFromColId,
   IdsFromCol,
+  tableUpdate,
 } from "@macrostrat-web/column-builder";
-import { GetServerSideProps } from "next";
-import { PostgrestError, PostgrestResponse } from "@supabase/postgrest-js";
+import { PostgrestError } from "@supabase/postgrest-js";
+import { useData } from "vike-react/useData";
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  let {
-    query: { col_id },
-  } = ctx;
-  if (Array.isArray(col_id)) {
-    col_id = col_id[0];
-  }
-  const query: IdsFromCol = await fetchIdsFromColId(parseInt(col_id ?? "0"));
-
-  const { data, error }: PostgrestResponse<ColumnForm> = await pg
-    .from("cols")
-    .select("*,refs(*)")
-    .match({ id: parseInt(col_id ?? "0") });
-
-  const { firstData, error: error_ } = await selectFirst("cols", {
-    columns: "col_groups!cols_col_group_id_fkey(*)",
-    match: { id: parseInt(col_id ?? "0") },
-    limit: 1,
-  });
-
-  const errors = [error, error_].filter((e) => e != null);
-
-  return {
-    props: {
-      col_id,
-      column: data,
-      curColGroup: firstData.col_groups,
-      query,
-      errors,
-    },
-  };
-};
-
-export default function EditColumn(props: {
+interface EditColumnData {
   col_id: string;
   curColGroup: any;
   column: ColumnForm[];
   query: IdsFromCol;
   errors: PostgrestError[];
-}) {
-  const { col_id, curColGroup, column, errors } = props;
+}
+
+export function Page() {
+  const { col_id, curColGroup, column, errors }: EditColumnData = useData();
   console.log(column);
   const persistChanges = async (
     e: ColumnForm,

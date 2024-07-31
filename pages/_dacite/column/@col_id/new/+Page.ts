@@ -2,35 +2,19 @@ import h from "@macrostrat/hyper";
 import {
   BasePage,
   UnitEditor,
-  fetchIdsFromColId,
   IdsFromCol,
   UnitsView,
 } from "@macrostrat-web/column-builder";
 import { persistNewUnitChanges } from "@macrostrat-web/column-builder/src/components/section/new-helpers";
-import { GetServerSideProps } from "next";
+import { useData } from "vike-react/useData";
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  let {
-    query: { col_id },
-  } = ctx;
-
-  if (Array.isArray(col_id)) {
-    col_id = col_id[0];
-  }
-  const query: IdsFromCol = await fetchIdsFromColId(parseInt(col_id ?? "0"));
-
-  return {
-    props: { col_id, query },
-  };
-};
-
-function NewUnitInSection({
-  col_id,
-  query,
-}: {
+interface NewUnitData {
   col_id: number;
   query: IdsFromCol;
-}) {
+}
+
+function Page() {
+  const { col_id, query }: NewUnitData = useData();
   const model = { unit: { col_id: col_id }, liths: [], envs: [] };
 
   const persistChanges = async (
@@ -45,5 +29,3 @@ function NewUnitInSection({
     h(UnitEditor, { model, persistChanges }),
   ]);
 }
-
-export default NewUnitInSection;
