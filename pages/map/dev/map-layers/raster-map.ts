@@ -7,6 +7,8 @@ import {
   MapView,
   PanelCard,
 } from "@macrostrat/map-interface";
+import { ParentRouteButton } from "~/components/map-navbar";
+
 import { useMapRef } from "@macrostrat/mapbox-react";
 import { useDarkMode } from "@macrostrat/ui-components";
 import { useEffect, useMemo, useState } from "react";
@@ -39,15 +41,16 @@ export function RasterMapInspectorPage({
     the search bar on mobile platforms
   */
   // This appears necessary to get the position to set successfully
-  const runAction = useAppActions();
-  const loaded = useSelector((state) => state.core.initialLoadComplete);
-  useEffect(() => {
-    runAction({ type: "get-initial-map-state" });
-  }, []);
-
+  // const runAction = useAppActions();
+  // const loaded = useSelector((state) => state.core.initialLoadComplete);
+  // useEffect(() => {
+  //   runAction({ type: "get-initial-map-state" });
+  // }, []);
+  //
   const [isOpen, setOpen] = useState(false);
 
-  const isLoading = useAppState((state) => state.core.mapIsLoading);
+  const isLoading = false; // useAppState((state) => state.core.mapIsLoading);
+  const loaded = true; // useAppState((state) => state.core.initialLoadComplete);
 
   let detailElement = null;
 

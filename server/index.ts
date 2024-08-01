@@ -8,7 +8,6 @@ import { createMiddleware } from "@universal-middleware/express";
 import { createMacrostratQlrAPI } from "@macrostrat-web/qgis-integration";
 import express from "express";
 import sirv from "sirv";
-import { createCDRProxy } from "../pages/integrations/criticalmaas/cdr-proxy.server";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -95,12 +94,6 @@ async function startServer() {
     process.env.VITE_MACROSTRAT_TILESERVER_DOMAIN,
     process.env.VITE_MACROSTRAT_INSTANCE
   );
-
-  // CriticalMAAS CDR integration
-  // Proxy requests to /* to https://api.cdr.land/*
-  // Add the Authorization header to the proxied request
-  // TODO: put this behind authorization, perhaps move to a separate service
-  app.use("/cdr", createCDRProxy());
 
   /**
    * Vike route
