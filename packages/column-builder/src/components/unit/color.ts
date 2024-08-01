@@ -1,11 +1,6 @@
-import { hyperStyled } from "@macrostrat/hyper";
 import pkg from "react-color";
-const { ChromePicker } = pkg;
-
 import { Popover2 } from "@blueprintjs/popover2";
-import styles from "../comp.module.sass";
-
-const h = hyperStyled(styles);
+import h from "../comp.module.sass";
 
 interface ColorProps {
   color: string;
@@ -17,16 +12,20 @@ function ColorBlock(props: ColorProps) {
     const { hex } = color;
     props.onChange(hex);
   };
+  const color = props.color ?? "black";
+
+  console.log(pkg);
+
   return h("div", [
     h(
       Popover2,
       {
-        content: h(ChromePicker, {
+        content: h(pkg, {
           onChange: onChange,
-          color: props.color ? props.color : "black",
+          color,
         }),
       },
-      [h("div.color-block", { style: { backgroundColor: props.color } })]
+      h("div.color-block", { style: { backgroundColor: color } })
     ),
   ]);
 }

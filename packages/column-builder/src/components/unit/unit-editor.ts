@@ -209,7 +209,7 @@ function UnitEditor(props: UnitEditorProps) {
       canEdit: true,
       isEditing: true,
     },
-    [h(UnitEdit)]
+    h(UnitEdit)
   );
 }
 

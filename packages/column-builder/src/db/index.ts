@@ -5,25 +5,20 @@ import {
   PostgrestQueryBuilder,
   PostgrestResponse,
 } from "@supabase/postgrest-js";
-import fetch from "cross-fetch"
+import fetch from "cross-fetch";
+import { postgrestPrefix } from "@macrostrat-web/settings";
 
 function isServer() {
   return typeof window === "undefined";
 }
-console.log(
-  process.env.NEXT_PUBLIC_SERVER_URL,
-  process.env.NEXT_PUBLIC_CLIENT_URL,
-  process.env.NEXT_PUBLIC_TOPOLOGY_URL
-);
+
 // The address of the postgrest service is different between the client and the server!
 const pg = new PostgrestClient(
   //@ts-ignore
-  isServer()
-    ? process.env.NEXT_PUBLIC_SERVER_URL
-    : process.env.NEXT_PUBLIC_CLIENT_URL,
+  postgrestPrefix,
   {
     fetch(input, options) {
-      console.log(input)
+      console.log(input);
       return fetch(input, options);
     },
   }
@@ -127,7 +122,7 @@ async function tableUpdate(table: string, opts: UpdateTableI) {
   return await query;
 }
 
-/* 
+/*
   Hook for easy table inserts
 */
 async function tableInsert(table: string, row: object) {
