@@ -19,6 +19,8 @@ export const pbdbDomain = "https://paleobiodb.org";
 
 export const mapboxAccessToken = getRuntimeConfig("MAPBOX_API_TOKEN");
 
+export const baseURL = getRuntimeConfig("BASE_URL", "/");
+
 export const apiV2Prefix = getRuntimeConfig(
   "MACROSTRAT_API_V2",
   apiDomain + "/api/v2"
@@ -28,6 +30,8 @@ export const ingestPrefix = getRuntimeConfig(
   "MACROSTRAT_INGEST_API",
   apiDomain + "/api/ingest"
 );
+
+export const cdrPrefix = getRuntimeConfig("CDR_API");
 
 export const mapPagePrefix = "/map";
 export const routerBasename = "/map";
@@ -43,6 +47,7 @@ export const elevationLayerURL = getRuntimeConfig("ELEVATION_LAYER_URL");
 
 /** Legacy settings object */
 export const SETTINGS = {
+  cdrPrefix,
   darkMapURL,
   baseMapURL,
   satelliteMapURL,

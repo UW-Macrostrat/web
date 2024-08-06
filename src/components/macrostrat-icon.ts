@@ -5,8 +5,8 @@ import h from "./icon.module.sass";
 import chroma from "chroma-js";
 import { hexToCSSFilter } from "hex-to-css-filter";
 import { navigate } from "vike/client/router";
-import { useLinkIsActive } from "~/components/navigation/link-component";
-import { usePageContext } from "~/renderer/page-context";
+import { useLinkIsActive } from "~/components/navigation/Link";
+import { usePageContext } from "vike-react/usePageContext";
 
 function useInitialFlavor() {
   const ctx = usePageContext();

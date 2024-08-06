@@ -26,22 +26,20 @@ export function replaceSourcesForTileset(
   tileset: MacrostratVectorTileset | string,
   parameters: Record<string, string | string[]>
 ) {
-
   let tilesetURL;
   if (!tileset.startsWith("http")) {
-    tilesetURL = burwellTileDomain + `/${tileset}/{z}/{x}/{y}`
+    tilesetURL = burwellTileDomain + `/${tileset}/{z}/{x}/{y}`;
   } else {
     tilesetURL = tileset;
   }
 
-  if(parameters != null){
+  if (parameters != null) {
     let urlParams = new URLSearchParams();
     // For each parameter that isn't empty add it to the URL
     for (const [key, value] of Object.entries(parameters)) {
-      if(value != null && value != ""){
-
+      if (value != null && value != "") {
         // If the value is a list of strings append each one
-        if(Array.isArray(value)){
+        if (Array.isArray(value)) {
           for (const v of value) {
             urlParams.append(key, v);
           }
@@ -90,13 +88,15 @@ export function LineSymbolManager({ showLineSymbols }) {
 }
 
 export function buildRasterStyle(layer: MacrostratRasterTileset) {
-  let tileURL = burwellTileDomain + `/${layer}/{z}/{x}/{y}.png`;
+  const tileDomain = "https://tiles.macrostrat.org";
+
+  let tileURL = tileDomain + `/${layer}/{z}/{x}/{y}.png`;
 
   // if (layer == MacrostratRasterTileset.Emphasized) {
   //   tileURL = `https://next.macrostrat.org/tiles/tiles/carto/{z}/{x}/{y}.png`;
   // }
 
-  return {
+  const style = {
     version: 8,
     sources: {
       burwell: {
@@ -116,4 +116,5 @@ export function buildRasterStyle(layer: MacrostratRasterTileset) {
       },
     ],
   };
+  return style;
 }
