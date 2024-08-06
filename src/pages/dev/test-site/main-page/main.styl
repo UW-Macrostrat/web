@@ -2,6 +2,7 @@ html, body
   color: #E0E1E6
   background-color: white 
   margin: 0
+  margin-top: 35px
 
 #total
   background-color: white
@@ -15,10 +16,9 @@ a:hover
 .nohighlight
   color: white
 
-.start
+.start-card
   margin-top: 75px
   margin-top: 75px
-  width: 100%
   display: flex;
   justify-content: center;
   align-items: center;  
@@ -34,6 +34,10 @@ a:hover
     display: inline-block
     width: 100%
 
+  .start-header
+    text-shadow: black 1px 0 10px
+    text-align: center
+
 .text
   position:absolute
   z-index: 100
@@ -42,7 +46,7 @@ a:hover
   width: 50%
   margin: auto
 
-.cover-image
+.cover-img
   position:absolute
   z-index:5
   height: 35vh
@@ -170,12 +174,6 @@ a:hover
   font-family: "Maven Pro", sans-serif;
   padding: 20vh 0
   text-align: center
-
-.header 
-  display: grid
-  margin: auto
-  margin-bottom: 0
-  text-shadow: black 1px 0 10px
 
 #main-title
   display: inline-block
@@ -464,16 +462,16 @@ a:hover
 
   h1
     color: black
-  
-  .card-image
-    height: 30vh
-    width: 100%
 
   .top
     border-radius: 10px 0 0 0
   
   .bottom
     border-radius: 0 0 10px 0
+
+.card-image
+  height: 30vh
+  width: 100%
 
 .location-text 
   h1
@@ -541,7 +539,7 @@ a:hover
   p
     margin-bottom: 0
 
-.section
+.header
   width: 60%
   margin-left: 20%
 
@@ -553,7 +551,7 @@ a:hover
     color: black
     margin-top: 0
 
-.temp
+.map-element
   font-size: 20px
 
   a 
