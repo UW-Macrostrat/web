@@ -14,7 +14,7 @@ export async function onBeforeRender(pageContext: PageContextServer) {
 
   return {
     pageContext: {
-      pageProps: { ...props, editMode },
+      pageProps: { ...props, editMode, source_id },
       documentProps: {
         // The page's <title>
         title: props.source.name,
