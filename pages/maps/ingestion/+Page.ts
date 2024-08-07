@@ -3,10 +3,9 @@ import { ingestPrefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import react, { useCallback, useEffect, useState } from "react";
 import { PageBreadcrumbs } from "~/components";
-import { usePageContext } from "vike-react/usePageContext";
 import { IngestProcessCard } from "./components";
 import styles from "./main.module.sass";
-import { AuthStatus } from "@macrostrat/auth-components";
+import { useAuth, AuthStatus } from "@macrostrat/auth-components";
 
 import { ContentPage } from "~/layouts";
 import Tag from "./components/Tag";
@@ -14,7 +13,7 @@ import Tag from "./components/Tag";
 const h = hyper.styled(styles);
 
 export function Page() {
-  const { user } = usePageContext();
+  const { user } = useAuth();
 
   const [ingestProcess, setIngestProcess] = useState<IngestProcess[]>([]);
   const [ingestFilter, setIngestFilter] = useState<URLSearchParams>(undefined);
