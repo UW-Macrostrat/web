@@ -48,8 +48,6 @@ export function IngestProcessCard({
     onUpdate();
   }, []);
 
-  console.log("ingestProcess", ingestProcess);
-
   const { id, tags } = _ingestProcess;
   const { slug, name, source_id, scale, raster_url } = _ingestProcess.source;
   const edit_href = `/maps/ingestion/${source_id}`;

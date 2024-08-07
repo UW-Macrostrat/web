@@ -1,9 +1,9 @@
 import { AnchorButton } from "@blueprintjs/core";
 import { ingestPrefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
-import { useEffect, useState } from "react";
+import react, { useCallback, useEffect, useState } from "react";
 import { PageBreadcrumbs } from "~/components";
-import { usePageProps } from "~/renderer/usePageProps";
+import { usePageContext } from "vike-react/usePageContext";
 import { IngestProcessCard } from "./components";
 import styles from "./main.module.sass";
 import { AuthStatus } from "@macrostrat/auth-components";
@@ -14,39 +14,42 @@ import Tag from "./components/Tag";
 const h = hyper.styled(styles);
 
 export function Page() {
-  const { user, url } = usePageProps();
+  const { user } = usePageContext();
+
   const [ingestProcess, setIngestProcess] = useState<IngestProcess[]>([]);
   const [ingestFilter, setIngestFilter] = useState<URLSearchParams>(undefined);
   const [tags, setTags] = useState<string[]>([]);
 
+  const updateTags = useCallback(() => {
+    getTags().then((tags) => setTags(tags));
+  }, []);
+
+  const updateIngestProcesses = useCallback(() => {
+    getIngestProcesses(ingestFilter).then((ingestProcesses) => {
+      setIngestProcess(ingestProcesses);
+    });
+  }, [ingestFilter]);
+
   // Get the initial data with the filter from the URL
-  useEffect(() => {
+  react.useEffect(() => {
     // Get the ingest process data
     const url = new URL(window.location.href);
     const searchParams = new URLSearchParams(url.search);
     searchParams.set("state", "not.eq.abandoned");
     setIngestFilter(searchParams);
-    getIngestProcesses(searchParams).then((ingestProcesses) => {
-      setIngestProcess(ingestProcesses);
-    });
-
-    // Get the current set of tags
-    getTags().then((tags) => setTags(tags));
+    updateIngestProcesses();
+    updateTags();
 
     // Set up the popstate event listener
     window.onpopstate = () => {
-      getIngestProcesses(ingestFilter).then((ingestProcesses) => {
-        setIngestProcess(ingestProcesses);
-      });
+      updateIngestProcesses();
     };
   }, []);
 
   // Re-fetch data when the filter changes
-  useEffect(() => {
+  react.useEffect(() => {
     if (ingestFilter) {
-      getIngestProcesses(ingestFilter).then((ingestProcesses) => {
-        setIngestProcess(ingestProcesses);
-      });
+      updateIngestProcesses();
     }
   }, [ingestFilter]);
 
@@ -76,7 +79,7 @@ export function Page() {
             ingestProcess: d,
             user: user,
             // What is this doing?
-            onUpdate: () => getTags().then((tags) => setTags(tags)),
+            onUpdate: updateTags,
           });
         })
       ),
