@@ -2,7 +2,7 @@
 name: Ingestion Update
 about: Create a report to help us improve
 title: ''
-labels: ingestion
+labels: map-ingestion-interface
 assignees: ''
 
 ---
