@@ -6348,6 +6348,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@macrostrat-web/sift@workspace:packages/sift"
   dependencies:
+    "@macrostrat-web/settings": "workspace:*"
     "@macrostrat/hyper": "npm:^2.2.1"
     "@types/react": "npm:^18"
     "@types/react-dom": "npm:^18"

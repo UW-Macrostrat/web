@@ -183,6 +183,21 @@ export const sitemap: Routes = {
           slug: "lithology",
           name: "Lithology",
         },
+        {
+          slug: "strat-names",
+          name: "Stratigraphic names",
+          children: [
+            {
+              param: "@id",
+              name(urlPart, ctx) {
+                return h(
+                  "code",
+                  ctx.pageProps?.stratName?.strat_name ?? urlPart
+                );
+              },
+            },
+          ],
+        },
       ],
     },
     columnsSubtree,

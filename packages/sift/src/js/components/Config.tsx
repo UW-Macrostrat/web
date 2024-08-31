@@ -1,5 +1,7 @@
+import { apiV2Prefix } from "@macrostrat-web/settings";
+
 var Config = {
-  apiURL: "https://v2.macrostrat.org/api/v2",
+  apiURL: apiV2Prefix,
   pbdbURL: "https://paleobiodb.org/data1.2",
 
   totalColumns: 1681,

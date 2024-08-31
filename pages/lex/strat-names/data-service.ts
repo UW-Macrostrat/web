@@ -123,7 +123,11 @@ export async function fetchStratNames(
   perPage = 20,
   abortSignal?: AbortSignal
 ) {
-  let base = postgrest.from("strat_names_units_kg").select("*");
+  let base = postgrest
+    .from("strat_names_units_kg")
+    .select(
+      "id,strat_name,rank,concept_id,concept,interval_id,interval_name,units"
+    );
   if (filters.match != null && filters.match != "") {
     base = base.ilike("strat_name", `%${filters.match}%`);
   }

@@ -1,1 +1,1 @@
-export default "/sift/*";
+export default "/sift*";
