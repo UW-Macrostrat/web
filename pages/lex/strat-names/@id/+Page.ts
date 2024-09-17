@@ -4,7 +4,6 @@ import { Link, PageHeader } from "~/components";
 import { AttributedLithTag } from "~/components";
 import { AnchorButton, Icon, InputGroup, Tag } from "@blueprintjs/core";
 import { GDDReferenceCard, CollapseCard } from "@macrostrat/ui-components";
-import { useState } from "react";
 import styles from "./main.module.sass";
 
 const h = hyper.styled(styles);
