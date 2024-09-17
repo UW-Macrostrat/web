@@ -5,7 +5,6 @@ import { ContentPage } from "~/layouts";
 import { PageHeaderV2 } from "~/components";
 import { postgrestPrefix } from "@macrostrat-web/settings";
 import { useEffect, useState } from "react";
-import { PageAdminConsole } from "~/components";
 
 const postgrest = new PostgrestClient(postgrestPrefix);
 
