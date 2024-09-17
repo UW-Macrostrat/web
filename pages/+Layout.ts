@@ -3,6 +3,7 @@ import { ReactNode } from "react";
 
 import { AuthProvider } from "~/_providers/auth";
 import { usePageContext } from "vike-react/usePageContext";
+import { enableAdmin } from "@macrostrat-web/settings";
 
 import "~/styles/blueprint-core";
 import "~/styles/_theme.styl";
@@ -10,6 +11,9 @@ import "~/styles/core.sass";
 import "~/styles/padding.css";
 //
 import h from "./layout.module.sass";
+import { onDemand } from "~/_utils";
+
+import { PageAdminConsole } from "~/components";
 
 export default function Layout({ children }: { children: ReactNode }) {
   const pageContext = usePageContext();
@@ -23,7 +27,12 @@ export default function Layout({ children }: { children: ReactNode }) {
     h(
       supportsDarkMode ? DarkModeProvider : NoOpDarkModeProvider,
       { followSystem: true },
-      h("div.app-shell", { className: pageStyle + "-page" }, children)
+      h("div.app-shell", { className: pageStyle + "-page" }, [
+        children,
+        h.if(enableAdmin)(PageAdminConsole, {
+          className: "page-admin-container",
+        }),
+      ])
     )
   );
 }

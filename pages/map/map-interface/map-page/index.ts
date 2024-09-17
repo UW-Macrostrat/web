@@ -3,7 +3,7 @@ import { Suspense, useCallback, useEffect, useRef } from "react";
 import { Spinner } from "@blueprintjs/core";
 import loadable from "@loadable/component";
 import { mapPagePrefix } from "@macrostrat-web/settings";
-import { MapAreaContainer } from "@macrostrat/map-interface";
+import { MapAreaContainer, MapBottomControls } from "@macrostrat/map-interface";
 import classNames from "classnames";
 import { useSelector } from "react-redux";
 import { Route, Routes } from "react-router-dom";
@@ -18,6 +18,8 @@ import Searchbar from "../components/navbar";
 import MapContainer from "./map-view";
 import { MenuPage } from "./menu";
 import h from "./main.module.styl";
+import { PageAdminButton, PageAdminConsole } from "~/components";
+import MapControls from "../../../../packages/sift/src/js/components/MapControls";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));
@@ -79,6 +81,7 @@ function MapPage({
       detailPanel: h(InfoDrawerHolder),
       detailPanelStyle: "floating",
       bottomPanel: h(ElevationChart, null),
+      mapControls: h(MapBottomControls, [h(PageAdminButton)]),
       contextPanelOpen: contextPanelOpen || inputFocus,
       detailPanelOpen: infoDrawerOpen,
       className: classNames(

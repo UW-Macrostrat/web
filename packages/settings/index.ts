@@ -45,6 +45,8 @@ export const macrostratInstance = getRuntimeConfig("MACROSTRAT_INSTANCE");
 
 export const elevationLayerURL = getRuntimeConfig("ELEVATION_LAYER_URL");
 
+export const enableAdmin = getRuntimeConfig("ENABLE_ADMIN", true);
+
 /** Legacy settings object */
 export const SETTINGS = {
   cdrPrefix,
