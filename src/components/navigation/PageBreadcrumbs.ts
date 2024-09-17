@@ -8,6 +8,13 @@ import h from "./breadcrumbs.module.sass";
 export function PageBreadcrumbs({ showLogo = false }) {
   const ctx = usePageContext();
   let items = buildBreadcrumbs(ctx.urlPathname, sitemap, ctx);
+  return h(PageBreadcrumbsInternal, {
+    showLogo,
+    items,
+  });
+}
+
+export function PageBreadcrumbsInternal({ showLogo = false, items }) {
   if (showLogo) {
     items[0].text = h("span.breadcrumbs-root", [
       h(MacrostratIcon, { size: 16 }),
@@ -20,7 +27,7 @@ export function PageBreadcrumbs({ showLogo = false }) {
   });
 }
 
-function buildBreadcrumbs(
+export function buildBreadcrumbs(
   currentPath: string,
   routes: Routes,
   ctx: PageContext

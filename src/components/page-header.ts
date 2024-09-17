@@ -1,10 +1,14 @@
-import hyper from "@macrostrat/hyper";
 import { MacrostratIcon } from "./macrostrat-icon";
 import { DevLinkButton, Link } from "./buttons";
-import styles from "./icon.module.sass";
+import h from "./icon.module.sass";
 import { AnchorButton, ButtonGroup } from "@blueprintjs/core";
-
-const h = hyper.styled(styles);
+import {
+  PageBreadcrumbsInternal,
+  buildBreadcrumbs,
+  sitemap,
+} from "~/components/navigation";
+import { usePageContext } from "vike-react/usePageContext";
+import { Breadcrumbs } from "@blueprintjs/core";
 
 export function PageHeader(props) {
   const {
@@ -31,23 +35,30 @@ export function PageHeader(props) {
   ]);
 }
 
-export function Icon(props) {
-  const { title = "", showSiteName = true, children, className } = props;
-  const siteName = "";
-  let _showSiteName = showSiteName;
-  if (title == siteName) {
-    _showSiteName = false;
+export function PageHeaderV2({ className, title, children, showLogo = true }) {
+  /** A page header component that includes a title and breadcrumbs. */
+  const ctx = usePageContext();
+  let items = buildBreadcrumbs(ctx.urlPathname, sitemap, ctx);
+
+  const lastItem = items.pop();
+  let _title = title ?? lastItem.text;
+
+  if (ctx.urlPathname == "/") {
+    items = [];
   }
 
-  return h("h1.page-title", { className }, [
-    h(MacrostratIcon, { size: 24 }),
-    h.if(_showSiteName)([
-      h(Link, { href: "/", className: "site-name" }, siteName),
-      " ",
+  return h("header.page-header", { className }, [
+    h.if(showLogo)("div.header-left", h(MacrostratIcon, { size: 24 })),
+    h("div.header-main", [
+      h("div.header-top", [
+        h.if(items.length > 0)(PageBreadcrumbsInternal, {
+          showLogo: false,
+          items,
+        }),
+        children,
+      ]),
+      h("h1.page-title", _title),
     ]),
-    h("span.title", title),
-    " ",
-    children,
   ]);
 }
 
