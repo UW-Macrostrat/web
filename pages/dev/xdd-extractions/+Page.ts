@@ -2,9 +2,10 @@ import h from "@macrostrat/hyper";
 import { PostgrestClient } from "@supabase/postgrest-js";
 
 import { ContentPage } from "~/layouts";
-import { PageBreadcrumbs } from "~/components";
+import { PageHeaderV2 } from "~/components";
 import { postgrestPrefix } from "@macrostrat-web/settings";
 import { useEffect, useState } from "react";
+import { PageAdminConsole } from "~/components";
 
 const postgrest = new PostgrestClient(postgrestPrefix);
 
@@ -24,12 +25,12 @@ function usePostgresQuery(query) {
 }
 
 export function Page() {
-  return h(ContentPage, [h(PageBreadcrumbs), h(PageMain)]);
+  return h(ContentPage, [h(PageMain)]);
 }
 
 function PageMain() {
   return h("div", [
-    h("h1", "xDD stratigraphic name extractions"),
+    h(PageHeaderV2, { title: "Stratigraphic name extractions" }),
     h(ExtractionIndex),
   ]);
 }

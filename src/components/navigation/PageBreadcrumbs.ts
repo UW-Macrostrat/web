@@ -5,9 +5,33 @@ import React from "react";
 import { MacrostratIcon } from "~/components";
 import h from "./breadcrumbs.module.sass";
 
+export function PageHeaderV2({ className, title, children, showLogo }) {
+  /** A page header component that includes a title and breadcrumbs. */
+  const ctx = usePageContext();
+  let items = buildBreadcrumbs(ctx.urlPathname, sitemap, ctx);
+
+  const lastItem = items.pop();
+  let _title = title ?? lastItem.text;
+
+  return h("header.page-header", { className }, [
+    h("div.header-top", [
+      h(PageBreadcrumbsInternal, { showLogo, items }),
+      children,
+    ]),
+    h("h1.page-title", _title),
+  ]);
+}
+
 export function PageBreadcrumbs({ showLogo = false }) {
   const ctx = usePageContext();
   let items = buildBreadcrumbs(ctx.urlPathname, sitemap, ctx);
+  return h(PageBreadcrumbsInternal, {
+    showLogo,
+    items,
+  });
+}
+
+function PageBreadcrumbsInternal({ showLogo = false, items }) {
   if (showLogo) {
     items[0].text = h("span.breadcrumbs-root", [
       h(MacrostratIcon, { size: 16 }),

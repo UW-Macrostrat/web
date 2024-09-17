@@ -3,7 +3,7 @@ import styles from "./main.module.sass";
 import { Spinner } from "@blueprintjs/core";
 import { usePageTransitionStore } from "~/renderer/usePageTransitionStore";
 import classNames from "classnames";
-import { PageBreadcrumbs } from "~/components";
+import { PageAdminConsole, PageBreadcrumbs } from "~/components";
 import { useTransition } from "transition-hook";
 
 const h = hyper.styled(styles);
@@ -22,6 +22,8 @@ export function BasePage({ children, className, fitViewport = false }) {
     },
     [
       children,
+      // A global admin console that can be opened with shift+I
+      h(PageAdminConsole, { className: "page-admin-container" }),
       h.if(loadingTransition.shouldMount)(
         "div.page-transition",
         { className: `page-transition-${loadingTransition.stage}` },
