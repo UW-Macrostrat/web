@@ -19,7 +19,7 @@ export async function vikeHandler<
     macrostratLogoFlavor: macrostratLogoFlavor(),
   };
 
-  console.log(pageContextInit);
+  console.log(pageContextInit, request);
 
   const pageContext = await renderPage(pageContextInit);
   const response = pageContext.httpResponse;
@@ -50,6 +50,8 @@ async function getUserFromCookie(request: Request) {
     console.log(user);
   } catch (e) {
     // I don't care if it fails, it just means the user isn't logged in
+    console.log("Failed to verify JWT");
+    console.log(e);
   }
 
   if (!isProduction && process.env.DEV_ENABLE_AUTH !== "true") {
