@@ -33,9 +33,7 @@ import { Button, Collapse, InputGroup } from "@blueprintjs/core";
 import { debounce, get } from "underscore";
 import { DataField } from "~/components/unit-details";
 
-const embeddingTileserverDomain = getRuntimeConfig(
-  "EMBEDDINGS_TILESERVER_DOMAIN"
-);
+import { useDebouncedCallback } from "use-debounce";
 
 export function Page() {
   const dark = useDarkMode();
@@ -53,13 +51,21 @@ export function Page() {
     isValidMapPosition
   );
 
-  const modelData =
-    useAPIResult(embeddingTileserverDomain, null, null)?.models ?? {};
-  const models = Object.entries(modelData).map(([key, value]) => ({
-    name: key,
-    description: value,
-  }));
+  // For now, we just have cmbert
+  const models = [
+    {
+      name: "cmbert",
+      description: "Embeddings against mining documents using xDD",
+    },
+  ];
 
+  // const modelData =
+  //   useAPIResult(embeddingTileserverDomain, null, null)?.models ?? {};
+  // const models = Object.entries(modelData).map(([key, value]) => ({
+  //   name: key,
+  //   description: value,
+  // }));
+  //
   const [model, setModel] = useState(null);
   const activeModel = model ?? models?.[0]?.name;
 
@@ -106,10 +112,10 @@ export function Page() {
     MapAreaContainer,
     {
       contextPanel: h(PanelCard, [
-        h(PageBreadcrumbs, { title: "Embeddings" }),
+        h(PageBreadcrumbs, { title: "Legend affinity" }),
         h("div.flex.row", [
           h(InputGroup, {
-            placeholder: "Geologic characteristics ",
+            placeholder: "Search",
             large: true,
             onChange: (e) => setValue(e.target.value),
             value,
@@ -247,34 +253,26 @@ function tileserverURL(term: string | null, model: string | null) {
   if (term == null) {
     return tileserverDomain + "/carto/{z}/{x}/{y}";
   }
-  let modelSuffix = "";
-  if (model == null) {
-    modelSuffix = "?model=" + model;
-  }
-
-  return (
-    embeddingTileserverDomain +
-    `/search/${term}/tiles/{z}/{x}/{y}` +
-    modelSuffix
-  );
+  let termSuffix = "?term=" + term;
+  let model_ = model ?? "cmbert";
+  return tileserverDomain + `/search/${model_}/tiles/{z}/{x}/{y}` + termSuffix;
 }
 
 function useSearchTerm() {
   const [term, setTerm] = useState(null);
   const [userText, setUserText] = useState("");
   // Set the search term, debounced
-  const setTermDebounced = debounce((term) => {
+  const setTermDebounced = useDebouncedCallback((term) => {
     setTerm(term);
-  }, 200);
+  }, 500);
 
   function getUserInput(text) {
     setUserText(text);
-    console.log("User input", text);
-    if (text.length <= 3 && term != null) {
+    if (text.length <= 3) {
       setTerm(null);
-      return null;
+    } else {
+      setTermDebounced(text);
     }
-    setTermDebounced(text);
   }
 
   return [userText, term, getUserInput];
