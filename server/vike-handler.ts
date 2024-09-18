@@ -10,7 +10,12 @@ export async function vikeHandler<
   Context extends Record<string | number | symbol, unknown>
 >(request: Request, context?: Context): Promise<Response> {
   const cookies = getCookies(request);
+
+  console.log(cookies);
+
   const user = await getUserFromCookie(cookies);
+
+  console.log(user);
 
   const pageContextInit = {
     ...context,
@@ -41,10 +46,13 @@ async function getUserFromCookie(cookies: Record<string, string>) {
     const authHeader = cookies?.Authorization;
     const secret = new TextEncoder().encode(process.env.SECRET_KEY);
     const jwt = authHeader.substring(7, authHeader.length);
+
+    console.log(cookies, jwt);
     // We probably don't need to verify the JWT on each request
     user = (await jose.jwtVerify(jwt, secret)).payload;
   } catch (e) {
     // I don't care if it fails, it just means the user isn't logged in
+    console.log(e);
   }
 
   if (!isProduction && process.env.DEV_ENABLE_AUTH !== "true") {
