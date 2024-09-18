@@ -7,8 +7,6 @@ export const guard: GuardAsync = async (
 ): ReturnType<GuardAsync> => {
   const { user } = pageContext;
 
-  console.log(user);
-
   if (user === undefined) {
     // Render the login page while preserving the URL. (This is novel technique
     // which we explain down below.)

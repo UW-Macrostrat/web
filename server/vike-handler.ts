@@ -9,7 +9,8 @@ const environment = synthesizeConfigFromEnvironment();
 export async function vikeHandler<
   Context extends Record<string | number | symbol, unknown>
 >(request: Request, context?: Context): Promise<Response> {
-  const user = await getUserFromCookie(request);
+  const cookies = getCookies(request);
+  const user = await getUserFromCookie(cookies);
 
   const pageContextInit = {
     ...context,
@@ -18,8 +19,6 @@ export async function vikeHandler<
     user,
     macrostratLogoFlavor: macrostratLogoFlavor(),
   };
-
-  console.log(pageContextInit, request);
 
   const pageContext = await renderPage(pageContextInit);
   const response = pageContext.httpResponse;
@@ -34,24 +33,18 @@ export async function vikeHandler<
   });
 }
 
-async function getUserFromCookie(request: Request) {
+async function getUserFromCookie(cookies: Record<string, string>) {
   const isProduction = process.env.NODE_ENV === "production";
   // Pull out the authorization cookie and decrypt it
   let user: any = undefined;
   try {
-    const authHeader = request.cookies?.Authorization;
+    const authHeader = cookies?.Authorization;
     const secret = new TextEncoder().encode(process.env.SECRET_KEY);
     const jwt = authHeader.substring(7, authHeader.length);
-
-    console.log(authHeader, jwt, request.cookies);
     // We probably don't need to verify the JWT on each request
     user = (await jose.jwtVerify(jwt, secret)).payload;
-
-    console.log(user);
   } catch (e) {
     // I don't care if it fails, it just means the user isn't logged in
-    console.log("Failed to verify JWT");
-    console.log(e);
   }
 
   if (!isProduction && process.env.DEV_ENABLE_AUTH !== "true") {
@@ -59,6 +52,18 @@ async function getUserFromCookie(request: Request) {
     user = { groups: [1] };
   }
   return user;
+}
+
+function getCookies(request: Request) {
+  const cookieHeader = request.headers.get("Cookie");
+  if (!cookieHeader) {
+    return {};
+  }
+  return cookieHeader.split("; ").reduce((acc, cookie) => {
+    const [key, value] = cookie.split("=");
+    acc[key] = value;
+    return acc;
+  }, {});
 }
 
 function synthesizeConfigFromEnvironment() {

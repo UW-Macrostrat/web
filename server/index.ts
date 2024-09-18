@@ -65,7 +65,6 @@ async function startServer() {
   const app = express();
 
   app.use(compression());
-  app.use(cookieParser());
   //
   if (isProduction) {
     app.use(sirv(`${root}/dist/client`));
