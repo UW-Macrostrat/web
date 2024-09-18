@@ -39,8 +39,12 @@ async function getUserFromCookie(request: Request) {
     const authHeader = request.cookies?.Authorization;
     const secret = new TextEncoder().encode(process.env.SECRET_KEY);
     const jwt = authHeader.substring(7, authHeader.length);
+
+    console.log(authHeader, jwt, request.cookies);
     // We probably don't need to verify the JWT on each request
     user = (await jose.jwtVerify(jwt, secret)).payload;
+
+    console.log(user);
   } catch (e) {
     // I don't care if it fails, it just means the user isn't logged in
   }
