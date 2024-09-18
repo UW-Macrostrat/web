@@ -69,7 +69,7 @@ function getCookies(request: Request) {
   }
   return cookieHeader.split("; ").reduce((acc, cookie) => {
     const [key, value] = cookie.split("=");
-    acc[key] = value;
+    acc[key] = value.replace(/"/g, "");
     return acc;
   }, {});
 }
