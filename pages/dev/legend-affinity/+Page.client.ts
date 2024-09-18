@@ -30,7 +30,6 @@ import {
 import { MapPosition } from "@macrostrat/mapbox-utils";
 import { PageBreadcrumbs } from "~/components";
 import { Button, Collapse, InputGroup } from "@blueprintjs/core";
-import { debounce, get } from "underscore";
 import { DataField } from "~/components/unit-details";
 
 import { useDebouncedCallback } from "use-debounce";
