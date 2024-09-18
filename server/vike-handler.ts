@@ -18,6 +18,9 @@ export async function vikeHandler<
     user,
     macrostratLogoFlavor: macrostratLogoFlavor(),
   };
+
+  console.log(pageContextInit);
+
   const pageContext = await renderPage(pageContextInit);
   const response = pageContext.httpResponse;
 
