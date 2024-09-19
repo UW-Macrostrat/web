@@ -7,7 +7,7 @@ import {
 } from "@macrostrat/ui-components";
 import { Select, SelectProps } from "@blueprintjs/select";
 import mapboxgl from "mapbox-gl";
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useMemo } from "react";
 import {
   MapMarker,
   MapLoadingButton,
@@ -49,7 +49,7 @@ export function Page() {
   // For now, we just have cmbert
   const models = [
     {
-      name: "cmbert",
+      name: "cm_bert",
       description: "Embeddings against mining documents using xDD",
     },
   ];
@@ -253,12 +253,24 @@ function tileserverURL(term: string | null, model: string | null) {
   return tileserverDomain + `/search/${model_}/tiles/{z}/{x}/{y}` + termSuffix;
 }
 
+function getStartingText() {
+  let query = getQueryString(window.location.search)?.term;
+  if (Array.isArray(query)) {
+    query = query[0];
+  }
+  return decodeURIComponent(query ?? "");
+}
+
 function useSearchTerm() {
-  const [term, setTerm] = useState(null);
-  const [userText, setUserText] = useState("");
+  const startingText = useMemo(getStartingText, []);
+  const [term, setTerm] = useState(startingText.length > 3 ? startingText : "");
+  const [userText, setUserText] = useState(startingText);
   // Set the search term, debounced
   const setTermDebounced = useDebouncedCallback((term) => {
     setTerm(term);
+    // Set term on the URL
+    // Modify the query string without affecting other parameters
+    updateSearchTerm(term);
   }, 500);
 
   function getUserInput(text) {
@@ -271,6 +283,17 @@ function useSearchTerm() {
   }
 
   return [userText, term, getUserInput];
+}
+
+function updateSearchTerm(term) {
+  // Modify the query string without affecting other parameters
+  const qst = new URLSearchParams(window.location.search);
+  if (term == null || term.length == 0) {
+    qst.delete("term");
+  } else {
+    qst.set("term", encodeURIComponent(term));
+  }
+  window.history.replaceState({}, "", "?" + qst.toString());
 }
 
 interface Model {
@@ -331,7 +354,7 @@ function useMapPosition(startPos) {
 
   const setMapPosition = useCallback((position) => {
     setMapPosition_(position);
-    let params = {};
+    let params = getQueryString(window.location.search) ?? {};
     applyMapPositionToHash(params, position);
     setQueryString(params);
   }, []);
