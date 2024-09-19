@@ -1,16 +1,20 @@
 import { PageContext } from "vike/types";
 import { usePageContext } from "vike-react/usePageContext";
 import { Breadcrumbs } from "@blueprintjs/core";
-import React from "react";
+import React, { useMemo } from "react";
 import { MacrostratIcon } from "~/components";
 import h from "./breadcrumbs.module.sass";
 
 export function PageBreadcrumbs({ showLogo = false, title }) {
   const ctx = usePageContext();
-  let items = buildBreadcrumbs(ctx.urlPathname, sitemap, ctx);
-  if (title != null) {
-    items[items.length - 1].text = title;
-  }
+  const items = useMemo(() => {
+    let items = buildBreadcrumbs(ctx.urlPathname, sitemap, ctx);
+    if (title != null) {
+      items[items.length - 1].text = title;
+    }
+    return items;
+  }, [ctx.urlPathname, title]);
+
   return h(PageBreadcrumbsInternal, {
     showLogo,
     items,

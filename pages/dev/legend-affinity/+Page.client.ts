@@ -1,11 +1,7 @@
 import h from "./main.module.sass";
-import { getRuntimeConfig } from "@macrostrat-web/settings/utils";
 import { mapboxAccessToken, tileserverDomain } from "@macrostrat-web/settings";
 import {
-  CollapseCard,
-  CollapsePanel,
-  Spacer,
-  useAPIResult,
+  buildQueryString,
   useDarkMode,
   useStoredState,
 } from "@macrostrat/ui-components";
@@ -14,7 +10,6 @@ import mapboxgl from "mapbox-gl";
 import { useCallback, useState, useEffect } from "react";
 import {
   MapMarker,
-  FloatingNavbar,
   MapLoadingButton,
   MapAreaContainer,
   buildInspectorStyle,
@@ -26,11 +21,14 @@ import {
   MapMovedReporter,
   PanelCard,
   ExpandableDetailsPanel,
+  getMapPositionForHash,
+  applyMapPositionToHash,
 } from "@macrostrat/map-interface";
 import { MapPosition } from "@macrostrat/mapbox-utils";
 import { PageBreadcrumbs } from "~/components";
 import { Button, Collapse, InputGroup } from "@blueprintjs/core";
 import { DataField } from "~/components/unit-details";
+import { getQueryString, setQueryString } from "@macrostrat/ui-components";
 
 import { useDebouncedCallback } from "use-debounce";
 
@@ -38,17 +36,15 @@ export function Page() {
   const dark = useDarkMode();
   const isEnabled = dark?.isEnabled;
 
-  const [mapPosition, setMapPosition] = useStoredState<MapPosition>(
-    "macrostrat:map-position",
-    {
-      camera: {
-        lng: -100,
-        lat: 40,
-        altitude: 500_000,
-      },
+  const startPos = {
+    camera: {
+      lng: -100,
+      lat: 40,
+      altitude: 500_000,
     },
-    isValidMapPosition
-  );
+  };
+
+  const [mapPosition, setMapPosition] = useMapPosition(startPos.camera);
 
   // For now, we just have cmbert
   const models = [
@@ -321,4 +317,24 @@ function ModelSelector({ models, model, setModel }) {
       ]
     )
   );
+}
+
+function useMapPosition(startPos) {
+  /** Use map position stored in the query string */
+  const [mapPosition, setMapPosition_] = useState<MapPosition | null>(null);
+
+  useEffect(() => {
+    const hashData = getQueryString(window.location.search) ?? {};
+    const position = getMapPositionForHash(hashData, startPos);
+    setMapPosition_(position);
+  }, []);
+
+  const setMapPosition = useCallback((position) => {
+    setMapPosition_(position);
+    let params = {};
+    applyMapPositionToHash(params, position);
+    setQueryString(params);
+  }, []);
+
+  return [mapPosition, setMapPosition];
 }
