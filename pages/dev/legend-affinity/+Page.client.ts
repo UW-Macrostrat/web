@@ -234,7 +234,7 @@ function paintProperties(term: string | null, grayColor: number) {
   return {
     "fill-color": [
       "interpolate",
-      ["exponential", 1.8],
+      ["exponential", 1.2],
       ["get", "similarity"],
       0,
       `rgba(${grayColor}, ${grayColor}, ${grayColor}, 0.02)`,
