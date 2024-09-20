@@ -225,9 +225,11 @@ async function buildStyle(params: StyleParams) {
 }
 
 function paintProperties(term: string | null, grayColor: number) {
-  if (term == null) {
+  if (term == null || term.length < 3) {
+    const gray = `rgba(${grayColor}, ${grayColor}, ${grayColor}, 0.1)`;
     return {
-      "fill-color": `rgba(${grayColor}, ${grayColor}, ${grayColor}, 0.1)`,
+      "fill-color": ["case", ["has", "color"], ["get", "color"], gray],
+      "fill-opacity": 0.25,
     };
   }
   // Data-driven styling by the 'similarity' property [0, 1]
@@ -247,7 +249,7 @@ function paintProperties(term: string | null, grayColor: number) {
 }
 
 function tileserverURL(term: string | null, model: string | null) {
-  if (term == null) {
+  if (term == null || term.length < 3) {
     return tileserverDomain + "/carto/{z}/{x}/{y}";
   }
   let termSuffix = "?term=" + term;
