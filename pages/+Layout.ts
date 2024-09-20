@@ -1,9 +1,8 @@
-import { DarkModeProvider } from "@macrostrat/ui-components";
+import { DarkModeProvider, DevToolsConsole } from "@macrostrat/ui-components";
 import { ReactNode } from "react";
 
 import { AuthProvider } from "~/_providers/auth";
 import { usePageContext } from "vike-react/usePageContext";
-import { enableAdmin } from "@macrostrat-web/settings";
 
 import "~/styles/blueprint-core";
 import "~/styles/_theme.styl";
@@ -12,7 +11,7 @@ import "~/styles/padding.css";
 //
 import h from "./layout.module.sass";
 
-import { PageAdminConsole } from "~/components";
+import { ClientOnly } from "vike-react/ClientOnly";
 
 export default function Layout({ children }: { children: ReactNode }) {
   const pageContext = usePageContext();
@@ -28,11 +27,25 @@ export default function Layout({ children }: { children: ReactNode }) {
       { followSystem: true },
       h("div.app-shell", { className: pageStyle + "-page" }, [
         children,
-        h.if(enableAdmin)(PageAdminConsole, {
-          className: "page-admin-container",
-        }),
+        h(
+          DevToolsConsole,
+          { className: "page-admin-container" },
+          h(DevToolsData)
+        ),
       ])
     )
+  );
+}
+
+function DevToolsData() {
+  return h(
+    ClientOnly,
+    {
+      load() {
+        return import("~/components/developer").then((mod) => mod.DevToolsData);
+      },
+    },
+    (DevToolsData) => h(DevToolsData)
   );
 }
 

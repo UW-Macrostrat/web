@@ -81,7 +81,6 @@ function MapPage({
       detailPanel: h(InfoDrawerHolder),
       detailPanelStyle: "floating",
       bottomPanel: h(ElevationChart, null),
-      mapControls: h(MapBottomControls, [h(PageAdminButton)]),
       contextPanelOpen: contextPanelOpen || inputFocus,
       detailPanelOpen: infoDrawerOpen,
       className: classNames(

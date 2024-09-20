@@ -100,4 +100,11 @@ export default defineConfig({
   ssr: {
     noExternal: ["labella", "@supabase/postgrest-js"],
   },
+  css: {
+    preprocessorOptions: {
+      sass: {
+        api: "modern-compiler",
+      },
+    },
+  },
 });
