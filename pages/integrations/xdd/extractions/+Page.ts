@@ -1,5 +1,6 @@
 import h from "@macrostrat/hyper";
 import { PostgrestClient } from "@supabase/postgrest-js";
+import { usePageContext } from "vike-react/usePageContext";
 
 import { ContentPage } from "~/layouts";
 import { PageHeaderV2 } from "~/components";
@@ -36,6 +37,8 @@ function PageMain() {
 
 function ExtractionIndex() {
   const data = usePostgresQuery("kg_publication_entities");
+  const ctx = usePageContext();
+  const pageLink = ctx.urlPathname;
   if (data == null) {
     return h("div", "Loading...");
   }
@@ -46,7 +49,7 @@ function ExtractionIndex() {
         return h("div", [
           h(xDDCitation, {
             citation: d.citation,
-            href: `/dev/xdd-extractions/${d.paper_id}`,
+            href: pageLink + `/${d.paper_id}`,
           }),
           h("p", `${d.n_matches} stratigraphic name matches`),
         ]);
