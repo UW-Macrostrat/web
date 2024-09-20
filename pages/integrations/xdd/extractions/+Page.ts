@@ -6,23 +6,52 @@ import { ContentPage } from "~/layouts";
 import { PageHeaderV2 } from "~/components";
 import { postgrestPrefix } from "@macrostrat-web/settings";
 import { useEffect, useState } from "react";
+import { InfiniteScroll, LoadingPlaceholder } from "@macrostrat/ui-components";
+import { create } from "zustand";
 
 const postgrest = new PostgrestClient(postgrestPrefix);
 
-function usePostgresQuery(query) {
-  const [data, setData] = useState(null);
-  useEffect(() => {
-    postgrest
-      .from(query)
-      .select("n_matches,citation,paper_id")
-      .order("n_matches", { ascending: false })
-      .limit(100)
-      .then((res) => {
-        setData(res.data);
-      });
-  }, [query]);
-  return data;
+interface DataStore {
+  data: any[];
+  hasMore: boolean;
+  lastID: number | null;
+  loadMore: (set: any) => void;
+  setData: (data: any[]) => void;
+  isLoading: boolean;
 }
+
+const useStore = create<DataStore>((set, get) => ({
+  data: [],
+  isLoading: false,
+  hasMore: true,
+  lastID: null,
+  setData: (data) => set({ data, isLoading: false }),
+  loadMore: async () => {
+    const { lastID, isLoading } = get();
+    set({ isLoading: true });
+    if (isLoading) return;
+
+    let req = postgrest
+      .from("kg_publication_entities")
+      .select("citation,paper_id")
+      .order("paper_id", { ascending: true });
+
+    if (lastID != null) {
+      req = req.gt("paper_id", lastID);
+    }
+
+    const res = await req.limit(10);
+
+    set((state) => {
+      return {
+        data: [...state.data, ...res.data],
+        isLoading: false,
+        hasMore: res.data.length > 0,
+        lastID: res.data[res.data.length - 1]?.paper_id,
+      };
+    });
+  },
+}));
 
 export function Page() {
   return h(ContentPage, [h(PageMain)]);
@@ -36,25 +65,30 @@ function PageMain() {
 }
 
 function ExtractionIndex() {
-  const data = usePostgresQuery("kg_publication_entities");
+  const { data, isLoading, hasMore, loadMore } = useStore();
+
+  return h(InfiniteScroll, { hasMore, loadMore, offset: 500, isLoading }, [
+    h(PaperList, { data }),
+    h.if(isLoading)(LoadingPlaceholder),
+  ]);
+}
+
+function PaperList({ data }) {
   const ctx = usePageContext();
   const pageLink = ctx.urlPathname;
-  if (data == null) {
-    return h("div", "Loading...");
-  }
-
-  return h([
-    h(
-      data.map((d) => {
-        return h("div", [
-          h(xDDCitation, {
-            citation: d.citation,
-            href: pageLink + `/${d.paper_id}`,
-          }),
-          h("p", `${d.n_matches} stratigraphic name matches`),
-        ]);
-      })
-    ),
+  return h("div.paper-list", [
+    data.map((d) => {
+      return h("div", [
+        h(xDDCitation, {
+          citation: d.citation,
+          href: pageLink + `/${d.paper_id}`,
+        }),
+        h.if(d.n_matches != null)(
+          "p",
+          `${d.n_matches} stratigraphic name matches`
+        ),
+      ]);
+    }),
   ]);
 }
 
