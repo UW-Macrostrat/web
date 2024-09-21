@@ -40,6 +40,7 @@ function ExtractionIndex() {
   const { paperId } = routeParams;
 
   const data = usePostgresQuery("kg_context_entities", { paperId });
+  console.log(data);
   if (data == null) {
     return h("div", "Loading...");
   }
@@ -72,8 +73,6 @@ function ExtractionInfo({ data }: { data: Entity }) {
   const children = data.children ?? [];
 
   const match = data.match ?? null;
-
-  console.log(data);
 
   return h("li.entity", { className: data.type }, [
     h("span.name", data.name),
