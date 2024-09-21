@@ -6,7 +6,11 @@ import { ContentPage } from "~/layouts";
 import { PageHeaderV2 } from "~/components";
 import { postgrestPrefix } from "@macrostrat-web/settings";
 import { useEffect, useState } from "react";
-import { InfiniteScroll, LoadingPlaceholder } from "@macrostrat/ui-components";
+import {
+  AuthorList,
+  InfiniteScroll,
+  LoadingPlaceholder,
+} from "@macrostrat/ui-components";
 import { create } from "zustand";
 
 const postgrest = new PostgrestClient(postgrestPrefix);
@@ -114,6 +118,40 @@ function pruneEmptyCitationElements(citation): any {
 
 function xDDCitation({ citation, href }) {
   const newCitation = pruneEmptyCitationElements(citation);
-  const { title } = newCitation;
-  return h("div", [h("h2.title", h("a", { href }, title))]);
+  const { title, author, journal, identifier } = newCitation;
+  console.log(newCitation);
+  const names = author?.map((d) => d.name);
+  console.log(names);
+  return h("div", [
+    h("h2.title", h("a", { href }, title)),
+    h("h3.journal", null, journal),
+    h(AuthorList, { names }),
+    h(IdentLink, { identifier: getBestIdentifier(identifier) }),
+  ]);
+}
+
+function IdentLink({ identifier }) {
+  const { type, id } = identifier;
+
+  let ident = h("code.identifier", id);
+  if (type == "doi") {
+    ident = h("a", { href: "https://dx.doi.org/doi/" + id }, ident);
+  }
+
+  return h("p", [h("span.label", type), " ", ident]);
+}
+
+type Identifier = {
+  id: string;
+  type: string;
+};
+
+function getBestIdentifier(identifier: Identifier[] | null): Identifier | null {
+  if (identifier == null || identifier.length == 0) return null;
+  for (const ident of identifier) {
+    if (ident.type == "doi") {
+      return ident;
+    }
+  }
+  return identifier[0];
 }
