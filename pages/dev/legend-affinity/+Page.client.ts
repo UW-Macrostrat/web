@@ -1,10 +1,6 @@
 import h from "./main.module.sass";
 import { mapboxAccessToken, tileserverDomain } from "@macrostrat-web/settings";
-import {
-  buildQueryString,
-  useDarkMode,
-  useStoredState,
-} from "@macrostrat/ui-components";
+import { useDarkMode } from "@macrostrat/ui-components";
 import { Select, SelectProps } from "@blueprintjs/select";
 import mapboxgl from "mapbox-gl";
 import { useCallback, useState, useEffect, useMemo } from "react";
@@ -156,14 +152,6 @@ export function Page() {
       ]
     )
   );
-}
-
-function isValidMapPosition(data: any): boolean {
-  if (data == null) return false;
-  if (typeof data !== "object") return false;
-  if (data?.camera?.lng == null) return false;
-  if (data?.camera?.lat == null) return false;
-  return true;
 }
 
 interface StyleParams {
@@ -360,6 +348,7 @@ function useMapPosition(startPos) {
     setMapPosition_(position);
     let params = getQueryString(window.location.search) ?? {};
     applyMapPositionToHash(params, position);
+    console.log(params);
     setQueryString(params);
   }, []);
 
