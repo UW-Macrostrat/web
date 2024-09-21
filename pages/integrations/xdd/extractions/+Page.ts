@@ -37,8 +37,8 @@ const useStore = create<DataStore>((set, get) => ({
 
     let req = postgrest
       .from("kg_publication_entities")
-      .select("citation,paper_id")
-      .order("paper_id", { ascending: true });
+      .select("*")
+      .order("n_matches", { ascending: false });
 
     if (lastID != null) {
       req = req.gt("paper_id", lastID);
@@ -77,11 +77,21 @@ function ExtractionIndex() {
   ]);
 }
 
+function NameMatch({ type, count, pluralSuffix = "s" }) {
+  let pluralType = type;
+  if (count > 1) {
+    pluralType += pluralSuffix;
+  }
+
+  return `${count} ${pluralType}`;
+}
+
 function PaperList({ data }) {
   const ctx = usePageContext();
   const pageLink = ctx.urlPathname;
   return h("div.paper-list", [
     data.map((d) => {
+      console.log(d);
       return h("div", [
         h(xDDCitation, {
           citation: d.citation,
@@ -89,7 +99,11 @@ function PaperList({ data }) {
         }),
         h.if(d.n_matches != null)(
           "p",
-          `${d.n_matches} stratigraphic name matches`
+          h(NameMatch, {
+            type: "stratigraphic name match",
+            count: d.n_matches,
+            pluralSuffix: "es",
+          })
         ),
       ]);
     }),
@@ -119,9 +133,7 @@ function pruneEmptyCitationElements(citation): any {
 function xDDCitation({ citation, href }) {
   const newCitation = pruneEmptyCitationElements(citation);
   const { title, author, journal, identifier } = newCitation;
-  console.log(newCitation);
   const names = author?.map((d) => d.name);
-  console.log(names);
   return h("div", [
     h("h2.title", h("a", { href }, title)),
     h("h3.journal", null, journal),
@@ -131,6 +143,7 @@ function xDDCitation({ citation, href }) {
 }
 
 function IdentLink({ identifier }) {
+  if (identifier == null) return null;
   const { type, id } = identifier;
 
   let ident = h("code.identifier", id);
