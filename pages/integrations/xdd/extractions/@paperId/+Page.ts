@@ -4,9 +4,9 @@ import { PostgrestClient } from "@supabase/postgrest-js";
 import { ContentPage } from "~/layouts";
 import { PageBreadcrumbs } from "~/components";
 import { postgrestPrefix } from "@macrostrat-web/settings";
-import { useEffect, useState } from "react";
+import { useEffect, memo, useState } from "react";
 import { usePageContext } from "vike-react/usePageContext";
-import { JSONView } from "@macrostrat/ui-components";
+import { Tag } from "@blueprintjs/core";
 
 const postgrest = new PostgrestClient(postgrestPrefix);
 
@@ -18,6 +18,7 @@ interface FilterDef {
 
 function usePostgresQuery(query: string, filter: FilterDef | null = null) {
   const [data, setData] = useState(null);
+
   useEffect(() => {
     let q = postgrest.from(query).select();
 
@@ -30,15 +31,25 @@ function usePostgresQuery(query: string, filter: FilterDef | null = null) {
     q.then((res) => {
       setData(res.data);
     });
-  }, [query, filter]);
+  }, [query]);
   return data;
 }
 
-function useModelIndex() {
-  const models = usePostgresQuery("kg_model");
+function useIndex(model, idField = "id") {
+  const models = usePostgresQuery(model);
   if (models == null) return null;
+  return new Map(models.map((d) => [d[idField], d]));
+}
 
-  return new Map(models.map((d) => [d.id, d]));
+function useModelIndex() {
+  return useIndex("kg_model");
+}
+
+function useEntityTypeIndex() {
+  const ix = useIndex("kg_entity_type");
+  // Add a "color" field
+
+  return ix;
 }
 
 export function Page() {
@@ -57,6 +68,7 @@ function ExtractionIndex() {
   const { paperId } = routeParams;
 
   const models = useModelIndex();
+  const entityTypes = useEntityTypeIndex();
 
   const data = usePostgresQuery("kg_context_entities", {
     subject: "paper_id",
@@ -68,15 +80,29 @@ function ExtractionIndex() {
 
   return h(
     data.map((d) => {
-      return h(ExtractionContext, { data: enhanceData(d, models) });
+      return h(ExtractionContext, {
+        data: enhanceData(d, models, entityTypes),
+      });
     })
   );
 }
 
-function enhanceData(extractionData, models) {
+function enhanceData(extractionData, models, entityTypes) {
+  console.log(entityTypes);
   return {
     ...extractionData,
     model: models.get(extractionData.model_id),
+    entities: extractionData.entities?.map((d) =>
+      enhanceEntity(d, entityTypes)
+    ),
+  };
+}
+
+function enhanceEntity(entity, entityTypes) {
+  return {
+    ...entity,
+    type: entityTypes.get(entity.type),
+    children: entity.children?.map((d) => enhanceEntity(d, entityTypes)),
   };
 }
 
@@ -85,7 +111,7 @@ function ExtractionContext({ data }) {
   const { name } = data.model;
   return h("div", [
     h("p", data.paragraph_text),
-    h("p.model-name", h("code", name)),
+    h("p.model-name", h("code.bp5-code", name)),
     h(
       "ul.entities",
       data.entities.map((d) => h(ExtractionInfo, { data: d }))
@@ -98,7 +124,7 @@ type Match = any;
 interface Entity {
   id: number;
   name: string;
-  type: "strat_name" | "lith" | "lith_att";
+  type?: number;
   indices: [number, number];
   children: Entity[];
   match?: Match;
@@ -109,8 +135,14 @@ function ExtractionInfo({ data }: { data: Entity }) {
 
   const match = data.match ?? null;
 
+  console.log(data.type);
+
   return h("li.entity", { className: data.type }, [
-    h("span.name", data.name),
+    h(Tag, { style: { backgroundColor: "#ddd", color: "#222" } }, [
+      h("span.name", data.name),
+      "  ",
+      h("code.type", null, data.type.name),
+    ]),
     h(Match, { data: match }),
     h.if(children.length > 0)([
       h(
