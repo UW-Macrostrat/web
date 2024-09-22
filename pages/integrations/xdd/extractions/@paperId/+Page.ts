@@ -73,8 +73,6 @@ function ExtractionIndex() {
     predicate: paperId,
   });
 
-  console.log(data);
-
   if (data == null || models == null) {
     return h("div", "Loading...");
   }
@@ -84,9 +82,24 @@ function ExtractionIndex() {
     data.map((d) => {
       return h(ExtractionContext, {
         data: enhanceData(d, models, entityTypes),
+        entityTypes,
       });
     }),
   ]);
+}
+
+function buildHighlights(entities, entityTypes): Highlight[] {
+  let highlights = [];
+  for (const entity of entities) {
+    console.log(entity);
+    highlights.push({
+      start: entity.indices[0],
+      end: entity.indices[1],
+      backgroundColor: entity.type.color ?? "#ccc",
+    });
+    highlights.push(...buildHighlights(entity.children ?? [], entityTypes));
+  }
+  return highlights;
 }
 
 function enhanceData(extractionData, models, entityTypes) {
@@ -101,6 +114,7 @@ function enhanceData(extractionData, models, entityTypes) {
 }
 
 function enhanceEntity(entity, entityTypes) {
+  console.log(entity);
   return {
     ...entity,
     type: entityTypes.get(entity.type),
@@ -108,10 +122,12 @@ function enhanceEntity(entity, entityTypes) {
   };
 }
 
-function ExtractionContext({ data }) {
+function ExtractionContext({ data, entityTypes }) {
   const { name } = data.model;
+  const highlights = buildHighlights(data.entities, entityTypes);
+
   return h("div", [
-    h("p", data.paragraph_text),
+    h("p", h(HighlightedText, { text: data.paragraph_text, highlights })),
     h("p.model-name", h("code.bp5-code", name)),
     h(
       "ul.entities",
@@ -143,10 +159,10 @@ function ExtractionInfo({ data }: { data: Entity }) {
   return h("li.entity", { className }, [
     h(Tag, { style: { backgroundColor: "#ddd", color: "#222" } }, [
       h("span.name", data.name),
-      "  ",
+      ":  ",
       h("code.type", null, data.type.name),
+      h(Match, { data: match }),
     ]),
-    h(Match, { data: match }),
     h.if(children.length > 0)([
       h(
         "ul.children",
@@ -159,7 +175,7 @@ function ExtractionInfo({ data }: { data: Entity }) {
 function Match({ data }) {
   if (data == null) return null;
   const href = buildHref(data);
-  return h([" ", h("a.match", { href }, data.name)]);
+  return h([" ", h("a.match", { href }, `#${matchID(data)}`)]);
 }
 
 function buildHref(match) {
@@ -179,4 +195,47 @@ function buildHref(match) {
   }
 
   return null;
+}
+
+function matchID(match) {
+  if (match == null) return null;
+
+  for (const id of ["strat_name_id", "lith_id", "lith_att_id"]) {
+    if (match[id]) {
+      return match[id];
+    }
+  }
+  return null;
+}
+
+type Highlight = {
+  start: number;
+  end: number;
+  backgroundColor?: string;
+  borderColor?: string;
+};
+
+function HighlightedText(props: { text: string; highlights: Highlight[] }) {
+  const { text, highlights = [] } = props;
+  const parts = [];
+  let start = 0;
+
+  const sortedHighlights = highlights.sort((a, b) => a.start - b.start);
+  const deconflictedHighlights = sortedHighlights.map((highlight, i) => {
+    if (i === 0) return highlight;
+    const prev = sortedHighlights[i - 1];
+    if (highlight.start < prev.end) {
+      highlight.start = prev.end;
+    }
+    return highlight;
+  });
+
+  for (const highlight of deconflictedHighlights) {
+    const { start: s, end, ...rest } = highlight;
+    parts.push(text.slice(start, s));
+    parts.push(h("span.highlight", { style: rest }, text.slice(s, end)));
+    start = end;
+  }
+  parts.push(text.slice(start));
+  return h("span", parts);
 }
