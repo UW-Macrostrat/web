@@ -1,4 +1,4 @@
-import h from "@macrostrat/hyper";
+import h from "./main.module.sass";
 import { PostgrestClient } from "@supabase/postgrest-js";
 
 import { ContentPage } from "~/layouts";
@@ -7,6 +7,7 @@ import { postgrestPrefix } from "@macrostrat-web/settings";
 import { useEffect, memo, useState } from "react";
 import { usePageContext } from "vike-react/usePageContext";
 import { Tag } from "@blueprintjs/core";
+import classNames from "classnames";
 
 const postgrest = new PostgrestClient(postgrestPrefix);
 
@@ -57,10 +58,7 @@ export function Page() {
 }
 
 function PageMain() {
-  return h("div", [
-    h("h1", "xDD stratigraphic name extractions"),
-    h(ExtractionIndex),
-  ]);
+  return h("div", [h(ExtractionIndex)]);
 }
 
 function ExtractionIndex() {
@@ -74,17 +72,21 @@ function ExtractionIndex() {
     subject: "paper_id",
     predicate: paperId,
   });
+
+  console.log(data);
+
   if (data == null || models == null) {
     return h("div", "Loading...");
   }
 
-  return h(
+  return h([
+    h("h1", data.citation?.title ?? "Model extractions"),
     data.map((d) => {
       return h(ExtractionContext, {
         data: enhanceData(d, models, entityTypes),
       });
-    })
-  );
+    }),
+  ]);
 }
 
 function enhanceData(extractionData, models, entityTypes) {
@@ -107,7 +109,6 @@ function enhanceEntity(entity, entityTypes) {
 }
 
 function ExtractionContext({ data }) {
-  console.log(data);
   const { name } = data.model;
   return h("div", [
     h("p", data.paragraph_text),
@@ -134,10 +135,12 @@ function ExtractionInfo({ data }: { data: Entity }) {
   const children = data.children ?? [];
 
   const match = data.match ?? null;
+  const className = classNames({
+    matched: match != null,
+    type: data.type.name,
+  });
 
-  console.log(data.type);
-
-  return h("li.entity", { className: data.type }, [
+  return h("li.entity", { className }, [
     h(Tag, { style: { backgroundColor: "#ddd", color: "#222" } }, [
       h("span.name", data.name),
       "  ",
