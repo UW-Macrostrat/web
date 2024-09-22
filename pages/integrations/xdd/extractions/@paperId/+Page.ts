@@ -8,6 +8,7 @@ import { useEffect, memo, useState } from "react";
 import { usePageContext } from "vike-react/usePageContext";
 import { Tag } from "@blueprintjs/core";
 import classNames from "classnames";
+import { asChromaColor } from "@macrostrat/color-utils";
 
 const postgrest = new PostgrestClient(postgrestPrefix);
 
@@ -48,8 +49,6 @@ function useModelIndex() {
 
 function useEntityTypeIndex() {
   const ix = useIndex("kg_entity_type");
-  // Add a "color" field
-
   return ix;
 }
 
@@ -95,7 +94,7 @@ function buildHighlights(entities, entityTypes): Highlight[] {
     highlights.push({
       start: entity.indices[0],
       end: entity.indices[1],
-      backgroundColor: entity.type.color ?? "#ccc",
+      backgroundColor: entity.type.color ?? "#ddd",
     });
     highlights.push(...buildHighlights(entity.children ?? [], entityTypes));
   }
@@ -117,9 +116,25 @@ function enhanceEntity(entity, entityTypes) {
   console.log(entity);
   return {
     ...entity,
-    type: entityTypes.get(entity.type),
+    type: addColor(entityTypes.get(entity.type), entity.match != null),
     children: entity.children?.map((d) => enhanceEntity(d, entityTypes)),
   };
+}
+
+function addColor(entityType, match = false) {
+  let color = "#ddd";
+  const name = entityType.name;
+  if (name == "strat_name") color = "#be75c6";
+
+  if (name == "lith") color = "#74ea41";
+
+  if (name == "strat_noun") color = "#be75c6";
+
+  if (name == "lith_att") color = "#e8e534";
+
+  color = asChromaColor(color).brighten(match ? 1 : 2);
+
+  return { ...entityType, color: color.css() };
 }
 
 function ExtractionContext({ data, entityTypes }) {
@@ -128,7 +143,7 @@ function ExtractionContext({ data, entityTypes }) {
 
   return h("div", [
     h("p", h(HighlightedText, { text: data.paragraph_text, highlights })),
-    h("p.model-name", h("code.bp5-code", name)),
+    h("p.model-name", ["Model: ", h("code.bp5-code", name)]),
     h(
       "ul.entities",
       data.entities.map((d) => h(ExtractionInfo, { data: d }))
@@ -157,12 +172,16 @@ function ExtractionInfo({ data }: { data: Entity }) {
   });
 
   return h("li.entity", { className }, [
-    h(Tag, { style: { backgroundColor: "#ddd", color: "#222" } }, [
-      h("span.name", data.name),
-      ":  ",
-      h("code.type", null, data.type.name),
-      h(Match, { data: match }),
-    ]),
+    h(
+      Tag,
+      { style: { backgroundColor: data.type.color ?? "#ddd", color: "#222" } },
+      [
+        h("span.name", data.name),
+        ":  ",
+        h("code.type", null, data.type.name),
+        h(Match, { data: match }),
+      ]
+    ),
     h.if(children.length > 0)([
       h(
         "ul.children",
