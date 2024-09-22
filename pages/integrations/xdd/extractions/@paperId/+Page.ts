@@ -10,18 +10,35 @@ import { JSONView } from "@macrostrat/ui-components";
 
 const postgrest = new PostgrestClient(postgrestPrefix);
 
-function usePostgresQuery(query, { paperId }) {
+interface FilterDef {
+  subject: string;
+  op?: string;
+  predicate: any;
+}
+
+function usePostgresQuery(query: string, filter: FilterDef | null = null) {
   const [data, setData] = useState(null);
   useEffect(() => {
-    postgrest
-      .from(query)
-      .select()
-      .filter("paper_id", "eq", paperId)
-      .then((res) => {
-        setData(res.data);
-      });
-  }, [query]);
+    let q = postgrest.from(query).select();
+
+    if (filter != null) {
+      const { subject, op = "eq", predicate } = filter;
+
+      q = q.filter(subject, op, predicate);
+    }
+
+    q.then((res) => {
+      setData(res.data);
+    });
+  }, [query, filter]);
   return data;
+}
+
+function useModelIndex() {
+  const models = usePostgresQuery("kg_model");
+  if (models == null) return null;
+
+  return new Map(models.map((d) => [d.id, d]));
 }
 
 export function Page() {
@@ -39,18 +56,36 @@ function ExtractionIndex() {
   const { routeParams } = usePageContext();
   const { paperId } = routeParams;
 
-  const data = usePostgresQuery("kg_context_entities", { paperId });
-  console.log(data);
-  if (data == null) {
+  const models = useModelIndex();
+
+  const data = usePostgresQuery("kg_context_entities", {
+    subject: "paper_id",
+    predicate: paperId,
+  });
+  if (data == null || models == null) {
     return h("div", "Loading...");
   }
 
-  return h(data.map((d) => h(ExtractionContext, { data: d })));
+  return h(
+    data.map((d) => {
+      return h(ExtractionContext, { data: enhanceData(d, models) });
+    })
+  );
+}
+
+function enhanceData(extractionData, models) {
+  return {
+    ...extractionData,
+    model: models.get(extractionData.model_id),
+  };
 }
 
 function ExtractionContext({ data }) {
+  console.log(data);
+  const { name } = data.model;
   return h("div", [
     h("p", data.paragraph_text),
+    h("p.model-name", h("code", name)),
     h(
       "ul.entities",
       data.entities.map((d) => h(ExtractionInfo, { data: d }))
