@@ -67,17 +67,22 @@ function ExtractionIndex() {
   const models = useModelIndex();
   const entityTypes = useEntityTypeIndex();
 
+  const paper = usePostgresQuery("kg_publication_entities", {
+    subject: "paper_id",
+    predicate: paperId,
+  })?.[0];
+
   const data = usePostgresQuery("kg_context_entities", {
     subject: "paper_id",
     predicate: paperId,
   });
 
-  if (data == null || models == null) {
+  if (data == null || models == null || paper == null || entityTypes == null) {
     return h("div", "Loading...");
   }
 
   return h([
-    h("h1", data.citation?.title ?? "Model extractions"),
+    h("h1", paper.citation?.title ?? "Model extractions"),
     data.map((d) => {
       return h(ExtractionContext, {
         data: enhanceData(d, models, entityTypes),
