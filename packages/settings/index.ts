@@ -31,7 +31,8 @@ export const ingestPrefix = getRuntimeConfig(
   apiDomain + "/api/ingest"
 );
 
-export const cdrPrefix = getRuntimeConfig("CDR_API");
+export const cdrPrefix = getRuntimeConfig("CDR_API_URL");
+export const cdrAPIKey = getRuntimeConfig("CDR_API_KEY");
 
 export const mapPagePrefix = "/map";
 export const routerBasename = "/map";

@@ -13,22 +13,18 @@ import {
   PanelCard,
   TileInfo,
 } from "@macrostrat/map-interface";
-import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
 import { useDarkMode } from "@macrostrat/ui-components";
-import boundingBox from "@turf/bbox";
-import { LngLatBoundsLike } from "mapbox-gl";
 import { useEffect, useMemo, useState } from "react";
 import { MapNavbar } from "~/components/map-navbar";
-import h from "./main.module.sass";
+import h from "@macrostrat/hyper";
 import {
   BaseLayerSelector,
   Basemap,
   basemapStyle,
-  ensureBoxInGeographicRange,
   OpacitySlider,
 } from "~/components";
-import { buildRasterStyle } from "~/_utils/map-layers.client";
+import { buildRasterStyle } from "../utils";
 
 interface StyleOpts {
   style: string;
@@ -41,38 +37,22 @@ interface StyleOpts {
   tileURL: string;
 }
 
-function buildOverlayStyle({
-  style,
-  focusedMap,
-  layerOpacity,
-  rasterURL = null,
-  tileURL,
-}: StyleOpts): any {
-  let mapStyle = emptyStyle;
-  if (layerOpacity.vector != null) {
-    mapStyle = buildMacrostratStyle({
-      tileserverDomain: "http://localhost:8000",
-      focusedMap,
-      fillOpacity: layerOpacity.vector - 0.1,
-      strokeOpacity: layerOpacity.vector + 0.2,
-      lineOpacity: layerOpacity.vector + 0.4,
-    });
-    mapStyle.sources.burwell.tiles = [tileURL];
-  }
+const emptyStyle: any = {
+  version: 8,
+  sprite: "mapbox://sprites/mapbox/bright-v9",
+  glyphs: "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
+  sources: {},
+  layers: [],
+};
 
-  if (rasterURL != null && layerOpacity.raster != null) {
-    const rasterStyle = buildRasterStyle(rasterURL, {
-      opacity: layerOpacity.raster,
-    });
+function buildOverlayStyle({ style, layerOpacity, rasterURL }: StyleOpts): any {
+  if (style == null) return emptyStyle;
 
-    mapStyle = mergeStyles(rasterStyle, mapStyle);
-  }
+  const rasterStyle = buildRasterStyle(rasterURL, {
+    opacity: layerOpacity.raster,
+  });
 
-  if (style == null) {
-    return mapStyle;
-  }
-
-  return mergeStyles(style, mapStyle);
+  return mergeStyles(style, rasterStyle);
 }
 
 export default function MapInterface() {
@@ -82,17 +62,14 @@ export default function MapInterface() {
 
   const data = useData();
   const [features, setFeatures] = useState(null);
-  const { cog_id, system, system_version, envelope, rasterURL } = data;
-  console.log(data);
+  const { cog_id, rasterURL } = data;
 
   const [isOpen, setOpen] = useState(false);
   const dark = useDarkMode()?.isEnabled ?? false;
-  const title = `${cog_id.substring(0, 10)} ${system} ${system_version}`;
+  const title = `${cog_id.substring(0, 10)}`;
   const hasRaster = rasterURL != null;
 
-  const bounds: LngLatBoundsLike = useMemo(() => {
-    return ensureBoxInGeographicRange(boundingBox(envelope));
-  }, [envelope]);
+  const bounds = null;
 
   const [layer, setLayer] = useState(Basemap.None);
   const [style, setStyle] = useState(null);
@@ -112,10 +89,6 @@ export default function MapInterface() {
     raster: 0.5,
   });
 
-  const tileURL = `${cdrPrefix}/tiles/polygon/cog/${cog_id}/system/${encodeURIComponent(
-    system
-  )}/system_version/${encodeURIComponent(system_version)}/tile/{z}/{x}/{y}`;
-
   // Overlay style
   const [mapStyle, setMapStyle] = useState(null);
   useEffect(() => {
@@ -123,55 +96,12 @@ export default function MapInterface() {
       buildOverlayStyle({
         style,
         layerOpacity,
-        tileURL,
         rasterURL,
       })
     );
   }, [null, style, layerOpacity.raster == null, layerOpacity.vector == null]);
 
-  // Layer opacity
-  useEffect(() => {
-    if (mapStyle == null) return;
-    const mergeLayers = buildOverlayStyle({
-      style,
-      layerOpacity,
-      tileURL,
-      rasterURL,
-    }).layers;
-
-    for (const layer of mapStyle.layers) {
-      let mergeLayer = mergeLayers.find((l) => l.id == layer.id);
-      layer.layout ??= {};
-      layer.paint ??= {};
-      if (mergeLayer == null) {
-        layer.layout.visibility = "none";
-        continue;
-      } else {
-        layer.layout.visibility = "visible";
-      }
-      for (const prop in ["fill-opacity", "line-opacity", "raster-opacity"]) {
-        if (mergeLayer.paint[prop] != null) {
-          layer.paint[prop] = mergeLayer.paint[prop];
-        }
-      }
-      setMapStyle({ ...mapStyle, layers: mergeLayers });
-    }
-  }, [layerOpacity]);
-
-  const maxBounds: LatLngBoundsLike = useMemo(() => {
-    const dx = bounds[2] - bounds[0];
-    const dy = bounds[3] - bounds[1];
-    const buf = 1 * Math.max(dx, dy);
-
-    return ensureBoxInGeographicRange([
-      bounds[0] - buf,
-      bounds[1] - buf,
-      bounds[2] + buf,
-      bounds[3] + buf,
-    ]);
-  }, [bounds]);
-
-  if (bounds == null || mapStyle == null) return h(Spinner);
+  if (mapStyle == null) return h(Spinner);
 
   const contextPanel = h(PanelCard, [
     h("div.map-meta", []),
@@ -221,7 +151,6 @@ export default function MapInterface() {
       className: "single-map",
       navbar: h(MapNavbar, {
         title,
-        parentRoute: "../..",
         isOpen,
         setOpen,
       }),
@@ -241,7 +170,6 @@ export default function MapInterface() {
           mapboxToken: SETTINGS.mapboxAccessToken,
           bounds,
           mapPosition: null,
-          maxBounds,
           fitBoundsOptions: { padding: 50 },
           infoMarkerPosition: selectedLocation,
         },

@@ -41,11 +41,12 @@ async function getUserFromCookie(cookies: Record<string, string>) {
     const authHeader = cookies?.Authorization;
     const secret = new TextEncoder().encode(process.env.SECRET_KEY);
     const jwt = authHeader.substring(7, authHeader.length);
-    // We probably don't need to verify the JWT on each request
+    // We probably don't need to verify the JWT on each request.
+    // OR we can pass the user obju
     user = (await jose.jwtVerify(jwt, secret)).payload;
   } catch (e) {
     // I don't care if it fails, it just means the user isn't logged in
-    console.log(e);
+    console.log("Anonymous user");
   }
 
   if (!isProduction && process.env.DEV_ENABLE_AUTH !== "true") {

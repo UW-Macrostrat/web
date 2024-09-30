@@ -5,7 +5,7 @@ import { AnchorButton, ButtonGroup, Spinner } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import { PageHeader } from "~/components";
 import { useEffect, useState } from "react";
-import { getMapSources } from "./util";
+import { getMapSources } from "./utils";
 
 export function Page() {
   const [sources, setSources] = useState([]);
