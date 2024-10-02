@@ -240,9 +240,10 @@ function tileserverURL(term: string | null, model: string | null) {
   if (term == null || term.length < 3) {
     return tileserverDomain + "/carto/{z}/{x}/{y}";
   }
-  let termSuffix = "?term=" + term;
+  let suffix = "?term=" + term;
+
   let model_ = model ?? "cmbert";
-  return tileserverDomain + `/search/${model_}/tiles/{z}/{x}/{y}` + termSuffix;
+  return tileserverDomain + `/search/${model_}/tiles/{z}/{x}/{y}` + suffix;
 }
 
 function getStartingText() {
