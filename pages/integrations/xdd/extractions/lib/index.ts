@@ -6,7 +6,6 @@ import { asChromaColor } from "@macrostrat/color-utils";
 function buildHighlights(entities, entityTypes): Highlight[] {
   let highlights = [];
   for (const entity of entities) {
-    console.log(entity);
     highlights.push({
       start: entity.indices[0],
       end: entity.indices[1],
@@ -18,7 +17,6 @@ function buildHighlights(entities, entityTypes): Highlight[] {
 }
 
 export function enhanceData(extractionData, models, entityTypes) {
-  console.log(entityTypes);
   return {
     ...extractionData,
     model: models.get(extractionData.model_id),
@@ -29,7 +27,6 @@ export function enhanceData(extractionData, models, entityTypes) {
 }
 
 function enhanceEntity(entity, entityTypes) {
-  console.log(entity);
   return {
     ...entity,
     type: addColor(entityTypes.get(entity.type), entity.match != null),

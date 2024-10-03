@@ -25,15 +25,14 @@ function ExtractionIndex() {
   const models = useModelIndex();
   const entityTypes = useEntityTypeIndex();
 
-  const paper = usePostgresQuery("kg_publication_entities", {
+  const filters = {
     subject: "paper_id",
     predicate: paperId,
-  })?.[0];
+  };
 
-  const data = usePostgresQuery("kg_context_entities", {
-    subject: "paper_id",
-    predicate: paperId,
-  });
+  const paper = usePostgresQuery("kg_publication_entities", filters)?.[0];
+
+  const data = usePostgresQuery("kg_context_entities", filters);
 
   if (data == null || models == null || paper == null || entityTypes == null) {
     return h("div", "Loading...");
@@ -42,10 +41,13 @@ function ExtractionIndex() {
   return h([
     h("h1", paper.citation?.title ?? "Model extractions"),
     data.map((d) => {
-      return h(ExtractionContext, {
-        data: enhanceData(d, models, entityTypes),
-        entityTypes,
-      });
+      return h([
+        h("a", { href: `../feedback/${d.source_text}` }, "Feedback"),
+        h(ExtractionContext, {
+          data: enhanceData(d, models, entityTypes),
+          entityTypes,
+        }),
+      ]);
     }),
   ]);
 }

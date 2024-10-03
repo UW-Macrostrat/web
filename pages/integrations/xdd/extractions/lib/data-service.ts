@@ -1,5 +1,4 @@
 import { PostgrestClient } from "@supabase/postgrest-js";
-
 import { postgrestPrefix } from "@macrostrat-web/settings";
 import { useEffect, useState } from "react";
 
@@ -13,16 +12,24 @@ const postgrest = new PostgrestClient(postgrestPrefix);
 
 export function usePostgresQuery(
   query: string,
-  filter: FilterDef | null = null
+  filters: FilterDef[] | FilterDef | null = null
 ) {
   const [data, setData] = useState(null);
+
+  let _filters: FilterDef[] = [];
+  if (filters != null) {
+    if (!Array.isArray(filters)) {
+      _filters = [filters];
+    } else {
+      _filters = filters;
+    }
+  }
 
   useEffect(() => {
     let q = postgrest.from(query).select();
 
-    if (filter != null) {
+    for (const filter of _filters) {
       const { subject, op = "eq", predicate } = filter;
-
       q = q.filter(subject, op, predicate);
     }
 
@@ -30,6 +37,7 @@ export function usePostgresQuery(
       setData(res.data);
     });
   }, [query]);
+  
   return data;
 }
 

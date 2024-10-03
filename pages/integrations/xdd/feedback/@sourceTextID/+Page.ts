@@ -9,13 +9,13 @@ import {
   useEntityTypeIndex,
 } from "../../extractions/lib/data-service";
 
+/**
+ * Get a single text window for feedback purposes
+ */
+
 // noinspection JSUnusedGlobalSymbols
 export function Page() {
-  return h(ContentPage, [h(PageBreadcrumbs), h(PageMain)]);
-}
-
-function PageMain() {
-  return h("div", [h(ExtractionIndex)]);
+  return h(ContentPage, [h(PageBreadcrumbs), h(ExtractionIndex)]);
 }
 
 function ExtractionIndex() {
@@ -34,13 +34,15 @@ function ExtractionIndex() {
     return h("div", "Loading...");
   }
 
+  const window = data[0];
+
+  console.log(window);
+
   return h([
     //h("h1", paper.citation?.title ?? "Model extractions"),
-    data.map((d) => {
-      return h(ExtractionContext, {
-        data: enhanceData(d, models, entityTypes),
-        entityTypes,
-      });
+    h(ExtractionContext, {
+      data: enhanceData(window, models, entityTypes),
+      entityTypes,
     }),
   ]);
 }
