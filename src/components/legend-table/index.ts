@@ -11,9 +11,10 @@ export * from "./data-loaders";
 
 const h = hyper.styled(styles);
 
-export function PostgRESTTableView({ table, columnOptions, order }) {
+export function PostgRESTTableView({ table, columnOptions, order, columns }) {
   const { data, onScroll } = usePostgRESTLazyLoader(table, {
     order,
+    columns,
   });
 
   if (data == null) {

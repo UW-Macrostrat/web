@@ -1,61 +1,50 @@
-import { HotkeysProvider } from "@blueprintjs/core";
 import { FullscreenPage } from "~/layouts";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
-import { ColorCell } from "@macrostrat/data-sheet2";
 import { PageBreadcrumbs } from "~/components";
-import {
-  LongTextViewer,
-  IntervalCell,
-  lithologyRenderer,
-  ExpandedLithologies,
-  PostgRESTTableView,
-} from "~/components/legend-table";
+import { PostgRESTTableView } from "~/components/legend-table";
 
 const h = hyper.styled(styles);
 
 export function Page() {
-  return h(
-    HotkeysProvider,
-    h(FullscreenPage, { className: "main" }, [
-      h(PageBreadcrumbs),
-      h("h1", "Model runs"),
-      h(PostgRESTTableView, {
-        table: "kg_model_run",
-        columnOptions,
-        order: { key: "timestamp", ascending: false },
-      }),
-    ])
-  );
+  return h(FullscreenPage, { className: "main" }, [
+    h(PageBreadcrumbs),
+    h("h1", "Model runs"),
+    h(PostgRESTTableView, {
+      table: "kg_model_run",
+      columns:
+        "id,timestamp,model_id,version_id,source_text_id,map_legend_id,supersedes,superseded_by",
+      columnOptions,
+      order: { key: "timestamp", ascending: false },
+    }),
+  ]);
+}
+
+function prettyDate(value) {
+  // Timestamp to pretty date
+  return new Date(value).toLocaleString("en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
 }
 
 const columnOptions = {
   overrides: {
-    source_id: "Source",
-    liths: {
-      name: "Lithologies",
-      valueRenderer: lithologyRenderer,
-      dataEditor: ExpandedLithologies,
+    timestamp: {
+      name: "Time",
+      valueRenderer: prettyDate,
     },
-    name: "Unit name",
-    comments: "Comments",
-    legend_id: "Legend ID",
-    strat_name: "Stratigraphic names",
-    b_interval: {
-      name: "Lower",
-      cellComponent: IntervalCell,
-    },
-    t_interval: {
-      name: "Upper",
-      cellComponent: IntervalCell,
-    },
-    color: {
-      name: "Color",
-      cellComponent: ColorCell,
-    },
-    descrip: {
-      name: "Description",
-      dataEditor: LongTextViewer,
+    source_text_id: {
+      name: "Source text",
+      valueRenderer: sourceTextRenderer,
     },
   },
 };
+
+function sourceTextRenderer(value) {
+  return h(
+    "a",
+    { href: `/integrations/xdd/feedback/${value}` },
+    h("code", value)
+  );
+}
