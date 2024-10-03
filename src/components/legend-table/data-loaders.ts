@@ -15,8 +15,6 @@ interface LazyLoaderState<T> {
   data: (T | null)[];
   loading: boolean;
   error: Error | null;
-  chunkSize: number;
-  sortKey: string;
   visibleRegion: RowRegion;
 }
 
@@ -132,7 +130,8 @@ function buildQuery<T>(endpoint: string, config: QueryConfig) {
       ascending: config.order.ascending,
     });
     if (config.after != null) {
-      query = query.gt(config.order.key, config.after);
+      const op = config.order.ascending ? "gt" : "lt";
+      query = query[op](config.order.key, config.after);
     }
   }
   if (config.limit != null) {
@@ -148,7 +147,7 @@ function buildQuery<T>(endpoint: string, config: QueryConfig) {
 
 function loadMoreData<T>(
   endpoint: string,
-  config: QueryConfig,
+  config: QueryConfig & { chunkSize: number },
   state: LazyLoaderState<T>,
   dispatch: any
 ) {
@@ -159,11 +158,14 @@ function loadMoreData<T>(
 
   dispatch({ type: "start-loading" });
 
+  const { chunkSize = 100, ...rest } = config;
+
+  const sortKey = config.order?.key ?? "id";
+
   let cfg: QueryConfig = {
-    ...config,
-    limit: state.chunkSize,
+    ...rest,
+    limit: chunkSize,
     offset: null,
-    order: { key: state.sortKey, ascending: true },
   };
 
   // Allows random seeking
@@ -174,7 +176,7 @@ function loadMoreData<T>(
 
   // This only works for forward queries
   if (!isInitialQuery) {
-    cfg.after = state.data[rowIndex - 1]?.[state.sortKey];
+    cfg.after = state.data[rowIndex - 1]?.[sortKey];
     if (cfg.after == null) {
       cfg.offset = rowIndex;
     }
@@ -202,13 +204,10 @@ export function usePostgRESTLazyLoader(
   endpoint: string,
   config: LazyLoaderOptions = {}
 ) {
-  const { chunkSize = 100, sortKey, ...rest } = config;
   const initialState: LazyLoaderState<any> = {
     data: [],
     loading: false,
     error: null,
-    chunkSize,
-    sortKey,
     visibleRegion: { rowIndexStart: 0, rowIndexEnd: 1 },
   };
 
@@ -216,7 +215,7 @@ export function usePostgRESTLazyLoader(
   const { data, loading } = state;
 
   useAsyncEffect(async () => {
-    loadMoreData(endpoint, rest, state, dispatch);
+    loadMoreData(endpoint, config, state, dispatch);
   }, [data, state.visibleRegion]);
 
   const onScroll = debounce((visibleCells: RowRegion) => {

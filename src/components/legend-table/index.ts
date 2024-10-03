@@ -5,14 +5,15 @@ import DataSheet, { ColorCell } from "@macrostrat/data-sheet2";
 import { LithologyTag } from "~/components";
 import { usePostgRESTLazyLoader } from "~/components/legend-table/data-loaders";
 import { HotkeysProvider } from "@blueprintjs/core";
+import { Spinner } from "@blueprintjs/core";
 
 export * from "./data-loaders";
 
 const h = hyper.styled(styles);
 
-export function PostgRESTTableView({ table, sortKey, columnOptions }) {
+export function PostgRESTTableView({ table, columnOptions, order }) {
   const { data, onScroll } = usePostgRESTLazyLoader(table, {
-    sortKey,
+    order,
   });
 
   if (data == null) {

@@ -19,7 +19,7 @@ export function Page() {
     h("h1", "Map legend units"),
     h(PostgRESTTableView, {
       table: "legend",
-      sortKey: "legend_id",
+      order: { key: "legend_id", ascending: true },
       columnOptions,
     }),
   ]);

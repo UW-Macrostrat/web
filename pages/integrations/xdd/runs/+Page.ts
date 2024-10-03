@@ -19,11 +19,11 @@ export function Page() {
     HotkeysProvider,
     h(FullscreenPage, { className: "main" }, [
       h(PageBreadcrumbs),
-      h("h1", "Map legend units"),
+      h("h1", "Model runs"),
       h(PostgRESTTableView, {
-        table: "legend",
-        sortKey: "legend_id",
+        table: "kg_model_run",
         columnOptions,
+        order: { key: "timestamp", ascending: false },
       }),
     ])
   );
