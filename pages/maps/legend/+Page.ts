@@ -1,5 +1,3 @@
-import { HotkeysProvider } from "@blueprintjs/core";
-import DataSheet from "@macrostrat/data-sheet2";
 import { FullscreenPage } from "~/layouts";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
@@ -10,46 +8,24 @@ import {
   IntervalCell,
   lithologyRenderer,
   ExpandedLithologies,
-  usePostgRESTLazyLoader,
+  PostgRESTTableView,
 } from "~/components/legend-table";
 
 const h = hyper.styled(styles);
 
-function preprocessData(data) {
-  return data.map((d) => {
-    const { best_age_bottom, best_age_top, ...rest } = d;
-    return {
-      ...rest,
-      model_age: [best_age_bottom, best_age_top],
-    };
-  });
-}
-
 export function Page() {
-  const { data, onScroll } = usePostgRESTLazyLoader();
-
-  if (data == null) {
-    return h("div", "Loading...");
-  }
-
-  return h(
-    HotkeysProvider,
-    h(FullscreenPage, { className: "main" }, [
-      h(PageBreadcrumbs),
-      h("h1", "Map legend units"),
-      h(DataSheet, {
-        data,
-        editable: false,
-        columnSpecOptions,
-        onVisibleCellsChange(visibleCells) {
-          onScroll(visibleCells);
-        },
-      }),
-    ])
-  );
+  return h(FullscreenPage, { className: "main" }, [
+    h(PageBreadcrumbs),
+    h("h1", "Map legend units"),
+    h(PostgRESTTableView, {
+      table: "legend",
+      sortKey: "legend_id",
+      columnOptions,
+    }),
+  ]);
 }
 
-const columnSpecOptions = {
+const columnOptions = {
   overrides: {
     source_id: "Source",
     liths: {

@@ -118,21 +118,21 @@ interface QueryConfig {
   limit?: number;
   offset?: number;
   order?: { key: string; ascending: boolean };
-  sortValue?: any;
+  after?: any;
 }
 
-function buildQuery<T>(config: QueryConfig) {
+function buildQuery<T>(endpoint: string, config: QueryConfig) {
   const { columns = "*", count } = config;
   const opts = { count };
 
-  let query = postgrest.from("legend").select(columns, opts);
+  let query = postgrest.from(endpoint).select(columns, opts);
 
   if (config.order != null) {
     query = query.order(config.order.key, {
       ascending: config.order.ascending,
     });
-    if (config.sortValue != null) {
-      query = query.gt(config.order.key, config.sortValue);
+    if (config.after != null) {
+      query = query.gt(config.order.key, config.after);
     }
   }
   if (config.limit != null) {
@@ -146,7 +146,12 @@ function buildQuery<T>(config: QueryConfig) {
   return query;
 }
 
-async function loadMoreData<T>(state: LazyLoaderState<T>, dispatch: any) {
+function loadMoreData<T>(
+  endpoint: string,
+  config: QueryConfig,
+  state: LazyLoaderState<T>,
+  dispatch: any
+) {
   const rowIndex = indexOfFirstNullInRegion(state.data, state.visibleRegion);
   if (state.loading || rowIndex == null) {
     return;
@@ -155,7 +160,9 @@ async function loadMoreData<T>(state: LazyLoaderState<T>, dispatch: any) {
   dispatch({ type: "start-loading" });
 
   let cfg: QueryConfig = {
+    ...config,
     limit: state.chunkSize,
+    offset: null,
     order: { key: state.sortKey, ascending: true },
   };
 
@@ -167,33 +174,41 @@ async function loadMoreData<T>(state: LazyLoaderState<T>, dispatch: any) {
 
   // This only works for forward queries
   if (!isInitialQuery) {
-    cfg.sortValue = state.data[rowIndex - 1]?.[state.sortKey];
-    if (cfg.sortValue == null) {
+    cfg.after = state.data[rowIndex - 1]?.[state.sortKey];
+    if (cfg.after == null) {
       cfg.offset = rowIndex;
     }
   }
 
-  const query = buildQuery(cfg);
+  const query = buildQuery(endpoint, cfg);
 
-  const res = await query;
-
-  const { data, count } = res;
-
-  dispatch({
-    type: "loaded",
-    data,
-    offset: rowIndex,
-    totalSize: count,
+  const res = query.then((res) => {
+    const { data, count } = res;
+    dispatch({
+      type: "loaded",
+      data,
+      offset: rowIndex,
+      totalSize: count,
+    });
   });
 }
 
-export function usePostgRESTLazyLoader() {
+type LazyLoaderOptions = Omit<QueryConfig, "count" | "offset" | "limit"> & {
+  chunkSize?: number;
+  sortKey?: string;
+};
+
+export function usePostgRESTLazyLoader(
+  endpoint: string,
+  config: LazyLoaderOptions = {}
+) {
+  const { chunkSize = 100, sortKey, ...rest } = config;
   const initialState: LazyLoaderState<any> = {
     data: [],
     loading: false,
     error: null,
-    chunkSize: 100,
-    sortKey: "legend_id",
+    chunkSize,
+    sortKey,
     visibleRegion: { rowIndexStart: 0, rowIndexEnd: 1 },
   };
 
@@ -201,7 +216,7 @@ export function usePostgRESTLazyLoader() {
   const { data, loading } = state;
 
   useAsyncEffect(async () => {
-    loadMoreData(state, dispatch);
+    loadMoreData(endpoint, rest, state, dispatch);
   }, [data, state.visibleRegion]);
 
   const onScroll = debounce((visibleCells: RowRegion) => {

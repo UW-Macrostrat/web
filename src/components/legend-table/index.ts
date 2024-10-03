@@ -1,12 +1,36 @@
 import { Tag } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
-import { ColorCell } from "@macrostrat/data-sheet2";
+import DataSheet, { ColorCell } from "@macrostrat/data-sheet2";
 import { LithologyTag } from "~/components";
+import { usePostgRESTLazyLoader } from "~/components/legend-table/data-loaders";
+import { HotkeysProvider } from "@blueprintjs/core";
 
 export * from "./data-loaders";
 
 const h = hyper.styled(styles);
+
+export function PostgRESTTableView({ table, sortKey, columnOptions }) {
+  const { data, onScroll } = usePostgRESTLazyLoader(table, {
+    sortKey,
+  });
+
+  if (data == null) {
+    return h(Spinner);
+  }
+
+  return h(
+    HotkeysProvider,
+    h(DataSheet, {
+      data,
+      columnSpecOptions: columnOptions,
+      editable: false,
+      onVisibleCellsChange(visibleCells) {
+        onScroll(visibleCells);
+      },
+    })
+  );
+}
 
 export function LongTextViewer({ value, onChange }) {
   return h("div.long-text", value);
