@@ -4,6 +4,8 @@ import styles from "./main.module.sass";
 import { ColorCell } from "@macrostrat/data-sheet2";
 import { LithologyTag } from "~/components";
 
+export * from "./data-loaders";
+
 const h = hyper.styled(styles);
 
 export function LongTextViewer({ value, onChange }) {

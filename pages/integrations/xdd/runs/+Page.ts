@@ -15,16 +15,6 @@ import {
 
 const h = hyper.styled(styles);
 
-function preprocessData(data) {
-  return data.map((d) => {
-    const { best_age_bottom, best_age_top, ...rest } = d;
-    return {
-      ...rest,
-      model_age: [best_age_bottom, best_age_top],
-    };
-  });
-}
-
 export function Page() {
   const { data, onScroll } = usePostgRESTLazyLoader();
 
