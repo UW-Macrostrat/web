@@ -302,18 +302,14 @@ export function FeedbackWrap({ data }) {
         "Click on a entity to see its type as well as the type of its children. You can also drag and drop entities up and down the hierarchy, thus changing their type."
       ),
       //show_save && h("button", { onClick: onSaveClick }, "Save result"),
-      h("p", null),
-      h(
-        Tree,
-        {
-          data: current_tree,
-          ref: treeRef,
-          onMove: onMove,
-          onDelete: onDelete,
-          onSelect: onSelect,
-        },
-        Node
-      ),
+      h(Tree, {
+        data: current_tree,
+        ref: treeRef,
+        onMove: onMove,
+        onDelete: onDelete,
+        onSelect: onSelect,
+        children: Node,
+      }),
     ]),
   ]);
 }

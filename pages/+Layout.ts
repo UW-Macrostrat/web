@@ -1,4 +1,8 @@
-import { DarkModeProvider, DevToolsConsole } from "@macrostrat/ui-components";
+import {
+  DarkModeProvider,
+  DevToolsConsole,
+  DevToolsProvider,
+} from "@macrostrat/ui-components";
 import { ReactNode } from "react";
 
 import { AuthProvider } from "~/_providers/auth";
@@ -20,19 +24,21 @@ export default function Layout({ children }: { children: ReactNode }) {
   const pageStyle = exports?.pageStyle ?? "fullscreen";
 
   return h(
-    AuthProvider,
-    { user }, // Prefer detailed user if available
+    DevToolsProvider,
     h(
-      supportsDarkMode ? DarkModeProvider : NoOpDarkModeProvider,
-      { followSystem: true },
-      h("div.app-shell", { className: pageStyle + "-page" }, [
-        children,
-        h(
-          DevToolsConsole,
-          { className: "page-admin-container" },
-          h(DevToolsData)
-        ),
-      ])
+      AuthProvider,
+      { user }, // Prefer detailed user if available
+      h(
+        supportsDarkMode ? DarkModeProvider : NoOpDarkModeProvider,
+        { followSystem: true },
+        h("div.app-shell", { className: pageStyle + "-page" }, [
+          children,
+          h(DevToolsConsole, {
+            className: "page-admin-container",
+            tools: [{ title: "Vike page context", component: DevToolsData }],
+          }),
+        ])
+      )
     )
   );
 }

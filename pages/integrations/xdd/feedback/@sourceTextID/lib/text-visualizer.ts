@@ -1,11 +1,6 @@
-import React from "react";
 import { AnnotateBlendTag, TextAnnotateBlend } from "react-text-annotate-blend";
 import { TextData, TreeData } from "./types";
 import h from "@macrostrat/hyper";
-
-/*
-Stateful example with blended tags allowed
-*/
 
 type RANGE_TO_LEVEL = {
   [range: string]: string;
