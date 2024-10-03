@@ -45,7 +45,6 @@ const Node = ({ node, style, dragHandle, tree }: any) => {
   let nameStyle = selected ? { backgroundColor: COLORS[node_level] } : {};
 
   return h("div", { style: { ...style, ...nameStyle }, ref: dragHandle }, [
-    "🍁",
     node.data.name,
   ]);
 };

@@ -153,32 +153,16 @@ export function FeedbackWrap({ data }) {
   let [current_text, setCurrentText] = useState(start_text);
   let [show_save, setShowSave] = useState(intial_show_save);
 
-  const onGenerateClick = async () => {
-    // Get an example
-    getExampleData()
-      .then((result) => {
-        let [start_text, tree_entities]: [TextData, TreeData[]] =
-          formatForVisualization(result);
-        setTree(tree_entities);
-        setNodesToShow([]);
-        setCurrentText(start_text);
-        setShowSave(true);
-      })
-      .catch((err_msg) => {
-        console.error("on Generate Click error of", err_msg);
-      });
-  };
-
-  const onSaveClick = async () => {
-    recordFeedback(current_text, current_tree)
-      .then((result) => {
-        onGenerateClick();
-      })
-      .catch((err_msg) => {
-        console.error("On Save Click got error of", err_msg);
-      });
-  };
-
+  // const onSaveClick = async () => {
+  //   recordFeedback(current_text, current_tree)
+  //     .then((result) => {
+  //       onGenerateClick();
+  //     })
+  //     .catch((err_msg) => {
+  //       console.error("On Save Click got error of", err_msg);
+  //     });
+  // };
+  //
   // Processing update from the text visualization
   let process_update = (nodes: string[]) => {
     let nodes_set = new Set<string>(nodes);
@@ -303,40 +287,35 @@ export function FeedbackWrap({ data }) {
     setNodesToShow(Array.from(nodes_to_show));
   };
 
-  return h(
-    "div",
-    { style: { display: "grid", gridTemplateColumns: "1fr 1fr" } },
-    [
-      h("div", [
-        h("button", { onClick: onGenerateClick }, "Generate random example"),
-        h("p", null),
-        h(
-          "p",
-          null,
-          "Click on a entity to see its type as well as the type of its children. You can also drag and drop entities up and down the heirachy, thus changing their type."
-        ),
-        show_save && h("button", { onClick: onSaveClick }, "Save result"),
-        h("p", null),
-        h(
-          Tree,
-          {
-            data: current_tree,
-            ref: treeRef,
-            onMove: onMove,
-            onDelete: onDelete,
-            onSelect: onSelect,
-          },
-          Node
-        ),
-      ]),
-      h(StatefulBlend, {
-        formatted_text: current_text,
-        tree_data: current_tree[0].children,
-        update_nodes: process_update,
-        nodes_to_show: nodes_to_show,
-      }),
-    ]
-  );
+  return h("div", [
+    h(StatefulBlend, {
+      formatted_text: current_text,
+      tree_data: current_tree[0].children,
+      update_nodes: process_update,
+      nodes_to_show: nodes_to_show,
+    }),
+    h("div", [
+      h("p", null),
+      h(
+        "p",
+        null,
+        "Click on a entity to see its type as well as the type of its children. You can also drag and drop entities up and down the hierarchy, thus changing their type."
+      ),
+      //show_save && h("button", { onClick: onSaveClick }, "Save result"),
+      h("p", null),
+      h(
+        Tree,
+        {
+          data: current_tree,
+          ref: treeRef,
+          onMove: onMove,
+          onDelete: onDelete,
+          onSelect: onSelect,
+        },
+        Node
+      ),
+    ]),
+  ]);
 }
 
 export default FeedbackWrap;
