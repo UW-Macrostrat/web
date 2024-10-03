@@ -1,10 +1,11 @@
 import { useRef, useState } from "react";
 import { NodeApi, Tree } from "react-arborist";
-import Node from "./Node";
-import { StatefulBlend } from "./TextVisualizer";
-import { getExampleData } from "./data_fetcher";
-import { recordFeedback } from "./feedback_recorder";
+import Node from "./node";
+import { StatefulBlend } from "./text-visualizer";
+import { getExampleData } from "./fetch-data";
+import { recordFeedback } from "./record-feedback";
 import { Entity, Result, TextData, TreeData } from "./types";
+import h from "@macrostrat/hyper";
 
 function process_entity(
   paragraph: TextData,
@@ -302,38 +303,39 @@ export function FeedbackWrap({ data }) {
     setNodesToShow(Array.from(nodes_to_show));
   };
 
-  return (
-    <>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
-        <div>
-          <button onClick={onGenerateClick}>Generate random example</button>
-          <p></p>
-          <p>
-            Click on a entity to see its type as well as the type of its
-            children. You can also drag and drop entities up and down the
-            heirachy, thus changing their type.
-          </p>
-          {show_save && <button onClick={onSaveClick}>Save result</button>}
-          <p></p>
-          <Tree
-            data={current_tree}
-            ref={treeRef}
-            onMove={onMove}
-            onDelete={onDelete}
-            onSelect={onSelect}
-          >
-            {Node}
-          </Tree>
-        </div>
-
-        <StatefulBlend
-          formatted_text={current_text}
-          tree_data={current_tree[0].children}
-          update_nodes={process_update}
-          nodes_to_show={nodes_to_show}
-        />
-      </div>
-    </>
+  return h(
+    "div",
+    { style: { display: "grid", gridTemplateColumns: "1fr 1fr" } },
+    [
+      h("div", [
+        h("button", { onClick: onGenerateClick }, "Generate random example"),
+        h("p", null),
+        h(
+          "p",
+          null,
+          "Click on a entity to see its type as well as the type of its children. You can also drag and drop entities up and down the heirachy, thus changing their type."
+        ),
+        show_save && h("button", { onClick: onSaveClick }, "Save result"),
+        h("p", null),
+        h(
+          Tree,
+          {
+            data: current_tree,
+            ref: treeRef,
+            onMove: onMove,
+            onDelete: onDelete,
+            onSelect: onSelect,
+          },
+          Node
+        ),
+      ]),
+      h(StatefulBlend, {
+        formatted_text: current_text,
+        tree_data: current_tree[0].children,
+        update_nodes: process_update,
+        nodes_to_show: nodes_to_show,
+      }),
+    ]
   );
 }
 

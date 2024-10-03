@@ -1,5 +1,5 @@
 import hyper from "@macrostrat/hyper";
-import FeedbackWrap from "./FeedbackWrap";
+import FeedbackWrap from "./feedback";
 import styles from "./feedback.module.sass";
 
 const h = hyper.styled(styles);

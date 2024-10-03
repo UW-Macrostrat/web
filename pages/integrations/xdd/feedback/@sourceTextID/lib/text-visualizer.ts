@@ -1,6 +1,7 @@
 import React from "react";
 import { AnnotateBlendTag, TextAnnotateBlend } from "react-text-annotate-blend";
 import { TextData, TreeData } from "./types";
+import h from "@macrostrat/hyper";
 
 /*
 Stateful example with blended tags allowed
@@ -139,32 +140,26 @@ export function StatefulBlend(props: StatefulBlendProps) {
     props.update_nodes(nodes_to_keep);
   };
 
-  return (
-    <div style={{ padding: 20 }}>
-      <p>
-        Use the below button to enable/disable edit mode. In edit mode, you can
-        either single or range select words to create new entities and double
-        click on existing entities to remove them from the heirachy.
-      </p>
-
-      <button onClick={() => setEditMode(!editMode)}>
-        {editMode ? "Disable edit mode" : "Enable edit mode"}
-      </button>
-
-      <p></p>
-      <TextAnnotateBlend
-        style={{
-          fontSize: "1.2rem",
-        }}
-        content={props.formatted_text.paragraph_text}
-        onChange={handleChange}
-        value={all_tags}
-        getSpan={(span) => ({
-          ...span,
-          tag: tag,
-          color: COLORS[tag],
-        })}
-      />
-    </div>
-  );
+  return h("div", { style: { padding: 20 } }, [
+    h("p", {}, [
+      "Use the below button to enable/disable edit mode. In edit mode, you can either single or range select words to create new entities and double click on existing entities to remove them from the hierarchy.",
+    ]),
+    h("button", { onClick: () => setEditMode(!editMode) }, [
+      editMode ? "Disable edit mode" : "Enable edit mode",
+    ]),
+    h("p", {}, []),
+    h(TextAnnotateBlend, {
+      style: {
+        fontSize: "1.2rem",
+      },
+      content: props.formatted_text.paragraph_text,
+      onChange: handleChange,
+      value: all_tags,
+      getSpan: (span) => ({
+        ...span,
+        tag: tag,
+        color: COLORS[tag],
+      }),
+    }),
+  ]);
 }

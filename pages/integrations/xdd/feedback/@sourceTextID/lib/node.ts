@@ -1,5 +1,6 @@
 import { NodeApi, TreeApi } from "react-arborist";
 import { TreeData } from "./types";
+import h from "@macrostrat/hyper";
 
 function isSelected(search_node: TreeData, tree_node: TreeData) {
   if (search_node.id == tree_node.id) {
@@ -43,12 +44,10 @@ const Node = ({ node, style, dragHandle, tree }: any) => {
   let node_level: string = node.data.id.split("_")[0];
   let nameStyle = selected ? { backgroundColor: COLORS[node_level] } : {};
 
-  return (
-    <div style={{ ...style, ...nameStyle }} ref={dragHandle}>
-      {"🍁"}
-      {node.data.name}
-    </div>
-  );
+  return h("div", { style: { ...style, ...nameStyle }, ref: dragHandle }, [
+    "🍁",
+    node.data.name,
+  ]);
 };
 
 export default Node;
