@@ -51,13 +51,6 @@ const LEVEL_TO_NAME: LEVEL_TO_NAME_TYPE = {
   2: "lith_att",
 };
 
-export interface StatefulBlendProps {
-  formatted_text: TextData;
-  nodes_to_show: string[];
-  tree_data: TreeData[];
-  update_nodes: (nodes: string[]) => void;
-}
-
 function perform_dfs(
   current_node: TreeData,
   paragraph: string,
@@ -97,7 +90,14 @@ function perform_dfs(
   }
 }
 
-export function StatefulBlend(props: StatefulBlendProps) {
+export interface FeedbackTextProps {
+  formatted_text: TextData;
+  nodes_to_show: string[];
+  tree_data: TreeData[];
+  updateNodes: (nodes: string[]) => void;
+}
+
+export function FeedbackText(props: FeedbackTextProps) {
   // Convert input to tags
   let nodes_set: Set<string> = new Set<string>(props.nodes_to_show);
   let all_tags: AnnotateBlendTag[] = [];
@@ -112,11 +112,11 @@ export function StatefulBlend(props: StatefulBlendProps) {
     );
   }
 
-  let [editMode, setEditMode] = React.useState(false);
+  const { updateNodes } = props;
 
   const tag = "strat_name";
   const handleChange = (tagged_words: AnnotateBlendTag[]) => {
-    if (!editMode) {
+    if (updateNodes == null) {
       return;
     }
 
@@ -137,29 +137,20 @@ export function StatefulBlend(props: StatefulBlendProps) {
       nodes_to_keep.push(node_id);
     }
 
-    props.update_nodes(nodes_to_keep);
+    updateNodes(nodes_to_keep);
   };
 
-  return h("div", { style: { padding: 20 } }, [
-    h("p", {}, [
-      "Use the below button to enable/disable edit mode. In edit mode, you can either single or range select words to create new entities and double click on existing entities to remove them from the hierarchy.",
-    ]),
-    h("button", { onClick: () => setEditMode(!editMode) }, [
-      editMode ? "Disable edit mode" : "Enable edit mode",
-    ]),
-    h("p", {}, []),
-    h(TextAnnotateBlend, {
-      style: {
-        fontSize: "1.2rem",
-      },
-      content: props.formatted_text.paragraph_text,
-      onChange: handleChange,
-      value: all_tags,
-      getSpan: (span) => ({
-        ...span,
-        tag: tag,
-        color: COLORS[tag],
-      }),
+  return h(TextAnnotateBlend, {
+    style: {
+      fontSize: "1.2rem",
+    },
+    content: props.formatted_text.paragraph_text,
+    onChange: handleChange,
+    value: all_tags,
+    getSpan: (span) => ({
+      ...span,
+      tag: tag,
+      color: COLORS[tag],
     }),
-  ]);
+  });
 }

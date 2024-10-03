@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { NodeApi, Tree } from "react-arborist";
 import Node from "./node";
-import { StatefulBlend } from "./text-visualizer";
+import { FeedbackText, StatefulBlend } from "./text-visualizer";
 import { getExampleData } from "./fetch-data";
 import { recordFeedback } from "./record-feedback";
 import { Entity, Result, TextData, TreeData } from "./types";
@@ -288,10 +288,10 @@ export function FeedbackWrap({ data }) {
   };
 
   return h("div", [
-    h(StatefulBlend, {
+    h(FeedbackText, {
       formatted_text: current_text,
       tree_data: current_tree[0].children,
-      update_nodes: process_update,
+      updateNodes: process_update,
       nodes_to_show: nodes_to_show,
     }),
     h("div", [
