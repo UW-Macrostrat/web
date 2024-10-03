@@ -8,6 +8,7 @@ import {
   useModelIndex,
   useEntityTypeIndex,
 } from "../../extractions/lib/data-service";
+import { FeedbackComponent } from "./lib";
 
 /**
  * Get a single text window for feedback purposes
@@ -36,10 +37,10 @@ function ExtractionIndex() {
 
   const window = data[0];
 
-  console.log(window);
-
   return h([
     //h("h1", paper.citation?.title ?? "Model extractions"),
+    h(FeedbackComponent),
+
     h(ExtractionContext, {
       data: enhanceData(window, models, entityTypes),
       entityTypes,
