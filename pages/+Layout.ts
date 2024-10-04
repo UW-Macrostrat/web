@@ -23,22 +23,21 @@ export default function Layout({ children }: { children: ReactNode }) {
   const supportsDarkMode = true;
   const pageStyle = exports?.pageStyle ?? "fullscreen";
 
+  const devTools = exports.devTools ?? [];
+
   return h(
-    DevToolsProvider,
+    AuthProvider,
+    { user }, // Prefer detailed user if available
     h(
-      AuthProvider,
-      { user }, // Prefer detailed user if available
-      h(
-        supportsDarkMode ? DarkModeProvider : NoOpDarkModeProvider,
-        { followSystem: true },
-        h("div.app-shell", { className: pageStyle + "-page" }, [
-          children,
-          h(DevToolsConsole, {
-            className: "page-admin-container",
-            tools: [{ title: "Vike page context", component: DevToolsData }],
-          }),
-        ])
-      )
+      supportsDarkMode ? DarkModeProvider : NoOpDarkModeProvider,
+      { followSystem: true },
+      h("div.app-shell", { className: pageStyle + "-page" }, [
+        children,
+        h(DevToolsConsole, {
+          className: "page-admin-container",
+          tools: [...devTools, DevToolsData],
+        }),
+      ])
     )
   );
 }
@@ -54,6 +53,8 @@ function DevToolsData() {
     (DevToolsData) => h(DevToolsData)
   );
 }
+
+DevToolsData.title = "Vike page context";
 
 function NoOpDarkModeProvider(props) {
   return props.children;

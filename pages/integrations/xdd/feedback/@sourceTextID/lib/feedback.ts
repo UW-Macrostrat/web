@@ -7,7 +7,7 @@ import { recordFeedback } from "./record-feedback";
 import { Entity, Result, TextData, TreeData } from "./types";
 import h from "@macrostrat/hyper";
 
-function process_entity(
+function processEntity(
   paragraph: TextData,
   entity: Entity,
   depth: number
@@ -16,7 +16,7 @@ function process_entity(
   let curr_children: TreeData[] = [];
   if (entity.children) {
     for (var child of entity.children) {
-      curr_children.push(process_entity(paragraph, child, depth + 1));
+      curr_children.push(processEntity(paragraph, child, depth + 1));
     }
   }
 
@@ -38,7 +38,7 @@ function formatForVisualization(initial_tree: Result): [TextData, TreeData[]] {
   let tree_entities: TreeData[] = [];
   if (initial_tree.strats) {
     for (var curr_strat of initial_tree.strats) {
-      tree_entities.push(process_entity(paragraph, curr_strat, 0));
+      tree_entities.push(processEntity(paragraph, curr_strat, 0));
     }
   }
 
@@ -280,7 +280,7 @@ export function FeedbackWrap({ data }) {
 
   const onSelect = (nodes: NodeApi<TreeData>[]) => {
     let nodes_to_show = new Set<string>();
-    for (var curr_node of nodes) {
+    for (const curr_node of nodes) {
       recordNode(curr_node.data, nodes_to_show);
     }
 
@@ -296,11 +296,10 @@ export function FeedbackWrap({ data }) {
     }),
     h("div", [
       h("p", null),
-      h(
-        "p",
-        null,
-        "Click on a entity to see its type as well as the type of its children. You can also drag and drop entities up and down the hierarchy, thus changing their type."
-      ),
+      h("p.help", null, [
+        "Click on a entity to see its type as well as the type of its children.",
+        "You can also drag and drop entities up and down the hierarchy, thus changing their type.",
+      ]),
       //show_save && h("button", { onClick: onSaveClick }, "Save result"),
       h(Tree, {
         data: current_tree,

@@ -9,7 +9,7 @@ import {
   useEntityTypeIndex,
 } from "../../extractions/lib/data-service";
 import { FeedbackComponent } from "./lib";
-import { JSONView, usePageDevTool } from "@macrostrat/ui-components";
+import { JSONView } from "@macrostrat/ui-components";
 import { create } from "zustand";
 import { useEffect } from "react";
 import { Card, NonIdealState, Spinner } from "@blueprintjs/core";
@@ -20,7 +20,11 @@ import { Card, NonIdealState, Spinner } from "@blueprintjs/core";
 
 // noinspection JSUnusedGlobalSymbols
 export function Page() {
-  return h(ContentPage, [h(PageBreadcrumbs), h(ExtractionIndex)]);
+  return h(ContentPage, [
+    h(PageBreadcrumbs),
+    h("h1", "Feedback"),
+    h(ExtractionIndex),
+  ]);
 }
 
 const useStore = create((set) => {
@@ -32,8 +36,6 @@ const useStore = create((set) => {
 function ExtractionIndex() {
   const { routeParams } = usePageContext();
   const { sourceTextID } = routeParams;
-
-  usePageDevTool("Feedback", FeedbackDevTool);
 
   const models = useModelIndex();
   const entityTypes = useEntityTypeIndex();
@@ -52,13 +54,13 @@ function ExtractionIndex() {
     return h("div", "Loading...");
   }
 
-  const window = data[0];
+  const window = enhanceData(data[0], models, entityTypes);
 
   return h([
     //h("h1", paper.citation?.title ?? "Model extractions"),
-    h(FeedbackComponent),
+    h(FeedbackComponent, { data: window }),
     h(ExtractionContext, {
-      data: enhanceData(window, models, entityTypes),
+      data: window,
       entityTypes,
     }),
   ]);
@@ -69,5 +71,9 @@ function FeedbackDevTool() {
   if (entities == null)
     return h(NonIdealState, { icon: h(Spinner), title: "Loading..." });
 
-  return h(JSONView, { data: entities, showRoot: false });
+  return h(JSONView, { data: entities, showRoot: false, keyPath: 0 });
 }
+
+FeedbackDevTool.title = "Feedback";
+
+export const devTools = [FeedbackDevTool];

@@ -8,8 +8,47 @@ export interface FeedbackComponentProps {
   // Add props here
 }
 
-export function FeedbackComponent() {
-  return h("div.feedback-component", h(FeedbackWrap, { data: data1 }));
+export function FeedbackComponent({ data }) {
+  console.log(data);
+
+  return h(
+    "div.feedback-component",
+    h(FeedbackWrap, { data: makeDataConform(data) })
+  );
+}
+
+function makeDataConform(data) {
+  return {
+    text: {
+      ...data,
+    },
+    strats: mergeIdenticalEntities(data.entities.map(makeEntityConform)),
+  };
+}
+
+function makeEntityConform(entity) {
+  return {
+    ...entity,
+    term_type: entity.type.name,
+    txt_range: [entity.indices],
+    children: entity.children?.map(makeEntityConform),
+  };
+}
+
+function mergeIdenticalEntities(entities) {
+  const entityMap = new Map();
+
+  for (const entity of entities) {
+    const key = entity.name;
+    if (entityMap.has(key)) {
+      console.log(entityMap.get(key));
+      entityMap.get(key).txt_range.push(entity.indices[0]);
+    } else {
+      entityMap.set(key, entity);
+    }
+  }
+
+  return Array.from(entityMap.values());
 }
 
 const data1 = {
