@@ -41,8 +41,7 @@ const COLORS: COLOR_TYPE = {
 
 const Node = ({ node, style, dragHandle, tree }: any) => {
   let selected: boolean = isNodeSelected(node, tree);
-  let node_level: string = node.data.id.split("_")[0];
-  let nameStyle = selected ? { backgroundColor: COLORS[node_level] } : {};
+  let nameStyle = selected ? { backgroundColor: null } : {};
 
   return h("div", { style: { ...style, ...nameStyle }, ref: dragHandle }, [
     node.data.name,

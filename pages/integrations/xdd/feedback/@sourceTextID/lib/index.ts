@@ -21,7 +21,7 @@ export function FeedbackComponent({ data }) {
 
   // Create state variables
   let [current_tree, setTree] = useState(tree_entities);
-  let [nodes_to_show, setNodesToShow] = useState(no_nodes);
+  let [selectedNodes, setNodesToShow] = useState(no_nodes);
 
   //
   // Processing update from the text visualization
@@ -153,7 +153,7 @@ export function FeedbackComponent({ data }) {
       text: start_text.paragraph_text,
       nodes: data.entities,
       updateNodes: process_update,
-      selectedNodes: nodes_to_show,
+      selectedNodes,
     }),
     h("div", [
       h("p.help", null, [
@@ -172,62 +172,19 @@ export function FeedbackComponent({ data }) {
   ]);
 }
 
-function makeDataConform(data) {
-  return {
-    text: {
-      ...data,
-    },
-    entities: data.entities.map(makeEntityConform),
-  };
-}
-
-function makeEntityConform(entity: Entity): InternalEntity {
+function processEntity(entity: Entity): InternalEntity {
+  console.log(entity);
   return {
     ...entity,
     term_type: entity.type.name,
     txt_range: [entity.indices],
-    children: entity.children?.map(makeEntityConform),
+    children: entity.children?.map(processEntity),
   };
 }
 
-function processEntity(
-  paragraph: TextData,
-  entity: Entity,
-  depth: number
-): TreeData {
-  // Record its children
-  let curr_children: TreeData[] = [];
-  if (entity.children) {
-    for (var child of entity.children) {
-      curr_children.push(processEntity(paragraph, child, depth + 1));
-    }
-  }
-
-  // Create the current node
-  let entity_tag = "" + depth;
-  return {
-    id:
-      entity_tag + "_" + entity.txt_range[0][0] + "_" + entity.txt_range[0][1],
-    name: paragraph.paragraph_text.substring(
-      entity.txt_range[0][0],
-      entity.txt_range[0][1]
-    ),
-    children: curr_children,
-  };
-}
-
-function formatForVisualization(initial_tree: Result): [TextData, TreeData[]] {
-  const { text, entities } = makeDataConform(initial_tree);
-
-  let paragraph: TextData = text;
-  let tree_entities: TreeData[] = [];
-  if (entities != null) {
-    for (const curr_strat of entities) {
-      tree_entities.push(processEntity(paragraph, curr_strat, 0));
-    }
-  }
-
-  return [paragraph, tree_entities];
+function formatForVisualization(data: Result): [TextData, TreeData[]] {
+  const { entities, ...text } = data;
+  return [text, entities?.map(processEntity)];
 }
 
 function update_tree(current_node: TreeData, nodes_set: Set<string>) {
