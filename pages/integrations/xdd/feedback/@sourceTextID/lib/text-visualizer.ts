@@ -1,151 +1,41 @@
 import { AnnotateBlendTag, TextAnnotateBlend } from "react-text-annotate-blend";
-import { TextData, TreeData } from "./types";
+import { InternalEntity } from "./types";
 import h from "@macrostrat/hyper";
-
-type RANGE_TO_LEVEL = {
-  [range: string]: string;
-};
-
-type COLOR_TYPE = {
-  [key: string]: string;
-  strat_name: string;
-  lithology: string;
-  lith_att: string;
-};
-
-const COLORS: COLOR_TYPE = {
-  strat_name: "rgb(179, 245, 66)",
-  lithology: "#42f5f5",
-  lith_att: "#4b46cd",
-  gray: "#D3D3D3",
-};
-
-type NAME_TO_LEVEL_TYPE = {
-  [key: string]: number;
-  strat_name: number;
-  lithology: number;
-  lith_att: number;
-};
-
-const NAME_TO_LEVEL: NAME_TO_LEVEL_TYPE = {
-  strat_name: 0,
-  lithology: 1,
-  lith_att: 2,
-};
-
-type LEVEL_TO_NAME_TYPE = {
-  [key: number]: string;
-  0: string;
-  1: string;
-  2: string;
-};
-
-const LEVEL_TO_NAME: LEVEL_TO_NAME_TYPE = {
-  0: "strat_name",
-  1: "lithology",
-  2: "lith_att",
-};
-
-function perform_dfs(
-  current_node: TreeData,
-  paragraph: string,
-  all_tags: AnnotateBlendTag[],
-  nodes_to_show: Set<string>,
-  mapping: RANGE_TO_LEVEL
-) {
-  // Extract the data
-  let parts = current_node.id.split("_");
-  let level = parseInt(parts[0]);
-  let start_idx = parseInt(parts[1]);
-  let end_idx = parseInt(parts[2]);
-  mapping[start_idx + "_" + end_idx] = "" + level;
-
-  // Determine if this node is selected or not
-  let tag: string = "";
-  let node_color: string = COLORS["gray"];
-  if (nodes_to_show.has(current_node.id)) {
-    // Record this node
-    tag = LEVEL_TO_NAME[level];
-    node_color = COLORS[tag];
-  }
-
-  all_tags.push({
-    start: start_idx,
-    end: end_idx,
-    text: paragraph.substring(start_idx, end_idx),
-    tag: tag,
-    color: node_color,
-  });
-
-  // Record the children
-  if (current_node.children) {
-    for (var node of current_node.children) {
-      perform_dfs(node, paragraph, all_tags, nodes_to_show, mapping);
-    }
-  }
-}
+import { buildHighlights } from "#/integrations/xdd/extractions/lib";
+import { Highlight } from "#/integrations/xdd/extractions/lib/types";
 
 export interface FeedbackTextProps {
-  formatted_text: TextData;
-  nodes_to_show: string[];
-  tree_data: TreeData[];
+  text: string;
+  selectedNodes: string[];
+  nodes: InternalEntity[];
   updateNodes: (nodes: string[]) => void;
+}
+
+function buildTags(highlights: Highlight[]): AnnotateBlendTag[] {
+  return highlights.map((highlight) => {
+    console.log(highlight);
+    return {
+      color: highlight.backgroundColor,
+      ...highlight,
+    };
+  });
 }
 
 export function FeedbackText(props: FeedbackTextProps) {
   // Convert input to tags
-  let nodes_set: Set<string> = new Set<string>(props.nodes_to_show);
-  let all_tags: AnnotateBlendTag[] = [];
-  let mapping: RANGE_TO_LEVEL = {};
-  for (var data of props.tree_data) {
-    perform_dfs(
-      data,
-      props.formatted_text.paragraph_text,
-      all_tags,
-      nodes_set,
-      mapping
-    );
-  }
+  const { text, selectedNodes, nodes, updateNodes } = props;
+  let allTags: AnnotateBlendTag[] = buildTags(buildHighlights(nodes));
 
-  const { updateNodes } = props;
+  const handleChange = (tagged_words: AnnotateBlendTag[]) => {};
 
-  const tag = "strat_name";
-  const handleChange = (tagged_words: AnnotateBlendTag[]) => {
-    if (updateNodes == null) {
-      return;
-    }
-
-    console.log("Tagged words: ", tagged_words);
-
-    let nodes_to_keep: string[] = [];
-    for (var curr_word of tagged_words) {
-      // Get the word level
-      let word_level: string = "0";
-      let search_key: string =
-        curr_word.start.toString() + "_" + curr_word.end.toString();
-      if (search_key in mapping) {
-        word_level = mapping[search_key];
-      }
-
-      // Record the node
-      let node_id = word_level + "_" + search_key;
-      nodes_to_keep.push(node_id);
-    }
-
-    updateNodes(nodes_to_keep);
-  };
+  console.log(allTags);
 
   return h(TextAnnotateBlend, {
     style: {
       fontSize: "1.2rem",
     },
-    content: props.formatted_text.paragraph_text,
+    content: text,
     onChange: handleChange,
-    value: all_tags,
-    getSpan: (span) => ({
-      ...span,
-      tag: tag,
-      color: COLORS[tag],
-    }),
+    value: allTags,
   });
 }

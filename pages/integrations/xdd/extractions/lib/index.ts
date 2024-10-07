@@ -2,21 +2,25 @@ import h from "./main.module.sass";
 import classNames from "classnames";
 import { Tag } from "@blueprintjs/core";
 import { asChromaColor } from "@macrostrat/color-utils";
+import { Entity, EntityExt, Highlight, EntityType } from "./types";
 
-function buildHighlights(entities, entityTypes): Highlight[] {
+export function buildHighlights(entities: EntityExt[]): Highlight[] {
   let highlights = [];
   for (const entity of entities) {
     highlights.push({
       start: entity.indices[0],
       end: entity.indices[1],
+      text: entity.name,
       backgroundColor: entity.type.color ?? "#ddd",
+      tag: entity.type.name,
     });
-    highlights.push(...buildHighlights(entity.children ?? [], entityTypes));
+    highlights.push(...buildHighlights(entity.children ?? []));
   }
   return highlights;
 }
 
 export function enhanceData(extractionData, models, entityTypes) {
+  console.log(extractionData, models);
   return {
     ...extractionData,
     model: models.get(extractionData.model_id),
@@ -26,7 +30,10 @@ export function enhanceData(extractionData, models, entityTypes) {
   };
 }
 
-function enhanceEntity(entity, entityTypes) {
+function enhanceEntity(
+  entity: Entity,
+  entityTypes: Map<number, EntityType>
+): EntityExt {
   return {
     ...entity,
     type: addColor(entityTypes.get(entity.type), entity.match != null),
@@ -34,7 +41,7 @@ function enhanceEntity(entity, entityTypes) {
   };
 }
 
-function addColor(entityType, match = false) {
+function addColor(entityType: EntityType, match = false) {
   let color = "#ddd";
   const name = entityType.name;
   if (name == "strat_name") color = "#be75c6";
@@ -50,9 +57,16 @@ function addColor(entityType, match = false) {
   return { ...entityType, color: color.css() };
 }
 
-export function ExtractionContext({ data, entityTypes }) {
+export function ExtractionContext({
+  data,
+  entityTypes,
+}: {
+  data: any;
+  entityTypes: Map<number, EntityType>;
+}) {
+  console.log(data);
   const { name } = data.model;
-  const highlights = buildHighlights(data.entities, entityTypes);
+  const highlights = buildHighlights(data.entities);
 
   return h("div", [
     h("p", h(HighlightedText, { text: data.paragraph_text, highlights })),
@@ -64,18 +78,7 @@ export function ExtractionContext({ data, entityTypes }) {
   ]);
 }
 
-type Match = any;
-
-interface Entity {
-  id: number;
-  name: string;
-  type?: number;
-  indices: [number, number];
-  children: Entity[];
-  match?: Match;
-}
-
-function ExtractionInfo({ data }: { data: Entity }) {
+function ExtractionInfo({ data }: { data: EntityExt }) {
   const children = data.children ?? [];
 
   const match = data.match ?? null;
@@ -139,13 +142,6 @@ function matchID(match) {
   }
   return null;
 }
-
-type Highlight = {
-  start: number;
-  end: number;
-  backgroundColor?: string;
-  borderColor?: string;
-};
 
 function HighlightedText(props: { text: string; highlights: Highlight[] }) {
   const { text, highlights = [] } = props;

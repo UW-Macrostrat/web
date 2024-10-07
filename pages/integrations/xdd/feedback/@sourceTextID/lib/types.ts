@@ -1,7 +1,11 @@
-export interface Entity {
+import { Entity, EntityExt } from "../../../extractions/lib/types";
+
+export { Entity };
+
+export interface InternalEntity extends EntityExt {
   term_type: string;
   txt_range: number[][];
-  children?: Entity[];
+  children: InternalEntity[];
 }
 
 export interface TextData {
@@ -16,7 +20,7 @@ export interface TextData {
 
 export interface Result {
   text: TextData;
-  strats?: Entity[];
+  entities?: InternalEntity[];
 }
 
 export interface TreeData {
