@@ -15,15 +15,13 @@ export interface FeedbackComponentProps {
 export function FeedbackComponent({ data }) {
   console.log(data);
   // Get the input arguments
-  let input_data: Result = makeDataConform(data);
   let [start_text, tree_entities]: [TextData, TreeData[]] =
-    formatForVisualization(input_data);
+    formatForVisualization(data);
   let no_nodes: string[] = [];
 
   // Create state variables
   let [current_tree, setTree] = useState(tree_entities);
   let [nodes_to_show, setNodesToShow] = useState(no_nodes);
-  let [current_text, setCurrentText] = useState(start_text);
 
   //
   // Processing update from the text visualization
@@ -45,7 +43,7 @@ export function FeedbackComponent({ data }) {
       // Create the new node
       let new_id: string =
         "0_" + start_idx.toString() + "_" + end_idx.toString();
-      let name: string = current_text.paragraph_text.substring(
+      let name: string = start_text.paragraph_text.substring(
         start_idx,
         end_idx
       );
@@ -152,7 +150,7 @@ export function FeedbackComponent({ data }) {
 
   return h("div", [
     h(FeedbackText, {
-      text: current_text.paragraph_text,
+      text: start_text.paragraph_text,
       nodes: data.entities,
       updateNodes: process_update,
       selectedNodes: nodes_to_show,
@@ -192,22 +190,6 @@ function makeEntityConform(entity: Entity): InternalEntity {
   };
 }
 
-function mergeIdenticalEntities(entities) {
-  const entityMap = new Map();
-
-  for (const entity of entities) {
-    const key = entity.name;
-    if (entityMap.has(key)) {
-      console.log(entityMap.get(key));
-      entityMap.get(key).txt_range.push(entity.indices[0]);
-    } else {
-      entityMap.set(key, entity);
-    }
-  }
-
-  return Array.from(entityMap.values());
-}
-
 function processEntity(
   paragraph: TextData,
   entity: Entity,
@@ -235,10 +217,12 @@ function processEntity(
 }
 
 function formatForVisualization(initial_tree: Result): [TextData, TreeData[]] {
-  let paragraph: TextData = initial_tree.text;
+  const { text, entities } = makeDataConform(initial_tree);
+
+  let paragraph: TextData = text;
   let tree_entities: TreeData[] = [];
-  if (initial_tree.entities) {
-    for (const curr_strat of initial_tree.entities) {
+  if (entities != null) {
+    for (const curr_strat of entities) {
       tree_entities.push(processEntity(paragraph, curr_strat, 0));
     }
   }
