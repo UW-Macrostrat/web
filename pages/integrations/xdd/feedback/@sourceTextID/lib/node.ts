@@ -1,6 +1,7 @@
 import { NodeApi, TreeApi } from "react-arborist";
 import { TreeData } from "./types";
-import h from "@macrostrat/hyper";
+import h from "./feedback.module.sass";
+import { EntityTag } from "../../../extractions/lib";
 
 function isSelected(search_node: TreeData, tree_node: TreeData) {
   if (search_node.id == tree_node.id) {
@@ -26,26 +27,14 @@ function isNodeSelected(node: NodeApi<TreeData>, tree: TreeApi<TreeData>) {
   return false;
 }
 
-type COLOR_TYPE = {
-  [key: string]: string;
-  0: string;
-  1: string;
-  2: string;
-};
-
-const COLORS: COLOR_TYPE = {
-  0: "rgb(179, 245, 66)",
-  1: "#42f5f5",
-  2: "#4b46cd",
-};
-
-const Node = ({ node, style, dragHandle, tree }: any) => {
+function Node({ node, style, dragHandle, tree }: any) {
   let selected: boolean = isNodeSelected(node, tree);
-  let nameStyle = selected ? { backgroundColor: null } : {};
 
-  return h("div", { style: { ...style, ...nameStyle }, ref: dragHandle }, [
-    node.data.name,
-  ]);
-};
+  return h(
+    "div.node",
+    { style, ref: dragHandle },
+    h(EntityTag, { data: node.data })
+  );
+}
 
 export default Node;

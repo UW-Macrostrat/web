@@ -42,15 +42,7 @@ function enhanceEntity(
 }
 
 function addColor(entityType: EntityType, match = false) {
-  let color = "#ddd";
-  const name = entityType.name;
-  if (name == "strat_name") color = "#be75c6";
-
-  if (name == "lith") color = "#74ea41";
-
-  if (name == "strat_noun") color = "#be75c6";
-
-  if (name == "lith_att") color = "#e8e534";
+  let color = entityType.color ?? "#ddd";
 
   color = asChromaColor(color).brighten(match ? 1 : 2);
 
@@ -64,13 +56,11 @@ export function ExtractionContext({
   data: any;
   entityTypes: Map<number, EntityType>;
 }) {
-  console.log(data);
-  const { name } = data.model;
   const highlights = buildHighlights(data.entities);
 
   return h("div", [
     h("p", h(HighlightedText, { text: data.paragraph_text, highlights })),
-    h("p.model-name", ["Model: ", h("code.bp5-code", name)]),
+    h(ModelInfo, { data: data.model }),
     h(
       "ul.entities",
       data.entities.map((d) => h(ExtractionInfo, { data: d }))
@@ -78,26 +68,37 @@ export function ExtractionContext({
   ]);
 }
 
+export function ModelInfo({ data }) {
+  return h("p.model-name", ["Model: ", h("code.bp5-code", data.name)]);
+}
+
+export function EntityTag({ data }) {
+  const { name, type, match } = data;
+  const className = classNames(
+    {
+      matched: match != null,
+      type: data.type.name,
+    },
+    "entity"
+  );
+
+  return h(
+    Tag,
+    { style: { backgroundColor: type.color ?? "#ddd" }, className },
+    [
+      h("span.name", name),
+      ": ",
+      h("code.type", type.name),
+      h(Match, { data: match }),
+    ]
+  );
+}
+
 function ExtractionInfo({ data }: { data: EntityExt }) {
   const children = data.children ?? [];
 
-  const match = data.match ?? null;
-  const className = classNames({
-    matched: match != null,
-    type: data.type.name,
-  });
-
-  return h("li.entity", { className }, [
-    h(
-      Tag,
-      { style: { backgroundColor: data.type.color ?? "#ddd", color: "#222" } },
-      [
-        h("span.name", data.name),
-        ":  ",
-        h("code.type", null, data.type.name),
-        h(Match, { data: match }),
-      ]
-    ),
+  return h("li.entity-row", [
+    h(EntityTag, { data }),
     h.if(children.length > 0)([
       h(
         "ul.children",

@@ -5,6 +5,7 @@ import Node from "./node";
 import { FeedbackText } from "./text-visualizer";
 import { Entity, Result, TextData, TreeData, InternalEntity } from "./types";
 import { useRef, useState } from "react";
+import { ModelInfo } from "#/integrations/xdd/extractions/lib";
 
 const h = hyper.styled(styles);
 
@@ -13,14 +14,13 @@ export interface FeedbackComponentProps {
 }
 
 export function FeedbackComponent({ data }) {
-  console.log(data);
   // Get the input arguments
-  let [start_text, tree_entities]: [TextData, TreeData[]] =
+  let [start_text, entities]: [TextData, TreeData[]] =
     formatForVisualization(data);
   let no_nodes: string[] = [];
 
   // Create state variables
-  let [current_tree, setTree] = useState(tree_entities);
+  let [current_tree, setTree] = useState(entities);
   let [selectedNodes, setNodesToShow] = useState(no_nodes);
 
   //
@@ -155,11 +155,12 @@ export function FeedbackComponent({ data }) {
       updateNodes: process_update,
       selectedNodes,
     }),
+    h(ModelInfo, { data: data.model }),
     h("div", [
-      h("p.help", null, [
-        "Click on a entity to see its type as well as the type of its children.",
-        "You can also drag and drop entities up and down the hierarchy, thus changing their type.",
-      ]),
+      // h("p.help", null, [
+      //   "Click on a entity to see its type as well as the type of its children.",
+      //   "You can also drag and drop entities up and down the hierarchy, thus changing their type.",
+      // ]),
       h(Tree, {
         data: current_tree,
         ref: treeRef,
