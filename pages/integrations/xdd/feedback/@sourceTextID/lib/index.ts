@@ -4,8 +4,9 @@ import { NodeApi, Tree } from "react-arborist";
 import Node from "./node";
 import { FeedbackText } from "./text-visualizer";
 import { Entity, Result, TextData, TreeData, InternalEntity } from "./types";
-import { useRef, useState } from "react";
+import { useMemo, useRef } from "react";
 import { ModelInfo } from "#/integrations/xdd/extractions/lib";
+import { useUpdatableTree } from "./edit-state";
 
 const h = hyper.styled(styles);
 
@@ -13,21 +14,18 @@ export interface FeedbackComponentProps {
   // Add props here
 }
 
-export function FeedbackComponent({ data }) {
+export function FeedbackComponent({ entities = [], text, model }) {
   // Get the input arguments
-  let [start_text, entities]: [TextData, TreeData[]] =
-    formatForVisualization(data);
-  let no_nodes: string[] = [];
 
-  // Create state variables
-  let [current_tree, setTree] = useState(entities);
-  let [selectedNodes, setNodesToShow] = useState(no_nodes);
+  const [state, dispatch] = useUpdatableTree(entities.map(processEntity));
+
+  const { selectedNodes, tree } = state;
 
   //
   // Processing update from the text visualization
   let process_update = (nodes: string[]) => {
     let nodes_set = new Set<string>(nodes);
-    let old_root = current_tree[0];
+    let old_root = tree[0];
     let new_root = JSON.parse(JSON.stringify(old_root));
 
     // Update the tree
@@ -64,14 +62,14 @@ export function FeedbackComponent({ data }) {
 
   // If the user rename the tree
   const treeRef = useRef();
-  const onMove = ({ dragIds, parentId, index }: any) => {
+  const onMove0 = ({ dragIds, parentId, index }: any) => {
     // Cast the input data
     let input_children_ids: string[] = dragIds;
     let input_parent_id: string = parentId;
     let input_index: number = index;
 
     // Create the new root
-    let old_root = current_tree[0];
+    let old_root = tree[0];
     let new_root = JSON.parse(JSON.stringify(old_root));
 
     // Remove the children from there location
@@ -109,11 +107,11 @@ export function FeedbackComponent({ data }) {
     setTree([new_root]);
   };
 
-  const onDelete = ({ ids }: any) => {
+  const onDelete0 = ({ ids }: any) => {
     let delete_ids: string[] = ids;
 
     // Create the new root
-    let old_root = current_tree[0];
+    let old_root = tree[0];
     let new_root = JSON.parse(JSON.stringify(old_root));
 
     // Remove the children from there location
@@ -139,7 +137,7 @@ export function FeedbackComponent({ data }) {
     setTree([new_root]);
   };
 
-  const onSelect = (nodes: NodeApi<TreeData>[]) => {
+  const onSelect0 = (nodes: NodeApi<TreeData>[]) => {
     let nodes_to_show = new Set<string>();
     for (const curr_node of nodes) {
       recordNode(curr_node.data, nodes_to_show);
@@ -150,23 +148,32 @@ export function FeedbackComponent({ data }) {
 
   return h("div", [
     h(FeedbackText, {
-      text: start_text.paragraph_text,
-      nodes: data.entities,
+      text,
+      nodes: entities,
       updateNodes: process_update,
       selectedNodes,
     }),
-    h(ModelInfo, { data: data.model }),
+    h(ModelInfo, { data: model }),
     h("div", [
       // h("p.help", null, [
       //   "Click on a entity to see its type as well as the type of its children.",
       //   "You can also drag and drop entities up and down the hierarchy, thus changing their type.",
       // ]),
       h(Tree, {
-        data: current_tree,
+        data: tree,
         ref: treeRef,
-        onMove: onMove,
-        onDelete: onDelete,
-        onSelect: onSelect,
+        onMove({ dragIds, parentId, index }) {
+          dispatch({
+            type: "move-node",
+            payload: { dragIds, parentId, index },
+          });
+        },
+        onDelete({ ids }) {
+          dispatch({ type: "delete-node", payload: { ids } });
+        },
+        onSelect(nodes) {
+          dispatch({ type: "select-node", payload: nodes });
+        },
         children: Node,
       }),
     ]),
