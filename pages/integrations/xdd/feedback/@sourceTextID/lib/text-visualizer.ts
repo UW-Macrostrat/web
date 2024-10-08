@@ -13,7 +13,6 @@ export interface FeedbackTextProps {
 
 function buildTags(highlights: Highlight[]): AnnotateBlendTag[] {
   return highlights.map((highlight) => {
-    console.log(highlight);
     return {
       color: highlight.backgroundColor,
       ...highlight,
@@ -26,9 +25,7 @@ export function FeedbackText(props: FeedbackTextProps) {
   const { text, selectedNodes, nodes, updateNodes } = props;
   let allTags: AnnotateBlendTag[] = buildTags(buildHighlights(nodes));
 
-  const handleChange = (tagged_words: AnnotateBlendTag[]) => {
-    console.log("changing tags", tagged_words);
-  };
+  const handleChange = (tagged_words: AnnotateBlendTag[]) => {};
 
   return h(TextAnnotateBlend, {
     style: {

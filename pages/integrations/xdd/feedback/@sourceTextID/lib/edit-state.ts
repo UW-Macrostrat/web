@@ -29,6 +29,7 @@ export function useUpdatableTree(
 }
 
 function treeReducer(state: TreeState, action: TreeAction) {
+  console.log(action);
   switch (action.type) {
     case "update":
       return action.payload;
@@ -39,13 +40,20 @@ function treeReducer(state: TreeState, action: TreeAction) {
         action.payload.dragIds
       );
       // Insert the removed nodes into the new parent
-      const newParent = newTree.find(
-        (node) => node.id === action.payload.parentId
-      );
+      let collection = newTree;
 
-      if (newParent) {
-        newParent.children.splice(action.payload.index, 0, ...removedNodes);
+      if (action.payload.parentId) {
+        const newParent = newTree.find(
+          (node) => node.id === action.payload.parentId
+        );
+        if (newParent == null) {
+          return state;
+        }
+        collection = newParent.children;
       }
+
+      collection.splice(action.payload.index, 0, ...removedNodes);
+      console.log(state.tree, newTree);
 
       return { ...state, tree: newTree };
     case "delete-node":
@@ -70,9 +78,11 @@ function popNodes(tree: TreeData[], ids: string[]): [TreeData[], TreeData[]] {
       removedNodes.push(node);
     } else {
       // Recurse into children
-      let [newChildren, removedChildren] = popNodes(node.children ?? [], ids);
-      node.children = newChildren;
-      removedNodes.push(...removedChildren);
+      if (node.children) {
+        let [newChildren, removedChildren] = popNodes(node.children, ids);
+        node.children = newChildren;
+        removedNodes.push(...removedChildren);
+      }
       newTree.push(node);
     }
   }
