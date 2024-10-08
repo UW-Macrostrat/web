@@ -86,9 +86,9 @@ export function EntityTag({ data }) {
     Tag,
     { style: { backgroundColor: type.color ?? "#ddd" }, className },
     [
-      h("span.name", name),
-      ": ",
-      h("code.type", type.name),
+      h("code.entity-type.bp5-code", type.name),
+      " ",
+      h("span.entity-name", name),
       h(Match, { data: match }),
     ]
   );

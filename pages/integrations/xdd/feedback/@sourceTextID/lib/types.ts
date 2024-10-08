@@ -24,7 +24,7 @@ export interface Result {
 }
 
 export interface TreeData {
-  id: string;
+  id: number;
   name: string;
   children: TreeData[];
 }

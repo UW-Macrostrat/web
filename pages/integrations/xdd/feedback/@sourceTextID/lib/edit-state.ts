@@ -1,20 +1,20 @@
 import { TreeData } from "./types";
 import { Dispatch, useReducer } from "react";
+import update, { Spec } from "immutability-helper";
 
 interface TreeState {
   initialTree: TreeData[];
   tree: TreeData[];
-  selectedNodes: string[];
+  selectedNodes: number[];
 }
 
 type TreeAction =
-  | { type: "update"; payload: TreeState }
   | {
       type: "move-node";
-      payload: { dragIds: string[]; parentId: string; index: number };
+      payload: { dragIds: number[]; parentId: number; index: number };
     }
-  | { type: "delete-node"; payload: { ids: string[] } }
-  | { type: "select-node"; payload: { ids: string[] } };
+  | { type: "delete-node"; payload: { ids: number[] } }
+  | { type: "select-node"; payload: { ids: number[] } };
 
 export function useUpdatableTree(
   initialTree: TreeData[]
@@ -31,44 +31,71 @@ export function useUpdatableTree(
 function treeReducer(state: TreeState, action: TreeAction) {
   console.log(action);
   switch (action.type) {
-    case "update":
-      return action.payload;
     case "move-node":
       // For each node in the tree, if the node is in the dragIds, remove it from the tree and collect it
-      const [newTree, removedNodes] = popNodes(
+      const [newTree, removedNodes] = removeNodes(
         state.tree,
         action.payload.dragIds
       );
-      // Insert the removed nodes into the new parent
-      let collection = newTree;
+      console.log(removedNodes);
 
+      let keyPath: number[] = [];
       if (action.payload.parentId) {
-        const newParent = newTree.find(
-          (node) => node.id === action.payload.parentId
-        );
-        if (newParent == null) {
-          return state;
-        }
-        collection = newParent.children;
+        keyPath = findNode(newTree, action.payload.parentId);
       }
 
-      collection.splice(action.payload.index, 0, ...removedNodes);
-      console.log(state.tree, newTree);
+      // Add removed nodes to the new tree at the correct location
+      let updateSpec = buildNestedSpec(keyPath, {
+        $splice: [[action.payload.index, 0, ...removedNodes]],
+      });
 
-      return { ...state, tree: newTree };
+      console.log("updateSpec", newTree, keyPath, updateSpec);
+
+      return { ...state, tree: update(newTree, updateSpec) };
     case "delete-node":
       // For each node in the tree, if the node is in the ids, remove it from the tree
-      const [newTree2, _] = popNodes(state.tree, action.payload.ids);
+      const [newTree2, _] = removeNodes(state.tree, action.payload.ids);
       return { ...state, tree: newTree2 };
     case "select-node":
       // For each node in the tree, if the node is in the ids, select it
       return state;
-    default:
-      return state;
   }
 }
 
-function popNodes(tree: TreeData[], ids: string[]): [TreeData[], TreeData[]] {
+function buildNestedSpec(
+  keyPath: number[],
+  innerSpec: Spec<any>
+): Spec<TreeData[]> {
+  // Build a nested object from a key path
+  let currentSpec = innerSpec;
+
+  // Walk down the key path, building a nested object
+  for (let i = keyPath.length - 1; i >= 0; i--) {
+    currentSpec = { [keyPath[i]]: { children: currentSpec } };
+  }
+  return currentSpec;
+  // Since we don't have a "children" key at the root, we make the top-level spec an array
+}
+
+function findNode(tree: TreeData[], id: number): number[] | null {
+  // Find the index of the node with the given id in the tree, returning the key path
+  for (let i = 0; i < tree.length; i++) {
+    if (tree[i].id == id) {
+      return [i];
+    } else if (tree[i].children) {
+      let path = findNode(tree[i].children, id);
+      if (path != null) {
+        return [i, ...path];
+      }
+    }
+  }
+  return null;
+}
+
+function removeNodes(
+  tree: TreeData[],
+  ids: number[]
+): [TreeData[], TreeData[]] {
   /** Remove nodes with the given ids from the tree and return the new tree and the removed nodes */
   let newTree: TreeData[] = [];
   let removedNodes: TreeData[] = [];
@@ -79,8 +106,8 @@ function popNodes(tree: TreeData[], ids: string[]): [TreeData[], TreeData[]] {
     } else {
       // Recurse into children
       if (node.children) {
-        let [newChildren, removedChildren] = popNodes(node.children, ids);
-        node.children = newChildren;
+        let [newChildren, removedChildren] = removeNodes(node.children, ids);
+        node = { ...node, children: newChildren };
         removedNodes.push(...removedChildren);
       }
       newTree.push(node);
