@@ -224,14 +224,14 @@ function paintProperties(term: string | null, grayColor: number) {
   return {
     "fill-color": [
       "interpolate",
-      ["exponential", 1.2],
+      ["exponential", 1.5],
       ["get", "similarity"],
       0,
-      `rgba(50, 50, 200, 0.02)`,
+      "rgba(50, 50, 200, 0.02)",
       0.5,
-      `rgba(50, 50, 200, 0.4)`,
+      "rgba(50, 50, 200, 0.4)",
       1,
-      "rgba(255, 0, 0, 0.5)",
+      "rgba(255, 0, 0, 0.8)",
     ],
   };
 }

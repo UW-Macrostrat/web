@@ -23,30 +23,50 @@ export function FeedbackComponent({ entities = [], text, model }) {
   return h("div", [
     h(FeedbackText, {
       text,
-      nodes: entities,
+      nodes: tree,
       updateNodes() {},
       selectedNodes,
     }),
     h(ModelInfo, { data: model }),
-    h("div", [
-      h(Tree, {
-        data: tree,
-        onMove({ dragIds, parentId, index }) {
-          dispatch({
-            type: "move-node",
-            payload: { dragIds, parentId, index },
-          });
-        },
-        onDelete({ ids }) {
-          dispatch({ type: "delete-node", payload: { ids } });
-        },
-        onSelect(nodes) {
-          dispatch({ type: "select-node", payload: nodes });
-        },
-        children: Node,
-      }),
-    ]),
+    h(Tree, {
+      data: tree,
+      onMove({ dragIds, parentId, index }) {
+        dispatch({
+          type: "move-node",
+          payload: {
+            dragIds: dragIds.map((d) => parseInt(d)),
+            parentId: parentId ? parseInt(parentId) : null,
+            index,
+          },
+        });
+      },
+      onDelete({ ids }) {
+        dispatch({
+          type: "delete-node",
+          payload: { ids: ids.map((d) => parseInt(d)) },
+        });
+      },
+      onSelect(nodes) {
+        const ids = nodes.map((d) => parseInt(d.id));
+        dispatch({ type: "select-node", payload: { ids } });
+      },
+      children: Node,
+      idAccessor(d: TreeData) {
+        return d.id.toString();
+      },
+    }),
   ]);
+}
+
+function _Tree({ data, onMove, onDelete, onSelect, children }) {
+  /* Tree that allows integer IDs for nodes */
+  return h(Tree, {
+    data: data,
+    onMove,
+    onDelete,
+    onSelect,
+    children,
+  });
 }
 
 function processEntity(entity: Entity): InternalEntity {
@@ -54,6 +74,6 @@ function processEntity(entity: Entity): InternalEntity {
     ...entity,
     term_type: entity.type.name,
     txt_range: [entity.indices],
-    children: entity.children?.map(processEntity),
+    children: entity.children?.map(processEntity) ?? [],
   };
 }

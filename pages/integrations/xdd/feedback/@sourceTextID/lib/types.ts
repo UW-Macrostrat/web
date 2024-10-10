@@ -6,6 +6,8 @@ export interface InternalEntity extends EntityExt {
   term_type: string;
   txt_range: number[][];
   children: InternalEntity[];
+  orig_id: number;
+  id: string;
 }
 
 export interface TextData {

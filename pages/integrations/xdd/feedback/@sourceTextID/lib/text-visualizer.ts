@@ -25,7 +25,9 @@ export function FeedbackText(props: FeedbackTextProps) {
   const { text, selectedNodes, nodes, updateNodes } = props;
   let allTags: AnnotateBlendTag[] = buildTags(buildHighlights(nodes));
 
-  const handleChange = (tagged_words: AnnotateBlendTag[]) => {};
+  const handleChange = (taggedWords: AnnotateBlendTag[]) => {
+    console.log(taggedWords);
+  };
 
   return h(TextAnnotateBlend, {
     style: {

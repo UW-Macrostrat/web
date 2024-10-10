@@ -1,7 +1,7 @@
 type Match = any;
 
 export interface Entity {
-  id: number;
+  id: number | string;
   name: string;
   type?: number;
   indices: [number, number];
@@ -22,6 +22,7 @@ export type Highlight = {
   text?: string;
   backgroundColor?: string;
   borderColor?: string;
+  id: number;
 };
 
 export interface EntityExt extends Omit<Entity, "type" | "children"> {

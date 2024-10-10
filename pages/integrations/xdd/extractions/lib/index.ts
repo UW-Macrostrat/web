@@ -13,6 +13,7 @@ export function buildHighlights(entities: EntityExt[]): Highlight[] {
       text: entity.name,
       backgroundColor: entity.type.color ?? "#ddd",
       tag: entity.type.name,
+      id: entity.id,
     });
     highlights.push(...buildHighlights(entity.children ?? []));
   }

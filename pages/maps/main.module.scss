@@ -15,9 +15,10 @@
 .source-id {
   &::before {
     content: "#";
-    color: --text-dim-color;
+    color: var(--text-dim-color);
   }
-  color: --text-subtle-color;
+
+  color: var(--text-subtle-color);
   min-width: 3em;
   display: inline-block;
 }
@@ -26,6 +27,7 @@
   list-style: none;
   padding: 0;
   margin: 0;
+
   li {
     padding: 0.5em 0;
   }
