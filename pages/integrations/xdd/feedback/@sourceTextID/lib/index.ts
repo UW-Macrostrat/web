@@ -23,8 +23,8 @@ export function FeedbackComponent({ entities = [], text, model }) {
   return h("div", [
     h(FeedbackText, {
       text,
+      dispatch,
       nodes: tree,
-      updateNodes() {},
       selectedNodes,
     }),
     h(ModelInfo, { data: model }),
@@ -58,14 +58,13 @@ export function FeedbackComponent({ entities = [], text, model }) {
   ]);
 }
 
-function _Tree({ data, onMove, onDelete, onSelect, children }) {
-  /* Tree that allows integer IDs for nodes */
-  return h(Tree, {
-    data: data,
-    onMove,
-    onDelete,
-    onSelect,
-    children,
+function updateIDType(tree: TreeData[]) {
+  return tree.map((d, i) => {
+    return {
+      ...d,
+      id: i.toString(),
+      children: updateIDType(d.children),
+    };
   });
 }
 

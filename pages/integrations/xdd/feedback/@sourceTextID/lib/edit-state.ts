@@ -16,9 +16,11 @@ type TreeAction =
   | { type: "delete-node"; payload: { ids: number[] } }
   | { type: "select-node"; payload: { ids: number[] } };
 
+export type TreeDispatch = Dispatch<TreeAction>;
+
 export function useUpdatableTree(
   initialTree: TreeData[]
-): [TreeState, Dispatch<TreeAction>] {
+): [TreeState, TreeDispatch] {
   const [state, dispatch] = useReducer(treeReducer, {
     initialTree,
     tree: initialTree,
@@ -29,6 +31,7 @@ export function useUpdatableTree(
 }
 
 function treeReducer(state: TreeState, action: TreeAction) {
+  console.log(action);
   switch (action.type) {
     case "move-node":
       // For each node in the tree, if the node is in the dragIds, remove it from the tree and collect it
@@ -36,7 +39,6 @@ function treeReducer(state: TreeState, action: TreeAction) {
         state.tree,
         action.payload.dragIds
       );
-      console.log(removedNodes);
 
       let keyPath: number[] = [];
       if (action.payload.parentId) {
@@ -48,16 +50,13 @@ function treeReducer(state: TreeState, action: TreeAction) {
         $splice: [[action.payload.index, 0, ...removedNodes]],
       });
 
-      console.log("updateSpec", newTree, keyPath, updateSpec);
-
       return { ...state, tree: update(newTree, updateSpec) };
     case "delete-node":
       // For each node in the tree, if the node is in the ids, remove it from the tree
       const [newTree2, _] = removeNodes(state.tree, action.payload.ids);
       return { ...state, tree: newTree2 };
     case "select-node":
-      // For each node in the tree, if the node is in the ids, select it
-      return state;
+      return { ...state, selectedNodes: action.payload.ids };
   }
 }
 
