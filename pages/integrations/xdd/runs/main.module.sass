@@ -1,0 +1,63 @@
+.main
+  padding: 2em 8em
+  display: flex
+  flex-direction: column
+  position: fixed
+  width: 100vw
+  height: 100vh
+  top: 0
+  left: 0
+
+.data-sheet-container
+  display: flex
+  flex-direction: column
+  flex: 1
+  position: relative
+  min-height: 0
+
+.lithology
+  font-weight: bold
+  display: inline-block
+  padding: 0 0.5em
+  border-radius: 0.5em
+
+.inline-lithology .lithology
+  line-height: 1.2em
+
+.basis-panel
+  :global(.bp5-tag)
+    margin: 0 0.5em 0.5em 0
+
+  td
+    vertical-align: top
+
+  th
+    text-align: left
+    font-weight: 400
+    font-size: 0.9em
+    font-style: italic
+    color: var(--secondary-color)
+
+.basis-panel, .long-text
+  max-width: 20em
+  padding: 8px
+  max-height: 30em
+  overflow-y: scroll
+  pointer-events: all
+
+.description
+  font-style: italic
+
+
+.tag-header
+  font-weight: bold
+  text-transform: small-caps
+  font-size: 0.8em
+  color: var(--secondary-color)
+
+.basis-col
+  max-width: 15em
+
+.liths :global(.bp5-tag)
+  padding: 0px 4px
+  min-height: 16px

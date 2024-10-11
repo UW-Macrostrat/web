@@ -1,10 +1,6 @@
 import h from "./main.module.sass";
 import { mapboxAccessToken, tileserverDomain } from "@macrostrat-web/settings";
-import {
-  buildQueryString,
-  useDarkMode,
-  useStoredState,
-} from "@macrostrat/ui-components";
+import { useDarkMode } from "@macrostrat/ui-components";
 import { Select, SelectProps } from "@blueprintjs/select";
 import mapboxgl from "mapbox-gl";
 import { useCallback, useState, useEffect, useMemo } from "react";
@@ -158,14 +154,6 @@ export function Page() {
   );
 }
 
-function isValidMapPosition(data: any): boolean {
-  if (data == null) return false;
-  if (typeof data !== "object") return false;
-  if (data?.camera?.lng == null) return false;
-  if (data?.camera?.lat == null) return false;
-  return true;
-}
-
 interface StyleParams {
   inDarkMode: boolean;
   term: string | null;
@@ -236,14 +224,14 @@ function paintProperties(term: string | null, grayColor: number) {
   return {
     "fill-color": [
       "interpolate",
-      ["exponential", 1.2],
+      ["exponential", 1.5],
       ["get", "similarity"],
       0,
-      `rgba(50, 50, 200, 0.02)`,
+      "rgba(50, 50, 200, 0.02)",
       0.5,
-      `rgba(50, 50, 200, 0.4)`,
+      "rgba(50, 50, 200, 0.4)",
       1,
-      "rgba(255, 0, 0, 0.5)",
+      "rgba(255, 0, 0, 0.8)",
     ],
   };
 }
@@ -252,9 +240,10 @@ function tileserverURL(term: string | null, model: string | null) {
   if (term == null || term.length < 3) {
     return tileserverDomain + "/carto/{z}/{x}/{y}";
   }
-  let termSuffix = "?term=" + term;
+  let suffix = "?term=" + term;
+
   let model_ = model ?? "cmbert";
-  return tileserverDomain + `/search/${model_}/tiles/{z}/{x}/{y}` + termSuffix;
+  return tileserverDomain + `/search/${model_}/tiles/{z}/{x}/{y}` + suffix;
 }
 
 function getStartingText() {
@@ -360,6 +349,7 @@ function useMapPosition(startPos) {
     setMapPosition_(position);
     let params = getQueryString(window.location.search) ?? {};
     applyMapPositionToHash(params, position);
+    console.log(params);
     setQueryString(params);
   }, []);
 
