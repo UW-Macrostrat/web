@@ -25,6 +25,7 @@ type TreeAction =
     }
   | { type: "delete-node"; payload: { ids: number[] } }
   | { type: "select-node"; payload: { ids: number[] } }
+  | { type: "toggle-node-selected"; payload: { ids: number[] } }
   | { type: "create-node"; payload: TextRange }
   | { type: "select-entity-type"; payload: EntityType };
 
@@ -95,6 +96,16 @@ function treeReducer(state: TreeState, action: TreeAction) {
       };
     case "select-node":
       return { ...state, selectedNodes: action.payload.ids };
+
+    case "toggle-node-selected":
+      const nodesToAdd = action.payload.ids.filter(
+        (id) => !state.selectedNodes.includes(id)
+      );
+      const nodesToKeep = state.selectedNodes.filter(
+        (id) => !action.payload.ids.includes(id)
+      );
+      return { ...state, selectedNodes: [...nodesToKeep, ...nodesToAdd] };
+
     case "create-node":
       const newId = state.lastInternalId - 1;
       const { text, start, end } = action.payload;

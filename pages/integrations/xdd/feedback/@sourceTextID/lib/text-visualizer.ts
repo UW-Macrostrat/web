@@ -21,7 +21,6 @@ function buildTags(
   selectedNodes: number[]
 ): AnnotateBlendTag[] {
   return highlights.map((highlight) => {
-    console.log(selectedNodes);
     const isSelected =
       selectedNodes.includes(highlight.id) || selectedNodes.length === 0;
     let color = highlight.backgroundColor;
@@ -66,14 +65,16 @@ export function FeedbackText(props: FeedbackTextProps) {
         return;
       }
 
-      const currentTags = tags.filter((d) => "id" in d).map((d) => d.id);
+      const tagIDs = new Set(tags.map((d) => d.id));
+      const removedIds = allTags.map((d) => d.id).filter((d) => !tagIDs.has(d));
 
-      const updatedIds = currentTags.map((d) => d.id);
       /* Find the id that was removed: that is the one that will be selected
        (we are hijacking the 'click to delete' functionality to select instead) */
-      const removedIds = currentTags.filter((d) => !updatedIds.includes(d));
       if (removedIds.length > 0) {
-        dispatch({ type: "select-node", payload: { ids: removedIds } });
+        dispatch({
+          type: "toggle-node-selected",
+          payload: { ids: removedIds },
+        });
       }
     },
     [allTags, text]
