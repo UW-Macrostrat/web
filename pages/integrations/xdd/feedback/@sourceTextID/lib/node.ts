@@ -4,21 +4,11 @@ import h from "./feedback.module.sass";
 import { EntityTag } from "../../../extractions/lib";
 
 function isSelected(searchNode: TreeData, treeNode: TreeData) {
-  if (searchNode.id == treeNode.id) {
-    return true;
-  }
-
-  for (const child of treeNode.children) {
-    if (isSelected(searchNode, child)) {
-      return true;
-    }
-  }
-
-  return false;
+  return searchNode.id == treeNode.id;
+  // We could also select children of the search node here if we wanted to
 }
 
 function isNodeSelected(node: NodeApi<TreeData>, tree: TreeApi<TreeData>) {
-  console.log(tree.selectedNodes);
   // We treat no selection as all nodes being active. We may add some nuance later
   if (tree.selectedNodes.length == 0) {
     return true;

@@ -53,11 +53,42 @@ function treeReducer(state: TreeState, action: TreeAction) {
       return { ...state, tree: update(newTree, updateSpec) };
     case "delete-node":
       // For each node in the tree, if the node is in the ids, remove it from the tree
-      const [newTree2, _] = removeNodes(state.tree, action.payload.ids);
-      return { ...state, tree: newTree2 };
+      const [newTree2, _removedNodes] = removeNodes(
+        state.tree,
+        action.payload.ids
+      );
+      // Get children of the removed nodes
+      // If children are not present elsewhere in the tree, insert them
+
+      const children = _removedNodes
+        .flatMap((node) => node.children ?? [])
+        .filter((child) => !nodeIsInTree(newTree2, child.id));
+
+      // Reset the selection
+
+      return {
+        ...state,
+        tree: [...newTree2, ...children],
+        selectedNodes: state.selectedNodes.filter(
+          (id) => !action.payload.ids.includes(id)
+        ),
+      };
     case "select-node":
       return { ...state, selectedNodes: action.payload.ids };
   }
+}
+
+function nodeIsInTree(tree: TreeData[], id: number): boolean {
+  for (let node of tree) {
+    if (node.id == id) {
+      return true;
+    } else if (node.children) {
+      if (nodeIsInTree(node.children, id)) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 function buildNestedSpec(
