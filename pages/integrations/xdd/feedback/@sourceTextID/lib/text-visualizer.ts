@@ -66,10 +66,12 @@ export function FeedbackText(props: FeedbackTextProps) {
         return;
       }
 
-      const updatedIds = tags.map((d) => d.id);
+      const currentTags = tags.filter((d) => "id" in d).map((d) => d.id);
+
+      const updatedIds = currentTags.map((d) => d.id);
       /* Find the id that was removed: that is the one that will be selected
        (we are hijacking the 'click to delete' functionality to select instead) */
-      const removedIds = allTags.filter((d) => !updatedIds.includes(d));
+      const removedIds = currentTags.filter((d) => !updatedIds.includes(d));
       if (removedIds.length > 0) {
         dispatch({ type: "select-node", payload: { ids: removedIds } });
       }
