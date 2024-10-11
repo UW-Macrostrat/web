@@ -6,7 +6,11 @@ import { FeedbackText } from "./text-visualizer";
 import { Entity, Result, TextData, TreeData, InternalEntity } from "./types";
 import { ModelInfo } from "#/integrations/xdd/extractions/lib";
 import { useUpdatableTree } from "./edit-state";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { ValueWithUnit } from "@macrostrat/map-interface";
+import { DataField } from "~/components/unit-details";
+import { Card } from "@blueprintjs/core";
+import { OmniboxSelector } from "#/integrations/xdd/feedback/@sourceTextID/lib/type-selector";
 
 const h = hyper.styled(styles);
 
@@ -30,7 +34,7 @@ export function FeedbackComponent({ entities = [], text, model, entityTypes }) {
     entityTypes
   );
 
-  const { selectedNodes, tree } = state;
+  const { selectedNodes, tree, selectedEntityType } = state;
 
   return h("div", [
     h(FeedbackText, {
@@ -40,11 +44,22 @@ export function FeedbackComponent({ entities = [], text, model, entityTypes }) {
       selectedNodes,
     }),
     h(ModelInfo, { data: model }),
-    h(ManagedSelectionTree, {
-      selectedNodes,
-      dispatch,
-      tree,
-    }),
+    h("div.entity-panel", [
+      h(Card, { className: "control-panel" }, [
+        h(EntityTypeSelector, {
+          entityTypes,
+          selected: selectedEntityType,
+          onChange(payload) {
+            dispatch({ type: "select-entity-type", payload });
+          },
+        }),
+      ]),
+      h(ManagedSelectionTree, {
+        selectedNodes,
+        dispatch,
+        tree,
+      }),
+    ]),
   ]);
 }
 
@@ -55,6 +70,33 @@ function processEntity(entity: Entity): InternalEntity {
     txt_range: [entity.indices],
     children: entity.children?.map(processEntity) ?? [],
   };
+}
+
+function EntityTypeSelector({ entityTypes, selected, onChange }) {
+  const [isOpen, setOpen] = useState(false);
+  return h(DataField, { label: "Entity type", inline: true }, [
+    h(
+      "code.bp5-code",
+      {
+        onClick() {
+          setOpen((d) => !d);
+        },
+      },
+      selected.name
+    ),
+    h(OmniboxSelector, {
+      isOpen,
+      items: Array.from(entityTypes.values()),
+      selectedItem: selected,
+      onSelectItem(item) {
+        setOpen(false);
+        onChange(item);
+      },
+      onClose() {
+        setOpen(false);
+      },
+    }),
+  ]);
 }
 
 function ManagedSelectionTree(props) {
@@ -79,6 +121,7 @@ function ManagedSelectionTree(props) {
   }, [selectedNodes]);
 
   return h(Tree, {
+    className: "selection-tree",
     ref,
     data: tree,
     onMove({ dragIds, parentId, index }) {

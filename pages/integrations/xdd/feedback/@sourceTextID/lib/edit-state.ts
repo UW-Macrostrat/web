@@ -25,7 +25,8 @@ type TreeAction =
     }
   | { type: "delete-node"; payload: { ids: number[] } }
   | { type: "select-node"; payload: { ids: number[] } }
-  | { type: "create-node"; payload: TextRange };
+  | { type: "create-node"; payload: TextRange }
+  | { type: "select-entity-type"; payload: EntityType };
 
 export type TreeDispatch = Dispatch<TreeAction>;
 
@@ -35,7 +36,6 @@ export function useUpdatableTree(
 ): [TreeState, TreeDispatch] {
   // Get the first entity type
   const type = entityTypes.values().next().value;
-  console.log("Type", type);
 
   const [state, dispatch] = useReducer(treeReducer, {
     initialTree,
@@ -59,9 +59,10 @@ function treeReducer(state: TreeState, action: TreeAction) {
         action.payload.dragIds
       );
 
-      let keyPath: number[] = [];
+      let keyPath: (number | "children")[] = [];
       if (action.payload.parentId) {
         keyPath = findNode(newTree, action.payload.parentId);
+        keyPath.push("children");
       }
 
       // Add removed nodes to the new tree at the correct location
@@ -106,13 +107,31 @@ function treeReducer(state: TreeState, action: TreeAction) {
         type: state.selectedEntityType,
       };
 
-      console.log(state.tree, node);
       return {
         ...state,
         tree: [...state.tree, node],
         selectedNodes: [newId],
         lastInternalId: newId,
       };
+    case "select-entity-type": {
+      // For each selected node, update the type
+      let newTree2 = state.tree;
+      for (let id of state.selectedNodes) {
+        const keyPath = findNode(state.tree, id);
+        console.log(keyPath);
+        const nestedSpec = buildNestedSpec(keyPath, {
+          type: { $set: action.payload },
+        });
+        console.log(nestedSpec);
+        newTree2 = update(newTree2, nestedSpec);
+      }
+
+      return {
+        ...state,
+        tree: newTree2,
+        selectedEntityType: action.payload,
+      };
+    }
   }
 }
 
@@ -130,21 +149,23 @@ function nodeIsInTree(tree: TreeData[], id: number): boolean {
 }
 
 function buildNestedSpec(
-  keyPath: number[],
+  keyPath: (number | "children")[],
   innerSpec: Spec<any>
 ): Spec<TreeData[]> {
   // Build a nested object from a key path
-  let currentSpec = innerSpec;
 
-  // Walk down the key path, building a nested object
+  let spec = innerSpec;
   for (let i = keyPath.length - 1; i >= 0; i--) {
-    currentSpec = { [keyPath[i]]: { children: currentSpec } };
+    spec = { [keyPath[i]]: spec };
   }
-  return currentSpec;
+  return spec;
   // Since we don't have a "children" key at the root, we make the top-level spec an array
 }
 
-function findNode(tree: TreeData[], id: number): number[] | null {
+function findNode(
+  tree: TreeData[],
+  id: number
+): (number | "children")[] | null {
   // Find the index of the node with the given id in the tree, returning the key path
   for (let i = 0; i < tree.length; i++) {
     if (tree[i].id == id) {
@@ -152,7 +173,7 @@ function findNode(tree: TreeData[], id: number): number[] | null {
     } else if (tree[i].children) {
       let path = findNode(tree[i].children, id);
       if (path != null) {
-        return [i, ...path];
+        return [i, "children", ...path];
       }
     }
   }

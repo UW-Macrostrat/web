@@ -12,7 +12,12 @@ import { FeedbackComponent } from "./lib";
 import { JSONView } from "@macrostrat/ui-components";
 import { create } from "zustand";
 import { useEffect } from "react";
-import { Card, NonIdealState, Spinner } from "@blueprintjs/core";
+import {
+  Card,
+  NonIdealState,
+  OverlaysProvider,
+  Spinner,
+} from "@blueprintjs/core";
 
 /**
  * Get a single text window for feedback purposes
@@ -20,11 +25,14 @@ import { Card, NonIdealState, Spinner } from "@blueprintjs/core";
 
 // noinspection JSUnusedGlobalSymbols
 export function Page() {
-  return h(ContentPage, [
-    h(PageBreadcrumbs),
-    h("h1", "Feedback"),
-    h(ExtractionIndex),
-  ]);
+  return h(
+    OverlaysProvider,
+    h(ContentPage, [
+      h(PageBreadcrumbs),
+      h("h1", "Feedback"),
+      h(ExtractionIndex),
+    ])
+  );
 }
 
 const useStore = create((set) => {
