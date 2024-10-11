@@ -40,14 +40,6 @@ function buildTags(
       },
       tagStyle: {
         display: "none",
-        fontFamily: `var(--monospace-font)`,
-        fontSize: "0.6em",
-        color: `var(--secondary-color)`,
-        padding: "0 0.2em",
-        borderRadius: "0.2em",
-        backgroundColor: "var(--panel-background-color)",
-        border: "1px solid var(--accent-color)",
-        fontWeight: 400,
       },
       ...highlight,
     };
@@ -56,24 +48,33 @@ function buildTags(
 
 export function FeedbackText(props: FeedbackTextProps) {
   // Convert input to tags
-  const { text, selectedNodes, nodes, updateNodes, dispatch } = props;
+  const { text, selectedNodes, nodes, dispatch } = props;
   let allTags: AnnotateBlendTag[] = buildTags(
     buildHighlights(nodes),
     selectedNodes
   );
 
   const onChange = useCallback(
-    (ids) => {
-      const currentIds = allTags.map((d) => d.id);
-      const updatedIds = ids.map((d) => d.id);
+    (tags) => {
+      // New tags
+      console.log(tags);
+      const newTags = tags.filter((d) => !("id" in d));
+      if (newTags.length > 0) {
+        const { start, end } = newTags[0];
+        const payload = { start, end, text: text.slice(start, end) };
+        dispatch({ type: "create-node", payload });
+        return;
+      }
+
+      const updatedIds = tags.map((d) => d.id);
       /* Find the id that was removed: that is the one that will be selected
        (we are hijacking the 'click to delete' functionality to select instead) */
-      const removedIds = currentIds.filter((d) => !updatedIds.includes(d));
+      const removedIds = allTags.filter((d) => !updatedIds.includes(d));
       if (removedIds.length > 0) {
         dispatch({ type: "select-node", payload: { ids: removedIds } });
       }
     },
-    [allTags]
+    [allTags, text]
   );
 
   return h(TextAnnotateBlend, {

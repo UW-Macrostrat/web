@@ -22,10 +22,13 @@ function setsAreTheSame<T>(a: Set<T>, b: Set<T>) {
   return true;
 }
 
-export function FeedbackComponent({ entities = [], text, model }) {
+export function FeedbackComponent({ entities = [], text, model, entityTypes }) {
   // Get the input arguments
 
-  const [state, dispatch] = useUpdatableTree(entities.map(processEntity));
+  const [state, dispatch] = useUpdatableTree(
+    entities.map(processEntity),
+    entityTypes
+  );
 
   const { selectedNodes, tree } = state;
 

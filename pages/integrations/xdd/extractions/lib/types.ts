@@ -1,7 +1,9 @@
+import type { EntityType } from "../../extractions/lib/types";
+
 type Match = any;
 
 export interface Entity {
-  id: number | string;
+  id: number;
   name: string;
   type?: number;
   indices: [number, number];
@@ -9,11 +11,7 @@ export interface Entity {
   match?: Match;
 }
 
-export interface EntityType {
-  name: string;
-  color: string;
-  id: number;
-}
+export { EntityType };
 
 export type Highlight = {
   start: number;

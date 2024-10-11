@@ -59,9 +59,10 @@ function ExtractionIndex() {
 
   return h([
     //h("h1", paper.citation?.title ?? "Model extractions"),
-    h(FeedbackComponent, { entities, text: paragraph_text, model }),
-    h(ExtractionContext, {
-      data: window,
+    h(FeedbackComponent, {
+      entities,
+      text: paragraph_text,
+      model,
       entityTypes,
     }),
   ]);

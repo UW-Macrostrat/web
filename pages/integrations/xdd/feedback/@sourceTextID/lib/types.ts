@@ -25,11 +25,7 @@ export interface Result {
   entities?: InternalEntity[];
 }
 
-export interface TreeData {
-  id: number;
-  name: string;
-  children: TreeData[];
-}
+export type TreeData = EntityExt;
 
 export interface ServerRelationship {
   src_name: string;

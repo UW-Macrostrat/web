@@ -1,12 +1,22 @@
 import { TreeData } from "./types";
 import { Dispatch, useReducer } from "react";
 import update, { Spec } from "immutability-helper";
+import { EntityType } from "#/integrations/xdd/extractions/lib/data-service";
 
 interface TreeState {
   initialTree: TreeData[];
   tree: TreeData[];
   selectedNodes: number[];
+  entityTypesMap: Map<number, EntityType>;
+  selectedEntityType: EntityType;
+  lastInternalId: number;
 }
+
+type TextRange = {
+  start: number;
+  end: number;
+  text: string;
+};
 
 type TreeAction =
   | {
@@ -14,17 +24,26 @@ type TreeAction =
       payload: { dragIds: number[]; parentId: number; index: number };
     }
   | { type: "delete-node"; payload: { ids: number[] } }
-  | { type: "select-node"; payload: { ids: number[] } };
+  | { type: "select-node"; payload: { ids: number[] } }
+  | { type: "create-node"; payload: TextRange };
 
 export type TreeDispatch = Dispatch<TreeAction>;
 
 export function useUpdatableTree(
-  initialTree: TreeData[]
+  initialTree: TreeData[],
+  entityTypes: Map<number, EntityType>
 ): [TreeState, TreeDispatch] {
+  // Get the first entity type
+  const type = entityTypes.values().next().value;
+  console.log("Type", type);
+
   const [state, dispatch] = useReducer(treeReducer, {
     initialTree,
     tree: initialTree,
     selectedNodes: [],
+    entityTypesMap: entityTypes,
+    selectedEntityType: type,
+    lastInternalId: 0,
   });
 
   return [state, dispatch];
@@ -75,6 +94,25 @@ function treeReducer(state: TreeState, action: TreeAction) {
       };
     case "select-node":
       return { ...state, selectedNodes: action.payload.ids };
+    case "create-node":
+      const newId = state.lastInternalId - 1;
+      const { text, start, end } = action.payload;
+      console.log(action.payload);
+      const node: TreeData = {
+        id: newId,
+        name: text,
+        children: [],
+        indices: [start, end],
+        type: state.selectedEntityType,
+      };
+
+      console.log(state.tree, node);
+      return {
+        ...state,
+        tree: [...state.tree, node],
+        selectedNodes: [newId],
+        lastInternalId: newId,
+      };
   }
 }
 

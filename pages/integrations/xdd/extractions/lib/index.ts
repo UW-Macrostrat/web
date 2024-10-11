@@ -36,8 +36,7 @@ export function getTagStyle(
   baseColor: string,
   options: { selected?: boolean; inDarkMode?: boolean }
 ): CSSProperties {
-  const _baseColor = asChromaColor(baseColor);
-  console.log(_baseColor);
+  const _baseColor = asChromaColor(baseColor ?? "#ddd");
   const { selected = true, inDarkMode = false } = options;
 
   const mixAmount = selected ? 0.8 : 0.5;

@@ -37,7 +37,7 @@ export function usePostgresQuery(
       setData(res.data);
     });
   }, [query]);
-  
+
   return data;
 }
 
@@ -51,7 +51,12 @@ export function useModelIndex() {
   return useIndex("kg_model");
 }
 
-export function useEntityTypeIndex() {
-  const ix = useIndex("kg_entity_type");
-  return ix;
+export type EntityType = {
+  id: number;
+  name: string;
+  color: string;
+};
+
+export function useEntityTypeIndex(): Map<number, EntityType> {
+  return useIndex("kg_entity_type");
 }
