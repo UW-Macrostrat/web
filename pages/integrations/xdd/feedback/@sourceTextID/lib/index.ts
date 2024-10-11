@@ -1,16 +1,25 @@
 import hyper from "@macrostrat/hyper";
 import styles from "./feedback.module.sass";
-import { NodeApi, Tree } from "react-arborist";
+import { NodeApi, Tree, TreeApi } from "react-arborist";
 import Node from "./node";
 import { FeedbackText } from "./text-visualizer";
 import { Entity, Result, TextData, TreeData, InternalEntity } from "./types";
 import { ModelInfo } from "#/integrations/xdd/extractions/lib";
 import { useUpdatableTree } from "./edit-state";
+import { useEffect, useRef } from "react";
 
 const h = hyper.styled(styles);
 
 export interface FeedbackComponentProps {
   // Add props here
+}
+
+function setsAreTheSame<T>(a: Set<T>, b: Set<T>) {
+  if (a.size !== b.size) return false;
+  for (const item of a) {
+    if (!b.has(item)) return false;
+  }
+  return true;
 }
 
 export function FeedbackComponent({ entities = [], text, model }) {
@@ -28,44 +37,12 @@ export function FeedbackComponent({ entities = [], text, model }) {
       selectedNodes,
     }),
     h(ModelInfo, { data: model }),
-    h(Tree, {
-      data: tree,
-      onMove({ dragIds, parentId, index }) {
-        dispatch({
-          type: "move-node",
-          payload: {
-            dragIds: dragIds.map((d) => parseInt(d)),
-            parentId: parentId ? parseInt(parentId) : null,
-            index,
-          },
-        });
-      },
-      onDelete({ ids }) {
-        dispatch({
-          type: "delete-node",
-          payload: { ids: ids.map((d) => parseInt(d)) },
-        });
-      },
-      onSelect(nodes) {
-        const ids = nodes.map((d) => parseInt(d.id));
-        dispatch({ type: "select-node", payload: { ids } });
-      },
-      children: Node,
-      idAccessor(d: TreeData) {
-        return d.id.toString();
-      },
+    h(ManagedSelectionTree, {
+      selectedNodes,
+      dispatch,
+      tree,
     }),
   ]);
-}
-
-function updateIDType(tree: TreeData[]) {
-  return tree.map((d, i) => {
-    return {
-      ...d,
-      id: i.toString(),
-      children: updateIDType(d.children),
-    };
-  });
 }
 
 function processEntity(entity: Entity): InternalEntity {
@@ -75,4 +52,55 @@ function processEntity(entity: Entity): InternalEntity {
     txt_range: [entity.indices],
     children: entity.children?.map(processEntity) ?? [],
   };
+}
+
+function ManagedSelectionTree(props) {
+  const { selectedNodes, dispatch, tree, ...rest } = props;
+
+  const ref = useRef<TreeApi<TreeData>>();
+
+  useEffect(() => {
+    if (ref.current == null) return;
+    // Check if selection matches current
+    const selection = new Set(selectedNodes.map((d) => d.toString()));
+    const currentSelection = ref.current.selectedIds;
+    if (setsAreTheSame(selection, currentSelection)) return;
+    // If the selection is the same, do nothing
+
+    // Set selection
+    ref.current.setSelection({
+      ids: selectedNodes.map((d) => d.toString()),
+      anchor: null,
+      mostRecent: null,
+    });
+  }, [selectedNodes]);
+
+  return h(Tree, {
+    ref,
+    data: tree,
+    onMove({ dragIds, parentId, index }) {
+      dispatch({
+        type: "move-node",
+        payload: {
+          dragIds: dragIds.map((d) => parseInt(d)),
+          parentId: parentId ? parseInt(parentId) : null,
+          index,
+        },
+      });
+    },
+    onDelete({ ids }) {
+      dispatch({
+        type: "delete-node",
+        payload: { ids: ids.map((d) => parseInt(d)) },
+      });
+    },
+    onSelect(nodes) {
+      const ids = nodes.map((d) => parseInt(d.id));
+      dispatch({ type: "select-node", payload: { ids } });
+    },
+    children: Node,
+    idAccessor(d: TreeData) {
+      return d.id.toString();
+    },
+  });
 }

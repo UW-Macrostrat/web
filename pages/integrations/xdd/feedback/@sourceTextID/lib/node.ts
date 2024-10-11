@@ -3,13 +3,13 @@ import { TreeData } from "./types";
 import h from "./feedback.module.sass";
 import { EntityTag } from "../../../extractions/lib";
 
-function isSelected(search_node: TreeData, tree_node: TreeData) {
-  if (search_node.id == tree_node.id) {
+function isSelected(searchNode: TreeData, treeNode: TreeData) {
+  if (searchNode.id == treeNode.id) {
     return true;
   }
 
-  for (var child of tree_node.children) {
-    if (isSelected(search_node, child)) {
+  for (const child of treeNode.children) {
+    if (isSelected(searchNode, child)) {
       return true;
     }
   }
@@ -18,8 +18,13 @@ function isSelected(search_node: TreeData, tree_node: TreeData) {
 }
 
 function isNodeSelected(node: NodeApi<TreeData>, tree: TreeApi<TreeData>) {
-  for (var selected_node of tree.selectedNodes) {
-    if (isSelected(node.data, selected_node.data)) {
+  console.log(tree.selectedNodes);
+  // We treat no selection as all nodes being active. We may add some nuance later
+  if (tree.selectedNodes.length == 0) {
+    return true;
+  }
+  for (const selectedNode of tree.selectedNodes) {
+    if (isSelected(node.data, selectedNode.data)) {
       return true;
     }
   }
@@ -33,7 +38,7 @@ function Node({ node, style, dragHandle, tree }: any) {
   return h(
     "div.node",
     { style, ref: dragHandle },
-    h(EntityTag, { data: node.data })
+    h(EntityTag, { data: node.data, selected })
   );
 }
 

@@ -6,6 +6,7 @@ import { buildHighlights } from "#/integrations/xdd/extractions/lib";
 import { Highlight } from "#/integrations/xdd/extractions/lib/types";
 import { useCallback } from "react";
 import { asChromaColor } from "@macrostrat/color-utils";
+import { getTagStyle } from "#/integrations/xdd/extractions/lib";
 
 export interface FeedbackTextProps {
   text: string;
@@ -31,9 +32,22 @@ function buildTags(
     return {
       color,
       markStyle: {
-        border: "1px solid #444",
-        borderRadius: "0.25em",
-        borderColor: highlight.borderColor,
+        ...getTagStyle(highlight.backgroundColor, { selected: isSelected }),
+        borderRadius: "0.2em",
+        padding: "0.1em",
+        fontWeight: 400,
+        borderWidth: "1.5px",
+      },
+      tagStyle: {
+        display: "none",
+        fontFamily: `var(--monospace-font)`,
+        fontSize: "0.6em",
+        color: `var(--secondary-color)`,
+        padding: "0 0.2em",
+        borderRadius: "0.2em",
+        backgroundColor: "var(--panel-background-color)",
+        border: "1px solid var(--accent-color)",
+        fontWeight: 400,
       },
       ...highlight,
     };

@@ -1,8 +1,9 @@
 import h from "./main.module.sass";
 import classNames from "classnames";
 import { Tag } from "@blueprintjs/core";
-import { asChromaColor } from "@macrostrat/color-utils";
 import { Entity, EntityExt, Highlight, EntityType } from "./types";
+import { CSSProperties } from "react";
+import { asChromaColor } from "@macrostrat/color-utils";
 
 export function buildHighlights(entities: EntityExt[]): Highlight[] {
   let highlights = [];
@@ -28,6 +29,34 @@ export function enhanceData(extractionData, models, entityTypes) {
     entities: extractionData.entities?.map((d) =>
       enhanceEntity(d, entityTypes)
     ),
+  };
+}
+
+export function getTagStyle(
+  baseColor: string,
+  options: { selected?: boolean; inDarkMode?: boolean }
+): CSSProperties {
+  const _baseColor = asChromaColor(baseColor);
+  console.log(_baseColor);
+  const { selected = true, inDarkMode = false } = options;
+
+  const mixAmount = selected ? 0.8 : 0.5;
+  const backgroundAlpha = selected ? 0.8 : 0.2;
+
+  const mixTarget = inDarkMode ? "white" : "black";
+
+  const color = _baseColor.mix(mixTarget, mixAmount).css();
+  const borderColor = selected
+    ? _baseColor.mix(mixTarget, mixAmount / 2).css()
+    : "transparent";
+
+  return {
+    color,
+    backgroundColor: _baseColor.alpha(backgroundAlpha).css(),
+    boxSizing: "border-box",
+    borderStyle: "solid",
+    borderColor,
+    borderWidth: "1px",
   };
 }
 
@@ -73,7 +102,7 @@ export function ModelInfo({ data }) {
   return h("p.model-name", ["Model: ", h("code.bp5-code", data.name)]);
 }
 
-export function EntityTag({ data }) {
+export function EntityTag({ data, selected = true }) {
   const { name, type, match } = data;
   const className = classNames(
     {
@@ -83,16 +112,14 @@ export function EntityTag({ data }) {
     "entity"
   );
 
-  return h(
-    Tag,
-    { style: { backgroundColor: type.color ?? "#ddd" }, className },
-    [
-      h("code.entity-type.bp5-code", type.name),
-      " ",
-      h("span.entity-name", name),
-      h(Match, { data: match }),
-    ]
-  );
+  const style = getTagStyle(type.color, { selected });
+
+  return h(Tag, { style, className }, [
+    h("code.entity-type.bp5-code", type.name),
+    " ",
+    h("span.entity-name", name),
+    h(Match, { data: match }),
+  ]);
 }
 
 function ExtractionInfo({ data }: { data: EntityExt }) {

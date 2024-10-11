@@ -6491,7 +6491,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@macrostrat/color-utils@workspace:deps/web-components/packages/color-utils"
   dependencies:
-    chroma-js: "npm:^2.4.2"
+    chroma-js: "npm:^3.0.0"
     typescript: "npm:^4.2.3"
   languageName: unknown
   linkType: soft
@@ -7063,7 +7063,7 @@ __metadata:
     "@vitejs/plugin-react": "npm:^4.0.4"
     "@yarnpkg/sdks": "npm:^3.1.0"
     axios: "npm:^0.25.0"
-    chroma-js: "npm:^2.4.2"
+    chroma-js: "npm:^3.0.0"
     classnames: "npm:^2.2.6"
     compression: "npm:^1.7.4"
     cookie-parser: "npm:^1.4.6"
@@ -15375,6 +15375,13 @@ __metadata:
   version: 2.4.2
   resolution: "chroma-js@npm:2.4.2"
   checksum: 10/2fb16f4189de7818abf9e4d61ab3afc76d4013ebdef36982105c41df834dc5050b04afff1b9559914edab384b39cbe61b26cbdcd4142d39532b1b0f2a2f14f76
+  languageName: node
+  linkType: hard
+
+"chroma-js@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "chroma-js@npm:3.1.1"
+  checksum: 10/71018790cef594904ee7d765ef22e45c781f2019d3aa878616a49a3c5e0d85179c5ceaab418d75f48e0089b597b57e99264320cdf3ac60deb2a067a9e5067f12
   languageName: node
   linkType: hard
 
