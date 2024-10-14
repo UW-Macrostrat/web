@@ -110,7 +110,6 @@ function treeReducer(state: TreeState, action: TreeAction) {
     case "create-node":
       const newId = state.lastInternalId - 1;
       const { text, start, end } = action.payload;
-      console.log(action.payload);
       const node: TreeData = {
         id: newId,
         name: text,
@@ -130,11 +129,9 @@ function treeReducer(state: TreeState, action: TreeAction) {
       let newTree2 = state.tree;
       for (let id of state.selectedNodes) {
         const keyPath = findNode(state.tree, id);
-        console.log(keyPath);
         const nestedSpec = buildNestedSpec(keyPath, {
           type: { $set: action.payload },
         });
-        console.log(nestedSpec);
         newTree2 = update(newTree2, nestedSpec);
       }
 

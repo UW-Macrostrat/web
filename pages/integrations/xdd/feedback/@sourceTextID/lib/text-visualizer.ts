@@ -21,21 +21,22 @@ function buildTags(
   selectedNodes: number[]
 ): AnnotateBlendTag[] {
   return highlights.map((highlight) => {
-    const isSelected =
+    const highlighted =
       selectedNodes.includes(highlight.id) || selectedNodes.length === 0;
     let color = highlight.backgroundColor;
-    if (!isSelected) {
+    if (!highlighted) {
       color = asChromaColor(color).alpha(0.2).css();
     }
 
     return {
       color,
       markStyle: {
-        ...getTagStyle(highlight.backgroundColor, { selected: isSelected }),
+        ...getTagStyle(highlight.backgroundColor, { highlighted }),
         borderRadius: "0.2em",
         padding: "0.1em",
         fontWeight: 400,
         borderWidth: "1.5px",
+        cursor: "pointer",
       },
       tagStyle: {
         display: "none",
