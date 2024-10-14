@@ -5,9 +5,7 @@
 import h from "./main.module.sass";
 import classNames from "classnames";
 import { Omnibar, OmnibarProps } from "@blueprintjs/select";
-import chroma from "chroma-js";
 import "@blueprintjs/select/lib/css/blueprint-select.css";
-import { useDarkMode, useInDarkMode } from "@macrostrat/ui-components";
 
 interface TagItemProps<T> {
   selected: boolean;

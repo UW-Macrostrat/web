@@ -1,8 +1,8 @@
 import h from "./feedback.module.sass";
-import { NodeApi, Tree, TreeApi } from "react-arborist";
+import { Tree, TreeApi } from "react-arborist";
 import Node from "./node";
 import { FeedbackText } from "./text-visualizer";
-import { Entity, Result, TextData, TreeData, InternalEntity } from "./types";
+import { Entity, InternalEntity, TreeData } from "./types";
 import { ModelInfo } from "#/integrations/xdd/extractions/lib";
 import { useUpdatableTree } from "./edit-state";
 import { useEffect, useRef, useState } from "react";
@@ -23,7 +23,14 @@ function setsAreTheSame<T>(a: Set<T>, b: Set<T>) {
   return true;
 }
 
-export function FeedbackComponent({ entities = [], text, model, entityTypes }) {
+export function FeedbackComponent({
+  entities = [],
+  text,
+  model,
+  entityTypes,
+  sourceTextID,
+  runID,
+}) {
   // Get the input arguments
 
   const [state, dispatch] = useUpdatableTree(
@@ -67,7 +74,12 @@ export function FeedbackComponent({ entities = [], text, model, entityTypes }) {
               SaveButton,
               {
                 onClick() {
-                  dispatch({ type: "save", tree });
+                  dispatch({
+                    type: "save",
+                    tree,
+                    sourceTextID: sourceID,
+                    runID: runID,
+                  });
                 },
                 disabled: state.initialTree == state.tree,
               },

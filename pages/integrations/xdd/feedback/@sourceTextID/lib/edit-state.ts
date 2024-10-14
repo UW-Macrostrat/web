@@ -2,8 +2,6 @@ import { TreeData } from "./types";
 import { Dispatch, useCallback, useReducer } from "react";
 import update, { Spec } from "immutability-helper";
 import { EntityType } from "#/integrations/xdd/extractions/lib/data-service";
-import { EntityExt } from "#/integrations/xdd/extractions/lib/types";
-import * as string_decoder from "node:string_decoder";
 
 interface TreeState {
   initialTree: TreeData[];
@@ -254,7 +252,7 @@ function removeNodes(
 export interface EntityOutput {
   id: number;
   type: number | null;
-  indices: number[];
+  txt_range: number[][];
   name: string;
   match: MatchInfo | null;
   reasoning: string | null;
@@ -271,7 +269,7 @@ interface GraphData {
 
 interface ServerResults extends GraphData {
   sourceTextId: number;
-  supersedesRunId: number;
+  supersedesRunIds: number[];
 }
 
 function normalizeMatch(match: any): MatchInfo | null {
@@ -305,7 +303,7 @@ function prepareGraphForServer(tree: TreeData[]): GraphData {
       id,
       type: node.type.id,
       name,
-      indices,
+      txt_range: [indices],
       reasoning: null,
       match: normalizeMatch(node.match),
     };
@@ -334,5 +332,5 @@ function prepareGraphForServer(tree: TreeData[]): GraphData {
 function prepareDataForServer(state: TreeData[]): ServerResults {
   /** This function should be used before sending the data to the server */
   const { nodes, edges } = prepareGraphForServer(state);
-  return { nodes, edges, sourceTextId: 0, supersedesRunId: 0 };
+  return { nodes, edges, sourceTextId: 0, supersedesRunIds: null };
 }

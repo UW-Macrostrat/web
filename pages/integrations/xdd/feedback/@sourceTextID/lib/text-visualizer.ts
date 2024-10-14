@@ -19,11 +19,19 @@ function buildTags(
   highlights: Highlight[],
   selectedNodes: number[]
 ): AnnotateBlendTag[] {
-  return highlights.map((highlight) => {
+  let tags: AnnotateBlendTag[] = [];
+
+  // If entity ID has already been seen, don't add it again
+  const entities = new Set<number>();
+
+  for (const highlight of highlights) {
+    // Don't add multiply-linked entities multiple times
+    if (entities.has(highlight.id)) continue;
+
     const highlighted = isHighlighted(highlight, selectedNodes);
     const active = isActive(highlight, selectedNodes);
 
-    return {
+    tags.push({
       markStyle: {
         ...getTagStyle(highlight.backgroundColor, { highlighted, active }),
         borderRadius: "0.2em",
@@ -35,8 +43,12 @@ function buildTags(
         display: "none",
       },
       ...highlight,
-    };
-  });
+    });
+
+    entities.add(highlight.id);
+  }
+
+  return tags;
 }
 
 function isActive(tag: Highlight, selectedNodes: number[]) {
