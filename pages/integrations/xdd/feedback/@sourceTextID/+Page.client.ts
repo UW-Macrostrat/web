@@ -30,12 +30,6 @@ export function Page() {
   );
 }
 
-const useStore = create((set) => {
-  return {
-    entities: null,
-  };
-});
-
 function ExtractionIndex() {
   const { routeParams } = usePageContext();
   const { sourceTextID } = routeParams;

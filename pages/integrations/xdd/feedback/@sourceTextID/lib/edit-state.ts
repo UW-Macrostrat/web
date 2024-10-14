@@ -1,7 +1,9 @@
 import { TreeData } from "./types";
-import { Dispatch, useReducer } from "react";
+import { Dispatch, useCallback, useReducer } from "react";
 import update, { Spec } from "immutability-helper";
 import { EntityType } from "#/integrations/xdd/extractions/lib/data-service";
+import { EntityExt } from "#/integrations/xdd/extractions/lib/types";
+import * as string_decoder from "node:string_decoder";
 
 interface TreeState {
   initialTree: TreeData[];
@@ -18,6 +20,11 @@ type TextRange = {
   text: string;
 };
 
+type TreeAsyncAction = {
+  type: "save";
+  tree: TreeData[];
+};
+
 type TreeAction =
   | {
       type: "move-node";
@@ -30,7 +37,7 @@ type TreeAction =
   | { type: "select-entity-type"; payload: EntityType }
   | { type: "reset" };
 
-export type TreeDispatch = Dispatch<TreeAction>;
+export type TreeDispatch = Dispatch<TreeAction | TreeAsyncAction>;
 
 export function useUpdatableTree(
   initialTree: TreeData[],
@@ -48,7 +55,32 @@ export function useUpdatableTree(
     lastInternalId: 0,
   });
 
-  return [state, dispatch];
+  const handler = useCallback(
+    (action: TreeAsyncAction | TreeAction) => {
+      treeActionHandler(action).then((action) => {
+        if (action == null) return;
+        dispatch(action);
+      });
+    },
+    [dispatch]
+  );
+
+  return [state, handler];
+}
+
+async function treeActionHandler(
+  action: TreeAsyncAction | TreeAction
+): Promise<TreeAction> {
+  switch (action.type) {
+    case "save":
+      // Save the tree to the server
+      const data = prepareDataForServer(action.tree);
+      console.log(JSON.stringify(data, null, 2));
+
+      return null;
+    default:
+      return action;
+  }
 }
 
 function treeReducer(state: TreeState, action: TreeAction) {
@@ -217,4 +249,90 @@ function removeNodes(
   }
 
   return [newTree, removedNodes];
+}
+
+export interface EntityOutput {
+  id: number;
+  type: number | null;
+  indices: number[];
+  name: string;
+  match: MatchInfo | null;
+  reasoning: string | null;
+}
+
+// We will extend this in the future, probably,
+// to handle ages and other things
+type MatchInfo = { type: "lith" | "lith_att" | "strat_name"; id: number };
+
+interface GraphData {
+  nodes: EntityOutput[];
+  edges: { source: number; dest: number }[];
+}
+
+interface ServerResults extends GraphData {
+  sourceTextId: number;
+  supersedesRunId: number;
+}
+
+function normalizeMatch(match: any): MatchInfo | null {
+  if (match == null) return null;
+  if (match.lith_id) return { type: "lith", id: match.lith_id };
+  if (match.lith_att_id) {
+    return { type: "lith_att", id: match.lith_att_id };
+  }
+  if (match.strat_name_id) {
+    return { type: "strat_name", id: match.strat_name_id };
+  }
+  return null;
+}
+
+function prepareGraphForServer(tree: TreeData[]): GraphData {
+  // Convert the tree to a graph
+  let nodes: EntityOutput[] = [];
+  let edges: { source: number; dest: number }[] = [];
+  const nodeMap = new Map<number, TreeData>();
+
+  for (let node of tree) {
+    // If we've already found an instance of this node, we don't need to record
+    // it again
+    if (nodeMap.has(node.id)) {
+      continue;
+    }
+
+    const { indices, id, name } = node;
+
+    const nodeData: EntityOutput = {
+      id,
+      type: node.type.id,
+      name,
+      indices,
+      reasoning: null,
+      match: normalizeMatch(node.match),
+    };
+
+    nodeMap.set(node.id, node);
+
+    nodes.push(nodeData);
+
+    if (node.children) {
+      for (let child of node.children) {
+        edges.push({ source: node.id, dest: child.id });
+      }
+
+      // Now process the children
+      const { nodes: childNodes, edges: childEdges } = prepareGraphForServer(
+        node.children
+      );
+      nodes.push(...childNodes);
+      edges.push(...childEdges);
+    }
+  }
+
+  return { nodes, edges };
+}
+
+function prepareDataForServer(state: TreeData[]): ServerResults {
+  /** This function should be used before sending the data to the server */
+  const { nodes, edges } = prepareGraphForServer(state);
+  return { nodes, edges, sourceTextId: 0, supersedesRunId: 0 };
 }

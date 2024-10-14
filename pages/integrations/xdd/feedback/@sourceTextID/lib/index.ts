@@ -1,5 +1,4 @@
-import hyper from "@macrostrat/hyper";
-import styles from "./feedback.module.sass";
+import h from "./feedback.module.sass";
 import { NodeApi, Tree, TreeApi } from "react-arborist";
 import Node from "./node";
 import { FeedbackText } from "./text-visualizer";
@@ -7,12 +6,10 @@ import { Entity, Result, TextData, TreeData, InternalEntity } from "./types";
 import { ModelInfo } from "#/integrations/xdd/extractions/lib";
 import { useUpdatableTree } from "./edit-state";
 import { useEffect, useRef, useState } from "react";
-import { ValueWithUnit } from "@macrostrat/map-interface";
 import { DataField } from "~/components/unit-details";
-import { Card } from "@blueprintjs/core";
-import { OmniboxSelector } from "#/integrations/xdd/feedback/@sourceTextID/lib/type-selector";
-
-const h = hyper.styled(styles);
+import { ButtonGroup, Card } from "@blueprintjs/core";
+import { OmniboxSelector } from "./type-selector";
+import { CancelButton, SaveButton } from "@macrostrat/ui-components";
 
 export interface FeedbackComponentProps {
   // Add props here
@@ -46,6 +43,38 @@ export function FeedbackComponent({ entities = [], text, model, entityTypes }) {
     h(ModelInfo, { data: model }),
     h("div.entity-panel", [
       h(Card, { className: "control-panel" }, [
+        h(
+          ButtonGroup,
+          {
+            vertical: true,
+            fill: true,
+            minimal: true,
+            alignText: "left",
+          },
+          [
+            h(
+              CancelButton,
+              {
+                icon: "trash",
+                disabled: state.initialTree == state.tree,
+                onClick() {
+                  dispatch({ type: "reset" });
+                },
+              },
+              "Reset"
+            ),
+            h(
+              SaveButton,
+              {
+                onClick() {
+                  dispatch({ type: "save", tree });
+                },
+                disabled: state.initialTree == state.tree,
+              },
+              "Save"
+            ),
+          ]
+        ),
         h(EntityTypeSelector, {
           entityTypes,
           selected: selectedEntityType,

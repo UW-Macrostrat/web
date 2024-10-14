@@ -60,8 +60,6 @@ export function FeedbackText(props: FeedbackTextProps) {
     selectedNodes
   );
 
-  console.log("All tags", allTags);
-
   const onChange = useCallback(
     (tags) => {
       // New tags

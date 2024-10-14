@@ -31,7 +31,6 @@ export function buildHighlights(
 }
 
 export function enhanceData(extractionData, models, entityTypes) {
-  console.log(extractionData, models);
   return {
     ...extractionData,
     model: models.get(extractionData.model_id),
