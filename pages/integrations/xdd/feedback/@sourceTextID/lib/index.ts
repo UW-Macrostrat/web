@@ -1,18 +1,15 @@
-import hyper from "@macrostrat/hyper";
-import styles from "./feedback.module.sass";
-import { NodeApi, Tree, TreeApi } from "react-arborist";
+import h from "./feedback.module.sass";
+import { Tree, TreeApi } from "react-arborist";
 import Node from "./node";
 import { FeedbackText } from "./text-visualizer";
-import { Entity, Result, TextData, TreeData, InternalEntity } from "./types";
+import { Entity, InternalEntity, TreeData } from "./types";
 import { ModelInfo } from "#/integrations/xdd/extractions/lib";
 import { useUpdatableTree } from "./edit-state";
 import { useEffect, useRef, useState } from "react";
-import { ValueWithUnit } from "@macrostrat/map-interface";
 import { DataField } from "~/components/unit-details";
-import { Card } from "@blueprintjs/core";
-import { OmniboxSelector } from "#/integrations/xdd/feedback/@sourceTextID/lib/type-selector";
-
-const h = hyper.styled(styles);
+import { ButtonGroup, Card } from "@blueprintjs/core";
+import { OmniboxSelector } from "./type-selector";
+import { CancelButton, SaveButton } from "@macrostrat/ui-components";
 
 export interface FeedbackComponentProps {
   // Add props here
@@ -26,7 +23,14 @@ function setsAreTheSame<T>(a: Set<T>, b: Set<T>) {
   return true;
 }
 
-export function FeedbackComponent({ entities = [], text, model, entityTypes }) {
+export function FeedbackComponent({
+  entities = [],
+  text,
+  model,
+  entityTypes,
+  sourceTextID,
+  runID,
+}) {
   // Get the input arguments
 
   const [state, dispatch] = useUpdatableTree(
@@ -46,6 +50,43 @@ export function FeedbackComponent({ entities = [], text, model, entityTypes }) {
     h(ModelInfo, { data: model }),
     h("div.entity-panel", [
       h(Card, { className: "control-panel" }, [
+        h(
+          ButtonGroup,
+          {
+            vertical: true,
+            fill: true,
+            minimal: true,
+            alignText: "left",
+          },
+          [
+            h(
+              CancelButton,
+              {
+                icon: "trash",
+                disabled: state.initialTree == state.tree,
+                onClick() {
+                  dispatch({ type: "reset" });
+                },
+              },
+              "Reset"
+            ),
+            h(
+              SaveButton,
+              {
+                onClick() {
+                  dispatch({
+                    type: "save",
+                    tree,
+                    sourceTextID: sourceTextID,
+                    supersedesRunIDs: [runID],
+                  });
+                },
+                disabled: state.initialTree == state.tree,
+              },
+              "Save"
+            ),
+          ]
+        ),
         h(EntityTypeSelector, {
           entityTypes,
           selected: selectedEntityType,
@@ -74,6 +115,8 @@ function processEntity(entity: Entity): InternalEntity {
 
 function EntityTypeSelector({ entityTypes, selected, onChange }) {
   const [isOpen, setOpen] = useState(false);
+  // Show all entity types when selected is null
+  const _selected = selected != null ? selected : undefined;
   return h(DataField, { label: "Entity type", inline: true }, [
     h(
       "code.bp5-code",
@@ -87,7 +130,7 @@ function EntityTypeSelector({ entityTypes, selected, onChange }) {
     h(OmniboxSelector, {
       isOpen,
       items: Array.from(entityTypes.values()),
-      selectedItem: selected,
+      selectedItem: _selected,
       onSelectItem(item) {
         setOpen(false);
         onChange(item);

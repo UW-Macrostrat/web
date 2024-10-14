@@ -5,8 +5,16 @@ import { Entity, EntityExt, Highlight, EntityType } from "./types";
 import { CSSProperties } from "react";
 import { asChromaColor } from "@macrostrat/color-utils";
 
-export function buildHighlights(entities: EntityExt[]): Highlight[] {
+export function buildHighlights(
+  entities: EntityExt[],
+  parent: EntityExt | null
+): Highlight[] {
   let highlights = [];
+  let parents = [];
+  if (parent != null) {
+    parents = [parent.id, ...(parent.parents ?? [])];
+  }
+
   for (const entity of entities) {
     highlights.push({
       start: entity.indices[0],
@@ -15,14 +23,14 @@ export function buildHighlights(entities: EntityExt[]): Highlight[] {
       backgroundColor: entity.type.color ?? "#ddd",
       tag: entity.type.name,
       id: entity.id,
+      parents,
     });
-    highlights.push(...buildHighlights(entity.children ?? []));
+    highlights.push(...buildHighlights(entity.children ?? [], entity));
   }
   return highlights;
 }
 
 export function enhanceData(extractionData, models, entityTypes) {
-  console.log(extractionData, models);
   return {
     ...extractionData,
     model: models.get(extractionData.model_id),
@@ -34,18 +42,23 @@ export function enhanceData(extractionData, models, entityTypes) {
 
 export function getTagStyle(
   baseColor: string,
-  options: { selected?: boolean; inDarkMode?: boolean }
+  options: { highlighted?: boolean; inDarkMode?: boolean; active?: boolean }
 ): CSSProperties {
   const _baseColor = asChromaColor(baseColor ?? "#ddd");
-  const { selected = true, inDarkMode = false } = options;
+  const { highlighted = true, inDarkMode = false, active = false } = options;
 
-  const mixAmount = selected ? 0.8 : 0.5;
-  const backgroundAlpha = selected ? 0.8 : 0.2;
+  let mixAmount = highlighted ? 0.8 : 0.5;
+  let backgroundAlpha = highlighted ? 0.8 : 0.2;
+
+  if (active) {
+    mixAmount = 1;
+    backgroundAlpha = 1;
+  }
 
   const mixTarget = inDarkMode ? "white" : "black";
 
   const color = _baseColor.mix(mixTarget, mixAmount).css();
-  const borderColor = selected
+  const borderColor = highlighted
     ? _baseColor.mix(mixTarget, mixAmount / 2).css()
     : "transparent";
 
@@ -56,6 +69,7 @@ export function getTagStyle(
     borderStyle: "solid",
     borderColor,
     borderWidth: "1px",
+    fontWeight: active ? "bold" : "normal",
   };
 }
 
@@ -101,7 +115,7 @@ export function ModelInfo({ data }) {
   return h("p.model-name", ["Model: ", h("code.bp5-code", data.name)]);
 }
 
-export function EntityTag({ data, selected = true }) {
+export function EntityTag({ data, highlighted = true, active = false }) {
   const { name, type, match } = data;
   const className = classNames(
     {
@@ -111,12 +125,12 @@ export function EntityTag({ data, selected = true }) {
     "entity"
   );
 
-  const style = getTagStyle(type.color, { selected });
+  const style = getTagStyle(type.color, { highlighted, active });
 
   return h(Tag, { style, className }, [
-    h("code.entity-type.bp5-code", type.name),
-    " ",
     h("span.entity-name", name),
+    " ",
+    h("code.entity-type.bp5-code", type.name),
     h(Match, { data: match }),
   ]);
 }

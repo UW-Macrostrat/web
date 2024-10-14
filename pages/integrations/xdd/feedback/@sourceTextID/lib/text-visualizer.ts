@@ -5,7 +5,6 @@ import h from "./feedback.module.sass";
 import { buildHighlights } from "#/integrations/xdd/extractions/lib";
 import { Highlight } from "#/integrations/xdd/extractions/lib/types";
 import { useCallback } from "react";
-import { asChromaColor } from "@macrostrat/color-utils";
 import { getTagStyle } from "#/integrations/xdd/extractions/lib";
 
 export interface FeedbackTextProps {
@@ -20,36 +19,56 @@ function buildTags(
   highlights: Highlight[],
   selectedNodes: number[]
 ): AnnotateBlendTag[] {
-  return highlights.map((highlight) => {
-    const isSelected =
-      selectedNodes.includes(highlight.id) || selectedNodes.length === 0;
-    let color = highlight.backgroundColor;
-    if (!isSelected) {
-      color = asChromaColor(color).alpha(0.2).css();
-    }
+  let tags: AnnotateBlendTag[] = [];
 
-    return {
-      color,
+  // If entity ID has already been seen, don't add it again
+  const entities = new Set<number>();
+
+  for (const highlight of highlights) {
+    // Don't add multiply-linked entities multiple times
+    if (entities.has(highlight.id)) continue;
+
+    const highlighted = isHighlighted(highlight, selectedNodes);
+    const active = isActive(highlight, selectedNodes);
+
+    tags.push({
       markStyle: {
-        ...getTagStyle(highlight.backgroundColor, { selected: isSelected }),
+        ...getTagStyle(highlight.backgroundColor, { highlighted, active }),
         borderRadius: "0.2em",
         padding: "0.1em",
-        fontWeight: 400,
         borderWidth: "1.5px",
+        cursor: "pointer",
       },
       tagStyle: {
         display: "none",
       },
       ...highlight,
-    };
-  });
+    });
+
+    entities.add(highlight.id);
+  }
+
+  return tags;
+}
+
+function isActive(tag: Highlight, selectedNodes: number[]) {
+  return selectedNodes.includes(tag.id);
+}
+
+function isHighlighted(tag: Highlight, selectedNodes: number[]) {
+  if (selectedNodes.length === 0) return true;
+  return (
+    (selectedNodes.includes(tag.id) ||
+      tag.parents?.some((d) => selectedNodes.includes(d))) ??
+    false
+  );
 }
 
 export function FeedbackText(props: FeedbackTextProps) {
   // Convert input to tags
   const { text, selectedNodes, nodes, dispatch } = props;
   let allTags: AnnotateBlendTag[] = buildTags(
-    buildHighlights(nodes),
+    buildHighlights(nodes, null),
     selectedNodes
   );
 
@@ -82,7 +101,7 @@ export function FeedbackText(props: FeedbackTextProps) {
 
   return h(TextAnnotateBlend, {
     style: {
-      fontSize: "1.2rem",
+      fontSize: "1.2em",
     },
     className: "feedback-text",
     content: text,

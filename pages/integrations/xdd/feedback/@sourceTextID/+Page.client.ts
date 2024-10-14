@@ -2,28 +2,19 @@ import h from "@macrostrat/hyper";
 import { ContentPage } from "~/layouts";
 import { PageBreadcrumbs } from "~/components";
 import { usePageContext } from "vike-react/usePageContext";
-import { enhanceData, ExtractionContext } from "../../extractions/lib";
+import { enhanceData } from "../../extractions/lib";
 import {
-  usePostgresQuery,
-  useModelIndex,
   useEntityTypeIndex,
+  useModelIndex,
+  usePostgresQuery,
 } from "../../extractions/lib/data-service";
 import { FeedbackComponent } from "./lib";
-import { JSONView } from "@macrostrat/ui-components";
-import { create } from "zustand";
-import { useEffect } from "react";
-import {
-  Card,
-  NonIdealState,
-  OverlaysProvider,
-  Spinner,
-} from "@blueprintjs/core";
+import { OverlaysProvider } from "@blueprintjs/core";
 
 /**
  * Get a single text window for feedback purposes
  */
 
-// noinspection JSUnusedGlobalSymbols
 export function Page() {
   return h(
     OverlaysProvider,
@@ -34,12 +25,6 @@ export function Page() {
     ])
   );
 }
-
-const useStore = create((set) => {
-  return {
-    entities: null,
-  };
-});
 
 function ExtractionIndex() {
   const { routeParams } = usePageContext();
@@ -53,37 +38,37 @@ function ExtractionIndex() {
     predicate: sourceTextID,
   });
 
-  useEffect(() => {
-    if (data == null) return;
-    useStore.setState({ entities: data[0]?.entities });
-  }, [data]);
-
   if (data == null || models == null || entityTypes == null) {
     return h("div", "Loading...");
   }
 
-  const window = enhanceData(data[0], models, entityTypes);
-  const { entities = [], paragraph_text, model } = window;
-
-  return h([
-    //h("h1", paper.citation?.title ?? "Model extractions"),
-    h(FeedbackComponent, {
-      entities,
-      text: paragraph_text,
-      model,
-      entityTypes,
-    }),
-  ]);
+  return h(
+    "div.feedback-windows",
+    data.map((d) => {
+      console.log(data);
+      const window = enhanceData(d, models, entityTypes);
+      const { entities = [], paragraph_text, model } = window;
+      //h("h1", paper.citation?.title ?? "Model extractions"),
+      return h(FeedbackComponent, {
+        entities,
+        text: paragraph_text,
+        model,
+        entityTypes,
+        sourceTextID: window.source_text,
+        runID: window.model_run,
+      });
+    })
+  );
 }
 
-function FeedbackDevTool() {
-  const entities = useStore((state) => state.entities);
-  if (entities == null)
-    return h(NonIdealState, { icon: h(Spinner), title: "Loading..." });
-
-  return h(JSONView, { data: entities, showRoot: false, keyPath: 0 });
-}
-
-FeedbackDevTool.title = "Feedback";
-
-export const devTools = [FeedbackDevTool];
+// function FeedbackDevTool() {
+//   const entities = useStore((state) => state.entities);
+//   if (entities == null)
+//     return h(NonIdealState, { icon: h(Spinner), title: "Loading..." });
+//
+//   return h(JSONView, { data: entities, showRoot: false, keyPath: 0 });
+// }
+//
+// FeedbackDevTool.title = "Feedback";
+//
+// export const devTools = [FeedbackDevTool];
