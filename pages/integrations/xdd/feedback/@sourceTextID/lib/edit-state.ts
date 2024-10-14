@@ -21,6 +21,8 @@ type TextRange = {
 type TreeAsyncAction = {
   type: "save";
   tree: TreeData[];
+  sourceTextID: number;
+  supersedesRunIDs: number[];
 };
 
 type TreeAction =
@@ -72,7 +74,11 @@ async function treeActionHandler(
   switch (action.type) {
     case "save":
       // Save the tree to the server
-      const data = prepareDataForServer(action.tree);
+      const data = prepareDataForServer(
+        action.tree,
+        action.sourceTextID,
+        action.supersedesRunIDs
+      );
       console.log(JSON.stringify(data, null, 2));
 
       return null;
@@ -329,8 +335,17 @@ function prepareGraphForServer(tree: TreeData[]): GraphData {
   return { nodes, edges };
 }
 
-function prepareDataForServer(state: TreeData[]): ServerResults {
+function prepareDataForServer(
+  tree: TreeData[],
+  sourceTextID,
+  supersedesRunIDs
+): ServerResults {
   /** This function should be used before sending the data to the server */
-  const { nodes, edges } = prepareGraphForServer(state);
-  return { nodes, edges, sourceTextId: 0, supersedesRunIds: null };
+  const { nodes, edges } = prepareGraphForServer(tree);
+  return {
+    nodes,
+    edges,
+    sourceTextId: sourceTextID,
+    supersedesRunIds: supersedesRunIDs ?? [],
+  };
 }

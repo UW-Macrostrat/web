@@ -77,8 +77,8 @@ export function FeedbackComponent({
                   dispatch({
                     type: "save",
                     tree,
-                    sourceTextID: sourceID,
-                    runID: runID,
+                    sourceTextID: sourceTextID,
+                    supersedesRunIDs: [runID],
                   });
                 },
                 disabled: state.initialTree == state.tree,
