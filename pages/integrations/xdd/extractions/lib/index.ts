@@ -5,8 +5,16 @@ import { Entity, EntityExt, Highlight, EntityType } from "./types";
 import { CSSProperties } from "react";
 import { asChromaColor } from "@macrostrat/color-utils";
 
-export function buildHighlights(entities: EntityExt[]): Highlight[] {
+export function buildHighlights(
+  entities: EntityExt[],
+  parent: EntityExt | null
+): Highlight[] {
   let highlights = [];
+  let parents = [];
+  if (parent != null) {
+    parents = [parent.id, ...(parent.parents ?? [])];
+  }
+
   for (const entity of entities) {
     highlights.push({
       start: entity.indices[0],
@@ -15,8 +23,9 @@ export function buildHighlights(entities: EntityExt[]): Highlight[] {
       backgroundColor: entity.type.color ?? "#ddd",
       tag: entity.type.name,
       id: entity.id,
+      parents,
     });
-    highlights.push(...buildHighlights(entity.children ?? []));
+    highlights.push(...buildHighlights(entity.children ?? [], entity));
   }
   return highlights;
 }

@@ -5,7 +5,6 @@ import h from "./feedback.module.sass";
 import { buildHighlights } from "#/integrations/xdd/extractions/lib";
 import { Highlight } from "#/integrations/xdd/extractions/lib/types";
 import { useCallback } from "react";
-import { asChromaColor } from "@macrostrat/color-utils";
 import { getTagStyle } from "#/integrations/xdd/extractions/lib";
 
 export interface FeedbackTextProps {
@@ -21,20 +20,14 @@ function buildTags(
   selectedNodes: number[]
 ): AnnotateBlendTag[] {
   return highlights.map((highlight) => {
-    const highlighted =
-      selectedNodes.includes(highlight.id) || selectedNodes.length === 0;
-    let color = highlight.backgroundColor;
-    if (!highlighted) {
-      color = asChromaColor(color).alpha(0.2).css();
-    }
+    const highlighted = isHighlighted(highlight, selectedNodes);
+    const active = isActive(highlight, selectedNodes);
 
     return {
-      color,
       markStyle: {
-        ...getTagStyle(highlight.backgroundColor, { highlighted }),
+        ...getTagStyle(highlight.backgroundColor, { highlighted, active }),
         borderRadius: "0.2em",
         padding: "0.1em",
-        fontWeight: 400,
         borderWidth: "1.5px",
         cursor: "pointer",
       },
@@ -46,13 +39,28 @@ function buildTags(
   });
 }
 
+function isActive(tag: Highlight, selectedNodes: number[]) {
+  return selectedNodes.includes(tag.id);
+}
+
+function isHighlighted(tag: Highlight, selectedNodes: number[]) {
+  if (selectedNodes.length === 0) return true;
+  return (
+    (selectedNodes.includes(tag.id) ||
+      tag.parents?.some((d) => selectedNodes.includes(d))) ??
+    false
+  );
+}
+
 export function FeedbackText(props: FeedbackTextProps) {
   // Convert input to tags
   const { text, selectedNodes, nodes, dispatch } = props;
   let allTags: AnnotateBlendTag[] = buildTags(
-    buildHighlights(nodes),
+    buildHighlights(nodes, null),
     selectedNodes
   );
+
+  console.log("All tags", allTags);
 
   const onChange = useCallback(
     (tags) => {
@@ -83,7 +91,7 @@ export function FeedbackText(props: FeedbackTextProps) {
 
   return h(TextAnnotateBlend, {
     style: {
-      fontSize: "1.2rem",
+      fontSize: "1.2em",
     },
     className: "feedback-text",
     content: text,

@@ -52,7 +52,6 @@ export function useUpdatableTree(
 }
 
 function treeReducer(state: TreeState, action: TreeAction) {
-  console.log(action);
   switch (action.type) {
     case "move-node":
       // For each node in the tree, if the node is in the dragIds, remove it from the tree and collect it
