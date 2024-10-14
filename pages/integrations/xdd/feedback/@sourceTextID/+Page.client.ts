@@ -12,12 +12,7 @@ import { FeedbackComponent } from "./lib";
 import { JSONView } from "@macrostrat/ui-components";
 import { create } from "zustand";
 import { useEffect } from "react";
-import {
-  Card,
-  NonIdealState,
-  OverlaysProvider,
-  Spinner,
-} from "@blueprintjs/core";
+import { NonIdealState, OverlaysProvider, Spinner } from "@blueprintjs/core";
 
 /**
  * Get a single text window for feedback purposes

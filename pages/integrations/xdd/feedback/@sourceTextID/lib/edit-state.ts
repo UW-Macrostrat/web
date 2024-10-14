@@ -27,7 +27,8 @@ type TreeAction =
   | { type: "select-node"; payload: { ids: number[] } }
   | { type: "toggle-node-selected"; payload: { ids: number[] } }
   | { type: "create-node"; payload: TextRange }
-  | { type: "select-entity-type"; payload: EntityType };
+  | { type: "select-entity-type"; payload: EntityType }
+  | { type: "reset" };
 
 export type TreeDispatch = Dispatch<TreeAction>;
 
@@ -143,6 +144,12 @@ function treeReducer(state: TreeState, action: TreeAction) {
         selectedEntityType: action.payload,
       };
     }
+    case "reset":
+      return {
+        ...state,
+        tree: state.initialTree,
+        selectedNodes: [],
+      };
   }
 }
 

@@ -114,9 +114,9 @@ export function EntityTag({ data, selected = true }) {
   const style = getTagStyle(type.color, { selected });
 
   return h(Tag, { style, className }, [
-    h("code.entity-type.bp5-code", type.name),
-    " ",
     h("span.entity-name", name),
+    " ",
+    h("code.entity-type.bp5-code", type.name),
     h(Match, { data: match }),
   ]);
 }

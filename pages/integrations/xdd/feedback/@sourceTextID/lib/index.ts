@@ -74,6 +74,8 @@ function processEntity(entity: Entity): InternalEntity {
 
 function EntityTypeSelector({ entityTypes, selected, onChange }) {
   const [isOpen, setOpen] = useState(false);
+  // Show all entity types when selected is null
+  const _selected = selected != null ? selected : undefined;
   return h(DataField, { label: "Entity type", inline: true }, [
     h(
       "code.bp5-code",
@@ -87,7 +89,7 @@ function EntityTypeSelector({ entityTypes, selected, onChange }) {
     h(OmniboxSelector, {
       isOpen,
       items: Array.from(entityTypes.values()),
-      selectedItem: selected,
+      selectedItem: _selected,
       onSelectItem(item) {
         setOpen(false);
         onChange(item);
