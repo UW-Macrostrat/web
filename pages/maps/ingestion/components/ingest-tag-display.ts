@@ -46,7 +46,7 @@ export function IngestTagDisplay({
     onUpdate();
   }, []);
 
-  const { id, tags } = ingestProcess;
+  const { id, tags } = _ingestProcess;
 
   return h(
     "div.flex.row",

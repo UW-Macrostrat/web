@@ -62,6 +62,7 @@ export function Page() {
               {
                 title: source.name,
                 sourceURL: source.url,
+                ingestProcess,
               },
               [h(ShowMapButton, { showMap, setShowMap })]
             ),
