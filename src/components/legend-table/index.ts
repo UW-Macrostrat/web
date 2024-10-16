@@ -1,4 +1,4 @@
-import { Tag } from "@blueprintjs/core";
+import { OverlayToaster, Tag } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
 import DataSheet, { ColorCell } from "@macrostrat/data-sheet2";
@@ -8,29 +8,84 @@ import { HotkeysProvider } from "@blueprintjs/core";
 import { Spinner } from "@blueprintjs/core";
 
 export * from "./data-loaders";
+import { postgrest } from "~/_providers";
+import { useRef } from "react";
 
 const h = hyper.styled(styles);
 
-export function PostgRESTTableView({ table, columnOptions, order, columns }) {
+interface PostgRESTTableViewProps {
+  table: string;
+  columnOptions?: any;
+  order?: any;
+  columns?: string;
+  editable?: boolean;
+}
+
+export function PostgRESTTableView({
+  table,
+  columnOptions,
+  order,
+  columns,
+  editable = false,
+}: PostgRESTTableViewProps) {
   const { data, onScroll } = usePostgRESTLazyLoader(table, {
     order,
     columns,
   });
+
+  const toasterRef = useRef(null);
 
   if (data == null) {
     return h(Spinner);
   }
 
   return h(
-    HotkeysProvider,
-    h(DataSheet, {
-      data,
-      columnSpecOptions: columnOptions,
-      editable: false,
-      onVisibleCellsChange(visibleCells) {
-        onScroll(visibleCells);
-      },
-    })
+    "div.data-sheet-container",
+    h(HotkeysProvider, [
+      h(OverlayToaster, { usePortal: false, ref: toasterRef }),
+      h(DataSheet, {
+        data,
+        columnSpecOptions: columnOptions ?? {},
+        editable,
+        onVisibleCellsChange(visibleCells) {
+          onScroll(visibleCells);
+        },
+        onSaveData(updates, data) {
+          if (!editable) return;
+
+          // Augment updates with primary key
+          let newUpdates = [];
+
+          for (let [key, value] of Object.entries(updates)) {
+            const id = data[key]?.id;
+            newUpdates.push({ id, ...value });
+          }
+
+          console.log(updates, data, newUpdates);
+
+          // Save data
+          postgrest
+            .from(table)
+            .upsert(newUpdates)
+            .then((res) => {
+              console.log(res);
+              console.log("Saved data");
+              if (res.status != 200) {
+                toasterRef.current.show({
+                  message: h([h("code", res.status), " ", res.error.message]),
+                  intent: "danger",
+                });
+              }
+            })
+            .catch((err: Error) => {
+              toasterRef.current.show({
+                message: err.message,
+                intent: "danger",
+              });
+            });
+        },
+      }),
+    ])
   );
 }
 

@@ -51,6 +51,7 @@ function lazyLoadingReducer<T>(
         visibleRegion: action.region,
       };
     case "loaded":
+      console.log(action);
       let data = adjustArraySize(state.data, action.totalSize);
       data = [
         ...data.slice(0, action.offset),
@@ -185,6 +186,7 @@ function loadMoreData<T>(
   const query = buildQuery(endpoint, cfg);
 
   const res = query.then((res) => {
+    console.log("Result", res);
     const { data, count } = res;
     dispatch({
       type: "loaded",
