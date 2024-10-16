@@ -6,6 +6,8 @@ import { PostgRESTTableView } from "~/components/legend-table";
 import { ColorCell, EditableTextArea } from "@macrostrat/data-sheet2";
 import { ColorPicker } from "@macrostrat/data-sheet";
 import { asChromaColor } from "@macrostrat/color-utils";
+import { LoginButton } from "#/maps/ingestion/components/navbar";
+import { AuthStatus } from "@macrostrat/auth-components";
 
 const colorField = {
   name: "Color",
@@ -24,7 +26,7 @@ const colorField = {
 export function Page() {
   return h(FullscreenPage, { className: "main" }, [
     h(PageBreadcrumbs),
-    h("h1", "Entity types"),
+    h("div.header", [h("h1", "Entity types"), h("div.spacer"), h(AuthStatus)]),
     h(PostgRESTTableView, {
       table: "kg_entity_type",
       editable: true,

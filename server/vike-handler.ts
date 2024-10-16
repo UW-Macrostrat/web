@@ -49,10 +49,6 @@ async function getUserFromCookie(cookies: Record<string, string>) {
     console.log("Anonymous user");
   }
 
-  if (!isProduction && process.env.DEV_ENABLE_AUTH !== "true") {
-    // Haha wow this is sketchy...this needs to be stopped.
-    user = { groups: [1] };
-  }
   return user;
 }
 
