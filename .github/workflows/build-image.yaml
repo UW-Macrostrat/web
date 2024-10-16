@@ -15,4 +15,6 @@ jobs:
     uses: UW-Macrostrat/build-push/.github/workflows/build-push.yaml@main
     secrets: inherit
     with:
+      context: .
+      path: .
       image: 'hub.opensciencegrid.org/macrostrat/web'
