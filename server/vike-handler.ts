@@ -34,7 +34,6 @@ export async function vikeHandler<
 }
 
 async function getUserFromCookie(cookies: Record<string, string>) {
-  const isProduction = process.env.NODE_ENV === "production";
   // Pull out the authorization cookie and decrypt it
   let user: any = undefined;
   try {
@@ -44,6 +43,7 @@ async function getUserFromCookie(cookies: Record<string, string>) {
     // We probably don't need to verify the JWT on each request.
     // OR we can pass the user obju
     user = (await jose.jwtVerify(jwt, secret)).payload;
+    console.log("User", user);
   } catch (e) {
     // I don't care if it fails, it just means the user isn't logged in
     console.log("Anonymous user");

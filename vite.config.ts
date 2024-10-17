@@ -31,6 +31,8 @@ for (const [key, value] of Object.entries(gitEnv)) {
   process.env["VITE_" + key] = value;
 }
 
+// Rewrite API URLs to localhost
+
 const cesiumRoot = require.resolve("cesium").replace("/index.cjs", "/Build");
 const cesiumBuildPath = path.resolve(cesiumRoot, "Cesium");
 
@@ -106,8 +108,5 @@ export default defineConfig({
         api: "modern-compiler",
       },
     },
-  },
-  server: {
-    https: true,
   },
 });

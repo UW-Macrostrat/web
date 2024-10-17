@@ -10,6 +10,7 @@ import { Spinner } from "@blueprintjs/core";
 export * from "./data-loaders";
 import { postgrest } from "~/_providers";
 import { useRef } from "react";
+import { ErrorBoundary } from "@macrostrat/ui-components";
 
 const h = hyper.styled(styles);
 
@@ -21,7 +22,11 @@ interface PostgRESTTableViewProps {
   editable?: boolean;
 }
 
-export function PostgRESTTableView({
+export function PostgRESTTableView(props: PostgRESTTableViewProps) {
+  return h(ErrorBoundary, h(_PostgRESTTableView, props));
+}
+
+export function _PostgRESTTableView({
   table,
   columnOptions,
   order,
@@ -66,7 +71,11 @@ export function PostgRESTTableView({
           // Save data
           postgrest
             .from(table)
-            .upsert(newUpdates)
+            .headers({
+              Prefer: "return=representation",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            })
+            .upsert(newUpdates, { onConflict: "id" })
             .then((res) => {
               console.log(res);
               console.log("Saved data");
