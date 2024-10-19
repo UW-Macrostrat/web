@@ -37,7 +37,7 @@ async function getUserFromCookie(cookies: Record<string, string>) {
   // Pull out the authorization cookie and decrypt it
   let user: any = undefined;
   try {
-    const authHeader = cookies?.Authorization;
+    const authHeader = cookies?.["access_token"];
     const secret = new TextEncoder().encode(process.env.SECRET_KEY);
     const jwt = authHeader.substring(7, authHeader.length);
     // We probably don't need to verify the JWT on each request.

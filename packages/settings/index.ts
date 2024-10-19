@@ -28,7 +28,7 @@ export const apiV2Prefix = getRuntimeConfig(
 
 export const ingestPrefix = getRuntimeConfig(
   "MACROSTRAT_INGEST_API",
-  apiDomain + "/api/ingest"
+  apiDomain + "/api/v3"
 );
 
 export const cdrPrefix = getRuntimeConfig("CDR_API_URL");

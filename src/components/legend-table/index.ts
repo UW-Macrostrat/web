@@ -71,10 +71,6 @@ export function _PostgRESTTableView({
           // Save data
           postgrest
             .from(table)
-            .headers({
-              Prefer: "return=representation",
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            })
             .upsert(newUpdates, { onConflict: "id" })
             .then((res) => {
               console.log(res);
@@ -113,7 +109,6 @@ export function lithologyRenderer(value) {
 }
 
 export function ExpandedLithologies({ value, onChange }) {
-  console.log(value);
   if (value == null) return h("div.basis-panel", "No lithologies");
   return h("div.basis-panel", [
     h("table", [

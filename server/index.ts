@@ -66,6 +66,7 @@ async function startServer() {
   const app = express();
 
   app.use(compression());
+
   //
   if (isProduction) {
     app.use(sirv(`${root}/dist/client`));
@@ -77,29 +78,30 @@ async function startServer() {
     // For localhost development: create a proxy to the API server to enable
     // API requests with the appropriate authorization cookies or headers.
     const proxyDomain = process.env.MACROSTRAT_API_PROXY_DOMAIN;
-    const target = proxyDomain + "/api";
-    console.log("Proxying API requests to", target);
-    const { createProxyMiddleware } = await import("http-proxy-middleware");
-    app.use(
-      "/api",
-      createProxyMiddleware({
-        target,
-        changeOrigin: true,
-        on: {
-          proxyReq: (proxyReq) => {
-            const parsedPath = new URL(proxyReq.path, proxyDomain);
-
-            console.log(
-              chalk.bold.green(`[${proxyReq.method}]`),
-              chalk.dim(proxyDomain) +
-                parsedPath.pathname +
-                chalk.dim(parsedPath.hash) +
-                chalk.dim(parsedPath.search)
-            );
+    if (proxyDomain) {
+      const target = proxyDomain + "/api";
+      console.log("Proxying API requests to", target);
+      const { createProxyMiddleware } = await import("http-proxy-middleware");
+      app.use(
+        "/api",
+        createProxyMiddleware({
+          target,
+          changeOrigin: true,
+          on: {
+            proxyReq: (proxyReq) => {
+              const parsedPath = new URL(proxyReq.path, proxyDomain);
+              console.log(
+                chalk.bold.green(`[${proxyReq.method}]`),
+                chalk.dim(proxyDomain) +
+                  parsedPath.pathname +
+                  chalk.dim(parsedPath.hash) +
+                  chalk.dim(parsedPath.search)
+              );
+            },
           },
-        },
-      })
-    );
+        })
+      );
+    }
 
     // Instantiate Vite's development server and integrate its middleware to our server.
     // ⚠️ We should instantiate it *only* in development. (It isn't needed in production

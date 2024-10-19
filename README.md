@@ -71,3 +71,13 @@ openssl req -x509 -newkey rsa:2048 -nodes -sha256 -subj '/CN=localhost' \
 
 To run the development server with SSL, you can use the following command:
 
+## Testing authentication on localhost
+
+If you are developing locally and need to test authentication, you can
+use a plugin like **CookieSync** to automatically pull cookies from the production or development
+site into your local environment. This will allow you to use the same session
+information locally. The cookie that must be copied is called `access_token`.
+
+We will eventually build in a shim authentication service to allow for easier
+local development.
+
