@@ -52,9 +52,7 @@ export function _PostgRESTTableView({
         data,
         columnSpecOptions: columnOptions ?? {},
         editable,
-        onVisibleCellsChange(visibleCells) {
-          onScroll(visibleCells);
-        },
+        onVisibleCellsChange: onScroll,
         onSaveData(updates, data) {
           if (!editable) return;
 
