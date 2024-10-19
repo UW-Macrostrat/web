@@ -4,6 +4,7 @@ import { useAsyncEffect } from "@macrostrat/ui-components";
 import { debounce } from "underscore";
 import { postgrest } from "~/_providers";
 import { useReducer } from "react";
+import update, { Spec } from "immutability-helper";
 
 interface ChunkIndex {
   startRow: number;
@@ -22,7 +23,8 @@ type LazyLoaderAction<T> =
   | { type: "start-loading" }
   | { type: "loaded"; data: T[]; offset: number; totalSize: number }
   | { type: "error"; error: Error }
-  | { type: "set-visible"; region: RowRegion };
+  | { type: "set-visible"; region: RowRegion }
+  | { type: "update-data"; data: Map<number, T> };
 
 function adjustArraySize<T>(arr: T[], newSize: number) {
   if (newSize == null || arr.length === newSize) {
@@ -50,8 +52,20 @@ function lazyLoadingReducer<T>(
         ...state,
         visibleRegion: action.region,
       };
+    case "update-data":
+      let spec: Spec<T[]> = {};
+      for (let [key, value] of Array.from(action.data.entries())) {
+        spec[key] = { $set: value };
+      }
+
+      console.log(spec);
+
+      return {
+        ...state,
+        loading: false,
+        data: update(state.data, spec),
+      };
     case "loaded":
-      console.log(action);
       let data = adjustArraySize(state.data, action.totalSize);
       data = [
         ...data.slice(0, action.offset),
@@ -218,7 +232,11 @@ export function usePostgRESTLazyLoader(
 
   useAsyncEffect(async () => {
     loadMoreData(endpoint, config, state, dispatch);
-  }, [data, state.visibleRegion]);
+  }, [
+    data,
+    state.visibleRegion.rowIndexStart,
+    state.visibleRegion.rowIndexEnd,
+  ]);
 
   const onScroll = debounce((visibleCells: RowRegion) => {
     dispatch({
@@ -231,6 +249,7 @@ export function usePostgRESTLazyLoader(
     data,
     loading,
     onScroll,
+    dispatch,
   };
 }
 

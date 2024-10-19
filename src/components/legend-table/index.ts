@@ -33,7 +33,7 @@ export function _PostgRESTTableView({
   columns,
   editable = false,
 }: PostgRESTTableViewProps) {
-  const { data, onScroll } = usePostgRESTLazyLoader(table, {
+  const { data, onScroll, dispatch } = usePostgRESTLazyLoader(table, {
     order,
     columns,
   });
@@ -59,32 +59,38 @@ export function _PostgRESTTableView({
           if (!editable) return;
 
           // Augment updates with primary key
-          let newUpdates = [];
+          let newUpdates: Map<number, any> = new Map(
+            Object.entries(updates).map(([key, update]) => {
+              return [key, { ...data[key], ...update }];
+            })
+          );
 
-          for (let [key, value] of Object.entries(updates)) {
-            const id = data[key]?.id;
-            newUpdates.push({ id, ...value });
-          }
+          let updateRows = Array.from(newUpdates.values());
 
-          console.log(updates, data, newUpdates);
+          dispatch({ type: "start-loading" });
 
           // Save data
           postgrest
             .from(table)
-            .upsert(newUpdates, { onConflict: "id" })
+            .upsert(updateRows)
             .then((res) => {
-              console.log(res);
-              console.log("Saved data");
               if (res.status != 200) {
-                toasterRef.current.show({
-                  message: h([h("code", res.status), " ", res.error.message]),
-                  intent: "danger",
-                });
+                // Throw an error with the status code
+                let err = new Error(res.error.message);
+                err["status"] = res.status;
+                throw err;
               }
+
+              // Merge new data with old data
+              dispatch({ type: "update-data", data: newUpdates });
             })
             .catch((err: Error) => {
+              const status = err["status"];
               toasterRef.current.show({
-                message: err.message,
+                message: h([
+                  h.if(status != null)([h("code", status), " "]),
+                  err.message,
+                ]),
                 intent: "danger",
               });
             });
