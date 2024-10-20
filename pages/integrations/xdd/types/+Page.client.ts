@@ -3,8 +3,11 @@ import h from "@macrostrat/hyper";
 import { PageBreadcrumbs } from "~/components";
 import { PostgRESTTableView } from "~/components/legend-table";
 
-import { ColorCell, EditableTextArea } from "@macrostrat/data-sheet2";
-import { ColorPicker } from "@macrostrat/data-sheet";
+import {
+  ColorCell,
+  EditableTextArea,
+  ColorPicker,
+} from "@macrostrat/data-sheet2";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { LoginButton } from "#/maps/ingestion/components/navbar";
 import { AuthStatus } from "@macrostrat/auth-components";
