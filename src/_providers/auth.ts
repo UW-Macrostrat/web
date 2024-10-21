@@ -21,6 +21,7 @@ async function authTransformer(
     case "login":
       // Assemble the return URL on click based on the current page
       const return_url = window.location.origin + window.location.pathname;
+      console.log("Returning to", return_url);
       window.location.href = `${ingestPrefix}/security/login?return_url=${return_url}`;
     case "logout":
       // Delete the token from the session

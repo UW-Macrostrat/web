@@ -11,10 +11,6 @@ import { ButtonGroup, Card } from "@blueprintjs/core";
 import { OmniboxSelector } from "./type-selector";
 import { CancelButton, SaveButton } from "@macrostrat/ui-components";
 
-export interface FeedbackComponentProps {
-  // Add props here
-}
-
 function setsAreTheSame<T>(a: Set<T>, b: Set<T>) {
   if (a.size !== b.size) return false;
   for (const item of a) {

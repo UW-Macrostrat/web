@@ -8,6 +8,7 @@ import { createMiddleware } from "@universal-middleware/express";
 import { createMacrostratQlrAPI } from "@macrostrat-web/qgis-integration";
 import express from "express";
 import sirv from "sirv";
+import chalk from "chalk";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -65,6 +66,7 @@ async function startServer() {
   const app = express();
 
   app.use(compression());
+
   //
   if (isProduction) {
     app.use(sirv(`${root}/dist/client`));
@@ -73,6 +75,34 @@ async function startServer() {
     // Ideally we'd be able to remove this fix.
     app.use("/cesium", sirv(`${root}/dist/cesium`));
   } else {
+    // For localhost development: create a proxy to the API server to enable
+    // API requests with the appropriate authorization cookies or headers.
+    const proxyDomain = process.env.MACROSTRAT_API_PROXY_DOMAIN;
+    if (proxyDomain) {
+      const target = proxyDomain + "/api";
+      console.log("Proxying API requests to", target);
+      const { createProxyMiddleware } = await import("http-proxy-middleware");
+      app.use(
+        "/api",
+        createProxyMiddleware({
+          target,
+          changeOrigin: true,
+          on: {
+            proxyReq: (proxyReq) => {
+              const parsedPath = new URL(proxyReq.path, proxyDomain);
+              console.log(
+                chalk.bold.green(`[${proxyReq.method}]`),
+                chalk.dim(proxyDomain) +
+                  parsedPath.pathname +
+                  chalk.dim(parsedPath.hash) +
+                  chalk.dim(parsedPath.search)
+              );
+            },
+          },
+        })
+      );
+    }
+
     // Instantiate Vite's development server and integrate its middleware to our server.
     // ⚠️ We should instantiate it *only* in development. (It isn't needed in production
     // and would unnecessarily bloat our server in production.)

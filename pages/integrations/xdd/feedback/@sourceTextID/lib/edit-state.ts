@@ -315,7 +315,6 @@ function prepareGraphForServer(tree: TreeData[]): GraphData {
     };
 
     nodeMap.set(node.id, node);
-
     nodes.push(nodeData);
 
     if (node.children) {

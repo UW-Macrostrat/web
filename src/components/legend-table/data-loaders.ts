@@ -3,7 +3,8 @@
 import { useAsyncEffect } from "@macrostrat/ui-components";
 import { debounce } from "underscore";
 import { postgrest } from "~/_providers";
-import { useReducer } from "react";
+import { useCallback, useReducer } from "react";
+import update, { Spec } from "immutability-helper";
 
 interface ChunkIndex {
   startRow: number;
@@ -16,13 +17,15 @@ interface LazyLoaderState<T> {
   loading: boolean;
   error: Error | null;
   visibleRegion: RowRegion;
+  initialized: boolean;
 }
 
 type LazyLoaderAction<T> =
   | { type: "start-loading" }
   | { type: "loaded"; data: T[]; offset: number; totalSize: number }
   | { type: "error"; error: Error }
-  | { type: "set-visible"; region: RowRegion };
+  | { type: "set-visible"; region: RowRegion }
+  | { type: "update-data"; changes: Spec<T[]> };
 
 function adjustArraySize<T>(arr: T[], newSize: number) {
   if (newSize == null || arr.length === newSize) {
@@ -44,11 +47,18 @@ function lazyLoadingReducer<T>(
       return {
         ...state,
         loading: true,
+        initialized: true,
       };
     case "set-visible":
       return {
         ...state,
         visibleRegion: action.region,
+      };
+    case "update-data":
+      return {
+        ...state,
+        loading: false,
+        data: update(state.data, action.changes),
       };
     case "loaded":
       let data = adjustArraySize(state.data, action.totalSize);
@@ -145,7 +155,7 @@ function buildQuery<T>(endpoint: string, config: QueryConfig) {
   return query;
 }
 
-function loadMoreData<T>(
+function _loadMoreData<T>(
   endpoint: string,
   config: QueryConfig & { chunkSize: number },
   state: LazyLoaderState<T>,
@@ -153,10 +163,10 @@ function loadMoreData<T>(
 ) {
   const rowIndex = indexOfFirstNullInRegion(state.data, state.visibleRegion);
   if (state.loading || rowIndex == null) {
-    return;
+    if (state.initialized) {
+      return;
+    }
   }
-
-  dispatch({ type: "start-loading" });
 
   const { chunkSize = 100, ...rest } = config;
 
@@ -169,7 +179,7 @@ function loadMoreData<T>(
   };
 
   // Allows random seeking
-  const isInitialQuery = state.data.length === 0;
+  const isInitialQuery = !state.initialized;
   if (isInitialQuery) {
     cfg.count = "exact";
   }
@@ -182,9 +192,11 @@ function loadMoreData<T>(
     }
   }
 
+  dispatch({ type: "start-loading" });
+
   const query = buildQuery(endpoint, cfg);
 
-  const res = query.then((res) => {
+  query.then((res) => {
     const { data, count } = res;
     dispatch({
       type: "loaded",
@@ -194,6 +206,9 @@ function loadMoreData<T>(
     });
   });
 }
+
+// Ensure only one data load is in progress at a time
+const loadMoreData = debounce(_loadMoreData, 100);
 
 type LazyLoaderOptions = Omit<QueryConfig, "count" | "offset" | "limit"> & {
   chunkSize?: number;
@@ -208,7 +223,8 @@ export function usePostgRESTLazyLoader(
     data: [],
     loading: false,
     error: null,
-    visibleRegion: { rowIndexStart: 0, rowIndexEnd: 1 },
+    visibleRegion: { rowIndexStart: 0, rowIndexEnd: 0 },
+    initialized: false,
   };
 
   const [state, dispatch] = useReducer(lazyLoadingReducer, initialState);
@@ -216,19 +232,27 @@ export function usePostgRESTLazyLoader(
 
   useAsyncEffect(async () => {
     loadMoreData(endpoint, config, state, dispatch);
-  }, [data, state.visibleRegion]);
+  }, [
+    data,
+    state.visibleRegion.rowIndexStart,
+    state.visibleRegion.rowIndexEnd,
+  ]);
 
-  const onScroll = debounce((visibleCells: RowRegion) => {
-    dispatch({
-      type: "set-visible",
-      region: visibleCells,
-    });
-  }, 500);
+  const onScroll = useCallback(
+    debounce((visibleCells: RowRegion) => {
+      dispatch({
+        type: "set-visible",
+        region: visibleCells,
+      });
+    }, 500),
+    [dispatch]
+  );
 
   return {
     data,
     loading,
     onScroll,
+    dispatch,
   };
 }
 

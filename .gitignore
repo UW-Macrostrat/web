@@ -26,4 +26,8 @@ docker-compose.yaml
 *.png
 *.jpg
 
+# Certificates for localhost SSL
+*.pem
+
+
 .vite
