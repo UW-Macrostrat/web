@@ -1,7 +1,7 @@
 import { OverlayToaster, Tag } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
-import DataSheet, { ColorCell } from "@macrostrat/data-sheet2";
+import DataSheet, { ColorCell, getRowsToDelete } from "@macrostrat/data-sheet2";
 import { LithologyTag } from "~/components";
 import { usePostgRESTLazyLoader } from "~/components/legend-table/data-loaders";
 import { HotkeysProvider } from "@blueprintjs/core";
@@ -9,8 +9,9 @@ import { Spinner } from "@blueprintjs/core";
 
 export * from "./data-loaders";
 import { postgrest } from "~/_providers";
-import { useRef } from "react";
+import { useCallback, useRef } from "react";
 import { ErrorBoundary } from "@macrostrat/ui-components";
+import { Spec } from "immutability-helper";
 
 const h = hyper.styled(styles);
 
@@ -26,6 +27,8 @@ export function PostgRESTTableView(props: PostgRESTTableViewProps) {
   return h(ErrorBoundary, h(_PostgRESTTableView, props));
 }
 
+const successResponses = [200, 201];
+
 export function _PostgRESTTableView({
   table,
   columnOptions,
@@ -40,62 +43,84 @@ export function _PostgRESTTableView({
 
   const toasterRef = useRef(null);
 
+  const finishResponse = useCallback(
+    (promisedResult, changes) => {
+      promisedResult
+        .then((res) => {
+          if (!successResponses.includes(res.status)) {
+            // Throw an error with the status code
+            let err = new Error(res.error.message);
+            err["status"] = res.status;
+            throw err;
+          }
+
+          // Merge new data with old data
+          dispatch({ type: "update-data", changes });
+        })
+        .catch((err: Error) => {
+          const status = err["status"];
+          toasterRef.current?.show({
+            message: h([
+              h.if(status != null)([h("code", status), " "]),
+              err.message,
+            ]),
+            intent: "danger",
+          });
+        });
+    },
+    [dispatch]
+  );
+
   if (data == null) {
     return h(Spinner);
   }
 
-  return h(
-    "div.data-sheet-container",
-    h(HotkeysProvider, [
-      h(OverlayToaster, { usePortal: false, ref: toasterRef }),
-      h(DataSheet, {
-        data,
-        columnSpecOptions: columnOptions ?? {},
-        editable,
-        onVisibleCellsChange: onScroll,
-        onSaveData(updates, data) {
-          if (!editable) return;
+  return h(HotkeysProvider, [
+    h(OverlayToaster, { usePortal: false, ref: toasterRef }),
+    h(DataSheet, {
+      data,
+      columnSpecOptions: columnOptions ?? {},
+      editable,
+      onVisibleCellsChange: onScroll,
+      onDeleteRows(selection) {
+        if (!editable) return;
 
-          // Augment updates with primary key
-          let newUpdates: Map<number, any> = new Map(
-            Object.entries(updates).map(([key, update]) => {
-              return [key, { ...data[key], ...update }];
-            })
-          );
+        const rowIndices = getRowsToDelete(selection);
 
-          let updateRows = Array.from(newUpdates.values());
+        console.log(rowIndices);
 
-          dispatch({ type: "start-loading" });
+        const ids = rowIndices.map((i) => data[i].id);
 
-          // Save data
-          postgrest
-            .from(table)
-            .upsert(updateRows)
-            .then((res) => {
-              if (res.status != 200) {
-                // Throw an error with the status code
-                let err = new Error(res.error.message);
-                err["status"] = res.status;
-                throw err;
-              }
+        dispatch({ type: "start-loading" });
 
-              // Merge new data with old data
-              dispatch({ type: "update-data", data: newUpdates });
-            })
-            .catch((err: Error) => {
-              const status = err["status"];
-              toasterRef.current.show({
-                message: h([
-                  h.if(status != null)([h("code", status), " "]),
-                  err.message,
-                ]),
-                intent: "danger",
-              });
-            });
-        },
-      }),
-    ])
-  );
+        const query = postgrest.from(table).delete().in("id", ids);
+
+        finishResponse(query, { $delete: Array.from(rowIndices.keys()) });
+      },
+      onSaveData(updates, data) {
+        if (!editable) return;
+
+        // Augment updates with primary key
+
+        let changes: Spec<any[]> = {};
+        let updateRows: any[] = [];
+        for (let [key, update] of Object.entries(updates)) {
+          const value = { ...data[key], ...update };
+          updateRows.push(value);
+          changes[key] = { $set: value };
+        }
+
+        dispatch({ type: "start-loading" });
+
+        // Save data
+        const query = postgrest
+          .from(table)
+          .upsert(updateRows, { defaultToNull: false });
+
+        finishResponse(query, changes);
+      },
+    }),
+  ]);
 }
 
 export function LongTextViewer({ value, onChange }) {

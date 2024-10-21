@@ -25,7 +25,7 @@ type LazyLoaderAction<T> =
   | { type: "loaded"; data: T[]; offset: number; totalSize: number }
   | { type: "error"; error: Error }
   | { type: "set-visible"; region: RowRegion }
-  | { type: "update-data"; data: Map<number, T> };
+  | { type: "update-data"; changes: Spec<T[]> };
 
 function adjustArraySize<T>(arr: T[], newSize: number) {
   if (newSize == null || arr.length === newSize) {
@@ -55,15 +55,10 @@ function lazyLoadingReducer<T>(
         visibleRegion: action.region,
       };
     case "update-data":
-      let spec: Spec<T[]> = {};
-      for (let [key, value] of Array.from(action.data.entries())) {
-        spec[key] = { $set: value };
-      }
-
       return {
         ...state,
         loading: false,
-        data: update(state.data, spec),
+        data: update(state.data, action.changes),
       };
     case "loaded":
       let data = adjustArraySize(state.data, action.totalSize);
