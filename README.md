@@ -60,24 +60,18 @@ To deploy to kubernetes there is two steps.
    You do this by updating the image tag here to whatever you tagged
    above: https://github.com/UW-Macrostrat/tiger-macrostrat-config/blob/main/manifests/development/web/deployment-patch.yaml
 
-## Local development with SSL
-
-You can generate self-signed SSL certificates for local development using the following command:
-
-```bash
-openssl req -x509 -newkey rsa:2048 -nodes -sha256 -subj '/CN=localhost' \
-  -keyout private-key.pem -out certificate.pem
-```
-
-To run the development server with SSL, you can use the following command:
-
 ## Testing authentication on localhost
 
 If you are developing locally and need to test authentication, you can
-use a plugin like **CookieSync** to automatically pull cookies from the production or development
+use a browser extension like **CookieSync** to automatically pull cookies from the production or development
 site into your local environment. This will allow you to use the same session
 information locally. The cookie that must be copied is called `access_token`.
 
-We will eventually build in a shim authentication service to allow for easier
+We will eventually build an enhanced authentication service to allow for easier
 local development.
+
+```sh
+MACROSTRAT_API_PROXY_DOMAIN="https://dev2.macrostrat.org"
+VITE_MACROSTRAT_API_DOMAIN="http://localhost:3000"
+```
 
