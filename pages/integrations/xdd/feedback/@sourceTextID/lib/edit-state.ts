@@ -2,6 +2,8 @@ import { TreeData } from "./types";
 import { Dispatch, useCallback, useReducer } from "react";
 import update, { Spec } from "immutability-helper";
 import { EntityType } from "#/integrations/xdd/extractions/lib/data-service";
+import { knowledgeGraphAPIURL } from "@macrostrat-web/settings";
+import { Toaster } from "@blueprintjs/core";
 
 interface TreeState {
   initialTree: TreeData[];
@@ -68,6 +70,8 @@ export function useUpdatableTree(
   return [state, handler];
 }
 
+const AppToaster = Toaster.create();
+
 async function treeActionHandler(
   action: TreeAsyncAction | TreeAction
 ): Promise<TreeAction> {
@@ -80,6 +84,31 @@ async function treeActionHandler(
         action.supersedesRunIDs
       );
       console.log(JSON.stringify(data, null, 2));
+
+      try {
+        const response = await fetch(knowledgeGraphAPIURL + "/record_run", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+        console.log(response);
+        if (!response.ok) {
+          throw new Error("Failed to save model information");
+        }
+        AppToaster.show({
+          message: "Model information saved",
+          intent: "success",
+        });
+      } catch (e) {
+        // Show the error in the toaster
+        console.error(e);
+        AppToaster.show({
+          message: "Failed to save model information",
+          intent: "danger",
+        });
+      }
 
       return null;
     default:

@@ -42,6 +42,11 @@ export const postgrestPrefix = getRuntimeConfig(
   apiDomain + "/api/pg"
 );
 
+export const knowledgeGraphAPIURL = getRuntimeConfig(
+  "XDD_KNOWLEDGE_GRAPH_API_URL",
+  apiDomain + "/api/knowledge-graph"
+);
+
 export const macrostratInstance = getRuntimeConfig("MACROSTRAT_INSTANCE");
 
 export const elevationLayerURL = getRuntimeConfig("ELEVATION_LAYER_URL");
