@@ -37,7 +37,6 @@
     "@macrostrat/revision-info-webpack": "^1.0.0",
     "@macrostrat/storybook": "workspace:*",
     "@mdx-js/rollup": "^2.3.0",
-    "@types/esprima": "^4",
     "@types/underscore": "^1",
     "@typescript-eslint/eslint-plugin": "^6.3.0",
     "@typescript-eslint/parser": "^6.3.0",

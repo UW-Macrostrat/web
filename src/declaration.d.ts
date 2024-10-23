@@ -1,7 +1,27 @@
 // declaration.d.ts
 
-import type { Hyper } from "@macrostrat/hyper";
 import type { Component, ReactNode, ReactElement } from "react";
+
+type Children = ReactNode | ReactNode[];
+
+declare module "@macrostrat/hyper" {
+  interface Hyper {
+    // Function with one or two arguments
+    (componentOrTag: Component, children?: Children): ReactNode;
+
+    // Function with three arguments, with one being props
+    <P = {}>(
+      componentOrTag: Component<P>,
+      props: P,
+      children?: Children
+    ): ReactNode;
+
+    // Function with one list of elements -> React fragment
+    (children?: ReactNode[]): ReactNode[];
+  }
+}
+
+import { Hyper } from "@macrostrat/hyper";
 
 // Favicon etc.
 declare module "*.png" {
@@ -9,13 +29,29 @@ declare module "*.png" {
   export default value;
 }
 
-// Union of hyper and record
-type StyledHyper = Hyper & Record<string, string>;
+// Get the hyper function from our custom module
+
+type Classes = { readonly [key: string]: string };
+
+type StyledHyper = Classes & Hyper;
 
 // Style modules
 declare module "*.module.styl" {
+  const classes: { readonly [key: string]: string };
+  export default StyledHyper;
+}
+
+// Override declarations for sass module
+declare module "*.module.sass" {
+  const classes: Classes;
+  export default StyledHyper;
+}
+
+// Override declarations for sass module
+declare module "*.module.scss" {
+  import styles from "./main.module.sass";
   const classes: { [key: string]: string };
-  export default classes;
+  export default StyledHyper;
 }
 
 declare module "*.styl" {
@@ -26,27 +62,4 @@ declare module "*.styl" {
 declare module "*.sass" {
   const content: string;
   export default content;
-}
-
-// Override declarations for sass module
-declare module "*.module.sass" {
-  const classes: { [key: string]: string };
-  export default classes;
-}
-
-type Children = ReactNode | ReactNode[];
-
-declare module "@macrostrat/hyper" {
-  export interface Hyper {
-    // Function with one or two arguments
-    (componentOrTag: Component, children?: Children): Children;
-    // Function with three arguments, with one being props
-    <P = {}>(
-      componentOrTag: Component<P>,
-      props: P,
-      children?: ReactElement
-    ): Children;
-    // Function with one list of elements -> React fragment
-    (children?: ReactNode[]): ReactElement;
-  }
 }
