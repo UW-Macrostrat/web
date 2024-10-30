@@ -1,5 +1,5 @@
-import h from "@macrostrat/hyper";
-import { ContentPage } from "~/layouts";
+import h from "./lib/feedback.module.sass";
+import { ContentPage, FullscreenPage } from "~/layouts";
 import { PageBreadcrumbs } from "~/components";
 import { usePageContext } from "vike-react/usePageContext";
 import { enhanceData } from "../../extractions/lib";
@@ -10,8 +10,16 @@ import {
 } from "../../extractions/lib/data-service";
 import { FeedbackComponent } from "./lib";
 import { Intent, NonIdealState, OverlaysProvider } from "@blueprintjs/core";
-import { ErrorBoundary, Pagination } from "@macrostrat/ui-components";
+import {
+  Box,
+  ErrorBoundary,
+  FlexCol,
+  FlexRow,
+  Pagination,
+  Spacer,
+} from "@macrostrat/ui-components";
 import { useState } from "react";
+import { AuthStatus } from "@macrostrat/auth-components";
 
 /**
  * Get a single text window for feedback purposes
@@ -20,10 +28,16 @@ import { useState } from "react";
 export function Page() {
   return h(
     OverlaysProvider,
-    h(ContentPage, [
-      h(PageBreadcrumbs),
-      h("h1", "Feedback"),
-      h(ExtractionIndex),
+    h(FullscreenPage, [
+      h("div.feedback-main", [
+        h(PageBreadcrumbs),
+        h(FlexRow, { alignItems: "center" }, [
+          h("h1", "Feedback"),
+          h(Spacer),
+          h(AuthStatus),
+        ]),
+        h(ExtractionIndex),
+      ]),
     ])
   );
 }
@@ -57,7 +71,7 @@ function MultiFeedbackInterface({ data, models, entityTypes }) {
   const currentData = data[ix];
   const count = data.length;
 
-  return h("div.feedback", [
+  return h("div.feedback-interface", [
     h.if(data.length > 1)([
       h(NonIdealState, {
         icon: "warning-sign",

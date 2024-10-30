@@ -1,5 +1,11 @@
 import { TreeData } from "./types";
-import { Dispatch, useCallback, useReducer } from "react";
+import {
+  createContext,
+  Dispatch,
+  useCallback,
+  useContext,
+  useReducer,
+} from "react";
 import update, { Spec } from "immutability-helper";
 import { EntityType } from "#/integrations/xdd/extractions/lib/data-service";
 import { knowledgeGraphAPIURL } from "@macrostrat-web/settings";
@@ -12,6 +18,7 @@ interface TreeState {
   entityTypesMap: Map<number, EntityType>;
   selectedEntityType: EntityType;
   lastInternalId: number;
+  isSelectingEntityType: boolean;
 }
 
 type TextRange = {
@@ -37,6 +44,8 @@ type TreeAction =
   | { type: "toggle-node-selected"; payload: { ids: number[] } }
   | { type: "create-node"; payload: TextRange }
   | { type: "select-entity-type"; payload: EntityType }
+  | { type: "toggle-entity-type-selector"; payload?: boolean | null }
+  | { type: "deselect" }
   | { type: "reset" };
 
 export type TreeDispatch = Dispatch<TreeAction | TreeAsyncAction>;
@@ -55,6 +64,7 @@ export function useUpdatableTree(
     entityTypesMap: entityTypes,
     selectedEntityType: type,
     lastInternalId: 0,
+    isSelectingEntityType: false,
   });
 
   const handler = useCallback(
@@ -71,6 +81,16 @@ export function useUpdatableTree(
 }
 
 const AppToaster = Toaster.create();
+
+export const TreeDispatchContext = createContext<TreeDispatch | null>(null);
+
+export function useTreeDispatch() {
+  const dispatch = useContext(TreeDispatchContext);
+  if (dispatch == null) {
+    throw new Error("No dispatch context available");
+  }
+  return dispatch;
+}
 
 async function treeActionHandler(
   action: TreeAsyncAction | TreeAction
@@ -93,7 +113,6 @@ async function treeActionHandler(
           },
           body: JSON.stringify(data),
         });
-        console.log(response);
         if (!response.ok) {
           throw new Error("Failed to save model information");
         }
@@ -117,6 +136,7 @@ async function treeActionHandler(
 }
 
 function treeReducer(state: TreeState, action: TreeAction) {
+  console.log(action);
   switch (action.type) {
     case "move-node":
       // For each node in the tree, if the node is in the dragIds, remove it from the tree and collect it
@@ -160,8 +180,9 @@ function treeReducer(state: TreeState, action: TreeAction) {
         ),
       };
     case "select-node":
-      return { ...state, selectedNodes: action.payload.ids };
-
+      const { ids } = action.payload;
+      return { ...state, selectedNodes: ids };
+    // otherwise fall through to toggle-node-selected for a single ID
     case "toggle-node-selected":
       const nodesToAdd = action.payload.ids.filter(
         (id) => !state.selectedNodes.includes(id)
@@ -188,6 +209,13 @@ function treeReducer(state: TreeState, action: TreeAction) {
         selectedNodes: [newId],
         lastInternalId: newId,
       };
+
+    /** Entity type selection */
+    case "toggle-entity-type-selector":
+      return {
+        ...state,
+        isSelectingEntityType: action.payload ?? !state.isSelectingEntityType,
+      };
     case "select-entity-type": {
       // For each selected node, update the type
       let newTree2 = state.tree;
@@ -205,6 +233,8 @@ function treeReducer(state: TreeState, action: TreeAction) {
         selectedEntityType: action.payload,
       };
     }
+    case "deselect":
+      return { ...state, selectedNodes: [] };
     case "reset":
       return {
         ...state,
