@@ -1,5 +1,5 @@
-import h from "@macrostrat/hyper";
-import { ContentPage } from "~/layouts";
+import h from "./lib/feedback.module.sass";
+import { ContentPage, FullscreenPage } from "~/layouts";
 import { PageBreadcrumbs } from "~/components";
 import { usePageContext } from "vike-react/usePageContext";
 import { enhanceData } from "../../extractions/lib";
@@ -11,7 +11,9 @@ import {
 import { FeedbackComponent } from "./lib";
 import { Intent, NonIdealState, OverlaysProvider } from "@blueprintjs/core";
 import {
+  Box,
   ErrorBoundary,
+  FlexCol,
   FlexRow,
   Pagination,
   Spacer,
@@ -26,14 +28,16 @@ import { AuthStatus } from "@macrostrat/auth-components";
 export function Page() {
   return h(
     OverlaysProvider,
-    h(ContentPage, [
-      h(PageBreadcrumbs),
-      h(FlexRow, { alignItems: "center" }, [
-        h("h1", "Feedback"),
-        h(Spacer),
-        h(AuthStatus),
+    h(FullscreenPage, [
+      h("div.feedback-main", [
+        h(PageBreadcrumbs),
+        h(FlexRow, { alignItems: "center" }, [
+          h("h1", "Feedback"),
+          h(Spacer),
+          h(AuthStatus),
+        ]),
+        h(ExtractionIndex),
       ]),
-      h(ExtractionIndex),
     ])
   );
 }
@@ -67,7 +71,7 @@ function MultiFeedbackInterface({ data, models, entityTypes }) {
   const currentData = data[ix];
   const count = data.length;
 
-  return h("div.feedback", [
+  return h("div.feedback-interface", [
     h.if(data.length > 1)([
       h(NonIdealState, {
         icon: "warning-sign",

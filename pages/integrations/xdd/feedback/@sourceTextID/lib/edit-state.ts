@@ -45,6 +45,7 @@ type TreeAction =
   | { type: "create-node"; payload: TextRange }
   | { type: "select-entity-type"; payload: EntityType }
   | { type: "toggle-entity-type-selector"; payload?: boolean | null }
+  | { type: "deselect" }
   | { type: "reset" };
 
 export type TreeDispatch = Dispatch<TreeAction | TreeAsyncAction>;
@@ -232,6 +233,8 @@ function treeReducer(state: TreeState, action: TreeAction) {
         selectedEntityType: action.payload,
       };
     }
+    case "deselect":
+      return { ...state, selectedNodes: [] };
     case "reset":
       return {
         ...state,

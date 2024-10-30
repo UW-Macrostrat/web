@@ -10,6 +10,7 @@ import { DataField } from "~/components/unit-details";
 import { ButtonGroup, Card } from "@blueprintjs/core";
 import { OmniboxSelector } from "./type-selector";
 import { CancelButton, SaveButton } from "@macrostrat/ui-components";
+import useElementDimensions from "use-element-dimensions";
 
 function setsAreTheSame<T>(a: Set<T>, b: Set<T>) {
   if (a.size !== b.size) return false;
@@ -37,6 +38,8 @@ export function FeedbackComponent({
   const { selectedNodes, tree, selectedEntityType, isSelectingEntityType } =
     state;
 
+  const [{ width, height }, ref] = useElementDimensions();
+
   return h(TreeDispatchContext.Provider, { value: dispatch }, [
     h(FeedbackText, {
       text,
@@ -45,62 +48,73 @@ export function FeedbackComponent({
       selectedNodes,
     }),
     h(ModelInfo, { data: model }),
-    h("div.entity-panel", [
-      h(Card, { className: "control-panel" }, [
-        h(
-          ButtonGroup,
-          {
-            vertical: true,
-            fill: true,
-            minimal: true,
-            alignText: "left",
-          },
-          [
-            h(
-              CancelButton,
-              {
-                icon: "trash",
-                disabled: state.initialTree == state.tree,
-                onClick() {
-                  dispatch({ type: "reset" });
+    h(
+      "div.entity-panel",
+      {
+        ref,
+      },
+      [
+        h(Card, { className: "control-panel" }, [
+          h(
+            ButtonGroup,
+            {
+              vertical: true,
+              fill: true,
+              minimal: true,
+              alignText: "left",
+            },
+            [
+              h(
+                CancelButton,
+                {
+                  icon: "trash",
+                  disabled: state.initialTree == state.tree,
+                  onClick() {
+                    dispatch({ type: "reset" });
+                  },
                 },
-              },
-              "Reset"
-            ),
-            h(
-              SaveButton,
-              {
-                onClick() {
-                  dispatch({
-                    type: "save",
-                    tree,
-                    sourceTextID: sourceTextID,
-                    supersedesRunIDs: [runID],
-                  });
+                "Reset"
+              ),
+              h(
+                SaveButton,
+                {
+                  onClick() {
+                    dispatch({
+                      type: "save",
+                      tree,
+                      sourceTextID: sourceTextID,
+                      supersedesRunIDs: [runID],
+                    });
+                  },
+                  disabled: state.initialTree == state.tree,
                 },
-                disabled: state.initialTree == state.tree,
-              },
-              "Save"
-            ),
-          ]
-        ),
-        h(EntityTypeSelector, {
-          entityTypes,
-          selected: selectedEntityType,
-          onChange(payload) {
-            dispatch({ type: "select-entity-type", payload });
-          },
-          isOpen: isSelectingEntityType,
-          setOpen: (isOpen: boolean) =>
-            dispatch({ type: "toggle-entity-type-selector", payload: isOpen }),
+                "Save"
+              ),
+            ]
+          ),
+          h(EntityTypeSelector, {
+            entityTypes,
+            selected: selectedEntityType,
+            onChange(payload) {
+              dispatch({ type: "select-entity-type", payload });
+            },
+            isOpen: isSelectingEntityType,
+            setOpen: (isOpen: boolean) =>
+              dispatch({
+                type: "toggle-entity-type-selector",
+                payload: isOpen,
+              }),
+          }),
+        ]),
+        h(ManagedSelectionTree, {
+          selectedNodes,
+          dispatch,
+          tree,
+          width,
+          height,
         }),
-      ]),
-      h(ManagedSelectionTree, {
-        selectedNodes,
-        dispatch,
-        tree,
-      }),
-    ]),
+      ]
+    ),
   ]);
 }
 
@@ -148,7 +162,7 @@ function EntityTypeSelector({
 }
 
 function ManagedSelectionTree(props) {
-  const { selectedNodes, dispatch, tree, ...rest } = props;
+  const { selectedNodes, dispatch, tree, height, width, ...rest } = props;
 
   const ref = useRef<TreeApi<TreeData>>();
 
@@ -170,6 +184,8 @@ function ManagedSelectionTree(props) {
 
   return h(Tree, {
     className: "selection-tree",
+    height,
+    width,
     ref,
     data: tree,
     onMove({ dragIds, parentId, index }) {
