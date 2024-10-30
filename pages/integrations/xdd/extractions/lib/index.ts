@@ -115,7 +115,12 @@ export function ModelInfo({ data }) {
   return h("p.model-name", ["Model: ", h("code.bp5-code", data.name)]);
 }
 
-export function EntityTag({ data, highlighted = true, active = false }) {
+export function EntityTag({
+  data,
+  highlighted = true,
+  active = false,
+  onClickType,
+}) {
   const { name, type, match } = data;
   const className = classNames(
     {
@@ -130,7 +135,18 @@ export function EntityTag({ data, highlighted = true, active = false }) {
   return h(Tag, { style, className }, [
     h("span.entity-name", name),
     " ",
-    h("code.entity-type.bp5-code", [type.name, h(Match, { data: match })]),
+    h(
+      "code.entity-type.bp5-code",
+      {
+        onClick(evt) {
+          if (active && onClickType != null) {
+            onClickType(type);
+            evt.stopPropagation();
+          }
+        },
+      },
+      [type.name, h(Match, { data: match })]
+    ),
   ]);
 }
 

@@ -2,6 +2,7 @@ import { NodeApi, TreeApi } from "react-arborist";
 import { TreeData } from "./types";
 import h from "./feedback.module.sass";
 import { EntityTag } from "../../../extractions/lib";
+import { useTreeDispatch } from "./edit-state";
 
 function isSelected(searchNode: TreeData, treeNode: TreeData) {
   return searchNode.id == treeNode.id;
@@ -41,10 +42,19 @@ function Node({ node, style, dragHandle, tree }: any) {
   let highlighted: boolean = isNodeHighlighted(node, tree);
   let active: boolean = isNodeActive(node, tree);
 
+  const dispatch = useTreeDispatch();
+
   return h(
     "div.node",
     { style, ref: dragHandle },
-    h(EntityTag, { data: node.data, active, highlighted })
+    h(EntityTag, {
+      data: node.data,
+      active,
+      highlighted,
+      onClickType() {
+        dispatch({ type: "toggle-entity-type-selector" });
+      },
+    })
   );
 }
 
