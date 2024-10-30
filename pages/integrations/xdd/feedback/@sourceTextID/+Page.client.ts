@@ -10,8 +10,14 @@ import {
 } from "../../extractions/lib/data-service";
 import { FeedbackComponent } from "./lib";
 import { Intent, NonIdealState, OverlaysProvider } from "@blueprintjs/core";
-import { ErrorBoundary, Pagination } from "@macrostrat/ui-components";
+import {
+  ErrorBoundary,
+  FlexRow,
+  Pagination,
+  Spacer,
+} from "@macrostrat/ui-components";
 import { useState } from "react";
+import { AuthStatus } from "@macrostrat/auth-components";
 
 /**
  * Get a single text window for feedback purposes
@@ -22,7 +28,11 @@ export function Page() {
     OverlaysProvider,
     h(ContentPage, [
       h(PageBreadcrumbs),
-      h("h1", "Feedback"),
+      h(FlexRow, { alignItems: "center" }, [
+        h("h1", "Feedback"),
+        h(Spacer),
+        h(AuthStatus),
+      ]),
       h(ExtractionIndex),
     ])
   );

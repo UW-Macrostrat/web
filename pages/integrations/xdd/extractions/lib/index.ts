@@ -130,8 +130,7 @@ export function EntityTag({ data, highlighted = true, active = false }) {
   return h(Tag, { style, className }, [
     h("span.entity-name", name),
     " ",
-    h("code.entity-type.bp5-code", type.name),
-    h(Match, { data: match }),
+    h("code.entity-type.bp5-code", [type.name, h(Match, { data: match })]),
   ]);
 }
 
