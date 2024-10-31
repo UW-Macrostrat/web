@@ -1,0 +1,43 @@
+import { PageHeader, PageBreadcrumbs } from "~/components";
+import { useEffect, useState } from "react";
+import { ContentPage } from "~/layouts";
+
+export default function DevelopmentPage() {
+    const [locations, setLocations] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        // Fetch data from the API endpoint
+        fetch("https://dev2.macrostrat.org/api/pg/saved_locations")
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok " + response.statusText);
+                }
+                return response.json();
+            })
+            .then((data) => {
+                setLocations(data);
+                setLoading(false);
+            })
+            .catch((error) => {
+                setError(error);
+                setLoading(false);
+            });
+    }, []);
+
+    return (
+        <ContentPage>
+            <PageHeader title="Development pages" />
+            <PageBreadcrumbs />
+
+            <h2>My Locations</h2>
+
+            {loading && <p>Loading...</p>}
+            {error && <p>Error: {error.message}</p>}
+            {!loading && !error && (
+                <pre>{JSON.stringify(locations, null, 2)}</pre>
+            )}
+        </ContentPage>
+    );
+}

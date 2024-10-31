@@ -69,7 +69,7 @@ function GeologicMapInfo(props) {
     [
       h("div.map-source-attrs", [
         h(SaveLocationButton, {
-          onClick: handleSaveLocationClick, // This toggles the form visibility
+          onClick: handleSaveLocationClick,
         }),
 
         showSaveLocationForm && h(SaveLocationForm, { onSubmit: handleFormSubmit }),

@@ -2,6 +2,7 @@ import { useState } from "react";
 import styles from "./save-location.module.styl";
 import { hyperStyled } from "@macrostrat/hyper";
 import { Button, Icon } from "@blueprintjs/core";
+import { useNavigate } from "react-router-dom";
 
 export function SaveLocationButton({ onClick }) {
   const h = hyperStyled(styles); // Use hyperStyled for scoped styling
@@ -12,7 +13,7 @@ export function SaveLocationButton({ onClick }) {
       rightIcon: h(Icon, { icon: "floppy-disk", size: 12 }),
       minimal: true,
       small: true,
-      onClick: onClick, // Handle the onClick event passed as props
+      onClick: onClick,
     },
     "Save Location"
   );
@@ -21,6 +22,10 @@ export function SaveLocationButton({ onClick }) {
 
 export function SaveLocationForm({ onSubmit, onViewLocations }) {
   const h = hyperStyled(styles);
+  const navigate = useNavigate();
+  const handleViewLocations = () => {
+    navigate("/dev/user-features/saved-locations");
+  };
 
   const [formData, setFormData] = useState({
     location_name: "",
@@ -42,7 +47,7 @@ export function SaveLocationForm({ onSubmit, onViewLocations }) {
   };
 
   return h("div.save-location-container", [
-    h("form.save-location-form", { onSubmit: handleSubmit }, [
+    h("form.save-location-form", { onSubmit: handleSubmit, onViewLocations: handleViewLocations }, [
       h("div.form-field", [
         h("label", ["Location Name"]),
         h("input", {
@@ -86,8 +91,7 @@ export function SaveLocationForm({ onSubmit, onViewLocations }) {
         h(
           "button",
           {
-            type: "button",
-            onClick: onViewLocations,
+            type: "submit",
             className: styles["view-locations-btn"],
           },
           "View Locations"
