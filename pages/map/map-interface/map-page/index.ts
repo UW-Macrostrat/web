@@ -18,8 +18,6 @@ import Searchbar from "../components/navbar";
 import MapContainer from "./map-view";
 import { MenuPage } from "./menu";
 import h from "./main.module.styl";
-import { PageAdminButton, PageAdminConsole } from "~/components";
-import MapControls from "../../../../packages/sift/src/js/components/MapControls";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));

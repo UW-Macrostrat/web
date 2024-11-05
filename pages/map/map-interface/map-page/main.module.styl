@@ -4,13 +4,15 @@ This stylesheet the overall application page layout.
 
 .panel-card
   padding: 10px
-  >:last-child
+
+  > :last-child
     margin-bottom: 0
 
 .panel-container
   display flex
   flex-direction: column
-  &>div
+
+  & > div
     pointer-events all
 
 .panel-title
@@ -42,23 +44,26 @@ This stylesheet the overall application page layout.
   min-width: 40px
   overflow: hidden
   text-align: right
+
   :global(.bp5-button-text)
     transition: all 200ms
     transition-delay: 100ms
 
 .menu-card.narrow-card
   // Transition opacity when leaving context panel
+
   .panel-header:not(.minimal)
     // .tab-button
     //   &:not(:hover) :global(.bp5-button-text)
     //     //width 0
     //     opacity: 1
-        //margin-left: -7px
+    //margin-left: -7px
     // Fancy CSS to select all buttons _after_ the currently hovered one
+
     .tab-button:global(.bp5-active) ~ .tab-button :global(.bp5-button-text)
-        width 0
-        opacity: 0
-        margin-left: -7px
+      width 0
+      opacity: 0
+      margin-left: -7px
 
 // Todo: not sure how to deal with this style
 // When panel is closing, fade out the buttons text-first
@@ -79,6 +84,7 @@ This stylesheet the overall application page layout.
       padding-right: 0
       min-width: 30px
       width: 30px
+
     :global(.bp5-button-text)
       width 0
       opacity: 0
@@ -98,6 +104,7 @@ This stylesheet the overall application page layout.
 .menu-content
   display flex
   flex-direction column
+
   .bp5-button-group
     margin-bottom 4px
   margin-bottom -8px
@@ -105,12 +112,21 @@ This stylesheet the overall application page layout.
   hr
     width 100%
 
+
+.macrostrat-map-container
+  --navbar-padding: 5px 6px
+
+  :global(.bp5-card)
+    background-color: var(--panel-background-color)
+    border-radius: 5px
+
 // This is a good candidate for moving to the map-interface package
 .macrostrat-map-container.searching
   .context-underlay
     background-color: var(--panel-background-color)
     opacity: 0.5
     pointer-events: all
+
   .map-view-container
     pointer-events: none
 
@@ -128,9 +144,12 @@ This stylesheet the overall application page layout.
 @media screen and (min-width: 768px)
   .macrostrat-map-container
     --map-context-stack-width: 18em
+
     &.context-open
       --map-context-stack-width: 34em
+
     &.searching
       --map-context-stack-width: 24em
+
     &.layers, &.settings
       --map-context-stack-width: 18em

@@ -1,10 +1,13 @@
 import { postgrestPrefix } from "@macrostrat-web/settings";
 import { PageContextServer } from "vike/types";
 import { PostgrestClient } from "@supabase/postgrest-js";
+import { useConfig } from "vike-react/useConfig";
 
 const client = new PostgrestClient(postgrestPrefix);
 
-export async function onBeforeRender(pageContext: PageContextServer) {
+export async function data(pageContext: PageContextServer) {
+  const config = useConfig();
+
   const { id } = pageContext.routeParams;
   const res: any = await client
     .from("sources")
@@ -14,12 +17,9 @@ export async function onBeforeRender(pageContext: PageContextServer) {
   const map = res?.data?.[0];
   const name = map?.name ?? "Unknown map";
 
-  return {
-    pageContext: {
-      pageProps: {
-        map,
-      },
-      title: map.name + "– Legend",
-    },
-  };
+  config({
+    title: name + "– Legend",
+  });
+
+  return map;
 }

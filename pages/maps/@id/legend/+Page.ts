@@ -12,10 +12,12 @@ import {
   ExpandedLithologies,
 } from "~/components/legend-table";
 import { useLegendData } from "../utils";
+import { useData } from "vike-react/useData";
 
 const h = hyper.styled(styles);
 
-export function Page({ map }) {
+export function Page() {
+  const map = useData();
   const data = useLegendData(map);
 
   if (data == null) {
