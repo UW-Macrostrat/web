@@ -12,14 +12,12 @@
     "server:dev": "tsx --env-file=.env ./server/index.ts",
     "format": "prettier --write src packages",
     "server:prod": "NODE_NO_WARNINGS=1 NODE_ENV=production yarn run server",
-    "dev:storybook": "yarn workspace @macrostrat/storybook run dev",
     "start": "yarn run build && yarn run server",
     "test:runtime": "tsx tests/test-urls.ts",
     "test": "vitest"
   },
   "workspaces": [
     "deps/web-components/packages/*",
-    "deps/web-components/storybook",
     "deps/cesium-viewer",
     "deps/cesium-martini",
     "packages/*"
@@ -35,7 +33,6 @@
     "@babel/preset-env": "^7.19.4",
     "@babel/preset-typescript": "^7.18.6",
     "@macrostrat/revision-info-webpack": "^1.0.0",
-    "@macrostrat/storybook": "workspace:*",
     "@mdx-js/rollup": "^2.3.0",
     "@types/underscore": "^1",
     "@typescript-eslint/eslint-plugin": "^6.3.0",
@@ -163,5 +160,5 @@
   "prettier": {
     "proseWrap": "always"
   },
-  "packageManager": "yarn@4.3.1"
+  "packageManager": "yarn@4.5.1"
 }
