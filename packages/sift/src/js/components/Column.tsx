@@ -285,13 +285,13 @@ class _Column extends React.Component {
           <PrevalentTaxa data={this.state.prevalentTaxa} />
 
           <StratColumn data={this.state.units} />
-          <LinkComponent
+          <VikeLink
             href={"/columns/" + this.state.properties.col_id}
             target="_blank"
             className="normalize-link alternate-column"
           >
             Alternate column view
-          </LinkComponent>
+          </VikeLink>
         </div>
 
         <Footer data={this.state.refs} />

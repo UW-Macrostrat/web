@@ -1,13 +1,27 @@
 import { PageContext } from "vike/types";
 import { usePageContext } from "vike-react/usePageContext";
 import { Breadcrumbs } from "@blueprintjs/core";
-import React from "react";
+import React, { useMemo } from "react";
 import { MacrostratIcon } from "~/components";
 import h from "./breadcrumbs.module.sass";
 
-export function PageBreadcrumbs({ showLogo = false }) {
+export function PageBreadcrumbs({ showLogo = false, title }) {
   const ctx = usePageContext();
-  let items = buildBreadcrumbs(ctx.urlPathname, sitemap, ctx);
+  const items = useMemo(() => {
+    let items = buildBreadcrumbs(ctx.urlPathname, sitemap, ctx);
+    if (title != null) {
+      items[items.length - 1].text = title;
+    }
+    return items;
+  }, [ctx.urlPathname, title]);
+
+  return h(PageBreadcrumbsInternal, {
+    showLogo,
+    items,
+  });
+}
+
+export function PageBreadcrumbsInternal({ showLogo = false, items }) {
   if (showLogo) {
     items[0].text = h("span.breadcrumbs-root", [
       h(MacrostratIcon, { size: 16 }),
@@ -20,7 +34,7 @@ export function PageBreadcrumbs({ showLogo = false }) {
   });
 }
 
-function buildBreadcrumbs(
+export function buildBreadcrumbs(
   currentPath: string,
   routes: Routes,
   ctx: PageContext
@@ -182,6 +196,21 @@ export const sitemap: Routes = {
         {
           slug: "lithology",
           name: "Lithology",
+        },
+        {
+          slug: "strat-names",
+          name: "Stratigraphic names",
+          children: [
+            {
+              param: "@id",
+              name(urlPart, ctx) {
+                return h(
+                  "code",
+                  ctx.pageProps?.stratName?.strat_name ?? urlPart
+                );
+              },
+            },
+          ],
         },
       ],
     },

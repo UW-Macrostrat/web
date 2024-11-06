@@ -1,6 +1,11 @@
 import hyper from "@macrostrat/hyper";
 import { ContentPage } from "~/layouts";
-import { PageHeader, Link, AttributedLithTag } from "~/components";
+import {
+  PageHeader,
+  Link,
+  AttributedLithTag,
+  PageBreadcrumbs,
+} from "~/components";
 import {
   InputGroup,
   Spinner,
@@ -67,7 +72,7 @@ export function Page() {
   return h(ContentPage, [
     h("div.page-header.stick-to-top", [
       h("div.flex.row.align-center", [
-        h(PageHeader, { title: "Stratigraphic names" }),
+        h(PageBreadcrumbs, { showLogo: true }),
         h("div.spacer"),
         h(FilterControl, {
           searchString: state.match,
@@ -75,6 +80,7 @@ export function Page() {
             dispatch({ type: "set-search-string", value });
           },
         }),
+        /* TODO
         h(Button, {
           icon: "settings",
           minimal: true,
@@ -83,8 +89,9 @@ export function Page() {
             setShowSettings(!showSettings);
           },
         }),
+         */
       ]),
-      h(SettingsPanel, { isOpen: showSettings, state, dispatch }),
+      //h(SettingsPanel, { isOpen: showSettings, state, dispatch }),
     ]),
     h(StratNamesView, { initialData: data, filters: state }),
     h("div.background-placeholder"),
@@ -146,40 +153,4 @@ function StratNamesList({ data }) {
   return h("div.strat-names-list", [
     data.map((d) => h(StratNameItem, { data: d, key: d.id })),
   ]);
-}
-
-const ranks = {
-  Fm: "Formation",
-  Mbr: "Member",
-  Gp: "Group",
-  Sgp: "Supergroup",
-};
-
-function StratNameItem({ data }) {
-  const { kg_liths, liths, units, id } = data;
-  return h("div.strat-name", {}, [
-    h(
-      Link,
-      { href: `/lex/strat-names/${id}` },
-      h("h2.strat-name", [
-        data.strat_name,
-        " ",
-        h("span", ranks[data.rank] ?? data.rank),
-      ])
-    ),
-    h("p", [`in ${units.length} columns`]),
-    h("div.strat-name-details", [h(Liths, { liths })]),
-    h.if(kg_liths != null)("div.strat-name-details", [
-      h(Liths, { liths: kg_liths, candidate: true }),
-    ]),
-  ]);
-}
-
-function Liths({ liths, candidate = false }) {
-  return h(
-    "p.liths",
-    liths.map((lith, i) => {
-      return h(AttributedLithTag, { key: i, lith, candidate });
-    })
-  );
 }

@@ -10,12 +10,14 @@ interface EditInterfaceMetaProps {
 }
 
 export function Page() {
-  const { source_id, source }: EditInterfaceMetaProps = usePageProps();
+  const { source_id, source, ingestProcess }: EditInterfaceMetaProps =
+    usePageProps();
   return h(ContentPage, { centered: true }, [
     h("div", {}, [
       h(Header, {
         title: source.name,
         sourceURL: source.url,
+        ingestProcess,
       }),
       h(EditSourceForm, { sourceId: source_id }),
     ]),

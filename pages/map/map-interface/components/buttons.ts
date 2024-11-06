@@ -12,7 +12,14 @@ const h = hyperStyled(styles);
 
 export const LinkButton = (props: ButtonProps & { to: string }) => {
   const { to, ...rest } = props;
-  const onClick = useHashNavigate(to);
+  // Check if in react-router context
+  let onClick = () => {};
+  try {
+    onClick = useHashNavigate(to);
+  } catch (err) {
+    console.warn("LinkButton used outside of react-router context");
+  }
+
   return h(Button, {
     ...rest,
     onClick,

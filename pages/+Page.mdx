@@ -1,14 +1,9 @@
 export { ContentPage as default } from "~/layouts";
 import { macrostratInstance } from "@macrostrat-web/settings";
-import { PageHeader } from "~/components";
+import { PageHeaderV2 } from "~/components";
 import { LinkCard } from "~/components/cards";
 
-<PageHeader title="Macrostrat">
-  <span className="subtitle">
-    <span className="secondary">v2</span>{" "}
-    <span className="tertiary">{macrostratInstance}</span>
-  </span>
-</PageHeader>
+<PageHeaderV2 title="Macrostrat"></PageHeaderV2>
 
 <LinkCard href="/map" title="Map interface">
   Macrostrat's main map interface showing a harmonized view of the Earth's crust

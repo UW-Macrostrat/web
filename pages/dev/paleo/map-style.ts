@@ -44,19 +44,19 @@ const common = {
   },
   glyphs: "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
   sprite: "", //mapbox://sprites/mapbox/light-v10",
-  fog: {
-    range: [10, 20],
-    color: "#000000",
-    "high-color": "hsl(207, 23%, 5%)",
-    "space-color": "hsl(207, 23%, 10%)",
-    "horizon-blend": 0.1,
-    "star-intensity": 0,
-  },
 };
 
 const darkStyle = {
   name: "PaleoDark",
   ...common,
+  fog: {
+    range: [10, 20],
+    color: "hsla(0, 0%, 0%, 0.43)",
+    "high-color": "hsl(207, 23%, 5%)",
+    "space-color": "hsl(207, 23%, 10%)",
+    "horizon-blend": 0.1,
+    "star-intensity": 0.5,
+  },
   layers: [
     {
       id: "background",
@@ -82,6 +82,21 @@ const darkStyle = {
 const lightStyle = {
   name: "PaleoLight",
   ...common,
+  fog: {
+    color: "#ffffff",
+    "space-color": [
+      "interpolate",
+      ["linear"],
+      ["zoom"],
+      4,
+      "hsl(215, 28%, 64%)",
+      7,
+      "hsl(209, 92%, 85%)",
+    ],
+    "star-intensity": ["interpolate", ["linear"], ["zoom"], 5, 0.35, 6, 0],
+    range: [5, 15],
+  },
+  light: { intensity: 0.55 },
   layers: [
     {
       id: "background",

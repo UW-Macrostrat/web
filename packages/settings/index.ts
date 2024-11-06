@@ -28,10 +28,11 @@ export const apiV2Prefix = getRuntimeConfig(
 
 export const ingestPrefix = getRuntimeConfig(
   "MACROSTRAT_INGEST_API",
-  apiDomain + "/api/ingest"
+  apiDomain + "/api/v3"
 );
 
-export const cdrPrefix = getRuntimeConfig("CDR_API");
+export const cdrPrefix = getRuntimeConfig("CDR_API_URL");
+export const cdrAPIKey = getRuntimeConfig("CDR_API_KEY");
 
 export const mapPagePrefix = "/map";
 export const routerBasename = "/map";
@@ -41,9 +42,16 @@ export const postgrestPrefix = getRuntimeConfig(
   apiDomain + "/api/pg"
 );
 
+export const knowledgeGraphAPIURL = getRuntimeConfig(
+  "XDD_KNOWLEDGE_GRAPH_API_URL",
+  apiDomain + "/api/knowledge-graph"
+);
+
 export const macrostratInstance = getRuntimeConfig("MACROSTRAT_INSTANCE");
 
 export const elevationLayerURL = getRuntimeConfig("ELEVATION_LAYER_URL");
+
+export const enableAdmin = getRuntimeConfig("ENABLE_ADMIN", true);
 
 /** Legacy settings object */
 export const SETTINGS = {

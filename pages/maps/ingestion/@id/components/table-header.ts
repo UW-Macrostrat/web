@@ -85,6 +85,12 @@ export const TableHeader = ({
             text: "Download Source Files",
             onClick: downloadSourceFiles,
           }),
+          h(MenuItem, {
+            icon: "issue-new",
+            text: "Report Issue/Request Feature",
+            href: "https://github.com/UW-Macrostrat/web/issues/new?assignees=&labels=ingestion&projects=&template=ingestion.md&title=",
+            target: "_blank",
+          }),
         ]),
         renderTarget: ({ ...targetProps }) =>
           h(Button, {

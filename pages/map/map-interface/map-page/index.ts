@@ -3,7 +3,7 @@ import { Suspense, useCallback, useEffect, useRef } from "react";
 import { Spinner } from "@blueprintjs/core";
 import loadable from "@loadable/component";
 import { mapPagePrefix } from "@macrostrat-web/settings";
-import { MapAreaContainer } from "@macrostrat/map-interface";
+import { MapAreaContainer, MapBottomControls } from "@macrostrat/map-interface";
 import classNames from "classnames";
 import { useSelector } from "react-redux";
 import { Route, Routes } from "react-router-dom";

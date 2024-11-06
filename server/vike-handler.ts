@@ -9,7 +9,8 @@ const environment = synthesizeConfigFromEnvironment();
 export async function vikeHandler<
   Context extends Record<string | number | symbol, unknown>
 >(request: Request, context?: Context): Promise<Response> {
-  const user = await getUserFromCookie(request);
+  const cookies = getCookies(request);
+  const user = await getUserFromCookie(cookies);
 
   const pageContextInit = {
     ...context,
@@ -18,6 +19,7 @@ export async function vikeHandler<
     user,
     macrostratLogoFlavor: macrostratLogoFlavor(),
   };
+
   const pageContext = await renderPage(pageContextInit);
   const response = pageContext.httpResponse;
 
@@ -31,25 +33,35 @@ export async function vikeHandler<
   });
 }
 
-async function getUserFromCookie(request: Request) {
-  const isProduction = process.env.NODE_ENV === "production";
+async function getUserFromCookie(cookies: Record<string, string>) {
   // Pull out the authorization cookie and decrypt it
   let user: any = undefined;
   try {
-    const authHeader = request.cookies?.Authorization;
+    const authHeader = cookies?.["access_token"];
     const secret = new TextEncoder().encode(process.env.SECRET_KEY);
     const jwt = authHeader.substring(7, authHeader.length);
-    // We probably don't need to verify the JWT on each request
+    // We probably don't need to verify the JWT on each request.
+    // OR we can pass the user obju
     user = (await jose.jwtVerify(jwt, secret)).payload;
+    console.log("User", user);
   } catch (e) {
     // I don't care if it fails, it just means the user isn't logged in
+    console.log("Anonymous user");
   }
 
-  if (!isProduction && process.env.DEV_ENABLE_AUTH !== "true") {
-    // Haha wow this is sketchy...this needs to be stopped.
-    user = { groups: [1] };
-  }
   return user;
+}
+
+function getCookies(request: Request) {
+  const cookieHeader = request.headers.get("Cookie");
+  if (!cookieHeader) {
+    return {};
+  }
+  return cookieHeader.split("; ").reduce((acc, cookie) => {
+    const [key, value] = cookie.split("=");
+    acc[key] = value.replace(/"/g, "");
+    return acc;
+  }, {});
 }
 
 function synthesizeConfigFromEnvironment() {

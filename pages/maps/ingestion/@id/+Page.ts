@@ -18,11 +18,13 @@ interface EditInterfaceProps {
 }
 
 export function Page() {
-  const { source_id, source, mapBounds }: EditInterfaceProps = usePageProps();
+  const { source_id, source, mapBounds, ingestProcess }: EditInterfaceProps =
+    usePageProps();
   const title = source.name;
 
   const headerProps = {
-    title: title,
+    title,
+    ingestProcess,
     sourceURL: source.url,
   };
 

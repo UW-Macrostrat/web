@@ -27,7 +27,8 @@ const routeMap = {
 };
 
 export function Page() {
-  const { source, ingestProcess, editMode, mapBounds } = usePageProps();
+  const { source, ingestProcess, editMode, mapBounds, source_id } =
+    usePageProps();
   const slug = source.slug;
 
   const sourcePrefix = `${ingestPrefix}/sources/${source_id}`;
@@ -61,6 +62,7 @@ export function Page() {
               {
                 title: source.name,
                 sourceURL: source.url,
+                ingestProcess,
               },
               [h(ShowMapButton, { showMap, setShowMap })]
             ),

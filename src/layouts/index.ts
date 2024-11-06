@@ -22,6 +22,7 @@ export function BasePage({ children, className, fitViewport = false }) {
     },
     [
       children,
+      // A global admin console that can be opened with shift+alt+I
       h.if(loadingTransition.shouldMount)(
         "div.page-transition",
         { className: `page-transition-${loadingTransition.stage}` },
