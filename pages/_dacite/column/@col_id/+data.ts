@@ -20,9 +20,7 @@ export async function data(ctx: PageContext) {
   const query: IdsFromCol = await fetchIdsFromColId(parseInt(col_id ?? "0"));
 
   const { data: colSections, error: e }: PostgrestResponse<ColSectionI> =
-    await pg.rpc("get_col_section_data", {
-      column_id: col_id,
-    });
+    await pg.from("col_section_data").select().match({ col_id });
 
   const {
     data: column,
@@ -37,6 +35,9 @@ export async function data(ctx: PageContext) {
   });
 
   const errors = [e, col_error, unit_error].filter((e) => e != null);
+  if (errors.length > 0) {
+    console.error(errors);
+  }
   return {
     col_id,
     colSections,

@@ -2,7 +2,6 @@ import h from "@macrostrat/hyper";
 import {
   BasePage,
   EditButton,
-  isServer,
   UnitSectionTable,
 } from "@macrostrat-web/column-builder";
 import { useData } from "vike-react/useData";
@@ -23,6 +22,6 @@ export function Page() {
     ]),
     // there doesn't appear to be a good solution yet, so this is the best we can do. It loses the SSR
     // for this component unfortunately
-    h.if(!isServer())(UnitSectionTable, { sections, colSections, col_id }),
+    h(UnitSectionTable, { sections, colSections, col_id }),
   ]);
 }

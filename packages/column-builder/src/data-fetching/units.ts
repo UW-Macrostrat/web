@@ -30,7 +30,5 @@ export async function getSectionData(
     return { ...rest, strat_names: unit_strat_name_expanded };
   });
 
-  console.log(unitsMapped);
-
   return { data: createUnitBySections(unitsMapped), error };
 }
