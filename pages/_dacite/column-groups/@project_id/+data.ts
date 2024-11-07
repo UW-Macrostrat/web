@@ -7,11 +7,10 @@ export async function data(ctx: PageContext): Promise<ColumnGroupsData> {
 
   const { data, error } = await pg
     .from("col_group_with_cols")
-    .select("*, projects(project)")
+    .select("*")
     .match({ project_id });
 
-  const projectName: string =
-    data && data.length > 0 ? data[0].projects.project : "";
+  const projectName: string = data && data.length > 0 ? data[0].project : "";
   const errors = [error].filter((e) => e != null);
 
   return { project_id, projectName, columnGroups: data, errors };
