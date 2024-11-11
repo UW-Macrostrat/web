@@ -1,16 +1,17 @@
 import h from "@macrostrat/hyper";
 import { ExpansionPanel } from "@macrostrat/map-interface";
-import LongText from "../long-text";
 import { IntervalChip } from "../info-blocks";
-import { useAppActions } from "#/map/map-interface/app-state";
+import { useAppActions, useAppState, useHashNavigate } from "#/map/map-interface/app-state";
 import { MapReference } from "~/components/map-info";
-import { useState } from "react";
+import React, { useState } from "react";
 import { SaveLocationButton, SaveLocationForm } from "./save-location-form/save-location";
+import LongText from "#/map/map-interface/components/long-text";
+import { ViewLocations } from "./save-location-form/view-locations";
+
 
 function LongTextRenderer(props) {
   const { name, text } = props;
-  return h.if(text && text.length)(LongText, { name, text });
-}
+  return text && text.length ? h(LongText, { name, text }) : null;}
 
 function GeoMapLines(props) {
   const { source } = props;
@@ -38,19 +39,82 @@ function GeoMapLines(props) {
   ]);
 }
 
+
 function GeologicMapInfo(props) {
   const { bedrockExpanded, source } = props;
   const runAction = useAppActions();
+  //import lat and lng from file1 or call function from file1 to obtain the lat and lng
   const [showSaveLocationForm, setShowSaveLocationForm] = useState(false);
   const handleSaveLocationClick = () => {
-    setShowSaveLocationForm((prevState) => !prevState);
-  };
-  const handleFormSubmit = (formData) => {
-    console.log("Saved location data:", formData);
+      setShowSaveLocationForm((prevState) => !prevState);
+    };
+  const [locations, setLocations] = useState(null)
+
+
+  //id is a sequential serial within the database and webanon has to
+  //specify every column value in order for any payload to post to the
+  //saved locations table. TODO specify permissions and RLA in postgrest.
+  let count_id = 18
+  let position = useAppState((state) => state.core.infoMarkerPosition);
+  let lat = position.lat
+  let lng = position.lng
+
+  const handleFormSubmit = async (formData) => {
+    count_id = count_id + 1;
+    const payload = {
+      id: count_id,
+      user_id: 46,
+      location_name: formData.location_name,
+      location_description: formData.location_description,
+      latitude: lat,  //need latitude from state
+      longitude: lng, //need longitude from state
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      category: formData.category
+    };
+    console.log("posting with this payload", payload)
+    const response = await fetch("https://dev2.macrostrat.org/api/pg/saved_locations", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+    console.log(response)
+    console.log(response.ok)
+    console.log(response.status)
+    console.log(response.statusText)
+    if (response.status != 201) {
+      alert(`Error ${response.status}: ${response.statusText}`)
+    }
+    else {
+      alert("Saved successfully")
+    }
     setShowSaveLocationForm(false);
   };
-  if (!source) return h("div");
 
+
+  const handleViewLocationsForm = async () => {
+    const response = await fetch("https://dev2.macrostrat.org/api/pg/saved_locations", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.status !== 200) {
+      alert(`Error ${response.status}: ${response.statusText}`)
+    }
+    else {
+      const result = await response.json();
+      console.log(result)
+      setLocations(result);
+    }
+  };
+
+
+
+  if (!source) return h("div");
   const interval = {
     int_name: source.age,
     b_age: source.b_int.b_age,
@@ -72,7 +136,8 @@ function GeologicMapInfo(props) {
           onClick: handleSaveLocationClick,
         }),
 
-        showSaveLocationForm && h(SaveLocationForm, { onSubmit: handleFormSubmit }),
+        showSaveLocationForm && h(SaveLocationForm, { onSubmit: handleFormSubmit, onViewLocations: handleViewLocationsForm }),
+        locations && h(ViewLocations, { locations }),
 
         h.if(source.name && source.name.length)("div.map-source-attr", [
           h("span.attr", ["Name: "]),

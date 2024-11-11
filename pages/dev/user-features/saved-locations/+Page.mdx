@@ -8,7 +8,6 @@ export default function DevelopmentPage() {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        // Fetch data from the API endpoint
         fetch("https://dev2.macrostrat.org/api/pg/saved_locations")
             .then((response) => {
                 if (!response.ok) {

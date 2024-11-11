@@ -14,6 +14,7 @@ import { LoadingArea } from "../transitions";
 import { StratColumn } from "./strat-column";
 import { useCallback } from "react";
 
+
 const h = hyper.styled(styles);
 
 function InfoDrawer(props) {

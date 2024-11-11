@@ -1,8 +1,7 @@
-import { useState } from "react";
 import styles from "./save-location.module.styl";
 import { hyperStyled } from "@macrostrat/hyper";
 import { Button, Icon } from "@blueprintjs/core";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
 
 export function SaveLocationButton({ onClick }) {
   const h = hyperStyled(styles); // Use hyperStyled for scoped styling
@@ -20,18 +19,16 @@ export function SaveLocationButton({ onClick }) {
 }
 
 
+
 export function SaveLocationForm({ onSubmit, onViewLocations }) {
   const h = hyperStyled(styles);
-  const navigate = useNavigate();
-  const handleViewLocations = () => {
-    navigate("/dev/user-features/saved-locations");
-  };
 
   const [formData, setFormData] = useState({
     location_name: "",
     location_description: "",
-    tag: "",
+    category: "",
   });
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -44,6 +41,10 @@ export function SaveLocationForm({ onSubmit, onViewLocations }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(formData);
+  };
+  const handleViewLocations = (e) => {
+  e.preventDefault();
+  onViewLocations()
   };
 
   return h("div.save-location-container", [
@@ -66,16 +67,16 @@ export function SaveLocationForm({ onSubmit, onViewLocations }) {
         }),
       ]),
       h("div.form-field", [
-        h("label", ["Tag"]),
+        h("label", ["Category"]),
         h(
           "select",
           {
-            name: "tag",
-            value: formData.tag,
+            name: "category",
+            value: formData.category,
             onChange: handleChange,
           },
           [
-            h("option", { value: "" }, "Select a tag"),
+            h("option", { value: "" }, "Select a category"),
             h("option", { value: "Favorites" }, "Favorites"),
             h("option", { value: "Want to go" }, "Want to go"),
             h("option", { value: "Geological wonder" }, "Geological wonder"),
@@ -91,7 +92,8 @@ export function SaveLocationForm({ onSubmit, onViewLocations }) {
         h(
           "button",
           {
-            type: "submit",
+            type: "button",
+            onClick: handleViewLocations,
             className: styles["view-locations-btn"],
           },
           "View Locations"
