@@ -83,10 +83,6 @@ export function Page() {
             tileset: MacrostratRasterTileset.Emphasized,
           }),
         }),
-        h(Route, {
-          path: "column-inspector",
-          element: loadableElement(() => import("./column-inspector")),
-        }),
         h(Route, { path: "catalog/*", element: h(MapLayerCatalog) }),
         h(Route, {
           path: "strabospot",
