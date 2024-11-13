@@ -9,9 +9,7 @@ import {
   MapLayerPage,
   LinkItem,
 } from "./map-layers";
-import { loadableElement } from "~/_utils";
 import styles from "./main.module.styl";
-import { WeaverPage } from "../weaver/+Page.client";
 import { BrowserRouter as Router } from "react-router-dom";
 
 const h = hyper.styled(styles);
@@ -70,10 +68,6 @@ export function Page() {
           }),
         }),
         h(Route, { path: "catalog/*", element: h(MapLayerCatalog) }),
-        h(Route, {
-          path: "strabospot",
-          element: loadableElement(() => import("./strabospot-integration")),
-        }),
         h(Route, { path: "*", element: h(MapInspectorIndex) }),
       ]),
     ]),
@@ -94,7 +88,6 @@ function MapInspectorIndex() {
       h(LinkItem, { to: "all-maps" }, "All maps"),
     ]),
     h("h2", "Integrations"),
-    h("ul.layers", [h(LinkItem, { to: "strabospot" }, "StraboSpot")]),
     h("h2", h(Link, { to: "catalog" }, "Map layer catalog")),
   ]);
 }

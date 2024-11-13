@@ -24,7 +24,7 @@ import {
 } from "@macrostrat/mapbox-styles";
 import { mergeStyles } from "@macrostrat/mapbox-utils";
 import { ParentRouteButton } from "~/components/map-navbar";
-import { useMapStyle } from "../map-layers/utils";
+import { useMapStyle } from "../layers/map-layers/utils";
 
 const h = hyperStyled(styles);
 
@@ -144,7 +144,7 @@ const overlays = mergeStyles(_macrostratStyle, straboOverlays);
 
 // https://www.strabospot.org/search/interfacesearch.php?dsids=8-204825
 
-export default function StraboSpotIntegrationPage({
+export function Page({
   children,
 }: {
   headerElement?: React.ReactElement;
