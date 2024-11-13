@@ -11,7 +11,6 @@ import {
 } from "./map-layers";
 import { loadableElement } from "~/_utils";
 import styles from "./main.module.styl";
-import { MapColorsInspector } from "./color-schemes";
 import { WeaverPage } from "./weaver";
 import { BrowserRouter as Router } from "react-router-dom";
 
@@ -60,12 +59,6 @@ export function Page() {
           element: h(MapLayerPage),
         }),
         h(Route, {
-          path: "color-schemes",
-          element: h(MapColorsInspector, {
-            title: "Map colors",
-          }),
-        }),
-        h(Route, {
           path: "carto-raster",
           element: h(RasterMapInspectorPage, {
             tileset: MacrostratRasterTileset.Carto,
@@ -107,7 +100,5 @@ function MapInspectorIndex() {
       h(LinkItem, { to: "weaver" }, "Weaver (point data experiments)"),
     ]),
     h("h2", h(Link, { to: "catalog" }, "Map layer catalog")),
-    h("h2", "Color scheme testing"),
-    h(Link, { to: "color-schemes" }, "Color schemes"),
   ]);
 }
