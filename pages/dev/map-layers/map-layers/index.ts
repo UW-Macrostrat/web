@@ -25,7 +25,7 @@ import { useDarkMode, useStoredState } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
 import { useCallback, useMemo, useState } from "react";
 import { ParentRouteButton } from "~/components/map-navbar";
-import { getBaseMapStyle } from "@macrostrat-web/map-utils";
+import { getBaseMapStyle } from "../../../../packages/map-utils";
 import styles from "../main.module.styl";
 import { useMapStyle } from "./utils";
 import { Spacer } from "@macrostrat/ui-components";

@@ -14,7 +14,7 @@ import { useDarkMode } from "@macrostrat/ui-components";
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useAppActions, useAppState } from "#/map/map-interface/app-state";
-import { MacrostratRasterTileset, buildRasterStyle, h } from ".";
+import { MacrostratRasterTileset, buildRasterStyle, h } from "./index";
 import { useMapStyle } from "./utils";
 
 export function RasterOpacityManager({ layerID, opacity }) {

@@ -20,7 +20,7 @@ const h = hyper.styled(styles);
 export function Page() {
   // A route for each layer
   return h("div.dev-index-page", [
-    h(Router, { basename: "/map/dev" }, [
+    h(Router, { basename: "/dev/map-layers" }, [
       h(Routes, [
         h(Route, { path: "weaver", element: h(WeaverPage) }),
         h(Route, {

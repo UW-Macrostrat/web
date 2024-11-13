@@ -6,7 +6,7 @@ import { burwellTileDomain } from "@macrostrat-web/settings";
 import { ErrorBoundary, useAPIResult } from "@macrostrat/ui-components";
 import { Link, Route, Routes, useParams } from "react-router-dom";
 import { ParentRouteButton } from "~/components/map-navbar";
-import { BasicLayerInspectorPage } from ".";
+import { BasicLayerInspectorPage } from "./index";
 import styles from "../main.module.styl";
 
 const h = hyper.styled(styles);
