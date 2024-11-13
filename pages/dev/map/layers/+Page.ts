@@ -20,7 +20,7 @@ const h = hyper.styled(styles);
 export function Page() {
   // A route for each layer
   return h("div.dev-index-page", [
-    h(Router, { basename: "/dev/map-layers" }, [
+    h(Router, { basename: "/dev/map/layers" }, [
       h(Routes, [
         h(Route, { path: "weaver", element: h(WeaverPage) }),
         h(Route, {
@@ -66,12 +66,6 @@ export function Page() {
           }),
         }),
         h(Route, {
-          path: "igcp-orogens",
-          element: h(VectorMapInspectorPage, {
-            tileset: MacrostratVectorTileset.IGCPOrogens,
-          }),
-        }),
-        h(Route, {
           path: "carto-raster",
           element: h(RasterMapInspectorPage, {
             tileset: MacrostratRasterTileset.Carto,
@@ -107,24 +101,13 @@ function MapInspectorIndex() {
       h(LinkItem, { to: "emphasized" }, "Carto (image, emphasized)"),
       h(LinkItem, { to: "all-maps" }, "All maps"),
     ]),
-    h("h2", "Additional layers"),
+    h("h2", "Integrations"),
     h("ul.layers", [
-      h(LinkItem, { to: "igcp-orogens" }, "IGCP orogens"),
+      h(LinkItem, { to: "strabospot" }, "StraboSpot"),
       h(LinkItem, { to: "weaver" }, "Weaver (point data experiments)"),
     ]),
     h("h2", h(Link, { to: "catalog" }, "Map layer catalog")),
-    h("h1", "Rendering libraries"),
-    h("ul.renderers", [
-      h(LinkItem, { to: "globe" }, "Globe"),
-      h(LinkItem, { to: "cesium-vector-providers" }, "Cesium Vector Provider"),
-    ]),
-    h("h1", "Stratigraphic column inspector"),
-    h(Link, { to: "column-inspector" }, "Stratigraphy"),
-    h("h1", "Visualizations"),
-    h(LinkItem, { to: "igcp-orogens" }, "IGCP orogens"),
     h("h2", "Color scheme testing"),
     h(Link, { to: "color-schemes" }, "Color schemes"),
-    h("h1", "Integrations"),
-    h(Link, { to: "strabospot" }, "StraboSpot"),
   ]);
 }

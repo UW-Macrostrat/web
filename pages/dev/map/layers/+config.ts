@@ -1,5 +1,5 @@
 export default {
-  route: "/dev/map-layers*",
+  route: "/dev/map/layers*",
   meta: {
     Page: {
       env: {
