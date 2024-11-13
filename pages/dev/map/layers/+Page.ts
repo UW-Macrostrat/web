@@ -11,7 +11,7 @@ import {
 } from "./map-layers";
 import { loadableElement } from "~/_utils";
 import styles from "./main.module.styl";
-import { WeaverPage } from "./weaver";
+import { WeaverPage } from "../weaver/+Page.client";
 import { BrowserRouter as Router } from "react-router-dom";
 
 const h = hyper.styled(styles);
@@ -21,7 +21,6 @@ export function Page() {
   return h("div.dev-index-page", [
     h(Router, { basename: "/dev/map/layers" }, [
       h(Routes, [
-        h(Route, { path: "weaver", element: h(WeaverPage) }),
         h(Route, {
           path: "carto",
           element: h(VectorMapInspectorPage, {
@@ -95,10 +94,7 @@ function MapInspectorIndex() {
       h(LinkItem, { to: "all-maps" }, "All maps"),
     ]),
     h("h2", "Integrations"),
-    h("ul.layers", [
-      h(LinkItem, { to: "strabospot" }, "StraboSpot"),
-      h(LinkItem, { to: "weaver" }, "Weaver (point data experiments)"),
-    ]),
+    h("ul.layers", [h(LinkItem, { to: "strabospot" }, "StraboSpot")]),
     h("h2", h(Link, { to: "catalog" }, "Map layer catalog")),
   ]);
 }
