@@ -2,33 +2,17 @@
 import { Switch } from "@blueprintjs/core";
 import { burwellTileDomain, mapboxAccessToken } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
-import {
-  DevMapPage,
-  FeaturePanel,
-  FeatureSelectionHandler,
-  FloatingNavbar,
-  LocationPanel,
-  MapLoadingButton,
-  MapMarker,
-  MapView,
-  TileExtentLayer,
-  TileInfo,
-  MapAreaContainer,
-  PanelCard,
-} from "@macrostrat/map-interface";
+import { DevMapPage } from "@macrostrat/map-interface";
 import {
   buildBasicStyle,
   buildMacrostratStyle,
 } from "@macrostrat/mapbox-styles";
 import { Text } from "@blueprintjs/core";
-import { useDarkMode, useStoredState } from "@macrostrat/ui-components";
+import { useInDarkMode, useStoredState } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
 import { useCallback, useMemo, useState } from "react";
 import { ParentRouteButton } from "~/components/map-navbar";
-import { getBaseMapStyle } from "@macrostrat-web/map-utils";
 import styles from "../main.module.styl";
-import { useMapStyle } from "./utils";
-import { Spacer } from "@macrostrat/ui-components";
 import {
   MacrostratVectorTileset,
   MacrostratRasterTileset,
@@ -113,7 +97,9 @@ export function VectorMapInspectorPage({
   );
 
   const _overlayStyle = useMemo(() => {
-    return replaceSourcesForTileset(overlayStyle, tileset);
+    const style = replaceSourcesForTileset(overlayStyle, tileset);
+    console.log("style", style);
+    return style;
   }, [tileset, overlayStyle]) as mapboxgl.Style;
 
   const controls = h([
@@ -135,18 +121,11 @@ export function VectorMapInspectorPage({
     h(LineSymbolManager, { showLineSymbols }),
   ]);
 
-  // TODO: styles need to be updated
-  const _headerElement = h([
-    h(ParentRouteButton),
-    headerElement ?? h(Text, { tag: "h2", ellipsize: true }, title) ?? tileset,
-  ]);
-
   return h(
     DevMapPage,
     {
-      headerElement: _headerElement,
+      headerElement: h(DevPageHeader, { headerElement, title, tileset }),
       mapboxToken: mapboxAccessToken,
-      title: title ?? tileset,
       overlayStyle: _overlayStyle,
       transformRequest,
     },
@@ -176,22 +155,24 @@ export function BasicLayerInspectorPage({
     the search bar on mobile platforms
   */
 
-  const tileset = layer.id;
+  const inDarkMode = useInDarkMode();
 
-  const _headerElement = h([
-    h(ParentRouteButton),
-    headerElement ?? h(Text, { tag: "h2", ellipsize: true }, title ?? tileset),
-  ]);
+  console.log(layer);
 
   return h(
     DevMapPage,
     {
-      headerElement: _headerElement,
+      headerElement: h(DevPageHeader, {
+        headerElement,
+        title: title ?? layer.id,
+      }),
       transformRequest,
       overlayStyle: buildBasicStyle({
-        inDarkMode: false,
+        inDarkMode,
         tileURL: layer.tileurl,
       }),
+      mapboxToken: mapboxAccessToken,
+      bounds: layer.bounds,
     },
     children
   );
@@ -199,3 +180,10 @@ export function BasicLayerInspectorPage({
 
 export * from "./catalog";
 export * from "./raster-map";
+
+function DevPageHeader({ headerElement, title }) {
+  return h([
+    h(ParentRouteButton),
+    headerElement ?? h(Text, { tag: "h2", ellipsize: true }, title),
+  ]);
+}

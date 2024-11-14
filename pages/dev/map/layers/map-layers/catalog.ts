@@ -8,6 +8,7 @@ import { Link, Route, Routes, useParams } from "react-router-dom";
 import { ParentRouteButton } from "~/components/map-navbar";
 import { BasicLayerInspectorPage } from "./index";
 import styles from "../main.module.styl";
+import { PageHeaderV2 } from "~/components";
 
 const h = hyper.styled(styles);
 
@@ -33,7 +34,7 @@ const BackButton = () => h(ParentRouteButton, {}, "Back");
 
 function MapLayerCatalogPage() {
   return h("div.page.layer-catalog-page", [
-    h(BackButton),
+    h(PageHeaderV2, { title: "Table Catalog" }),
     h(MapLayerCatalogList),
   ]);
 }
@@ -42,8 +43,6 @@ function MapLayerCatalogList() {
   // A route for each layer
   const url = burwellTileDomain + "/tables.json";
   const layers = useAPIResult(url);
-
-  console.log(layers);
 
   if (layers == null) {
     return h("div.loading", h(Spinner));

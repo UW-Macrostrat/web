@@ -6,7 +6,6 @@ import {
   MacrostratRasterTileset,
   RasterMapInspectorPage,
   MapLayerCatalog,
-  MapLayerPage,
   LinkItem,
 } from "./map-layers";
 import styles from "./main.module.styl";
