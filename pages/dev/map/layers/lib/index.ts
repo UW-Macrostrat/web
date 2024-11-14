@@ -7,12 +7,10 @@ import {
   buildBasicStyle,
   buildMacrostratStyle,
 } from "@macrostrat/mapbox-styles";
-import { Text } from "@blueprintjs/core";
 import { useInDarkMode, useStoredState } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
-import { useCallback, useMemo, useState } from "react";
-import { ParentRouteButton } from "~/components/map-navbar";
-import styles from "../main.module.styl";
+import { useCallback, useMemo } from "react";
+import { DevPageHeader } from "./utils";
 import {
   MacrostratVectorTileset,
   MacrostratRasterTileset,
@@ -30,7 +28,7 @@ export {
   buildMapStyle,
 };
 
-export const h = hyper.styled(styles);
+export const h = hyper;
 
 const _macrostratStyle = buildMacrostratStyle({
   tileserverDomain: burwellTileDomain,
@@ -124,7 +122,10 @@ export function VectorMapInspectorPage({
   return h(
     DevMapPage,
     {
-      headerElement: h(DevPageHeader, { headerElement, title, tileset }),
+      headerElement: h(DevPageHeader, {
+        headerElement,
+        title,
+      }),
       mapboxToken: mapboxAccessToken,
       overlayStyle: _overlayStyle,
       transformRequest,
@@ -180,10 +181,3 @@ export function BasicLayerInspectorPage({
 
 export * from "./catalog";
 export * from "./raster-map";
-
-function DevPageHeader({ headerElement, title }) {
-  return h([
-    h(ParentRouteButton),
-    headerElement ?? h(Text, { tag: "h2", ellipsize: true }, title),
-  ]);
-}

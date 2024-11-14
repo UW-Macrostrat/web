@@ -7,13 +7,14 @@ import {
   MapView,
   PanelCard,
 } from "@macrostrat/map-interface";
-import { ParentRouteButton } from "~/components/map-navbar";
+import { DevPageHeader } from "./utils";
 
 import { useMapRef } from "@macrostrat/mapbox-react";
 import { useDarkMode } from "@macrostrat/ui-components";
 import { useEffect, useMemo, useState } from "react";
-import { MacrostratRasterTileset, buildRasterStyle, h } from "./index";
+import { MacrostratRasterTileset, buildRasterStyle } from "./index";
 import { useMapStyle } from "./utils";
+import h from "./raster-map.module.sass";
 
 export function RasterOpacityManager({ layerID, opacity }) {
   const mapRef = useMapRef();
@@ -29,6 +30,7 @@ export function RasterOpacityManager({ layerID, opacity }) {
 
 export function RasterMapInspectorPage({
   tileset,
+  title,
 }: {
   tileset: MacrostratRasterTileset;
 }) {
@@ -67,15 +69,14 @@ export function RasterMapInspectorPage({
   return h(
     MapAreaContainer,
     {
-      navbar: h(FloatingNavbar, { className: "searchbar" }, [
-        h([h(ParentRouteButton), h("h2", `${tileset}`)]),
-        h("div.spacer"),
-        h(MapLoadingButton, {
+      navbar: h(FloatingNavbar, {
+        rightElement: h(MapLoadingButton, {
           active: isOpen,
           onClick: () => setOpen(!isOpen),
           isLoading,
         }),
-      ]),
+        headerElement: h(DevPageHeader, { title }),
+      }),
       contextPanel: h(PanelCard, [
         h(FormGroup, { className: "opacity-slider" }, [
           h(Label, "Opacity"),
