@@ -7,7 +7,7 @@ import {
   RasterMapInspectorPage,
   MapLayerCatalog,
   LinkItem,
-} from "./map-layers";
+} from "./lib";
 import styles from "./main.module.styl";
 import { BrowserRouter as Router } from "react-router-dom";
 import { PageHeaderV2 } from "~/components";

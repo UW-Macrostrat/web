@@ -1,7 +1,4 @@
-import {
-  VectorMapInspectorPage,
-  MacrostratVectorTileset,
-} from "../layers/map-layers";
+import { VectorMapInspectorPage, MacrostratVectorTileset } from "../layers/lib";
 import h from "@macrostrat/hyper";
 import { useState } from "react";
 import { ButtonGroup, Button } from "@blueprintjs/core";

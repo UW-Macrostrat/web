@@ -24,7 +24,7 @@ import {
 } from "@macrostrat/mapbox-styles";
 import { mergeStyles } from "@macrostrat/mapbox-utils";
 import { ParentRouteButton } from "~/components/map-navbar";
-import { useMapStyle } from "../layers/map-layers/utils";
+import { useMapStyle } from "#/dev/map/layers/lib/utils";
 
 const h = hyperStyled(styles);
 
