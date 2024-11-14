@@ -20,6 +20,7 @@ import {
   buildBasicStyle,
   buildMacrostratStyle,
 } from "@macrostrat/mapbox-styles";
+import { Text } from "@blueprintjs/core";
 import { useDarkMode, useStoredState } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
 import { useCallback, useMemo, useState } from "react";
@@ -137,7 +138,7 @@ export function VectorMapInspectorPage({
   // TODO: styles need to be updated
   const _headerElement = h([
     h(ParentRouteButton),
-    headerElement ?? h("h2", title ?? tileset),
+    headerElement ?? h(Text, { tag: "h2", ellipsize: true }, title) ?? tileset,
   ]);
 
   return h(
@@ -177,93 +178,22 @@ export function BasicLayerInspectorPage({
 
   const tileset = layer.id;
 
-  const [isOpen, setOpen] = useState(false);
-
-  const [state, setState] = useState({ showTileExtent: false });
-  const { showTileExtent } = state;
-
-  const [inspectPosition, setInspectPosition] =
-    useState<mapboxgl.LngLat | null>(null);
-
-  const [data, setData] = useState(null);
-
-  const onSelectPosition = useCallback((position: mapboxgl.LngLat) => {
-    setInspectPosition(position);
-  }, []);
-
-  let detailElement = null;
-  if (inspectPosition != null) {
-    detailElement = h(
-      LocationPanel,
-      {
-        onClose() {
-          setInspectPosition(null);
-        },
-        position: inspectPosition,
-        // This should be inverted probably
-        showCopyPositionButton: false,
-      },
-      [
-        h(TileInfo, {
-          feature: data?.[0] ?? null,
-          showExtent: showTileExtent,
-          setShowExtent() {
-            setState({ ...state, showTileExtent: !showTileExtent });
-          },
-        }),
-        h(FeaturePanel, { features: data }),
-      ]
-    );
-  }
-
-  const { isEnabled } = useDarkMode();
-
-  // Style management
-  const baseMapURL = getBaseMapStyle(false, isEnabled);
-
-  const _overlayStyle = useMemo(() => {
-    return buildBasicStyle({
-      inDarkMode: isEnabled,
-      tileURL: layer.tileurl,
-    });
-  }, [layer, isEnabled]) as mapboxgl.Style;
-
-  const style = useMapStyle(baseMapURL, _overlayStyle);
-
-  let tile = null;
-  if (showTileExtent && data?.[0] != null) {
-    let f = data[0];
-    tile = { x: f._x, y: f._y, z: f._z };
-  }
-
-  //if (!loaded) return h(Spinner);
+  const _headerElement = h([
+    h(ParentRouteButton),
+    headerElement ?? h(Text, { tag: "h2", ellipsize: true }, title ?? tileset),
+  ]);
 
   return h(
-    MapAreaContainer,
+    DevMapPage,
     {
-      navbar: h(FloatingNavbar, { className: "searchbar" }, [
-        h([h(ParentRouteButton), headerElement ?? h("h2", title ?? tileset)]),
-        h(Spacer),
-        h(MapLoadingButton, {
-          active: isOpen,
-          onClick: () => setOpen(!isOpen),
-        }),
-      ]),
-      contextPanel: h(PanelCard, [children]),
-      detailPanel: detailElement,
-      contextPanelOpen: isOpen,
+      headerElement: _headerElement,
+      transformRequest,
+      overlayStyle: buildBasicStyle({
+        inDarkMode: false,
+        tileURL: layer.tileurl,
+      }),
     },
-    h(MapView, { style, transformRequest, accessToken: mapboxgl.accessToken }, [
-      h(FeatureSelectionHandler, {
-        selectedLocation: inspectPosition,
-        setFeatures: setData,
-      }),
-      h(MapMarker, {
-        position: inspectPosition,
-        setPosition: onSelectPosition,
-      }),
-      h(TileExtentLayer, { tile, color: isEnabled ? "white" : "black" }),
-    ])
+    children
   );
 }
 

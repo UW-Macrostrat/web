@@ -43,6 +43,8 @@ function MapLayerCatalogList() {
   const url = burwellTileDomain + "/tables.json";
   const layers = useAPIResult(url);
 
+  console.log(layers);
+
   if (layers == null) {
     return h("div.loading", h(Spinner));
   }
@@ -63,14 +65,11 @@ function MapLayerCatalogItem({ layer }) {
 
 export function MapLayerPage() {
   const { layer } = useParams();
-  const l1 = `sources.${layer}_polygons`;
   // get path from URL
-  const url = burwellTileDomain + "/table/" + l1 + ".json";
-  console.log(url);
+  const url = burwellTileDomain + "/table/" + layer + ".json";
   const layerDef = useAPIResult(url);
   if (layerDef == null) {
     return h("div", [h(BackButton), h("div.loading", h(Spinner))]);
   }
-  console.log(layerDef);
   return h(ErrorBoundary, h(BasicLayerInspectorPage, { layer: layerDef }));
 }

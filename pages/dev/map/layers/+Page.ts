@@ -53,10 +53,6 @@ export function Page() {
           }),
         }),
         h(Route, {
-          path: "sources/:layer",
-          element: h(MapLayerPage),
-        }),
-        h(Route, {
           path: "carto-raster",
           element: h(RasterMapInspectorPage, {
             tileset: MacrostratRasterTileset.Carto,
@@ -83,12 +79,11 @@ function MapInspectorIndex() {
       h(LinkItem, { to: "carto" }, "Carto"),
       h(LinkItem, { to: "carto-slim" }, "Carto (slim)"),
       h(LinkItem, { to: "carto-v1" }, "Carto (v1)"),
-      h(LinkItem, { to: "carto-slim-v1" }, "Carto (v1)"),
+      h(LinkItem, { to: "carto-slim-v1" }, "Carto (slim, v1)"),
       h(LinkItem, { to: "carto-raster" }, "Carto (image)"),
       h(LinkItem, { to: "emphasized" }, "Carto (image, emphasized)"),
       h(LinkItem, { to: "all-maps" }, "All maps"),
     ]),
-    h("h2", "Integrations"),
     h("h2", h(Link, { to: "catalog" }, "Map layer catalog")),
   ]);
 }
