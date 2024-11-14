@@ -11,6 +11,7 @@ import {
 } from "./map-layers";
 import styles from "./main.module.styl";
 import { BrowserRouter as Router } from "react-router-dom";
+import { PageHeaderV2 } from "~/components";
 
 const h = hyper.styled(styles);
 
@@ -76,7 +77,7 @@ export function Page() {
 
 function MapInspectorIndex() {
   return h("div.page.map-inspector-index", [
-    h("h1", "Map layer inspectors"),
+    h(PageHeaderV2, { title: "Map layer inspectors", showLogo: true }),
     h("h2", "Core layers"),
     h("ul.layers", [
       h(LinkItem, { to: "carto" }, "Carto"),

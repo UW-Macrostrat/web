@@ -16,7 +16,6 @@ import {
   MapAreaContainer,
   PanelCard,
 } from "@macrostrat/map-interface";
-import { useMapStatus } from "@macrostrat/mapbox-react";
 import {
   buildBasicStyle,
   buildMacrostratStyle,
@@ -25,7 +24,7 @@ import { useDarkMode, useStoredState } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
 import { useCallback, useMemo, useState } from "react";
 import { ParentRouteButton } from "~/components/map-navbar";
-import { getBaseMapStyle } from "../../../../../packages/map-utils";
+import { getBaseMapStyle } from "@macrostrat-web/map-utils";
 import styles from "../main.module.styl";
 import { useMapStyle } from "./utils";
 import { Spacer } from "@macrostrat/ui-components";
@@ -61,7 +60,7 @@ function isStateValid(state) {
   }
   // Must have several specific boolean keys
   for (let k of ["showLineSymbols", "xRay", "showTileExtent", "bypassCache"]) {
-    if (typeof state[k] != "boolean") {
+    if (state[k] != null && typeof state[k] != "boolean") {
       return false;
     }
   }
@@ -78,8 +77,9 @@ export function VectorMapInspectorPage({
   overlayStyle = _macrostratStyle,
   title = null,
   headerElement = null,
+  children,
 }: {
-  headerElement?: React.ReactElement;
+  headerElement?: React.ReactNode;
   title?: string;
   tileset?: MacrostratVectorTileset;
   overlayStyle?: mapboxgl.Style;
@@ -112,12 +112,11 @@ export function VectorMapInspectorPage({
   );
 
   const _overlayStyle = useMemo(() => {
-    const style = replaceSourcesForTileset(overlayStyle, tileset);
-    console.log("Overlay style", style);
-    return style;
+    return replaceSourcesForTileset(overlayStyle, tileset);
   }, [tileset, overlayStyle]) as mapboxgl.Style;
 
   const controls = h([
+    children,
     h(Switch, {
       checked: showLineSymbols,
       label: "Show line symbols",
@@ -135,10 +134,16 @@ export function VectorMapInspectorPage({
     h(LineSymbolManager, { showLineSymbols }),
   ]);
 
+  // TODO: styles need to be updated
+  const _headerElement = h([
+    h(ParentRouteButton),
+    headerElement ?? h("h2", title ?? tileset),
+  ]);
+
   return h(
     DevMapPage,
     {
-      headerElement,
+      headerElement: _headerElement,
       mapboxToken: mapboxAccessToken,
       title: title ?? tileset,
       overlayStyle: _overlayStyle,
@@ -171,8 +176,6 @@ export function BasicLayerInspectorPage({
   */
 
   const tileset = layer.id;
-
-  const { isInitialized: loaded, isLoading } = useMapStatus();
 
   const [isOpen, setOpen] = useState(false);
 

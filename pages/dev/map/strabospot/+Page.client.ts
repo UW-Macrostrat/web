@@ -209,7 +209,11 @@ export function Page({
     MapAreaContainer,
     {
       navbar: h(FloatingNavbar, [
-        h([h(ParentRouteButton), "Macrostrat + StraboSpot"]),
+        h([
+          // TODO: change the route to be auto-managed.
+          h(ParentRouteButton, { parentRoute: "/dev/map" }),
+          "Macrostrat + StraboSpot",
+        ]),
       ]),
       contextPanel: h(PanelCard, [
         h.if(selectedDataset == null)("h3", "No dataset selected"),
