@@ -5,16 +5,20 @@
 .key-value
   display: inline-block
   margin-right: 1em
+
   .key
     font-weight: bold
     font-size: 0.9em
+
     &:after
       content: ': '
+
   .value
     font-size: 0.9em
 
 .feature-properties
   position: relative
+
   &:before
     content: "–"
     position: absolute
@@ -31,6 +35,7 @@
   margin-left: -1em
   margin-right: -1em
   margin-bottom: 0.5em
+
   &:last-child
     border-bottom: none
 
@@ -39,15 +44,9 @@
   flex-direction: row
   align-items: baseline
   padding 0 1em
-  h3
-    margin-right: 0.5em    
 
-.opacity-slider
-  margin: 0 1em 0.5em
-  :global
-    .bp5-slider-handle .bp5-slider-label
-      background-color: var(--secondary-color)
-      color: var(--text-color)
+  h3
+    margin-right: 0.5em
 
 .unit-number
   .unit

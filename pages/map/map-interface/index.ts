@@ -17,6 +17,7 @@ import reducerStack, {
   useAppState,
   useAppActions,
 } from "./app-state";
+import MapPage from "./map-page";
 
 /** Redux is used only for the main map applicaton. This heavy state-management approach is
  * essentially a legacy approach, and we are moving away from this in favor of more lightweight
@@ -32,8 +33,6 @@ let store = createStore<AppState, AppAction, any, any>(
   reducerStack,
   composeEnhancers(applyMiddleware(routerMiddleware))
 );
-
-import MapPage from "./map-page";
 
 export default function MapApp({ routerBasename }) {
   return h(

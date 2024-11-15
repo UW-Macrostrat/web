@@ -17,7 +17,7 @@ import {
   FeatureSelectionHandler,
 } from "@macrostrat/map-interface";
 import { NonIdealState } from "@blueprintjs/core";
-import { LinkItem } from "#/map/dev/map-layers";
+import { LinkItem } from "pages/dev/map/layers/lib";
 import { Link } from "~/components";
 
 export function Page() {

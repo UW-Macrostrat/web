@@ -1,4 +1,4 @@
-import { VectorMapInspectorPage, MacrostratVectorTileset } from "./map-layers";
+import { VectorMapInspectorPage, MacrostratVectorTileset } from "../layers/lib";
 import h from "@macrostrat/hyper";
 import { useState } from "react";
 import { ButtonGroup, Button } from "@blueprintjs/core";
@@ -71,7 +71,7 @@ const newStyle = {
   }),
 };
 
-export function MapColorsInspector() {
+export function Page() {
   const [tileset, setTileset] = useState(MacrostratVectorTileset.CartoSlim);
   const tilesetSwitch = h("p.tileset-switch", [
     h(ButtonGroup, [
