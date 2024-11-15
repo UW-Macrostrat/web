@@ -1,5 +1,4 @@
 import h from "@macrostrat/hyper";
-import { Routes, Route, Link } from "react-router-dom";
 import { PageHeaderV2 } from "~/components";
 import { ContentPage } from "~/layouts";
 
@@ -16,7 +15,7 @@ export function Page() {
       h(LinkItem, { to: "emphasized" }, "Carto (image, emphasized)"),
       h(LinkItem, { to: "all-maps" }, "All maps"),
     ]),
-    h("h2", h("a", { href: "./layers/tables" }, "Map layer catalog")),
+    h("h2", h("a", { href: "./layers/tables" }, "Table catalog")),
   ]);
 }
 
