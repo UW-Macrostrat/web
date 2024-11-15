@@ -1,41 +1,14 @@
 import { MacrostratIcon } from "./macrostrat-icon";
-import { DevLinkButton, Link } from "./buttons";
 import h from "./icon.module.sass";
-import { AnchorButton, ButtonGroup } from "@blueprintjs/core";
+import { ButtonGroup } from "@blueprintjs/core";
 import {
   PageBreadcrumbsInternal,
   buildBreadcrumbs,
   sitemap,
 } from "~/components/navigation";
 import { usePageContext } from "vike-react/usePageContext";
-import { Breadcrumbs } from "@blueprintjs/core";
 
-export function PageHeader(props) {
-  const {
-    title = "Macrostrat",
-    showSiteName = true,
-    children,
-    className,
-  } = props;
-  const siteName = "Macrostrat";
-  let _showSiteName = showSiteName;
-  if (title == siteName) {
-    _showSiteName = false;
-  }
-
-  return h("h1.page-title", { className }, [
-    h(MacrostratIcon, { size: 24 }),
-    h.if(_showSiteName)([
-      h(Link, { href: "/", className: "site-name" }, siteName),
-      " ",
-    ]),
-    h("span.title", title),
-    " ",
-    children,
-  ]);
-}
-
-export function PageHeaderV2({ className, title, children, showLogo = true }) {
+export function PageHeader({ className, title, children, showLogo = true }) {
   /** A page header component that includes a title and breadcrumbs. */
   const ctx = usePageContext();
   let items = buildBreadcrumbs(ctx.urlPathname, sitemap, ctx);

@@ -1,10 +1,10 @@
 import h from "@macrostrat/hyper";
-import { PageHeaderV2 } from "~/components";
+import { PageHeader } from "~/components";
 import { ContentPage } from "~/layouts";
 
 export function Page() {
   return h(ContentPage, [
-    h(PageHeaderV2, { title: "Layer inspectors", showLogo: true }),
+    h(PageHeader, { title: "Layer inspectors", showLogo: true }),
     h("h2", "Core layers"),
     h("ul.layers", [
       h(LinkItem, { to: "carto" }, "Carto"),
