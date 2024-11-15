@@ -179,5 +179,4 @@ export function BasicLayerInspectorPage({
   );
 }
 
-export * from "./catalog";
 export * from "./raster-map";

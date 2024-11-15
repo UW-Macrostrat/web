@@ -1,4 +1,7 @@
-// Map layer catalog
+/**
+ * Map layer catalog.
+ * This page is a good example of nesting react-router within a Vike page.
+ */
 import hyper from "@macrostrat/hyper";
 
 import { Spinner } from "@blueprintjs/core";
@@ -6,33 +9,34 @@ import { burwellTileDomain } from "@macrostrat-web/settings";
 import { ErrorBoundary, useAPIResult } from "@macrostrat/ui-components";
 import { Link, Route, Routes, useParams } from "react-router-dom";
 import { ParentRouteButton } from "~/components/map-navbar";
-import { BasicLayerInspectorPage } from "./index";
+import { BasicLayerInspectorPage } from "../lib";
+import { BrowserRouter as Router } from "react-router-dom";
+
 import styles from "../index/main.module.styl";
 import { PageHeaderV2 } from "~/components";
 
 const h = hyper.styled(styles);
 
-export function LinkItem({ to, children }) {
-  return h("li", h("a", { href: "./layers/" + to }, children));
+function LinkItem({ to, children }) {
+  return h("li", h(Link, { to }, children));
 }
 
-export function MapLayerCatalog() {
+export function Page() {
   // A route for each layer
-  return h(
-    ErrorBoundary,
+  return h(Router, { basename: "/dev/map/layers/tables" }, [
     h(Routes, [
       h(Route, {
         path: ":layer",
         element: h(MapLayerPage),
       }),
-      h(Route, { path: "*", element: h(MapLayerCatalogPage) }),
-    ])
-  );
+      h(Route, { path: "*", element: h(TableCatalogIndexPage) }),
+    ]),
+  ]);
 }
 
 const BackButton = () => h(ParentRouteButton, {}, "Back");
 
-function MapLayerCatalogPage() {
+function TableCatalogIndexPage() {
   return h("div.page.layer-catalog-page", [
     h(PageHeaderV2, { title: "Table Catalog" }),
     h(MapLayerCatalogList),

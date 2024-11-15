@@ -1,13 +1,10 @@
-import hyper from "@macrostrat/hyper";
+import h from "@macrostrat/hyper";
 import { Routes, Route, Link } from "react-router-dom";
-import styles from "./main.module.styl";
-import { BrowserRouter as Router } from "react-router-dom";
 import { PageHeaderV2 } from "~/components";
-
-const h = hyper.styled(styles);
+import { ContentPage } from "~/layouts";
 
 export function Page() {
-  return h("div.page.map-inspector-index", [
+  return h(ContentPage, [
     h(PageHeaderV2, { title: "Layer inspectors", showLogo: true }),
     h("h2", "Core layers"),
     h("ul.layers", [
@@ -19,7 +16,7 @@ export function Page() {
       h(LinkItem, { to: "emphasized" }, "Carto (image, emphasized)"),
       h(LinkItem, { to: "all-maps" }, "All maps"),
     ]),
-    h("h2", h("a", { href: "./layers/catalog" }, "Map layer catalog")),
+    h("h2", h("a", { href: "./layers/tables" }, "Map layer catalog")),
   ]);
 }
 
