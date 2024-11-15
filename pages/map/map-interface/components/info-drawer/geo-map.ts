@@ -93,7 +93,7 @@ function GeologicMapInfo(props) {
     setShowSaveLocationForm(false);
   };
 
-
+//build own view locations component outside of geo-map
   const handleViewLocationsForm = async () => {
     const response = await fetch("https://dev2.macrostrat.org/api/pg/saved_locations", {
       method: "GET",

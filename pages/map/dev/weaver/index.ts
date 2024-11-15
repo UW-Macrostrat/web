@@ -66,7 +66,7 @@ function weaverStyle(type: object) {
       weaver: {
         type: "vector",
         tiles: [
-          "https://dev.macrostrat.org/tiles/weaver-tile/{z}/{x}/{y}?model_name=" +
+          "http://localhost:8000/weaver-tile/{z}/{x}/{y}?model_name=" +
             type.id,
         ],
       },

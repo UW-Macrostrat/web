@@ -59,6 +59,9 @@ function InfoDrawerInterior(props) {
   const columnInfo = useAppState((state) => state.core.columnInfo);
   return h(Routes, [
     h(Route, { path: "/column", element: h(StratColumn, { columnInfo }) }),
+    //update view locations route
+    h(Route, { path: "/locations", element: h('div', 'hello world') }),
+
     h(Route, { path: "*", element: h(InfoDrawerMainPanel) }),
   ]);
 }

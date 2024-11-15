@@ -9,7 +9,7 @@ function BackButton() {
   const to = prevRoute?.match.pathname || "/";
   return h(LinkButton, { to, icon: "arrow-left", minimal: true, small: true });
 }
-
+//http request outside of page. page to only render the dynamic
 function ViewLocations({ locations }) { // Destructure props to access locations
   return h("div.view-locations-container", [
     h(BackButton),
