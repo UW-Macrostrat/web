@@ -4,6 +4,7 @@ import { FloatingNavbar, MapLoadingButton } from "@macrostrat/map-interface";
 import { useMapStatus } from "@macrostrat/mapbox-react";
 import { hyperStyled } from "@macrostrat/hyper";
 import styles from "./main.module.sass";
+import { useInRouterContext } from "react-router";
 
 const h = hyperStyled(styles);
 
@@ -12,12 +13,27 @@ export function ParentRouteButton({
   icon = "arrow-left",
   ...rest
 }) {
-  // A button that links to the parent route. This may not be responsive to all needs.
-  if (parentRoute != null) {
-    return h(AnchorButton, { href: parentRoute, icon, minimal: true });
+  // Check if we are in a react-router context
+  const inRouterContext = useInRouterContext();
+
+  let _parentRoute = parentRoute;
+  if (parentRoute == null) {
+    // Check if the current route ends with a slash
+    const path = window.location.pathname;
+    if (path.endsWith("/")) {
+      _parentRoute = "..";
+    } else {
+      _parentRoute = ".";
+    }
   }
 
-  return h(LinkButton, { to: "..", icon, minimal: true, ...rest });
+  if (inRouterContext) {
+    // Should check whether we are the "root" route
+    return h(LinkButton, { to: "..", icon, minimal: true, ...rest });
+  }
+
+  // A button that links to the parent route. This may not be responsive to all needs.
+  return h(AnchorButton, { href: _parentRoute, icon, minimal: true });
 }
 
 export function MapNavbar({

@@ -1,8 +1,7 @@
-import { Radio, RadioGroup, Spinner } from "@blueprintjs/core";
+import { Spinner } from "@blueprintjs/core";
 import { useData } from "vike-react/useData";
 
-import { SETTINGS, cdrPrefix } from "@macrostrat-web/settings";
-import hyper from "@macrostrat/hyper";
+import { cdrPrefix, SETTINGS } from "@macrostrat-web/settings";
 import {
   DetailPanelStyle,
   FeaturePanel,
@@ -16,14 +15,20 @@ import {
 } from "@macrostrat/map-interface";
 import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
-import { NullableSlider, useDarkMode } from "@macrostrat/ui-components";
+import { useDarkMode } from "@macrostrat/ui-components";
 import boundingBox from "@turf/bbox";
 import { LngLatBoundsLike } from "mapbox-gl";
 import { useEffect, useMemo, useState } from "react";
 import { MapNavbar } from "~/components/map-navbar";
-import styles from "./main.module.sass";
-
-const h = hyper.styled(styles);
+import h from "./main.module.sass";
+import {
+  BaseLayerSelector,
+  Basemap,
+  basemapStyle,
+  ensureBoxInGeographicRange,
+  OpacitySlider,
+} from "~/components";
+import { buildRasterStyle } from "~/_utils/map-layers.client";
 
 interface StyleOpts {
   style: string;
@@ -35,14 +40,6 @@ interface StyleOpts {
   rasterURL?: string;
   tileURL: string;
 }
-
-const emptyStyle: any = {
-  version: 8,
-  sprite: "mapbox://sprites/mapbox/bright-v9",
-  glyphs: "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
-  sources: {},
-  layers: [],
-};
 
 function buildOverlayStyle({
   style,
@@ -64,35 +61,9 @@ function buildOverlayStyle({
   }
 
   if (rasterURL != null && layerOpacity.raster != null) {
-    const rasterStyle = {
-      ...emptyStyle,
-      sources: {
-        raster: {
-          type: "raster",
-          tiles: [
-            SETTINGS.burwellTileDomain +
-              "/cog/tiles/{z}/{x}/{y}.png?url=" +
-              rasterURL,
-          ],
-          tileSize: 256,
-        },
-      },
-      layers: [
-        {
-          id: "raster",
-          type: "raster",
-          source: "raster",
-          minzoom: 0,
-          maxzoom: 22,
-          layout: {
-            visibility: "visible",
-          },
-          paint: {
-            "raster-opacity": layerOpacity.raster,
-          },
-        },
-      ],
-    };
+    const rasterStyle = buildRasterStyle(rasterURL, {
+      opacity: layerOpacity.raster,
+    });
 
     mapStyle = mergeStyles(rasterStyle, mapStyle);
   }
@@ -102,29 +73,6 @@ function buildOverlayStyle({
   }
 
   return mergeStyles(style, mapStyle);
-}
-
-function ensureBoxInGeographicRange(bounds: LngLatBoundsLike) {
-  if (bounds[1] < -90) bounds[1] = -90;
-  if (bounds[3] > 90) bounds[3] = 90;
-  return bounds;
-}
-
-enum Basemap {
-  Satellite = "satellite",
-  Basic = "basic",
-  None = "none",
-}
-
-function basemapStyle(basemap, inDarkMode) {
-  switch (basemap) {
-    case Basemap.Satellite:
-      return SETTINGS.satelliteMapURL;
-    case Basemap.Basic:
-      return inDarkMode ? SETTINGS.darkMapURL : SETTINGS.baseMapURL;
-    case Basemap.None:
-      return null;
-  }
 }
 
 export default function MapInterface() {
@@ -312,39 +260,4 @@ export default function MapInterface() {
       ),
     ]
   );
-}
-
-function BaseLayerSelector({ layer, setLayer }) {
-  return h("div.base-layer-selector", [
-    h("h3", "Base layer"),
-    h(
-      RadioGroup,
-      {
-        selectedValue: layer,
-        onChange(e) {
-          setLayer(e.currentTarget.value);
-        },
-      },
-      [
-        h(Radio, { label: "Satellite", value: Basemap.Satellite }),
-        h(Radio, { label: "Basic", value: Basemap.Basic }),
-        h(Radio, { label: "None", value: Basemap.None }),
-      ]
-    ),
-  ]);
-}
-
-function OpacitySlider(props) {
-  return h("div.opacity-slider", [
-    h(NullableSlider, {
-      value: props.opacity,
-      min: 0.1,
-      max: 1,
-      labelStepSize: 0.2,
-      stepSize: 0.1,
-      onChange(v) {
-        props.setOpacity(v);
-      },
-    }),
-  ]);
 }

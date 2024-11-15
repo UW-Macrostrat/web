@@ -53,6 +53,10 @@ export function useHashNavigate(to: string) {
   const navigate = useNavigate();
   const location = useLocation();
 
+  if (navigate == null || location == null) {
+    return null;
+  }
+
   return () => {
     // This may be needed because of module/context stuff
     // Compute relative path if necessary

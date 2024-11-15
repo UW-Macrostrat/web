@@ -77,8 +77,10 @@ export function Page() {
             key: d.id,
             ingestProcess: d,
             user: user,
-            // What is this doing?
-            onUpdate: updateTags,
+            onUpdate: () => {
+              updateTags();
+              updateIngestProcesses();
+            },
           });
         })
       ),
