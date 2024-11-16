@@ -56,7 +56,6 @@
     "@blueprintjs/table": "^5.1.4",
     "@lagunovsky/redux-react-router": "^3.2.0",
     "@loadable/component": "^5.14.1",
-    "@macrostrat-web/data-sheet-test": "workspace:*",
     "@macrostrat-web/globe": "workspace:*",
     "@macrostrat-web/lithology-hierarchy": "workspace:*",
     "@macrostrat-web/map-utils": "workspace:*",
