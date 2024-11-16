@@ -1,4 +1,7 @@
-// Map layer catalog
+/**
+ * Map layer catalog.
+ * This page is a good example of nesting react-router within a Vike page.
+ */
 import hyper from "@macrostrat/hyper";
 
 import { Spinner } from "@blueprintjs/core";
@@ -6,34 +9,36 @@ import { burwellTileDomain } from "@macrostrat-web/settings";
 import { ErrorBoundary, useAPIResult } from "@macrostrat/ui-components";
 import { Link, Route, Routes, useParams } from "react-router-dom";
 import { ParentRouteButton } from "~/components/map-navbar";
-import { BasicLayerInspectorPage } from ".";
-import styles from "../main.module.styl";
+import { BasicLayerInspectorPage } from "../lib";
+import { BrowserRouter as Router } from "react-router-dom";
+
+import styles from "../index/main.module.styl";
+import { PageHeader } from "~/components";
 
 const h = hyper.styled(styles);
 
-export function LinkItem({ to, children }) {
+function LinkItem({ to, children }) {
   return h("li", h(Link, { to }, children));
 }
 
-export function MapLayerCatalog() {
+export function Page() {
   // A route for each layer
-  return h(
-    ErrorBoundary,
+  return h(Router, { basename: "/dev/map/layers/tables" }, [
     h(Routes, [
       h(Route, {
         path: ":layer",
         element: h(MapLayerPage),
       }),
-      h(Route, { path: "*", element: h(MapLayerCatalogPage) }),
-    ])
-  );
+      h(Route, { path: "*", element: h(TableCatalogIndexPage) }),
+    ]),
+  ]);
 }
 
 const BackButton = () => h(ParentRouteButton, {}, "Back");
 
-function MapLayerCatalogPage() {
+function TableCatalogIndexPage() {
   return h("div.page.layer-catalog-page", [
-    h(BackButton),
+    h(PageHeader, { title: "Table Catalog" }),
     h(MapLayerCatalogList),
   ]);
 }
@@ -63,14 +68,11 @@ function MapLayerCatalogItem({ layer }) {
 
 export function MapLayerPage() {
   const { layer } = useParams();
-  const l1 = `sources.${layer}_polygons`;
   // get path from URL
-  const url = burwellTileDomain + "/table/" + l1 + ".json";
-  console.log(url);
+  const url = burwellTileDomain + "/table/" + layer + ".json";
   const layerDef = useAPIResult(url);
   if (layerDef == null) {
     return h("div", [h(BackButton), h("div.loading", h(Spinner))]);
   }
-  console.log(layerDef);
   return h(ErrorBoundary, h(BasicLayerInspectorPage, { layer: layerDef }));
 }

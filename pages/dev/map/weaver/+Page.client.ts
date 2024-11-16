@@ -30,7 +30,7 @@ import {
 import mapboxgl from "mapbox-gl";
 import { useCallback, useEffect, useState } from "react";
 
-export function WeaverPage() {
+export function Page() {
   return h(
     "div.weaver-page",
     h(WeaverMap, { mapboxToken: SETTINGS.mapboxAccessToken })

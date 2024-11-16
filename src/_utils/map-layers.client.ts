@@ -8,18 +8,9 @@ import {
   removeMapLabels,
 } from "@macrostrat/mapbox-utils";
 import mapboxgl from "mapbox-gl";
+import { MacrostratVectorTileset, MacrostratRasterTileset } from "./map-layers";
 
-export enum MacrostratVectorTileset {
-  Carto = "carto",
-  CartoSlim = "carto-slim",
-  IGCPOrogens = "igcp-orogens",
-  AllMaps = "all-maps",
-}
-
-export enum MacrostratRasterTileset {
-  Carto = "carto",
-  Emphasized = "emphasized",
-}
+export * from "./map-layers";
 
 export function replaceSourcesForTileset(
   style: mapboxgl.Style,

@@ -2,33 +2,15 @@
 import { Switch } from "@blueprintjs/core";
 import { burwellTileDomain, mapboxAccessToken } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
-import {
-  DevMapPage,
-  FeaturePanel,
-  FeatureSelectionHandler,
-  FloatingNavbar,
-  LocationPanel,
-  MapLoadingButton,
-  MapMarker,
-  MapView,
-  TileExtentLayer,
-  TileInfo,
-  MapAreaContainer,
-  PanelCard,
-} from "@macrostrat/map-interface";
-import { useMapStatus } from "@macrostrat/mapbox-react";
+import { DevMapPage } from "@macrostrat/map-interface";
 import {
   buildBasicStyle,
   buildMacrostratStyle,
 } from "@macrostrat/mapbox-styles";
-import { useDarkMode, useStoredState } from "@macrostrat/ui-components";
+import { useInDarkMode, useStoredState } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
-import { useCallback, useMemo, useState } from "react";
-import { ParentRouteButton } from "~/components/map-navbar";
-import { getBaseMapStyle } from "@macrostrat-web/map-utils";
-import styles from "../main.module.styl";
-import { useMapStyle } from "./utils";
-import { Spacer } from "@macrostrat/ui-components";
+import { useCallback, useMemo } from "react";
+import { DevPageHeader } from "./utils";
 import {
   MacrostratVectorTileset,
   MacrostratRasterTileset,
@@ -46,7 +28,7 @@ export {
   buildMapStyle,
 };
 
-export const h = hyper.styled(styles);
+export const h = hyper;
 
 const _macrostratStyle = buildMacrostratStyle({
   tileserverDomain: burwellTileDomain,
@@ -61,7 +43,7 @@ function isStateValid(state) {
   }
   // Must have several specific boolean keys
   for (let k of ["showLineSymbols", "xRay", "showTileExtent", "bypassCache"]) {
-    if (typeof state[k] != "boolean") {
+    if (state[k] != null && typeof state[k] != "boolean") {
       return false;
     }
   }
@@ -78,8 +60,9 @@ export function VectorMapInspectorPage({
   overlayStyle = _macrostratStyle,
   title = null,
   headerElement = null,
+  children,
 }: {
-  headerElement?: React.ReactElement;
+  headerElement?: React.ReactNode;
   title?: string;
   tileset?: MacrostratVectorTileset;
   overlayStyle?: mapboxgl.Style;
@@ -113,11 +96,12 @@ export function VectorMapInspectorPage({
 
   const _overlayStyle = useMemo(() => {
     const style = replaceSourcesForTileset(overlayStyle, tileset);
-    console.log("Overlay style", style);
+    console.log("style", style);
     return style;
   }, [tileset, overlayStyle]) as mapboxgl.Style;
 
   const controls = h([
+    children,
     h(Switch, {
       checked: showLineSymbols,
       label: "Show line symbols",
@@ -138,9 +122,11 @@ export function VectorMapInspectorPage({
   return h(
     DevMapPage,
     {
-      headerElement,
+      headerElement: h(DevPageHeader, {
+        headerElement,
+        title,
+      }),
       mapboxToken: mapboxAccessToken,
-      title: title ?? tileset,
       overlayStyle: _overlayStyle,
       transformRequest,
     },
@@ -170,99 +156,27 @@ export function BasicLayerInspectorPage({
     the search bar on mobile platforms
   */
 
-  const tileset = layer.id;
+  const inDarkMode = useInDarkMode();
 
-  const { isInitialized: loaded, isLoading } = useMapStatus();
-
-  const [isOpen, setOpen] = useState(false);
-
-  const [state, setState] = useState({ showTileExtent: false });
-  const { showTileExtent } = state;
-
-  const [inspectPosition, setInspectPosition] =
-    useState<mapboxgl.LngLat | null>(null);
-
-  const [data, setData] = useState(null);
-
-  const onSelectPosition = useCallback((position: mapboxgl.LngLat) => {
-    setInspectPosition(position);
-  }, []);
-
-  let detailElement = null;
-  if (inspectPosition != null) {
-    detailElement = h(
-      LocationPanel,
-      {
-        onClose() {
-          setInspectPosition(null);
-        },
-        position: inspectPosition,
-        // This should be inverted probably
-        showCopyPositionButton: false,
-      },
-      [
-        h(TileInfo, {
-          feature: data?.[0] ?? null,
-          showExtent: showTileExtent,
-          setShowExtent() {
-            setState({ ...state, showTileExtent: !showTileExtent });
-          },
-        }),
-        h(FeaturePanel, { features: data }),
-      ]
-    );
-  }
-
-  const { isEnabled } = useDarkMode();
-
-  // Style management
-  const baseMapURL = getBaseMapStyle(false, isEnabled);
-
-  const _overlayStyle = useMemo(() => {
-    return buildBasicStyle({
-      inDarkMode: isEnabled,
-      tileURL: layer.tileurl,
-    });
-  }, [layer, isEnabled]) as mapboxgl.Style;
-
-  const style = useMapStyle(baseMapURL, _overlayStyle);
-
-  let tile = null;
-  if (showTileExtent && data?.[0] != null) {
-    let f = data[0];
-    tile = { x: f._x, y: f._y, z: f._z };
-  }
-
-  //if (!loaded) return h(Spinner);
+  console.log(layer);
 
   return h(
-    MapAreaContainer,
+    DevMapPage,
     {
-      navbar: h(FloatingNavbar, { className: "searchbar" }, [
-        h([h(ParentRouteButton), headerElement ?? h("h2", title ?? tileset)]),
-        h(Spacer),
-        h(MapLoadingButton, {
-          active: isOpen,
-          onClick: () => setOpen(!isOpen),
-        }),
-      ]),
-      contextPanel: h(PanelCard, [children]),
-      detailPanel: detailElement,
-      contextPanelOpen: isOpen,
+      headerElement: h(DevPageHeader, {
+        headerElement,
+        title: title ?? layer.id,
+      }),
+      transformRequest,
+      overlayStyle: buildBasicStyle({
+        inDarkMode,
+        tileURL: layer.tileurl,
+      }),
+      mapboxToken: mapboxAccessToken,
+      bounds: layer.bounds,
     },
-    h(MapView, { style, transformRequest, accessToken: mapboxgl.accessToken }, [
-      h(FeatureSelectionHandler, {
-        selectedLocation: inspectPosition,
-        setFeatures: setData,
-      }),
-      h(MapMarker, {
-        position: inspectPosition,
-        setPosition: onSelectPosition,
-      }),
-      h(TileExtentLayer, { tile, color: isEnabled ? "white" : "black" }),
-    ])
+    children
   );
 }
 
-export * from "./catalog";
 export * from "./raster-map";
