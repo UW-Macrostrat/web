@@ -6,7 +6,7 @@ import h from "@macrostrat/hyper";
 
 export function Link(props: { href: string; children: ReactChild }) {
   // A shim for next/link
-  return h("a", { href: props.href }, [props.children]);
+  return h("a", { href: "/dev/column-editor" + props.href }, [props.children]);
 }
 
 export interface IdsFromColGroup {
@@ -88,63 +88,63 @@ async function fetchIdsFromColId(col_id: number): Promise<IdsFromCol> {
 /**
  *
  * Legacy NextJS implementation of breadcrumbs
-interface BreadCrumbsHookI {
-  query: QueryI;
-  router: NextRouter;
-}
-function useBreadCrumbs(props: BreadCrumbsHookI) {
-  const { query, router } = props;
+ interface BreadCrumbsHookI {
+ query: QueryI;
+ router: NextRouter;
+ }
+ function useBreadCrumbs(props: BreadCrumbsHookI) {
+ const { query, router } = props;
 
-  const filterCrumbs = (obj: CrumbsI): boolean => {
-    if (obj.text == "Projects") {
-      return true;
-    }
+ const filterCrumbs = (obj: CrumbsI): boolean => {
+ if (obj.text == "Projects") {
+ return true;
+ }
 
-    if (!(obj.predicate in query)) return false;
-    return true;
-  };
+ if (!(obj.predicate in query)) return false;
+ return true;
+ };
 
-  const breadCrumbs: CrumbsI[] = [
-    {
-      text: "Projects",
-      onClick: async () => {
-        router.push("/");
-      },
-      predicate: "",
-    },
-    {
-      text: "Column Groups",
-      onClick: async () => {
-        router.push(`/column-groups/${query.project_id}`);
-      },
-      predicate: "project_id",
-    },
-    {
-      text: "Column",
-      onClick: async () => {
-        router.push(`/column/${query.col_id}`);
-      },
-      predicate: "col_id",
-    },
-    {
-      text: "Section",
-      onClick: async () => {
-        router.push(`/section/${query.section_id}`);
-      },
-      predicate: "section_id",
-    },
-    {
-      text: "Unit",
-      onClick: async () => {
-        router.push(`/unit/${query.unit_id}/edit`);
-      },
-      predicate: "unit_id",
-    },
-  ].filter(filterCrumbs);
+ const breadCrumbs: CrumbsI[] = [
+ {
+ text: "Projects",
+ onClick: async () => {
+ router.push("/");
+ },
+ predicate: "",
+ },
+ {
+ text: "Column Groups",
+ onClick: async () => {
+ router.push(`/column-groups/${query.project_id}`);
+ },
+ predicate: "project_id",
+ },
+ {
+ text: "Column",
+ onClick: async () => {
+ router.push(`/column/${query.col_id}`);
+ },
+ predicate: "col_id",
+ },
+ {
+ text: "Section",
+ onClick: async () => {
+ router.push(`/section/${query.section_id}`);
+ },
+ predicate: "section_id",
+ },
+ {
+ text: "Unit",
+ onClick: async () => {
+ router.push(`/unit/${query.unit_id}/edit`);
+ },
+ predicate: "unit_id",
+ },
+ ].filter(filterCrumbs);
 
-  return breadCrumbs;
-}
-  */
+ return breadCrumbs;
+ }
+ */
 
 export {
   fetchIdsFromColId,

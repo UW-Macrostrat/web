@@ -34,7 +34,7 @@ export function Page() {
           Row,
           {
             key: i,
-            href: `/_dacite/column-groups/${project.id}`,
+            href: `/column-groups/${project.id}`,
           },
           [
             h("td", [project.id]),

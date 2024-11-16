@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { navigate } from "vike/client/router";
 import { ReactChild } from "react";
 import h from "./comp.module.sass";
@@ -20,6 +20,8 @@ interface RowProps {
   isMoved?: boolean;
   onDoubleClick?: () => void;
 }
+
+const routePrefix = "/dev/column-editor";
 
 const getItemStyle = (isDragging: boolean, draggableStyle: any) => ({
   display: isDragging ? "table" : "",
@@ -45,7 +47,15 @@ const RowWrapper = (props: {
 
 function Row(props: { href: string; children: ReactChild }) {
   const { href, children } = props;
-  const onClick = href == null ? null : () => navigate(href);
+
+  const onClick = useCallback(
+    (evt) => {
+      console.log("Navigating to", routePrefix + href);
+      navigate(routePrefix + href);
+      evt.stopPropagation();
+    },
+    [href]
+  );
 
   return h("tr", { onClick }, children);
 }
