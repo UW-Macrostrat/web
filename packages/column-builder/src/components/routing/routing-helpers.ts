@@ -1,12 +1,57 @@
-import { NextRouter } from "next/router";
 import pg from "../../db";
-import { QueryI, CrumbsI } from "./base-page";
-import { ReactChild } from "react";
+import { ReactChild, useCallback } from "react";
 import h from "@macrostrat/hyper";
+import { usePageContext } from "vike-react/usePageContext";
+import { navigate as vikeNavigate } from "vike/client/router";
+
+const routePrefix = "/dev/column-editor";
 
 export function Link(props: { href: string; children: ReactChild }) {
-  // A shim for next/link
-  return h("a", { href: "/dev/column-editor" + props.href }, [props.children]);
+  const ctx = usePageContext();
+  return h("a", { href: buildHref(props.href, ctx.urlPathname) }, [
+    props.children,
+  ]);
+}
+
+export function useNavigate() {
+  const ctx = usePageContext();
+  return useCallback(
+    (href: string, opts: any) => {
+      vikeNavigate(buildHref(href, ctx.urlPathname), opts);
+    },
+    [ctx.urlPathname]
+  );
+}
+
+function buildHref(href: string, currentRoute: string) {
+  console.log(currentRoute, href);
+  if (href.startsWith("/")) {
+    return joinPaths(routePrefix, href.slice(1));
+  } else {
+    // A relative path
+    return joinPaths(currentRoute, href);
+  }
+}
+
+function joinPaths(...paths: string[]) {
+  let parts: string[] = [];
+  for (const path of paths) {
+    // If we're not the first path but are an absolute path, throw an error
+    console.log(parts, path);
+    if (path.startsWith("/") && parts.length > 0) {
+      throw new Error("Cannot join an absolute path with a relative path");
+    }
+
+    const newParts = path.split("/");
+    for (const part of newParts) {
+      if (part == ".") continue;
+      if (part == "..") {
+        parts.pop();
+      }
+      parts.push(part);
+    }
+  }
+  return parts.join("/");
 }
 
 export interface IdsFromColGroup {

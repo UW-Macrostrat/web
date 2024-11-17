@@ -1,5 +1,4 @@
 import React, { useCallback } from "react";
-import { navigate } from "vike/client/router";
 import { ReactChild } from "react";
 import h from "./comp.module.sass";
 import {
@@ -10,6 +9,7 @@ import {
   DroppableProvided,
 } from "react-beautiful-dnd";
 import { Card, Icon } from "@blueprintjs/core";
+import { useNavigate } from "../components";
 
 interface RowProps {
   children: ReactChild;
@@ -47,12 +47,11 @@ const RowWrapper = (props: {
 
 function Row(props: { href: string; children: ReactChild }) {
   const { href, children } = props;
+  const navigate = useNavigate();
 
   const onClick = useCallback(
     (evt) => {
-      console.log("Navigating to", routePrefix + href);
-      navigate(routePrefix + href);
-      evt.stopPropagation();
+      navigate(href);
     },
     [href]
   );
