@@ -15,7 +15,7 @@ export function Page() {
 
   return h(BasePage, { query, errors }, [
     h("h3", [
-      `Sections for Column: ${columnName}`,
+      `Sections for column ${columnName}`,
       h(EditButton, {
         href: `./${col_id}/edit`,
       }),
