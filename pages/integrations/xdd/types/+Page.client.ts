@@ -5,8 +5,8 @@ import { PostgRESTTableView } from "~/components/legend-table";
 
 import {
   ColorCell,
-  EditableTextArea,
-  ColorPicker,
+  //EditableTextArea,
+  //ColorPicker,
 } from "@macrostrat/data-sheet2";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { LoginButton } from "#/maps/ingestion/components/navbar";
@@ -17,7 +17,7 @@ const colorField = {
   key: "color",
   required: false,
   transform: (d) => d,
-  dataEditor: ColorPicker,
+  //dataEditor: ColorPicker,
   valueRenderer: (d) => {
     let color = asChromaColor(d);
     return color?.name() ?? "";

@@ -1,7 +1,7 @@
 import { OverlayToaster, Tag } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
-import DataSheet, { ColorCell, getRowsToDelete } from "@macrostrat/data-sheet2";
+import DataSheet, { ColorCell } from "@macrostrat/data-sheet2"; //getRowsToDelete
 import { LithologyTag } from "~/components";
 import { usePostgRESTLazyLoader } from "~/components/legend-table/data-loaders";
 import { HotkeysProvider } from "@blueprintjs/core";
@@ -85,7 +85,7 @@ export function _PostgRESTTableView({
       onDeleteRows(selection) {
         if (!editable) return;
 
-        const rowIndices = getRowsToDelete(selection);
+        const rowIndices = //getRowsToDelete(selection);
 
         console.log(rowIndices);
 
