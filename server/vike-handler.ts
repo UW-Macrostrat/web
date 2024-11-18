@@ -35,17 +35,16 @@ export async function vikeHandler<
 
 async function getUserFromCookie(cookies: Record<string, string>) {
   // Pull out the authorization cookie and decrypt it
-  let user: any = undefined;
+  let user: any = null;
   try {
     const authHeader = cookies?.["access_token"];
     const secret = new TextEncoder().encode(process.env.SECRET_KEY);
     const jwt = authHeader.substring(7, authHeader.length);
-    // We probably don't need to verify the JWT on each request.
-    // OR we can pass the user obju
-    user = (await jose.jwtVerify(jwt, secret)).payload;
+    let res = await jose.jwtVerify(jwt, secret);
+    user = res.payload;
     console.log("User", user);
   } catch (e) {
-    // I don't care if it fails, it just means the user isn't logged in
+    // If it fails, the user isn't logged in. Could also have an expired token...
     console.log("Anonymous user");
   }
 
@@ -67,9 +66,9 @@ function getCookies(request: Request) {
 function synthesizeConfigFromEnvironment() {
   /** Creates a mapping of environment variables that start with VITE_,
    * and returns them as an object. This allows us to pass environment
-   * variables to the client.
+   * variables to the client at runtime.
    *
-   * TODO: Ideally this would be defined in library code.
+   * TODO: Ideally this would be defined in a library.
    * */
   const env = {};
   for (const key of Object.keys(process.env)) {
