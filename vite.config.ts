@@ -100,7 +100,12 @@ export default defineConfig({
     // If not building for server context
   },
   ssr: {
-    noExternal: ["labella", "@supabase/postgrest-js"],
+    // https://vike.dev/broken-npm-package
+    noExternal: [
+      "labella",
+      "@supabase/postgrest-js",
+      "@macrostrat/auth-components",
+    ],
   },
   css: {
     preprocessorOptions: {
