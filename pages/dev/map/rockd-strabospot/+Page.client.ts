@@ -36,24 +36,24 @@ const _macrostratStyle = buildMacrostratStyle({
 function buildCheckinStyle(darkMode) {
   const color = darkMode ? "#8561f5" : "#7426d3";
 
-  const spotsColor = darkMode ? "#87e070" : "#4be124";
+  const spotsColor = darkMode ? "red" : "red";
 
   return {
     sources: {
       rockdCheckins: {
         type: "vector",
         tiles: [tileserverDomain + "/checkins/tiles/{z}/{x}/{y}"],
-        minzoom: 4,
-        maxzoom: 14,
+        minzoom: 2,
+        maxzoom: 8,
       },
       notableSpots: {
         type: "vector",
         tiles: [
           tileserverDomain +
-            "/integrations/StraboSpot/Notable Spots/tile/{z}/{x}/{y}",
+            "/integrations/StraboSpot/Notable spots/tiles/{z}/{x}/{y}",
         ],
-        minzoom: 4,
-        maxzoom: 14,
+        minzoom: 2,
+        maxzoom: 8,
       },
     },
     layers: [
@@ -77,7 +77,7 @@ function buildCheckinStyle(darkMode) {
         source: "notableSpots",
         "source-layer": "default",
         paint: {
-          "circle-radius": 5,
+          "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, 3, 16, 12],
           "circle-color": spotsColor,
           "circle-opacity": 0.8,
           "circle-stroke-width": 1,
