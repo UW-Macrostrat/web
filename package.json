@@ -160,7 +160,8 @@
     "zustand": "^4.5.1"
   },
   "resolutions": {
-    "cesium": "^1.123.1"
+    "cesium": "^1.123.1",
+    "resium:": "1.17.1"
   },
   "prettier": {
     "proseWrap": "always"

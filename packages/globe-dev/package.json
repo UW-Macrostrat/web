@@ -20,6 +20,6 @@
     "@macrostrat/hyper": "^2.0.1",
     "@macrostrat/mapbox-react": "workspace:*",
     "@macrostrat/mapbox-utils": "workspace:*",
-    "cesium": "^1.109.0"
+    "cesium": "^1.123.1"
   }
 }

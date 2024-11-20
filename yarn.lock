@@ -5668,7 +5668,7 @@ __metadata:
     "@macrostrat/hyper": "npm:^2.0.1"
     "@macrostrat/mapbox-react": "workspace:*"
     "@macrostrat/mapbox-utils": "workspace:*"
-    cesium: "npm:^1.109.0"
+    cesium: "npm:^1.123.1"
     react: "npm:^18"
     react-dom: "npm:^18"
     typescript: "npm:^5.0.0"
