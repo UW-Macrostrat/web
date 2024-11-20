@@ -25,7 +25,8 @@
   "authors": [
     "John Czaplewski <jczaplewski@wisc.edu>",
     "Daven Quinn <daven.quinn@wisc.edu>",
-    "Casey Idzikowski <cidzikowski@wisc.edu>"
+    "Casey Idzikowski <cidzikowski@wisc.edu>",
+    "Amy Fromandi <afromandi@wisc.edu>"
   ],
   "license": "MIT",
   "devDependencies": {
@@ -157,6 +158,9 @@
     "vite-plugin-cesium": "^1.2.22",
     "vite-plugin-inspect": "^0.8.4",
     "zustand": "^4.5.1"
+  },
+  "resolutions": {
+    "cesium": "^1.123.1"
   },
   "prettier": {
     "proseWrap": "always"
