@@ -8,6 +8,7 @@ import CesiumViewer, {
   DisplayQuality,
   MapboxLogo,
   SatelliteLayer,
+  GeologyLayer,
 } from "@macrostrat/cesium-viewer";
 import { MapboxImageryProvider } from "cesium";
 import { elevationLayerURL } from "@macrostrat-web/settings";
@@ -35,7 +36,7 @@ function buildSatelliteLayer({ accessToken }) {
   return provider;
 }
 
-function CesiumView({ style, accessToken, ...rest }) {
+function CesiumView({ style, showGeology, accessToken, ...rest }) {
   const terrainProvider = useRef(
     new TerrainProvider({
       hasVertexNormals: false,
@@ -61,7 +62,11 @@ function CesiumView({ style, accessToken, ...rest }) {
       showIonLogo: false,
       ...rest,
     },
-    [h(SatelliteLayer, { accessToken }), h(MapboxLogo)]
+    [
+      h(SatelliteLayer, { accessToken }),
+      h(GeologyLayer, { alpha: 0.3, show: showGeology }),
+      h(MapboxLogo),
+    ]
   );
 }
 

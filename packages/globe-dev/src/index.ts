@@ -3,6 +3,7 @@ import {
   DisplayQuality,
   flyToParams,
   translateCameraPosition,
+  GeologyLayer,
 } from "@macrostrat/cesium-viewer";
 import hyper from "@macrostrat/hyper";
 import { MapPosition } from "@macrostrat/mapbox-utils";
@@ -75,6 +76,7 @@ function App({ accessToken }) {
   const [showWireframe, setShowWireframe] = useState(false);
   const [showInspector, setShowInspector] = useState(false);
   const [showMapbox, setShowMapbox] = useState(false);
+  const [showGeology, setShowGeology] = useState(false);
   const [position, setPosition] = useState<MapPosition>(
     initialPosition.current
   );
@@ -133,6 +135,11 @@ function App({ accessToken }) {
           show: showMapbox,
           setShown: setShowMapbox,
         }),
+        h(VisControl, {
+          name: "geology",
+          show: showGeology,
+          setShown: setShowGeology,
+        }),
         h(Link, { href: mapURL }, "Switch to map"),
         h(GoogleEarthLink, { position }, "Open in Google Earth"),
       ]),
@@ -145,6 +152,7 @@ function App({ accessToken }) {
           flyTo,
           showWireframe,
           showInspector,
+          showGeology,
           highResolution: true,
           displayQuality: DisplayQuality.High,
           onViewChange,
