@@ -27,10 +27,9 @@ import Map from "./map-comparison";
 
 const h = hyper.styled(styles);
 
-function VisControl({ show, setShown, name }) {
+function VisControl({ show, setShown, name, children }) {
   const className = show ? "active" : "";
-  return h(
-    "li",
+  return h("li.vis-control", [
     h(
       "a",
       {
@@ -40,8 +39,9 @@ function VisControl({ show, setShown, name }) {
         },
       },
       [show ? "Hide" : "Show", " ", name]
-    )
-  );
+    ),
+    children,
+  ]);
 }
 
 function getStartingPosition(): MapPosition {
@@ -75,17 +75,20 @@ function App({ accessToken }) {
   const style = "mapbox://styles/jczaplewski/cklb8aopu2cnv18mpxwfn7c9n";
   const [showWireframe, setShowWireframe] = useState(false);
   const [showInspector, setShowInspector] = useState(false);
-  const [useGoogleTiles, setUseGoogleTiles] = useState(false);
+  const [showGoogleTiles, setShowGoogleTiles] = useState(false);
   const [showMapbox, setShowMapbox] = useState(false);
   const [showGeology, setShowGeology] = useState(false);
   const [position, setPosition] = useState<MapPosition>(
     initialPosition.current
   );
 
+  const googleMapsAPIKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
   const queryString = useRef<object>({});
 
   useEffect(() => {
     let hashData = {};
+    console.log("Updated position");
     applyMapPositionToHash(hashData, position);
     queryString.current = buildQueryString(hashData);
     setHashString(hashData);
@@ -105,6 +108,7 @@ function App({ accessToken }) {
   }
 
   const onViewChange = useCallback((cpos: CameraParams) => {
+    console.log("View changed");
     const { camera } = cpos;
     setPosition({
       camera: {
@@ -138,8 +142,8 @@ function App({ accessToken }) {
         }),
         h(VisControl, {
           name: "Google tiles",
-          show: useGoogleTiles,
-          setShown: setUseGoogleTiles,
+          show: showGoogleTiles,
+          setShown: setShowGoogleTiles,
         }),
         h(VisControl, {
           name: "geology",
@@ -159,10 +163,11 @@ function App({ accessToken }) {
           showWireframe,
           showInspector,
           showGeology,
-          useGoogleTiles,
+          showGoogleTiles,
           highResolution: true,
           displayQuality: DisplayQuality.High,
           onViewChange,
+          googleMapsAPIKey,
         }),
       ]),
       h.if(showMapbox)("div.map-panel", [

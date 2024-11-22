@@ -41,8 +41,15 @@ function buildSatelliteLayer({ accessToken }) {
   return provider;
 }
 
-function CesiumView({ style, showGeology, accessToken, useGoogleTiles = false, ...rest }) {
-  const terrainProvider = useRef(
+function CesiumView({
+  style,
+  showGeology,
+  accessToken,
+  showGoogleTiles,
+  googleMapsAPIKey,
+  ...rest
+}) {
+  const terrainProvider: any = useRef(
     new TerrainProvider({
       hasVertexNormals: false,
       hasWaterMask: false,
@@ -54,11 +61,12 @@ function CesiumView({ style, showGeology, accessToken, useGoogleTiles = false, .
     })
   );
 
-  if (useGoogleTiles) {
+  if (showGoogleTiles) {
+    // @ts-ignore
     return h(
       CesiumViewer,
       {
-        terrainProvider: null,
+        terrainProvider: terrainProvider.current,
         displayQuality: DisplayQuality.High,
         fogDensity: 0.0002,
         //skyBox: true,
@@ -68,12 +76,13 @@ function CesiumView({ style, showGeology, accessToken, useGoogleTiles = false, .
       },
       [
         h(GooglePhotorealistic3DTileset, {
-          googleMapsAPIKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+          googleMapsAPIKey,
         }),
       ]
     );
   }
 
+  // @ts-ignore
   return h(
     CesiumViewer,
     {
@@ -86,9 +95,13 @@ function CesiumView({ style, showGeology, accessToken, useGoogleTiles = false, .
       ...rest,
     },
     [
-      h(SatelliteLayer, { accessToken }),
-      h(GeologyLayer, { alpha: 0.3, show: showGeology }),
+      h(SatelliteLayer, { accessToken, show: !showGoogleTiles }),
+      h(GeologyLayer, { alpha: 0.3, show: showGeology && !showGoogleTiles }),
       h(MapboxLogo),
+      // h(GooglePhotorealistic3DTileset, {
+      //   googleMapsAPIKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+      //   show: showGoogleTiles,
+      // }),
     ]
   );
 }
