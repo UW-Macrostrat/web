@@ -12,11 +12,25 @@ import mapboxgl from "mapbox-gl";
 import { useInDarkMode } from "@macrostrat/ui-components";
 import { useMemo } from "react";
 
+function getRenderedFeatures(map: mapboxgl.Map, layerName: string): void {
+  const features = map.queryRenderedFeatures(undefined, {
+    layers: [layerName],
+  });
+  console.log("Rendered Features:", features);
+}
+
+
 export function Page() {
   const inDarkMode = useInDarkMode();
   const style = useMemo(() => {
     return mergeStyles(_macrostratStyle, buildCheckinStyle(inDarkMode));
   }, [inDarkMode]);
+
+    const handleMapLoad = (map: mapboxgl.Map) => {
+    map.on("load", () => {
+      getRenderedFeatures(map, "notable-spots");
+    });
+  };
 
   return h(DevMapPage, {
     title: "Rockd + StraboSpot",
@@ -24,6 +38,7 @@ export function Page() {
     mapboxToken: mapboxAccessToken,
     // Start off showing the continental US, where there are lots of checkins
     bounds: [-125, 24, -66, 49],
+    onMapLoad: handleMapLoad,
   });
 }
 
@@ -37,6 +52,7 @@ function buildCheckinStyle(darkMode) {
   const color = darkMode ? "#8561f5" : "#7426d3";
 
   const spotsColor = darkMode ? "red" : "red";
+
 
   return {
     sources: {
