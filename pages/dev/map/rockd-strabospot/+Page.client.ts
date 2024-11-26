@@ -6,8 +6,7 @@ import h from "@macrostrat/hyper";
 import { mapboxAccessToken } from "@macrostrat-web/settings";
 import { useRockdStraboSpotStyle } from "./map-style";
 // Import other components
-import { Switch } from "@blueprintjs/core";
-import { useDarkMode, useStoredState } from "@macrostrat/ui-components";
+import { useDarkMode } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
 import { useCallback, useState, useEffect } from "react";
 import {
@@ -19,12 +18,12 @@ import {
   MapLoadingButton,
   PanelCard,
   buildInspectorStyle,
-  TileExtentLayer,
   FeaturePanel,
   FeatureSelectionHandler,
-  TileInfo,
 } from "@macrostrat/map-interface";
 import { MapPosition } from "@macrostrat/mapbox-utils";
+
+mapboxgl.accessToken = mapboxAccessToken;
 
 export function Page() {
   const overlayStyle = useRockdStraboSpotStyle();
@@ -45,19 +44,15 @@ function DevMapPage({
   mapPosition = null,
   mapboxToken = null,
   overlayStyle = null,
-  controls = null,
   children = null,
-  style,
   bounds = null,
   focusedSource = null,
   focusedSourceTitle = null,
   fitViewport = true,
-  styleType = "macrostrat",
 }: {
   headerElement?: React.ReactNode;
   transformRequest?: mapboxgl.TransformRequestFunction;
   title?: string;
-  style?: mapboxgl.Style | string;
   controls?: React.ReactNode;
   children?: React.ReactNode;
   mapboxToken?: string;
@@ -68,7 +63,6 @@ function DevMapPage({
   mapPosition?: MapPosition;
   bounds?: [number, number, number, number];
   fitViewport?: boolean;
-  styleType?: "standard" | "macrostrat";
 }) {
   /* We apply a custom style to the panel container when we are interacting
     with the search bar, so that we can block map interactions until search
@@ -80,27 +74,11 @@ function DevMapPage({
   const dark = useDarkMode();
   const isEnabled = dark?.isEnabled;
 
-  if (mapboxToken != null) {
-    mapboxgl.accessToken = mapboxToken;
-  }
-
-  if (styleType == "macrostrat") {
-    style ??= isEnabled
-      ? "mapbox://styles/jczaplewski/cl5uoqzzq003614o6url9ou9z?optimize=true"
-      : "mapbox://styles/jczaplewski/clatdbkw4002q14lov8zx0bm0?optimize=true";
-  } else {
-    style ??= isEnabled
-      ? "mapbox://styles/mapbox/dark-v10"
-      : "mapbox://styles/mapbox/light-v10";
-  }
+  const style = isEnabled
+    ? "mapbox://styles/jczaplewski/cl5uoqzzq003614o6url9ou9z?optimize=true"
+    : "mapbox://styles/jczaplewski/clatdbkw4002q14lov8zx0bm0?optimize=true";
 
   const [isOpen, setOpen] = useState(false);
-
-  const [state, setState] = useStoredState("macrostrat:dev-map-page", {
-    showTileExtent: false,
-    xRay: false,
-  });
-  const { showTileExtent, xRay } = state;
 
   const [actualStyle, setActualStyle] = useState(null);
 
@@ -108,9 +86,9 @@ function DevMapPage({
     buildInspectorStyle(style, overlayStyle, {
       mapboxToken,
       inDarkMode: isEnabled,
-      xRay,
+      xRay: false,
     }).then(setActualStyle);
-  }, [style, xRay, mapboxToken, isEnabled, overlayStyle]);
+  }, [style, mapboxToken, isEnabled, overlayStyle]);
 
   const [inspectPosition, setInspectPosition] =
     useState<mapboxgl.LngLat | null>(null);
@@ -131,23 +109,8 @@ function DevMapPage({
         },
         position: inspectPosition,
       },
-      [
-        h(TileInfo, {
-          feature: data?.[0] ?? null,
-          showExtent: showTileExtent,
-          setShowExtent() {
-            setState({ ...state, showTileExtent: !showTileExtent });
-          },
-        }),
-        h(FeaturePanel, { features: data, focusedSource, focusedSourceTitle }),
-      ]
+      [h(FeaturePanel, { features: data, focusedSource, focusedSourceTitle })]
     );
-  }
-
-  let tile = null;
-  if (showTileExtent && data?.[0] != null) {
-    let f = data[0];
-    tile = { x: f._x, y: f._y, z: f._z };
   }
 
   return h(
@@ -166,18 +129,10 @@ function DevMapPage({
         title,
       }),
       contextPanel: h(PanelCard, [
-        controls,
-        h(Switch, {
-          checked: xRay,
-          label: "X-ray mode",
-          onChange() {
-            setState({ ...state, xRay: !xRay });
-          },
-        }),
+        h("p", "This prototype shows Rockd Checkins and StraboSpot spots."),
       ]),
       detailPanel: detailElement,
       contextPanelOpen: isOpen,
-      fitViewport,
     },
     h(
       MapView,
@@ -198,7 +153,6 @@ function DevMapPage({
           position: inspectPosition,
           setPosition: onSelectPosition,
         }),
-        h(TileExtentLayer, { tile, color: isEnabled ? "white" : "black" }),
         children,
       ]
     )
