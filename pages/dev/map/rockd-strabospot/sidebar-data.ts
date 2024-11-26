@@ -24,16 +24,22 @@ export function useNearbySpots(nearbyFeatures) {
   );
 }
 
-async function processSpotsData(data) {
-  const restrictedData = data
+async function processSpotsData(nearbyFeatures) {
+  const firstFewSpots = nearbyFeatures
     .filter((d) => d.source === "notableSpots")
     .slice(0, 5);
 
-  const ids = restrictedData.map((d) => d.properties.id);
+  const ids = firstFewSpots.map((d) => d.properties.id);
+  const res = await pg.from("dataset").select("data").in("id", ids);
+  const { data, error } = res;
 
-  const features = await pg.from("datasets").select("*").in("id", ids);
+  if (error != null) {
+    throw error;
+  }
 
-  return restrictedData;
+  return data.map((d) => {
+    return { properties: d.data };
+  });
 }
 
 function useLoadableValue(func, deps): [any, boolean, any] {
