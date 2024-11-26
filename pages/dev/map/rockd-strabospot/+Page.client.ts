@@ -17,7 +17,6 @@ import {
   MapAreaContainer,
   MapLoadingButton,
   PanelCard,
-  buildInspectorStyle,
   FeaturePanel,
   FeatureSelectionHandler,
 } from "@macrostrat/map-interface";
@@ -26,12 +25,11 @@ import { MapPosition } from "@macrostrat/mapbox-utils";
 mapboxgl.accessToken = mapboxAccessToken;
 
 export function Page() {
-  const overlayStyle = useRockdStraboSpotStyle();
+  const style = useRockdStraboSpotStyle();
 
   return h(DevMapPage, {
     title: "Rockd + StraboSpot",
-    overlayStyle,
-    mapboxToken: mapboxAccessToken,
+    style,
     // Start off showing the continental US, where there are lots of checkins
     bounds: [-125, 24, -66, 49],
   });
@@ -39,16 +37,13 @@ export function Page() {
 
 function DevMapPage({
   title = "Map inspector",
+  style,
   headerElement = null,
   transformRequest = null,
   mapPosition = null,
-  mapboxToken = null,
-  overlayStyle = null,
-  children = null,
   bounds = null,
   focusedSource = null,
   focusedSourceTitle = null,
-  fitViewport = true,
 }: {
   headerElement?: React.ReactNode;
   transformRequest?: mapboxgl.TransformRequestFunction;
@@ -56,7 +51,7 @@ function DevMapPage({
   controls?: React.ReactNode;
   children?: React.ReactNode;
   mapboxToken?: string;
-  overlayStyle?: mapboxgl.Style | string;
+  style?: mapboxgl.Style | string;
   focusedSource?: string;
   focusedSourceTitle?: string;
   projection?: string;
@@ -71,24 +66,7 @@ function DevMapPage({
     the search bar on mobile platforms
   */
 
-  const dark = useDarkMode();
-  const isEnabled = dark?.isEnabled;
-
-  const style = isEnabled
-    ? "mapbox://styles/jczaplewski/cl5uoqzzq003614o6url9ou9z?optimize=true"
-    : "mapbox://styles/jczaplewski/clatdbkw4002q14lov8zx0bm0?optimize=true";
-
   const [isOpen, setOpen] = useState(false);
-
-  const [actualStyle, setActualStyle] = useState(null);
-
-  useEffect(() => {
-    buildInspectorStyle(style, overlayStyle, {
-      mapboxToken,
-      inDarkMode: isEnabled,
-      xRay: false,
-    }).then(setActualStyle);
-  }, [style, mapboxToken, isEnabled, overlayStyle]);
 
   const [inspectPosition, setInspectPosition] =
     useState<mapboxgl.LngLat | null>(null);
@@ -137,11 +115,11 @@ function DevMapPage({
     h(
       MapView,
       {
-        style: actualStyle,
+        style,
         transformRequest,
         mapPosition,
         projection: { name: "globe" },
-        mapboxToken,
+        mapboxToken: mapboxAccessToken,
         bounds,
       },
       [
@@ -153,7 +131,6 @@ function DevMapPage({
           position: inspectPosition,
           setPosition: onSelectPosition,
         }),
-        children,
       ]
     )
   );

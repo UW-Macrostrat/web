@@ -11,8 +11,17 @@ export function useRockdStraboSpotStyle() {
    * with the appropriate color scheme for dark mode.
    * */
   const inDarkMode = useInDarkMode();
+
+  const baseStyle = inDarkMode
+    ? "mapbox://styles/jczaplewski/cl5uoqzzq003614o6url9ou9z?optimize=true"
+    : "mapbox://styles/jczaplewski/clatdbkw4002q14lov8zx0bm0?optimize=true";
+
   return useMemo(() => {
-    return mergeStyles(_macrostratStyle, buildCheckinStyle(inDarkMode));
+    return mergeStyles(
+      baseStyle,
+      _macrostratStyle,
+      buildCheckinStyle(inDarkMode)
+    );
   }, [inDarkMode]);
 }
 
