@@ -9,12 +9,14 @@ import {
   FeatureRecord,
   LocationPanel,
 } from "@macrostrat/map-interface";
+import { useSidebarFeatures } from "./sidebar-data";
 
 const h = hyper.styled(styles);
 
 export function DetailsPanel({ position, nearbyFeatures, onClose }) {
-  if (position == null) return null;
+  const [features, loading, error] = useSidebarFeatures(nearbyFeatures);
 
+  if (position == null) return null;
   return h(
     LocationPanel,
     {
@@ -22,7 +24,7 @@ export function DetailsPanel({ position, nearbyFeatures, onClose }) {
       position,
     },
     h(FeaturePanel, {
-      features: nearbyFeatures,
+      features,
       focusedSource: null,
       focusedSourceTitle: null,
     })
