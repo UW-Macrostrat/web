@@ -1,8 +1,8 @@
-import { tileserverDomain } from "@macrostrat-web/settings";
+import { tileserverDomain, mapboxAccessToken } from "@macrostrat-web/settings";
 import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
-import { mergeStyles } from "@macrostrat/mapbox-utils";
-import { useInDarkMode } from "@macrostrat/ui-components";
-import { useMemo } from "react";
+import { mergeStyles, getMapboxStyle } from "@macrostrat/mapbox-utils";
+import { useInDarkMode, useAsyncEffect } from "@macrostrat/ui-components";
+import { useState } from "react";
 import mapboxgl from "mapbox-gl";
 
 export function useRockdStraboSpotStyle() {
@@ -12,17 +12,21 @@ export function useRockdStraboSpotStyle() {
    * */
   const inDarkMode = useInDarkMode();
 
-  const baseStyle = inDarkMode
-    ? "mapbox://styles/jczaplewski/cl5uoqzzq003614o6url9ou9z?optimize=true"
-    : "mapbox://styles/jczaplewski/clatdbkw4002q14lov8zx0bm0?optimize=true";
+  const [style, setStyle] = useState(null);
 
-  return useMemo(() => {
-    return mergeStyles(
-      baseStyle,
-      _macrostratStyle,
-      buildCheckinStyle(inDarkMode)
+  useAsyncEffect(async () => {
+    const baseStyle = inDarkMode
+      ? "mapbox://styles/jczaplewski/cl5uoqzzq003614o6url9ou9z?optimize=true"
+      : "mapbox://styles/jczaplewski/clatdbkw4002q14lov8zx0bm0?optimize=true";
+    const style = await getMapboxStyle(baseStyle, {
+      access_token: mapboxAccessToken,
+    });
+    setStyle(
+      mergeStyles(style, _macrostratStyle, buildCheckinStyle(inDarkMode))
     );
   }, [inDarkMode]);
+
+  return style;
 }
 
 /** Macrostrat style with lower opacity than usual */
