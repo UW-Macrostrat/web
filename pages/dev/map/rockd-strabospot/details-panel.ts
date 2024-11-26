@@ -4,9 +4,30 @@ import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
 import { useEffect, useState } from "react";
 import { group } from "d3-array";
-import { ExpansionPanel, FeatureRecord } from "@macrostrat/map-interface";
+import {
+  ExpansionPanel,
+  FeatureRecord,
+  LocationPanel,
+} from "@macrostrat/map-interface";
 
 const h = hyper.styled(styles);
+
+export function DetailsPanel({ position, nearbyFeatures, onClose }) {
+  if (position == null) return null;
+
+  return h(
+    LocationPanel,
+    {
+      onClose,
+      position,
+    },
+    h(FeaturePanel, {
+      features: nearbyFeatures,
+      focusedSource: null,
+      focusedSourceTitle: null,
+    })
+  );
+}
 
 function FeatureHeader({ feature }) {
   return h("div.feature-header", [h("h3", [h("code", feature.source)])]);
@@ -56,12 +77,10 @@ export function FeaturePanel({ features, focusedSource = null }) {
         className: "macrostrat-features",
         expanded: true,
       },
-      [
-        h(LoadingAwareFeatureSet, {
-          features,
-          sourceID: focusedSource,
-        }),
-      ]
+      h(LoadingAwareFeatureSet, {
+        features,
+        sourceID: focusedSource,
+      })
     );
     filteredFeatures = features.filter((d) => d.source != focusedSource);
   }
@@ -71,11 +90,9 @@ export function FeaturePanel({ features, focusedSource = null }) {
     h(
       ExpansionPanel,
       { title, className: "basemap-features", expanded: focusedSource == null },
-      [
-        h(FeatureGroups, {
-          features: filteredFeatures,
-        }),
-      ]
+      h(FeatureGroups, {
+        features: filteredFeatures,
+      })
     ),
   ]);
 }

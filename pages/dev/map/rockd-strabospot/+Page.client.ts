@@ -10,7 +10,6 @@ import { useCallback, useState, useEffect } from "react";
 import {
   MapView,
   MapMarker,
-  LocationPanel,
   FloatingNavbar,
   MapAreaContainer,
   MapLoadingButton,
@@ -19,7 +18,7 @@ import {
 } from "@macrostrat/map-interface";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
-import { FeaturePanel } from "./details-panel";
+import { DetailsPanel, FeaturePanel } from "./details-panel";
 
 const h = hyper.styled(styles);
 
@@ -39,26 +38,6 @@ export function Page() {
     setInspectPosition(position);
   }, []);
 
-  let detailElement = null;
-  if (inspectPosition != null) {
-    detailElement = h(
-      LocationPanel,
-      {
-        onClose() {
-          setInspectPosition(null);
-        },
-        position: inspectPosition,
-      },
-      [
-        h(FeaturePanel, {
-          features: data,
-          focusedSource: null,
-          focusedSourceTitle: null,
-        }),
-      ]
-    );
-  }
-
   return h(
     MapAreaContainer,
     {
@@ -72,7 +51,13 @@ export function Page() {
       contextPanel: h(PanelCard, { className: "context-panel" }, [
         h("p", "Rockd Checkins and StraboSpot spots."),
       ]),
-      detailPanel: detailElement,
+      detailPanel: h(DetailsPanel, {
+        position: inspectPosition,
+        onClose() {
+          setInspectPosition(null);
+        },
+        nearbyFeatures: data,
+      }),
       contextPanelOpen: isOpen,
     },
     h(
