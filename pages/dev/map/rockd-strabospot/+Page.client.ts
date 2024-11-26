@@ -18,7 +18,7 @@ import {
 } from "@macrostrat/map-interface";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
-import { DetailsPanel, FeaturePanel } from "./details-panel";
+import { DetailsPanel } from "./details-panel";
 
 const h = hyper.styled(styles);
 

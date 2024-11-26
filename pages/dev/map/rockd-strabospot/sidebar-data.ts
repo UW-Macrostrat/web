@@ -29,6 +29,10 @@ async function processSpotsData(data) {
     .filter((d) => d.source === "notableSpots")
     .slice(0, 5);
 
+  const ids = restrictedData.map((d) => d.properties.id);
+
+  const features = await pg.from("datasets").select("*").in("id", ids);
+
   return restrictedData;
 }
 
