@@ -1,6 +1,30 @@
 import { tileserverDomain } from "@macrostrat-web/settings";
+import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
+import { mergeStyles } from "@macrostrat/mapbox-utils";
+import { useInDarkMode } from "@macrostrat/ui-components";
+import { useMemo } from "react";
+import mapboxgl from "mapbox-gl";
 
-export function buildCheckinStyle(darkMode) {
+export function useRockdStraboSpotStyle() {
+  /** Hook to return a style object for the map overlay, including
+   * macrostrat map layers, rockd checkins, and strabospot "notable spots',
+   * with the appropriate color scheme for dark mode.
+   * */
+  const inDarkMode = useInDarkMode();
+  return useMemo(() => {
+    return mergeStyles(_macrostratStyle, buildCheckinStyle(inDarkMode));
+  }, [inDarkMode]);
+}
+
+/** Macrostrat style with lower opacity than usual */
+const _macrostratStyle = buildMacrostratStyle({
+  tileserverDomain: tileserverDomain,
+  fillOpacity: 0.2,
+  strokeOpacity: 0.1,
+}) as mapboxgl.Style;
+
+function buildCheckinStyle(darkMode) {
+  /** Function to build point styles */
   const color = darkMode ? "#8561f5" : "#7426d3";
 
   const spotsColor = darkMode ? "red" : "red";
