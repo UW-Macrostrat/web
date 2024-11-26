@@ -15,11 +15,11 @@ import {
   MapAreaContainer,
   MapLoadingButton,
   PanelCard,
-  FeaturePanel,
   FeatureSelectionHandler,
 } from "@macrostrat/map-interface";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
+import { FeaturePanel } from "./details-panel";
 
 const h = hyper.styled(styles);
 
@@ -70,7 +70,7 @@ export function Page() {
         title: "Rockd + StraboSpot",
       }),
       contextPanel: h(PanelCard, { className: "context-panel" }, [
-        h("p", "This prototype shows Rockd Checkins and StraboSpot spots."),
+        h("p", "Rockd Checkins and StraboSpot spots."),
       ]),
       detailPanel: detailElement,
       contextPanelOpen: isOpen,
