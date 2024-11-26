@@ -1,4 +1,4 @@
-import { Spinner } from "@blueprintjs/core";
+import { NonIdealState, Spinner } from "@blueprintjs/core";
 import { useMapRef } from "@macrostrat/mapbox-react";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
@@ -14,8 +14,6 @@ import { useSidebarFeatures } from "./sidebar-data";
 const h = hyper.styled(styles);
 
 export function DetailsPanel({ position, nearbyFeatures, onClose }) {
-  const [features, loading, error] = useSidebarFeatures(nearbyFeatures);
-
   if (position == null) return null;
   return h(
     LocationPanel,
@@ -23,10 +21,8 @@ export function DetailsPanel({ position, nearbyFeatures, onClose }) {
       onClose,
       position,
     },
-    h(FeaturePanel, {
-      features,
-      focusedSource: null,
-      focusedSourceTitle: null,
+    h(SpotsPanel, {
+      nearbyFeatures,
     })
   );
 }
@@ -35,65 +31,26 @@ function FeatureHeader({ feature }) {
   return h("div.feature-header", [h("h3", [h("code", feature.source)])]);
 }
 
-function LoadingAwareFeatureSet({ features, sourceID }) {
-  const map = useMapRef();
-  if (map?.current == null) return null;
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  const sourceFeatures = features.filter((d) => d.source == "burwell");
-
-  useEffect(() => {
-    if (sourceFeatures.length > 0) {
-      setIsLoaded(true);
-      return;
-    }
-
-    const isLoaded = map.current.isSourceLoaded(sourceID);
-    setIsLoaded(isLoaded);
-    if (!isLoaded) {
-      map.current.once("sourcedata", (e) => {
-        if (e.sourceId == sourceID) {
-          setIsLoaded(true);
-        }
-      });
-    }
-  }, [map.current, sourceID, sourceFeatures.length]);
-
-  if (!isLoaded) return h(Spinner);
-  return h(Features, { features: sourceFeatures });
-}
-
-export function FeaturePanel({ features, focusedSource = null }) {
-  if (features == null) return null;
-
-  let focusedSourcePanel = null;
-  let filteredFeatures = features;
-  let title = "Features";
-
-  if (focusedSource != null) {
-    title = "Basemap features";
-    focusedSourcePanel = h(
-      ExpansionPanel,
-      {
-        title: "Macrostrat features",
-        className: "macrostrat-features",
-        expanded: true,
-      },
-      h(LoadingAwareFeatureSet, {
-        features,
-        sourceID: focusedSource,
-      })
-    );
-    filteredFeatures = features.filter((d) => d.source != focusedSource);
+export function SpotsPanel({ nearbyFeatures }) {
+  // Here, we handle loading state for feature
+  const [features, loading, error] = useSidebarFeatures(nearbyFeatures);
+  if (loading) return h(Spinner);
+  if (error != null) {
+    return h(NonIdealState, {
+      title: "Error loading features",
+      description: `${error}`,
+      icon: "error",
+    });
   }
 
+  let title = "Features";
+
   return h("div.feature-panel", [
-    focusedSourcePanel,
     h(
       ExpansionPanel,
-      { title, className: "basemap-features", expanded: focusedSource == null },
+      { title, className: "basemap-features", expanded: true },
       h(FeatureGroups, {
-        features: filteredFeatures,
+        features,
       })
     ),
   ]);

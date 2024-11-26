@@ -15,7 +15,7 @@ async function processSidebarData(data) {
   return data;
 }
 
-function useLoadableValue(func, deps): [data, loading, error] {
+function useLoadableValue(func, deps): [any, boolean, any] {
   /** This should be moved to UI components */
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
