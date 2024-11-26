@@ -8,17 +8,28 @@ import { postgrestPrefix } from "@macrostrat-web/settings";
 
 const pg = new PostgrestClient(postgrestPrefix);
 
-export function useSidebarFeatures(nearbyFeatures) {
+export function useNearbyCheckins(nearbyFeatures) {
+  if (nearbyFeatures == null) {
+    return [];
+  }
+  return nearbyFeatures.filter((d) => d.source === "rockdCheckins").slice(0, 5);
+}
+
+export function useNearbySpots(nearbyFeatures) {
+  console.log("Rendering sidebar features");
+
   return useLoadableValue(
-    () => processSidebarData(nearbyFeatures),
+    () => processSpotsData(nearbyFeatures),
     [nearbyFeatures]
   );
 }
 
-async function processSidebarData(data) {
-  console.log(data);
+async function processSpotsData(data) {
+  const restrictedData = data
+    .filter((d) => d.source === "notableSpots")
+    .slice(0, 5);
 
-  return data;
+  return restrictedData;
 }
 
 function useLoadableValue(func, deps): [any, boolean, any] {
@@ -34,7 +45,7 @@ function useLoadableValue(func, deps): [any, boolean, any] {
     } catch (err) {
       setError(err);
     }
-  }, [func, ...deps]);
+  }, deps);
 
   return [result, result == null && error == null, error];
 }

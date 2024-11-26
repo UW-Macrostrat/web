@@ -9,7 +9,7 @@ import {
   FeatureRecord,
   LocationPanel,
 } from "@macrostrat/map-interface";
-import { useSidebarFeatures } from "./sidebar-data";
+import { useNearbyCheckins, useNearbySpots } from "./sidebar-data";
 
 const h = hyper.styled(styles);
 
@@ -21,19 +21,34 @@ export function DetailsPanel({ position, nearbyFeatures, onClose }) {
       onClose,
       position,
     },
-    h(SpotsPanel, {
-      nearbyFeatures,
-    })
+    [
+      h(CheckinsPanel, { nearbyFeatures }),
+      h(SpotsPanel, {
+        nearbyFeatures,
+      }),
+    ]
   );
 }
 
-function FeatureHeader({ feature }) {
-  return h("div.feature-header", [h("h3", [h("code", feature.source)])]);
+export function CheckinsPanel({ nearbyFeatures }) {
+  const checkins = useNearbyCheckins(nearbyFeatures);
+
+  return h(FeatureTypePanel, {
+    features: checkins,
+    title: "Rockd checkins",
+  });
 }
 
 export function SpotsPanel({ nearbyFeatures }) {
   // Here, we handle loading state for feature
-  const [features, loading, error] = useSidebarFeatures(nearbyFeatures);
+  const [features, loading, error] = useNearbySpots(nearbyFeatures);
+
+  const title = "StraboSpot spots";
+
+  return h(FeatureTypePanel, { features, title, loading, error });
+}
+
+function FeatureTypePanel({ features, title, loading = false, error = null }) {
   if (loading) return h(Spinner);
   if (error != null) {
     return h(NonIdealState, {
@@ -43,34 +58,22 @@ export function SpotsPanel({ nearbyFeatures }) {
     });
   }
 
-  let title = "Features";
+  if (features.length == 0) {
+    return h("div.empty-list", h("p", "No nearby " + title));
+  }
 
   return h("div.feature-panel", [
     h(
       ExpansionPanel,
-      { title, className: "basemap-features", expanded: true },
-      h(FeatureGroups, {
+      {
+        title,
+        expanded: true,
+      },
+      h(Features, {
         features,
       })
     ),
   ]);
-}
-
-function FeatureGroups({ features }) {
-  /** Group features by source and sourceLayer */
-  if (features == null) return null;
-
-  const groups = group(features, (d) => `${d.source} - ${d.sourceLayer}`);
-
-  return h(
-    "div.feature-groups",
-    Array.from(groups).map(([key, features]) => {
-      return h("div.feature-group", [
-        h(FeatureHeader, { feature: features[0] }),
-        h(Features, { features }),
-      ]);
-    })
-  );
 }
 
 export function Features({ features }) {
