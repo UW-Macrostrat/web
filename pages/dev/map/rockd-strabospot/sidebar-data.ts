@@ -3,6 +3,10 @@ Async so that we can add data fetching from server.
 */
 import { useAsyncEffect } from "@macrostrat/ui-components";
 import { useState } from "react";
+import { PostgrestClient } from "@supabase/postgrest-js";
+import { postgrestPrefix } from "@macrostrat-web/settings";
+
+const pg = new PostgrestClient(postgrestPrefix);
 
 export function useSidebarFeatures(nearbyFeatures) {
   return useLoadableValue(
@@ -12,6 +16,8 @@ export function useSidebarFeatures(nearbyFeatures) {
 }
 
 async function processSidebarData(data) {
+  console.log(data);
+
   return data;
 }
 
