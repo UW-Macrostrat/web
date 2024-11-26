@@ -44,7 +44,7 @@ function buildCheckinStyle(darkMode) {
         type: "vector",
         tiles: [tileserverDomain + "/checkins/tiles/{z}/{x}/{y}"],
         minzoom: 2,
-        maxzoom: 8,
+        maxzoom: 12,
       },
       notableSpots: {
         type: "vector",
@@ -53,7 +53,7 @@ function buildCheckinStyle(darkMode) {
             "/integrations/StraboSpot/Notable spots/tiles/{z}/{x}/{y}",
         ],
         minzoom: 2,
-        maxzoom: 8,
+        maxzoom: 12,
       },
     },
     layers: [
