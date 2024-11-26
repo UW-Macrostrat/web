@@ -16,8 +16,6 @@ export function useNearbyCheckins(nearbyFeatures) {
 }
 
 export function useNearbySpots(nearbyFeatures) {
-  console.log("Rendering sidebar features");
-
   return useLoadableValue(
     () => processSpotsData(nearbyFeatures),
     [nearbyFeatures]
