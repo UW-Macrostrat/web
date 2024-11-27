@@ -30,6 +30,10 @@ async function processSpotsData(nearbyFeatures) {
     .filter((d) => d.source === "notableSpots")
     .slice(0, 5);
 
+  if (firstFewSpots.length == 0) {
+    return [];
+  }
+
   const ids = firstFewSpots.map((d) => d.properties.id);
   const res = await pg.from("dataset").select("data").in("id", ids);
   const { data, error } = res;

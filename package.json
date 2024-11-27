@@ -131,6 +131,7 @@
     "jose": "^5.1.2",
     "mapbox-gl": "^2.15.0",
     "new-github-issue-url": "^1.0.0",
+    "part-regex": "^0.1.2",
     "react": "^18.3.0",
     "react-cookie": "^3.0.4",
     "react-dom": "^18.3.0",
