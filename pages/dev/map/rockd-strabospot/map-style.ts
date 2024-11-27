@@ -38,9 +38,7 @@ const _macrostratStyle = buildMacrostratStyle({
 
 function buildCheckinStyle(darkMode) {
   /** Function to build point styles */
-  const color = darkMode ? "#8561f5" : "#7426d3";
-
-  const spotsColor = darkMode ? "red" : "red";
+  const colors = getColors(darkMode);
 
   return {
     sources: {
@@ -69,10 +67,10 @@ function buildCheckinStyle(darkMode) {
         paint: {
           // Increase the size of the circles as we zoom in
           "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, 3, 16, 12],
-          "circle-color": color,
+          "circle-color": colors.checkins,
           "circle-opacity": 0.8,
           "circle-stroke-width": 0.5,
-          "circle-stroke-color": color,
+          "circle-stroke-color": colors.checkins,
         },
       },
       {
@@ -82,12 +80,19 @@ function buildCheckinStyle(darkMode) {
         "source-layer": "default",
         paint: {
           "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, 3, 16, 12],
-          "circle-color": spotsColor,
+          "circle-color": colors.spots,
           "circle-opacity": 0.8,
           "circle-stroke-width": 1,
-          "circle-stroke-color": spotsColor,
+          "circle-stroke-color": colors.spots,
         },
       },
     ],
+  };
+}
+
+export function getColors(darkMode): { checkins: string; spots: string } {
+  return {
+    checkins: darkMode ? "#8561f5" : "#7426d3",
+    spots: darkMode ? "#3fea71" : "#1d9a44",
   };
 }

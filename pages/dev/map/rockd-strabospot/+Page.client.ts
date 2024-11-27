@@ -3,7 +3,7 @@
  */
 
 import { mapboxAccessToken } from "@macrostrat-web/settings";
-import { useRockdStraboSpotStyle } from "./map-style";
+import { getColors, useRockdStraboSpotStyle } from "./map-style";
 // Import other components
 import mapboxgl from "mapbox-gl";
 import { useCallback, useState, useEffect } from "react";
@@ -19,6 +19,8 @@ import {
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
 import { DetailsPanel } from "./details-panel";
+import Legend from "./legend.mdx";
+import { useInDarkMode } from "@macrostrat/ui-components";
 
 const h = hyper.styled(styles);
 
@@ -26,6 +28,7 @@ mapboxgl.accessToken = mapboxAccessToken;
 
 export function Page() {
   const style = useRockdStraboSpotStyle();
+  const inDarkMode = useInDarkMode();
 
   const [isOpen, setOpen] = useState(true);
 
@@ -48,9 +51,13 @@ export function Page() {
         }),
         title: "Rockd + StraboSpot",
       }),
-      contextPanel: h(PanelCard, { className: "context-panel" }, [
-        h("p", "Rockd Checkins and StraboSpot spots."),
-      ]),
+      contextPanel: h(
+        PanelCard,
+        { className: "context-panel" },
+        h(Legend, {
+          colors: getColors(inDarkMode),
+        })
+      ),
       detailPanel: h(DetailsPanel, {
         position: inspectPosition,
         onClose() {

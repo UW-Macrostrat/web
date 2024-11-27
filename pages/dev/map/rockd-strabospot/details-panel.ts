@@ -8,6 +8,8 @@ import {
 } from "@macrostrat/map-interface";
 import { useNearbyCheckins, useNearbySpots } from "./sidebar-data";
 import { CheckinListing, SpotListing } from "@macrostrat/data-components";
+import { getColors } from "#/dev/map/rockd-strabospot/map-style";
+import { useInDarkMode } from "@macrostrat/ui-components";
 
 const h = hyper.styled(styles);
 
@@ -34,8 +36,7 @@ export function CheckinsPanel({ nearbyFeatures }) {
   const titleComponent = () =>
     h(PanelHeader, {
       title: "Checkins",
-      link: "rockd.org",
-      linkText: "Rockd",
+      sourceLink: h(SystemLink, { href: "https://rockd.org" }, "Rockd"),
       hasData: checkins.length != 0,
     });
 
@@ -53,8 +54,11 @@ export function SpotsPanel({ nearbyFeatures }) {
   const titleComponent = () =>
     h(PanelHeader, {
       title: "Featured spots",
-      link: "https://strabospot.org",
-      linkText: "StraboSpot",
+      sourceLink: h(
+        SystemLink,
+        { href: "https://strabospot.org" },
+        "StraboSpot"
+      ),
       hasData: features.length != 0,
     });
 
@@ -113,15 +117,72 @@ export function Features({ features, featureComponent = FeatureProperties }) {
   );
 }
 
-function PanelHeader({ title, link, linkText, hasData }) {
+function PanelHeader({ title, sourceLink, hasData }) {
   return h("div.panel-header", [
     h("h2", title),
     h("span.details", [
-      h.if(hasData)("span.system-link", [
-        "via ",
-        h("a", { href: link }, linkText),
-      ]),
+      h.if(hasData && sourceLink != null)([sourceLink]),
       h.if(!hasData)("span.no-data", "None nearby"),
     ]),
   ]);
+}
+
+function SystemLink({ href, children }) {
+  return h("span.system-link", [
+    "via ",
+    h("a.system-link", { href }, children),
+  ]);
+}
+
+export function LegendList() {
+  const darkMode = useInDarkMode();
+  const colors = getColors(darkMode);
+  return h("ul.legend-list", [
+    h(
+      LegendItem,
+      {
+        color: colors.checkins,
+        name: "Checkins",
+        sourceLink: h(SystemLink, { href: "https://rockd.org" }, "Rockd"),
+      },
+      "Outcrops collected as part of a community-collaborative field guide."
+    ),
+    h(
+      LegendItem,
+      {
+        color: colors.spots,
+        name: "Spots",
+        sourceLink: h(
+          SystemLink,
+          { href: "https://strabospot.org" },
+          "StraboSpot"
+        ),
+      },
+      "Sites collected for research purposes (filtered for general interest)."
+    ),
+  ]);
+}
+
+function LegendItem({ color, name, sourceLink, children }) {
+  let child = children;
+  if (typeof children === "string") {
+    child = h("p.description", children);
+  }
+
+  return h("li.legend-item", [
+    h(LegendHeader, { color, name, sourceLink }),
+    h("div.legend-body", child),
+  ]);
+}
+
+function LegendHeader({ color, name, sourceLink = null }) {
+  return h("div.legend-header", [
+    h(Swatch, { color }),
+    h("h4", name),
+    sourceLink,
+  ]);
+}
+
+function Swatch({ color }) {
+  return h("span.swatch", { style: { backgroundColor: color } });
 }
