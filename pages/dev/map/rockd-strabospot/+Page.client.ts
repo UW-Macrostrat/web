@@ -1,89 +1,92 @@
 /**
- * A development interface for rendering "Rockd Checkins".
+ * A development interface for rendering Rockd "checkins" and StraboSpot "spots".
  */
 
-import h from "@macrostrat/hyper";
-
-import { mapboxAccessToken, tileserverDomain } from "@macrostrat-web/settings";
-import { DevMapPage } from "@macrostrat/map-interface";
-import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
-import { mergeStyles } from "@macrostrat/mapbox-utils";
+import { mapboxAccessToken } from "@macrostrat-web/settings";
+import { getColors, useRockdStraboSpotStyle } from "./map-style";
+// Import other components
 import mapboxgl from "mapbox-gl";
+import { useCallback, useState, useEffect } from "react";
+import {
+  MapView,
+  MapMarker,
+  FloatingNavbar,
+  MapAreaContainer,
+  MapLoadingButton,
+  PanelCard,
+  FeatureSelectionHandler,
+} from "@macrostrat/map-interface";
+import hyper from "@macrostrat/hyper";
+import styles from "./main.module.sass";
+import { DetailsPanel } from "./details-panel";
+import Legend from "./legend.mdx";
 import { useInDarkMode } from "@macrostrat/ui-components";
-import { useMemo } from "react";
+
+const h = hyper.styled(styles);
+
+mapboxgl.accessToken = mapboxAccessToken;
 
 export function Page() {
+  const style = useRockdStraboSpotStyle();
   const inDarkMode = useInDarkMode();
-  const style = useMemo(() => {
-    return mergeStyles(_macrostratStyle, buildCheckinStyle(inDarkMode));
-  }, [inDarkMode]);
 
-  return h(DevMapPage, {
-    title: "Rockd + StraboSpot",
-    overlayStyle: style,
-    mapboxToken: mapboxAccessToken,
-    // Start off showing the continental US, where there are lots of checkins
-    bounds: [-125, 24, -66, 49],
-  });
-}
+  const [isOpen, setOpen] = useState(true);
 
-const _macrostratStyle = buildMacrostratStyle({
-  tileserverDomain: tileserverDomain,
-  fillOpacity: 0.2,
-  strokeOpacity: 0.1,
-}) as mapboxgl.Style;
+  const [inspectPosition, setInspectPosition] =
+    useState<mapboxgl.LngLat | null>(null);
 
-function buildCheckinStyle(darkMode) {
-  const color = darkMode ? "#8561f5" : "#7426d3";
+  const [data, setData] = useState(null);
 
-  const spotsColor = darkMode ? "red" : "red";
+  const onSelectPosition = useCallback((position: mapboxgl.LngLat) => {
+    setInspectPosition(position);
+  }, []);
 
-  return {
-    sources: {
-      rockdCheckins: {
-        type: "vector",
-        tiles: [tileserverDomain + "/checkins/tiles/{z}/{x}/{y}"],
-        minzoom: 2,
-        maxzoom: 8,
-      },
-      notableSpots: {
-        type: "vector",
-        tiles: [
-          tileserverDomain +
-            "/integrations/StraboSpot/Notable spots/tiles/{z}/{x}/{y}",
-        ],
-        minzoom: 2,
-        maxzoom: 8,
-      },
+  return h(
+    MapAreaContainer,
+    {
+      navbar: h(FloatingNavbar, {
+        rightElement: h(MapLoadingButton, {
+          active: isOpen,
+          onClick: () => setOpen(!isOpen),
+        }),
+        title: "Rockd + StraboSpot",
+      }),
+      contextPanel: h(
+        PanelCard,
+        { className: "context-panel" },
+        h(Legend, {
+          colors: getColors(inDarkMode),
+        })
+      ),
+      detailPanel: h(DetailsPanel, {
+        position: inspectPosition,
+        onClose() {
+          setInspectPosition(null);
+        },
+        nearbyFeatures: data,
+      }),
+      contextPanelOpen: isOpen,
     },
-    layers: [
+    h(
+      MapView,
       {
-        id: "rockd-checkins",
-        type: "circle",
-        source: "rockdCheckins",
-        "source-layer": "default",
-        paint: {
-          // Increase the size of the circles as we zoom in
-          "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, 3, 16, 12],
-          "circle-color": color,
-          "circle-opacity": 0.8,
-          "circle-stroke-width": 0.5,
-          "circle-stroke-color": color,
-        },
+        style,
+        projection: { name: "globe" },
+        mapboxToken: mapboxAccessToken,
+        mapPosition: null, // Have to set map position to null for bounds to work
+        bounds: [-125, 24, -66, 49],
       },
-      {
-        id: "notable-spots",
-        type: "circle",
-        source: "notableSpots",
-        "source-layer": "default",
-        paint: {
-          "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, 3, 16, 12],
-          "circle-color": spotsColor,
-          "circle-opacity": 0.8,
-          "circle-stroke-width": 1,
-          "circle-stroke-color": spotsColor,
-        },
-      },
-    ],
-  };
+      [
+        h(FeatureSelectionHandler, {
+          selectedLocation: inspectPosition,
+          setFeatures: setData,
+          radius: 6,
+        }),
+        h(MapMarker, {
+          position: inspectPosition,
+          setPosition: onSelectPosition,
+        }),
+      ]
+    )
+  );
 }

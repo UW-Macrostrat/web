@@ -74,6 +74,7 @@
     "@macrostrat/column-components": "workspace:*",
     "@macrostrat/column-views": "workspace:*",
     "@macrostrat/corelle": "^2.0.1",
+    "@macrostrat/data-components": "workspace:*",
     "@macrostrat/data-sheet2": "workspace:*",
     "@macrostrat/feedback-components": "workspace:*",
     "@macrostrat/hyper": "^2.2.1",
