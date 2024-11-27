@@ -1,15 +1,13 @@
 import { NonIdealState, Spinner } from "@blueprintjs/core";
-import { useMapRef } from "@macrostrat/mapbox-react";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
-import { useEffect, useState } from "react";
-import { group } from "d3-array";
 import {
   ExpansionPanel,
-  FeatureRecord,
+  FeatureProperties,
   LocationPanel,
 } from "@macrostrat/map-interface";
 import { useNearbyCheckins, useNearbySpots } from "./sidebar-data";
+import { CheckinListing, SpotListing } from "@macrostrat/data-components";
 
 const h = hyper.styled(styles);
 
@@ -36,6 +34,7 @@ export function CheckinsPanel({ nearbyFeatures }) {
   return h(FeatureTypePanel, {
     features: checkins,
     title: "Rockd checkins",
+    featureComponent: CheckinFeature,
   });
 }
 
@@ -45,10 +44,25 @@ export function SpotsPanel({ nearbyFeatures }) {
 
   const title = "StraboSpot spots";
 
-  return h(FeatureTypePanel, { features, title, loading, error });
+  return h(FeatureTypePanel, {
+    features,
+    title,
+    loading,
+    error,
+    featureComponent: StraboSpotFeature,
+  });
 }
 
-function FeatureTypePanel({ features, title, loading = false, error = null }) {
+const StraboSpotFeature = (props) => h(SpotListing, { spot: props.data });
+const CheckinFeature = (props) => h(CheckinListing, { checkin: props.data });
+
+function FeatureTypePanel({
+  features,
+  title,
+  loading = false,
+  error = null,
+  featureComponent,
+}) {
   if (loading) return h(Spinner);
   if (error != null) {
     return h(NonIdealState, {
@@ -62,6 +76,8 @@ function FeatureTypePanel({ features, title, loading = false, error = null }) {
     return h("div.empty-list", h("p", "No nearby " + title));
   }
 
+  console.log(features);
+
   return h("div.feature-panel", [
     h(
       ExpansionPanel,
@@ -71,14 +87,15 @@ function FeatureTypePanel({ features, title, loading = false, error = null }) {
       },
       h(Features, {
         features,
+        featureComponent,
       })
     ),
   ]);
 }
 
-export function Features({ features }) {
+export function Features({ features, featureComponent = FeatureProperties }) {
   return h(
     "div.features",
-    features.map((feature, i) => h(FeatureRecord, { key: i, feature }))
+    features.map((feature, i) => h(featureComponent, { key: i, data: feature }))
   );
 }

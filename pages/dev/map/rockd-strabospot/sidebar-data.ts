@@ -12,7 +12,10 @@ export function useNearbyCheckins(nearbyFeatures) {
   if (nearbyFeatures == null) {
     return [];
   }
-  return nearbyFeatures.filter((d) => d.source === "rockdCheckins").slice(0, 5);
+  return nearbyFeatures
+    .filter((d) => d.source === "rockdCheckins")
+    .slice(0, 5)
+    .map((d) => d.properties);
 }
 
 export function useNearbySpots(nearbyFeatures) {
@@ -35,9 +38,7 @@ async function processSpotsData(nearbyFeatures) {
     throw error;
   }
 
-  return data.map((d) => {
-    return { properties: d.data };
-  });
+  return data.map((d) => d.data);
 }
 
 function useLoadableValue(func, deps): [any, boolean, any] {
