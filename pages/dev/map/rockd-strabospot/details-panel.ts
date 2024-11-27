@@ -31,9 +31,17 @@ export function DetailsPanel({ position, nearbyFeatures, onClose }) {
 export function CheckinsPanel({ nearbyFeatures }) {
   const checkins = useNearbyCheckins(nearbyFeatures);
 
+  const titleComponent = () =>
+    h(PanelHeader, {
+      title: "Checkins",
+      link: "rockd.org",
+      linkText: "Rockd",
+      hasData: checkins.length != 0,
+    });
+
   return h(FeatureTypePanel, {
     features: checkins,
-    title: "Rockd checkins",
+    titleComponent,
     featureComponent: CheckinFeature,
   });
 }
@@ -42,11 +50,17 @@ export function SpotsPanel({ nearbyFeatures }) {
   // Here, we handle loading state for feature
   const [features, loading, error] = useNearbySpots(nearbyFeatures);
 
-  const title = "StraboSpot spots";
+  const titleComponent = () =>
+    h(PanelHeader, {
+      title: "Featured spots",
+      link: "https://strabospot.org",
+      linkText: "StraboSpot",
+      hasData: features.length != 0,
+    });
 
   return h(FeatureTypePanel, {
     features,
-    title,
+    titleComponent,
     loading,
     error,
     featureComponent: StraboSpotFeature,
@@ -58,7 +72,7 @@ const CheckinFeature = (props) => h(CheckinListing, { checkin: props.data });
 
 function FeatureTypePanel({
   features,
-  title,
+  titleComponent,
   loading = false,
   error = null,
   featureComponent,
@@ -72,17 +86,16 @@ function FeatureTypePanel({
     });
   }
 
-  if (features.length == 0) {
-    return h("div.empty-list", h("p", "No nearby " + title));
-  }
-
-  console.log(features);
+  // if (features.length == 0) {
+  //   return h("div.empty-list", h("p", "No nearby " + title));
+  // }
 
   return h("div.feature-panel", [
     h(
       ExpansionPanel,
       {
-        title,
+        titleComponent,
+        title: null,
         expanded: true,
       },
       h(Features, {
@@ -98,4 +111,17 @@ export function Features({ features, featureComponent = FeatureProperties }) {
     "div.features",
     features.map((feature, i) => h(featureComponent, { key: i, data: feature }))
   );
+}
+
+function PanelHeader({ title, link, linkText, hasData }) {
+  return h("div.panel-header", [
+    h("h2", title),
+    h("span.details", [
+      h.if(hasData)("span.system-link", [
+        "via ",
+        h("a", { href: link }, linkText),
+      ]),
+      h.if(!hasData)("span.no-data", "None nearby"),
+    ]),
+  ]);
 }

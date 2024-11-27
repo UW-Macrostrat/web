@@ -34,3 +34,16 @@
   &:not(:last-child)
     margin-bottom: 1em
     border-bottom: 1px solid var(--panel-rule-color)
+
+.panel-header
+  display: flex
+  flex-direction: row
+  align-items: baseline
+  gap: 1em
+  flex-grow: 1
+
+  h2
+    flex-grow: 1
+
+  .details
+    color: var(--secondary-color)
