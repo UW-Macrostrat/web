@@ -19,7 +19,7 @@ import {
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
 import { DetailsPanel } from "./details-panel";
-import Legend from "./legend.mdx";
+import Legend from "./legend-text.mdx";
 import { useInDarkMode } from "@macrostrat/ui-components";
 
 const h = hyper.styled(styles);
