@@ -13,7 +13,7 @@ import { BasicLayerInspectorPage } from "../lib";
 import { BrowserRouter as Router } from "react-router-dom";
 
 import styles from "../index/main.module.styl";
-import { PageHeaderV2 } from "~/components";
+import { PageHeader } from "~/components";
 
 const h = hyper.styled(styles);
 
@@ -38,7 +38,7 @@ const BackButton = () => h(ParentRouteButton, {}, "Back");
 
 function TableCatalogIndexPage() {
   return h("div.page.layer-catalog-page", [
-    h(PageHeaderV2, { title: "Table Catalog" }),
+    h(PageHeader, { title: "Table Catalog" }),
     h(MapLayerCatalogList),
   ]);
 }

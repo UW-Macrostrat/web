@@ -117,6 +117,20 @@ const lightStyle = {
       },
     },
   ],
+  fog: {
+    color: "#ffffff",
+    "space-color": [
+      "interpolate",
+      ["linear"],
+      ["zoom"],
+      4,
+      "hsl(215, 28%, 64%)",
+      7,
+      "hsl(209, 92%, 85%)",
+    ],
+    "star-intensity": ["interpolate", ["linear"], ["zoom"], 5, 0.35, 6, 0],
+    range: [5, 15],
+  },
 } as mapboxgl.Style;
 
 export function replaceSourcesForTileset(

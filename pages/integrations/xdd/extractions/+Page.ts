@@ -3,7 +3,7 @@ import { PostgrestClient } from "@supabase/postgrest-js";
 import { usePageContext } from "vike-react/usePageContext";
 
 import { ContentPage } from "~/layouts";
-import { PageHeaderV2 } from "~/components";
+import { PageHeader } from "~/components";
 import { postgrestPrefix } from "@macrostrat-web/settings";
 import { useEffect, useState } from "react";
 import {
@@ -63,7 +63,7 @@ export function Page() {
 
 function PageMain() {
   return h("div", [
-    h(PageHeaderV2, { title: "Stratigraphic name extractions" }),
+    h(PageHeader, { title: "Stratigraphic name extractions" }),
     h(ExtractionIndex),
   ]);
 }

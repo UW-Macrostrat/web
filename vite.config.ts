@@ -23,6 +23,7 @@ const aliasedModules = [
   "mapbox-styles",
   "cesium-viewer",
   "map-components",
+  "data-components",
 ];
 
 const gitEnv = revisionInfo(pkg, "https://github.com/UW-Macrostrat/web");
@@ -98,7 +99,12 @@ export default defineConfig({
     // If not building for server context
   },
   ssr: {
-    noExternal: ["labella", "@supabase/postgrest-js"],
+    // https://vike.dev/broken-npm-package
+    noExternal: [
+      "labella",
+      "@supabase/postgrest-js",
+      "@macrostrat/auth-components",
+    ],
   },
   css: {
     preprocessorOptions: {
