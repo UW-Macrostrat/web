@@ -44,6 +44,7 @@ export function Page() {
 
   const [data, setData] = useState(null);
 
+
   return h(
     MapAreaContainer,
     {

@@ -9080,6 +9080,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@rushstack/eslint-patch@npm:^1.1.3":
+  version: 1.10.3
+  resolution: "@rushstack/eslint-patch@npm:1.10.3"
+  checksum: 10/e1986178618bfb5fb636a54c420a7c359879d7aed6a0e456333a92fdc93e0e7a9a914114284308317cdc75e522c0696f760cd6d0b77409ed8b9633e75f096628
+  languageName: node
+  linkType: hard
+
 "@semantic-release/commit-analyzer@npm:^6.1.0":
   version: 6.3.3
   resolution: "@semantic-release/commit-analyzer@npm:6.3.3"

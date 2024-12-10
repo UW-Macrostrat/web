@@ -1,1 +1,1 @@
-export const title = "My saved locations";
+export const title = "Saved Locations";

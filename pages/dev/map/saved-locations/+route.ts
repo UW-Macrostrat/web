@@ -7,6 +7,9 @@ const lngLatRegex = /(-?\d+\.\d+)/;
 
 const routeRegex = partRegex`/loc/${lngLatRegex}/${lngLatRegex}`;
 
+
+
+
 export function route(pageContext) {
   const url = pageContext.urlPathname;
 
