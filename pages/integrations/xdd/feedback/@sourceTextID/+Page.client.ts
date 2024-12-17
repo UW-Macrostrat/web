@@ -1,19 +1,19 @@
-import h from "./lib/feedback.module.sass";
-import { ContentPage, FullscreenPage } from "~/layouts";
+import h from "./+Page.client.module.sass";
+import { FullscreenPage } from "~/layouts";
 import { PageBreadcrumbs } from "~/components";
 import { usePageContext } from "vike-react/usePageContext";
-import { enhanceData } from "../../extractions/lib";
+import {
+  enhanceData,
+  FeedbackComponent,
+} from "@macrostrat/feedback-components";
 import {
   useEntityTypeIndex,
   useModelIndex,
   usePostgresQuery,
-} from "../../extractions/lib/data-service";
-import { FeedbackComponent } from "./lib";
-import { Intent, NonIdealState, OverlaysProvider } from "@blueprintjs/core";
+} from "../../extractions/data-service";
+import { NonIdealState, OverlaysProvider, Spinner } from "@blueprintjs/core";
 import {
-  Box,
   ErrorBoundary,
-  FlexCol,
   FlexRow,
   Pagination,
   Spacer,
@@ -55,7 +55,7 @@ function ExtractionIndex() {
   });
 
   if (data == null || models == null || entityTypes == null) {
-    return h("div", "Loading...");
+    return h(Spinner);
   }
 
   console.log(data);
