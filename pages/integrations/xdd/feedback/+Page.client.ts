@@ -1,8 +1,11 @@
 import { FullscreenPage } from "~/layouts";
-import h from "./main.module.sass";
+import styles from "./main.module.sass";
+import hyper from "@macrostrat/hyper";
 import { PageBreadcrumbs } from "~/components";
 import { PostgRESTTableView } from "@macrostrat/data-sheet2";
 import { postgrestPrefix } from "@macrostrat-web/settings";
+
+const h = hyper.styled(styles);
 
 export function Page() {
   return h(FullscreenPage, { className: "main" }, [

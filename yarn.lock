@@ -5742,16 +5742,12 @@ __metadata:
     "@blueprintjs/core": "npm:^5.10.2"
     "@blueprintjs/table": "npm:^5.1.4"
     "@macrostrat/hyper": "npm:^2.0.0"
-    "@supabase/postgrest-js": "npm:^1.17.7"
-    "@types/underscore": "npm:^1"
     chroma-js: "npm:^2.4.2"
     classnames: "npm:^2.3.1"
     immutability-helper: "npm:^3.1.1"
     react: "npm:^17.0.2||^18"
     react-color: "npm:^2.19.3"
     react-colorful: "npm:^5.6.1"
-    underscore: "npm:^1.13.7"
-    zustand: "npm:^5.0.2"
   languageName: unknown
   linkType: soft
 
@@ -6138,7 +6134,6 @@ __metadata:
     "@visx/scale": "npm:^2.2.2"
     "@vitejs/plugin-react": "npm:^4.0.4"
     "@yarnpkg/sdks": "npm:^3.1.0"
-    allotment: "npm:^1.20.2"
     axios: "npm:^0.25.0"
     chalk: "npm:^5.3.0"
     chroma-js: "npm:^3.0.0"
@@ -7694,15 +7689,6 @@ __metadata:
   dependencies:
     "@supabase/node-fetch": "npm:^2.6.14"
   checksum: 10/bb348d68563c36cefb9a23aa8476b077018f07466f73f712b735606e873e2f979b55c02d52800c72bd49b351615f62a1fd138a6929114af268ec7f24c919a7c6
-  languageName: node
-  linkType: hard
-
-"@supabase/postgrest-js@npm:^1.17.7":
-  version: 1.17.7
-  resolution: "@supabase/postgrest-js@npm:1.17.7"
-  dependencies:
-    "@supabase/node-fetch": "npm:^2.6.14"
-  checksum: 10/c21b76226c68f33f3eb70814847c1b3f18e2f1962ec29f3fea15331fb2f86a93e68c038370931369ad207a656d599ece2f6d85d8285e6277c548d3528ff1358e
   languageName: node
   linkType: hard
 
@@ -10876,23 +10862,6 @@ __metadata:
     require-from-string: "npm:^2.0.2"
     uri-js: "npm:^4.4.1"
   checksum: 10/b6430527c2e1bf3d20dce4cca2979b5cc69db15751ac00105e269e04d7b09c2e20364070257cafacfa676171a8bf9c84c1cd9def97267a20cd15c64daa486151
-  languageName: node
-  linkType: hard
-
-"allotment@npm:^1.20.2":
-  version: 1.20.2
-  resolution: "allotment@npm:1.20.2"
-  dependencies:
-    classnames: "npm:^2.3.0"
-    eventemitter3: "npm:^5.0.0"
-    lodash.clamp: "npm:^4.0.0"
-    lodash.debounce: "npm:^4.0.0"
-    lodash.isequal: "npm:^4.5.0"
-    use-resize-observer: "npm:^9.0.0"
-  peerDependencies:
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
-  checksum: 10/79266656a8907626f8c3a60e586515d28e8c17b151903dd2359b38c347d68d482a3ca0805d319487ca4f04e20f110b5aa24d1bb453910496eae4874b7de20422
   languageName: node
   linkType: hard
 
@@ -16935,13 +16904,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eventemitter3@npm:^5.0.0":
-  version: 5.0.1
-  resolution: "eventemitter3@npm:5.0.1"
-  checksum: 10/ac6423ec31124629c84c7077eed1e6987f6d66c31cf43c6fcbf6c87791d56317ce808d9ead483652436df171b526fc7220eccdc9f3225df334e81582c3cf7dd5
-  languageName: node
-  linkType: hard
-
 "events@npm:^3.2.0":
   version: 3.3.0
   resolution: "events@npm:3.3.0"
@@ -22019,13 +21981,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash.clamp@npm:^4.0.0":
-  version: 4.0.3
-  resolution: "lodash.clamp@npm:4.0.3"
-  checksum: 10/02baa03ebb96f2ce8d9cec28b21fa3ed808c32f3b8fe54e2f990f1177779b13dcda69232db72d7285763e14a0ee64666a82a2047558eaba7198580173756c888
-  languageName: node
-  linkType: hard
-
 "lodash.clonedeep@npm:^4.5.0, lodash.clonedeep@npm:~4.5.0":
   version: 4.5.0
   resolution: "lodash.clonedeep@npm:4.5.0"
@@ -22033,7 +21988,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash.debounce@npm:^4, lodash.debounce@npm:^4.0.0, lodash.debounce@npm:^4.0.8":
+"lodash.debounce@npm:^4, lodash.debounce@npm:^4.0.8":
   version: 4.0.8
   resolution: "lodash.debounce@npm:4.0.8"
   checksum: 10/cd0b2819786e6e80cb9f5cda26b1a8fc073daaf04e48d4cb462fa4663ec9adb3a5387aa22d7129e48eed1afa05b482e2a6b79bfc99b86886364449500cbb00fd
@@ -32660,7 +32615,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"underscore@npm:^1.13.1, underscore@npm:^1.13.7":
+"underscore@npm:^1.13.1":
   version: 1.13.7
   resolution: "underscore@npm:1.13.7"
   checksum: 10/1ce3368dbe73d1e99678fa5d341a9682bd27316032ad2de7883901918f0f5d50e80320ccc543f53c1862ab057a818abc560462b5f83578afe2dd8dd7f779766c
@@ -33140,7 +33095,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"use-resize-observer@npm:^9.0.0, use-resize-observer@npm:^9.1.0":
+"use-resize-observer@npm:^9.1.0":
   version: 9.1.0
   resolution: "use-resize-observer@npm:9.1.0"
   dependencies:
@@ -34667,27 +34622,6 @@ __metadata:
     use-sync-external-store:
       optional: true
   checksum: 10/9ee5b2483213157c519be2647e873fb21962b4e6e521031916e8969552379dd03348057c9dfd030eb1e7ef98a945a1f99f9aa9badda5d9673eb4004e354dc2dc
-  languageName: node
-  linkType: hard
-
-"zustand@npm:^5.0.2":
-  version: 5.0.2
-  resolution: "zustand@npm:5.0.2"
-  peerDependencies:
-    "@types/react": ">=18.0.0"
-    immer: ">=9.0.6"
-    react: ">=18.0.0"
-    use-sync-external-store: ">=1.2.0"
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-    immer:
-      optional: true
-    react:
-      optional: true
-    use-sync-external-store:
-      optional: true
-  checksum: 10/9fb60796b9770dcc3f78dd794e7f424ff735e5676784cbc9726761037613942b62470b24a9ca9e98534ee4369a3b5429be570ff34281cb3c9d6d4e8df559ec3f
   languageName: node
   linkType: hard
 
