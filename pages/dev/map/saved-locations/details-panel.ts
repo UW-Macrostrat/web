@@ -51,7 +51,7 @@ export function CheckinsPanel({ nearbyFeatures }) {
   });
 }
  */
-export function SpotsPanel({ onSelectPosition }) {
+export function SpotsPanel({ onSelectPosition, map }) {
   const [features, setFeatures] = useState([]); // State to store features
   const [loading, setLoading] = useState(true); // State to track loading
   const [error, setError] = useState(null); // State to track errors
@@ -77,10 +77,10 @@ export function SpotsPanel({ onSelectPosition }) {
     fetchFeatures();
   }, []);
 
-  const FeatureComponent = ({ data, onSelectPosition }) => {
+  const FeatureComponent = ({ data, onSelectPosition, map }) => {
     const handleLinkClick = () => {
       if (onSelectPosition) {
-        onSelectPosition({ lng: data.longitude, lat: data.latitude, zoom: 12 }, null);
+        onSelectPosition({ lng: data.longitude, lat: data.latitude, zoom: 12 }, map);
       }
     };
   return h("div.feature", [
@@ -113,7 +113,7 @@ export function SpotsPanel({ onSelectPosition }) {
     titleComponent,
     loading,
     error,
-    featureComponent: (props) => h(FeatureComponent, { ...props, onSelectPosition }),
+    featureComponent: (props) => h(FeatureComponent, { ...props, onSelectPosition, map }),
   });
 }
 

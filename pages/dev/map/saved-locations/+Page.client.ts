@@ -35,7 +35,7 @@ const baseURL = "/dev/map/saved-locations";
 
 export function Page() {
   const [inspectPosition, onSelectPosition] = useMapLocationManager();
-
+  const [mapInstance, setMapInstance] = useState(null);
   const style = useSavedLocationsStyle();
   const inDarkMode = useInDarkMode();
 
@@ -59,7 +59,8 @@ export function Page() {
         { className: "context-panel" },
         h(SpotsPanel, {
           colors: getColors(inDarkMode),
-          onSelectPosition
+          onSelectPosition,
+          map: mapInstance,
         })
       ),
       detailPanel: h(DetailsPanel, {
@@ -79,6 +80,7 @@ export function Page() {
         mapboxToken: mapboxAccessToken,
         mapPosition: inspectPosition,
         bounds: [-125, 24, -66, 49],
+        onMapLoaded: (map) => setMapInstance(map),
         onMapMoved(pos, map) {
           setURL(inspectPosition, map);
         },
