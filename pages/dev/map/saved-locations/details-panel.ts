@@ -33,24 +33,6 @@ export function DetailsPanel({ position, nearbyFeatures, onClose }) {
   );
 }
 
-//implement tileserver api to reorient user to an exact location
-/*
-export function CheckinsPanel({ nearbyFeatures }) {
-  const checkins = useNearbyCheckins(nearbyFeatures);
-  const titleComponent = () =>
-    h(PanelHeader, {
-      title: "Checkins",
-      sourceLink: h(SystemLink, { href: "https://rockd.org" }, "Rockd"),
-      hasData: checkins.length != 0,
-    });
-
-  return h(FeatureTypePanel, {
-    features: checkins,
-    titleComponent,
-    featureComponent: CheckinFeature,
-  });
-}
- */
 export function SpotsPanel({ onSelectPosition, map }) {
   const [features, setFeatures] = useState([]); // State to store features
   const [loading, setLoading] = useState(true); // State to track loading
@@ -80,7 +62,7 @@ export function SpotsPanel({ onSelectPosition, map }) {
   const FeatureComponent = ({ data, onSelectPosition, map }) => {
     const handleLinkClick = () => {
       if (onSelectPosition) {
-        onSelectPosition({ lng: data.longitude, lat: data.latitude, zoom: 12 }, map);
+        onSelectPosition({ lng: data.longitude, lat: data.latitude, zoom: 7 }, map);
       }
     };
   return h("div.feature", [
