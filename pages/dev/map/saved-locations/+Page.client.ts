@@ -18,8 +18,7 @@ import {
 } from "@macrostrat/map-interface";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
-import { DetailsPanel } from "./details-panel";
-import Legend from "./legend-text.mdx";
+import { DetailsPanel, SpotsPanel } from "./details-panel";
 import { useInDarkMode } from "@macrostrat/ui-components";
 import { usePageContext } from "vike-react/usePageContext";
 import {
@@ -58,8 +57,9 @@ export function Page() {
       contextPanel: h(
         PanelCard,
         { className: "context-panel" },
-        h(Legend, {
+        h(SpotsPanel, {
           colors: getColors(inDarkMode),
+          onSelectPosition
         })
       ),
       detailPanel: h(DetailsPanel, {
@@ -129,6 +129,13 @@ function useMapLocationManager(): [MapPosition, PositionBuilder] {
     (position: mapboxgl.LngLat | null, map: mapboxgl.Map | undefined) => {
       setInspectPosition(position);
       setURL(position, map);
+      if (map) {
+        console.log("MAP!!", map)
+        map.flyTo({
+          center: [position.lng, position.lat],
+          zoom: position.zoom || 12,
+        });
+      }
     },
     []
   );
@@ -155,7 +162,7 @@ function setURL(position: mapboxgl.LngLat, map: mapboxgl.Map) {
 
 function buildHashParams(map, selectedPosition) {
   if (selectedPosition == null) return "";
-  const z = map.getZoom();
+  const z = map.getZoom() ?? 7;
   // Parse hash and add zoom level
   let q = new URLSearchParams(window.location.hash.slice(1));
   q.set("z", z.toFixed(0));
