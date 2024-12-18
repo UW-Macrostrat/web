@@ -9,6 +9,7 @@ import {
 import { getColors } from "#/dev/map/rockd-strabospot/map-style";
 import { useInDarkMode } from "@macrostrat/ui-components";
 import { SaveLocationForm } from "./save-location";
+import mapboxgl from "mapbox-gl";
 import React, { useState, useEffect } from "react";
 
 
@@ -17,7 +18,7 @@ import React, { useState, useEffect } from "react";
 const h = hyper.styled(styles);
 export function DetailsPanel({ position, nearbyFeatures, onClose }) {
   if (position == null) return null;
-  let count = 22;
+  let count = 24;
 
   return h(
     LocationPanel,
@@ -26,34 +27,13 @@ export function DetailsPanel({ position, nearbyFeatures, onClose }) {
       position,
     },
     [
-      h(SaveLocationForm, { position, count }),
-      //h(CheckinsPanel, { nearbyFeatures }),
-      h(SpotsPanel, {
-        nearbyFeatures,
-      }),
+      h(SaveLocationForm, { position, count })
+      //h(CheckinsPanel, { nearbyFeatures })
     ]
   );
 }
 
-//implement tileserver api to reorient user to an exact location
-/*
-export function CheckinsPanel({ nearbyFeatures }) {
-  const checkins = useNearbyCheckins(nearbyFeatures);
-  const titleComponent = () =>
-    h(PanelHeader, {
-      title: "Checkins",
-      sourceLink: h(SystemLink, { href: "https://rockd.org" }, "Rockd"),
-      hasData: checkins.length != 0,
-    });
-
-  return h(FeatureTypePanel, {
-    features: checkins,
-    titleComponent,
-    featureComponent: CheckinFeature,
-  });
-}
- */
-export function SpotsPanel({ nearbyFeatures }) {
+export function SpotsPanel({ onSelectPosition, map }) {
   const [features, setFeatures] = useState([]); // State to store features
   const [loading, setLoading] = useState(true); // State to track loading
   const [error, setError] = useState(null); // State to track errors
@@ -79,11 +59,19 @@ export function SpotsPanel({ nearbyFeatures }) {
     fetchFeatures();
   }, []);
 
-  console.log("features!!", features)
-
-  const FeatureComponent = ({ data }) => {
+  const FeatureComponent = ({ data, onSelectPosition, map }) => {
+    const handleLinkClick = () => {
+      if (onSelectPosition) {
+        onSelectPosition({ lng: data.longitude, lat: data.latitude, zoom: 7 }, map);
+      }
+    };
   return h("div.feature", [
-    h("h3.feature-title", data.location_name),
+    h("h3.feature-title",
+      {
+        style: { cursor: "pointer", textDecoration: "bold", color: "purple" }, // Optional styling for a clickable look
+        onClick: handleLinkClick,
+      },
+      data.location_name),
     h("p.feature-description", data.location_description),
     h("p.feature-coordinates", [
       `Latitude: ${data.latitude}, Longitude: ${data.longitude}`,
@@ -107,7 +95,7 @@ export function SpotsPanel({ nearbyFeatures }) {
     titleComponent,
     loading,
     error,
-    featureComponent: FeatureComponent,
+    featureComponent: (props) => h(FeatureComponent, { ...props, onSelectPosition, map }),
   });
 }
 
@@ -166,40 +154,6 @@ function SystemLink({ href, children }) {
   ]);
 }
 
-export function LegendList() {
-  const darkMode = useInDarkMode();
-  const colors = getColors(darkMode);
-  return h("ul.legend-list", [
-    h(
-      LegendItem,
-      {
-        color: colors.checkins,
-        name: "My saved locations",
-      },
-      "Will show the user locations on the map. Need to build it within the tileserver."
-    ),
-  ]);
-}
-
-function LegendItem({ color, name, sourceLink, children }) {
-  let child = children;
-  if (typeof children === "string") {
-    child = h("p.description", children);
-  }
-
-  return h("li.legend-item", [
-    h(LegendHeader, { color, name, sourceLink }),
-    h("div.legend-body", child),
-  ]);
-}
-
-function LegendHeader({ color, name, sourceLink = null }) {
-  return h("div.legend-header", [
-    h(Swatch, { color }),
-    h("h4", name),
-    sourceLink,
-  ]);
-}
 
 function Swatch({ color }) {
   return h("span.swatch", { style: { backgroundColor: color } });
