@@ -116,23 +116,58 @@ function FeedbackInterface({ data, models, entityTypes }) {
     model,
     entityTypes,
     matchComponent: MatchedEntityLink,
-    toaster: AppToaster,
-    async onSave(tree: TreeData[]) {
-      const data = prepareDataForServer(tree, window.source_text, [
-        window.model_run,
-      ]);
-      const response = await fetch(knowledgeGraphAPIURL + "/record_run", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) {
-        throw new Error("Failed to save model information");
+    onSave: wrapWithToaster(
+      async (tree) => {
+        const data = prepareDataForServer(tree, window.source_text, [
+          window.model_run,
+        ]);
+        await postDataToServer(data);
+      },
+      AppToaster,
+      {
+        success: "Model information saved",
+        error: "Failed to save model information",
       }
-    },
+    ),
   });
+}
+
+async function postDataToServer(data: ServerResults) {
+  const response = await fetch(knowledgeGraphAPIURL + "/record_run", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+}
+
+function wrapWithToaster(
+  fn: (...args: any[]) => Promise<void>,
+  toaster: Toaster,
+  messages: {
+    success: string;
+    error: string;
+  }
+) {
+  return async (...args: any[]) => {
+    try {
+      await fn(...args);
+      toaster.show({
+        message: messages.success,
+        intent: "success",
+      });
+    } catch (e) {
+      console.error(e);
+      toaster.show({
+        message: messages.error + ": " + e.message,
+        intent: "danger",
+      });
+    }
+  };
 }
 
 interface ServerResults extends GraphData {
