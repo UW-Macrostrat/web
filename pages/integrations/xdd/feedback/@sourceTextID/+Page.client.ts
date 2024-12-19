@@ -78,7 +78,7 @@ function MultiFeedbackInterface({ data, models, entityTypes }) {
         title: "Multiple model runs for feedback",
         description: `Showing entities from ${
           ix + 1
-        } of ${count} model runs. Merging several runs is not yet supported.`,
+        } of ${count} model runs. Merging runs is not yet supported.`,
       }),
       h(Pagination, {
         count,
@@ -98,6 +98,10 @@ function MultiFeedbackInterface({ data, models, entityTypes }) {
 function FeedbackInterface({ data, models, entityTypes }) {
   const window = enhanceData(data, models, entityTypes);
   const { entities = [], paragraph_text, model } = window;
+
+  console.log(window);
+  console.log(Array.from(entityTypes.values()));
+
   return h(FeedbackComponent, {
     entities,
     text: paragraph_text,
