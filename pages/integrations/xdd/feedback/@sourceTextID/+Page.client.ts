@@ -147,12 +147,37 @@ function prepareDataForServer(
 ): ServerResults {
   /** This function should be used before sending the data to the server */
   const { nodes, edges } = treeToGraph(tree);
+
+  // Prepare match for server
+  const normalizedNodes = nodes.map((d) => {
+    return {
+      ...d,
+      match: normalizeMatch(d.match),
+    };
+  });
+
   return {
-    nodes,
+    nodes: normalizedNodes,
     edges,
     sourceTextId: sourceTextID,
     supersedesRunIds: supersedesRunIDs ?? [],
   };
+}
+
+// We will extend this in the future, probably,
+// to handle ages and other things
+type MatchInfo = { type: "lith" | "lith_att" | "strat_name"; id: number };
+
+function normalizeMatch(match: any): MatchInfo | null {
+  if (match == null) return null;
+  if (match.lith_id) return { type: "lith", id: match.lith_id };
+  if (match.lith_att_id) {
+    return { type: "lith_att", id: match.lith_att_id };
+  }
+  if (match.strat_name_id) {
+    return { type: "strat_name", id: match.strat_name_id };
+  }
+  return null;
 }
 
 
