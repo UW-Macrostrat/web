@@ -5,6 +5,9 @@ import { usePageContext } from "vike-react/usePageContext";
 import {
   enhanceData,
   FeedbackComponent,
+  GraphData,
+  treeToGraph,
+  TreeData,
 } from "@macrostrat/feedback-components";
 import {
   useEntityTypeIndex,
@@ -20,6 +23,9 @@ import {
 } from "@macrostrat/ui-components";
 import { useState } from "react";
 import { AuthStatus } from "@macrostrat/auth-components";
+import { MatchedEntityLink } from "#/integrations/xdd/extractions/match";
+import { knowledgeGraphAPIURL } from "@macrostrat-web/settings";
+import { Toaster } from "@blueprintjs/core";
 
 /**
  * Get a single text window for feedback purposes
@@ -95,6 +101,8 @@ function MultiFeedbackInterface({ data, models, entityTypes }) {
   ]);
 }
 
+const AppToaster = Toaster.create();
+
 function FeedbackInterface({ data, models, entityTypes }) {
   const window = enhanceData(data, models, entityTypes);
   const { entities = [], paragraph_text, model } = window;
@@ -107,9 +115,44 @@ function FeedbackInterface({ data, models, entityTypes }) {
     text: paragraph_text,
     model,
     entityTypes,
-    sourceTextID: window.source_text,
-    runID: window.model_run,
+    matchComponent: MatchedEntityLink,
+    toaster: AppToaster,
+    async onSave(tree: TreeData[]) {
+      const data = prepareDataForServer(tree, window.source_text, [
+        window.model_run,
+      ]);
+      const response = await fetch(knowledgeGraphAPIURL + "/record_run", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to save model information");
+      }
+    },
   });
+}
+
+interface ServerResults extends GraphData {
+  sourceTextId: number;
+  supersedesRunIds: number[];
+}
+
+function prepareDataForServer(
+  tree: TreeData[],
+  sourceTextID: number,
+  supersedesRunIDs: number[] | null
+): ServerResults {
+  /** This function should be used before sending the data to the server */
+  const { nodes, edges } = treeToGraph(tree);
+  return {
+    nodes,
+    edges,
+    sourceTextId: sourceTextID,
+    supersedesRunIds: supersedesRunIDs ?? [],
+  };
 }
 
 

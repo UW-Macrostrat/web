@@ -6,12 +6,13 @@ import { usePageContext } from "vike-react/usePageContext";
 import {
   ExtractionContext,
   enhanceData,
-} from "@macrostrat/feedback-components/src/extractions";
+} from "@macrostrat/feedback-components";
 import {
   useEntityTypeIndex,
   useModelIndex,
   usePostgresQuery,
-} from "./data-service";
+} from "../data-service";
+import { MatchedEntityLink } from "../match";
 
 export function Page() {
   return h(ContentPage, [h(PageBreadcrumbs), h(PageMain)]);
@@ -49,6 +50,7 @@ function ExtractionIndex() {
         h(ExtractionContext, {
           data: enhanceData(d, models, entityTypes),
           entityTypes,
+          matchComponent: MatchedEntityLink,
         }),
       ]);
     }),
