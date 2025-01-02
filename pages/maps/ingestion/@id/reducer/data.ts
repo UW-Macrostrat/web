@@ -127,6 +127,7 @@ export const updateData = (
     totalNumberOfRows: number;
   }
 ) => {
+  console.log("updateData", action.data);
   // Check if there are new columns to record
   const dataColumns =
     action.data.length == 0 ? [] : Object.keys(action.data[0]);
