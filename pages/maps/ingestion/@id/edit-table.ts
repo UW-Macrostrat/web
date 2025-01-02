@@ -55,6 +55,8 @@ import "@blueprintjs/table/lib/css/table.css";
 import styles from "./edit-table.module.sass";
 import "./override.sass";
 import TableHeader from "#/maps/ingestion/@id/components/table-header";
+import { postgrest } from "~/_providers";
+import { createAppToaster, useAsyncEffect } from "@macrostrat/ui-components";
 
 const h = hyper.styled(styles);
 
@@ -67,11 +69,48 @@ export interface EditTableProps {
   columnGenerator: (props: ColumnConfigGenerator) => ColumnConfig;
 }
 
-function useTableData({ ref, allColumns, url }): [TableData, Dispatch<any>] {
+const Toaster = createAppToaster();
+
+function useTableData({
+  ref,
+  allColumns,
+  url,
+  ingestProcessId,
+}): [TableData, Dispatch<any>] {
   const [tableData, dispatch] = useReducer(tableDataReducer, {
     ...initialState,
     allColumns,
   });
+
+  // Handle column changes
+  useAsyncEffect(async () => {
+    // Load the ingest_process data from the API
+    const client = postgrest.from("map_ingest_metadata");
+
+    const res = await client
+      .select("polygon_omit")
+      .eq("id", ingestProcessId)
+      .single();
+    const omit = res.data.polygon_omit ?? [];
+
+    dispatch({ type: "updateHiddenColumns", data: omit });
+  }, []);
+
+  useAsyncEffect(async () => {
+    try {
+      const client = postgrest.from("map_ingest_metadata");
+
+      await client
+        .update({ polygon_omit: tableData.hiddenColumns })
+        .eq("id", ingestProcessId);
+    } catch (err) {
+      console.error(err);
+      Toaster.show({
+        message: "Error updating hidden columns",
+        intent: "danger",
+      });
+    }
+  }, [tableData.hiddenColumns]);
 
   useEffect(() => {
     (async () => {
@@ -113,6 +152,7 @@ export function TableInterface({
   const [tableData, dispatch] = useTableData({
     ref,
     allColumns: finalColumns,
+    ingestProcessId,
     url,
   });
 
