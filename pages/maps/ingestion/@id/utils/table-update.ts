@@ -88,16 +88,28 @@ export const createTableUpdate = (
   row: Record<string, boolean | string | number | null>,
   dataParameters: DataParameters
 ): TableUpdate => {
+  /** Create an update operation that is queued for application to the
+   * table
+   */
+  console.log(url, value, columnName, row, dataParameters);
   let newDataParameters = cloneDataParameters(dataParameters);
-  if (newDataParameters?.group != undefined) {
-    newDataParameters.filter[newDataParameters?.group] = new Filter(
-      newDataParameters?.group,
-      "eq",
-      row[newDataParameters?.group]
-    );
+
+  // If we are grouped by a column, set the filter based on that.
+
+  const group = newDataParameters.group;
+
+  if (group != undefined) {
+    if (group != null) {
+      newDataParameters.filter[group] = new Filter(group, "eq", row[group]);
+    } else {
+      // special case for remaining elements not in a group
+      newDataParameters.filter[group] = new Filter(group, "is", "null");
+    }
   } else {
     newDataParameters.filter["_pkid"] = new Filter("_pkid", "eq", row["_pkid"]);
   }
+
+  console.log(newDataParameters.filter);
 
   const execute = async () =>
     submitChange(url, value, [columnName], newDataParameters.filter);

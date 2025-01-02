@@ -15,7 +15,7 @@ function UserIdentity() {
   const { user } = useAuth();
 
   return h("div", [
-    h("h3", "User Identity"),g
+    h("h3", "User Identity"),
     h("pre", JSON.stringify(user, null, 2)),
   ]);
 }

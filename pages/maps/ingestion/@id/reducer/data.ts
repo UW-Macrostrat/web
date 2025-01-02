@@ -43,6 +43,7 @@ export const addTableUpdates = (
   state: TableData,
   tableUpdates: TableUpdate[]
 ) => {
+  /** Add a table update to the state */
   // Squash new and existing updates
   const newTableUpdates = squashTableUpdates([
     ...state.tableUpdates,
@@ -105,7 +106,7 @@ export const toggleShowOmittedRows = (state: TableData) => {
   const currentlyHidden = newDataParameters.filter["omit"].is_valid();
 
   if (currentlyHidden) {
-    newDataParameters.filter["omit"] = new Filter("omit", "eq", null);
+    delete newDataParameters.filter["omit"];
   } else {
     newDataParameters.filter["omit"] = new Filter(
       "omit",
@@ -127,18 +128,17 @@ export const updateData = (
     totalNumberOfRows: number;
   }
 ) => {
-  console.log("updateData", action.data);
   // Check if there are new columns to record
   const dataColumns =
     action.data.length == 0 ? [] : Object.keys(action.data[0]);
   const allColumns = [...new Set([...state.allColumns, ...dataColumns])];
 
   // Add a filter for all the new columns
-  allColumns.forEach((c) => {
-    if (!(c in state.parameters.filter)) {
-      state.parameters.filter[c] = new Filter(c, "eq", null);
-    }
-  });
+  // allColumns.forEach((c) => {
+  //   if (!(c in state.parameters.filter)) {
+  //     state.parameters.filter[c] = new Filter(c, "eq", null);
+  //   }
+  // });
 
   return {
     ...state,
