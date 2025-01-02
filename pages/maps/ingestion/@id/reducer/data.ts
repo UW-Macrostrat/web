@@ -1,4 +1,3 @@
-
 import { buildURL } from "../components/table-util";
 import {
   applyTableUpdates,
@@ -6,10 +5,10 @@ import {
   DataParameters,
   squashTableUpdates,
   cloneDataParameters,
-  Filter
+  Filter,
 } from "../utils/index";
 
-interface TableData {
+export interface TableData {
   loading: boolean;
   remoteData: Record<string, boolean | string | number | null>[];
   totalNumberOfRows?: number;
@@ -29,30 +28,36 @@ export const initialState: TableData = {
   parameters: {
     select: {
       page: "0",
-      pageSize: "50"
+      pageSize: "50",
     },
     filter: {
-      "omit": new Filter("omit", "is_distinct_from", "true")
-    }
-  }
+      omit: new Filter("omit", "is_distinct_from", "true"),
+    },
+  },
 };
 
-export const addTableUpdates = (state: TableData, tableUpdates: TableUpdate[]) => {
+export const addTableUpdates = (
+  state: TableData,
+  tableUpdates: TableUpdate[]
+) => {
   // Squash new and existing updates
-  const newTableUpdates = squashTableUpdates([...state.tableUpdates, ...tableUpdates]);
+  const newTableUpdates = squashTableUpdates([
+    ...state.tableUpdates,
+    ...tableUpdates,
+  ]);
 
   return {
     ...state,
-    tableUpdates: newTableUpdates
-  }
-}
+    tableUpdates: newTableUpdates,
+  };
+};
 
 export const clearTableUpdates = (state: TableData) => {
   return {
     ...state,
-    tableUpdates: []
+    tableUpdates: [],
   };
-}
+};
 
 export const revertTableUpdate = (state: TableData) => {
   const newTableUpdates = [...state.tableUpdates];
@@ -60,65 +65,68 @@ export const revertTableUpdate = (state: TableData) => {
 
   return {
     ...state,
-    tableUpdates: newTableUpdates
+    tableUpdates: newTableUpdates,
   };
-}
+};
 
 export const updateColumns = (state: TableData, columns: string[]) => {
   return {
     ...state,
-    allColumns: columns
+    allColumns: columns,
   };
-}
+};
 
 export const hideColumn = (state: TableData, column: string) => {
   return {
     ...state,
-    hiddenColumns: [...state.hiddenColumns, column]
+    hiddenColumns: [...state.hiddenColumns, column],
   };
-}
+};
 
 export const showColumn = (state: TableData, column: string) => {
   return {
     ...state,
-    hiddenColumns: state.hiddenColumns.filter(c => c !== column)
+    hiddenColumns: state.hiddenColumns.filter((c) => c !== column),
   };
-}
+};
 
 export const showAllColumns = (state: TableData) => {
   return {
     ...state,
-    hiddenColumns: []
+    hiddenColumns: [],
   };
-}
+};
 
 export const toggleShowOmittedRows = (state: TableData) => {
-
   const newDataParameters = cloneDataParameters(state.parameters);
-  const currentlyHidden = newDataParameters.filter["omit"].is_valid()
+  const currentlyHidden = newDataParameters.filter["omit"].is_valid();
 
   if (currentlyHidden) {
     newDataParameters.filter["omit"] = new Filter("omit", "eq", null);
   } else {
-    newDataParameters.filter["omit"] = new Filter("omit", "is_distinct_from", "true");
+    newDataParameters.filter["omit"] = new Filter(
+      "omit",
+      "is_distinct_from",
+      "true"
+    );
   }
 
   return {
     ...state,
-    parameters: newDataParameters
+    parameters: newDataParameters,
   };
-}
+};
 
 export const updateData = (
   state: TableData,
-  action : {
-    data: Record<string, boolean | string | number | null>[],
-    totalNumberOfRows: number
+  action: {
+    data: Record<string, boolean | string | number | null>[];
+    totalNumberOfRows: number;
   }
 ) => {
-
   // Check if there are new columns to record
-  const dataColumns = action.data.length == 0 ? [] : Object.keys(action.data[0]);
+  const dataColumns =
+    action.data.length == 0 ? [] : Object.keys(action.data[0]);
   const allColumns = [...new Set([...state.allColumns, ...dataColumns])];
 
   // Add a filter for all the new columns
@@ -126,29 +134,28 @@ export const updateData = (
     if (!(c in state.parameters.filter)) {
       state.parameters.filter[c] = new Filter(c, "eq", null);
     }
-  })
+  });
 
   return {
     ...state,
     remoteData: action.data,
     totalNumberOfRows: action.totalNumberOfRows,
     allColumns,
-    loading: false
-  }
-}
+    loading: false,
+  };
+};
 
 export const appendData = (
   state: TableData,
   data: Record<string, boolean | string | number | null>[]
 ) => {
-
   const remoteData = [...state.remoteData, ...data];
 
   return {
     ...state,
-    remoteData
+    remoteData,
   };
-}
+};
 
 export const setPage = (state: TableData, page: string) => {
   const newDataParameters = cloneDataParameters(state.parameters);
@@ -156,15 +163,15 @@ export const setPage = (state: TableData, page: string) => {
 
   return {
     ...state,
-    parameters: newDataParameters
+    parameters: newDataParameters,
   };
-}
+};
 
-export const incrementPage = (state: TableData, increment: number | string ) => {
-  const page = parseInt(state.parameters.select.page) +
-    parseInt(increment.toString());
+export const incrementPage = (state: TableData, increment: number | string) => {
+  const page =
+    parseInt(state.parameters.select.page) + parseInt(increment.toString());
   return setPage(state, page.toString());
-}
+};
 
 export const setPageSize = (state: TableData, pageSize: string) => {
   const newDataParameters = cloneDataParameters(state.parameters);
@@ -172,15 +179,18 @@ export const setPageSize = (state: TableData, pageSize: string) => {
 
   return {
     ...state,
-    parameters: newDataParameters
+    parameters: newDataParameters,
   };
-}
+};
 
-export const incrementPageSize = (state: TableData, increment: number | string) => {
-  const pageSize = parseInt(state.parameters.select.pageSize) +
-    parseInt(increment.toString());
+export const incrementPageSize = (
+  state: TableData,
+  increment: number | string
+) => {
+  const pageSize =
+    parseInt(state.parameters.select.pageSize) + parseInt(increment.toString());
   return setPageSize(state, pageSize.toString());
-}
+};
 
 export const setGroupBy = (state: TableData, groupBy: string | undefined) => {
   const newDataParameters = cloneDataParameters(state.parameters);
@@ -188,9 +198,9 @@ export const setGroupBy = (state: TableData, groupBy: string | undefined) => {
 
   return {
     ...state,
-    parameters: newDataParameters
+    parameters: newDataParameters,
   };
-}
+};
 
 export const setFilter = (state: TableData, filter: Filter) => {
   const newDataParameters = cloneDataParameters(state.parameters);
@@ -198,9 +208,9 @@ export const setFilter = (state: TableData, filter: Filter) => {
 
   return {
     ...state,
-    parameters: newDataParameters
+    parameters: newDataParameters,
   };
-}
+};
 
 export const clearDataParameters = (state: TableData) => {
   const newDataParameters = cloneDataParameters(state.parameters);
@@ -209,10 +219,9 @@ export const clearDataParameters = (state: TableData) => {
 
   return {
     ...state,
-    parameters: newDataParameters
+    parameters: newDataParameters,
   };
-
-}
+};
 
 export const tableDataReducer = (state: TableData, action: any): TableData => {
   switch (action.type) {
@@ -252,4 +261,3 @@ export const tableDataReducer = (state: TableData, action: any): TableData => {
       return incrementPageSize(state, action.increment);
   }
 };
-

@@ -17,6 +17,7 @@ import {
   useState,
   useRef,
   MutableRefObject,
+  Dispatch,
 } from "react";
 import {
   Filter,
@@ -26,7 +27,7 @@ import {
   applyTableUpdates,
   submitTableUpdates,
 } from "./utils/";
-import { tableDataReducer, initialState } from "./reducer/";
+import { tableDataReducer, initialState, TableData } from "./reducer/";
 import { ingestPrefix } from "@macrostrat-web/settings";
 import {
   EditableCell,
@@ -66,37 +67,11 @@ export interface EditTableProps {
   columnGenerator: (props: ColumnConfigGenerator) => ColumnConfig;
 }
 
-export function TableInterface({
-  url,
-  ingestProcessId,
-  finalColumns,
-  columnGenerator,
-}: EditTableProps) {
+function useTableData({ ref, allColumns, url }): [TableData, Dispatch<any>] {
   const [tableData, dispatch] = useReducer(tableDataReducer, {
     ...initialState,
-    allColumns: finalColumns,
+    allColumns,
   });
-
-  // Selection State
-  const [selection, setSelection] = useState<Selection[]>([]);
-  const [copiedSelection, setCopiedSelection] = useState<
-    Selection[] | undefined
-  >(undefined);
-
-  // Cell refs
-  const ref = useRef<MutableRefObject<any>[][]>(null);
-
-  // Error State
-  const [error, setError] = useState<string | undefined>(undefined);
-
-  // Table Update State
-  const [updateProgress, setUpdateProgress] =
-    useState<ProgressPopoverProps>(undefined);
-
-  // Focused Cell
-  const [focusedCell, setFocusedCell] = useState<
-    FocusedCellCoordinates | undefined
-  >(undefined);
 
   useEffect(() => {
     (async () => {
@@ -122,6 +97,42 @@ export function TableInterface({
       });
     })();
   }, [tableData.parameters]);
+
+  return [tableData, dispatch];
+}
+
+export function TableInterface({
+  url,
+  ingestProcessId,
+  finalColumns,
+  columnGenerator,
+}: EditTableProps) {
+  // Cell refs
+  const ref = useRef<MutableRefObject<any>[][]>(null);
+
+  const [tableData, dispatch] = useTableData({
+    ref,
+    allColumns: finalColumns,
+    url,
+  });
+
+  // Selection State
+  const [selection, setSelection] = useState<Selection[]>([]);
+  const [copiedSelection, setCopiedSelection] = useState<
+    Selection[] | undefined
+  >(undefined);
+
+  // Error State
+  const [error, setError] = useState<string | undefined>(undefined);
+
+  // Table Update State
+  const [updateProgress, setUpdateProgress] =
+    useState<ProgressPopoverProps>(undefined);
+
+  // Focused Cell
+  const [focusedCell, setFocusedCell] = useState<
+    FocusedCellCoordinates | undefined
+  >(undefined);
 
   const transformedData = useMemo(() => {
     let data = structuredClone(tableData.remoteData);
