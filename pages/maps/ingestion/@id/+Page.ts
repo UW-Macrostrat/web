@@ -1,7 +1,7 @@
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
 import { AnchorButton, ButtonGroup } from "@blueprintjs/core";
-import { FullscreenPage } from "~/layouts";
+import { BasePage } from "~/layouts";
 import { Header } from "./components";
 import { MapInterface } from "./components";
 import { usePageProps } from "~/renderer/usePageProps";
@@ -30,7 +30,7 @@ export function Page() {
 
   const basename = `/maps/ingestion/${source_id}`;
 
-  return h(FullscreenPage, { className: "page" }, [
+  return h(BasePage, { className: "page" }, [
     h(Header, headerProps),
     h("div.ingestion-main-panel", [
       h("div.context-panel", [h(EditMenu, { parentRoute: basename })]),

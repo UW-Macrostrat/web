@@ -82,12 +82,11 @@ function useTableData({
     allColumns,
   });
 
+  const client = useRef(postgrest.from("map_ingest_metadata"));
+
   // Handle column changes
   useAsyncEffect(async () => {
-    // Load the ingest_process data from the API
-    const client = postgrest.from("map_ingest_metadata");
-
-    const res = await client
+    const res = await client.current
       .select("polygon_omit")
       .eq("id", ingestProcessId)
       .single();
@@ -98,9 +97,7 @@ function useTableData({
 
   useAsyncEffect(async () => {
     try {
-      const client = postgrest.from("map_ingest_metadata");
-
-      await client
+      await client.current
         .update({ polygon_omit: tableData.hiddenColumns })
         .eq("id", ingestProcessId);
     } catch (err) {

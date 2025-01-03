@@ -232,7 +232,7 @@ export function MapInterface({
     },
     [
       h(MapView, {
-        style: mapStyle, ///"mapbox://styles/mapbox/satellite-v9",
+        style: "mapbox://styles/mapbox/satellite-v9",
         mapboxToken: SETTINGS.mapboxAccessToken,
         bounds,
         mapPosition: null,

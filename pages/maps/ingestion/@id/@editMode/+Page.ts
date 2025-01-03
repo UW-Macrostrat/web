@@ -2,12 +2,14 @@ import { Button, HotkeysProvider } from "@blueprintjs/core";
 import { ingestPrefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import { useStoredState } from "@macrostrat/ui-components";
-import { FullscreenPage } from "~/layouts";
-import { Header, WidthAdjustablePanel } from "../components";
+import { BasePage } from "~/layouts";
+import { Header } from "../components";
 import styles from "./main.module.sass";
 import { MapInterface } from "../components";
 import { LinesTable, PointsTable, PolygonsTable } from "../tables";
 import { usePageProps } from "~/renderer/usePageProps";
+import { Allotment } from "allotment";
+import "allotment/dist/style.css";
 
 const h = hyper.styled(styles);
 
@@ -45,18 +47,12 @@ export function Page() {
   );
 
   return h(
-    FullscreenPage,
+    BasePage,
+    { fitViewport: true },
     h(HotkeysProvider, [
       h("div.edit-page", [
-        h(
-          WidthAdjustablePanel,
-          {
-            expand: !showMap,
-            className: "edit-page-content",
-            storageID: "edit-panel-width",
-          },
-          // TODO: make this basename dynamic
-          [
+        h(Allotment, { gap: 10 }, [
+          h("div.main-panel", [
             h(
               Header,
               {
@@ -66,32 +62,24 @@ export function Page() {
               },
               [h(ShowMapButton, { showMap, setShowMap })]
             ),
-            h(TableContainer, {}, [
+            h("div.table-container", [
               h(tableComponent, {
                 url,
                 ingestProcessId,
               }),
             ]),
-          ]
-        ),
-        h.if(showMap)(MapInterface, {
-          id: source_id,
-          map: mapBounds,
-          slug,
-          featureTypes: [editMode],
-        }),
+          ]),
+          h.if(showMap)(MapInterface, {
+            id: source_id,
+            map: mapBounds,
+            slug,
+            featureTypes: [editMode],
+          }),
+        ]),
       ]),
     ])
   );
 }
-
-const TableContainer = ({ children }) => {
-  return h(
-    "div.table-container",
-    { style: { display: "flex", flexDirection: "column", height: "100%" } },
-    children
-  );
-};
 
 function ShowMapButton({ showMap, setShowMap }) {
   return h(Button, {

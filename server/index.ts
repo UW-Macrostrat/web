@@ -21,14 +21,13 @@ const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 if (process.env.HMR_DOMAIN) {
   const hmrDomain = new URL(process.env.HMR_DOMAIN);
   process.env.HMR_HOST = hmrDomain.hostname;
-  process.env.HMR_PORT = hmrDomain.port;
-  process.env.HMR_PROTOCOL = hmrDomain.protocol;
+  process.env.HMR_PROTOCOL = hmrDomain.protocol.replace(":", "");
 }
 
 const hmrPort = process.env.HMR_PORT
   ? parseInt(process.env.HMR_PORT, 10)
   : 24678;
-const hmrHost = process.env.HMR_HOST;
+const hmrHost = process.env.HMR_HOST ?? "localhost";
 const hmrProtocol = process.env.HMR_PROTOCOL ?? "ws";
 
 const hmr = {
@@ -36,6 +35,8 @@ const hmr = {
   port: hmrPort,
   protocol: hmrProtocol,
 };
+
+console.log(hmr);
 
 interface Middleware<
   Context extends Record<string | number | symbol, unknown>
