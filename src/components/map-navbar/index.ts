@@ -42,6 +42,7 @@ export function MapNavbar({
   setOpen,
   parentRoute,
   minimal = false,
+  large = false,
 }) {
   if (minimal) {
     return MapMinimalNavbar({ isOpen, setOpen });
@@ -54,11 +55,12 @@ export function MapNavbar({
       active: isOpen,
       onClick: () => setOpen(!isOpen),
       isLoading,
+      large,
     }),
   ]);
 }
 
-function MapMinimalNavbar({ isOpen, setOpen }) {
+function MapMinimalNavbar({ isOpen, setOpen, large = false }) {
   const { isLoading } = useMapStatus();
   return h("div.map-minimal-navbar map-navbar", [
     h(FloatingNavbar, { className: "searchbar" }, [
@@ -66,8 +68,8 @@ function MapMinimalNavbar({ isOpen, setOpen }) {
         active: isOpen,
         onClick: () => setOpen(!isOpen),
         isLoading,
+        large,
       }),
     ]),
-    h("div.spacer"),
   ]);
 }

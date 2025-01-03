@@ -1,8 +1,10 @@
-import { Radio, RadioGroup } from "@blueprintjs/core";
+import { Radio, RadioGroup, Spinner } from "@blueprintjs/core";
 import { SETTINGS, tileserverDomain } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import {
+  FloatingNavbar,
   MapAreaContainer,
+  MapLoadingButton,
   MapView,
   PanelCard,
 } from "@macrostrat/map-interface";
@@ -21,7 +23,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { MapNavbar } from "~/components/map-navbar";
 import "~/styles/global.styl";
 import styles from "./main.module.sass";
-import chroma from "chroma-js";
+import { asChromaColor, toRGBAString } from "@macrostrat/color-utils";
 
 const h = hyper.styled(styles);
 
@@ -137,7 +139,7 @@ export function MapInterface({
 
   const [layer, setLayer] = useStoredState(
     "ingestion:baseLayer",
-    Basemap.None,
+    Basemap.Basic,
     (v) => {
       return Object.values(Basemap).includes(v);
     }
@@ -174,7 +176,7 @@ export function MapInterface({
         style,
         mapSlug: slug,
         layers: _featureTypes,
-        //focusedMap: map.properties.source_id,
+        focusedMap: map.properties.source_id,
         layerOpacity,
       })
     );
@@ -220,6 +222,10 @@ export function MapInterface({
     h(BaseLayerSelector, { layer, setLayer }),
   ]);
 
+  if (mapStyle == null) {
+    return h(Spinner);
+  }
+
   return h(
     MapAreaContainer,
     {
@@ -232,7 +238,7 @@ export function MapInterface({
     },
     [
       h(MapView, {
-        style: "mapbox://styles/mapbox/satellite-v9",
+        style: mapStyle,
         mapboxToken: SETTINGS.mapboxAccessToken,
         bounds,
         mapPosition: null,
@@ -338,13 +344,11 @@ export function buildStyle({
   tileURL,
 }): mapboxgl.Style {
   const xRayColor = (opacity = 1, darken = 0) => {
+    const c0 = asChromaColor(color).alpha(opacity);
     if (!inDarkMode) {
-      return chroma(color)
-        .darken(2 - darken)
-        .alpha(opacity)
-        .css();
+      return toRGBAString(c0.darken(2 - darken));
     }
-    return chroma(color).alpha(opacity).darken(darken).css();
+    return toRGBAString(c0.darken(darken));
   };
 
   let layers = [];

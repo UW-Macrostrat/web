@@ -51,7 +51,7 @@ export function Page() {
     { fitViewport: true },
     h(HotkeysProvider, [
       h("div.edit-page", [
-        h(Allotment, { gap: 10 }, [
+        h(Allotment, [
           h("div.main-panel", [
             h(
               Header,
@@ -60,7 +60,7 @@ export function Page() {
                 sourceURL: source.url,
                 ingestProcess,
               },
-              [h(ShowMapButton, { showMap, setShowMap })]
+              h(ShowMapButton, { showMap, setShowMap })
             ),
             h("div.table-container", [
               h(tableComponent, {
