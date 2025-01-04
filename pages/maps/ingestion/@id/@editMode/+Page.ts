@@ -1,4 +1,4 @@
-import { Button, HotkeysProvider } from "@blueprintjs/core";
+import { Button, HotkeysProvider, Switch } from "@blueprintjs/core";
 import { ingestPrefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import { useStoredState } from "@macrostrat/ui-components";
@@ -10,6 +10,7 @@ import { LinesTable, PointsTable, PolygonsTable } from "../tables";
 import { usePageProps } from "~/renderer/usePageProps";
 import { Allotment } from "allotment";
 import "allotment/dist/style.css";
+import { PolygonsOldTable } from "#/maps/ingestion/@id/tables/polygons-old";
 
 const h = hyper.styled(styles);
 
@@ -23,7 +24,7 @@ interface EditInterfaceProps {
 }
 
 const routeMap = {
-  polygons: PolygonsTable,
+  polygons: PolygonsOldTable,
   lines: LinesTable,
   points: PointsTable,
 };
@@ -37,7 +38,18 @@ export function Page() {
 
   let url = sourcePrefix + `/${editMode}`;
   const ingestProcessId = ingestProcess.id;
-  const tableComponent = routeMap[editMode];
+  let tableComponent = routeMap[editMode];
+
+  const [newTableDesign, setNewTableDesign] = useStoredState(
+    "edit:newTableDesign",
+    true,
+    // Check if is valid boolean
+    (v) => typeof v === "boolean"
+  );
+
+  if (newTableDesign && editMode === "polygons") {
+    tableComponent = PolygonsTable;
+  }
 
   const [showMap, setShowMap] = useStoredState(
     "edit:showMap",
@@ -60,7 +72,17 @@ export function Page() {
                 sourceURL: source.url,
                 ingestProcess,
               },
-              h(ShowMapButton, { showMap, setShowMap })
+              [
+                h(Switch, {
+                  checked: newTableDesign,
+                  disabled: editMode !== "polygons",
+                  onChange(evt) {
+                    setNewTableDesign(evt.target.checked);
+                  },
+                  label: "New table",
+                }),
+                h(ShowMapButton, { showMap, setShowMap }),
+              ]
             ),
             h("div.table-container", [
               h(tableComponent, {
