@@ -16,8 +16,8 @@ import IntervalSelection, {
   Interval,
 } from "#/maps/ingestion/@id/components/cells/interval-selection";
 import CheckboxCell from "#/maps/ingestion/@id/components/cells/checkbox-cell";
-import { TableInterface } from "../edit-table";
-import styles from "#/maps/ingestion/@id/edit-table.module.sass";
+import { TableInterface } from "./edit-table";
+import styles from "./edit-table.module.sass";
 import { COMMON_COLUMNS } from ".";
 import { toBoolean } from "#/maps/ingestion/@id/components/cells/util";
 import { apiV2Prefix } from "@macrostrat-web/settings";

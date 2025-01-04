@@ -3,15 +3,12 @@ import React from "react";
 import { useDebouncedCallback } from "use-debounce";
 
 // @ts-ignore
-import hyper from "@macrostrat/hyper";
 
 import { OperatorQueryParameter, ColumnOperatorOption } from "../table";
 
 import "~/styles/blueprint-select";
-import styles from "../edit-table.module.sass";
 import { Filter } from "../utils/filter";
-
-const h = hyper.styled(styles);
+import h from "../hyper";
 
 const validExpressions: ColumnOperatorOption[] = [
   { key: "na", value: "", verbose: "None" },

@@ -26,8 +26,8 @@ import {
   createTableUpdate,
   applyTableUpdates,
   submitTableUpdates,
-} from "./utils/";
-import { tableDataReducer, initialState, TableData } from "./reducer/";
+} from "../utils";
+import { tableDataReducer, initialState, TableData } from "../reducer";
 import { ingestPrefix } from "@macrostrat-web/settings";
 import {
   EditableCell,
@@ -43,7 +43,7 @@ import {
   sleep,
   reorderColumns,
   downloadSourceFiles,
-} from "./components/index";
+} from "../components";
 import {
   ColumnConfig,
   ColumnConfigGenerator,
@@ -53,7 +53,7 @@ import {
 
 import "@blueprintjs/table/lib/css/table.css";
 import styles from "./edit-table.module.sass";
-import "./override.sass";
+import "../override.sass";
 import TableHeader from "#/maps/ingestion/@id/components/table-header";
 import { postgrest } from "~/_providers";
 import { createAppToaster, useAsyncEffect } from "@macrostrat/ui-components";

@@ -2,17 +2,14 @@
  * Generators for the table columns in the ingestion table
  */
 
-import hyper from "@macrostrat/hyper";
-
 import { ColumnProps, Column } from "@blueprintjs/table";
 import { DataParameters } from "#/maps/ingestion/@id/table";
 import IntervalSelection from "#/maps/ingestion/@id/components/cells/interval-selection";
 import { getTableUpdate } from "#/maps/ingestion/@id/components/table-util";
 import CheckboxCell from "#/maps/ingestion/@id/components/cells/checkbox-cell";
 import { toBoolean } from "#/maps/ingestion/@id/components/cells/util";
-import styles from "#/maps/ingestion/@id/edit-table.module.sass";
 
-const h = hyper.styled(styles);
+import h from "./hyper";
 
 type ColumnConfig = {
   [key: string]: ColumnProps;

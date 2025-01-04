@@ -4,14 +4,7 @@ import { Cell, EditableCell2Props } from "@blueprintjs/table";
 import React, { useMemo, memo } from "react";
 import { useInDarkMode } from "@macrostrat/ui-components";
 import { getColorPair } from "@macrostrat/color-utils";
-
-// @ts-ignore
-import hyper from "@macrostrat/hyper";
-
-import "~/styles/blueprint-select";
-import styles from "../../edit-table.module.sass";
-
-const h = hyper.styled(styles);
+import h from "../../hyper";
 
 interface Timescale {
   timescale_id: number;
