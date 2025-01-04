@@ -46,7 +46,7 @@ interface TableSelection {
 
 export interface ColumnConfigGenerator {
   url: string;
-  defaultColumnConfig: ColumnConfig;
+  sharedColumnConfig: ColumnConfig;
   dataParameters: DataParameters;
   addTableUpdate: (updates: TableUpdate[]) => void;
   transformedData: any[];

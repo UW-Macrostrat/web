@@ -29,16 +29,16 @@ export function PointsTable({ url, ingestProcessId }: CustomTableProps) {
   const pointColumnGenerator = useCallback(
     ({
       url,
-      defaultColumnConfig,
+      sharedColumnConfig,
       dataParameters,
       addTableUpdate,
       transformedData,
       ref,
     }: ColumnConfigGenerator): ColumnConfig => {
       return {
-        ...defaultColumnConfig,
+        ...sharedColumnConfig,
         omit: h(Column, {
-          ...defaultColumnConfig?.["omit"]?.props,
+          ...sharedColumnConfig?.["omit"]?.props,
           cellRenderer: (rowIndex: number, columnIndex: number) =>
             h(CheckboxCell, {
               ref: (el) => {

@@ -57,7 +57,7 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
   const polygonColumnGenerator = useCallback(
     ({
       url,
-      defaultColumnConfig,
+      sharedColumnConfig,
       dataParameters,
       addTableUpdate,
       transformedData,
@@ -65,9 +65,9 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
       ref,
     }: ColumnConfigGenerator): ColumnConfig => {
       return {
-        ...defaultColumnConfig,
+        ...sharedColumnConfig,
         t_interval: h(Column, {
-          ...defaultColumnConfig?.["t_interval"]?.props,
+          ...sharedColumnConfig?.["t_interval"]?.props,
           cellRenderer: (rowIndex: number, columnIndex: number) =>
             h(IntervalSelection, {
               ref: (el) => {
@@ -116,7 +116,7 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
             }),
         }),
         b_interval: h(Column, {
-          ...defaultColumnConfig?.["b_interval"]?.props,
+          ...sharedColumnConfig?.["b_interval"]?.props,
           cellRenderer: (rowIndex: number, columnIndex: number) =>
             h(IntervalSelection, {
               ref: (el) => {
@@ -165,7 +165,7 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
             }),
         }),
         omit: h(Column, {
-          ...defaultColumnConfig?.["omit"]?.props,
+          ...sharedColumnConfig?.["omit"]?.props,
           cellRenderer: (rowIndex: number, columnIndex: number) =>
             h(CheckboxCell, {
               ref: (el) => {

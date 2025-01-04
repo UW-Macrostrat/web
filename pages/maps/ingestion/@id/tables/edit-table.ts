@@ -366,7 +366,7 @@ export function TableInterface({
     [tableData.parameters, transformedData]
   );
 
-  const defaultColumnConfig = useMemo(() => {
+  const sharedColumnConfig = useMemo(() => {
     if (visibleColumns.length == 0) {
       return {};
     }
@@ -429,12 +429,13 @@ export function TableInterface({
 
   const columnConfig = useMemo(() => {
     if (visibleColumns.length == 0) {
-      return defaultColumnConfig;
+      return sharedColumnConfig;
     }
 
-    const generatedColumns = columnGenerator({
+    /** Here, we generate the column configuration */
+    return columnGenerator({
       url,
-      defaultColumnConfig,
+      sharedColumnConfig: sharedColumnConfig,
       dataParameters: tableData.parameters,
       addTableUpdate: (t) =>
         dispatch({ type: "addTableUpdates", tableUpdates: t }),
@@ -442,10 +443,8 @@ export function TableInterface({
       data: tableData.remoteData,
       ref,
     });
-
-    return generatedColumns;
   }, [
-    defaultColumnConfig,
+    sharedColumnConfig,
     tableData.parameters,
     transformedData,
     tableData.remoteData,
