@@ -1,15 +1,15 @@
 import { FullscreenPage } from "~/layouts";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
-import { ColorCell } from "@macrostrat/data-sheet2";
+import { ColorCell, PostgRESTTableView } from "@macrostrat/data-sheet2";
+import { postgrestPrefix } from "@macrostrat-web/settings";
 import { PageBreadcrumbs } from "~/components";
 import {
   LongTextViewer,
   IntervalCell,
   lithologyRenderer,
   ExpandedLithologies,
-  PostgRESTTableView,
-} from "~/components/legend-table";
+} from "~/components/data-table";
 
 const h = hyper.styled(styles);
 
@@ -18,6 +18,7 @@ export function Page() {
     h(PageBreadcrumbs),
     h("h1", "Map legend units"),
     h(PostgRESTTableView, {
+      endpoint: postgrestPrefix,
       table: "legend",
       order: { key: "legend_id", ascending: true },
       columnOptions,

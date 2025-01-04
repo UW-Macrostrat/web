@@ -1,16 +1,15 @@
-import { HotkeysProvider, Spinner, Tag } from "@blueprintjs/core";
-import DataSheet from "@macrostrat/data-sheet2";
+import { HotkeysProvider, Spinner } from "@blueprintjs/core";
+import { DataSheet, ColorCell } from "@macrostrat/data-sheet2";
 import { FullscreenPage } from "~/layouts";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
-import { ColorCell } from "@macrostrat/data-sheet2";
 import { PageBreadcrumbs } from "~/components";
 import {
   LongTextViewer,
   IntervalCell,
   lithologyRenderer,
   ExpandedLithologies,
-} from "~/components/legend-table";
+} from "~/components/data-table";
 import { useLegendData } from "../utils";
 import { useData } from "vike-react/useData";
 

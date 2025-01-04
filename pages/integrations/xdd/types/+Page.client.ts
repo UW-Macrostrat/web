@@ -1,15 +1,14 @@
 import { FullscreenPage } from "~/layouts";
 import h from "@macrostrat/hyper";
 import { PageBreadcrumbs } from "~/components";
-import { PostgRESTTableView } from "~/components/legend-table";
-
 import {
+  PostgRESTTableView,
   ColorCell,
-  //EditableTextArea,
-  //ColorPicker,
+  EditableTextArea,
 } from "@macrostrat/data-sheet2";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { AuthStatus } from "@macrostrat/auth-components";
+import { postgrestPrefix } from "@macrostrat-web/settings";
 
 const colorField = {
   name: "Color",
@@ -30,6 +29,7 @@ export function Page() {
     h(PageBreadcrumbs),
     h("div.header", [h("h1", "Entity types"), h("div.spacer"), h(AuthStatus)]),
     h(PostgRESTTableView, {
+      endpoint: postgrestPrefix,
       table: "kg_entity_type",
       editable: true,
       columnOptions: {
