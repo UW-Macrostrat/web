@@ -96,4 +96,4 @@ const LongTextCell = forwardRef((props: EditableCell2Props, forwardRef) => {
   );
 });
 
-export default LongTextCell;
+export { LongTextCell };

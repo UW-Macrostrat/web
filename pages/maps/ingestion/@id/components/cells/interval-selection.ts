@@ -185,3 +185,4 @@ function IntervalButton({ interval, intent, setActive }) {
 IntervalSelection = memo(IntervalSelection);
 
 export default IntervalSelection;
+export { IntervalSelection };

@@ -2,10 +2,7 @@ import React, { forwardRef, memo, useEffect } from "react";
 
 import { Cell, EditableCell2Props } from "@blueprintjs/table";
 
-import hyper from "@macrostrat/hyper";
-import styles from "./main.module.sass";
-
-const h = hyper.styled(styles);
+import h from "../../hyper";
 
 interface EditableCellProps extends EditableCell2Props {
   columnName: string;
@@ -18,7 +15,6 @@ interface EditableCellProps extends EditableCell2Props {
 }
 
 const _EditableCell = forwardRef((props: EditableCellProps, ref) => {
-
   const { style, ...rest } = props;
 
   // Keep an optimistic value so that the ui is responsive in case of slow onConfirm
@@ -39,7 +35,7 @@ const _EditableCell = forwardRef((props: EditableCellProps, ref) => {
           className: "editable-cell",
           style: {
             width: (props.value?.length ?? 2) + "ch",
-            color: "inherit" // Necessary so changed cells have the correct color text
+            color: "inherit", // Necessary so changed cells have the correct color text
           },
           value: optimisticValue || "",
           onChange: (e) => {
@@ -64,7 +60,7 @@ const _EditableCell = forwardRef((props: EditableCellProps, ref) => {
           },
           onBlur: (e) => {
             props.onConfirm(e.target.value);
-          }
+          },
         },
         []
       ),

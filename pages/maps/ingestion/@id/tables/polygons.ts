@@ -3,27 +3,19 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-
-import hyper from "@macrostrat/hyper";
-
 import { Column } from "@blueprintjs/table";
+import { ColumnConfig, ColumnConfigGenerator, CustomTableProps } from "./table";
 import {
-  ColumnConfig,
-  ColumnConfigGenerator,
-  CustomTableProps,
-} from "#/maps/ingestion/@id/table";
-import IntervalSelection, {
+  IntervalSelection,
   Interval,
-} from "#/maps/ingestion/@id/components/cells/interval-selection";
-import CheckboxCell from "#/maps/ingestion/@id/components/cells/checkbox-cell";
+  CheckboxCell,
+  toBoolean,
+} from "../components";
+import h from "../hyper";
 import { TableInterface } from "./edit-table";
-import styles from "./edit-table.module.sass";
 import { COMMON_COLUMNS } from ".";
-import { toBoolean } from "#/maps/ingestion/@id/components/cells/util";
 import { apiV2Prefix } from "@macrostrat-web/settings";
-import { createTableUpdate } from "#/maps/ingestion/@id/utils";
-
-const h = hyper.styled(styles);
+import { createTableUpdate } from "../utils";
 
 export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
   const FINAL_POLYGON_COLUMNS = [
