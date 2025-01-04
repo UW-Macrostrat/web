@@ -2,24 +2,18 @@
  * Generators for the table columns in the ingestion table
  */
 
-import { useCallback, useEffect, useState } from "react";
-
-import hyper from "@macrostrat/hyper";
-
-import { ColumnProps, Column } from "@blueprintjs/table";
+import { useCallback } from "react";
+import { Column } from "@blueprintjs/table";
 import {
   ColumnConfig,
   ColumnConfigGenerator,
+  COMMON_COLUMNS,
   CustomTableProps,
-} from "#/maps/ingestion/@id/table";
-import CheckboxCell from "#/maps/ingestion/@id/components/cells/checkbox-cell";
+} from "./defs";
+import { CheckboxCell, toBoolean } from "../components";
 import { TableInterface } from "./edit-table";
-import styles from "./edit-table.module.sass";
-import { COMMON_COLUMNS } from ".";
-import { toBoolean } from "#/maps/ingestion/@id/components/cells/util";
-import { createTableUpdate } from "#/maps/ingestion/@id/utils";
-
-const h = hyper.styled(styles);
+import { createTableUpdate } from "../utils";
+import h from "../hyper";
 
 export function PointsTable({ url, ingestProcessId }: CustomTableProps) {
   const FINAL_POINT_COLUMNS = [

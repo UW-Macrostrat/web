@@ -4,7 +4,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Column } from "@blueprintjs/table";
-import { ColumnConfig, ColumnConfigGenerator, CustomTableProps } from "./table";
+import {
+  ColumnConfig,
+  ColumnConfigGenerator,
+  COMMON_COLUMNS,
+  CustomTableProps,
+} from "./defs";
 import {
   IntervalSelection,
   Interval,
@@ -13,7 +18,6 @@ import {
 } from "../components";
 import h from "../hyper";
 import { TableInterface } from "./edit-table";
-import { COMMON_COLUMNS } from ".";
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import { createTableUpdate } from "../utils";
 

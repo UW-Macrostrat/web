@@ -1,4 +1,4 @@
-import { Filter } from "./components/table-util.js";
+import { Filter } from "../components/table-util";
 
 export type ColumnOperators =
   | "eq"
@@ -62,3 +62,11 @@ export interface CustomTableProps {
   url: string;
   ingestProcessId: number;
 }
+
+export const COMMON_COLUMNS = [
+  "omit",
+  "source_layer",
+  "source_id",
+  "orig_id",
+  "descrip",
+];

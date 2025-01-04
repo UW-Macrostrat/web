@@ -49,7 +49,7 @@ import {
   ColumnConfigGenerator,
   OperatorQueryParameter,
   Selection,
-} from "./table";
+} from "./defs";
 
 import "@blueprintjs/table/lib/css/table.css";
 import styles from "./edit-table.module.sass";
