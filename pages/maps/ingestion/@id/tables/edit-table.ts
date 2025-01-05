@@ -366,66 +366,17 @@ export function TableInterface({
     [tableData.parameters, transformedData]
   );
 
-  const sharedColumnConfig = useMemo(() => {
-    if (visibleColumns.length == 0) {
-      return {};
-    }
-
-    return visibleColumns.reduce((prev, columnName, index) => {
-      return {
-        ...prev,
-        [columnName]: h(Column, {
-          name: columnName,
-          className: finalColumns.includes(columnName) ? "final-column" : "",
-          columnHeaderCellRenderer: columnHeaderCellRenderer,
-          cellRenderer: (rowIndex: number, columnIndex: number) =>
-            h(EditableCell, {
-              ref: (el) => {
-                try {
-                  ref.current[rowIndex][columnIndex] = el;
-                } catch {}
-              },
-              columnName: columnName,
-              onConfirm: (value) => {
-                if (value != transformedData[rowIndex][columnName]) {
-                  dispatch({
-                    type: "addTableUpdates",
-                    tableUpdates: [
-                      createTableUpdate(
-                        url,
-                        value,
-                        columnName,
-                        transformedData[rowIndex],
-                        tableData.parameters
-                      ),
-                    ],
-                  });
-                }
-              },
-              onCopy: (e) => handleCopy(e),
-              onPaste: handlePaste,
-              intent:
-                tableData.remoteData[rowIndex][columnName] !=
-                transformedData[rowIndex][columnName]
-                  ? "success"
-                  : undefined,
-              value:
-                transformedData.length == 0
-                  ? ""
-                  : transformedData[rowIndex][columnName],
-            }),
-          key: columnName,
-        }),
-      };
-    }, {});
-  }, [
+  const sharedColumnConfig = useSharedColumns({
     visibleColumns,
-    tableData.remoteData,
-    tableData.parameters,
+    finalColumns,
+    columnHeaderCellRenderer,
     transformedData,
+    tableData,
+    ref,
+    url,
     handleCopy,
     handlePaste,
-  ]);
+  });
 
   const columnConfig = useMemo(() => {
     if (visibleColumns.length == 0) {
@@ -435,7 +386,7 @@ export function TableInterface({
     /** Here, we generate the column configuration */
     return columnGenerator({
       url,
-      sharedColumnConfig: sharedColumnConfig,
+      sharedColumnConfig,
       dataParameters: tableData.parameters,
       addTableUpdate: (t) =>
         dispatch({ type: "addTableUpdates", tableUpdates: t }),
@@ -575,4 +526,77 @@ function HotkeysManager({ hotkeys, style, children }) {
     style,
     children,
   });
+}
+
+function useSharedColumns({
+  visibleColumns,
+  finalColumns,
+  columnHeaderCellRenderer,
+  transformedData,
+  tableData,
+  ref,
+  url,
+  handleCopy,
+  handlePaste,
+}) {
+  return useMemo(() => {
+    if (visibleColumns.length == 0) {
+      return {};
+    }
+
+    return visibleColumns.reduce((prev, columnName, index) => {
+      return {
+        ...prev,
+        [columnName]: h(Column, {
+          name: columnName,
+          className: finalColumns.includes(columnName) ? "final-column" : "",
+          columnHeaderCellRenderer,
+          cellRenderer: (rowIndex: number, columnIndex: number) =>
+            h(EditableCell, {
+              ref: (el) => {
+                try {
+                  ref.current[rowIndex][columnIndex] = el;
+                } catch {}
+              },
+              columnName: columnName,
+              onConfirm: (value) => {
+                if (value != transformedData[rowIndex][columnName]) {
+                  dispatch({
+                    type: "addTableUpdates",
+                    tableUpdates: [
+                      createTableUpdate(
+                        url,
+                        value,
+                        columnName,
+                        transformedData[rowIndex],
+                        tableData.parameters
+                      ),
+                    ],
+                  });
+                }
+              },
+              onCopy: (e) => handleCopy(e),
+              onPaste: handlePaste,
+              intent:
+                tableData.remoteData[rowIndex][columnName] !=
+                transformedData[rowIndex][columnName]
+                  ? "success"
+                  : undefined,
+              value:
+                transformedData.length == 0
+                  ? ""
+                  : transformedData[rowIndex][columnName],
+            }),
+          key: columnName,
+        }),
+      };
+    }, {});
+  }, [
+    visibleColumns,
+    tableData.remoteData,
+    tableData.parameters,
+    transformedData,
+    handleCopy,
+    handlePaste,
+  ]);
 }

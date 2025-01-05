@@ -1,4 +1,4 @@
-import { ColumnOperators } from "#/maps/ingestion/@id/table";
+import { ColumnOperators } from "../tables/defs";
 
 export class Filter {
   readonly column_name: string;
