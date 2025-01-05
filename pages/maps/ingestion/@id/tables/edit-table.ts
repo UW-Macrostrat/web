@@ -8,6 +8,7 @@ import {
   RowHeaderCell2,
   SelectionModes,
   Table2,
+  Cell,
 } from "@blueprintjs/table";
 import {
   useCallback,
@@ -50,17 +51,14 @@ import {
   OperatorQueryParameter,
   Selection,
 } from "./defs";
+import h from "../hyper";
+import classNames from "classnames";
 
-import "@blueprintjs/table/lib/css/table.css";
-import styles from "./edit-table.module.sass";
-import "../override.sass";
 import TableHeader from "#/maps/ingestion/@id/components/table-header";
 import { postgrest } from "~/_providers";
 import { createAppToaster, useAsyncEffect } from "@macrostrat/ui-components";
 
-const h = hyper.styled(styles);
-
-const INTERNAL_COLUMNS = ["_pkid", "source_id"];
+const INTERNAL_COLUMNS = ["_pkid", "source_id", "omit"];
 
 export interface EditTableProps {
   url: string;
@@ -275,6 +273,7 @@ export function TableInterface({
       return h(
         ColumnHeaderCell2,
         {
+          enableColumnReordering: columnName != "source_layer",
           nameRenderer: () =>
             h(
               "div.column-name",
@@ -361,7 +360,18 @@ export function TableInterface({
         name = name.slice(0, 47) + "...";
       }
 
-      return h(RowHeaderCell2, { name: name.toString() }, []);
+      console.log(transformedData[rowIndex]);
+
+      const omit = transformedData[rowIndex]["omit"] ?? false;
+      console.log(omit);
+
+      return h(RowHeaderCell2, {
+        name: h(
+          "span.row-header-text",
+          { className: classNames({ omit }) },
+          name.toString()
+        ),
+      });
     },
     [tableData.parameters, transformedData]
   );
@@ -376,6 +386,7 @@ export function TableInterface({
     url,
     handleCopy,
     handlePaste,
+    dispatch,
   });
 
   const columnConfig = useMemo(() => {
@@ -464,7 +475,7 @@ export function TableInterface({
             enableFocusedCell: true,
             enableColumnReordering: true,
             selectionModes: SelectionModes.COLUMNS_AND_CELLS,
-            rowHeaderCellRenderer: rowHeaderCellRenderer,
+            rowHeaderCellRenderer,
             onFocusedCell: (focusedCellCoordinates) => {
               setFocusedCell(focusedCellCoordinates);
             },
@@ -538,6 +549,7 @@ function useSharedColumns({
   url,
   handleCopy,
   handlePaste,
+  dispatch,
 }) {
   return useMemo(() => {
     if (visibleColumns.length == 0) {
@@ -551,16 +563,37 @@ function useSharedColumns({
           name: columnName,
           className: finalColumns.includes(columnName) ? "final-column" : "",
           columnHeaderCellRenderer,
-          cellRenderer: (rowIndex: number, columnIndex: number) =>
-            h(EditableCell, {
+          cellRenderer: (rowIndex: number, columnIndex: number) => {
+            if (columnName == "source_layer") {
+              return h(
+                Cell,
+                {
+                  key: columnName,
+                  columnName: columnName,
+                  onCopy: (e) => handleCopy(e),
+                  className: "read-only-cell",
+                },
+                h(
+                  "span.read-only-value",
+                  null,
+                  transformedData[rowIndex][columnName]
+                )
+              );
+            }
+
+            const omit = transformedData[rowIndex].omit ?? false;
+
+            return h(EditableCell, {
               ref: (el) => {
                 try {
                   ref.current[rowIndex][columnIndex] = el;
                 } catch {}
               },
+              disabled: omit,
               columnName: columnName,
               onConfirm: (value) => {
                 if (value != transformedData[rowIndex][columnName]) {
+                  console.log("Confirmed value change", value);
                   dispatch({
                     type: "addTableUpdates",
                     tableUpdates: [
@@ -586,7 +619,8 @@ function useSharedColumns({
                 transformedData.length == 0
                   ? ""
                   : transformedData[rowIndex][columnName],
-            }),
+            });
+          },
           key: columnName,
         }),
       };

@@ -15,7 +15,7 @@ interface EditableCellProps extends EditableCell2Props {
 }
 
 const _EditableCell = forwardRef((props: EditableCellProps, ref) => {
-  const { style, ...rest } = props;
+  const { style, disabled, ...rest } = props;
 
   // Keep an optimistic value so that the ui is responsive in case of slow onConfirm
   const [optimisticValue, setOptimisticValue] = React.useState(props.value);
@@ -31,7 +31,7 @@ const _EditableCell = forwardRef((props: EditableCellProps, ref) => {
         "input",
         {
           ref,
-          disabled: props?.editableTextProps?.disabled,
+          disabled: disabled ?? props?.editableTextProps?.disabled,
           className: "editable-cell",
           style: {
             width: (props.value?.length ?? 2) + "ch",
