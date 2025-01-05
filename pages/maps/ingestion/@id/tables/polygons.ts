@@ -10,12 +10,7 @@ import {
   COMMON_COLUMNS,
   CustomTableProps,
 } from "./defs";
-import {
-  IntervalSelection,
-  Interval,
-  CheckboxCell,
-  toBoolean,
-} from "../components";
+import { IntervalSelection, Interval } from "../components";
 import h from "../hyper";
 import { TableInterface } from "./edit-table";
 import { apiV2Prefix } from "@macrostrat-web/settings";
@@ -162,29 +157,6 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
                 transformedData.length == 0
                   ? ""
                   : transformedData[rowIndex]["b_interval"],
-            }),
-        }),
-        omit: h(Column, {
-          ...sharedColumnConfig?.["omit"]?.props,
-          cellRenderer: (rowIndex: number, columnIndex: number) =>
-            h(CheckboxCell, {
-              ref: (el) => {
-                try {
-                  ref.current[rowIndex][columnIndex] = el;
-                } catch (e) {}
-              },
-              onConfirm: (value) => {
-                addTableUpdate([
-                  createTableUpdate(
-                    url,
-                    value,
-                    "omit",
-                    transformedData[rowIndex],
-                    dataParameters
-                  ),
-                ]);
-              },
-              value: toBoolean(transformedData[rowIndex]["omit"]),
             }),
         }),
       };

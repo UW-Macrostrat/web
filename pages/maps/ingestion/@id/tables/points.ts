@@ -3,16 +3,13 @@
  */
 
 import { useCallback } from "react";
-import { Column } from "@blueprintjs/table";
 import {
   ColumnConfig,
   ColumnConfigGenerator,
   COMMON_COLUMNS,
   CustomTableProps,
 } from "./defs";
-import { CheckboxCell, toBoolean } from "../components";
 import { TableInterface } from "./edit-table";
-import { createTableUpdate } from "../utils";
 import h from "../hyper";
 
 export function PointsTable({ url, ingestProcessId }: CustomTableProps) {
@@ -27,41 +24,8 @@ export function PointsTable({ url, ingestProcessId }: CustomTableProps) {
   ];
 
   const pointColumnGenerator = useCallback(
-    ({
-      url,
-      sharedColumnConfig,
-      dataParameters,
-      addTableUpdate,
-      transformedData,
-      ref,
-    }: ColumnConfigGenerator): ColumnConfig => {
-      return {
-        ...sharedColumnConfig,
-        omit: h(Column, {
-          ...sharedColumnConfig?.["omit"]?.props,
-          cellRenderer: (rowIndex: number, columnIndex: number) =>
-            h(CheckboxCell, {
-              ref: (el) => {
-                try {
-                  ref.current[rowIndex][columnIndex] = el;
-                } catch (e) {}
-              },
-              onConfirm: (value) => {
-                addTableUpdate([
-                  createTableUpdate(
-                    url,
-                    value,
-                    "omit",
-                    rowIndex,
-                    transformedData,
-                    dataParameters
-                  ),
-                ]);
-              },
-              value: toBoolean(transformedData[rowIndex]["omit"]),
-            }),
-        }),
-      };
+    ({ sharedColumnConfig }: ColumnConfigGenerator): ColumnConfig => {
+      return sharedColumnConfig;
     },
     []
   );

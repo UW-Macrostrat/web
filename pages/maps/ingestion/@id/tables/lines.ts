@@ -5,7 +5,6 @@
 import { useCallback } from "react";
 import h from "../hyper";
 
-import { Column } from "@blueprintjs/table";
 import {
   ColumnConfig,
   ColumnConfigGenerator,
@@ -13,8 +12,6 @@ import {
   CustomTableProps,
 } from "./defs";
 import { TableInterface } from "./edit-table";
-import { CheckboxCell, toBoolean } from "../components";
-import { createTableUpdate } from "../utils";
 
 export function LinesTable({ url, ingestProcessId }: CustomTableProps) {
   const FINAL_LINE_COLUMNS = [
@@ -26,40 +23,9 @@ export function LinesTable({ url, ingestProcessId }: CustomTableProps) {
   ];
 
   const linesColumnGenerator = useCallback(
-    ({
-      url,
-      sharedColumnConfig,
-      dataParameters,
-      addTableUpdate,
-      transformedData,
-      ref,
-    }: ColumnConfigGenerator): ColumnConfig => {
+    ({ sharedColumnConfig }: ColumnConfigGenerator): ColumnConfig => {
       return {
         ...sharedColumnConfig,
-        omit: h(Column, {
-          ...sharedColumnConfig?.["omit"]?.props,
-          cellRenderer: (rowIndex: number, columnIndex: number) =>
-            h(CheckboxCell, {
-              ref: (el) => {
-                try {
-                  ref.current[rowIndex][columnIndex] = el;
-                } catch (e) {}
-              },
-              onConfirm: (value) => {
-                addTableUpdate([
-                  createTableUpdate(
-                    url,
-                    value,
-                    "omit",
-                    rowIndex,
-                    transformedData,
-                    dataParameters
-                  ),
-                ]);
-              },
-              value: toBoolean(transformedData[rowIndex]["omit"]),
-            }),
-        }),
       };
     },
     []
