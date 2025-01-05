@@ -1,49 +1,46 @@
-import hyper from "@macrostrat/hyper";
-
-import { Icon, useHotkeys } from "@blueprintjs/core";
+import { Button, Checkbox, Icon, useHotkeys } from "@blueprintjs/core";
 import {
+  Cell,
   Column,
   ColumnHeaderCell2,
   FocusedCellCoordinates,
+  RegionCardinality,
   RowHeaderCell2,
-  SelectionModes,
   Table2,
-  Cell,
 } from "@blueprintjs/table";
 import {
+  Dispatch,
+  MutableRefObject,
   useCallback,
-  useReducer,
   useEffect,
   useMemo,
-  useState,
+  useReducer,
   useRef,
-  MutableRefObject,
-  Dispatch,
+  useState,
 } from "react";
 import {
-  Filter,
-  createTableUpdateCopyColumn,
-  isColumnActive,
-  createTableUpdate,
   applyTableUpdates,
+  createTableUpdate,
+  createTableUpdateCopyColumn,
+  Filter,
+  isColumnActive,
   submitTableUpdates,
 } from "../utils";
-import { tableDataReducer, initialState, TableData } from "../reducer";
+import { initialState, TableData, tableDataReducer } from "../reducer";
 import { ingestPrefix } from "@macrostrat-web/settings";
 import {
+  downloadSourceFiles,
   EditableCell,
+  getCellSelected,
+  getData,
+  getSelectedColumns,
   ProgressPopover,
   ProgressPopoverProps,
-  TableMenu,
-  getSelectedColumns,
-  selectionToText,
-  textToTableUpdates,
-  getData,
-  getCellSelected,
-  download_file,
-  sleep,
   reorderColumns,
-  downloadSourceFiles,
+  selectionToText,
+  TableMenu,
+  textToTableUpdates,
+  toBoolean,
 } from "../components";
 import {
   ColumnConfig,
@@ -360,11 +357,7 @@ export function TableInterface({
         name = name.slice(0, 47) + "...";
       }
 
-      console.log(transformedData[rowIndex]);
-
       const omit = transformedData[rowIndex]["omit"] ?? false;
-      console.log(omit);
-
       return h(RowHeaderCell2, {
         name: h(
           "span.row-header-text",
@@ -426,55 +419,78 @@ export function TableInterface({
     [
       h("div.table-container", {}, [
         h.if(error != undefined)("div.warning", {}, [error]),
-        h(TableHeader, {
-          hiddenColumns: tableData.hiddenColumns,
-          tableUpdates: tableData.tableUpdates,
-          dataParameters: tableData.parameters,
-          totalNumberOfRows: tableData.totalNumberOfRows,
-          showAllColumns: () => dispatch({ type: "showAllColumns" }),
-          toggleShowOmittedRows: () =>
-            dispatch({ type: "toggleShowOmittedRows" }),
-          clearTableUpdates: () => dispatch({ type: "clearTableUpdates" }),
-          submitTableUpdates: async () => {
-            await submitTableUpdates(tableData.tableUpdates, setUpdateProgress);
-            // Update the table data
-            dispatch({
-              type: "updateData",
-              ...(await getData(url, tableData.parameters)),
-            });
-            dispatch({ type: "clearTableUpdates" });
-          },
-          downloadSourceFiles: async () => downloadSourceFiles(ingestProcessId),
-          clearDataParameters: () => dispatch({ type: "clearDataParameters" }),
-          markAsHarmonized: async () => {
-            const response = await fetch(
-              `${ingestPrefix}/ingest-process/${ingestProcessId}`,
-              {
-                method: "PATCH",
-                headers: {
-                  Accept: "application/json",
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ state: "post_harmonization" }),
-              }
-            );
-            if (response.ok) {
-              dispatch({ type: "clearTableUpdates" });
+        h(
+          TableHeader,
+          {
+            hiddenColumns: tableData.hiddenColumns,
+            tableUpdates: tableData.tableUpdates,
+            dataParameters: tableData.parameters,
+            totalNumberOfRows: tableData.totalNumberOfRows,
+            showAllColumns: () => dispatch({ type: "showAllColumns" }),
+            toggleShowOmittedRows: () =>
+              dispatch({ type: "toggleShowOmittedRows" }),
+            clearTableUpdates: () => dispatch({ type: "clearTableUpdates" }),
+            submitTableUpdates: async () => {
+              await submitTableUpdates(
+                tableData.tableUpdates,
+                setUpdateProgress
+              );
+              // Update the table data
               dispatch({
                 type: "updateData",
                 ...(await getData(url, tableData.parameters)),
               });
-            } else {
-              console.error("uh oh", response);
-            }
+              dispatch({ type: "clearTableUpdates" });
+            },
+            downloadSourceFiles: async () =>
+              downloadSourceFiles(ingestProcessId),
+            clearDataParameters: () =>
+              dispatch({ type: "clearDataParameters" }),
+            markAsHarmonized: async () => {
+              const response = await fetch(
+                `${ingestPrefix}/ingest-process/${ingestProcessId}`,
+                {
+                  method: "PATCH",
+                  headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({ state: "post_harmonization" }),
+                }
+              );
+              if (response.ok) {
+                dispatch({ type: "clearTableUpdates" });
+                dispatch({
+                  type: "updateData",
+                  ...(await getData(url, tableData.parameters)),
+                });
+              } else {
+                console.error("uh oh", response);
+              }
+            },
           },
-        }),
+          h(TableActions, {
+            dispatch,
+            selection,
+            data: transformedData,
+            setSelection,
+            updateProps: {
+              url,
+              dataParameters: tableData.parameters,
+            },
+          })
+        ),
         h(
           Table2,
           {
             enableFocusedCell: true,
             enableColumnReordering: true,
-            selectionModes: SelectionModes.COLUMNS_AND_CELLS,
+            selectedRegions: selection,
+            selectionModes: [
+              RegionCardinality.FULL_COLUMNS,
+              RegionCardinality.FULL_ROWS,
+              RegionCardinality.CELLS,
+            ],
             rowHeaderCellRenderer,
             onFocusedCell: (focusedCellCoordinates) => {
               setFocusedCell(focusedCellCoordinates);
@@ -525,6 +541,148 @@ export function TableInterface({
       ]),
     ]
   );
+}
+
+function getSelectedRows(selection: Selection[], data: any[]): number[] {
+  return selection
+    .map((s) => {
+      if (s.rows == null) return [];
+      const start = Math.min(s.rows[0], s.rows[1]);
+      const end = Math.max(s.rows[0], s.rows[1]);
+      return Array.from({ length: end - start + 1 }, (_, i) => {
+        return start + i;
+      });
+    })
+    .flat();
+}
+
+const hasSelection = (selection: Selection[]) => {
+  return selection != null && selection.length > 0;
+};
+
+function selectionCardinality(selection: Selection[]): RegionCardinality {
+  if (selection.length == 0) {
+    return RegionCardinality.NONE;
+  }
+
+  const firstSelection = selection[0];
+  if (firstSelection.rows == null && firstSelection.cols == null) {
+    return RegionCardinality.FULL_TABLE;
+  }
+
+  if (firstSelection.cols == null) {
+    return RegionCardinality.FULL_ROWS;
+  }
+
+  if (firstSelection.rows == null) {
+    return RegionCardinality.FULL_COLUMNS;
+  }
+
+  return RegionCardinality.CELLS;
+}
+
+function TableActions({
+  dispatch,
+  selection,
+  data,
+  setSelection,
+  updateProps,
+}) {
+  const cardinality = selectionCardinality(selection);
+
+  const name = nameForCardinality(cardinality);
+
+  let actions = h("p", "No selection");
+
+  if (cardinality == RegionCardinality.FULL_ROWS) {
+    actions = h([
+      h("h4", name + " actions"),
+      h(RowActions, {
+        rows: getSelectedRows(selection, data),
+        dispatch,
+        data,
+        updateProps,
+      }),
+    ]);
+  } else if (cardinality == RegionCardinality.CELLS) {
+    actions = h("p", "No cell actions defined");
+  } else if (cardinality == RegionCardinality.FULL_COLUMNS) {
+    actions = h("p", "No column actions defined");
+  }
+
+  return h("div.table-actions", [
+    h("h4", "Selection"),
+    h(
+      Button,
+      {
+        disabled: !hasSelection(selection),
+        small: true,
+        minimal: true,
+        intent: "warning",
+        onClick() {
+          setSelection([]);
+        },
+      },
+      "Clear"
+    ),
+    actions,
+    h("div.spacer"),
+  ]);
+}
+
+function nameForCardinality(cardinality: RegionCardinality) {
+  switch (cardinality) {
+    case RegionCardinality.FULL_TABLE:
+      return "Table";
+    case RegionCardinality.FULL_COLUMNS:
+      return "Column";
+    case RegionCardinality.FULL_ROWS:
+      return "Row";
+    case RegionCardinality.CELLS:
+      return "Cell";
+    default:
+      return null;
+  }
+}
+
+function RowActions({ rows, dispatch, data, updateProps }) {
+  if (rows == null || rows.length == 0) {
+    return null;
+  }
+
+  const allRowsChecked = rows.every((i) => toBoolean(data[i]["omit"]));
+  const allRowsUnchecked = rows.every((i) => !toBoolean(data[i]["omit"]));
+
+  let checked = null;
+  const indeterminate = !(allRowsChecked || allRowsUnchecked);
+  if (!indeterminate) {
+    checked = allRowsChecked;
+  }
+
+  const { url, dataParameters } = updateProps;
+
+  return h("div.table-actions", {}, [
+    // Omit rows
+    h(Checkbox, {
+      checked,
+      indeterminate,
+      label: "Omit Rows",
+      onChange: (e) => {
+        // Get boolean value
+        const value = e.target.checked;
+        // If state is indeterminate, do nothing
+        if (value == null) return;
+
+        // Synthesize updates (we don't support multi-row or ranged updates currently)
+        const updates = rows.map((i) => {
+          return createTableUpdate(url, value, "omit", data[i], dataParameters);
+        });
+
+        // Dispatch updates
+        dispatch({ type: "addTableUpdates", tableUpdates: updates });
+      },
+    }),
+  ]);
 }
 
 function HotkeysManager({ hotkeys, style, children }) {
@@ -581,7 +739,7 @@ function useSharedColumns({
               );
             }
 
-            const omit = transformedData[rowIndex].omit ?? false;
+            const omit = toBoolean(transformedData[rowIndex]["omit"]);
 
             return h(EditableCell, {
               ref: (el) => {
@@ -590,10 +748,10 @@ function useSharedColumns({
                 } catch {}
               },
               disabled: omit,
+              className: classNames({ disabled: omit }),
               columnName: columnName,
               onConfirm: (value) => {
                 if (value != transformedData[rowIndex][columnName]) {
-                  console.log("Confirmed value change", value);
                   dispatch({
                     type: "addTableUpdates",
                     tableUpdates: [

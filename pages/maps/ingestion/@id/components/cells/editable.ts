@@ -3,6 +3,7 @@ import React, { forwardRef, memo, useEffect } from "react";
 import { Cell, EditableCell2Props } from "@blueprintjs/table";
 
 import h from "../../hyper";
+import classNames from "classnames";
 
 interface EditableCellProps extends EditableCell2Props {
   columnName: string;
@@ -32,7 +33,7 @@ const _EditableCell = forwardRef((props: EditableCellProps, ref) => {
         {
           ref,
           disabled: disabled ?? props?.editableTextProps?.disabled,
-          className: "editable-cell",
+          className: classNames("editable-cell", { disabled }),
           style: {
             width: (props.value?.length ?? 2) + "ch",
             color: "inherit", // Necessary so changed cells have the correct color text
