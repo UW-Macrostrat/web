@@ -1,7 +1,7 @@
 import { Button, HotkeysProvider } from "@blueprintjs/core";
 import { ingestPrefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
-import { useStoredState } from "@macrostrat/ui-components";
+import { ErrorBoundary, useStoredState } from "@macrostrat/ui-components";
 import { BasePage } from "~/layouts";
 import { Header, MapInterface } from "../components";
 import styles from "./main.module.sass";
@@ -69,10 +69,12 @@ export function Page() {
               [h(ShowMapButton, { showMap, setShowMap })]
             ),
             h("div.table-container", [
-              h(tableComponent, {
-                url,
-                ingestProcessId,
-              }),
+              h(ErrorBoundary, [
+                h(tableComponent, {
+                  url,
+                  ingestProcessId,
+                }),
+              ]),
             ]),
           ]),
           h.if(showMap)("div.map-panel", [

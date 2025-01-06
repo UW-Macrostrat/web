@@ -72,6 +72,10 @@ enum ColumnShowMode {
   ORIGINAL = "original",
 }
 
+function computeHiddenColumns(omit, tableData) {
+  return omit;
+}
+
 function useTableData({
   ref,
   allColumns,
@@ -658,6 +662,7 @@ function RowActions({ rows, dispatch, data, updateProps }) {
     return null;
   }
 
+  console.log(data);
   const allRowsChecked = rows.every((i) => toBoolean(data[i]["omit"]));
   const allRowsUnchecked = rows.every((i) => !toBoolean(data[i]["omit"]));
 
