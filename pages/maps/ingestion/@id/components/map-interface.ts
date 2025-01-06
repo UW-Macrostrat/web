@@ -8,7 +8,6 @@ import {
   MapView,
   PanelCard,
 } from "@macrostrat/map-interface";
-import { useMapRef } from "@macrostrat/mapbox-react";
 import { NonIdealState, Switch } from "@blueprintjs/core";
 import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
@@ -98,9 +97,18 @@ export function MapInterface({
   }
 
   const dark = useDarkMode()?.isEnabled ?? false;
-  const table = `sources.${slug}_polygons`;
 
   const hasRaster = rasterURL(map.properties.source_id) != null;
+
+  const [showOmittedRows, setShowOmittedRows] = useStoredState(
+    "ingestion:mapShowOmittedRows",
+    false
+  );
+
+  const [showColors, setShowColors] = useStoredState(
+    "ingestion:mapShowColors",
+    false
+  );
 
   const bounds: LngLatBoundsLike | "invalid" = useMemo(() => {
     return ensureBoxInGeographicRange(boundingBox(map.geometry));
@@ -151,9 +159,18 @@ export function MapInterface({
         layers: _featureTypes,
         focusedMap: map.properties.source_id,
         layerOpacity,
+        showOmittedRows,
+        showColors,
       })
     );
-  }, [map.properties.source_id, style, layerOpacity, _featureTypes]);
+  }, [
+    map.properties.source_id,
+    style,
+    layerOpacity,
+    _featureTypes,
+    showOmittedRows,
+    showColors,
+  ]);
 
   if (bounds == null || bounds == "invalid") {
     let title = "No map data";
@@ -192,6 +209,20 @@ export function MapInterface({
         },
       }),
     ]),
+    h(Switch, {
+      label: "Show omitted rows",
+      checked: showOmittedRows,
+      onChange(e) {
+        setShowOmittedRows(e.target.checked);
+      },
+    }),
+    h(Switch, {
+      label: "Show colors",
+      checked: showColors,
+      onChange(e) {
+        setShowColors(e.target.checked);
+      },
+    }),
     h(BaseLayerSelector, { layer, setLayer }),
   ]);
 
@@ -225,44 +256,8 @@ export function MapInterface({
         position: inspectPosition,
         setPosition: setInspectPosition,
       }),
-      // h(MapFeatureSelector, {
-      //   featureTypes: _featureTypes,
-      //   slug,
-      //   onClick: onClickFeatures,
-      // }),
     ]
   );
-}
-
-function MapFeatureSelector({ featureTypes, slug, onClick }) {
-  const queryLayers = useMemo(
-    () => featureTypes.map((t) => tableName(slug, t) + "_" + t),
-    [featureTypes, slug]
-  );
-
-  const mapRef = useMapRef();
-
-  const listener = useCallback(
-    (e) => {
-      const features = mapRef.current?.queryRenderedFeatures(e.point, {
-        layers: queryLayers,
-      });
-      onClick(features);
-    },
-    [mapRef.current, queryLayers, onClick]
-  );
-
-  useEffect(() => {
-    console.log("Setting up listener");
-    const map = mapRef.current;
-    if (map == null) return;
-    map.on("click", listener);
-    return () => {
-      map.off("click", listener);
-    };
-  }, [listener]);
-
-  return null;
 }
 
 function FeatureTypeSwitches({ featureTypes, setFeatureTypes }) {
@@ -320,11 +315,15 @@ function OpacitySlider(props) {
   ]);
 }
 
+const _defaultColor = "rgb(74, 242, 161)";
+
 function buildOverlayStyle({
   style,
   mapSlug,
   layers = ["points", "lines", "polygons"],
   layerOpacity,
+  showOmittedRows,
+  showColors,
 }: StyleOpts): any {
   let baseStyle = style ?? emptyStyle;
   let macrostratStyle = {};
@@ -337,25 +336,88 @@ function buildOverlayStyle({
     });
   }
 
-  let tableStyles = layers.map((layer) => {
-    return buildStyle({
-      inDarkMode: false,
-      sourceID: mapSlug,
-      featureTypes: [layer],
-      tileURL: tileserverDomain + `/ingestion/${mapSlug}/tilejson.json`,
-    });
+  const notOmitted = ["!=", "omit", true];
+
+  let mainColor = "#000000";
+  let omitColor = "#ffffff";
+
+  let tableStyle = buildBasicStyle({
+    inDarkMode: false,
+    sourceID: mapSlug,
+    featureTypes: layers,
+    color: showColors ? mainColor : _defaultColor,
+    tileURL: tileserverDomain + `/ingestion/${mapSlug}/tilejson.json`,
+    filter: notOmitted,
   });
 
-  return mergeStyles(baseStyle, macrostratStyle, ...tableStyles);
+  if (showColors) {
+    for (let layer of tableStyle.layers) {
+      if (layer["source-layer"] == "polygons") {
+        layer.filter = ["all", layer.filter, ["!has", "color"]];
+      }
+    }
+
+    if (layers.includes("polygons")) {
+      tableStyle.layers = [
+        {
+          ...baseElements(mapSlug, "polygons", "color", [
+            "all",
+            ["has", "color"],
+            notOmitted,
+          ]),
+          type: "fill",
+          paint: {
+            "fill-color": ["get", "color"],
+            "fill-opacity": 0.5,
+          },
+        },
+        ...tableStyle.layers,
+      ];
+    }
+  }
+
+  let omittedTableStyle = null;
+  if (showOmittedRows) {
+    omittedTableStyle = buildBasicStyle({
+      inDarkMode: false,
+      sourceID: mapSlug,
+      featureTypes: layers,
+      tileURL: tileserverDomain + `/ingestion/${mapSlug}/tilejson.json`,
+      suffix: "omitted",
+      filter: ["==", "omit", true],
+      color: omitColor,
+    });
+  }
+
+  return mergeStyles(baseStyle, macrostratStyle, tableStyle, omittedTableStyle);
 }
 
-export function buildStyle({
+function baseElements(sourceID, featureType, suffix = "", filter = null) {
+  let id = sourceID + "_" + featureType;
+  if (suffix != null && suffix != "") {
+    id += "_" + suffix;
+  }
+  let lyr = {
+    id,
+    source: sourceID,
+    "source-layer": featureType,
+  };
+
+  if (filter != null) {
+    lyr.filter = filter;
+  }
+  return lyr;
+}
+
+export function buildBasicStyle({
   color = "rgb(74, 242, 161)",
   inDarkMode,
   sourceLayers,
   sourceID = "tileLayer",
   featureTypes = ["points", "lines", "polygons"],
   tileURL,
+  filter = null,
+  suffix = null,
 }): mapboxgl.Style {
   const xRayColor = (opacity = 1, darken = 0) => {
     const c0 = asChromaColor(color).alpha(opacity);
@@ -367,25 +429,21 @@ export function buildStyle({
 
   let layers = [];
 
-  if (featureTypes.includes("polygons")) {
+  if (featureTypes.includes("points")) {
     layers.push({
-      id: sourceID + "_polygons",
-      type: "fill",
-      source: sourceID,
-      "source-layer": "polygons",
+      ...baseElements(sourceID, "points", suffix, filter),
+      type: "circle",
       paint: {
-        "fill-color": xRayColor(0.1),
-        "fill-outline-color": xRayColor(0.5),
+        "circle-color": xRayColor(1, 1),
+        "circle-radius": 5,
       },
     });
   }
 
   if (featureTypes.includes("lines")) {
     layers.push({
-      id: sourceID + "_lines",
+      ...baseElements(sourceID, "lines", suffix, filter),
       type: "line",
-      source: sourceID,
-      "source-layer": "lines",
       paint: {
         "line-color": xRayColor(1, -1),
         "line-width": 1.5,
@@ -393,15 +451,13 @@ export function buildStyle({
     });
   }
 
-  if (featureTypes.includes("points")) {
+  if (featureTypes.includes("polygons")) {
     layers.push({
-      id: sourceID + "_points",
-      type: "circle",
-      source: sourceID,
-      "source-layer": "points",
+      ...baseElements(sourceID, "polygons", suffix, filter),
+      type: "fill",
       paint: {
-        "circle-color": xRayColor(1, 1),
-        "circle-radius": 5,
+        "fill-color": xRayColor(0.1),
+        "fill-outline-color": xRayColor(0.5),
       },
     });
   }
