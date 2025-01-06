@@ -19,11 +19,18 @@ export default {
     "environment",
     "urlPathname",
     "scripts",
+    "pageStyle",
   ],
   clientRouting: true,
   supportsDarkMode: true,
   meta: {
     supportsDarkMode: {
+      env: {
+        client: true,
+        server: true,
+      },
+    },
+    pageStyle: {
       env: {
         client: true,
         server: true,
