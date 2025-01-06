@@ -10,6 +10,11 @@
   margin: 0
   --map-context-stack-width: 16em
 
+.map-container
+  height: 100%
+  display: flex
+  flex-direction: column
+
 .map-legend-container
   overflow-y: scroll
 
@@ -82,9 +87,10 @@
   gap: 2em
   padding-bottom: 3em
 
-.main-content
-  position: relative
-  flex-grow: 1
+
+.main-panel
   border-radius: 8px
   overflow: hidden
+  box-shadow: 1px 1px 8px 1px #00000038
+  border: 1px solid var(--panel-rule-color)
 

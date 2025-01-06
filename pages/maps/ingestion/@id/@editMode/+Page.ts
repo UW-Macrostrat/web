@@ -1,16 +1,16 @@
-import { Button, HotkeysProvider, Switch } from "@blueprintjs/core";
+import { Button, HotkeysProvider } from "@blueprintjs/core";
 import { ingestPrefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
-import { JSONView, useStoredState } from "@macrostrat/ui-components";
+import { useStoredState } from "@macrostrat/ui-components";
 import { BasePage } from "~/layouts";
-import { Header } from "../components";
+import { Header, MapInterface } from "../components";
 import styles from "./main.module.sass";
-import { MapInterface } from "../components";
 import { LinesTable, PointsTable, PolygonsTable } from "../tables";
 import { usePageProps } from "~/renderer/usePageProps";
 import { Allotment } from "allotment";
 import { useState } from "react";
 import "allotment/dist/style.css";
+import { MapSelectedFeatures } from "#/maps/ingestion/@id/details-panel";
 
 const h = hyper.styled(styles);
 
@@ -49,6 +49,9 @@ export function Page() {
 
   const [mapSelectedFeatures, selectFeatures] = useState([]);
 
+  const showSelectedFeatures =
+    mapSelectedFeatures != null && mapSelectedFeatures.length > 0;
+
   return h(
     BasePage,
     { fitViewport: true },
@@ -80,22 +83,15 @@ export function Page() {
               featureTypes: [editMode],
               onClickFeatures: selectFeatures,
             }),
-            h(MapSelectedFeatures, { features: mapSelectedFeatures }),
           ]),
+          h.if(showSelectedFeatures)(MapSelectedFeatures, {
+            features: mapSelectedFeatures,
+            selectFeatures,
+          }),
         ]),
       ]),
     ])
   );
-}
-
-function MapSelectedFeatures({ features }) {
-  if (features == null || features.length === 0) {
-    return null;
-  }
-  return h("div.map-selected-features", [
-    h("h3", "Selected features"),
-    h(JSONView, { data: features }),
-  ]);
 }
 
 function ShowMapButton({ showMap, setShowMap }) {
