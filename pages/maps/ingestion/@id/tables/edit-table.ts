@@ -51,7 +51,7 @@ import {
 import h from "../hyper";
 import classNames from "classnames";
 
-import TableHeader from "#/maps/ingestion/@id/components/table-header";
+import TableHeader from "../components/table-header";
 import { postgrest } from "~/_providers";
 import { createAppToaster, useAsyncEffect } from "@macrostrat/ui-components";
 
@@ -65,6 +65,12 @@ export interface EditTableProps {
 }
 
 const Toaster = createAppToaster();
+
+enum ColumnShowMode {
+  ALL = "all",
+  FINAL = "final",
+  ORIGINAL = "original",
+}
 
 function useTableData({
   ref,
@@ -87,7 +93,9 @@ function useTableData({
       .single();
     const omit = res.data.polygon_omit ?? [];
 
-    dispatch({ type: "updateHiddenColumns", data: omit });
+    const hiddenColumns = computeHiddenColumns(omit, tableData);
+
+    dispatch({ type: "updateHiddenColumns", data: hiddenColumns });
   }, []);
 
   useAsyncEffect(async () => {
