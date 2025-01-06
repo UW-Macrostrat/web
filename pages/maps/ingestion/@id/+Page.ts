@@ -49,6 +49,7 @@ export function Page() {
             map: mapBounds,
             slug: source.slug,
             onClickFeatures: selectFeatures,
+            selectedFeatures: mapSelectedFeatures,
           }),
         ]),
         h(Allotment.Pane, { visible: showSelectedFeatures }, [

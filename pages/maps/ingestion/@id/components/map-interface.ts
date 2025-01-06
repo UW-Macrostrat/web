@@ -84,6 +84,7 @@ export function MapInterface({
   slug,
   featureTypes = ["points", "lines", "polygons"],
   onClickFeatures,
+  selectedFeatures,
 }) {
   const [isOpen, setOpen] = useState(false);
 
@@ -161,6 +162,7 @@ export function MapInterface({
         layerOpacity,
         showOmittedRows,
         showColors,
+        selectedFeatures,
       })
     );
   }, [
@@ -170,6 +172,7 @@ export function MapInterface({
     _featureTypes,
     showOmittedRows,
     showColors,
+    selectedFeatures,
   ]);
 
   if (bounds == null || bounds == "invalid") {
@@ -192,6 +195,21 @@ export function MapInterface({
   const contextPanel = h(PanelCard, [
     h(FeatureTypeSwitches, { featureTypes: _featureTypes, setFeatureTypes }),
     h("div.vector-controls", [
+      h("h3", "Display options"),
+      h(Switch, {
+        label: "Show omitted rows",
+        checked: showOmittedRows,
+        onChange(e) {
+          setShowOmittedRows(e.target.checked);
+        },
+      }),
+      h(Switch, {
+        label: "Show colors",
+        checked: showColors,
+        onChange(e) {
+          setShowColors(e.target.checked);
+        },
+      }),
       h("h3", "Macrostrat"),
       h(OpacitySlider, {
         opacity: layerOpacity.vector,
@@ -209,20 +227,6 @@ export function MapInterface({
         },
       }),
     ]),
-    h(Switch, {
-      label: "Show omitted rows",
-      checked: showOmittedRows,
-      onChange(e) {
-        setShowOmittedRows(e.target.checked);
-      },
-    }),
-    h(Switch, {
-      label: "Show colors",
-      checked: showColors,
-      onChange(e) {
-        setShowColors(e.target.checked);
-      },
-    }),
     h(BaseLayerSelector, { layer, setLayer }),
   ]);
 
@@ -324,6 +328,7 @@ function buildOverlayStyle({
   layerOpacity,
   showOmittedRows,
   showColors,
+  selectedFeatures,
 }: StyleOpts): any {
   let baseStyle = style ?? emptyStyle;
   let macrostratStyle = {};
@@ -341,30 +346,54 @@ function buildOverlayStyle({
   let mainColor = "#000000";
   let omitColor = "#ffffff";
 
+  // This filtering strategy doesn't quite work because lines, points, and polygons
+  // have overlapping source layers sometimes
+
   let tableStyle = buildBasicStyle({
     inDarkMode: false,
     sourceID: mapSlug,
     featureTypes: layers,
     color: showColors ? mainColor : _defaultColor,
     tileURL: tileserverDomain + `/ingestion/${mapSlug}/tilejson.json`,
-    filter: notOmitted,
+    filter: buildFilters(notOmitted),
   });
+
+  let selectedStyle = null;
+  if (selectedFeatures != null && selectedFeatures.length > 0) {
+    selectedStyle = buildBasicStyle({
+      inDarkMode: false,
+      sourceID: mapSlug,
+      featureTypes: layers,
+      color: "red",
+      tileURL: tileserverDomain + `/ingestion/${mapSlug}/tilejson.json`,
+      //filter: buildFilters(isSelected),
+      suffix: "selected",
+      adjustForDarkMode: false,
+      fillOpacity: 0.3,
+    });
+    for (let layer of selectedStyle.layers) {
+      const type = layer["source-layer"];
+      const isSelected = buildSelectionFilters(selectedFeatures, type);
+      layer.filter = buildFilters(layer.filter, isSelected);
+    }
+  }
 
   if (showColors) {
     for (let layer of tableStyle.layers) {
       if (layer["source-layer"] == "polygons") {
-        layer.filter = ["all", layer.filter, ["!has", "color"]];
+        layer.filter = buildFilters(layer.filter, ["!has", "color"]);
       }
     }
 
     if (layers.includes("polygons")) {
       tableStyle.layers = [
         {
-          ...baseElements(mapSlug, "polygons", "color", [
-            "all",
-            ["has", "color"],
-            notOmitted,
-          ]),
+          ...baseElements(
+            mapSlug,
+            "polygons",
+            "color",
+            buildFilters(["has", "color"], notOmitted)
+          ),
           type: "fill",
           paint: {
             "fill-color": ["get", "color"],
@@ -384,12 +413,47 @@ function buildOverlayStyle({
       featureTypes: layers,
       tileURL: tileserverDomain + `/ingestion/${mapSlug}/tilejson.json`,
       suffix: "omitted",
-      filter: ["==", "omit", true],
+      filter: buildFilters(["==", "omit", true]),
       color: omitColor,
     });
   }
 
-  return mergeStyles(baseStyle, macrostratStyle, tableStyle, omittedTableStyle);
+  return mergeStyles(
+    baseStyle,
+    macrostratStyle,
+    tableStyle,
+    omittedTableStyle,
+    selectedStyle
+  );
+}
+
+function buildSelectionFilters(selectedFeatures, type = "polygons") {
+  if (selectedFeatures == null || selectedFeatures.length == 0) {
+    return null;
+  }
+
+  const keys = selectedFeatures
+    .filter((f) => f.layer["source-layer"] == type)
+    .map(getProp("_pkid"));
+  return ["in", "_pkid", ...keys];
+}
+
+function getProp(key) {
+  return (f) => f._vectorTileFeature.properties[key];
+}
+
+function buildFilters(...filters) {
+  const _filters = filters.filter((f) => f != null);
+  if (_filters.length == 0) return null;
+  if (_filters.length == 1) return _filters[0];
+  return ["all", ..._filters];
+}
+
+function anyFilters(...filters) {
+  const _filters = filters.filter((f) => f != null);
+  if (_filters.length == 0) return null;
+  if (_filters.length == 1) return _filters[0];
+  return ["any", ..._filters];
 }
 
 function baseElements(sourceID, featureType, suffix = "", filter = null) {
@@ -418,16 +482,24 @@ export function buildBasicStyle({
   tileURL,
   filter = null,
   suffix = null,
+  adjustForDarkMode = true,
+  fillOpacity = 0.1,
 }): mapboxgl.Style {
   const xRayColor = (opacity = 1, darken = 0) => {
     const c0 = asChromaColor(color).alpha(opacity);
-    if (!inDarkMode) {
-      return toRGBAString(c0.darken(2 - darken));
+    let c1 = c0;
+    if (adjustForDarkMode) {
+      if (!inDarkMode) {
+        c1 = c0.darken(2 - darken);
+      }
+      c1 = c0.darken(darken);
     }
-    return toRGBAString(c0.darken(darken));
+    return toRGBAString(c1);
   };
 
   let layers = [];
+
+  const fillOutlineOpacity = Math.max(fillOpacity + 0.4, 1);
 
   if (featureTypes.includes("points")) {
     layers.push({
@@ -456,8 +528,8 @@ export function buildBasicStyle({
       ...baseElements(sourceID, "polygons", suffix, filter),
       type: "fill",
       paint: {
-        "fill-color": xRayColor(0.1),
-        "fill-outline-color": xRayColor(0.5),
+        "fill-color": xRayColor(fillOpacity),
+        "fill-outline-color": xRayColor(fillOutlineOpacity),
       },
     });
   }
