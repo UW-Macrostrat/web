@@ -30,12 +30,17 @@ export function Page() {
 
   const basename = `/maps/ingestion/${source_id}`;
 
-  return h(BasePage, { className: "page" }, [
+  return h("div.page", [
     h(Header, headerProps),
     h("div.ingestion-main-panel", [
       h("div.context-panel", [h(EditMenu, { parentRoute: basename })]),
       h("div.main-content", [
-        h(MapInterface, { id: source_id, map: mapBounds, slug: source.slug }),
+        h(MapInterface, {
+          id: source_id,
+          map: mapBounds,
+          slug: source.slug,
+          onClickFeatures() {},
+        }),
       ]),
     ]),
   ]);

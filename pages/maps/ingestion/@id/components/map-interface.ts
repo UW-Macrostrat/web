@@ -2,9 +2,9 @@ import { Radio, RadioGroup, Spinner } from "@blueprintjs/core";
 import { SETTINGS, tileserverDomain } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import {
-  FloatingNavbar,
+  FeatureSelectionHandler,
   MapAreaContainer,
-  MapLoadingButton,
+  MapMarker,
   MapView,
   PanelCard,
 } from "@macrostrat/map-interface";
@@ -51,36 +51,6 @@ const emptyStyle: any = {
   layers: [],
 };
 
-function buildOverlayStyle({
-  style,
-  mapSlug,
-  layers = ["points", "lines", "polygons"],
-  layerOpacity,
-}: StyleOpts): any {
-  let baseStyle = style ?? emptyStyle;
-  let macrostratStyle = {};
-  if (layerOpacity.vector != null) {
-    macrostratStyle = buildMacrostratStyle({
-      tileserverDomain: SETTINGS.burwellTileDomain,
-      fillOpacity: layerOpacity.vector - 0.1,
-      strokeOpacity: layerOpacity.vector + 0.2,
-      lineOpacity: layerOpacity.vector + 0.4,
-    });
-  }
-
-  let tableStyles = layers.map((layer) => {
-    const table = tableName(mapSlug, layer);
-    return buildStyle({
-      inDarkMode: false,
-      sourceID: table,
-      featureTypes: [layer],
-      tileURL: tileserverDomain + `/${table}/tilejson.json`,
-    });
-  });
-
-  return mergeStyles(baseStyle, macrostratStyle, ...tableStyles);
-}
-
 function tableName(slug, layer) {
   return `sources.${slug}_${layer}`;
 }
@@ -114,6 +84,7 @@ export function MapInterface({
   map,
   slug,
   featureTypes = ["points", "lines", "polygons"],
+  onClickFeatures,
 }) {
   const [isOpen, setOpen] = useState(false);
 
@@ -167,6 +138,8 @@ export function MapInterface({
       return true;
     }
   );
+
+  const [inspectPosition, setInspectPosition] = useState(null);
 
   // Overlay style
   const [mapStyle, setMapStyle] = useState(null);
@@ -244,12 +217,24 @@ export function MapInterface({
         mapPosition: null,
         fitBoundsOptions: { padding: 50 },
       }),
-      h(MapFeatureSelector, { featureTypes: _featureTypes, slug }),
+      h(FeatureSelectionHandler, {
+        selectedLocation: inspectPosition,
+        setFeatures: onClickFeatures,
+      }),
+      h(MapMarker, {
+        position: inspectPosition,
+        setPosition: setInspectPosition,
+      }),
+      // h(MapFeatureSelector, {
+      //   featureTypes: _featureTypes,
+      //   slug,
+      //   onClick: onClickFeatures,
+      // }),
     ]
   );
 }
 
-function MapFeatureSelector({ featureTypes, slug }) {
+function MapFeatureSelector({ featureTypes, slug, onClick }) {
   const queryLayers = useMemo(
     () => featureTypes.map((t) => tableName(slug, t) + "_" + t),
     [featureTypes, slug]
@@ -262,9 +247,9 @@ function MapFeatureSelector({ featureTypes, slug }) {
       const features = mapRef.current?.queryRenderedFeatures(e.point, {
         layers: queryLayers,
       });
-      console.log(features);
+      onClick(features);
     },
-    [mapRef.current, queryLayers]
+    [mapRef.current, queryLayers, onClick]
   );
 
   useEffect(() => {
@@ -335,6 +320,35 @@ function OpacitySlider(props) {
   ]);
 }
 
+function buildOverlayStyle({
+  style,
+  mapSlug,
+  layers = ["points", "lines", "polygons"],
+  layerOpacity,
+}: StyleOpts): any {
+  let baseStyle = style ?? emptyStyle;
+  let macrostratStyle = {};
+  if (layerOpacity.vector != null) {
+    macrostratStyle = buildMacrostratStyle({
+      tileserverDomain: SETTINGS.burwellTileDomain,
+      fillOpacity: layerOpacity.vector - 0.1,
+      strokeOpacity: layerOpacity.vector + 0.2,
+      lineOpacity: layerOpacity.vector + 0.4,
+    });
+  }
+
+  let tableStyles = layers.map((layer) => {
+    return buildStyle({
+      inDarkMode: false,
+      sourceID: mapSlug,
+      featureTypes: [layer],
+      tileURL: tileserverDomain + `/ingestion/${mapSlug}/tilejson.json`,
+    });
+  });
+
+  return mergeStyles(baseStyle, macrostratStyle, ...tableStyles);
+}
+
 export function buildStyle({
   color = "rgb(74, 242, 161)",
   inDarkMode,
@@ -358,7 +372,7 @@ export function buildStyle({
       id: sourceID + "_polygons",
       type: "fill",
       source: sourceID,
-      "source-layer": sourceLayers?.polygons ?? "default",
+      "source-layer": "polygons",
       paint: {
         "fill-color": xRayColor(0.1),
         "fill-outline-color": xRayColor(0.5),
@@ -371,7 +385,7 @@ export function buildStyle({
       id: sourceID + "_lines",
       type: "line",
       source: sourceID,
-      "source-layer": sourceLayers?.lines ?? "default",
+      "source-layer": "lines",
       paint: {
         "line-color": xRayColor(1, -1),
         "line-width": 1.5,
@@ -384,7 +398,7 @@ export function buildStyle({
       id: sourceID + "_points",
       type: "circle",
       source: sourceID,
-      "source-layer": sourceLayers?.points ?? "default",
+      "source-layer": "points",
       paint: {
         "circle-color": xRayColor(1, 1),
         "circle-radius": 5,
