@@ -21,7 +21,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   const pageContext = usePageContext();
   const { exports = {}, config, user } = pageContext;
   const supportsDarkMode = true;
-  const pageStyle = exports?.pageStyle ?? "content";
+  const pageStyle = exports?.pageStyle ?? "fullscreen";
 
   const devTools = exports.devTools ?? [];
 
