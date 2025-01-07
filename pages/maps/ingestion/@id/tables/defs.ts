@@ -70,3 +70,9 @@ export const COMMON_COLUMNS = [
   "orig_id",
   "descrip",
 ];
+
+export enum FeatureType {
+  POINT = "point",
+  LINE = "line",
+  POLYGON = "polygon",
+}

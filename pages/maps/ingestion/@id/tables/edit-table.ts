@@ -47,6 +47,7 @@ import {
   ColumnConfigGenerator,
   OperatorQueryParameter,
   Selection,
+  FeatureType,
 } from "./defs";
 import h from "../hyper";
 import classNames from "classnames";
@@ -62,6 +63,7 @@ export interface EditTableProps {
   ingestProcessId: number;
   finalColumns: string[];
   columnGenerator: (props: ColumnConfigGenerator) => ColumnConfig;
+  featureType: FeatureType;
 }
 
 const Toaster = createAppToaster();
@@ -72,8 +74,8 @@ enum ColumnShowMode {
   ORIGINAL = "original",
 }
 
-function computeHiddenColumns(omit, tableData) {
-  return omit;
+function editColumnForFeatureType(featureType: FeatureType) {
+  return featureType + "_state";
 }
 
 function useTableData({
@@ -81,6 +83,7 @@ function useTableData({
   allColumns,
   url,
   ingestProcessId,
+  featureType,
 }): [TableData, Dispatch<any>] {
   const [tableData, dispatch] = useReducer(tableDataReducer, {
     ...initialState,
@@ -89,23 +92,29 @@ function useTableData({
 
   const client = useRef(postgrest.from("map_ingest_metadata"));
 
+  const [currentData, setCurrentData] = useState<any[]>(null);
+
   // Handle column changes
+  const columnName = editColumnForFeatureType(featureType);
   useAsyncEffect(async () => {
     const res = await client.current
-      .select("polygon_omit")
+      .select(columnName)
       .eq("id", ingestProcessId)
       .single();
-    const omit = res.data.polygon_omit ?? [];
+    const data = res.data[columnName] ?? {};
+    setCurrentData(data);
 
-    const hiddenColumns = computeHiddenColumns(omit, tableData);
+    const hiddenColumns = data.hiddenColumns ?? [];
 
     dispatch({ type: "updateHiddenColumns", data: hiddenColumns });
   }, []);
 
   useAsyncEffect(async () => {
+    if (currentData == null) return;
+    const newData = { ...currentData, hiddenColumns: tableData.hiddenColumns };
     try {
       await client.current
-        .update({ polygon_omit: tableData.hiddenColumns })
+        .update({ [columnName]: newData })
         .eq("id", ingestProcessId);
     } catch (err) {
       console.error(err);
@@ -149,6 +158,7 @@ export function TableInterface({
   ingestProcessId,
   finalColumns,
   columnGenerator,
+  featureType,
 }: EditTableProps) {
   // Cell refs
   const ref = useRef<MutableRefObject<any>[][]>(null);
@@ -158,6 +168,7 @@ export function TableInterface({
     allColumns: finalColumns,
     ingestProcessId,
     url,
+    featureType,
   });
 
   // Selection State

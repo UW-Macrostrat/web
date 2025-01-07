@@ -169,5 +169,6 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
     ingestProcessId,
     finalColumns: FINAL_POLYGON_COLUMNS,
     columnGenerator: polygonColumnGenerator,
+    featureType: "polygon",
   });
 }

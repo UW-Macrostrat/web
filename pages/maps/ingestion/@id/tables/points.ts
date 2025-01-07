@@ -35,5 +35,6 @@ export function PointsTable({ url, ingestProcessId }: CustomTableProps) {
     ingestProcessId: ingestProcessId,
     finalColumns: FINAL_POINT_COLUMNS,
     columnGenerator: pointColumnGenerator,
+    featureType: "point",
   });
 }

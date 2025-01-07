@@ -36,5 +36,6 @@ export function LinesTable({ url, ingestProcessId }: CustomTableProps) {
     ingestProcessId: ingestProcessId,
     finalColumns: FINAL_LINE_COLUMNS,
     columnGenerator: linesColumnGenerator,
+    featureType: "line",
   });
 }
