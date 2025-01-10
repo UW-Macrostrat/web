@@ -23,6 +23,7 @@ import { MapNavbar } from "~/components/map-navbar";
 import "~/styles/global.styl";
 import styles from "./main.module.sass";
 import { asChromaColor, toRGBAString } from "@macrostrat/color-utils";
+import { boundingGeometryMapStyle } from "~/map-styles";
 
 const h = hyper.styled(styles);
 
@@ -82,7 +83,7 @@ export function MapInterface({
   id,
   map,
   slug,
-  featureTypes = ["points", "lines", "polygons"],
+  featureTypes = ["points", "lines", "polygons", "rgeom"],
   onClickFeatures,
   selectedFeatures,
 }) {
@@ -267,7 +268,7 @@ export function MapInterface({
 function FeatureTypeSwitches({ featureTypes, setFeatureTypes }) {
   return h("div.feature-type-switches", [
     h("h3", "Map layers"),
-    ["points", "lines", "polygons"].map((t) => {
+    ["points", "lines", "polygons", "rgeom"].map((t) => {
       return h(Switch, {
         label: t.charAt(0).toUpperCase() + t.slice(1),
         checked: featureTypes.includes(t),
@@ -324,7 +325,7 @@ const _defaultColor = "rgb(74, 242, 161)";
 function buildOverlayStyle({
   style,
   mapSlug,
-  layers = ["points", "lines", "polygons"],
+  layers = ["points", "lines", "polygons", "rgeom"],
   layerOpacity,
   showOmittedRows,
   showColors,
@@ -418,9 +419,15 @@ function buildOverlayStyle({
     });
   }
 
+  let rgeomStyle = null;
+  if (layers.includes("rgeom")) {
+    rgeomStyle = boundingGeometryMapStyle(false, mapSlug);
+  }
+
   return mergeStyles(
     baseStyle,
     macrostratStyle,
+    rgeomStyle,
     tableStyle,
     omittedTableStyle,
     selectedStyle
