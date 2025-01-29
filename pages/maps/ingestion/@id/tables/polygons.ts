@@ -57,7 +57,6 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
       addTableUpdate,
       transformedData,
       data,
-      ref,
     }: ColumnConfigGenerator): ColumnConfig => {
       return {
         ...sharedColumnConfig,
@@ -65,11 +64,6 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
           ...sharedColumnConfig?.["t_interval"]?.props,
           cellRenderer: (rowIndex: number, columnIndex: number) =>
             h(IntervalSelection, {
-              ref: (el) => {
-                try {
-                  ref.current[rowIndex][columnIndex] = el;
-                } catch (e) {}
-              },
               intervals: intervals,
               onConfirm: (value) => {
                 const tableUpdate = createTableUpdate(
@@ -114,11 +108,6 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
           ...sharedColumnConfig?.["b_interval"]?.props,
           cellRenderer: (rowIndex: number, columnIndex: number) =>
             h(IntervalSelection, {
-              ref: (el) => {
-                try {
-                  ref.current[rowIndex][columnIndex] = el;
-                } catch (e) {}
-              },
               intervals: intervals,
               onConfirm: (value) => {
                 const tableUpdate = createTableUpdate(

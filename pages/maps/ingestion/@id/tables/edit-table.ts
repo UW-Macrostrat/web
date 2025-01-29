@@ -727,7 +727,6 @@ function useSharedColumns({
   columnHeaderCellRenderer,
   transformedData,
   tableData,
-  ref,
   url,
   handleCopy,
   handlePaste,
@@ -766,11 +765,6 @@ function useSharedColumns({
             const omit = toBoolean(transformedData[rowIndex]["omit"]);
 
             return h(EditableCell, {
-              ref: (el) => {
-                try {
-                  ref.current[rowIndex][columnIndex] = el;
-                } catch {}
-              },
               disabled: omit,
               className: classNames({ disabled: omit }),
               columnName: columnName,
