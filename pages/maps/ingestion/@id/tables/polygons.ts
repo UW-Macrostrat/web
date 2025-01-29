@@ -62,91 +62,27 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
         ...sharedColumnConfig,
         t_interval: h(Column, {
           ...sharedColumnConfig?.["t_interval"]?.props,
-          cellRenderer: (rowIndex: number, columnIndex: number) =>
-            h(IntervalSelection, {
-              intervals: intervals,
-              onConfirm: (value) => {
-                const tableUpdate = createTableUpdate(
-                  url,
-                  value,
-                  "t_interval",
-                  transformedData[rowIndex],
-                  dataParameters
-                );
-
-                let newTableUpdates = [tableUpdate];
-
-                if (
-                  transformedData[rowIndex]["b_interval"] == undefined ||
-                  transformedData[rowIndex]["b_interval"] == ""
-                ) {
-                  let oppositeIntervalTableUpdate = createTableUpdate(
-                    url,
-                    value,
-                    "b_interval",
-                    transformedData[rowIndex],
-                    dataParameters
-                  );
-
-                  newTableUpdates.push(oppositeIntervalTableUpdate);
-                }
-
-                addTableUpdate(newTableUpdates);
-              },
-              intent:
-                data[rowIndex]["t_interval"] !=
-                transformedData[rowIndex]["t_interval"]
-                  ? "success"
-                  : undefined,
-              value:
-                transformedData.length == 0
-                  ? ""
-                  : transformedData[rowIndex]["t_interval"],
-            }),
+          cellRenderer: useIntervalSelectionRenderer(
+            IntervalType.TOP,
+            data,
+            transformedData,
+            intervals,
+            dataParameters,
+            addTableUpdate,
+            url
+          ),
         }),
         b_interval: h(Column, {
           ...sharedColumnConfig?.["b_interval"]?.props,
-          cellRenderer: (rowIndex: number, columnIndex: number) =>
-            h(IntervalSelection, {
-              intervals: intervals,
-              onConfirm: (value) => {
-                const tableUpdate = createTableUpdate(
-                  url,
-                  value,
-                  "b_interval",
-                  transformedData[rowIndex],
-                  dataParameters
-                );
-
-                let newTableUpdates = [tableUpdate];
-
-                if (
-                  transformedData[rowIndex]["t_interval"] == undefined ||
-                  transformedData[rowIndex]["t_interval"] == ""
-                ) {
-                  let oppositeIntervalTableUpdate = createTableUpdate(
-                    url,
-                    value,
-                    "t_interval",
-                    transformedData[rowIndex],
-                    dataParameters
-                  );
-
-                  newTableUpdates.push(oppositeIntervalTableUpdate);
-                }
-
-                addTableUpdate(newTableUpdates);
-              },
-              intent:
-                data[rowIndex]["b_interval"] !=
-                transformedData[rowIndex]["b_interval"]
-                  ? "success"
-                  : undefined,
-              value:
-                transformedData.length == 0
-                  ? ""
-                  : transformedData[rowIndex]["b_interval"],
-            }),
+          cellRenderer: useIntervalSelectionRenderer(
+            IntervalType.BOTTOM,
+            data,
+            transformedData,
+            intervals,
+            dataParameters,
+            addTableUpdate,
+            url
+          ),
         }),
       };
     },
@@ -160,4 +96,71 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
     columnGenerator: polygonColumnGenerator,
     featureType: "polygon",
   });
+}
+
+enum IntervalType {
+  TOP = "t_interval",
+  BOTTOM = "b_interval",
+}
+
+function useIntervalSelectionRenderer(
+  type: IntervalType,
+  data,
+  transformedData,
+  intervals,
+  dataParameters,
+  addTableUpdate,
+  url
+) {
+  let currentInterval: string;
+  let oppInterval: string;
+
+  if (type == IntervalType.TOP) {
+    currentInterval = "t_interval";
+    oppInterval = "b_interval";
+  } else if (type == IntervalType.BOTTOM) {
+    currentInterval = "b_interval";
+    oppInterval = "t_interval";
+  }
+
+  return (rowIndex: number, columnIndex: number) => {
+    const cellValue = transformedData[rowIndex][currentInterval];
+    let cellValueOpp = transformedData[rowIndex][oppInterval];
+    if (cellValueOpp == "") {
+      cellValueOpp = null;
+    }
+
+    return h(IntervalSelection, {
+      intervals: intervals,
+      onConfirm: (value) => {
+        let newTableUpdates = [
+          createTableUpdate(
+            url,
+            value,
+            currentInterval,
+            transformedData[rowIndex],
+            dataParameters
+          ),
+        ];
+
+        if (cellValueOpp == null) {
+          // If the opposite interval is empty, set it to the same value
+          newTableUpdates.push(
+            createTableUpdate(
+              url,
+              value,
+              oppInterval,
+              transformedData[rowIndex],
+              dataParameters
+            )
+          );
+        }
+
+        addTableUpdate(newTableUpdates);
+      },
+      intent:
+        data[rowIndex][currentInterval] != cellValue ? "success" : undefined,
+      value: transformedData.length == 0 ? "" : cellValue,
+    });
+  };
 }
