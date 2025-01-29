@@ -3,7 +3,7 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import { Column } from "@blueprintjs/table";
+import { Cell, Column, Region } from "@blueprintjs/table";
 import {
   ColumnConfig,
   ColumnConfigGenerator,
@@ -57,6 +57,7 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
       addTableUpdate,
       transformedData,
       data,
+      selection,
     }: ColumnConfigGenerator): ColumnConfig => {
       return {
         ...sharedColumnConfig,
@@ -69,7 +70,8 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
             intervals,
             dataParameters,
             addTableUpdate,
-            url
+            url,
+            selection
           ),
         }),
         b_interval: h(Column, {
@@ -81,7 +83,8 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
             intervals,
             dataParameters,
             addTableUpdate,
-            url
+            url,
+            selection
           ),
         }),
       };
@@ -110,7 +113,8 @@ function useIntervalSelectionRenderer(
   intervals,
   dataParameters,
   addTableUpdate,
-  url
+  url,
+  selection
 ) {
   let currentInterval: string;
   let oppInterval: string;
@@ -163,4 +167,22 @@ function useIntervalSelectionRenderer(
       value: transformedData.length == 0 ? "" : cellValue,
     });
   };
+}
+
+function isCellUniquelySelected(
+  rowIndex: number,
+  columnIndex: number,
+  selection: Region[]
+): boolean {
+  return selection.some((region) => {
+    if (region.rows == undefined || region.cols == undefined) {
+      return false;
+    }
+    return (
+      rowIndex >= region.rows[0] &&
+      rowIndex <= region.rows[1] &&
+      columnIndex >= region.cols[0] &&
+      columnIndex <= region.cols[1]
+    );
+  });
 }

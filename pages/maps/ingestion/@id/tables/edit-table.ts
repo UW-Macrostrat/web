@@ -403,6 +403,7 @@ export function TableInterface({
     handleCopy,
     handlePaste,
     dispatch,
+    selection,
   });
 
   const columnConfig = useMemo(() => {
@@ -419,6 +420,7 @@ export function TableInterface({
         dispatch({ type: "addTableUpdates", tableUpdates: t }),
       transformedData,
       data: tableData.remoteData,
+      selection,
       ref,
     });
   }, [

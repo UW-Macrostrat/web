@@ -146,13 +146,13 @@ let IntervalSelection = ({
             roleStructure: "listoption",
           }),
         },
-        h(IntervalButton, { interval, intent, setActive })
+        h(IntervalView, { interval, intent, setActive })
       ),
     ]
   );
 };
 
-function IntervalButton({ interval, intent, setActive }) {
+export function IntervalView({ interval, intent, setActive }) {
   const inDarkMode = useInDarkMode();
   const colors = getColorPair(interval?.color, inDarkMode);
   return h(
