@@ -80,12 +80,13 @@ function basemapStyle(basemap, inDarkMode) {
 }
 
 export function MapInterface({
-  id,
   map,
   slug,
   featureTypes = ["points", "lines", "polygons", "rgeom"],
   onClickFeatures,
   selectedFeatures,
+  inspectPosition,
+  setInspectPosition,
 }) {
   const [isOpen, setOpen] = useState(false);
 
@@ -148,8 +149,6 @@ export function MapInterface({
       return true;
     }
   );
-
-  const [inspectPosition, setInspectPosition] = useState(null);
 
   // Overlay style
   const [mapStyle, setMapStyle] = useState(null);

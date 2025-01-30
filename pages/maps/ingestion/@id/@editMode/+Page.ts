@@ -48,6 +48,7 @@ export function Page() {
   );
 
   const [mapSelectedFeatures, selectFeatures] = useState([]);
+  const [inspectPosition, setInspectPosition] = useState(null);
 
   const showSelectedFeatures =
     mapSelectedFeatures != null && mapSelectedFeatures.length > 0;
@@ -79,16 +80,21 @@ export function Page() {
           ]),
           h.if(showMap)("div.map-panel", [
             h(MapInterface, {
-              id: source_id,
               map: mapBounds,
               slug,
               featureTypes: [editMode],
               onClickFeatures: selectFeatures,
+              inspectPosition,
+              setInspectPosition,
             }),
           ]),
           h.if(showSelectedFeatures)(MapSelectedFeatures, {
             features: mapSelectedFeatures,
             selectFeatures,
+            onClose() {
+              setInspectPosition(null);
+              selectFeatures([]);
+            },
           }),
         ]),
       ]),

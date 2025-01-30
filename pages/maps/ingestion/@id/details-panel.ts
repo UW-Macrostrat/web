@@ -5,7 +5,12 @@ import hyper from "@macrostrat/hyper";
 
 const h = hyper.styled(styles);
 
-export function MapSelectedFeatures({ features, selectFeatures, className }) {
+export function MapSelectedFeatures({
+  features,
+  onClose,
+  selectFeatures,
+  className,
+}) {
   if (features == null || features.length === 0) {
     return null;
   }
@@ -15,7 +20,7 @@ export function MapSelectedFeatures({ features, selectFeatures, className }) {
       h(Button, {
         icon: "cross",
         minimal: true,
-        onClick: () => selectFeatures([]),
+        onClick: onClose,
       }),
     ]),
     h("div.feature-list", [

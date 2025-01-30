@@ -34,6 +34,7 @@ export function Page() {
   const basename = `/maps/ingestion/${source_id}`;
 
   const [mapSelectedFeatures, selectFeatures] = useState([]);
+  const [inspectPosition, setInspectPosition] = useState(null);
 
   const showSelectedFeatures =
     mapSelectedFeatures != null && mapSelectedFeatures.length > 0;
@@ -45,16 +46,21 @@ export function Page() {
       h(Allotment, { className: "main-panel", defaultSizes: [800, 300] }, [
         h("div.map-container", [
           h(MapInterface, {
-            id: source_id,
             map: mapBounds,
             slug: source.slug,
             onClickFeatures: selectFeatures,
             selectedFeatures: mapSelectedFeatures,
+            inspectPosition,
+            setInspectPosition,
           }),
         ]),
         h(Allotment.Pane, { visible: showSelectedFeatures }, [
           h(MapSelectedFeatures, {
             features: mapSelectedFeatures,
+            onClose() {
+              selectFeatures([]);
+              setInspectPosition(null);
+            },
             selectFeatures,
             className: "details-panel",
           }),
