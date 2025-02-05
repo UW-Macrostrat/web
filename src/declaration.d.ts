@@ -35,31 +35,22 @@ type Classes = { readonly [key: string]: string };
 
 type StyledHyper = Classes & Hyper;
 
-// Style modules
-declare module "*.module.styl" {
-  const classes: { readonly [key: string]: string };
-  export default StyledHyper;
-}
-
-// Override declarations for sass module
-declare module "*.module.sass" {
-  const classes: Classes;
-  export default StyledHyper;
-}
-
-// Override declarations for sass module
-declare module "*.module.scss" {
-  import styles from "./main.module.sass";
-  const classes: { [key: string]: string };
-  export default StyledHyper;
-}
-
 declare module "*.styl" {
   const content: string;
   export default content;
 }
 
-declare module "*.sass" {
-  const content: string;
-  export default content;
+// Style modules
+declare module "*.module.styl" {
+  const classes: StyledHyper;
+}
+
+// Augment existing declarations for sass module
+declare module "*.module.sass" {
+  const classes: StyledHyper;
+}
+
+// Augment existing declarations for sass module
+declare module "*.module.scss" {
+  const classes: StyledHyper;
 }

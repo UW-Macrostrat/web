@@ -16,6 +16,10 @@ export function usePostgresQuery(
 ) {
   const [data, setData] = useState(null);
 
+  useEffect(() => {
+    console.warn("usePostgresQuery should be moved to a separate package");
+  }, []);
+
   let _filters: FilterDef[] = [];
   if (filters != null) {
     if (!Array.isArray(filters)) {

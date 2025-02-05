@@ -1,25 +1,31 @@
-import h from "./lib/feedback.module.sass";
-import { ContentPage, FullscreenPage } from "~/layouts";
+import h from "./+Page.client.module.sass";
+import { FullscreenPage } from "~/layouts";
 import { PageBreadcrumbs } from "~/components";
 import { usePageContext } from "vike-react/usePageContext";
-import { enhanceData } from "../../extractions/lib";
+import {
+  enhanceData,
+  FeedbackComponent,
+  GraphData,
+  treeToGraph,
+  TreeData,
+} from "@macrostrat/feedback-components";
 import {
   useEntityTypeIndex,
   useModelIndex,
   usePostgresQuery,
-} from "../../extractions/lib/data-service";
-import { FeedbackComponent } from "./lib";
-import { Intent, NonIdealState, OverlaysProvider } from "@blueprintjs/core";
+} from "../../extractions/data-service";
+import { NonIdealState, OverlaysProvider, Spinner } from "@blueprintjs/core";
 import {
-  Box,
   ErrorBoundary,
-  FlexCol,
   FlexRow,
   Pagination,
   Spacer,
 } from "@macrostrat/ui-components";
 import { useState } from "react";
 import { AuthStatus } from "@macrostrat/auth-components";
+import { MatchedEntityLink } from "#/integrations/xdd/extractions/match";
+import { knowledgeGraphAPIURL } from "@macrostrat-web/settings";
+import { Toaster } from "@blueprintjs/core";
 
 /**
  * Get a single text window for feedback purposes
@@ -55,7 +61,7 @@ function ExtractionIndex() {
   });
 
   if (data == null || models == null || entityTypes == null) {
-    return h("div", "Loading...");
+    return h(Spinner);
   }
 
   console.log(data);
@@ -78,7 +84,7 @@ function MultiFeedbackInterface({ data, models, entityTypes }) {
         title: "Multiple model runs for feedback",
         description: `Showing entities from ${
           ix + 1
-        } of ${count} model runs. Merging several runs is not yet supported.`,
+        } of ${count} model runs. Merging runs is not yet supported.`,
       }),
       h(Pagination, {
         count,
@@ -95,17 +101,118 @@ function MultiFeedbackInterface({ data, models, entityTypes }) {
   ]);
 }
 
+const AppToaster = Toaster.create();
+
 function FeedbackInterface({ data, models, entityTypes }) {
   const window = enhanceData(data, models, entityTypes);
   const { entities = [], paragraph_text, model } = window;
+
+  console.log(window);
+  console.log(Array.from(entityTypes.values()));
+
   return h(FeedbackComponent, {
     entities,
     text: paragraph_text,
     model,
     entityTypes,
-    sourceTextID: window.source_text,
-    runID: window.model_run,
+    matchComponent: MatchedEntityLink,
+    onSave: wrapWithToaster(
+      async (tree) => {
+        const data = prepareDataForServer(tree, window.source_text, [
+          window.model_run,
+        ]);
+        await postDataToServer(data);
+      },
+      AppToaster,
+      {
+        success: "Model information saved",
+        error: "Failed to save model information",
+      }
+    ),
   });
+}
+
+async function postDataToServer(data: ServerResults) {
+  const response = await fetch(knowledgeGraphAPIURL + "/record_run", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+}
+
+function wrapWithToaster(
+  fn: (...args: any[]) => Promise<void>,
+  toaster: Toaster,
+  messages: {
+    success: string;
+    error: string;
+  }
+) {
+  return async (...args: any[]) => {
+    try {
+      await fn(...args);
+      toaster.show({
+        message: messages.success,
+        intent: "success",
+      });
+    } catch (e) {
+      console.error(e);
+      toaster.show({
+        message: messages.error + ": " + e.message,
+        intent: "danger",
+      });
+    }
+  };
+}
+
+interface ServerResults extends GraphData {
+  sourceTextId: number;
+  supersedesRunIds: number[];
+}
+
+function prepareDataForServer(
+  tree: TreeData[],
+  sourceTextID: number,
+  supersedesRunIDs: number[] | null
+): ServerResults {
+  /** This function should be used before sending the data to the server */
+  const { nodes, edges } = treeToGraph(tree);
+
+  // Prepare match for server
+  const normalizedNodes = nodes.map((d) => {
+    return {
+      ...d,
+      match: normalizeMatch(d.match),
+    };
+  });
+
+  return {
+    nodes: normalizedNodes,
+    edges,
+    sourceTextId: sourceTextID,
+    supersedesRunIds: supersedesRunIDs ?? [],
+  };
+}
+
+// We will extend this in the future, probably,
+// to handle ages and other things
+type MatchInfo = { type: "lith" | "lith_att" | "strat_name"; id: number };
+
+function normalizeMatch(match: any): MatchInfo | null {
+  if (match == null) return null;
+  if (match.lith_id) return { type: "lith", id: match.lith_id };
+  if (match.lith_att_id) {
+    return { type: "lith_att", id: match.lith_att_id };
+  }
+  if (match.strat_name_id) {
+    return { type: "strat_name", id: match.strat_name_id };
+  }
+  return null;
 }
 
 

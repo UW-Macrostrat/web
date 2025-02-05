@@ -1,10 +1,12 @@
-import classNames from "classnames";
 import { mergeAgeRanges } from "@macrostrat-web/utility-functions";
 import { LithologyTag } from "~/components";
 import h from "./main.module.sass";
 import { Button, Popover } from "@blueprintjs/core";
 import { DOMElement } from "react";
 import { JSONView } from "@macrostrat/ui-components";
+import { DataField, ValueContainer } from "@macrostrat/ui-components";
+
+export { DataField };
 
 export function UnitDetailsPopover({
   style,
@@ -54,36 +56,6 @@ export function LegendJSONView({ data }) {
   return h(JSONView, { data, hideRoot: true, className: "legend-json-view" });
 }
 
-export function DataField({
-  label,
-  value,
-  inline = true,
-  showIfEmpty = false,
-  className,
-  children,
-  unit,
-}: {
-  label?: string;
-  value?: any;
-  inline?: boolean;
-  showIfEmpty?: boolean;
-  className?: string;
-  children?: any;
-  unit?: string;
-}) {
-  if (!showIfEmpty && (value == null || value === "") && children == null) {
-    return null;
-  }
-
-  return h("div.data-field", { className: classNames(className, { inline }) }, [
-    h("div.label", label),
-    h("div.data-container", [
-      h.if(value != null)(Value, { value, unit }),
-      children,
-    ]),
-  ]);
-}
-
 export type IntervalShort = {
   id: number;
   b_age: number;
@@ -110,25 +82,12 @@ export function IntervalField({ intervals }: { intervals: IntervalShort[] }) {
             showAgeRange: true,
           });
         }),
-        h(Value, { unit: "Ma", value: `${ageRange[0]} - ${ageRange[1]}` }),
+        h(ValueContainer, {
+          unit: "Ma",
+          value: `${ageRange[0]} - ${ageRange[1]}`,
+        }),
       ]
     ),
-  ]);
-}
-
-function Value({
-  value,
-  unit,
-  children,
-}: {
-  value?: any;
-  unit?: string;
-  children?: any;
-}) {
-  const val = value ?? children;
-  return h("span.value-container", [
-    h("span.value", val),
-    h.if(unit != null)([" ", h("span.unit", unit)]),
   ]);
 }
 

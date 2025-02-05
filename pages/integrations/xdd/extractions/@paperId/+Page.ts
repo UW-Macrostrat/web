@@ -3,12 +3,16 @@ import h from "@macrostrat/hyper";
 import { ContentPage } from "~/layouts";
 import { PageBreadcrumbs } from "~/components";
 import { usePageContext } from "vike-react/usePageContext";
-import { ExtractionContext, enhanceData } from "../lib";
+import {
+  ExtractionContext,
+  enhanceData,
+} from "@macrostrat/feedback-components";
 import {
   useEntityTypeIndex,
   useModelIndex,
   usePostgresQuery,
-} from "../lib/data-service";
+} from "../data-service";
+import { MatchedEntityLink } from "../match";
 
 export function Page() {
   return h(ContentPage, [h(PageBreadcrumbs), h(PageMain)]);
@@ -46,6 +50,7 @@ function ExtractionIndex() {
         h(ExtractionContext, {
           data: enhanceData(d, models, entityTypes),
           entityTypes,
+          matchComponent: MatchedEntityLink,
         }),
       ]);
     }),
