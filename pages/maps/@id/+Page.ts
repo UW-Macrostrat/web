@@ -6,7 +6,14 @@ import {
   Spinner,
   Tag,
 } from "@blueprintjs/core";
-import { SETTINGS, apiV2Prefix } from "@macrostrat-web/settings";
+import {
+  tileserverDomain,
+  apiV2Prefix,
+  darkMapURL,
+  baseMapURL,
+  satelliteMapURL,
+  mapboxAccessToken,
+} from "@macrostrat-web/settings";
 import {
   DetailPanelStyle,
   InfoDrawerContainer,
@@ -15,7 +22,7 @@ import {
   MapView,
   PanelCard,
 } from "@macrostrat/map-interface";
-import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
+import { buildMacrostratStyleLayers } from "@macrostrat/mapbox-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
 import {
   JSONView,
@@ -51,6 +58,30 @@ const emptyStyle: any = {
   layers: [],
 };
 
+function buildMacrostratStyle({
+  fillOpacity = 0.4,
+  strokeOpacity = 0.2,
+  lineOpacity = 1,
+  focusedMap = null,
+}): mapboxgl.Style {
+  const tileURL = `${tileserverDomain}/map/{z}/{x}/{y}?source_id=${focusedMap}`;
+
+  return {
+    version: 8,
+    sources: {
+      burwell: {
+        type: "vector",
+        tiles: [tileURL],
+      },
+    },
+    layers: buildMacrostratStyleLayers({
+      fillOpacity,
+      strokeOpacity,
+      lineOpacity,
+    }),
+  };
+}
+
 function buildOverlayStyle({
   style,
   focusedMap,
@@ -60,7 +91,6 @@ function buildOverlayStyle({
   let mapStyle = emptyStyle;
   if (layerOpacity.vector != null) {
     mapStyle = buildMacrostratStyle({
-      tileserverDomain: SETTINGS.burwellTileDomain,
       focusedMap,
       fillOpacity: layerOpacity.vector - 0.1,
       strokeOpacity: layerOpacity.vector + 0.2,
@@ -75,9 +105,7 @@ function buildOverlayStyle({
         raster: {
           type: "raster",
           tiles: [
-            SETTINGS.burwellTileDomain +
-              "/cog/tiles/{z}/{x}/{y}.png?url=" +
-              rasterURL,
+            tileserverDomain + "/cog/tiles/{z}/{x}/{y}.png?url=" + rasterURL,
           ],
           tileSize: 256,
         },
@@ -124,9 +152,9 @@ enum Basemap {
 function basemapStyle(basemap, inDarkMode) {
   switch (basemap) {
     case Basemap.Satellite:
-      return SETTINGS.satelliteMapURL;
+      return satelliteMapURL;
     case Basemap.Basic:
-      return inDarkMode ? SETTINGS.darkMapURL : SETTINGS.baseMapURL;
+      return inDarkMode ? darkMapURL : baseMapURL;
     case Basemap.None:
       return null;
   }
@@ -152,7 +180,7 @@ export function Page() {
     if (layer == null) setStyle(null);
     const styleURL = basemapStyle(layer, dark);
     getMapboxStyle(styleURL, {
-      access_token: SETTINGS.mapboxAccessToken,
+      access_token: mapboxAccessToken,
     }).then(setStyle);
   }, [layer, dark]);
 
@@ -292,7 +320,7 @@ export function Page() {
         MapView,
         {
           style: mapStyle, //"mapbox://styles/mapbox/satellite-v9",
-          mapboxToken: SETTINGS.mapboxAccessToken,
+          mapboxToken: mapboxAccessToken,
           //projection: { name: "globe" },
           bounds,
           mapPosition: null,
