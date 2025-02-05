@@ -1,4 +1,4 @@
-import { ColumnOperators } from "#/maps/ingestion/@id/table";
+import { ColumnOperators } from "../tables/defs";
 
 export class Filter {
   readonly column_name: string;
@@ -69,7 +69,7 @@ export class Filter {
   };
 
   is_valid = () => {
-    if (this.operator == undefined || this.value == null) {
+    if (this.operator == undefined) {
       return false;
     }
     return true;

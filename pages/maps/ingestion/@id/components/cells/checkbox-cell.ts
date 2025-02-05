@@ -2,11 +2,7 @@ import React, { forwardRef, memo, useEffect, useMemo } from "react";
 
 import { Button } from "@blueprintjs/core";
 import { Cell, EditableCell2Props } from "@blueprintjs/table";
-
-import hyper from "@macrostrat/hyper";
-import styles from "./main.module.sass";
-
-const h = hyper.styled(styles);
+import h from "../../hyper";
 
 interface CheckboxCell extends Omit<EditableCell2Props, "value" | "onConfirm"> {
   value: boolean | undefined;
@@ -67,3 +63,4 @@ let CheckboxCell = forwardRef((props: CheckboxCell, ref) => {
 CheckboxCell = memo(CheckboxCell);
 
 export default CheckboxCell;
+export { CheckboxCell };

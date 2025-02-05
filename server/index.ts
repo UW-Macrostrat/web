@@ -16,9 +16,27 @@ const isProduction = process.env.NODE_ENV === "production";
 // Serve the app out of the `src` directory.
 const root = resolve(join(__dirname, ".."));
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+
+// Set HMR variables
+if (process.env.HMR_DOMAIN) {
+  const hmrDomain = new URL(process.env.HMR_DOMAIN);
+  process.env.HMR_HOST = hmrDomain.hostname;
+  process.env.HMR_PROTOCOL = hmrDomain.protocol.replace(":", "");
+}
+
 const hmrPort = process.env.HMR_PORT
   ? parseInt(process.env.HMR_PORT, 10)
   : 24678;
+const hmrHost = process.env.HMR_HOST ?? "localhost";
+const hmrProtocol = process.env.HMR_PROTOCOL ?? "ws";
+
+const hmr = {
+  host: hmrHost,
+  port: hmrPort,
+  protocol: hmrProtocol,
+};
+
+console.log(hmr);
 
 interface Middleware<
   Context extends Record<string | number | symbol, unknown>
@@ -110,7 +128,10 @@ async function startServer() {
     const viteDevMiddleware = (
       await vite.createServer({
         root,
-        server: { middlewareMode: true, hmr: { port: hmrPort } },
+        server: {
+          middlewareMode: true,
+          hmr,
+        },
       })
     ).middlewares;
     app.use(viteDevMiddleware);

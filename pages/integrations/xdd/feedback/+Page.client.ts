@@ -1,13 +1,15 @@
 import { FullscreenPage } from "~/layouts";
 import h from "./main.module.sass";
 import { PageBreadcrumbs } from "~/components";
-import { PostgRESTTableView } from "~/components/legend-table";
+import { PostgRESTTableView } from "@macrostrat/data-sheet2";
+import { postgrestPrefix } from "@macrostrat-web/settings";
 
 export function Page() {
   return h(FullscreenPage, { className: "main" }, [
     h(PageBreadcrumbs),
     h("h1", "Source text"),
     h(PostgRESTTableView, {
+      endpoint: postgrestPrefix,
       table: "kg_source_text",
       columns:
         "id,map_legend_id,paper_id,last_update,created,n_runs,n_entities,n_matches,n_strat_names",

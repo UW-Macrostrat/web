@@ -2,13 +2,7 @@ import { Button, Popover } from "@blueprintjs/core";
 import { Cell, EditableCell2Props } from "@blueprintjs/table";
 import React, { forwardRef, useEffect } from "react";
 
-// @ts-ignore
-import hyper from "@macrostrat/hyper";
-
-//import "@blueprintjs/core/lib/css/blueprint.css";
-import styles from "../../edit-table.module.sass";
-
-const h = hyper.styled(styles);
+import h from "../../hyper";
 
 const LongTextCell = forwardRef((props: EditableCell2Props, forwardRef) => {
   const { value, onConfirm } = props;
@@ -102,4 +96,4 @@ const LongTextCell = forwardRef((props: EditableCell2Props, forwardRef) => {
   );
 });
 
-export default LongTextCell;
+export { LongTextCell };

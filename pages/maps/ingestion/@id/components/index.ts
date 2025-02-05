@@ -1,4 +1,3 @@
-export * from "./panels";
 export * from "./progress-popover";
 export * from "./cells";
 export * from "./table-menu";

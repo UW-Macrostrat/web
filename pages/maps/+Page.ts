@@ -1,5 +1,5 @@
 import h from "./main.module.scss";
-import { AnchorButton, ButtonGroup } from "@blueprintjs/core";
+import { AnchorButton } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import { PageHeader, DevLinkButton, AssistantLinks } from "~/components";
 import { usePageProps } from "~/renderer/usePageProps";
@@ -20,9 +20,7 @@ export function Page() {
     h(PageHeader, { title: "Maps" }),
     h(
       "ul.maps-list",
-      sources.map((d) =>
-        h.if(d.is_mapped)(SourceItem, { source: d, key: d.source_id })
-      )
+      sources.map((d) => h(SourceItem, { source: d, key: d.source_id }))
     ),
   ]);
 }

@@ -1,4 +1,4 @@
-import { Filter } from "./components/table-util.js";
+import { Filter } from "../components/table-util";
 
 export type ColumnOperators =
   | "eq"
@@ -46,7 +46,7 @@ interface TableSelection {
 
 export interface ColumnConfigGenerator {
   url: string;
-  defaultColumnConfig: ColumnConfig;
+  sharedColumnConfig: ColumnConfig;
   dataParameters: DataParameters;
   addTableUpdate: (updates: TableUpdate[]) => void;
   transformedData: any[];
@@ -61,4 +61,18 @@ export type ColumnConfig = {
 export interface CustomTableProps {
   url: string;
   ingestProcessId: number;
+}
+
+export const COMMON_COLUMNS = [
+  "omit",
+  "source_layer",
+  "source_id",
+  "orig_id",
+  "descrip",
+];
+
+export enum FeatureType {
+  POINT = "point",
+  LINE = "line",
+  POLYGON = "polygon",
 }

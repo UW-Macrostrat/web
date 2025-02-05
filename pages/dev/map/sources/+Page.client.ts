@@ -1,6 +1,6 @@
 import h from "@macrostrat/hyper";
 // Import other components
-import { burwellTileDomain, mapboxAccessToken } from "@macrostrat-web/settings";
+import { mapboxAccessToken } from "@macrostrat-web/settings";
 // Import other components
 import { Spacer, useDarkMode } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
@@ -13,12 +13,11 @@ import {
   buildInspectorStyle,
   LocationPanel,
   MapView,
-  FeaturePanel,
   FeatureSelectionHandler,
 } from "@macrostrat/map-interface";
 import { NonIdealState } from "@blueprintjs/core";
-import { LinkItem } from "pages/dev/map/layers/lib";
 import { Link } from "~/components";
+import { boundingGeometryMapStyle } from "~/map-styles";
 
 export function Page() {
   const dark = useDarkMode();
@@ -33,39 +32,7 @@ export function Page() {
   const [actualStyle, setActualStyle] = useState(null);
 
   useEffect(() => {
-    const color = isEnabled ? 255 : 20;
-
-    const overlayStyle: mapboxgl.Style = {
-      version: 8,
-      sources: {
-        rgeom: {
-          type: "vector",
-          tiles: [burwellTileDomain + "/maps/bounds/{z}/{x}/{y}"],
-          maxzoom: 9,
-        },
-      },
-      layers: [
-        {
-          id: "rgeom",
-          type: "fill",
-          source: "rgeom",
-          "source-layer": "bounds",
-          paint: {
-            "fill-color": `rgba(${color}, ${color}, ${color}, 0.1)`,
-          },
-        },
-        {
-          id: "rgeom-line",
-          type: "line",
-          source: "rgeom",
-          "source-layer": "bounds",
-          paint: {
-            "line-color": `rgba(${color}, ${color}, ${color}, 0.5)`,
-            "line-width": 1,
-          },
-        },
-      ],
-    };
+    const overlayStyle = boundingGeometryMapStyle(isEnabled);
 
     buildInspectorStyle(baseStyle, overlayStyle, {
       mapboxToken: mapboxAccessToken,

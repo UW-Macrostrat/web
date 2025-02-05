@@ -3,15 +3,12 @@ import React from "react";
 import { useDebouncedCallback } from "use-debounce";
 
 // @ts-ignore
-import hyper from "@macrostrat/hyper";
 
 import { OperatorQueryParameter, ColumnOperatorOption } from "../table";
 
 import "~/styles/blueprint-select";
-import styles from "../edit-table.module.sass";
-import { Filter } from "./table-util";
-
-const h = hyper.styled(styles);
+import { Filter } from "../utils/filter";
+import h from "../hyper";
 
 const validExpressions: ColumnOperatorOption[] = [
   { key: "na", value: "", verbose: "None" },
@@ -21,8 +18,16 @@ const validExpressions: ColumnOperatorOption[] = [
   { key: "gt", value: ">", verbose: "Is greater than" },
   { key: "ge", value: ">=", verbose: "Is greater than or equal to" },
   { key: "ne", value: "<>", verbose: "Is not equal to" },
-  { key: "is_distinct_from", value: "IS DISTINCT FROM", verbose: "Is distinct from" },
-  { key: "is_not_distinct_from", value: "IS NOT DISTINCT FROM", verbose: "Is not distinct from" },
+  {
+    key: "is_distinct_from",
+    value: "IS DISTINCT FROM",
+    verbose: "Is distinct from",
+  },
+  {
+    key: "is_not_distinct_from",
+    value: "IS NOT DISTINCT FROM",
+    verbose: "Is not distinct from",
+  },
   { key: "like", value: "LIKE", verbose: "Like" },
   { key: "is", value: "IS", verbose: "Is", placeholder: "true | false | null" },
   { key: "in", value: "IN", verbose: "In", placeholder: "1,2,3" },
@@ -41,12 +46,14 @@ interface TableMenuProps {
 export const TableMenu = ({
   columnName,
   onFilterChange,
-  filter,
+  filter: _filter,
   onGroupChange,
   group,
   onHide,
 }: TableMenuProps) => {
   const [inputPlaceholder, setInputPlaceholder] = React.useState<string>("");
+
+  const filter = _filter ?? new Filter(columnName, "eq", null);
 
   // Create a debounced version of the text state
   const [inputValue, setInputValue] = React.useState<string>(filter.value);

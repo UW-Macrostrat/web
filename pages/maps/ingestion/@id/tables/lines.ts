@@ -3,23 +3,15 @@
  */
 
 import { useCallback } from "react";
+import h from "../hyper";
 
-import hyper from "@macrostrat/hyper";
-
-import { Column } from "@blueprintjs/table";
 import {
   ColumnConfig,
   ColumnConfigGenerator,
+  COMMON_COLUMNS,
   CustomTableProps,
-} from "#/maps/ingestion/@id/table";
-import CheckboxCell from "#/maps/ingestion/@id/components/cells/checkbox-cell";
-import { TableInterface } from "../edit-table";
-import styles from "../edit-table.module.sass";
-import { COMMON_COLUMNS } from ".";
-import { toBoolean } from "../components/cells/util";
-import { createTableUpdate } from "#/maps/ingestion/@id/utils";
-
-const h = hyper.styled(styles);
+} from "./defs";
+import { TableInterface } from "./edit-table";
 
 export function LinesTable({ url, ingestProcessId }: CustomTableProps) {
   const FINAL_LINE_COLUMNS = [
@@ -31,40 +23,9 @@ export function LinesTable({ url, ingestProcessId }: CustomTableProps) {
   ];
 
   const linesColumnGenerator = useCallback(
-    ({
-      url,
-      defaultColumnConfig,
-      dataParameters,
-      addTableUpdate,
-      transformedData,
-      ref,
-    }: ColumnConfigGenerator): ColumnConfig => {
+    ({ sharedColumnConfig }: ColumnConfigGenerator): ColumnConfig => {
       return {
-        ...defaultColumnConfig,
-        omit: h(Column, {
-          ...defaultColumnConfig?.["omit"]?.props,
-          cellRenderer: (rowIndex: number, columnIndex: number) =>
-            h(CheckboxCell, {
-              ref: (el) => {
-                try {
-                  ref.current[rowIndex][columnIndex] = el;
-                } catch (e) {}
-              },
-              onConfirm: (value) => {
-                addTableUpdate([
-                  createTableUpdate(
-                    url,
-                    value,
-                    "omit",
-                    rowIndex,
-                    transformedData,
-                    dataParameters
-                  ),
-                ]);
-              },
-              value: toBoolean(transformedData[rowIndex]["omit"]),
-            }),
-        }),
+        ...sharedColumnConfig,
       };
     },
     []
@@ -75,5 +36,6 @@ export function LinesTable({ url, ingestProcessId }: CustomTableProps) {
     ingestProcessId: ingestProcessId,
     finalColumns: FINAL_LINE_COLUMNS,
     columnGenerator: linesColumnGenerator,
+    featureType: "line",
   });
 }

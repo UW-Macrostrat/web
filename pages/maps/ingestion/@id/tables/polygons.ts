@@ -3,27 +3,18 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-
-import hyper from "@macrostrat/hyper";
-
-import { Column } from "@blueprintjs/table";
+import { Cell, Column, Region } from "@blueprintjs/table";
 import {
   ColumnConfig,
   ColumnConfigGenerator,
+  COMMON_COLUMNS,
   CustomTableProps,
-} from "#/maps/ingestion/@id/table";
-import IntervalSelection, {
-  Interval,
-} from "#/maps/ingestion/@id/components/cells/interval-selection";
-import CheckboxCell from "#/maps/ingestion/@id/components/cells/checkbox-cell";
-import { TableInterface } from "../edit-table";
-import styles from "#/maps/ingestion/@id/edit-table.module.sass";
-import { COMMON_COLUMNS } from ".";
-import { toBoolean } from "#/maps/ingestion/@id/components/cells/util";
+} from "./defs";
+import { IntervalSelection, Interval } from "../components";
+import h from "../hyper";
+import { TableInterface } from "./edit-table";
 import { apiV2Prefix } from "@macrostrat-web/settings";
-import { createTableUpdate } from "#/maps/ingestion/@id/utils";
-
-const h = hyper.styled(styles);
+import { createTableUpdate } from "../utils";
 
 export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
   const FINAL_POLYGON_COLUMNS = [
@@ -61,135 +52,40 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
   const polygonColumnGenerator = useCallback(
     ({
       url,
-      defaultColumnConfig,
+      sharedColumnConfig,
       dataParameters,
       addTableUpdate,
       transformedData,
       data,
-      ref,
+      selection,
     }: ColumnConfigGenerator): ColumnConfig => {
       return {
-        ...defaultColumnConfig,
+        ...sharedColumnConfig,
         t_interval: h(Column, {
-          ...defaultColumnConfig?.["t_interval"]?.props,
-          cellRenderer: (rowIndex: number, columnIndex: number) =>
-            h(IntervalSelection, {
-              ref: (el) => {
-                try {
-                  ref.current[rowIndex][columnIndex] = el;
-                } catch (e) {}
-              },
-              intervals: intervals,
-              onConfirm: (value) => {
-                const tableUpdate = createTableUpdate(
-                  url,
-                  value,
-                  "t_interval",
-                  transformedData[rowIndex],
-                  dataParameters
-                );
-
-                let newTableUpdates = [tableUpdate];
-
-                if (
-                  transformedData[rowIndex]["b_interval"] == undefined ||
-                  transformedData[rowIndex]["b_interval"] == ""
-                ) {
-                  let oppositeIntervalTableUpdate = createTableUpdate(
-                    url,
-                    value,
-                    "b_interval",
-                    transformedData[rowIndex],
-                    dataParameters
-                  );
-
-                  newTableUpdates.push(oppositeIntervalTableUpdate);
-                }
-
-                addTableUpdate(newTableUpdates);
-              },
-              intent:
-                data[rowIndex]["t_interval"] !=
-                transformedData[rowIndex]["t_interval"]
-                  ? "success"
-                  : undefined,
-              value:
-                transformedData.length == 0
-                  ? ""
-                  : transformedData[rowIndex]["t_interval"],
-            }),
+          ...sharedColumnConfig?.["t_interval"]?.props,
+          cellRenderer: useIntervalSelectionRenderer(
+            IntervalType.TOP,
+            data,
+            transformedData,
+            intervals,
+            dataParameters,
+            addTableUpdate,
+            url,
+            selection
+          ),
         }),
         b_interval: h(Column, {
-          ...defaultColumnConfig?.["b_interval"]?.props,
-          cellRenderer: (rowIndex: number, columnIndex: number) =>
-            h(IntervalSelection, {
-              ref: (el) => {
-                try {
-                  ref.current[rowIndex][columnIndex] = el;
-                } catch (e) {}
-              },
-              intervals: intervals,
-              onConfirm: (value) => {
-                const tableUpdate = createTableUpdate(
-                  url,
-                  value,
-                  "b_interval",
-                  transformedData[rowIndex],
-                  dataParameters
-                );
-
-                let newTableUpdates = [tableUpdate];
-
-                if (
-                  transformedData[rowIndex]["t_interval"] == undefined ||
-                  transformedData[rowIndex]["t_interval"] == ""
-                ) {
-                  let oppositeIntervalTableUpdate = createTableUpdate(
-                    url,
-                    value,
-                    "t_interval",
-                    transformedData[rowIndex],
-                    dataParameters
-                  );
-
-                  newTableUpdates.push(oppositeIntervalTableUpdate);
-                }
-
-                addTableUpdate(newTableUpdates);
-              },
-              intent:
-                data[rowIndex]["b_interval"] !=
-                transformedData[rowIndex]["b_interval"]
-                  ? "success"
-                  : undefined,
-              value:
-                transformedData.length == 0
-                  ? ""
-                  : transformedData[rowIndex]["b_interval"],
-            }),
-        }),
-        omit: h(Column, {
-          ...defaultColumnConfig?.["omit"]?.props,
-          cellRenderer: (rowIndex: number, columnIndex: number) =>
-            h(CheckboxCell, {
-              ref: (el) => {
-                try {
-                  ref.current[rowIndex][columnIndex] = el;
-                } catch (e) {}
-              },
-              onConfirm: (value) => {
-                addTableUpdate([
-                  createTableUpdate(
-                    url,
-                    value,
-                    "omit",
-                    transformedData[rowIndex],
-                    dataParameters
-                  ),
-                ]);
-              },
-              value: toBoolean(transformedData[rowIndex]["omit"]),
-            }),
+          ...sharedColumnConfig?.["b_interval"]?.props,
+          cellRenderer: useIntervalSelectionRenderer(
+            IntervalType.BOTTOM,
+            data,
+            transformedData,
+            intervals,
+            dataParameters,
+            addTableUpdate,
+            url,
+            selection
+          ),
         }),
       };
     },
@@ -201,5 +97,92 @@ export function PolygonsTable({ url, ingestProcessId }: CustomTableProps) {
     ingestProcessId,
     finalColumns: FINAL_POLYGON_COLUMNS,
     columnGenerator: polygonColumnGenerator,
+    featureType: "polygon",
+  });
+}
+
+enum IntervalType {
+  TOP = "t_interval",
+  BOTTOM = "b_interval",
+}
+
+function useIntervalSelectionRenderer(
+  type: IntervalType,
+  data,
+  transformedData,
+  intervals,
+  dataParameters,
+  addTableUpdate,
+  url,
+  selection
+) {
+  let currentInterval: string;
+  let oppInterval: string;
+
+  if (type == IntervalType.TOP) {
+    currentInterval = "t_interval";
+    oppInterval = "b_interval";
+  } else if (type == IntervalType.BOTTOM) {
+    currentInterval = "b_interval";
+    oppInterval = "t_interval";
+  }
+
+  return (rowIndex: number, columnIndex: number) => {
+    const cellValue = transformedData[rowIndex][currentInterval];
+    let cellValueOpp = transformedData[rowIndex][oppInterval];
+    if (cellValueOpp == "") {
+      cellValueOpp = null;
+    }
+
+    return h(IntervalSelection, {
+      intervals: intervals,
+      onConfirm: (value) => {
+        let newTableUpdates = [
+          createTableUpdate(
+            url,
+            value,
+            currentInterval,
+            transformedData[rowIndex],
+            dataParameters
+          ),
+        ];
+
+        if (cellValueOpp == null) {
+          // If the opposite interval is empty, set it to the same value
+          newTableUpdates.push(
+            createTableUpdate(
+              url,
+              value,
+              oppInterval,
+              transformedData[rowIndex],
+              dataParameters
+            )
+          );
+        }
+
+        addTableUpdate(newTableUpdates);
+      },
+      intent:
+        data[rowIndex][currentInterval] != cellValue ? "success" : undefined,
+      value: transformedData.length == 0 ? "" : cellValue,
+    });
+  };
+}
+
+function isCellUniquelySelected(
+  rowIndex: number,
+  columnIndex: number,
+  selection: Region[]
+): boolean {
+  return selection.some((region) => {
+    if (region.rows == undefined || region.cols == undefined) {
+      return false;
+    }
+    return (
+      rowIndex >= region.rows[0] &&
+      rowIndex <= region.rows[1] &&
+      columnIndex >= region.cols[0] &&
+      columnIndex <= region.cols[1]
+    );
   });
 }

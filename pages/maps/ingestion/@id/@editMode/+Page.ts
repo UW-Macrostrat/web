@@ -1,13 +1,16 @@
 import { Button, HotkeysProvider } from "@blueprintjs/core";
 import { ingestPrefix } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
-import { useStoredState } from "@macrostrat/ui-components";
-import { FullscreenPage } from "~/layouts";
-import { Header, WidthAdjustablePanel } from "../components";
+import { ErrorBoundary, useStoredState } from "@macrostrat/ui-components";
+import { BasePage } from "~/layouts";
+import { Header, MapInterface } from "../components";
 import styles from "./main.module.sass";
-import { MapInterface } from "../components";
 import { LinesTable, PointsTable, PolygonsTable } from "../tables";
 import { usePageProps } from "~/renderer/usePageProps";
+import { Allotment } from "allotment";
+import { useState } from "react";
+import "allotment/dist/style.css";
+import { MapSelectedFeatures } from "#/maps/ingestion/@id/details-panel";
 
 const h = hyper.styled(styles);
 
@@ -35,7 +38,7 @@ export function Page() {
 
   let url = sourcePrefix + `/${editMode}`;
   const ingestProcessId = ingestProcess.id;
-  const tableComponent = routeMap[editMode];
+  let tableComponent = routeMap[editMode];
 
   const [showMap, setShowMap] = useStoredState(
     "edit:showMap",
@@ -44,19 +47,19 @@ export function Page() {
     (v) => typeof v === "boolean"
   );
 
+  const [mapSelectedFeatures, selectFeatures] = useState([]);
+  const [inspectPosition, setInspectPosition] = useState(null);
+
+  const showSelectedFeatures =
+    mapSelectedFeatures != null && mapSelectedFeatures.length > 0;
+
   return h(
-    FullscreenPage,
+    BasePage,
+    { fitViewport: true },
     h(HotkeysProvider, [
       h("div.edit-page", [
-        h(
-          WidthAdjustablePanel,
-          {
-            expand: !showMap,
-            className: "edit-page-content",
-            storageID: "edit-panel-width",
-          },
-          // TODO: make this basename dynamic
-          [
+        h(Allotment, [
+          h("div.main-panel", [
             h(
               Header,
               {
@@ -66,32 +69,38 @@ export function Page() {
               },
               [h(ShowMapButton, { showMap, setShowMap })]
             ),
-            h(TableContainer, {}, [
-              h(tableComponent, {
-                url,
-                ingestProcessId,
-              }),
+            h("div.table-container", [
+              h(ErrorBoundary, [
+                h(tableComponent, {
+                  url,
+                  ingestProcessId,
+                }),
+              ]),
             ]),
-          ]
-        ),
-        h.if(showMap)(MapInterface, {
-          id: source_id,
-          map: mapBounds,
-          slug,
-          featureTypes: [editMode],
-        }),
+          ]),
+          h.if(showMap)("div.map-panel", [
+            h(MapInterface, {
+              map: mapBounds,
+              slug,
+              featureTypes: [editMode],
+              onClickFeatures: selectFeatures,
+              inspectPosition,
+              setInspectPosition,
+            }),
+          ]),
+          h.if(showSelectedFeatures)(MapSelectedFeatures, {
+            features: mapSelectedFeatures,
+            selectFeatures,
+            onClose() {
+              setInspectPosition(null);
+              selectFeatures([]);
+            },
+          }),
+        ]),
       ]),
     ])
   );
 }
-
-const TableContainer = ({ children }) => {
-  return h(
-    "div.table-container",
-    { style: { display: "flex", flexDirection: "column", height: "100%" } },
-    children
-  );
-};
 
 function ShowMapButton({ showMap, setShowMap }) {
   return h(Button, {

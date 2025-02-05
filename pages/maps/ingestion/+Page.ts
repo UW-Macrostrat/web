@@ -54,7 +54,6 @@ export function Page() {
 
   return h(ContentPage, [
     h(PageBreadcrumbs),
-    //h(IngestNavbar, { user }),
     h("div.ingestion-title-bar", [
       h("h1", ["Map ingestion queue"]),
       h("div.spacer"),

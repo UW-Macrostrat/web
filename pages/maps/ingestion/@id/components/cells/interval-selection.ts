@@ -4,14 +4,7 @@ import { Cell, EditableCell2Props } from "@blueprintjs/table";
 import React, { useMemo, memo } from "react";
 import { useInDarkMode } from "@macrostrat/ui-components";
 import { getColorPair } from "@macrostrat/color-utils";
-
-// @ts-ignore
-import hyper from "@macrostrat/hyper";
-
-import "~/styles/blueprint-select";
-import styles from "../../edit-table.module.sass";
-
-const h = hyper.styled(styles);
+import h from "../../hyper";
 
 interface Timescale {
   timescale_id: number;
@@ -153,13 +146,13 @@ let IntervalSelection = ({
             roleStructure: "listoption",
           }),
         },
-        h(IntervalButton, { interval, intent, setActive })
+        h(IntervalView, { interval, intent, setActive })
       ),
     ]
   );
 };
 
-function IntervalButton({ interval, intent, setActive }) {
+export function IntervalView({ interval, intent, setActive }) {
   const inDarkMode = useInDarkMode();
   const colors = getColorPair(interval?.color, inDarkMode);
   return h(
@@ -192,3 +185,4 @@ function IntervalButton({ interval, intent, setActive }) {
 IntervalSelection = memo(IntervalSelection);
 
 export default IntervalSelection;
+export { IntervalSelection };

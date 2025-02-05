@@ -31,7 +31,7 @@ export function Header({
     setIngestProcess(await response.json());
   }, []);
 
-  return h("div", [
+  return h("div.header", [
     h(PageBreadcrumbs),
     h("div.edit-page-header", [
       h("h2", "Map ingestion"),

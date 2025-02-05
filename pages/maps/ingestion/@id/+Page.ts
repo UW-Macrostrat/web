@@ -1,10 +1,13 @@
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
 import { AnchorButton, ButtonGroup } from "@blueprintjs/core";
-import { FullscreenPage } from "~/layouts";
 import { Header } from "./components";
 import { MapInterface } from "./components";
 import { usePageProps } from "~/renderer/usePageProps";
+import { useState } from "react";
+import { Allotment } from "allotment";
+import { MapSelectedFeatures } from "./details-panel";
+import "allotment/dist/style.css";
 
 const h = hyper.styled(styles);
 
@@ -30,12 +33,38 @@ export function Page() {
 
   const basename = `/maps/ingestion/${source_id}`;
 
-  return h(FullscreenPage, { className: "page" }, [
+  const [mapSelectedFeatures, selectFeatures] = useState([]);
+  const [inspectPosition, setInspectPosition] = useState(null);
+
+  const showSelectedFeatures =
+    mapSelectedFeatures != null && mapSelectedFeatures.length > 0;
+
+  return h("div.page", [
     h(Header, headerProps),
     h("div.ingestion-main-panel", [
       h("div.context-panel", [h(EditMenu, { parentRoute: basename })]),
-      h("div.main-content", [
-        h(MapInterface, { id: source_id, map: mapBounds, slug: source.slug }),
+      h(Allotment, { className: "main-panel", defaultSizes: [800, 300] }, [
+        h("div.map-container", [
+          h(MapInterface, {
+            map: mapBounds,
+            slug: source.slug,
+            onClickFeatures: selectFeatures,
+            selectedFeatures: mapSelectedFeatures,
+            inspectPosition,
+            setInspectPosition,
+          }),
+        ]),
+        h(Allotment.Pane, { visible: showSelectedFeatures }, [
+          h(MapSelectedFeatures, {
+            features: mapSelectedFeatures,
+            onClose() {
+              selectFeatures([]);
+              setInspectPosition(null);
+            },
+            selectFeatures,
+            className: "details-panel",
+          }),
+        ]),
       ]),
     ]),
   ]);

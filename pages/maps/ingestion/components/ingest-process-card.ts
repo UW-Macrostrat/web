@@ -31,10 +31,10 @@ export function IngestProcessCard({
       h("div.flex.row", [
         h("h3.map-card-title", name),
         h("div.spacer"),
-        h.if(
-          user !== undefined &&
-            !["failed", "pending"].includes(ingestProcess.state)
-        )(AnchorButton, { href: edit_href, icon: "edit" }),
+        h.if(user !== undefined)(AnchorButton, {
+          href: edit_href,
+          icon: "edit",
+        }),
       ]),
       h(IngestTagDisplay, { ingestProcess: ingestProcess, onUpdate }),
       h("div.flex.row", [
