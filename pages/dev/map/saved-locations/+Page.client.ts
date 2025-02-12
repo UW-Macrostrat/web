@@ -18,8 +18,7 @@ import {
 } from "@macrostrat/map-interface";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
-import { DetailsPanel } from "./details-panel";
-import Legend from "./legend-text.mdx";
+import { DetailsPanel, SpotsPanel } from "./details-panel";
 import { useInDarkMode } from "@macrostrat/ui-components";
 import { usePageContext } from "vike-react/usePageContext";
 import {
@@ -36,7 +35,7 @@ const baseURL = "/dev/map/saved-locations";
 
 export function Page() {
   const [inspectPosition, onSelectPosition] = useMapLocationManager();
-
+  const [mapInstance, setMapInstance] = useState(null);
   const style = useSavedLocationsStyle();
   const inDarkMode = useInDarkMode();
 
@@ -58,8 +57,10 @@ export function Page() {
       contextPanel: h(
         PanelCard,
         { className: "context-panel" },
-        h(Legend, {
+        h(SpotsPanel, {
           colors: getColors(inDarkMode),
+          onSelectPosition,
+          map: mapInstance,
         })
       ),
       detailPanel: h(DetailsPanel, {
@@ -79,6 +80,7 @@ export function Page() {
         mapboxToken: mapboxAccessToken,
         mapPosition: inspectPosition,
         bounds: [-125, 24, -66, 49],
+        onMapLoaded: (map) => setMapInstance(map),
         onMapMoved(pos, map) {
           setURL(inspectPosition, map);
         },
@@ -129,6 +131,13 @@ function useMapLocationManager(): [MapPosition, PositionBuilder] {
     (position: mapboxgl.LngLat | null, map: mapboxgl.Map | undefined) => {
       setInspectPosition(position);
       setURL(position, map);
+      if (map) {
+        console.log("MAP!!", map)
+        map.flyTo({
+          center: [position.lng, position.lat],
+          zoom: position.zoom || 12,
+        });
+      }
     },
     []
   );
@@ -155,7 +164,7 @@ function setURL(position: mapboxgl.LngLat, map: mapboxgl.Map) {
 
 function buildHashParams(map, selectedPosition) {
   if (selectedPosition == null) return "";
-  const z = map.getZoom();
+  const z = map.getZoom() ?? 7;
   // Parse hash and add zoom level
   let q = new URLSearchParams(window.location.hash.slice(1));
   q.set("z", z.toFixed(0));
