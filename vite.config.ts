@@ -10,21 +10,6 @@ import pkg from "./package.json";
 // Non-transpiled typescript can't be imported as a standalone package
 import textToolchain from "./packages/text-toolchain/src";
 
-const aliasedModules = [
-  "ui-components",
-  "column-components",
-  "api-types",
-  "api-views",
-  "column-views",
-  "timescale",
-  "map-interface",
-  "mapbox-utils",
-  "mapbox-react",
-  "mapbox-styles",
-  "map-components",
-  "data-components",
-];
-
 const gitEnv = revisionInfo(pkg, "https://github.com/UW-Macrostrat/web");
 // prefix with VITE_ to make available to client
 for (const [key, value] of Object.entries(gitEnv)) {
@@ -67,7 +52,6 @@ export default defineConfig({
       "~": path.resolve("./src"),
       "#": path.resolve("./pages"),
     },
-    dedupe: [...aliasedModules.map((d) => "@macrostrat/" + d)],
   },
   plugins: [
     react(),
