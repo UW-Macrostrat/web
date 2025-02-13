@@ -22,7 +22,7 @@ import {
   MapView,
   PanelCard,
 } from "@macrostrat/map-interface";
-import { buildMacrostratStyleLayers } from "@macrostrat/mapbox-styles";
+import { buildMacrostratStyleLayers } from "@macrostrat/map-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
 import {
   JSONView,

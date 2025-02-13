@@ -3,10 +3,7 @@ import { Switch } from "@blueprintjs/core";
 import { burwellTileDomain, mapboxAccessToken } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import { DevMapPage } from "@macrostrat/map-interface";
-import {
-  buildBasicStyle,
-  buildMacrostratStyle,
-} from "@macrostrat/mapbox-styles";
+import { buildBasicStyle, buildMacrostratStyle } from "@macrostrat/map-styles";
 import { useInDarkMode, useStoredState } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
 import { useCallback, useMemo } from "react";

@@ -1,5 +1,5 @@
 import h from "@macrostrat/hyper";
-import { IntervalCell, ExpandedLithologies } from "@macrostrat/data-sheet2";
+import { IntervalCell, ExpandedLithologies } from "@macrostrat/data-sheet";
 import { LithologyTag } from "~/components";
 
 export { IntervalCell, ExpandedLithologies };

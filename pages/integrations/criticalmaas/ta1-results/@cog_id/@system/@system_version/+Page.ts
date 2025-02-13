@@ -13,7 +13,7 @@ import {
   PanelCard,
   TileInfo,
 } from "@macrostrat/map-interface";
-import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
+import { buildMacrostratStyle } from "@macrostrat/map-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
 import { useDarkMode } from "@macrostrat/ui-components";
 import boundingBox from "@turf/bbox";

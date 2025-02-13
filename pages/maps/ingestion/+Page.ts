@@ -5,7 +5,7 @@ import react, { useCallback, useEffect, useState } from "react";
 import { PageBreadcrumbs } from "~/components";
 import { IngestProcessCard } from "./components";
 import styles from "./main.module.sass";
-import { useAuth, AuthStatus } from "@macrostrat/auth-components";
+import { useAuth, AuthStatus } from "@macrostrat/form-components";
 
 import { ContentPage } from "~/layouts";
 import Tag from "./components/Tag";

@@ -17,8 +17,6 @@
     "test": "vitest"
   },
   "workspaces": [
-    "deps/web-components/packages/*",
-    "deps/cesium-viewer",
     "packages/*"
   ],
   "authors": [
@@ -73,7 +71,9 @@
     "@macrostrat/data-components": "^0.0.5",
     "@macrostrat/data-sheet": "^2.0.0",
     "@macrostrat/feedback-components": "^1.1.0",
+    "@macrostrat/form-components": "^0.1.1",
     "@macrostrat/hyper": "^2.2.1",
+    "@macrostrat/map-components": "portal:../web-components/packages/svg-map-components",
     "@macrostrat/map-interface": "^1.1.0",
     "@macrostrat/map-styles": "^1.0.3",
     "@macrostrat/mapbox-react": "^2.4.0",
@@ -178,7 +178,8 @@
     "@macrostrat/timescale": "portal:../web-components/packages/timescale",
     "@macrostrat/ui-components": "portal:../web-components/packages/ui-components",
     "@macrostrat/hyperstyle-loader": "portal:../web-components/toolchain/hyperstyle-loader",
-    "@macrostrat/vite-plugin-hyperstyles": "portal:../web-components/toolchain/vite-plugin-hyperstyles"
+    "@macrostrat/vite-plugin-hyperstyles": "portal:../web-components/toolchain/vite-plugin-hyperstyles",
+    "@macrostrat/map-components": "portal:../web-components/packages/svg-map-components"
   },
   "prettier": {
     "proseWrap": "always"

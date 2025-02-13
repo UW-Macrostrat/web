@@ -44,7 +44,7 @@ export function BaseLayer({ enabled = true, style, accessToken, ...rest }) {
 import "@znemz/cesium-navigation/dist/index.css";
 
 import { SETTINGS } from "../settings";
-import { buildXRayStyle } from "@macrostrat/mapbox-styles";
+import { buildXRayStyle } from "@macrostrat/map-styles";
 
 // const VectorGeologyLayer = ({ enabled = true, ...rest }) => {
 //   const provider = useRef(

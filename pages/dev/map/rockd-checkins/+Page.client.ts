@@ -6,7 +6,7 @@ import h from "@macrostrat/hyper";
 
 import { mapboxAccessToken, tileserverDomain } from "@macrostrat-web/settings";
 import { DevMapPage } from "@macrostrat/map-interface";
-import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
+import { buildMacrostratStyle } from "@macrostrat/map-styles";
 import { mergeStyles } from "@macrostrat/mapbox-utils";
 import mapboxgl from "mapbox-gl";
 import { useInDarkMode } from "@macrostrat/ui-components";

@@ -1,4 +1,4 @@
-import { MacrostratAPIProvider } from "@macrostrat/api-views";
+import { MacrostratAPIProvider } from "@macrostrat/column-views";
 import {
   ColumnNavigatorMap,
   UnitSelectionProvider,

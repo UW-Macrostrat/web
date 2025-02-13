@@ -5,9 +5,9 @@ import {
   PostgRESTTableView,
   ColorCell,
   EditableTextArea,
-} from "@macrostrat/data-sheet2";
+} from "@macrostrat/data-sheet";
 import { asChromaColor } from "@macrostrat/color-utils";
-import { AuthStatus } from "@macrostrat/auth-components";
+import { AuthStatus } from "@macrostrat/form-components";
 import { postgrestPrefix } from "@macrostrat-web/settings";
 
 const colorField = {

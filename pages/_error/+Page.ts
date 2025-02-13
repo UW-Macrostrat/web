@@ -40,7 +40,7 @@ function LoginButton() {
   /** For now, the login button only loads on the client side */
   return h(ClientOnly, {
     load: async () => {
-      const res = await import("@macrostrat/auth-components");
+      const res = await import("@macrostrat/form-components");
       return res.AuthStatus;
     },
     fallback: h(

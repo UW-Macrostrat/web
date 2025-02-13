@@ -2,7 +2,7 @@ import { FullscreenPage } from "~/layouts";
 import styles from "./main.module.sass";
 import hyper from "@macrostrat/hyper";
 import { PageBreadcrumbs } from "~/components";
-import { PostgRESTTableView } from "@macrostrat/data-sheet2";
+import { PostgRESTTableView } from "@macrostrat/data-sheet";
 import { postgrestPrefix } from "@macrostrat-web/settings";
 
 const h = hyper.styled(styles);

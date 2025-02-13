@@ -9,8 +9,11 @@ import {
   ColumnContext,
   NotesColumn,
 } from "@macrostrat/column-components";
-import { MacrostratColumnProvider } from "@macrostrat/api-views";
-import { CompositeUnitsColumn, IUnit } from "@macrostrat/column-views";
+import {
+  CompositeUnitsColumn,
+  IUnit,
+  MacrostratColumnProvider,
+} from "@macrostrat/column-views";
 import { useContext } from "react";
 
 interface IColumnProps {

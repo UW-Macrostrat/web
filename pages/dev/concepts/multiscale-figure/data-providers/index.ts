@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import {
   useMeasurementData,
   MeasurementDataContext,
-} from "@macrostrat/concept-app-helpers";
+} from "@macrostrat/column-views";
 import { useAPIResult } from "@macrostrat/ui-components";
 import type {
   MeasurementLong,
@@ -14,7 +14,7 @@ import {
   alignMeasurementsToTargetColumn,
   filterMeasurements,
   FilterFunc,
-} from "@macrostrat/api-utils";
+} from "@macrostrat/stratigraphy-utils";
 
 /** This file defines subsidiary measurement data providers that transform
  * data requests into formats for column subsets.
@@ -23,6 +23,7 @@ import {
 type MeasurementProviderProps = React.PropsWithChildren<{
   measureData?: MeasurementLong[];
 }>;
+
 function AlignedMeasurementProvider(
   props: MeasurementProviderProps & { targetColumn: ColumnSpec }
 ) {

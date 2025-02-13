@@ -1,5 +1,5 @@
 import { tileserverDomain, mapboxAccessToken } from "@macrostrat-web/settings";
-import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
+import { buildMacrostratStyle } from "@macrostrat/map-styles";
 import { mergeStyles, getMapboxStyle } from "@macrostrat/mapbox-utils";
 import { useInDarkMode, useAsyncEffect } from "@macrostrat/ui-components";
 import { useState } from "react";

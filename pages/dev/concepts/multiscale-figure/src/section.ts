@@ -4,12 +4,15 @@ import {
   ColumnSVG,
   useColumn,
 } from "@macrostrat/column-components";
-import { AgeAxis } from "@macrostrat/concept-app-helpers";
-import { IUnit } from "@macrostrat/column-views";
+import {
+  AgeAxis,
+  IUnit,
+  preprocessUnits,
+  MacrostratColumnProvider,
+} from "@macrostrat/column-views";
 import { Timescale, TimescaleOrientation } from "@macrostrat/timescale";
+
 //import "../../../packages/timescale/dist/timescale.css";
-import { preprocessUnits } from "@macrostrat/concept-app-helpers";
-import { MacrostratColumnProvider } from "@macrostrat/api-views";
 
 interface IColumnProps {
   data: IUnit[];

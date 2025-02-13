@@ -19,7 +19,7 @@ import {
   buildInspectorStyle,
 } from "@macrostrat/map-interface";
 import { useMapRef } from "@macrostrat/mapbox-react";
-import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
+import { buildMacrostratStyle } from "@macrostrat/map-styles";
 import { mergeStyles } from "@macrostrat/mapbox-utils";
 import {
   DarkModeButton,
@@ -66,8 +66,7 @@ function weaverStyle(type: object) {
       weaver: {
         type: "vector",
         tiles: [
-          "http://localhost:8000/weaver-tile/{z}/{x}/{y}?model_name=" +
-            type.id,
+          "http://localhost:8000/weaver-tile/{z}/{x}/{y}?model_name=" + type.id,
         ],
       },
     },

@@ -2,11 +2,11 @@ import h from "@macrostrat/hyper";
 import { useColumnDivisions } from "@macrostrat/column-components";
 import { Padding, extractPadding } from "@macrostrat/ui-components";
 import { AnnotatedUnitsColumn } from "@macrostrat/column-views";
-import { useMeasurementData } from "@macrostrat/concept-app-helpers";
+import { useMeasurementData } from "@macrostrat/column-views";
 import { createContext, useContext, useMemo } from "react";
-import { scaleLinear } from "@vx/scale";
-import { AreaClosed } from "@vx/shape";
-import { AxisBottom, AxisScale } from "@vx/axis";
+import { scaleLinear } from "@visx/scale";
+import { AreaClosed } from "@visx/shape";
+import { AxisBottom, AxisScale } from "@visx/axis";
 import { max } from "d3-array";
 import {
   kernelDensityEstimator,

@@ -4127,6 +4127,7 @@ __metadata:
     "@types/mapbox__mapbox-gl-draw": "npm:^1.2.3"
     "@types/react-dom": "npm:^17.0.16||^18.0.0"
     axios: "npm:^1.7.9"
+    classnames: "npm:^2.5.1"
     mapbox-gl: "npm:^2.15.0"
   peerDependencies:
     react: ^17.0.2||^18
@@ -4145,18 +4146,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/hyper@npm:^1.2.11":
-  version: 1.4.2
-  resolution: "@macrostrat/hyper@npm:1.4.2"
-  dependencies:
-    "@types/react": "npm:*"
-    "@types/react-hyperscript": "npm:^3.0.5"
-    classnames: "npm:^2.3.1"
-    react-hyperscript: "npm:^3.2.0"
-  checksum: 10/964ed47d7ea1114dfa578f72e5d689a3f1a16aaabc82c679a0fb6c0ed8ab875085d2a48407b4b0e9408415c1e1ffefada157d126c7cadfbbdef6ad9ab22f4c57
-  languageName: node
-  linkType: hard
-
 "@macrostrat/hyper@npm:^3.0.6":
   version: 3.0.6
   resolution: "@macrostrat/hyper@npm:3.0.6"
@@ -4169,30 +4158,35 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/map-components@npm:^0.2.1":
-  version: 0.2.6
-  resolution: "@macrostrat/map-components@npm:0.2.6"
+"@macrostrat/map-components@portal:../web-components/packages/svg-map-components::locator=%40macrostrat%2Fweb%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@macrostrat/map-components@portal:../web-components/packages/svg-map-components::locator=%40macrostrat%2Fweb%40workspace%3A."
   dependencies:
-    "@macrostrat/hyper": "npm:^1.2.11"
-    "@macrostrat/ui-components": "npm:^0.4.4"
+    "@macrostrat/hyper": "npm:^3.0.6"
+    "@macrostrat/ui-components": "workspace:^"
+    "@swc/helpers": "npm:^0.5.15"
     "@types/d3-array": "npm:^2.0.0"
     "@types/d3-drag": "npm:^1.2.3"
-    "@types/d3-geo": "npm:^1.11.1"
+    "@types/d3-geo": "npm:^1.12.3"
     "@types/d3-selection": "npm:^1.4.2"
     "@types/d3-zoom": "npm:^1.7.4"
-    "@types/react-dom": "npm:^16.9.8"
-    d3-array: "npm:^2.5.1"
+    "@types/geojson": "npm:^7946.0.8"
+    "@types/react-dom": "npm:^16.9.8||^17.0.6||^18.0.0"
+    axios: "npm:^1.7.9"
+    d3-array: "npm:^3.2.4"
     d3-drag: "npm:^1.2.5"
     d3-geo: "npm:^1.11.9"
     d3-selection: "npm:^1.4.1"
     d3-zoom: "npm:^1.8.3"
-    prop-types: "npm:^15.7.2"
+    kld-intersections: "npm:^0.7.0"
+    kld-path-parser: "npm:^0.2.1"
+    prop-types: "npm:^15.8.1"
+    topojson-client: "npm:^3.1.0"
   peerDependencies:
-    react: ^16.11.0
-    react-dom: ^16.11.0
-  checksum: 10/a31d2bbdcd0710bd6d38f067a0d9f296ddc9b957e1978ff77fe1837d43e917d088938bbf65f3edf69697dc37ded7d5f44b72cda62b98478a423d75a57231dcbe
+    react: ^16.11.0||^17.0.0||^18.0.0
+    react-dom: ^16.11.0||^17.0.0||^18.0.0
   languageName: node
-  linkType: hard
+  linkType: soft
 
 "@macrostrat/map-interface@portal:../web-components/packages/map-interface::locator=%40macrostrat%2Fweb%40workspace%3A.":
   version: 0.0.0-use.local
@@ -4399,7 +4393,9 @@ __metadata:
     "@macrostrat/data-components": "npm:^0.0.5"
     "@macrostrat/data-sheet": "npm:^2.0.0"
     "@macrostrat/feedback-components": "npm:^1.1.0"
+    "@macrostrat/form-components": "npm:^0.1.1"
     "@macrostrat/hyper": "npm:^2.2.1"
+    "@macrostrat/map-components": "portal:../web-components/packages/svg-map-components"
     "@macrostrat/map-interface": "npm:^1.1.0"
     "@macrostrat/map-styles": "npm:^1.0.3"
     "@macrostrat/mapbox-react": "npm:^2.4.0"
@@ -7159,15 +7155,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:^16.9.8":
-  version: 16.9.19
-  resolution: "@types/react-dom@npm:16.9.19"
-  dependencies:
-    "@types/react": "npm:^16"
-  checksum: 10/af1b13a4207bd13f1b4a2db313b1c37b2ba17eec19ca7c270a6c5173c1eed579e70235060f9d422ea4da1a2bcb72e7a0a6cb5fffdfb1ecb40808357abc19b3e1
-  languageName: node
-  linkType: hard
-
 "@types/react-dom@npm:^16.9.8||^17.0.6||^18.0.0, @types/react-dom@npm:^17.0.16||^18.0.0":
   version: 18.3.5
   resolution: "@types/react-dom@npm:18.3.5"
@@ -7204,15 +7191,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-hyperscript@npm:^3.0.5":
-  version: 3.0.13
-  resolution: "@types/react-hyperscript@npm:3.0.13"
-  dependencies:
-    "@types/react": "npm:*"
-  checksum: 10/d7218351cd4d355f3e8c3b11b581ce747e7c5b0b8ae9f103dd9f835d2b89afc823005f36f3dce68082270a3e5ee5910739d4066c84eae81117f3d44d099ade27
-  languageName: node
-  linkType: hard
-
 "@types/react-redux@npm:^7.1.20, @types/react-redux@npm:^7.1.7":
   version: 7.1.26
   resolution: "@types/react-redux@npm:7.1.26"
@@ -7243,17 +7221,6 @@ __metadata:
     "@types/prop-types": "npm:*"
     csstype: "npm:^3.0.2"
   checksum: 10/c9bbdfeacd5347d2240e0d2cb5336bc57dbc1b9ff557b6c4024b49df83419e4955553518169d3736039f1b62608e15b35762a6c03d49bd86e33add4b43b19033
-  languageName: node
-  linkType: hard
-
-"@types/react@npm:^16":
-  version: 16.14.46
-  resolution: "@types/react@npm:16.14.46"
-  dependencies:
-    "@types/prop-types": "npm:*"
-    "@types/scheduler": "npm:*"
-    csstype: "npm:^3.0.2"
-  checksum: 10/1b071eb04725aab375417588c42afd235d73ba5f4cc33faab916d74d75b83a23618f033cd74a7224803d67ef54162f8e9515b1218275301803918f9c6a472444
   languageName: node
   linkType: hard
 
@@ -10070,7 +10037,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"d3-array@npm:2, d3-array@npm:^2.3.0, d3-array@npm:^2.5.1":
+"d3-array@npm:2, d3-array@npm:^2.3.0":
   version: 2.12.1
   resolution: "d3-array@npm:2.12.1"
   dependencies:
@@ -17927,15 +17894,6 @@ __metadata:
     prop-types: ^15.5
     react: ^15.6 || ^16
   checksum: 10/aabbb856caeb5e9eb328e7d30be6c8689cf39c99b0120adc123a36b9e2091b4a2eb5e59c12fde0433cf8a9fb195ace936fb75fe782feb80ee45ed63a89b04c35
-  languageName: node
-  linkType: hard
-
-"react-hyperscript@npm:^3.2.0":
-  version: 3.2.0
-  resolution: "react-hyperscript@npm:3.2.0"
-  peerDependencies:
-    react: ">= 0.12.0 < 17.0.0"
-  checksum: 10/ba19730d6a27409619a6d0ef77236e152607649ab9141237ed87e31ff901ab1daf1d319a043b543a7004b91e47ecd881f2b3a6e1ba96f01f776e4271a6372d20
   languageName: node
   linkType: hard
 
