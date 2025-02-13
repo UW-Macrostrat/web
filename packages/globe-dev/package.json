@@ -14,10 +14,10 @@
     "vite-plugin-cesium": "^1.2.22"
   },
   "dependencies": {
-    "@macrostrat/cesium-martini": "^1.5.2",
+    "@macrostrat/cesium-martini": "^1.5.3",
     "@macrostrat/cesium-vector-provider": "2.0.2",
-    "@macrostrat/cesium-viewer": "^1.2.0",
-    "@macrostrat/hyper": "^2.0.1",
+    "@macrostrat/cesium-viewer": "^1.2.1",
+    "@macrostrat/hyper": "^3.0.6",
     "@macrostrat/mapbox-react": "workspace:*",
     "@macrostrat/mapbox-utils": "workspace:*",
     "cesium": "^1.123.1",

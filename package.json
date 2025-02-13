@@ -161,8 +161,7 @@
   },
   "resolutions": {
     "cesium": "^1.123.1",
-    "resium:": "1.17.1",
-    "@macrostrat/cesium-viewer": "portal:/Users/Daven/Projects/Macrostrat/Software/cesium-viewer"
+    "resium:": "1.17.1"
   },
   "prettier": {
     "proseWrap": "always"

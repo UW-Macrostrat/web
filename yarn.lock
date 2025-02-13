@@ -4272,10 +4272,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@macrostrat-web/globe@workspace:packages/globe-dev"
   dependencies:
-    "@macrostrat/cesium-martini": "npm:^1.5.2"
+    "@macrostrat/cesium-martini": "npm:^1.5.3"
     "@macrostrat/cesium-vector-provider": "npm:2.0.2"
-    "@macrostrat/cesium-viewer": "npm:^1.2.0"
-    "@macrostrat/hyper": "npm:^2.0.1"
+    "@macrostrat/cesium-viewer": "npm:^1.2.1"
+    "@macrostrat/hyper": "npm:^3.0.6"
     "@macrostrat/mapbox-react": "workspace:*"
     "@macrostrat/mapbox-utils": "workspace:*"
     cesium: "npm:^1.123.1"
@@ -4440,9 +4440,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@macrostrat/cesium-martini@npm:^1.2.3":
-  version: 1.5.1
-  resolution: "@macrostrat/cesium-martini@npm:1.5.1"
+"@macrostrat/cesium-martini@npm:^1.2.3, @macrostrat/cesium-martini@npm:^1.5.3":
+  version: 1.5.3
+  resolution: "@macrostrat/cesium-martini@npm:1.5.3"
   dependencies:
     "@mapbox/martini": "git+https://github.com/davenquinn/martini.git"
     "@types/ndarray": "npm:^1.0.11"
@@ -4450,21 +4450,7 @@ __metadata:
     cesium: "npm:^1.81.0"
     get-pixels: "npm:^3.3.2"
     ndarray: "npm:^1.0.19"
-  checksum: 10/6b7bdd20ac1a9b4a50d17de61693eb3a9cf16769d0bcae2c8bd4fbc5b64cf8c19c1b1186bcacd1adf6e1bf08ecfe398f12be15fe76045e925b82054eda91f10a
-  languageName: node
-  linkType: hard
-
-"@macrostrat/cesium-martini@npm:^1.5.2":
-  version: 1.5.2
-  resolution: "@macrostrat/cesium-martini@npm:1.5.2"
-  dependencies:
-    "@mapbox/martini": "git+https://github.com/davenquinn/martini.git"
-    "@types/ndarray": "npm:^1.0.11"
-    axios: "npm:^1.7.9"
-    cesium: "npm:^1.81.0"
-    get-pixels: "npm:^3.3.2"
-    ndarray: "npm:^1.0.19"
-  checksum: 10/0019dd7ae9ee80972c6226b3b163c90236d4ca432b3895b2c6edbc0ab5dfefd5a1b9b9b0d4670052b95abc9bcd9af18dd14787e4d01800b023327b3c9ffeaa1c
+  checksum: 10/b00536f16af788ac755bfd69b38e2e6afd08d1d2d82f5ff4ebf9aca4ce1b0161c052d396d2e9a50c78c123f70a2ac3decf7efa6cecc91689472041cf2e2af387
   languageName: node
   linkType: hard
 
@@ -4477,9 +4463,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/cesium-viewer@portal:/Users/Daven/Projects/Macrostrat/Software/cesium-viewer::locator=%40macrostrat%2Fweb%40workspace%3A.":
-  version: 0.0.0-use.local
-  resolution: "@macrostrat/cesium-viewer@portal:/Users/Daven/Projects/Macrostrat/Software/cesium-viewer::locator=%40macrostrat%2Fweb%40workspace%3A."
+"@macrostrat/cesium-viewer@npm:^1.2.1":
+  version: 1.2.1
+  resolution: "@macrostrat/cesium-viewer@npm:1.2.1"
   dependencies:
     "@blueprintjs/core": "npm:^5.16.6"
     "@macrostrat/cesium-martini": "npm:^1.2.3"
@@ -4494,8 +4480,9 @@ __metadata:
   peerDependencies:
     react: ^16||^17||^18
     react-dom: ^16||^17||^18
+  checksum: 10/1d1356d16fb36a4ca135a325f291f5d9a2d881f1975e86824d4350f57773784008d1af1b4000815490b374e8f3d47ae15a533e177d2bfa44deb111c2d88911e9
   languageName: node
-  linkType: soft
+  linkType: hard
 
 "@macrostrat/chronostrat-utils@workspace:*, @macrostrat/chronostrat-utils@workspace:deps/web-components/packages/chronostrat-utils":
   version: 0.0.0-use.local
