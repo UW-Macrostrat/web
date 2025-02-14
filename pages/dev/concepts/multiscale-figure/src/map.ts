@@ -1,12 +1,13 @@
 import { useRef } from "react";
 import h from "@macrostrat/hyper";
-import { Globe, LandLayer } from "@macrostrat/map-components";
+import { Globe, LandLayer } from "@macrostrat/svg-map-components";
 import { geoCentroid } from "d3-geo";
 import { MeasurementsLayer, Columns } from "@macrostrat/column-views";
 import { useAPIResult } from "@macrostrat/ui-components";
 import useSize from "@react-hook/size";
-import { FeatureLayer } from "@macrostrat/map-components";
+import { FeatureLayer } from "@macrostrat/svg-map-components";
 import chroma from "chroma-js";
+
 const useColumnData = (params) => {
   const colParams = { ...params, format: "geojson" };
   return useAPIResult("/columns", colParams)?.features[0];

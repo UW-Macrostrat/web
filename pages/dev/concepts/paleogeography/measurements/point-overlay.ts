@@ -1,21 +1,17 @@
 /// https://paleobiodb.org/data1.2/colls/summary.json?show=time&min_ma=10&max_ma=12&level=3
 import { useRotations, usePathGenerator } from "@macrostrat/corelle";
-import { FeatureLayer } from "@macrostrat/map-components";
+import { FeatureLayer } from "@macrostrat/svg-map-components";
 import { useSGPData } from "./features/sgp";
 import { scalePow } from "d3-scale";
 import {
   usePBDBFeatures,
   useMacrostratFeatures,
-  useSGPFeatures
+  useSGPFeatures,
 } from "./features";
 import h from "@macrostrat/hyper";
 
-const radiusScale = scalePow([0, 30], [1, 10])
-  .exponent(0.5)
-  .clamp(true);
-const opacityScale = scalePow([0, 30], [0.5, 0.2])
-  .exponent(0.5)
-  .clamp(true);
+const radiusScale = scalePow([0, 30], [1, 10]).exponent(0.5).clamp(true);
+const opacityScale = scalePow([0, 30], [0.5, 0.2]).exponent(0.5).clamp(true);
 
 function PBDBPoint({ feature }) {
   /** Render a single PBDB point */
@@ -31,7 +27,7 @@ function PBDBPoint({ feature }) {
   if (pt == null) return null;
   return h("path", {
     opacity: opacityScale(nco + noc),
-    d: pt
+    d: pt,
   });
 }
 
@@ -50,7 +46,7 @@ export function PBDBCollectionLayer() {
 
 const defaultStyle = {
   fill: "transparent",
-  stroke: "purple"
+  stroke: "purple",
 };
 
 function BasicPoint({ feature }) {
@@ -67,7 +63,7 @@ function BasicPoint({ feature }) {
   if (pt == null) return null;
   return h("path", {
     opacity: opacityScale(pointCount),
-    d: pt
+    d: pt,
   });
 }
 
