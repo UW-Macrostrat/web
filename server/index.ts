@@ -85,6 +85,15 @@ async function startServer() {
 
   app.use(compression());
 
+  // Assets and static files
+  // Serve FGDC assets
+  const fgdcPatterns = join(
+    dirname(require.resolve("geologic-patterns")),
+    "assets"
+  );
+
+  app.use("/assets/geologic-patterns", sirv(fgdcPatterns));
+
   //
   if (isProduction) {
     app.use(sirv(`${root}/dist/client`));
