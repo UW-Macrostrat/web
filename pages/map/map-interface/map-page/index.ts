@@ -18,6 +18,7 @@ import Searchbar from "../components/navbar";
 import MapContainer from "./map-view";
 import { MenuPage } from "./menu";
 import h from "./main.module.styl";
+import { ErrorBoundary } from "@macrostrat/ui-components";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));
@@ -69,26 +70,29 @@ function MapPage({
   }
 
   return h(
-    MapAreaContainer,
-    {
-      navbar: h(Searchbar, { className: "searchbar" }),
-      contextPanel: h(Menu, {
-        className: "context-panel",
-        menuPage: menuPage ?? navMenuPage,
-      }),
-      detailPanel: h(InfoDrawerHolder),
-      detailPanelStyle: "floating",
-      bottomPanel: h(ElevationChart, null),
-      contextPanelOpen: contextPanelOpen || inputFocus,
-      detailPanelOpen: infoDrawerOpen,
-      className: classNames(
-        "macrostrat-map-container",
-        inputFocus ? "searching" : contextClass,
-        contextPanelOpen || inputFocus ? "context-open" : "context-closed"
-      ),
-      fitViewport: true,
-    },
-    [h("div.context-underlay", { onClick: onMouseDown }), h(MapView)]
+    ErrorBoundary,
+    h(
+      MapAreaContainer,
+      {
+        navbar: h(Searchbar, { className: "searchbar" }),
+        contextPanel: h(Menu, {
+          className: "context-panel",
+          menuPage: menuPage ?? navMenuPage,
+        }),
+        detailPanel: h(InfoDrawerHolder),
+        detailPanelStyle: "floating",
+        bottomPanel: h(ElevationChart, null),
+        contextPanelOpen: contextPanelOpen || inputFocus,
+        detailPanelOpen: infoDrawerOpen,
+        className: classNames(
+          "macrostrat-map-container",
+          inputFocus ? "searching" : contextClass,
+          contextPanelOpen || inputFocus ? "context-open" : "context-closed"
+        ),
+        fitViewport: true,
+      },
+      [h("div.context-underlay", { onClick: onMouseDown }), h(MapView)]
+    )
   );
 }
 

@@ -6,6 +6,7 @@ import ssr from "vike/plugin";
 import { defineConfig, Plugin } from "vite";
 import cesium from "vite-plugin-cesium";
 import pkg from "./package.json";
+import { cjsInterop } from "vite-plugin-cjs-interop";
 
 // Non-transpiled typescript can't be imported as a standalone package
 import textToolchain from "./packages/text-toolchain/src";
@@ -47,14 +48,20 @@ function hyperStyles(): Plugin {
 export default defineConfig({
   //root: path.resolve("./src"),
   resolve: {
-    conditions: ["typescript"],
+    conditions: ["source"],
     alias: {
       "~": path.resolve("./src"),
       "#": path.resolve("./pages"),
     },
+    dedupe: ["react", "react-dom", "@macrostrat/mapbox-react"],
   },
   plugins: [
     react(),
+    // Fix broken imports in non-ESM packages. We should endeavor to move away from these
+    // dependencies if they are unmaintained.
+    cjsInterop({
+      dependencies: ["react-images", "labella", "react-color"],
+    }),
     textToolchain({
       contentDir: path.resolve(__dirname, "content"),
       wikiPrefix: "/dev/docs",
@@ -82,12 +89,7 @@ export default defineConfig({
     // If not building for server context
   },
   ssr: {
-    // https://vike.dev/broken-npm-package
-    noExternal: [
-      "labella",
-      "@supabase/postgrest-js",
-      "@macrostrat/auth-components",
-    ],
+    noExternal: ["@supabase/postgrest-js"],
   },
   css: {
     preprocessorOptions: {

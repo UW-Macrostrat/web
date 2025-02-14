@@ -10,7 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "@blueprintjs/core": "^5.10.3",
-    "@macrostrat/hyper": "^2.0",
+    "@macrostrat/hyper": "^3.0.6",
     "@macrostrat/ui-components": "workspace:*",
     "chroma-js": "^2.0.6",
     "d3": "^5.12.0",
