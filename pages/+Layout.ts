@@ -1,8 +1,4 @@
-import {
-  DarkModeProvider,
-  DevToolsConsole,
-  DevToolsProvider,
-} from "@macrostrat/ui-components";
+import { DarkModeProvider, DevToolsConsole } from "@macrostrat/ui-components";
 import { ReactNode } from "react";
 
 import { AuthProvider } from "~/_providers/auth";
