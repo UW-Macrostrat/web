@@ -1,6 +1,6 @@
 import { geoNaturalEarth1 } from "d3-geo";
 import { useRef } from "react";
-import { PlateFeatureLayer } from "@macrostrat/corelle";
+import { PlateFeatureLayer } from "@corelle/svg-map-layers";
 import { hyperStyled } from "@macrostrat/hyper";
 import { PBDBCollectionLayer } from "./point-overlay";
 import { Globe } from "@macrostrat/svg-map-components";

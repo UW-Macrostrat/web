@@ -53,7 +53,12 @@ export default defineConfig({
       "~": path.resolve("./src"),
       "#": path.resolve("./pages"),
     },
-    dedupe: ["react", "react-dom", "@macrostrat/mapbox-react"],
+    dedupe: [
+      "react",
+      "react-dom",
+      "@macrostrat/mapbox-react",
+      "@macrostrat/ui-components",
+    ],
   },
   plugins: [
     react(),
@@ -97,5 +102,8 @@ export default defineConfig({
         api: "modern-compiler",
       },
     },
+  },
+  optimizeDeps: {
+    extensions: [".css"],
   },
 });

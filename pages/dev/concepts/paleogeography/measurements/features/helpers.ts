@@ -1,7 +1,7 @@
 import { geoContains } from "d3-geo";
 import Supercluster from "supercluster";
 import { useMemo } from "react";
-import { usePlatePolygons } from "@macrostrat/corelle";
+import { usePlatePolygons } from "@corelle/svg-map-layers";
 
 export function intersectFeatures(polygons, points) {
   let output = [];
@@ -13,7 +13,7 @@ export function intersectFeatures(polygons, points) {
           ...pt,
           old_lim,
           plate_id,
-          young_lim
+          young_lim,
         });
         break;
       }
@@ -25,7 +25,7 @@ export function intersectFeatures(polygons, points) {
 export function clusterPoints(data, zoomLevel = 4, opts = {}) {
   const cluster = new Supercluster({
     radius: 20,
-    ...opts
+    ...opts,
   });
   cluster.load(data);
   return cluster.getClusters([-180, -90, 180, 90], zoomLevel);

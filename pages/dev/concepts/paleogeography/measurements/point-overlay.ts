@@ -1,5 +1,5 @@
 /// https://paleobiodb.org/data1.2/colls/summary.json?show=time&min_ma=10&max_ma=12&level=3
-import { useRotations, usePathGenerator } from "@macrostrat/corelle";
+import { useRotations, usePathGenerator } from "@corelle/svg-map-layers";
 import { FeatureLayer } from "@macrostrat/svg-map-components";
 import { useSGPData } from "./features/sgp";
 import { scalePow } from "d3-scale";

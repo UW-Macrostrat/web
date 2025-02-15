@@ -18,8 +18,8 @@
     "@macrostrat/cesium-vector-provider": "2.0.2",
     "@macrostrat/cesium-viewer": "^1.2.1",
     "@macrostrat/hyper": "^3.0.6",
-    "@macrostrat/mapbox-react": "workspace:*",
-    "@macrostrat/mapbox-utils": "workspace:*",
+    "@macrostrat/mapbox-react": "^2.5.0",
+    "@macrostrat/mapbox-utils": "^1.4.0",
     "cesium": "^1.123.1",
     "resium": "^1.18.0"
   }

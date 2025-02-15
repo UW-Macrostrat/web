@@ -4,9 +4,9 @@
   "main": "src/index.ts",
   "license": "ISC",
   "dependencies": {
-    "@macrostrat-web/settings": "workspace:^1.0.0",
+    "@macrostrat-web/settings": "workspace:^",
     "@macrostrat/hyper": "^3.0.6",
-    "@macrostrat/ui-components": "workspace:*",
+    "@macrostrat/ui-components": "^4.1.0",
     "@visx/gradient": "^3.3.0",
     "@visx/group": "^3.3.0",
     "@visx/hierarchy": "^3.3.0",

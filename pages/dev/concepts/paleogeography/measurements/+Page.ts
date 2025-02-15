@@ -1,7 +1,7 @@
 import h from "@macrostrat/hyper";
 import { useState, useEffect } from "react";
 import { ResizeSensor } from "@blueprintjs/core";
-import { RotationsProvider } from "@macrostrat/corelle";
+import { RotationsProvider } from "@corelle/svg-map-layers";
 import { Timescale } from "@macrostrat/timescale";
 //// import "@macrostrat/timescale/dist/timescale.css";
 import { Map } from "./map";
@@ -39,6 +39,7 @@ function useTimeRange(range: [number, number], initialValue: number) {
         setTime(Math.max(time - 2, range[1]));
       }
     }
+
     document.onkeydown = checkKey;
   }, [time]);
 

@@ -1,6 +1,6 @@
 import { geoStereographic } from "d3-geo";
 import { useRef } from "react";
-import { PlateFeatureLayer, PlatePolygons } from "@macrostrat/corelle";
+import { PlateFeatureLayer, PlatePolygons } from "@corelle/svg-map-layers";
 import { hyperStyled } from "@macrostrat/hyper";
 import {
   PBDBCollectionLayer,
