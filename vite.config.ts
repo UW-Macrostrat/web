@@ -48,7 +48,7 @@ function hyperStyles(): Plugin {
 export default defineConfig({
   //root: path.resolve("./src"),
   resolve: {
-    conditions: ["source"],
+    //conditions: ["source"],
     alias: {
       "~": path.resolve("./src"),
       "#": path.resolve("./pages"),
@@ -94,7 +94,21 @@ export default defineConfig({
     // If not building for server context
   },
   ssr: {
-    noExternal: ["@supabase/postgrest-js"],
+    noExternal: [
+      /** All dependencies that cannot be bundled on the server (e.g., due to CSS imports)
+       * should be listed here.
+       */
+      "@supabase/postgrest-js",
+      "@macrostrat/ui-components",
+      "@macrostrat/form-components",
+      "@macrostrat/column-views",
+      "@macrostrat/column-components",
+      "@macrostrat/svg-map-components",
+      "@macrostrat/data-components",
+      "@macrostrat/map-interface",
+      "@macrostrat/timescale",
+      "@macrostrat/feedback-components",
+    ],
   },
   css: {
     preprocessorOptions: {
@@ -103,7 +117,7 @@ export default defineConfig({
       },
     },
   },
-  optimizeDeps: {
-    extensions: [".css"],
-  },
+  // optimizeDeps: {
+  //   extensions: [".css"],
+  // },
 });
