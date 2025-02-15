@@ -1,6 +1,6 @@
 import h, { C, compose } from "@macrostrat/hyper";
 import { APIProvider, useAPIResult } from "@macrostrat/ui-components";
-import { PatternProvider } from "~/_providers.client";
+import { PatternProvider } from "~/_providers";
 import {
   AlignedMeasurementProvider,
   FilteredMeasurementProvider,

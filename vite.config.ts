@@ -48,17 +48,11 @@ function hyperStyles(): Plugin {
 export default defineConfig({
   //root: path.resolve("./src"),
   resolve: {
-    //conditions: ["source"],
     alias: {
       "~": path.resolve("./src"),
       "#": path.resolve("./pages"),
     },
-    dedupe: [
-      "react",
-      "react-dom",
-      "@macrostrat/mapbox-react",
-      "@macrostrat/ui-components",
-    ],
+    dedupe: ["react", "react-dom", "@macrostrat/mapbox-react"],
   },
   plugins: [
     react(),
@@ -98,7 +92,6 @@ export default defineConfig({
       /** All dependencies that cannot be bundled on the server (e.g., due to CSS imports)
        * should be listed here.
        */
-      "@supabase/postgrest-js",
       "@macrostrat/ui-components",
       "@macrostrat/form-components",
       "@macrostrat/column-views",
@@ -117,7 +110,4 @@ export default defineConfig({
       },
     },
   },
-  // optimizeDeps: {
-  //   extensions: [".css"],
-  // },
 });

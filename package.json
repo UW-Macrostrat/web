@@ -82,7 +82,7 @@
     "@macrostrat/timescale": "^2.1.0",
     "@macrostrat/ui-components": "^4.1.0",
     "@react-hook/size": "^2.1.2",
-    "@supabase/postgrest-js": "^1.11.0",
+    "@supabase/postgrest-js": "^1.18.1",
     "@turf/bbox": "^6.5.0",
     "@turf/boolean-contains": "^6.5.0",
     "@turf/buffer": "^6.5.0",

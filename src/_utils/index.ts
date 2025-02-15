@@ -15,5 +15,6 @@ export function loadableElement(func, props = null) {
 }
 
 export function resolvePattern(name: string | number) {
+  console.log("Resolving pattern", name);
   return `/assets/geologic-patterns/svg/${name}.svg`;
 }

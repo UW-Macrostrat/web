@@ -19,7 +19,7 @@ import {
 } from "@macrostrat/ui-components";
 import { NonIdealState, Spinner, Button, ButtonGroup } from "@blueprintjs/core";
 import { useEffect, useState, useRef } from "react";
-import { PatternProvider } from "~/_providers.client";
+import { PatternProvider } from "~/_providers";
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import styles from "./age-model.module.styl";
 

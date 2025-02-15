@@ -2776,7 +2776,7 @@ __metadata:
     "@macrostrat/hyper": "npm:^3.0.6"
     "@macrostrat/ui-components": "npm:^4.1.0"
     "@mapbox/mapbox-gl-draw": "npm:^1.3.0"
-    "@supabase/postgrest-js": "npm:^0.36.0"
+    "@supabase/postgrest-js": "npm:^1.18.1"
     "@types/mapbox__mapbox-gl-draw": "npm:^1.2.3"
     "@types/node": "npm:^17.0.10"
     "@types/react": "npm:^17"
@@ -3393,7 +3393,7 @@ __metadata:
     "@macrostrat/ui-components": "npm:^4.1.0"
     "@mdx-js/rollup": "npm:^2.3.0"
     "@react-hook/size": "npm:^2.1.2"
-    "@supabase/postgrest-js": "npm:^1.11.0"
+    "@supabase/postgrest-js": "npm:^1.18.1"
     "@turf/bbox": "npm:^6.5.0"
     "@turf/boolean-contains": "npm:^6.5.0"
     "@turf/buffer": "npm:^6.5.0"
@@ -4378,16 +4378,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@supabase/postgrest-js@npm:^0.36.0":
-  version: 0.36.2
-  resolution: "@supabase/postgrest-js@npm:0.36.2"
-  dependencies:
-    cross-fetch: "npm:^3.0.6"
-  checksum: 10/7adc59ece6a16741566cb29963f4ed69042ace6fa30666501665ee4b5ecb3b571b964a998324ec614af79b464ca41733e357577050b7437f2767f722896c485e
-  languageName: node
-  linkType: hard
-
-"@supabase/postgrest-js@npm:^1.11.0, @supabase/postgrest-js@npm:^1.17.7":
+"@supabase/postgrest-js@npm:^1.17.7, @supabase/postgrest-js@npm:^1.18.1":
   version: 1.18.1
   resolution: "@supabase/postgrest-js@npm:1.18.1"
   dependencies:
@@ -8302,7 +8293,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cross-fetch@npm:^3.0.6, cross-fetch@npm:^3.1.5":
+"cross-fetch@npm:^3.1.5":
   version: 3.1.8
   resolution: "cross-fetch@npm:3.1.8"
   dependencies:

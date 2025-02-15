@@ -10,7 +10,7 @@ import { hyperStyled } from "@macrostrat/hyper";
 import { getHashString, setHashString } from "@macrostrat/ui-components";
 import { useEffect, useRef } from "react";
 import { apiV2Prefix } from "@macrostrat-web/settings";
-import { PatternProvider } from "~/_providers.client";
+import { PatternProvider } from "~/_providers";
 import styles from "./column-inspector.module.styl";
 import ModalUnitPanel from "./modal-panel";
 import { BasePage } from "~/layouts";

@@ -7,7 +7,7 @@ import { NonIdealState } from "@blueprintjs/core";
 import useBreadcrumbs from "use-react-router-breadcrumbs";
 import { LinkButton } from "../../buttons";
 import { InfoPanelSection } from "@macrostrat/map-interface";
-import { PatternProvider } from "~/_providers.client";
+import { PatternProvider } from "~/_providers";
 import { useMemo } from "react";
 
 const h = hyperStyled(styles);
