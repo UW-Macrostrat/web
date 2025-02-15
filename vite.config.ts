@@ -52,7 +52,7 @@ export default defineConfig({
       "~": path.resolve("./src"),
       "#": path.resolve("./pages"),
     },
-    dedupe: ["react", "react-dom", "@macrostrat/mapbox-react"],
+    dedupe: ["react", "react-dom"],
   },
   plugins: [
     react(),
@@ -92,14 +92,10 @@ export default defineConfig({
       /** All dependencies that cannot be bundled on the server (e.g., due to CSS imports)
        * should be listed here.
        */
-      "@macrostrat/ui-components",
       "@macrostrat/form-components",
-      "@macrostrat/column-views",
-      "@macrostrat/column-components",
       "@macrostrat/svg-map-components",
       "@macrostrat/data-components",
       "@macrostrat/map-interface",
-      "@macrostrat/timescale",
       "@macrostrat/feedback-components",
     ],
   },
