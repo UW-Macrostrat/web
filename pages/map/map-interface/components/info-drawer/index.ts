@@ -14,7 +14,6 @@ import { LoadingArea } from "../transitions";
 import { StratColumn } from "./strat-column";
 import { useCallback } from "react";
 
-
 const h = hyper.styled(styles);
 
 function InfoDrawer(props) {
@@ -44,6 +43,7 @@ function InfoDrawer(props) {
       onClose,
       loading: fetchingMapInfo,
       showCopyPositionButton: true,
+      contentContainer: "div.infodrawer-content-holder",
     },
     [
       h(
@@ -60,7 +60,7 @@ function InfoDrawerInterior(props) {
   return h(Routes, [
     h(Route, { path: "/column", element: h(StratColumn, { columnInfo }) }),
     //update view locations route
-    h(Route, { path: "/locations", element: h('div', 'hello world') }),
+    h(Route, { path: "/locations", element: h("div", "hello world") }),
 
     h(Route, { path: "*", element: h(InfoDrawerMainPanel) }),
   ]);
