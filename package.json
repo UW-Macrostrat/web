@@ -151,6 +151,7 @@
     "vike": "^0.4.222",
     "vike-react": "^0.5.12",
     "vite": "^6.1.0",
+    "vite-css-modules": "^1.8.4",
     "vite-plugin-cesium": "^1.2.22",
     "vite-plugin-cjs-interop": "^2.1.6",
     "vite-plugin-inspect": "^0.8.4",

@@ -7,6 +7,7 @@ import { defineConfig, Plugin } from "vite";
 import cesium from "vite-plugin-cesium";
 import pkg from "./package.json";
 import { cjsInterop } from "vite-plugin-cjs-interop";
+import { patchCssModules } from "vite-css-modules";
 
 // Non-transpiled typescript can't be imported as a standalone package
 import textToolchain from "./packages/text-toolchain/src";
@@ -56,6 +57,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    patchCssModules(),
     // Fix broken imports in non-ESM packages. We should endeavor to move away from these
     // dependencies if they are unmaintained.
     cjsInterop({
