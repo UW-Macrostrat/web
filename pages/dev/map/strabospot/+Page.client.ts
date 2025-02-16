@@ -21,7 +21,7 @@ import {
   getOrientationSymbolName,
   pointLayoutProperties,
   setupPointSymbols,
-} from "@macrostrat/mapbox-styles";
+} from "@macrostrat/map-styles";
 import { mergeStyles } from "@macrostrat/mapbox-utils";
 import { ParentRouteButton } from "~/components/map-navbar";
 import { useMapStyle } from "#/dev/map/layers/lib/utils";

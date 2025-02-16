@@ -2,11 +2,12 @@ import hyper from "@macrostrat/hyper";
 import styles from "./main.module.styl";
 import { useState, useEffect } from "react";
 import { ResizeSensor } from "@blueprintjs/core";
-import { RotationsProvider } from "@macrostrat/corelle";
+import { RotationsProvider } from "@corelle/svg-map-layers";
 import { Timescale, TimescaleOrientation } from "@macrostrat/timescale";
 // import "@macrostrat/timescale/dist/timescale.css";
 import { Map } from "./map";
 import { getQueryString, setQueryString } from "@macrostrat/ui-components";
+
 const h = hyper.styled(styles);
 
 function useTimeState(initialValue) {
@@ -40,6 +41,7 @@ function useTimeRange(range: [number, number], initialValue: number) {
         setTime(Math.max(time - 2, range[1]));
       }
     }
+
     document.onkeydown = checkKey;
   }, [time]);
 

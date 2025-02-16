@@ -15,7 +15,7 @@ import { Feature, FeatureCollection, LineString, Point } from "geojson";
 import { useEffect, useMemo } from "react";
 import { setGeoJSON } from "@macrostrat/mapbox-utils";
 import { useCorrelationDiagramStore } from "./state";
-import { PatternProvider } from "~/_providers.client";
+import { PatternProvider } from "~/_providers";
 
 import { buildCrossSectionLayers } from "~/_utils/map-layers";
 import { Button, OverlaysProvider } from "@blueprintjs/core";

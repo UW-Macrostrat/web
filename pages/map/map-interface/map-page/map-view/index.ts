@@ -8,12 +8,10 @@ import {
   useMapRef,
   useMapStatus,
   useMapStyleOperator,
-} from "@macrostrat/mapbox-react";
-import {
   MacrostratLineSymbolManager,
   MapSourcesLayer,
-  buildMacrostratStyle,
-} from "@macrostrat/mapbox-styles";
+} from "@macrostrat/mapbox-react";
+import { buildMacrostratStyle } from "@macrostrat/map-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
 import { useInDarkMode } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";

@@ -1,8 +1,5 @@
 import { hyperStyled } from "@macrostrat/hyper";
 import { preprocessUnits, Column } from "@macrostrat/column-views";
-//import "@macrostrat/column-components/src/main.module.scss";
-import { UnitLong } from "@macrostrat/api-types";
-//import "@macrostrat/column-components/src/main.module.scss";
 
 import styles from "./strat-column.module.styl";
 import { ColumnSummary } from "#/map/map-interface/app-state/handlers/columns";
@@ -10,7 +7,7 @@ import { NonIdealState } from "@blueprintjs/core";
 import useBreadcrumbs from "use-react-router-breadcrumbs";
 import { LinkButton } from "../../buttons";
 import { InfoPanelSection } from "@macrostrat/map-interface";
-import { PatternProvider } from "~/_providers.client";
+import { PatternProvider } from "~/_providers";
 import { useMemo } from "react";
 
 const h = hyperStyled(styles);

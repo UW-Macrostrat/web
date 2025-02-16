@@ -6,21 +6,20 @@
     "jsx": "react",
     "paths": {
       // Workspace code
-      "@macrostrat/cesium-viewer": ["deps/cesium-viewer/src"],
-      "@macrostrat/cesium-martini": ["deps/cesium-martini/src"],
-      "@macrostrat/*": ["deps/web-components/packages/*/src"],
-      "@macrostrat/corelle": ["node_modules/@macrostrat/corelle/src"],
-      "@macrostrat-web/*": ["packages/*/src"],
-      "~/*": ["src/*"],
-      "#/*": ["pages/*"]
-    },
+      "@macrostrat-web/*": [
+        "packages/*/src"
+      ],
+      "~/*": [
+        "src/*"
+      ],
+      "#/*": [
+        "pages/*"
+      ]
+    }
   },
   "include": [
-    "deps/cesium-viewer/src/**/*",
-    "deps/cesium-martini/src/**/*",
-    "deps/web-components/packages/*/src/**/*",
     "packages/*/src/**/*",
     "src/**/*",
     "pages/**/*"
-  ],
+  ]
 }

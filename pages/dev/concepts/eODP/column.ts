@@ -7,9 +7,12 @@ import {
   NotesColumn,
 } from "@macrostrat/column-components";
 import { useContext } from "react";
-import { AnnotatedUnitsColumn } from "@macrostrat/column-views";
+import {
+  AnnotatedUnitsColumn,
+  AgeAxis,
+  MacrostratColumnProvider,
+} from "@macrostrat/column-views";
 import { IUnit, transformAxisType } from "@macrostrat/column-views";
-import { AgeAxis } from "@macrostrat/concept-app-helpers";
 import { TrackedLabeledUnit } from "@macrostrat/column-views";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { useColumnNav } from "@macrostrat/column-views";
@@ -19,7 +22,6 @@ import {
   ReconstructedColumnAgeDataset,
   useColumnAgeModel,
 } from "./age-model-column";
-import { MacrostratColumnProvider } from "@macrostrat/api-views";
 // import "@macrostrat/timescale/dist/timescale.css";
 import { Timescale } from "@macrostrat/timescale";
 import styles from "./age-model.module.styl";

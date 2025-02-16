@@ -5,6 +5,10 @@ import loadable from "@loadable/component";
 import { Spinner } from "@blueprintjs/core";
 
 export function onDemand(func) {
+  // If we're on the server, return null
+  if (typeof window === "undefined") {
+    return () => null;
+  }
   const _Component = loadable(func);
   return (props) => h(Suspense, { fallback: h(Spinner) }, h(_Component, props));
 }
@@ -15,5 +19,5 @@ export function loadableElement(func, props = null) {
 }
 
 export function resolvePattern(name: string | number) {
-  return `//visualization-assets.s3.amazonaws.com/geologic-patterns/svg/${name}.svg`;
+  return `/assets/geologic-patterns/svg/${name}.svg`;
 }

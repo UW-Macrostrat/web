@@ -1,5 +1,5 @@
 import { HotkeysProvider, Spinner } from "@blueprintjs/core";
-import { DataSheet, ColorCell } from "@macrostrat/data-sheet2";
+import { DataSheet, ColorCell } from "@macrostrat/data-sheet";
 import { FullscreenPage } from "~/layouts";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";

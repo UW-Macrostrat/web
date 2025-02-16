@@ -1,6 +1,6 @@
 import h, { C, compose } from "@macrostrat/hyper";
 import { APIProvider, useAPIResult } from "@macrostrat/ui-components";
-import { PatternProvider } from "~/_providers.client";
+import { PatternProvider } from "~/_providers";
 import {
   AlignedMeasurementProvider,
   FilteredMeasurementProvider,
@@ -8,22 +8,19 @@ import {
 import { BaseSection, InteriorSection } from "./src/section";
 import {
   CompositeUnitsColumn,
-  CompositeUnitComponent,
   IUnit,
+  IsotopesColumn,
+  MeasurementDataProvider,
+  preprocessUnits,
 } from "@macrostrat/column-views";
 import type { ColumnSpec } from "@macrostrat/api-types";
-import {
-  IsotopesColumn,
-  IsotopesDataset,
-  MeasurementDataProvider,
-} from "@macrostrat/concept-app-helpers";
+
 import {
   IsotopesSpectraColumn,
   IsotopeSpectrumNote,
   shouldRenderNote,
 } from "./src/spectra";
 import { MeasuredSection } from "./src/measured-section";
-import { preprocessUnits } from "@macrostrat/concept-app-helpers";
 import { ColumnMap } from "./src/map";
 import "./src/main.styl";
 
@@ -74,7 +71,7 @@ function Column(props: React.PropsWithChildren<{ params: ColumnSpec }>) {
 
 function MultiIsotopesColumn({ transform }) {
   return h("g.isotopes-columns", { transform }, [
-    h(IsotopesColumn, {
+    h(CarbonIsotopesColumn, {
       label: "δ¹³C",
       color: "dodgerblue",
       domain: [-20, 5],
@@ -83,7 +80,7 @@ function MultiIsotopesColumn({ transform }) {
       showAxis: true,
       parameter: "D13C",
     }),
-    h(IsotopesColumn, {
+    h(CarbonIsotopesColumn, {
       label: "δ¹⁸O",
       color: "red",
       domain: [-15, 5],

@@ -1,12 +1,3 @@
 [submodule "bundledDeps/cesium-martini"]
 	path = packages/cesium-martini
 	url = https://github.com/davenquinn/cesium-martini.git
-[submodule "deps/ui-components"]
-	path = deps/web-components
-	url = https://github.com/UW-Macrostrat/web-components.git
-[submodule "deps/cesium-viewer"]
-	path = deps/cesium-viewer
-	url = https://github.com/UW-Macrostrat/cesium-viewer.git
-[submodule "deps/cesium-martini"]
-	path = deps/cesium-martini
-	url = https://github.com/davenquinn/cesium-martini.git

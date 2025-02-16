@@ -1,5 +1,5 @@
 import { burwellTileDomain, mapboxAccessToken } from "@macrostrat-web/settings";
-import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
+import { buildMacrostratStyle } from "@macrostrat/map-styles";
 import { buildInspectorStyle } from "@macrostrat/map-interface";
 import { useDarkMode } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";

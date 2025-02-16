@@ -5,13 +5,14 @@ import { useAPIResult } from "@macrostrat/ui-components";
 import { bisector, extent, max, min } from "d3-array";
 import { axisBottom, axisLeft } from "d3-axis";
 import { scaleLinear } from "d3-scale";
-import { mouse, select } from "d3-selection";
+import { select, pointer } from "d3-selection";
 import { area, line } from "d3-shape";
 import React, { useEffect, useRef } from "react";
 import { useAppActions, useAppState } from "#/map/map-interface/app-state";
 
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import styles from "./main.module.styl";
+
 const h = hyper.styled(styles);
 
 function drawElevationChart(
@@ -166,7 +167,7 @@ function drawElevationChart(
       updateElevationMarker(null, null);
     })
     .on("mousemove", function (e) {
-      let x0 = x.invert(mouse(this)[0]);
+      let x0 = x.invert(pointer(e)[0]);
       let i = bisect(data, x0, 1);
       let d0 = data[i - 1];
       let d1 = data[i];

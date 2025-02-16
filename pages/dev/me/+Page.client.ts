@@ -1,6 +1,6 @@
 import h from "@macrostrat/hyper";
 import { DocumentationPage } from "~/layouts";
-import { AuthStatus, useAuth } from "@macrostrat/auth-components";
+import { AuthStatus, useAuth } from "@macrostrat/form-components";
 import { usePostgresQuery } from "#/integrations/xdd/extractions/data-service";
 
 export function Page() {

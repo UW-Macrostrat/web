@@ -1,7 +1,7 @@
 import { FullscreenPage } from "~/layouts";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
-import { ColorCell, PostgRESTTableView } from "@macrostrat/data-sheet2";
+import { ColorCell, PostgRESTTableView } from "@macrostrat/data-sheet";
 import { postgrestPrefix } from "@macrostrat-web/settings";
 import { PageBreadcrumbs } from "~/components";
 import {

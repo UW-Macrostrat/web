@@ -2,7 +2,7 @@ import {
   BaseAuthProvider,
   AuthAction,
   AsyncAuthAction,
-} from "@macrostrat/auth-components";
+} from "@macrostrat/form-components";
 import h from "@macrostrat/hyper";
 import { ingestPrefix } from "../../packages/settings";
 

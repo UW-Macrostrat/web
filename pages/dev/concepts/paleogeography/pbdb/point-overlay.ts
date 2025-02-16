@@ -6,7 +6,7 @@ import {
   useRotations,
   usePathGenerator,
   usePlatePolygons,
-} from "@macrostrat/corelle";
+} from "@corelle/svg-map-layers";
 import { geoContains } from "d3-geo";
 import { scalePow } from "d3-scale";
 import h from "@macrostrat/hyper";
@@ -53,12 +53,8 @@ function usePBDBFeatures(time: number, timeDelta: number = 2) {
   return platePoints;
 }
 
-const radiusScale = scalePow([0, 30], [1, 10])
-  .exponent(0.5)
-  .clamp(true);
-const opacityScale = scalePow([0, 30], [0.8, 0.2])
-  .exponent(0.5)
-  .clamp(true);
+const radiusScale = scalePow([0, 30], [1, 10]).exponent(0.5).clamp(true);
+const opacityScale = scalePow([0, 30], [0.8, 0.2]).exponent(0.5).clamp(true);
 
 function PBDBPoint({ feature }) {
   /** Render a single PBDB point */

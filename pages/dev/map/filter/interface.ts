@@ -3,7 +3,7 @@ import { Switch, Button, MenuItem } from "@blueprintjs/core";
 import { tileserverDomain, mapboxAccessToken } from "@macrostrat-web/settings";
 import hyper from "@macrostrat/hyper";
 import { DevMapPage } from "@macrostrat/map-interface";
-import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
+import { buildMacrostratStyle } from "@macrostrat/map-styles";
 import { Select } from "@blueprintjs/select";
 import mapboxgl from "mapbox-gl";
 import { useMemo, useState } from "react";

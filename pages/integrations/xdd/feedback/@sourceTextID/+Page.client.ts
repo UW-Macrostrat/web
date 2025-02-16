@@ -22,7 +22,7 @@ import {
   Spacer,
 } from "@macrostrat/ui-components";
 import { useState } from "react";
-import { AuthStatus } from "@macrostrat/auth-components";
+import { AuthStatus } from "@macrostrat/form-components";
 import { MatchedEntityLink } from "#/integrations/xdd/extractions/match";
 import { knowledgeGraphAPIURL } from "@macrostrat-web/settings";
 import { Toaster } from "@blueprintjs/core";

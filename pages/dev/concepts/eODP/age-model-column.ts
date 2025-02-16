@@ -1,7 +1,7 @@
 import { format } from "d3-format";
 import h from "@macrostrat/hyper";
 import classNames from "classnames";
-import { AxisBottom } from "@vx/axis";
+import { AxisBottom } from "@visx/axis";
 import { useMemo } from "react";
 import { useColumnNav } from "@macrostrat/column-views";
 

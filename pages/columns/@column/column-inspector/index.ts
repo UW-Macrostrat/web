@@ -1,4 +1,4 @@
-import { MacrostratAPIProvider } from "@macrostrat/api-views";
+import { MacrostratAPIProvider } from "@macrostrat/column-views";
 import {
   ColumnNavigatorMap,
   UnitSelectionProvider,
@@ -10,13 +10,15 @@ import { hyperStyled } from "@macrostrat/hyper";
 import { getHashString, setHashString } from "@macrostrat/ui-components";
 import { useEffect, useRef } from "react";
 import { apiV2Prefix } from "@macrostrat-web/settings";
-import { PatternProvider } from "~/_providers.client";
+import { PatternProvider } from "~/_providers";
 import styles from "./column-inspector.module.styl";
-import ModalUnitPanel from "./modal-panel";
 import { BasePage } from "~/layouts";
 
 import { navigate } from "vike/client/router";
 import { PageBreadcrumbs } from "~/components";
+import { onDemand } from "~/_utils";
+
+const ModalUnitPanel = onDemand(() => import("./modal-panel"));
 
 const h = hyperStyled(styles);
 

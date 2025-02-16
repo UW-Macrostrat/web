@@ -1,8 +1,8 @@
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import cookieParser from "cookie-parser";
 import compression from "compression";
 
+import { createDevMiddleware } from "vike/server";
 import { vikeHandler } from "./vike-handler";
 import { createMiddleware } from "@universal-middleware/express";
 import { createMacrostratQlrAPI } from "@macrostrat-web/qgis-integration";
@@ -85,6 +85,15 @@ async function startServer() {
 
   app.use(compression());
 
+  // Assets and static files
+  // Serve FGDC assets
+  const fgdcPatterns = join(
+    dirname(require.resolve("geologic-patterns")),
+    "assets"
+  );
+
+  app.use("/assets/geologic-patterns", sirv(fgdcPatterns));
+
   //
   if (isProduction) {
     app.use(sirv(`${root}/dist/client`));
@@ -93,8 +102,10 @@ async function startServer() {
     // Ideally we'd be able to remove this fix.
     app.use("/cesium", sirv(`${root}/dist/cesium`));
   } else {
-    // For localhost development: create a proxy to the API server to enable
-    // API requests with the appropriate authorization cookies or headers.
+    /**
+     * For localhost development: create a proxy to the API server to enable
+     * API requests with the appropriate authorization cookies or headers.
+     */
     const proxyDomain = process.env.MACROSTRAT_API_PROXY_DOMAIN;
     if (proxyDomain) {
       const target = proxyDomain + "/api";
@@ -124,17 +135,13 @@ async function startServer() {
     // Instantiate Vite's development server and integrate its middleware to our server.
     // ⚠️ We should instantiate it *only* in development. (It isn't needed in production
     // and would unnecessarily bloat our server in production.)
-    const vite = await import("vite");
-    const viteDevMiddleware = (
-      await vite.createServer({
-        root,
-        server: {
-          middlewareMode: true,
-          hmr,
-        },
-      })
-    ).middlewares;
-    app.use(viteDevMiddleware);
+    const { devMiddleware } = await createDevMiddleware({
+      root,
+      viteConfig: {
+        server: { hmr },
+      },
+    });
+    app.use(devMiddleware);
   }
 
   // API layer handler: should restructure this as a middleware

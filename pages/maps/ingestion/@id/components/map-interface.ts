@@ -9,7 +9,7 @@ import {
   PanelCard,
 } from "@macrostrat/map-interface";
 import { NonIdealState, Switch } from "@blueprintjs/core";
-import { buildMacrostratStyle } from "@macrostrat/mapbox-styles";
+import { buildMacrostratStyle } from "@macrostrat/map-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
 import {
   NullableSlider,

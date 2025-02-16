@@ -3,7 +3,6 @@
 import TerrainProvider from "@macrostrat/cesium-martini";
 import { useRef, useEffect } from "react";
 import h from "@macrostrat/hyper";
-import { ImageryLayer } from "resium";
 import CesiumViewer, {
   DisplayQuality,
   MapboxLogo,

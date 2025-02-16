@@ -1,7 +1,7 @@
 // Import other components
 import { burwellTileDomain, mapboxAccessToken } from "@macrostrat-web/settings";
 import { useMapConditionalStyle, useMapRef } from "@macrostrat/mapbox-react";
-import { toggleLineSymbols } from "@macrostrat/mapbox-styles";
+import { toggleLineSymbols } from "@macrostrat/map-styles";
 import {
   getMapboxStyle,
   mergeStyles,

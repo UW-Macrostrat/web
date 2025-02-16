@@ -6,25 +6,11 @@ import ssr from "vike/plugin";
 import { defineConfig, Plugin } from "vite";
 import cesium from "vite-plugin-cesium";
 import pkg from "./package.json";
+import { cjsInterop } from "vite-plugin-cjs-interop";
+import { patchCssModules } from "vite-css-modules";
 
 // Non-transpiled typescript can't be imported as a standalone package
 import textToolchain from "./packages/text-toolchain/src";
-
-const aliasedModules = [
-  "ui-components",
-  "column-components",
-  "api-types",
-  "api-views",
-  "column-views",
-  "timescale",
-  "map-interface",
-  "mapbox-utils",
-  "mapbox-react",
-  "mapbox-styles",
-  "cesium-viewer",
-  "map-components",
-  "data-components",
-];
 
 const gitEnv = revisionInfo(pkg, "https://github.com/UW-Macrostrat/web");
 // prefix with VITE_ to make available to client
@@ -63,15 +49,21 @@ function hyperStyles(): Plugin {
 export default defineConfig({
   //root: path.resolve("./src"),
   resolve: {
-    conditions: ["typescript"],
+    conditions: ["source"],
     alias: {
       "~": path.resolve("./src"),
       "#": path.resolve("./pages"),
     },
-    dedupe: [...aliasedModules.map((d) => "@macrostrat/" + d)],
+    dedupe: ["react", "react-dom", "@macrostrat/column-components"],
   },
   plugins: [
     react(),
+    patchCssModules(),
+    // Fix broken imports in non-ESM packages. We should endeavor to move away from these
+    // dependencies if they are unmaintained.
+    cjsInterop({
+      dependencies: ["react-images", "labella", "react-color"],
+    }),
     textToolchain({
       contentDir: path.resolve(__dirname, "content"),
       wikiPrefix: "/dev/docs",
@@ -99,11 +91,19 @@ export default defineConfig({
     // If not building for server context
   },
   ssr: {
-    // https://vike.dev/broken-npm-package
     noExternal: [
-      "labella",
-      "@supabase/postgrest-js",
-      "@macrostrat/auth-components",
+      /** All dependencies that cannot be bundled on the server (e.g., due to CSS imports)
+       * should be listed here.
+       */
+      "@macrostrat/form-components",
+      "@macrostrat/ui-components",
+      "@macrostrat/column-components",
+      "@macrostrat/column-views",
+      "@macrostrat/data-components",
+      "@macrostrat/svg-map-components",
+      "@macrostrat/map-interface",
+      "@macrostrat/feedback-components",
+      "@macrostrat/timescale",
     ],
   },
   css: {
