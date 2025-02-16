@@ -93,10 +93,14 @@ export default defineConfig({
        * should be listed here.
        */
       "@macrostrat/form-components",
-      "@macrostrat/svg-map-components",
+      "@macrostrat/ui-components",
+      "@macrostrat/column-components",
+      "@macrostrat/column-views",
       "@macrostrat/data-components",
+      "@macrostrat/svg-map-components",
       "@macrostrat/map-interface",
       "@macrostrat/feedback-components",
+      "@macrostrat/timescale",
     ],
   },
   css: {

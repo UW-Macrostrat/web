@@ -15,7 +15,7 @@
     "@macrostrat-web/settings": "workspace:*",
     "@macrostrat/column-components": "^1.0.2",
     "@macrostrat/data-components": "^0.0.6",
-    "@macrostrat/form-components": "^0.1.1",
+    "@macrostrat/form-components": "^0.1.2",
     "@macrostrat/hyper": "^3.0.6",
     "@macrostrat/ui-components": "^4.1.1",
     "@mapbox/mapbox-gl-draw": "^1.3.0",
