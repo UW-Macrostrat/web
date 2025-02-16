@@ -49,6 +49,7 @@ function hyperStyles(): Plugin {
 export default defineConfig({
   //root: path.resolve("./src"),
   resolve: {
+    conditions: ["source"],
     alias: {
       "~": path.resolve("./src"),
       "#": path.resolve("./pages"),
