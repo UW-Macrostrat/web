@@ -50,8 +50,7 @@ function Filter({ filter }) {
   ]);
 }
 
-function Filters() {
-  const { filters } = useAppState((state) => state.core.filters);
+function FiltersView({ filters }) {
   const shouldFiltersBeOpen = filters.length > 0;
   return h("div.filter-container", [
     h.if(!shouldFiltersBeOpen)("div", [
@@ -89,11 +88,10 @@ function makeFilterString(filters) {
   return finalString;
 }
 
-function FilterPanel() {
+function FilterPanel({ filters, admonishments }) {
   const [open, setOpen] = useState(false);
-  const filters = useAppState((s) => s.core.filters);
+
   const runAction = useAppActions();
-  const admonishments = useAdmoinshments();
 
   if (filters.length == 0 && admonishments.length == 0) {
     return null;
@@ -120,7 +118,7 @@ function FilterPanel() {
           h(Button, { minimal: true, small: true, icon: iconName, onClick }),
         ]),
       ]),
-      h(Collapse, { isOpen: open }, [h(Filters)]),
+      h(Collapse, { isOpen: open }, [h(FiltersView, { filters })]),
     ]),
   ]);
 }
@@ -137,5 +135,4 @@ function Admonishments({
   return h("div.admonishments", admonishments);
 }
 
-export default Filters;
 export { FilterPanel };

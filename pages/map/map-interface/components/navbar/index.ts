@@ -13,6 +13,7 @@ import { PanelSubhead } from "@macrostrat/map-interface";
 import classNames from "classnames";
 import { navigate } from "vike/client/router";
 import { MacrostratIcon } from "~/components/macrostrat-icon";
+import { useAdmoinshments } from "#/map/map-interface/components/filter-panel/admonishments";
 
 const h = hyper.styled(styles);
 
@@ -136,6 +137,14 @@ function Searchbar({ className }) {
       runAction({ type: "received-search-query", data: null });
     }
   }, [term]);
+
+  const filters = useAppState((s) => s.core.filters);
+  const admonishments = useAdmoinshments();
+
+  let filterPanelElement = null;
+  if (filters.length > 0 || admonishments.length > 0) {
+    filterPanelElement = h(FilterPanel, { filters, admonishments });
+  }
 
   return h(FloatingNavbar, { statusElement: filterPanelElement }, [
     h(MacrostratIcon, {

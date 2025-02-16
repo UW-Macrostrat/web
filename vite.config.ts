@@ -52,7 +52,7 @@ export default defineConfig({
       "~": path.resolve("./src"),
       "#": path.resolve("./pages"),
     },
-    dedupe: ["react", "react-dom"],
+    dedupe: ["react", "react-dom", "@macrostrat/column-components"],
   },
   plugins: [
     react(),
