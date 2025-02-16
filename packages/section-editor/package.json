@@ -11,7 +11,7 @@
   "dependencies": {
     "@blueprintjs/core": "^5.10.3",
     "@macrostrat/hyper": "^3.0.6",
-    "@macrostrat/ui-components": "^4.1.0",
+    "@macrostrat/ui-components": "^4.1.1",
     "chroma-js": "^2.0.6",
     "d3": "^5.12.0",
     "labella": "^1.1.4",
