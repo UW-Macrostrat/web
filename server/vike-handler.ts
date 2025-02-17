@@ -2,22 +2,36 @@ import { renderPage } from "vike/server";
 
 // Auth imports
 import * as jose from "jose";
+import { PageContextBuiltInServer, PageContextServer } from "vike/types";
+import { Request } from "express";
 
 // Synthesize the config from the environment at runtime
 const environment = synthesizeConfigFromEnvironment();
 
+interface ExtraContext {
+  urlOriginal: string;
+  environment: Record<string, string>;
+  user: any;
+  macrostratLogoFlavor: string;
+  clientIPAddress?: string;
+}
+
 export async function vikeHandler<
   Context extends Record<string | number | symbol, unknown>
->(request: Request, context?: Context): Promise<Response> {
+>(
+  request: Request,
+  context?: PageContextBuiltInServer<any>
+): Promise<Response> {
   const cookies = getCookies(request);
   const user = await getUserFromCookie(cookies);
 
-  const pageContextInit = {
+  const pageContextInit: PageContextServer = {
     ...context,
     urlOriginal: request.url,
     environment,
     user,
     macrostratLogoFlavor: macrostratLogoFlavor(),
+    clientIPAddress: request.ip,
   };
 
   const pageContext = await renderPage(pageContextInit);

@@ -78,12 +78,15 @@ export function handlerAdapter<
   );
 }
 
-startServer();
+startServer().then(() => {});
 
 async function startServer() {
   const app = express();
 
   app.use(compression());
+
+  // Trust the proxy to return the correct IP address
+  app.set("trust proxy", true);
 
   // Assets and static files
   // Serve FGDC assets

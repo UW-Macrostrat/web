@@ -33,6 +33,7 @@ declare global {
       supportsDarkMode?: boolean;
       scripts?: string[];
     }
+
     interface PageContext {
       pageProps?: PageProps;
       urlPathname: string;
@@ -40,6 +41,7 @@ declare global {
       macrostratLogoFlavor?: string;
       mdxContent?: string;
       environment: Record<string, string>;
+      clientIPAddress?: string;
       exports: {
         pageStyle?: PageStyle;
         documentProps?: DocumentProps;
