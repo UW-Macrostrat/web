@@ -113,4 +113,11 @@ export default defineConfig({
       },
     },
   },
+  server: {
+    allowedHosts: [
+      "localhost",
+      // For local development
+      "dev.macrostrat.local",
+    ],
+  },
 });

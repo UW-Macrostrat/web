@@ -1,0 +1,25 @@
+# GET requests
+# IP address ranges via https://www.webpagetest.org/addresses.php
+### Madison, WI
+GET http://localhost:3000/test/geoip
+Accept: application/json
+Headers:
+x-forwarded-for: 50.93.222.249
+
+### Los Angeles
+GET http://localhost:3000/test/geoip
+Accept: application/json
+Headers:
+x-forwarded-for: 34.94.159.140
+
+### Singapore
+GET http://localhost:3000/test/geoip
+Accept: application/json
+Headers:
+x-forwarded-for: 34.124.137.169
+
+### Ireland
+GET http://localhost:3000/test/geoip
+Accept: application/json
+Headers:
+x-forwarded-for: 34.240.49.81

@@ -9,6 +9,7 @@ import { createMacrostratQlrAPI } from "@macrostrat-web/qgis-integration";
 import express from "express";
 import sirv from "sirv";
 import chalk from "chalk";
+import { getGeoIPResult } from "./geoip";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -105,6 +106,11 @@ async function startServer() {
     // Ideally we'd be able to remove this fix.
     app.use("/cesium", sirv(`${root}/dist/cesium`));
   } else {
+    app.get("/test/geoip", (req, res) => {
+      const geo = getGeoIPResult(req.ip);
+      return res.json({ ip: req.ip, geo });
+    });
+
     /**
      * For localhost development: create a proxy to the API server to enable
      * API requests with the appropriate authorization cookies or headers.

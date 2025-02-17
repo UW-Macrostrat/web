@@ -8,14 +8,6 @@ import { Request } from "express";
 // Synthesize the config from the environment at runtime
 const environment = synthesizeConfigFromEnvironment();
 
-interface ExtraContext {
-  urlOriginal: string;
-  environment: Record<string, string>;
-  user: any;
-  macrostratLogoFlavor: string;
-  clientIPAddress?: string;
-}
-
 export async function vikeHandler<
   Context extends Record<string | number | symbol, unknown>
 >(
