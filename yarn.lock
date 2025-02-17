@@ -3541,9 +3541,6 @@ __metadata:
     vite-plugin-inspect: "npm:^0.8.4"
     vitest: "npm:^1.6.0"
     zustand: "npm:^4.5.1"
-  dependenciesMeta:
-    geoip-lite@1.4.10:
-      unplugged: true
   languageName: unknown
   linkType: soft
 

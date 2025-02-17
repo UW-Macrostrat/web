@@ -14,7 +14,8 @@
     "server:prod": "NODE_NO_WARNINGS=1 NODE_ENV=production yarn run server",
     "start": "yarn run build && yarn run server",
     "test:runtime": "tsx tests/test-urls.ts",
-    "test": "vitest"
+    "test": "vitest",
+    "update-geoip": "tsx scripts/update-geoip.ts"
   },
   "workspaces": [
     "packages/*"
@@ -167,10 +168,5 @@
   "prettier": {
     "proseWrap": "always"
   },
-  "packageManager": "yarn@4.6.0",
-  "dependenciesMeta": {
-    "geoip-lite@1.4.10": {
-      "unplugged": true
-    }
-  }
+  "packageManager": "yarn@4.6.0"
 }
