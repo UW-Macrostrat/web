@@ -119,5 +119,9 @@ export default defineConfig({
       // For local development
       "dev.macrostrat.local",
     ],
+    watch: {
+      // We reload .env files using Nodemon when in development
+      ignored: [".env"],
+    },
   },
 });

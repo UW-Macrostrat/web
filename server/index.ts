@@ -107,8 +107,12 @@ async function startServer() {
     app.use("/cesium", sirv(`${root}/dist/cesium`));
   } else {
     app.get("/test/geoip", (req, res) => {
-      const geo = getGeoIPResult(req.ip);
-      return res.json({ ip: req.ip, geo });
+      try {
+        const geo = getGeoIPResult(req.ip);
+        return res.json({ ip: req.ip, geo });
+      } catch (err) {
+        return res.status(404).json({ error: err.message });
+      }
     });
 
     /**
