@@ -11,4 +11,5 @@ export default {
   scripts: ["/cesium/Cesium.js"],
   title: "Globe",
   description: "Macrostrat Globe",
+  pageStyle: "fullscreen",
 };

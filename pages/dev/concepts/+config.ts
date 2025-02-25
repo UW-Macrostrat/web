@@ -8,4 +8,5 @@ export default {
     },
   },
   clientRouting: false,
+  pageStyle: "fullscreen",
 };
