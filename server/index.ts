@@ -10,6 +10,7 @@ import express from "express";
 import sirv from "sirv";
 import chalk from "chalk";
 import { getGeoIPResult } from "./geoip";
+import { PageContext } from "vike/types";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -49,16 +50,21 @@ interface Middleware<
     | Promise<void>;
 }
 
+type BaseContext = Record<string, unknown> & {
+  context: Partial<PageContext>;
+};
+
 export function handlerAdapter<
   Context extends Record<string | number | symbol, unknown>
 >(handler: Middleware<Context>) {
   return createMiddleware(
     async (context) => {
-      const rawRequest = context.platform.request as unknown as Record<
-        string,
-        unknown
-      >;
+      const rawRequest = context.platform.request as unknown as BaseContext;
+
       rawRequest.context ??= {};
+
+      // Add the clientIPAddress to the context
+      rawRequest.context.clientIPAddress = rawRequest.ip;
       const response = await handler(
         context.request,
         rawRequest.context as Context
@@ -106,6 +112,7 @@ async function startServer() {
     // Ideally we'd be able to remove this fix.
     app.use("/cesium", sirv(`${root}/dist/cesium`));
   } else {
+    /** Route for testing GeoIP lookups */
     app.get("/test/geoip", (req, res) => {
       try {
         const geo = getGeoIPResult(req.ip);

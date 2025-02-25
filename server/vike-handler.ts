@@ -23,7 +23,6 @@ export async function vikeHandler<
     environment,
     user,
     macrostratLogoFlavor: macrostratLogoFlavor(),
-    clientIPAddress: request.ip,
   };
 
   const pageContext = await renderPage(pageContextInit);
