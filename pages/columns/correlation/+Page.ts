@@ -174,6 +174,9 @@ function SelectedColumnsLayer({ columns, focusedLine }) {
   );
   useMapStyleOperator(
     (map) => {
+      if (!map.isStyleLoaded()) {
+        return;
+      }
       let features = focusedColumns;
 
       const data: FeatureCollection = {
@@ -207,6 +210,9 @@ function ColumnsLayer({ columns, enabled = true }) {
   useMapStyleOperator(
     (map) => {
       if (columns == null) {
+        return;
+      }
+      if (!map.isStyleLoaded()) {
         return;
       }
       const data: FeatureCollection = {

@@ -12,6 +12,7 @@ import { GapBoundPackage, SectionRenderData, AgeComparable } from "./types";
 import { useCorrelationDiagramStore } from "./state";
 import styles from "./main.module.sass";
 import hyper from "@macrostrat/hyper";
+import { UnconformityLine } from "#/columns/correlation/unconformity-line";
 
 const h = hyper.styled(styles);
 
@@ -89,23 +90,28 @@ export function CorrelationChart({ data }: { data: CorrelationChartData }) {
     h("div.main-chart", [
       h(
         packages.map((pkg, i) => {
-          return h(
-            "div.package",
-            { key: i },
-            pkg.columnData.map((d, ia) => {
-              const data = {
-                columnID: d.columnID,
-                units: d.units,
-                b_age: pkg.b_age,
-                t_age: pkg.t_age,
-                bestPixelScale: pkg.bestPixelScale,
-              };
-              return h(SingleColumn, {
-                data,
-                key: i,
-              });
-            })
-          );
+          return h([
+            // h.if(i > 0)(UnconformityLine, {
+            //   width: pkg.columnData.length * 100,
+            // }),
+            h(
+              "div.package",
+              { key: i },
+              pkg.columnData.map((d, ia) => {
+                const data = {
+                  columnID: d.columnID,
+                  units: d.units,
+                  b_age: pkg.b_age,
+                  t_age: pkg.t_age,
+                  bestPixelScale: pkg.bestPixelScale,
+                };
+                return h(SingleColumn, {
+                  data,
+                  key: i,
+                });
+              })
+            ),
+          ]);
         })
       ),
     ]),
