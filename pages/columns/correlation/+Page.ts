@@ -8,10 +8,10 @@ import {
 import { LngLatBounds } from "mapbox-gl";
 import { FullscreenPage } from "~/layouts";
 import h from "./main.module.sass";
-import { compose, C } from "@macrostrat/hyper";
+import { compose } from "@macrostrat/hyper";
 import { baseMapURL, mapboxAccessToken } from "@macrostrat-web/settings";
 import { PageBreadcrumbs } from "~/components";
-import { Feature, FeatureCollection, LineString, Point } from "geojson";
+import { Feature, FeatureCollection, LineString } from "geojson";
 import { useEffect, useMemo } from "react";
 import { setGeoJSON } from "@macrostrat/mapbox-utils";
 import { useCorrelationDiagramStore } from "./state";
@@ -21,13 +21,12 @@ import { buildCrossSectionLayers } from "~/_utils/map-layers";
 import { Button, OverlaysProvider } from "@blueprintjs/core";
 import classNames from "classnames";
 import { CorrelationChart } from "./correlation-chart";
-import { DarkModeProvider } from "@macrostrat/ui-components";
-import { ErrorBoundary } from "@macrostrat/ui-components";
+import { DarkModeProvider, ErrorBoundary } from "@macrostrat/ui-components";
 import {
+  UnitDetailsPanel,
   UnitSelectionProvider,
   useSelectedUnit,
 } from "@macrostrat/column-views";
-import { UnitDescription } from "#/columns/correlation/column";
 
 export function Page() {
   const startup = useCorrelationDiagramStore((state) => state.startup);
@@ -47,7 +46,7 @@ export function Page() {
           h(CorrelationDiagramWrapper),
           h("div.overlay-safe-area"),
         ]),
-        h("div.assistant", [h(InsetMap), h(UnitDetailsPanel)]),
+        h("div.assistant", [h(InsetMap), h(UnitDetailsExt)]),
       ]
     ),
   ]);
@@ -79,7 +78,7 @@ function UnitSelectionManager({ children }) {
   );
 }
 
-function UnitDetailsPanel() {
+function UnitDetailsExt() {
   const selectedUnit = useSelectedUnit();
   const expanded = useCorrelationDiagramStore((state) => state.mapExpanded);
   const setSelectedUnit = useCorrelationDiagramStore(
@@ -91,7 +90,7 @@ function UnitDetailsPanel() {
   }
 
   return h("div.unit-details-panel", [
-    h(UnitDescription, {
+    h(UnitDetailsPanel, {
       unit: selectedUnit,
       onClose: () => setSelectedUnit(null),
     }),

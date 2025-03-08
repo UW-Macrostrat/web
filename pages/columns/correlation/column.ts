@@ -2,25 +2,19 @@ import {
   ColumnLayoutContext,
   ColumnProvider,
   ColumnSVG,
-  useColumn,
 } from "@macrostrat/column-components";
 import { Timescale, TimescaleOrientation } from "@macrostrat/timescale";
 import { useDarkMode } from "@macrostrat/ui-components";
 import classNames from "classnames";
-import { useContext, useEffect, useMemo, useRef } from "react";
-import { AgeAxis, useSelectedUnit } from "@macrostrat/column-views";
+import { useContext, useMemo } from "react";
+
+import { AgeAxis } from "@macrostrat/column-views";
 import { SectionRenderData } from "./types";
 import {
   CompositeUnitsColumn,
   TrackedLabeledUnit,
 } from "@macrostrat/column-views";
 import { ColumnAxisType } from "@macrostrat/column-components";
-import { UnitLong } from "@macrostrat/api-types";
-import {
-  LegendJSONView,
-  LegendPanelHeader,
-  UnitDetailsPopover,
-} from "~/components/unit-details";
 import { useCorrelationDiagramStore } from "./state";
 import styles from "./column.module.scss";
 import hyper from "@macrostrat/hyper";
@@ -157,11 +151,7 @@ export function Column(props: IColumnProps) {
     ...rest
   } = props;
 
-  console.log("packages", data);
-
   const darkMode = useDarkMode();
-
-  const sectionGroups = [[0, data]];
 
   const className = classNames(baseClassName, {
     "dark-mode": darkMode?.isEnabled ?? false,
@@ -174,12 +164,6 @@ export function Column(props: IColumnProps) {
       h(
         "div.main-column",
         data.map((sectionData, i) => {
-          const lastGroup = sectionGroups[i - 1]?.[1];
-          let upperUnits = [];
-          if (i != 0) {
-            upperUnits = [data[i - 1]];
-          }
-
           return h([
             h(`div.section.section-${i}`, [
               h(Section, {
@@ -289,60 +273,5 @@ function TimescaleSection(props: {
         }),
       ]),
     ]
-  );
-}
-
-export function UnitDescription({
-  unit,
-  onClose,
-}: {
-  unit: UnitLong;
-  onClose?: () => void;
-}) {
-  const { unit_name, unit_id, strat_name_long } = unit;
-  const name = strat_name_long ?? unit_name;
-  return h("div.unit-description", [
-    h(LegendPanelHeader, { title: name, id: unit_id, onClose }),
-    h(LegendJSONView, { data: unit }),
-  ]);
-}
-
-function SelectedUnitPopover<T>({ width }: { width: number }) {
-  const { scale, divisions } = useColumn();
-
-  const item0 = useSelectedUnit();
-  const item = divisions.find((d) => d.unit_id == item0?.unit_id);
-
-  const scrollParentRef = useRef(null);
-  useEffect(() => {
-    scrollParentRef.current = document.getElementsByClassName(
-      styles["overlay-safe-area"]
-    )[0];
-  }, []);
-
-  if (item == null) {
-    return null;
-  }
-
-  const { t_age, b_age } = item0;
-  const range = [b_age, t_age];
-
-  const content = h(UnitDescription, { unit: item });
-
-  const top = scale(range[1]) + 10;
-  const bottom = scale(range[0]) + 10;
-
-  return h(
-    UnitDetailsPopover,
-    {
-      style: {
-        top,
-        left: 0,
-        width,
-        height: bottom - top,
-      },
-      boundary: scrollParentRef.current,
-    },
-    content
   );
 }
