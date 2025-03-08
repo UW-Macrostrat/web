@@ -9,23 +9,23 @@ import { useDarkMode } from "@macrostrat/ui-components";
 import classNames from "classnames";
 import { useContext, useEffect, useMemo, useRef } from "react";
 import { AgeAxis, useSelectedUnit } from "@macrostrat/column-views";
-import h from "./column.module.scss";
 import { SectionRenderData } from "./types";
 import {
   CompositeUnitsColumn,
   TrackedLabeledUnit,
 } from "@macrostrat/column-views";
-import styles from "./main.module.sass";
-
 import { ColumnAxisType } from "@macrostrat/column-components";
-
 import { UnitLong } from "@macrostrat/api-types";
 import {
   LegendJSONView,
   LegendPanelHeader,
   UnitDetailsPopover,
 } from "~/components/unit-details";
-import { useCorrelationDiagramStore } from "#/columns/correlation/state";
+import { useCorrelationDiagramStore } from "./state";
+import styles from "./column.module.scss";
+import hyper from "@macrostrat/hyper";
+
+const h = hyper.styled(styles);
 
 export function MacrostratColumnProvider(props) {
   // A column provider specialized the Macrostrat API

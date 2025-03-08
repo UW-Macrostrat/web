@@ -1,6 +1,5 @@
 import { LineString } from "geojson";
-import { getHashString, setHashString } from "@macrostrat/ui-components";
-import type { CorrelationState } from "./state";
+import { setHashString } from "@macrostrat/ui-components";
 
 interface CorrelationHashParams {
   section?: LineString | null;

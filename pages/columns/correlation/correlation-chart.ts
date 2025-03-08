@@ -1,15 +1,14 @@
 /** Correlation chart */
-import {
-  preprocessUnits,
-  useUnitSelectionDispatch,
-} from "@macrostrat/column-views";
+import { preprocessUnits } from "@macrostrat/column-views";
 import { runColumnQuery } from "#/map/map-interface/app-state/handlers/fetch";
 import { Column, TimescaleColumn } from "./column";
 import { UnitLong } from "@macrostrat/api-types";
 import { GapBoundPackage, SectionRenderData, AgeComparable } from "./types";
+import { useCorrelationDiagramStore } from "./state";
+import styles from "./main.module.sass";
+import hyper from "@macrostrat/hyper";
 
-import h from "./main.module.sass";
-import { useCorrelationDiagramStore } from "#/columns/correlation/state";
+const h = hyper.styled(styles);
 
 export interface ColumnIdentifier {
   col_id: number;
