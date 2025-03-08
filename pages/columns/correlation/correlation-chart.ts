@@ -1,5 +1,10 @@
 /** Correlation chart */
-import { preprocessUnits } from "@macrostrat/column-views";
+import {
+  preprocessUnits,
+  groupUnitsIntoSections,
+  _mergeOverlappingSections,
+  SectionInfo,
+} from "@macrostrat/column-views";
 import { runColumnQuery } from "#/map/map-interface/app-state/handlers/fetch";
 import { Column, TimescaleColumn } from "./column";
 import { UnitLong } from "@macrostrat/api-types";
@@ -107,6 +112,7 @@ type ColumnData = {
 
 async function fetchUnitsForColumn(col_id: number): Promise<ColumnData> {
   const res = await runColumnQuery({ col_id }, null);
+
   return { columnID: col_id, units: preprocessUnits(res) };
 }
 
@@ -156,26 +162,28 @@ function buildColumnData(
   const pixelScales = pkgs.map(findBestPixelScale);
 
   const columnData = columns.map((d) => {
-    return pkgs.map((pkg, i): SectionRenderData => {
-      const { t_age, b_age } = pkg;
-      let units = pkg.unitIndex.get(d.columnID) ?? [];
+    return pkgs
+      .map((pkg, i): SectionRenderData => {
+        const { t_age, b_age } = pkg;
+        let units = pkg.unitIndex.get(d.columnID) ?? [];
 
-      units.sort((a, b) => a.b_age - b.b_age);
+        units.sort((a, b) => a.b_age - b.b_age);
 
-      return {
-        t_age,
-        b_age,
-        columnID: d.columnID,
-        bestPixelScale: pixelScales[i],
-        units,
-      };
-    });
+        return {
+          t_age,
+          b_age,
+          columnID: d.columnID,
+          bestPixelScale: pixelScales[i],
+          units,
+        };
+      })
+      .sort((a, b) => a.b_age - b.b_age);
   });
 
   return { columnData, b_age, t_age };
 }
 
-function findBestPixelScale(pkg: GapBoundPackage) {
+function findBestPixelScale(pkg: SectionInfo) {
   const dAge = pkg.b_age - pkg.t_age;
   const maxNUnits = Math.max(
     ...Array.from(pkg.unitIndex.values()).map((d) => d.length)

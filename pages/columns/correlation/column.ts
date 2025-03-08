@@ -124,6 +124,8 @@ function Unconformity({ upperUnits = [], lowerUnits = [], style }) {
     return null;
   }
 
+  console.log("units", lowerUnits, upperUnits);
+
   const ageGap = lowerUnits[0].t_age - upperUnits[upperUnits.length - 1].b_age;
 
   return h(
@@ -157,6 +159,8 @@ export function Column(props: IColumnProps) {
     ...rest
   } = props;
 
+  console.log("packages", data);
+
   const darkMode = useDarkMode();
 
   const sectionGroups = [[0, data]];
@@ -173,10 +177,15 @@ export function Column(props: IColumnProps) {
         "div.main-column",
         data.map((sectionData, i) => {
           const lastGroup = sectionGroups[i - 1]?.[1];
+          let upperUnits = [];
+          if (i != 0) {
+            upperUnits = [data[i - 1]];
+          }
+
           return h([
             h.if(unconformityLabels)(Unconformity, {
-              upperUnits: lastGroup,
-              lowerUnits: data,
+              upperUnits,
+              lowerUnits: [sectionData],
               style: { width: showLabels ? columnWidth : width },
             }),
             h(`div.section.section-${i}`, [
