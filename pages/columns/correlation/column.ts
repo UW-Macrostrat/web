@@ -22,6 +22,7 @@ import styles from "./column.module.scss";
 import hyper from "@macrostrat/hyper";
 import { UnitDetailsPanel } from "@macrostrat/column-views";
 import { UnitDetailsPopover } from "~/components/unit-details";
+import { ColumnIdentifier } from "#/columns/correlation/correlation-chart";
 
 const h = hyper.styled(styles);
 
@@ -131,33 +132,15 @@ function Unconformity({ upperUnits = [], lowerUnits = [], style }) {
   );
 }
 
-interface IColumnProps {
-  data: SectionRenderData[];
-  unitComponent?: React.FunctionComponent<any>;
-  unitComponentProps?: any;
-  showLabels?: boolean;
-  width?: number;
-  columnWidth?: number;
-  targetUnitHeight?: number;
-  unconformityLabels: boolean;
-  className?: string;
-}
-
-export function Column(props: IColumnProps) {
-  const {
-    data,
-    unitComponent = UnitComponent,
-    unconformityLabels = false,
-    showLabels = true,
-    width = 300,
-    columnWidth = 150,
-    className: baseClassName,
-    ...rest
-  } = props;
-
+export function Column({
+  data,
+}: {
+  column: ColumnIdentifier;
+  data: SectionRenderData;
+}) {
   const darkMode = useDarkMode();
 
-  const className = classNames(baseClassName, {
+  const className = classNames({
     "dark-mode": darkMode?.isEnabled ?? false,
   });
 
@@ -165,23 +148,15 @@ export function Column(props: IColumnProps) {
     "div.column-container",
     { className },
     h("div.column", [
-      h(
-        "div.main-column",
-        data.map((sectionData, i) => {
-          return h([
-            h(`div.section.section-${i}`, [
-              h(Section, {
-                data: sectionData,
-                unitComponent,
-                showLabels,
-                width,
-                columnWidth,
-                ...rest,
-              }),
-            ]),
-          ]);
-        })
-      ),
+      h(`div.section`, [
+        h(Section, {
+          data,
+          unitComponent: UnitComponent,
+          showLabels: false,
+          width: 100,
+          columnWidth: 100,
+        }),
+      ]),
     ])
   );
 }

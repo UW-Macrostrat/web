@@ -1,10 +1,5 @@
 /** Correlation chart */
-import {
-  preprocessUnits,
-  groupUnitsIntoSections,
-  _mergeOverlappingSections,
-  SectionInfo,
-} from "@macrostrat/column-views";
+import { preprocessUnits, SectionInfo } from "@macrostrat/column-views";
 import { runColumnQuery } from "#/map/map-interface/app-state/handlers/fetch";
 import { Column, TimescaleColumn } from "./column";
 import { UnitLong } from "@macrostrat/api-types";
@@ -12,7 +7,6 @@ import { GapBoundPackage, SectionRenderData, AgeComparable } from "./types";
 import { useCorrelationDiagramStore } from "./state";
 import styles from "./main.module.sass";
 import hyper from "@macrostrat/hyper";
-import { UnconformityLine } from "#/columns/correlation/unconformity-line";
 
 const h = hyper.styled(styles);
 
@@ -91,9 +85,6 @@ export function CorrelationChart({ data }: { data: CorrelationChartData }) {
       h(
         packages.map((pkg, i) => {
           return h([
-            // h.if(i > 0)(UnconformityLine, {
-            //   width: pkg.columnData.length * 100,
-            // }),
             h(
               "div.package",
               { key: i },
@@ -105,7 +96,7 @@ export function CorrelationChart({ data }: { data: CorrelationChartData }) {
                   t_age: pkg.t_age,
                   bestPixelScale: pkg.bestPixelScale,
                 };
-                return h(SingleColumn, {
+                return h(Column, {
                   data,
                   key: i,
                 });
@@ -142,23 +133,6 @@ function TimescaleColumnExt({ packages }: { packages: SectionRenderData[] }) {
       width: 100,
       columnWidth: 100,
       packages,
-    }),
-  ]);
-}
-
-function SingleColumn({
-  data,
-}: {
-  column: ColumnIdentifier;
-  data: SectionRenderData;
-}) {
-  return h("div.column", [
-    h(Column, {
-      data: [data],
-      showLabels: false,
-      unconformityLabels: true,
-      width: 100,
-      columnWidth: 100,
     }),
   ]);
 }
