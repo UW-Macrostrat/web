@@ -124,8 +124,6 @@ function Unconformity({ upperUnits = [], lowerUnits = [], style }) {
     return null;
   }
 
-  console.log("units", lowerUnits, upperUnits);
-
   const ageGap = lowerUnits[0].t_age - upperUnits[upperUnits.length - 1].b_age;
 
   return h(
@@ -183,11 +181,6 @@ export function Column(props: IColumnProps) {
           }
 
           return h([
-            h.if(unconformityLabels)(Unconformity, {
-              upperUnits,
-              lowerUnits: [sectionData],
-              style: { width: showLabels ? columnWidth : width },
-            }),
             h(`div.section.section-${i}`, [
               h(Section, {
                 data: sectionData,
@@ -208,10 +201,17 @@ export function Column(props: IColumnProps) {
 interface TimescaleColumnProps {
   packages: SectionRenderData[];
   className?: string;
+  showLabels?: boolean;
+  unconformityLabels: boolean;
 }
 
 export function TimescaleColumn(props: TimescaleColumnProps) {
-  const { className: baseClassName, packages } = props;
+  const {
+    className: baseClassName,
+    packages,
+    columnWidth = 100,
+    unconformityLabels = true,
+  } = props;
 
   const darkMode = useDarkMode();
 
@@ -229,8 +229,18 @@ export function TimescaleColumn(props: TimescaleColumnProps) {
         packages.map((data, i) => {
           const range = [data.b_age, data.t_age];
           const pixelScale = data.bestPixelScale;
+          let upperUnits = [];
+          if (i != 0) {
+            upperUnits = [packages[i - 1]];
+          }
+          const lowerUnits = [data];
 
           return h([
+            h.if(unconformityLabels)(Unconformity, {
+              upperUnits,
+              lowerUnits,
+              style: { width: columnWidth },
+            }),
             h(`div.section.section-${i}`, [
               h(TimescaleSection, {
                 range,
