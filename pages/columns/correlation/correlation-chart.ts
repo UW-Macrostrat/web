@@ -28,12 +28,13 @@ export interface CorrelationChartData {
 }
 
 interface ColumnExt {
-  columnID: ColumnIdentifier;
+  columnID: number;
   units: UnitLong[];
 }
 
 interface MultiColumnPackageData {
   columnData: ColumnExt[];
+  bestPixelScale: number;
   b_age: number;
   t_age: number;
 }
@@ -85,14 +86,29 @@ export function CorrelationChart({ data }: { data: CorrelationChartData }) {
       key: "timescale",
       packages: firstColumn,
     }),
-    h(
-      chartData.columnData.map((packages, i) =>
-        h(SingleColumn, {
-          packages,
-          key: i,
+    h("div.main-chart", [
+      h(
+        packages.map((pkg, i) => {
+          return h(
+            "div.package",
+            { key: i },
+            pkg.columnData.map((d, ia) => {
+              const data = {
+                columnID: d.columnID,
+                units: d.units,
+                b_age: pkg.b_age,
+                t_age: pkg.t_age,
+                bestPixelScale: pkg.bestPixelScale,
+              };
+              return h(SingleColumn, {
+                data,
+                key: i,
+              });
+            })
+          );
         })
-      )
-    ),
+      ),
+    ]),
   ]);
 }
 
@@ -125,14 +141,14 @@ function TimescaleColumnExt({ packages }: { packages: SectionRenderData[] }) {
 }
 
 function SingleColumn({
-  packages,
+  data,
 }: {
   column: ColumnIdentifier;
-  packages: SectionRenderData[];
+  data: SectionRenderData;
 }) {
   return h("div.column", [
     h(Column, {
-      data: packages,
+      data: [data],
       showLabels: false,
       unconformityLabels: true,
       width: 100,

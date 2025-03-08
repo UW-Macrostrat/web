@@ -3,6 +3,7 @@ import {
   MapboxMapProvider,
   useMapClickHandler,
   useMapEaseTo,
+  useMapRef,
   useMapStyleOperator,
 } from "@macrostrat/mapbox-react";
 import { LngLatBounds } from "mapbox-gl";
@@ -284,6 +285,11 @@ function SectionLine({ focusedLine }: { focusedLine: LineString }) {
   useMapStyleOperator(
     (map) => {
       if (focusedLine == null) {
+        return;
+      }
+      // TODO: there is apparently a bug that results in this being called before style loads.
+      // Perhaps this has to do with hot reloading since it only seems to happen later.
+      if (!map.isStyleLoaded()) {
         return;
       }
       const data: FeatureCollection = {

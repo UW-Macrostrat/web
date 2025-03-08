@@ -9,6 +9,7 @@ $map-size-inset: 12em
   flex-direction: row
   gap: 1em
   overflow: hidden
+
   &.map-inset
     .column-selection-map
       position: absolute
@@ -29,6 +30,7 @@ $map-size-inset: 12em
 
 .column-selection-map
   overflow: hidden
+
   :global(.main-view)
     height: 100%
   flex: 1
@@ -64,6 +66,9 @@ $map-size-inset: 12em
   --column-background-color: var(--background-color)
   --column-stroke-color: var(--text-color)
 
+.package
+  display: flex
+  flex-direction: row
 
 .map-expanded-button
   position: absolute
