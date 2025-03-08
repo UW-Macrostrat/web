@@ -13,11 +13,15 @@ import { SectionRenderData } from "./types";
 import {
   CompositeUnitsColumn,
   TrackedLabeledUnit,
+  useSelectedUnit,
 } from "@macrostrat/column-views";
-import { ColumnAxisType } from "@macrostrat/column-components";
+import { useRef, useEffect } from "react";
+import { ColumnAxisType, useColumn } from "@macrostrat/column-components";
 import { useCorrelationDiagramStore } from "./state";
 import styles from "./column.module.scss";
 import hyper from "@macrostrat/hyper";
+import { UnitDetailsPanel } from "@macrostrat/column-views";
+import { UnitDetailsPopover } from "~/components/unit-details";
 
 const h = hyper.styled(styles);
 
@@ -273,5 +277,45 @@ function TimescaleSection(props: {
         }),
       ]),
     ]
+  );
+}
+
+function SelectedUnitPopover<T>({ width }: { width: number }) {
+  const { scale, divisions } = useColumn();
+
+  const item0 = useSelectedUnit();
+  const item = divisions.find((d) => d.unit_id == item0?.unit_id);
+
+  const scrollParentRef = useRef(null);
+  useEffect(() => {
+    scrollParentRef.current = document.getElementsByClassName(
+      styles["overlay-safe-area"]
+    )[0];
+  }, []);
+
+  if (item == null) {
+    return null;
+  }
+
+  const { t_age, b_age } = item0;
+  const range = [b_age, t_age];
+
+  const content = h(UnitDetailsPanel, { unit: item });
+
+  const top = scale(range[1]) + 10;
+  const bottom = scale(range[0]) + 10;
+
+  return h(
+    UnitDetailsPopover,
+    {
+      style: {
+        top,
+        left: 0,
+        width,
+        height: bottom - top,
+      },
+      boundary: scrollParentRef.current,
+    },
+    content
   );
 }
