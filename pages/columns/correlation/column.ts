@@ -48,15 +48,14 @@ function Section(props: ISectionProps) {
   const {
     data,
     unitComponent,
-    showLabels = true,
-    width = 300,
-    columnWidth = 150,
+    width = 150,
     unitComponentProps,
     columnSpacing = 0,
   } = props;
 
   const expanded = useCorrelationDiagramStore((s) => s.mapExpanded);
 
+  const columnWidth = width;
   const { units, bestPixelScale: pixelScale, t_age, b_age } = data;
   const range = [b_age, t_age];
 
@@ -81,12 +80,10 @@ function Section(props: ISectionProps) {
   return h(
     ColumnSVG,
     {
-      innerWidth: showLabels ? width : columnWidth,
-      paddingRight: columnSpacing / 2,
-      paddingLeft: columnSpacing / 2,
+      innerWidth: columnWidth,
+      paddingH: columnSpacing / 2,
       paddingV: 10,
       innerHeight: height,
-      pixelHeight: height,
     },
     h(
       MacrostratColumnProvider,
@@ -117,8 +114,8 @@ function Section(props: ISectionProps) {
 
 function ColumnSVG(props) {
   //# Need to rework to use UI Box code
-  const { children, className, innerRef, style, pixelHeight, ...rest } = props;
-  const nextProps = expandInnerSize({ innerHeight: pixelHeight, ...rest });
+  const { children, className, innerRef, style, ...rest } = props;
+  const nextProps = expandInnerSize(rest);
   const {
     paddingLeft,
     paddingTop,
@@ -197,7 +194,6 @@ export function Column({
           unitComponent: UnitComponent,
           showLabels: false,
           width: 100,
-          columnWidth: 100,
           columnSpacing,
         }),
       ]),
