@@ -105,21 +105,11 @@ function Section(props: ISectionProps) {
           unitComponentProps: _unitComponentProps,
           clipToFrame: false,
         }),
-        h.if(!expanded)(
-          ForeignObject,
-          {
-            width: columnWidth,
-            height,
-            style: {
-              pointerEvents: "none",
-            },
-          },
-          h(
-            "div.selected-unit-popover-container",
-            { style: { width: columnWidth, height } },
-            [h(SelectedUnitPopover, { width })]
-          )
-        ),
+        h.if(!expanded)(SelectedUnitPopoverContainer, {
+          width: columnWidth,
+          height,
+          padding: 2,
+        }),
       ]
     )
   );
@@ -306,6 +296,33 @@ function TimescaleSection(props: {
         }),
       ]),
     ]
+  );
+}
+
+function SelectedUnitPopoverContainer({ width, height, padding = 0 }) {
+  const extraWidth = padding * 2;
+
+  return h(
+    ForeignObject,
+    {
+      width: width + extraWidth,
+      height: height + extraWidth,
+      style: {
+        transform: `translate(-${padding}px, -${padding}px)`,
+        pointerEvents: "none",
+      },
+    },
+    h(
+      "div.selected-unit-popover-container",
+      {
+        style: {
+          width,
+          height,
+          transform: `translate(${padding}px, ${padding}px)`,
+        },
+      },
+      [h(SelectedUnitPopover, { width })]
+    )
   );
 }
 

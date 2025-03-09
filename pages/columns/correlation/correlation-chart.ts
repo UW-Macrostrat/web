@@ -72,6 +72,8 @@ export function CorrelationChart({ data }: { data: CorrelationChartData }) {
     return null;
   }
 
+  const columnSpacing = 4;
+
   const packages = regridChartData(data);
 
   const firstColumn = chartData.columnData[0];
@@ -82,15 +84,19 @@ export function CorrelationChart({ data }: { data: CorrelationChartData }) {
       packages: firstColumn,
     }),
     h("div.main-chart", [
-      h(packages.map((pkg, i) => h(Package, { data: pkg, key: i }))),
+      h(
+        packages.map((pkg, i) =>
+          h(Package, { data: pkg, key: i, columnSpacing })
+        )
+      ),
     ]),
   ]);
 }
 
-function Package({ data }) {
+function Package({ data, columnSpacing }) {
   const { columnData, b_age, t_age, bestPixelScale } = data;
   return h("div.package", [
-    h(PackageSVGOverlay, { data }),
+    h(PackageSVGOverlay, { data, columnSpacing }),
     h("div.column-container", [
       columnData.map((d, i) => {
         return h(Column, {
@@ -100,6 +106,7 @@ function Package({ data }) {
             t_age,
             bestPixelScale,
           },
+          columnSpacing,
           key: i,
         });
       }),
