@@ -1,11 +1,8 @@
 import { ForeignObject, useColumn } from "@macrostrat/column-components";
 import { UnitDetailsPanel, useSelectedUnit } from "@macrostrat/column-views";
-import { DOMElement, useEffect, useRef } from "react";
+import { DOMElement } from "react";
 import { UnitDetailsPopover } from "~/components/unit-details";
 import h from "@macrostrat/hyper";
-// import styles from "./column.module.scss";
-//
-// const h = hyper.styled(styles);
 
 export function SelectedUnitPopoverContainer({ width, height, padding = 0 }) {
   const extraWidth = padding * 2;
