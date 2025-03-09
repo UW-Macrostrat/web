@@ -107,12 +107,10 @@ function Package({ data }) {
   ]);
 }
 
-function PackageSVGOverlay({ data }) {
+function PackageSVGOverlay({ data, columnSpacing = 0 }) {
   const { b_age, t_age, bestPixelScale, columnData } = data;
 
-  console.log(data);
-
-  const width = 100 * columnData.length;
+  const width = (100 + columnSpacing) * columnData.length;
   const height = Math.ceil((b_age - t_age) * bestPixelScale) + 2;
 
   return h("div.package-overlay", { style: { width, height } });

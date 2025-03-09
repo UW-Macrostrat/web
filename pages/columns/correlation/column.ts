@@ -1,10 +1,11 @@
 import {
   ColumnLayoutContext,
   ColumnProvider,
-  ColumnSVG,
+  ForeignObject,
+  SVG,
 } from "@macrostrat/column-components";
 import { Timescale, TimescaleOrientation } from "@macrostrat/timescale";
-import { useDarkMode } from "@macrostrat/ui-components";
+import { useDarkMode, expandInnerSize } from "@macrostrat/ui-components";
 import classNames from "classnames";
 import { useContext, useMemo } from "react";
 
@@ -22,7 +23,7 @@ import styles from "./column.module.scss";
 import hyper from "@macrostrat/hyper";
 import { UnitDetailsPanel } from "@macrostrat/column-views";
 import { UnitDetailsPopover } from "~/components/unit-details";
-import { ColumnIdentifier } from "#/columns/correlation/correlation-chart";
+import { ColumnIdentifier } from "./correlation-chart";
 
 const h = hyper.styled(styles);
 
@@ -38,6 +39,7 @@ interface ISectionProps {
   showLabels?: boolean;
   width?: number;
   columnWidth?: number;
+  columnSpacing?: number;
   targetUnitHeight?: number;
 }
 
@@ -50,6 +52,7 @@ function Section(props: ISectionProps) {
     width = 300,
     columnWidth = 150,
     unitComponentProps,
+    columnSpacing = 0,
   } = props;
 
   const expanded = useCorrelationDiagramStore((s) => s.mapExpanded);
@@ -76,22 +79,23 @@ function Section(props: ISectionProps) {
   }, [units, unitComponentProps]);
 
   return h(
-    MacrostratColumnProvider,
+    ColumnSVG,
     {
-      divisions: units,
-      range,
-      pixelsPerMeter: pixelScale, // Actually pixels per myr
+      innerWidth: showLabels ? width : columnWidth,
+      paddingRight: columnSpacing / 2,
+      paddingLeft: columnSpacing / 2,
+      paddingV: 10,
+      innerHeight: height,
+      pixelHeight: height,
     },
-    [
-      h(
-        ColumnSVG,
-        {
-          innerWidth: showLabels ? width : columnWidth,
-          paddingRight: 0,
-          paddingLeft: 0,
-          paddingV: 10,
-          innerHeight: height,
-        },
+    h(
+      MacrostratColumnProvider,
+      {
+        divisions: units,
+        range,
+        pixelsPerMeter: pixelScale, // Actually pixels per myr
+      },
+      [
         h(CompositeUnitsColumn, {
           width: columnWidth,
           columnWidth,
@@ -100,10 +104,57 @@ function Section(props: ISectionProps) {
           unitComponent,
           unitComponentProps: _unitComponentProps,
           clipToFrame: false,
-        })
-      ),
-      h.if(!expanded)(SelectedUnitPopover, { width }),
-    ]
+        }),
+        h.if(!expanded)(
+          ForeignObject,
+          {
+            width: columnWidth,
+            height,
+            style: {
+              pointerEvents: "none",
+            },
+          },
+          h(
+            "div.selected-unit-popover-container",
+            { style: { width: columnWidth, height } },
+            [h(SelectedUnitPopover, { width })]
+          )
+        ),
+      ]
+    )
+  );
+}
+
+function ColumnSVG(props) {
+  //# Need to rework to use UI Box code
+  const { children, className, innerRef, style, pixelHeight, ...rest } = props;
+  const nextProps = expandInnerSize({ innerHeight: pixelHeight, ...rest });
+  const {
+    paddingLeft,
+    paddingTop,
+    innerHeight,
+    innerWidth,
+    height,
+    width,
+    ...remainingProps
+  } = nextProps;
+  return h(
+    SVG,
+    {
+      className: classNames(className, "section"),
+      height,
+      width,
+      innerRef,
+      ...remainingProps,
+      style,
+    },
+    h(
+      "g.backdrop",
+      {
+        transform: `translate(${paddingLeft},${paddingTop})`,
+      },
+      children
+    )
   );
 }
 
@@ -134,9 +185,11 @@ function Unconformity({ upperUnits = [], lowerUnits = [], style }) {
 
 export function Column({
   data,
+  columnSpacing,
 }: {
   column: ColumnIdentifier;
   data: SectionRenderData;
+  columnSpacing: number;
 }) {
   const darkMode = useDarkMode();
 
@@ -155,6 +208,7 @@ export function Column({
           showLabels: false,
           width: 100,
           columnWidth: 100,
+          columnSpacing,
         }),
       ]),
     ])
@@ -277,8 +331,8 @@ function SelectedUnitPopover<T>({ width }: { width: number }) {
 
   const content = h(UnitDetailsPanel, { unit: item });
 
-  const top = scale(range[1]) + 10;
-  const bottom = scale(range[0]) + 10;
+  const top = scale(range[1]);
+  const bottom = scale(range[0]);
 
   return h(
     UnitDetailsPopover,
@@ -290,6 +344,7 @@ function SelectedUnitPopover<T>({ width }: { width: number }) {
         height: bottom - top,
       },
       boundary: scrollParentRef.current,
+      usePortal: true,
     },
     content
   );
