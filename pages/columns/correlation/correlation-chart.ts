@@ -112,7 +112,7 @@ function PackageSVGOverlay({ data }) {
 
   console.log(data);
 
-  const width = 102 * columnData.length;
+  const width = 100 * columnData.length;
   const height = Math.ceil((b_age - t_age) * bestPixelScale) + 2;
 
   return h("div.package-overlay", { style: { width, height } });

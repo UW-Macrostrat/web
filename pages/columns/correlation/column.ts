@@ -87,8 +87,8 @@ function Section(props: ISectionProps) {
         ColumnSVG,
         {
           innerWidth: showLabels ? width : columnWidth,
-          paddingRight: 1,
-          paddingLeft: 1,
+          paddingRight: 0,
+          paddingLeft: 0,
           paddingV: 10,
           innerHeight: height,
         },
