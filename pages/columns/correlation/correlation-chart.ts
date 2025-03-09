@@ -82,31 +82,40 @@ export function CorrelationChart({ data }: { data: CorrelationChartData }) {
       packages: firstColumn,
     }),
     h("div.main-chart", [
-      h(
-        packages.map((pkg, i) => {
-          return h([
-            h(
-              "div.package",
-              { key: i },
-              pkg.columnData.map((d, ia) => {
-                const data = {
-                  columnID: d.columnID,
-                  units: d.units,
-                  b_age: pkg.b_age,
-                  t_age: pkg.t_age,
-                  bestPixelScale: pkg.bestPixelScale,
-                };
-                return h(Column, {
-                  data,
-                  key: i,
-                });
-              })
-            ),
-          ]);
-        })
-      ),
+      h(packages.map((pkg, i) => h(Package, { data: pkg, key: i }))),
     ]),
   ]);
+}
+
+function Package({ data }) {
+  const { columnData, b_age, t_age, bestPixelScale } = data;
+  return h("div.package", [
+    h(PackageSVGOverlay, { data }),
+    h("div.column-container", [
+      columnData.map((d, i) => {
+        return h(Column, {
+          data: {
+            ...d,
+            b_age,
+            t_age,
+            bestPixelScale,
+          },
+          key: i,
+        });
+      }),
+    ]),
+  ]);
+}
+
+function PackageSVGOverlay({ data }) {
+  const { b_age, t_age, bestPixelScale, columnData } = data;
+
+  console.log(data);
+
+  const width = 102 * columnData.length;
+  const height = Math.ceil((b_age - t_age) * bestPixelScale) + 2;
+
+  return h("div.package-overlay", { style: { width, height } });
 }
 
 function ChartArea({ children }) {
