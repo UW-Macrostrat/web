@@ -1,29 +1,25 @@
 import {
+  ColumnAxisType,
   ColumnLayoutContext,
   ColumnProvider,
-  ForeignObject,
   SVG,
 } from "@macrostrat/column-components";
 import { Timescale, TimescaleOrientation } from "@macrostrat/timescale";
-import { useDarkMode, expandInnerSize } from "@macrostrat/ui-components";
+import { expandInnerSize, useDarkMode } from "@macrostrat/ui-components";
 import classNames from "classnames";
 import { useContext, useMemo } from "react";
 
-import { AgeAxis } from "@macrostrat/column-views";
-import { SectionRenderData } from "./types";
 import {
+  AgeAxis,
   CompositeUnitsColumn,
   TrackedLabeledUnit,
-  useSelectedUnit,
 } from "@macrostrat/column-views";
-import { useRef, useEffect } from "react";
-import { ColumnAxisType, useColumn } from "@macrostrat/column-components";
+import { SectionRenderData } from "./types";
 import { useCorrelationDiagramStore } from "./state";
-import styles from "./column.module.scss";
 import hyper from "@macrostrat/hyper";
-import { UnitDetailsPanel } from "@macrostrat/column-views";
-import { UnitDetailsPopover } from "~/components/unit-details";
 import { ColumnIdentifier } from "./correlation-chart";
+import { SelectedUnitPopoverContainer } from "#/columns/correlation/selected-unit";
+import styles from "./column.module.scss";
 
 const h = hyper.styled(styles);
 
@@ -292,73 +288,5 @@ function TimescaleSection(props: {
         }),
       ]),
     ]
-  );
-}
-
-function SelectedUnitPopoverContainer({ width, height, padding = 0 }) {
-  const extraWidth = padding * 2;
-
-  return h(
-    ForeignObject,
-    {
-      width: width + extraWidth,
-      height: height + extraWidth,
-      style: {
-        transform: `translate(-${padding}px, -${padding}px)`,
-        pointerEvents: "none",
-      },
-    },
-    h(
-      "div.selected-unit-popover-container",
-      {
-        style: {
-          width,
-          height,
-          transform: `translate(${padding}px, ${padding}px)`,
-        },
-      },
-      [h(SelectedUnitPopover, { width })]
-    )
-  );
-}
-
-function SelectedUnitPopover<T>({ width }: { width: number }) {
-  const { scale, divisions } = useColumn();
-
-  const item0 = useSelectedUnit();
-  const item = divisions.find((d) => d.unit_id == item0?.unit_id);
-
-  const scrollParentRef = useRef(null);
-  useEffect(() => {
-    scrollParentRef.current = document.getElementsByClassName(
-      styles["overlay-safe-area"]
-    )[0];
-  }, []);
-
-  if (item == null) {
-    return null;
-  }
-
-  const { t_age, b_age } = item0;
-  const range = [b_age, t_age];
-
-  const content = h(UnitDetailsPanel, { unit: item });
-
-  const top = scale(range[1]);
-  const bottom = scale(range[0]);
-
-  return h(
-    UnitDetailsPopover,
-    {
-      style: {
-        top,
-        left: 0,
-        width,
-        height: bottom - top,
-      },
-      boundary: scrollParentRef.current,
-      usePortal: true,
-    },
-    content
   );
 }
