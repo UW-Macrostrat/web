@@ -98,7 +98,8 @@ function Package({ data, columnSpacing }) {
   const { columnData, b_age, t_age, bestPixelScale } = data;
 
   return h("div.package", [
-    h(PackageSVGOverlay, { data, columnSpacing }),
+    // Disable the SVG overlay for now
+    //h(PackageSVGOverlay, { data, columnSpacing }),
     h("div.column-container", [
       columnData.map((d, i) => {
         return h(Column, {
