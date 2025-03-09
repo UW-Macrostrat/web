@@ -12,10 +12,12 @@ export function UnitDetailsPopover({
   style,
   children,
   boundary,
+  usePortal = false,
 }: {
   style: object;
   children: React.ReactNode;
   boundary?: DOMElement<any, any>;
+  usePortal?: boolean;
 }) {
   const content = h(LegendPopoverContainer, children);
 
@@ -26,7 +28,7 @@ export function UnitDetailsPopover({
     },
     h(
       Popover,
-      { content, isOpen: true, usePortal: false, boundary },
+      { content, isOpen: true, usePortal, boundary },
       h("span.popover-target")
     )
   );

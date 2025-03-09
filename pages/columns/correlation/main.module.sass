@@ -68,8 +68,21 @@ $map-size-inset: 12em
 
 
 .package
-  display: flex
-  flex-direction: row
+  position: relative
+
+  .package-overlay
+    position: absolute
+    top: 9px
+    left: 0
+    border: 2px solid red
+
+  .laterally-extensive-unit .strat-col-span
+    position: absolute
+    border: 2px solid red
+
+  .column-container
+    display: flex
+    flex-direction: row
 
 .map-expanded-button
   position: absolute

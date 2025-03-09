@@ -1,28 +1,25 @@
 import {
+  ColumnAxisType,
   ColumnLayoutContext,
   ColumnProvider,
-  ColumnSVG,
+  SVG,
 } from "@macrostrat/column-components";
 import { Timescale, TimescaleOrientation } from "@macrostrat/timescale";
-import { useDarkMode } from "@macrostrat/ui-components";
+import { expandInnerSize, useDarkMode } from "@macrostrat/ui-components";
 import classNames from "classnames";
 import { useContext, useMemo } from "react";
 
-import { AgeAxis } from "@macrostrat/column-views";
-import { SectionRenderData } from "./types";
 import {
+  AgeAxis,
   CompositeUnitsColumn,
   TrackedLabeledUnit,
-  useSelectedUnit,
 } from "@macrostrat/column-views";
-import { useRef, useEffect } from "react";
-import { ColumnAxisType, useColumn } from "@macrostrat/column-components";
+import { SectionRenderData } from "./types";
 import { useCorrelationDiagramStore } from "./state";
-import styles from "./column.module.scss";
 import hyper from "@macrostrat/hyper";
-import { UnitDetailsPanel } from "@macrostrat/column-views";
-import { UnitDetailsPopover } from "~/components/unit-details";
-import { ColumnIdentifier } from "#/columns/correlation/correlation-chart";
+import { ColumnIdentifier } from "./correlation-chart";
+import { SelectedUnitPopoverContainer } from "#/columns/correlation/selected-unit";
+import styles from "./column.module.scss";
 
 const h = hyper.styled(styles);
 
@@ -38,6 +35,7 @@ interface ISectionProps {
   showLabels?: boolean;
   width?: number;
   columnWidth?: number;
+  columnSpacing?: number;
   targetUnitHeight?: number;
 }
 
@@ -46,14 +44,14 @@ function Section(props: ISectionProps) {
   const {
     data,
     unitComponent,
-    showLabels = true,
-    width = 300,
-    columnWidth = 150,
+    width = 150,
     unitComponentProps,
+    columnSpacing = 0,
   } = props;
 
   const expanded = useCorrelationDiagramStore((s) => s.mapExpanded);
 
+  const columnWidth = width;
   const { units, bestPixelScale: pixelScale, t_age, b_age } = data;
   const range = [b_age, t_age];
 
@@ -76,22 +74,21 @@ function Section(props: ISectionProps) {
   }, [units, unitComponentProps]);
 
   return h(
-    MacrostratColumnProvider,
+    ColumnSVG,
     {
-      divisions: units,
-      range,
-      pixelsPerMeter: pixelScale, // Actually pixels per myr
+      innerWidth: columnWidth,
+      paddingH: columnSpacing / 2,
+      paddingV: 10,
+      innerHeight: height,
     },
-    [
-      h(
-        ColumnSVG,
-        {
-          innerWidth: showLabels ? width : columnWidth,
-          paddingRight: 1,
-          paddingLeft: 1,
-          paddingV: 10,
-          innerHeight: height,
-        },
+    h(
+      MacrostratColumnProvider,
+      {
+        divisions: units,
+        range,
+        pixelsPerMeter: pixelScale, // Actually pixels per myr
+      },
+      [
         h(CompositeUnitsColumn, {
           width: columnWidth,
           columnWidth,
@@ -100,10 +97,47 @@ function Section(props: ISectionProps) {
           unitComponent,
           unitComponentProps: _unitComponentProps,
           clipToFrame: false,
-        })
-      ),
-      h.if(!expanded)(SelectedUnitPopover, { width }),
-    ]
+        }),
+        h.if(!expanded)(SelectedUnitPopoverContainer, {
+          width: columnWidth,
+          height,
+          padding: 2,
+        }),
+      ]
+    )
+  );
+}
+
+function ColumnSVG(props) {
+  //# Need to rework to use UI Box code
+  const { children, className, innerRef, style, ...rest } = props;
+  const nextProps = expandInnerSize(rest);
+  const {
+    paddingLeft,
+    paddingTop,
+    innerHeight,
+    innerWidth,
+    height,
+    width,
+    ...remainingProps
+  } = nextProps;
+  return h(
+    SVG,
+    {
+      className: classNames(className, "section"),
+      height,
+      width,
+      innerRef,
+      ...remainingProps,
+      style,
+    },
+    h(
+      "g.backdrop",
+      {
+        transform: `translate(${paddingLeft},${paddingTop})`,
+      },
+      children
+    )
   );
 }
 
@@ -134,9 +168,11 @@ function Unconformity({ upperUnits = [], lowerUnits = [], style }) {
 
 export function Column({
   data,
+  columnSpacing,
 }: {
   column: ColumnIdentifier;
   data: SectionRenderData;
+  columnSpacing: number;
 }) {
   const darkMode = useDarkMode();
 
@@ -154,7 +190,7 @@ export function Column({
           unitComponent: UnitComponent,
           showLabels: false,
           width: 100,
-          columnWidth: 100,
+          columnSpacing,
         }),
       ]),
     ])
@@ -252,45 +288,5 @@ function TimescaleSection(props: {
         }),
       ]),
     ]
-  );
-}
-
-function SelectedUnitPopover<T>({ width }: { width: number }) {
-  const { scale, divisions } = useColumn();
-
-  const item0 = useSelectedUnit();
-  const item = divisions.find((d) => d.unit_id == item0?.unit_id);
-
-  const scrollParentRef = useRef(null);
-  useEffect(() => {
-    scrollParentRef.current = document.getElementsByClassName(
-      styles["overlay-safe-area"]
-    )[0];
-  }, []);
-
-  if (item == null) {
-    return null;
-  }
-
-  const { t_age, b_age } = item0;
-  const range = [b_age, t_age];
-
-  const content = h(UnitDetailsPanel, { unit: item });
-
-  const top = scale(range[1]) + 10;
-  const bottom = scale(range[0]) + 10;
-
-  return h(
-    UnitDetailsPopover,
-    {
-      style: {
-        top,
-        left: 0,
-        width,
-        height: bottom - top,
-      },
-      boundary: scrollParentRef.current,
-    },
-    content
   );
 }

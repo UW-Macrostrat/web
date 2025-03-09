@@ -5,6 +5,7 @@ import { Column, TimescaleColumn } from "./column";
 import { UnitLong } from "@macrostrat/api-types";
 import { GapBoundPackage, SectionRenderData, AgeComparable } from "./types";
 import { useCorrelationDiagramStore } from "./state";
+import { mergeAgeRanges } from "@macrostrat-web/utility-functions";
 import styles from "./main.module.sass";
 import hyper from "@macrostrat/hyper";
 
@@ -72,6 +73,8 @@ export function CorrelationChart({ data }: { data: CorrelationChartData }) {
     return null;
   }
 
+  const columnSpacing = 4;
+
   const packages = regridChartData(data);
 
   const firstColumn = chartData.columnData[0];
@@ -83,30 +86,125 @@ export function CorrelationChart({ data }: { data: CorrelationChartData }) {
     }),
     h("div.main-chart", [
       h(
-        packages.map((pkg, i) => {
-          return h([
-            h(
-              "div.package",
-              { key: i },
-              pkg.columnData.map((d, ia) => {
-                const data = {
-                  columnID: d.columnID,
-                  units: d.units,
-                  b_age: pkg.b_age,
-                  t_age: pkg.t_age,
-                  bestPixelScale: pkg.bestPixelScale,
-                };
-                return h(Column, {
-                  data,
-                  key: i,
-                });
-              })
-            ),
-          ]);
-        })
+        packages.map((pkg, i) =>
+          h(Package, { data: pkg, key: i, columnSpacing })
+        )
       ),
     ]),
   ]);
+}
+
+function Package({ data, columnSpacing }) {
+  const { columnData, b_age, t_age, bestPixelScale } = data;
+
+  return h("div.package", [
+    h(PackageSVGOverlay, { data, columnSpacing }),
+    h("div.column-container", [
+      columnData.map((d, i) => {
+        return h(Column, {
+          data: {
+            ...d,
+            b_age,
+            t_age,
+            bestPixelScale,
+          },
+          columnSpacing,
+          key: i,
+        });
+      }),
+    ]),
+  ]);
+}
+
+function PackageSVGOverlay({ data, columnSpacing = 0 }) {
+  const { b_age, t_age, bestPixelScale, columnData } = data;
+
+  const width = (100 + columnSpacing) * columnData.length;
+  const height = Math.ceil((b_age - t_age) * bestPixelScale) + 2;
+
+  const extensiveUnits = findLaterallyExtensiveUnits(data);
+  console.log(extensiveUnits);
+
+  const scale = (val: number) => {
+    return (val - t_age) * bestPixelScale;
+  };
+
+  return h(
+    "div.package-overlay",
+    { style: { width, height } },
+    extensiveUnits.map((d) => {
+      return h(LaterallyExtensiveUnit, {
+        data: d,
+        scale,
+        pixelScale: bestPixelScale,
+        columnSpacing,
+      });
+    })
+  );
+}
+
+function LaterallyExtensiveUnit({ data, scale, pixelScale, columnSpacing }) {
+  const { b_age, t_age, strat_name_long, units } = data;
+  // Build boxes by column groups
+  const boxes: UnitGroupBox[] = splitStratIntoBoxes(data);
+
+  return h(
+    "div.laterally-extensive-unit",
+    boxes.map((d, i) => {
+      return h(StratColSpan, {
+        scale,
+        data: d,
+        pixelScale,
+        key: i,
+        columnSpacing,
+      });
+    })
+  );
+}
+
+function StratColSpan({ data, scale, columnSpacing = 0, pixelScale = 1 }) {
+  const { startCol, endCol, strat_name_long, t_age, b_age } = data;
+  const top = scale(t_age);
+  const left = startCol * (100 + columnSpacing);
+  const width = (endCol - startCol + 1) * (100 + columnSpacing);
+  const height = (b_age - t_age) * pixelScale;
+  console.log(b_age, t_age, height);
+  return h(
+    "div.strat-col-span",
+    { style: { top, height, width, left } },
+    strat_name_long
+  );
+}
+
+function splitStratIntoBoxes(pkg: UnitGroup): UnitGroupBox[] {
+  const { strat_name_long, strat_name_id, units } = pkg;
+  const boxes: UnitGroupBox[] = [];
+  let currentBox: UnitGroupBox = null;
+  for (let i = 0; i < units.length; i++) {
+    const unit = units[i];
+    if (unit == null) {
+      if (currentBox != null) {
+        boxes.push(currentBox);
+        currentBox = null;
+      }
+      continue;
+    }
+    if (currentBox == null) {
+      currentBox = {
+        startCol: i,
+        endCol: i,
+        strat_name_id,
+        strat_name_long,
+        t_age: unit.t_age,
+        b_age: unit.b_age,
+        units: [],
+      };
+    } else {
+      currentBox.endCol = i;
+    }
+    currentBox.units.push(unit);
+  }
+  return boxes;
 }
 
 function ChartArea({ children }) {
@@ -213,6 +311,57 @@ function buildColumnData(
   });
 
   return { columnData, b_age, t_age };
+}
+
+interface UnitGroup {
+  b_age: number;
+  t_age: number;
+  strat_name_id: number;
+  strat_name_long: string;
+  units: (UnitLong | null)[];
+}
+
+interface UnitGroupBox extends UnitGroup {
+  units: UnitLong[];
+  startCol: number;
+  endCol: number;
+}
+
+function findLaterallyExtensiveUnits(pkg: MultiColumnPackageData): UnitGroup[] {
+  const { columnData, b_age, t_age } = pkg;
+  // Group units by strat_name_id
+  const unitIndex = new Map<number, Map<number, UnitLong>>();
+  for (const column of columnData) {
+    const { units } = column;
+    for (const unit of units) {
+      if (unit.strat_name_id == null) continue;
+      if (!unitIndex.has(unit.strat_name_id)) {
+        unitIndex.set(unit.strat_name_id, new Map());
+      }
+      unitIndex.get(unit.strat_name_id).set(column.columnID, unit);
+    }
+  }
+
+  // Prepare grouped units for rendering
+  const unitGroups: UnitGroup[] = [];
+  for (const [strat_name_id, unitIndex0] of unitIndex) {
+    const units = columnData.map((d) => unitIndex0.get(d.columnID) ?? null);
+    const filteredUnits = units.filter((d) => d != null);
+    const [t_age, b_age] = mergeAgeRanges(
+      filteredUnits.map((d) => [d.t_age, d.b_age])
+    );
+    if (filteredUnits.length <= 1) continue;
+
+    unitGroups.push({
+      b_age,
+      t_age,
+      strat_name_id,
+      strat_name_long: filteredUnits[0].strat_name_long,
+      units,
+    });
+  }
+
+  return unitGroups;
 }
 
 function findBestPixelScale(pkg: SectionInfo) {
