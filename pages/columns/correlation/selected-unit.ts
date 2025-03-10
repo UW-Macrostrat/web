@@ -66,9 +66,6 @@ function SelectedUnitPopover<T>({
       },
       boundary: scrollParentRef?.current,
       usePortal: true,
-      onClick(e) {
-        e.stopPropagation();
-      },
     },
     content
   );

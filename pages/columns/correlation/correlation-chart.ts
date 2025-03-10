@@ -247,7 +247,7 @@ async function fetchUnitsForColumn(col_id: number): Promise<ColumnData> {
   return { columnID: col_id, units: preprocessUnits(res) };
 }
 
-const targetUnitHeight = 20;
+const targetUnitHeight = 5;
 
 export enum AgeScaleMode {
   Continuous = "continuous",

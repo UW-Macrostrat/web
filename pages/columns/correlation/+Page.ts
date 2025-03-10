@@ -160,6 +160,7 @@ function MapClickHandler() {
 
   useMapClickHandler(
     (e) => {
+      console.log("Map click", e);
       onClickMap(e, { type: "Point", coordinates: e.lngLat.toArray() });
     },
     [onClickMap]
@@ -174,9 +175,8 @@ function SelectedColumnsLayer({ columns, focusedLine }) {
   );
   useMapStyleOperator(
     (map) => {
-      if (!map.isStyleLoaded()) {
-        return;
-      }
+      console.log("Setting up focused columns");
+
       let features = focusedColumns;
 
       const data: FeatureCollection = {
@@ -210,9 +210,6 @@ function ColumnsLayer({ columns, enabled = true }) {
   useMapStyleOperator(
     (map) => {
       if (columns == null) {
-        return;
-      }
-      if (!map.isStyleLoaded()) {
         return;
       }
       const data: FeatureCollection = {
@@ -295,9 +292,9 @@ function SectionLine({ focusedLine }: { focusedLine: LineString }) {
       }
       // TODO: there is apparently a bug that results in this being called before style loads.
       // Perhaps this has to do with hot reloading since it only seems to happen later.
-      if (!map.isStyleLoaded()) {
-        return;
-      }
+      // if (!map.isStyleLoaded()) {
+      //   return;
+      // }
       const data: FeatureCollection = {
         type: "FeatureCollection",
         features: [
