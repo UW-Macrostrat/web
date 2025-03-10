@@ -169,9 +169,11 @@ function Unconformity({ upperUnits = [], lowerUnits = [], style }) {
 export function Column({
   data,
   columnSpacing,
+  width,
 }: {
   column: ColumnIdentifier;
   data: SectionRenderData;
+  width: number;
   columnSpacing: number;
 }) {
   const darkMode = useDarkMode();
@@ -189,7 +191,7 @@ export function Column({
           data,
           unitComponent: UnitComponent,
           showLabels: false,
-          width: 100,
+          width,
           columnSpacing,
         }),
       ]),

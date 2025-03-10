@@ -73,6 +73,7 @@ export function CorrelationChart({ data }: { data: CorrelationChartData }) {
     return null;
   }
 
+  const columnWidth = 130;
   const columnSpacing = 4;
 
   const packages = regridChartData(data);
@@ -87,14 +88,14 @@ export function CorrelationChart({ data }: { data: CorrelationChartData }) {
     h("div.main-chart", [
       h(
         packages.map((pkg, i) =>
-          h(Package, { data: pkg, key: i, columnSpacing })
+          h(Package, { data: pkg, key: i, columnWidth, columnSpacing })
         )
       ),
     ]),
   ]);
 }
 
-function Package({ data, columnSpacing }) {
+function Package({ data, columnSpacing, columnWidth }) {
   const { columnData, b_age, t_age, bestPixelScale } = data;
 
   return h("div.package", [
@@ -109,6 +110,7 @@ function Package({ data, columnSpacing }) {
             t_age,
             bestPixelScale,
           },
+          width: columnWidth,
           columnSpacing,
           key: i,
         });
@@ -117,10 +119,10 @@ function Package({ data, columnSpacing }) {
   ]);
 }
 
-function PackageSVGOverlay({ data, columnSpacing = 0 }) {
+function PackageSVGOverlay({ data, columnWidth = 100, columnSpacing = 0 }) {
   const { b_age, t_age, bestPixelScale, columnData } = data;
 
-  const width = (100 + columnSpacing) * columnData.length;
+  const width = (columnWidth + columnSpacing) * columnData.length;
   const height = Math.ceil((b_age - t_age) * bestPixelScale) + 2;
 
   const extensiveUnits = findLaterallyExtensiveUnits(data);
@@ -163,11 +165,17 @@ function LaterallyExtensiveUnit({ data, scale, pixelScale, columnSpacing }) {
   );
 }
 
-function StratColSpan({ data, scale, columnSpacing = 0, pixelScale = 1 }) {
+function StratColSpan({
+  data,
+  scale,
+  columnWidth = 100,
+  columnSpacing = 0,
+  pixelScale = 1,
+}) {
   const { startCol, endCol, strat_name_long, t_age, b_age } = data;
   const top = scale(t_age);
-  const left = startCol * (100 + columnSpacing);
-  const width = (endCol - startCol + 1) * (100 + columnSpacing);
+  const left = startCol * (columnWidth + columnSpacing);
+  const width = (endCol - startCol + 1) * (columnWidth + columnSpacing);
   const height = (b_age - t_age) * pixelScale;
   console.log(b_age, t_age, height);
   return h(
@@ -365,12 +373,15 @@ function findLaterallyExtensiveUnits(pkg: MultiColumnPackageData): UnitGroup[] {
   return unitGroups;
 }
 
-function findBestPixelScale(pkg: SectionInfo) {
+function findBestPixelScale(pkg: SectionInfo): number {
   const dAge = pkg.b_age - pkg.t_age;
   const maxNUnits = Math.max(
     ...Array.from(pkg.unitIndex.values()).map((d) => d.length)
   );
-  const targetHeight = targetUnitHeight * maxNUnits;
+  let targetHeight = targetUnitHeight * maxNUnits;
+
+  targetHeight = Math.max(targetHeight, 25, dAge / 25);
+
   return targetHeight / dAge;
 }
 
