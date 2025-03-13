@@ -24,6 +24,7 @@ import classNames from "classnames";
 import { CorrelationChart } from "./correlation-chart";
 import { DarkModeProvider, ErrorBoundary } from "@macrostrat/ui-components";
 import {
+  LithologiesProvider,
   UnitDetailsPanel,
   UnitSelectionProvider,
   useSelectedUnit,
@@ -104,7 +105,10 @@ function CorrelationDiagramWrapper() {
   return h("div.correlation-diagram", [
     h(
       ErrorBoundary,
-      h(OverlaysProvider, [h(CorrelationChart, { data: chartData })])
+      h(
+        LithologiesProvider,
+        h(OverlaysProvider, [h(CorrelationChart, { data: chartData })])
+      )
     ),
   ]);
 }

@@ -12,7 +12,9 @@ import { useContext, useMemo } from "react";
 import {
   AgeAxis,
   CompositeUnitsColumn,
+  getMixedUnitColor,
   TrackedLabeledUnit,
+  useLithologies,
 } from "@macrostrat/column-views";
 import { SectionRenderData } from "./types";
 import { useCorrelationDiagramStore } from "./state";
@@ -143,10 +145,14 @@ function ColumnSVG(props) {
 
 export function UnitComponent({ division, nColumns = 2, ...rest }) {
   const { width } = useContext(ColumnLayoutContext);
+  const lithMap = useLithologies();
+
+  const backgroundColor = getMixedUnitColor(division, lithMap);
 
   return h(TrackedLabeledUnit, {
     division,
     ...rest,
+    backgroundColor,
     width: division.overlappingUnits.length > 0 ? width / nColumns : width,
     x: (division.column * width) / nColumns,
   });

@@ -74,7 +74,7 @@ export function CorrelationChart({ data }: { data: CorrelationChartData }) {
   }
 
   const columnWidth = 130;
-  const columnSpacing = 4;
+  const columnSpacing = 0;
 
   const packages = regridChartData(data);
 
