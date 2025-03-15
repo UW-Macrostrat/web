@@ -114,7 +114,9 @@ export const useCorrelationDiagramStore = create<CorrelationState>(
 
         buildCorrelationChartData(
           columns.map(columnGeoJSONRecordToColumnIdentifier),
-          AgeScaleMode.Broken
+          {
+            ageMode: AgeScaleMode.Broken,
+          }
         ).then((data) => set({ chartData: data }));
 
         setHashStringForCorrelation({
@@ -136,7 +138,7 @@ export const useCorrelationDiagramStore = create<CorrelationState>(
 
         const chartData = await buildCorrelationChartData(
           focusedColumns.map(columnGeoJSONRecordToColumnIdentifier),
-          AgeScaleMode.Broken
+          { ageMode: AgeScaleMode.Broken }
         );
 
         // Actually set the selected unit from the hash string once column data has been downloaded

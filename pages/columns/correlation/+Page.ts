@@ -8,9 +8,14 @@ import {
 } from "@macrostrat/mapbox-react";
 import { LngLatBounds } from "mapbox-gl";
 import { FullscreenPage } from "~/layouts";
+import { C } from "@macrostrat/hyper";
 import h from "./main.module.sass";
 import { compose } from "@macrostrat/hyper";
-import { baseMapURL, mapboxAccessToken } from "@macrostrat-web/settings";
+import {
+  baseMapURL,
+  mapboxAccessToken,
+  apiV2Prefix,
+} from "@macrostrat-web/settings";
 import { PageBreadcrumbs } from "~/components";
 import { Feature, FeatureCollection, LineString } from "geojson";
 import { useEffect, useMemo } from "react";
@@ -58,6 +63,7 @@ const PageWrapper = compose(
   FullscreenPage,
   DarkModeProvider,
   PatternProvider,
+  C(LithologiesProvider, { baseURL: apiV2Prefix }),
   UnitSelectionManager,
   ({ children }) => h("div.main-panel", children)
 );
@@ -105,10 +111,7 @@ function CorrelationDiagramWrapper() {
   return h("div.correlation-diagram", [
     h(
       ErrorBoundary,
-      h(
-        LithologiesProvider,
-        h(OverlaysProvider, [h(CorrelationChart, { data: chartData })])
-      )
+      h(OverlaysProvider, [h(CorrelationChart, { data: chartData })])
     ),
   ]);
 }

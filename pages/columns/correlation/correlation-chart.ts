@@ -35,6 +35,11 @@ interface MultiColumnPackageData {
   t_age: number;
 }
 
+interface CorrelationChartSettings {
+  ageMode?: AgeScaleMode;
+  targetUnitHeight?: number;
+}
+
 // Regrid chart data to go by package
 function regridChartData(data: CorrelationChartData) {
   const { columnData } = data;
@@ -60,10 +65,10 @@ function regridChartData(data: CorrelationChartData) {
 
 export async function buildCorrelationChartData(
   columns: ColumnIdentifier[],
-  ageMode: AgeScaleMode = AgeScaleMode.Broken
+  settings: CorrelationChartSettings | undefined
 ): Promise<CorrelationChartData> {
   const promises = columns.map((col) => fetchUnitsForColumn(col.col_id));
-  return Promise.all(promises).then((data) => buildColumnData(data, ageMode));
+  return Promise.all(promises).then((data) => buildColumnData(data, settings));
 }
 
 export function CorrelationChart({ data }: { data: CorrelationChartData }) {
@@ -255,8 +260,6 @@ async function fetchUnitsForColumn(col_id: number): Promise<ColumnData> {
   return { columnID: col_id, units: preprocessUnits(res) };
 }
 
-const targetUnitHeight = 5;
-
 export enum AgeScaleMode {
   Continuous = "continuous",
   Broken = "broken",
@@ -264,8 +267,11 @@ export enum AgeScaleMode {
 
 function buildColumnData(
   columns: ColumnData[],
-  ageMode: AgeScaleMode = AgeScaleMode.Continuous
+  settings: CorrelationChartSettings | undefined
 ): CorrelationChartData {
+  const { ageMode = AgeScaleMode.Continuous, targetUnitHeight = 10 } =
+    settings ?? {};
+
   // Create a single gap-bound package for each column
   const units = columns.map((d) => d.units);
   const [b_age, t_age] = findEncompassingScaleBounds(units.flat());
@@ -298,7 +304,9 @@ function buildColumnData(
   pkgs.sort((a, b) => a.b_age - b.b_age);
 
   // Get the best pixel scale for each gap-bound package
-  const pixelScales = pkgs.map(findBestPixelScale);
+  const pixelScales = pkgs.map((pkg) =>
+    findBestPixelScale(pkg, { targetUnitHeight })
+  );
 
   const columnData = columns.map((d) => {
     return pkgs
@@ -373,7 +381,15 @@ function findLaterallyExtensiveUnits(pkg: MultiColumnPackageData): UnitGroup[] {
   return unitGroups;
 }
 
-function findBestPixelScale(pkg: SectionInfo): number {
+interface PixelScaleOptions {
+  targetUnitHeight: number;
+}
+
+function findBestPixelScale(
+  pkg: SectionInfo,
+  options: PixelScaleOptions
+): number {
+  const { targetUnitHeight } = options;
   const dAge = pkg.b_age - pkg.t_age;
   const maxNUnits = Math.max(
     ...Array.from(pkg.unitIndex.values()).map((d) => d.length)
