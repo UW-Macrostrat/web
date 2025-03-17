@@ -16,12 +16,14 @@ import {
   mapboxAccessToken,
   apiV2Prefix,
 } from "@macrostrat-web/settings";
+import { FormGroup, Popover, SegmentedControl } from "@blueprintjs/core";
 import { PageBreadcrumbs } from "~/components";
 import { Feature, FeatureCollection, LineString } from "geojson";
 import { useEffect, useMemo } from "react";
 import { setGeoJSON } from "@macrostrat/mapbox-utils";
-import { useCorrelationDiagramStore } from "./state";
+import { DisplayDensity, useCorrelationDiagramStore } from "./state";
 import { PatternProvider } from "~/_providers";
+import { useRef } from "react";
 
 import { buildCrossSectionLayers } from "~/_utils/map-layers";
 import { Button, OverlaysProvider } from "@blueprintjs/core";
@@ -42,30 +44,78 @@ export function Page() {
   }, []);
 
   const expanded = useCorrelationDiagramStore((state) => state.mapExpanded);
+  const ref = useRef();
 
-  return h(PageWrapper, [
-    h("header", [h(PageBreadcrumbs)]),
-    h(
-      "div.diagram-container",
-      { className: expanded ? "map-expanded" : "map-inset" },
-      [
-        h("div.main-area", [
-          h(CorrelationDiagramWrapper),
-          h("div.overlay-safe-area"),
-        ]),
-        h("div.assistant", [h(InsetMap), h(UnitDetailsExt)]),
-      ]
-    ),
+  return h(
+    PageWrapper,
+    h("div.main-panel", { ref }, [
+      h("header.page-header", [
+        h(PageBreadcrumbs),
+        h(CorrelationSettingsPopup, { boundary: ref.current }),
+      ]),
+      h(
+        "div.diagram-container",
+        { className: expanded ? "map-expanded" : "map-inset" },
+        [
+          h("div.main-area", [
+            h(CorrelationDiagramWrapper),
+            h("div.overlay-safe-area"),
+          ]),
+          h("div.assistant", [h(InsetMap), h(UnitDetailsExt)]),
+        ]
+      ),
+    ])
+  );
+}
+
+function CorrelationSettings() {
+  return h("div.correlation-settings.settings", [
+    h("h3", "Settings"),
+    h(DisplayDensitySelector),
   ]);
+}
+
+function DisplayDensitySelector() {
+  const displayDensity = useCorrelationDiagramStore((d) => d.displayDensity);
+  const setDisplayDensity = useCorrelationDiagramStore(
+    (d) => d.setDisplayDensity
+  );
+  const options = [
+    { label: "Low", value: DisplayDensity.LOW },
+    { label: "Medium", value: DisplayDensity.MEDIUM },
+    { label: "High", value: DisplayDensity.HIGH },
+  ];
+
+  return h(
+    FormGroup,
+    { label: "Display density" },
+    h(SegmentedControl, {
+      options,
+      value: displayDensity,
+      onChange: setDisplayDensity,
+      size: "small",
+    })
+  );
+}
+
+function CorrelationSettingsPopup({ boundary }) {
+  console.log("Boundary ref", boundary);
+  return h(
+    Popover,
+    {
+      content: h(CorrelationSettings),
+    },
+    h(Button, { icon: "settings", minimal: true })
+  );
 }
 
 const PageWrapper = compose(
   FullscreenPage,
   DarkModeProvider,
   PatternProvider,
+  OverlaysProvider,
   C(LithologiesProvider, { baseURL: apiV2Prefix }),
-  UnitSelectionManager,
-  ({ children }) => h("div.main-panel", children)
+  UnitSelectionManager
 );
 
 function UnitSelectionManager({ children }) {

@@ -23,21 +23,28 @@ import { LocalStorage } from "@macrostrat/ui-components";
 import { SectionRenderData } from "./types";
 import mapboxgl from "mapbox-gl";
 
-export interface CorrelationState {
+export interface CorrelationState extends CorrelationLocalStorageState {
   focusedLine: LineString | null;
   columns: ColumnGeoJSONRecord[];
   focusedColumns: FocusedColumnGeoJSONRecord[];
   chartData: CorrelationChartData | null;
-  mapExpanded: boolean;
   selectedUnit: UnitLong | null;
   onClickMap: (event: mapboxgl.MapMouseEvent, point: Point) => void;
   toggleMapExpanded: () => void;
   startup: () => Promise<void>;
   setSelectedUnit: (unit: UnitLong) => void;
+  setDisplayDensity: (value: DisplayDensity) => void;
+}
+
+export enum DisplayDensity {
+  LOW = 0,
+  MEDIUM = 1,
+  HIGH = 2,
 }
 
 interface CorrelationLocalStorageState {
   mapExpanded: boolean;
+  displayDensity: DisplayDensity;
 }
 
 const localStorage = new LocalStorage<CorrelationLocalStorageState>(
@@ -50,9 +57,12 @@ const localStorage = new LocalStorage<CorrelationLocalStorageState>(
  * */
 export const useCorrelationDiagramStore = create<CorrelationState>(
   (set, get) => {
-    const { mapExpanded } = localStorage.get() ?? {
-      mapExpanded: false,
-    };
+    const { mapExpanded, displayDensity } =
+      localStorage.get() ??
+      ({
+        mapExpanded: false,
+        displayDensity: DisplayDensity.MEDIUM,
+      } as CorrelationLocalStorageState);
 
     const { section, unit } = getCorrelationHashParams();
 
@@ -61,6 +71,7 @@ export const useCorrelationDiagramStore = create<CorrelationState>(
       columns: [],
       focusedColumns: [],
       mapExpanded,
+      displayDensity,
       selectedUnit: null,
       setSelectedUnit(selectedUnit: UnitLong | null) {
         set({ selectedUnit });
@@ -72,6 +83,10 @@ export const useCorrelationDiagramStore = create<CorrelationState>(
           unit: selectedUnit?.unit_id ?? null,
         });
       },
+      setDisplayDensity(displayDensity: DisplayDensity) {
+        set({ displayDensity });
+        localStorage.set({ displayDensity });
+      },
       toggleMapExpanded: () =>
         set((state) => {
           const partial = { mapExpanded: !state.mapExpanded };
@@ -81,7 +96,6 @@ export const useCorrelationDiagramStore = create<CorrelationState>(
       onClickMap(event: mapboxgl.MapMouseEvent, point: Point) {
         const state = get();
 
-        console.log(event, point);
         // Check if shift key is pressed
         const shiftKeyPressed = event.originalEvent.shiftKey;
 
