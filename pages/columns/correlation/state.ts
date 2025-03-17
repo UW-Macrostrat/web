@@ -2,7 +2,10 @@ import { LineString, Point } from "geojson";
 import { create } from "zustand";
 import { ColumnGeoJSONRecord } from "#/map/map-interface/app-state/handlers/columns";
 // Turf intersection
-import { fetchAllColumns } from "#/map/map-interface/app-state/handlers/fetch";
+import {
+  fetchAllColumns,
+  runColumnQuery,
+} from "#/map/map-interface/app-state/handlers/fetch";
 import {
   getCorrelationHashParams,
   setHashStringForCorrelation,
@@ -12,22 +15,18 @@ import { lineIntersect } from "@turf/line-intersect";
 import { distance } from "@turf/distance";
 import { nearestPointOnLine } from "@turf/nearest-point-on-line";
 import { centroid } from "@turf/centroid";
-import {
-  ColumnIdentifier,
-  CorrelationChartData,
-  buildCorrelationChartData,
-  AgeScaleMode,
-} from "./correlation-chart";
+import { ColumnIdentifier } from "./correlation-chart";
 import { UnitLong } from "@macrostrat/api-types";
 import { LocalStorage } from "@macrostrat/ui-components";
 import { SectionRenderData } from "./types";
 import mapboxgl from "mapbox-gl";
+import { preprocessUnits } from "@macrostrat/column-views";
 
 export interface CorrelationState extends CorrelationLocalStorageState {
   focusedLine: LineString | null;
   columns: ColumnGeoJSONRecord[];
   focusedColumns: FocusedColumnGeoJSONRecord[];
-  chartData: CorrelationChartData | null;
+  columnUnits: ColumnData[];
   selectedUnit: UnitLong | null;
   onClickMap: (event: mapboxgl.MapMouseEvent, point: Point) => void;
   toggleMapExpanded: () => void;
@@ -70,6 +69,7 @@ export const useCorrelationDiagramStore = create<CorrelationState>(
     return {
       focusedLine: section,
       columns: [],
+      columnUnits: [],
       focusedColumns: [],
       mapExpanded,
       displayDensity,
@@ -135,7 +135,8 @@ export const useCorrelationDiagramStore = create<CorrelationState>(
           selectedUnit: null,
         });
 
-        buildChartData(get, set).then(() => {});
+        // Actually download the appropriate units
+        getCorrelationUnits(get, set).then(() => {});
 
         setHashStringForCorrelation({
           section: focusedLine,
@@ -146,35 +147,42 @@ export const useCorrelationDiagramStore = create<CorrelationState>(
         const columns = await fetchAllColumns();
         set({ columns });
 
-        const { focusedLine, displayDensity } = get();
+        const { focusedLine } = get();
         if (focusedLine == null) {
           return;
         }
 
         const focusedColumns = buildCorrelationColumns(columns, focusedLine);
         set({ focusedColumns });
-
-        await buildChartData(get, set);
+        await getCorrelationUnits(get, set);
       },
     };
   }
 );
 
-async function buildChartData(get, set) {
-  const { focusedColumns, displayDensity } = get();
-  let targetUnitHeight = 15;
-  if (displayDensity === DisplayDensity.LOW) {
-    targetUnitHeight = 30;
-  }
-  if (displayDensity === DisplayDensity.HIGH) {
-    targetUnitHeight = 5;
-  }
+async function getCorrelationUnits(get, set) {
+  const { focusedColumns } = get();
+  const columnIDs = focusedColumns.map(columnGeoJSONRecordToColumnIdentifier);
+  const columnUnits = await fetchAllColumnUnits(columnIDs);
+  set({ columnUnits });
+}
 
-  const chartData = await buildCorrelationChartData(
-    focusedColumns.map(columnGeoJSONRecordToColumnIdentifier),
-    { ageMode: AgeScaleMode.Broken, targetUnitHeight }
-  );
-  set({ chartData });
+type ColumnData = {
+  units: UnitLong[];
+  columnID: number;
+};
+
+async function fetchUnitsForColumn(col_id: number): Promise<ColumnData> {
+  const res = await runColumnQuery({ col_id }, null);
+
+  return { columnID: col_id, units: preprocessUnits(res) };
+}
+
+export async function fetchAllColumnUnits(
+  columns: ColumnIdentifier[]
+): Promise<ColumnData[]> {
+  const promises = columns.map((col) => fetchUnitsForColumn(col.col_id));
+  return await Promise.all(promises);
 }
 
 function setLocalStorageState(state: CorrelationState) {

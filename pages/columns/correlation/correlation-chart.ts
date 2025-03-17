@@ -1,10 +1,9 @@
 /** Correlation chart */
-import { preprocessUnits, SectionInfo } from "@macrostrat/column-views";
-import { runColumnQuery } from "#/map/map-interface/app-state/handlers/fetch";
+import { SectionInfo } from "@macrostrat/column-views";
 import { Column, TimescaleColumn } from "./column";
 import { UnitLong } from "@macrostrat/api-types";
 import { GapBoundPackage, SectionRenderData, AgeComparable } from "./types";
-import { useCorrelationDiagramStore } from "./state";
+import { DisplayDensity, useCorrelationDiagramStore } from "./state";
 import { mergeAgeRanges } from "@macrostrat-web/utility-functions";
 import styles from "./main.module.sass";
 import hyper from "@macrostrat/hyper";
@@ -63,14 +62,6 @@ function regridChartData(data: CorrelationChartData) {
   return packages;
 }
 
-export async function buildCorrelationChartData(
-  columns: ColumnIdentifier[],
-  settings: CorrelationChartSettings | undefined
-): Promise<CorrelationChartData> {
-  const promises = columns.map((col) => fetchUnitsForColumn(col.col_id));
-  return Promise.all(promises).then((data) => buildColumnData(data, settings));
-}
-
 export function CorrelationChart({ data }: { data: CorrelationChartData }) {
   const chartData = data;
 
@@ -98,6 +89,24 @@ export function CorrelationChart({ data }: { data: CorrelationChartData }) {
       ),
     ]),
   ]);
+}
+
+export function useCorrelationChartData() {
+  const columnUnits = useCorrelationDiagramStore((state) => state.columnUnits);
+  const displayDensity = useCorrelationDiagramStore((d) => d.displayDensity);
+
+  let targetUnitHeight = 15;
+  if (displayDensity === DisplayDensity.LOW) {
+    targetUnitHeight = 30;
+  }
+  if (displayDensity === DisplayDensity.HIGH) {
+    targetUnitHeight = 5;
+  }
+
+  return buildColumnData(columnUnits, {
+    ageMode: AgeScaleMode.Broken,
+    targetUnitHeight,
+  });
 }
 
 function Package({ data, columnSpacing, columnWidth }) {
@@ -246,17 +255,6 @@ function TimescaleColumnExt({ packages }: { packages: SectionRenderData[] }) {
       packages,
     }),
   ]);
-}
-
-type ColumnData = {
-  units: UnitLong[];
-  columnID: number;
-};
-
-async function fetchUnitsForColumn(col_id: number): Promise<ColumnData> {
-  const res = await runColumnQuery({ col_id }, null);
-
-  return { columnID: col_id, units: preprocessUnits(res) };
 }
 
 export enum AgeScaleMode {

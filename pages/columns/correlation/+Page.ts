@@ -34,7 +34,7 @@ import { useRef } from "react";
 import { buildCrossSectionLayers } from "~/_utils/map-layers";
 import { Button, OverlaysProvider } from "@blueprintjs/core";
 import classNames from "classnames";
-import { CorrelationChart } from "./correlation-chart";
+import { CorrelationChart, useCorrelationChartData } from "./correlation-chart";
 import { DarkModeProvider, ErrorBoundary } from "@macrostrat/ui-components";
 import {
   LithologiesProvider,
@@ -174,7 +174,7 @@ function UnitDetailsExt() {
 }
 
 function CorrelationDiagramWrapper() {
-  const chartData = useCorrelationDiagramStore((state) => state.chartData);
+  const chartData = useCorrelationChartData();
 
   return h("div.correlation-diagram", [
     h(
