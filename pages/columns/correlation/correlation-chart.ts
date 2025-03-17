@@ -131,7 +131,6 @@ function PackageSVGOverlay({ data, columnWidth = 100, columnSpacing = 0 }) {
   const height = Math.ceil((b_age - t_age) * bestPixelScale) + 2;
 
   const extensiveUnits = findLaterallyExtensiveUnits(data);
-  console.log(extensiveUnits);
 
   const scale = (val: number) => {
     return (val - t_age) * bestPixelScale;

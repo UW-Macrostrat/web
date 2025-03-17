@@ -16,7 +16,13 @@ import {
   mapboxAccessToken,
   apiV2Prefix,
 } from "@macrostrat-web/settings";
-import { FormGroup, Popover, SegmentedControl } from "@blueprintjs/core";
+import {
+  Alignment,
+  FormGroup,
+  Popover,
+  SegmentedControl,
+  Switch,
+} from "@blueprintjs/core";
 import { PageBreadcrumbs } from "~/components";
 import { Feature, FeatureCollection, LineString } from "geojson";
 import { useEffect, useMemo } from "react";
@@ -69,17 +75,26 @@ export function Page() {
 }
 
 function CorrelationSettings() {
+  const colorize = useCorrelationDiagramStore((d) => d.colorizeUnits);
+  const applySettings = useCorrelationDiagramStore((d) => d.applySettings);
+
   return h("div.correlation-settings.settings", [
     h("h3", "Settings"),
     h(DisplayDensitySelector),
+    h(Switch, {
+      label: "Colorize",
+      isOn: colorize,
+      alignIndicator: Alignment.RIGHT,
+      onChange() {
+        applySettings({ colorizeUnits: !colorize });
+      },
+    }),
   ]);
 }
 
 function DisplayDensitySelector() {
   const displayDensity = useCorrelationDiagramStore((d) => d.displayDensity);
-  const setDisplayDensity = useCorrelationDiagramStore(
-    (d) => d.setDisplayDensity
-  );
+  const applySettings = useCorrelationDiagramStore((d) => d.applySettings);
   const options = [
     { label: "Low", value: DisplayDensity.LOW },
     { label: "Medium", value: DisplayDensity.MEDIUM },
@@ -92,8 +107,11 @@ function DisplayDensitySelector() {
     h(SegmentedControl, {
       options,
       value: displayDensity,
-      onChange: setDisplayDensity,
-      size: "small",
+      onValueChange(value) {
+        applySettings({ displayDensity: value });
+      },
+      small: true,
+      defaultValue: DisplayDensity.MEDIUM,
     })
   );
 }

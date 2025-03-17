@@ -33,6 +33,7 @@ export interface CorrelationState extends CorrelationLocalStorageState {
   toggleMapExpanded: () => void;
   startup: () => Promise<void>;
   setSelectedUnit: (unit: UnitLong) => void;
+  applySettings: (settings: Partial<CorrelationLocalStorageState>) => void;
   setDisplayDensity: (value: DisplayDensity) => void;
 }
 
@@ -45,6 +46,7 @@ export enum DisplayDensity {
 interface CorrelationLocalStorageState {
   mapExpanded: boolean;
   displayDensity: DisplayDensity;
+  colorizeUnits: boolean;
 }
 
 const localStorage = new LocalStorage<CorrelationLocalStorageState>(
@@ -57,12 +59,11 @@ const localStorage = new LocalStorage<CorrelationLocalStorageState>(
  * */
 export const useCorrelationDiagramStore = create<CorrelationState>(
   (set, get) => {
-    const { mapExpanded, displayDensity } =
-      localStorage.get() ??
-      ({
-        mapExpanded: false,
-        displayDensity: DisplayDensity.MEDIUM,
-      } as CorrelationLocalStorageState);
+    const {
+      mapExpanded = false,
+      displayDensity = DisplayDensity.MEDIUM,
+      colorizeUnits = true,
+    } = localStorage.get() ?? ({} as CorrelationLocalStorageState);
 
     const { section, unit } = getCorrelationHashParams();
 
@@ -73,6 +74,7 @@ export const useCorrelationDiagramStore = create<CorrelationState>(
       mapExpanded,
       displayDensity,
       selectedUnit: null,
+      colorizeUnits,
       setSelectedUnit(selectedUnit: UnitLong | null) {
         set({ selectedUnit });
 
@@ -85,14 +87,21 @@ export const useCorrelationDiagramStore = create<CorrelationState>(
       },
       setDisplayDensity(displayDensity: DisplayDensity) {
         set({ displayDensity });
-        localStorage.set({ displayDensity });
+        setLocalStorageState(get());
       },
-      toggleMapExpanded: () =>
+      applySettings(settings: Partial<CorrelationLocalStorageState>) {
+        set(settings);
+        setLocalStorageState(get());
+      },
+      toggleMapExpanded: () => {
         set((state) => {
           const partial = { mapExpanded: !state.mapExpanded };
           localStorage.set(partial);
           return partial;
-        }),
+        });
+
+        setLocalStorageState(get());
+      },
       onClickMap(event: mapboxgl.MapMouseEvent, point: Point) {
         const state = get();
 
@@ -126,12 +135,7 @@ export const useCorrelationDiagramStore = create<CorrelationState>(
           selectedUnit: null,
         });
 
-        buildCorrelationChartData(
-          columns.map(columnGeoJSONRecordToColumnIdentifier),
-          {
-            ageMode: AgeScaleMode.Broken,
-          }
-        ).then((data) => set({ chartData: data }));
+        buildChartData(get, set).then(() => {});
 
         setHashStringForCorrelation({
           section: focusedLine,
@@ -142,7 +146,7 @@ export const useCorrelationDiagramStore = create<CorrelationState>(
         const columns = await fetchAllColumns();
         set({ columns });
 
-        const { focusedLine } = get();
+        const { focusedLine, displayDensity } = get();
         if (focusedLine == null) {
           return;
         }
@@ -150,22 +154,36 @@ export const useCorrelationDiagramStore = create<CorrelationState>(
         const focusedColumns = buildCorrelationColumns(columns, focusedLine);
         set({ focusedColumns });
 
-        const chartData = await buildCorrelationChartData(
-          focusedColumns.map(columnGeoJSONRecordToColumnIdentifier),
-          { ageMode: AgeScaleMode.Broken }
-        );
-
-        // Actually set the selected unit from the hash string once column data has been downloaded
-        if (unit != null) {
-          const selectedUnit = findMatchingUnit(chartData.columnData, unit);
-          set({ selectedUnit });
-        }
-
-        set({ chartData });
+        await buildChartData(get, set);
       },
     };
   }
 );
+
+async function buildChartData(get, set) {
+  const { focusedColumns, displayDensity } = get();
+  let targetUnitHeight = 15;
+  if (displayDensity === DisplayDensity.LOW) {
+    targetUnitHeight = 30;
+  }
+  if (displayDensity === DisplayDensity.HIGH) {
+    targetUnitHeight = 5;
+  }
+
+  const chartData = await buildCorrelationChartData(
+    focusedColumns.map(columnGeoJSONRecordToColumnIdentifier),
+    { ageMode: AgeScaleMode.Broken, targetUnitHeight }
+  );
+  set({ chartData });
+}
+
+function setLocalStorageState(state: CorrelationState) {
+  localStorage.set({
+    mapExpanded: state.mapExpanded,
+    displayDensity: state.displayDensity,
+    colorizeUnits: state.colorizeUnits,
+  });
+}
 
 function findMatchingUnit(
   columns: SectionRenderData[][],
