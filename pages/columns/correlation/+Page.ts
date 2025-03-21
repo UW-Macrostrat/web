@@ -8,22 +8,36 @@ import {
 } from "@macrostrat/mapbox-react";
 import { LngLatBounds } from "mapbox-gl";
 import { FullscreenPage } from "~/layouts";
+import { C } from "@macrostrat/hyper";
 import h from "./main.module.sass";
 import { compose } from "@macrostrat/hyper";
-import { baseMapURL, mapboxAccessToken } from "@macrostrat-web/settings";
+import {
+  baseMapURL,
+  mapboxAccessToken,
+  apiV2Prefix,
+} from "@macrostrat-web/settings";
+import {
+  Alignment,
+  FormGroup,
+  Popover,
+  SegmentedControl,
+  Switch,
+} from "@blueprintjs/core";
 import { PageBreadcrumbs } from "~/components";
 import { Feature, FeatureCollection, LineString } from "geojson";
 import { useEffect, useMemo } from "react";
 import { setGeoJSON } from "@macrostrat/mapbox-utils";
-import { useCorrelationDiagramStore } from "./state";
+import { DisplayDensity, useCorrelationDiagramStore } from "./state";
 import { PatternProvider } from "~/_providers";
+import { useRef } from "react";
 
 import { buildCrossSectionLayers } from "~/_utils/map-layers";
 import { Button, OverlaysProvider } from "@blueprintjs/core";
 import classNames from "classnames";
-import { CorrelationChart } from "./correlation-chart";
+import { CorrelationChart, useCorrelationChartData } from "./correlation-chart";
 import { DarkModeProvider, ErrorBoundary } from "@macrostrat/ui-components";
 import {
+  LithologiesProvider,
   UnitDetailsPanel,
   UnitSelectionProvider,
   useSelectedUnit,
@@ -36,29 +50,90 @@ export function Page() {
   }, []);
 
   const expanded = useCorrelationDiagramStore((state) => state.mapExpanded);
+  const ref = useRef();
 
-  return h(PageWrapper, [
-    h("header", [h(PageBreadcrumbs)]),
-    h(
-      "div.diagram-container",
-      { className: expanded ? "map-expanded" : "map-inset" },
-      [
-        h("div.main-area", [
-          h(CorrelationDiagramWrapper),
-          h("div.overlay-safe-area"),
-        ]),
-        h("div.assistant", [h(InsetMap), h(UnitDetailsExt)]),
-      ]
-    ),
+  return h(
+    PageWrapper,
+    h("div.main-panel", { ref }, [
+      h("header.page-header", [
+        h(PageBreadcrumbs),
+        h(CorrelationSettingsPopup, { boundary: ref.current }),
+      ]),
+      h(
+        "div.diagram-container",
+        { className: expanded ? "map-expanded" : "map-inset" },
+        [
+          h("div.main-area", [
+            h(CorrelationDiagramWrapper),
+            h("div.overlay-safe-area"),
+          ]),
+          h("div.assistant", [h(InsetMap), h(UnitDetailsExt)]),
+        ]
+      ),
+    ])
+  );
+}
+
+function CorrelationSettings() {
+  const colorize = useCorrelationDiagramStore((d) => d.colorizeUnits);
+  const applySettings = useCorrelationDiagramStore((d) => d.applySettings);
+
+  return h("div.correlation-settings.settings", [
+    h("h3", "Settings"),
+    h(DisplayDensitySelector),
+    h(Switch, {
+      label: "Colorize",
+      isOn: colorize,
+      alignIndicator: Alignment.RIGHT,
+      onChange() {
+        applySettings({ colorizeUnits: !colorize });
+      },
+    }),
   ]);
+}
+
+function DisplayDensitySelector() {
+  const displayDensity = useCorrelationDiagramStore((d) => d.displayDensity);
+  const applySettings = useCorrelationDiagramStore((d) => d.applySettings);
+  const options = [
+    { label: "Low", value: DisplayDensity.LOW },
+    { label: "Medium", value: DisplayDensity.MEDIUM },
+    { label: "High", value: DisplayDensity.HIGH },
+  ];
+
+  return h(
+    FormGroup,
+    { label: "Display density" },
+    h(SegmentedControl, {
+      options,
+      value: displayDensity,
+      onValueChange(value) {
+        applySettings({ displayDensity: value });
+      },
+      small: true,
+      defaultValue: DisplayDensity.MEDIUM,
+    })
+  );
+}
+
+function CorrelationSettingsPopup({ boundary }) {
+  console.log("Boundary ref", boundary);
+  return h(
+    Popover,
+    {
+      content: h(CorrelationSettings),
+    },
+    h(Button, { icon: "settings", minimal: true })
+  );
 }
 
 const PageWrapper = compose(
   FullscreenPage,
   DarkModeProvider,
   PatternProvider,
-  UnitSelectionManager,
-  ({ children }) => h("div.main-panel", children)
+  OverlaysProvider,
+  C(LithologiesProvider, { baseURL: apiV2Prefix }),
+  UnitSelectionManager
 );
 
 function UnitSelectionManager({ children }) {
@@ -99,7 +174,7 @@ function UnitDetailsExt() {
 }
 
 function CorrelationDiagramWrapper() {
-  const chartData = useCorrelationDiagramStore((state) => state.chartData);
+  const chartData = useCorrelationChartData();
 
   return h("div.correlation-diagram", [
     h(
@@ -160,6 +235,7 @@ function MapClickHandler() {
 
   useMapClickHandler(
     (e) => {
+      console.log("Map click", e);
       onClickMap(e, { type: "Point", coordinates: e.lngLat.toArray() });
     },
     [onClickMap]
@@ -174,9 +250,8 @@ function SelectedColumnsLayer({ columns, focusedLine }) {
   );
   useMapStyleOperator(
     (map) => {
-      if (!map.isStyleLoaded()) {
-        return;
-      }
+      console.log("Setting up focused columns");
+
       let features = focusedColumns;
 
       const data: FeatureCollection = {
@@ -210,9 +285,6 @@ function ColumnsLayer({ columns, enabled = true }) {
   useMapStyleOperator(
     (map) => {
       if (columns == null) {
-        return;
-      }
-      if (!map.isStyleLoaded()) {
         return;
       }
       const data: FeatureCollection = {
@@ -295,9 +367,9 @@ function SectionLine({ focusedLine }: { focusedLine: LineString }) {
       }
       // TODO: there is apparently a bug that results in this being called before style loads.
       // Perhaps this has to do with hot reloading since it only seems to happen later.
-      if (!map.isStyleLoaded()) {
-        return;
-      }
+      // if (!map.isStyleLoaded()) {
+      //   return;
+      // }
       const data: FeatureCollection = {
         type: "FeatureCollection",
         features: [

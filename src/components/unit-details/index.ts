@@ -35,7 +35,15 @@ export function UnitDetailsPopover({
 }
 
 export function LegendPopoverContainer({ children }) {
-  return h("div.legend-panel-outer", [h("div.legend-info-panel", children)]);
+  return h(
+    "div.legend-panel-outer",
+    {
+      onClick(e) {
+        e.stopPropagation();
+      },
+    },
+    [h("div.legend-info-panel", children)]
+  );
 }
 
 export function LegendPanelHeader({ title, id, onClose }) {

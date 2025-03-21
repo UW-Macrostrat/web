@@ -5,14 +5,19 @@ import {
   SVG,
 } from "@macrostrat/column-components";
 import { Timescale, TimescaleOrientation } from "@macrostrat/timescale";
-import { expandInnerSize, useDarkMode } from "@macrostrat/ui-components";
+import {
+  expandInnerSize,
+  useDarkMode,
+  useInDarkMode,
+} from "@macrostrat/ui-components";
 import classNames from "classnames";
 import { useContext, useMemo } from "react";
-
 import {
   AgeAxis,
   CompositeUnitsColumn,
+  getMixedUnitColor,
   TrackedLabeledUnit,
+  useLithologies,
 } from "@macrostrat/column-views";
 import { SectionRenderData } from "./types";
 import { useCorrelationDiagramStore } from "./state";
@@ -143,10 +148,15 @@ function ColumnSVG(props) {
 
 export function UnitComponent({ division, nColumns = 2, ...rest }) {
   const { width } = useContext(ColumnLayoutContext);
+  const lithMap = useLithologies();
+  const inDarkMode = useInDarkMode();
+
+  const backgroundColor = getMixedUnitColor(division, lithMap, inDarkMode);
 
   return h(TrackedLabeledUnit, {
     division,
     ...rest,
+    backgroundColor,
     width: division.overlappingUnits.length > 0 ? width / nColumns : width,
     x: (division.column * width) / nColumns,
   });
@@ -169,9 +179,11 @@ function Unconformity({ upperUnits = [], lowerUnits = [], style }) {
 export function Column({
   data,
   columnSpacing,
+  width,
 }: {
   column: ColumnIdentifier;
   data: SectionRenderData;
+  width: number;
   columnSpacing: number;
 }) {
   const darkMode = useDarkMode();
@@ -189,7 +201,7 @@ export function Column({
           data,
           unitComponent: UnitComponent,
           showLabels: false,
-          width: 100,
+          width,
           columnSpacing,
         }),
       ]),

@@ -1,10 +1,9 @@
 /** Correlation chart */
-import { preprocessUnits, SectionInfo } from "@macrostrat/column-views";
-import { runColumnQuery } from "#/map/map-interface/app-state/handlers/fetch";
+import { SectionInfo } from "@macrostrat/column-views";
 import { Column, TimescaleColumn } from "./column";
 import { UnitLong } from "@macrostrat/api-types";
 import { GapBoundPackage, SectionRenderData, AgeComparable } from "./types";
-import { useCorrelationDiagramStore } from "./state";
+import { DisplayDensity, useCorrelationDiagramStore } from "./state";
 import { mergeAgeRanges } from "@macrostrat-web/utility-functions";
 import styles from "./main.module.sass";
 import hyper from "@macrostrat/hyper";
@@ -35,6 +34,11 @@ interface MultiColumnPackageData {
   t_age: number;
 }
 
+interface CorrelationChartSettings {
+  ageMode?: AgeScaleMode;
+  targetUnitHeight?: number;
+}
+
 // Regrid chart data to go by package
 function regridChartData(data: CorrelationChartData) {
   const { columnData } = data;
@@ -58,14 +62,6 @@ function regridChartData(data: CorrelationChartData) {
   return packages;
 }
 
-export async function buildCorrelationChartData(
-  columns: ColumnIdentifier[],
-  ageMode: AgeScaleMode = AgeScaleMode.Broken
-): Promise<CorrelationChartData> {
-  const promises = columns.map((col) => fetchUnitsForColumn(col.col_id));
-  return Promise.all(promises).then((data) => buildColumnData(data, ageMode));
-}
-
 export function CorrelationChart({ data }: { data: CorrelationChartData }) {
   const chartData = data;
 
@@ -73,7 +69,8 @@ export function CorrelationChart({ data }: { data: CorrelationChartData }) {
     return null;
   }
 
-  const columnSpacing = 4;
+  const columnWidth = 130;
+  const columnSpacing = 0;
 
   const packages = regridChartData(data);
 
@@ -87,18 +84,37 @@ export function CorrelationChart({ data }: { data: CorrelationChartData }) {
     h("div.main-chart", [
       h(
         packages.map((pkg, i) =>
-          h(Package, { data: pkg, key: i, columnSpacing })
+          h(Package, { data: pkg, key: i, columnWidth, columnSpacing })
         )
       ),
     ]),
   ]);
 }
 
-function Package({ data, columnSpacing }) {
+export function useCorrelationChartData() {
+  const columnUnits = useCorrelationDiagramStore((state) => state.columnUnits);
+  const displayDensity = useCorrelationDiagramStore((d) => d.displayDensity);
+
+  let targetUnitHeight = 15;
+  if (displayDensity === DisplayDensity.LOW) {
+    targetUnitHeight = 30;
+  }
+  if (displayDensity === DisplayDensity.HIGH) {
+    targetUnitHeight = 5;
+  }
+
+  return buildColumnData(columnUnits, {
+    ageMode: AgeScaleMode.Broken,
+    targetUnitHeight,
+  });
+}
+
+function Package({ data, columnSpacing, columnWidth }) {
   const { columnData, b_age, t_age, bestPixelScale } = data;
 
   return h("div.package", [
-    h(PackageSVGOverlay, { data, columnSpacing }),
+    // Disable the SVG overlay for now
+    //h(PackageSVGOverlay, { data, columnSpacing }),
     h("div.column-container", [
       columnData.map((d, i) => {
         return h(Column, {
@@ -108,6 +124,7 @@ function Package({ data, columnSpacing }) {
             t_age,
             bestPixelScale,
           },
+          width: columnWidth,
           columnSpacing,
           key: i,
         });
@@ -116,14 +133,13 @@ function Package({ data, columnSpacing }) {
   ]);
 }
 
-function PackageSVGOverlay({ data, columnSpacing = 0 }) {
+function PackageSVGOverlay({ data, columnWidth = 100, columnSpacing = 0 }) {
   const { b_age, t_age, bestPixelScale, columnData } = data;
 
-  const width = (100 + columnSpacing) * columnData.length;
+  const width = (columnWidth + columnSpacing) * columnData.length;
   const height = Math.ceil((b_age - t_age) * bestPixelScale) + 2;
 
   const extensiveUnits = findLaterallyExtensiveUnits(data);
-  console.log(extensiveUnits);
 
   const scale = (val: number) => {
     return (val - t_age) * bestPixelScale;
@@ -162,11 +178,17 @@ function LaterallyExtensiveUnit({ data, scale, pixelScale, columnSpacing }) {
   );
 }
 
-function StratColSpan({ data, scale, columnSpacing = 0, pixelScale = 1 }) {
+function StratColSpan({
+  data,
+  scale,
+  columnWidth = 100,
+  columnSpacing = 0,
+  pixelScale = 1,
+}) {
   const { startCol, endCol, strat_name_long, t_age, b_age } = data;
   const top = scale(t_age);
-  const left = startCol * (100 + columnSpacing);
-  const width = (endCol - startCol + 1) * (100 + columnSpacing);
+  const left = startCol * (columnWidth + columnSpacing);
+  const width = (endCol - startCol + 1) * (columnWidth + columnSpacing);
   const height = (b_age - t_age) * pixelScale;
   console.log(b_age, t_age, height);
   return h(
@@ -235,19 +257,6 @@ function TimescaleColumnExt({ packages }: { packages: SectionRenderData[] }) {
   ]);
 }
 
-type ColumnData = {
-  units: UnitLong[];
-  columnID: number;
-};
-
-async function fetchUnitsForColumn(col_id: number): Promise<ColumnData> {
-  const res = await runColumnQuery({ col_id }, null);
-
-  return { columnID: col_id, units: preprocessUnits(res) };
-}
-
-const targetUnitHeight = 20;
-
 export enum AgeScaleMode {
   Continuous = "continuous",
   Broken = "broken",
@@ -255,8 +264,11 @@ export enum AgeScaleMode {
 
 function buildColumnData(
   columns: ColumnData[],
-  ageMode: AgeScaleMode = AgeScaleMode.Continuous
+  settings: CorrelationChartSettings | undefined
 ): CorrelationChartData {
+  const { ageMode = AgeScaleMode.Continuous, targetUnitHeight = 10 } =
+    settings ?? {};
+
   // Create a single gap-bound package for each column
   const units = columns.map((d) => d.units);
   const [b_age, t_age] = findEncompassingScaleBounds(units.flat());
@@ -289,7 +301,9 @@ function buildColumnData(
   pkgs.sort((a, b) => a.b_age - b.b_age);
 
   // Get the best pixel scale for each gap-bound package
-  const pixelScales = pkgs.map(findBestPixelScale);
+  const pixelScales = pkgs.map((pkg) =>
+    findBestPixelScale(pkg, { targetUnitHeight })
+  );
 
   const columnData = columns.map((d) => {
     return pkgs
@@ -364,12 +378,23 @@ function findLaterallyExtensiveUnits(pkg: MultiColumnPackageData): UnitGroup[] {
   return unitGroups;
 }
 
-function findBestPixelScale(pkg: SectionInfo) {
+interface PixelScaleOptions {
+  targetUnitHeight: number;
+}
+
+function findBestPixelScale(
+  pkg: SectionInfo,
+  options: PixelScaleOptions
+): number {
+  const { targetUnitHeight } = options;
   const dAge = pkg.b_age - pkg.t_age;
   const maxNUnits = Math.max(
     ...Array.from(pkg.unitIndex.values()).map((d) => d.length)
   );
-  const targetHeight = targetUnitHeight * maxNUnits;
+  let targetHeight = targetUnitHeight * maxNUnits;
+
+  targetHeight = Math.max(targetHeight, 25, dAge / 25);
+
   return targetHeight / dAge;
 }
 

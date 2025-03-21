@@ -2,7 +2,10 @@ import { LineString, Point } from "geojson";
 import { create } from "zustand";
 import { ColumnGeoJSONRecord } from "#/map/map-interface/app-state/handlers/columns";
 // Turf intersection
-import { fetchAllColumns } from "#/map/map-interface/app-state/handlers/fetch";
+import {
+  fetchAllColumns,
+  runColumnQuery,
+} from "#/map/map-interface/app-state/handlers/fetch";
 import {
   getCorrelationHashParams,
   setHashStringForCorrelation,
@@ -12,32 +15,37 @@ import { lineIntersect } from "@turf/line-intersect";
 import { distance } from "@turf/distance";
 import { nearestPointOnLine } from "@turf/nearest-point-on-line";
 import { centroid } from "@turf/centroid";
-import {
-  ColumnIdentifier,
-  CorrelationChartData,
-  buildCorrelationChartData,
-  AgeScaleMode,
-} from "./correlation-chart";
+import { ColumnIdentifier } from "./correlation-chart";
 import { UnitLong } from "@macrostrat/api-types";
 import { LocalStorage } from "@macrostrat/ui-components";
 import { SectionRenderData } from "./types";
 import mapboxgl from "mapbox-gl";
+import { preprocessUnits } from "@macrostrat/column-views";
 
-export interface CorrelationState {
+export interface CorrelationState extends CorrelationLocalStorageState {
   focusedLine: LineString | null;
   columns: ColumnGeoJSONRecord[];
   focusedColumns: FocusedColumnGeoJSONRecord[];
-  chartData: CorrelationChartData | null;
-  mapExpanded: boolean;
+  columnUnits: ColumnData[];
   selectedUnit: UnitLong | null;
   onClickMap: (event: mapboxgl.MapMouseEvent, point: Point) => void;
   toggleMapExpanded: () => void;
   startup: () => Promise<void>;
   setSelectedUnit: (unit: UnitLong) => void;
+  applySettings: (settings: Partial<CorrelationLocalStorageState>) => void;
+  setDisplayDensity: (value: DisplayDensity) => void;
+}
+
+export enum DisplayDensity {
+  LOW = 0,
+  MEDIUM = 1,
+  HIGH = 2,
 }
 
 interface CorrelationLocalStorageState {
   mapExpanded: boolean;
+  displayDensity: DisplayDensity;
+  colorizeUnits: boolean;
 }
 
 const localStorage = new LocalStorage<CorrelationLocalStorageState>(
@@ -50,18 +58,23 @@ const localStorage = new LocalStorage<CorrelationLocalStorageState>(
  * */
 export const useCorrelationDiagramStore = create<CorrelationState>(
   (set, get) => {
-    const { mapExpanded } = localStorage.get() ?? {
-      mapExpanded: false,
-    };
+    const {
+      mapExpanded = false,
+      displayDensity = DisplayDensity.MEDIUM,
+      colorizeUnits = true,
+    } = localStorage.get() ?? ({} as CorrelationLocalStorageState);
 
     const { section, unit } = getCorrelationHashParams();
 
     return {
       focusedLine: section,
       columns: [],
+      columnUnits: [],
       focusedColumns: [],
       mapExpanded,
+      displayDensity,
       selectedUnit: null,
+      colorizeUnits,
       setSelectedUnit(selectedUnit: UnitLong | null) {
         set({ selectedUnit });
 
@@ -72,16 +85,26 @@ export const useCorrelationDiagramStore = create<CorrelationState>(
           unit: selectedUnit?.unit_id ?? null,
         });
       },
-      toggleMapExpanded: () =>
+      setDisplayDensity(displayDensity: DisplayDensity) {
+        set({ displayDensity });
+        setLocalStorageState(get());
+      },
+      applySettings(settings: Partial<CorrelationLocalStorageState>) {
+        set(settings);
+        setLocalStorageState(get());
+      },
+      toggleMapExpanded: () => {
         set((state) => {
           const partial = { mapExpanded: !state.mapExpanded };
           localStorage.set(partial);
           return partial;
-        }),
+        });
+
+        setLocalStorageState(get());
+      },
       onClickMap(event: mapboxgl.MapMouseEvent, point: Point) {
         const state = get();
 
-        console.log(event, point);
         // Check if shift key is pressed
         const shiftKeyPressed = event.originalEvent.shiftKey;
 
@@ -112,10 +135,8 @@ export const useCorrelationDiagramStore = create<CorrelationState>(
           selectedUnit: null,
         });
 
-        buildCorrelationChartData(
-          columns.map(columnGeoJSONRecordToColumnIdentifier),
-          AgeScaleMode.Broken
-        ).then((data) => set({ chartData: data }));
+        // Actually download the appropriate units
+        getCorrelationUnits(get, set).then(() => {});
 
         setHashStringForCorrelation({
           section: focusedLine,
@@ -133,23 +154,44 @@ export const useCorrelationDiagramStore = create<CorrelationState>(
 
         const focusedColumns = buildCorrelationColumns(columns, focusedLine);
         set({ focusedColumns });
-
-        const chartData = await buildCorrelationChartData(
-          focusedColumns.map(columnGeoJSONRecordToColumnIdentifier),
-          AgeScaleMode.Broken
-        );
-
-        // Actually set the selected unit from the hash string once column data has been downloaded
-        if (unit != null) {
-          const selectedUnit = findMatchingUnit(chartData.columnData, unit);
-          set({ selectedUnit });
-        }
-
-        set({ chartData });
+        await getCorrelationUnits(get, set);
       },
     };
   }
 );
+
+async function getCorrelationUnits(get, set) {
+  const { focusedColumns } = get();
+  const columnIDs = focusedColumns.map(columnGeoJSONRecordToColumnIdentifier);
+  const columnUnits = await fetchAllColumnUnits(columnIDs);
+  set({ columnUnits });
+}
+
+type ColumnData = {
+  units: UnitLong[];
+  columnID: number;
+};
+
+async function fetchUnitsForColumn(col_id: number): Promise<ColumnData> {
+  const res = await runColumnQuery({ col_id }, null);
+
+  return { columnID: col_id, units: preprocessUnits(res) };
+}
+
+export async function fetchAllColumnUnits(
+  columns: ColumnIdentifier[]
+): Promise<ColumnData[]> {
+  const promises = columns.map((col) => fetchUnitsForColumn(col.col_id));
+  return await Promise.all(promises);
+}
+
+function setLocalStorageState(state: CorrelationState) {
+  localStorage.set({
+    mapExpanded: state.mapExpanded,
+    displayDensity: state.displayDensity,
+    colorizeUnits: state.colorizeUnits,
+  });
+}
 
 function findMatchingUnit(
   columns: SectionRenderData[][],
