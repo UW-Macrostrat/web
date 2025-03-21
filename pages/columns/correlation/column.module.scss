@@ -7,6 +7,7 @@
   display: flex;
   flex-direction: row;
 }
+
 .column-container :global .column .age-axis-label {
   writing-mode: vertical-lr;
   transform: rotate(180deg);
@@ -16,23 +17,28 @@
   top: 0;
   max-height: 100vh;
 }
+
 .column-container :global .column .tick text {
   text-anchor: middle;
   font-weight: 400 !important;
   transform: rotate(-90deg) translate(8px, -12px);
 }
+
 .column-container :global rect.unit {
   stroke: var(--stroke-color);
   stroke-width: 1px;
 }
+
 .column-container :global g.lithology-column use.frame {
   ///stroke: var(--stroke-color);
   //stroke-width: 1.5px !important;
   pointer-events: none;
 }
+
 .column-container :global .unit-label {
   text-align: center;
 }
+
 .column-container :global .col-note-label {
   font-size: 10px;
   margin-top: 3px;
@@ -41,15 +47,19 @@
   line-height: 9px;
   border-left: none !important;
 }
+
 .column-container :global g.height-range {
   display: none;
 }
+
 .column-container :global .note-inner {
   border: none;
 }
+
 .column-container :global .frame rect {
   fill: transparent;
 }
+
 .column-container :global .labeled-unit .unit-overlay {
   font-size: 10px;
   font-style: italic;
@@ -57,10 +67,7 @@
   align-items: center;
   justify-content: center;
 }
-.column-container :global .labeled-unit .unit-overlay .unit-label {
-  display: block;
-  text-shadow: 0px 0px 4px var(--background-color), 0px 0px 4px var(--background-color), 0px 0px 4px var(--background-color), 0px 0px 4px var(--background-color), 0px 0px 4px var(--background-color), 0px 0px 4px var(--background-color), 0px 0px 4px var(--background-color), 0px 0px 4px var(--background-color), 0px 0px 4px var(--background-color), 0px 0px 4px var(--background-color), 0px 0px 4px var(--background-color), 0px 0px 4px var(--background-color), 0px 0px 4px var(--background-color), 0px 0px 4px var(--background-color), 0px 0px 4px var(--background-color), 0px 0px 4px var(--background-color), 0px 0px 4px var(--background-color), 0px 0px 4px var(--background-color), 0px 0px 4px var(--background-color), 0px 0px 4px var(--background-color);
-}
+
 .column-container :global .default-buttons {
   width: 100%;
   margin: 0 -10px;
@@ -69,11 +76,13 @@
 .column-container :global div.section :global(.timescale) {
   transform: translateY(0.5);
 }
+
 .column-container :global .section .divisions .unit {
   cursor: pointer;
 }
+
 .column-container :global rect.selection-overlay {
-  fill: rgba(255,0,0,0.5);
+  fill: rgba(255, 0, 0, 0.5);
 }
 
 .unconformity {
@@ -83,20 +92,20 @@
   text-align: center;
   margin-left: 0;
 }
+
 .unconformity-text {
   transform: translateY(-0.5em);
   width: var(--column-width);
   color: var(--stroke-color);
 }
-.column-container.dark-mode :global {
-  color: var(--text-color);
-}
+
 .column-container.dark-mode :global .timescale {
   color: #000;
 }
 
 .column-container.dark-mode :global g.lithology-column pattern image {
-  filter: invert(80%);
+  filter: invert(100%);
+  opacity: 0.4;
 }
 
 .column-container :global div.timescale {

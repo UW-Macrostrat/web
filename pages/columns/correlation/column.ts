@@ -5,10 +5,13 @@ import {
   SVG,
 } from "@macrostrat/column-components";
 import { Timescale, TimescaleOrientation } from "@macrostrat/timescale";
-import { expandInnerSize, useDarkMode } from "@macrostrat/ui-components";
+import {
+  expandInnerSize,
+  useDarkMode,
+  useInDarkMode,
+} from "@macrostrat/ui-components";
 import classNames from "classnames";
 import { useContext, useMemo } from "react";
-
 import {
   AgeAxis,
   CompositeUnitsColumn,
@@ -146,8 +149,9 @@ function ColumnSVG(props) {
 export function UnitComponent({ division, nColumns = 2, ...rest }) {
   const { width } = useContext(ColumnLayoutContext);
   const lithMap = useLithologies();
+  const inDarkMode = useInDarkMode();
 
-  const backgroundColor = getMixedUnitColor(division, lithMap);
+  const backgroundColor = getMixedUnitColor(division, lithMap, inDarkMode);
 
   return h(TrackedLabeledUnit, {
     division,

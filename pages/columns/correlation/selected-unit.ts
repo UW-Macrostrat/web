@@ -50,7 +50,10 @@ function SelectedUnitPopover<T>({
   const { t_age, b_age } = item0;
   const range = [b_age, t_age];
 
-  const content = h(UnitDetailsPanel, { unit: item });
+  const content = h(UnitDetailsPanel, {
+    unit: item,
+    showLithologyProportions: true,
+  });
 
   const top = scale(range[1]);
   const bottom = scale(range[0]);
