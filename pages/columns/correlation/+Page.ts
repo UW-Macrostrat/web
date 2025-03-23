@@ -33,7 +33,7 @@ export function Page() {
     startup();
   }, []);
 
-  const expanded = true; // = useCorrelationDiagramStore((state) => state.mapExpanded);
+  const expanded = useCorrelationDiagramStore((state) => state.mapExpanded);
   const onSelectColumns = useCorrelationDiagramStore(
     (state) => state.onSelectColumns
   );
@@ -50,10 +50,10 @@ export function Page() {
         "div.diagram-container",
         { className: expanded ? "map-expanded" : "map-inset" },
         [
-          // h("div.main-area", [
-          //   h(CorrelationDiagramWrapper),
-          //   h("div.overlay-safe-area"),
-          // ]),
+          h("div.main-area", [
+            h(CorrelationDiagramWrapper),
+            h("div.overlay-safe-area"),
+          ]),
           h("div.assistant", [
             h("div.column-selection-map", [
               h(ColumnCorrelationMap, {
@@ -62,6 +62,7 @@ export function Page() {
                 apiBaseURL: apiV2Prefix,
                 showLogo: false,
                 onSelectColumns,
+                padding: expanded ? 100 : 20,
               }),
               h(MapExpandedButton),
             ]),
