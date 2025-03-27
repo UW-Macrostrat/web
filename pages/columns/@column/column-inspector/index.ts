@@ -23,7 +23,7 @@ const ModalUnitPanel = onDemand(() => import("./modal-panel"));
 
 const h = hyperStyled(styles);
 
-function ColumnPage({ columnInfo, linkPrefix = "/", project }) {
+function ColumnPage({ columnInfo, linkPrefix = "/", projectID }) {
   const { units, geometry } = columnInfo;
 
   const selectedUnit = useUnitSelection(units);
@@ -77,7 +77,7 @@ function ColumnPage({ columnInfo, linkPrefix = "/", project }) {
         h(ColumnNavigationMap, {
           className: "column-map",
           inProcess: true,
-          projectId: columnInfo.project_id,
+          projectID,
           accessToken: mapboxAccessToken,
           selectedColumn: columnInfo.col_id,
           onSelectColumn(colID) {
@@ -94,14 +94,11 @@ function ColumnPage({ columnInfo, linkPrefix = "/", project }) {
   ]);
 }
 
-export default function ColumnInspector({ columnInfo, linkPrefix }) {
+export default function ColumnInspector(props) {
   return h(
     MacrostratDataProvider,
     { baseURL: apiV2Prefix },
-    h(
-      UnitSelectionProvider,
-      h(PatternProvider, h(ColumnPage, { columnInfo, linkPrefix }))
-    )
+    h(UnitSelectionProvider, h(PatternProvider, h(ColumnPage, props)))
   );
 }
 

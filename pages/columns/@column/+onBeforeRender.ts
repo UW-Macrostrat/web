@@ -17,7 +17,12 @@ export async function onBeforeRender(pageContext) {
 
   const linkPrefix = project_id == null ? "/" : `/projects/${project_id}/`;
 
-  console.log(linkPrefix);
+  let projectID = null;
+  if (project_id != null) {
+    projectID = parseInt(project_id);
+  }
+
+  console.log(linkPrefix, project_id);
 
   /** This is a hack to make sure that all requisite data is on the table. */
   const responses = await Promise.all([
@@ -58,6 +63,7 @@ export async function onBeforeRender(pageContext) {
       pageProps: {
         columnInfo,
         linkPrefix,
+        projectID,
         project: projectData?.[0],
       },
       documentProps: {

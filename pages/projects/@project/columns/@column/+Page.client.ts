@@ -3,6 +3,7 @@ import h from "@macrostrat/hyper";
 import { usePageProps } from "~/renderer/usePageProps";
 
 export function Page() {
-  const { columnInfo, linkPrefix } = usePageProps();
-  return h(ColumnPage, { columnInfo, linkPrefix });
+  const props = usePageProps();
+  console.log("Page props", props);
+  return h(ColumnPage, props);
 }
