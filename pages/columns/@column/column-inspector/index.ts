@@ -12,7 +12,7 @@ import { getHashString, setHashString } from "@macrostrat/ui-components";
 import { useEffect, useRef } from "react";
 import { apiV2Prefix, mapboxAccessToken } from "@macrostrat-web/settings";
 import { PatternProvider } from "~/_providers";
-import styles from "./column-inspector.module.styl";
+import styles from "./index.module.sass";
 import { BasePage } from "~/layouts";
 
 import { navigate } from "vike/client/router";
@@ -32,65 +32,60 @@ function ColumnPage({ columnInfo, linkPrefix = "/", project }) {
   const lat = new Number(columnInfo.lat);
   const zoom = 7;
 
-  return h(BasePage, [
+  return h("div.page-container", [
     h("div.main", [
-      h("div.column-header", [
-        h("nav", [h(PageBreadcrumbs, { showLogo: true })]),
-        h("h1.page-title", [
-          h("span.col-name", columnInfo.col_name),
-          h.if(columnInfo.col_group != null)("span.subtitle", [
-            h("span.separator", " – "),
-            h("span.col-group", `${columnInfo.col_group}`),
-          ]),
-        ]),
-      ]),
-      h("div.column-ui", [
-        h("div.left-column", [
-          h("div.column-view", [
-            h("p.column-details", [
-              h("span.column-id", ["#", columnInfo.col_id]),
-              ", ",
-              h("span.project", ["project ", columnInfo.project_id]),
-              ", ",
-              h(
-                "a",
-                {
-                  href: `/map/loc/${lon}/${lat}/column#z=${zoom}&show=columns,geology`,
-                },
-                "show in map"
-              ),
-              ".",
+      h("div.left-column", [
+        h("div.column-header", [
+          h("nav", [h(PageBreadcrumbs, { showLogo: true })]),
+          h("h1.page-title", [
+            h("span.col-name", columnInfo.col_name),
+            h.if(columnInfo.col_group != null)("span.subtitle", [
+              h("span.separator", " – "),
+              h("span.col-group", `${columnInfo.col_group}`),
             ]),
-            h(Column, {
-              data: units,
-              unconformityLabels: true,
-              columnWidth: 350,
-              width: 600,
-              unitComponent: ColoredUnitComponent,
-              unitComponentProps: {
-                nColumns: 5,
-              },
-            }),
           ]),
         ]),
-        h("div.right-column", [
-          h(ColumnNavigationMap, {
-            style: {
-              height: "400px",
-              width: "400px",
-            },
-            inProcess: true,
-            projectId: columnInfo.project_id,
-            accessToken: mapboxAccessToken,
-            selectedColumn: columnInfo.col_id,
-            onSelectColumn(colID) {
-              navigate(linkPrefix + `columns/${colID}`, {
-                overwriteLastHistoryEntry: true,
-              });
+        h("div.column-view", [
+          h("p.column-details", [
+            h("span.column-id", ["#", columnInfo.col_id]),
+            ", ",
+            h("span.project", ["project ", columnInfo.project_id]),
+            ", ",
+            h(
+              "a",
+              {
+                href: `/map/loc/${lon}/${lat}/column#z=${zoom}&show=columns,geology`,
+              },
+              "show in map"
+            ),
+            ".",
+          ]),
+          h(Column, {
+            data: units,
+            unconformityLabels: true,
+            columnWidth: 350,
+            width: 600,
+            unitComponent: ColoredUnitComponent,
+            unitComponentProps: {
+              nColumns: 5,
             },
           }),
-          h(ModalUnitPanel, { unitData: units }),
         ]),
+      ]),
+      h("div.right-column", [
+        h(ColumnNavigationMap, {
+          className: "column-map",
+          inProcess: true,
+          projectId: columnInfo.project_id,
+          accessToken: mapboxAccessToken,
+          selectedColumn: columnInfo.col_id,
+          onSelectColumn(colID) {
+            navigate(linkPrefix + `columns/${colID}`, {
+              overwriteLastHistoryEntry: true,
+            });
+          },
+        }),
+        h(ModalUnitPanel, { unitData: units, className: "unit-details-panel" }),
       ]),
     ]),
   ]);

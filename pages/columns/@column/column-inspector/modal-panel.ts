@@ -1,16 +1,14 @@
 import { Button, ButtonGroup } from "@blueprintjs/core";
 import {
+  UnitDetailsPanel,
   useSelectedUnit,
   useUnitSelectionDispatch,
 } from "@macrostrat/column-views";
-import { hyperStyled } from "@macrostrat/hyper";
 import { JSONView, ModalPanel, useKeyHandler } from "@macrostrat/ui-components";
-import styles from "./column-inspector.module.styl";
-
-const h = hyperStyled(styles);
+import h from "@macrostrat/hyper";
 
 function ModalUnitPanel(props) {
-  const { unitData } = props;
+  const { unitData, className } = props;
   const selectedUnit = useSelectedUnit();
   const selectUnit = useUnitSelectionDispatch();
 
@@ -35,7 +33,7 @@ function ModalUnitPanel(props) {
 
   if (selectedUnit == null) return null;
 
-  const headerChildren = h(ButtonGroup, { minimal: true }, [
+  const actions = h([
     h(Button, {
       icon: "arrow-up",
       disabled: ix === 0,
@@ -52,18 +50,15 @@ function ModalUnitPanel(props) {
     }),
   ]);
 
-  return h(
-    ModalPanel,
-    {
-      onClose() {
-        selectUnit(null);
-      },
-      title: selectedUnit.unit_name,
-      minimal: true,
-      headerChildren,
+  return h(UnitDetailsPanel, {
+    unit: selectedUnit,
+    onClose(event) {
+      selectUnit(null, null, event);
     },
-    h(JSONView, { data: selectedUnit, hideRoot: true })
-  );
+    className,
+    actions,
+    showLithologyProportions: true,
+  });
 }
 
 export default ModalUnitPanel;
