@@ -1,6 +1,6 @@
 import {
   ColoredUnitComponent,
-  MacrostratAPIProvider,
+  MacrostratDataProvider,
   ColumnNavigationMap,
   UnitSelectionProvider,
   useSelectedUnit,
@@ -44,7 +44,6 @@ function ColumnPage({ columnInfo, linkPrefix = "/", project }) {
           ]),
         ]),
       ]),
-      //h(PageHeader, { title: columnInfo.col_name, className: "column-header" }),
       h("div.column-ui", [
         h("div.left-column", [
           h("div.column-view", [
@@ -99,7 +98,7 @@ function ColumnPage({ columnInfo, linkPrefix = "/", project }) {
 
 export default function ColumnInspector({ columnInfo, linkPrefix }) {
   return h(
-    MacrostratAPIProvider,
+    MacrostratDataProvider,
     { baseURL: apiV2Prefix },
     h(
       UnitSelectionProvider,
