@@ -19,17 +19,31 @@ import { useRef } from "react";
 import { Button, OverlaysProvider } from "@blueprintjs/core";
 import { CorrelationChart, useCorrelationChartData } from "./correlation-chart";
 import { DarkModeProvider, ErrorBoundary } from "@macrostrat/ui-components";
-import { ColumnCorrelationMap } from "@macrostrat/column-views";
+import {
+  ColumnCorrelationMap,
+  ColumnCorrelationProvider,
+} from "@macrostrat/column-views";
 import {
   LithologiesProvider,
   UnitDetailsPanel,
   UnitSelectionProvider,
   useSelectedUnit,
 } from "@macrostrat/column-views";
+import { getCorrelationHashParams } from "#/columns/correlation/hash-string";
 
 export function Page() {
+  return h(PageWrapper, h(PageInner));
+}
+
+export function PageInner() {
   const startup = useCorrelationDiagramStore((state) => state.startup);
+
   useEffect(() => {
+    const { section, unit } = getCorrelationHashParams();
+    startup({ unit });
+  }, []);
+
+  const sectionLineRef = useEffect(() => {
     startup();
   }, []);
 
@@ -40,7 +54,11 @@ export function Page() {
   const ref = useRef();
 
   return h(
-    PageWrapper,
+    ColumnCorrelationProvider,
+    {
+      apiBaseURL: apiV2Prefix,
+      line,
+    },
     h("div.main-panel", { ref }, [
       h("header.page-header", [
         h(PageBreadcrumbs),
@@ -63,6 +81,7 @@ export function Page() {
                 showLogo: false,
                 onSelectColumns,
                 padding: expanded ? 100 : 20,
+                focusedLine: section,
               }),
               h(MapExpandedButton),
             ]),

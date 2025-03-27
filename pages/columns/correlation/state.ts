@@ -55,8 +55,6 @@ export const useCorrelationDiagramStore = create<CorrelationState>(
       colorizeUnits = true,
     } = localStorage.get() ?? ({} as CorrelationLocalStorageState);
 
-    const { section, unit } = getCorrelationHashParams();
-
     return {
       focusedColumns: [],
       columnUnits: [],
@@ -89,14 +87,14 @@ export const useCorrelationDiagramStore = create<CorrelationState>(
 
         setLocalStorageState(get());
       },
-      async startup() {
+      async startup({}) {
         await getCorrelationUnits(get, set);
       },
     };
   }
 );
 
-async function getCorrelationUnits(get, set) {
+export async function getCorrelationUnits(get, set) {
   const { focusedColumns } = get();
   const columnIDs = focusedColumns.map(columnGeoJSONRecordToColumnIdentifier);
   const columnUnits = await fetchAllColumnUnits(columnIDs);

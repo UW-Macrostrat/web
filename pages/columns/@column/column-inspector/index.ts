@@ -1,6 +1,6 @@
 import { MacrostratAPIProvider } from "@macrostrat/column-views";
 import {
-  ColumnNavigatorMap,
+  ColumnNavigationMap,
   UnitSelectionProvider,
   useSelectedUnit,
   useUnitSelectionDispatch,
@@ -9,7 +9,7 @@ import {
 import { hyperStyled } from "@macrostrat/hyper";
 import { getHashString, setHashString } from "@macrostrat/ui-components";
 import { useEffect, useRef } from "react";
-import { apiV2Prefix } from "@macrostrat-web/settings";
+import { apiV2Prefix, mapboxAccessToken } from "@macrostrat-web/settings";
 import { PatternProvider } from "~/_providers";
 import styles from "./column-inspector.module.styl";
 import { BasePage } from "~/layouts";
@@ -73,30 +73,20 @@ function ColumnPage({ columnInfo, linkPrefix = "/", project }) {
           ]),
         ]),
         h("div.right-column", [
-          h(ColumnNavigatorMap, {
-            className: "column-map",
-            format: "geojson_bare",
-            showInProcessColumns: true,
-            currentColumn: {
-              geometry,
-              type: "Feature",
-              properties: {
-                col_id: columnInfo.col_id,
-                col_name: columnInfo.col_name,
-                project_id: columnInfo.project_id,
-              },
-            },
+          h(ColumnNavigationMap, {
             style: {
-              display: selectedUnit == null ? "block" : "none",
+              height: "400px",
+              width: "400px",
             },
-            setCurrentColumn(newColumn) {
-              const { col_id } = newColumn.properties;
-              navigate(linkPrefix + `columns/${col_id}`, {
+            inProcess: true,
+            projectId: columnInfo.project_id,
+            accessToken: mapboxAccessToken,
+            selectedColumn: columnInfo.col_id,
+            onSelectColumn(colID) {
+              navigate(linkPrefix + `columns/${colID}`, {
                 overwriteLastHistoryEntry: true,
               });
             },
-            margin: 10,
-            project_id: columnInfo.project_id,
           }),
           h(ModalUnitPanel, { unitData: units }),
         ]),

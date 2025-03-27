@@ -3055,6 +3055,7 @@ __metadata:
     "@macrostrat/svg-map-components": "workspace:^"
     "@macrostrat/timescale": "workspace:^"
     "@macrostrat/ui-components": "workspace:^"
+    "@turf/buffer": "npm:^7.2.0"
     "@turf/distance": "npm:^7.2.0"
     "@turf/line-intersect": "npm:^7.2.0"
     "@turf/nearest-point-on-line": "npm:^7.2.0"
@@ -4947,6 +4948,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@turf/bbox@npm:^7.2.0":
+  version: 7.2.0
+  resolution: "@turf/bbox@npm:7.2.0"
+  dependencies:
+    "@turf/helpers": "npm:^7.2.0"
+    "@turf/meta": "npm:^7.2.0"
+    "@types/geojson": "npm:^7946.0.10"
+    tslib: "npm:^2.8.1"
+  checksum: 10/34dfb634d04bc20be292a211e0fdef610556bead4bb5a38174fe040c59f041b4a0e2f586148c2c8b88677b1c5af08a07de5745235233dbaa0197fd67bf21e0da
+  languageName: node
+  linkType: hard
+
 "@turf/bearing@npm:^7.0.0":
   version: 7.0.0
   resolution: "@turf/bearing@npm:7.0.0"
@@ -5006,6 +5019,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@turf/buffer@npm:^7.2.0":
+  version: 7.2.0
+  resolution: "@turf/buffer@npm:7.2.0"
+  dependencies:
+    "@turf/bbox": "npm:^7.2.0"
+    "@turf/center": "npm:^7.2.0"
+    "@turf/helpers": "npm:^7.2.0"
+    "@turf/jsts": "npm:^2.7.1"
+    "@turf/meta": "npm:^7.2.0"
+    "@turf/projection": "npm:^7.2.0"
+    "@types/geojson": "npm:^7946.0.10"
+    d3-geo: "npm:1.7.1"
+  checksum: 10/a64f107025e68575739629193997a02c8bf39c6e7463501bf0172ebc20d1213be7ea0e2a0e394d709d04a3c8bbf9f0663741fc1e8306a17291c1d0ecab242fb8
+  languageName: node
+  linkType: hard
+
 "@turf/center@npm:^6.5.0":
   version: 6.5.0
   resolution: "@turf/center@npm:6.5.0"
@@ -5013,6 +5042,18 @@ __metadata:
     "@turf/bbox": "npm:^6.5.0"
     "@turf/helpers": "npm:^6.5.0"
   checksum: 10/d0e26ff714537a57ff67c4fbcce3acbcabb7a4ff7caae5cc031668243649e49fb66f2648480c47f5ef8d7b5c47d2e34511a4727293b59381d8c4ac5f397f3808
+  languageName: node
+  linkType: hard
+
+"@turf/center@npm:^7.2.0":
+  version: 7.2.0
+  resolution: "@turf/center@npm:7.2.0"
+  dependencies:
+    "@turf/bbox": "npm:^7.2.0"
+    "@turf/helpers": "npm:^7.2.0"
+    "@types/geojson": "npm:^7946.0.10"
+    tslib: "npm:^2.8.1"
+  checksum: 10/d8c88e972eabec094993d875607d0467b98826517bbeb24bd6b289e62cbbfbdbdd649e7e03f1b7967d0f258a3adfac0955d4d09aaabb59bebf5db99bcca485e3
   languageName: node
   linkType: hard
 
@@ -5034,6 +5075,17 @@ __metadata:
   dependencies:
     "@turf/helpers": "npm:^6.5.0"
   checksum: 10/8ef6f6ba8876bb32b35691b62554a74b1e8e2b9d04a1c4f7bcba9348163b4ae4cde774b9e8e9f63211e5eb816517d94b94c3d54e5f855691a84cd3556d3157e4
+  languageName: node
+  linkType: hard
+
+"@turf/clone@npm:^7.2.0":
+  version: 7.2.0
+  resolution: "@turf/clone@npm:7.2.0"
+  dependencies:
+    "@turf/helpers": "npm:^7.2.0"
+    "@types/geojson": "npm:^7946.0.10"
+    tslib: "npm:^2.8.1"
+  checksum: 10/bbca31a4595ed725db0d5b27673316d0bdc71a79edca607155cc62162d4e1056d994f9a0150ad07bafad8b29890064e2d3a6bd549004bd884cdd16cd924f4171
   languageName: node
   linkType: hard
 
@@ -5138,6 +5190,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@turf/jsts@npm:^2.7.1":
+  version: 2.7.2
+  resolution: "@turf/jsts@npm:2.7.2"
+  dependencies:
+    jsts: "npm:2.7.1"
+  checksum: 10/302833b889f8e796f6e4edd3d01ca1616b4b32965455de4f2883389d2fe805169ff76c672037b0f21578e1a632c8e229eb9dd8cc64548ee0589dd08fff9815dc
+  languageName: node
+  linkType: hard
+
 "@turf/line-intersect@npm:^7.0.0":
   version: 7.0.0
   resolution: "@turf/line-intersect@npm:7.0.0"
@@ -5228,6 +5289,19 @@ __metadata:
     "@turf/helpers": "npm:^6.5.0"
     "@turf/meta": "npm:^6.5.0"
   checksum: 10/31baafb27e3c2a7b639a08156b38c771d312236a9ab218133f7136b4f5ac94cec2465ad62b7da8a0b7f26d5afb09b79d122e56022c27fd17fc9994213fe61833
+  languageName: node
+  linkType: hard
+
+"@turf/projection@npm:^7.2.0":
+  version: 7.2.0
+  resolution: "@turf/projection@npm:7.2.0"
+  dependencies:
+    "@turf/clone": "npm:^7.2.0"
+    "@turf/helpers": "npm:^7.2.0"
+    "@turf/meta": "npm:^7.2.0"
+    "@types/geojson": "npm:^7946.0.10"
+    tslib: "npm:^2.8.1"
+  checksum: 10/c57ff913e4315d038b5cc2f85b34eef2860ce3ca96e71ebf30161f62aeb252972fe7fcfe1121e589e49c5d8a128f288ce73cfd38327e1cde7c7aed76f4d91bb4
   languageName: node
   linkType: hard
 
@@ -12951,6 +13025,13 @@ __metadata:
     json-schema: "npm:0.4.0"
     verror: "npm:1.10.0"
   checksum: 10/df2bf234eab1b5078d01bcbff3553d50a243f7b5c10a169745efeda6344d62798bd1d85bcca6a8446f3b5d0495e989db45f9de8dae219f0f9796e70e0c776089
+  languageName: node
+  linkType: hard
+
+"jsts@npm:2.7.1":
+  version: 2.7.1
+  resolution: "jsts@npm:2.7.1"
+  checksum: 10/c881679ff5d79e14be1611dcc7b3330c1db157063243012194c62183c64350b60501398085d624538d5d8bf798ecc288e0dad89a2c9b7a91f0b0d65a506f8a43
   languageName: node
   linkType: hard
 
