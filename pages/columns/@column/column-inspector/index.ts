@@ -1,5 +1,6 @@
-import { MacrostratAPIProvider } from "@macrostrat/column-views";
 import {
+  ColoredUnitComponent,
+  MacrostratAPIProvider,
   ColumnNavigationMap,
   UnitSelectionProvider,
   useSelectedUnit,
@@ -64,10 +65,11 @@ function ColumnPage({ columnInfo, linkPrefix = "/", project }) {
             h(Column, {
               data: units,
               unconformityLabels: true,
-              columnWidth: 250,
-              width: 500,
+              columnWidth: 350,
+              width: 600,
+              unitComponent: ColoredUnitComponent,
               unitComponentProps: {
-                nColumns: 3,
+                nColumns: 5,
               },
             }),
           ]),
