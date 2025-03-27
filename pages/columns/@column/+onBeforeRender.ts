@@ -5,7 +5,6 @@ import { preprocessUnits } from "@macrostrat/column-views";
 import fetch from "node-fetch";
 
 import { ColumnSummary } from "#/map/map-interface/app-state/handlers/columns";
-import { fetchAPIData } from "#/columns/utils";
 
 export async function onBeforeRender(pageContext) {
   // `.page.server.js` files always run in Node.js; we could use SQL/ORM queries here.
@@ -17,6 +16,8 @@ export async function onBeforeRender(pageContext) {
   // https://v2.macrostrat.org/api/v2/columns?col_id=3&response=long
 
   const linkPrefix = project_id == null ? "/" : `/projects/${project_id}/`;
+
+  console.log(linkPrefix);
 
   /** This is a hack to make sure that all requisite data is on the table. */
   const responses = await Promise.all([

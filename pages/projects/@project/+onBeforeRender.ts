@@ -14,7 +14,11 @@ export async function onBeforeRender(pageContext) {
 
   return {
     pageContext: {
-      pageProps: { columnGroups, project },
+      pageProps: {
+        columnGroups,
+        project,
+        linkPrefix: `/projects/${project_id}/`,
+      },
     },
   };
 }

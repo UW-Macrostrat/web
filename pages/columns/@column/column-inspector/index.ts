@@ -27,6 +27,7 @@ function ColumnPage({ columnInfo, linkPrefix = "/", project }) {
   const { units, geometry } = columnInfo;
 
   const selectedUnit = useUnitSelection(units);
+  const setSelectedUnit = useUnitSelectionDispatch();
 
   const lon = new Number(columnInfo.lng);
   const lat = new Number(columnInfo.lat);
@@ -80,6 +81,8 @@ function ColumnPage({ columnInfo, linkPrefix = "/", project }) {
           accessToken: mapboxAccessToken,
           selectedColumn: columnInfo.col_id,
           onSelectColumn(colID) {
+            // We could probably find a more elegant way to do this
+            setSelectedUnit(null);
             navigate(linkPrefix + `columns/${colID}`, {
               overwriteLastHistoryEntry: true,
             });
