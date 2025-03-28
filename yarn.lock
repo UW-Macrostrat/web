@@ -3488,7 +3488,7 @@ __metadata:
     vite-plugin-cjs-interop: "npm:^2.1.6"
     vite-plugin-inspect: "npm:^0.8.4"
     vitest: "npm:^1.6.0"
-    zustand: "npm:^4.5.1"
+    zustand: "npm:^5.0.1"
   languageName: unknown
   linkType: soft
 

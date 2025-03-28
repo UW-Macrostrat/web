@@ -28,10 +28,10 @@ export default function Layout({ children }: { children: ReactNode }) {
       { followSystem: true },
       h("div.app-shell", { className: pageStyle + "-page" }, [
         children,
-        h(DevToolsConsole, {
-          className: "page-admin-container",
-          tools: [...devTools, DevToolsData],
-        }),
+        // h(DevToolsConsole, {
+        //   className: "page-admin-container",
+        //   tools: [...devTools, DevToolsData],
+        // }),
       ])
     )
   );
