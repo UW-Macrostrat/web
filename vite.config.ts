@@ -119,6 +119,9 @@ export default defineConfig({
       "@macrostrat/feedback-components",
       "@macrostrat/timescale",
     ],
+    resolve: {
+      conditions: ["source"],
+    },
   },
   css: {
     preprocessorOptions: {

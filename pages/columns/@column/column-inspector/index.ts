@@ -1,11 +1,12 @@
 import {
   ColoredUnitComponent,
+  MacrostratDataProvider,
   UnitSelectionProvider,
   useSelectedUnit,
   useUnitSelectionDispatch,
   Column,
 } from "@macrostrat/column-views";
-import { MacrostratDataProvider } from "#/../../web-components/packages/column-views/src/data-provider/base";
+//import { MacrostratDataProvider } from "#/../../web-components/packages/column-views/src";
 import { hyperStyled } from "@macrostrat/hyper";
 import { getHashString, setHashString } from "@macrostrat/ui-components";
 import { useEffect, useRef } from "react";

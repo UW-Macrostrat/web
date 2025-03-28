@@ -3489,6 +3489,7 @@ __metadata:
     vite-plugin-inspect: "npm:^0.8.4"
     vitest: "npm:^1.6.0"
     zustand: "npm:^4.5.1"
+    zustand-computed: "npm:^2.0.2"
   languageName: unknown
   linkType: soft
 
