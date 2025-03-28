@@ -156,8 +156,7 @@
     "vite-plugin-cesium": "^1.2.22",
     "vite-plugin-cjs-interop": "^2.1.6",
     "vite-plugin-inspect": "^0.8.4",
-    "zustand": "^4.5.1",
-    "zustand-computed": "^2.0.2"
+    "zustand": "^4.5.1"
   },
   "resolutions": {
     "cesium": "^1.123.1",

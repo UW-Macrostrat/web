@@ -68,7 +68,12 @@ export default defineConfig({
       "~": path.resolve("./src"),
       "#": path.resolve("./pages"),
     },
-    dedupe: ["react", "react-dom", "@macrostrat/column-components"],
+    dedupe: [
+      "react",
+      "react-dom",
+      "@macrostrat/column-components",
+      "@macrostrat/ui-components",
+    ],
   },
   plugins: [
     react(),
