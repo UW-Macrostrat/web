@@ -18,35 +18,54 @@ export type ColumnGroup = {
   columns: Array<any>;
 };
 
-export async function getGroupedColumns(project_id) {
+export async function getGroupedColumns(project_id: number | null) {
+  let columnURL = "/defs/columns";
+  let params = {};
+  if (project_id == null) {
+    // The 'columns' route gives all columns in active projects
+    let columnURL = "/columns";
+    params = { all: true }; // get all columns
+  } else {
+    // Only get columns for a specific project
+    params = { project_id };
+  }
+
   const [columns, groups] = await Promise.all([
-    fetchAPIData(`/defs/columns`, { project_id }),
-    fetchAPIData(`/defs/groups`, { project_id }),
+    fetchAPIData(columnURL, params),
+    fetchAPIData(`/defs/groups`, params),
   ]);
 
   columns.sort((a, b) => a.col_id - b.col_id);
 
   // Group by col_group
+  // Create a map of column groups
+  const groupMap = new Map<number, ColumnGroup>(
+    groups.map((g) => [
+      g.col_group_id,
+      { name: g.name, id: g.col_group_id, columns: [] },
+    ])
+  );
+  groupMap.set(-1, {
+    id: -1,
+    name: "Ungrouped",
+    columns: [],
+  });
 
-  const columnGroupIx: { [ix: number]: ColumnGroup } = columns.reduce(
-    (acc, d) => {
-      const { col_group_id } = d;
+  for (const col of columns) {
+    const col_group_id = col.col_group_id ?? -1;
+    const group = groupMap.get(col_group_id);
+    group.columns.push(col);
+  }
 
-      const col_group =
-        groups.find((d) => d.col_group_id == col_group_id) ?? {};
-
-      acc[col_group_id] ??= {
-        id: col_group_id,
-        ...col_group,
-        columns: [],
-      };
-      acc[col_group_id].columns.push(d);
-      return acc;
-    },
-    {}
+  const groupsArray = Array.from(groupMap.values()).filter(
+    (g) => g.columns.length > 0
   );
 
-  const columnGroups = Object.values(columnGroupIx);
-  columnGroups.sort((a, b) => a.id - b.id);
-  return columnGroups;
+  // Sort the groups by id
+  groupsArray.sort((a, b) => {
+    if (a.id === -1) return 1; // Ungrouped should come last
+    return a.id - b.id;
+  });
+
+  return groupsArray;
 }
