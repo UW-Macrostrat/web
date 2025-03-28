@@ -31,7 +31,7 @@ export async function onBeforeRender(pageContext) {
       : getAndUnwrap(apiV2Prefix + `/defs/projects?project_id=${project_id}`),
     getData(
       "columns",
-      { col_id, project_id, format: "geojson" },
+      { col_id, project_id: projectID, format: "geojson" },
       (res) => res?.features
     ),
     getData(
@@ -46,6 +46,7 @@ export async function onBeforeRender(pageContext) {
 
   const [projectData, columns, unitsLong]: [any, any, any] = responses;
 
+  console.log(columns);
   const col = columns?.[0];
 
   const columnInfo: ColumnSummary = {
@@ -75,6 +76,7 @@ export async function onBeforeRender(pageContext) {
 }
 
 async function getAndUnwrap<T>(url: string): Promise<T> {
+  console.log("Fetching", url);
   const res = await fetch(url);
   const res1 = await res.json();
   return res1.success.data;
@@ -108,7 +110,7 @@ function assembleURL(
   entity,
   {
     col_id,
-    project_id = 1,
+    project_id,
     status_code = "active",
     ...rest
   }: {
@@ -121,10 +123,13 @@ function assembleURL(
   const base = apiV2Prefix + "/" + entity;
   let params = new URLSearchParams({
     col_id: col_id.toString(),
-    project_id: project_id.toString(),
     response: "long",
     status_code,
     ...rest,
   });
+  if (project_id != null) {
+    params.set("project_id", project_id.toString());
+  }
+
   return `${base}?${params}`;
 }

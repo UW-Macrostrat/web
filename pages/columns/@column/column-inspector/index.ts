@@ -1,21 +1,18 @@
 import {
   ColoredUnitComponent,
-  MacrostratDataProvider,
-  ColumnNavigationMap,
   UnitSelectionProvider,
   useSelectedUnit,
   useUnitSelectionDispatch,
   Column,
 } from "@macrostrat/column-views";
+import { MacrostratDataProvider } from "#/../../web-components/packages/column-views/src/data-provider/base";
 import { hyperStyled } from "@macrostrat/hyper";
 import { getHashString, setHashString } from "@macrostrat/ui-components";
 import { useEffect, useRef } from "react";
-import { apiV2Prefix, mapboxAccessToken } from "@macrostrat-web/settings";
+import { apiV2Prefix } from "@macrostrat-web/settings";
 import { PatternProvider } from "~/_providers";
 import styles from "./index.module.sass";
-import { BasePage } from "~/layouts";
 
-import { navigate } from "vike/client/router";
 import { PageBreadcrumbs } from "~/components";
 import { onDemand } from "~/_utils";
 
@@ -23,7 +20,19 @@ const ModalUnitPanel = onDemand(() => import("./modal-panel"));
 
 const h = hyperStyled(styles);
 
-function ColumnPage({ columnInfo, linkPrefix = "/", projectID }) {
+const ColumnMap = onDemand(() => import("./map").then((mod) => mod.ColumnMap));
+
+export function ColumnPage(props) {
+  console.log(MacrostratDataProvider);
+
+  return h(
+    MacrostratDataProvider,
+    { baseURL: apiV2Prefix },
+    h(UnitSelectionProvider, h(PatternProvider, h(ColumnPageInner, props)))
+  );
+}
+
+function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
   const { units, geometry } = columnInfo;
 
   const selectedUnit = useUnitSelection(units);
@@ -74,32 +83,17 @@ function ColumnPage({ columnInfo, linkPrefix = "/", projectID }) {
         ]),
       ]),
       h("div.right-column", [
-        h(ColumnNavigationMap, {
+        h(ColumnMap, {
           className: "column-map",
           inProcess: true,
           projectID,
-          accessToken: mapboxAccessToken,
+          linkPrefix,
           selectedColumn: columnInfo.col_id,
-          onSelectColumn(colID) {
-            // We could probably find a more elegant way to do this
-            setSelectedUnit(null);
-            navigate(linkPrefix + `columns/${colID}`, {
-              overwriteLastHistoryEntry: true,
-            });
-          },
         }),
         h(ModalUnitPanel, { unitData: units, className: "unit-details-panel" }),
       ]),
     ]),
   ]);
-}
-
-export default function ColumnInspector(props) {
-  return h(
-    MacrostratDataProvider,
-    { baseURL: apiV2Prefix },
-    h(UnitSelectionProvider, h(PatternProvider, h(ColumnPage, props)))
-  );
 }
 
 function useUnitSelection(units): number {

@@ -1,4 +1,4 @@
-import ColumnPage from "./column-inspector";
+import { ColumnPage } from "./column-inspector";
 import h from "@macrostrat/hyper";
 import { usePageProps } from "~/renderer/usePageProps";
 

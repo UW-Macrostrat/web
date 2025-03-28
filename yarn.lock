@@ -3048,6 +3048,7 @@ __metadata:
   resolution: "@macrostrat/column-views@portal:../web-components/packages/column-views::locator=%40macrostrat%2Fweb%40workspace%3A."
   dependencies:
     "@macrostrat/api-types": "workspace:^"
+    "@macrostrat/color-utils": "workspace:^"
     "@macrostrat/column-components": "workspace:^"
     "@macrostrat/data-components": "workspace:^"
     "@macrostrat/hyper": "npm:^3.0.6"
@@ -3067,6 +3068,7 @@ __metadata:
     "@visx/axis": "npm:^3.12.0"
     chroma-js: "npm:^3.1.2"
     classnames: "npm:^2.5.1"
+    cross-fetch: "npm:^4.1.0"
     d3-array: "npm:^3.2.4"
     d3-format: "npm:^3.1.0"
     d3-geo: "npm:^3.1.1"
@@ -3382,7 +3384,7 @@ __metadata:
     "@macrostrat/api-types": "npm:^1.0.0"
     "@macrostrat/color-utils": "npm:^1.0.0"
     "@macrostrat/column-components": "npm:^1.0.3"
-    "@macrostrat/column-views": "npm:^1.0.3"
+    "@macrostrat/column-views": "portal:../web-components/packages/column-views"
     "@macrostrat/data-components": "npm:^0.0.6"
     "@macrostrat/data-sheet": "npm:^2.0.1"
     "@macrostrat/feedback-components": "npm:^1.0.1"
@@ -8467,6 +8469,15 @@ __metadata:
   dependencies:
     node-fetch: "npm:^2.6.12"
   checksum: 10/e231a71926644ef122d334a3a4e73d9ba3ba4b480a8a277fb9badc434c1ba905b3d60c8034e18b348361a09afbec40ba9371036801ba2b675a7b84588f9f55d8
+  languageName: node
+  linkType: hard
+
+"cross-fetch@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "cross-fetch@npm:4.1.0"
+  dependencies:
+    node-fetch: "npm:^2.7.0"
+  checksum: 10/07624940607b64777d27ec9c668ddb6649e8c59ee0a5a10e63a51ce857e2bbb1294a45854a31c10eccb91b65909a5b199fcb0217339b44156f85900a7384f489
   languageName: node
   linkType: hard
 
@@ -14592,7 +14603,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-fetch@npm:^2.6.12":
+"node-fetch@npm:^2.6.12, node-fetch@npm:^2.7.0":
   version: 2.7.0
   resolution: "node-fetch@npm:2.7.0"
   dependencies:

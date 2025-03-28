@@ -76,7 +76,7 @@ export default defineConfig({
     // Fix broken imports in non-ESM packages. We should endeavor to move away from these
     // dependencies if they are unmaintained.
     cjsInterop({
-      dependencies: ["react-images", "labella", "react-color"],
+      dependencies: ["react-images", "labella", "react-color", "mapbox-gl"],
     }),
     textToolchain({
       contentDir: path.resolve(__dirname, "content"),

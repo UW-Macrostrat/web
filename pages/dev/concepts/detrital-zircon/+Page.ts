@@ -8,7 +8,7 @@ import {
 import Column from "./column";
 import { DetritalColumn } from "./detrital";
 import {
-  ColumnNavigatorMap,
+  ColumnNavigationMap,
   MeasurementsLayer,
 } from "@macrostrat/column-views";
 import { PatternProvider } from "~/_providers";
@@ -33,7 +33,7 @@ const ColumnUI = ({ setCurrentColumn }) => {
     ]),
     h("div.map-column", [
       h(
-        ColumnNavigatorMap,
+        ColumnNavigationMap,
         { currentColumn: footprint, setCurrentColumn, margin: 0 },
         [
           h(MeasurementsLayer, {
