@@ -11,7 +11,7 @@ import {
   Switch,
 } from "@blueprintjs/core";
 import { PageBreadcrumbs } from "~/components";
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DisplayDensity, useCorrelationDiagramStore } from "./state";
 import { PatternProvider } from "~/_providers";
 import { useRef } from "react";
@@ -22,6 +22,8 @@ import { DarkModeProvider, ErrorBoundary } from "@macrostrat/ui-components";
 import {
   ColumnCorrelationMap,
   ColumnCorrelationProvider,
+  useCorrelationMapStore,
+  MacrostratDataProvider,
 } from "@macrostrat/column-views";
 import {
   LithologiesProvider,
@@ -29,68 +31,87 @@ import {
   UnitSelectionProvider,
   useSelectedUnit,
 } from "@macrostrat/column-views";
-import { getCorrelationHashParams } from "#/columns/correlation/hash-string";
+import {
+  getCorrelationHashParams,
+  setHashStringForCorrelation,
+} from "#/columns/correlation/hash-string";
 
 export function Page() {
-  return h(PageWrapper, h(PageInner));
+  const hashData = useMemo(getCorrelationHashParams, []);
+  // const setSelectedUnit = useCorrelationDiagramStore(
+  //   (state) => state.setSelectedUnit
+  // );
+  // useEffect(() => {
+  //   // Set the selected unit from the hash if available
+  //   if (hashData.unit) {
+  //     setSelectedUnit(hashData.unit);
+  //   }
+  // }, []);
+
+  return h(
+    PageWrapper,
+    h(
+      ColumnCorrelationProvider,
+      {
+        baseURL: apiV2Prefix,
+        focusedLine: hashData.section,
+        onSelectColumns(cols, line) {
+          setHashStringForCorrelation({ section: line });
+        },
+      },
+      [h(PageInner)]
+    )
+  );
 }
 
 export function PageInner() {
-  const startup = useCorrelationDiagramStore((state) => state.startup);
+  const setFocusedColumns = useCorrelationDiagramStore(
+    (s) => s.setSelectedColumns
+  );
+
+  // Sync focused columns with map
+  const focusedColumns = useCorrelationMapStore(
+    (state) => state.focusedColumns
+  );
 
   useEffect(() => {
-    const { section, unit } = getCorrelationHashParams();
-    startup({ unit });
-  }, []);
+    setFocusedColumns(focusedColumns);
+  }, [focusedColumns]);
 
-  const sectionLineRef = useEffect(() => {
-    startup();
-  }, []);
+  //const selectColumns = useCorrelationDiagramStore((d) => d.selectColumns);
 
   const expanded = useCorrelationDiagramStore((state) => state.mapExpanded);
-  const onSelectColumns = useCorrelationDiagramStore(
-    (state) => state.onSelectColumns
-  );
   const ref = useRef();
 
-  return h(
-    ColumnCorrelationProvider,
-    {
-      apiBaseURL: apiV2Prefix,
-      line,
-    },
-    h("div.main-panel", { ref }, [
-      h("header.page-header", [
-        h(PageBreadcrumbs),
-        h(CorrelationSettingsPopup, { boundary: ref.current }),
-      ]),
-      h(
-        "div.diagram-container",
-        { className: expanded ? "map-expanded" : "map-inset" },
-        [
-          h("div.main-area", [
-            h(CorrelationDiagramWrapper),
-            h("div.overlay-safe-area"),
+  return h("div.main-panel", { ref }, [
+    h("header.page-header", [
+      h(PageBreadcrumbs),
+      h(CorrelationSettingsPopup, { boundary: ref.current }),
+    ]),
+    h(
+      "div.diagram-container",
+      { className: expanded ? "map-expanded" : "map-inset" },
+      [
+        h("div.main-area", [
+          h(CorrelationDiagramWrapper),
+          h("div.overlay-safe-area"),
+        ]),
+        h("div.assistant", [
+          h("div.column-selection-map", [
+            h(ColumnCorrelationMap, {
+              accessToken: mapboxAccessToken,
+              className: "correlation-map",
+              apiBaseURL: apiV2Prefix,
+              showLogo: false,
+              padding: expanded ? 100 : 20,
+            }),
+            h(MapExpandedButton),
           ]),
-          h("div.assistant", [
-            h("div.column-selection-map", [
-              h(ColumnCorrelationMap, {
-                accessToken: mapboxAccessToken,
-                className: "correlation-map",
-                apiBaseURL: apiV2Prefix,
-                showLogo: false,
-                onSelectColumns,
-                padding: expanded ? 100 : 20,
-                focusedLine: section,
-              }),
-              h(MapExpandedButton),
-            ]),
-            h(UnitDetailsExt),
-          ]),
-        ]
-      ),
-    ])
-  );
+          h(UnitDetailsExt),
+        ]),
+      ]
+    ),
+  ]);
 }
 
 function CorrelationSettings() {
@@ -151,7 +172,7 @@ const PageWrapper = compose(
   DarkModeProvider,
   PatternProvider,
   OverlaysProvider,
-  C(LithologiesProvider, { baseURL: apiV2Prefix }),
+  C(MacrostratDataProvider, { baseURL: apiV2Prefix }),
   UnitSelectionManager
 );
 

@@ -17,11 +17,7 @@ export interface CorrelationState extends CorrelationLocalStorageState {
   columnUnits: ColumnData[];
   selectedUnit: UnitLong | null;
   toggleMapExpanded: () => void;
-  onSelectColumns: (
-    columns: FocusedColumnGeoJSONRecord[],
-    line: LineString
-  ) => void;
-  startup: () => Promise<void>;
+  setSelectedColumns: (columns: FocusedColumnGeoJSONRecord[]) => void;
   setSelectedUnit: (unit: UnitLong) => void;
   applySettings: (settings: Partial<CorrelationLocalStorageState>) => void;
   setDisplayDensity: (value: DisplayDensity) => void;
@@ -62,9 +58,8 @@ export const useCorrelationDiagramStore = create<CorrelationState>(
       displayDensity,
       selectedUnit: null,
       colorizeUnits,
-      onSelectColumns(columns, line) {
+      setSelectedColumns(columns) {
         set({ focusedColumns: columns });
-        setHashStringForCorrelation(columns, line);
         getCorrelationUnits(get, set);
       },
       setSelectedUnit(selectedUnit: UnitLong | null) {
@@ -86,9 +81,6 @@ export const useCorrelationDiagramStore = create<CorrelationState>(
         });
 
         setLocalStorageState(get());
-      },
-      async startup({}) {
-        await getCorrelationUnits(get, set);
       },
     };
   }
