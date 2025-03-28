@@ -2,10 +2,10 @@ import h from "./main.module.scss";
 import { AnchorButton } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import { PageHeader, DevLinkButton, AssistantLinks } from "~/components";
-import { usePageProps } from "~/renderer/usePageProps";
+import { useData } from "vike-react/useData";
 
 export function Page() {
-  const { sources } = usePageProps();
+  const { sources } = useData();
 
   return h(ContentPage, [
     h(AssistantLinks, [

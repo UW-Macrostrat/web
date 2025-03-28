@@ -2,11 +2,14 @@ import h from "@macrostrat/hyper";
 import { ContentPage } from "~/layouts";
 import { PageHeader, Link, AssistantLinks, DevLinkButton } from "~/components";
 import { AnchorButton, Tag } from "@blueprintjs/core";
-import { usePageProps } from "~/renderer/usePageProps";
+import { useData } from "vike-react/useData";
 
 export function Page() {
-  const { columnGroups, title, linkPrefix } = usePageProps();
+  return h(ColumnPage);
+}
 
+export function ColumnPage({ title = "Columns", linkPrefix = "/" }) {
+  const { columnGroups } = useData();
   return h(ContentPage, [
     h(AssistantLinks, [
       h(AnchorButton, { href: "/projects", minimal: true }, "Projects"),

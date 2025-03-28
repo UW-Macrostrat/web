@@ -23,8 +23,6 @@ const h = hyperStyled(styles);
 const ColumnMap = onDemand(() => import("./map").then((mod) => mod.ColumnMap));
 
 export function ColumnPage(props) {
-  console.log(MacrostratDataProvider);
-
   return h(
     MacrostratDataProvider,
     { baseURL: apiV2Prefix },

@@ -2,11 +2,11 @@
 
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import { preprocessUnits } from "@macrostrat/column-views";
-import fetch from "node-fetch";
+import fetch from "cross-fetch";
 
 import { ColumnSummary } from "#/map/map-interface/app-state/handlers/columns";
 
-export async function onBeforeRender(pageContext) {
+export async function data(pageContext) {
   // `.page.server.js` files always run in Node.js; we could use SQL/ORM queries here.
   const col_id = pageContext.routeParams.column;
 
@@ -22,13 +22,8 @@ export async function onBeforeRender(pageContext) {
     projectID = parseInt(project_id);
   }
 
-  console.log(linkPrefix, project_id);
-
   /** This is a hack to make sure that all requisite data is on the table. */
   const responses = await Promise.all([
-    project_id == null
-      ? Promise.resolve(null)
-      : getAndUnwrap(apiV2Prefix + `/defs/projects?project_id=${project_id}`),
     getData(
       "columns",
       { col_id, project_id: projectID, format: "geojson" },
@@ -44,9 +39,8 @@ export async function onBeforeRender(pageContext) {
     ),
   ]);
 
-  const [projectData, columns, unitsLong]: [any, any, any] = responses;
+  const [columns, unitsLong]: [any, any] = responses;
 
-  console.log(columns);
   const col = columns?.[0];
 
   const columnInfo: ColumnSummary = {
@@ -56,22 +50,9 @@ export async function onBeforeRender(pageContext) {
   };
 
   return {
-    pageContext: {
-      exports: {
-        ...pageContext.exports,
-        title: columnInfo.col_name,
-      },
-      pageProps: {
-        columnInfo,
-        linkPrefix,
-        projectID,
-        project: projectData?.[0],
-      },
-      documentProps: {
-        // The page's <title>
-        title: columnInfo.col_name,
-      },
-    },
+    columnInfo,
+    linkPrefix,
+    projectID,
   };
 }
 

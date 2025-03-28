@@ -1,8 +1,8 @@
 import { ColumnPage } from "./column-inspector";
 import h from "@macrostrat/hyper";
-import { usePageProps } from "~/renderer/usePageProps";
+import { useData } from "vike-react/useData";
 
 export function Page() {
-  const props = usePageProps();
+  const props = useData();
   return h(ColumnPage, props);
 }
