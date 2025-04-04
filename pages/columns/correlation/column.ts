@@ -3,6 +3,7 @@ import {
   ColumnLayoutContext,
   ColumnProvider,
   SVG,
+  AgeAxis,
 } from "@macrostrat/column-components";
 import { Timescale, TimescaleOrientation } from "@macrostrat/timescale";
 import {
@@ -13,7 +14,6 @@ import {
 import classNames from "classnames";
 import { useContext, useMemo } from "react";
 import {
-  AgeAxis,
   CompositeUnitsColumn,
   getMixedUnitColor,
   TrackedLabeledUnit,
