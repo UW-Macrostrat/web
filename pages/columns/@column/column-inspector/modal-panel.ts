@@ -7,10 +7,8 @@ import {
 import { JSONView, ModalPanel, useKeyHandler } from "@macrostrat/ui-components";
 import h from "@macrostrat/hyper";
 
-function ModalUnitPanel(props) {
-  const { unitData, className } = props;
-  const selectedUnit = useSelectedUnit();
-  const selectUnit = useUnitSelectionDispatch();
+export function ModalUnitPanel(props) {
+  const { unitData, className, selectedUnit, onSelectUnit } = props;
 
   const ix = unitData?.findIndex(
     (unit) => unit.unit_id === selectedUnit?.unit_id
@@ -25,7 +23,7 @@ function ModalUnitPanel(props) {
     (event) => {
       const nextIx = keyMap[event.keyCode];
       if (nextIx == null || nextIx < 0 || nextIx >= unitData.length) return;
-      selectUnit(unitData[nextIx]);
+      onSelectUnit(unitData[nextIx].unit_id);
       event.stopPropagation();
     },
     [unitData, ix]
@@ -38,14 +36,14 @@ function ModalUnitPanel(props) {
       icon: "arrow-up",
       disabled: ix === 0,
       onClick() {
-        selectUnit(unitData[ix - 1]);
+        onSelectUnit(unitData[ix - 1]?.unit_id);
       },
     }),
     h(Button, {
       icon: "arrow-down",
       disabled: ix === unitData.length - 1,
       onClick() {
-        selectUnit(unitData[ix + 1]);
+        onSelectUnit(unitData[ix + 1]?.unit_id);
       },
     }),
   ]);
@@ -53,12 +51,12 @@ function ModalUnitPanel(props) {
   return h(UnitDetailsPanel, {
     unit: selectedUnit,
     onClose(event) {
-      selectUnit(null, null, event);
+      onSelectUnit(null);
     },
     className,
     actions,
     showLithologyProportions: true,
+    onSelectUnit,
+    columnUnits: unitData,
   });
 }
-
-export default ModalUnitPanel;

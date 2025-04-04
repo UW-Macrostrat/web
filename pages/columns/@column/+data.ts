@@ -39,14 +39,14 @@ export async function data(pageContext) {
     ),
   ]);
 
-  const [columns, unitsLong]: [any, any] = responses;
+  const [columns, units]: [any, any] = responses;
 
   const col = columns?.[0];
 
   const columnInfo: ColumnSummary = {
     ...col.properties,
     geometry: col.geometry,
-    units: preprocessUnits(unitsLong),
+    units,
   };
 
   return {

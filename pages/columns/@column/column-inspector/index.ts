@@ -1,40 +1,47 @@
 import {
   ColoredUnitComponent,
   MacrostratDataProvider,
-  UnitSelectionProvider,
-  useSelectedUnit,
-  useUnitSelectionDispatch,
   Column,
 } from "@macrostrat/column-views";
 import { hyperStyled } from "@macrostrat/hyper";
-import { getHashString, setHashString } from "@macrostrat/ui-components";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import { PatternProvider } from "~/_providers";
 import styles from "./index.module.sass";
 
+import { ModalUnitPanel } from "./modal-panel";
+
 import { PageBreadcrumbs } from "~/components";
 import { onDemand } from "~/_utils";
 
-const ModalUnitPanel = onDemand(() => import("./modal-panel"));
+const ColumnMap = onDemand(() => import("./map").then((mod) => mod.ColumnMap));
 
 const h = hyperStyled(styles);
-
-const ColumnMap = onDemand(() => import("./map").then((mod) => mod.ColumnMap));
 
 export function ColumnPage(props) {
   return h(
     MacrostratDataProvider,
     { baseURL: apiV2Prefix },
-    h(UnitSelectionProvider, h(PatternProvider, h(ColumnPageInner, props)))
+    h(PatternProvider, h(ColumnPageInner, props))
   );
 }
 
 function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
-  const { units, geometry } = columnInfo;
+  const { units } = columnInfo;
 
-  const selectedUnit = useUnitSelection(units);
-  const setSelectedUnit = useUnitSelectionDispatch();
+  const [selectedUnitID, setSelectedUnitID] = useState<number>(
+    getInitialSelectedUnitID
+  );
+
+  const selectedUnit = useMemo(() => {
+    return units.find((d) => d.unit_id == selectedUnitID);
+  }, [selectedUnitID]);
+
+  useEffect(() => {
+    setHashString(selectedUnitID);
+  }, [selectedUnitID]);
+
+  console.log("selectedUnit", units, selectedUnit);
 
   const lon = new Number(columnInfo.lng);
   const lat = new Number(columnInfo.lat);
@@ -69,14 +76,13 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
             ".",
           ]),
           h(Column, {
-            data: units,
+            units,
             unconformityLabels: true,
-            columnWidth: 350,
-            width: 600,
+            columnWidth: 300,
+            width: 450,
             unitComponent: ColoredUnitComponent,
-            unitComponentProps: {
-              nColumns: 5,
-            },
+            onUnitSelected: setSelectedUnitID,
+            selectedUnit: selectedUnitID,
           }),
         ]),
       ]),
@@ -88,42 +94,43 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
           linkPrefix,
           selectedColumn: columnInfo.col_id,
         }),
-        h(ModalUnitPanel, { unitData: units, className: "unit-details-panel" }),
+        h(ModalUnitPanel, {
+          unitData: units,
+          className: "unit-details-panel",
+          selectedUnit,
+          onSelectUnit: setSelectedUnitID,
+        }),
       ]),
     ]),
   ]);
 }
 
-function useUnitSelection(units): number {
-  /* Harmonize selected unit and column data providers
-    TODO: we could link the providers for selecting units and columns,
-    but for now we have just nested together current separate state elements
-  */
+function getHashParams() {
+  // Harvest selected unit ID from hash string
+  const currentHash = document.location.hash.substring(1);
+  return new URLSearchParams(currentHash);
+}
 
-  const initializedRef = useRef(false);
-  const initialized = initializedRef.current;
+function getInitialSelectedUnitID() {
+  // Harvest selected unit ID from hash string
+  const params = getHashParams();
+  const unit_id = params.get("unit");
+  // If no unit_id, return null
+  if (unit_id == null) return null;
+  const id = parseInt(unit_id);
+  if (isNaN(id)) return null;
+  return id;
+}
 
-  // TODO: this API should probably be moved into the column itself. We shouldn't need
-  // to use a context for this.
-  const selectedUnit = useSelectedUnit();
-  const setSelectedUnit = useUnitSelectionDispatch();
-
-  useEffect(() => {
-    // Set initial unit selection
-    if (units.length == 0) return;
-    if (!initialized) {
-      // Harvest selected unit ID from hash string
-      const unit_id =
-        getHashString(document.location.hash)?.unit ?? selectedUnit?.unit_id;
-
-      const unit = units.find((d) => d.unit_id == unit_id);
-      setSelectedUnit(unit);
-      initializedRef.current = true;
-    } else {
-      setHashString({ unit: selectedUnit?.unit_id });
-      setSelectedUnit(selectedUnit);
-    }
-  }, [units, selectedUnit]);
-
-  return selectedUnit?.unit_id;
+function setHashString(selectedUnitID: number) {
+  const params = getHashParams();
+  params.delete("unit");
+  if (selectedUnitID != null) {
+    params.set("unit", selectedUnitID.toString());
+  }
+  console.log(selectedUnitID, params);
+  const newHash = params.toString();
+  if (newHash !== document.location.hash) {
+    document.location.hash = newHash;
+  }
 }
