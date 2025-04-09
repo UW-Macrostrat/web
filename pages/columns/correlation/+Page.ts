@@ -109,9 +109,9 @@ function CorrelationDiagramWrapper(props: Omit<CorrelationChartProps, "data">) {
   );
 
   // selected unit management
-  const selectedUnit = useCorrelationDiagramStore(
-    (state) => state.selectedUnit
-  );
+  // const selectedUnit = useCorrelationDiagramStore(
+  //   (state) => state.selectedUnit
+  // );
   const onUnitSelected = useCorrelationDiagramStore(
     (state) => state.setSelectedUnit
   );
@@ -130,7 +130,7 @@ function CorrelationDiagramWrapper(props: Omit<CorrelationChartProps, "data">) {
       h(OverlaysProvider, [
         h(CorrelationChart, {
           data: columnUnits,
-          selectedUnit,
+          selectedUnit: null,
           onUnitSelected,
           showUnitPopover: !expanded,
           ...props,
