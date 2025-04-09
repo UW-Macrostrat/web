@@ -43,8 +43,8 @@ export function Page() {
     (state) => state.setSelectedUnit
   );
   useEffect(() => {
-    // Set the selected unit from the hash if available
-    if (hashData.unit) {
+    // Set the initial selected unit from the hash if available
+    if (hashData.unit != null) {
       setSelectedUnit(hashData.unit, undefined);
     }
   }, []);
@@ -56,9 +56,6 @@ export function Page() {
       {
         baseURL: apiV2Prefix,
         focusedLine: hashData.section,
-        onSelectColumns(cols, line) {
-          setHashStringForCorrelation({ section: line });
-        },
       },
       h(PageInner, { selectedUnit: hashData.unit })
     )
@@ -108,6 +105,15 @@ function CorrelationDiagramWrapper(props: Omit<CorrelationChartProps, "data">) {
     (state) => state.focusedColumns
   );
 
+  const focusedLine = useCorrelationMapStore((state) => state.focusedLine);
+  const selectedUnitID = useCorrelationDiagramStore(
+    (state) => state.selectedUnitID
+  );
+
+  useEffect(() => {
+    setHashStringForCorrelation({ section: focusedLine, unit: selectedUnitID });
+  }, [focusedLine, selectedUnitID]);
+
   // selected unit management
   // const selectedUnit = useCorrelationDiagramStore(
   //   (state) => state.selectedUnit
@@ -133,6 +139,7 @@ function CorrelationDiagramWrapper(props: Omit<CorrelationChartProps, "data">) {
           selectedUnit: null,
           onUnitSelected,
           showUnitPopover: !expanded,
+          collapseSmallUnconformities: true,
           ...props,
         }),
       ])

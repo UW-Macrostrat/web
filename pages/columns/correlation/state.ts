@@ -57,6 +57,7 @@ export const useCorrelationDiagramStore = create<CorrelationState>(
         unit_id: number,
         selectedUnit: UnitLong | null = undefined
       ) {
+        console.log("setSelectedUnit", unit_id, selectedUnit);
         set({ selectedUnitID: unit_id, selectedUnit });
       },
       setDisplayDensity(displayDensity: DisplayDensity) {
