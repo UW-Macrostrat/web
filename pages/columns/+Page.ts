@@ -8,7 +8,7 @@ export function Page() {
   return h(ColumnPage);
 }
 
-export function ColumnPage({ title = "Columns", linkPrefix = "/" }) {
+function ColumnPage({ title = "Columns", linkPrefix = "/" }) {
   const { columnGroups } = useData();
   return h(ContentPage, [
     h(AssistantLinks, [

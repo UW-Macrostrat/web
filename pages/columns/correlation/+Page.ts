@@ -11,42 +11,43 @@ import {
   Switch,
 } from "@blueprintjs/core";
 import { PageBreadcrumbs } from "~/components";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { DisplayDensity, useCorrelationDiagramStore } from "./state";
 import { PatternProvider } from "~/_providers";
 import { useRef } from "react";
 
 import { Button, OverlaysProvider } from "@blueprintjs/core";
-import { CorrelationChart, useCorrelationChartData } from "./correlation-chart";
-import { DarkModeProvider, ErrorBoundary } from "@macrostrat/ui-components";
+import { DarkModeProvider } from "@macrostrat/ui-components";
 import {
   ColumnCorrelationMap,
   ColumnCorrelationProvider,
   useCorrelationMapStore,
   MacrostratDataProvider,
-} from "@macrostrat/column-views";
-import {
-  LithologiesProvider,
+  fetchUnits,
   UnitDetailsPanel,
-  UnitSelectionProvider,
-  useSelectedUnit,
+  CorrelationChart,
+  CorrelationChartProps,
+  useMacrostratStore,
 } from "@macrostrat/column-views";
 import {
   getCorrelationHashParams,
   setHashStringForCorrelation,
-} from "#/columns/correlation/hash-string";
+} from "./hash-string";
+
+import { ErrorBoundary, useAsyncMemo } from "@macrostrat/ui-components";
 
 export function Page() {
   const hashData = useMemo(getCorrelationHashParams, []);
-  // const setSelectedUnit = useCorrelationDiagramStore(
-  //   (state) => state.setSelectedUnit
-  // );
-  // useEffect(() => {
-  //   // Set the selected unit from the hash if available
-  //   if (hashData.unit) {
-  //     setSelectedUnit(hashData.unit);
-  //   }
-  // }, []);
+
+  const setSelectedUnit = useCorrelationDiagramStore(
+    (state) => state.setSelectedUnit
+  );
+  useEffect(() => {
+    // Set the selected unit from the hash if available
+    if (hashData.unit) {
+      setSelectedUnit(hashData.unit, undefined);
+    }
+  }, []);
 
   return h(
     PageWrapper,
@@ -59,27 +60,12 @@ export function Page() {
           setHashStringForCorrelation({ section: line });
         },
       },
-      [h(PageInner)]
+      h(PageInner, { selectedUnit: hashData.unit })
     )
   );
 }
 
 export function PageInner() {
-  const setFocusedColumns = useCorrelationDiagramStore(
-    (s) => s.setSelectedColumns
-  );
-
-  // Sync focused columns with map
-  const focusedColumns = useCorrelationMapStore(
-    (state) => state.focusedColumns
-  );
-
-  useEffect(() => {
-    setFocusedColumns(focusedColumns);
-  }, [focusedColumns]);
-
-  //const selectColumns = useCorrelationDiagramStore((d) => d.selectColumns);
-
   const expanded = useCorrelationDiagramStore((state) => state.mapExpanded);
   const ref = useRef();
 
@@ -110,6 +96,46 @@ export function PageInner() {
           h(UnitDetailsExt),
         ]),
       ]
+    ),
+  ]);
+}
+
+function CorrelationDiagramWrapper(props: Omit<CorrelationChartProps, "data">) {
+  /** This state management is a bit too complicated, but it does kinda sorta work */
+
+  // Sync focused columns with map
+  const focusedColumns = useCorrelationMapStore(
+    (state) => state.focusedColumns
+  );
+
+  // selected unit management
+  const selectedUnit = useCorrelationDiagramStore(
+    (state) => state.selectedUnit
+  );
+  const onUnitSelected = useCorrelationDiagramStore(
+    (state) => state.setSelectedUnit
+  );
+
+  const expanded = useCorrelationDiagramStore((state) => state.mapExpanded);
+
+  const fetch = useMacrostratStore((state) => state.fetch);
+  const columnUnits = useAsyncMemo(async () => {
+    const col_ids = focusedColumns.map((col) => col.properties.col_id);
+    return await fetchUnits(col_ids, fetch);
+  }, [focusedColumns]);
+
+  return h("div.correlation-diagram", [
+    h(
+      ErrorBoundary,
+      h(OverlaysProvider, [
+        h(CorrelationChart, {
+          data: columnUnits,
+          selectedUnit,
+          onUnitSelected,
+          showUnitPopover: !expanded,
+          ...props,
+        }),
+      ])
     ),
   ]);
 }
@@ -172,30 +198,13 @@ const PageWrapper = compose(
   DarkModeProvider,
   PatternProvider,
   OverlaysProvider,
-  C(MacrostratDataProvider, { baseURL: apiV2Prefix }),
-  UnitSelectionManager
+  C(MacrostratDataProvider, { baseURL: apiV2Prefix })
 );
 
-function UnitSelectionManager({ children }) {
+function UnitDetailsExt() {
   const selectedUnit = useCorrelationDiagramStore(
     (state) => state.selectedUnit
   );
-  const setSelectedUnit = useCorrelationDiagramStore(
-    (state) => state.setSelectedUnit
-  );
-
-  return h(
-    UnitSelectionProvider,
-    {
-      unit: selectedUnit,
-      setUnit: setSelectedUnit,
-    },
-    children
-  );
-}
-
-function UnitDetailsExt() {
-  const selectedUnit = useSelectedUnit();
   const expanded = useCorrelationDiagramStore((state) => state.mapExpanded);
   const setSelectedUnit = useCorrelationDiagramStore(
     (state) => state.setSelectedUnit
@@ -210,17 +219,6 @@ function UnitDetailsExt() {
       unit: selectedUnit,
       onClose: () => setSelectedUnit(null),
     }),
-  ]);
-}
-
-function CorrelationDiagramWrapper() {
-  const chartData = useCorrelationChartData();
-
-  return h("div.correlation-diagram", [
-    h(
-      ErrorBoundary,
-      h(OverlaysProvider, [h(CorrelationChart, { data: chartData })])
-    ),
   ]);
 }
 
