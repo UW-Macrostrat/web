@@ -1,12 +1,17 @@
 /** Correlation chart */
-import { SectionInfo } from "@macrostrat/column-views";
+import {
+  PrepareColumnOptions,
+  prepareColumnUnits,
+  SectionInfo,
+} from "@macrostrat/column-views";
 import { Column, TimescaleColumn } from "./column";
 import { UnitLong } from "@macrostrat/api-types";
-import { GapBoundPackage, SectionRenderData, AgeComparable } from "./types";
+import { AgeComparable, GapBoundPackage, SectionRenderData } from "./types";
 import { DisplayDensity, useCorrelationDiagramStore } from "./state";
 import { mergeAgeRanges } from "@macrostrat-web/utility-functions";
 import styles from "./main.module.sass";
 import hyper from "@macrostrat/hyper";
+import { ColumnAxisType } from "../../../../web-components/packages/column-components/src";
 
 const h = hyper.styled(styles);
 
@@ -269,8 +274,25 @@ function buildColumnData(
   const { ageMode = AgeScaleMode.Continuous, targetUnitHeight = 10 } =
     settings ?? {};
 
+  const opts: PrepareColumnOptions = {
+    axisType: ColumnAxisType.AGE,
+  };
+
+  // Preprocess column data
+  const columns1 = columns.map((d) => {
+    const { columnID, units } = d;
+    return {
+      columnID,
+      ...prepareColumnUnits(units, opts),
+    };
+  });
+
+  console.log(columns1);
+
+  console.log(columns1);
+
   // Create a single gap-bound package for each column
-  const units = columns.map((d) => d.units);
+  const units = columns1.map((d) => d.units);
   const [b_age, t_age] = findEncompassingScaleBounds(units.flat());
 
   if (ageMode == AgeScaleMode.Continuous) {
@@ -279,7 +301,7 @@ function buildColumnData(
     const targetHeight = targetUnitHeight * maxNUnits;
     const pixelScale = Math.ceil(targetHeight / dAge);
 
-    const columnData: SectionRenderData[][] = columns.map((d) => {
+    const columnData: SectionRenderData[][] = columns1.map((d) => {
       return [
         {
           b_age,

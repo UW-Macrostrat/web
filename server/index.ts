@@ -92,8 +92,6 @@ async function startServer() {
     "assets"
   );
 
-  app.use("/assets/geologic-patterns", sirv(fgdcPatterns));
-
   //
   if (isProduction) {
     app.use(sirv(`${root}/dist/client`));
@@ -102,6 +100,10 @@ async function startServer() {
     // Ideally we'd be able to remove this fix.
     app.use("/cesium", sirv(`${root}/dist/cesium`));
   } else {
+    // In development, we want to serve geologic patterns locally.
+    // Otherwise, we'll handle this with a web server
+    app.use("/assets/geologic-patterns", sirv(fgdcPatterns));
+
     /**
      * For localhost development: create a proxy to the API server to enable
      * API requests with the appropriate authorization cookies or headers.

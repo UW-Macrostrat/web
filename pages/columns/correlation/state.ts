@@ -99,9 +99,8 @@ type ColumnData = {
 };
 
 async function fetchUnitsForColumn(col_id: number): Promise<ColumnData> {
-  const res = await runColumnQuery({ col_id }, null);
-
-  return { columnID: col_id, units: preprocessUnits(res) };
+  const units = await runColumnQuery({ col_id }, null);
+  return { columnID: col_id, units };
 }
 
 export async function fetchAllColumnUnits(

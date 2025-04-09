@@ -4,10 +4,11 @@ import {
   Column,
 } from "@macrostrat/column-views";
 import { hyperStyled } from "@macrostrat/hyper";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import { PatternProvider } from "~/_providers";
 import styles from "./index.module.sass";
+import { navigate } from "vike/client/router";
 
 import { ModalUnitPanel } from "./modal-panel";
 
@@ -29,6 +30,8 @@ export function ColumnPage(props) {
 function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
   const { units } = columnInfo;
 
+  console.log("columnInfo", columnInfo);
+
   const [selectedUnitID, setSelectedUnitID] = useState<number>(
     getInitialSelectedUnitID
   );
@@ -46,6 +49,18 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
   const lon = new Number(columnInfo.lng);
   const lat = new Number(columnInfo.lat);
   const zoom = 7;
+
+  const onSelectColumn = useCallback(
+    (col_id: number) => {
+      // do nothing
+      // We could probably find a more elegant way to do this
+      setSelectedUnitID(null);
+      navigate(linkPrefix + `columns/${col_id}`, {
+        overwriteLastHistoryEntry: true,
+      });
+    },
+    [setSelectedUnitID]
+  );
 
   return h("div.page-container", [
     h("div.main", [
@@ -91,8 +106,8 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
           className: "column-map",
           inProcess: true,
           projectID,
-          linkPrefix,
           selectedColumn: columnInfo.col_id,
+          onSelectColumn,
         }),
         h(ModalUnitPanel, {
           unitData: units,

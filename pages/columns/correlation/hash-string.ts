@@ -34,8 +34,6 @@ function parseSectionFromHash(section: any): LineString | null {
     return null;
   }
 
-  console.log(section);
-
   try {
     let coords = section.split(" ").map(parseCoordinates);
     return {
