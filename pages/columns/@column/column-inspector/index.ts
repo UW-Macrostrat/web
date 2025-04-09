@@ -30,8 +30,6 @@ export function ColumnPage(props) {
 function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
   const { units } = columnInfo;
 
-  console.log("columnInfo", columnInfo);
-
   const [selectedUnitID, setSelectedUnitID] = useState<number>(
     getInitialSelectedUnitID
   );
@@ -44,7 +42,7 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
     setHashString(selectedUnitID);
   }, [selectedUnitID]);
 
-  console.log("selectedUnit", units, selectedUnit);
+  console.log(columnInfo);
 
   const lon = new Number(columnInfo.lng);
   const lat = new Number(columnInfo.lat);
@@ -92,10 +90,11 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
           ]),
           h(Column, {
             units,
+            unitComponent: ColoredUnitComponent,
             unconformityLabels: true,
+            collapseSmallUnconformities: true,
             columnWidth: 300,
             width: 450,
-            unitComponent: ColoredUnitComponent,
             onUnitSelected: setSelectedUnitID,
             selectedUnit: selectedUnitID,
           }),
