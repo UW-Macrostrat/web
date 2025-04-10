@@ -1,20 +1,23 @@
 import { geoCentroid, geoStereographic, geoNaturalEarth1 } from "d3-geo";
-import { ResizableMapFrame } from "@macrostrat/column-views";
+import {
+  ResizableMapFrame,
+  useMacrostratColumns,
+} from "@macrostrat/column-views";
 import {
   ColumnKeyboardNavigation,
   ColumnFeatures,
-  useColumnData,
+  useMacrostratColumns,
   CurrentColumn,
 } from "@macrostrat/column-views";
 import { useMemo, forwardRef } from "react";
-import { Tabs, Tab } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import styles from "./age-model.module.styl";
+
 const h = hyper.styled(styles);
 
-function useFilteredColumns({ apiRoute, status_code, project_id }) {
+function useFilteredColumns({ project_id }) {
   // Filter columns by whether they contain any units
-  const features = useColumnData({ apiRoute, status_code, project_id });
+  const features = useMacrostratColumns(project_id, true);
 
   return useMemo(() => {
     let completedColumns = [];
@@ -35,7 +38,7 @@ const ColumnMapView = forwardRef((props, ref) => {
   const { currentColumn, setCurrentColumn, children, ...rest } = props;
   const center = geoCentroid(currentColumn);
 
-  const { apiRoute = "/columns", status_code, project_id, color } = props;
+  const { project_id, color } = props;
 
   const col_id = currentColumn?.properties?.col_id;
 

@@ -96,7 +96,6 @@ function ColumnMapPanel(props) {
   return h(ColumnMap, {
     margin: 0,
     color: "dodgerblue",
-    apiRoute: "/defs/columns",
     filterColumns(col) {
       return col.properties.t_units > 0;
     },

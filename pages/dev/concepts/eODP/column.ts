@@ -5,24 +5,20 @@ import {
   ColumnLayoutContext,
   ColumnAxisType,
   NotesColumn,
+  AgeAxis,
 } from "@macrostrat/column-components";
 import { useContext } from "react";
 import {
   AnnotatedUnitsColumn,
-  AgeAxis,
   MacrostratColumnProvider,
 } from "@macrostrat/column-views";
 import { IUnit } from "@macrostrat/column-views";
-import {
-  TrackedLabeledUnit,
-  getUnitHeightRange,
-} from "@macrostrat/column-views";
+import { TrackedLabeledUnit } from "@macrostrat/column-views";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { useColumnNav } from "@macrostrat/column-views";
 import {
   AgeModelColumn,
   AgeModelDataset,
-  ReconstructedColumnAgeDataset,
   useColumnAgeModel,
 } from "./age-model-column";
 // import "@macrostrat/timescale/dist/timescale.css";

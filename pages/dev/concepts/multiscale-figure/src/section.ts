@@ -1,11 +1,6 @@
 import h from "@macrostrat/hyper";
+import { ColumnSVG, useColumn, AgeAxis } from "@macrostrat/column-components";
 import {
-  ColumnProvider,
-  ColumnSVG,
-  useColumn,
-} from "@macrostrat/column-components";
-import {
-  AgeAxis,
   IUnit,
   preprocessUnits,
   MacrostratColumnProvider,
