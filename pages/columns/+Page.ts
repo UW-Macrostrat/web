@@ -4,11 +4,11 @@ import { PageHeader, Link, AssistantLinks, DevLinkButton } from "~/components";
 import { AnchorButton, Tag } from "@blueprintjs/core";
 import { useData } from "vike-react/useData";
 
-export function Page() {
-  return h(ColumnPage);
+export function Page(props) {
+  return h(ColumnListPage, props);
 }
 
-function ColumnPage({ title = "Columns", linkPrefix = "/" }) {
+function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const { columnGroups } = useData();
   return h(ContentPage, [
     h(AssistantLinks, [

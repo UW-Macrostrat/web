@@ -51,6 +51,7 @@ export function ModalUnitPanel(props) {
   return h(UnitDetailsPanel, {
     unit: selectedUnit,
     onClose(event) {
+      console.log("close");
       onSelectUnit(null);
     },
     className,

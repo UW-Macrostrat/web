@@ -1,10 +1,10 @@
 import h from "@macrostrat/hyper";
-import { ColumnPage } from "#/columns/+Page";
+import { Page as ColumnListPage } from "#/columns/+Page";
 import { useData } from "vike-react/useData";
 
 export function Page() {
   const { columnGroups, project } = useData();
-  return h(ColumnPage, {
+  return h(ColumnListPage, {
     columnGroups,
     title: project.project,
     linkPrefix: `/projects/${project.project_id}/`,

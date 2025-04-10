@@ -21,13 +21,18 @@
   min-width: 200px
   width: 40%
   max-width: 500px
-  height: calc(100vh - 12em)
+  height: 100vh
   position: sticky
   top: 0
   display: flex
   flex-direction: column
   padding: 2em 0
+
+.right-column-boxes
+  display: flex
+  flex-direction: column
   gap: 2em
+
 
 .column-view
   margin: 0 4em 4em
@@ -97,3 +102,7 @@ rect.selection-overlay
 .unit-details-panel
   flex: 1
   min-height: 0
+
+.column-map, .unit-details-panel
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3)
+  border-radius: 6px

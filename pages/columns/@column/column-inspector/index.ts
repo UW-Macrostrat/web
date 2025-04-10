@@ -28,6 +28,7 @@ export function ColumnPage(props) {
 }
 
 function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
+  console.log(columnInfo);
   const { units } = columnInfo;
 
   const [selectedUnitID, setSelectedUnitID] = useState<number>(
@@ -35,6 +36,7 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
   );
 
   const selectedUnit = useMemo(() => {
+    if (selectedUnitID == null) return null;
     return units.find((d) => d.unit_id == selectedUnitID);
   }, [selectedUnitID]);
 
@@ -101,19 +103,21 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
         ]),
       ]),
       h("div.right-column", [
-        h(ColumnMap, {
-          className: "column-map",
-          inProcess: true,
-          projectID,
-          selectedColumn: columnInfo.col_id,
-          onSelectColumn,
-        }),
-        h(ModalUnitPanel, {
-          unitData: units,
-          className: "unit-details-panel",
-          selectedUnit,
-          onSelectUnit: setSelectedUnitID,
-        }),
+        h("div.right-column-boxes", [
+          h(ColumnMap, {
+            className: "column-map",
+            inProcess: true,
+            projectID,
+            selectedColumn: columnInfo.col_id,
+            onSelectColumn,
+          }),
+          h(ModalUnitPanel, {
+            unitData: units,
+            className: "unit-details-panel",
+            selectedUnit,
+            onSelectUnit: setSelectedUnitID,
+          }),
+        ]),
       ]),
     ]),
   ]);
