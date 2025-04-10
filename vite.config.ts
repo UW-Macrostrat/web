@@ -48,18 +48,19 @@ function hyperStyles(): Plugin {
 
 // Exclude local development dependencies from optimization
 let exclude = [];
-for (const [key, value] of Object.entries(
-  pkg.resolutions as Record<string, string>
-)) {
-  if (
-    value.startsWith("link:") ||
-    value.startsWith("file:") ||
-    value.startsWith("portal:")
-  ) {
-    exclude.push(key);
+if ("resolutions" in pkg) {
+  for (const [key, value] of Object.entries(
+    pkg.resolutions as Record<string, string>
+  )) {
+    if (
+      value.startsWith("link:") ||
+      value.startsWith("file:") ||
+      value.startsWith("portal:")
+    ) {
+      exclude.push(key);
+    }
   }
 }
-
 export default defineConfig({
   //root: path.resolve("./src"),
   resolve: {
