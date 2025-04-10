@@ -74,6 +74,8 @@ export default defineConfig({
       "react-dom",
       "@macrostrat/column-components",
       "@macrostrat/ui-components",
+      "@macrostrat/column-views",
+      "@macrostrat/mapbox-react",
     ],
   },
   plugins: [

@@ -1,6 +1,7 @@
 import h from "@macrostrat/hyper";
 import { ColumnNavigationMap } from "@macrostrat/column-views";
 import { mapboxAccessToken } from "@macrostrat-web/settings";
+import { ErrorBoundary } from "@macrostrat/ui-components";
 
 export function ColumnMap({
   projectID,
@@ -9,12 +10,15 @@ export function ColumnMap({
   selectedColumn,
   onSelectColumn,
 }) {
-  return h(ColumnNavigationMap, {
-    className,
-    inProcess,
-    projectID,
-    accessToken: mapboxAccessToken,
-    selectedColumn,
-    onSelectColumn,
-  });
+  return h(
+    ErrorBoundary,
+    h(ColumnNavigationMap, {
+      className,
+      inProcess,
+      projectID,
+      accessToken: mapboxAccessToken,
+      selectedColumn,
+      onSelectColumn,
+    })
+  );
 }
