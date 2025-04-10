@@ -46,6 +46,21 @@ function hyperStyles(): Plugin {
   };
 }
 
+// Exclude local development dependencies from optimization
+let exclude = [];
+if ("resolutions" in pkg) {
+  for (const [key, value] of Object.entries(
+    pkg.resolutions as Record<string, string>
+  )) {
+    if (
+      value.startsWith("link:") ||
+      value.startsWith("file:") ||
+      value.startsWith("portal:")
+    ) {
+      exclude.push(key);
+    }
+  }
+}
 export default defineConfig({
   //root: path.resolve("./src"),
   resolve: {
@@ -54,7 +69,14 @@ export default defineConfig({
       "~": path.resolve("./src"),
       "#": path.resolve("./pages"),
     },
-    dedupe: ["react", "react-dom", "@macrostrat/column-components"],
+    dedupe: [
+      "react",
+      "react-dom",
+      "@macrostrat/column-components",
+      "@macrostrat/ui-components",
+      "@macrostrat/column-views",
+      "@macrostrat/mapbox-react",
+    ],
   },
   plugins: [
     react(),
@@ -62,7 +84,7 @@ export default defineConfig({
     // Fix broken imports in non-ESM packages. We should endeavor to move away from these
     // dependencies if they are unmaintained.
     cjsInterop({
-      dependencies: ["react-images", "labella", "react-color"],
+      dependencies: ["react-images", "labella", "react-color", "mapbox-gl"],
     }),
     textToolchain({
       contentDir: path.resolve(__dirname, "content"),
@@ -105,6 +127,9 @@ export default defineConfig({
       "@macrostrat/feedback-components",
       "@macrostrat/timescale",
     ],
+    resolve: {
+      conditions: ["source"],
+    },
   },
   css: {
     preprocessorOptions: {
@@ -112,5 +137,8 @@ export default defineConfig({
         api: "modern-compiler",
       },
     },
+  },
+  optimizeDeps: {
+    exclude,
   },
 });

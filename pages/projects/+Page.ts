@@ -1,10 +1,10 @@
 import h from "@macrostrat/hyper";
 import { ContentPage } from "~/layouts";
 import { PageHeader, LinkCard } from "~/components";
-import { usePageProps } from "~/renderer/usePageProps";
+import { useData } from "vike-react/useData";
 
 export function Page() {
-  const { projects } = usePageProps();
+  const { projects } = useData();
   return h(ContentPage, [
     h(PageHeader, { title: "Projects" }),
     projects.map((d) => h(ProjectItem, { data: d, key: d.project_id })),

@@ -2,30 +2,31 @@
 
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import { preprocessUnits } from "@macrostrat/column-views";
-import fetch from "node-fetch";
+import fetch from "cross-fetch";
 
 import { ColumnSummary } from "#/map/map-interface/app-state/handlers/columns";
-import { fetchAPIData } from "#/columns/utils";
 
-export async function onBeforeRender(pageContext) {
+export async function data(pageContext) {
   // `.page.server.js` files always run in Node.js; we could use SQL/ORM queries here.
   const col_id = pageContext.routeParams.column;
 
   // In cases where we are in a project context, we need to fetch the project data
-  const project_id = pageContext.routeParams.project ?? 1;
+  const project_id = pageContext.routeParams.project;
 
   // https://v2.macrostrat.org/api/v2/columns?col_id=3&response=long
 
   const linkPrefix = project_id == null ? "/" : `/projects/${project_id}/`;
 
+  let projectID = null;
+  if (project_id != null) {
+    projectID = parseInt(project_id);
+  }
+
   /** This is a hack to make sure that all requisite data is on the table. */
   const responses = await Promise.all([
-    project_id == null
-      ? Promise.resolve(null)
-      : getAndUnwrap(apiV2Prefix + `/defs/projects?project_id=${project_id}`),
     getData(
       "columns",
-      { col_id, project_id, format: "geojson" },
+      { col_id, project_id: projectID, format: "geojson" },
       (res) => res?.features
     ),
     getData(
@@ -38,36 +39,25 @@ export async function onBeforeRender(pageContext) {
     ),
   ]);
 
-  const [projectData, columns, unitsLong]: [any, any, any] = responses;
+  const [columns, units]: [any, any] = responses;
 
   const col = columns?.[0];
 
   const columnInfo: ColumnSummary = {
     ...col.properties,
     geometry: col.geometry,
-    units: preprocessUnits(unitsLong),
+    units,
   };
 
   return {
-    pageContext: {
-      exports: {
-        ...pageContext.exports,
-        title: columnInfo.col_name,
-      },
-      pageProps: {
-        columnInfo,
-        linkPrefix,
-        project: projectData?.[0],
-      },
-      documentProps: {
-        // The page's <title>
-        title: columnInfo.col_name,
-      },
-    },
+    columnInfo,
+    linkPrefix,
+    projectID,
   };
 }
 
 async function getAndUnwrap<T>(url: string): Promise<T> {
+  console.log("Fetching", url);
   const res = await fetch(url);
   const res1 = await res.json();
   return res1.success.data;
@@ -101,7 +91,7 @@ function assembleURL(
   entity,
   {
     col_id,
-    project_id = 1,
+    project_id,
     status_code = "active",
     ...rest
   }: {
@@ -114,10 +104,13 @@ function assembleURL(
   const base = apiV2Prefix + "/" + entity;
   let params = new URLSearchParams({
     col_id: col_id.toString(),
-    project_id: project_id.toString(),
     response: "long",
     status_code,
     ...rest,
   });
+  if (project_id != null) {
+    params.set("project_id", project_id.toString());
+  }
+
   return `${base}?${params}`;
 }

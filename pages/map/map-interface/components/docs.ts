@@ -4,7 +4,7 @@ import hyper from "@macrostrat/hyper";
 import classNames from "classnames";
 import { useInView } from "react-intersection-observer";
 import { HashLink } from "react-router-hash-link";
-import { joinURL } from "#/map/map-interface/utils";
+import { joinURL } from "@macrostrat/ui-components";
 import styles from "./docs.module.styl";
 
 const h = hyper.styled(styles);

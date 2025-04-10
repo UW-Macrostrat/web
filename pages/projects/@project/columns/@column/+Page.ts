@@ -1,8 +1,8 @@
-import ColumnPage from "#/columns/@column/column-inspector";
+import { ColumnPage } from "#/columns/@column/column-inspector";
 import h from "@macrostrat/hyper";
-import { usePageProps } from "~/renderer/usePageProps";
+import { useData } from "vike-react/useData";
 
 export function Page() {
-  const { columnInfo, linkPrefix } = usePageProps();
-  return h(ColumnPage, { columnInfo, linkPrefix });
+  const props = useData();
+  return h(ColumnPage, props);
 }

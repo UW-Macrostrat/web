@@ -1,44 +1,76 @@
-import { MapView } from "@macrostrat/map-interface";
-import {
-  MapboxMapProvider,
-  useMapClickHandler,
-  useMapEaseTo,
-  useMapStyleOperator,
-} from "@macrostrat/mapbox-react";
-import { LngLatBounds } from "mapbox-gl";
 import { FullscreenPage } from "~/layouts";
+import { C } from "@macrostrat/hyper";
 import h from "./main.module.sass";
-import { compose, C } from "@macrostrat/hyper";
-import { baseMapURL, mapboxAccessToken } from "@macrostrat-web/settings";
-import { PageBreadcrumbs } from "~/components";
-import { Feature, FeatureCollection, LineString, Point } from "geojson";
-import { useEffect, useMemo } from "react";
-import { setGeoJSON } from "@macrostrat/mapbox-utils";
-import { useCorrelationDiagramStore } from "./state";
-import { PatternProvider } from "~/_providers";
-
-import { buildCrossSectionLayers } from "~/_utils/map-layers";
-import { Button, OverlaysProvider } from "@blueprintjs/core";
-import classNames from "classnames";
-import { CorrelationChart } from "./correlation-chart";
-import { DarkModeProvider } from "@macrostrat/ui-components";
-import { ErrorBoundary } from "@macrostrat/ui-components";
+import { compose } from "@macrostrat/hyper";
+import { mapboxAccessToken, apiV2Prefix } from "@macrostrat-web/settings";
 import {
-  UnitSelectionProvider,
-  useSelectedUnit,
+  Alignment,
+  FormGroup,
+  Popover,
+  SegmentedControl,
+  Switch,
+} from "@blueprintjs/core";
+import { PageBreadcrumbs } from "~/components";
+import { useEffect, useMemo } from "react";
+import { DisplayDensity, useCorrelationDiagramStore } from "./state";
+import { PatternProvider } from "~/_providers";
+import { useRef } from "react";
+
+import { Button, OverlaysProvider } from "@blueprintjs/core";
+import { DarkModeProvider } from "@macrostrat/ui-components";
+import {
+  ColumnCorrelationMap,
+  ColumnCorrelationProvider,
+  useCorrelationMapStore,
+  MacrostratDataProvider,
+  fetchUnits,
+  UnitDetailsPanel,
+  CorrelationChart,
+  CorrelationChartProps,
+  useMacrostratStore,
 } from "@macrostrat/column-views";
-import { UnitDescription } from "#/columns/correlation/column";
+import {
+  getCorrelationHashParams,
+  setHashStringForCorrelation,
+} from "./hash-string";
+
+import { ErrorBoundary, useAsyncMemo } from "@macrostrat/ui-components";
 
 export function Page() {
-  const startup = useCorrelationDiagramStore((state) => state.startup);
+  const hashData = useMemo(getCorrelationHashParams, []);
+
+  const setSelectedUnit = useCorrelationDiagramStore(
+    (state) => state.setSelectedUnit
+  );
   useEffect(() => {
-    startup();
+    // Set the initial selected unit from the hash if available
+    if (hashData.unit != null) {
+      setSelectedUnit(hashData.unit, undefined);
+    }
   }, []);
 
-  const expanded = useCorrelationDiagramStore((state) => state.mapExpanded);
+  return h(
+    PageWrapper,
+    h(
+      ColumnCorrelationProvider,
+      {
+        baseURL: apiV2Prefix,
+        focusedLine: hashData.section,
+      },
+      h(PageInner, { selectedUnit: hashData.unit })
+    )
+  );
+}
 
-  return h(PageWrapper, [
-    h("header", [h(PageBreadcrumbs)]),
+export function PageInner() {
+  const expanded = useCorrelationDiagramStore((state) => state.mapExpanded);
+  const ref = useRef();
+
+  return h("div.main-panel", { ref }, [
+    h("header.page-header", [
+      h(PageBreadcrumbs),
+      h(CorrelationSettingsPopup, { boundary: ref.current }),
+    ]),
     h(
       "div.diagram-container",
       { className: expanded ? "map-expanded" : "map-inset" },
@@ -47,40 +79,139 @@ export function Page() {
           h(CorrelationDiagramWrapper),
           h("div.overlay-safe-area"),
         ]),
-        h("div.assistant", [h(InsetMap), h(UnitDetailsPanel)]),
+        h("div.assistant", [
+          h("div.column-selection-map", [
+            h(ColumnCorrelationMap, {
+              accessToken: mapboxAccessToken,
+              className: "correlation-map",
+              apiBaseURL: apiV2Prefix,
+              showLogo: false,
+              padding: expanded ? 100 : 20,
+            }),
+            h(MapExpandedButton),
+          ]),
+          h(UnitDetailsExt),
+        ]),
       ]
     ),
   ]);
+}
+
+function CorrelationDiagramWrapper(props: Omit<CorrelationChartProps, "data">) {
+  /** This state management is a bit too complicated, but it does kinda sorta work */
+
+  // Sync focused columns with map
+  const focusedColumns = useCorrelationMapStore(
+    (state) => state.focusedColumns
+  );
+
+  const focusedLine = useCorrelationMapStore((state) => state.focusedLine);
+  const selectedUnitID = useCorrelationDiagramStore(
+    (state) => state.selectedUnitID
+  );
+
+  useEffect(() => {
+    setHashStringForCorrelation({ section: focusedLine, unit: selectedUnitID });
+  }, [focusedLine, selectedUnitID]);
+
+  // selected unit management
+  // const selectedUnit = useCorrelationDiagramStore(
+  //   (state) => state.selectedUnit
+  // );
+  const onUnitSelected = useCorrelationDiagramStore(
+    (state) => state.setSelectedUnit
+  );
+
+  const expanded = useCorrelationDiagramStore((state) => state.mapExpanded);
+
+  const fetch = useMacrostratStore((state) => state.fetch);
+  const columnUnits = useAsyncMemo(async () => {
+    const col_ids = focusedColumns.map((col) => col.properties.col_id);
+    return await fetchUnits(col_ids, fetch);
+  }, [focusedColumns]);
+
+  return h("div.correlation-diagram", [
+    h(
+      ErrorBoundary,
+      h(OverlaysProvider, [
+        h(CorrelationChart, {
+          data: columnUnits,
+          selectedUnit: null,
+          onUnitSelected,
+          showUnitPopover: !expanded,
+          collapseSmallUnconformities: true,
+          ...props,
+        }),
+      ])
+    ),
+  ]);
+}
+
+function CorrelationSettings() {
+  const colorize = useCorrelationDiagramStore((d) => d.colorizeUnits);
+  const applySettings = useCorrelationDiagramStore((d) => d.applySettings);
+
+  return h("div.correlation-settings.settings", [
+    h("h3", "Settings"),
+    h(DisplayDensitySelector),
+    h(Switch, {
+      label: "Colorize",
+      isOn: colorize,
+      alignIndicator: Alignment.RIGHT,
+      onChange() {
+        applySettings({ colorizeUnits: !colorize });
+      },
+    }),
+  ]);
+}
+
+function DisplayDensitySelector() {
+  const displayDensity = useCorrelationDiagramStore((d) => d.displayDensity);
+  const applySettings = useCorrelationDiagramStore((d) => d.applySettings);
+  const options = [
+    { label: "Low", value: DisplayDensity.LOW },
+    { label: "Medium", value: DisplayDensity.MEDIUM },
+    { label: "High", value: DisplayDensity.HIGH },
+  ];
+
+  return h(
+    FormGroup,
+    { label: "Display density" },
+    h(SegmentedControl, {
+      options,
+      value: displayDensity,
+      onValueChange(value) {
+        applySettings({ displayDensity: value });
+      },
+      small: true,
+      defaultValue: DisplayDensity.MEDIUM,
+    })
+  );
+}
+
+function CorrelationSettingsPopup({ boundary }) {
+  console.log("Boundary ref", boundary);
+  return h(
+    Popover,
+    {
+      content: h(CorrelationSettings),
+    },
+    h(Button, { icon: "settings", minimal: true })
+  );
 }
 
 const PageWrapper = compose(
   FullscreenPage,
   DarkModeProvider,
   PatternProvider,
-  UnitSelectionManager,
-  ({ children }) => h("div.main-panel", children)
+  OverlaysProvider,
+  C(MacrostratDataProvider, { baseURL: apiV2Prefix })
 );
 
-function UnitSelectionManager({ children }) {
+function UnitDetailsExt() {
   const selectedUnit = useCorrelationDiagramStore(
     (state) => state.selectedUnit
   );
-  const setSelectedUnit = useCorrelationDiagramStore(
-    (state) => state.setSelectedUnit
-  );
-
-  return h(
-    UnitSelectionProvider,
-    {
-      unit: selectedUnit,
-      setUnit: setSelectedUnit,
-    },
-    children
-  );
-}
-
-function UnitDetailsPanel() {
-  const selectedUnit = useSelectedUnit();
   const expanded = useCorrelationDiagramStore((state) => state.mapExpanded);
   const setSelectedUnit = useCorrelationDiagramStore(
     (state) => state.setSelectedUnit
@@ -91,53 +222,11 @@ function UnitDetailsPanel() {
   }
 
   return h("div.unit-details-panel", [
-    h(UnitDescription, {
+    h(UnitDetailsPanel, {
       unit: selectedUnit,
       onClose: () => setSelectedUnit(null),
     }),
   ]);
-}
-
-function CorrelationDiagramWrapper() {
-  const chartData = useCorrelationDiagramStore((state) => state.chartData);
-
-  return h("div.correlation-diagram", [
-    h(
-      ErrorBoundary,
-      h(OverlaysProvider, [h(CorrelationChart, { data: chartData })])
-    ),
-  ]);
-}
-
-function InsetMap() {
-  const focusedLine = useCorrelationDiagramStore((state) => state.focusedLine);
-  const columns = useCorrelationDiagramStore((state) => state.columns);
-  const expanded = useCorrelationDiagramStore((state) => state.mapExpanded);
-
-  const padding = expanded ? 100 : 20;
-
-  return h(
-    "div.column-selection-map",
-    { className: classNames({ expanded }) },
-    [
-      h(MapboxMapProvider, [
-        h(MapExpandedButton),
-        h(
-          MapView,
-          {
-            style: baseMapURL,
-            accessToken: mapboxAccessToken,
-          },
-          [
-            h(MapClickHandler),
-            h(SectionLine, { focusedLine, padding }),
-            h(ColumnsLayer, { columns }),
-            h(SelectedColumnsLayer),
-          ]
-        ),
-      ]),
-    ]
-  );
 }
 
 function MapExpandedButton() {
@@ -153,187 +242,4 @@ function MapExpandedButton() {
     icon,
     onClick: toggleMapExpanded,
   });
-}
-
-function MapClickHandler() {
-  const onClickMap = useCorrelationDiagramStore((state) => state.onClickMap);
-
-  useMapClickHandler(
-    (e) => {
-      onClickMap(e, { type: "Point", coordinates: e.lngLat.toArray() });
-    },
-    [onClickMap]
-  );
-
-  return null;
-}
-
-function SelectedColumnsLayer({ columns, focusedLine }) {
-  const focusedColumns = useCorrelationDiagramStore(
-    (state) => state.focusedColumns
-  );
-  useMapStyleOperator(
-    (map) => {
-      let features = focusedColumns;
-
-      const data: FeatureCollection = {
-        type: "FeatureCollection",
-        features,
-      };
-
-      const columnCentroidLine: Feature = {
-        type: "Feature",
-        geometry: {
-          type: "LineString",
-          coordinates: features.map(
-            (col) => col.properties.centroid.geometry.coordinates
-          ),
-        },
-        properties: {},
-      };
-
-      setGeoJSON(map, "selected-columns", data);
-      setGeoJSON(map, "selected-column-centroids", {
-        type: "FeatureCollection",
-        features: [columnCentroidLine],
-      });
-    },
-    [focusedColumns]
-  );
-  return null;
-}
-
-function ColumnsLayer({ columns, enabled = true }) {
-  useMapStyleOperator(
-    (map) => {
-      if (columns == null) {
-        return;
-      }
-      const data: FeatureCollection = {
-        type: "FeatureCollection",
-        features: columns,
-      };
-      const sourceID = "columns";
-      setGeoJSON(map, sourceID, data);
-
-      const columnLayers = buildColumnLayers(sourceID);
-      for (let layer of columnLayers) {
-        if (map.getSource(layer.source) == null) {
-          continue;
-        }
-        if (map.getLayer(layer.id) == null) {
-          map.addLayer(layer);
-        }
-      }
-    },
-    [columns, enabled]
-  );
-  return null;
-}
-
-function buildColumnLayers(sourceID: string) {
-  return [
-    {
-      id: "selected-columns-fill",
-      type: "fill",
-      source: "selected-columns",
-      paint: {
-        "fill-color": "rgba(255, 0, 0, 0.1)",
-      },
-    },
-    {
-      id: "selected-column-centroids-line",
-      type: "line",
-      source: "selected-column-centroids",
-      paint: {
-        "line-color": "rgba(255, 0, 0, 0.8)",
-        "line-width": 2,
-        "line-dasharray": [2, 2],
-      },
-    },
-    {
-      id: "selected-column-centroids-points",
-      type: "circle",
-      source: "selected-column-centroids",
-      paint: {
-        "circle-radius": 4,
-        "circle-color": "rgba(255, 0, 0, 0.8)",
-      },
-    },
-    {
-      id: "columns-fill",
-      type: "fill",
-      source: sourceID,
-      paint: {
-        "fill-color": "rgba(0, 0, 0, 0.1)",
-      },
-    },
-    {
-      id: "columns-line",
-      type: "line",
-      source: sourceID,
-      paint: {
-        "line-color": "rgba(0, 0, 0, 0.5)",
-        "line-width": 1,
-      },
-    },
-  ];
-}
-
-function SectionLine({ focusedLine }: { focusedLine: LineString }) {
-  // Setup focused line
-  useMapStyleOperator(
-    (map) => {
-      if (focusedLine == null) {
-        return;
-      }
-      const data: FeatureCollection = {
-        type: "FeatureCollection",
-        features: [
-          {
-            type: "Feature",
-            geometry: focusedLine,
-            properties: { id: "focusedLine" },
-          },
-        ],
-      };
-
-      setGeoJSON(map, "crossSectionLine", data);
-      setGeoJSON(map, "crossSectionEndpoints", {
-        type: "FeatureCollection",
-        features: focusedLine.coordinates.map((coord) => ({
-          type: "Feature",
-          geometry: { type: "Point", coordinates: coord },
-          properties: {},
-        })),
-      });
-
-      // Add layers
-      const layers = buildCrossSectionLayers();
-      for (let layer of layers) {
-        if (map.getSource(layer.source) == null) {
-          continue;
-        }
-        if (map.getLayer(layer.id) == null) {
-          map.addLayer(layer);
-        }
-      }
-    },
-    [focusedLine]
-  );
-
-  const bounds = useMemo(() => {
-    if (focusedLine == null || focusedLine?.coordinates.length < 2) {
-      return null;
-    }
-    let bounds = new LngLatBounds();
-    for (let coord of focusedLine.coordinates) {
-      bounds.extend(coord);
-    }
-    return bounds;
-  }, [focusedLine]);
-
-  useMapEaseTo({ bounds, padding: 50, trackResize: true });
-
-  return null;
 }

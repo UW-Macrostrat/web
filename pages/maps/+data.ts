@@ -1,6 +1,6 @@
 import { postgrest } from "~/_providers";
 
-export async function onBeforeRender(pageContext) {
+export async function data(pageContext) {
   // `.page.server.js` files always run in Node.js; we could use SQL/ORM queries here.
 
   const res = await postgrest
@@ -9,10 +9,5 @@ export async function onBeforeRender(pageContext) {
     .eq("is_finalized", true)
     .order("source_id", { ascending: true });
 
-  const pageProps = { sources: res.data };
-  return {
-    pageContext: {
-      pageProps,
-    },
-  };
+  return { sources: res.data };
 }

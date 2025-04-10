@@ -16,7 +16,6 @@ import { ClientOnly } from "vike-react/ClientOnly";
 export default function Layout({ children }: { children: ReactNode }) {
   const pageContext = usePageContext();
   const { exports = {}, config, user } = pageContext;
-  const supportsDarkMode = true;
   const pageStyle = exports?.pageStyle ?? "fullscreen";
 
   const devTools = exports.devTools ?? [];
@@ -25,14 +24,14 @@ export default function Layout({ children }: { children: ReactNode }) {
     AuthProvider,
     { user }, // Prefer detailed user if available
     h(
-      supportsDarkMode ? DarkModeProvider : NoOpDarkModeProvider,
+      DarkModeProvider,
       { followSystem: true },
       h("div.app-shell", { className: pageStyle + "-page" }, [
         children,
-        h(DevToolsConsole, {
-          className: "page-admin-container",
-          tools: [...devTools, DevToolsData],
-        }),
+        // h(DevToolsConsole, {
+        //   className: "page-admin-container",
+        //   tools: [...devTools, DevToolsData],
+        // }),
       ])
     )
   );

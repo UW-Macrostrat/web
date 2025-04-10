@@ -12,10 +12,12 @@ export function UnitDetailsPopover({
   style,
   children,
   boundary,
+  usePortal = false,
 }: {
   style: object;
   children: React.ReactNode;
   boundary?: DOMElement<any, any>;
+  usePortal?: boolean;
 }) {
   const content = h(LegendPopoverContainer, children);
 
@@ -26,14 +28,22 @@ export function UnitDetailsPopover({
     },
     h(
       Popover,
-      { content, isOpen: true, usePortal: false, boundary },
+      { content, isOpen: true, usePortal, boundary },
       h("span.popover-target")
     )
   );
 }
 
 export function LegendPopoverContainer({ children }) {
-  return h("div.legend-panel-outer", [h("div.legend-info-panel", children)]);
+  return h(
+    "div.legend-panel-outer",
+    {
+      onClick(e) {
+        e.stopPropagation();
+      },
+    },
+    [h("div.legend-info-panel", children)]
+  );
 }
 
 export function LegendPanelHeader({ title, id, onClose }) {

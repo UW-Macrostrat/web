@@ -9,6 +9,8 @@ export default {
   description:
     "A platform for geological data exploration, integration, and analysis.",
   extends: vikeReact,
+  // Setting these values forces a pageContext.json request to be generated with each page request.
+  // https://vike.dev/pageContext.json#avoid-pagecontext-json-requests
   passToClient: [
     "pageProps",
     "supportsDarkMode",

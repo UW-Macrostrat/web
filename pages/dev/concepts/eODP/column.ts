@@ -12,8 +12,11 @@ import {
   AgeAxis,
   MacrostratColumnProvider,
 } from "@macrostrat/column-views";
-import { IUnit, transformAxisType } from "@macrostrat/column-views";
-import { TrackedLabeledUnit } from "@macrostrat/column-views";
+import { IUnit } from "@macrostrat/column-views";
+import {
+  TrackedLabeledUnit,
+  getUnitHeightRange,
+} from "@macrostrat/column-views";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { useColumnNav } from "@macrostrat/column-views";
 import {

@@ -1,18 +1,14 @@
 import { Button, ButtonGroup } from "@blueprintjs/core";
 import {
+  UnitDetailsPanel,
   useSelectedUnit,
   useUnitSelectionDispatch,
 } from "@macrostrat/column-views";
-import { hyperStyled } from "@macrostrat/hyper";
 import { JSONView, ModalPanel, useKeyHandler } from "@macrostrat/ui-components";
-import styles from "./column-inspector.module.styl";
+import h from "@macrostrat/hyper";
 
-const h = hyperStyled(styles);
-
-function ModalUnitPanel(props) {
-  const { unitData } = props;
-  const selectedUnit = useSelectedUnit();
-  const selectUnit = useUnitSelectionDispatch();
+export function ModalUnitPanel(props) {
+  const { unitData, className, selectedUnit, onSelectUnit } = props;
 
   const ix = unitData?.findIndex(
     (unit) => unit.unit_id === selectedUnit?.unit_id
@@ -27,7 +23,7 @@ function ModalUnitPanel(props) {
     (event) => {
       const nextIx = keyMap[event.keyCode];
       if (nextIx == null || nextIx < 0 || nextIx >= unitData.length) return;
-      selectUnit(unitData[nextIx]);
+      onSelectUnit(unitData[nextIx].unit_id);
       event.stopPropagation();
     },
     [unitData, ix]
@@ -35,35 +31,33 @@ function ModalUnitPanel(props) {
 
   if (selectedUnit == null) return null;
 
-  const headerChildren = h(ButtonGroup, { minimal: true }, [
+  const actions = h([
     h(Button, {
       icon: "arrow-up",
       disabled: ix === 0,
       onClick() {
-        selectUnit(unitData[ix - 1]);
+        onSelectUnit(unitData[ix - 1]?.unit_id);
       },
     }),
     h(Button, {
       icon: "arrow-down",
       disabled: ix === unitData.length - 1,
       onClick() {
-        selectUnit(unitData[ix + 1]);
+        onSelectUnit(unitData[ix + 1]?.unit_id);
       },
     }),
   ]);
 
-  return h(
-    ModalPanel,
-    {
-      onClose() {
-        selectUnit(null);
-      },
-      title: selectedUnit.unit_name,
-      minimal: true,
-      headerChildren,
+  return h(UnitDetailsPanel, {
+    unit: selectedUnit,
+    onClose(event) {
+      console.log("close");
+      onSelectUnit(null);
     },
-    h(JSONView, { data: selectedUnit, hideRoot: true })
-  );
+    className,
+    actions,
+    showLithologyProportions: true,
+    onSelectUnit,
+    columnUnits: unitData,
+  });
 }
-
-export default ModalUnitPanel;

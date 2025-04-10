@@ -1,151 +1,154 @@
-import { MacrostratAPIProvider } from "@macrostrat/column-views";
 import {
-  ColumnNavigatorMap,
-  UnitSelectionProvider,
-  useSelectedUnit,
-  useUnitSelectionDispatch,
+  ColoredUnitComponent,
+  MacrostratDataProvider,
   Column,
 } from "@macrostrat/column-views";
 import { hyperStyled } from "@macrostrat/hyper";
-import { getHashString, setHashString } from "@macrostrat/ui-components";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import { PatternProvider } from "~/_providers";
-import styles from "./column-inspector.module.styl";
-import { BasePage } from "~/layouts";
-
+import styles from "./index.module.sass";
 import { navigate } from "vike/client/router";
+
+import { ModalUnitPanel } from "./modal-panel";
+
 import { PageBreadcrumbs } from "~/components";
 import { onDemand } from "~/_utils";
 
-const ModalUnitPanel = onDemand(() => import("./modal-panel"));
+const ColumnMap = onDemand(() => import("./map").then((mod) => mod.ColumnMap));
 
 const h = hyperStyled(styles);
 
-function ColumnPage({ columnInfo, linkPrefix = "/", project }) {
-  const { units, geometry } = columnInfo;
+export function ColumnPage(props) {
+  return h(
+    MacrostratDataProvider,
+    { baseURL: apiV2Prefix },
+    h(PatternProvider, h(ColumnPageInner, props))
+  );
+}
 
-  const selectedUnit = useUnitSelection(units);
+function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
+  console.log(columnInfo);
+  const { units } = columnInfo;
+
+  const [selectedUnitID, setSelectedUnitID] = useState<number>(
+    getInitialSelectedUnitID
+  );
+
+  const selectedUnit = useMemo(() => {
+    if (selectedUnitID == null) return null;
+    return units.find((d) => d.unit_id == selectedUnitID);
+  }, [selectedUnitID]);
+
+  useEffect(() => {
+    setHashString(selectedUnitID);
+  }, [selectedUnitID]);
+
+  console.log(columnInfo);
 
   const lon = new Number(columnInfo.lng);
   const lat = new Number(columnInfo.lat);
   const zoom = 7;
 
-  return h(BasePage, [
+  const onSelectColumn = useCallback(
+    (col_id: number) => {
+      // do nothing
+      // We could probably find a more elegant way to do this
+      setSelectedUnitID(null);
+      navigate(linkPrefix + `columns/${col_id}`, {
+        overwriteLastHistoryEntry: true,
+      });
+    },
+    [setSelectedUnitID]
+  );
+
+  return h("div.page-container", [
     h("div.main", [
-      h("div.column-header", [
-        h("nav", [h(PageBreadcrumbs, { showLogo: true })]),
-        h("h1.page-title", [
-          h("span.col-name", columnInfo.col_name),
-          h.if(columnInfo.col_group != null)("span.subtitle", [
-            h("span.separator", " – "),
-            h("span.col-group", `${columnInfo.col_group}`),
+      h("div.left-column", [
+        h("div.column-header", [
+          h("nav", [h(PageBreadcrumbs, { showLogo: true })]),
+          h("h1.page-title", [
+            h("span.col-name", columnInfo.col_name),
+            h.if(columnInfo.col_group != null)("span.subtitle", [
+              h("span.separator", " – "),
+              h("span.col-group", `${columnInfo.col_group}`),
+            ]),
           ]),
+        ]),
+        h("div.column-view", [
+          h("p.column-details", [
+            h("span.column-id", ["#", columnInfo.col_id]),
+            ", ",
+            h("span.project", ["project ", columnInfo.project_id]),
+            ", ",
+            h(
+              "a",
+              {
+                href: `/map/loc/${lon}/${lat}/column#z=${zoom}&show=columns,geology`,
+              },
+              "show in map"
+            ),
+            ".",
+          ]),
+          h(Column, {
+            units,
+            unitComponent: ColoredUnitComponent,
+            unconformityLabels: true,
+            collapseSmallUnconformities: true,
+            columnWidth: 300,
+            width: 450,
+            onUnitSelected: setSelectedUnitID,
+            selectedUnit: selectedUnitID,
+          }),
         ]),
       ]),
-      //h(PageHeader, { title: columnInfo.col_name, className: "column-header" }),
-      h("div.column-ui", [
-        h("div.left-column", [
-          h("div.column-view", [
-            h("p.column-details", [
-              h("span.column-id", ["#", columnInfo.col_id]),
-              ", ",
-              h("span.project", ["project ", columnInfo.project_id]),
-              ", ",
-              h(
-                "a",
-                {
-                  href: `/map/loc/${lon}/${lat}/column#z=${zoom}&show=columns,geology`,
-                },
-                "show in map"
-              ),
-              ".",
-            ]),
-            h(Column, {
-              data: units,
-              unconformityLabels: true,
-              columnWidth: 250,
-              width: 500,
-              unitComponentProps: {
-                nColumns: 3,
-              },
-            }),
-          ]),
-        ]),
-        h("div.right-column", [
-          h(ColumnNavigatorMap, {
+      h("div.right-column", [
+        h("div.right-column-boxes", [
+          h(ColumnMap, {
             className: "column-map",
-            format: "geojson_bare",
-            showInProcessColumns: true,
-            currentColumn: {
-              geometry,
-              type: "Feature",
-              properties: {
-                col_id: columnInfo.col_id,
-                col_name: columnInfo.col_name,
-                project_id: columnInfo.project_id,
-              },
-            },
-            style: {
-              display: selectedUnit == null ? "block" : "none",
-            },
-            setCurrentColumn(newColumn) {
-              const { col_id } = newColumn.properties;
-              navigate(linkPrefix + `columns/${col_id}`, {
-                overwriteLastHistoryEntry: true,
-              });
-            },
-            margin: 10,
-            project_id: columnInfo.project_id,
+            inProcess: true,
+            projectID,
+            selectedColumn: columnInfo.col_id,
+            onSelectColumn,
           }),
-          h(ModalUnitPanel, { unitData: units }),
+          h(ModalUnitPanel, {
+            unitData: units,
+            className: "unit-details-panel",
+            selectedUnit,
+            onSelectUnit: setSelectedUnitID,
+          }),
         ]),
       ]),
     ]),
   ]);
 }
 
-export default function ColumnInspector({ columnInfo, linkPrefix }) {
-  return h(
-    MacrostratAPIProvider,
-    { baseURL: apiV2Prefix },
-    h(
-      UnitSelectionProvider,
-      h(PatternProvider, h(ColumnPage, { columnInfo, linkPrefix }))
-    )
-  );
+function getHashParams() {
+  // Harvest selected unit ID from hash string
+  const currentHash = document.location.hash.substring(1);
+  return new URLSearchParams(currentHash);
 }
 
-function useUnitSelection(units): number {
-  /* Harmonize selected unit and column data providers
-    TODO: we could link the providers for selecting units and columns,
-    but for now we have just nested together current separate state elements
-  */
+function getInitialSelectedUnitID() {
+  // Harvest selected unit ID from hash string
+  const params = getHashParams();
+  const unit_id = params.get("unit");
+  // If no unit_id, return null
+  if (unit_id == null) return null;
+  const id = parseInt(unit_id);
+  if (isNaN(id)) return null;
+  return id;
+}
 
-  const initializedRef = useRef(false);
-  const initialized = initializedRef.current;
-
-  // TODO: this API should probably be moved into the column itself. We shouldn't need
-  // to use a context for this.
-  const selectedUnit = useSelectedUnit();
-  const setSelectedUnit = useUnitSelectionDispatch();
-
-  useEffect(() => {
-    // Set initial unit selection
-    if (units.length == 0) return;
-    if (!initialized) {
-      // Harvest selected unit ID from hash string
-      const unit_id =
-        getHashString(document.location.hash)?.unit ?? selectedUnit?.unit_id;
-
-      const unit = units.find((d) => d.unit_id == unit_id);
-      setSelectedUnit(unit);
-      initializedRef.current = true;
-    } else {
-      setHashString({ unit: selectedUnit?.unit_id });
-      setSelectedUnit(selectedUnit);
-    }
-  }, [units, selectedUnit]);
-
-  return selectedUnit?.unit_id;
+function setHashString(selectedUnitID: number) {
+  const params = getHashParams();
+  params.delete("unit");
+  if (selectedUnitID != null) {
+    params.set("unit", selectedUnitID.toString());
+  }
+  console.log(selectedUnitID, params);
+  const newHash = params.toString();
+  if (newHash !== document.location.hash) {
+    document.location.hash = newHash;
+  }
 }

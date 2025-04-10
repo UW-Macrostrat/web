@@ -1,36 +1,46 @@
 $map-size: 40em
 $map-size-inset: 12em
 
+.page-header
+  display: flex
+  flex-direction: row
+  justify-content: space-between
+  margin-bottom: 1em
+
 .diagram-container
   flex: 1
   position: relative
   min-height: 0
   display: flex
-  flex-direction: row
-  gap: 1em
-  overflow: hidden
+
   &.map-inset
     .column-selection-map
       position: absolute
       top: 1em
-      right: 2em
+      right: 1em
       height: $map-size-inset
       width: $map-size-inset
       z-index: 1000
 
   &.map-expanded
+    flex-direction: row
+    gap: 1em
+
     .assistant
       width: 40em
       position: relative
 
-.column-selection-map, .unit-details-panel, .correlation-diagram
-  box-shadow: 0 0 0.3em 0 rgba(0, 0, 0, 0.5)
+.column-selection-map, .unit-details-panel, .main-area
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3)
   border-radius: 6px
 
 .column-selection-map
   overflow: hidden
-  :global(.main-view)
+
+  .correlation-map
     height: 100%
+    position: relative
+
   flex: 1
   min-height: $map-size-inset
   max-height: $map-size
@@ -43,7 +53,6 @@ $map-size-inset: 12em
   overflow: scroll
   background: var(--panel-secondary-background-color)
   flex: 2
-  padding: 1em
   max-width: 100%
 
 .main-area
@@ -51,19 +60,36 @@ $map-size-inset: 12em
   flex: 1
   min-height: 0
   min-width: 0
+  overflow: scroll
+  background-color: var(--panel-secondary-background-color)
 
+.diagram-container
+  position: relative
 
 .correlation-diagram
-  overflow: scroll
-  min-height: 0
-  height: 100%
-  width: 100%
-  padding: 1em
+  margin-right: 2em
+  width: fit-content
   background-color: var(--panel-secondary-background-color)
-  box-shadow: 0 0 0.3em 0 var(--card-shadow-color)
   --column-background-color: var(--background-color)
   --column-stroke-color: var(--text-color)
 
+
+.package
+  position: relative
+
+  .package-overlay
+    position: absolute
+    top: 9px
+    left: 0
+    border: 2px solid red
+
+  .laterally-extensive-unit .strat-col-span
+    position: absolute
+    border: 2px solid red
+
+  .column-container
+    display: flex
+    flex-direction: row
 
 .map-expanded-button
   position: absolute
@@ -101,3 +127,13 @@ $map-size-inset: 12em
   display: flex
   flex-direction: column
   gap: 1em
+
+.settings
+  padding: 1em
+  min-width: 10em
+
+  > :first-child
+    margin-top: 0
+
+  > :last-child
+    margin-bottom: 0
