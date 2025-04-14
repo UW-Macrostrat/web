@@ -1,14 +1,19 @@
 import { hyperStyled } from "@macrostrat/hyper";
-import { preprocessUnits, Column } from "@macrostrat/column-views";
+import {
+  Column,
+  ColoredUnitComponent,
+  UnitDetailsFeature,
+} from "@macrostrat/column-views";
 
 import styles from "./strat-column.module.styl";
 import { ColumnSummary } from "#/map/map-interface/app-state/handlers/columns";
 import { NonIdealState } from "@blueprintjs/core";
 import useBreadcrumbs from "use-react-router-breadcrumbs";
 import { LinkButton } from "../../buttons";
-import { InfoPanelSection } from "@macrostrat/map-interface";
+import { ExpansionPanel, InfoPanelSection } from "@macrostrat/map-interface";
 import { PatternProvider } from "~/_providers";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { ModalUnitPanel } from "#/columns/@column/column-inspector/modal-panel";
 
 const h = hyperStyled(styles);
 
@@ -21,12 +26,18 @@ function BackButton() {
 
 function ColumnOverlay({ columnInfo }: { columnInfo: ColumnSummary | null }) {
   const units = columnInfo?.units;
+
+  const [selectedUnitID, setSelectedUnitID] = useState<number>(null);
+
+  const selectedUnit = useMemo(() => {
+    if (selectedUnitID == null || units == null) return null;
+    return units.find((d) => d.unit_id == selectedUnitID);
+  }, [selectedUnitID]);
+
   if (units == null)
     return h(NonIdealState, { title: "No column available", icon: "error" }, [
       h("p", "A stratigraphic column has not been assigned for this location."),
     ]);
-
-  const unitsA = useMemo(() => preprocessUnits(units), []);
 
   const headerElement = h([
     h("div.controls", [h(BackButton)]),
@@ -39,20 +50,33 @@ function ColumnOverlay({ columnInfo }: { columnInfo: ColumnSummary | null }) {
     ),
   ]);
 
-  return h(
-    InfoPanelSection,
-    { className: "strat-column-panel", headerElement },
-    h("div.strat-column-container", [
-      h(Column, {
-        data: unitsA,
-        showLabels: true,
-        targetUnitHeight: 25,
-        unconformityLabels: true,
-        width: 280,
-        columnWidth: 180,
-      }),
-    ])
-  );
+  return h([
+    h(InfoPanelSection, { className: "strat-column-panel", headerElement }, [
+      h("div.strat-column-container", [
+        h(Column, {
+          units,
+          unitComponent: ColoredUnitComponent,
+          showLabelColumn: false,
+          targetUnitHeight: 25,
+          unconformityLabels: true,
+          width: 280,
+          columnWidth: 240,
+          selectedUnit: selectedUnitID,
+          onUnitSelected: setSelectedUnitID,
+        }),
+      ]),
+    ]),
+    h(ModalUnitPanel, {
+      unitData: units,
+      className: "unit-details-panel",
+      selectedUnit,
+      onSelectUnit: setSelectedUnitID,
+      features: new Set([
+        UnitDetailsFeature.JSONToggle,
+        UnitDetailsFeature.DepthRange,
+      ]),
+    }),
+  ]);
 }
 
 export function StratColumn(props) {

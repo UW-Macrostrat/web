@@ -3465,6 +3465,7 @@ __metadata:
     "@react-hook/size": "npm:^2.1.2"
     "@supabase/postgrest-js": "npm:^1.18.1"
     "@turf/bbox": "npm:^6.5.0"
+    "@turf/boolean-contains": "npm:^7.2.0"
     "@turf/centroid": "npm:^7.0.0"
     "@turf/distance": "npm:^7.0.0"
     "@types/compression": "npm:^1.7.2"
@@ -4989,6 +4990,46 @@ __metadata:
     "@types/geojson": "npm:^7946.0.10"
     tslib: "npm:^2.8.1"
   checksum: 10/34dfb634d04bc20be292a211e0fdef610556bead4bb5a38174fe040c59f041b4a0e2f586148c2c8b88677b1c5af08a07de5745235233dbaa0197fd67bf21e0da
+  languageName: node
+  linkType: hard
+
+"@turf/boolean-contains@npm:^7.2.0":
+  version: 7.2.0
+  resolution: "@turf/boolean-contains@npm:7.2.0"
+  dependencies:
+    "@turf/bbox": "npm:^7.2.0"
+    "@turf/boolean-point-in-polygon": "npm:^7.2.0"
+    "@turf/boolean-point-on-line": "npm:^7.2.0"
+    "@turf/helpers": "npm:^7.2.0"
+    "@turf/invariant": "npm:^7.2.0"
+    "@types/geojson": "npm:^7946.0.10"
+    tslib: "npm:^2.8.1"
+  checksum: 10/1648a44269a4d5b185666ef87a9c05d742da1147dd51d48f942eecbd3d249401fec6d1337f4c6fd7e505b4fc2ab4c16f783e2a3d0b06a6a5ab865e6a0277124c
+  languageName: node
+  linkType: hard
+
+"@turf/boolean-point-in-polygon@npm:^7.2.0":
+  version: 7.2.0
+  resolution: "@turf/boolean-point-in-polygon@npm:7.2.0"
+  dependencies:
+    "@turf/helpers": "npm:^7.2.0"
+    "@turf/invariant": "npm:^7.2.0"
+    "@types/geojson": "npm:^7946.0.10"
+    point-in-polygon-hao: "npm:^1.1.0"
+    tslib: "npm:^2.8.1"
+  checksum: 10/37624a62d88e7d8c39a37d774399e3a9322f8b544e708c5f6eb4ad34ed86f57c7ac1ef6fafcc66297eb77b44aa28cccb9c8c583bf317471d142c0fbefc4aeb9c
+  languageName: node
+  linkType: hard
+
+"@turf/boolean-point-on-line@npm:^7.2.0":
+  version: 7.2.0
+  resolution: "@turf/boolean-point-on-line@npm:7.2.0"
+  dependencies:
+    "@turf/helpers": "npm:^7.2.0"
+    "@turf/invariant": "npm:^7.2.0"
+    "@types/geojson": "npm:^7946.0.10"
+    tslib: "npm:^2.8.1"
+  checksum: 10/1f9388b181fc4e02d0106a0fb17a19c397a257691e3fee533fac357eb7e4c07495cffb9a801fad90383e06fb105dc0f07f789e0423bc4c8f9026b243c3204548
   languageName: node
   linkType: hard
 
@@ -15154,6 +15195,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"point-in-polygon-hao@npm:^1.1.0":
+  version: 1.2.4
+  resolution: "point-in-polygon-hao@npm:1.2.4"
+  dependencies:
+    robust-predicates: "npm:^3.0.2"
+  checksum: 10/cba3e1cda20343056797afe18eafbde01da8e3ce5e76f8ae232b22ff502b27471fd55390b5d3cc20ef5e2021cb0a3a80d34c257c49abd0b5231f38f9c35de75e
+  languageName: node
+  linkType: hard
+
 "popper.js@npm:^1.14.4, popper.js@npm:^1.16.1":
   version: 1.16.1
   resolution: "popper.js@npm:1.16.1"
@@ -17046,7 +17096,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"robust-predicates@npm:^3.0.0":
+"robust-predicates@npm:^3.0.0, robust-predicates@npm:^3.0.2":
   version: 3.0.2
   resolution: "robust-predicates@npm:3.0.2"
   checksum: 10/88bd7d45a6b89e88da2631d4c111aaaf0443de4d7078e9ab7f732245790a3645cf79bf91882a9740dbc959cf56ba75d5dced5bf2259410f8b6de19fd240cd08c

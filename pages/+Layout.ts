@@ -17,8 +17,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   const pageContext = usePageContext();
   const { exports = {}, config, user } = pageContext;
   const pageStyle = exports?.pageStyle ?? "fullscreen";
-
-  const devTools = exports.devTools ?? [];
+  // const devTools = exports.devTools ?? [];
 
   return h(
     AuthProvider,

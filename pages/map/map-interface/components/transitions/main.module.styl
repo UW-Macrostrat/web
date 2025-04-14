@@ -15,9 +15,9 @@ transitionable()
   transitionable()
 
 .loading-area
-  position: relative
   .spinner, .data
     transition: height 0.5s ease-in, opacity 0.2s ease-in
+
   .spinner
     position absolute
     top 0
@@ -27,22 +27,28 @@ transitionable()
     min-height: 90px
     background-color: var(--panel-background-color)
     padding: 15px
+
   &.enter
     .spinner
       height: 0
       opacity: 0
+
     .data
       opacity: 1
+
   &.from
     .spinner
       height: 90px
       opacity: 1
+
     .data
       opacity: 0
+
   &.leave
     .spinner
       height: 90px
       opacity: 1
+
     .data
       opacity: 0
 

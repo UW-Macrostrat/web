@@ -83,6 +83,7 @@
     "@react-hook/size": "^2.1.2",
     "@supabase/postgrest-js": "^1.18.1",
     "@turf/bbox": "^6.5.0",
+    "@turf/boolean-contains": "^7.2.0",
     "@turf/centroid": "^7.0.0",
     "@turf/distance": "^7.0.0",
     "@types/compression": "^1.7.2",

@@ -17,8 +17,9 @@ import {
 import Searchbar from "../components/navbar";
 import MapContainer from "./map-view";
 import { MenuPage } from "./menu";
-import h from "./main.module.styl";
 import { ErrorBoundary } from "@macrostrat/ui-components";
+
+import h from "./main.module.styl";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const InfoDrawer = loadable(() => import("../components/info-drawer"));

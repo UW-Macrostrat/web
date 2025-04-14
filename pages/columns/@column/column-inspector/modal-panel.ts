@@ -1,14 +1,10 @@
-import { Button, ButtonGroup } from "@blueprintjs/core";
-import {
-  UnitDetailsPanel,
-  useSelectedUnit,
-  useUnitSelectionDispatch,
-} from "@macrostrat/column-views";
-import { JSONView, ModalPanel, useKeyHandler } from "@macrostrat/ui-components";
+import { Button } from "@blueprintjs/core";
+import { UnitDetailsPanel } from "@macrostrat/column-views";
+import { useKeyHandler } from "@macrostrat/ui-components";
 import h from "@macrostrat/hyper";
 
 export function ModalUnitPanel(props) {
-  const { unitData, className, selectedUnit, onSelectUnit } = props;
+  const { unitData, className, selectedUnit, onSelectUnit, features } = props;
 
   const ix = unitData?.findIndex(
     (unit) => unit.unit_id === selectedUnit?.unit_id
@@ -59,5 +55,6 @@ export function ModalUnitPanel(props) {
     showLithologyProportions: true,
     onSelectUnit,
     columnUnits: unitData,
+    features,
   });
 }
