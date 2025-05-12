@@ -8,13 +8,11 @@ export function Image({ src, className, width, height }) {
 
 export function Navbar() {
     return h("div", {className: "nav"}, [
-        h("ul", [
-            h("li", h("a", {href: "/dev/test-site/main-page"}, h(MacrostratIcon))),
-            h("li", h("a", {href: "/dev/test-site/about"}, "About")),
-            h("li", h("a", {href: "/dev/test-site/publications"}, "Publications")),
-            h("li", h("a", {href: "/dev/test-site/people"}, "People")),
-            h("li", h("a", {href: "/dev/test-site/donate"}, "Donate"))
-        ])
+            h("a", {href: "/dev/test-site/main-page"}, h(MacrostratIcon)),
+            h("a", {href: "/dev/test-site/about"}, "About"),
+            h("a", {href: "/dev/test-site/publications"}, "Publications"),
+            h("a", {href: "/dev/test-site/people"}, "People"),
+            h("a", {href: "/dev/test-site/donate"}, "Donate"),
     ]);
 }
 

@@ -8,7 +8,7 @@ export function Page() {
         h(Navbar),
 
         h('div.start', {}, [
-            h('img.back-img.cover-image', { src: 'cover_large.jpg' }),
+            h(Image, { className: "back-img cover-image", src: 'cover_large.jpg' }),
             h('div.text', {}, [
             h('span.header', {}, [
                 h('h1#main-title.big', {}, [
@@ -42,7 +42,7 @@ export function Page() {
                 h('a.btn', { href: '/map/#3/40.78/-94.13' }, 'Geologic Map'),
                 h('div.btn.rockd', { onclick: () => window.location = 'https://rockd.org' }, [
                 h('div.rockd-button-container', {}, [
-                    h('img.rockd-png', { src: 'rockd.jpg', width: '22px' }),
+                    h(Image, { className: "rockd-png", src: 'rockd.jpg', width: '22px' }),
                     h('a', { href: 'https://rockd.org', target: '_blank' }, 'Go mobile')
                 ])
                 ])
@@ -57,7 +57,7 @@ export function Page() {
                 h('h1', {}, 'North America'),
                 h('div.caption', {}, '243 packages. 798 units. 897 collections.')
             ]),
-            h('img.location-img.t2', { src: 'caribbean_new_medium.jpg' }),
+            h(Image, { className: "location-img t2", src: 'caribbean_new_medium.jpg' }),
             h('div.location-text', {}, [
                 h('h1', {}, 'Caribbean'),
                 h('div.caption', {}, '243 packages. 798 units. 897 collections.')
@@ -68,12 +68,12 @@ export function Page() {
                 h('h1', {}, 'New Zealand'),
                 h('div.caption', {}, '828 packages. 2,168 units. 328 collections.')
             ]),
-            h('img.location-img.t1', { src: 'new_zealand_new_medium.jpg' }),
+            h(Image, { className: "location-img t1", src: 'new_zealand_new_medium.jpg' }),
             h('div.location-text', {}, [
                 h('h1', {}, 'Deep Sea'),
                 h('div.caption', {}, '388 packages. 7,124 units. 0 collections.')
             ]),
-            h('img.location-img.t2', { src: 'deep_sea_new_medium.jpg' })
+            h(Image, { className: "location-img t2", src: 'deep_sea_new_medium.jpg' })
             ])
         ]),
 
@@ -142,7 +142,7 @@ const Projects =
 
 const Donate = 
   h('div.donate-container#donate', {}, [
-    h('img.back-img.donate-img', { src: 'donate_medium.jpg' }),
+    h(Image, { className: "back-img donate-img", src: 'donate_medium.jpg' }),
     h('div.text-donate', {}, [
       h('div.donate-left', {}, [
         h('h1.title.donate-title', {}, [
@@ -158,4 +158,3 @@ const Donate =
       ])
     ])
   ]);
-
