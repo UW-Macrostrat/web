@@ -117,19 +117,6 @@ export function Page() {
             
         ]),
 
-        h('div.temp-class#map', {}, [
-            h('div.link-title', {}, [
-            h('a', { href: '/map' }, h('h1', {}, 'Map Interface'))
-            ]),
-        ]),
-
-        h('div.temp-class#maps', {}, [
-            h('div.link-title', {}, [
-            h('a', { href: '/maps' }, h('h1', {}, 'Maps'))
-            ]),
-            h('p', {}, 'The spatial footprint of rocks on the Earth\'s surface')
-        ]),
-
         Donate,
         h(Footer),
     ])
