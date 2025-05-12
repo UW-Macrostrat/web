@@ -2,6 +2,8 @@ import { Image, Navbar, Footer } from "./index";
 import "./main.sass";
 import "./main.styl";
 import h from "@macrostrat/hyper";
+import { PanelCard } from "@macrostrat/map-interface";
+import { useState } from 'react';
 
 export function Page() {
     return h('div.total', [
@@ -18,34 +20,75 @@ export function Page() {
               ]),
               h('div.stats', {}, [
                   h('div.stat', {}, [
-                  h('span.top-stat#n_columns', {}, '1,400'),
-                  h('span.top-stat-label', {}, 'Regional Rock Columns')
+                    h('span.top-stat#n_columns', {}, '1,400'),
+                    h('span.top-stat-label', {}, 'Regional Rock Columns')
                   ]),
                   h('div.stat', {}, [
-                  h('span.top-stat#n_units', {}, '33,903'),
-                  h('span.top-stat-label', {}, 'Rock Units')
+                    h('span.top-stat#n_units', {}, '33,903'),
+                    h('span.top-stat-label', {}, 'Rock Units')
                   ]),
                   h('div.stat', {}, [
-                  h('span.top-stat#n_polys', {}, '2,500,000'),
-                  h('span.top-stat-label', {}, 'Geologic Map Polygons')
+                    h('span.top-stat#n_polys', {}, '2,500,000'),
+                    h('span.top-stat-label', {}, 'Geologic Map Polygons')
                   ]),
                   h('div.stat', {}, [
-                  h('span.top-stat#n_names', {}, '51,212'),
-                  h('span.top-stat-label', {}, 
+                    h('span.top-stat#n_names', {}, '51,212'),
+                    h('span.top-stat-label', {}, 
                       h('a', { href: 'Macrostrat_strat_names.html', target: '_blank' }, 'Stratigraphic Names')
-                  )
+                    )
                   ])
               ]),
               h('p.big-text', {}, 'A platform for geological data exploration, integration, and analysis'),
-              h('div.buttons1', {}, [
-                  h('a.btn', { href: '/sift/#/' }, 'Search'),
-                  h('a.btn', { href: '/map/#3/40.78/-94.13' }, 'Geologic Map'),
-                  h('div.btn.rockd', { onclick: () => window.location = 'https://rockd.org' }, [
-                  h('div.rockd-button-container', {}, [
-                      h(Image, { className: "rockd-png", src: 'rockd.jpg', width: '22px' }),
-                      h('a', { href: 'https://rockd.org', target: '_blank' }, 'Go mobile')
-                  ])
-                  ])
+              h('div.buttons', {}, [
+                  h(PanelCard, { className: 'btn' }, [
+                    h('a.btn', { href: '/sift/#/' }, 'Search'),
+                  ]),
+                  h(PanelCard, { className: "btn" }, [
+                    h('a.btn', { href: '/map/#3/40.78/-94.13' }, 'Geologic Map'),
+                    h('p', { className: 'long'}, [
+                      h('div.temp', {}, [
+                          'With over 225 maps from data providers around the world across every scale, Macrostrat is the world\'s largest homogenized geologic map database. Our data processing pipeline links geologic map polygons to Macrostrat column polygons, external stratigraphic name lexicons, and geochronological intervals, enabling the enhancement of the original map data and allowing for direct links into ',
+                          h('a', { href: 'https://xdd.wisc.edu', target: '_blank' }, 'xDD'),
+                          ' (formly GeoDeepDive).'
+                      ]),
+                      h('div.temp', {}, [
+                          'Are you affiliated with a state or national geologic survey? ',
+                          h('a', { href: 'mailto:contact@macrostrat.org?Subject=Geologic%20Map%20Collaboration' }, 'Get in touch'),
+                          ' with us - we\'d love to collaborate and help publicize your maps!'
+                      ]),
+                      h('div.temp', {}, [
+                          'Get started by ',
+                          h('a', { href: '/map' }, 'exploring the map'),
+                          ' or ',
+                          h('a', { href: '/map/sources' }, 'taking a look at'),
+                          ' which maps are currently a part of Macrostrat.'
+                      ])
+                    ]),
+                  ]),
+                  h(PanelCard, { className: "btn"}, [
+                    h('a.btn', { href: '/projects' }, 'Projects'),
+                    h('p', 'Projects for specific regions or geological problems')
+                  ]),
+                  h(PanelCard, { className: "btn"}, [
+                    h('a.btn', { href: '/lex' }, 'Geologic Lexicon'),
+                    h('p', 'Geologic units and data dictionaries')
+                  ]),
+                  h(PanelCard, { className: "btn"}, [
+                    h('a', { href: '/maps' }, 'Maps'),
+                    h('p', "The spatial footprint of rocks on the Earth\'s surface")
+                  ]),
+                  h(PanelCard, { className: "btn"}, [
+                    h('a.btn', { href: '/columns' }, 'Columns'),
+                    h('p', 'Stratigraphic and geological columns showing the organization of rocks in time')
+                  ]),
+                  h(PanelCard, { className: "btn"}, [
+                    h('a.btn.rockd', { href: 'https://rockd.org' }, [
+                      h('div.rockd-button-container', {}, [
+                          h(Image, { className: "rockd-png", src: 'rockd.jpg', width: '22px' }),
+                          h('a', { href: 'https://rockd.org', target: '_blank' }, 'Go mobile')
+                      ])
+                    ])
+                  ]),
               ])
             ])
         ]),
@@ -78,25 +121,6 @@ export function Page() {
             h('div.link-title', {}, [
             h('a', { href: '/map' }, h('h1', {}, 'Map Interface'))
             ]),
-            h('p.long', {}, [
-            h('div.temp', {}, [
-                'With over 225 maps from data providers around the world across every scale, Macrostrat is the world\'s largest homogenized geologic map database. Our data processing pipeline links geologic map polygons to Macrostrat column polygons, external stratigraphic name lexicons, and geochronological intervals, enabling the enhancement of the original map data and allowing for direct links into ',
-                h('a', { href: 'https://xdd.wisc.edu', target: '_blank' }, 'xDD'),
-                ' (formly GeoDeepDive).'
-            ]),
-            h('div.temp', {}, [
-                'Are you affiliated with a state or national geologic survey? ',
-                h('a', { href: 'mailto:contact@macrostrat.org?Subject=Geologic%20Map%20Collaboration' }, 'Get in touch'),
-                ' with us - we\'d love to collaborate and help publicize your maps!'
-            ]),
-            h('div.temp', {}, [
-                'Get started by ',
-                h('a', { href: '/map' }, 'exploring the map'),
-                ' or ',
-                h('a', { href: '/map/sources' }, 'taking a look at'),
-                ' which maps are currently a part of Macrostrat.'
-            ])
-            ])
         ]),
 
         h('div.temp-class#maps', {}, [
@@ -106,36 +130,10 @@ export function Page() {
             h('p', {}, 'The spatial footprint of rocks on the Earth\'s surface')
         ]),
 
-        h('div.temp-class#columns', {}, [
-            h('div.link-title', {}, [
-            h('a', { href: '/columns' }, h('h1', {}, 'Columns'))
-            ]),
-            h('p', {}, 'Stratigraphic and geological columns showing the organization of rocks in time')
-        ]),
-
-        Lexicon,
-        Projects,
         Donate,
         h(Footer),
     ])
 }
-
-
-const Lexicon = 
-  h('div.temp-class#lexicon', {}, [
-    h('div.link-title', {}, [
-      h('a', { href: '/lex' }, h('h1', {}, 'Geologic Lexicon'))
-    ]),
-    h('p', {}, 'Geologic units and data dictionaries')
-  ]);
-
-const Projects = 
-  h('div.temp-class#project', {}, [
-    h('div.link-title', {}, [
-      h('a', { href: '/projects' }, h('h1', {}, 'Projects'))
-    ]),
-    h('p', {}, 'Projects for specific regions or geological problems')
-  ]);
 
 const Donate = 
   h('div.donate-container#donate', {}, [
