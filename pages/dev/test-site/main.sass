@@ -34,10 +34,24 @@ a
 
 .text
   position: absolute
+  top: 0
+  left: 0
+  width: 100%
   z-index: 100
   padding: 0 20px
-  display: grid
-  margin: auto
+  display: flex
+  flex-direction: column
+
+  .header
+    text-shadow: black 1px 0 10px
+    text-align: center
+  
+  .big-text
+    text-align: center
+    font-family: Helvetica, sans-serif
+    font-weight: 900
+    font-size: 20px
+    text-shadow: black 1px 0 10px
 
 .cover-image
   position: absolute
@@ -63,12 +77,6 @@ a
   font-size: 72px
   font-family: "Maven Pro", sans-serif
   text-align: center
-
-.big-text
-  font-family: Helvetica, sans-serif
-  font-weight: 900
-  font-size: 20px
-  text-shadow: black 1px 0 10px
 
 .top-stat, .top-stat-label
   display: grid
@@ -100,7 +108,6 @@ a
   border: none
   color: white
   padding: 13px 10px
-  margin: 5% 15%
   text-align: center
   text-decoration: none
   border-radius: 12px
@@ -111,8 +118,9 @@ a
 .buttons1
   font-size: 20px
   padding: 0px
-  display: grid
-  grid-template-columns: 33.33% 33.33% 33.33%
+  display: flex
+  gap: 100px
+  justify-content: center
 
   a
     color: white
@@ -167,10 +175,6 @@ a
   font-family: "Maven Pro", sans-serif
   padding: 20vh 0
   text-align: center
-
-.header
-  margin: 0 20%
-  text-shadow: black 1px 0 10px
 
 #main-title
   display: inline-block

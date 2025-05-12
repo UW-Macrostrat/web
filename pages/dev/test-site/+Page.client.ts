@@ -10,43 +10,43 @@ export function Page() {
         h('div.start', {}, [
             h(Image, { className: "back-img cover-image", src: 'cover_large.jpg' }),
             h('div.text', {}, [
-            h('span.header', {}, [
-                h('h1#main-title.big', {}, [
-                'Macrostrat',
-                h('h2.version', {}, 'v2')
-                ])
-            ]),
-            h('div.stats', {}, [
-                h('div.stat', {}, [
-                h('span.top-stat#n_columns', {}, '1,400'),
-                h('span.top-stat-label', {}, 'Regional Rock Columns')
-                ]),
-                h('div.stat', {}, [
-                h('span.top-stat#n_units', {}, '33,903'),
-                h('span.top-stat-label', {}, 'Rock Units')
-                ]),
-                h('div.stat', {}, [
-                h('span.top-stat#n_polys', {}, '2,500,000'),
-                h('span.top-stat-label', {}, 'Geologic Map Polygons')
-                ]),
-                h('div.stat', {}, [
-                h('span.top-stat#n_names', {}, '51,212'),
-                h('span.top-stat-label', {}, 
-                    h('a', { href: 'Macrostrat_strat_names.html', target: '_blank' }, 'Stratigraphic Names')
-                )
-                ])
-            ]),
-            h('p.big-text', {}, 'A platform for geological data exploration, integration, and analysis'),
-            h('div.buttons1', {}, [
-                h('a.btn', { href: '/sift/#/' }, 'Search'),
-                h('a.btn', { href: '/map/#3/40.78/-94.13' }, 'Geologic Map'),
-                h('div.btn.rockd', { onclick: () => window.location = 'https://rockd.org' }, [
-                h('div.rockd-button-container', {}, [
-                    h(Image, { className: "rockd-png", src: 'rockd.jpg', width: '22px' }),
-                    h('a', { href: 'https://rockd.org', target: '_blank' }, 'Go mobile')
-                ])
-                ])
-            ])
+              h('span.header', {}, [
+                  h('h1#main-title', [
+                    'Macrostrat',
+                    h('h2.version','v2')
+                  ])
+              ]),
+              h('div.stats', {}, [
+                  h('div.stat', {}, [
+                  h('span.top-stat#n_columns', {}, '1,400'),
+                  h('span.top-stat-label', {}, 'Regional Rock Columns')
+                  ]),
+                  h('div.stat', {}, [
+                  h('span.top-stat#n_units', {}, '33,903'),
+                  h('span.top-stat-label', {}, 'Rock Units')
+                  ]),
+                  h('div.stat', {}, [
+                  h('span.top-stat#n_polys', {}, '2,500,000'),
+                  h('span.top-stat-label', {}, 'Geologic Map Polygons')
+                  ]),
+                  h('div.stat', {}, [
+                  h('span.top-stat#n_names', {}, '51,212'),
+                  h('span.top-stat-label', {}, 
+                      h('a', { href: 'Macrostrat_strat_names.html', target: '_blank' }, 'Stratigraphic Names')
+                  )
+                  ])
+              ]),
+              h('p.big-text', {}, 'A platform for geological data exploration, integration, and analysis'),
+              h('div.buttons1', {}, [
+                  h('a.btn', { href: '/sift/#/' }, 'Search'),
+                  h('a.btn', { href: '/map/#3/40.78/-94.13' }, 'Geologic Map'),
+                  h('div.btn.rockd', { onclick: () => window.location = 'https://rockd.org' }, [
+                  h('div.rockd-button-container', {}, [
+                      h(Image, { className: "rockd-png", src: 'rockd.jpg', width: '22px' }),
+                      h('a', { href: 'https://rockd.org', target: '_blank' }, 'Go mobile')
+                  ])
+                  ])
+              ])
             ])
         ]),
 
