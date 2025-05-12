@@ -50,31 +50,28 @@ export function Page() {
             ])
         ]),
 
-        h('div#locations', {}, [
-            h('div.location', {}, [
-            h(Image, { className: "location-img t1", src: 'north_america_med.jpg' }),
+        h('div.locations', [
+            h(Image, { className: "location-img", src: 'north_america_med.jpg' }),
             h('div.location-text', {}, [
                 h('h1', {}, 'North America'),
                 h('div.caption', {}, '243 packages. 798 units. 897 collections.')
             ]),
-            h(Image, { className: "location-img t2", src: 'caribbean_new_medium.jpg' }),
+            h(Image, { className: "location-img", src: 'caribbean_new_medium.jpg' }),
             h('div.location-text', {}, [
                 h('h1', {}, 'Caribbean'),
                 h('div.caption', {}, '243 packages. 798 units. 897 collections.')
-            ])
             ]),
-            h('div.location', {}, [
             h('div.location-text', {}, [
                 h('h1', {}, 'New Zealand'),
                 h('div.caption', {}, '828 packages. 2,168 units. 328 collections.')
             ]),
-            h(Image, { className: "location-img t1", src: 'new_zealand_new_medium.jpg' }),
+            h(Image, { className: "location-img", src: 'new_zealand_new_medium.jpg' }),
             h('div.location-text', {}, [
                 h('h1', {}, 'Deep Sea'),
                 h('div.caption', {}, '388 packages. 7,124 units. 0 collections.')
             ]),
-            h(Image, { className: "location-img t2", src: 'deep_sea_new_medium.jpg' })
-            ])
+            h(Image, { className: "location-img", src: 'deep_sea_new_medium.jpg' }),
+            
         ]),
 
         h('div.temp-class#map', {}, [
