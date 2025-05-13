@@ -2,11 +2,11 @@
     color: black
     background-color: white
 
-#body
+.body
   background-color: white
-  padding: 0 20%
+  padding-top: 5vh
 
-#apps
+.apps
   padding: 75px 0    
 
 a:hover
@@ -25,6 +25,11 @@ a:hover
   position: relative
   color: black
 
+  img
+    height: 80%
+    margin: auto
+    margin-left: 6%
+
 .app-background-text
   margin: auto
   padding-right: 20px
@@ -36,10 +41,7 @@ a:hover
 .blurb
     font-size: 15px
 
-.app-img
-  height: 80%
-  margin: auto
-  margin-left: 6%
+
 
 .big-apps
   font-size: 72px
@@ -54,7 +56,10 @@ a:hover
 .big
   font-size: 72px
   font-family: "Maven Pro", sans-serif;
-  text-align: center
+  text-align: left
+  margin-left: 20%
+  padding: 0
+
 
 #api  
   position: relative
@@ -114,11 +119,17 @@ a:hover
   padding-bottom: 0
 
 .line
-  width: 100%;
-  border-bottom: 1px solid #E0E1E6;
+  width: 60%;
+  border-bottom: 1px solid black;
   position: absolute;
 
 .rock-border
   width: 100%
   margin: 0
   padding: 0
+
+.table
+  margin: 30px 20%
+  .table-row
+    display: grid
+    grid-template-columns: 40% 60%
