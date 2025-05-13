@@ -8,7 +8,7 @@ export function Image({ src, className, width, height }) {
 
 export function Navbar() {
     return h("div", {className: "nav"}, [
-            h("a", {href: "/dev/test-site/main-page"}, h(MacrostratIcon)),
+            h("a", {className: "nav-link", href: "/dev/test-site/"}, h(MacrostratIcon)),
             h("a", {href: "/dev/test-site/about"}, "About"),
             h("a", {href: "/dev/test-site/publications"}, "Publications"),
             h("a", {href: "/dev/test-site/people"}, "People"),
@@ -19,23 +19,21 @@ export function Navbar() {
 export function Footer() {
     return h("div", {className: "footer"}, [
         h("div", {className: "footer-container"}, [
-            h("div", {className: "col-sm-4"}, [
+            h("div", {className: "footer-text-container"}, [
                 h(Image, {className: "logo_white", src: "logo_white.png", width: "100px"}),
-                h("p", {className: "f1-text"}, [
+                h("p", {className: "footer-text"}, [
                     "Produced by the ",
                     h("a", {href: "http://strata.geology.wisc.edu", target: "_blank"}, "UW Macrostrat Lab"),
                     h("a", {href: "https://github.com/UW-Macrostrat", target: "_blank"}, h(Image, {className: "git_logo", src: "git-logo.png", width: "18px"})),
                 ])
             ]),
-            h("div", {className: "col-sm-4"}, [
-                h("ul", {className: "footer-nav"}, [
-                    h("li", h("a", {href: "/dev/test-site/about"}, "About")),
-                    h("li", h("a", {href: "/dev/test-site/publications"}, "Publications")),
-                    h("li", h("a", {href: "/dev/test-site/people"}, "People")),
-                    h("li", h("a", {href: "/dev/test-site/donate"}, "Donate"))
-                ])
+            h("div", {className: "footer-nav"}, [
+                h("a", {href: "/dev/test-site/about"}, "About"),
+                h("a", {href: "/dev/test-site/publications"}, "Publications"),
+                h("a", {href: "/dev/test-site/people"}, "People"),
+                h("a", {href: "/dev/test-site/donate"}, "Donate"),
             ]),
-            h("div", {className: "col-sm-4"}, [
+            h("div", {className: "footer-text-container"}, [
                 h(Image, {className: "funding-logo", src: "nsf.png", width: "100px"}),
                 h("div", {className: "funding-line"}, "Current support:"),
                 h("div", {className: "funding-line"}, "EAR-1948843"),
