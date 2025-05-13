@@ -1,4 +1,4 @@
-import { Image, Navbar, Footer } from "./index";
+import { Image, Navbar, Footer, useMacrostratAPI } from "./index";
 import "./main.sass";
 import "./main.styl";
 import h from "@macrostrat/hyper";
@@ -6,6 +6,28 @@ import { PanelCard } from "@macrostrat/map-interface";
 import { useState } from 'react';
 
 export function Page() {
+    const result = useMacrostratAPI('/stats?all')?.success.data
+
+    if(!result) {
+      return h('div.loading')
+    }
+
+    let columns = 0;
+    let units = 0;
+    let polygons = 0;
+    let names = 0;
+
+    result.forEach(project => {
+      columns += project.columns;
+      units += project.units;
+      polygons += project.t_polys;
+    });
+
+    const NorthAmerica = result.filter(project => project.project === 'North America')[0];
+    const Caribbean = result.filter(project => project.project === 'Caribbean')[0];
+    const NewZealand = result.filter(project => project.project === 'New Zealand')[0];
+    const DeepSea = result.filter(project => project.project === 'Deep Sea')[0];
+
     return h('div.total', [
         h(Navbar),
 
@@ -18,22 +40,20 @@ export function Page() {
               ]),
               h('div.stats', {}, [
                   h('div.stat', {}, [
-                    h('span.top-stat#n_columns', {}, '1,400'),
+                    h('span.top-stat#n_columns', {}, formatNumber(columns)),
                     h('span.top-stat-label', {}, 'Regional Rock Columns')
                   ]),
                   h('div.stat', {}, [
-                    h('span.top-stat#n_units', {}, '33,903'),
+                    h('span.top-stat#n_units', {}, formatNumber(units)),
                     h('span.top-stat-label', {}, 'Rock Units')
                   ]),
                   h('div.stat', {}, [
-                    h('span.top-stat#n_polys', {}, '2,500,000'),
+                    h('span.top-stat#n_polys', {}, formatNumber(polygons)),
                     h('span.top-stat-label', {}, 'Geologic Map Polygons')
                   ]),
                   h('div.stat', {}, [
-                    h('span.top-stat#n_names', {}, '51,212'),
-                    h('span.top-stat-label', {}, 
-                      h('a', { href: 'Macrostrat_strat_names.html', target: '_blank' }, 'Stratigraphic Names')
-                    )
+                    h('span.top-stat#n_names', {}, formatNumber(result.length)),
+                    h('span.top-stat-label', {}, 'Projects')
                   ])
               ]),
               h('p.big-text', {}, 'A platform for geological data exploration, integration, and analysis'),
@@ -95,21 +115,20 @@ export function Page() {
             h(Image, { className: "location-img", src: 'north_america_med.jpg' }),
             h('div.location-text', {}, [
                 h('h1', {}, 'North America'),
-                h('div.caption', {}, '243 packages. 798 units. 897 collections.')
+                h('div.caption', {}, formatNumber(NorthAmerica.packages) + ' packages. ' + formatNumber(NorthAmerica.units) + ' units. ' + formatNumber(NorthAmerica.pbdb_collections) + ' collections.')
             ]),
             h(Image, { className: "location-img", src: 'caribbean_new_medium.jpg' }),
             h('div.location-text', {}, [
                 h('h1', {}, 'Caribbean'),
-                h('div.caption', {}, '243 packages. 798 units. 897 collections.')
+                h('div.caption', {}, formatNumber(Caribbean.packages) + ' packages. ' + formatNumber(Caribbean.units) + ' units. ' + formatNumber(Caribbean.pbdb_collections) + ' collections.')
             ]),
             h('div.location-text', {}, [
                 h('h1', {}, 'New Zealand'),
-                h('div.caption', {}, '828 packages. 2,168 units. 328 collections.')
-            ]),
+                h('div.caption', {}, formatNumber(NewZealand.packages) + ' packages. ' + formatNumber(NewZealand.units) + ' units. ' + formatNumber(NewZealand.pbdb_collections) + ' collections.')            ]),
             h(Image, { className: "location-img", src: 'new_zealand_new_medium.jpg' }),
             h('div.location-text', {}, [
                 h('h1', {}, 'Deep Sea'),
-                h('div.caption', {}, '388 packages. 7,124 units. 0 collections.')
+                h('div.caption', {}, formatNumber(DeepSea.packages) + ' packages. ' + formatNumber(DeepSea.units) + ' units. ' + formatNumber(DeepSea.pbdb_collections) + ' collections.')
             ]),
             h(Image, { className: "location-img", src: 'deep_sea_new_medium.jpg' }),
             
@@ -134,3 +153,8 @@ const Donate =
       ])
     ])
   ]);
+
+
+  function formatNumber(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  } 

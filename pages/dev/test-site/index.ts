@@ -1,5 +1,7 @@
 import h from "@macrostrat/hyper";
 import { MacrostratIcon } from "~/components";
+import { SETTINGS } from "@macrostrat-web/settings";
+import { useAPIResult } from "@macrostrat/ui-components";
 
 export function Image({ src, className, width, height }) {
     const srcWithAddedPrefix = "https://storage.macrostrat.org/assets/web/main-page/" + src;
@@ -42,4 +44,8 @@ export function Footer() {
             ])
         ])
     ]);
+}
+
+export function useMacrostratAPI(str) {
+    return useAPIResult(SETTINGS.apiV2Prefix + str)
 }
