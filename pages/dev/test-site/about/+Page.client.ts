@@ -1,16 +1,13 @@
-import { PageHeader } from "~/components";
-import { LinkCard } from "~/components/cards";
 import { Image, Navbar, Footer } from "../index";
 import "./main.styl";
 import "../main.styl";
-import { MacrostratIcon } from "~/components";
 import h from "@macrostrat/hyper";
 
 export function Page() {
     return h('div', [
     h(Navbar),
     h('div.body', [  
-        h('h1.big', 'About Macrostrat'),      
+        h('h1.title-about', 'About Macrostrat'),      
         h('div.line'),
         h('div.table', [
             h('dv.table-row', [

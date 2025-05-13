@@ -42,6 +42,7 @@ a
   flex-direction: column
   gap: 20px
   height: 95vh
+  justify-content: center
 
   .header
     text-shadow: black 1px 0 10px
@@ -57,6 +58,7 @@ a
     .version
       font-size: 40px
       padding: 0
+      margin: 0
   
   .big-text
     text-align: center
@@ -126,22 +128,23 @@ a
   flex-wrap: wrap
   justify-content: center
 
-  .btn
-    text-align: center
-    text-wrap: wrap
+  a
+    color: white !important
+    text-decoration: none
 
-    a
+    &:hover
       color: white
-      text-decoration: none
 
-      &:hover
-        color: white
+.rockd-button-container
+  display: flex
+  justify-content: center
+  align-items: center
+  gap: 5px
 
-.rockd-png
-  width: 22px
-  padding-right: 4px
-  float: left
-  padding-top: 5px
+  .rockd-png
+    width: 22px
+    height: 22px
+    float: left
 
 .country_container
   height: 100vh

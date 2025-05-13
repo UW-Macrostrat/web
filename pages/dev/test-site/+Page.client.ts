@@ -3,6 +3,7 @@ import "./main.sass";
 import "./main.styl";
 import h from "@macrostrat/hyper";
 import { PanelCard } from "@macrostrat/map-interface";
+import { LinkCard } from "~/components/cards";
 import { useState } from 'react';
 
 export function Page() {
@@ -15,7 +16,6 @@ export function Page() {
     let columns = 0;
     let units = 0;
     let polygons = 0;
-    let names = 0;
 
     result.forEach(project => {
       columns += project.columns;
@@ -58,11 +58,8 @@ export function Page() {
               ]),
               h('p.big-text', {}, 'A platform for geological data exploration, integration, and analysis'),
               h('div.buttons', {}, [
-                  h(PanelCard, { className: 'btn' }, [
-                    h('a.btn', { href: '/sift/#/' }, 'Search'),
-                  ]),
-                  h(PanelCard, { className: "btn" }, [
-                    h('a.btn', { href: '/map/#3/40.78/-94.13' }, 'Geologic Map'),
+                  h(LinkCard, { title: 'Search', href: '/sift/#/' }),
+                  h(LinkCard, { title: "Geologic Map", href: '/map/#3/40.78/-94.13' }, [
                     /*h('p', { className: 'long'}, [
                       h('div.temp', {}, [
                           'With over 225 maps from data providers around the world across every scale, Macrostrat is the world\'s largest homogenized geologic map database. Our data processing pipeline links geologic map polygons to Macrostrat column polygons, external stratigraphic name lexicons, and geochronological intervals, enabling the enhancement of the original map data and allowing for direct links into ',
@@ -83,29 +80,22 @@ export function Page() {
                       ])
                     ]),*/
                   ]),
-                  h(PanelCard, { className: "btn"}, [
-                    h('a.btn', { href: '/projects' }, 'Projects'),
+                  h(LinkCard, { title: 'Projects', href: '/projects'}, [
                     // h('p', 'Projects for specific regions or geological problems')
                   ]),
-                  h(PanelCard, { className: "btn"}, [
-                    h('a.btn', { href: '/lex' }, 'Geologic Lexicon'),
+                  h(LinkCard, { title: 'Geologic Lexicon', href: '/lex'}, [
                     // h('p', 'Geologic units and data dictionaries')
                   ]),
-                  h(PanelCard, { className: "btn"}, [
-                    h('a', { href: '/maps' }, 'Maps'),
+                  h(LinkCard, { title: 'Maps', href: '/maps'}, [
                     // h('p', "The spatial footprint of rocks on the Earth\'s surface")
                   ]),
-                  h(PanelCard, { className: "btn"}, [
-                    h('a.btn', { href: '/columns' }, 'Columns'),
+                  h(LinkCard, { title: 'Columns', href: '/columns'}, [
                     // h('p', 'Stratigraphic and geological columns showing the organization of rocks in time')
                   ]),
-                  h(PanelCard, { className: "btn"}, [
-                    h('a.btn.rockd', { href: 'https://rockd.org' }, [
-                      h('div.rockd-button-container', {}, [
+                  h(LinkCard, { title: h('div.rockd-button-container', {}, [
                           h(Image, { className: "rockd-png", src: 'rockd.jpg', width: '22px' }),
                           h('a', { href: 'https://rockd.org', target: '_blank' }, 'Go mobile')
-                      ])
-                    ])
+                      ]), href: 'https://rockd.org'}, [
                   ]),
               ])
             ])
