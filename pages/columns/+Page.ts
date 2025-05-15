@@ -3,6 +3,7 @@ import { ContentPage } from "~/layouts";
 import { PageHeader, Link, AssistantLinks, DevLinkButton } from "~/components";
 import { AnchorButton, Tag } from "@blueprintjs/core";
 import { useData } from "vike-react/useData";
+import { PanelCard } from "@macrostrat/map-interface";
 
 export function Page(props) {
   return h(ColumnListPage, props);
@@ -22,7 +23,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
 
 function ColumnGroup({ data, linkPrefix }) {
   const { id, name, columns } = data;
-  return h("div.column-group", [
+  return h('div', [
     h("h2.column-group", name),
     h(
       "ul",

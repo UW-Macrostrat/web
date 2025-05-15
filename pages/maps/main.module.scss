@@ -32,3 +32,30 @@
     padding: 0.5em 0;
   }
 }
+
+.pages {
+  margin: 10px 0;
+  width: 100%;
+  display: flex;
+  text-align: center;
+  justify-content: center;
+
+  .page-container {
+    display: grid;
+    grid-template-columns: 100px 50px 100px;
+    color: var(--text-emphasized-color);
+
+    .btn-content {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    p {
+      margin: 0;
+      text-align: center;
+    }
+  }
+}
