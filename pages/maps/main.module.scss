@@ -12,6 +12,26 @@
   display: flex;
   gap: 10px;
   flex-direction: column;
+
+  a {
+    color: white !important;
+  }
+
+  .link-title {
+    display: flex;
+    justify-content: space-between;
+
+    p {
+      margin: 0;
+    }
+
+    a {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      justify-content: center;
+    }
+  }
 }
 
 .source-id {

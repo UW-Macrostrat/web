@@ -40,11 +40,17 @@ function SourceItem({ source }) {
   const href = `/maps/${source_id}`;
   const href1 = `/map/dev/sources/${slug}`;
 
-  return h(LinkCard, {href, title: name}, [
-    h("span.source-id", {}, source_id),
-    h("span.scale", {}, source.scale),
+  return h(LinkCard, {
+    href, 
+    title: h('div.link-title', [
+      h('h1',"#" + source_id + " " + name),
+      h("a", { href: href1 }, [
+        h('p', "View on map (" + source.scale + ")"),
+        h(Icon, { icon: "map" })
+      ]),
+    ]),
+  }, [
     h.if(source.raster_url != null)([" ", h("span.raster", "Raster")]),
-    h("span", ["   ", h("a", { href: href1 }, h("code", {}, slug))]),
   ]);
 }
 
