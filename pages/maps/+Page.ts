@@ -1,20 +1,20 @@
 import h from "./main.module.scss";
 import { AnchorButton, Icon } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
-import { PageHeader, DevLinkButton, AssistantLinks } from "~/components";
+import { PageHeader, DevLinkButton, AssistantLinks, LinkCard } from "~/components";
 import { useData } from "vike-react/useData";
 import { useState } from "react";
+import { LinkCard } from "~/components/cards";
 
 export function Page() {
   const { sources } = useData();
 
-  const pageLength = 15;
+  const pageLength = 5;
   const length = sources.length;
   const numPages = Math.ceil(length / pageLength);
   const [page, setPage] = useState(0);
 
   const items = sources.slice(page * pageLength, (page + 1) * pageLength);
-  console.log(numPages);
 
   return h(ContentPage, [
     h(AssistantLinks, [
@@ -28,7 +28,7 @@ export function Page() {
     ]),
     h(PageHeader, { title: "Maps" }),
     h(
-      "ul.maps-list",
+      "div.maps-list",
       items.map((d) => h(SourceItem, { source: d, key: d.source_id })),
     ),
     pageCarousel({ page, setPage, numPages }),
@@ -40,11 +40,8 @@ function SourceItem({ source }) {
   const href = `/maps/${source_id}`;
   const href1 = `/map/dev/sources/${slug}`;
 
-  return h("li", [
+  return h(LinkCard, {href, title: name}, [
     h("span.source-id", {}, source_id),
-    " ",
-    h("a", { href }, [name]),
-    " ",
     h("span.scale", {}, source.scale),
     h.if(source.raster_url != null)([" ", h("span.raster", "Raster")]),
     h("span", ["   ", h("a", { href: href1 }, h("code", {}, slug))]),
