@@ -12,7 +12,8 @@ export function Page() {
 
     if (res == null) return h("div", "Loading...");
 
-    console.log("environments", res);
+    const grouped = groupByType(res);
+    console.log("environments", grouped);
 
     return h('div.environ-list-page', [
     h(AssistantLinks, [
@@ -28,19 +29,17 @@ export function Page() {
     ]),
     h(ContentPage, [
       h(PageHeader, { title: "Environments" }),
-      h('div.environ-table', [
-        h('div.environ-header', [
-          h('div.environ-id-header', "ID"),
-          h('div.environ-name-header', "Name"),
-        ]),
-        h(Divider),
-        res.map((d) => h(EnvronmentItem, { data: d }) ),
-        ])
+        h('div.environment-list', Object.entries(grouped).map(([type, group]) =>
+            h('div.environment-group', [
+            h('h3', type), // Group heading
+            ...group.map(item => EnvironmentItem({ data: item }))
+            ])
+        ))
     ])
   ]);
 }
 
-function EnvronmentItem({ data, linkPrefix }) {
+function EnvironmentItem({ data }) {
   const { environ_id, name, color } = data;
   return h('div.environ-item', [
     h('div.environ-id', "#" + environ_id),
@@ -62,4 +61,14 @@ function getContrastTextColor(bgColor) {
 
   // Return black or white depending on luminance
   return luminance > 0.6 ? '#000000' : '#FFFFFF';
+}
+
+function groupByType(items) {
+  return items.reduce((acc, item) => {
+    if (!acc[item.type]) {
+      acc[item.type] = [];
+    }
+    acc[item.type].push(item);
+    return acc;
+  }, {});
 }
