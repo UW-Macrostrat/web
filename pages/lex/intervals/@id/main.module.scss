@@ -1,0 +1,18 @@
+.int-item-header {
+    display: flex;
+    gap: 5px;
+    flex-direction: column;   
+
+    .int-name {
+        padding: 2px 6px;
+        margin: .2em 0;
+        border-radius: 0.2em;  
+        font-size: 2em;
+        place-self: end start;
+    }
+}
+
+ul, h3 {
+    margin: 0;
+    padding: 0;
+}

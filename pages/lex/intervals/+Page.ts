@@ -1,11 +1,10 @@
 import h from "./main.module.scss";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
-import { PageHeader, AssistantLinks } from "~/components";
+import { PageHeader, AssistantLinks, Link } from "~/components";
 import { Card, Icon, Popover, RangeSlider } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
-
 
 export function Page() {
     const [input, setInput] = useState("");
@@ -103,12 +102,9 @@ function EconItem({ data }) {
     className: "int-item-popover",
     content: h('div.int-tooltip', [
         h('div.int-tooltip-id', "ID - #" + int_id),
-        h('div.int-tooltip-ages', "Ages - " + b_age + " to " + t_age),
+        h('div.int-tooltip-ages', "Ages - " + b_age + " - " + t_age + " Ma"),
         abbrev ? h('div.int-tooltip-abbrev', "Abbreviation - " + abbrev) : null,
-        timescales[0].timescale_id ?  h('div.int-tooltip-timescales', [
-          h('div.int-tooltip-timescales-title', "Timescales"),
-          h('ul.int-tooltip-timescales-list', timescales.map((t) => h('li.int-tooltip-timescale', "#" + t.timescale_id + " - " + t.name)))
-        ]) : null,
+        h(Link, { href: "/lex/intervals/" + int_id }, "View more")
       ]),
     }, 
     h('div.int-item', [
