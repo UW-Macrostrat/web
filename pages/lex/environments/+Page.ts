@@ -13,7 +13,6 @@ export function Page() {
     if (res == null) return h("div", "Loading...");
 
     const grouped = groupByClassThenType(res);
-    console.log("environments", grouped);
 
     return h('div.environ-list-page', [
     h(AssistantLinks, [
@@ -72,12 +71,19 @@ function getContrastTextColor(bgColor) {
 function groupByClassThenType(items) {
   return items.reduce((acc, item) => {
     const { class: className, type } = item;
+
+    // Only include items with a valid type (not null, undefined, or empty string)
+    if (!type || type.trim() === '') {
+      return acc; // Skip this item if it has no valid type
+    }
+
     if (!acc[className]) {
       acc[className] = {};
     }
     if (!acc[className][type]) {
       acc[className][type] = [];
     }
+
     acc[className][type].push(item);
     return acc;
   }, {});
