@@ -96,7 +96,11 @@ function ColumnItem({ data, linkPrefix = "/" }) {
   return h("div.column-row", [
     h("span.col-id", "#" + col_id),
     h(Link, { className: 'col-link', href }, [col_name]),
-    h("span", { className: status === "active" ? 'active' : 'inprocess'},  status.charAt(0).toUpperCase() + status.slice(1)),
+    h("span", { className: status === "active" ? 'active' : 'inprocess'},  UpperCase(status)),
     h("span.col-group", "#" + col_group_id),
   ]);
+}
+
+function UpperCase(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }

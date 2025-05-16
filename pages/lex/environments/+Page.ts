@@ -32,10 +32,10 @@ export function Page() {
         h('div.environment-list',
             Object.entries(grouped).map(([className, types]) =>
                 h('div.environment-class-group', [
-                h('h2', className),
+                h('h2', UpperCase(className)),
                 ...Object.entries(types).map(([type, group]) =>
                     h('div.environment-group', [
-                    h('h3', type),
+                    h('h3', UpperCase(type)),
                     ...group.map(item => EnvironmentItem({ data: item }))
                     ])
                 )
@@ -82,4 +82,8 @@ function groupByClassThenType(items) {
     acc[className][type].push(item);
     return acc;
   }, {});
+}
+
+function UpperCase(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
