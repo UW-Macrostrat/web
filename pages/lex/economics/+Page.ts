@@ -26,29 +26,29 @@ export function Page() {
 
     const grouped = groupByClassThenType(filtered);
 
-    return h('div.environ-list-page', [
+    return h('div.econ-list-page', [
     h(AssistantLinks, [
       h(Card, [
         h('div.search-bar', [
           h(Icon, { icon: "search" }),
           h('input', {
             type: "text",
-            placeholder: "Search environments",
+            placeholder: "Search economics",
             onChange: handleChange,
           }),
         ])
       ]),      
     ]),
     h(ContentPage, [
-      h(PageHeader, { title: "Environments" }),
-        h('div.environment-list',
+      h(PageHeader, { title: "Economics" }),
+        h('div.econ-list',
             Object.entries(grouped).map(([className, types]) =>
-                h('div.environment-class-group', [
+                h('div.econ-class-group', [
                 h('h2', UpperCase(className)),
                 ...Object.entries(types).map(([type, group]) =>
-                    h('div.environment-group', [
+                    h('div.econ-group', [
                         h('h3', UpperCase(type)),
-                        h('div.environment-items', group.map((d) => h(EnvironmentItem, { data: d, key: d.environ_id }))),
+                        h('div.econ-items', group.map((d) => h(EconItem, { data: d, key: d.environ_id }))),
                     ])
                 )
                 ])
@@ -58,10 +58,10 @@ export function Page() {
   ]);
 }
 
-function EnvironmentItem({ data }) {
+function EconItem({ data }) {
   const { environ_id, name, color } = data;
-  return h('div.environ-item', [
-    h('div.environ-name', { style: { "background-color": color, "color": getContrastTextColor(color)} }, name),
+  return h('div.econ-item', [
+    h('div.econ-name', { style: { "background-color": color, "color": getContrastTextColor(color)} }, name),
   ]);
 }
 
