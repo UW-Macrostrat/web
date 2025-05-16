@@ -8,14 +8,7 @@ import { LinkCard } from "~/components/cards";
 
 export function Page() {
   const { sources } = useData();
-
-  const pageLength = 5;
-  const length = sources.length;
-  const numPages = Math.ceil(length / pageLength);
-  const [page, setPage] = useState(0);
   const [inputValue, setInputValue] = useState("");
-
-  console.log("inputValue", inputValue);
 
   const filteredSources = sources.filter((source) => {
     const name = source.name.toLowerCase();
@@ -23,6 +16,13 @@ export function Page() {
     const input = inputValue.toLowerCase();
     return name.includes(input) || slug.includes(input);
   });
+
+  const pageLength = 5;
+  const length = filteredSources.length;
+  const numPages = Math.ceil(length / pageLength);
+  const [page, setPage] = useState(0);
+
+  console.log("inputValue", inputValue);
 
 
   const items = filteredSources.slice(page * pageLength, (page + 1) * pageLength);
@@ -32,7 +32,7 @@ export function Page() {
   }
 
 
-  return h(ContentPage, [
+  return h('div.maps-page', [
     h(AssistantLinks, [
       h(
         AnchorButton,
@@ -53,12 +53,14 @@ export function Page() {
       ]),
       h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
     ]),
-    h(PageHeader, { title: "Maps" }),
-    h(
-      "div.maps-list",
-      items.map((d) => h(SourceItem, { source: d, key: d.source_id })),
-    ),
-    pageCarousel({ page, setPage, numPages }),
+    h(ContentPage, [
+      h(PageHeader, { title: "Maps" }),
+      h(
+        "div.maps-list",
+        items.map((d) => h(SourceItem, { source: d, key: d.source_id })),
+      ),
+      pageCarousel({ page, setPage, numPages }),
+    ]),
   ]);
 }
 
@@ -82,10 +84,11 @@ function SourceItem({ source }) {
 }
 
 function pageCarousel({page, setPage, numPages}) {
+  console.log('numpages', numPages);
     return h('div.pages', 
         h('div.page-container', [
           h('div', { className: "page-btn" }, [
-            h('div', { className: page != 0 ? 'btn-content' : 'hide',             
+            h('div', { className: page != 0 && numPages != 1 ? 'btn-content' : 'hide',             
                 onClick: () => {
                     setPage(page - 1);
                 }}, [
@@ -95,7 +98,7 @@ function pageCarousel({page, setPage, numPages}) {
           ]),
           h('p', 'Page ' + (page + 1)),
           h('div', { className: "page-btn" }, [
-            h('div', { className: page < numPages - 1 ? 'btn-content' : 'hide',
+            h('div', { className: page < numPages - 1 && numPages != 1 ? 'btn-content' : 'hide',
                 onClick: () => {
                     setPage(page + 1);
                 }
