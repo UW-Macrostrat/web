@@ -17,16 +17,16 @@ export function Page() {
         setInput(event.target.value.toLowerCase());
     }
 
-    /*
     const filtered = res.filter((d) => {
         const name = d.name.toLowerCase();
-        const className = d.class.toLowerCase();
-        const type = d.int_type ? d.int_type.toLowerCase() : "";
-        return name.includes(input) || className.includes(input) || type.includes(input);
+        const intType = d.int_type ? d.int_type.toLowerCase() : "";
+        const abbrev = d.abbrev ? d.abbrev.toLowerCase() : "";
+        const b_age = d.b_age ? d.b_age.toString() : "";
+        const t_age = d.t_age ? d.t_age.toString() : "";
+        return name.includes(input) || intType.includes(input) || abbrev.includes(input) || b_age.includes(input) || t_age.includes(input);
     });
-    */
 
-    const grouped = groupByIntType(res);
+    const grouped = groupByIntType(filtered);
     console.log(grouped);
 
 
