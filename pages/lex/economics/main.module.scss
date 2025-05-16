@@ -1,0 +1,57 @@
+h3, h2 {
+    margin: 0;
+    padding: 0;
+}
+
+.environment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.3em;
+
+    .environment-class-group {
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
+
+        .environment-group {
+            border-left: 2px solid rgb(56, 62, 71);
+            padding-left: 1em;
+
+                .environment-items {
+                    display: flex;
+                    gap: 5px;
+                    flex-wrap: wrap;
+                    align-items: center;
+
+                    .environ-name {
+                        padding: 2px 6px;
+                        margin: .2em 0;
+                        border-radius: 0.2em;  
+                    }
+                }
+        }
+    }
+}
+
+.search-bar {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  justify-content: center;
+
+  input {
+    width: 100%;
+    padding: 0.5em;
+    border-radius: 0.2em;
+    border: none;
+    background-color: var(--background-color);
+    color: var(--text-emphasized-color);
+    font-size: 1em;
+    margin: 3px;
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0.2em var(--text-emphasized-color);
+    }
+  }
+}
