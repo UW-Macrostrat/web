@@ -1,4 +1,4 @@
-import h from "@macrostrat/hyper";
+import h from "./main.module.scss";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
 import { PageHeader, Link, AssistantLinks, DevLinkButton } from "~/components";
@@ -14,7 +14,7 @@ export function Page() {
 
     console.log("environments", res);
 
-    return h('div.environment-list-page', [
+    return h('div.environ-list-page', [
     h(AssistantLinks, [
       h(AnchorButton, [
         h('div.search-bar', [
@@ -28,16 +28,21 @@ export function Page() {
     ]),
     h(ContentPage, [
       h(PageHeader, { title: "Environments" }),
-      h('div.environment-groups', 
+      h('div.environ-table', [
+        h('div.environ-header', [
+          h('div.environ-id-header', "ID"),
+          h('div.environ-name-header', "Name"),
+        ]),
+        h(Divider),
         res.map((d) => h(EnvronmentItem, { data: d }) ),
-      )
+        ])
     ])
   ]);
 }
 
 function EnvronmentItem({ data, linkPrefix }) {
   const { environ_id, name, color } = data;
-  return h('div.environment-item', [
+  return h('div.environ-item', [
     h('div.environ-id', "#" + environ_id),
     h('div.environ-name', { style: { "background-color": color, "color": getContrastTextColor(color)} }, name),
   ]);

@@ -1,0 +1,19 @@
+.environ-name {
+    padding: 5px
+}
+
+.environ-header, .environ-item {
+    display: grid;
+    grid-template-columns: 10% 90%
+}
+
+.environ-name {
+    place-self: end start;
+    padding: 0.5em;
+    margin: .2em 0;
+    border-radius: 0.2em;  
+}
+.environ-id {
+    margin: auto;
+    margin-left: 0;
+}
