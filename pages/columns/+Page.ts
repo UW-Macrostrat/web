@@ -59,6 +59,8 @@ function ColumnGroup({ data, linkPrefix, columnInput }) {
     return name.includes(input);
   });
 
+  if (filteredColumns?.length === 0) return null;
+
   const { id, name, columns } = data;
   return h(Card, { className: 'column-group', onClick : () => setIsOpen(!isOpen) }, [
     h('div.column-group-header', [
@@ -83,9 +85,7 @@ function ColumnGroup({ data, linkPrefix, columnInput }) {
               h(ColumnItem, { data, key: data.col_id, linkPrefix })
             )
           ]),
-        ]
-        
-      )
+      ])
     ),
   ]);
 }
@@ -95,7 +95,7 @@ function ColumnItem({ data, linkPrefix = "/" }) {
   const href = linkPrefix + `columns/${col_id}`;
   return h("div.column-row", [
     h("span.col-id", "#" + col_id),
-    h(Link, { href }, [col_name]),
+    h(Link, { className: 'col-link', href }, [col_name]),
     h("span", { className: status === "active" ? 'active' : 'inprocess'},  status.charAt(0).toUpperCase() + status.slice(1)),
     h("span.col-group", "#" + col_group_id),
   ]);
