@@ -14,8 +14,6 @@ export function Page() {
 
     if (res == null) return h("div", "Loading...");
 
-    console.log(res);
-
     const handleChange = (event) => { 
         setInput(event.target.value.toLowerCase());
     }
@@ -68,17 +66,13 @@ function EnvironmentItem({ data }) {
     className: "environ-item-popover",
     content: h('div.environ-tooltip', [
         h('div.environ-tooltip-id', "ID - #" + environ_id),
-        h('div.environ-tooltip-id', "Time Units - " + t_units),
+        h('div.environ-tooltip-t-unit', "Time Units - " + t_units),
       ]),
     }, 
     h('div.environ-item', [
-      h('div.environ-name', { style: { "background-color": color, "color": getContrastTextColor(color)} }, name),
+      h('div.environ-name', { style: { "backgroundColor": color, "color": getContrastTextColor(color)} }, name),
     ])
   )
-
-  return h('div.environ-item', [
-    h('div.environ-name', { style: { "background-color": color, "color": getContrastTextColor(color)} }, name),
-  ]);
 }
 
 function getContrastTextColor(bgColor) {

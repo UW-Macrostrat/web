@@ -13,6 +13,8 @@ export function Page() {
 
     if (res == null) return h("div", "Loading...");
 
+    console.log(res);
+
     const handleChange = (event) => { 
         setInput(event.target.value.toLowerCase());
     }
@@ -59,11 +61,21 @@ export function Page() {
 }
 
 function EconItem({ data }) {
-  const { environ_id, name, color } = data;
+  const { name, color, econ_id, t_units } = data;
 
-  return h('div.econ-item', [
-    h('div.econ-name', { style: { "background-color": color, "color": getContrastTextColor(color)} }, name),
-  ]);
+  return h(Popover, {
+    className: "econ-item-popover",
+    content: h('div.econ-tooltip', [
+        h('div.econ-tooltip-id', "ID - #" + econ_id),
+        h('div.econ-toolti[-t-unit', "Time Units - " + t_units),
+      ]),
+    }, 
+    h('div.econ-item', [
+      h('div.econ-name', { style: { "backgroundColor": color, "color": getContrastTextColor(color)} }, name),
+    ])
+  )
+
+  return ;
 }
 
 function getContrastTextColor(bgColor) {
