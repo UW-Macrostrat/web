@@ -49,7 +49,6 @@ export function Page() {
             onChange: handleInputChange 
           }),
         ])
-        
       ]),
       h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
     ]),

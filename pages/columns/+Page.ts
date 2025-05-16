@@ -11,23 +11,51 @@ export function Page(props) {
 
 function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const { columnGroups } = useData();
+  const [groupInput, setGroupInput] = useState("");
+  const filteredGroups = columnGroups.filter((group) => {
+    const name = group.name.toLowerCase();
+    const columns = group.columns.map((col) => col.col_name.toLowerCase());
+    const input = groupInput.toLowerCase();
+    return name.includes(input) || columns.some((col) => col.includes(input));
+  });
+
+  const handleInputChange = (event) => {
+    setGroupInput(event.target.value.toLowerCase());
+  }
   
   return h('div.column-list-page', [
     h(AssistantLinks, [
       h(AnchorButton, { href: "/projects", minimal: true }, "Projects"),
+      h(AnchorButton, [
+        h('div.search-bar', [
+          h(Icon, { icon: "search" }),
+          h('input', {
+            type: "text",
+            placeholder: "Search",
+            onChange: handleInputChange 
+          }),
+        ])
+      ]),      
       h(DevLinkButton, { href: "/columns/correlation" }, "Correlation chart"),
     ]),
     h(ContentPage, [
       h(PageHeader, { title }),
       h('div.column-groups', 
-        columnGroups.map((d) => h(ColumnGroup, { data: d, key: d.id, linkPrefix })),
+        filteredGroups.map((d) => h(ColumnGroup, { data: d, key: d.id, linkPrefix, groupInput }) ),
       )
     ])
   ]);
 }
 
-function ColumnGroup({ data, linkPrefix }) {
+function ColumnGroup({ data, linkPrefix, groupInput }) {
   const [isOpen, setIsOpen] = useState(false);
+  const filteredColumns = data.columns.filter((col) => {
+    const name = col.col_name.toLowerCase();
+    const input = groupInput.toLowerCase();
+    return name.includes(input);
+  });
+
+  console.log("filteredColumns", filteredColumns);
 
   const { id, name, columns } = data;
   return h(Card, { className: 'column-group', onClick : () => setIsOpen(!isOpen) }, [
@@ -41,7 +69,7 @@ function ColumnGroup({ data, linkPrefix }) {
       h(
         "div.column-list", [
           h(Divider),
-          columns.map((data) =>
+          filteredColumns.map((data) =>
             h(ColumnItem, { data, key: data.col_id, linkPrefix })
           )
         ]
