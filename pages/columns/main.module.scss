@@ -40,3 +40,8 @@ h2 {
     }
   }
 }
+
+.column-row {
+    display: grid;
+    grid-template-columns: 10% 60% 20% 10%
+}

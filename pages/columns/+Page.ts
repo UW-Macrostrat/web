@@ -4,6 +4,7 @@ import { Divider, AnchorButton, Tag, Card, Collapse, Icon } from "@blueprintjs/c
 import { useData } from "vike-react/useData";
 import { useState } from "react";
 import h from "./main.module.scss";
+import { log } from "console";
 
 export function Page(props) {
   return h(ColumnListPage, props);
@@ -11,16 +12,19 @@ export function Page(props) {
 
 function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const { columnGroups } = useData();
-  const [groupInput, setGroupInput] = useState("");
+
+  console.log("columnGroups", columnGroups);
+
+  const [columnInput, setColumnInput] = useState("");
   const filteredGroups = columnGroups.filter((group) => {
     const name = group.name.toLowerCase();
     const columns = group.columns.map((col) => col.col_name.toLowerCase());
-    const input = groupInput.toLowerCase();
+    const input = columnInput.toLowerCase();
     return name.includes(input) || columns.some((col) => col.includes(input));
   });
 
   const handleInputChange = (event) => {
-    setGroupInput(event.target.value.toLowerCase());
+    setColumnInput(event.target.value.toLowerCase());
   }
   
   return h('div.column-list-page', [
@@ -31,7 +35,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
           h(Icon, { icon: "search" }),
           h('input', {
             type: "text",
-            placeholder: "Search",
+            placeholder: "Search columns",
             onChange: handleInputChange 
           }),
         ])
@@ -41,21 +45,19 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
     h(ContentPage, [
       h(PageHeader, { title }),
       h('div.column-groups', 
-        filteredGroups.map((d) => h(ColumnGroup, { data: d, key: d.id, linkPrefix, groupInput }) ),
+        filteredGroups.map((d) => h(ColumnGroup, { data: d, key: d.id, linkPrefix, columnInput }) ),
       )
     ])
   ]);
 }
 
-function ColumnGroup({ data, linkPrefix, groupInput }) {
+function ColumnGroup({ data, linkPrefix, columnInput }) {
   const [isOpen, setIsOpen] = useState(false);
   const filteredColumns = data.columns.filter((col) => {
     const name = col.col_name.toLowerCase();
-    const input = groupInput.toLowerCase();
+    const input = columnInput.toLowerCase();
     return name.includes(input);
   });
-
-  console.log("filteredColumns", filteredColumns);
 
   const { id, name, columns } = data;
   return h(Card, { className: 'column-group', onClick : () => setIsOpen(!isOpen) }, [
@@ -69,9 +71,18 @@ function ColumnGroup({ data, linkPrefix, groupInput }) {
       h(
         "div.column-list", [
           h(Divider),
-          filteredColumns.map((data) =>
-            h(ColumnItem, { data, key: data.col_id, linkPrefix })
-          )
+          h('div.column-table', [
+            h("div.column-row.column-header", [
+              h("span.col-id", "Id"),
+              h("span.col-name", "Name"),
+              h("span.col-status", "Status"),
+              h("span.col-status", "Group"),
+            ]),
+            h(Divider),
+            filteredColumns.map((data) =>
+              h(ColumnItem, { data, key: data.col_id, linkPrefix })
+            )
+          ]),
         ]
         
       )
@@ -82,7 +93,7 @@ function ColumnGroup({ data, linkPrefix, groupInput }) {
 function ColumnItem({ data, linkPrefix = "/" }) {
   const { col_id, col_name } = data;
   const href = linkPrefix + `columns/${col_id}`;
-  return h("div", [
+  return h("div.column-row", [
     h("span.col-id", "#" + col_id),
     " ",
     h(Link, { href }, [col_name]),
