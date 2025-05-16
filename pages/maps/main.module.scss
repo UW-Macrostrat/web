@@ -7,6 +7,11 @@
   font-size: 0.8em;
 }
 
+h1 {
+  margin: 0;
+  font-size: 1em;
+}
+
 .maps-list {
   padding: 0;
   display: flex;
@@ -31,6 +36,10 @@
       align-items: center;
       justify-content: center;
     }
+  }
+
+  p {
+    font-size: .5em;
   }
 }
 
@@ -78,6 +87,29 @@
     p {
       margin: 0;
       text-align: center;
+    }
+  }
+}
+
+.search-bar {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  justify-content: center;
+
+  input {
+    width: 100%;
+    padding: 0.5em;
+    border-radius: 0.2em;
+    border: none;
+    background-color: var(--background-color);
+    color: var(--text-emphasized-color);
+    font-size: 1em;
+    margin: 3px;
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0.2em var(--text-emphasized-color);
     }
   }
 }

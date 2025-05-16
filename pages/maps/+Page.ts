@@ -13,8 +13,24 @@ export function Page() {
   const length = sources.length;
   const numPages = Math.ceil(length / pageLength);
   const [page, setPage] = useState(0);
+  const [inputValue, setInputValue] = useState("");
 
-  const items = sources.slice(page * pageLength, (page + 1) * pageLength);
+  console.log("inputValue", inputValue);
+
+  const filteredSources = sources.filter((source) => {
+    const name = source.name.toLowerCase();
+    const slug = source.slug.toLowerCase();
+    const input = inputValue.toLowerCase();
+    return name.includes(input) || slug.includes(input);
+  });
+
+
+  const items = filteredSources.slice(page * pageLength, (page + 1) * pageLength);
+
+  const handleInputChange = (event) => {
+    setInputValue(event.target.value.toLowerCase());
+  }
+
 
   return h(ContentPage, [
     h(AssistantLinks, [
@@ -24,6 +40,17 @@ export function Page() {
         "Ingestion system"
       ),
       h(AnchorButton, { icon: "map", href: "/map/sources" }, "Show on map"),
+      h(AnchorButton, [
+        h('div.search-bar', [
+          h(Icon, { icon: "search" }),
+          h('input', {
+            type: "text",
+            placeholder: "Search",
+            onChange: handleInputChange 
+          }),
+        ])
+        
+      ]),
       h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
     ]),
     h(PageHeader, { title: "Maps" }),

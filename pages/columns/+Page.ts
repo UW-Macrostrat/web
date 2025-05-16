@@ -1,9 +1,9 @@
 import h from "@macrostrat/hyper";
 import { ContentPage } from "~/layouts";
 import { PageHeader, Link, AssistantLinks, DevLinkButton } from "~/components";
-import { AnchorButton, Tag } from "@blueprintjs/core";
+import { AnchorButton, Tag, Card, Collapse } from "@blueprintjs/core";
 import { useData } from "vike-react/useData";
-import { PanelCard } from "@macrostrat/map-interface";
+import { CollapseCard } from "@macrostrat/ui-components";
 
 export function Page(props) {
   return h(ColumnListPage, props);
@@ -11,6 +11,7 @@ export function Page(props) {
 
 function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const { columnGroups } = useData();
+  
   return h(ContentPage, [
     h(AssistantLinks, [
       h(AnchorButton, { href: "/projects", minimal: true }, "Projects"),
@@ -23,12 +24,14 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
 
 function ColumnGroup({ data, linkPrefix }) {
   const { id, name, columns } = data;
-  return h('div', [
+  return h(Card, [
     h("h2.column-group", name),
-    h(
-      "ul",
-      columns.map((data) =>
-        h(ColumnItem, { data, key: data.col_id, linkPrefix })
+    h(Collapse, { isOpen: false }, 
+      h(
+        "ul",
+        columns.map((data) =>
+          h(ColumnItem, { data, key: data.col_id, linkPrefix })
+        )
       )
     ),
   ]);
