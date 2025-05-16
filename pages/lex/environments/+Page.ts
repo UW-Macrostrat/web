@@ -2,26 +2,39 @@ import h from "./main.module.scss";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
 import { PageHeader, Link, AssistantLinks, DevLinkButton } from "~/components";
-import { Divider, AnchorButton, Tag, Card, Collapse, Icon } from "@blueprintjs/core";
+import { Divider, Tag, Card, Collapse, Icon } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
 
 
 export function Page() {
+    const [input, setInput] = useState("");
     const res = useAPIResult(SETTINGS.apiV2Prefix + "/defs/environments?all")?.success.data;
 
     if (res == null) return h("div", "Loading...");
 
-    const grouped = groupByClassThenType(res);
+    const handleChange = (event) => { 
+        setInput(event.target.value.toLowerCase());
+    }
+
+    const filtered = res.filter((d) => {
+        const name = d.name.toLowerCase();
+        const className = d.class.toLowerCase();
+        const type = d.type ? d.type.toLowerCase() : "";
+        return name.includes(input) || className.includes(input) || type.includes(input);
+    });
+
+    const grouped = groupByClassThenType(filtered);
 
     return h('div.environ-list-page', [
     h(AssistantLinks, [
-      h(AnchorButton, [
+      h(Card, [
         h('div.search-bar', [
           h(Icon, { icon: "search" }),
           h('input', {
             type: "text",
             placeholder: "Search environments",
+            onChange: handleChange,
           }),
         ])
       ]),      

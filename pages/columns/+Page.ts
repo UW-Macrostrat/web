@@ -30,7 +30,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   return h('div.column-list-page', [
     h(AssistantLinks, [
       h(AnchorButton, { href: "/projects", minimal: true }, "Projects"),
-      h(AnchorButton, [
+      h(Card, [
         h('div.search-bar', [
           h(Icon, { icon: "search" }),
           h('input', {
