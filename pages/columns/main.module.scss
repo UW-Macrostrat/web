@@ -1,0 +1,19 @@
+.column-group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+h2 {
+    margin: 0;
+}
+
+.column-group {
+    cursor: pointer;
+}
+
+.column-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
