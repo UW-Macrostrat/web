@@ -1,8 +1,8 @@
 import h from "./main.module.scss";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
-import { PageHeader, Link, AssistantLinks, DevLinkButton } from "~/components";
-import { Divider, Tag, Card, Collapse, Icon } from "@blueprintjs/core";
+import { PageHeader, AssistantLinks } from "~/components";
+import { Card, Icon, Popover } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
 
@@ -17,52 +17,65 @@ export function Page() {
         setInput(event.target.value.toLowerCase());
     }
 
+    /*
     const filtered = res.filter((d) => {
         const name = d.name.toLowerCase();
         const className = d.class.toLowerCase();
-        const type = d.type ? d.type.toLowerCase() : "";
+        const type = d.int_type ? d.int_type.toLowerCase() : "";
         return name.includes(input) || className.includes(input) || type.includes(input);
     });
+    */
 
-    const grouped = groupByClassThenType(filtered);
+    const grouped = groupByIntType(res);
+    console.log(grouped);
 
-    return h('div.environ-list-page', [
+
+    return h('div.int-list-page', [
     h(AssistantLinks, [
       h(Card, [
         h('div.search-bar', [
           h(Icon, { icon: "search" }),
           h('input', {
             type: "text",
-            placeholder: "Search environments",
+            placeholder: "Search interval names",
             onChange: handleChange,
           }),
         ])
       ]),      
     ]),
     h(ContentPage, [
-      h(PageHeader, { title: "Environments" }),
-        h('div.environment-list',
-            Object.entries(grouped).map(([className, types]) =>
-                h('div.environment-class-group', [
-                h('h2', UpperCase(className)),
-                ...Object.entries(types).map(([type, group]) =>
-                    h('div.environment-group', [
-                        h('h3', UpperCase(type)),
-                        h('div.environment-items', group.map((d) => h(EnvironmentItem, { data: d, key: d.environ_id }))),
-                    ])
-                )
-                ])
-            )
+      h(PageHeader, { title: "Intervals" }),
+        h('div.int-list',
+          Object.entries(grouped).map(([intType, group]) =>
+            h('div.int-group', [
+              h('h2', UpperCase(intType)),
+              h('div.int-items', group.map((d) => h(EconItem, { data: d, key: d.environ_id })))
+            ])
+          )
         )
     ])
   ]);
 }
 
-function EnvironmentItem({ data }) {
-  const { environ_id, name, color } = data;
-  return h('div.environ-item', [
-    h('div.environ-name', { style: { "background-color": color, "color": getContrastTextColor(color)} }, name),
-  ]);
+function EconItem({ data }) {
+  const { name, color, abbrev, b_age, int_id, t_age, timescales } = data;
+
+  return h(Popover, {
+    className: "int-item-popover",
+    content: h('div.int-tooltip', [
+        h('div.int-tooltip-id', "ID - #" + int_id),
+        h('div.int-tooltip-ages', "Ages - " + b_age + " to " + t_age),
+        abbrev ? h('div.int-tooltip-abbrev', "Abbreviation - " + abbrev) : null,
+        timescales[0].timescale_id ?  h('div.int-tooltip-timescales', [
+          h('div.int-tooltip-timescales-title', "Timescales"),
+          h('ul.int-tooltip-timescales-list', timescales.map((t) => h('li.int-tooltip-timescale', "#" + t.timescale_id + " - " + t.name)))
+        ]) : null,
+      ]),
+    }, 
+    h('div.int-item', [
+      h('div.int-name', { style: { "backgroundColor": color, "color": getContrastTextColor(color)} }, name),
+    ])
+  )
 }
 
 function getContrastTextColor(bgColor) {
@@ -81,26 +94,20 @@ function getContrastTextColor(bgColor) {
   return luminance > 0.6 ? '#000000' : '#FFFFFF';
 }
 
-function groupByClassThenType(items) {
+function groupByIntType(items) {
   return items.reduce((acc, item) => {
-    const { class: className, type } = item;
+    const intType = item.int_type?.trim?.();
+    if (!intType) return acc; // Skip items with no int_type
 
-    // Only include items with a valid type (not null, undefined, or empty string)
-    if (!type || type.trim() === '') {
-      return acc; // Skip this item if it has no valid type
+    if (!acc[intType]) {
+      acc[intType] = [];
     }
 
-    if (!acc[className]) {
-      acc[className] = {};
-    }
-    if (!acc[className][type]) {
-      acc[className][type] = [];
-    }
-
-    acc[className][type].push(item);
+    acc[intType].push(item);
     return acc;
   }, {});
 }
+
 
 function UpperCase(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);

@@ -67,7 +67,7 @@ function EconItem({ data }) {
     className: "econ-item-popover",
     content: h('div.econ-tooltip', [
         h('div.econ-tooltip-id', "ID - #" + econ_id),
-        h('div.econ-toolti[-t-unit', "Time Units - " + t_units),
+        h('div.econ-tooltip-t-unit', "Time Units - " + t_units),
       ]),
     }, 
     h('div.econ-item', [
