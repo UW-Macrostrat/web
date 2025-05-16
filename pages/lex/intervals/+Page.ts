@@ -83,14 +83,14 @@ export function Page() {
     ]),
     h(ContentPage, [
       h(PageHeader, { title: "Intervals" }),
-        h('div.int-list',
-          Object.entries(grouped).map(([intType, group]) =>
-            h('div.int-group', [
-              h('h2', UpperCase(intType)),
-              h('div.int-items', group.map((d) => h(EconItem, { data: d, key: d.environ_id })))
-            ])
-          )
+      h('div.int-list',
+        Object.entries(grouped).map(([intType, group]) =>
+          h('div.int-group', [
+            h('h2', UpperCase(intType)),
+            h('div.int-items', group.map((d) => h(EconItem, { data: d, key: d.environ_id })))
+          ])
         )
+      )
     ])
   ]);
 }
