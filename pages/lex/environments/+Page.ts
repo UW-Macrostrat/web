@@ -12,7 +12,7 @@ export function Page() {
 
     if (res == null) return h("div", "Loading...");
 
-    const grouped = groupByType(res);
+    const grouped = groupByClassThenType(res);
     console.log("environments", grouped);
 
     return h('div.environ-list-page', [
@@ -29,12 +29,19 @@ export function Page() {
     ]),
     h(ContentPage, [
       h(PageHeader, { title: "Environments" }),
-        h('div.environment-list', Object.entries(grouped).map(([type, group]) =>
-            h('div.environment-group', [
-            h('h3', type), // Group heading
-            ...group.map(item => EnvironmentItem({ data: item }))
-            ])
-        ))
+        h('div.environment-list',
+            Object.entries(grouped).map(([className, types]) =>
+                h('div.environment-class-group', [
+                h('h2', className),
+                ...Object.entries(types).map(([type, group]) =>
+                    h('div.environment-group', [
+                    h('h3', type),
+                    ...group.map(item => EnvironmentItem({ data: item }))
+                    ])
+                )
+                ])
+            )
+        )
     ])
   ]);
 }
@@ -63,12 +70,16 @@ function getContrastTextColor(bgColor) {
   return luminance > 0.6 ? '#000000' : '#FFFFFF';
 }
 
-function groupByType(items) {
+function groupByClassThenType(items) {
   return items.reduce((acc, item) => {
-    if (!acc[item.type]) {
-      acc[item.type] = [];
+    const { class: className, type } = item;
+    if (!acc[className]) {
+      acc[className] = {};
     }
-    acc[item.type].push(item);
+    if (!acc[className][type]) {
+      acc[className][type] = [];
+    }
+    acc[className][type].push(item);
     return acc;
   }, {});
 }
