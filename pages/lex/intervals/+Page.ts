@@ -2,46 +2,85 @@ import h from "./main.module.scss";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
 import { PageHeader, AssistantLinks } from "~/components";
-import { Card, Icon, Popover } from "@blueprintjs/core";
+import { Card, Icon, Popover, RangeSlider } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
 
 
 export function Page() {
     const [input, setInput] = useState("");
+    const [bottomAge, setBottomAge] = useState([0, 4600]);
+    const [topAge, setTopAge] = useState([0, 4180]);
     const res = useAPIResult(SETTINGS.apiV2Prefix + "/defs/intervals?all")?.success.data;
 
     if (res == null) return h("div", "Loading...");
+
+    console.log(res);
 
     const handleChange = (event) => { 
         setInput(event.target.value.toLowerCase());
     }
 
     const filtered = res.filter((d) => {
-        const name = d.name.toLowerCase();
-        const intType = d.int_type ? d.int_type.toLowerCase() : "";
-        const abbrev = d.abbrev ? d.abbrev.toLowerCase() : "";
-        const b_age = d.b_age ? d.b_age.toString() : "";
-        const t_age = d.t_age ? d.t_age.toString() : "";
-        return name.includes(input) || intType.includes(input) || abbrev.includes(input) || b_age.includes(input) || t_age.includes(input);
+        const name = d.name?.toLowerCase() || "";
+        const intType = d.int_type?.toLowerCase() || "";
+        const abbrev = d.abbrev?.toLowerCase() || "";
+        const b_age = d.b_age ? parseInt(d.b_age, 10) : NaN; // Convert to number
+        const t_age = d.t_age ? parseInt(d.t_age, 10) : NaN; // Convert to number
+
+        // Check if name, intType, abbrev, or age falls within the ranges or input
+        const matchesName = name.includes(input);
+        const matchesType = intType.includes(input);
+        const matchesAbbrev = abbrev.includes(input);
+        const matchesAgeRange =
+            (!isNaN(b_age) && b_age >= bottomAge[0] && b_age <= bottomAge[1]) &&
+            (!isNaN(t_age) && t_age >= topAge[0] && t_age <= topAge[1]);
+
+        return (matchesName || matchesType || matchesAbbrev) && matchesAgeRange;
     });
 
     const grouped = groupByIntType(filtered);
     console.log(grouped);
 
-
     return h('div.int-list-page', [
     h(AssistantLinks, [
       h(Card, [
+        h('p', "Filter by name, type, or abbreviation"),
         h('div.search-bar', [
           h(Icon, { icon: "search" }),
           h('input', {
             type: "text",
-            placeholder: "Search interval names",
+            placeholder: "Search...",
             onChange: handleChange,
           }),
         ])
-      ]),      
+      ]),     
+      h(Card, [
+        h('p', "Filter by top age"),
+        h(RangeSlider, {
+          min: 0,
+          max: 4180,
+          stepSize: 10,
+          labelStepSize: 1000,
+          value: [topAge[0], topAge[1]],
+          onChange: (value) => {
+            setTopAge(value);
+          },
+        }),
+      ]), 
+      h(Card, [
+        h('p', "Filter by bottom age"),
+        h(RangeSlider, {
+          min: 0,
+          max: 4600,
+          stepSize: 10,
+          labelStepSize: 1000,
+          value: [bottomAge[0], bottomAge[1]],
+          onChange: (value) => {
+            setBottomAge(value);
+          }
+        }),
+      ]),
     ]),
     h(ContentPage, [
       h(PageHeader, { title: "Intervals" }),
