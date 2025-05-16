@@ -45,3 +45,18 @@ h2 {
     display: grid;
     grid-template-columns: 10% 60% 20% 10%
 }
+
+.active {
+    background-color: green;
+    color: white;
+    place-self: end start;
+    padding: 0.5em;
+    margin: .2em 0;
+    border-radius: 0.2em;  
+    font-weight: bold;
+}
+
+.inprocess {
+    background-color: yellow;
+    color: black;
+}

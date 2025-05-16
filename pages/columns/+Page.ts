@@ -91,23 +91,12 @@ function ColumnGroup({ data, linkPrefix, columnInput }) {
 }
 
 function ColumnItem({ data, linkPrefix = "/" }) {
-  const { col_id, col_name } = data;
+  const { col_id, col_name, status, col_group_id } = data;
   const href = linkPrefix + `columns/${col_id}`;
   return h("div.column-row", [
     h("span.col-id", "#" + col_id),
-    " ",
     h(Link, { href }, [col_name]),
-    h.if(data.status == "in process")([
-      " ",
-      h(Tag, { minimal: true }, "in process"),
-    ]),
-    h.if(data.status == "obsolete")([
-      " ",
-      h(Tag, { minimal: true, intent: "danger" }, "obsolete"),
-    ]),
-    h.if(data?.t_units == 0)([
-      " ",
-      h(Tag, { minimal: true, intent: "warning" }, "empty"),
-    ]),
+    h("span", { className: status === "active" ? 'active' : 'inprocess'},  status.charAt(0).toUpperCase() + status.slice(1)),
+    h("span.col-group", "#" + col_group_id),
   ]);
 }
