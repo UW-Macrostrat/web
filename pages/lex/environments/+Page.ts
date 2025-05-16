@@ -35,8 +35,8 @@ export function Page() {
                 h('h2', UpperCase(className)),
                 ...Object.entries(types).map(([type, group]) =>
                     h('div.environment-group', [
-                    h('h3', UpperCase(type)),
-                    ...group.map(item => EnvironmentItem({ data: item }))
+                        h('h3', UpperCase(type)),
+                        h('div.environment-items', group.map((d) => h(EnvironmentItem, { data: d, key: d.environ_id }))),
                     ])
                 )
                 ])
@@ -49,7 +49,6 @@ export function Page() {
 function EnvironmentItem({ data }) {
   const { environ_id, name, color } = data;
   return h('div.environ-item', [
-    h('div.environ-id', "#" + environ_id),
     h('div.environ-name', { style: { "background-color": color, "color": getContrastTextColor(color)} }, name),
   ]);
 }

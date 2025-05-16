@@ -1,23 +1,33 @@
-.environ-name {
-    padding: 5px
+h3, h2 {
+    margin: 0;
+    padding: 0;
 }
 
-.environ-header, .environ-item {
-    display: grid;
-    grid-template-columns: 10% 90%
-}
+.environment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.3em;
 
-.environ-name {
-    place-self: end start;
-    padding: 0.5em;
-    margin: .2em 0;
-    border-radius: 0.2em;  
-}
-.environ-id {
-    margin: auto;
-    margin-left: 0;
-}
+    .environment-class-group {
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
 
-.environment-group {
-    margin-left: 20px;
+        .environment-group {
+            border-left: 2px solid rgb(56, 62, 71);
+            padding-left: 1em;
+
+                .environment-items {
+                    display: flex;
+                    gap: 5px;
+                    flex-wrap: wrap;
+                    align-items: center;
+                    .environ-name {
+                        padding: 0.5em;
+                        margin: .2em 0;
+                        border-radius: 0.2em;  
+                    }
+                }
+        }
+    }
 }
