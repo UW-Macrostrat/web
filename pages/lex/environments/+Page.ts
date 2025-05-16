@@ -1,10 +1,11 @@
 import h from "./main.module.scss";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
-import { PageHeader, Link, AssistantLinks, DevLinkButton } from "~/components";
-import { Divider, Tag, Card, Collapse, Icon } from "@blueprintjs/core";
+import { PageHeader, AssistantLinks } from "~/components";
+import { Card, Icon, Popover } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
+
 
 
 export function Page() {
@@ -12,6 +13,8 @@ export function Page() {
     const res = useAPIResult(SETTINGS.apiV2Prefix + "/defs/environments?all")?.success.data;
 
     if (res == null) return h("div", "Loading...");
+
+    console.log(res);
 
     const handleChange = (event) => { 
         setInput(event.target.value.toLowerCase());
@@ -59,7 +62,20 @@ export function Page() {
 }
 
 function EnvironmentItem({ data }) {
-  const { environ_id, name, color } = data;
+  const { environ_id, name, color, t_units } = data;
+
+  return h(Popover, {
+    className: "environ-item-popover",
+    content: h('div.environ-tooltip', [
+        h('div.environ-tooltip-id', "ID - #" + environ_id),
+        h('div.environ-tooltip-id', "Time Units - " + t_units),
+      ]),
+    }, 
+    h('div.environ-item', [
+      h('div.environ-name', { style: { "background-color": color, "color": getContrastTextColor(color)} }, name),
+    ])
+  )
+
   return h('div.environ-item', [
     h('div.environ-name', { style: { "background-color": color, "color": getContrastTextColor(color)} }, name),
   ]);

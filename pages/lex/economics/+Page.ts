@@ -1,8 +1,8 @@
 import h from "./main.module.scss";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
-import { PageHeader, Link, AssistantLinks, DevLinkButton } from "~/components";
-import { Divider, Tag, Card, Collapse, Icon } from "@blueprintjs/core";
+import { PageHeader, AssistantLinks } from "~/components";
+import { Card, Icon, Popover } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
 
@@ -60,6 +60,7 @@ export function Page() {
 
 function EconItem({ data }) {
   const { environ_id, name, color } = data;
+
   return h('div.econ-item', [
     h('div.econ-name', { style: { "background-color": color, "color": getContrastTextColor(color)} }, name),
   ]);
