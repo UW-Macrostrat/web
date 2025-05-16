@@ -1,14 +1,12 @@
-.int-item-header {
+.int-names {
     display: flex;
     gap: 5px;
-    flex-direction: column;   
-
-    .int-name {
+    
+    .int-name, .int-abbrev {
         padding: 2px 6px;
         margin: .2em 0;
         border-radius: 0.2em;  
         font-size: 2em;
-        place-self: end start;
     }
 }
 

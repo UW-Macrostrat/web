@@ -21,13 +21,14 @@ export function Page() {
 
 
     return h(ContentPage, [
-        h('div.int-item-header', [
-            h(PageHeader, { title: "Interval #" + int_id }),
+        h(PageHeader, { title: "Interval #" + int_id }),
+        h('div.int-names', [
             h('div.int-name', { style: { "backgroundColor": color, "color": getContrastTextColor(color)} }, name),
+            abbrev ? h('p', " aka ") : null,
+            abbrev ? h('div.int-abbrev', { style: { "backgroundColor": color, "color": getContrastTextColor(color)} }, abbrev) : null,
         ]),
         h('div.int-item-content', [
             h('div.int-type', "Type: " + UpperCase(int_type)),
-            abbrev ? h('div.int-abbrev', "Abbreviation: " + abbrev) : null,
             h('div.int-age', b_age + " - " + t_age + " Ma"),
             h('div.int-timescales', [
                 h('h3', "Timescales"),
