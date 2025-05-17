@@ -1,5 +1,6 @@
 ---
 permalink: index
+title: Documentation
 ---
 
 Macrostrat is a geological model of the Earth's crust and its stratigraphic
@@ -19,7 +20,8 @@ more fully to contributors in [[Version 2]].
 The documentation is open-source, and we encourage contributions. Please
 contribute on [GitHub](https://github.com/UW-Macrostrat/docs).
 
-## Code elements
+## Sections
 
+- [Legacy documentation](/docs/legacy)
 - [Web components](/docs/web-components)
-- [Python libraries](/docs/python-libraries)
+- [Python](/docs/python-libraries)
