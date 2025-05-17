@@ -2,39 +2,58 @@ import h from "./main.module.scss";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
 import { PageHeader, Link, AssistantLinks, DevLinkButton } from "~/components";
-import { Card, Icon, Popover, RangeSlider } from "@blueprintjs/core";
+import { Card, Icon, Popover, Divider, RangeSlider } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { usePageContext } from 'vike-react/usePageContext';
+import {
+  MapAreaContainer,
+  MapMarker,
+  MapView,
+  buildInspectorStyle,
+} from "@macrostrat/map-interface";
 
 
 export function Page() {
     const pageContext = usePageContext();
     const id = parseInt(pageContext.urlParsed.pathname.split("/")[3]);
-    const res = useAPIResult(SETTINGS.apiV2Prefix + "/defs/intervals?int_id=" + id)?.success.data[0];
+    const intRes = useAPIResult(SETTINGS.apiV2Prefix + "/defs/intervals?int_id=" + id)?.success.data[0];
 
-    if (res == null) return h("div", "Loading...");
+    if (intRes == null) return h("div", "Loading...");
 
-    console.log(res);
-
-    const { name, color, abbrev, b_age, int_id, t_age, timescales, int_type } = res;
+    const { name, color, abbrev, b_age, int_id, t_age, timescales, int_type } = intRes;
 
 
     return h(ContentPage, [
         h(PageHeader, { title: "Interval #" + int_id }),
         h('div.int-names', [
             h('div.int-name', { style: { "backgroundColor": color, "color": getContrastTextColor(color)} }, name),
-            abbrev ? h('p', " aka ") : null,
-            abbrev ? h('div.int-abbrev', { style: { "backgroundColor": color, "color": getContrastTextColor(color)} }, abbrev) : null,
+            abbrev ? h('div.int-abbrev', [
+                h('p', " aka "),
+                h('div.int-abbrev-item', { style: { "backgroundColor": color, "color": getContrastTextColor(color)} }, abbrev)
+            ]) : null,
         ]),
-        h('div.int-item-content', [
-            h('div.int-type', "Type: " + UpperCase(int_type)),
-            h('div.int-age', b_age + " - " + t_age + " Ma"),
-            h('div.int-timescales', [
-                h('h3', "Timescales"),
-                h('ul', timescales.map((t) => h('li', h(Link, { href: "/timescales/" + t.timescale_id}, t.name)))),
+        h('div.table', [
+            h('div.table-content', [
+                h('div.int-type', "Type: " + UpperCase(int_type)),
+                h('div.int-age', b_age + " - " + t_age + " Ma"),
             ]),
+            /*
+            h("div.map-container", 
+                h(MapAreaContainer,
+                    {
+                        className: "map-area-container",
+                    },
+                    h(MapView, { style: "mapbox://styles/mapbox/dark-v10", mapboxToken: SETTINGS.mapboxAccessToken,}),
+                ),
+            ),
+            */
         ]),
+        h('div.int-timescales', [
+            h('h3', "Timescales"),
+            h('ul', timescales.map((t) => h('li', h(Link, { href: "/timescales/" + t.timescale_id}, t.name)))),
+        ]),
+        h(References, { id: int_id }),
     ]);
 }
 
@@ -56,4 +75,21 @@ function getContrastTextColor(bgColor) {
 
 function UpperCase(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function References({ id }) {
+    const res1 = useAPIResult(SETTINGS.apiV2Prefix + "/columns?int_id=" + id)?.success;
+    const res2 = useAPIResult(SETTINGS.apiV2Prefix + "/fossils?int_id=" + id)?.success;
+
+    if (res1 == null || res2 == null) return h("div", "Loading...");
+
+    const refArray1 = Object.values(res1.refs);
+    const refArray2 = Object.values(res2.refs);
+    const refs = [...refArray1, ...refArray2];
+
+    return h('div.int-references', [
+        h('h3', "Primary Sources"),
+        h(Divider),
+        h('ol.ref-list', refs.map((r) => h('li.ref-item', r))),
+    ]);
 }

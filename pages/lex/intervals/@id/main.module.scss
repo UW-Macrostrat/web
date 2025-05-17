@@ -1,16 +1,40 @@
 .int-names {
     display: flex;
     gap: 5px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     
-    .int-name, .int-abbrev {
+    .int-name {
         padding: 2px 6px;
         margin: .2em 0;
         border-radius: 0.2em;  
         font-size: 2em;
+    }
+    
+    .int-abbrev {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+
+        p {
+            margin: 0;
+        }
+
+        .int-abbrev-item {
+            padding: 2px 6px;
+            margin: .2em 0;
+            border-radius: 0.2em;  
+            font-size: 1em;
+        }
     }
 }
 
 ul, h3 {
     margin: 0;
     padding: 0;
+}
+
+.ref-list {
+    margin-top: 1em;
 }
