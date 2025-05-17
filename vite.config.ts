@@ -86,9 +86,10 @@ export default defineConfig({
     cjsInterop({
       dependencies: ["react-images", "labella", "react-color", "mapbox-gl"],
     }),
+    // This should maybe be integrated directly into the server-side rendering code
     textToolchain({
       contentDir: path.resolve(__dirname, "content"),
-      wikiPrefix: "/dev/docs",
+      wikiPrefix: "/docs",
     }),
     /* Fix error with single-page app reloading where paths
     with dots (e.g., locations) are not rewritten to index

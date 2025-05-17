@@ -26,6 +26,7 @@ export default {
   ],
   clientRouting: true,
   supportsDarkMode: true,
+  trailingSlash: false,
   meta: {
     supportsDarkMode: {
       env: {
