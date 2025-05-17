@@ -23,7 +23,6 @@ export function Page() {
 
     const { name, color, abbrev, b_age, int_id, t_age, timescales, int_type } = intRes;
 
-
     return h(ContentPage, [
         h(PageHeader, { title: "Interval #" + int_id }),
         h('div.int-names', [
@@ -38,16 +37,16 @@ export function Page() {
                 h('div.int-type', "Type: " + UpperCase(int_type)),
                 h('div.int-age', b_age + " - " + t_age + " Ma"),
             ]),
-            /*
+            
             h("div.map-container", 
                 h(MapAreaContainer,
                     {
                         className: "map-area-container",
                     },
-                    h(MapView, { style: "mapbox://styles/mapbox/dark-v10", mapboxToken: SETTINGS.mapboxAccessToken,}),
+                    h(MapView, { style: "mapbox://styles/mapbox/dark-v10", mapboxToken: SETTINGS.mapboxAccessToken}),
                 ),
             ),
-            */
+            
         ]),
         h('div.int-timescales', [
             h('h3', "Timescales"),
