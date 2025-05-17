@@ -10,5 +10,5 @@ export default {
     "mdxContent",
     "title",
   ],
-  route: "/dev/docs*",
+  route: "/docs*",
 } satisfies Config;
