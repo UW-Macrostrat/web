@@ -61,10 +61,12 @@ function ColumnGroup({ data, linkPrefix, columnInput }) {
 
   if (filteredColumns?.length === 0) return null;
 
+  console.log("filteredColumns", filteredColumns);
+
   const { name } = data;
   return h('div', { className: 'column-group', onClick : () => setIsOpen(!isOpen) }, [
     h('div.column-group-header', [
-      h("h2.column-group-name", name),
+      h("h2.column-group-name", name + " (Group #" + filteredColumns[0].col_group_id + ")"),
     ]),
     h(
       "div.column-list", [
@@ -74,11 +76,10 @@ function ColumnGroup({ data, linkPrefix, columnInput }) {
             h("span.col-id", "Id"),
             h("span.col-name", "Name"),
             h("span.col-status", "Status"),
-            h("span.col-status", "Group"),
           ]),
           h(Divider),
           filteredColumns.map((data) =>
-            h(ColumnItem, { data, key: data.col_id, linkPrefix })
+            h(ColumnItem, { data, linkPrefix })
           )
         ]),
     ])
@@ -86,13 +87,13 @@ function ColumnGroup({ data, linkPrefix, columnInput }) {
 }
 
 function ColumnItem({ data, linkPrefix = "/" }) {
-  const { col_id, col_name, status, col_group_id } = data;
+  console.log("data", data);
+  const { col_id, col_name, status } = data;
   const href = linkPrefix + `columns/${col_id}`;
   return h("div.column-row", [
     h("span.col-id", "#" + col_id),
     h(Link, { className: 'col-link', href }, [col_name]),
     h("span", { className: status === "active" ? 'active' : status === 'obsolete' ? "obsolete" : 'inprocess'},  UpperCase(status)),
-    h("span.col-group", "#" + col_group_id),
   ]);
 }
 
