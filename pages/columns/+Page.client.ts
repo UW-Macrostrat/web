@@ -14,6 +14,7 @@ import {
 import { SETTINGS } from "@macrostrat-web/settings";
 import mapboxgl, { LngLat } from "mapbox-gl";
 import { MapPosition } from "@macrostrat/mapbox-utils";
+import { useEffect } from "react";
 
 
 
@@ -23,8 +24,9 @@ export function Page(props) {
 
 function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const { columnGroups } = useData();
-
   const [columnInput, setColumnInput] = useState("");
+  const [mapInstance, setMapInstance] = useState<mapboxgl.Map | null>(null);
+
   const filteredGroups = columnGroups.filter((group) => {
     const name = group.name.toLowerCase();
     const columns = group.columns.map((col) => col.col_name.toLowerCase());
@@ -33,125 +35,139 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   });
 
   const mapPosition: MapPosition = {
-        camera: {
-          lat: 39, 
-          lng: -98, 
-          altitude: 6000000,
+    camera: {
+      lat: 39,
+      lng: -98,
+      altitude: 6000000,
+    },
+  };
+
+  const generateGeoJSON = () => ({
+    type: "FeatureCollection",
+    features: filteredGroups.flatMap((group) =>
+      group.columns.map((col) => ({
+        type: "Feature",
+        properties: {
+          name: col.col_name,
+          id: col.col_id,
+          status: col.status,
         },
-      };
+        geometry: {
+          type: "Point",
+          coordinates: [col.lng, col.lat],
+        },
+      }))
+    ),
+  });
 
   const handleMapLoaded = (map: mapboxgl.Map) => {
-        if (!map.isStyleLoaded()) {
-            map.once('style.load', () => addGeoJsonLayer(map));
-        } else {
-            addGeoJsonLayer(map);
-        }
-    };
+    setMapInstance(map);
+
+    if (!map.isStyleLoaded()) {
+      map.once("style.load", () => addGeoJsonLayer(map));
+    } else {
+      addGeoJsonLayer(map);
+    }
+  };
 
   const addGeoJsonLayer = (map: mapboxgl.Map) => {
-    const geojson = {
-        type: "FeatureCollection",
-        features: columnGroups.flatMap((group) =>
-            group.columns.map((col) => ({
-                type: "Feature",
-                properties: {
-                    name: col.col_name,
-                    id: col.col_id,
-                    status: col.status,
-                },
-                geometry: {
-                    type: "Point",
-                    coordinates: [col.lng, col.lat],
-                },
-            }))
-        ),
-    };
+    const geojson = generateGeoJSON();
 
-    if (!map.getSource('geojson-data')) {
-        map.addSource('geojson-data', {
-            type: 'geojson',
-            data: geojson,
-        });
-    } else {
-        map.getSource('geojson-data').setData(geojson);
+    if (!map.getSource("geojson-data")) {
+      map.addSource("geojson-data", {
+        type: "geojson",
+        data: geojson,
+      });
     }
 
-    if (!map.getLayer('geojson-layer')) {
-        map.addLayer({
-            id: 'geojson-layer',
-            type: 'circle',
-            source: 'geojson-data',
-            paint: {
-                'circle-radius': 6,
-                'circle-color': '#007cbf',
-                'circle-opacity': 0.75,
-            },
-        });
+    if (!map.getLayer("geojson-layer")) {
+      map.addLayer({
+        id: "geojson-layer",
+        type: "circle",
+        source: "geojson-data",
+        paint: {
+          "circle-radius": 6,
+          "circle-color": "#007cbf",
+          "circle-opacity": 0.75,
+        },
+      });
     }
 
-    // popups
-    map.on('click', 'geojson-layer', (e) => {
+    map.on("click", "geojson-layer", (e) => {
       const feature = e.features?.[0];
       if (!feature) return;
 
       const coordinates = feature.geometry.coordinates as [number, number];
-      const { name, id, status } = feature.properties;
+      const { name, id } = feature.properties;
 
-      // Create content
-      const el = document.createElement('div');
-      el.className = 'popup';
-      el.innerHTML = `<a href="${linkPrefix}columns/${id}" class="popup-link">
-        <h3>${name}</h3>
+      const el = document.createElement("div");
+      el.className = "popup";
+      el.innerHTML = `
+        <a href="${linkPrefix}columns/${id}" class="popup-link">
+          <h3>${name}</h3>
         </a>
       `;
 
-    // Create and add popup to map
-    new mapboxgl.Popup({ offset: 12 }) // optional: tweak placement
-      .setLngLat(coordinates)
-      .setDOMContent(el)
-      .addTo(map);
-  });
+      new mapboxgl.Popup({ offset: 12 })
+        .setLngLat(coordinates)
+        .setDOMContent(el)
+        .addTo(map);
+    });
 
-
+    map.on("mouseenter", "geojson-layer", () => {
+      map.getCanvas().style.cursor = "pointer";
+    });
+    map.on("mouseleave", "geojson-layer", () => {
+      map.getCanvas().style.cursor = "";
+    });
   };
+
+  useEffect(() => {
+    if (!mapInstance) return;
+
+    const geojson = generateGeoJSON();
+    const source = mapInstance.getSource("geojson-data") as mapboxgl.GeoJSONSource;
+    if (source) source.setData(geojson);
+  }, [filteredGroups, mapInstance]);
 
   const handleInputChange = (event) => {
     setColumnInput(event.target.value.toLowerCase());
-  }
-  
-  return h('div.column-list-page', [
+  };
+
+  return h("div.column-list-page", [
     h(AssistantLinks, [
       h(AnchorButton, { href: "/projects", minimal: true }, "Projects"),
       h(DevLinkButton, { href: "/columns/correlation" }, "Correlation chart"),
     ]),
     h(ContentPage, [
       h(PageHeader, { title }),
-      h('div.map-section', [
-        h('h2', "Map of Columns"),
+      h("div.map-section", [
+        h("h2", "Map of Columns"),
         h("div.map-container",
-          h(MapAreaContainer,
-              { className: "map-area-container" },
-              h(MapView, {
-                  style: "mapbox://styles/mapbox/dark-v10",
-                  mapboxToken: SETTINGS.mapboxAccessToken,
-                  onMapLoaded: handleMapLoaded,
-                  mapPosition,
-              }),
-          ),
+          h(MapAreaContainer, { className: "map-area-container" },
+            h(MapView, {
+              style: "mapbox://styles/mapbox/dark-v10",
+              mapboxToken: SETTINGS.mapboxAccessToken,
+              onMapLoaded: handleMapLoaded,
+              mapPosition,
+            })
+          )
         ),
       ]),
-      h(Card, {className: "search-bar"}, [
+      h(Card, { className: "search-bar" }, [
         h(Icon, { icon: "search" }),
-        h('input', {
+        h("input", {
           type: "text",
           placeholder: "Search columns...",
-          onChange: handleInputChange 
+          onChange: handleInputChange,
         }),
-      ]),      
-      h('div.column-groups', 
-        filteredGroups.map((d) => h(ColumnGroup, { data: d, key: d.id, linkPrefix, columnInput }) ),
-      )
-    ])
+      ]),
+      h("div.column-groups",
+        filteredGroups.map((d) =>
+          h(ColumnGroup, { data: d, key: d.id, linkPrefix, columnInput })
+        )
+      ),
+    ]),
   ]);
 }
 
