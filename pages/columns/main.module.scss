@@ -46,9 +46,7 @@ h2 {
     grid-template-columns: 10% 60% 20% 10%
 }
 
-.active {
-    background-color: green;
-    color: white;
+.active, .inprocess, .obsolete {
     place-self: end start;
     padding: 0.5em;
     margin: .2em 0;
@@ -56,9 +54,19 @@ h2 {
     font-weight: bold;
 }
 
+.active {
+    background-color: green;
+    color: white;
+}
+
 .inprocess {
     background-color: yellow;
     color: black;
+}
+
+.obsolete {
+    background-color: red;
+    color: white;
 }
 
 .col-id, .col-group, .col-link {

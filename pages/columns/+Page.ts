@@ -61,32 +61,27 @@ function ColumnGroup({ data, linkPrefix, columnInput }) {
 
   if (filteredColumns?.length === 0) return null;
 
-  const { id, name, columns } = data;
-  return h(Card, { className: 'column-group', onClick : () => setIsOpen(!isOpen) }, [
+  const { name } = data;
+  return h('div', { className: 'column-group', onClick : () => setIsOpen(!isOpen) }, [
     h('div.column-group-header', [
       h("h2.column-group-name", name),
-      h(Icon, { 
-        icon: isOpen ? "chevron-up" : "chevron-down",
-      }),
     ]),
-    h(Collapse, { isOpen }, 
-      h(
-        "div.column-list", [
-          h(Divider),
-          h('div.column-table', [
-            h("div.column-row.column-header", [
-              h("span.col-id", "Id"),
-              h("span.col-name", "Name"),
-              h("span.col-status", "Status"),
-              h("span.col-status", "Group"),
-            ]),
-            h(Divider),
-            filteredColumns.map((data) =>
-              h(ColumnItem, { data, key: data.col_id, linkPrefix })
-            )
+    h(
+      "div.column-list", [
+        h(Divider),
+        h('div.column-table', [
+          h("div.column-row.column-header", [
+            h("span.col-id", "Id"),
+            h("span.col-name", "Name"),
+            h("span.col-status", "Status"),
+            h("span.col-status", "Group"),
           ]),
-      ])
-    ),
+          h(Divider),
+          filteredColumns.map((data) =>
+            h(ColumnItem, { data, key: data.col_id, linkPrefix })
+          )
+        ]),
+    ])
   ]);
 }
 
@@ -96,7 +91,7 @@ function ColumnItem({ data, linkPrefix = "/" }) {
   return h("div.column-row", [
     h("span.col-id", "#" + col_id),
     h(Link, { className: 'col-link', href }, [col_name]),
-    h("span", { className: status === "active" ? 'active' : 'inprocess'},  UpperCase(status)),
+    h("span", { className: status === "active" ? 'active' : status === 'obsolete' ? "obsolete" : 'inprocess'},  UpperCase(status)),
     h("span.col-group", "#" + col_group_id),
   ]);
 }
