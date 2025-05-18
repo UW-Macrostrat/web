@@ -1,8 +1,8 @@
 import h from "./main.module.scss";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
-import { PageHeader, AssistantLinks, Link } from "~/components";
-import { Card, Icon, Popover, RangeSlider } from "@blueprintjs/core";
+import { PageHeader } from "~/components";
+import { Card, Icon, Popover, RangeSlider, Divider } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
 
@@ -35,38 +35,39 @@ export function Page() {
         return matchesName && matchesAgeRange;
     });
 
-    return h('div.int-list-page', [
-    h(AssistantLinks, [
-      h(Card, [
-        h('p', "Filter by name, type, or abbreviation"),
-        h('div.search-bar', [
-          h(Icon, { icon: "search" }),
-          h('input', {
-            type: "text",
-            placeholder: "Search...",
-            onChange: handleChange,
-          }),
-        ])
-      ]),     
-      h(Card, [
-        h('p', "Filter by ages"),
-        h(RangeSlider, {
-          min: min_age,
-          max: max_age,
-          stepSize: 10,
-          labelStepSize: 1000,
-          value: [age[0], age[1]],
-          onChange: (value) => {
-            setAge(value);
-          },
-        }),
-      ]), 
-    ]),
-    h(ContentPage, [
+    console.log(filtered.length);
+
+    return h(ContentPage, { className: "timescale-list-page"}, [
       h(PageHeader, { title: "Timescales" }),
+      h(Card, { className: "filters" }, [
+        h('h2', "Filters"),
+        h('div.name-filter', [
+          h('div.search-bar', [
+            h(Icon, { icon: "search" }),
+            h('input', {
+              type: "text",
+              placeholder: "Filter by name...",
+              onChange: handleChange,
+            }),
+          ])
+        ]),     
+        h('div.age-filter', [
+          h('p', "Filter by ages"),
+          h(RangeSlider, {
+            min: min_age,
+            max: max_age,
+            stepSize: 10,
+            labelStepSize: 1000,
+            value: [age[0], age[1]],
+            onChange: (value) => {
+              setAge(value);
+            },
+          }),
+        ]), 
+      ]),
+      h(Divider),
       h('div.timescale-list', filtered.map((data) => TimescaleItem({ data }))),
     ])
-  ]);
 }
 
 function TimescaleItem({ data }) {

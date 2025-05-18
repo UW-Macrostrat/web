@@ -3,6 +3,18 @@ h3, h2 {
     padding: 0;
 }
 
+.timescale-list-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
 .timescale-list {
     display: flex;
     flex-direction: column;
