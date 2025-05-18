@@ -1,10 +1,9 @@
 import h from "./main.module.scss";
-import { AnchorButton, Icon } from "@blueprintjs/core";
+import { AnchorButton, Icon, Card } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import { PageHeader, DevLinkButton, AssistantLinks, LinkCard } from "~/components";
 import { useData } from "vike-react/useData";
 import { useState } from "react";
-import { LinkCard } from "~/components/cards";
 
 export function Page() {
   const { sources } = useData();
@@ -32,23 +31,21 @@ export function Page() {
         "Ingestion system"
       ),
       h(AnchorButton, { icon: "map", href: "/map/sources" }, "Show on map"),
-      h(AnchorButton, [
-        h('div.search-bar', [
-          h(Icon, { icon: "search" }),
-          h('input', {
-            type: "text",
-            placeholder: "Search",
-            onChange: handleInputChange 
-          }),
-        ])
-      ]),
       h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
     ]),
     h(ContentPage, [
       h(PageHeader, { title: "Maps" }),
+      h(Card, { className: "search-bar" },  [
+        h(Icon, { icon: "search" }),
+        h('input', {
+          type: "text",
+          placeholder: "Filter by name...",
+          onChange: handleInputChange 
+        }),
+    ]),
       h(
         "div.maps-list",
-        filteredSources.map((d) => h(SourceItem, { source: d, key: d.source_id })),
+        filteredSources.map((source) => h(SourceItem, { source })),
       ),
     ]),
   ]);
@@ -56,6 +53,7 @@ export function Page() {
 
 function SourceItem({ source }) {
   const { source_id, slug, name } = source;
+  console.log("source", source);
   const href = `/maps/${source_id}`;
   const href1 = `/map/dev/sources/${slug}`;
 
