@@ -15,8 +15,9 @@ h1 {
 .maps-list {
   padding: 0;
   display: flex;
-  gap: 10px;
-  flex-direction: column;
+  column-gap: 1em;
+  row-gap: 0;
+  flex-wrap: wrap;
 
   a {
     color: white !important;

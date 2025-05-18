@@ -52,49 +52,14 @@ export function Page() {
 }
 
 function SourceItem({ source }) {
-  const { source_id, slug, name } = source;
-  console.log("source", source);
+  const { source_id, name } = source;
   const href = `/maps/${source_id}`;
-  const href1 = `/map/dev/sources/${slug}`;
 
   return h(LinkCard, {
     href, 
-    title: h('div.link-title', [
-      h('h1',"#" + source_id + " " + name),
-      h("a", { href: href1 }, [
-        h('p', "View on map (" + source.scale + ")"),
-        h(Icon, { icon: "map" })
-      ]),
-    ]),
+    title: h('h1',"#" + source_id + " " + name),
+    className: 'item'
   }, [
     h.if(source.raster_url != null)([" ", h("span.raster", "Raster")]),
   ]);
-}
-
-function pageCarousel({page, setPage, numPages}) {
-  console.log('numpages', numPages);
-    return h('div.pages', 
-        h('div.page-container', [
-          h('div', { className: "page-btn" }, [
-            h('div', { className: page != 0 && numPages != 1 ? 'btn-content' : 'hide',             
-                onClick: () => {
-                    setPage(page - 1);
-                }}, [
-              h(Icon, { icon: 'arrow-left' }),
-              h('p', "Previous"),
-            ])
-          ]),
-          h('p', 'Page ' + (page + 1)),
-          h('div', { className: "page-btn" }, [
-            h('div', { className: page < numPages - 1 && numPages != 1 ? 'btn-content' : 'hide',
-                onClick: () => {
-                    setPage(page + 1);
-                }
-            }, [
-              h('p', "Next"),
-              h(Icon, { icon: 'arrow-right' }),
-            ])
-          ]),
-        ])
-      );
 }
