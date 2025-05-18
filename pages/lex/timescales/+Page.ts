@@ -35,8 +35,6 @@ export function Page() {
         return matchesName && matchesAgeRange;
     });
 
-    console.log(filtered.length);
-
     return h(ContentPage, { className: "timescale-list-page"}, [
       h(PageHeader, { title: "Timescales" }),
       h(Card, { className: "filters" }, [
