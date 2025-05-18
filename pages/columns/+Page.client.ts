@@ -13,6 +13,8 @@ import {
 } from "@macrostrat/map-interface";
 import { SETTINGS } from "@macrostrat-web/settings";
 import mapboxgl, { LngLat } from "mapbox-gl";
+import { MapPosition } from "@macrostrat/mapbox-utils";
+
 
 
 export function Page(props) {
@@ -29,6 +31,14 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
     const input = columnInput.toLowerCase();
     return name.includes(input) || columns.some((col) => col.includes(input));
   });
+
+  const mapPosition: MapPosition = {
+        camera: {
+          lat: 39, 
+          lng: -98, 
+          altitude: 6000000,
+        },
+      };
 
   const handleMapLoaded = (map: mapboxgl.Map) => {
         if (!map.isStyleLoaded()) {
@@ -116,16 +126,20 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
     ]),
     h(ContentPage, [
       h(PageHeader, { title }),
-      h("div.map-container",
-        h(MapAreaContainer,
-            { className: "map-area-container" },
-            h(MapView, {
-                style: "mapbox://styles/mapbox/dark-v10",
-                mapboxToken: SETTINGS.mapboxAccessToken,
-                onMapLoaded: handleMapLoaded,
-            }),
+      h('div.map-section', [
+        h('h2', "Map of Columns"),
+        h("div.map-container",
+          h(MapAreaContainer,
+              { className: "map-area-container" },
+              h(MapView, {
+                  style: "mapbox://styles/mapbox/dark-v10",
+                  mapboxToken: SETTINGS.mapboxAccessToken,
+                  onMapLoaded: handleMapLoaded,
+                  mapPosition,
+              }),
+          ),
         ),
-      ),
+      ]),
       h(Card, {className: "search-bar"}, [
         h(Icon, { icon: "search" }),
         h('input', {

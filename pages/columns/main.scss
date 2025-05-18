@@ -92,3 +92,14 @@ h2 {
     justify-content: center;
     align-items: center;
 }
+
+#map {
+  width: 60%;
+  height: 80%;
+  position: absolute;
+  z-index: 1;
+}
+
+.map-container {
+    height: 50vh;
+}
