@@ -17,15 +17,7 @@ export function Page() {
     return name.includes(input) || slug.includes(input);
   });
 
-  const pageLength = 5;
-  const length = filteredSources.length;
-  const numPages = Math.ceil(length / pageLength);
-  const [page, setPage] = useState(0);
-
   console.log("inputValue", inputValue);
-
-
-  const items = filteredSources.slice(page * pageLength, (page + 1) * pageLength);
 
   const handleInputChange = (event) => {
     setInputValue(event.target.value.toLowerCase());
@@ -56,9 +48,8 @@ export function Page() {
       h(PageHeader, { title: "Maps" }),
       h(
         "div.maps-list",
-        items.map((d) => h(SourceItem, { source: d, key: d.source_id })),
+        filteredSources.map((d) => h(SourceItem, { source: d, key: d.source_id })),
       ),
-      pageCarousel({ page, setPage, numPages }),
     ]),
   ]);
 }
