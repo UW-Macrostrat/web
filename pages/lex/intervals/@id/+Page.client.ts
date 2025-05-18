@@ -12,6 +12,7 @@ import {
   MapView,
   buildInspectorStyle,
 } from "@macrostrat/map-interface";
+import { useEffect } from "react";
 
 
 export function Page() {
@@ -37,16 +38,7 @@ export function Page() {
                 h('div.int-type', "Type: " + UpperCase(int_type)),
                 h('div.int-age', b_age + " - " + t_age + " Ma"),
             ]),
-            
-            h("div.map-container", 
-                h(MapAreaContainer,
-                    {
-                        className: "map-area-container",
-                    },
-                    h(MapView, { style: "mapbox://styles/mapbox/dark-v10", mapboxToken: SETTINGS.mapboxAccessToken}),
-                ),
-            ),
-            
+            h(Map)
         ]),
         h('div.int-timescales', [
             h('h3', "Timescales"),
@@ -91,4 +83,84 @@ function References({ id }) {
         h(Divider),
         h('ol.ref-list', refs.map((r) => h('li.ref-item', r))),
     ]);
+}
+
+function Map() {
+    // Define state for data and loading
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch(SETTINGS.apiV2Prefix + "/columns?int_id=1&response=long&format=geojson");
+                const result = await response.json();
+
+                if (result.success) {
+                    setData(result.success.data);  // Assume this is the correct data
+                    setLoading(false);
+                } else {
+                    setError("Failed to load data");
+                    setLoading(false);
+                }
+            } catch (error) {
+                setError("Error fetching data");
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);  // Empty dependency array means this effect runs only once after the first render
+
+    if (loading) {
+        return h("div", "Loading...");  // Show loading state
+    }
+
+    if (error) {
+        return h("div", error);  // Show error state
+    }
+
+    const handleMapLoaded = (map: mapboxgl.Map) => {
+        if (!map.isStyleLoaded()) {
+            map.once('style.load', () => addGeoJsonLayer(map));
+        } else {
+            addGeoJsonLayer(map);
+        }
+    };
+
+    const addGeoJsonLayer = (map: mapboxgl.Map) => {
+        if (!map.getSource('geojson-data')) {
+            map.addSource('geojson-data', {
+                type: 'geojson',
+                // data: 'https://docs.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson',
+                data: data,
+            });
+        }
+
+        if (!map.getLayer('geojson-layer')) {
+            map.addLayer({
+                id: 'geojson-layer',
+                type: 'fill', // Use 'fill' for rendering polygons
+                source: 'geojson-data',
+                paint: {
+                    'fill-color': '#FFFFFF',  // Color of the polygon fill
+                    'fill-opacity': 0.5,       // Opacity of the fill
+                },
+            });
+        }
+    };
+
+
+    return h("div.map-container",
+        h(MapAreaContainer,
+            { className: "map-area-container" },
+            h(MapView, {
+                style: "mapbox://styles/mapbox/dark-v10",
+                mapboxToken: SETTINGS.mapboxAccessToken,
+                onMapLoaded: handleMapLoaded,
+            }),
+        ),
+    );
+
 }
