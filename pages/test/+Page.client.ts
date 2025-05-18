@@ -25,7 +25,7 @@ export function Page() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    console.log(SETTINGS.apiV2Prefix + "/columns?int_id=1&response=long&format=topojson")
+    console.log(SETTINGS.apiV2Prefix + "/columns?int_id=10&response=long&format=topojson")
 
     useEffect(() => {
         const fetchData = async () => {
@@ -103,3 +103,61 @@ export function Page() {
     
 }
 
+/*
+import { onDemand } from "~/_utils";
+
+const ColumnMap = onDemand(() => import("./map").then((mod) => mod.ColumnMap));
+
+export function Page() {
+    // Define state for data and loading
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    console.log(SETTINGS.apiV2Prefix + "/columns?int_id=1&response=long&format=topojson")
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch(SETTINGS.apiV2Prefix + "/columns?int_id=1&response=long&format=geojson");
+                const result = await response.json();
+
+                if (result.success) {
+                    setData(result.success.data);  // Assume this is the correct data
+                    setLoading(false);
+                } else {
+                    setError("Failed to load data");
+                    setLoading(false);
+                }
+            } catch (error) {
+                setError("Error fetching data");
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);  // Empty dependency array means this effect runs only once after the first render
+
+    if (loading) {
+        return h("div", "Loading...");  // Show loading state
+    }
+
+    if (error) {
+        return h("div", error);  // Show error state
+    }
+
+    console.log("Data fetched:", data);  // Log the fetched data
+
+
+    return h(ContentPage, [
+        h(ColumnMap, {
+            className: "column-map",
+            inProcess: true,
+            projectID: 1,
+            selectedColumn: 1,
+            onSelectColumn: null,
+          }),
+    ])
+}
+
+*/
