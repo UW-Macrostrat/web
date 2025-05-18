@@ -11,6 +11,8 @@ import {
   buildInspectorStyle,
 } from "@macrostrat/map-interface";
 import { SETTINGS } from "@macrostrat-web/settings";
+import mapboxgl, { LngLat } from "mapbox-gl";
+
 
 export function Page(props) {
   return h(ColumnListPage, props);
@@ -75,6 +77,28 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
             },
         });
     }
+
+    // popups
+    map.on('click', 'geojson-layer', (e) => {
+      const feature = e.features?.[0];
+      if (!feature) return;
+
+      const coordinates = feature.geometry.coordinates as [number, number];
+      const { name, id, status } = feature.properties;
+
+      // Create content
+      const el = document.createElement('div');
+      el.className = 'popup';
+      el.innerHTML = "<h3>" + name + "</h3>";
+
+      // Create and add popup to map
+      new mapboxgl.Popup({ offset: 12 }) // optional: tweak placement
+        .setLngLat(coordinates)
+        .setDOMContent(el)
+        .addTo(map);
+    });
+
+
   };
 
   const handleInputChange = (event) => {
