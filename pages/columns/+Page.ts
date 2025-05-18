@@ -30,20 +30,18 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   return h('div.column-list-page', [
     h(AssistantLinks, [
       h(AnchorButton, { href: "/projects", minimal: true }, "Projects"),
-      h(Card, [
-        h('div.search-bar', [
-          h(Icon, { icon: "search" }),
-          h('input', {
-            type: "text",
-            placeholder: "Search columns",
-            onChange: handleInputChange 
-          }),
-        ])
-      ]),      
       h(DevLinkButton, { href: "/columns/correlation" }, "Correlation chart"),
     ]),
     h(ContentPage, [
       h(PageHeader, { title }),
+      h(Card, {className: "search-bar"}, [
+        h(Icon, { icon: "search" }),
+        h('input', {
+          type: "text",
+          placeholder: "Search columns...",
+          onChange: handleInputChange 
+        }),
+      ]),      
       h('div.column-groups', 
         filteredGroups.map((d) => h(ColumnGroup, { data: d, key: d.id, linkPrefix, columnInput }) ),
       )
