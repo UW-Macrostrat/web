@@ -3,7 +3,8 @@ import { PageHeader, Link, AssistantLinks, DevLinkButton } from "~/components";
 import { Divider, AnchorButton, Tag, Card, Collapse, Icon } from "@blueprintjs/core";
 import { useData } from "vike-react/useData";
 import { useState } from "react";
-import h from "./main.module.scss";
+import "./main.scss";
+import h from "@macrostrat/hyper";
 import {
   MapAreaContainer,
   MapMarker,
@@ -89,14 +90,17 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
       // Create content
       const el = document.createElement('div');
       el.className = 'popup';
-      el.innerHTML = "<h3>" + name + "</h3>";
+      el.innerHTML = `<a href="${linkPrefix}columns/${id}" class="popup-link">
+        <h3>${name}</h3>
+        </a>
+      `;
 
-      // Create and add popup to map
-      new mapboxgl.Popup({ offset: 12 }) // optional: tweak placement
-        .setLngLat(coordinates)
-        .setDOMContent(el)
-        .addTo(map);
-    });
+    // Create and add popup to map
+    new mapboxgl.Popup({ offset: 12 }) // optional: tweak placement
+      .setLngLat(coordinates)
+      .setDOMContent(el)
+      .addTo(map);
+  });
 
 
   };

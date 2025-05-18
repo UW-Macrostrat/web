@@ -76,8 +76,19 @@ h2 {
 }
 
 .popup {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background-color: aqua;
+    padding: 1em;
+    h3 {
+        font-size: 1.5em;
+        text-align: center;
+        margin: 0;
+    }
+}
+
+.mapboxgl-popup-close-button {
+    padding: 0.5em;
+    margin: 0;
+    font-size: 1.5em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
