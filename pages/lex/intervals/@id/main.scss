@@ -2,14 +2,14 @@
     display: flex;
     gap: 5px;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
     
     .int-name {
         padding: 2px 6px;
         margin: .2em 0;
         border-radius: 0.2em;  
         font-size: 2em;
+        display: flex;
+        width: fit-content;
     }
     
     .int-abbrev {
@@ -37,4 +37,35 @@ ul, h3 {
 
 .ref-list {
     margin-top: 1em;
+}
+
+.table {
+    background-color: var(--secondary-color);
+    color: var(--text-emphasized-color);
+    border: 2px solid #000;
+
+    p {
+        margin: 0;
+    }
+
+    .table-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: .5em;
+        gap: .5em;
+    }
+}
+
+#map {
+    width: 60%;
+    height: 100%;
+    position: absolute;
+    z-index: 1;
+}
+
+.int-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
 }

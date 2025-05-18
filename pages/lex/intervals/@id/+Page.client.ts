@@ -1,4 +1,5 @@
-import h from "./main.module.scss";
+import "./main.scss";
+import h from "@macrostrat/hyper";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
 import { PageHeader, Link, AssistantLinks, DevLinkButton } from "~/components";
@@ -13,7 +14,7 @@ import {
   buildInspectorStyle,
 } from "@macrostrat/map-interface";
 import { useEffect } from "react";
-
+import { MapPosition } from "@macrostrat/mapbox-utils";
 
 export function Page() {
     const pageContext = usePageContext();
@@ -24,7 +25,7 @@ export function Page() {
 
     const { name, color, abbrev, b_age, int_id, t_age, timescales, int_type } = intRes;
 
-    return h(ContentPage, [
+    return h(ContentPage, { className: 'int-page'}, [
         h(PageHeader, { title: "Interval #" + int_id }),
         h('div.int-names', [
             h('div.int-name', { style: { "backgroundColor": color, "color": getContrastTextColor(color)} }, name),
@@ -151,16 +152,23 @@ function Map() {
         }
     };
 
+    const mapPosition: MapPosition = {
+        camera: {
+        lat: 39,
+        lng: -98,
+        altitude: 6000000,
+        },
+    };
+
 
     return h("div.map-container",
-        h(MapAreaContainer,
-            { className: "map-area-container" },
+          h(MapAreaContainer, { className: "map-area-container" },
             h(MapView, {
-                style: "mapbox://styles/mapbox/dark-v10",
-                mapboxToken: SETTINGS.mapboxAccessToken,
-                onMapLoaded: handleMapLoaded,
-            }),
-        ),
-    );
-
+              style: "mapbox://styles/mapbox/dark-v10",
+              mapboxToken: SETTINGS.mapboxAccessToken,
+              onMapLoaded: handleMapLoaded,
+              mapPosition,
+            })
+          )
+        );
 }
