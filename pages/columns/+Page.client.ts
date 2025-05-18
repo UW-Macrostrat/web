@@ -4,7 +4,13 @@ import { Divider, AnchorButton, Tag, Card, Collapse, Icon } from "@blueprintjs/c
 import { useData } from "vike-react/useData";
 import { useState } from "react";
 import h from "./main.module.scss";
-import { log } from "console";
+import {
+  MapAreaContainer,
+  MapMarker,
+  MapView,
+  buildInspectorStyle,
+} from "@macrostrat/map-interface";
+import { SETTINGS } from "@macrostrat-web/settings";
 
 export function Page(props) {
   return h(ColumnListPage, props);
@@ -13,8 +19,6 @@ export function Page(props) {
 function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const { columnGroups } = useData();
 
-  console.log("columnGroups", columnGroups);
-
   const [columnInput, setColumnInput] = useState("");
   const filteredGroups = columnGroups.filter((group) => {
     const name = group.name.toLowerCase();
@@ -22,6 +26,56 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
     const input = columnInput.toLowerCase();
     return name.includes(input) || columns.some((col) => col.includes(input));
   });
+
+  const handleMapLoaded = (map: mapboxgl.Map) => {
+        if (!map.isStyleLoaded()) {
+            map.once('style.load', () => addGeoJsonLayer(map));
+        } else {
+            addGeoJsonLayer(map);
+        }
+    };
+
+  const addGeoJsonLayer = (map: mapboxgl.Map) => {
+    const geojson = {
+        type: "FeatureCollection",
+        features: columnGroups.flatMap((group) =>
+            group.columns.map((col) => ({
+                type: "Feature",
+                properties: {
+                    name: col.col_name,
+                    id: col.col_id,
+                    status: col.status,
+                },
+                geometry: {
+                    type: "Point",
+                    coordinates: [col.lng, col.lat],
+                },
+            }))
+        ),
+    };
+
+    if (!map.getSource('geojson-data')) {
+        map.addSource('geojson-data', {
+            type: 'geojson',
+            data: geojson,
+        });
+    } else {
+        map.getSource('geojson-data').setData(geojson);
+    }
+
+    if (!map.getLayer('geojson-layer')) {
+        map.addLayer({
+            id: 'geojson-layer',
+            type: 'circle',
+            source: 'geojson-data',
+            paint: {
+                'circle-radius': 6,
+                'circle-color': '#007cbf',
+                'circle-opacity': 0.75,
+            },
+        });
+    }
+  };
 
   const handleInputChange = (event) => {
     setColumnInput(event.target.value.toLowerCase());
@@ -34,6 +88,16 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
     ]),
     h(ContentPage, [
       h(PageHeader, { title }),
+      h("div.map-container",
+        h(MapAreaContainer,
+            { className: "map-area-container" },
+            h(MapView, {
+                style: "mapbox://styles/mapbox/dark-v10",
+                mapboxToken: SETTINGS.mapboxAccessToken,
+                onMapLoaded: handleMapLoaded,
+            }),
+        ),
+      ),
       h(Card, {className: "search-bar"}, [
         h(Icon, { icon: "search" }),
         h('input', {
@@ -59,8 +123,6 @@ function ColumnGroup({ data, linkPrefix, columnInput }) {
 
   if (filteredColumns?.length === 0) return null;
 
-  console.log("filteredColumns", filteredColumns);
-
   const { name } = data;
   return h('div', { className: 'column-group', onClick : () => setIsOpen(!isOpen) }, [
     h('div.column-group-header', [
@@ -85,7 +147,6 @@ function ColumnGroup({ data, linkPrefix, columnInput }) {
 }
 
 function ColumnItem({ data, linkPrefix = "/" }) {
-  console.log("data", data);
   const { col_id, col_name, status } = data;
   const href = linkPrefix + `columns/${col_id}`;
   return h("div.column-row", [
