@@ -8,8 +8,7 @@ import { ContentPage } from "~/layouts";
 
 export function Page() {
     const [input, setInput] = useState("");
-    const [bottomAge, setBottomAge] = useState([0, 4600]);
-    const [topAge, setTopAge] = useState([0, 4180]);
+    const [age, setAge] = useState([0, 4600]);
     const res = useAPIResult(SETTINGS.apiV2Prefix + "/defs/intervals?all")?.success.data;
 
     if (res == null) return h("div", "Loading...");
@@ -24,16 +23,16 @@ export function Page() {
         const name = d.name?.toLowerCase() || "";
         const intType = d.int_type?.toLowerCase() || "";
         const abbrev = d.abbrev?.toLowerCase() || "";
-        const b_age = d.b_age ? parseInt(d.b_age, 10) : NaN; // Convert to number
-        const t_age = d.t_age ? parseInt(d.t_age, 10) : NaN; // Convert to number
+        const b_age = d.b_age ? parseInt(d.b_age, 10) : 0; // Convert to number
+        const t_age = d.t_age ? parseInt(d.t_age, 10) : 4600; // Convert to number
 
         // Check if name, intType, abbrev, or age falls within the ranges or input
         const matchesName = name.includes(input);
         const matchesType = intType.includes(input);
         const matchesAbbrev = abbrev.includes(input);
         const matchesAgeRange =
-            (!isNaN(b_age) && b_age >= bottomAge[0] && b_age <= bottomAge[1]) &&
-            (!isNaN(t_age) && t_age >= topAge[0] && t_age <= topAge[1]);
+            (!isNaN(b_age) && b_age >= age[0]) &&
+            (!isNaN(t_age) && t_age <= age[1]);
 
         return (matchesName || matchesType || matchesAbbrev) && matchesAgeRange;
     });
@@ -56,32 +55,19 @@ export function Page() {
             }),
           ])
         ]),     
-        h('div', [
-          h('p', "Filter by top age"),
-          h(RangeSlider, {
-            min: 0,
-            max: 4180,
-            stepSize: 10,
-            labelStepSize: 1000,
-            value: [topAge[0], topAge[1]],
-            onChange: (value) => {
-              setTopAge(value);
-            },
-          }),
-        ]), 
-        h('div', [
-          h('p', "Filter by bottom age"),
+        h('div.age-filter', [
+          h('p', "Filter by ages"),
           h(RangeSlider, {
             min: 0,
             max: 4600,
             stepSize: 10,
             labelStepSize: 1000,
-            value: [bottomAge[0], bottomAge[1]],
+            value: [age[0], age[1]],
             onChange: (value) => {
-              setBottomAge(value);
-            }
+              setAge(value);
+            },
           }),
-        ]),
+        ]), 
       ]),
       h('div.int-list',
         Object.entries(grouped).map(([intType, group]) =>
