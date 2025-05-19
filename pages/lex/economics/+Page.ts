@@ -28,36 +28,33 @@ export function Page() {
 
     const grouped = groupByClassThenType(filtered);
 
-    return h('div.econ-list-page', [
-    h(AssistantLinks, [
-      h(Card, [
+    return h(ContentPage, { className: 'econ-list-page'}, [
+      h(PageHeader, { title: "Economics" }),
+      h(Card, { className: 'filters' }, [
+        h('h3', "Filters"),
         h('div.search-bar', [
           h(Icon, { icon: "search" }),
           h('input', {
             type: "text",
-            placeholder: "Search economics",
+            placeholder: "Search economics...",
             onChange: handleChange,
           }),
         ])
-      ]),      
-    ]),
-    h(ContentPage, [
-      h(PageHeader, { title: "Economics" }),
-        h('div.econ-list',
-            Object.entries(grouped).map(([className, types]) =>
-                h('div.econ-class-group', [
-                h('h2', UpperCase(className)),
-                ...Object.entries(types).map(([type, group]) =>
-                    h('div.econ-group', [
-                        h('h3', UpperCase(type)),
-                        h('div.econ-items', group.map((d) => h(EconItem, { data: d, key: d.environ_id }))),
-                    ])
-                )
-                ])
-            )
-        )
-    ])
-  ]);
+      ]),  
+      h('div.econ-list',
+          Object.entries(grouped).map(([className, types]) =>
+              h('div.econ-class-group', [
+              h('h2', UpperCase(className)),
+              ...Object.entries(types).map(([type, group]) =>
+                  h('div.econ-group', [
+                      h('h3', UpperCase(type)),
+                      h('div.econ-items', group.map((d) => h(EconItem, { data: d, key: d.environ_id }))),
+                  ])
+              )
+              ])
+          )
+      )
+    ]);
 }
 
 function EconItem({ data }) {

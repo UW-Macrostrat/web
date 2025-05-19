@@ -3,6 +3,12 @@ h3, h2 {
     padding: 0;
 }
 
+.environ-list-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
 .environment-list {
     display: flex;
     flex-direction: column;
@@ -58,4 +64,10 @@ h3, h2 {
 
 .environ-tooltip {
   padding: 0.5em;
+}
+
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
 }

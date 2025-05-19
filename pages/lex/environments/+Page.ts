@@ -27,36 +27,33 @@ export function Page() {
 
     const grouped = groupByClassThenType(filtered);
 
-    return h('div.environ-list-page', [
-    h(AssistantLinks, [
+    return h(ContentPage, { className: 'environ-list-page'}, [
+      h(PageHeader, { title: "Environments" }),
       h(Card, [
+        h('h3', "Filters"),
         h('div.search-bar', [
           h(Icon, { icon: "search" }),
           h('input', {
             type: "text",
-            placeholder: "Search environments",
+            placeholder: "Search environments...",
             onChange: handleChange,
           }),
         ])
       ]),      
-    ]),
-    h(ContentPage, [
-      h(PageHeader, { title: "Environments" }),
-        h('div.environment-list',
-            Object.entries(grouped).map(([className, types]) =>
-                h('div.environment-class-group', [
-                h('h2', UpperCase(className)),
-                ...Object.entries(types).map(([type, group]) =>
-                    h('div.environment-group', [
-                        h('h3', UpperCase(type)),
-                        h('div.environment-items', group.map((d) => h(EnvironmentItem, { data: d, key: d.environ_id }))),
-                    ])
-                )
-                ])
-            )
-        )
-    ])
-  ]);
+      h('div.environment-list',
+          Object.entries(grouped).map(([className, types]) =>
+              h('div.environment-class-group', [
+              h('h2', UpperCase(className)),
+              ...Object.entries(types).map(([type, group]) =>
+                  h('div.environment-group', [
+                      h('h3', UpperCase(type)),
+                      h('div.environment-items', group.map((d) => h(EnvironmentItem, { data: d, key: d.environ_id }))),
+                  ])
+              )
+              ])
+          )
+      )
+    ]);
 }
 
 function EnvironmentItem({ data }) {

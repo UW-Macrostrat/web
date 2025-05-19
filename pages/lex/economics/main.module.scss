@@ -59,3 +59,9 @@ h3, h2 {
 .econ-tooltip {
   padding: 0.5em;
 }
+
+.filters, .econ-list-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
