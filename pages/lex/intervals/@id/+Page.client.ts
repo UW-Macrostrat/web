@@ -15,6 +15,7 @@ import {
 } from "@macrostrat/map-interface";
 import { useEffect } from "react";
 import { MapPosition } from "@macrostrat/mapbox-utils";
+import { useNavigate } from "react-router";
 
 export function Page() {
     const pageContext = usePageContext();
@@ -128,6 +129,26 @@ function Map() {
         } else {
             addGeoJsonLayer(map);
         }
+
+        map.on('click', 'geojson-layer', (e) => {
+            const features = map.queryRenderedFeatures(e.point, {
+                layers: ['geojson-layer'],
+            });
+
+            if (features.length > 0) {
+                const feature = features[0];
+                console.log("Feature clicked:", feature.properties.col_id);
+                // route to column
+            }
+        });
+
+        map.on('mouseenter', 'geojson-layer', () => {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+
+        map.on('mouseleave', 'geojson-layer', () => {
+            map.getCanvas().style.cursor = '';
+        });
     };
 
     const addGeoJsonLayer = (map: mapboxgl.Map) => {

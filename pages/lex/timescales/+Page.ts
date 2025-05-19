@@ -5,6 +5,8 @@ import { PageHeader } from "~/components";
 import { Card, Icon, Popover, RangeSlider, Divider } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
+import { Timescale } from "@macrostrat/timescale";
+import { contextPanelIsInitiallyOpen } from "#/map/map-interface/app-state";
 
 export function Page() {
     const [input, setInput] = useState("");
@@ -35,6 +37,9 @@ export function Page() {
         return matchesName && matchesAgeRange;
     });
 
+    const width = window.screen.width;
+    const timescaleWidth = width * .6 - 40;
+
     return h(ContentPage, { className: "timescale-list-page"}, [
       h(PageHeader, { title: "Timescales" }),
       h(Card, { className: "filters" }, [
@@ -62,6 +67,7 @@ export function Page() {
             },
           }),
         ]), 
+        h(Timescale, { length: timescaleWidth, levels: [1,5], ageRange: [age[0], age[1]], absoluteAgeScale: true })
       ]),
       h(Divider),
       h('div.timescale-list', filtered.map((data) => TimescaleItem({ data }))),
@@ -78,11 +84,8 @@ function TimescaleItem({ data }) {
     }, 
     h(Card, { className: 'timescale-item' }, [
       h('h1.timescale-name', titleCase(timescale)),
+      h('h3', `${max_age} - ${min_age} Ma`),
       h('p', `Intervals: ${n_intervals}`),
-      h('div.timescale-age', [
-        h('span', `Min Age: ${min_age}`),
-        h('span', `Max Age: ${max_age}`),
-      ])
     ])
   )
 }
