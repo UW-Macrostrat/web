@@ -57,7 +57,7 @@ function SourceItem({ source }) {
 
   return h(LinkCard, {
     href, 
-    title: h('h1',"#" + source_id + " " + name),
+    title: h('h1', name),
     className: 'item'
   }, [
     h.if(source.raster_url != null)([" ", h("span.raster", "Raster")]),
