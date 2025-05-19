@@ -48,7 +48,7 @@ export function Page() {
 function GroupItem({ data }) {
   const { name, col_group, col_group_id } = data;
 
-  return h(LinkCard, { href: "/lex/group/" + col_group_id}, [
+  return h(LinkCard, { href: "/lex/groups/" + col_group_id}, [
     h('h3', name),
     h('p', col_group),
   ])
