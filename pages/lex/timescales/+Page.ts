@@ -6,6 +6,7 @@ import { Card, Icon, Popover, RangeSlider, Divider } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { Timescale } from "@macrostrat/timescale";
+import { titleCase } from "../index";
 
 export function Page() {
     const [input, setInput] = useState("");
@@ -89,13 +90,4 @@ function TimescaleItem({ data }) {
       h('p', `Intervals: ${n_intervals}`),
     ])
   )
-}
-
-
-function titleCase(str) {
-  return str
-    .toLowerCase()
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
 }

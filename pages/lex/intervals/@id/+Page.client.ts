@@ -2,7 +2,7 @@ import "./main.scss";
 import h from "@macrostrat/hyper";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
-import { PageHeader, Link, AssistantLinks, DevLinkButton } from "~/components";
+import { PageHeader, Link, AssistantLinks, DevLinkButton, PageBreadcrumbs } from "~/components";
 import { Card, Icon, Popover, Divider, RangeSlider } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
@@ -16,6 +16,7 @@ import {
 import { useEffect } from "react";
 import { MapPosition } from "@macrostrat/mapbox-utils";
 import { useNavigate } from "react-router";
+import { titleCase } from "../../index";
 
 export function Page() {
     const pageContext = usePageContext();
@@ -27,7 +28,7 @@ export function Page() {
     const { name, color, abbrev, b_age, int_id, t_age, timescales, int_type } = intRes;
 
     return h(ContentPage, { className: 'int-page'}, [
-        h(PageHeader, { title: "Interval #" + int_id }),
+        h(PageBreadcrumbs, { title: "#" + int_id }),
         h('div.int-names', [
             h('div.int-name', { style: { "backgroundColor": color, "color": getContrastTextColor(color)} }, name),
             abbrev ? h('div.int-abbrev', [
@@ -44,7 +45,7 @@ export function Page() {
         ]),
         h('div.int-timescales', [
             h('h3', "Timescales"),
-            h('ul', timescales.map((t) => h('li', h(Link, { href: "/timescales/" + t.timescale_id}, t.name)))),
+            h('ul', timescales.map((t) => h('li', h(Link, { href: "/lex/timescales/" + t.timescale_id}, titleCase(t.name))))),
         ]),
         h(References, { id: int_id }),
     ]);
@@ -183,7 +184,7 @@ function Map() {
 
 
     return h("div.map-container",
-          h(MapAreaContainer, { className: "map-area-container" },
+          h(MapAreaContainer, { className: "map-area-container",},
             h(MapView, {
               style: "mapbox://styles/mapbox/dark-v10",
               mapboxToken: SETTINGS.mapboxAccessToken,

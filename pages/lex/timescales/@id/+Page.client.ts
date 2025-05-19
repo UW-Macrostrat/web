@@ -2,10 +2,12 @@ import "./main.scss";
 import h from "@macrostrat/hyper";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
-import { PageHeader, Link, AssistantLinks, DevLinkButton } from "~/components";
+import { PageHeader, Link, AssistantLinks, DevLinkButton, PageBreadcrumbs } from "~/components";
 import { ContentPage } from "~/layouts";
 import { usePageContext } from 'vike-react/usePageContext';
 import { Timescale } from "@macrostrat/timescale";
+import { titleCase } from "../../index";
+
 
 export function Page() {
     const pageContext = usePageContext();
@@ -24,19 +26,11 @@ export function Page() {
     const timescaleWidth = width * .6;
 
     return h(ContentPage, [
-        h(PageHeader, { title: "Timescale #" + id }),
+        h(PageBreadcrumbs, { title: "#" + id }),
         h('div.timescale-content', [
             h('h1', titleCase(timescale)),
             h('h3', max_age + " - " +  min_age + " Ma"),
             h(Timescale, { length: timescaleWidth, levels: [0,5], ageRange: [min_age, max_age], absoluteAgeScale: true }),
         ])
     ]);
-}
-
-function titleCase(str) {
-  return str
-    .toLowerCase()
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
 }
