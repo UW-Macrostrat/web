@@ -55,3 +55,10 @@ h1, h2, h3 {
     }
   }
 }
+
+.filters {
+    margin-bottom: 1em;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}

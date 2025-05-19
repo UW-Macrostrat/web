@@ -36,7 +36,7 @@ export function Page() {
 
     return h(ContentPage, [
         h(PageBreadcrumbs, { title: "Strat Names" }),
-        h(Card, [
+        h(Card, { className: 'filters'}, [
             h("h2", 'Filter'),
             h('div.search-bar', [
                 h(Icon, { icon: "search" }),
