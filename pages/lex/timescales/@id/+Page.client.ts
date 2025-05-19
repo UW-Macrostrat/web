@@ -30,7 +30,7 @@ export function Page() {
         h('div.timescale-content', [
             h('h1', titleCase(timescale)),
             h('h3', max_age + " - " +  min_age + " Ma"),
-            h(Timescale, { length: timescaleWidth, levels: [0,5], ageRange: [min_age, max_age], absoluteAgeScale: true }),
+            h(Timescale, { levels: [0,5], ageRange: [min_age, max_age], orientation: "vertical" }),
         ])
     ]);
 }
