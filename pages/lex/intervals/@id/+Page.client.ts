@@ -23,8 +23,13 @@ export function Page() {
     const pageContext = usePageContext();
     const id = parseInt(pageContext.urlParsed.pathname.split("/")[3]);
     const intRes = useAPIResult(SETTINGS.apiV2Prefix + "/defs/intervals?int_id=" + id)?.success.data[0];
+    const fossilRes = useAPIResult(SETTINGS.apiV2Prefix + "/fossils?int_id=" + id)?.success.data;
+    console.log(SETTINGS.apiV2Prefix + "/fossils?int_id=" + id);
 
-    if (intRes == null) return h("div", "Loading...");
+    if (!intRes || !fossilRes) return h("div", "Loading...");
+
+    console.log("fossil res", fossilRes);
+    console.log("int res", intRes);
 
     const { name, color, abbrev, b_age, int_id, t_age, timescales, int_type } = intRes;
 
@@ -154,10 +159,15 @@ function Map() {
     };
 
     const addGeoJsonLayer = (map: mapboxgl.Map) => {
-        if (!map.getSource('geojson-data')) {
-            map.addSource('geojson-data', {
+        const sourceId = 'geojson-data';
+
+        if (map.getSource(sourceId)) {
+            // Update existing source with new data
+            (map.getSource(sourceId) as mapboxgl.GeoJSONSource).setData(data);
+        } else {
+            // Add source if it doesn't exist
+            map.addSource(sourceId, {
                 type: 'geojson',
-                // data: 'https://docs.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson',
                 data: data,
             });
         }
@@ -165,15 +175,16 @@ function Map() {
         if (!map.getLayer('geojson-layer')) {
             map.addLayer({
                 id: 'geojson-layer',
-                type: 'fill', // Use 'fill' for rendering polygons
-                source: 'geojson-data',
+                type: 'fill',
+                source: sourceId,
                 paint: {
                     'fill-color': '#00aaff',
-                    'fill-opacity': 0.5,       
+                    'fill-opacity': 0.5,
                 },
             });
         }
     };
+
 
     const mapPosition: MapPosition = {
         camera: {
