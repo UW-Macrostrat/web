@@ -38,7 +38,10 @@ a:hover
 
         a
             color: white !important
-    p
+    .description
+        display: flex
+        flex-direction: column;
+        gap: .25em
         text-align: right
         position:absolute
         padding: 5px 20px
@@ -49,6 +52,9 @@ a:hover
         right: 0
         white-space: nowrap
         margin: 5px
+
+        p 
+            margin: 0 !important
 
         a
             color: white
@@ -62,14 +68,14 @@ a:hover
     object-fit: cover
     width: 100%
 
-n
+.name
     font-size: 25px
     font-weight: 200px
 
-t
+.role
     font-weight: 400px
 
-e 
+.email
     font-size: 14px
     font-weight: 200px
 
