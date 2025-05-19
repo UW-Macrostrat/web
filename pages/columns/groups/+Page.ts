@@ -24,7 +24,7 @@ export function Page() {
     });
 
     return h(ContentPage, { className: 'group-list-page'}, [
-      h(PageBreadcrumbs, { title: "Column Groups" }),
+      h(PageBreadcrumbs, { title: "Groups" }),
       h(Card, { className: 'filters' }, [
         h('h3', "Filters"),
         h('div.search-bar', [
@@ -48,7 +48,7 @@ export function Page() {
 function GroupItem({ data }) {
   const { name, col_group, col_group_id } = data;
 
-  return h(LinkCard, { href: "/lex/groups/" + col_group_id}, [
+  return h(LinkCard, { href: "/columns/groups/" + col_group_id}, [
     h('h3', name),
     h('p', col_group),
   ])
