@@ -42,47 +42,47 @@ export function Page() {
     console.log(grouped);
 
     return h('div.int-list-page', [
-    h(AssistantLinks, [
-      h(Card, [
-        h('p', "Filter by name, type, or abbreviation"),
-        h('div.search-bar', [
-          h(Icon, { icon: "search" }),
-          h('input', {
-            type: "text",
-            placeholder: "Search...",
-            onChange: handleChange,
-          }),
-        ])
-      ]),     
-      h(Card, [
-        h('p', "Filter by top age"),
-        h(RangeSlider, {
-          min: 0,
-          max: 4180,
-          stepSize: 10,
-          labelStepSize: 1000,
-          value: [topAge[0], topAge[1]],
-          onChange: (value) => {
-            setTopAge(value);
-          },
-        }),
-      ]), 
-      h(Card, [
-        h('p', "Filter by bottom age"),
-        h(RangeSlider, {
-          min: 0,
-          max: 4600,
-          stepSize: 10,
-          labelStepSize: 1000,
-          value: [bottomAge[0], bottomAge[1]],
-          onChange: (value) => {
-            setBottomAge(value);
-          }
-        }),
-      ]),
-    ]),
     h(ContentPage, [
       h(PageHeader, { title: "Intervals" }),
+      h(Card, { className: "filters" }, [
+        h('h3', "Filters"),
+        h('div', [
+          h('div.search-bar', [
+            h(Icon, { icon: "search" }),
+            h('input', {
+              type: "text",
+              placeholder: "Filter by name, type, or abbreviation...",
+              onChange: handleChange,
+            }),
+          ])
+        ]),     
+        h('div', [
+          h('p', "Filter by top age"),
+          h(RangeSlider, {
+            min: 0,
+            max: 4180,
+            stepSize: 10,
+            labelStepSize: 1000,
+            value: [topAge[0], topAge[1]],
+            onChange: (value) => {
+              setTopAge(value);
+            },
+          }),
+        ]), 
+        h('div', [
+          h('p', "Filter by bottom age"),
+          h(RangeSlider, {
+            min: 0,
+            max: 4600,
+            stepSize: 10,
+            labelStepSize: 1000,
+            value: [bottomAge[0], bottomAge[1]],
+            onChange: (value) => {
+              setBottomAge(value);
+            }
+          }),
+        ]),
+      ]),
       h('div.int-list',
         Object.entries(grouped).map(([intType, group]) =>
           h('div.int-group', [

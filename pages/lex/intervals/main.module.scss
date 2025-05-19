@@ -59,3 +59,9 @@ h3, h2 {
 ul, li { 
   margin: 0;
 }
+
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}

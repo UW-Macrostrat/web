@@ -58,6 +58,8 @@ export function Page() {
   const [showSettings, setShowSettings] = useState(false);
   const [state, dispatch] = useReducer(filterReducer, startingFilters);
 
+  console.log("data", data)
+
   useEffect(() => {
     let s1 = state;
     if (s1.match === "") {
