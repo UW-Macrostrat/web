@@ -17,6 +17,7 @@ import { useEffect } from "react";
 import { MapPosition } from "@macrostrat/mapbox-utils";
 import { useNavigate } from "react-router";
 import { titleCase } from "../../index";
+import { features } from "process";
 
 export function Page() {
     const pageContext = usePageContext();
@@ -143,7 +144,7 @@ function Map() {
             }
         });
 
-        map.on('mouseenter', 'geojson-layer', () => {
+        map.on('mouseenter', 'geojson-layer', (e) => {
             map.getCanvas().style.cursor = 'pointer';
         });
 
@@ -167,8 +168,8 @@ function Map() {
                 type: 'fill', // Use 'fill' for rendering polygons
                 source: 'geojson-data',
                 paint: {
-                    'fill-color': '#FFFFFF',  // Color of the polygon fill
-                    'fill-opacity': 0.5,       // Opacity of the fill
+                    'fill-color': '#00aaff',
+                    'fill-opacity': 0.5,       
                 },
             });
         }
