@@ -1,7 +1,7 @@
 import h from "./main.module.scss";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
-import { PageHeader, AssistantLinks, Link } from "~/components";
+import { PageBreadcrumbs, AssistantLinks, Link } from "~/components";
 import { Card, Icon, Popover, RangeSlider } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
@@ -42,7 +42,7 @@ export function Page() {
 
     return h('div.int-list-page', [
     h(ContentPage, [
-      h(PageHeader, { title: "Intervals" }),
+      h(PageBreadcrumbs, { title: "Intervals" }),
       h(Card, { className: "filters" }, [
         h('h3', "Filters"),
         h('div', [

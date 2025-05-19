@@ -1,7 +1,7 @@
 import h from "./main.module.scss";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
-import { PageHeader, AssistantLinks } from "~/components";
+import { PageHeader, AssistantLinks, PageBreadcrumbs } from "~/components";
 import { Card, Icon, Popover } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
@@ -28,7 +28,7 @@ export function Page() {
     const grouped = groupByClassThenType(filtered);
 
     return h(ContentPage, { className: 'environ-list-page'}, [
-      h(PageHeader, { title: "Environments" }),
+      h(PageBreadcrumbs, { title: "Environments" }),
       h(Card, [
         h('h3', "Filters"),
         h('div.search-bar', [

@@ -1,7 +1,7 @@
 import h from "./main.module.scss";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
-import { PageHeader, AssistantLinks } from "~/components";
+import { PageHeader, PageBreadcrumbs } from "~/components";
 import { Card, Icon, Popover } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
@@ -29,7 +29,7 @@ export function Page() {
     const grouped = groupByClassThenType(filtered);
 
     return h(ContentPage, { className: 'econ-list-page'}, [
-      h(PageHeader, { title: "Economics" }),
+      h(PageBreadcrumbs, { title: "Economics" }),
       h(Card, { className: 'filters' }, [
         h('h3', "Filters"),
         h('div.search-bar', [

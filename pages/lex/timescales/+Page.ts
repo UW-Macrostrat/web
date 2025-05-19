@@ -1,12 +1,11 @@
 import h from "./main.module.scss";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
-import { PageHeader } from "~/components";
+import { PageBreadcrumbs, LinkCard } from "~/components";
 import { Card, Icon, Popover, RangeSlider, Divider } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { Timescale } from "@macrostrat/timescale";
-import { contextPanelIsInitiallyOpen } from "#/map/map-interface/app-state";
 
 export function Page() {
     const [input, setInput] = useState("");
@@ -14,6 +13,8 @@ export function Page() {
     const res = useAPIResult(SETTINGS.apiV2Prefix + "/defs/timescales?all")?.success.data;
 
     if (res == null) return h("div", "Loading...");
+
+    console.log(res);
 
     const min_age_arr = res.map((d) => d.min_age);
     const min_age = Math.min(...min_age_arr);
@@ -41,7 +42,7 @@ export function Page() {
     const timescaleWidth = width * .6 - 40;
 
     return h(ContentPage, { className: "timescale-list-page"}, [
-      h(PageHeader, { title: "Timescales" }),
+      h(PageBreadcrumbs, { title: "Timescales" }),
       h(Card, { className: "filters" }, [
         h('h2', "Filters"),
         h('div.name-filter', [
@@ -76,13 +77,13 @@ export function Page() {
 
 function TimescaleItem({ data }) {
 
-  const { timescale, min_age, max_age, n_intervals } = data;
+  const { timescale, min_age, max_age, n_intervals, timescale_id } = data;
 
   return h(Popover, {
     className: "timescale-item-popover",
     content: h('div.timescale-tooltip')
     }, 
-    h(Card, { className: 'timescale-item' }, [
+    h(LinkCard, { className: 'timescale-item', href: "/lex/timescales/" + timescale_id }, [
       h('h1.timescale-name', titleCase(timescale)),
       h('h3', `${max_age} - ${min_age} Ma`),
       h('p', `Intervals: ${n_intervals}`),
