@@ -42,6 +42,8 @@ ul, h3 {
 .table {
     background-color: var(--secondary-color);
     color: var(--text-emphasized-color);
+    display: grid;
+    grid-template-columns: 20% 80%;
 
     p {
         margin: 0;
@@ -49,9 +51,9 @@ ul, h3 {
 
     .table-content {
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: .5em;
         gap: .5em;
     }
 }
