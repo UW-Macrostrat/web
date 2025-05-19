@@ -144,8 +144,8 @@ function Map() {
 
             if (features.length > 0) {
                 const feature = features[0];
-                console.log("Feature clicked:", feature.properties.col_id);
-                // route to column
+                const url = "/columns/" + feature.properties.col_id;
+                window.open(url, "_blank");
             }
         });
 

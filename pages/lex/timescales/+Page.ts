@@ -32,6 +32,10 @@ export function Page() {
 
     const width = window.screen.width;
     const timescaleWidth = width * .6 - 40;
+    const handleClick = (timescale) => {
+        const url = SETTINGS.apiV2Prefix + "/defs/timescales/" + timescale;
+        window.open(url, "_blank");
+    }
 
     return h(ContentPage, { className: "timescale-list-page"}, [
       h(PageBreadcrumbs, { title: "Timescales" }),
@@ -60,7 +64,7 @@ export function Page() {
             },
           }),
         ]), 
-        h(Timescale, { length: timescaleWidth, levels: [1,5], ageRange: [age[0], age[1]], absoluteAgeScale: true })
+        h(Timescale, { length: timescaleWidth, levels: [1,5], ageRange: [age[0], age[1]], absoluteAgeScale: true, onClick: handleClick })
       ]),
       h(Divider),
       h('div.timescale-list', filtered.map((data) => TimescaleItem({ data }))),
