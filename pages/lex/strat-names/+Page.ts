@@ -59,6 +59,6 @@ export function Page() {
 function StratItem({ data }) {
     const { strat_name, strat_name_id } = data;
 
-    return h('a.strat-name', { href: "/strat-names/" + strat_name_id}, strat_name)
+    return h('a.strat-name', { href: "/lex/strat-names/" + strat_name_id}, strat_name)
 }
 

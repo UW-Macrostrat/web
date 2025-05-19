@@ -212,6 +212,51 @@ export const sitemap: Routes = {
             },
           ],
         },
+        {
+          slug: "intervals",
+          name: "Intervals",
+          children: [
+            {
+              param: "@id",
+              name(urlPart, ctx) {
+                return h(
+                  "code",
+                  ctx.pageProps?.interval?.int_id ?? urlPart
+                );
+              },
+            },
+          ],
+        },
+        {
+          slug: "environments",
+          name: "Environments",
+          children: [
+            {
+              param: "@id",
+              name(urlPart, ctx) {
+                return h(
+                  "code",
+                  ctx.pageProps?.environment?.environ_id ?? urlPart
+                );
+              },
+            },
+          ],
+        }, 
+        {
+          slug: "timescales",
+          name: "Timescales",
+          children: [
+            {
+              param: "@id",
+              name(urlPart, ctx) {
+                return h(
+                  "code",
+                  ctx.pageProps?.timescale?.timescale_id ?? urlPart
+                );
+              },
+            },
+          ],
+        }, 
       ],
     },
     columnsSubtree,
