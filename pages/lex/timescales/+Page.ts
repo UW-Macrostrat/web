@@ -7,26 +7,26 @@ import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { Timescale } from "@macrostrat/timescale";
 import { titleCase } from "../index";
-import { c } from "vite/dist/node/moduleRunnerTransport.d-CXw_Ws6P";
-import { time } from "console";
 
 export function Page() {
     const [input, setInput] = useState("");
     const [age, setAge] = useState([0, 4000]);
     const [clickedInterval, setClickedInterval] = useState(null);
     const res = useAPIResult(SETTINGS.apiV2Prefix + "/defs/timescales?all")?.success.data;
+    /*
     const clickedRes = useAPIResult("https://macrostrat.org/api/defs/intervals?name=" + clickedInterval)?.success.data[0];
 
     if (clickedRes) {
       const url = "/lex/intervals/" + clickedRes.int_id;
-      window.open(url, "_blank")
+      // window.open(url)
     }
+    */
 
     if (res == null) return h("div", "Loading...");
 
-    const handleChange = (event) => { 
+    const handleChange = (event) => {
         setInput(event.target.value.toLowerCase());
-    }
+      }
 
     const filtered = res.filter((d) => {
         const name = d.timescale?.toLowerCase() || "";
@@ -44,6 +44,7 @@ export function Page() {
     const handleClick = (timescale) => {
         const name = timescale.target.textContent;
         setClickedInterval(name);
+        console.log(timescale)
         console.log("interval clicked:", name);
     }
 
