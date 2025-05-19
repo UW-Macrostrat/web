@@ -10,17 +10,10 @@ import { titleCase } from "../index";
 
 export function Page() {
     const [input, setInput] = useState("");
-    const [age, setAge] = useState([0, 4600]);
+    const [age, setAge] = useState([0, 4000]);
     const res = useAPIResult(SETTINGS.apiV2Prefix + "/defs/timescales?all")?.success.data;
 
     if (res == null) return h("div", "Loading...");
-
-    console.log(res);
-
-    const min_age_arr = res.map((d) => d.min_age);
-    const min_age = Math.min(...min_age_arr);
-    const max_age_arr = res.map((d) => d.max_age);
-    const max_age = Math.max(...max_age_arr);
 
     const handleChange = (event) => { 
         setInput(event.target.value.toLowerCase());
@@ -28,13 +21,11 @@ export function Page() {
 
     const filtered = res.filter((d) => {
         const name = d.timescale?.toLowerCase() || "";
-        const max_age = d.max_age ? parseInt(d.max_age, 10) : 0;
-        const min_age = d.min_age ? parseInt(d.min_age, 10) : 4600; 
+        const max_age = d.max_age ? parseInt(d.max_age, 10) : 4000;
+        const min_age = d.min_age ? parseInt(d.min_age, 10) : 0; 
         
         const matchesName = name.includes(input);
-        const matchesAgeRange =
-            (!isNaN(max_age) && max_age <= age[1]) &&
-            (!isNaN(min_age) && min_age >= age[0]);
+        const matchesAgeRange = max_age >= age[0] && min_age <= age[1];
 
         return matchesName && matchesAgeRange;
     });
@@ -59,8 +50,8 @@ export function Page() {
         h('div.age-filter', [
           h('p', "Filter by ages"),
           h(RangeSlider, {
-            min: min_age,
-            max: max_age,
+            min: 0,
+            max: 4000,
             stepSize: 10,
             labelStepSize: 1000,
             value: [age[0], age[1]],
