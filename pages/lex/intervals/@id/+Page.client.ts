@@ -7,7 +7,7 @@ import { Card, Icon, Popover, Divider, RangeSlider } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import { usePageContext } from 'vike-react/usePageContext';
 import { titleCase } from "../../index";
-import { ColumnMap, SiftLink } from "../../../index";
+import { ColumnMap, BlankImage } from "../../../index";
 import { navigate } from "vike/client/router";
 import { useState, useCallback } from "react";
 
@@ -16,8 +16,14 @@ export function Page() {
     const id = parseInt(pageContext.urlParsed.pathname.split("/")[3]);
     const intRes = useAPIResult(SETTINGS.apiV2Prefix + "/defs/intervals?int_id=" + id)?.success.data[0];
     const fossilRes = useAPIResult(SETTINGS.apiV2Prefix + "/fossils?int_id=" + id)?.success.data;
+    const colData = useAPIResult(SETTINGS.apiV2Prefix + "/columns?int_id=" + id + "&response=long&format=geojson")?.success.data;
     const [selectedUnitID, setSelectedUnitID] = useState(null);
+    const cols = colData?.features.map((feature) => feature.properties.col_id).join(',')
+    const taxaData = useAPIResult("https://paleobiodb.org/data1.2/occs/prevalence.json?limit=5&coll_id=" + cols)
 
+    console.log(colData)
+    const liths = colData?.features.map((feature) => feature.properties.lith).flat();
+    console.log(liths)
     /*
     const onSelectColumn = useCallback(
         (col_id: number) => {
@@ -60,8 +66,9 @@ export function Page() {
                 h('div.int-type', "Type: " + UpperCase(int_type)),
                 h('div.int-age', b_age + " - " + t_age + " Ma"),
             ]),
-            h(Map, { id: int_id, onSelectColumn }),
+            colData ? h(Map, { id: int_id, onSelectColumn, data: colData }) : h('div.loading', "loading"),
         ]),
+        h(PrevalentTaxa, { data: taxaData}),
         timescales[0].name ? h('div.int-timescales', [
             h('h3', "Timescales"),
             h('ul', timescales.map((t) => h('li', h(Link, { href: "/lex/timescales/" + t.timescale_id}, titleCase(t.name))))),
@@ -107,15 +114,7 @@ function References({ id }) {
     ]);
 }
 
-function Map({id, onSelectColumn}) {
-    const data = useAPIResult(SETTINGS.apiV2Prefix + "/columns?int_id=" + id + "&response=long&format=geojson")?.success.data;
-
-    if (!data) {
-        return h("div", "Loading..."); 
-    }
-
-    console.log(data)
-    
+function Map({id, onSelectColumn, data}) {
     return h("div.page-container", [
           h(ColumnMap, {
             className: "column-map",
@@ -126,4 +125,21 @@ function Map({id, onSelectColumn}) {
             columns: data.features,
           }),
         ])
+}
+
+function PrevalentTaxa({data}) {
+    const records = data?.records;
+
+    return h('div.prevalent-taxa-container', 
+        records?.map((record) => Taxa(record))
+    )
+}
+
+function Taxa(record) {
+    const imgUrl = "https://paleobiodb.org/data1.2/taxa/thumb.png?id=";
+
+    return h('div.taxa', [
+        h(BlankImage, { src: imgUrl + record.img}),
+        h('p.name', record.nam)
+    ])
 }
