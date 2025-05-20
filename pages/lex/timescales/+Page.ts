@@ -13,14 +13,14 @@ export function Page() {
     const [age, setAge] = useState([0, 4000]);
     const [clickedInterval, setClickedInterval] = useState(null);
     const res = useAPIResult(SETTINGS.apiV2Prefix + "/defs/timescales?all")?.success.data;
-    /*
+
+    console.log("clickedInterval", clickedInterval);
     const clickedRes = useAPIResult("https://macrostrat.org/api/defs/intervals?name=" + clickedInterval)?.success.data[0];
 
     if (clickedRes) {
       const url = "/lex/intervals/" + clickedRes.int_id;
-      // window.open(url)
+      window.open(url)
     }
-    */
 
     if (res == null) return h("div", "Loading...");
 
@@ -42,10 +42,20 @@ export function Page() {
     const width = window.screen.width;
     const timescaleWidth = width * .6 - 40;
     const handleClick = (timescale) => {
-        const name = timescale.target.textContent;
-        setClickedInterval(name);
-        console.log(timescale)
-        console.log("interval clicked:", name);
+        const parent = timescale.target.parentElement;
+        let selected;
+
+        // container clicked
+        const containerClickedData = parent.className.split(" ")[1];
+
+        if(containerClickedData === "interval-label") {
+          const labelClickedData = parent.parentElement.parentElement.className.split(" ")[1];
+          selected = labelClickedData
+        } else {
+          selected = containerClickedData
+        }
+
+        setClickedInterval(selected);
     }
 
     return h(ContentPage, { className: "timescale-list-page"}, [
