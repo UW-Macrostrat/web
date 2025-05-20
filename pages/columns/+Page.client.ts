@@ -19,6 +19,7 @@ import { onDemand } from "~/_utils";
 import { navigate } from "vike/client/router";
 import { useMapRef } from "@macrostrat/mapbox-react";
 import { ColumnMap } from "../index";
+import { useAPIResult } from "@macrostrat/ui-components";
 
 export function Page(props) {
   return h(ColumnListPage, props);
@@ -26,9 +27,12 @@ export function Page(props) {
 
 function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const { columnGroups } = useData();
+  // const columnData = useAPIResult(SETTINGS.apiV2Prefix + "/columns&all");
   const [columnInput, setColumnInput] = useState("");
   const [mapInstance, setMapInstance] = useState<mapboxgl.Map | null>(null);
   const [selectedUnitID, setSelectedUnitID] = useState<number>(null);
+
+  // if(!columnData) return h('div.loading', "Loading...")
 
   const filteredGroups = columnGroups.filter((group) => {
     const name = group.name.toLowerCase();
@@ -36,6 +40,10 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
     const input = columnInput.toLowerCase();
     return name.includes(input) || columns.some((col) => col.includes(input));
   });
+
+  const colArr = filteredGroups.map(item => item.columns.map(col => col.col_id)).flat();
+
+  const columnData = useAPIResult(SETTINGS.apiV2Prefix + "/columns?col_id=" + colArr.join(',') + "&response=long&format=geojson");    
 
   const handleInputChange = (event) => {
     setColumnInput(event.target.value.toLowerCase());
@@ -53,6 +61,10 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
     [setSelectedUnitID]
   );
 
+  if(!columnData) return h('div.loading', "loading...");
+
+  const columnFeatures = columnData?.success.data.features
+  
   return h("div.column-list-page", [
     h(AssistantLinks, [
       h(AnchorButton, { href: "/projects", minimal: true }, "Projects"),
@@ -66,6 +78,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
         projectID: null,
         selectedColumn: null,
         onSelectColumn,
+        columns: columnFeatures,
       }),
       h(Card, { className: "search-bar" }, [
         h(Icon, { icon: "search" }),
