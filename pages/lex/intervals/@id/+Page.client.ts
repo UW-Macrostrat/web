@@ -102,41 +102,10 @@ function References({ id }) {
 }
 
 function Map({id}) {
-    // Define state for data and loading
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const data = useAPIResult(SETTINGS.apiV2Prefix + "/columns?int_id=" + id + "&response=long&format=geojson")?.success.data;
 
-    // useAPIResult(SETTINGS.apiV2Prefix + "/columns?int_id=" + id + "&response=long&format=geojson")?.success.data;
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch(SETTINGS.apiV2Prefix + "/columns?int_id=" + id + "&response=long&format=geojson");
-                const result = await response.json();
-
-                if (result.success) {
-                    setData(result.success.data);  // Assume this is the correct data
-                    setLoading(false);
-                } else {
-                    setError("Failed to load data");
-                    setLoading(false);
-                }
-            } catch (error) {
-                setError("Error fetching data");
-                setLoading(false);
-            }
-        };
-
-        fetchData();
-    }, []);  // Empty dependency array means this effect runs only once after the first render
-
-    if (loading) {
-        return h("div", "Loading...");  // Show loading state
-    }
-
-    if (error) {
-        return h("div", error);  // Show error state
+    if (!data) {
+        return h("div", "Loading..."); 
     }
     
     return h("div.page-container", [
