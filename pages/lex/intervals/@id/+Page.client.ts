@@ -1,5 +1,5 @@
 import "./main.scss";
-import h from "@macrostrat/hyper";
+import { hyperStyled } from "@macrostrat/hyper";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
 import { PageHeader, Link, AssistantLinks, DevLinkButton, PageBreadcrumbs } from "~/components";
@@ -18,6 +18,13 @@ import { MapPosition } from "@macrostrat/mapbox-utils";
 import { useNavigate } from "react-router";
 import { titleCase } from "../../index";
 import { features } from "process";
+import { onDemand } from "~/_utils";
+import styles from "./index.module.sass";
+const h = hyperStyled(styles);
+
+
+
+const ColumnMap = onDemand(() => import("./map").then((mod) => mod.ColumnMap));
 
 export function Page() {
     const pageContext = usePageContext();
@@ -100,8 +107,6 @@ function Map() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    console.log("DATA", data)
-
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -131,6 +136,8 @@ function Map() {
     if (error) {
         return h("div", error);  // Show error state
     }
+
+
 
     const handleMapLoaded = (map: mapboxgl.Map) => {
         if (!map.isStyleLoaded()) {
@@ -195,6 +202,17 @@ function Map() {
         altitude: 6000000,
         },
     };
+
+    return h("div.page-container", [
+          h(ColumnMap, {
+            className: "column-map",
+            inProcess: true,
+            projectID: null,
+            selectedColumn: null,
+            onSelectColumn: () => {},
+            columns: data.features,
+          }),
+        ])
 
 
     return h("div.map-container",
