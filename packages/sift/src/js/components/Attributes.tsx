@@ -383,7 +383,7 @@ class _Attributes extends React.Component {
         </div>
       );
     }
-
+    
     return (
       <div className="page-content">
         <Loading loading={this.state.loading} />

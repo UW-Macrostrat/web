@@ -21,9 +21,14 @@ export function Page() {
     const cols = colData?.features.map((feature) => feature.properties.col_id).join(',')
     const taxaData = useAPIResult("https://paleobiodb.org/data1.2/occs/prevalence.json?limit=5&coll_id=" + cols)
 
-    console.log(colData)
-    const liths = colData?.features.map((feature) => feature.properties.lith).flat();
-    console.log(liths)
+    // data for charts
+    const liths = ChartInfo(colData, 'lith')
+    const environs = ChartInfo(colData, 'environ')
+    const econs = ChartInfo(colData, 'econ')
+
+    const summary = summarize(colData?.features);
+    console.log(summary)
+
     /*
     const onSelectColumn = useCallback(
         (col_id: number) => {
@@ -142,4 +147,58 @@ function Taxa(record) {
         h(BlankImage, { src: imgUrl + record.img}),
         h('p.name', record.nam)
     ])
+}
+
+function ChartInfo(data, key) {
+    return data?.features.map((feature) => feature.properties[key]).flat();
+}
+
+function summarize(data) {
+  const summary = {
+    col_area: 0,
+    max_thick: 0,
+    min_min_thick: Infinity,
+    b_age: 0,
+    t_age: Infinity,
+    b_int_name: "",
+    t_int_name: "",
+    pbdb_collections: 0,
+    t_units: 0,
+    t_sections: 0,
+  };
+
+  if (!Array.isArray(data)) return summary;
+
+  for (const { properties } of data) {
+    const {
+      col_area,
+      max_thick,
+      min_min_thick,
+      b_age,
+      t_age,
+      b_int_name,
+      t_int_name,
+      pbdb_collections,
+      t_units,
+      t_sections,
+    } = properties;
+
+    summary.col_area += col_area;
+    summary.pbdb_collections += pbdb_collections;
+    summary.t_units += t_units;
+    summary.t_sections += t_sections;
+
+    if (max_thick > summary.max_thick) summary.max_thick = max_thick;
+    if (min_min_thick < summary.min_min_thick) summary.min_min_thick = min_min_thick;
+    if (b_age > summary.b_age) {
+      summary.b_age = b_age;
+      summary.b_int_name = b_int_name;
+    }
+    if (t_age < summary.t_age) {
+      summary.t_age = t_age;
+      summary.t_int_name = t_int_name;
+    }
+  }
+
+  return summary;
 }
