@@ -28,6 +28,8 @@ export function Page() {
     const econs = summarizeAttributes(colData?.features, 'econ')
     const summary = summarize(colData?.features);
 
+    console.log('liths', liths)
+
     /*
     const onSelectColumn = useCallback(
         (col_id: number) => {
@@ -89,6 +91,18 @@ export function Page() {
             ]),
             colData ? h(Map, { id: int_id, onSelectColumn, data: colData }) : h('div.loading', "loading"),
         ]),
+        h('div.charts', [
+            h('div.chart', [
+                h('div.legend', liths?.map((lith) => ChartLegend(lith)))
+            ]),
+            h('div.chart', [
+                h('div.legend', econs?.map((lith) => ChartLegend(lith)))
+            ]),
+            h('div.chart', [
+                h('div.legend', environs?.map((lith) => ChartLegend(lith)))
+            ]),
+        ]),
+
         h(PrevalentTaxa, { data: taxaData}),
         timescales[0].name ? h('div.int-timescales', [
             h('h3', "Timescales"),
@@ -170,4 +184,11 @@ function Taxa(record) {
         h(BlankImage, { src: imgUrl + record.img}),
         h('p.name', record.nam)
     ])
+}
+
+function ChartLegend(data) {
+    return h('div.legend-item', [
+        h('div.box', { style: { "background-color": data.color}}), 
+        h('p', data.label)
+    ]);
 }
