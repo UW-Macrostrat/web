@@ -50,10 +50,11 @@ ul, h3 {
     }
 
     .table-content {
+        padding: 2em;
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
+        justify-content: space-between;
         gap: .5em;
     }
 }
@@ -69,8 +70,9 @@ ul, h3 {
     width: 100% !important;
 }
 
-.column-map {
+.column-map, #map {
   width: 100%;
+  height: 100%;
   aspect-ratio: 3/2;
   cursor: pointer;
   z-index: 100;
@@ -112,4 +114,8 @@ ul, h3 {
             filter: invert(1)
         }
     }
+}
+
+.divider {
+    width: 100%;
 }

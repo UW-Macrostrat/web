@@ -52,7 +52,7 @@ export function Page() {
 
     console.log('summary', summary)
     const { t_units, t_sections, t_int_name, pbdb_collections, b_int_name, max_thick, col_area } = summary
-    const area = parseInt(col_area.toString().split('.')[0])
+    const area = parseInt(col_area.toString().split('.')[0]);
 
     return h(ContentPage, { className: 'int-page'}, [
         h(PageBreadcrumbs, { title: "#" + int_id }),
@@ -72,12 +72,19 @@ export function Page() {
         h('div.table', [
             h('div.table-content', [
                 h('div.thickness', "<= " + max_thick.toLocaleString() + 'm thick'),
+                h(Divider, { className: 'divider' }),
                 h('div.units', t_units.toLocaleString() + ' units'),
+                h(Divider, { className: 'divider' }),
                 h('div.collections', pbdb_collections.toLocaleString() + ' collections'),
+                h(Divider, { className: 'divider' }),
                 h('div.interval', b_int_name.toLocaleString() + " - " + t_int_name),
+                h(Divider, { className: 'divider' }),
                 h('div.packages', t_sections.toLocaleString() + " packages"),
+                h(Divider, { className: 'divider' }),
                 h('div.packages', area.toLocaleString() + " m^2"),
+                h(Divider, { className: 'divider' }),
                 h('div.int-type', "Type: " + UpperCase(int_type)),
+                h(Divider, { className: 'divider' }),
                 h('div.int-age', b_age + " - " + t_age + " Ma"),
             ]),
             colData ? h(Map, { id: int_id, onSelectColumn, data: colData }) : h('div.loading', "loading"),
