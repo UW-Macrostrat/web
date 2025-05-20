@@ -18,6 +18,7 @@ import { MapPosition } from "@macrostrat/mapbox-utils";
 import { useEffect, useCallback } from "react";
 import { onDemand } from "~/_utils";
 import { navigate } from "vike/client/router";
+import { useMapRef } from "@macrostrat/mapbox-react";
 
 const h = hyperStyled(styles);
 
@@ -39,106 +40,6 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
     const input = columnInput.toLowerCase();
     return name.includes(input) || columns.some((col) => col.includes(input));
   });
-
-  /*
-
-  const mapPosition: MapPosition = {
-    camera: {
-      lat: 39,
-      lng: -98,
-      altitude: 6000000,
-    },
-  };
-
-  const generateGeoJSON = () => ({
-    type: "FeatureCollection",
-    features: filteredGroups.flatMap((group) =>
-      group.columns.map((col) => ({
-        type: "Feature",
-        properties: {
-          name: col.col_name,
-          id: col.col_id,
-          status: col.status,
-        },
-        geometry: {
-          type: "Point",
-          coordinates: [col.lng, col.lat],
-        },
-      }))
-    ),
-  });
-
-  const handleMapLoaded = (map: mapboxgl.Map) => {
-    setMapInstance(map);
-
-    if (!map.isStyleLoaded()) {
-      map.once("style.load", () => addGeoJsonLayer(map));
-    } else {
-      addGeoJsonLayer(map);
-    }
-  };
-
-  const addGeoJsonLayer = (map: mapboxgl.Map) => {
-    const geojson = generateGeoJSON();
-
-    if (!map.getSource("geojson-data")) {
-      map.addSource("geojson-data", {
-        type: "geojson",
-        data: geojson,
-      });
-    }
-
-    if (!map.getLayer("geojson-layer")) {
-      map.addLayer({
-        id: "geojson-layer",
-        type: "circle",
-        source: "geojson-data",
-        paint: {
-          "circle-radius": 6,
-          "circle-color": "#007cbf",
-          "circle-opacity": 0.75,
-        },
-      });
-    }
-
-    map.on("click", "geojson-layer", (e) => {
-      const feature = e.features?.[0];
-      if (!feature) return;
-
-      const coordinates = feature.geometry.coordinates as [number, number];
-      const { name, id } = feature.properties;
-
-      const el = document.createElement("div");
-      el.className = "popup";
-      el.innerHTML = `
-        <a href="${linkPrefix}columns/${id}" class="popup-link">
-          <h3>${name}</h3>
-        </a>
-      `;
-
-      new mapboxgl.Popup({ offset: 12 })
-        .setLngLat(coordinates)
-        .setDOMContent(el)
-        .addTo(map);
-    });
-
-    map.on("mouseenter", "geojson-layer", () => {
-      map.getCanvas().style.cursor = "pointer";
-    });
-    map.on("mouseleave", "geojson-layer", () => {
-      map.getCanvas().style.cursor = "";
-    });
-  };
-
-  useEffect(() => {
-    if (!mapInstance) return;
-
-    const geojson = generateGeoJSON();
-    const source = mapInstance.getSource("geojson-data") as mapboxgl.GeoJSONSource;
-    if (source) source.setData(geojson);
-  }, [filteredGroups, mapInstance]);
-    */
-
 
   const handleInputChange = (event) => {
     setColumnInput(event.target.value.toLowerCase());
@@ -170,21 +71,6 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
         selectedColumn: null,
         onSelectColumn,
       }),
-      /*
-      h("div.map-section", [
-        h("h2", "Map of Columns"),
-        h("div.map-container",
-          h(MapAreaContainer, { className: "map-area-container" },
-            h(MapView, {
-              style: "mapbox://styles/mapbox/dark-v10",
-              mapboxToken: SETTINGS.mapboxAccessToken,
-              onMapLoaded: handleMapLoaded,
-              mapPosition,
-            })
-          )
-        ),
-      ]),
-      */
       h(Card, { className: "search-bar" }, [
         h(Icon, { icon: "search" }),
         h("input", {

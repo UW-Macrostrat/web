@@ -11,6 +11,9 @@ import { navigate } from "vike/client/router";
 import { PageBreadcrumbs } from "~/components";
 import { onDemand } from "~/_utils";
 import styles from "./index.module.sass";
+import { CorrelationChart } from "@macrostrat/column-views";
+
+
 const h = hyperStyled(styles);
 
 
