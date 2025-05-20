@@ -32,6 +32,8 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const [mapInstance, setMapInstance] = useState<mapboxgl.Map | null>(null);
   const [selectedUnitID, setSelectedUnitID] = useState<number>(null);
 
+  console.log("selected", selectedUnitID)
+
   // if(!columnData) return h('div.loading', "Loading...")
 
 const filteredGroups = columnGroups.filter((group) => {
@@ -62,6 +64,7 @@ const filteredGroups = columnGroups.filter((group) => {
     (col_id: number) => {
       // do nothing
       // We could probably find a more elegant way to do this
+      console.log("we selected", col_id)
       setSelectedUnitID(null);
       navigate(linkPrefix + `columns/${col_id}`, {
         overwriteLastHistoryEntry: true,
