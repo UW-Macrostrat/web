@@ -4,25 +4,10 @@ import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
 import { PageHeader, Link, AssistantLinks, DevLinkButton, PageBreadcrumbs } from "~/components";
 import { Card, Icon, Popover, Divider, RangeSlider } from "@blueprintjs/core";
-import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { usePageContext } from 'vike-react/usePageContext';
-import {
-  MapAreaContainer,
-  MapMarker,
-  MapView,
-  buildInspectorStyle,
-} from "@macrostrat/map-interface";
-import { useEffect } from "react";
-import { MapPosition } from "@macrostrat/mapbox-utils";
-import { useNavigate } from "react-router";
 import { titleCase } from "../../index";
-import { features } from "process";
-import { onDemand } from "~/_utils";
-
-
-
-const ColumnMap = onDemand(() => import("./map").then((mod) => mod.ColumnMap));
+import { ColumnMap } from "../../../index";
 
 export function Page() {
     const pageContext = usePageContext();

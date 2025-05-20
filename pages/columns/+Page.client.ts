@@ -19,10 +19,10 @@ import { useEffect, useCallback } from "react";
 import { onDemand } from "~/_utils";
 import { navigate } from "vike/client/router";
 import { useMapRef } from "@macrostrat/mapbox-react";
+import { ColumnMap } from "../index";
 
 const h = hyperStyled(styles);
 
-const ColumnMap = onDemand(() => import("./map").then((mod) => mod.ColumnMap));
 
 export function Page(props) {
   return h(ColumnListPage, props);
