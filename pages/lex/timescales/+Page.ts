@@ -15,7 +15,6 @@ export function Page() {
     const [clickedInterval, setClickedInterval] = useState(null);
     const res = useAPIResult(SETTINGS.apiV2Prefix + "/defs/timescales?all")?.success.data;
 
-    console.log("clickedInterval", clickedInterval);
     useEffect(() => {
       if (!clickedInterval) return;
 
@@ -35,7 +34,7 @@ export function Page() {
 
       fetchInterval();
     }, [clickedInterval]);
-    
+
     if (res == null) return h("div", "Loading...");
 
     const handleChange = (event) => {
@@ -99,7 +98,15 @@ export function Page() {
             },
           }),
         ]), 
-        h(Timescale, { length: timescaleWidth, levels: [1,5], ageRange: [age[0], age[1]], absoluteAgeScale: true, onClick: handleClick })
+        h('div.timescale', 
+          h(Timescale, { 
+            length: timescaleWidth, 
+            levels: [1,5], 
+            ageRange: [age[0], age[1]], 
+            absoluteAgeScale: true, 
+            onClick: handleClick 
+          }
+        ))
       ]),
       h(Divider),
       h('div.timescale-list', filtered.map((data) => TimescaleItem({ data }))),
