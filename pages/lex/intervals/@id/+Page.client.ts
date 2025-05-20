@@ -42,12 +42,18 @@ export function Page() {
 
     return h(ContentPage, { className: 'int-page'}, [
         h(PageBreadcrumbs, { title: "#" + int_id }),
-        h('div.int-names', [
-            h('div.int-name', { style: { "backgroundColor": color, "color": getContrastTextColor(color)} }, name),
-            abbrev ? h('div.int-abbrev', [
-                h('p', " aka "),
-                h('div.int-abbrev-item', { style: { "backgroundColor": color, "color": getContrastTextColor(color)} }, abbrev)
-            ]) : null,
+        h('div.int-header', [
+            h('div.int-names', [
+                h('div.int-name', { style: { "backgroundColor": color, "color": getContrastTextColor(color)} }, name),
+                abbrev ? h('div.int-abbrev', [
+                    h('p', " aka "),
+                    h('div.int-abbrev-item', { style: { "backgroundColor": color, "color": getContrastTextColor(color)} }, abbrev)
+                ]) : null,
+            ]),
+            h('div.sift-link', [
+                h('p', "This page is is in development."),
+                h('a', { href: "/sift/interval/" + int_id, target: "_blank" }, "View in Sift")
+            ])
         ]),
         h('div.table', [
             h('div.table-content', [

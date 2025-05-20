@@ -75,3 +75,12 @@ ul, h3 {
   cursor: pointer;
   z-index: 100;
 }
+
+.int-header {
+    display: flex;
+    justify-content: space-between;
+
+    .sift-link {
+        text-align: right;
+    }
+}
