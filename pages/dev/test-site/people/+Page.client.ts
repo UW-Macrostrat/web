@@ -5,8 +5,11 @@ import "./main.styl";
 import "../main.styl";
 import { MacrostratIcon } from "~/components";
 import { h } from "@macrostrat/map-interface";
+import { Divider, Card, Icon } from "@blueprintjs/core";
+import { useState } from "react";
 
 export function Page() {
+    const [input, setInput] = useState("");
     const res = [
     {
         "name": "Shanan Peters",
@@ -106,17 +109,35 @@ export function Page() {
         "link": "http://www.jonhusson.com",
         "image": "jon.jpg"
     }
-]
+    ];
 
+    const handleInputChange = (e) => {
+        const value = e.target.value;
+        setInput(value);
+    };
 
+    const filteredPeople = res.filter(person => {
+        const name = person.name.toLowerCase();
+        const role = person.role ? person.role.toLowerCase() : "";
+        const email = person.email ? person.email.toLowerCase() : "";
 
+        return name.includes(input) || role.includes(input) || email.includes(input);
+    });
+    
     return h('div.main', [
         h(Navbar),
         h('h1.big', "People"),
         h('p.subtitle', "major contributors to the project"),
-        h('div.line'),
+        h(Card, { className: "search-bar" }, [
+            h(Icon, { icon: "search", style: { color: "white" } }),
+            h("input", {
+                type: "text",
+                placeholder: "Search people...",
+                onChange: handleInputChange,
+            }),
+        ]),
         h('div.people', [
-            res.map(person => {
+            filteredPeople.map(person => {
                 return h(PersonCard, person);
             })
         ]),
