@@ -56,10 +56,10 @@ export function Page() {
             ]),
             h(Map, { id: int_id, onSelectColumn }),
         ]),
-        h('div.int-timescales', [
+        timescales[0].name ? h('div.int-timescales', [
             h('h3', "Timescales"),
             h('ul', timescales.map((t) => h('li', h(Link, { href: "/lex/timescales/" + t.timescale_id}, titleCase(t.name))))),
-        ]),
+        ]) : null,
         h(References, { id: int_id }),
     ]);
 }
