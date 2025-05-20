@@ -68,3 +68,10 @@ ul, h3 {
 .map-area-container {
     width: 100% !important;
 }
+
+.column-map {
+  width: 100%;
+  aspect-ratio: 3/2;
+  cursor: pointer;
+  z-index: 100;
+}

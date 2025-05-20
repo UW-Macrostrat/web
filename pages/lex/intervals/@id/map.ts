@@ -9,7 +9,7 @@ export function ColumnMap({
   className,
   selectedColumn,
   onSelectColumn,
-  columns,
+  columns = [],
 }) {
   return h(
     ErrorBoundary,

@@ -1,5 +1,5 @@
 import "./main.scss";
-import { hyperStyled } from "@macrostrat/hyper";
+import h from "@macrostrat/hyper";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
 import { PageHeader, Link, AssistantLinks, DevLinkButton, PageBreadcrumbs } from "~/components";
@@ -19,8 +19,6 @@ import { useNavigate } from "react-router";
 import { titleCase } from "../../index";
 import { features } from "process";
 import { onDemand } from "~/_utils";
-import styles from "./index.module.sass";
-const h = hyperStyled(styles);
 
 
 
