@@ -1,0 +1,19 @@
+ul, h1, h2, p, h3 {
+    margin: 0;
+    padding: 0;
+}
+
+.timescale-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+tspan {
+  fill: var(--text-color); // sets the color to deep orange
+  font-size: 14px;
+}
+
+.visx-line {
+    stroke: var(--text-color);
+}
