@@ -50,6 +50,10 @@ export function Page() {
 
     const { name, color, abbrev, b_age, int_id, t_age, timescales, int_type } = intRes;
 
+    console.log('summary', summary)
+    const { t_units, t_sections, t_int_name, pbdb_collections, b_int_name, max_thick, col_area } = summary
+    const area = parseInt(col_area.toString().split('.')[0])
+
     return h(ContentPage, { className: 'int-page'}, [
         h(PageBreadcrumbs, { title: "#" + int_id }),
         h('div.int-header', [
@@ -67,6 +71,12 @@ export function Page() {
         ]),
         h('div.table', [
             h('div.table-content', [
+                h('div.thickness', "<= " + max_thick.toLocaleString() + 'm thick'),
+                h('div.units', t_units.toLocaleString() + ' units'),
+                h('div.collections', pbdb_collections.toLocaleString() + ' collections'),
+                h('div.interval', b_int_name.toLocaleString() + " - " + t_int_name),
+                h('div.packages', t_sections.toLocaleString() + " packages"),
+                h('div.packages', area.toLocaleString() + " m^2"),
                 h('div.int-type', "Type: " + UpperCase(int_type)),
                 h('div.int-age', b_age + " - " + t_age + " Ma"),
             ]),
