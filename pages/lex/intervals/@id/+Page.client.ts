@@ -28,8 +28,6 @@ export function Page() {
     const econs = summarizeAttributes(colData?.features, 'econ')
     const summary = summarize(colData?.features);
 
-    console.log('liths', liths)
-
     /*
     const onSelectColumn = useCallback(
         (col_id: number) => {
@@ -52,7 +50,6 @@ export function Page() {
 
     const { name, color, abbrev, b_age, int_id, t_age, timescales, int_type } = intRes;
 
-    console.log('summary', summary)
     const { t_units, t_sections, t_int_name, pbdb_collections, b_int_name, max_thick, col_area } = summary
     const area = parseInt(col_area.toString().split('.')[0]);
 
@@ -68,7 +65,7 @@ export function Page() {
             ]),
             h('div.sift-link', [
                 h('p', "This page is is in development."),
-                h('a', { href: "/sift/interval" + int_id, target: "_blank" }, "View in Sift")
+                h('a', { href: "/sift/interval/" + int_id, target: "_blank" }, "View in Sift")
             ]),
         ]),
         h('div.table', [
@@ -93,13 +90,16 @@ export function Page() {
         ]),
         h('div.charts', [
             h('div.chart', [
-                h('div.legend', liths?.map((lith) => ChartLegend(lith)))
+                h('h3', "Lithologies"),
+                h('div.legend', liths?.map((lith) => ChartLegend(lith, "lithologies")))
             ]),
             h('div.chart', [
-                h('div.legend', econs?.map((lith) => ChartLegend(lith)))
+                h('h3', "Economics"),
+                h('div.legend', econs?.map((econ) => ChartLegend(econ, "economics")))
             ]),
             h('div.chart', [
-                h('div.legend', environs?.map((lith) => ChartLegend(lith)))
+                h('h3', "Environments"),
+                h('div.legend', environs?.map((environ) => ChartLegend(environ, "environments")))
             ]),
         ]),
 
@@ -186,9 +186,9 @@ function Taxa(record) {
     ])
 }
 
-function ChartLegend(data) {
+function ChartLegend(data, route) {
     return h('div.legend-item', [
         h('div.box', { style: { "background-color": data.color}}), 
-        h('p', data.label)
+        h('a', { href: "/lex/" + route+ "/" + data.id}, data.label)
     ]);
 }
