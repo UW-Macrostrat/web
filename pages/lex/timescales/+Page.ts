@@ -7,6 +7,7 @@ import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { Timescale } from "@macrostrat/timescale";
 import { titleCase } from "../index";
+import { useEffect } from "react";
 
 export function Page() {
     const [input, setInput] = useState("");
@@ -15,13 +16,26 @@ export function Page() {
     const res = useAPIResult(SETTINGS.apiV2Prefix + "/defs/timescales?all")?.success.data;
 
     console.log("clickedInterval", clickedInterval);
-    const clickedRes = useAPIResult("https://macrostrat.org/api/defs/intervals?name=" + clickedInterval)?.success.data[0];
+    useEffect(() => {
+      if (!clickedInterval) return;
 
-    if (clickedRes) {
-      const url = "/lex/intervals/" + clickedRes.int_id;
-      window.open(url)
-    }
+      const fetchInterval = async () => {
+        try {
+          const res = await fetch(`https://macrostrat.org/api/defs/intervals?name=${clickedInterval}`);
+          const data = await res.json();
+          const clickedData = data?.success?.data?.[0];
+          if (clickedData) {
+            const url = "/lex/intervals/" + clickedData.int_id;
+            window.open(url, "_blank");
+          }
+        } catch (error) {
+          console.error("Error fetching interval data:", error);
+        }
+      };
 
+      fetchInterval();
+    }, [clickedInterval]);
+    
     if (res == null) return h("div", "Loading...");
 
     const handleChange = (event) => {
