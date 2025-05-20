@@ -16,7 +16,19 @@ export function Page() {
     const id = parseInt(pageContext.urlParsed.pathname.split("/")[3]);
     const intRes = useAPIResult(SETTINGS.apiV2Prefix + "/defs/intervals?int_id=" + id)?.success.data[0];
     const fossilRes = useAPIResult(SETTINGS.apiV2Prefix + "/fossils?int_id=" + id)?.success.data;
-    console.log(SETTINGS.apiV2Prefix + "/fossils?int_id=" + id);
+    const [selectedUnitID, setSelectedUnitID] = useState(null);
+
+    const onSelectColumn = useCallback(
+        (col_id: number) => {
+        // do nothing
+        // We could probably find a more elegant way to do this
+        setSelectedUnitID(null);
+        navigate(`/columns/${col_id}`, {
+            overwriteLastHistoryEntry: true,
+        });
+        },
+        [setSelectedUnitID]
+    );
 
     if (!intRes || !fossilRes) return h("div", "Loading...");
 
@@ -39,7 +51,7 @@ export function Page() {
                 h('div.int-type', "Type: " + UpperCase(int_type)),
                 h('div.int-age', b_age + " - " + t_age + " Ma"),
             ]),
-            h(Map, { id: int_id }),
+            h(Map, { id: int_id, onSelectColumn }),
         ]),
         h('div.int-timescales', [
             h('h3', "Timescales"),
@@ -86,7 +98,7 @@ function References({ id }) {
     ]);
 }
 
-function Map({id}) {
+function Map({id, onSelectColumn}) {
     const [selectedUnitID, setSelectedUnitID] = useState(null);
     const data = useAPIResult(SETTINGS.apiV2Prefix + "/columns?int_id=" + id + "&response=long&format=geojson")?.success.data;
 
@@ -114,7 +126,7 @@ function Map({id}) {
             inProcess: true,
             projectID: null,
             selectedColumn: selectedUnitID,
-            onSelectColumn: () => {},
+            onSelectColumn,
             columns: data.features,
           }),
         ])
