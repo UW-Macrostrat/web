@@ -18,6 +18,7 @@ export function Page() {
     const fossilRes = useAPIResult(SETTINGS.apiV2Prefix + "/fossils?int_id=" + id)?.success.data;
     const [selectedUnitID, setSelectedUnitID] = useState(null);
 
+    /*
     const onSelectColumn = useCallback(
         (col_id: number) => {
         // do nothing
@@ -29,11 +30,13 @@ export function Page() {
         },
         [setSelectedUnitID]
     );
+    */
+
+    const onSelectColumn = (e) => {
+        console.log("selected", e)
+    }
 
     if (!intRes || !fossilRes) return h("div", "Loading...");
-
-    console.log("fossil res", fossilRes);
-    console.log("int res", intRes);
 
     const { name, color, abbrev, b_age, int_id, t_age, timescales, int_type } = intRes;
 
@@ -99,33 +102,20 @@ function References({ id }) {
 }
 
 function Map({id, onSelectColumn}) {
-    const [selectedUnitID, setSelectedUnitID] = useState(null);
     const data = useAPIResult(SETTINGS.apiV2Prefix + "/columns?int_id=" + id + "&response=long&format=geojson")?.success.data;
 
     if (!data) {
         return h("div", "Loading..."); 
     }
 
-    /*
-    const onSelectColumn = useCallback(
-        (col_id: number) => {
-        // do nothing
-        // We could probably find a more elegant way to do this
-        setSelectedUnitID(null);
-        navigate(`/columns/${col_id}`, {
-            overwriteLastHistoryEntry: true,
-        });
-        },
-        [setSelectedUnitID]
-    );
-    */
+    console.log(data)
     
     return h("div.page-container", [
           h(ColumnMap, {
             className: "column-map",
             inProcess: true,
             projectID: null,
-            selectedColumn: selectedUnitID,
+            selectedColumn: null,
             onSelectColumn,
             columns: data.features,
           }),
