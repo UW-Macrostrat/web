@@ -16,8 +16,6 @@ import mapboxgl, { LngLat } from "mapbox-gl";
 import { MapPosition } from "@macrostrat/mapbox-utils";
 import { useEffect } from "react";
 
-
-
 export function Page(props) {
   return h(ColumnListPage, props);
 }
