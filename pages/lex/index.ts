@@ -76,7 +76,7 @@ export function IndividualPage(id, type) {
         ]),
         h('div.table', [
             h('div.table-content', [
-                h('div.thickness', "<= " + max_thick.toLocaleString() + 'm thick'),
+                h('div.thickness', "≤ " + max_thick.toLocaleString() + 'm thick'),
                 h(Divider, { className: 'divider' }),
                 h('div.units', t_units.toLocaleString() + ' units'),
                 h(Divider, { className: 'divider' }),
@@ -86,7 +86,11 @@ export function IndividualPage(id, type) {
                 h(Divider, { className: 'divider' }),
                 h('div.packages', t_sections.toLocaleString() + " packages"),
                 h(Divider, { className: 'divider' }),
-                h('div.packages', area.toLocaleString() + " m^2"),
+
+                h('div.area', [
+                  h('p', area.toLocaleString() + " km"),
+                  h('sup', "2"),
+                ]),
                 h(Divider, { className: 'divider' }),
                 h('div.int-type', "Type: " + UpperCase(int_type)),
                 h(Divider, { className: 'divider' }),
