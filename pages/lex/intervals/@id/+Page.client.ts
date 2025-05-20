@@ -54,7 +54,7 @@ export function Page() {
                 h('div.int-type', "Type: " + UpperCase(int_type)),
                 h('div.int-age', b_age + " - " + t_age + " Ma"),
             ]),
-            h(Map)
+            h(Map, { id: int_id }),
         ]),
         h('div.int-timescales', [
             h('h3', "Timescales"),
@@ -101,16 +101,18 @@ function References({ id }) {
     ]);
 }
 
-function Map() {
+function Map({id}) {
     // Define state for data and loading
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // useAPIResult(SETTINGS.apiV2Prefix + "/columns?int_id=" + id + "&response=long&format=geojson")?.success.data;
+
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch(SETTINGS.apiV2Prefix + "/columns?int_id=1&response=long&format=geojson");
+                const response = await fetch(SETTINGS.apiV2Prefix + "/columns?int_id=" + id + "&response=long&format=geojson");
                 const result = await response.json();
 
                 if (result.success) {
@@ -136,73 +138,7 @@ function Map() {
     if (error) {
         return h("div", error);  // Show error state
     }
-
-
-
-    const handleMapLoaded = (map: mapboxgl.Map) => {
-        if (!map.isStyleLoaded()) {
-            map.once('style.load', () => addGeoJsonLayer(map));
-        } else {
-            addGeoJsonLayer(map);
-        }
-
-        map.on('click', 'geojson-layer', (e) => {
-            const features = map.queryRenderedFeatures(e.point, {
-                layers: ['geojson-layer'],
-            });
-
-            if (features.length > 0) {
-                const feature = features[0];
-                const url = "/columns/" + feature.properties.col_id;
-                window.open(url, "_blank");
-            }
-        });
-
-        map.on('mouseenter', 'geojson-layer', (e) => {
-            map.getCanvas().style.cursor = 'pointer';
-        });
-
-        map.on('mouseleave', 'geojson-layer', () => {
-            map.getCanvas().style.cursor = '';
-        });
-    };
-
-    const addGeoJsonLayer = (map: mapboxgl.Map) => {
-        const sourceId = 'geojson-data';
-
-        if (map.getSource(sourceId)) {
-            // Update existing source with new data
-            (map.getSource(sourceId) as mapboxgl.GeoJSONSource).setData(data);
-        } else {
-            // Add source if it doesn't exist
-            map.addSource(sourceId, {
-                type: 'geojson',
-                data: data,
-            });
-        }
-
-        if (!map.getLayer('geojson-layer')) {
-            map.addLayer({
-                id: 'geojson-layer',
-                type: 'fill',
-                source: sourceId,
-                paint: {
-                    'fill-color': '#00aaff',
-                    'fill-opacity': 0.5,
-                },
-            });
-        }
-    };
-
-
-    const mapPosition: MapPosition = {
-        camera: {
-        lat: 39,
-        lng: -98,
-        altitude: 6000000,
-        },
-    };
-
+    
     return h("div.page-container", [
           h(ColumnMap, {
             className: "column-map",
@@ -213,16 +149,4 @@ function Map() {
             columns: data.features,
           }),
         ])
-
-
-    return h("div.map-container",
-          h(MapAreaContainer, { className: "map-area-container",},
-            h(MapView, {
-              style: "mapbox://styles/mapbox/dark-v10",
-              mapboxToken: SETTINGS.mapboxAccessToken,
-              onMapLoaded: handleMapLoaded,
-              mapPosition,
-            })
-          )
-        );
 }
