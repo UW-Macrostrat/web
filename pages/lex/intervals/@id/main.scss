@@ -84,3 +84,32 @@ ul, h3 {
         text-align: right;
     }
 }
+
+.prevalent-taxa-container {
+    display: flex;
+    justify-content: space-between;
+
+    .link {
+        display: flex;
+        gap: 5px;
+        justify-content: center;
+    }
+    
+    .taxa-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .taxa {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+
+        img {
+            filter: invert(1)
+        }
+    }
+}
