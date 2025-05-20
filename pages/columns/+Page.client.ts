@@ -4,8 +4,7 @@ import { Divider, AnchorButton, Tag, Card, Collapse, Icon } from "@blueprintjs/c
 import { useData } from "vike-react/useData";
 import { useState } from "react";
 import "./main.scss";
-import { hyperStyled } from "@macrostrat/hyper";
-import styles from "./index.module.sass";
+import h from "@macrostrat/hyper";
 import {
   MapAreaContainer,
   MapMarker,
@@ -20,9 +19,6 @@ import { onDemand } from "~/_utils";
 import { navigate } from "vike/client/router";
 import { useMapRef } from "@macrostrat/mapbox-react";
 import { ColumnMap } from "../index";
-
-const h = hyperStyled(styles);
-
 
 export function Page(props) {
   return h(ColumnListPage, props);

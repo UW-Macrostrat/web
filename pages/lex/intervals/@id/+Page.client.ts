@@ -8,6 +8,8 @@ import { ContentPage } from "~/layouts";
 import { usePageContext } from 'vike-react/usePageContext';
 import { titleCase } from "../../index";
 import { ColumnMap } from "../../../index";
+import { navigate } from "vike/client/router";
+import { useState, useCallback } from "react";
 
 export function Page() {
     const pageContext = usePageContext();
@@ -85,18 +87,33 @@ function References({ id }) {
 }
 
 function Map({id}) {
+    const [selectedUnitID, setSelectedUnitID] = useState(null);
     const data = useAPIResult(SETTINGS.apiV2Prefix + "/columns?int_id=" + id + "&response=long&format=geojson")?.success.data;
 
     if (!data) {
         return h("div", "Loading..."); 
     }
+
+    /*
+    const onSelectColumn = useCallback(
+        (col_id: number) => {
+        // do nothing
+        // We could probably find a more elegant way to do this
+        setSelectedUnitID(null);
+        navigate(`/columns/${col_id}`, {
+            overwriteLastHistoryEntry: true,
+        });
+        },
+        [setSelectedUnitID]
+    );
+    */
     
     return h("div.page-container", [
           h(ColumnMap, {
             className: "column-map",
             inProcess: true,
             projectID: null,
-            selectedColumn: null,
+            selectedColumn: selectedUnitID,
             onSelectColumn: () => {},
             columns: data.features,
           }),
