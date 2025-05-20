@@ -34,11 +34,20 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
 
   // if(!columnData) return h('div.loading', "Loading...")
 
-  const filteredGroups = columnGroups.filter((group) => {
-    const name = group.name.toLowerCase();
-    const columns = group.columns.map((col) => col.col_name.toLowerCase());
-    const input = columnInput.toLowerCase();
-    return name.includes(input) || columns.some((col) => col.includes(input));
+const filteredGroups = columnGroups.filter((group) => {
+    // Filter the columns of the group based on the input
+    const filteredColumns = group.columns.filter((col) => {
+      const name = col.col_name.toLowerCase();
+      const input = columnInput.toLowerCase();
+      return name.includes(input);
+    });
+
+    // If any columns match the input, include the group (with the filtered columns)
+    if (filteredColumns.length > 0 || group.name.toLowerCase().includes(columnInput.toLowerCase())) {
+      return { ...group, columns: filteredColumns }; // Return the group with filtered columns
+    }
+
+    return false; // Exclude this group if no matching columns or group name
   });
 
   const colArr = filteredGroups.map(item => item.columns.map(col => col.col_id)).flat();
@@ -63,7 +72,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
 
   if(!columnData) return h('div.loading', "loading...");
 
-  const columnFeatures = columnData?.success.data.features
+  const columnFeatures = columnData?.success?.data.features
   
   return h("div.column-list-page", [
     h(AssistantLinks, [
@@ -72,14 +81,14 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
     ]),
     h(ContentPage, [
       h(PageHeader, { title }),
-      h(ColumnMap, {
+      columnFeatures ? h(ColumnMap, {
         className: "column-map",
         inProcess: true,
         projectID: null,
         selectedColumn: null,
         onSelectColumn,
         columns: columnFeatures,
-      }),
+      }) : null,
       h(Card, { className: "search-bar" }, [
         h(Icon, { icon: "search" }),
         h("input", {
@@ -143,3 +152,4 @@ function ColumnItem({ data, linkPrefix = "/" }) {
 function UpperCase(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
