@@ -4,7 +4,8 @@ import { Divider, AnchorButton, Tag, Card, Collapse, Icon } from "@blueprintjs/c
 import { useData } from "vike-react/useData";
 import { useState } from "react";
 import "./main.scss";
-import h from "@macrostrat/hyper";
+import { hyperStyled } from "@macrostrat/hyper";
+import styles from "./index.module.sass";
 import {
   MapAreaContainer,
   MapMarker,
@@ -14,7 +15,13 @@ import {
 import { SETTINGS } from "@macrostrat-web/settings";
 import mapboxgl, { LngLat } from "mapbox-gl";
 import { MapPosition } from "@macrostrat/mapbox-utils";
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
+import { onDemand } from "~/_utils";
+import { navigate } from "vike/client/router";
+
+const h = hyperStyled(styles);
+
+const ColumnMap = onDemand(() => import("./map").then((mod) => mod.ColumnMap));
 
 export function Page(props) {
   return h(ColumnListPage, props);
@@ -24,6 +31,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const { columnGroups } = useData();
   const [columnInput, setColumnInput] = useState("");
   const [mapInstance, setMapInstance] = useState<mapboxgl.Map | null>(null);
+  const [selectedUnitID, setSelectedUnitID] = useState<number>(null);
 
   const filteredGroups = columnGroups.filter((group) => {
     const name = group.name.toLowerCase();
@@ -31,6 +39,8 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
     const input = columnInput.toLowerCase();
     return name.includes(input) || columns.some((col) => col.includes(input));
   });
+
+  /*
 
   const mapPosition: MapPosition = {
     camera: {
@@ -127,10 +137,24 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
     const source = mapInstance.getSource("geojson-data") as mapboxgl.GeoJSONSource;
     if (source) source.setData(geojson);
   }, [filteredGroups, mapInstance]);
+    */
+
 
   const handleInputChange = (event) => {
     setColumnInput(event.target.value.toLowerCase());
   };
+
+  const onSelectColumn = useCallback(
+    (col_id: number) => {
+      // do nothing
+      // We could probably find a more elegant way to do this
+      setSelectedUnitID(null);
+      navigate(linkPrefix + `columns/${col_id}`, {
+        overwriteLastHistoryEntry: true,
+      });
+    },
+    [setSelectedUnitID]
+  );
 
   return h("div.column-list-page", [
     h(AssistantLinks, [
@@ -139,6 +163,14 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
     ]),
     h(ContentPage, [
       h(PageHeader, { title }),
+      h(ColumnMap, {
+        className: "column-map",
+        inProcess: true,
+        projectID: null,
+        selectedColumn: null,
+        onSelectColumn,
+      }),
+      /*
       h("div.map-section", [
         h("h2", "Map of Columns"),
         h("div.map-container",
@@ -152,6 +184,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
           )
         ),
       ]),
+      */
       h(Card, { className: "search-bar" }, [
         h(Icon, { icon: "search" }),
         h("input", {
