@@ -7,7 +7,7 @@ import { Card, Icon, Popover, Divider, RangeSlider } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import { usePageContext } from 'vike-react/usePageContext';
 import { titleCase } from "../../index";
-import { ColumnMap } from "../../../index";
+import { ColumnMap, SiftLink } from "../../../index";
 import { navigate } from "vike/client/router";
 import { useState, useCallback } from "react";
 
@@ -52,8 +52,8 @@ export function Page() {
             ]),
             h('div.sift-link', [
                 h('p', "This page is is in development."),
-                h('a', { href: "/sift/interval/" + int_id, target: "_blank" }, "View in Sift")
-            ])
+                h('a', { href: "/sift/interval" + int_id, target: "_blank" }, "View in Sift")
+            ]),
         ]),
         h('div.table', [
             h('div.table-content', [
