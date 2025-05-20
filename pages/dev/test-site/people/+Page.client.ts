@@ -10,6 +10,7 @@ import { useState } from "react";
 
 export function Page() {
     const [input, setInput] = useState("");
+    const [tags, setTags] = useState([]);
     const res = [
     {
         "name": "Shanan Peters",
@@ -111,6 +112,17 @@ export function Page() {
     }
     ];
 
+    console.log(tags)
+
+    const tagList = [
+        "Student",
+        "Researcher",
+        "Developer",
+        "Postdoc",
+        "Research Scientist",
+        "Former"
+    ]
+
     const handleInputChange = (e) => {
         const value = e.target.value;
         setInput(value);
@@ -121,7 +133,15 @@ export function Page() {
         const role = person.role ? person.role.toLowerCase() : "";
         const email = person.email ? person.email.toLowerCase() : "";
 
-        return name.includes(input) || role.includes(input) || email.includes(input);
+        const roleTags = tagList.map(tag => {
+            if (role.includes(tag.toLowerCase())) {
+                return tag;
+            }
+            return null;
+        }).filter(tag => tag !== null);
+        const tagMatch = tags.length === 0 || tags.some(tag => roleTags.includes(tag));
+
+        return (name.includes(input) || role.includes(input) || email.includes(input)) && tagMatch;
     });
     
     return h('div.main', [
@@ -129,12 +149,31 @@ export function Page() {
         h('h1.big', "People"),
         h('p.subtitle', "major contributors to the project"),
         h(Card, { className: "search-bar" }, [
-            h(Icon, { icon: "search", style: { color: "white" } }),
-            h("input", {
-                type: "text",
-                placeholder: "Search people...",
-                onChange: handleInputChange,
-            }),
+            h('div.input-container', [
+                h(Icon, { icon: "search", style: { color: "white" } }),
+                h("input", {
+                    type: "text",
+                    placeholder: "Search people...",
+                    onChange: handleInputChange,
+                }),
+            ]),
+            h('div.tags', [
+                tagList.map(tag => {
+                    return h('div', { 
+                        onClick: () => {
+                            setTags(prevTags => {  
+                                if (prevTags.includes(tag)) {
+                                    return prevTags.filter(t => t !== tag);
+                                } else {
+                                    return [...prevTags, tag];
+                                }
+                            }
+                        )
+                        },
+                        className: tags.includes(tag) ? "filter-card selected" : "filter-card"
+                    }, tag);
+                })
+            ])
         ]),
         h('div.people', [
             filteredPeople.map(person => {
