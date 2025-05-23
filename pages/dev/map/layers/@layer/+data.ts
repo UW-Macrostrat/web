@@ -5,6 +5,7 @@ import {
   MacrostratVectorTileset,
 } from "~/_utils/map-layers";
 import { render } from "vike/abort";
+import { tileserverDomain } from "@macrostrat-web/settings";
 
 export async function data(pageContext: PageContextServer) {
   const config = useConfig();
@@ -66,9 +67,15 @@ const layerIndex: LayerInfo[] = [
   },
   {
     slug: "carto-raster",
-    tileset: MacrostratRasterTileset.Carto,
+    tileset: tileserverDomain + "/legacy/carto/{z}/{x}/{y}.png", //?cache=bypass",
     type: "raster",
     title: "Carto (raster)",
+  },
+  {
+    slug: "carto-raster-v1",
+    tileset: "https://tiles.macrostrat.org/carto/{z}/{x}/{y}.png",
+    type: "raster",
+    title: "Carto (raster, v1)",
   },
   {
     slug: "emphasized",
