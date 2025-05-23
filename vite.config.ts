@@ -113,6 +113,9 @@ export default defineConfig({
     CESIUM_BASE_URL: JSON.stringify("/cesium"),
     // If not building for server context
   },
+  server: {
+    allowedHosts: ["localhost", "dev.macrostrat.local"],
+  },
   ssr: {
     noExternal: [
       /** All dependencies that cannot be bundled on the server (e.g., due to CSS imports)
