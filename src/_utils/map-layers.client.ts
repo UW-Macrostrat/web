@@ -78,11 +78,12 @@ export function LineSymbolManager({ showLineSymbols }) {
   return null;
 }
 
-export function buildRasterStyle(layer: MacrostratRasterTileset) {
-  const tileDomain = "https://tiles.macrostrat.org";
-
-  let tileURL = tileDomain + `/${layer}/{z}/{x}/{y}.png`;
-
+export function buildRasterStyle(layer: MacrostratRasterTileset | string) {
+  let tileURL = layer;
+  if (!tileURL.startsWith("http")) {
+    const tileDomain = "https://tiles.macrostrat.org";
+    tileURL = tileDomain + `/${layer}/{z}/{x}/{y}.png`;
+  }
   // if (layer == MacrostratRasterTileset.Emphasized) {
   //   tileURL = `https://next.macrostrat.org/tiles/tiles/carto/{z}/{x}/{y}.png`;
   // }
