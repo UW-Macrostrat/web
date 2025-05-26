@@ -65,6 +65,7 @@ function EconItem({ data }) {
     content: h('div.econ-tooltip', [
         h('div.econ-tooltip-id', "ID - #" + econ_id),
         h('div.econ-tooltip-t-unit', "Time Units - " + t_units),
+        h('a', { href: `/lex/economics/${econ_id}`, className: 'econ-tooltip-link' }, "View details"),
       ]),
     }, 
     h('div.econ-item', [

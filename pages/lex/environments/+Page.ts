@@ -64,6 +64,7 @@ function EnvironmentItem({ data }) {
     content: h('div.environ-tooltip', [
         h('div.environ-tooltip-id', "ID - #" + environ_id),
         h('div.environ-tooltip-t-unit', "Time Units - " + t_units),
+        h('a', { href: `/lex/environments/${environ_id}` }, "View details")
       ]),
     }, 
     h('div.environ-item', [

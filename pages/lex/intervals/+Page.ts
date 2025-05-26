@@ -90,7 +90,7 @@ function EconItem({ data }) {
         h('div.int-tooltip-id', "ID: #" + int_id),
         h('div.int-tooltip-ages', b_age + " - " + t_age + " Ma"),
         abbrev ? h('div.int-tooltip-abbrev', "Abbreviation - " + abbrev) : null,
-        h(Link, { href: "/lex/intervals/" + int_id }, "View more")
+        h(Link, { href: "/lex/intervals/" + int_id }, "View details")
       ]),
     }, 
     h('div.int-item', [
