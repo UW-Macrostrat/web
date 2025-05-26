@@ -5,9 +5,10 @@ import h from "@macrostrat/hyper";
 import { PanelCard } from "@macrostrat/map-interface";
 import { LinkCard } from "~/components/cards";
 import { useState } from 'react';
+import { SETTINGS } from "@macrostrat-web/settings";
 
 export function Page() {
-    const result = useMacrostratAPI('/stats?all')?.success.data
+    const result = useMacrostratAPI('/stats?all')?.success.data;
 
     if(!result) {
       return h('div.loading')
@@ -97,10 +98,12 @@ export function Page() {
                           h('a', { href: 'https://rockd.org', target: '_blank' }, 'Go mobile')
                       ]), href: 'https://rockd.org'}, [
                   ]),
+                  h.if(SETTINGS.instance === "Development")(LinkCard, { title: 'Dev Pages', href: '/dev'}),
               ])
             ])
         ]),
 
+        /*
         h('div.locations', [
             h(Image, { className: "location-img", src: 'north_america_med.jpg' }),
             h('div.location-text', {}, [
@@ -123,6 +126,7 @@ export function Page() {
             h(Image, { className: "location-img", src: 'deep_sea_new_medium.jpg' }),
             
         ]),
+        */
 
         Donate,
         h(Footer),
