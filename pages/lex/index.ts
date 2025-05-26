@@ -26,7 +26,7 @@ export function IndividualPage(id, type, header) {
     const cols = colData?.features.map((feature) => feature.properties.col_id).join(',')
     const taxaData = useAPIResult("https://paleobiodb.org/data1.2/occs/prevalence.json?limit=5&coll_id=" + cols)
 
-    const siftLink = header === "intervals" ? "interval" : header === "environments" ? "environment" : "economic";
+    const siftLink = header === "intervals" ? "interval" : header === "environments" ? "environment" : header === "lithologies" ? "lithology" : "economic";
 
 
     // data for charts
