@@ -243,6 +243,21 @@ export const sitemap: Routes = {
           ],
         }, 
         {
+          slug: "economics",
+          name: "Economics",
+          children: [
+            {
+              param: "@id",
+              name(urlPart, ctx) {
+                return h(
+                  "code",
+                  ctx.pageProps?.economic?.econ_id ?? urlPart
+                );
+              },
+            },
+          ],
+        }, 
+        {
           slug: "timescales",
           name: "Timescales",
           children: [
