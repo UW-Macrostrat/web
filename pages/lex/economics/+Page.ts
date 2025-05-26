@@ -5,6 +5,7 @@ import { PageHeader, PageBreadcrumbs } from "~/components";
 import { Card, Icon, Popover } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
+import { asChromaColor } from "@macrostrat/color-utils";
 
 
 export function Page() {
@@ -59,6 +60,8 @@ export function Page() {
 
 function EconItem({ data }) {
   const { name, color, econ_id, t_units } = data;
+  const luminance = 0.9;
+  const chromaColor = asChromaColor(color);
 
   return h(Popover, {
     className: "econ-item-popover",
@@ -69,7 +72,7 @@ function EconItem({ data }) {
       ]),
     }, 
     h('div.econ-item', [
-      h('div.econ-name', { style: { "backgroundColor": color, "color": getContrastTextColor(color)} }, name),
+      h('div.econ-name', { style: { color: chromaColor?.luminance(luminance).hex(), backgroundColor: chromaColor?.luminance(1 - luminance).hex() } }, name),
     ])
   )
 
