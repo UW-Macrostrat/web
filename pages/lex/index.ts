@@ -70,7 +70,7 @@ export function IndividualPage(id, type, header) {
                 h('div.int-name', { style: { "backgroundColor": chromaColor?.luminance(1 - luminance).hex(), "color": chromaColor?.luminance(luminance).hex()} }, UpperCase(name)),
                 abbrev ? h('div.int-abbrev', [
                     h('p', " aka "),
-                    h('div.int-abbrev-item', { style: { "backgroundColor": color, "color": getContrastTextColor(color)} }, abbrev)
+                    h('div.int-abbrev-item', { style: { "backgroundColor": chromaColor?.luminance(1 - luminance).hex(), "color": chromaColor?.luminance(luminance).hex()} }, abbrev)
                 ]) : null,
             ]),
             h('div.sift-link', [
@@ -95,8 +95,8 @@ export function IndividualPage(id, type, header) {
                   h('p', area.toLocaleString() + " km"),
                   h('sup', "2"),
                 ]),
-                h(Divider, { className: 'divider' }),
-                h('div.int-age', b_age + " - " + t_age + " Ma"),
+                h.if(b_age && t_age)(Divider, { className: 'divider' }),
+                h.if(b_age && t_age)('div.int-age', b_age + " - " + t_age + " Ma"),
             ]),
             colData ? h(Map, { id: int_id, onSelectColumn, data: colData }) : h('div.loading', "loading"),
         ]),
