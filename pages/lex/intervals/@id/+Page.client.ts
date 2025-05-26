@@ -1,4 +1,3 @@
-import "./main.scss";
 import { usePageContext } from 'vike-react/usePageContext';
 import { IndividualPage } from "../../index"
 
