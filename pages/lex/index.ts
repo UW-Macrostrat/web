@@ -17,11 +17,10 @@ export function titleCase(str) {
     .join(' ');
 }
 
-export function IndividualPage(id, type) {
-    const intRes = useAPIResult(SETTINGS.apiV2Prefix + "/defs/intervals?" + type + "=" + id)?.success.data[0];
+export function IndividualPage(id, type, header) {
+    const intRes = useAPIResult(SETTINGS.apiV2Prefix + "/defs/" + header + "?" + type + "=" + id)?.success.data[0];
     const fossilResult = useAPIResult(SETTINGS.apiV2Prefix + "/fossils?" + type + "=" + id)?.success;
     const colDataResult = useAPIResult(SETTINGS.apiV2Prefix + "/columns?" + type + "=" + id + "&response=long&format=geojson")?.success;
-    const [selectedUnitID, setSelectedUnitID] = useState(null);
     const fossilRes = fossilResult?.data;
     const colData = colDataResult?.data;
     const cols = colData?.features.map((feature) => feature.properties.col_id).join(',')
