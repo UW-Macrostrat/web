@@ -5,6 +5,7 @@ import { PageHeader, AssistantLinks, PageBreadcrumbs } from "~/components";
 import { Card, Icon, Popover } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
+import { asChromaColor } from "@macrostrat/color-utils";
 
 
 
@@ -59,6 +60,10 @@ export function Page() {
 function EnvironmentItem({ data }) {
   const { environ_id, name, color, t_units } = data;
 
+  const chromaColor = asChromaColor(color)
+
+  const luminance = 0.9;
+
   return h(Popover, {
     className: "environ-item-popover",
     content: h('div.environ-tooltip', [
@@ -68,25 +73,9 @@ function EnvironmentItem({ data }) {
       ]),
     }, 
     h('div.environ-item', [
-      h('div.environ-name', { style: { "backgroundColor": color, "color": getContrastTextColor(color)} }, name),
+      h('div.environ-name', { style: { "backgroundColor": chromaColor?.luminance(1 - luminance).hex(), "color": chromaColor?.luminance(luminance).hex()} }, name),
     ])
   )
-}
-
-function getContrastTextColor(bgColor) {
-  // Remove '#' if present
-  const color = bgColor.replace('#', '');
-
-  // Parse r, g, b
-  const r = parseInt(color.substr(0, 2), 16);
-  const g = parseInt(color.substr(2, 2), 16);
-  const b = parseInt(color.substr(4, 2), 16);
-
-  // Calculate luminance
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-
-  // Return black or white depending on luminance
-  return luminance > 0.6 ? '#000000' : '#FFFFFF';
 }
 
 function groupByClassThenType(items) {

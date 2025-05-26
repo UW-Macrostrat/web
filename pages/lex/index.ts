@@ -8,6 +8,7 @@ import { usePageContext } from 'vike-react/usePageContext';
 import { ColumnMap, BlankImage } from "../index";
 import { navigate } from "vike/client/router";
 import { useState, useCallback } from "react";
+import { asChromaColor } from "@macrostrat/color-utils";
 
 export function titleCase(str) {
   return str
@@ -49,6 +50,9 @@ export function IndividualPage(id, type, header) {
     );
     */
 
+    const chromaColor = intRes?.color ? asChromaColor(intRes.color) : null;
+    const luminance = .9;
+
     const onSelectColumn = (e) => {
         console.log("selected", e)
     }
@@ -63,7 +67,7 @@ export function IndividualPage(id, type, header) {
         h(PageBreadcrumbs, { title: "#" + id }),
         h('div.int-header', [
             h('div.int-names', [
-                h('div.int-name', { style: { "backgroundColor": color, "color": getContrastTextColor(color)} }, UpperCase(name)),
+                h('div.int-name', { style: { "backgroundColor": chromaColor?.luminance(1 - luminance).hex(), "color": chromaColor?.luminance(luminance).hex()} }, UpperCase(name)),
                 abbrev ? h('div.int-abbrev', [
                     h('p', " aka "),
                     h('div.int-abbrev-item', { style: { "backgroundColor": color, "color": getContrastTextColor(color)} }, abbrev)
