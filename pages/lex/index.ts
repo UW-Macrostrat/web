@@ -26,6 +26,8 @@ export function IndividualPage(id, type, header) {
     const cols = colData?.features.map((feature) => feature.properties.col_id).join(',')
     const taxaData = useAPIResult("https://paleobiodb.org/data1.2/occs/prevalence.json?limit=5&coll_id=" + cols)
 
+    const siftLink = header === "intervals" ? "interval" : header === "environments" ? "environment" : "economic";
+
 
     // data for charts
     const liths = summarizeAttributes(colData?.features, 'lith')
@@ -69,7 +71,7 @@ export function IndividualPage(id, type, header) {
             ]),
             h('div.sift-link', [
                 h('p', "This page is is in development."),
-                h('a', { href: "/sift/interval/" + int_id, target: "_blank" }, "View in Sift")
+                h('a', { href: "/sift/" + siftLink + "/" + id, target: "_blank" }, "View in Sift")
             ]),
         ]),
         h('div.table', [
