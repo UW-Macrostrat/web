@@ -98,7 +98,7 @@ export function Page() {
                           h('a', { href: 'https://rockd.org', target: '_blank' }, 'Go mobile')
                       ]), href: 'https://rockd.org'}, [
                   ]),
-                  h.if(SETTINGS.instance === "Development")(LinkCard, { title: 'Dev Pages', href: '/dev'}),
+                  h.if(SETTINGS.isDev)(LinkCard, { title: 'Dev Pages', href: '/dev'}),
               ])
             ])
         ]),

@@ -13,7 +13,7 @@ export const burwellTileDomain = getRuntimeConfig(
 );
 export const apiDomain = getRuntimeConfig("MACROSTRAT_API_DOMAIN");
 export const tileserverDomain = burwellTileDomain;
-export const instance = getRuntimeConfig("MACROSTRAT_INSTANCE");
+export const isDev = getRuntimeConfig("MACROSTRAT_INSTANCE") === "Development";
 
 export const gddDomain = "https://xdd.wisc.edu";
 export const pbdbDomain = "https://paleobiodb.org";
@@ -68,5 +68,5 @@ export const SETTINGS = {
   apiV2Prefix,
   mapPagePrefix,
   routerBasename,
-  instance,
+  isDev,
 };
