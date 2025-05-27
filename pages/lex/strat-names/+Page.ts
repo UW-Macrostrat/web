@@ -10,7 +10,8 @@ import { usePageContext } from 'vike-react/usePageContext';
 
 export function Page() {
     const [input, setInput] = useState("");
-    const res = useAPIResult(SETTINGS.apiV2Prefix + "/defs/strat_names?strat_name_like=" + input)?.success.data;
+    const [page, setPage] = useState(1);
+    const res = useAPIResult(SETTINGS.apiV2Prefix + "/defs/strat_names?strat_name_like=" + input + "&page=" + page)?.success.data;
 
     if (res == null) return h("div", "Loading...");
 
@@ -36,6 +37,10 @@ export function Page() {
 
     return h(ContentPage, [
         h(PageBreadcrumbs, { title: "Strat Names" }),
+        h('div.sift-link', [
+            h('p', "This page is is in development."),
+            h('a', { href: "/sift/definitions/strat_names", target: "_blank" }, "View in Sift")
+        ]),
         h(Card, { className: 'filters'}, [
             h("h2", 'Filter'),
             h('div.search-bar', [
