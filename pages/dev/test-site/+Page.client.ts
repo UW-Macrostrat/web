@@ -59,9 +59,10 @@ export function Page() {
               ]),
               h('p.big-text', {}, 'A platform for geological data exploration, integration, and analysis'),
               h('div.buttons', {}, [
-                  h(LinkCard, { title: 'Search', href: '/sift/#/' }),
+                  // h(LinkCard, { title: 'Search', href: '/sift/#/' }),
                   h(LinkCard, { title: "Geologic Map", href: '/map/#3/40.78/-94.13' }, [
-                    /*h('p', { className: 'long'}, [
+                    /*
+                    h('p', { className: 'long'}, [
                       h('div.temp', {}, [
                           'With over 225 maps from data providers around the world across every scale, Macrostrat is the world\'s largest homogenized geologic map database. Our data processing pipeline links geologic map polygons to Macrostrat column polygons, external stratigraphic name lexicons, and geochronological intervals, enabling the enhancement of the original map data and allowing for direct links into ',
                           h('a', { href: 'https://xdd.wisc.edu', target: '_blank' }, 'xDD'),
@@ -79,13 +80,8 @@ export function Page() {
                           h('a', { href: '/map/sources' }, 'taking a look at'),
                           ' which maps are currently a part of Macrostrat.'
                       ])
-                    ]),*/
-                  ]),
-                  h(LinkCard, { title: 'Projects', href: '/projects'}, [
-                    // h('p', 'Projects for specific regions or geological problems')
-                  ]),
-                  h(LinkCard, { title: 'Geologic Lexicon', href: '/lex'}, [
-                    // h('p', 'Geologic units and data dictionaries')
+                    ]),
+                    */
                   ]),
                   h(LinkCard, { title: 'Maps', href: '/maps'}, [
                     // h('p', "The spatial footprint of rocks on the Earth\'s surface")
@@ -93,41 +89,22 @@ export function Page() {
                   h(LinkCard, { title: 'Columns', href: '/columns'}, [
                     // h('p', 'Stratigraphic and geological columns showing the organization of rocks in time')
                   ]),
+                  h(LinkCard, { title: 'Geologic Lexicon', href: '/lex'}, [
+                    // h('p', 'Geologic units and data dictionaries')
+                  ]),
+                  h(LinkCard, { title: 'Projects', href: '/projects'}, [
+                    // h('p', 'Projects for specific regions or geological problems')
+                  ]),
                   h(LinkCard, { title: h('div.rockd-button-container', {}, [
                           h(Image, { className: "rockd-png", src: 'rockd.jpg', width: '22px' }),
                           h('a', { href: 'https://rockd.org', target: '_blank' }, 'Go mobile')
                       ]), href: 'https://rockd.org'}, [
                   ]),
                   h.if(SETTINGS.isDev)(LinkCard, { title: 'Dev Pages', href: '/dev'}),
+                  h.if(SETTINGS.isDev)(LinkCard, { title: 'Decomentation', href: '/docs'}),
               ])
             ])
         ]),
-
-        /*
-        h('div.locations', [
-            h(Image, { className: "location-img", src: 'north_america_med.jpg' }),
-            h('div.location-text', {}, [
-                h('h1', {}, 'North America'),
-                h('div.caption', {}, formatNumber(NorthAmerica.packages) + ' packages. ' + formatNumber(NorthAmerica.units) + ' units. ' + formatNumber(NorthAmerica.pbdb_collections) + ' collections.')
-            ]),
-            h(Image, { className: "location-img", src: 'caribbean_new_medium.jpg' }),
-            h('div.location-text', {}, [
-                h('h1', {}, 'Caribbean'),
-                h('div.caption', {}, formatNumber(Caribbean.packages) + ' packages. ' + formatNumber(Caribbean.units) + ' units. ' + formatNumber(Caribbean.pbdb_collections) + ' collections.')
-            ]),
-            h('div.location-text', {}, [
-                h('h1', {}, 'New Zealand'),
-                h('div.caption', {}, formatNumber(NewZealand.packages) + ' packages. ' + formatNumber(NewZealand.units) + ' units. ' + formatNumber(NewZealand.pbdb_collections) + ' collections.')            ]),
-            h(Image, { className: "location-img", src: 'new_zealand_new_medium.jpg' }),
-            h('div.location-text', {}, [
-                h('h1', {}, 'Deep Sea'),
-                h('div.caption', {}, formatNumber(DeepSea.packages) + ' packages. ' + formatNumber(DeepSea.units) + ' units. ' + formatNumber(DeepSea.pbdb_collections) + ' collections.')
-            ]),
-            h(Image, { className: "location-img", src: 'deep_sea_new_medium.jpg' }),
-            
-        ]),
-        */
-
         Donate,
         h(Footer),
     ])
