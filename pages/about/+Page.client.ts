@@ -1,13 +1,13 @@
 import { Image, Navbar, Footer } from "../index";
-import "./main.styl";
-import h from "@macrostrat/hyper";
+import { Divider } from "@blueprintjs/core"
+import h from "./main.module.sass";
 
 export function Page() {
     return h('div', [
     h(Navbar),
     h('div.body', [  
         h('h1.title-about', 'About Macrostrat'),      
-        h('div.line'),
+        h(Divider, { className: 'divider', style: { margin: "0 0 0 20%"  } }),
         h('div.table', [
             h('dv.table-row', [
                 h('p', 'Summary'),
@@ -31,9 +31,9 @@ export function Page() {
             ]),   
         ]),
 
-        h('div#api', [
+        h('div.api', [
             h('div.api-circle', [
-                h('div#api-circle-text', 'API')
+                h('div.api-circle-text', 'API')
             ]),
             h('div#api-text', [
                 'All data contained in the Macrostrat database are freely available via our Application Programming Interface (API), which provides a ',
