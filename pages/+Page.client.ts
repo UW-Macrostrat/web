@@ -99,7 +99,7 @@ export function Page() {
                       ]), href: 'https://rockd.org'}, [
                   ]),
                   h.if(SETTINGS.isDev)(LinkCard, { title: 'Dev Pages', href: '/dev'}),
-                  h.if(SETTINGS.isDev)(LinkCard, { title: 'Decomentation', href: '/docs'}),
+                  h.if(SETTINGS.isDev)(LinkCard, { title: 'Documentation', href: '/docs'}),
               ])
             ])
         ]),

@@ -9,6 +9,7 @@ import { ColumnMap, BlankImage } from "../index";
 import { navigate } from "vike/client/router";
 import { useState, useCallback } from "react";
 import { asChromaColor } from "@macrostrat/color-utils";
+import { DarkModeButton } from "@macrostrat/ui-components";
 
 export function titleCase(str) {
   return str
@@ -121,6 +122,7 @@ export function IndividualPage(id, type, header) {
             h('ul', timescales.map((t) => h('li', h(Link, { href: "/lex/timescales/" + t.timescale_id}, titleCase(t.name))))),
         ]) : null,
         h(References, { res1: fossilResult, res2: colDataResult}),
+        h(DarkModeButton)
     ]);
 }
 
@@ -190,7 +192,7 @@ function Taxa(record) {
     const imgUrl = "https://paleobiodb.org/data1.2/taxa/thumb.png?id=";
 
     return h('div.taxa', [
-        h(BlankImage, { src: imgUrl + record.img}),
+        h(BlankImage, { src: imgUrl + record.img, className: 'taxa-image' }),
         h('p.name', record.nam)
     ])
 }

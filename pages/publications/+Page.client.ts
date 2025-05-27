@@ -1,4 +1,5 @@
 import { Image, Navbar, Footer } from "../index";
+import { Divider } from "@blueprintjs/core"
 import h  from "./main.module.sass"
 
 export function Page() {
@@ -8,7 +9,7 @@ export function Page() {
         h('div.publications', [
             h('h1.pub-title', "Publications"),
             h('p.blurb', "literature utilizing Macrostrat"),
-            h('div.pub-line'),
+            h(Divider, { className: 'divider' }),
             h('ol', { class: 'pub-list', reversed: true }, [
                 h('li', [
                     h('span', "Gazdewich, S., T. Hauck, J. Husson. 2024. Authigenic carbonate burial within the Late Devonian western Canada sedimentary bsain and its impact on the global carbon cycle. <em>Geochemistry, Geophysics, Geosystems</em> 10.1029/2023GC011376."),

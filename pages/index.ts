@@ -3,6 +3,7 @@ import h from "./layout.module.sass";
 import { MacrostratIcon } from "~/components";
 import { SETTINGS } from "@macrostrat-web/settings";
 import { useAPIResult } from "@macrostrat/ui-components";
+import { DarkModeButton } from "@macrostrat/ui-components";
 
 export function Image({ src, className, width, height }) {
     const srcWithAddedPrefix = "https://storage.macrostrat.org/assets/web/main-page/" + src;
@@ -31,6 +32,7 @@ export function Footer() {
                 ])
             ]),
             h("div", {className: "footer-nav"}, [
+                h(DarkModeButton, { showText: true}),
                 h("a", {href: "/dev/test-site/about"}, "About"),
                 h("a", {href: "/dev/test-site/publications"}, "Publications"),
                 h("a", {href: "/dev/test-site/people"}, "People"),

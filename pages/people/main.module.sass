@@ -1,12 +1,12 @@
 .html, .body, .main
     color: black
-    background-color: white
+    background-color: var(--background-color)
 
 a:hover
     text-decoration: none
 
 .big
-    color: black
+    color: var(--text-color)
     text-align: left
     font-size: 75px
     font-family: "Maven Pro", sans-serif
@@ -26,7 +26,7 @@ a:hover
     align-items: center
     justify-content: center
     gap: 30px
-    margin: 50px 20%
+    padding: 50px 20%
 
     .person-info
         flex-basis: 45%
@@ -77,15 +77,12 @@ a:hover
 
 .subtitle
   margin-left: 20%
-  color: black
+  color: var(--text-color)
 
 .search-bar 
-    background-color: white
     margin: .5em 20%
 
     input
-        background-color: white
-        color: black
         margin: 0
 
 .divider
@@ -102,18 +99,17 @@ a:hover
 
 .tags
     display: flex
-    color: white
     gap: 5px
     justify-content: center
 
     .filter-card
         padding: 2px 5px
-        background-color: white
-        color: black
+        background-color: var(--secondary-background-color)
+        color: var(--text-color)
         border-radius: 5%
 
     .selected
-        background-color: grey
+        background-color: var(--background-color)
 
 .search-bar
     display: flex
