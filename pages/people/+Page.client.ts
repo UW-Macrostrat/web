@@ -1,11 +1,6 @@
-import { PageHeader } from "~/components";
-import { PageBreadcrumbs } from "~/components";
 import { Image, Navbar, Footer } from "../index";
-import "./main.styl";
-import "../main.styl";
-import { MacrostratIcon } from "~/components";
-import { h } from "@macrostrat/map-interface";
-import { Divider, Card, Icon } from "@blueprintjs/core";
+import h from "./main.module.sass"
+import { Card, Icon } from "@blueprintjs/core";
 import { useState } from "react";
 
 export function Page() {

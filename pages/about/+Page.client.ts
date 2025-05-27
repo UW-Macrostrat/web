@@ -1,6 +1,5 @@
 import { Image, Navbar, Footer } from "../index";
 import "./main.styl";
-import "../main.styl";
 import h from "@macrostrat/hyper";
 
 export function Page() {
