@@ -137,10 +137,11 @@ ul, h3 {
 }
 
 .charts {
-    display: grid;
-    grid-template-columns: 33% 33% 33%;
+    display: flex;
+    justify-content: center;;
 
     .chart {
+        width: 33%;
         h3 {
             text-align: center;
         }
@@ -151,4 +152,8 @@ ul, h3 {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.page-container {
+    height: 100%;
 }

@@ -23,11 +23,6 @@ export function Page() {
       polygons += project.t_polys;
     });
 
-    const NorthAmerica = result.filter(project => project.project === 'North America')[0];
-    const Caribbean = result.filter(project => project.project === 'Caribbean')[0];
-    const NewZealand = result.filter(project => project.project === 'New Zealand')[0];
-    const DeepSea = result.filter(project => project.project === 'Deep Sea')[0];
-
     return h('div.total', [
         h(Navbar),
 
@@ -57,53 +52,56 @@ export function Page() {
                   ])
               ]),
               h('p.big-text', {}, 'A platform for geological data exploration, integration, and analysis'),
-              h('div.buttons', {}, [
-                  // h(LinkCard, { title: 'Search', href: '/sift/#/' }),
-                  h(LinkCard, { title: "Geologic Map", href: '/map/#3/40.78/-94.13' }, [
-                    /*
-                    h('p', { className: 'long'}, [
-                      h('div.temp', {}, [
-                          'With over 225 maps from data providers around the world across every scale, Macrostrat is the world\'s largest homogenized geologic map database. Our data processing pipeline links geologic map polygons to Macrostrat column polygons, external stratigraphic name lexicons, and geochronological intervals, enabling the enhancement of the original map data and allowing for direct links into ',
-                          h('a', { href: 'https://xdd.wisc.edu', target: '_blank' }, 'xDD'),
-                          ' (formly GeoDeepDive).'
-                      ]),
-                      h('div.temp', {}, [
-                          'Are you affiliated with a state or national geologic survey? ',
-                          h('a', { href: 'mailto:contact@macrostrat.org?Subject=Geologic%20Map%20Collaboration' }, 'Get in touch'),
-                          ' with us - we\'d love to collaborate and help publicize your maps!'
-                      ]),
-                      h('div.temp', {}, [
-                          'Get started by ',
-                          h('a', { href: '/map' }, 'exploring the map'),
-                          ' or ',
-                          h('a', { href: '/map/sources' }, 'taking a look at'),
-                          ' which maps are currently a part of Macrostrat.'
-                      ])
-                    ]),
-                    */
-                  ]),
-                  h(LinkCard, { title: 'Maps', href: '/maps'}, [
-                    // h('p', "The spatial footprint of rocks on the Earth\'s surface")
-                  ]),
-                  h(LinkCard, { title: 'Columns', href: '/columns'}, [
-                    // h('p', 'Stratigraphic and geological columns showing the organization of rocks in time')
-                  ]),
-                  h(LinkCard, { title: 'Geologic Lexicon', href: '/lex'}, [
-                    // h('p', 'Geologic units and data dictionaries')
-                  ]),
-                  h(LinkCard, { title: 'Projects', href: '/projects'}, [
-                    // h('p', 'Projects for specific regions or geological problems')
-                  ]),
-                  h(LinkCard, { title: h('div.rockd-button-container', {}, [
-                          h(Image, { className: "rockd-png", src: 'rockd.jpg', width: '22px' }),
-                          h('a', { href: 'https://rockd.org', target: '_blank' }, 'Go mobile')
-                      ]), href: 'https://rockd.org'}, [
-                  ]),
-                  h.if(SETTINGS.isDev)(LinkCard, { title: 'Dev Pages', href: '/dev'}),
-                  h.if(SETTINGS.isDev)(LinkCard, { title: 'Documentation', href: '/docs'}),
-              ])
             ])
         ]),
+        h('div.buttons', [
+          // h(LinkCard, { title: 'Search', href: '/sift/#/' }),
+          h(LinkCard, { title: "Geologic Map", href: '/map/#3/40.78/-94.13' }, [
+            h('p', { className: 'long'}, [
+              h('div.temp', {}, [
+                  'With over 225 maps from data providers around the world across every scale, Macrostrat is the world\'s largest homogenized geologic map database. Our data processing pipeline links geologic map polygons to Macrostrat column polygons, external stratigraphic name lexicons, and geochronological intervals, enabling the enhancement of the original map data and allowing for direct links into ',
+                  h('a', { href: 'https://xdd.wisc.edu', target: '_blank' }, 'xDD'),
+                  ' (formly GeoDeepDive).'
+              ]),
+              h('div.temp', {}, [
+                  'Are you affiliated with a state or national geologic survey? ',
+                  h('a', { href: 'mailto:contact@macrostrat.org?Subject=Geologic%20Map%20Collaboration' }, 'Get in touch'),
+                  ' with us - we\'d love to collaborate and help publicize your maps!'
+              ]),
+              h('div.temp', {}, [
+                  'Get started by ',
+                  h('a', { href: '/map' }, 'exploring the map'),
+                  ' or ',
+                  h('a', { href: '/map/sources' }, 'taking a look at'),
+                  ' which maps are currently a part of Macrostrat.'
+              ])
+            ]),
+          ]),
+          h(LinkCard, { title: 'Maps', href: '/maps'}, [
+            h('p', "The spatial footprint of rocks on the Earth\'s surface")
+          ]),
+          h(LinkCard, { title: 'Columns', href: '/columns'}, [
+            h('p', 'Stratigraphic and geological columns showing the organization of rocks in time')
+          ]),
+          h(LinkCard, { title: 'Geologic Lexicon', href: '/lex'}, [
+            h('p', 'Geologic units and data dictionaries')
+          ]),
+          h(LinkCard, { title: 'Projects', href: '/projects'}, [
+            h('p', 'Projects for specific regions or geological problems')
+          ]),
+          h(LinkCard, { title: h('div.rockd-button-container', [
+                  h(Image, { className: "rockd-png", src: 'rockd.png', width: '22px' }),
+                  h('p', 'Rockd')
+              ]), href: 'https://rockd.org'}, [
+                h('p', 'Go mobile!')
+          ]),
+          h.if(SETTINGS.isDev)(LinkCard, { title: 'Dev Apps', href: '/dev'},
+            h('p', 'Layers and testbed apps that aren\'t ready for prime time'),
+          ),
+          h.if(SETTINGS.isDev)(LinkCard, { title: 'Documentation', href: '/docs'}, 
+            h('p', "Macrostrat documentation") 
+          ),
+      ]),
         Donate,
         h(Footer),
     ])

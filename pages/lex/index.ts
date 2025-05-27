@@ -62,11 +62,9 @@ export function IndividualPage(id, type, header) {
 
     if (!intRes || !fossilRes) return h(Loading);
 
-    const { name, color, abbrev, b_age, int_id, t_age, timescales, strat_name } = intRes;
+    const { name, color, abbrev, b_age, int_id, t_age, timescales, strat_name, concept_id } = intRes;
     const { t_units, t_sections, t_int_name, pbdb_collections, b_int_name, max_thick, col_area } = summary
     const area = parseInt(col_area.toString().split('.')[0]);
-
-    console.log('liths', liths);
 
     return h(ContentPage, { className: 'int-page'}, [
         h(PageBreadcrumbs, { title: "#" + id }),
@@ -85,38 +83,38 @@ export function IndividualPage(id, type, header) {
         ]),
         h('div.table', [
             h('div.table-content', [
-                h('div.thickness', "≤ " + max_thick.toLocaleString() + 'm thick'),
+                h('div.packages', t_sections.toLocaleString() + " packages"),
                 h(Divider, { className: 'divider' }),
                 h('div.units', t_units.toLocaleString() + ' units'),
                 h(Divider, { className: 'divider' }),
-                h('div.collections', pbdb_collections.toLocaleString() + ' collections'),
-                h(Divider, { className: 'divider' }),
                 h('div.interval', b_int_name.toLocaleString() + " - " + t_int_name),
-                h(Divider, { className: 'divider' }),
-                h('div.packages', t_sections.toLocaleString() + " packages"),
+                h.if(b_age && t_age)(Divider, { className: 'divider' }),
+                h.if(b_age && t_age)('div.int-age', b_age + " - " + t_age + " Ma"),
                 h(Divider, { className: 'divider' }),
 
                 h('div.area', [
                   h('p', area.toLocaleString() + " km"),
                   h('sup', "2"),
                 ]),
-                h.if(b_age && t_age)(Divider, { className: 'divider' }),
-                h.if(b_age && t_age)('div.int-age', b_age + " - " + t_age + " Ma"),
+                h(Divider, { className: 'divider' }),
+                h('div.thickness', "≤ " + max_thick.toLocaleString() + 'm thick'),
+                h(Divider, { className: 'divider' }),
+                h('div.collections', pbdb_collections.toLocaleString() + ' collections'),
             ]),
             colData ? h(Map, { id: int_id, onSelectColumn, data: colData }) : h(Loading),
         ]),
         h('div.charts', [
-            h('div.chart', [
+            h.if(liths?.length)('div.chart', [
                 h('h3', "Lithologies"),
                 Chart(liths),
-                h('div.legend', liths?.map((lith) => ChartLegend(lith, "lithologies")))
+                h('div.legend', liths?.map((lith) => ChartLegend(lith, "lithology")))
             ]),
-            h('div.chart', [
+            h.if(econs?.length)('div.chart', [
                 h('h3', "Economics"),
                 Chart(econs),
                 h('div.legend', econs?.map((econ) => ChartLegend(econ, "economics")))
             ]),
-            h('div.chart', [
+            h.if(environs?.length)('div.chart', [
                 h('h3', "Environments"),
                 Chart(environs),
                 h('div.legend', environs?.map((environ) => ChartLegend(environ, "environments")))
@@ -124,10 +122,15 @@ export function IndividualPage(id, type, header) {
         ]),
 
         h(PrevalentTaxa, { data: taxaData}),
-        timescales?.[0]?.name ? h('div.int-timescales', [
+        h.if(timescales?.[0]?.name)('div.int-timescales', [
             h('h3', "Timescales"),
-            h('ul', timescales.map((t) => h('li', h(Link, { href: "/lex/timescales/" + t.timescale_id}, titleCase(t.name))))),
-        ]) : null,
+            h('ul', timescales?.map((t) => h('li', h(Link, { href: "/lex/timescales/" + t.timescale_id}, titleCase(t.name))))),
+        ]),
+        h.if(concept_id)('h1', 
+          h('a', { href: "/lex/strat-name-concepts/" + concept_id, className: 'concept-link' }, 
+            "Parent Stratigraphic Concept"
+          )
+        ),
         h(References, { res1: fossilResult, res2: colDataResult}),
         h(DarkModeButton)
     ]);
