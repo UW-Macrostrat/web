@@ -52,7 +52,12 @@ const filteredGroups = columnGroups.filter((group) => {
     return false; // Exclude this group if no matching columns or group name
   });
 
-  const colArr = filteredGroups.map(item => item.columns.map(col => col.col_id)).flat();
+  const colArr = filteredGroups
+    .flatMap(item => 
+      item.columns
+        .filter(col => col.col_name.toLowerCase().includes(columnInput.toLowerCase()))
+        .map(col => col.col_id)
+    );
 
   const columnData = useAPIResult(SETTINGS.apiV2Prefix + "/columns?col_id=" + colArr.join(',') + "&response=long&format=geojson");    
 
@@ -84,14 +89,14 @@ const filteredGroups = columnGroups.filter((group) => {
     ]),
     h(ContentPage, [
       h(PageHeader, { title }),
-      columnFeatures ? h(ColumnMap, {
+      h.if(columnFeatures)(ColumnMap, {
         className: "column-map",
         inProcess: true,
         projectID: null,
         selectedColumn: null,
         onSelectColumn,
         columns: columnFeatures,
-      }) : null,
+      }),
       h(Card, { className: "search-bar" }, [
         h(Icon, { icon: "search" }),
         h("input", {
