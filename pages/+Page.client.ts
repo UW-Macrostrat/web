@@ -1,7 +1,5 @@
 import { Image, Navbar, Footer, useMacrostratAPI } from "./index";
-import "./main.sass";
-import "./main.styl";
-import h from "@macrostrat/hyper";
+import h from "./main.module.sass";
 import { PanelCard } from "@macrostrat/map-interface";
 import { LinkCard } from "~/components/cards";
 import { useState } from 'react';
