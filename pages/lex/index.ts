@@ -10,6 +10,7 @@ import { navigate } from "vike/client/router";
 import { useState, useCallback } from "react";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { DarkModeButton } from "@macrostrat/ui-components";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 export function titleCase(str) {
   return str
@@ -64,6 +65,8 @@ export function IndividualPage(id, type, header) {
     const { t_units, t_sections, t_int_name, pbdb_collections, b_int_name, max_thick, col_area } = summary
     const area = parseInt(col_area.toString().split('.')[0]);
 
+    console.log('liths', liths);
+
     return h(ContentPage, { className: 'int-page'}, [
         h(PageBreadcrumbs, { title: "#" + id }),
         h('div.int-header', [
@@ -104,14 +107,17 @@ export function IndividualPage(id, type, header) {
         h('div.charts', [
             h('div.chart', [
                 h('h3', "Lithologies"),
+                Chart(liths),
                 h('div.legend', liths?.map((lith) => ChartLegend(lith, "lithologies")))
             ]),
             h('div.chart', [
                 h('h3', "Economics"),
+                Chart(econs),
                 h('div.legend', econs?.map((econ) => ChartLegend(econ, "economics")))
             ]),
             h('div.chart', [
                 h('h3', "Environments"),
+                Chart(environs),
                 h('div.legend', environs?.map((environ) => ChartLegend(environ, "environments")))
             ]),
         ]),
@@ -585,4 +591,28 @@ function parseAttributes(type, data) {
     }
 
     return parsed;
-  }
+}
+
+function Chart(data) {
+  return h(ResponsiveContainer, { width: "100%", height: 300 }, 
+    h(PieChart, {className: 'lithology-chart' }, 
+    h(Pie, {
+        data,
+        dataKey: "value",
+        nameKey: "label",
+        cx: "50%",
+        cy: "50%",
+        outerRadius: 120,
+        fill: "#8884d8",
+      },
+      data?.map((entry, index) => (
+        h(Cell, {
+          key: `cell-${index}`,
+          fill: entry.color,
+          stroke: entry.color,
+        })
+      ))
+    ),
+  )
+)
+}

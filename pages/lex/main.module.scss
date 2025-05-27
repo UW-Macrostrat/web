@@ -138,6 +138,12 @@ ul, h3 {
 .charts {
     display: grid;
     grid-template-columns: 33% 33% 33%;
+
+    .chart {
+        h3 {
+            text-align: center;
+        }
+    }
 }
 
 .area {

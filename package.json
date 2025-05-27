@@ -134,6 +134,7 @@
     "react-router-dom": "^6.8.2",
     "react-router-hash-link": "^2.4.3",
     "react-spring": "^9.7.3",
+    "recharts": "^2.13.0",
     "reduce-reducers": "^1.0.4",
     "redux": "^4.0.5",
     "sirv": "^2.0.3",
