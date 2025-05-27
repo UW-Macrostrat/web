@@ -10,7 +10,7 @@ import { navigate } from "vike/client/router";
 import { useState, useCallback } from "react";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { DarkModeButton } from "@macrostrat/ui-components";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Label } from 'recharts';
 import { Loading } from "../index";
 
 export function titleCase(str) {
@@ -22,6 +22,7 @@ export function titleCase(str) {
 }
 
 export function IndividualPage(id, type, header) {
+    const [activeIndex, setActiveIndex] = useState(null);
     const intRes = useAPIResult(SETTINGS.apiV2Prefix + "/defs/" + header + "?" + type + "=" + id)?.success.data[0];
     const fossilResult = useAPIResult(SETTINGS.apiV2Prefix + "/fossils?" + type + "=" + id)?.success;
     const colDataResult = useAPIResult(SETTINGS.apiV2Prefix + "/columns?" + type + "=" + id + "&response=long&format=geojson")?.success;
@@ -106,17 +107,17 @@ export function IndividualPage(id, type, header) {
         h('div.charts', [
             h.if(liths?.length)('div.chart', [
                 h('h3', "Lithologies"),
-                Chart(liths),
+                Chart(liths, "Lithologies"),
                 h('div.legend', liths?.map((lith) => ChartLegend(lith, "lithology")))
             ]),
             h.if(econs?.length)('div.chart', [
                 h('h3', "Economics"),
-                Chart(econs),
+                Chart(econs, "Economics"),
                 h('div.legend', econs?.map((econ) => ChartLegend(econ, "economics")))
             ]),
             h.if(environs?.length)('div.chart', [
                 h('h3', "Environments"),
-                Chart(environs),
+                Chart(environs, "Environments"),
                 h('div.legend', environs?.map((environ) => ChartLegend(environ, "environments")))
             ]),
         ]),
@@ -597,25 +598,29 @@ function parseAttributes(type, data) {
     return parsed;
 }
 
-function Chart(data) {
+function Chart(data, label) {
   return h(ResponsiveContainer, { width: "100%", height: 300 }, 
     h(PieChart, {className: 'lithology-chart' }, 
     h(Pie, {
         data,
         dataKey: "value",
         nameKey: "label",
+        outerRadius: 120,
+        innerRadius: 80,
         cx: "50%",
         cy: "50%",
-        outerRadius: 120,
         fill: "#8884d8",
       },
       data?.map((entry, index) => (
         h(Cell, {
           key: `cell-${index}`,
           fill: entry.color,
-          stroke: entry.color,
+          stroke: "#fff", // activeIndex === index ? '#000000' : '#ffffff', // Black on hover
+          strokeWidth: 2,
+          // onMouseEnter: () => setActiveIndex(index),
+          // onMouseLeave: () => setActiveIndex(null),
         })
-      ))
+      )),
     ),
   )
 )
