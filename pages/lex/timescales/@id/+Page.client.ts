@@ -8,8 +8,7 @@ import { usePageContext } from 'vike-react/usePageContext';
 import { Timescale } from "@macrostrat/timescale";
 import { titleCase } from "../../index";
 import { useState, useEffect } from "react";
-import { CarbonIsotopesColumn } from "@macrostrat/column-views";
-
+import { Loading } from "../../../index";
 
 export function Page() {
     const pageContext = usePageContext();
@@ -39,7 +38,7 @@ export function Page() {
       fetchInterval();
     }, [clickedInterval]);
 
-    if (res == null) return h("div", "Loading...");
+    if (res == null) return h(Loading);
 
     // temporary till api is fixed
     const timeRes = res.find((d) => d.timescale_id === id); 

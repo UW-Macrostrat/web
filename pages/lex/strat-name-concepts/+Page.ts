@@ -6,13 +6,13 @@ import { Card, Icon, Popover, RangeSlider } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { usePageContext } from 'vike-react/usePageContext';
-
+import { Loading } from "../../index";
 
 export function Page() {
     const [input, setInput] = useState("");
     const res = useAPIResult(SETTINGS.apiV2Prefix + "/defs/strat_name_concepts?all")?.success.data;
 
-    if (res == null) return h("div", "Loading...");
+    if (res == null) return h(Loading);
 
     const handleChange = (event) => { 
         setInput(event.target.value.toLowerCase());

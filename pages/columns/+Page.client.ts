@@ -20,6 +20,7 @@ import { navigate } from "vike/client/router";
 import { useMapRef } from "@macrostrat/mapbox-react";
 import { ColumnMap } from "../index";
 import { useAPIResult } from "@macrostrat/ui-components";
+import { Loading } from "../index";
 
 export function Page(props) {
   return h(ColumnListPage, props);
@@ -34,7 +35,6 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
 
   console.log("selected", selectedUnitID)
 
-  // if(!columnData) return h('div.loading', "Loading...")
 
 const filteredGroups = columnGroups.filter((group) => {
     // Filter the columns of the group based on the input
@@ -78,7 +78,7 @@ const filteredGroups = columnGroups.filter((group) => {
     [setSelectedUnitID]
   );
 
-  if(!columnData) return h('div.loading', "loading...");
+  if(!columnData) return h(Loading);
 
   const columnFeatures = columnData?.success?.data.features
   

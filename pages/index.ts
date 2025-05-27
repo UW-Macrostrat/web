@@ -4,6 +4,7 @@ import { MacrostratIcon } from "~/components";
 import { SETTINGS } from "@macrostrat-web/settings";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { DarkModeButton } from "@macrostrat/ui-components";
+import { Spinner } from "@blueprintjs/core";
 
 export function Image({ src, className, width, height }) {
     const srcWithAddedPrefix = "https://storage.macrostrat.org/assets/web/main-page/" + src;
@@ -57,4 +58,11 @@ export const ColumnMap = onDemand(() => import("./map").then((mod) => mod.Column
 
 export function BlankImage({ src, className, width, height }) {
     return h("img", {src, className, width, height})
+}
+
+export function Loading() {
+    return h("div", {className: "loading"}, [
+        h(Spinner),
+        h("h3", "Loading..."),
+    ]);
 }

@@ -11,6 +11,7 @@ import { useState, useCallback } from "react";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { DarkModeButton } from "@macrostrat/ui-components";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { Loading } from "../index";
 
 export function titleCase(str) {
   return str
@@ -59,7 +60,7 @@ export function IndividualPage(id, type, header) {
         console.log("selected", e)
     }
 
-    if (!intRes || !fossilRes) return h("div", "Loading...");
+    if (!intRes || !fossilRes) return h(Loading);
 
     const { name, color, abbrev, b_age, int_id, t_age, timescales, strat_name } = intRes;
     const { t_units, t_sections, t_int_name, pbdb_collections, b_int_name, max_thick, col_area } = summary
@@ -102,7 +103,7 @@ export function IndividualPage(id, type, header) {
                 h.if(b_age && t_age)(Divider, { className: 'divider' }),
                 h.if(b_age && t_age)('div.int-age', b_age + " - " + t_age + " Ma"),
             ]),
-            colData ? h(Map, { id: int_id, onSelectColumn, data: colData }) : h('div.loading', "loading"),
+            colData ? h(Map, { id: int_id, onSelectColumn, data: colData }) : h(Loading),
         ]),
         h('div.charts', [
             h('div.chart', [
@@ -153,7 +154,7 @@ function UpperCase(str) {
 }
 
 function References({ res1, res2 }) {
-    if (res1 == null || res2 == null) return h("div", "Loading...");
+    if (res1 == null || res2 == null) return h(Loading);
 
     const refArray1 = Object.values(res1.refs);
     const refArray2 = Object.values(res2.refs);

@@ -6,13 +6,14 @@ import { Card, Icon, Popover, RangeSlider } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { asChromaColor } from "@macrostrat/color-utils";
+import { Loading } from "../../index";
 
 export function Page() {
     const [input, setInput] = useState("");
     const [age, setAge] = useState([0, 4600]);
     const res = useAPIResult(SETTINGS.apiV2Prefix + "/defs/intervals?all")?.success.data;
 
-    if (res == null) return h("div", "Loading...");
+    if (res == null) return h(Loading);
 
     console.log(res);
 

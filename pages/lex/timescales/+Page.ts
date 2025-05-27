@@ -8,6 +8,7 @@ import { ContentPage } from "~/layouts";
 import { Timescale } from "@macrostrat/timescale";
 import { titleCase } from "../index";
 import { useEffect } from "react";
+import { Loading } from "../../index";
 
 export function Page() {
     const [input, setInput] = useState("");
@@ -35,7 +36,7 @@ export function Page() {
       fetchInterval();
     }, [clickedInterval]);
 
-    if (res == null) return h("div", "Loading...");
+    if (res == null) return h(Loading);
 
     const handleChange = (event) => {
         setInput(event.target.value.toLowerCase());

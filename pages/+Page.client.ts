@@ -4,12 +4,13 @@ import { PanelCard } from "@macrostrat/map-interface";
 import { LinkCard } from "~/components/cards";
 import { useState } from 'react';
 import { SETTINGS } from "@macrostrat-web/settings";
+import { Loading } from "./index"
 
 export function Page() {
     const result = useMacrostratAPI('/stats?all')?.success.data;
 
     if(!result) {
-      return h('div.loading')
+      return h(Loading)
     }
 
     let columns = 0;

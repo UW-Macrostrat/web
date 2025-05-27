@@ -6,6 +6,7 @@ import { Card, Icon, Popover, RangeSlider } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { usePageContext } from 'vike-react/usePageContext';
+import { Loading } from "../../index";
 
 
 export function Page() {
@@ -13,7 +14,7 @@ export function Page() {
     const [page, setPage] = useState(1);
     const res = useAPIResult(SETTINGS.apiV2Prefix + "/defs/strat_names?strat_name_like=" + input + "&page=" + page)?.success.data;
 
-    if (res == null) return h("div", "Loading...");
+    if (res == null) return h(Loading);
 
     const grouped = res.reduce((acc, item) => {
         const { rank, gp, subgp } = item;
