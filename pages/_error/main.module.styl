@@ -1,0 +1,51 @@
+.error404
+    background: black
+    height: 90vh
+    text-align: center
+    color: black
+
+    h1 
+        margin-top 0
+        font-size 100px
+
+.error-text
+    position absolute
+    z-index 2
+    top 30%
+    left 50%
+    transform translate(-50%, -50%)
+    color white
+
+.error-image
+    position absolute
+    z-index 1
+    top 0
+    left 0
+    opacity .5
+
+.buttons
+    display flex      
+    gap 100px
+    justify-content center
+    margin-top 50px
+
+    a 
+        color black
+        text-decoration none
+
+    a:hover
+        color black
+        background-color rgba(100, 100, 100, 1)
+
+.btn, button
+    padding 10px 20px
+    font-size 20px
+    border none
+    background-color white
+    color black
+    cursor pointer
+    border-radius 5px
+    transition background-color 0.3s ease
+
+button:hover
+    background-color rgba(100, 100, 100, 1)
