@@ -3,9 +3,26 @@ import { CenteredContentPage } from "~/layouts";
 import { PageHeader } from "~/components";
 import { usePageContext } from "vike-react/usePageContext";
 import { ClientOnly } from "vike-react/ClientOnly";
-import { Spinner, Button } from "@blueprintjs/core";
+import { Spinner, Button, Card } from "@blueprintjs/core";
+import { BlankImage } from "../index";
+import { LinkCard } from "~/components";
 
 export function Page() {
+  const ctx = usePageContext();
+  const is404 = ctx.is404;
+
+  if(is404) return h('div.error404', [
+      h(BlankImage, { src: "https://storage.macrostrat.org/assets/web/earth-crust.jpg", className: "error-image", width: "100%", height: "100%" }),
+      h('div.error-text', [
+        h('h1', "404"),
+        h('h2', "The rock you are looking for doesn't exist. Keep digging."),
+        h('div.buttons', [
+          h(Card, { className: "btn", onClick: () => history.back() }, "Go back"),
+          h(LinkCard, { className: "btn", href: "/" }, "Go home")
+        ]),
+      ])  
+    ]);
+
   return h(CenteredContentPage, [h(PageHeader), h(PageContent)]);
 }
 
@@ -18,7 +35,7 @@ function PageContent() {
 
   if (is404) {
     return h('div.error404', [
-      // h(Image, { src: "earth-crust.jpg", className: "error-image", width: "100%", height: "100%" }),
+      h(BlankImage, { src: "https://storage.macrostrat.org/assets/web/earth-crust.jpg", className: "error-image", width: "100%", height: "100%" }),
       h('div.error-text', [
         h('h1', "404"),
         h('h2', "The rock you are looking for doesn't exist. Keep digging."),

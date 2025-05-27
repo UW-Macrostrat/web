@@ -1,6 +1,6 @@
 .error404
     background: black
-    height: 90vh
+    height: 100vh
     text-align: center
     color: black
 
@@ -30,22 +30,18 @@
     margin-top 50px
 
     a 
-        color black
         text-decoration none
 
-    a:hover
-        color black
-        background-color rgba(100, 100, 100, 1)
-
-.btn, button
-    padding 10px 20px
-    font-size 20px
-    border none
-    background-color white
-    color black
-    cursor pointer
-    border-radius 5px
-    transition background-color 0.3s ease
 
 button:hover
-    background-color rgba(100, 100, 100, 1)
+    background-color var(--secondary-background-color)
+    color: var(text-emphasized-color) !important
+
+.btn
+    background-color var(--background-color)
+    color: var(text-emphasized-color) !important
+    cursor: pointer
+    margin 14px 0
+
+a
+    color: var(--text-emphasized-color) !important
