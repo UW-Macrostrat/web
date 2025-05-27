@@ -2,7 +2,7 @@ import h from "./main.module.scss";
 import { ContentPage } from "~/layouts";
 import { PageHeader, LinkCard } from "~/components";
 import { useData } from "vike-react/useData";
-import { Image } from "../dev/test-site/index";
+import { Image } from "../index";
 
 
 export function Page() {
