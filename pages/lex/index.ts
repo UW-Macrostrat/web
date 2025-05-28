@@ -4,7 +4,7 @@ import { SETTINGS } from "@macrostrat-web/settings";
 import { PageHeader, Link, PageBreadcrumbs } from "~/components";
 import { Card, Icon, Popover, Divider, RangeSlider } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
-import { ColumnMap, BlankImage } from "../index";
+import { BlankImage } from "../index";
 import { useState, useCallback, act } from "react";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { DarkModeButton } from "@macrostrat/ui-components";
@@ -136,19 +136,6 @@ function References({ res1, res2 }) {
         h(Divider),
         h('ol.ref-list', refs.map((r) => h('li.ref-item', r))),
     ]);
-}
-
-function Map({id, onSelectColumn, data}) {
-    return h("div.page-container", [
-          h(ColumnMap, {
-            className: "column-map",
-            inProcess: true,
-            projectID: null,
-            selectedColumn: null,
-            onSelectColumn,
-            columns: data.features,
-          }),
-        ])
 }
 
 function PrevalentTaxa({data}) {

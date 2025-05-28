@@ -18,7 +18,6 @@ import { useEffect, useCallback } from "react";
 import { onDemand } from "~/_utils";
 import { navigate } from "vike/client/router";
 import { useMapRef } from "@macrostrat/mapbox-react";
-import { ColumnMap } from "../index";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { Loading, ColumnsMap } from "../index";
 
