@@ -73,121 +73,94 @@ export function Loading() {
 }
 
 export function ColumnsMap(columns) {
-    // Define state for data and loading
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+  const [mapInstance, setMapInstance] = useState(null); 
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch(SETTINGS.apiV2Prefix + "/columns?int_id=1&response=long&format=geojson");
-                const result = await response.json();
+  const mapPosition = {
+    camera: {
+      lat: 39,
+      lng: -98,
+      altitude: 9000000,
+    },
+  };
 
-                if (result.success) {
-                    setData(result.success.data);  // Assume this is the correct data
-                    setLoading(false);
-                } else {
-                    setError("Failed to load data");
-                    setLoading(false);
-                }
-            } catch (error) {
-                setError("Error fetching data");
-                setLoading(false);
-            }
-        };
+  const handleMapLoaded = (map) => {
+    setMapInstance(map);
+  };
 
-        fetchData();
-    }, []);  // Empty dependency array means this effect runs only once after the first render
+  useEffect(() => {
+    if (!mapInstance || !columns || !columns.features?.length) return;
 
-    if (loading) {
-        return h("div", "Loading...");  // Show loading state
+    if (!mapInstance.isStyleLoaded()) {
+      mapInstance.once("style.load", () => addGeoJsonLayer(mapInstance, columns));
+    } else {
+      addGeoJsonLayer(mapInstance, columns);
+    }
+  }, [columns, mapInstance]);
+
+  const addGeoJsonLayer = (map, data) => {
+    if (!map.getSource("geojson-data")) {
+      map.addSource("geojson-data", {
+        type: "geojson",
+        data,
+      });
     }
 
-    if (error) {
-        return h("div", error);  // Show error state
-    }
-
-    const handleMapLoaded = (map: mapboxgl.Map) => {
-        if (!map.isStyleLoaded()) {
-            map.once('style.load', () => addGeoJsonLayer(map));
-        } else {
-            addGeoJsonLayer(map);
-        }
-    };
-
-    const addGeoJsonLayer = (map: mapboxgl.Map) => {
-        if (!map.getSource('geojson-data')) {
-            map.addSource('geojson-data', {
-                type: 'geojson',
-                data: columns,
-            });
-        }
-
-        if (!map.getLayer('geojson-layer')) {
-            map.addLayer({
-                id: 'geojson-layer',
-                type: 'fill', 
-                source: 'geojson-data',
-                paint: {
-                    'fill-color': '#FFFFFF',  
-                    'fill-opacity': 0.5,      
-                },
-            });
-
-            map.on('click', 'geojson-layer', (e) => {
-                const feature = e.features?.[0];
-                const col_id = feature.properties.col_id
-                const url = "/columns/" + col_id
-                window.open(url, "_blank")
-            })
-
-            map.on('mousemove', 'geojson-layer', (e) => {
-                map.getCanvas().style.cursor = 'pointer';
-                const feature = e.features?.[0];
-                const col_id = feature.properties?.col_id;
-                map.setFilter('highlight-layer', ['==', 'col_id', col_id]);
-            });
-
-            map.on('mouseleave', 'geojson-layer', () => {
-                map.getCanvas().style.cursor = '';
-                map.setFilter('highlight-layer', ['==', 'id', '']);
-            });
-        }
-
-        if (!map.getLayer('highlight-layer')) {
-            map.addLayer({
-            id: 'highlight-layer',
-            type: 'line', 
-            source: 'geojson-data',
-            paint: {
-                'line-color': '#FF0000',
-                'line-width': 3,
-            },
-            filter: ['==', 'col_id', ''], 
-            });
-        }
-    };
-
-    const mapPosition = {
-        camera: {
-        lat: 39,
-        lng: -98,
-        altitude: 9000000,
+    if (!map.getLayer("geojson-layer")) {
+      map.addLayer({
+        id: "geojson-layer",
+        type: "fill",
+        source: "geojson-data",
+        paint: {
+          "fill-color": "#FFFFFF",
+          "fill-opacity": 0.5,
         },
-    };
+      });
 
+      map.on("click", "geojson-layer", (e) => {
+        const feature = e.features?.[0];
+        const col_id = feature?.properties?.col_id;
+        if (col_id) {
+          window.open(`/columns/${col_id}`, "_blank");
+        }
+      });
 
-    return h("div.map-container",
-        h(MapAreaContainer,
-            { className: "map-area-container" },
-          h(MapAreaContainer, { className: "map-area-container" },
-            h(MapView, {
-                style: "mapbox://styles/mapbox/dark-v10",
-                mapboxToken: SETTINGS.mapboxAccessToken,
-                mapPosition,
-                onMapLoaded: handleMapLoaded,
-            }),
-        ),
-    ));
+      map.on("mousemove", "geojson-layer", (e) => {
+        map.getCanvas().style.cursor = "pointer";
+        const feature = e.features?.[0];
+        const col_id = feature?.properties?.col_id;
+        if (col_id) {
+          map.setFilter("highlight-layer", ["==", "col_id", col_id]);
+        }
+      });
+
+      map.on("mouseleave", "geojson-layer", () => {
+        map.getCanvas().style.cursor = "";
+        map.setFilter("highlight-layer", ["==", "col_id", ""]);
+      });
+    }
+
+    if (!map.getLayer("highlight-layer")) {
+      map.addLayer({
+        id: "highlight-layer",
+        type: "line",
+        source: "geojson-data",
+        paint: {
+          "line-color": "#FF0000",
+          "line-width": 3,
+        },
+        filter: ["==", "col_id", ""],
+      });
+    }
+  };
+
+  return h("div.map-container",
+    h(MapAreaContainer, { className: "map-area-container" },
+      h(MapView, {
+        style: "mapbox://styles/mapbox/dark-v10",
+        mapboxToken: SETTINGS.mapboxAccessToken,
+        mapPosition,
+        onMapLoaded: handleMapLoaded,
+      })
+    )
+  );
 }
