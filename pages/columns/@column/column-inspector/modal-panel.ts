@@ -56,5 +56,18 @@ export function ModalUnitPanel(props) {
     onSelectUnit,
     columnUnits: unitData,
     features,
+    onClickItem: (unit) => {
+      if (unit?.lith_id) {
+        window.open("/lex/lithology/" + unit.lith_id, "_blank");
+      }
+
+      if (unit?.environ_id) {
+        window.open("/lex/environments/" + unit.environ_id, "_blank");
+      }
+
+      if (unit?.int_id) {
+        window.open("/lex/intervals/" + unit.int_id, "_blank");
+      }
+    }
   });
 }
