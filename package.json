@@ -159,5 +159,26 @@
   "prettier": {
     "proseWrap": "always"
   },
-  "packageManager": "yarn@4.8.1"
+  "packageManager": "yarn@4.8.1",
+  "resolutions": {
+    "@macrostrat/api-types": "portal:../rockd/web-components/packages/api-types",
+    "@macrostrat/color-utils": "portal:../rockd/web-components/packages/color-utils",
+    "@macrostrat/column-components": "portal:../rockd/web-components/packages/column-components",
+    "@macrostrat/column-views": "portal:../rockd/web-components/packages/column-views",
+    "@macrostrat/data-components": "portal:../rockd/web-components/packages/data-components",
+    "@macrostrat/data-sheet": "portal:../rockd/web-components/packages/data-sheet",
+    "@macrostrat/feedback-components": "portal:../rockd/web-components/packages/feedback-components",
+    "@macrostrat/form-components": "portal:../rockd/web-components/packages/form-components",
+    "@macrostrat/map-interface": "portal:../rockd/web-components/packages/map-interface",
+    "@macrostrat/map-styles": "portal:../rockd/web-components/packages/map-styles",
+    "@macrostrat/mapbox-react": "portal:../rockd/web-components/packages/mapbox-react",
+    "@macrostrat/mapbox-utils": "portal:../rockd/web-components/packages/mapbox-utils",
+    "@macrostrat/stratigraphy-utils": "portal:../rockd/web-components/packages/stratigraphy-utils",
+    "@macrostrat/style-system": "portal:../rockd/web-components/packages/style-system",
+    "@macrostrat/svg-map-components": "portal:../rockd/web-components/packages/svg-map-components",
+    "@macrostrat/timescale": "portal:../rockd/web-components/packages/timescale",
+    "@macrostrat/ui-components": "portal:../rockd/web-components/packages/ui-components",
+    "@macrostrat/hyperstyle-loader": "portal:../rockd/web-components/toolchain/hyperstyle-loader",
+    "@macrostrat/vite-plugin-hyperstyles": "portal:../rockd/web-components/toolchain/vite-plugin-hyperstyles"
+  }
 }

@@ -4,7 +4,7 @@ import { SETTINGS } from "@macrostrat-web/settings";
 import { PageHeader, Link, PageBreadcrumbs } from "~/components";
 import { Card, Icon, Popover, Divider, RangeSlider } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
-import { ColumnMap, BlankImage } from "../index";
+import { BlankImage } from "../index";
 import { useState, useCallback, act } from "react";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { DarkModeButton } from "@macrostrat/ui-components";
