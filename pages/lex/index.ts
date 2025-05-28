@@ -33,8 +33,6 @@ export function IndividualPage(id, type, header) {
 
     const siftLink = header === "intervals" ? "interval" : header === "environments" ? "environment" : header === "lithologies" ? "lithology" : "economic";
 
-    console.log("activeIndex", activeIndex);
-
     // data for charts
     const liths = summarizeAttributes(colData?.features, 'lith')
     const environs = summarizeAttributes(colData?.features, 'environ')
@@ -597,6 +595,7 @@ function Chart(data, title, route, activeIndex, setActiveIndex) {
           },
           data?.map((entry, index) => (
             h(Cell, {
+                className: `id-${entry.id}`,
                 key: `cell-${index}`,
                 fill: entry.color,
                 stroke:
@@ -619,6 +618,11 @@ function Chart(data, title, route, activeIndex, setActiveIndex) {
                     setActiveIndex(null);
                   }
                 },
+                onClick: (e) => {
+                  const id = e.target.className.baseVal.split(" ")[1].split("-")[1];
+                  const url = "/lex/" + route + "/" + id;
+                  window.open(url, "_blank")
+                }
               })
             )
           )
