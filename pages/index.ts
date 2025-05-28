@@ -146,7 +146,6 @@ export function ColumnsMap(columns) {
                 map.getCanvas().style.cursor = 'pointer';
                 const feature = e.features?.[0];
                 const col_id = feature.properties?.col_id;
-                console.log('col_id', col_id);
                 map.setFilter('highlight-layer', ['==', 'col_id', col_id]);
             });
 
@@ -159,13 +158,13 @@ export function ColumnsMap(columns) {
         if (!map.getLayer('highlight-layer')) {
             map.addLayer({
             id: 'highlight-layer',
-            type: 'line', // use 'line' to outline or 'fill' for full highlight
+            type: 'line', 
             source: 'geojson-data',
             paint: {
                 'line-color': '#FF0000',
                 'line-width': 3,
             },
-            filter: ['==', 'col_id', ''], // Initially match nothing
+            filter: ['==', 'col_id', ''], 
             });
         }
     };
