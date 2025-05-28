@@ -125,6 +125,10 @@ ul, h3 {
     gap: 5px;
     align-items: center;
 
+    a {
+        color: white !important;
+    }
+
     p {
         margin: 0;
     }
@@ -138,7 +142,7 @@ ul, h3 {
 
 .charts {
     display: flex;
-    justify-content: center;;
+    justify-content: center;
 
     .chart {
         width: 33%;

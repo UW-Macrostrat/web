@@ -106,21 +106,9 @@ export function IndividualPage(id, type, header) {
             colData ? h(Map, { id: int_id, onSelectColumn, data: colData }) : h(Loading),
         ]),
         h('div.charts', [
-            h.if(liths?.length)('div.chart', [
-                h('h3', "Lithologies"),
-                Chart(liths, "Lithologies", activeIndex, setActiveIndex),
-                h('div.legend', liths?.map((lith) => ChartLegend(lith, "lithology", activeIndex)))
-            ]),
-            h.if(econs?.length)('div.chart', [
-                h('h3', "Economics"),
-                Chart(econs, "Economics", activeIndex, setActiveIndex),
-                h('div.legend', econs?.map((econ) => ChartLegend(econ, "economics", activeIndex)))
-            ]),
-            h.if(environs?.length)('div.chart', [
-                h('h3', "Environments"),
-                Chart(environs, "Environments", activeIndex, setActiveIndex),
-                h('div.legend', environs?.map((environ) => ChartLegend(environ, "environments", activeIndex)))
-            ]),
+            h.if(liths?.length)('div.chart', Chart(liths, "Lithologies", "lithology", activeIndex, setActiveIndex)),
+            h.if(econs?.length)('div.chart', Chart(econs, "Economics", "economics", activeIndex, setActiveIndex)),
+            h.if(environs?.length)('div.chart', Chart(environs, "Environments", "environments", activeIndex, setActiveIndex)),
         ]),
 
         h(PrevalentTaxa, { data: taxaData}),
@@ -207,17 +195,6 @@ function Taxa(record) {
         h(BlankImage, { src: imgUrl + record.img, className: 'taxa-image' }),
         h('p.name', record.nam)
     ])
-}
-
-function ChartLegend(data, route, activeIndex) {
-  const hovered = activeIndex?.label === data.label;
-
-  if(hovered) console.log(data.label)
-
-  return h('div.legend-item', [
-    h('div.box', { style: { "background-color": data.color}}), 
-    h('a', { href: "/lex/" + route + "/" + data.id, style: { "font-weight": hovered ? "600" : "300" } }, data.label)
-  ]);
 }
 
 export function summarizeAttributes(data, type) {
@@ -603,47 +580,62 @@ function parseAttributes(type, data) {
     return parsed;
 }
 
-function Chart(data, label, activeIndex, setActiveIndex) {
-  return h(ResponsiveContainer, { width: "100%", height: 300 }, 
-    h(PieChart, {className: 'lithology-chart' }, 
-    h(Pie, {
-        data,
-        dataKey: "value",
-        nameKey: "label",
-        outerRadius: 120,
-        innerRadius: 80,
-        cx: "50%",
-        cy: "50%",
-        fill: "#8884d8",
-      },
-      data?.map((entry, index) => (
-        h(Cell, {
-            key: `cell-${index}`,
-            fill: entry.color,
-            stroke:
-              activeIndex?.index === index &&
-              activeIndex.label === entry.label
-                ? '#fff'
-                : '#000',
-            strokeWidth: 2,
-            onMouseEnter: () => {
-              if (
-                !activeIndex ||
-                activeIndex.index !== index ||
-                activeIndex.label !== entry.label
-              ) {
-                setActiveIndex({ index, label: entry.label });
-              }
-            },
-            onMouseLeave: () => {
-              if (activeIndex) {
-                setActiveIndex(null);
-              }
-            },
-          })
-        )
+function Chart(data, title, route, activeIndex, setActiveIndex) {
+  return h('div.chart-container', [
+    h('h3', title),
+    h(ResponsiveContainer, { width: "100%", height: 300 }, 
+        h(PieChart, {className: 'lithology-chart' }, 
+        h(Pie, {
+            data,
+            dataKey: "value",
+            nameKey: "label",
+            outerRadius: 120,
+            innerRadius: 80,
+            cx: "50%",
+            cy: "50%",
+            fill: "#8884d8",
+          },
+          data?.map((entry, index) => (
+            h(Cell, {
+                key: `cell-${index}`,
+                fill: entry.color,
+                stroke:
+                  activeIndex?.index === index &&
+                  activeIndex.label === entry.label
+                    ? '#fff'
+                    : '#000',
+                strokeWidth: 2,
+                onMouseEnter: () => {
+                  if (
+                    !activeIndex ||
+                    activeIndex.index !== index ||
+                    activeIndex.label !== entry.label
+                  ) {
+                    setActiveIndex({ index, label: entry.label });
+                  }
+                },
+                onMouseLeave: () => {
+                  if (activeIndex) {
+                    setActiveIndex(null);
+                  }
+                },
+              })
+            )
+          )
+        ),
       )
     ),
-  )
-)
+    h('div.legend', data?.map((item) => ChartLegend(item, route, activeIndex))),
+  ])
+}
+
+function ChartLegend(data, route, activeIndex) {
+  const hovered = activeIndex?.label === data.label;
+
+  if(hovered) console.log(data.label)
+
+  return h('div.legend-item', [
+    h('div.box', { style: { "background-color": data.color}}), 
+    h('a', { href: "/lex/" + route + "/" + data.id, style: { "font-weight": hovered ? "600" : "300" } }, data.label)
+  ]);
 }
