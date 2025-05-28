@@ -625,17 +625,35 @@ function Chart(data, title, route, activeIndex, setActiveIndex) {
         ),
       )
     ),
-    h('div.legend', data?.map((item) => ChartLegend(item, route, activeIndex))),
+    h('div.legend', data?.map((item, index) => ChartLegend(item, route, activeIndex, setActiveIndex, index))),
   ])
 }
 
-function ChartLegend(data, route, activeIndex) {
+function ChartLegend(data, route, activeIndex, setActiveIndex, index) {
   const hovered = activeIndex?.label === data.label;
-
-  if(hovered) console.log(data.label)
 
   return h('div.legend-item', [
     h('div.box', { style: { "background-color": data.color}}), 
-    h('a', { href: "/lex/" + route + "/" + data.id, style: { "font-weight": hovered ? "600" : "300" } }, data.label)
+    h('a', { 
+      href: "/lex/" + route + "/" + data.id, 
+      onMouseEnter: () => {
+                  if (
+                    !activeIndex ||
+                    activeIndex.index !== index ||
+                    activeIndex.label !== data.label
+                  ) {
+                    setActiveIndex({ index, label: data.label });
+                  }
+                },
+      onMouseLeave: () => {
+                  if (activeIndex) {
+                    setActiveIndex(null);
+                  }
+                },
+      style: { 
+          "font-weight": hovered ? "600" : "300" 
+        } 
+      }, 
+      data.label)
   ]);
 }
