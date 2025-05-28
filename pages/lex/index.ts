@@ -12,6 +12,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Label } from 'recharts';
 import { Loading, ColumnsMap } from "../index";
 
 export function titleCase(str) {
+  if (!str) return str;
   return str
     .toLowerCase()
     .split(' ')
