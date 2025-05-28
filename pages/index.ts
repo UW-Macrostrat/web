@@ -72,7 +72,7 @@ export function Loading() {
     ]);
 }
 
-export function ColumnsMap(columns) {
+export function ColumnsMap({columns}) {
   const [mapInstance, setMapInstance] = useState(null); 
 
   const mapPosition = {
@@ -98,12 +98,33 @@ export function ColumnsMap(columns) {
   }, [columns, mapInstance]);
 
   const addGeoJsonLayer = (map, data) => {
-    if (!map.getSource("geojson-data")) {
-      map.addSource("geojson-data", {
+    if (map.getLayer("highlight-layer")) {
+        map.removeLayer("highlight-layer");
+    }
+    if (map.getLayer("geojson-layer")) {
+        map.removeLayer("geojson-layer");
+    }
+    if (map.getSource("geojson-data")) {
+        map.removeSource("geojson-data");
+    }
+
+    map.addSource("geojson-data", {
         type: "geojson",
         data,
+    });
+
+    if (!map.getLayer("highlight-layer")) {
+      map.addLayer({
+        id: "highlight-layer",
+        type: "fill",
+        source: "geojson-data",
+        paint: {
+          "fill-color": "#FF0000",
+        },
+        filter: ["==", "col_id", ""],
       });
     }
+    
 
     if (!map.getLayer("geojson-layer")) {
       map.addLayer({
@@ -138,23 +159,12 @@ export function ColumnsMap(columns) {
         map.setFilter("highlight-layer", ["==", "col_id", ""]);
       });
     }
-
-    if (!map.getLayer("highlight-layer")) {
-      map.addLayer({
-        id: "highlight-layer",
-        type: "line",
-        source: "geojson-data",
-        paint: {
-          "line-color": "#FF0000",
-          "line-width": 3,
-        },
-        filter: ["==", "col_id", ""],
-      });
-    }
   };
 
-  return h("div.map-container",
-    h(MapAreaContainer, { className: "map-area-container" },
+  return h("div.map-container", 
+    h(MapAreaContainer, { 
+        className: "map-area-container",
+    },
       h(MapView, {
         style: "mapbox://styles/mapbox/dark-v10",
         mapboxToken: SETTINGS.mapboxAccessToken,

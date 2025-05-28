@@ -20,7 +20,7 @@ import { navigate } from "vike/client/router";
 import { useMapRef } from "@macrostrat/mapbox-react";
 import { ColumnMap } from "../index";
 import { useAPIResult } from "@macrostrat/ui-components";
-import { Loading } from "../index";
+import { Loading, ColumnsMap } from "../index";
 
 export function Page(props) {
   return h(ColumnListPage, props);
@@ -30,11 +30,6 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const { columnGroups } = useData();
   // const columnData = useAPIResult(SETTINGS.apiV2Prefix + "/columns&all");
   const [columnInput, setColumnInput] = useState("");
-  const [mapInstance, setMapInstance] = useState<mapboxgl.Map | null>(null);
-  const [selectedUnitID, setSelectedUnitID] = useState<number>(null);
-
-  console.log("selected", selectedUnitID)
-
 
 const filteredGroups = columnGroups.filter((group) => {
     // Filter the columns of the group based on the input
@@ -65,22 +60,9 @@ const filteredGroups = columnGroups.filter((group) => {
     setColumnInput(event.target.value.toLowerCase());
   };
 
-  const onSelectColumn = useCallback(
-    (col_id: number) => {
-      // do nothing
-      // We could probably find a more elegant way to do this
-      console.log("we selected", col_id)
-      setSelectedUnitID(null);
-      navigate(linkPrefix + `columns/${col_id}`, {
-        overwriteLastHistoryEntry: true,
-      });
-    },
-    [setSelectedUnitID]
-  );
-
   if(!columnData) return h(Loading);
 
-  const columnFeatures = columnData?.success?.data.features
+  const columnFeatures = columnData?.success?.data;
   
   return h("div.column-list-page", [
     h(AssistantLinks, [
@@ -89,14 +71,7 @@ const filteredGroups = columnGroups.filter((group) => {
     ]),
     h(ContentPage, [
       h(PageHeader, { title }),
-      h.if(columnFeatures)(ColumnMap, {
-        className: "column-map",
-        inProcess: true,
-        projectID: null,
-        selectedColumn: null,
-        onSelectColumn,
-        columns: columnFeatures,
-      }),
+      h.if(columnFeatures)(ColumnsMap, { columns: columnFeatures}),
       h(Card, { className: "search-bar" }, [
         h(Icon, { icon: "search" }),
         h("input", {

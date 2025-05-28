@@ -5,5 +5,5 @@ import { useAPIResult } from "@macrostrat/ui-components";
 
 export function Page() {
     const columns = useAPIResult(SETTINGS.apiV2Prefix + "/columns?all&response=long&format=geojson")?.success.data;
-    return ColumnsMap(columns);
+    return ColumnsMap({columns});
 }
