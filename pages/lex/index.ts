@@ -10,6 +10,8 @@ import { asChromaColor } from "@macrostrat/color-utils";
 import { DarkModeButton } from "@macrostrat/ui-components";
 import { PieChart, Pie, Cell, ResponsiveContainer, Label } from 'recharts';
 import { Loading, ColumnsMap } from "../index";
+import { Parenthetical } from "@macrostrat/data-components";
+import { Duration } from "@macrostrat/column-views";
 
 export function titleCase(str) {
   if (!str) return str;
@@ -70,9 +72,11 @@ export function IndividualPage(id, type, header) {
                 h(Divider, { className: 'divider' }),
                 h('div.interval', b_int_name.toLocaleString() + " - " + t_int_name),
                 h.if(b_age && t_age)(Divider, { className: 'divider' }),
-                h.if(b_age && t_age)('div.int-age', b_age + " - " + t_age + " Ma"),
+                h.if(b_age && t_age)('div.age-range', [
+                  h('div.int-age', b_age + " - " + t_age + " Ma"),
+                  // h(Parenthetical, { className: "range"}, h(Duration, { value: b_age - t_age })),
+                ]),
                 h(Divider, { className: 'divider' }),
-
                 h('div.area', [
                   h('p', area.toLocaleString() + " km"),
                   h('sup', "2"),

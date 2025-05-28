@@ -117,7 +117,8 @@ export function ColumnsMap({columns}) {
         type: "fill",
         source: "geojson-data",
         paint: {
-          "fill-color": "#FF0000",
+          "fill-color": "#FFFFFF",
+          "fill-opacity": 0.5,
         },
         filter: ["==", "col_id", ""],
       });
@@ -131,7 +132,7 @@ export function ColumnsMap({columns}) {
         source: "geojson-data",
         paint: {
           "fill-color": "#FFFFFF",
-          "fill-opacity": 0.5,
+          "fill-opacity": 0.2,
         },
       });
 
@@ -164,7 +165,7 @@ export function ColumnsMap({columns}) {
         className: "map-area-container",
     },
       h(MapView, {
-        style: "mapbox://styles/mapbox/dark-v10",
+        style: "mapbox://styles/jczaplewski/cl5uoqzzq003614o6url9ou9z?optimize=true",
         mapboxToken: SETTINGS.mapboxAccessToken,
         mapPosition,
         onMapLoaded: handleMapLoaded,
