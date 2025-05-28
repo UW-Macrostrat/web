@@ -7,7 +7,7 @@ import { ContentPage } from "~/layouts";
 import { usePageContext } from 'vike-react/usePageContext';
 import { ColumnMap, BlankImage } from "../index";
 import { navigate } from "vike/client/router";
-import { useState, useCallback } from "react";
+import { useState, useCallback, act } from "react";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { DarkModeButton } from "@macrostrat/ui-components";
 import { PieChart, Pie, Cell, ResponsiveContainer, Label } from 'recharts';
@@ -33,6 +33,7 @@ export function IndividualPage(id, type, header) {
 
     const siftLink = header === "intervals" ? "interval" : header === "environments" ? "environment" : header === "lithologies" ? "lithology" : "economic";
 
+    console.log("activeIndex", activeIndex);
 
     // data for charts
     const liths = summarizeAttributes(colData?.features, 'lith')
@@ -107,18 +108,18 @@ export function IndividualPage(id, type, header) {
         h('div.charts', [
             h.if(liths?.length)('div.chart', [
                 h('h3', "Lithologies"),
-                Chart(liths, "Lithologies"),
-                h('div.legend', liths?.map((lith) => ChartLegend(lith, "lithology")))
+                Chart(liths, "Lithologies", activeIndex, setActiveIndex),
+                h('div.legend', liths?.map((lith) => ChartLegend(lith, "lithology", activeIndex)))
             ]),
             h.if(econs?.length)('div.chart', [
                 h('h3', "Economics"),
-                Chart(econs, "Economics"),
-                h('div.legend', econs?.map((econ) => ChartLegend(econ, "economics")))
+                Chart(econs, "Economics", activeIndex, setActiveIndex),
+                h('div.legend', econs?.map((econ) => ChartLegend(econ, "economics", activeIndex)))
             ]),
             h.if(environs?.length)('div.chart', [
                 h('h3', "Environments"),
-                Chart(environs, "Environments"),
-                h('div.legend', environs?.map((environ) => ChartLegend(environ, "environments")))
+                Chart(environs, "Environments", activeIndex, setActiveIndex),
+                h('div.legend', environs?.map((environ) => ChartLegend(environ, "environments", activeIndex)))
             ]),
         ]),
 
@@ -208,11 +209,15 @@ function Taxa(record) {
     ])
 }
 
-function ChartLegend(data, route) {
-    return h('div.legend-item', [
-        h('div.box', { style: { "background-color": data.color}}), 
-        h('a', { href: "/lex/" + route+ "/" + data.id}, data.label)
-    ]);
+function ChartLegend(data, route, activeIndex) {
+  const hovered = activeIndex?.label === data.label;
+
+  if(hovered) console.log(data.label)
+
+  return h('div.legend-item', [
+    h('div.box', { style: { "background-color": data.color}}), 
+    h('a', { href: "/lex/" + route + "/" + data.id, style: { "font-weight": hovered ? "600" : "300" } }, data.label)
+  ]);
 }
 
 export function summarizeAttributes(data, type) {
@@ -598,7 +603,7 @@ function parseAttributes(type, data) {
     return parsed;
 }
 
-function Chart(data, label) {
+function Chart(data, label, activeIndex, setActiveIndex) {
   return h(ResponsiveContainer, { width: "100%", height: 300 }, 
     h(PieChart, {className: 'lithology-chart' }, 
     h(Pie, {
@@ -613,14 +618,31 @@ function Chart(data, label) {
       },
       data?.map((entry, index) => (
         h(Cell, {
-          key: `cell-${index}`,
-          fill: entry.color,
-          stroke: "#fff", // activeIndex === index ? '#000000' : '#ffffff', // Black on hover
-          strokeWidth: 2,
-          // onMouseEnter: () => setActiveIndex(index),
-          // onMouseLeave: () => setActiveIndex(null),
-        })
-      )),
+            key: `cell-${index}`,
+            fill: entry.color,
+            stroke:
+              activeIndex?.index === index &&
+              activeIndex.label === entry.label
+                ? '#fff'
+                : '#000',
+            strokeWidth: 2,
+            onMouseEnter: () => {
+              if (
+                !activeIndex ||
+                activeIndex.index !== index ||
+                activeIndex.label !== entry.label
+              ) {
+                setActiveIndex({ index, label: entry.label });
+              }
+            },
+            onMouseLeave: () => {
+              if (activeIndex) {
+                setActiveIndex(null);
+              }
+            },
+          })
+        )
+      )
     ),
   )
 )
