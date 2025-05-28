@@ -2,6 +2,7 @@ import { buildPageIndex } from "@macrostrat-web/text-toolchain";
 import { renderToString } from "react-dom/server";
 import { PageContext } from "vike/types";
 import h from "@macrostrat/hyper";
+
 const modules = import.meta.glob("../../../content/**/*.md");
 import { join } from "path";
 import { dirname } from "path";
@@ -12,7 +13,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const contentDirName = "../../../content";
 const contentDir = join(__dirname, contentDirName);
 
-const [pageIndex, permalinkIndex] = buildPageIndex(contentDir, "/dev/docs");
+const [pageIndex, permalinkIndex] = buildPageIndex(contentDir, "/docs");
 
 type OurPageContext = {
   mdxContent: string | null;
@@ -64,5 +65,3 @@ export async function onBeforeRender(
     },
   };
 }
-
-export const passToClient = ["mdxContentFile", "mdxContent", "title"];

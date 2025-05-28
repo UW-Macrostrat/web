@@ -12,6 +12,7 @@ export function Page() {
       h(LinkItem, { to: "carto-v1" }, "Carto (v1)"),
       h(LinkItem, { to: "carto-slim-v1" }, "Carto (slim, v1)"),
       h(LinkItem, { to: "carto-raster" }, "Carto (image)"),
+      h(LinkItem, { to: "carto-raster-v1" }, "Carto (image, v1)"),
       h(LinkItem, { to: "emphasized" }, "Carto (image, emphasized)"),
       h(LinkItem, { to: "all-maps" }, "All maps"),
     ]),
