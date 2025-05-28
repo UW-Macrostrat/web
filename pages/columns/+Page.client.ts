@@ -1,26 +1,13 @@
 import { ContentPage } from "~/layouts";
 import { PageHeader, Link, AssistantLinks, DevLinkButton } from "~/components";
-import { Divider, AnchorButton, Tag, Card, Collapse, Icon } from "@blueprintjs/core";
+import { Divider, AnchorButton, Card, Icon } from "@blueprintjs/core";
 import { useData } from "vike-react/useData";
 import { useState } from "react";
 import "./main.scss";
 import h from "@macrostrat/hyper";
-import {
-  MapAreaContainer,
-  MapMarker,
-  MapView,
-  buildInspectorStyle,
-} from "@macrostrat/map-interface";
 import { SETTINGS } from "@macrostrat-web/settings";
-import mapboxgl, { LngLat } from "mapbox-gl";
-import { MapPosition } from "@macrostrat/mapbox-utils";
-import { useEffect, useCallback } from "react";
-import { onDemand } from "~/_utils";
-import { navigate } from "vike/client/router";
-import { useMapRef } from "@macrostrat/mapbox-react";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { Loading, ColumnsMap } from "../index";
-import { cp } from "fs";
 
 export function Page(props) {
   return h(ColumnListPage, props);
