@@ -1,17 +1,15 @@
 import h from "./main.module.scss";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
-import { PageHeader, Link, AssistantLinks, DevLinkButton, PageBreadcrumbs } from "~/components";
+import { PageHeader, Link, PageBreadcrumbs } from "~/components";
 import { Card, Icon, Popover, Divider, RangeSlider } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
-import { usePageContext } from 'vike-react/usePageContext';
 import { ColumnMap, BlankImage } from "../index";
-import { navigate } from "vike/client/router";
 import { useState, useCallback, act } from "react";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { DarkModeButton } from "@macrostrat/ui-components";
 import { PieChart, Pie, Cell, ResponsiveContainer, Label } from 'recharts';
-import { Loading } from "../index";
+import { Loading, ColumnsMap } from "../index";
 
 export function titleCase(str) {
   return str
@@ -39,30 +37,12 @@ export function IndividualPage(id, type, header) {
     const econs = summarizeAttributes(colData?.features, 'econ')
     const summary = summarize(colData?.features);
 
-    /*
-    const onSelectColumn = useCallback(
-        (col_id: number) => {
-        // do nothing
-        // We could probably find a more elegant way to do this
-        setSelectedUnitID(null);
-        navigate(`/columns/${col_id}`, {
-            overwriteLastHistoryEntry: true,
-        });
-        },
-        [setSelectedUnitID]
-    );
-    */
-
     const chromaColor = intRes?.color ? asChromaColor(intRes.color) : null;
     const luminance = .9;
 
-    const onSelectColumn = (e) => {
-        console.log("selected", e)
-    }
-
     if (!intRes || !fossilRes) return h(Loading);
 
-    const { name, color, abbrev, b_age, int_id, t_age, timescales, strat_name, concept_id } = intRes;
+    const { name, abbrev, b_age, t_age, timescales, strat_name, concept_id } = intRes;
     const { t_units, t_sections, t_int_name, pbdb_collections, b_int_name, max_thick, col_area } = summary
     const area = parseInt(col_area.toString().split('.')[0]);
 
@@ -101,7 +81,7 @@ export function IndividualPage(id, type, header) {
                 h(Divider, { className: 'divider' }),
                 h('div.collections', pbdb_collections.toLocaleString() + ' collections'),
             ]),
-            colData ? h(Map, { id: int_id, onSelectColumn, data: colData }) : h(Loading),
+            colData ? h(ColumnsMap, { columns: colData }) : h(Loading),
         ]),
         h('div.charts', [
             h.if(liths?.length)('div.chart', Chart(liths, "Lithologies", "lithology", activeIndex, setActiveIndex)),
