@@ -20,6 +20,7 @@ import { navigate } from "vike/client/router";
 import { useMapRef } from "@macrostrat/mapbox-react";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { Loading, ColumnsMap } from "../index";
+import { cp } from "fs";
 
 export function Page(props) {
   return h(ColumnListPage, props);
@@ -29,8 +30,9 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const { columnGroups } = useData();
   // const columnData = useAPIResult(SETTINGS.apiV2Prefix + "/columns&all");
   const [columnInput, setColumnInput] = useState("");
+  const shouldFilter = columnInput.length == 0 || columnInput.length >= 3;
 
-const filteredGroups = columnGroups.filter((group) => {
+const filteredGroups = shouldFilter ? columnGroups.filter((group) => {
     // Filter the columns of the group based on the input
     const filteredColumns = group.columns.filter((col) => {
       const name = col.col_name.toLowerCase();
@@ -44,7 +46,7 @@ const filteredGroups = columnGroups.filter((group) => {
     }
 
     return false; // Exclude this group if no matching columns or group name
-  });
+  }) : columnGroups;
 
   const colArr = filteredGroups
     .flatMap(item => 
@@ -53,8 +55,10 @@ const filteredGroups = columnGroups.filter((group) => {
         .map(col => col.col_id)
     );
 
-  const columnData = useAPIResult(SETTINGS.apiV2Prefix + "/columns?col_id=" + colArr.join(',') + "&response=long&format=geojson");    
+  const cols = shouldFilter ? "col_id=" + colArr.join(',') : "all=1";
 
+  const columnData = useAPIResult(SETTINGS.apiV2Prefix + "/columns?" + cols + "&response=long&format=geojson");    
+  
   const handleInputChange = (event) => {
     setColumnInput(event.target.value.toLowerCase());
   };
@@ -62,6 +66,8 @@ const filteredGroups = columnGroups.filter((group) => {
   if(!columnData) return h(Loading);
 
   const columnFeatures = columnData?.success?.data;
+
+  console.log(filteredGroups)
   
   return h("div.column-list-page", [
     h(AssistantLinks, [
@@ -81,20 +87,20 @@ const filteredGroups = columnGroups.filter((group) => {
       ]),
       h("div.column-groups",
         filteredGroups.map((d) =>
-          h(ColumnGroup, { data: d, key: d.id, linkPrefix, columnInput })
+          h(ColumnGroup, { data: d, key: d.id, linkPrefix, columnInput, shouldFilter })
         )
       ),
     ]),
   ]);
 }
 
-function ColumnGroup({ data, linkPrefix, columnInput }) {
+function ColumnGroup({ data, linkPrefix, columnInput, shouldFilter }) {
   const [isOpen, setIsOpen] = useState(false);
-  const filteredColumns = data.columns.filter((col) => {
+  const filteredColumns = shouldFilter ? data.columns.filter((col) => {
     const name = col.col_name.toLowerCase();
     const input = columnInput.toLowerCase();
     return name.includes(input);
-  });
+  }) : data.columns;
 
   if (filteredColumns?.length === 0) return null;
 
