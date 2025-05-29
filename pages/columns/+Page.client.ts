@@ -15,6 +15,7 @@ export function Page(props) {
 
 function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const { columnGroups } = useData();
+  let columnGroupsNew;
   const columnRes = useAPIResult(SETTINGS.apiV2Prefix + "/columns?all")?.success?.data;
   const [columnInput, setColumnInput] = useState("");
   const shouldFilter = columnInput.length == 0 || columnInput.length >= 3;
@@ -27,8 +28,8 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
 
       if (!grouped[key]) {
         grouped[key] = {
-          group_name: item.col_group,
-          group_id: item.col_group_id,
+          name: item.col_group,
+          id: item.col_group_id,
           columns: []
         };
       }
@@ -36,11 +37,12 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
       grouped[key].columns.push(item);
     }
 
-    const result = Object.values(grouped);
-    console.log("Grouped columns:", result);
+    columnGroupsNew = Object.values(grouped);
+    console.log("Old:", columnGroups);
+    console.log("New:", columnGroupsNew);
   }
 
-  const filteredGroups = shouldFilter ? columnGroups.filter((group) => {
+  const filteredGroups = shouldFilter ? columnGroups?.filter((group) => {
     const filteredColumns = group.columns.filter((col) => {
       const name = col.col_name.toLowerCase();
       const input = columnInput.toLowerCase();
@@ -55,13 +57,13 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   }) : columnGroups;
 
   const colArr = filteredGroups
-    .flatMap(item => 
+    ?.flatMap(item => 
       item.columns
         .filter(col => col.col_name.toLowerCase().includes(columnInput.toLowerCase()))
         .map(col => col.col_id)
     );
 
-  const cols = shouldFilter ? "col_id=" + colArr.join(',') : "all=1";
+  const cols = shouldFilter ? "col_id=" + colArr?.join(',') : "all=1";
 
   const columnData = useAPIResult(SETTINGS.apiV2Prefix + "/columns?" + cols + "&response=long&format=geojson");    
   
@@ -72,6 +74,8 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   if(!columnData || !columnRes) return h(Loading);
 
   const columnFeatures = columnData?.success?.data;
+
+  console.log("Column Features:", columnFeatures);
   
   return h("div.column-list-page", [
     h(AssistantLinks, [
@@ -137,7 +141,7 @@ function ColumnItem({ data, linkPrefix = "/" }) {
   return h("div.column-row", [
     h("span.col-id", "#" + col_id),
     h(Link, { className: 'col-link', href }, [col_name]),
-    h("span", { className: status === "active" ? 'active' : status === 'obsolete' ? "obsolete" : 'inprocess'},  UpperCase(status)),
+    h("span", { className: status === "active" ? 'active' : status === 'obsolete' ? "obsolete" : 'inprocess'},  status ? UpperCase(status) : null),
   ]);
 }
 
