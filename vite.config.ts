@@ -130,6 +130,7 @@ export default defineConfig({
       "@macrostrat/map-interface",
       "@macrostrat/feedback-components",
       "@macrostrat/timescale",
+      "@macrostrat/mapbox-react",
     ],
     resolve: {
       conditions: ["source"],
