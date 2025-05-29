@@ -15,24 +15,43 @@ export function Page(props) {
 
 function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const { columnGroups } = useData();
-  // const columnData = useAPIResult(SETTINGS.apiV2Prefix + "/columns&all");
+  const columnRes = useAPIResult(SETTINGS.apiV2Prefix + "/columns?all")?.success?.data;
   const [columnInput, setColumnInput] = useState("");
   const shouldFilter = columnInput.length == 0 || columnInput.length >= 3;
 
-const filteredGroups = shouldFilter ? columnGroups.filter((group) => {
-    // Filter the columns of the group based on the input
+  if(columnRes) {
+    const grouped = {};
+
+    for (const item of columnRes) {
+      const key = item.col_group_id;
+
+      if (!grouped[key]) {
+        grouped[key] = {
+          group_name: item.col_group,
+          group_id: item.col_group_id,
+          columns: []
+        };
+      }
+
+      grouped[key].columns.push(item);
+    }
+
+    const result = Object.values(grouped);
+    console.log("Grouped columns:", result);
+  }
+
+  const filteredGroups = shouldFilter ? columnGroups.filter((group) => {
     const filteredColumns = group.columns.filter((col) => {
       const name = col.col_name.toLowerCase();
       const input = columnInput.toLowerCase();
       return name.includes(input);
     });
 
-    // If any columns match the input, include the group (with the filtered columns)
     if (filteredColumns.length > 0 || group.name.toLowerCase().includes(columnInput.toLowerCase())) {
-      return { ...group, columns: filteredColumns }; // Return the group with filtered columns
+      return { ...group, columns: filteredColumns }; 
     }
 
-    return false; // Exclude this group if no matching columns or group name
+    return false; 
   }) : columnGroups;
 
   const colArr = filteredGroups
@@ -50,11 +69,9 @@ const filteredGroups = shouldFilter ? columnGroups.filter((group) => {
     setColumnInput(event.target.value.toLowerCase());
   };
 
-  if(!columnData) return h(Loading);
+  if(!columnData || !columnRes) return h(Loading);
 
   const columnFeatures = columnData?.success?.data;
-
-  console.log(filteredGroups)
   
   return h("div.column-list-page", [
     h(AssistantLinks, [
