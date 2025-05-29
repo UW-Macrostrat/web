@@ -1,3 +1,0 @@
-[submodule "bundledDeps/cesium-martini"]
-	path = packages/cesium-martini
-	url = https://github.com/davenquinn/cesium-martini.git
