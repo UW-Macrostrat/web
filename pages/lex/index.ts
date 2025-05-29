@@ -12,6 +12,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Label } from 'recharts';
 import { Loading, ColumnsMap } from "../index";
 import { Parenthetical } from "@macrostrat/data-components";
 import { Duration } from "@macrostrat/column-views";
+import { useDarkMode } from "@macrostrat/ui-components";
 
 export function titleCase(str) {
   if (!str) return str;
@@ -94,7 +95,7 @@ export function IndividualPage(id, type, header) {
             h.if(environs?.length)('div.chart', Chart(environs, "Environments", "environments", activeIndex, setActiveIndex)),
         ]),
 
-        h(PrevalentTaxa, { data: taxaData}),
+        h.if(taxaData)(PrevalentTaxa, { data: taxaData}),
         h.if(timescales?.[0]?.name)('div.int-timescales', [
             h('h3', "Timescales"),
             h('ul', timescales?.map((t) => h('li', h(Link, { href: "/lex/timescales/" + t.timescale_id}, titleCase(t.name))))),
@@ -136,7 +137,7 @@ function References({ res1, res2 }) {
     const refArray2 = Object.values(res2.refs);
     const refs = [...refArray1, ...refArray2];
 
-    return h('div.int-references', [
+    return h.if(refs?.length != 0)('div.int-references', [
         h('h3', "Primary Sources"),
         h(Divider),
         h('ol.ref-list', refs.map((r) => h('li.ref-item', r))),
@@ -160,9 +161,10 @@ function PrevalentTaxa({data}) {
 
 function Taxa(record) {
     const imgUrl = "https://paleobiodb.org/data1.2/taxa/thumb.png?id=";
+    const isDarkMode = useDarkMode().isEnabled;
 
     return h('div.taxa', [
-        h(BlankImage, { src: imgUrl + record.img, className: 'taxa-image' }),
+        h(BlankImage, { src: imgUrl + record.img, className: 'taxa-image' + (isDarkMode ? ' img-dark-mode' : '') }),
         h('p.name', record.nam)
     ])
 }

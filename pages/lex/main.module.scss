@@ -101,10 +101,6 @@ ul, h3 {
         flex-direction: column;
         align-items: center;
         gap: 10px;
-
-        .taxa-image {
-            filter: invert(1);
-        }
     }
 }
 
@@ -162,4 +158,8 @@ ul, h3 {
 
 .range {
     color: var(--text-emphasized-color) !important;
+}
+
+.img-dark-mode {
+    filter: invert(1);
 }
