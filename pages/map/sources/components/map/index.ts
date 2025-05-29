@@ -36,7 +36,7 @@ function IndexMapContainer() {
       mapRef.current = mapObj;
     });
     return () => {
-      mapRef.current.remove();
+      mapRef.current?.remove();
     };
   }, [mapContainerRef]);
 
