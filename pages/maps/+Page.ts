@@ -2,18 +2,24 @@ import h from "./main.module.scss";
 import { AnchorButton, Icon, Card } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import { PageHeader, DevLinkButton, AssistantLinks, LinkCard } from "~/components";
-import { useData } from "vike-react/useData";
 import { useState } from "react";
+import { useAPIResult } from "@macrostrat/ui-components";
+import { SETTINGS } from "@macrostrat-web/settings";
 
 export function Page() {
-  const { sources } = useData();
   const [inputValue, setInputValue] = useState("");
+  const sources = useAPIResult(SETTINGS.apiV2Prefix + "/defs/sources?all=true")?.success?.data;
+
+  if (sources == null) {
+    return h("div.loading", "Loading sources...");
+  }
+
+  console.log("sources", sources[0]);
 
   const filteredSources = sources.filter((source) => {
     const name = source.name.toLowerCase();
-    const slug = source.slug.toLowerCase();
     const input = inputValue.toLowerCase();
-    return name.includes(input) || slug.includes(input);
+    return name.includes(input);
   });
 
   console.log("inputValue", inputValue);
@@ -52,14 +58,16 @@ export function Page() {
 }
 
 function SourceItem({ source }) {
-  const { source_id, name } = source;
+  const { source_id, name, ref_title, url, scale } = source;
   const href = `/maps/${source_id}`;
 
-  return h(LinkCard, {
-    href, 
-    title: h('h1', name),
-    className: 'item'
-  }, [
-    h.if(source.raster_url != null)([" ", h("span.raster", "Raster")]),
+  return h(LinkCard, { 
+    href,
+    title: h('div.title', [
+      h('h1', name),
+      h('div', { className: "size " + scale }, scale)
+    ]),
+   },  [
+    h('a', { href: url, target: "_blank" }, ref_title),
   ]);
 }

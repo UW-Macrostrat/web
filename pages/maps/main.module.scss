@@ -110,3 +110,14 @@ h1 {
     }
   }
 }
+
+.title {
+  display: flex;
+  justify-content: space-between;
+
+  .size {
+    color: var(--text-emphasized-color);
+    padding: 0.2em 0.5em;
+    border-radius: .2em;
+  }
+}
