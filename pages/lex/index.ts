@@ -105,7 +105,7 @@ export function IndividualPage(id, type, header) {
 
         h.if(taxaData)(PrevalentTaxa, { data: taxaData}),
         h.if(header === "strat_names")(StratNameHierarchy, { id }),
-        h.if(header === "strat_name_concepts")(ConceptHierarchy, { id}),
+        // h.if(header === "strat_name_concepts")(ConceptHierarchy, { id}),
         h.if(timescales?.[0]?.name)('div.int-timescales', [
             h('h3', "Timescales"),
             h('ul', timescales?.map((t) => h('li', h(Link, { href: "/lex/timescales/" + t.timescale_id}, titleCase(t.name))))),
@@ -163,15 +163,19 @@ function ConceptHierarchy({ id }) {
   const data = useAPIResult(url)?.success?.data;
   if (!data) return h(Loading);
 
+  console.log("Concept Hierarchy Data:", data);
+
   return h('div.concept-hierarchy', [
     data.map((item) => {
-      const { strat_name_id, strat_name, strat_name_concept_id } = item;
+      const { t_units, strat_name, rank } = item;
       return h(LinkCard, {
-
+        title: h('div.concept-item', [
+          h('p', strat_name + " " + (rank ? "(" + rank + ")" : "")),
+          h('p', t_units),
+        ]),
       });
     }),
   ])
-  console.log(data);
 }
 
 function conceptInfo({concept_id}) {
