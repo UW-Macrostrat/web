@@ -10,9 +10,10 @@ import { asChromaColor } from "@macrostrat/color-utils";
 import { DarkModeButton } from "@macrostrat/ui-components";
 import { PieChart, Pie, Cell, ResponsiveContainer, Label } from 'recharts';
 import { Loading, ColumnsMap } from "../index";
-import { Parenthetical } from "@macrostrat/data-components";
+import { Parenthetical, Hierarchy } from "@macrostrat/data-components";
 import { Duration } from "@macrostrat/column-views";
 import { useDarkMode } from "@macrostrat/ui-components";
+import { StratNameHierarchy } from "./StratNameHierarchy";
 
 export function titleCase(str) {
   if (!str) return str;
@@ -96,6 +97,7 @@ export function IndividualPage(id, type, header) {
         ]),
 
         h.if(taxaData)(PrevalentTaxa, { data: taxaData}),
+        h.if(header === "strat_name_concepts" || header === "strat_names")(StratNameHierarchy, { strat_name_id: id }),
         h.if(timescales?.[0]?.name)('div.int-timescales', [
             h('h3', "Timescales"),
             h('ul', timescales?.map((t) => h('li', h(Link, { href: "/lex/timescales/" + t.timescale_id}, titleCase(t.name))))),
@@ -108,22 +110,6 @@ export function IndividualPage(id, type, header) {
         h(References, { res1: fossilResult, res2: colDataResult}),
         h(DarkModeButton)
     ]);
-}
-
-function getContrastTextColor(bgColor) {
-  // Remove '#' if present
-  const color = bgColor.replace('#', '');
-
-  // Parse r, g, b
-  const r = parseInt(color.substr(0, 2), 16);
-  const g = parseInt(color.substr(2, 2), 16);
-  const b = parseInt(color.substr(4, 2), 16);
-
-  // Calculate luminance
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-
-  // Return black or white depending on luminance
-  return luminance > 0.6 ? '#000000' : '#FFFFFF';
 }
 
 function UpperCase(str) {
