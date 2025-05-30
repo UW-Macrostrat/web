@@ -13,7 +13,7 @@ export function PostgrestPage({ table, order_col, filter_col, pageSize, Item }) 
     const [data, setData] = useState([]);
     const result = useAPIResult(`https://dev.macrostrat.org/api/pg/${table}?order=${order_col}.asc&${filter_col}=like.*${input}*&limit=${pageSize}&${order_col}=gt.` + lastID);
 
-    console.log(result)
+    console.log("result", result)
 
     useEffect(() => {
         if (result) {
