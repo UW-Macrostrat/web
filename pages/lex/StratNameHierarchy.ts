@@ -31,8 +31,6 @@ var rankMapOrder = { SGp: 1, Gp: 2, SubGp: 3, Fm: 4, Mbr: 5, Bed: 6 };
 function fetchStratNames({id}) {
   // function to fetch stratnames and orgnize hierarchy
   const data = useAPIResult(url + "?rule=all&strat_name_id=" + id)?.success?.data;
-  console.log(url + "?rule=all&strat_name_id=" + id);
-  console.log("StratNameHierarchy data", data);
 
   if (data == null) return null;
 

@@ -1,4 +1,4 @@
-import h from "./main.module.scss";
+import h from "./main.module.sass";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
 import { PageHeader, Link, PageBreadcrumbs } from "~/components";
@@ -66,7 +66,8 @@ export function IndividualPage(id, type, header) {
                 h('a', { href: "/sift/" + siftLink + "/" + id, target: "_blank" }, "View in Sift")
             ]),
         ]),
-        h('div.table', [
+        h.if(concept_id)(conceptInfo, { concept_id } ),
+        h.if(colData?.features.length)('div.table', [
             h('div.table-content', [
                 h('div.packages', t_sections.toLocaleString() + " packages"),
                 h(Divider, { className: 'divider' }),
@@ -102,11 +103,6 @@ export function IndividualPage(id, type, header) {
             h('h3', "Timescales"),
             h('ul', timescales?.map((t) => h('li', h(Link, { href: "/lex/timescales/" + t.timescale_id}, titleCase(t.name))))),
         ]),
-        h.if(concept_id)('h1', 
-          h('a', { href: "/lex/strat-name-concepts/" + concept_id, className: 'concept-link' }, 
-            "Parent Stratigraphic Concept"
-          )
-        ),
         h(References, { res1: fossilResult, res2: colDataResult}),
         h(DarkModeButton)
     ]);
@@ -153,6 +149,39 @@ function Taxa(record) {
         h(BlankImage, { src: imgUrl + record.img, className: 'taxa-image' + (isDarkMode ? ' img-dark-mode' : '') }),
         h('p.name', record.nam)
     ])
+}
+
+function conceptInfo({concept_id}) {
+  const url = SETTINGS.apiV2Prefix + "/defs/strat_name_concepts?strat_name_concept_id=" + concept_id;
+  const data = useAPIResult(url)?.success?.data[0];
+
+  if (!data) return h(Loading);
+
+  const { author, name, province, geologic_age, other, usage_notes } = data;
+  
+  return h('div.concept-info', [
+    h('h3', "Stratigraphic Concept"),
+    h('div.concept-name', [
+      h("a.title", name),
+      h('a.concept-ref', { href: url, target: "_blank" }, "via " + author)
+    ]),
+    h.if(province)('div.province', [
+      h('span.title', "Province: "),
+      h('span.province-text', province)
+    ]),
+    h.if(geologic_age)('div.geologic-age', [
+      h('span.title', "Geologic Age: "),
+      h('span.geologic-age-text', geologic_age)
+    ]),
+    h.if(other)('div.other', [
+      h('span.title', "Other: "),
+      h('span.other-text', other)
+    ]),
+    h.if(usage_notes)('div.usage-notes', [
+        h('span.title', "Usage: "),
+        h('span.usage-text', usage_notes)
+    ])
+  ])
 }
 
 export function summarizeAttributes(data, type) {
