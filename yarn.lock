@@ -2939,9 +2939,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@macrostrat/api-types@portal:../rockd/web-components/packages/api-types::locator=%40macrostrat%2Fweb%40workspace%3A.":
+"@macrostrat/api-types@portal:../web-components/packages/api-types::locator=%40macrostrat%2Fweb%40workspace%3A.":
   version: 0.0.0-use.local
-  resolution: "@macrostrat/api-types@portal:../rockd/web-components/packages/api-types::locator=%40macrostrat%2Fweb%40workspace%3A."
+  resolution: "@macrostrat/api-types@portal:../web-components/packages/api-types::locator=%40macrostrat%2Fweb%40workspace%3A."
   dependencies:
     "@types/geojson": "npm:^7946.0.16"
   languageName: node
@@ -2991,18 +2991,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/color-utils@portal:../rockd/web-components/packages/color-utils::locator=%40macrostrat%2Fweb%40workspace%3A.":
+"@macrostrat/color-utils@portal:../web-components/packages/color-utils::locator=%40macrostrat%2Fweb%40workspace%3A.":
   version: 0.0.0-use.local
-  resolution: "@macrostrat/color-utils@portal:../rockd/web-components/packages/color-utils::locator=%40macrostrat%2Fweb%40workspace%3A."
+  resolution: "@macrostrat/color-utils@portal:../web-components/packages/color-utils::locator=%40macrostrat%2Fweb%40workspace%3A."
   dependencies:
     "@types/chroma-js": "npm:^3.1.1"
     chroma-js: "npm:^3.0.0"
   languageName: node
   linkType: soft
 
-"@macrostrat/column-components@portal:../rockd/web-components/packages/column-components::locator=%40macrostrat%2Fweb%40workspace%3A.":
+"@macrostrat/column-components@portal:../web-components/packages/column-components::locator=%40macrostrat%2Fweb%40workspace%3A.":
   version: 0.0.0-use.local
-  resolution: "@macrostrat/column-components@portal:../rockd/web-components/packages/column-components::locator=%40macrostrat%2Fweb%40workspace%3A."
+  resolution: "@macrostrat/column-components@portal:../web-components/packages/column-components::locator=%40macrostrat%2Fweb%40workspace%3A."
   dependencies:
     "@blueprintjs/core": "npm:^5.0.0"
     "@macrostrat/hyper": "npm:^3.0.6"
@@ -3033,9 +3033,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@macrostrat/column-views@portal:../rockd/web-components/packages/column-views::locator=%40macrostrat%2Fweb%40workspace%3A.":
+"@macrostrat/column-views@portal:../web-components/packages/column-views::locator=%40macrostrat%2Fweb%40workspace%3A.":
   version: 0.0.0-use.local
-  resolution: "@macrostrat/column-views@portal:../rockd/web-components/packages/column-views::locator=%40macrostrat%2Fweb%40workspace%3A."
+  resolution: "@macrostrat/column-views@portal:../web-components/packages/column-views::locator=%40macrostrat%2Fweb%40workspace%3A."
   dependencies:
     "@macrostrat/api-types": "workspace:^"
     "@macrostrat/color-utils": "workspace:^"
@@ -3082,9 +3082,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@macrostrat/data-components@portal:../rockd/web-components/packages/data-components::locator=%40macrostrat%2Fweb%40workspace%3A.":
+"@macrostrat/data-components@portal:../web-components/packages/data-components::locator=%40macrostrat%2Fweb%40workspace%3A.":
   version: 0.0.0-use.local
-  resolution: "@macrostrat/data-components@portal:../rockd/web-components/packages/data-components::locator=%40macrostrat%2Fweb%40workspace%3A."
+  resolution: "@macrostrat/data-components@portal:../web-components/packages/data-components::locator=%40macrostrat%2Fweb%40workspace%3A."
   dependencies:
     "@macrostrat/color-utils": "workspace:^"
     "@macrostrat/hyper": "npm:^3.0.6"
@@ -3103,9 +3103,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@macrostrat/data-sheet@portal:../rockd/web-components/packages/data-sheet::locator=%40macrostrat%2Fweb%40workspace%3A.":
+"@macrostrat/data-sheet@portal:../web-components/packages/data-sheet::locator=%40macrostrat%2Fweb%40workspace%3A.":
   version: 0.0.0-use.local
-  resolution: "@macrostrat/data-sheet@portal:../rockd/web-components/packages/data-sheet::locator=%40macrostrat%2Fweb%40workspace%3A."
+  resolution: "@macrostrat/data-sheet@portal:../web-components/packages/data-sheet::locator=%40macrostrat%2Fweb%40workspace%3A."
   dependencies:
     "@blueprintjs/core": "npm:^5.10.2"
     "@blueprintjs/table": "npm:^5.1.4"
@@ -3124,9 +3124,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@macrostrat/feedback-components@portal:../rockd/web-components/packages/feedback-components::locator=%40macrostrat%2Fweb%40workspace%3A.":
+"@macrostrat/feedback-components@portal:../web-components/packages/feedback-components::locator=%40macrostrat%2Fweb%40workspace%3A.":
   version: 0.0.0-use.local
-  resolution: "@macrostrat/feedback-components@portal:../rockd/web-components/packages/feedback-components::locator=%40macrostrat%2Fweb%40workspace%3A."
+  resolution: "@macrostrat/feedback-components@portal:../web-components/packages/feedback-components::locator=%40macrostrat%2Fweb%40workspace%3A."
   dependencies:
     "@babel/preset-react": "npm:^7.18.6"
     "@blueprintjs/core": "npm:^5.10.2"
@@ -3147,9 +3147,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@macrostrat/form-components@portal:../rockd/web-components/packages/form-components::locator=%40macrostrat%2Fweb%40workspace%3A.":
+"@macrostrat/form-components@portal:../web-components/packages/form-components::locator=%40macrostrat%2Fweb%40workspace%3A.":
   version: 0.0.0-use.local
-  resolution: "@macrostrat/form-components@portal:../rockd/web-components/packages/form-components::locator=%40macrostrat%2Fweb%40workspace%3A."
+  resolution: "@macrostrat/form-components@portal:../web-components/packages/form-components::locator=%40macrostrat%2Fweb%40workspace%3A."
   dependencies:
     "@blueprintjs/core": "npm:^5.10.2"
     "@blueprintjs/icons": "npm:^5.9.0"
@@ -3183,9 +3183,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/map-interface@portal:../rockd/web-components/packages/map-interface::locator=%40macrostrat%2Fweb%40workspace%3A.":
+"@macrostrat/map-interface@portal:../web-components/packages/map-interface::locator=%40macrostrat%2Fweb%40workspace%3A.":
   version: 0.0.0-use.local
-  resolution: "@macrostrat/map-interface@portal:../rockd/web-components/packages/map-interface::locator=%40macrostrat%2Fweb%40workspace%3A."
+  resolution: "@macrostrat/map-interface@portal:../web-components/packages/map-interface::locator=%40macrostrat%2Fweb%40workspace%3A."
   dependencies:
     "@blueprintjs/core": "npm:^5.0.0"
     "@macrostrat/color-utils": "workspace:^"
@@ -3208,9 +3208,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@macrostrat/map-styles@portal:../rockd/web-components/packages/map-styles::locator=%40macrostrat%2Fweb%40workspace%3A.":
+"@macrostrat/map-styles@portal:../web-components/packages/map-styles::locator=%40macrostrat%2Fweb%40workspace%3A.":
   version: 0.0.0-use.local
-  resolution: "@macrostrat/map-styles@portal:../rockd/web-components/packages/map-styles::locator=%40macrostrat%2Fweb%40workspace%3A."
+  resolution: "@macrostrat/map-styles@portal:../web-components/packages/map-styles::locator=%40macrostrat%2Fweb%40workspace%3A."
   dependencies:
     "@macrostrat/color-utils": "workspace:*"
     axios: "npm:^1.7.9"
@@ -3218,9 +3218,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@macrostrat/mapbox-react@portal:../rockd/web-components/packages/mapbox-react::locator=%40macrostrat%2Fweb%40workspace%3A.":
+"@macrostrat/mapbox-react@portal:../web-components/packages/mapbox-react::locator=%40macrostrat%2Fweb%40workspace%3A.":
   version: 0.0.0-use.local
-  resolution: "@macrostrat/mapbox-react@portal:../rockd/web-components/packages/mapbox-react::locator=%40macrostrat%2Fweb%40workspace%3A."
+  resolution: "@macrostrat/mapbox-react@portal:../web-components/packages/mapbox-react::locator=%40macrostrat%2Fweb%40workspace%3A."
   dependencies:
     "@macrostrat/hyper": "npm:^3.0.6"
     "@macrostrat/map-styles": "workspace:^"
@@ -3241,9 +3241,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@macrostrat/mapbox-utils@portal:../rockd/web-components/packages/mapbox-utils::locator=%40macrostrat%2Fweb%40workspace%3A.":
+"@macrostrat/mapbox-utils@portal:../web-components/packages/mapbox-utils::locator=%40macrostrat%2Fweb%40workspace%3A.":
   version: 0.0.0-use.local
-  resolution: "@macrostrat/mapbox-utils@portal:../rockd/web-components/packages/mapbox-utils::locator=%40macrostrat%2Fweb%40workspace%3A."
+  resolution: "@macrostrat/mapbox-utils@portal:../web-components/packages/mapbox-utils::locator=%40macrostrat%2Fweb%40workspace%3A."
   dependencies:
     "@types/mapbox-gl": "npm:^2.7.5"
     axios: "npm:^1.7.9"
@@ -3260,15 +3260,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/stratigraphy-utils@portal:../rockd/web-components/packages/stratigraphy-utils::locator=%40macrostrat%2Fweb%40workspace%3A.":
+"@macrostrat/stratigraphy-utils@portal:../web-components/packages/stratigraphy-utils::locator=%40macrostrat%2Fweb%40workspace%3A.":
   version: 0.0.0-use.local
-  resolution: "@macrostrat/stratigraphy-utils@portal:../rockd/web-components/packages/stratigraphy-utils::locator=%40macrostrat%2Fweb%40workspace%3A."
+  resolution: "@macrostrat/stratigraphy-utils@portal:../web-components/packages/stratigraphy-utils::locator=%40macrostrat%2Fweb%40workspace%3A."
   languageName: node
   linkType: soft
 
-"@macrostrat/style-system@portal:../rockd/web-components/packages/style-system::locator=%40macrostrat%2Fweb%40workspace%3A.":
+"@macrostrat/style-system@portal:../web-components/packages/style-system::locator=%40macrostrat%2Fweb%40workspace%3A.":
   version: 0.0.0-use.local
-  resolution: "@macrostrat/style-system@portal:../rockd/web-components/packages/style-system::locator=%40macrostrat%2Fweb%40workspace%3A."
+  resolution: "@macrostrat/style-system@portal:../web-components/packages/style-system::locator=%40macrostrat%2Fweb%40workspace%3A."
   dependencies:
     "@blueprintjs/colors": "npm:^5.1.1"
     "@blueprintjs/core": "npm:^5.10.2"
@@ -3278,9 +3278,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@macrostrat/svg-map-components@portal:../rockd/web-components/packages/svg-map-components::locator=%40macrostrat%2Fweb%40workspace%3A.":
+"@macrostrat/svg-map-components@portal:../web-components/packages/svg-map-components::locator=%40macrostrat%2Fweb%40workspace%3A.":
   version: 0.0.0-use.local
-  resolution: "@macrostrat/svg-map-components@portal:../rockd/web-components/packages/svg-map-components::locator=%40macrostrat%2Fweb%40workspace%3A."
+  resolution: "@macrostrat/svg-map-components@portal:../web-components/packages/svg-map-components::locator=%40macrostrat%2Fweb%40workspace%3A."
   dependencies:
     "@macrostrat/hyper": "npm:^3.0.6"
     "@macrostrat/ui-components": "workspace:^"
@@ -3306,9 +3306,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@macrostrat/timescale@portal:../rockd/web-components/packages/timescale::locator=%40macrostrat%2Fweb%40workspace%3A.":
+"@macrostrat/timescale@portal:../web-components/packages/timescale::locator=%40macrostrat%2Fweb%40workspace%3A.":
   version: 0.0.0-use.local
-  resolution: "@macrostrat/timescale@portal:../rockd/web-components/packages/timescale::locator=%40macrostrat%2Fweb%40workspace%3A."
+  resolution: "@macrostrat/timescale@portal:../web-components/packages/timescale::locator=%40macrostrat%2Fweb%40workspace%3A."
   dependencies:
     "@macrostrat/hyper": "npm:^3.0.6"
     "@macrostrat/ui-components": "workspace:^"
@@ -3325,9 +3325,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@macrostrat/ui-components@portal:../rockd/web-components/packages/ui-components::locator=%40macrostrat%2Fweb%40workspace%3A.":
+"@macrostrat/ui-components@portal:../web-components/packages/ui-components::locator=%40macrostrat%2Fweb%40workspace%3A.":
   version: 0.0.0-use.local
-  resolution: "@macrostrat/ui-components@portal:../rockd/web-components/packages/ui-components::locator=%40macrostrat%2Fweb%40workspace%3A."
+  resolution: "@macrostrat/ui-components@portal:../web-components/packages/ui-components::locator=%40macrostrat%2Fweb%40workspace%3A."
   dependencies:
     "@blueprintjs/core": "npm:^5.10.2"
     "@blueprintjs/datetime2": "npm:^2.3.11"
