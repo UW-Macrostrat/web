@@ -214,6 +214,21 @@ export const sitemap: Routes = {
           ],
         },
         {
+          slug: "strat-name-concepts",
+          name: "Strat Name Concepts",
+          children: [
+            {
+              param: "@id",
+              name(urlPart, ctx) {
+                return h(
+                  "code",
+                  urlPart
+                );
+              },
+            },
+          ],
+        },
+        {
           slug: "intervals",
           name: "Intervals",
           children: [
