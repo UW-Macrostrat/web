@@ -156,3 +156,12 @@ function StratNamesList({ data }) {
     data.map((d) => h(StratNameItem, { data: d, key: d.id })),
   ]);
 }
+
+function StratNameItem({ data }) {
+  return h("div.strat-name-item", [
+    h(Link, { href: `/lex/strat-names/${data.id}` }, [
+      h("div.strat-name", data.strat_name),
+      h("div.strat-id", `ID: ${data.id}`),
+    ]),
+  ]);
+}
