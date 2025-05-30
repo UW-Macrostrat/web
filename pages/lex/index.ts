@@ -156,13 +156,14 @@ function conceptInfo({concept_id}) {
   const data = useAPIResult(url)?.success?.data[0];
 
   if (!data) return h(Loading);
+  console.log(data);
 
   const { author, name, province, geologic_age, other, usage_notes } = data;
   
   return h('div.concept-info', [
     h('h3', "Stratigraphic Concept"),
     h('div.concept-name', [
-      h("a.title", name),
+      h("a.title", { href: "/lex/strat-name-concepts/" + concept_id, target: "_blank"}, name),
       h('a.concept-ref', { href: url, target: "_blank" }, "via " + author)
     ]),
     h.if(province)('div.province', [
