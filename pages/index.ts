@@ -88,11 +88,7 @@ export function ColumnsMap({columns}) {
   useEffect(() => {
     if (!mapInstance || !columns || !columns.features?.length) return;
 
-    if (!mapInstance.isStyleLoaded()) {
-      mapInstance.once("style.load", () => addGeoJsonLayer(mapInstance, columns));
-    } else {
-      addGeoJsonLayer(mapInstance, columns);
-    }
+    addGeoJsonLayer(mapInstance, columns);
   }, [columns, mapInstance]);
 
   const addGeoJsonLayer = (map, data) => {

@@ -13,8 +13,7 @@ export function Page(props) {
 }
 
 function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
-  const { columnGroups } = useData();
-  let columnGroupsNew;
+  let columnGroups;
   const columnRes = useAPIResult(SETTINGS.apiV2Prefix + "/columns?all")?.success?.data;
   const [columnInput, setColumnInput] = useState("");
   const shouldFilter = columnInput.length == 0 || columnInput.length >= 3;
@@ -36,9 +35,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
       grouped[key].columns.push(item);
     }
 
-    columnGroupsNew = Object.values(grouped);
-    console.log("Old:", columnGroups);
-    console.log("New:", columnGroupsNew);
+    columnGroups = Object.values(grouped);
   }
 
   const filteredGroups = shouldFilter ? columnGroups?.filter((group) => {
@@ -73,8 +70,6 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   if(!columnData || !columnRes) return h(Loading);
 
   const columnFeatures = columnData?.success?.data;
-
-  console.log("Column Features:", columnFeatures);
   
   return h("div.column-list-page", [
     h(AssistantLinks, [
@@ -123,7 +118,6 @@ function ColumnGroup({ data, linkPrefix, columnInput, shouldFilter }) {
           h("div.column-row.column-header", [
             h("span.col-id", "Id"),
             h("span.col-name", "Name"),
-            h("span.col-status", "Status"),
           ]),
           h(Divider),
           filteredColumns.map((data) =>
@@ -140,7 +134,6 @@ function ColumnItem({ data, linkPrefix = "/" }) {
   return h("div.column-row", [
     h("span.col-id", "#" + col_id),
     h(Link, { className: 'col-link', href }, [col_name]),
-    h("span", { className: status === "active" ? 'active' : status === 'obsolete' ? "obsolete" : 'inprocess'},  status ? UpperCase(status) : null),
   ]);
 }
 
