@@ -1,34 +1,31 @@
 import h from "./main.module.scss";
-import { useAPIResult } from "@macrostrat/ui-components";
+import { useAPIResult, InfiniteScroll, LoadingPlaceholder } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
 import { PageHeader, Link, AssistantLinks, DevLinkButton, LinkCard, PageBreadcrumbs } from "~/components";
-import { Card, Icon, Popover, RangeSlider } from "@blueprintjs/core";
-import { useState } from "react";
+import { Card, Icon, Spinner, RangeSlider } from "@blueprintjs/core";
+import { useState, useEffect } from "react";
 import { ContentPage } from "~/layouts";
 import { Loading } from "../../index";
 
 export function Page() {
     const [input, setInput] = useState("");
-    const [page, setPage] = useState(1);
-    const res = useAPIResult(SETTINGS.apiV2Prefix + "/defs/strat_names?strat_name_like=" + input + "&page=" + page)?.success.data;
+    const [lastID, setLastID] = useState(0);
+    const [data, setData] = useState([]);
+    const result = useStratData(lastID, input);
 
-    if (res == null) return h(Loading);
+    useEffect(() => {
+        if (result) {
+            setData(prevData => [...prevData, ...result]);
+        }
+    }, [result]);
 
-    const grouped = res.reduce((acc, item) => {
-        const { rank, gp, subgp } = item;
+    useEffect(() => {
+        // Example: Reset data if lastID changes
+        setData([]);
+    }, [input]);
 
-        const safeRank = rank ?? 'Unknown';
-        const safeGp = gp ?? '';         // Empty string to sort it first
-        const safeSubgp = subgp ?? '';   // Same here
 
-        if (!acc[safeRank]) acc[safeRank] = {};
-        if (!acc[safeRank][safeGp]) acc[safeRank][safeGp] = {};
-        if (!acc[safeRank][safeGp][safeSubgp]) acc[safeRank][safeGp][safeSubgp] = [];
-
-        acc[safeRank][safeGp][safeSubgp].push(item);
-
-        return acc;
-    }, {});
+    if (data == null) return h(Loading);
 
     const handleChange = (event) => { 
         setInput(event.target.value.toLowerCase());
@@ -52,32 +49,20 @@ export function Page() {
             ])
         ]),
         h('div.strat-list',
-            Object.entries(grouped).map(([rank, gps]) =>
-            h('div.strat-rank-group', [
-                h('h2', `Rank: ${rank}`),
-
-                ...Object.entries(gps).map(([gp, subgps]) =>
-                h('div.strat-group', [
-                    h('h3', `Group: ${gp}`),
-
-                    ...Object.entries(subgps).map(([subgp, items]) =>
-                    h('div.strat-subgroup', [
-                        h('h4', `Subgroup: ${subgp.toUpperCase()}`),
-
-                        h('div.strat-items',
-                        items.map(data =>
-                            h(StratItem, { data })
-                        )
-                        )
-                    ])
-                    )
-                ])
+            h('div.strat-items',
+                data.map(data =>
+                    h(StratItem, { data })
                 )
-            ])
             )
-        )
+        ),
+        h('div.page-loader-container', [
+            h('h4', {
+                onClick: () => {
+                    setLastID(data.length > 0 ? data[data.length - 1].strat_name_id : lastID);
+                }
+            }, "Load More"),
         ])
-
+    ]);          
 }
 
 function StratItem({ data }) {
@@ -86,3 +71,7 @@ function StratItem({ data }) {
     return h(LinkCard, { href: "/lex/strat-names/" + strat_name_id }, strat_name)
 }
 
+function useStratData(lastID, input) {
+    const result = useAPIResult(`${SETTINGS.apiV2Prefix}/defs/strat_names?page_size=20&last_id=${lastID}&strat_name_like=${input}`);
+    return result?.success?.data;
+}
