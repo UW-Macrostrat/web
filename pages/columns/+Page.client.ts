@@ -16,7 +16,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   let columnGroups;
   const columnRes = useAPIResult(SETTINGS.apiV2Prefix + "/columns?all")?.success?.data;
   const [columnInput, setColumnInput] = useState("");
-  const shouldFilter = columnInput.length == 0 || columnInput.length >= 3;
+  const shouldFilter = columnInput.length >= 3;
 
   if(columnRes) {
     const grouped = {};
