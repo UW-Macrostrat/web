@@ -14,6 +14,7 @@ import { Parenthetical, Hierarchy } from "@macrostrat/data-components";
 import { Duration } from "@macrostrat/column-views";
 import { useDarkMode } from "@macrostrat/ui-components";
 import { StratNameHierarchy } from "./StratNameHierarchy";
+import { LinkCard } from "~/components/cards";
 
 export function titleCase(str) {
   if (!str) return str;
@@ -25,6 +26,11 @@ export function titleCase(str) {
 }
 
 export function IndividualPage(id, type, header) {
+    // for fetching fossil data with strat concept
+    if (type === "concept_id") {
+      type = "strat_name_concept_id";
+    }
+
     const [activeIndex, setActiveIndex] = useState(null);
     const intRes = useAPIResult(SETTINGS.apiV2Prefix + "/defs/" + header + "?" + type + "=" + id)?.success.data[0];
     const fossilResult = useAPIResult(SETTINGS.apiV2Prefix + "/fossils?" + type + "=" + id)?.success;
@@ -98,7 +104,8 @@ export function IndividualPage(id, type, header) {
         ]),
 
         h.if(taxaData)(PrevalentTaxa, { data: taxaData}),
-        h.if(header === "strat_name_concepts" || header === "strat_names")(StratNameHierarchy, { id }),
+        h.if(header === "strat_names")(StratNameHierarchy, { id }),
+        h.if(header === "strat_name_concepts")(ConceptHierarchy, { id}),
         h.if(timescales?.[0]?.name)('div.int-timescales', [
             h('h3', "Timescales"),
             h('ul', timescales?.map((t) => h('li', h(Link, { href: "/lex/timescales/" + t.timescale_id}, titleCase(t.name))))),
@@ -151,12 +158,27 @@ function Taxa(record) {
     ])
 }
 
+function ConceptHierarchy({ id }) {
+  const url = SETTINGS.apiV2Prefix + "/defs/strat_names?strat_name_concept_id=" + id;
+  const data = useAPIResult(url)?.success?.data;
+  if (!data) return h(Loading);
+
+  return h('div.concept-hierarchy', [
+    data.map((item) => {
+      const { strat_name_id, strat_name, strat_name_concept_id } = item;
+      return h(LinkCard, {
+
+      });
+    }),
+  ])
+  console.log(data);
+}
+
 function conceptInfo({concept_id}) {
   const url = SETTINGS.apiV2Prefix + "/defs/strat_name_concepts?strat_name_concept_id=" + concept_id;
   const data = useAPIResult(url)?.success?.data[0];
 
   if (!data) return h(Loading);
-  console.log(data);
 
   const { author, name, province, geologic_age, other, usage_notes } = data;
   
