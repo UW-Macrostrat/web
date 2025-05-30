@@ -3,7 +3,7 @@ import { useAPIResult, InfiniteScroll, LoadingPlaceholder } from "@macrostrat/ui
 import { SETTINGS } from "@macrostrat-web/settings";
 import { PageHeader, Link, AssistantLinks, DevLinkButton, LinkCard, PageBreadcrumbs } from "~/components";
 import { Card, Icon, Spinner, RangeSlider } from "@blueprintjs/core";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ContentPage } from "~/layouts";
 import { Loading } from "../../index";
 
@@ -11,7 +11,8 @@ export function Page() {
     const [input, setInput] = useState("");
     const [lastID, setLastID] = useState(0);
     const [data, setData] = useState([]);
-    const result = useStratData(lastID, input);
+    const pageSize = 20;
+    const result = useStratData(lastID, input, pageSize);
 
     useEffect(() => {
         if (result) {
@@ -43,7 +44,7 @@ export function Page() {
                 h(Icon, { icon: "search" }),
                 h('input', {
                     type: "text",
-                    placeholder: "Filter by name, subgroup, group, or rank...",
+                    placeholder: "Filter by name...",
                     onChange: handleChange,
                 }),
             ])
@@ -55,13 +56,7 @@ export function Page() {
                 )
             )
         ),
-        h('div.page-loader-container', [
-            h('h4', {
-                onClick: () => {
-                    setLastID(data.length > 0 ? data[data.length - 1].strat_name_id : lastID);
-                }
-            }, "Load More"),
-        ])
+        LoadMoreTrigger({ data, setLastID, pageSize, result }),
     ]);          
 }
 
@@ -71,7 +66,29 @@ function StratItem({ data }) {
     return h(LinkCard, { href: "/lex/strat-names/" + strat_name_id }, strat_name)
 }
 
-function useStratData(lastID, input) {
-    const result = useAPIResult(`${SETTINGS.apiV2Prefix}/defs/strat_names?page_size=20&last_id=${lastID}&strat_name_like=${input}`);
+function useStratData(lastID, input, pageSize) {
+    const result = useAPIResult(`${SETTINGS.apiV2Prefix}/defs/strat_names?page_size=${pageSize}&last_id=${lastID}&strat_name_like=${input}`);
     return result?.success?.data;
+}
+
+function LoadMoreTrigger({ data, setLastID, pageSize, result }) {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        if (data.length > 0) {
+          setLastID(data[data.length - 1].strat_name_id);
+        }
+      }
+    });
+
+    observer.observe(ref.current);
+
+    return () => observer.disconnect();
+  }, [data, setLastID]);
+
+  return h.if(result?.length == pageSize)('div.load-more', { ref }, h(Spinner));
 }
