@@ -10,6 +10,7 @@ import {
   MapView,
 } from "@macrostrat/map-interface";
 import { useState, useEffect } from 'react'
+import mapboxgl from 'mapbox-gl';
 
 export function Image({ src, className, width, height }) {
     const srcWithAddedPrefix = "https://storage.macrostrat.org/assets/web/main-page/" + src;
@@ -89,7 +90,39 @@ export function ColumnsMap({columns}) {
     if (!mapInstance || !columns || !columns.features?.length) return;
 
     addGeoJsonLayer(mapInstance, columns);
+    fitMapToColumns(mapInstance, columns);
   }, [columns, mapInstance]);
+
+  const fitMapToColumns = (map, columns) => {
+    if(columns.features.length > 10) return;
+
+    const bounds = new mapboxgl.LngLatBounds();
+
+    columns.features.forEach((feature) => {
+      const coords = feature.geometry.type === "Point"
+        ? [feature.geometry.coordinates]
+        : feature.geometry.type === "Polygon"
+        ? feature.geometry.coordinates[0]
+        : feature.geometry.type === "MultiPolygon"
+        ? feature.geometry.coordinates.flat(1)
+        : [];
+
+      coords.forEach(([lng, lat]) => {
+        bounds.extend([lng, lat]);
+      });
+    });
+
+    // Fit the map to these bounds
+    map.fitBounds(bounds, {
+      padding: {
+        top: 20,
+        bottom: 20,
+        left: 200,
+        right: 20
+      },
+      animate: false
+    });
+  }
 
   const addGeoJsonLayer = (map, data) => {
     if (map.getLayer("highlight-layer")) {

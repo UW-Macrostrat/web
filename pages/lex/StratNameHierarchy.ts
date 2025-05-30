@@ -7,8 +7,7 @@ export function StratNameHierarchy({start_name_id}) {
   const data = fetchStratNames(1);
 
   if (data == null) return h("div", "Loading...");
-  console.log(data);
-return h(Hierarchy, {...data});
+  return h(Hierarchy, {...data});
 }
 
 const url = "https://macrostrat.org/api/v2/defs/strat_names";
