@@ -3,10 +3,10 @@ import { useAPIResult } from "@macrostrat/ui-components";
 import { Hierarchy } from "@macrostrat/data-components";
 import { useState } from "react";
 
-export function StratNameHierarchy({start_name_id}) {
-  const data = fetchStratNames(1);
-
+export function StratNameHierarchy({id}) {
+  const data = fetchStratNames({id});
   if (data == null) return h("div", "Loading...");
+
   return h(Hierarchy, {...data});
 }
 
@@ -28,9 +28,12 @@ var rankMap = {
 };
 var rankMapOrder = { SGp: 1, Gp: 2, SubGp: 3, Fm: 4, Mbr: 5, Bed: 6 };
 
-function fetchStratNames(id) {
+function fetchStratNames({id}) {
   // function to fetch stratnames and orgnize hierarchy
-  const data = useAPIResult(url + "?rule=all&strat_name_id=" + id)?.success.data;
+  const data = useAPIResult(url + "?rule=all&strat_name_id=" + id)?.success?.data;
+  console.log(url + "?rule=all&strat_name_id=" + id);
+  console.log("StratNameHierarchy data", data);
+
   if (data == null) return null;
 
   data.forEach((d) => {

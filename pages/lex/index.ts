@@ -97,7 +97,7 @@ export function IndividualPage(id, type, header) {
         ]),
 
         h.if(taxaData)(PrevalentTaxa, { data: taxaData}),
-        h.if(header === "strat_name_concepts" || header === "strat_names")(StratNameHierarchy, { strat_name_id: id }),
+        h.if(header === "strat_name_concepts" || header === "strat_names")(StratNameHierarchy, { id }),
         h.if(timescales?.[0]?.name)('div.int-timescales', [
             h('h3', "Timescales"),
             h('ul', timescales?.map((t) => h('li', h(Link, { href: "/lex/timescales/" + t.timescale_id}, titleCase(t.name))))),
