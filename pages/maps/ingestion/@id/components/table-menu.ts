@@ -6,7 +6,6 @@ import { useDebouncedCallback } from "use-debounce";
 
 import { OperatorQueryParameter, ColumnOperatorOption } from "../table";
 
-import "~/styles/blueprint-select";
 import { Filter } from "../utils/filter";
 import h from "../hyper";
 

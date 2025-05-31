@@ -4,12 +4,11 @@ import { ReactNode } from "react";
 import { AuthProvider } from "~/_providers/auth";
 import { usePageContext } from "vike-react/usePageContext";
 
-import "~/styles/blueprint-core";
-import "~/styles/_theme.styl";
+import "@blueprintjs/core/lib/css/blueprint.css";
 import "~/styles/core.sass";
 import "~/styles/padding.css";
 //
-import h from "./layout.module.sass";
+import h from "@macrostrat/hyper";
 
 import { ClientOnly } from "vike-react/ClientOnly";
 
