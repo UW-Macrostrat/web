@@ -4,21 +4,22 @@ import { PageHeader, LinkCard } from "~/components";
 import { useData } from "vike-react/useData";
 import { Image } from "../index";
 
-
 export function Page() {
   // static list of projects with pictures
   const pictures = {
-    1: 'north_america_med.jpg',
-    4: 'deep_sea_new_medium.jpg',
-    5: 'new_zealand_new_medium.jpg',
-    7: 'caribbean_new_medium.jpg',
-  }
+    1: "north_america_med.jpg",
+    4: "deep_sea_new_medium.jpg",
+    5: "new_zealand_new_medium.jpg",
+    7: "caribbean_new_medium.jpg",
+  };
 
   const { projects } = useData();
 
   return h(ContentPage, [
     h(PageHeader, { title: "Projects" }),
-    projects.map((d) => h(ProjectItem, { data: d, key: d.project_id, pictures })),
+    projects.map((d) =>
+      h(ProjectItem, { data: d, key: d.project_id, pictures })
+    ),
   ]);
 }
 
@@ -28,9 +29,11 @@ function ProjectItem({ data, pictures }) {
 
   const { project_id, project, descrip } = data;
   const href = `/projects/${project_id}`;
-  return h(LinkCard, { href, title: project }, 
-    h('div.project', [
-      h('div.project-body', [
+  return h(
+    LinkCard,
+    { href, title: project },
+    h("div.project", [
+      h("div.project-body", [
         h("p", descrip),
         h("p.col_stats", [
           h(KeyValue, { name: "Columns", value: data.t_cols }),
@@ -42,7 +45,7 @@ function ProjectItem({ data, pictures }) {
           h(KeyValue, { name: "Units", value: data.t_units }),
         ]),
       ]),
-      hasPicture ? h(Image, {src: pictures[data.project_id]}) : null,
+      hasPicture ? h(Image, { src: pictures[data.project_id] }) : null,
     ])
   );
 }

@@ -1,10 +1,102 @@
-[{"bottom":-5,"lithology":"limestone","grainsize":"m","pattern":"limestone","covered":false,"facies":"none","fill_pattern":null,"definite_boundary":null},
- {"bottom":0,"lithology":"dolomite","grainsize":"ms","pattern":"dolomite","covered":false,"facies":"carbonate-mudstone","fill_pattern":null,"definite_boundary":null},
- {"bottom":20,"lithology":null,"grainsize":"ms","pattern":null,"covered":false,"facies":null,"fill_pattern":null,"definite_boundary":true},
- {"bottom":39,"lithology":"sandstone","grainsize":"c","pattern":"sandstone","covered":false,"facies":"coarse-clastics","fill_pattern":null,"definite_boundary":null},
- {"bottom":39.43,"lithology":null,"grainsize":null,"pattern":null,"covered":false,"facies":null,"fill_pattern":null,"definite_boundary":true},
- {"bottom":39.72,"lithology":null,"grainsize":null,"pattern":null,"covered":false,"facies":null,"fill_pattern":null,"definite_boundary":true},
- {"bottom":53,"lithology":"dolomite","grainsize":"ms","pattern":"dolomite","covered":false,"facies":"carbonate-mudstone","fill_pattern":null,"definite_boundary":null},
- {"bottom":55.5,"lithology":"sandstone","grainsize":"c","pattern":"sandstone","covered":false,"facies":"coarse-clastics","fill_pattern":null,"definite_boundary":null},
- {"bottom":58,"lithology":"siltstone","grainsize":"s","pattern":"624","covered":false,"facies":"fine-clastics","fill_pattern":"624","definite_boundary":null},
- {"bottom":85,"lithology":null,"grainsize":null,"pattern":null,"covered":false,"facies":null,"fill_pattern":null,"definite_boundary":true}]
+[
+  {
+    "bottom": -5,
+    "lithology": "limestone",
+    "grainsize": "m",
+    "pattern": "limestone",
+    "covered": false,
+    "facies": "none",
+    "fill_pattern": null,
+    "definite_boundary": null
+  },
+  {
+    "bottom": 0,
+    "lithology": "dolomite",
+    "grainsize": "ms",
+    "pattern": "dolomite",
+    "covered": false,
+    "facies": "carbonate-mudstone",
+    "fill_pattern": null,
+    "definite_boundary": null
+  },
+  {
+    "bottom": 20,
+    "lithology": null,
+    "grainsize": "ms",
+    "pattern": null,
+    "covered": false,
+    "facies": null,
+    "fill_pattern": null,
+    "definite_boundary": true
+  },
+  {
+    "bottom": 39,
+    "lithology": "sandstone",
+    "grainsize": "c",
+    "pattern": "sandstone",
+    "covered": false,
+    "facies": "coarse-clastics",
+    "fill_pattern": null,
+    "definite_boundary": null
+  },
+  {
+    "bottom": 39.43,
+    "lithology": null,
+    "grainsize": null,
+    "pattern": null,
+    "covered": false,
+    "facies": null,
+    "fill_pattern": null,
+    "definite_boundary": true
+  },
+  {
+    "bottom": 39.72,
+    "lithology": null,
+    "grainsize": null,
+    "pattern": null,
+    "covered": false,
+    "facies": null,
+    "fill_pattern": null,
+    "definite_boundary": true
+  },
+  {
+    "bottom": 53,
+    "lithology": "dolomite",
+    "grainsize": "ms",
+    "pattern": "dolomite",
+    "covered": false,
+    "facies": "carbonate-mudstone",
+    "fill_pattern": null,
+    "definite_boundary": null
+  },
+  {
+    "bottom": 55.5,
+    "lithology": "sandstone",
+    "grainsize": "c",
+    "pattern": "sandstone",
+    "covered": false,
+    "facies": "coarse-clastics",
+    "fill_pattern": null,
+    "definite_boundary": null
+  },
+  {
+    "bottom": 58,
+    "lithology": "siltstone",
+    "grainsize": "s",
+    "pattern": "624",
+    "covered": false,
+    "facies": "fine-clastics",
+    "fill_pattern": "624",
+    "definite_boundary": null
+  },
+  {
+    "bottom": 85,
+    "lithology": null,
+    "grainsize": null,
+    "pattern": null,
+    "covered": false,
+    "facies": null,
+    "fill_pattern": null,
+    "definite_boundary": true
+  }
+]

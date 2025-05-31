@@ -215,7 +215,6 @@ function normalizeMatch(match: any): MatchInfo | null {
   return null;
 }
 
-
 // function FeedbackDevTool() {
 //   const entities = useStore((state) => state.entities);
 //   if (entities == null)

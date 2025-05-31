@@ -1,14 +1,18 @@
 import h from "@macrostrat/hyper";
 import { ExpansionPanel } from "@macrostrat/map-interface";
 import { IntervalChip } from "../info-blocks";
-import { useAppActions, useAppState, useHashNavigate } from "#/map/map-interface/app-state";
+import {
+  useAppActions,
+  useAppState,
+  useHashNavigate,
+} from "#/map/map-interface/app-state";
 import { MapReference } from "~/components/map-info";
 import LongText from "#/map/map-interface/components/long-text";
 
-
 function LongTextRenderer(props) {
   const { name, text } = props;
-  return text && text.length ? h(LongText, { name, text }) : null;}
+  return text && text.length ? h(LongText, { name, text }) : null;
+}
 
 function GeoMapLines(props) {
   const { source } = props;
@@ -36,13 +40,9 @@ function GeoMapLines(props) {
   ]);
 }
 
-
 function GeologicMapInfo(props) {
   const { bedrockExpanded, source } = props;
   const runAction = useAppActions();
-
-
-
 
   if (!source) return h("div");
   const interval = {
@@ -62,7 +62,6 @@ function GeologicMapInfo(props) {
     },
     [
       h("div.map-source-attrs", [
-
         h.if(source.name && source.name.length)("div.map-source-attr", [
           h("span.attr", ["Name: "]),
           source.name,

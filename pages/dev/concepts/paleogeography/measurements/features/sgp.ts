@@ -6,7 +6,7 @@ import { useSelectedInterval } from "../time-intervals";
 function clusterSGPResult(rows: any[]) {
   console.log(rows);
   if (rows == null) return null;
-  const data = rows.map(d => {
+  const data = rows.map((d) => {
     return {
       type: "Feature",
       id: d["sample identifier"],
@@ -14,9 +14,9 @@ function clusterSGPResult(rows: any[]) {
         type: "Point",
         coordinates: [
           parseFloat(d["site longitude"]),
-          parseFloat(d["site latitude"])
-        ]
-      }
+          parseFloat(d["site latitude"]),
+        ],
+      },
     };
   });
   return clusterPoints(data);
@@ -28,9 +28,9 @@ async function getSGPResult(ageRange: [number, number]) {
     count: 100000,
     page: 1,
     filters: {
-      interpreted_age: ageRange
+      interpreted_age: ageRange,
     },
-    show: ["coord_lat", "coord_long"]
+    show: ["coord_lat", "coord_long"],
   };
   const res = await axios.post(
     "http://sgp-search.io/api/frontend/post-paged",

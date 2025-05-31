@@ -39,7 +39,7 @@ export function useDetritalMeasurements(columnArgs) {
     response: "long",
     show_values: true,
     // Other isotope systems are organized separately
-    measurement: "207Pb-206Pb"
+    measurement: "207Pb-206Pb",
   };
   const res: MeasurementInfo[] = useAPIResult(
     "https://dev.macrostrat.org/api/v2/measurements",
@@ -47,5 +47,5 @@ export function useDetritalMeasurements(columnArgs) {
     columnArgs
   );
   if (res == null) return null;
-  return group(res, d => d.unit_id);
+  return group(res, (d) => d.unit_id);
 }

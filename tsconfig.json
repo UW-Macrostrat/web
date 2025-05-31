@@ -6,20 +6,10 @@
     "jsx": "react",
     "paths": {
       // Workspace code
-      "@macrostrat-web/*": [
-        "packages/*/src"
-      ],
-      "~/*": [
-        "src/*"
-      ],
-      "#/*": [
-        "pages/*"
-      ]
+      "@macrostrat-web/*": ["packages/*/src"],
+      "~/*": ["src/*"],
+      "#/*": ["pages/*"]
     }
   },
-  "include": [
-    "packages/*/src/**/*",
-    "src/**/*",
-    "pages/**/*"
-  ]
+  "include": ["packages/*/src/**/*", "src/**/*", "pages/**/*"]
 }

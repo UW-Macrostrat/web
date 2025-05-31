@@ -3,11 +3,11 @@ import { useAPIResult } from "@macrostrat/ui-components";
 import { Hierarchy } from "@macrostrat/data-components";
 import { useState } from "react";
 
-export function StratNameHierarchy( { id } ) {
+export function StratNameHierarchy({ id }) {
   const data = fetchStratNames({ id });
   if (data == null) return h("div", "Loading...");
 
-  return h(Hierarchy, {...data});
+  return h(Hierarchy, { ...data });
 }
 
 var rankMap = {
@@ -27,7 +27,7 @@ var rankMap = {
 var rankMapOrder = { SGp: 1, Gp: 2, SubGp: 3, Fm: 4, Mbr: 5, Bed: 6 };
 
 function fetchStratNames({ id }) {
-  const urlBase= "https://macrostrat.org/api/v2/defs";
+  const urlBase = "https://macrostrat.org/api/v2/defs";
   const url = urlBase + "/strat_names?rule=all&strat_name_id=" + id;
 
   // function to fetch stratnames and orgnize hierarchy
@@ -77,7 +77,7 @@ function fetchStratNames({ id }) {
   const mappedData = mapToHier(hierarchy);
   // Find the top of the hierarchy and return it
   return mappedData;
-};
+}
 
 const mapToHier = (data) => {
   const Hier = {};

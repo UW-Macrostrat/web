@@ -11,7 +11,7 @@ interface UnitNamesProps {
   nameForDivision(object): string;
 }
 
-const NoteComponent = props => {
+const NoteComponent = (props) => {
   const { note, division, measurement } = props;
   let text = note.note;
   /*if (note.measurement != null) {
@@ -32,7 +32,7 @@ const UnitNamesColumn = (props: UnitNamesProps) => {
       note: nameForDivision(div),
       division: div,
       //measurement: dz?.get(div.unit_id)
-      id: i
+      id: i,
     };
   });
 
@@ -42,19 +42,19 @@ const UnitNamesColumn = (props: UnitNamesProps) => {
     noteComponent: NoteComponent,
     notes,
     forceOptions: {
-      nodeSpacing: 1
+      nodeSpacing: 1,
     },
-    ...rest
+    ...rest,
   });
 };
 
 UnitNamesColumn.defaultProps = {
-  nameForDivision: div => {
+  nameForDivision: (div) => {
     return div.unit_name
       .replace("Mbr", "Member")
       .replace("Fm", "Formation")
       .replace("Gp", "Group");
-  }
+  },
 };
 
 export default UnitNamesColumn;

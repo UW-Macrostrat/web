@@ -1,1 +1,6 @@
 *.mdx
+.yarn
+.idea
+.vscode
+dist
+content/.obsidian

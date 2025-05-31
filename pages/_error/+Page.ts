@@ -22,16 +22,25 @@ function PageContent() {
   const reason = ctx.abortReason;
 
   if (is404) {
-    return h('div.error404', [
-      h(BlankImage, { src: "https://storage.macrostrat.org/assets/web/earth-crust.jpg", className: "error-image", width: "100%", height: "100%" }),
-      h('div.error-text', [
-        h('h1', "404"),
-        h('h2', "The rock you are looking for doesn't exist. Keep digging."),
-        h('div.buttons', [
-          h('button', { className: "btn", onClick: () => history.back() }, "Go back"),
-          h('a', { className: "btn", href: "/" }, "Go home")
+    return h("div.error404", [
+      h(BlankImage, {
+        src: "https://storage.macrostrat.org/assets/web/earth-crust.jpg",
+        className: "error-image",
+        width: "100%",
+        height: "100%",
+      }),
+      h("div.error-text", [
+        h("h1", "404"),
+        h("h2", "The rock you are looking for doesn't exist. Keep digging."),
+        h("div.buttons", [
+          h(
+            "button",
+            { className: "btn", onClick: () => history.back() },
+            "Go back"
+          ),
+          h("a", { className: "btn", href: "/" }, "Go home"),
         ]),
-      ])  
+      ]),
     ]);
   } else if (statusCode == 401) {
     return h([

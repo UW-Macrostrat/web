@@ -20,7 +20,7 @@ function extendDivision(
   divisions: UnitLong[]
 ): ExtUnit {
   const overlappingUnits = divisions.filter(
-    d => d.unit_id != unit.unit_id && unitsOverlap(unit, d)
+    (d) => d.unit_id != unit.unit_id && unitsOverlap(unit, d)
   );
   let bottomOverlap = false;
   for (const d of overlappingUnits) {
@@ -36,7 +36,7 @@ function extendDivision(
     ...unit,
     bottomOverlap,
     column,
-    overlappingUnits: overlappingUnits.map(d => d.unit_id)
+    overlappingUnits: overlappingUnits.map((d) => d.unit_id),
   };
 }
 

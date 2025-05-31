@@ -43,7 +43,6 @@ export function Page() {
 
   const [data, setData] = useState(null);
 
-
   return h(
     MapAreaContainer,
     {
@@ -132,7 +131,7 @@ function useMapLocationManager(): [MapPosition, PositionBuilder] {
       setInspectPosition(position);
       setURL(position, map);
       if (map) {
-        console.log("MAP!!", map)
+        console.log("MAP!!", map);
         map.flyTo({
           center: [position.lng, position.lat],
           zoom: position.zoom || 12,

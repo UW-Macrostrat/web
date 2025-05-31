@@ -363,7 +363,7 @@ class _StratName extends React.Component {
       stratHierarchy = <StratNameHierarchy stratNameID={this.state.id} />;
     }
 
-    console.log(this.state.strat_names)
+    console.log(this.state.strat_names);
 
     return (
       <div className="page-content">

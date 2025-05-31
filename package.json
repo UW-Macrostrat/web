@@ -10,7 +10,7 @@
     "build": "vite build",
     "server": "tsx ./server/index.ts",
     "server:dev": "nodemon --watch server --watch .pnp.cjs --exec tsx --env-file=.env ./server/index.ts",
-    "format": "prettier --write src packages",
+    "format": "prettier --write .",
     "server:prod": "NODE_NO_WARNINGS=1 NODE_ENV=production yarn run server",
     "start": "yarn run build && yarn run server",
     "test:runtime": "tsx tests/test-urls.ts",

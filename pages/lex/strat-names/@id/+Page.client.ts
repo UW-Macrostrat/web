@@ -1,8 +1,8 @@
-import { usePageContext } from 'vike-react/usePageContext';
-import { IndividualPage } from "../../index"
+import { usePageContext } from "vike-react/usePageContext";
+import { IndividualPage } from "../../index";
 
 export function Page() {
-    const pageContext = usePageContext();
-    const id = parseInt(pageContext.urlParsed.pathname.split("/")[3]);
-    return IndividualPage(id, "strat_name_id", "strat_names")
+  const pageContext = usePageContext();
+  const id = parseInt(pageContext.urlParsed.pathname.split("/")[3]);
+  return IndividualPage(id, "strat_name_id", "strat_names");
 }

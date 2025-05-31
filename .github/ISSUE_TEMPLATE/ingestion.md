@@ -1,14 +1,12 @@
 ---
 name: Ingestion Update
 about: Create a report to help us improve
-title: ''
+title: ""
 labels: map-ingestion-interface
-assignees: ''
-
+assignees: ""
 ---
 
 - [ ] Bug
 - [ ] Feature Request
 
 **Description**
-

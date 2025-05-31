@@ -27,7 +27,7 @@ export function StratNameHierarchy({
   }, [strat_name_id]);
 
   if (typeof strat_name_id === "undefined") return null;
-  
+
   if (!state) {
     return h("h3", "No results");
   }
