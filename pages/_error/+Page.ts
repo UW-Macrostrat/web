@@ -1,11 +1,16 @@
-import h from "@macrostrat/hyper";
+import h from "./main.module.styl";
 import { CenteredContentPage } from "~/layouts";
 import { PageHeader } from "~/components";
 import { usePageContext } from "vike-react/usePageContext";
 import { ClientOnly } from "vike-react/ClientOnly";
-import { Spinner, Button } from "@blueprintjs/core";
+import { Spinner, Button, Card } from "@blueprintjs/core";
+import { BlankImage } from "../index";
+import { LinkCard } from "~/components";
 
 export function Page() {
+  const ctx = usePageContext();
+  const is404 = ctx.is404;
+
   return h(CenteredContentPage, [h(PageHeader), h(PageContent)]);
 }
 
@@ -17,9 +22,16 @@ function PageContent() {
   const reason = ctx.abortReason;
 
   if (is404) {
-    return h([
-      h("h1", [h("code.bp5-code", "404"), " Page Not Found"]),
-      h("p", ["Could not find a page at path ", h("code.bp5-code", path), "."]),
+    return h('div.error404', [
+      h(BlankImage, { src: "https://storage.macrostrat.org/assets/web/earth-crust.jpg", className: "error-image", width: "100%", height: "100%" }),
+      h('div.error-text', [
+        h('h1', "404"),
+        h('h2', "The rock you are looking for doesn't exist. Keep digging."),
+        h('div.buttons', [
+          h('button', { className: "btn", onClick: () => history.back() }, "Go back"),
+          h('a', { className: "btn", href: "/" }, "Go home")
+        ]),
+      ])  
     ]);
   } else if (statusCode == 401) {
     return h([

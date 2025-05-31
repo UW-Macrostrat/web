@@ -1,0 +1,116 @@
+.html, .body, .main
+    color: black
+    background-color: var(--background-color)
+
+a:hover
+    text-decoration: none
+
+.big
+    color: var(--text-color)
+    text-align: left
+    font-size: 75px
+    font-family: "Maven Pro", sans-serif
+    margin: 0
+    margin-left: 20%
+    padding-top: 100px
+
+.line
+  border-bottom: 1px solid black
+  width: 60%
+  margin: 0 20% 
+
+
+.people
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    justify-content: center
+    gap: 30px
+    padding: 50px 20%
+
+    .person-info
+        flex-basis: 45%
+        height: 30vh
+        width: 45%
+        position: relative
+
+        .back-img
+            position: relative
+            z-index: 0
+            object-fit: cover
+            width: 100%
+            height: 100%
+
+        a
+            color: white !important
+            
+        .description
+            position: absolute
+            bottom: 0
+            right: 0
+            display: flex
+            flex-direction: column
+            gap: .25em
+            text-align: right
+            padding: 5px 20px
+            z-index: 100
+            color: white
+            background-color: rgba(0, 0, 0, 0.2)
+            white-space: nowrap
+            margin: 5px
+
+            p 
+                margin: 0 !important
+
+            a
+                color: white
+
+            a:hover
+                color: white
+
+.role
+    font-weight: 400px
+
+.email
+    font-size: 14px
+    font-weight: 200px
+
+.subtitle
+  margin-left: 20%
+  color: var(--text-color)
+
+.search-bar 
+    margin: .5em 20%
+
+    input
+        margin: 0
+
+.divider
+    background-color: black
+    margin: 0 20% !important
+
+.input-container
+    display: flex
+    align-items: center
+    justify-content: center
+    gap: 5px
+    width: 100%
+    margin-bottom: 1em
+
+.tags
+    display: flex
+    gap: 5px
+    justify-content: center
+
+    .filter-card
+        padding: 2px 5px
+        background-color: var(--secondary-background-color)
+        color: var(--text-color)
+        border-radius: 5%
+
+    .selected
+        background-color: var(--background-color)
+
+.search-bar
+    display: flex
+    flex-direction: column

@@ -27,6 +27,8 @@ export default function MacrostratLithologyHierarchy({ width, height }) {
   }
   const liths: Lith[] = res.success.data;
 
+  console.log("Liths", liths);
+
   return h("div.flex.row", [
     h("div.example-container", [
       h(Hierarchy, { width, height, data: nestLiths(liths) }),

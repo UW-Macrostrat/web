@@ -1,0 +1,12 @@
+@use "sass:color";
+@use "@blueprintjs/colors/lib/scss/colors" as *;
+
+$colors: (
+  img-color: invert(0),
+  anti-img-color: invert(1),
+);
+
+$dark-colors: (
+  img-color: invert(1),
+  anti-img-color: invert(0),
+);
