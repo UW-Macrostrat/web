@@ -1,18 +1,7 @@
 import h from "./main.module.scss";
-import {
-  useAPIResult,
-  InfiniteScroll,
-  LoadingPlaceholder,
-} from "@macrostrat/ui-components";
+import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
-import {
-  PageHeader,
-  Link,
-  AssistantLinks,
-  DevLinkButton,
-  LinkCard,
-  PageBreadcrumbs,
-} from "~/components";
+import { LinkCard, PageBreadcrumbs } from "~/components";
 import { Card, Icon, Spinner, RangeSlider } from "@blueprintjs/core";
 import { useState, useEffect, useRef } from "react";
 import { ContentPage } from "~/layouts";
@@ -20,7 +9,7 @@ import { Loading } from "../../index";
 
 export function Page() {
   const [input, setInput] = useState("");
-  const [lastID, setLastID] = useState(0);
+  const [lastID, setLastID] = useState(null);
   const [data, setData] = useState([]);
   const pageSize = 20;
   const result = useStratData(lastID, input, pageSize);

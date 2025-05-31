@@ -20,11 +20,7 @@ import {
 } from "./components/Link";
 
 import "leaflet/dist/leaflet.css";
-import "../css/animate.min.css";
-import "../css/bootstrap.min.css";
-import "../css/normalize.css";
-import "../css/skeleton.css";
-import "../css/styles.css";
+import "../css/styles.scss";
 
 //import "../../dist/css/styles.min.css";
 
@@ -123,6 +119,7 @@ class App extends React.Component {
 
     this.getNavigateURL = this.getNavigateURL.bind(this);
   }
+
   getNavigateURL(item) {
     let prefix = "/" + this.props.categoryRouteLookup[item.dataset] + "/";
     if (item.id != 0) {
@@ -135,7 +132,7 @@ class App extends React.Component {
   render() {
     return (
       <BrowserRouter basename={siftPrefix}>
-        <div className="container-fluid">
+        <div className="container-fluid sift-root">
           <div
             className={
               this.state.autocompleteIsOpen ? "autocomplete-mask" : "hidden"
