@@ -6,7 +6,8 @@ import { useState } from "react";
 import h from "./main.module.scss";
 import { SETTINGS } from "@macrostrat-web/settings";
 import { useAPIResult } from "@macrostrat/ui-components";
-import { Loading, ColumnsMap } from "../index";
+import { Loading } from "../index";
+import { ColumnsMap } from "~/columns-map/index.client";
 
 export function Page(props) {
   return h(ColumnListPage, props);

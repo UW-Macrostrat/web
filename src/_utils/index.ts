@@ -21,3 +21,5 @@ export function loadableElement(func, props = null) {
 export function resolvePattern(name: string | number) {
   return `/assets/geologic-patterns/svg/${name}.svg`;
 }
+
+export * from "./fetch-helpers";

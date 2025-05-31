@@ -9,12 +9,13 @@ import { useState, useCallback, act } from "react";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { DarkModeButton } from "@macrostrat/ui-components";
 import { PieChart, Pie, Cell, ResponsiveContainer, Label } from "recharts";
-import { Loading, ColumnsMap } from "../index";
+import { Loading } from "../index";
 import { Parenthetical, Hierarchy } from "@macrostrat/data-components";
 import { Duration } from "@macrostrat/column-views";
 import { useDarkMode } from "@macrostrat/ui-components";
 import { StratNameHierarchy } from "./StratNameHierarchy";
 import { LinkCard } from "~/components/cards";
+import { ColumnsMap } from "~/columns-map/index.client";
 
 export function titleCase(str) {
   if (!str) return str;

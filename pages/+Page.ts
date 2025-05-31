@@ -1,28 +1,34 @@
-import { Image, Navbar, Footer, useMacrostratAPI } from "./index";
+import { Image, Navbar, Footer } from "./index";
 import h from "./main.module.sass";
-import { PanelCard } from "@macrostrat/map-interface";
 import { LinkCard } from "~/components/cards";
-import { useState } from "react";
 import { SETTINGS } from "@macrostrat-web/settings";
-import { Loading } from "./index";
+import { useData } from "vike-react/useData";
+
+function MacrostratStats() {
+  const { stats } = useData();
+  const { columns, units, polygons, projects } = stats;
+
+  return h("div.stats", {}, [
+    h("div.stat", {}, [
+      h("span.top-stat#n_columns", {}, formatNumber(columns)),
+      h("span.top-stat-label", {}, "Regional Rock Columns"),
+    ]),
+    h("div.stat", {}, [
+      h("span.top-stat#n_units", {}, formatNumber(units)),
+      h("span.top-stat-label", {}, "Rock Units"),
+    ]),
+    h("div.stat", {}, [
+      h("span.top-stat#n_polys", {}, formatNumber(polygons)),
+      h("span.top-stat-label", {}, "Geologic Map Polygons"),
+    ]),
+    h("div.stat", {}, [
+      h("span.top-stat#n_names", {}, formatNumber(projects)),
+      h("span.top-stat-label", {}, "Projects"),
+    ]),
+  ]);
+}
 
 export function Page() {
-  const result = useMacrostratAPI("/stats?all")?.success.data;
-
-  if (!result) {
-    return h(Loading);
-  }
-
-  let columns = 0;
-  let units = 0;
-  let polygons = 0;
-
-  result.forEach((project) => {
-    columns += project.columns;
-    units += project.units;
-    polygons += project.t_polys;
-  });
-
   return h("div.total", [
     h(Navbar),
 
@@ -33,24 +39,7 @@ export function Page() {
           h("h1.main-title", "Macrostrat"),
           h("h2.version", "v2"),
         ]),
-        h("div.stats", {}, [
-          h("div.stat", {}, [
-            h("span.top-stat#n_columns", {}, formatNumber(columns)),
-            h("span.top-stat-label", {}, "Regional Rock Columns"),
-          ]),
-          h("div.stat", {}, [
-            h("span.top-stat#n_units", {}, formatNumber(units)),
-            h("span.top-stat-label", {}, "Rock Units"),
-          ]),
-          h("div.stat", {}, [
-            h("span.top-stat#n_polys", {}, formatNumber(polygons)),
-            h("span.top-stat-label", {}, "Geologic Map Polygons"),
-          ]),
-          h("div.stat", {}, [
-            h("span.top-stat#n_names", {}, formatNumber(result.length)),
-            h("span.top-stat-label", {}, "Projects"),
-          ]),
-        ]),
+        h(MacrostratStats),
         h(
           "p.big-text",
           {},
