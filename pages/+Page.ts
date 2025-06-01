@@ -83,11 +83,11 @@ export function Page() {
         { title: "Documentation", href: "/docs" },
         h("p", "Macrostrat documentation")
       ),
-      h.if(SETTINGS.isDev)(
-        LinkCard,
-        { title: "Dev Apps", href: "/dev" },
-        h("p", "Layers and testbed apps that aren't ready for prime time")
-      ),
+      //h.if(SETTINGS.isDev)(
+      LinkCard,
+      { title: "Developer apps", href: "/dev" },
+      h("p", "Layers and testbed apps that aren't ready for prime time"),
+      //),
     ]),
     Donate,
     h(Footer),
