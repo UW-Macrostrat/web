@@ -1,50 +1,21 @@
 import { Image, Navbar, Footer } from "./index";
-import h from "./main.module.sass";
+import h from "./+Page.module.sass";
 import { LinkCard } from "~/components/cards";
 import { SETTINGS } from "@macrostrat-web/settings";
 import { useData } from "vike-react/useData";
 
-function MacrostratStats() {
-  const { stats } = useData();
-  const { columns, units, polygons, projects } = stats;
-
-  return h("div.stats", {}, [
-    h("div.stat", {}, [
-      h("span.top-stat#n_columns", {}, formatNumber(columns)),
-      h("span.top-stat-label", {}, "Regional Rock Columns"),
-    ]),
-    h("div.stat", {}, [
-      h("span.top-stat#n_units", {}, formatNumber(units)),
-      h("span.top-stat-label", {}, "Rock Units"),
-    ]),
-    h("div.stat", {}, [
-      h("span.top-stat#n_polys", {}, formatNumber(polygons)),
-      h("span.top-stat-label", {}, "Geologic Map Polygons"),
-    ]),
-    h("div.stat", {}, [
-      h("span.top-stat#n_names", {}, formatNumber(projects)),
-      h("span.top-stat-label", {}, "Projects"),
-    ]),
-  ]);
-}
-
 export function Page() {
-  return h("div.total", [
-    h(Navbar),
-
+  return h("div.page-main", [
+    h(Navbar, { className: "main-navbar" }),
     h("div.start", [
       h(Image, { className: "back-img cover-image", src: "cover_large.jpg" }),
-      h("div.text", [
-        h("div.header", {}, [
-          h("h1.main-title", "Macrostrat"),
-          h("h2.version", "v2"),
-        ]),
-        h(MacrostratStats),
+      h("div.banner", [
+        h("div.header", h("h1.main-title", "Macrostrat")),
         h(
-          "p.big-text",
-          {},
+          "h2.subtitle",
           "A platform for geological data exploration, integration, and analysis"
         ),
+        h(MacrostratStats),
       ]),
     ]),
     h("div.buttons", [
@@ -94,27 +65,28 @@ export function Page() {
       h(
         LinkCard,
         {
-          title: h("div.rockd-button-container", [
+          title: h("h3", [
             h(Image, {
               className: "rockd-png",
               src: "rockd.png",
               width: "22px",
+              height: "22px",
             }),
-            h("p", "Rockd"),
+            h("span", " Rockd"),
           ]),
           href: "https://rockd.org",
         },
-        [h("p", "Go mobile!")]
+        h("p", "Go mobile!")
+      ),
+      h(
+        LinkCard,
+        { title: "Documentation", href: "/docs" },
+        h("p", "Macrostrat documentation")
       ),
       h.if(SETTINGS.isDev)(
         LinkCard,
         { title: "Dev Apps", href: "/dev" },
         h("p", "Layers and testbed apps that aren't ready for prime time")
-      ),
-      h.if(SETTINGS.isDev)(
-        LinkCard,
-        { title: "Documentation", href: "/docs" },
-        h("p", "Macrostrat documentation")
       ),
     ]),
     Donate,
@@ -147,4 +119,28 @@ const Donate = h("div.donate-container", {}, [
 
 function formatNumber(num) {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function MacrostratStats() {
+  const { stats } = useData();
+  const { columns, units, polygons, projects } = stats;
+
+  return h("div.stats", {}, [
+    h("div.stat", {}, [
+      h("span.top-stat#n_columns", {}, formatNumber(columns)),
+      h("span.top-stat-label", {}, "Regional Rock Columns"),
+    ]),
+    h("div.stat", {}, [
+      h("span.top-stat#n_units", {}, formatNumber(units)),
+      h("span.top-stat-label", {}, "Rock Units"),
+    ]),
+    h("div.stat", {}, [
+      h("span.top-stat#n_polys", {}, formatNumber(polygons)),
+      h("span.top-stat-label", {}, "Geologic Map Polygons"),
+    ]),
+    h("div.stat", {}, [
+      h("span.top-stat#n_names", {}, formatNumber(projects)),
+      h("span.top-stat-label", {}, "Projects"),
+    ]),
+  ]);
 }

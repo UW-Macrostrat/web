@@ -1,3 +1,33 @@
+@use "sass:color"
+@use "@macrostrat/style-system/src/main.sass"
+@use "./colors" as colorOverrides
+
+@import url("https://fonts.googleapis.com/css?family=Montserrat:400,700|Source+Sans+Pro")
+
+:root
+  @each $name, $color in colorOverrides.$colors
+    --#{$name}: #{$color}
+
+  --sans-serif-font: "Source Sans Pro", sans-serif
+  --serif-font: "Merriweather", serif
+
+.secondary
+  color: var(--secondary-color)
+
+.tertiary
+  color: var(--tertiary-color)
+
+p, li, div, ul, ol
+  font-family: var(--serif-font)
+  font-size: 16px
+
+h1, h2, h3, h4, h5, h6
+  font-family: var(--sans-serif-font)
+
+span.spacer
+  min-width: 1em
+
+
 .float-right
   float: right
 

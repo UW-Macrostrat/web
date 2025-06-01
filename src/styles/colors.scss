@@ -2,6 +2,8 @@
 @use "@blueprintjs/colors/lib/scss/colors" as *;
 
 // Overrides for Macrostrat style system colors
+$dark-background: #141a1e;
+
 
 $colors: (
         secondary-color: $gray3,
@@ -24,16 +26,17 @@ $colors: (
         box-horizontal-padding: 0.8em,
         text-color: #333,
         text-subtle-color: #555,
+        dark-backgound: $dark-background,
         text-emphasized-color: #000,
         card-shadow-color: rgba(17, 20, 24, 0.15),
         error-text-color: #cd4246,
 );
 
-$dark-background: #141a1e;
 $accent: color.scale($dark-background, $lightness: 10%);
 $dark-text: $gray4;
 
 $dark-colors: (
+        dark-background: $dark-background,
         text-emphasized-color: #fff,
         text-color: $dark-text,
         text-subtle-color: $gray3,

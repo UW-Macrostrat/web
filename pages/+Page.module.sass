@@ -1,8 +1,12 @@
-.total
-  width: 100%
-
 .nohighlight
   color: white
+
+.main-navbar
+  width: 100%
+  margin: 1em 0 2em
+  display: flex
+  flex-direction: row
+  gap: 1em
 
 .start
   width: 100%
@@ -11,6 +15,7 @@
   align-items: center
   height: 50vh
   color: white
+  position: relative
 
   li
     float: left
@@ -21,41 +26,31 @@
     display: inline-block
     width: 100%
 
-.text
-  position: absolute
-  top: 5vh
-  left: 0
-  width: 100%
-  z-index: 100
+.banner
+  z-index: 30
+
+  h1, h2
+    text-shadow: var(--dark-background) 1px 0 10px
+
+.header
+  text-shadow: black 1px 0 10px
+  text-align: center
   display: flex
-  flex-direction: column
-  gap: 20px
-  height: 95vh
   justify-content: center
-  height: 50vh
+  gap: 10px
 
-  .header
-    text-shadow: black 1px 0 10px
-    text-align: center
-    display: flex
-    justify-content: center
-    gap: 10px
+  .main-title
+    font-size: 60px
+    padding: 0
 
-    .main-title
-      font-size: 60px
-      padding: 0
+  .version
+    font-size: 40px
+    padding: 0
+    margin: 0
 
-    .version
-      font-size: 40px
-      padding: 0
-      margin: 0
-
-  .big-text
-    text-align: center
-    font-family: Helvetica, sans-serif
-    font-weight: 900
-    font-size: 20px
-    text-shadow: black 1px 0 10px
+.subtitle
+  text-align: center
+  font-weight: 500
 
 .cover-image
   position: absolute
@@ -77,8 +72,9 @@
   display: inline-flex
   width: 100%
 
-.big
+.main-title
   font-size: 72px
+  font-weight: 400
   font-family: "Maven Pro", sans-serif
   text-align: center
 
@@ -117,24 +113,6 @@
   flex-direction: column
   width: 100%
   padding: 0 20%
-  background-color: var(--text-emphasized-color)
-
-  a
-    color: var(--text-emphasized-color) !important
-    text-decoration: none
-
-    &:hover
-      color: white
-
-.rockd-button-container
-  display: flex
-  align-items: center
-  gap: 5px
-
-  .rockd-png
-    width: 22px
-    height: 22px
-    float: left
 
 .country_container
   height: 100vh
@@ -191,8 +169,11 @@
 #api
   height: 100vh
 
+:root
+  --donate-height: 40vh
+
 .donate-container
-  height: 80vh
+  height: var(--donate-height)
   display: flex
   justify-content: center
   align-items: center
@@ -202,24 +183,17 @@
   width: 100%
   text-decoration: none
 
-  a
-    color: white
-    text-decoration: none
-
-    &:hover
-      text-decoration: none
-
   color: white
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6)
   font-family: "Maven Pro", sans-serif
   padding: 0
+
 
 .donate-info
   flex: 0 0 50%
   background: rgba(255, 255, 255, 0.6)
   padding: 25px
   color: black
-  width: 80%
   font-size: 18px
 
   a
@@ -230,7 +204,7 @@
 .donate-img
   position: absolute
   z-index: 5
-  height: 80vh
+  height: var(--donate-height)
   width: 100%
   object-fit: cover
 

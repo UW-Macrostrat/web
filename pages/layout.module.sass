@@ -19,7 +19,7 @@
 .app-shell
   background-color: var(--background-color)
 
-#map
+.column-map
   height: 100%
   width: 100%
   aspect-ratio: 3/2
@@ -32,16 +32,8 @@
 
 // davids
 .nav
-  position: fixed
-  top: 0
-  left: 0
-  width: 100%
-  z-index: 10000
   display: flex
   gap: 20px
-  background-color: #015eab
-  height: 5vh
-  padding: 0 10px
   align-items: center
 
   .nav-link
@@ -49,20 +41,16 @@
     justify-content: center
     align-items: center
 
-  a 
-    color: white !important
+  a
     text-align: center
     text-decoration: none
 
 
-.footer 
+.footer
   width: 100%
   position: absolute
   left: 0
-  background-color: #015EAB
   margin: 0
-  a
-    color: white !important
 
   .footer-nav
     display: flex
@@ -70,12 +58,6 @@
     justify-content: center
     align-items: center
     gap: 10px
-    
-    a
-      color: white !important
-
-    a:hover
-      text-decoration: none
 
   .footer-container
     display: flex
@@ -101,7 +83,7 @@
   .f1-text
     display: flex
     gap: 7px
-    
+
     a
       color: white
 

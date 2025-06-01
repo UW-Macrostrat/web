@@ -10,8 +10,8 @@ export function Image({ src, className, width, height }) {
   return h("img", { src: srcWithAddedPrefix, className, width, height });
 }
 
-export function Navbar() {
-  return h("div", { className: "nav" }, [
+export function Navbar({ className }) {
+  return h("nav", { className }, [
     h("a", { className: "nav-link", href: "/" }, h(MacrostratIcon)),
     h("a", { href: "/about" }, "About"),
     h("a", { href: "/publications" }, "Publications"),
