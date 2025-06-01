@@ -39,7 +39,7 @@ export function SaveLocationForm({ position, count }) {
   const submitSavedLocation = async (e) => {
     e.preventDefault();
     const payload = {
-      id: count += 1,
+      id: (count += 1),
       user_id: 46,
       location_name: formData.location_name,
       location_description: formData.location_description,
@@ -67,7 +67,6 @@ export function SaveLocationForm({ position, count }) {
       })
       .catch((error) => console.error("Error:", error));
   };
-
 
   return h("div.save-location-container", [
     h("form.save-location-form", { onSubmit: submitSavedLocation }, [
@@ -115,5 +114,3 @@ export function SaveLocationForm({ position, count }) {
     ]),
   ]);
 }
-
-

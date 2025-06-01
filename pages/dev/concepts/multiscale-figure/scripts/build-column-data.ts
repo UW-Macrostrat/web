@@ -7,9 +7,9 @@ buildMacrostratMeasurements(
   {
     col_id: 2163,
     project_id: 10,
-    status_code: "in process"
+    status_code: "in process",
   },
   { col_id: 1481 }
-).then(data => {
+).then((data) => {
   writeJSON("macrostrat/measurements", data);
 });

@@ -17,7 +17,7 @@ const apiParams = {
   "regional/column-measurements":
     "/measurements?col_id=2163,2164,2158,2159&project_id=10&response=long&show_values=true&status_code=in%20process",
   "regional/column.geo":
-    "/columns?col_id=2163&format=geojson&project_id=10&status_code=in%20process"
+    "/columns?col_id=2163&format=geojson&project_id=10&status_code=in%20process",
 };
 
 for (let key in apiParams) {
@@ -26,7 +26,7 @@ for (let key in apiParams) {
     url = apiBaseURL + url;
   }
   const promise = axios.get(url);
-  promise.then(response => {
+  promise.then((response) => {
     writeJSON(key, response.data);
   });
 }

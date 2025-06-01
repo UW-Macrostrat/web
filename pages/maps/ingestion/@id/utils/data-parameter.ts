@@ -11,7 +11,9 @@ interface DataParameters {
   };
 }
 
-const cloneDataParameters = (dataParameters: DataParameters) : DataParameters => {
+const cloneDataParameters = (
+  dataParameters: DataParameters
+): DataParameters => {
   return {
     group: dataParameters?.group,
     select: { ...dataParameters?.select },
@@ -28,11 +30,15 @@ const cloneDataParameters = (dataParameters: DataParameters) : DataParameters =>
 /*
  * Check if a column is active in the data parameters
  */
-export const isColumnActive = (dataParameters: DataParameters, column: string) => {
+export const isColumnActive = (
+  dataParameters: DataParameters,
+  column: string
+) => {
   return (
-    column in dataParameters.filter &&
-    dataParameters.filter[column].is_valid()
-  ) || column == dataParameters?.group
-}
+    (column in dataParameters.filter &&
+      dataParameters.filter[column].is_valid()) ||
+    column == dataParameters?.group
+  );
+};
 
 export { cloneDataParameters, DataParameters };

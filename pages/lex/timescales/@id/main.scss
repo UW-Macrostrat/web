@@ -1,6 +1,10 @@
-ul, h1, h2, p, h3 {
-    margin: 0;
-    padding: 0;
+ul,
+h1,
+h2,
+p,
+h3 {
+  margin: 0;
+  padding: 0;
 }
 
 .timescale-content {
@@ -15,5 +19,5 @@ tspan {
 }
 
 .visx-line {
-    stroke: var(--text-color);
+  stroke: var(--text-color);
 }

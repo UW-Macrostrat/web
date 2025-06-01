@@ -1,4 +1,5 @@
-import { fetchAPIData, getGroupedColumns } from "#/columns/utils";
+import { getGroupedColumns } from "#/columns/utils";
+import { fetchAPIData } from "~/_utils/fetch-helpers";
 
 export async function data(pageContext) {
   // `.page.server.js` files always run in Node.js; we could use SQL/ORM queries here.

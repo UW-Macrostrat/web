@@ -9,7 +9,7 @@ function createFeature(record) {
   return {
     type: "Feature",
     geometry: { type: "Point", coordinates: [lng, lat] },
-    ...rest
+    ...rest,
   };
 }
 
@@ -22,7 +22,7 @@ export function usePBDBFeatures(time: number, timeDelta: number = 2) {
       show: "time",
       min_ma: int.lag,
       max_ma: int.eag,
-      level: 3
+      level: 3,
     }
   );
   return usePlateIntersection(res?.records.map(createFeature));

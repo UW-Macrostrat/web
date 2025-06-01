@@ -4,6 +4,6 @@ import { VectorMapInspectorPage } from "./interface";
 
 export function Page() {
   return h(VectorMapInspectorPage, {
-    title: "Server-side filtering"
+    title: "Server-side filtering",
   });
 }

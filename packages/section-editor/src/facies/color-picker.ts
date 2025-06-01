@@ -15,7 +15,7 @@ class FaciesColorPicker extends Component {
   static initClass() {
     this.contextType = FaciesContext;
     this.propTypes = {
-      facies: T.object.isRequired
+      facies: T.object.isRequired,
     };
   }
   render() {
@@ -29,9 +29,9 @@ class FaciesColorPicker extends Component {
         },
         styles: {
           width: 500,
-          height: 570
-        }
-      })
+          height: 570,
+        },
+      }),
     ]);
   }
 }
@@ -42,9 +42,9 @@ const BasicFaciesSwatch = ({ facies: d, ...rest }) =>
     style: {
       backgroundColor: d.color || "black",
       width: "2em",
-      height: "2em"
+      height: "2em",
     },
-    ...rest
+    ...rest,
   });
 
 class FaciesSwatch extends Component {
@@ -57,7 +57,7 @@ class FaciesSwatch extends Component {
   static initClass() {
     this.defaultProps = {
       isEditable: true,
-      facies: null
+      facies: null,
     };
   }
   renderBasicSwatch() {
@@ -73,8 +73,8 @@ class FaciesSwatch extends Component {
       Popover,
       {
         tetherOptions: {
-          constraints: [{ attachment: "together", to: "scrollParent" }]
-        }
+          constraints: [{ attachment: "together", to: "scrollParent" }],
+        },
       },
       [this.renderBasicSwatch(), h(FaciesColorPicker, { facies })]
     );

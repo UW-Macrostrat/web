@@ -8,7 +8,7 @@ function findMatchingIntervals(
   time: number,
   minimumAgeSpan: number = 2
 ): Interval {
-  let bestIntervals = intervals.filter(int => {
+  let bestIntervals = intervals.filter((int) => {
     return (
       int.eag >= time && int.lag <= time && int.eag - int.lag >= minimumAgeSpan
     );
@@ -45,8 +45,8 @@ export function IntervalProvider({ time, children, minimumAgeSpan = 2 }) {
         matchingIntervals,
         time,
         minimumAgeSpan,
-        ageRange
-      }
+        ageRange,
+      },
     },
     children
   );

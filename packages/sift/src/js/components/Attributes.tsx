@@ -352,7 +352,7 @@ class _Attributes extends React.Component {
     }
 
     if (this.state.liths.length) {
-      console.log("liths", this.state.liths)
+      console.log("liths", this.state.liths);
       totalCharts += 1;
       lithChart = (
         <div>

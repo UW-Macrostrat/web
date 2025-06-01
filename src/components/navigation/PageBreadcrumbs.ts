@@ -220,10 +220,7 @@ export const sitemap: Routes = {
             {
               param: "@id",
               name(urlPart, ctx) {
-                return h(
-                  "code",
-                  urlPart
-                );
+                return h("code", urlPart);
               },
             },
           ],
@@ -235,10 +232,7 @@ export const sitemap: Routes = {
             {
               param: "@id",
               name(urlPart, ctx) {
-                return h(
-                  "code",
-                  ctx.pageProps?.interval?.int_id ?? urlPart
-                );
+                return h("code", ctx.pageProps?.interval?.int_id ?? urlPart);
               },
             },
           ],
@@ -257,7 +251,7 @@ export const sitemap: Routes = {
               },
             },
           ],
-        }, 
+        },
         {
           slug: "economics",
           name: "Economics",
@@ -265,14 +259,11 @@ export const sitemap: Routes = {
             {
               param: "@id",
               name(urlPart, ctx) {
-                return h(
-                  "code",
-                  ctx.pageProps?.economic?.econ_id ?? urlPart
-                );
+                return h("code", ctx.pageProps?.economic?.econ_id ?? urlPart);
               },
             },
           ],
-        }, 
+        },
         {
           slug: "timescales",
           name: "Timescales",
@@ -287,7 +278,7 @@ export const sitemap: Routes = {
               },
             },
           ],
-        }, 
+        },
       ],
     },
     columnsSubtree,

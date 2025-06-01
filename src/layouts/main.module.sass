@@ -7,8 +7,8 @@
   left: 0
 
 .content-page
-  padding: 2em 20% !important
-  padding: 0 4em
+  width: 970px
+  margin: 0 auto
   @media only screen and (max-width: 900px)
     padding: 0 1em
 
@@ -32,12 +32,14 @@
   background-color: var(--translucent-panel-background-color)
   opacity: 0.5
   z-index: 1000
+
   .page-transition-content
     // Center the content
     position: absolute
     top: 50%
     left: 50%
     transform: translate(-50%, -50%)
+
   &.page-transition-leave
     opacity: 0
 

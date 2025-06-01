@@ -1,36 +1,37 @@
-h3, h2 {
-    margin: 0;
-    padding: 0;
+h3,
+h2 {
+  margin: 0;
+  padding: 0;
 }
 
 .econ-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.3em;
+
+  .econ-class-group {
     display: flex;
     flex-direction: column;
-    gap: 1.3em;
+    gap: 1em;
 
-    .econ-class-group {
+    .econ-group {
+      border-left: 2px solid rgb(56, 62, 71);
+      padding-left: 1em;
+
+      .econ-items {
         display: flex;
-        flex-direction: column;
-        gap: 1em;
+        gap: 5px;
+        flex-wrap: wrap;
+        align-items: center;
 
-        .econ-group {
-            border-left: 2px solid rgb(56, 62, 71);
-            padding-left: 1em;
-
-                .econ-items {
-                    display: flex;
-                    gap: 5px;
-                    flex-wrap: wrap;
-                    align-items: center;
-
-                    .econ-name {
-                        padding: 2px 6px;
-                        margin: .2em 0;
-                        border-radius: 0.2em;  
-                    }
-                }
+        .econ-name {
+          padding: 2px 6px;
+          margin: 0.2em 0;
+          border-radius: 0.2em;
         }
+      }
     }
+  }
 }
 
 .search-bar {
@@ -60,7 +61,8 @@ h3, h2 {
   padding: 0.5em;
 }
 
-.filters, .econ-list-page {
+.filters,
+.econ-list-page {
   display: flex;
   flex-direction: column;
   gap: 1em;

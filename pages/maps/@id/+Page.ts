@@ -373,7 +373,11 @@ function MapLegendPanel(params) {
           h(ErrorBoundary, [
             h(MapReference, { reference: params, showSourceID: false }),
           ]),
-          h('a.global-link', { href: "/map/dev/sources/" + params.slug, target: "_blank" }, "View on global map")
+          h(
+            "a.global-link",
+            { href: "/map/dev/sources/" + params.slug, target: "_blank" },
+            "View on global map"
+          ),
         ]),
         h("div.flex.row", [
           h("h3", "Legend"),

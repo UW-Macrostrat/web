@@ -2,7 +2,7 @@ import { addFilterToURL, Filter } from "../utils/filter";
 import { DataParameters } from "../utils/data-parameter";
 import { secureFetch } from "@macrostrat-web/security";
 import { ingestPrefix } from "@macrostrat-web/settings";
-import { Selection } from "../table"
+import { Selection } from "../table";
 import { createTableUpdate } from "../utils";
 
 export function buildURL(baseURL: string, dataParameters: DataParameters) {
@@ -26,7 +26,7 @@ export function buildURL(baseURL: string, dataParameters: DataParameters) {
   if (dataParameters?.filter != undefined) {
     Object.values(dataParameters.filter).forEach((filter) => {
       url = addFilterToURL(url, filter);
-    })
+    });
   }
 
   return url;
@@ -73,7 +73,7 @@ export function isEmptyArray(arr) {
   return arr.length == 0 || arr.every((x) => x == null);
 }
 
-export const range = (start, stop, step = 1) : number[] =>
+export const range = (start, stop, step = 1): number[] =>
   Array(Math.ceil((stop - start) / step))
     .fill(start)
     .map((x, y) => x + y * step);
@@ -102,7 +102,10 @@ export const updateInput = async (input, value) => {
   input.dispatchEvent(event);
 };
 
-export const getSelectedColumns = (columns: string[], selection: Selection[] | undefined) => {
+export const getSelectedColumns = (
+  columns: string[],
+  selection: Selection[] | undefined
+) => {
   if (selection == undefined || selection.length == 0) {
     return undefined;
   }
@@ -117,34 +120,28 @@ export const getSelectedColumns = (columns: string[], selection: Selection[] | u
   } else {
     return undefined;
   }
-}
+};
 
 export const selectionToText = (
   selection: Selection,
   columns: string[],
   data: Record<string, string | number | boolean | null>[]
 ) => {
-
   // If no text is selected return empty string
   if (selection?.cols == undefined || selection?.rows == undefined) {
     return "";
   }
 
-  let clipboardValue = range(
-    selection.rows[0],
-    selection.rows[1] + 1
-  ).map((rowIndex) => {
-    return range(selection.cols[0], selection.cols[1] + 1).map(
-      (colIndex) => {
+  let clipboardValue = range(selection.rows[0], selection.rows[1] + 1).map(
+    (rowIndex) => {
+      return range(selection.cols[0], selection.cols[1] + 1).map((colIndex) => {
         return data[rowIndex][columns[colIndex]];
-      }
-    );
-  });
+      });
+    }
+  );
 
-  return clipboardValue
-    .map((row) => row.join("\t"))
-    .join("\n");
-}
+  return clipboardValue.map((row) => row.join("\t")).join("\n");
+};
 
 export const textToTableUpdates = (
   text: string,
@@ -154,9 +151,7 @@ export const textToTableUpdates = (
   data: Record<string, string | number | boolean | null>[],
   dataParameters: DataParameters
 ) => {
-  let clipboardValue = text
-    .split("\n")
-    .map((row) => row.split("\t"));
+  let clipboardValue = text.split("\n").map((row) => row.split("\t"));
 
   let rowRange = range(selection.rows[0], selection.rows[1] + 1);
   let colRange = range(selection.cols[0], selection.cols[1] + 1);
@@ -187,54 +182,55 @@ export const textToTableUpdates = (
     return newTableUpdates;
   }
 
-  return []
-}
+  return [];
+};
 
-export const getData = async (
-  url: string,
-  parameters: DataParameters
-)  => {
-
-  const parameterizedURL = buildURL(url, parameters)
+export const getData = async (url: string, parameters: DataParameters) => {
+  const parameterizedURL = buildURL(url, parameters);
   const response = await fetch(parameterizedURL, {
     method: "GET",
     headers: {
-      "Content-Type": "application/json"
-    }
+      "Content-Type": "application/json",
+    },
   });
 
   const data = await response.json();
   const totalNumberOfRows = parseInt(response.headers.get("X-Total-Count"));
 
   return { data, totalNumberOfRows };
-}
+};
 
 export const getCellSelected = (
   columns: string[],
   selection: Selection[]
-) : {rowIndex: number, columnIndex: number} | undefined => {
+): { rowIndex: number; columnIndex: number } | undefined => {
   const firstSelection = selection[0];
   if (firstSelection?.cols == undefined || firstSelection?.rows == undefined) {
     return undefined;
   }
 
-  if(
+  if (
     firstSelection.cols[0] == firstSelection.cols[1] &&
     firstSelection.rows[0] == firstSelection.rows[1]
   ) {
     return {
       rowIndex: firstSelection.rows[0],
       columnIndex: firstSelection.cols[0],
-    }
+    };
   }
-}
+};
 
 export function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export const reorderColumns = (columns: string[], visibleColumns: string[], oldIndex: number, newIndex: number, length: number) => {
-
+export const reorderColumns = (
+  columns: string[],
+  visibleColumns: string[],
+  oldIndex: number,
+  newIndex: number,
+  length: number
+) => {
   let newColumns = [...columns];
 
   // Get the columns that are being moved and then remove them
@@ -244,12 +240,12 @@ export const reorderColumns = (columns: string[], visibleColumns: string[], oldI
   newColumns = newColumns.filter((c) => !movedColumns.includes(c));
 
   // Place the columns at the new index
-  if(newIndex == visibleColumns.length - 1) {
+  if (newIndex == visibleColumns.length - 1) {
     newColumns = [...newColumns, ...movedColumns];
   } else {
     let columnAfter;
-    if(newIndex > oldIndex) {
-      columnAfter = visibleColumns[newIndex + length]
+    if (newIndex > oldIndex) {
+      columnAfter = visibleColumns[newIndex + length];
     } else {
       columnAfter = visibleColumns[newIndex];
     }
@@ -258,8 +254,8 @@ export const reorderColumns = (columns: string[], visibleColumns: string[], oldI
     newColumns.splice(indexAfter, 0, ...movedColumns);
   }
 
-  return newColumns
-}
+  return newColumns;
+};
 
 export const downloadSourceFiles = async (id: number) => {
   const objects_response = await fetch(
@@ -268,8 +264,8 @@ export const downloadSourceFiles = async (id: number) => {
   const objects: any[] = await objects_response.json();
 
   // Download each function sleeping for a second between each attempt
-  for(const o of objects) {
-    await sleep(1000)
-    download_file(o.pre_signed_url)
+  for (const o of objects) {
+    await sleep(1000);
+    download_file(o.pre_signed_url);
   }
-}
+};

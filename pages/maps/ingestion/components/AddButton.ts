@@ -47,7 +47,7 @@ const Button = ({ onClick }: { onClick: () => void }) => {
 const Input = ({
   ingestId,
   onChange,
-  onBlur
+  onBlur,
 }: {
   ingestId: number;
   onChange: () => Promise<void>;

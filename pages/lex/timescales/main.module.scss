@@ -1,6 +1,8 @@
-h3, h2, h1 {
-    margin: 0;
-    padding: 0;
+h3,
+h2,
+h1 {
+  margin: 0;
+  padding: 0;
 }
 
 .timescale-list-page {
@@ -16,26 +18,26 @@ h3, h2, h1 {
 }
 
 .timescale-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.3em;
+
+  h2 {
+    margin: 0.5em 0;
+  }
+
+  .timescale-items {
     display: flex;
-    flex-direction: column;
-    gap: 1.3em;
+    gap: 5px;
+    flex-wrap: wrap;
+    align-items: center;
 
-    h2 {
-      margin: 0.5em 0;
+    .timescale-name {
+      padding: 2px 6px;
+      margin: 0.2em 0;
+      border-radius: 0.2em;
     }
-
-    .timescale-items {
-        display: flex;
-        gap: 5px;
-        flex-wrap: wrap;
-        align-items: center;
-
-        .timescale-name {
-            padding: 2px 6px;
-            margin: .2em 0;
-            border-radius: 0.2em;  
-        }
-    }
+  }
 }
 
 .search-bar {
@@ -52,7 +54,7 @@ h3, h2, h1 {
     background-color: var(--background-color);
     color: var(--text-emphasized-color);
     font-size: 1em;
-    margin: 3px;  
+    margin: 3px;
 
     &:focus {
       outline: none;
@@ -68,7 +70,8 @@ h3, h2, h1 {
   gap: 0.5em;
 }
 
-ul, li { 
+ul,
+li {
   margin: 0;
 }
 

@@ -13,7 +13,7 @@ export function useMacrostratFeatures() {
     {
       format: "geojson",
       response: "light",
-      interval_name: interval.nam
+      interval_name: interval.nam,
     }
   );
 

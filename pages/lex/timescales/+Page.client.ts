@@ -11,121 +11,134 @@ import { useEffect } from "react";
 import { Loading } from "../../index";
 
 export function Page() {
-    const [input, setInput] = useState("");
-    const [age, setAge] = useState([0, 4000]);
-    const [clickedInterval, setClickedInterval] = useState(null);
-    const res = useAPIResult(SETTINGS.apiV2Prefix + "/defs/timescales?all")?.success.data;
+  const [input, setInput] = useState("");
+  const [age, setAge] = useState([0, 4000]);
+  const [clickedInterval, setClickedInterval] = useState(null);
+  const res = useAPIResult(SETTINGS.apiV2Prefix + "/defs/timescales?all")
+    ?.success.data;
 
-    useEffect(() => {
-      if (!clickedInterval) return;
+  useEffect(() => {
+    if (!clickedInterval) return;
 
-      const fetchInterval = async () => {
-        try {
-          const res = await fetch(`https://macrostrat.org/api/defs/intervals?name=${clickedInterval}`);
-          const data = await res.json();
-          const clickedData = data?.success?.data?.[0];
-          if (clickedData) {
-            const url = "/lex/intervals/" + clickedData.int_id;
-            window.open(url, "_blank");
-          }
-        } catch (error) {
-          console.error("Error fetching interval data:", error);
+    const fetchInterval = async () => {
+      try {
+        const res = await fetch(
+          `https://macrostrat.org/api/defs/intervals?name=${clickedInterval}`
+        );
+        const data = await res.json();
+        const clickedData = data?.success?.data?.[0];
+        if (clickedData) {
+          const url = "/lex/intervals/" + clickedData.int_id;
+          window.open(url, "_blank");
         }
-      };
-
-      fetchInterval();
-    }, [clickedInterval]);
-
-    if (res == null) return h(Loading);
-
-    const handleChange = (event) => {
-        setInput(event.target.value.toLowerCase());
+      } catch (error) {
+        console.error("Error fetching interval data:", error);
       }
+    };
 
-    const filtered = res.filter((d) => {
-        const name = d.timescale?.toLowerCase() || "";
-        const max_age = d.max_age ? parseInt(d.max_age, 10) : 4000;
-        const min_age = d.min_age ? parseInt(d.min_age, 10) : 0; 
-        
-        const matchesName = name.includes(input);
-        const matchesAgeRange = max_age >= age[0] && min_age <= age[1];
+    fetchInterval();
+  }, [clickedInterval]);
 
-        return matchesName && matchesAgeRange;
-    });
+  if (res == null) return h(Loading);
 
-    const width = window.screen.width;
-    const timescaleWidth = width * .6 - 40;
-    const handleClick = (timescale) => {
-        const parent = timescale.target.parentElement;
-        let selected;
+  const handleChange = (event) => {
+    setInput(event.target.value.toLowerCase());
+  };
 
-        // container clicked
-        const containerClickedData = parent.className.split(" ")[1];
+  const filtered = res.filter((d) => {
+    const name = d.timescale?.toLowerCase() || "";
+    const max_age = d.max_age ? parseInt(d.max_age, 10) : 4000;
+    const min_age = d.min_age ? parseInt(d.min_age, 10) : 0;
 
-        if(containerClickedData === "interval-label") {
-          const labelClickedData = parent.parentElement.parentElement.className.split(" ")[1];
-          selected = labelClickedData
-        } else {
-          selected = containerClickedData
-        }
+    const matchesName = name.includes(input);
+    const matchesAgeRange = max_age >= age[0] && min_age <= age[1];
 
-        setClickedInterval(selected);
+    return matchesName && matchesAgeRange;
+  });
+
+  const width = window.screen.width;
+  const timescaleWidth = width * 0.6 - 40;
+  const handleClick = (timescale) => {
+    const parent = timescale.target.parentElement;
+    let selected;
+
+    // container clicked
+    const containerClickedData = parent.className.split(" ")[1];
+
+    if (containerClickedData === "interval-label") {
+      const labelClickedData =
+        parent.parentElement.parentElement.className.split(" ")[1];
+      selected = labelClickedData;
+    } else {
+      selected = containerClickedData;
     }
 
-    return h(ContentPage, { className: "timescale-list-page"}, [
-      h(PageBreadcrumbs, { title: "Timescales" }),
-      h(Card, { className: "filters" }, [
-        h('h2', "Filters"),
-        h('div.name-filter', [
-          h('div.search-bar', [
-            h(Icon, { icon: "search" }),
-            h('input', {
-              type: "text",
-              placeholder: "Filter by name...",
-              onChange: handleChange,
-            }),
-          ])
-        ]),     
-        h('div.age-filter', [
-          h('p', "Filter by ages"),
-          h(RangeSlider, {
-            min: 0,
-            max: 4000,
-            stepSize: 10,
-            labelStepSize: 1000,
-            value: [age[0], age[1]],
-            onChange: (value) => {
-              setAge(value);
-            },
+    setClickedInterval(selected);
+  };
+
+  return h(ContentPage, { className: "timescale-list-page" }, [
+    h(PageBreadcrumbs, { title: "Timescales" }),
+    h(Card, { className: "filters" }, [
+      h("h2", "Filters"),
+      h("div.name-filter", [
+        h("div.search-bar", [
+          h(Icon, { icon: "search" }),
+          h("input", {
+            type: "text",
+            placeholder: "Filter by name...",
+            onChange: handleChange,
           }),
-        ]), 
-        h('div.timescale', 
-          h(Timescale, { 
-            length: timescaleWidth, 
-            levels: [1,5], 
-            ageRange: [age[0], age[1]], 
-            absoluteAgeScale: true, 
-            onClick: handleClick 
-          }
-        ))
+        ]),
       ]),
-      h(Divider),
-      h('div.timescale-list', filtered.map((data) => TimescaleItem({ data }))),
-    ])
+      h("div.age-filter", [
+        h("p", "Filter by ages"),
+        h(RangeSlider, {
+          min: 0,
+          max: 4000,
+          stepSize: 10,
+          labelStepSize: 1000,
+          value: [age[0], age[1]],
+          onChange: (value) => {
+            setAge(value);
+          },
+        }),
+      ]),
+      h(
+        "div.timescale",
+        h(Timescale, {
+          length: timescaleWidth,
+          levels: [1, 5],
+          ageRange: [age[0], age[1]],
+          absoluteAgeScale: true,
+          onClick: handleClick,
+        })
+      ),
+    ]),
+    h(Divider),
+    h(
+      "div.timescale-list",
+      filtered.map((data) => TimescaleItem({ data }))
+    ),
+  ]);
 }
 
 function TimescaleItem({ data }) {
-
   const { timescale, min_age, max_age, n_intervals, timescale_id } = data;
 
-  return h(Popover, {
-    className: "timescale-item-popover",
-    content: h('div.timescale-tooltip')
-    }, 
-    h(LinkCard, { className: 'timescale-item', href: "/lex/timescales/" + timescale_id }, [
-      h('h1.timescale-name', titleCase(timescale)),
-      h('h3', `${max_age} - ${min_age} Ma`),
-      h('p', `Intervals: ${n_intervals}`),
-    ])
-  )
+  return h(
+    Popover,
+    {
+      className: "timescale-item-popover",
+      content: h("div.timescale-tooltip"),
+    },
+    h(
+      LinkCard,
+      { className: "timescale-item", href: "/lex/timescales/" + timescale_id },
+      [
+        h("h1.timescale-name", titleCase(timescale)),
+        h("h3", `${max_age} - ${min_age} Ma`),
+        h("p", `Intervals: ${n_intervals}`),
+      ]
+    )
+  );
 }
