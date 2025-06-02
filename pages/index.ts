@@ -11,6 +11,7 @@ import {
 } from "@macrostrat/map-interface";
 import { useState, useEffect } from 'react'
 import mapboxgl from 'mapbox-gl';
+import { map } from "underscore";
 
 export function Image({ src, className, width, height }) {
     const srcWithAddedPrefix = "https://storage.macrostrat.org/assets/web/main-page/" + src;
@@ -73,6 +74,7 @@ export function Loading() {
 
 export function ColumnsMap({columns}) {
   const [mapInstance, setMapInstance] = useState(null); 
+  const [mapBounds, setMapBounds] = useState(null);
 
   const mapPosition = {
     camera: {
@@ -84,6 +86,7 @@ export function ColumnsMap({columns}) {
 
   const handleMapLoaded = (map) => {
     setMapInstance(map);
+    setMapBounds(map.getBounds());
   };
 
   useEffect(() => {
@@ -94,7 +97,10 @@ export function ColumnsMap({columns}) {
   }, [columns, mapInstance]);
 
   const fitMapToColumns = (map, columns) => {
-    if(columns.features.length > 10) return;
+    if(columns.features.length > 10) {
+      map.fitBounds(mapBounds)
+      return;
+    }
 
     const bounds = new mapboxgl.LngLatBounds();
 
@@ -120,7 +126,7 @@ export function ColumnsMap({columns}) {
         left: 200,
         right: 20
       },
-      animate: false
+      animate: true
     });
   }
 
