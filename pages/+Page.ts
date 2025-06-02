@@ -84,11 +84,9 @@ export function Page() {
         h("p", "Macrostrat documentation")
       ),
       h.if(isDev)(
-        h(
-          LinkCard,
-          { title: "Developer apps", href: "/dev" },
-          h("p", "Layers and testbed apps that aren't ready for prime time")
-        )
+        LinkCard,
+        { title: "Developer apps", href: "/dev" },
+        h("p", "Layers and testbed apps that aren't ready for prime time")
       ),
     ]),
     Donate,

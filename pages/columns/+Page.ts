@@ -3,16 +3,24 @@ import { PageHeader, Link, AssistantLinks, DevLinkButton } from "~/components";
 import { Divider, AnchorButton, Card, Icon } from "@blueprintjs/core";
 import { useState } from "react";
 import h from "./main.module.scss";
-import { onDemand } from "~/_utils";
 import { useData } from "vike-react/useData";
+import { ClientOnly } from "vike-react/ClientOnly";
 
 export function Page(props) {
   return h(ColumnListPage, props);
 }
 
-const ColumnsMapContainer = onDemand(() =>
-  import("./map").then((d) => d.ColumnsMapContainer)
-);
+function ColumnMapContainer(props) {
+  return h(
+    ClientOnly,
+    {
+      load: () => import("./map.client").then((d) => d.ColumnsMapContainer),
+      fallback: h("div.loading", "Loading map..."),
+      deps: [props.columnIDs, props.projectID],
+    },
+    (component) => h(component, props)
+  );
+}
 
 function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const { columnGroups, project } = useData();
@@ -57,7 +65,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
     h(AssistantLinks, [
       h(AnchorButton, { href: "/projects", minimal: true }, "Projects"),
       h(DevLinkButton, { href: "/columns/correlation" }, "Correlation chart"),
-      h(ColumnsMapContainer, { columnIDs, projectID: project.project_id }),
+      h(ColumnMapContainer, { columnIDs, projectID: project?.project_id }),
     ]),
     h(ContentPage, [
       h(PageHeader, { title }),
