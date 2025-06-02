@@ -7,11 +7,14 @@ import { ContentPage } from "~/layouts";
 import { Loading } from "./index";
 import h from "./postgrest.module.scss";
 
-export function PostgrestPage({ table, order_col, filter_col, pageSize, ItemList, start = 0 }) {
+export function PostgrestPage({ table, order_col, filter_col, pageSize, ItemList, start = 0, order = "asc", order_col2 = null }) {
     const [input, setInput] = useState("");
-    const [lastID, setLastID] = useState(start);
+    const [lastID, setLastID] = useState(0);
+    const [lastID2, setLastID2] = useState(start);
     const [data, setData] = useState([]);
-    const url = `https://dev.macrostrat.org/api/pg/${table}?order=${order_col}.asc&${filter_col}=like.*${input}*&limit=${pageSize}&${order_col}=gt.${lastID}`
+    const url1 = `https://dev.macrostrat.org/api/pg/${table}?${filter_col}=like.*${input}*&limit=${pageSize}&${order_col}=gt.${lastID}&order=${order_col}.${order}`;
+    const url2 = `https://dev.macrostrat.org/api/pg/${table}?${filter_col}=like.*${input}*&limit=${pageSize}&or=(${order_col2}.gt.${lastID2},and(${order_col2}.eq.${lastID2},${order_col}.gt.${lastID}))&order=${order_col2 ? order_col2 : order_col }.${order}`;
+    const url = order_col2 ? url2 : url1;
     const result = useAPIResult(url);
 
     useEffect(() => {
@@ -21,7 +24,8 @@ export function PostgrestPage({ table, order_col, filter_col, pageSize, ItemList
     }, [result]);
 
     useEffect(() => {
-        // Example: Reset data if lastID changes
+        setLastID(0);
+        setLastID2(start);
         setData([]);
     }, [input]);
 
@@ -46,11 +50,11 @@ export function PostgrestPage({ table, order_col, filter_col, pageSize, ItemList
             ])
         ]),
         ItemList({ data }),
-        LoadMoreTrigger({ data, setLastID, pageSize, result, order_col }),
+        LoadMoreTrigger({ data, setLastID, pageSize, result, order_col, setLastID2, order_col2 }),
     ]);          
 }
 
-function LoadMoreTrigger({ data, setLastID, pageSize, result, order_col }) {
+function LoadMoreTrigger({ data, setLastID, pageSize, result, order_col, setLastID2, order_col2 }) {
   const ref = useRef(null);
 
   useEffect(() => {
@@ -60,6 +64,7 @@ function LoadMoreTrigger({ data, setLastID, pageSize, result, order_col }) {
       if (entry.isIntersecting) {
         if (data.length > 0) {
             setLastID(data[data.length - 1][order_col]);
+            setLastID2(data[data.length - 1][order_col2]);
         }
       }
     });

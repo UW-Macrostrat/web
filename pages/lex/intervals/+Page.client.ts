@@ -14,11 +14,12 @@ import { group } from "console";
 export function Page() {
     return h(PostgrestPage, {
         table: "intervals",
-        order_col: "interval_type",
+        order_col: "id",
+        order_col2: "interval_type",
         filter_col: "interval_name",
-        pageSize: 20,
+        pageSize: 50,
         ItemList,
-        start: "supereon"
+        start: "supereon",
     });
 }
 
@@ -28,7 +29,12 @@ function ItemList({ data }) {
     if (!acc[intType]) {
       acc[intType] = [];
     }
-    acc[intType].push(item);
+    
+    const alreadyExists = acc[intType].some(existing => existing.id === item.id);
+    if (!alreadyExists) {
+      acc[intType].push(item);
+    }
+
     return acc;
   }, {});
 
@@ -44,17 +50,17 @@ function ItemList({ data }) {
 }
 
 function Item({ data }) {
-  const { interval_name, interval_color, abbrev, b_age, int_id, t_age } = data;
+  const { interval_name, interval_color, abbrev, age_bottom, age_top, id } = data;
   const chromaColor = interval_color ? asChromaColor(interval_color) : null;
   const luminance = .9;
 
   return h(Popover, {
     className: "int-item-popover",
     content: h('div.int-tooltip', [
-        h('div.int-tooltip-id', "ID: #" + int_id),
-        h('div.int-tooltip-ages', b_age + " - " + t_age + " Ma"),
+        h('div.int-tooltip-id', "ID: #" + id),
+        h('div.int-tooltip-ages', age_bottom + " - " + age_top + " Ma"),
         abbrev ? h('div.int-tooltip-abbrev', "Abbreviation - " + abbrev) : null,
-        h(Link, { href: "/lex/intervals/" + int_id }, "View details")
+        h(Link, { href: "/lex/intervals/" + id }, "View details")
       ]),
     }, 
     h('div.int-item', [
