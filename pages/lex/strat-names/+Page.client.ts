@@ -9,7 +9,7 @@ import { Loading } from "../../index";
 
 export function Page() {
   const [input, setInput] = useState("");
-  const [lastID, setLastID] = useState(null);
+  const [lastID, setLastID] = useState(0);
   const [data, setData] = useState([]);
   const pageSize = 20;
   const result = useStratData(lastID, input, pageSize);
