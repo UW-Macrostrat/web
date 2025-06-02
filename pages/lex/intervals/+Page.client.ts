@@ -7,7 +7,62 @@ import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { Loading } from "../../index";
+import { PostgrestPage } from "../../PostgrestPage"
+import { LinkCard } from "~/components/cards";
+import { group } from "console";
 
+export function Page() {
+    return h(PostgrestPage, {
+        table: "intervals",
+        order_col: "interval_type",
+        filter_col: "interval_name",
+        pageSize: 20,
+        ItemList,
+        start: "supereon"
+    });
+}
+
+function ItemList({ data }) {
+  const grouped = data.reduce((acc, item) => {
+    const intType = item.interval_type?.trim?.() || "Uncategorized"; // Default to "Uncategorized" if no type
+    if (!acc[intType]) {
+      acc[intType] = [];
+    }
+    acc[intType].push(item);
+    return acc;
+  }, {});
+
+  console.log("Grouped intervals:", grouped);
+  return h('div.int-list',
+    Object.entries(grouped).map(([intType, group]) =>
+      h('div.int-group', [
+        h('h2', intType),
+        h('div.int-items', group.map((d) => h(Item, { data: d, key: d.environ_id })))
+      ])
+    )
+  )
+}
+
+function Item({ data }) {
+  const { interval_name, interval_color, abbrev, b_age, int_id, t_age } = data;
+  const chromaColor = interval_color ? asChromaColor(interval_color) : null;
+  const luminance = .9;
+
+  return h(Popover, {
+    className: "int-item-popover",
+    content: h('div.int-tooltip', [
+        h('div.int-tooltip-id', "ID: #" + int_id),
+        h('div.int-tooltip-ages', b_age + " - " + t_age + " Ma"),
+        abbrev ? h('div.int-tooltip-abbrev', "Abbreviation - " + abbrev) : null,
+        h(Link, { href: "/lex/intervals/" + int_id }, "View details")
+      ]),
+    }, 
+    h('div.int-item', [
+      h('div.int-name', { style: { "backgroundColor": chromaColor?.luminance(1 - luminance).hex(), "color": chromaColor?.luminance(luminance).hex()} }, interval_name),
+    ])
+  )
+}
+/*
 export function Page() {
     const [input, setInput] = useState("");
     const [age, setAge] = useState([0, 4600]);
@@ -119,6 +174,12 @@ function getContrastTextColor(bgColor) {
   return luminance > 0.6 ? '#000000' : '#FFFFFF';
 }
 
+
+function UpperCase(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+*/
+
 function groupByIntType(items) {
   return items.reduce((acc, item) => {
     const intType = item.int_type?.trim?.();
@@ -131,9 +192,4 @@ function groupByIntType(items) {
     acc[intType].push(item);
     return acc;
   }, {});
-}
-
-
-function UpperCase(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
 }

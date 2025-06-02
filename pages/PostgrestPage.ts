@@ -7,13 +7,12 @@ import { ContentPage } from "~/layouts";
 import { Loading } from "./index";
 import h from "./postgrest.module.scss";
 
-export function PostgrestPage({ table, order_col, filter_col, pageSize, ItemList }) {
+export function PostgrestPage({ table, order_col, filter_col, pageSize, ItemList, start = 0 }) {
     const [input, setInput] = useState("");
-    const [lastID, setLastID] = useState(0);
+    const [lastID, setLastID] = useState(start);
     const [data, setData] = useState([]);
-    const result = useAPIResult(`https://dev.macrostrat.org/api/pg/${table}?order=${order_col}.asc&${filter_col}=like.*${input}*&limit=${pageSize}&${order_col}=gt.` + lastID);
-
-    console.log("result", result)
+    const url = `https://dev.macrostrat.org/api/pg/${table}?order=${order_col}.asc&${filter_col}=like.*${input}*&limit=${pageSize}&${order_col}=gt.${lastID}`
+    const result = useAPIResult(url);
 
     useEffect(() => {
         if (result) {
@@ -60,7 +59,7 @@ function LoadMoreTrigger({ data, setLastID, pageSize, result, order_col }) {
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
         if (data.length > 0) {
-          setLastID(data[data.length - 1][order_col]);
+            setLastID(data[data.length - 1][order_col]);
         }
       }
     });
