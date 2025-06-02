@@ -7,6 +7,7 @@ import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { Loading } from "../../index";
+import { IntervalTag } from "@macrostrat/data-components";
 
 export function Page() {
   const [input, setInput] = useState("");
@@ -91,6 +92,9 @@ function EconItem({ data }) {
   const { name, color, abbrev, b_age, int_id, t_age, timescales } = data;
   const chromaColor = color ? asChromaColor(color) : null;
   const luminance = 0.9;
+  data.id = int_id;
+  
+  // return IntervalTag({ showAgeRange: true, interval: data });
 
   return h(
     Popover,
@@ -116,22 +120,6 @@ function EconItem({ data }) {
       ),
     ])
   );
-}
-
-function getContrastTextColor(bgColor) {
-  // Remove '#' if present
-  const color = bgColor.replace("#", "");
-
-  // Parse r, g, b
-  const r = parseInt(color.substr(0, 2), 16);
-  const g = parseInt(color.substr(2, 2), 16);
-  const b = parseInt(color.substr(4, 2), 16);
-
-  // Calculate luminance
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-
-  // Return black or white depending on luminance
-  return luminance > 0.6 ? "#000000" : "#FFFFFF";
 }
 
 function groupByIntType(items) {
