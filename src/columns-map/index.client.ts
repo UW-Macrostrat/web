@@ -55,7 +55,6 @@ export function ColumnsMap({ columns }) {
         left: 20,
         right: 20,
       },
-      animate: false,
     });
   };
 

@@ -12,16 +12,19 @@ export function ColumnsMapContainer({ columnIDs }) {
 }
 
 function ColumnsMapInner({ columnIDs = null }) {
-  console.log("ColumnsMapInner", columnIDs);
-  const cols = columnIDs != null ? "col_id=" + columnIDs?.join(",") : "all=1";
+  const columnData = useAPIResult(apiV2Prefix + "/columns?all&format=geojson");
 
-  const columnData = useAPIResult(
-    apiV2Prefix + "/columns?" + cols + "&response=long&format=geojson"
-  );
+  let columns = columnData?.success?.data;
 
-  const columns = columnData?.success?.data;
-
-  console.log("Column data", columnData);
+  // Filter columns on the client side
+  if (columnIDs != null) {
+    columns = {
+      type: "FeatureCollection",
+      features: columns.features.filter((feature) =>
+        columnIDs.includes(feature.properties.col_id)
+      ),
+    };
+  }
 
   return h(
     "div.column-container",
