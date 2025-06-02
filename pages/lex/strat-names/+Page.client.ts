@@ -9,10 +9,12 @@ import { Loading } from "../../index";
 
 export function Page() {
   const [input, setInput] = useState("");
-  const [lastID, setLastID] = useState(null);
+  const [lastID, setLastID] = useState(0);
   const [data, setData] = useState([]);
   const pageSize = 20;
   const result = useStratData(lastID, input, pageSize);
+
+  console.log("Strat names result:", result);
 
   useEffect(() => {
     if (result) {
@@ -73,6 +75,7 @@ function useStratData(lastID, input, pageSize) {
   const result = useAPIResult(
     `${SETTINGS.apiV2Prefix}/defs/strat_names?page_size=${pageSize}&last_id=${lastID}&strat_name_like=${input}`
   );
+  console.log("API result:", `${SETTINGS.apiV2Prefix}/defs/strat_names?page_size=${pageSize}&last_id=${lastID}&strat_name_like=${input}`);
   return result?.success?.data;
 }
 
