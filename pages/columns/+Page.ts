@@ -3,10 +3,8 @@ import { PageHeader, Link, AssistantLinks, DevLinkButton } from "~/components";
 import { Divider, AnchorButton, Card, Icon } from "@blueprintjs/core";
 import { useState } from "react";
 import h from "./main.module.scss";
-import { apiV2Prefix } from "@macrostrat-web/settings";
-import { useAPIResult } from "@macrostrat/ui-components";
-import { Loading } from "../index";
 import { onDemand } from "~/_utils";
+import { useData } from "vike-react/useData";
 
 export function Page(props) {
   return h(ColumnListPage, props);
@@ -17,30 +15,10 @@ const ColumnsMapContainer = onDemand(() =>
 );
 
 function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
-  let columnGroups;
-  const columnRes = useAPIResult(apiV2Prefix + "/columns?all")?.success?.data;
+  const { columnGroups } = useData();
+
   const [columnInput, setColumnInput] = useState("");
   const shouldFilter = columnInput.length >= 3;
-
-  if (columnRes) {
-    const grouped = {};
-
-    for (const item of columnRes) {
-      const key = item.col_group_id;
-
-      if (!grouped[key]) {
-        grouped[key] = {
-          name: item.col_group,
-          id: item.col_group_id,
-          columns: [],
-        };
-      }
-
-      grouped[key].columns.push(item);
-    }
-
-    columnGroups = Object.values(grouped);
-  }
 
   const filteredGroups = shouldFilter
     ? columnGroups?.filter((group) => {
@@ -74,8 +52,6 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   };
 
   const allGroups = filteredGroups ?? columnGroups ?? [];
-
-  if (!columnRes) return h(Loading);
 
   return h("div.column-list-page", [
     h(AssistantLinks, [
