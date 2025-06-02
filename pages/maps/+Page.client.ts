@@ -1,4 +1,4 @@
-import h from "@macrostrat/hyper";
+import h from "./main.module.scss";
 import { PostgrestPage } from "../PostgrestPage"
 import { LinkCard } from "~/components/cards";
 
@@ -13,7 +13,12 @@ export function Page() {
 }
 
 function Item({ data }) {
-    const { name, source_id } = data;
+    const { name, source_id, scale } = data;
 
-    return h(LinkCard, { href: "/lex/strat-names/" + source_id }, name)
+    return h(LinkCard, { href: "/maps/" + source_id, title: 
+        h('div.item-title', [
+            h('p', name),
+            h('div', { className: "size " + scale }, scale)
+        ])
+    })
 }

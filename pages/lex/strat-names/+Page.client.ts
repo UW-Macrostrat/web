@@ -8,12 +8,15 @@ export function Page() {
         order_col: "id",
         filter_col: "strat_name",
         pageSize: 20,
-        Item,
+        ItemList,
     });
 }
 
-function Item({ data }) {
-    const { strat_name, id } = data;
+function ItemList({ data }) {
+    return h("div", { className: "item-list" }, data.map(item => h(Item, { key: item.id, data: item })));
+}
 
+function Item({ data }) {
+    const { strat_name, id } = data;    
     return h(LinkCard, { href: "/lex/strat-names/" + id }, strat_name)
 }

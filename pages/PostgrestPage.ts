@@ -5,9 +5,9 @@ import { Card, Icon, Spinner, RangeSlider } from "@blueprintjs/core";
 import { useState, useEffect, useRef } from "react";
 import { ContentPage } from "~/layouts";
 import { Loading } from "./index";
-import h from "@macrostrat/hyper";
+import h from "./postgrest.module.scss";
 
-export function PostgrestPage({ table, order_col, filter_col, pageSize, Item }) {
+export function PostgrestPage({ table, order_col, filter_col, pageSize, ItemList }) {
     const [input, setInput] = useState("");
     const [lastID, setLastID] = useState(0);
     const [data, setData] = useState([]);
@@ -46,13 +46,7 @@ export function PostgrestPage({ table, order_col, filter_col, pageSize, Item }) 
                 }),
             ])
         ]),
-        h('div.strat-list',
-            h('div.strat-items',
-                data.map(data =>
-                    h(Item, { data })
-                )
-            )
-        ),
+        ItemList({ data }),
         LoadMoreTrigger({ data, setLastID, pageSize, result, order_col }),
     ]);          
 }
