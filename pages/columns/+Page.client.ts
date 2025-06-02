@@ -10,13 +10,13 @@ import { Loading } from "../index";
 import { ColumnsMap } from "~/columns-map/index.client";
 
 export function Page(props) {
-  return h(ColumnListPage, props);
-}
-
-function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
-  let columnGroups;
   const columnRes = useAPIResult(SETTINGS.apiV2Prefix + "/columns?all")?.success
     ?.data;
+  return h(ColumnListPage, { ...props, columnRes });
+}
+
+export function ColumnListPage({ title = "Columns", linkPrefix = "/", columnRes, project = null }) {
+  let columnGroups;
   const [columnInput, setColumnInput] = useState("");
   const shouldFilter = columnInput.length >= 3;
 
@@ -67,7 +67,14 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
       .map((col) => col.col_id)
   );
 
-  const cols = shouldFilter ? "col_id=" + colArr?.join(",") : "all=1";
+  let cols;
+  if (project) {
+    cols = shouldFilter
+      ? "col_id=" + colArr?.join(",")
+      : "project_id=" + project.project_id;
+  } else {
+    cols = shouldFilter ? "col_id=" + colArr?.join(",") : "all";
+  }
 
   const columnData = useAPIResult(
     SETTINGS.apiV2Prefix + "/columns?" + cols + "&response=long&format=geojson"
@@ -88,7 +95,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
     ]),
     h(ContentPage, [
       h(PageHeader, { title }),
-      h.if(columnFeatures)(ColumnsMap, { columns: columnFeatures }),
+      h.if(columnFeatures)(ColumnsMap, { columns: columnFeatures, project }),
       h(Card, { className: "search-bar" }, [
         h(Icon, { icon: "search" }),
         h("input", {

@@ -4,7 +4,7 @@ import { SETTINGS } from "@macrostrat-web/settings";
 import h from "./main.module.sass";
 import mapboxgl from "mapbox-gl";
 
-export function ColumnsMap({ columns }) {
+export function ColumnsMap({ columns, project = null }) {
   const [mapInstance, setMapInstance] = useState(null);
   const [mapBounds, setMapBounds] = useState(null);
 
@@ -29,7 +29,7 @@ export function ColumnsMap({ columns }) {
   }, [columns, mapInstance]);
 
   const fitMapToColumns = (map, columns) => {
-    if (columns.features.length > 10) {
+    if (columns.features.length > 10 && !project) {
       map.fitBounds(mapBounds)
       return
     }
