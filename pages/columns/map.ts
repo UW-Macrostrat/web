@@ -1,9 +1,43 @@
-import h from "@macrostrat/hyper";
-import { ColumnNavigationMap } from "@macrostrat/column-views";
+import {
+  ColumnNavigationMap,
+  useMacrostratColumns,
+} from "@macrostrat/column-views";
 import { mapboxAccessToken } from "@macrostrat-web/settings";
 import { ErrorBoundary } from "@macrostrat/ui-components";
+import h from "./main.module.scss";
+import { ColumnsMap } from "~/columns-map/index.client";
 
-export function ColumnMap({
+export function ColumnsMapContainer(props) {
+  /* TODO: integrate this with shared web components */
+  return h(ErrorBoundary, h(ColumnsMapInner, props));
+}
+
+function ColumnsMapInner({ columnIDs = null, projectID = null }) {
+  const columnData = useMacrostratColumns(projectID, projectID != null);
+
+  let columns = columnData;
+
+  // Filter columns on the client side
+  if (columnIDs != null) {
+    columns = columns.filter((feature) =>
+      columnIDs.includes(feature.properties.col_id)
+    );
+  }
+
+  return h(
+    "div.column-container",
+    {
+      style: {
+        width: 350,
+        height: 350,
+        position: "relative",
+      },
+    },
+    h(ColumnsMap, { columns: { type: "FeatureCollection", features: columns } })
+  );
+}
+
+export function ColumnsMapOld({
   projectID,
   inProcess,
   className,

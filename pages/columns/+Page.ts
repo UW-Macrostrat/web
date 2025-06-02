@@ -1,44 +1,24 @@
 import { ContentPage } from "~/layouts";
 import { PageHeader, Link, AssistantLinks, DevLinkButton } from "~/components";
 import { Divider, AnchorButton, Card, Icon } from "@blueprintjs/core";
-import { useData } from "vike-react/useData";
 import { useState } from "react";
 import h from "./main.module.scss";
-import { SETTINGS } from "@macrostrat-web/settings";
-import { useAPIResult } from "@macrostrat/ui-components";
-import { Loading } from "../index";
-import { ColumnsMap } from "~/columns-map/index.client";
+import { onDemand } from "~/_utils";
+import { useData } from "vike-react/useData";
 
 export function Page(props) {
   return h(ColumnListPage, props);
 }
 
+const ColumnsMapContainer = onDemand(() =>
+  import("./map").then((d) => d.ColumnsMapContainer)
+);
+
 function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
-  let columnGroups;
-  const columnRes = useAPIResult(SETTINGS.apiV2Prefix + "/columns?all")?.success
-    ?.data;
+  const { columnGroups, project } = useData();
+
   const [columnInput, setColumnInput] = useState("");
   const shouldFilter = columnInput.length >= 3;
-
-  if (columnRes) {
-    const grouped = {};
-
-    for (const item of columnRes) {
-      const key = item.col_group_id;
-
-      if (!grouped[key]) {
-        grouped[key] = {
-          name: item.col_group,
-          id: item.col_group_id,
-          columns: [],
-        };
-      }
-
-      grouped[key].columns.push(item);
-    }
-
-    columnGroups = Object.values(grouped);
-  }
 
   const filteredGroups = shouldFilter
     ? columnGroups?.filter((group) => {
@@ -57,9 +37,9 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
 
         return false;
       })
-    : columnGroups;
+    : null;
 
-  const colArr = filteredGroups?.flatMap((item) =>
+  const columnIDs = filteredGroups?.flatMap((item) =>
     item.columns
       .filter((col) =>
         col.col_name.toLowerCase().includes(columnInput.toLowerCase())
@@ -67,28 +47,20 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
       .map((col) => col.col_id)
   );
 
-  const cols = shouldFilter ? "col_id=" + colArr?.join(",") : "all=1";
-
-  const columnData = useAPIResult(
-    SETTINGS.apiV2Prefix + "/columns?" + cols + "&response=long&format=geojson"
-  );
-
   const handleInputChange = (event) => {
     setColumnInput(event.target.value.toLowerCase());
   };
 
-  if (!columnData || !columnRes) return h(Loading);
-
-  const columnFeatures = columnData?.success?.data;
+  const allGroups = filteredGroups ?? columnGroups ?? [];
 
   return h("div.column-list-page", [
     h(AssistantLinks, [
       h(AnchorButton, { href: "/projects", minimal: true }, "Projects"),
       h(DevLinkButton, { href: "/columns/correlation" }, "Correlation chart"),
+      h(ColumnsMapContainer, { columnIDs, projectID: project.project_id }),
     ]),
     h(ContentPage, [
       h(PageHeader, { title }),
-      h.if(columnFeatures)(ColumnsMap, { columns: columnFeatures }),
       h(Card, { className: "search-bar" }, [
         h(Icon, { icon: "search" }),
         h("input", {
@@ -99,7 +71,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
       ]),
       h(
         "div.column-groups",
-        filteredGroups.map((d) =>
+        allGroups.map((d) =>
           h(ColumnGroup, {
             data: d,
             key: d.id,

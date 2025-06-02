@@ -1,3 +1,18 @@
+.column-list-page {
+  #map {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 1;
+  }
+}
+
+.column-map-container {
+  position: relative;
+  width: 100%;
+  height: 300px;
+}
+
 .column-group-header {
   display: flex;
   justify-content: space-between;
@@ -82,6 +97,7 @@ h2 {
 
 .popup {
   padding: 1em;
+
   h3 {
     font-size: 1.5em;
     text-align: center;
@@ -98,9 +114,4 @@ h2 {
   align-items: center;
 }
 
-#map {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  z-index: 1;
-}
+
