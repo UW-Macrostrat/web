@@ -120,6 +120,16 @@ class App extends React.Component {
     this.getNavigateURL = this.getNavigateURL.bind(this);
   }
 
+  componentDidMount() {
+    const { pathname, hash } = window.location;
+
+    // Match old-style hash routes like /sift#/explore or /sift/#/explore
+    if ((pathname === "/sift" || pathname === "/sift/") && hash.startsWith("#/")) {
+      const cleanPath = hash.replace("#", ""); // Remove the #
+      window.location.replace(`/sift${cleanPath}`);
+    }
+  }
+
   getNavigateURL(item) {
     let prefix = "/" + this.props.categoryRouteLookup[item.dataset] + "/";
     if (item.id != 0) {

@@ -19,7 +19,6 @@ export function Page() {
       ]),
     ]),
     h("div.buttons", [
-      // h(LinkCard, { title: 'Search', href: '/sift/#/' }),
       h(LinkCard, { title: "Geologic Map", href: "/map/#3/40.78/-94.13" }, [
         h("p", { className: "long" }, [
           h("div.temp", {}, [
