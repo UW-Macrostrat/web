@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { MapAreaContainer, MapView } from "@macrostrat/map-interface";
 import { SETTINGS } from "@macrostrat-web/settings";
-import h from "@macrostrat/hyper";
+import h from "./main.module.sass";
 import mapboxgl from "mapbox-gl";
 
 export function ColumnsMap({ columns }) {
   const [mapInstance, setMapInstance] = useState(null);
+  const [mapBounds, setMapBounds] = useState(null);
 
   const mapPosition = {
     camera: {
@@ -17,6 +18,7 @@ export function ColumnsMap({ columns }) {
 
   const handleMapLoaded = (map) => {
     setMapInstance(map);
+    setMapBounds(map.getBounds());
   };
 
   useEffect(() => {
@@ -27,7 +29,10 @@ export function ColumnsMap({ columns }) {
   }, [columns, mapInstance]);
 
   const fitMapToColumns = (map, columns) => {
-    if (columns.features.length > 10) return;
+    if (columns.features.length > 10) {
+      map.fitBounds(mapBounds)
+      return
+    }
 
     const bounds = new mapboxgl.LngLatBounds();
 
@@ -54,7 +59,6 @@ export function ColumnsMap({ columns }) {
         left: 200,
         right: 20,
       },
-      animate: false,
     });
   };
 
