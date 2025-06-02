@@ -1,29 +1,27 @@
-import { ColumnNavigationMap } from "@macrostrat/column-views";
+import {
+  ColumnNavigationMap,
+  useMacrostratColumns,
+} from "@macrostrat/column-views";
 import { mapboxAccessToken } from "@macrostrat-web/settings";
 import { ErrorBoundary } from "@macrostrat/ui-components";
 import h from "./main.module.scss";
-import { apiV2Prefix } from "@macrostrat-web/settings";
-import { useAPIResult } from "@macrostrat/ui-components";
 import { ColumnsMap } from "~/columns-map/index.client";
 
-export function ColumnsMapContainer({ columnIDs }) {
+export function ColumnsMapContainer(props) {
   /* TODO: integrate this with shared web components */
-  return h(ErrorBoundary, h(ColumnsMapInner, { columnIDs }));
+  return h(ErrorBoundary, h(ColumnsMapInner, props));
 }
 
-function ColumnsMapInner({ columnIDs = null }) {
-  const columnData = useAPIResult(apiV2Prefix + "/columns?all&format=geojson");
+function ColumnsMapInner({ columnIDs = null, projectID = null }) {
+  const columnData = useMacrostratColumns(projectID, projectID != null);
 
-  let columns = columnData?.success?.data;
+  let columns = columnData;
 
   // Filter columns on the client side
   if (columnIDs != null) {
-    columns = {
-      type: "FeatureCollection",
-      features: columns.features.filter((feature) =>
-        columnIDs.includes(feature.properties.col_id)
-      ),
-    };
+    columns = columns.filter((feature) =>
+      columnIDs.includes(feature.properties.col_id)
+    );
   }
 
   return h(
@@ -35,7 +33,7 @@ function ColumnsMapInner({ columnIDs = null }) {
         position: "relative",
       },
     },
-    h(ColumnsMap, { columns })
+    h(ColumnsMap, { columns: { type: "FeatureCollection", features: columns } })
   );
 }
 

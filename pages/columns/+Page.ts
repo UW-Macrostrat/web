@@ -15,7 +15,7 @@ const ColumnsMapContainer = onDemand(() =>
 );
 
 function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
-  const { columnGroups } = useData();
+  const { columnGroups, project } = useData();
 
   const [columnInput, setColumnInput] = useState("");
   const shouldFilter = columnInput.length >= 3;
@@ -57,7 +57,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
     h(AssistantLinks, [
       h(AnchorButton, { href: "/projects", minimal: true }, "Projects"),
       h(DevLinkButton, { href: "/columns/correlation" }, "Correlation chart"),
-      h(ColumnsMapContainer, { columnIDs }),
+      h(ColumnsMapContainer, { columnIDs, projectID: project.project_id }),
     ]),
     h(ContentPage, [
       h(PageHeader, { title }),
