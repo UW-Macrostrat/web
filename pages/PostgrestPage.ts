@@ -7,7 +7,17 @@ import { ContentPage } from "~/layouts";
 import { Loading } from "./index";
 import h from "./postgrest.module.scss";
 
-export function PostgrestPage({ table, order_col, filter_col, pageSize, ItemList, start = 0, order = "asc", order_col2 = null }) {
+export function PostgrestPage({ 
+    table, 
+    order_col, 
+    filter_col, 
+    pageSize, 
+    ItemList, 
+    start = 0, 
+    order = "asc", 
+    order_col2 = null, 
+    Header = function Header({ data }) { return null; } 
+}) {
     const [input, setInput] = useState("");
     const [lastID, setLastID] = useState(0);
     const [lastID2, setLastID2] = useState(start);
@@ -38,6 +48,7 @@ export function PostgrestPage({ table, order_col, filter_col, pageSize, ItemList
 
     return h(ContentPage, [
         h(PageBreadcrumbs),
+        Header({ data }),
         h(Card, { className: 'filters'}, [
             h("h2", 'Filter'),
             h('div.search-bar', [
@@ -76,3 +87,4 @@ function LoadMoreTrigger({ data, setLastID, pageSize, result, order_col, setLast
 
   return h.if(result?.length == pageSize)('div.load-more', { ref }, h(Spinner));
 }
+

@@ -7,109 +7,60 @@ import h from "./main.module.scss";
 import { SETTINGS } from "@macrostrat-web/settings";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { Loading, ColumnsMap } from "../index";
+import { LinkCard } from "~/components/cards";
+import { PostgrestPage } from "../PostgrestPage";
 
-export function Page(props) {
-  return h(ColumnListPage, props);
-}
 
-function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
-  let columnGroups;
-  const columnRes = useAPIResult(SETTINGS.apiV2Prefix + "/columns?all")?.success?.data;
-  const [columnInput, setColumnInput] = useState("");
-  const shouldFilter = columnInput.length >= 3;
-
-  if(columnRes) {
-    const grouped = {};
-
-    for (const item of columnRes) {
-      const key = item.col_group_id;
-
-      if (!grouped[key]) {
-        grouped[key] = {
-          name: item.col_group,
-          id: item.col_group_id,
-          columns: []
-        };
-      }
-
-      grouped[key].columns.push(item);
-    }
-
-    columnGroups = Object.values(grouped);
-  }
-
-  const filteredGroups = shouldFilter ? columnGroups?.filter((group) => {
-    const filteredColumns = group.columns.filter((col) => {
-      const name = col.col_name.toLowerCase();
-      const input = columnInput.toLowerCase();
-      return name.includes(input);
+export function Page() {
+    return h(PostgrestPage, {
+        table: "cols_with_groups",
+        order_col: "id",
+        order_col2: "col_group_long",
+        order: "asc",
+        filter_col: "col_name",
+        pageSize: 20,
+        ItemList,
+        Header,
     });
-
-    if (filteredColumns.length > 0 || group.name.toLowerCase().includes(columnInput.toLowerCase())) {
-      return { ...group, columns: filteredColumns }; 
-    }
-
-    return false; 
-  }) : columnGroups;
-
-  const colArr = filteredGroups
-    ?.flatMap(item => 
-      item.columns
-        .filter(col => col.col_name.toLowerCase().includes(columnInput.toLowerCase()))
-        .map(col => col.col_id)
-    );
-
-  const cols = shouldFilter ? "col_id=" + colArr?.join(',') : "all=1";
-
-  const columnData = useAPIResult(SETTINGS.apiV2Prefix + "/columns?" + cols + "&response=long&format=geojson");    
-  
-  const handleInputChange = (event) => {
-    setColumnInput(event.target.value.toLowerCase());
-  };
-
-  if(!columnData || !columnRes) return h(Loading);
-
-  const columnFeatures = columnData?.success?.data;
-  
-  return h("div.column-list-page", [
-    h(AssistantLinks, [
-      h(AnchorButton, { href: "/projects", minimal: true }, "Projects"),
-      h(DevLinkButton, { href: "/columns/correlation" }, "Correlation chart"),
-    ]),
-    h(ContentPage, [
-      h(PageHeader, { title }),
-      h.if(columnFeatures)(ColumnsMap, { columns: columnFeatures}),
-      h(Card, { className: "search-bar" }, [
-        h(Icon, { icon: "search" }),
-        h("input", {
-          type: "text",
-          placeholder: "Search columns...",
-          onChange: handleInputChange,
-        }),
-      ]),
-      h("div.column-groups",
-        filteredGroups.map((d) =>
-          h(ColumnGroup, { data: d, key: d.id, linkPrefix, columnInput, shouldFilter })
-        )
-      ),
-    ]),
-  ]);
 }
 
-function ColumnGroup({ data, linkPrefix, columnInput, shouldFilter }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const filteredColumns = shouldFilter ? data.columns.filter((col) => {
-    const name = col.col_name.toLowerCase();
-    const input = columnInput.toLowerCase();
-    return name.includes(input);
-  }) : data.columns;
+function Header({ data }) {
+  const colArr = data.map((d) => (d.id));
+  const columnData = useAPIResult(
+    SETTINGS.apiV2Prefix + "/columns?col_id=" + colArr?.join(",") + "&response=long&format=geojson"
+  );
+  const columnFeatures = columnData?.success?.data;
 
-  if (filteredColumns?.length === 0) return null;
+  console.log("Column features:", columnFeatures);
 
-  const { name } = data;
-  return h('div', { className: 'column-group', onClick : () => setIsOpen(!isOpen) }, [
+  return h(ColumnsMap, {
+    columns: columnFeatures,
+  })
+}
+
+function ItemList({ data }) {
+  const groups = data.reduce((acc, item) => {
+    const groupId = item.col_group_long || "Uncategorized"; // Default to "Uncategorized" if no group
+    if (!acc[groupId]) {  
+      acc[groupId] = [];
+    }
+
+    const alreadyExists = acc[groupId].some(existing => existing.id === item.id);
+    if (!alreadyExists) {
+      acc[groupId].push(item);
+    }
+    return acc;
+  }, {});
+
+  return Object.entries(groups).map(([groupId, items]) => ColumnGroup({ data: { col_group_long: groupId, cols: items } }));
+}
+
+function ColumnGroup({ data }) {
+  const { col_group_long } = data;
+
+  return h('div', { className: 'column-group'}, [
     h('div.column-group-header', [
-      h("h2.column-group-name", name + " (Group #" + filteredColumns[0].col_group_id + ")"),
+      h("h2.column-group-name", col_group_long + " (Group #" + data.cols[0].col_group_id + ")"),
     ]),
     h(
       "div.column-list", [
@@ -120,24 +71,19 @@ function ColumnGroup({ data, linkPrefix, columnInput, shouldFilter }) {
             h("span.col-name", "Name"),
           ]),
           h(Divider),
-          filteredColumns.map((data) =>
-            h(ColumnItem, { data, linkPrefix })
+          data.cols.map((data) =>
+            h(ColumnItem, { data })
           )
         ]),
     ])
   ]);
 }
 
-function ColumnItem({ data, linkPrefix = "/" }) {
-  const { col_id, col_name, status } = data;
-  const href = linkPrefix + `columns/${col_id}`;
+function ColumnItem({ data}) {
+  const { id, col_name } = data;
+  const href = `/columns/${id}`;
   return h("div.column-row", [
-    h("span.col-id", "#" + col_id),
-    h(Link, { className: 'col-link', href }, [col_name]),
+    h("span.col-id", "#" + id),
+    h(Link, { className: 'col-link', href }, col_name),
   ]);
 }
-
-function UpperCase(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
