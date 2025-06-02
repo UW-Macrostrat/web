@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { MapAreaContainer, MapView } from "@macrostrat/map-interface";
-import { SETTINGS } from "@macrostrat-web/settings";
+import { mapboxAccessToken } from "@macrostrat-web/settings";
 import h from "@macrostrat/hyper";
 import mapboxgl from "mapbox-gl";
+import { navigate } from "vike/client/router";
 
 export function ColumnsMap({ columns }) {
   const [mapInstance, setMapInstance] = useState(null);
@@ -51,7 +52,7 @@ export function ColumnsMap({ columns }) {
       padding: {
         top: 20,
         bottom: 20,
-        left: 200,
+        left: 20,
         right: 20,
       },
       animate: false,
@@ -103,7 +104,7 @@ export function ColumnsMap({ columns }) {
         const col_id = feature?.properties?.col_id;
         if (col_id) {
           // TODO: fix this navigation
-          window.open(`/columns/${col_id}`, "_blank");
+          navigate(`/columns/${col_id}`);
         }
       });
 
@@ -124,19 +125,14 @@ export function ColumnsMap({ columns }) {
   };
 
   return h(
-    "div.map-container",
-    h(
-      MapAreaContainer,
-      {
-        className: "map-area-container",
-      },
-      h(MapView, {
-        style:
-          "mapbox://styles/jczaplewski/cl5uoqzzq003614o6url9ou9z?optimize=true",
-        mapboxToken: SETTINGS.mapboxAccessToken,
-        mapPosition,
-        onMapLoaded: handleMapLoaded,
-      })
-    )
+    MapAreaContainer,
+    { fitViewport: false },
+    h(MapView, {
+      style:
+        "mapbox://styles/jczaplewski/cl5uoqzzq003614o6url9ou9z?optimize=true",
+      mapboxToken: mapboxAccessToken,
+      mapPosition,
+      onMapLoaded: handleMapLoaded,
+    })
   );
 }

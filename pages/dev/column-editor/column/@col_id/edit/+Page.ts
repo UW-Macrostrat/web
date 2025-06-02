@@ -8,6 +8,7 @@ import pg, {
 } from "@macrostrat-web/column-builder";
 import { PostgrestError } from "@supabase/postgrest-js";
 import { useData } from "vike-react/useData";
+import { StratColumn } from "#/map/map-interface/components/info-drawer/strat-column";
 
 interface EditColumnData {
   col_id: string;
@@ -20,7 +21,6 @@ interface EditColumnData {
 export function Page() {
   const props = useData();
   const { col_id, curColGroup, column, errors }: EditColumnData = props;
-  console.log(column);
   const persistChanges = async (
     e: ColumnForm,
     changes: Partial<ColumnForm>
@@ -76,10 +76,13 @@ export function Page() {
       `Edit column ${column[0].col_name}, part of ${curColGroup.col_group_long}(${curColGroup.col_group}) Column Group`,
     ]),
     //@ts-ignore
-    h(ColumnEditor, {
-      model: column[0],
-      persistChanges,
-      curColGroup: curColGroup,
-    }),
+    h(FlexRow, [
+      h(ColumnEditor, {
+        model: column[0],
+        persistChanges,
+        curColGroup: curColGroup,
+      }),
+      h(StratColumn, { col_id }),
+    ]),
   ]);
 }
