@@ -72,9 +72,9 @@ export function IndividualPage(id, type, header) {
       : "strat_name";
 
   // data for charts
-  const liths = summarizeAttributes(colData?.features, "lith");
-  const environs = summarizeAttributes(colData?.features, "environ");
-  const econs = summarizeAttributes(colData?.features, "econ");
+  const liths = summarizeAttributes({data: colData?.features, type: "lith"});
+  const environs = summarizeAttributes({data: colData?.features, type: "environ"});
+  const econs = summarizeAttributes({data: colData?.features, type: "econ"});
   const summary = summarize(colData?.features);
 
   const chromaColor = intRes?.color ? asChromaColor(intRes.color) : null;
@@ -224,7 +224,7 @@ function References({ res1, res2 }) {
   const refArray1 = Object.values(res1.refs);
   const refArray2 = Object.values(res2.refs);
   const refs = [...refArray1, ...refArray2];
-
+  
   return h.if(refs?.length != 0)("div.int-references", [
     h("h3", "Primary Sources"),
     h(Divider),
@@ -254,7 +254,7 @@ function Taxa(record) {
   const imgUrl = "https://paleobiodb.org/data1.2/taxa/thumb.png?id=";
   const isDarkMode = useDarkMode().isEnabled;
 
-  return h("div.taxa", [
+  return h(Link, { href: "https://paleobiodb.org/classic/basicTaxonInfo?taxon_no=" + record.oid, className: "taxa", target: "_blank" },  [
     h(BlankImage, {
       src: imgUrl + record.img,
       className: "taxa-image" + (isDarkMode ? " img-dark-mode" : ""),
@@ -332,29 +332,34 @@ function conceptInfo({ concept_id }) {
   ]);
 }
 
-export function summarizeAttributes(data, type) {
-  var index = {};
+export function summarizeAttributes({data, type}) {
   if (!data) return null;
 
-  for (var i = 0; i < data.length; i++) {
-    for (var j = 0; j < data[i].properties[type].length; j++) {
-      // If we have seen this attribute ID before, add to the summary
-      if (index[data[i].properties[type][j][type + "_id"]]) {
-        index[data[i].properties[type][j][type + "_id"]].prop +=
-          data[i].properties[type][j].prop;
-      } else {
-        index[data[i].properties[type][j][type + "_id"]] =
-          data[i].properties[type][j];
-      }
-    }
-  }
+  const index = {};
 
-  var parsed = Object.keys(index).map((d) => {
-    index[d].prop = index[d].prop / data.length;
-    return index[d];
+  data.forEach(item => {
+    const props = item.properties[type];
+    if (!props) return;
+
+    props.forEach(attr => {
+      const id = attr[`${type}_id`];
+      if (!index[id]) {
+        index[id] = { ...attr, prop: attr.prop, count: 1 };
+      } else {
+        index[id].prop += attr.prop;
+      }
+    });
+  });
+
+  const sum = Object.values(index).reduce((acc, attr) => acc + attr.prop, 0);
+
+  const parsed = Object.values(index).map(attr => {
+    attr.prop = attr.prop / sum;
+    return attr;
   });
 
   return parseAttributes(type, parsed);
+
 }
 
 export function summarize(data) {
@@ -715,6 +720,10 @@ function parseAttributes(type, data) {
 }
 
 function Chart(data, title, route, activeIndex, setActiveIndex) {
+  const isDarkMode = useDarkMode().isEnabled;
+  const reg = isDarkMode ? "#fff" : "#000" ;
+  const hovered = isDarkMode? "#000" : "#fff" ;
+
   return h("div.chart-container", [
     h(
       ResponsiveContainer,
@@ -742,8 +751,8 @@ function Chart(data, title, route, activeIndex, setActiveIndex) {
               stroke:
                 activeIndex?.index === index &&
                 activeIndex.label === entry.label
-                  ? "#fff"
-                  : "#000",
+                  ? reg
+                  : hovered,
               strokeWidth: 2,
               onMouseEnter: () => {
                 if (
@@ -795,7 +804,7 @@ function ChartLegend(data, route, activeIndex, setActiveIndex, index) {
   const hovered = activeIndex?.label === data.label;
 
   return h("div.legend-item", [
-    h("div.box", { style: { "background-color": data.color } }),
+    h("div.box", { style: { "backgroundColor": data.color } }),
     h(
       "a",
       {
@@ -815,7 +824,7 @@ function ChartLegend(data, route, activeIndex, setActiveIndex, index) {
           }
         },
         style: {
-          "font-weight": hovered ? "600" : "300",
+          "fontWeight": hovered ? "600" : "300",
         },
       },
       data.label + (hovered ? " (" + Math.trunc(data.value * 100) + "%)" : "")
