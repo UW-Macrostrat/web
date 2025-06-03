@@ -1,11 +1,11 @@
 import h from "./main.module.scss";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
-import { LinkCard, PageBreadcrumbs } from "~/components";
-import { Card, Icon, Spinner, RangeSlider } from "@blueprintjs/core";
+import { LinkCard, PageBreadcrumbs, StickyHeader } from "~/components";
+import { Card, Icon, Spinner } from "@blueprintjs/core";
 import { useState, useEffect, useRef } from "react";
 import { ContentPage } from "~/layouts";
-import { Loading } from "../../index";
+import { Loading, SearchBar } from "../../index";
 
 export function Page() {
   const [input, setInput] = useState("");
@@ -14,7 +14,6 @@ export function Page() {
   const pageSize = 20;
   const result = useStratData(lastID, input, pageSize);
 
-  console.log("Strat names result:", result);
 
   useEffect(() => {
     if (result) {
@@ -30,29 +29,26 @@ export function Page() {
   if (data == null) return h(Loading);
 
   const handleChange = (event) => {
-    setInput(event.target.value.toLowerCase());
+    setInput(event.toLowerCase());
   };
 
   return h(ContentPage, [
-    h(PageBreadcrumbs, { title: "Strat Names" }),
-    h("div.sift-link", [
-      h("p", "This page is is in development."),
-      h(
-        "a",
-        { href: "/sift/definitions/strat_names", target: "_blank" },
-        "View in Sift"
-      ),
-    ]),
-    h(Card, { className: "filters" }, [
-      h("h2", "Filter"),
-      h("div.search-bar", [
-        h(Icon, { icon: "search" }),
-        h("input", {
-          type: "text",
-          placeholder: "Filter by name...",
-          onChange: handleChange,
-        }),
+    h(StickyHeader, [
+      h("div.header", [
+        h(PageBreadcrumbs, { title: "Strat Names" }),
+        h("div.sift-link", [
+          h("p", "This page is is in development."),
+          h(
+            "a",
+            { href: "/sift/definitions/strat_names", target: "_blank" },
+            "View in Sift"
+          ),
+        ]),
       ]),
+      h(SearchBar, {
+        placeholder: "Filter by name...",
+        onChange: handleChange,
+      }),
     ]),
     h(
       "div.strat-list",

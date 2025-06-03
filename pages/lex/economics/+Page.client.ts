@@ -1,12 +1,12 @@
 import h from "./main.module.scss";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
-import { PageHeader, PageBreadcrumbs } from "~/components";
-import { Card, Icon, Popover } from "@blueprintjs/core";
+import { PageBreadcrumbs, StickyHeader } from "~/components";
+import { Card, Popover } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { asChromaColor } from "@macrostrat/color-utils";
-import { Loading } from "../../index";
+import { Loading, SearchBar } from "../../index";
 
 export function Page() {
   const [input, setInput] = useState("");
@@ -18,7 +18,7 @@ export function Page() {
   console.log(res);
 
   const handleChange = (event) => {
-    setInput(event.target.value.toLowerCase());
+    setInput(event.toLowerCase());
   };
 
   const filtered = res.filter((d) => {
@@ -33,17 +33,9 @@ export function Page() {
   const grouped = groupByClassThenType(filtered);
 
   return h(ContentPage, { className: "econ-list-page" }, [
-    h(PageBreadcrumbs, { title: "Economics" }),
-    h(Card, { className: "filters" }, [
-      h("h3", "Filters"),
-      h("div.search-bar", [
-        h(Icon, { icon: "search" }),
-        h("input", {
-          type: "text",
-          placeholder: "Search economics...",
-          onChange: handleChange,
-        }),
-      ]),
+    h(StickyHeader, [
+      h(PageBreadcrumbs, { title: "Economics" }),
+      h(SearchBar, { placeHolder: "Search economics...", onChange: handleChange }),
     ]),
     h(
       "div.econ-list",
@@ -97,24 +89,6 @@ function EconItem({ data }) {
       ),
     ])
   );
-
-  return;
-}
-
-function getContrastTextColor(bgColor) {
-  // Remove '#' if present
-  const color = bgColor.replace("#", "");
-
-  // Parse r, g, b
-  const r = parseInt(color.substr(0, 2), 16);
-  const g = parseInt(color.substr(2, 2), 16);
-  const b = parseInt(color.substr(4, 2), 16);
-
-  // Calculate luminance
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-
-  // Return black or white depending on luminance
-  return luminance > 0.6 ? "#000000" : "#FFFFFF";
 }
 
 function groupByClassThenType(items) {

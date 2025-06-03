@@ -6,10 +6,12 @@ import {
   DevLinkButton,
   AssistantLinks,
   LinkCard,
+  StickyHeader
 } from "~/components";
 import { useState } from "react";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
+import { SearchBar } from "../index";
 
 export function Page() {
   const [inputValue, setInputValue] = useState("");
@@ -31,7 +33,7 @@ export function Page() {
   console.log("inputValue", inputValue);
 
   const handleInputChange = (event) => {
-    setInputValue(event.target.value.toLowerCase());
+    setInputValue(event.toLowerCase());
   };
 
   return h("div.maps-page", [
@@ -45,11 +47,9 @@ export function Page() {
       h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
     ]),
     h(ContentPage, [
-      h(PageHeader, { title: "Maps" }),
-      h(Card, { className: "search-bar" }, [
-        h(Icon, { icon: "search" }),
-        h("input", {
-          type: "text",
+      h(StickyHeader, [
+        h(PageHeader, { title: "Maps" }),
+        h(SearchBar, {
           placeholder: "Filter by name...",
           onChange: handleInputChange,
         }),

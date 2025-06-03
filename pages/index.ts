@@ -2,7 +2,7 @@ import h from "./layout.module.sass";
 import { MacrostratIcon } from "~/components";
 import { SETTINGS } from "@macrostrat-web/settings";
 import { DarkModeButton, useAPIResult } from "@macrostrat/ui-components";
-import { Spinner } from "@blueprintjs/core";
+import { Spinner, Icon, Card } from "@blueprintjs/core";
 import { useDarkMode } from "@macrostrat/ui-components";
 
 export function Image({ src, className, width, height }) {
@@ -78,4 +78,15 @@ export function BlankImage({ src, className, width, height }) {
 
 export function Loading() {
   return h("div.loading", h(Spinner));
+}
+
+export function SearchBar({ onChange, placeholder = "Search..." }) {
+  return h(Card, { className: "search-bar" }, [
+    h(Icon, { icon: "search" }),
+    h("input", {
+      type: "text",
+      placeholder,
+      onChange: (e) => onChange(e.target.value),
+    }),
+  ])
 }

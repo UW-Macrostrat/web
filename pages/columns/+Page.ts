@@ -5,13 +5,14 @@ import {
   PageBreadcrumbs,
   StickyHeader,
 } from "~/components";
-import { AnchorButton, ButtonGroup, InputGroup } from "@blueprintjs/core";
+import { AnchorButton, ButtonGroup, Card } from "@blueprintjs/core";
 import { Tag } from "@macrostrat/data-components";
 import { useState } from "react";
 import h from "./main.module.sass";
 import { useData } from "vike-react/useData";
 import { ClientOnly } from "vike-react/ClientOnly";
 import { navigate } from "vike/client/router";
+import { SearchBar } from "../index";
 
 export function Page(props) {
   return h(ColumnListPage, props);
@@ -74,15 +75,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
         h("div.main", [
           h(StickyHeader, [
             h(PageBreadcrumbs, { showLogo: true }),
-            h("div.search-bar", [
-              h(InputGroup, {
-                placeholder: "Search columns...",
-                onValueChange: handleInputChange,
-                leftIcon: "search",
-                large: true,
-                fill: true,
-              }),
-            ]),
+            h(SearchBar, { placeholder: "Search columns...", onChange: handleInputChange }),
           ]),
           h(
             "div.column-groups",

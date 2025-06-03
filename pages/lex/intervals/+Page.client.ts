@@ -1,12 +1,12 @@
 import h from "./main.module.scss";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
-import { PageBreadcrumbs, AssistantLinks, Link } from "~/components";
-import { Card, Icon, Popover, RangeSlider } from "@blueprintjs/core";
+import { PageBreadcrumbs, StickyHeader, Link } from "~/components";
+import { Card, Popover, RangeSlider } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { asChromaColor } from "@macrostrat/color-utils";
-import { Loading } from "../../index";
+import { Loading, SearchBar } from "../../index";
 import { IntervalTag } from "@macrostrat/data-components";
 
 export function Page() {
@@ -19,18 +19,17 @@ export function Page() {
 
   console.log(res);
 
-  const handleChange = (event) => {
-    setInput(event.target.value.toLowerCase());
+  const handleChange = (e) => {
+    setInput(e.toLowerCase());
   };
 
   const filtered = res.filter((d) => {
     const name = d.name?.toLowerCase() || "";
     const intType = d.int_type?.toLowerCase() || "";
     const abbrev = d.abbrev?.toLowerCase() || "";
-    const b_age = d.b_age ? parseInt(d.b_age, 10) : 0; // Convert to number
-    const t_age = d.t_age ? parseInt(d.t_age, 10) : 4600; // Convert to number
+    const b_age = d.b_age ? parseInt(d.b_age, 10) : 0; 
+    const t_age = d.t_age ? parseInt(d.t_age, 10) : 4600; 
 
-    // Check if name, intType, abbrev, or age falls within the ranges or input
     const matchesName = name.includes(input);
     const matchesType = intType.includes(input);
     const matchesAbbrev = abbrev.includes(input);
@@ -45,31 +44,23 @@ export function Page() {
 
   return h("div.int-list-page", [
     h(ContentPage, [
-      h(PageBreadcrumbs, { title: "Intervals" }),
-      h(Card, { className: "filters" }, [
-        h("h3", "Filters"),
-        h("div", [
-          h("div.search-bar", [
-            h(Icon, { icon: "search" }),
-            h("input", {
-              type: "text",
-              placeholder: "Filter by name, type, or abbreviation...",
-              onChange: handleChange,
+      h(StickyHeader, [
+        h(PageBreadcrumbs, { title: "Intervals" }),
+        h(Card, { className: "filters" }, [
+          h(SearchBar, { placeholder: "Filter by name, type, or abbreviation...", onChange: handleChange }),
+          h("div.age-filter", [
+            h("p", "Filter by ages"),
+            h(RangeSlider, {
+              min: 0,
+              max: 4600,
+              stepSize: 10,
+              labelStepSize: 1000,
+              value: [age[0], age[1]],
+              onChange: (value) => {
+                setAge(value);
+              },
             }),
           ]),
-        ]),
-        h("div.age-filter", [
-          h("p", "Filter by ages"),
-          h(RangeSlider, {
-            min: 0,
-            max: 4600,
-            stepSize: 10,
-            labelStepSize: 1000,
-            value: [age[0], age[1]],
-            onChange: (value) => {
-              setAge(value);
-            },
-          }),
         ]),
       ]),
       h(

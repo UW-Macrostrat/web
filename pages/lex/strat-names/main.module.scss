@@ -73,3 +73,12 @@
     cursor: pointer;
   }
 }
+
+.header {
+  display: flex;
+  justify-content: space-between;
+
+  .sift-link {
+    text-align: right;
+  }
+}

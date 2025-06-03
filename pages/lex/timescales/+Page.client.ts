@@ -1,14 +1,14 @@
 import h from "./main.module.scss";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
-import { PageBreadcrumbs, LinkCard } from "~/components";
+import { PageBreadcrumbs, LinkCard, StickyHeader } from "~/components";
 import { Card, Icon, Popover, RangeSlider, Divider } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { Timescale } from "@macrostrat/timescale";
 import { titleCase } from "../index";
 import { useEffect } from "react";
-import { Loading } from "../../index";
+import { Loading, SearchBar } from "../../index";
 
 export function Page() {
   const [input, setInput] = useState("");
@@ -42,7 +42,7 @@ export function Page() {
   if (res == null) return h(Loading);
 
   const handleChange = (event) => {
-    setInput(event.target.value.toLowerCase());
+    setInput(event.toLowerCase());
   };
 
   const filtered = res.filter((d) => {
@@ -77,19 +77,14 @@ export function Page() {
   };
 
   return h(ContentPage, { className: "timescale-list-page" }, [
-    h(PageBreadcrumbs, { title: "Timescales" }),
+    h(StickyHeader, [
+      h(PageBreadcrumbs, { title: "Timescales" }),
+    ]),
     h(Card, { className: "filters" }, [
-      h("h2", "Filters"),
-      h("div.name-filter", [
-        h("div.search-bar", [
-          h(Icon, { icon: "search" }),
-          h("input", {
-            type: "text",
-            placeholder: "Filter by name...",
-            onChange: handleChange,
-          }),
-        ]),
-      ]),
+      h(SearchBar, {
+        placeholder: "Filter by name...",
+        onChange: handleChange,
+      }),
       h("div.age-filter", [
         h("p", "Filter by ages"),
         h(RangeSlider, {

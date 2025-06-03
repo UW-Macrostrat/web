@@ -1,22 +1,17 @@
 import h from "./main.module.scss";
 import {
   useAPIResult,
-  InfiniteScroll,
-  LoadingPlaceholder,
 } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
 import {
-  PageHeader,
-  Link,
-  AssistantLinks,
-  DevLinkButton,
+  StickyHeader,
   LinkCard,
   PageBreadcrumbs,
 } from "~/components";
-import { Card, Icon, Spinner, RangeSlider } from "@blueprintjs/core";
+import { Card, Icon, Spinner } from "@blueprintjs/core";
 import { useState, useEffect, useRef } from "react";
 import { ContentPage } from "~/layouts";
-import { Loading } from "../../index";
+import { Loading, SearchBar } from "../../index";
 
 export function Page() {
   const [input, setInput] = useState("");
@@ -32,36 +27,22 @@ export function Page() {
   }, [result]);
 
   useEffect(() => {
-    // Example: Reset data if lastID changes
     setData([]);
   }, [input]);
 
   if (data == null) return h(Loading);
 
   const handleChange = (event) => {
-    setInput(event.target.value.toLowerCase());
+    setInput(event.toLowerCase());
   };
 
   return h(ContentPage, [
-    h(PageBreadcrumbs, { title: "Strat Name Concepts" }),
-    h("div.sift-link", [
-      h("p", "This page is is in development."),
-      h(
-        "a",
-        { href: "/sift/definitions/strat_name_concepts", target: "_blank" },
-        "View in Sift"
-      ),
-    ]),
-    h(Card, { className: "filters" }, [
-      h("h2", "Filter"),
-      h("div.search-bar", [
-        h(Icon, { icon: "search" }),
-        h("input", {
-          type: "text",
-          placeholder: "Filter by name...",
-          onChange: handleChange,
-        }),
-      ]),
+    h(StickyHeader, [
+      h(PageBreadcrumbs, { title: "Strat Name Concepts" }),
+      h(SearchBar, {
+        placeholder: "Filter by name...",
+        onChange: handleChange,
+      }),
     ]),
     h(
       "div.strat-list",
