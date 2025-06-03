@@ -62,34 +62,48 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
     [setSelectedUnitID]
   );
 
+  let assistantContent = h("div.column-info", [
+    h("h1.page-title", [
+      h("span.col-name", columnInfo.col_name),
+      h.if(columnInfo.col_group != null)("span.subtitle", [
+        h("span.separator", " – "),
+        h("span.col-group", `${columnInfo.col_group}`),
+      ]),
+    ]),
+    h("p.column-details", [
+      h("span.column-id", ["#", columnInfo.col_id]),
+      ", ",
+      h("span.project", ["project ", columnInfo.project_id]),
+      ", ",
+      h(
+        "a",
+        {
+          href: `/map/loc/${lon}/${lat}/column#z=${zoom}&show=columns,geology`,
+        },
+        "show in map"
+      ),
+      ".",
+    ]),
+  ]);
+
+  if (selectedUnit != null) {
+    assistantContent = h(ModalUnitPanel, {
+      unitData: units,
+      className: "unit-details-panel",
+      selectedUnit,
+      onSelectUnit: setSelectedUnitID,
+    });
+  }
+
   return h("div.page-container", [
     h("div.main", [
       h("div.left-column", [
         h("div.column-header", [
-          h("nav", [h(PageBreadcrumbs, { showLogo: true })]),
-          h("h1.page-title", [
-            h("span.col-name", columnInfo.col_name),
-            h.if(columnInfo.col_group != null)("span.subtitle", [
-              h("span.separator", " – "),
-              h("span.col-group", `${columnInfo.col_group}`),
-            ]),
+          h("nav", [
+            h(PageBreadcrumbs, { showLogo: true, title: columnInfo.col_name }),
           ]),
         ]),
         h("div.column-view", [
-          h("p.column-details", [
-            h("span.column-id", ["#", columnInfo.col_id]),
-            ", ",
-            h("span.project", ["project ", columnInfo.project_id]),
-            ", ",
-            h(
-              "a",
-              {
-                href: `/map/loc/${lon}/${lat}/column#z=${zoom}&show=columns,geology`,
-              },
-              "show in map"
-            ),
-            ".",
-          ]),
           h(Column, {
             units,
             unitComponent: ColoredUnitComponent,
@@ -111,12 +125,7 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
             selectedColumn: columnInfo.col_id,
             onSelectColumn,
           }),
-          h(ModalUnitPanel, {
-            unitData: units,
-            className: "unit-details-panel",
-            selectedUnit,
-            onSelectUnit: setSelectedUnitID,
-          }),
+          assistantContent,
         ]),
       ]),
     ]),

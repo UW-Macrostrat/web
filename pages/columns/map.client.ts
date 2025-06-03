@@ -2,9 +2,9 @@ import {
   ColumnNavigationMap,
   useMacrostratColumns,
 } from "@macrostrat/column-views";
+import h from "@macrostrat/hyper";
 import { mapboxAccessToken } from "@macrostrat-web/settings";
 import { ErrorBoundary } from "@macrostrat/ui-components";
-import h from "./main.module.scss";
 import { ColumnsMap } from "~/columns-map/index.client";
 
 export function ColumnsMapContainer(props) {
@@ -12,7 +12,7 @@ export function ColumnsMapContainer(props) {
   return h(ErrorBoundary, h(ColumnsMapInner, props));
 }
 
-function ColumnsMapInner({ columnIDs = null, projectID = null }) {
+function ColumnsMapInner({ columnIDs = null, projectID = null, className }) {
   const columnData = useMacrostratColumns(projectID, projectID != null);
 
   let columns = columnData;
@@ -25,14 +25,8 @@ function ColumnsMapInner({ columnIDs = null, projectID = null }) {
   }
 
   return h(
-    "div.column-container",
-    {
-      style: {
-        width: 350,
-        height: 350,
-        position: "relative",
-      },
-    },
+    "div",
+    { className },
     h(ColumnsMap, { columns: { type: "FeatureCollection", features: columns } })
   );
 }
