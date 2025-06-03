@@ -16,6 +16,7 @@ import { useDarkMode } from "@macrostrat/ui-components";
 import { StratNameHierarchy } from "./StratNameHierarchy";
 import { LinkCard } from "~/components/cards";
 import { ColumnsMap } from "~/columns-map/index.client";
+import { get } from "underscore";
 
 export function titleCase(str) {
   if (!str) return str;
@@ -79,10 +80,6 @@ export function IndividualPage(id, type, header) {
   const chromaColor = intRes?.color ? asChromaColor(intRes.color) : null;
   const luminance = 0.9;
 
-  if (!intRes || !fossilRes) return h(Loading);
-
-  const { name, abbrev, b_age, t_age, timescales, strat_name, concept_id } =
-    intRes;
   const {
     t_units,
     t_sections,
@@ -92,6 +89,14 @@ export function IndividualPage(id, type, header) {
     max_thick,
     col_area,
   } = summary;
+
+  const t_id = getIntID({name: t_int_name});
+  const b_id = getIntID({name: b_int_name});
+
+  if (!intRes || !fossilRes) return h(Loading);
+
+  const { name, abbrev, b_age, t_age, timescales, strat_name, concept_id } =
+    intRes;
   const area = parseInt(col_area.toString().split(".")[0]);
 
   return h(ContentPage, { className: "int-page" }, [
@@ -142,7 +147,11 @@ export function IndividualPage(id, type, header) {
         h(Divider, { className: "divider" }),
         h("div.units", t_units.toLocaleString() + " units"),
         h(Divider, { className: "divider" }),
-        h("div.interval", b_int_name.toLocaleString() + " - " + t_int_name),
+        h("div.interval", [
+          h(Link, { href: "/lex/intervals/" + b_id }, b_int_name.toLocaleString()),
+          " - ",
+          h(Link, { href: "/lex/intervals/" + t_id }, t_int_name.toLocaleString()),
+        ]),
         h.if(b_age && t_age)(Divider, { className: "divider" }),
         h.if(b_age && t_age)("div.age-range", [
           h("div.int-age", b_age + " - " + t_age + " Ma"),
@@ -273,6 +282,14 @@ function ConceptHierarchy({ id }) {
       });
     }),
   ]);
+}
+
+function getIntID({name}) {
+  const res = useAPIResult(
+    SETTINGS.apiV2Prefix + "/defs/intervals?name_like=" + encodeURI(name)
+  )?.success?.data;
+
+  return res ? res[0].int_id : null;
 }
 
 function conceptInfo({ concept_id }) {
@@ -699,13 +716,12 @@ function parseAttributes(type, data) {
 
 function Chart(data, title, route, activeIndex, setActiveIndex) {
   return h("div.chart-container", [
-    h("h3", title),
     h(
       ResponsiveContainer,
       { width: "100%", height: 300 },
       h(
         PieChart,
-        { className: "lithology-chart" },
+        { className: "lithology-chart" }, [
         h(
           Pie,
           {
@@ -717,7 +733,7 @@ function Chart(data, title, route, activeIndex, setActiveIndex) {
             cx: "50%",
             cy: "50%",
             fill: "#8884d8",
-          },
+          }, 
           data?.map((entry, index) =>
             h(Cell, {
               className: `id-${entry.id}`,
@@ -752,8 +768,19 @@ function Chart(data, title, route, activeIndex, setActiveIndex) {
               },
             })
           )
+        ),
+        h(
+          "text",
+          {
+            x: "50%",
+            y: "50%",
+            textAnchor: "middle",
+            dominantBaseline: "middle",
+            className: "chart-title",
+          },
+          h(Link, { href: "/lex/" + route }, title)
         )
-      )
+      ])
     ),
     h(
       "div.legend",
@@ -791,7 +818,7 @@ function ChartLegend(data, route, activeIndex, setActiveIndex, index) {
           "font-weight": hovered ? "600" : "300",
         },
       },
-      data.label
+      data.label + (hovered ? " (" + Math.trunc(data.value * 100) + "%)" : "")
     ),
   ]);
 }
