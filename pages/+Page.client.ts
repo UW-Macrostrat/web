@@ -1,8 +1,8 @@
 import { Image, Navbar, Footer } from "./index";
 import h from "./+Page.module.sass";
 import { LinkCard } from "~/components/cards";
-import { SETTINGS } from "@macrostrat-web/settings";
 import { useData } from "vike-react/useData";
+import { isDev } from "@macrostrat-web/settings";
 
 export function Page() {
   return h("div.page-main", [
@@ -77,10 +77,10 @@ export function Page() {
         { title: "Documentation", href: "/docs" },
         h("p", "Macrostrat documentation")
       ),
-      h.if(/*SETTINGS.isDev*/ true)(
+      h.if(isDev)(
         LinkCard,
         { title: "Developer apps", href: "/dev" },
-        h("p", "Layers and testbed apps that aren't ready for prime time"),
+        h("p", "Layers and testbed apps that aren't ready for prime time")
       ),
     ]),
     Donate,

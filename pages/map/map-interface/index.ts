@@ -5,7 +5,6 @@ import { useEffect } from "react";
 
 import "~/styles/global.styl";
 import "./searchbar.styl";
-import "./ui-components.styl";
 
 import { createRouterMiddleware } from "@lagunovsky/redux-react-router";
 import { Provider } from "react-redux";
