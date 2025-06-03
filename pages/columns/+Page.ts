@@ -1,10 +1,18 @@
 import { ContentPage } from "~/layouts";
-import { PageHeader, Link, AssistantLinks, DevLinkButton } from "~/components";
-import { Divider, AnchorButton, Card, Icon } from "@blueprintjs/core";
+import {
+  PageHeader,
+  Link,
+  AssistantLinks,
+  DevLinkButton,
+  PageBreadcrumbs,
+} from "~/components";
+import { AnchorButton, InputGroup } from "@blueprintjs/core";
+import { Tag } from "@macrostrat/data-components";
 import { useState } from "react";
-import h from "./main.module.scss";
+import h from "./main.module.sass";
 import { useData } from "vike-react/useData";
 import { ClientOnly } from "vike-react/ClientOnly";
+import { navigate } from "vike/client/router";
 
 export function Page(props) {
   return h(ColumnListPage, props);
@@ -55,8 +63,8 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
       .map((col) => col.col_id)
   );
 
-  const handleInputChange = (event) => {
-    setColumnInput(event.target.value.toLowerCase());
+  const handleInputChange = (value, target) => {
+    setColumnInput(value.toLowerCase());
   };
 
   const allGroups = filteredGroups ?? columnGroups ?? [];
@@ -65,16 +73,21 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
     h(AssistantLinks, [
       h(AnchorButton, { href: "/projects", minimal: true }, "Projects"),
       h(DevLinkButton, { href: "/columns/correlation" }, "Correlation chart"),
-      h(ColumnMapContainer, { columnIDs, projectID: project?.project_id }),
+      h(ColumnMapContainer, {
+        columnIDs,
+        projectID: project?.project_id,
+        className: "column-map-container",
+      }),
     ]),
     h(ContentPage, [
-      h(PageHeader, { title }),
-      h(Card, { className: "search-bar" }, [
-        h(Icon, { icon: "search" }),
-        h("input", {
-          type: "text",
+      h(PageBreadcrumbs, { showLogo: true }),
+      h("div.search-bar", [
+        h(InputGroup, {
           placeholder: "Search columns...",
-          onChange: handleInputChange,
+          onValueChange: handleInputChange,
+          leftIcon: "search",
+          large: true,
+          fill: true,
         }),
       ]),
       h(
@@ -117,14 +130,17 @@ function ColumnGroup({ data, linkPrefix, columnInput, shouldFilter }) {
         ),
       ]),
       h("div.column-list", [
-        h(Divider),
-        h("div.column-table", [
-          h("div.column-row.column-header", [
-            h("span.col-id", "Id"),
-            h("span.col-name", "Name"),
+        h("table.column-table", [
+          h("thead.column-row.column-header", [
+            h("tr", [
+              h("th.col-id", "ID"),
+              h("th.col-name", "Name"),
+              h("th.col-status", "Status"),
+            ]),
           ]),
-          h(Divider),
-          filteredColumns.map((data) => h(ColumnItem, { data, linkPrefix })),
+          h("tbody", [
+            filteredColumns.map((data) => h(ColumnItem, { data, linkPrefix })),
+          ]),
         ]),
       ]),
     ]
@@ -132,14 +148,48 @@ function ColumnGroup({ data, linkPrefix, columnInput, shouldFilter }) {
 }
 
 function ColumnItem({ data, linkPrefix = "/" }) {
-  const { col_id, col_name, status } = data;
-  const href = linkPrefix + `columns/${col_id}`;
-  return h("div.column-row", [
-    h("span.col-id", "#" + col_id),
-    h(Link, { className: "col-link", href }, [col_name]),
-  ]);
-}
+  const { col_id, col_name } = data;
 
-function UpperCase(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
+  let nUnits = 0;
+  try {
+    nUnits = parseInt(data.t_units);
+  } catch (e) {
+    console.warn("Invalid number of units for column", col_id, data.t_units);
+  }
+
+  const unitsText = nUnits > 0 ? `${nUnits} units` : "empty";
+
+  const href = linkPrefix + `columns/${col_id}`;
+  return h(
+    "tr.column-row",
+    {
+      onClick() {
+        navigate(href);
+      },
+    },
+    [
+      h("td.col-id", h("code.bp5-code", col_id)),
+      // Keep the semantic HTML structure for accessibility
+      h("td.col-name", h("a", { href }, col_name)),
+      h("td.col-status", [
+        h.if(data.status == "in process")([
+          h(
+            Tag,
+            { minimal: true, color: "lightgreen", size: "small" },
+            "in process"
+          ),
+        ]),
+        " ",
+        h(
+          Tag,
+          {
+            minimal: true,
+            size: "small",
+            color: nUnits == 0 ? "orange" : "dodgerblue",
+          },
+          unitsText
+        ),
+      ]),
+    ]
+  );
 }
