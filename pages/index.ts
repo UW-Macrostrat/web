@@ -1,5 +1,5 @@
 import h from "./layout.module.sass";
-import { MacrostratIcon } from "~/components";
+import { MacrostratIcon, StickyHeader } from "~/components";
 import { SETTINGS } from "@macrostrat-web/settings";
 import { DarkModeButton, useAPIResult } from "@macrostrat/ui-components";
 import { Spinner, Icon, Card } from "@blueprintjs/core";
@@ -12,13 +12,15 @@ export function Image({ src, className, width, height }) {
 }
 
 export function Navbar({ className }) {
-  return h("nav", { className: "nav " + className }, [
-    h("a", { className: "nav-link", href: "/" }, h(MacrostratIcon)),
-    h("a", { href: "/about" }, "About"),
-    h("a", { href: "/publications" }, "Publications"),
-    h("a", { href: "/people" }, "People"),
-    h("a", { href: "/donate" }, "Donate"),
-  ]);
+  return h(StickyHeader, { style: {padding: 0} }, [
+      h("nav", { className: "nav " + className }, [
+        h("a", { className: "nav-link", href: "/" }, h(MacrostratIcon)),
+        h("a", { href: "/about" }, "About"),
+        h("a", { href: "/publications" }, "Publications"),
+        h("a", { href: "/people" }, "People"),
+        h("a", { href: "/donate" }, "Donate"),
+      ]),
+    ]) 
 }
 
 export function Footer() {
