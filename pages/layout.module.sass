@@ -32,8 +32,14 @@
 
 // davids
 .nav
+  border-bottom: 2px solid var(--text-emphasized-color)
+
+nav
+  width: 100%
+  padding: 1em .5em
   display: flex
-  gap: 20px
+  flex-direction: row
+  gap: 1em
   align-items: center
 
   .nav-link
@@ -51,6 +57,10 @@
   position: absolute
   left: 0
   margin: 0
+    border-top: 2px solid var(--text-emphasized-color)
+
+  .funding-line
+    color: var(--text-emphasized-color)
 
   .footer-nav
     display: flex
@@ -71,8 +81,11 @@
     flex-direction: column
     justify-content: center
     align-items: center
-    color: white
     margin: 1em 0
+
+    .footer-text
+      display: flex
+      gap: 5px
 
   .nav-logo
     padding-top: 5px
@@ -97,3 +110,6 @@
   display: flex
   flex-direction: column
   gap: 2em
+
+.img-light
+  filter: invert(1)

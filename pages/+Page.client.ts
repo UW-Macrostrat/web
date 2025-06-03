@@ -61,32 +61,27 @@ export function Page() {
       h(LinkCard, { title: "Projects", href: "/projects" }, [
         h("p", "Projects for specific regions or geological problems"),
       ]),
-      h(
-        LinkCard,
-        {
-          title: h("h3", [
-            h(Image, {
-              className: "rockd-png",
-              src: "rockd.png",
-              width: "22px",
-              height: "22px",
-            }),
-            h("span", " Rockd"),
-          ]),
-          href: "https://rockd.org",
-        },
-        h("p", "Go mobile!")
-      ),
+      h(LinkCard, { title: "Rockd", href: "https://rockd.org" }, [
+        h("h3.rock-info", [
+          h(Image, {
+            className: "rockd-png",
+            src: "rockd.png",
+            width: "22px",
+            height: "22px",
+          }),
+          h("span", " Go Mobile!"),
+        ]),
+      ]),
       h(
         LinkCard,
         { title: "Documentation", href: "/docs" },
         h("p", "Macrostrat documentation")
       ),
-      //h.if(SETTINGS.isDev)(
-      LinkCard,
-      { title: "Developer apps", href: "/dev" },
-      h("p", "Layers and testbed apps that aren't ready for prime time"),
-      //),
+      h.if(/*SETTINGS.isDev*/ true)(
+        LinkCard,
+        { title: "Developer apps", href: "/dev" },
+        h("p", "Layers and testbed apps that aren't ready for prime time"),
+      ),
     ]),
     Donate,
     h(Footer),
