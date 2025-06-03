@@ -35,6 +35,9 @@
   border-bottom: 2px solid var(--text-emphasized-color)
   background-color: var(--background-color)
 
+  a
+    color: vaR(--text-emphasized-color) !important
+
 nav
   width: 100%
   padding: 1em .5em
@@ -56,6 +59,7 @@ nav
 .footer
   width: 100%
   position: absolute
+  border-top: 2px solid var(--text-emphasized-color)
   left: 0
   margin: 0
     border-top: 2px solid var(--text-emphasized-color)
@@ -65,10 +69,16 @@ nav
 
   .footer-nav
     display: flex
-    flex-direction: column
-    justify-content: center
-    align-items: center
-    gap: 10px
+    padding: 2em 0
+    flex-wrap: wrap
+    max-width: 400px 
+    gap: 10px 40px
+
+    a 
+      color: var(--text-emphasized-color) !important
+
+  .footer-nav > *
+    width: calc(50% - 20px) 
 
   .footer-container
     display: flex
@@ -103,6 +113,11 @@ nav
 
   #who-made-it
     padding-top: 25px
+
+  .nav-link
+    display: inline-flex
+    gap: 5px
+    align-items: center
 
 .loading
   text-align: center

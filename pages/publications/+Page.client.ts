@@ -1,12 +1,13 @@
-import { Image, Navbar, Footer } from "../index";
+import { Navbar, Footer } from "../index";
 import { Divider } from "@blueprintjs/core";
 import h from "./main.module.sass";
+import { ContentPage } from "~/layouts";
 
 export function Page() {
   return h("div.container", [
     h(Navbar),
 
-    h("div.publications", [
+    h(ContentPage, [
       h("h1.pub-title", "Publications"),
       h("p.blurb", "literature utilizing Macrostrat"),
       h(Divider, { className: "divider" }),

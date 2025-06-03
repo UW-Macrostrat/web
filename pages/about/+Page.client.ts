@@ -1,13 +1,14 @@
 import { Image, Navbar, Footer } from "../index";
 import { Divider } from "@blueprintjs/core";
 import h from "./main.module.sass";
+import { ContentPage } from "~/layouts";
 
 export function Page() {
   return h("div", [
     h(Navbar),
-    h("div.body", [
+    h(ContentPage, [
       h("h1.title-about", "About Macrostrat"),
-      h(Divider, { className: "divider", style: { margin: "0 0 0 20%" } }),
+      h(Divider, { className: "divider"}),
       h("div.table", [
         h("dv.table-row", [
           h("p", "Summary"),
@@ -71,7 +72,7 @@ export function Page() {
 
           h("a", { href: "https://rockd.org" }, [
             h("div.app-box", [
-              h(Image, { src: "rockd.jpg" }),
+              h(Image, { src: "rockd.png" }),
               h("div.app-background-text", [
                 "Rockd",
                 h("p.blurb", "A mobile field book, Macrostrat style."),

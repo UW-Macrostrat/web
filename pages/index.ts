@@ -19,12 +19,29 @@ export function Navbar({ className }) {
         h("a", { href: "/publications" }, "Publications"),
         h("a", { href: "/people" }, "People"),
         h("a", { href: "/donate" }, "Donate"),
+        h("a", { href: "/map" }, "Map"),
+        h("a", { href: "/columns" }, "Columns"),
+        h("a", { href: "/projects" }, "Projects"),
+        h("a", { href: "/lex" }, "Lexicon"),
+        h("a", { href: "/docs" }, "Documentation"),
       ]),
     ]) 
 }
 
 export function Footer() {
   const isDarkMode = useDarkMode()?.isEnabled;
+
+  const navItems = [
+    { href: "/about", text: "About", icon: "info-sign" },
+    { href: "/publications", text: "Publications", icon: "book" },
+    { href: "/people", text: "People", icon: "people" },
+    { href: "/donate", text: "Donate", icon: "dollar" },
+    { href: "/map", text: "Map", icon: "map" },
+    { href: "/columns", text: "Columns", icon: "timeline-bar-chart" },
+    { href: "/projects", text: "Projects", icon: "projects" },
+    { href: "/lex", text: "Lexicon", icon: "manual" },
+    { href: "/docs", text: "Documentation", icon: "document" }
+  ];
 
   return h("div", { className: "footer" }, [
     h("div", { className: "footer-container" }, [
@@ -53,11 +70,16 @@ export function Footer() {
         ]),
       ]),
       h("div", { className: "footer-nav" }, [
-        h(DarkModeButton, { showText: true }),
-        h("a", { href: "/about" }, "About"),
-        h("a", { href: "/publications" }, "Publications"),
-        h("a", { href: "/people" }, "People"),
-        h("a", { href: "/donate" }, "Donate"),
+        h("a", { className: "nav-link", href: "/" }, [
+          h(MacrostratIcon),
+          h("span", { className: "nav-text" }, "Home"),
+        ]),
+        navItems.map(({ href, text, icon }) =>
+        h("a", { className: "nav-link", href }, [
+          h(Icon, { icon }),
+          h("span", { className: "nav-text" }, text)
+        ])
+      )
       ]),
       h("div", { className: "footer-text-container" }, [
         h(Image, { className: "funding-logo " + (isDarkMode ? "img-dark" : "img-light"), src: "nsf.png", width: "100px" }),
