@@ -8,6 +8,9 @@ html, body
   height 100vh
   height -webkit-fill-available
 
+// Override Blueprint styles with our own
+.bp5-card, .bp5-navbar
+  background-color var(--panel-background-color) !important;
 
 .bp5-input
   box-shadow: 0 0 0 0 rgba(19, 124, 189, 0), 0 0 0 0 rgba(19, 124, 189, 0), inset 0 0 0 1px rgba(16, 22, 26, 0.15), inset 0 1px 1px rgba(16, 22, 26, 0.2);

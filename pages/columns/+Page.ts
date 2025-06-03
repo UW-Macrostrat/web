@@ -1,12 +1,11 @@
 import { ContentPage } from "~/layouts";
 import {
-  PageHeader,
-  Link,
   AssistantLinks,
   DevLinkButton,
   PageBreadcrumbs,
+  StickyHeader,
 } from "~/components";
-import { AnchorButton, InputGroup } from "@blueprintjs/core";
+import { AnchorButton, ButtonGroup, InputGroup } from "@blueprintjs/core";
 import { Tag } from "@macrostrat/data-components";
 import { useState } from "react";
 import h from "./main.module.sass";
@@ -70,38 +69,52 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const allGroups = filteredGroups ?? columnGroups ?? [];
 
   return h("div.column-list-page", [
-    h(AssistantLinks, [
-      h(AnchorButton, { href: "/projects", minimal: true }, "Projects"),
-      h(DevLinkButton, { href: "/columns/correlation" }, "Correlation chart"),
-      h(ColumnMapContainer, {
-        columnIDs,
-        projectID: project?.project_id,
-        className: "column-map-container",
-      }),
-    ]),
     h(ContentPage, [
-      h(PageBreadcrumbs, { showLogo: true }),
-      h("div.search-bar", [
-        h(InputGroup, {
-          placeholder: "Search columns...",
-          onValueChange: handleInputChange,
-          leftIcon: "search",
-          large: true,
-          fill: true,
-        }),
+      h("div.flex-row", [
+        h("div.main", [
+          h(StickyHeader, [
+            h(PageBreadcrumbs, { showLogo: true }),
+            h("div.search-bar", [
+              h(InputGroup, {
+                placeholder: "Search columns...",
+                onValueChange: handleInputChange,
+                leftIcon: "search",
+                large: true,
+                fill: true,
+              }),
+            ]),
+          ]),
+          h(
+            "div.column-groups",
+            allGroups.map((d) =>
+              h(ColumnGroup, {
+                data: d,
+                key: d.id,
+                linkPrefix,
+                columnInput,
+                shouldFilter,
+              })
+            )
+          ),
+        ]),
+        h("div.sidebar", [
+          h("div.sidebar-content", [
+            h(ButtonGroup, { vertical: true, large: true }, [
+              h(AnchorButton, { href: "/projects", minimal: true }, "Projects"),
+              h(
+                DevLinkButton,
+                { href: "/columns/correlation" },
+                "Correlation chart"
+              ),
+            ]),
+            h(ColumnMapContainer, {
+              columnIDs,
+              projectID: project?.project_id,
+              className: "column-map-container",
+            }),
+          ]),
+        ]),
       ]),
-      h(
-        "div.column-groups",
-        allGroups.map((d) =>
-          h(ColumnGroup, {
-            data: d,
-            key: d.id,
-            linkPrefix,
-            columnInput,
-            shouldFilter,
-          })
-        )
-      ),
     ]),
   ]);
 }
