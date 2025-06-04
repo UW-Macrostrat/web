@@ -100,7 +100,10 @@ export function IndividualPage(id, type, header) {
   const area = parseInt(col_area.toString().split(".")[0]);
 
   return h(ContentPage, { className: "int-page" }, [
-    h(PageBreadcrumbs, { title: "#" + id }),
+    h('div.page-header', [
+      h(PageBreadcrumbs, { title: "#" + id }),
+      h(DarkModeButton, { className: "dark-mode-button", showText: true }),
+    ]),
     h("div.int-header", [
       h("div.int-names", [
         h(
@@ -140,7 +143,7 @@ export function IndividualPage(id, type, header) {
         ),
       ]),
     ]),
-    h.if(concept_id)(conceptInfo, { concept_id }),
+    h.if(concept_id)(conceptInfo, { concept_id, header }),
     h.if(colData?.features.length)("div.table", [
       h("div.table-content", [
         h("div.packages", t_sections.toLocaleString() + " packages"),
@@ -174,10 +177,6 @@ export function IndividualPage(id, type, header) {
         "div.chart",
         Chart(liths, "Lithologies", "lithology", activeIndex, setActiveIndex)
       ),
-      h.if(econs?.length)(
-        "div.chart",
-        Chart(econs, "Economics", "economics", activeIndex, setActiveIndex)
-      ),
       h.if(environs?.length)(
         "div.chart",
         Chart(
@@ -187,6 +186,10 @@ export function IndividualPage(id, type, header) {
           activeIndex,
           setActiveIndex
         )
+      ),
+      h.if(econs?.length)(
+        "div.chart",
+        Chart(econs, "Economics", "economics", activeIndex, setActiveIndex)
       ),
     ]),
 
@@ -210,7 +213,6 @@ export function IndividualPage(id, type, header) {
       ),
     ]),
     h(References, { res1: fossilResult, res2: colDataResult }),
-    h(DarkModeButton),
   ]);
 }
 
@@ -289,10 +291,12 @@ function getIntID({name}) {
     SETTINGS.apiV2Prefix + "/defs/intervals?name_like=" + encodeURI(name)
   )?.success?.data;
 
-  return res ? res[0].int_id : null;
+  const id = res?.filter((d) => d.name === name)[0]?.int_id;
+
+  return id;
 }
 
-function conceptInfo({ concept_id }) {
+function conceptInfo({ concept_id, header }) {
   const url =
     SETTINGS.apiV2Prefix +
     "/defs/strat_name_concepts?strat_name_concept_id=" +
@@ -304,14 +308,18 @@ function conceptInfo({ concept_id }) {
   const { author, name, province, geologic_age, other, usage_notes } = data;
 
   return h("div.concept-info", [
-    h("h3", "Stratigraphic Concept"),
-    h("div.concept-name", [
+    h.if(header != "strat_name_concepts")("h3", "Stratigraphic Concept"),
+    h.if(header != "strat_name_concepts")("div.concept-name", [
       h(
         "a.title",
         { href: "/lex/strat-name-concepts/" + concept_id, target: "_blank" },
         name
       ),
       h("a.concept-ref", { href: url, target: "_blank" }, "via " + author),
+    ]),
+    h.if(header === "strat_name_concepts")("div.author", [
+      h("span.title", "Author: "),
+      h("span.author-text", h(Link, { href: url, target: "_blank" }, author)),
     ]),
     h.if(province)("div.province", [
       h("span.title", "Province: "),
@@ -809,6 +817,7 @@ function ChartLegend(data, route, activeIndex, setActiveIndex, index) {
       "a",
       {
         href: "/lex/" + route + "/" + data.id,
+        target: "_blank",
         onMouseEnter: () => {
           if (
             !activeIndex ||
