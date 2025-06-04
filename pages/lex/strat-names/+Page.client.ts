@@ -58,8 +58,18 @@ export function Page() {
   };
 
   return h(ContentPage, [
-    h(StickyHeader, [
+    h(StickyHeader, {className: "header"}, [
       h(PageBreadcrumbs, { title }),
+      h("div.header-description", [
+        h("p", [
+          h('strong', "Strat Names: "),
+          h('span', "names of rock units, organized hierarchically")
+        ]),
+        h("p", [
+          h('strong', "Strat Concepts: "),
+          h('span', "capture relationships between differently-named rock units")
+        ]),
+      ]),
       h(Card, { className: "filter" }, [
         h(SearchBar, {
           placeholder: "Filter by name...",

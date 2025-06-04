@@ -73,3 +73,15 @@
     cursor: pointer;
   }
 }
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+
+  p {
+    display: flex;
+    align-items: flex-end;
+    gap: 5px;
+  }
+}
