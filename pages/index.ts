@@ -118,3 +118,14 @@ export function SearchBar({ onChange, placeholder = "Search..." }) {
     }),
   ]);
 }
+
+export function SearchBar({ onChange, placeholder = "Search..." }) {
+  return h(Card, { className: "search-bar" }, [
+    h(Icon, { icon: "search" }),
+    h("input", {
+      type: "text",
+      placeholder,
+      onChange: (e) => onChange(e.target.value),
+    }),
+  ]);
+}

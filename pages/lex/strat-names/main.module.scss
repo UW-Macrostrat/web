@@ -56,7 +56,7 @@
   }
 }
 
-.filters {
+.filter {
   margin-bottom: 1em;
   display: flex;
   flex-direction: column;
@@ -76,9 +76,12 @@
 
 .header {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 1em;
 
-  .sift-link {
-    text-align: right;
+  p {
+    display: flex;
+    align-items: flex-end;
+    gap: 5px;
   }
 }
