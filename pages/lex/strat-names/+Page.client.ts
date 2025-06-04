@@ -22,7 +22,6 @@ export function StratPage({ show }) {
   const [lastID, setLastID] = useState(startingID);
   const [data, setData] = useState(res);
   const pageSize = 20;
-  const firstLoad = useRef(true);
 
   const strat_name_vars = {
     title: "Strat Names",
@@ -90,7 +89,14 @@ export function StratPage({ show }) {
       h("div.header-description", [
         h(Card,
           {
-            className: !showConcepts ? "selected" : "",
+            className: !showConcepts ? "selected" : "unselected",
+            onClick: () => {
+              if (showConcepts) {
+                setShowConcepts(false);
+                setLastID(0);
+                setData([]);
+              }
+            }
           },
           [
             h("strong", "Strat Names: "),
@@ -99,7 +105,14 @@ export function StratPage({ show }) {
       ),
         h(Card,
           {
-            className: showConcepts ? "selected" : "",
+            className: showConcepts ? "selected" : "unselected",
+            onClick: () => {
+              if (!showConcepts) {
+                setShowConcepts(true);
+                setLastID(0);
+                setData([]);
+              }
+            }
           }, 
           [
             h("strong", "Strat Concepts: "),
