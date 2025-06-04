@@ -1,18 +1,44 @@
 import h from "./main.module.scss";
-import { useAPIResult } from "@macrostrat/ui-components";
+import {
+  useAPIResult,
+} from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
-import { LinkCard, PageBreadcrumbs } from "~/components";
-import { Card, Icon, Spinner, RangeSlider } from "@blueprintjs/core";
+import {
+  StickyHeader,
+  LinkCard,
+  PageBreadcrumbs,
+} from "~/components";
+import { Card, Switch, Spinner } from "@blueprintjs/core";
 import { useState, useEffect, useRef } from "react";
 import { ContentPage } from "~/layouts";
-import { Loading } from "../../index";
+import { Loading, SearchBar } from "../../index";
 
 export function Page() {
   const [input, setInput] = useState("");
+  const [showConcepts, setShowConcepts] = useState(false);
   const [lastID, setLastID] = useState(0);
   const [data, setData] = useState([]);
   const pageSize = 20;
-  const result = useStratData(lastID, input, pageSize);
+
+  const strat_name_vars = {
+    title: "Strat Names",
+    item_route: "/strat-names/",
+    data_route: "strat_names",
+    like: "strat_name_like",
+  }
+
+  const concept_vars = {
+    title: "Strat Name Concepts",
+    item_route: "/strat-name-concepts/",
+    data_route: "strat_name_concepts",
+    like: "concept_like",
+  }
+
+  const vars = showConcepts ? concept_vars : strat_name_vars;
+
+  const { title, item_route, data_route, like } = vars;
+
+  const result = useStratData(lastID, input, pageSize, data_route, like);
 
   useEffect(() => {
     if (result) {
@@ -21,62 +47,57 @@ export function Page() {
   }, [result]);
 
   useEffect(() => {
-    // Example: Reset data if lastID changes
     setData([]);
-  }, [input]);
+    setLastID(0);
+  }, [input, showConcepts]);
 
   if (data == null) return h(Loading);
 
   const handleChange = (event) => {
-    setInput(event.target.value.toLowerCase());
+    setInput(event.toLowerCase());
   };
 
   return h(ContentPage, [
-    h(PageBreadcrumbs, { title: "Strat Names" }),
-    h("div.sift-link", [
-      h("p", "This page is is in development."),
-      h(
-        "a",
-        { href: "/sift/definitions/strat_names", target: "_blank" },
-        "View in Sift"
-      ),
-    ]),
-    h(Card, { className: "filters" }, [
-      h("h2", "Filter"),
-      h("div.search-bar", [
-        h(Icon, { icon: "search" }),
-        h("input", {
-          type: "text",
+    h(StickyHeader, [
+      h(PageBreadcrumbs, { title }),
+      h(Card, { className: "filter" }, [
+        h(SearchBar, {
           placeholder: "Filter by name...",
           onChange: handleChange,
         }),
-      ]),
+        h(Switch, {
+          label: "Include concepts",
+          onChange: (e) => {
+            setShowConcepts(e.target.checked);
+          }
+        }),
+      ])
     ]),
     h(
       "div.strat-list",
       h(
         "div.strat-items",
-        data.map((data) => h(StratItem, { data }))
+        data.map((data) => h(StratItem, { data, item_route }))
       )
     ),
-    LoadMoreTrigger({ data, setLastID, pageSize, result }),
+    LoadMoreTrigger({ data, setLastID, pageSize, result, showConcepts }),
   ]);
 }
 
-function StratItem({ data }) {
-  const { strat_name, strat_name_id } = data;
+function StratItem({ data, item_route }) {
+  const { name, concept_id, strat_name, strat_name_id } = data;
 
-  return h(LinkCard, { href: "/lex/strat-names/" + strat_name_id }, strat_name);
+  return h(LinkCard, { href: `/lex/${item_route}/` + (concept_id ?? strat_name_id) }, name ?? strat_name ?? "Unnamed");
 }
 
-function useStratData(lastID, input, pageSize) {
-  const result = useAPIResult(
-    `${SETTINGS.apiV2Prefix}/defs/strat_names?page_size=${pageSize}&last_id=${lastID}&strat_name_like=${input}`
-  );
+function useStratData(lastID, input, pageSize, data_route, like) {
+  const url = `${SETTINGS.apiV2Prefix}/defs/${data_route}?page_size=${pageSize}&last_id=${lastID}&${like}=${input}`
+
+  const result = useAPIResult(url);
   return result?.success?.data;
 }
 
-function LoadMoreTrigger({ data, setLastID, pageSize, result }) {
+function LoadMoreTrigger({ data, setLastID, pageSize, result, showConcepts }) {
   const ref = useRef(null);
 
   useEffect(() => {
@@ -85,7 +106,10 @@ function LoadMoreTrigger({ data, setLastID, pageSize, result }) {
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
         if (data.length > 0) {
-          setLastID(data[data.length - 1].strat_name_id);
+          const id1 = data[data.length - 1]?.concept_id;
+          const id2 = data[data.length - 1]?.strat_name_id;
+
+          setLastID(showConcepts ? id1 : id2);
         }
       }
     });
