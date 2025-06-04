@@ -35,7 +35,10 @@ export function Page() {
   return h(ContentPage, { className: "econ-list-page" }, [
     h(StickyHeader, [
       h(PageBreadcrumbs, { title: "Economics" }),
-      h(SearchBar, { placeHolder: "Search economics...", onChange: handleChange }),
+      h(SearchBar, {
+        placeHolder: "Search economics...",
+        onChange: handleChange,
+      }),
     ]),
     h(
       "div.econ-list",

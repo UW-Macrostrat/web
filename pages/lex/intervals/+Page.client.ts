@@ -27,8 +27,8 @@ export function Page() {
     const name = d.name?.toLowerCase() || "";
     const intType = d.int_type?.toLowerCase() || "";
     const abbrev = d.abbrev?.toLowerCase() || "";
-    const b_age = d.b_age ? parseInt(d.b_age, 10) : 0; 
-    const t_age = d.t_age ? parseInt(d.t_age, 10) : 4600; 
+    const b_age = d.b_age ? parseInt(d.b_age, 10) : 0;
+    const t_age = d.t_age ? parseInt(d.t_age, 10) : 4600;
 
     const matchesName = name.includes(input);
     const matchesType = intType.includes(input);
@@ -47,7 +47,10 @@ export function Page() {
       h(StickyHeader, [
         h(PageBreadcrumbs, { title: "Intervals" }),
         h(Card, { className: "filters" }, [
-          h(SearchBar, { placeholder: "Filter by name, type, or abbreviation...", onChange: handleChange }),
+          h(SearchBar, {
+            placeholder: "Filter by name, type, or abbreviation...",
+            onChange: handleChange,
+          }),
           h("div.age-filter", [
             h("p", "Filter by ages"),
             h(RangeSlider, {
@@ -84,7 +87,7 @@ function EconItem({ data }) {
   const chromaColor = color ? asChromaColor(color) : null;
   const luminance = 0.9;
   data.id = int_id;
-  
+
   // return IntervalTag({ showAgeRange: true, interval: data });
 
   return h(

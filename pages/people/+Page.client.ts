@@ -146,10 +146,10 @@ export function Page() {
     );
   });
 
-  return h('div', [
+  return h("div", [
     h(Navbar),
     h(ContentPage, { className: "people-page" }, [
-      h('div.page-header', [
+      h("div.page-header", [
         h("h1.big", "People"),
         h("p.subtitle", "major contributors to the project"),
         h(Divider),
@@ -189,7 +189,7 @@ export function Page() {
       ]),
     ]),
     h(Footer),
-  ])
+  ]);
 }
 
 function PersonCard({ name, role, email, link, image }) {

@@ -1,13 +1,7 @@
 import h from "./main.module.scss";
-import {
-  useAPIResult,
-} from "@macrostrat/ui-components";
+import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
-import {
-  StickyHeader,
-  LinkCard,
-  PageBreadcrumbs,
-} from "~/components";
+import { StickyHeader, LinkCard, PageBreadcrumbs } from "~/components";
 import { Card, Icon, Spinner } from "@blueprintjs/core";
 import { useState, useEffect, useRef } from "react";
 import { ContentPage } from "~/layouts";

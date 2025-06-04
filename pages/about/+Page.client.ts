@@ -8,7 +8,7 @@ export function Page() {
     h(Navbar),
     h(ContentPage, [
       h("h1.title-about", "About Macrostrat"),
-      h(Divider, { className: "divider"}),
+      h(Divider, { className: "divider" }),
       h("div.table", [
         h("dv.table-row", [
           h("p", "Summary"),

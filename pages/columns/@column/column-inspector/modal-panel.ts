@@ -58,6 +58,6 @@ export function ModalUnitPanel(props) {
     features,
     onClickItem: (unit) => {
       console.log("Clicked unit:", unit);
-    }
+    },
   });
 }

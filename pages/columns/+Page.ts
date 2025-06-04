@@ -75,7 +75,10 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
         h("div.main", [
           h(StickyHeader, [
             h(PageBreadcrumbs, { showLogo: true }),
-            h(SearchBar, { placeholder: "Search columns...", onChange: handleInputChange }),
+            h(SearchBar, {
+              placeholder: "Search columns...",
+              onChange: handleInputChange,
+            }),
           ]),
           h(
             "div.column-groups",

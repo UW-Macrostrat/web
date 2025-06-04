@@ -72,9 +72,12 @@ export function IndividualPage(id, type, header) {
       : "strat_name";
 
   // data for charts
-  const liths = summarizeAttributes({data: colData?.features, type: "lith"});
-  const environs = summarizeAttributes({data: colData?.features, type: "environ"});
-  const econs = summarizeAttributes({data: colData?.features, type: "econ"});
+  const liths = summarizeAttributes({ data: colData?.features, type: "lith" });
+  const environs = summarizeAttributes({
+    data: colData?.features,
+    type: "environ",
+  });
+  const econs = summarizeAttributes({ data: colData?.features, type: "econ" });
   const summary = summarize(colData?.features);
 
   const chromaColor = intRes?.color ? asChromaColor(intRes.color) : null;
@@ -90,8 +93,8 @@ export function IndividualPage(id, type, header) {
     col_area,
   } = summary;
 
-  const t_id = getIntID({name: t_int_name});
-  const b_id = getIntID({name: b_int_name});
+  const t_id = getIntID({ name: t_int_name });
+  const b_id = getIntID({ name: b_int_name });
 
   if (!intRes || !fossilRes) return h(Loading);
 
@@ -100,7 +103,7 @@ export function IndividualPage(id, type, header) {
   const area = parseInt(col_area.toString().split(".")[0]);
 
   return h(ContentPage, { className: "int-page" }, [
-    h('div.page-header', [
+    h("div.page-header", [
       h(PageBreadcrumbs, { title: "#" + id }),
       h(DarkModeButton, { className: "dark-mode-button", showText: true }),
     ]),
@@ -151,9 +154,17 @@ export function IndividualPage(id, type, header) {
         h("div.units", t_units.toLocaleString() + " units"),
         h(Divider, { className: "divider" }),
         h("div.interval", [
-          h(Link, { href: "/lex/intervals/" + b_id }, b_int_name.toLocaleString()),
+          h(
+            Link,
+            { href: "/lex/intervals/" + b_id },
+            b_int_name.toLocaleString()
+          ),
           " - ",
-          h(Link, { href: "/lex/intervals/" + t_id }, t_int_name.toLocaleString()),
+          h(
+            Link,
+            { href: "/lex/intervals/" + t_id },
+            t_int_name.toLocaleString()
+          ),
         ]),
         h.if(b_age && t_age)(Divider, { className: "divider" }),
         h.if(b_age && t_age)("div.age-range", [
@@ -226,7 +237,7 @@ function References({ res1, res2 }) {
   const refArray1 = Object.values(res1.refs);
   const refArray2 = Object.values(res2.refs);
   const refs = [...refArray1, ...refArray2];
-  
+
   return h.if(refs?.length != 0)("div.int-references", [
     h("h3", "Primary Sources"),
     h(Divider),
@@ -256,13 +267,22 @@ function Taxa(record) {
   const imgUrl = "https://paleobiodb.org/data1.2/taxa/thumb.png?id=";
   const isDarkMode = useDarkMode().isEnabled;
 
-  return h(Link, { href: "https://paleobiodb.org/classic/basicTaxonInfo?taxon_no=" + record.oid, className: "taxa", target: "_blank" },  [
-    h(BlankImage, {
-      src: imgUrl + record.img,
-      className: "taxa-image" + (isDarkMode ? " img-dark-mode" : ""),
-    }),
-    h("p.name", record.nam),
-  ]);
+  return h(
+    Link,
+    {
+      href:
+        "https://paleobiodb.org/classic/basicTaxonInfo?taxon_no=" + record.oid,
+      className: "taxa",
+      target: "_blank",
+    },
+    [
+      h(BlankImage, {
+        src: imgUrl + record.img,
+        className: "taxa-image" + (isDarkMode ? " img-dark-mode" : ""),
+      }),
+      h("p.name", record.nam),
+    ]
+  );
 }
 
 function ConceptHierarchy({ id }) {
@@ -286,7 +306,7 @@ function ConceptHierarchy({ id }) {
   ]);
 }
 
-function getIntID({name}) {
+function getIntID({ name }) {
   const res = useAPIResult(
     SETTINGS.apiV2Prefix + "/defs/intervals?name_like=" + encodeURI(name)
   )?.success?.data;
@@ -340,16 +360,16 @@ function conceptInfo({ concept_id, header }) {
   ]);
 }
 
-export function summarizeAttributes({data, type}) {
+export function summarizeAttributes({ data, type }) {
   if (!data) return null;
 
   const index = {};
 
-  data.forEach(item => {
+  data.forEach((item) => {
     const props = item.properties[type];
     if (!props) return;
 
-    props.forEach(attr => {
+    props.forEach((attr) => {
       const id = attr[`${type}_id`];
       if (!index[id]) {
         index[id] = { ...attr, prop: attr.prop, count: 1 };
@@ -361,13 +381,12 @@ export function summarizeAttributes({data, type}) {
 
   const sum = Object.values(index).reduce((acc, attr) => acc + attr.prop, 0);
 
-  const parsed = Object.values(index).map(attr => {
+  const parsed = Object.values(index).map((attr) => {
     attr.prop = attr.prop / sum;
     return attr;
   });
 
   return parseAttributes(type, parsed);
-
 }
 
 export function summarize(data) {
@@ -729,16 +748,14 @@ function parseAttributes(type, data) {
 
 function Chart(data, title, route, activeIndex, setActiveIndex) {
   const isDarkMode = useDarkMode().isEnabled;
-  const reg = isDarkMode ? "#fff" : "#000" ;
-  const hovered = isDarkMode? "#000" : "#fff" ;
+  const reg = isDarkMode ? "#fff" : "#000";
+  const hovered = isDarkMode ? "#000" : "#fff";
 
   return h("div.chart-container", [
     h(
       ResponsiveContainer,
       { width: "100%", height: 300 },
-      h(
-        PieChart,
-        { className: "lithology-chart" }, [
+      h(PieChart, { className: "lithology-chart" }, [
         h(
           Pie,
           {
@@ -750,7 +767,7 @@ function Chart(data, title, route, activeIndex, setActiveIndex) {
             cx: "50%",
             cy: "50%",
             fill: "#8884d8",
-          }, 
+          },
           data?.map((entry, index) =>
             h(Cell, {
               className: `id-${entry.id}`,
@@ -796,7 +813,7 @@ function Chart(data, title, route, activeIndex, setActiveIndex) {
             className: "chart-title",
           },
           h(Link, { href: "/lex/" + route }, title)
-        )
+        ),
       ])
     ),
     h(
@@ -812,7 +829,7 @@ function ChartLegend(data, route, activeIndex, setActiveIndex, index) {
   const hovered = activeIndex?.label === data.label;
 
   return h("div.legend-item", [
-    h("div.box", { style: { "backgroundColor": data.color } }),
+    h("div.box", { style: { backgroundColor: data.color } }),
     h(
       "a",
       {
@@ -833,7 +850,7 @@ function ChartLegend(data, route, activeIndex, setActiveIndex, index) {
           }
         },
         style: {
-          "fontWeight": hovered ? "600" : "300",
+          fontWeight: hovered ? "600" : "300",
         },
       },
       data.label + (hovered ? " (" + Math.trunc(data.value * 100) + "%)" : "")

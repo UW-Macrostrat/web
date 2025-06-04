@@ -14,7 +14,6 @@ export function Page() {
   const pageSize = 20;
   const result = useStratData(lastID, input, pageSize);
 
-
   useEffect(() => {
     if (result) {
       setData((prevData) => [...prevData, ...result]);
@@ -71,7 +70,10 @@ function useStratData(lastID, input, pageSize) {
   const result = useAPIResult(
     `${SETTINGS.apiV2Prefix}/defs/strat_names?page_size=${pageSize}&last_id=${lastID}&strat_name_like=${input}`
   );
-  console.log("API result:", `${SETTINGS.apiV2Prefix}/defs/strat_names?page_size=${pageSize}&last_id=${lastID}&strat_name_like=${input}`);
+  console.log(
+    "API result:",
+    `${SETTINGS.apiV2Prefix}/defs/strat_names?page_size=${pageSize}&last_id=${lastID}&strat_name_like=${input}`
+  );
   return result?.success?.data;
 }
 

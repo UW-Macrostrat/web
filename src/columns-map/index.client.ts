@@ -31,8 +31,8 @@ export function ColumnsMap({ columns, project = null }) {
 
   const fitMapToColumns = (map, columns) => {
     if (columns.features.length > 10 && !project) {
-      map.fitBounds(mapBounds)
-      return
+      map.fitBounds(mapBounds);
+      return;
     }
 
     const bounds = new mapboxgl.LngLatBounds();

@@ -6,7 +6,7 @@ import {
   DevLinkButton,
   AssistantLinks,
   LinkCard,
-  StickyHeader
+  StickyHeader,
 } from "~/components";
 import { useState } from "react";
 import { useAPIResult } from "@macrostrat/ui-components";

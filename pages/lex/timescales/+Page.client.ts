@@ -77,9 +77,7 @@ export function Page() {
   };
 
   return h(ContentPage, { className: "timescale-list-page" }, [
-    h(StickyHeader, [
-      h(PageBreadcrumbs, { title: "Timescales" }),
-    ]),
+    h(StickyHeader, [h(PageBreadcrumbs, { title: "Timescales" })]),
     h(Card, { className: "filters" }, [
       h(SearchBar, {
         placeholder: "Filter by name...",
