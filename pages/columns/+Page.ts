@@ -140,8 +140,7 @@ function ColumnGroup({ data, linkPrefix, columnInput, shouldFilter }) {
             "h2.column-group-name",
             name + " (Group #" + filteredColumns[0].col_group_id + ")"
           ),
-        ])
-
+        ]),
       ]),
       h("div.column-list", [
         h("table.column-table", [
