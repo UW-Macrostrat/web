@@ -79,6 +79,15 @@
   flex-direction: column;
   gap: 1em;
 
+  .selected {
+    color: var(--text-emphasized-color) !important;
+    background-color: var(--secondary-background) !important;
+  }
+
+  .unselected {
+    cursor: pointer;
+  }
+
   p {
     display: flex;
     align-items: flex-end;

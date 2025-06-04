@@ -6,16 +6,23 @@ import { Card, Switch, Spinner } from "@blueprintjs/core";
 import { useState, useEffect, useRef } from "react";
 import { ContentPage } from "~/layouts";
 import { Loading, SearchBar } from "../../index";
+import { useData } from "vike-react/useData";
 
 export function Page() {
   return StratPage({ show: false });
 }
 
 export function StratPage({ show }) {
+  const { res } = useData();
+  console.log("res", res);
+  const startingID = show
+    ? res[res?.length - 1]?.concept_id
+    : res[res?.length - 1]?.strat_name_id;
+
   const [input, setInput] = useState("");
   const [showConcepts, setShowConcepts] = useState(show ?? false);
-  const [lastID, setLastID] = useState(0);
-  const [data, setData] = useState([]);
+  const [lastID, setLastID] = useState(startingID);
+  const [data, setData] = useState(res);
   const pageSize = 20;
 
   const strat_name_vars = {
@@ -38,16 +45,40 @@ export function StratPage({ show }) {
 
   const result = useStratData(lastID, input, pageSize, data_route, like);
 
-  useEffect(() => {
-    if (result) {
-      setData((prevData) => [...prevData, ...result]);
-    }
-  }, [result]);
+  console.log(lastID);
+  console.log("data", data);
+
+  const prevInputRef = useRef(input);
+  const prevShowConceptsRef = useRef(showConcepts);
 
   useEffect(() => {
-    setData([]);
-    setLastID(0);
+    // Only reset if input or showConcepts actually changed from previous render
+    if (
+      prevInputRef.current !== input ||
+      prevShowConceptsRef.current !== showConcepts
+    ) {
+      // Reset data and lastID to starting ID for current mode
+      setData([]);
+      setLastID(0);
+
+      prevInputRef.current = input;
+      prevShowConceptsRef.current = showConcepts;
+    }
   }, [input, showConcepts]);
+
+  useEffect(() => {
+    if (
+      result &&
+      data[data.length - 1]?.[showConcepts ? "concept_id" : "strat_name_id"] !==
+        result[result.length - 1]?.[
+          showConcepts ? "concept_id" : "strat_name_id"
+        ]
+    ) {
+      setData((prevData) => {
+        return [...prevData, ...result];
+      });
+    }
+  }, [result]);
 
   if (data == null) return h(Loading);
 
@@ -59,17 +90,43 @@ export function StratPage({ show }) {
     h(StickyHeader, { className: "header" }, [
       h(PageBreadcrumbs, { title }),
       h("div.header-description", [
-        h("p", [
-          h("strong", "Strat Names: "),
-          h("span", "names of rock units, organized hierarchically"),
-        ]),
-        h("p", [
-          h("strong", "Strat Concepts: "),
-          h(
-            "span",
-            "capture relationships between differently-named rock units"
-          ),
-        ]),
+        h(
+          Card,
+          {
+            className: !showConcepts ? "selected" : "unselected",
+            onClick: () => {
+              if (showConcepts) {
+                setShowConcepts(false);
+                setLastID(0);
+                setData([]);
+              }
+            },
+          },
+          [
+            h("strong", "Strat Names: "),
+            h("span", "names of rock units, organized hierarchically"),
+          ]
+        ),
+        h(
+          Card,
+          {
+            className: showConcepts ? "selected" : "unselected",
+            onClick: () => {
+              if (!showConcepts) {
+                setShowConcepts(true);
+                setLastID(0);
+                setData([]);
+              }
+            },
+          },
+          [
+            h("strong", "Strat Concepts: "),
+            h(
+              "span",
+              "capture relationships between differently-named rock units"
+            ),
+          ]
+        ),
       ]),
       h(Card, { className: "filter" }, [
         h(SearchBar, {
@@ -81,6 +138,8 @@ export function StratPage({ show }) {
           checked: showConcepts,
           onChange: (e) => {
             setShowConcepts(e.target.checked);
+            setLastID(0);
+            setData([]);
           },
         }),
       ]),
