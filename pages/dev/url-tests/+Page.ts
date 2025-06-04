@@ -1,4 +1,5 @@
 import h from "@macrostrat/hyper";
+import { useEffect, useState } from "react";
 
 export function Page() {
   const siftUrls = [
@@ -78,6 +79,74 @@ export function Page() {
     "/-112.1976/36.0962#strat_name_concepts=11016&x=-112.236&y=36.2119&z=15.61km&a=165&e=42",
   ];
 
+  const allUrls = [
+    ...locUrls.map((url) => ({ path: "/map/loc" + url, type: "loc" })),
+    ...siftUrls.flatMap((url) =>
+      url.startsWith("/")
+        ? [
+            { path: "/sift#" + url, type: "sift" },
+            { path: "/sift/#" + url, type: "sift" },
+            { path: "/sift" + url, type: "sift" },
+          ]
+        : [{ path: null, label: url }]
+    ),
+  ];
+
+  const [statusMap, setStatusMap] = useState({});
+
+  useEffect(() => {
+    async function checkUrls() {
+      const updates = {};
+      for (const entry of allUrls) {
+        if (!entry.path) continue;
+        try {
+          const response = await fetch(entry.path, {
+            method: "HEAD",
+            redirect: "follow",
+          });
+          setStatusMap((prev) => ({
+            ...prev,
+            [entry.path]: {
+              ok: response.ok,
+              redirected: response.redirected,
+              finalUrl: response.url,
+              status: response.status,
+            },
+          }));
+        } catch (err) {
+          setStatusMap((prev) => ({ ...prev, [entry.path]: { ok: false } }));
+        }
+      }
+    }
+    checkUrls();
+  }, []);
+
+  function renderUrlEntry(entry) {
+    if (!entry.path) return h("h3", entry.label);
+
+    const status = statusMap[entry.path];
+    let statusColor = "yellow";
+
+    if (status) {
+      statusColor = status.ok ? "green" : "red";
+    }
+
+    return h("div.url-entry", [
+      h("span.status", {
+        style: {
+          backgroundColor: statusColor,
+          width: "1.5em",
+          height: "1.5em",
+          display: "inline-block",
+          borderRadius: "10%",
+          marginRight: "0.5em",
+        },
+      }),
+      h("a", { href: entry.path }, entry.path),
+      status?.finalUrl ? h("span.redirect", ` -> ${status.finalUrl}`) : null,
+    ]);
+  }
+
   return h(
     "div.url-list",
     {
@@ -90,18 +159,9 @@ export function Page() {
     },
     [
       h("h1", "Loc URLs"),
-      ...locUrls.map((url) => {
-        return [h("a", { href: "/map/loc" + url }, "/map/loc" + url)];
-      }),
-
+      ...allUrls.slice(0, locUrls.length).map(renderUrlEntry),
       h("h1", "Sift URLs"),
-      ...siftUrls.map((url) => {
-        if (url.slice(0, 1) != "/") return h("h3", url);
-        return [
-          h("a", { href: "/sift#" + url }, "/sift#" + url),
-          h("a", { href: "/sift/#" + url }, "/sift/#" + url),
-        ];
-      }),
+      ...allUrls.slice(locUrls.length).map(renderUrlEntry),
     ]
   );
 }
