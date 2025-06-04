@@ -85,5 +85,5 @@ export function SearchBar({ onChange, placeholder = "Search..." }) {
       placeholder,
       onChange: (e) => onChange(e.target.value),
     }),
-  ])
+  ]);
 }

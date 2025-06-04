@@ -1,13 +1,7 @@
 import h from "./main.module.scss";
-import {
-  useAPIResult,
-} from "@macrostrat/ui-components";
+import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
-import {
-  StickyHeader,
-  LinkCard,
-  PageBreadcrumbs,
-} from "~/components";
+import { StickyHeader, LinkCard, PageBreadcrumbs } from "~/components";
 import { Card, Switch, Spinner } from "@blueprintjs/core";
 import { useState, useEffect, useRef } from "react";
 import { ContentPage } from "~/layouts";
@@ -17,7 +11,7 @@ export function Page() {
   return StratPage({ show: false });
 }
 
-export function StratPage({show}) {
+export function StratPage({ show }) {
   const [input, setInput] = useState("");
   const [showConcepts, setShowConcepts] = useState(show ?? false);
   const [lastID, setLastID] = useState(0);
@@ -29,14 +23,14 @@ export function StratPage({show}) {
     item_route: "/strat-names/",
     data_route: "strat_names",
     like: "strat_name_like",
-  }
+  };
 
   const concept_vars = {
     title: "Strat Name Concepts",
     item_route: "/strat-name-concepts/",
     data_route: "strat_name_concepts",
     like: "concept_like",
-  }
+  };
 
   const vars = showConcepts ? concept_vars : strat_name_vars;
 
@@ -62,16 +56,19 @@ export function StratPage({show}) {
   };
 
   return h(ContentPage, [
-    h(StickyHeader, {className: "header"}, [
+    h(StickyHeader, { className: "header" }, [
       h(PageBreadcrumbs, { title }),
       h("div.header-description", [
         h("p", [
-          h('strong', "Strat Names: "),
-          h('span', "names of rock units, organized hierarchically")
+          h("strong", "Strat Names: "),
+          h("span", "names of rock units, organized hierarchically"),
         ]),
         h("p", [
-          h('strong', "Strat Concepts: "),
-          h('span', "capture relationships between differently-named rock units")
+          h("strong", "Strat Concepts: "),
+          h(
+            "span",
+            "capture relationships between differently-named rock units"
+          ),
         ]),
       ]),
       h(Card, { className: "filter" }, [
@@ -84,9 +81,9 @@ export function StratPage({show}) {
           checked: showConcepts,
           onChange: (e) => {
             setShowConcepts(e.target.checked);
-          }
+          },
         }),
-      ])
+      ]),
     ]),
     h(
       "div.strat-list",
@@ -102,11 +99,15 @@ export function StratPage({show}) {
 function StratItem({ data, item_route }) {
   const { name, concept_id, strat_name, strat_name_id } = data;
 
-  return h(LinkCard, { href: `/lex/${item_route}/` + (concept_id ?? strat_name_id) }, name ?? strat_name ?? "Unnamed");
+  return h(
+    LinkCard,
+    { href: `/lex/${item_route}/` + (concept_id ?? strat_name_id) },
+    name ?? strat_name ?? "Unnamed"
+  );
 }
 
 function useStratData(lastID, input, pageSize, data_route, like) {
-  const url = `${SETTINGS.apiV2Prefix}/defs/${data_route}?page_size=${pageSize}&last_id=${lastID}&${like}=${input}`
+  const url = `${SETTINGS.apiV2Prefix}/defs/${data_route}?page_size=${pageSize}&last_id=${lastID}&${like}=${input}`;
 
   const result = useAPIResult(url);
   return result?.success?.data;
