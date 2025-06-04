@@ -15,7 +15,9 @@ export function Page() {
 export function StratPage({ show }) {
   const { res } = useData();
   console.log("res", res);
-  const startingID = show ? res[res?.length - 1]?.concept_id : res[res?.length - 1]?.strat_name_id;
+  const startingID = show
+    ? res[res?.length - 1]?.concept_id
+    : res[res?.length - 1]?.strat_name_id;
 
   const [input, setInput] = useState("");
   const [showConcepts, setShowConcepts] = useState(show ?? false);
@@ -43,8 +45,8 @@ export function StratPage({ show }) {
 
   const result = useStratData(lastID, input, pageSize, data_route, like);
 
-  console.log(lastID)
-  console.log("data", data)
+  console.log(lastID);
+  console.log("data", data);
 
   const prevInputRef = useRef(input);
   const prevShowConceptsRef = useRef(showConcepts);
@@ -64,16 +66,17 @@ export function StratPage({ show }) {
     }
   }, [input, showConcepts]);
 
-
   useEffect(() => {
     if (
-      result && 
-      data[data.length - 1]?.[showConcepts ? "concept_id" : "strat_name_id"] !== result[result.length - 1]?.[showConcepts ? "concept_id" : "strat_name_id"]
+      result &&
+      data[data.length - 1]?.[showConcepts ? "concept_id" : "strat_name_id"] !==
+        result[result.length - 1]?.[
+          showConcepts ? "concept_id" : "strat_name_id"
+        ]
     ) {
       setData((prevData) => {
-          return [...prevData, ...result];
-        }
-      );
+        return [...prevData, ...result];
+      });
     }
   }, [result]);
 
@@ -87,7 +90,8 @@ export function StratPage({ show }) {
     h(StickyHeader, { className: "header" }, [
       h(PageBreadcrumbs, { title }),
       h("div.header-description", [
-        h(Card,
+        h(
+          Card,
           {
             className: !showConcepts ? "selected" : "unselected",
             onClick: () => {
@@ -96,14 +100,15 @@ export function StratPage({ show }) {
                 setLastID(0);
                 setData([]);
               }
-            }
+            },
           },
           [
             h("strong", "Strat Names: "),
             h("span", "names of rock units, organized hierarchically"),
           ]
-      ),
-        h(Card,
+        ),
+        h(
+          Card,
           {
             className: showConcepts ? "selected" : "unselected",
             onClick: () => {
@@ -112,8 +117,8 @@ export function StratPage({ show }) {
                 setLastID(0);
                 setData([]);
               }
-            }
-          }, 
+            },
+          },
           [
             h("strong", "Strat Concepts: "),
             h(
