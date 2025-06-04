@@ -1,6 +1,6 @@
 import { ContentPage } from "~/layouts";
 import {
-  AssistantLinks,
+  Link,
   DevLinkButton,
   PageBreadcrumbs,
   StickyHeader,
@@ -35,6 +35,8 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
 
   const [columnInput, setColumnInput] = useState("");
   const shouldFilter = columnInput.length >= 3;
+
+  console.log("columnGroups", columnGroups);
 
   const filteredGroups = shouldFilter
     ? columnGroups?.filter((group) => {
@@ -133,10 +135,13 @@ function ColumnGroup({ data, linkPrefix, columnInput, shouldFilter }) {
     { className: "column-group", onClick: () => setIsOpen(!isOpen) },
     [
       h("div.column-group-header", [
-        h(
-          "h2.column-group-name",
-          name + " (Group #" + filteredColumns[0].col_group_id + ")"
-        ),
+        h(Link, { href: `/lex/groups/${data.id}`, target: "_blank" }, [
+          h(
+            "h2.column-group-name",
+            name + " (Group #" + filteredColumns[0].col_group_id + ")"
+          ),
+        ])
+
       ]),
       h("div.column-list", [
         h("table.column-table", [
