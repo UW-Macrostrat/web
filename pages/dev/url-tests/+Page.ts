@@ -1,7 +1,6 @@
 import h from "@macrostrat/hyper";
 import { useEffect, useState } from "react";
 
-
 export function Page() {
   const siftUrls = [
     "Intervals",
@@ -13,7 +12,6 @@ export function Page() {
     "/interval/843",
     "/interval/402",
 
-
     "Strat Names (Individual Pages dont work)",
     "/definitions/strat_names",
     "/strat_name/57",
@@ -22,7 +20,6 @@ export function Page() {
     "/strat_name/513",
     "/strat_name/1430",
     "/strat_name/902",
-
 
     "Columns",
     "/definitions/columns",
@@ -33,7 +30,6 @@ export function Page() {
     "/column/1410",
     "/column/202",
 
-
     "Strat Name Concepts",
     "/definitions/strat_name_concepts",
     "/strat_name_concept/57",
@@ -43,14 +39,12 @@ export function Page() {
     "/strat_name_concept/1430",
     "/strat_name_concept/902",
 
-
     "Groups",
     "/definitions/groups",
     "/group/1",
     "/group/2",
     "/group/3",
     "/group/4",
-
 
     "Lithologies",
     "/definitions/lithologies",
@@ -61,14 +55,12 @@ export function Page() {
     "/lithology/140",
     "/lithology/902",
 
-
     "Environments",
     "/definitions/environments",
     "/environment/17",
     "/environment/1",
     "/environment/9",
     "/environment/13",
-
 
     "Economics",
     "/definitions/economics",
@@ -78,7 +70,6 @@ export function Page() {
     "/economic/13",
   ];
 
-
   const locUrls = [
     "/",
     "/-3/2/",
@@ -87,7 +78,6 @@ export function Page() {
     "/-107.7083/38.5802#x=-107.8909&y=38.7058&z=8.73km&a=132&e=76&show=satellite,geology",
     "/-112.1976/36.0962#strat_name_concepts=11016&x=-112.236&y=36.2119&z=15.61km&a=165&e=42",
   ];
-
 
   const allUrls = [
     ...locUrls.map((url) => ({ path: "/map/loc" + url, type: "loc" })),
@@ -102,9 +92,7 @@ export function Page() {
     ),
   ];
 
-
   const [statusMap, setStatusMap] = useState({});
-
 
   useEffect(() => {
     async function checkUrls() {
@@ -112,7 +100,10 @@ export function Page() {
       for (const entry of allUrls) {
         if (!entry.path) continue;
         try {
-          const response = await fetch(entry.path, { method: "HEAD", redirect: "follow" });
+          const response = await fetch(entry.path, {
+            method: "HEAD",
+            redirect: "follow",
+          });
           setStatusMap((prev) => ({
             ...prev,
             [entry.path]: {
@@ -130,31 +121,32 @@ export function Page() {
     checkUrls();
   }, []);
 
-
   function renderUrlEntry(entry) {
     if (!entry.path) return h("h3", entry.label);
 
-
     const status = statusMap[entry.path];
     let statusColor = "yellow";
-
 
     if (status) {
       statusColor = status.ok ? "green" : "red";
     }
 
-
     return h("div.url-entry", [
       h("span.status", {
-        style: { backgroundColor: statusColor, width: "1.5em", height: "1.5em", display: "inline-block", borderRadius: "10%", marginRight: "0.5em" },
+        style: {
+          backgroundColor: statusColor,
+          width: "1.5em",
+          height: "1.5em",
+          display: "inline-block",
+          borderRadius: "10%",
+          marginRight: "0.5em",
+        },
       }),
       h("a", { href: entry.path }, entry.path),
-      status?.finalUrl
-        ? h("span.redirect", ` -> ${status.finalUrl}`)
-        : null,
+      status?.finalUrl ? h("span.redirect", ` -> ${status.finalUrl}`) : null,
     ]);
   }
- 
+
   return h(
     "div.url-list",
     {
