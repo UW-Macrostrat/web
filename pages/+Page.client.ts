@@ -19,7 +19,6 @@ export function Page() {
       ]),
     ]),
     h("div.buttons", [
-      // h(LinkCard, { title: 'Search', href: '/sift/#/' }),
       h(LinkCard, { title: "Geologic Map", href: "/map/#3/40.78/-94.13" }, [
         h("p", { className: "long" }, [
           h("div.temp", {}, [
@@ -62,22 +61,17 @@ export function Page() {
       h(LinkCard, { title: "Projects", href: "/projects" }, [
         h("p", "Projects for specific regions or geological problems"),
       ]),
-      h(
-        LinkCard,
-        {
-          title: h("h3", [
-            h(Image, {
-              className: "rockd-png",
-              src: "rockd.png",
-              width: "22px",
-              height: "22px",
-            }),
-            h("span", " Rockd"),
-          ]),
-          href: "https://rockd.org",
-        },
-        h("p", "Go mobile!")
-      ),
+      h(LinkCard, { title: "Rockd", href: "https://rockd.org" }, [
+        h("h3.rock-info", [
+          h(Image, {
+            className: "rockd-png",
+            src: "rockd.png",
+            width: "22px",
+            height: "22px",
+          }),
+          h("span", " Go Mobile!"),
+        ]),
+      ]),
       h(
         LinkCard,
         { title: "Documentation", href: "/docs" },

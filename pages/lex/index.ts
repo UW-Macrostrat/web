@@ -16,6 +16,7 @@ import { useDarkMode } from "@macrostrat/ui-components";
 import { StratNameHierarchy } from "./StratNameHierarchy";
 import { LinkCard } from "~/components/cards";
 import { ColumnsMap } from "~/columns-map/index.client";
+import { get } from "underscore";
 
 export function titleCase(str) {
   if (!str) return str;
@@ -64,25 +65,24 @@ export function IndividualPage(id, type, header) {
       ? "environment"
       : header === "lithologies"
       ? "lithology"
-      : header === "economics"
+      : header === "econs"
       ? "economic"
       : header === "strat_name_concepts"
       ? "strat_name_concept"
       : "strat_name";
 
   // data for charts
-  const liths = summarizeAttributes(colData?.features, "lith");
-  const environs = summarizeAttributes(colData?.features, "environ");
-  const econs = summarizeAttributes(colData?.features, "econ");
+  const liths = summarizeAttributes({ data: colData?.features, type: "lith" });
+  const environs = summarizeAttributes({
+    data: colData?.features,
+    type: "environ",
+  });
+  const econs = summarizeAttributes({ data: colData?.features, type: "econ" });
   const summary = summarize(colData?.features);
 
   const chromaColor = intRes?.color ? asChromaColor(intRes.color) : null;
   const luminance = 0.9;
 
-  if (!intRes || !fossilRes) return h(Loading);
-
-  const { name, abbrev, b_age, t_age, timescales, strat_name, concept_id } =
-    intRes;
   const {
     t_units,
     t_sections,
@@ -92,10 +92,21 @@ export function IndividualPage(id, type, header) {
     max_thick,
     col_area,
   } = summary;
+
+  const t_id = getIntID({ name: t_int_name });
+  const b_id = getIntID({ name: b_int_name });
+
+  if (!intRes || !fossilRes) return h(Loading);
+
+  const { name, abbrev, b_age, t_age, timescales, strat_name, concept_id } =
+    intRes;
   const area = parseInt(col_area.toString().split(".")[0]);
 
   return h(ContentPage, { className: "int-page" }, [
-    h(PageBreadcrumbs, { title: "#" + id }),
+    h("div.page-header", [
+      h(PageBreadcrumbs, { title: "#" + id }),
+      h(DarkModeButton, { className: "dark-mode-button", showText: true }),
+    ]),
     h("div.int-header", [
       h("div.int-names", [
         h(
@@ -135,14 +146,26 @@ export function IndividualPage(id, type, header) {
         ),
       ]),
     ]),
-    h.if(concept_id)(conceptInfo, { concept_id }),
+    h.if(concept_id)(conceptInfo, { concept_id, header }),
     h.if(colData?.features.length)("div.table", [
       h("div.table-content", [
         h("div.packages", t_sections.toLocaleString() + " packages"),
         h(Divider, { className: "divider" }),
         h("div.units", t_units.toLocaleString() + " units"),
         h(Divider, { className: "divider" }),
-        h("div.interval", b_int_name.toLocaleString() + " - " + t_int_name),
+        h("div.interval", [
+          h(
+            Link,
+            { href: "/lex/intervals/" + b_id },
+            b_int_name.toLocaleString()
+          ),
+          " - ",
+          h(
+            Link,
+            { href: "/lex/intervals/" + t_id },
+            t_int_name.toLocaleString()
+          ),
+        ]),
         h.if(b_age && t_age)(Divider, { className: "divider" }),
         h.if(b_age && t_age)("div.age-range", [
           h("div.int-age", b_age + " - " + t_age + " Ma"),
@@ -165,10 +188,6 @@ export function IndividualPage(id, type, header) {
         "div.chart",
         Chart(liths, "Lithologies", "lithology", activeIndex, setActiveIndex)
       ),
-      h.if(econs?.length)(
-        "div.chart",
-        Chart(econs, "Economics", "economics", activeIndex, setActiveIndex)
-      ),
       h.if(environs?.length)(
         "div.chart",
         Chart(
@@ -178,6 +197,10 @@ export function IndividualPage(id, type, header) {
           activeIndex,
           setActiveIndex
         )
+      ),
+      h.if(econs?.length)(
+        "div.chart",
+        Chart(econs, "Economics", "economics", activeIndex, setActiveIndex)
       ),
     ]),
 
@@ -201,7 +224,6 @@ export function IndividualPage(id, type, header) {
       ),
     ]),
     h(References, { res1: fossilResult, res2: colDataResult }),
-    h(DarkModeButton),
   ]);
 }
 
@@ -245,13 +267,22 @@ function Taxa(record) {
   const imgUrl = "https://paleobiodb.org/data1.2/taxa/thumb.png?id=";
   const isDarkMode = useDarkMode().isEnabled;
 
-  return h("div.taxa", [
-    h(BlankImage, {
-      src: imgUrl + record.img,
-      className: "taxa-image" + (isDarkMode ? " img-dark-mode" : ""),
-    }),
-    h("p.name", record.nam),
-  ]);
+  return h(
+    Link,
+    {
+      href:
+        "https://paleobiodb.org/classic/basicTaxonInfo?taxon_no=" + record.oid,
+      className: "taxa",
+      target: "_blank",
+    },
+    [
+      h(BlankImage, {
+        src: imgUrl + record.img,
+        className: "taxa-image" + (isDarkMode ? " img-dark-mode" : ""),
+      }),
+      h("p.name", record.nam),
+    ]
+  );
 }
 
 function ConceptHierarchy({ id }) {
@@ -275,7 +306,17 @@ function ConceptHierarchy({ id }) {
   ]);
 }
 
-function conceptInfo({ concept_id }) {
+function getIntID({ name }) {
+  const res = useAPIResult(
+    SETTINGS.apiV2Prefix + "/defs/intervals?name_like=" + encodeURI(name)
+  )?.success?.data;
+
+  const id = res?.filter((d) => d.name === name)[0]?.int_id;
+
+  return id;
+}
+
+function conceptInfo({ concept_id, header }) {
   const url =
     SETTINGS.apiV2Prefix +
     "/defs/strat_name_concepts?strat_name_concept_id=" +
@@ -287,14 +328,18 @@ function conceptInfo({ concept_id }) {
   const { author, name, province, geologic_age, other, usage_notes } = data;
 
   return h("div.concept-info", [
-    h("h3", "Stratigraphic Concept"),
-    h("div.concept-name", [
+    h.if(header != "strat_name_concepts")("h3", "Stratigraphic Concept"),
+    h.if(header != "strat_name_concepts")("div.concept-name", [
       h(
         "a.title",
         { href: "/lex/strat-name-concepts/" + concept_id, target: "_blank" },
         name
       ),
       h("a.concept-ref", { href: url, target: "_blank" }, "via " + author),
+    ]),
+    h.if(header === "strat_name_concepts")("div.author", [
+      h("span.title", "Author: "),
+      h("span.author-text", h(Link, { href: url, target: "_blank" }, author)),
     ]),
     h.if(province)("div.province", [
       h("span.title", "Province: "),
@@ -315,26 +360,30 @@ function conceptInfo({ concept_id }) {
   ]);
 }
 
-export function summarizeAttributes(data, type) {
-  var index = {};
+export function summarizeAttributes({ data, type }) {
   if (!data) return null;
 
-  for (var i = 0; i < data.length; i++) {
-    for (var j = 0; j < data[i].properties[type].length; j++) {
-      // If we have seen this attribute ID before, add to the summary
-      if (index[data[i].properties[type][j][type + "_id"]]) {
-        index[data[i].properties[type][j][type + "_id"]].prop +=
-          data[i].properties[type][j].prop;
-      } else {
-        index[data[i].properties[type][j][type + "_id"]] =
-          data[i].properties[type][j];
-      }
-    }
-  }
+  const index = {};
 
-  var parsed = Object.keys(index).map((d) => {
-    index[d].prop = index[d].prop / data.length;
-    return index[d];
+  data.forEach((item) => {
+    const props = item.properties[type];
+    if (!props) return;
+
+    props.forEach((attr) => {
+      const id = attr[`${type}_id`];
+      if (!index[id]) {
+        index[id] = { ...attr, prop: attr.prop, count: 1 };
+      } else {
+        index[id].prop += attr.prop;
+      }
+    });
+  });
+
+  const sum = Object.values(index).reduce((acc, attr) => acc + attr.prop, 0);
+
+  const parsed = Object.values(index).map((attr) => {
+    attr.prop = attr.prop / sum;
+    return attr;
   });
 
   return parseAttributes(type, parsed);
@@ -698,14 +747,15 @@ function parseAttributes(type, data) {
 }
 
 function Chart(data, title, route, activeIndex, setActiveIndex) {
+  const isDarkMode = useDarkMode().isEnabled;
+  const reg = isDarkMode ? "#fff" : "#000";
+  const hovered = isDarkMode ? "#000" : "#fff";
+
   return h("div.chart-container", [
-    h("h3", title),
     h(
       ResponsiveContainer,
       { width: "100%", height: 300 },
-      h(
-        PieChart,
-        { className: "lithology-chart" },
+      h(PieChart, { className: "lithology-chart" }, [
         h(
           Pie,
           {
@@ -726,8 +776,8 @@ function Chart(data, title, route, activeIndex, setActiveIndex) {
               stroke:
                 activeIndex?.index === index &&
                 activeIndex.label === entry.label
-                  ? "#fff"
-                  : "#000",
+                  ? reg
+                  : hovered,
               strokeWidth: 2,
               onMouseEnter: () => {
                 if (
@@ -752,8 +802,19 @@ function Chart(data, title, route, activeIndex, setActiveIndex) {
               },
             })
           )
-        )
-      )
+        ),
+        h(
+          "text",
+          {
+            x: "50%",
+            y: "50%",
+            textAnchor: "middle",
+            dominantBaseline: "middle",
+            className: "chart-title",
+          },
+          h(Link, { href: "/lex/" + route }, title)
+        ),
+      ])
     ),
     h(
       "div.legend",
@@ -768,11 +829,12 @@ function ChartLegend(data, route, activeIndex, setActiveIndex, index) {
   const hovered = activeIndex?.label === data.label;
 
   return h("div.legend-item", [
-    h("div.box", { style: { "background-color": data.color } }),
+    h("div.box", { style: { backgroundColor: data.color } }),
     h(
       "a",
       {
         href: "/lex/" + route + "/" + data.id,
+        target: "_blank",
         onMouseEnter: () => {
           if (
             !activeIndex ||
@@ -788,10 +850,10 @@ function ChartLegend(data, route, activeIndex, setActiveIndex, index) {
           }
         },
         style: {
-          "font-weight": hovered ? "600" : "300",
+          fontWeight: hovered ? "600" : "300",
         },
       },
-      data.label
+      data.label + (hovered ? " (" + Math.trunc(data.value * 100) + "%)" : "")
     ),
   ]);
 }

@@ -56,5 +56,8 @@ export function ModalUnitPanel(props) {
     onSelectUnit,
     columnUnits: unitData,
     features,
+    onClickItem: (unit) => {
+      console.log("Clicked unit:", unit);
+    },
   });
 }

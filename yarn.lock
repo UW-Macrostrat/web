@@ -3036,9 +3036,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/column-views@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "@macrostrat/column-views@npm:2.0.0"
+"@macrostrat/column-views@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "@macrostrat/column-views@npm:2.0.1"
   dependencies:
     "@macrostrat/api-types": "npm:^1.1.0"
     "@macrostrat/color-utils": "npm:^1.1.0"
@@ -3058,10 +3058,10 @@ __metadata:
     "@turf/distance": "npm:^7.2.0"
     "@turf/line-intersect": "npm:^7.2.0"
     "@turf/nearest-point-on-line": "npm:^7.2.0"
-    "@types/chroma-js": "npm:^3"
-    "@types/d3-format": "npm:^3"
-    "@types/d3-geo": "npm:^3"
-    "@types/d3-shape": "npm:^3"
+    "@types/chroma-js": "npm:^3.1.1"
+    "@types/d3-format": "npm:^3.0.4"
+    "@types/d3-geo": "npm:^3.1.0"
+    "@types/d3-shape": "npm:^3.1.7"
     "@types/topojson-client": "npm:^3.1.5"
     "@visx/axis": "npm:^3.12.0"
     chroma-js: "npm:^3.1.2"
@@ -3074,15 +3074,15 @@ __metadata:
     d3-path: "npm:^3.1.0"
     d3-scale: "npm:^4.0.2"
     d3-shape: "npm:^3.2.0"
-    mapbox-gl: "npm:^2.11.0"
+    mapbox-gl: "npm:^2.15.0"
     react-spring: "npm:^9.7.5"
     topojson-client: "npm:^3.1.0"
     zustand: "npm:^5.0.3"
     zustand-computed: "npm:^2.0.2"
   peerDependencies:
-    "@blueprintjs/core": ^3.43.0 || ^4.3.0 || ^5.0.0
+    "@blueprintjs/core": ^5.0.0
     react: ^16.8.6||^17.0.0||^18.0.0
-  checksum: 10/f627e9abff1fbc8aa4375279da0d6e7ed0596281252690d4440fb7e73f356db493a2942a81dada749f0796d695e7530fbde0ee2e11e16e4d92930b6c7d8656e7
+  checksum: 10/4881986d1bb0ea77aa21028d967726fbebda0cfd3b1b90b140b82d50bb3a6da1dfba7a4e16550e954002b31eaeea7f2efee74ac201cd09a5c3fc2312bebbf5aa
   languageName: node
   linkType: hard
 
@@ -3446,7 +3446,7 @@ __metadata:
     "@macrostrat/api-types": "npm:^1.1.0"
     "@macrostrat/color-utils": "npm:^1.1.0"
     "@macrostrat/column-components": "npm:^1.1.0"
-    "@macrostrat/column-views": "npm:^2.0.0"
+    "@macrostrat/column-views": "npm:^2.0.1"
     "@macrostrat/data-components": "npm:^0.1.0"
     "@macrostrat/data-sheet": "npm:^2.0.2"
     "@macrostrat/feedback-components": "npm:^1.0.1"
@@ -5290,7 +5290,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/chroma-js@npm:^3, @types/chroma-js@npm:^3.1.1":
+"@types/chroma-js@npm:^3.1.1":
   version: 3.1.1
   resolution: "@types/chroma-js@npm:3.1.1"
   checksum: 10/24770bd645425a1d90e3651dbb18bc5977290a2d2fc6e9f32d3892d4c43c1e9f554fb324cd0f4e20a23b734ee652278330a0d331973a7da824e0c15192ba129b
@@ -5403,14 +5403,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/d3-format@npm:^3":
+"@types/d3-format@npm:^3.0.4":
   version: 3.0.4
   resolution: "@types/d3-format@npm:3.0.4"
   checksum: 10/b937ecd2712d4aa38d5b4f5daab9cc8a576383868be1809e046aec99eeb1f1798c139f2e862dc400a82494c763be46087d154891773417f8eb53c73762ba3eb8
   languageName: node
   linkType: hard
 
-"@types/d3-geo@npm:3.1.0, @types/d3-geo@npm:^3, @types/d3-geo@npm:^3.0, @types/d3-geo@npm:^3.0.0":
+"@types/d3-geo@npm:3.1.0, @types/d3-geo@npm:^3.0, @types/d3-geo@npm:^3.0.0, @types/d3-geo@npm:^3.1.0":
   version: 3.1.0
   resolution: "@types/d3-geo@npm:3.1.0"
   dependencies:
@@ -5510,7 +5510,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/d3-shape@npm:^3, @types/d3-shape@npm:^3.1.0":
+"@types/d3-shape@npm:^3.1.0, @types/d3-shape@npm:^3.1.7":
   version: 3.1.7
   resolution: "@types/d3-shape@npm:3.1.7"
   dependencies:
@@ -13403,7 +13403,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mapbox-gl@npm:^2.11.0, mapbox-gl@npm:^2.15.0, mapbox-gl@npm:^2.8.2":
+"mapbox-gl@npm:^2.15.0, mapbox-gl@npm:^2.8.2":
   version: 2.15.0
   resolution: "mapbox-gl@npm:2.15.0"
   dependencies:

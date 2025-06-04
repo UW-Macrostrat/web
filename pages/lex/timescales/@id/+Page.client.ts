@@ -1,5 +1,4 @@
-import "./main.scss";
-import h from "@macrostrat/hyper";
+import h from "./main.module.scss";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
 import {

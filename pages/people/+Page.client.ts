@@ -1,7 +1,8 @@
-import { Image, Navbar, Footer } from "../index";
+import { Image, Navbar, Footer, SearchBar } from "../index";
 import h from "./main.module.sass";
-import { Card, Icon } from "@blueprintjs/core";
+import { Card, Divider } from "@blueprintjs/core";
 import { useState } from "react";
+import { ContentPage } from "~/layouts";
 
 export function Page() {
   const [input, setInput] = useState("");
@@ -44,7 +45,7 @@ export function Page() {
     },
     {
       name: "David Sklar",
-      role: "Undergraduate Research Assistant",
+      role: "Undergrad Student",
       email: "dsklar@wisc.edu",
       link: null,
       image: "david.jpg",
@@ -137,7 +138,7 @@ export function Page() {
       })
       .filter((tag) => tag !== null);
     const tagMatch =
-      tags.length === 0 || tags.some((tag) => roleTags.includes(tag));
+      tags.length === 0 || tags.every((tag) => roleTags.includes(tag));
 
     return (
       (name.includes(input) || role.includes(input) || email.includes(input)) &&
@@ -145,46 +146,47 @@ export function Page() {
     );
   });
 
-  return h("div.main", [
+  return h("div", [
     h(Navbar),
-    h("h1.big", "People"),
-    h("p.subtitle", "major contributors to the project"),
-    h(Card, { className: "search-bar" }, [
-      h("div.input-container", [
-        h(Icon, { icon: "search", style: { color: "white" } }),
-        h("input", {
-          type: "text",
-          placeholder: "Search people...",
+    h(ContentPage, { className: "people-page" }, [
+      h("div.page-header", [
+        h("h1.big", "People"),
+        h("p.subtitle", "major contributors to the project"),
+        h(Divider),
+      ]),
+      h(Card, { className: "search-bar" }, [
+        h(SearchBar, {
           onChange: handleInputChange,
+          placeholder: "Search by name, role, or email",
         }),
-      ]),
-      h("div.tags", [
-        tagList.map((tag) => {
-          return h(
-            "div",
-            {
-              onClick: () => {
-                setTags((prevTags) => {
-                  if (prevTags.includes(tag)) {
-                    return prevTags.filter((t) => t !== tag);
-                  } else {
-                    return [...prevTags, tag];
-                  }
-                });
+        h("div.tags", [
+          tagList.map((tag) => {
+            return h(
+              "div",
+              {
+                onClick: () => {
+                  setTags((prevTags) => {
+                    if (prevTags.includes(tag)) {
+                      return prevTags.filter((t) => t !== tag);
+                    } else {
+                      return [...prevTags, tag];
+                    }
+                  });
+                },
+                className: tags.includes(tag)
+                  ? "filter-card selected"
+                  : "filter-card",
               },
-              className: tags.includes(tag)
-                ? "filter-card selected"
-                : "filter-card",
-            },
-            tag
-          );
+              tag
+            );
+          }),
+        ]),
+      ]),
+      h("div.people", [
+        filteredPeople.map((person) => {
+          return h(PersonCard, person);
         }),
       ]),
-    ]),
-    h("div.people", [
-      filteredPeople.map((person) => {
-        return h(PersonCard, person);
-      }),
     ]),
     h(Footer),
   ]);

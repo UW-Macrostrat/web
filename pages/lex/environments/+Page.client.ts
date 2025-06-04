@@ -1,12 +1,12 @@
 import h from "./main.module.scss";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { SETTINGS } from "@macrostrat-web/settings";
-import { PageHeader, AssistantLinks, PageBreadcrumbs } from "~/components";
+import { PageBreadcrumbs, StickyHeader } from "~/components";
 import { Card, Icon, Popover } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { asChromaColor } from "@macrostrat/color-utils";
-import { Loading } from "../../index";
+import { Loading, SearchBar } from "../../index";
 
 export function Page() {
   const [input, setInput] = useState("");
@@ -31,17 +31,12 @@ export function Page() {
   const grouped = groupByClassThenType(filtered);
 
   return h(ContentPage, { className: "environ-list-page" }, [
-    h(PageBreadcrumbs, { title: "Environments" }),
-    h(Card, [
-      h("h3", "Filters"),
-      h("div.search-bar", [
-        h(Icon, { icon: "search" }),
-        h("input", {
-          type: "text",
-          placeholder: "Search environments...",
-          onChange: handleChange,
-        }),
-      ]),
+    h(StickyHeader, [
+      h(PageBreadcrumbs, { title: "Environments" }),
+      h(SearchBar, {
+        placeholder: "Search environments...",
+        onChange: handleChange,
+      }),
     ]),
     h(
       "div.environment-list",
