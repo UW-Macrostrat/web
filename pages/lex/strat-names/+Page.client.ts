@@ -14,7 +14,8 @@ export function Page() {
 
 export function StratPage({ show }) {
   const { res } = useData();
-  const startingID = show ? res[res.length - 1]?.concept_id : res[res.length - 1]?.strat_name_id;
+  console.log("res", res);
+  const startingID = show ? res[res?.length - 1]?.concept_id : res[res?.length - 1]?.strat_name_id;
 
   const [input, setInput] = useState("");
   const [showConcepts, setShowConcepts] = useState(show ?? false);
