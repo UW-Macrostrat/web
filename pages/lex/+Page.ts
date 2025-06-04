@@ -52,20 +52,12 @@ export function Page() {
       h("p.stat", `${formatNumber(measurements)} measurements`),
     ]),
 
-    h("h2", "Stratigraphic names"),
-
+    h("h2", "Dictionaries"),
     h(
       LinkCard,
       { href: "/lex/strat-names", title: "Stratigraphic names" },
-      "Names of rock units, organized hierarchically"
+      "Names of rock units, organized hierarchically and concepts that capture relationships between differently-named rock units"
     ),
-    h(
-      LinkCard,
-      { href: "/lex/strat-name-concepts", title: "Stratigraphic concepts" },
-      "Concepts that capture relationships between differently-named rock units"
-    ),
-
-    h("h2", "Dictionaries"),
 
     h(
       LinkCard,
