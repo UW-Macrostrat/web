@@ -59,17 +59,27 @@ export function StratPage({ show }) {
     h(StickyHeader, { className: "header" }, [
       h(PageBreadcrumbs, { title }),
       h("div.header-description", [
-        h("p", [
-          h("strong", "Strat Names: "),
-          h("span", "names of rock units, organized hierarchically"),
-        ]),
-        h("p", [
-          h("strong", "Strat Concepts: "),
-          h(
-            "span",
-            "capture relationships between differently-named rock units"
-          ),
-        ]),
+        h(Card,
+          {
+            className: !showConcepts ? "selected" : "",
+          },
+          [
+            h("strong", "Strat Names: "),
+            h("span", "names of rock units, organized hierarchically"),
+          ]
+      ),
+        h(Card,
+          {
+            className: showConcepts ? "selected" : "",
+          }, 
+          [
+            h("strong", "Strat Concepts: "),
+            h(
+              "span",
+              "capture relationships between differently-named rock units"
+            ),
+          ]
+        ),
       ]),
       h(Card, { className: "filter" }, [
         h(SearchBar, {
