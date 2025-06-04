@@ -14,8 +14,12 @@ import { ContentPage } from "~/layouts";
 import { Loading, SearchBar } from "../../index";
 
 export function Page() {
+  return StratPage({ show: false });
+}
+
+export function StratPage({show}) {
   const [input, setInput] = useState("");
-  const [showConcepts, setShowConcepts] = useState(false);
+  const [showConcepts, setShowConcepts] = useState(show ?? false);
   const [lastID, setLastID] = useState(0);
   const [data, setData] = useState([]);
   const pageSize = 20;
@@ -77,6 +81,7 @@ export function Page() {
         }),
         h(Switch, {
           label: "Include concepts",
+          checked: showConcepts,
           onChange: (e) => {
             setShowConcepts(e.target.checked);
           }
