@@ -1,22 +1,18 @@
 import h from "./main.module.scss";
-import { useAPIResult } from "@macrostrat/ui-components";
-import { SETTINGS } from "@macrostrat-web/settings";
 import { PageBreadcrumbs, StickyHeader } from "~/components";
-import { Card, Icon, Popover } from "@blueprintjs/core";
+import { Popover } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { Loading, SearchBar } from "../../index";
+import { useData } from "vike-react/useData";
 
 export function Page() {
   const [input, setInput] = useState("");
-  const res = useAPIResult(SETTINGS.apiV2Prefix + "/defs/environments?all")
-    ?.success.data;
-
-  if (res == null) return h(Loading);
+  const { res } = useData();
 
   const handleChange = (event) => {
-    setInput(event.target.value.toLowerCase());
+    setInput(event.toLowerCase());
   };
 
   const filtered = res.filter((d) => {
