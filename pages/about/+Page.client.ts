@@ -117,7 +117,7 @@ export function Page() {
           h(
             "a",
             {
-              href: "http://fc.umn.edu/",
+              href: "https://flyovercountry.io/",
               target: "_blank",
               rel: "noopener noreferrer",
             },

@@ -19,6 +19,7 @@ export function Navbar({ className }) {
       h("a", { href: "/publications" }, "Publications"),
       h("a", { href: "/people" }, "People"),
       h("a", { href: "/donate" }, "Donate"),
+      h("a", { href: "https://rockd.org/" }, "Rockd"),
     ]),
   ]);
 }
@@ -26,12 +27,19 @@ export function Navbar({ className }) {
 export function Footer() {
   const isDarkMode = useDarkMode()?.isEnabled;
 
-  const navItems = [
-    { href: "/about", text: "About", icon: "info-sign" },
-    { href: "/publications", text: "Publications", icon: "book" },
-    { href: "/people", text: "People", icon: "people" },
-    { href: "/donate", text: "Donate", icon: "dollar" },
-  ];
+const navItems = [
+  { href: "/about", text: "About", icon: "info-sign" },
+  { href: "/publications", text: "Publications", icon: "book" },
+  { href: "/people", text: "People", icon: "people" },
+  { href: "/donate", text: "Donate", icon: "dollar" },
+  { href: "/map/#3/40.78/-94.13", text: "Geologic Map", icon: "map" },
+  { href: "/maps", text: "Maps", icon: "globe" },
+  { href: "/columns", text: "Columns", icon: "layers" },
+  { href: "/lex", text: "Lexicon", icon: "book" },
+  { href: "/projects", text: "Projects", icon: "briefcase" },
+  { href: "/docs", text: "Documentation", icon: "manual" },
+  { href: "https://rockd.org", text: "Rockd", icon: "phone-search" },
+];
 
   return h("div", { className: "footer" }, [
     h("div", { className: "footer-container" }, [
