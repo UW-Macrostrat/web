@@ -6,7 +6,6 @@ import { isDev } from "@macrostrat-web/settings";
 
 export function Page() {
   return h("div.page-main", [
-    h(Navbar, { className: "main-navbar" }),
     h("div.start", [
       h(Image, { className: "back-img cover-image", src: "cover_large.jpg" }),
       h("div.banner", [
@@ -18,6 +17,7 @@ export function Page() {
         h(MacrostratStats),
       ]),
     ]),
+    h(Navbar, { className: "main-navbar" }),
     h("div.buttons", [
       h(LinkCard, { title: "Geologic Map", href: "/map/#3/40.78/-94.13" }, [
         h("p", { className: "long" }, [

@@ -19,11 +19,6 @@ export function Navbar({ className }) {
       h("a", { href: "/publications" }, "Publications"),
       h("a", { href: "/people" }, "People"),
       h("a", { href: "/donate" }, "Donate"),
-      h("a", { href: "/map" }, "Map"),
-      h("a", { href: "/columns" }, "Columns"),
-      h("a", { href: "/projects" }, "Projects"),
-      h("a", { href: "/lex" }, "Lexicon"),
-      h("a", { href: "/docs" }, "Documentation"),
     ]),
   ]);
 }
@@ -36,11 +31,6 @@ export function Footer() {
     { href: "/publications", text: "Publications", icon: "book" },
     { href: "/people", text: "People", icon: "people" },
     { href: "/donate", text: "Donate", icon: "dollar" },
-    { href: "/map", text: "Map", icon: "map" },
-    { href: "/columns", text: "Columns", icon: "timeline-bar-chart" },
-    { href: "/projects", text: "Projects", icon: "projects" },
-    { href: "/lex", text: "Lexicon", icon: "manual" },
-    { href: "/docs", text: "Documentation", icon: "document" },
   ];
 
   return h("div", { className: "footer" }, [
