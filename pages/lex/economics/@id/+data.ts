@@ -8,7 +8,14 @@ export async function data(pageContext) {
   const [res, fossilRes, colData] = await Promise.all([
     fetchAPIData("/defs/econs", { econ_id }),
     (await fetch(apiV2Prefix + "/fossils?econ_id=" + econ_id)).json(),
-    (await fetch(apiV2Prefix + "/columns?econ_id=" + econ_id + "&response=long&format=geojson")).json(),
+    (
+      await fetch(
+        apiV2Prefix +
+          "/columns?econ_id=" +
+          econ_id +
+          "&response=long&format=geojson"
+      )
+    ).json(),
   ]);
 
   const cols = colData.success.data.features

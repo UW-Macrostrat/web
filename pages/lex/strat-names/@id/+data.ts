@@ -7,8 +7,17 @@ export async function data(pageContext) {
   // Await all API calls
   const [res, fossilRes, colData] = await Promise.all([
     fetchAPIData("/defs/strat_names", { strat_name_id }),
-    (await fetch(apiV2Prefix + "/fossils?strat_name_id=" + strat_name_id)).json(),
-    (await fetch(apiV2Prefix + "/columns?strat_name_id=" + strat_name_id + "&response=long&format=geojson")).json(),
+    (
+      await fetch(apiV2Prefix + "/fossils?strat_name_id=" + strat_name_id)
+    ).json(),
+    (
+      await fetch(
+        apiV2Prefix +
+          "/columns?strat_name_id=" +
+          strat_name_id +
+          "&response=long&format=geojson"
+      )
+    ).json(),
   ]);
 
   const cols = colData.success.data.features

@@ -45,12 +45,18 @@ export function IndividualPage(id, header, res, fossilRes, colData, taxaData) {
       : "strat_name";
 
   // data for charts
-  const liths = summarizeAttributes({ data: colData.success.data.features, type: "lith" });
+  const liths = summarizeAttributes({
+    data: colData.success.data.features,
+    type: "lith",
+  });
   const environs = summarizeAttributes({
     data: colData.success.data.features,
     type: "environ",
   });
-  const econs = summarizeAttributes({ data: colData.success.data.features, type: "econ" });
+  const econs = summarizeAttributes({
+    data: colData.success.data.features,
+    type: "econ",
+  });
   const summary = summarize(colData.success.data.features);
 
   const chromaColor = intRes?.color ? asChromaColor(intRes.color) : null;

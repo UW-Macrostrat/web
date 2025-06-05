@@ -6,5 +6,12 @@ export function Page() {
 
   console.log("Strat Name Concepts Page", res, fossilRes, colData, taxaData);
 
-  return IndividualPage(res[0].strat_name_id, "strat_names", res, fossilRes, colData, taxaData);
+  return IndividualPage(
+    res[0].strat_name_id,
+    "strat_names",
+    res,
+    fossilRes,
+    colData,
+    taxaData
+  );
 }
