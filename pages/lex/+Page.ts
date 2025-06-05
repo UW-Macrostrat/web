@@ -4,11 +4,10 @@ import { apiV2Prefix } from "@macrostrat-web/settings";
 import { useAPIResult } from "@macrostrat/ui-components";
 import h from "./+Page.module.sass";
 import { Loading } from "../index";
+import { useData } from "vike-react/useData";
 
 export function Page() {
-  const res = useAPIResult(apiV2Prefix + "/stats?all")?.success?.data;
-
-  if (!res) return h(ContentPage, Loading);
+  const { res } = useData();
 
   const seen = new Set();
   const stats = res.filter((project) => {

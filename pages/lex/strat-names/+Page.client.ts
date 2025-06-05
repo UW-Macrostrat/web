@@ -160,7 +160,7 @@ function StratItem({ data, item_route }) {
 
   return h(
     LinkCard,
-    { href: `/lex/${item_route}/` + (concept_id ?? strat_name_id) },
+    { href: `/lex/${item_route}/` + (strat_name_id ?? concept_id) },
     name ?? strat_name ?? "Unnamed"
   );
 }
