@@ -11,9 +11,9 @@ import {
 import { ContentPage } from "~/layouts";
 import { usePageContext } from "vike-react/usePageContext";
 import { Timescale } from "@macrostrat/timescale";
-import { titleCase } from "../../index";
+import { titleCase } from "~/components/lex";
 import { useState, useEffect } from "react";
-import { Loading } from "../../../index";
+import { Loading } from "~/components/general";
 
 export function Page() {
   const pageContext = usePageContext();

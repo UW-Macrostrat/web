@@ -6,7 +6,7 @@ import { Card, Icon, Popover, RangeSlider, Divider } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { Timescale } from "@macrostrat/timescale";
-import { titleCase } from "../index";
+import { titleCase } from "../../../src/components/lex/index";
 import { useEffect } from "react";
 import { Loading, SearchBar } from "~/components/general";
 
