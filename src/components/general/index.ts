@@ -94,10 +94,6 @@ const navItems = [
   ]);
 }
 
-export function useMacrostratAPI(str) {
-  return useAPIResult(SETTINGS.apiV2Prefix + str);
-}
-
 export function BlankImage({ src, className, width, height }) {
   return h("img", { src, className, width, height });
 }

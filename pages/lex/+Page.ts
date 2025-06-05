@@ -3,7 +3,7 @@ import { ContentPage } from "~/layouts";
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import { useAPIResult } from "@macrostrat/ui-components";
 import h from "./+Page.module.sass";
-import { Loading } from "../index";
+import { Loading } from "~/components/general";
 
 export function Page() {
   const res = useAPIResult(apiV2Prefix + "/stats?all")?.success?.data;

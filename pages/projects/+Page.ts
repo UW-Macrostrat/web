@@ -2,7 +2,7 @@ import h from "./main.module.scss";
 import { ContentPage } from "~/layouts";
 import { PageHeader, LinkCard } from "~/components";
 import { useData } from "vike-react/useData";
-import { Image } from "../index";
+import { Image } from "~/components/general";
 
 export function Page() {
   // static list of projects with pictures

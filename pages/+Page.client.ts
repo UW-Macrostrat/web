@@ -1,9 +1,8 @@
-import { Image, Navbar, Footer } from "./index";
+import { Image, Navbar, Footer } from "~/components/general";
 import h from "./+Page.module.sass";
 import { LinkCard } from "~/components/cards";
 import { useData } from "vike-react/useData";
 import { isDev } from "@macrostrat-web/settings";
-import { ContentPage } from "~/layouts";
 
 export function Page() {
   return h("div.page-main", [

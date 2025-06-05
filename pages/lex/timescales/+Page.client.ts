@@ -8,7 +8,7 @@ import { ContentPage } from "~/layouts";
 import { Timescale } from "@macrostrat/timescale";
 import { titleCase } from "../index";
 import { useEffect } from "react";
-import { Loading, SearchBar } from "../../index";
+import { Loading, SearchBar } from "~/components/general";
 
 export function Page() {
   const [input, setInput] = useState("");

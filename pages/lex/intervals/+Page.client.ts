@@ -6,7 +6,7 @@ import { Card, Popover, RangeSlider } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { asChromaColor } from "@macrostrat/color-utils";
-import { Loading, SearchBar } from "../../index";
+import { Loading, SearchBar } from "~/components/general";
 import { IntervalTag } from "@macrostrat/data-components";
 
 export function Page() {
