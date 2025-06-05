@@ -16,7 +16,6 @@ import { useDarkMode } from "@macrostrat/ui-components";
 import { StratNameHierarchy } from "./StratNameHierarchy";
 import { LinkCard } from "~/components/cards";
 import { ColumnsMap } from "~/columns-map/index.client";
-import { get } from "underscore";
 
 export function titleCase(str) {
   if (!str) return str;
@@ -27,36 +26,10 @@ export function titleCase(str) {
     .join(" ");
 }
 
-export function IndividualPage(id, type, header) {
-  // for fetching fossil data with strat concept
-  if (type === "concept_id") {
-    type = "strat_name_concept_id";
-  }
+export function IndividualPage(id, header, res, fossilRes, colData, taxaData) {
+  const intRes = res[0];
 
   const [activeIndex, setActiveIndex] = useState(null);
-  const intRes = useAPIResult(
-    SETTINGS.apiV2Prefix + "/defs/" + header + "?" + type + "=" + id
-  )?.success.data[0];
-  const fossilResult = useAPIResult(
-    SETTINGS.apiV2Prefix + "/fossils?" + type + "=" + id
-  )?.success;
-  const colDataResult = useAPIResult(
-    SETTINGS.apiV2Prefix +
-      "/columns?" +
-      type +
-      "=" +
-      id +
-      "&response=long&format=geojson"
-  )?.success;
-  const fossilRes = fossilResult?.data;
-  const colData = colDataResult?.data;
-  const cols = colData?.features
-    .map((feature) => feature.properties.col_id)
-    .join(",");
-  const taxaData = useAPIResult(
-    "https://paleobiodb.org/data1.2/occs/prevalence.json?limit=5&coll_id=" +
-      cols
-  );
 
   const siftLink =
     header === "intervals"
@@ -72,13 +45,13 @@ export function IndividualPage(id, type, header) {
       : "strat_name";
 
   // data for charts
-  const liths = summarizeAttributes({ data: colData?.features, type: "lith" });
+  const liths = summarizeAttributes({ data: colData.success.data.features, type: "lith" });
   const environs = summarizeAttributes({
-    data: colData?.features,
+    data: colData.success.data.features,
     type: "environ",
   });
-  const econs = summarizeAttributes({ data: colData?.features, type: "econ" });
-  const summary = summarize(colData?.features);
+  const econs = summarizeAttributes({ data: colData.success.data.features, type: "econ" });
+  const summary = summarize(colData.success.data.features);
 
   const chromaColor = intRes?.color ? asChromaColor(intRes.color) : null;
   const luminance = 0.9;
@@ -95,8 +68,6 @@ export function IndividualPage(id, type, header) {
 
   const t_id = getIntID({ name: t_int_name });
   const b_id = getIntID({ name: b_int_name });
-
-  if (!intRes || !fossilRes) return h(Loading);
 
   const { name, abbrev, b_age, t_age, timescales, strat_name, concept_id } =
     intRes;
@@ -147,7 +118,7 @@ export function IndividualPage(id, type, header) {
       ]),
     ]),
     h.if(concept_id)(conceptInfo, { concept_id, header }),
-    h.if(colData?.features.length)("div.table", [
+    h.if(colData.success.data.features.length)("div.table", [
       h("div.table-content", [
         h("div.packages", t_sections.toLocaleString() + " packages"),
         h(Divider, { className: "divider" }),
@@ -181,7 +152,7 @@ export function IndividualPage(id, type, header) {
           pbdb_collections.toLocaleString() + " collections"
         ),
       ]),
-      colData ? h(ColumnsMap, { columns: colData }) : h(Loading),
+      colData ? h(ColumnsMap, { columns: colData.success.data }) : h(Loading),
     ]),
     h("div.charts", [
       h.if(liths?.length)(
@@ -223,7 +194,7 @@ export function IndividualPage(id, type, header) {
         )
       ),
     ]),
-    h(References, { res1: fossilResult, res2: colDataResult }),
+    h(References, { res1: fossilRes, res2: colData }),
   ]);
 }
 
@@ -232,10 +203,11 @@ function UpperCase(str) {
 }
 
 function References({ res1, res2 }) {
+  console.log("References:", res1, res2);
   if (res1 == null || res2 == null) return h(Loading);
 
-  const refArray1 = Object.values(res1.refs);
-  const refArray2 = Object.values(res2.refs);
+  const refArray1 = Object.values(res1.success.refs);
+  const refArray2 = Object.values(res2.success.refs);
   const refs = [...refArray1, ...refArray2];
 
   return h.if(refs?.length != 0)("div.int-references", [
