@@ -99,144 +99,153 @@ export function IndividualPage(id, type, header) {
 
   if (!intRes || !fossilRes) return h(Loading);
 
-  const { name, abbrev, b_age, t_age, timescales, strat_name, concept_id, int_id } =
-    intRes;
+  const {
+    name,
+    abbrev,
+    b_age,
+    t_age,
+    timescales,
+    strat_name,
+    concept_id,
+    int_id,
+  } = intRes;
 
   const area = parseInt(col_area.toString().split(".")[0]);
 
-  return h('div', [
-  h(ContentPage, { className: "int-page" }, [
-    h("div.page-header", [
-      h(PageBreadcrumbs, { title: "#" + id }),
-      h(DarkModeButton, { className: "dark-mode-button", showText: true }),
-    ]),
-    h("div.int-header", [
-      h("div.int-names", [
-        h(
-          "div.int-name",
-          {
-            style: {
-              backgroundColor: chromaColor?.luminance(1 - luminance).hex(),
-              color: chromaColor?.luminance(luminance).hex(),
+  return h("div", [
+    h(ContentPage, { className: "int-page" }, [
+      h("div.page-header", [
+        h(PageBreadcrumbs, { title: "#" + id }),
+        h(DarkModeButton, { className: "dark-mode-button", showText: true }),
+      ]),
+      h("div.int-header", [
+        h("div.int-names", [
+          h(
+            "div.int-name",
+            {
+              style: {
+                backgroundColor: chromaColor?.luminance(1 - luminance).hex(),
+                color: chromaColor?.luminance(luminance).hex(),
+              },
             },
-          },
-          UpperCase(strat_name ? strat_name : name)
-        ),
-        abbrev
-          ? h("div.int-abbrev", [
-              h("p", " aka "),
-              h(
-                "div.int-abbrev-item",
-                {
-                  style: {
-                    backgroundColor: chromaColor
-                      ?.luminance(1 - luminance)
-                      .hex(),
-                    color: chromaColor?.luminance(luminance).hex(),
+            UpperCase(strat_name ? strat_name : name)
+          ),
+          abbrev
+            ? h("div.int-abbrev", [
+                h("p", " aka "),
+                h(
+                  "div.int-abbrev-item",
+                  {
+                    style: {
+                      backgroundColor: chromaColor
+                        ?.luminance(1 - luminance)
+                        .hex(),
+                      color: chromaColor?.luminance(luminance).hex(),
+                    },
                   },
-                },
-                abbrev
-              ),
-            ])
-          : null,
-      ]),
-      h("div.sift-link", [
-        h("p", "This page is is in development."),
-        h(
-          "a",
-          { href: "/sift/" + siftLink + "/" + id, target: "_blank" },
-          "View in Sift"
-        ),
-      ]),
-    ]),
-    h.if(concept_id)(conceptInfo, { concept_id, header }),
-    h.if(header === "intervals")("div.timescale",
-      h(Timescale, {
-        length: 970,
-        levels: [1, 5],
-        ageRange: [b_age, t_age],
-        absoluteAgeScale: true,
-      })
-    ),
-    h.if(colData?.features.length)("div.table", [
-      h("div.table-content", [
-        h("div.packages", t_sections.toLocaleString() + " packages"),
-        h(Divider, { className: "divider" }),
-        h("div.units", t_units.toLocaleString() + " units"),
-        h(Divider, { className: "divider" }),
-        h("div.interval", [
+                  abbrev
+                ),
+              ])
+            : null,
+        ]),
+        h("div.sift-link", [
+          h("p", "This page is is in development."),
           h(
-            Link,
-            { href: "/lex/intervals/" + b_id },
-            b_int_name.toLocaleString()
-          ),
-          " - ",
-          h(
-            Link,
-            { href: "/lex/intervals/" + t_id },
-            t_int_name.toLocaleString()
+            "a",
+            { href: "/sift/" + siftLink + "/" + id, target: "_blank" },
+            "View in Sift"
           ),
         ]),
-        h.if(b_age && t_age)(Divider, { className: "divider" }),
-        h.if(b_age && t_age)("div.age-range", [
-          h("div.int-age", b_age + " - " + t_age + " Ma"),
-          // h(Parenthetical, { className: "range"}, h(Duration, { value: b_age - t_age })),
-        ]),
-        h(Divider, { className: "divider" }),
-        h("div.area", [h("p", area.toLocaleString() + " km"), h("sup", "2")]),
-        h(Divider, { className: "divider" }),
-        h("div.thickness", "≤ " + max_thick.toLocaleString() + "m thick"),
-        h(Divider, { className: "divider" }),
-        h(
-          "div.collections",
-          pbdb_collections.toLocaleString() + " collections"
-        ),
       ]),
-      colData ? h(ColumnsMap, { columns: colData }) : h(Loading),
-    ]),
-    h("div.charts", [
-      h.if(liths?.length)(
-        "div.chart",
-        Chart(liths, "Lithologies", "lithology", activeIndex, setActiveIndex)
+      h.if(concept_id)(conceptInfo, { concept_id, header }),
+      h.if(header === "intervals")(
+        "div.timescale",
+        h(Timescale, {
+          length: 970,
+          levels: [1, 5],
+          ageRange: [b_age, t_age],
+          absoluteAgeScale: true,
+        })
       ),
-      h.if(environs?.length)(
-        "div.chart",
-        Chart(
-          environs,
-          "Environments",
-          "environments",
-          activeIndex,
-          setActiveIndex
-        )
-      ),
-      h.if(econs?.length)(
-        "div.chart",
-        Chart(econs, "Economics", "economics", activeIndex, setActiveIndex)
-      ),
-    ]),
-
-    h.if(taxaData)(PrevalentTaxa, { data: taxaData }),
-    h.if(header === "strat_names")(StratNameHierarchy, { id }),
-    // h.if(header === "strat_name_concepts")(ConceptHierarchy, { id}),
-    h.if(timescales?.[0]?.name)("div.int-timescales", [
-      h("h3", "Timescales"),
-      h(
-        "ul",
-        timescales?.map((t) =>
-          h(
-            "li",
+      h.if(colData?.features.length)("div.table", [
+        h("div.table-content", [
+          h("div.packages", t_sections.toLocaleString() + " packages"),
+          h(Divider, { className: "divider" }),
+          h("div.units", t_units.toLocaleString() + " units"),
+          h(Divider, { className: "divider" }),
+          h("div.interval", [
             h(
               Link,
-              { href: "/lex/timescales/" + t.timescale_id },
-              titleCase(t.name)
+              { href: "/lex/intervals/" + b_id },
+              b_int_name.toLocaleString()
+            ),
+            " - ",
+            h(
+              Link,
+              { href: "/lex/intervals/" + t_id },
+              t_int_name.toLocaleString()
+            ),
+          ]),
+          h.if(b_age && t_age)(Divider, { className: "divider" }),
+          h.if(b_age && t_age)("div.age-range", [
+            h("div.int-age", b_age + " - " + t_age + " Ma"),
+            // h(Parenthetical, { className: "range"}, h(Duration, { value: b_age - t_age })),
+          ]),
+          h(Divider, { className: "divider" }),
+          h("div.area", [h("p", area.toLocaleString() + " km"), h("sup", "2")]),
+          h(Divider, { className: "divider" }),
+          h("div.thickness", "≤ " + max_thick.toLocaleString() + "m thick"),
+          h(Divider, { className: "divider" }),
+          h(
+            "div.collections",
+            pbdb_collections.toLocaleString() + " collections"
+          ),
+        ]),
+        colData ? h(ColumnsMap, { columns: colData }) : h(Loading),
+      ]),
+      h("div.charts", [
+        h.if(liths?.length)(
+          "div.chart",
+          Chart(liths, "Lithologies", "lithology", activeIndex, setActiveIndex)
+        ),
+        h.if(environs?.length)(
+          "div.chart",
+          Chart(
+            environs,
+            "Environments",
+            "environments",
+            activeIndex,
+            setActiveIndex
+          )
+        ),
+        h.if(econs?.length)(
+          "div.chart",
+          Chart(econs, "Economics", "economics", activeIndex, setActiveIndex)
+        ),
+      ]),
+
+      h.if(taxaData)(PrevalentTaxa, { data: taxaData }),
+      h.if(header === "strat_names")(StratNameHierarchy, { id }),
+      // h.if(header === "strat_name_concepts")(ConceptHierarchy, { id}),
+      h.if(timescales?.[0]?.name)("div.int-timescales", [
+        h("h3", "Timescales"),
+        h(
+          "ul",
+          timescales?.map((t) =>
+            h(
+              "li",
+              h(
+                Link,
+                { href: "/lex/timescales/" + t.timescale_id },
+                titleCase(t.name)
+              )
             )
           )
-        )
-      ),
+        ),
+      ]),
+      h(References, { res1: fossilResult, res2: colDataResult }),
     ]),
-    h(References, { res1: fossilResult, res2: colDataResult }),
-  ]),
-  h(Footer),
+    h(Footer),
   ]);
 }
 

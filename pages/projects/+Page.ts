@@ -15,14 +15,14 @@ export function Page() {
 
   const { projects } = useData();
 
-  return h('div', [
+  return h("div", [
     h(ContentPage, [
       h(PageHeader, { title: "Projects" }),
       projects.map((d) =>
         h(ProjectItem, { data: d, key: d.project_id, pictures })
       ),
     ]),
-    h(Footer)
+    h(Footer),
   ]);
 }
 

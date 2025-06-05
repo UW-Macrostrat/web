@@ -21,8 +21,9 @@ export function Page() {
   const id = parseInt(pageContext.urlParsed.pathname.split("/")[3]);
   const res = useAPIResult(SETTINGS.apiV2Prefix + "/defs/timescales?all")
     ?.success.data;
-  const intervals = useAPIResult(SETTINGS.apiV2Prefix + "/defs/intervals?timescale_id=" + id)
-    ?.success.data;
+  const intervals = useAPIResult(
+    SETTINGS.apiV2Prefix + "/defs/intervals?timescale_id=" + id
+  )?.success.data;
   const [clickedInterval, setClickedInterval] = useState(null);
 
   useEffect(() => {
@@ -103,7 +104,7 @@ export function Page() {
         ),
       ]),
     ]),
-    h(Footer)
+    h(Footer),
   ]);
 }
 

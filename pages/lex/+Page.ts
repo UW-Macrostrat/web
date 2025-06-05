@@ -31,7 +31,7 @@ export function Page() {
     measurements += stat.measurements || 0;
   });
 
-  return h('div', [
+  return h("div", [
     h(ContentPage, [
       h(PageHeader, { title: "Lexicon" }),
 
@@ -91,7 +91,7 @@ export function Page() {
         ", Macrostrat's legacy lexicon app, is still available for use as it is gradually brought into this new framework.",
       ]),
     ]),
-    h(Footer)
+    h(Footer),
   ]);
 }
 
