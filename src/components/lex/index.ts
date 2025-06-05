@@ -4,7 +4,7 @@ import { SETTINGS } from "@macrostrat-web/settings";
 import { PageHeader, Link, PageBreadcrumbs } from "~/components";
 import { Card, Icon, Popover, Divider, RangeSlider } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
-import { BlankImage, Loading } from "~/components/general";
+import { BlankImage, Footer, Loading } from "~/components/general";
 import { useState, useCallback, act } from "react";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { DarkModeButton } from "@macrostrat/ui-components";
@@ -103,7 +103,8 @@ export function IndividualPage(id, type, header) {
     intRes;
   const area = parseInt(col_area.toString().split(".")[0]);
 
-  return h(ContentPage, { className: "int-page" }, [
+  return h('div', [
+  h(ContentPage, { className: "int-page" }, [
     h("div.page-header", [
       h(PageBreadcrumbs, { title: "#" + id }),
       h(DarkModeButton, { className: "dark-mode-button", showText: true }),
@@ -225,6 +226,8 @@ export function IndividualPage(id, type, header) {
       ),
     ]),
     h(References, { res1: fossilResult, res2: colDataResult }),
+  ]),
+  h(Footer),
   ]);
 }
 
