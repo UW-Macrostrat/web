@@ -1,23 +1,17 @@
 import h from "./main.module.scss";
-import { useAPIResult } from "@macrostrat/ui-components";
-import { SETTINGS } from "@macrostrat-web/settings";
 import { PageBreadcrumbs, StickyHeader, Link } from "~/components";
 import { Card, Popover, RangeSlider } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { asChromaColor } from "@macrostrat/color-utils";
-import { Loading, SearchBar } from "../../index";
+import { SearchBar } from "../../index";
 import { IntervalTag } from "@macrostrat/data-components";
+import { useData } from "vike-react/useData";
 
 export function Page() {
   const [input, setInput] = useState("");
   const [age, setAge] = useState([0, 4600]);
-  const res = useAPIResult(SETTINGS.apiV2Prefix + "/defs/intervals?all")
-    ?.success.data;
-
-  if (res == null) return h(Loading);
-
-  console.log(res);
+  const { res } = useData();
 
   const handleChange = (e) => {
     setInput(e.toLowerCase());
