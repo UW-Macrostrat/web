@@ -15,7 +15,7 @@ import { useDarkMode } from "@macrostrat/ui-components";
 import { StratNameHierarchy } from "./StratNameHierarchy";
 import { LinkCard } from "~/components/cards";
 import { ColumnsMap } from "~/columns-map/index.client";
-import { get } from "underscore";
+import { Timescale } from "@macrostrat/timescale";
 
 export function titleCase(str) {
   if (!str) return str;
@@ -99,8 +99,9 @@ export function IndividualPage(id, type, header) {
 
   if (!intRes || !fossilRes) return h(Loading);
 
-  const { name, abbrev, b_age, t_age, timescales, strat_name, concept_id } =
+  const { name, abbrev, b_age, t_age, timescales, strat_name, concept_id, int_id } =
     intRes;
+
   const area = parseInt(col_area.toString().split(".")[0]);
 
   return h('div', [
@@ -149,6 +150,14 @@ export function IndividualPage(id, type, header) {
       ]),
     ]),
     h.if(concept_id)(conceptInfo, { concept_id, header }),
+    h.if(header === "intervals")("div.timescale",
+      h(Timescale, {
+        length: 970,
+        levels: [1, 5],
+        ageRange: [b_age, t_age],
+        absoluteAgeScale: true,
+      })
+    ),
     h.if(colData?.features.length)("div.table", [
       h("div.table-content", [
         h("div.packages", t_sections.toLocaleString() + " packages"),
