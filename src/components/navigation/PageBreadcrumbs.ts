@@ -114,6 +114,18 @@ const columnsSubtree = {
         ]);
       },
     },
+    {
+      slug: "groups",
+      name: "Groups",
+      children: [
+        {
+          param: "@id",
+          name(urlPart, ctx) {
+            return h("code", ctx.pageProps?.group?.group_id ?? urlPart);
+          },
+        },
+      ],
+    },
   ],
 };
 

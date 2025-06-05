@@ -67,6 +67,8 @@ export function IndividualPage(id, type, header) {
       ? "lithology"
       : header === "econs"
       ? "economic"
+      : header === "groups"
+      ? "group"
       : header === "strat_name_concepts"
       ? "strat_name_concept"
       : "strat_name";
