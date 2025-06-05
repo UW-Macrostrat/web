@@ -1,12 +1,10 @@
 import h from "./main.module.scss";
-import { useAPIResult } from "@macrostrat/ui-components";
-import { SETTINGS } from "@macrostrat-web/settings";
 import { PageBreadcrumbs, StickyHeader } from "~/components";
-import { Card, Popover } from "@blueprintjs/core";
+import { Popover } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { asChromaColor } from "@macrostrat/color-utils";
-import { Loading, SearchBar } from "../../index";
+import { SearchBar } from "../../index";
 import { useData } from "vike-react/useData";
 
 export function Page() {
