@@ -7,15 +7,11 @@ import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { Loading, SearchBar } from "../../index";
+import { useData } from "vike-react/useData";
 
 export function Page() {
   const [input, setInput] = useState("");
-  const res = useAPIResult(SETTINGS.apiV2Prefix + "/defs/econs?all")?.success
-    .data;
-
-  if (res == null) return h(Loading);
-
-  console.log(res);
+  const { res } = useData();
 
   const handleChange = (event) => {
     setInput(event.toLowerCase());
