@@ -56,8 +56,6 @@ export function Page() {
     return matchesName && matchesAgeRange;
   });
 
-  const width = window.screen.width;
-  const timescaleWidth = width * 0.6 - 40;
   const handleClick = (timescale) => {
     const parent = timescale.target.parentElement;
     let selected;
@@ -99,7 +97,7 @@ export function Page() {
       h(
         "div.timescale",
         h(Timescale, {
-          length: timescaleWidth,
+          length: 970 - 40,
           levels: [1, 5],
           ageRange: [age[0], age[1]],
           absoluteAgeScale: true,

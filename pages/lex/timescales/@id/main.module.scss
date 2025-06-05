@@ -21,3 +21,26 @@ tspan {
 .visx-line {
   stroke: var(--text-color);
 }
+
+.int-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.3em;
+
+  h2 {
+    margin: 0.5em 0;
+  }
+
+  .int-items {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    align-items: center;
+
+    .int-name {
+      padding: 2px 6px;
+      margin: 0.2em 0;
+      border-radius: 0.2em;
+    }
+  }
+}
