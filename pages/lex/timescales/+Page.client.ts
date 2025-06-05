@@ -1,21 +1,19 @@
 import h from "./main.module.scss";
-import { useAPIResult } from "@macrostrat/ui-components";
-import { SETTINGS } from "@macrostrat-web/settings";
 import { PageBreadcrumbs, LinkCard, StickyHeader } from "~/components";
-import { Card, Icon, Popover, RangeSlider, Divider } from "@blueprintjs/core";
+import { Card, Popover, RangeSlider, Divider } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { Timescale } from "@macrostrat/timescale";
 import { titleCase } from "../index";
 import { useEffect } from "react";
-import { Loading, SearchBar } from "../../index";
+import { SearchBar } from "../../index";
+import { useData } from "vike-react/useData";
 
 export function Page() {
   const [input, setInput] = useState("");
   const [age, setAge] = useState([0, 4000]);
   const [clickedInterval, setClickedInterval] = useState(null);
-  const res = useAPIResult(SETTINGS.apiV2Prefix + "/defs/timescales?all")
-    ?.success.data;
+  const { res } = useData();
 
   useEffect(() => {
     if (!clickedInterval) return;
@@ -38,8 +36,6 @@ export function Page() {
 
     fetchInterval();
   }, [clickedInterval]);
-
-  if (res == null) return h(Loading);
 
   const handleChange = (event) => {
     setInput(event.toLowerCase());
