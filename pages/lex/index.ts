@@ -203,7 +203,6 @@ function UpperCase(str) {
 }
 
 function References({ res1, res2 }) {
-  console.log("References:", res1, res2);
   if (res1 == null || res2 == null) return h(Loading);
 
   const refArray1 = Object.values(res1.success.refs);

@@ -1,8 +1,8 @@
-import { usePageContext } from "vike-react/usePageContext";
 import { IndividualPage } from "../../index";
+import { useData } from "vike-react/useData";
 
 export function Page() {
-  const pageContext = usePageContext();
-  const id = parseInt(pageContext.urlParsed.pathname.split("/")[3]);
-  return IndividualPage(id, "econ_id", "econs");
+  const { res, fossilRes, colData, taxaData } = useData();
+
+  return IndividualPage(res[0].environ_id, "econs", res, fossilRes, colData, taxaData);
 }
