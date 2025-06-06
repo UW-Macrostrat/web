@@ -8,15 +8,16 @@ interface LinkCardProps {
   title: string;
   href: string;
   children: React.ReactNode;
+  className?: string;
 }
 
 export function LinkCard(props: LinkCardProps) {
-  const { href, title, children } = props;
+  const { href, title, children, className } = props;
 
   return h(
     Link,
     {
-      className: "link-card bp5-card",
+      className: `link-card bp5-card ${className}`,
       href,
     },
     [h("h3", title), children]

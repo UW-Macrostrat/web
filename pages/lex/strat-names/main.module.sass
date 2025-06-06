@@ -67,10 +67,6 @@
   flex-direction: column
   gap: 1em
 
-  .selected
-    color: var(--text-emphasized-color) !important
-    background-color: var(--secondary-background) !important
-
   .unselected
     cursor: pointer
 
@@ -79,12 +75,15 @@
     align-items: flex-end
     gap: 5px
 
+.strat-concept-card
+  background-color: var(--secondary-color) !important
+
 .strat-body
   display: flex
   justify-content: space-between
 
   .concept-tag
-    background-color: grey
+    background-color:  var(--secondary-color)
     color: white !important
     padding: 0.2em 0.5em
     border-radius: 0.2em
@@ -93,7 +92,8 @@
   display: flex
   gap: 1em
   align-items: center
-  
+  color: var(--text-emphasized-color) !important
+
   .status
     height: 10px
     width: 10px

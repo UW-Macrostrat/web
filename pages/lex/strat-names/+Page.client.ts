@@ -91,7 +91,7 @@ export function StratPage({ show }) {
           h(
             Card,
             {
-              className: !showConcepts ? "selected" : "unselected",
+              className: "strat-name-card " + (!showConcepts ? "selected" : "unselected"),
               onClick: () => {
                 if (showConcepts) {
                   setShowConcepts(false);
@@ -111,7 +111,7 @@ export function StratPage({ show }) {
           h(
             Card,
             {
-              className: showConcepts ? "selected" : "unselected",
+              className: "strat-concept-card " + (showConcepts ? "selected" : "unselected"),
               onClick: () => {
                 if (!showConcepts) {
                   setShowConcepts(true);
@@ -158,13 +158,13 @@ export function StratPage({ show }) {
 }
 
 function StratItem({ data, item_route }) {
-  const { name, concept_id, strat_name, id } = data;
+  const { concept_id, id } = data;
 
   const isConcept = item_route === "/strat-name-concepts/";
 
   return h(
     LinkCard,
-    { href: `/lex/${item_route}/` + (concept_id ?? id) },
+    { href: `/lex/${isConcept ? "strat-name-concepts/" + concept_id : "strat-names/" + id}`, className: isConcept ? "strat-concept-card" : "strat-name-card" },
     isConcept ? ConceptBody({ data }) : StratBody({ data })
   );
 }
@@ -175,7 +175,6 @@ function StratBody({ data }) {
   return h("div.strat-body", [
     h("strong", strat_name),
     h.if(concept_id)('div.concept-container', [
-      h("span", "Concept: "),
       h(Link, { className: "concept-tag", href: `/lex/strat-name-concepts/${concept_id}` }, concept_name)
     ]),
   ]);
