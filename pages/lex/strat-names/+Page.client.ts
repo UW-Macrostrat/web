@@ -24,21 +24,21 @@ export function StratPage({ show }) {
   const [showNames, setShowNames] = useState(!show);
   const [lastID, setLastID] = useState(startingID);
   const [data, setData] = useState(res);
+  const showBoth = showConcepts && showNames;
   const pageSize = 20;
 
-  const result = useStratData(lastID, input, pageSize, showConcepts, showNames);
+  const result = useStratData(lastID, input, pageSize, showBoth, showNames);
   const prevInputRef = useRef(input);
   const prevShowConceptsRef = useRef(showConcepts);
   const prevShowNamesRef = useRef(showNames);
+  console.log("lastID", lastID);  
 
   useEffect(() => {
-    // Only reset if input or showConcepts actually changed from previous render
     if (
       prevInputRef.current !== input ||
       prevShowConceptsRef.current !== showConcepts ||
       prevShowNamesRef.current !== showNames
     ) {
-      // Reset data and lastID to starting ID for current mode
       setData([]);
       setLastID(0);
 
@@ -128,14 +128,12 @@ export function StratPage({ show }) {
         data.map((data) => h(StratItem, { data }))
       )
     ),
-    LoadMoreTrigger({ data, setLastID, pageSize, result, showConcepts }),
+    LoadMoreTrigger({ data, setLastID, pageSize, result, showBoth, showNames }),
   ]);
 }
 
 function StratItem({ data }) {
   const { concept_id, id } = data;
-  console.log("StratItem data", data);
-
   const isConcept = !id;
 
   return h(
@@ -174,20 +172,18 @@ function ConceptBody({ data }) {
   ]);
 }
 
-function useStratData(lastID, input, pageSize, showConcepts, showNames) {
+function useStratData(lastID, input, pageSize, showBoth, showNames) {
   const url1 = `${apiDomain}/api/pg/strat_names_test?limit=${pageSize}&id=gt.${lastID}&order=id.asc&name=ilike.*${input}*`;
   const url2 = `${apiDomain}/api/pg/strat_concepts_test?limit=${pageSize}&concept_id=gt.${lastID}&order=concept_id.asc&name=ilike.*${input}*`;
   const url3 = `${apiDomain}/api/pg/strat_combined_test?limit=${pageSize}&combined_id=gt.${lastID}&order=combined_id.asc&name=ilike.*${input}*`;
-  const url = showConcepts && showNames ? url3 : showNames ? url1 : showConcepts ? url2 : null;
+  const url = showBoth ? url3 : showNames ? url1 :  url2;
 
   const result = useAPIResult(url);
-  console.log(url)
-  console.log("result", result);
 
   return result;
 }
 
-function LoadMoreTrigger({ data, setLastID, pageSize, result, showConcepts }) {
+function LoadMoreTrigger({ data, setLastID, pageSize, result, showBoth, showNames }) {
   const ref = useRef(null);
 
   useEffect(() => {
@@ -198,8 +194,9 @@ function LoadMoreTrigger({ data, setLastID, pageSize, result, showConcepts }) {
         if (data.length > 0) {
           const id1 = data[data.length - 1]?.concept_id;
           const id2 = data[data.length - 1]?.id;
+          const id3 = data[data.length - 1]?.combined_id;
 
-          setLastID(showConcepts ? id1 : id2);
+          setLastID(showBoth ? id3 : showNames ? id2 : id1);
         }
       }
     });
