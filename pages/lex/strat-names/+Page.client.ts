@@ -163,7 +163,7 @@ function StratItem({ data, item_route }) {
 
 function useStratData(lastID, input, pageSize, showConcepts) {
   const url1 = `${apiV2Prefix}/defs/strat_names?page_size=${pageSize}&last_id=${lastID}&strat_name_like=${input}`;
-  const url2 = `${apiDomain}/api/pg/strat_concepts_with_ids?limit=${pageSize}&concept_id=gt.${lastID}&order=concept_id.asc`;
+  const url2 = `${apiDomain}/api/pg/strat_concepts_test?limit=${pageSize}&concept_id=gt.${lastID}&order=concept_id.asc`;
   const result = showConcepts ? useAPIResult(url2) : useAPIResult(url1)?.success?.data;
 
   return result;
