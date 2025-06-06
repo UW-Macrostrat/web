@@ -174,9 +174,7 @@ function StratBody({ data }) {
 
   return h("div.strat-body", [
     h("strong", strat_name),
-    h.if(concept_id)('div.concept-container', [
-      h(Link, { className: "concept-tag", href: `/lex/strat-name-concepts/${concept_id}` }, concept_name)
-    ]),
+    h.if(concept_id)(Link, { className: "concept-tag", href: `/lex/strat-name-concepts/${concept_id}` }, concept_name),
   ]);
 }
 
@@ -192,7 +190,7 @@ function ConceptBody({ data }) {
       ids?.map((id, index) =>
         h(
           Link,
-          { key: id, href: `/lex/strat-names/${id}` },
+          { className: "strat-tag", href: `/lex/strat-names/${id}` },
           names[index]
         )
       ),
