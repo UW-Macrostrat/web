@@ -1,7 +1,7 @@
-import h from "./main.module.scss";
+import h from "./main.module.sass";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { apiV2Prefix, apiDomain } from "@macrostrat-web/settings";
-import { StickyHeader, LinkCard, PageBreadcrumbs } from "~/components";
+import { StickyHeader, LinkCard, PageBreadcrumbs, Link } from "~/components";
 import { Card, Switch, Spinner } from "@blueprintjs/core";
 import { useState, useEffect, useRef } from "react";
 import { ContentPage } from "~/layouts";
@@ -86,43 +86,49 @@ export function StratPage({ show }) {
     h(StickyHeader, { className: "header" }, [
       h(PageBreadcrumbs, { title }),
       h("div.header-description", [
-        h(
-          Card,
-          {
-            className: !showConcepts ? "selected" : "unselected",
-            onClick: () => {
-              if (showConcepts) {
-                setShowConcepts(false);
-                setLastID(0);
-                setData([]);
-              }
+        h('div.card-container', [
+          h('div', { className: "status " + (!showConcepts ? "active" : "inactive") }),
+          h(
+            Card,
+            {
+              className: !showConcepts ? "selected" : "unselected",
+              onClick: () => {
+                if (showConcepts) {
+                  setShowConcepts(false);
+                  setLastID(0);
+                  setData([]);
+                }
+              },
             },
-          },
-          [
-            h("strong", "Strat Names: "),
-            h("span", "names of rock units, organized hierarchically"),
-          ]
-        ),
-        h(
-          Card,
-          {
-            className: showConcepts ? "selected" : "unselected",
-            onClick: () => {
-              if (!showConcepts) {
-                setShowConcepts(true);
-                setLastID(0);
-                setData([]);
-              }
+            [
+              h("strong", "Strat Names: "),
+              h("span", "names of rock units, organized hierarchically"),
+            ]
+          ),
+        ]),
+        h('div.card-container', [
+          h('div', { className: "status " + (showConcepts ? "active" : "inactive") }),
+          h(
+            Card,
+            {
+              className: showConcepts ? "selected" : "unselected",
+              onClick: () => {
+                if (!showConcepts) {
+                  setShowConcepts(true);
+                  setLastID(0);
+                  setData([]);
+                }
+              },
             },
-          },
-          [
-            h("strong", "Strat Concepts: "),
-            h(
-              "span",
-              "capture relationships between differently-named rock units"
-            ),
-          ]
-        ),
+            [
+              h("strong", "Strat Concepts: "),
+              h(
+                "span",
+                "capture relationships between differently-named rock units"
+              ),
+            ]
+          ),
+        ]),
       ]),
       h(Card, { className: "filter" }, [
         h(SearchBar, {
@@ -154,11 +160,45 @@ export function StratPage({ show }) {
 function StratItem({ data, item_route }) {
   const { name, concept_id, strat_name, id } = data;
 
+  const isConcept = item_route === "/strat-name-concepts/";
+
   return h(
     LinkCard,
     { href: `/lex/${item_route}/` + (concept_id ?? id) },
-    name ?? strat_name ?? "Unnamed"
+    isConcept ? ConceptBody({ data }) : StratBody({ data })
   );
+}
+
+function StratBody({ data }) {
+  const { strat_name, concept_id, concept_name } = data;
+
+  return h("div.strat-body", [
+    h("strong", strat_name),
+    h.if(concept_id)('div.concept-container', [
+      h("span", "Concept: "),
+      h(Link, { className: "concept-tag", href: `/lex/strat-name-concepts/${concept_id}` }, concept_name)
+    ]),
+  ]);
+}
+
+function ConceptBody({ data }) {
+  const { name, strat_ids, strat_names } = data;
+
+  const ids = strat_ids?.split(",");
+  const names = strat_names?.split(",");
+
+  return h("div.concept-body", [
+    h("strong", name),
+    h("div.concept-strats", [
+      ids?.map((id, index) =>
+        h(
+          Link,
+          { key: id, href: `/lex/strat-names/${id}` },
+          names[index]
+        )
+      ),
+    ]),
+  ]);
 }
 
 function useStratData(lastID, input, pageSize, showConcepts) {
