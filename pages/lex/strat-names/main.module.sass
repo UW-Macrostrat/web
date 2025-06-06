@@ -1,0 +1,125 @@
+.sift-link
+  margin-bottom: 1em
+
+.strat-list
+  display: flex
+  flex-direction: column
+  gap: 1.3em
+  width: calc(100% - 2px)
+
+  .strat-rank-group
+    display: flex
+    flex-direction: column
+    gap: 1em
+
+    .strat-subgroup,
+    .strat-group
+      border-left: 2px solid rgb(56, 62, 71)
+      padding-left: 1em
+
+      .strat-items
+        display: flex
+        gap: 5px
+        flex-wrap: wrap
+        align-items: center
+
+        .strat-name
+          padding: 2px 6px
+          margin: 0.2em 0
+          border-radius: 0.2em
+
+.search-bar
+  display: flex
+  gap: 5px
+  align-items: center
+  justify-content: center
+
+  input
+    width: 100%
+    padding: 0.5em
+    border-radius: 0.2em
+    border: none
+    background-color: var(--background-color)
+    color: var(--text-emphasized-color)
+    font-size: 1em
+    margin: 3px
+
+    &:focus
+      outline: none
+      box-shadow: 0 0 0.2em var(--text-emphasized-color)
+
+.filter
+  margin-bottom: 1em
+  display: flex
+  flex-direction: column
+  gap: 1em
+
+.page-loader-container
+  display: flex
+  flex-direction: column
+  align-items: center
+  justify-content: center
+
+  h4
+    cursor: pointer
+
+.header
+  display: flex
+  flex-direction: column
+  gap: 1em
+
+  .unselected
+    cursor: pointer
+
+  p
+    display: flex
+    align-items: flex-end
+    gap: 5px
+
+.strat-concept-card
+  background-color: var(--secondary-color) !important
+
+.strat-body
+  display: flex
+  justify-content: space-between
+
+  .concept-tag
+    background-color:  var(--secondary-color)
+    color: white !important
+    padding: 0.2em 0.5em
+    border-radius: 0.2em
+
+.concept-body
+  display: flex
+  justify-content: space-between
+
+.concept-strats
+  display: flex
+  gap: .5em
+  
+  .strat-tag
+      background-color:  var(--secondary-background)
+      color: white !important
+      padding: 0.2em 0.5em
+      border-radius: 0.2em
+
+.card-container
+  display: flex
+  gap: 1em
+  align-items: center
+  color: var(--text-emphasized-color) !important
+
+  .status
+    height: 10px
+    width: 10px
+    border-radius: 50%
+    display: inline-block
+    
+  .active
+    background-color: green
+
+  .inactive
+    background-color: red
+
+.clickable
+  cursor: pointer

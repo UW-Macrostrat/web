@@ -16,7 +16,6 @@ import { useDarkMode } from "@macrostrat/ui-components";
 import { StratNameHierarchy } from "./StratNameHierarchy";
 import { LinkCard } from "~/components/cards";
 import { ColumnsMap } from "~/columns-map/index.client";
-import { get } from "underscore";
 
 export function titleCase(str) {
   if (!str) return str;
