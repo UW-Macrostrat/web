@@ -31,7 +31,7 @@ export function StratPage({ show }) {
   const prevInputRef = useRef(input);
   const prevShowConceptsRef = useRef(showConcepts);
   const prevShowNamesRef = useRef(showNames);
-  console.log("lastID", lastID);  
+  console.log("lastID", lastID);
 
   useEffect(() => {
     if (
@@ -52,9 +52,7 @@ export function StratPage({ show }) {
     if (
       result &&
       data[data.length - 1]?.[showConcepts ? "concept_id" : "id"] !==
-        result[result.length - 1]?.[
-          showConcepts ? "concept_id" : "id"
-        ]
+        result[result.length - 1]?.[showConcepts ? "concept_id" : "id"]
     ) {
       setData((prevData) => {
         return [...prevData, ...result];
@@ -70,14 +68,25 @@ export function StratPage({ show }) {
 
   return h(ContentPage, [
     h(StickyHeader, { className: "header" }, [
-      h(PageBreadcrumbs, { title: showNames && showConcepts ? "Strat Names & Concepts" : showNames ? "Strat Names" : "Strat Concepts" }),
+      h(PageBreadcrumbs, {
+        title:
+          showNames && showConcepts
+            ? "Strat Names & Concepts"
+            : showNames
+            ? "Strat Names"
+            : "Strat Concepts",
+      }),
       h("div.header-description", [
-        h('div.card-container', [
-          h('div', { className: "status " + (showNames ? "active" : "inactive") }),
+        h("div.card-container", [
+          h("div", {
+            className: "status " + (showNames ? "active" : "inactive"),
+          }),
           h(
             Card,
             {
-              className: "strat-name-card " + (!showNames || showConcepts ? "clickable" : ""),
+              className:
+                "strat-name-card " +
+                (!showNames || showConcepts ? "clickable" : ""),
               onClick: () => {
                 if (!showNames || showConcepts) {
                   setShowNames(!showNames);
@@ -92,12 +101,16 @@ export function StratPage({ show }) {
             ]
           ),
         ]),
-        h('div.card-container', [
-          h('div', { className: "status " + (showConcepts ? "active" : "inactive") }),
+        h("div.card-container", [
+          h("div", {
+            className: "status " + (showConcepts ? "active" : "inactive"),
+          }),
           h(
             Card,
             {
-              className: "strat-concept-card " + (showNames || !showConcepts ? "clickable" : ""),
+              className:
+                "strat-concept-card " +
+                (showNames || !showConcepts ? "clickable" : ""),
               onClick: () => {
                 if (showNames || !showConcepts) {
                   setShowConcepts(!showConcepts);
@@ -138,7 +151,12 @@ function StratItem({ data }) {
 
   return h(
     LinkCard,
-    { href: `/lex/${isConcept ? "strat-name-concepts/" + concept_id : "strat-names/" + id}`, className: isConcept ? "strat-concept-card" : "strat-name-card" },
+    {
+      href: `/lex/${
+        isConcept ? "strat-name-concepts/" + concept_id : "strat-names/" + id
+      }`,
+      className: isConcept ? "strat-concept-card" : "strat-name-card",
+    },
     isConcept ? ConceptBody({ data }) : StratBody({ data })
   );
 }
@@ -148,7 +166,14 @@ function StratBody({ data }) {
 
   return h("div.strat-body", [
     h("strong", name),
-    h.if(concept_id)(Link, { className: "concept-tag", href: `/lex/strat-name-concepts/${concept_id}` }, concept_name),
+    h.if(concept_id)(
+      Link,
+      {
+        className: "concept-tag",
+        href: `/lex/strat-name-concepts/${concept_id}`,
+      },
+      concept_name
+    ),
   ]);
 }
 
@@ -176,14 +201,21 @@ function useStratData(lastID, input, pageSize, showBoth, showNames) {
   const url1 = `${apiDomain}/api/pg/strat_names_test?limit=${pageSize}&id=gt.${lastID}&order=id.asc&name=ilike.*${input}*`;
   const url2 = `${apiDomain}/api/pg/strat_concepts_test?limit=${pageSize}&concept_id=gt.${lastID}&order=concept_id.asc&name=ilike.*${input}*`;
   const url3 = `${apiDomain}/api/pg/strat_combined_test?limit=${pageSize}&combined_id=gt.${lastID}&order=combined_id.asc&name=ilike.*${input}*`;
-  const url = showBoth ? url3 : showNames ? url1 :  url2;
+  const url = showBoth ? url3 : showNames ? url1 : url2;
 
   const result = useAPIResult(url);
 
   return result;
 }
 
-function LoadMoreTrigger({ data, setLastID, pageSize, result, showBoth, showNames }) {
+function LoadMoreTrigger({
+  data,
+  setLastID,
+  pageSize,
+  result,
+  showBoth,
+  showNames,
+}) {
   const ref = useRef(null);
 
   useEffect(() => {
