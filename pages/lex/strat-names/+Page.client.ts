@@ -20,38 +20,23 @@ export function StratPage({ show }) {
     : res[res?.length - 1]?.id;
 
   const [input, setInput] = useState("");
-  const [showConcepts, setShowConcepts] = useState(show ?? false);
+  const [showConcepts, setShowConcepts] = useState(show);
+  const [showNames, setShowNames] = useState(!show);
   const [lastID, setLastID] = useState(startingID);
   const [data, setData] = useState(res);
   const pageSize = 20;
 
-  const strat_name_vars = {
-    title: "Strat Names",
-    item_route: "/strat-names/",
-  };
-
-  const concept_vars = {
-    title: "Strat Name Concepts",
-    item_route: "/strat-name-concepts/",
-  };
-
-  const vars = showConcepts ? concept_vars : strat_name_vars;
-
-  const { title, item_route} = vars;
-
-  const result = useStratData(lastID, input, pageSize, showConcepts);
-
-  console.log(lastID);
-  console.log("data", data);
-
+  const result = useStratData(lastID, input, pageSize, showConcepts, showNames);
   const prevInputRef = useRef(input);
   const prevShowConceptsRef = useRef(showConcepts);
+  const prevShowNamesRef = useRef(showNames);
 
   useEffect(() => {
     // Only reset if input or showConcepts actually changed from previous render
     if (
       prevInputRef.current !== input ||
-      prevShowConceptsRef.current !== showConcepts
+      prevShowConceptsRef.current !== showConcepts ||
+      prevShowNamesRef.current !== showNames
     ) {
       // Reset data and lastID to starting ID for current mode
       setData([]);
@@ -59,8 +44,9 @@ export function StratPage({ show }) {
 
       prevInputRef.current = input;
       prevShowConceptsRef.current = showConcepts;
+      prevShowNamesRef.current = showNames;
     }
-  }, [input, showConcepts]);
+  }, [input, showConcepts, showNames]);
 
   useEffect(() => {
     if (
@@ -84,17 +70,17 @@ export function StratPage({ show }) {
 
   return h(ContentPage, [
     h(StickyHeader, { className: "header" }, [
-      h(PageBreadcrumbs, { title }),
+      h(PageBreadcrumbs, { title: showNames && showConcepts ? "Strat Names & Concepts" : showNames ? "Strat Names" : "Strat Concepts" }),
       h("div.header-description", [
         h('div.card-container', [
-          h('div', { className: "status " + (!showConcepts ? "active" : "inactive") }),
+          h('div', { className: "status " + (showNames ? "active" : "inactive") }),
           h(
             Card,
             {
-              className: "strat-name-card " + (!showConcepts ? "selected" : "unselected"),
+              className: "strat-name-card " + (!showNames || showConcepts ? "clickable" : ""),
               onClick: () => {
-                if (showConcepts) {
-                  setShowConcepts(false);
+                if (!showNames || showConcepts) {
+                  setShowNames(!showNames);
                   setLastID(0);
                   setData([]);
                 }
@@ -111,10 +97,10 @@ export function StratPage({ show }) {
           h(
             Card,
             {
-              className: "strat-concept-card " + (showConcepts ? "selected" : "unselected"),
+              className: "strat-concept-card " + (showNames || !showConcepts ? "clickable" : ""),
               onClick: () => {
-                if (!showConcepts) {
-                  setShowConcepts(true);
+                if (showNames || !showConcepts) {
+                  setShowConcepts(!showConcepts);
                   setLastID(0);
                   setData([]);
                 }
@@ -130,37 +116,27 @@ export function StratPage({ show }) {
           ),
         ]),
       ]),
-      h(Card, { className: "filter" }, [
-        h(SearchBar, {
-          placeholder: "Filter by name...",
-          onChange: handleChange,
-        }),
-        h(Switch, {
-          label: "Include concepts",
-          checked: showConcepts,
-          onChange: (e) => {
-            setShowConcepts(e.target.checked);
-            setLastID(0);
-            setData([]);
-          },
-        }),
-      ]),
+      h(SearchBar, {
+        placeholder: "Filter by name...",
+        onChange: handleChange,
+      }),
     ]),
     h(
       "div.strat-list",
       h(
         "div.strat-items",
-        data.map((data) => h(StratItem, { data, item_route }))
+        data.map((data) => h(StratItem, { data }))
       )
     ),
     LoadMoreTrigger({ data, setLastID, pageSize, result, showConcepts }),
   ]);
 }
 
-function StratItem({ data, item_route }) {
+function StratItem({ data }) {
   const { concept_id, id } = data;
+  console.log("StratItem data", data);
 
-  const isConcept = item_route === "/strat-name-concepts/";
+  const isConcept = !id;
 
   return h(
     LinkCard,
@@ -170,10 +146,10 @@ function StratItem({ data, item_route }) {
 }
 
 function StratBody({ data }) {
-  const { strat_name, concept_id, concept_name } = data;
+  const { name, concept_id, concept_name } = data;
 
   return h("div.strat-body", [
-    h("strong", strat_name),
+    h("strong", name),
     h.if(concept_id)(Link, { className: "concept-tag", href: `/lex/strat-name-concepts/${concept_id}` }, concept_name),
   ]);
 }
@@ -198,10 +174,11 @@ function ConceptBody({ data }) {
   ]);
 }
 
-function useStratData(lastID, input, pageSize, showConcepts) {
-  const url1 = `${apiDomain}/api/pg/strat_names_test?limit=${pageSize}&id=gt.${lastID}&order=id.asc&strat_name=like.*${input}*`;
-  const url2 = `${apiDomain}/api/pg/strat_concepts_test?limit=${pageSize}&concept_id=gt.${lastID}&order=concept_id.asc&name=like.*${input}*`;
-  const url = showConcepts ? url2 : url1;
+function useStratData(lastID, input, pageSize, showConcepts, showNames) {
+  const url1 = `${apiDomain}/api/pg/strat_names_test?limit=${pageSize}&id=gt.${lastID}&order=id.asc&name=ilike.*${input}*`;
+  const url2 = `${apiDomain}/api/pg/strat_concepts_test?limit=${pageSize}&concept_id=gt.${lastID}&order=concept_id.asc&name=ilike.*${input}*`;
+  const url3 = `${apiDomain}/api/pg/strat_combined_test?limit=${pageSize}&combined_id=gt.${lastID}&order=combined_id.asc&name=ilike.*${input}*`;
+  const url = showConcepts && showNames ? url3 : showNames ? url1 : showConcepts ? url2 : null;
 
   const result = useAPIResult(url);
   console.log(url)
