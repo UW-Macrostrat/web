@@ -17,7 +17,7 @@ export function StratPage({ show }) {
   console.log("res", res);
   const startingID = show
     ? res[res?.length - 1]?.concept_id
-    : res[res?.length - 1]?.strat_name_id;
+    : res[res?.length - 1]?.id;
 
   const [input, setInput] = useState("");
   const [showConcepts, setShowConcepts] = useState(show ?? false);
@@ -65,9 +65,9 @@ export function StratPage({ show }) {
   useEffect(() => {
     if (
       result &&
-      data[data.length - 1]?.[showConcepts ? "concept_id" : "strat_name_id"] !==
+      data[data.length - 1]?.[showConcepts ? "concept_id" : "id"] !==
         result[result.length - 1]?.[
-          showConcepts ? "concept_id" : "strat_name_id"
+          showConcepts ? "concept_id" : "id"
         ]
     ) {
       setData((prevData) => {
@@ -152,19 +152,23 @@ export function StratPage({ show }) {
 }
 
 function StratItem({ data, item_route }) {
-  const { name, concept_id, strat_name, strat_name_id } = data;
+  const { name, concept_id, strat_name, id } = data;
 
   return h(
     LinkCard,
-    { href: `/lex/${item_route}/` + (concept_id ?? strat_name_id) },
+    { href: `/lex/${item_route}/` + (concept_id ?? id) },
     name ?? strat_name ?? "Unnamed"
   );
 }
 
 function useStratData(lastID, input, pageSize, showConcepts) {
-  const url1 = `${apiV2Prefix}/defs/strat_names?page_size=${pageSize}&last_id=${lastID}&strat_name_like=${input}`;
-  const url2 = `${apiDomain}/api/pg/strat_concepts_test?limit=${pageSize}&concept_id=gt.${lastID}&order=concept_id.asc`;
-  const result = showConcepts ? useAPIResult(url2) : useAPIResult(url1)?.success?.data;
+  const url1 = `${apiDomain}/api/pg/strat_names_test?limit=${pageSize}&id=gt.${lastID}&order=id.asc&strat_name=like.*${input}*`;
+  const url2 = `${apiDomain}/api/pg/strat_concepts_test?limit=${pageSize}&concept_id=gt.${lastID}&order=concept_id.asc&name=like.*${input}*`;
+  const url = showConcepts ? url2 : url1;
+
+  const result = useAPIResult(url);
+  console.log(url)
+  console.log("result", result);
 
   return result;
 }
@@ -179,7 +183,7 @@ function LoadMoreTrigger({ data, setLastID, pageSize, result, showConcepts }) {
       if (entry.isIntersecting) {
         if (data.length > 0) {
           const id1 = data[data.length - 1]?.concept_id;
-          const id2 = data[data.length - 1]?.strat_name_id;
+          const id2 = data[data.length - 1]?.id;
 
           setLastID(showConcepts ? id1 : id2);
         }
