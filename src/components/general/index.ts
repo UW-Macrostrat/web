@@ -19,11 +19,7 @@ export function Navbar({ className }) {
       h("a", { href: "/publications" }, "Publications"),
       h("a", { href: "/people" }, "People"),
       h("a", { href: "/donate" }, "Donate"),
-      h("a", { href: "/map" }, "Map"),
-      h("a", { href: "/columns" }, "Columns"),
-      h("a", { href: "/projects" }, "Projects"),
-      h("a", { href: "/lex" }, "Lexicon"),
-      h("a", { href: "/docs" }, "Documentation"),
+      h("a", { href: "https://rockd.org/" }, "Rockd"),
     ]),
   ]);
 }
@@ -36,11 +32,13 @@ export function Footer() {
     { href: "/publications", text: "Publications", icon: "book" },
     { href: "/people", text: "People", icon: "people" },
     { href: "/donate", text: "Donate", icon: "dollar" },
-    { href: "/map", text: "Map", icon: "map" },
-    { href: "/columns", text: "Columns", icon: "timeline-bar-chart" },
-    { href: "/projects", text: "Projects", icon: "projects" },
-    { href: "/lex", text: "Lexicon", icon: "manual" },
-    { href: "/docs", text: "Documentation", icon: "document" },
+    { href: "/map/#3/40.78/-94.13", text: "Geologic Map", icon: "map" },
+    { href: "/maps", text: "Maps", icon: "globe" },
+    { href: "/columns", text: "Columns", icon: "layers" },
+    { href: "/lex", text: "Lexicon", icon: "book" },
+    { href: "/projects", text: "Projects", icon: "briefcase" },
+    { href: "/docs", text: "Documentation", icon: "manual" },
+    { href: "https://rockd.org", text: "Rockd", icon: "phone-search" },
   ];
 
   return h("div", { className: "footer" }, [
@@ -94,10 +92,6 @@ export function Footer() {
       ]),
     ]),
   ]);
-}
-
-export function useMacrostratAPI(str) {
-  return useAPIResult(SETTINGS.apiV2Prefix + str);
 }
 
 export function BlankImage({ src, className, width, height }) {

@@ -1,5 +1,5 @@
 import { usePageContext } from "vike-react/usePageContext";
-import { IndividualPage } from "../../../lex/index";
+import { IndividualPage } from "../../../../src/components/lex/index";
 
 export function Page() {
   const pageContext = usePageContext();

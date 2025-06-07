@@ -1,4 +1,4 @@
-import { Image, Navbar, Footer } from "../index";
+import { Image, Navbar, Footer } from "~/components/general";
 import h from "./main.module.sass";
 
 export function Page() {

@@ -6,7 +6,7 @@ import { Card, Popover } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { asChromaColor } from "@macrostrat/color-utils";
-import { Loading, SearchBar } from "../../index";
+import { Loading, SearchBar } from "~/components/general";
 
 export function Page() {
   const [input, setInput] = useState("");
