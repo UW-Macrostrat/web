@@ -4,10 +4,9 @@ import { LexItemPage } from "~/components/lex";
 export function Page() {
   const { resData, colData, taxaData, refs } = useData();
 
-  console.log("Page data:", resData);
   return LexItemPage({
-    id: resData.environ_id,
-    header: "environments",
+    id: resData.econ_id,
+    header: "econs",
     resData,
     colData,
     taxaData,

@@ -6,7 +6,7 @@ export function Page() {
 
   return LexItemPage({
     id: resData.environ_id,
-    header: "econs",
+    header: "environments",
     resData,
     colData,
     taxaData,

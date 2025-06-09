@@ -1,4 +1,4 @@
-import { StratPage } from "../strat-names/+Page.client";
+import { StratPage } from "../strat-names/+Page";
 
 export function Page() {
   return StratPage({ show: true });

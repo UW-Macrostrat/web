@@ -15,6 +15,7 @@ export function Page() {
   const [clickedInterval, setClickedInterval] = useState(null);
   const { res } = useData();
 
+
   useEffect(() => {
     if (!clickedInterval) return;
 

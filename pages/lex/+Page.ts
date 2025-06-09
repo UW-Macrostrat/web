@@ -16,8 +16,6 @@ export function Page() {
     return true;
   });
 
-  console.log("Lexicon stats", stats);
-
   let columns = 0,
     packages = 0,
     units = 0,

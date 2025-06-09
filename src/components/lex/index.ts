@@ -18,6 +18,7 @@ import { ColumnsMap } from "~/columns-map/index.client";
 import { Timescale } from "@macrostrat/timescale";
 import { LexItemPageProps } from "~/types";
 import { fetchAPIData, fetchAPIRefs } from "~/_utils";
+import { ClientOnly } from "vike-react/ClientOnly";
 
 export function titleCase(str) {
   if (!str) return str;
@@ -26,6 +27,18 @@ export function titleCase(str) {
     .split(" ")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
+}
+
+function ColumnMapContainer(props) {
+  return h(
+    ClientOnly,
+    {
+      load: () => import("./map.client").then((d) => d.ColumnsMapContainer),
+      fallback: h("div.loading", "Loading map..."),
+      deps: [props.columnIDs, props.projectID],
+    },
+    (component) => h(component, props)
+  );
 }
 
 export function LexItemPage(props: LexItemPageProps) {
@@ -181,7 +194,10 @@ export function LexItemPage(props: LexItemPageProps) {
             pbdb_collections.toLocaleString() + " collections"
           ),
         ]),
-        h(ColumnsMap, { columns: colData }),
+        h(ColumnMapContainer, {
+          columns: colData,
+          className: "column-map-container",
+        }),
       ]),
       h("div.charts", [
         h.if(liths?.length)(
