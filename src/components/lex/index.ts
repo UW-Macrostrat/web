@@ -355,7 +355,7 @@ function getIntID({ name }) {
   return id;
 }
 
-function conceptInfo({ concept_id, header }) {
+export function ConceptInfo({ concept_id, showHeader }) {
   const url =
     apiV2Prefix +
     "/defs/strat_name_concepts?strat_name_concept_id=" +
@@ -367,8 +367,8 @@ function conceptInfo({ concept_id, header }) {
   const { author, name, province, geologic_age, other, usage_notes } = data;
 
   return h("div.concept-info", [
-    h.if(header != "strat_name_concepts")("h3", "Stratigraphic Concept"),
-    h.if(header != "strat_name_concepts")("div.concept-name", [
+    h.if(showHeader)("h3", "Stratigraphic Concept"),
+    h.if(showHeader)("div.concept-name", [
       h(
         "a.title",
         { href: "/lex/strat-name-concepts/" + concept_id, target: "_blank" },
@@ -376,7 +376,7 @@ function conceptInfo({ concept_id, header }) {
       ),
       h("a.concept-ref", { href: url, target: "_blank" }, "via " + author),
     ]),
-    h.if(header === "strat_name_concepts")("div.author", [
+    h.if(showHeader)("div.author", [
       h("span.title", "Author: "),
       h("span.author-text", h(Link, { href: url, target: "_blank" }, author)),
     ]),

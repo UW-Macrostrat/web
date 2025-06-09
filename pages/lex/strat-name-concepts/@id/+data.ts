@@ -1,13 +1,11 @@
-import { pbdbDomain } from "@macrostrat-web/settings";
 import { fetchAPIData, fetchAPIRefs } from "~/_utils";
 
 export async function data(pageContext) {
   const concept_id = parseInt(pageContext.urlParsed.pathname.split("/")[3]);
 
   // Await all API calls
-  const [resData, colData, refs1, refs2] = await Promise.all([
+  const [resData, refs1, refs2] = await Promise.all([
     fetchAPIData("/defs/strat_name_concepts", { concept_id }),
-    fetchAPIData("/columns", { concept_id, response: "long", format: "geojson" }),
     fetchAPIRefs("/fossils", { concept_id }),
     fetchAPIRefs("/columns", { concept_id }),
   ]);
@@ -16,17 +14,5 @@ export async function data(pageContext) {
   const refValues2 = refs2 ? Object.values(refs2) : [];
   const refs = [...refValues1, ...refValues2];
 
-  const cols = colData?.features
-    ?.map((feature) => feature.properties.col_id)
-    ?.join(",");
-
-  let taxaData = null;
-  if (cols) {
-    const response = await fetch(
-      `${pbdbDomain}/data1.2/occs/prevalence.json?limit=5&coll_id=${cols}`
-    );
-    taxaData = await response.json();
-  }
-
-  return { resData: resData[0], colData, taxaData, refs };
+  return { resData: resData[0], refs };
 }

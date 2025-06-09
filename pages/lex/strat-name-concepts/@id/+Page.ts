@@ -1,15 +1,15 @@
 import { useData } from "vike-react/useData";
-import { LexItemPage } from "~/components/lex";
+import h from "@macrostrat/hyper"
+import { LexItemPage, ConceptInfo } from "~/components/lex";
 
 export function Page() {
-  const { resData, colData, taxaData, refs } = useData();
+  const { resData, refs } = useData();
 
-  return LexItemPage({
-    id: resData.concept_id,
-    header: "strat_name_concepts",
-    resData,
-    colData,
-    taxaData,
-    refs
-  });
+  const id = resData.concept_id;
+
+  const children = [
+    h(ConceptInfo, { concept_id: id, showHeader: false }),
+  ]
+
+  return LexItemPage({children, id, refs, resData, siftLink: "strat_name_concept"});
 }
