@@ -62,11 +62,10 @@ export interface ColData {
 }
 
 export interface LexItemPageProps {
+  children: any[],
+  siftLink: string;
   id: number;
-  header: string;
   resData: ResData;
-  colData: ColData;
-  taxaData: any[];
   refs: string[];
 }
 
