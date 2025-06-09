@@ -16,6 +16,8 @@ import { StratNameHierarchy } from "./StratNameHierarchy";
 import { LinkCard } from "~/components/cards";
 import { ColumnsMap } from "~/columns-map/index.client";
 import { Timescale } from "@macrostrat/timescale";
+import { LexItemPageProps } from "~/types";
+import { fetchAPIData, fetchAPIRefs } from "~/_utils";
 
 export function titleCase(str) {
   if (!str) return str;
@@ -26,19 +28,8 @@ export function titleCase(str) {
     .join(" ");
 }
 
-interface LexItemPageProps {
-  id: number;
-  header: string;
-  res: any[];
-  fossilRes: any;
-  colData: any;
-  taxaData: any;
-}
-
 export function LexItemPage(props: LexItemPageProps) {
-  const { id, header, res, fossilRes, colData, taxaData } = props;
-  const intRes = res[0];
-
+  const { id, header, resData, colData, taxaData, refs } = props;
   const [activeIndex, setActiveIndex] = useState(null);
 
   const siftLink =
@@ -57,21 +48,23 @@ export function LexItemPage(props: LexItemPageProps) {
       : "strat_name";
 
   // data for charts
+  const features = colData?.features || [];
+
   const liths = summarizeAttributes({
-    data: colData.success.data.features,
+    data: features,
     type: "lith",
   });
   const environs = summarizeAttributes({
-    data: colData.success.data.features,
+    data: features,
     type: "environ",
   });
   const econs = summarizeAttributes({
-    data: colData.success.data.features,
+    data: features,
     type: "econ",
   });
-  const summary = summarize(colData.success.data.features);
+  const summary = summarize(features);
 
-  const chromaColor = intRes?.color ? asChromaColor(intRes.color) : null;
+  const chromaColor = resData?.color ? asChromaColor(resData.color) : null;
   const luminance = 0.9;
 
   const {
@@ -95,8 +88,7 @@ export function LexItemPage(props: LexItemPageProps) {
     timescales,
     strat_name,
     concept_id,
-    int_id,
-  } = intRes;
+  } = resData;
 
   const area = parseInt(col_area.toString().split(".")[0]);
 
@@ -155,7 +147,7 @@ export function LexItemPage(props: LexItemPageProps) {
           absoluteAgeScale: true,
         })
       ),
-      h.if(colData?.success.data.features.length)("div.table", [
+      h.if(features.length)("div.table", [
         h("div.table-content", [
           h("div.packages", t_sections.toLocaleString() + " packages"),
           h(Divider, { className: "divider" }),
@@ -189,7 +181,7 @@ export function LexItemPage(props: LexItemPageProps) {
             pbdb_collections.toLocaleString() + " collections"
           ),
         ]),
-        h(ColumnsMap, { columns: colData.success.data }),
+        h(ColumnsMap, { columns: colData }),
       ]),
       h("div.charts", [
         h.if(liths?.length)(
@@ -231,7 +223,7 @@ export function LexItemPage(props: LexItemPageProps) {
           )
         ),
       ]),
-      h(References, { res1: fossilRes, res2: colData }),
+      h(References, { refs }),
     ]),
     h(Footer),
   ]);
@@ -241,13 +233,7 @@ function UpperCase(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function References({ res1, res2 }) {
-  if (res1 == null || res2 == null) return h(Loading);
-
-  const refArray1 = Object.values(res1.success.refs);
-  const refArray2 = Object.values(res2.success.refs);
-  const refs = [...refArray1, ...refArray2];
-
+function References({ refs }) {
   return h.if(refs?.length != 0)("div.int-references", [
     h("h3", "Primary Sources"),
     h(Divider),

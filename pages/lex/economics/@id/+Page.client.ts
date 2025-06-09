@@ -2,14 +2,14 @@ import { useData } from "vike-react/useData";
 import { LexItemPage } from "~/components/lex";
 
 export function Page() {
-  const { res, fossilRes, colData, taxaData } = useData();
+  const { resData, colData, taxaData, refs } = useData();
 
   return LexItemPage({
-    id: res[0].econ_id,
+    id: resData.environ_id,
     header: "econs",
-    res,
-    fossilRes,
+    resData,
     colData,
-    taxaData
+    taxaData,
+    refs
   });
 }

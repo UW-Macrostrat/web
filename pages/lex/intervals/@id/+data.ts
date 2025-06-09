@@ -1,24 +1,22 @@
-import { apiV2Prefix, pbdbDomain } from "@macrostrat-web/settings";
-import { fetchAPIData } from "~/_utils";
+import { pbdbDomain } from "@macrostrat-web/settings";
+import { fetchAPIData, fetchAPIRefs } from "~/_utils";
 
 export async function data(pageContext) {
   const int_id = parseInt(pageContext.urlParsed.pathname.split("/")[3]);
 
   // Await all API calls
-  const [res, fossilRes, colData] = await Promise.all([
+  const [resData, colData, refs1, refs2] = await Promise.all([
     fetchAPIData("/defs/intervals", { int_id }),
-    (await fetch(apiV2Prefix + "/fossils?int_id=" + int_id)).json(),
-    (
-      await fetch(
-        apiV2Prefix +
-          "/columns?int_id=" +
-          int_id +
-          "&response=long&format=geojson"
-      )
-    ).json(),
+    fetchAPIData("/columns", { int_id, response: "long", format: "geojson" }),
+    fetchAPIRefs("/fossils", { int_id }),
+    fetchAPIRefs("/columns", { int_id }),
   ]);
 
-  const cols = colData.success.data.features
+  const refValues1 = Object.values(refs1)
+  const refValues2 = Object.values(refs2)
+  const refs = [...refValues1, ...refValues2]
+
+  const cols = colData.features
     ?.map((feature) => feature.properties.col_id)
     ?.join(",");
 
@@ -30,5 +28,5 @@ export async function data(pageContext) {
     taxaData = await response.json();
   }
 
-  return { res, fossilRes, colData, taxaData };
+  return { resData: resData[0], colData, taxaData, refs };
 }
