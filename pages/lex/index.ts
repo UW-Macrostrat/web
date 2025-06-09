@@ -1,6 +1,6 @@
 import h from "./main.module.sass";
 import { useAPIResult } from "@macrostrat/ui-components";
-import { apiV2Prefix } from "@macrostrat-web/settings";
+import { apiV2Prefix, pbdbDomain } from "@macrostrat-web/settings";
 import { PageHeader, Link, PageBreadcrumbs } from "~/components";
 import { Card, Icon, Popover, Divider, RangeSlider } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
@@ -235,7 +235,7 @@ function PrevalentTaxa({ data }) {
       h("h3", "Prevalent Taxa"),
       h("div.link", [
         h("p", "via"),
-        h("a", { href: "https://paleobiodb.org/#/" }, "PaleoBioDB"),
+        h("a", { href: pbdbDomain + "/#/" }, "PaleoBioDB"),
       ]),
     ]),
     records?.map((record) => Taxa(record)),
@@ -243,14 +243,14 @@ function PrevalentTaxa({ data }) {
 }
 
 function Taxa(record) {
-  const imgUrl = "https://paleobiodb.org/data1.2/taxa/thumb.png?id=";
+  const imgUrl = pbdbDomain + "/data1.2/taxa/thumb.png?id=";
   const isDarkMode = useDarkMode().isEnabled;
 
   return h(
     Link,
     {
       href:
-        "https://paleobiodb.org/classic/basicTaxonInfo?taxon_no=" + record.oid,
+        pbdbDomain + "/classic/basicTaxonInfo?taxon_no=" + record.oid,
       className: "taxa",
       target: "_blank",
     },

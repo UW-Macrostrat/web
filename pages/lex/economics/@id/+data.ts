@@ -1,4 +1,4 @@
-import { apiV2Prefix } from "@macrostrat-web/settings";
+import { apiV2Prefix, pbdbDomain } from "@macrostrat-web/settings";
 import { fetchAPIData } from "~/_utils";
 
 export async function data(pageContext) {
@@ -25,7 +25,7 @@ export async function data(pageContext) {
   let taxaData = null;
   if (cols) {
     const response = await fetch(
-      `https://paleobiodb.org/data1.2/occs/prevalence.json?limit=5&coll_id=${cols}`
+      `${pbdbDomain}/data1.2/occs/prevalence.json?limit=5&coll_id=${cols}`
     );
     taxaData = await response.json();
   }
