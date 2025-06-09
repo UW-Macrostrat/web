@@ -1,6 +1,6 @@
 import h from "./main.module.scss";
 import { useAPIResult } from "@macrostrat/ui-components";
-import { SETTINGS } from "@macrostrat-web/settings";
+import { apiV2Prefix } from "@macrostrat-web/settings";
 import {
   PageHeader,
   Link,
@@ -18,7 +18,7 @@ import { Loading } from "../../../index";
 export function Page() {
   const pageContext = usePageContext();
   const id = parseInt(pageContext.urlParsed.pathname.split("/")[3]);
-  const res = useAPIResult(SETTINGS.apiV2Prefix + "/defs/timescales?all")
+  const res = useAPIResult(apiV2Prefix + "/defs/timescales?all")
     ?.success.data;
   const [clickedInterval, setClickedInterval] = useState(null);
 

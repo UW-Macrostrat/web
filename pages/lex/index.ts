@@ -1,6 +1,6 @@
 import h from "./main.module.sass";
 import { useAPIResult } from "@macrostrat/ui-components";
-import { SETTINGS } from "@macrostrat-web/settings";
+import { apiV2Prefix } from "@macrostrat-web/settings";
 import { PageHeader, Link, PageBreadcrumbs } from "~/components";
 import { Card, Icon, Popover, Divider, RangeSlider } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
@@ -266,7 +266,7 @@ function Taxa(record) {
 
 function ConceptHierarchy({ id }) {
   const url =
-    SETTINGS.apiV2Prefix + "/defs/strat_names?strat_name_concept_id=" + id;
+    apiV2Prefix + "/defs/strat_names?strat_name_concept_id=" + id;
   const data = useAPIResult(url)?.success?.data;
   if (!data) return h(Loading);
 
@@ -287,7 +287,7 @@ function ConceptHierarchy({ id }) {
 
 function getIntID({ name }) {
   const res = useAPIResult(
-    SETTINGS.apiV2Prefix + "/defs/intervals?name_like=" + encodeURI(name)
+    apiV2Prefix + "/defs/intervals?name_like=" + encodeURI(name)
   )?.success?.data;
 
   const id = res?.filter((d) => d.name === name)[0]?.int_id;
@@ -297,7 +297,7 @@ function getIntID({ name }) {
 
 function conceptInfo({ concept_id, header }) {
   const url =
-    SETTINGS.apiV2Prefix +
+    apiV2Prefix +
     "/defs/strat_name_concepts?strat_name_concept_id=" +
     concept_id;
   const data = useAPIResult(url)?.success?.data[0];
