@@ -12,7 +12,12 @@ export function ColumnsMapContainer(props) {
   return h(ErrorBoundary, h(ColumnsMapInner, props));
 }
 
-function ColumnsMapInner({ columnIDs = null, projectID = null, className, columns = null}) {
+function ColumnsMapInner({
+  columnIDs = null,
+  projectID = null,
+  className,
+  columns = null,
+}) {
   const columnData = useMacrostratColumns(projectID, projectID != null);
 
   let _columns = columns?.features ?? columnData;
@@ -27,7 +32,9 @@ function ColumnsMapInner({ columnIDs = null, projectID = null, className, column
   return h(
     "div",
     { className },
-    h(ColumnsMap, { columns: { type: "FeatureCollection", features: _columns } })
+    h(ColumnsMap, {
+      columns: { type: "FeatureCollection", features: _columns },
+    })
   );
 }
 

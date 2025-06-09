@@ -1,6 +1,12 @@
 import { useData } from "vike-react/useData";
-import h from "@macrostrat/hyper"
-import { LexItemPage, ColumnsTable, Charts, PrevalentTaxa, Timescales } from "~/components/lex";
+import h from "@macrostrat/hyper";
+import {
+  LexItemPage,
+  ColumnsTable,
+  Charts,
+  PrevalentTaxa,
+  Timescales,
+} from "~/components/lex";
 
 export function Page() {
   const { resData, colData, taxaData, refs } = useData();
@@ -17,7 +23,7 @@ export function Page() {
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),
     h(Timescales, { timescales }),
-  ]
+  ];
 
-  return LexItemPage({children, id, refs, resData, siftLink: "lithology"});
+  return LexItemPage({ children, id, refs, resData, siftLink: "lithology" });
 }

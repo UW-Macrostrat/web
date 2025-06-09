@@ -56,11 +56,7 @@ export function LexItemPage(props: LexItemPageProps) {
       : "strat_name";
   */
 
-  const {
-    name,
-    strat_name,
-  } = resData;
-
+  const { name, strat_name } = resData;
 
   return h("div", [
     h(ContentPage, { className: "int-page" }, [
@@ -68,7 +64,12 @@ export function LexItemPage(props: LexItemPageProps) {
         h(PageBreadcrumbs, { title: "#" + id }),
         h(DarkModeButton, { className: "dark-mode-button", showText: true }),
       ]),
-      h(LexItemHeader, { resData, name: strat_name ? strat_name : name, siftLink, id }),
+      h(LexItemHeader, {
+        resData,
+        name: strat_name ? strat_name : name,
+        siftLink,
+        id,
+      }),
       children,
       h(References, { refs }),
     ]),
@@ -79,10 +80,7 @@ export function LexItemPage(props: LexItemPageProps) {
 export function ColumnsTable({ resData, colData }) {
   const summary = summarize(colData.features || []);
 
-  const {
-    b_age,
-    t_age,
-  } = resData;
+  const { b_age, t_age } = resData;
 
   const {
     t_units,
@@ -95,7 +93,6 @@ export function ColumnsTable({ resData, colData }) {
   } = summary;
 
   const area = parseInt(col_area.toString().split(".")[0]);
-
 
   const t_id = getIntID({ name: t_int_name });
   const b_id = getIntID({ name: b_int_name });
@@ -129,10 +126,7 @@ export function ColumnsTable({ resData, colData }) {
       h(Divider, { className: "divider" }),
       h("div.thickness", "≤ " + max_thick.toLocaleString() + "m thick"),
       h(Divider, { className: "divider" }),
-      h(
-        "div.collections",
-        pbdb_collections.toLocaleString() + " collections"
-      ),
+      h("div.collections", pbdb_collections.toLocaleString() + " collections"),
     ]),
     h(ColumnMapContainer, {
       columns: colData,
@@ -168,16 +162,14 @@ function LexItemHeader({ resData, name, siftLink, id }) {
             backgroundColor: chromaColor?.luminance(1 - luminance).hex(),
             color: chromaColor?.luminance(luminance).hex(),
           },
-        }, 
+        },
         [
           UpperCase(name),
-          h.if(abbrev)(IntAbbrev, 
-            {
-              abbrev,
-              chromaColor,
-              luminance,
-            }
-          ),
+          h.if(abbrev)(IntAbbrev, {
+            abbrev,
+            chromaColor,
+            luminance,
+          }),
         ]
       ),
     ]),
@@ -195,9 +187,7 @@ function IntAbbrev({ abbrev, chromaColor, luminance }) {
       "div.int-abbrev-item",
       {
         style: {
-          backgroundColor: chromaColor
-            ?.luminance(1 - luminance)
-            .hex(),
+          backgroundColor: chromaColor?.luminance(1 - luminance).hex(),
           color: chromaColor?.luminance(luminance).hex(),
         },
       },

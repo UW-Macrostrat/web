@@ -1,6 +1,13 @@
 import { useData } from "vike-react/useData";
-import h from "@macrostrat/hyper"
-import { LexItemPage, ColumnsTable, Charts, PrevalentTaxa, Timescales, ConceptInfo } from "~/components/lex";
+import h from "@macrostrat/hyper";
+import {
+  LexItemPage,
+  ColumnsTable,
+  Charts,
+  PrevalentTaxa,
+  Timescales,
+  ConceptInfo,
+} from "~/components/lex";
 import { StratNameHierarchy } from "~/components/lex/StratNameHierarchy";
 
 export function Page() {
@@ -20,7 +27,7 @@ export function Page() {
     h(PrevalentTaxa, { taxaData }),
     h(StratNameHierarchy, { id }),
     h(Timescales, { timescales }),
-  ]
+  ];
 
-  return LexItemPage({children, id, refs, resData, siftLink: "strat-name"});
+  return LexItemPage({ children, id, refs, resData, siftLink: "strat-name" });
 }
