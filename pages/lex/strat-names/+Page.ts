@@ -1,7 +1,7 @@
-import h from "./main.module.scss";
+import h from "./main.module.sass";
 import { useAPIResult } from "@macrostrat/ui-components";
-import { SETTINGS } from "@macrostrat-web/settings";
-import { StickyHeader, LinkCard, PageBreadcrumbs } from "~/components";
+import { apiV2Prefix, apiDomain } from "@macrostrat-web/settings";
+import { StickyHeader, LinkCard, PageBreadcrumbs, Link } from "~/components";
 import { Card, Switch, Spinner } from "@blueprintjs/core";
 import { useState, useEffect, useRef } from "react";
 import { ContentPage } from "~/layouts";
@@ -17,62 +17,42 @@ export function StratPage({ show }) {
   console.log("res", res);
   const startingID = show
     ? res[res?.length - 1]?.concept_id
-    : res[res?.length - 1]?.strat_name_id;
+    : res[res?.length - 1]?.id;
 
   const [input, setInput] = useState("");
-  const [showConcepts, setShowConcepts] = useState(show ?? false);
+  const [showConcepts, setShowConcepts] = useState(show);
+  const [showNames, setShowNames] = useState(!show);
   const [lastID, setLastID] = useState(startingID);
   const [data, setData] = useState(res);
+  const showBoth = showConcepts && showNames;
   const pageSize = 20;
 
-  const strat_name_vars = {
-    title: "Strat Names",
-    item_route: "/strat-names/",
-    data_route: "strat_names",
-    like: "strat_name_like",
-  };
-
-  const concept_vars = {
-    title: "Strat Name Concepts",
-    item_route: "/strat-name-concepts/",
-    data_route: "strat_name_concepts",
-    like: "concept_like",
-  };
-
-  const vars = showConcepts ? concept_vars : strat_name_vars;
-
-  const { title, item_route, data_route, like } = vars;
-
-  const result = useStratData(lastID, input, pageSize, data_route, like);
-
-  console.log(lastID);
-  console.log("data", data);
-
+  const result = useStratData(lastID, input, pageSize, showBoth, showNames);
   const prevInputRef = useRef(input);
   const prevShowConceptsRef = useRef(showConcepts);
+  const prevShowNamesRef = useRef(showNames);
+  console.log("lastID", lastID);
 
   useEffect(() => {
-    // Only reset if input or showConcepts actually changed from previous render
     if (
       prevInputRef.current !== input ||
-      prevShowConceptsRef.current !== showConcepts
+      prevShowConceptsRef.current !== showConcepts ||
+      prevShowNamesRef.current !== showNames
     ) {
-      // Reset data and lastID to starting ID for current mode
       setData([]);
       setLastID(0);
 
       prevInputRef.current = input;
       prevShowConceptsRef.current = showConcepts;
+      prevShowNamesRef.current = showNames;
     }
-  }, [input, showConcepts]);
+  }, [input, showConcepts, showNames]);
 
   useEffect(() => {
     if (
       result &&
-      data[data.length - 1]?.[showConcepts ? "concept_id" : "strat_name_id"] !==
-        result[result.length - 1]?.[
-          showConcepts ? "concept_id" : "strat_name_id"
-        ]
+      data[data.length - 1]?.[showConcepts ? "concept_id" : "id"] !==
+        result[result.length - 1]?.[showConcepts ? "concept_id" : "id"]
     ) {
       setData((prevData) => {
         return [...prevData, ...result];
@@ -88,91 +68,154 @@ export function StratPage({ show }) {
 
   return h(ContentPage, [
     h(StickyHeader, { className: "header" }, [
-      h(PageBreadcrumbs, { title }),
+      h(PageBreadcrumbs, {
+        title:
+          showNames && showConcepts
+            ? "Strat Names & Concepts"
+            : showNames
+            ? "Strat Names"
+            : "Strat Concepts",
+      }),
       h("div.header-description", [
-        h(
-          Card,
-          {
-            className: !showConcepts ? "selected" : "unselected",
-            onClick: () => {
-              if (showConcepts) {
-                setShowConcepts(false);
-                setLastID(0);
-                setData([]);
-              }
+        h("div.card-container", [
+          h("div", {
+            className: "status " + (showNames ? "active" : "inactive"),
+          }),
+          h(
+            Card,
+            {
+              className:
+                "strat-name-card " +
+                (!showNames || showConcepts ? "clickable" : ""),
+              onClick: () => {
+                if (!showNames || showConcepts) {
+                  setShowNames(!showNames);
+                  setLastID(0);
+                  setData([]);
+                }
+              },
             },
-          },
-          [
-            h("strong", "Strat Names: "),
-            h("span", "names of rock units, organized hierarchically"),
-          ]
-        ),
-        h(
-          Card,
-          {
-            className: showConcepts ? "selected" : "unselected",
-            onClick: () => {
-              if (!showConcepts) {
-                setShowConcepts(true);
-                setLastID(0);
-                setData([]);
-              }
+            [
+              h("strong", "Strat Names: "),
+              h("span", "names of rock units, organized hierarchically"),
+            ]
+          ),
+        ]),
+        h("div.card-container", [
+          h("div", {
+            className: "status " + (showConcepts ? "active" : "inactive"),
+          }),
+          h(
+            Card,
+            {
+              className:
+                "strat-concept-card " +
+                (showNames || !showConcepts ? "clickable" : ""),
+              onClick: () => {
+                if (showNames || !showConcepts) {
+                  setShowConcepts(!showConcepts);
+                  setLastID(0);
+                  setData([]);
+                }
+              },
             },
-          },
-          [
-            h("strong", "Strat Concepts: "),
-            h(
-              "span",
-              "capture relationships between differently-named rock units"
-            ),
-          ]
-        ),
+            [
+              h("strong", "Strat Concepts: "),
+              h(
+                "span",
+                "capture relationships between differently-named rock units"
+              ),
+            ]
+          ),
+        ]),
       ]),
-      h(Card, { className: "filter" }, [
-        h(SearchBar, {
-          placeholder: "Filter by name...",
-          onChange: handleChange,
-        }),
-        h(Switch, {
-          label: "Include concepts",
-          checked: showConcepts,
-          onChange: (e) => {
-            setShowConcepts(e.target.checked);
-            setLastID(0);
-            setData([]);
-          },
-        }),
-      ]),
+      h(SearchBar, {
+        placeholder: "Filter by name...",
+        onChange: handleChange,
+      }),
     ]),
     h(
       "div.strat-list",
       h(
         "div.strat-items",
-        data.map((data) => h(StratItem, { data, item_route }))
+        data.map((data) => h(StratItem, { data }))
       )
     ),
-    LoadMoreTrigger({ data, setLastID, pageSize, result, showConcepts }),
+    LoadMoreTrigger({ data, setLastID, pageSize, result, showBoth, showNames }),
   ]);
 }
 
-function StratItem({ data, item_route }) {
-  const { name, concept_id, strat_name, strat_name_id } = data;
+function StratItem({ data }) {
+  const { concept_id, id } = data;
+  const isConcept = !id;
 
   return h(
     LinkCard,
-    { href: `/lex/${item_route}/` + (strat_name_id ?? concept_id) },
-    name ?? strat_name ?? "Unnamed"
+    {
+      href: `/lex/${
+        isConcept ? "strat-name-concepts/" + concept_id : "strat-names/" + id
+      }`,
+      className: isConcept ? "strat-concept-card" : "strat-name-card",
+    },
+    isConcept ? ConceptBody({ data }) : StratBody({ data })
   );
 }
 
-function useStratData(lastID, input, pageSize, data_route, like) {
-  const url = `${SETTINGS.apiV2Prefix}/defs/${data_route}?page_size=${pageSize}&last_id=${lastID}&${like}=${input}`;
+function StratBody({ data }) {
+  const { name, concept_id, concept_name } = data;
 
-  const result = useAPIResult(url);
-  return result?.success?.data;
+  return h("div.strat-body", [
+    h("strong", name),
+    h.if(concept_id)(
+      Link,
+      {
+        className: "concept-tag",
+        href: `/lex/strat-name-concepts/${concept_id}`,
+      },
+      concept_name
+    ),
+  ]);
 }
 
-function LoadMoreTrigger({ data, setLastID, pageSize, result, showConcepts }) {
+function ConceptBody({ data }) {
+  const { name, strat_ids, strat_names } = data;
+
+  const ids = strat_ids?.split(",");
+  const names = strat_names?.split(",");
+
+  return h("div.concept-body", [
+    h("strong", name),
+    h("div.concept-strats", [
+      ids?.map((id, index) =>
+        h(
+          Link,
+          { className: "strat-tag", href: `/lex/strat-names/${id}` },
+          names[index]
+        )
+      ),
+    ]),
+  ]);
+}
+
+function useStratData(lastID, input, pageSize, showBoth, showNames) {
+  const url1 = `${apiDomain}/api/pg/strat_names_test?limit=${pageSize}&id=gt.${lastID}&order=id.asc&name=ilike.*${input}*`;
+  const url2 = `${apiDomain}/api/pg/strat_concepts_test?limit=${pageSize}&concept_id=gt.${lastID}&order=concept_id.asc&name=ilike.*${input}*`;
+  const url3 = `${apiDomain}/api/pg/strat_combined_test?limit=${pageSize}&combined_id=gt.${lastID}&order=combined_id.asc&name=ilike.*${input}*`;
+  const url = showBoth ? url3 : showNames ? url1 : url2;
+
+  const result = useAPIResult(url);
+
+  return result;
+}
+
+function LoadMoreTrigger({
+  data,
+  setLastID,
+  pageSize,
+  result,
+  showBoth,
+  showNames,
+}) {
   const ref = useRef(null);
 
   useEffect(() => {
@@ -182,9 +225,10 @@ function LoadMoreTrigger({ data, setLastID, pageSize, result, showConcepts }) {
       if (entry.isIntersecting) {
         if (data.length > 0) {
           const id1 = data[data.length - 1]?.concept_id;
-          const id2 = data[data.length - 1]?.strat_name_id;
+          const id2 = data[data.length - 1]?.id;
+          const id3 = data[data.length - 1]?.combined_id;
 
-          setLastID(showConcepts ? id1 : id2);
+          setLastID(showBoth ? id3 : showNames ? id2 : id1);
         }
       }
     });
