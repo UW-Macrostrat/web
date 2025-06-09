@@ -270,8 +270,7 @@ function Taxa(record) {
   return h(
     Link,
     {
-      href:
-        pbdbDomain + "/classic/basicTaxonInfo?taxon_no=" + record.oid,
+      href: pbdbDomain + "/classic/basicTaxonInfo?taxon_no=" + record.oid,
       className: "taxa",
       target: "_blank",
     },
@@ -286,8 +285,7 @@ function Taxa(record) {
 }
 
 function ConceptHierarchy({ id }) {
-  const url =
-    apiV2Prefix + "/defs/strat_names?strat_name_concept_id=" + id;
+  const url = apiV2Prefix + "/defs/strat_names?strat_name_concept_id=" + id;
   const data = useAPIResult(url)?.success?.data;
   if (!data) return h(Loading);
 

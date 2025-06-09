@@ -19,8 +19,7 @@ import { Popover } from "@blueprintjs/core";
 export function Page() {
   const pageContext = usePageContext();
   const id = parseInt(pageContext.urlParsed.pathname.split("/")[3]);
-  const res = useAPIResult(apiV2Prefix + "/defs/timescales?all")
-    ?.success.data;
+  const res = useAPIResult(apiV2Prefix + "/defs/timescales?all")?.success.data;
   const intervals = useAPIResult(
     SETTINGS.apiV2Prefix + "/defs/intervals?timescale_id=" + id
   )?.success.data;

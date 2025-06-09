@@ -15,8 +15,8 @@ import { SearchBar } from "~/components/general";
 
 export function Page() {
   const [inputValue, setInputValue] = useState("");
-  const sources = useAPIResult(apiV2Prefix + "/defs/sources?all=true")
-    ?.success?.data;
+  const sources = useAPIResult(apiV2Prefix + "/defs/sources?all=true")?.success
+    ?.data;
 
   if (sources == null) {
     return h("div.loading", "Loading sources...");
