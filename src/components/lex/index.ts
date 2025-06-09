@@ -145,7 +145,7 @@ export function IndividualPage(id, header, res, fossilRes, colData, taxaData) {
           absoluteAgeScale: true,
         })
       ),
-      h.if(colData?.features.length)("div.table", [
+      h.if(colData?.success.data.features.length)("div.table", [
         h("div.table-content", [
           h("div.packages", t_sections.toLocaleString() + " packages"),
           h(Divider, { className: "divider" }),
@@ -179,7 +179,7 @@ export function IndividualPage(id, header, res, fossilRes, colData, taxaData) {
             pbdb_collections.toLocaleString() + " collections"
           ),
         ]),
-        colData ? h(ColumnsMap, { columns: colData }) : h(Loading),
+        h(ColumnsMap, { columns: colData.success.data }),
       ]),
       h("div.charts", [
         h.if(liths?.length)(
@@ -221,7 +221,7 @@ export function IndividualPage(id, header, res, fossilRes, colData, taxaData) {
           )
         ),
       ]),
-      h(References, { res1: fossilResult, res2: colDataResult }),
+      h(References, { res1: fossilRes, res2: colData }),
     ]),
     h(Footer),
   ]);
