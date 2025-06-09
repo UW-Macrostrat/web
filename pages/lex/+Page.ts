@@ -3,12 +3,11 @@ import { ContentPage } from "~/layouts";
 import { apiV2Prefix } from "@macrostrat-web/settings";
 import { useAPIResult } from "@macrostrat/ui-components";
 import h from "./+Page.module.sass";
+import { useData } from "vike-react/useData";
 import { Loading, Footer } from "~/components/general";
 
 export function Page() {
-  const res = useAPIResult(apiV2Prefix + "/stats?all")?.success?.data;
-
-  if (!res) return h(ContentPage, Loading);
+  const { res } = useData();
 
   const seen = new Set();
   const stats = res.filter((project) => {
@@ -16,8 +15,6 @@ export function Page() {
     seen.add(project.project_id);
     return true;
   });
-
-  console.log("Lexicon stats", stats);
 
   let columns = 0,
     packages = 0,

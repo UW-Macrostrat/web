@@ -5,8 +5,8 @@ export function Page() {
   const { resData, colData, taxaData, refs } = useData();
 
   return LexItemPage({
-    id: resData.col_group_id,
-    header: "groups",
+    id: resData.econ_id,
+    header: "econs",
     resData,
     colData,
     taxaData,

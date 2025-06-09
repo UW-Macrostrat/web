@@ -10,13 +10,13 @@ import {
 } from "~/components";
 import { useState } from "react";
 import { useAPIResult } from "@macrostrat/ui-components";
-import { SETTINGS } from "@macrostrat-web/settings";
+import { apiV2Prefix } from "@macrostrat-web/settings";
 import { SearchBar } from "~/components/general";
 
 export function Page() {
   const [inputValue, setInputValue] = useState("");
-  const sources = useAPIResult(SETTINGS.apiV2Prefix + "/defs/sources?all=true")
-    ?.success?.data;
+  const sources = useAPIResult(apiV2Prefix + "/defs/sources?all=true")?.success
+    ?.data;
 
   if (sources == null) {
     return h("div.loading", "Loading sources...");

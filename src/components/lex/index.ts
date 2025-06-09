@@ -1,6 +1,6 @@
 import h from "./main.module.sass";
 import { useAPIResult } from "@macrostrat/ui-components";
-import { SETTINGS } from "@macrostrat-web/settings";
+import { apiV2Prefix, pbdbDomain } from "@macrostrat-web/settings";
 import { PageHeader, Link, PageBreadcrumbs } from "~/components";
 import { Card, Icon, Popover, Divider, RangeSlider } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
@@ -16,6 +16,9 @@ import { StratNameHierarchy } from "./StratNameHierarchy";
 import { LinkCard } from "~/components/cards";
 import { ColumnsMap } from "~/columns-map/index.client";
 import { Timescale } from "@macrostrat/timescale";
+import { LexItemPageProps } from "~/types";
+import { fetchAPIData, fetchAPIRefs } from "~/_utils";
+import { ClientOnly } from "vike-react/ClientOnly";
 
 export function titleCase(str) {
   if (!str) return str;
@@ -26,36 +29,21 @@ export function titleCase(str) {
     .join(" ");
 }
 
-export function IndividualPage(id, type, header) {
-  // for fetching fossil data with strat concept
-  if (type === "concept_id") {
-    type = "strat_name_concept_id";
-  }
-
-  const [activeIndex, setActiveIndex] = useState(null);
-  const intRes = useAPIResult(
-    SETTINGS.apiV2Prefix + "/defs/" + header + "?" + type + "=" + id
-  )?.success.data[0];
-  const fossilResult = useAPIResult(
-    SETTINGS.apiV2Prefix + "/fossils?" + type + "=" + id
-  )?.success;
-  const colDataResult = useAPIResult(
-    SETTINGS.apiV2Prefix +
-      "/columns?" +
-      type +
-      "=" +
-      id +
-      "&response=long&format=geojson"
-  )?.success;
-  const fossilRes = fossilResult?.data;
-  const colData = colDataResult?.data;
-  const cols = colData?.features
-    .map((feature) => feature.properties.col_id)
-    .join(",");
-  const taxaData = useAPIResult(
-    "https://paleobiodb.org/data1.2/occs/prevalence.json?limit=5&coll_id=" +
-      cols
+function ColumnMapContainer(props) {
+  return h(
+    ClientOnly,
+    {
+      load: () => import("./map.client").then((d) => d.ColumnsMapContainer),
+      fallback: h("div.loading", "Loading map..."),
+      deps: [props.columnIDs, props.projectID],
+    },
+    (component) => h(component, props)
   );
+}
+
+export function LexItemPage(props: LexItemPageProps) {
+  const { id, header, resData, colData, taxaData, refs } = props;
+  const [activeIndex, setActiveIndex] = useState(null);
 
   const siftLink =
     header === "intervals"
@@ -73,15 +61,23 @@ export function IndividualPage(id, type, header) {
       : "strat_name";
 
   // data for charts
-  const liths = summarizeAttributes({ data: colData?.features, type: "lith" });
+  const features = colData?.features || [];
+
+  const liths = summarizeAttributes({
+    data: features,
+    type: "lith",
+  });
   const environs = summarizeAttributes({
-    data: colData?.features,
+    data: features,
     type: "environ",
   });
-  const econs = summarizeAttributes({ data: colData?.features, type: "econ" });
-  const summary = summarize(colData?.features);
+  const econs = summarizeAttributes({
+    data: features,
+    type: "econ",
+  });
+  const summary = summarize(features);
 
-  const chromaColor = intRes?.color ? asChromaColor(intRes.color) : null;
+  const chromaColor = resData?.color ? asChromaColor(resData.color) : null;
   const luminance = 0.9;
 
   const {
@@ -97,8 +93,6 @@ export function IndividualPage(id, type, header) {
   const t_id = getIntID({ name: t_int_name });
   const b_id = getIntID({ name: b_int_name });
 
-  if (!intRes || !fossilRes) return h(Loading);
-
   const {
     name,
     abbrev,
@@ -107,8 +101,7 @@ export function IndividualPage(id, type, header) {
     timescales,
     strat_name,
     concept_id,
-    int_id,
-  } = intRes;
+  } = resData;
 
   const area = parseInt(col_area.toString().split(".")[0]);
 
@@ -167,7 +160,7 @@ export function IndividualPage(id, type, header) {
           absoluteAgeScale: true,
         })
       ),
-      h.if(colData?.features.length)("div.table", [
+      h.if(features.length)("div.table", [
         h("div.table-content", [
           h("div.packages", t_sections.toLocaleString() + " packages"),
           h(Divider, { className: "divider" }),
@@ -201,7 +194,10 @@ export function IndividualPage(id, type, header) {
             pbdb_collections.toLocaleString() + " collections"
           ),
         ]),
-        colData ? h(ColumnsMap, { columns: colData }) : h(Loading),
+        h(ColumnMapContainer, {
+          columns: colData,
+          className: "column-map-container",
+        }),
       ]),
       h("div.charts", [
         h.if(liths?.length)(
@@ -243,7 +239,7 @@ export function IndividualPage(id, type, header) {
           )
         ),
       ]),
-      h(References, { res1: fossilResult, res2: colDataResult }),
+      h(References, { refs }),
     ]),
     h(Footer),
   ]);
@@ -253,13 +249,7 @@ function UpperCase(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function References({ res1, res2 }) {
-  if (res1 == null || res2 == null) return h(Loading);
-
-  const refArray1 = Object.values(res1.refs);
-  const refArray2 = Object.values(res2.refs);
-  const refs = [...refArray1, ...refArray2];
-
+function References({ refs }) {
   return h.if(refs?.length != 0)("div.int-references", [
     h("h3", "Primary Sources"),
     h(Divider),
@@ -278,7 +268,7 @@ function PrevalentTaxa({ data }) {
       h("h3", "Prevalent Taxa"),
       h("div.link", [
         h("p", "via"),
-        h("a", { href: "https://paleobiodb.org/#/" }, "PaleoBioDB"),
+        h("a", { href: pbdbDomain + "/#/" }, "PaleoBioDB"),
       ]),
     ]),
     records?.map((record) => Taxa(record)),
@@ -286,14 +276,13 @@ function PrevalentTaxa({ data }) {
 }
 
 function Taxa(record) {
-  const imgUrl = "https://paleobiodb.org/data1.2/taxa/thumb.png?id=";
+  const imgUrl = pbdbDomain + "/data1.2/taxa/thumb.png?id=";
   const isDarkMode = useDarkMode().isEnabled;
 
   return h(
     Link,
     {
-      href:
-        "https://paleobiodb.org/classic/basicTaxonInfo?taxon_no=" + record.oid,
+      href: pbdbDomain + "/classic/basicTaxonInfo?taxon_no=" + record.oid,
       className: "taxa",
       target: "_blank",
     },
@@ -308,8 +297,7 @@ function Taxa(record) {
 }
 
 function ConceptHierarchy({ id }) {
-  const url =
-    SETTINGS.apiV2Prefix + "/defs/strat_names?strat_name_concept_id=" + id;
+  const url = apiV2Prefix + "/defs/strat_names?strat_name_concept_id=" + id;
   const data = useAPIResult(url)?.success?.data;
   if (!data) return h(Loading);
 
@@ -330,7 +318,7 @@ function ConceptHierarchy({ id }) {
 
 function getIntID({ name }) {
   const res = useAPIResult(
-    SETTINGS.apiV2Prefix + "/defs/intervals?name_like=" + encodeURI(name)
+    apiV2Prefix + "/defs/intervals?name_like=" + encodeURI(name)
   )?.success?.data;
 
   const id = res?.filter((d) => d.name === name)[0]?.int_id;
@@ -340,7 +328,7 @@ function getIntID({ name }) {
 
 function conceptInfo({ concept_id, header }) {
   const url =
-    SETTINGS.apiV2Prefix +
+    apiV2Prefix +
     "/defs/strat_name_concepts?strat_name_concept_id=" +
     concept_id;
   const data = useAPIResult(url)?.success?.data[0];
