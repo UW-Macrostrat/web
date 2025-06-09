@@ -26,7 +26,17 @@ export function titleCase(str) {
     .join(" ");
 }
 
-export function IndividualPage(id, header, res, fossilRes, colData, taxaData) {
+interface LexItemPageProps {
+  id: number;
+  header: string;
+  res: any[];
+  fossilRes: any;
+  colData: any;
+  taxaData: any;
+}
+
+export function LexItemPage(props: LexItemPageProps) {
+  const { id, header, res, fossilRes, colData, taxaData } = props;
   const intRes = res[0];
 
   const [activeIndex, setActiveIndex] = useState(null);

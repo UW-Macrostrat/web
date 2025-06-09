@@ -1,15 +1,15 @@
 import { useData } from "vike-react/useData";
-import { IndividualPage } from "~/components/lex";
+import { LexItemPage } from "~/components/lex";
 
 export function Page() {
   const { res, fossilRes, colData, taxaData } = useData();
 
-  return IndividualPage(
-    res[0].lith_id,
-    "lithologies",
+  return LexItemPage({
+    id: res[0].lith_id,
+    header: "lithologies",
     res,
     fossilRes,
     colData,
     taxaData
-  );
+  });
 }
