@@ -7,14 +7,13 @@ import { Timescale } from "@macrostrat/timescale";
 import { titleCase } from "~/components/lex/index";
 import { useEffect } from "react";
 import { SearchBar } from "~/components/general";
-import { useData } from "@macrostrat/ui-components";
+import { useData } from "vike-react/useData";
 
 export function Page() {
   const [input, setInput] = useState("");
   const [age, setAge] = useState([0, 4000]);
   const [clickedInterval, setClickedInterval] = useState(null);
   const { res } = useData();
-
 
   useEffect(() => {
     if (!clickedInterval) return;

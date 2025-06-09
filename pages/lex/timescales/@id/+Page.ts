@@ -16,13 +16,10 @@ import { useState, useEffect } from "react";
 import { Footer, Loading } from "~/components/general";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { Popover } from "@blueprintjs/core";
+import { useData } from "vike-react/useData";
+
 export function Page() {
-  const pageContext = usePageContext();
-  const id = parseInt(pageContext.urlParsed.pathname.split("/")[3]);
-  const res = useAPIResult(apiV2Prefix + "/defs/timescales?all")?.success.data;
-  const intervals = useAPIResult(
-    SETTINGS.apiV2Prefix + "/defs/intervals?timescale_id=" + id
-  )?.success.data;
+  const { res, intervals, id } = useData();
   const [clickedInterval, setClickedInterval] = useState(null);
 
   useEffect(() => {
@@ -46,8 +43,6 @@ export function Page() {
 
     fetchInterval();
   }, [clickedInterval]);
-
-  if (!res || !intervals) return h(Loading);
 
   // temporary till api is fixed
   const timeRes = res.find((d) => d.timescale_id === id);
