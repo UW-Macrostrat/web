@@ -1,15 +1,15 @@
-import { useData } "vike-react/useData";
-import { LexItemPage } from "~/components/lex/index";
+import { useData } from "vike-react/useData";
+import { LexItemPage } from "~/components/lex";
 
 export function Page() {
-  const { res, fossilRes, colData, taxaData } = useData();
+  const { resData, colData, taxaData, refs } = useData();
 
   return LexItemPage({
-    id: res[0].col_group_id,
+    id: resData.col_group_id,
     header: "groups",
-    res,
-    fossilRes,
+    resData,
     colData,
-    taxaData
+    taxaData,
+    refs
   });
 }
