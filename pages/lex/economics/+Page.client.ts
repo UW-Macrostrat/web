@@ -4,8 +4,8 @@ import { Popover } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { asChromaColor } from "@macrostrat/color-utils";
-import { SearchBar } from "../../index";
 import { useData } from "vike-react/useData";
+import { Loading, SearchBar } from "~/components/general";
 
 export function Page() {
   const [input, setInput] = useState("");

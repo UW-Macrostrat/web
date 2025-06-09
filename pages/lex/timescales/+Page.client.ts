@@ -4,10 +4,10 @@ import { Card, Popover, RangeSlider, Divider } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { Timescale } from "@macrostrat/timescale";
-import { titleCase } from "../index";
+import { titleCase } from "~/components/lex/index";
 import { useEffect } from "react";
-import { SearchBar } from "../../index";
-import { useData } from "vike-react/useData";
+import { SearchBar } from "~/components/general";
+import { useData } from "@macrostrat/ui-components";
 
 export function Page() {
   const [input, setInput] = useState("");
@@ -52,8 +52,6 @@ export function Page() {
     return matchesName && matchesAgeRange;
   });
 
-  const width = window.screen.width;
-  const timescaleWidth = width * 0.6 - 40;
   const handleClick = (timescale) => {
     const parent = timescale.target.parentElement;
     let selected;
@@ -95,7 +93,7 @@ export function Page() {
       h(
         "div.timescale",
         h(Timescale, {
-          length: timescaleWidth,
+          length: 970 - 40,
           levels: [1, 5],
           ageRange: [age[0], age[1]],
           absoluteAgeScale: true,

@@ -12,7 +12,7 @@ import h from "./main.module.sass";
 import { useData } from "vike-react/useData";
 import { ClientOnly } from "vike-react/ClientOnly";
 import { navigate } from "vike/client/router";
-import { SearchBar } from "../index";
+import { SearchBar } from "~/components/general";
 
 export function Page(props) {
   return h(ColumnListPage, props);

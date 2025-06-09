@@ -1,5 +1,5 @@
-import { IndividualPage } from "../../../lex/index";
 import { useData } from "vike-react/useData";
+import { IndividualPage } from "~/components/lex/index";
 
 export function Page() {
   const { res, fossilRes, colData, taxaData } = useData();

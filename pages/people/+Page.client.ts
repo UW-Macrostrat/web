@@ -1,4 +1,4 @@
-import { Image, Navbar, Footer, SearchBar } from "../index";
+import { Image, Navbar, Footer, SearchBar } from "~/components/general";
 import h from "./main.module.sass";
 import { Card, Divider } from "@blueprintjs/core";
 import { useState } from "react";

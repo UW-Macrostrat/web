@@ -4,7 +4,7 @@ import { Card, Popover, RangeSlider } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { asChromaColor } from "@macrostrat/color-utils";
-import { SearchBar } from "../../index";
+import { SearchBar } from "~/components/general";
 import { IntervalTag } from "@macrostrat/data-components";
 import { useData } from "vike-react/useData";
 

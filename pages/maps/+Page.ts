@@ -11,7 +11,7 @@ import {
 import { useState } from "react";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { apiV2Prefix } from "@macrostrat-web/settings";
-import { SearchBar } from "../index";
+import { SearchBar } from "~/components/general";
 
 export function Page() {
   const [inputValue, setInputValue] = useState("");

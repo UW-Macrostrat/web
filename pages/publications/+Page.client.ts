@@ -1,4 +1,4 @@
-import { Navbar, Footer } from "../index";
+import { Navbar, Footer } from "~/components/general";
 import { Divider } from "@blueprintjs/core";
 import h from "./main.module.sass";
 import { ContentPage } from "~/layouts";

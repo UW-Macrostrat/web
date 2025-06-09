@@ -2,7 +2,7 @@ import h from "./main.module.scss";
 import { ContentPage } from "~/layouts";
 import { PageHeader, LinkCard } from "~/components";
 import { useData } from "vike-react/useData";
-import { Image } from "../index";
+import { Footer, Image } from "~/components/general";
 
 export function Page() {
   // static list of projects with pictures
@@ -15,11 +15,14 @@ export function Page() {
 
   const { projects } = useData();
 
-  return h(ContentPage, [
-    h(PageHeader, { title: "Projects" }),
-    projects.map((d) =>
-      h(ProjectItem, { data: d, key: d.project_id, pictures })
-    ),
+  return h("div", [
+    h(ContentPage, [
+      h(PageHeader, { title: "Projects" }),
+      projects.map((d) =>
+        h(ProjectItem, { data: d, key: d.project_id, pictures })
+      ),
+    ]),
+    h(Footer),
   ]);
 }
 
