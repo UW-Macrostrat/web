@@ -5,7 +5,7 @@ import { StickyHeader, LinkCard, PageBreadcrumbs, Link } from "~/components";
 import { Card, Switch, Spinner } from "@blueprintjs/core";
 import { useState, useEffect, useRef } from "react";
 import { ContentPage } from "~/layouts";
-import { Loading, SearchBar } from "../../index";
+import { Loading, SearchBar } from "~/components/general";
 import { useData } from "vike-react/useData";
 
 export function Page() {

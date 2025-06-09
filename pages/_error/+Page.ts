@@ -4,7 +4,7 @@ import { Link, PageHeader } from "~/components";
 import { usePageContext } from "vike-react/usePageContext";
 import { ClientOnly } from "vike-react/ClientOnly";
 import { Spinner, Button, Card } from "@blueprintjs/core";
-import { BlankImage } from "../index";
+import { BlankImage } from "~/components/general";
 import { LinkCard } from "~/components";
 
 export function Page() {

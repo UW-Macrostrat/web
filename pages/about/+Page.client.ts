@@ -1,4 +1,4 @@
-import { Image, Navbar, Footer } from "../index";
+import { Image, Navbar, Footer } from "~/components/general";
 import { Divider } from "@blueprintjs/core";
 import h from "./main.module.sass";
 import { ContentPage } from "~/layouts";
@@ -117,7 +117,7 @@ export function Page() {
           h(
             "a",
             {
-              href: "http://fc.umn.edu/",
+              href: "https://flyovercountry.io/",
               target: "_blank",
               rel: "noopener noreferrer",
             },
