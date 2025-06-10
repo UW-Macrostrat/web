@@ -10,6 +10,6 @@ export function Page() {
     resData,
     colData,
     taxaData,
-    refs
+    refs,
   });
 }

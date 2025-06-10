@@ -93,15 +93,8 @@ export function LexItemPage(props: LexItemPageProps) {
   const t_id = getIntID({ name: t_int_name });
   const b_id = getIntID({ name: b_int_name });
 
-  const {
-    name,
-    abbrev,
-    b_age,
-    t_age,
-    timescales,
-    strat_name,
-    concept_id,
-  } = resData;
+  const { name, abbrev, b_age, t_age, timescales, strat_name, concept_id } =
+    resData;
 
   const area = parseInt(col_area.toString().split(".")[0]);
 

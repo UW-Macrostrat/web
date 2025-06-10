@@ -7,14 +7,18 @@ export async function data(pageContext) {
   // Await all API calls
   const [resData, colData, refs1, refs2] = await Promise.all([
     fetchAPIData("/defs/groups", { col_group_id }),
-    fetchAPIData("/columns", { col_group_id, response: "long", format: "geojson" }),
+    fetchAPIData("/columns", {
+      col_group_id,
+      response: "long",
+      format: "geojson",
+    }),
     fetchAPIRefs("/fossils", { col_group_id }),
     fetchAPIRefs("/columns", { col_group_id }),
   ]);
 
-  const refValues1 = Object.values(refs1)
-  const refValues2 = Object.values(refs2)
-  const refs = [...refValues1, ...refValues2]
+  const refValues1 = Object.values(refs1);
+  const refValues2 = Object.values(refs2);
+  const refs = [...refValues1, ...refValues2];
 
   const cols = colData?.features
     ?.map((feature) => feature.properties.col_id)

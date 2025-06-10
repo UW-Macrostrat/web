@@ -10,7 +10,7 @@ import { useData } from "vike-react/useData";
 
 export function Page() {
   const { res } = useData();
-  const startingID = res[res.length - 1].combined_id
+  const startingID = res[res.length - 1].combined_id;
 
   const [input, setInput] = useState("");
   const [lastID, setLastID] = useState(startingID);
@@ -21,9 +21,7 @@ export function Page() {
   const prevInputRef = useRef(input);
 
   useEffect(() => {
-    if (
-      prevInputRef.current !== input
-    ) {
+    if (prevInputRef.current !== input) {
       setData([]);
       setLastID(0);
 
@@ -50,13 +48,13 @@ export function Page() {
   return h(ContentPage, [
     h(StickyHeader, { className: "header" }, [
       h(PageBreadcrumbs, {
-        title: "Strat Names"
+        title: "Strat Names",
       }),
       h("div.header-description", [
         h(
           Card,
           {
-            className: "strat-name-card"
+            className: "strat-name-card",
           },
           [
             h("strong", "Strat Names: "),
@@ -66,7 +64,7 @@ export function Page() {
         h(
           Card,
           {
-            className: "strat-concept-card"
+            className: "strat-concept-card",
           },
           [
             h("strong", "Strat Concepts: "),
@@ -112,9 +110,9 @@ function StratItem({ data, input }) {
 function StratBody({ data }) {
   const { name, id, rank } = data;
 
-  return h('div.strat-name', [
-    h("strong",`${name} ${rank} (#${id})`),
-    h('div.strat-tag', "Name")
+  return h("div.strat-name", [
+    h("strong", `${name} ${rank} (#${id})`),
+    h("div.strat-tag", "Name"),
   ]);
 }
 
@@ -131,26 +129,27 @@ function ConceptBody({ data, input }) {
   }));
 
   // only show strats that match the input
-  if (strats?.some((s) => (s.name.toLowerCase()).includes(input.toLowerCase()))) {
-    strats = strats.filter((s) => (s.name.toLowerCase()).includes(input.toLowerCase()));
+  if (strats?.some((s) => s.name.toLowerCase().includes(input.toLowerCase()))) {
+    strats = strats.filter((s) =>
+      s.name.toLowerCase().includes(input.toLowerCase())
+    );
   }
 
   return h("div.concept-body", [
-    h('div.concept', [
-      h("strong",`${name} (#${concept_id})`),
-      h('div.concept-tag', "Concept")
+    h("div.concept", [
+      h("strong", `${name} (#${concept_id})`),
+      h("div.concept-tag", "Concept"),
     ]),
     h("ul.concept-strats", [
       strats?.map(({ id, name, rank }) =>
-        h('li.strat-name', [
+        h("li.strat-name", [
           h(
             Link,
             { href: `/lex/strat-names/${id}` },
             `${name} ${rank} (#${id})`
           ),
-          h('div.strat-tag', "Name")
-        ]
-        )
+          h("div.strat-tag", "Name"),
+        ])
       ),
     ]),
   ]);
@@ -164,12 +163,7 @@ function useStratData(lastID, input, pageSize) {
   return result;
 }
 
-function LoadMoreTrigger({
-  data,
-  setLastID,
-  pageSize,
-  result,
-}) {
+function LoadMoreTrigger({ data, setLastID, pageSize, result }) {
   const ref = useRef(null);
 
   useEffect(() => {

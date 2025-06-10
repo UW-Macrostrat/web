@@ -7,7 +7,11 @@ export async function data(pageContext) {
   // Await all API calls
   const [resData, colData, refs1, refs2] = await Promise.all([
     fetchAPIData("/defs/strat_name_concepts", { concept_id }),
-    fetchAPIData("/columns", { concept_id, response: "long", format: "geojson" }),
+    fetchAPIData("/columns", {
+      concept_id,
+      response: "long",
+      format: "geojson",
+    }),
     fetchAPIRefs("/fossils", { concept_id }),
     fetchAPIRefs("/columns", { concept_id }),
   ]);
