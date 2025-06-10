@@ -5,7 +5,7 @@ import { StickyHeader, LinkCard, PageBreadcrumbs, Link } from "~/components";
 import { Card, Spinner } from "@blueprintjs/core";
 import { useState, useEffect, useRef } from "react";
 import { ContentPage } from "~/layouts";
-import { SearchBar } from "~/components/general";
+import { SearchBar, StratTag } from "~/components/general";
 import { useData } from "vike-react/useData";
 
 export function Page() {
@@ -112,7 +112,7 @@ function StratBody({ data }) {
 
   return h("div.strat-name", [
     h("strong", `${name} ${rank} (#${id})`),
-    h("div.strat-tag", "Name"),
+    h(StratTag, { isConcept: false }),
   ]);
 }
 
@@ -138,7 +138,7 @@ function ConceptBody({ data, input }) {
   return h("div.concept-body", [
     h("div.concept", [
       h("strong", `${name} (#${concept_id})`),
-      h("div.concept-tag", "Concept"),
+      h(StratTag, { isConcept: true }),
     ]),
     h("ul.concept-strats", [
       strats?.map(({ id, name, rank }) =>
@@ -148,7 +148,7 @@ function ConceptBody({ data, input }) {
             { href: `/lex/strat-names/${id}` },
             `${name} ${rank} (#${id})`
           ),
-          h("div.strat-tag", "Name"),
+          h(StratTag, { isConcept: false }),
         ])
       ),
     ]),

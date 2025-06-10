@@ -1,23 +1,19 @@
 import h from "./main.module.sass";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { apiV2Prefix, pbdbDomain } from "@macrostrat-web/settings";
-import { PageHeader, Link, PageBreadcrumbs } from "~/components";
-import { Card, Icon, Popover, Divider, RangeSlider } from "@blueprintjs/core";
+import { Link, PageBreadcrumbs } from "~/components";
+import { Card, Divider } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
-import { BlankImage, Footer, Loading } from "~/components/general";
-import { useState, useCallback, act } from "react";
+import { BlankImage, Footer, Loading, StratTag } from "~/components/general";
+import { useState } from "react";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { DarkModeButton } from "@macrostrat/ui-components";
 import { PieChart, Pie, Cell, ResponsiveContainer, Label } from "recharts";
-import { Parenthetical, Hierarchy } from "@macrostrat/data-components";
-import { Duration } from "@macrostrat/column-views";
 import { useDarkMode } from "@macrostrat/ui-components";
 import { StratNameHierarchy } from "./StratNameHierarchy";
 import { LinkCard } from "~/components/cards";
-import { ColumnsMap } from "~/columns-map/index.client";
 import { Timescale } from "@macrostrat/timescale";
 import { LexItemPageProps } from "~/types";
-import { fetchAPIData, fetchAPIRefs } from "~/_utils";
 import { ClientOnly } from "vike-react/ClientOnly";
 
 export function titleCase(str) {
@@ -42,26 +38,163 @@ function ColumnMapContainer(props) {
 }
 
 export function LexItemPage(props: LexItemPageProps) {
-  const { id, header, resData, colData, taxaData, refs } = props;
+  const { children, siftLink, id, resData, refs, header } = props;
+
+  const { name, strat_name_long } = resData;
+
+  return h("div", [
+    h(ContentPage, { className: "int-page" }, [
+      h("div.page-header", [
+        h(PageBreadcrumbs, { title: "#" + id }),
+        h(DarkModeButton, { className: "dark-mode-button", showText: true }),
+      ]),
+      header ??
+        h(LexItemHeader, {
+          resData,
+          name: name ?? strat_name_long,
+          siftLink,
+          id,
+        }),
+      children,
+      h(References, { refs }),
+    ]),
+    h(Footer),
+  ]);
+}
+
+export function ColumnsTable({ resData, colData }) {
+  if (!colData || !colData.features || colData.features.length === 0) return;
+  const summary = summarize(colData.features || []);
+
+  const { b_age, t_age } = resData;
+
+  const {
+    t_units,
+    t_sections,
+    t_int_name,
+    pbdb_collections,
+    b_int_name,
+    max_thick,
+    col_area,
+  } = summary;
+
+  const area = parseInt(col_area.toString().split(".")[0]);
+
+  const t_id = getIntID({ name: t_int_name });
+  const b_id = getIntID({ name: b_int_name });
+
+  return h("div.table", [
+    h("div.table-content", [
+      h("div.packages", t_sections.toLocaleString() + " packages"),
+      h(Divider, { className: "divider" }),
+      h("div.units", t_units.toLocaleString() + " units"),
+      h(Divider, { className: "divider" }),
+      h("div.interval", [
+        h(
+          Link,
+          { href: "/lex/intervals/" + b_id },
+          b_int_name.toLocaleString()
+        ),
+        " - ",
+        h(
+          Link,
+          { href: "/lex/intervals/" + t_id },
+          t_int_name.toLocaleString()
+        ),
+      ]),
+      h.if(b_age && t_age)(Divider, { className: "divider" }),
+      h.if(b_age && t_age)("div.age-range", [
+        h("div.int-age", b_age + " - " + t_age + " Ma"),
+        // h(Parenthetical, { className: "range"}, h(Duration, { value: b_age - t_age })),
+      ]),
+      h(Divider, { className: "divider" }),
+      h("div.area", [h("p", area.toLocaleString() + " km"), h("sup", "2")]),
+      h(Divider, { className: "divider" }),
+      h("div.thickness", "≤ " + max_thick.toLocaleString() + "m thick"),
+      h(Divider, { className: "divider" }),
+      h("div.collections", pbdb_collections.toLocaleString() + " collections"),
+    ]),
+    h(ColumnMapContainer, {
+      columns: colData,
+      className: "column-map-container",
+    }),
+  ]);
+}
+
+export function Intervals({ resData }) {
+  const { b_age, t_age } = resData;
+  return h(
+    "div.timescale",
+    h(Timescale, {
+      length: 970,
+      levels: [1, 5],
+      ageRange: [b_age, t_age],
+      absoluteAgeScale: true,
+    })
+  );
+}
+
+function LexItemHeader({ resData, name, siftLink, id }) {
+  const chromaColor = resData?.color ? asChromaColor(resData.color) : null;
+  const luminance = 0.9;
+  const abbrev = resData?.abbrev && resData?.abbrev !== name;
+
+  return h("div.int-header", [
+    h("div.int-names", [
+      h(
+        "div.int-name",
+        {
+          style: {
+            backgroundColor: chromaColor?.luminance(1 - luminance).hex(),
+            color: chromaColor?.luminance(luminance).hex(),
+          },
+        },
+        [
+          UpperCase(name),
+          h.if(abbrev)(IntAbbrev, {
+            abbrev,
+            chromaColor,
+            luminance,
+          }),
+        ]
+      ),
+    ]),
+    SiftLink({
+      id,
+      siftLink,
+    }),
+  ]);
+}
+
+function IntAbbrev({ abbrev, chromaColor, luminance }) {
+  return h("div.int-abbrev", [
+    h("p", " aka "),
+    h(
+      "div.int-abbrev-item",
+      {
+        style: {
+          backgroundColor: chromaColor?.luminance(1 - luminance).hex(),
+          color: chromaColor?.luminance(luminance).hex(),
+        },
+      },
+      abbrev
+    ),
+  ]);
+}
+
+function SiftLink({ id, siftLink }) {
+  return h("div.sift-link", [
+    h("p", "This page is is in development."),
+    h(
+      "a",
+      { href: "/sift/" + siftLink + "/" + id, target: "_blank" },
+      "View in Sift"
+    ),
+  ]);
+}
+
+export function Charts({ features }) {
   const [activeIndex, setActiveIndex] = useState(null);
-
-  const siftLink =
-    header === "intervals"
-      ? "interval"
-      : header === "environments"
-      ? "environment"
-      : header === "lithologies"
-      ? "lithology"
-      : header === "econs"
-      ? "economic"
-      : header === "groups"
-      ? "group"
-      : header === "strat_name_concepts"
-      ? "strat_name_concept"
-      : "strat_name";
-
-  // data for charts
-  const features = colData?.features || [];
 
   const liths = summarizeAttributes({
     data: features,
@@ -75,171 +208,50 @@ export function LexItemPage(props: LexItemPageProps) {
     data: features,
     type: "econ",
   });
-  const summary = summarize(features);
 
-  const chromaColor = resData?.color ? asChromaColor(resData.color) : null;
-  const luminance = 0.9;
-
-  const {
-    t_units,
-    t_sections,
-    t_int_name,
-    pbdb_collections,
-    b_int_name,
-    max_thick,
-    col_area,
-  } = summary;
-
-  const t_id = getIntID({ name: t_int_name });
-  const b_id = getIntID({ name: b_int_name });
-
-  const { name, abbrev, b_age, t_age, timescales, strat_name, concept_id } =
-    resData;
-
-  const area = parseInt(col_area.toString().split(".")[0]);
-
-  return h("div", [
-    h(ContentPage, { className: "int-page" }, [
-      h("div.page-header", [
-        h(PageBreadcrumbs, { title: "#" + id }),
-        h(DarkModeButton, { className: "dark-mode-button", showText: true }),
-      ]),
-      h("div.int-header", [
-        h("div.int-names", [
-          h(
-            "div.int-name",
-            {
-              style: {
-                backgroundColor: chromaColor?.luminance(1 - luminance).hex(),
-                color: chromaColor?.luminance(luminance).hex(),
-              },
-            },
-            UpperCase(strat_name ? strat_name : name)
-          ),
-          abbrev
-            ? h("div.int-abbrev", [
-                h("p", " aka "),
-                h(
-                  "div.int-abbrev-item",
-                  {
-                    style: {
-                      backgroundColor: chromaColor
-                        ?.luminance(1 - luminance)
-                        .hex(),
-                      color: chromaColor?.luminance(luminance).hex(),
-                    },
-                  },
-                  abbrev
-                ),
-              ])
-            : null,
-        ]),
-        h("div.sift-link", [
-          h("p", "This page is is in development."),
-          h(
-            "a",
-            { href: "/sift/" + siftLink + "/" + id, target: "_blank" },
-            "View in Sift"
-          ),
-        ]),
-      ]),
-      h.if(concept_id)(conceptInfo, { concept_id, header }),
-      h.if(header === "intervals")(
-        "div.timescale",
-        h(Timescale, {
-          length: 970,
-          levels: [1, 5],
-          ageRange: [b_age, t_age],
-          absoluteAgeScale: true,
-        })
-      ),
-      h.if(features.length)("div.table", [
-        h("div.table-content", [
-          h("div.packages", t_sections.toLocaleString() + " packages"),
-          h(Divider, { className: "divider" }),
-          h("div.units", t_units.toLocaleString() + " units"),
-          h(Divider, { className: "divider" }),
-          h("div.interval", [
-            h(
-              Link,
-              { href: "/lex/intervals/" + b_id },
-              b_int_name.toLocaleString()
-            ),
-            " - ",
-            h(
-              Link,
-              { href: "/lex/intervals/" + t_id },
-              t_int_name.toLocaleString()
-            ),
-          ]),
-          h.if(b_age && t_age)(Divider, { className: "divider" }),
-          h.if(b_age && t_age)("div.age-range", [
-            h("div.int-age", b_age + " - " + t_age + " Ma"),
-            // h(Parenthetical, { className: "range"}, h(Duration, { value: b_age - t_age })),
-          ]),
-          h(Divider, { className: "divider" }),
-          h("div.area", [h("p", area.toLocaleString() + " km"), h("sup", "2")]),
-          h(Divider, { className: "divider" }),
-          h("div.thickness", "≤ " + max_thick.toLocaleString() + "m thick"),
-          h(Divider, { className: "divider" }),
-          h(
-            "div.collections",
-            pbdb_collections.toLocaleString() + " collections"
-          ),
-        ]),
-        h(ColumnMapContainer, {
-          columns: colData,
-          className: "column-map-container",
-        }),
-      ]),
-      h("div.charts", [
-        h.if(liths?.length)(
-          "div.chart",
-          Chart(liths, "Lithologies", "lithology", activeIndex, setActiveIndex)
-        ),
-        h.if(environs?.length)(
-          "div.chart",
-          Chart(
-            environs,
-            "Environments",
-            "environments",
-            activeIndex,
-            setActiveIndex
-          )
-        ),
-        h.if(econs?.length)(
-          "div.chart",
-          Chart(econs, "Economics", "economics", activeIndex, setActiveIndex)
-        ),
-      ]),
-
-      h.if(taxaData)(PrevalentTaxa, { data: taxaData }),
-      h.if(header === "strat_names")(StratNameHierarchy, { id }),
-      // h.if(header === "strat_name_concepts")(ConceptHierarchy, { id}),
-      h.if(timescales?.[0]?.name)("div.int-timescales", [
-        h("h3", "Timescales"),
-        h(
-          "ul",
-          timescales?.map((t) =>
-            h(
-              "li",
-              h(
-                Link,
-                { href: "/lex/timescales/" + t.timescale_id },
-                titleCase(t.name)
-              )
-            )
-          )
-        ),
-      ]),
-      h(References, { refs }),
-    ]),
-    h(Footer),
+  return h("div.charts", [
+    h.if(liths?.length)(
+      "div.chart",
+      Chart(liths, "Lithologies", "lithology", activeIndex, setActiveIndex)
+    ),
+    h.if(environs?.length)(
+      "div.chart",
+      Chart(
+        environs,
+        "Environments",
+        "environments",
+        activeIndex,
+        setActiveIndex
+      )
+    ),
+    h.if(econs?.length)(
+      "div.chart",
+      Chart(econs, "Economics", "economics", activeIndex, setActiveIndex)
+    ),
   ]);
 }
 
 function UpperCase(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+export function Timescales({ timescales }) {
+  return h.if(timescales?.length)("div.int-timescales", [
+    h("h3", "Timescales"),
+    h(
+      "ul",
+      timescales?.map((t) =>
+        h(
+          "li",
+          h(
+            Link,
+            { href: "/lex/timescales/" + t.timescale_id },
+            titleCase(t.name)
+          )
+        )
+      )
+    ),
+  ]);
 }
 
 function References({ refs }) {
@@ -253,8 +265,10 @@ function References({ refs }) {
   ]);
 }
 
-function PrevalentTaxa({ data }) {
-  const records = data?.records;
+export function PrevalentTaxa({ taxaData }) {
+  const records = taxaData?.records;
+
+  if (!records || records.length === 0) return;
 
   return h(Card, { className: "prevalent-taxa-container" }, [
     h("div.taxa-header", [
@@ -319,28 +333,27 @@ function getIntID({ name }) {
   return id;
 }
 
-function conceptInfo({ concept_id, header }) {
-  const url =
+export function ConceptInfo({ concept_id, showHeader }) {
+  if (!concept_id) return;
+
+  const data = useAPIResult(
     apiV2Prefix +
-    "/defs/strat_name_concepts?strat_name_concept_id=" +
-    concept_id;
-  const data = useAPIResult(url)?.success?.data[0];
+      "/defs/strat_name_concepts?strat_name_concept_id=" +
+      concept_id
+  )?.success?.data[0];
 
-  if (!data) return h(Loading);
+  if (!data) return;
 
-  const { author, name, province, geologic_age, other, usage_notes } = data;
+  const { author, name, province, geologic_age, other, usage_notes, url } =
+    data;
 
   return h("div.concept-info", [
-    h.if(header != "strat_name_concepts")("h3", "Stratigraphic Concept"),
-    h.if(header != "strat_name_concepts")("div.concept-name", [
-      h(
-        "a.title",
-        { href: "/lex/strat-name-concepts/" + concept_id, target: "_blank" },
-        name
-      ),
-      h("a.concept-ref", { href: url, target: "_blank" }, "via " + author),
-    ]),
-    h.if(header === "strat_name_concepts")("div.author", [
+    h.if(showHeader)(
+      "a.concept-header",
+      { href: "/lex/strat-name-concepts/" + concept_id },
+      [h("h3", name), h(StratTag, { isConcept: true, fontSize: "1.5em" })]
+    ),
+    h("div.author", [
       h("span.title", "Author: "),
       h("span.author-text", h(Link, { href: url, target: "_blank" }, author)),
     ]),
