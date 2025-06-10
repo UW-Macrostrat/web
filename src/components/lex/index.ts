@@ -78,6 +78,7 @@ export function LexItemPage(props: LexItemPageProps) {
 }
 
 export function ColumnsTable({ resData, colData }) {
+  if (!colData || !colData.features || colData.features.length === 0) return
   const summary = summarize(colData.features || []);
 
   const { b_age, t_age } = resData;
@@ -96,6 +97,7 @@ export function ColumnsTable({ resData, colData }) {
 
   const t_id = getIntID({ name: t_int_name });
   const b_id = getIntID({ name: b_int_name });
+
 
   return h("div.table", [
     h("div.table-content", [
@@ -281,6 +283,8 @@ function References({ refs }) {
 
 export function PrevalentTaxa({ taxaData }) {
   const records = taxaData?.records;
+
+  if (!records || records.length === 0) return;
 
   return h(Card, { className: "prevalent-taxa-container" }, [
     h("div.taxa-header", [
