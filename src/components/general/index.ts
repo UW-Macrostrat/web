@@ -113,7 +113,10 @@ export function SearchBar({ onChange, placeholder = "Search..." }) {
   ]);
 }
 
-
-export function StratTag({isConcept, fontSize = ".75em"}) {
-  return h("div.strat-tag", { style: { fontSize } }, isConcept ? "Concept" : "Name");
+export function StratTag({ isConcept, fontSize = ".75em" }) {
+  return h(
+    "div.strat-tag",
+    { style: { fontSize } },
+    isConcept ? "Concept" : "Name"
+  );
 }

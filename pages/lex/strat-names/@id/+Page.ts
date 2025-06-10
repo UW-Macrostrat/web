@@ -32,10 +32,15 @@ export function Page() {
     h(ConceptInfo, { concept_id: resData?.concept_id, showHeader: true }),
   ];
 
-  return LexItemPage({ children, id, refs, resData, siftLink: "strat-name", header: 
-    h("div.strat-header", [
+  return LexItemPage({
+    children,
+    id,
+    refs,
+    resData,
+    siftLink: "strat-name",
+    header: h("div.strat-header", [
       h("h1.strat-title", strat_name_long),
       h(StratTag, { isConcept: false, fontSize: "1.6em" }),
-    ])
-   });
+    ]),
+  });
 }

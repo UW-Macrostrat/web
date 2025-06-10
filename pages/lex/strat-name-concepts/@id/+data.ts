@@ -6,8 +6,10 @@ export async function data(pageContext) {
 
   // Await all API calls
   const [resData, refs1, refs2] = await Promise.all([
-    fetch(`${apiDomain}/api/pg/strat_concepts_with_names?concept_id=eq.` + concept_id)
-      .then((res) => res.json()),
+    fetch(
+      `${apiDomain}/api/pg/strat_concepts_with_names?concept_id=eq.` +
+        concept_id
+    ).then((res) => res.json()),
     fetchAPIRefs("/fossils", { concept_id }),
     fetchAPIRefs("/columns", { concept_id }),
   ]);

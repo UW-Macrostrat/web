@@ -7,11 +7,9 @@ import { LinkCard } from "~/components/cards";
 export function Page() {
   const { resData, refs } = useData();
 
-
   const id = resData.concept_id;
 
   const { name } = resData;
-
 
   const children = [
     h(ConceptInfo, { concept_id: id, showHeader: false }),
@@ -44,7 +42,16 @@ function ConceptBody({ resData }) {
   }));
 
   return h("div.concept-body", [
-    h('h2.strat-names', "Strat Names"),
-    h('ul.strat-name-list', strats.map(strat => h(LinkCard, { href: "/lex/strat-names/" + strat.id, className: 'strat-name' }, strat.name + " (" + strat.rank + ")"))),
+    h("h2.strat-names", "Strat Names"),
+    h(
+      "ul.strat-name-list",
+      strats.map((strat) =>
+        h(
+          LinkCard,
+          { href: "/lex/strat-names/" + strat.id, className: "strat-name" },
+          strat.name + " (" + strat.rank + ")"
+        )
+      )
+    ),
   ]);
 }

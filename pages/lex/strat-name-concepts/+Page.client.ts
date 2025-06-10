@@ -9,14 +9,14 @@ export function Page() {
       h("h2", "Stratigraphic Names"),
       h("p", [
         h("em", "Stratigraphic names"),
-        " are the names of rock units, organized hierarchically."
+        " are the names of rock units, organized hierarchically.",
       ]),
     ]),
     h("div.concepts", [
       h("h2", "Stratigraphic Concepts"),
       h("p", [
         h("em", "Stratigraphic concepts"),
-        " capture the complexity associated with the usage of stratigraphic names over a long period of time by many workers. A concept establishes a set of stratigraphic names that describe the same rock unit."
+        " capture the complexity associated with the usage of stratigraphic names over a long period of time by many workers. A concept establishes a set of stratigraphic names that describe the same rock unit.",
       ]),
     ]),
     h(

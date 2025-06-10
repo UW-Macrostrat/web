@@ -48,12 +48,13 @@ export function LexItemPage(props: LexItemPageProps) {
         h(PageBreadcrumbs, { title: "#" + id }),
         h(DarkModeButton, { className: "dark-mode-button", showText: true }),
       ]),
-      header ?? h(LexItemHeader, {
-        resData,
-        name: name ?? strat_name_long,
-        siftLink,
-        id,
-      }),
+      header ??
+        h(LexItemHeader, {
+          resData,
+          name: name ?? strat_name_long,
+          siftLink,
+          id,
+        }),
       children,
       h(References, { refs }),
     ]),
@@ -62,7 +63,7 @@ export function LexItemPage(props: LexItemPageProps) {
 }
 
 export function ColumnsTable({ resData, colData }) {
-  if (!colData || !colData.features || colData.features.length === 0) return
+  if (!colData || !colData.features || colData.features.length === 0) return;
   const summary = summarize(colData.features || []);
 
   const { b_age, t_age } = resData;
@@ -81,7 +82,6 @@ export function ColumnsTable({ resData, colData }) {
 
   const t_id = getIntID({ name: t_int_name });
   const b_id = getIntID({ name: b_int_name });
-
 
   return h("div.table", [
     h("div.table-content", [
@@ -336,19 +336,23 @@ function getIntID({ name }) {
 export function ConceptInfo({ concept_id, showHeader }) {
   if (!concept_id) return;
 
-  const data = useAPIResult(apiV2Prefix +
-    "/defs/strat_name_concepts?strat_name_concept_id=" +
-    concept_id)?.success?.data[0];
+  const data = useAPIResult(
+    apiV2Prefix +
+      "/defs/strat_name_concepts?strat_name_concept_id=" +
+      concept_id
+  )?.success?.data[0];
 
   if (!data) return;
 
-  const { author, name, province, geologic_age, other, usage_notes, url } = data;
+  const { author, name, province, geologic_age, other, usage_notes, url } =
+    data;
 
   return h("div.concept-info", [
-    h.if(showHeader)("a.concept-header", { href: "/lex/strat-name-concepts/" + concept_id }, [
-      h("h3", name),
-      h(StratTag, { isConcept: true, fontSize: "1.5em" }),
-    ]),
+    h.if(showHeader)(
+      "a.concept-header",
+      { href: "/lex/strat-name-concepts/" + concept_id },
+      [h("h3", name), h(StratTag, { isConcept: true, fontSize: "1.5em" })]
+    ),
     h("div.author", [
       h("span.title", "Author: "),
       h("span.author-text", h(Link, { href: url, target: "_blank" }, author)),
