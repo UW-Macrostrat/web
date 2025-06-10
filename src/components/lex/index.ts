@@ -38,7 +38,7 @@ function ColumnMapContainer(props) {
 }
 
 export function LexItemPage(props: LexItemPageProps) {
-  const { children, siftLink, id, resData, refs } = props;
+  const { children, siftLink, id, resData, refs, header } = props;
 
   const { name, strat_name_long } = resData;
 
@@ -48,9 +48,9 @@ export function LexItemPage(props: LexItemPageProps) {
         h(PageBreadcrumbs, { title: "#" + id }),
         h(DarkModeButton, { className: "dark-mode-button", showText: true }),
       ]),
-      h(LexItemHeader, {
+      header ?? h(LexItemHeader, {
         resData,
-        name: strat_name_long ? strat_name_long : name,
+        name: name ?? strat_name_long,
         siftLink,
         id,
       }),
@@ -336,25 +336,18 @@ function getIntID({ name }) {
 export function ConceptInfo({ concept_id, showHeader }) {
   if (!concept_id) return;
 
-  const url =
-    apiV2Prefix +
+  const data = useAPIResult(apiV2Prefix +
     "/defs/strat_name_concepts?strat_name_concept_id=" +
-    concept_id;
-  const data = useAPIResult(url)?.success?.data[0];
+    concept_id)?.success?.data[0];
 
   if (!data) return;
 
-  const { author, name, province, geologic_age, other, usage_notes } = data;
+  const { author, name, province, geologic_age, other, usage_notes, url } = data;
 
   return h("div.concept-info", [
-    h.if(showHeader)("h3", "Stratigraphic Concept"),
-    h.if(showHeader)("div.concept-name", [
-      h(
-        "a.title",
-        { href: "/lex/strat-name-concepts/" + concept_id, target: "_blank" },
-        name
-      ),
-      h("a.concept-ref", { href: url, target: "_blank" }, "via " + author),
+    h.if(showHeader)("a.concept-header", { href: "/lex/strat-name-concepts/" + concept_id }, [
+      h("h3", name),
+      h("h3.concept-tag", "Concept"),
     ]),
     h.if(showHeader)("div.author", [
       h("span.title", "Author: "),

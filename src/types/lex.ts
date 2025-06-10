@@ -67,6 +67,7 @@ export interface LexItemPageProps {
   id: number;
   resData: ResData;
   refs: string[];
+  header?: any;
 }
 
 export interface ResData {

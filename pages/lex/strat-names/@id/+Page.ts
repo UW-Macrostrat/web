@@ -1,5 +1,5 @@
 import { useData } from "vike-react/useData";
-import h from "@macrostrat/hyper";
+import h from "./main.module.sass";
 import {
   LexItemPage,
   ColumnsTable,
@@ -17,8 +17,9 @@ export function Page() {
   const features = colData?.features || [];
   const timescales = resData?.timescales || [];
 
+  const { strat_name_long } = resData;
+
   const children = [
-    h(ConceptInfo, { concept_id: resData?.concept_id, showHeader: true }),
     h(ColumnsTable, {
       resData,
       colData,
@@ -27,7 +28,13 @@ export function Page() {
     h(PrevalentTaxa, { taxaData }),
     h(StratNameHierarchy, { id }),
     h(Timescales, { timescales }),
+    h(ConceptInfo, { concept_id: resData?.concept_id, showHeader: true }),
   ];
 
-  return LexItemPage({ children, id, refs, resData, siftLink: "strat-name" });
+  return LexItemPage({ children, id, refs, resData, siftLink: "strat-name", header: 
+    h("div.strat-header", [
+      h("h1.strat-title", strat_name_long),
+      h("h1.strat-tag", "Name"),
+    ]),
+   });
 }
