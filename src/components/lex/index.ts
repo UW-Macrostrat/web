@@ -4,7 +4,7 @@ import { apiV2Prefix, pbdbDomain } from "@macrostrat-web/settings";
 import { Link, PageBreadcrumbs } from "~/components";
 import { Card, Divider } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
-import { BlankImage, Footer, Loading } from "~/components/general";
+import { BlankImage, Footer, Loading, StratTag } from "~/components/general";
 import { useState } from "react";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { DarkModeButton } from "@macrostrat/ui-components";
@@ -347,7 +347,7 @@ export function ConceptInfo({ concept_id, showHeader }) {
   return h("div.concept-info", [
     h.if(showHeader)("a.concept-header", { href: "/lex/strat-name-concepts/" + concept_id }, [
       h("h3", name),
-      h("h3.concept-tag", "Concept"),
+      h(StratTag, { isConcept: true, fontSize: "1.5em" }),
     ]),
     h("div.author", [
       h("span.title", "Author: "),

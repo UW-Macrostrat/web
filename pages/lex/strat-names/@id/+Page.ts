@@ -9,6 +9,7 @@ import {
   ConceptInfo,
 } from "~/components/lex";
 import { StratNameHierarchy } from "~/components/lex/StratNameHierarchy";
+import { StratTag } from "~/components/general";
 
 export function Page() {
   const { resData, colData, taxaData, refs } = useData();
@@ -34,7 +35,7 @@ export function Page() {
   return LexItemPage({ children, id, refs, resData, siftLink: "strat-name", header: 
     h("div.strat-header", [
       h("h1.strat-title", strat_name_long),
-      h("h1.strat-tag", "Name"),
+      h(StratTag, { isConcept: false, fontSize: "1.6em" }),
     ])
    });
 }
