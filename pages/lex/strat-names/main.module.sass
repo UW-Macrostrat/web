@@ -81,9 +81,33 @@
   flex-direction: column
   gap: .5em
 
+  .concept  
+    display: flex
+    gap: .5em
+    alignn-items: center
+
+    .concept-tag
+      font-size: .75em
+      padding: .2em .5em
+      border-radius: .2em
+      background-color: var(--tertiary-background)
+
   .concept-strats
     list-style-type: circle
     padding-left: 40px
+
+    .strat-name:not(:last-child)
+      margin-bottom: 10px
+
+.strat-name
+  display: flex
+  gap: .5em
+
+  .strat-tag
+    font-size: .75em
+    padding: .2em .5em
+    border-radius: .2em
+    background-color: var(--tertiary-background)
 
 .card-container
   display: flex

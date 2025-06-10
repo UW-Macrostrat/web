@@ -1,18 +1,14 @@
 import h from "./main.module.sass";
 import { useAPIResult } from "@macrostrat/ui-components";
-import { apiV2Prefix, apiDomain } from "@macrostrat-web/settings";
+import { apiDomain } from "@macrostrat-web/settings";
 import { StickyHeader, LinkCard, PageBreadcrumbs, Link } from "~/components";
-import { Card, Switch, Spinner } from "@blueprintjs/core";
+import { Card, Spinner } from "@blueprintjs/core";
 import { useState, useEffect, useRef } from "react";
 import { ContentPage } from "~/layouts";
-import { Loading, SearchBar } from "~/components/general";
+import { SearchBar } from "~/components/general";
 import { useData } from "vike-react/useData";
 
 export function Page() {
-  return StratPage({ show: false });
-}
-
-export function StratPage({ show }) {
   const { res } = useData();
   const startingID = res[res.length - 1].combined_id
 
@@ -114,29 +110,24 @@ function StratItem({ data, input }) {
 }
 
 function StratBody({ data }) {
-  const { name, concept_id, concept_name } = data;
+  const { name, id, rank } = data;
 
-  return h("div.strat-body", [
-    h("strong", name),
-    h.if(concept_id)(
-      Link,
-      {
-        className: "concept-tag",
-        href: `/lex/strat-name-concepts/${concept_id}`,
-      },
-      concept_name
-    ),
+  return h('div.strat-name', [
+    h("strong",`${name} ${rank} (#${id})`),
+    h('div.strat-tag', "Name")
   ]);
 }
 
 function ConceptBody({ data, input }) {
-  const { name, strat_ids, strat_names, concept_id } = data;
+  const { name, strat_ids, strat_names, concept_id, strat_ranks } = data;
 
   const ids = strat_ids?.split(",");
   const names = strat_names?.split(",");
+  const ranks = strat_ranks?.split(",");
   let strats = ids?.map((id, index) => ({
     id,
     name: names[index],
+    rank: ranks[index],
   }));
 
   // only show strats that match the input
@@ -145,15 +136,20 @@ function ConceptBody({ data, input }) {
   }
 
   return h("div.concept-body", [
-    h("strong",`${name} (#${concept_id})`),
+    h('div.concept', [
+      h("strong",`${name} (#${concept_id})`),
+      h('div.concept-tag', "Concept")
+    ]),
     h("ul.concept-strats", [
-      strats?.map(({ id, name }) =>
-        h('li.strat-tag', 
+      strats?.map(({ id, name, rank }) =>
+        h('li.strat-name', [
           h(
             Link,
             { href: `/lex/strat-names/${id}` },
-            `${name} (#${id})`
-          )
+            `${name} ${rank} (#${id})`
+          ),
+          h('div.strat-tag', "Name")
+        ]
         )
       ),
     ]),
