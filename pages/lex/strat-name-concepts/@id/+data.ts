@@ -1,3 +1,4 @@
+import { apiDomain, apiV2Prefix } from "@macrostrat-web/settings";
 import { fetchAPIData, fetchAPIRefs } from "~/_utils";
 
 export async function data(pageContext) {
@@ -5,7 +6,8 @@ export async function data(pageContext) {
 
   // Await all API calls
   const [resData, refs1, refs2] = await Promise.all([
-    fetchAPIData("/defs/strat_name_concepts", { concept_id }),
+    fetch(`${apiDomain}/api/pg/strat_concepts_with_names?concept_id=eq.` + concept_id)
+      .then((res) => res.json()),
     fetchAPIRefs("/fossils", { concept_id }),
     fetchAPIRefs("/columns", { concept_id }),
   ]);
