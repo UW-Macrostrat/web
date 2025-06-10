@@ -349,7 +349,7 @@ export function ConceptInfo({ concept_id, showHeader }) {
       h("h3", name),
       h("h3.concept-tag", "Concept"),
     ]),
-    h.if(showHeader)("div.author", [
+    h("div.author", [
       h("span.title", "Author: "),
       h("span.author-text", h(Link, { href: url, target: "_blank" }, author)),
     ]),

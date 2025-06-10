@@ -35,6 +35,6 @@ export function Page() {
     h("div.strat-header", [
       h("h1.strat-title", strat_name_long),
       h("h1.strat-tag", "Name"),
-    ]),
+    ])
    });
 }
