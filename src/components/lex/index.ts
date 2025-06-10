@@ -39,24 +39,8 @@ function ColumnMapContainer(props) {
 
 export function LexItemPage(props: LexItemPageProps) {
   const { children, siftLink, id, resData, refs } = props;
-  /*
-  const siftLink =
-    header === "intervals"
-      ? "interval"
-      : header === "environments"
-      ? "environment"
-      : header === "lithologies"
-      ? "lithology"
-      : header === "econs"
-      ? "economic"
-      : header === "groups"
-      ? "group"
-      : header === "strat_name_concepts"
-      ? "strat_name_concept"
-      : "strat_name";
-  */
 
-  const { name, strat_name } = resData;
+  const { name, strat_name_long } = resData;
 
   return h("div", [
     h(ContentPage, { className: "int-page" }, [
@@ -66,7 +50,7 @@ export function LexItemPage(props: LexItemPageProps) {
       ]),
       h(LexItemHeader, {
         resData,
-        name: strat_name ? strat_name : name,
+        name: strat_name_long ? strat_name_long : name,
         siftLink,
         id,
       }),
@@ -350,13 +334,15 @@ function getIntID({ name }) {
 }
 
 export function ConceptInfo({ concept_id, showHeader }) {
+  if (!concept_id) return;
+
   const url =
     apiV2Prefix +
     "/defs/strat_name_concepts?strat_name_concept_id=" +
     concept_id;
   const data = useAPIResult(url)?.success?.data[0];
 
-  if (!data) return h(Loading);
+  if (!data) return;
 
   const { author, name, province, geologic_age, other, usage_notes } = data;
 
