@@ -19,42 +19,55 @@ export function Page() {
     ]),
     h(Navbar, { className: "main-navbar" }),
     h("div.buttons", [
-      h(LinkCard, { title: "Geologic Map", href: "/map/#3/40.78/-94.13" }, [
-        h("p", { className: "long" }, [
-          h("div.temp", {}, [
-            "With over 225 maps from data providers around the world across every scale, Macrostrat is the world's largest homogenized geologic map database. Our data processing pipeline links geologic map polygons to Macrostrat column polygons, external stratigraphic name lexicons, and geochronological intervals, enabling the enhancement of the original map data and allowing for direct links into ",
-            h("a", { href: "https://xdd.wisc.edu", target: "_blank" }, "xDD"),
-            " (formly GeoDeepDive).",
-          ]),
-          h("div.temp", {}, [
-            "Are you affiliated with a state or national geologic survey? ",
-            h(
-              "a",
-              {
-                href: "mailto:contact@macrostrat.org?Subject=Geologic%20Map%20Collaboration",
-              },
-              "Get in touch"
-            ),
-            " with us - we'd love to collaborate and help publicize your maps!",
-          ]),
-          h("div.temp", {}, [
-            "Get started by ",
-            h("a", { href: "/map" }, "exploring the map"),
-            " or ",
-            h("a", { href: "/map/sources" }, "taking a look at"),
-            " which maps are currently a part of Macrostrat.",
-          ]),
+      h("h2", "Geologic maps"),
+      h(LinkCard, { title: "Map interface", href: "/map/#3/40.78/-94.13" }, [
+        "An integrated geological map of the world",
+      ]),
+      h(
+        LinkCard,
+        { title: "Map index", href: "/maps" },
+        "Maps from different data providers that have been integrated into Macrostrat"
+      ),
+      h("div.details", [
+        h("p", {}, [
+          "With over 225 maps from data providers around the world at every scale, Macrostrat is the world's largest homogenized geologic map database. ",
+          "Our data processing pipeline links geologic map polygons to stratigraphic columns, external stratigraphic name lexicons, and geochronological intervals. ",
+          "This enhancement of map data allows for direct links to the literature via ",
+          h("a", { href: "https://xdd.wisc.edu", target: "_blank" }, "xDD"),
+          " (formly GeoDeepDive).",
+        ]),
+        h("p", [
+          "Are you affiliated with a state or national geologic survey? ",
+          h(
+            "a",
+            {
+              href: "mailto:contact@macrostrat.org?Subject=Geologic%20Map%20Collaboration",
+            },
+            "Get in touch"
+          ),
+          " with us - we'd love to collaborate and help publicize your maps!",
+        ]),
+        h("p", {}, [
+          "Get started by ",
+          h("a", { href: "/map" }, "exploring the map"),
+          " or ",
+          h("a", { href: "/map/sources" }, "taking a look at"),
+          " which maps are currently a part of Macrostrat.",
         ]),
       ]),
-      h(LinkCard, { title: "Maps", href: "/maps" }, [
-        h("p", "The spatial footprint of rocks on the Earth's surface"),
-      ]),
+      h("h2", "Stratigraphic columns"),
       h(LinkCard, { title: "Columns", href: "/columns" }, [
-        h(
-          "p",
-          "Stratigraphic and geological columns showing the organization of rocks in time"
-        ),
+        "Regional and local descriptions of the evolution of the Earth's crust through time",
       ]),
+      h(
+        "p",
+        "Macrostrat's stratigraphic columns account for the organization of rocks in the crust and their evolution over Earth history."
+      ),
+      h(
+        "p",
+        "Macrostrat stores both regional columns that represent a unified chronostratigraphic framework and measured sections and drill core logs that provide detailed information about specific locations."
+      ),
+
       h(LinkCard, { title: "Geologic Lexicon", href: "/lex" }, [
         h("p", "Geologic units and data dictionaries"),
       ]),
@@ -69,7 +82,7 @@ export function Page() {
             width: "22px",
             height: "22px",
           }),
-          h("span", " Go Mobile!"),
+          h("span", " Go mobile!"),
         ]),
       ]),
       h(
