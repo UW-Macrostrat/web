@@ -20,7 +20,6 @@ import boundingBox from "@turf/bbox";
 import { LngLatBoundsLike } from "mapbox-gl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { MapNavbar } from "~/components/map-navbar";
-import "~/styles/global.styl";
 import styles from "./main.module.sass";
 import { asChromaColor, toRGBAString } from "@macrostrat/color-utils";
 import { boundingGeometryMapStyle } from "~/map-styles";

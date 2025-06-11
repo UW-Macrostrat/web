@@ -1,7 +1,5 @@
 import h from "./layout.module.sass";
 import { MacrostratIcon, StickyHeader } from "~/components";
-import { SETTINGS } from "@macrostrat-web/settings";
-import { DarkModeButton, useAPIResult } from "@macrostrat/ui-components";
 import { Spinner, Icon, Card } from "@blueprintjs/core";
 import { useDarkMode } from "@macrostrat/ui-components";
 
@@ -11,15 +9,34 @@ export function Image({ src, className, width, height }) {
   return h("img", { src: srcWithAddedPrefix, className, width, height });
 }
 
-export function Navbar({ className }) {
-  return h(StickyHeader, { style: { padding: 0 } }, [
-    h("nav", { className: "nav " + className }, [
-      h("a", { className: "nav-link", href: "/" }, h(MacrostratIcon)),
-      h("a", { href: "/about" }, "About"),
-      h("a", { href: "/publications" }, "Publications"),
-      h("a", { href: "/people" }, "People"),
-      h("a", { href: "/donate" }, "Donate"),
-      h("a", { href: "https://rockd.org/" }, "Rockd"),
+export function NavListItem({ href, children }) {
+  return h(
+    "li.nav-list-item",
+    h("a", { className: "nav-link", href }, children)
+  );
+}
+
+export function SiteTitle() {
+  return h("a.site-title", { href: "/" }, [
+    h("img.macrostrat-logo", {
+      src: "https://storage.macrostrat.org/assets/web/macrostrat-icons/macrostrat-icon.svg",
+    }),
+    h("h1", "Macrostrat"),
+  ]);
+}
+
+export function Navbar({ className, children, showSiteTitle = true }) {
+  return h(StickyHeader, [
+    h("nav.navbar", { className }, [
+      h.if(showSiteTitle)(SiteTitle),
+      children,
+      h("ul.nav-list", [
+        h(NavListItem, { href: "/about" }, "About"),
+        h(NavListItem, { href: "/publications" }, "Publications"),
+        h(NavListItem, { href: "/people" }, "People"),
+        h(NavListItem, { href: "/donate" }, "Donate"),
+        h(NavListItem, { href: "https://rockd.org/" }, "Rockd"),
+      ]),
     ]),
   ]);
 }
