@@ -1,7 +1,28 @@
 .sticky-header
   position: sticky
-  top: 0
+  top: -1em
+  // Provide some overlap for intersection observer
   z-index: 100
-  margin: -1em -100rem 0
-  padding: 1em 100rem 1em
-  background: linear-gradient(var(--background-color) 90%, rgba(255, 255, 255, 0))
+  margin: 0 0 0
+  padding: 1em 0 0em
+
+
+  &:global(.is-stuck)
+    .backdrop
+      border-bottom: 1px solid var(--panel-rule-color)
+
+  &.fade-bottom
+    .backdrop
+      background: linear-gradient(var(--background-color) 90%, rgba(255, 255, 255, 0))
+      border-bottom: none
+
+  .backdrop
+    position: absolute
+    top: 0
+    left: 50%
+    width: 100vw
+    height: 100%
+    background: var(--background-color)
+    margin: 0 -50vw 0
+    z-index: -1
+

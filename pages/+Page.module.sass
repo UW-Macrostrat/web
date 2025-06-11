@@ -7,6 +7,18 @@
   padding-bottom: 5em
   height: 500px
 
+.site-navbar
+  :global(.navbar-title)
+    transition: opacity 0.3s ease-in-out
+
+  &:global(.transition-enter)
+    :global(.navbar-title)
+      opacity: 1
+
+  &:global(.transition-leave)
+    :global(.navbar-title)
+      opacity: 0
+//
 .hero
   height: 300px
   border-radius: 1em

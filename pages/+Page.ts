@@ -19,7 +19,7 @@ export function Page() {
         h(MacrostratStats),
       ]),
     ]),
-    h(Navbar, { className: "site-header" }),
+    h(Navbar, { className: "site-navbar" }),
     h("div.buttons", [
       h("h2", "Geologic maps"),
       h(LinkCard, { title: "Map interface", href: "/map/#3/40.78/-94.13" }, [
