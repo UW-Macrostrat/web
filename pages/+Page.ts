@@ -1,4 +1,4 @@
-import { Image, Navbar, Footer } from "~/components/general";
+import { Image, Navbar, Footer, SiteTitle } from "~/components/general";
 import h from "./+Page.module.sass";
 import { LinkCard } from "~/components/cards";
 import { useData } from "vike-react/useData";
@@ -6,10 +6,12 @@ import { isDev } from "@macrostrat-web/settings";
 
 export function Page() {
   return h("div.page-main", [
-    h("div.start", [
-      h(Image, { className: "back-img cover-image", src: "cover_large.jpg" }),
-      h("div.banner", [
-        h("div.header", h("h1.main-title", "Macrostrat")),
+    h("div.hero.site-header", [
+      h("div.hero-backdrop", [
+        h(Image, { className: "cover-image", src: "cover_large.jpg" }),
+      ]),
+      h("div.hero-content", [
+        h(SiteTitle),
         h(
           "h2.subtitle",
           "A platform for geological data exploration, integration, and analysis"
@@ -17,7 +19,7 @@ export function Page() {
         h(MacrostratStats),
       ]),
     ]),
-    h(Navbar, { className: "main-navbar" }),
+    h(Navbar, { className: "site-header" }),
     h("div.buttons", [
       h("h2", "Geologic maps"),
       h(LinkCard, { title: "Map interface", href: "/map/#3/40.78/-94.13" }, [
@@ -82,7 +84,7 @@ export function Page() {
             width: "22px",
             height: "22px",
           }),
-          h("span", " Go mobile!"),
+          " Go mobile!",
         ]),
       ]),
       h(

@@ -67,3 +67,8 @@ export function CenteredContentPage({ children, className }) {
     children
   );
 }
+
+export const pageLayouts = {
+  fullscreen: FullscreenPage,
+  content: ContentPage,
+};

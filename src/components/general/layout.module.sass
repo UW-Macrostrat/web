@@ -26,9 +26,6 @@
   cursor: pointer
   z-index: 100
 
-.map-area-container
-  width: 100% !important
-  height: 50vh !important
 
 .nav
   border-bottom: 2px solid var(--text-emphasized-color)
@@ -69,14 +66,14 @@
     display: flex
     padding: 2em 0
     flex-wrap: wrap
-    max-width: 400px 
+    max-width: 400px
     gap: 10px 40px
 
-    a 
+    a
       color: var(--text-emphasized-color) !important
 
   .footer-nav > *
-    width: calc(50% - 20px) 
+    width: calc(50% - 20px)
 
   .footer-container
     display: flex
@@ -128,13 +125,13 @@
 .img-light
   filter: invert(1)
 
-.search-bar 
+.search-bar
   display: flex
   gap: 5px
   align-items: center
   justify-content: center
 
-  input 
+  input
     width: 100%
     padding: 0.5em
     border-radius: 0.2em
@@ -144,11 +141,52 @@
     font-size: 1em
     margin: 3px
 
-    &:focus 
+    &:focus
       outline: none
       box-shadow: 0 0 0.2em var(--text-emphasized-color)
-    
+
 .strat-tag
   padding: .2em .5em
   border-radius: .2em
   background-color: var(--tertiary-background)
+
+.navbar
+  display: flex
+  flex-direction: row
+  justify-content: space-between
+
+.nav-list
+  display: flex
+  flex-direction: row
+  gap: 1em
+  list-style: none
+
+// Site title and logo
+
+:root
+  --macrostrat-logo-size: 30px
+
+a.site-title
+  --macrostrat-wordmark-size-internal: var(--macrostrat-wordmark-size, calc(var(--macrostrat-logo-size) * 0.8))
+  font-size: var(--macrostrat-wordmark-size-internal)
+  display: flex
+  flex-direction: row
+  gap: 0.3em
+  align-items: center
+  justify-content: center
+
+  color: inherit !important
+
+  &:hover
+    text-decoration: none
+
+  img
+    height: var(--macrostrat-logo-size)
+    aspect-ratio: 1
+
+  h1, h2
+    font-size: 1em
+    font-weight: 400
+    font-family: "Maven Pro", sans-serif
+    margin: 0
+

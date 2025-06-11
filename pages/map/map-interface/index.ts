@@ -3,7 +3,6 @@ import h from "@macrostrat/hyper";
 import { Route, Routes } from "react-router-dom";
 import { useEffect } from "react";
 
-import "~/styles/global.styl";
 import "./searchbar.styl";
 
 import { createRouterMiddleware } from "@lagunovsky/redux-react-router";

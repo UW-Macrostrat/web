@@ -34,7 +34,6 @@ import {
 import boundingBox from "@turf/bbox";
 import { LngLatBoundsLike } from "mapbox-gl";
 import { useEffect, useMemo, useState } from "react";
-import "~/styles/global.styl";
 import h from "./main.module.sass";
 import { PageBreadcrumbs, MapReference, DevLink } from "~/components";
 import { MapNavbar } from "~/components/map-navbar";
