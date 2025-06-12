@@ -35,6 +35,9 @@
 
   .hero-content
     text-align: center
+    display: flex
+    flex-direction: column
+    gap: 1em
 
 
 .cover-image
@@ -392,3 +395,24 @@
   display: flex
   align-items: center
   gap: .5em
+
+.search-results
+  overflow-y: auto
+  background-color: var(--panel-background-color)
+  height: 10vh
+
+  .category
+    text-align: left
+    background-color: var(--accent-secondary-color)
+    padding: 5px 10px
+    margin: 0
+    border-top: solid var(--panel-background-color) 2px
+
+  .item
+    text-align: left
+    padding: 2px 20px
+    cursor: pointer
+    width: 100%
+
+    &:hover
+      background-color: var(--accent-secondary-hover-color)

@@ -1,8 +1,11 @@
-import { Image, Navbar, Footer, SiteTitle } from "~/components/general";
+import { Image, Navbar, Footer, SiteTitle, SearchBar } from "~/components/general";
 import h from "./+Page.module.sass";
 import { LinkCard } from "~/components/cards";
 import { useData } from "vike-react/useData";
 import { isDev } from "@macrostrat-web/settings";
+import { useState } from "react";
+import { useAPIResult } from "@macrostrat/ui-components";
+import { SETTINGS } from "@macrostrat-web/settings";
 
 export function Page() {
   return h("div.page-main", [
@@ -17,6 +20,7 @@ export function Page() {
           "A platform for geological data exploration, integration, and analysis"
         ),
         h(MacrostratStats),
+        h(SearchContainer),
       ]),
     ]),
     h(Navbar, { className: "site-header" }),
@@ -152,4 +156,86 @@ function MacrostratStats() {
       h("span.top-stat-label", {}, "Projects"),
     ]),
   ]);
+}
+
+function SearchContainer() {
+  const [input, setInput] = useState("sand");
+  const url = SETTINGS.apiDomain + "/api/defs/autocomplete?query=" + input;
+  const data = useAPIResult(url)?.success?.data || [];
+
+  const categories = [
+    "columns",
+    "econs",
+    // "econ_types",
+    // "econ_classes",
+    "environments",
+    // "environment_types",
+    // "environment_classes",
+    "groups",
+    "intervals",
+    "lithologies",
+    // "lithology_types",
+    // "lithology_classes",
+    // "lithology_attributes",
+    "projects",
+    "strat_name_concepts",
+    // "strat_name_orphans",
+    // "structures",
+    // "minerals",
+  ];
+
+  return h("div.search-container", [
+    h(SearchBar, {
+      placeholder: "Search the geologic lexicon...",
+      onChange: (e) => setInput(e),
+    }),
+    h(SearchResults, { data }),
+  ]);
+}
+
+function SearchResults({ data }) {
+
+  const categories = [
+    "columns",
+    "econs",
+    // "econ_types",
+    // "econ_classes",
+    "environments",
+    // "environment_types",
+    // "environment_classes",
+    "groups",
+    "intervals",
+    "lithologies",
+    // "lithology_types",
+    // "lithology_classes",
+    // "lithology_attributes",
+    "projects",
+    "strat_name_concepts",
+    // "strat_name_orphans",
+    // "structures",
+    // "minerals",
+  ];
+
+  return h("div.search-results", [
+      categories?.map((category) => {
+        const items = data?.[category];
+        if (!items || items?.length === 0) return;
+
+        const link = category === "econs" ?
+          "economics" : 
+          category === "lithologies" ?
+          "lithology" : 
+          category === "strat_name_concepts" ?
+          "strat-name-concepts" : category 
+
+        return h("div.search-category", [
+          h("h3.category", category.charAt(0).toUpperCase() + category.slice(1)),
+          h("ul.items", items?.map((item) => {
+            const { name } = item;
+            return h("li", { key: item.id, className: "item" }, h("a", { href: `/lex/${link}/${item.id}` }, name.charAt(0).toUpperCase() + name.slice(1)));
+          })),
+        ]);
+      }),
+    ])
+
 }
