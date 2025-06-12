@@ -147,7 +147,7 @@ function SearchResults({ data }) {
     // "minerals",
   ];
 
-  return h("div.search-results", [
+  return h.if(Object.keys(data).length > 0)("div.search-results", [
       categories?.map((category) => {
         const items = data?.[category];
         if (!items || items?.length === 0) return;
@@ -160,10 +160,10 @@ function SearchResults({ data }) {
           "strat-name-concepts" : category 
 
         return h("div.search-category", [
-          h("h3.category", category.charAt(0).toUpperCase() + category.slice(1)),
-          h("ul.items", items?.map((item) => {
+          h("h3.category", (category.charAt(0).toUpperCase() + category.slice(1)).replace(/_/g, " ")),
+          h('div.items', items?.map((item) => {
             const { name } = item;
-            return h("li", { key: item.id, className: "item" }, h("a", { href: `/lex/${link}/${item.id}` }, name.charAt(0).toUpperCase() + name.slice(1)));
+            return h("a.item", { href: `/lex/${link}/${item.id}` }, name.charAt(0).toUpperCase() + name.slice(1));
           })),
         ]);
       }),
