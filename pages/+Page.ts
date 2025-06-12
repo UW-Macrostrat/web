@@ -3,9 +3,6 @@ import h from "./+Page.module.sass";
 import { LinkCard } from "~/components/cards";
 import { useData } from "vike-react/useData";
 import { isDev } from "@macrostrat-web/settings";
-import { useState } from "react";
-import { useAPIResult } from "@macrostrat/ui-components";
-import { SETTINGS } from "@macrostrat-web/settings";
 
 export function Page() {
   return h("div.page-main", [
