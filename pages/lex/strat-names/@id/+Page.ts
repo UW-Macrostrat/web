@@ -7,12 +7,14 @@ import {
   PrevalentTaxa,
   Timescales,
   ConceptInfo,
+  Units,
+  Fossils,
 } from "~/components/lex";
 import { StratNameHierarchy } from "~/components/lex/StratNameHierarchy";
 import { StratTag } from "~/components/general";
 
 export function Page() {
-  const { resData, colData, taxaData, refs } = useData();
+  const { resData, colData, taxaData, refs, unitsData, fossilsData } = useData();
 
   const id = resData.strat_name_id;
   const features = colData?.features || [];
@@ -27,8 +29,10 @@ export function Page() {
     }),
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),
-    h(StratNameHierarchy, { id }),
     h(Timescales, { timescales }),
+    h(Units, { unitsData }),
+    h(Fossils, { fossilsData }),
+    h(StratNameHierarchy, { id }),
     h(ConceptInfo, { concept_id: resData?.concept_id, showHeader: true }),
   ];
 

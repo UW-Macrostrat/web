@@ -15,6 +15,7 @@ import { LinkCard } from "~/components/cards";
 import { Timescale } from "@macrostrat/timescale";
 import { LexItemPageProps } from "~/types";
 import { ClientOnly } from "vike-react/ClientOnly";
+import { ExpansionPanel } from "@macrostrat/map-interface";
 
 export function titleCase(str) {
   if (!str) return str;
@@ -32,6 +33,17 @@ function ColumnMapContainer(props) {
       load: () => import("./map.client").then((d) => d.ColumnsMapContainer),
       fallback: h("div.loading", "Loading map..."),
       deps: [props.columnIDs, props.projectID],
+    },
+    (component) => h(component, props)
+  );
+}
+
+function ExpansionPanelContainer(props) {
+  return h(
+    ClientOnly,
+    {
+      load: () => import("./map.client").then((d) => d.ExpansionPanelContainer),
+      fallback: h("div.loading", "Loading map..."),
     },
     (component) => h(component, props)
   );
@@ -149,15 +161,13 @@ function LexItemHeader({ resData, name, siftLink, id }) {
             color: chromaColor?.luminance(luminance).hex(),
           },
         },
-        [
-          UpperCase(name),
-          h.if(abbrev)(IntAbbrev, {
-            abbrev,
-            chromaColor,
-            luminance,
-          }),
-        ]
+        UpperCase(name),
       ),
+      h.if(abbrev)(IntAbbrev, {
+        abbrev: resData.abbrev,
+        chromaColor,
+        luminance,
+      }),
     ]),
     SiftLink({
       id,
@@ -183,7 +193,7 @@ function IntAbbrev({ abbrev, chromaColor, luminance }) {
 }
 
 function SiftLink({ id, siftLink }) {
-  return h("div.sift-link", [
+  return h.if(siftLink)("div.sift-link", [
     h("p", "This page is is in development."),
     h(
       "a",
@@ -237,16 +247,16 @@ function UpperCase(str) {
 
 export function Timescales({ timescales }) {
   return h.if(timescales?.length)("div.int-timescales", [
-    h("h3", "Timescales"),
-    h(
-      "ul",
-      timescales?.map((t) =>
-        h(
-          "li",
+    h(ExpansionPanelContainer, { title: "Timescales" },
+      h("ul",
+        timescales?.map((t) =>
           h(
-            Link,
-            { href: "/lex/timescales/" + t.timescale_id },
-            titleCase(t.name)
+            "li",
+            h(
+              Link,
+              { href: "/lex/timescales/" + t.timescale_id },
+              titleCase(t.name)
+            )
           )
         )
       )
@@ -872,4 +882,28 @@ function ChartLegend(data, route, activeIndex, setActiveIndex, index) {
       data.label + (hovered ? " (" + Math.trunc(data.value * 100) + "%)" : "")
     ),
   ]);
+}
+
+export function Units({ unitsData }) {
+  return h.if(unitsData.length > 0)('div.units-container', [
+    h(ExpansionPanelContainer, { title: "Units" }, 
+      h('div.units-list', 
+        unitsData.map(unit => 
+          h('a.unit-item', { href: "/columns/" + unit.col_id + "#unit=" + unit.unit_id }, unit.unit_name + " (#" + unit.unit_id + ")")
+        )
+      )
+    )
+  ])
+}
+
+export function Fossils({ fossilsData }) {
+  return h.if(fossilsData.length > 0)('div.fossils-container', [
+    h(ExpansionPanelContainer, { title: "Fossils" }, 
+      h('div.fossils-list', 
+        fossilsData.map(fossil => 
+          h('a.fossil-item', { href: `https://paleobiodb.org/classic/displayCollResults?collection_no=col:${fossil.cltn_id}` }, fossil.cltn_name + " (#" + fossil.cltn_id + ")")
+        )
+      )
+    )
+  ])
 }

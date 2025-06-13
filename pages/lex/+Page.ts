@@ -79,6 +79,11 @@ export function Page() {
         ),
         h(
           LinkCard,
+          { href: "/lex/lith-atts", title: "Lithology attributes" },
+          "Names and descriptions of lithology attributes"
+        ),
+        h(
+          LinkCard,
           { href: "/lex/environments", title: "Environments" },
           "Depositional environments and formation mechanisms"
         ),
@@ -86,6 +91,16 @@ export function Page() {
           LinkCard,
           { href: "/lex/economics", title: "Economics" },
           "Economic uses of geologic materials"
+        ),
+        h(
+          LinkCard,
+          { href: "/lex/minerals", title: "Minerals" },
+          "Mineral names and formulas"
+        ),
+        h(
+          LinkCard,
+          { href: "/lex/structures", title: "Structures" },
+          "Names and descriptions of geologic structures"
         ),
 
         h("p", [
@@ -139,12 +154,12 @@ function SearchResults({ data }) {
     "lithologies",
     // "lithology_types",
     // "lithology_classes",
-    // "lithology_attributes",
+    "lithology_attributes",
     "projects",
     "strat_name_concepts",
     // "strat_name_orphans",
-    // "structures",
-    // "minerals",
+    "structures",
+    "minerals",
   ];
 
   return h.if(Object.keys(data).length > 0)("div.search-results", [
@@ -157,7 +172,10 @@ function SearchResults({ data }) {
           category === "lithologies" ?
           "lithology" : 
           category === "strat_name_concepts" ?
-          "strat-name-concepts" : category 
+          "strat-name-concepts" : 
+          category === "lithology_attributes" ?
+          "lith-atts" :
+          category
 
         return h("div.search-category", [
           h("h3.category", (category.charAt(0).toUpperCase() + category.slice(1)).replace(/_/g, " ")),
