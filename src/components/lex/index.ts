@@ -249,16 +249,16 @@ function UpperCase(str) {
 
 export function Timescales({ timescales }) {
   return h.if(timescales?.length)("div.int-timescales", [
-    h("h3", "Timescales"),
-    h(
-      "ul",
-      timescales?.map((t) =>
-        h(
-          "li",
+    h(ExpansionPanelContainer, { title: "Timescales" },
+      h("ul",
+        timescales?.map((t) =>
           h(
-            Link,
-            { href: "/lex/timescales/" + t.timescale_id },
-            titleCase(t.name)
+            "li",
+            h(
+              Link,
+              { href: "/lex/timescales/" + t.timescale_id },
+              titleCase(t.name)
+            )
           )
         )
       )
