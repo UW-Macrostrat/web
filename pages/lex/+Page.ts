@@ -87,6 +87,11 @@ export function Page() {
           { href: "/lex/economics", title: "Economics" },
           "Economic uses of geologic materials"
         ),
+        h(
+          LinkCard,
+          { href: "/lex/minerals", title: "Minerals" },
+          "Mineral names and formulas"
+        ),
 
         h("p", [
           h("strong", h("a", { href: "/sift" }, "Sift")),
@@ -144,7 +149,7 @@ function SearchResults({ data }) {
     "strat_name_concepts",
     // "strat_name_orphans",
     // "structures",
-    // "minerals",
+    "minerals",
   ];
 
   return h.if(Object.keys(data).length > 0)("div.search-results", [
