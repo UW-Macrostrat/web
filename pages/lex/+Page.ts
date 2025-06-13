@@ -172,7 +172,10 @@ function SearchResults({ data }) {
           category === "lithologies" ?
           "lithology" : 
           category === "strat_name_concepts" ?
-          "strat-name-concepts" : category 
+          "strat-name-concepts" : 
+          category === "lithology_attributes" ?
+          "lith-atts" :
+          category
 
         return h("div.search-category", [
           h("h3.category", (category.charAt(0).toUpperCase() + category.slice(1)).replace(/_/g, " ")),
