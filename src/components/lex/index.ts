@@ -193,7 +193,7 @@ function IntAbbrev({ abbrev, chromaColor, luminance }) {
 }
 
 function SiftLink({ id, siftLink }) {
-  return h("div.sift-link", [
+  return h.if(siftLink)("div.sift-link", [
     h("p", "This page is is in development."),
     h(
       "a",

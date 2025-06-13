@@ -1,33 +1,25 @@
 import { useData } from "vike-react/useData";
 import h from "@macrostrat/hyper";
-import {
-  LexItemPage,
-  ColumnsTable,
-  Charts,
-  PrevalentTaxa,
-  Timescales,
-  Units,
-  Fossils,
-} from "~/components/lex";
+import { LexItemPage } from "~/components/lex";
 
 export function Page() {
-  const { resData, colData, taxaData, refs, unitsData, fossilsData } = useData();
+  const { resData } = useData();
 
-  const id = resData.econ_id;
-  const features = colData?.features || [];
-  const timescales = resData?.timescales || [];
+  const id = resData.structure_id;
 
   const children = [
-    h(ColumnsTable, {
-      resData,
-      colData,
-    }),
-    h(Charts, { features }),
-    h(PrevalentTaxa, { taxaData }),
-    h(Timescales, { timescales }),
-    h(Units, { unitsData }),
-    h(Fossils, { fossilsData }),
+    h(StructureDetails, { resData }),
   ];
 
-  return LexItemPage({ children, id, refs, resData, siftLink: "economic" });
+  return LexItemPage({ children, id, refs: [], resData, siftLink: "" });
+}
+
+function StructureDetails({ resData }) {
+  const { group, structure_type } = resData;
+
+  return h("div", { class: "structure-details" }, [
+    h.if(group)("p", `Group: ${group}`),
+    h("p", `Class: ${resData.class}`),
+    h("p", `Structure Type: ${structure_type}`),
+  ]);
 }
