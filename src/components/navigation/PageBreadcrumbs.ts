@@ -211,6 +211,10 @@ export const sitemap: Routes = {
           name: "Lithology",
         },
         {
+          slug: "minerals",
+          name: "Minerals",
+        },
+        {
           slug: "strat-names",
           name: "Stratigraphic names",
           children: [

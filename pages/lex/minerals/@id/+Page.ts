@@ -2,49 +2,39 @@ import { useData } from "vike-react/useData";
 import h from "./main.module.sass";
 import {
   LexItemPage,
-  ColumnsTable,
-  Charts,
-  PrevalentTaxa,
-  Timescales,
-  ConceptInfo,
-  Units,
-  Fossils,
 } from "~/components/lex";
-import { StratNameHierarchy } from "~/components/lex/StratNameHierarchy";
-import { StratTag } from "~/components/general";
 
 export function Page() {
-  const { resData, colData, taxaData, refs, unitsData, fossilsData } = useData();
+  const { resData } = useData();
 
-  const id = resData.strat_name_id;
-  const features = colData?.features || [];
-  const timescales = resData?.timescales || [];
-
-  const { strat_name_long } = resData;
+  const id = resData.mineral_id;
 
   const children = [
-    h(ColumnsTable, {
-      resData,
-      colData,
-    }),
-    h(Charts, { features }),
-    h(PrevalentTaxa, { taxaData }),
-    h(Timescales, { timescales }),
-    h(Units, { unitsData }),
-    h(Fossils, { fossilsData }),
-    h(StratNameHierarchy, { id }),
-    h(ConceptInfo, { concept_id: resData?.concept_id, showHeader: true }),
+    h(MineralDetails, { resData }),
   ];
 
   return LexItemPage({
     children,
     id,
-    refs,
+    refs: [],
     resData,
-    siftLink: "strat-name",
+    siftLink: "mineral",
     header: h("div.strat-header", [
-      h("h1.strat-title", strat_name_long),
-      h(StratTag, { isConcept: false, fontSize: "1.6em" }),
+      h("h1.strat-title", resData.mineral),
     ]),
   });
+}
+
+function MineralDetails({ resData }) {
+  const { mineral_type, formula, url, hardness_min, hardness_max, crystal_form, mineral_color, lustre } = resData;
+
+  return h("div.mineral-details", [
+    h.if(mineral_type)("p.mineral-type", `Type: ${mineral_type}`),
+    h("p.formula", `Formula: ${formula}`),
+    h("p.hardness", `Hardness: ${hardness_min} - ${hardness_max}`),
+    h("p.crystal-form", `Crystal Form: ${crystal_form}`),
+    h("p.color", `Color: ${mineral_color}`),
+    h("p.lustre", `Lustre: ${lustre}`),
+    url ? h("a.mineral-url", { href: url, target: "_blank" }, "More Info") : null,
+  ]);
 }
