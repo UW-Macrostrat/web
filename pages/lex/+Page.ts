@@ -92,6 +92,11 @@ export function Page() {
           { href: "/lex/minerals", title: "Minerals" },
           "Mineral names and formulas"
         ),
+        h(
+          LinkCard,
+          { href: "/lex/structures", title: "Structures" },
+          "Names and descriptions of geologic structures"
+        ),
 
         h("p", [
           h("strong", h("a", { href: "/sift" }, "Sift")),
@@ -148,7 +153,7 @@ function SearchResults({ data }) {
     "projects",
     "strat_name_concepts",
     // "strat_name_orphans",
-    // "structures",
+    "structures",
     "minerals",
   ];
 
