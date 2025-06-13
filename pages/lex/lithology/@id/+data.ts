@@ -5,9 +5,10 @@ export async function data(pageContext) {
   const lith_id = parseInt(pageContext.urlParsed.pathname.split("/")[3]);
 
   // Await all API calls
-  const [resData, colData, refs1, refs2] = await Promise.all([
+  const [resData, colData, unitsData, refs1, refs2] = await Promise.all([
     fetchAPIData("/defs/lithologies", { lith_id }),
     fetchAPIData("/columns", { lith_id, response: "long", format: "geojson" }),
+    fetchAPIData("/units", { lith_id }),
     fetchAPIRefs("/fossils", { lith_id }),
     fetchAPIRefs("/columns", { lith_id }),
   ]);
@@ -28,5 +29,5 @@ export async function data(pageContext) {
     taxaData = await response.json();
   }
 
-  return { resData: resData[0], colData, taxaData, refs };
+  return { resData: resData[0], colData, taxaData, refs, unitsData };
 }

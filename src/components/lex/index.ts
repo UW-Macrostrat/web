@@ -887,7 +887,7 @@ function ChartLegend(data, route, activeIndex, setActiveIndex, index) {
 }
 
 export function Units({ unitsData }) {
-  return h('div.units-container', [
+  return h.if(unitsData.length > 0)('div.units-container', [
     h(ExpansionPanelContainer, { title: "Units" }, 
       h('div.units-list', 
         unitsData.map(unit => 
