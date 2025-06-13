@@ -161,15 +161,13 @@ function LexItemHeader({ resData, name, siftLink, id }) {
             color: chromaColor?.luminance(luminance).hex(),
           },
         },
-        [
-          UpperCase(name),
-          h.if(abbrev)(IntAbbrev, {
-            abbrev,
-            chromaColor,
-            luminance,
-          }),
-        ]
+        UpperCase(name),
       ),
+      h.if(abbrev)(IntAbbrev, {
+        abbrev: resData.abbrev,
+        chromaColor,
+        luminance,
+      }),
     ]),
     SiftLink({
       id,
@@ -892,6 +890,18 @@ export function Units({ unitsData }) {
       h('div.units-list', 
         unitsData.map(unit => 
           h('a.unit-item', { href: "/columns/" + unit.col_id + "#unit=" + unit.unit_id }, unit.unit_name + " (#" + unit.unit_id + ")")
+        )
+      )
+    )
+  ])
+}
+
+export function Fossils({ fossilsData }) {
+  return h.if(fossilsData.length > 0)('div.fossils-container', [
+    h(ExpansionPanelContainer, { title: "Fossils" }, 
+      h('div.fossils-list', 
+        fossilsData.map(fossil => 
+          h('a.fossil-item', { href: `https://paleobiodb.org/classic/displayCollResults?collection_no=col:${fossil.cltn_id}` }, fossil.cltn_name + " (#" + fossil.cltn_id + ")")
         )
       )
     )

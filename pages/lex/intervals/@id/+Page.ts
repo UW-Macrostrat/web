@@ -8,10 +8,11 @@ import {
   PrevalentTaxa,
   Timescales,
   Units,
+  Fossils,
 } from "~/components/lex";
 
 export function Page() {
-  const { resData, colData, taxaData, refs, unitsData } = useData();
+  const { resData, colData, taxaData, refs, unitsData, fossilsData } = useData();
 
   const id = resData.int_id;
   const features = colData?.features || [];
@@ -26,7 +27,8 @@ export function Page() {
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),
     h(Timescales, { timescales }),
-    h(Units, { unitsData })
+    h(Units, { unitsData }),
+    h(Fossils, { fossilsData }),
   ];
 
   return LexItemPage({ children, id, refs, resData, siftLink: "interval" });

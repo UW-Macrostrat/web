@@ -5,10 +5,11 @@ export async function data(pageContext) {
   const econ_id = parseInt(pageContext.urlParsed.pathname.split("/")[3]);
 
   // Await all API calls
-  const [resData, colData, unitsData, refs1, refs2] = await Promise.all([
+  const [resData, colData, unitsData, fossilsData, refs1, refs2] = await Promise.all([
     fetchAPIData("/defs/econs", { econ_id }),
     fetchAPIData("/columns", { econ_id, response: "long", format: "geojson" }),
     fetchAPIData("/units", { econ_id }),
+    fetchAPIData("/fossils", { econ_id }),
     fetchAPIRefs("/fossils", { econ_id }),
     fetchAPIRefs("/columns", { econ_id }),
   ]);
@@ -29,5 +30,5 @@ export async function data(pageContext) {
     taxaData = await response.json();
   }
 
-  return { resData: resData[0], colData, taxaData, refs, unitsData };
+  return { resData: resData[0], colData, taxaData, refs, unitsData, fossilsData };
 }

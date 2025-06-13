@@ -5,12 +5,13 @@ export async function data(pageContext) {
   const concept_id = parseInt(pageContext.urlParsed.pathname.split("/")[3]);
 
   // Await all API calls
-  const [resData, refs1, refs2] = await Promise.all([
+  const [resData, fossilsData, refs1, refs2] = await Promise.all([
     fetch(
       `${apiDomain}/api/pg/strat_concepts_with_names?concept_id=eq.` +
         concept_id
     ).then((res) => res.json()),
-    fetchAPIRefs("/fossils", { concept_id }),
+    fetchAPIData("/fossils", { strat_name_concept_id: concept_id }),
+    fetchAPIRefs("/fossils", { strat_name_concept_id: concept_id }),
     fetchAPIRefs("/columns", { concept_id }),
   ]);
 
@@ -18,5 +19,5 @@ export async function data(pageContext) {
   const refValues2 = refs2 ? Object.values(refs2) : [];
   const refs = [...refValues1, ...refValues2];
 
-  return { resData: resData[0], refs };
+  return { resData: resData[0], refs, fossilsData };
 }
