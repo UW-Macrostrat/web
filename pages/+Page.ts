@@ -1,4 +1,4 @@
-import { Image, Navbar, Footer, SiteTitle } from "~/components/general";
+import { Image, Navbar, Footer, SiteTitle, SearchBar } from "~/components/general";
 import h from "./+Page.module.sass";
 import { LinkCard } from "~/components/cards";
 import { useData } from "vike-react/useData";
