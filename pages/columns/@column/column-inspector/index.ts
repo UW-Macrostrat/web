@@ -54,8 +54,7 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
     (col_id: number) => {
       // do nothing
       // We could probably find a more elegant way to do this
-      setSelectedUnitID(null);
-      navigate(linkPrefix + `columns/${col_id}`, {
+      navigate(`${linkPrefix}columns/${col_id}${window.location.hash}`, {
         overwriteLastHistoryEntry: true,
       });
     },
