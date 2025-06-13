@@ -15,6 +15,7 @@ import { LinkCard } from "~/components/cards";
 import { Timescale } from "@macrostrat/timescale";
 import { LexItemPageProps } from "~/types";
 import { ClientOnly } from "vike-react/ClientOnly";
+import { ExpansionPanel } from "@macrostrat/map-interface";
 
 export function titleCase(str) {
   if (!str) return str;
@@ -32,6 +33,17 @@ function ColumnMapContainer(props) {
       load: () => import("./map.client").then((d) => d.ColumnsMapContainer),
       fallback: h("div.loading", "Loading map..."),
       deps: [props.columnIDs, props.projectID],
+    },
+    (component) => h(component, props)
+  );
+}
+
+function ExpansionPanelContainer(props) {
+  return h(
+    ClientOnly,
+    {
+      load: () => import("./map.client").then((d) => d.ExpansionPanelContainer),
+      fallback: h("div.loading", "Loading map..."),
     },
     (component) => h(component, props)
   );
@@ -872,4 +884,16 @@ function ChartLegend(data, route, activeIndex, setActiveIndex, index) {
       data.label + (hovered ? " (" + Math.trunc(data.value * 100) + "%)" : "")
     ),
   ]);
+}
+
+export function Units({ unitsData }) {
+  return h('div.units-container', [
+    h(ExpansionPanelContainer, { title: "Units" }, 
+      h('div.units-list', 
+        unitsData.map(unit => 
+          h('a.unit-item', { href: "/columns/" + unit.col_id + "#unit=" + unit.unit_id }, unit.unit_name + " (#" + unit.unit_id + ")")
+        )
+      )
+    )
+  ])
 }
