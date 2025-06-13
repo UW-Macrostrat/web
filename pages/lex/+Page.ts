@@ -79,6 +79,11 @@ export function Page() {
         ),
         h(
           LinkCard,
+          { href: "/lex/lith-atts", title: "Lithology attributes" },
+          "Names and descriptions of lithology attributes"
+        ),
+        h(
+          LinkCard,
           { href: "/lex/environments", title: "Environments" },
           "Depositional environments and formation mechanisms"
         ),
@@ -149,7 +154,7 @@ function SearchResults({ data }) {
     "lithologies",
     // "lithology_types",
     // "lithology_classes",
-    // "lithology_attributes",
+    "lithology_attributes",
     "projects",
     "strat_name_concepts",
     // "strat_name_orphans",
