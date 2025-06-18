@@ -1,5 +1,5 @@
 import h from "./main.module.scss";
-import { AnchorButton, Icon, Card } from "@blueprintjs/core";
+import { Spinner } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import {
   PageHeader,
@@ -8,62 +8,107 @@ import {
   LinkCard,
   StickyHeader,
 } from "~/components";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAPIResult } from "@macrostrat/ui-components";
-import { apiV2Prefix } from "@macrostrat-web/settings";
+import { apiDomain } from "@macrostrat-web/settings";
 import { SearchBar } from "~/components/general";
+import { useData } from "vike-react/useData";
+import { PageBreadcrumbs } from "~/components";
 
 export function Page() {
-  const [inputValue, setInputValue] = useState("");
-  const sources = useAPIResult(apiV2Prefix + "/defs/sources?all=true")?.success
-    ?.data;
+  const { sources } = useData();
+  const startingID = sources[sources.length - 1].source_id;
 
-  if (sources == null) {
-    return h("div.loading", "Loading sources...");
-  }
+  const [input, setInput] = useState("");
+  const [lastID, setLastID] = useState(startingID);
+  const [data, setData] = useState(sources);
+  const pageSize = 20;
 
-  console.log("sources", sources[0]);
+  const result = useSourceData(lastID, input, pageSize);
+  const prevInputRef = useRef(input);
 
-  const filteredSources = sources.filter((source) => {
-    const name = source.name.toLowerCase();
-    const input = inputValue.toLowerCase();
-    return name.includes(input);
-  });
+  console.log("result", result);
 
-  console.log("inputValue", inputValue);
+  useEffect(() => {
+    if (prevInputRef.current !== input) {
+      setData([]);
+      setLastID(0);
 
-  const handleInputChange = (event) => {
-    setInputValue(event.toLowerCase());
+      prevInputRef.current = input;
+    }
+  }, [input]);
+
+  useEffect(() => {
+    if (
+      result &&
+      data[data.length - 1]?.source_id !==
+        result[result.length - 1]?.source_id
+    ) {
+      setData((prevData) => {
+        return [...prevData, ...result];
+      });
+    }
+  }, [result]);
+
+  const handleChange = (event) => {
+    setInput(event.toLowerCase());
   };
 
-  return h("div.maps-page", [
-    h(AssistantLinks, [
-      h(
-        AnchorButton,
-        { icon: "flows", href: "/maps/ingestion" },
-        "Ingestion system"
-      ),
-      h(AnchorButton, { icon: "map", href: "/map/sources" }, "Show on map"),
-      h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
+  return h(ContentPage, [
+    h(StickyHeader, { className: "header" }, [
+      h(PageBreadcrumbs, {
+        title: "Maps",
+      }),
+      h(SearchBar, {
+        placeholder: "Filter by name...",
+        onChange: handleChange,
+      }),
     ]),
-    h(ContentPage, [
-      h(StickyHeader, [
-        h(PageHeader, { title: "Maps" }),
-        h(SearchBar, {
-          placeholder: "Filter by name...",
-          onChange: handleInputChange,
-        }),
-      ]),
+    h(
+      "div.strat-list",
       h(
-        "div.maps-list",
-        filteredSources.map((source) => h(SourceItem, { source }))
-      ),
-    ]),
+        "div.strat-items",
+        data.map((data) => h(SourceItem, { data }))
+      )
+    ),
+    LoadMoreTrigger({ data, setLastID, pageSize, result }),
   ]);
 }
 
-function SourceItem({ source }) {
-  const { source_id, name, ref_title, url, scale } = source;
+function useSourceData(lastID, input, pageSize) {
+  const url = `${apiDomain}/api/pg/sources_metadata?limit=${pageSize}&source_id=gt.${lastID}&order=ref_year.asc&name=ilike.*${input}*`;
+
+  const result = useAPIResult(url);
+
+  return result;
+}
+
+function LoadMoreTrigger({ data, setLastID, pageSize, result }) {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        if (data.length > 0) {
+          const id = data[data.length - 1].source_id;
+
+          setLastID(id);
+        }
+      }
+    });
+
+    observer.observe(ref.current);
+
+    return () => observer.disconnect();
+  }, [data, setLastID]);
+
+  return h.if(result?.length == pageSize)("div.load-more", { ref }, h(Spinner));
+}
+
+function SourceItem({ data }) {
+  const { source_id, name, ref_title, url, scale } = data;
   const href = `/maps/${source_id}`;
 
   return h(
