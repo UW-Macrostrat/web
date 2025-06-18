@@ -11,7 +11,7 @@ import {
 import { useState, useRef, useEffect } from "react";
 import { useAPIResult } from "@macrostrat/ui-components";
 import { apiDomain } from "@macrostrat-web/settings";
-import { SearchBar } from "~/components/general";
+import { IDTag, SearchBar } from "~/components/general";
 import { useData } from "vike-react/useData";
 import { PageBreadcrumbs } from "~/components";
 
@@ -142,13 +142,18 @@ function SourceItem({ data }) {
     LinkCard,
     {
       href,
+      title: h('div.title', [
+        h('h2', name),
+        h("div", { className: "size " + scale }, scale),
+      ])
     },
     [
-      h("div.title", [
-        h("h2", { className: "name" }, name + ` (#${source_id})`),
-        h("div", { className: "size " + scale },scale),
-      ]),
-      h("a", { href: url, target: "_blank" }, ref_title)
+      h('div.content', [
+        h("a", { href: url, target: "_blank" }, ref_title),
+        h('div.tags', [
+          h(IDTag, { id: source_id }),
+        ])
+      ])
     ]
   );
 }

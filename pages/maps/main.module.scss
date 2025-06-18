@@ -7,7 +7,7 @@
   font-size: 0.8em;
 }
 
-h1 {
+h1, h3 {
   margin: 0;
 }
 
@@ -110,15 +110,11 @@ h1 {
   }
 }
 
-.title {
+.content {
   display: flex;
   justify-content: space-between;
-
-  .size {
-    color: var(--text-emphasized-color);
-    padding: 0.2em 0.5em;
-    border-radius: 0.2em;
-  }
+  padding-top: .5em;
+  align-items: center;
 }
 
 .tiny {
@@ -140,10 +136,32 @@ h1 {
   gap: 1em;
 }
 
-.scale {
-  white-space: nowrap;
-}
-
 .maps-page {
   width: 100%;
+}
+
+.id {
+  text-align: right;
+  padding: 0.2em 0.5em;
+  border-radius: 0.2em;
+  color: var(--text-emphasized-color);
+  background-color: var(--background-color);
+  align-self: flex-end;
+}
+
+.size {
+  color: var(--text-emphasized-color);
+  padding: 0.2em 0.5em;
+  border-radius: 0.2em;
+  align-self: flex-end;
+}
+
+.title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h2 {
+    margin: 0;
+  }
 }

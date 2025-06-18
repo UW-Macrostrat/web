@@ -137,3 +137,7 @@ export function StratTag({ isConcept, fontSize = ".75em" }) {
     isConcept ? "Concept" : "Name"
   );
 }
+
+export function IDTag({ id }) {
+  return h("div.id-tag", "ID: #" + id);
+}
