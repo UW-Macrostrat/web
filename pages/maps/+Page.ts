@@ -1,5 +1,5 @@
 import h from "./main.module.scss";
-import { Spinner, Switch } from "@blueprintjs/core";
+import { Spinner, Switch, AnchorButton } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import {
   PageHeader,
@@ -58,29 +58,41 @@ export function Page() {
     setInput(event.toLowerCase());
   };
 
-  return h(ContentPage, [
-    h(StickyHeader, { className: "header" }, [
-      h(PageBreadcrumbs, {
-        title: "Maps",
-      }),
-      h(SearchBar, {
-        placeholder: "Filter by name...",
-        onChange: handleChange,
-      }),
-      h(Switch, {
-        label: "Active only",
-        checked: activeOnly,
-        onChange: () => setActiveOnly(!activeOnly),
-      })
-    ]),
-    h(
-      "div.strat-list",
+  return h('div.maps-page', [
+    h(AssistantLinks, { className: "assistant-links" }, [
       h(
-        "div.strat-items",
-        data.map((data) => h(SourceItem, { data }))
-      )
-    ),
-    LoadMoreTrigger({ data, setLastID, pageSize, result }),
+        AnchorButton,
+        { icon: "flows", href: "/maps/ingestion" },
+        "Ingestion system"
+      ),
+      h(AnchorButton, { icon: "map", href: "/map/sources" }, "Show on map"),
+      h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
+    ]),
+    h(ContentPage, [
+      h(StickyHeader, {className: "header"}, [
+        h(PageBreadcrumbs, {
+          title: "Maps",
+        }),
+        h(SearchBar, {
+          placeholder: "Filter by name...",
+          onChange: handleChange,
+        }),
+        h(Switch, {
+          label: "Active only",
+          checked: activeOnly,
+          onChange: () => setActiveOnly(!activeOnly),
+        }),
+      ]),
+      h(
+        "div.strat-list",
+        h(
+          "div.strat-items",
+          data.map((data) => h(SourceItem, { data }))
+        )
+      ),
+      LoadMoreTrigger({ data, setLastID, pageSize, result }),
+    ]),
+
   ]);
 }
 
@@ -133,7 +145,7 @@ function SourceItem({ data }) {
     },
     [
       h("div.title", [
-        h("h2", { className: "name" }, name),
+        h("h2", { className: "name" }, name + ` (#${source_id})`),
         h("div", { className: "size " + scale },scale),
       ]),
       h("a", { href: url, target: "_blank" }, ref_title)
