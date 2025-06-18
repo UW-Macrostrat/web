@@ -1,5 +1,5 @@
 import h from "./main.module.scss";
-import { Spinner } from "@blueprintjs/core";
+import { Spinner, Switch } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import {
   PageHeader,
@@ -17,24 +17,30 @@ import { PageBreadcrumbs } from "~/components";
 
 export function Page() {
   const { sources } = useData();
-  const startingID = sources[sources.length - 1].source_id;
 
   const [input, setInput] = useState("");
+  const [activeOnly, setActiveOnly] = useState(true);
+
+  console.log("activeOnly", activeOnly);
+
+  const startingID = sources[sources.length - 1].source_id;
   const [lastID, setLastID] = useState(startingID);
   const [data, setData] = useState(sources);
   const pageSize = 20;
 
   const result = useSourceData(lastID, input, pageSize);
   const prevInputRef = useRef(input);
+  const prevActiveOnlyRef = useRef(activeOnly);
 
   console.log("result", result);
 
   useEffect(() => {
-    if (prevInputRef.current !== input) {
+    if (prevInputRef.current !== input || prevActiveOnlyRef.current !== activeOnly) {
       setData([]);
       setLastID(0);
 
       prevInputRef.current = input;
+      prevActiveOnlyRef.current = activeOnly;
     }
   }, [input]);
 
@@ -63,6 +69,11 @@ export function Page() {
         placeholder: "Filter by name...",
         onChange: handleChange,
       }),
+      h(Switch, {
+        label: "Active only",
+        checked: activeOnly,
+        onChange: () => setActiveOnly(!activeOnly),
+      })
     ]),
     h(
       "div.strat-list",
