@@ -28,11 +28,9 @@ export function Page() {
   const [data, setData] = useState(sources);
   const pageSize = 20;
 
-  const result = useSourceData(lastID, input, pageSize);
+  const result = useSourceData(lastID, input, pageSize, activeOnly);
   const prevInputRef = useRef(input);
   const prevActiveOnlyRef = useRef(activeOnly);
-
-  console.log("result", result);
 
   useEffect(() => {
     if (prevInputRef.current !== input || prevActiveOnlyRef.current !== activeOnly) {
@@ -42,7 +40,7 @@ export function Page() {
       prevInputRef.current = input;
       prevActiveOnlyRef.current = activeOnly;
     }
-  }, [input]);
+  }, [input, activeOnly]);
 
   useEffect(() => {
     if (
@@ -86,11 +84,17 @@ export function Page() {
   ]);
 }
 
-function useSourceData(lastID, input, pageSize) {
-  const url = `${apiDomain}/api/pg/sources_metadata?limit=${pageSize}&source_id=gt.${lastID}&order=source_id.asc&name=ilike.*${input}*&is_finalized=eq.true&status_code=eq.active`;
+function useSourceData(lastID, input, pageSize, activeOnly) {
+  const url = `${apiDomain}/api/pg/sources_metadata`;
 
-  const result = useAPIResult(url);
-
+  const result = useAPIResult(url, {
+      is_finalized: activeOnly ? "eq.true" : undefined,
+      status_code: activeOnly ? "eq.active" : undefined,
+      source_id: `gt.${lastID}`,
+      name: `ilike.%${input}%`,
+      limit: pageSize,
+      order: "source_id.asc",
+  });
   return result;
 }
 
@@ -126,11 +130,13 @@ function SourceItem({ data }) {
     LinkCard,
     {
       href,
-      title: h("div.title", [
-        h("h1", name),
-        h("div", { className: "size " + scale }, scale),
-      ]),
     },
-    [h("a", { href: url, target: "_blank" }, ref_title)]
+    [
+      h("div.title", [
+        h("h2", { className: "name" }, name),
+        h("div", { className: "size " + scale },scale),
+      ]),
+      h("a", { href: url, target: "_blank" }, ref_title)
+    ]
   );
 }

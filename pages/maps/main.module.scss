@@ -120,3 +120,26 @@ h1 {
     border-radius: 0.2em;
   }
 }
+
+.tiny {
+  background-color: #45B29D;
+}
+.small {
+  background-color: #45B29D;
+}
+.medium {
+  background-color: #E27A3F;
+}
+.large {
+  background-color: #3498DB;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.scale {
+  white-space: nowrap;
+}
