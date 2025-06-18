@@ -7,6 +7,7 @@ export async function data(pageContext) {
     .from("sources_metadata")
     .select("*")
     .eq("is_finalized", true)
+    .eq("status_code", "active")
     .order("source_id", { ascending: true })
     .limit(20);
 

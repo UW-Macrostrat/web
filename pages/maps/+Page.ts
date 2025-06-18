@@ -76,7 +76,7 @@ export function Page() {
 }
 
 function useSourceData(lastID, input, pageSize) {
-  const url = `${apiDomain}/api/pg/sources_metadata?limit=${pageSize}&source_id=gt.${lastID}&order=ref_year.asc&name=ilike.*${input}*`;
+  const url = `${apiDomain}/api/pg/sources_metadata?limit=${pageSize}&source_id=gt.${lastID}&order=source_id.asc&name=ilike.*${input}*&is_finalized=eq.true&status_code=eq.active`;
 
   const result = useAPIResult(url);
 
