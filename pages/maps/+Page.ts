@@ -59,29 +59,31 @@ export function Page() {
   };
 
   return h('div.maps-page', [
-    h(AssistantLinks, { className: "assistant-links" }, [
-      h(
-        AnchorButton,
-        { icon: "flows", href: "/maps/ingestion" },
-        "Ingestion system"
-      ),
-      h(AnchorButton, { icon: "map", href: "/map/sources" }, "Show on map"),
-      h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
-    ]),
     h(ContentPage, [
-      h(StickyHeader, {className: "header"}, [
-        h(PageBreadcrumbs, {
-          title: "Maps",
-        }),
-        h(SearchBar, {
-          placeholder: "Filter by name...",
-          onChange: handleChange,
-        }),
-        h(Switch, {
-          label: "Active only",
-          checked: activeOnly,
-          onChange: () => setActiveOnly(!activeOnly),
-        }),
+      h(StickyHeader, {className: "header-container"}, [
+        h('div.header', [
+          h(PageBreadcrumbs, {
+            title: "Maps",
+          }),
+          h(SearchBar, {
+            placeholder: "Filter by name...",
+            onChange: handleChange,
+          }),
+          h(Switch, {
+            label: "Active only",
+            checked: activeOnly,
+            onChange: () => setActiveOnly(!activeOnly),
+          }),
+        ]),
+        h(AssistantLinks, { className: "assistant-links" }, [
+          h(
+            AnchorButton,
+            { icon: "flows", href: "/maps/ingestion" },
+            "Ingestion system"
+          ),
+          h(AnchorButton, { icon: "map", href: "/map/sources" }, "Show on map"),
+          h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
+        ]),
       ]),
       h(
         "div.strat-list",

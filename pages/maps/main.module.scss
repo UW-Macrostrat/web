@@ -130,12 +130,6 @@ h1, h3 {
   background-color: #3498DB;
 }
 
-.header {
-  display: flex;
-  flex-direction: column;
-  gap: 1em;
-}
-
 .maps-page {
   width: 100%;
 }
@@ -163,5 +157,18 @@ h1, h3 {
 
   h2 {
     margin: 0;
+  }
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .header {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    width: 70%
   }
 }
