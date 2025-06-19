@@ -13,7 +13,9 @@ import { PanelSubhead } from "@macrostrat/map-interface";
 import classNames from "classnames";
 import { navigate } from "vike/client/router";
 import { MacrostratIcon } from "~/components/macrostrat-icon";
-import { useAdmoinshments } from "#/map/map-interface/components/filter-panel/admonishments";
+import { useAdmoinshments } from "../filter-panel/admonishments";
+import { MacrostatLogoLink } from "~/components/general";
+import { useInDarkMode } from "@macrostrat/ui-components";
 
 const h = hyper.styled(styles);
 
@@ -146,22 +148,26 @@ function Searchbar({ className }) {
     filterPanelElement = h(FilterPanel, { filters, admonishments });
   }
 
-  return h(FloatingNavbar, { statusElement: filterPanelElement }, [
-    h(MacrostratIcon, {
-      size: 36,
-      onClick() {
-        navigate("/");
-      },
-    }),
-    h(InputGroup, {
-      large: true,
-      onChange: handleSearchInput,
-      onClick: gainInputFocus,
-      rightElement: h(MenuButton),
-      placeholder: "Search Macrostrat...",
-      value: term,
-    }),
-  ]);
+  return h(
+    FloatingNavbar,
+    { statusElement: filterPanelElement, className: "map-navbar" },
+    [
+      h("div.navbar-link-container", [
+        h(MacrostatLogoLink, {
+          logoStyle: "frameless-simple",
+          className: "navbar-logo",
+        }),
+      ]),
+      h(InputGroup, {
+        large: true,
+        onChange: handleSearchInput,
+        onClick: gainInputFocus,
+        rightElement: h(MenuButton),
+        placeholder: "Search Macrostrat...",
+        value: term,
+      }),
+    ]
+  );
 }
 
 function SearchGuidance() {

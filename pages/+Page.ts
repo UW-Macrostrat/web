@@ -14,7 +14,7 @@ export function Page() {
   return h("div.page-main", [
     h("header.site-header", [
       h(SiteTitle, { className: "main-title" }, [
-        //h("h2.subtitle", "The data system for the crust"),
+        h("h2.subtitle", "The data system for the crust"),
       ]),
     ]),
     h(Navbar, { className: "site-navbar" }),

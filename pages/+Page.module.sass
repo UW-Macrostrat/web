@@ -3,11 +3,20 @@
 
 .site-header
   z-index: 1000
+  position: relative
 
 .main-title
   --macrostrat-logo-size: 100px
-  --macrostrat-wordmark-size: 3em
-  justify-content: start
+  --macrostrat-wordmark-size: 3.5rem
+  justify-content: center
+
+  .subtitle
+    font-size: 1.2rem
+    margin-top: 0.25rem
+    color: var(--secondary-color)
+    margin-bottom: 0.5rem
+
+  gap: 1rem !important
 
 .site-navbar
   :global(.navbar-title)
