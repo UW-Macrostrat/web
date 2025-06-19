@@ -33,11 +33,14 @@ export function Page() {
   const prevActiveOnlyRef = useRef(activeOnly);
   const prevRecentOrderRef = useRef(recentOrder);
 
+  console.log("Last ID:", lastID);
+  console.log("Last Year:", lastYear);
+
   useEffect(() => {
     if (prevInputRef.current !== input || prevActiveOnlyRef.current !== activeOnly || prevRecentOrderRef.current !== recentOrder) {
       setData([]);
-      setLastID(0);
       setLastYear(9999);
+      setLastID(0);
 
       prevInputRef.current = input;
       prevActiveOnlyRef.current = activeOnly;
@@ -58,6 +61,7 @@ export function Page() {
   }, [result]);
 
   const handleChange = (event) => {
+    window.scrollTo(0, 0);
     setInput(event.toLowerCase());
   };
 
@@ -75,12 +79,18 @@ export function Page() {
           h(Switch, {
             label: "Active only",
             checked: activeOnly,
-            onChange: () => setActiveOnly(!activeOnly),
+            onChange: () => {
+              window.scrollTo(0, 0);
+              setActiveOnly(!activeOnly);
+            },
           }),
           h(Switch, {
             label: "Recent order",
             checked: recentOrder,
-            onChange: () => setRecentOrder(!recentOrder),
+            onChange: () => {
+              window.scrollTo(0, 0);
+              setRecentOrder(!recentOrder);
+            },
           }),
         ]),
         h(AssistantLinks, { className: "assistant-links" }, [
