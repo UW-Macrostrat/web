@@ -23,30 +23,14 @@ export function Page() {
   const [recentOrder, setRecentOrder] = useState(false);
 
   const startingID = sources[sources.length - 1].source_id;
-  const [lastID, setLastID] = useState(startingID);
-  const [lastYear, setLastYear] = useState(9999);
+  const [key, setKey] = useState({
+    lastID: startingID,
+    lastYear: 9999,
+  });
   const [data, setData] = useState(sources);
   const pageSize = 20;
 
-  const result = useSourceData(lastID, input, pageSize, activeOnly, recentOrder, lastYear);
-  const prevInputRef = useRef(input);
-  const prevActiveOnlyRef = useRef(activeOnly);
-  const prevRecentOrderRef = useRef(recentOrder);
-
-  console.log("Last ID:", lastID);
-  console.log("Last Year:", lastYear);
-
-  useEffect(() => {
-    if (prevInputRef.current !== input || prevActiveOnlyRef.current !== activeOnly || prevRecentOrderRef.current !== recentOrder) {
-      setData([]);
-      setLastYear(9999);
-      setLastID(0);
-
-      prevInputRef.current = input;
-      prevActiveOnlyRef.current = activeOnly;
-      prevRecentOrderRef.current = recentOrder;
-    }
-  }, [input, activeOnly, recentOrder]);
+  const result = useSourceData(key.lastID, input, pageSize, activeOnly, recentOrder, key.lastYear);
 
   useEffect(() => {
     if (
@@ -60,9 +44,28 @@ export function Page() {
     }
   }, [result]);
 
-  const handleChange = (event) => {
+  const resetData = () => {
     window.scrollTo(0, 0);
+    setData([]);
+    setKey({
+      lastID: 0,
+      lastYear: 9999,
+    });
+  };
+
+  const handleInputChange = (event) => {
     setInput(event.toLowerCase());
+    resetData();
+  };
+  
+  const handleActiveChange = () => {
+    setActiveOnly(!activeOnly);
+    resetData();
+  };
+
+  const handleRecentChange = () => {
+    setRecentOrder(!recentOrder);
+    resetData();
   };
 
   return h('div.maps-page', [
@@ -74,23 +77,17 @@ export function Page() {
           }),
           h(SearchBar, {
             placeholder: "Filter by name...",
-            onChange: handleChange,
+            onChange: handleInputChange,
           }),
           h(Switch, {
             label: "Active only",
             checked: activeOnly,
-            onChange: () => {
-              window.scrollTo(0, 0);
-              setActiveOnly(!activeOnly);
-            },
+            onChange: handleActiveChange,
           }),
           h(Switch, {
             label: "Recent order",
             checked: recentOrder,
-            onChange: () => {
-              window.scrollTo(0, 0);
-              setRecentOrder(!recentOrder);
-            },
+            onChange: handleRecentChange,
           }),
         ]),
         h(AssistantLinks, { className: "assistant-links" }, [
@@ -110,7 +107,7 @@ export function Page() {
           data.map((data) => h(SourceItem, { data }))
         )
       ),
-      LoadMoreTrigger({ data, setLastID, pageSize, result, setLastYear }),
+      LoadMoreTrigger({ data, setKey, pageSize, result }),
     ]),
 
   ]);
@@ -131,7 +128,7 @@ function useSourceData(lastID, input, pageSize, activeOnly, recentOrder, lastYea
   return result;
 }
 
-function LoadMoreTrigger({ data, setLastID, pageSize, result, setLastYear }) {
+function LoadMoreTrigger({ data, setKey, pageSize, result }) {
   const ref = useRef(null);
 
   useEffect(() => {
@@ -143,8 +140,10 @@ function LoadMoreTrigger({ data, setLastID, pageSize, result, setLastYear }) {
           const id = data[data.length - 1].source_id;
           const year = data[data.length - 1].ref_year || 9999;
 
-          setLastID(id);
-          setLastYear(year);
+          setKey({
+            lastID: id,
+            lastYear: year,
+          });
         }
       }
     });
@@ -152,7 +151,7 @@ function LoadMoreTrigger({ data, setLastID, pageSize, result, setLastYear }) {
     observer.observe(ref.current);
 
     return () => observer.disconnect();
-  }, [data, setLastID, setLastYear]);
+  }, [data]);
 
   return h.if(result?.length == pageSize)("div.load-more", { ref }, h(Spinner));
 }
