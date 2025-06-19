@@ -108,7 +108,6 @@ export function Page() {
 
 function useSourceData(lastID, input, pageSize, activeOnly, recentOrder, lastYear) {
   const url = `${apiDomain}/api/pg/sources_metadata`;
-  const filter = "or=(ref_year.lt.2022,and(ref_year.eq.2022,source_id.gt.120))";
 
   const result = useAPIResult(url, {
       is_finalized: activeOnly ? "eq.true" : undefined,
@@ -117,7 +116,7 @@ function useSourceData(lastID, input, pageSize, activeOnly, recentOrder, lastYea
       or: recentOrder ? `(ref_year.lt.${lastYear},and(ref_year.eq.${lastYear},source_id.gt.${lastID}))` : undefined,
       name: `ilike.%${input}%`,
       limit: pageSize,
-      order: "source_id.asc",
+      order: recentOrder ? "ref_year.desc,source_id.asc" : "source_id.asc",
   });
   return result;
 }
@@ -149,7 +148,7 @@ function LoadMoreTrigger({ data, setLastID, pageSize, result, setLastYear }) {
 }
 
 function SourceItem({ data }) {
-  const { source_id, name, ref_title, url, scale } = data;
+  const { source_id, name, ref_title, url, scale, ref_year } = data;
   const href = `/maps/${source_id}`;
 
   return h(
@@ -158,6 +157,7 @@ function SourceItem({ data }) {
       href,
       title: h('div.title', [
         h('h2', name),
+        h('h2', ref_year),
         h("div", { className: "size " + scale }, scale),
       ])
     },
