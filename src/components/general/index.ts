@@ -2,6 +2,7 @@ import h from "./layout.module.sass";
 import { MacrostratIcon, StickyHeader } from "~/components";
 import { Spinner, Icon, Card } from "@blueprintjs/core";
 import { useDarkMode } from "@macrostrat/ui-components";
+import classNames from "classnames";
 
 export function Image({ src, className, width, height }) {
   const srcWithAddedPrefix =
@@ -16,17 +17,30 @@ export function NavListItem({ href, children }) {
   );
 }
 
-export function SiteTitle({ logoStyle, className }) {
+export function MacrostatLogoLink({
+  href = "/",
+  className,
+  logoStyle,
+  children,
+}) {
   const logoFile =
     logoStyle != null
       ? `macrostrat-icon-${logoStyle}.svg`
       : "macrostrat-icon.svg";
-  return h("a.site-title", { href: "/", className }, [
+  return h("a.macrostrat-logo-link", { href, className }, [
     h("img.macrostrat-logo", {
       src: `https://storage.macrostrat.org/assets/web/macrostrat-icons/${logoFile}`,
     }),
-    h("h1", "Macrostrat"),
+    children,
   ]);
+}
+
+export function SiteTitle({ logoStyle, className, children }) {
+  return h(
+    MacrostatLogoLink,
+    { logoStyle, className: classNames("site-title", className) },
+    h("div.site-title-content", [h("h1", "Macrostrat"), children])
+  );
 }
 
 export function Navbar({ className, children, showSiteTitle = true }) {
