@@ -38,6 +38,7 @@ import h from "./main.module.sass";
 import { PageBreadcrumbs, MapReference, DevLink } from "~/components";
 import { MapNavbar } from "~/components/map-navbar";
 import { usePageProps } from "~/renderer/usePageProps";
+import { usePageContext } from 'vike-react/usePageContext'
 
 interface StyleOpts {
   style: string;
@@ -442,7 +443,8 @@ function LegendEntry({ data }) {
     ...r1
   } = rest;
 
-  const [isOpen, setOpen] = useState(false);
+  const selectedLegend = parseInt(usePageContext().urlOriginal?.split("=")[1]) ?? null;
+  const [isOpen, setOpen] = useState(selectedLegend === legend_id);
 
   const title = h(
     "div.legend-title",
