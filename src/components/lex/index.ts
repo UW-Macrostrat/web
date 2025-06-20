@@ -5,7 +5,7 @@ import { Link, PageBreadcrumbs } from "~/components";
 import { Card, Divider } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import { BlankImage, Footer, Loading, StratTag } from "~/components/general";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { DarkModeButton } from "@macrostrat/ui-components";
 import { PieChart, Pie, Cell, ResponsiveContainer, Label } from "recharts";
@@ -897,15 +897,30 @@ export function Units({ unitsData }) {
 }
 
 export function Maps({ mapsData }) {
-  return h.if(mapsData.length > 0)('div.maps-container', [
-    h(ExpansionPanelContainer, { title: "Maps" }, 
-      h('div.maps-list', 
-        mapsData.map(item => 
-          h('a.maps-item', { href: "/maps/" + item.source_id }, item.map_unit_name + " (#" + item.source_id + ")")
-        )
+  const [visibleCount, setVisibleCount] = useState(20);
+  // Slice the unique list to show only what's visible
+  const visibleMaps = mapsData.slice(0, visibleCount);
+
+  const loadMore = () => {
+    setVisibleCount((count) => Math.min(count + 20, mapsData.length));
+  };
+
+  const items = visibleMaps.map(item =>
+      h('a.maps-item', { key: item.map_unit_name, href: "/maps/" + item.source_id },
+        item.map_unit_name + " (#" + item.source_id + ")"
       )
     )
-  ])
+  
+    console.log('items', items);
+
+  return h('div.maps-container', [
+    h(ExpansionPanelContainer, { title: "Maps" },
+      h('div.maps-list', [
+        ...items,
+        h.if(visibleCount < mapsData.length)('button.load-more', { onClick: loadMore }, 'Load More: ' + visibleCount + ' of ' + mapsData.length)
+      ]),
+    )
+  ]);
 }
 
 export function Fossils({ fossilsData }) {

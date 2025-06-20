@@ -14,8 +14,6 @@ import {
 export function Page() {
   const { resData, colData, taxaData, refs, unitsData, fossilsData, mapsData } = useData();
 
-  console.log("MAPS DATA", mapsData);
-
   const id = resData.lith_id;
   const features = colData?.features || [];
   const timescales = resData?.timescales || [];
