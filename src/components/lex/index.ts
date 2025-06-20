@@ -896,32 +896,33 @@ export function Units({ unitsData }) {
   ])
 }
 
-export function Maps({ mapsData }) {
-  const [visibleCount, setVisibleCount] = useState(20);
-  // Slice the unique list to show only what's visible
-  const visibleMaps = mapsData.slice(0, visibleCount);
 
-  const loadMore = () => {
-    setVisibleCount((count) => Math.min(count + 20, mapsData.length));
+export function Maps({ mapsData }) {
+  const ITEMS_PER_PAGE = 10;
+  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+
+  const visibleItems = mapsData.slice(0, visibleCount).map(item =>
+    h('a.maps-item', { key: item.map_unit_name, href: "/maps/" + item.source_id },
+      item.map_unit_name + " (#" + item.source_id + ")"
+    )
+  );
+
+  const handleLoadMore = () => {
+    setVisibleCount(prev => Math.min(prev + ITEMS_PER_PAGE, mapsData.length));
   };
 
-  const items = visibleMaps.map(item =>
-      h('a.maps-item', { key: item.map_unit_name, href: "/maps/" + item.source_id },
-        item.map_unit_name + " (#" + item.source_id + ")"
-      )
-    )
-  
-    console.log('items', items);
+  const showLoadMore = visibleCount < mapsData.length;
 
   return h('div.maps-container', [
     h(ExpansionPanelContainer, { title: "Maps" },
       h('div.maps-list', [
-        ...items,
-        h.if(visibleCount < mapsData.length)('button.load-more', { onClick: loadMore }, 'Load More: ' + visibleCount + ' of ' + mapsData.length)
-      ]),
+        ...visibleItems,
+        h.if(showLoadMore)('button.load-more-btn', { onClick: handleLoadMore }, 'Load More')
+      ])
     )
   ]);
 }
+
 
 export function Fossils({ fossilsData }) {
   return h.if(fossilsData.length > 0)('div.fossils-container', [
