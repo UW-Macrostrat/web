@@ -457,9 +457,62 @@ function LegendEntry({ data }) {
     ]
   );
 
+  const {age, b_age, descrip, lith_classes, lith_types, strat_name, strat_name_id, t_age} = r1;
+
   return h("div.legend-entry", [
     title,
-    h(Collapse, { isOpen }, h(JSONView, { data: r1, hideRoot: true })),
+    h(Collapse, { isOpen }, [
+      h("div.legend-details", [
+        h.if(descrip)(
+          "div.legend-description",
+          h("p", descrip)
+        ),
+        h.if(strat_name)(
+          "div.legend-strat-name",
+          h("p", [
+            "Stratigraphic name: ",
+            h("span", [
+              h("a", { href: `/strat_names/${strat_name_id}` }, strat_name),
+            ]),
+          ])
+        ),
+        h.if(lith_classes?.length > 0)(
+          "div.legend-lith-classes",
+          h("p", [
+            "Lithology classes: ",
+            h("span", lith_classes?.map((l) => h(Tag, { minimal: true }, l))),
+          ])
+        ),
+        h.if(lith_types?.length > 0)(
+          "div.legend-lith-types",
+          h("p", [
+            "Lithology types: ",
+            h("span", lith_types?.map((l) => h(Tag, { minimal: true }, l))),
+          ])
+        ),
+        h.if(age)(
+          "div.legend-age",
+          h("p", [
+            "Age: ",
+            h("span", age),
+          ])
+        ),
+        h.if(b_age)(
+          "div.legend-b-age",
+          h("p", [
+            "Base age: ",
+            h("span", b_age),
+          ])
+        ),
+        h.if(t_age)(
+          "div.legend-t-age",
+          h("p", [
+            "Top age: ",
+            h("span", t_age),
+          ])
+        ),
+      ]),
+    ])
   ]);
 }
 
