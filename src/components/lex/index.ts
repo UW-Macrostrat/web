@@ -896,6 +896,18 @@ export function Units({ unitsData }) {
   ])
 }
 
+export function Maps({ mapsData }) {
+  return h.if(mapsData.length > 0)('div.maps-container', [
+    h(ExpansionPanelContainer, { title: "Maps" }, 
+      h('div.maps-list', 
+        mapsData.map(item => 
+          h('a.maps-item', { href: "/maps/" + item.source_id }, item.map_unit_name + " (#" + item.source_id + ")")
+        )
+      )
+    )
+  ])
+}
+
 export function Fossils({ fossilsData }) {
   return h.if(fossilsData.length > 0)('div.fossils-container', [
     h(ExpansionPanelContainer, { title: "Fossils" }, 
