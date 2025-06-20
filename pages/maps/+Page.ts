@@ -166,7 +166,6 @@ function SourceItem({ data }) {
       href,
       title: h('div.title', [
         h('h2', name),
-        h('h2', ref_year),
         h("div", { className: "size " + scale }, scale),
       ])
     },
