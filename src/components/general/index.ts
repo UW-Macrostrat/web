@@ -2,6 +2,7 @@ import h from "./layout.module.sass";
 import { MacrostratIcon, StickyHeader } from "~/components";
 import { Spinner, Icon, Card } from "@blueprintjs/core";
 import { useDarkMode } from "@macrostrat/ui-components";
+import classNames from "classnames";
 
 export function Image({ src, className, width, height }) {
   const srcWithAddedPrefix =
@@ -16,24 +17,44 @@ export function NavListItem({ href, children }) {
   );
 }
 
-export function SiteTitle() {
-  return h("a.site-title", { href: "/" }, [
+export function MacrostatLogoLink({
+  href = "/",
+  className,
+  logoStyle,
+  children,
+}) {
+  const logoFile =
+    logoStyle != null
+      ? `macrostrat-icon-${logoStyle}.svg`
+      : "macrostrat-icon.svg";
+  return h("a.macrostrat-logo-link", { href, className }, [
     h("img.macrostrat-logo", {
-      src: "https://storage.macrostrat.org/assets/web/macrostrat-icons/macrostrat-icon.svg",
+      src: `https://storage.macrostrat.org/assets/web/macrostrat-icons/${logoFile}`,
     }),
-    h("h1", "Macrostrat"),
+    children,
   ]);
 }
 
+export function SiteTitle({ logoStyle, className, children }) {
+  return h(
+    MacrostatLogoLink,
+    { logoStyle, className: classNames("site-title", className) },
+    h("div.site-title-content", [h("h1", "Macrostrat"), children])
+  );
+}
+
 export function Navbar({ className, children, showSiteTitle = true }) {
-  return h(StickyHeader, [
-    h("nav.navbar", { className }, [
-      h.if(showSiteTitle)(SiteTitle),
+  return h(StickyHeader, { className }, [
+    h("nav.navbar", [
+      h.if(showSiteTitle)(SiteTitle, {
+        logoStyle: "simple",
+        className: "navbar-title",
+      }),
       children,
       h("ul.nav-list", [
         h(NavListItem, { href: "/about" }, "About"),
-        h(NavListItem, { href: "/publications" }, "Publications"),
         h(NavListItem, { href: "/people" }, "People"),
+        h(NavListItem, { href: "/publications" }, "Publications"),
         h(NavListItem, { href: "/donate" }, "Donate"),
         h(NavListItem, { href: "https://rockd.org/" }, "Rockd"),
       ]),

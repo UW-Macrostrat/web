@@ -12,20 +12,22 @@ import { isDev } from "@macrostrat-web/settings";
 
 export function Page() {
   return h("div.page-main", [
-    h("div.hero.site-header", [
-      h("div.hero-backdrop", [
-        h(Image, { className: "cover-image", src: "cover_large.jpg" }),
+    h("header.site-header", [
+      h(SiteTitle, { className: "main-title" }, [
+        h("h2.subtitle", "The data system for the crust"),
       ]),
+    ]),
+    h(Navbar, { className: "site-navbar" }),
+    h("div.hero", [
+      h("div.hero-backdrop"),
       h("div.hero-content", [
-        h(SiteTitle),
-        h(
-          "h2.subtitle",
-          "A platform for geological data exploration, integration, and analysis"
-        ),
+        h("p.hero-text", [
+          "Macrostrat integrates geologic maps and stratigraphic columns " +
+            "into a  model of the Earth's crustal framework through time.",
+        ]),
         h(MacrostratStats),
       ]),
     ]),
-    h(Navbar, { className: "site-header" }),
     h("div.buttons", [
       h("h2", "Geologic maps"),
       h(LinkCard, { title: "Map interface", href: "/map/#3/40.78/-94.13" }, [
@@ -143,19 +145,19 @@ function MacrostratStats() {
   return h("div.stats", {}, [
     h("div.stat", {}, [
       h("span.top-stat#n_columns", {}, formatNumber(columns)),
-      h("span.top-stat-label", {}, "Regional Rock Columns"),
+      h("span.top-stat-label", {}, "columns"),
     ]),
     h("div.stat", {}, [
       h("span.top-stat#n_units", {}, formatNumber(units)),
-      h("span.top-stat-label", {}, "Rock Units"),
+      h("span.top-stat-label", {}, "rock units"),
     ]),
     h("div.stat", {}, [
       h("span.top-stat#n_polys", {}, formatNumber(polygons)),
-      h("span.top-stat-label", {}, "Geologic Map Polygons"),
+      h("span.top-stat-label", {}, "map polygons"),
     ]),
     h("div.stat", {}, [
       h("span.top-stat#n_names", {}, formatNumber(projects)),
-      h("span.top-stat-label", {}, "Projects"),
+      h("span.top-stat-label", {}, "projects"),
     ]),
   ]);
 }

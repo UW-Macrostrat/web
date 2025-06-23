@@ -166,16 +166,15 @@
 :root
   --macrostrat-logo-size: 30px
 
-a.site-title
+a.macrostrat-logo-link
   --macrostrat-wordmark-size-internal: var(--macrostrat-wordmark-size, calc(var(--macrostrat-logo-size) * 0.8))
   font-size: var(--macrostrat-wordmark-size-internal)
   display: flex
   flex-direction: row
   gap: 0.3em
   align-items: center
-  justify-content: center
 
-  color: inherit !important
+  color: inherit
 
   &:hover
     text-decoration: none
@@ -184,11 +183,13 @@ a.site-title
     height: var(--macrostrat-logo-size)
     aspect-ratio: 1
 
-  h1, h2
+  h1
     font-size: 1em
     font-weight: 400
     font-family: "Maven Pro", sans-serif
     margin: 0
+  *
+    font-family: "Publico Text", serif
 
 .id-tag
   text-align: right
@@ -197,3 +198,4 @@ a.site-title
   color: var(--text-emphasized-color)
   background-color: var(--background-color)
   align-self: flex-end
+
