@@ -65,6 +65,8 @@ export function Navbar({ className, children, showSiteTitle = true }) {
 export function Footer() {
   const isDarkMode = useDarkMode()?.isEnabled;
 
+  console.log("Footer isDarkMode:", isDarkMode);
+
   const navItems = [
     { href: "/about", text: "About", icon: "info-sign" },
     { href: "/publications", text: "Publications", icon: "book" },
