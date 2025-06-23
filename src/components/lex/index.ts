@@ -897,11 +897,13 @@ export function Units({ unitsData }) {
 }
 
 
-export function Maps({ mapsData }) {
+export 
+function Maps({ mapsData }) {
   const ITEMS_PER_PAGE = 10;
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+  const data = mapsData.slice(0, visibleCount);
 
-  const visibleItems = mapsData.map(item =>
+  const visibleItems = data.map(item =>
     h('a.maps-item', { key: item.map_unit_name, href: "/maps/" + item.source_id + "?legend=" + item.legend_id },
       item.map_unit_name + " (#" + item.source_id + ")"
     )
@@ -914,10 +916,10 @@ export function Maps({ mapsData }) {
   const showLoadMore = visibleCount < mapsData.length;
 
   return h('div.maps-container', [
-    h(ExpansionPanelContainer, { title: "Maps" },
+    h(ExpansionPanel, { title: "Maps" },
       h('div.maps-list', [
         ...visibleItems,
-        // h.if(showLoadMore)('button.load-more-btn', { onClick: handleLoadMore }, 'Load More')
+        h.if(showLoadMore)('button.load-more-btn', { onClick: handleLoadMore }, 'Load More')
       ])
     )
   ]);
