@@ -901,8 +901,8 @@ export function Maps({ mapsData }) {
   const ITEMS_PER_PAGE = 10;
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
 
-  const visibleItems = mapsData.slice(0, visibleCount).map(item =>
-    h('a.maps-item', { key: item.map_unit_name, href: "/maps/" + item.source_id },
+  const visibleItems = mapsData.map(item =>
+    h('a.maps-item', { key: item.map_unit_name, href: "/maps/" + item.source_id + "?legend=" + item.legend_id },
       item.map_unit_name + " (#" + item.source_id + ")"
     )
   );
@@ -917,7 +917,7 @@ export function Maps({ mapsData }) {
     h(ExpansionPanelContainer, { title: "Maps" },
       h('div.maps-list', [
         ...visibleItems,
-        h.if(showLoadMore)('button.load-more-btn', { onClick: handleLoadMore }, 'Load More')
+        // h.if(showLoadMore)('button.load-more-btn', { onClick: handleLoadMore }, 'Load More')
       ])
     )
   ]);
