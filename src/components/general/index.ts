@@ -83,7 +83,7 @@ export function Footer() {
     h("div", { className: "footer-container" }, [
       h("div", { className: "footer-text-container" }, [
         h(Image, {
-          className: "logo_white " + (isDarkMode ? "img-dark" : "img-light"),
+          className: "logo_white " + (isDarkMode ? "img-invert" : ""),
           src: "logo_white.png",
           width: "100px",
         }),
@@ -98,7 +98,7 @@ export function Footer() {
             "a",
             { href: "https://github.com/UW-Macrostrat", target: "_blank" },
             h(Image, {
-              className: "git_logo " + (isDarkMode ? "img-light" : "img-dark"),
+              className: "git_logo " + (!isDarkMode ? "img-invert" : ""),
               src: "git-logo.png",
               width: "18px",
             })
@@ -119,7 +119,7 @@ export function Footer() {
       ]),
       h("div", { className: "footer-text-container" }, [
         h(Image, {
-          className: "funding-logo " + (isDarkMode ? "img-dark" : "img-light"),
+          className: "funding-logo " + (isDarkMode ? "img-invert" : ""),
           src: "nsf.png",
           width: "100px",
         }),
