@@ -43,10 +43,7 @@ async function getUserFromCookie(cookies: Record<string, string>) {
     let res = await jose.jwtVerify(jwt, secret);
     user = res.payload;
     console.log("User", user);
-  } catch (e) {
-    // If it fails, the user isn't logged in. Could also have an expired token...
-    console.log("Anonymous user");
-  }
+  } catch (e) {}
 
   return user;
 }

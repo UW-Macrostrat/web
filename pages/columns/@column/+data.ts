@@ -41,14 +41,17 @@ export async function data(pageContext) {
 
   const [columns, units]: [any, any] = responses;
 
-  const col = columns?.[0];
+  const col = columns?.[0] ?? {};
+
+  if (!columns?.[0]?.properties) {
+  console.warn("Column has no properties:", columns);
+  }
 
   const columnInfo: ColumnSummary = {
-    ...col.properties,
-    geometry: col.geometry,
-    units,
+    ...(col.properties ?? {}),
+    geometry: col.geometry ?? null,
+    units: units ?? [],
   };
-
   return {
     columnInfo,
     linkPrefix,
@@ -76,6 +79,8 @@ async function getData(
     assembleURL(entity, { ...args, status_code: "active" })
   );
   let data = unwrapResponse(res);
+  console.log("Received", entity, "data:", data);
+
 
   if (data.length > 0) {
     return data;
