@@ -10,7 +10,7 @@ import { useState } from "react";
 
 export function Page() {
   const { res } = useData();
-  const [ showBody, setShowBody ] = useState(true);
+  const [showBody, setShowBody] = useState(true);
 
   const seen = new Set();
   const stats = res.filter((project) => {
@@ -52,9 +52,9 @@ export function Page() {
         h("p.stat", `${formatNumber(measurements)} measurements`),
       ]),
 
-      h(SearchContainer, { setShowBody}),
-      
-      h.if(showBody)('div.body-content', [
+      h(SearchContainer, { setShowBody }),
+
+      h.if(showBody)("div.body-content", [
         h("h2", "Dictionaries"),
         h(
           LinkCard,
@@ -117,18 +117,16 @@ function formatNumber(num) {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-function SearchContainer({setShowBody}) {
+function SearchContainer({ setShowBody }) {
   const [input, setInput] = useState("");
-  const url =  apiDomain + `/api/pg/autocomplete?name=ilike.*${input}*`;
+  const url = apiDomain + `/api/pg/autocomplete?name=ilike.*${input}*`;
   const data = useAPIResult(url) || [];
 
-
-  if(data && input.length > 0) {
+  if (data && input.length > 0) {
     setShowBody(false);
   } else {
     setShowBody(true);
   }
-  
 
   return h("div.search-container", [
     h(SearchBar, {
@@ -168,30 +166,48 @@ function SearchResults({ data }) {
   console.log("Grouped data:", grouped);
 
   return h.if(Object.keys(grouped).length > 0)("div.search-results", [
-      categories?.map((category) => {
-        const items = grouped?.[category];
-        if (!items || items?.length === 0) return;
+    categories?.map((category) => {
+      const items = grouped?.[category];
+      if (!items || items?.length === 0) return;
 
-        const link = category === "econs" ?
-          "economics" : 
-          category === "lithologies" ?
-          "lithology" : 
-          category === "strat_name_concepts" ?
-          "strat-name-concepts" : 
-          category === "lithology_attributes" ?
-          "lith-atts" :
-          category
+      const link =
+        category === "econs"
+          ? "economics"
+          : category === "lithologies"
+          ? "lithology"
+          : category === "strat_name_concepts"
+          ? "strat-name-concepts"
+          : category === "lithology_attributes"
+          ? "lith-atts"
+          : category;
 
-        return h("div.search-category", [
-          h("h3.category", (category.charAt(0).toUpperCase() + category.slice(1)).replace(/_/g, " ")),
-          h('div.items', items?.map((item) => {
+      return h("div.search-category", [
+        h(
+          "h3.category",
+          (category.charAt(0).toUpperCase() + category.slice(1)).replace(
+            /_/g,
+            " "
+          )
+        ),
+        h(
+          "div.items",
+          items?.map((item) => {
             const { name } = item;
-            const href = category === "columns" || category === "projects" || category === "maps" ? `/${link}/${item.id}` : `/lex/${link}/${item.id}`;
+            const href =
+              category === "columns" ||
+              category === "projects" ||
+              category === "maps"
+                ? `/${link}/${item.id}`
+                : `/lex/${link}/${item.id}`;
             console.log("Item:", item, "Href:", href, "category:", category);
-            return h("a.item", { href }, name.charAt(0).toUpperCase() + name.slice(1));
-          })),
-        ]);
-      }),
-    ])
-
+            return h(
+              "a.item",
+              { href },
+              name.charAt(0).toUpperCase() + name.slice(1)
+            );
+          })
+        ),
+      ]);
+    }),
+  ]);
 }

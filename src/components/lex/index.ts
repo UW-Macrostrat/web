@@ -161,7 +161,7 @@ function LexItemHeader({ resData, name, siftLink, id }) {
             color: chromaColor?.luminance(luminance).hex(),
           },
         },
-        UpperCase(name),
+        UpperCase(name)
       ),
       h.if(abbrev)(IntAbbrev, {
         abbrev: resData.abbrev,
@@ -247,8 +247,11 @@ function UpperCase(str) {
 
 export function Timescales({ timescales }) {
   return h.if(timescales?.length)("div.int-timescales", [
-    h(ExpansionPanelContainer, { title: "Timescales" },
-      h("ul",
+    h(
+      ExpansionPanelContainer,
+      { title: "Timescales" },
+      h(
+        "ul",
         timescales?.map((t) =>
           h(
             "li",
@@ -891,25 +894,30 @@ export function Units({ unitsData }) {
     return unitsData.slice(0, visibleCount);
   }, [unitsData, visibleCount]);
 
-  const visibleItems = data.map(item =>
-    h('a.unit-item', { href: "/columns/" + item.col_id + "#unit=" + item.unit_id }, item.unit_name + " (#" + item.unit_id + ")")
+  const visibleItems = data.map((item) =>
+    h(
+      "a.unit-item",
+      { href: "/columns/" + item.col_id + "#unit=" + item.unit_id },
+      item.unit_name + " (#" + item.unit_id + ")"
+    )
   );
 
   const handleLoadMore = () => {
-    setVisibleCount(prev => Math.min(prev + ITEMS_PER_PAGE, unitsData.length));
+    setVisibleCount((prev) =>
+      Math.min(prev + ITEMS_PER_PAGE, unitsData.length)
+    );
   };
 
   const showLoadMore = visibleCount < unitsData.length;
 
-  return h('div.units-container', [
+  return h("div.units-container", [
     h(ExpansionPanel, { title: "Units", className: "units-panel" }, [
-      h('div.units-list', [
-        ...visibleItems,
-      ]),
-      h.if(showLoadMore)('div.load-more-wrapper',
-        h('button.load-more-btn', { onClick: handleLoadMore }, 'Load More')
-      )
-    ])
+      h("div.units-list", [...visibleItems]),
+      h.if(showLoadMore)(
+        "div.load-more-wrapper",
+        h("button.load-more-btn", { onClick: handleLoadMore }, "Load More")
+      ),
+    ]),
   ]);
 }
 
@@ -920,27 +928,31 @@ export function Maps({ mapsData }) {
     return mapsData.slice(0, visibleCount);
   }, [mapsData, visibleCount]);
 
-  const visibleItems = data.map(item =>
-    h('a.maps-item', { key: item.map_unit_name, href: "/maps/" + item.source_id + "?legend=" + item.legend_id },
+  const visibleItems = data.map((item) =>
+    h(
+      "a.maps-item",
+      {
+        key: item.map_unit_name,
+        href: "/maps/" + item.source_id + "?legend=" + item.legend_id,
+      },
       item.map_unit_name + " (#" + item.source_id + ")"
     )
   );
 
   const handleLoadMore = () => {
-    setVisibleCount(prev => Math.min(prev + ITEMS_PER_PAGE, mapsData.length));
+    setVisibleCount((prev) => Math.min(prev + ITEMS_PER_PAGE, mapsData.length));
   };
 
   const showLoadMore = visibleCount < mapsData.length;
 
-  return h('div.maps-container', [
+  return h("div.maps-container", [
     h(ExpansionPanel, { title: "Maps", className: "maps-panel" }, [
-      h('div.maps-list', [
-        ...visibleItems,
-      ]),
-      h.if(showLoadMore)('div.load-more-wrapper',
-        h('button.load-more-btn', { onClick: handleLoadMore }, 'Load More')
-      )
-    ])
+      h("div.maps-list", [...visibleItems]),
+      h.if(showLoadMore)(
+        "div.load-more-wrapper",
+        h("button.load-more-btn", { onClick: handleLoadMore }, "Load More")
+      ),
+    ]),
   ]);
 }
 
@@ -951,24 +963,31 @@ export function Fossils({ fossilsData }) {
     return fossilsData.slice(0, visibleCount);
   }, [fossilsData, visibleCount]);
 
-  const visibleItems = data.map(item =>
-    h('a.fossil-item', { href: `https://paleobiodb.org/classic/displayCollResults?collection_no=col:${item.cltn_id}` }, item.cltn_name + " (#" + item.cltn_id + ")")
+  const visibleItems = data.map((item) =>
+    h(
+      "a.fossil-item",
+      {
+        href: `https://paleobiodb.org/classic/displayCollResults?collection_no=col:${item.cltn_id}`,
+      },
+      item.cltn_name + " (#" + item.cltn_id + ")"
+    )
   );
 
   const handleLoadMore = () => {
-    setVisibleCount(prev => Math.min(prev + ITEMS_PER_PAGE, fossilsData.length));
+    setVisibleCount((prev) =>
+      Math.min(prev + ITEMS_PER_PAGE, fossilsData.length)
+    );
   };
 
   const showLoadMore = visibleCount < fossilsData.length;
 
-  return h('div.fossils-container', [
+  return h("div.fossils-container", [
     h(ExpansionPanel, { title: "Fossils", className: "fossils-panel" }, [
-      h('div.fossils-list', [
-        ...visibleItems,
-      ]),
-      h.if(showLoadMore)('div.load-more-wrapper',
-        h('button.load-more-btn', { onClick: handleLoadMore }, 'Load More')
-      )
-    ])
+      h("div.fossils-list", [...visibleItems]),
+      h.if(showLoadMore)(
+        "div.load-more-wrapper",
+        h("button.load-more-btn", { onClick: handleLoadMore }, "Load More")
+      ),
+    ]),
   ]);
 }

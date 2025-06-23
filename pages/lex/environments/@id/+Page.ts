@@ -7,11 +7,12 @@ import {
   PrevalentTaxa,
   Timescales,
   Units,
-  Fossils
+  Fossils,
 } from "~/components/lex";
 
 export function Page() {
-  const { resData, colData, taxaData, refs, unitsData, fossilsData } = useData();
+  const { resData, colData, taxaData, refs, unitsData, fossilsData } =
+    useData();
 
   const id = resData.environ_id;
   const features = colData?.features || [];
@@ -26,7 +27,7 @@ export function Page() {
     h(PrevalentTaxa, { taxaData }),
     h(Timescales, { timescales }),
     h(Units, { unitsData }),
-    h(Fossils, { fossilsData })
+    h(Fossils, { fossilsData }),
   ];
 
   return LexItemPage({ children, id, refs, resData, siftLink: "environment" });

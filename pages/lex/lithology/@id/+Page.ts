@@ -12,7 +12,8 @@ import {
 } from "~/components/lex";
 
 export function Page() {
-  const { resData, colData, taxaData, refs, unitsData, fossilsData, mapsData } = useData();
+  const { resData, colData, taxaData, refs, unitsData, fossilsData, mapsData } =
+    useData();
 
   const id = resData.lith_id;
   const features = colData?.features || [];
@@ -28,7 +29,7 @@ export function Page() {
     h(Timescales, { timescales }),
     h(Units, { unitsData }),
     h(Fossils, { fossilsData }),
-    h(Maps, { mapsData })
+    h(Maps, { mapsData }),
   ];
 
   return LexItemPage({ children, id, refs, resData, siftLink: "lithology" });
