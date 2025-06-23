@@ -30,13 +30,19 @@ export function Page() {
   const [data, setData] = useState(sources);
   const pageSize = 20;
 
-  const result = useSourceData(key.lastID, input, pageSize, activeOnly, recentOrder, key.lastYear);
+  const result = useSourceData(
+    key.lastID,
+    input,
+    pageSize,
+    activeOnly,
+    recentOrder,
+    key.lastYear
+  );
 
   useEffect(() => {
     if (
       result &&
-      data[data.length - 1]?.source_id !==
-        result[result.length - 1]?.source_id
+      data[data.length - 1]?.source_id !== result[result.length - 1]?.source_id
     ) {
       setData((prevData) => {
         return [...prevData, ...result];
@@ -57,7 +63,7 @@ export function Page() {
     setInput(event.toLowerCase());
     resetData();
   };
-  
+
   const handleActiveChange = () => {
     setActiveOnly(!activeOnly);
     resetData();
@@ -68,10 +74,10 @@ export function Page() {
     resetData();
   };
 
-  return h('div.maps-page', [
+  return h("div.maps-page", [
     h(ContentPage, [
-      h(StickyHeader, {className: "header-container"}, [
-        h('div.header', [
+      h(StickyHeader, { className: "header-container" }, [
+        h("div.header", [
           h(PageBreadcrumbs, {
             title: "Maps",
           }),
@@ -109,21 +115,29 @@ export function Page() {
       ),
       LoadMoreTrigger({ data, setKey, pageSize, result }),
     ]),
-
   ]);
 }
 
-function useSourceData(lastID, input, pageSize, activeOnly, recentOrder, lastYear) {
+function useSourceData(
+  lastID,
+  input,
+  pageSize,
+  activeOnly,
+  recentOrder,
+  lastYear
+) {
   const url = `${apiDomain}/api/pg/sources_metadata`;
 
   const result = useAPIResult(url, {
-      is_finalized: activeOnly ? "eq.true" : undefined,
-      status_code: activeOnly ? "eq.active" : undefined,
-      source_id: !recentOrder ? `gt.${lastID}` : undefined,
-      or: recentOrder ? `(ref_year.lt.${lastYear},and(ref_year.eq.${lastYear},source_id.gt.${lastID}))` : undefined,
-      name: `ilike.%${input}%`,
-      limit: pageSize,
-      order: recentOrder ? "ref_year.desc,source_id.asc" : "source_id.asc",
+    is_finalized: activeOnly ? "eq.true" : undefined,
+    status_code: activeOnly ? "eq.active" : undefined,
+    source_id: !recentOrder ? `gt.${lastID}` : undefined,
+    or: recentOrder
+      ? `(ref_year.lt.${lastYear},and(ref_year.eq.${lastYear},source_id.gt.${lastID}))`
+      : undefined,
+    name: `ilike.%${input}%`,
+    limit: pageSize,
+    order: recentOrder ? "ref_year.desc,source_id.asc" : "source_id.asc",
   });
   return result;
 }
@@ -164,18 +178,16 @@ function SourceItem({ data }) {
     LinkCard,
     {
       href,
-      title: h('div.title', [
-        h('h2', name),
+      title: h("div.title", [
+        h("h2", name),
         h("div", { className: "size " + scale }, scale),
-      ])
+      ]),
     },
     [
-      h('div.content', [
+      h("div.content", [
         h("a", { href: url, target: "_blank" }, ref_title),
-        h('div.tags', [
-          h(IDTag, { id: source_id }),
-        ])
-      ])
+        h("div.tags", [h(IDTag, { id: source_id })]),
+      ]),
     ]
   );
 }

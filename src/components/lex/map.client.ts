@@ -8,7 +8,6 @@ import { ErrorBoundary } from "@macrostrat/ui-components";
 import { ColumnsMap } from "~/columns-map/index.client";
 import { ExpansionPanel } from "@macrostrat/map-interface";
 
-
 export function ColumnsMapContainer(props) {
   /* TODO: integrate this with shared web components */
   return h(ErrorBoundary, h(ColumnsMapInner, props));

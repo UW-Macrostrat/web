@@ -10,7 +10,7 @@ import { useState } from "react";
 
 export function Page() {
   const { res } = useData();
-  const [ showBody, setShowBody ] = useState(true);
+  const [showBody, setShowBody] = useState(true);
 
   const seen = new Set();
   const stats = res.filter((project) => {
@@ -52,9 +52,9 @@ export function Page() {
         h("p.stat", `${formatNumber(measurements)} measurements`),
       ]),
 
-      h(SearchContainer, { setShowBody}),
-      
-      h.if(showBody)('div.body-content', [
+      h(SearchContainer, { setShowBody }),
+
+      h.if(showBody)("div.body-content", [
         h("h2", "Dictionaries"),
         h(
           LinkCard,
@@ -117,18 +117,16 @@ function formatNumber(num) {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-function SearchContainer({setShowBody}) {
+function SearchContainer({ setShowBody }) {
   const [input, setInput] = useState("");
   const url = apiV2Prefix + "/defs/autocomplete?query=" + input;
   const data = useAPIResult(url)?.success?.data || [];
 
-
-  if(data && input.length > 0) {
+  if (data && input.length > 0) {
     setShowBody(false);
   } else {
     setShowBody(true);
   }
-  
 
   return h("div.search-container", [
     h(SearchBar, {
@@ -140,7 +138,6 @@ function SearchContainer({setShowBody}) {
 }
 
 function SearchResults({ data }) {
-
   const categories = [
     "columns",
     "econs",
@@ -163,28 +160,41 @@ function SearchResults({ data }) {
   ];
 
   return h.if(Object.keys(data).length > 0)("div.search-results", [
-      categories?.map((category) => {
-        const items = data?.[category];
-        if (!items || items?.length === 0) return;
+    categories?.map((category) => {
+      const items = data?.[category];
+      if (!items || items?.length === 0) return;
 
-        const link = category === "econs" ?
-          "economics" : 
-          category === "lithologies" ?
-          "lithology" : 
-          category === "strat_name_concepts" ?
-          "strat-name-concepts" : 
-          category === "lithology_attributes" ?
-          "lith-atts" :
-          category
+      const link =
+        category === "econs"
+          ? "economics"
+          : category === "lithologies"
+          ? "lithology"
+          : category === "strat_name_concepts"
+          ? "strat-name-concepts"
+          : category === "lithology_attributes"
+          ? "lith-atts"
+          : category;
 
-        return h("div.search-category", [
-          h("h3.category", (category.charAt(0).toUpperCase() + category.slice(1)).replace(/_/g, " ")),
-          h('div.items', items?.map((item) => {
+      return h("div.search-category", [
+        h(
+          "h3.category",
+          (category.charAt(0).toUpperCase() + category.slice(1)).replace(
+            /_/g,
+            " "
+          )
+        ),
+        h(
+          "div.items",
+          items?.map((item) => {
             const { name } = item;
-            return h("a.item", { href: `/lex/${link}/${item.id}` }, name.charAt(0).toUpperCase() + name.slice(1));
-          })),
-        ]);
-      }),
-    ])
-
+            return h(
+              "a.item",
+              { href: `/lex/${link}/${item.id}` },
+              name.charAt(0).toUpperCase() + name.slice(1)
+            );
+          })
+        ),
+      ]);
+    }),
+  ]);
 }

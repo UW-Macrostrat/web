@@ -7,7 +7,8 @@
   font-size: 0.8em;
 }
 
-h1, h3 {
+h1,
+h3 {
   margin: 0;
 }
 
@@ -113,21 +114,21 @@ h1, h3 {
 .content {
   display: flex;
   justify-content: space-between;
-  padding-top: .5em;
+  padding-top: 0.5em;
   align-items: center;
 }
 
 .tiny {
-  background-color: #45B29D;
+  background-color: #45b29d;
 }
 .small {
-  background-color: #45B29D;
+  background-color: #45b29d;
 }
 .medium {
-  background-color: #E27A3F;
+  background-color: #e27a3f;
 }
 .large {
-  background-color: #3498DB;
+  background-color: #3498db;
 }
 
 .maps-page {
@@ -169,6 +170,6 @@ h1, h3 {
     display: flex;
     flex-direction: column;
     gap: 1em;
-    width: 70%
+    width: 70%;
   }
 }
