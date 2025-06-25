@@ -5,7 +5,7 @@ import { Link, PageBreadcrumbs } from "~/components";
 import { Card, Divider } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import { BlankImage, Footer, Loading, StratTag } from "~/components/general";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { DarkModeButton } from "@macrostrat/ui-components";
 import { PieChart, Pie, Cell, ResponsiveContainer, Label } from "recharts";
@@ -135,6 +135,30 @@ export function ColumnsTable({ resData, colData }) {
 
 export function Intervals({ resData }) {
   const { b_age, t_age } = resData;
+  const [clickedInterval, setClickedInterval] = useState(null);
+
+  useEffect(() => {
+    if (!clickedInterval) return;
+
+    const fetchInterval = async () => {
+      try {
+        const res = await fetch(
+          `https://macrostrat.org/api/defs/intervals?name=${clickedInterval}`
+        );
+        const data = await res.json();
+        const clickedData = data?.success?.data?.[0];
+        if (clickedData) {
+          const url = "/lex/intervals/" + clickedData.int_id;
+          window.open(url, "_blank");
+        }
+      } catch (error) {
+        console.error("Error fetching interval data:", error);
+      }
+    };
+
+    fetchInterval();
+  }, [clickedInterval]);
+
   return h(
     "div.timescale",
     h(Timescale, {
@@ -142,6 +166,7 @@ export function Intervals({ resData }) {
       levels: [1, 5],
       ageRange: [b_age, t_age],
       absoluteAgeScale: true,
+      onClick: (e, data) => setClickedInterval(data.nam),
     })
   );
 }
