@@ -17,6 +17,7 @@ import { Footer, Loading } from "~/components/general";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { Popover } from "@blueprintjs/core";
 import { useData } from "vike-react/useData";
+import { data } from "#/+data";
 
 export function Page() {
   const { res, intervals, id } = useData();
@@ -52,22 +53,8 @@ export function Page() {
 
   const { min_age, max_age, timescale } = timeRes;
 
-  const handleClick = (timescale) => {
-    const parent = timescale.target.parentElement;
-    let selected;
-
-    // container clicked
-    const containerClickedData = parent.className.split(" ")[1];
-
-    if (containerClickedData === "interval-label") {
-      const labelClickedData =
-        parent.parentElement.parentElement.className.split(" ")[1];
-      selected = labelClickedData;
-    } else {
-      selected = containerClickedData;
-    }
-
-    setClickedInterval(selected);
+  const handleClick = (e, data) => {
+    setClickedInterval(data.nam);
   };
 
   return h("div", [
