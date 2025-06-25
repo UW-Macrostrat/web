@@ -52,22 +52,10 @@ export function Page() {
     return matchesName && matchesAgeRange;
   });
 
-  const handleClick = (timescale) => {
-    const parent = timescale.target.parentElement;
-    let selected;
+  const handleClick = (e, data) => {
+    console.log("Clicked timescale:", data);
 
-    // container clicked
-    const containerClickedData = parent.className.split(" ")[1];
-
-    if (containerClickedData === "interval-label") {
-      const labelClickedData =
-        parent.parentElement.parentElement.className.split(" ")[1];
-      selected = labelClickedData;
-    } else {
-      selected = containerClickedData;
-    }
-
-    setClickedInterval(selected);
+    setClickedInterval(data.nam);
   };
 
   return h(ContentPage, { className: "timescale-list-page" }, [
