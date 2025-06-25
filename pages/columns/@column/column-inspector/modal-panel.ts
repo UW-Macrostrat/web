@@ -57,7 +57,7 @@ export function ModalUnitPanel(props) {
     columnUnits: unitData,
     features,
     onClickItem: (e, unit) => {
-
+      console.log("Clicked unit", unit);
       if(unit?.lith_id) {
         window.open(`/lex/lithology/${unit.lith_id}`);
       }
