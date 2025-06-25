@@ -1,5 +1,5 @@
 import h from "./main.module.sass";
-import { useAPIResult } from "@macrostrat/ui-components";
+import { useAPIResult, InfiniteScrollView } from "@macrostrat/ui-components";
 import { apiDomain } from "@macrostrat-web/settings";
 import { StickyHeader, LinkCard, PageBreadcrumbs, Link } from "~/components";
 import { Spinner } from "@blueprintjs/core";
@@ -55,14 +55,18 @@ export function Page() {
         onChange: handleChange,
       }),
     ]),
-    h(
-      "div.strat-list",
-      h(
-        "div.strat-items",
-        data.map((data) => h(MineralItem, { data }))
-      )
-    ),
-    LoadMoreTrigger({ data, setLastID, pageSize, result }),
+    h(InfiniteScrollView, {
+      params: {
+        order: "id.asc",
+        mineral: `ilike.*${input}*`,
+        id: `gt.${lastID}`,
+        limit: pageSize,
+      },
+      route: `${apiDomain}/api/pg/minerals`,
+      getNextParams,
+      initialData: res,
+      itemComponent: MineralItem,
+    })
   ]);
 }
 
@@ -84,31 +88,13 @@ function useMineralData(lastID, input, pageSize) {
 
   const result = useAPIResult(url);
 
-  console.log("Mineral data fetched:", result);
-
   return result;
 }
 
-function LoadMoreTrigger({ data, setLastID, pageSize, result }) {
-  const ref = useRef(null);
-
-  useEffect(() => {
-    if (!ref.current) return;
-
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        if (data.length > 0) {
-          const id = data[data.length - 1].id;
-
-          setLastID(id);
-        }
-      }
-    });
-
-    observer.observe(ref.current);
-
-    return () => observer.disconnect();
-  }, [data, setLastID]);
-
-  return h.if(result?.length == pageSize)("div.load-more", { ref }, h(Spinner));
+function getNextParams(response, params) {
+  console.log("getNextParams", response, params, "gt." + response[response.length - 1].id);
+  return {
+    ...params,
+    id: "gt." + response[response.length - 1].id,
+  };
 }
