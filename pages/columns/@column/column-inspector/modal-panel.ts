@@ -56,8 +56,15 @@ export function ModalUnitPanel(props) {
     onSelectUnit,
     columnUnits: unitData,
     features,
-    onClickItem: (unit) => {
-      console.log("Clicked unit:", unit);
+    onClickItem: (e, unit) => {
+
+      if(unit?.lith_id) {
+        window.open(`/lex/lithology/${unit.lith_id}`);
+      }
+
+      if(unit?.environ_id) {
+        window.open(`/lex/environments/${unit.environ_id}`);
+      }
     },
   });
 }
