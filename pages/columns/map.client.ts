@@ -19,27 +19,21 @@ function ColumnsMapInner({ columnIDs = null, projectID = null, className, hideCo
     return h("div", { className }, "Loading map...");
   }
 
-  const params = { 
-    style: { height: "100%" },
-    accessToken: mapboxAccessToken,
-    onSelectColumn: (col) => {
-      if (col) {
-        window.open(`/columns/${col}`, "_blank");
-      }
-    }
-  }
-
-  console.log("hidecolumns", hideColumns);
-
-  if(!hideColumns) {
-    params.columns = columnData;
-    params.columnIDs = columnIDs;
-  } else {
-    params.columns = [];
-  }
   return h(
     "div",
     { className },
-    h(ColumnNavigationMap, params),
+    h(ColumnNavigationMap, 
+      { 
+        style: { height: "100%" },
+        accessToken: mapboxAccessToken,
+        onSelectColumn: (col) => {
+          if (col) {
+            window.open(`/columns/${col}`, "_blank");
+          }
+        },
+        columnIDs,
+        columns: hideColumns ? [] :columnData,
+      }
+    ),
   );
 }
