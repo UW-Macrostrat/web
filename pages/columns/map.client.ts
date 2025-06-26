@@ -32,7 +32,14 @@ function ColumnsMapInner({ columnIDs = null, projectID = null, className, hideCo
           }
         },
         columnIDs,
-        columns: hideColumns ? [] :columnData,
+        columns: hideColumns ? [] : columnData,
+        mapPosition: {
+          camera: {
+            lat: 39, 
+            lng: -98, 
+            altitude: 10000000,
+          },
+        }
       }
     ),
   );
