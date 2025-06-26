@@ -1,7 +1,7 @@
 import h from "./main.module.scss";
 import { PageBreadcrumbs, StickyHeader, Link } from "~/components";
 import { Card, Popover, RangeSlider } from "@blueprintjs/core";
-import { useState } from "react";
+import { useState, memo } from "react";
 import { ContentPage } from "~/layouts";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { SearchBar } from "~/components/general";
@@ -17,7 +17,7 @@ export function Page() {
     setInput(e.toLowerCase());
   };
 
-  const filtered = res.filter((d) => {
+  const filtered = input.length < 3 ? res : res.filter((d) => {
     const name = d.name?.toLowerCase() || "";
     const intType = d.int_type?.toLowerCase() || "";
     const abbrev = d.abbrev?.toLowerCase() || "";
@@ -66,16 +66,16 @@ export function Page() {
             h("h2", UpperCase(intType)),
             h(
               "div.int-items",
-              group.map((d) => h(LithologyTag, {
-                    data: {
-                      id: d.int_id,
-                      name: d.name,
-                      color: d.color || "#000000",
-                    },
-                    onClick: (e, d) => {
-                        window.open(`/lex/intervals/${d.id}`, "_blank");
-                    },
-                })),
+              group.map((d) => h(MemoLithologyTag, {
+                  data: {
+                    id: d.int_id,
+                    name: d.name,
+                    color: d.color || "#000000",
+                  },
+                  onClick: (e, d) => {
+                      window.open(`/lex/intervals/${d.id}`, "_blank");
+                  },
+              })),
             ),
           ])
         )
@@ -101,3 +101,15 @@ function groupByIntType(items) {
 function UpperCase(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
+
+const MemoLithologyTag = memo(
+  function MemoLithologyTag({ data, onClick }) {
+    return h(LithologyTag, { data, onClick });
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.data.name === nextProps.data.name
+    );
+  }
+);
