@@ -24,6 +24,13 @@ function ColumnsMapInner({
 }) {
   columns = columns.features
 
+  columns = columns.map((col) => {
+    // Add a property to each column feature for the column ID
+    col.id = col.properties.col_id;
+    return col;
+  });
+
+
   console.log("ColumnsMapInner", columns);
   
   return h(
@@ -33,29 +40,12 @@ function ColumnsMapInner({
       columns,
       accessToken: mapboxAccessToken,
       style: {height: "100%"},
-      onSelectColumn: (e, data) => {
-        console.log("Selected column:", data.properties.col_id);
+      onSelectColumn: (id) => {
+        window.open(
+          `/columns/${id}`,
+          "_blank"
+        );
       }
-    })
-  );
-}
-
-export function ColumnsMapOld({
-  projectID,
-  inProcess,
-  className,
-  selectedColumn,
-  onSelectColumn,
-}) {
-  return h(
-    ErrorBoundary,
-    h(ColumnNavigationMap, {
-      className,
-      inProcess,
-      projectID,
-      accessToken: mapboxAccessToken,
-      selectedColumn,
-      onSelectColumn,
     })
   );
 }
