@@ -66,6 +66,5 @@ function getNextParams(response, params) {
 }
 
 function hasMore(response) {
-  console.log("hasMore", response);
   return response.length === PAGE_SIZE; 
 }

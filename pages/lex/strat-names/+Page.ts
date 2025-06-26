@@ -9,11 +9,12 @@ import { SearchBar, StratTag } from "~/components/general";
 import { useData } from "vike-react/useData";
 import { InfiniteScrollView } from "@macrostrat/ui-components";
 
+const PAGE_SIZE = 20;
+
 export function Page() {
   const { res } = useData();
 
   const [input, setInput] = useState("");
-  const pageSize = 20;
 
   const handleChange = (event) => {
     setInput(event.toLowerCase());
@@ -59,20 +60,22 @@ export function Page() {
         order: "combined_id.asc",
         all_names: `ilike.*${input}*`,
         combined_id: `gt.0`,
-        limit: pageSize,
+        limit: PAGE_SIZE,
       },
       route: `${apiDomain}/api/pg/strat_combined`,
       getNextParams,
       initialData: res,
       itemComponent: StratItem,
+      hasMore,
     })
   ]);
 }
 
 function getNextParams(response, params) {
+  const id = response[response.length - 1]?.combined_id;
   return {
     ...params,
-    combined_id: "gt." + response[response.length - 1].combined_id,
+    combined_id: "gt." + id,
   };
 }
 
@@ -139,4 +142,8 @@ function ConceptBody({ data, input }) {
       ),
     ]),
   ]);
+}
+
+function hasMore(response) {
+  return response.length === PAGE_SIZE;
 }
