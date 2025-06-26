@@ -64,6 +64,16 @@ export function ModalUnitPanel(props) {
       if(unit?.environ_id) {
         window.open('/lex/environments/' + unit.environ_id, '_blank');
       }
+
+      if(e?.data?.int_id) { // fix when new we components release is out
+        window.open('/lex/intervals/' + e.data.int_id, '_blank');
+      }
+
+      /* // implement when new web components release is out
+      if(unit?.strat_name_id) {
+        window.open('/lex/strat-names/' + unit.strat_name_id, '_blank');
+      }
+      */
     },
   });
 }
