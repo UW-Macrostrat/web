@@ -3162,28 +3162,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/data-components@npm:^0.1.0":
-  version: 0.1.0
-  resolution: "@macrostrat/data-components@npm:0.1.0"
-  dependencies:
-    "@macrostrat/color-utils": "npm:^1.1.0"
-    "@macrostrat/hyper": "npm:^3.0.6"
-    "@macrostrat/stratigraphy-utils": "npm:^1.0.0"
-    "@macrostrat/ui-components": "npm:^4.2.0"
-    "@visx/axis": "npm:^3.12.0"
-    "@visx/gradient": "npm:^3.12.0"
-    "@visx/scale": "npm:^3.12.0"
-    "@visx/shape": "npm:^3.12.0"
-    axios: "npm:^1.7.9"
-    classnames: "npm:^2.5.1"
-    d3-array: "npm:^3.2.4"
-  peerDependencies:
-    "@blueprintjs/core": ^5.10.2
-    react: ^16.8.6||^17.0.2||^18
-  checksum: 10/9bc8c9f16f97b479cb5af686f3cab07fc6d61f22982826c652b71289989919a79edfa4f37a260f876f108ebefa5ced7e907b76e3b7cfab3ad843ed6150a21ce0
-  languageName: node
-  linkType: hard
-
 "@macrostrat/data-components@npm:^0.2.0":
   version: 0.2.0
   resolution: "@macrostrat/data-components@npm:0.2.0"
@@ -3709,7 +3687,7 @@ __metadata:
     "@macrostrat/color-utils": "npm:^1.1.0"
     "@macrostrat/column-components": "npm:^1.1.0"
     "@macrostrat/column-views": "npm:^2.1.1"
-    "@macrostrat/data-components": "npm:^0.1.0"
+    "@macrostrat/data-components": "npm:^0.2.0"
     "@macrostrat/data-sheet": "npm:^2.0.2"
     "@macrostrat/feedback-components": "npm:^1.1.0"
     "@macrostrat/form-components": "npm:^0.2.1"

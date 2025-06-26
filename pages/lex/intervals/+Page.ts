@@ -5,7 +5,7 @@ import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { SearchBar } from "~/components/general";
-import { IntervalTag } from "@macrostrat/data-components";
+import { LithologyTag } from "@macrostrat/data-components";
 import { useData } from "vike-react/useData";
 
 export function Page() {
@@ -34,7 +34,6 @@ export function Page() {
   });
 
   const grouped = groupByIntType(filtered);
-  console.log(grouped);
 
   return h("div.int-list-page", [
     h(ContentPage, [
@@ -67,7 +66,15 @@ export function Page() {
             h("h2", UpperCase(intType)),
             h(
               "div.int-items",
-              group.map((d) => h(EconItem, { data: d, key: d.environ_id }))
+              group.map((d) => h(LithologyTag, 
+                { 
+                  data: {
+                  lith_id: d.int_id,
+                  name: d.name,
+                },
+                color: d.color.includes("#") ? d.color : `rgba(${d.color})`,
+                onClick: (e, d) => console.log("Clicked item"),  
+              }))
             ),
           ])
         )
@@ -81,8 +88,6 @@ function EconItem({ data }) {
   const chromaColor = color ? asChromaColor(color) : null;
   const luminance = 0.9;
   data.id = int_id;
-
-  // return IntervalTag({ showAgeRange: true, interval: data });
 
   return h(
     Popover,
