@@ -66,15 +66,16 @@ export function Page() {
             h("h2", UpperCase(intType)),
             h(
               "div.int-items",
-              group.map((d) => h(LithologyTag, 
-                { 
-                  data: {
-                  lith_id: d.int_id,
-                  name: d.name,
-                },
-                color: d.color.includes("#") ? d.color : `rgba(${d.color})`,
-                onClick: (e, d) => console.log("Clicked item"),  
-              }))
+              group.map((d) => h(LithologyTag, {
+                    data: {
+                      id: d.int_id,
+                      name: d.name,
+                      color: d.color || "#000000",
+                    },
+                    onClick: (e, d) => {
+                        window.open(`/lex/intervals/${d.id}`, "_blank");
+                    },
+                })),
             ),
           ])
         )
@@ -88,6 +89,19 @@ function EconItem({ data }) {
   const chromaColor = color ? asChromaColor(color) : null;
   const luminance = 0.9;
   data.id = int_id;
+
+  return h(LithologyTag, {
+    data: {
+      id: int_id,
+      name: name,
+      color: chromaColor?.hex() || "#000000",
+    }
+    ,
+    onClick: (e, d) => {
+      console.log("Clicked item", d);
+    },
+  });
+
 
   return h(
     Popover,
