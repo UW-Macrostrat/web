@@ -7,11 +7,12 @@ import { ContentPage } from "~/layouts";
 import { SearchBar } from "~/components/general";
 import { useData } from "vike-react/useData";
 
+const PAGE_SIZE = 20;
+
 export function Page() {
   const { res } = useData();
 
   const [input, setInput] = useState("");
-  const pageSize = 20;
 
   const handleChange = (event) => {
     setInput(event.toLowerCase());
@@ -32,11 +33,12 @@ export function Page() {
         order: "id.asc",
         mineral: `ilike.*${input}*`,
         id: `gt.0`,
-        limit: pageSize,
+        limit: PAGE_SIZE,
       },
       route: `${apiDomain}/api/pg/minerals`,
       getNextParams,
       initialData: res,
+      hasMore,
       itemComponent: MineralItem,
     })
   ]);
@@ -56,9 +58,14 @@ function MineralItem({ data }) {
 }
 
 function getNextParams(response, params) {
-  console.log("getNextParams", response, params, "gt." + response[response.length - 1].id);
+  const id = response[response.length - 1]?.id;
   return {
     ...params,
-    id: "gt." + response[response.length - 1].id,
+    id: "gt." + id,
   };
+}
+
+function hasMore(response) {
+  console.log("hasMore", response);
+  return response.length === PAGE_SIZE; 
 }
