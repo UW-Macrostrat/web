@@ -13,8 +13,11 @@ export function ColumnsMapContainer(props) {
 
 function ColumnsMapInner({ columnIDs = null, projectID = null, className }) {
   const columnData = useMacrostratColumns(projectID, projectID != null);
+  console.log("columnData", columnData);
 
-  let columns = columnData;
+  if(!columnData) {
+    return h("div", { className }, "Loading map...");
+  }
 
   return h(
     "div",
@@ -22,6 +25,7 @@ function ColumnsMapInner({ columnIDs = null, projectID = null, className }) {
     h(ColumnNavigationMap, { 
       style: { height: "100%" },
       accessToken: mapboxAccessToken,
+      columns: columnData,
       columnIDs,
       onSelectColumn: (col) => {
         if (col) {
