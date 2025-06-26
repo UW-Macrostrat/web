@@ -1,15 +1,18 @@
 import h from "./main.module.scss";
 import { PageBreadcrumbs, StickyHeader } from "~/components";
-import { Popover } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { useData } from "vike-react/useData";
-import { Loading, SearchBar } from "~/components/general";
+import { SearchBar } from "~/components/general";
 
 export function Page() {
+  const { res } = useData();  
+  return h(LexListPage, { res, title: "Economics", route: "economics", id: "econ_id" });
+}
+
+export function LexListPage({ res, title, route, id }) {
   const [input, setInput] = useState("");
-  const { res } = useData();
 
   const handleChange = (event) => {
     setInput(event.toLowerCase());
@@ -28,7 +31,7 @@ export function Page() {
 
   return h(ContentPage, { className: "econ-list-page" }, [
     h(StickyHeader, [
-      h(PageBreadcrumbs, { title: "Economics" }),
+      h(PageBreadcrumbs, { title }),
       h(SearchBar, {
         placeHolder: "Search economics...",
         onChange: handleChange,
@@ -44,7 +47,7 @@ export function Page() {
               h("h3", UpperCase(type)),
               h(
                 "div.econ-items",
-                group.map((d) => h(EconItem, { data: d, key: d.environ_id }))
+                group.map((d) => h(LexItem, { data: d, route, id }))
               ),
             ])
           ),
@@ -54,8 +57,8 @@ export function Page() {
   ]);
 }
 
-function EconItem({ data }) {
-  const { name, color, econ_id, t_units } = data;
+function LexItem({ data, route, id }) {
+  const { name, color } = data;
   const luminance = 0.9;
   const chromaColor = asChromaColor(color);
 
@@ -68,7 +71,7 @@ function EconItem({ data }) {
             backgroundColor: chromaColor?.luminance(1 - luminance).hex(),
           },
           onClick: (e) => {
-            window.open(`/lex/economics/${econ_id}`, "_blank");
+            window.open(`/lex/${route}/${data[id]}`, "_blank");
           },
         },
         name
@@ -80,9 +83,8 @@ function groupByClassThenType(items) {
   return items.reduce((acc, item) => {
     const { class: className, type } = item;
 
-    // Only include items with a valid type (not null, undefined, or empty string)
     if (!type || type.trim() === "") {
-      return acc; // Skip this item if it has no valid type
+      return acc; 
     }
 
     if (!acc[className]) {
