@@ -29,9 +29,6 @@ function ColumnsMapInner({
     col.id = col.properties.col_id;
     return col;
   });
-
-
-  console.log("ColumnsMapInner", columns);
   
   return h(
     "div",
