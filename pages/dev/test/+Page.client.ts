@@ -17,7 +17,7 @@ export function Page() {
 
     return h(ColumnNavigationMap, { 
         style: { height: "100vh" },
-        columns,
-        accessToken: mapboxAccessToken 
+        columns: [],
+        accessToken: mapboxAccessToken ,
     });
 }
