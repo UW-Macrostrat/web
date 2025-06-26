@@ -84,55 +84,10 @@ export function Page() {
   ]);
 }
 
-function EconItem({ data }) {
-  const { name, color, abbrev, b_age, int_id, t_age, timescales } = data;
-  const chromaColor = color ? asChromaColor(color) : null;
-  const luminance = 0.9;
-  data.id = int_id;
-
-  return h(LithologyTag, {
-    data: {
-      id: int_id,
-      name: name,
-      color: chromaColor?.hex() || "#000000",
-    }
-    ,
-    onClick: (e, d) => {
-      console.log("Clicked item", d);
-    },
-  });
-
-
-  return h(
-    Popover,
-    {
-      className: "int-item-popover",
-      content: h("div.int-tooltip", [
-        h("div.int-tooltip-id", "ID: #" + int_id),
-        h("div.int-tooltip-ages", b_age + " - " + t_age + " Ma"),
-        abbrev ? h("div.int-tooltip-abbrev", "Abbreviation - " + abbrev) : null,
-        h(Link, { href: "/lex/intervals/" + int_id }, "View details"),
-      ]),
-    },
-    h("div.int-item", [
-      h(
-        "div.int-name",
-        {
-          style: {
-            backgroundColor: chromaColor?.luminance(1 - luminance).hex(),
-            color: chromaColor?.luminance(luminance).hex(),
-          },
-        },
-        name
-      ),
-    ])
-  );
-}
-
 function groupByIntType(items) {
   return items.reduce((acc, item) => {
     const intType = item.int_type?.trim?.();
-    if (!intType) return acc; // Skip items with no int_type
+    if (!intType) return acc; 
 
     if (!acc[intType]) {
       acc[intType] = [];
