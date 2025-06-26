@@ -3090,9 +3090,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/column-views@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "@macrostrat/column-views@npm:2.1.0"
+"@macrostrat/column-views@npm:^2.1.1":
+  version: 2.1.1
+  resolution: "@macrostrat/column-views@npm:2.1.1"
   dependencies:
     "@macrostrat/api-types": "npm:^1.1.1"
     "@macrostrat/color-utils": "npm:^1.1.1"
@@ -3136,7 +3136,7 @@ __metadata:
   peerDependencies:
     "@blueprintjs/core": ^5.0.0
     react: ^16.13.1||^17||^18||^19
-  checksum: 10/7b7fb76898185e52bcb7842dba2561d123683ae1cbd66f77b7d1a67fd24bd39bb21ca3ada6a20a26efc171274f32b9686f1089b43d2b8f075e1cd3b300b8474f
+  checksum: 10/21f1fe36b406df08f67043345f83ea4cdf637a703411505268548f7f7c4eb1c3b31b8aebb5d360f9494b0bbe8001c2f630443dffc373d873a8a4aa00f2fb3c50
   languageName: node
   linkType: hard
 
@@ -3708,7 +3708,7 @@ __metadata:
     "@macrostrat/api-types": "npm:^1.1.0"
     "@macrostrat/color-utils": "npm:^1.1.0"
     "@macrostrat/column-components": "npm:^1.1.0"
-    "@macrostrat/column-views": "npm:^2.1.0"
+    "@macrostrat/column-views": "npm:^2.1.1"
     "@macrostrat/data-components": "npm:^0.1.0"
     "@macrostrat/data-sheet": "npm:^2.0.2"
     "@macrostrat/feedback-components": "npm:^1.1.0"
