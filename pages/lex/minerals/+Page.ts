@@ -1,45 +1,17 @@
 import h from "./main.module.sass";
-import { useAPIResult, InfiniteScrollView } from "@macrostrat/ui-components";
+import { InfiniteScrollView } from "@macrostrat/ui-components";
 import { apiDomain } from "@macrostrat-web/settings";
-import { StickyHeader, LinkCard, PageBreadcrumbs, Link } from "~/components";
-import { Spinner } from "@blueprintjs/core";
-import { useState, useEffect, useRef } from "react";
+import { StickyHeader, LinkCard, PageBreadcrumbs } from "~/components";
+import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { SearchBar } from "~/components/general";
 import { useData } from "vike-react/useData";
 
 export function Page() {
   const { res } = useData();
-  const startingID = res[res.length - 1].id;
 
   const [input, setInput] = useState("");
-  const [lastID, setLastID] = useState(startingID);
-  const [data, setData] = useState(res);
   const pageSize = 20;
-
-  const result = useMineralData(lastID, input, pageSize);
-  const prevInputRef = useRef(input);
-
-  useEffect(() => {
-    if (prevInputRef.current !== input) {
-      setData([]);
-      setLastID(0);
-
-      prevInputRef.current = input;
-    }
-  }, [input]);
-
-  useEffect(() => {
-    if (
-      result &&
-      data[data.length - 1]?.id !==
-        result[result.length - 1]?.id
-    ) {
-      setData((prevData) => {
-        return [...prevData, ...result];
-      });
-    }
-  }, [result]);
 
   const handleChange = (event) => {
     setInput(event.toLowerCase());
@@ -59,7 +31,7 @@ export function Page() {
       params: {
         order: "id.asc",
         mineral: `ilike.*${input}*`,
-        id: `gt.${lastID}`,
+        id: `gt.0`,
         limit: pageSize,
       },
       route: `${apiDomain}/api/pg/minerals`,
@@ -81,14 +53,6 @@ function MineralItem({ data }) {
       title: mineral,
     },
   );
-}
-
-function useMineralData(lastID, input, pageSize) {
-  const url = `${apiDomain}/api/pg/minerals?limit=${pageSize}&id=gt.${lastID}&order=id.asc&mineral=ilike.*${input}*`;
-
-  const result = useAPIResult(url);
-
-  return result;
 }
 
 function getNextParams(response, params) {

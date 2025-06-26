@@ -5,5 +5,6 @@ export async function data() {
   const res = await fetch(url).then((r) => {
     return r.json();
   });
+
   return { res };
 }
