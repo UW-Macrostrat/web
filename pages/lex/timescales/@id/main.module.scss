@@ -13,8 +13,16 @@ h3 {
   gap: 1em;
 }
 
+.timescale-container {
+  color: var(--text-emphasized-color) !important;
+
+  line {
+    stroke: var(--text-emphasized-color) !important;
+  }
+}
+
 tspan {
-  fill: var(--text-color); // sets the color to deep orange
+  fill: var(--text-color); 
   font-size: 14px;
 }
 
