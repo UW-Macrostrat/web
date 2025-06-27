@@ -30,11 +30,7 @@ export function Page() {
   }, [input]);
 
   useEffect(() => {
-    if (
-      result &&
-      data[data.length - 1]?.id !==
-        result[result.length - 1]?.id
-    ) {
+    if (result && data[data.length - 1]?.id !== result[result.length - 1]?.id) {
       setData((prevData) => {
         return [...prevData, ...result];
       });
@@ -69,14 +65,11 @@ export function Page() {
 function MineralItem({ data }) {
   const { id, mineral } = data;
 
-  return h(
-    LinkCard,
-    {
-      href: `/lex/minerals/${id}`,
-      className: "mineral-item",
-      title: mineral,
-    },
-  );
+  return h(LinkCard, {
+    href: `/lex/minerals/${id}`,
+    className: "mineral-item",
+    title: mineral,
+  });
 }
 
 function useMineralData(lastID, input, pageSize) {

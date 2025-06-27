@@ -16,9 +16,7 @@ export function Page() {
   const filtered = res.filter((d) => {
     const name = d.name.toLowerCase();
     const type = d.type ? d.type.toLowerCase() : "";
-    return (
-      name.includes(input) || type.includes(input)
-    );
+    return name.includes(input) || type.includes(input);
   });
 
   const grouped = groupByType(filtered);
@@ -33,17 +31,23 @@ export function Page() {
     ]),
     h(
       "div.econ-list",
-      Object.entries(grouped).map(([className, types]) => 
+      Object.entries(grouped).map(([className, types]) =>
         h("div.econ-class-group", [
           h("h2", UpperCase(className)),
           h(
             "div.econ-items",
-            types?.map((d) => h(LinkCard, { href: `/lex/lith-atts/${d.lith_att_id}` }, UpperCase(d.name)))
+            types?.map((d) =>
+              h(
+                LinkCard,
+                { href: `/lex/lith-atts/${d.lith_att_id}` },
+                UpperCase(d.name)
+              )
+            )
           ),
         ])
       )
     ),
-  ])
+  ]);
 }
 
 function groupByType(items) {

@@ -7,9 +7,7 @@ export function Page() {
 
   const id = resData.structure_id;
 
-  const children = [
-    h(StructureDetails, { resData }),
-  ];
+  const children = [h(StructureDetails, { resData })];
 
   return LexItemPage({ children, id, refs: [], resData, siftLink: "" });
 }
