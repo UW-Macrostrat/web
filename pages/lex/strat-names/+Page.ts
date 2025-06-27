@@ -7,39 +7,14 @@ import { useState, useEffect, useRef } from "react";
 import { ContentPage } from "~/layouts";
 import { SearchBar, StratTag } from "~/components/general";
 import { useData } from "vike-react/useData";
+import { InfiniteScrollView } from "@macrostrat/ui-components";
+
+const PAGE_SIZE = 20;
 
 export function Page() {
   const { res } = useData();
-  const startingID = res[res.length - 1].combined_id;
 
   const [input, setInput] = useState("");
-  const [lastID, setLastID] = useState(startingID);
-  const [data, setData] = useState(res);
-  const pageSize = 20;
-
-  const result = useStratData(lastID, input, pageSize);
-  const prevInputRef = useRef(input);
-
-  useEffect(() => {
-    if (prevInputRef.current !== input) {
-      setData([]);
-      setLastID(0);
-
-      prevInputRef.current = input;
-    }
-  }, [input]);
-
-  useEffect(() => {
-    if (
-      result &&
-      data[data.length - 1]?.combined_id !==
-        result[result.length - 1]?.combined_id
-    ) {
-      setData((prevData) => {
-        return [...prevData, ...result];
-      });
-    }
-  }, [result]);
 
   const handleChange = (event) => {
     setInput(event.toLowerCase());
@@ -48,7 +23,7 @@ export function Page() {
   return h(ContentPage, [
     h(StickyHeader, { className: "header" }, [
       h(PageBreadcrumbs, {
-        title: "Strat Names",
+        title: "Minerals",
       }),
       h("div.header-description", [
         h(
@@ -80,15 +55,28 @@ export function Page() {
         onChange: handleChange,
       }),
     ]),
-    h(
-      "div.strat-list",
-      h(
-        "div.strat-items",
-        data.map((data) => h(StratItem, { data, input }))
-      )
-    ),
-    LoadMoreTrigger({ data, setLastID, pageSize, result }),
+    h(InfiniteScrollView, {
+      params: {
+        order: "combined_id.asc",
+        all_names: `ilike.*${input}*`,
+        combined_id: `gt.0`,
+        limit: PAGE_SIZE,
+      },
+      route: `${apiDomain}/api/pg/strat_combined`,
+      getNextParams,
+      initialData: res,
+      itemComponent: StratItem,
+      hasMore,
+    })
   ]);
+}
+
+function getNextParams(response, params) {
+  const id = response[response.length - 1]?.combined_id;
+  return {
+    ...params,
+    combined_id: "gt." + id,
+  };
 }
 
 function StratItem({ data, input }) {
@@ -129,9 +117,10 @@ function ConceptBody({ data, input }) {
   }));
 
   // only show strats that match the input
-  if (strats?.some((s) => s.name.toLowerCase().includes(input.toLowerCase()))) {
+  if (strats?.some((s) => s.name.toLowerCase().includes(input?.toLowerCase()))) {
+    console.log("Filtering strats", strats, input);
     strats = strats.filter((s) =>
-      s.name.toLowerCase().includes(input.toLowerCase())
+      s.name.toLowerCase().includes(input?.toLowerCase())
     );
   }
 
@@ -155,34 +144,6 @@ function ConceptBody({ data, input }) {
   ]);
 }
 
-function useStratData(lastID, input, pageSize) {
-  const url = `${apiDomain}/api/pg/strat_combined?limit=${pageSize}&combined_id=gt.${lastID}&order=combined_id.asc&all_names=ilike.*${input}*`;
-
-  const result = useAPIResult(url);
-
-  return result;
-}
-
-function LoadMoreTrigger({ data, setLastID, pageSize, result }) {
-  const ref = useRef(null);
-
-  useEffect(() => {
-    if (!ref.current) return;
-
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        if (data.length > 0) {
-          const id = data[data.length - 1].combined_id;
-
-          setLastID(id);
-        }
-      }
-    });
-
-    observer.observe(ref.current);
-
-    return () => observer.disconnect();
-  }, [data, setLastID]);
-
-  return h.if(result?.length == pageSize)("div.load-more", { ref }, h(Spinner));
+function hasMore(response) {
+  return response.length === PAGE_SIZE;
 }

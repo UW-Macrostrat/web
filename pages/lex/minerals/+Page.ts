@@ -1,41 +1,18 @@
 import h from "./main.module.sass";
-import { useAPIResult } from "@macrostrat/ui-components";
+import { InfiniteScrollView } from "@macrostrat/ui-components";
 import { apiDomain } from "@macrostrat-web/settings";
-import { StickyHeader, LinkCard, PageBreadcrumbs, Link } from "~/components";
-import { Spinner } from "@blueprintjs/core";
-import { useState, useEffect, useRef } from "react";
+import { StickyHeader, LinkCard, PageBreadcrumbs } from "~/components";
+import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { SearchBar } from "~/components/general";
 import { useData } from "vike-react/useData";
 
+const PAGE_SIZE = 20;
+
 export function Page() {
   const { res } = useData();
-  const startingID = res[res.length - 1].id;
 
   const [input, setInput] = useState("");
-  const [lastID, setLastID] = useState(startingID);
-  const [data, setData] = useState(res);
-  const pageSize = 20;
-
-  const result = useMineralData(lastID, input, pageSize);
-  const prevInputRef = useRef(input);
-
-  useEffect(() => {
-    if (prevInputRef.current !== input) {
-      setData([]);
-      setLastID(0);
-
-      prevInputRef.current = input;
-    }
-  }, [input]);
-
-  useEffect(() => {
-    if (result && data[data.length - 1]?.id !== result[result.length - 1]?.id) {
-      setData((prevData) => {
-        return [...prevData, ...result];
-      });
-    }
-  }, [result]);
 
   const handleChange = (event) => {
     setInput(event.toLowerCase());
@@ -51,14 +28,19 @@ export function Page() {
         onChange: handleChange,
       }),
     ]),
-    h(
-      "div.strat-list",
-      h(
-        "div.strat-items",
-        data.map((data) => h(MineralItem, { data }))
-      )
-    ),
-    LoadMoreTrigger({ data, setLastID, pageSize, result }),
+    h(InfiniteScrollView, {
+      params: {
+        order: "id.asc",
+        mineral: `ilike.*${input}*`,
+        id: `gt.0`,
+        limit: PAGE_SIZE,
+      },
+      route: `${apiDomain}/api/pg/minerals`,
+      getNextParams,
+      initialData: res,
+      hasMore,
+      itemComponent: MineralItem,
+    })
   ]);
 }
 
@@ -72,36 +54,14 @@ function MineralItem({ data }) {
   });
 }
 
-function useMineralData(lastID, input, pageSize) {
-  const url = `${apiDomain}/api/pg/minerals?limit=${pageSize}&id=gt.${lastID}&order=id.asc&mineral=ilike.*${input}*`;
-
-  const result = useAPIResult(url);
-
-  console.log("Mineral data fetched:", result);
-
-  return result;
+function getNextParams(response, params) {
+  const id = response[response.length - 1]?.id;
+  return {
+    ...params,
+    id: "gt." + id,
+  };
 }
 
-function LoadMoreTrigger({ data, setLastID, pageSize, result }) {
-  const ref = useRef(null);
-
-  useEffect(() => {
-    if (!ref.current) return;
-
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        if (data.length > 0) {
-          const id = data[data.length - 1].id;
-
-          setLastID(id);
-        }
-      }
-    });
-
-    observer.observe(ref.current);
-
-    return () => observer.disconnect();
-  }, [data, setLastID]);
-
-  return h.if(result?.length == pageSize)("div.load-more", { ref }, h(Spinner));
+function hasMore(response) {
+  return response.length === PAGE_SIZE; 
 }
