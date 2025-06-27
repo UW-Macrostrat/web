@@ -1,6 +1,6 @@
 import { LinkCard, PageHeader } from "~/components";
 import { ContentPage } from "~/layouts";
-import { apiV2Prefix } from "@macrostrat-web/settings";
+import { apiDomain } from "@macrostrat-web/settings";
 import { useAPIResult } from "@macrostrat/ui-components";
 import h from "./+Page.module.sass";
 import { useData } from "vike-react/useData";
@@ -119,8 +119,8 @@ function formatNumber(num) {
 
 function SearchContainer({ setShowBody }) {
   const [input, setInput] = useState("");
-  const url = apiV2Prefix + "/defs/autocomplete?query=" + input;
-  const data = useAPIResult(url)?.success?.data || [];
+  const url = apiDomain + `/api/pg/autocomplete?name=ilike.*${input}*`;
+  const data = useAPIResult(url) || [];
 
   if (data && input.length > 0) {
     setShowBody(false);
@@ -141,27 +141,33 @@ function SearchResults({ data }) {
   const categories = [
     "columns",
     "econs",
-    // "econ_types",
-    // "econ_classes",
+    "maps",
     "environments",
-    // "environment_types",
-    // "environment_classes",
     "groups",
     "intervals",
     "lithologies",
-    // "lithology_types",
-    // "lithology_classes",
     "lithology_attributes",
     "projects",
     "strat_name_concepts",
-    // "strat_name_orphans",
+    "projects",
     "structures",
     "minerals",
   ];
 
-  return h.if(Object.keys(data).length > 0)("div.search-results", [
+  const grouped = data?.reduce((acc, item) => {
+    const category = item.category || "other";
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(item);
+    return acc;
+  }, {});
+
+  console.log("Grouped data:", grouped);
+
+  return h.if(Object.keys(grouped).length > 0)("div.search-results", [
     categories?.map((category) => {
-      const items = data?.[category];
+      const items = grouped?.[category];
       if (!items || items?.length === 0) return;
 
       const link =
@@ -187,9 +193,16 @@ function SearchResults({ data }) {
           "div.items",
           items?.map((item) => {
             const { name } = item;
+            const href =
+              category === "columns" ||
+              category === "projects" ||
+              category === "maps"
+                ? `/${link}/${item.id}`
+                : `/lex/${link}/${item.id}`;
+            console.log("Item:", item, "Href:", href, "category:", category);
             return h(
               "a.item",
-              { href: `/lex/${link}/${item.id}` },
+              { href },
               name.charAt(0).toUpperCase() + name.slice(1)
             );
           })

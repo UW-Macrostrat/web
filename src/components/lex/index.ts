@@ -5,7 +5,7 @@ import { Link, PageBreadcrumbs } from "~/components";
 import { Card, Divider } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import { BlankImage, Footer, Loading, StratTag } from "~/components/general";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { DarkModeButton } from "@macrostrat/ui-components";
 import { PieChart, Pie, Cell, ResponsiveContainer, Label } from "recharts";
@@ -888,41 +888,106 @@ function ChartLegend(data, route, activeIndex, setActiveIndex, index) {
 }
 
 export function Units({ unitsData }) {
-  return h.if(unitsData.length > 0)("div.units-container", [
+  const ITEMS_PER_PAGE = 20;
+  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+  const data = useMemo(() => {
+    return unitsData.slice(0, visibleCount);
+  }, [unitsData, visibleCount]);
+
+  const visibleItems = data.map((item) =>
     h(
-      ExpansionPanelContainer,
-      { title: "Units" },
-      h(
-        "div.units-list",
-        unitsData.map((unit) =>
-          h(
-            "a.unit-item",
-            { href: "/columns/" + unit.col_id + "#unit=" + unit.unit_id },
-            unit.unit_name + " (#" + unit.unit_id + ")"
-          )
-        )
-      )
-    ),
+      "a.unit-item",
+      { href: "/columns/" + item.col_id + "#unit=" + item.unit_id },
+      item.unit_name + " (#" + item.unit_id + ")"
+    )
+  );
+
+  const handleLoadMore = () => {
+    setVisibleCount((prev) =>
+      Math.min(prev + ITEMS_PER_PAGE, unitsData.length)
+    );
+  };
+
+  const showLoadMore = visibleCount < unitsData.length;
+
+  return h("div.units-container", [
+    h(ExpansionPanel, { title: "Units", className: "units-panel" }, [
+      h("div.units-list", [...visibleItems]),
+      h.if(showLoadMore)(
+        "div.load-more-wrapper",
+        h("button.load-more-btn", { onClick: handleLoadMore }, "Load More")
+      ),
+    ]),
+  ]);
+}
+
+export function Maps({ mapsData }) {
+  const ITEMS_PER_PAGE = 20;
+  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+  const data = useMemo(() => {
+    return mapsData.slice(0, visibleCount);
+  }, [mapsData, visibleCount]);
+
+  const visibleItems = data.map((item) =>
+    h(
+      "a.maps-item",
+      {
+        key: item.map_unit_name,
+        href: "/maps/" + item.source_id + "?legend=" + item.legend_id,
+      },
+      item.map_unit_name + " (#" + item.source_id + ")"
+    )
+  );
+
+  const handleLoadMore = () => {
+    setVisibleCount((prev) => Math.min(prev + ITEMS_PER_PAGE, mapsData.length));
+  };
+
+  const showLoadMore = visibleCount < mapsData.length;
+
+  return h("div.maps-container", [
+    h(ExpansionPanel, { title: "Maps", className: "maps-panel" }, [
+      h("div.maps-list", [...visibleItems]),
+      h.if(showLoadMore)(
+        "div.load-more-wrapper",
+        h("button.load-more-btn", { onClick: handleLoadMore }, "Load More")
+      ),
+    ]),
   ]);
 }
 
 export function Fossils({ fossilsData }) {
-  return h.if(fossilsData.length > 0)("div.fossils-container", [
+  const ITEMS_PER_PAGE = 20;
+  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+  const data = useMemo(() => {
+    return fossilsData.slice(0, visibleCount);
+  }, [fossilsData, visibleCount]);
+
+  const visibleItems = data.map((item) =>
     h(
-      ExpansionPanelContainer,
-      { title: "Fossils" },
-      h(
-        "div.fossils-list",
-        fossilsData.map((fossil) =>
-          h(
-            "a.fossil-item",
-            {
-              href: `https://paleobiodb.org/classic/displayCollResults?collection_no=col:${fossil.cltn_id}`,
-            },
-            fossil.cltn_name + " (#" + fossil.cltn_id + ")"
-          )
-        )
-      )
-    ),
+      "a.fossil-item",
+      {
+        href: `https://paleobiodb.org/classic/displayCollResults?collection_no=col:${item.cltn_id}`,
+      },
+      item.cltn_name + " (#" + item.cltn_id + ")"
+    )
+  );
+
+  const handleLoadMore = () => {
+    setVisibleCount((prev) =>
+      Math.min(prev + ITEMS_PER_PAGE, fossilsData.length)
+    );
+  };
+
+  const showLoadMore = visibleCount < fossilsData.length;
+
+  return h("div.fossils-container", [
+    h(ExpansionPanel, { title: "Fossils", className: "fossils-panel" }, [
+      h("div.fossils-list", [...visibleItems]),
+      h.if(showLoadMore)(
+        "div.load-more-wrapper",
+        h("button.load-more-btn", { onClick: handleLoadMore }, "Load More")
+      ),
+    ]),
   ]);
 }

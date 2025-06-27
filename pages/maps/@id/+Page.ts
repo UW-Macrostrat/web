@@ -481,7 +481,11 @@ function LegendEntry({ data }) {
           h("p", [
             "Stratigraphic name: ",
             h("span", [
-              h("a", { href: `/strat_names/${strat_name_id}` }, strat_name),
+              h(
+                "a",
+                { href: `/lex/strat-names/${strat_name_id?.[0]}` },
+                strat_name
+              ), // need to fix when api is updated
             ]),
           ])
         ),

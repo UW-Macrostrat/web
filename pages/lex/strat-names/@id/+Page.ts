@@ -9,12 +9,13 @@ import {
   ConceptInfo,
   Units,
   Fossils,
+  Maps,
 } from "~/components/lex";
 import { StratNameHierarchy } from "~/components/lex/StratNameHierarchy";
 import { StratTag } from "~/components/general";
 
 export function Page() {
-  const { resData, colData, taxaData, refs, unitsData, fossilsData } =
+  const { resData, colData, taxaData, refs, unitsData, fossilsData, mapsData } =
     useData();
 
   const id = resData.strat_name_id;
@@ -33,6 +34,7 @@ export function Page() {
     h(Timescales, { timescales }),
     h(Units, { unitsData }),
     h(Fossils, { fossilsData }),
+    h(Maps, { mapsData }),
     h(StratNameHierarchy, { id }),
     h(ConceptInfo, { concept_id: resData?.concept_id, showHeader: true }),
   ];

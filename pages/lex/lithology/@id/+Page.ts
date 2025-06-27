@@ -8,10 +8,11 @@ import {
   Timescales,
   Units,
   Fossils,
+  Maps,
 } from "~/components/lex";
 
 export function Page() {
-  const { resData, colData, taxaData, refs, unitsData, fossilsData } =
+  const { resData, colData, taxaData, refs, unitsData, fossilsData, mapsData } =
     useData();
 
   const id = resData.lith_id;
@@ -28,6 +29,7 @@ export function Page() {
     h(Timescales, { timescales }),
     h(Units, { unitsData }),
     h(Fossils, { fossilsData }),
+    h(Maps, { mapsData }),
   ];
 
   return LexItemPage({ children, id, refs, resData, siftLink: "lithology" });
