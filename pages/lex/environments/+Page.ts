@@ -6,6 +6,7 @@ import { ContentPage } from "~/layouts";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { useData } from "vike-react/useData";
 import { SearchBar } from "~/components/general";
+import { LithologyTag } from "@macrostrat/data-components";
 
 export function Page() {
   const [input, setInput] = useState("");
@@ -63,17 +64,7 @@ function EnvironmentItem({ data }) {
 
   const luminance = 0.9;
 
-  return h(
-    Popover,
-    {
-      className: "environ-item-popover",
-      content: h("div.environ-tooltip", [
-        h("div.environ-tooltip-id", "ID - #" + environ_id),
-        h("div.environ-tooltip-t-unit", "Time Units - " + t_units),
-        h("a", { href: `/lex/environments/${environ_id}` }, "View details"),
-      ]),
-    },
-    h("div.environ-item", [
+  return h("div.environ-item", [
       h(
         "div.environ-name",
         {
@@ -81,11 +72,13 @@ function EnvironmentItem({ data }) {
             backgroundColor: chromaColor?.luminance(1 - luminance).hex(),
             color: chromaColor?.luminance(luminance).hex(),
           },
+          onClick: (e) => {
+            window.open(`/lex/environments/${environ_id}`, "_blank");
+          },
         },
         name
       ),
-    ])
-  );
+    ]);
 }
 
 function groupByClassThenType(items) {

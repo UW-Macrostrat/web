@@ -471,8 +471,6 @@ function LegendEntry({ data }) {
     t_age,
   } = r1;
 
-  console.log(lith, lith_id);
-
   return h("div.legend-entry", [
     title,
     h(Collapse, { isOpen }, [

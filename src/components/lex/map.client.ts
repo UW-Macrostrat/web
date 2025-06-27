@@ -5,7 +5,6 @@ import {
 import h from "@macrostrat/hyper";
 import { mapboxAccessToken } from "@macrostrat-web/settings";
 import { ErrorBoundary } from "@macrostrat/ui-components";
-import { ColumnsMap } from "~/columns-map/index.client";
 import { ExpansionPanel } from "@macrostrat/map-interface";
 
 export function ColumnsMapContainer(props) {
@@ -19,46 +18,30 @@ export function ExpansionPanelContainer(props) {
 
 function ColumnsMapInner({
   columnIDs = null,
-  projectID = null,
   className,
   columns = null,
 }) {
-  const columnData = useMacrostratColumns(projectID, projectID != null);
+  columns = columns.features
 
-  let _columns = columns?.features ?? columnData;
-
-  // Filter columns on the client side
-  if (columnIDs != null) {
-    _columns = _columns.filter((feature) =>
-      columnIDs.includes(feature.properties.col_id)
-    );
-  }
-
+  columns = columns.map((col) => {
+    // Add a property to each column feature for the column ID
+    col.id = col.properties.col_id;
+    return col;
+  });
+  
   return h(
     "div",
     { className },
-    h(ColumnsMap, {
-      columns: { type: "FeatureCollection", features: _columns },
-    })
-  );
-}
-
-export function ColumnsMapOld({
-  projectID,
-  inProcess,
-  className,
-  selectedColumn,
-  onSelectColumn,
-}) {
-  return h(
-    ErrorBoundary,
     h(ColumnNavigationMap, {
-      className,
-      inProcess,
-      projectID,
+      columns,
       accessToken: mapboxAccessToken,
-      selectedColumn,
-      onSelectColumn,
+      style: {height: "100%"},
+      onSelectColumn: (id) => {
+        window.open(
+          `/columns/${id}`,
+          "_blank"
+        );
+      }
     })
   );
 }
