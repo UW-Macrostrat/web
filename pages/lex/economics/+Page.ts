@@ -59,21 +59,7 @@ function EconItem({ data }) {
   const luminance = 0.9;
   const chromaColor = asChromaColor(color);
 
-  return h(
-    Popover,
-    {
-      className: "econ-item-popover",
-      content: h("div.econ-tooltip", [
-        h("div.econ-tooltip-id", "ID - #" + econ_id),
-        h("div.econ-tooltip-t-unit", "Time Units - " + t_units),
-        h(
-          "a",
-          { href: `/lex/economics/${econ_id}`, className: "econ-tooltip-link" },
-          "View details"
-        ),
-      ]),
-    },
-    h("div.econ-item", [
+  return h("div.econ-item", [
       h(
         "div.econ-name",
         {
@@ -81,11 +67,13 @@ function EconItem({ data }) {
             color: chromaColor?.luminance(luminance).hex(),
             backgroundColor: chromaColor?.luminance(1 - luminance).hex(),
           },
+          onClick: (e) => {
+            window.open(`/lex/economics/${econ_id}`, "_blank");
+          },
         },
         name
       ),
     ])
-  );
 }
 
 function groupByClassThenType(items) {

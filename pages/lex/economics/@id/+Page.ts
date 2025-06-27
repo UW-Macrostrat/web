@@ -11,7 +11,8 @@ import {
 } from "~/components/lex";
 
 export function Page() {
-  const { resData, colData, taxaData, refs, unitsData, fossilsData } = useData();
+  const { resData, colData, taxaData, refs, unitsData, fossilsData } =
+    useData();
 
   const id = resData.econ_id;
   const features = colData?.features || [];

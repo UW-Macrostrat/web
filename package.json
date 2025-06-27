@@ -67,7 +67,7 @@
     "@macrostrat/color-utils": "^1.1.0",
     "@macrostrat/column-components": "^1.1.0",
     "@macrostrat/column-views": "^2.1.1",
-    "@macrostrat/data-components": "^0.1.0",
+    "@macrostrat/data-components": "^0.2.0",
     "@macrostrat/data-sheet": "^2.0.2",
     "@macrostrat/feedback-components": "^1.1.0",
     "@macrostrat/form-components": "^0.2.1",

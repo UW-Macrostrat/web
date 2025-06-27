@@ -36,17 +36,23 @@ export function Page() {
     ]),
     h(
       "div.econ-list",
-      Object.entries(grouped).map(([className, types]) => 
+      Object.entries(grouped).map(([className, types]) =>
         h("div.econ-class-group", [
           h("h2", UpperCase(className)),
           h(
             "div.econ-items",
-            types?.map((d) => h(LinkCard, { href: `/lex/structures/${d.structure_id}` }, UpperCase(d.name)))
+            types?.map((d) =>
+              h(
+                LinkCard,
+                { href: `/lex/structures/${d.structure_id}` },
+                UpperCase(d.name)
+              )
+            )
           ),
         ])
       )
     ),
-  ])
+  ]);
 }
 
 function groupByClass(items) {

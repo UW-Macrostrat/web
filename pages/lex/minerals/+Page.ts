@@ -47,14 +47,11 @@ export function Page() {
 function MineralItem({ data }) {
   const { id, mineral } = data;
 
-  return h(
-    LinkCard,
-    {
-      href: `/lex/minerals/${id}`,
-      className: "mineral-item",
-      title: mineral,
-    },
-  );
+  return h(LinkCard, {
+    href: `/lex/minerals/${id}`,
+    className: "mineral-item",
+    title: mineral,
+  });
 }
 
 function getNextParams(response, params) {
