@@ -1,5 +1,5 @@
 import h from "./main.module.scss";
-import { Spinner, Switch, AnchorButton } from "@blueprintjs/core";
+import { Spinner, Switch, AnchorButton, Icon } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import {
   PageHeader,
@@ -180,7 +180,7 @@ function LoadMoreTrigger({ data, setKey, pageSize, result }) {
 }
 
 function SourceItem({ data }) {
-  const { source_id, name, ref_title, url, scale, ref_year } = data;
+  const { source_id, name, ref_title, url, scale, ref_year, ref_source } = data;
   const href = `/maps/${source_id}`;
 
   return h(
@@ -194,7 +194,12 @@ function SourceItem({ data }) {
     },
     [
       h("div.content", [
-        h("a", { href: url, target: "_blank" }, ref_title),
+        h('div.source', [
+          h("span", ref_source + ": " + ref_title + " (" + ref_year + ") "),
+          h("a", { href: url, target: "_blank" }, 
+            h(Icon, { icon: "link" }),
+          ),
+        ]),
         h("div.tags", [h(IDTag, { id: source_id })]),
       ]),
     ]
