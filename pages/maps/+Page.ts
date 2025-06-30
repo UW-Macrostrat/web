@@ -17,6 +17,7 @@ import { PageBreadcrumbs } from "~/components";
 
 export function Page() {
   const { sources } = useData();
+  console.log("sources", sources);
 
   const [input, setInput] = useState("");
   const [activeOnly, setActiveOnly] = useState(true);

@@ -8,6 +8,16 @@ export function Page() {
   const res = useAPIResult(apiV2Prefix + "/geologic_units/map/legend?lith_id=1")
     ?.success.data;
 
+    const params = new URLSearchParams({
+    is_finalized: "eq.true",
+    status_code: "eq.active",
+    or: `(ref_year.lt.9999,and(ref_year.eq.9999,source_id.gt.0))`,
+    limit: 20,
+    order: "ref_year.desc,source_id.asc",
+  }).toString()
+
+  console.log('params', params);
+
   if (!res) {
     return h("div", "Loading...");
   }
