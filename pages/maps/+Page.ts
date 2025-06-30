@@ -9,71 +9,37 @@ import {
   StickyHeader,
 } from "~/components";
 import { useState, useRef, useEffect } from "react";
-import { useAPIResult } from "@macrostrat/ui-components";
+import { useAPIResult, InfiniteScrollView } from "@macrostrat/ui-components";
 import { apiDomain } from "@macrostrat-web/settings";
 import { IDTag, SearchBar } from "~/components/general";
 import { useData } from "vike-react/useData";
 import { PageBreadcrumbs } from "~/components";
 
+const PAGE_SIZE = 20;
+
 export function Page() {
   const { sources } = useData();
-  console.log("sources", sources);
 
   const [input, setInput] = useState("");
   const [activeOnly, setActiveOnly] = useState(true);
   const [recentOrder, setRecentOrder] = useState(true);
 
-  const startingID = sources[sources.length - 1].source_id;
-  const [key, setKey] = useState({
-    lastID: startingID,
-    lastYear: 9999,
-  });
-  const [data, setData] = useState(sources);
-  const pageSize = 20;
+  function getNextParams(response, params) {
+    const id = response[response.length - 1]?.source_id;
+    const year = response[response.length - 1]?.ref_year || 9999;
 
-  const result = useSourceData(
-    key.lastID,
-    input,
-    pageSize,
-    activeOnly,
-    recentOrder,
-    key.lastYear
-  );
-
-  useEffect(() => {
-    if (
-      result &&
-      data[data.length - 1]?.source_id !== result[result.length - 1]?.source_id
-    ) {
-      setData((prevData) => {
-        return [...prevData, ...result];
-      });
+    return {
+      ...params,
+      is_finalized: activeOnly ? "eq.true" : undefined,
+      status_code: activeOnly ? "eq.active" : undefined,
+      source_id: !recentOrder ? `gt.${id}` : undefined,
+      or: recentOrder
+        ? `(ref_year.lt.${year},and(ref_year.eq.${year},source_id.gt.${id}))`
+        : undefined,
+      name: `ilike.%${input}%`,
+      order: recentOrder ? "ref_year.desc,source_id.asc" : "source_id.asc",
     }
-  }, [result]);
-
-  const resetData = () => {
-    window.scrollTo(0, 0);
-    setData([]);
-    setKey({
-      lastID: 0,
-      lastYear: 9999,
-    });
-  };
-
-  const handleInputChange = (event) => {
-    setInput(event.toLowerCase());
-    resetData();
-  };
-
-  const handleActiveChange = () => {
-    setActiveOnly(!activeOnly);
-    resetData();
-  };
-
-  const handleRecentChange = () => {
-    setRecentOrder(!recentOrder);
-    resetData();
-  };
+  }
 
   return h("div.maps-page", [
     h(ContentPage, [
@@ -86,19 +52,19 @@ export function Page() {
           h('div.search', [
             h(SearchBar, {
               placeholder: "Filter by name...",
-              onChange: handleInputChange,
+              onChange: (event) => setInput(event.toLowerCase()),
               className: "search-bar",
             }),
             h('div.switches', [
               h(Switch, {
                 label: "Active only",
                 checked: activeOnly,
-                onChange: handleActiveChange,
+                onChange: () => setActiveOnly(!activeOnly),
               }),
               h(Switch, {
                 label: "Recent order",
                 checked: recentOrder,
-                onChange: handleRecentChange,
+                onChange: () => setRecentOrder(!recentOrder),
               }),
             ]),
           ]),
@@ -115,68 +81,22 @@ export function Page() {
           h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
         ]),
       ),
-      h(
-        "div.strat-list",
-        h(
-          "div.strat-items",
-          data.map((data) => h(SourceItem, { data }))
-        )
-      ),
-      LoadMoreTrigger({ data, setKey, pageSize, result }),
+       h(InfiniteScrollView, {
+        params: {
+          is_finalized: "eq.true",
+          status_code: "eq.active",
+          or: `(ref_year.lt.9999,and(ref_year.eq.9999,source_id.gt.0))`,
+          limit: PAGE_SIZE,
+          order: "ref_year.desc,source_id.asc",
+        },
+        route: `${apiDomain}/api/pg/sources_metadata`,
+        getNextParams,
+        initialData: sources,
+        hasMore,
+        itemComponent: SourceItem,
+      })
     ]),
   ]);
-}
-
-function useSourceData(
-  lastID,
-  input,
-  pageSize,
-  activeOnly,
-  recentOrder,
-  lastYear
-) {
-  const url = `${apiDomain}/api/pg/sources_metadata`;
-
-  const result = useAPIResult(url, {
-    is_finalized: activeOnly ? "eq.true" : undefined,
-    status_code: activeOnly ? "eq.active" : undefined,
-    source_id: !recentOrder ? `gt.${lastID}` : undefined,
-    or: recentOrder
-      ? `(ref_year.lt.${lastYear},and(ref_year.eq.${lastYear},source_id.gt.${lastID}))`
-      : undefined,
-    name: `ilike.%${input}%`,
-    limit: pageSize,
-    order: recentOrder ? "ref_year.desc,source_id.asc" : "source_id.asc",
-  });
-  return result;
-}
-
-function LoadMoreTrigger({ data, setKey, pageSize, result }) {
-  const ref = useRef(null);
-
-  useEffect(() => {
-    if (!ref.current) return;
-
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        if (data.length > 0) {
-          const id = data[data.length - 1].source_id;
-          const year = data[data.length - 1].ref_year || 9999;
-
-          setKey({
-            lastID: id,
-            lastYear: year,
-          });
-        }
-      }
-    });
-
-    observer.observe(ref.current);
-
-    return () => observer.disconnect();
-  }, [data]);
-
-  return h.if(result?.length == pageSize)("div.load-more", { ref }, h(Spinner));
 }
 
 function SourceItem({ data }) {
@@ -204,4 +124,8 @@ function SourceItem({ data }) {
       ]),
     ]
   );
+}
+
+function hasMore(response) {
+  return response.length === PAGE_SIZE; 
 }
