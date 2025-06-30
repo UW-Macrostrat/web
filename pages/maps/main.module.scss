@@ -185,3 +185,10 @@ h3 {
     width: 100%;
   }
 }
+
+.assistant-links {
+  position: sticky;
+  top: 0;
+  right: -20%;
+  z-index: 100;
+}

@@ -102,19 +102,18 @@ export function Page() {
             ]),
           ]),
         ]),
-        h('div.header2', [
-
-          h(AssistantLinks, { className: "assistant-links" }, [
-            h(
-              AnchorButton,
-              { icon: "flows", href: "/maps/ingestion" },
-              "Ingestion system"
-            ),
-            h(AnchorButton, { icon: "map", href: "/map/sources" }, "Show on map"),
-            h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
-          ]),
-        ]),
       ]),
+      h('div.assistant-links', 
+        h(AssistantLinks, { className: "assistant-links" }, [
+          h(
+            AnchorButton,
+            { icon: "flows", href: "/maps/ingestion" },
+            "Ingestion system"
+          ),
+          h(AnchorButton, { icon: "map", href: "/map/sources" }, "Show on map"),
+          h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
+        ]),
+      ),
       h(
         "div.strat-list",
         h(
