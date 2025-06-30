@@ -443,6 +443,8 @@ function LegendEntry({ data }) {
     ...r1
   } = rest;
 
+  console.log(unit_id)
+
   const selectedLegend =
     parseInt(usePageContext().urlOriginal?.split("=")[1]) ?? null;
   const [isOpen, setOpen] = useState(selectedLegend === legend_id);
@@ -518,6 +520,14 @@ function LegendEntry({ data }) {
           "div.legend-t-age",
           h("p", ["Top age: ", h("span", t_age)])
         ),
+        h.if(unit_id)(
+          "div.legend-unit-ids", [
+            h('span', 'Unit IDs: '),
+            unit_id?.map((id) =>
+              h('a', { href: `/columns/#unit` }, h(Tag, { minimal: true }, id))
+            )
+          ]
+        )
       ]),
     ]),
   ]);
