@@ -80,6 +80,7 @@ export function Page() {
         h("div.header", [
           h(PageBreadcrumbs, {
             title: "Maps",
+            showLogo: true,
           }),
           h(SearchBar, {
             placeholder: "Filter by name...",
