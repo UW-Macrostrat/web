@@ -82,29 +82,37 @@ export function Page() {
             title: "Maps",
             showLogo: true,
           }),
-          h(SearchBar, {
-            placeholder: "Filter by name...",
-            onChange: handleInputChange,
-          }),
-          h(Switch, {
-            label: "Active only",
-            checked: activeOnly,
-            onChange: handleActiveChange,
-          }),
-          h(Switch, {
-            label: "Recent order",
-            checked: recentOrder,
-            onChange: handleRecentChange,
-          }),
+          h('div.search', [
+            h(SearchBar, {
+              placeholder: "Filter by name...",
+              onChange: handleInputChange,
+              className: "search-bar",
+            }),
+            h('div.switches', [
+              h(Switch, {
+                label: "Active only",
+                checked: activeOnly,
+                onChange: handleActiveChange,
+              }),
+              h(Switch, {
+                label: "Recent order",
+                checked: recentOrder,
+                onChange: handleRecentChange,
+              }),
+            ]),
+          ]),
         ]),
-        h(AssistantLinks, { className: "assistant-links" }, [
-          h(
-            AnchorButton,
-            { icon: "flows", href: "/maps/ingestion" },
-            "Ingestion system"
-          ),
-          h(AnchorButton, { icon: "map", href: "/map/sources" }, "Show on map"),
-          h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
+        h('div.header2', [
+
+          h(AssistantLinks, { className: "assistant-links" }, [
+            h(
+              AnchorButton,
+              { icon: "flows", href: "/maps/ingestion" },
+              "Ingestion system"
+            ),
+            h(AnchorButton, { icon: "map", href: "/map/sources" }, "Show on map"),
+            h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
+          ]),
         ]),
       ]),
       h(
