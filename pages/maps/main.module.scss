@@ -131,10 +131,6 @@ h3 {
   background-color: #3498db;
 }
 
-.maps-page {
-  width: 100%;
-}
-
 .id {
   text-align: right;
   padding: 0.2em 0.5em;
@@ -187,8 +183,5 @@ h3 {
 }
 
 .assistant-links {
-  position: sticky;
-  top: 0;
-  right: -20%;
-  z-index: 100;
+  flex: 1;
 }

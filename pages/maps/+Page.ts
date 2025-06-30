@@ -42,6 +42,17 @@ export function Page() {
   }
 
   return h("div.maps-page", [
+    h('div.assistant-links', 
+      h(AssistantLinks, { className: "assistant-links" }, [
+        h(
+          AnchorButton,
+          { icon: "flows", href: "/maps/ingestion" },
+          "Ingestion system"
+        ),
+        h(AnchorButton, { icon: "map", href: "/map/sources" }, "Show on map"),
+        h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
+      ]),
+    ),
     h(ContentPage, [
       h(StickyHeader, { className: "header-container" }, [
         h("div.header", [
@@ -70,18 +81,7 @@ export function Page() {
           ]),
         ]),
       ]),
-      h('div.assistant-links', 
-        h(AssistantLinks, { className: "assistant-links" }, [
-          h(
-            AnchorButton,
-            { icon: "flows", href: "/maps/ingestion" },
-            "Ingestion system"
-          ),
-          h(AnchorButton, { icon: "map", href: "/map/sources" }, "Show on map"),
-          h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
-        ]),
-      ),
-       h(InfiniteScrollView, {
+      h(InfiniteScrollView, {
         params: {
           is_finalized: "eq.true",
           status_code: "eq.active",
