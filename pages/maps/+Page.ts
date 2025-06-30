@@ -20,7 +20,7 @@ export function Page() {
 
   const [input, setInput] = useState("");
   const [activeOnly, setActiveOnly] = useState(true);
-  const [recentOrder, setRecentOrder] = useState(false);
+  const [recentOrder, setRecentOrder] = useState(true);
 
   const startingID = sources[sources.length - 1].source_id;
   const [key, setKey] = useState({
