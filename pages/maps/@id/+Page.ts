@@ -172,7 +172,7 @@ export function Page() {
     return ensureBoxInGeographicRange(boundingBox(map.geometry));
   }, [map.geometry]);
 
-  const [layer, setLayer] = useState(Basemap.None);
+  const [layer, setLayer] = useState(localStorage.getItem('basemap') || Basemap.None);
   const [style, setStyle] = useState(null);
   // Basemap style
   useEffect(() => {
@@ -353,9 +353,9 @@ function BaseLayerSelector({ layer, setLayer }) {
         },
       },
       [
-        h(Radio, { label: "Satellite", value: Basemap.Satellite }),
-        h(Radio, { label: "Basic", value: Basemap.Basic }),
-        h(Radio, { label: "None", value: Basemap.None }),
+        h(Radio, { label: "Satellite", value: Basemap.Satellite, onClick: () => localStorage.setItem('basemap', Basemap.Satellite) }),
+        h(Radio, { label: "Basic", value: Basemap.Basic, onClick: () => localStorage.setItem('basemap', Basemap.Basic) }),
+        h(Radio, { label: "None", value: Basemap.None, onClick: () => localStorage.setItem('basemap', Basemap.None) }),
       ]
     ),
   ]);
