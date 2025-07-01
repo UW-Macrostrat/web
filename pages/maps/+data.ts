@@ -7,7 +7,7 @@ export async function data(pageContext) {
     is_finalized: "eq.true",
     status_code: "eq.active",
     or: `(ref_year.lt.9999,and(ref_year.eq.9999,source_id.gt.0))`,
-    limit: 20,
+    limit: 2,
     order: "ref_year.desc,source_id.asc",
   }).toString()
 

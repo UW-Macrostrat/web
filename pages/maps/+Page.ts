@@ -15,7 +15,7 @@ import { IDTag, SearchBar } from "~/components/general";
 import { useData } from "vike-react/useData";
 import { PageBreadcrumbs } from "~/components";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 2;
 
 export function Page() {
   const { sources } = useData();
@@ -25,19 +25,25 @@ export function Page() {
   const [recentOrder, setRecentOrder] = useState(true);
 
   const baseParams = useMemo(() => {
+    //const lastYear = sources?.[sources.length - 1]?.ref_year || 9999;
+    //const lastId = sources?.[sources.length - 1]?.source_id || 0
+    const lastYear = 9999;
+    const lastId = 0;
+
+    console.log("Last year:", lastYear);
+    console.log("Last ID:", lastId);
+
     return {
       is_finalized: activeOnly ? "eq.true" : undefined,
       status_code: activeOnly ? "eq.active" : undefined,
       or: recentOrder
-        ? `(ref_year.lt.9999,and(ref_year.eq.9999,source_id.gt.0))`
+        ? `(ref_year.lt.${lastYear},and(ref_year.eq.${lastYear},source_id.gt.${lastId}))`
         : undefined,
       name: input ? `ilike.%${input}%` : undefined,
       order: recentOrder ? "ref_year.desc,source_id.asc" : "source_id.asc",
       limit: PAGE_SIZE,
     };
   }, [input, activeOnly, recentOrder]);
-
-
 
   function getNextParams(response, params) {
     const id = response[response.length - 1]?.source_id;
@@ -55,7 +61,7 @@ export function Page() {
       order: recentOrder ? "ref_year.desc,source_id.asc" : "source_id.asc",
     };
 
-    console.log(response)
+    console.log("New params:", newParams, "response", response);
 
     return newParams
   }
