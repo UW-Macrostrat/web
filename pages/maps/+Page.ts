@@ -8,8 +8,8 @@ import {
   LinkCard,
   StickyHeader,
 } from "~/components";
-import { useState, useRef, useEffect } from "react";
-import { useAPIResult, InfiniteScrollView } from "@macrostrat/ui-components";
+import { useState, useMemo, useEffect } from "react";
+import { InfiniteScrollView } from "@macrostrat/ui-components";
 import { apiDomain } from "@macrostrat-web/settings";
 import { IDTag, SearchBar } from "~/components/general";
 import { useData } from "vike-react/useData";
@@ -24,11 +24,26 @@ export function Page() {
   const [activeOnly, setActiveOnly] = useState(true);
   const [recentOrder, setRecentOrder] = useState(true);
 
+  const baseParams = useMemo(() => {
+    return {
+      is_finalized: activeOnly ? "eq.true" : undefined,
+      status_code: activeOnly ? "eq.active" : undefined,
+      or: recentOrder
+        ? `(ref_year.lt.9999,and(ref_year.eq.9999,source_id.gt.0))`
+        : undefined,
+      name: input ? `ilike.%${input}%` : undefined,
+      order: recentOrder ? "ref_year.desc,source_id.asc" : "source_id.asc",
+      limit: PAGE_SIZE,
+    };
+  }, [input, activeOnly, recentOrder]);
+
+
+
   function getNextParams(response, params) {
     const id = response[response.length - 1]?.source_id;
     const year = response[response.length - 1]?.ref_year || 9999;
 
-    return {
+    const newParams = {
       ...params,
       is_finalized: activeOnly ? "eq.true" : undefined,
       status_code: activeOnly ? "eq.active" : undefined,
@@ -38,7 +53,11 @@ export function Page() {
         : undefined,
       name: `ilike.%${input}%`,
       order: recentOrder ? "ref_year.desc,source_id.asc" : "source_id.asc",
-    }
+    };
+
+    console.log(response)
+
+    return newParams
   }
 
   return h("div.maps-page", [
@@ -82,17 +101,11 @@ export function Page() {
         ]),
       ]),
       h(InfiniteScrollView, {
-        params: {
-          is_finalized: "eq.true",
-          status_code: "eq.active",
-          or: `(ref_year.lt.9999,and(ref_year.eq.9999,source_id.gt.0))`,
-          limit: PAGE_SIZE,
-          order: "ref_year.desc,source_id.asc",
-        },
+        params: baseParams,
         route: `${apiDomain}/api/pg/sources_metadata`,
         getNextParams,
-        initialData: sources,
         hasMore,
+        initialData: sources,
         itemComponent: SourceItem,
       })
     ]),
