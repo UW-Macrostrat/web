@@ -165,7 +165,6 @@ export function Page() {
   const [isOpen, setOpen] = useState(false);
   const dark = useDarkMode()?.isEnabled ?? false;
   const title = map.properties.name;
-  console.log(map);
 
   const hasRaster = map.properties.raster_url != null;
 
@@ -423,16 +422,16 @@ function LegendEntry({ data }) {
   const { map_unit_name, color, ...rest } = data;
   const {
     legend_id,
-    source_id,
+    source_id, 
     t_interval,
     b_interval,
     //strat_name,
     //strat_name_id,
-    unit_id,
-    area,
-    tiny_area,
-    small_area,
-    medium_area,
+    unit_id, // need column id
+    area, 
+    tiny_area, 
+    small_area, 
+    medium_area, 
     large_area,
     lith,
     // lith_classes,
@@ -442,8 +441,6 @@ function LegendEntry({ data }) {
     comments,
     ...r1
   } = rest;
-
-  console.log(unit_id)
 
   const selectedLegend =
     parseInt(usePageContext().urlOriginal?.split("=")[1]) ?? null;
@@ -527,7 +524,11 @@ function LegendEntry({ data }) {
               h('a', { href: `/columns/#unit` }, h(Tag, { minimal: true }, id))
             )
           ]
-        )
+        ),
+        h.if(area)(
+          "div.legend-area",
+          h("p", ["Area: ", h("span", area)])
+        ),
       ]),
     ]),
   ]);
