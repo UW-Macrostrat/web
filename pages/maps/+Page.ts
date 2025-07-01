@@ -15,7 +15,7 @@ import { IDTag, SearchBar } from "~/components/general";
 import { useData } from "vike-react/useData";
 import { PageBreadcrumbs } from "~/components";
 
-const PAGE_SIZE = 2;
+const PAGE_SIZE = 20;
 
 export function Page() {
   const { sources } = useData();
@@ -111,7 +111,7 @@ export function Page() {
         route: `${apiDomain}/api/pg/sources_metadata`,
         getNextParams,
         hasMore,
-        initialData: sources,
+        initialItems: sources,
         itemComponent: SourceItem,
       })
     ]),
