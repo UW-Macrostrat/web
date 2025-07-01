@@ -40,7 +40,7 @@ import { PageBreadcrumbs, MapReference, DevLink } from "~/components";
 import { MapNavbar } from "~/components/map-navbar";
 import { usePageProps } from "~/renderer/usePageProps";
 import { usePageContext } from "vike-react/usePageContext";
-import { LithologyList } from "@macrostrat/data-components";
+import { LithologyList, LithologyTag } from "@macrostrat/data-components";
 
 interface StyleOpts {
   style: string;
@@ -411,8 +411,6 @@ function MapLegendData({ source_id }) {
 
 
   if (legendData == null) return h(NonIdealState, { icon: "error" });
-    console.log("Map legend data", legendData[4]);
-
 
   legendData.sort((a, b) => a.t_age - b.t_age);
 
@@ -474,6 +472,7 @@ function LegendEntry({ data }) {
     strat_name_id,
     t_age,
     units,
+    strat_names,
     min_age_interval,
   } = r1;
 
@@ -482,53 +481,33 @@ function LegendEntry({ data }) {
     h(Collapse, { isOpen }, [
       h("div.legend-details", [
         h.if(descrip)("div.legend-description", h("p", descrip)),
-        h.if(strat_name)(
+        h.if(strat_names)(
           "div.legend-strat-name",
           h("p", [
-            "Stratigraphic name: ",
-            h("span", [
-              h(
-                "a",
-                { href: `/lex/strat-names/${strat_name_id?.[0]}` },
-                strat_name
-              ), // need to fix when api is updated
-            ]),
+            "Stratigraphic names: ", [
+              strat_names?.map((sn) =>
+                h(
+                  "a",
+                  { href: `/lex/strat-names/${sn.strat_name_id}` },
+                  h(Tag, { minimal: true }, sn.strat_name)
+                )
+              ),
+            ]
           ])
         ),
         h.if(lith_classes?.length > 0)(
-          "div.legend-lith-classes",
-          h("p", [
-            "Lithology classes: ",
-            h(
-              "span",
-              lith_classes?.map((l) => h(Tag, { minimal: true }, l))
-            ),
-          ])
+          "div.legend-lith-types",
+          h(LithologyList, { label: "Lithology classes: ", lithologies: lith_classes?.map((l) => ({ name: l })) })
         ),
         h.if(lith_types?.length > 0)(
           "div.legend-lith-types",
-          h("p", [
-            "Lithology types: ",
-            h(
-              "span",
-              lith_types?.map((l) => h(Tag, { minimal: true }, l))
-            ),
-          ])
-        ),
-        h.if(age)("div.legend-age", h("p", ["Age: ", h("span", age)])),
-        h.if(b_age)(
-          "div.legend-b-age",
-          h("p", ["Base age: ", h("span", b_age)])
-        ),
-        h.if(t_age)(
-          "div.legend-t-age",
-          h("p", ["Top age: ", h("span", t_age)])
+          h(LithologyList, { label: "Lithology types: ", lithologies: lith_types?.map((l) => ({ name: l })) })
         ),
         h.if(units)(
           "div.legend-unit-ids", [
             h('span', 'Unit IDs: '),
             units?.map((unit) =>
-              h('a', { href: `/columns/${unit.col_id}#unit=${unit.unit_id}` }, h(Tag, { minimal: true }, unit.unit_id))
+              h(LithologyTag, { data: unit, onClick: (e, u) => window.open(`/columns/${unit.col_id}#unit=${unit.unit_id}`, '_self') })
             )
           ]
         ),
@@ -541,9 +520,15 @@ function LegendEntry({ data }) {
           lithologies,
           onClickItem: (e, lith) => window.open(`/lex/lithology/${lith.lith_id}`, '_self') 
         }) : null,
-        h.if(min_age_interval)(
+        h.if(min_age_interval.name)(
           "div.legend-min-age-interval",
-          h("p", ["Min age interval: ", h("span", min_age_interval)])
+          h("p", [
+            "Min age interval: ", 
+            h(LithologyTag, { 
+              data: min_age_interval,
+              onClick: (e, int) => window.open(`/lex/intervals/${int.int_id}`, '_self')
+            })
+          ])
         ),
       ]),
     ]),
