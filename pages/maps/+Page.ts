@@ -1,4 +1,4 @@
-import h from "./main.module.scss";
+import h from "./main.module.sass";
 import { Spinner, Switch, AnchorButton, Icon } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import {
@@ -66,7 +66,66 @@ export function Page() {
     return newParams
   }
 
-  return h("div.maps-page", [
+  return h("div.maps-list-page", [
+      h(ContentPage, [
+        h("div.flex-row", [
+          h('div.main', [
+            h(StickyHeader, { className: "header-container" }, [
+              h("div.header", [
+                h(PageBreadcrumbs, {
+                  title: "Maps",
+                  showLogo: true,
+                }),
+                h('div.search', [
+                  h(SearchBar, {
+                    placeholder: "Filter by name...",
+                    onChange: (event) => setInput(event.toLowerCase()),
+                    className: "search-bar",
+                  }),
+                  h('div.switches', [
+                    h(Switch, {
+                      label: "Active only",
+                      checked: activeOnly,
+                      onChange: () => setActiveOnly(!activeOnly),
+                    }),
+                    h(Switch, {
+                      label: "Recent order",
+                      checked: recentOrder,
+                      onChange: () => setRecentOrder(!recentOrder),
+                    }),
+                  ]),
+                ]),
+              ]),
+            ]),
+            h(InfiniteScrollView, {
+              params: baseParams,
+              route: `${apiDomain}/api/pg/sources_metadata`,
+              getNextParams,
+              hasMore,
+              initialItems: sources,
+              itemComponent: SourceItem,
+            })
+          ]),
+          h("div.sidebar", 
+            h("div.sidebar-content", [
+              h(AssistantLinks, { className: "assistant-links" }, [
+                h(
+                  AnchorButton,
+                  { icon: "flows", href: "/maps/ingestion" },
+                  "Ingestion system"
+                ),
+                h(AnchorButton, { icon: "map", href: "/map/sources" }, "Show on map"),
+                h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
+              ]),
+            ])
+          ),
+        ])
+      ]),
+    ]);
+  
+  
+  
+  h("div.maps-page", [
     h('div.assistant-links', 
       h(AssistantLinks, { className: "assistant-links" }, [
         h(
@@ -79,41 +138,7 @@ export function Page() {
       ]),
     ),
     h(ContentPage, [
-      h(StickyHeader, { className: "header-container" }, [
-        h("div.header", [
-          h(PageBreadcrumbs, {
-            title: "Maps",
-            showLogo: true,
-          }),
-          h('div.search', [
-            h(SearchBar, {
-              placeholder: "Filter by name...",
-              onChange: (event) => setInput(event.toLowerCase()),
-              className: "search-bar",
-            }),
-            h('div.switches', [
-              h(Switch, {
-                label: "Active only",
-                checked: activeOnly,
-                onChange: () => setActiveOnly(!activeOnly),
-              }),
-              h(Switch, {
-                label: "Recent order",
-                checked: recentOrder,
-                onChange: () => setRecentOrder(!recentOrder),
-              }),
-            ]),
-          ]),
-        ]),
-      ]),
-      h(InfiniteScrollView, {
-        params: baseParams,
-        route: `${apiDomain}/api/pg/sources_metadata`,
-        getNextParams,
-        hasMore,
-        initialItems: sources,
-        itemComponent: SourceItem,
-      })
+      
     ]),
   ]);
 }
