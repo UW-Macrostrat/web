@@ -466,17 +466,66 @@ function LegendEntry({ data }) {
 
   const {
     age,
-    b_age,
     descrip,
     lith_classes,
     lith_types,
-    strat_name,
-    strat_name_id,
-    t_age,
     units,
     strat_names,
     min_age_interval,
+    max_age_interval,
   } = r1;
+
+  let AgeTag = null;
+
+  if(!min_age_interval && !max_age_interval) {
+    AgeTag = h(LithologyTag, {
+      data: {
+        name: age,
+      },
+    });
+  } else if (min_age_interval && !max_age_interval) {
+    AgeTag = h(LithologyTag, {
+      data: {
+        name: min_age_interval.name,
+        color: min_age_interval.color,
+      },
+      onClick: () => {
+        window.open(`/lex/intervals/${min_age_interval.int_id}`, '_self');
+      },
+    });
+  } else if (!min_age_interval && max_age_interval) {
+    AgeTag = h(LithologyTag, {
+      data: {
+        name: max_age_interval.name,
+        color: max_age_interval.color,
+      },
+      onClick: () => {
+        window.open(`/lex/intervals/${max_age_interval.int_id}`, '_self');
+      },
+    });
+  } else {
+    AgeTag = h('div.age-interval', [
+      h(LithologyTag, {
+        data: {
+          name: min_age_interval.name,
+          color: min_age_interval.color,
+        },
+        onClick: () => {
+          window.open(`/lex/intervals/${min_age_interval.int_id}`, '_self');
+        },
+      }),
+      " - ",
+      h(LithologyTag, {
+        data: {
+          name: max_age_interval.name,
+          color: max_age_interval.color,
+        },
+        onClick: () => {
+          window.open(`/lex/intervals/${max_age_interval.int_id}`, '_self');
+        },
+      }),
+    ])
+  }
 
   return h("div.legend-entry", [
     title,
@@ -527,21 +576,18 @@ function LegendEntry({ data }) {
             })
           }
         ),
-        h.if(min_age_interval)(
+        h.if(age)(
           DataField,
           {
-            label: "Minimum age interval: ",
-            value: h(LithologyTag, { 
-              data: min_age_interval,
-              onClick: (e, int) => window.open(`/lex/intervals/${int.int_id}`, '_self')
-            })
+            label: "Age: ",
+            value: AgeTag,
           }
         ),
         h.if(area)(
           DataField,
           {
             label: "Area: ",
-            value: area,
+            value: area.toLocaleString(),
             unit: "km²",
           }
         ),
