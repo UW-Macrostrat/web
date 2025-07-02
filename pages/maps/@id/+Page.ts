@@ -42,6 +42,7 @@ import { usePageProps } from "~/renderer/usePageProps";
 import { usePageContext } from "vike-react/usePageContext";
 import { LithologyList, LithologyTag } from "@macrostrat/data-components";
 import { DataField } from "~/components/unit-details";
+import { stratNameConcepts } from "#/map/map-interface/app-state/handlers/filters";
 
 interface StyleOpts {
   style: string;
@@ -411,7 +412,7 @@ function MapLegendData({ source_id }) {
   });
 
 
-  if (legendData == null) return h(NonIdealState, { icon: "error" });
+  if (legendData == null) return h(Spinner);
 
   legendData.sort((a, b) => a.t_age - b.t_age);
 
@@ -481,20 +482,16 @@ function LegendEntry({ data }) {
     title,
     h(Collapse, { isOpen }, [
       h("div.legend-details", [
-        h.if(descrip)("div.legend-description", h("p", descrip)),
+        h.if(descrip)("p.legend-description", descrip),
         h.if(strat_names)(
-          "div.legend-strat-name",
-          h("p", [
-            "Stratigraphic names: ", [
-              strat_names?.map((sn) =>
-                h(
-                  "a",
-                  { href: `/lex/strat-names/${sn.strat_name_id}` },
-                  h(Tag, { minimal: true }, sn.strat_name)
-                )
-              ),
-            ]
-          ])
+          DataField,
+          {
+            label: "Stratigraphic names: ",
+            value: h(LithologyList, { 
+              lithologies: strat_names?.map((sn) => ({ name: sn.strat_name, id: sn.strat_name_id })),
+              onClickItem: (e, sn) => window.open(`/lex/strat-names/${sn.id}`, '_self')
+            }),
+          }
         ),
         h.if(lith_classes?.length > 0)(
           DataField,
@@ -514,22 +511,23 @@ function LegendEntry({ data }) {
           DataField,
           {
             label: "Units: ",
-            value: units?.map((unit) =>
-              h(LithologyTag, { data: unit, onClick: (e, u) => window.open(`/columns/${unit.col_id}#unit=${unit.unit_id}`, '_self') })
-            )
+            value: h(LithologyList, { 
+              lithologies: units?.map((unit) => ({ name: unit.name, unit_id: unit.unit_id, col_id: unit.col_id })),
+              onClickItem: (e, unit) => window.open(`/columns/${unit.col_id}#unit=${unit.unit_id}`, '_self') 
+            })
           }
         ),
-        lithologies ? h(
+        h.if(lithologies)(
           DataField,
           {
             label: "Lithologies: ",
             value: h(LithologyList, { 
-              lithologies,
+              lithologies: lithologies?.map((lith) => ({ name: lith.lith_name, ...lith })),
               onClickItem: (e, lith) => window.open(`/lex/lithology/${lith.lith_id}`, '_self') 
             })
           }
-        ) : null,
-        h.if(min_age_interval.name)(
+        ),
+        h.if(min_age_interval)(
           DataField,
           {
             label: "Minimum age interval: ",
