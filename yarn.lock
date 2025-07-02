@@ -3090,22 +3090,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/column-views@npm:^2.1.1":
-  version: 2.1.1
-  resolution: "@macrostrat/column-views@npm:2.1.1"
+"@macrostrat/column-views@npm:^2.1.2":
+  version: 2.1.2
+  resolution: "@macrostrat/column-views@npm:2.1.2"
   dependencies:
     "@macrostrat/api-types": "npm:^1.1.1"
     "@macrostrat/color-utils": "npm:^1.1.1"
     "@macrostrat/column-components": "npm:^1.2.0"
     "@macrostrat/data-components": "npm:^0.2.0"
     "@macrostrat/hyper": "npm:^3.0.6"
-    "@macrostrat/map-interface": "npm:^1.3.1"
+    "@macrostrat/map-interface": "npm:^1.4.0"
     "@macrostrat/map-styles": "npm:^1.2.1"
-    "@macrostrat/mapbox-react": "npm:^2.6.1"
-    "@macrostrat/mapbox-utils": "npm:^1.5.1"
+    "@macrostrat/mapbox-react": "npm:^2.6.2"
+    "@macrostrat/mapbox-utils": "npm:^1.6.0"
     "@macrostrat/stratigraphy-utils": "npm:^1.0.1"
     "@macrostrat/svg-map-components": "npm:^1.0.5"
-    "@macrostrat/timescale": "npm:^2.2.0"
+    "@macrostrat/timescale": "npm:^2.2.1"
     "@macrostrat/ui-components": "npm:^4.3.0"
     "@turf/buffer": "npm:^7.2.0"
     "@turf/centroid": "npm:^7.2.0"
@@ -3136,7 +3136,7 @@ __metadata:
   peerDependencies:
     "@blueprintjs/core": ^5.0.0
     react: ^16.13.1||^17||^18||^19
-  checksum: 10/21f1fe36b406df08f67043345f83ea4cdf637a703411505268548f7f7c4eb1c3b31b8aebb5d360f9494b0bbe8001c2f630443dffc373d873a8a4aa00f2fb3c50
+  checksum: 10/f13c75e28d1c3f1d8c4e6041cfac1d39d2c45cb2a5d2960c1bb194c2b5f7098304b2f53eadb302e7c16e22f60ceed3050e942b223c1ecbcaed3553c4855ae7ea
   languageName: node
   linkType: hard
 
@@ -3371,6 +3371,32 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@macrostrat/map-interface@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "@macrostrat/map-interface@npm:1.4.0"
+  dependencies:
+    "@blueprintjs/core": "npm:^5.0.0"
+    "@macrostrat/color-utils": "npm:^1.1.1"
+    "@macrostrat/hyper": "npm:^3.0.6"
+    "@macrostrat/mapbox-react": "npm:^2.6.2"
+    "@macrostrat/mapbox-utils": "npm:^1.6.0"
+    "@macrostrat/ui-components": "npm:^4.3.0"
+    "@mapbox/tilebelt": "npm:^2.0.0"
+    classnames: "npm:^2.5.1"
+    d3-array: "npm:^3.2.4"
+    d3-format: "npm:^3.1.0"
+    mapbox-gl: "npm:^2.15.0||^3.0.0"
+    query-string: "npm:^9.0.0"
+    transition-hook: "npm:^1.5.2"
+    underscore: "npm:^1.13.6"
+    use-resize-observer: "npm:^9.1.0"
+  peerDependencies:
+    react: ^16.8.6||^17.0.0||^18.0.0||^19.0.0
+    react-dom: ^16.8.6||^17.0.0||^18.0.0||^19.0.0
+  checksum: 10/fccf1a25911ba1f326d79b4739ea05ba0f8e6044e15fabc7e68454c2ce4c3de303658998f878af2a65ba098563040f88f7a494f2b1700709241db2a8926f14ec
+  languageName: node
+  linkType: hard
+
 "@macrostrat/map-styles@npm:^1.2.0":
   version: 1.2.0
   resolution: "@macrostrat/map-styles@npm:1.2.0"
@@ -3441,6 +3467,29 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@macrostrat/mapbox-react@npm:^2.6.2":
+  version: 2.6.2
+  resolution: "@macrostrat/mapbox-react@npm:2.6.2"
+  dependencies:
+    "@macrostrat/hyper": "npm:^3.0.6"
+    "@macrostrat/map-styles": "npm:^1.2.1"
+    "@macrostrat/mapbox-utils": "npm:^1.6.0"
+    "@macrostrat/ui-components": "npm:^4.3.0"
+    "@turf/centroid": "npm:^7.1.0"
+    "@types/mapbox-gl": "npm:^3.4.1"
+    classnames: "npm:^2.3.1"
+    immutability-helper: "npm:^3.1.1"
+    mapbox-gl: "npm:^2.15.0||^3.0.0"
+    mapbox-gl-controls: "npm:^2.3.5"
+    zustand: "npm:^5.0.1"
+  peerDependencies:
+    "@blueprintjs/core": ^3||^4||^5.10.2
+    react: ^16.8.6||^17.0.0||^18.0.0||^19.0.0
+    react-dom: ^16.8.6||^17.0.0||^18.0.0||^19.0.0
+  checksum: 10/6a5502d3ca4504d384b5b4266168e7eb2d5577096f415e7b4d8ccc917fc53f0a43f4c37cd035482f7fc50590e7f44ed29421e1b7e65b9d67ddafcf2c2b763fca
+  languageName: node
+  linkType: hard
+
 "@macrostrat/mapbox-utils@npm:^1.1.1, @macrostrat/mapbox-utils@npm:^1.5.0":
   version: 1.5.0
   resolution: "@macrostrat/mapbox-utils@npm:1.5.0"
@@ -3460,6 +3509,18 @@ __metadata:
     axios: "npm:^1.7.9"
     mapbox-gl: "npm:^2.15.0||^3.0.0"
   checksum: 10/039e8fd57bc15fc6520b13d2ee20d79de7d42bf98179f406d97926ac945519c85e9f4ab494260701f9cd6553b7d14599005d046129f8297cdcbeac340da907c7
+  languageName: node
+  linkType: hard
+
+"@macrostrat/mapbox-utils@npm:^1.6.0":
+  version: 1.6.0
+  resolution: "@macrostrat/mapbox-utils@npm:1.6.0"
+  dependencies:
+    "@turf/bbox": "npm:^7.1.0"
+    "@types/mapbox-gl": "npm:^3.4.1"
+    axios: "npm:^1.7.9"
+    mapbox-gl: "npm:^2.15.0||^3.0.0"
+  checksum: 10/d447e84cab61aae17bcc74e2c0873ffec29cdb1ddec285b21635d41e5099da1a1333539c3c2d1c0c5dca2d8d112c52706312c9baa6a99bd932e85e4974dec27e
   languageName: node
   linkType: hard
 
@@ -3597,6 +3658,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@macrostrat/timescale@npm:^2.2.1":
+  version: 2.2.1
+  resolution: "@macrostrat/timescale@npm:2.2.1"
+  dependencies:
+    "@macrostrat/hyper": "npm:^3.0.6"
+    "@macrostrat/ui-components": "npm:^4.3.0"
+    "@types/classnames": "npm:^2.3.4"
+    "@types/d3-array": "npm:^3.2.1"
+    "@visx/axis": "npm:^3.12.0"
+    "@visx/scale": "npm:^3.12.0"
+    classnames: "npm:^2.2.6"
+    d3-array: "npm:^3.2.4"
+    d3-format: "npm:^3.1.0"
+  peerDependencies:
+    react: ^16.13.1||^17||^18||^19
+    react-dom: ^16.13.1||^17||^18||^19
+  checksum: 10/5beee0f9f4bbc6d05ceae6ca321c27517714485bc165b998041c128f434d0f4d0f5b8611d17d316d19d10d11f9a91aeced22e1a52b8ce40497644781d253e90d
+  languageName: node
+  linkType: hard
+
 "@macrostrat/ui-components@npm:^4.0.0, @macrostrat/ui-components@npm:^4.1.1, @macrostrat/ui-components@npm:^4.1.2, @macrostrat/ui-components@npm:^4.1.3, @macrostrat/ui-components@npm:^4.2.0":
   version: 4.2.0
   resolution: "@macrostrat/ui-components@npm:4.2.0"
@@ -3686,7 +3767,7 @@ __metadata:
     "@macrostrat/api-types": "npm:^1.1.0"
     "@macrostrat/color-utils": "npm:^1.1.0"
     "@macrostrat/column-components": "npm:^1.1.0"
-    "@macrostrat/column-views": "npm:^2.1.1"
+    "@macrostrat/column-views": "npm:^2.1.2"
     "@macrostrat/data-components": "npm:^0.2.0"
     "@macrostrat/data-sheet": "npm:^2.0.2"
     "@macrostrat/feedback-components": "npm:^1.1.0"
@@ -3699,7 +3780,7 @@ __metadata:
     "@macrostrat/revision-info-webpack": "npm:^1.0.0"
     "@macrostrat/style-system": "npm:^0.2.1"
     "@macrostrat/svg-map-components": "npm:^1.0.4"
-    "@macrostrat/timescale": "npm:^2.2.0"
+    "@macrostrat/timescale": "npm:^2.2.1"
     "@macrostrat/ui-components": "npm:^4.3.0"
     "@mdx-js/rollup": "npm:^2.3.0"
     "@react-hook/size": "npm:^2.1.2"
