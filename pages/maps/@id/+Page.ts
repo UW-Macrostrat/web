@@ -41,6 +41,7 @@ import { MapNavbar } from "~/components/map-navbar";
 import { usePageProps } from "~/renderer/usePageProps";
 import { usePageContext } from "vike-react/usePageContext";
 import { LithologyList, LithologyTag } from "@macrostrat/data-components";
+import { DataField } from "~/components/unit-details";
 
 interface StyleOpts {
   style: string;
@@ -511,24 +512,28 @@ function LegendEntry({ data }) {
             )
           ]
         ),
-        h.if(area)(
-          "div.legend-area",
-          h("p", ["Area: ", h("span", area)])
-        ),
         lithologies ? h(LithologyList, { 
           label: "Lithologies: ", 
           lithologies,
           onClickItem: (e, lith) => window.open(`/lex/lithology/${lith.lith_id}`, '_self') 
         }) : null,
         h.if(min_age_interval.name)(
-          "div.legend-min-age-interval",
-          h("p", [
-            "Min age interval: ", 
-            h(LithologyTag, { 
+          DataField,
+          {
+            label: "Minimum age interval: ",
+            value: h(LithologyTag, { 
               data: min_age_interval,
               onClick: (e, int) => window.open(`/lex/intervals/${int.int_id}`, '_self')
             })
-          ])
+          }
+        ),
+        h.if(area)(
+          DataField,
+          {
+            label: "Area: ",
+            value: area,
+            unit: "km²",
+          }
         ),
       ]),
     ]),
