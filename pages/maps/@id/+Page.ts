@@ -9,6 +9,7 @@ import {
 import {
   tileserverDomain,
   apiV2Prefix,
+  apiDomain,
   darkMapURL,
   baseMapURL,
   satelliteMapURL,
@@ -39,6 +40,9 @@ import { PageBreadcrumbs, MapReference, DevLink } from "~/components";
 import { MapNavbar } from "~/components/map-navbar";
 import { usePageProps } from "~/renderer/usePageProps";
 import { usePageContext } from "vike-react/usePageContext";
+import { LithologyList, LithologyTag } from "@macrostrat/data-components";
+import { DataField } from "~/components/unit-details";
+import { stratNameConcepts } from "#/map/map-interface/app-state/handlers/filters";
 
 interface StyleOpts {
   style: string;
@@ -165,7 +169,6 @@ export function Page() {
   const [isOpen, setOpen] = useState(false);
   const dark = useDarkMode()?.isEnabled ?? false;
   const title = map.properties.name;
-  console.log(map);
 
   const hasRaster = map.properties.raster_url != null;
 
@@ -173,7 +176,7 @@ export function Page() {
     return ensureBoxInGeographicRange(boundingBox(map.geometry));
   }, [map.geometry]);
 
-  const [layer, setLayer] = useState(Basemap.None);
+  const [layer, setLayer] = useState(localStorage.getItem('basemap') || Basemap.None);
   const [style, setStyle] = useState(null);
   // Basemap style
   useEffect(() => {
@@ -354,9 +357,9 @@ function BaseLayerSelector({ layer, setLayer }) {
         },
       },
       [
-        h(Radio, { label: "Satellite", value: Basemap.Satellite }),
-        h(Radio, { label: "Basic", value: Basemap.Basic }),
-        h(Radio, { label: "None", value: Basemap.None }),
+        h(Radio, { label: "Satellite", value: Basemap.Satellite, onClick: () => localStorage.setItem('basemap', Basemap.Satellite) }),
+        h(Radio, { label: "Basic", value: Basemap.Basic, onClick: () => localStorage.setItem('basemap', Basemap.Basic) }),
+        h(Radio, { label: "None", value: Basemap.None, onClick: () => localStorage.setItem('basemap', Basemap.None) }),
       ]
     ),
   ]);
@@ -404,12 +407,12 @@ function MapLegendPanel(params) {
 }
 
 function MapLegendData({ source_id }) {
-  const mapLegend = useAPIResult(apiV2Prefix + "/geologic_units/map/legend", {
-    source_id,
+  const legendData = useAPIResult(apiDomain + "/api/pg/new_legend", {
+    source_id: 'eq.' + source_id,
   });
-  if (mapLegend == null) return h(Spinner);
-  const legendData = mapLegend?.success?.data;
-  if (legendData == null) return h(NonIdealState, { icon: "error" });
+
+
+  if (legendData == null) return h(Spinner);
 
   legendData.sort((a, b) => a.t_age - b.t_age);
 
@@ -420,19 +423,19 @@ function MapLegendData({ source_id }) {
 }
 
 function LegendEntry({ data }) {
-  const { map_unit_name, color, ...rest } = data;
+  const { name, color, ...rest } = data;
   const {
     legend_id,
-    source_id,
+    source_id, 
     t_interval,
     b_interval,
     //strat_name,
     //strat_name_id,
-    unit_id,
-    area,
-    tiny_area,
-    small_area,
-    medium_area,
+    unit_id, // need column id
+    area, 
+    tiny_area, 
+    small_area, 
+    medium_area, 
     large_area,
     lith,
     // lith_classes,
@@ -440,6 +443,7 @@ function LegendEntry({ data }) {
     lith_id,
     scale,
     comments,
+    lithologies,
     ...r1
   } = rest;
 
@@ -456,67 +460,136 @@ function LegendEntry({ data }) {
     },
     [
       h("div.legend-swatch", { style: { backgroundColor: color } }),
-      h("div.legend-label", h("h4", map_unit_name)),
+      h("div.legend-label", h("h4", name)),
     ]
   );
 
   const {
     age,
-    b_age,
     descrip,
     lith_classes,
     lith_types,
-    strat_name,
-    strat_name_id,
-    t_age,
+    units,
+    strat_names,
+    min_age_interval,
+    max_age_interval,
   } = r1;
+
+  let AgeTag = null;
+
+  if(!min_age_interval && !max_age_interval) {
+    AgeTag = h(LithologyTag, {
+      data: {
+        name: age,
+      },
+    });
+  } else if (min_age_interval && !max_age_interval) {
+    AgeTag = h(LithologyTag, {
+      data: {
+        name: min_age_interval.name,
+        color: min_age_interval.color,
+      },
+      onClick: () => {
+        window.open(`/lex/intervals/${min_age_interval.int_id}`, '_self');
+      },
+    });
+  } else if (!min_age_interval && max_age_interval) {
+    AgeTag = h(LithologyTag, {
+      data: {
+        name: max_age_interval.name,
+        color: max_age_interval.color,
+      },
+      onClick: () => {
+        window.open(`/lex/intervals/${max_age_interval.int_id}`, '_self');
+      },
+    });
+  } else {
+    AgeTag = h('div.age-interval', [
+      h(LithologyTag, {
+        data: {
+          name: min_age_interval.name,
+          color: min_age_interval.color,
+        },
+        onClick: () => {
+          window.open(`/lex/intervals/${min_age_interval.int_id}`, '_self');
+        },
+      }),
+      " - ",
+      h(LithologyTag, {
+        data: {
+          name: max_age_interval.name,
+          color: max_age_interval.color,
+        },
+        onClick: () => {
+          window.open(`/lex/intervals/${max_age_interval.int_id}`, '_self');
+        },
+      }),
+    ])
+  }
 
   return h("div.legend-entry", [
     title,
     h(Collapse, { isOpen }, [
       h("div.legend-details", [
-        h.if(descrip)("div.legend-description", h("p", descrip)),
-        h.if(strat_name)(
-          "div.legend-strat-name",
-          h("p", [
-            "Stratigraphic name: ",
-            h("span", [
-              h(
-                "a",
-                { href: `/lex/strat-names/${strat_name_id?.[0]}` },
-                strat_name
-              ), // need to fix when api is updated
-            ]),
-          ])
+        h.if(descrip)("p.legend-description", descrip),
+        h.if(strat_names)(
+          DataField,
+          {
+            label: "Stratigraphic names: ",
+            value: h(LithologyList, { 
+              lithologies: strat_names?.map((sn) => ({ name: sn.strat_name, id: sn.strat_name_id })),
+              onClickItem: (e, sn) => window.open(`/lex/strat-names/${sn.id}`, '_self')
+            }),
+          }
         ),
         h.if(lith_classes?.length > 0)(
-          "div.legend-lith-classes",
-          h("p", [
-            "Lithology classes: ",
-            h(
-              "span",
-              lith_classes?.map((l) => h(Tag, { minimal: true }, l))
-            ),
-          ])
+          DataField,
+          {
+            label: "Lithology classes: ",
+            value: h(LithologyList, { lithologies: lith_classes?.map((l) => ({ name: l })) })
+          }
         ),
         h.if(lith_types?.length > 0)(
-          "div.legend-lith-types",
-          h("p", [
-            "Lithology types: ",
-            h(
-              "span",
-              lith_types?.map((l) => h(Tag, { minimal: true }, l))
-            ),
-          ])
+          DataField,
+          {
+            label: "Lithology types: ",
+            value: h(LithologyList, { lithologies: lith_types?.map((l) => ({ name: l })) })
+          }
         ),
-        h.if(age)("div.legend-age", h("p", ["Age: ", h("span", age)])),
-        h.if(b_age)(
-          "div.legend-b-age",
-          h("p", ["Base age: ", h("span", b_age)])
+        h.if(units)(
+          DataField,
+          {
+            label: "Units: ",
+            value: h(LithologyList, { 
+              lithologies: units?.map((unit) => ({ name: unit.name, unit_id: unit.unit_id, col_id: unit.col_id })),
+              onClickItem: (e, unit) => window.open(`/columns/${unit.col_id}#unit=${unit.unit_id}`, '_self') 
+            })
+          }
         ),
-        h.if(t_age)(
-          "div.legend-t-age",
-          h("p", ["Top age: ", h("span", t_age)])
+        h.if(lithologies)(
+          DataField,
+          {
+            label: "Lithologies: ",
+            value: h(LithologyList, { 
+              lithologies: lithologies?.map((lith) => ({ name: lith.lith_name, ...lith })),
+              onClickItem: (e, lith) => window.open(`/lex/lithology/${lith.lith_id}`, '_self') 
+            })
+          }
+        ),
+        h.if(age)(
+          DataField,
+          {
+            label: "Age: ",
+            value: AgeTag,
+          }
+        ),
+        h.if(area)(
+          DataField,
+          {
+            label: "Area: ",
+            value: area.toLocaleString(),
+            unit: "km²",
+          }
         ),
       ]),
     ]),
