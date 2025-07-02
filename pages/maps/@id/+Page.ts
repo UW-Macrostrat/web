@@ -497,26 +497,38 @@ function LegendEntry({ data }) {
           ])
         ),
         h.if(lith_classes?.length > 0)(
-          "div.legend-lith-types",
-          h(LithologyList, { label: "Lithology classes: ", lithologies: lith_classes?.map((l) => ({ name: l })) })
+          DataField,
+          {
+            label: "Lithology classes: ",
+            value: h(LithologyList, { lithologies: lith_classes?.map((l) => ({ name: l })) })
+          }
         ),
         h.if(lith_types?.length > 0)(
-          "div.legend-lith-types",
-          h(LithologyList, { label: "Lithology types: ", lithologies: lith_types?.map((l) => ({ name: l })) })
+          DataField,
+          {
+            label: "Lithology types: ",
+            value: h(LithologyList, { lithologies: lith_types?.map((l) => ({ name: l })) })
+          }
         ),
         h.if(units)(
-          "div.legend-unit-ids", [
-            h('span', 'Unit IDs: '),
-            units?.map((unit) =>
+          DataField,
+          {
+            label: "Units: ",
+            value: units?.map((unit) =>
               h(LithologyTag, { data: unit, onClick: (e, u) => window.open(`/columns/${unit.col_id}#unit=${unit.unit_id}`, '_self') })
             )
-          ]
+          }
         ),
-        lithologies ? h(LithologyList, { 
-          label: "Lithologies: ", 
-          lithologies,
-          onClickItem: (e, lith) => window.open(`/lex/lithology/${lith.lith_id}`, '_self') 
-        }) : null,
+        lithologies ? h(
+          DataField,
+          {
+            label: "Lithologies: ",
+            value: h(LithologyList, { 
+              lithologies,
+              onClickItem: (e, lith) => window.open(`/lex/lithology/${lith.lith_id}`, '_self') 
+            })
+          }
+        ) : null,
         h.if(min_age_interval.name)(
           DataField,
           {
