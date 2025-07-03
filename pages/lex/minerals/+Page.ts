@@ -18,6 +18,13 @@ export function Page() {
     setInput(event.toLowerCase());
   };
 
+  const params = {
+    order: "id.asc",
+    mineral: `ilike.*${input}*`,
+    id: `gt.0`,
+    limit: PAGE_SIZE,
+  };
+
   return h(ContentPage, [
     h(StickyHeader, { className: "header" }, [
       h(PageBreadcrumbs, {
@@ -29,17 +36,13 @@ export function Page() {
       }),
     ]),
     h(InfiniteScrollView, {
-      params: {
-        order: "id.asc",
-        mineral: `ilike.*${input}*`,
-        id: `gt.0`,
-        limit: PAGE_SIZE,
-      },
+      params,
       route: `${apiDomain}/api/pg/minerals`,
       getNextParams,
-      // initialItems: res,
+      initialItems: input === "" ? res : [],
       hasMore,
       itemComponent: MineralItem,
+      key: input
     })
   ]);
 }
