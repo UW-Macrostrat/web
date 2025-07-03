@@ -26,15 +26,14 @@ export function Page() {
 
   const key = input + activeOnly + recentOrder;
 
+  const initialItems = recentOrder && input === "" ? sources : [];
+
   const baseParams = useMemo(() => {
-    //const lastYear = sources?.[sources.length - 1]?.ref_year || 9999;
-    //const lastId = sources?.[sources.length - 1]?.source_id || 0
-    const lastYear = 9999;
-    const lastId = 0;
-
-    console.log("Last year:", lastYear);
-    console.log("Last ID:", lastId);
-
+    const lastYear = initialItems.length > 0 ? 
+    initialItems[initialItems.length - 1]?.ref_year : 9999;
+    const lastId = initialItems.length > 0 ? 
+      initialItems[initialItems.length - 1]?.source_id : 0
+      
     return {
       is_finalized: activeOnly ? "eq.true" : undefined,
       status_code: activeOnly ? "eq.active" : undefined,
@@ -113,7 +112,7 @@ export function Page() {
               route: `${apiDomain}/api/pg/sources_metadata`,
               getNextParams,
               hasMore,
-              // initialItems: sources,
+              initialItems,
               itemComponent: SourceItem,
               key,
               delay: 100
