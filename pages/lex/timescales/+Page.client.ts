@@ -12,30 +12,7 @@ import { useData } from "vike-react/useData";
 export function Page() {
   const [input, setInput] = useState("");
   const [age, setAge] = useState([0, 4000]);
-  const [clickedInterval, setClickedInterval] = useState(null);
   const { res } = useData();
-
-  useEffect(() => {
-    if (!clickedInterval) return;
-
-    const fetchInterval = async () => {
-      try {
-        const res = await fetch(
-          `https://macrostrat.org/api/defs/intervals?name=${clickedInterval}`
-        );
-        const data = await res.json();
-        const clickedData = data?.success?.data?.[0];
-        if (clickedData) {
-          const url = "/lex/intervals/" + clickedData.int_id;
-          window.open(url, "_blank");
-        }
-      } catch (error) {
-        console.error("Error fetching interval data:", error);
-      }
-    };
-
-    fetchInterval();
-  }, [clickedInterval]);
 
   const handleChange = (event) => {
     setInput(event.toLowerCase());
@@ -51,24 +28,6 @@ export function Page() {
 
     return matchesName && matchesAgeRange;
   });
-
-  const handleClick = (timescale) => {
-    const parent = timescale.target.parentElement;
-    let selected;
-
-    // container clicked
-    const containerClickedData = parent.className.split(" ")[1];
-
-    if (containerClickedData === "interval-label") {
-      const labelClickedData =
-        parent.parentElement.parentElement.className.split(" ")[1];
-      selected = labelClickedData;
-    } else {
-      selected = containerClickedData;
-    }
-
-    setClickedInterval(selected);
-  };
 
   return h(ContentPage, { className: "timescale-list-page" }, [
     h(StickyHeader, [h(PageBreadcrumbs, { title: "Timescales" })]),
@@ -97,7 +56,7 @@ export function Page() {
           levels: [1, 5],
           ageRange: [age[0], age[1]],
           absoluteAgeScale: true,
-          onClick: handleClick,
+          onClick: (e, d) => window.open("/lex/intervals/" + d.int_id, "_self"),
         })
       ),
     ]),

@@ -142,6 +142,7 @@ export function Intervals({ resData }) {
       levels: [1, 5],
       ageRange: [b_age, t_age],
       absoluteAgeScale: true,
+      onClick: (e, d) => window.open("/lex/intervals/" + d.int_id, "_self"),
     })
   );
 }

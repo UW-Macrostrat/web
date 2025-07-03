@@ -182,6 +182,7 @@ function CorrelationChart({
               ageRange: domain,
               absoluteAgeScale: true,
               levels: [2, 3],
+              onClick: (e, d) => window.open(`/lex/intervals/${d.int_id}`, "_self"),
             }),
           ]),
           h(
