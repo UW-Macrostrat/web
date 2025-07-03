@@ -1,5 +1,5 @@
-import h from "./main.module.scss";
-import { Spinner, Switch, AnchorButton } from "@blueprintjs/core";
+import h from "./main.module.sass";
+import { Spinner, Switch, AnchorButton, Icon } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import {
   PageHeader,
@@ -8,170 +8,155 @@ import {
   LinkCard,
   StickyHeader,
 } from "~/components";
-import { useState, useRef, useEffect } from "react";
-import { useAPIResult } from "@macrostrat/ui-components";
+import { useState, useMemo, useEffect } from "react";
+import { InfiniteScrollView } from "@macrostrat/ui-components";
 import { apiDomain } from "@macrostrat-web/settings";
 import { IDTag, SearchBar } from "~/components/general";
 import { useData } from "vike-react/useData";
 import { PageBreadcrumbs } from "~/components";
+
+const PAGE_SIZE = 20;
 
 export function Page() {
   const { sources } = useData();
 
   const [input, setInput] = useState("");
   const [activeOnly, setActiveOnly] = useState(true);
-  const [recentOrder, setRecentOrder] = useState(false);
+  const [recentOrder, setRecentOrder] = useState(true);
 
-  const startingID = sources[sources.length - 1].source_id;
-  const [key, setKey] = useState({
-    lastID: startingID,
-    lastYear: 9999,
-  });
-  const [data, setData] = useState(sources);
-  const pageSize = 20;
+  const key = input + activeOnly + recentOrder;
 
-  const result = useSourceData(
-    key.lastID,
-    input,
-    pageSize,
-    activeOnly,
-    recentOrder,
-    key.lastYear
-  );
+  const initialItems = recentOrder && input === "" ? sources : [];
 
-  useEffect(() => {
-    if (
-      result &&
-      data[data.length - 1]?.source_id !== result[result.length - 1]?.source_id
-    ) {
-      setData((prevData) => {
-        return [...prevData, ...result];
-      });
-    }
-  }, [result]);
+  const baseParams = useMemo(() => {
+    const lastYear = initialItems.length > 0 ? 
+    initialItems[initialItems.length - 1]?.ref_year : 9999;
+    const lastId = initialItems.length > 0 ? 
+      initialItems[initialItems.length - 1]?.source_id : 0
+      
+    return {
+      is_finalized: activeOnly ? "eq.true" : undefined,
+      status_code: activeOnly ? "eq.active" : undefined,
+      or: recentOrder
+        ? `(ref_year.lt.${lastYear},and(ref_year.eq.${lastYear},source_id.gt.${lastId}))`
+        : undefined,
+      name: input ? `ilike.%${input}%` : undefined,
+      order: recentOrder ? "ref_year.desc,source_id.asc" : "source_id.asc",
+      limit: PAGE_SIZE,
+    };
+  }, [input, activeOnly, recentOrder]);
 
-  const resetData = () => {
-    window.scrollTo(0, 0);
-    setData([]);
-    setKey({
-      lastID: 0,
-      lastYear: 9999,
-    });
-  };
+  function getNextParams(response, params) {
+    const id = response[response.length - 1]?.source_id;
+    const year = response[response.length - 1]?.ref_year || 9999;
 
-  const handleInputChange = (event) => {
-    setInput(event.toLowerCase());
-    resetData();
-  };
+    const newParams = {
+      ...params,
+      is_finalized: activeOnly ? "eq.true" : undefined,
+      status_code: activeOnly ? "eq.active" : undefined,
+      source_id: !recentOrder ? `gt.${id}` : undefined,
+      or: recentOrder
+        ? `(ref_year.lt.${year},and(ref_year.eq.${year},source_id.gt.${id}))`
+        : undefined,
+      name: `ilike.%${input}%`,
+      order: recentOrder ? "ref_year.desc,source_id.asc" : "source_id.asc",
+    };
 
-  const handleActiveChange = () => {
-    setActiveOnly(!activeOnly);
-    resetData();
-  };
+    console.log("New params:", newParams, "response", response);
 
-  const handleRecentChange = () => {
-    setRecentOrder(!recentOrder);
-    resetData();
-  };
+    return newParams
+  }
 
-  return h("div.maps-page", [
-    h(ContentPage, [
-      h(StickyHeader, { className: "header-container" }, [
-        h("div.header", [
-          h(PageBreadcrumbs, {
-            title: "Maps",
-          }),
-          h(SearchBar, {
-            placeholder: "Filter by name...",
-            onChange: handleInputChange,
-          }),
-          h(Switch, {
-            label: "Active only",
-            checked: activeOnly,
-            onChange: handleActiveChange,
-          }),
-          h(Switch, {
-            label: "Recent order",
-            checked: recentOrder,
-            onChange: handleRecentChange,
-          }),
-        ]),
-        h(AssistantLinks, { className: "assistant-links" }, [
-          h(
-            AnchorButton,
-            { icon: "flows", href: "/maps/ingestion" },
-            "Ingestion system"
+  return h("div.maps-list-page", [
+      h(ContentPage, [
+        h("div.flex-row", [
+          h('div.main', [
+            h(StickyHeader, { className: "header-container" }, [
+              h("div.header", [
+                h(PageBreadcrumbs, {
+                  title: "Maps",
+                  showLogo: true,
+                }),
+                h('div.search', [
+                  h(SearchBar, {
+                    placeholder: "Filter by name...",
+                    onChange: (event) => {
+                      window.scrollTo(0, 0);
+                      setInput(event.toLowerCase());
+                    },
+                    className: "search-bar",
+                  }),
+                  h('div.switches', [
+                    h(Switch, {
+                      label: "Active only",
+                      checked: activeOnly,
+                      onChange: () => {
+                        window.scrollTo(0, 0);
+                        setActiveOnly(!activeOnly);
+                      },
+                    }),
+                    h(Switch, {
+                      label: "Recent order",
+                      checked: recentOrder,
+                      onChange: () => {
+                        window.scrollTo(0, 0);
+                        setRecentOrder(!recentOrder)
+                      },
+                    }),
+                  ]),
+                ]),
+              ]),
+            ]),
+            h(InfiniteScrollView, {
+              params: baseParams,
+              route: `${apiDomain}/api/pg/sources_metadata`,
+              getNextParams,
+              hasMore,
+              initialItems,
+              itemComponent: SourceItem,
+              key,
+              delay: 100
+            })
+          ]),
+          h("div.sidebar", 
+            h("div.sidebar-content", [
+              h(AssistantLinks, { className: "assistant-links" }, [
+                h(
+                  AnchorButton,
+                  { icon: "flows", href: "/maps/ingestion" },
+                  "Ingestion system"
+                ),
+                h(AnchorButton, { icon: "map", href: "/map/sources" }, "Show on map"),
+                h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
+              ]),
+            ])
           ),
-          h(AnchorButton, { icon: "map", href: "/map/sources" }, "Show on map"),
-          h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
-        ]),
+        ])
       ]),
-      h(
-        "div.strat-list",
+    ]);
+  
+  
+  
+  h("div.maps-page", [
+    h('div.assistant-links', 
+      h(AssistantLinks, { className: "assistant-links" }, [
         h(
-          "div.strat-items",
-          data.map((data) => h(SourceItem, { data }))
-        )
-      ),
-      LoadMoreTrigger({ data, setKey, pageSize, result }),
+          AnchorButton,
+          { icon: "flows", href: "/maps/ingestion" },
+          "Ingestion system"
+        ),
+        h(AnchorButton, { icon: "map", href: "/map/sources" }, "Show on map"),
+        h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
+      ]),
+    ),
+    h(ContentPage, [
+      
     ]),
   ]);
 }
 
-function useSourceData(
-  lastID,
-  input,
-  pageSize,
-  activeOnly,
-  recentOrder,
-  lastYear
-) {
-  const url = `${apiDomain}/api/pg/sources_metadata`;
-
-  const result = useAPIResult(url, {
-    is_finalized: activeOnly ? "eq.true" : undefined,
-    status_code: activeOnly ? "eq.active" : undefined,
-    source_id: !recentOrder ? `gt.${lastID}` : undefined,
-    or: recentOrder
-      ? `(ref_year.lt.${lastYear},and(ref_year.eq.${lastYear},source_id.gt.${lastID}))`
-      : undefined,
-    name: `ilike.%${input}%`,
-    limit: pageSize,
-    order: recentOrder ? "ref_year.desc,source_id.asc" : "source_id.asc",
-  });
-  return result;
-}
-
-function LoadMoreTrigger({ data, setKey, pageSize, result }) {
-  const ref = useRef(null);
-
-  useEffect(() => {
-    if (!ref.current) return;
-
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        if (data.length > 0) {
-          const id = data[data.length - 1].source_id;
-          const year = data[data.length - 1].ref_year || 9999;
-
-          setKey({
-            lastID: id,
-            lastYear: year,
-          });
-        }
-      }
-    });
-
-    observer.observe(ref.current);
-
-    return () => observer.disconnect();
-  }, [data]);
-
-  return h.if(result?.length == pageSize)("div.load-more", { ref }, h(Spinner));
-}
-
 function SourceItem({ data }) {
-  const { source_id, name, ref_title, url, scale, ref_year } = data;
+  const { source_id, name, ref_title, url, scale, ref_year, ref_source } = data;
   const href = `/maps/${source_id}`;
 
   return h(
@@ -185,9 +170,18 @@ function SourceItem({ data }) {
     },
     [
       h("div.content", [
-        h("a", { href: url, target: "_blank" }, ref_title),
+        h('div.source', [
+          h("span", ref_source + ": " + ref_title + " (" + ref_year + ") "),
+          h("a", { href: url, target: "_blank" }, 
+            h(Icon, { icon: "link" }),
+          ),
+        ]),
         h("div.tags", [h(IDTag, { id: source_id })]),
       ]),
     ]
   );
+}
+
+function hasMore(response) {
+  return response.length === PAGE_SIZE; 
 }
