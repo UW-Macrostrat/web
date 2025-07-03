@@ -24,6 +24,8 @@ export function Page() {
   const [activeOnly, setActiveOnly] = useState(true);
   const [recentOrder, setRecentOrder] = useState(true);
 
+  const key = input + activeOnly + recentOrder;
+
   const baseParams = useMemo(() => {
     //const lastYear = sources?.[sources.length - 1]?.ref_year || 9999;
     //const lastId = sources?.[sources.length - 1]?.source_id || 0
@@ -79,19 +81,28 @@ export function Page() {
                 h('div.search', [
                   h(SearchBar, {
                     placeholder: "Filter by name...",
-                    onChange: (event) => setInput(event.toLowerCase()),
+                    onChange: (event) => {
+                      window.scrollTo(0, 0);
+                      setInput(event.toLowerCase());
+                    },
                     className: "search-bar",
                   }),
                   h('div.switches', [
                     h(Switch, {
                       label: "Active only",
                       checked: activeOnly,
-                      onChange: () => setActiveOnly(!activeOnly),
+                      onChange: () => {
+                        window.scrollTo(0, 0);
+                        setActiveOnly(!activeOnly);
+                      },
                     }),
                     h(Switch, {
                       label: "Recent order",
                       checked: recentOrder,
-                      onChange: () => setRecentOrder(!recentOrder),
+                      onChange: () => {
+                        window.scrollTo(0, 0);
+                        setRecentOrder(!recentOrder)
+                      },
                     }),
                   ]),
                 ]),
@@ -102,8 +113,10 @@ export function Page() {
               route: `${apiDomain}/api/pg/sources_metadata`,
               getNextParams,
               hasMore,
-              initialItems: sources,
+              // initialItems: sources,
               itemComponent: SourceItem,
+              key,
+              delay: 100
             })
           ]),
           h("div.sidebar", 
