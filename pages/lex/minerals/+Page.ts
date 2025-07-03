@@ -37,7 +37,7 @@ export function Page() {
       },
       route: `${apiDomain}/api/pg/minerals`,
       getNextParams,
-      initialData: res,
+      // initialItems: res,
       hasMore,
       itemComponent: MineralItem,
     })
