@@ -1,15 +1,14 @@
 import h from "./main.module.sass";
-import { Spinner, Switch, AnchorButton, Icon } from "@blueprintjs/core";
+import { Switch, AnchorButton, Icon } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import {
-  PageHeader,
   DevLinkButton,
   AssistantLinks,
   LinkCard,
   StickyHeader,
 } from "~/components";
-import { useState, useMemo, useEffect } from "react";
-import { InfiniteScrollView } from "@macrostrat/ui-components";
+import { useState } from "react";
+import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
 import { apiDomain } from "@macrostrat-web/settings";
 import { IDTag, SearchBar } from "~/components/general";
 import { useData } from "vike-react/useData";
@@ -20,52 +19,12 @@ const PAGE_SIZE = 20;
 export function Page() {
   const { sources } = useData();
 
-  const [input, setInput] = useState("");
   const [activeOnly, setActiveOnly] = useState(true);
   const [recentOrder, setRecentOrder] = useState(true);
 
-  const key = input + activeOnly + recentOrder;
+  const key = "" + activeOnly + recentOrder; // should be able to remove on next release (4.3.7)
 
-  const initialItems = recentOrder && input === "" ? sources : [];
-
-  const baseParams = useMemo(() => {
-    const lastYear = initialItems.length > 0 ? 
-    initialItems[initialItems.length - 1]?.ref_year : 9999;
-    const lastId = initialItems.length > 0 ? 
-      initialItems[initialItems.length - 1]?.source_id : 0
-      
-    return {
-      is_finalized: activeOnly ? "eq.true" : undefined,
-      status_code: activeOnly ? "eq.active" : undefined,
-      or: recentOrder
-        ? `(ref_year.lt.${lastYear},and(ref_year.eq.${lastYear},source_id.gt.${lastId}))`
-        : undefined,
-      name: input ? `ilike.%${input}%` : undefined,
-      order: recentOrder ? "ref_year.desc,source_id.asc" : "source_id.asc",
-      limit: PAGE_SIZE,
-    };
-  }, [input, activeOnly, recentOrder]);
-
-  function getNextParams(response, params) {
-    const id = response[response.length - 1]?.source_id;
-    const year = response[response.length - 1]?.ref_year || 9999;
-
-    const newParams = {
-      ...params,
-      is_finalized: activeOnly ? "eq.true" : undefined,
-      status_code: activeOnly ? "eq.active" : undefined,
-      source_id: !recentOrder ? `gt.${id}` : undefined,
-      or: recentOrder
-        ? `(ref_year.lt.${year},and(ref_year.eq.${year},source_id.gt.${id}))`
-        : undefined,
-      name: `ilike.%${input}%`,
-      order: recentOrder ? "ref_year.desc,source_id.asc" : "source_id.asc",
-    };
-
-    console.log("New params:", newParams, "response", response);
-
-    return newParams
-  }
+  const initialItems = recentOrder && activeOnly ? sources : undefined;
 
   return h("div.maps-list-page", [
       h(ContentPage, [
@@ -78,14 +37,6 @@ export function Page() {
                   showLogo: true,
                 }),
                 h('div.search', [
-                  h(SearchBar, {
-                    placeholder: "Filter by name...",
-                    onChange: (event) => {
-                      window.scrollTo(0, 0);
-                      setInput(event.toLowerCase());
-                    },
-                    className: "search-bar",
-                  }),
                   h('div.switches', [
                     h(Switch, {
                       label: "Active only",
@@ -107,15 +58,19 @@ export function Page() {
                 ]),
               ]),
             ]),
-            h(InfiniteScrollView, {
-              params: baseParams,
+            h(PostgRESTInfiniteScrollView, {
               route: `${apiDomain}/api/pg/sources_metadata`,
-              getNextParams,
-              hasMore,
-              initialItems,
+              id_key: "source_id",
+              order_key: recentOrder ? "ref_year" : undefined,
+              filterable: true,
+              extraParams: {
+                is_finalized: activeOnly ? "eq.true" : undefined,
+              },
+              ascending: !recentOrder,
+              limit: PAGE_SIZE,
               itemComponent: SourceItem,
-              key,
-              delay: 100
+              initialItems,
+              key
             })
           ]),
           h("div.sidebar", 
@@ -134,25 +89,6 @@ export function Page() {
         ])
       ]),
     ]);
-  
-  
-  
-  h("div.maps-page", [
-    h('div.assistant-links', 
-      h(AssistantLinks, { className: "assistant-links" }, [
-        h(
-          AnchorButton,
-          { icon: "flows", href: "/maps/ingestion" },
-          "Ingestion system"
-        ),
-        h(AnchorButton, { icon: "map", href: "/map/sources" }, "Show on map"),
-        h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
-      ]),
-    ),
-    h(ContentPage, [
-      
-    ]),
-  ]);
 }
 
 function SourceItem({ data }) {
@@ -180,8 +116,4 @@ function SourceItem({ data }) {
       ]),
     ]
   );
-}
-
-function hasMore(response) {
-  return response.length === PAGE_SIZE; 
 }
