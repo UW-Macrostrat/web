@@ -116,6 +116,7 @@ function FeedbackInterface({ data, models, entityTypes }) {
     model,
     entityTypes,
     matchComponent: MatchedEntityLink,
+    lineHeight: 3,
     onSave: wrapWithToaster(
       async (tree) => {
         const data = prepareDataForServer(tree, window.source_text, [

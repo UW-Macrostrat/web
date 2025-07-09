@@ -32,10 +32,8 @@ function SourceTextItem({ data }) {
     className: "source-text-item",
     href: `/integrations/xdd/feedback/${id}`,
     title: '#' + id + ' - ' + prettyDate(last_update),
-  }, [
-    h('p', paragraph_text.slice(0, 100) + '...'),
-    h('div.numbers-container', [
-      h('h4', 'Number of: '),
+  }, h('div.link-content', [
+    h('p.text', paragraph_text),
       h('div.numbers', [
         h(DataField, {
           className: 'number-field',
@@ -58,8 +56,7 @@ function SourceTextItem({ data }) {
           value: n_strat_names,
         }),
       ]),
-    ]),
-  ]);
+  ]));
 }
 
 function prettyDate(value) {
