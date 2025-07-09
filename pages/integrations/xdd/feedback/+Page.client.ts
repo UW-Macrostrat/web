@@ -6,10 +6,15 @@ import { postgrestPrefix } from "@macrostrat-web/settings";
 import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
 import { DataField } from "~/components/unit-details";
 import { Switch } from "@blueprintjs/core";
+import { usePageContext } from "vike-react/usePageContext";
 
 const h = hyper.styled(styles);
 
 export function Page() {
+  const showDetails = parseInt(usePageContext()?.urlOriginal?.split('=')[1] || 1);
+
+  console.log("XDD Feedback Page version:", showDetails);
+
   return h(ContentPage, { className: "main" }, [
     h(PageBreadcrumbs),
     h("h1", "Source text"),
@@ -18,15 +23,15 @@ export function Page() {
       id_key: 'id',
       limit: 20,
       ascending: false,
-      itemComponent: SourceTextItem,
+      itemComponent: showDetails ? SourceTextItemDetailed : SourceTextItem,
       filterable: true,
       // toggles: h('h1', "Toggles here"),
     }),
   ]);
 }
 
-function SourceTextItem({ data }) {
-  const { id, paragraph_text, created, last_update, n_runs, n_entities, n_matches, n_strat_names } = data;
+function SourceTextItemDetailed({ data }) {
+  const { id, paragraph_text, last_update, n_runs, n_entities, n_matches, n_strat_names } = data;
 
   return h(LinkCard, {
     className: "source-text-item",
@@ -34,29 +39,39 @@ function SourceTextItem({ data }) {
     title: '#' + id + ' - ' + prettyDate(last_update),
   }, h('div.link-content', [
     h('p.text', paragraph_text),
-      h('div.numbers', [
-        h(DataField, {
-          className: 'number-field',
-          label: 'Runs',
-          value: n_runs,
-        }),
-        h(DataField, {
-          className: 'number-field',
-          label: 'Entities',
-          value: n_entities,
-        }),
-        h(DataField, {
-          className: 'number-field',
-          label: 'Matches',
-          value: n_matches,
-        }),
-        h(DataField, {
-          className: 'number-field',
-          label: 'Stratigraphic Names',
-          value: n_strat_names,
-        }),
-      ]),
+    h('div.numbers', [
+      h(DataField, {
+        className: 'number-field',
+        label: 'Runs',
+        value: n_runs,
+      }),
+      h(DataField, {
+        className: 'number-field',
+        label: 'Entities',
+        value: n_entities,
+      }),
+      h(DataField, {
+        className: 'number-field',
+        label: 'Matches',
+        value: n_matches,
+      }),
+      h(DataField, {
+        className: 'number-field',
+        label: 'Stratigraphic Names',
+        value: n_strat_names,
+      }),
+    ]),
   ]));
+}
+
+function SourceTextItem({ data }) {
+  const { id, paragraph_text, last_update } = data;
+
+  return h(LinkCard, {
+    className: "text",
+    href: `/integrations/xdd/feedback/${id}`,
+    title: '#' + id + ' - ' + prettyDate(last_update),
+  }, paragraph_text.slice(0,100) + '...');
 }
 
 function prettyDate(value) {

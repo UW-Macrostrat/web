@@ -1,5 +1,5 @@
 import h from "./+Page.client.module.sass";
-import { FullscreenPage } from "~/layouts";
+import { ContentPage, FullscreenPage } from "~/layouts";
 import { PageBreadcrumbs } from "~/components";
 import { usePageContext } from "vike-react/usePageContext";
 import {
@@ -34,7 +34,7 @@ import { Toaster } from "@blueprintjs/core";
 export function Page() {
   return h(
     OverlaysProvider,
-    h(FullscreenPage, [
+    h(ContentPage, [
       h("div.feedback-main", [
         h(PageBreadcrumbs),
         h(FlexRow, { alignItems: "center" }, [
