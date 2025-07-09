@@ -1,24 +1,64 @@
-import { FullscreenPage } from "~/layouts";
+import { ContentPage, FullscreenPage } from "~/layouts";
 import styles from "./main.module.sass";
 import hyper from "@macrostrat/hyper";
-import { PageBreadcrumbs } from "~/components";
-import { PostgRESTTableView } from "@macrostrat/data-sheet";
+import { LinkCard, PageBreadcrumbs } from "~/components";
 import { postgrestPrefix } from "@macrostrat-web/settings";
+import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
+import { DataField } from "~/components/unit-details";
+import { Switch } from "@blueprintjs/core";
 
 const h = hyper.styled(styles);
 
 export function Page() {
-  return h(FullscreenPage, { className: "main" }, [
+  return h(ContentPage, { className: "main" }, [
     h(PageBreadcrumbs),
     h("h1", "Source text"),
-    h(PostgRESTTableView, {
-      endpoint: postgrestPrefix,
-      table: "kg_source_text",
-      columns:
-        "id,map_legend_id,paper_id,last_update,created,n_runs,n_entities,n_matches,n_strat_names",
-      columnOptions,
-      order: { key: "last_update", ascending: false },
+    h(PostgRESTInfiniteScrollView, {
+      route: postgrestPrefix + 'kg_source_text',
+      id_key: 'id',
+      limit: 20,
+      ascending: false,
+      itemComponent: SourceTextItem,
+      filterable: true,
+      // toggles: h('h1', "Toggles here"),
     }),
+  ]);
+}
+
+function SourceTextItem({ data }) {
+  const { id, paragraph_text, created, last_update, n_runs, n_entities, n_matches, n_strat_names } = data;
+
+  return h(LinkCard, {
+    className: "source-text-item",
+    href: `/integrations/xdd/feedback/${id}`,
+    title: '#' + id + ' - ' + prettyDate(last_update),
+  }, [
+    h('p', paragraph_text.slice(0, 100) + '...'),
+    h('div.numbers-container', [
+      h('h4', 'Number of: '),
+      h('div.numbers', [
+        h(DataField, {
+          className: 'number-field',
+          label: 'Runs',
+          value: n_runs,
+        }),
+        h(DataField, {
+          className: 'number-field',
+          label: 'Entities',
+          value: n_entities,
+        }),
+        h(DataField, {
+          className: 'number-field',
+          label: 'Matches',
+          value: n_matches,
+        }),
+        h(DataField, {
+          className: 'number-field',
+          label: 'Stratigraphic Names',
+          value: n_strat_names,
+        }),
+      ]),
+    ]),
   ]);
 }
 
@@ -28,29 +68,4 @@ function prettyDate(value) {
     dateStyle: "medium",
     timeStyle: "short",
   });
-}
-
-const columnOptions = {
-  overrides: {
-    last_update: {
-      name: "Updated",
-      valueRenderer: prettyDate,
-    },
-    created: {
-      name: "Created",
-      valueRenderer: prettyDate,
-    },
-    id: {
-      name: "ID",
-      valueRenderer: sourceTextRenderer,
-    },
-  },
-};
-
-function sourceTextRenderer(value) {
-  return h(
-    "a",
-    { href: `/integrations/xdd/feedback/${value}` },
-    h("code", value)
-  );
 }

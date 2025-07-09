@@ -79,7 +79,7 @@
     "@macrostrat/style-system": "^0.2.1",
     "@macrostrat/svg-map-components": "^1.0.4",
     "@macrostrat/timescale": "^2.2.1",
-    "@macrostrat/ui-components": "^4.3.2",
+    "@macrostrat/ui-components": "^4.3.7",
     "@react-hook/size": "^2.1.2",
     "@supabase/postgrest-js": "^1.18.1",
     "@turf/bbox": "^6.5.0",
