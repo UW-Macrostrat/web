@@ -5,7 +5,7 @@ import React, { useMemo } from "react";
 import { MacrostratIcon } from "~/components";
 import h from "./breadcrumbs.module.sass";
 
-export function PageBreadcrumbs({ showLogo = false, title }) {
+export function PageBreadcrumbs({ showLogo = true, title }) {
   const ctx = usePageContext();
 
   const items = useMemo(() => {
@@ -152,6 +152,22 @@ export const sitemap: Routes = {
           ],
         },
       ],
+    },
+    {
+      slug: 'integrations',
+      name: "Integrations",
+      children: [
+        {
+          slug: "xdd",
+          name: "xDD",
+          children: [
+            {
+              slug: "feedback",
+              name: "Feedback",
+            },
+          ]
+        },
+      ]
     },
     {
       slug: "maps",

@@ -34,7 +34,7 @@ export function Page() {
   ]);
 
   return h(ContentPage, { className: "main" }, [
-    h(PageBreadcrumbs),
+    h(PageBreadcrumbs, {showLogo: true}),
     h("h1", "Source text"),
     h(PostgRESTInfiniteScrollView, {
       route: postgrestPrefix + 'kg_source_text',
