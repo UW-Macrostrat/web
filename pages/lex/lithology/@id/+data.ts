@@ -19,7 +19,7 @@ export async function data(pageContext) {
       fetchAPIRefs("/fossils", { lith_id }),
       fetchAPIRefs("/columns", { lith_id }),
     ]);
-
+  
   const refValues1 = Object.values(refs1);
   const refValues2 = Object.values(refs2);
   const refs = [...refValues1, ...refValues2];
