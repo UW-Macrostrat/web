@@ -1,5 +1,5 @@
 import h from "./main.module.sass";
-import { useAPIResult } from "@macrostrat/ui-components";
+import { useAPIResult, ErrorBoundary } from "@macrostrat/ui-components";
 import { apiV2Prefix, pbdbDomain } from "@macrostrat-web/settings";
 import { Link, PageBreadcrumbs } from "~/components";
 import { Card, Divider } from "@blueprintjs/core";
@@ -10,7 +10,6 @@ import { asChromaColor } from "@macrostrat/color-utils";
 import { DarkModeButton } from "@macrostrat/ui-components";
 import { PieChart, Pie, Cell, ResponsiveContainer, Label } from "recharts";
 import { useDarkMode } from "@macrostrat/ui-components";
-import { StratNameHierarchy } from "./StratNameHierarchy";
 import { LinkCard } from "~/components/cards";
 import { Timescale } from "@macrostrat/timescale";
 import { LexItemPageProps } from "~/types";
@@ -50,6 +49,23 @@ function ExpansionPanelContainer(props) {
 }
 
 export function LexItemPage(props: LexItemPageProps) {
+  const title = props.siftLink
+    ? props.siftLink
+        .split('-')
+        .join(' ')
+        .replace(/^\w/, (c) => c.toUpperCase())
+    : "Unknown";
+  const id = props.id || 0;
+  
+  return h(ErrorBoundary, 
+    {
+      description: `${title} #${id} doesn't exist`
+    },
+    h(LexItemPageInner, props)
+  )
+}
+
+function LexItemPageInner(props: LexItemPageProps) {
   const { children, siftLink, id, resData, refs, header } = props;
 
   const { name, strat_name_long } = resData;

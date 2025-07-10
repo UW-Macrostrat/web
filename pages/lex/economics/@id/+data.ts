@@ -23,7 +23,7 @@ export async function data(pageContext) {
   const refValues2 = Object.values(refs2);
   const refs = [...refValues1, ...refValues2];
 
-  const cols = colData.features
+  const cols = colData?.features
     ?.map((feature) => feature.properties.col_id)
     ?.join(",");
 
