@@ -844,7 +844,7 @@ function Chart(data, title, route, activeIndex, setActiveIndex) {
                   .split(" ")[1]
                   .split("-")[1];
                 const url = "/lex/" + route + "/" + id;
-                window.open(url, "_blank");
+                window.open(url, "_self");
               },
             })
           )
@@ -880,7 +880,6 @@ function ChartLegend(data, route, activeIndex, setActiveIndex, index) {
       "a",
       {
         href: "/lex/" + route + "/" + data.id,
-        target: "_blank",
         onMouseEnter: () => {
           if (
             !activeIndex ||
