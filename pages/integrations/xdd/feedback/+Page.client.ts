@@ -50,6 +50,7 @@ export function Page() {
         'paragraph_text',
       ],
       SearchBarComponent: SearchBar,
+      MultiSelectComponent: MultiSelect,
     }),
   ]);
 }
