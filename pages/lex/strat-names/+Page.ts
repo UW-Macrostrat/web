@@ -4,8 +4,9 @@ import { apiDomain } from "@macrostrat-web/settings";
 import { StickyHeader, LinkCard, PageBreadcrumbs, Link } from "~/components";
 import { Card } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
-import { StratTag } from "~/components/general";
+import { SearchBar, StratTag } from "~/components/general";
 import { useData } from "vike-react/useData";
+import { MultiSelect } from "@blueprintjs/select";
 
 const PAGE_SIZE = 20;
 
@@ -17,7 +18,22 @@ export function Page() {
       h(PageBreadcrumbs, {
         title: "Minerals",
       }),
-      h("div.header-description", [
+      
+    ]),
+    h(PostgRESTInfiniteScrollView, {
+      route: `${apiDomain}/api/pg/strat_combined`,
+      initialItems: res,
+      itemComponent: StratItem,
+      id_key: "combined_id",
+      limit: PAGE_SIZE,
+      filterable: true,
+      SearchBarComponent: SearchBar,
+      MultiSelectComponent: MultiSelect,
+      searchColumns: [
+        "all_names",
+        "name",
+      ],
+      toggles: h("div.header-description", [
         h(
           Card,
           {
@@ -42,14 +58,6 @@ export function Page() {
           ]
         ),
       ]),
-    ]),
-    h(PostgRESTInfiniteScrollView, {
-      route: `${apiDomain}/api/pg/strat_combined`,
-      initialItems: res,
-      itemComponent: StratItem,
-      id_key: "combined_id",
-      limit: PAGE_SIZE,
-      filterable: true,
     })
   ]);
 }

@@ -4,6 +4,8 @@ import { apiDomain } from "@macrostrat-web/settings";
 import { StickyHeader, LinkCard, PageBreadcrumbs } from "~/components";
 import { ContentPage } from "~/layouts";
 import { useData } from "vike-react/useData";
+import { SearchBar } from "~/components/general";
+import { MultiSelect } from "@blueprintjs/select";
 
 const PAGE_SIZE = 20;
 
@@ -24,6 +26,8 @@ export function Page() {
       id_key: "id",
       limit: PAGE_SIZE,
       searchColumns: ["mineral"],
+      SearchBarComponent: SearchBar,
+      MultiSelectComponent: MultiSelect
     })
   ]);
 }
