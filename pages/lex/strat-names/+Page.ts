@@ -31,7 +31,6 @@ export function Page() {
       MultiSelectComponent: MultiSelect,
       searchColumns: [
         "all_names",
-        "name",
       ],
       toggles: h("div.header-description", [
         h(
