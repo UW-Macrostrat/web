@@ -911,7 +911,7 @@ export function Units({ unitsData }) {
 
   const showLoadMore = visibleCount < unitsData.length;
 
-  return h("div.units-container", [
+  return h.if(unitsData?.length > 0)("div.units-container", [
     h(ExpansionPanel, { title: "Units", className: "units-panel" }, [
       h("div.units-list", [...visibleItems]),
       h.if(showLoadMore)(
@@ -946,7 +946,7 @@ export function Maps({ mapsData }) {
 
   const showLoadMore = visibleCount < mapsData.length;
 
-  return h("div.maps-container", [
+  return h.if(mapsData?.length > 0)("div.maps-container", [
     h(ExpansionPanel, { title: "Maps", className: "maps-panel" }, [
       h("div.maps-list", [...visibleItems]),
       h.if(showLoadMore)(
@@ -982,7 +982,7 @@ export function Fossils({ fossilsData }) {
 
   const showLoadMore = visibleCount < fossilsData.length;
 
-  return h("div.fossils-container", [
+  return h.if(fossilsData?.length > 0)("div.fossils-container", [
     h(ExpansionPanel, { title: "Fossils", className: "fossils-panel" }, [
       h("div.fossils-list", [...visibleItems]),
       h.if(showLoadMore)(
