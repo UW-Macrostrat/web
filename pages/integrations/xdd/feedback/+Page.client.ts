@@ -6,14 +6,32 @@ import { postgrestPrefix } from "@macrostrat-web/settings";
 import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
 import { DataField } from "~/components/unit-details";
 import { Switch } from "@blueprintjs/core";
+import { useState } from "react";
 import { usePageContext } from "vike-react/usePageContext";
 
 const h = hyper.styled(styles);
 
 export function Page() {
-  const showDetails = parseInt(usePageContext()?.urlOriginal?.split('=')[1] || 1);
+  const type = usePageContext()?.urlOriginal?.split('=')[1]
+  const [showDetails, setShowDetails] = useState(type !== '0');
+  const [showNoFeedback, setShowNoFeedback] = useState(false);
 
-  console.log("XDD Feedback Page version:", showDetails);
+  const toggles = h('div.toggles', [
+    h(Switch, {
+      checked: showDetails,
+      label: "Show details",
+      onChange: (e) => {
+        setShowDetails(e.target.checked);
+      },
+    }),
+    h(Switch, {
+      checked: showNoFeedback,
+      label: "Show texts with no feedback",
+      onChange: (e) => {
+        setShowNoFeedback(e.target.checked);
+      },
+    }),
+  ]);
 
   return h(ContentPage, { className: "main" }, [
     h(PageBreadcrumbs),
@@ -25,7 +43,10 @@ export function Page() {
       ascending: false,
       itemComponent: showDetails ? SourceTextItemDetailed : SourceTextItem,
       filterable: true,
-      // toggles: h('h1', "Toggles here"),
+      toggles,
+      searchColumns: [
+        'paragraph_text',
+      ]
     }),
   ]);
 }
