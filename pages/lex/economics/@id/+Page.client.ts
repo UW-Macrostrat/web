@@ -14,7 +14,6 @@ import { usePageContext } from "vike-react/usePageContext";
 export function Page() {
   const { resData, colData, taxaData, refs, unitsData, fossilsData } =
     useData();
-    console.log('resData:', resData);
 
   const id = usePageContext()?.urlPathname.split("/")?.[3] || [];
   const features = colData?.features || [];
