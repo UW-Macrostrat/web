@@ -8,6 +8,8 @@ import { DataField } from "~/components/unit-details";
 import { Switch } from "@blueprintjs/core";
 import { useState } from "react";
 import { usePageContext } from "vike-react/usePageContext";
+import { SearchBar } from "~/components/general";
+import { MultiSelect, ItemRenderer, ItemPredicate } from "@blueprintjs/select";
 
 const h = hyper.styled(styles);
 
@@ -46,7 +48,8 @@ export function Page() {
       toggles,
       searchColumns: [
         'paragraph_text',
-      ]
+      ],
+      SearchBarComponent: SearchBar,
     }),
   ]);
 }
