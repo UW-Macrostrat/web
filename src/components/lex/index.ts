@@ -51,7 +51,7 @@ function ExpansionPanelContainer(props) {
 export function LexItemPage(props: LexItemPageProps) {
   const title = props.siftLink
     ? props.siftLink
-        .split('-')
+        .split(/[-_]/)
         .join(' ')
         .replace(/^\w/, (c) => c.toUpperCase())
     : "Unknown";
