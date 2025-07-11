@@ -30,7 +30,7 @@ export function Page() {
       SearchBarComponent: SearchBar,
       MultiSelectComponent: MultiSelect,
       searchColumns: [
-        "all_names",
+        { label: "Name", value: "all_names" },
       ],
       toggles: h("div.header-description", [
         h(

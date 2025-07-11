@@ -1489,15 +1489,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blueprintjs/colors@npm:^5.1.8":
-  version: 5.1.8
-  resolution: "@blueprintjs/colors@npm:5.1.8"
-  dependencies:
-    tslib: "npm:~2.6.2"
-  checksum: 10/2675c7011a4a3ec574fe3bcf11a3ddf1aed6f3f5ada31ac48b542bf7968affe8e0db4fe87ff5faa150b920e25fb7724373a4df3d5a558ea27c49763f2e3dc9a8
-  languageName: node
-  linkType: hard
-
 "@blueprintjs/core@npm:^4.20.2":
   version: 4.20.2
   resolution: "@blueprintjs/core@npm:4.20.2"
@@ -1552,33 +1543,6 @@ __metadata:
     upgrade-blueprint-2.0.0-rename: scripts/upgrade-blueprint-2.0.0-rename.sh
     upgrade-blueprint-3.0.0-rename: scripts/upgrade-blueprint-3.0.0-rename.sh
   checksum: 10/89558e4e97bd51fc4e6f1bb1fa837a4fbd20e2bc5de502922ffc20d390097c381e2d44159a2af2d7f29994fa88043a413804aa461f9cc2f943fe7d32a44e88ad
-  languageName: node
-  linkType: hard
-
-"@blueprintjs/core@npm:^6.0.0":
-  version: 6.0.0
-  resolution: "@blueprintjs/core@npm:6.0.0"
-  dependencies:
-    "@blueprintjs/colors": "npm:^5.1.8"
-    "@blueprintjs/icons": "npm:^6.0.0"
-    "@popperjs/core": "npm:^2.11.8"
-    classnames: "npm:^2.3.1"
-    normalize.css: "npm:^8.0.1"
-    react-popper: "npm:^2.3.0"
-    react-transition-group: "npm:^4.4.5"
-    tslib: "npm:~2.6.2"
-    use-sync-external-store: "npm:^1.2.0"
-  peerDependencies:
-    "@types/react": 18
-    react: 18
-    react-dom: 18
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-  bin:
-    upgrade-blueprint-2.0.0-rename: scripts/upgrade-blueprint-2.0.0-rename.sh
-    upgrade-blueprint-3.0.0-rename: scripts/upgrade-blueprint-3.0.0-rename.sh
-  checksum: 10/0bfcec31ab5aa0f697cc7dea24868447f6b6b9a78b1f8f8ba053a7a76c3320e9b2dd46bc4eeb05fdbe671604f39e462fe7691a6b4904c22ee9d7e83688c8fc19
   languageName: node
   linkType: hard
 
@@ -1657,24 +1621,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blueprintjs/icons@npm:^6.0.0":
-  version: 6.0.0
-  resolution: "@blueprintjs/icons@npm:6.0.0"
-  dependencies:
-    change-case: "npm:^4.1.2"
-    classnames: "npm:^2.3.1"
-    tslib: "npm:~2.6.2"
-  peerDependencies:
-    "@types/react": 18
-    react: 18
-    react-dom: 18
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-  checksum: 10/2fe412c430ad56bc1529416170cce0b5121e67b410ac277f89947bcf0d71a06e9ad0c398e50fe0abfe0fd7b1a52e0dd3497296b9c6349b4f209217c337840350
-  languageName: node
-  linkType: hard
-
 "@blueprintjs/popover2@npm:^1.2.1":
   version: 1.14.11
   resolution: "@blueprintjs/popover2@npm:1.14.11"
@@ -1713,25 +1659,6 @@ __metadata:
     "@types/react":
       optional: true
   checksum: 10/8baf28292e8c9a42994c9bb0c129e06d7287b17adaa308ef9628529716524c2314dd2753965cd2137af2e4f8f16781c491ddc41645d63519415db3aa81c585be
-  languageName: node
-  linkType: hard
-
-"@blueprintjs/select@npm:^6.0.0":
-  version: 6.0.0
-  resolution: "@blueprintjs/select@npm:6.0.0"
-  dependencies:
-    "@blueprintjs/core": "npm:^6.0.0"
-    "@blueprintjs/icons": "npm:^6.0.0"
-    classnames: "npm:^2.3.1"
-    tslib: "npm:~2.6.2"
-  peerDependencies:
-    "@types/react": 18
-    react: 18
-    react-dom: 18
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-  checksum: 10/b4bce6e925673cdd6cebbb30dbb73d9bca974182610344512e456d959dfc5c6083d2053b4930f137f9e246bc8bc538e886ffa571ee89ebc7bdf00ac09d0f4080
   languageName: node
   linkType: hard
 
@@ -3813,13 +3740,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/ui-components@npm:^4.3.8":
-  version: 4.3.8
-  resolution: "@macrostrat/ui-components@npm:4.3.8"
+"@macrostrat/ui-components@npm:^4.4.0":
+  version: 4.4.0
+  resolution: "@macrostrat/ui-components@npm:4.4.0"
   dependencies:
     "@blueprintjs/core": "npm:^5.10.2"
     "@blueprintjs/datetime2": "npm:^2.3.11"
-    "@blueprintjs/select": "npm:^6.0.0"
+    "@blueprintjs/select": "npm:^5.3.10"
     "@macrostrat/hyper": "npm:^3.0.6"
     "@types/react": "npm:^18.3.12"
     "@types/react-dom": "npm:^18"
@@ -3841,7 +3768,7 @@ __metadata:
   peerDependencies:
     react: ^16.8.6 || ^17 || ^18 || ^19
     react-dom: ^16.8.6 || ^17 || ^18 || ^19
-  checksum: 10/ad2e997510a8ed424b0cecddce8412e8fe4a4cbfec6685e7811065188c956d9f251aa784275b1e2185d9b2603f2dd2549ea543c02c59925c9de0fa19de7a9b0e
+  checksum: 10/9f3e3db3c6c8b421c8258271e92bd1746689ffeb1cc61b5a7e5752af9c067f93559e5bdbe6532e350737818a1fbbc4f221cfae8e7d3eb9c60a077ae9f89e0ebb
   languageName: node
   linkType: hard
 
@@ -3886,7 +3813,7 @@ __metadata:
     "@macrostrat/style-system": "npm:^0.2.1"
     "@macrostrat/svg-map-components": "npm:^1.0.4"
     "@macrostrat/timescale": "npm:^2.2.1"
-    "@macrostrat/ui-components": "npm:^4.3.8"
+    "@macrostrat/ui-components": "npm:^4.4.0"
     "@mdx-js/rollup": "npm:^2.3.0"
     "@react-hook/size": "npm:^2.1.2"
     "@supabase/postgrest-js": "npm:^1.18.1"

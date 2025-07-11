@@ -25,7 +25,7 @@ export function Page() {
       filterable: true,
       id_key: "id",
       limit: PAGE_SIZE,
-      searchColumns: ["mineral"],
+      searchColumns: [{ label: "Mineral", value: "mineral" }],
       SearchBarComponent: SearchBar,
       MultiSelectComponent: MultiSelect
     })
