@@ -19,22 +19,27 @@ function IntervalChip(props) {
   const darkMode = useDarkMode();
   const darkenAmount = darkMode.isEnabled ? 2 : 0;
 
-  return h(
-    "div.chip.age-chip",
+  return h('a.chip-link', 
     {
-      className,
-      style: {
-        backgroundColor: getColor(interval.color, darkenAmount),
+      href: `/lex/intervals/${interval.int_id}`,
+    }, 
+    h(
+      "div.chip.age-chip",
+      {
+        className,
+        style: {
+          backgroundColor: getColor(interval.color, darkenAmount),
+        },
       },
-    },
-    [
-      h("div.age-chip-interval", interval.int_name),
-      h("div.age-chip-age", [
-        h(Age, { age: interval.b_age }),
-        " - ",
-        h(Age, { age: interval.t_age }),
-      ]),
-    ]
+      [
+        h("div.age-chip-interval", interval.int_name),
+        h("div.age-chip-age", [
+          h(Age, { age: interval.b_age }),
+          " - ",
+          h(Age, { age: interval.t_age }),
+        ]),
+      ]
+    )
   );
 }
 
