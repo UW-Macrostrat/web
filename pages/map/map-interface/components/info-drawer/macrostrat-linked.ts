@@ -312,7 +312,7 @@ function LithsAndClasses(props) {
       h(LithologyList, {
         lithologies,
         onClickItem: (e, lith) => {
-          window.open('/lex/lithology/' + lith.lith_id, '_blank');
+          window.open('/lex/lithology/' + lith.lith_id, '_self');
         },
       }),
     ])
@@ -330,7 +330,7 @@ function Environments(props) {
   const { environs = null, environ_types = null } = macrostrat;
 
   if (!environs || environs.length == 0) return null;
-  
+
   const lithologies = environs.map((environ) => {
     return {
       ...environ,
@@ -349,7 +349,7 @@ function Environments(props) {
        h(LithologyList, {
         lithologies,
         onClickItem: (e, environ) => {
-          window.open('/lex/environments/' + environ.environ_id, '_blank');
+          window.open('/lex/environments/' + environ.environ_id, '_self');
         },
       }),
     ])
