@@ -485,7 +485,7 @@ function LegendEntry({ data }) {
                 "a",
                 { href: `/lex/strat-names/${strat_name_id?.[0]}` },
                 strat_name
-              ), // need to fix when api is updated
+              ), // need to fix when api is updated 
             ]),
           ])
         ),

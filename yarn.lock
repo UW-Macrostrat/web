@@ -3740,12 +3740,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/ui-components@npm:^4.3.2":
-  version: 4.3.2
-  resolution: "@macrostrat/ui-components@npm:4.3.2"
+"@macrostrat/ui-components@npm:^4.4.0":
+  version: 4.4.0
+  resolution: "@macrostrat/ui-components@npm:4.4.0"
   dependencies:
     "@blueprintjs/core": "npm:^5.10.2"
     "@blueprintjs/datetime2": "npm:^2.3.11"
+    "@blueprintjs/select": "npm:^5.3.10"
     "@macrostrat/hyper": "npm:^3.0.6"
     "@types/react": "npm:^18.3.12"
     "@types/react-dom": "npm:^18"
@@ -3767,7 +3768,7 @@ __metadata:
   peerDependencies:
     react: ^16.8.6 || ^17 || ^18 || ^19
     react-dom: ^16.8.6 || ^17 || ^18 || ^19
-  checksum: 10/706819c270cdbc66f13e1bf290dba63cd9f8a360b7d537b869324a17e903188b981774149b75a8c87f2d8157a81074a26c52e7b6f991ea5a4bacdb9b566225f4
+  checksum: 10/9f3e3db3c6c8b421c8258271e92bd1746689ffeb1cc61b5a7e5752af9c067f93559e5bdbe6532e350737818a1fbbc4f221cfae8e7d3eb9c60a077ae9f89e0ebb
   languageName: node
   linkType: hard
 
@@ -3812,7 +3813,7 @@ __metadata:
     "@macrostrat/style-system": "npm:^0.2.1"
     "@macrostrat/svg-map-components": "npm:^1.0.4"
     "@macrostrat/timescale": "npm:^2.2.1"
-    "@macrostrat/ui-components": "npm:^4.3.2"
+    "@macrostrat/ui-components": "npm:^4.4.0"
     "@mdx-js/rollup": "npm:^2.3.0"
     "@react-hook/size": "npm:^2.1.2"
     "@supabase/postgrest-js": "npm:^1.18.1"

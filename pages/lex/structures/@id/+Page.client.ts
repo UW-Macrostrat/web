@@ -1,15 +1,16 @@
 import { useData } from "vike-react/useData";
 import h from "@macrostrat/hyper";
 import { LexItemPage } from "~/components/lex";
+import { usePageContext } from "vike-react/usePageContext";
 
 export function Page() {
   const { resData } = useData();
 
-  const id = resData.structure_id;
+  const id = usePageContext().urlParsed.pathname.split("/")[3];
 
   const children = [h(StructureDetails, { resData })];
 
-  return LexItemPage({ children, id, refs: [], resData, siftLink: "" });
+  return LexItemPage({ children, id, refs: [], resData, siftLink: "structure" });
 }
 
 function StructureDetails({ resData }) {

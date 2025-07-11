@@ -3,13 +3,14 @@ import h from "./main.module.sass";
 import { LexItemPage, ConceptInfo, Charts, Fossils } from "~/components/lex";
 import { StratTag } from "~/components/general";
 import { LinkCard } from "~/components/cards";
+import { usePageContext } from "vike-react/usePageContext";
 
 export function Page() {
   const { resData, refs, fossilsData } = useData();
 
-  const id = resData.concept_id;
+  const id = usePageContext()?.urlPathname.split("/")?.[3] || [];
 
-  const { name } = resData;
+  const { name } = resData || {};
 
   const children = [
     h(ConceptInfo, { concept_id: id, showHeader: false }),

@@ -1,48 +1,33 @@
 import h from "./main.module.sass";
-import { InfiniteScrollView } from "@macrostrat/ui-components";
+import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
 import { apiDomain } from "@macrostrat-web/settings";
 import { StickyHeader, LinkCard, PageBreadcrumbs } from "~/components";
-import { useState } from "react";
 import { ContentPage } from "~/layouts";
-import { SearchBar } from "~/components/general";
 import { useData } from "vike-react/useData";
+import { SearchBar } from "~/components/general";
+import { MultiSelect } from "@blueprintjs/select";
 
 const PAGE_SIZE = 20;
 
 export function Page() {
   const { res } = useData();
 
-  const [input, setInput] = useState("");
-
-  const handleChange = (event) => {
-    setInput(event.toLowerCase());
-  };
-
-  const params = {
-    order: "id.asc",
-    mineral: `ilike.*${input}*`,
-    id: `gt.0`,
-    limit: PAGE_SIZE,
-  };
-
   return h(ContentPage, [
     h(StickyHeader, { className: "header" }, [
       h(PageBreadcrumbs, {
         title: "Minerals",
       }),
-      h(SearchBar, {
-        placeholder: "Filter by name...",
-        onChange: handleChange,
-      }),
     ]),
-    h(InfiniteScrollView, {
-      params,
+    h(PostgRESTInfiniteScrollView, {
       route: `${apiDomain}/api/pg/minerals`,
-      getNextParams,
-      initialItems: input === "" ? res : [],
-      hasMore,
+      initialItems: res,
       itemComponent: MineralItem,
-      key: input
+      filterable: true,
+      id_key: "id",
+      limit: PAGE_SIZE,
+      searchColumns: [{ label: "Mineral", value: "mineral" }],
+      SearchBarComponent: SearchBar,
+      MultiSelectComponent: MultiSelect
     })
   ]);
 }
@@ -55,16 +40,4 @@ function MineralItem({ data }) {
     className: "mineral-item",
     title: mineral,
   });
-}
-
-function getNextParams(response, params) {
-  const id = response[response.length - 1]?.id;
-  return {
-    ...params,
-    id: "gt." + id,
-  };
-}
-
-function hasMore(response) {
-  return response.length === PAGE_SIZE; 
 }

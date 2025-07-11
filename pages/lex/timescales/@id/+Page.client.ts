@@ -1,19 +1,13 @@
 import h from "./main.module.scss";
-import { useAPIResult } from "@macrostrat/ui-components";
-import { apiV2Prefix } from "@macrostrat-web/settings";
+import { ErrorBoundary } from "@macrostrat/ui-components";
 import {
-  PageHeader,
   Link,
-  AssistantLinks,
-  DevLinkButton,
   PageBreadcrumbs,
 } from "~/components";
 import { ContentPage } from "~/layouts";
-import { usePageContext } from "vike-react/usePageContext";
 import { Timescale } from "@macrostrat/timescale";
 import { titleCase } from "~/components/lex";
-import { useState, useEffect } from "react";
-import { Footer, Loading } from "~/components/general";
+import { Footer } from "~/components/general";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { Popover } from "@blueprintjs/core";
 import { useData } from "vike-react/useData";
@@ -25,7 +19,11 @@ export function Page() {
   const timeRes = res.find((d) => d.timescale_id === id);
   const grouped = groupByIntType(intervals);
 
-  if (timeRes == null) return h("div", "Timescale not found");
+  if (timeRes == null) {
+    return h(ErrorBoundary, { description: `Timescale #${id} not found` },
+      h(Fail, { timeRes })
+    );
+  }
 
   const { min_age, max_age, timescale } = timeRes;
 
@@ -114,4 +112,8 @@ function EconItem({ data }) {
       ),
     ])
   );
+}
+
+function Fail({timeRes}){
+  return h('div', timeRes.timescale)
 }

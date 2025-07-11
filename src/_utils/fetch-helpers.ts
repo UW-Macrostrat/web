@@ -7,8 +7,8 @@ export async function fetchAPIData(apiURL: string, params: any) {
     url.search = new URLSearchParams(params).toString();
   }
   const res = await fetch(url.toString());
-  const res1 = await res.json();
-  return res1?.success?.data;
+  const res1 = await res?.json();
+  return res1?.success?.data || [];
 }
 
 export async function fetchAPIRefs(apiURL: string, params: any) {
@@ -17,6 +17,6 @@ export async function fetchAPIRefs(apiURL: string, params: any) {
     url.search = new URLSearchParams(params).toString();
   }
   const res = await fetch(url.toString());
-  const res1 = await res.json();
-  return res1?.success?.refs;
+  const res1 = await res?.json();
+  return res1?.success?.refs || [];
 }
