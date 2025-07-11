@@ -9,7 +9,8 @@ import styles from "./main.module.styl";
 import { scaleLinear } from "@visx/scale";
 import { AxisBottom } from "@visx/axis";
 import chroma from "chroma-js";
-import { LithologyTag } from "~/components";
+import { LithologyList } from "@macrostrat/data-components";
+
 const h = hyper.styled(styles);
 
 function MacrostratLinkedData(props) {
@@ -279,14 +280,8 @@ function LithTypes(props) {
   return h.if(lith_types && lith_types.length > 0)(
     "div.lithologies.lithology-types",
     [
-      lith_types?.map((lithClass, i) => {
-        return h(LithologyTag, {
-          key: lithClass.name,
-          data: {
-            ...lithClass,
-          },
-          tooltip: false,
-        });
+      h(LithologyList, {
+        lithologies: lith_types,
       }),
     ]
   );
@@ -298,6 +293,14 @@ function LithsAndClasses(props) {
   const { liths = null, lith_types = null } = macrostrat;
 
   if (!liths || liths.length == 0) return null;
+  
+  const lithologies = liths.map((lith) => {
+    return {
+      ...lith,
+      name: lith.lith,
+      color: lith.color || "#000000",
+    };
+  });
 
   return h(
     ExpandableDetailsPanel,
@@ -306,33 +309,19 @@ function LithsAndClasses(props) {
       value: h(LithTypes, { lith_types }),
     },
     h(ExpansionBody, { title: "Matched lithologies" }, [
-      h(
-        "span.lithologies",
-        macrostrat.liths.map((lith, i) => {
-          const l1 = {
-            lith_id: lith.lith_id,
-            name: lith.lith,
-            color: lith.color,
-          };
-          return h(LithologyTag, { data: l1, expandOnHover: false });
-        })
-      ),
+      h(LithologyList, {
+        lithologies,
+        onClickItem: (e, lith) => {
+          window.open('/lex/lithology/' + lith.lith_id, '_blank');
+        },
+      }),
     ])
   );
 }
 
 function EnvironTypes(props) {
   const { environ_types } = props;
-
-  return h.if(environ_types && environ_types.length > 0)("div", [
-    environ_types?.map((type, i) => {
-      return h(AttrChip, {
-        key: i,
-        name: type.name || "other",
-        color: type.color,
-      });
-    }),
-  ]);
+  return h.if(environ_types && environ_types.length > 0)(LithologyList, { lithologies: environ_types.filter((e) => e.name != '') });
 }
 
 function Environments(props) {
@@ -341,6 +330,14 @@ function Environments(props) {
   const { environs = null, environ_types = null } = macrostrat;
 
   if (!environs || environs.length == 0) return null;
+  
+  const lithologies = environs.map((environ) => {
+    return {
+      ...environ,
+      name: environ.environ,
+      color: environ.color || "#000000",
+    };
+  });
 
   return h(
     ExpandableDetailsPanel,
@@ -349,13 +346,11 @@ function Environments(props) {
       value: h(EnvironTypes, { environ_types }),
     },
     h(ExpansionBody, { title: "Matched environments" }, [
-      macrostrat.environs.map((env, i) => {
-        return h(AttrChip, {
-          key: i,
-          name: env.environ,
-          color: env.color,
-          emphasized: false,
-        });
+       h(LithologyList, {
+        lithologies,
+        onClickItem: (e, environ) => {
+          window.open('/lex/environments/' + environ.environ_id, '_blank');
+        },
       }),
     ])
   );
