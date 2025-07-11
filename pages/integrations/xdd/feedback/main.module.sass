@@ -1,17 +1,23 @@
-.main
-  padding: 2em 8em
+.numbers
   display: flex
-  flex-direction: column
-  position: fixed
-  width: 100vw
-  height: 100vh
-  top: 0
-  left: 0
+  flex-wrap: wrap
+  gap: 1em
+  width: 50%
 
-.data-sheet-container
+  .number-field
+    width: calc(50% - 1em)
+    margin: 0
+
+.link-content
   display: flex
-  flex-direction: column
-  flex: 1
-  position: relative
-  min-height: 0
+  justify-content: space-between
+  gap: 1em
 
+  .text
+    width: 80%
+    display: -webkit-box
+    -webkit-box-orient: vertical
+    overflow: hidden
+    text-overflow: ellipsis
+    -webkit-line-clamp: 3
+    line-clamp: 3
