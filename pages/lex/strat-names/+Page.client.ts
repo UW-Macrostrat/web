@@ -20,6 +20,13 @@ export function Page() {
     setInput(event.toLowerCase());
   };
 
+  const params = {
+    order: "combined_id.asc",
+    all_names: `ilike.*${input}*`,
+    combined_id: `gt.0`,
+    limit: PAGE_SIZE,
+  }
+
   return h(ContentPage, [
     h(StickyHeader, { className: "header" }, [
       h(PageBreadcrumbs, {
@@ -56,17 +63,13 @@ export function Page() {
       }),
     ]),
     h(InfiniteScrollView, {
-      params: {
-        order: "combined_id.asc",
-        all_names: `ilike.*${input}*`,
-        combined_id: `gt.0`,
-        limit: PAGE_SIZE,
-      },
+      params,
       route: `${apiDomain}/api/pg/strat_combined`,
       getNextParams,
-      initialData: res,
+      initialItems: input === "" ? res : [],
       itemComponent: StratItem,
       hasMore,
+      key: input
     })
   ]);
 }
