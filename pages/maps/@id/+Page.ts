@@ -14,6 +14,7 @@ import {
   baseMapURL,
   satelliteMapURL,
   mapboxAccessToken,
+  gddDomain,
 } from "@macrostrat-web/settings";
 import {
   DetailPanelStyle,
@@ -189,9 +190,14 @@ export function Page() {
     }).then(setStyle);
   }, [layer, dark]);
 
+  const [layerOpacity, setLayerOpacity] = useState({
+    vector: 0.5,
+    raster: 0.5,
+  });
+
   const [selectedLocation, setSelectedLocation] = useState(null);
 
-  // new stuff
+  // Info panel
   const [mapRef, setMapRef] = useState();
   const handleMapLoaded = (map) => {
     setMapRef(map);
@@ -212,11 +218,17 @@ export function Page() {
       response: 'long'
     }
   )?.success?.data?.[0];
+  const xddInfo = useAPIResult(
+    `${gddDomain}/api/v1/snippets`,
+    {
+      article_limit: 20,
+      term: mapInfo?.mapData?.[0]?.macrostrat?.strat_names
+        ?.map((d) => d.rank_name)
+        .join(","),
+    }
+  )?.success?.data;
 
-  const [layerOpacity, setLayerOpacity] = useState({
-    vector: 0.5,
-    raster: 0.5,
-  });
+  console.log("Outside xdd" , xddInfo);
 
   // Overlay style
   const [mapStyle, setMapStyle] = useState(null);
@@ -346,6 +358,7 @@ export function Page() {
         zoom: mapRef?.getZoom(),
         columnInfo,
         setSelectedLocation,
+        xddInfo
       })
       : h(MapLegendPanel, map.properties),
     },

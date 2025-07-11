@@ -279,7 +279,7 @@ function LithTypes(props) {
   return h.if(lith_types && lith_types.length > 0)(
     "div.lithologies.lithology-types",
     [
-      lith_types.map((lithClass, i) => {
+      lith_types?.map((lithClass, i) => {
         return h(LithologyTag, {
           key: lithClass.name,
           data: {
@@ -325,7 +325,7 @@ function EnvironTypes(props) {
   const { environ_types } = props;
 
   return h.if(environ_types && environ_types.length > 0)("div", [
-    environ_types.map((type, i) => {
+    environ_types?.map((type, i) => {
       return h(AttrChip, {
         key: i,
         name: type.name || "other",
