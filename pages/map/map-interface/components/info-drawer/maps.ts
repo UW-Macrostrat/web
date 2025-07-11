@@ -20,7 +20,7 @@ const h = hyper.styled(styles);
 function InfoDrawer(props) {
   // We used to enable panels when certain layers were on,
   // but now we just show all panels always
-  const { className, mapInfo, columnInfo, fetchingMapInfo, position, zoom } = props;
+  const { className, mapInfo, columnInfo, fetchingMapInfo, position, zoom, setSelectedLocation } = props;
 
   return h(
     LocationPanel,
@@ -29,6 +29,7 @@ function InfoDrawer(props) {
       position,
       elevation: mapInfo?.elevation,
       zoom,
+      onClose: () => setSelectedLocation(null),
       loading: fetchingMapInfo,
       showCopyPositionButton: true,
       contentContainer: "div.infodrawer-content-holder",

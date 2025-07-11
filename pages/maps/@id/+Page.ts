@@ -344,7 +344,8 @@ export function Page() {
         fetchingMapInfo: mapInfo == null, 
         position: selectedLocation, 
         zoom: mapRef?.getZoom(),
-        columnInfo 
+        columnInfo,
+        setSelectedLocation,
       })
       : h(MapLegendPanel, map.properties),
     },
