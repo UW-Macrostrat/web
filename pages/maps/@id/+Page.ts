@@ -43,7 +43,7 @@ import { usePageContext } from "vike-react/usePageContext";
 import { LithologyList, LithologyTag } from "@macrostrat/data-components";
 import { DataField } from "~/components/unit-details";
 import { LocationPanel } from "@macrostrat/map-interface";
-import { MacrostratLayerManager } from "./map-view/map";
+import InfoDrawerMainPanel from "#/map/map-interface/components/info-drawer/maps";
 
 interface StyleOpts {
   style: string;
@@ -356,7 +356,6 @@ export function Page() {
               setSelectedLocation(lnglat);
             },
           }),
-          h(MacrostratLayerManager)
         ]
         //[h(FitBoundsManager, { bounds })]
       ),
@@ -627,54 +626,5 @@ function OpacitySlider(props) {
         props.setOpacity(v);
       },
     }),
-  ]);
-}
-
-function InfoDrawerMainPanel(props) {
-
-
-
-  return h('div', "Hello world");
-  const mapInfo = useAppState((state) => state.core.mapInfo);
-  const pbdbData = useAppState((state) => state.core.pbdbData);
-  const columnInfo = useAppState((state) => state.core.columnInfo);
-
-  if (!mapInfo || !mapInfo.mapData) {
-    return null;
-  }
-
-  const { mapData } = mapInfo;
-
-  let source =
-    mapInfo && mapInfo.mapData && mapInfo.mapData.length
-      ? mapInfo.mapData[0]
-      : {
-          name: null,
-          descrip: null,
-          comments: null,
-          liths: [],
-          b_int: {},
-          t_int: {},
-          ref: {},
-        };
-
-  return h([
-    h(GeologicMapInfo, {
-      mapInfo,
-      bedrockExpanded: true,
-      source,
-    }),
-    h(RegionalStratigraphy, {
-      mapInfo,
-      columnInfo,
-    }),
-    h(FossilCollections, { data: pbdbData, expanded: true }),
-    h(MacrostratLinkedData, {
-      mapInfo,
-      bedrockMatchExpanded: true,
-      source,
-    }),
-    h.if(mapData[0] && mapData[0].strat_name.length)(XddExpansion),
-    h(Physiography, { mapInfo }),
   ]);
 }
