@@ -43,7 +43,7 @@ import { usePageContext } from "vike-react/usePageContext";
 import { LithologyList, LithologyTag } from "@macrostrat/data-components";
 import { DataField } from "~/components/unit-details";
 import { LocationPanel } from "@macrostrat/map-interface";
-import InfoDrawerMainPanel from "#/map/map-interface/components/info-drawer/maps";
+import InfoDrawer from "#/map/map-interface/components/info-drawer/maps";
 
 interface StyleOpts {
   style: string;
@@ -190,6 +190,17 @@ export function Page() {
 
   const [selectedLocation, setSelectedLocation] = useState(null);
 
+  // new stuff
+  const [mapRef, setMapRef] = useState();
+  const handleMapLoaded = (map) => {
+    setMapRef(map);
+  };
+  const mapInfo = useAPIResult(
+    `https://dev2.macrostrat.org/api/v2/mobile/map_query_v2?lng=${selectedLocation?.lng}&lat=${selectedLocation?.lat}&z=${mapRef?.getZoom()}`
+  )?.success?.data;
+
+  console.log('mapInfo:', mapInfo);
+
   const [layerOpacity, setLayerOpacity] = useState({
     vector: 0.5,
     raster: 0.5,
@@ -319,22 +330,9 @@ export function Page() {
         adaptiveWidth: true,
       },
       detailPanelStyle: DetailPanelStyle.FIXED,
-      detailPanel: selectedLocation != null ? h(
-        LocationPanel,
-        {
-          className: 'location-panel',
-          position: selectedLocation,
-          elevation: 10000,
-          zoom: map.properties.zoom ?? 2,
-          onClose: () => setSelectedLocation(null),
-          loading: false,
-          showCopyPositionButton: true,
-          contentContainer: "div.infodrawer-content-holder",
-        },
-        [
-          h(InfoDrawerMainPanel)
-        ]
-      ) : h(MapLegendPanel, map.properties),
+      detailPanel: selectedLocation != null ? 
+      h(InfoDrawer, { mapInfo, fetchingMapInfo: false, position: selectedLocation, zoom: mapRef?.getZoom() })
+      : h(MapLegendPanel, map.properties),
     },
     [
       h(
@@ -348,6 +346,7 @@ export function Page() {
           maxBounds,
           fitBoundsOptions: { padding: 50 },
           infoMarkerPosition: selectedLocation,
+          onMapLoaded: handleMapLoaded,
         },
         [
           h(MapMarker, {

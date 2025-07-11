@@ -19,28 +19,15 @@ const h = hyper.styled(styles);
 function InfoDrawer(props) {
   // We used to enable panels when certain layers were on,
   // but now we just show all panels always
-  let { className } = props;
-  const mapInfo = useAppState((state) => state.core.mapInfo);
-  const fetchingMapInfo = useAppState((state) => state.core.fetchingMapInfo);
-
-  const runAction = useAppActions();
-
-  const onClose = useCallback(
-    () => runAction({ type: "close-infodrawer" }),
-    [runAction]
-  );
-
-  const position = useAppState((state) => state.core.infoMarkerPosition);
-  const zoom = useAppState((state) => state.core.mapPosition.target?.zoom);
+  const { className, mapInfo, fetchingMapInfo, position, zoom } = props;
 
   return h(
     LocationPanel,
     {
       className,
       position,
-      elevation: mapInfo.elevation,
+      elevation: mapInfo?.elevation,
       zoom,
-      onClose,
       loading: fetchingMapInfo,
       showCopyPositionButton: true,
       contentContainer: "div.infodrawer-content-holder",
@@ -49,29 +36,24 @@ function InfoDrawer(props) {
       h(
         LoadingArea,
         { loaded: !fetchingMapInfo, className: "infodrawer-content" },
-        h.if(!fetchingMapInfo)(InfoDrawerInterior)
+        h.if(!fetchingMapInfo)(InfoDrawerInterior, {mapInfo})
       ),
     ]
   );
 }
 
 function InfoDrawerInterior(props) {
-  const columnInfo = useAppState((state) => state.core.columnInfo);
-  return h(Routes, [
-    h(Route, { path: "/column", element: h(StratColumn, { columnInfo }) }),
-    //update view locations route
-    h(Route, { path: "/locations", element: h("div", "hello world") }),
-
-    h(Route, { path: "*", element: h(InfoDrawerMainPanel) }),
-  ]);
+  const { mapInfo } = props;
+  return h(InfoDrawerMainPanel, { mapInfo });
 }
 
 function InfoDrawerMainPanel({mapInfo, columnInfo, pbdbData}) {
-  return h("div", "Hello world");
-
   if (!mapInfo || !mapInfo.mapData) {
     return null;
   }
+
+  console.log('GOT TO MAIN PANEL');
+
 
   const { mapData } = mapInfo;
 
@@ -89,6 +71,7 @@ function InfoDrawerMainPanel({mapInfo, columnInfo, pbdbData}) {
         };
 
   return h([
+    /*
     h(GeologicMapInfo, {
       mapInfo,
       bedrockExpanded: true,
@@ -98,7 +81,8 @@ function InfoDrawerMainPanel({mapInfo, columnInfo, pbdbData}) {
       mapInfo,
       columnInfo,
     }),
-    h(FossilCollections, { data: pbdbData, expanded: true }),
+    */
+    // h(FossilCollections, { data: pbdbData, expanded: true }),
     h(MacrostratLinkedData, {
       mapInfo,
       bedrockMatchExpanded: true,
@@ -109,4 +93,4 @@ function InfoDrawerMainPanel({mapInfo, columnInfo, pbdbData}) {
   ]);
 }
 
-export default InfoDrawerMainPanel;
+export default InfoDrawer;
