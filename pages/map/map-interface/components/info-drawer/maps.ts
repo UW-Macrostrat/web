@@ -3,9 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import { useAppActions } from "#/map/map-interface/app-state";
 import { LocationPanel } from "@macrostrat/map-interface";
 import { FossilCollections } from "./fossil-collections";
-import { GeologicMapInfo } from "./geo-map";
 import { MacrostratLinkedData } from "./macrostrat-linked";
-import { RegionalStratigraphy } from "./reg-strat";
 import { Physiography } from "./physiography";
 import { XddExpansion } from "./xdd-panel";
 import { useAppState } from "#/map/map-interface/app-state";
@@ -13,13 +11,16 @@ import styles from "./main.module.styl";
 import { LoadingArea } from "../transitions";
 import { StratColumn } from "./strat-column";
 import { useCallback } from "react";
+import { ExpansionPanel } from "@macrostrat/map-interface";
+import { addCommas } from "#/map/map-interface/utils";
+
 
 const h = hyper.styled(styles);
 
 function InfoDrawer(props) {
   // We used to enable panels when certain layers were on,
   // but now we just show all panels always
-  const { className, mapInfo, fetchingMapInfo, position, zoom } = props;
+  const { className, mapInfo, columnInfo, fetchingMapInfo, position, zoom } = props;
 
   return h(
     LocationPanel,
@@ -36,24 +37,21 @@ function InfoDrawer(props) {
       h(
         LoadingArea,
         { loaded: !fetchingMapInfo, className: "infodrawer-content" },
-        h.if(!fetchingMapInfo)(InfoDrawerInterior, {mapInfo})
+        h.if(!fetchingMapInfo)(InfoDrawerInterior, {mapInfo, columnInfo})
       ),
     ]
   );
 }
 
 function InfoDrawerInterior(props) {
-  const { mapInfo } = props;
-  return h(InfoDrawerMainPanel, { mapInfo });
+  const { mapInfo, columnInfo } = props;
+  return h(InfoDrawerMainPanel, { mapInfo, columnInfo });
 }
 
 function InfoDrawerMainPanel({mapInfo, columnInfo, pbdbData}) {
   if (!mapInfo || !mapInfo.mapData) {
     return null;
   }
-
-  console.log('GOT TO MAIN PANEL');
-
 
   const { mapData } = mapInfo;
 
@@ -71,17 +69,10 @@ function InfoDrawerMainPanel({mapInfo, columnInfo, pbdbData}) {
         };
 
   return h([
-    /*
-    h(GeologicMapInfo, {
-      mapInfo,
-      bedrockExpanded: true,
-      source,
-    }),
     h(RegionalStratigraphy, {
       mapInfo,
       columnInfo,
     }),
-    */
     // h(FossilCollections, { data: pbdbData, expanded: true }),
     h(MacrostratLinkedData, {
       mapInfo,
@@ -94,3 +85,76 @@ function InfoDrawerMainPanel({mapInfo, columnInfo, pbdbData}) {
 }
 
 export default InfoDrawer;
+
+function RegionalStratigraphy(props) {
+  const { mapInfo, columnInfo } = props;
+  if (mapInfo?.mapData == null || !columnInfo) return null;
+
+  return h(
+    ExpansionPanel,
+    {
+      classes: { root: "regional-panel" },
+      title: "Regional stratigraphy",
+      expanded: true,
+    },
+    [
+      h.if(columnInfo != null)(ColumnData, { columnInfo }),
+    ]
+  );
+}
+
+function ColumnData({ columnInfo }) {
+  return h("div.column-data", [
+    h('a', { href: '/columns/' + columnInfo.col_id }, "View column page"),
+    h(MapAttribute, {
+      label: "Name: ",
+      content: [columnInfo.col_name],
+    }),
+    h(MapAttribute, {
+      label: "Column ID: ",
+      content: [columnInfo.col_id],
+    }),
+    h(MapAttribute, {
+      label: "Group: ",
+      content: [columnInfo.col_group],
+    }),
+    h(MapAttribute, {
+      label: "Group ID: ",
+      content: [columnInfo.col_group_id],
+    }),
+    h.if(columnInfo.min_min_thick || columnInfo.max_thick)(MapAttribute, {
+      label: "Thickness: ",
+      content: [
+        addCommas(parseInt(columnInfo.min_min_thick)),
+        " - ",
+        addCommas(parseInt(columnInfo.max_thick)),
+        h("span.age-ma", ["m"]),
+      ],
+    }),
+    h(MapAttribute, {
+      label: "Age: ",
+      content: [
+        columnInfo.b_age,
+        " - ",
+        columnInfo.t_age,
+        " ",
+        h("span.age-ma", ["Ma"]),
+      ],
+    }),
+    h(MapAttribute, {
+      label: "Area: ",
+      content: [addCommas(columnInfo.col_area), " ", h("span.age-ma", ["km2"])],
+    }),
+    h(MapAttribute, {
+      label: "Fossil collections: ",
+      content: [addCommas(columnInfo.pbdb_collections)],
+    }),
+  ]);
+}
+
+function MapAttribute(props) {
+  return h("div.map-source-attr", [
+    h("span.attr", [props.label]),
+    ...props.content,
+  ]);
+}

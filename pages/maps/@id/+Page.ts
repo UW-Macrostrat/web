@@ -44,6 +44,7 @@ import { LithologyList, LithologyTag } from "@macrostrat/data-components";
 import { DataField } from "~/components/unit-details";
 import { LocationPanel } from "@macrostrat/map-interface";
 import InfoDrawer from "#/map/map-interface/components/info-drawer/maps";
+import { fetchAPIData } from "~/_utils";
 
 interface StyleOpts {
   style: string;
@@ -196,10 +197,21 @@ export function Page() {
     setMapRef(map);
   };
   const mapInfo = useAPIResult(
-    `https://dev2.macrostrat.org/api/v2/mobile/map_query_v2?lng=${selectedLocation?.lng}&lat=${selectedLocation?.lat}&z=${mapRef?.getZoom()}`
+    `${apiV2Prefix}/mobile/map_query_v2`,
+    {
+      lng: selectedLocation?.lng,
+      lat: selectedLocation?.lat,
+      z: mapRef?.getZoom(),
+    }
   )?.success?.data;
-
-  console.log('mapInfo:', mapInfo);
+  const columnInfo = useAPIResult(
+    `${apiV2Prefix}/columns`,
+    {
+      lat: selectedLocation?.lat,
+      lng: selectedLocation?.lng,
+      response: 'long'
+    }
+  )?.success?.data?.[0];
 
   const [layerOpacity, setLayerOpacity] = useState({
     vector: 0.5,
@@ -315,10 +327,6 @@ export function Page() {
     h(BaseLayerSelector, { layer, setLayer }),
   ]);
 
-  console.log(mapStyle, bounds, maxBounds);
-
-  console.log('selectedLocation', selectedLocation);
-
   return h(
     MapAreaContainer,
     {
@@ -331,7 +339,13 @@ export function Page() {
       },
       detailPanelStyle: DetailPanelStyle.FIXED,
       detailPanel: selectedLocation != null ? 
-      h(InfoDrawer, { mapInfo, fetchingMapInfo: false, position: selectedLocation, zoom: mapRef?.getZoom() })
+      h(InfoDrawer, { 
+        mapInfo, 
+        fetchingMapInfo: mapInfo == null, 
+        position: selectedLocation, 
+        zoom: mapRef?.getZoom(),
+        columnInfo 
+      })
       : h(MapLegendPanel, map.properties),
     },
     [
