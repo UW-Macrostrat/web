@@ -39,7 +39,7 @@ export function Page() {
     h(PageBreadcrumbs, {showLogo: true}),
     h("h1", "Source text"),
     h(PostgRESTInfiniteScrollView, {
-      route: postgrestPrefix + 'kg_source_text',
+      route: postgrestPrefix + '/kg_source_text',
       id_key: 'id',
       limit: 20,
       ascending: false,
@@ -47,7 +47,7 @@ export function Page() {
       filterable: true,
       toggles,
       searchColumns: [
-        'paragraph_text',
+        { label: "Paragraph Text", value: 'paragraph_text'},
       ],
       SearchBarComponent: SearchBar,
       MultiSelectComponent: MultiSelect,
