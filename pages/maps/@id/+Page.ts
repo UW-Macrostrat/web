@@ -46,6 +46,7 @@ import { DataField } from "~/components/unit-details";
 import { LocationPanel } from "@macrostrat/map-interface";
 import InfoDrawer from "#/map/map-interface/components/info-drawer/maps";
 import { fetchAPIData } from "~/_utils";
+import { SETTINGS } from "@macrostrat-web/settings";
 
 interface StyleOpts {
   style: string;
@@ -80,12 +81,45 @@ function buildMacrostratStyle({
         type: "vector",
         tiles: [tileURL],
       },
+      "pbdb-points": {
+        type: "geojson",
+        cluster: true,
+        clusterRadius: 50,
+        data: {
+          type: "FeatureCollection",
+          features: [],
+        },
+      },
     },
-    layers: buildMacrostratStyleLayers({
-      fillOpacity,
-      strokeOpacity,
-      lineOpacity,
-    }),
+    layers: [
+      ...buildMacrostratStyleLayers({
+        fillOpacity,
+        strokeOpacity,
+        lineOpacity,
+      }),
+      {
+        id: "pbdb-points",
+        type: "circle",
+        source: "pbdb-points",
+        filter: ["!", ["has", "point_count"]],
+        paint: {
+          "circle-color": [
+            "case",
+            ["boolean", ["feature-state", "hover"], false],
+            "#154974",
+            "#2171b5",
+          ],
+          "circle-radius": ["interpolate", ["linear"], ["zoom"], 7, 8, 16, 20],
+          "circle-stroke-width": [
+            "case",
+            ["boolean", ["feature-state", "hover"], false],
+            2,
+            1,
+          ],
+          "circle-stroke-color": "#ffffff",
+        },
+      }
+    ]
   };
 }
 
@@ -199,9 +233,35 @@ export function Page() {
 
   // Info panel
   const [mapRef, setMapRef] = useState();
+  const [pointsRef, setPointsRef] = useState(null);
+
+  useEffect(() => {
+    setPointsRef({ current: null });
+  }, []);
+  
+  if(mapRef != null) {
+    refreshPBDB(
+      mapRef,
+      pointsRef,
+      []
+    ).then((data) => {
+      console.log("PBDB data fetched", data);
+    });
+  }
+
+  /*
+  let collections = map.queryRenderedFeatures(event.point, {
+    layers: ["pbdb-points-clustered", "pbdb-points", "pbdb-clusters"],
+  });
+
+  console.log("Collections", collections);
+  */
+
+
   const handleMapLoaded = (map) => {
     setMapRef(map);
   };
+
   const mapInfo = useAPIResult(
     `${apiV2Prefix}/mobile/map_query_v2`,
     {
@@ -654,4 +714,144 @@ function OpacitySlider(props) {
       },
     }),
   ]);
+}
+
+export async function refreshPBDB(map, pointsRef, filters) {
+  console.log("Refreshing PBDB data", map, pointsRef, filters);
+  let bounds = map.getBounds();
+  console.log("Refreshing PBDB data", bounds);
+  let zoom = map.getZoom();
+  const maxClusterZoom = 7;
+  pointsRef.current = await getPBDBData(filters, bounds, zoom, maxClusterZoom);
+
+  console.log("PBDB points fetched", pointsRef.current);
+  console.log("sourceS",map.getStyle().sources);
+
+
+  // Show or hide the proper PBDB layers
+  // TODO: this is a bit janky
+
+    map.getSource("pbdb-points").setData(pointsRef.current);
+
+    map.setLayoutProperty("pbdb-points", "visibility", "visible");
+}
+
+
+export async function getPBDBData(
+  filters: FilterData[],
+  bounds: mapboxgl.LngLatBounds,
+  zoom: number,
+  maxClusterZoom: number = 7
+): Promise<FeatureCollection<Point, any>> {
+  // One for time, one for everything else because
+  // time filters require a separate request for each filter
+  let timeQuery = [];
+  let queryString = [];
+
+  const timeFilters = filters.filter(
+    (f) => f.type === "intervals"
+  ) as IntervalFilterData[];
+  const stratNameFilters = filters.filter(
+    (f) => f.type === "strat_name_concepts" || f.type === "strat_name_orphans"
+  );
+
+  if (timeFilters.length > 0) {
+    for (const f of timeFilters) {
+      timeQuery.push(`max_ma=${f.b_age}`, `min_ma=${f.t_age}`);
+    }
+  }
+  // lith filters broken on pbdb (500 error returned)
+  // if (map.lithFilters.length) {
+  //   let filters = map.lithFilters.filter((f) => f != "sedimentary");
+  //   if (filters.length) {
+  //     queryString.push(`lithology=${filters.join(",")}`);
+  //   }
+  // }
+  if (stratNameFilters.length > 0) {
+    const names = stratNameFilters.map((f) => f.name);
+    queryString.push(`strat=${names.join(",")}`);
+  }
+
+  // Define the pbdb cluster level
+  let level = zoom < 3 ? "&level=2" : "&level=3";
+
+  let urls = [];
+  // Make sure lngs are between -180 and 180
+  const lngMin = bounds._sw.lng < -180 ? -180 : bounds._sw.lng;
+  const lngMax = bounds._ne.lng > 180 ? 180 : bounds._ne.lng;
+  // If more than one time filter is present, multiple requests are needed
+
+  /* Currently there is a limitation in the globe for the getBounds function that
+  resolves incorrect latitude ranges for low zoom levels.
+  - https://docs.mapbox.com/mapbox-gl-js/guides/globe/#limitations-of-globe
+  - https://github.com/mapbox/mapbox-gl-js/issues/11795
+  -   https://github.com/UW-Macrostrat/web/issues/68
+
+  This is a workaround for that issue.
+  */
+  let latMin = bounds._sw.lat;
+  let latMax = bounds._ne.lat;
+
+  if (zoom < 5) {
+    latMin = Math.max(Math.min(latMin, latMin * 5), -85);
+    latMax = Math.min(Math.max(latMax, latMax * 5), 85);
+  }
+
+  if (timeFilters.length && timeFilters.length > 1) {
+    urls = timeFilters.map((f) => {
+      let url = `${SETTINGS.pbdbDomain}/data1.2/colls/${
+        zoom < maxClusterZoom ? "summary" : "list"
+      }.json?lngmin=${lngMin}&lngmax=${lngMax}&latmin=${latMin}&latmax=${latMax}&max_ma=${
+        f.b_age
+      }&min_ma=${f.t_age}${zoom < maxClusterZoom ? level : ""}`;
+      if (queryString.length) {
+        url += `&${queryString.join("&")}`;
+      }
+      return url;
+    });
+  } else {
+    let url = `${SETTINGS.pbdbDomain}/data1.2/colls/${
+      zoom < maxClusterZoom ? "summary" : "list"
+    }.json?lngmin=${lngMin}&lngmax=${lngMax}&latmin=${latMin}&latmax=${latMax}${
+      zoom < maxClusterZoom ? level : ""
+    }`;
+    if (timeQuery.length) {
+      url += `&${timeQuery.join("&")}`;
+    }
+    if (queryString.length) {
+      url += `&${queryString.join("&")}`;
+    }
+    urls = [url];
+  }
+
+  // Fetch the data
+  return await Promise.all(
+    urls.map((url) => fetch(url).then((response) => response.json()))
+  ).then((responses) => {
+    // Ignore data that comes with warnings, as it means nothing was
+    // found under most conditions
+    let data = responses
+      .filter((res) => {
+        if (!res.warnings) return res;
+      })
+      .map((res) => res.records)
+      .reduce((a, b) => {
+        return [...a, ...b];
+      }, []);
+
+    return {
+      type: "FeatureCollection",
+      features: data.map((f, i) => {
+        return {
+          type: "Feature",
+          properties: f,
+          id: i,
+          geometry: {
+            type: "Point",
+            coordinates: [f.lng, f.lat],
+          },
+        };
+      }),
+    };
+  });
 }
