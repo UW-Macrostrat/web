@@ -116,6 +116,12 @@ function FeedbackInterface({ data, models, entityTypes }) {
     model,
     entityTypes,
     matchComponent: MatchedEntityLink,
+    matchLinks: {
+      lithology: "/lex/lithology",
+      lith_att: "/lex/lith-atts",
+      strat_name: "/lex/strat-names",
+      concept: "/lex/strat-name-concepts",
+    },
     lineHeight: 3,
     onSave: wrapWithToaster(
       async (tree) => {
