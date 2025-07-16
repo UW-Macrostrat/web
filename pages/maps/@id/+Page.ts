@@ -43,8 +43,7 @@ import { usePageProps } from "~/renderer/usePageProps";
 import { usePageContext } from "vike-react/usePageContext";
 import { LithologyList, LithologyTag } from "@macrostrat/data-components";
 import { DataField } from "~/components/unit-details";
-import { LocationPanel } from "@macrostrat/map-interface";
-import InfoDrawer from "#/map/map-interface/components/info-drawer/maps";
+import { InfoDrawer } from "@macrostrat/map-interface";
 import { fetchAPIData } from "~/_utils";
 import { SETTINGS } from "@macrostrat-web/settings";
 
@@ -91,35 +90,11 @@ function buildMacrostratStyle({
         },
       },
     },
-    layers: [
-      ...buildMacrostratStyleLayers({
+    layers: buildMacrostratStyleLayers({
         fillOpacity,
         strokeOpacity,
         lineOpacity,
-      }),
-      {
-        id: "pbdb-points",
-        type: "circle",
-        source: "pbdb-points",
-        filter: ["!", ["has", "point_count"]],
-        paint: {
-          "circle-color": [
-            "case",
-            ["boolean", ["feature-state", "hover"], false],
-            "#154974",
-            "#2171b5",
-          ],
-          "circle-radius": ["interpolate", ["linear"], ["zoom"], 7, 8, 16, 20],
-          "circle-stroke-width": [
-            "case",
-            ["boolean", ["feature-state", "hover"], false],
-            2,
-            1,
-          ],
-          "circle-stroke-color": "#ffffff",
-        },
-      }
-    ]
+      })
   };
 }
 
@@ -233,62 +208,10 @@ export function Page() {
 
   // Info panel
   const [mapRef, setMapRef] = useState();
-  const [pointsRef, setPointsRef] = useState(null);
-
-  useEffect(() => {
-    setPointsRef({ current: null });
-  }, []);
   
-  if(mapRef != null) {
-    refreshPBDB(
-      mapRef,
-      pointsRef,
-      []
-    ).then((data) => {
-      console.log("PBDB data fetched", data);
-    });
-  }
-
-  /*
-  let collections = map.queryRenderedFeatures(event.point, {
-    layers: ["pbdb-points-clustered", "pbdb-points", "pbdb-clusters"],
-  });
-
-  console.log("Collections", collections);
-  */
-
-
   const handleMapLoaded = (map) => {
     setMapRef(map);
   };
-
-  const mapInfo = useAPIResult(
-    `${apiV2Prefix}/mobile/map_query_v2`,
-    {
-      lng: selectedLocation?.lng,
-      lat: selectedLocation?.lat,
-      z: mapRef?.getZoom(),
-    }
-  )?.success?.data;
-  const columnInfo = useAPIResult(
-    `${apiV2Prefix}/columns`,
-    {
-      lat: selectedLocation?.lat,
-      lng: selectedLocation?.lng,
-      response: 'long'
-    }
-  )?.success?.data?.[0];
-  const xddInfo = useAPIResult(
-    `${gddDomain}/api/v1/snippets`,
-    {
-      article_limit: 20,
-      term: mapInfo?.mapData?.[0]?.macrostrat?.strat_names
-        ?.map((d) => d.rank_name)
-        .join(","),
-    }
-  )?.success?.data;
-
-  console.log("Outside xdd" , xddInfo);
 
   // Overlay style
   const [mapStyle, setMapStyle] = useState(null);
@@ -412,13 +335,9 @@ export function Page() {
       detailPanelStyle: DetailPanelStyle.FIXED,
       detailPanel: selectedLocation != null ? 
       h(InfoDrawer, { 
-        mapInfo, 
-        fetchingMapInfo: mapInfo == null, 
         position: selectedLocation, 
         zoom: mapRef?.getZoom(),
-        columnInfo,
         setSelectedLocation,
-        xddInfo
       })
       : h(MapLegendPanel, map.properties),
     },
