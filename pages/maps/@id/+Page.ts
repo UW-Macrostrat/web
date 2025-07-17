@@ -9,10 +9,12 @@ import {
 import {
   tileserverDomain,
   apiV2Prefix,
+  apiDomain,
   darkMapURL,
   baseMapURL,
   satelliteMapURL,
   mapboxAccessToken,
+  gddDomain,
 } from "@macrostrat-web/settings";
 import {
   DetailPanelStyle,
@@ -39,6 +41,11 @@ import { PageBreadcrumbs, MapReference, DevLink } from "~/components";
 import { MapNavbar } from "~/components/map-navbar";
 import { usePageProps } from "~/renderer/usePageProps";
 import { usePageContext } from "vike-react/usePageContext";
+import { LithologyList, LithologyTag } from "@macrostrat/data-components";
+import { DataField } from "~/components/unit-details";
+import { InfoDrawer } from "@macrostrat/map-interface";
+import { fetchAPIData } from "~/_utils";
+import { SETTINGS } from "@macrostrat-web/settings";
 
 interface StyleOpts {
   style: string;
@@ -73,12 +80,21 @@ function buildMacrostratStyle({
         type: "vector",
         tiles: [tileURL],
       },
+      "pbdb-points": {
+        type: "geojson",
+        cluster: true,
+        clusterRadius: 50,
+        data: {
+          type: "FeatureCollection",
+          features: [],
+        },
+      },
     },
     layers: buildMacrostratStyleLayers({
-      fillOpacity,
-      strokeOpacity,
-      lineOpacity,
-    }),
+        fillOpacity,
+        strokeOpacity,
+        lineOpacity,
+      })
   };
 }
 
@@ -165,7 +181,6 @@ export function Page() {
   const [isOpen, setOpen] = useState(false);
   const dark = useDarkMode()?.isEnabled ?? false;
   const title = map.properties.name;
-  console.log(map);
 
   const hasRaster = map.properties.raster_url != null;
 
@@ -173,7 +188,7 @@ export function Page() {
     return ensureBoxInGeographicRange(boundingBox(map.geometry));
   }, [map.geometry]);
 
-  const [layer, setLayer] = useState(Basemap.None);
+  const [layer, setLayer] = useState(localStorage.getItem('basemap') || Basemap.None);
   const [style, setStyle] = useState(null);
   // Basemap style
   useEffect(() => {
@@ -184,12 +199,19 @@ export function Page() {
     }).then(setStyle);
   }, [layer, dark]);
 
-  const [selectedLocation, setSelectedLocation] = useState(null);
-
   const [layerOpacity, setLayerOpacity] = useState({
     vector: 0.5,
     raster: 0.5,
   });
+
+  const [selectedLocation, setSelectedLocation] = useState(null);
+
+  // Info panel
+  const [mapRef, setMapRef] = useState();
+  
+  const handleMapLoaded = (map) => {
+    setMapRef(map);
+  };
 
   // Overlay style
   const [mapStyle, setMapStyle] = useState(null);
@@ -300,8 +322,6 @@ export function Page() {
     h(BaseLayerSelector, { layer, setLayer }),
   ]);
 
-  console.log(mapStyle, bounds, maxBounds);
-
   return h(
     MapAreaContainer,
     {
@@ -313,7 +333,13 @@ export function Page() {
         adaptiveWidth: true,
       },
       detailPanelStyle: DetailPanelStyle.FIXED,
-      detailPanel: h(MapLegendPanel, map.properties),
+      detailPanel: selectedLocation != null ? 
+      h(InfoDrawer, { 
+        position: selectedLocation, 
+        zoom: mapRef?.getZoom(),
+        setSelectedLocation,
+      })
+      : h(MapLegendPanel, map.properties),
     },
     [
       h(
@@ -327,6 +353,7 @@ export function Page() {
           maxBounds,
           fitBoundsOptions: { padding: 50 },
           infoMarkerPosition: selectedLocation,
+          onMapLoaded: handleMapLoaded,
         },
         [
           h(MapMarker, {
@@ -354,9 +381,9 @@ function BaseLayerSelector({ layer, setLayer }) {
         },
       },
       [
-        h(Radio, { label: "Satellite", value: Basemap.Satellite }),
-        h(Radio, { label: "Basic", value: Basemap.Basic }),
-        h(Radio, { label: "None", value: Basemap.None }),
+        h(Radio, { label: "Satellite", value: Basemap.Satellite, onClick: () => localStorage.setItem('basemap', Basemap.Satellite) }),
+        h(Radio, { label: "Basic", value: Basemap.Basic, onClick: () => localStorage.setItem('basemap', Basemap.Basic) }),
+        h(Radio, { label: "None", value: Basemap.None, onClick: () => localStorage.setItem('basemap', Basemap.None) }),
       ]
     ),
   ]);
@@ -404,12 +431,12 @@ function MapLegendPanel(params) {
 }
 
 function MapLegendData({ source_id }) {
-  const mapLegend = useAPIResult(apiV2Prefix + "/geologic_units/map/legend", {
-    source_id,
+  const legendData = useAPIResult(apiDomain + "/api/pg/new_legend", {
+    source_id: 'eq.' + source_id,
   });
-  if (mapLegend == null) return h(Spinner);
-  const legendData = mapLegend?.success?.data;
-  if (legendData == null) return h(NonIdealState, { icon: "error" });
+
+
+  if (legendData == null) return h(Spinner);
 
   legendData.sort((a, b) => a.t_age - b.t_age);
 
@@ -420,19 +447,19 @@ function MapLegendData({ source_id }) {
 }
 
 function LegendEntry({ data }) {
-  const { map_unit_name, color, ...rest } = data;
+  const { name, color, ...rest } = data;
   const {
     legend_id,
-    source_id,
+    source_id, 
     t_interval,
     b_interval,
     //strat_name,
     //strat_name_id,
-    unit_id,
-    area,
-    tiny_area,
-    small_area,
-    medium_area,
+    unit_id, // need column id
+    area, 
+    tiny_area, 
+    small_area, 
+    medium_area, 
     large_area,
     lith,
     // lith_classes,
@@ -440,6 +467,7 @@ function LegendEntry({ data }) {
     lith_id,
     scale,
     comments,
+    lithologies,
     ...r1
   } = rest;
 
@@ -456,67 +484,136 @@ function LegendEntry({ data }) {
     },
     [
       h("div.legend-swatch", { style: { backgroundColor: color } }),
-      h("div.legend-label", h("h4", map_unit_name)),
+      h("div.legend-label", h("h4", name)),
     ]
   );
 
   const {
     age,
-    b_age,
     descrip,
     lith_classes,
     lith_types,
-    strat_name,
-    strat_name_id,
-    t_age,
+    units,
+    strat_names,
+    min_age_interval,
+    max_age_interval,
   } = r1;
+
+  let AgeTag = null;
+
+  if(!min_age_interval && !max_age_interval) {
+    AgeTag = h(LithologyTag, {
+      data: {
+        name: age,
+      },
+    });
+  } else if (min_age_interval && !max_age_interval) {
+    AgeTag = h(LithologyTag, {
+      data: {
+        name: min_age_interval.name,
+        color: min_age_interval.color,
+      },
+      onClick: () => {
+        window.open(`/lex/intervals/${min_age_interval.int_id}`, '_self');
+      },
+    });
+  } else if (!min_age_interval && max_age_interval) {
+    AgeTag = h(LithologyTag, {
+      data: {
+        name: max_age_interval.name,
+        color: max_age_interval.color,
+      },
+      onClick: () => {
+        window.open(`/lex/intervals/${max_age_interval.int_id}`, '_self');
+      },
+    });
+  } else {
+    AgeTag = h('div.age-interval', [
+      h(LithologyTag, {
+        data: {
+          name: min_age_interval.name,
+          color: min_age_interval.color,
+        },
+        onClick: () => {
+          window.open(`/lex/intervals/${min_age_interval.int_id}`, '_self');
+        },
+      }),
+      " - ",
+      h(LithologyTag, {
+        data: {
+          name: max_age_interval.name,
+          color: max_age_interval.color,
+        },
+        onClick: () => {
+          window.open(`/lex/intervals/${max_age_interval.int_id}`, '_self');
+        },
+      }),
+    ])
+  }
 
   return h("div.legend-entry", [
     title,
     h(Collapse, { isOpen }, [
       h("div.legend-details", [
-        h.if(descrip)("div.legend-description", h("p", descrip)),
-        h.if(strat_name)(
-          "div.legend-strat-name",
-          h("p", [
-            "Stratigraphic name: ",
-            h("span", [
-              h(
-                "a",
-                { href: `/lex/strat-names/${strat_name_id?.[0]}` },
-                strat_name
-              ), // need to fix when api is updated 
-            ]),
-          ])
+        h.if(descrip)("p.legend-description", descrip),
+        h.if(strat_names)(
+          DataField,
+          {
+            label: "Stratigraphic names: ",
+            value: h(LithologyList, { 
+              lithologies: strat_names?.map((sn) => ({ name: sn.strat_name, id: sn.strat_name_id })),
+              onClickItem: (e, sn) => window.open(`/lex/strat-names/${sn.id}`, '_self')
+            }),
+          }
         ),
         h.if(lith_classes?.length > 0)(
-          "div.legend-lith-classes",
-          h("p", [
-            "Lithology classes: ",
-            h(
-              "span",
-              lith_classes?.map((l) => h(Tag, { minimal: true }, l))
-            ),
-          ])
+          DataField,
+          {
+            label: "Lithology classes: ",
+            value: h(LithologyList, { lithologies: lith_classes?.map((l) => ({ name: l })) })
+          }
         ),
         h.if(lith_types?.length > 0)(
-          "div.legend-lith-types",
-          h("p", [
-            "Lithology types: ",
-            h(
-              "span",
-              lith_types?.map((l) => h(Tag, { minimal: true }, l))
-            ),
-          ])
+          DataField,
+          {
+            label: "Lithology types: ",
+            value: h(LithologyList, { lithologies: lith_types?.map((l) => ({ name: l })) })
+          }
         ),
-        h.if(age)("div.legend-age", h("p", ["Age: ", h("span", age)])),
-        h.if(b_age)(
-          "div.legend-b-age",
-          h("p", ["Base age: ", h("span", b_age)])
+        h.if(units)(
+          DataField,
+          {
+            label: "Units: ",
+            value: h(LithologyList, { 
+              lithologies: units?.map((unit) => ({ name: unit.name, unit_id: unit.unit_id, col_id: unit.col_id })),
+              onClickItem: (e, unit) => window.open(`/columns/${unit.col_id}#unit=${unit.unit_id}`, '_self') 
+            })
+          }
         ),
-        h.if(t_age)(
-          "div.legend-t-age",
-          h("p", ["Top age: ", h("span", t_age)])
+        h.if(lithologies)(
+          DataField,
+          {
+            label: "Lithologies: ",
+            value: h(LithologyList, { 
+              lithologies: lithologies?.map((lith) => ({ name: lith.lith_name, ...lith })),
+              onClickItem: (e, lith) => window.open(`/lex/lithology/${lith.lith_id}`, '_self') 
+            })
+          }
+        ),
+        h.if(age)(
+          DataField,
+          {
+            label: "Age: ",
+            value: AgeTag,
+          }
+        ),
+        h.if(area)(
+          DataField,
+          {
+            label: "Area: ",
+            value: area.toLocaleString(),
+            unit: "km²",
+          }
         ),
       ]),
     ]),
@@ -536,4 +633,144 @@ function OpacitySlider(props) {
       },
     }),
   ]);
+}
+
+export async function refreshPBDB(map, pointsRef, filters) {
+  console.log("Refreshing PBDB data", map, pointsRef, filters);
+  let bounds = map.getBounds();
+  console.log("Refreshing PBDB data", bounds);
+  let zoom = map.getZoom();
+  const maxClusterZoom = 7;
+  pointsRef.current = await getPBDBData(filters, bounds, zoom, maxClusterZoom);
+
+  console.log("PBDB points fetched", pointsRef.current);
+  console.log("sourceS",map.getStyle().sources);
+
+
+  // Show or hide the proper PBDB layers
+  // TODO: this is a bit janky
+
+    map.getSource("pbdb-points").setData(pointsRef.current);
+
+    map.setLayoutProperty("pbdb-points", "visibility", "visible");
+}
+
+
+export async function getPBDBData(
+  filters: FilterData[],
+  bounds: mapboxgl.LngLatBounds,
+  zoom: number,
+  maxClusterZoom: number = 7
+): Promise<FeatureCollection<Point, any>> {
+  // One for time, one for everything else because
+  // time filters require a separate request for each filter
+  let timeQuery = [];
+  let queryString = [];
+
+  const timeFilters = filters.filter(
+    (f) => f.type === "intervals"
+  ) as IntervalFilterData[];
+  const stratNameFilters = filters.filter(
+    (f) => f.type === "strat_name_concepts" || f.type === "strat_name_orphans"
+  );
+
+  if (timeFilters.length > 0) {
+    for (const f of timeFilters) {
+      timeQuery.push(`max_ma=${f.b_age}`, `min_ma=${f.t_age}`);
+    }
+  }
+  // lith filters broken on pbdb (500 error returned)
+  // if (map.lithFilters.length) {
+  //   let filters = map.lithFilters.filter((f) => f != "sedimentary");
+  //   if (filters.length) {
+  //     queryString.push(`lithology=${filters.join(",")}`);
+  //   }
+  // }
+  if (stratNameFilters.length > 0) {
+    const names = stratNameFilters.map((f) => f.name);
+    queryString.push(`strat=${names.join(",")}`);
+  }
+
+  // Define the pbdb cluster level
+  let level = zoom < 3 ? "&level=2" : "&level=3";
+
+  let urls = [];
+  // Make sure lngs are between -180 and 180
+  const lngMin = bounds._sw.lng < -180 ? -180 : bounds._sw.lng;
+  const lngMax = bounds._ne.lng > 180 ? 180 : bounds._ne.lng;
+  // If more than one time filter is present, multiple requests are needed
+
+  /* Currently there is a limitation in the globe for the getBounds function that
+  resolves incorrect latitude ranges for low zoom levels.
+  - https://docs.mapbox.com/mapbox-gl-js/guides/globe/#limitations-of-globe
+  - https://github.com/mapbox/mapbox-gl-js/issues/11795
+  -   https://github.com/UW-Macrostrat/web/issues/68
+
+  This is a workaround for that issue.
+  */
+  let latMin = bounds._sw.lat;
+  let latMax = bounds._ne.lat;
+
+  if (zoom < 5) {
+    latMin = Math.max(Math.min(latMin, latMin * 5), -85);
+    latMax = Math.min(Math.max(latMax, latMax * 5), 85);
+  }
+
+  if (timeFilters.length && timeFilters.length > 1) {
+    urls = timeFilters.map((f) => {
+      let url = `${SETTINGS.pbdbDomain}/data1.2/colls/${
+        zoom < maxClusterZoom ? "summary" : "list"
+      }.json?lngmin=${lngMin}&lngmax=${lngMax}&latmin=${latMin}&latmax=${latMax}&max_ma=${
+        f.b_age
+      }&min_ma=${f.t_age}${zoom < maxClusterZoom ? level : ""}`;
+      if (queryString.length) {
+        url += `&${queryString.join("&")}`;
+      }
+      return url;
+    });
+  } else {
+    let url = `${SETTINGS.pbdbDomain}/data1.2/colls/${
+      zoom < maxClusterZoom ? "summary" : "list"
+    }.json?lngmin=${lngMin}&lngmax=${lngMax}&latmin=${latMin}&latmax=${latMax}${
+      zoom < maxClusterZoom ? level : ""
+    }`;
+    if (timeQuery.length) {
+      url += `&${timeQuery.join("&")}`;
+    }
+    if (queryString.length) {
+      url += `&${queryString.join("&")}`;
+    }
+    urls = [url];
+  }
+
+  // Fetch the data
+  return await Promise.all(
+    urls.map((url) => fetch(url).then((response) => response.json()))
+  ).then((responses) => {
+    // Ignore data that comes with warnings, as it means nothing was
+    // found under most conditions
+    let data = responses
+      .filter((res) => {
+        if (!res.warnings) return res;
+      })
+      .map((res) => res.records)
+      .reduce((a, b) => {
+        return [...a, ...b];
+      }, []);
+
+    return {
+      type: "FeatureCollection",
+      features: data.map((f, i) => {
+        return {
+          type: "Feature",
+          properties: f,
+          id: i,
+          geometry: {
+            type: "Point",
+            coordinates: [f.lng, f.lat],
+          },
+        };
+      }),
+    };
+  });
 }

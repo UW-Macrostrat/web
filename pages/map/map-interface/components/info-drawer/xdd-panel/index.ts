@@ -21,6 +21,14 @@ export function XddExpansion() {
   });
 }
 
+export function XddExpansion2({xddInfo}) {
+  return h(xDDPanelCore, {
+    className: "regional-panel",
+    data: xddInfo,
+    isFetching: xddInfo == undefined || xddInfo.length === 0,
+  });
+}
+
 export function xDDPanelCore({ isFetching, data: xddInfo, ...rest }) {
   const groupedData = groupSnippetsByJournal(xddInfo);
 
@@ -35,7 +43,7 @@ export function xDDPanelCore({ isFetching, data: xddInfo, ...rest }) {
     [
       h.if(isFetching)(Spinner),
       h.if(!isFetching && xddInfo.length > 0)([
-        Array.from(groupedData.entries()).map(([journal, snippets]) => {
+        Array.from(groupedData.entries())?.map(([journal, snippets]) => {
           return h(Journal, {
             name: journal,
             articles: snippets,
@@ -52,6 +60,10 @@ function groupSnippetsByJournal(
   snippets: XDDSnippet[]
 ): Map<string, XDDSnippet[]> {
   const journals = new Map<string, XDDSnippet[]>();
+  if (!snippets || snippets.length === 0) {
+    return journals;
+  }
+  console.log("Grouping snippets by journal:", snippets);
   for (let snippet of snippets) {
     const { pubname: journal } = snippet;
     if (!journals.has(journal)) {
