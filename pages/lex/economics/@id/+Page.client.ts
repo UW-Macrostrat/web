@@ -9,12 +9,13 @@ import {
   Units,
   Fossils,
 } from "~/components/lex";
+import { usePageContext } from "vike-react/usePageContext";
 
 export function Page() {
   const { resData, colData, taxaData, refs, unitsData, fossilsData } =
     useData();
 
-  const id = resData.econ_id;
+  const id = usePageContext()?.urlPathname.split("/")?.[3] || [];
   const features = colData?.features || [];
   const timescales = resData?.timescales || [];
 
