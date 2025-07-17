@@ -13,16 +13,17 @@ import {
 } from "~/components/lex";
 import { StratNameHierarchy } from "~/components/lex/StratNameHierarchy";
 import { StratTag } from "~/components/general";
+import { usePageContext } from "vike-react/usePageContext";
 
 export function Page() {
   const { resData, colData, taxaData, refs, unitsData, fossilsData, mapsData } =
     useData();
 
-  const id = resData.strat_name_id;
+  const id = usePageContext()?.urlPathname.split("/")?.[3] || [];
   const features = colData?.features || [];
   const timescales = resData?.timescales || [];
 
-  const { strat_name_long } = resData;
+  const { strat_name_long } = resData || {};
 
   const children = [
     h(ColumnsTable, {
@@ -39,15 +40,17 @@ export function Page() {
     h(ConceptInfo, { concept_id: resData?.concept_id, showHeader: true }),
   ];
 
-  return LexItemPage({
-    children,
-    id,
-    refs,
-    resData,
-    siftLink: "strat-name",
-    header: h("div.strat-header", [
-      h("h1.strat-title", strat_name_long),
-      h(StratTag, { isConcept: false, fontSize: "1.6em" }),
-    ]),
-  });
+  return h(LexItemPage, 
+    {
+      children,
+      id,
+      refs,
+      resData,
+      siftLink: "strat-name",
+      header: h("div.strat-header", [
+        h("h1.strat-title", strat_name_long),
+        h(StratTag, { isConcept: false, fontSize: "1.6em" }),
+      ]),
+    }
+  );
 }

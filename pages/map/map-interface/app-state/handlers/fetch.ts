@@ -182,7 +182,7 @@ export async function getPBDBData(collections: number[]) {
     axios.get(pbdbURL, {
       ...opts,
       params: {
-        id: coll_id,
+        coll_id,
         show: "ref,time,strat,geo,lith,entname,prot",
         markrefs: true,
       },

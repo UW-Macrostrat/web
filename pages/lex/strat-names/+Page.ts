@@ -1,31 +1,38 @@
 import h from "./main.module.sass";
-import { useAPIResult } from "@macrostrat/ui-components";
+import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
 import { apiDomain } from "@macrostrat-web/settings";
 import { StickyHeader, LinkCard, PageBreadcrumbs, Link } from "~/components";
-import { Card, Spinner } from "@blueprintjs/core";
-import { useState, useEffect, useRef } from "react";
+import { Card } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import { SearchBar, StratTag } from "~/components/general";
 import { useData } from "vike-react/useData";
-import { InfiniteScrollView } from "@macrostrat/ui-components";
+import { MultiSelect } from "@blueprintjs/select";
 
 const PAGE_SIZE = 20;
 
 export function Page() {
   const { res } = useData();
 
-  const [input, setInput] = useState("");
-
-  const handleChange = (event) => {
-    setInput(event.toLowerCase());
-  };
-
   return h(ContentPage, [
     h(StickyHeader, { className: "header" }, [
       h(PageBreadcrumbs, {
         title: "Minerals",
       }),
-      h("div.header-description", [
+      
+    ]),
+    h(PostgRESTInfiniteScrollView, {
+      route: `${apiDomain}/api/pg/strat_combined`,
+      initialItems: res,
+      itemComponent: StratItem,
+      id_key: "combined_id",
+      limit: PAGE_SIZE,
+      filterable: true,
+      SearchBarComponent: SearchBar,
+      MultiSelectComponent: MultiSelect,
+      searchColumns: [
+        { label: "Name", value: "all_names" },
+      ],
+      toggles: h("div.header-description", [
         h(
           Card,
           {
@@ -50,33 +57,8 @@ export function Page() {
           ]
         ),
       ]),
-      h(SearchBar, {
-        placeholder: "Filter by name...",
-        onChange: handleChange,
-      }),
-    ]),
-    h(InfiniteScrollView, {
-      params: {
-        order: "combined_id.asc",
-        all_names: `ilike.*${input}*`,
-        combined_id: `gt.0`,
-        limit: PAGE_SIZE,
-      },
-      route: `${apiDomain}/api/pg/strat_combined`,
-      getNextParams,
-      initialData: res,
-      itemComponent: StratItem,
-      hasMore,
     })
   ]);
-}
-
-function getNextParams(response, params) {
-  const id = response[response.length - 1]?.combined_id;
-  return {
-    ...params,
-    combined_id: "gt." + id,
-  };
 }
 
 function StratItem({ data, input }) {
@@ -142,8 +124,4 @@ function ConceptBody({ data, input }) {
       ),
     ]),
   ]);
-}
-
-function hasMore(response) {
-  return response.length === PAGE_SIZE;
 }

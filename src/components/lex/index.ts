@@ -1,5 +1,5 @@
 import h from "./main.module.sass";
-import { useAPIResult } from "@macrostrat/ui-components";
+import { useAPIResult, ErrorBoundary } from "@macrostrat/ui-components";
 import { apiV2Prefix, pbdbDomain } from "@macrostrat-web/settings";
 import { Link, PageBreadcrumbs } from "~/components";
 import { Card, Divider } from "@blueprintjs/core";
@@ -10,7 +10,6 @@ import { asChromaColor } from "@macrostrat/color-utils";
 import { DarkModeButton } from "@macrostrat/ui-components";
 import { PieChart, Pie, Cell, ResponsiveContainer, Label } from "recharts";
 import { useDarkMode } from "@macrostrat/ui-components";
-import { StratNameHierarchy } from "./StratNameHierarchy";
 import { LinkCard } from "~/components/cards";
 import { Timescale } from "@macrostrat/timescale";
 import { LexItemPageProps } from "~/types";
@@ -50,6 +49,23 @@ function ExpansionPanelContainer(props) {
 }
 
 export function LexItemPage(props: LexItemPageProps) {
+  const title = props.siftLink
+    ? props.siftLink
+        .split(/[-_]/)
+        .join(' ')
+        .replace(/^\w/, (c) => c.toUpperCase())
+    : "Unknown";
+  const id = props.id || 0;
+  
+  return h(ErrorBoundary, 
+    {
+      description: `${title} #${id} doesn't exist`
+    },
+    h(LexItemPageInner, props)
+  )
+}
+
+function LexItemPageInner(props: LexItemPageProps) {
   const { children, siftLink, id, resData, refs, header } = props;
 
   const { name, strat_name_long } = resData;
@@ -142,6 +158,7 @@ export function Intervals({ resData }) {
       levels: [1, 5],
       ageRange: [b_age, t_age],
       absoluteAgeScale: true,
+      onClick: (e, d) => window.open("/lex/intervals/" + d.int_id, "_self"),
     })
   );
 }
@@ -827,7 +844,7 @@ function Chart(data, title, route, activeIndex, setActiveIndex) {
                   .split(" ")[1]
                   .split("-")[1];
                 const url = "/lex/" + route + "/" + id;
-                window.open(url, "_blank");
+                window.open(url, "_self");
               },
             })
           )
@@ -863,7 +880,6 @@ function ChartLegend(data, route, activeIndex, setActiveIndex, index) {
       "a",
       {
         href: "/lex/" + route + "/" + data.id,
-        target: "_blank",
         onMouseEnter: () => {
           if (
             !activeIndex ||
@@ -910,7 +926,7 @@ export function Units({ unitsData }) {
 
   const showLoadMore = visibleCount < unitsData.length;
 
-  return h("div.units-container", [
+  return h.if(unitsData?.length > 0)("div.units-container", [
     h(ExpansionPanel, { title: "Units", className: "units-panel" }, [
       h("div.units-list", [...visibleItems]),
       h.if(showLoadMore)(
@@ -945,7 +961,7 @@ export function Maps({ mapsData }) {
 
   const showLoadMore = visibleCount < mapsData.length;
 
-  return h("div.maps-container", [
+  return h.if(mapsData?.length > 0)("div.maps-container", [
     h(ExpansionPanel, { title: "Maps", className: "maps-panel" }, [
       h("div.maps-list", [...visibleItems]),
       h.if(showLoadMore)(
@@ -981,7 +997,7 @@ export function Fossils({ fossilsData }) {
 
   const showLoadMore = visibleCount < fossilsData.length;
 
-  return h("div.fossils-container", [
+  return h.if(fossilsData?.length > 0)("div.fossils-container", [
     h(ExpansionPanel, { title: "Fossils", className: "fossils-panel" }, [
       h("div.fossils-list", [...visibleItems]),
       h.if(showLoadMore)(
