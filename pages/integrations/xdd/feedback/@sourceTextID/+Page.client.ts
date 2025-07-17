@@ -1,5 +1,5 @@
 import h from "./+Page.client.module.sass";
-import { FullscreenPage } from "~/layouts";
+import { ContentPage, FullscreenPage } from "~/layouts";
 import { PageBreadcrumbs } from "~/components";
 import { usePageContext } from "vike-react/usePageContext";
 import {
@@ -34,7 +34,7 @@ import { Toaster } from "@blueprintjs/core";
 export function Page() {
   return h(
     OverlaysProvider,
-    h(FullscreenPage, [
+    h(ContentPage, [
       h("div.feedback-main", [
         h(PageBreadcrumbs),
         h(FlexRow, { alignItems: "center" }, [
@@ -116,6 +116,13 @@ function FeedbackInterface({ data, models, entityTypes }) {
     model,
     entityTypes,
     matchComponent: MatchedEntityLink,
+    matchLinks: {
+      lithology: "/lex/lithology",
+      lith_att: "/lex/lith-atts",
+      strat_name: "/lex/strat-names",
+      concept: "/lex/strat-name-concepts",
+    },
+    lineHeight: 3,
     onSave: wrapWithToaster(
       async (tree) => {
         const data = prepareDataForServer(tree, window.source_text, [
