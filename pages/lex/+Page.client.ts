@@ -139,17 +139,16 @@ function SearchContainer({ setShowBody }) {
 
 function SearchResults({ data }) {
   const categories = [
-    "column",
-    "econ",
+    "columns",
+    "econs",
     "maps",
-    "environ",
+    "environments",
     "groups",
     "intervals",
-    "lithology",
-    "lith_att",
+    "lithologies",
+    "lith_attributes",
     "projects",
     "strat_name_concepts",
-    "project",
     "structures",
     "minerals",
   ];
@@ -157,7 +156,7 @@ function SearchResults({ data }) {
   console.log("Search results data:", data);
 
   const grouped = data?.reduce((acc, item) => {
-    const category = item.category || "other";
+    const category = item.type || "other";
     if (!acc[category]) {
       acc[category] = [];
     }
@@ -173,7 +172,7 @@ function SearchResults({ data }) {
       if (!items || items?.length === 0) return;
 
       const link =
-        category === "econ"
+        category === "econs"
           ? "economics"
           : category === "lithologies"
           ? "lithology"
@@ -197,7 +196,7 @@ function SearchResults({ data }) {
           ? "columns"
           : category === "project"
           ? "projects"
-          : "other";
+          : category;
 
       return h("div.search-category", [
         h(
@@ -212,9 +211,9 @@ function SearchResults({ data }) {
           items?.map((item) => {
             const { name } = item;
             const href =
-              category === "column" ||
-              category === "project" ||
-              category === "map"
+              category === "columns" ||
+              category === "projects" ||
+              category === "maps"
                 ? `/${link}/${item.id}`
                 : `/lex/${link}/${item.id}`;
 
