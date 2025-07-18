@@ -1,12 +1,12 @@
 import { LinkCard, PageHeader } from "~/components";
 import { ContentPage } from "~/layouts";
-import { apiDomain } from "@macrostrat-web/settings";
-import { useAPIResult } from "@macrostrat/ui-components";
+import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
 import h from "./+Page.module.sass";
 import { useData } from "vike-react/useData";
 import { Footer } from "~/components/general";
 import { SearchBar } from "~/components/general";
 import { useState } from "react";
+import { ExpansionPanel } from "@macrostrat/map-interface";
 
 export function Page() {
   const { res } = useData();
@@ -118,113 +118,59 @@ function formatNumber(num) {
 }
 
 function SearchContainer({ setShowBody }) {
-  const [input, setInput] = useState("");
-  const url = apiDomain + `/api/pg/autocomplete?name=ilike.*${input}*`;
-  const data = useAPIResult(url) || [];
-
-  if (data && input.length > 0) {
-    setShowBody(false);
-  } else {
-    setShowBody(true);
-  }
-
-  return h("div.search-container", [
-    h(SearchBar, {
-      placeholder: "Search the geologic lexicon...",
-      onChange: (e) => setInput(e),
-    }),
-    h(SearchResults, { data }),
-  ]);
+  return h(PostgRESTInfiniteScrollView, {
+    limit: 20,
+    id_key: "id",
+    filterable: true,
+    ascending: true,
+    route: "https://dev2.macrostrat.org/api/pg/autocomplete",
+    delay: 100,
+    searchColumns: [{ value: "name", label: "Name" }],
+    group_key: "type",
+    groups: [
+      { value: "econs", label: "Economics" },
+      { value: "maps", label: "Maps" },
+      { value: "environments", label: "Environments" },
+      { value: "groups", label: "Column groups" },
+      { value: "columns", label: "Columns" },
+      { value: "intervals", label: "Intervals" },
+      { value: "lithologies", label: "Lithologies" },
+      { value: "lithology_attributes", label: "Lithology attributes" },
+      { value: "projects", label: "Projects" },
+      { value: "strat_name_concepts", label: "Strat name concepts" },
+      { value: "structures", label: "Structures" },
+      { value: "minerals", label: "Minerals" },
+    ],
+    itemComponent: LexCard,
+    SearchBarComponent: SearchBar,
+    GroupingComponent: ExpansionPanel,
+    filter_threshold: 2,
+  })
 }
 
-function SearchResults({ data }) {
-  const categories = [
-    "columns",
-    "econs",
-    "maps",
-    "environments",
-    "groups",
-    "intervals",
-    "lithologies",
-    "lith_attributes",
-    "projects",
-    "strat_name_concepts",
-    "structures",
-    "minerals",
-  ];
+function LexCard({data}) {
+  const type = data.type || "other";
+  const href = type === "column" ? 
+    `/columns/${data.id}` :
+    type === "project" ?
+    `/lex/projects/${data.id}` :
+    type === "map" ?
+    `/lex/maps/${data.id}` :
+    type === "environment" ?
+    `/lex/environments/${data.id}` :
+    type === "interval" ?
+    `/lex/intervals/${data.id}` :
+    type === "lithologies" ?
+    `/lex/lithology/${data.id}` :
+    type === "mineral" ?
+    `/lex/minerals/${data.id}` :
+    type === 'strat_name_concepts' ?
+    `/lex/strat-name-concepts/${data.id}` :
+    type === "lithology_attributes" ?
+    `/lex/lith-atts/${data.id}` :
+    type === "structure" ?
+    `/lex/structures/${data.id}` :
+    `/lex/${type}/${data.id}`;
 
-  console.log("Search results data:", data);
-
-  const grouped = data?.reduce((acc, item) => {
-    const category = item.type || "other";
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(item);
-    return acc;
-  }, {});
-
-  console.log("Grouped data:", grouped);
-
-  return h.if(Object.keys(grouped).length > 0)("div.search-results", [
-    categories?.map((category) => {
-      const items = grouped?.[category];
-      if (!items || items?.length === 0) return;
-
-      const link =
-        category === "econs"
-          ? "economics"
-          : category === "lithologies"
-          ? "lithology"
-          : category === "strat_name_concepts"
-          ? "strat-name-concepts"
-          : category === "lith_att"
-          ? "lith-atts"
-          : category === "environ"
-          ? "environments"
-          : category === "intervals"
-          ? "intervals"
-          : category === "minerals"
-          ? "minerals"
-          : category === "structures"
-          ? "structures"
-          : category === "maps"
-          ? "maps"
-          : category === "projects"
-          ? "projects"
-          : category === "column"
-          ? "columns"
-          : category === "project"
-          ? "projects"
-          : category;
-
-      return h("div.search-category", [
-        h(
-          "h3.category",
-          (category.charAt(0).toUpperCase() + category.slice(1)).replace(
-            /_/g,
-            " "
-          )
-        ),
-        h(
-          "div.items",
-          items?.map((item) => {
-            const { name } = item;
-            const href =
-              category === "columns" ||
-              category === "projects" ||
-              category === "maps"
-                ? `/${link}/${item.id}`
-                : `/lex/${link}/${item.id}`;
-
-                return h(
-              "a.item",
-              { href },
-              name.charAt(0).toUpperCase() + name.slice(1)
-            );
-          })
-        ),
-      ]);
-    }),
-  ]);
+  return h('div', h('a', { href }, data.name));
 }
