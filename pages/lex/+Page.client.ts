@@ -139,20 +139,22 @@ function SearchContainer({ setShowBody }) {
 
 function SearchResults({ data }) {
   const categories = [
-    "columns",
-    "econs",
+    "column",
+    "econ",
     "maps",
-    "environments",
+    "environ",
     "groups",
     "intervals",
-    "lithologies",
-    "lithology_attributes",
+    "lithology",
+    "lith_att",
     "projects",
     "strat_name_concepts",
-    "projects",
+    "project",
     "structures",
     "minerals",
   ];
+
+  console.log("Search results data:", data);
 
   const grouped = data?.reduce((acc, item) => {
     const category = item.category || "other";
@@ -171,15 +173,31 @@ function SearchResults({ data }) {
       if (!items || items?.length === 0) return;
 
       const link =
-        category === "econs"
+        category === "econ"
           ? "economics"
           : category === "lithologies"
           ? "lithology"
           : category === "strat_name_concepts"
           ? "strat-name-concepts"
-          : category === "lithology_attributes"
+          : category === "lith_att"
           ? "lith-atts"
-          : category;
+          : category === "environ"
+          ? "environments"
+          : category === "intervals"
+          ? "intervals"
+          : category === "minerals"
+          ? "minerals"
+          : category === "structures"
+          ? "structures"
+          : category === "maps"
+          ? "maps"
+          : category === "projects"
+          ? "projects"
+          : category === "column"
+          ? "columns"
+          : category === "project"
+          ? "projects"
+          : "other";
 
       return h("div.search-category", [
         h(
@@ -194,13 +212,13 @@ function SearchResults({ data }) {
           items?.map((item) => {
             const { name } = item;
             const href =
-              category === "columns" ||
-              category === "projects" ||
-              category === "maps"
+              category === "column" ||
+              category === "project" ||
+              category === "map"
                 ? `/${link}/${item.id}`
                 : `/lex/${link}/${item.id}`;
-            console.log("Item:", item, "Href:", href, "category:", category);
-            return h(
+
+                return h(
               "a.item",
               { href },
               name.charAt(0).toUpperCase() + name.slice(1)
