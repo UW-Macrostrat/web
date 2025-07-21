@@ -138,6 +138,12 @@ function useMapClickHandler(pbdbPoints) {
         return;
       }
 
+      const cluster = map.queryRenderedFeatures(event.point, {
+        layers: ['pbdb-clusters']
+      });
+
+      console.log("Clicked on map", event, cluster);
+
       // If we are viewing fossils, prioritize clicks on those
       if (mapLayers.has(MapLayer.FOSSILS)) {
         const action = handleFossilLayerClick(event, map, pbdbPoints.current);
@@ -193,32 +199,6 @@ function useMapClickHandler(pbdbPoints) {
   );
 }
 
-// PBDB hexgrids and points are refreshed on every map move
-export async function refreshPBDB(map, pointsRef, filters) {
-  let bounds = map.getBounds();
-  let zoom = map.getZoom();
-  const maxClusterZoom = 7;
-  pointsRef.current = await getPBDBData(filters, bounds, zoom, maxClusterZoom);
-
-  // Show or hide the proper PBDB layers
-  // TODO: this is a bit janky
-  if (zoom < maxClusterZoom) {
-    map.getSource("pbdb-clusters").setData(pointsRef.current);
-    map.setLayoutProperty("pbdb-clusters", "visibility", "visible");
-    map.setLayoutProperty("pbdb-points-clustered", "visibility", "none");
-    //  map.map.setLayoutProperty('pbdb-point-cluster-count', 'visibility', 'none')
-    map.setLayoutProperty("pbdb-points", "visibility", "none");
-  } else {
-    map.getSource("pbdb-points").setData(pointsRef.current);
-
-    //map.map.getSource("pbdb-clusters").setData(map.pbdbPoints);
-    map.setLayoutProperty("pbdb-clusters", "visibility", "none");
-    map.setLayoutProperty("pbdb-points-clustered", "visibility", "visible");
-    //    map.map.setLayoutProperty('pbdb-point-cluster-count', 'visibility', 'visible')
-    // map.map.setLayoutProperty("pbdb-points", "visibility", "visible");
-  }
-}
-
 export function MacrostratLayerManager() {
   /** Manager for map layers */
   const mapRef = useMapRef();
@@ -270,22 +250,6 @@ export function MacrostratLayerManager() {
     };
   }, [mapRef.current, mapClickHandler]);
 
-  // Handle map movement
-  const mapMovedHandler = useCallback(() => {
-    if (mapRef.current == null) return;
-    if (mapLayers.has(MapLayer.FOSSILS)) {
-      refreshPBDB(mapRef.current, pbdbPoints, filters);
-    }
-  }, [mapRef.current, mapLayers, filters]);
-
-  useEffect(() => {
-    if (mapRef.current == null) return;
-    mapRef.current.on("moveend", mapMovedHandler);
-    return () => {
-      mapRef.current?.off("moveend", mapMovedHandler);
-    };
-  }, [mapRef.current, mapMovedHandler]);
-
   return null;
 }
 
@@ -331,10 +295,6 @@ function useStyleReloader(pbdbPoints) {
             mapLayers.has(MapLayer.COLUMNS) && filters.length !== 0
           );
         }
-      }
-
-      if (mapLayers.has(MapLayer.FOSSILS)) {
-        refreshPBDB(map, pbdbPoints, filters);
       }
     },
     [mapLayers, filters]
