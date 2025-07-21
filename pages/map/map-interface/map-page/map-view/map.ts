@@ -303,9 +303,10 @@ export function FlyToPlaceManager() {
 const highlightLayers = [
   { layer: "pbdb-points", source: "pbdb" },
   { layer: "pbdb-clusters", source: "pbdb" },
+  { layer: "cluster-count", source: "pbdb" },
 ];
 
-export function HoveredFeatureManager() {
+export function HoveredFeatureManager() { // fix with fossils
   const mapRef = useMapRef();
   const { isStyleLoaded } = useMapStatus();
   const map = mapRef.current;
