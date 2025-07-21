@@ -35,64 +35,18 @@ function handleFossilLayerClick(
 ): AppAction | MapZoomAction | null {
   const mapZoom = map.getZoom();
   let collections = map.queryRenderedFeatures(event.point, {
-    layers: ["pbdb-points-clustered", "pbdb-points", "pbdb-clusters"],
+    layers: ["pbdb-points"],
   });
-  // Clicked on a hex grid
-  if (
-    collections.length &&
-    collections[0].properties.hasOwnProperty("hex_id")
-  ) {
-    return { type: "zoom-map", dz: 1 };
-    // Clicked on a summary cluster
-  } else if (
-    collections.length &&
-    collections[0].properties.hasOwnProperty("oid") &&
-    collections[0].properties.oid.split(":")[0] === "clu" &&
-    mapZoom <= 12
-  ) {
-    return { type: "zoom-map", dz: 2 };
-    // Clicked on a real cluster of collections
 
-    // ... the way we do clustering here is kind of strange.
-  } else if (
-    collections.length &&
-    (collections[0].properties.hasOwnProperty("cluster") ||
-      // Summary cluster when zoom is too high
-      collections[0].properties.oid.split(":")[0] === "clu")
-  ) {
-    // via https://jsfiddle.net/aznkw784/
-    let pointsInCluster = pbdbPoints.features
-      .filter((f) => {
-        let pointPixels = map.project(f.geometry.coordinates);
-        let pixelDistance = Math.sqrt(
-          Math.pow(event.point.x - pointPixels.x, 2) +
-            Math.pow(event.point.y - pointPixels.y, 2)
-        );
-        return Math.abs(pixelDistance) <= 50;
-      })
-      .map((f) => {
-        return f.properties.oid.replace("col:", "");
-      });
-
-    // Need to recolor on selection somehow
-    return {
-      type: "get-pbdb",
-      collection_nos: pointsInCluster,
-    };
-
-    // Clicked on an unclustered point
-  } else if (
-    collections.length &&
-    collections[0].properties.hasOwnProperty("oid")
-  ) {
-    let collection_nos = collections.map((col) => {
-      return col.properties.oid.replace("col:", "");
-    });
-    return { type: "get-pbdb", collection_nos };
-    //    return
+  // Need to recolor on selection somehow
+  if(collections.length === 0) {
+    return null;
   }
 
-  return null;
+  return {
+    type: "get-pbdb",
+    collection_nos: collections.map((c) => c.properties.collection_no),
+  };
 }
 
 function handleCrossSectionClick(event, _crossSectionLine): AppAction | null {
@@ -142,7 +96,15 @@ function useMapClickHandler(pbdbPoints) {
         layers: ['pbdb-clusters']
       });
 
-      console.log("Clicked on map", event, cluster);
+      const zoom = cluster[0]?.properties?.expansion_zoom;
+      if (zoom != null && map.getZoom() < zoom) {
+        map.flyTo({
+          center: event.lngLat,
+          zoom: zoom + 2,
+          speed: 0.5,
+          curve: 1.5,
+        })
+      }
 
       // If we are viewing fossils, prioritize clicks on those
       if (mapLayers.has(MapLayer.FOSSILS)) {
@@ -342,7 +304,6 @@ export function FlyToPlaceManager() {
 
 const highlightLayers = [
   { layer: "pbdb-points", source: "pbdb-points" },
-  { layer: "pbdb-points-clustered", source: "pbdb-points" },
   { layer: "pbdb-clusters", source: "pbdb-clusters" },
 ];
 
