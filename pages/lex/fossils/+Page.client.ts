@@ -47,7 +47,7 @@ function fossilStyle(type: object) {
     sources: {
       fossils: {
         type: "vector",
-        tiles: ["http://localhost:8000/fossils/{z}/{x}/{y}"],
+        tiles: ["http://localhost:8000/pbdb/fossils/{z}/{x}/{y}"],
       }
     },
     layers: [

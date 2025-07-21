@@ -28,13 +28,13 @@ const overlaySources: { [k: string]: SourceExt } = {
   "pbdb-points": {
     type: "vector",
     tiles: [
-      `http://localhost:8000/fossils/{z}/{x}/{y}`,
+      `http://localhost:8000/pbdb/fossils/{z}/{x}/{y}?cluster=false`,
     ],
   },
   "pbdb-clusters": {
     type: "vector",
     tiles: [
-      `http://localhost:8000/fossils/{z}/{x}/{y}`,
+      `http://localhost:8000/pbdb/fossils/{z}/{x}/{y}`,
     ],
   },
   columns: {
