@@ -25,13 +25,7 @@ const overlaySources: { [k: string]: SourceExt } = {
   //     "tileSize": 512,
   //     "maxzoom": 6,
   // },
-  "pbdb-points": {
-    type: "vector",
-    tiles: [
-      `http://localhost:8000/pbdb/fossils/{z}/{x}/{y}?cluster=false`,
-    ],
-  },
-  "pbdb-clusters": {
+  pbdb: {
     type: "vector",
     tiles: [
       `http://localhost:8000/pbdb/fossils/{z}/{x}/{y}`,
@@ -153,7 +147,7 @@ export function buildOverlayLayers(): mapboxgl.Layer[] {
     {
       id: "pbdb-points",
       type: "circle",
-      source: "pbdb-points",
+      source: "pbdb",
       "source-layer": "default",
       filter: ['<=', ['get', 'n'], clusterThreshold],
       paint: {
@@ -176,7 +170,7 @@ export function buildOverlayLayers(): mapboxgl.Layer[] {
     {
       id: "pbdb-clusters",
       type: "circle",
-      source: "pbdb-clusters",
+      source: "pbdb",
       "source-layer": "default",
       filter: ['>', ['get', 'n'], clusterThreshold],
       paint: {
@@ -210,7 +204,7 @@ export function buildOverlayLayers(): mapboxgl.Layer[] {
     {
       id: 'cluster-count',
       type: 'symbol',
-      source: 'pbdb-points',
+      source: 'pbdb',
       "source-layer": "default",
       filter: ['>', ['get', 'n'], clusterThreshold],
       layout: {

@@ -93,7 +93,7 @@ function useMapClickHandler(pbdbPoints) {
       }
 
       const cluster = map.queryRenderedFeatures(event.point, {
-        layers: ['pbdb-clusters']
+        layers: ['pbdb-clusters', 'pbdb-points'],
       });
 
       const zoom = cluster[0]?.properties?.expansion_zoom;
@@ -236,9 +236,7 @@ function useStyleReloader(pbdbPoints) {
           setVisibility(map, layer.id, mapLayers.has(MapLayer.LINES));
         }
         if (
-          layer.source === "pbdb" ||
-          layer.source === "pbdb-points" ||
-          layer.source === "pbdb-clusters"
+          layer.source === "pbdb"
         ) {
           setVisibility(map, layer.id, mapLayers.has(MapLayer.FOSSILS));
         }
@@ -303,8 +301,8 @@ export function FlyToPlaceManager() {
 }
 
 const highlightLayers = [
-  { layer: "pbdb-points", source: "pbdb-points" },
-  { layer: "pbdb-clusters", source: "pbdb-clusters" },
+  { layer: "pbdb-points", source: "pbdb" },
+  { layer: "pbdb-clusters", source: "pbdb" },
 ];
 
 export function HoveredFeatureManager() {
