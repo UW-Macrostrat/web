@@ -1,29 +1,25 @@
-import { useMapRef } from "@macrostrat/mapbox-react";
-import { Spinner, Icon, Divider, Button } from "@blueprintjs/core";
 import { SETTINGS } from "@macrostrat-web/settings";
 import {buildInspectorStyle } from "@macrostrat/map-interface";
 import { buildMacrostratStyle } from "@macrostrat/map-styles";
 import { mergeStyles } from "@macrostrat/mapbox-utils";
-import { useDarkMode, DarkModeButton } from "@macrostrat/ui-components";
+import { useDarkMode } from "@macrostrat/ui-components";
 import mapboxgl from "mapbox-gl";
-import { useCallback, useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import h from "@macrostrat/hyper";
-import { Image } from "~/components/general";
 import "@macrostrat/style-system";
 import { MapPosition } from "@macrostrat/mapbox-utils";
 import {
   MapAreaContainer,
-  MapMarker,
   MapView,
 } from "@macrostrat/map-interface";
 import { mapboxAccessToken } from "@macrostrat-web/settings";
+import { FullscreenPage } from "~/layouts";
 
 
 export function Page() {
-  return h(
-    "div.weaver-page",
-    h(WeaverMap, { mapboxToken: SETTINGS.mapboxAccessToken })
-  );
+  return h(FullscreenPage,
+    h(FossilMap, { mapboxToken: SETTINGS.mapboxAccessToken })
+  )
 }
 
 mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
@@ -41,7 +37,7 @@ const type =
     color: "purple",
   };
 
-function weaverStyle(type: object) {
+function fossilStyle(type: object) {
   const clusterThreshold = 1;
 
   const baseColor = "#868aa2";
@@ -49,7 +45,7 @@ function weaverStyle(type: object) {
 
   return {
     sources: {
-      weaver: {
+      fossils: {
         type: "vector",
         tiles: ["http://localhost:8000/fossils/{z}/{x}/{y}"],
       }
@@ -58,7 +54,7 @@ function weaverStyle(type: object) {
         {
         id: "clusters",
         type: "circle",
-        source: "weaver",
+        source: "fossils",
         "source-layer": "default",
         filter: ['>', ['get', 'n'], clusterThreshold],
         paint: {
@@ -95,7 +91,7 @@ function weaverStyle(type: object) {
       {
         id: 'cluster-count',
         type: 'symbol',
-        source: 'weaver',
+        source: 'fossils',
         "source-layer": "default",
         filter: ['has', 'n'],
         layout: {
@@ -111,7 +107,7 @@ function weaverStyle(type: object) {
       {
         id: 'unclustered-point',
         type: 'circle',
-        source: 'weaver',
+        source: 'fossils',
         "source-layer": "default",
         filter: ['<=', ['get', 'n'], clusterThreshold],
         paint: {
@@ -125,7 +121,7 @@ function weaverStyle(type: object) {
   };
 }
 
-function WeaverMap({
+function FossilMap({
   mapboxToken,
 }: {
   headerElement?: React.ReactElement;
@@ -151,9 +147,6 @@ function WeaverMap({
           // The Map Area Container
           h(
             MapAreaContainer,
-            {
-              className: "map-area-container",
-            },
             [
               h(MapView, { style, mapboxToken: mapboxAccessToken, mapPosition }),
             ]
@@ -171,7 +164,8 @@ function useMapStyle(type, mapboxToken) {
     : "mapbox://styles/mapbox/light-v10";
 
   const [actualStyle, setActualStyle] = useState(null);
-  const overlayStyle = mergeStyles(_macrostratStyle, weaverStyle(type));
+  // const overlayStyle = mergeStyles(_macrostratStyle, fossilStyle(type)); // OVERLAY
+    const overlayStyle = fossilStyle(type); 
 
   // Auto select sample type
   useEffect(() => {
