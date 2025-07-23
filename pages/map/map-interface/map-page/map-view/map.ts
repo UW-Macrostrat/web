@@ -96,8 +96,6 @@ function useMapClickHandler(pbdbPoints) {
         layers: ['pbdb-clusters', 'pbdb-points'],
       });
 
-      console.log('Cluster properties:', cluster);
-
       const zoom = cluster[0]?.properties?.expansion_zoom;
 
       if (zoom != null) {
@@ -308,15 +306,14 @@ export function FlyToPlaceManager() {
 const highlightLayers = [
   { layer: "pbdb-points", source: "pbdb", sourceLayer: "default" },
   { layer: "pbdb-clusters", source: "pbdb", sourceLayer: "default" },
-  { layer: "cluster-count", source: "pbdb", sourceLayer: "default" },
 ];
 
-export function HoveredFeatureManager() { // fix with fossils
+export function HoveredFeatureManager() { 
   const mapRef = useMapRef();
   const { isStyleLoaded } = useMapStatus();
   const map = mapRef.current;
   const hoveredFeatures = useRef({});
-
+  
   useEffect(() => {
     if (map == null) return;
     if (!isStyleLoaded) return;

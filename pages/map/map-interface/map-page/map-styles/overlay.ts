@@ -17,14 +17,6 @@ export function buildOverlayStyle() {
 }
 
 const overlaySources: { [k: string]: SourceExt } = {
-  // "pbdb": {
-  //     "type": "vector",
-  //     "tiles": [
-  //       `${SETTINGS.burwellTileDomain}/hexgrid/{z}/{x}/{y}.mvt`
-  //     ],
-  //     "tileSize": 512,
-  //     "maxzoom": 6,
-  // },
   pbdb: {
     type: "vector",
     tiles: [
@@ -167,6 +159,9 @@ export function buildOverlayLayers(): mapboxgl.Layer[] {
         ],
         "circle-stroke-color": "#ffffff",
       },
+      layout: {
+        visibility: "none",
+      }
     },
     {
       id: "pbdb-clusters",
@@ -201,6 +196,9 @@ export function buildOverlayLayers(): mapboxgl.Layer[] {
         ],
         "circle-stroke-color": "#fff",
       },
+      layout: {
+        visibility: "none",
+      },
     },
     {
       id: 'cluster-count',
@@ -213,6 +211,7 @@ export function buildOverlayLayers(): mapboxgl.Layer[] {
         'text-size': 10,
         'text-allow-overlap': true,
         'text-ignore-placement': true,
+        'visibility': "none",
       },
       paint: {
         "text-color": "#fff"
