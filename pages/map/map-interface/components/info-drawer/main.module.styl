@@ -1,0 +1,67 @@
+.spacer
+  flex-grow 1
+  pointer-events none
+
+.infodrawer-content
+  margin: 0;
+
+.macrostrat-detail
+  display: flex;
+  align-items: center;
+  margin 0.2em 0 0.4em;
+
+  .expansion-summary-title
+    margin-right: 0.8em;
+
+    &:after
+      content: ":";
+
+.described-age, .macrostrat-detail
+  display: flex;
+  align-items: center;
+
+  .expansion-summary-title
+    margin-right: 0.8em;
+
+    &:after
+      content: ":";
+
+  .description
+    font-style italic
+    font-size 0.7em
+    max-width: 100px
+    text-align: right
+
+  .age-chips
+    flex-grow 1
+
+
+// &.loading
+//   max-height: 200px
+// max-height: calc(100vh - 60px)
+// transition: max-height 0.5s ease-in-out 0.25s
+
+
+.spacer
+  flex-grow 1
+  pointer-events none
+
+.macrostrat-unit
+  h3
+    margin: 0.5em 0 0.5em;
+    flex-grow: 1;
+
+  .description
+    margin-right: 1em
+
+.description
+  font-style italic
+
+.age-refinement-plot
+  position relative
+
+  .age-refinement-bar
+    border-radius: 3px
+    margin-bottom: 1px
+
+

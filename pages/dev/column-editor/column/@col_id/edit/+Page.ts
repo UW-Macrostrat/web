@@ -8,7 +8,7 @@ import pg, {
 } from "@macrostrat-web/column-builder";
 import { PostgrestError } from "@supabase/postgrest-js";
 import { useData } from "vike-react/useData";
-import { StratColumn } from "#/map/map-interface/components/info-drawer/strat-column";
+import { StratColumn } from "./strat-column";
 
 interface EditColumnData {
   col_id: string;
