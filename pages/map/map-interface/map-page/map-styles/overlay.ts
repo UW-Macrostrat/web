@@ -200,22 +200,5 @@ export function buildOverlayLayers(): mapboxgl.Layer[] {
         visibility: "none",
       },
     },
-    {
-      id: 'cluster-count',
-      type: 'symbol',
-      source: 'pbdb',
-      "source-layer": "default",
-      filter: ['>', ['get', 'n'], clusterThreshold],
-      layout: {
-        'text-field': ['get', 'n'],
-        'text-size': 10,
-        'text-allow-overlap': true,
-        'text-ignore-placement': true,
-        'visibility': "none",
-      },
-      paint: {
-        "text-color": "#fff"
-      },
-    },
   ];
 }
