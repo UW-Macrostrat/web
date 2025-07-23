@@ -30,6 +30,7 @@ const overlaySources: { [k: string]: SourceExt } = {
     tiles: [
       `http://localhost:8000/pbdb/fossils/{z}/{x}/{y}`,
     ],
+    promoteId: 'collection_no' 
   },
   columns: {
     type: "geojson",
@@ -80,7 +81,7 @@ export function buildOverlayLayers(): mapboxgl.Layer[] {
     "--panel-rule-color"
   );
 
-  const clusterThreshold = 2;
+  const clusterThreshold = 1;
 
   return [
     {

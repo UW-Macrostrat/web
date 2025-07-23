@@ -96,14 +96,19 @@ function useMapClickHandler(pbdbPoints) {
         layers: ['pbdb-clusters', 'pbdb-points'],
       });
 
+      console.log('Cluster properties:', cluster);
+
       const zoom = cluster[0]?.properties?.expansion_zoom;
-      if (zoom != null && map.getZoom() < zoom) {
+
+      if (zoom != null) {
+        console.log('Zooming to cluster at zoom level:', zoom);
         map.flyTo({
           center: event.lngLat,
           zoom: zoom + 2,
           speed: 0.5,
           curve: 1.5,
         })
+        return
       }
 
       // If we are viewing fossils, prioritize clicks on those
@@ -301,9 +306,9 @@ export function FlyToPlaceManager() {
 }
 
 const highlightLayers = [
-  { layer: "pbdb-points", source: "pbdb" },
-  { layer: "pbdb-clusters", source: "pbdb" },
-  { layer: "cluster-count", source: "pbdb" },
+  { layer: "pbdb-points", source: "pbdb", sourceLayer: "default" },
+  { layer: "pbdb-clusters", source: "pbdb", sourceLayer: "default" },
+  { layer: "cluster-count", source: "pbdb", sourceLayer: "default" },
 ];
 
 export function HoveredFeatureManager() { // fix with fossils
@@ -326,13 +331,13 @@ export function HoveredFeatureManager() { // fix with fossils
         if (evt.features) {
           if (hoverState[layer.layer]) {
             map.setFeatureState(
-              { source: layer.source, id: hoverState[layer.layer] },
+              { source: layer.source, id: hoverState[layer.layer], sourceLayer: layer.sourceLayer },
               { hover: false }
             );
           }
           hoverState[layer.layer] = evt.features[0].id;
           map.setFeatureState(
-            { source: layer.source, id: evt.features[0].id },
+            { source: layer.source, id: evt.features[0].id, sourceLayer: layer.sourceLayer },
             { hover: true }
           );
         }
@@ -341,7 +346,7 @@ export function HoveredFeatureManager() { // fix with fossils
       map.on("mouseleave", layer.layer, (evt) => {
         if (hoverState[layer.layer]) {
           map.setFeatureState(
-            { source: layer.source, id: hoverState[layer.layer] },
+            { source: layer.source, id: hoverState[layer.layer], sourceLayer: layer.sourceLayer },
             { hover: false }
           );
         }

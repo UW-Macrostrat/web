@@ -141,7 +141,7 @@ function FossilMap({
           },
         };
 
-  return  h(
+  return h(
         "div.map-container",
         [
           // The Map Area Container
