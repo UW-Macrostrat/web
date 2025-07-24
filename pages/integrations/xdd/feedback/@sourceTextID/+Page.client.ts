@@ -14,31 +14,47 @@ import {
   useModelIndex,
   usePostgresQuery,
 } from "../../extractions/data-service";
-import { NonIdealState, OverlaysProvider, Spinner } from "@blueprintjs/core";
+import { NonIdealState, OverlaysProvider, Spinner, Button } from "@blueprintjs/core";
 import {
   ErrorBoundary,
   FlexRow,
   Pagination,
   Spacer,
+  useAPIResult,
 } from "@macrostrat/ui-components";
 import { useState } from "react";
 import { AuthStatus, useAuth } from "@macrostrat/form-components";
 import { MatchedEntityLink } from "#/integrations/xdd/extractions/match";
 import { knowledgeGraphAPIURL } from "@macrostrat-web/settings";
 import { Toaster } from "@blueprintjs/core";
+import { fetchPGData } from "~/_utils";
 
 /**
  * Get a single text window for feedback purposes
  */
 
 export function Page() {
+  const nextID = getNextID();
+  console.log("Next ID:", nextID);
+
   return h(
     OverlaysProvider,
     h(ContentPage, [
       h("div.feedback-main", [
         h(PageBreadcrumbs),
         h(FlexRow, { alignItems: "center" }, [
-          h("h1", "Feedback"),
+          h(FlexRow, [
+            h("h1", "Feedback"),
+            h(Button, { 
+              className: "next-btn",
+              onClick: () => {
+                window.open(
+                  `/integrations/xdd/feedback/${nextID}`,
+                  "_self"
+                ); 
+              } 
+            }, "Next"),
+          ]),
           h(Spacer),
           h(AuthStatus),
         ]),
@@ -235,3 +251,21 @@ function normalizeMatch(match: any): MatchInfo | null {
 // FeedbackDevTool.title = "Feedback";
 //
 // export const devTools = [FeedbackDevTool];
+
+function getNextID() {
+  const currentID = usePageContext().urlPathname.split("/").pop();
+  const [nextID, setNextID] = useState<number | null>(null);
+
+  const res = fetchPGData(
+    "/kg_source_text",
+    {
+      order: "id",
+      limit: 1,
+      id: "gt." + currentID
+    }
+  ).then((data) => {
+    setNextID(data?.[0]?.id || 18131); // Default to 18131 if no next ID found
+  });
+
+  return nextID;
+}
