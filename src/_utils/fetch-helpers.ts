@@ -1,4 +1,4 @@
-import { apiV2Prefix, apiDomain } from "@macrostrat-web/settings";
+import { apiV2Prefix, postgrestPrefix } from "@macrostrat-web/settings";
 import fetch from "cross-fetch";
 
 export async function fetchAPIData(apiURL: string, params: any) {
@@ -22,7 +22,7 @@ export async function fetchAPIRefs(apiURL: string, params: any) {
 }
 
 export async function fetchPGData(apiURL: string, params: any) {
-  let url = new URL(apiDomain + "/api/pg" + apiURL);
+  let url = new URL(postgrestPrefix + apiURL);
   if (params != null) {
     url.search = new URLSearchParams(params).toString();
   }
