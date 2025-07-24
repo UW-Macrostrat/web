@@ -39,7 +39,7 @@ export function Page() {
     h(PageBreadcrumbs, {showLogo: true}),
     h("h1", "Source text"),
     h(PostgRESTInfiniteScrollView, {
-      route: postgrestPrefix + '/kg_source_text',
+      route: postgrestPrefix + '/kg_source_text_casted',
       id_key: 'id',
       limit: 20,
       ascending: false,
@@ -48,6 +48,8 @@ export function Page() {
       toggles,
       searchColumns: [
         { label: "Paragraph Text", value: 'paragraph_text'},
+        { label: "Date", value: 'created' },
+        { label: "Model", value: 'model_name' },
       ],
       SearchBarComponent: SearchBar,
       MultiSelectComponent: MultiSelect,
@@ -56,6 +58,7 @@ export function Page() {
 }
 
 function SourceTextItemDetailed({ data }) {
+  console.log("SourceTextItemDetailed", data);
   const { id, paragraph_text, last_update, n_runs, n_entities, n_matches, n_strat_names } = data;
 
   return h(LinkCard, {
