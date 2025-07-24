@@ -34,6 +34,7 @@ import { fetchPGData } from "~/_utils";
  */
 
 export function Page() {
+  const [paper_id, setPaperID] = useState<number | null>(null);
   const nextID = getNextID();
   console.log("Next ID:", nextID);
 
@@ -45,8 +46,8 @@ export function Page() {
         h(FlexRow, { alignItems: "center" }, [
           h(FlexRow, [
             h("h1", "Feedback"),
-            h(Button, { 
-              className: "next-btn",
+            h.if(nextID)(Button, { 
+              className: "next btn",
               onClick: () => {
                 window.open(
                   `/integrations/xdd/feedback/${nextID}`,
@@ -56,15 +57,26 @@ export function Page() {
             }, "Next"),
           ]),
           h(Spacer),
-          h(AuthStatus),
+          h('div', [
+            h(AuthStatus),
+            h.if(paper_id)(Button, { 
+              className: "paper btn",
+              onClick: () => {
+                window.open(
+                  `/integrations/xdd/extractions/${paper_id}`,
+                  "_self"
+                ); 
+              } 
+            }, "View papers extraction"),
+          ])
         ]),
-        h(ExtractionIndex),
+        h(ExtractionIndex, { setPaperID }),
       ]),
     ])
   );
 }
 
-function ExtractionIndex() {
+function ExtractionIndex({setPaperID}) {
   const { routeParams } = usePageContext();
   const { sourceTextID } = routeParams;
 
@@ -81,6 +93,8 @@ function ExtractionIndex() {
   }
 
   console.log(data);
+
+  setPaperID(data[0]?.paper_id || null);
 
   return h(
     ErrorBoundary,
