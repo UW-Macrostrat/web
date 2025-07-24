@@ -31,89 +31,52 @@ const type =
     color: "purple",
   };
 
-function fossilStyle(type: object) {
-  const clusterThreshold = 1;
-
-  const baseColor = "#868aa2";
-  const endColor = "#212435";
-
+function todayStyle() {
   return {
     sources: {
-      fossils: {
+      today: {
         type: "vector",
-        tiles: ["http://localhost:8000/pbdb/fossils/{z}/{x}/{y}"],
+        tiles: ["http://localhost:8000/usage-stats/macrostrat/{z}/{x}/{y}?today=true"],
       }
     },
     layers: [
-        {
-        id: "clusters",
-        type: "circle",
-        source: "fossils",
-        "source-layer": "default",
-        filter: ['>', ['get', 'n'], clusterThreshold],
-        paint: {
-          "circle-radius": [
-            'step',
-            ['get', 'n'],
-            7, 50,
-            9, 100,
-            11, 150,
-            13, 200,
-            15, 
-          ],
-          "circle-color": [
-            'step',
-            ['get', 'n'],
-            "#7b7fa0", 50,
-            '#636b8d', 100,
-            '#4a546e', 150,
-            '#353b49', 200,
-            endColor
-          ],
-          "circle-stroke-color": [
-            'step',
-            ['get', 'n'],
-            "#8b8eab", 50,
-            '#7a7e96', 100,
-            '#5d5f7c', 150,
-            '#484b63', 
-          ],
-          "circle-stroke-width": 3,
-          "circle-stroke-opacity": 1,
-        },
-      },
       {
-        id: 'cluster-count',
-        type: 'symbol',
-        source: 'fossils',
-        "source-layer": "default",
-        filter: ['has', 'n'],
-        layout: {
-          'text-field': ['get', 'n'],
-          'text-size': 10,
-          'text-allow-overlap': true,
-          'text-ignore-placement': true,
-        },
-        paint: {
-          "text-color": "#fff"
-        },
-      },
-      {
-        id: 'unclustered-point',
+        id: 'today-points',
         type: 'circle',
-        source: 'fossils',
+        source: 'today',
         "source-layer": "default",
-        filter: ['<=', ['get', 'n'], clusterThreshold],
         paint: {
-          'circle-color': baseColor,
+          'circle-color': "#373ec4",
           'circle-radius': 4,
-          'circle-stroke-width': 1,
-          'circle-stroke-color': '#fff'
         }
       },
     ],
   };
 }
+
+function allStyle() {
+  return {
+    sources: {
+      all: {
+        type: "vector",
+        tiles: ["http://localhost:8000/usage-stats/macrostrat/{z}/{x}/{y}"],
+      }
+    },
+    layers: [
+      {
+        id: 'all-points',
+        type: 'circle',
+        source: 'all',
+        "source-layer": "default",
+        paint: {
+          'circle-color': "#838383",
+          'circle-radius': 4,
+        }
+      },
+    ],
+  };
+}
+
 
 function FossilMap({
   mapboxToken,
@@ -158,8 +121,7 @@ function useMapStyle(type, mapboxToken) {
     : "mapbox://styles/mapbox/light-v10";
 
   const [actualStyle, setActualStyle] = useState(null);
-  // const overlayStyle = mergeStyles(_macrostratStyle, fossilStyle(type)); // OVERLAY
-    const overlayStyle = fossilStyle(type); 
+    const overlayStyle = mergeStyles(allStyle(), todayStyle()); // OVERLAY
 
   // Auto select sample type
   useEffect(() => {
