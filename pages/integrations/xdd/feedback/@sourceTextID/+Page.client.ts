@@ -22,7 +22,7 @@ import {
   Spacer,
 } from "@macrostrat/ui-components";
 import { useState } from "react";
-import { AuthStatus } from "@macrostrat/form-components";
+import { AuthStatus, useAuth } from "@macrostrat/form-components";
 import { MatchedEntityLink } from "#/integrations/xdd/extractions/match";
 import { knowledgeGraphAPIURL } from "@macrostrat-web/settings";
 import { Toaster } from "@blueprintjs/core";
@@ -106,6 +106,7 @@ const AppToaster = Toaster.create();
 function FeedbackInterface({ data, models, entityTypes }) {
   const window = enhanceData(data, models, entityTypes);
   const { entities = [], paragraph_text, model } = window;
+  const { user } = useAuth();
 
   console.log(window);
   console.log(Array.from(entityTypes.values()));
@@ -123,6 +124,7 @@ function FeedbackInterface({ data, models, entityTypes }) {
       concept: "/lex/strat-name-concepts",
     },
     lineHeight: 3,
+    view: user === null,
     onSave: wrapWithToaster(
       async (tree) => {
         const data = prepareDataForServer(tree, window.source_text, [
