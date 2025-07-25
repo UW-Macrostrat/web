@@ -165,7 +165,7 @@ function LexCard({data}) {
     type === "mineral" ?
     `/lex/minerals/${data.id}` :
     type === 'strat_name_concepts' ?
-    `/lex/strat-name-concepts/${data.id}` :
+    `/lex/strat-concepts/${data.id}` :
     type === "lithology_attributes" ?
     `/lex/lith-atts/${data.id}` :
     type === "structure" ?

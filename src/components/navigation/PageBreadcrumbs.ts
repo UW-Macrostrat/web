@@ -254,8 +254,8 @@ export const sitemap: Routes = {
           ],
         },
         {
-          slug: "strat-name-concepts",
-          name: "Strat Name Concepts",
+          slug: "strat-concepts",
+          name: "Strat Concepts",
           children: [
             {
               param: "@id",

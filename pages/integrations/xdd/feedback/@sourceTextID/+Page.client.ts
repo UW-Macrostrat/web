@@ -120,7 +120,7 @@ function FeedbackInterface({ data, models, entityTypes }) {
       lithology: "/lex/lithology",
       lith_att: "/lex/lith-atts",
       strat_name: "/lex/strat-names",
-      concept: "/lex/strat-name-concepts",
+      concept: "/lex/strat-concepts",
     },
     lineHeight: 3,
     onSave: wrapWithToaster(

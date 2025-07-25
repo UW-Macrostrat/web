@@ -380,7 +380,7 @@ export function ConceptInfo({ concept_id, showHeader }) {
   return h("div.concept-info", [
     h.if(showHeader)(
       "a.concept-header",
-      { href: "/lex/strat-name-concepts/" + concept_id },
+      { href: "/lex/strat-concepts/" + concept_id },
       [h("h3", name), h(StratTag, { isConcept: true, fontSize: "1.5em" })]
     ),
     h("div.author", [
