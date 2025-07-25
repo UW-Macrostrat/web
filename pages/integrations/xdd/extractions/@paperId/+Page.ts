@@ -54,7 +54,7 @@ function ExtractionIndex() {
       const { entities = [], paragraph_text, model, model_run, source_text, version_id } = data;
 
       return h([
-        h(FlexRow, { justifyContent: "space-between" }, [
+        h(FlexRow, { justifyContent: "space-between", alignItems: "center" }, [
           h("a", { href: `../feedback/${d.source_text}` }, h('h2', "View feedback")),
           h('div.data', [
             h(DataField, {
