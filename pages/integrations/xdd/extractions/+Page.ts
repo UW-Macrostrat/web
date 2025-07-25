@@ -11,7 +11,7 @@ import {
 
 export function Page() {
   return h(ContentPage, [h(PageMain)]);
-}
+} 
 
 function PageMain() {
   return h("div", [
