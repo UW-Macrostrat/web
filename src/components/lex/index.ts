@@ -1079,7 +1079,7 @@ function Match({ data }) {
           "p.match-name", 
           {
             style: {
-              "background-color": match.color ?? "#f0f0f0",
+              "background-color": match.color ?? "black",
             }
           },
           name
