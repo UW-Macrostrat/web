@@ -69,7 +69,7 @@
     "@macrostrat/column-views": "^2.1.2",
     "@macrostrat/data-components": "^0.2.0",
     "@macrostrat/data-sheet": "^2.0.2",
-    "@macrostrat/feedback-components": "^1.1.4",
+    "@macrostrat/feedback-components": "^1.1.7",
     "@macrostrat/form-components": "^0.2.1",
     "@macrostrat/hyper": "^3.0.6",
     "@macrostrat/map-interface": "^1.5.1",

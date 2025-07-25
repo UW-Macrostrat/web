@@ -18,7 +18,7 @@ function PageMain() {
     h(PageHeader, { title: "Stratigraphic name extractions" }),
     h(PostgRESTInfiniteScrollView, {
       route: `${postgrestPrefix}/kg_publication_entities`,
-      id_key: "paper_id",
+      id_key: "id",
       limit: 10,
       order_key: "n_matches",
       ascending: false,
