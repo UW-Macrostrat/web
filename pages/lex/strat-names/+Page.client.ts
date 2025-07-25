@@ -16,7 +16,7 @@ export function Page() {
   return h(ContentPage, [
     h(StickyHeader, { className: "header" }, [
       h(PageBreadcrumbs, {
-        title: "Minerals",
+        title: "Stratigraphic Names",
       }),
       
     ]),
@@ -69,7 +69,7 @@ function StratItem({ data, input }) {
     LinkCard,
     {
       href: `/lex/${
-        isConcept ? "strat-concepts/" + concept_id : "strat-names/" + id
+        isConcept ? "strat-concept/" + concept_id : "strat-name/" + id
       }`,
       className: isConcept ? "strat-concept-card" : "strat-name-card",
     },
@@ -116,7 +116,7 @@ function ConceptBody({ data, input }) {
         h("li.strat-name", [
           h(
             Link,
-            { href: `/lex/strat-names/${id}` },
+            { href: `/lex/strat-name/${id}` },
             `${name} ${rank} (#${id})`
           ),
           h(StratTag, { isConcept: false }),

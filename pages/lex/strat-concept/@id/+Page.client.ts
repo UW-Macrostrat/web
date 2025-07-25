@@ -50,7 +50,7 @@ function ConceptBody({ resData }) {
       strats.map((strat) =>
         h(
           LinkCard,
-          { href: "/lex/strat-names/" + strat.id, className: "strat-name" },
+          { href: "/lex/strat-name/" + strat.id, className: "strat-name" },
           strat.name + " (" + strat.rank + ")"
         )
       )

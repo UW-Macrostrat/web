@@ -239,15 +239,15 @@ export const sitemap: Routes = {
           name: "Lithology attributes",
         },
         {
-          slug: "strat-names",
-          name: "Stratigraphic names",
+          slug: "strat-concept",
+          name: "Strat Concept",
           children: [
             {
               param: "@id",
               name(urlPart, ctx) {
                 return h(
                   "code",
-                  ctx.pageProps?.stratName?.strat_name ?? urlPart
+                  ctx.pageProps?.stratConcept?.strat_name ?? urlPart
                 );
               },
             },
@@ -264,6 +264,10 @@ export const sitemap: Routes = {
               },
             },
           ],
+        },
+        {
+          slug: "strat-name",
+          name: "Stratigraphic name",
         },
         {
           slug: "intervals",
