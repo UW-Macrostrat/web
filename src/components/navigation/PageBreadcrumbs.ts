@@ -227,8 +227,8 @@ export const sitemap: Routes = {
           name: "Lithology",
         },
         {
-          slug: "minerals",
-          name: "Minerals",
+          slug: "mineral",
+          name: "Mineral",
         },
         {
           slug: "structures",
