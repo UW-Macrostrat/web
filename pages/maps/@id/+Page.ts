@@ -529,7 +529,7 @@ function LegendEntry({ data }) {
         color: min_age_interval.color,
       },
       onClick: () => {
-        window.open(`/lex/intervals/${min_age_interval.int_id}`, '_self');
+        window.open(`/lex/interval/${min_age_interval.int_id}`, '_self');
       },
     });
   } else if (!min_age_interval && max_age_interval) {
@@ -539,7 +539,7 @@ function LegendEntry({ data }) {
         color: max_age_interval.color,
       },
       onClick: () => {
-        window.open(`/lex/intervals/${max_age_interval.int_id}`, '_self');
+        window.open(`/lex/interval/${max_age_interval.int_id}`, '_self');
       },
     });
   } else {
@@ -550,7 +550,7 @@ function LegendEntry({ data }) {
           color: min_age_interval.color,
         },
         onClick: () => {
-          window.open(`/lex/intervals/${min_age_interval.int_id}`, '_self');
+          window.open(`/lex/interval/${min_age_interval.int_id}`, '_self');
         },
       }),
       " - ",
@@ -560,7 +560,7 @@ function LegendEntry({ data }) {
           color: max_age_interval.color,
         },
         onClick: () => {
-          window.open(`/lex/intervals/${max_age_interval.int_id}`, '_self');
+          window.open(`/lex/interval/${max_age_interval.int_id}`, '_self');
         },
       }),
     ])

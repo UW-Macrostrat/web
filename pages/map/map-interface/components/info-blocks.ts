@@ -21,7 +21,7 @@ function IntervalChip(props) {
 
   return h('a.chip-link', 
     {
-      href: `/lex/intervals/${interval.int_id}`,
+      href: `/lex/interval/${interval.int_id}`,
     }, 
     h(
       "div.chip.age-chip",
