@@ -6,6 +6,7 @@ import { usePageContext } from "vike-react/usePageContext";
 import {
   ExtractionContext,
   enhanceData,
+  FeedbackComponent
 } from "@macrostrat/feedback-components";
 import {
   useEntityTypeIndex,
@@ -45,12 +46,22 @@ function ExtractionIndex() {
   return h([
     h("h1", paper.citation?.title ?? "Model extractions"),
     data.map((d) => {
+      const data = enhanceData(d, models, entityTypes)
+      console.log(data);
+
+      const { entities = [], paragraph_text, model, model_run, source_text } = data;
+
       return h([
-        h("a", { href: `../feedback/${d.source_text}` }, "Feedback"),
-        h(ExtractionContext, {
-          data: enhanceData(d, models, entityTypes),
+        h("a", { href: `../feedback/${d.source_text}` }, h('h2', "View feedback")),
+        h(FeedbackComponent, {
+          entities,
+          text: paragraph_text,
+          model,
           entityTypes,
-          matchComponent: MatchedEntityLink,
+          sourceTextID: source_text,
+          runID: model_run,
+          allowOverlap: true,
+          view: true,
         }),
       ]);
     }),
