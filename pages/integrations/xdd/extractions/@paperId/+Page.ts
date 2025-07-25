@@ -14,6 +14,8 @@ import {
   usePostgresQuery,
 } from "../data-service";
 import { MatchedEntityLink } from "../match";
+import { DataField } from "~/components/unit-details";
+import { FlexRow } from "@macrostrat/ui-components";
 
 export function Page() {
   return h(ContentPage, [h(PageBreadcrumbs), h(PageMain)]);
@@ -49,10 +51,27 @@ function ExtractionIndex() {
       const data = enhanceData(d, models, entityTypes)
       console.log(data);
 
-      const { entities = [], paragraph_text, model, model_run, source_text } = data;
+      const { entities = [], paragraph_text, model, model_run, source_text, version_id } = data;
 
       return h([
-        h("a", { href: `../feedback/${d.source_text}` }, h('h2', "View feedback")),
+        h(FlexRow, { justifyContent: "space-between" }, [
+          h("a", { href: `../feedback/${d.source_text}` }, h('h2', "View feedback")),
+          h('div.data', [
+            h(DataField, {
+              label: "Model run",
+              value: "#" + model_run,
+            }),
+            h(DataField, {
+              label: "Version",
+              value: "#" + version_id,
+            }),
+            h(DataField, {
+              label: "Date",
+              value: new Date(model.first_run).toLocaleDateString(),
+            }),
+          ]),
+        ]),
+
         h(FeedbackComponent, {
           entities,
           text: paragraph_text,
