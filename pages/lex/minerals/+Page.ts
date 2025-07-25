@@ -36,7 +36,7 @@ function MineralItem({ data }) {
   const { id, mineral } = data;
 
   return h(LinkCard, {
-    href: `/lex/minerals/${id}`,
+    href: `/lex/mineral/${id}`,
     className: "mineral-item",
     title: mineral,
   });

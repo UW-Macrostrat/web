@@ -3,7 +3,7 @@ import { Suspense, useCallback, useEffect, useRef } from "react";
 import { Spinner } from "@blueprintjs/core";
 import loadable from "@loadable/component";
 import { mapPagePrefix } from "@macrostrat-web/settings";
-import { MapAreaContainer, MapBottomControls } from "@macrostrat/map-interface";
+import { MapAreaContainer, InfoDrawer } from "@macrostrat/map-interface";
 import classNames from "classnames";
 import { useSelector } from "react-redux";
 import { Route, Routes } from "react-router-dom";
@@ -18,11 +18,11 @@ import Searchbar from "../components/navbar";
 import MapContainer from "./map-view";
 import { MenuPage } from "./menu";
 import { ErrorBoundary } from "@macrostrat/ui-components";
+import { useState } from "react";
 
 import h from "./main.module.styl";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
-const InfoDrawer = loadable(() => import("../components/info-drawer"));
 const Menu = loadable(() => import("./menu"));
 
 function MapView(props) {
@@ -46,6 +46,8 @@ function MapPage({
   const navMenuPage = useAppState((s) => s.menu.activePage);
 
   const ref = useRef<HTMLElement>(null);
+  const [map, setMap] = useState(null);
+  console.log("MapPage mounted", map);  
 
   const contextPanelOpen = useContextPanelOpen(baseRoute);
   const contextClass = useContextClass(baseRoute);
@@ -115,6 +117,8 @@ function InfoDrawerHolder() {
   // We could probably do this in the reducer...
   const infoDrawerOpen = useAppState((s) => s.core.infoDrawerOpen);
   const detailPanelTrans = useTransition(infoDrawerOpen, 800);
+  const position = useAppState((state) => state.core.infoMarkerPosition);
+  const zoom = useAppState((state) => state.core.mapPosition.target?.zoom);
 
   return h([
     // This is essentially a shim implementation of React Router
@@ -122,7 +126,8 @@ function InfoDrawerHolder() {
       h(Route, {
         path: mapPagePrefix + "/loc/:lng/:lat/*",
         element: h.if(detailPanelTrans.shouldMount)(InfoDrawer, {
-          className: "detail-panel",
+          position,
+          zoom,
         }),
       }),
     ]),

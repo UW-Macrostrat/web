@@ -39,7 +39,7 @@ export function Page() {
             types?.map((d) =>
               h(
                 LinkCard,
-                { href: `/lex/lith-atts/${d.lith_att_id}` },
+                { href: `/lex/lith-att/${d.lith_att_id}` },
                 UpperCase(d.name)
               )
             )

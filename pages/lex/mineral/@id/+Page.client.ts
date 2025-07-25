@@ -34,11 +34,11 @@ function MineralDetails({ resData }) {
 
   return h("div.mineral-details", [
     h.if(mineral_type)("p.mineral-type", `Type: ${mineral_type}`),
-    h("p.formula", `Formula: ${formula}`),
-    h("p.hardness", `Hardness: ${hardness_min} - ${hardness_max}`),
-    h("p.crystal-form", `Crystal Form: ${crystal_form}`),
-    h("p.color", `Color: ${mineral_color}`),
-    h("p.lustre", `Lustre: ${lustre}`),
+    h.if(formula)("p.formula", `Formula: ${formula}`),
+    h.if(hardness_min || hardness_max)("p.hardness", `Hardness: ${hardness_min} - ${hardness_max}`),
+    h.if(crystal_form)("p.crystal-form", `Crystal Form: ${crystal_form}`),
+    h.if(mineral_color)("p.color", `Color: ${mineral_color}`),
+    h.if(lustre)("p.lustre", `Lustre: ${lustre}`),
     url
       ? h("a.mineral-url", { href: url, target: "_blank" }, "More Info")
       : null,

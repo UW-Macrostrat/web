@@ -56,7 +56,7 @@ export function Page() {
           levels: [1, 5],
           ageRange: [age[0], age[1]],
           absoluteAgeScale: true,
-          onClick: (e, d) => window.open("/lex/intervals/" + d.int_id, "_self"),
+          onClick: (e, d) => window.open("/lex/interval/" + d.int_id, "_self"),
         })
       ),
     ]),
@@ -79,7 +79,7 @@ function TimescaleItem({ data }) {
     },
     h(
       LinkCard,
-      { className: "timescale-item", href: "/lex/timescales/" + timescale_id },
+      { className: "timescale-item", href: "/lex/timescale/" + timescale_id },
       [
         h("h1.timescale-name", titleCase(timescale)),
         h("h3", `${max_age} - ${min_age} Ma`),

@@ -44,7 +44,7 @@ export function Page() {
             types?.map((d) =>
               h(
                 LinkCard,
-                { href: `/lex/structures/${d.structure_id}` },
+                { href: `/lex/structure/${d.structure_id}` },
                 UpperCase(d.name)
               )
             )

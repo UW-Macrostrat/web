@@ -18,8 +18,8 @@ export function MapReference(props) {
     name = "",
   } = ref;
 
-  const year = ref_year.length ? " " + ref_year + ", " : "";
-  const source = ref_source.length ? ": " + ref_source : "";
+  const year = ref_year?.length ? " " + ref_year + ", " : "";
+  const source = ref_source?.length ? ": " + ref_source : "";
   const doiText = isbn_doi?.length ? ", " + isbn_doi : "";
 
   return h("p.reference.map-source-attr", [

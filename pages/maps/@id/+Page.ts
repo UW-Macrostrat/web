@@ -154,6 +154,16 @@ function buildOverlayStyle({
 }
 
 function ensureBoxInGeographicRange(bounds: LngLatBoundsLike) {
+  // for infinity
+  if (bounds[0] > 180) {
+    return [
+      -90,
+      -90,
+      90,
+      90
+    ]
+  }
+  
   if (bounds[1] < -90) bounds[1] = -90;
   if (bounds[3] > 90) bounds[3] = 90;
   return bounds;
@@ -322,6 +332,8 @@ export function Page() {
     h(BaseLayerSelector, { layer, setLayer }),
   ]);
 
+  console.log('bounds', bounds);
+
   return h(
     MapAreaContainer,
     {
@@ -390,6 +402,8 @@ function BaseLayerSelector({ layer, setLayer }) {
 }
 
 function MapLegendPanel(params) {
+  console.log("MapLegendPanel", params);
+
   return h(
     InfoDrawerContainer,
     h(
@@ -435,8 +449,9 @@ function MapLegendData({ source_id }) {
     source_id: 'eq.' + source_id,
   });
 
-
   if (legendData == null) return h(Spinner);
+
+  if (legendData.length === 0) return null;
 
   legendData.sort((a, b) => a.t_age - b.t_age);
 
@@ -514,7 +529,7 @@ function LegendEntry({ data }) {
         color: min_age_interval.color,
       },
       onClick: () => {
-        window.open(`/lex/intervals/${min_age_interval.int_id}`, '_self');
+        window.open(`/lex/interval/${min_age_interval.int_id}`, '_self');
       },
     });
   } else if (!min_age_interval && max_age_interval) {
@@ -524,7 +539,7 @@ function LegendEntry({ data }) {
         color: max_age_interval.color,
       },
       onClick: () => {
-        window.open(`/lex/intervals/${max_age_interval.int_id}`, '_self');
+        window.open(`/lex/interval/${max_age_interval.int_id}`, '_self');
       },
     });
   } else {
@@ -535,7 +550,7 @@ function LegendEntry({ data }) {
           color: min_age_interval.color,
         },
         onClick: () => {
-          window.open(`/lex/intervals/${min_age_interval.int_id}`, '_self');
+          window.open(`/lex/interval/${min_age_interval.int_id}`, '_self');
         },
       }),
       " - ",
@@ -545,7 +560,7 @@ function LegendEntry({ data }) {
           color: max_age_interval.color,
         },
         onClick: () => {
-          window.open(`/lex/intervals/${max_age_interval.int_id}`, '_self');
+          window.open(`/lex/interval/${max_age_interval.int_id}`, '_self');
         },
       }),
     ])
