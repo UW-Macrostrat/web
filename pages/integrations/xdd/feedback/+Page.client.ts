@@ -35,6 +35,11 @@ export function Page() {
     }),
   ]);
 
+  const extraParams = showNoFeedback ?
+    {
+      has_feedback: "is.false",
+    } : undefined;
+
   return h(ContentPage, { className: "main" }, [
     h(PageBreadcrumbs, {showLogo: true}),
     h("h1", "Source text"),
@@ -53,6 +58,7 @@ export function Page() {
       ],
       SearchBarComponent: SearchBar,
       MultiSelectComponent: MultiSelect,
+      extraParams
     }),
   ]);
 }
