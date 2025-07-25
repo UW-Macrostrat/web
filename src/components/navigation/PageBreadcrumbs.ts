@@ -231,6 +231,30 @@ export const sitemap: Routes = {
           name: "Mineral",
         },
         {
+          slug: "structure",
+          name: "Structure",
+        },
+        {
+          slug: "economic",
+          name: "Economic",
+        },
+        {
+          slug: "environment",
+          name: "Environment",
+        },
+        {
+          slug: "interval",
+          name: "Interval",
+        },
+        {
+          slug: "timescale",
+          name: "Timescale",
+        },
+        {
+          slug: "lith-att",
+          name: "Lithology attribute",
+        },
+        {
           slug: "structures",
           name: "Structures",
         },

@@ -106,7 +106,7 @@ async function startServer() {
   });
 
   app.get("/lex/lith-att", (req, res) => {
-    res.redirect(301, "/lex/lith-att");
+    res.redirect(301, "/lex/lith-atts");
   });
 
   app.get("/lex/environment", (req, res) => {
