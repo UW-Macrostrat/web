@@ -1039,7 +1039,7 @@ export function MatchesPanel({ fossilsData }) {
   ]);
 }
 
-export function Matches({ lith_id, lith_att_id }) {
+export function Matches({ lith_id, lith_att_id, strat_name_id, concept_id }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -1049,6 +1049,10 @@ export function Matches({ lith_id, lith_att_id }) {
       filter.lith_id = `eq.${lith_id}`;
     } else if (lith_att_id != null) {
       filter.lith_att_id = `eq.${lith_att_id}`;
+    } else if (strat_name_id != null) {
+      filter.strat_name_id = `eq.${strat_name_id}`;
+    } else if (concept_id != null) {
+      filter.concept_id = `eq.${concept_id}`;
     } else {
       setData(null);
       return; 
