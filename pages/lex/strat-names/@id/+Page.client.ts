@@ -10,6 +10,7 @@ import {
   Units,
   Fossils,
   Maps,
+  Matches
 } from "~/components/lex";
 import { StratNameHierarchy } from "~/components/lex/StratNameHierarchy";
 import { StratTag } from "~/components/general";
@@ -36,6 +37,9 @@ export function Page() {
     h(Units, { unitsData }),
     h(Fossils, { fossilsData }),
     h(Maps, { mapsData }),
+    h(Matches, {
+      strat_name_id: id,
+    }),
     h(StratNameHierarchy, { id }),
     h(ConceptInfo, { concept_id: resData?.concept_id, showHeader: true }),
   ];
