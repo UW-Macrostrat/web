@@ -1,3 +1,4 @@
+import { tileserverDomain } from "@macrostrat-web/settings";
 import { buildCrossSectionLayers } from "~/_utils/map-layers";
 
 /** Add extra types we use in this style... */
@@ -20,7 +21,7 @@ const overlaySources: { [k: string]: SourceExt } = {
   pbdb: {
     type: "vector",
     tiles: [
-      `http://localhost:8000/pbdb/fossils/{z}/{x}/{y}`,
+      tileserverDomain + `/pbdb/fossils/{z}/{x}/{y}`,
     ],
     promoteId: 'collection_no' 
   },
