@@ -17,7 +17,8 @@ import { MatchedEntityLink } from "../match";
 import { DataField } from "~/components/unit-details";
 import { FlexRow } from "@macrostrat/ui-components";
 import { MultiSelect } from "@blueprintjs/select"
-import { contextPanelIsInitiallyOpen } from "#/map/map-interface/app-state";
+import { MenuItem } from "@blueprintjs/core";
+import { useState } from "react";
 
 export function Page() {
   return h(ContentPage, [h(PageBreadcrumbs), h(PageMain)]);
@@ -30,6 +31,8 @@ function PageMain() {
 function ExtractionIndex() {
   const { routeParams } = usePageContext();
   const { paperId } = routeParams;
+
+  const [selectedFeedbackType, setSelectedFeedbackType] = useState();
 
   const models = useModelIndex();
   const entityTypes = useEntityTypeIndex();
@@ -49,14 +52,54 @@ function ExtractionIndex() {
     return h("div", "Loading...");
   }
 
-  console.log("feedback", feedback);
+  console.log('feedback', feedback);
+
+  // Helpers
+  const isItemSelected = (item) => selectedFeedbackType.includes(item);
+
+  const handleItemSelect = (item) => {
+    if (!isItemSelected(item)) {
+      setSelectedFeedbackType([...selectedFeedbackType, item]);
+    }
+  };
+
+  const handleTagRemove = (_tag, index) => {
+    const next = [...selectedFeedbackType];
+    next.splice(index, 1);
+    setSelectedFeedbackType(next);
+  };
+
+  const itemPredicate = (query, item) =>
+    item.type.toLowerCase().includes(query.toLowerCase());
+
+  const itemRenderer = (item, { handleClick, modifiers }) => {
+    if (!modifiers.matchesPredicate) return null;
+
+    return h(MenuItem, {
+      key: item.id,
+      text: item.type,
+      onClick: handleClick,
+      active: modifiers.active,
+      shouldDismissPopover: false,
+    });
+  };
 
   return h([
     h.if(feedback.length > 0)(
       'h3',
       "Extraction feedback"
     ),
-
+    h.if(feedback.length > 0)(MultiSelect, {
+      items: feedback,
+      itemRenderer,
+      itemPredicate,
+      selectedItems: selectedFeedbackType,
+      onItemSelect: handleItemSelect,
+      onRemoveTag: handleTagRemove,
+      tagRenderer: (item) => item.type,
+      popoverProps: { minimal: true },
+      fill: true,
+    }),
     h("h1", paper.citation?.title ?? "Model extractions"),
     data.map((d) => {
       const data = enhanceData(d, models, entityTypes)
