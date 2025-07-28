@@ -16,6 +16,8 @@ import {
 import { MatchedEntityLink } from "../match";
 import { DataField } from "~/components/unit-details";
 import { FlexRow } from "@macrostrat/ui-components";
+import { MultiSelect } from "@blueprintjs/select"
+import { contextPanelIsInitiallyOpen } from "#/map/map-interface/app-state";
 
 export function Page() {
   return h(ContentPage, [h(PageBreadcrumbs), h(PageMain)]);
@@ -41,11 +43,20 @@ function ExtractionIndex() {
 
   const data = usePostgresQuery("kg_context_entities", filters);
 
+  const feedback = usePostgresQuery("kg_extraction_feedback_type");
+
   if (data == null || models == null || paper == null || entityTypes == null) {
     return h("div", "Loading...");
   }
 
+  console.log("feedback", feedback);
+
   return h([
+    h.if(feedback.length > 0)(
+      'h3',
+      "Extraction feedback"
+    ),
+
     h("h1", paper.citation?.title ?? "Model extractions"),
     data.map((d) => {
       const data = enhanceData(d, models, entityTypes)
