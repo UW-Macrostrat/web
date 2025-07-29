@@ -50,7 +50,7 @@ export function SaveLocationForm({ position, count }) {
       category: formData.category,
     };
     console.log("Posting with this payload:", payload);
-    await fetch("https://dev2.macrostrat.org/api/pg/saved_locations", {
+    await fetch("https://dev.macrostrat.org/api/pg/saved_locations", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

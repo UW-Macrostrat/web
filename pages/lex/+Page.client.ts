@@ -123,7 +123,7 @@ function SearchContainer({ setShowBody }) {
     id_key: "id",
     filterable: true,
     ascending: true,
-    route: "https://dev2.macrostrat.org/api/pg/autocomplete",
+    route: "https://dev.macrostrat.org/api/pg/autocomplete",
     delay: 100,
     searchColumns: [{ value: "name", label: "Name" }],
     group_key: "type",
