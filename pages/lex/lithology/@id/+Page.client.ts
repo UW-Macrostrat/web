@@ -9,8 +9,11 @@ import {
   Units,
   Fossils,
   Maps,
+  Matches
 } from "~/components/lex";
 import { usePageContext } from "vike-react/usePageContext";
+import { fetchPGData } from "~/_utils";
+import { useState, useEffect } from "react";
 
 export function Page() {
   const { resData, colData, taxaData, refs, unitsData, fossilsData, mapsData } =
@@ -31,6 +34,9 @@ export function Page() {
     h(Units, { unitsData }),
     h(Fossils, { fossilsData }),
     h(Maps, { mapsData }),
+    h(Matches, {
+      lith_id: id,
+    })
   ];
 
   return LexItemPage({ children, id, refs, resData, siftLink: "lithology" });
