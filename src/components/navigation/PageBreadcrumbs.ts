@@ -16,6 +16,8 @@ export function PageBreadcrumbs({ showLogo = true, title }) {
     return items;
   }, [ctx.urlPathname, title]);
 
+  console.log(items)
+
   return h(PageBreadcrumbsInternal, {
     showLogo,
     items,
@@ -40,6 +42,19 @@ export function buildBreadcrumbs(
   routes: Routes,
   ctx: PageContext
 ): Item[] {
+  const pathRedirects = {
+    "/lex/strat-concept": "/lex/strat-names",
+    "/lex/strat-name": "/lex/strat-names",
+    "/lex/interval": "/lex/intervals",
+    "/lex/timescale": "/lex/timescales",
+    "/lex/lithology": "/lex/lithologies",
+    "/lex/lith-att": "/lex/lith-atts",
+    "/lex/environment": "/lex/environments",
+    "/lex/economic": "/lex/economics",
+    "/lex/mineral": "/lex/minerals",
+    "/lex/structure": "/lex/structures",
+  }
+
   const parts = currentPath.split("/");
   const items: Item[] = [];
   let children = [routes];
@@ -77,9 +92,13 @@ export function buildBreadcrumbs(
 
     let disabled = child?.disabled ?? false;
 
+    if (pathRedirects[route]) {
+      route = pathRedirects[route];
+    }
+
     items.push({
       text,
-      href: route == currentPath ? undefined : route,
+      href: route == currentPath || route.match(/-?\d+/) ? undefined : route,
       disabled,
     });
     children = child?.children;

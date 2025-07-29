@@ -85,46 +85,6 @@ async function startServer() {
 
   app.use(compression());
 
-  app.get("/lex/strat-concept", (req, res) => {
-    res.redirect(301, "/lex/strat-names");
-  });
-
-  app.get("/lex/strat-name", (req, res) => {
-    res.redirect(301, "/lex/strat-names");
-  });
-  
-  app.get("/lex/interval", (req, res) => {
-    res.redirect(301, "/lex/intervals");
-  });
-
-  app.get("/lex/timescale", (req, res) => {
-    res.redirect(301, "/lex/timescales");
-  });
-  
-  app.get("/lex/lithology", (req, res) => {
-    res.redirect(301, "/lex/lithologies");
-  });
-
-  app.get("/lex/lith-att", (req, res) => {
-    res.redirect(301, "/lex/lith-atts");
-  });
-
-  app.get("/lex/environment", (req, res) => {
-    res.redirect(301, "/lex/environments");
-  });
-
-  app.get("/lex/economic", (req, res) => {
-    res.redirect(301, "/lex/economics");
-  });
-  
-  app.get("/lex/mineral", (req, res) => {
-    res.redirect(301, "/lex/minerals");
-  });
-
-  app.get("/lex/structure", (req, res) => {
-    res.redirect(301, "/lex/structures");
-  });
-
   // Assets and static files
   // Serve FGDC assets
   const fgdcPatterns = join(
