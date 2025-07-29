@@ -1,6 +1,6 @@
 import { useData } from "vike-react/useData";
 import h from "./main.module.sass";
-import { LexItemPage, ConceptInfo, Charts, Fossils } from "~/components/lex";
+import { LexItemPage, ConceptInfo, Matches, Fossils } from "~/components/lex";
 import { StratTag } from "~/components/general";
 import { LinkCard } from "~/components/cards";
 import { usePageContext } from "vike-react/usePageContext";
@@ -16,6 +16,9 @@ export function Page() {
     h(ConceptInfo, { concept_id: id, showHeader: false }),
     h(ConceptBody, { resData }),
     h(Fossils, { fossilsData }),
+    h(Matches, {
+      concept_id: id,
+    }),
   ];
 
   return LexItemPage({

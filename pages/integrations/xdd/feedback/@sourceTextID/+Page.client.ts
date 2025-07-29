@@ -14,41 +14,69 @@ import {
   useModelIndex,
   usePostgresQuery,
 } from "../../extractions/data-service";
-import { NonIdealState, OverlaysProvider, Spinner } from "@blueprintjs/core";
+import { NonIdealState, OverlaysProvider, Spinner, Button } from "@blueprintjs/core";
 import {
   ErrorBoundary,
   FlexRow,
   Pagination,
   Spacer,
+  useAPIResult,
 } from "@macrostrat/ui-components";
 import { useState } from "react";
-import { AuthStatus } from "@macrostrat/form-components";
+import { AuthStatus, useAuth } from "@macrostrat/form-components";
 import { MatchedEntityLink } from "#/integrations/xdd/extractions/match";
 import { knowledgeGraphAPIURL } from "@macrostrat-web/settings";
 import { Toaster } from "@blueprintjs/core";
+import { fetchPGData } from "~/_utils";
 
 /**
  * Get a single text window for feedback purposes
  */
 
 export function Page() {
+  const [paper_id, setPaperID] = useState<number | null>(null);
+  const nextID = getNextID();
+  console.log("Next ID:", nextID);
+
   return h(
     OverlaysProvider,
     h(ContentPage, [
       h("div.feedback-main", [
         h(PageBreadcrumbs),
         h(FlexRow, { alignItems: "center" }, [
-          h("h1", "Feedback"),
+          h(FlexRow, [
+            h("h1", "Feedback"),
+            h.if(nextID)(Button, { 
+              className: "next btn",
+              onClick: () => {
+                window.open(
+                  `/integrations/xdd/feedback/${nextID}`,
+                  "_self"
+                ); 
+              } 
+            }, "Next"),
+          ]),
           h(Spacer),
-          h(AuthStatus),
+          h('div', [
+            h(AuthStatus),
+            h.if(paper_id)(Button, { 
+              className: "paper btn",
+              onClick: () => {
+                window.open(
+                  `/integrations/xdd/extractions/${paper_id}`,
+                  "_self"
+                ); 
+              } 
+            }, "View papers extraction"),
+          ])
         ]),
-        h(ExtractionIndex),
+        h(ExtractionIndex, { setPaperID }),
       ]),
     ])
   );
 }
 
-function ExtractionIndex() {
+function ExtractionIndex({setPaperID}) {
   const { routeParams } = usePageContext();
   const { sourceTextID } = routeParams;
 
@@ -65,6 +93,8 @@ function ExtractionIndex() {
   }
 
   console.log(data);
+
+  setPaperID(data[0]?.paper_id || null);
 
   return h(
     ErrorBoundary,
@@ -106,6 +136,7 @@ const AppToaster = Toaster.create();
 function FeedbackInterface({ data, models, entityTypes }) {
   const window = enhanceData(data, models, entityTypes);
   const { entities = [], paragraph_text, model } = window;
+  const { user } = useAuth();
 
   console.log(window);
   console.log(Array.from(entityTypes.values()));
@@ -123,6 +154,7 @@ function FeedbackInterface({ data, models, entityTypes }) {
       concept: "/lex/strat-concepts",
     },
     lineHeight: 3,
+    view: user === null,
     onSave: wrapWithToaster(
       async (tree) => {
         const data = prepareDataForServer(tree, window.source_text, [
@@ -233,3 +265,21 @@ function normalizeMatch(match: any): MatchInfo | null {
 // FeedbackDevTool.title = "Feedback";
 //
 // export const devTools = [FeedbackDevTool];
+
+function getNextID() {
+  const currentID = usePageContext().urlPathname.split("/").pop();
+  const [nextID, setNextID] = useState<number | null>(null);
+
+  const res = fetchPGData(
+    "/kg_source_text",
+    {
+      order: "id",
+      limit: 1,
+      id: "gt." + currentID
+    }
+  ).then((data) => {
+    setNextID(data?.[0]?.id || 18131); // Default to 18131 if no next ID found
+  });
+
+  return nextID;
+}
