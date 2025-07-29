@@ -35,11 +35,16 @@ export function Page() {
     }),
   ]);
 
+  const extraParams = showNoFeedback ?
+    {
+      has_feedback: "is.false",
+    } : undefined;
+
   return h(ContentPage, { className: "main" }, [
     h(PageBreadcrumbs, {showLogo: true}),
     h("h1", "Source text"),
     h(PostgRESTInfiniteScrollView, {
-      route: postgrestPrefix + '/kg_source_text',
+      route: postgrestPrefix + '/kg_source_text_casted',
       id_key: 'id',
       limit: 20,
       ascending: false,
@@ -48,14 +53,18 @@ export function Page() {
       toggles,
       searchColumns: [
         { label: "Paragraph Text", value: 'paragraph_text'},
+        { label: "Date", value: 'created' },
+        { label: "Model", value: 'model_name' },
       ],
       SearchBarComponent: SearchBar,
       MultiSelectComponent: MultiSelect,
+      extraParams
     }),
   ]);
 }
 
 function SourceTextItemDetailed({ data }) {
+  console.log("SourceTextItemDetailed", data);
   const { id, paragraph_text, last_update, n_runs, n_entities, n_matches, n_strat_names } = data;
 
   return h(LinkCard, {
