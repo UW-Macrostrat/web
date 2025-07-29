@@ -15,7 +15,7 @@ import {
 } from "../data-service";
 import { MatchedEntityLink } from "../match";
 import { DataField } from "~/components/unit-details";
-import { FlexRow } from "@macrostrat/ui-components";
+import { FlexRow, SaveButton } from "@macrostrat/ui-components";
 import { MultiSelect } from "@blueprintjs/select"
 import { MenuItem } from "@blueprintjs/core";
 import { useState } from "react";
@@ -32,7 +32,7 @@ function ExtractionIndex() {
   const { routeParams } = usePageContext();
   const { paperId } = routeParams;
 
-  const [selectedFeedbackType, setSelectedFeedbackType] = useState();
+  const [selectedFeedbackType, setSelectedFeedbackType] = useState([]);
 
   const models = useModelIndex();
   const entityTypes = useEntityTypeIndex();
@@ -48,11 +48,9 @@ function ExtractionIndex() {
 
   const feedback = usePostgresQuery("kg_extraction_feedback_type");
 
-  if (data == null || models == null || paper == null || entityTypes == null) {
+  if (data == null || models == null || paper == null || entityTypes == null || feedback == null) {
     return h("div", "Loading...");
   }
-
-  console.log('feedback', feedback);
 
   // Helpers
   const isItemSelected = (item) => selectedFeedbackType.includes(item);
@@ -63,11 +61,11 @@ function ExtractionIndex() {
     }
   };
 
-  const handleTagRemove = (_tag, index) => {
-    const next = [...selectedFeedbackType];
-    next.splice(index, 1);
+  const handleItemDelete = (itemToDelete) => {
+    const next = selectedFeedbackType.filter((item) => item.id !== itemToDelete.id);
     setSelectedFeedbackType(next);
   };
+
 
   const itemPredicate = (query, item) =>
     item.type.toLowerCase().includes(query.toLowerCase());
@@ -85,25 +83,27 @@ function ExtractionIndex() {
   };
 
   return h([
-    h.if(feedback.length > 0)(
+    h(
       'h3',
       "Extraction feedback"
     ),
-    h.if(feedback.length > 0)(MultiSelect, {
-      items: feedback,
-      itemRenderer,
-      itemPredicate,
-      selectedItems: selectedFeedbackType,
-      onItemSelect: handleItemSelect,
-      onRemoveTag: handleTagRemove,
-      tagRenderer: (item) => item.type,
-      popoverProps: { minimal: true },
-      fill: true,
-    }),
+    h(FlexRow, { justifyContent: "space-between", alignItems: "center" }, [
+      h(MultiSelect, {
+        items: feedback.filter((f) => !isItemSelected(f)),
+        itemRenderer,
+        itemPredicate,
+        selectedItems: selectedFeedbackType,
+        onItemSelect: handleItemSelect,
+        onRemove: handleItemDelete,
+        tagRenderer: (item) => item.type,
+        popoverProps: { minimal: true },
+        fill: true,
+      }),
+      h(SaveButton)
+    ]),
     h("h1", paper.citation?.title ?? "Model extractions"),
     data.map((d) => {
       const data = enhanceData(d, models, entityTypes)
-      console.log(data);
 
       const { entities = [], paragraph_text, model, model_run, source_text, version_id } = data;
 
