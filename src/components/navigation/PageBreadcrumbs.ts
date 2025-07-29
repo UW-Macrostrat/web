@@ -40,6 +40,19 @@ export function buildBreadcrumbs(
   routes: Routes,
   ctx: PageContext
 ): Item[] {
+  const pathRedirects = {
+    "/lex/strat-concept": "/lex/strat-names",
+    "/lex/strat-name": "/lex/strat-names",
+    "/lex/interval": "/lex/intervals",
+    "/lex/timescale": "/lex/timescales",
+    "/lex/lithology": "/lex/lithologies",
+    "/lex/lith-att": "/lex/lith-atts",
+    "/lex/environment": "/lex/environments",
+    "/lex/economic": "/lex/economics",
+    "/lex/mineral": "/lex/minerals",
+    "/lex/structure": "/lex/structures",
+  }
+
   const parts = currentPath.split("/");
   const items: Item[] = [];
   let children = [routes];
@@ -77,9 +90,13 @@ export function buildBreadcrumbs(
 
     let disabled = child?.disabled ?? false;
 
+    if (pathRedirects[route]) {
+      route = pathRedirects[route];
+    }
+
     items.push({
       text,
-      href: route == currentPath ? undefined : route,
+      href: route == currentPath || route.match(/-?\d+/) ? undefined : route,
       disabled,
     });
     children = child?.children;
@@ -227,8 +244,32 @@ export const sitemap: Routes = {
           name: "Lithology",
         },
         {
-          slug: "minerals",
-          name: "Minerals",
+          slug: "mineral",
+          name: "Mineral",
+        },
+        {
+          slug: "structure",
+          name: "Structure",
+        },
+        {
+          slug: "economic",
+          name: "Economic",
+        },
+        {
+          slug: "environment",
+          name: "Environment",
+        },
+        {
+          slug: "interval",
+          name: "Interval",
+        },
+        {
+          slug: "timescale",
+          name: "Timescale",
+        },
+        {
+          slug: "lith-att",
+          name: "Lithology attribute",
         },
         {
           slug: "structures",
@@ -239,23 +280,23 @@ export const sitemap: Routes = {
           name: "Lithology attributes",
         },
         {
-          slug: "strat-names",
-          name: "Stratigraphic names",
+          slug: "strat-concept",
+          name: "Strat Concept",
           children: [
             {
               param: "@id",
               name(urlPart, ctx) {
                 return h(
                   "code",
-                  ctx.pageProps?.stratName?.strat_name ?? urlPart
+                  ctx.pageProps?.stratConcept?.strat_name ?? urlPart
                 );
               },
             },
           ],
         },
         {
-          slug: "strat-name-concepts",
-          name: "Strat Name Concepts",
+          slug: "strat-concepts",
+          name: "Strat Concepts",
           children: [
             {
               param: "@id",
@@ -264,6 +305,10 @@ export const sitemap: Routes = {
               },
             },
           ],
+        },
+        {
+          slug: "strat-name",
+          name: "Stratigraphic name",
         },
         {
           slug: "intervals",
