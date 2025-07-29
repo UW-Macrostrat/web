@@ -16,8 +16,6 @@ export function PageBreadcrumbs({ showLogo = true, title }) {
     return items;
   }, [ctx.urlPathname, title]);
 
-  console.log(items)
-
   return h(PageBreadcrumbsInternal, {
     showLogo,
     items,

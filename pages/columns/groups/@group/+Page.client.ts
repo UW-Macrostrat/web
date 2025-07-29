@@ -10,9 +10,7 @@ import {
 
 export function Page() {
   const { resData, colData, taxaData, refs } = useData();
-
-  console.log("Lexicon Page Data", resData, colData, taxaData, refs);
-
+  
   const id = resData.col_group_id;
   const features = colData?.features || [];
   const timescales = resData?.timescales || [];
