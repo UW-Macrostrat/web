@@ -1,34 +1,36 @@
-import { SETTINGS } from "@macrostrat-web/settings";
-import {buildInspectorStyle } from "@macrostrat/map-interface";
-import { buildMacrostratStyle } from "@macrostrat/map-styles";
-import { mergeStyles } from "@macrostrat/mapbox-utils";
-import { useDarkMode } from "@macrostrat/ui-components";
-import mapboxgl from "mapbox-gl";
-import { useEffect, useState } from "react";
-import h from "@macrostrat/hyper";
-import "@macrostrat/style-system";
-import { MapPosition } from "@macrostrat/mapbox-utils";
+import h from "./main.module.sass";
+import { useAPIResult } from "@macrostrat/ui-components";
 import {
   MapAreaContainer,
   MapView,
+  buildInspectorStyle
 } from "@macrostrat/map-interface";
-import { mapboxAccessToken, tileserverDomain } from "@macrostrat-web/settings";
-import { FullscreenPage } from "~/layouts";
+import { mapboxAccessToken, matomoToken, matomoApiURL, tileserverDomain } from "@macrostrat-web/settings";
+import { Footer } from "~/components/general";
+import { Divider, Spinner, Tabs, Tab } from "@blueprintjs/core";
+import { useEffect, useState } from "react";
+import { mergeStyles } from "@macrostrat/mapbox-utils";
+import { useDarkMode } from "@macrostrat/ui-components";
+
 
 export function Page() {
-  return h(FullscreenPage,
-    h(FossilMap, { mapboxToken: SETTINGS.mapboxAccessToken })
-  )
+    return h('div.main', [
+        h('div.heatmap-page', [
+            h(PageHeader),
+            h(HeatMap)
+        ]),
+        h(Footer)
+    ]);
 }
 
-mapboxgl.accessToken = SETTINGS.mapboxAccessToken;
-
-const type = 
-  {
-    id: "Sample",
-    name: "Sample",
-    color: "purple",
-  };
+function PageHeader() {
+    return h('div.page-header', [
+        h('h1', 'Heatmap'),
+        h(Divider),
+        h('p', 'This is a heatmap of all the locations where Macrostrat has been accessed from.'),
+        h('p', 'The blue markers indicate today\'s accesses, while the grey markers indicate accesses from other days.'),
+    ]);
+}
 
 function todayStyle() {
   return {
@@ -58,7 +60,7 @@ function allStyle() {
     sources: {
       all: {
         type: "vector",
-        tiles: [ tileserverDomain + "/usage-stats/macrostrat/{z}/{x}/{y}" ],
+        tiles: [ tileserverDomain + "/usage-stats/macrostrat/{z}/{x}/{y}"],
       }
     },
     layers: [
@@ -77,7 +79,7 @@ function allStyle() {
 }
 
 
-function FossilMap({
+function HeatMap({
   mapboxToken,
 }: {
   headerElement?: React.ReactElement;
@@ -86,10 +88,10 @@ function FossilMap({
   mapboxToken?: string;
 }) {
 
-  const style = useMapStyle(type, mapboxToken);
+  const style = useMapStyle();
   if(style == null) return null;
 
-  const mapPosition: MapPosition = {
+  const mapPosition = {
           camera: {
             lat: 39, 
             lng: -98, 
@@ -103,6 +105,9 @@ function FossilMap({
           // The Map Area Container
           h(
             MapAreaContainer,
+            {
+                className: 'map-area-container',
+            },
             [
               h(MapView, { style, mapboxToken: mapboxAccessToken, mapPosition }),
             ]
@@ -111,7 +116,7 @@ function FossilMap({
       );
 }
 
-function useMapStyle(type, mapboxToken) {
+function useMapStyle() {
   const dark = useDarkMode();
   const isEnabled = dark?.isEnabled;
 
@@ -120,12 +125,12 @@ function useMapStyle(type, mapboxToken) {
     : "mapbox://styles/mapbox/light-v10";
 
   const [actualStyle, setActualStyle] = useState(null);
-    const overlayStyle = mergeStyles(allStyle(), todayStyle()); // OVERLAY
+    const overlayStyle = mergeStyles(allStyle(), todayStyle());
 
   // Auto select sample type
   useEffect(() => {
       buildInspectorStyle(baseStyle, overlayStyle, {
-        mapboxToken,
+        mapboxToken: mapboxAccessToken,
         inDarkMode: isEnabled,
       }).then((s) => {
         setActualStyle(s);
