@@ -12,9 +12,8 @@ import {
   MapAreaContainer,
   MapView,
 } from "@macrostrat/map-interface";
-import { mapboxAccessToken } from "@macrostrat-web/settings";
+import { mapboxAccessToken, tileserverDomain } from "@macrostrat-web/settings";
 import { FullscreenPage } from "~/layouts";
-
 
 export function Page() {
   return h(FullscreenPage,
@@ -36,7 +35,7 @@ function todayStyle() {
     sources: {
       today: {
         type: "vector",
-        tiles: ["http://localhost:8000/usage-stats/macrostrat/{z}/{x}/{y}?today=true"],
+        tiles: [ tileserverDomain + "/usage-stats/macrostrat/{z}/{x}/{y}?today=true" ],
       }
     },
     layers: [
@@ -59,7 +58,7 @@ function allStyle() {
     sources: {
       all: {
         type: "vector",
-        tiles: ["http://localhost:8000/usage-stats/macrostrat/{z}/{x}/{y}"],
+        tiles: [ tileserverDomain + "/usage-stats/macrostrat/{z}/{x}/{y}" ],
       }
     },
     layers: [
