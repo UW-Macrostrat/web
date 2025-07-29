@@ -117,6 +117,21 @@ function formatNumber(num) {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
+const groups = [
+  { value: "econs", label: "Economics", href: '/lex/economic' },
+  { value: "maps", label: "Maps", href: '/maps' },
+  { value: "environments", label: "Environments", href: '/lex/environment' },
+  { value: "groups", label: "Column groups", href: '/columns/groups' },
+  { value: "columns", label: "Columns", href: '/columns' },
+  { value: "intervals", label: "Intervals", href: '/lex/interval' },
+  { value: "lithologies", label: "Lithologies", href: '/lex/lithology' },
+  { value: "lithology_attributes", label: "Lithology attributes", href: '/lex/lith-att' },
+  { value: "projects", label: "Projects", href: '/projects' },
+  { value: "strat_name_concepts", label: "Strat name concepts", href: '/lex/strat-concept' },
+  { value: "structures", label: "Structures", href: '/lex/structure' },
+  { value: "minerals", label: "Minerals", href: '/lex/mineral' },
+]
+
 function SearchContainer({ setShowBody }) {
   return h(PostgRESTInfiniteScrollView, {
     limit: 20,
@@ -127,20 +142,7 @@ function SearchContainer({ setShowBody }) {
     delay: 100,
     searchColumns: [{ value: "name", label: "Name" }],
     group_key: "type",
-    groups: [
-      { value: "econs", label: "Economics" },
-      { value: "maps", label: "Maps" },
-      { value: "environments", label: "Environments" },
-      { value: "groups", label: "Column groups" },
-      { value: "columns", label: "Columns" },
-      { value: "intervals", label: "Intervals" },
-      { value: "lithologies", label: "Lithologies" },
-      { value: "lithology_attributes", label: "Lithology attributes" },
-      { value: "projects", label: "Projects" },
-      { value: "strat_name_concepts", label: "Strat name concepts" },
-      { value: "structures", label: "Structures" },
-      { value: "minerals", label: "Minerals" },
-    ],
+    groups,
     itemComponent: LexCard,
     SearchBarComponent: SearchBar,
     GroupingComponent: ExpansionPanel,
@@ -150,27 +152,7 @@ function SearchContainer({ setShowBody }) {
 
 function LexCard({data}) {
   const type = data.type || "other";
-  const href = type === "column" ? 
-    `/columns/${data.id}` :
-    type === "project" ?
-    `/lex/projects/${data.id}` :
-    type === "map" ?
-    `/lex/maps/${data.id}` :
-    type === "environment" ?
-    `/lex/environments/${data.id}` :
-    type === "interval" ?
-    `/lex/intervals/${data.id}` :
-    type === "lithologies" ?
-    `/lex/lithology/${data.id}` :
-    type === "mineral" ?
-    `/lex/minerals/${data.id}` :
-    type === 'strat_name_concepts' ?
-    `/lex/strat-concepts/${data.id}` :
-    type === "lithology_attributes" ?
-    `/lex/lith-atts/${data.id}` :
-    type === "structure" ?
-    `/lex/structures/${data.id}` :
-    `/lex/${type}/${data.id}`;
+  const href = groups.find(group => group.value === type)?.href + "/" + data.id;
 
   return h('div', h('a', { href }, data.name));
 }
