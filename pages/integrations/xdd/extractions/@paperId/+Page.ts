@@ -13,7 +13,7 @@ import {
   useModelIndex,
   usePostgresQuery,
 } from "../data-service";
-import { MatchedEntityLink } from "../match";
+import { AuthStatus } from "@macrostrat/form-components";
 import { DataField } from "~/components/unit-details";
 import { FlexRow, SaveButton } from "@macrostrat/ui-components";
 import { MultiSelect } from "@blueprintjs/select"
@@ -83,10 +83,13 @@ function ExtractionIndex() {
   };
 
   return h([
-    h(
-      'h3',
-      "Extraction feedback"
-    ),
+    h(FlexRow, { justifyContent: "space-between", alignItems: "center" }, [
+      h(
+        'h3',
+        "Extraction feedback"
+      ),
+      h(AuthStatus)
+    ]),
     h(FlexRow, { justifyContent: "space-between", alignItems: "center" }, [
       h(MultiSelect, {
         items: feedback.filter((f) => !isItemSelected(f)),
