@@ -1480,16 +1480,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blueprintjs/colors@npm:^5.1.1, @blueprintjs/colors@npm:^5.1.7":
-  version: 5.1.7
-  resolution: "@blueprintjs/colors@npm:5.1.7"
-  dependencies:
-    tslib: "npm:~2.6.2"
-  checksum: 10/dd5aa55cd78b5b88164b6e7936a2760cf10ac38a361b9e1e825592dfa4f43deaf7c9ab2d68be57cd7052587751d1a330b0da6833313384456a3cf62c3040594d
-  languageName: node
-  linkType: hard
-
-"@blueprintjs/colors@npm:^5.1.8":
+"@blueprintjs/colors@npm:^5.1.1, @blueprintjs/colors@npm:^5.1.8":
   version: 5.1.8
   resolution: "@blueprintjs/colors@npm:5.1.8"
   dependencies:
@@ -1527,35 +1518,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blueprintjs/core@npm:^5.0.0, @blueprintjs/core@npm:^5.10.2, @blueprintjs/core@npm:^5.10.3, @blueprintjs/core@npm:^5.10.5, @blueprintjs/core@npm:^5.14.0, @blueprintjs/core@npm:^5.16.6":
-  version: 5.16.6
-  resolution: "@blueprintjs/core@npm:5.16.6"
-  dependencies:
-    "@blueprintjs/colors": "npm:^5.1.7"
-    "@blueprintjs/icons": "npm:^5.18.1"
-    "@popperjs/core": "npm:^2.11.8"
-    classnames: "npm:^2.3.1"
-    normalize.css: "npm:^8.0.1"
-    react-popper: "npm:^2.3.0"
-    react-transition-group: "npm:^4.4.5"
-    react-uid: "npm:^2.3.3"
-    tslib: "npm:~2.6.2"
-    use-sync-external-store: "npm:^1.2.0"
-  peerDependencies:
-    "@types/react": ^16.14.41 || 17 || 18
-    react: ^16.8 || 17 || 18
-    react-dom: ^16.8 || 17 || 18
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-  bin:
-    upgrade-blueprint-2.0.0-rename: scripts/upgrade-blueprint-2.0.0-rename.sh
-    upgrade-blueprint-3.0.0-rename: scripts/upgrade-blueprint-3.0.0-rename.sh
-  checksum: 10/89558e4e97bd51fc4e6f1bb1fa837a4fbd20e2bc5de502922ffc20d390097c381e2d44159a2af2d7f29994fa88043a413804aa461f9cc2f943fe7d32a44e88ad
-  languageName: node
-  linkType: hard
-
-"@blueprintjs/core@npm:^5.19.1":
+"@blueprintjs/core@npm:^5.0.0, @blueprintjs/core@npm:^5.10.2, @blueprintjs/core@npm:^5.10.3, @blueprintjs/core@npm:^5.10.5, @blueprintjs/core@npm:^5.14.0, @blueprintjs/core@npm:^5.16.6, @blueprintjs/core@npm:^5.19.1":
   version: 5.19.1
   resolution: "@blueprintjs/core@npm:5.19.1"
   dependencies:
@@ -1640,25 +1603,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blueprintjs/icons@npm:^5.10.0, @blueprintjs/icons@npm:^5.14.0, @blueprintjs/icons@npm:^5.18.1, @blueprintjs/icons@npm:^5.9.0":
-  version: 5.18.1
-  resolution: "@blueprintjs/icons@npm:5.18.1"
-  dependencies:
-    change-case: "npm:^4.1.2"
-    classnames: "npm:^2.3.1"
-    tslib: "npm:~2.6.2"
-  peerDependencies:
-    "@types/react": ^16.14.41 || 17 || 18
-    react: ^16.8 || 17 || 18
-    react-dom: ^16.8 || 17 || 18
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-  checksum: 10/42fd37bf45748a747293e363b5d77088b606af24478fc5c7f9fc8f980e79bac7d959283e2b1f955c8381fcd1484455cc42f057597b0823ad91c58902b92a3a94
-  languageName: node
-  linkType: hard
-
-"@blueprintjs/icons@npm:^5.23.0":
+"@blueprintjs/icons@npm:^5.10.0, @blueprintjs/icons@npm:^5.14.0, @blueprintjs/icons@npm:^5.23.0, @blueprintjs/icons@npm:^5.9.0":
   version: 5.23.0
   resolution: "@blueprintjs/icons@npm:5.23.0"
   dependencies:
@@ -1698,7 +1643,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blueprintjs/select@npm:^5.1.4":
+"@blueprintjs/select@npm:^5.1.4, @blueprintjs/select@npm:^5.2.1, @blueprintjs/select@npm:^5.3.1, @blueprintjs/select@npm:^5.3.10":
   version: 5.3.21
   resolution: "@blueprintjs/select@npm:5.3.21"
   dependencies:
@@ -1714,25 +1659,6 @@ __metadata:
     "@types/react":
       optional: true
   checksum: 10/a68b18e1edef9b15bc4428c3693c94ed8187bc5d6b6042b24e83fadd225bb8be0e3bb7e965c528d0196cd769d650d1efaf211abffcb422fe30499424f3314744
-  languageName: node
-  linkType: hard
-
-"@blueprintjs/select@npm:^5.2.1, @blueprintjs/select@npm:^5.3.1, @blueprintjs/select@npm:^5.3.10":
-  version: 5.3.11
-  resolution: "@blueprintjs/select@npm:5.3.11"
-  dependencies:
-    "@blueprintjs/core": "npm:^5.16.6"
-    "@blueprintjs/icons": "npm:^5.18.1"
-    classnames: "npm:^2.3.1"
-    tslib: "npm:~2.6.2"
-  peerDependencies:
-    "@types/react": ^16.14.41 || 17 || 18
-    react: ^16.8 || 17 || 18
-    react-dom: ^16.8 || 17 || 18
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-  checksum: 10/8baf28292e8c9a42994c9bb0c129e06d7287b17adaa308ef9628529716524c2314dd2753965cd2137af2e4f8f16781c491ddc41645d63519415db3aa81c585be
   languageName: node
   linkType: hard
 
@@ -1807,33 +1733,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cesium/engine@npm:^16.0.0":
-  version: 16.0.0
-  resolution: "@cesium/engine@npm:16.0.0"
-  dependencies:
-    "@tweenjs/tween.js": "npm:^25.0.0"
-    "@zip.js/zip.js": "npm:^2.7.34"
-    autolinker: "npm:^4.0.0"
-    bitmap-sdf: "npm:^1.0.3"
-    dompurify: "npm:^3.0.2"
-    draco3d: "npm:^1.5.1"
-    earcut: "npm:^3.0.0"
-    grapheme-splitter: "npm:^1.0.4"
-    jsep: "npm:^1.3.8"
-    kdbush: "npm:^4.0.1"
-    ktx-parse: "npm:^1.0.0"
-    lerc: "npm:^2.0.0"
-    mersenne-twister: "npm:^1.1.0"
-    meshoptimizer: "npm:^0.23.0"
-    pako: "npm:^2.0.4"
-    protobufjs: "npm:^7.1.0"
-    rbush: "npm:3.0.1"
-    topojson-client: "npm:^3.1.0"
-    urijs: "npm:^1.19.7"
-  checksum: 10/3d6de5a6a41355035c1a1688a0dcc1e35253fc7c6744cd26b6be5511bc43c514ba2af0701e60d5bc2e70153137d321b673a3dabb6de02e9730aaadabe9b2cd46
-  languageName: node
-  linkType: hard
-
 "@cesium/engine@npm:^18.2.0":
   version: 18.2.0
   resolution: "@cesium/engine@npm:18.2.0"
@@ -1867,16 +1766,6 @@ __metadata:
   version: 0.1.0-alpha.2
   resolution: "@cesium/wasm-splats@npm:0.1.0-alpha.2"
   checksum: 10/9490317bd6b35f10f0b635f8625ba0788d77e40c1ee4b2402e8f3747ee88bc6b25f94abcf6ef05e1529f238893a36373ea89a338508c2d527730ed87b6b3b9d9
-  languageName: node
-  linkType: hard
-
-"@cesium/widgets@npm:^11.1.0":
-  version: 11.1.0
-  resolution: "@cesium/widgets@npm:11.1.0"
-  dependencies:
-    "@cesium/engine": "npm:^16.0.0"
-    nosleep.js: "npm:^0.12.0"
-  checksum: 10/947271f855b4004be758c4e507c2b8bdca8dc85ec74bd5d224a5523082eed8e6f4b23dcf29f0590b10277f025390f3e131cbabdb3eed48922997e89ed9bc1ade
   languageName: node
   linkType: hard
 
@@ -2900,7 +2789,7 @@ __metadata:
     "@macrostrat-web/settings": "workspace:*"
     "@macrostrat/column-components": "npm:^1.0.3"
     "@macrostrat/data-components": "npm:^0.0.6"
-    "@macrostrat/form-components": "npm:^0.1.2"
+    "@macrostrat/form-components": "npm:^0.2.2"
     "@macrostrat/hyper": "npm:^3.0.6"
     "@macrostrat/ui-components": "npm:^4.1.2"
     "@mapbox/mapbox-gl-draw": "npm:^1.3.0"
@@ -2913,7 +2802,7 @@ __metadata:
     cross-fetch: "npm:^3.1.5"
     eslint: "npm:^8.7.0"
     eslint-config-next: "npm:^12.0.8"
-    mapbox-gl: "npm:^2.8.2"
+    mapbox-gl: "npm:^3.0.0"
     react: "npm:^18"
     react-beautiful-dnd: "npm:^13.1.0"
     react-color: "npm:^2.19.3"
@@ -3059,16 +2948,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@macrostrat/api-types@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@macrostrat/api-types@npm:1.1.0"
-  dependencies:
-    "@types/geojson": "npm:^7946.0.16"
-  checksum: 10/cb5ba5609a1cd2e13cd4223aa3b8fa47b2383dd2ac673bd72153de46fbb8e4b4e818903b3a94cb813bd41e6f8fb95c6cc0a12139ab9f78c76072f14b9fd3967e
-  languageName: node
-  linkType: hard
-
-"@macrostrat/api-types@npm:^1.1.1":
+"@macrostrat/api-types@npm:^1.1.0, @macrostrat/api-types@npm:^1.1.1":
   version: 1.1.1
   resolution: "@macrostrat/api-types@npm:1.1.1"
   dependencies:
@@ -3121,17 +3001,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/color-utils@npm:1.1.0, @macrostrat/color-utils@npm:^1.0.1, @macrostrat/color-utils@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@macrostrat/color-utils@npm:1.1.0"
-  dependencies:
-    "@types/chroma-js": "npm:^3.1.1"
-    chroma-js: "npm:^3.0.0"
-  checksum: 10/abb879f0d5901d4904bdc1955f7805367fefb3d6d9c38be8b1bcf6dc0c2dc355cfc8b9135d6a528cfbf3c5b56209eaeeca7325d16aeb35e5376ca06cd993cc83
-  languageName: node
-  linkType: hard
-
-"@macrostrat/color-utils@npm:1.1.1, @macrostrat/color-utils@npm:^1.1.1":
+"@macrostrat/color-utils@npm:1.1.1, @macrostrat/color-utils@npm:^1.0.1, @macrostrat/color-utils@npm:^1.1.0, @macrostrat/color-utils@npm:^1.1.1":
   version: 1.1.1
   resolution: "@macrostrat/color-utils@npm:1.1.1"
   dependencies:
@@ -3141,41 +3011,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/column-components@npm:^1.0.3, @macrostrat/column-components@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@macrostrat/column-components@npm:1.1.0"
-  dependencies:
-    "@blueprintjs/core": "npm:^5.0.0"
-    "@macrostrat/hyper": "npm:^3.0.6"
-    "@macrostrat/timescale": "npm:^2.1.1"
-    "@macrostrat/ui-components": "npm:^4.2.0"
-    chroma-js: "npm:^2.1.0"
-    classnames: "npm:^2.2.6"
-    d3-axis: "npm:^3.0.0"
-    d3-format: "npm:^3.1.0"
-    d3-path: "npm:^3.1.0"
-    d3-scale: "npm:^3.2.1"
-    d3-selection: "npm:^3.0.0"
-    fscreen: "npm:^1.0.2"
-    immutability-helper: "npm:^3.0.2"
-    labella: "npm:^1.1.4"
-    react-color: "npm:^2.18.0"
-    react-draggable: "npm:^4.4.5"
-    react-images: "npm:^1.1.0-beta.1"
-    react-router-dom: "npm:^5.1.2"
-    react-scroll: "npm:^1.7.16"
-    react-select: "npm:^3.0.8"
-    react-svg-textures: "npm:^1.4.7"
-    ui-box: "npm:^5.4.1"
-    uuid: "npm:^7.0.3"
-  peerDependencies:
-    react: ^16.12.0||^17.0.0||^18
-    react-dom: ^16.12.0||^17.0.0||^18
-  checksum: 10/ed2eb98380387bf3f427e7970f96353e223a82d53cc762e9637e6b6418033b74441fdc9f929dea04276c524bdfc0268488c10a1145eb85f6fbdfd2b4bb05f5c6
-  languageName: node
-  linkType: hard
-
-"@macrostrat/column-components@npm:^1.2.0":
+"@macrostrat/column-components@npm:^1.0.3, @macrostrat/column-components@npm:^1.1.0, @macrostrat/column-components@npm:^1.2.0":
   version: 1.2.0
   resolution: "@macrostrat/column-components@npm:1.2.0"
   dependencies:
@@ -3306,29 +3142,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/data-sheet@npm:^2.0.2":
-  version: 2.0.2
-  resolution: "@macrostrat/data-sheet@npm:2.0.2"
-  dependencies:
-    "@blueprintjs/core": "npm:^5.10.2"
-    "@blueprintjs/table": "npm:^5.1.4"
-    "@macrostrat/color-utils": "npm:^1.1.0"
-    "@macrostrat/hyper": "npm:^3.0.6"
-    "@macrostrat/ui-components": "npm:^4.2.0"
-    "@supabase/postgrest-js": "npm:^1.17.7"
-    chroma-js: "npm:^2.4.2"
-    classnames: "npm:^2.3.1"
-    immutability-helper: "npm:^3.1.1"
-    react: "npm:^17.0.2||^18"
-    react-color: "npm:^2.19.3"
-    react-colorful: "npm:^5.6.1"
-    underscore: "npm:^1.13.7"
-    zustand: "npm:^5.0.2"
-  checksum: 10/115510ac86f2192668944de60ceb51dfe910a2f90b74539b069424d8c9d81e0c7c1166c3d80284d3a39a519f43b3df9298b443bc755d717381c8792a486edfb8
-  languageName: node
-  linkType: hard
-
-"@macrostrat/data-sheet@npm:^2.1.1":
+"@macrostrat/data-sheet@npm:^2.0.2, @macrostrat/data-sheet@npm:^2.1.1":
   version: 2.1.1
   resolution: "@macrostrat/data-sheet@npm:2.1.1"
   dependencies:
@@ -3378,53 +3192,29 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/form-components@npm:^0.1.2":
-  version: 0.1.2
-  resolution: "@macrostrat/form-components@npm:0.1.2"
+"@macrostrat/form-components@npm:^0.2.1, @macrostrat/form-components@npm:^0.2.2":
+  version: 0.2.2
+  resolution: "@macrostrat/form-components@npm:0.2.2"
   dependencies:
     "@blueprintjs/core": "npm:^5.10.2"
     "@blueprintjs/icons": "npm:^5.9.0"
     "@blueprintjs/select": "npm:^5.3.10"
     "@blueprintjs/table": "npm:^5.3.4"
-    "@macrostrat/color-utils": "npm:^1.0.1"
+    "@macrostrat/color-utils": "npm:^1.1.1"
     "@macrostrat/hyper": "npm:^3.0.6"
-    "@macrostrat/ui-components": "npm:^4.1.1"
+    "@macrostrat/ui-components": "npm:^4.3.0"
     "@mantine/core": "npm:^4.2.1"
     "@mantine/hooks": "npm:^4.2.1"
-    "@mapbox/mapbox-gl-draw": "npm:^1.3.0"
-    "@types/mapbox__mapbox-gl-draw": "npm:^1.2.3"
-    "@types/react-dom": "npm:^17.0.16||^18.0.0"
+    "@mapbox/mapbox-gl-draw": "npm:^1.5.0"
+    "@types/mapbox__mapbox-gl-draw": "npm:^1.4.8"
+    "@types/react-dom": "npm:^18"
     axios: "npm:^1.7.9"
     classnames: "npm:^2.5.1"
-    mapbox-gl: "npm:^2.15.0"
+    mapbox-gl: "npm:^2.15.0||^3.0.0"
   peerDependencies:
-    react: ^17.0.2||^18
-  checksum: 10/9692c53c54871be56c427899abaf2c45cf97ab842c4b3b0c6b0cc9960aebe5a152a0fb9c233727f95c3f3f4a62a197051062b321b0ae9f86bc9ace874f98a1f5
-  languageName: node
-  linkType: hard
-
-"@macrostrat/form-components@npm:^0.2.1":
-  version: 0.2.1
-  resolution: "@macrostrat/form-components@npm:0.2.1"
-  dependencies:
-    "@blueprintjs/core": "npm:^5.10.2"
-    "@blueprintjs/icons": "npm:^5.9.0"
-    "@blueprintjs/select": "npm:^5.3.10"
-    "@blueprintjs/table": "npm:^5.3.4"
-    "@macrostrat/color-utils": "npm:^1.0.1"
-    "@macrostrat/hyper": "npm:^3.0.6"
-    "@macrostrat/ui-components": "npm:^4.1.3"
-    "@mantine/core": "npm:^4.2.1"
-    "@mantine/hooks": "npm:^4.2.1"
-    "@mapbox/mapbox-gl-draw": "npm:^1.3.0"
-    "@types/mapbox__mapbox-gl-draw": "npm:^1.2.3"
-    "@types/react-dom": "npm:^17.0.16||^18.0.0"
-    axios: "npm:^1.7.9"
-    classnames: "npm:^2.5.1"
-    mapbox-gl: "npm:^2.15.0"
-  peerDependencies:
-    react: ^17.0.2||^18
-  checksum: 10/da74797d07de9d0bd3424be1512ae3dbf815f59563e26aaf07b5960432b44d8b29431536582ff433e5272283af6aea9fc350d13bc322584b2c0f509de1cd05b8
+    react: ^16.13.1||^17||^18||^19
+    react-dom: ^16.13.1||^17||^18||^19
+  checksum: 10/6b63ed4cca6179bf0135cb5692b4931ec5ca7a31574a9212d08d273ab5dc90795f00667007cb350c6a112f183438daa60659baeaa4e0e16b5ab2c53806d37730
   languageName: node
   linkType: hard
 
@@ -3440,7 +3230,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/map-interface@npm:1.5.2, @macrostrat/map-interface@npm:^1.5.2":
+"@macrostrat/map-interface@npm:1.5.2, @macrostrat/map-interface@npm:^1.3.1, @macrostrat/map-interface@npm:^1.4.0, @macrostrat/map-interface@npm:^1.5.2":
   version: 1.5.2
   resolution: "@macrostrat/map-interface@npm:1.5.2"
   dependencies:
@@ -3471,70 +3261,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/map-interface@npm:^1.3.1":
-  version: 1.3.1
-  resolution: "@macrostrat/map-interface@npm:1.3.1"
-  dependencies:
-    "@blueprintjs/core": "npm:^5.0.0"
-    "@macrostrat/color-utils": "npm:^1.1.1"
-    "@macrostrat/hyper": "npm:^3.0.6"
-    "@macrostrat/mapbox-react": "npm:^2.6.1"
-    "@macrostrat/mapbox-utils": "npm:^1.5.1"
-    "@macrostrat/ui-components": "npm:^4.3.0"
-    "@mapbox/tilebelt": "npm:^2.0.0"
-    classnames: "npm:^2.5.1"
-    d3-array: "npm:^3.2.4"
-    d3-format: "npm:^3.1.0"
-    mapbox-gl: "npm:^2.15.0||^3.0.0"
-    query-string: "npm:^9.0.0"
-    transition-hook: "npm:^1.5.2"
-    underscore: "npm:^1.13.6"
-    use-resize-observer: "npm:^9.1.0"
-  peerDependencies:
-    react: ^16.8.6||^17.0.0||^18.0.0||^19.0.0
-    react-dom: ^16.8.6||^17.0.0||^18.0.0||^19.0.0
-  checksum: 10/59a86adaf801bf08f67197396478663888255dd7adefdbac4f82c7461af80d5f91dee3a26a15b45ad8234ab8f37a1ad9b56bacc51375d6b2ef2607c7a01b4f4e
-  languageName: node
-  linkType: hard
-
-"@macrostrat/map-interface@npm:^1.4.0":
-  version: 1.4.0
-  resolution: "@macrostrat/map-interface@npm:1.4.0"
-  dependencies:
-    "@blueprintjs/core": "npm:^5.0.0"
-    "@macrostrat/color-utils": "npm:^1.1.1"
-    "@macrostrat/hyper": "npm:^3.0.6"
-    "@macrostrat/mapbox-react": "npm:^2.6.2"
-    "@macrostrat/mapbox-utils": "npm:^1.6.0"
-    "@macrostrat/ui-components": "npm:^4.3.0"
-    "@mapbox/tilebelt": "npm:^2.0.0"
-    classnames: "npm:^2.5.1"
-    d3-array: "npm:^3.2.4"
-    d3-format: "npm:^3.1.0"
-    mapbox-gl: "npm:^2.15.0||^3.0.0"
-    query-string: "npm:^9.0.0"
-    transition-hook: "npm:^1.5.2"
-    underscore: "npm:^1.13.6"
-    use-resize-observer: "npm:^9.1.0"
-  peerDependencies:
-    react: ^16.8.6||^17.0.0||^18.0.0||^19.0.0
-    react-dom: ^16.8.6||^17.0.0||^18.0.0||^19.0.0
-  checksum: 10/fccf1a25911ba1f326d79b4739ea05ba0f8e6044e15fabc7e68454c2ce4c3de303658998f878af2a65ba098563040f88f7a494f2b1700709241db2a8926f14ec
-  languageName: node
-  linkType: hard
-
-"@macrostrat/map-styles@npm:^1.2.0":
-  version: 1.2.0
-  resolution: "@macrostrat/map-styles@npm:1.2.0"
-  dependencies:
-    "@macrostrat/color-utils": "npm:1.1.0"
-    axios: "npm:^1.7.9"
-    mapbox-gl: "npm:^2.15.0"
-  checksum: 10/0312d299011e5df2d9634962a4d13536f042b2b36ccee2f45242e23f7fe11ca0a1dcfed9350ba8319c6623c8ebcca4f4a51e0c0be5fdee3e1f543c2fdc368ba6
-  languageName: node
-  linkType: hard
-
-"@macrostrat/map-styles@npm:^1.2.1":
+"@macrostrat/map-styles@npm:^1.2.0, @macrostrat/map-styles@npm:^1.2.1":
   version: 1.2.1
   resolution: "@macrostrat/map-styles@npm:1.2.1"
   dependencies:
@@ -3545,55 +3272,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/mapbox-react@npm:^2.6.0":
-  version: 2.6.0
-  resolution: "@macrostrat/mapbox-react@npm:2.6.0"
-  dependencies:
-    "@macrostrat/hyper": "npm:^3.0.6"
-    "@macrostrat/map-styles": "npm:^1.2.0"
-    "@macrostrat/mapbox-utils": "npm:^1.5.0"
-    "@macrostrat/ui-components": "npm:^4.2.0"
-    "@turf/bbox": "npm:^7.1.0"
-    "@turf/centroid": "npm:^7.1.0"
-    "@types/mapbox-gl": "npm:^2.7.5"
-    classnames: "npm:^2.3.1"
-    immutability-helper: "npm:^3.1.1"
-    mapbox-gl: "npm:^2.15.0"
-    mapbox-gl-controls: "npm:^2.3.5"
-    zustand: "npm:^5.0.1"
-  peerDependencies:
-    "@blueprintjs/core": ^3||^4||^5.10.2
-    react: ^16||^17||^18
-    react-dom: ^16||^17||^18
-  checksum: 10/097090e2c0f4230eab1a3dbb2f81e7a9cbec7edcf423b402d4bda3ce601b17776f95eaff06a74f5da802f4f9569d4181cad287a52e14c570f9b9d6ef20ee5ab9
-  languageName: node
-  linkType: hard
-
-"@macrostrat/mapbox-react@npm:^2.6.1":
-  version: 2.6.1
-  resolution: "@macrostrat/mapbox-react@npm:2.6.1"
-  dependencies:
-    "@macrostrat/hyper": "npm:^3.0.6"
-    "@macrostrat/map-styles": "npm:^1.2.1"
-    "@macrostrat/mapbox-utils": "npm:^1.5.1"
-    "@macrostrat/ui-components": "npm:^4.3.0"
-    "@turf/bbox": "npm:^7.1.0"
-    "@turf/centroid": "npm:^7.1.0"
-    "@types/mapbox-gl": "npm:^3.4.1"
-    classnames: "npm:^2.3.1"
-    immutability-helper: "npm:^3.1.1"
-    mapbox-gl: "npm:^2.15.0||^3.0.0"
-    mapbox-gl-controls: "npm:^2.3.5"
-    zustand: "npm:^5.0.1"
-  peerDependencies:
-    "@blueprintjs/core": ^3||^4||^5.10.2
-    react: ^16.8.6||^17.0.0||^18.0.0||^19.0.0
-    react-dom: ^16.8.6||^17.0.0||^18.0.0||^19.0.0
-  checksum: 10/52339579e1b2c47f7e0679906a6b457775ccd7ff74a82e3c14013e758fe83c54e366127ff05eff0b4960b2663d065b2ed9fca3d9401ddf8c737fc2bb33b0eaa7
-  languageName: node
-  linkType: hard
-
-"@macrostrat/mapbox-react@npm:^2.6.2":
+"@macrostrat/mapbox-react@npm:^2.6.0, @macrostrat/mapbox-react@npm:^2.6.2":
   version: 2.6.2
   resolution: "@macrostrat/mapbox-react@npm:2.6.2"
   dependencies:
@@ -3616,29 +3295,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/mapbox-utils@npm:^1.1.1, @macrostrat/mapbox-utils@npm:^1.5.0":
-  version: 1.5.0
-  resolution: "@macrostrat/mapbox-utils@npm:1.5.0"
-  dependencies:
-    "@types/mapbox-gl": "npm:^2.7.5"
-    axios: "npm:^1.7.9"
-    mapbox-gl: "npm:^2.15.0"
-  checksum: 10/3dfdcd81f9bdeba3a57eebb6910259335a3163f678a90e49b705a6b49265c4f85a720a655d7b060f281f081e9f49bfb5aad57bf3962f9998f1fcd489faf6929d
-  languageName: node
-  linkType: hard
-
-"@macrostrat/mapbox-utils@npm:^1.5.1":
-  version: 1.5.1
-  resolution: "@macrostrat/mapbox-utils@npm:1.5.1"
-  dependencies:
-    "@types/mapbox-gl": "npm:^3.4.1"
-    axios: "npm:^1.7.9"
-    mapbox-gl: "npm:^2.15.0||^3.0.0"
-  checksum: 10/039e8fd57bc15fc6520b13d2ee20d79de7d42bf98179f406d97926ac945519c85e9f4ab494260701f9cd6553b7d14599005d046129f8297cdcbeac340da907c7
-  languageName: node
-  linkType: hard
-
-"@macrostrat/mapbox-utils@npm:^1.6.0":
+"@macrostrat/mapbox-utils@npm:^1.1.1, @macrostrat/mapbox-utils@npm:^1.5.0, @macrostrat/mapbox-utils@npm:^1.6.0":
   version: 1.6.0
   resolution: "@macrostrat/mapbox-utils@npm:1.6.0"
   dependencies:
@@ -3659,14 +3316,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/stratigraphy-utils@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "@macrostrat/stratigraphy-utils@npm:1.0.0"
-  checksum: 10/0b33ee2a1ff974e994c0fedf5d738adccba99477dd6c6e3d52e4f5a9cf50391af4b9f32e9fa959709e0b26076f83999837764f4114d0677a84f9ee192bb7038f
-  languageName: node
-  linkType: hard
-
-"@macrostrat/stratigraphy-utils@npm:^1.0.1":
+"@macrostrat/stratigraphy-utils@npm:^1.0.0, @macrostrat/stratigraphy-utils@npm:^1.0.1":
   version: 1.0.1
   resolution: "@macrostrat/stratigraphy-utils@npm:1.0.1"
   checksum: 10/cef82e2e809ebc6958d0c2b8bdbf2042a6a29b29ddfe6098c65919d708bdea45f546470965e78495bb4a7f72daf46ed0a53b72d1e94f834eadf1d5d2ce0da5bd
@@ -3686,36 +3336,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/svg-map-components@npm:^1.0.2, @macrostrat/svg-map-components@npm:^1.0.4":
-  version: 1.0.4
-  resolution: "@macrostrat/svg-map-components@npm:1.0.4"
-  dependencies:
-    "@macrostrat/hyper": "npm:^3.0.6"
-    "@macrostrat/ui-components": "npm:^4.2.0"
-    "@types/d3-array": "npm:^3.0.0"
-    "@types/d3-drag": "npm:^3.0.0"
-    "@types/d3-geo": "npm:^3.0.0"
-    "@types/d3-selection": "npm:^3.0.0"
-    "@types/d3-zoom": "npm:^3.0.0"
-    "@types/geojson": "npm:^7946.0.8"
-    "@types/react-dom": "npm:^16.9.8||^17.0.6||^18.0.0"
-    axios: "npm:^1.7.9"
-    d3-array: "npm:^3.2.4"
-    d3-drag: "npm:^3.0.0"
-    d3-geo: "npm:^3.1.1"
-    d3-selection: "npm:^3.0.0"
-    d3-zoom: "npm:^3.0.0"
-    kld-intersections: "npm:^0.7.0"
-    kld-path-parser: "npm:^0.2.1"
-    topojson-client: "npm:^3.1.0"
-  peerDependencies:
-    react: ^16.11.0||^17.0.0||^18.0.0
-    react-dom: ^16.11.0||^17.0.0||^18.0.0
-  checksum: 10/dcfe6498f2efd932ea083dd0f71fd880aa73aa12422e741857e5afd85863ee06c1a72aa7e5104d6eccaca4621e64ffc52b2f6e4cf7da169a92962376bd865b32
-  languageName: node
-  linkType: hard
-
-"@macrostrat/svg-map-components@npm:^1.0.5":
+"@macrostrat/svg-map-components@npm:^1.0.2, @macrostrat/svg-map-components@npm:^1.0.4, @macrostrat/svg-map-components@npm:^1.0.5":
   version: 1.0.5
   resolution: "@macrostrat/svg-map-components@npm:1.0.5"
   dependencies:
@@ -3744,47 +3365,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/timescale@npm:^2.1.1":
-  version: 2.1.1
-  resolution: "@macrostrat/timescale@npm:2.1.1"
-  dependencies:
-    "@macrostrat/hyper": "npm:^3.0.6"
-    "@macrostrat/ui-components": "npm:^4.1.1"
-    "@types/classnames": "npm:^2.2.10"
-    "@types/d3-array": "npm:^2.0.0"
-    "@visx/axis": "npm:^3.12.0"
-    "@visx/scale": "npm:^3.12.0"
-    classnames: "npm:^2.2.6"
-    d3-array: "npm:^3.2.4"
-    d3-format: "npm:^3.1.0"
-  peerDependencies:
-    react: ^16.13.1||^17||^18
-    react-dom: ^16.13.1||^17||^18
-  checksum: 10/ff6b88f9454b12e2bd91e334a7eef5ba69eae96b73263544cd23b5b3d14931d6b9b0148ac93d400a929621ef09b46e794d88a114bd7813bf06101dc9ed7fee57
-  languageName: node
-  linkType: hard
-
-"@macrostrat/timescale@npm:^2.2.0":
-  version: 2.2.0
-  resolution: "@macrostrat/timescale@npm:2.2.0"
-  dependencies:
-    "@macrostrat/hyper": "npm:^3.0.6"
-    "@macrostrat/ui-components": "npm:^4.3.0"
-    "@types/classnames": "npm:^2.3.4"
-    "@types/d3-array": "npm:^3.2.1"
-    "@visx/axis": "npm:^3.12.0"
-    "@visx/scale": "npm:^3.12.0"
-    classnames: "npm:^2.2.6"
-    d3-array: "npm:^3.2.4"
-    d3-format: "npm:^3.1.0"
-  peerDependencies:
-    react: ^16.13.1||^17||^18||^19
-    react-dom: ^16.13.1||^17||^18||^19
-  checksum: 10/dc385bdf27acd65010e19348be273461fa82c3394f19e220bedba11ae622b21d28d9adb48fda84ee460f6e2dcb2e2644fbe56df0bf1913f41ffcdf8b710af82e
-  languageName: node
-  linkType: hard
-
-"@macrostrat/timescale@npm:^2.2.1":
+"@macrostrat/timescale@npm:^2.2.0, @macrostrat/timescale@npm:^2.2.1":
   version: 2.2.1
   resolution: "@macrostrat/timescale@npm:2.2.1"
   dependencies:
@@ -3804,69 +3385,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/ui-components@npm:^4.0.0, @macrostrat/ui-components@npm:^4.1.1, @macrostrat/ui-components@npm:^4.1.2, @macrostrat/ui-components@npm:^4.1.3, @macrostrat/ui-components@npm:^4.2.0":
-  version: 4.2.0
-  resolution: "@macrostrat/ui-components@npm:4.2.0"
-  dependencies:
-    "@blueprintjs/core": "npm:^5.10.2"
-    "@blueprintjs/datetime2": "npm:^2.3.11"
-    "@macrostrat/hyper": "npm:^3.0.6"
-    "@types/react": "npm:^16.14.41 || 17 || 18"
-    "@types/react-dom": "npm:^17 || ^18"
-    axios: "npm:^1.7.9"
-    chroma-js: "npm:^2.4.2||^3.0.0"
-    classnames: "npm:^2.3.0"
-    d3-array: "npm:^3.2.4"
-    immutability-helper: "npm:^3.1.1"
-    query-string: "npm:^9.0.0"
-    react-color: "npm:^2.19.3"
-    react-dropzone: "npm:^11.4.2"
-    react-intersection-observer: "npm:^8.32.1"
-    react-json-tree: "npm:^0.19.0"
-    ui-box: "npm:^5.4.1"
-    underscore: "npm:^1.13.1"
-    use-async-effect: "npm:^2.2.1"
-    use-element-dimensions: "npm:^2.1.3"
-    zustand: "npm:^5.0.3"
-  peerDependencies:
-    react: ^16.8.6 || ^17 || ^18
-    react-dom: ^16.8.6 || ^17 || ^18
-  checksum: 10/ad3fe5c59f52e25764fd7e9a5f439a625fbde99cf3969b07a7d7e8b5919f76e16632c6a9579fb767bb1563ebebdf027abb9c3329e25b9be1feb7ecbf7827ca27
-  languageName: node
-  linkType: hard
-
-"@macrostrat/ui-components@npm:^4.3.0":
-  version: 4.3.0
-  resolution: "@macrostrat/ui-components@npm:4.3.0"
-  dependencies:
-    "@blueprintjs/core": "npm:^5.10.2"
-    "@blueprintjs/datetime2": "npm:^2.3.11"
-    "@macrostrat/hyper": "npm:^3.0.6"
-    "@types/react": "npm:^18.3.12"
-    "@types/react-dom": "npm:^18"
-    axios: "npm:^1.7.9"
-    chroma-js: "npm:^2.4.2||^3.0.0"
-    classnames: "npm:^2.3.0"
-    d3-array: "npm:^3.2.4"
-    immutability-helper: "npm:^3.1.1"
-    query-string: "npm:^9.0.0"
-    react-color: "npm:^2.19.3"
-    react-dropzone: "npm:^11.4.2"
-    react-intersection-observer: "npm:^8.32.1"
-    react-json-tree: "npm:^0.19.0"
-    ui-box: "npm:^5.4.1"
-    underscore: "npm:^1.13.1"
-    use-async-effect: "npm:^2.2.1"
-    use-element-dimensions: "npm:^2.1.3"
-    zustand: "npm:^5.0.3"
-  peerDependencies:
-    react: ^16.8.6 || ^17 || ^18 || ^19
-    react-dom: ^16.8.6 || ^17 || ^18 || ^19
-  checksum: 10/e0c27a98c78c9977ecae417ced7d14233f4e30b02ed14084f654346b5a246314172a27b319e085ec978d46a9fb2e6bbb3e630a1adc23d73abdb77e76f6b1f53a
-  languageName: node
-  linkType: hard
-
-"@macrostrat/ui-components@npm:^4.4.4":
+"@macrostrat/ui-components@npm:^4.0.0, @macrostrat/ui-components@npm:^4.1.1, @macrostrat/ui-components@npm:^4.1.2, @macrostrat/ui-components@npm:^4.3.0, @macrostrat/ui-components@npm:^4.4.4":
   version: 4.4.4
   resolution: "@macrostrat/ui-components@npm:4.4.4"
   dependencies:
@@ -3990,7 +3509,7 @@ __metadata:
     http-proxy-middleware: "npm:^3.0.3"
     immutability-helper: "npm:^3.1.1"
     jose: "npm:^5.1.2"
-    mapbox-gl: "npm:^2.15.0"
+    mapbox-gl: "npm:^3.13.0"
     new-github-issue-url: "npm:^1.0.0"
     nodemon: "npm:^3.1.9"
     part-regex: "npm:^0.1.2"
@@ -4075,13 +3594,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mapbox/extent@npm:0.4.0":
-  version: 0.4.0
-  resolution: "@mapbox/extent@npm:0.4.0"
-  checksum: 10/275702e366270a3883b6cfee90f1a8d8d3eb9ad546c089f4c0361b6be00f69f7ecf63e62f131ab63b04bf80d0f7dc477ef91f7ad8cd31937df1ccdb8dd0c7155
-  languageName: node
-  linkType: hard
-
 "@mapbox/geojson-area@npm:^0.2.2":
   version: 0.2.2
   resolution: "@mapbox/geojson-area@npm:0.2.2"
@@ -4091,48 +3603,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mapbox/geojson-coords@npm:0.0.2":
-  version: 0.0.2
-  resolution: "@mapbox/geojson-coords@npm:0.0.2"
-  dependencies:
-    "@mapbox/geojson-normalize": "npm:0.0.1"
-    geojson-flatten: "npm:^1.0.4"
-  checksum: 10/24442eaaa243bd44b4ef2534656d3aaa0c9aa4193e559b07abce407dd2fb197266bbeb442611e26fb2c4fbcc0ab30510383a9f5c8742deaee37747700f26e261
-  languageName: node
-  linkType: hard
-
-"@mapbox/geojson-extent@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "@mapbox/geojson-extent@npm:1.0.1"
-  dependencies:
-    "@mapbox/extent": "npm:0.4.0"
-    "@mapbox/geojson-coords": "npm:0.0.2"
-    rw: "npm:~0.1.4"
-    traverse: "npm:~0.6.6"
-  bin:
-    geojson-extent: bin/geojson-extent
-  checksum: 10/c102ecb16cbdacab88baf7193e654ca75ba4bb76f4e04047b3f02cc1d0f24117c895dc1ec5087e4c2fd825cf62b488d9e3ac59c293c2f8f0b551ee3466264fb0
-  languageName: node
-  linkType: hard
-
-"@mapbox/geojson-normalize@npm:0.0.1, @mapbox/geojson-normalize@npm:^0.0.1":
+"@mapbox/geojson-normalize@npm:^0.0.1":
   version: 0.0.1
   resolution: "@mapbox/geojson-normalize@npm:0.0.1"
   bin:
     geojson-normalize: geojson-normalize
   checksum: 10/b3a00a065841db397a91f4af4aa5fdfe0a0ede0e0bd001a15566937b10ac3399f9fa989ec9b9c6c86dd7b0cc69be76fd918b3ee8ada59c934ebb262c1a18369b
-  languageName: node
-  linkType: hard
-
-"@mapbox/geojson-rewind@npm:^0.5.2":
-  version: 0.5.2
-  resolution: "@mapbox/geojson-rewind@npm:0.5.2"
-  dependencies:
-    get-stream: "npm:^6.0.1"
-    minimist: "npm:^1.2.6"
-  bin:
-    geojson-rewind: geojson-rewind
-  checksum: 10/721470ab5e8912d69aef06fa4db891bade8b028d6708a35a982b1dfec0f40eb4ba05a749258867f5844cf4e776e53866813bf9c97e3289054b21cbf7840d3608
   languageName: node
   linkType: hard
 
@@ -4143,25 +3619,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mapbox/mapbox-gl-draw@npm:^1.3.0":
-  version: 1.4.3
-  resolution: "@mapbox/mapbox-gl-draw@npm:1.4.3"
+"@mapbox/mapbox-gl-draw@npm:^1.3.0, @mapbox/mapbox-gl-draw@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "@mapbox/mapbox-gl-draw@npm:1.5.0"
   dependencies:
     "@mapbox/geojson-area": "npm:^0.2.2"
-    "@mapbox/geojson-extent": "npm:^1.0.1"
     "@mapbox/geojson-normalize": "npm:^0.0.1"
-    "@mapbox/point-geometry": "npm:^0.1.0"
-    hat: "npm:0.0.3"
-    lodash.isequal: "npm:^4.5.0"
-    xtend: "npm:^4.0.2"
-  checksum: 10/183634b0327b764605940170d3860c5503114757e08b712c7fd36a5b8362e61952190bd0e27de5d9066e629c87158653fa3769717a9d09be6c7b1a969faa004d
-  languageName: node
-  linkType: hard
-
-"@mapbox/mapbox-gl-supported@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "@mapbox/mapbox-gl-supported@npm:2.0.1"
-  checksum: 10/36877eb32510e43ad524152fc95bb29e04e3ba7129d0f81ccb3704a71badac7e53e6ef0a203d3ae6d4fd289844fb6229e7ec31c9e66934c4a74b33ee1a7fde0f
+    "@mapbox/point-geometry": "npm:^1.1.0"
+    fast-deep-equal: "npm:^3.1.3"
+    nanoid: "npm:^5.0.9"
+  checksum: 10/b9b5ae0ec6fe34577c98e4490a01c090cf4e52b7a4943334600d93bbc28579eba9191ebb263845841145556435f72517683198356528300aadcdc1ab18460d2f
   languageName: node
   linkType: hard
 
@@ -4183,6 +3650,13 @@ __metadata:
   version: 0.1.0
   resolution: "@mapbox/point-geometry@npm:0.1.0"
   checksum: 10/f6f78ac8a7f798efb19db6eb1a9e05da7ba942102f5347c1a673d94202d0c606ec3f522efa3e76d583cdca46fb96dde52c3d37234f162d21df42f9e8c4f182bd
+  languageName: node
+  linkType: hard
+
+"@mapbox/point-geometry@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@mapbox/point-geometry@npm:1.1.0"
+  checksum: 10/1e649be5c6c83584fae9e043a398c61ad56f81e2ae5334deeb4048884ed1f2a5dc7e727e1757e3159ebf12e6cb1f5b059519078df8d16452bf7c7ab26323eb4a
   languageName: node
   linkType: hard
 
@@ -5791,15 +5265,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/classnames@npm:^2.2.10":
-  version: 2.3.0
-  resolution: "@types/classnames@npm:2.3.0"
-  dependencies:
-    classnames: "npm:*"
-  checksum: 10/e1bd6de60fc5e4ead601838078b10f378d6a66ad21112922856de59a1f450b1361f597aa3ca34f2cc33bc030f950112872fddfde43c5189bec89737a8b237f24
-  languageName: node
-  linkType: hard
-
 "@types/classnames@npm:^2.3.4":
   version: 2.3.4
   resolution: "@types/classnames@npm:2.3.4"
@@ -5841,14 +5306,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/d3-array@npm:^2.0.0":
-  version: 2.12.5
-  resolution: "@types/d3-array@npm:2.12.5"
-  checksum: 10/7c98f904bb8fa3835964b3bd8bbccb4d2067ffd2e725ba9b92306744b8b415bcb44c47e860e61fdaf2704d37ecef0270d9c1f6ee4ec100b9fc3c1e0f2ecf1cd6
-  languageName: node
-  linkType: hard
-
-"@types/d3-array@npm:^3.0.0, @types/d3-array@npm:^3.0.3, @types/d3-array@npm:^3.2.1":
+"@types/d3-array@npm:^3.0.3, @types/d3-array@npm:^3.2.1":
   version: 3.2.1
   resolution: "@types/d3-array@npm:3.2.1"
   checksum: 10/4a9ecacaa859cff79e10dcec0c79053f027a4749ce0a4badeaff7400d69a9c44eb8210b147916b6ff5309be049030e7d68a0e333294ff3fa11c44aa1af4ba458
@@ -5883,7 +5341,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/d3-drag@npm:^3.0.0, @types/d3-drag@npm:^3.0.7":
+"@types/d3-drag@npm:^3.0.7":
   version: 3.0.7
   resolution: "@types/d3-drag@npm:3.0.7"
   dependencies:
@@ -5913,7 +5371,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/d3-geo@npm:3.1.0, @types/d3-geo@npm:^3.0, @types/d3-geo@npm:^3.0.0, @types/d3-geo@npm:^3.1.0":
+"@types/d3-geo@npm:3.1.0, @types/d3-geo@npm:^3.0, @types/d3-geo@npm:^3.1.0":
   version: 3.1.0
   resolution: "@types/d3-geo@npm:3.1.0"
   dependencies:
@@ -5997,7 +5455,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/d3-selection@npm:*, @types/d3-selection@npm:^3.0.0, @types/d3-selection@npm:^3.0.10, @types/d3-selection@npm:^3.0.11":
+"@types/d3-selection@npm:*, @types/d3-selection@npm:^3.0.10, @types/d3-selection@npm:^3.0.11":
   version: 3.0.11
   resolution: "@types/d3-selection@npm:3.0.11"
   checksum: 10/2d2d993b9e9553d066566cb22916c632e5911090db99e247bd8c32855a344e6b7c25b674f3c27956c367a6b3b1214b09931ce854788c3be2072003e01f2c75d7
@@ -6066,7 +5524,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/d3-zoom@npm:^3.0.0, @types/d3-zoom@npm:^3.0.8":
+"@types/d3-zoom@npm:^3.0.8":
   version: 3.0.8
   resolution: "@types/d3-zoom@npm:3.0.8"
   dependencies:
@@ -6155,7 +5613,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/geojson@npm:*, @types/geojson@npm:^7946.0.10, @types/geojson@npm:^7946.0.16, @types/geojson@npm:^7946.0.8":
+"@types/geojson@npm:*, @types/geojson@npm:^7946.0.10, @types/geojson@npm:^7946.0.16":
   version: 7946.0.16
   resolution: "@types/geojson@npm:7946.0.16"
   checksum: 10/34d07421bdd60e7b99fa265441d17ac6e9aef48e3ce22d04324127d0de1daf7fbaa0bd3be1cece2092eb6995f21da84afa5231e24621a2910ff7340bc98f496f
@@ -6234,15 +5692,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/mapbox-gl@npm:*, @types/mapbox-gl@npm:^2.7.5":
-  version: 2.7.14
-  resolution: "@types/mapbox-gl@npm:2.7.14"
-  dependencies:
-    "@types/geojson": "npm:*"
-  checksum: 10/c453a8e07439211ad61885630f4e342e7a05f7ff5e737139a5aa0a63a386e6554a0c12c9f615c433a4f8d36d183a43409ae657f0edefc03a2c9d22374eab376a
-  languageName: node
-  linkType: hard
-
 "@types/mapbox-gl@npm:^3.4.1":
   version: 3.4.1
   resolution: "@types/mapbox-gl@npm:3.4.1"
@@ -6252,13 +5701,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/mapbox__mapbox-gl-draw@npm:^1.2.3":
-  version: 1.4.2
-  resolution: "@types/mapbox__mapbox-gl-draw@npm:1.4.2"
+"@types/mapbox__mapbox-gl-draw@npm:^1.2.3, @types/mapbox__mapbox-gl-draw@npm:^1.4.8":
+  version: 1.4.9
+  resolution: "@types/mapbox__mapbox-gl-draw@npm:1.4.9"
   dependencies:
     "@types/geojson": "npm:*"
-    "@types/mapbox-gl": "npm:*"
-  checksum: 10/cb6f2853e91fbfde1d156060e6e0bd29dd5bfc5010bcfccecee609021f6b397a2432b40481b2cbf34b0df0648428323c485e1ec983de503656db39418ec762b6
+    mapbox-gl: "npm:*"
+  checksum: 10/1e65bb0a5444129d2200a53238bb9b3cf3a4154d15a974b01330798775f1e023769d7b74dde6c0326937f71549c0564d03fb76b1653f853a9759e51647621ce8
   languageName: node
   linkType: hard
 
@@ -6398,7 +5847,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:^16.9.8||^17.0.6||^18.0.0, @types/react-dom@npm:^17 || ^18, @types/react-dom@npm:^17.0.16||^18.0.0, @types/react-dom@npm:^18, @types/react-dom@npm:^18.2.7":
+"@types/react-dom@npm:^18, @types/react-dom@npm:^18.2.7":
   version: 18.3.5
   resolution: "@types/react-dom@npm:18.3.5"
   peerDependencies:
@@ -6419,13 +5868,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:>= 16.0.0 < 20.0.0, @types/react@npm:^16.14.41 || 17 || 18, @types/react@npm:^18, @types/react@npm:^18.2.20":
-  version: 18.3.12
-  resolution: "@types/react@npm:18.3.12"
+"@types/react@npm:*, @types/react@npm:>= 16.0.0 < 20.0.0, @types/react@npm:^18, @types/react@npm:^18.2.20, @types/react@npm:^18.3.12":
+  version: 18.3.23
+  resolution: "@types/react@npm:18.3.23"
   dependencies:
     "@types/prop-types": "npm:*"
     csstype: "npm:^3.0.2"
-  checksum: 10/c9bbdfeacd5347d2240e0d2cb5336bc57dbc1b9ff557b6c4024b49df83419e4955553518169d3736039f1b62608e15b35762a6c03d49bd86e33add4b43b19033
+  checksum: 10/4b965dffe34a1f8aac8e2d7e976f113373f38134f9e37239f7e75d7ac6b3c2e1333a8df21febf1fe7749640f8de5708f7668cdfc70bffebda1cc4d3346724fd5
   languageName: node
   linkType: hard
 
@@ -6437,16 +5886,6 @@ __metadata:
     "@types/scheduler": "npm:*"
     csstype: "npm:^3.0.2"
   checksum: 10/4e360fa1423771ca2227cba7589ae7425437c2b1109f5e51b69bf110401a340d0b518cce9834e52384a4b69a2bd85fd47321fd3a5f8b424760511645e4787460
-  languageName: node
-  linkType: hard
-
-"@types/react@npm:^18.3.12":
-  version: 18.3.23
-  resolution: "@types/react@npm:18.3.23"
-  dependencies:
-    "@types/prop-types": "npm:*"
-    csstype: "npm:^3.0.2"
-  checksum: 10/4b965dffe34a1f8aac8e2d7e976f113373f38134f9e37239f7e75d7ac6b3c2e1333a8df21febf1fe7749640f8de5708f7668cdfc70bffebda1cc4d3346724fd5
   languageName: node
   linkType: hard
 
@@ -8308,17 +7747,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cesium@npm:>=1.48, cesium@npm:^1.123.1, cesium@npm:^1.81.0":
-  version: 1.128.0
-  resolution: "cesium@npm:1.128.0"
-  dependencies:
-    "@cesium/engine": "npm:^16.0.0"
-    "@cesium/widgets": "npm:^11.1.0"
-  checksum: 10/67433472eee35eaeae9ac2339bdb2abbfc4c1b02113156afd6f94f9fbdfbe4118840a3c27ad9e64bf0f45f34227ecd3092eb3ad881ac81847b5568df00c32785
-  languageName: node
-  linkType: hard
-
-"cesium@npm:^1.130.1":
+"cesium@npm:>=1.48, cesium@npm:^1.123.1, cesium@npm:^1.130.1, cesium@npm:^1.81.0":
   version: 1.130.1
   resolution: "cesium@npm:1.130.1"
   dependencies:
@@ -10244,21 +9673,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"earcut@npm:^2.2.4":
-  version: 2.2.4
-  resolution: "earcut@npm:2.2.4"
-  checksum: 10/ca8b24714cc2fa67f98fbca6ddcf64bb42ee8d75d0b4f1a81486b3282b0f7f1bf9ec49ad4d02149985886a0c8a03a173463f2acb1f51fa0bb7ba2e1d4aa1254d
-  languageName: node
-  linkType: hard
-
-"earcut@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "earcut@npm:3.0.0"
-  checksum: 10/4f7394a657c9789a1beb1be617d18eccf7fd9e1aa0a37fd4e8927000ece7f715bf126180d1a7ce562be35e2c4812ed7fe852a1bfe8e104ced31dee172173e547
-  languageName: node
-  linkType: hard
-
-"earcut@npm:^3.0.1":
+"earcut@npm:^3.0.0, earcut@npm:^3.0.1":
   version: 3.0.1
   resolution: "earcut@npm:3.0.1"
   checksum: 10/92786b5a35276a099eb2545bd7183e31a8ddd34f0d24d26eb26a280bcf7d35dcf5a01cd8712343bfbe504849229d01ff4771aa4ed0d8d900083afaa01d732b5c
@@ -11830,20 +11245,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"geojson-flatten@npm:^1.0.4":
-  version: 1.1.1
-  resolution: "geojson-flatten@npm:1.1.1"
-  checksum: 10/cd1ce6d664bb71f815923f87473d415c5ae6a9d007a6a99fc7237a54beef139379c2a63491757a790ee7506babee0364d1d290a73b5ce0cd84a59ed3e223e406
-  languageName: node
-  linkType: hard
-
-"geojson-vt@npm:^3.2.1":
-  version: 3.2.1
-  resolution: "geojson-vt@npm:3.2.1"
-  checksum: 10/66fab64b0b57602efe199919686bfb6ae9bdd644c25b3e69d0188efa471581d00ddb5a851c83cc7301232aad7cb7baffc1d02aef550a7494b946801cec46e033
-  languageName: node
-  linkType: hard
-
 "geojson-vt@npm:^4.0.2":
   version: 4.0.2
   resolution: "geojson-vt@npm:4.0.2"
@@ -11939,13 +11340,6 @@ __metadata:
   dependencies:
     pump: "npm:^3.0.0"
   checksum: 10/13a73148dca795e41421013da6e3ebff8ccb7fba4d2f023fd0c6da2c166ec4e789bec9774a73a7b49c08daf2cae552f8a3e914042ac23b5f59dd278cc8f9cbfb
-  languageName: node
-  linkType: hard
-
-"get-stream@npm:^6.0.1":
-  version: 6.0.1
-  resolution: "get-stream@npm:6.0.1"
-  checksum: 10/781266d29725f35c59f1d214aedc92b0ae855800a980800e2923b3fbc4e56b3cb6e462c42e09a1cf1a00c64e056a78fa407cbe06c7c92b7e5cd49b4b85c2a497
   languageName: node
   linkType: hard
 
@@ -12371,13 +11765,6 @@ __metadata:
     property-information: "npm:^5.0.0"
     space-separated-tokens: "npm:^1.0.0"
   checksum: 10/78f91b71e50506f7499c8275d67645f9f4f130e6f12b038853261d1fa7393432da4113baf3508c41b79d933f255089d6d593beea9d4cda89dfd34d0a498cf378
-  languageName: node
-  linkType: hard
-
-"hat@npm:0.0.3":
-  version: 0.0.3
-  resolution: "hat@npm:0.0.3"
-  checksum: 10/3be85f476e3b2082194ff43f55794325308ec6f77a6a88476b0a6539fe49934dca96554b0b75fef6ae234cc45958bc361384dcf1593e9bb0f50b01551a5aa452
   languageName: node
   linkType: hard
 
@@ -13999,37 +13386,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mapbox-gl@npm:^2.15.0, mapbox-gl@npm:^2.8.2":
-  version: 2.15.0
-  resolution: "mapbox-gl@npm:2.15.0"
-  dependencies:
-    "@mapbox/geojson-rewind": "npm:^0.5.2"
-    "@mapbox/jsonlint-lines-primitives": "npm:^2.0.2"
-    "@mapbox/mapbox-gl-supported": "npm:^2.0.1"
-    "@mapbox/point-geometry": "npm:^0.1.0"
-    "@mapbox/tiny-sdf": "npm:^2.0.6"
-    "@mapbox/unitbezier": "npm:^0.0.1"
-    "@mapbox/vector-tile": "npm:^1.3.1"
-    "@mapbox/whoots-js": "npm:^3.1.0"
-    csscolorparser: "npm:~1.0.3"
-    earcut: "npm:^2.2.4"
-    geojson-vt: "npm:^3.2.1"
-    gl-matrix: "npm:^3.4.3"
-    grid-index: "npm:^1.1.0"
-    kdbush: "npm:^4.0.1"
-    murmurhash-js: "npm:^1.0.0"
-    pbf: "npm:^3.2.1"
-    potpack: "npm:^2.0.0"
-    quickselect: "npm:^2.0.0"
-    rw: "npm:^1.3.3"
-    supercluster: "npm:^8.0.0"
-    tinyqueue: "npm:^2.0.3"
-    vt-pbf: "npm:^3.1.3"
-  checksum: 10/5e44737f0026f1fc649c70dc19e82ade0e85e771cea8f061ff8b9d67388bd4d6ce3d8e9edc27385d48b629f18a157219c75d67f056e6ea3b125ca9b29e50ea2e
-  languageName: node
-  linkType: hard
-
-"mapbox-gl@npm:^2.15.0||^3.0.0, mapbox-gl@npm:^2.7.0||^3.13.0":
+"mapbox-gl@npm:*, mapbox-gl@npm:^2.15.0||^3.0.0, mapbox-gl@npm:^2.7.0||^3.13.0, mapbox-gl@npm:^3.0.0, mapbox-gl@npm:^3.13.0":
   version: 3.13.0
   resolution: "mapbox-gl@npm:3.13.0"
   dependencies:
@@ -15049,6 +14406,15 @@ __metadata:
   bin:
     nanoid: bin/nanoid.cjs
   checksum: 10/2d1766606cf0d6f47b6f0fdab91761bb81609b2e3d367027aff45e6ee7006f660fb7e7781f4a34799fe6734f1268eeed2e37a5fdee809ade0c2d4eb11b0f9c40
+  languageName: node
+  linkType: hard
+
+"nanoid@npm:^5.0.9":
+  version: 5.1.5
+  resolution: "nanoid@npm:5.1.5"
+  bin:
+    nanoid: bin/nanoid.js
+  checksum: 10/6de2d006b51c983be385ef7ee285f7f2a57bd96f8c0ca881c4111461644bd81fafc2544f8e07cb834ca0f3e0f3f676c1fe78052183f008b0809efe6e273119f5
   languageName: node
   linkType: hard
 
@@ -16260,13 +15626,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"quickselect@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "quickselect@npm:2.0.0"
-  checksum: 10/ed2e78431050d223fb75da20ee98011aef1a03f7cb04e1a32ee893402e640be3cfb76d72e9dbe01edf3bb457ff6a62e5c2d85748424d1aa531f6ba50daef098c
-  languageName: node
-  linkType: hard
-
 "quickselect@npm:^3.0.0":
   version: 3.0.0
   resolution: "quickselect@npm:3.0.0"
@@ -16361,15 +15720,6 @@ __metadata:
     iconv-lite: "npm:0.4.24"
     unpipe: "npm:1.0.0"
   checksum: 10/863b5171e140546a4d99f349b720abac4410338e23df5e409cfcc3752538c9caf947ce382c89129ba976f71894bd38b5806c774edac35ebf168d02aa1ac11a95
-  languageName: node
-  linkType: hard
-
-"rbush@npm:3.0.1":
-  version: 3.0.1
-  resolution: "rbush@npm:3.0.1"
-  dependencies:
-    quickselect: "npm:^2.0.0"
-  checksum: 10/489e2e7d9889888ad533518f194e3ab7cc19b1f1365a38ee99fbdda542a47f41cda7dc89870180050f4d04ea402e9ff294e1d767d03c0f1694e0028b7609eec9
   languageName: node
   linkType: hard
 
@@ -17983,14 +17333,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rw@npm:0.1, rw@npm:~0.1.4":
+"rw@npm:0.1":
   version: 0.1.4
   resolution: "rw@npm:0.1.4"
   checksum: 10/bacef98f8a1fbd1a953a6a9ef767e41cccbd03ea702d18129b18000ebd79b95486ddf441840eb717ba05c9c3d1404f89a87ed1db3ea78d3afb0c9db15c8c0ee7
   languageName: node
   linkType: hard
 
-"rw@npm:1, rw@npm:^1.3.3":
+"rw@npm:1":
   version: 1.3.3
   resolution: "rw@npm:1.3.3"
   checksum: 10/e90985d64777a00f4ab5f8c0bfea2fb5645c6bda5238840afa339c8a4f86f776e8ce83731155643a7425a0b27ce89077dab27b2f57519996ba4d2fe54cac1941
@@ -19093,7 +18443,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"supercluster@npm:^8.0.0, supercluster@npm:^8.0.1":
+"supercluster@npm:^8.0.1":
   version: 8.0.1
   resolution: "supercluster@npm:8.0.1"
   dependencies:
@@ -19360,7 +18710,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tinyqueue@npm:^2.0.0, tinyqueue@npm:^2.0.3":
+"tinyqueue@npm:^2.0.0":
   version: 2.0.3
   resolution: "tinyqueue@npm:2.0.3"
   checksum: 10/b676fdf2050bc9b2b76fe3faa433f3122c623e3f2c32d2a6921487b1e8fb541a85af79ea0eca3618e261b293280db78b02e1f835321783b8c078c507b739017c
@@ -21030,7 +20380,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"xtend@npm:^4.0.0, xtend@npm:^4.0.2, xtend@npm:~4.0.1":
+"xtend@npm:^4.0.0, xtend@npm:~4.0.1":
   version: 4.0.2
   resolution: "xtend@npm:4.0.2"
   checksum: 10/ac5dfa738b21f6e7f0dd6e65e1b3155036d68104e67e5d5d1bde74892e327d7e5636a076f625599dc394330a731861e87343ff184b0047fef1360a7ec0a5a36a
@@ -21088,17 +20438,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zustand-computed@npm:^2.0.2":
-  version: 2.0.2
-  resolution: "zustand-computed@npm:2.0.2"
-  peerDependencies:
-    react: ^18.2.0
-    zustand: ^5.0.0
-  checksum: 10/1c52f71d6a402d90acf8aa60ef280f8e46b2217acd9998b7cd0c1a127933bdc758341b50d2c8a8512470873c2a04b1471fd41d16dc9ed90a58b63a9f676b6a1b
-  languageName: node
-  linkType: hard
-
-"zustand-computed@npm:^2.1.0":
+"zustand-computed@npm:^2.0.2, zustand-computed@npm:^2.1.0":
   version: 2.1.0
   resolution: "zustand-computed@npm:2.1.0"
   peerDependencies:

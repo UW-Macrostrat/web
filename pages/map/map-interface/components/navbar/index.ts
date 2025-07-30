@@ -1,5 +1,5 @@
-import { useCallback, useRef, useEffect } from "react";
-import { Navbar, Button, InputGroup, Spinner, Card } from "@blueprintjs/core";
+import { useCallback, useEffect } from "react";
+import { InputGroup, Card } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import {
   useAppActions,
@@ -11,11 +11,8 @@ import styles from "./navbar.module.sass";
 import { MapLoadingButton, FloatingNavbar } from "@macrostrat/map-interface";
 import { PanelSubhead } from "@macrostrat/map-interface";
 import classNames from "classnames";
-import { navigate } from "vike/client/router";
-import { MacrostratIcon } from "~/components/macrostrat-icon";
 import { useAdmoinshments } from "../filter-panel/admonishments";
-import { MacrostatLogoLink } from "~/components/general";
-import { useInDarkMode } from "@macrostrat/ui-components";
+import { MacrostratLogoLink } from "~/components";
 
 const h = hyper.styled(styles);
 
@@ -153,7 +150,7 @@ function Searchbar({ className }) {
     { statusElement: filterPanelElement, className: "map-navbar" },
     [
       h("div.navbar-link-container", [
-        h(MacrostatLogoLink, {
+        h(MacrostratLogoLink, {
           logoStyle: "frameless-simple",
           className: "navbar-logo",
         }),
