@@ -2,7 +2,9 @@ import { PageContext } from "vike/types";
 import { usePageContext } from "vike-react/usePageContext";
 import { Breadcrumbs } from "@blueprintjs/core";
 import React, { useMemo } from "react";
-import { MacrostratIcon } from "~/components";
+import { MacrostratIcon, MacrostratLogoLink } from "~/components";
+import hyper from "@macrostrat/hyper";
+
 import h from "./breadcrumbs.module.sass";
 
 export function PageBreadcrumbs({ showLogo = true, title }) {
@@ -25,7 +27,7 @@ export function PageBreadcrumbs({ showLogo = true, title }) {
 export function PageBreadcrumbsInternal({ showLogo = false, items }) {
   if (showLogo) {
     items[0].text = h("span.breadcrumbs-root", [
-      h(MacrostratIcon, { size: 16 }),
+      h(MacrostratLogoLink, { logoStyle: "simple" }),
       "Macrostrat",
     ]);
   }
@@ -154,7 +156,7 @@ export const sitemap: Routes = {
       ],
     },
     {
-      slug: 'integrations',
+      slug: "integrations",
       name: "Integrations",
       children: [
         {
@@ -165,9 +167,9 @@ export const sitemap: Routes = {
               slug: "feedback",
               name: "Feedback",
             },
-          ]
+          ],
         },
-      ]
+      ],
     },
     {
       slug: "maps",

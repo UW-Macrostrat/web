@@ -1,5 +1,9 @@
 import h from "./main.module.sass";
-import { useAPIResult, ErrorBoundary, FlexRow } from "@macrostrat/ui-components";
+import {
+  useAPIResult,
+  ErrorBoundary,
+  FlexRow,
+} from "@macrostrat/ui-components";
 import { apiV2Prefix, pbdbDomain } from "@macrostrat-web/settings";
 import { Link, PageBreadcrumbs } from "~/components";
 import { Card, Divider } from "@blueprintjs/core";
@@ -53,17 +57,18 @@ export function LexItemPage(props: LexItemPageProps) {
   const title = props.siftLink
     ? props.siftLink
         .split(/[-_]/)
-        .join(' ')
+        .join(" ")
         .replace(/^\w/, (c) => c.toUpperCase())
     : "Unknown";
   const id = props.id || 0;
-  
-  return h(ErrorBoundary, 
+
+  return h(
+    ErrorBoundary,
     {
-      description: `${title} #${id} doesn't exist`
+      description: `${title} #${id} doesn't exist`,
     },
     h(LexItemPageInner, props)
-  )
+  );
 }
 
 function LexItemPageInner(props: LexItemPageProps) {
@@ -381,7 +386,7 @@ export function ConceptInfo({ concept_id, showHeader }) {
   return h("div.concept-info", [
     h.if(showHeader)(
       "a.concept-header",
-      { href: "/lex/strat-concepts/" + concept_id },
+      { href: "/lex/strat-concept/" + concept_id },
       [h("h3", name), h(StratTag, { isConcept: true, fontSize: "1.5em" })]
     ),
     h("div.author", [
@@ -1016,9 +1021,7 @@ export function MatchesPanel({ fossilsData }) {
     return fossilsData.slice(0, visibleCount);
   }, [fossilsData, visibleCount]);
 
-  const visibleItems = data.map((item) =>
-    h(Match, { data: item })
-  );
+  const visibleItems = data.map((item) => h(Match, { data: item }));
 
   const handleLoadMore = () => {
     setVisibleCount((prev) =>
@@ -1055,12 +1058,11 @@ export function Matches({ lith_id, lith_att_id, strat_name_id, concept_id }) {
       filter.concept_id = `eq.${concept_id}`;
     } else {
       setData(null);
-      return; 
+      return;
     }
 
-    fetchPGData('/kg_matches', filter).then(setData);
+    fetchPGData("/kg_matches", filter).then(setData);
   }, [lith_id, lith_att_id]);
-
 
   return h(MatchesPanel, { fossilsData: data });
 }
@@ -1068,28 +1070,31 @@ export function Matches({ lith_id, lith_att_id, strat_name_id, concept_id }) {
 function Match({ data }) {
   const { source, context_text, name, match, indices } = data;
 
-  const beginning = context_text.slice(Math.max(0, indices[0] - 50), indices[0]);
-  const end = context_text.slice(indices[1], Math.min(context_text.length, indices[1] + 50));
+  const beginning = context_text.slice(
+    Math.max(0, indices[0] - 50),
+    indices[0]
+  );
+  const end = context_text.slice(
+    indices[1],
+    Math.min(context_text.length, indices[1] + 50)
+  );
 
   console.log(beginning, name, end);
 
   return h("div", { class: "match-item" }, [
-    h('a', { href: '/integrations/xdd/feedback/' + source }, "View source"),
-    h(FlexRow,
-      { className: "match-text", alignItems: "center" },
-      [
-        h("p", beginning),
-        h(
-          "p.match-name", 
-          {
-            style: {
-              "background-color": match.color ?? "black",
-            }
+    h("a", { href: "/integrations/xdd/feedback/" + source }, "View source"),
+    h(FlexRow, { className: "match-text", alignItems: "center" }, [
+      h("p", beginning),
+      h(
+        "p.match-name",
+        {
+          style: {
+            "background-color": match.color ?? "black",
           },
-          name
-        ),
-        h("p", end),
-      ]
-    )
-  ])
+        },
+        name
+      ),
+      h("p", end),
+    ]),
+  ]);
 }

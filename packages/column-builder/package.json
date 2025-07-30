@@ -15,7 +15,7 @@
     "@macrostrat-web/settings": "workspace:*",
     "@macrostrat/column-components": "^1.0.3",
     "@macrostrat/data-components": "^0.0.6",
-    "@macrostrat/form-components": "^0.1.2",
+    "@macrostrat/form-components": "^0.2.2",
     "@macrostrat/hyper": "^3.0.6",
     "@macrostrat/ui-components": "^4.1.2",
     "@mapbox/mapbox-gl-draw": "^1.3.0",
@@ -23,7 +23,7 @@
     "@types/mapbox__mapbox-gl-draw": "^1.2.3",
     "axios": "^1.7.9",
     "cross-fetch": "^3.1.5",
-    "mapbox-gl": "^2.8.2",
+    "mapbox-gl": "^3.0.0",
     "react": "^18",
     "react-beautiful-dnd": "^13.1.0",
     "react-color": "^2.19.3"

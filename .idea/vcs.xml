@@ -31,6 +31,22 @@
           <option name="issueRegexp" value="\(#(\d+)\)" />
           <option name="linkRegexp" value="https://github.com/davenquinn/geologic-patterns/issues/$1" />
         </IssueNavigationLink>
+        <IssueNavigationLink>
+          <option name="issueRegexp" value="\(#(\d+)\)" />
+          <option name="linkRegexp" value="https://github.com/UW-Macrostrat/web/issues/$1" />
+        </IssueNavigationLink>
+        <IssueNavigationLink>
+          <option name="issueRegexp" value="#(\d+)" />
+          <option name="linkRegexp" value="https://github.com/UW-Macrostrat/web/issues/$1" />
+        </IssueNavigationLink>
+        <IssueNavigationLink>
+          <option name="issueRegexp" value="GH-(\d+)" />
+          <option name="linkRegexp" value="https://github.com/UW-Macrostrat/web/issues/$1" />
+        </IssueNavigationLink>
+        <IssueNavigationLink>
+          <option name="issueRegexp" value="([^/\n ]+/[^#\n]+)#(\d+)" />
+          <option name="linkRegexp" value="https://github.com/$1/issues/$2" />
+        </IssueNavigationLink>
       </list>
     </option>
   </component>
