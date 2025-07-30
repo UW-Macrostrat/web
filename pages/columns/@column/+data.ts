@@ -44,7 +44,7 @@ export async function data(pageContext) {
   const col = columns?.[0] ?? {};
 
   if (!columns?.[0]?.properties) {
-  console.warn("Column has no properties:", columns);
+    console.warn("Column has no properties:", columns);
   }
 
   const columnInfo: ColumnSummary = {
@@ -79,8 +79,6 @@ async function getData(
     assembleURL(entity, { ...args, status_code: "active" })
   );
   let data = unwrapResponse(res);
-  console.log("Received", entity, "data:", data);
-
 
   if (data.length > 0) {
     return data;
