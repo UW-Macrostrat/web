@@ -121,13 +121,13 @@ export function ColumnsTable({ resData, colData }) {
       h("div.interval", [
         h(
           Link,
-          { href: "/lex/interval/" + b_id },
+          { href: "/lex/intervals/" + b_id },
           b_int_name.toLocaleString()
         ),
         " - ",
         h(
           Link,
-          { href: "/lex/interval/" + t_id },
+          { href: "/lex/intervals/" + t_id },
           t_int_name.toLocaleString()
         ),
       ]),
@@ -159,7 +159,7 @@ export function Intervals({ resData }) {
       levels: [1, 5],
       ageRange: [b_age, t_age],
       absoluteAgeScale: true,
-      onClick: (e, d) => window.open("/lex/interval/" + d.int_id, "_self"),
+      onClick: (e, d) => window.open("/lex/intervals/" + d.int_id, "_self"),
     })
   );
 }

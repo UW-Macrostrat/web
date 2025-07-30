@@ -66,7 +66,7 @@ export function ModalUnitPanel(props) {
       }
 
       if(unit?.int_id) {
-        window.open('/lex/interval/' + unit.int_id, '_self');
+        window.open('/lex/intervals/' + unit.int_id, '_self');
       }
 
       if(unit?.strat_name_id) {
