@@ -82,6 +82,8 @@ function ExtractionIndex() {
     });
   };
 
+  const lexURL = "/lex"
+
   return h([
     h(FlexRow, { justifyContent: "space-between", alignItems: "center" }, [
       h(
@@ -138,6 +140,13 @@ function ExtractionIndex() {
           runID: model_run,
           allowOverlap: true,
           view: true,
+          matchLinks: {
+            lithology: `${lexURL}/lithologies`,
+            strat_name: `${lexURL}/strat-names`,
+            lith_att: `${lexURL}/lith-atts`,
+            concept: `${lexURL}/strat-concepts`,
+            interval: `${lexURL}/intervals`,
+          },
         }),
       ]);
     }),
