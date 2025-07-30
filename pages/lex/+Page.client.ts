@@ -1,12 +1,12 @@
 import { LinkCard, PageHeader } from "~/components";
 import { ContentPage } from "~/layouts";
-import { apiDomain } from "@macrostrat-web/settings";
-import { useAPIResult } from "@macrostrat/ui-components";
+import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
 import h from "./+Page.module.sass";
 import { useData } from "vike-react/useData";
 import { Footer } from "~/components/general";
 import { SearchBar } from "~/components/general";
 import { useState } from "react";
+import { ExpansionPanel } from "@macrostrat/map-interface";
 
 export function Page() {
   const { res } = useData();
@@ -117,97 +117,42 @@ function formatNumber(num) {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
+const groups = [
+  { value: "econs", label: "Economics", href: '/lex/economics' },
+  { value: "maps", label: "Maps", href: '/maps' },
+  { value: "environments", label: "Environments", href: '/lex/environments' },
+  { value: "groups", label: "Column groups", href: '/columns/groups' },
+  { value: "columns", label: "Columns", href: '/columns' },
+  { value: "intervals", label: "Intervals", href: '/lex/intervals' },
+  { value: "lithologies", label: "Lithologies", href: '/lex/lithologies' },
+  { value: "lithology_attributes", label: "Lithology attributes", href: '/lex/lith-atts' },
+  { value: "projects", label: "Projects", href: '/projects' },
+  { value: "strat_name_concepts", label: "Strat name concepts", href: '/lex/strat-concepts' },
+  { value: "structures", label: "Structures", href: '/lex/structures' },
+  { value: "minerals", label: "Minerals", href: '/lex/minerals' },
+]
+
 function SearchContainer({ setShowBody }) {
-  const [input, setInput] = useState("");
-  const url = apiDomain + `/api/pg/autocomplete?name=ilike.*${input}*`;
-  const data = useAPIResult(url) || [];
-
-  if (data && input.length > 0) {
-    setShowBody(false);
-  } else {
-    setShowBody(true);
-  }
-
-  return h("div.search-container", [
-    h(SearchBar, {
-      placeholder: "Search the geologic lexicon...",
-      onChange: (e) => setInput(e),
-    }),
-    h(SearchResults, { data }),
-  ]);
+  return h(PostgRESTInfiniteScrollView, {
+    limit: 20,
+    id_key: "id",
+    filterable: true,
+    ascending: true,
+    route: "https://dev.macrostrat.org/api/pg/autocomplete",
+    delay: 100,
+    searchColumns: [{ value: "name", label: "Name" }],
+    group_key: "type",
+    groups,
+    itemComponent: LexCard,
+    SearchBarComponent: SearchBar,
+    GroupingComponent: ExpansionPanel,
+    filter_threshold: 2,
+  })
 }
 
-function SearchResults({ data }) {
-  const categories = [
-    "columns",
-    "econs",
-    "maps",
-    "environments",
-    "groups",
-    "intervals",
-    "lithologies",
-    "lithology_attributes",
-    "projects",
-    "strat_name_concepts",
-    "projects",
-    "structures",
-    "minerals",
-  ];
+function LexCard({data}) {
+  const type = data.type || "other";
+  const href = groups.find(group => group.value === type)?.href + "/" + data.id;
 
-  const grouped = data?.reduce((acc, item) => {
-    const category = item.category || "other";
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(item);
-    return acc;
-  }, {});
-
-  console.log("Grouped data:", grouped);
-
-  return h.if(Object.keys(grouped).length > 0)("div.search-results", [
-    categories?.map((category) => {
-      const items = grouped?.[category];
-      if (!items || items?.length === 0) return;
-
-      const link =
-        category === "econs"
-          ? "economics"
-          : category === "lithologies"
-          ? "lithology"
-          : category === "strat_name_concepts"
-          ? "strat-name-concepts"
-          : category === "lithology_attributes"
-          ? "lith-atts"
-          : category;
-
-      return h("div.search-category", [
-        h(
-          "h3.category",
-          (category.charAt(0).toUpperCase() + category.slice(1)).replace(
-            /_/g,
-            " "
-          )
-        ),
-        h(
-          "div.items",
-          items?.map((item) => {
-            const { name } = item;
-            const href =
-              category === "columns" ||
-              category === "projects" ||
-              category === "maps"
-                ? `/${link}/${item.id}`
-                : `/lex/${link}/${item.id}`;
-            console.log("Item:", item, "Href:", href, "category:", category);
-            return h(
-              "a.item",
-              { href },
-              name.charAt(0).toUpperCase() + name.slice(1)
-            );
-          })
-        ),
-      ]);
-    }),
-  ]);
+  return h('div', h('a', { href }, data.name));
 }

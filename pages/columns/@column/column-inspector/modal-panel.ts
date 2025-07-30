@@ -62,7 +62,7 @@ export function ModalUnitPanel(props) {
       }
 
       if(unit?.environ_id) {
-        window.open('/lex/environments/' + unit.environ_id, '_self');
+        window.open('/lex/environment/' + unit.environ_id, '_self');
       }
 
       if(unit?.int_id) {
@@ -70,7 +70,7 @@ export function ModalUnitPanel(props) {
       }
 
       if(unit?.strat_name_id) {
-        window.open('/lex/strat-names/' + unit.strat_name_id, '_self');
+        window.open('/lex/strat-name/' + unit.strat_name_id, '_self');
       }
     },
   });

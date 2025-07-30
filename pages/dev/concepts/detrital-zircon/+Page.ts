@@ -74,7 +74,7 @@ export function Page() {
     h(
       APIProvider,
       {
-        baseURL: "https://dev2.macrostrat.org/api/v2",
+        baseURL: "https://dev.macrostrat.org/api/v2",
         unwrapResponse: (res) => {
           return res.success.data;
         },

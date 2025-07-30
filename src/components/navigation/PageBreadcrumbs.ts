@@ -231,8 +231,32 @@ export const sitemap: Routes = {
           name: "Lithology",
         },
         {
-          slug: "minerals",
-          name: "Minerals",
+          slug: "mineral",
+          name: "Mineral",
+        },
+        {
+          slug: "structure",
+          name: "Structure",
+        },
+        {
+          slug: "economic",
+          name: "Economic",
+        },
+        {
+          slug: "environment",
+          name: "Environment",
+        },
+        {
+          slug: "interval",
+          name: "Interval",
+        },
+        {
+          slug: "timescale",
+          name: "Timescale",
+        },
+        {
+          slug: "lith-att",
+          name: "Lithology attribute",
         },
         {
           slug: "structures",
@@ -243,23 +267,23 @@ export const sitemap: Routes = {
           name: "Lithology attributes",
         },
         {
-          slug: "strat-names",
-          name: "Stratigraphic names",
+          slug: "strat-concept",
+          name: "Strat Concept",
           children: [
             {
               param: "@id",
               name(urlPart, ctx) {
                 return h(
                   "code",
-                  ctx.pageProps?.stratName?.strat_name ?? urlPart
+                  ctx.pageProps?.stratConcept?.strat_name ?? urlPart
                 );
               },
             },
           ],
         },
         {
-          slug: "strat-name-concepts",
-          name: "Strat Name Concepts",
+          slug: "strat-concepts",
+          name: "Strat Concepts",
           children: [
             {
               param: "@id",
@@ -268,6 +292,10 @@ export const sitemap: Routes = {
               },
             },
           ],
+        },
+        {
+          slug: "strat-name",
+          name: "Stratigraphic name",
         },
         {
           slug: "intervals",
