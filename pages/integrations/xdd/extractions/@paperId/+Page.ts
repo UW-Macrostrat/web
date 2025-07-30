@@ -1,4 +1,4 @@
-import h from "@macrostrat/hyper";
+import h from "./main.module.sass";
 
 import { ContentPage } from "~/layouts";
 import { PageBreadcrumbs } from "~/components";
@@ -13,11 +13,11 @@ import {
   useModelIndex,
   usePostgresQuery,
 } from "../data-service";
-import { AuthStatus } from "@macrostrat/form-components";
+import { AuthStatus, useAuth } from "@macrostrat/form-components";
 import { DataField } from "~/components/unit-details";
 import { FlexRow, SaveButton } from "@macrostrat/ui-components";
 import { MultiSelect } from "@blueprintjs/select"
-import { MenuItem } from "@blueprintjs/core";
+import { MenuItem, TextArea, Popover } from "@blueprintjs/core";
 import { useState } from "react";
 
 export function Page() {
@@ -32,8 +32,6 @@ function ExtractionIndex() {
   const { routeParams } = usePageContext();
   const { paperId } = routeParams;
 
-  const [selectedFeedbackType, setSelectedFeedbackType] = useState([]);
-
   const models = useModelIndex();
   const entityTypes = useEntityTypeIndex();
 
@@ -46,41 +44,9 @@ function ExtractionIndex() {
 
   const data = usePostgresQuery("kg_context_entities", filters);
 
-  const feedback = usePostgresQuery("kg_extraction_feedback_type");
-
-  if (data == null || models == null || paper == null || entityTypes == null || feedback == null) {
+  if (data == null || models == null || paper == null || entityTypes == null) {
     return h("div", "Loading...");
   }
-
-  // Helpers
-  const isItemSelected = (item) => selectedFeedbackType.includes(item);
-
-  const handleItemSelect = (item) => {
-    if (!isItemSelected(item)) {
-      setSelectedFeedbackType([...selectedFeedbackType, item]);
-    }
-  };
-
-  const handleItemDelete = (itemToDelete) => {
-    const next = selectedFeedbackType.filter((item) => item.id !== itemToDelete.id);
-    setSelectedFeedbackType(next);
-  };
-
-
-  const itemPredicate = (query, item) =>
-    item.type.toLowerCase().includes(query.toLowerCase());
-
-  const itemRenderer = (item, { handleClick, modifiers }) => {
-    if (!modifiers.matchesPredicate) return null;
-
-    return h(MenuItem, {
-      key: item.id,
-      text: item.type,
-      onClick: handleClick,
-      active: modifiers.active,
-      shouldDismissPopover: false,
-    });
-  };
 
   const lexURL = "/lex"
 
@@ -92,20 +58,7 @@ function ExtractionIndex() {
       ),
       h(AuthStatus)
     ]),
-    h(FlexRow, { justifyContent: "space-between", alignItems: "center" }, [
-      h(MultiSelect, {
-        items: feedback.filter((f) => !isItemSelected(f)),
-        itemRenderer,
-        itemPredicate,
-        selectedItems: selectedFeedbackType,
-        onItemSelect: handleItemSelect,
-        onRemove: handleItemDelete,
-        tagRenderer: (item) => item.type,
-        popoverProps: { minimal: true },
-        fill: true,
-      }),
-      h(SaveButton)
-    ]),
+    h(Feedback),
     h("h1", paper.citation?.title ?? "Model extractions"),
     data.map((d) => {
       const data = enhanceData(d, models, entityTypes)
@@ -151,4 +104,87 @@ function ExtractionIndex() {
       ]);
     }),
   ]);
+}
+
+function Feedback() {  
+  const [selectedFeedbackType, setSelectedFeedbackType] = useState([]);
+  const [customFeedback, setCustomFeedback] = useState("");
+
+  const loggedIn = useAuth().user !== null;
+  const feedbackGiven = selectedFeedbackType.length > 0 || customFeedback.length > 0;
+
+  const feedback = usePostgresQuery("kg_extraction_feedback_type");
+
+  if (feedback == null) {
+    return h("div", "Loading feedback types...");
+  }
+
+  const isItemSelected = (item) => selectedFeedbackType.includes(item);
+
+  const handleItemSelect = (item) => {
+    if (!isItemSelected(item)) {
+      setSelectedFeedbackType([...selectedFeedbackType, item]);
+    }
+  };
+
+  const handleItemDelete = (itemToDelete) => {
+    const next = selectedFeedbackType.filter((item) => item.id !== itemToDelete.id);
+    setSelectedFeedbackType(next);
+  };
+
+  const itemPredicate = (query, item) =>
+    item.type.toLowerCase().includes(query.toLowerCase());
+
+  const itemRenderer = (item, { handleClick, modifiers }) => {
+    if (!modifiers.matchesPredicate) return null;
+
+    return h(MenuItem, {
+      key: item.id,
+      text: item.type,
+      onClick: handleClick,
+      active: modifiers.active,
+      shouldDismissPopover: false,
+    });
+  };
+
+  return h(FlexRow, { className: "feedback-flexbox" }, [
+    h('div.inputs', [
+      h(MultiSelect, {
+        items: feedback.filter((f) => !isItemSelected(f)),
+        itemRenderer,
+        itemPredicate,
+        selectedItems: selectedFeedbackType,
+        onItemSelect: handleItemSelect,
+        onRemove: handleItemDelete,
+        tagRenderer: (item) => item.type,
+        popoverProps: { minimal: true },
+        fill: true,
+      }),
+      h(TextArea, {
+        onChange: (e) => setCustomFeedback(e.target.value),
+        placeholder: "Enter custom feedback here...",
+        autoResize: true,
+        className: 'input'
+      })
+    ]),
+    h.if(!loggedIn || !feedbackGiven)(
+      Popover,
+      {
+        interactionKind: "hover",
+        content: !loggedIn ? "You must be logged in to provide feedback." : 
+          !feedbackGiven ? "Select feedback types and/or provide custom feedback to submit." : null,
+        position: "top",
+      },
+      h(SaveButton, {
+        disabled: true,
+      })
+    ),
+    h.if(loggedIn && feedbackGiven)(
+      SaveButton,
+      {
+        className: "submit-feedback",
+      },
+      "Submit Feedback"
+    ),
+  ])
 }
