@@ -123,7 +123,7 @@
     "history": "^5.3.0",
     "immutability-helper": "^3.1.1",
     "jose": "^5.1.2",
-    "mapbox-gl": "^2.15.0",
+    "mapbox-gl": "^3.13.0",
     "new-github-issue-url": "^1.0.0",
     "part-regex": "^0.1.2",
     "react": "^18.3.0",

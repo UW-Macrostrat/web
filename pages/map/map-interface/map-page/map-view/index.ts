@@ -3,7 +3,6 @@ import hyper from "@macrostrat/hyper";
 import { MapMarker, MapView } from "@macrostrat/map-interface";
 import {
   PositionFocusState,
-  getFocusState,
   useMapLabelVisibility,
   useMapRef,
   useMapStatus,
@@ -11,6 +10,7 @@ import {
   MacrostratLineSymbolManager,
   MapSourcesLayer,
 } from "@macrostrat/mapbox-react";
+import { getFocusState } from "@macrostrat/mapbox-utils";
 import { buildMacrostratStyle } from "@macrostrat/map-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
 import { useInDarkMode } from "@macrostrat/ui-components";

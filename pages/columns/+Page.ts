@@ -8,11 +8,15 @@ import {
 } from "~/components";
 import { AnchorButton, ButtonGroup } from "@blueprintjs/core";
 import { Tag } from "@macrostrat/data-components";
-import h from "./main.module.sass";
+import hyper from "@macrostrat/hyper";
+import styles from "./main.module.sass";
+
 import { useData } from "vike-react/useData";
 import { ClientOnly } from "vike-react/ClientOnly";
 import { navigate } from "vike/client/router";
 import { SearchBar } from "~/components/general";
+
+const h = hyper.styled(styles);
 
 export function Page(props) {
   return h(ColumnListPage, props);
