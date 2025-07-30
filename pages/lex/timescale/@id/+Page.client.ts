@@ -11,6 +11,7 @@ import { Footer } from "~/components/general";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { Popover } from "@blueprintjs/core";
 import { useData } from "vike-react/useData";
+import { LithologyTag } from "@macrostrat/data-components";
 
 export function Page() {
   const { res, intervals, id } = useData();
@@ -40,7 +41,7 @@ export function Page() {
             ageRange: [min_age, max_age],
             orientation: "horizontal",
             absoluteAgeScale: true,
-            onClick: (e, d) => window.open(`/lex/intervals/${d.int_id}`, "_self"),
+            onClick: (e, d) => window.open(`/lex/interval/${d.int_id}`, "_self"),
             className: "timescale",
           }),
         ),
@@ -51,7 +52,7 @@ export function Page() {
               h("h2", UpperCase(intType)),
               h(
                 "div.int-items",
-                group.map((d) => h(EconItem, { data: d, key: d.environ_id }))
+                group.map((d) => h(LithologyTag, { data: d, onClick: () => window.open(`/lex/interval/${d.int_id}`, "_self") }))
               ),
             ])
           )
@@ -96,7 +97,7 @@ function EconItem({ data }) {
         h("div.int-tooltip-id", "ID: #" + int_id),
         h("div.int-tooltip-ages", b_age + " - " + t_age + " Ma"),
         abbrev ? h("div.int-tooltip-abbrev", "Abbreviation - " + abbrev) : null,
-        h(Link, { href: "/lex/intervals/" + int_id }, "View details"),
+        h(Link, { href: "/lex/interval/" + int_id }, "View details"),
       ]),
     },
     h("div.int-item", [

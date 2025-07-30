@@ -39,7 +39,7 @@ export function SpotsPanel({ onSelectPosition, map }) {
     const fetchFeatures = async () => {
       try {
         const response = await fetch(
-          "https://dev2.macrostrat.org/api/pg/saved_locations"
+          "https://dev.macrostrat.org/api/pg/saved_locations"
         );
         if (!response.ok) {
           throw new Error(`Error ${response.status}: ${response.statusText}`);

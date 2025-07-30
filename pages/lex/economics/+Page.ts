@@ -8,7 +8,7 @@ import { SearchBar } from "~/components/general";
 
 export function Page() {
   const { res } = useData();  
-  return h(LexListPage, { res, title: "Economics", route: "economics", id: "econ_id" });
+  return h(LexListPage, { res, title: "Economics", route: "economic", id: "econ_id" });
 }
 
 export function LexListPage({ res, title, route, id }) {

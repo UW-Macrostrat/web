@@ -7,6 +7,6 @@ const h = hyper.styled(styles);
 
 export function Page() {
   return h(ContentPage, [
-    h("div.main", [h(StickyHeader, h(PageBreadcrumbs)), h(LithologyHierarchy)]),
+    h("div.main", [h(StickyHeader, h(PageBreadcrumbs, {title: "Lithologies"})), h(LithologyHierarchy)]),
   ]);
 }

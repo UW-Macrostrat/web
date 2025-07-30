@@ -121,13 +121,13 @@ export function ColumnsTable({ resData, colData }) {
       h("div.interval", [
         h(
           Link,
-          { href: "/lex/intervals/" + b_id },
+          { href: "/lex/interval/" + b_id },
           b_int_name.toLocaleString()
         ),
         " - ",
         h(
           Link,
-          { href: "/lex/intervals/" + t_id },
+          { href: "/lex/interval/" + t_id },
           t_int_name.toLocaleString()
         ),
       ]),
@@ -159,7 +159,7 @@ export function Intervals({ resData }) {
       levels: [1, 5],
       ageRange: [b_age, t_age],
       absoluteAgeScale: true,
-      onClick: (e, d) => window.open("/lex/intervals/" + d.int_id, "_self"),
+      onClick: (e, d) => window.open("/lex/interval/" + d.int_id, "_self"),
     })
   );
 }
@@ -381,7 +381,7 @@ export function ConceptInfo({ concept_id, showHeader }) {
   return h("div.concept-info", [
     h.if(showHeader)(
       "a.concept-header",
-      { href: "/lex/strat-name-concepts/" + concept_id },
+      { href: "/lex/strat-concepts/" + concept_id },
       [h("h3", name), h(StratTag, { isConcept: true, fontSize: "1.5em" })]
     ),
     h("div.author", [
