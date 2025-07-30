@@ -171,9 +171,9 @@ function Feedback() {
       Popover,
       {
         interactionKind: "hover",
-        content: !loggedIn ? "You must be logged in to provide feedback." : 
-          !feedbackGiven ? "Select feedback types and/or provide custom feedback to submit." : null,
-        position: "top",
+        content: h('p.popover', !loggedIn ? "You must be logged in to provide feedback" :
+          !feedbackGiven ? "Select feedback types and/or provide custom feedback to submit" : null),
+        position: "left",
       },
       h(SaveButton, {
         disabled: true,
