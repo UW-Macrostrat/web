@@ -118,18 +118,18 @@ function formatNumber(num) {
 }
 
 const groups = [
-  { value: "econs", label: "Economics", href: '/lex/economic' },
+  { value: "econs", label: "Economics", href: '/lex/economics' },
   { value: "maps", label: "Maps", href: '/maps' },
-  { value: "environments", label: "Environments", href: '/lex/environment' },
+  { value: "environments", label: "Environments", href: '/lex/environments' },
   { value: "groups", label: "Column groups", href: '/columns/groups' },
   { value: "columns", label: "Columns", href: '/columns' },
-  { value: "intervals", label: "Intervals", href: '/lex/interval' },
-  { value: "lithologies", label: "Lithologies", href: '/lex/lithology' },
-  { value: "lithology_attributes", label: "Lithology attributes", href: '/lex/lith-att' },
+  { value: "intervals", label: "Intervals", href: '/lex/intervals' },
+  { value: "lithologies", label: "Lithologies", href: '/lex/lithologies' },
+  { value: "lithology_attributes", label: "Lithology attributes", href: '/lex/lith-atts' },
   { value: "projects", label: "Projects", href: '/projects' },
-  { value: "strat_name_concepts", label: "Strat name concepts", href: '/lex/strat-concept' },
-  { value: "structures", label: "Structures", href: '/lex/structure' },
-  { value: "minerals", label: "Minerals", href: '/lex/mineral' },
+  { value: "strat_name_concepts", label: "Strat name concepts", href: '/lex/strat-concepts' },
+  { value: "structures", label: "Structures", href: '/lex/structures' },
+  { value: "minerals", label: "Minerals", href: '/lex/minerals' },
 ]
 
 function SearchContainer({ setShowBody }) {

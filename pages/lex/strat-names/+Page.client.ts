@@ -69,7 +69,7 @@ function StratItem({ data, input }) {
     LinkCard,
     {
       href: `/lex/${
-        isConcept ? "strat-concept/" + concept_id : "strat-name/" + id
+        isConcept ? "strat-concepts/" + concept_id : "strat-names/" + id
       }`,
       className: isConcept ? "strat-concept-card" : "strat-name-card",
     },
@@ -116,7 +116,7 @@ function ConceptBody({ data, input }) {
         h("li.strat-name", [
           h(
             Link,
-            { href: `/lex/strat-name/${id}` },
+            { href: `/lex/strat-names/${id}` },
             `${name} ${rank} (#${id})`
           ),
           h(StratTag, { isConcept: false }),
