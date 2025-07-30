@@ -17,7 +17,7 @@ export function NavListItem({ href, children }) {
   );
 }
 
-export function MacrostatLogoLink({
+export function MacrostratLogoLink({
   href = "/",
   className,
   logoStyle,
@@ -37,7 +37,7 @@ export function MacrostatLogoLink({
 
 export function SiteTitle({ logoStyle, className, children }) {
   return h(
-    MacrostatLogoLink,
+    MacrostratLogoLink,
     { logoStyle, className: classNames("site-title", className) },
     h("div.site-title-content", [h("h1", "Macrostrat"), children])
   );

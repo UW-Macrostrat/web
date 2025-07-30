@@ -7,4 +7,5 @@ export * from "./lithology";
 export * from "./buttons";
 export * from "./navigation";
 export * from "./map-controls";
+export * from "./general";
 export { buildCrossSectionLayers } from "~/_utils/map-layers";
