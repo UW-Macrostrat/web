@@ -1082,7 +1082,7 @@ function Match({ data }) {
   console.log(beginning, name, end);
 
   return h("div", { class: "match-item" }, [
-    h("a", { href: "/integrations/xdd/feedback/" + source }, "View source"),
+    h("a", { href: "/integrations/xdd/feedback/" + source + "?autoselect=" + name }, "View source"),
     h(FlexRow, { className: "match-text", alignItems: "center" }, [
       h("p", beginning),
       h(
