@@ -1,4 +1,4 @@
-import h from "./main.module.sass";
+import h from "@macrostrat/hyper";
 
 import { ContentPage } from "~/layouts";
 import { PageBreadcrumbs } from "~/components";
@@ -58,7 +58,6 @@ function ExtractionIndex() {
       ),
       h(AuthStatus)
     ]),
-    h(Feedback),
     h("h1", paper.citation?.title ?? "Model extractions"),
     data.map((d) => {
       const data = enhanceData(d, models, entityTypes)
@@ -104,87 +103,4 @@ function ExtractionIndex() {
       ]);
     }),
   ]);
-}
-
-function Feedback() {  
-  const [selectedFeedbackType, setSelectedFeedbackType] = useState([]);
-  const [customFeedback, setCustomFeedback] = useState("");
-
-  const loggedIn = useAuth().user !== null;
-  const feedbackGiven = selectedFeedbackType.length > 0 || customFeedback.length > 0;
-
-  const feedback = usePostgresQuery("kg_extraction_feedback_type");
-
-  if (feedback == null) {
-    return h("div", "Loading feedback types...");
-  }
-
-  const isItemSelected = (item) => selectedFeedbackType.includes(item);
-
-  const handleItemSelect = (item) => {
-    if (!isItemSelected(item)) {
-      setSelectedFeedbackType([...selectedFeedbackType, item]);
-    }
-  };
-
-  const handleItemDelete = (itemToDelete) => {
-    const next = selectedFeedbackType.filter((item) => item.id !== itemToDelete.id);
-    setSelectedFeedbackType(next);
-  };
-
-  const itemPredicate = (query, item) =>
-    item.type.toLowerCase().includes(query.toLowerCase());
-
-  const itemRenderer = (item, { handleClick, modifiers }) => {
-    if (!modifiers.matchesPredicate) return null;
-
-    return h(MenuItem, {
-      key: item.id,
-      text: item.type,
-      onClick: handleClick,
-      active: modifiers.active,
-      shouldDismissPopover: false,
-    });
-  };
-
-  return h(FlexRow, { className: "feedback-flexbox" }, [
-    h('div.inputs', [
-      h(MultiSelect, {
-        items: feedback.filter((f) => !isItemSelected(f)),
-        itemRenderer,
-        itemPredicate,
-        selectedItems: selectedFeedbackType,
-        onItemSelect: handleItemSelect,
-        onRemove: handleItemDelete,
-        tagRenderer: (item) => item.type,
-        popoverProps: { minimal: true },
-        fill: true,
-      }),
-      h(TextArea, {
-        onChange: (e) => setCustomFeedback(e.target.value),
-        placeholder: "Enter custom feedback here...",
-        autoResize: true,
-        className: 'input'
-      })
-    ]),
-    h.if(!loggedIn || !feedbackGiven)(
-      Popover,
-      {
-        interactionKind: "hover",
-        content: h('p.popover', !loggedIn ? "You must be logged in to provide feedback" :
-          !feedbackGiven ? "Select feedback types and/or provide custom feedback to submit" : null),
-        position: "left",
-      },
-      h(SaveButton, {
-        disabled: true,
-      })
-    ),
-    h.if(loggedIn && feedbackGiven)(
-      SaveButton,
-      {
-        className: "submit-feedback",
-      },
-      "Submit Feedback"
-    ),
-  ])
 }
