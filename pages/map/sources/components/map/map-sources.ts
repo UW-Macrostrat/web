@@ -129,6 +129,7 @@ async function mapSources(
   }
 
   map.sourcesFillListener = (e) => {
+    console.log("sources-fill click", e);
     if (map.clickedFeatures) {
       map.clickedFeatures.map((f) => {
         map.setFeatureState(
