@@ -93,8 +93,6 @@ function InfoDrawerMainPanel(props) {
           ref: {},
         };
 
-  const columnURL = usePageContext().urlPathname + "/column"
-
   return h([
     h(GeologicMapInfo, {
       mapInfo,
@@ -104,7 +102,6 @@ function InfoDrawerMainPanel(props) {
     h(RegionalStratigraphy, {
       mapInfo,
       columnInfo,
-      columnURL
     }),
     h(FossilCollections, { data: pbdbData, expanded: false }),
     h(MacrostratLinkedData, {
