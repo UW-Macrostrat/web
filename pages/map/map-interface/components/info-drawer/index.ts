@@ -1,11 +1,9 @@
 import hyper from "@macrostrat/hyper";
 import { Route, Routes } from "react-router-dom";
 import { useAppActions } from "#/map/map-interface/app-state";
-import { LocationPanel } from "@macrostrat/map-interface";
-import { FossilCollections } from "./fossil-collections";
+import { LocationPanel, FossilCollections, RegionalStratigraphy } from "@macrostrat/map-interface";
 import { GeologicMapInfo } from "./geo-map";
 import { MacrostratLinkedData } from "./macrostrat-linked";
-import { RegionalStratigraphy } from "./reg-strat";
 import { Physiography } from "./physiography";
 import { XddExpansion } from "./xdd-panel";
 import { useAppState } from "#/map/map-interface/app-state";
@@ -99,6 +97,7 @@ function InfoDrawerMainPanel(props) {
     h(RegionalStratigraphy, {
       mapInfo,
       columnInfo,
+      columnURL: "/columns"
     }),
     h(FossilCollections, { data: pbdbData, expanded: true }),
     h(MacrostratLinkedData, {
