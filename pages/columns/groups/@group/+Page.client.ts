@@ -10,8 +10,8 @@ import {
 
 export function Page() {
   const { resData, colData, taxaData, refs } = useData();
-
-  const id = resData.environ_id;
+  
+  const id = resData.col_group_id;
   const features = colData?.features || [];
   const timescales = resData?.timescales || [];
 
@@ -25,5 +25,5 @@ export function Page() {
     h(Timescales, { timescales }),
   ];
 
-  return LexItemPage({ children, id, refs, resData, siftLink: "environment" });
+  return LexItemPage({ children, id, refs, resData, siftLink: "groups" });
 }

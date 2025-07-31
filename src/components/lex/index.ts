@@ -1,11 +1,15 @@
 import h from "./main.module.sass";
-import { useAPIResult, ErrorBoundary } from "@macrostrat/ui-components";
+import {
+  useAPIResult,
+  ErrorBoundary,
+  FlexRow,
+} from "@macrostrat/ui-components";
 import { apiV2Prefix, pbdbDomain } from "@macrostrat-web/settings";
 import { Link, PageBreadcrumbs } from "~/components";
 import { Card, Divider } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import { BlankImage, Footer, Loading, StratTag } from "~/components/general";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { DarkModeButton } from "@macrostrat/ui-components";
 import { PieChart, Pie, Cell, ResponsiveContainer, Label } from "recharts";
@@ -15,6 +19,7 @@ import { Timescale } from "@macrostrat/timescale";
 import { LexItemPageProps } from "~/types";
 import { ClientOnly } from "vike-react/ClientOnly";
 import { ExpansionPanel } from "@macrostrat/map-interface";
+import { fetchPGData } from "~/_utils";
 
 export function titleCase(str) {
   if (!str) return str;
@@ -52,17 +57,18 @@ export function LexItemPage(props: LexItemPageProps) {
   const title = props.siftLink
     ? props.siftLink
         .split(/[-_]/)
-        .join(' ')
+        .join(" ")
         .replace(/^\w/, (c) => c.toUpperCase())
     : "Unknown";
   const id = props.id || 0;
-  
-  return h(ErrorBoundary, 
+
+  return h(
+    ErrorBoundary,
     {
-      description: `${title} #${id} doesn't exist`
+      description: `${title} #${id} doesn't exist`,
     },
     h(LexItemPageInner, props)
-  )
+  );
 }
 
 function LexItemPageInner(props: LexItemPageProps) {
@@ -380,7 +386,7 @@ export function ConceptInfo({ concept_id, showHeader }) {
   return h("div.concept-info", [
     h.if(showHeader)(
       "a.concept-header",
-      { href: "/lex/strat-name-concepts/" + concept_id },
+      { href: "/lex/strat-concept/" + concept_id },
       [h("h3", name), h(StratTag, { isConcept: true, fontSize: "1.5em" })]
     ),
     h("div.author", [
@@ -1004,6 +1010,91 @@ export function Fossils({ fossilsData }) {
         "div.load-more-wrapper",
         h("button.load-more-btn", { onClick: handleLoadMore }, "Load More")
       ),
+    ]),
+  ]);
+}
+
+export function MatchesPanel({ fossilsData }) {
+  const ITEMS_PER_PAGE = 20;
+  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+  const data = useMemo(() => {
+    return fossilsData.slice(0, visibleCount);
+  }, [fossilsData, visibleCount]);
+
+  const visibleItems = data.map((item) => h(Match, { data: item }));
+
+  const handleLoadMore = () => {
+    setVisibleCount((prev) =>
+      Math.min(prev + ITEMS_PER_PAGE, fossilsData.length)
+    );
+  };
+
+  const showLoadMore = visibleCount < fossilsData.length;
+
+  return h.if(fossilsData?.length > 0)("div.fossils-container", [
+    h(ExpansionPanel, { title: "Matches", className: "fossils-panel" }, [
+      h("div.fossils-list", [...visibleItems]),
+      h.if(showLoadMore)(
+        "div.load-more-wrapper",
+        h("button.load-more-btn", { onClick: handleLoadMore }, "Load More")
+      ),
+    ]),
+  ]);
+}
+
+export function Matches({ lith_id, lith_att_id, strat_name_id, concept_id }) {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let filter = {};
+    if (lith_id != null) {
+      filter.lith_id = `eq.${lith_id}`;
+    } else if (lith_att_id != null) {
+      filter.lith_att_id = `eq.${lith_att_id}`;
+    } else if (strat_name_id != null) {
+      filter.strat_name_id = `eq.${strat_name_id}`;
+    } else if (concept_id != null) {
+      filter.concept_id = `eq.${concept_id}`;
+    } else {
+      setData(null);
+      return;
+    }
+
+    fetchPGData("/kg_matches", filter).then(setData);
+  }, [lith_id, lith_att_id]);
+
+  return h(MatchesPanel, { fossilsData: data });
+}
+
+function Match({ data }) {
+  const { source, context_text, name, match, indices } = data;
+
+  const beginning = context_text.slice(
+    Math.max(0, indices[0] - 50),
+    indices[0]
+  );
+  const end = context_text.slice(
+    indices[1],
+    Math.min(context_text.length, indices[1] + 50)
+  );
+
+  console.log(beginning, name, end);
+
+  return h("div", { class: "match-item" }, [
+    h("a", { href: "/integrations/xdd/feedback/" + source }, "View source"),
+    h(FlexRow, { className: "match-text", alignItems: "center" }, [
+      h("p", beginning),
+      h(
+        "p.match-name",
+        {
+          style: {
+            "background-color": match.color ?? "black",
+          },
+        },
+        name
+      ),
+      h("p", end),
     ]),
   ]);
 }

@@ -3,13 +3,24 @@
     "baseUrl": "./",
     // Allow importing of JSON and default imports from CommonJS modules
     "esModuleInterop": true,
+    "sourceMap": true,
     "jsx": "react",
     "paths": {
       // Workspace code
-      "@macrostrat-web/*": ["packages/*/src"],
-      "~/*": ["src/*"],
-      "#/*": ["pages/*"]
+      "@macrostrat-web/*": [
+        "packages/*/src"
+      ],
+      "~/*": [
+        "src/*"
+      ],
+      "#/*": [
+        "pages/*"
+      ]
     }
   },
-  "include": ["packages/*/src/**/*", "src/**/*", "pages/**/*"]
+  "include": [
+    "packages/*/src/**/*",
+    "src/**/*",
+    "pages/**/*"
+  ]
 }

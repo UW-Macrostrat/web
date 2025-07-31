@@ -2,7 +2,9 @@ import { PageContext } from "vike/types";
 import { usePageContext } from "vike-react/usePageContext";
 import { Breadcrumbs } from "@blueprintjs/core";
 import React, { useMemo } from "react";
-import { MacrostratIcon } from "~/components";
+import { MacrostratIcon, MacrostratLogoLink } from "~/components";
+import hyper from "@macrostrat/hyper";
+
 import h from "./breadcrumbs.module.sass";
 
 export function PageBreadcrumbs({ showLogo = true, title }) {
@@ -25,7 +27,7 @@ export function PageBreadcrumbs({ showLogo = true, title }) {
 export function PageBreadcrumbsInternal({ showLogo = false, items }) {
   if (showLogo) {
     items[0].text = h("span.breadcrumbs-root", [
-      h(MacrostratIcon, { size: 16 }),
+      h(MacrostratLogoLink, { logoStyle: "simple" }),
       "Macrostrat",
     ]);
   }
@@ -154,7 +156,7 @@ export const sitemap: Routes = {
       ],
     },
     {
-      slug: 'integrations',
+      slug: "integrations",
       name: "Integrations",
       children: [
         {
@@ -165,9 +167,9 @@ export const sitemap: Routes = {
               slug: "feedback",
               name: "Feedback",
             },
-          ]
+          ],
         },
-      ]
+      ],
     },
     {
       slug: "maps",
@@ -227,8 +229,32 @@ export const sitemap: Routes = {
           name: "Lithology",
         },
         {
-          slug: "minerals",
-          name: "Minerals",
+          slug: "mineral",
+          name: "Mineral",
+        },
+        {
+          slug: "structure",
+          name: "Structure",
+        },
+        {
+          slug: "economic",
+          name: "Economic",
+        },
+        {
+          slug: "environment",
+          name: "Environment",
+        },
+        {
+          slug: "interval",
+          name: "Interval",
+        },
+        {
+          slug: "timescale",
+          name: "Timescale",
+        },
+        {
+          slug: "lith-att",
+          name: "Lithology attribute",
         },
         {
           slug: "structures",
@@ -239,23 +265,23 @@ export const sitemap: Routes = {
           name: "Lithology attributes",
         },
         {
-          slug: "strat-names",
-          name: "Stratigraphic names",
+          slug: "strat-concept",
+          name: "Strat Concept",
           children: [
             {
               param: "@id",
               name(urlPart, ctx) {
                 return h(
                   "code",
-                  ctx.pageProps?.stratName?.strat_name ?? urlPart
+                  ctx.pageProps?.stratConcept?.strat_name ?? urlPart
                 );
               },
             },
           ],
         },
         {
-          slug: "strat-name-concepts",
-          name: "Strat Name Concepts",
+          slug: "strat-concepts",
+          name: "Strat Concepts",
           children: [
             {
               param: "@id",
@@ -264,6 +290,10 @@ export const sitemap: Routes = {
               },
             },
           ],
+        },
+        {
+          slug: "strat-name",
+          name: "Stratigraphic name",
         },
         {
           slug: "intervals",
