@@ -1,11 +1,15 @@
 import hyper from "@macrostrat/hyper";
 import { Route, Routes } from "react-router-dom";
 import { useAppActions } from "#/map/map-interface/app-state";
-import { LocationPanel, FossilCollections, RegionalStratigraphy } from "@macrostrat/map-interface";
+import { 
+  LocationPanel, 
+  FossilCollections, 
+  RegionalStratigraphy,
+  MacrostratLinkedData,
+  Physiography,
+} from "@macrostrat/map-interface";
 import { GeologicMapInfo } from "./geo-map";
-import { MacrostratLinkedData } from "./macrostrat-linked";
-import { Physiography } from "./physiography";
-import { XddExpansion } from "./xdd-panel";
+import { XddExpansionContainer } from "./xdd-panel";
 import { useAppState } from "#/map/map-interface/app-state";
 import styles from "./main.module.styl";
 import { LoadingArea } from "../transitions";
@@ -99,13 +103,13 @@ function InfoDrawerMainPanel(props) {
       columnInfo,
       columnURL: "/columns"
     }),
-    h(FossilCollections, { data: pbdbData, expanded: true }),
+    h(FossilCollections, { data: pbdbData, expanded: false }),
     h(MacrostratLinkedData, {
       mapInfo,
-      bedrockMatchExpanded: true,
+      expanded: true,
       source,
     }),
-    h.if(mapData[0] && mapData[0].strat_name.length)(XddExpansion),
+    h.if(mapData[0] && mapData[0].strat_name.length)(XddExpansionContainer),
     h(Physiography, { mapInfo }),
   ]);
 }
