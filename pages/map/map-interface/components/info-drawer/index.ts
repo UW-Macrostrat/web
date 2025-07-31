@@ -108,6 +108,10 @@ function InfoDrawerMainPanel(props) {
       mapInfo,
       expanded: true,
       source,
+      stratNameURL: "/lex/strat-names",
+      environmentURL: "/lex/environments",
+      intervalURL: "/lex/intervals",
+      lithologyURL: "/lex/lithologies"
     }),
     h.if(mapData[0] && mapData[0].strat_name.length)(XddExpansionContainer),
     h(Physiography, { mapInfo }),
