@@ -44,12 +44,9 @@ function ViewMap({ feature }) {
   if (coordinates == null) {
     return null;
   }
-  //                       lon      lat     zoom
-  // #layers=bedrock,lines&x=5.012&y=29.031&z=1.45
-  const zoom = zoomMap[properties.scale];
-  const lat = (coordinates[0][0][1] + coordinates[0][2][1]) / 2;
-  const long = (coordinates[0][0][0] + coordinates[0][2][0]) / 2;
-  const to = `/map#layers=bedrock,lines&x=${long}&y=${lat}&z=${zoom}`;
+  
+  const source = properties.source_id;
+  const to = `/maps/${source}`;
 
   return <Link href={to}>View map</Link>;
 }
