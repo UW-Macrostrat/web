@@ -99,7 +99,7 @@ function InfoDrawerMainPanel(props) {
       bedrockExpanded: true,
       source,
     }),
-    h(RegionalStratigraphy, {
+    h.if(columnInfo)(RegionalStratigraphy, {
       mapInfo,
       columnInfo,
     }),
