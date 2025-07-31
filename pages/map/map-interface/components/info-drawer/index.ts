@@ -4,7 +4,6 @@ import { useAppActions } from "#/map/map-interface/app-state";
 import { 
   LocationPanel, 
   FossilCollections, 
-  RegionalStratigraphy,
   MacrostratLinkedData,
   Physiography,
 } from "@macrostrat/map-interface";
@@ -15,6 +14,8 @@ import styles from "./main.module.styl";
 import { LoadingArea } from "../transitions";
 import { StratColumn } from "./strat-column";
 import { useCallback } from "react";
+import { usePageContext } from "vike-react/usePageContext";
+import { RegionalStratigraphy } from "./reg-strat";
 
 const h = hyper.styled(styles);
 
@@ -92,6 +93,8 @@ function InfoDrawerMainPanel(props) {
           ref: {},
         };
 
+  const columnURL = usePageContext().urlPathname + "/column"
+
   return h([
     h(GeologicMapInfo, {
       mapInfo,
@@ -101,7 +104,7 @@ function InfoDrawerMainPanel(props) {
     h(RegionalStratigraphy, {
       mapInfo,
       columnInfo,
-      columnURL: "/columns"
+      columnURL
     }),
     h(FossilCollections, { data: pbdbData, expanded: false }),
     h(MacrostratLinkedData, {
