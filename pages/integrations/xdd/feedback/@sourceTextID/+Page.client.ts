@@ -20,14 +20,16 @@ import {
   FlexRow,
   Pagination,
   Spacer,
-  useAPIResult,
+  SaveButton,
 } from "@macrostrat/ui-components";
 import { useState } from "react";
-import { AuthStatus, useAuth } from "@macrostrat/form-components";
 import { MatchedEntityLink } from "#/integrations/xdd/extractions/match";
 import { knowledgeGraphAPIURL } from "@macrostrat-web/settings";
 import { Toaster } from "@blueprintjs/core";
 import { fetchPGData } from "~/_utils";
+import { AuthStatus, useAuth } from "@macrostrat/form-components";
+import { MultiSelect } from "@blueprintjs/select"
+import { MenuItem, TextArea, Popover } from "@blueprintjs/core";
 
 /**
  * Get a single text window for feedback purposes
@@ -43,7 +45,7 @@ export function Page() {
     h(ContentPage, [
       h("div.feedback-main", [
         h(PageBreadcrumbs),
-        h(FlexRow, { alignItems: "center" }, [
+        h(FlexRow, { alignItems: "center", justifyContent: "space-between" }, [
           h(FlexRow, [
             h("h1", "Feedback"),
             h.if(nextID)(Button, { 
@@ -56,10 +58,9 @@ export function Page() {
               } 
             }, "Next"),
           ]),
-          h(Spacer),
-          h('div', [
-            h(AuthStatus),
-            h.if(paper_id)(Button, { 
+          h.if(paper_id)(
+            Button, 
+            { 
               className: "paper btn",
               onClick: () => {
                 window.open(
@@ -67,8 +68,13 @@ export function Page() {
                   "_self"
                 ); 
               } 
-            }, "View papers extraction"),
-          ])
+            }, 
+            "View papers extraction"
+          ),
+        ]),
+        h(FlexRow, { className: "feedback-index", justifyContent: "space-between" }, [
+          h(Feedback),
+          h(AuthStatus)
         ]),
         h(ExtractionIndex, { setPaperID }),
       ]),
@@ -282,4 +288,65 @@ function getNextID() {
   });
 
   return nextID;
+}
+
+function Feedback() {  
+  const [selectedFeedbackType, setSelectedFeedbackType] = useState([]);
+  const [customFeedback, setCustomFeedback] = useState("");
+
+  const feedback = usePostgresQuery("kg_extraction_feedback_type");
+
+  if (feedback == null) {
+    return h("div", "Loading feedback types...");
+  }
+
+  const isItemSelected = (item) => selectedFeedbackType.includes(item);
+
+  const handleItemSelect = (item) => {
+    if (!isItemSelected(item)) {
+      setSelectedFeedbackType([...selectedFeedbackType, item]);
+    }
+  };
+
+  const handleItemDelete = (itemToDelete) => {
+    const next = selectedFeedbackType.filter((item) => item.id !== itemToDelete.id);
+    setSelectedFeedbackType(next);
+  };
+
+  const itemPredicate = (query, item) =>
+    item.type.toLowerCase().includes(query.toLowerCase());
+
+  const itemRenderer = (item, { handleClick, modifiers }) => {
+    if (!modifiers.matchesPredicate) return null;
+
+    return h(MenuItem, {
+      key: item.id,
+      text: item.type,
+      onClick: handleClick,
+      active: modifiers.active,
+      shouldDismissPopover: false,
+    });
+  };
+
+  return h(FlexRow, { className: "feedback-flexbox" }, [
+    h('div.inputs', [
+      h(MultiSelect, {
+        items: feedback.filter((f) => !isItemSelected(f)),
+        itemRenderer,
+        itemPredicate,
+        selectedItems: selectedFeedbackType,
+        onItemSelect: handleItemSelect,
+        onRemove: handleItemDelete,
+        tagRenderer: (item) => item.type,
+        popoverProps: { minimal: true },
+        fill: true,
+      }),
+      h(TextArea, {
+        onChange: (e) => setCustomFeedback(e.target.value),
+        placeholder: "Enter custom feedback here...",
+        autoResize: true,
+        className: 'input'
+      })
+    ]),
+  ])
 }

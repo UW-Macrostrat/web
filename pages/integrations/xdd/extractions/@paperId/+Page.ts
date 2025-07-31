@@ -13,9 +13,12 @@ import {
   useModelIndex,
   usePostgresQuery,
 } from "../data-service";
-import { MatchedEntityLink } from "../match";
+import { AuthStatus, useAuth } from "@macrostrat/form-components";
 import { DataField } from "~/components/unit-details";
-import { FlexRow } from "@macrostrat/ui-components";
+import { FlexRow, SaveButton } from "@macrostrat/ui-components";
+import { MultiSelect } from "@blueprintjs/select"
+import { MenuItem, TextArea, Popover } from "@blueprintjs/core";
+import { useState } from "react";
 
 export function Page() {
   return h(ContentPage, [h(PageBreadcrumbs), h(PageMain)]);
@@ -45,11 +48,19 @@ function ExtractionIndex() {
     return h("div", "Loading...");
   }
 
+  const lexURL = "/lex"
+
   return h([
+    h(FlexRow, { justifyContent: "space-between", alignItems: "center" }, [
+      h(
+        'h3',
+        "Extraction feedback"
+      ),
+      h(AuthStatus)
+    ]),
     h("h1", paper.citation?.title ?? "Model extractions"),
     data.map((d) => {
       const data = enhanceData(d, models, entityTypes)
-      console.log(data);
 
       const { entities = [], paragraph_text, model, model_run, source_text, version_id } = data;
 
@@ -81,6 +92,13 @@ function ExtractionIndex() {
           runID: model_run,
           allowOverlap: true,
           view: true,
+          matchLinks: {
+            lithology: `${lexURL}/lithologies`,
+            strat_name: `${lexURL}/strat-names`,
+            lith_att: `${lexURL}/lith-atts`,
+            concept: `${lexURL}/strat-concepts`,
+            interval: `${lexURL}/intervals`,
+          },
         }),
       ]);
     }),
