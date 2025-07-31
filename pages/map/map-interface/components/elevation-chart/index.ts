@@ -246,7 +246,7 @@ function ElevationChartContainer() {
     null,
     h("div.elevation-chart", [
       h("div.control-bar", [
-        // h(LocationFocusButton, { location: crossSectionLine }),
+        hasElevationData ? h(LocationFocusButton, { location: crossSectionLine }) : null,
         h("div.spacer"),
         h(Button, {
           icon: "cross",
