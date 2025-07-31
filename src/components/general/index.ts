@@ -17,7 +17,7 @@ export function NavListItem({ href, children }) {
   );
 }
 
-export function MacrostatLogoLink({
+export function MacrostratLogoLink({
   href = "/",
   className,
   logoStyle,
@@ -37,7 +37,7 @@ export function MacrostatLogoLink({
 
 export function SiteTitle({ logoStyle, className, children }) {
   return h(
-    MacrostatLogoLink,
+    MacrostratLogoLink,
     { logoStyle, className: classNames("site-title", className) },
     h("div.site-title-content", [h("h1", "Macrostrat"), children])
   );
@@ -63,8 +63,6 @@ export function Navbar({ className, children, showSiteTitle = true }) {
 }
 
 export function Footer() {
-  const isDarkMode = useDarkMode()?.isEnabled;
-
   const navItems = [
     { href: "/about", text: "About", icon: "info-sign" },
     { href: "/publications", text: "Publications", icon: "book" },
@@ -83,7 +81,7 @@ export function Footer() {
     h("div", { className: "footer-container" }, [
       h("div", { className: "footer-text-container" }, [
         h(Image, {
-          className: "logo_white " + (isDarkMode ? "img-dark" : "img-light"),
+          className: "logo_white",
           src: "logo_white.png",
           width: "100px",
         }),
@@ -98,7 +96,7 @@ export function Footer() {
             "a",
             { href: "https://github.com/UW-Macrostrat", target: "_blank" },
             h(Image, {
-              className: "git_logo " + (isDarkMode ? "img-light" : "img-dark"),
+              className: "git_logo",
               src: "git-logo.png",
               width: "18px",
             })
@@ -119,7 +117,7 @@ export function Footer() {
       ]),
       h("div", { className: "footer-text-container" }, [
         h(Image, {
-          className: "funding-logo " + (isDarkMode ? "img-dark" : "img-light"),
+          className: "funding-logo",
           src: "nsf.png",
           width: "100px",
         }),
