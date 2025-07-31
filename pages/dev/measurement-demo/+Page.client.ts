@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import { useDarkMode } from "@macrostrat/ui-components";
 import { FullscreenPage } from "~/layouts";
 import { MultiSelect } from "@blueprintjs/select"
-import { MenuItem, Switch } from "@blueprintjs/core";
+import { MenuItem, Switch, Divider } from "@blueprintjs/core";
 
 export function Page() {
     return  h(FullscreenPage, h(Map))
@@ -26,7 +26,7 @@ function Map({
   mapboxToken?: string;
 }) {
     const [selectedTypes, setSelectedTypes] = useState([]);
-    const [clustered, setClustered] = useState(false);
+    const [clustered, setClustered] = useState(true);
 
     const style = useMapStyle({ selectedTypes, clustered });
 
@@ -78,6 +78,71 @@ function useMapStyle({selectedTypes, clustered}) {
 
     const url = baseURL + "?" + params;
 
+    const clusteredLayers = [
+        // Clustered points
+        {
+        id: 'clusters',
+        type: 'circle',
+        source: 'today',
+        'source-layer': 'default',
+        filter: ['>', ['get', 'n'], 1],
+        paint: {
+            'circle-color': [
+                'step',
+                ['get', 'n'],
+                '#51bbd6',
+                100, '#f1f075',
+                750, '#f28cb1'
+            ],
+            'circle-radius': [
+                'step',
+                ['get', 'n'],
+                10,     
+                100, 12,
+                750, 14
+            ]
+        }
+        },
+        // Cluster count labels
+        {
+            id: 'cluster-count',
+            type: 'symbol',
+            source: 'today',
+            'source-layer': 'default',
+            filter: ['>', ['get', 'n'], 1],
+            layout: {
+                'text-field': '{n}',
+                'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+                'text-size': 12
+            }
+        },
+        // Individual (non-clustered) points
+        {
+            id: 'unclustered-point',
+            type: 'circle',
+            source: 'today',
+            'source-layer': 'default',
+            filter: ['==', ['get', 'n'], 1],
+            paint: {
+                'circle-color': 'rgba(140, 144, 228, 1)',
+                'circle-radius': 4
+            }
+        }
+    ];
+
+    const unclusteredLayers = [
+        {
+            id: 'points',
+            type: 'circle',
+            source: 'today',
+            "source-layer": "default",
+            paint: {
+            'circle-color': "#373ec4",
+            'circle-radius': 4,
+            }
+        },
+    ];
+
     console.log("Using URL: ", url);
 
     const overlayStyle = {
@@ -87,18 +152,7 @@ function useMapStyle({selectedTypes, clustered}) {
             tiles: [ url ],
         }
         },
-        layers: [
-        {
-            id: 'today-points',
-            type: 'circle',
-            source: 'today',
-            "source-layer": "default",
-            paint: {
-            'circle-color': "#373ec4",
-            'circle-radius': 4,
-            }
-        },
-        ],
+        layers: clustered ? clusteredLayers : unclusteredLayers,
     }
 
   // Auto select sample type
@@ -168,6 +222,7 @@ function Panel({selectedTypes, setSelectedTypes, clustered, setClustered}) {
             popoverProps: { minimal: true },
             fill: true,
         }),
+        h(Divider),
         h(
             Switch, 
             {
