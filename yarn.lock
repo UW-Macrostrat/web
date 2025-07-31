@@ -3261,15 +3261,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/map-interface@npm:1.5.3, @macrostrat/map-interface@npm:^1.5.3":
-  version: 1.5.3
-  resolution: "@macrostrat/map-interface@npm:1.5.3"
+"@macrostrat/map-interface@npm:1.5.4, @macrostrat/map-interface@npm:^1.5.4":
+  version: 1.5.4
+  resolution: "@macrostrat/map-interface@npm:1.5.4"
   dependencies:
     "@blueprintjs/core": "npm:^5.0.0"
     "@macrostrat/color-utils": "npm:^1.1.1"
     "@macrostrat/data-components": "npm:^0.2.0"
     "@macrostrat/hyper": "npm:^3.0.6"
-    "@macrostrat/map-interface": "npm:1.5.3"
+    "@macrostrat/map-interface": "npm:1.5.4"
     "@macrostrat/mapbox-react": "npm:^2.6.2"
     "@macrostrat/mapbox-utils": "npm:^1.6.0"
     "@macrostrat/ui-components": "npm:^4.4.4"
@@ -3288,7 +3288,7 @@ __metadata:
   peerDependencies:
     react: ^16.8.6||^17.0.0||^18.0.0||^19.0.0
     react-dom: ^16.8.6||^17.0.0||^18.0.0||^19.0.0
-  checksum: 10/e1061b2a77cc1631f4d250ecd6b92729959927739d1fe5bfe1441d1c82fb606fa592580a41f01ffb8cb854b0e7ec5d72258edc6464e65f714811aaf9ddaaca7e
+  checksum: 10/e2aebe73fb6f411f68af86c285b48e2ecf88432cd27b4508a3d89093eae931ae1bf661eef09bfce733aac7a994c397a1a57beb23a6bfc90e54ee0ea67f480c85
   languageName: node
   linkType: hard
 
@@ -3481,7 +3481,7 @@ __metadata:
     "@macrostrat/feedback-components": "npm:^1.1.7"
     "@macrostrat/form-components": "npm:^0.2.1"
     "@macrostrat/hyper": "npm:^3.0.6"
-    "@macrostrat/map-interface": "npm:^1.5.3"
+    "@macrostrat/map-interface": "npm:^1.5.4"
     "@macrostrat/map-styles": "npm:^1.2.0"
     "@macrostrat/mapbox-react": "npm:^2.6.0"
     "@macrostrat/mapbox-utils": "npm:^1.5.0"
