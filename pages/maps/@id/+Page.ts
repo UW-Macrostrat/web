@@ -310,15 +310,6 @@ export function Page() {
     ]);
   }, [bounds]);
 
-  const lat = selectedLocation?.lat;
-  const lng = selectedLocation?.lng;
-  const zoom = mapRef?.getZoom() ?? 0;
-
-  const mapInfo = fetchMapInfo(lng, lat, zoom);
-  const columnInfo = fetchColumnInfo(lng, lat);
-  const xddInfo = fetchXddInfo(mapInfo?.strat_names);
-  const fossilInfo = fetchFossilInfo(lng, lat);
-
   if (bounds == null || mapStyle == null) return h(Spinner);
 
   const contextPanel = h(PanelCard, [
@@ -358,10 +349,7 @@ export function Page() {
         adaptiveWidth: true,
       },
       detailPanelStyle: DetailPanelStyle.FIXED,
-      detailPanel: selectedLocation != null ? 
-      h(InfoDrawerContainer, 
-        h(RegionalStratigraphy, { mapInfo, columnInfo, columnURL: "/columns" })
-      ) : h(MapLegendPanel, map.properties),
+      detailPanel: selectedLocation != null ? h(InfoDrawer, { selectedLocation, mapRef }) : h(MapLegendPanel, map.properties),
     },
     [
       h(
@@ -798,4 +786,46 @@ export async function getPBDBData(
       }),
     };
   });
+}
+
+function InfoDrawer({ selectedLocation, mapRef }) {
+  const lat = selectedLocation?.lat;
+  const lng = selectedLocation?.lng;
+  const zoom = mapRef?.getZoom() ?? 0;
+
+  const mapInfo = fetchMapInfo(lng, lat, zoom);
+  const columnInfo = fetchColumnInfo(lng, lat);
+  const xddInfo = fetchXddInfo(mapInfo?.mapData?.[0]?.macrostrat?.strat_names);
+  const fossilInfo = fetchFossilInfo(lng, lat);
+
+  const source =
+    mapInfo && mapInfo?.mapData && mapInfo?.mapData.length
+      ? mapInfo?.mapData[0]
+      : {
+          name: null,
+          descrip: null,
+          comments: null,
+          liths: [],
+          b_int: {},
+          t_int: {},
+          ref: {},
+        };
+
+  if (!mapInfo) return h(Spinner)
+
+
+  return h('div.info-drawer', [
+    h(RegionalStratigraphy, { mapInfo, columnInfo, columnURL: "/columns" }),
+    h(XddExpansion, { xddInfo }),
+    h(FossilCollections, { fossilInfo }),
+    h(Physiography, { mapInfo }),
+    h(MacrostratLinkedData, { 
+      mapInfo, 
+      source,
+      stratNameURL: "/lex/strat-names",
+      environmentURL: "/lex/environments",
+      intervalURL: "/lex/intervals",
+      lithologyURL: "/lex/lithologies",
+    })
+  ])
 }
