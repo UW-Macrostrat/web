@@ -23,6 +23,7 @@ import {
   MapMarker,
   MapView,
   PanelCard,
+  LocationPanel,
 } from "@macrostrat/map-interface";
 import { buildMacrostratStyleLayers } from "@macrostrat/map-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
@@ -43,9 +44,15 @@ import { usePageProps } from "~/renderer/usePageProps";
 import { usePageContext } from "vike-react/usePageContext";
 import { LithologyList, LithologyTag } from "@macrostrat/data-components";
 import { DataField } from "~/components/unit-details";
-import { InfoDrawer } from "@macrostrat/map-interface";
-import { fetchAPIData } from "~/_utils";
+import { fetchMapInfo, fetchColumnInfo, fetchFossilInfo, fetchXddInfo } from "./fetch";
 import { SETTINGS } from "@macrostrat-web/settings";
+import { 
+  FossilCollections, 
+  XddExpansion, 
+  MacrostratLinkedData, 
+  Physiography, 
+  RegionalStratigraphy  
+} from "@macrostrat/map-interface";
 
 interface StyleOpts {
   style: string;
@@ -332,8 +339,6 @@ export function Page() {
     h(BaseLayerSelector, { layer, setLayer }),
   ]);
 
-  console.log('bounds', bounds);
-
   return h(
     MapAreaContainer,
     {
@@ -345,13 +350,7 @@ export function Page() {
         adaptiveWidth: true,
       },
       detailPanelStyle: DetailPanelStyle.FIXED,
-      detailPanel: selectedLocation != null ? 
-      h(InfoDrawer, { 
-        position: selectedLocation, 
-        zoom: mapRef?.getZoom(),
-        setSelectedLocation,
-      })
-      : h(MapLegendPanel, map.properties),
+      detailPanel: selectedLocation != null ? h(InfoDrawer, { selectedLocation, mapRef, setSelectedLocation }) : h(MapLegendPanel, map.properties),
     },
     [
       h(
@@ -409,7 +408,7 @@ function MapLegendPanel(params) {
     h(
       "div.map-legend-container",
       h("div.map-legend", [
-        h(PageBreadcrumbs),
+        h(PageBreadcrumbs, { title: params.name}),
         h("div.legend-header", [
           h(ErrorBoundary, [
             h(MapReference, { reference: params, showSourceID: false }),
@@ -788,4 +787,53 @@ export async function getPBDBData(
       }),
     };
   });
+}
+
+function InfoDrawer({ selectedLocation, mapRef, setSelectedLocation }) {
+  const lat = selectedLocation?.lat;
+  const lng = selectedLocation?.lng;
+  const zoom = mapRef?.getZoom() ?? 0;
+
+  const mapInfo = fetchMapInfo(lng, lat, zoom);
+  const columnInfo = fetchColumnInfo(lng, lat);
+  const xddInfo = fetchXddInfo(mapInfo?.mapData?.[0]?.macrostrat?.strat_names);
+  const fossilInfo = fetchFossilInfo(lng, lat);
+
+  const source =
+    mapInfo && mapInfo?.mapData && mapInfo?.mapData.length
+      ? mapInfo?.mapData[0]
+      : {
+          name: null,
+          descrip: null,
+          comments: null,
+          liths: [],
+          b_int: {},
+          t_int: {},
+          ref: {},
+        };
+
+  return h(
+    LocationPanel, 
+    {
+      position: selectedLocation,
+      onClose: () => setSelectedLocation(null)
+    },
+    [
+      mapInfo ? 
+      [ 
+        h(RegionalStratigraphy, { mapInfo, columnInfo, columnURL: "/columns" }),
+        h(Physiography, { mapInfo }),
+        h(MacrostratLinkedData, { 
+          mapInfo, 
+          source,
+          stratNameURL: "/lex/strat-names",
+          environmentURL: "/lex/environments",
+          intervalURL: "/lex/intervals",
+          lithologyURL: "/lex/lithologies",
+        }),
+      ] : null,
+      h(XddExpansion, { xddInfo }),
+      h(FossilCollections, { fossilInfo }),
+    ]
+  )
 }

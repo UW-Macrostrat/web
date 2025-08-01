@@ -52,7 +52,13 @@ export function LayerButton(props: LayerButtonProps) {
   const { buttonComponent = ListButton, layer, name, ...rest } = props;
   const active = useAppState((state) => state.core.mapLayers.has(layer));
   const runAction = useAppActions();
-  const onClick = () => runAction({ type: "toggle-map-layer", layer });
+  const onClick = () => {
+    runAction({ type: "toggle-map-layer", layer });
+
+    if (layer === MapLayer.FOSSILS) {
+      runAction({ type: "reset-pbdb" });;
+    }
+  };
   return h(buttonComponent, {
     active,
     onClick,

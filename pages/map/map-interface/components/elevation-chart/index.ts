@@ -159,6 +159,7 @@ function drawElevationChart(
     .attr("class", "overlay")
     .attr("width", width)
     .attr("height", height)
+    .style("fill", "transparent")
     .on("mouseover", () => {
       focus.style("display", null);
     })
@@ -245,7 +246,7 @@ function ElevationChartContainer() {
     null,
     h("div.elevation-chart", [
       h("div.control-bar", [
-        h(LocationFocusButton, { location: crossSectionLine }),
+        hasElevationData ? h(LocationFocusButton, { location: crossSectionLine }) : null,
         h("div.spacer"),
         h(Button, {
           icon: "cross",
@@ -257,7 +258,6 @@ function ElevationChartContainer() {
           },
         }),
       ]),
-
       h("div", [
         h.if(nCoords < 2)("div.elevation-instructions", [
           nCoords == 0 ? "Click two points on the map" : "Click a second point",
