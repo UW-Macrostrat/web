@@ -13,12 +13,12 @@ export function Page() {
   const [tagList, setTagList] = useState([]);
 
   useEffect(() => {
-    fetchPGData("/people", {})
+    fetchPGData("/people", { name: `ilike.*${input}*` })
       .then(setPeople)
       .catch((err) => {
         console.error("Failed to fetch people:", err);
       });
-  }, []);
+  }, [input]);
 
   useEffect(() => {
     fetchPGData("/roles", {})
@@ -31,11 +31,6 @@ export function Page() {
   if(!res || !tagList) {
     return h("div.loading", "Loading...");
   }
-
-  const handleInputChange = (e) => {
-    const value = e.target.value;
-    setInput(value);
-  };
 
   const filteredPeople = res.filter((person) => {
     const name = person.name.toLowerCase();
@@ -69,7 +64,7 @@ export function Page() {
       ]),
       h(Card, { className: "search-bar" }, [
         h(SearchBar, {
-          onChange: handleInputChange,
+          onChange: (e) => setInput(e),
           placeholder: "Search by name, role, or email",
         }),
         h("div.tags", [
