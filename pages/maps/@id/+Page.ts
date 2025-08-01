@@ -43,9 +43,15 @@ import { usePageProps } from "~/renderer/usePageProps";
 import { usePageContext } from "vike-react/usePageContext";
 import { LithologyList, LithologyTag } from "@macrostrat/data-components";
 import { DataField } from "~/components/unit-details";
-import { InfoDrawer } from "@macrostrat/map-interface";
-import { fetchAPIData } from "~/_utils";
+import { fetchMapInfo, fetchColumnInfo, fetchFossilInfo, fetchXddInfo } from "./fetch";
 import { SETTINGS } from "@macrostrat-web/settings";
+import { 
+  FossilCollections, 
+  XddExpansion, 
+  MacrostratLinkedData, 
+  Physiography, 
+  RegionalStratigraphy  
+} from "@macrostrat/map-interface";
 
 interface StyleOpts {
   style: string;
@@ -304,6 +310,15 @@ export function Page() {
     ]);
   }, [bounds]);
 
+  const lat = selectedLocation?.lat;
+  const lng = selectedLocation?.lng;
+  const zoom = mapRef?.getZoom() ?? 0;
+
+  const mapInfo = fetchMapInfo(lng, lat, zoom);
+  const columnInfo = fetchColumnInfo(lng, lat);
+  const xddInfo = fetchXddInfo(mapInfo?.strat_names);
+  const fossilInfo = fetchFossilInfo(lng, lat);
+
   if (bounds == null || mapStyle == null) return h(Spinner);
 
   const contextPanel = h(PanelCard, [
@@ -332,8 +347,6 @@ export function Page() {
     h(BaseLayerSelector, { layer, setLayer }),
   ]);
 
-  console.log('bounds', bounds);
-
   return h(
     MapAreaContainer,
     {
@@ -346,12 +359,9 @@ export function Page() {
       },
       detailPanelStyle: DetailPanelStyle.FIXED,
       detailPanel: selectedLocation != null ? 
-      h(InfoDrawer, { 
-        position: selectedLocation, 
-        zoom: mapRef?.getZoom(),
-        setSelectedLocation,
-      })
-      : h(MapLegendPanel, map.properties),
+      h(InfoDrawerContainer, 
+        h(RegionalStratigraphy, { mapInfo, columnInfo, columnURL: "/columns" })
+      ) : h(MapLegendPanel, map.properties),
     },
     [
       h(
