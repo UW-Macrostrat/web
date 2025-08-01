@@ -12,11 +12,6 @@ jobs:
   smoke-test:
     runs-on: ubuntu-latest
 
-    env:
-      VITE_MAPBOX_API_TOKEN: ${{ secrets.MAPBOX_API_TOKEN }}
-      VITE_MACROSTRAT_TILESERVER_DOMAIN: 'https://tileserver.staging.svc.macrostrat.org'
-      VITE_MACROSTRAT_API_DOMAIN: 'https://macrostrat.org'
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -28,6 +23,13 @@ jobs:
 
       - name: Install dependencies
         run: yarn install
+
+      - name: Create .env file
+        run: |
+          echo "VITE_MAPBOX_API_TOKEN=${{ secrets.MAPBOX_API_TOKEN }}" >> .env
+          echo "VITE_MACROSTRAT_TILESERVER_DOMAIN=https://tileserver.staging.svc.macrostrat.org" >> .env
+          echo "VITE_MACROSTRAT_API_DOMAIN=https://macrostrat.org" >> .env
+
 
       - name: Start the app in background
         run: |
