@@ -44,6 +44,9 @@ jobs:
             "http://localhost:3000/"
             "http://localhost:3000/map/loc"
             "http://localhost:3000/#/sift/"
+            "http://localhost:3000/fdsfhdsbfbhdsjbhf"
+            "http://localhost:3000/lex/strat-names/1"
+            "http://localhost:3000/lex/intervals/10"
           )
 
           for url in "${urls[@]}"; do
@@ -51,7 +54,7 @@ jobs:
             status=$(curl -s -o /dev/null -w "%{http_code}" "$url")
             echo "  → HTTP $status"
             if [[ "$status" != "200" ]]; then
-              echo "❌ Unexpected status code: $status for $url"
+              echo "Unexpected status code: $status for $url"
               exit 1
             fi
           done
