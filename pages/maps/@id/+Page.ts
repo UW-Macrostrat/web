@@ -812,9 +812,6 @@ function InfoDrawer({ selectedLocation, mapRef, setSelectedLocation }) {
           ref: {},
         };
 
-  if (!mapInfo) return h(Spinner)
-
-
   return h(
     LocationPanel, 
     {
@@ -822,18 +819,21 @@ function InfoDrawer({ selectedLocation, mapRef, setSelectedLocation }) {
       onClose: () => setSelectedLocation(null)
     },
     [
-      h(RegionalStratigraphy, { mapInfo, columnInfo, columnURL: "/columns" }),
+      mapInfo ? 
+      [ 
+        h(RegionalStratigraphy, { mapInfo, columnInfo, columnURL: "/columns" }),
+        h(Physiography, { mapInfo }),
+        h(MacrostratLinkedData, { 
+          mapInfo, 
+          source,
+          stratNameURL: "/lex/strat-names",
+          environmentURL: "/lex/environments",
+          intervalURL: "/lex/intervals",
+          lithologyURL: "/lex/lithologies",
+        }),
+      ] : null,
       h(XddExpansion, { xddInfo }),
       h(FossilCollections, { fossilInfo }),
-      h(Physiography, { mapInfo }),
-      h(MacrostratLinkedData, { 
-        mapInfo, 
-        source,
-        stratNameURL: "/lex/strat-names",
-        environmentURL: "/lex/environments",
-        intervalURL: "/lex/intervals",
-        lithologyURL: "/lex/lithologies",
-      })
     ]
   )
 }
