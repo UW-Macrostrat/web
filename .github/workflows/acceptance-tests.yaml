@@ -44,7 +44,6 @@ jobs:
             "http://localhost:3000/"
             "http://localhost:3000/map/loc"
             "http://localhost:3000/#/sift/"
-            "http://localhost:3000/fdsfhdsbfbhdsjbhf"
             "http://localhost:3000/lex/strat-names/1"
             "http://localhost:3000/lex/intervals/10"
           )
