@@ -1,23 +1,18 @@
 import { Spinner } from "@blueprintjs/core";
 import h from "@macrostrat/hyper";
 import Journal from "./Journal";
-import { ExpansionPanel } from "@macrostrat/map-interface";
+import { ExpansionPanel, XddExpansion } from "@macrostrat/map-interface";
 import { useAppActions, useAppState } from "#/map/map-interface/app-state";
-import { XDDSnippet } from "#/map/map-interface/app-state/handlers/fetch";
 
-export function XddExpansion() {
+export function XddExpansionContainer() {
   const runAction = useAppActions();
 
-  const fetchingXdd = useAppState((state) => state.core.fetchingXdd);
   const xddInfo = useAppState((state) => state.core.xddInfo);
 
-  return h(xDDPanelCore, {
-    className: "regional-panel",
-    onChange() {
-      runAction({ type: "fetch-xdd" });
-    },
-    data: xddInfo,
-    isFetching: fetchingXdd,
+  runAction({ type: "fetch-xdd" });
+
+  return h(XddExpansion, {
+    xddInfo,
   });
 }
 
