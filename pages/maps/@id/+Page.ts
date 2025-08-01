@@ -23,6 +23,7 @@ import {
   MapMarker,
   MapView,
   PanelCard,
+  LocationPanel,
 } from "@macrostrat/map-interface";
 import { buildMacrostratStyleLayers } from "@macrostrat/map-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
@@ -349,7 +350,7 @@ export function Page() {
         adaptiveWidth: true,
       },
       detailPanelStyle: DetailPanelStyle.FIXED,
-      detailPanel: selectedLocation != null ? h(InfoDrawer, { selectedLocation, mapRef }) : h(MapLegendPanel, map.properties),
+      detailPanel: selectedLocation != null ? h(InfoDrawer, { selectedLocation, mapRef, setSelectedLocation }) : h(MapLegendPanel, map.properties),
     },
     [
       h(
@@ -407,7 +408,7 @@ function MapLegendPanel(params) {
     h(
       "div.map-legend-container",
       h("div.map-legend", [
-        h(PageBreadcrumbs),
+        h(PageBreadcrumbs, { title: params.name}),
         h("div.legend-header", [
           h(ErrorBoundary, [
             h(MapReference, { reference: params, showSourceID: false }),
@@ -788,7 +789,7 @@ export async function getPBDBData(
   });
 }
 
-function InfoDrawer({ selectedLocation, mapRef }) {
+function InfoDrawer({ selectedLocation, mapRef, setSelectedLocation }) {
   const lat = selectedLocation?.lat;
   const lng = selectedLocation?.lng;
   const zoom = mapRef?.getZoom() ?? 0;
@@ -814,18 +815,25 @@ function InfoDrawer({ selectedLocation, mapRef }) {
   if (!mapInfo) return h(Spinner)
 
 
-  return h('div.info-drawer', [
-    h(RegionalStratigraphy, { mapInfo, columnInfo, columnURL: "/columns" }),
-    h(XddExpansion, { xddInfo }),
-    h(FossilCollections, { fossilInfo }),
-    h(Physiography, { mapInfo }),
-    h(MacrostratLinkedData, { 
-      mapInfo, 
-      source,
-      stratNameURL: "/lex/strat-names",
-      environmentURL: "/lex/environments",
-      intervalURL: "/lex/intervals",
-      lithologyURL: "/lex/lithologies",
-    })
-  ])
+  return h(
+    LocationPanel, 
+    {
+      position: selectedLocation,
+      onClose: () => setSelectedLocation(null)
+    },
+    [
+      h(RegionalStratigraphy, { mapInfo, columnInfo, columnURL: "/columns" }),
+      h(XddExpansion, { xddInfo }),
+      h(FossilCollections, { fossilInfo }),
+      h(Physiography, { mapInfo }),
+      h(MacrostratLinkedData, { 
+        mapInfo, 
+        source,
+        stratNameURL: "/lex/strat-names",
+        environmentURL: "/lex/environments",
+        intervalURL: "/lex/intervals",
+        lithologyURL: "/lex/lithologies",
+      })
+    ]
+  )
 }
