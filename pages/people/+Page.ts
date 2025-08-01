@@ -39,7 +39,7 @@ export function Page() {
 
   const filteredPeople = res.filter((person) => {
     const name = person.name.toLowerCase();
-    const role = person.role ? person.role.toLowerCase() : "";
+    const role = person.roles.map(role => role.name).join(", ").toLowerCase();
     const email = person.email ? person.email.toLowerCase() : "";
 
     const roleTags = tagList
@@ -110,8 +110,8 @@ function PersonCard({ name, roles, email, website, img_id }) {
     h(Image, { src: img_id, className: "back-img" }),
     h("div.description", [
       h("a.name", { href: website }, name),
-      roles ? h("p.role", roles.map(role => role.name).join(", ")) : null,
-      email ? h("a.email", { href: "mailto: " + email }, email) : null,
+      h("p.role", roles.map(role => role.name).join(", ")),
+      h.if(email)("a.email", { href: "mailto: " + email }, email),
     ]),
   ]);
 }
