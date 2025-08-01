@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useBurwellActions } from "#/map/sources/app-state";
-import h from "@macrostrat/hyper";
+import h from "./main.module.sass"; 
 import IndexMapContainer from "./map";
 import { InfoDrawer } from "./info-drawer";
 // // Needed for onTouchTap
@@ -18,7 +18,7 @@ function App() {
   }, []);
   return h("div.full-height", [
     h(IndexMapContainer),
-    // h("div.content-overlay", [h(InfoDrawer)]),
+    h("div.content-overlay", [h(InfoDrawer)]),
   ]);
 }
 
