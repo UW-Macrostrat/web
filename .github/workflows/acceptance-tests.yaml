@@ -49,9 +49,7 @@ jobs:
           )
 
           for url in "${urls[@]}"; do
-            echo "Testing $url..."
             status=$(curl -s -o /dev/null -w "%{http_code}" "$url")
-            echo "  → HTTP $status"
             if [[ "$status" != "200" ]]; then
               echo "Unexpected status code: $status for $url"
               exit 1
