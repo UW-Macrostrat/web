@@ -25,15 +25,28 @@ export function PageBreadcrumbs({ showLogo = true, title }) {
 }
 
 export function PageBreadcrumbsInternal({ showLogo = false, items }) {
+  let itemsList = items;
+  if (itemsList.length === 0) {
+    itemsList = [
+      {
+        text: h("span.breadcrumbs-root", "Macrostrat"),
+        href: "/",
+      },
+    ];
+  }
+
   if (showLogo) {
-    items[0].text = h("span.breadcrumbs-root", [
-      h(MacrostratLogoLink, { logoStyle: "simple" }),
-      "Macrostrat",
-    ]);
+    itemsList[0] = {
+      text: h("span.breadcrumbs-root", [
+        h(MacrostratIcon, { iconStyle: "simple" }),
+        "Macrostrat",
+      ]),
+      href: "/",
+    };
   }
 
   return h(Breadcrumbs, {
-    items,
+    items: itemsList,
   });
 }
 
