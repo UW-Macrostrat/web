@@ -22,7 +22,9 @@ export function Page() {
 
   useEffect(() => {
     fetchPGData("/roles", {})
-      .then(data => setTagList(data.map(role => role.name)))
+      .then(data => { 
+        setTagList([...(data.map(role => role.name)), "Active", "Former"]);
+      })
       .catch((err) => {
         console.error("Failed to fetch tags:", err);
       });
@@ -37,22 +39,21 @@ export function Page() {
     const role = person.roles.map(role => role.name).join(", ").toLowerCase();
     const email = person.email ? person.email.toLowerCase() : "";
 
-    const roleTags = tagList
-      .map((tag) => {
-        if (role.includes(tag.toLowerCase())) {
-          return tag;
-        }
-        return null;
-      })
-      .filter((tag) => tag !== null);
+    const isActive = !person.active_end;
+    const personTags = [
+      ...person.roles.map(role => role.name),
+      isActive ? "Active" : "Former",
+    ];
+
     const tagMatch =
-      tags.length === 0 || tags.every((tag) => roleTags.includes(tag));
+      tags.length === 0 || tags.every((tag) => personTags.includes(tag));
 
     return (
       (name.includes(input) || role.includes(input) || email.includes(input)) &&
       tagMatch
     );
   });
+
 
   return h("div", [
     h(Navbar),
