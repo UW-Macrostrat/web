@@ -6,25 +6,19 @@ import {
   buildInspectorStyle
 } from "@macrostrat/map-interface";
 import { mapboxAccessToken } from "@macrostrat-web/settings";
-import { Footer } from "~/components/general";
+import { useMapRef } from "@macrostrat/mapbox-react";
 import { useEffect, useState } from "react";
 import { useDarkMode } from "@macrostrat/ui-components";
 import { FullscreenPage } from "~/layouts";
 import { MultiSelect } from "@blueprintjs/select"
 import { MenuItem, Switch, Divider } from "@blueprintjs/core";
+import { tileserverDomain } from "@macrostrat-web/settings";
 
 export function Page() {
     return  h(FullscreenPage, h(Map))
 }
 
-function Map({
-  mapboxToken,
-}: {
-  headerElement?: React.ReactElement;
-  title?: string;
-  children?: React.ReactNode;
-  mapboxToken?: string;
-}) {
+function Map() {
     const [selectedTypes, setSelectedTypes] = useState([]);
     const [clustered, setClustered] = useState(true);
 
@@ -40,6 +34,32 @@ function Map({
             },
         };
 
+    const handleClick = (map, e) => {
+        const cluster = map.queryRenderedFeatures(e.point, {
+            layers: ['clusters']
+        });
+
+        if(cluster.length > 0) {
+            const zoom = cluster[0].properties.expansion_zoom;
+
+            map.flyTo({
+            center: cluster[0].geometry.coordinates,
+            zoom: zoom + 2,
+            speed: 10,
+            curve: .5,
+            });
+        }
+
+        const features = map.queryRenderedFeatures(e.point, {
+            layers: ['unclustered-point']
+        });
+
+        if (features.length > 0) {
+            const properties = features[0].properties;
+            console.log("Feature clicked: ", properties);
+        } 
+    };
+
     return h(
         "div.map-container",
         [
@@ -52,11 +72,14 @@ function Map({
                 key: selectedTypes.join(",") + clustered,
             },
             [
-            h(MapView, { 
-                style, 
-                mapboxToken: mapboxAccessToken, 
-                mapPosition,
-            }),
+                h(MapView, { 
+                    style, 
+                    mapboxToken: mapboxAccessToken, 
+                    mapPosition,
+                    onMapLoaded: (map) => {
+                        map.on('click', (e) => handleClick(map, e));
+                    }
+                }),
             ]
         ),
         ]
@@ -73,7 +96,7 @@ function useMapStyle({selectedTypes, clustered}) {
 
     const [actualStyle, setActualStyle] = useState(null);
 
-    const baseURL = "http://localhost:8000/measurements/tile/{z}/{x}/{y}"
+    const baseURL = tileserverDomain + "/measurements/tile/{z}/{x}/{y}"
     const params = "cluster=" + clustered + (selectedTypes.length > 0 ? "&type=" + selectedTypes.map(encodeURIComponent).join(",") : "");
 
     const url = baseURL + "?" + params;
@@ -232,4 +255,60 @@ function Panel({selectedTypes, setSelectedTypes, clustered, setClustered}) {
             }
         )
     ]);
+}
+
+function handleClick() {
+  const mapRef = useMapRef();
+  const map = mapRef.current;
+
+    const handleClick = (e) => {
+        console.log("Map clicked at: ", e.point);
+      const cluster = map.queryRenderedFeatures(e.point, {
+        layers: ['clusters']
+      });
+
+      if(cluster.length > 0) {
+        const zoom = cluster[0].properties.expansion_zoom;
+
+        map.flyTo({
+          center: cluster[0].geometry.coordinates,
+          zoom: zoom + 2,
+          speed: 10,
+          curve: .5,
+        });
+      }
+
+      /*
+      const features = map.queryRenderedFeatures(e.point, {
+        layers: ['unclustered-point']
+      });
+
+      if (features.length > 0) {
+        const checkinId = features[0].properties.id;
+
+        // add marker
+        const coord = features[0].geometry.coordinates.slice();
+
+        const el = document.createElement('div');
+        el.className = 'selected_pin';
+        el.style.backgroundColor = 'blue';
+        el.style.borderRadius = '50%';
+        el.style.border = '2px solid white';
+        el.style.width = '15px';
+        el.style.height = '15px';
+
+
+        new mapboxgl.Marker(el)
+          .setLngLat(coord)
+          .addTo(map);
+
+        console.log("data", features[0]);
+        setSelectedCheckin(checkinId);
+      } else {
+        setSelectedCheckin(null); 
+      }
+    */
+    };
+
+    return handleClick;
 }
