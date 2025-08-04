@@ -5,6 +5,7 @@ import { DataField } from "~/components/unit-details";
 import { fetchPGData } from "~/_utils";
 
 import { SaveButton } from "@macrostrat/ui-components";
+import { postgrestPrefix } from "@macrostrat-web/settings";
 import { MultiSelect } from "@blueprintjs/select";
 import { MenuItem } from "@blueprintjs/core";
 
@@ -12,13 +13,13 @@ import { useEffect, useState } from "react";
 
 export function Page() {
     const [form, setForm] = useState({
-        name: "",
-        email: "",
-        title: "",
-        website: "",
-        profileImage: "",
-        startDate: "",
-        endDate: "",
+        name: null,
+        email: null,
+        title: null,
+        website: null,
+        img_id: null,
+        active_start: null,
+        active_end: null,
         roles: [],
     });
 
@@ -59,8 +60,8 @@ export function Page() {
                 h(RolesInput, { setForm }),
                 h(ImageInput, {
                     label: "Profile Image *",
-                    value: form.profileImage,
-                    onChange: handleChange("profileImage"),
+                    value: form.img_id,
+                    onChange: handleChange("img_id"),
                     required: true
                 }),
                 h(TextInput, {
@@ -71,14 +72,14 @@ export function Page() {
                 }),
                 h(DateInput, {
                     label: "Active Start Date",
-                    value: form.startDate,
-                    onChange: handleChange("startDate"),
+                    value: form.active_start,
+                    onChange: handleChange("active_start"),
                     required: true
                 }),
                 h(DateInput, {
                     label: "Active End Date",
-                    value: form.endDate,
-                    onChange: handleChange("endDate")
+                    value: form.active_end,
+                    onChange: handleChange("active_end")
                 }),
             ]),
             h(SubmitButton, { disabled: false, form }),
@@ -143,73 +144,99 @@ function SubmitButton({ disabled, form }) {
                 Object.entries(form).map(([key, value]) => [key, value === "" ? null : value])
             );
 
-            console.log("Form submitted with data:", formattedForm);
-            // Your form submission logic here, using formattedForm
+            const { roles, ...personData } = formattedForm;
+
+            fetch(postgrestPrefix + "/people", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: personData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json(); // or response.text(), depending on your API
+            })
+            .then(data => {
+                alert('Success: ' + form.name + ' has been added!');
+            })
+            .catch(error => {
+                console.warn('Error:', error);
+            });
         }
     };
 
     return h(SaveButton, { disabled, onClick: handleSubmit }, text)
 }
 
-function RolesInput({setForm}) {
+function RolesInput({ setForm }) {
   const [roles, setRoles] = useState([]);
   const [selectedRoles, setSelectedRoles] = useState([]);
 
   useEffect(() => {
     fetchPGData("/roles", {})
-      .then(data => {
-        setRoles(data.map(role => role.name));
+      .then((data) => {
+        setRoles(data); 
       })
       .catch((err) => {
         console.error("Failed to fetch roles:", err);
       });
   }, []);
 
-  // Check if item is selected in selectedRoles (not roles)
-  const isItemSelected = (item) => selectedRoles.includes(item);
+  const isItemSelected = (item) =>
+    selectedRoles.some((r) => r.id === item.id);
 
   const handleItemSelect = (item) => {
     if (!isItemSelected(item)) {
-      setSelectedRoles([...selectedRoles, item]);
-      setForm((prev) => ({ ...prev, roles: [...prev.roles, item] }));
+      const next = [...selectedRoles, item];
+      setSelectedRoles(next);
+      setForm((prev) => ({
+        ...prev,
+        roles: next.map((r) => r.id),
+      }));
     }
   };
 
   const handleItemDelete = (itemToDelete) => {
-    const next = selectedRoles.filter((item) => item !== itemToDelete);
+    const next = selectedRoles.filter((item) => item.id !== itemToDelete.id);
     setSelectedRoles(next);
-    setForm((prev) => ({ ...prev, roles: next }));
+    setForm((prev) => ({
+      ...prev,
+      roles: next.map((r) => r.id),
+    }));
   };
 
   const itemPredicate = (query, item) =>
-    item.toLowerCase().includes(query.toLowerCase());
+    item.name.toLowerCase().includes(query.toLowerCase());
 
-    const itemRenderer = (item, { handleClick, modifiers }) => {
-        if (!modifiers.matchesPredicate) return null;
+  const itemRenderer = (item, { handleClick, modifiers }) => {
+    if (!modifiers.matchesPredicate) return null;
 
-        return h(MenuItem, {
-            key: item,
-            text: item,
-            onClick: handleClick,
-            active: modifiers.active,
-            shouldDismissPopover: false,
-        });
-    };
-
-    const items = roles.filter((f) => !isItemSelected(f));
-
-    return h(DataField, {
-        label: "Roles *",
-        value: h(MultiSelect, {
-            items,
-            itemRenderer,
-            itemPredicate,
-            selectedItems: selectedRoles,
-            onItemSelect: handleItemSelect,
-            onRemove: handleItemDelete,
-            tagRenderer: (item) => item,
-            popoverProps: { minimal: true },
-            fill: true,
-        })
+    return h(MenuItem, {
+      key: item.id,
+      text: item.name,
+      onClick: handleClick,
+      active: modifiers.active,
+      shouldDismissPopover: false,
     });
+  };
+
+  const items = roles.filter((role) => !isItemSelected(role));
+
+  return h(DataField, {
+    label: "Roles *",
+    value: h(MultiSelect, {
+      items,
+      itemRenderer,
+      itemPredicate,
+      selectedItems: selectedRoles,
+      onItemSelect: handleItemSelect,
+      onRemove: handleItemDelete,
+      tagRenderer: (item) => item.name,
+      popoverProps: { minimal: true },
+      fill: true,
+    }),
+  });
 }
