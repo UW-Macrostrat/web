@@ -1,10 +1,8 @@
-import "regenerator-runtime/runtime";
 import React from "react";
-import { render } from "react-dom";
 import { AppContextProvider } from "./context";
 import { Map } from "./components";
 
-function App() {
+export function App() {
   return (
     <AppContextProvider>
       <div>
@@ -13,5 +11,3 @@ function App() {
     </AppContextProvider>
   );
 }
-
-render(<App />, document.getElementById("root"));
