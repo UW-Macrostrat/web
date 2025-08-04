@@ -23,12 +23,9 @@ export function Page() {
         roles: [],
     });
 
-    console.log("Initial form state:", form);
-
-    const disabled = !form.name || !form.email || !form.title || !form.profileImage;
+    const disabled = !form.name || !form.email || !form.title || !form.img_id || form.roles.length === 0;
 
     const handleChange = (field) => (value) => {
-        console.log(`${field} changed:`, value);
         setForm({ ...form, [field]: value });
     };
 
@@ -82,7 +79,7 @@ export function Page() {
                     onChange: handleChange("active_end")
                 }),
             ]),
-            h(SubmitButton, { disabled: false, form }),
+            h(SubmitButton, { disabled, form }),
             h("p.note", h('em', "Fields marked with * are required")),
         ]),
     ]);
@@ -144,18 +141,23 @@ function SubmitButton({ disabled, form }) {
                 Object.entries(form).map(([key, value]) => [key, value === "" ? null : value])
             );
 
-            const { roles, ...personData } = formattedForm;
+            const { roles, img_id, ...personData } = formattedForm;
 
-            fetch(postgrestPrefix + "/people", {
+            console.log("Submitting person data:", personData);
+
+            fetch(postgrestPrefix + "/people_table", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: personData
+                body: JSON.stringify({
+                    ...personData,
+                    img_id: "david.jpg"
+                })
             })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
+                    throw new Error(`HTTP error! Status: ${response.toString()}`);
                 }
                 return response.json(); // or response.text(), depending on your API
             })
@@ -165,7 +167,7 @@ function SubmitButton({ disabled, form }) {
                 // Now handle roles
                 if (roles.length > 0) {
                     const rolePromises = roles.map(roleId => {
-                        return fetch(postgrestPrefix + "/people_roles", {
+                        return fetch(postgrestPrefix + "/people_roles_table", {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
