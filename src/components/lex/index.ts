@@ -36,7 +36,7 @@ function ColumnMapContainer(props) {
     {
       load: () => import("./map.client").then((d) => d.ColumnsMapContainer),
       fallback: h("div.loading", "Loading map..."),
-      deps: [props.columnIDs, props.projectID],
+      deps: [props.columns, props.projectID],
     },
     (component) => h(component, props)
   );
