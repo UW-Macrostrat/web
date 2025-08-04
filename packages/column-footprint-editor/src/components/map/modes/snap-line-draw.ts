@@ -1,18 +1,7 @@
 //import { SnapLineMode, SnapModeDrawStyles } from "mapbox-gl-draw-snap-mode";
 
-import {
-  geojsonTypes,
-  activeStates,
-  meta,
-  cursors,
-} from "@mapbox/mapbox-gl-draw/src/constants";
-import doubleClickZoom from "@mapbox/mapbox-gl-draw/src/lib/double_click_zoom";
-import DrawLine from "@mapbox/mapbox-gl-draw/src/modes/draw_line_string";
-import {
-  addPointTovertices,
-  createSnapList,
-} from "mapbox-gl-draw-snap-mode/src/utils";
-import createVertex from "@mapbox/mapbox-gl-draw/src/lib/create_vertex";
+import MapboxDraw from "@mapbox/mapbox-gl-draw";
+import { Utils } from "mapbox-gl-draw-snap-mode";
 import {
   createPointOnLine,
   incrementMultiPath,
@@ -20,7 +9,13 @@ import {
   snapToCoord,
 } from "./utils";
 
-const SnapLineMode = { ...DrawLine };
+const { addPointTovertices, createSnapList } = Utils;
+
+const SnapLineMode: any = { ...MapboxDraw.modes.draw_line_string };
+
+const { createVertex, doubleClickZoom } = MapboxDraw.lib;
+
+const { geojsonTypes, activeStates, meta, cursors } = MapboxDraw.constants;
 
 SnapLineMode.onSetup = function (opts) {
   const line = this.newFeature({
@@ -149,7 +144,7 @@ SnapLineMode.onStop = function (state) {
   this.map.off("moveend", state.moveendCallback);
   this.map.off("draw.snap.options_changed", state.optionsChangedCallBAck);
 
-  DrawLine.onStop.call(this, state);
+  modes.draw_line_string.onStop.call(this, state);
   const obj = {
     action: "draw.create",
     feature: state.line.toGeoJSON(),

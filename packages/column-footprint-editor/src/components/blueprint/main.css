@@ -1,59 +1,62 @@
-@import "~/node_modules/@blueprintjs/core/lib/css/blueprint.css";
-@import "~/node_modules/@blueprintjs/icons/lib/css/blueprint-icons.css";
 
 .overlay {
-  max-width: 500px;
+    max-width: 500px;
 }
 
 .drag-bar-top {
-  height: 50px;
-  width: 100%;
-  z-index: 22;
+    height: 50px;
+    width: 100%;
+    z-index: 22;
 }
+
 .projects-drop-down {
-  display: flex;
-  align-items: flex-start;
-  flex-direction: column;
-  padding: 5px;
-  justify-content: flex-end;
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 5px;
+    justify-content: flex-end;
 }
 
 .projects-drop-more {
-  display: flex;
-  flex-direction: column;
-  padding: 5px;
-  justify-content: flex-end;
+    display: flex;
+    flex-direction: column;
+    padding: 5px;
+    justify-content: flex-end;
 }
 
 .nav-contents {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 10px;
 }
 
 .toolbar {
-  max-width: 300px;
-  margin-top: 5px;
+    max-width: 300px;
+    margin-top: 5px;
 }
+
 .nav-right,
 .nav-left {
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
 }
 
 .panel-stack {
-  min-height: 500px;
+    min-height: 500px;
 }
+
 .main-dialog-header {
-  margin-top: 5px;
-  margin-left: 5px;
+    margin-top: 5px;
+    margin-left: 5px;
 }
+
 .btn-holder {
-  float: right;
-  margin-top: -23px;
-  margin-right: -20px;
+    float: right;
+    margin-top: -23px;
+    margin-right: -20px;
 }
+
 .project-btns {
-  margin: 0px 5px 10px 0px;
+    margin: 0px 5px 10px 0px;
 }

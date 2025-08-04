@@ -1,9 +1,8 @@
-import "regenerator-runtime/runtime";
-import SimpleSelect from "@mapbox/mapbox-gl-draw/src/modes/simple_select";
-import "mapbox-gl/dist/mapbox-gl.css";
-import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
+import MapboxDraw from "@mapbox/mapbox-gl-draw";
 
-const PointsOnly = { ...SimpleSelect };
+const SimpleSelect = MapboxDraw.modes.simple_select;
+
+const PointsOnly: any = { ...SimpleSelect };
 
 PointsOnly.clickOnFeature = function (state, e) {
   if (e.featureTarget.geometry.type !== "Point") {

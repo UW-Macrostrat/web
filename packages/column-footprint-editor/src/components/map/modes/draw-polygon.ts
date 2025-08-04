@@ -1,17 +1,13 @@
-import * as CommonSelectors from "@mapbox/mapbox-gl-draw/src/lib/common_selectors";
-import {
-  geojsonTypes,
-  meta,
-  activeStates,
-} from "@mapbox/mapbox-gl-draw/src/constants";
-import doubleClickZoom from "@mapbox/mapbox-gl-draw/src/lib/double_click_zoom";
-import DrawPolygon from "@mapbox/mapbox-gl-draw/src/modes/draw_polygon";
-import "mapbox-gl/dist/mapbox-gl.css";
-import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
-import * as Constants from "@mapbox/mapbox-gl-draw/src/constants";
+import MapboxDraw from "@mapbox/mapbox-gl-draw";
+
 import { distance_between_points } from "../utils";
 
-let DrawPolyMult = { ...DrawPolygon };
+const { CommonSelectors, doubleClickZoom } = MapboxDraw.lib;
+
+const DrawPolygon = MapboxDraw.modes.draw_polygon;
+const { geojsonTypes, meta, activeStates } = MapboxDraw.constants;
+
+let DrawPolyMult: any = { ...DrawPolygon };
 
 DrawPolyMult.onSetup = function (opts) {
   const line = this.newFeature({

@@ -1,7 +1,10 @@
-import "regenerator-runtime/runtime";
 import React, { useRef, useEffect, useState, useContext } from "react";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
+import "@blueprintjs/core/lib/css/blueprint.css";
+import "@blueprintjs/icons/lib/css/blueprint-icons.css";
+import "@blueprintjs/popover2/lib/css/blueprint-popover2.css";
+
 import mapboxgl from "mapbox-gl";
 import { AppContext, ChangeSetItem } from "../../context";
 import { MapNavBar, AppToaster } from "../blueprint";
@@ -17,8 +20,9 @@ import {
   voronoiModeMap,
 } from "./map-pieces";
 import { VoronoiToolBar } from "../voronoi/tool-bar";
-import { mapboxToken } from "../../context/env";
 import { MAP_MODES, VoronoiPoint } from "../../context";
+
+import { mapboxAccessToken } from "@macrostrat-web/settings";
 
 /**
  *
@@ -29,7 +33,7 @@ import { MAP_MODES, VoronoiPoint } from "../../context";
  *
  */
 
-mapboxgl.accessToken = mapboxToken;
+mapboxgl.accessToken = mapboxAccessToken;
 
 export function Map() {
   const mapContainerRef = useRef(null);
@@ -97,7 +101,7 @@ export function Map() {
       mapRef.current = mapObj;
     });
     return () => {
-      mapRef.current.remove();
+      mapRef.current?.remove();
     };
   }, [mapContainerRef]);
 

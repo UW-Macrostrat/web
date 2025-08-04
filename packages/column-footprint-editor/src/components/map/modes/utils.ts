@@ -1,4 +1,3 @@
-import * as Constants from "@mapbox/mapbox-gl-draw/src/constants";
 import nearestPointOnLine from "@turf/nearest-point-on-line";
 import { distance_between_points } from "../utils";
 

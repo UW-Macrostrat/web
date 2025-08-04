@@ -16,7 +16,7 @@
     "@types/mapbox__mapbox-gl-draw": "^1.2.4",
     "axios": "^1.11.0",
     "mapbox-gl": "^3.13.0",
-    "mapbox-gl-draw-snap-mode": "^0.1.6",
+    "mapbox-gl-draw-snap-mode": "^0.4.0",
     "react": "^18.3.0",
     "react-color": "^2.19.3",
     "react-dom": "^18.3.0",

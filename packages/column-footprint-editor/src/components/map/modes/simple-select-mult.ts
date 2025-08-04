@@ -1,13 +1,12 @@
-import "regenerator-runtime/runtime";
-import SimpleSelect from "@mapbox/mapbox-gl-draw/src/modes/simple_select";
-import "mapbox-gl/dist/mapbox-gl.css";
-import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
-import * as Constants from "@mapbox/mapbox-gl-draw/src/constants";
-import * as CommonSelectors from "@mapbox/mapbox-gl-draw/src/lib/common_selectors";
+import MapboxDraw from "@mapbox/mapbox-gl-draw";
+
+const CommonSelectors = MapboxDraw.lib.CommonSelectors;
+const Constants = MapboxDraw.constants;
+const SimpleSelect = MapboxDraw.modes.simple_select;
 
 import { distance_between_points } from "../utils";
 
-const MultVertSimpleSelect = { ...SimpleSelect };
+const MultVertSimpleSelect: any = { ...SimpleSelect };
 
 MultVertSimpleSelect.onSetup = function (opts) {
   // turn the opts into state.

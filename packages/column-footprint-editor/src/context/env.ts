@@ -1,3 +1,6 @@
-const base = process.env.API_BASE;
-const mapboxToken = process.env.MAPBOX_TOKEN;
+const base = "/";
+import { mapboxAccessToken } from "@macrostrat-web/settings";
+
+const mapboxToken = mapboxAccessToken;
+
 export { base, mapboxToken };
