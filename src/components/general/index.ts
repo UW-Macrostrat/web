@@ -1,7 +1,9 @@
 import h from "./layout.module.sass";
 import { MacrostratIcon, StickyHeader } from "~/components";
 import { Spinner, Icon, Card } from "@blueprintjs/core";
-import { useDarkMode } from "@macrostrat/ui-components";
+import { ContentPage } from "~/layouts";
+import { PageBreadcrumbs } from "~/components";
+import { DarkModeButton } from "@macrostrat/ui-components";
 import classNames from "classnames";
 
 export function Image({ src, className, width, height }) {
@@ -159,4 +161,14 @@ export function StratTag({ isConcept, fontSize = ".75em" }) {
 
 export function IDTag({ id }) {
   return h("div.id-tag", "ID: #" + id);
+}
+
+export function BasePage({title, className, children}) {
+  return h("div", [
+    h(ContentPage, { className }, [
+      h(PageBreadcrumbs, { title }),
+      children,
+    ]),
+    h(Footer),
+  ]);
 }
