@@ -74,7 +74,7 @@ export function Page() {
         ),
         h(
           LinkCard,
-          { href: "/lex/lithology", title: "Lithologies" },
+          { href: "/lex/lithologies", title: "Lithologies" },
           "Names of geologic materials"
         ),
         h(

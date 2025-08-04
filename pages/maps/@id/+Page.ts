@@ -610,7 +610,7 @@ function LegendEntry({ data }) {
             label: "Lithologies: ",
             value: h(LithologyList, { 
               lithologies: lithologies?.map((lith) => ({ name: lith.lith_name, ...lith })),
-              onClickItem: (e, lith) => window.open(`/lex/lithology/${lith.lith_id}`, '_self') 
+              onClickItem: (e, lith) => window.open(`/lex/lithologies/${lith.lith_id}`, '_self') 
             })
           }
         ),

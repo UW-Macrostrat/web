@@ -245,7 +245,7 @@ export function Charts({ features }) {
   return h("div.charts", [
     h.if(liths?.length)(
       "div.chart",
-      Chart(liths, "Lithologies", "lithology", activeIndex, setActiveIndex)
+      Chart(liths, "Lithologies", "lithologies", activeIndex, setActiveIndex)
     ),
     h.if(environs?.length)(
       "div.chart",

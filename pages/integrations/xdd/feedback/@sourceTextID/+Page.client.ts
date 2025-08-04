@@ -148,7 +148,7 @@ function FeedbackInterface({ data, models, entityTypes }) {
     entityTypes,
     matchComponent: MatchedEntityLink,
     matchLinks: {
-      lithology: "/lex/lithology",
+      lithology: "/lex/lithologies",
       lith_att: "/lex/lith-atts",
       strat_name: "/lex/strat-names",
       concept: "/lex/strat-concepts",
