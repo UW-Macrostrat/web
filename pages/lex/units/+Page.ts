@@ -23,6 +23,7 @@ export function Page() {
       h(PageBreadcrumbs, {
         title: "Units",
       }),
+      h("p", "Units linked to " + field + " " + value),
       data?.map((d) => h(UnitItem, { key: d.id, data: d })),
     ]),
   ]);
