@@ -6,13 +6,15 @@ import {
   buildInspectorStyle
 } from "@macrostrat/map-interface";
 import { mapboxAccessToken } from "@macrostrat-web/settings";
-import { useMapRef } from "@macrostrat/mapbox-react";
+import { LithologyTag } from "@macrostrat/data-components";
 import { useEffect, useState } from "react";
 import { useDarkMode } from "@macrostrat/ui-components";
 import { FullscreenPage } from "~/layouts";
 import { MultiSelect } from "@blueprintjs/select"
 import { MenuItem, Switch, Divider } from "@blueprintjs/core";
 import { tileserverDomain } from "@macrostrat-web/settings";
+import { fetchPGData } from "~/_utils";
+import { DataField } from "~/components/unit-details";
 
 export function Page() {
     return  h(FullscreenPage, h(Map))
@@ -21,6 +23,7 @@ export function Page() {
 function Map() {
     const [selectedTypes, setSelectedTypes] = useState([]);
     const [clustered, setClustered] = useState(true);
+    const [selectedMeasurement, setSelectedMeasurement] = useState(null);
 
     const style = useMapStyle({ selectedTypes, clustered });
 
@@ -43,10 +46,10 @@ function Map() {
             const zoom = cluster[0].properties.expansion_zoom;
 
             map.flyTo({
-            center: cluster[0].geometry.coordinates,
-            zoom: zoom + 2,
-            speed: 10,
-            curve: .5,
+                center: cluster[0].geometry.coordinates,
+                zoom: zoom + 2,
+                speed: 10,
+                curve: .5,
             });
         }
 
@@ -56,7 +59,7 @@ function Map() {
 
         if (features.length > 0) {
             const properties = features[0].properties;
-            console.log("Feature clicked: ", properties);
+            setSelectedMeasurement(properties.id);
         } 
     };
 
@@ -68,7 +71,7 @@ function Map() {
             MapAreaContainer,
             {
                 className: 'map-area-container',
-                contextPanel: h(Panel, { selectedTypes, setSelectedTypes, clustered, setClustered }),
+                contextPanel: h(Panel, { selectedTypes, setSelectedTypes, clustered, setClustered, selectedMeasurement, setSelectedMeasurement }),
                 key: selectedTypes.join(",") + clustered,
             },
             [
@@ -191,7 +194,7 @@ function useMapStyle({selectedTypes, clustered}) {
   return actualStyle;
 }
 
-function Panel({selectedTypes, setSelectedTypes, clustered, setClustered}) {
+function Panel({selectedTypes, setSelectedTypes, clustered, setClustered, selectedMeasurement, setSelectedMeasurement}) {
     const types = [
         "petrologic",
         "environmental",
@@ -253,62 +256,66 @@ function Panel({selectedTypes, setSelectedTypes, clustered, setClustered}) {
                label: "Clustered",
                onChange: () => setClustered(!clustered), 
             }
-        )
+        ),
+        h(SelectedMeasurement, { selectedMeasurement, setSelectedMeasurement }),
     ]);
 }
 
-function handleClick() {
-  const mapRef = useMapRef();
-  const map = mapRef.current;
+function SelectedMeasurement({ selectedMeasurement, setSelectedMeasurement }) {
+    const [data, setData] = useState(null);
 
-    const handleClick = (e) => {
-        console.log("Map clicked at: ", e.point);
-      const cluster = map.queryRenderedFeatures(e.point, {
-        layers: ['clusters']
-      });
-
-      if(cluster.length > 0) {
-        const zoom = cluster[0].properties.expansion_zoom;
-
-        map.flyTo({
-          center: cluster[0].geometry.coordinates,
-          zoom: zoom + 2,
-          speed: 10,
-          curve: .5,
+    useEffect(() => {
+        fetchPGData(
+            "/measurements_with_type",
+            {
+                id: "eq." + selectedMeasurement,
+            }
+        ).then((data) => {
+            if(selectedMeasurement != null) {
+                setData(data[0]);
+            }
         });
-      }
+    }, [selectedMeasurement]);
 
-      /*
-      const features = map.queryRenderedFeatures(e.point, {
-        layers: ['unclustered-point']
-      });
+    if (selectedMeasurement == null) {
+        return null;
+    }
 
-      if (features.length > 0) {
-        const checkinId = features[0].properties.id;
+    if (data == null) {
+        return h("div", "Loading measurement data...");
+    }   
 
-        // add marker
-        const coord = features[0].geometry.coordinates.slice();
+    console.log("Selected measurement data: ", data);
 
-        const el = document.createElement('div');
-        el.className = 'selected_pin';
-        el.style.backgroundColor = 'blue';
-        el.style.borderRadius = '50%';
-        el.style.border = '2px solid white';
-        el.style.width = '15px';
-        el.style.height = '15px';
+    const { sample_name, sample_geo_unit, sample_lith, lith_id, age, early_id, late_id, sample_description, ref, type } = data;
 
-
-        new mapboxgl.Marker(el)
-          .setLngLat(coord)
-          .addTo(map);
-
-        console.log("data", features[0]);
-        setSelectedCheckin(checkinId);
-      } else {
-        setSelectedCheckin(null); 
-      }
-    */
+    // Lithology tag component
+    let lithProps = {
+        data: { name: sample_lith }
     };
 
-    return handleClick;
+    if (lith_id !== 0) {
+        lithProps.onClick = () => { window.open('/lex/lithologies/' + lith_id); };
+    }
+
+    // Interval tag component
+    let ageProps = {
+        data: { name: age }
+    };
+
+    if (early_id !== 0) {
+        ageProps.onClick = () => { window.open('/lex/intervals/' + early_id); };
+    }
+
+    return h("div.selected-measurement", [
+        h("h3", "Selected Measurement"),
+        h(Divider),
+        h(DataField, { label: "Name", value: sample_name }),
+        h(DataField, { label: "Type", value: type }),
+        h(DataField, { label: "Geological Unit", value: sample_geo_unit }),
+        h.if(sample_lith)(DataField, { label: "Lithology", value: h(LithologyTag, lithProps) }),
+        h.if(age)(DataField, { label: "Age", value: h(LithologyTag, ageProps) }),
+        h(DataField, { label: "Description", value: sample_description }),
+        h.if(ref.includes("http"))('a', { href: ref, target: "_blank" }, "View Reference"),
+    ]);
 }
