@@ -1005,7 +1005,7 @@ export function Fossils({ fossilsData }) {
   const showLoadMore = visibleCount < fossilsData.length;
 
   return h.if(fossilsData?.length > 0)("div.fossils-container", [
-    h(ExpansionPanel, { title: "Fossils", className: "fossils-panel" }, [
+    h(ExpansionPanel, { title: "Fossils", helpText: "via PBDB", className: "fossils-panel" }, [
       h("div.fossils-list", [...visibleItems]),
       h.if(showLoadMore)(
         "div.load-more-wrapper",
