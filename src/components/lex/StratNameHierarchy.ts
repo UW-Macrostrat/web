@@ -87,7 +87,7 @@ const mapToHier = (data) => {
   Hier.onClick = (e) => {
     e.preventDefault();
     const url = `/lex/strat-names/${data.strat_name_id}`;
-    window?.open(url, "_blank")?.focus();
+    window?.open(url, "_self")?.focus();
   };
   Hier.subhierarchy = data.children.map((c) => mapToHier(c));
   return Hier;
