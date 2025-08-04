@@ -13,7 +13,7 @@ import {
 import { usePageContext } from "vike-react/usePageContext";
 
 export function Page() {
-  const { resData, colData, taxaData, refs, unitsData, fossilsData } =
+  const { resData, colData, taxaData, refs, fossilsData } =
     useData();
 
   const id = usePageContext().urlParsed.pathname.split("/")[3];
@@ -29,7 +29,7 @@ export function Page() {
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),
     h(Timescales, { timescales }),
-    h(Units, { unitsData }),
+    h(Units, { href: "int_id=" + id }),
     h(Fossils, { fossilsData }),
   ];
 

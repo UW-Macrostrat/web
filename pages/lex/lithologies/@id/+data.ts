@@ -19,7 +19,7 @@ export async function data(pageContext) {
   };
 
   // Perform all API calls concurrently, with error handling
-  const [resData, colData, unitsData, mapsData, fossilsData, refs1, refs2] =
+  const [resData, colData, mapsData, fossilsData, refs1, refs2] =
     await Promise.all([
       safeFetch(() => fetchAPIData("/defs/lithologies", { lith_id }), "resData"),
       safeFetch(
@@ -31,7 +31,6 @@ export async function data(pageContext) {
           }),
         "colData"
       ),
-      safeFetch(() => fetchAPIData("/units", { lith_id }), "unitsData"),
       safeFetch(() => fetchAPIData("/geologic_units/map/legend", { lith_id }), "mapsData"),
       safeFetch(() => fetchAPIData("/fossils", { lith_id }), "fossilsData"),
       safeFetch(() => fetchAPIRefs("/fossils", { lith_id }), "refs1"),
@@ -69,7 +68,6 @@ export async function data(pageContext) {
     colData: colData ?? null,
     taxaData,
     refs,
-    unitsData: unitsData ?? null,
     fossilsData: fossilsData ?? null,
     mapsData: mapsData ?? null,
   };

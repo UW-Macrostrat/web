@@ -16,12 +16,14 @@ import { fetchPGData } from "~/_utils";
 import { useState, useEffect } from "react";
 
 export function Page() {
-  const { resData, colData, taxaData, refs, unitsData, fossilsData, mapsData } =
+  const { resData, colData, taxaData, refs, fossilsData, mapsData } =
     useData();
 
   const id = usePageContext().urlParsed.pathname.split("/")[3];
   const features = colData?.features || [];
   const timescales = resData?.timescales || [];
+
+  console.log("resData:", resData);
 
   const children = [
     h(ColumnsTable, {
@@ -31,7 +33,7 @@ export function Page() {
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),
     h(Timescales, { timescales }),
-    h(Units, { unitsData }),
+    h(Units, { href: "lith_id=" + id }),
     h(Fossils, { fossilsData }),
     h(Maps, { mapsData }),
     h(Matches, {

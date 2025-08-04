@@ -19,7 +19,7 @@ export async function data(pageContext) {
   };
 
   // Fetch all data in parallel with error tolerance
-  const [resData, colData, unitsData, fossilsData, refs1, refs2] =
+  const [resData, colData, fossilsData, refs1, refs2] =
     await Promise.all([
       safeFetch(() => fetchAPIData("/defs/econs", { econ_id }), "resData"),
       safeFetch(
@@ -31,7 +31,6 @@ export async function data(pageContext) {
           }),
         "colData"
       ),
-      safeFetch(() => fetchAPIData("/units", { econ_id }), "unitsData"),
       safeFetch(() => fetchAPIData("/fossils", { econ_id }), "fossilsData"),
       safeFetch(() => fetchAPIRefs("/fossils", { econ_id }), "refs1"),
       safeFetch(() => fetchAPIRefs("/columns", { econ_id }), "refs2"),
@@ -68,7 +67,6 @@ export async function data(pageContext) {
     colData: colData ?? null,
     taxaData,
     refs,
-    unitsData: unitsData ?? null,
     fossilsData: fossilsData ?? null,
   };
 }

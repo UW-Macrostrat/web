@@ -910,38 +910,8 @@ function ChartLegend(data, route, activeIndex, setActiveIndex, index) {
   ]);
 }
 
-export function Units({ unitsData }) {
-  const ITEMS_PER_PAGE = 20;
-  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
-  const data = useMemo(() => {
-    return unitsData.slice(0, visibleCount);
-  }, [unitsData, visibleCount]);
-
-  const visibleItems = data.map((item) =>
-    h(
-      "a.unit-item",
-      { href: "/columns/" + item.col_id + "#unit=" + item.unit_id },
-      item.unit_name + " (#" + item.unit_id + ")"
-    )
-  );
-
-  const handleLoadMore = () => {
-    setVisibleCount((prev) =>
-      Math.min(prev + ITEMS_PER_PAGE, unitsData.length)
-    );
-  };
-
-  const showLoadMore = visibleCount < unitsData.length;
-
-  return h.if(unitsData?.length > 0)("div.units-container", [
-    h(ExpansionPanel, { title: "Units", className: "units-panel" }, [
-      h("div.units-list", [...visibleItems]),
-      h.if(showLoadMore)(
-        "div.load-more-wrapper",
-        h("button.load-more-btn", { onClick: handleLoadMore }, "Load More")
-      ),
-    ]),
-  ]);
+export function Units({ href }) {
+  return h(LinkCard, { title: "View linked units", href: '/lex/units?' + href, className: "units-card" });
 }
 
 export function Maps({ mapsData }) {

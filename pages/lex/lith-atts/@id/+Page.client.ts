@@ -1,16 +1,15 @@
 import { useData } from "vike-react/useData";
 import h from "@macrostrat/hyper";
-import { LexItemPage, Matches, Units, Matches } from "~/components/lex";
+import { LexItemPage, Matches } from "~/components/lex";
 import { usePageContext } from "vike-react/usePageContext";
 
 export function Page() {
-  const { resData, unitsData } = useData();
+  const { resData } = useData();
 
   const id = usePageContext().urlParsed.pathname.split("/")[3];
 
   const children = [
     h(LithologyAttributeDetails, { resData }),
-    h(Units, { unitsData }),
     h(Matches, { lith_att_id: id})
   ];
 
