@@ -11,10 +11,12 @@ import { useEffect, useState } from "react";
 import { useDarkMode } from "@macrostrat/ui-components";
 import { FullscreenPage } from "~/layouts";
 import { MultiSelect } from "@blueprintjs/select"
-import { MenuItem, Switch, Divider } from "@blueprintjs/core";
+import { MenuItem, Switch, Divider, Icon } from "@blueprintjs/core";
 import { tileserverDomain } from "@macrostrat-web/settings";
 import { fetchPGData } from "~/_utils";
 import { DataField } from "~/components/unit-details";
+import { FlexRow } from "@macrostrat/ui-components";
+
 
 export function Page() {
     return  h(FullscreenPage, h(Map))
@@ -238,25 +240,29 @@ function Panel({selectedTypes, setSelectedTypes, clustered, setClustered, select
 
     return h('div.panel', [
         h.if(!selectedMeasurement)('div.filter', [
-            h(MultiSelect, {
-                items,
-                itemRenderer,
-                itemPredicate,
-                selectedItems: selectedTypes,
-                onItemSelect: handleItemSelect,
-                onRemove: handleItemDelete,
-                tagRenderer: (item) => item,
-                popoverProps: { minimal: true },
-                fill: true,
-            }),
-            h(
-                Switch, 
-                {
-                checked: clustered,
-                label: "Clustered",
-                onChange: () => setClustered(!clustered), 
-                }
-            ),
+            h("h3", "Filter Measurements"),
+            h(Divider),
+            h('div.filter-select', [
+                h(MultiSelect, {
+                    items,
+                    itemRenderer,
+                    itemPredicate,
+                    selectedItems: selectedTypes,
+                    onItemSelect: handleItemSelect,
+                    onRemove: handleItemDelete,
+                    tagRenderer: (item) => item,
+                    popoverProps: { minimal: true },
+                    fill: true,
+                }),
+                h(
+                    Switch, 
+                    {
+                    checked: clustered,
+                    label: "Clustered",
+                    onChange: () => setClustered(!clustered), 
+                    }
+                ),
+            ]),
         ]),
         h.if(selectedMeasurement)(SelectedMeasurement, { selectedMeasurement, setSelectedMeasurement }),
     ]);
@@ -278,13 +284,9 @@ function SelectedMeasurement({ selectedMeasurement, setSelectedMeasurement }) {
         });
     }, [selectedMeasurement]);
 
-    if (selectedMeasurement == null) {
+    if (selectedMeasurement == null || data == null) {
         return null;
     }
-
-    if (data == null) {
-        return h("div", "Loading measurement data...");
-    }   
 
     const { sample_name, sample_geo_unit, sample_lith, lith_id, age, early_id, late_id, sample_description, ref, type } = data;
 
@@ -307,7 +309,10 @@ function SelectedMeasurement({ selectedMeasurement, setSelectedMeasurement }) {
     }
 
     return h("div.selected-measurement", [
-        h("h3", "Selected Measurement"),
+        h(FlexRow, { justifyContent: 'space-between' }, [ 
+            h("h3", "Selected Measurement"),
+            h(Icon, { icon: "cross", className: 'close-btn', onClick: () => setSelectedMeasurement(null) }),
+        ]),
         h(Divider),
         h(DataField, { label: "Name", value: sample_name }),
         h(DataField, { label: "Type", value: type }),
