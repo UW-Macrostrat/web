@@ -157,9 +157,12 @@ function SubmitButton({ disabled, form }) {
             })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.toString()}`);
+                    // Wait for the response text before throwing an error
+                    return response.text().then(text => {
+                        throw new Error(`HTTP error! Status: ${response.status} - ${text}`);
+                    });
                 }
-                return response.json(); // or response.text(), depending on your API
+                return response.json();
             })
             .then(data => {
                 const personId = data.id;
@@ -180,7 +183,7 @@ function SubmitButton({ disabled, form }) {
                 }
             })
             .catch(error => {
-                console.warn('Error:', error);
+                console.warn(error);
             });
         }
     };
