@@ -66,7 +66,7 @@ export interface LexItemPageProps {
   siftLink: string;
   id: number;
   resData: ResData;
-  refs: string[];
+  refs?: string[];
   header?: any;
 }
 
