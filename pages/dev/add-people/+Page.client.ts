@@ -160,7 +160,22 @@ function SubmitButton({ disabled, form }) {
                 return response.json(); // or response.text(), depending on your API
             })
             .then(data => {
-                alert('Success: ' + form.name + ' has been added!');
+                const personId = data.id;
+
+                // Now handle roles
+                if (roles.length > 0) {
+                    const rolePromises = roles.map(roleId => {
+                        return fetch(postgrestPrefix + "/people_roles", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ person_id: personId, role_id: roleId })
+                        });
+                    });
+
+                    return Promise.all(rolePromises);
+                }
             })
             .catch(error => {
                 console.warn('Error:', error);
