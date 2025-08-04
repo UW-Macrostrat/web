@@ -237,27 +237,28 @@ function Panel({selectedTypes, setSelectedTypes, clustered, setClustered, select
     const items = types.filter((f) => !isItemSelected(f))
 
     return h('div.panel', [
-        h(MultiSelect, {
-            items,
-            itemRenderer,
-            itemPredicate,
-            selectedItems: selectedTypes,
-            onItemSelect: handleItemSelect,
-            onRemove: handleItemDelete,
-            tagRenderer: (item) => item,
-            popoverProps: { minimal: true },
-            fill: true,
-        }),
-        h(Divider),
-        h(
-            Switch, 
-            {
-               checked: clustered,
-               label: "Clustered",
-               onChange: () => setClustered(!clustered), 
-            }
-        ),
-        h(SelectedMeasurement, { selectedMeasurement, setSelectedMeasurement }),
+        h.if(!selectedMeasurement)('div.filter', [
+            h(MultiSelect, {
+                items,
+                itemRenderer,
+                itemPredicate,
+                selectedItems: selectedTypes,
+                onItemSelect: handleItemSelect,
+                onRemove: handleItemDelete,
+                tagRenderer: (item) => item,
+                popoverProps: { minimal: true },
+                fill: true,
+            }),
+            h(
+                Switch, 
+                {
+                checked: clustered,
+                label: "Clustered",
+                onChange: () => setClustered(!clustered), 
+                }
+            ),
+        ]),
+        h.if(selectedMeasurement)(SelectedMeasurement, { selectedMeasurement, setSelectedMeasurement }),
     ]);
 }
 
@@ -284,8 +285,6 @@ function SelectedMeasurement({ selectedMeasurement, setSelectedMeasurement }) {
     if (data == null) {
         return h("div", "Loading measurement data...");
     }   
-
-    console.log("Selected measurement data: ", data);
 
     const { sample_name, sample_geo_unit, sample_lith, lith_id, age, early_id, late_id, sample_description, ref, type } = data;
 
@@ -316,6 +315,6 @@ function SelectedMeasurement({ selectedMeasurement, setSelectedMeasurement }) {
         h.if(sample_lith)(DataField, { label: "Lithology", value: h(LithologyTag, lithProps) }),
         h.if(age)(DataField, { label: "Age", value: h(LithologyTag, ageProps) }),
         h(DataField, { label: "Description", value: sample_description }),
-        h.if(ref.includes("http"))('a', { href: ref, target: "_blank" }, "View Reference"),
+        h.if(ref.includes("http"))('a.ref', { href: ref, target: "_blank" }, "View Reference"),
     ]);
 }
