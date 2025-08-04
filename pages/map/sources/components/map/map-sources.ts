@@ -159,6 +159,12 @@ async function mapSources(
     }
   };
 
+  map.on("load", () => {
+    const layerIds = map.getStyle().layers.map(layer => layer.id).filter(id => id.startsWith("sources-"));
+    console.log("Layers on map after load:", layerIds);
+  });
+
+
   map.clickMap = (e) => {
     if (map.clickedFeatures) {
       map.clickedFeatures.map((f) => {
