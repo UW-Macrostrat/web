@@ -113,7 +113,7 @@ function SourceItem({ data }) {
       h("div.content", [
         h("div.source", [
           h("span", ref_source + ": " + ref_title + " (" + ref_year + ") "),
-          h("a", { href: url, target: "_blank" }, h(Icon, { icon: "link" })),
+          h("a", { href: url, target: "_self" }, h(Icon, { icon: "link" })),
         ]),
         h("div.tags", [h(IDTag, { id: source_id })]),
       ]),

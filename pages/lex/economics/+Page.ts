@@ -71,7 +71,7 @@ function LexItem({ data, route, id }) {
             backgroundColor: chromaColor?.luminance(1 - luminance).hex(),
           },
           onClick: (e) => {
-            window.open(`/lex/${route}/${data[id]}`, "_blank");
+            window.open(`/lex/${route}/${data[id]}`, "_self");
           },
         },
         name
