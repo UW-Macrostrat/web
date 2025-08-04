@@ -100,12 +100,17 @@ export function Page() {
   ]);
 }
 
-function PersonCard({ name, roles, email, website, img_id }) {
+function PersonCard({ name, roles, email, website, img_id, active_start, active_end }) {
+  const start = new Date(active_start).toLocaleDateString();
+  const end = new Date(active_end).toLocaleDateString();
+
   return h("div.person-info", [
     h(Image, { src: img_id, className: "back-img" }),
     h("div.description", [
       h("a.name", { href: website }, name),
       h("p.role", roles.map(role => role.name).join(", ")),
+      h.if(active_start && !active_end)("p.start", `Active since ${start}`),
+      h.if(active_end)("p.dates", `Active from ${start} to ${end}`),
       h.if(email)("a.email", { href: "mailto: " + email }, email),
     ]),
   ]);
