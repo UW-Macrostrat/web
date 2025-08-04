@@ -156,6 +156,10 @@ export const sitemap: Routes = {
       ],
     },
     {
+      slug: "measurements",
+      name: "Measurements",
+    },
+    {
       slug: "integrations",
       name: "Integrations",
       children: [

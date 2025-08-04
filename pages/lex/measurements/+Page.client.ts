@@ -106,63 +106,83 @@ function useMapStyle({selectedTypes, clustered}) {
 
     const url = baseURL + "?" + params;
 
+    const baseColor = "#868aa2";
+    const endColor = "#212435";
+
     const clusteredLayers = [
-        // Clustered points
-        {
-        id: 'clusters',
-        type: 'circle',
-        source: 'today',
-        'source-layer': 'default',
+      {
+        id: "clusters",
+        type: "circle",
+        source: "measurements",
+        "source-layer": "default",
         filter: ['>', ['get', 'n'], 1],
         paint: {
-            'circle-color': [
-                'step',
-                ['get', 'n'],
-                '#51bbd6',
-                100, '#f1f075',
-                750, '#f28cb1'
-            ],
-            'circle-radius': [
-                'step',
-                ['get', 'n'],
-                10,     
-                100, 12,
-                750, 14
-            ]
-        }
+          "circle-radius": [
+            'step',
+            ['get', 'n'],
+            7, 50,
+            9, 100,
+            11, 150,
+            13, 200,
+            15, 
+          ],
+          "circle-color": [
+            'step',
+            ['get', 'n'],
+            "#7b7fa0", 50,
+            '#636b8d', 100,
+            '#4a546e', 150,
+            '#353b49', 200,
+            endColor
+          ],
+          "circle-stroke-color": [
+            'step',
+            ['get', 'n'],
+            "#8b8eab", 50,
+            '#7a7e96', 100,
+            '#5d5f7c', 150,
+            '#484b63', 
+          ],
+          "circle-stroke-width": 3,
+          "circle-stroke-opacity": 1,
         },
-        // Cluster count labels
-        {
-            id: 'cluster-count',
-            type: 'symbol',
-            source: 'today',
-            'source-layer': 'default',
-            filter: ['>', ['get', 'n'], 1],
-            layout: {
-                'text-field': '{n}',
-                'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-                'text-size': 12
-            }
+      },
+      {
+        id: 'cluster-count',
+        type: 'symbol',
+        source: 'measurements',
+        "source-layer": "default",
+        filter: ['has', 'n'],
+        layout: {
+          'text-field': ['get', 'n'],
+          'text-size': 10,
+          'text-allow-overlap': true,
+          'text-ignore-placement': true,
         },
-        // Individual (non-clustered) points
-        {
-            id: 'unclustered-point',
-            type: 'circle',
-            source: 'today',
-            'source-layer': 'default',
-            filter: ['==', ['get', 'n'], 1],
-            paint: {
-                'circle-color': 'rgba(140, 144, 228, 1)',
-                'circle-radius': 4
-            }
+        paint: {
+          "text-color": "#fff"
+        },
+      },
+      {
+        id: 'unclustered-point',
+        type: 'circle',
+        source: 'measurements',
+        "source-layer": "default",
+        filter: ['<=', ['get', 'n'], 1],
+        paint: {
+          'circle-color': baseColor,
+          'circle-radius': 4,
+          'circle-stroke-width': 1,
+          'circle-stroke-color': '#fff'
         }
+      },
     ];
 
     const unclusteredLayers = [
         {
             id: 'points',
             type: 'circle',
-            source: 'today',
+            source: 'measurements',
             "source-layer": "default",
             paint: {
             'circle-color': "#373ec4",
@@ -175,7 +195,7 @@ function useMapStyle({selectedTypes, clustered}) {
 
     const overlayStyle = {
         sources: {
-        today: {
+        measurements: {
             type: "vector",
             tiles: [ url ],
         }
@@ -314,7 +334,7 @@ function SelectedMeasurement({ selectedMeasurement, setSelectedMeasurement }) {
             h(Icon, { icon: "cross", className: 'close-btn', onClick: () => setSelectedMeasurement(null) }),
         ]),
         h(Divider),
-        h(DataField, { label: "Name", value: sample_name }),
+        h(DataField, { label: "Name", value: h('a.ref', { href: '/lex/measurements/' + selectedMeasurement, target: "_blank" }, sample_name) }),
         h(DataField, { label: "Type", value: type }),
         h(DataField, { label: "Geological Unit", value: sample_geo_unit }),
         h.if(sample_lith)(DataField, { label: "Lithology", value: h(LithologyTag, lithProps) }),
