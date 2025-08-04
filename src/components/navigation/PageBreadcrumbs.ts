@@ -38,7 +38,7 @@ export function PageBreadcrumbsInternal({ showLogo = false, items }) {
   if (showLogo) {
     itemsList[0] = {
       text: h("span.breadcrumbs-root", [
-        h(MacrostratIcon, { iconStyle: "simple" }),
+        h(MacrostratIcon, { iconStyle: "simple", small: true }),
         "Macrostrat",
       ]),
       href: "/",
