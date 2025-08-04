@@ -819,6 +819,7 @@ function Chart(data, title, route, activeIndex, setActiveIndex) {
             cx: "50%",
             cy: "50%",
             fill: "#8884d8",
+            isAnimationActive: false
           },
           data?.map((entry, index) =>
             h(Cell, {
