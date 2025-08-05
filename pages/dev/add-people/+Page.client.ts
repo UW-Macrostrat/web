@@ -145,7 +145,7 @@ function SubmitButton({ disabled, form }) {
 
             console.log("Submitting person data:", personData);
 
-            fetch(postgrestPrefix + "/people_table", {
+            fetch(postgrestPrefix + "/people", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -165,12 +165,12 @@ function SubmitButton({ disabled, form }) {
                 return response.json();
             })
             .then(data => {
-                const personId = data.id;
+                const personId = data.person_id;
 
                 // Now handle roles
                 if (roles.length > 0) {
                     const rolePromises = roles.map(roleId => {
-                        return fetch(postgrestPrefix + "/people_roles_table", {
+                        return fetch(postgrestPrefix + "/people_roles", {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -180,7 +180,7 @@ function SubmitButton({ disabled, form }) {
                     });
 
                     return Promise.all(rolePromises);
-                }
+                }    
             })
             .catch(error => {
                 console.warn(error);
