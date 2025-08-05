@@ -156,3 +156,30 @@ This stylesheet the overall application page layout.
 
     &.layers, &.settings
       --map-context-stack-width: 18em
+
+.fossil-container
+  background-color: var(--background-color)
+  display: flex
+  flex-direction: column
+  position: relative
+  padding: 0 .5em
+
+  .close-icon
+    position: absolute
+    top: 0
+    right: 0
+    padding: .5em
+    cursor: pointer
+
+  .title
+    margin: .5em 0
+
+  .collections
+    max-height: 90vh
+    overflow: auto     
+    scrollbar-width: none 
+
+    &::-webkit-scrollbar
+      display: none
+
+  

@@ -107,6 +107,8 @@ function MultiFeedbackInterface({ data, models, entityTypes }) {
   const currentData = data[ix];
   const count = data.length;
 
+  const autoSelect = window.location.href.split('autoselect=')[1]?.split(",");
+
   return h("div.feedback-interface", [
     h.if(data.length > 1)([
       h(NonIdealState, {
@@ -127,13 +129,14 @@ function MultiFeedbackInterface({ data, models, entityTypes }) {
       data: currentData,
       models,
       entityTypes,
+      autoSelect
     }),
   ]);
 }
 
 const AppToaster = Toaster.create();
 
-function FeedbackInterface({ data, models, entityTypes }) {
+function FeedbackInterface({ data, models, entityTypes, autoSelect }) {
   const window = enhanceData(data, models, entityTypes);
   const { entities = [], paragraph_text, model } = window;
   const { user } = useAuth();
@@ -155,6 +158,7 @@ function FeedbackInterface({ data, models, entityTypes }) {
     },
     lineHeight: 3,
     view: user === null,
+    autoSelect,
     onSave: wrapWithToaster(
       async (tree) => {
         const data = prepareDataForServer(tree, window.source_text, [

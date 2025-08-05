@@ -23,16 +23,21 @@ export function MacrostratLogoLink({
   logoStyle,
   children,
 }) {
-  const logoFile =
-    logoStyle != null
-      ? `macrostrat-icon-${logoStyle}.svg`
-      : "macrostrat-icon.svg";
   return h("a.macrostrat-logo-link", { href, className }, [
-    h("img.macrostrat-logo", {
-      src: `https://storage.macrostrat.org/assets/web/macrostrat-icons/${logoFile}`,
-    }),
+    h(MacrostratIcon, { iconStyle: logoStyle }),
     children,
   ]);
+}
+
+export function MacrostratIcon({ iconStyle, className }) {
+  const iconFile =
+    iconStyle != null
+      ? `macrostrat-icon-${iconStyle}.svg`
+      : "macrostrat-icon.svg";
+  return h("img.macrostrat-logo", {
+    className,
+    src: `https://storage.macrostrat.org/assets/web/macrostrat-icons/${iconFile}`,
+  });
 }
 
 export function SiteTitle({ logoStyle, className, children }) {
