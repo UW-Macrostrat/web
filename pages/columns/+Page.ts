@@ -39,10 +39,8 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const { columnGroups, project } = useData();
 
   const [columnInput, setColumnInput] = useState("");
-  const [filteredInput, setFilteredInput] = useState("");
   // const [showEmpty, setShowEmpty] = useState(false);  
   const [showInProcess, setShowInProcess] = useState(false);
-  const filterText = true//columnInput.length >= 3;
 
   let validStatus = [
     "active",
@@ -50,14 +48,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
 
   if (showInProcess) validStatus.push("in process");
 
-  useEffect(() => {
-    if (columnInput.length >= 3) {
-      setFilteredInput(columnInput.toLowerCase());
-    }
-  }, [columnInput]);
-
   const filteredGroups = useMemo(() => {
-    console.log("Filtering column groups with input:", filteredInput);
     return columnGroups?.filter((group) => {
       const filteredColumns = group.columns.filter((col) => {
         const status = col.status.toLowerCase();
@@ -77,7 +68,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
 
       return false;
     })
-  }, [filteredInput, validStatus]);
+  }, [validStatus]);
 
   const columnIDs = filteredGroups?.flatMap((item) =>
     item.columns
@@ -128,7 +119,6 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
                 key: d.id,
                 linkPrefix,
                 columnInput,
-                filterText,
                 validStatus,
               })
             )
@@ -157,10 +147,9 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   ]);
 }
 
-function ColumnGroup({ data, linkPrefix, columnInput, filterText, validStatus }) {
+function ColumnGroup({ data, linkPrefix, columnInput, validStatus }) {
   const [isOpen, setIsOpen] = useState(false);
-  const filteredColumns = filterText
-    ? data.columns.filter((col) => {
+  const filteredColumns = data.columns.filter((col) => {
         const status = col.status.toLowerCase();
 
         const name = col.col_name.toLowerCase();
@@ -168,7 +157,6 @@ function ColumnGroup({ data, linkPrefix, columnInput, filterText, validStatus })
 
         return name.includes(input) && validStatus.includes(status);
       })
-    : data.columns;
 
   if (filteredColumns?.length === 0) return null;
 
