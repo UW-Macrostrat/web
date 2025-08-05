@@ -161,8 +161,15 @@ This stylesheet the overall application page layout.
   background-color: var(--background-color)
   display: flex
   flex-direction: column
+  position: relative
+  max-height: 90vh
+  overflow: auto     
+  scrollbar-width: none 
+
+  &::-webkit-scrollbar
+    display: none
 
   .close-icon
     align-self: flex-end
+    padding: .5em
     cursor: pointer
-    padding: 0.5em

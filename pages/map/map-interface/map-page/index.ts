@@ -21,6 +21,7 @@ import { ErrorBoundary } from "@macrostrat/ui-components";
 import { useState } from "react";
 
 import h from "./main.module.styl";
+import { StickyHeader } from "~/components";
 
 const ElevationChart = loadable(() => import("../components/elevation-chart"));
 const Menu = loadable(() => import("./menu"));
@@ -132,8 +133,10 @@ function InfoDrawerHolder() {
   
   if (pbdbData && pbdbData.length > 0) {
     return h('div.fossil-container', [
-      h(Icon, { icon: "cross", onClick: onClose, className: "close-icon" }),
-      h(FossilCollections, { data: pbdbData, expanded: true })
+      h(StickyHeader, [
+        h(Icon, { icon: "cross", onClick: onClose, className: "close-icon" }),
+        h(FossilCollections, { data: pbdbData, expanded: true })
+      ]),
     ]);
   }
   
