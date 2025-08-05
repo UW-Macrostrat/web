@@ -57,6 +57,7 @@ function Header({ name, color, idType, id }) {
     'econ_id': "economics",
     'environ_id': "environments",
     'strat_name_id': "strat-names",
+    'strat_name_concept_id': "strat-concepts",
   }
 
   return h(StickyHeader, { className: "header" }, [

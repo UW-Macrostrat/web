@@ -31,11 +31,11 @@ export function Page() {
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),
     h(Timescales, { timescales }),
-    h(Fossils, { fossilsData }),
     h(Maps, { mapsData }),
     h(Matches, {
       lith_id: id,
     }),
+    h.if(fossilsData.length > 0)(Fossils, { href: "lith_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
     h.if(unitsData.length > 0)(Units, { href: "lith_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
   ];
 
