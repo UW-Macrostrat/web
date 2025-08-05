@@ -57,7 +57,7 @@ function FitBounds({ columnData }) {
 
     map.fitBounds(bounds, {
       padding: 50,
-      duration: 500,
+      duration: 0,
     });
   });
 

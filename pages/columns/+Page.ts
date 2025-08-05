@@ -6,7 +6,7 @@ import {
   PageBreadcrumbs,
   StickyHeader,
 } from "~/components";
-import { AnchorButton, ButtonGroup } from "@blueprintjs/core";
+import { AnchorButton, ButtonGroup, Switch } from "@blueprintjs/core";
 import { Tag } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
@@ -15,6 +15,7 @@ import { useData } from "vike-react/useData";
 import { ClientOnly } from "vike-react/ClientOnly";
 import { navigate } from "vike/client/router";
 import { SearchBar } from "~/components/general";
+import { FlexRow } from "@macrostrat/ui-components";
 
 const h = hyper.styled(styles);
 
@@ -38,31 +39,40 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const { columnGroups, project } = useData();
 
   const [columnInput, setColumnInput] = useState("");
-  const shouldFilter = columnInput.length >= 3;
+  // const [showEmpty, setShowEmpty] = useState(false);  
+  const [showInProcess, setShowInProcess] = useState(false);
+  const filterText = true//columnInput.length >= 3;
 
-  const filteredGroups = shouldFilter
-    ? columnGroups?.filter((group) => {
-        const filteredColumns = group.columns.filter((col) => {
-          const name = col.col_name.toLowerCase();
-          const input = columnInput.toLowerCase();
-          return name.includes(input);
-        });
+  let validStatus = [
+    "active",
+  ]
 
-        if (
-          filteredColumns.length > 0 ||
-          group.name.toLowerCase().includes(columnInput.toLowerCase())
-        ) {
-          return { ...group, columns: filteredColumns };
-        }
+  if (showInProcess) validStatus.push("in process");
 
-        return false;
-      })
-    : null;
+  const filteredGroups = columnGroups?.filter((group) => {
+    const filteredColumns = group.columns.filter((col) => {
+      const status = col.status.toLowerCase();
+
+      const name = col.col_name.toLowerCase();
+      const input = columnInput.toLowerCase();
+
+      return name.includes(input) && validStatus.includes(status);
+    });
+
+    if (
+      filteredColumns.length > 0 ||
+      group.name.toLowerCase().includes(columnInput.toLowerCase())
+    ) {
+      return { ...group, columns: filteredColumns };
+    }
+
+    return false;
+  })
 
   const columnIDs = filteredGroups?.flatMap((item) =>
     item.columns
       .filter((col) =>
-        col.col_name.toLowerCase().includes(columnInput.toLowerCase())
+        col.col_name.toLowerCase().includes(columnInput.toLowerCase()) && validStatus.includes(col.status.toLowerCase())
       )
       .map((col) => col.col_id)
   );
@@ -81,10 +91,24 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
         h("div.main", [
           h(StickyHeader, [
             h(PageBreadcrumbs, { showLogo: true }),
-            h(SearchBar, {
-              placeholder: "Search columns...",
-              onChange: handleInputChange,
-            }),
+              h('div.search', [
+                h(SearchBar, {
+                  placeholder: "Search columns...",
+                  onChange: handleInputChange,
+                }),
+                /*
+                h(Switch, {
+                  checked: showEmpty,
+                  label: "Show empty",
+                  onChange: (e) => setShowEmpty(!showEmpty),
+                }),
+                */
+                h(Switch, {
+                  checked: showInProcess,
+                  label: "Show in process",
+                  onChange: (e) => setShowInProcess(!showInProcess),
+                }),
+              ])
           ]),
           h(
             "div.column-groups",
@@ -94,7 +118,8 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
                 key: d.id,
                 linkPrefix,
                 columnInput,
-                shouldFilter,
+                filterText,
+                validStatus,
               })
             )
           ),
@@ -122,13 +147,16 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   ]);
 }
 
-function ColumnGroup({ data, linkPrefix, columnInput, shouldFilter }) {
+function ColumnGroup({ data, linkPrefix, columnInput, filterText, validStatus }) {
   const [isOpen, setIsOpen] = useState(false);
-  const filteredColumns = shouldFilter
+  const filteredColumns = filterText
     ? data.columns.filter((col) => {
+        const status = col.status.toLowerCase();
+
         const name = col.col_name.toLowerCase();
         const input = columnInput.toLowerCase();
-        return name.includes(input);
+
+        return name.includes(input) && validStatus.includes(status);
       })
     : data.columns;
 
