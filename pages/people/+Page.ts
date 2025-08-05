@@ -13,7 +13,7 @@ export function Page() {
   const [tagList, setTagList] = useState([]);
 
   useEffect(() => {
-    fetchPGData("/people", { name: `ilike.*${input}*` })
+    fetchPGData("/people_with_roles", { name: `ilike.*${input}*` })
       .then(setPeople)
       .catch((err) => {
         console.error("Failed to fetch people:", err);
