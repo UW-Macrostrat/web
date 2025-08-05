@@ -26,28 +26,27 @@ export function Page() {
   const name = params.name;
 
   useEffect(() => {
-    fetchAPIData("/units", {
+    fetchAPIData("/fossils", {
       [idType]: id
     }).then((res) => setData(res));
   }, []);
 
-
   return h(ContentPage, [
     h(Header, { name, color, idType, id }),
     h('div.units', [
-      data?.map((d) => h(UnitItem, { key: d.id, data: d })),
+      data?.map((d) => h(FossilItem, { key: d.id, data: d })),
     ]),
     h(Footer)
   ]);
 }
 
-function UnitItem({ data }) {
-  const { unit_id, col_id, unit_name } = data;
+function FossilItem({ data }) {
+  const { cltn_name, cltn_id } = data;
 
   return h(LinkCard, {
-    href: `/columns/${col_id}#unit=${unit_id}`,
-    className: "unit-item",
-    title: unit_name,
+    href: 'https://paleobiodb.org/classic/displayCollResults?collection_no=col:' + cltn_id,
+    className: "fossil-item",
+    title: cltn_name,
   });
 }
 
@@ -63,7 +62,7 @@ function Header({ name, color, idType, id }) {
   return h(StickyHeader, { className: "header" }, [
     h(PageBreadcrumbs, {
       title: h(FlexRow, { gap: ".5em", alignItems: "center" }, [
-        h('p.title', 'Units for '),
+        h('p.title', 'Fossils for '),
         h(LithologyTag, { data: { name, color }, onClick: () => { window.open(`/lex/${map[idType]}/${id}`, "_self")} }),
       ]),
     })

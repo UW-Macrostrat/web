@@ -949,40 +949,8 @@ export function Maps({ mapsData }) {
   ]);
 }
 
-export function Fossils({ fossilsData }) {
-  const ITEMS_PER_PAGE = 20;
-  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
-  const data = useMemo(() => {
-    return fossilsData.slice(0, visibleCount);
-  }, [fossilsData, visibleCount]);
-
-  const visibleItems = data.map((item) =>
-    h(
-      "a.fossil-item",
-      {
-        href: `https://paleobiodb.org/classic/displayCollResults?collection_no=col:${item.cltn_id}`,
-      },
-      item.cltn_name + " (#" + item.cltn_id + ")"
-    )
-  );
-
-  const handleLoadMore = () => {
-    setVisibleCount((prev) =>
-      Math.min(prev + ITEMS_PER_PAGE, fossilsData.length)
-    );
-  };
-
-  const showLoadMore = visibleCount < fossilsData.length;
-
-  return h.if(fossilsData?.length > 0)("div.fossils-container", [
-    h(ExpansionPanel, { title: "Fossils", helpText: "via PBDB", className: "fossils-panel" }, [
-      h("div.fossils-list", [...visibleItems]),
-      h.if(showLoadMore)(
-        "div.load-more-wrapper",
-        h("button.load-more-btn", { onClick: handleLoadMore }, "Load More")
-      ),
-    ]),
-  ]);
+export function Fossils({ href }) {
+  return h(LinkCard, { title: "View linked fossils", href: '/lex/fossils?' + href, className: "fossils-card" });
 }
 
 export function MatchesPanel({ fossilsData }) {
