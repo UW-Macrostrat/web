@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { ContentPage } from "~/layouts";
 import {
   Link,
@@ -39,6 +39,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const { columnGroups, project } = useData();
 
   const [columnInput, setColumnInput] = useState("");
+  const [filteredInput, setFilteredInput] = useState("");
   // const [showEmpty, setShowEmpty] = useState(false);  
   const [showInProcess, setShowInProcess] = useState(false);
   const filterText = true//columnInput.length >= 3;
@@ -49,25 +50,34 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
 
   if (showInProcess) validStatus.push("in process");
 
-  const filteredGroups = columnGroups?.filter((group) => {
-    const filteredColumns = group.columns.filter((col) => {
-      const status = col.status.toLowerCase();
-
-      const name = col.col_name.toLowerCase();
-      const input = columnInput.toLowerCase();
-
-      return name.includes(input) && validStatus.includes(status);
-    });
-
-    if (
-      filteredColumns.length > 0 ||
-      group.name.toLowerCase().includes(columnInput.toLowerCase())
-    ) {
-      return { ...group, columns: filteredColumns };
+  useEffect(() => {
+    if (columnInput.length >= 3) {
+      setFilteredInput(columnInput.toLowerCase());
     }
+  }, [columnInput]);
 
-    return false;
-  })
+  const filteredGroups = useMemo(() => {
+    console.log("Filtering column groups with input:", filteredInput);
+    return columnGroups?.filter((group) => {
+      const filteredColumns = group.columns.filter((col) => {
+        const status = col.status.toLowerCase();
+
+        const name = col.col_name.toLowerCase();
+        const input = columnInput.toLowerCase();
+
+        return name.includes(input) && validStatus.includes(status);
+      });
+
+      if (
+        filteredColumns.length > 0 ||
+        group.name.toLowerCase().includes(columnInput.toLowerCase())
+      ) {
+        return { ...group, columns: filteredColumns };
+      }
+
+      return false;
+    })
+  }, [filteredInput, validStatus]);
 
   const columnIDs = filteredGroups?.flatMap((item) =>
     item.columns
