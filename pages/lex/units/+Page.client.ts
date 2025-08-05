@@ -6,12 +6,20 @@ import { fetchAPIData } from "~/_utils";
 import { usePageContext } from "vike-react/usePageContext";
 import { LithologyTag } from "@macrostrat/data-components";
 import { FlexRow } from "@macrostrat/ui-components";
+import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
+import { postgrestPrefix } from "@macrostrat-web/settings";
 
 
 export function Page() {
+  const url = usePageContext().urlOriginal.split("?")[1];
+
+  if (!url) {
+    return h(Base);
+  } 
+
   const [data, setData] = useState(null);
 
-  const params = getUrlParams(usePageContext().urlOriginal.split("?")[1]);
+  const params = getUrlParams(url);
   const idType = params.idType;
   const id = params[idType];
   const color = params.color;
@@ -75,4 +83,27 @@ function getUrlParams(urlString) {
   }
 
   return result;
+}
+
+function Base() {
+  return h(ContentPage, { className: 'page' }, [
+    h(StickyHeader, { className: "header" }, h(PageBreadcrumbs, { title: "Units" })),
+    h(PostgRESTInfiniteScrollView, {
+      route: postgrestPrefix + '/units',
+      id_key: 'id',
+      limit: 20,
+      itemComponent: BaseUnitItem,
+      filterable: true,
+      searchColumns: [{ value: "strat_name", label: "Name" }],
+    }),
+  ]);
+}
+
+function BaseUnitItem({ data }) {
+  const { id, col_id, strat_name } = data;
+
+  return h(LinkCard, {
+    href: `/columns/${col_id}#unit=${id}`,
+    title: strat_name,
+  })
 }

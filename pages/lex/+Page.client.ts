@@ -102,6 +102,11 @@ export function Page() {
           { href: "/lex/structures", title: "Structures" },
           "Names and descriptions of geologic structures"
         ),
+        h(
+          LinkCard,
+          { href: "/lex/units", title: "Units" },
+          "Names and descriptions of geologic units"
+        ),
 
         h("p", [
           h("strong", h("a", { href: "/sift" }, "Sift")),
