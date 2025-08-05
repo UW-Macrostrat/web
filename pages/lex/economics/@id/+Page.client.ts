@@ -27,8 +27,8 @@ export function Page() {
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),
     h(Timescales, { timescales }),
-    h(Units, { href: "econ_id=" + id }),
     h(Fossils, { fossilsData }),
+    h(Units, { href: "econ_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
   ];
 
   return LexItemPage({ children, id, refs, resData, siftLink: "economic" });

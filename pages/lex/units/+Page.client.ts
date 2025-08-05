@@ -1,5 +1,5 @@
 import h from "./main.module.sass";
-import { StickyHeader, LinkCard, PageBreadcrumbs } from "~/components";
+import { StickyHeader, LinkCard, PageBreadcrumbs, Footer } from "~/components";
 import { ContentPage } from "~/layouts";
 import { useState, useEffect } from "react";
 import { fetchAPIData } from "~/_utils";
@@ -29,6 +29,7 @@ export function Page() {
     h('div.units', [
       data?.map((d) => h(UnitItem, { key: d.id, data: d })),
     ]),
+    h(Footer)
   ]);
 }
 
@@ -44,7 +45,11 @@ function UnitItem({ data }) {
 
 function Header({ name, color, idType, id }) {
   const map = {
-    'int_id': "intervals"
+    'int_id': "intervals",
+    'lith_id': "lithologies",
+    'econ_id': "economics",
+    'environ_id': "environments",
+    'strat_name_id': "strat-names",
   }
 
   return h(StickyHeader, { className: "header" }, [

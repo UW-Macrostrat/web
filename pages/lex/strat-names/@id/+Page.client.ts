@@ -34,7 +34,7 @@ export function Page() {
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),
     h(Timescales, { timescales }),
-    h(Units, { href: "strat_name_id=" + id }),
+    h(Units, { href: "strat_name_id=" + id + "&name=" + resData?.strat_name }),
     h(Fossils, { fossilsData }),
     h(Maps, { mapsData }),
     h(Matches, {
