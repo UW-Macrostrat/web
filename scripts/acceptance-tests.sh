@@ -1,7 +1,6 @@
-#!/usr/bin/env bash
 set -euo pipefail
 
-# Load .env file if present
+# Load .env file
 if [ -f ".env" ]; then
   export $(grep -v '^#' .env | xargs)
 fi
@@ -25,5 +24,7 @@ for path in "${urls[@]}"; do
   if [[ "$status" != "200" ]]; then
     echo "Unexpected status code: $status for $url"
     exit 1
+    else
+    echo "Success: $url returned status code $status"
   fi
 done
