@@ -48,29 +48,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
 
   if (showInProcess) validStatus.push("in process");
 
-  const filteredGroups = useMemo(() => {
-    return columnGroups?.filter((group) => {
-      const filteredColumns = group.columns.filter((col) => {
-        const status = col.status.toLowerCase();
-
-        const name = col.col_name.toLowerCase();
-        const input = columnInput.toLowerCase();
-
-        return name.includes(input) && validStatus.includes(status);
-      });
-
-      if (
-        filteredColumns.length > 0 ||
-        group.name.toLowerCase().includes(columnInput.toLowerCase())
-      ) {
-        return { ...group, columns: filteredColumns };
-      }
-
-      return false;
-    })
-  }, [validStatus]);
-
-  const columnIDs = filteredGroups?.flatMap((item) =>
+  const columnIDs = columnGroups?.flatMap((item) =>
     item.columns
       .filter((col) =>
         col.col_name.toLowerCase().includes(columnInput.toLowerCase()) && validStatus.includes(col.status.toLowerCase())
@@ -83,8 +61,6 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const handleInputChange = (value, target) => {
     setColumnInput(value.toLowerCase());
   };
-
-  const allGroups = filteredGroups ?? columnGroups ?? [];
 
   return h("div.column-list-page", [
     h(ContentPage, [
@@ -113,7 +89,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
           ]),
           h(
             "div.column-groups",
-            allGroups.map((d) =>
+            columnGroups.map((d) =>
               h(ColumnGroup, {
                 data: d,
                 key: d.id,
@@ -149,14 +125,19 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
 
 function ColumnGroup({ data, linkPrefix, columnInput, validStatus }) {
   const [isOpen, setIsOpen] = useState(false);
-  const filteredColumns = data.columns.filter((col) => {
-        const status = col.status.toLowerCase();
+  const [filteredColumns, setFilteredColumns] = useState([]);
+
+  useEffect(() => {
+    const filtered = data.columns.filter((col) => {
+      const status = col.status.toLowerCase();
 
         const name = col.col_name.toLowerCase();
         const input = columnInput.toLowerCase();
 
         return name.includes(input) && validStatus.includes(status);
       })
+      setFilteredColumns(filtered);
+  }, [validStatus]);
 
   if (filteredColumns?.length === 0) return null;
 
