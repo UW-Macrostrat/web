@@ -1,15 +1,14 @@
 set -euo pipefail
 
-# Load .env file
 if [ -f ".env" ]; then
   export $(grep -v '^#' .env | xargs)
 fi
 
-# Use TEST_BASE_URL or default to localhost
 BASE_URL=${TEST_BASE_URL:-http://localhost:3000}
 
 echo "Testing against: $BASE_URL"
 
+# Can add more URLs as needed
 urls=(
   "/"
   "/map/loc"
