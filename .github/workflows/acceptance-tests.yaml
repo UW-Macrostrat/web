@@ -36,23 +36,9 @@ jobs:
           yarn run dev &
           sleep 20 
 
-      - name: Run smoke tests on key URLs
-        run: |
-          set -e  
+      - name: Acceptance Tests
+        run: bash ./scripts/acceptance-tests.sh
+        env:
+          TEST_BASE_URL: http://localhost:3000
 
-          declare -a urls=(
-            "http://localhost:3000/"
-            "http://localhost:3000/map/loc"
-            "http://localhost:3000/#/sift/"
-            "http://localhost:3000/lex/strat-names/1"
-            "http://localhost:3000/lex/intervals/10"
-          )
-
-          for url in "${urls[@]}"; do
-            status=$(curl -s -o /dev/null -w "%{http_code}" "$url")
-            if [[ "$status" != "200" ]]; then
-              echo "Unexpected status code: $status for $url"
-              exit 1
-            fi
-          done
 
