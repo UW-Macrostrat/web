@@ -37,7 +37,7 @@ jobs:
           sleep 20 
 
       - name: Acceptance Tests
-        run: bash ./scripts/acceptance-tests.sh
+        run: bash ./scripts/acceptance-tests/main.sh
         env:
           TEST_BASE_URL: http://localhost:3000
 
