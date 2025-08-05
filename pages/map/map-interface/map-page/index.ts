@@ -1,9 +1,9 @@
 import { Suspense, useCallback, useEffect, useRef } from "react";
 // Import other components
-import { Spinner } from "@blueprintjs/core";
+import { Spinner, Icon } from "@blueprintjs/core";
 import loadable from "@loadable/component";
 import { mapPagePrefix } from "@macrostrat-web/settings";
-import { MapAreaContainer } from "@macrostrat/map-interface";
+import { MapAreaContainer, FossilCollections, LocationPanel } from "@macrostrat/map-interface";
 import classNames from "classnames";
 import { useSelector } from "react-redux";
 import { Route, Routes } from "react-router-dom";
@@ -120,6 +120,23 @@ function InfoDrawerHolder() {
   const detailPanelTrans = useTransition(infoDrawerOpen, 800);
   const position = useAppState((state) => state.core.infoMarkerPosition);
   const zoom = useAppState((state) => state.core.mapPosition.target?.zoom);
+
+  // For fossil click
+  const pbdbData = useAppState((state) => state.core.pbdbData);
+  const runAction = useAppActions();
+
+  const onClose = useCallback(
+    () => runAction({ type: "close-infodrawer" }),
+    [runAction]
+  );
+  
+  if (pbdbData && pbdbData.length > 0) {
+    return h('div.fossil-container', [
+      h(Icon, { icon: "cross", onClick: onClose, className: "close-icon" }),
+      h(FossilCollections, { data: pbdbData, expanded: true })
+    ]);
+  }
+  
 
   return h([
     // This is essentially a shim implementation of React Router

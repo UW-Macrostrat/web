@@ -2,8 +2,7 @@ import hyper from "@macrostrat/hyper";
 import { Route, Routes } from "react-router-dom";
 import { useAppActions } from "#/map/map-interface/app-state";
 import { 
-  LocationPanel, 
-  FossilCollections, 
+  LocationPanel,  
   MacrostratLinkedData,
   Physiography,
 } from "@macrostrat/map-interface";
@@ -14,7 +13,6 @@ import styles from "./main.module.styl";
 import { LoadingArea } from "../transitions";
 import { StratColumn } from "./strat-column";
 import { useCallback } from "react";
-import { usePageContext } from "vike-react/usePageContext";
 import { RegionalStratigraphy } from "./reg-strat";
 
 const h = hyper.styled(styles);
@@ -71,7 +69,6 @@ function InfoDrawerInterior(props) {
 
 function InfoDrawerMainPanel(props) {
   const mapInfo = useAppState((state) => state.core.mapInfo);
-  const pbdbData = useAppState((state) => state.core.pbdbData);
   const columnInfo = useAppState((state) => state.core.columnInfo);
 
   if (!mapInfo || !mapInfo.mapData) {
@@ -103,7 +100,6 @@ function InfoDrawerMainPanel(props) {
       mapInfo,
       columnInfo,
     }),
-    h(FossilCollections, { data: pbdbData, expanded: false }),
     h(MacrostratLinkedData, {
       mapInfo,
       expanded: true,
