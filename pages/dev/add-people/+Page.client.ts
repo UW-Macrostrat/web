@@ -135,58 +135,70 @@ function SubmitButton({ disabled, form }) {
     const text = disabled ? "Please fill out all required fields" : "Add person";
 
     const handleSubmit = () => {
-        if (!disabled) {
-            // Convert empty strings in form to null
-            const formattedForm = Object.fromEntries(
-                Object.entries(form).map(([key, value]) => [key, value === "" ? null : value])
-            );
+        if (disabled) return;
 
-            const { roles, img_id, ...personData } = formattedForm;
+        // Convert empty strings to null
+        const formattedForm = Object.fromEntries(
+            Object.entries(form).map(([key, value]) => [key, value === "" ? null : value])
+        );
 
-            console.log("Submitting person data:", personData);
+        // Destructure roles and img_id, default img_id if missing
+        const { roles = [], img_id, ...personData } = formattedForm;
 
-            fetch(postgrestPrefix + "/people", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    ...personData,
-                    img_id: "david.jpg"
-                })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    // Wait for the response text before throwing an error
-                    return response.text().then(text => {
-                        throw new Error(`HTTP error! Status: ${response.status} - ${text}`);
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                const personId = data.person_id;
+        console.log("Submitting person data:", personData);
 
-                // Now handle roles
-                if (roles.length > 0) {
-                    const rolePromises = roles.map(roleId => {
-                        return fetch(postgrestPrefix + "/people_roles", {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ person_id: personId, role_id: roleId })
-                        });
-                    });
+        fetch(`${postgrestPrefix}/people`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                ...personData,
+                img_id: img_id || "david.jpg", // fallback to default
+            }),
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(`Failed to create person: ${response.status} - ${text}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            const personId = data.person_id;
+            if (!personId) {
+                throw new Error("Missing person_id in response");
+            }
 
-                    return Promise.all(rolePromises);
-                }    
-            })
-            .catch(error => {
-                console.warn(error);
-            });
-        }
+            // Handle roles if present
+            if (roles.length > 0) {
+                const rolePromises = roles.map(roleId =>
+                    fetch(`${postgrestPrefix}/people_roles`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ person_id: personId, role_id: roleId }),
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.text().then(text => {
+                                throw new Error(`Failed to assign role: ${response.status} - ${text}`);
+                            });
+                        }
+                        return response.json();
+                    })
+                );
+
+                return Promise.all(rolePromises);
+            }
+        })
+        .catch(error => {
+            console.warn("Submission error:", error);
+        });
     };
+
 
     return h(SaveButton, { disabled, onClick: handleSubmit }, text)
 }
