@@ -162,14 +162,24 @@ This stylesheet the overall application page layout.
   display: flex
   flex-direction: column
   position: relative
-  max-height: 90vh
-  overflow: auto     
-  scrollbar-width: none 
-
-  &::-webkit-scrollbar
-    display: none
+  padding: 0 .5em
 
   .close-icon
-    align-self: flex-end
+    position: absolute
+    top: 0
+    right: 0
     padding: .5em
     cursor: pointer
+
+  .title
+    margin: .5em 0
+
+  .collections
+    max-height: 90vh
+    overflow: auto     
+    scrollbar-width: none 
+
+    &::-webkit-scrollbar
+      display: none
+
+  
