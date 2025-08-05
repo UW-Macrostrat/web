@@ -30,14 +30,8 @@ jobs:
           echo "VITE_MACROSTRAT_TILESERVER_DOMAIN=https://tileserver.staging.svc.macrostrat.org" >> .env
           echo "VITE_MACROSTRAT_API_DOMAIN=https://macrostrat.org" >> .env
 
-
-      - name: Start the app in background
-        run: |
-          yarn run dev &
-          sleep 20 
-
       - name: Acceptance Tests
-        run: bash ./scripts/acceptance-tests/main.sh
+        run: bash ./scripts/acceptance-tests/run-tests.sh
         env:
           TEST_BASE_URL: http://localhost:3000
 
