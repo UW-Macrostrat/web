@@ -110,7 +110,7 @@ export function Footer() {
       ]),
       h("div", { className: "footer-nav" }, [
         h("a", { className: "nav-link", href: "/" }, [
-          h(MacrostratIcon),
+          h(MacrostratIcon, { iconStyle: "simple", small: true }),
           h("span", { className: "nav-text" }, "Home"),
         ]),
         navItems.map(({ href, text, icon }) =>
