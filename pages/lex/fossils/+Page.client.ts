@@ -87,23 +87,24 @@ function getUrlParams(urlString) {
 
 function Base() {
   return h(ContentPage, { className: 'page' }, [
-    h(StickyHeader, { className: "header" }, h(PageBreadcrumbs, { title: "Units" })),
+    h(StickyHeader, { className: "header" }, h(PageBreadcrumbs, { title: "Fossils" })),
     h(PostgRESTInfiniteScrollView, {
-      route: postgrestPrefix + '/units',
-      id_key: 'id',
+      route: postgrestPrefix + '/fossils',
+      id_key: 'collection_no',
       limit: 20,
-      itemComponent: BaseUnitItem,
+      itemComponent: BaseFossilItem,
       filterable: true,
-      searchColumns: [{ value: "strat_name", label: "Name" }],
+      searchColumns: [{ value: 'name', label: 'Fossil Name' }],
     }),
   ]);
 }
 
-function BaseUnitItem({ data }) {
-  const { id, col_id, strat_name } = data;
+function BaseFossilItem({ data }) {
+  const { name, collection_no } = data;
 
   return h(LinkCard, {
-    href: `/columns/${col_id}#unit=${id}`,
-    title: strat_name,
-  })
+    href: 'https://paleobiodb.org/classic/displayCollResults?collection_no=col:' + collection_no,
+    className: "fossil-item",
+    title: name,
+  });
 }
