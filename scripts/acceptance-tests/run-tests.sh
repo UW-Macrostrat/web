@@ -6,7 +6,7 @@ setsid yarn run dev &
 DEV_PID=$!
 
 # Wait for server to start
-sleep 10
+sleep 20
 
 # Run acceptance tests
 echo "Running acceptance tests..."
