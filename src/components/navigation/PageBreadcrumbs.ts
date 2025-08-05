@@ -282,8 +282,8 @@ export const sitemap: Routes = {
           name: "Strat Concepts",
         },
         {
-          slug: "strat-name",
-          name: "Stratigraphic name",
+          slug: "strat-names",
+          name: "Stratigraphic names",
         },
         {
           slug: "intervals",

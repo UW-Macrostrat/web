@@ -19,7 +19,7 @@ export async function data(pageContext) {
   };
 
   // Perform all API calls concurrently, with error handling
-  const [resData, colData, mapsData, fossilsData, refs1, refs2] =
+  const [resData, colData, mapsData, fossilsData, refs1, refs2, unitsData] =
     await Promise.all([
       safeFetch(() => fetchAPIData("/defs/lithologies", { lith_id }), "resData"),
       safeFetch(
@@ -35,6 +35,7 @@ export async function data(pageContext) {
       safeFetch(() => fetchAPIData("/fossils", { lith_id }), "fossilsData"),
       safeFetch(() => fetchAPIRefs("/fossils", { lith_id }), "refs1"),
       safeFetch(() => fetchAPIRefs("/columns", { lith_id }), "refs2"),
+      safeFetch(() => fetchAPIData("/units", { lith_id }), "unitsData"),
     ]);
 
   // Combine and flatten references safely
@@ -70,5 +71,6 @@ export async function data(pageContext) {
     refs,
     fossilsData: fossilsData ?? null,
     mapsData: mapsData ?? null,
+    unitsData: unitsData ?? null,
   };
 }

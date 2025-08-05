@@ -12,7 +12,7 @@ import {
 import { usePageContext } from "vike-react/usePageContext";
 
 export function Page() {
-  const { resData, colData, taxaData, refs, fossilsData } =
+  const { resData, colData, taxaData, refs, fossilsData, unitsData } =
     useData();
 
   const id = usePageContext().urlParsed.pathname.split("/")[3];
@@ -28,7 +28,7 @@ export function Page() {
     h(PrevalentTaxa, { taxaData }),
     h(Timescales, { timescales }),
     h(Fossils, { fossilsData }),
-    h(Units, { href: "environ_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
+    h.if(unitsData.length > 0)(Units, { href: "environ_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
   ];
 
   return LexItemPage({ children, id, refs, resData, siftLink: "environment" });

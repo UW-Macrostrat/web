@@ -12,11 +12,9 @@ import {
   Matches
 } from "~/components/lex";
 import { usePageContext } from "vike-react/usePageContext";
-import { fetchPGData } from "~/_utils";
-import { useState, useEffect } from "react";
 
 export function Page() {
-  const { resData, colData, taxaData, refs, fossilsData, mapsData } =
+  const { resData, colData, taxaData, refs, fossilsData, mapsData, unitsData } =
     useData();
 
   const id = usePageContext().urlParsed.pathname.split("/")[3];
@@ -38,7 +36,7 @@ export function Page() {
     h(Matches, {
       lith_id: id,
     }),
-    h(Units, { href: "lith_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
+    h.if(unitsData.length > 0)(Units, { href: "lith_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
   ];
 
   return LexItemPage({ children, id, refs, resData, siftLink: "lithology" });

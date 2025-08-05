@@ -17,7 +17,7 @@ import { StratTag } from "~/components/general";
 import { usePageContext } from "vike-react/usePageContext";
 
 export function Page() {
-  const { resData, colData, taxaData, refs, fossilsData, mapsData } =
+  const { resData, colData, taxaData, refs, fossilsData, mapsData, unitsData } =
     useData();
 
   const id = usePageContext()?.urlPathname.split("/")?.[3] || [];
@@ -34,7 +34,7 @@ export function Page() {
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),
     h(Timescales, { timescales }),
-    h(Units, { href: "strat_name_id=" + id + "&name=" + resData?.strat_name }),
+    h.if(unitsData.length > 0)(Units, { href: "strat_name_id=" + id + "&name=" + resData?.strat_name }),
     h(Fossils, { fossilsData }),
     h(Maps, { mapsData }),
     h(Matches, {
