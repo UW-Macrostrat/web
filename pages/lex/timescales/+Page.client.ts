@@ -50,13 +50,14 @@ export function Page() {
         }),
       ]),
       h(
-        "div.timescale",
+        "div.timescale-container",
         h(Timescale, {
           length: 970 - 40,
           levels: [1, 5],
           ageRange: [age[0], age[1]],
           absoluteAgeScale: true,
           onClick: (e, d) => window.open("/lex/intervals/" + d.int_id, "_self"),
+          className: "timescale",
         })
       ),
     ]),
