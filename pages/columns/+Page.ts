@@ -15,6 +15,7 @@ import { useData } from "vike-react/useData";
 import { ClientOnly } from "vike-react/ClientOnly";
 import { navigate } from "vike/client/router";
 import { SearchBar } from "~/components/general";
+import { FlexRow } from "~/components/lex/tag";
 
 const h = hyper.styled(styles);
 
@@ -105,21 +106,24 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
         h("div.main", [
           h(StickyHeader, [
             h(PageBreadcrumbs, { showLogo: true }),
-              h('div.search', [
+              h(FlexRow, { gap: "1em", alignItems: "center"}, [
                 h(SearchBar, {
                   placeholder: "Search columns...",
                   onChange: handleInputChange,
+                  className: "search-bar",
                 }),
-                h(Switch, {
-                  checked: showEmpty,
-                  label: "Show empty",
-                  onChange: () => setShowEmpty(!showEmpty),
-                }),
-                h(Switch, {
-                  checked: showInProcess,
-                  label: "Show in process",
-                  onChange: () => setShowInProcess(!showInProcess),
-                }),
+                h('div.switches', [
+                  h(Switch, {
+                    checked: showEmpty,
+                    label: "Show empty",
+                    onChange: () => setShowEmpty(!showEmpty),
+                  }),
+                  h(Switch, {
+                    checked: showInProcess,
+                    label: "Show in process",
+                    onChange: () => setShowInProcess(!showInProcess),
+                  }),
+                ])
               ])
           ]),
           h(
