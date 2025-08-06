@@ -31,15 +31,24 @@ export async function fetchPGData(apiURL: string, params: any) {
   return res1 || [];
 }
 
+function isServer() {
+  return (
+    typeof window === "undefined" ||
+    typeof process !== "undefined" && process.release?.name === "node"
+  );
+}
+
 function fetchWrapper(url: string): Promise<Response> {
   const startTime = performance.now();
 
   return fetch(url).then((response) => {
-    const endTime = performance.now();
-    const duration = endTime - startTime;
-    console.log(
-      `Fetching ${url} - status ${response.status} - ${duration.toFixed(2)} ms`
-    );
+    if (isServer()) {
+      const endTime = performance.now();
+      const duration = endTime - startTime;
+      console.log(
+        `Fetching ${url} - status ${response.status} - ${duration.toFixed(2)} ms`
+      );
+    }
     return response;
   });
 }
