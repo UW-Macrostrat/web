@@ -2,7 +2,7 @@ import h from "@macrostrat/hyper";
 import { usePageContext } from "vike-react/usePageContext";
 
 import { ContentPage } from "~/layouts";
-import { PageHeader } from "~/components";
+import { PageBreadcrumbs, PageHeader } from "~/components";
 import { postgrestPrefix } from "@macrostrat-web/settings";
 import {
   AuthorList,
@@ -11,11 +11,11 @@ import {
 
 export function Page() {
   return h(ContentPage, [h(PageMain)]);
-}
+} 
 
 function PageMain() {
   return h("div", [
-    h(PageHeader, { title: "Stratigraphic name extractions" }),
+    h(PageBreadcrumbs),
     h(PostgRESTInfiniteScrollView, {
       route: `${postgrestPrefix}/kg_publication_entities`,
       id_key: "id",

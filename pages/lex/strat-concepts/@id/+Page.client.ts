@@ -15,7 +15,7 @@ export function Page() {
   const children = [
     h(ConceptInfo, { concept_id: id, showHeader: false }),
     h(ConceptBody, { resData }),
-    h(Fossils, { fossilsData }),
+    h.if(fossilsData.length > 0)(Fossils, { href: "strat_name_concept_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
     h(Matches, {
       concept_id: id,
     }),
@@ -53,7 +53,7 @@ function ConceptBody({ resData }) {
       strats.map((strat) =>
         h(
           LinkCard,
-          { href: "/lex/strat-name/" + strat.id, className: "strat-name" },
+          { href: "/lex/strat-names/" + strat.id, className: "strat-name" },
           strat.name + " (" + strat.rank + ")"
         )
       )

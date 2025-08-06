@@ -1,20 +1,16 @@
 import {
   Collapse,
-  NonIdealState,
   Radio,
   RadioGroup,
   Spinner,
-  Tag,
 } from "@blueprintjs/core";
 import {
   tileserverDomain,
-  apiV2Prefix,
   apiDomain,
   darkMapURL,
   baseMapURL,
   satelliteMapURL,
   mapboxAccessToken,
-  gddDomain,
 } from "@macrostrat-web/settings";
 import {
   DetailPanelStyle,
@@ -28,7 +24,6 @@ import {
 import { buildMacrostratStyleLayers } from "@macrostrat/map-styles";
 import { getMapboxStyle, mergeStyles } from "@macrostrat/mapbox-utils";
 import {
-  JSONView,
   NullableSlider,
   useAPIResult,
   useDarkMode,
@@ -527,9 +522,7 @@ function LegendEntry({ data }) {
         name: min_age_interval.name,
         color: min_age_interval.color,
       },
-      onClick: () => {
-        window.open(`/lex/intervals/${min_age_interval.int_id}`, '_self');
-      },
+      href: `/lex/intervals/${min_age_interval.int_id}`
     });
   } else if (!min_age_interval && max_age_interval) {
     AgeTag = h(LithologyTag, {
@@ -537,9 +530,7 @@ function LegendEntry({ data }) {
         name: max_age_interval.name,
         color: max_age_interval.color,
       },
-      onClick: () => {
-        window.open(`/lex/intervals/${max_age_interval.int_id}`, '_self');
-      },
+      href: `/lex/intervals/${max_age_interval.int_id}`
     });
   } else {
     AgeTag = h('div.age-interval', [
@@ -548,9 +539,7 @@ function LegendEntry({ data }) {
           name: min_age_interval.name,
           color: min_age_interval.color,
         },
-        onClick: () => {
-          window.open(`/lex/intervals/${min_age_interval.int_id}`, '_self');
-        },
+        href: `/lex/intervals/${min_age_interval.int_id}`
       }),
       " - ",
       h(LithologyTag, {
@@ -558,9 +547,7 @@ function LegendEntry({ data }) {
           name: max_age_interval.name,
           color: max_age_interval.color,
         },
-        onClick: () => {
-          window.open(`/lex/intervals/${max_age_interval.int_id}`, '_self');
-        },
+        href: `/lex/intervals/${max_age_interval.int_id}`
       }),
     ])
   }
@@ -576,7 +563,7 @@ function LegendEntry({ data }) {
             label: "Stratigraphic names: ",
             value: h(LithologyList, { 
               lithologies: strat_names?.map((sn) => ({ name: sn.strat_name, id: sn.strat_name_id })),
-              onClickItem: (e, sn) => window.open(`/lex/strat-names/${sn.id}`, '_self')
+              getItemHref: (sn) => `/lex/strat-names/${sn.id}`
             }),
           }
         ),
@@ -600,7 +587,7 @@ function LegendEntry({ data }) {
             label: "Units: ",
             value: h(LithologyList, { 
               lithologies: units?.map((unit) => ({ name: unit.name, unit_id: unit.unit_id, col_id: unit.col_id })),
-              onClickItem: (e, unit) => window.open(`/columns/${unit.col_id}#unit=${unit.unit_id}`, '_self') 
+              getItemHref: (unit) => `/columns/${unit.col_id}#unit=${unit.unit_id}`
             })
           }
         ),
@@ -610,7 +597,7 @@ function LegendEntry({ data }) {
             label: "Lithologies: ",
             value: h(LithologyList, { 
               lithologies: lithologies?.map((lith) => ({ name: lith.lith_name, ...lith })),
-              onClickItem: (e, lith) => window.open(`/lex/lithology/${lith.lith_id}`, '_self') 
+              getItemHref: (lith) => `/lex/lithologies/${lith.lith_id}`
             })
           }
         ),
