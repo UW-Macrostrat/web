@@ -40,7 +40,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
 
   const [columnInput, setColumnInput] = useState("");
   // const [showEmpty, setShowEmpty] = useState(false);  
-  const [showInProcess, setShowInProcess] = useState(false);
+  const [showInProcess, setShowInProcess] = useState(true);
 
   let validStatus = [
     "active",
