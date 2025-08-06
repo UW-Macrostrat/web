@@ -3,23 +3,12 @@ import { PageBreadcrumbs, StickyHeader } from "~/components";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { useData } from "vike-react/useData";
-import { ClientOnly } from "vike-react/ClientOnly";
 import { SearchBar } from "~/components/general";
+import { LithologyTag } from "~/components/lex/tag";
 
 export function Page() {
   const { res } = useData();  
   return h(LexListPage, { res, title: "Economics", route: "economics", id: "econ_id" });
-}
-
-function LithologyTag(props) {
-  return h(
-    ClientOnly,
-    {
-      load: () => import("~/components/lex/lithology-tag.client").then((d) => d.LithologyTagInner),
-      deps: [props.data, props.href],
-    },
-    (component) => h(component, props)
-  );
 }
 
 export function LexListPage({ res, title, route, id }) {
