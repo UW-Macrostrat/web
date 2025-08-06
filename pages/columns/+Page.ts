@@ -39,7 +39,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const { columnGroups, project } = useData();
 
   const [columnInput, setColumnInput] = useState("");
-  // const [showEmpty, setShowEmpty] = useState(false);  
+  const [showEmpty, setShowEmpty] = useState(false);  
   const [showInProcess, setShowInProcess] = useState(true);
 
   let validStatus = [
@@ -50,13 +50,21 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
 
   const columnIDs = columnGroups?.flatMap((item) =>
     item.columns
-      .filter((col) =>
-        col.col_name.toLowerCase().includes(columnInput.toLowerCase()) && validStatus.includes(col.status.toLowerCase())
-      )
+      .filter((col) => {
+        let nUnits = 0;
+
+        try {
+          nUnits = parseInt(col.t_units);
+        } catch (e) {
+          console.warn("Invalid number of units for column", col.col_id, col.t_units);
+        }
+
+        return col.col_name.toLowerCase().includes(columnInput.toLowerCase()) && validStatus.includes(col.status.toLowerCase()) && (nUnits > 0 || showEmpty);
+      })
       .map((col) => col.col_id)
   );
 
-  const hideColumns = columnIDs?.length === 0 && columnInput.length >= 3;
+  const hideColumns = columnIDs?.length === 0;
 
   const handleInputChange = (value, target) => {
     setColumnInput(value.toLowerCase());
@@ -73,17 +81,15 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
                   placeholder: "Search columns...",
                   onChange: handleInputChange,
                 }),
-                /*
                 h(Switch, {
                   checked: showEmpty,
                   label: "Show empty",
-                  onChange: (e) => setShowEmpty(!showEmpty),
+                  onChange: () => setShowEmpty(!showEmpty),
                 }),
-                */
                 h(Switch, {
                   checked: showInProcess,
                   label: "Show in process",
-                  onChange: (e) => setShowInProcess(!showInProcess),
+                  onChange: () => setShowInProcess(!showInProcess),
                 }),
               ])
           ]),
@@ -96,6 +102,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
                 linkPrefix,
                 columnInput,
                 validStatus,
+                showEmpty,
               })
             )
           ),
@@ -123,18 +130,25 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   ]);
 }
 
-function ColumnGroup({ data, linkPrefix, columnInput, validStatus }) {
+function ColumnGroup({ data, linkPrefix, columnInput, validStatus, showEmpty }) {
   const [isOpen, setIsOpen] = useState(false);
   const [filteredColumns, setFilteredColumns] = useState([]);
 
   useEffect(() => {
     const filtered = data.columns.filter((col) => {
-      const status = col.status.toLowerCase();
+        const status = col.status.toLowerCase();
+
+        let nUnits = 0;
+        try {
+          nUnits = parseInt(col.t_units);
+        } catch (e) {
+          console.warn("Invalid number of units for column", col.col_id, col.t_units);
+        }
 
         const name = col.col_name.toLowerCase();
         const input = columnInput.toLowerCase();
 
-        return name.includes(input) && validStatus.includes(status);
+        return name.includes(input) && validStatus.includes(status) && (nUnits > 0 || showEmpty);
       })
       setFilteredColumns(filtered);
   }, [validStatus]);
