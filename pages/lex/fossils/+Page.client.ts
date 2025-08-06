@@ -4,11 +4,21 @@ import { ContentPage } from "~/layouts";
 import { useState, useEffect } from "react";
 import { fetchAPIData } from "~/_utils";
 import { usePageContext } from "vike-react/usePageContext";
-import { LithologyTag } from "@macrostrat/data-components";
+import { ClientOnly } from "vike-react/ClientOnly";
 import { FlexRow } from "@macrostrat/ui-components";
 import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
 import { postgrestPrefix } from "@macrostrat-web/settings";
 
+function LithologyTag(props) {
+  return h(
+    ClientOnly,
+    {
+      load: () => import("~/components/lex/lithology-tag.client").then((d) => d.LithologyTagInner),
+      deps: [props.data, props.href],
+    },
+    (component) => h(component, props)
+  );
+}
 
 export function Page() {
   const url = usePageContext().urlOriginal.split("?")[1];

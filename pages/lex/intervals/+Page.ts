@@ -1,12 +1,22 @@
 import h from "./main.module.scss";
 import { PageBreadcrumbs, StickyHeader, Link } from "~/components";
-import { Card, Popover, RangeSlider } from "@blueprintjs/core";
+import { Card, RangeSlider } from "@blueprintjs/core";
 import { useState, memo } from "react";
 import { ContentPage } from "~/layouts";
-import { asChromaColor } from "@macrostrat/color-utils";
 import { SearchBar } from "~/components/general";
-import { LithologyTag } from "@macrostrat/data-components";
 import { useData } from "vike-react/useData";
+import { ClientOnly } from "vike-react/ClientOnly";
+
+function LithologyTag(props) {
+  return h(
+    ClientOnly,
+    {
+      load: () => import("~/components/lex/lithology-tag.client").then((d) => d.LithologyTagInner),
+      deps: [props.data, props.href],
+    },
+    (component) => h(component, props)
+  );
+}
 
 export function Page() {
   const [input, setInput] = useState("");
