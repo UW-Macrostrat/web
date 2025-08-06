@@ -4,11 +4,9 @@ import { ContentPage } from "~/layouts";
 import { useState, useEffect } from "react";
 import { fetchAPIData } from "~/_utils";
 import { usePageContext } from "vike-react/usePageContext";
-import { LithologyTag } from "@macrostrat/data-components";
-import { FlexRow } from "@macrostrat/ui-components";
 import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
 import { postgrestPrefix } from "@macrostrat-web/settings";
-
+import { LithologyTag, FlexRow } from "~/components/lex/tag";
 
 export function Page() {
   const url = usePageContext().urlOriginal.split("?")[1];
@@ -64,7 +62,7 @@ function Header({ name, color, idType, id }) {
     h(PageBreadcrumbs, {
       title: h(FlexRow, { gap: ".5em", alignItems: "center" }, [
         h('p.title', 'Fossils for '),
-        h(LithologyTag, { data: { name, color }, onClick: () => { window.open(`/lex/${map[idType]}/${id}`, "_self")} }),
+        h(LithologyTag, { data: { name, color }, href: `/lex/${map[idType]}/${id}` }),
       ]),
     })
   ]);
