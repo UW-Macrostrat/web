@@ -1,2 +1,5 @@
 run:
-	python3 upload.py
+	./upload.sh
+
+list:
+	./list.sh
