@@ -180,7 +180,11 @@ export const sitemap: Routes = {
               slug: "feedback",
               name: "Feedback",
             },
-          ],
+            {
+              slug: "extractions",
+              name: "Extractions",
+            }
+          ]
         },
       ],
     },
