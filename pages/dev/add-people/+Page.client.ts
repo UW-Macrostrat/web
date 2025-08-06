@@ -191,6 +191,8 @@ function RolesInput({ setForm }) {
   const [roles, setRoles] = useState([]);
   const [selectedRoles, setSelectedRoles] = useState([]);
 
+  console.log('RolesInput', roles, selectedRoles);
+
   useEffect(() => {
     fetchPGData("/roles", {})
       .then((data) => {
@@ -202,25 +204,26 @@ function RolesInput({ setForm }) {
   }, []);
 
   const isItemSelected = (item) =>
-    selectedRoles.some((r) => r.id === item.id);
+    selectedRoles.some((r) => r.role_id === item.role_id);
 
   const handleItemSelect = (item) => {
     if (!isItemSelected(item)) {
       const next = [...selectedRoles, item];
+      console.log('Selected roles updated:', next.map((r) => r.role_id));
       setSelectedRoles(next);
       setForm((prev) => ({
         ...prev,
-        roles: next.map((r) => r.id),
+        roles: next.map((r) => r.role_id),
       }));
     }
   };
 
   const handleItemDelete = (itemToDelete) => {
-    const next = selectedRoles.filter((item) => item.id !== itemToDelete.id);
+    const next = selectedRoles.filter((item) => item.role_id !== itemToDelete.role_id);
     setSelectedRoles(next);
     setForm((prev) => ({
       ...prev,
-      roles: next.map((r) => r.id),
+      roles: next.map((r) => r.role_id),
     }));
   };
 
@@ -231,7 +234,7 @@ function RolesInput({ setForm }) {
     if (!modifiers.matchesPredicate) return null;
 
     return h(MenuItem, {
-      key: item.id,
+      key: item.role_id,
       text: item.name,
       onClick: handleClick,
       active: modifiers.active,
