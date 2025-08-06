@@ -275,9 +275,9 @@ function Panel({selectedTypes, setSelectedTypes, clustered, setClustered, select
                 h(
                     Switch, 
                     {
-                    checked: clustered,
-                    label: "Clustered",
-                    onChange: () => setClustered(!clustered), 
+                        checked: clustered,
+                        label: "Clustered",
+                        onChange: () => setClustered(!clustered), 
                     }
                 ),
             ]),
@@ -290,16 +290,9 @@ function SelectedMeasurement({ selectedMeasurement, setSelectedMeasurement }) {
     const [data, setData] = useState(null);
 
     useEffect(() => {
-        fetchPGData(
-            "/measurements_with_type",
-            {
-                id: "eq." + selectedMeasurement,
-            }
-        ).then((data) => {
-            if(selectedMeasurement != null) {
-                setData(data[0]);
-            }
-        });
+        fetchPGData("/measurements_with_type", { id: "eq." + selectedMeasurement })
+            .then(data => setData(data[0]))
+            .catch(err => console.error("Error fetching data:", err));
     }, [selectedMeasurement]);
 
     if (selectedMeasurement == null || data == null) {
