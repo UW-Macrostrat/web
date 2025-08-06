@@ -23,8 +23,6 @@ export function Page() {
         roles: [],
     });
 
-    console.log('form', form);
-
     const disabled = !form.name || !form.email || !form.title || !form.img_id || form.roles.length === 0;
 
     const handleChange = (field) => (value) => {
@@ -157,10 +155,7 @@ function SubmitButton({ disabled, form }) {
         })
         .then(r => r.json())
         .then(data => {
-            console.log("Test submission response:", data[0]);
             const personId = data[0].person_id;
-
-            console.log("Person ID:", personId, "roles:", roles);
 
             roles.forEach(roleId => {
                 console.log("Assigning role:", roleId, "to person:", personId);
@@ -174,10 +169,6 @@ function SubmitButton({ disabled, form }) {
                     },
                     body,
                 })
-                .then(r => r.json())
-                .then(roleData => {
-                    console.log("Role assignment response:", roleData);
-                })
                 .catch(e => console.error("Role assignment error:", e));
             });
         })
@@ -190,8 +181,6 @@ function SubmitButton({ disabled, form }) {
 function RolesInput({ setForm }) {
   const [roles, setRoles] = useState([]);
   const [selectedRoles, setSelectedRoles] = useState([]);
-
-  console.log('RolesInput', roles, selectedRoles);
 
   useEffect(() => {
     fetchPGData("/roles", {})
