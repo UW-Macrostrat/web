@@ -42,8 +42,6 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const [showInProcess, setShowInProcess] = useState(true);
   const [columnIDs, setColumnIDs] = useState([]);
 
-  console.log("columnids", columnIDs);
-
   const validStatus = useMemo(() => {
     const statuses = ["active"];
     if (showInProcess) statuses.push("in process");
