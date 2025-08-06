@@ -64,7 +64,7 @@ function Header({ name, color, idType, id }) {
     h(PageBreadcrumbs, {
       title: h(FlexRow, { gap: ".5em", alignItems: "center" }, [
         h('p.title', 'Fossils for '),
-        h(LithologyTag, { data: { name, color }, onClick: () => { window.open(`/lex/${map[idType]}/${id}`, "_self")} }),
+        h(LithologyTag, { data: { name, color }, href: `/lex/${map[idType]}/${id}` }),
       ]),
     })
   ]);

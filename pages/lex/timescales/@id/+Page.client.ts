@@ -52,7 +52,7 @@ export function Page() {
               h("h2", UpperCase(intType)),
               h(
                 "div.int-items",
-                group.map((d) => h(LithologyTag, { data: d, onClick: () => window.open(`/lex/interval/${d.int_id}`, "_self") }))
+                group.map((d) => h(LithologyTag, { data: d, href: `/lex/interval/${d.int_id}` }))
               ),
             ])
           )
