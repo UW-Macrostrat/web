@@ -1,18 +1,19 @@
 import hyper from "@macrostrat/hyper";
 import { Route, Routes } from "react-router-dom";
 import { useAppActions } from "#/map/map-interface/app-state";
-import { LocationPanel } from "@macrostrat/map-interface";
-import { FossilCollections } from "./fossil-collections";
+import { 
+  LocationPanel,  
+  MacrostratLinkedData,
+  Physiography,
+} from "@macrostrat/map-interface";
 import { GeologicMapInfo } from "./geo-map";
-import { MacrostratLinkedData } from "./macrostrat-linked";
-import { RegionalStratigraphy } from "./reg-strat";
-import { Physiography } from "./physiography";
-import { XddExpansion } from "./xdd-panel";
+import { XddExpansionContainer } from "./xdd-panel";
 import { useAppState } from "#/map/map-interface/app-state";
 import styles from "./main.module.styl";
 import { LoadingArea } from "../transitions";
 import { StratColumn } from "./strat-column";
 import { useCallback } from "react";
+import { RegionalStratigraphy } from "./reg-strat";
 
 const h = hyper.styled(styles);
 
@@ -68,7 +69,6 @@ function InfoDrawerInterior(props) {
 
 function InfoDrawerMainPanel(props) {
   const mapInfo = useAppState((state) => state.core.mapInfo);
-  const pbdbData = useAppState((state) => state.core.pbdbData);
   const columnInfo = useAppState((state) => state.core.columnInfo);
 
   if (!mapInfo || !mapInfo.mapData) {
@@ -96,17 +96,20 @@ function InfoDrawerMainPanel(props) {
       bedrockExpanded: true,
       source,
     }),
-    h(RegionalStratigraphy, {
+    h.if(columnInfo)(RegionalStratigraphy, {
       mapInfo,
       columnInfo,
     }),
-    h(FossilCollections, { data: pbdbData, expanded: true }),
     h(MacrostratLinkedData, {
       mapInfo,
-      bedrockMatchExpanded: true,
+      expanded: true,
       source,
+      stratNameURL: "/lex/strat-names",
+      environmentURL: "/lex/environments",
+      intervalURL: "/lex/intervals",
+      lithologyURL: "/lex/lithologies"
     }),
-    h.if(mapData[0] && mapData[0].strat_name.length)(XddExpansion),
+    h.if(mapData[0] && mapData[0].strat_name.length)(XddExpansionContainer),
     h(Physiography, { mapInfo }),
   ]);
 }

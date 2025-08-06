@@ -19,7 +19,7 @@ export async function data(pageContext) {
   };
 
   // Fetch all API data concurrently, with individual error handling
-  const [resData, colData, unitsData, fossilsData, refs1, refs2] =
+  const [resData, colData, fossilsData, refs1, refs2, unitsData] =
     await Promise.all([
       safeFetch(() => fetchAPIData("/defs/environments", { environ_id }), "resData"),
       safeFetch(
@@ -31,10 +31,10 @@ export async function data(pageContext) {
           }),
         "colData"
       ),
-      safeFetch(() => fetchAPIData("/units", { environ_id }), "unitsData"),
       safeFetch(() => fetchAPIData("/fossils", { environ_id }), "fossilsData"),
       safeFetch(() => fetchAPIRefs("/fossils", { environ_id }), "refs1"),
       safeFetch(() => fetchAPIRefs("/columns", { environ_id }), "refs2"),
+      safeFetch(() => fetchAPIData("/units", { environ_id }), "unitsData"),
     ]);
 
   // Merge references safely
@@ -69,7 +69,7 @@ export async function data(pageContext) {
     colData: colData ?? null,
     taxaData,
     refs,
-    unitsData: unitsData ?? null,
     fossilsData: fossilsData ?? null,
+    unitsData: unitsData ?? null,
   };
 }

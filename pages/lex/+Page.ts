@@ -6,7 +6,7 @@ import { useData } from "vike-react/useData";
 import { Footer } from "~/components/general";
 import { SearchBar } from "~/components/general";
 import { useState } from "react";
-import { ExpansionPanel } from "@macrostrat/map-interface";
+import { ExpansionPanel } from "~/components/lex/tag";
 
 export function Page() {
   const { res } = useData();
@@ -74,7 +74,7 @@ export function Page() {
         ),
         h(
           LinkCard,
-          { href: "/lex/lithology", title: "Lithologies" },
+          { href: "/lex/lithologies", title: "Lithologies" },
           "Names of geologic materials"
         ),
         h(
@@ -102,7 +102,16 @@ export function Page() {
           { href: "/lex/structures", title: "Structures" },
           "Names and descriptions of geologic structures"
         ),
-
+        h(
+          LinkCard,
+          { href: "/lex/units", title: "Units" },
+          "Names and descriptions of geologic units"
+        ),
+        h(
+          LinkCard,
+          { href: "/lex/fossils", title: "Fossils" },
+          "Fossil names and descriptions (via the Paleobiology Database)"
+        ),
         h("p", [
           h("strong", h("a", { href: "/sift" }, "Sift")),
           ", Macrostrat's legacy lexicon app, is still available for use as it is gradually brought into this new framework.",

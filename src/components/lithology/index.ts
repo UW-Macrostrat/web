@@ -68,7 +68,7 @@ function DefaultTooltip({ data, showExternalLinks = false }) {
     ]),
     h("ul.tight-list", [
       h(LinkItem, { href: `/map#lithologies=${data.lith_id}` }, "Filter map"),
-      h(LinkItem, { href: `/lex/lithology/${data.lith_id}` }, "View details"),
+      h(LinkItem, { href: `/lex/lithologies/${data.lith_id}` }, "View details"),
       h.if(showExternalLinks)([
         h(
           LinkItem,

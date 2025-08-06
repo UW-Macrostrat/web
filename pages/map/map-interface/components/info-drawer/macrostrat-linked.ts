@@ -311,9 +311,7 @@ function LithsAndClasses(props) {
     h(ExpansionBody, { title: "Matched lithologies" }, [
       h(LithologyList, {
         lithologies,
-        onClickItem: (e, lith) => {
-          window.open('/lex/lithology/' + lith.lith_id, '_self');
-        },
+        getItemHref: (lith) => `/lex/lithologies/${lith.lith_id}`,
       }),
     ])
   );
@@ -348,9 +346,7 @@ function Environments(props) {
     h(ExpansionBody, { title: "Matched environments" }, [
        h(LithologyList, {
         lithologies,
-        onClickItem: (e, environ) => {
-          window.open('/lex/environments/' + environ.environ_id, '_self');
-        },
+        getItemHref: (environ) => `/lex/environments/${environ.environ_id}`,
       }),
     ])
   );

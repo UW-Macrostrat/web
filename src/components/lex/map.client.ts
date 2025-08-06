@@ -39,7 +39,7 @@ function ColumnsMapInner({
       onSelectColumn: (id) => {
         window.open(
           `/columns/${id}`,
-          "_blank"
+          "_self"
         );
       }
     })

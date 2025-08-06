@@ -25,16 +25,21 @@ export function MacrostratLogoLink({
   logoStyle,
   children,
 }) {
-  const logoFile =
-    logoStyle != null
-      ? `macrostrat-icon-${logoStyle}.svg`
-      : "macrostrat-icon.svg";
   return h("a.macrostrat-logo-link", { href, className }, [
-    h("img.macrostrat-logo", {
-      src: `https://storage.macrostrat.org/assets/web/macrostrat-icons/${logoFile}`,
-    }),
+    h(MacrostratIcon, { iconStyle: logoStyle }),
     children,
   ]);
+}
+
+export function MacrostratIcon({ iconStyle, className, small = false }) {
+  const iconFile =
+    iconStyle != null
+      ? `macrostrat-icon-${iconStyle}.svg`
+      : "macrostrat-icon.svg";
+  return h("img.macrostrat-logo" + (small ? ".small" : ""), {
+    className,
+    src: `https://storage.macrostrat.org/assets/web/macrostrat-icons/${iconFile}`,
+  });
 }
 
 export function SiteTitle({ logoStyle, className, children }) {
@@ -107,7 +112,7 @@ export function Footer() {
       ]),
       h("div", { className: "footer-nav" }, [
         h("a", { className: "nav-link", href: "/" }, [
-          h(MacrostratIcon),
+          h(MacrostratIcon, { iconStyle: "simple", small: true }),
           h("span", { className: "nav-text" }, "Home"),
         ]),
         navItems.map(({ href, text, icon }) =>

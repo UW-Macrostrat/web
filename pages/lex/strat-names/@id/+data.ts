@@ -5,7 +5,7 @@ export async function data(pageContext) {
   const strat_name_id = parseInt(pageContext.urlParsed.pathname.split("/")[3]);
 
   // Await all API calls
-  const [resData, colData, unitsData, fossilsData, mapsData, refs1, refs2] =
+  const [resData, colData, fossilsData, mapsData, refs1, refs2, unitsData] =
     await Promise.all([
       fetchAPIData("/defs/strat_names", { strat_name_id }),
       fetchAPIData("/columns", {
@@ -13,11 +13,11 @@ export async function data(pageContext) {
         response: "long",
         format: "geojson",
       }),
-      fetchAPIData("/units", { strat_name_id }),
       fetchAPIData("/fossils", { strat_name_id }),
       fetchAPIData("/geologic_units/map/legend", { strat_name_id }),
       fetchAPIRefs("/fossils", { strat_name_id }),
       fetchAPIRefs("/columns", { strat_name_id }),
+      fetchAPIData("/units", { strat_name_id }),
     ]);
 
   const refValues1 = Object.values(refs1);
@@ -41,8 +41,8 @@ export async function data(pageContext) {
     colData,
     taxaData,
     refs,
-    unitsData,
     fossilsData,
     mapsData,
+    unitsData,
   };
 }
