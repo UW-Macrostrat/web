@@ -1,4 +1,4 @@
-import { h } from "@macrostrat/map-interface";
+import h from "@macrostrat/hyper";
 import { PageBreadcrumbs } from "~/components";
 import { ContentPage } from "~/layouts";
 
