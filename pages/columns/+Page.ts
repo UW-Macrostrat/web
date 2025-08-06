@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { ContentPage } from "~/layouts";
 import {
   Link,
@@ -15,7 +15,6 @@ import { useData } from "vike-react/useData";
 import { ClientOnly } from "vike-react/ClientOnly";
 import { navigate } from "vike/client/router";
 import { SearchBar } from "~/components/general";
-import { FlexRow } from "@macrostrat/ui-components";
 
 const h = hyper.styled(styles);
 
@@ -42,11 +41,11 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const [showEmpty, setShowEmpty] = useState(false);  
   const [showInProcess, setShowInProcess] = useState(true);
 
-  let validStatus = [
-    "active",
-  ]
-
-  if (showInProcess) validStatus.push("in process");
+  const validStatus = useMemo(() => {
+    const statuses = ["active"];
+    if (showInProcess) statuses.push("in process");
+    return statuses;
+  }, [showInProcess]);
 
   const columnIDs = columnGroups?.flatMap((item) =>
     item.columns
@@ -133,6 +132,23 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
 function ColumnGroup({ data, linkPrefix, columnInput, validStatus, showEmpty }) {
   const [isOpen, setIsOpen] = useState(false);
   const [filteredColumns, setFilteredColumns] = useState([]);
+  const [filteredInput, setFilteredInput] = useState(columnInput);
+
+  const prevInput = useRef("");
+
+  useEffect(() => {
+    const prevLength = prevInput.current.length;
+    const currLength = columnInput.length;
+
+    if (prevLength === 3 && currLength === 2) {
+      setFilteredInput("");
+    } else if (columnInput.length >= 3) {
+      setFilteredInput(columnInput);
+    }
+
+    prevInput.current = columnInput;
+  }, [columnInput]);
+
 
   useEffect(() => {
     const filtered = data.columns.filter((col) => {
@@ -148,10 +164,10 @@ function ColumnGroup({ data, linkPrefix, columnInput, validStatus, showEmpty }) 
         const name = col.col_name.toLowerCase();
         const input = columnInput.toLowerCase();
 
-        return name.includes(input) && validStatus.includes(status) && (nUnits > 0 || showEmpty);
+        return (name.includes(input) || filteredInput == "") && validStatus.includes(status) && (nUnits > 0 || showEmpty);
       })
       setFilteredColumns(filtered);
-  }, [validStatus]);
+  }, [validStatus, filteredInput]);
 
   if (filteredColumns?.length === 0) return null;
 
