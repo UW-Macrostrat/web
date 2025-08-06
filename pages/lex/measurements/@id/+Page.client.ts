@@ -2,11 +2,7 @@ import { useData } from "vike-react/useData";
 import h from "./main.module.sass";
 import { LexItemPage } from "~/components/lex";
 import { usePageContext } from "vike-react/usePageContext";
-import { DataField } from "~/components/unit-details";
-import { LithologyTag } from "@macrostrat/data-components";
-import { fetchAPIData } from "~/_utils";
-import { useEffect, useState } from "react";
-import { Measurement } from "../+Page.client";
+import { Measurement } from "../measurement";
 
 export function Page() {
   const { resData } = useData();

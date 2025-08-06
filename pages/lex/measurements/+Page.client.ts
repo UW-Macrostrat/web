@@ -6,7 +6,6 @@ import {
   buildInspectorStyle
 } from "@macrostrat/map-interface";
 import { mapboxAccessToken } from "@macrostrat-web/settings";
-import { LithologyTag } from "@macrostrat/data-components";
 import { useEffect, useState } from "react";
 import { useDarkMode } from "@macrostrat/ui-components";
 import { FullscreenPage } from "~/layouts";
@@ -14,8 +13,7 @@ import { MultiSelect } from "@blueprintjs/select"
 import { MenuItem, Switch, Divider, Icon } from "@blueprintjs/core";
 import { tileserverDomain } from "@macrostrat-web/settings";
 import { fetchPGData } from "~/_utils";
-import { DataField } from "~/components/unit-details";
-import { FlexRow } from "@macrostrat/ui-components";
+import { Measurement } from "./measurement";
 
 
 export function Page() {
@@ -309,41 +307,4 @@ function SelectedMeasurement({ selectedMeasurement, setSelectedMeasurement }) {
     }
 
     return h(Measurement, { data, setSelectedMeasurement });
-}
-
-export function Measurement({data, setSelectedMeasurement}) {
-    const { sample_name, sample_geo_unit, sample_lith, lith_id, lith_color, int_name, int_id, int_color, sample_description, ref, type, id } = data;
-
-    // Lithology tag component
-    let lithProps = {
-        data: { name: sample_lith, color: lith_color }
-    };
-
-    if (lith_id !== 0) {
-        lithProps.onClick = () => { window.open('/lex/lithologies/' + lith_id); };
-    }
-
-    // Interval tag component
-    let ageProps = {
-        data: { name: int_name, color: int_color }
-    };
-
-    if (int_id !== 0) {
-        ageProps.onClick = () => { window.open('/lex/intervals/' + int_id); };
-    }
-
-    return h("div.selected-measurement", [
-        h.if(setSelectedMeasurement)(FlexRow, { justifyContent: 'space-between' }, [ 
-            h("h3", "Selected Measurement"),
-            h(Icon, { icon: "cross", className: 'close-btn', onClick: () => setSelectedMeasurement(null) }),
-        ]),
-        h.if(setSelectedMeasurement)(Divider),
-        h.if(setSelectedMeasurement)(DataField, { label: "Name", value: h('a.ref', { href: '/lex/measurements/' + id, target: "_blank" }, sample_name) }),
-        h(DataField, { label: "Type", value: type }),
-        h(DataField, { label: "Geological Unit", value: sample_geo_unit }),
-        h.if(sample_lith)(DataField, { label: "Lithology", value: h(LithologyTag, lithProps) }),
-        h.if(int_id)(DataField, { label: "Age", value: h(LithologyTag, ageProps) }),
-        h(DataField, { label: "Description", value: sample_description }),
-        h.if(ref.includes("http"))('a.ref', { href: ref, target: "_blank" }, "View Reference"),
-    ]);
 }
