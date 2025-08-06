@@ -23,6 +23,8 @@ export function Page() {
         roles: [],
     });
 
+    console.log('form', form);
+
     const disabled = !form.name || !form.email || !form.title || !form.img_id || form.roles.length === 0;
 
     const handleChange = (field) => (value) => {
@@ -79,7 +81,7 @@ export function Page() {
                     onChange: handleChange("active_end")
                 }),
             ]),
-            h(SubmitButton, { disabled, form }),
+            h(SubmitButton, { disabled: false, form }),
             h("p.note", h('em', "Fields marked with * are required")),
         ]),
     ]);
@@ -137,70 +139,52 @@ function SubmitButton({ disabled, form }) {
     const handleSubmit = () => {
         if (disabled) return;
 
-        // Convert empty strings to null
-        const formattedForm = Object.fromEntries(
-            Object.entries(form).map(([key, value]) => [key, value === "" ? null : value])
+        // Destructure roles and img_id, default img_id if missing
+        const { roles, ...personData } = form;
+        const filteredPersonData = Object.fromEntries(
+            Object.entries(personData).filter(([_, v]) => v !== null && v !== undefined)
         );
 
-        // Destructure roles and img_id, default img_id if missing
-        const { roles = [], img_id, ...personData } = formattedForm;
-
-        console.log("Submitting person data:", personData);
+        const testBody = new URLSearchParams(filteredPersonData).toString();
 
         fetch(`${postgrestPrefix}/people`, {
-            method: 'POST',
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/x-www-form-urlencoded",
+                "Prefer": "return=representation",
             },
-            body: JSON.stringify({
-                ...personData,
-                img_id: img_id || "david.jpg", // fallback to default
-            }),
+            body: testBody,
         })
-        .then(response => {
-            if (!response.ok) {
-                return response.text().then(text => {
-                    throw new Error(`Failed to create person: ${response.status} - ${text}`);
-                });
-            }
-            return response.json();
-        })
+        .then(r => r.json())
         .then(data => {
-            const personId = data.person_id;
-            if (!personId) {
-                throw new Error("Missing person_id in response");
-            }
+            console.log("Test submission response:", data[0]);
+            const personId = data[0].person_id;
 
-            // Handle roles if present
-            if (roles.length > 0) {
-                const rolePromises = roles.map(roleId =>
-                    fetch(`${postgrestPrefix}/people_roles`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ person_id: personId, role_id: roleId }),
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            return response.text().then(text => {
-                                throw new Error(`Failed to assign role: ${response.status} - ${text}`);
-                            });
-                        }
-                        return response.json();
-                    })
-                );
+            console.log("Person ID:", personId, "roles:", roles);
 
-                return Promise.all(rolePromises);
-            }
+            roles.forEach(roleId => {
+                console.log("Assigning role:", roleId, "to person:", personId);
+                const body = new URLSearchParams({ person_id: personId, role_id: roleId }).toString();
+
+                fetch(`${postgrestPrefix}/people_roles`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "Prefer": "return=representation",
+                    },
+                    body,
+                })
+                .then(r => r.json())
+                .then(roleData => {
+                    console.log("Role assignment response:", roleData);
+                })
+                .catch(e => console.error("Role assignment error:", e));
+            });
         })
-        .catch(error => {
-            console.warn("Submission error:", error);
-        });
+        .catch(e => console.error("Test submission error:", e));
     };
 
-
-    return h(SaveButton, { disabled, onClick: handleSubmit }, text)
+    return h(SaveButton, { disabled, onClick: handleSubmit }, text);
 }
 
 function RolesInput({ setForm }) {
