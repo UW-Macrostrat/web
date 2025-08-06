@@ -15,7 +15,7 @@ export function Measurement({data, setSelectedMeasurement}) {
     };
 
     if (lith_id !== 0) {
-        lithProps.onClick = () => { window.open('/lex/lithologies/' + lith_id); };
+        lithProps.href = '/lex/lithologies/' + lith_id
     }
 
     // Interval tag component
@@ -24,7 +24,7 @@ export function Measurement({data, setSelectedMeasurement}) {
     };
 
     if (int_id !== 0) {
-        ageProps.onClick = () => { window.open('/lex/intervals/' + int_id); };
+        ageProps.href = '/lex/intervals/' + int_id;
     }
 
     let topRows = null;
