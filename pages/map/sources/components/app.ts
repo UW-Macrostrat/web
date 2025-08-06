@@ -18,9 +18,7 @@ function App() {
   }, []);
   return h("div.full-height", [
     h(IndexMapContainer),
-    h("div.content-overlay", [
-      h(InfoDrawer)
-    ]),
+    h("div.content-overlay", [h(InfoDrawer)]),
   ]);
 }
 

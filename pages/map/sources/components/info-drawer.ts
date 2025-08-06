@@ -8,7 +8,7 @@ import {
 } from "../app-state";
 import Options from "./options";
 import { InfoDrawerContainer } from "@macrostrat/map-interface";
-import  FeatureList  from "./feature-list.tsx";
+import FeatureList from "./feature-list";
 import { PageBreadcrumbs } from "~/components";
 
 function BackButton() {
@@ -69,8 +69,8 @@ function InfoDrawer() {
     "div.infodrawer-container-sources",
     h(InfoDrawerContainer, [
       h(Header, { len, btn: h(CloseBtn) }),
-      len == 0 ? h(FeatureList, { features: data, open }) : null,
-      len > 0 ? h(FeatureList, { features: selectedFeatures, open }) : null,
+      h.if(len == 0)(FeatureList, { features: data, open }),
+      h.if(len > 0)(FeatureList, { features: selectedFeatures, open }),
     ])
   );
 }
