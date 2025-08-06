@@ -27,13 +27,21 @@ export function Measurement({data, setSelectedMeasurement}) {
         ageProps.onClick = () => { window.open('/lex/intervals/' + int_id); };
     }
 
+    let topRows = null;
+    
+    if (setSelectedMeasurement) {
+        topRows = [
+            h(FlexRow, { justifyContent: 'space-between' }, [ 
+                h("h3", "Selected Measurement"),
+                h(Icon, { icon: "cross", className: 'close-btn', onClick: () => setSelectedMeasurement(null) }),
+            ]),
+            h(Divider),
+            h(DataField, { label: "Name", value: h('a.ref', { href: '/lex/measurements/' + id, target: "_blank" }, sample_name) }),
+        ];
+    }
+
     return h("div.selected-measurement", [
-        h.if(setSelectedMeasurement)(FlexRow, { justifyContent: 'space-between' }, [ 
-            h("h3", "Selected Measurement"),
-            h(Icon, { icon: "cross", className: 'close-btn', onClick: () => setSelectedMeasurement(null) }),
-        ]),
-        h.if(setSelectedMeasurement)(Divider),
-        h.if(setSelectedMeasurement)(DataField, { label: "Name", value: h('a.ref', { href: '/lex/measurements/' + id, target: "_blank" }, sample_name) }),
+        topRows,
         h(DataField, { label: "Type", value: type }),
         h(DataField, { label: "Geological Unit", value: sample_geo_unit }),
         h.if(sample_lith)(DataField, { label: "Lithology", value: h(LithologyTag, lithProps) }),
