@@ -4,7 +4,6 @@ import { Card, Popover, RangeSlider, Divider } from "@blueprintjs/core";
 import { useState } from "react";
 import { ContentPage } from "~/layouts";
 import { Timescale } from "@macrostrat/timescale";
-import { titleCase } from "~/components/lex/index";
 import { useEffect } from "react";
 import { SearchBar } from "~/components/general";
 import { useData } from "vike-react/useData";
@@ -82,7 +81,7 @@ function TimescaleItem({ data }) {
       LinkCard,
       { className: "timescale-item", href: "/lex/timescales/" + timescale_id },
       [
-        h("h1.timescale-name", titleCase(timescale)),
+        h("h1.timescale-name", timescale),
         h("h3", `${max_age} - ${min_age} Ma`),
         h("p", `Intervals: ${n_intervals}`),
       ]

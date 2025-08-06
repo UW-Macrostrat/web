@@ -4,11 +4,9 @@ import { ContentPage } from "~/layouts";
 import { useState, useEffect } from "react";
 import { fetchAPIData } from "~/_utils";
 import { usePageContext } from "vike-react/usePageContext";
-import { LithologyTag } from "@macrostrat/data-components";
-import { FlexRow } from "@macrostrat/ui-components";
 import { PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
 import { postgrestPrefix } from "@macrostrat-web/settings";
-
+import { LithologyTag, FlexRow } from "~/components/lex/tag";
 
 export function Page() {
   const url = usePageContext().urlOriginal.split("?")[1];
@@ -26,28 +24,27 @@ export function Page() {
   const name = params.name;
 
   useEffect(() => {
-    fetchAPIData("/units", {
+    fetchAPIData("/fossils", {
       [idType]: id
     }).then((res) => setData(res));
   }, []);
 
-
   return h(ContentPage, [
     h(Header, { name, color, idType, id }),
     h('div.units', [
-      data?.map((d) => h(UnitItem, { key: d.id, data: d })),
+      data?.map((d) => h(FossilItem, { key: d.id, data: d })),
     ]),
     h(Footer)
   ]);
 }
 
-function UnitItem({ data }) {
-  const { unit_id, col_id, unit_name } = data;
+function FossilItem({ data }) {
+  const { cltn_name, cltn_id } = data;
 
   return h(LinkCard, {
-    href: `/columns/${col_id}#unit=${unit_id}`,
-    className: "unit-item",
-    title: unit_name,
+    href: 'https://paleobiodb.org/classic/displayCollResults?collection_no=col:' + cltn_id,
+    className: "fossil-item",
+    title: cltn_name,
   });
 }
 
@@ -58,12 +55,13 @@ function Header({ name, color, idType, id }) {
     'econ_id': "economics",
     'environ_id': "environments",
     'strat_name_id': "strat-names",
+    'strat_name_concept_id': "strat-concepts",
   }
 
   return h(StickyHeader, { className: "header" }, [
     h(PageBreadcrumbs, {
       title: h(FlexRow, { gap: ".5em", alignItems: "center" }, [
-        h('p.title', 'Units for '),
+        h('p.title', 'Fossils for '),
         h(LithologyTag, { data: { name, color }, href: `/lex/${map[idType]}/${id}` }),
       ]),
     })
@@ -87,23 +85,24 @@ function getUrlParams(urlString) {
 
 function Base() {
   return h(ContentPage, { className: 'page' }, [
-    h(StickyHeader, { className: "header" }, h(PageBreadcrumbs, { title: "Units" })),
+    h(StickyHeader, { className: "header" }, h(PageBreadcrumbs, { title: "Fossils" })),
     h(PostgRESTInfiniteScrollView, {
-      route: postgrestPrefix + '/units',
-      id_key: 'id',
+      route: postgrestPrefix + '/fossils',
+      id_key: 'collection_no',
       limit: 20,
-      itemComponent: BaseUnitItem,
+      itemComponent: BaseFossilItem,
       filterable: true,
-      searchColumns: [{ value: "strat_name", label: "Name" }],
+      searchColumns: [{ value: 'name', label: 'Fossil Name' }],
     }),
   ]);
 }
 
-function BaseUnitItem({ data }) {
-  const { id, col_id, strat_name } = data;
+function BaseFossilItem({ data }) {
+  const { name, collection_no } = data;
 
   return h(LinkCard, {
-    href: `/columns/${col_id}#unit=${id}`,
-    title: strat_name,
-  })
+    href: 'https://paleobiodb.org/classic/displayCollResults?collection_no=col:' + collection_no,
+    className: "fossil-item",
+    title: name,
+  });
 }
