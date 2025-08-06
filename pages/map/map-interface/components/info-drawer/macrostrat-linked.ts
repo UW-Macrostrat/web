@@ -312,7 +312,7 @@ function LithsAndClasses(props) {
       h(LithologyList, {
         lithologies,
         onClickItem: (e, lith) => {
-          window.open('/lex/lithology/' + lith.lith_id, '_self');
+          window.open('/lex/lithologies/' + lith.lith_id, '_self');
         },
       }),
     ])

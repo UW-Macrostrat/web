@@ -13,7 +13,7 @@ import {
 import { usePageContext } from "vike-react/usePageContext";
 
 export function Page() {
-  const { resData, colData, taxaData, refs, unitsData, fossilsData } =
+  const { resData, colData, taxaData, refs, fossilsData, unitsData } =
     useData();
 
   const id = usePageContext().urlParsed.pathname.split("/")[3];
@@ -29,8 +29,8 @@ export function Page() {
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),
     h(Timescales, { timescales }),
-    h(Units, { unitsData }),
-    h(Fossils, { fossilsData }),
+    h.if(fossilsData.length > 0)(Fossils, { href: "int_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
+    h.if(unitsData.length > 0)(Units, { href: "int_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
   ];
 
   return LexItemPage({ children, id, refs, resData, siftLink: "interval" });

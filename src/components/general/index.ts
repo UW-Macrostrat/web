@@ -29,12 +29,12 @@ export function MacrostratLogoLink({
   ]);
 }
 
-export function MacrostratIcon({ iconStyle, className }) {
+export function MacrostratIcon({ iconStyle, className, small = false }) {
   const iconFile =
     iconStyle != null
       ? `macrostrat-icon-${iconStyle}.svg`
       : "macrostrat-icon.svg";
-  return h("img.macrostrat-logo", {
+  return h("img.macrostrat-logo" + (small ? ".small" : ""), {
     className,
     src: `https://storage.macrostrat.org/assets/web/macrostrat-icons/${iconFile}`,
   });
@@ -110,7 +110,7 @@ export function Footer() {
       ]),
       h("div", { className: "footer-nav" }, [
         h("a", { className: "nav-link", href: "/" }, [
-          h(MacrostratIcon),
+          h(MacrostratIcon, { iconStyle: "simple", small: true }),
           h("span", { className: "nav-text" }, "Home"),
         ]),
         navItems.map(({ href, text, icon }) =>

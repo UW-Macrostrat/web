@@ -40,7 +40,7 @@ function MineralDetails({ resData }) {
     h.if(mineral_color)("p.color", `Color: ${mineral_color}`),
     h.if(lustre)("p.lustre", `Lustre: ${lustre}`),
     url
-      ? h("a.mineral-url", { href: url, target: "_blank" }, "More Info")
+      ? h("a.mineral-url", { href: url, target: "_self" }, "More Info")
       : null,
   ]);
 }

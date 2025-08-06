@@ -73,7 +73,7 @@ export function Page() {
                     color: d.color || "#000000",
                   },
                   onClick: (e, d) => {
-                      window.open(`/lex/intervals/${d.id}`, "_blank");
+                      window.open(`/lex/intervals/${d.id}`, "_self");
                   },
               })),
             ),

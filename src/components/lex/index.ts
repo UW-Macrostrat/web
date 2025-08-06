@@ -36,7 +36,7 @@ function ColumnMapContainer(props) {
     {
       load: () => import("./map.client").then((d) => d.ColumnsMapContainer),
       fallback: h("div.loading", "Loading map..."),
-      deps: [props.columnIDs, props.projectID],
+      deps: [props.columns, props.projectID],
     },
     (component) => h(component, props)
   );
@@ -245,7 +245,7 @@ export function Charts({ features }) {
   return h("div.charts", [
     h.if(liths?.length)(
       "div.chart",
-      Chart(liths, "Lithologies", "lithology", activeIndex, setActiveIndex)
+      Chart(liths, "Lithologies", "lithologies", activeIndex, setActiveIndex)
     ),
     h.if(environs?.length)(
       "div.chart",
@@ -819,6 +819,7 @@ function Chart(data, title, route, activeIndex, setActiveIndex) {
             cx: "50%",
             cy: "50%",
             fill: "#8884d8",
+            isAnimationActive: false
           },
           data?.map((entry, index) =>
             h(Cell, {
@@ -909,38 +910,8 @@ function ChartLegend(data, route, activeIndex, setActiveIndex, index) {
   ]);
 }
 
-export function Units({ unitsData }) {
-  const ITEMS_PER_PAGE = 20;
-  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
-  const data = useMemo(() => {
-    return unitsData.slice(0, visibleCount);
-  }, [unitsData, visibleCount]);
-
-  const visibleItems = data.map((item) =>
-    h(
-      "a.unit-item",
-      { href: "/columns/" + item.col_id + "#unit=" + item.unit_id },
-      item.unit_name + " (#" + item.unit_id + ")"
-    )
-  );
-
-  const handleLoadMore = () => {
-    setVisibleCount((prev) =>
-      Math.min(prev + ITEMS_PER_PAGE, unitsData.length)
-    );
-  };
-
-  const showLoadMore = visibleCount < unitsData.length;
-
-  return h.if(unitsData?.length > 0)("div.units-container", [
-    h(ExpansionPanel, { title: "Units", className: "units-panel" }, [
-      h("div.units-list", [...visibleItems]),
-      h.if(showLoadMore)(
-        "div.load-more-wrapper",
-        h("button.load-more-btn", { onClick: handleLoadMore }, "Load More")
-      ),
-    ]),
-  ]);
+export function Units({ href }) {
+  return h(LinkCard, { title: "View linked units", href: '/lex/units?' + href, className: "units-card" });
 }
 
 export function Maps({ mapsData }) {
@@ -978,40 +949,8 @@ export function Maps({ mapsData }) {
   ]);
 }
 
-export function Fossils({ fossilsData }) {
-  const ITEMS_PER_PAGE = 20;
-  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
-  const data = useMemo(() => {
-    return fossilsData.slice(0, visibleCount);
-  }, [fossilsData, visibleCount]);
-
-  const visibleItems = data.map((item) =>
-    h(
-      "a.fossil-item",
-      {
-        href: `https://paleobiodb.org/classic/displayCollResults?collection_no=col:${item.cltn_id}`,
-      },
-      item.cltn_name + " (#" + item.cltn_id + ")"
-    )
-  );
-
-  const handleLoadMore = () => {
-    setVisibleCount((prev) =>
-      Math.min(prev + ITEMS_PER_PAGE, fossilsData.length)
-    );
-  };
-
-  const showLoadMore = visibleCount < fossilsData.length;
-
-  return h.if(fossilsData?.length > 0)("div.fossils-container", [
-    h(ExpansionPanel, { title: "Fossils", className: "fossils-panel" }, [
-      h("div.fossils-list", [...visibleItems]),
-      h.if(showLoadMore)(
-        "div.load-more-wrapper",
-        h("button.load-more-btn", { onClick: handleLoadMore }, "Load More")
-      ),
-    ]),
-  ]);
+export function Fossils({ href }) {
+  return h(LinkCard, { title: "View linked fossils", href: '/lex/fossils?' + href, className: "fossils-card" });
 }
 
 export function MatchesPanel({ fossilsData }) {

@@ -38,7 +38,7 @@ export function PageBreadcrumbsInternal({ showLogo = false, items }) {
   if (showLogo) {
     itemsList[0] = {
       text: h("span.breadcrumbs-root", [
-        h(MacrostratIcon, { iconStyle: "simple" }),
+        h(MacrostratIcon, { iconStyle: "simple", small: true }),
         "Macrostrat",
       ]),
       href: "/",
@@ -180,7 +180,11 @@ export const sitemap: Routes = {
               slug: "feedback",
               name: "Feedback",
             },
-          ],
+            {
+              slug: "extractions",
+              name: "Extractions",
+            }
+          ]
         },
       ],
     },
@@ -238,8 +242,8 @@ export const sitemap: Routes = {
       name: "Lexicon",
       children: [
         {
-          slug: "lithology",
-          name: "Lithology",
+          slug: "lithologies",
+          name: "Lithologies",
         },
         {
           slug: "mineral",
@@ -278,89 +282,28 @@ export const sitemap: Routes = {
           name: "Lithology attributes",
         },
         {
-          slug: "strat-concept",
-          name: "Strat Concept",
-          children: [
-            {
-              param: "@id",
-              name(urlPart, ctx) {
-                return h(
-                  "code",
-                  ctx.pageProps?.stratConcept?.strat_name ?? urlPart
-                );
-              },
-            },
-          ],
-        },
-        {
           slug: "strat-concepts",
           name: "Strat Concepts",
-          children: [
-            {
-              param: "@id",
-              name(urlPart, ctx) {
-                return h("code", urlPart);
-              },
-            },
-          ],
         },
         {
-          slug: "strat-name",
-          name: "Stratigraphic name",
+          slug: "strat-names",
+          name: "Stratigraphic names",
         },
         {
           slug: "intervals",
           name: "Intervals",
-          children: [
-            {
-              param: "@id",
-              name(urlPart, ctx) {
-                return h("code", ctx.pageProps?.interval?.int_id ?? urlPart);
-              },
-            },
-          ],
         },
         {
           slug: "environments",
           name: "Environments",
-          children: [
-            {
-              param: "@id",
-              name(urlPart, ctx) {
-                return h(
-                  "code",
-                  ctx.pageProps?.environment?.environ_id ?? urlPart
-                );
-              },
-            },
-          ],
         },
         {
           slug: "economics",
           name: "Economics",
-          children: [
-            {
-              param: "@id",
-              name(urlPart, ctx) {
-                return h("code", ctx.pageProps?.economic?.econ_id ?? urlPart);
-              },
-            },
-          ],
         },
         {
           slug: "timescales",
           name: "Timescales",
-          children: [
-            {
-              param: "@id",
-              name(urlPart, ctx) {
-                return h(
-                  "code",
-                  ctx.pageProps?.timescale?.timescale_id ?? urlPart
-                );
-              },
-            },
-          ],
         },
       ],
     },

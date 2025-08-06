@@ -81,40 +81,6 @@ function UpperCase(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function EconItem({ data }) {
-  const { name, color, abbrev, b_age, int_id, t_age, timescales } = data;
-  const chromaColor = color ? asChromaColor(color) : null;
-  const luminance = 0.9;
-  data.id = int_id;
-
-  // return IntervalTag({ showAgeRange: true, interval: data });
-
-  return h(
-    Popover,
-    {
-      className: "int-item-popover",
-      content: h("div.int-tooltip", [
-        h("div.int-tooltip-id", "ID: #" + int_id),
-        h("div.int-tooltip-ages", b_age + " - " + t_age + " Ma"),
-        abbrev ? h("div.int-tooltip-abbrev", "Abbreviation - " + abbrev) : null,
-        h(Link, { href: "/lex/intervals/" + int_id }, "View details"),
-      ]),
-    },
-    h("div.int-item", [
-      h(
-        "div.int-name",
-        {
-          style: {
-            backgroundColor: chromaColor?.luminance(1 - luminance).hex(),
-            color: chromaColor?.luminance(luminance).hex(),
-          },
-        },
-        name
-      ),
-    ])
-  );
-}
-
 function Fail({timeRes}){
   return h('div', timeRes.timescale)
 }

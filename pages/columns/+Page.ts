@@ -147,7 +147,7 @@ function ColumnGroup({ data, linkPrefix, columnInput, validStatus }) {
     { className: "column-group", onClick: () => setIsOpen(!isOpen) },
     [
       h("div.column-group-header", [
-        h(Link, { href: `/columns/groups/${data.id}`, target: "_blank" }, [
+        h(Link, { href: `/columns/groups/${data.id}`, target: "_self" }, [
           h(
             "h2.column-group-name",
             name + " (Group #" + filteredColumns[0].col_group_id + ")"

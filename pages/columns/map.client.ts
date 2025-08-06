@@ -28,7 +28,7 @@ function ColumnsMapInner({ columnIDs = null, projectID = null, className, hideCo
         accessToken: mapboxAccessToken,
         onSelectColumn: (col) => {
           if (col) {
-            window.open(`/columns/${col}`, "_blank");
+            window.open(`/columns/${col}`, "_self");
           }
         },
         columnIDs,
