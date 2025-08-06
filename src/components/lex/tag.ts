@@ -22,3 +22,14 @@ export function FlexRow(props) {
     (component) => h(component, props)
   );
 }
+
+export function ExpansionPanel(props) {
+  return h(
+    ClientOnly,
+    {
+      load: () => import("~/components/lex/load.client").then((d) => d.ExpansionPanelInner),
+      deps: [props],
+    },
+    (component) => h(component, props)
+  );
+}

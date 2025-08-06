@@ -6,7 +6,7 @@ import { useData } from "vike-react/useData";
 import { Footer } from "~/components/general";
 import { SearchBar } from "~/components/general";
 import { useState } from "react";
-import { ExpansionPanel } from "@macrostrat/map-interface";
+import { ExpansionPanel } from "~/components/lex/tag";
 
 export function Page() {
   const { res } = useData();
