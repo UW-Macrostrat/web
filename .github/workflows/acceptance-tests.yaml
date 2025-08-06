@@ -1,0 +1,38 @@
+name: Acceptance Tests
+
+permissions: read-all
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  acceptance-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Create .env file
+        run: |
+          echo "VITE_MAPBOX_API_TOKEN=${{ secrets.MAPBOX_API_TOKEN }}" >> .env
+          echo "VITE_MACROSTRAT_TILESERVER_DOMAIN=https://tileserver.staging.svc.macrostrat.org" >> .env
+          echo "VITE_MACROSTRAT_API_DOMAIN=https://macrostrat.org" >> .env
+
+      - name: Acceptance Tests
+        run: bash ./scripts/acceptance-tests/run-tests.sh
+        env:
+          TEST_BASE_URL: http://localhost:3000
+
+
