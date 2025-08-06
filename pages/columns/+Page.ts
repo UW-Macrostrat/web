@@ -40,6 +40,9 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const [columnInput, setColumnInput] = useState("");
   const [showEmpty, setShowEmpty] = useState(false);  
   const [showInProcess, setShowInProcess] = useState(true);
+  const [columnIDs, setColumnIDs] = useState([]);
+
+  console.log("columnids", columnIDs);
 
   const validStatus = useMemo(() => {
     const statuses = ["active"];
@@ -47,21 +50,50 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
     return statuses;
   }, [showInProcess]);
 
-  const columnIDs = columnGroups?.flatMap((item) =>
-    item.columns
-      .filter((col) => {
-        let nUnits = 0;
+  const [filteredInput, setFilteredInput] = useState(columnInput);
 
-        try {
-          nUnits = parseInt(col.t_units);
-        } catch (e) {
-          console.warn("Invalid number of units for column", col.col_id, col.t_units);
-        }
+  const prevInput = useRef("");
 
-        return col.col_name.toLowerCase().includes(columnInput.toLowerCase()) && validStatus.includes(col.status.toLowerCase()) && (nUnits > 0 || showEmpty);
-      })
-      .map((col) => col.col_id)
-  );
+  useEffect(() => {
+    const prevLength = prevInput.current.length;
+    const currLength = columnInput.length;
+
+    if (prevLength === 3 && currLength === 2) {
+      setFilteredInput("");
+    } else if (columnInput.length >= 3) {
+      setFilteredInput(columnInput);
+    }
+
+    prevInput.current = columnInput;
+  }, [columnInput]);
+
+  useEffect(() => {
+    const filtered = columnGroups.flatMap((group) =>
+      group.columns
+        .filter((col) => {
+          const status = col.status.toLowerCase();
+
+          let nUnits = 0;
+          try {
+            nUnits = parseInt(col.t_units);
+          } catch (e) {
+            console.warn("Invalid number of units for column", col.col_id, col.t_units);
+          }
+
+          const name = col.col_name.toLowerCase();
+          const input = filteredInput.toLowerCase();
+
+          return (
+            (input === "" || name.includes(input)) &&
+            validStatus.includes(status) &&
+            (nUnits > 0 || showEmpty)
+          );
+        })
+        .map((col) => col.col_id)
+    );
+
+    setColumnIDs(filtered);
+  }, [validStatus, filteredInput]);
 
   const hideColumns = columnIDs?.length === 0;
 
