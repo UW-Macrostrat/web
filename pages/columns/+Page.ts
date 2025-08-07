@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ContentPage } from "~/layouts";
 import {
   Link,
@@ -50,6 +50,10 @@ async function getGroupedColumns(project_id: number | null, params?: any) {
     fetchAPIData(`/defs/groups`, { ...params, all: true}),
   ]);
 
+  if(!columns) {
+    return null
+  }
+
   columns.sort((a, b) => a.col_id - b.col_id);
 
   // Group by col_group
@@ -89,37 +93,37 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   // const { columnGroups, project } = useData();
   const [columnGroups, setColumnGroups] = useState(null);
   const [extraParams, setExtraParams] = useState({});
-
-  getGroupedColumns(null, extraParams)
-    .then((columnGroups) => setColumnGroups(columnGroups));
-
   const [columnInput, setColumnInput] = useState("");
   const shouldFilter = columnInput.length >= 3;
 
-  const filteredGroups = shouldFilter
-    ? columnGroups?.filter((group) => {
-        const filteredColumns = group.columns.filter((col) => {
-          const name = col.col_name.toLowerCase();
-          const input = columnInput.toLowerCase();
-          return name.includes(input);
-        });
+  useEffect(() => {
+    const prevLength = prevInputLengthRef.current;
+    
+    if (columnInput.length >= 3) {
+      setExtraParams({ name: `ilike.%${columnInput}%` });
+    } else if (prevLength >= 3 && columnInput.length === 2) {
+      setExtraParams({});
+    }
 
-        if (
-          filteredColumns.length > 0 ||
-          group.name.toLowerCase().includes(columnInput.toLowerCase())
-        ) {
-          return { ...group, columns: filteredColumns };
-        }
+    // Update the ref for next time
+    prevInputLengthRef.current = columnInput.length;
+  }, [columnInput]);
 
-        return false;
-      })
-    : null;
+  const prevInputLengthRef = useRef(columnInput.length);
 
-  const columnIDs = filteredGroups?.flatMap((item) =>
+  useEffect(() => {
+
+    
+    getGroupedColumns(null, extraParams)
+      .then((groups) => setColumnGroups(groups));
+  }, [extraParams]);
+
+  if(!columnGroups) {
+    return h("div.loading", "Loading columns...");
+  }
+
+  const columnIDs = columnGroups?.flatMap((item) =>
     item.columns
-      .filter((col) =>
-        col.col_name.toLowerCase().includes(columnInput.toLowerCase())
-      )
       .map((col) => col.col_id)
   );
 
@@ -129,7 +133,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
     setColumnInput(value.toLowerCase());
   };
 
-  const allGroups = filteredGroups ?? columnGroups ?? [];
+  const allGroups = columnGroups ?? [];
 
   return h("div.column-list-page", [
     h(ContentPage, [
@@ -137,10 +141,12 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
         h("div.main", [
           h(StickyHeader, [
             h(PageBreadcrumbs, { showLogo: true }),
-            h(SearchBar, {
-              placeholder: "Search columns...",
-              onChange: handleInputChange,
-            }),
+            h('div.filters', [
+              h(SearchBar, {
+                placeholder: "Search columns...",
+                onChange: handleInputChange,
+              }),
+            ])
           ]),
           h(
             "div.column-groups",
@@ -180,13 +186,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
 
 function ColumnGroup({ data, linkPrefix, columnInput, shouldFilter }) {
   const [isOpen, setIsOpen] = useState(false);
-  const filteredColumns = shouldFilter
-    ? data.columns.filter((col) => {
-        const name = col.col_name.toLowerCase();
-        const input = columnInput.toLowerCase();
-        return name.includes(input);
-      })
-    : data.columns;
+  const filteredColumns = data.columns
 
   if (filteredColumns?.length === 0) return null;
 
