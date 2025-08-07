@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { ContentPage } from "~/layouts";
 import {
   Link,
@@ -16,7 +16,8 @@ import { ClientOnly } from "vike-react/ClientOnly";
 import { navigate } from "vike/client/router";
 import { SearchBar } from "~/components/general";
 import { fetchAPIData, fetchPGData } from "~/_utils";
-import { Units } from "~/components/lex";
+import { FlexRow } from "@macrostrat/ui-components";
+import { Switch } from "@blueprintjs/core";
 
 const h = hyper.styled(styles);
 
@@ -93,39 +94,61 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   // const { columnGroups, project } = useData();
   const [columnGroups, setColumnGroups] = useState(null);
   const [extraParams, setExtraParams] = useState({});
+
   const [columnInput, setColumnInput] = useState("");
+  const [showEmpty, setShowEmpty] = useState(true);
+  const [filteredInput, setFilteredInput] = useState("");
+
+
+  const [showInProcess, setShowInProcess] = useState(true);
   const shouldFilter = columnInput.length >= 3;
 
+  useEffect(() => {
+    const params: any = {};
+
+    if (filteredInput.length >= 3) {
+      params.name = `ilike.%${filteredInput}%`;
+    }
+    if (!showEmpty) {
+      params.empty = `is.false`;
+    }
+    if (!showInProcess) {
+      params.status_code = 'eq.active';
+    }
+
+    setExtraParams(params);
+  }, [filteredInput, showEmpty, showInProcess]);
+
+
+  // set filtered input
   useEffect(() => {
     const prevLength = prevInputLengthRef.current;
     
     if (columnInput.length >= 3) {
-      setExtraParams({ name: `ilike.%${columnInput}%` });
+      setFilteredInput(columnInput);
     } else if (prevLength >= 3 && columnInput.length === 2) {
-      setExtraParams({});
+      setFilteredInput("");
     }
 
-    // Update the ref for next time
     prevInputLengthRef.current = columnInput.length;
-  }, [columnInput]);
+  }, [columnInput, showEmpty, showInProcess]);
 
   const prevInputLengthRef = useRef(columnInput.length);
 
   useEffect(() => {
-
-    
     getGroupedColumns(null, extraParams)
       .then((groups) => setColumnGroups(groups));
   }, [extraParams]);
 
+  const columnIDs = useMemo(() => {
+    return columnGroups?.flatMap((item) =>
+      item.columns.map((col) => col.col_id)
+    );
+  }, [columnGroups]);
+  
   if(!columnGroups) {
     return h("div.loading", "Loading columns...");
   }
-
-  const columnIDs = columnGroups?.flatMap((item) =>
-    item.columns
-      .map((col) => col.col_id)
-  );
 
   const hideColumns = columnIDs?.length === 0 && columnInput.length >= 3;
 
@@ -141,12 +164,25 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
         h("div.main", [
           h(StickyHeader, [
             h(PageBreadcrumbs, { showLogo: true }),
-            h('div.filters', [
-              h(SearchBar, {
-                placeholder: "Search columns...",
-                onChange: handleInputChange,
-              }),
-            ])
+              h(FlexRow, { gap: "1em", alignItems: "center"}, [
+                h(SearchBar, {
+                  placeholder: "Search columns...",
+                  onChange: handleInputChange,
+                  className: "search-bar",
+                }),
+                h('div.switches', [
+                  h(Switch, {
+                    checked: showEmpty,
+                    label: "Show empty",
+                    onChange: () => setShowEmpty(!showEmpty),
+                  }),
+                  h(Switch, {
+                    checked: showInProcess,
+                    label: "Show in process",
+                    onChange: () => setShowInProcess(!showInProcess),
+                  }),
+                ])
+              ])
           ]),
           h(
             "div.column-groups",
