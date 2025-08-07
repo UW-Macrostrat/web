@@ -15,6 +15,8 @@ import { useData } from "vike-react/useData";
 import { ClientOnly } from "vike-react/ClientOnly";
 import { navigate } from "vike/client/router";
 import { SearchBar } from "~/components/general";
+import { fetchAPIData, fetchPGData } from "~/_utils";
+import { Units } from "~/components/lex";
 
 const h = hyper.styled(styles);
 
@@ -34,8 +36,62 @@ function ColumnMapContainer(props) {
   );
 }
 
+async function getGroupedColumns(project_id: number | null) {
+  let columnURL = "/col_data";
+  let params = {};
+  if (project_id == null) {
+    // The 'columns' route gives all columns in active projects
+  } else {
+    // Only get columns for a specific project
+    params = { project_id };
+  }
+
+  const [columns, groups] = await Promise.all([
+    fetchPGData(columnURL, params),
+    fetchAPIData(`/defs/groups`, { ...params, all: true}),
+  ]);
+
+  columns.sort((a, b) => a.col_id - b.col_id);
+
+  // Group by col_group
+  // Create a map of column groups
+  const groupMap = new Map<number, ColumnGroup>(
+    groups.map((g) => [
+      g.col_group_id,
+      { name: g.name, id: g.col_group_id, columns: [] },
+    ])
+  );
+  groupMap.set(-1, {
+    id: -1,
+    name: "Ungrouped",
+    columns: [],
+  });
+
+  for (const col of columns) {
+    const col_group_id = col.col_group_id ?? -1;
+    const group = groupMap.get(col_group_id);
+    group.columns.push(col);
+  }
+
+  const groupsArray = Array.from(groupMap.values()).filter(
+    (g) => g.columns.length > 0
+  );
+
+  // Sort the groups by id
+  groupsArray.sort((a, b) => {
+    if (a.id === -1) return 1; // Ungrouped should come last
+    return a.id - b.id;
+  });
+
+  return groupsArray;
+}
+
 function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
-  const { columnGroups, project } = useData();
+  // const { columnGroups, project } = useData();
+  const [columnGroups, setColumnGroups] = useState(null);
+
+  getGroupedColumns(null)
+    .then((columnGroups) => setColumnGroups(columnGroups));
 
   const [columnInput, setColumnInput] = useState("");
   const shouldFilter = columnInput.length >= 3;
@@ -111,7 +167,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
             ]),
             h(ColumnMapContainer, {
               columnIDs,
-              projectID: project?.project_id,
+              projectID: null, // Fix
               className: "column-map-container",
               hideColumns,
             }),
@@ -167,16 +223,9 @@ function ColumnGroup({ data, linkPrefix, columnInput, shouldFilter }) {
 
 const ColumnItem = React.memo(
   function ColumnItem({ data, linkPrefix = "/" }) {
-    const { col_id, col_name } = data;
+    const { col_id, name, units } = data;
 
-    let nUnits = 0;
-    try {
-      nUnits = parseInt(data.t_units);
-    } catch (e) {
-      console.warn("Invalid number of units for column", col_id, data.t_units);
-    }
-
-    const unitsText = nUnits > 0 ? `${nUnits} units` : "empty";
+    const unitsText = units?.length > 0 ? `${units?.length} units` : "empty";
 
     const href = linkPrefix + `columns/${col_id}`;
     return h(
@@ -188,9 +237,9 @@ const ColumnItem = React.memo(
       },
       [
         h("td.col-id", h("code.bp5-code", col_id)),
-        h("td.col-name", h("a", { href }, col_name)),
+        h("td.col-name", h("a", { href }, name)),
         h("td.col-status", [
-          data.status === "in process" &&
+          data.status_code === "in process" &&
             h(
               Tag,
               { minimal: true, color: "lightgreen", size: "small" },
@@ -202,7 +251,7 @@ const ColumnItem = React.memo(
             {
               minimal: true,
               size: "small",
-              color: nUnits === 0 ? "orange" : "dodgerblue",
+              color: units?.length === 0 ? "orange" : "dodgerblue",
             },
             unitsText
           ),
