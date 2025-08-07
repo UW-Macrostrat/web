@@ -36,9 +36,8 @@ function ColumnMapContainer(props) {
   );
 }
 
-async function getGroupedColumns(project_id: number | null) {
+async function getGroupedColumns(project_id: number | null, params?: any) {
   let columnURL = "/col_data";
-  let params = {};
   if (project_id == null) {
     // The 'columns' route gives all columns in active projects
   } else {
@@ -89,8 +88,9 @@ async function getGroupedColumns(project_id: number | null) {
 function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   // const { columnGroups, project } = useData();
   const [columnGroups, setColumnGroups] = useState(null);
+  const [extraParams, setExtraParams] = useState({});
 
-  getGroupedColumns(null)
+  getGroupedColumns(null, extraParams)
     .then((columnGroups) => setColumnGroups(columnGroups));
 
   const [columnInput, setColumnInput] = useState("");
