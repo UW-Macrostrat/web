@@ -96,11 +96,6 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
     );
   }, [filteredGroups]);
 
-  if(!columnGroups) {
-    console.log('filteredGroups:', filteredGroups);
-    return h("div.loading", "Loading columns...");
-  }
-
   const handleInputChange = (value, target) => {
     setColumnInput(value.toLowerCase());
   };
@@ -111,25 +106,25 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
         h("div.main", [
           h(StickyHeader, [
             h(PageBreadcrumbs, { showLogo: true }),
-              h(FlexRow, { gap: "1em", alignItems: "center"}, [
-                h(SearchBar, {
-                  placeholder: "Search columns...",
-                  onChange: handleInputChange,
-                  className: "search-bar",
+            h('div.filters', [
+              h(SearchBar, {
+                placeholder: "Search columns...",
+                onChange: handleInputChange,
+                className: "search-bar",
+              }),
+              h('div.switches', [
+                h(Switch, {
+                  checked: showEmpty,
+                  label: "Show empty",
+                  onChange: () => setShowEmpty(!showEmpty),
                 }),
-                h('div.switches', [
-                  h(Switch, {
-                    checked: showEmpty,
-                    label: "Show empty",
-                    onChange: () => setShowEmpty(!showEmpty),
-                  }),
-                  h(Switch, {
-                    checked: showInProcess,
-                    label: "Show in process",
-                    onChange: () => setShowInProcess(!showInProcess),
-                  }),
-                ])
+                h(Switch, {
+                  checked: showInProcess,
+                  label: "Show in process",
+                  onChange: () => setShowInProcess(!showInProcess),
+                }),
               ])
+            ])
           ]),
           h(
             "div.column-groups",
@@ -156,7 +151,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
             ]),
             h(ColumnMapContainer, {
               columnIDs,
-              projectID: null, // Fix
+              projectID: project?.project_id, 
               className: "column-map-container",
             }),
           ]),
