@@ -22,6 +22,7 @@ import { navigate } from "vike/client/router";
 import { LexSelection } from "@macrostrat/form-components";
 import { postgrestPrefix } from "@macrostrat-web/settings";
 import { useAPIResult } from "@macrostrat/ui-components"
+import { cdrPrefix } from "packages/settings";
 
 const h = hyper.styled(styles);
 
@@ -59,8 +60,6 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
 
   const isEmpty = Object.keys(extraParams).length === 0;
   const filteredGroups = isEmpty ? allColumnGroups : columnGroups ?? [];
-
-  console.log("filteredGroups", allColumnGroups);
 
   useEffect(() => {
     const params: any = {};
@@ -119,14 +118,14 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const handleInputChange = (value, target) => {
     setColumnInput(value.toLowerCase());
   };
-
+  
   return h("div.column-list-page", [
     h(ContentPage, [
       h("div.flex-row", [
         h("div.main", [
           h(StickyHeader, [
             h(PageBreadcrumbs, { showLogo: true }),
-            h(FlexRow, { gap: "1em", alignItems: "center" }, [
+            h('div.filters', [
               h(SearchBar, {
                 placeholder: "Search columns...",
                 onChange: handleInputChange,
@@ -161,7 +160,6 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
                 data: d,
                 key: d.id,
                 linkPrefix,
-                columnInput,
                 showEmpty,
               })
             )
