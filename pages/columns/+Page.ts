@@ -60,6 +60,8 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const isEmpty = Object.keys(extraParams).length === 0;
   const filteredGroups = isEmpty ? allColumnGroups : columnGroups ?? [];
 
+  console.log("filteredGroups", allColumnGroups);
+
   useEffect(() => {
     const params: any = {};
 
@@ -103,7 +105,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
 
   useEffect(() => {
     setLoading(true);
-    getGroupedColumns(null, extraParams)
+    getGroupedColumns(project?.project_id, extraParams)
       .then((groups) => setColumnGroups(groups))
       .finally(() => setLoading(false));
   }, [extraParams]);
@@ -154,7 +156,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
           ]),
           h.if(!loading)(
             "div.column-groups",
-            filteredGroups.map((d) =>
+            filteredGroups?.map((d) =>
               h(ColumnGroup, {
                 data: d,
                 key: d.id,
