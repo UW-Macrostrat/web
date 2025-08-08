@@ -103,11 +103,14 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const prevInputLengthRef = useRef(columnInput.length);
 
   useEffect(() => {
-    setLoading(true);
-    getGroupedColumns(project?.project_id, extraParams)
-      .then((groups) => setColumnGroups(groups))
-      .finally(() => setLoading(false));
-  }, [extraParams]);
+    if (!isEmpty) {
+      setLoading(true);
+      getGroupedColumns(project?.project_id, extraParams)
+        .then((groups) => setColumnGroups(groups))
+        .finally(() => setLoading(false));
+    }
+  }, [project?.project_id, extraParams]);
+
 
   const columnIDs = useMemo(() => {
     return filteredGroups?.flatMap((item) =>
