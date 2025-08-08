@@ -1,4 +1,7 @@
+import hyper from "@macrostrat/hyper";
+import styles from "./main.module.sass";
 import React, { useState, useEffect, useRef, useMemo } from "react";
+
 import { ContentPage } from "~/layouts";
 import {
   Link,
@@ -6,18 +9,17 @@ import {
   PageBreadcrumbs,
   StickyHeader,
 } from "~/components";
+import { FlexRow } from "~/components/lex/tag";
+import { SearchBar } from "~/components/general";
+import { getGroupedColumns } from "./grouped-cols";
+
 import { AnchorButton, ButtonGroup, Switch } from "@blueprintjs/core";
 import { Tag, Icon } from "@blueprintjs/core";
-import hyper from "@macrostrat/hyper";
-import styles from "./main.module.sass";
-
 import { useData } from "vike-react/useData";
 import { ClientOnly } from "vike-react/ClientOnly";
 import { navigate } from "vike/client/router";
-import { SearchBar } from "~/components/general";
-import { getGroupedColumns } from "./grouped-cols";
+
 import { LexSelection } from "@macrostrat/form-components";
-import { FlexRow } from "~/components/lex/tag";
 import { postgrestPrefix } from "@macrostrat-web/settings";
 import { useAPIResult } from "@macrostrat/ui-components"
 
@@ -162,6 +164,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
               })
             )
           ),
+          h.if(columnGroups?.length == 0 && !loading)("div.empty", "No columns found"),
           h.if(loading)("div.loading", "Loading columns..."),
         ]),
         h("div.sidebar", [
@@ -284,40 +287,40 @@ function LexFilters({ selectedLiths, setSelectedLiths, selectedUnits, setSelecte
       align: "center",
       gap: ".5em",
     }, [
-      h.if(selectedLiths)('p', "Filtering columns by "),
+      h('p', "Filtering columns by "),
       h(LexSelection, {
         value: selectedLiths,
         onConfirm: (value) => setSelectedLiths(value),
         items: liths,
         placeholder: "Select a lithology",
       }),
-      h.if(selectedLiths)(Icon, { icon: "cross", onClick: () => setSelectedLiths(null) })
+      h.if(selectedLiths)(Icon, { className: 'close-btn', icon: "cross", onClick: () => setSelectedLiths(null) })
     ]),
     h(FlexRow, {
       align: "center",
       gap: ".5em",
     }, [
-      h.if(selectedUnits)('p', "Filtering columns by "),
+      h('p', "Filtering columns by "),
       h(LexSelection, {
         value: selectedUnits,
         onConfirm: (value) => setSelectedUnits(value),
         items: units,
         placeholder: "Select a unit",
       }),
-      h.if(selectedUnits)(Icon, { icon: "cross", onClick: () => setSelectedUnits(null) })
+      h.if(selectedUnits)(Icon, { className: 'close-btn', icon: "cross", onClick: () => setSelectedUnits(null) })
     ]),
     h(FlexRow, {
       align: "center",
       gap: ".5em",
     }, [
-      h.if(selectedStratNames)('p', "Filtering columns by "),
+      h('p', "Filtering columns by "),
       h(LexSelection, {
         value: selectedStratNames,
         onConfirm: (value) => setSelectedStratNames(value),
         items: stratNames,
         placeholder: "Select a strat name",
       }),
-      h.if(selectedStratNames)(Icon, { icon: "cross", onClick: () => setSelectedStratNames(null) })
+      h.if(selectedStratNames)(Icon, { className: 'close-btn', icon: "cross", onClick: () => setSelectedStratNames(null) })
     ]),
   ]);
 }
