@@ -16,7 +16,7 @@ import { ClientOnly } from "vike-react/ClientOnly";
 import { navigate } from "vike/client/router";
 import { SearchBar } from "~/components/general";
 import { getGroupedColumns } from "./grouped-cols";
-import { LexDropdown } from "./utils";
+import { LexSelection } from "@macrostrat/form-components";
 import { FlexRow } from "~/components/lex/tag";
 import { postgrestPrefix } from "@macrostrat-web/settings";
 import { useAPIResult } from "@macrostrat/ui-components"
@@ -43,6 +43,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const { allColumnGroups, project } = useData();
   
   const [columnGroups, setColumnGroups] = useState(null);
+  const [loading, setLoading] = useState(false);  
   const [extraParams, setExtraParams] = useState({});
 
   const [columnInput, setColumnInput] = useState("");
@@ -50,7 +51,9 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const [filteredInput, setFilteredInput] = useState("");
   const [showInProcess, setShowInProcess] = useState(true);
 
-  const [selectedInterval, setSelectedInterval] = useState(null);
+  const [selectedLiths, setSelectedLiths] = useState(null);
+  const [selectedUnits, setSelectedUnits] = useState(null);
+  const [selectedStratNames, setSelectedStratNames] = useState(null);
 
   const isEmpty = Object.keys(extraParams).length === 0;
   const filteredGroups = isEmpty ? allColumnGroups : columnGroups ?? [];
@@ -67,12 +70,18 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
     if (!showInProcess) {
       params.status_code = 'eq.active';
     }
-    if (selectedInterval) {
-      // params.intervals = `cs{${selectedInterval.int_id}}`;
+    if (selectedLiths) {
+      params.liths = `cs.[${selectedLiths}]`;
+    }
+    if (selectedUnits) {
+      params.units = `cs.[${selectedUnits}]`;
+    }
+    if (selectedStratNames) {
+      params.strat_names = `cs.[${selectedStratNames}]`;
     }
 
     setExtraParams(params);
-  }, [filteredInput, showEmpty, showInProcess, selectedInterval]);
+  }, [filteredInput, showEmpty, showInProcess, selectedLiths, selectedUnits, selectedStratNames]);
 
 
   // set filtered input
@@ -91,8 +100,10 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const prevInputLengthRef = useRef(columnInput.length);
 
   useEffect(() => {
+    setLoading(true);
     getGroupedColumns(null, extraParams)
-      .then((groups) => setColumnGroups(groups));
+      .then((groups) => setColumnGroups(groups))
+      .finally(() => setLoading(false));
   }, [extraParams]);
 
   const columnIDs = useMemo(() => {
@@ -111,7 +122,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
         h("div.main", [
           h(StickyHeader, [
             h(PageBreadcrumbs, { showLogo: true }),
-            h('div.filters', [
+            h(FlexRow, { gap: "1em", alignItems: "center" }, [
               h(SearchBar, {
                 placeholder: "Search columns...",
                 onChange: handleInputChange,
@@ -128,14 +139,18 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
                   label: "Show in process",
                   onChange: () => setShowInProcess(!showInProcess),
                 }),
-                h(LexFilters, {
-                  selectedInterval,
-                  setSelectedInterval,
-                })
-              ])
-            ])
+              ]),
+            ]),
+            h(LexFilters, {
+              selectedLiths,
+              setSelectedLiths,
+              selectedUnits,
+              setSelectedUnits,
+              selectedStratNames,
+              setSelectedStratNames,
+            })
           ]),
-          h(
+          h.if(!loading)(
             "div.column-groups",
             filteredGroups.map((d) =>
               h(ColumnGroup, {
@@ -147,6 +162,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
               })
             )
           ),
+          h.if(loading)("div.loading", "Loading columns..."),
         ]),
         h("div.sidebar", [
           h("div.sidebar-content", [
@@ -256,27 +272,64 @@ const ColumnItem = React.memo(
   }
 );
 
-function LexFilters({ selectedInterval, setSelectedInterval }) {
-  const intervals = useIntervals();
+function LexFilters({ selectedLiths, setSelectedLiths, selectedUnits, setSelectedUnits, selectedStratNames, setSelectedStratNames }) {
+  const liths = useLiths();
+  const units = useUnits();
+  const stratNames = useStratNames();
 
-  if(!intervals) return null
+  if(!liths || !units || !stratNames) return null
 
-  return h('div.filters', [
+  return h('div.lex-filters', [
     h(FlexRow, {
       align: "center",
       gap: ".5em",
     }, [
-      h.if(selectedInterval)('p', "Filtering columns by "),
-      h(LexDropdown, {
-        selectedInterval,
-        setSelectedInterval,
-        // intervals
+      h.if(selectedLiths)('p', "Filtering columns by "),
+      h(LexSelection, {
+        value: selectedLiths,
+        onConfirm: (value) => setSelectedLiths(value),
+        items: liths,
+        placeholder: "Select a lithology",
       }),
-      h.if(selectedInterval)(Icon, { icon: "cross", onClick: () => setSelectedInterval(null) })
+      h.if(selectedLiths)(Icon, { icon: "cross", onClick: () => setSelectedLiths(null) })
+    ]),
+    h(FlexRow, {
+      align: "center",
+      gap: ".5em",
+    }, [
+      h.if(selectedUnits)('p', "Filtering columns by "),
+      h(LexSelection, {
+        value: selectedUnits,
+        onConfirm: (value) => setSelectedUnits(value),
+        items: units,
+        placeholder: "Select a unit",
+      }),
+      h.if(selectedUnits)(Icon, { icon: "cross", onClick: () => setSelectedUnits(null) })
+    ]),
+    h(FlexRow, {
+      align: "center",
+      gap: ".5em",
+    }, [
+      h.if(selectedStratNames)('p', "Filtering columns by "),
+      h(LexSelection, {
+        value: selectedStratNames,
+        onConfirm: (value) => setSelectedStratNames(value),
+        items: stratNames,
+        placeholder: "Select a strat name",
+      }),
+      h.if(selectedStratNames)(Icon, { icon: "cross", onClick: () => setSelectedStratNames(null) })
     ]),
   ]);
 }
 
-function useIntervals() {
-  return useAPIResult(postgrestPrefix + "/intervals");
+function useLiths() {
+  return useAPIResult(postgrestPrefix + "/liths?select=id,name:lith,color:lith_color");
+}
+
+function useUnits() {
+  return useAPIResult(postgrestPrefix + "/units?select=id,name:strat_name");
+}
+
+function useStratNames() {
+  return useAPIResult(postgrestPrefix + "/strat_names?select=id,name:strat_name");
 }
