@@ -96,7 +96,7 @@ function LexItemPageInner(props: LexItemPageProps) {
   ]);
 }
 
-export function ColumnsTable({ resData, colData }) {
+export function ColumnsTable({ resData, colData, fossilsData }) {
   if (!colData || !colData.features || colData.features.length === 0) return;
   const summary = summarize(colData.features || []);
 
@@ -151,6 +151,8 @@ export function ColumnsTable({ resData, colData }) {
     h(ColumnMapContainer, {
       columns: colData,
       className: "column-map-container",
+      fossilsData,
+      lex: true
     }),
   ]);
 }

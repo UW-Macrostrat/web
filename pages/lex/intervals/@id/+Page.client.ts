@@ -25,6 +25,7 @@ export function Page() {
     h(ColumnsTable, {
       resData,
       colData,
+      fossilsData
     }),
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),
