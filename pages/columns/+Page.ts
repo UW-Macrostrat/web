@@ -7,7 +7,7 @@ import {
   StickyHeader,
 } from "~/components";
 import { AnchorButton, ButtonGroup, Switch } from "@blueprintjs/core";
-import { Tag } from "@blueprintjs/core";
+import { Tag, Icon } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
 
@@ -16,6 +16,10 @@ import { ClientOnly } from "vike-react/ClientOnly";
 import { navigate } from "vike/client/router";
 import { SearchBar } from "~/components/general";
 import { getGroupedColumns } from "./grouped-cols";
+import { LexDropdown } from "./utils";
+import { FlexRow } from "~/components/lex/tag";
+import { postgrestPrefix } from "@macrostrat-web/settings";
+import { useAPIResult } from "@macrostrat/ui-components"
 
 const h = hyper.styled(styles);
 
@@ -44,9 +48,9 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const [columnInput, setColumnInput] = useState("");
   const [showEmpty, setShowEmpty] = useState(true);
   const [filteredInput, setFilteredInput] = useState("");
-
   const [showInProcess, setShowInProcess] = useState(true);
-  const shouldFilter = columnInput.length >= 3;
+
+  const [selectedInterval, setSelectedInterval] = useState(null);
 
   const isEmpty = Object.keys(extraParams).length === 0;
   const filteredGroups = isEmpty ? allColumnGroups : columnGroups ?? [];
@@ -63,9 +67,12 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
     if (!showInProcess) {
       params.status_code = 'eq.active';
     }
+    if (selectedInterval) {
+      // params.intervals = `cs{${selectedInterval.int_id}}`;
+    }
 
     setExtraParams(params);
-  }, [filteredInput, showEmpty, showInProcess]);
+  }, [filteredInput, showEmpty, showInProcess, selectedInterval]);
 
 
   // set filtered input
@@ -121,6 +128,10 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
                   label: "Show in process",
                   onChange: () => setShowInProcess(!showInProcess),
                 }),
+                h(LexFilters, {
+                  selectedInterval,
+                  setSelectedInterval,
+                })
               ])
             ])
           ]),
@@ -244,3 +255,28 @@ const ColumnItem = React.memo(
     );
   }
 );
+
+function LexFilters({ selectedInterval, setSelectedInterval }) {
+  const intervals = useIntervals();
+
+  if(!intervals) return null
+
+  return h('div.filters', [
+    h(FlexRow, {
+      align: "center",
+      gap: ".5em",
+    }, [
+      h.if(selectedInterval)('p', "Filtering columns by "),
+      h(LexDropdown, {
+        selectedInterval,
+        setSelectedInterval,
+        // intervals
+      }),
+      h.if(selectedInterval)(Icon, { icon: "cross", onClick: () => setSelectedInterval(null) })
+    ]),
+  ]);
+}
+
+function useIntervals() {
+  return useAPIResult(postgrestPrefix + "/intervals");
+}
