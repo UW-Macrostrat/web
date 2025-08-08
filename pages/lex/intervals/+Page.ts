@@ -71,9 +71,7 @@ export function Page() {
                     name: d.name,
                     color: d.color || "#000000",
                   },
-                  onClick: (e, d) => {
-                      window.open(`/lex/intervals/${d.id}`, "_self");
-                  },
+                  href: "/lex/intervals/" + d.int_id
               })),
             ),
           ])
@@ -103,8 +101,8 @@ function UpperCase(str) {
 
 
 const MemoLithologyTag = memo(
-  function MemoLithologyTag({ data, onClick }) {
-    return h(LithologyTag, { data, onClick });
+  function MemoLithologyTag({ data, href }) {
+    return h(LithologyTag, { data, href });
   },
   (prevProps, nextProps) => {
     return (
