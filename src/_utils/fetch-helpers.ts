@@ -27,6 +27,7 @@ export async function fetchPGData(apiURL: string, params: any) {
     url.search = new URLSearchParams(params).toString();
   }
   const res = await fetch(url.toString());
+  console.log("fetchPGData", url.toString());
   const res1 = await res?.json();
   return res1 || [];
 }

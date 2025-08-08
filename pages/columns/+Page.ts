@@ -38,7 +38,8 @@ function ColumnMapContainer(props) {
 }
 
 function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
-  // const { columnGroups, project } = useData();
+  const { allColumnGroups, project } = useData();
+  
   const [columnGroups, setColumnGroups] = useState(null);
   const [extraParams, setExtraParams] = useState({});
 
@@ -46,9 +47,11 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const [showEmpty, setShowEmpty] = useState(true);
   const [filteredInput, setFilteredInput] = useState("");
 
-
   const [showInProcess, setShowInProcess] = useState(true);
   const shouldFilter = columnInput.length >= 3;
+
+  const isEmpty = Object.keys(extraParams).length === 0;
+  const filteredGroups = isEmpty ? allColumnGroups : columnGroups ?? [];
 
   useEffect(() => {
     const params: any = {};
@@ -88,22 +91,19 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   }, [extraParams]);
 
   const columnIDs = useMemo(() => {
-    return columnGroups?.flatMap((item) =>
+    return filteredGroups?.flatMap((item) =>
       item.columns.map((col) => col.col_id)
     );
-  }, [columnGroups]);
-  
+  }, [filteredGroups]);
+
   if(!columnGroups) {
+    console.log('filteredGroups:', filteredGroups);
     return h("div.loading", "Loading columns...");
   }
-
-  const hideColumns = columnIDs?.length === 0 && columnInput.length >= 3;
 
   const handleInputChange = (value, target) => {
     setColumnInput(value.toLowerCase());
   };
-
-  const allGroups = columnGroups ?? [];
 
   return h("div.column-list-page", [
     h(ContentPage, [
@@ -133,7 +133,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
           ]),
           h(
             "div.column-groups",
-            allGroups.map((d) =>
+            filteredGroups.map((d) =>
               h(ColumnGroup, {
                 data: d,
                 key: d.id,
@@ -158,7 +158,6 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
               columnIDs,
               projectID: null, // Fix
               className: "column-map-container",
-              hideColumns,
             }),
           ]),
         ]),

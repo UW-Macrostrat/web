@@ -2,16 +2,12 @@ import { fetchAPIData, fetchPGData } from "~/_utils";
 
 export async function getGroupedColumns(project_id: number | null, params?: any) {
   let columnURL = "/col_data";
-  if (project_id == null) {
-    // The 'columns' route gives all columns in active projects
-  } else {
-    // Only get columns for a specific project
-    params = { project_id };
-  }
+
+  const pgParams = project_id != null ? { ...params, project_id: `eq.${project_id}` } : params;
 
   const [columns, groups] = await Promise.all([
-    fetchPGData(columnURL, params),
-    fetchAPIData(`/defs/groups`, { ...params, all: true}),
+    fetchPGData(columnURL, pgParams),
+    fetchAPIData(`/defs/groups`, { all: true }),
   ]);
 
   if(!columns) {
