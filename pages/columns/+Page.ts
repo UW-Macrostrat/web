@@ -6,7 +6,7 @@ import {
   PageBreadcrumbs,
   StickyHeader,
 } from "~/components";
-import { AnchorButton, ButtonGroup } from "@blueprintjs/core";
+import { AnchorButton, ButtonGroup, Switch } from "@blueprintjs/core";
 import { Tag } from "@blueprintjs/core";
 import hyper from "@macrostrat/hyper";
 import styles from "./main.module.sass";
@@ -16,8 +16,6 @@ import { ClientOnly } from "vike-react/ClientOnly";
 import { navigate } from "vike/client/router";
 import { SearchBar } from "~/components/general";
 import { getGroupedColumns } from "./grouped-cols";
-import { FlexRow } from "@macrostrat/ui-components";
-import { Switch } from "@blueprintjs/core";
 
 const h = hyper.styled(styles);
 
@@ -134,7 +132,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
                 key: d.id,
                 linkPrefix,
                 columnInput,
-                shouldFilter,
+                showEmpty,
               })
             )
           ),
