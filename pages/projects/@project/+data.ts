@@ -1,4 +1,4 @@
-import { getGroupedColumns } from "#/columns/utils";
+import { getGroupedColumns } from "#/columns/grouped-cols";
 import { fetchAPIData } from "~/_utils/fetch-helpers";
 
 export async function data(pageContext) {
@@ -11,10 +11,10 @@ export async function data(pageContext) {
   });
   const project = projects[0];
 
-  const columnGroups = await getGroupedColumns(project_id);
+  const allColumnGroups = await getGroupedColumns(project_id);
 
   return {
-    columnGroups,
+    allColumnGroups,
     project,
     linkPrefix: `/projects/${project_id}/`,
   };

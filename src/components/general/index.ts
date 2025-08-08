@@ -143,7 +143,7 @@ export function Loading() {
   return h("div.loading", h(Spinner));
 }
 
-export function SearchBar({ onChange, placeholder = "Search...", className }) {
+export function SearchBar({ onChange, placeholder = "Search...", className, value }) {
   return h(Card, { className: "search-bar " + className }, [
     h(Icon, { icon: "search" }),
     h("input", {
