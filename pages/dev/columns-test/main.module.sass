@@ -1,0 +1,134 @@
+.flex-row
+  display: flex
+  flex-direction: row
+  position: relative
+  gap: 2em
+
+.main, .sidebar
+  flex: 1
+
+:root
+  --main-extra-width: 200px
+
+
+@media (min-width: 1100px)
+  .flex-row
+    margin-right: calc(-1 * var(--main-extra-width))
+
+  .sidebar
+    max-width: calc(50% - var(--main-extra-width) / 2)
+
+.sidebar-content
+  padding-top: 2em
+  position: sticky
+  top: 0
+  display: flex
+  flex-direction: column
+  gap: 1em
+
+.column-map-container
+  position: relative
+  min-height: 300px
+  width: 100%
+  aspect-ratio: 1/1
+
+.column-group-header
+  display: flex
+  justify-content: space-between
+  align-items: center
+
+.column-group
+  cursor: pointer
+
+.column-groups
+  display: flex
+  flex-direction: column
+  gap: 10px
+
+.search-bar
+  display: flex
+  flex-direction: row
+  gap: 5px
+  align-items: center
+  justify-content: center
+  margin: 1em 0
+
+.active,
+.inprocess,
+.obsolete
+  place-self: end start
+  padding: 0.5em
+  margin: 0.2em 0
+  border-radius: 0.2em
+  font-weight: bold
+
+.active
+  background-color: green
+  color: white
+
+.column-list table
+  width: 100%
+  position: relative
+
+  th
+    text-align: left
+    background-color: var(--panel-background-color)
+
+  tr
+    align-items: baseline
+
+    &:hover
+      background-color: var(--tertiary-background)
+
+  td.col-id
+    width: 60px
+
+  td.col-name
+    max-width: 60%
+
+  .col-status
+    text-align: right
+
+.inprocess
+  background-color: yellow
+  color: black
+
+.obsolete
+  background-color: red
+  color: white
+
+
+.popup
+  padding: 1em
+
+  h3
+    font-size: 1.5em
+    text-align: center
+    margin: 0
+
+.mapboxgl-popup-close-button
+  padding: 0.5em
+  margin: 0
+  font-size: 1.5em
+  display: flex
+  justify-content: center
+  align-items: center
+
+.search-bar
+  flex: 1 1 0
+
+.switches
+  flex: 0 0 auto
+
+.lex-filters
+  display: flex
+  flex-direction: column
+  gap: .5em
+
+.close-btn
+  cursor: pointer
+
+.filters
+  display: flex
+  gap: 1em
+  align-items: center
