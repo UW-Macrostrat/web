@@ -32,7 +32,6 @@ function ColumnsMapInner({ columnIDs = null, projectID = null, className, hideCo
           }
         },
         columnIDs,
-        columns: hideColumns ? [] : columnData,
       },
       h(FitBounds, { columnData })
     ),
@@ -45,8 +44,7 @@ function FitBounds({ columnData }) {
 
     // Extract coordinates
     const coords = columnData
-      .map(col => [col.properties.lng, col.properties.lat]);
-
+      .map(col => col.geometry.coordinates[0][0]);
     if (coords.length === 0) return;
 
     // Build bounds using the first coordinate
