@@ -385,10 +385,10 @@ export function ConceptInfo({ concept_id, showHeader }) {
     data;
 
   return h("div.concept-info", [
-    h.if(showHeader)(
-      "a.concept-header",
-      { href: "/lex/strat-concepts/" + concept_id },
-      [h("h3", "Part of " + name), h(StratTag, { isConcept: true, fontSize: "1.5em" })]
+    h.if(showHeader)('div.concept-head-container', [
+        h('h2.head', "Part of "),
+        h("a.concept-header", { href: "/lex/strat-concepts/" + concept_id }, [h("h3", name), h(StratTag, { isConcept: true, fontSize: "1.5em" })])
+      ]
     ),
     h("div.author", [
       h("span.title", "Author: "),
@@ -912,7 +912,14 @@ function ChartLegend(data, route, activeIndex, setActiveIndex, index) {
 }
 
 export function Units({ href }) {
-  return h(LinkCard, { title: "View linked units", href: '/lex/units?' + href, className: "units-card" });
+  return h(LinkCard, { 
+    title: h(FlexRow, { alignItems: "center", gap: ".5em"}, [
+      h('h4', "Columns"),
+      h(LithologyTag, { data: { name: "Beta" }})
+    ]), 
+    href: '/lex/units?' + href, 
+    className: "units-card" 
+  });
 }
 
 export function Maps({ mapsData }) {
@@ -951,7 +958,14 @@ export function Maps({ mapsData }) {
 }
 
 export function Fossils({ href }) {
-  return h(LinkCard, { title: "View linked fossils", href: '/lex/fossils?' + href, className: "fossils-card" });
+  return h(LinkCard, { 
+    title: h(FlexRow, { alignItems: "center", gap: ".5em"}, [
+      h('h4', "Fossils"),
+      h(LithologyTag, { data: { name: "Beta" }})
+    ]), 
+    href: '/lex/fossils?' + href,  
+    className: "fossils-card" 
+  });
 }
 
 export function MatchesPanel({ fossilsData }) {
@@ -973,7 +987,7 @@ export function MatchesPanel({ fossilsData }) {
 
   return h.if(fossilsData?.length > 0)("div.fossils-container", [
     h(ExpansionPanel, { title: h(FlexRow, { alignItems: "center", gap: ".5em"}, [
-      h('h4', "Matches"),
+      h('h4', "Text Extractions"),
       h(LithologyTag, { data: { name: "Alpha" }})
     ]), className: "fossils-panel" }, [
       h("div.fossils-list", [...visibleItems]),
@@ -985,7 +999,7 @@ export function MatchesPanel({ fossilsData }) {
   ]);
 }
 
-export function Matches({ lith_id, lith_att_id, strat_name_id, concept_id }) {
+export function TextExtractions({ lith_id, lith_att_id, strat_name_id, concept_id }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -1023,7 +1037,7 @@ function Match({ data }) {
   );
 
   return h("div", { class: "match-item" }, [
-    h.if(isDev)("a", { href: "/integrations/xdd/feedback/" + source + "?autoselect=" + name }, "View source"),
+    h.if(isDev)("a", { href: "/integrations/xdd/sources/" + source + "?autoselect=" + name }, "View source"),
     h(FlexRow, { className: "match-text", alignItems: "center" }, [
       h("p", beginning),
       h(

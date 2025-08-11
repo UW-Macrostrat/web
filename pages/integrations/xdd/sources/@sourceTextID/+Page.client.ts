@@ -30,6 +30,7 @@ import { fetchPGData } from "~/_utils";
 import { AuthStatus, useAuth } from "@macrostrat/form-components";
 import { MultiSelect } from "@blueprintjs/select"
 import { MenuItem, TextArea, Popover } from "@blueprintjs/core";
+import { LithologyTag } from "@macrostrat/data-components";
 
 /**
  * Get a single text window for feedback purposes
@@ -37,7 +38,25 @@ import { MenuItem, TextArea, Popover } from "@blueprintjs/core";
 
 export function Page() {
   const [paper_id, setPaperID] = useState<number | null>(null);
-  const nextID = getNextID();
+  const url = window.location.href.split("?")[1];
+
+  const params = getUrlParams(url);
+  const idType = params.idType;
+  const id = params[idType];
+  const color = params.color;
+  const name = params.autoselect;
+  const data = { id, color, name };
+
+  const map = {
+    'int_id': "intervals",
+    'lith_id': "lithologies",
+    'econ_id': "economics",
+    'environ_id': "environments",
+    'strat_name_id': "strat-names",
+    'strat_name_concept_id': "strat-concepts",
+  }
+
+  console.log(data)
 
   return h(
     OverlaysProvider,
@@ -46,16 +65,8 @@ export function Page() {
         h(PageBreadcrumbs),
         h(FlexRow, { alignItems: "center", justifyContent: "space-between" }, [
           h(FlexRow, [
-            h("h1", "Feedback"),
-            h.if(nextID)(Button, { 
-              className: "next btn",
-              onClick: () => {
-                window.open(
-                  `/integrations/xdd/feedback/${nextID}`,
-                  "_self"
-                ); 
-              } 
-            }, "Next"),
+            h("h1", "Matches for "),
+            h(LithologyTag, { data, href: `/lex/${map[idType]}/${id}` }),
           ]),
           h.if(paper_id)(
             Button, 
@@ -70,10 +81,6 @@ export function Page() {
             }, 
             "View papers extraction"
           ),
-        ]),
-        h(FlexRow, { className: "feedback-index", justifyContent: "space-between" }, [
-          h(Feedback),
-          h(AuthStatus)
         ]),
         h(ExtractionIndex, { setPaperID }),
       ]),
@@ -96,8 +103,6 @@ function ExtractionIndex({setPaperID}) {
   if (data == null || models == null || entityTypes == null) {
     return h(Spinner);
   }
-
-  console.log(data);
 
   setPaperID(data[0]?.paper_id || null);
 
@@ -263,93 +268,17 @@ function normalizeMatch(match: any): MatchInfo | null {
   return null;
 }
 
-// function FeedbackDevTool() {
-//   const entities = useStore((state) => state.entities);
-//   if (entities == null)
-//     return h(NonIdealState, { icon: h(Spinner), title: "Loading..." });
-//
-//   return h(JSONView, { data: entities, showRoot: false, keyPath: 0 });
-// }
-//
-// FeedbackDevTool.title = "Feedback";
-//
-// export const devTools = [FeedbackDevTool];
+function getUrlParams(urlString) {
+  const params = new URLSearchParams(urlString);
+  const result = {};
 
-function getNextID() {
-  const currentID = usePageContext().urlPathname.split("/").pop();
-  const [nextID, setNextID] = useState<number | null>(null);
+  for (const [key, value] of params.entries()) {
+    result[key] = value;
 
-  const res = fetchPGData(
-    "/kg_source_text",
-    {
-      order: "id",
-      limit: 1,
-      id: "gt." + currentID
+    if (key.toLowerCase().includes('id')) {
+      result.idType = key;
     }
-  ).then((data) => {
-    setNextID(data?.[0]?.id || 18131); // Default to 18131 if no next ID found
-  });
-
-  return nextID;
-}
-
-function Feedback() {  
-  const [selectedFeedbackType, setSelectedFeedbackType] = useState([]);
-  const [customFeedback, setCustomFeedback] = useState("");
-
-  const feedback = usePostgresQuery("kg_extraction_feedback_type");
-
-  if (feedback == null) {
-    return h("div", "Loading feedback types...");
   }
 
-  const isItemSelected = (item) => selectedFeedbackType.includes(item);
-
-  const handleItemSelect = (item) => {
-    if (!isItemSelected(item)) {
-      setSelectedFeedbackType([...selectedFeedbackType, item]);
-    }
-  };
-
-  const handleItemDelete = (itemToDelete) => {
-    const next = selectedFeedbackType.filter((item) => item.id !== itemToDelete.id);
-    setSelectedFeedbackType(next);
-  };
-
-  const itemPredicate = (query, item) =>
-    item.type.toLowerCase().includes(query.toLowerCase());
-
-  const itemRenderer = (item, { handleClick, modifiers }) => {
-    if (!modifiers.matchesPredicate) return null;
-
-    return h(MenuItem, {
-      key: item.id,
-      text: item.type,
-      onClick: handleClick,
-      active: modifiers.active,
-      shouldDismissPopover: false,
-    });
-  };
-
-  return h(FlexRow, { className: "feedback-flexbox" }, [
-    h('div.inputs', [
-      h(MultiSelect, {
-        items: feedback.filter((f) => !isItemSelected(f)),
-        itemRenderer,
-        itemPredicate,
-        selectedItems: selectedFeedbackType,
-        onItemSelect: handleItemSelect,
-        onRemove: handleItemDelete,
-        tagRenderer: (item) => item.type,
-        popoverProps: { minimal: true },
-        fill: true,
-      }),
-      h(TextArea, {
-        onChange: (e) => setCustomFeedback(e.target.value),
-        placeholder: "Enter custom feedback here...",
-        autoResize: true,
-        className: 'input'
-      })
-    ]),
-  ])
+  return result;
 }

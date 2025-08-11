@@ -64,7 +64,8 @@ function Header({ name, color, idType, id }) {
         h('p.title', 'Units for '),
         h(LithologyTag, { data: { name, color }, href: `/lex/${map[idType]}/${id}` }),
       ]),
-    })
+    }),
+    h(LithologyTag, { data: { name: "Beta" }})
   ]);
 }
 

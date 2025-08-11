@@ -9,7 +9,7 @@ import {
   Units,
   Fossils,
   Maps,
-  Matches
+  TextExtractions
 } from "~/components/lex";
 import { usePageContext } from "vike-react/usePageContext";
 
@@ -33,7 +33,7 @@ export function Page() {
     h(PrevalentTaxa, { taxaData }),
     h(Timescales, { timescales }),
     h(Maps, { mapsData }),
-    h(Matches, {
+    h(TextExtractions, {
       lith_id: id,
     }),
     h.if(fossilsData.features.length > 0)(Fossils, { href: "lith_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
