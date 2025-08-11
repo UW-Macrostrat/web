@@ -188,26 +188,41 @@ function FossilsLayer({ fossilsData, showFossils, fossilClickRef }) {
   return null;
 }
 
+
 function FitBounds({ columnData }) {
   useMapStyleOperator((map) => {
-    if (!map || columnData.length === 0) return;
+    if (!map || !Array.isArray(columnData) || columnData.length === 0) return;
 
-    // Extract coordinates
-    const coords = columnData
-      .map(col => col.geometry.coordinates[0][0]);
-    if (coords.length === 0) return;
+    // Flatten all polygon coordinates (assumes Polygon or MultiPolygon)
+    const coordinates = columnData
+      .flatMap(col => {
+        const geom = col.geometry;
+        if (!geom || !geom.coordinates) return [];
 
-    // Build bounds using the first coordinate
-    const bounds = coords.reduce(
+        // Handle Polygon or MultiPolygon
+        if (geom.type === 'Polygon') {
+          return geom.coordinates[0]; // outer ring
+        } else if (geom.type === 'MultiPolygon') {
+          return geom.coordinates.flat(1)[0]; // first outer ring
+        }
+
+        return [];
+      })
+      .filter(Boolean); // remove invalid entries
+
+    if (coordinates.length === 0) return;
+
+    // Calculate bounds
+    const bounds = coordinates.reduce(
       (b, coord) => b.extend(coord),
-      new mapboxgl.LngLatBounds(coords[0], coords[0])
+      new mapboxgl.LngLatBounds(coordinates[0], coordinates[0])
     );
 
     map.fitBounds(bounds, {
       padding: 50,
       duration: 0,
     });
-  });
+  }, [columnData]);
 
   return null;
 }
