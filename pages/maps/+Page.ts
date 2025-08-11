@@ -27,68 +27,73 @@ export function Page() {
   const initialItems = recentOrder && activeOnly ? sources : undefined;
 
   return h("div.maps-list-page", [
-      h(ContentPage, [
-        h("div.flex-row", [
-          h('div.main', [
-            h(StickyHeader, { className: "header-container" }, [
-              h("div.header", [
-                h(PageBreadcrumbs, {
-                  title: "Maps",
-                  showLogo: true,
-                }),
-                h('div.search', [
-                  h('div.switches', [
-                    h(Switch, {
-                      label: "Active only",
-                      checked: activeOnly,
-                      onChange: () => {
-                        window.scrollTo(0, 0);
-                        setActiveOnly(!activeOnly);
-                      },
-                    }),
-                    h(Switch, {
-                      label: "Recent order",
-                      checked: recentOrder,
-                      onChange: () => {
-                        window.scrollTo(0, 0);
-                        setRecentOrder(!recentOrder)
-                      },
-                    }),
-                  ]),
+    h(ContentPage, [
+      h("div.flex-row", [
+        h("div.main", [
+          h(StickyHeader, { className: "header-container" }, [
+            h("div.header", [
+              h(PageBreadcrumbs, {
+                title: "Maps",
+                showLogo: true,
+              }),
+              h("div.search", [
+                h("div.switches", [
+                  h(Switch, {
+                    label: "Active only",
+                    checked: activeOnly,
+                    onChange: () => {
+                      window.scrollTo(0, 0);
+                      setActiveOnly(!activeOnly);
+                    },
+                  }),
+                  h(Switch, {
+                    label: "Recent order",
+                    checked: recentOrder,
+                    onChange: () => {
+                      window.scrollTo(0, 0);
+                      setRecentOrder(!recentOrder);
+                    },
+                  }),
                 ]),
               ]),
             ]),
-            h(PostgRESTInfiniteScrollView, {
-              route: `${apiDomain}/api/pg/sources_metadata`,
-              id_key: "source_id",
-              order_key: recentOrder ? "ref_year" : undefined,
-              filterable: true,
-              extraParams: {
-                is_finalized: activeOnly ? "eq.true" : undefined,
-              },
-              ascending: !recentOrder,
-              limit: PAGE_SIZE,
-              itemComponent: SourceItem,
-              initialItems,
-              key
-            })
           ]),
-          h("div.sidebar", 
-            h("div.sidebar-content", [
-              h(AssistantLinks, { className: "assistant-links" }, [
-                h(
-                  AnchorButton,
-                  { icon: "flows", href: "/maps/ingestion" },
-                  "Ingestion system"
-                ),
-                h(AnchorButton, { icon: "map", href: "/map/sources" }, "Show on map"),
-                h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
-              ]),
-            ])
-          ),
-        ])
+          h(PostgRESTInfiniteScrollView, {
+            route: `${apiDomain}/api/pg/sources_metadata`,
+            id_key: "source_id",
+            order_key: recentOrder ? "ref_year" : undefined,
+            filterable: true,
+            extraParams: {
+              is_finalized: activeOnly ? "eq.true" : undefined,
+            },
+            ascending: !recentOrder,
+            limit: PAGE_SIZE,
+            itemComponent: SourceItem,
+            initialItems,
+            key,
+          }),
+        ]),
+        h(
+          "div.sidebar",
+          h("div.sidebar-content", [
+            h(AssistantLinks, { className: "assistant-links" }, [
+              h(
+                AnchorButton,
+                { icon: "flows", href: "/maps/ingestion" },
+                "Ingestion system"
+              ),
+              h(
+                AnchorButton,
+                { icon: "map", href: "/map/sources" },
+                "Show on map"
+              ),
+              h(DevLinkButton, { href: "/maps/legend" }, "Legend table"),
+            ]),
+          ])
+        ),
       ]),
-    ]);
+    ]),
+  ]);
 }
 
 function SourceItem({ data }) {
@@ -106,11 +111,9 @@ function SourceItem({ data }) {
     },
     [
       h("div.content", [
-        h('div.source', [
+        h("div.source", [
           h("span", ref_source + ": " + ref_title + " (" + ref_year + ") "),
-          h("a", { href: url, target: "_blank" }, 
-            h(Icon, { icon: "link" }),
-          ),
+          h("a", { href: url, target: "_self" }, h(Icon, { icon: "link" })),
         ]),
         h("div.tags", [h(IDTag, { id: source_id })]),
       ]),

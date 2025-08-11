@@ -4,8 +4,8 @@ import {
   ErrorBoundary,
   FlexRow,
 } from "@macrostrat/ui-components";
-import { apiV2Prefix, pbdbDomain } from "@macrostrat-web/settings";
-import { Link, PageBreadcrumbs } from "~/components";
+import { apiV2Prefix, pbdbDomain, isDev } from "@macrostrat-web/settings";
+import { Link, LithologyTag, PageBreadcrumbs } from "~/components";
 import { Card, Divider } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import { BlankImage, Footer, Loading, StratTag } from "~/components/general";
@@ -36,7 +36,7 @@ function ColumnMapContainer(props) {
     {
       load: () => import("./map.client").then((d) => d.ColumnsMapContainer),
       fallback: h("div.loading", "Loading map..."),
-      deps: [props.columnIDs, props.projectID],
+      deps: [props.columns, props.projectID, props.fossilData],
     },
     (component) => h(component, props)
   );
@@ -89,6 +89,10 @@ function LexItemPageInner(props: LexItemPageProps) {
           siftLink,
           id,
         }),
+      SiftLink({
+        id,
+        siftLink,
+      }),
       children,
       h(References, { refs }),
     ]),
@@ -96,7 +100,7 @@ function LexItemPageInner(props: LexItemPageProps) {
   ]);
 }
 
-export function ColumnsTable({ resData, colData }) {
+export function ColumnsTable({ resData, colData, fossilsData }) {
   if (!colData || !colData.features || colData.features.length === 0) return;
   const summary = summarize(colData.features || []);
 
@@ -151,6 +155,8 @@ export function ColumnsTable({ resData, colData }) {
     h(ColumnMapContainer, {
       columns: colData,
       className: "column-map-container",
+      fossilsData,
+      lex: true
     }),
   ]);
 }
@@ -192,10 +198,6 @@ function LexItemHeader({ resData, name, siftLink, id }) {
         luminance,
       }),
     ]),
-    SiftLink({
-      id,
-      siftLink,
-    }),
   ]);
 }
 
@@ -217,7 +219,6 @@ function IntAbbrev({ abbrev, chromaColor, luminance }) {
 
 function SiftLink({ id, siftLink }) {
   return h.if(siftLink)("div.sift-link", [
-    h("p", "This page is is in development."),
     h(
       "a",
       { href: "/sift/" + siftLink + "/" + id, target: "_blank" },
@@ -245,7 +246,7 @@ export function Charts({ features }) {
   return h("div.charts", [
     h.if(liths?.length)(
       "div.chart",
-      Chart(liths, "Lithologies", "lithology", activeIndex, setActiveIndex)
+      Chart(liths, "Lithologies", "lithologies", activeIndex, setActiveIndex)
     ),
     h.if(environs?.length)(
       "div.chart",
@@ -386,8 +387,8 @@ export function ConceptInfo({ concept_id, showHeader }) {
   return h("div.concept-info", [
     h.if(showHeader)(
       "a.concept-header",
-      { href: "/lex/strat-concept/" + concept_id },
-      [h("h3", name), h(StratTag, { isConcept: true, fontSize: "1.5em" })]
+      { href: "/lex/strat-concepts/" + concept_id },
+      [h("h3", "Part of " + name), h(StratTag, { isConcept: true, fontSize: "1.5em" })]
     ),
     h("div.author", [
       h("span.title", "Author: "),
@@ -819,6 +820,7 @@ function Chart(data, title, route, activeIndex, setActiveIndex) {
             cx: "50%",
             cy: "50%",
             fill: "#8884d8",
+            isAnimationActive: false
           },
           data?.map((entry, index) =>
             h(Cell, {
@@ -909,38 +911,8 @@ function ChartLegend(data, route, activeIndex, setActiveIndex, index) {
   ]);
 }
 
-export function Units({ unitsData }) {
-  const ITEMS_PER_PAGE = 20;
-  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
-  const data = useMemo(() => {
-    return unitsData.slice(0, visibleCount);
-  }, [unitsData, visibleCount]);
-
-  const visibleItems = data.map((item) =>
-    h(
-      "a.unit-item",
-      { href: "/columns/" + item.col_id + "#unit=" + item.unit_id },
-      item.unit_name + " (#" + item.unit_id + ")"
-    )
-  );
-
-  const handleLoadMore = () => {
-    setVisibleCount((prev) =>
-      Math.min(prev + ITEMS_PER_PAGE, unitsData.length)
-    );
-  };
-
-  const showLoadMore = visibleCount < unitsData.length;
-
-  return h.if(unitsData?.length > 0)("div.units-container", [
-    h(ExpansionPanel, { title: "Units", className: "units-panel" }, [
-      h("div.units-list", [...visibleItems]),
-      h.if(showLoadMore)(
-        "div.load-more-wrapper",
-        h("button.load-more-btn", { onClick: handleLoadMore }, "Load More")
-      ),
-    ]),
-  ]);
+export function Units({ href }) {
+  return h(LinkCard, { title: "View linked units", href: '/lex/units?' + href, className: "units-card" });
 }
 
 export function Maps({ mapsData }) {
@@ -957,7 +929,7 @@ export function Maps({ mapsData }) {
         key: item.map_unit_name,
         href: "/maps/" + item.source_id + "?legend=" + item.legend_id,
       },
-      item.map_unit_name + " (#" + item.source_id + ")"
+      `Map #${item.source_id}: ${item.map_unit_name} (#${item.legend_id})`
     )
   );
 
@@ -978,40 +950,8 @@ export function Maps({ mapsData }) {
   ]);
 }
 
-export function Fossils({ fossilsData }) {
-  const ITEMS_PER_PAGE = 20;
-  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
-  const data = useMemo(() => {
-    return fossilsData.slice(0, visibleCount);
-  }, [fossilsData, visibleCount]);
-
-  const visibleItems = data.map((item) =>
-    h(
-      "a.fossil-item",
-      {
-        href: `https://paleobiodb.org/classic/displayCollResults?collection_no=col:${item.cltn_id}`,
-      },
-      item.cltn_name + " (#" + item.cltn_id + ")"
-    )
-  );
-
-  const handleLoadMore = () => {
-    setVisibleCount((prev) =>
-      Math.min(prev + ITEMS_PER_PAGE, fossilsData.length)
-    );
-  };
-
-  const showLoadMore = visibleCount < fossilsData.length;
-
-  return h.if(fossilsData?.length > 0)("div.fossils-container", [
-    h(ExpansionPanel, { title: "Fossils", className: "fossils-panel" }, [
-      h("div.fossils-list", [...visibleItems]),
-      h.if(showLoadMore)(
-        "div.load-more-wrapper",
-        h("button.load-more-btn", { onClick: handleLoadMore }, "Load More")
-      ),
-    ]),
-  ]);
+export function Fossils({ href }) {
+  return h(LinkCard, { title: "View linked fossils", href: '/lex/fossils?' + href, className: "fossils-card" });
 }
 
 export function MatchesPanel({ fossilsData }) {
@@ -1032,7 +972,10 @@ export function MatchesPanel({ fossilsData }) {
   const showLoadMore = visibleCount < fossilsData.length;
 
   return h.if(fossilsData?.length > 0)("div.fossils-container", [
-    h(ExpansionPanel, { title: "Matches", className: "fossils-panel" }, [
+    h(ExpansionPanel, { title: h(FlexRow, { alignItems: "center", gap: ".5em"}, [
+      h('h4', "Matches"),
+      h(LithologyTag, { data: { name: "Alpha" }})
+    ]), className: "fossils-panel" }, [
       h("div.fossils-list", [...visibleItems]),
       h.if(showLoadMore)(
         "div.load-more-wrapper",
@@ -1079,10 +1022,8 @@ function Match({ data }) {
     Math.min(context_text.length, indices[1] + 50)
   );
 
-  console.log(beginning, name, end);
-
   return h("div", { class: "match-item" }, [
-    h("a", { href: "/integrations/xdd/feedback/" + source }, "View source"),
+    h.if(isDev)("a", { href: "/integrations/xdd/feedback/" + source + "?autoselect=" + name }, "View source"),
     h(FlexRow, { className: "match-text", alignItems: "center" }, [
       h("p", beginning),
       h(

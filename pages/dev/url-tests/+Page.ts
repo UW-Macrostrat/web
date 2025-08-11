@@ -48,12 +48,12 @@ export function Page() {
 
     "Lithologies",
     "/definitions/lithologies",
-    "/lithology/17",
-    "/lithology/101",
-    "/lithology/9",
-    "/lithology/513",
-    "/lithology/140",
-    "/lithology/902",
+    "/lithologies/17",
+    "/lithologies/101",
+    "/lithologies/9",
+    "/lithologies/513",
+    "/lithologies/140",
+    "/lithologies/902",
 
     "Environments",
     "/definitions/environments",

@@ -67,7 +67,6 @@ function InfoDrawer() {
   }
   return h(
     "div.infodrawer-container-sources",
-    null,
     h(InfoDrawerContainer, [
       h(Header, { len, btn: h(CloseBtn) }),
       h.if(len == 0)(FeatureList, { features: data, open }),

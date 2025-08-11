@@ -99,6 +99,7 @@ class _StratName extends React.Component {
     */
 
     // Get column geometry for map and summary attributes
+    console.log(`columns?${type}=${id}&response=long`)
     Utilities.fetchMapData(
       `columns?${type}=${id}&response=long`,
       (mapError, data, refs) => {
