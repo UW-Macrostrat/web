@@ -4,8 +4,8 @@ import {
   ErrorBoundary,
   FlexRow,
 } from "@macrostrat/ui-components";
-import { apiV2Prefix, pbdbDomain } from "@macrostrat-web/settings";
-import { Link, PageBreadcrumbs } from "~/components";
+import { apiV2Prefix, pbdbDomain, isDev } from "@macrostrat-web/settings";
+import { Link, LithologyTag, PageBreadcrumbs } from "~/components";
 import { Card, Divider } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import { BlankImage, Footer, Loading, StratTag } from "~/components/general";
@@ -976,7 +976,10 @@ export function MatchesPanel({ fossilsData }) {
   const showLoadMore = visibleCount < fossilsData.length;
 
   return h.if(fossilsData?.length > 0)("div.fossils-container", [
-    h(ExpansionPanel, { title: "Matches", className: "fossils-panel" }, [
+    h(ExpansionPanel, { title: h(FlexRow, { alignItems: "center", gap: ".5em"}, [
+      h('h4', "Matches"),
+      h(LithologyTag, { data: { name: "Alpha" }})
+    ]), className: "fossils-panel" }, [
       h("div.fossils-list", [...visibleItems]),
       h.if(showLoadMore)(
         "div.load-more-wrapper",
@@ -1023,10 +1026,8 @@ function Match({ data }) {
     Math.min(context_text.length, indices[1] + 50)
   );
 
-  console.log(beginning, name, end);
-
   return h("div", { class: "match-item" }, [
-    h("a", { href: "/integrations/xdd/feedback/" + source + "?autoselect=" + name }, "View source"),
+    h.if(isDev)("a", { href: "/integrations/xdd/feedback/" + source + "?autoselect=" + name }, "View source"),
     h(FlexRow, { className: "match-text", alignItems: "center" }, [
       h("p", beginning),
       h(
