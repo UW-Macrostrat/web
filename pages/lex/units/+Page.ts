@@ -1,5 +1,5 @@
 import h from "./main.module.sass";
-import { StickyHeader, LinkCard, PageBreadcrumbs, Footer } from "~/components";
+import { StickyHeader, LinkCard, PageBreadcrumbs, Footer, BetaTag } from "~/components";
 import { ContentPage } from "~/layouts";
 import { useState, useEffect } from "react";
 import { fetchAPIData } from "~/_utils";
@@ -65,7 +65,7 @@ function Header({ name, color, idType, id }) {
         h(LithologyTag, { data: { name, color }, href: `/lex/${map[idType]}/${id}` }),
       ]),
     }),
-    h(LithologyTag, { data: { name: "Beta" }})
+    h(BetaTag)
   ]);
 }
 

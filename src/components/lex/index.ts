@@ -8,7 +8,7 @@ import { apiV2Prefix, pbdbDomain, isDev } from "@macrostrat-web/settings";
 import { Link, LithologyTag, PageBreadcrumbs } from "~/components";
 import { Card, Divider } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
-import { BlankImage, Footer, Loading, StratTag } from "~/components/general";
+import { AlphaTag, BetaTag, BlankImage, Footer, Loading, StratTag } from "~/components/general";
 import { useState, useMemo, useEffect } from "react";
 import { asChromaColor } from "@macrostrat/color-utils";
 import { DarkModeButton } from "@macrostrat/ui-components";
@@ -915,7 +915,7 @@ export function Units({ href }) {
   return h(LinkCard, { 
     title: h(FlexRow, { alignItems: "center", gap: ".5em"}, [
       h('h4', "Columns"),
-      h(LithologyTag, { data: { name: "Beta" }})
+      h(BetaTag)
     ]), 
     href: '/lex/units?' + href, 
     className: "units-card" 
@@ -961,7 +961,7 @@ export function Fossils({ href }) {
   return h(LinkCard, { 
     title: h(FlexRow, { alignItems: "center", gap: ".5em"}, [
       h('h4', "Fossils"),
-      h(LithologyTag, { data: { name: "Beta" }})
+      h(BetaTag)
     ]), 
     href: '/lex/fossils?' + href,  
     className: "fossils-card" 
@@ -988,7 +988,7 @@ export function MatchesPanel({ fossilsData, href }) {
   return h.if(fossilsData?.length > 0)("div.fossils-container", [
     h(ExpansionPanel, { title: h(FlexRow, { alignItems: "center", gap: ".5em"}, [
       h('h4', "Text Extractions"),
-      h(LithologyTag, { data: { name: "Alpha" }})
+      h(AlphaTag)
     ]), className: "fossils-panel" }, [
       h("div.fossils-list", [...visibleItems]),
       h.if(showLoadMore)(
@@ -1039,17 +1039,9 @@ function Match({ data, href }) {
   return h("div", { class: "match-item" }, [
     h.if(isDev)("a", { href: "/integrations/xdd/sources/" + source + "?" + href }, "View source"),
     h(FlexRow, { className: "match-text", alignItems: "center" }, [
-      h("p", beginning),
-      h(
-        "p.match-name",
-        {
-          style: {
-            "background-color": match.color ?? "black",
-          },
-        },
-        name
-      ),
-      h("p", end),
+      h("p.text", beginning),
+      h(LithologyTag, { data: match, className: 'match-tag' }),
+      h("p.text", end),
     ]),
   ]);
 }
