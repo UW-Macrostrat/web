@@ -26,8 +26,6 @@ export function Page() {
 
   const { strat_name_long } = resData || {};
 
-  console.log("resData:", fossilsData);
-
   const children = [
     h(ColumnsTable, {
       resData,

@@ -98,6 +98,7 @@ function LexItemPageInner(props: LexItemPageProps) {
 
 export function ColumnsTable({ resData, colData, fossilsData }) {
   if (!colData || !colData.features || colData.features.length === 0) return;
+  console.log("ColumnsTable", colData);
   const summary = summarize(colData.features || []);
 
   const { b_age, t_age } = resData;
