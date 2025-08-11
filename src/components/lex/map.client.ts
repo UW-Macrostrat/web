@@ -51,7 +51,7 @@ function ColumnsMapInner({
 
     return h('div.lex-controls', [
       h('div.btn', { onClick: handleFossils }, h(Icon, { icon: "mountain", className: 'icon' })),
-      h('div.btn', { onClick: handleOutcrop }, h(Icon, { icon: "excavator", className: 'icon' })),
+      // h('div.btn', { onClick: handleOutcrop }, h(Icon, { icon: "excavator", className: 'icon' })),
       h('div.btn', { onClick: handleSatellite }, h(Icon, { icon: "satellite", className: 'icon' })),
     ])
   }
@@ -100,8 +100,6 @@ function FossilsLayer({ fossilsData, showFossils, fossilClickRef }) {
   useMapStyleOperator(
     (map) => {
       if (fossilsData == null) return;
-
-      console.log("show fossils", showFossils)
 
       setGeoJSON(map, "points", fossilsData);
 
