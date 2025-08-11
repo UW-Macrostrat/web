@@ -37,12 +37,10 @@ function ColumnsMapInner({
 
   function LexControls() {
     const handleFossils = () => {
-      console.log("fossils clicked");
       setShowFossils(!showFossils);
     };
 
     const handleSatellite = () => {
-      console.log("satellite clicked");
       setShowSatellite(!showSatellite);
     };
 
@@ -61,7 +59,6 @@ function ColumnsMapInner({
   columns = columns.features
 
   columns = columns.map((col) => {
-    // Add a property to each column feature for the column ID
     col.id = col.properties.col_id;
     return col;
   });
