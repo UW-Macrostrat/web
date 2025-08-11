@@ -14,7 +14,8 @@ import { MenuItem, Switch, Divider, Icon } from "@blueprintjs/core";
 import { tileserverDomain } from "@macrostrat-web/settings";
 import { fetchAPIData, fetchPGData } from "~/_utils";
 import { Measurement } from "./measurement";
-
+import { usePageContext } from "vike-react/usePageContext";
+import { Loading } from "~/components";
 
 export function Page() {
     const [types, setTypes] = useState([]);
@@ -30,9 +31,19 @@ export function Page() {
 }
 
 function Map({types}) {
-    const [selectedTypes, setSelectedTypes] = useState([]);
+    const id = usePageContext().urlOriginal.split("=")[1];
     const [clustered, setClustered] = useState(true);
     const [selectedMeasurement, setSelectedMeasurement] = useState(null);
+
+    const [selectedTypes, setSelectedTypes] = useState([]);
+
+    useEffect(() => {
+    if (types.length > 0 && id != null) {
+        const matching = types.filter((d) => d.measure_id === parseInt(id));
+        setSelectedTypes(matching);
+    }
+    }, [types, id]);
+
 
     const style = useMapStyle({ selectedTypes, clustered });
 
@@ -72,7 +83,7 @@ function Map({types}) {
         } 
     };
 
-    return h(
+    return types.length == 0 ? h(Loading) : h(
         "div.map-container",
         [
         // The Map Area Container
@@ -110,8 +121,6 @@ function useMapStyle({selectedTypes, clustered}) {
     console.log(selectedTypes)
 
     const ids = selectedTypes.map((t) => t.measure_id)
-
-    console.log(ids)
 
     const baseURL = "http://localhost:8000/measurements/tile/{z}/{x}/{y}"
     const params = "cluster=" + clustered + (ids.length > 0 ? "&measurement_id=" + ids.join(",") : "");
@@ -229,6 +238,7 @@ function useMapStyle({selectedTypes, clustered}) {
 }
 
 function Panel({selectedTypes, setSelectedTypes, clustered, setClustered, selectedMeasurement, setSelectedMeasurement, types}) {
+    console.log("selectedTypes", selectedTypes)
     const isItemSelected = (item) =>
         selectedTypes.some((selected) => selected.measure_id === item.measure_id);
 
