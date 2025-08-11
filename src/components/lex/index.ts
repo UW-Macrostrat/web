@@ -98,7 +98,6 @@ function LexItemPageInner(props: LexItemPageProps) {
 
 export function ColumnsTable({ resData, colData, fossilsData }) {
   if (!colData || !colData.features || colData.features.length === 0) return;
-  console.log("ColumnsTable", colData);
   const summary = summarize(colData.features || []);
 
   const { b_age, t_age } = resData;
@@ -923,8 +922,6 @@ export function Maps({ mapsData }) {
   const data = useMemo(() => {
     return mapsData.slice(0, visibleCount);
   }, [mapsData, visibleCount]);
-
-  console.log("mapsData", mapsData)
 
   const visibleItems = data.map((item) =>
     h(
