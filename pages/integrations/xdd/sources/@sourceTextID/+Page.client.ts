@@ -64,8 +64,8 @@ export function Page() {
       h("div.feedback-main", [
         h(PageBreadcrumbs),
         h(FlexRow, { alignItems: "center", justifyContent: "space-between" }, [
-          h(FlexRow, [
-            h("h1", "Matches for "),
+          h(FlexRow, { gap: ".5em", alignItems: "center" }, [
+            h("h2", "Matches for "),
             h(LithologyTag, { data, href: `/lex/${map[idType]}/${id}` }),
           ]),
           h.if(paper_id)(
@@ -117,7 +117,7 @@ function MultiFeedbackInterface({ data, models, entityTypes }) {
   const currentData = data[ix];
   const count = data.length;
 
-  const autoSelect = window.location.href.split('autoselect=')[1]?.split(",");
+  const autoSelect = [window.location.href.split('autoselect=')[1]?.split("&")[0]];
 
   return h("div.feedback-interface", [
     h.if(data.length > 1)([
@@ -151,7 +151,7 @@ function FeedbackInterface({ data, models, entityTypes, autoSelect }) {
   const { entities = [], paragraph_text, model } = window;
   const { user } = useAuth();
 
-  console.log(window);
+  console.log(autoSelect);
   console.log(Array.from(entityTypes.values()));
 
   return h(FeedbackComponent, {
@@ -167,7 +167,7 @@ function FeedbackInterface({ data, models, entityTypes, autoSelect }) {
       concept: "/lex/strat-concepts",
     },
     lineHeight: 3,
-    view: user === null,
+    view: true,
     autoSelect,
     onSave: wrapWithToaster(
       async (tree) => {
