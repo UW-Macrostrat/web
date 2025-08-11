@@ -34,6 +34,7 @@ function ColumnsMapInner({
   const [showFossils, setShowFossils] = useState(false);
   const [showOutcrop, setShowOutcrop] = useState(true);
   const fossilClickRef = useRef(false);
+  const hasFitted = useRef(false);
 
   const fossilsExist = fossilsData?.features?.length > 0;
 
@@ -64,7 +65,7 @@ function ColumnsMapInner({
     col.id = col.properties.col_id;
     return col;
   });
-  
+
   return h(
     "div",
     { className },
@@ -79,21 +80,19 @@ function ColumnsMapInner({
               setTimeout(() => {
                 console.log("fossilClicked", fossilClickRef.current)
                 if(!showFossils || !fossilClickRef.current) {
-                  /*
                   window.open(
                     `/columns/${id}`,
                     "_self"
                   );
-                  */
                 }
               }, 0);
           },
-          mapStyle: showSatellite ? satelliteMapURL : null
+          mapStyle: showSatellite ? satelliteMapURL : null,
         }, 
         [
           fossilsExist ? h(FossilsLayer, { fossilsData, showFossils, fossilClickRef }) : null,
           h(LexControls),
-          h(FitBounds, { columnData: columns })
+          !hasFitted.current ? h(FitBounds, { columnData: columns, hasFitted }) : null
         ]
       ),
     ]
@@ -103,7 +102,7 @@ function ColumnsMapInner({
 function FossilsLayer({ fossilsData, showFossils, fossilClickRef }) {
   useMapStyleOperator(
     (map) => {
-      if (fossilsData == null) return;
+      if (fossilsData == null) return
 
       setGeoJSON(map, "points", fossilsData);
 
@@ -189,9 +188,11 @@ function FossilsLayer({ fossilsData, showFossils, fossilClickRef }) {
 }
 
 
-function FitBounds({ columnData }) {
+function FitBounds({ columnData, hasFitted }) {
   useMapStyleOperator((map) => {
     if (!map || !Array.isArray(columnData) || columnData.length === 0) return;
+
+    hasFitted.current = true;
 
     // Flatten all polygon coordinates (assumes Polygon or MultiPolygon)
     const coordinates = columnData
@@ -222,7 +223,7 @@ function FitBounds({ columnData }) {
       padding: 50,
       duration: 0,
     });
-  }, [columnData]);
+  }, []);
 
   return null;
 }
