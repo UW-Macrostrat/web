@@ -92,7 +92,8 @@ function ColumnsMapInner({
         }, 
         [
           fossilsExist ? h(FossilsLayer, { fossilsData, showFossils, fossilClickRef }) : null,
-          h(LexControls)
+          h(LexControls),
+          h(FitBounds, { columnData: columns })
         ]
       ),
     ]
@@ -183,6 +184,30 @@ function FossilsLayer({ fossilsData, showFossils, fossilClickRef }) {
     },
     [fossilsData, showFossils],
   );
+
+  return null;
+}
+
+function FitBounds({ columnData }) {
+  useMapStyleOperator((map) => {
+    if (!map || columnData.length === 0) return;
+
+    // Extract coordinates
+    const coords = columnData
+      .map(col => col.geometry.coordinates[0][0]);
+    if (coords.length === 0) return;
+
+    // Build bounds using the first coordinate
+    const bounds = coords.reduce(
+      (b, coord) => b.extend(coord),
+      new mapboxgl.LngLatBounds(coords[0], coords[0])
+    );
+
+    map.fitBounds(bounds, {
+      padding: 50,
+      duration: 0,
+    });
+  });
 
   return null;
 }
