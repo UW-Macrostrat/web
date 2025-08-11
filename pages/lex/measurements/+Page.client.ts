@@ -12,15 +12,22 @@ import { FullscreenPage } from "~/layouts";
 import { MultiSelect } from "@blueprintjs/select"
 import { MenuItem, Switch, Divider, Icon } from "@blueprintjs/core";
 import { tileserverDomain } from "@macrostrat-web/settings";
-import { fetchPGData } from "~/_utils";
+import { fetchAPIData, fetchPGData } from "~/_utils";
 import { Measurement } from "./measurement";
 
 
 export function Page() {
-    return  h(FullscreenPage, h(Map))
+    const [types, setTypes] = useState([]);
+
+    useEffect(() => {
+        fetchAPIData("/defs/measurements", { all: true})
+            .then(data => setTypes(data))
+            .catch(err => console.error("Error fetching data:", err));
+    }, []);
+    return  h(FullscreenPage, h(Map, {types}))
 }
 
-function Map() {
+function Map({types}) {
     const [selectedTypes, setSelectedTypes] = useState([]);
     const [clustered, setClustered] = useState(true);
     const [selectedMeasurement, setSelectedMeasurement] = useState(null);
@@ -71,7 +78,7 @@ function Map() {
             MapAreaContainer,
             {
                 className: 'map-area-container',
-                contextPanel: h(Panel, { selectedTypes, setSelectedTypes, clustered, setClustered, selectedMeasurement, setSelectedMeasurement }),
+                contextPanel: h(Panel, { selectedTypes, setSelectedTypes, clustered, setClustered, selectedMeasurement, setSelectedMeasurement, types }),
                 key: selectedTypes.join(",") + clustered,
             },
             [
@@ -98,9 +105,14 @@ function useMapStyle({selectedTypes, clustered}) {
         : "mapbox://styles/mapbox/light-v10";
 
     const [actualStyle, setActualStyle] = useState(null);
+    console.log(selectedTypes)
 
-    const baseURL = tileserverDomain + "/measurements/tile/{z}/{x}/{y}"
-    const params = "cluster=" + clustered + (selectedTypes.length > 0 ? "&type=" + selectedTypes.map(encodeURIComponent).join(",") : "");
+    const ids = selectedTypes.map((t) => t.measure_id)
+
+    console.log(ids)
+
+    const baseURL = "http://localhost:8000/measurements/tile/{z}/{x}/{y}"
+    const params = "cluster=" + clustered + (ids.length > 0 ? "&measurement_id=" + ids.join(",") : "");
 
     const url = baseURL + "?" + params;
 
@@ -214,19 +226,9 @@ function useMapStyle({selectedTypes, clustered}) {
   return actualStyle;
 }
 
-function Panel({selectedTypes, setSelectedTypes, clustered, setClustered, selectedMeasurement, setSelectedMeasurement}) {
-    const types = [
-        "petrologic",
-        "environmental",
-        "stable isotopes",
-        "minor elements",
-        "major elements",
-        "material properties",
-        "radiogenic isotopes",
-        "geochronological"
-    ]
-
-    const isItemSelected = (item) => selectedTypes.includes(item);
+function Panel({selectedTypes, setSelectedTypes, clustered, setClustered, selectedMeasurement, setSelectedMeasurement, types}) {
+    const isItemSelected = (item) =>
+        selectedTypes.some((selected) => selected.measure_id === item.measure_id);
 
     const handleItemSelect = (item) => {
         if (!isItemSelected(item)) {
@@ -235,26 +237,28 @@ function Panel({selectedTypes, setSelectedTypes, clustered, setClustered, select
     };
 
     const handleItemDelete = (itemToDelete) => {
-        const next = selectedTypes.filter((item) => item !== itemToDelete);
+        const next = selectedTypes.filter(
+            (item) => item.measure_id !== itemToDelete.measure_id
+        );
         setSelectedTypes(next);
     };
 
     const itemPredicate = (query, item) =>
-        item.toLowerCase().includes(query.toLowerCase());
+        item.name.toLowerCase().includes(query.toLowerCase());
 
     const itemRenderer = (item, { handleClick, modifiers }) => {
         if (!modifiers.matchesPredicate) return null;
 
         return h(MenuItem, {
-            key: item,
-            text: item,
+            key: item.measure_id,
+            text: item.name,
             onClick: handleClick,
             active: modifiers.active,
             shouldDismissPopover: false,
         });
     };
 
-    const items = types.filter((f) => !isItemSelected(f))
+    const items = types.filter((f) => !isItemSelected(f));
 
     return h('div.panel', [
         h.if(!selectedMeasurement)('div.filter', [
@@ -268,7 +272,8 @@ function Panel({selectedTypes, setSelectedTypes, clustered, setClustered, select
                     selectedItems: selectedTypes,
                     onItemSelect: handleItemSelect,
                     onRemove: handleItemDelete,
-                    tagRenderer: (item) => item,
+                    tagRenderer: (item) => item.name,
+                    tagInputProps: { tagKey: "measure_id" },
                     popoverProps: { minimal: true },
                     fill: true,
                 }),
