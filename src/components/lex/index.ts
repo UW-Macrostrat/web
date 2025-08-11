@@ -924,6 +924,8 @@ export function Maps({ mapsData }) {
     return mapsData.slice(0, visibleCount);
   }, [mapsData, visibleCount]);
 
+  console.log("mapsData", mapsData)
+
   const visibleItems = data.map((item) =>
     h(
       "a.maps-item",
@@ -931,7 +933,7 @@ export function Maps({ mapsData }) {
         key: item.map_unit_name,
         href: "/maps/" + item.source_id + "?legend=" + item.legend_id,
       },
-      item.map_unit_name + " (#" + item.source_id + ")"
+      `Map #${item.source_id}: ${item.map_unit_name} (#${item.legend_id})`
     )
   );
 
