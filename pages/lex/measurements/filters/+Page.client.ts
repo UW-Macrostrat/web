@@ -28,7 +28,7 @@ export function Page() {
 
     return h('div.page', [
         h(PageBreadcrumbs, { title: "Filters" }),
-        h(LexHierarchy, { width: "100%", height: "400px", data, onClick: (e, item) => navigate(`/lex/measurements?id=${item.measure_id}`) }),
+        h(LexHierarchy, { data, onClick: (e, item) => navigate(`/lex/measurements?id=${item.measure_id}`) }),
         h(Footer)
     ]);
 }
