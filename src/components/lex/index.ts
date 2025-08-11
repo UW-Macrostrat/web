@@ -89,6 +89,10 @@ function LexItemPageInner(props: LexItemPageProps) {
           siftLink,
           id,
         }),
+      SiftLink({
+        id,
+        siftLink,
+      }),
       children,
       h(References, { refs }),
     ]),
@@ -194,10 +198,6 @@ function LexItemHeader({ resData, name, siftLink, id }) {
         luminance,
       }),
     ]),
-    SiftLink({
-      id,
-      siftLink,
-    }),
   ]);
 }
 
@@ -219,7 +219,6 @@ function IntAbbrev({ abbrev, chromaColor, luminance }) {
 
 function SiftLink({ id, siftLink }) {
   return h.if(siftLink)("div.sift-link", [
-    h("p", "This page is is in development."),
     h(
       "a",
       { href: "/sift/" + siftLink + "/" + id, target: "_blank" },
@@ -386,10 +385,10 @@ export function ConceptInfo({ concept_id, showHeader }) {
     data;
 
   return h("div.concept-info", [
-    h(
+    h.if(showHeader)(
       "a.concept-header",
       { href: "/lex/strat-concepts/" + concept_id },
-      [h("h3", (!showHeader ? "Part of " : "") + name), h(StratTag, { isConcept: true, fontSize: "1.5em" })]
+      [h("h3", "Part of " + name), h(StratTag, { isConcept: true, fontSize: "1.5em" })]
     ),
     h("div.author", [
       h("span.title", "Author: "),

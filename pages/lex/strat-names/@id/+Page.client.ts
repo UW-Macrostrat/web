@@ -42,7 +42,7 @@ export function Page() {
       strat_name_id: id,
     }),
     h(StratNameHierarchy, { id }),
-    h(ConceptInfo, { concept_id: resData?.concept_id, showHeader: false }),
+    h(ConceptInfo, { concept_id: resData?.concept_id, showHeader: true }),
   ];
 
   return h(LexItemPage, 

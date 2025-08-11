@@ -29,6 +29,7 @@ export function Page() {
 
 
   const children = [
+    h(ConceptInfo, { concept_id: id, showHeader: false }),
     h(ColumnsTable, {
       resData,
       colData,
@@ -37,7 +38,6 @@ export function Page() {
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),
     h(Timescales, { timescales }),
-    h(ConceptInfo, { concept_id: id, showHeader: true }),
     h(ConceptBody, { concept_id: id }),
     h.if(unitsData.length > 0)(Units, { href: "strat_name_concept_id=" + id + "&name=" + resData?.name }),
     h.if(fossilsData.length > 0)(Fossils, { href: "strat_name_concept_id=" + id + "&name=" + resData?.name }),
@@ -77,8 +77,6 @@ function ConceptBody({ concept_id }) {
   }, [concept_id]);
 
   if (!data) return null;
-
-  console.log("Linked strat names", data)
 
   return h("div.concept-body", [
     h("h2.strat-names", "Contains strat names"),
