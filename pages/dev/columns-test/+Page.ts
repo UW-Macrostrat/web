@@ -21,7 +21,7 @@ import { navigate } from "vike/client/router";
 
 import { LexSelection } from "@macrostrat/form-components";
 import { postgrestPrefix } from "@macrostrat-web/settings";
-import { useAPIResult } from "@macrostrat/ui-components"
+import { useAPIResult, PostgRESTInfiniteScrollView } from "@macrostrat/ui-components"
 import { cdrPrefix } from "packages/settings";
 
 const h = hyper.styled(styles);
@@ -118,23 +118,33 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
     );
   }, [filteredGroups]);
 
-  const handleInputChange = (value, target) => {
-    setColumnInput(value.toLowerCase());
-  };
-  
+  console.log("extraparams", extraParams);
+
   return h("div.column-list-page", [
     h(ContentPage, [
       h("div.flex-row", [
         h("div.main", [
           h(StickyHeader, [
             h(PageBreadcrumbs, { showLogo: true }),
-            h('div.filters', [
-              h(SearchBar, {
-                placeholder: "Search columns...",
-                onChange: handleInputChange,
-                className: "search-bar",
-              }),
-              h('div.switches', [
+            h(LexFilters, {
+              selectedLiths,
+              setSelectedLiths,
+              selectedUnits,
+              setSelectedUnits,
+              selectedStratNames,
+              setSelectedStratNames,
+            })
+          ]),
+            h(PostgRESTInfiniteScrollView, {
+              route: postgrestPrefix + `/col_data`,
+              id_key: "col_id",
+              order_key: "col_group_id",
+              limit: 50,
+              itemComponent: ColumnItem,
+              filterable: true,
+              extraParams,
+              searchColumns: [{ label: "Name", value: "name" }],
+              toggles: h('div.switches', [
                 h(Switch, {
                   checked: showEmpty,
                   label: "Show empty",
@@ -146,29 +156,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
                   onChange: () => setShowInProcess(!showInProcess),
                 }),
               ]),
-            ]),
-            h(LexFilters, {
-              selectedLiths,
-              setSelectedLiths,
-              selectedUnits,
-              setSelectedUnits,
-              selectedStratNames,
-              setSelectedStratNames,
             })
-          ]),
-          h.if(!loading)(
-            "div.column-groups",
-            filteredGroups?.map((d) =>
-              h(ColumnGroup, {
-                data: d,
-                key: d.id,
-                linkPrefix,
-                showEmpty,
-              })
-            )
-          ),
-          h.if(columnGroups?.length == 0 && !loading)("div.empty", "No columns found"),
-          h.if(loading)("div.loading", "Loading columns..."),
         ]),
         h("div.sidebar", [
           h("div.sidebar-content", [
@@ -231,7 +219,7 @@ function ColumnGroup({ data, linkPrefix }) {
 
 const ColumnItem = React.memo(
   function ColumnItem({ data, linkPrefix = "/" }) {
-    const { col_id, name, units } = data;
+    const { col_id, name, units, col_group_id } = data;
 
     const unitsText = units?.length > 0 ? `${units?.length} units` : "empty";
 
@@ -262,6 +250,10 @@ const ColumnItem = React.memo(
               color: units?.length === 0 ? "orange" : "dodgerblue",
             },
             unitsText
+          ),
+          " ",
+          h(Tag, { minimal: true, color: "lightgreen", size: "small" },
+            h(Link, { href: `/columns/groups/${data.id}`, target: "_self" }, "#" + col_group_id),
           ),
         ]),
       ]

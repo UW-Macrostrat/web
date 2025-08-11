@@ -3192,7 +3192,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@macrostrat/form-components@npm:^0.2.1, @macrostrat/form-components@npm:^0.2.2":
+"@macrostrat/form-components@npm:^0.2.2":
   version: 0.2.2
   resolution: "@macrostrat/form-components@npm:0.2.2"
   dependencies:
@@ -3215,6 +3215,32 @@ __metadata:
     react: ^16.13.1||^17||^18||^19
     react-dom: ^16.13.1||^17||^18||^19
   checksum: 10/6b63ed4cca6179bf0135cb5692b4931ec5ca7a31574a9212d08d273ab5dc90795f00667007cb350c6a112f183438daa60659baeaa4e0e16b5ab2c53806d37730
+  languageName: node
+  linkType: hard
+
+"@macrostrat/form-components@npm:^0.2.4":
+  version: 0.2.4
+  resolution: "@macrostrat/form-components@npm:0.2.4"
+  dependencies:
+    "@blueprintjs/core": "npm:^5.10.2"
+    "@blueprintjs/icons": "npm:^5.9.0"
+    "@blueprintjs/select": "npm:^5.3.10"
+    "@blueprintjs/table": "npm:^5.3.4"
+    "@macrostrat/color-utils": "npm:^1.1.1"
+    "@macrostrat/hyper": "npm:^3.0.6"
+    "@macrostrat/ui-components": "npm:^4.4.4"
+    "@mantine/core": "npm:^4.2.1"
+    "@mantine/hooks": "npm:^4.2.1"
+    "@mapbox/mapbox-gl-draw": "npm:^1.5.0"
+    "@types/mapbox__mapbox-gl-draw": "npm:^1.4.8"
+    "@types/react-dom": "npm:^18"
+    axios: "npm:^1.7.9"
+    classnames: "npm:^2.5.1"
+    mapbox-gl: "npm:^2.15.0||^3.0.0"
+  peerDependencies:
+    react: ^16.13.1||^17||^18||^19
+    react-dom: ^16.13.1||^17||^18||^19
+  checksum: 10/9afcec73d1f2acee9ecbb52765bdcff23d92120e586167f3adcc7c87dd26075084765c3fa3d74004d1f9cf1134886099a42979ec506dc3b18025a2ebe2ae4ab3
   languageName: node
   linkType: hard
 
@@ -3479,7 +3505,7 @@ __metadata:
     "@macrostrat/data-components": "npm:^0.2.0"
     "@macrostrat/data-sheet": "npm:^2.0.2"
     "@macrostrat/feedback-components": "npm:^1.1.8"
-    "@macrostrat/form-components": "npm:^0.2.1"
+    "@macrostrat/form-components": "npm:^0.2.4"
     "@macrostrat/hyper": "npm:^3.0.6"
     "@macrostrat/map-interface": "npm:^1.5.6"
     "@macrostrat/map-styles": "npm:^1.2.0"
