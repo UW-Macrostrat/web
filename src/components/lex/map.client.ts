@@ -25,25 +25,24 @@ export function ExpansionPanelContainer(props) {
 
 function ColumnsMapInner({
   columnIDs = null,
-  className,
+  className = "map-container",
   columns = null,
   lex = false,
   fossilsData = []
 }) {
   const [showSatellite, setShowSatellite] = useState(true);
-  const [showFossils, setShowFossils] = useState(true);
+  const [showFossils, setShowFossils] = useState(false);
   const [showOutcrop, setShowOutcrop] = useState(true);
   const fossilClickRef = useRef(false);
 
   function LexControls() {
-    const [showFossils, setShowFossils] = useState(false);
-    const [showOutcrop, setShowOutcrop] = useState(false);
-
     const handleFossils = () => {
+      console.log("fossils clicked");
       setShowFossils(!showFossils);
     };
 
     const handleSatellite = () => {
+      console.log("satellite clicked");
       setShowSatellite(!showSatellite);
     };
 
@@ -54,8 +53,8 @@ function ColumnsMapInner({
 
     return h('div.lex-controls', [
       h('div.btn', { onClick: handleFossils }, h(Icon, { icon: "mountain", className: 'icon' })),
-      h('div.btn', { onClick: handleSatellite }, h(Icon, { icon: "excavator", className: 'icon' })),
-      h('div.btn', { onClick: handleOutcrop }, h(Icon, { icon: "satellite", className: 'icon' })),
+      h('div.btn', { onClick: handleOutcrop }, h(Icon, { icon: "excavator", className: 'icon' })),
+      h('div.btn', { onClick: handleSatellite }, h(Icon, { icon: "satellite", className: 'icon' })),
     ])
   }
 
@@ -70,30 +69,33 @@ function ColumnsMapInner({
   return h(
     "div",
     { className },
-    h(
-      ColumnNavigationMap, 
-      {
-        columns,
-        accessToken: mapboxAccessToken,
-        style: {height: "100%"},
-        onSelectColumn: (id) => {
-            setTimeout(() => {
-              if(!showFossils || !fossilClickRef.current) {
-                fossilClickRef.current = false;
+    [
+      h(
+        ColumnNavigationMap, 
+        {
+          columns,
+          accessToken: mapboxAccessToken,
+          style: {height: "100%"},
+          onSelectColumn: (id) => {
+              setTimeout(() => {
+                if(!showFossils || !fossilClickRef.current) {
+                  fossilClickRef.current = false;
 
-                window.open(
-                  `/columns/${id}`,
-                  "_self"
-                );
-              }
-            }, 0);
-        },
-        mapStyle: showSatellite ? satelliteMapURL : null
-      }, 
-      [
-        h(FossilsLayer, { fossilsData, showFossils, fossilClickRef }),
-      ]
-    )
+                  window.open(
+                    `/columns/${id}`,
+                    "_self"
+                  );
+                }
+              }, 0);
+          },
+          mapStyle: showSatellite ? satelliteMapURL : null
+        }, 
+        [
+          h(FossilsLayer, { fossilsData, showFossils, fossilClickRef }),
+          h(LexControls)
+        ]
+      ),
+    ]
   );
 }
 
@@ -101,6 +103,8 @@ function FossilsLayer({ fossilsData, showFossils, fossilClickRef }) {
   useMapStyleOperator(
     (map) => {
       if (fossilsData == null) return;
+
+      console.log("show fossils", showFossils)
 
       setGeoJSON(map, "points", fossilsData);
 
@@ -177,7 +181,7 @@ function FossilsLayer({ fossilsData, showFossils, fossilClickRef }) {
 
       map.on("click", onClick);
     },
-    [fossilsData],
+    [fossilsData, showFossils],
   );
 
   return null;
