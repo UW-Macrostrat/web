@@ -45,7 +45,7 @@ function UnitItem({ data }) {
   return h(LinkCard, {
     href: `/columns/${col_id}#unit=${unit_id}`,
     className: "unit-item",
-    title: unit_name,
+    title: `Column #${col_id}: ${unit_name} (#${unit_id})`,
   });
 }
 

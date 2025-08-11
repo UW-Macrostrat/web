@@ -31,7 +31,7 @@ export async function data(pageContext) {
           }),
         "colData"
       ),
-      safeFetch(() => fetchAPIData("/fossils", { econ_id }), "fossilsData"),
+      safeFetch(() => fetchAPIData("/fossils", { econ_id, format: "geojson"  }), "fossilsData"),
       safeFetch(() => fetchAPIRefs("/fossils", { econ_id }), "refs1"),
       safeFetch(() => fetchAPIRefs("/columns", { econ_id }), "refs2"),
       safeFetch(() => fetchAPIData("/units", { econ_id }), "unitsData"),

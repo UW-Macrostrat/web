@@ -25,11 +25,12 @@ export function Page() {
     h(ColumnsTable, {
       resData,
       colData,
+      fossilsData
     }),
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),
     h(Timescales, { timescales }),
-    h.if(fossilsData.length > 0)(Fossils, { href: "int_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
+    h.if(fossilsData.features.length > 0)(Fossils, { href: "int_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
     h.if(unitsData.length > 0)(Units, { href: "int_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
   ];
 

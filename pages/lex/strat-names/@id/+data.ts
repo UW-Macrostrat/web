@@ -13,7 +13,7 @@ export async function data(pageContext) {
         response: "long",
         format: "geojson",
       }),
-      fetchAPIData("/fossils", { strat_name_id }),
+      fetchAPIData("/fossils", { strat_name_id, format: "geojson" }),
       fetchAPIData("/geologic_units/map/legend", { strat_name_id }),
       fetchAPIRefs("/fossils", { strat_name_id }),
       fetchAPIRefs("/columns", { strat_name_id }),
