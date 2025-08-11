@@ -968,14 +968,14 @@ export function Fossils({ href }) {
   });
 }
 
-export function MatchesPanel({ fossilsData }) {
+export function MatchesPanel({ fossilsData, href }) {
   const ITEMS_PER_PAGE = 20;
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
   const data = useMemo(() => {
     return fossilsData.slice(0, visibleCount);
   }, [fossilsData, visibleCount]);
 
-  const visibleItems = data.map((item) => h(Match, { data: item }));
+  const visibleItems = data.map((item) => h(Match, { data: item, href }));
 
   const handleLoadMore = () => {
     setVisibleCount((prev) =>
@@ -999,7 +999,7 @@ export function MatchesPanel({ fossilsData }) {
   ]);
 }
 
-export function TextExtractions({ lith_id, lith_att_id, strat_name_id, concept_id }) {
+export function TextExtractions({ lith_id, lith_att_id, strat_name_id, concept_id, href }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -1021,10 +1021,10 @@ export function TextExtractions({ lith_id, lith_att_id, strat_name_id, concept_i
     fetchPGData("/kg_matches", filter).then(setData);
   }, [lith_id, lith_att_id]);
 
-  return h(MatchesPanel, { fossilsData: data });
+  return h(MatchesPanel, { fossilsData: data, href });
 }
 
-function Match({ data }) {
+function Match({ data, href }) {
   const { source, context_text, name, match, indices } = data;
 
   const beginning = context_text.slice(
@@ -1037,7 +1037,7 @@ function Match({ data }) {
   );
 
   return h("div", { class: "match-item" }, [
-    h.if(isDev)("a", { href: "/integrations/xdd/sources/" + source + "?autoselect=" + name }, "View source"),
+    h.if(isDev)("a", { href: "/integrations/xdd/sources/" + source + "?" + href }, "View source"),
     h(FlexRow, { className: "match-text", alignItems: "center" }, [
       h("p", beginning),
       h(

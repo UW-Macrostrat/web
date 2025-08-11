@@ -33,9 +33,7 @@ export function Page() {
     h(PrevalentTaxa, { taxaData }),
     h(Timescales, { timescales }),
     h(Maps, { mapsData }),
-    h(TextExtractions, {
-      lith_id: id,
-    }),
+    h(TextExtractions, { lith_id: id, href: "autoselect=" + resData?.name + "&lith_id=" + id + "&color=" + resData?.color }),
     h.if(fossilsData.features.length > 0)(Fossils, { href: "lith_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
     h.if(unitsData.length > 0)(Units, { href: "lith_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
   ];

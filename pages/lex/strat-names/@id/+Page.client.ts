@@ -40,6 +40,7 @@ export function Page() {
     h(Maps, { mapsData }),
     h(TextExtractions, {
       strat_name_id: id,
+      href: "autoselect=" + resData?.strat_name_long + "&strat_name_id=" + id,
     }),
     h(StratNameHierarchy, { id }),
     h(ConceptInfo, { concept_id: resData?.concept_id, showHeader: true }),

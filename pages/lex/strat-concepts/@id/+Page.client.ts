@@ -41,9 +41,7 @@ export function Page() {
     h(ConceptBody, { concept_id: id }),
     h.if(unitsData.length > 0)(Units, { href: "strat_name_concept_id=" + id + "&name=" + resData?.name }),
     h.if(fossilsData.length > 0)(Fossils, { href: "strat_name_concept_id=" + id + "&name=" + resData?.name }),
-    h(TextExtractions, {
-      concept_id: id,
-    }),
+    h(TextExtractions, { concept_id: id, href: "autoselect=" + resData?.name + "&concept_id=" + id }),
   ];
 
   return LexItemPage({
