@@ -7,7 +7,7 @@ import {
 } from "@macrostrat/map-interface";
 import { mapboxAccessToken } from "@macrostrat-web/settings";
 import { useEffect, useState } from "react";
-import { useDarkMode } from "@macrostrat/ui-components";
+import { useDarkMode, FlexRow } from "@macrostrat/ui-components";
 import { FullscreenPage } from "~/layouts";
 import { MultiSelect } from "@blueprintjs/select"
 import { MenuItem, Switch, Divider, Icon } from "@blueprintjs/core";
@@ -18,6 +18,8 @@ import { Measurement } from "./measurement";
 
 export function Page() {
     const [types, setTypes] = useState([]);
+
+    console.log(types)
 
     useEffect(() => {
         fetchAPIData("/defs/measurements", { all: true})
@@ -249,9 +251,18 @@ function Panel({selectedTypes, setSelectedTypes, clustered, setClustered, select
     const itemRenderer = (item, { handleClick, modifiers }) => {
         if (!modifiers.matchesPredicate) return null;
 
+        const { measure_id, name, type } = item;
+
         return h(MenuItem, {
-            key: item.measure_id,
-            text: item.name,
+            key: measure_id,
+            text: h('div.type', [
+                h('p', name),
+                h(FlexRow, { alignItems: "center", gap: ".25em"}, [
+                    h('div.text', item.class),
+                    h(Icon, {icon: "chevron-right", size: 12}),
+                    h('div.text', type),
+                ]),
+            ]),
             onClick: handleClick,
             active: modifiers.active,
             shouldDismissPopover: false,
