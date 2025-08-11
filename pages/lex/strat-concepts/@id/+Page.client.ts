@@ -15,6 +15,9 @@ import {
 import { StratTag } from "~/components/general";
 import { LinkCard } from "~/components/cards";
 import { usePageContext } from "vike-react/usePageContext";
+import { fetchAPIData } from "~/_utils";
+import { useEffect, useState } from "react";
+import { ConceptHierarchy } from "~/components/lex/StratNameHierarchy";
 
 export function Page() {
   const { resData, refs, fossilsData, colData, taxaData, unitsData } = useData();
@@ -35,7 +38,7 @@ export function Page() {
     h(PrevalentTaxa, { taxaData }),
     h(Timescales, { timescales }),
     h(ConceptInfo, { concept_id: id, showHeader: true }),
-    h(ConceptBody, { resData }),
+    h(ConceptBody, { concept_id: id }),
     h.if(unitsData.length > 0)(Units, { href: "strat_name_concept_id=" + id + "&name=" + resData?.name }),
     h.if(fossilsData.length > 0)(Fossils, { href: "strat_name_concept_id=" + id + "&name=" + resData?.name }),
     h(Matches, {
@@ -56,27 +59,36 @@ export function Page() {
   });
 }
 
-function ConceptBody({ resData }) {
-  let { strat_names, strat_ids, strat_ranks } = resData;
+function ConceptBody({ concept_id }) {
+  const [data, setData] = useState(null);
 
-  const stratNames = strat_names ? strat_names.split(",") : [];
-  const stratIds = strat_ids ? strat_ids.split(",") : [];
-  const stratRanks = strat_ranks ? strat_ranks.split(",") : [];
-  const strats = stratNames.map((name, i) => ({
-    name,
-    id: stratIds[i],
-    rank: stratRanks[i],
-  }));
+  useEffect(() => {
+    if (!concept_id) return; // Avoid calling API with undefined/null ID
+
+    fetchAPIData(`/defs/strat_names`, { concept_id })
+      .then((response) => {
+        setData(response);
+        console.log("Linked strat names", response);
+      })
+      .catch((error) => {
+        console.error("Error fetching strat names:", error);
+        setData(null);
+      });
+  }, [concept_id]);
+
+  if (!data) return null;
+
+  console.log("Linked strat names", data)
 
   return h("div.concept-body", [
     h("h2.strat-names", "Contains strat names"),
     h(
       "ul.strat-name-list",
-      strats.map((strat) =>
+      data.map((strat) =>
         h(
           LinkCard,
-          { href: "/lex/strat-names/" + strat.id, className: "strat-name" },
-          strat.name + " (" + strat.rank + ")"
+          { href: "/lex/strat-names/" + strat.strat_name_id, className: "strat-name" },
+          strat.strat_name_long + " (" + strat.t_units + ")"
         )
       )
     ),
