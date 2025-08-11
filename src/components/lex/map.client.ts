@@ -77,13 +77,14 @@ function ColumnsMapInner({
           style: {height: "100%"},
           onSelectColumn: (id) => {
               setTimeout(() => {
+                console.log("fossilClicked", fossilClickRef.current)
                 if(!showFossils || !fossilClickRef.current) {
-                  fossilClickRef.current = false;
-
+                  /*
                   window.open(
                     `/columns/${id}`,
                     "_self"
                   );
+                  */
                 }
               }, 0);
           },
@@ -148,8 +149,6 @@ function FossilsLayer({ fossilsData, showFossils, fossilClickRef }) {
           layers: ["expanded-layer"],
         });
 
-        console.log(features.length > 0)
-
         fossilClickRef.current = features.length > 0;
 
         if (!features.length) return;
@@ -177,6 +176,10 @@ function FossilsLayer({ fossilsData, showFossils, fossilClickRef }) {
       };
 
       map.on("click", onClick);
+
+      return () => {
+      map.off("click", onClick);
+    };
     },
     [fossilsData, showFossils],
   );
