@@ -10,6 +10,9 @@ import { Icon } from "@blueprintjs/core"
 import { useState } from "react";
 import { useMapStyleOperator } from "@macrostrat/mapbox-react"
 import { satelliteMapURL } from "@macrostrat-web/settings";
+import { setGeoJSON } from "@macrostrat/mapbox-utils";
+import mapboxgl from "mapbox-gl"
+import { pbdbDomain } from "@macrostrat-web/settings";
 
 export function ColumnsMapContainer(props) {
   /* TODO: integrate this with shared web components */
@@ -24,8 +27,37 @@ function ColumnsMapInner({
   columnIDs = null,
   className,
   columns = null,
-  lex = false
+  lex = false,
+  fossilsData = []
 }) {
+  const [showSatellite, setShowSatellite] = useState(true);
+  const [showFossils, setShowFossils] = useState(true);
+  const [showOutcrop, setShowOutcrop] = useState(true);
+
+  function LexControls() {
+    const [showFossils, setShowFossils] = useState(false);
+    const [showOutcrop, setShowOutcrop] = useState(false);
+
+    const handleFossils = () => {
+      setShowFossils(!showFossils);
+    };
+
+    const handleSatellite = () => {
+      setShowSatellite(!showSatellite);
+    };
+
+    const handleOutcrop = () => {
+      setShowOutcrop(!showOutcrop);
+    }
+
+
+    return h('div.lex-controls', [
+      h('div.btn', { onClick: handleFossils }, h(Icon, { icon: "mountain", className: 'icon' })),
+      h('div.btn', { onClick: handleSatellite }, h(Icon, { icon: "excavator", className: 'icon' })),
+      h('div.btn', { onClick: handleOutcrop }, h(Icon, { icon: "satellite", className: 'icon' })),
+    ])
+  }
+
   columns = columns.features
 
   columns = columns.map((col) => {
@@ -44,55 +76,102 @@ function ColumnsMapInner({
         accessToken: mapboxAccessToken,
         style: {height: "100%"},
         onSelectColumn: (id) => {
-          window.open(
-            `/columns/${id}`,
-            "_self"
-          );
-        }
-      },
-      h.if(lex)(LexControls)
+          if(!showFossils) {
+            window.open(
+              `/columns/${id}`,
+              "_self"
+            );
+          }
+        },
+        mapStyle: showSatellite ? satelliteMapURL : null
+      }, 
+      [
+        h(FossilsLayer, { fossilsData, showFossils }),
+      ]
     )
   );
 }
 
-function LexControls() {
-    const [showFossils, setShowFossils] = useState(false);
-    const [showSatellite, setShowSatellite] = useState(false);
-    const [showOutcrop, setShowOutcrop] = useState(false);
+function FossilsLayer({fossilsData, showFossils}) {
+  useMapStyleOperator(
+    (map) => {
+      if (fossilsData == null) return;
 
-    const handleFossils = () => {
-      setShowFossils(!showFossils);
-    };
-
-    const handleSatellite = () => {
-      setShowSatellite(!showSatellite);
-    };
-
-    const handleOutcrop = () => {
-      setShowOutcrop(!showOutcrop);
-    };
-
-          console.log(showSatellite)
+      setGeoJSON(map, "points", fossilsData);
+      console.log(map.getStyle().layers);
 
 
-    useMapStyleOperator((map) => {
-      const baseStyleURL = "mapbox://styles/your-org/default-style"; // <-- your non-satellite base style
-
-      const currentStyle = map.getStyle().sprite; // a stable part of style for comparison
-
-      const isSatellite = currentStyle.includes("satellite");
-
-      if (showSatellite && !isSatellite) {
-        map.setStyle(satelliteMapURL);
-      } else if (!showSatellite && isSatellite) {
-        map.setStyle(baseStyleURL);
+      if (showFossils) {
+      if (map.getLayer("minimal-layer")) {
+        map.removeLayer("minimal-layer");
       }
-    }, [showSatellite, satelliteMapURL]);
 
+      if (!map.getLayer("expanded-layer")) {
+        map.addLayer({
+          id: "expanded-layer",
+          type: "circle",
+          source: "points",
+          paint: {
+            "circle-radius": 5,
+            "circle-color": "grey",
+            "circle-opacity": 0.5,
+            "circle-stroke-color": "white",
+            "circle-stroke-width": 2,
+            "circle-stroke-opacity": 1,
+          },
+        });
+      }
+    } else {
+      if (map.getLayer("expanded-layer")) {
+        map.removeLayer("expanded-layer");
+      }
+      if (!map.getLayer("minimal-layer")) {
+        map.addLayer({
+          id: "minimal-layer",
+          type: "circle",
+          source: "points",
+          paint: {
+            "circle-radius": 2,
+            "circle-color": "white",
+            "circle-opacity": 0.8,
+          },
+        });
+      }
+    }
 
-    return h('div.lex-controls', [
-      h('div.btn', { onClick: handleFossils }, h(Icon, { icon: "mountain", className: 'icon' })),
-      h('div.btn', { onClick: handleSatellite }, h(Icon, { icon: "excavator", className: 'icon' })),
-      h('div.btn', { onClick: handleOutcrop }, h(Icon, { icon: "satellite", className: 'icon' })),
-    ])
+    const onClick = (e) => {
+      const features = map.queryRenderedFeatures(e.point, {
+        layers: ["expanded-layer"],
+      });
+      if (!features.length) return;
+
+      const feature = features[0];
+
+      const { cltn_name, pbdb_occs, cltn_id } = feature.properties;
+
+      const coordinates = feature.geometry.coordinates.slice();
+      const name = cltn_name || "Unknown Fossil";
+      const occurrences = (pbdb_occs || 0) + " occurrences";
+      const url = pbdbDomain + "/classic/displayCollResults?collection_no=col:" + cltn_id;
+
+      new mapboxgl.Popup()
+        .setLngLat(coordinates)
+        .setHTML(`
+          <div style="color: black; text-align: center;">
+            <strong><a href="${url}" target="_blank" style="color: black;">
+              ${name}
+            </a></strong>
+            <div>${occurrences}</div>
+          </div>
+        `)
+        .addTo(map);
+    };
+
+    map.on("click", onClick);
+
+    },
+    [fossilsData],
+  );
+
+  return null;
 }

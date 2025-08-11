@@ -2,7 +2,7 @@ import { apiV2Prefix, postgrestPrefix } from "@macrostrat-web/settings";
 import fetch from "cross-fetch";
 
 export async function fetchAPIData(apiURL: string, params: any) {
-  let url = new URL(apiV2Prefix + apiURL);
+  let url = new URL('https://macrostrat.org/api' + apiURL);
   if (params != null) {
     url.search = new URLSearchParams(params).toString();
   }
