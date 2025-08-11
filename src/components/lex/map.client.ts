@@ -7,7 +7,7 @@ import { mapboxAccessToken } from "@macrostrat-web/settings";
 import { ErrorBoundary } from "@macrostrat/ui-components";
 import { ExpansionPanel } from "@macrostrat/map-interface";
 import { Icon } from "@blueprintjs/core"
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useMapStyleOperator } from "@macrostrat/mapbox-react"
 import { satelliteMapURL } from "@macrostrat-web/settings";
 import { setGeoJSON } from "@macrostrat/mapbox-utils";
@@ -33,6 +33,7 @@ function ColumnsMapInner({
   const [showSatellite, setShowSatellite] = useState(true);
   const [showFossils, setShowFossils] = useState(true);
   const [showOutcrop, setShowOutcrop] = useState(true);
+  const fossilClickRef = useRef(false);
 
   function LexControls() {
     const [showFossils, setShowFossils] = useState(false);
@@ -76,99 +77,105 @@ function ColumnsMapInner({
         accessToken: mapboxAccessToken,
         style: {height: "100%"},
         onSelectColumn: (id) => {
-          if(!showFossils) {
-            window.open(
-              `/columns/${id}`,
-              "_self"
-            );
-          }
+            setTimeout(() => {
+              if(!showFossils || !fossilClickRef.current) {
+                fossilClickRef.current = false;
+
+                window.open(
+                  `/columns/${id}`,
+                  "_self"
+                );
+              }
+            }, 0);
         },
         mapStyle: showSatellite ? satelliteMapURL : null
       }, 
       [
-        h(FossilsLayer, { fossilsData, showFossils }),
+        h(FossilsLayer, { fossilsData, showFossils, fossilClickRef }),
       ]
     )
   );
 }
 
-function FossilsLayer({fossilsData, showFossils}) {
+function FossilsLayer({ fossilsData, showFossils, fossilClickRef }) {
   useMapStyleOperator(
     (map) => {
       if (fossilsData == null) return;
 
       setGeoJSON(map, "points", fossilsData);
-      console.log(map.getStyle().layers);
-
 
       if (showFossils) {
-      if (map.getLayer("minimal-layer")) {
-        map.removeLayer("minimal-layer");
+        if (map.getLayer("minimal-layer")) {
+          map.removeLayer("minimal-layer");
+        }
+
+        if (!map.getLayer("expanded-layer")) {
+          map.addLayer({
+            id: "expanded-layer",
+            type: "circle",
+            source: "points",
+            paint: {
+              "circle-radius": 5,
+              "circle-color": "grey",
+              "circle-opacity": 0.5,
+              "circle-stroke-color": "white",
+              "circle-stroke-width": 2,
+              "circle-stroke-opacity": 1,
+            },
+          });
+        }
+      } else {
+        if (map.getLayer("expanded-layer")) {
+          map.removeLayer("expanded-layer");
+        }
+        if (!map.getLayer("minimal-layer")) {
+          map.addLayer({
+            id: "minimal-layer",
+            type: "circle",
+            source: "points",
+            paint: {
+              "circle-radius": 2,
+              "circle-color": "white",
+              "circle-opacity": 0.8,
+            },
+          });
+        }
       }
 
-      if (!map.getLayer("expanded-layer")) {
-        map.addLayer({
-          id: "expanded-layer",
-          type: "circle",
-          source: "points",
-          paint: {
-            "circle-radius": 5,
-            "circle-color": "grey",
-            "circle-opacity": 0.5,
-            "circle-stroke-color": "white",
-            "circle-stroke-width": 2,
-            "circle-stroke-opacity": 1,
-          },
+      const onClick = (e) => {
+        const features = map.queryRenderedFeatures(e.point, {
+          layers: ["expanded-layer"],
         });
-      }
-    } else {
-      if (map.getLayer("expanded-layer")) {
-        map.removeLayer("expanded-layer");
-      }
-      if (!map.getLayer("minimal-layer")) {
-        map.addLayer({
-          id: "minimal-layer",
-          type: "circle",
-          source: "points",
-          paint: {
-            "circle-radius": 2,
-            "circle-color": "white",
-            "circle-opacity": 0.8,
-          },
-        });
-      }
-    }
 
-    const onClick = (e) => {
-      const features = map.queryRenderedFeatures(e.point, {
-        layers: ["expanded-layer"],
-      });
-      if (!features.length) return;
+        console.log(features.length > 0)
 
-      const feature = features[0];
+        fossilClickRef.current = features.length > 0;
 
-      const { cltn_name, pbdb_occs, cltn_id } = feature.properties;
+        if (!features.length) return;
 
-      const coordinates = feature.geometry.coordinates.slice();
-      const name = cltn_name || "Unknown Fossil";
-      const occurrences = (pbdb_occs || 0) + " occurrences";
-      const url = pbdbDomain + "/classic/displayCollResults?collection_no=col:" + cltn_id;
+        const feature = features[0];
 
-      new mapboxgl.Popup()
-        .setLngLat(coordinates)
-        .setHTML(`
-          <div style="color: black; text-align: center;">
-            <strong><a href="${url}" target="_blank" style="color: black;">
-              ${name}
-            </a></strong>
-            <div>${occurrences}</div>
-          </div>
-        `)
-        .addTo(map);
-    };
+        const { cltn_name, pbdb_occs, cltn_id } = feature.properties;
 
-    map.on("click", onClick);
+        const coordinates = feature.geometry.coordinates.slice();
+        const name = cltn_name || "Unknown Fossil";
+        const occurrences = (pbdb_occs || 0) + " occurrences";
+        const url = pbdbDomain + "/classic/displayCollResults?collection_no=col:" + cltn_id;
 
+        new mapboxgl.Popup()
+          .setLngLat(coordinates)
+          .setHTML(`
+            <div style="color: black; text-align: center;">
+              <strong><a href="${url}" target="_blank" style="color: black;">
+                ${name}
+              </a></strong>
+              <div>${occurrences}</div>
+            </div>
+          `)
+          .addTo(map);
+      };
+
+      map.on("click", onClick);
     },
     [fossilsData],
   );
