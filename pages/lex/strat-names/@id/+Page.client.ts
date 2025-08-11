@@ -26,16 +26,19 @@ export function Page() {
 
   const { strat_name_long } = resData || {};
 
+  console.log("resData:", fossilsData);
+
   const children = [
     h(ColumnsTable, {
       resData,
       colData,
+      fossilsData
     }),
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),
     h(Timescales, { timescales }),
     h.if(unitsData.length > 0)(Units, { href: "strat_name_id=" + id + "&name=" + resData?.strat_name }),
-    h.if(fossilsData.length > 0)(Fossils, { href: "strat_name_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
+    h.if(fossilsData.features.length > 0)(Fossils, { href: "strat_name_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
     h(Maps, { mapsData }),
     h(Matches, {
       strat_name_id: id,

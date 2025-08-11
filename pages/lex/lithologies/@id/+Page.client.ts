@@ -27,6 +27,7 @@ export function Page() {
     h(ColumnsTable, {
       resData,
       colData,
+      fossilsData
     }),
     h(Charts, { features }),
     h(PrevalentTaxa, { taxaData }),
@@ -35,7 +36,7 @@ export function Page() {
     h(Matches, {
       lith_id: id,
     }),
-    h.if(fossilsData.length > 0)(Fossils, { href: "lith_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
+    h.if(fossilsData.features.length > 0)(Fossils, { href: "lith_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
     h.if(unitsData.length > 0)(Units, { href: "lith_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
   ];
 

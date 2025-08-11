@@ -32,7 +32,7 @@ export async function data(pageContext) {
         "colData"
       ),
       safeFetch(() => fetchAPIData("/geologic_units/map/legend", { lith_id }), "mapsData"),
-      safeFetch(() => fetchAPIData("/fossils", { lith_id }), "fossilsData"),
+      safeFetch(() => fetchAPIData("/fossils", { lith_id, format: "geojson" }), "fossilsData"),
       safeFetch(() => fetchAPIRefs("/fossils", { lith_id }), "refs1"),
       safeFetch(() => fetchAPIRefs("/columns", { lith_id }), "refs2"),
       safeFetch(() => fetchAPIData("/units", { lith_id }), "unitsData"),

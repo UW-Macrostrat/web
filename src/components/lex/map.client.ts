@@ -35,6 +35,8 @@ function ColumnsMapInner({
   const [showOutcrop, setShowOutcrop] = useState(true);
   const fossilClickRef = useRef(false);
 
+  const fossilsExist = fossilsData?.features?.length > 0;
+
   function LexControls() {
     const handleFossils = () => {
       setShowFossils(!showFossils);
@@ -50,7 +52,7 @@ function ColumnsMapInner({
 
 
     return h('div.lex-controls', [
-      h('div.btn', { onClick: handleFossils }, h(Icon, { icon: "mountain", className: 'icon' })),
+      h.if(fossilsExist)('div.btn', { onClick: handleFossils }, h(Icon, { icon: "mountain", className: 'icon' })),
       // h('div.btn', { onClick: handleOutcrop }, h(Icon, { icon: "excavator", className: 'icon' })),
       h('div.btn', { onClick: handleSatellite }, h(Icon, { icon: "satellite", className: 'icon' })),
     ])
@@ -88,7 +90,7 @@ function ColumnsMapInner({
           mapStyle: showSatellite ? satelliteMapURL : null
         }, 
         [
-          h(FossilsLayer, { fossilsData, showFossils, fossilClickRef }),
+          fossilsExist ? h(FossilsLayer, { fossilsData, showFossils, fossilClickRef }) : null,
           h(LexControls)
         ]
       ),
