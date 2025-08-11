@@ -69,7 +69,7 @@ function ConceptBody({ resData }) {
   }));
 
   return h("div.concept-body", [
-    h("h2.strat-names", "Strat Names"),
+    h("h2.strat-names", "Contains strat names"),
     h(
       "ul.strat-name-list",
       strats.map((strat) =>

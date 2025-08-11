@@ -36,13 +36,13 @@ export function Page() {
     h(PrevalentTaxa, { taxaData }),
     h(Timescales, { timescales }),
     h.if(unitsData.length > 0)(Units, { href: "strat_name_id=" + id + "&name=" + resData?.strat_name }),
-    h.if(fossilsData.features.length > 0)(Fossils, { href: "strat_name_id=" + id + "&color=" + resData?.color + "&name=" + resData?.name }),
+    h.if(fossilsData.features.length > 0)(Fossils, { href: "strat_name_id=" + id + "&name=" + resData?.name }),
     h(Maps, { mapsData }),
     h(Matches, {
       strat_name_id: id,
     }),
     h(StratNameHierarchy, { id }),
-    h(ConceptInfo, { concept_id: resData?.concept_id, showHeader: true }),
+    h(ConceptInfo, { concept_id: resData?.concept_id, showHeader: false }),
   ];
 
   return h(LexItemPage, 
