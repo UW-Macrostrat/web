@@ -36,8 +36,6 @@ const Tree = React.memo(function Tree({
               data: d.lith ?? d,
               href,
               onClick,
-              tooltip: true,
-              tooltipProps: { showExternalLinks: true },
             }),
           ])
         )

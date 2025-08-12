@@ -1,4 +1,4 @@
-import h from "@macrostrat/hyper"
+import h from "./main.module.sass"
 import { navigate } from "vike/client/router";
 import { LexHierarchy } from "@macrostrat-web/lithology-hierarchy";
 import { useAPIResult, ErrorCallout } from "@macrostrat/ui-components";
@@ -28,7 +28,9 @@ export function Page() {
 
     return h('div.page', [
         h(PageBreadcrumbs, { title: "Filters" }),
-        h(LexHierarchy, { data, onClick: (e, item) => navigate(`/lex/measurements?id=${item.measure_id}`) }),
+        h('div.hierarchy', [
+            h(LexHierarchy, { data, onClick: (e, item) => navigate(`/lex/measurements?id=${item.measure_id}`) }),
+        ]),
         h(Footer)
     ]);
 }
