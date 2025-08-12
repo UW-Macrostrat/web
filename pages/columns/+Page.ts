@@ -8,12 +8,13 @@ import {
   DevLinkButton,
   PageBreadcrumbs,
   StickyHeader,
+  LithologyTag,
 } from "~/components";
-import { FlexRow } from "~/components/lex/tag";
+import { FlexRow, DataField } from "~/components/lex/tag";
 import { SearchBar } from "~/components/general";
 import { getGroupedColumns } from "./grouped-cols";
 
-import { AnchorButton, ButtonGroup, Switch } from "@blueprintjs/core";
+import { AnchorButton, ButtonGroup, Switch, Popover } from "@blueprintjs/core";
 import { Tag, Icon } from "@blueprintjs/core";
 import { useData } from "vike-react/useData";
 import { ClientOnly } from "vike-react/ClientOnly";
@@ -21,8 +22,7 @@ import { navigate } from "vike/client/router";
 
 import { LexSelection } from "@macrostrat/form-components";
 import { postgrestPrefix } from "@macrostrat-web/settings";
-import { useAPIResult } from "@macrostrat/ui-components"
-import { cdrPrefix } from "packages/settings";
+import { useAPIResult, PostgRESTInfiniteScrollView } from "@macrostrat/ui-components";
 
 const h = hyper.styled(styles);
 
@@ -61,6 +61,8 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const isEmpty = Object.keys(extraParams).length === 0;
   const filteredGroups = isEmpty ? allColumnGroups : columnGroups ?? [];
 
+  const selectedItems = selectedLiths || selectedUnits || selectedStratNames;
+
   useEffect(() => {
     const params: any = {};
 
@@ -74,13 +76,13 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
       params.status_code = 'eq.active';
     }
     if (selectedLiths) {
-      params.liths = `cs.[${selectedLiths}]`;
+      params.liths = `cs.[${selectedLiths.lex_id}]`;
     }
     if (selectedUnits) {
-      params.units = `cs.[${selectedUnits}]`;
+      params.units = `cs.[${selectedUnits.lex_id}]`;
     }
     if (selectedStratNames) {
-      params.strat_names = `cs.[${selectedStratNames}]`;
+      params.strat_names = `cs.[${selectedStratNames.lex_id}]`;
     }
 
     setExtraParams(params);
@@ -121,19 +123,48 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const handleInputChange = (value, target) => {
     setColumnInput(value.toLowerCase());
   };
-  
+
+  const handleLexclick = (data) => {
+    if(data.type == "strat name") setSelectedLiths(data)
+    if(data.type == "unit") setSelectedUnits(data)
+    if(data.type == "lithology") setSelectedLiths(data)
+    setColumnInput("")
+    setFilteredInput("")
+  };
+
+  function LexCard({data}) {
+    return h(FlexRow, { alignItems: "center", width: "fit-content", className: "lith-tag", onClick: () => handleLexclick(data)}, [
+      h(LithologyTag, { data: { name: data.name, color: data.color } }),
+      h('p.label', data.type),
+    ]);
+  }
+
+  const res = useAPIResult(postgrestPrefix + "/col_filter?name=ilike.*" + filteredInput + "*" )
+
+  const suggestData = res?.slice(0,5)
+
   return h("div.column-list-page", [
     h(ContentPage, [
       h("div.flex-row", [
         h("div.main", [
-          h(StickyHeader, [
+          h('div', [
             h(PageBreadcrumbs, { showLogo: true }),
             h('div.filters', [
               h(SearchBar, {
                 placeholder: "Search columns...",
                 onChange: handleInputChange,
                 className: "search-bar",
+                value: columnInput
               }),
+              h(
+                Popover,
+                {
+                  content: h.if(!selectedItems && suggestData?.length > 0)("div.suggested-items", suggestData?.map(item => h(LexCard, { data: item }))),
+                  isOpen: filteredInput.length >= 3,
+                  position: "right",
+                },
+                h('div')
+              ),
               h('div.switches', [
                 h(Switch, {
                   checked: showEmpty,
@@ -279,53 +310,16 @@ const ColumnItem = React.memo(
 );
 
 function LexFilters({ selectedLiths, setSelectedLiths, selectedUnits, setSelectedUnits, selectedStratNames, setSelectedStratNames }) {
-  const liths = useLiths();
-  const units = useUnits();
-  const stratNames = useStratNames();
-
-  if(!liths || !units || !stratNames) return null
-
-  return h('div.lex-filters', [
+  return selectedLiths ||  selectedStratNames || selectedUnits ? h('div.lex-filters', [
     h(FlexRow, {
       align: "center",
       gap: ".5em",
     }, [
-      h('p', "Filtering columns by "),
-      h(LexSelection, {
-        value: selectedLiths,
-        onConfirm: (value) => setSelectedLiths(value),
-        items: liths,
-        placeholder: "Select a lithology",
-      }),
-      h.if(selectedLiths)(Icon, { className: 'close-btn', icon: "cross", onClick: () => setSelectedLiths(null) })
+      h('p.filter', "Filtering columns by "),
+      h(LithologyTag, { data: selectedLiths ?? selectedStratNames ?? selectedUnits}),
+      h(Icon, { className: 'close-btn', icon: "cross", onClick: () => { setSelectedLiths(null); setSelectedStratNames(null); setSelectedUnits(null); } })
     ]),
-    h(FlexRow, {
-      align: "center",
-      gap: ".5em",
-    }, [
-      h('p', "Filtering columns by "),
-      h(LexSelection, {
-        value: selectedUnits,
-        onConfirm: (value) => setSelectedUnits(value),
-        items: units,
-        placeholder: "Select a unit",
-      }),
-      h.if(selectedUnits)(Icon, { className: 'close-btn', icon: "cross", onClick: () => setSelectedUnits(null) })
-    ]),
-    h(FlexRow, {
-      align: "center",
-      gap: ".5em",
-    }, [
-      h('p', "Filtering columns by "),
-      h(LexSelection, {
-        value: selectedStratNames,
-        onConfirm: (value) => setSelectedStratNames(value),
-        items: stratNames,
-        placeholder: "Select a strat name",
-      }),
-      h.if(selectedStratNames)(Icon, { className: 'close-btn', icon: "cross", onClick: () => setSelectedStratNames(null) })
-    ]),
-  ]);
+  ]) : null
 }
 
 function useLiths() {
