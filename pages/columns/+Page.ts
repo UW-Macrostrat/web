@@ -11,7 +11,7 @@ import {
   LithologyTag,
 } from "~/components";
 import { FlexRow, DataField } from "~/components/lex/tag";
-import { SearchBar } from "~/components/general";
+import { Footer, SearchBar } from "~/components/general";
 import { getGroupedColumns } from "./grouped-cols";
 
 import { AnchorButton, ButtonGroup, Switch, Popover } from "@blueprintjs/core";
@@ -220,6 +220,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
         ]),
       ]),
     ]),
+    h(Footer)
   ]);
 }
 
