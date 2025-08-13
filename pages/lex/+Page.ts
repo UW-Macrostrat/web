@@ -112,6 +112,11 @@ export function Page() {
           { href: "/lex/fossils", title: "Fossils" },
           "Fossil names and descriptions (via the Paleobiology Database)"
         ),
+        h(
+          LinkCard,
+          { href: "/lex/measurements", title: "Measurements" },
+          "Measurement names and descriptions"
+        ),
         h("p", [
           h("strong", h("a", { href: "/sift" }, "Sift")),
           ", Macrostrat's legacy lexicon app, is still available for use as it is gradually brought into this new framework.",

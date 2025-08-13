@@ -29,9 +29,9 @@ const Tree = React.memo(function Tree({
     h("div.main-tree", [
       h.if(data.children != null)(headerEl, capitalize(data.name)),
       h.if(nodes.length > 0)(
-        "ul.nodes",
+        "div.nodes",
         nodes.map((d) =>
-          h("li", { key: d.name }, [
+          h("div.node", { key: d.name }, [
             h(LithologyTag, {
               data: d.lith ?? d,
               href,
