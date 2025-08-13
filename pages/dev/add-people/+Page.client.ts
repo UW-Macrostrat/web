@@ -133,7 +133,10 @@ function ImageInput({ label, value = null, onChange, required = false }) {
 
 
 function SubmitButton({ disabled, form }) {
+    const [img, setImg] = useState(null);
     const text = disabled ? "Please fill out all required fields" : "Add person";
+
+    console.log("Image: ", img);
 
     const handleSubmit = () => {
         if (disabled) return;
@@ -152,11 +155,49 @@ function SubmitButton({ disabled, form }) {
             return res.json(); 
         })
         .then(data => {
-            console.log("Image uploaded successfully:", data);
-            return data;  
+            // Upload person
+            const { roles, img_id, ...personData } = form;
+            const filteredPersonData = Object.fromEntries(
+                Object.entries(personData).filter(([_, v]) => v !== null && v !== undefined)
+            );
+
+            const fullData = {
+                ...filteredPersonData,
+                img_id: data.filename
+            }
+
+            const body = new URLSearchParams(fullData).toString();
+
+            fetch(`${postgrestPrefix}/people`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Prefer": "return=representation",
+                },
+                body,
+            })
+            .then(r => r.json())
+            .then(data => {
+                const personId = data[0].person_id;
+
+                roles.forEach(roleId => {
+                    console.log("Assigning role:", roleId, "to person:", personId);
+                    const body = new URLSearchParams({ person_id: personId, role_id: roleId }).toString();
+
+                    fetch(`${postgrestPrefix}/people_roles`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded",
+                            "Prefer": "return=representation",
+                        },
+                        body,
+                    })
+                    .catch(e => console.error("Role assignment error:", e));
+                });
+            })
+            .catch(e => console.error("Test submission error:", e));
         })
         .catch(err => console.error("Image upload error:", err));
-
 
         /*
         // Upload person
