@@ -1,35 +1,24 @@
 import h from "./+Page.client.module.sass";
-import { ContentPage, FullscreenPage } from "~/layouts";
-import { getPGData, PageBreadcrumbs } from "~/components";
+import { ContentPage } from "~/layouts";
+import { Footer, getPGData, PageBreadcrumbs } from "~/components";
 import { usePageContext } from "vike-react/usePageContext";
 import {
   enhanceData,
   FeedbackComponent,
-  GraphData,
-  treeToGraph,
-  TreeData,
 } from "@macrostrat/feedback-components";
 import {
   useEntityTypeIndex,
   useModelIndex,
-  usePostgresQuery,
 } from "../../../extractions/data-service";
 import { NonIdealState, OverlaysProvider, Spinner, Button } from "@blueprintjs/core";
 import {
   ErrorBoundary,
   FlexRow,
   Pagination,
-  Spacer,
-  SaveButton,
 } from "@macrostrat/ui-components";
 import { useState } from "react";
 import { MatchedEntityLink } from "#/integrations/xdd/extractions/match";
-import { knowledgeGraphAPIURL } from "@macrostrat-web/settings";
-import { Toaster } from "@blueprintjs/core";
 import { fetchPGData } from "~/_utils";
-import { AuthStatus, useAuth } from "@macrostrat/form-components";
-import { MultiSelect } from "@blueprintjs/select"
-import { MenuItem, TextArea, Popover } from "@blueprintjs/core";
 
 /**
  * Get a single text window for feedback purposes
@@ -41,11 +30,10 @@ export function Page() {
 
   return h(
     OverlaysProvider,
-    h(ContentPage, [
-      h("div.feedback-main", [
-        h(PageBreadcrumbs, { title: "Previous Feedback" }),
-        h(FlexRow, { alignItems: "center", justifyContent: "space-between" }, [
-          h("h1", "Previous Feedback"),
+    [
+      h(ContentPage, [
+        h("div.feedback-main", [
+          h(PageBreadcrumbs, { title: "Human Feedback" }),
           h('div.buttons', [
             h.if(paper_id)(
               Button, 
@@ -61,10 +49,11 @@ export function Page() {
               "View papers extraction"
             ),
           ]),
+          h(ExtractionIndex, { setPaperID }),
         ]),
-        h(ExtractionIndex, { setPaperID }),
       ]),
-    ])
+      h(Footer)
+    ]
   );
 }
 
@@ -126,10 +115,6 @@ function MultiFeedbackInterface({ data, models, entityTypes }) {
 function FeedbackInterface({ data, models, entityTypes, autoSelect }) {
   const window = enhanceData(data, models, entityTypes);
   const { entities = [], paragraph_text, model } = window;
-  const { user } = useAuth();
-
-  console.log(window);
-  console.log(Array.from(entityTypes.values()));
 
   return h(FeedbackComponent, {
     entities,

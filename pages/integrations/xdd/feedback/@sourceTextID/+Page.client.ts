@@ -79,12 +79,12 @@ export function Page() {
                 className: "previous btn",
                 onClick: () => {
                   window.open(
-                    `/integrations/xdd/feedback/${currentID}/previous`,
+                    `/integrations/xdd/feedback/${currentID}/human`,
                     "_self"
                   ); 
                 }
               },
-              "View previous feedback"
+              "View human feedback"
             ),
           ]),
         ]),
