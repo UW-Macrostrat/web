@@ -1,4 +1,4 @@
-import { Image, Navbar, Footer, SearchBar } from "~/components/general";
+import { PersonImage, Navbar, Footer, SearchBar } from "~/components/general";
 import h from "./main.module.sass";
 import { Card, Divider } from "@blueprintjs/core";
 import { useState, useEffect } from "react";
@@ -106,7 +106,7 @@ function PersonCard({ name, roles, email, website, img_id, active_start, active_
   const end = new Date(active_end).toLocaleDateString();
 
   return h("div.person-info", [
-    h(Image, { src: img_id, className: "back-img" }),
+    h(PersonImage, { src: img_id, className: "back-img" }),
     h("div.description", [
       h("a.name", { href: website }, name),
       h("p.role", roles.map(role => role.name).join(", ")),

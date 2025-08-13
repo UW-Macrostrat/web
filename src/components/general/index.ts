@@ -12,6 +12,12 @@ export function Image({ src, className, width, height }) {
   return h("img", { src: srcWithAddedPrefix, className, width, height });
 }
 
+export function PersonImage({ src, className, width, height }) {
+  const srcWithAddedPrefix =
+    "https://storage.macrostrat.org/macrostrat-sites/test/" + src;
+  return h("img", { src: srcWithAddedPrefix, className, width, height });
+}
+
 export function NavListItem({ href, children }) {
   return h(
     "li.nav-list-item",
