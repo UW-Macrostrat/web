@@ -112,8 +112,6 @@ function MultiFeedbackInterface({ data, models, entityTypes }) {
 
   const autoSelect = window.location.href.split('autoselect=')[1]?.split(",");
 
-  console.log("data", data)
-
   return h("div.feedback-interface", [
     h.if(data.length > 1)([
       h(NonIdealState, {
@@ -161,7 +159,7 @@ function FeedbackInterface({ data, models, entityTypes, autoSelect }) {
       concept: "/lex/strat-concepts",
     },
     lineHeight: 3,
-    // view: user === null,
+    view: user === null,
     autoSelect,
     onSave: wrapWithToaster(
       async (tree) => {
@@ -180,7 +178,7 @@ function FeedbackInterface({ data, models, entityTypes, autoSelect }) {
 }
 
 async function postDataToServer(data: ServerResults) {
-  const response = await fetch("http://localhost:9543" + "/record_run", {
+  const response = await fetch(knowledgeGraphAPIURL + "/record_run", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
