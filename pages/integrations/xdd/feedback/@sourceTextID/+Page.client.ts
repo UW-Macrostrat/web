@@ -98,8 +98,6 @@ function ExtractionIndex({setPaperID}) {
     return h(Spinner);
   }
 
-  console.log(data);
-
   setPaperID(data[0]?.paper_id || null);
 
   return h(
@@ -125,8 +123,7 @@ function MultiFeedbackInterface({ data, models, entityTypes }) {
         } of ${count} model runs. Merging runs is not yet supported.`,
       }),
       h(Pagination, {
-        count,
-        page: ix,
+        currentPage: ix,
         setPage: setIX,
         nextDisabled: ix >= count - 1,
       }),
