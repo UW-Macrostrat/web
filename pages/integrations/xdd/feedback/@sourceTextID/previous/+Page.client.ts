@@ -13,7 +13,7 @@ import {
   useEntityTypeIndex,
   useModelIndex,
   usePostgresQuery,
-} from "../../extractions/data-service";
+} from "../../../extractions/data-service";
 import { NonIdealState, OverlaysProvider, Spinner, Button } from "@blueprintjs/core";
 import {
   ErrorBoundary,
@@ -37,29 +37,16 @@ import { MenuItem, TextArea, Popover } from "@blueprintjs/core";
 
 export function Page() {
   const [paper_id, setPaperID] = useState<number | null>(null);
-  const currentID = usePageContext().urlPathname.split("/").pop();
   const nextID = getNextID();
-  const previousFeedback = getPreviousFeedback();
 
   return h(
     OverlaysProvider,
     h(ContentPage, [
       h("div.feedback-main", [
-        h(PageBreadcrumbs),
+        h(PageBreadcrumbs, { title: "Previous Feedback" }),
         h(FlexRow, { alignItems: "center", justifyContent: "space-between" }, [
-          h(FlexRow, [
-            h("h1", "Feedback"),
-            h.if(nextID)(Button, { 
-              className: "next btn",
-              onClick: () => {
-                window.open(
-                  `/integrations/xdd/feedback/${nextID}`,
-                  "_self"
-                ); 
-              } 
-            }, "Next"),
-          ]),
-          h(FlexRow,  { flexDirection: "column", gap: ".5em" }, [
+          h("h1", "Previous Feedback"),
+          h('div.buttons', [
             h.if(paper_id)(
               Button, 
               { 
@@ -73,24 +60,7 @@ export function Page() {
               }, 
               "View papers extraction"
             ),
-            h.if(previousFeedback?.length > 0)(
-              Button, 
-              { 
-                className: "previous btn",
-                onClick: () => {
-                  window.open(
-                    `/integrations/xdd/feedback/${currentID}/previous`,
-                    "_self"
-                  ); 
-                }
-              },
-              "View previous feedback"
-            ),
           ]),
-        ]),
-        h(FlexRow, { className: "feedback-index", justifyContent: "space-between" }, [
-          h(Feedback),
-          h(AuthStatus)
         ]),
         h(ExtractionIndex, { setPaperID }),
       ]),
@@ -107,7 +77,7 @@ function ExtractionIndex({setPaperID}) {
 
   const data = getPGData("/kg_context_entities", {
     source_text: "eq." + sourceTextID,
-    user_id: "is.null"
+    version_id: "is.null"
   });
 
   if (data == null || models == null || entityTypes == null) {
@@ -153,8 +123,6 @@ function MultiFeedbackInterface({ data, models, entityTypes }) {
   ]);
 }
 
-const AppToaster = Toaster.create();
-
 function FeedbackInterface({ data, models, entityTypes, autoSelect }) {
   const window = enhanceData(data, models, entityTypes);
   const { entities = [], paragraph_text, model } = window;
@@ -176,90 +144,9 @@ function FeedbackInterface({ data, models, entityTypes, autoSelect }) {
       concept: "/lex/strat-concepts",
     },
     lineHeight: 3,
-    view: user === null,
+    view: true,
     autoSelect,
-    onSave: wrapWithToaster(
-      async (tree) => {
-        const data = prepareDataForServer(tree, window.source_text, [
-          window.model_run,
-        ]);
-        await postDataToServer(data);
-      },
-      AppToaster,
-      {
-        success: "Model information saved",
-        error: "Failed to save model information",
-      }
-    ),
   });
-}
-
-async function postDataToServer(data: ServerResults) {
-  const response = await fetch(knowledgeGraphAPIURL + "/record_run", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-
-    },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) {
-    throw new Error(response.statusText);
-  }
-}
-
-function wrapWithToaster(
-  fn: (...args: any[]) => Promise<void>,
-  toaster: Toaster,
-  messages: {
-    success: string;
-    error: string;
-  }
-) {
-  return async (...args: any[]) => {
-    try {
-      await fn(...args);
-      toaster.show({
-        message: messages.success,
-        intent: "success",
-      });
-    } catch (e) {
-      console.error(e);
-      toaster.show({
-        message: messages.error + ": " + e.message,
-        intent: "danger",
-      });
-    }
-  };
-}
-
-interface ServerResults extends GraphData {
-  sourceTextId: number;
-  supersedesRunIds: number[];
-}
-
-function prepareDataForServer(
-  tree: TreeData[],
-  sourceTextID: number,
-  supersedesRunIDs: number[] | null
-): ServerResults {
-  /** This function should be used before sending the data to the server */
-  const { nodes, edges } = treeToGraph(tree);
-
-  // Prepare match for server
-  const normalizedNodes = nodes.map((d) => {
-    return {
-      ...d,
-      match: normalizeMatch(d.match),
-    };
-  });
-
-  return {
-    nodes: normalizedNodes,
-    edges,
-    sourceTextId: sourceTextID,
-    supersedesRunIds: supersedesRunIDs ?? [],
-  };
 }
 
 // We will extend this in the future, probably,
@@ -306,78 +193,4 @@ function getNextID() {
   });
 
   return nextID;
-}
-
-function getPreviousFeedback() {
-  const currentID = usePageContext().urlPathname.split("/").pop();
-
-  return getPGData(
-    "/kg_context_entities",
-    {
-      select: "model_run",
-      source_text: "eq." + currentID,
-      version_id: "is.null"
-    }
-  )
-}
-
-function Feedback() {  
-  const [selectedFeedbackType, setSelectedFeedbackType] = useState([]);
-  const [customFeedback, setCustomFeedback] = useState("");
-
-  const feedback = usePostgresQuery("kg_extraction_feedback_type");
-
-  if (feedback == null) {
-    return h("div", "Loading feedback types...");
-  }
-
-  const isItemSelected = (item) => selectedFeedbackType.includes(item);
-
-  const handleItemSelect = (item) => {
-    if (!isItemSelected(item)) {
-      setSelectedFeedbackType([...selectedFeedbackType, item]);
-    }
-  };
-
-  const handleItemDelete = (itemToDelete) => {
-    const next = selectedFeedbackType.filter((item) => item.id !== itemToDelete.id);
-    setSelectedFeedbackType(next);
-  };
-
-  const itemPredicate = (query, item) =>
-    item.type.toLowerCase().includes(query.toLowerCase());
-
-  const itemRenderer = (item, { handleClick, modifiers }) => {
-    if (!modifiers.matchesPredicate) return null;
-
-    return h(MenuItem, {
-      key: item.id,
-      text: item.type,
-      onClick: handleClick,
-      active: modifiers.active,
-      shouldDismissPopover: false,
-    });
-  };
-
-  return h(FlexRow, { className: "feedback-flexbox" }, [
-    h('div.inputs', [
-      h(MultiSelect, {
-        items: feedback.filter((f) => !isItemSelected(f)),
-        itemRenderer,
-        itemPredicate,
-        selectedItems: selectedFeedbackType,
-        onItemSelect: handleItemSelect,
-        onRemove: handleItemDelete,
-        tagRenderer: (item) => item.type,
-        popoverProps: { minimal: true },
-        fill: true,
-      }),
-      h(TextArea, {
-        onChange: (e) => setCustomFeedback(e.target.value),
-        placeholder: "Enter custom feedback here...",
-        autoResize: true,
-        className: 'input'
-      })
-    ]),
-  ])
 }
