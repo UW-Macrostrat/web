@@ -14,7 +14,7 @@ export function Image({ src, className, width, height }) {
 
 export function PersonImage({ src, className, width, height }) {
   const srcWithAddedPrefix =
-    "https://storage.macrostrat.org/macrostrat-sites/test/" + src;
+    "https://storage.macrostrat.org/macrostrat-sites/people/" + src;
   return h("img", { src: srcWithAddedPrefix, className, width, height });
 }
 

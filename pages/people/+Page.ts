@@ -102,8 +102,8 @@ export function Page() {
 }
 
 function PersonCard({ name, roles, email, website, img_id, active_start, active_end }) {
-  const start = new Date(active_start).toLocaleDateString();
-  const end = new Date(active_end).toLocaleDateString();
+  const start = new Date(active_start).toLocaleDateString('en-US', { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric' });
+  const end = new Date(active_end).toLocaleDateString('en-US', { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric' });
 
   return h("div.person-info", [
     h(PersonImage, { src: img_id, className: "back-img" }),

@@ -81,7 +81,7 @@ export function Page() {
                     onChange: handleChange("active_end")
                 }),
             ]),
-            h(SubmitButton, { disabled: false, form }),
+            h(SubmitButton, { disabled, form, setForm }),
             h("p.note", h('em', "Fields marked with * are required")),
         ]),
     ]);
@@ -132,14 +132,13 @@ function ImageInput({ label, value = null, onChange, required = false }) {
 }
 
 
-function SubmitButton({ disabled, form }) {
-    const [img, setImg] = useState(null);
+function SubmitButton({ disabled, form, setForm }) {
+    const [inProgress, setInProgress] = useState(false);
     const text = disabled ? "Please fill out all required fields" : "Add person";
-
-    console.log("Image: ", img);
 
     const handleSubmit = () => {
         if (disabled) return;
+        setInProgress(true);
 
         // Upload image
         const APIURL = "http://localhost:8000/image_upload";
@@ -156,90 +155,27 @@ function SubmitButton({ disabled, form }) {
         })
         .then(data => {
             // Upload person
-            const { roles, img_id, ...personData } = form;
-            const filteredPersonData = Object.fromEntries(
-                Object.entries(personData).filter(([_, v]) => v !== null && v !== undefined)
-            );
-
-            const fullData = {
-                ...filteredPersonData,
-                img_id: data.filename
-            }
-
-            const body = new URLSearchParams(fullData).toString();
-
-            fetch(`${postgrestPrefix}/people`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                    "Prefer": "return=representation",
-                },
-                body,
+            uploadPerson({ data, form });
+        })
+        .then(() => {
+            // Handle successful upload
+            alert("Person added successfully!");
+            setForm({
+                name: null,
+                email: null,
+                title: null,
+                website: null,
+                img_id: null,
+                active_start: null,
+                active_end: null,
+                roles: [],
             })
-            .then(r => r.json())
-            .then(data => {
-                const personId = data[0].person_id;
-
-                roles.forEach(roleId => {
-                    console.log("Assigning role:", roleId, "to person:", personId);
-                    const body = new URLSearchParams({ person_id: personId, role_id: roleId }).toString();
-
-                    fetch(`${postgrestPrefix}/people_roles`, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/x-www-form-urlencoded",
-                            "Prefer": "return=representation",
-                        },
-                        body,
-                    })
-                    .catch(e => console.error("Role assignment error:", e));
-                });
-            })
-            .catch(e => console.error("Test submission error:", e));
+            setInProgress(false);
         })
         .catch(err => console.error("Image upload error:", err));
-
-        /*
-        // Upload person
-        const { roles, ...personData } = form;
-        const filteredPersonData = Object.fromEntries(
-            Object.entries(personData).filter(([_, v]) => v !== null && v !== undefined)
-        );
-
-        const testBody = new URLSearchParams(filteredPersonData).toString();
-
-        fetch(`${postgrestPrefix}/people`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-                "Prefer": "return=representation",
-            },
-            body: testBody,
-        })
-        .then(r => r.json())
-        .then(data => {
-            const personId = data[0].person_id;
-
-            roles.forEach(roleId => {
-                console.log("Assigning role:", roleId, "to person:", personId);
-                const body = new URLSearchParams({ person_id: personId, role_id: roleId }).toString();
-
-                fetch(`${postgrestPrefix}/people_roles`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/x-www-form-urlencoded",
-                        "Prefer": "return=representation",
-                    },
-                    body,
-                })
-                .catch(e => console.error("Role assignment error:", e));
-            });
-        })
-        .catch(e => console.error("Test submission error:", e));
-        */
     };
 
-    return h(SaveButton, { disabled, onClick: handleSubmit }, text);
+    return h(SaveButton, { disabled, onClick: handleSubmit, inProgress }, text);
 }
 
 function RolesInput({ setForm }) {
@@ -311,4 +247,47 @@ function RolesInput({ setForm }) {
       fill: true,
     }),
   });
+}
+
+function uploadPerson({ data, form }) {
+    const { roles, img_id, ...personData } = form;
+    const filteredPersonData = Object.fromEntries(
+        Object.entries(personData).filter(([_, v]) => v !== null && v !== undefined)
+    );
+
+    const fullData = {
+        ...filteredPersonData,
+        img_id: data.filename
+    }
+
+    const body = new URLSearchParams(fullData).toString();
+
+    fetch(`${postgrestPrefix}/people`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Prefer": "return=representation",
+        },
+        body,
+    })
+    .then(r => r.json())
+    .then(data => {
+        const personId = data[0].person_id;
+
+        roles.forEach(roleId => {
+            console.log("Assigning role:", roleId, "to person:", personId);
+            const body = new URLSearchParams({ person_id: personId, role_id: roleId }).toString();
+
+            fetch(`${postgrestPrefix}/people_roles`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Prefer": "return=representation",
+                },
+                body,
+            })
+            .catch(e => console.error("Role assignment error:", e));
+        });
+    })
+    .catch(e => console.error("Test submission error:", e));
 }
