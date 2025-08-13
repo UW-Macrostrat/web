@@ -1,6 +1,8 @@
 import h from "./layout.module.sass";
 import { MacrostratIcon, StickyHeader } from "~/components";
 import { Spinner, Icon, Card } from "@blueprintjs/core";
+import { ContentPage } from "~/layouts";
+import { PageBreadcrumbs } from "~/components";
 import { useAPIResult } from "@macrostrat/ui-components";
 import classNames from "classnames";
 import { postgrestPrefix } from "@macrostrat-web/settings";
@@ -8,6 +10,12 @@ import { postgrestPrefix } from "@macrostrat-web/settings";
 export function Image({ src, className, width, height }) {
   const srcWithAddedPrefix =
     "https://storage.macrostrat.org/assets/web/main-page/" + src;
+  return h("img", { src: srcWithAddedPrefix, className, width, height });
+}
+
+export function PersonImage({ src, className, width, height }) {
+  const srcWithAddedPrefix =
+    "https://storage.macrostrat.org/macrostrat-sites/people/" + src;
   return h("img", { src: srcWithAddedPrefix, className, width, height });
 }
 
@@ -167,6 +175,15 @@ export function IDTag({ id }) {
   return h("div.id-tag", "ID: #" + id);
 }
 
+export function BasePage({title, className, children}) {
+  return h("div", [
+    h(ContentPage, { className }, [
+      h(PageBreadcrumbs, { title }),
+      children,
+    ]),
+    h(Footer),
+  ]);
+}
 export function getPGData(url, filters) {
   return useAPIResult(postgrestPrefix + url, filters);
 }
