@@ -29,6 +29,8 @@ export function Page() {
         setForm({ ...form, [field]: value });
     };
 
+    console.log("form", form)
+
     return h(BasePage, { title: "Add people" }, [
         h("div.add-people-page", [
             h("p", "This page is meant to add people to the Macrostrat database. Please fill out the form below with the person's details."),
@@ -112,24 +114,23 @@ function DateInput({ label, value = "", onChange, required = false }) {
     });
 }
 
-function ImageInput({ label, onChange, required = false }) {
-    return h(DataField, {
-        label,
-        value: h("input.image-input", {
-            type: "file",
-            accept: "image/*",
-            required,
-            onChange: (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (event) => onChange(event.target.result);
-                    reader.readAsDataURL(file);
-                }
-            },
-        }),
-    });
+function ImageInput({ label, value = null, onChange, required = false }) {
+  return h(DataField, {
+    label,
+    value: h("input.image-input", {
+      type: "file",
+      accept: "image/*",
+      required,
+      onChange: (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          onChange(file);
+        }
+      },
+    }),
+  });
 }
+
 
 function SubmitButton({ disabled, form }) {
     const text = disabled ? "Please fill out all required fields" : "Add person";
@@ -137,7 +138,28 @@ function SubmitButton({ disabled, form }) {
     const handleSubmit = () => {
         if (disabled) return;
 
-        // Destructure roles and img_id, default img_id if missing
+        // Upload image
+        const APIURL = "http://localhost:8000/image_upload";
+        const formData = new FormData();
+        formData.append("file", form.img_id);
+
+        return fetch(APIURL, {
+            method: "POST",
+            body: formData,
+        })
+        .then(res => {
+            if (!res.ok) throw new Error(`Image upload failed: ${res.statusText}`);
+            return res.json(); 
+        })
+        .then(data => {
+            console.log("Image uploaded successfully:", data);
+            return data;  
+        })
+        .catch(err => console.error("Image upload error:", err));
+
+
+        /*
+        // Upload person
         const { roles, ...personData } = form;
         const filteredPersonData = Object.fromEntries(
             Object.entries(personData).filter(([_, v]) => v !== null && v !== undefined)
@@ -173,6 +195,7 @@ function SubmitButton({ disabled, form }) {
             });
         })
         .catch(e => console.error("Test submission error:", e));
+        */
     };
 
     return h(SaveButton, { disabled, onClick: handleSubmit }, text);
