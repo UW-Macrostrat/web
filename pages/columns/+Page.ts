@@ -7,10 +7,8 @@ import {
   Link,
   DevLinkButton,
   PageBreadcrumbs,
-  StickyHeader,
-  LithologyTag,
 } from "~/components";
-import { FlexRow, DataField } from "~/components/lex/tag";
+import { FlexRow, LithologyTag } from "~/components/lex/tag";
 import { Footer, SearchBar } from "~/components/general";
 import { getGroupedColumns } from "./grouped-cols";
 
@@ -133,7 +131,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   };
 
   function LexCard({data}) {
-    return h(FlexRow, { alignItems: "center", width: "fit-content", className: "lith-tag", onClick: () => handleLexclick(data)}, [
+    return h(FlexRow, { alignItems: "center", width: "fit-content", gap: ".5em", className: "lith-tag", onClick: () => handleLexclick(data)}, [
       h(LithologyTag, { data: { name: data.name, color: data.color } }),
       h('p.label', data.type),
     ]);
@@ -310,27 +308,23 @@ const ColumnItem = React.memo(
   }
 );
 
-function LexFilters({ selectedLiths, setSelectedLiths, selectedUnits, setSelectedUnits, selectedStratNames, setSelectedStratNames }) {
-  return selectedLiths ||  selectedStratNames || selectedUnits ? h('div.lex-filters', [
+function LexFilters({ selectedLiths, setSelectedLiths, selectedUnits, setSelectedUnits, selectedStratNames, setSelectedStratNames }) {  
+  const show = selectedLiths ||  selectedStratNames || selectedUnits;
+
+  if(!show) return null;
+
+  const { type, lex_id } = selectedLiths ?? selectedStratNames ?? selectedUnits;
+
+  const route = type === "lithology" ? "lithologies" : type === "strat name" ? "strat-names" : "units";
+
+  return h('div.lex-filters', [
     h(FlexRow, {
       align: "center",
       gap: ".5em",
     }, [
       h('p.filter', "Filtering columns by "),
-      h(LithologyTag, { data: selectedLiths ?? selectedStratNames ?? selectedUnits}),
+      h(LithologyTag, { href: `/lex/${route}/${lex_id}`, data: selectedLiths ?? selectedStratNames ?? selectedUnits }),
       h(Icon, { className: 'close-btn', icon: "cross", onClick: () => { setSelectedLiths(null); setSelectedStratNames(null); setSelectedUnits(null); } })
     ]),
-  ]) : null
-}
-
-function useLiths() {
-  return useAPIResult(postgrestPrefix + "/liths?select=id,name:lith,color:lith_color");
-}
-
-function useUnits() {
-  return useAPIResult(postgrestPrefix + "/units?select=id,name:strat_name");
-}
-
-function useStratNames() {
-  return useAPIResult(postgrestPrefix + "/strat_names?select=id,name:strat_name");
+  ]);
 }
