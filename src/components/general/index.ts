@@ -3,8 +3,9 @@ import { MacrostratIcon, StickyHeader } from "~/components";
 import { Spinner, Icon, Card } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import { PageBreadcrumbs } from "~/components";
-import { DarkModeButton } from "@macrostrat/ui-components";
+import { useAPIResult } from "@macrostrat/ui-components";
 import classNames from "classnames";
+import { postgrestPrefix } from "@macrostrat-web/settings";
 
 export function Image({ src, className, width, height }) {
   const srcWithAddedPrefix =
@@ -151,7 +152,7 @@ export function Loading() {
   return h("div.loading", h(Spinner));
 }
 
-export function SearchBar({ onChange, placeholder = "Search...", className }) {
+export function SearchBar({ onChange, placeholder = "Search...", className, value }) {
   return h(Card, { className: "search-bar " + className }, [
     h(Icon, { icon: "search" }),
     h("input", {
@@ -182,4 +183,7 @@ export function BasePage({title, className, children}) {
     ]),
     h(Footer),
   ]);
+}
+export function getPGData(url, filters) {
+  return useAPIResult(postgrestPrefix + url, filters);
 }

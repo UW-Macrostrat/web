@@ -1,4 +1,7 @@
-import React, { useState } from "react";
+import hyper from "@macrostrat/hyper";
+import styles from "./main.module.sass";
+import React, { useState, useEffect, useRef, useMemo } from "react";
+
 import { ContentPage } from "~/layouts";
 import {
   Link,
@@ -6,15 +9,20 @@ import {
   PageBreadcrumbs,
   StickyHeader,
 } from "~/components";
-import { AnchorButton, ButtonGroup } from "@blueprintjs/core";
-import { Tag } from "@blueprintjs/core";
-import hyper from "@macrostrat/hyper";
-import styles from "./main.module.sass";
+import { FlexRow } from "~/components/lex/tag";
+import { SearchBar } from "~/components/general";
+import { getGroupedColumns } from "./grouped-cols";
 
+import { AnchorButton, ButtonGroup, Switch } from "@blueprintjs/core";
+import { Tag, Icon } from "@blueprintjs/core";
 import { useData } from "vike-react/useData";
 import { ClientOnly } from "vike-react/ClientOnly";
 import { navigate } from "vike/client/router";
-import { SearchBar } from "~/components/general";
+
+import { LexSelection } from "@macrostrat/form-components";
+import { postgrestPrefix } from "@macrostrat-web/settings";
+import { useAPIResult } from "@macrostrat/ui-components"
+import { cdrPrefix } from "packages/settings";
 
 const h = hyper.styled(styles);
 
@@ -35,69 +43,132 @@ function ColumnMapContainer(props) {
 }
 
 function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
-  const { columnGroups, project } = useData();
+  const { allColumnGroups, project } = useData();
+  
+  const [columnGroups, setColumnGroups] = useState(null);
+  const [loading, setLoading] = useState(false);  
+  const [extraParams, setExtraParams] = useState({});
 
   const [columnInput, setColumnInput] = useState("");
-  const shouldFilter = columnInput.length >= 3;
+  const [showEmpty, setShowEmpty] = useState(true);
+  const [filteredInput, setFilteredInput] = useState("");
+  const [showInProcess, setShowInProcess] = useState(true);
 
-  const filteredGroups = shouldFilter
-    ? columnGroups?.filter((group) => {
-        const filteredColumns = group.columns.filter((col) => {
-          const name = col.col_name.toLowerCase();
-          const input = columnInput.toLowerCase();
-          return name.includes(input);
-        });
+  const [selectedLiths, setSelectedLiths] = useState(null);
+  const [selectedUnits, setSelectedUnits] = useState(null);
+  const [selectedStratNames, setSelectedStratNames] = useState(null);
 
-        if (
-          filteredColumns.length > 0 ||
-          group.name.toLowerCase().includes(columnInput.toLowerCase())
-        ) {
-          return { ...group, columns: filteredColumns };
-        }
+  const isEmpty = Object.keys(extraParams).length === 0;
+  const filteredGroups = isEmpty ? allColumnGroups : columnGroups ?? [];
 
-        return false;
-      })
-    : null;
+  useEffect(() => {
+    const params: any = {};
 
-  const columnIDs = filteredGroups?.flatMap((item) =>
-    item.columns
-      .filter((col) =>
-        col.col_name.toLowerCase().includes(columnInput.toLowerCase())
-      )
-      .map((col) => col.col_id)
-  );
+    if (filteredInput.length >= 3) {
+      params.name = `ilike.%${filteredInput}%`;
+    }
+    if (!showEmpty) {
+      params.empty = `is.false`;
+    }
+    if (!showInProcess) {
+      params.status_code = 'eq.active';
+    }
+    if (selectedLiths) {
+      params.liths = `cs.[${selectedLiths}]`;
+    }
+    if (selectedUnits) {
+      params.units = `cs.[${selectedUnits}]`;
+    }
+    if (selectedStratNames) {
+      params.strat_names = `cs.[${selectedStratNames}]`;
+    }
 
-  const hideColumns = columnIDs?.length === 0 && columnInput.length >= 3;
+    setExtraParams(params);
+  }, [filteredInput, showEmpty, showInProcess, selectedLiths, selectedUnits, selectedStratNames]);
+
+
+  // set filtered input
+  useEffect(() => {
+    const prevLength = prevInputLengthRef.current;
+    
+    if (columnInput.length >= 3) {
+      setFilteredInput(columnInput);
+    } else if (prevLength >= 3 && columnInput.length === 2) {
+      setFilteredInput("");
+    }
+
+    prevInputLengthRef.current = columnInput.length;
+  }, [columnInput, showEmpty, showInProcess]);
+
+  const prevInputLengthRef = useRef(columnInput.length);
+
+  useEffect(() => {
+    if (!isEmpty) {
+      setLoading(true);
+      getGroupedColumns(project?.project_id, extraParams)
+        .then((groups) => setColumnGroups(groups))
+        .finally(() => setLoading(false));
+    }
+  }, [project?.project_id, extraParams]);
+
+
+  const columnIDs = useMemo(() => {
+    return filteredGroups?.flatMap((item) =>
+      item.columns.map((col) => col.col_id)
+    );
+  }, [filteredGroups]);
 
   const handleInputChange = (value, target) => {
     setColumnInput(value.toLowerCase());
   };
-
-  const allGroups = filteredGroups ?? columnGroups ?? [];
-
+  
   return h("div.column-list-page", [
     h(ContentPage, [
       h("div.flex-row", [
         h("div.main", [
           h(StickyHeader, [
             h(PageBreadcrumbs, { showLogo: true }),
-            h(SearchBar, {
-              placeholder: "Search columns...",
-              onChange: handleInputChange,
-            }),
+            h('div.filters', [
+              h(SearchBar, {
+                placeholder: "Search columns...",
+                onChange: handleInputChange,
+                className: "search-bar",
+              }),
+              h('div.switches', [
+                h(Switch, {
+                  checked: showEmpty,
+                  label: "Show empty",
+                  onChange: () => setShowEmpty(!showEmpty),
+                }),
+                h(Switch, {
+                  checked: showInProcess,
+                  label: "Show in process",
+                  onChange: () => setShowInProcess(!showInProcess),
+                }),
+              ]),
+            ]),
+            h(LexFilters, {
+              selectedLiths,
+              setSelectedLiths,
+              selectedUnits,
+              setSelectedUnits,
+              selectedStratNames,
+              setSelectedStratNames,
+            })
           ]),
-          h(
+          h.if(!loading)(
             "div.column-groups",
-            allGroups.map((d) =>
+            filteredGroups?.map((d) =>
               h(ColumnGroup, {
                 data: d,
                 key: d.id,
                 linkPrefix,
-                columnInput,
-                shouldFilter,
+                showEmpty,
               })
             )
           ),
+          h.if(columnGroups?.length == 0 && !loading)("div.empty", "No columns found"),
+          h.if(loading)("div.loading", "Loading columns..."),
         ]),
         h("div.sidebar", [
           h("div.sidebar-content", [
@@ -111,9 +182,8 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
             ]),
             h(ColumnMapContainer, {
               columnIDs,
-              projectID: project?.project_id,
+              projectID: project?.project_id, 
               className: "column-map-container",
-              hideColumns,
             }),
           ]),
         ]),
@@ -122,15 +192,9 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   ]);
 }
 
-function ColumnGroup({ data, linkPrefix, columnInput, shouldFilter }) {
+function ColumnGroup({ data, linkPrefix }) {
   const [isOpen, setIsOpen] = useState(false);
-  const filteredColumns = shouldFilter
-    ? data.columns.filter((col) => {
-        const name = col.col_name.toLowerCase();
-        const input = columnInput.toLowerCase();
-        return name.includes(input);
-      })
-    : data.columns;
+  const filteredColumns = data.columns
 
   if (filteredColumns?.length === 0) return null;
 
@@ -167,16 +231,9 @@ function ColumnGroup({ data, linkPrefix, columnInput, shouldFilter }) {
 
 const ColumnItem = React.memo(
   function ColumnItem({ data, linkPrefix = "/" }) {
-    const { col_id, col_name } = data;
+    const { col_id, name, units } = data;
 
-    let nUnits = 0;
-    try {
-      nUnits = parseInt(data.t_units);
-    } catch (e) {
-      console.warn("Invalid number of units for column", col_id, data.t_units);
-    }
-
-    const unitsText = nUnits > 0 ? `${nUnits} units` : "empty";
+    const unitsText = units?.length > 0 ? `${units?.length} units` : "empty";
 
     const href = linkPrefix + `columns/${col_id}`;
     return h(
@@ -188,9 +245,9 @@ const ColumnItem = React.memo(
       },
       [
         h("td.col-id", h("code.bp5-code", col_id)),
-        h("td.col-name", h("a", { href }, col_name)),
+        h("td.col-name", h("a", { href }, name)),
         h("td.col-status", [
-          data.status === "in process" &&
+          data.status_code === "in process" &&
             h(
               Tag,
               { minimal: true, color: "lightgreen", size: "small" },
@@ -202,7 +259,7 @@ const ColumnItem = React.memo(
             {
               minimal: true,
               size: "small",
-              color: nUnits === 0 ? "orange" : "dodgerblue",
+              color: units?.length === 0 ? "orange" : "dodgerblue",
             },
             unitsText
           ),
@@ -220,3 +277,65 @@ const ColumnItem = React.memo(
     );
   }
 );
+
+function LexFilters({ selectedLiths, setSelectedLiths, selectedUnits, setSelectedUnits, selectedStratNames, setSelectedStratNames }) {
+  const liths = useLiths();
+  const units = useUnits();
+  const stratNames = useStratNames();
+
+  if(!liths || !units || !stratNames) return null
+
+  return h('div.lex-filters', [
+    h(FlexRow, {
+      align: "center",
+      gap: ".5em",
+    }, [
+      h('p', "Filtering columns by "),
+      h(LexSelection, {
+        value: selectedLiths,
+        onConfirm: (value) => setSelectedLiths(value),
+        items: liths,
+        placeholder: "Select a lithology",
+      }),
+      h.if(selectedLiths)(Icon, { className: 'close-btn', icon: "cross", onClick: () => setSelectedLiths(null) })
+    ]),
+    h(FlexRow, {
+      align: "center",
+      gap: ".5em",
+    }, [
+      h('p', "Filtering columns by "),
+      h(LexSelection, {
+        value: selectedUnits,
+        onConfirm: (value) => setSelectedUnits(value),
+        items: units,
+        placeholder: "Select a unit",
+      }),
+      h.if(selectedUnits)(Icon, { className: 'close-btn', icon: "cross", onClick: () => setSelectedUnits(null) })
+    ]),
+    h(FlexRow, {
+      align: "center",
+      gap: ".5em",
+    }, [
+      h('p', "Filtering columns by "),
+      h(LexSelection, {
+        value: selectedStratNames,
+        onConfirm: (value) => setSelectedStratNames(value),
+        items: stratNames,
+        placeholder: "Select a strat name",
+      }),
+      h.if(selectedStratNames)(Icon, { className: 'close-btn', icon: "cross", onClick: () => setSelectedStratNames(null) })
+    ]),
+  ]);
+}
+
+function useLiths() {
+  return useAPIResult(postgrestPrefix + "/liths?select=id,name:lith,color:lith_color");
+}
+
+function useUnits() {
+  return useAPIResult(postgrestPrefix + "/units?select=id,name:strat_name");
+}
+
+function useStratNames() {
+  return useAPIResult(postgrestPrefix + "/strat_names?select=id,name:strat_name");
+}

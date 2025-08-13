@@ -6,6 +6,7 @@ interface FilterDef {
   subject: string;
   op?: string;
   predicate: any;
+  user_id?: string;
 }
 
 const postgrest = new PostgrestClient(postgrestPrefix);

@@ -1,6 +1,6 @@
 import h from "./+Page.client.module.sass";
 import { ContentPage, FullscreenPage } from "~/layouts";
-import { PageBreadcrumbs } from "~/components";
+import { getPGData, PageBreadcrumbs } from "~/components";
 import { usePageContext } from "vike-react/usePageContext";
 import {
   enhanceData,
@@ -37,8 +37,9 @@ import { MenuItem, TextArea, Popover } from "@blueprintjs/core";
 
 export function Page() {
   const [paper_id, setPaperID] = useState<number | null>(null);
+  const currentID = usePageContext().urlPathname.split("/").pop();
   const nextID = getNextID();
-  console.log("Next ID:", nextID);
+  const previousFeedback = getPreviousFeedback();
 
   return h(
     OverlaysProvider,
@@ -58,19 +59,34 @@ export function Page() {
               } 
             }, "Next"),
           ]),
-          h.if(paper_id)(
-            Button, 
-            { 
-              className: "paper btn",
-              onClick: () => {
-                window.open(
-                  `/integrations/xdd/extractions/${paper_id}`,
-                  "_self"
-                ); 
-              } 
-            }, 
-            "View papers extraction"
-          ),
+          h(FlexRow,  { flexDirection: "column", gap: ".5em" }, [
+            h.if(paper_id)(
+              Button, 
+              { 
+                className: "paper btn",
+                onClick: () => {
+                  window.open(
+                    `/integrations/xdd/extractions/${paper_id}`,
+                    "_self"
+                  ); 
+                } 
+              }, 
+              "View papers extraction"
+            ),
+            h.if(previousFeedback?.length > 0)(
+              Button, 
+              { 
+                className: "previous btn",
+                onClick: () => {
+                  window.open(
+                    `/integrations/xdd/feedback/${currentID}/human`,
+                    "_self"
+                  ); 
+                }
+              },
+              "View human feedback"
+            ),
+          ]),
         ]),
         h(FlexRow, { className: "feedback-index", justifyContent: "space-between" }, [
           h(Feedback),
@@ -89,16 +105,14 @@ function ExtractionIndex({setPaperID}) {
   const models = useModelIndex();
   const entityTypes = useEntityTypeIndex();
 
-  const data = usePostgresQuery("kg_context_entities", {
-    subject: "source_text",
-    predicate: sourceTextID,
+  const data = getPGData("/kg_context_entities", {
+    source_text: "eq." + sourceTextID,
+    user_id: "is.null"
   });
 
   if (data == null || models == null || entityTypes == null) {
     return h(Spinner);
   }
-
-  console.log(data);
 
   setPaperID(data[0]?.paper_id || null);
 
@@ -125,8 +139,7 @@ function MultiFeedbackInterface({ data, models, entityTypes }) {
         } of ${count} model runs. Merging runs is not yet supported.`,
       }),
       h(Pagination, {
-        count,
-        page: ix,
+        currentPage: ix,
         setPage: setIX,
         nextDisabled: ix >= count - 1,
       }),
@@ -186,6 +199,7 @@ async function postDataToServer(data: ServerResults) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+
     },
     body: JSON.stringify(data),
   });
@@ -292,6 +306,19 @@ function getNextID() {
   });
 
   return nextID;
+}
+
+function getPreviousFeedback() {
+  const currentID = usePageContext().urlPathname.split("/").pop();
+
+  return getPGData(
+    "/kg_context_entities",
+    {
+      select: "model_run",
+      source_text: "eq." + currentID,
+      version_id: "is.null"
+    }
+  )
 }
 
 function Feedback() {  
