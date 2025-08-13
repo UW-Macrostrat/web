@@ -1,6 +1,6 @@
 import h from "@macrostrat/hyper";
 import { useData } from "vike-react/useData";
-import { LexListPage } from "../economics/+Page";
+import { LexListPage } from "../economics/+Page.client";
 
 export function Page() {
   const { res } = useData();  
