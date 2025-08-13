@@ -1,8 +1,9 @@
 import h from "./layout.module.sass";
 import { MacrostratIcon, StickyHeader } from "~/components";
 import { Spinner, Icon, Card } from "@blueprintjs/core";
-import { useDarkMode } from "@macrostrat/ui-components";
+import { useAPIResult } from "@macrostrat/ui-components";
 import classNames from "classnames";
+import { postgrestPrefix } from "@macrostrat-web/settings";
 
 export function Image({ src, className, width, height }) {
   const srcWithAddedPrefix =
@@ -164,4 +165,8 @@ export function StratTag({ isConcept, fontSize = ".75em" }) {
 
 export function IDTag({ id }) {
   return h("div.id-tag", "ID: #" + id);
+}
+
+export function getPGData(url, filters) {
+  return useAPIResult(postgrestPrefix + url, filters);
 }

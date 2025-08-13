@@ -1,6 +1,6 @@
 import h from "./+Page.client.module.sass";
 import { ContentPage, FullscreenPage } from "~/layouts";
-import { PageBreadcrumbs } from "~/components";
+import { getPGData, PageBreadcrumbs } from "~/components";
 import { usePageContext } from "vike-react/usePageContext";
 import {
   enhanceData,
@@ -38,7 +38,6 @@ import { MenuItem, TextArea, Popover } from "@blueprintjs/core";
 export function Page() {
   const [paper_id, setPaperID] = useState<number | null>(null);
   const nextID = getNextID();
-  console.log("Next ID:", nextID);
 
   return h(
     OverlaysProvider,
@@ -89,9 +88,9 @@ function ExtractionIndex({setPaperID}) {
   const models = useModelIndex();
   const entityTypes = useEntityTypeIndex();
 
-  const data = usePostgresQuery("kg_context_entities", {
-    subject: "source_text",
-    predicate: sourceTextID,
+  const data = getPGData("/kg_context_entities", {
+    source_text: "eq." + sourceTextID,
+    user_id: "is.null"
   });
 
   if (data == null || models == null || entityTypes == null) {
@@ -112,6 +111,8 @@ function MultiFeedbackInterface({ data, models, entityTypes }) {
   const count = data.length;
 
   const autoSelect = window.location.href.split('autoselect=')[1]?.split(",");
+
+  console.log("data", data)
 
   return h("div.feedback-interface", [
     h.if(data.length > 1)([
@@ -160,7 +161,7 @@ function FeedbackInterface({ data, models, entityTypes, autoSelect }) {
       concept: "/lex/strat-concepts",
     },
     lineHeight: 3,
-    view: user === null,
+    // view: user === null,
     autoSelect,
     onSave: wrapWithToaster(
       async (tree) => {
@@ -179,10 +180,11 @@ function FeedbackInterface({ data, models, entityTypes, autoSelect }) {
 }
 
 async function postDataToServer(data: ServerResults) {
-  const response = await fetch(knowledgeGraphAPIURL + "/record_run", {
+  const response = await fetch("http://localhost:9543" + "/record_run", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+
     },
     body: JSON.stringify(data),
   });
