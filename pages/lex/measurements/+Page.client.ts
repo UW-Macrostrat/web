@@ -20,8 +20,6 @@ import { Loading } from "~/components";
 export function Page() {
     const [types, setTypes] = useState([]);
 
-    console.log(types)
-
     useEffect(() => {
         fetchAPIData("/defs/measurements", { all: true})
             .then(data => setTypes(data))
@@ -63,7 +61,7 @@ function Map({types}) {
         });
 
         if(cluster.length > 0) {
-            const zoom = cluster[0].properties.expansion_zoom;
+            const zoom = cluster[0].properties.expansion_zoom ?? 12;
 
             map.flyTo({
                 center: cluster[0].geometry.coordinates,
@@ -118,11 +116,10 @@ function useMapStyle({selectedTypes, clustered}) {
         : "mapbox://styles/mapbox/light-v10";
 
     const [actualStyle, setActualStyle] = useState(null);
-    console.log(selectedTypes)
 
     const ids = selectedTypes.map((t) => t.measure_id)
 
-    const baseURL = "http://localhost:8000/measurements/tile/{z}/{x}/{y}"
+    const baseURL = tileserverDomain + "/measurements/tile/{z}/{x}/{y}"
     const params = "cluster=" + clustered + (ids.length > 0 ? "&measurement_id=" + ids.join(",") : "");
 
     const url = baseURL + "?" + params;
@@ -212,8 +209,6 @@ function useMapStyle({selectedTypes, clustered}) {
         },
     ];
 
-    console.log("Using URL: ", url);
-
     const overlayStyle = {
         sources: {
         measurements: {
@@ -238,7 +233,6 @@ function useMapStyle({selectedTypes, clustered}) {
 }
 
 function Panel({selectedTypes, setSelectedTypes, clustered, setClustered, selectedMeasurement, setSelectedMeasurement, types}) {
-    console.log("selectedTypes", selectedTypes)
     const isItemSelected = (item) =>
         selectedTypes.some((selected) => selected.measure_id === item.measure_id);
 
@@ -298,6 +292,7 @@ function Panel({selectedTypes, setSelectedTypes, clustered, setClustered, select
                     popoverProps: { minimal: true },
                     fill: true,
                 }),
+                h('a.view-filters', { href: '/lex/measurements/filters' }, "View Filters"),
                 h(
                     Switch, 
                     {
