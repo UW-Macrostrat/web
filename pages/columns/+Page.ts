@@ -55,11 +55,12 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
   const [selectedLiths, setSelectedLiths] = useState(null);
   const [selectedUnits, setSelectedUnits] = useState(null);
   const [selectedStratNames, setSelectedStratNames] = useState(null);
+  const [selectedIntervals, setSelectedIntervals] = useState(null);
 
   const isEmpty = Object.keys(extraParams).length === 0;
   const filteredGroups = isEmpty ? allColumnGroups : columnGroups ?? [];
 
-  const selectedItems = selectedLiths || selectedUnits || selectedStratNames;
+  const selectedItems = selectedLiths || selectedUnits || selectedStratNames || selectedIntervals;
 
   useEffect(() => {
     const params: any = {};
@@ -82,9 +83,12 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
     if (selectedStratNames) {
       params.strat_names = `cs.[${selectedStratNames.lex_id}]`;
     }
+    if (selectedIntervals) {
+      params.intervals = `cs.[${selectedIntervals.lex_id}]`;
+    }
 
     setExtraParams(params);
-  }, [filteredInput, showEmpty, showInProcess, selectedLiths, selectedUnits, selectedStratNames]);
+  }, [filteredInput, showEmpty, showInProcess, selectedLiths, selectedUnits, selectedStratNames, selectedIntervals]);
 
 
   // set filtered input
@@ -126,6 +130,7 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
     if(data.type == "strat name") setSelectedLiths(data)
     if(data.type == "unit") setSelectedUnits(data)
     if(data.type == "lithology") setSelectedLiths(data)
+    if(data.type == "interval") setSelectedIntervals(data)
     setColumnInput("")
     setFilteredInput("")
   };
@@ -183,6 +188,8 @@ function ColumnListPage({ title = "Columns", linkPrefix = "/" }) {
               setSelectedUnits,
               selectedStratNames,
               setSelectedStratNames,
+              selectedIntervals,
+              setSelectedIntervals,
             })
           ]),
           h.if(!loading)(
@@ -308,14 +315,14 @@ const ColumnItem = React.memo(
   }
 );
 
-function LexFilters({ selectedLiths, setSelectedLiths, selectedUnits, setSelectedUnits, selectedStratNames, setSelectedStratNames }) {  
-  const show = selectedLiths ||  selectedStratNames || selectedUnits;
+function LexFilters({ selectedLiths, setSelectedLiths, selectedUnits, setSelectedUnits, selectedStratNames, setSelectedStratNames, selectedIntervals, setSelectedIntervals }) {
+  const show = selectedLiths ||  selectedStratNames || selectedUnits || selectedIntervals;
 
   if(!show) return null;
 
-  const { type, lex_id } = selectedLiths ?? selectedStratNames ?? selectedUnits;
+  const { type, lex_id } = selectedLiths ?? selectedStratNames ?? selectedUnits ?? selectedIntervals;
 
-  const route = type === "lithology" ? "lithologies" : type === "strat name" ? "strat-names" : "units";
+  const route = type === "lithology" ? "lithologies" : type === "strat name" ? "strat-names" : type === "interval" ? "intervals" : "units";
 
   return h('div.lex-filters', [
     h(FlexRow, {
@@ -323,8 +330,8 @@ function LexFilters({ selectedLiths, setSelectedLiths, selectedUnits, setSelecte
       gap: ".5em",
     }, [
       h('p.filter', "Filtering columns by "),
-      h(LithologyTag, { href: `/lex/${route}/${lex_id}`, data: selectedLiths ?? selectedStratNames ?? selectedUnits }),
-      h(Icon, { className: 'close-btn', icon: "cross", onClick: () => { setSelectedLiths(null); setSelectedStratNames(null); setSelectedUnits(null); } })
+      h(LithologyTag, { href: `/lex/${route}/${lex_id}`, data: selectedLiths ?? selectedStratNames ?? selectedUnits ?? selectedIntervals }),
+      h(Icon, { className: 'close-btn', icon: "cross", onClick: () => { setSelectedLiths(null); setSelectedStratNames(null); setSelectedUnits(null); setSelectedIntervals(null); } })
     ]),
   ]);
 }

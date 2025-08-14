@@ -1,7 +1,10 @@
 import { fetchAPIData, fetchPGData } from "~/_utils";
 
 export async function getGroupedColumns(project_id: number | null, params?: any) {
-  let columnURL = "/col_data";
+  // lex filter
+  const useBase = !params?.liths && !params?.units && !params?.strat_names && !params?.intervals;
+
+  const columnURL = useBase ? "/col_base" : "/col_data";
 
   const pgParams = project_id != null ? { ...params, project_id: `eq.${project_id}` } : params;
 
