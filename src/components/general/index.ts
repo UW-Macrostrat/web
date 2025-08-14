@@ -1,7 +1,9 @@
 import h from "./layout.module.sass";
 import { MacrostratIcon, StickyHeader } from "~/components";
 import { Spinner, Icon, Card, Popover, Tag } from "@blueprintjs/core";
+import { useAPIResult } from "@macrostrat/ui-components";
 import classNames from "classnames";
+import { postgrestPrefix } from "@macrostrat-web/settings";
 
 export function Image({ src, className, width, height }) {
   const srcWithAddedPrefix =
@@ -185,4 +187,8 @@ export function AlphaTag({ content = "This page is in alpha and highly experimen
     },
     [h(Tag, { intent: "danger" }, "Alpha")]
   );
+}
+
+export function getPGData(url, filters) {
+  return useAPIResult(postgrestPrefix + url, filters);
 }
