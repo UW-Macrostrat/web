@@ -47,7 +47,7 @@ export function Page() {
         ", and other sources. The lexicon is continually updated in partnership with researchers and data providers.",
       ]),
       h("div.stats-table", [
-        h("p.stat", `${formatNumber(columns)} columns`),
+        h('a', { href: "/columns" }, h("p.stat", `${formatNumber(columns)} columns`)),
         h("p.stat", `${formatNumber(packages)} packages`),
         h("p.stat", `${formatNumber(units)} units`),
         h("p.stat", `${formatNumber(measurements)} measurements`),
