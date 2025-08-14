@@ -975,9 +975,12 @@ export function Maps({ mapsData }) {
 
 export function Fossils({ href }) {
   return h(LinkCard, { 
-    title: h(FlexRow, { alignItems: "center", gap: ".5em"}, [
-      h('h4', "Fossils"),
-      h(BetaTag)
+    title: h(FlexRow, { justifyContent: "space-between" }, [
+      h(FlexRow, { alignItems: "center", gap: ".5em"}, [
+        h('h4', "Fossils"),
+        h(BetaTag),
+      ]), 
+      h('p.via', "via PBDB")
     ]), 
     href: '/lex/fossils?' + href,  
     className: "fossils-card" 

@@ -71,12 +71,12 @@ export function Page() {
         h(
           LinkCard,
           { href: "/lex/timescales", title: "Timescales" },
-          "Continuous representations of relative geologic time"
+          "Groups of intervals used together to span intervals of time"
         ),
         h(
           LinkCard,
           { href: "/lex/lithologies", title: "Lithologies" },
-          "Names of geologic materials"
+          "Names and hierarchies for geological materials"
         ),
         h(
           LinkCard,
@@ -106,12 +106,12 @@ export function Page() {
         h(
           LinkCard,
           { href: "/lex/units", title: "Units" },
-          "Names and descriptions of geologic units"
+          "Lithologically and chronologically defined building blocks for columns, often representing a strat name"
         ),
         h(
           LinkCard,
           { href: "/lex/fossils", title: "Fossils" },
-          "Fossil names and descriptions (via the Paleobiology Database)"
+          "Fossil taxonomic occurrences from the Paleobiology Database linked to Macrostrat units"
         ),
         h("p", [
           h("strong", h("a", { href: "/sift" }, "Sift")),
