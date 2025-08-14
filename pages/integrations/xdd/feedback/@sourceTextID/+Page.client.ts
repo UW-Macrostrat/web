@@ -30,7 +30,7 @@ import { fetchPGData } from "~/_utils";
 import { AuthStatus, useAuth } from "@macrostrat/form-components";
 import { MultiSelect } from "@blueprintjs/select"
 import { MenuItem, TextArea, Popover } from "@blueprintjs/core";
-import { postgrestPrefix } from "packages/settings";
+import { postgrestPrefix } from "@macrostrat-web/settings";
 
 /**
  * Get a single text window for feedback purposes
@@ -38,6 +38,9 @@ import { postgrestPrefix } from "packages/settings";
 
 export function Page() {
   const [paper_id, setPaperID] = useState<number | null>(null);
+  const [selectedFeedbackType, setSelectedFeedbackType] = useState([]);
+  const [customFeedback, setCustomFeedback] = useState("");
+
   const currentID = usePageContext().urlPathname.split("/").pop();
   const nextID = getNextID();
   const previousFeedback = getPreviousFeedback();
@@ -90,16 +93,16 @@ export function Page() {
           ]),
         ]),
         h(FlexRow, { className: "feedback-index", justifyContent: "space-between" }, [
-          h(Feedback),
+          h(Feedback, { selectedFeedbackType, setSelectedFeedbackType, setCustomFeedback }),
           h(AuthStatus)
         ]),
-        h(ExtractionIndex, { setPaperID }),
+        h(ExtractionIndex, { setPaperID, customFeedback, selectedFeedbackType }),
       ]),
     ])
   );
 }
 
-function ExtractionIndex({setPaperID}) {
+function ExtractionIndex({setPaperID, customFeedback, selectedFeedbackType}) {
   const { routeParams } = usePageContext();
   const { sourceTextID } = routeParams;
 
@@ -119,11 +122,11 @@ function ExtractionIndex({setPaperID}) {
 
   return h(
     ErrorBoundary,
-    h(MultiFeedbackInterface, { data, models, entityTypes })
+    h(MultiFeedbackInterface, { data, models, entityTypes, customFeedback, selectedFeedbackType })
   );
 }
 
-function MultiFeedbackInterface({ data, models, entityTypes }) {
+function MultiFeedbackInterface({ data, models, entityTypes, customFeedback, selectedFeedbackType }) {
   const [ix, setIX] = useState(0);
   const currentData = data[ix];
   const count = data.length;
@@ -149,14 +152,16 @@ function MultiFeedbackInterface({ data, models, entityTypes }) {
       data: currentData,
       models,
       entityTypes,
-      autoSelect
+      autoSelect,
+      customFeedback,
+      selectedFeedbackType
     }),
   ]);
 }
 
 const AppToaster = Toaster.create();
 
-function FeedbackInterface({ data, models, entityTypes, autoSelect }) {
+function FeedbackInterface({ data, models, entityTypes, autoSelect, customFeedback, selectedFeedbackType }) {
   const window = enhanceData(data, models, entityTypes);
   const { entities = [], paragraph_text, model } = window;
   const { user } = useAuth();
@@ -184,7 +189,7 @@ function FeedbackInterface({ data, models, entityTypes, autoSelect }) {
         const data = prepareDataForServer(tree, window.source_text, [
           window.model_run,
         ]);
-        await postDataToServer(data);
+        await postDataToServer(data, customFeedback, selectedFeedbackType);
       },
       AppToaster,
       {
@@ -195,8 +200,9 @@ function FeedbackInterface({ data, models, entityTypes, autoSelect }) {
   });
 }
 
-async function postDataToServer(data: ServerResults) {
-  console.log("Posting data to server:", data); 
+async function postDataToServer(data: ServerResults, customFeedback: string, selectedFeedbackType: string[]) {
+ console.log("Posting data to server:", data);
+
   const response = await fetch("http://localhost:9543/record_run", {
     method: "POST",
     headers: {
@@ -205,25 +211,65 @@ async function postDataToServer(data: ServerResults) {
     body: JSON.stringify(data),
   });
 
-  
   if (!response.ok) {
     throw new Error(response.statusText);
   }
 
   const result = await response.json();
-  const { internal_id, table_id } = result.data;
+  const { table_id } = result.data;
 
-  /*
-  const finalResponse = await fetch(postgrestPrefix + `/`, {
+  console.log("xDD Server response:", result.data);
+
+  // Step 2: Post feedback
+  const feedbackBody = {
+    feedback_id: table_id,
+    custom_note: customFeedback
+  };
+
+  console.log("Sending feedback:", feedbackBody);
+
+  const feedbackResponse = await fetch(postgrestPrefix + `/extraction_feedback`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Prefer": "return=representation",
     },
-    body: JSON.stringify({ table_id }),
+    body: new URLSearchParams(feedbackBody).toString(),
   });
-  */
 
-  console.log("Server response:", result.data);
+  if (!feedbackResponse.ok) {
+    throw new Error("Failed to post feedback");
+  }
+
+  const feedbackData = await feedbackResponse.json();
+  console.log("Feedback response:", feedbackData);
+
+  // Step 3: Associate types with note_id from response
+  const note_id = feedbackData[0]?.note_id;
+
+  if (!note_id) {
+    throw new Error("No note_id returned from feedback post");
+  }
+
+  // Assume `selectedFeedbackType` is an array of type_id values from user input
+  for (const type of selectedFeedbackType) {
+    const linkBody = {
+      note_id,
+      type_id: type.type_id 
+    };
+
+    const linkResponse = await fetch(postgrestPrefix + `/lookup_extraction_type`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Prefer": "return=representation",
+      },
+      body: new URLSearchParams(linkBody).toString(),
+    });
+
+    const linkResult = await linkResponse.json();
+    console.log(`Linked type_id ${type.type_id}:`, linkResult);
+  }
 }
 
 function wrapWithToaster(
@@ -339,11 +385,8 @@ function getPreviousFeedback() {
   )
 }
 
-function Feedback() {  
-  const [selectedFeedbackType, setSelectedFeedbackType] = useState([]);
-  const [customFeedback, setCustomFeedback] = useState("");
-
-  const feedback = usePostgresQuery("kg_extraction_feedback_type");
+function Feedback({ selectedFeedbackType, setSelectedFeedbackType, setCustomFeedback }) {
+  const feedback = usePostgresQuery("extraction_feedback_type");
 
   if (feedback == null) {
     return h("div", "Loading feedback types...");
