@@ -10,7 +10,7 @@ import {
   useEntityTypeIndex,
   useModelIndex,
 } from "../../../extractions/data-service";
-import { NonIdealState, OverlaysProvider, Spinner, Button } from "@blueprintjs/core";
+import { NonIdealState, OverlaysProvider, Spinner, Button, Divider } from "@blueprintjs/core";
 import {
   ErrorBoundary,
   FlexRow,
@@ -18,7 +18,6 @@ import {
 } from "@macrostrat/ui-components";
 import { useState } from "react";
 import { MatchedEntityLink } from "#/integrations/xdd/extractions/match";
-import { fetchPGData } from "~/_utils";
 
 /**
  * Get a single text window for feedback purposes
@@ -26,7 +25,6 @@ import { fetchPGData } from "~/_utils";
 
 export function Page() {
   const [paper_id, setPaperID] = useState<number | null>(null);
-  const nextID = getNextID();
 
   return h(
     OverlaysProvider,
@@ -34,21 +32,6 @@ export function Page() {
       h(ContentPage, [
         h("div.feedback-main", [
           h(PageBreadcrumbs, { title: "Human Feedback" }),
-          h('div.buttons', [
-            h.if(paper_id)(
-              Button, 
-              { 
-                className: "paper btn",
-                onClick: () => {
-                  window.open(
-                    `/integrations/xdd/extractions/${paper_id}`,
-                    "_self"
-                  ); 
-                } 
-              }, 
-              "View papers extraction"
-            ),
-          ]),
           h(ExtractionIndex, { setPaperID }),
         ]),
       ]),
@@ -86,23 +69,26 @@ function MultiFeedbackInterface({ data, models, entityTypes }) {
   const currentData = data[ix];
   const count = data.length;
 
+  const { feedback_id } = currentData;
+
   const autoSelect = window.location.href.split('autoselect=')[1]?.split(",");
 
   return h("div.feedback-interface", [
-    h.if(data.length > 1)([
-      h(NonIdealState, {
-        icon: "warning-sign",
-        title: "Multiple model runs for feedback",
-        description: `Showing entities from ${
-          ix + 1
-        } of ${count} model runs. Merging runs is not yet supported.`,
-      }),
-      h(Pagination, {
+    h.if(data.length > 1)(NonIdealState, {
+      title: "Feedback from multiple users",
+      description: `Showing entities from feedback #${
+        ix + 1
+      } of ${count} feedback entries`,
+    }),
+    h(FlexRow, { justifyContent: "space-between" },  [
+      h(FeedbackNotes, { feedback_id }),
+      h.if(data.length > 1)(Pagination, {
         currentPage: ix,
         setPage: setIX,
         nextDisabled: ix >= count - 1,
       }),
     ]),
+    h(Divider),
     h(FeedbackInterface, {
       data: currentData,
       models,
@@ -134,48 +120,29 @@ function FeedbackInterface({ data, models, entityTypes, autoSelect }) {
   });
 }
 
-// We will extend this in the future, probably,
-// to handle ages and other things
-type MatchInfo = { type: "lith" | "lith_att" | "strat_name"; id: number };
-
-function normalizeMatch(match: any): MatchInfo | null {
-  if (match == null) return null;
-  if (match.lith_id) return { type: "lith", id: match.lith_id };
-  if (match.lith_att_id) {
-    return { type: "lith_att", id: match.lith_att_id };
-  }
-  if (match.strat_name_id) {
-    return { type: "strat_name", id: match.strat_name_id };
-  }
-  return null;
-}
-
-// function FeedbackDevTool() {
-//   const entities = useStore((state) => state.entities);
-//   if (entities == null)
-//     return h(NonIdealState, { icon: h(Spinner), title: "Loading..." });
-//
-//   return h(JSONView, { data: entities, showRoot: false, keyPath: 0 });
-// }
-//
-// FeedbackDevTool.title = "Feedback";
-//
-// export const devTools = [FeedbackDevTool];
-
-function getNextID() {
-  const currentID = usePageContext().urlPathname.split("/").pop();
-  const [nextID, setNextID] = useState<number | null>(null);
-
-  const res = fetchPGData(
-    "/kg_source_text",
-    {
-      order: "id",
-      limit: 1,
-      id: "gt." + currentID
-    }
-  ).then((data) => {
-    setNextID(data?.[0]?.id || 18131); // Default to 18131 if no next ID found
+function FeedbackNotes({ feedback_id }) {
+  const feedback = getPGData("/extraction_feedback_combined", {
+    feedback_id: "eq." + feedback_id,
   });
 
-  return nextID;
+  console.log("feedback", feedback)
+
+  if (feedback == null) {
+    return h("div", "Loading feedback notes...");
+  }
+
+  if (feedback.length === 0) {
+    return null
+  }
+
+  const { date, note, types } = feedback[0];
+
+  const formattedTypes = types.map(e => e.type)
+
+  return h("div.feedback-notes", [
+    h("h3", "Feedback Notes"),
+    h("p", "From " + new Date(date).toLocaleDateString()),
+    h.if(note.length > 0)("p", "Note: " + note || "No notes provided."),
+    h.if(types.length > 0)("p", "Types: " + (formattedTypes.join(", "))),
+  ]);
 }
