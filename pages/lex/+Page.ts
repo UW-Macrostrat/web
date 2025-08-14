@@ -7,6 +7,7 @@ import { Footer } from "~/components/general";
 import { SearchBar } from "~/components/general";
 import { useState } from "react";
 import { ExpansionPanel } from "~/components/lex/tag";
+import { title } from "#/dev/map/rockd-strabospot/+title";
 
 export function Page() {
   const { res } = useData();
@@ -141,6 +142,11 @@ const groups = [
   { value: "minerals", label: "Minerals", href: '/lex/minerals' },
 ]
 
+function OpenPanel(props) {
+  const { title, children } = props;
+  return h(ExpansionPanel, { title, expanded: true }, children);
+}
+
 function SearchContainer({ setShowBody }) {
   return h(PostgRESTInfiniteScrollView, {
     limit: 20,
@@ -154,7 +160,7 @@ function SearchContainer({ setShowBody }) {
     groups,
     itemComponent: LexCard,
     SearchBarComponent: SearchBar,
-    GroupingComponent: ExpansionPanel,
+    GroupingComponent: OpenPanel,
     filter_threshold: 2,
   })
 }
