@@ -1,5 +1,5 @@
 import h from "@macrostrat/hyper";
-import { LithologyTag } from "@macrostrat/data-components";
+import { LithologyTag, DataField } from "@macrostrat/data-components";
 import { FlexRow } from "@macrostrat/ui-components";
 import { ExpansionPanel } from "@macrostrat/map-interface";
 
@@ -19,4 +19,8 @@ export function FlexRowInner(props) {
 
 export function ExpansionPanelInner(props) {
   return h(ExpansionPanel, props);
+}
+
+export function DataFieldInner(props) {
+  return h(DataField, props);
 }
