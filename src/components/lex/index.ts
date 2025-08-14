@@ -6,7 +6,7 @@ import {
 } from "@macrostrat/ui-components";
 import { apiV2Prefix, pbdbDomain, isDev } from "@macrostrat-web/settings";
 import { Link, LithologyTag, PageBreadcrumbs } from "~/components";
-import { Card, Divider } from "@blueprintjs/core";
+import { Card, Divider, Popover } from "@blueprintjs/core";
 import { ContentPage } from "~/layouts";
 import { AlphaTag, BetaTag, BlankImage, Footer, Loading, StratTag } from "~/components/general";
 import { useState, useMemo, useEffect } from "react";
@@ -882,8 +882,24 @@ function Chart(data, title, route, activeIndex, setActiveIndex) {
 function ChartLegend(data, route, activeIndex, setActiveIndex, index) {
   const hovered = activeIndex?.label === data.label;
 
+  const hasColon = data.label.includes(":");
+  const label = hasColon ? data.label.split(": ")[1] : data.label;
+  const group = hasColon ? data.label.split(": ")[0] : null;
+
+  const finalLabel = label + (hovered ? " (" + Math.trunc(data.value * 100) + "%)" : "")
+
   return h("div.legend-item", [
-    h("div.box", { style: { backgroundColor: data.color } }),
+    group ? 
+      h(
+        Popover,
+        {
+          content: h('p.group', "Group: " + group),
+          isOpen: hovered,
+          position: 'left'
+        },
+        h("div.box", { style: { backgroundColor: data.color } })
+      ) 
+      : h("div.box", { style: { backgroundColor: data.color } }),
     h(
       "a",
       {
@@ -906,8 +922,8 @@ function ChartLegend(data, route, activeIndex, setActiveIndex, index) {
           fontWeight: hovered ? "600" : "300",
         },
       },
-      data.label + (hovered ? " (" + Math.trunc(data.value * 100) + "%)" : "")
-    ),
+      finalLabel
+    )
   ]);
 }
 
