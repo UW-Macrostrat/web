@@ -30,6 +30,7 @@ import { fetchPGData } from "~/_utils";
 import { AuthStatus, useAuth } from "@macrostrat/form-components";
 import { MultiSelect } from "@blueprintjs/select"
 import { MenuItem, TextArea, Popover } from "@blueprintjs/core";
+import { postgrestPrefix } from "packages/settings";
 
 /**
  * Get a single text window for feedback purposes
@@ -176,7 +177,7 @@ function FeedbackInterface({ data, models, entityTypes, autoSelect }) {
       concept: "/lex/strat-concepts",
     },
     lineHeight: 3,
-    view: user === null,
+    // view: user === null,
     autoSelect,
     onSave: wrapWithToaster(
       async (tree) => {
@@ -195,17 +196,34 @@ function FeedbackInterface({ data, models, entityTypes, autoSelect }) {
 }
 
 async function postDataToServer(data: ServerResults) {
-  const response = await fetch(knowledgeGraphAPIURL + "/record_run", {
+  console.log("Posting data to server:", data); 
+  const response = await fetch("http://localhost:9543/record_run", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-
     },
     body: JSON.stringify(data),
   });
+
+  
   if (!response.ok) {
     throw new Error(response.statusText);
   }
+
+  const result = await response.json();
+  const { internal_id, table_id } = result.data;
+
+  /*
+  const finalResponse = await fetch(postgrestPrefix + `/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ table_id }),
+  });
+  */
+
+  console.log("Server response:", result.data);
 }
 
 function wrapWithToaster(
