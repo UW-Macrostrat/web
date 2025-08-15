@@ -138,6 +138,7 @@ const groups = [
   { value: "lithology_attributes", label: "Lithology attributes", href: '/lex/lith-atts' },
   { value: "projects", label: "Projects", href: '/projects' },
   { value: "strat_name_concepts", label: "Strat name concepts", href: '/lex/strat-concepts' },
+  { value: "strat_name", label: "Strat names", href: '/lex/strat-names' },
   { value: "structures", label: "Structures", href: '/lex/structures' },
   { value: "minerals", label: "Minerals", href: '/lex/minerals' },
 ]

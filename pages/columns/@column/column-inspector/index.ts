@@ -66,7 +66,7 @@ function ColumnPageInner({ columnInfo, linkPrefix = "/", projectID }) {
       h("span.col-name", columnInfo.col_name),
       h.if(columnInfo.col_group != null)("span.subtitle", [
         h("span.separator", " – "),
-        h("span.col-group", `${columnInfo.col_group}`),
+        h('a', { href: `/columns/groups/${columnInfo.col_group_id}` }, h("span.col-group", `${columnInfo.col_group}`)),
       ]),
     ]),
     h("p.column-details", [
